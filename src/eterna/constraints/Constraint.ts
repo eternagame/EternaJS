@@ -1,4 +1,4 @@
-import UndoBlock from 'eterna/UndoBlock';
+import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import Puzzle from 'eterna/puzzle/Puzzle';
 import {ConstraintBoxConfig} from './ConstraintBox';
@@ -17,7 +17,7 @@ export interface HighlightInfo {
 
 export interface ConstraintContext {
     undoBlocks: UndoBlock[];
-    targetConditions?: any[];
+    targetConditions?: TargetConditions[];
     puzzle?: Puzzle;
 }
 
@@ -54,7 +54,7 @@ export default abstract class Constraint<ConstraintStatus extends BaseConstraint
         status: ConstraintStatus,
         forMissionScreen: boolean,
         undoBlocks: UndoBlock[],
-        targetConditions?: any[],
+        targetConditions?: TargetConditions[],
     ): ConstraintBoxConfig;
 
     public getHighlight(

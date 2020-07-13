@@ -34,17 +34,17 @@ export default class BaseTextures {
         this.baseType = baseType;
         this.letterData = BaseTextures.createLetterTextures(baseType, Base.ZOOM_SCALE_FACTOR);
 
-        this.bodyData = BaseTextures.createBodyTextures('LBase*', baseType);
-        this.fBodyData = BaseTextures.createBodyTextures('LBase*f', baseType);
-        this.lBodyData = BaseTextures.createBodyTextures('LBase*', baseType);
-        this.lfBodyData = BaseTextures.createBodyTextures('LBase*f', baseType);
-        this.lockData = BaseTextures.createBodyTextures('Base*Lock', baseType);
-        this.fLockData = BaseTextures.createBodyTextures('Base*fLock', baseType);
-        this.midData = BaseTextures.createBodyTextures('Base*Mid', baseType);
-        this.fMidData = BaseTextures.createBodyTextures('Base*fMid', baseType);
-        this.midLockData = BaseTextures.createBodyTextures('Base*MidLock', baseType);
-        this.fMidLockData = BaseTextures.createBodyTextures('Base*fMidLock', baseType);
-        this.minData = BitmapManager.getBitmapNamed(BaseTextures.getTexName('Base*Min', baseType));
+        this.bodyData = [BitmapManager.getLBase(BaseTextures.type2Letter(baseType))];
+        this.fBodyData = [BitmapManager.getLBasef(BaseTextures.type2Letter(baseType))];
+        this.lBodyData = [BitmapManager.getLBase(BaseTextures.type2Letter(baseType))];
+        this.lfBodyData = [BitmapManager.getLBasef(BaseTextures.type2Letter(baseType))];
+        this.lockData = [BitmapManager.getBaseLock(BaseTextures.type2Letter(baseType))];
+        this.fLockData = [BitmapManager.getBasefLock(BaseTextures.type2Letter(baseType))];
+        this.midData = [BitmapManager.getBaseMid(BaseTextures.type2Letter(baseType))];
+        this.fMidData = [BitmapManager.getBasefMid(BaseTextures.type2Letter(baseType))];
+        this.midLockData = [BitmapManager.getBaseMidLock(BaseTextures.type2Letter(baseType))];
+        this.fMidLockData = [BitmapManager.getBasefMidLock(BaseTextures.type2Letter(baseType))];
+        this.minData = BitmapManager.getBaseMin(BaseTextures.type2Letter(baseType));
     }
 
     public getBodyTexture(zoomLevel: number, flags: number): Texture {
@@ -94,17 +94,7 @@ export default class BaseTextures {
         return textures;
     }
 
-    private static createBodyTextures(nameTemplate: string, baseType: number): Texture[] {
-        let bmName: string = BaseTextures.getTexName(nameTemplate, baseType);
-        let textures: Texture[] = [BitmapManager.getBitmapNamed(bmName)];
-        EternaTextureUtil.createScaled(textures, Base.ZOOM_SCALE_FACTOR, Base.NUM_ZOOM_LEVELS);
-        return textures;
-    }
-
-    private static getTexName(nameTemplate: string, baseType: number): string {
-        return nameTemplate.replace(/\*/, BaseTextures.type2Letter(baseType));
-    }
-
+    // AMW TODO: isn't this just the EPars function?
     private static type2Letter(baseType: number): string {
         switch (baseType) {
             case EPars.RNABASE_URACIL:

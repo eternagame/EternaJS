@@ -23,6 +23,7 @@ import Solution from 'eterna/puzzle/Solution';
 import SolutionManager from 'eterna/puzzle/SolutionManager';
 import URLButton from 'eterna/ui/URLButton';
 import int from 'eterna/util/int';
+import {AchievementData} from 'eterna/achievements/AchievementManager';
 import VoteProcessor from './VoteProcessor';
 import ViewSolutionDialog from './ViewSolutionDialog';
 import SortOptionsDialog from './SortOptionsDialog';
@@ -456,7 +457,7 @@ export default class DesignBrowserMode extends GameMode {
                 this._voteProcessor.processData(data['votes']);
                 this.syncVotes();
 
-                let cheevs: any = data['new_achievements'];
+                let cheevs: Map<string, AchievementData> = data['new_achievements'];
                 if (cheevs != null) {
                     this._achievements.awardAchievements(cheevs).then(() => { /* ignore result */ });
                 }

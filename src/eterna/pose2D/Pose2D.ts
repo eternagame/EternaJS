@@ -11,6 +11,7 @@ import {
     ParallelTask, AlphaTask, LocationTask, DelayTask, SelfDestructTask, Vector2, Arrays,
     RepeatingTask, Updatable, Assert
 } from 'flashbang';
+import {Move} from 'eterna/mode/PoseEdit/PoseEditMode';
 import LightRay from 'eterna/vfx/LightRay';
 import TextBalloon from 'eterna/ui/TextBalloon';
 import ROPWait from 'eterna/rscript/ROPWait';
@@ -41,6 +42,15 @@ import ExplosionFactorPanel from './ExplosionFactorPanel';
 import triangulate from './triangulate';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
+
+interface Mut {
+    pos: number;
+    base: string;
+}
+
+interface AuxInfo {
+    cleavingSite?: number;
+}
 
 export type PoseMouseDownCallback = (e: InteractionEvent, closestDist: number, closestIndex: number) => void;
 
@@ -350,7 +360,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         let numMut = 0;
-        let muts: any[] = [];
+        let muts: Mut[] = [];
         let div = 1;
         if (this._currentColor === EPars.RNABASE_PAIR
             || this._currentColor === EPars.RNABASE_GC_PAIR
@@ -405,7 +415,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         let numMut = 0;
-        let muts: any[] = [];
+        let muts: Mut[] = [];
 
         let n: number = Math.min(sequence.length, this._sequence.length);
         let needUpdate = false;
@@ -1223,7 +1233,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._auxInfoCanvas.visible = display;
     }
 
-    public set auxInfo(auxInfo: any) {
+    public set auxInfo(auxInfo: AuxInfo) {
         this._auxInfo = auxInfo;
 
         if (this._auxInfo != null && this._auxInfo[Pose2D.CLEAVING_SITE] != null) {
@@ -1312,11 +1322,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public set trackMovesCallback(cb: (count: number, moves: any[]) => void) {
+    public set trackMovesCallback(cb: (count: number, moves: Move[]) => void) {
         this._trackMovesCallback = cb;
     }
 
-    public callTrackMovesCallback(count: number, moves: any[]): void {
+    public callTrackMovesCallback(count: number, moves: Move[]): void {
         if (this._trackMovesCallback != null) {
             this._trackMovesCallback(count, moves);
         }
@@ -2651,7 +2661,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    private printFeedback(dat: any[]): void {
+    private printFeedback(dat: number[]): void {
         // for (let i: number = 0; i < dat.length; i++) {
         //     let feedback_obj: GameText = null;
         //     feedback_obj = new GameText(Fonts.arial(12, true));
@@ -3484,7 +3494,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     // Pointer to callback function to be called after change in pose
     private _poseEditCallback: (() => void) | null = null;
-    private _trackMovesCallback: ((count: number, moves: any[]) => void) | null = null;
+    private _trackMovesCallback: ((count: number, moves: Move[]) => void) | null = null;
     private _addBaseCallback: (parenthesis: string | null, op: PuzzleEditOp | null, index: number) => void;
     private _startMousedownCallback: PoseMouseDownCallback;
     private _mouseDownAltKey: boolean = false;
@@ -3588,7 +3598,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _expContinuous: boolean = false;
     private _expExtendedScale: boolean = false;
     private _displayAuxInfo: boolean;
-    private _auxInfo: any;
+    private _auxInfo: AuxInfo;
     private _auxInfoCanvas: Graphics;
     private _auxTextballoon: TextBalloon;
 

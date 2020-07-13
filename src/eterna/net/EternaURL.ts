@@ -1,6 +1,16 @@
 import Eterna from 'eterna/Eterna';
 import Utility from 'eterna/util/Utility';
 
+interface EternaURLParams {
+    page: string;
+    puznid?: number;
+    uid?: number;
+    nid?: number;
+    filter1?: string;
+    filter1_arg1?: number | string;
+    filter1_arg2?: number;
+}
+
 export default class EternaURL {
     public static readonly BARCODE_HELP: string = '/web/lab/manual/#barcode';
     public static readonly STRATEGY_GUIDE: string =
@@ -19,9 +29,9 @@ export default class EternaURL {
      *
      * @returns a URL string
      */
-    public static createURL(params: any): string {
+    public static createURL(params: EternaURLParams | null): string {
         if (params == null) {
-            params = {};
+            params = {page: 'me'};
         }
 
         if (params['page'] === 'player') {
@@ -72,7 +82,13 @@ export default class EternaURL {
             let url = `/game/browse/${params['puznid']}/?`;
             delete params['page'];
             delete params['puznid'];
-            return url + new URLSearchParams(params);
+            return url + new URLSearchParams({
+                filter1: params.filter1,
+                /* eslint-disable @typescript-eslint/camelcase */
+                filter1_arg1: String(params.filter1_arg1),
+                filter1_arg2: String(params.filter1_arg2)
+                /* eslint-enable @typescript-eslint/camelcase */
+            });
         } else if (params['page'] === 'script') {
             return '/web/script/';
         } else if (params['page'] === 'group') {

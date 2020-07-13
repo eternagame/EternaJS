@@ -272,10 +272,10 @@ export default class Vector2 {
     }
 
     /** Returns true if this vector is exactly equal to v.
-     * AMW: I am going to assert that we are never going to need the 
+     * AMW: I am going to assert that we are never going to need the
      * crazy version where we are passing a Record for no reason.
      * The only other place we use the Record type is in getCache and putCache
-     * in Folder, and that is because we don't have a schema for what that 
+     * in Folder, and that is because we don't have a schema for what that
      * cache should be yet.
      */
     public equals(v: Vector2): boolean {

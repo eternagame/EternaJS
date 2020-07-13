@@ -1,11 +1,12 @@
 import * as log from 'loglevel';
-import {Graphics, Point} from 'pixi.js';
+import {Graphics, Point, Rectangle} from 'pixi.js';
 import {
     GameObject, RepeatingTask, SceneObject, SerialTask, Easing, AlphaTask, ColorUtil, Assert
 } from 'flashbang';
 import {RNAHighlightState} from 'eterna/pose2D/Pose2D';
 import ConstraintBox from 'eterna/constraints/ConstraintBox';
 import EternaMenu from 'eterna/ui/EternaMenu';
+import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
 import {RScriptUIElement, GetRScriptUIElementBounds, RScriptUIElementID} from './RScriptUIElement';
 import RScriptOp from './RScriptOp';
 import RScriptEnv, {RScriptVarType} from './RScriptEnv';
@@ -58,11 +59,23 @@ export default class ROPHighlight extends RScriptOp {
             this._env.setVar(this._id, rnaHighlight);
         } else if (this._opVisible && this._mode === ROPHighlightMode.UI) {
             const [uiElement, elementID, altParam] = this._env.getUIElementFromID(this._uiElementString);
-            const highlightParent: any = this.getUiElementReference(elementID, altParam);
+            const highlightParent = this.getUiElementReference(elementID, altParam);
             if (highlightParent == null) {
                 log.warn(`ROPHighlight: missing highlight parent [id='${this._uiElementString}']`);
                 return;
             }
+            // if (highlightParent instanceof PIXI.DisplayObject) {
+            //     log.warn(`ROPHighlight: highlight parent is a raw PIXI.DisplayObject [id='${this._uiElementString}']`);
+            //     return;
+            // }
+            // if (highlightParent instanceof GameObject) {
+            //     log.warn(`ROPHighlight: highlight parent is a raw GameObject [id='${this._uiElementString}']`);
+            //     return;
+            // }
+            // if (highlightParent instanceof Rectangle) {
+            //     log.warn(`ROPHighlight: highlight parent is a raw Rectangle [id='${this._uiElementString}']`);
+            //     return;
+            // }
 
             // Draw highlight around the UI element.
             // Give it a bit of padding so the highlight isn't so tight.
@@ -86,8 +99,9 @@ export default class ROPHighlight extends RScriptOp {
                 new AlphaTask(0.2, 0.75, Easing.easeInOut),
                 new AlphaTask(1.0, 0.75, Easing.easeInOut)
             )));
-
-            highlightParent.addObject(highlightObj, highlightParent.container);
+            if (highlightParent instanceof PoseEditMode) {
+                highlightParent.addObject(highlightObj, highlightParent.container);
+            }
             this._env.setVar(this._id, highlight);
         }
     }
@@ -197,7 +211,10 @@ export default class ROPHighlight extends RScriptOp {
         return size;
     }
 
-    private getUiElementReference(key: RScriptUIElementID, altParam: number = -1): any {
+    private getUiElementReference(
+        key: RScriptUIElementID,
+        altParam: number = -1
+    ): PoseEditMode | RScriptUIElement | null {
         switch (key) {
             case RScriptUIElementID.A:
             case RScriptUIElementID.U:

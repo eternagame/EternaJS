@@ -1,6 +1,10 @@
 export interface BrentTheoData {
     type: string;
+    score: number;
+    ribo_with_theo: number;
+    ribo_without_theo: number;
 }
+
 export default class Feedback {
     public static readonly EXPCODES: number[] = [1, -100, -200];
     public static readonly EXPSTRINGS: string[] = ['NOT SYNTHESIZED', 'FAILED', 'NOT INTERPRETABLE'];

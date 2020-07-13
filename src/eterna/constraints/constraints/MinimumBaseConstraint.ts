@@ -53,8 +53,8 @@ abstract class MinimumBaseConstraint extends Constraint<MinBaseConstraintStatus>
             statText: status.currentCount.toString(),
             showOutline: true,
             fullTexture: forMissionScreen
-                ? BitmapManager.getBitmapNamed(`Nova${EPars.nucleotideToString(this.baseType, false, false)}MissionReq`)
-                : BitmapManager.getBitmapNamed(`Nova${EPars.nucleotideToString(this.baseType, false, false)}Req`)
+                ? BitmapManager.missionBitmapNucl(EPars.nucleotideToString(this.baseType, false, false))
+                : BitmapManager.bitmapNucl(EPars.nucleotideToString(this.baseType, false, false))
         };
     }
 }

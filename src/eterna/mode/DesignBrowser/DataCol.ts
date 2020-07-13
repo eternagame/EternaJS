@@ -5,7 +5,7 @@ import {Signal, UnitSignal} from 'signals';
 import {
     ContainerObject, TextBuilder, Flashbang, Assert
 } from 'flashbang';
-import Feedback from 'eterna/Feedback';
+import Feedback, {BrentTheoData} from 'eterna/Feedback';
 import GameButton from 'eterna/ui/GameButton';
 import TextInputObject from 'eterna/ui/TextInputObject';
 import Fonts from 'eterna/util/Fonts';
@@ -256,7 +256,7 @@ export default class DataCol extends ContainerObject {
         this._feedback = feedback;
     }
 
-    public setDataAndDisplay(raw: any[]): void {
+    public setDataAndDisplay(raw: (number | string)[]): void {
         this._rawData = [];
 
         for (let ii = 0; ii < raw.length; ii++) {
@@ -314,7 +314,7 @@ export default class DataCol extends ContainerObject {
     private updateView(): void {
         let dataString = '';
         let boardData: string[] = [];
-        let boardExpData: any[] = [];
+        let boardExpData: Feedback[] = [];
 
         let pairsLength = 0;
         if (this._pairsArray != null) {
@@ -366,14 +366,14 @@ export default class DataCol extends ContainerObject {
                         if (exp == null) {
                             dataString += '-\n';
                         } else {
-                            let brentData: any = exp.brentTheoData;
+                            let brentData: BrentTheoData = exp.brentTheoData;
                             if (brentData != null) {
                                 dataString += `${brentData['score'].toFixed(3)}x`;
                                 dataString += ` (${brentData['ribo_without_theo'].toFixed(3)} / ${brentData['ribo_with_theo'].toFixed(3)})\n`;
-                            } else if (this._rawData[ii] >= 0) {
+                            } else if (this._rawData[ii] as number >= 0) {
                                 dataString += `${rawstr} / 100\n`;
-                            } else if (this._rawData[ii] < 0) {
-                                dataString += `${Feedback.EXPDISPLAYS[Feedback.EXPCODES.indexOf(this._rawData[ii])]}\n`;
+                            } else if (this._rawData[ii] as number < 0) {
+                                dataString += `${Feedback.EXPDISPLAYS[Feedback.EXPCODES.indexOf(this._rawData[ii] as number)]}\n`;
                             } else {
                                 dataString += '-\n';
                             }
@@ -394,7 +394,7 @@ export default class DataCol extends ContainerObject {
 
                     case DesignCategory.GU_PAIRS:
                         if (pairsLength > 0) {
-                            dataString += `${rawstr} (${Math.round((this._rawData[ii] / pairsLength) * 100)}%)\n`;
+                            dataString += `${rawstr} (${Math.round((this._rawData[ii] as number / pairsLength) * 100)}%)\n`;
                         } else {
                             dataString += `${rawstr}\n`;
                         }
@@ -402,7 +402,7 @@ export default class DataCol extends ContainerObject {
 
                     case DesignCategory.GC_PAIRS:
                         if (pairsLength > 0) {
-                            dataString += `${rawstr} (${Math.round((this._rawData[ii] / pairsLength) * 100)}%)\n`;
+                            dataString += `${rawstr} (${Math.round((this._rawData[ii] as number / pairsLength) * 100)}%)\n`;
                         } else {
                             dataString += `${rawstr}\n`;
                         }
@@ -410,7 +410,7 @@ export default class DataCol extends ContainerObject {
 
                     case DesignCategory.UA_PAIRS:
                         if (pairsLength > 0) {
-                            dataString += `${rawstr} (${Math.round((this._rawData[ii] / pairsLength) * 100)}%)\n`;
+                            dataString += `${rawstr} (${Math.round((this._rawData[ii] as number / pairsLength) * 100)}%)\n`;
                         } else {
                             dataString += `${rawstr}\n`;
                         }
@@ -450,7 +450,7 @@ export default class DataCol extends ContainerObject {
 
     private _dataDisplay: Text;
 
-    private _rawData: any[] = [];
+    private _rawData: (string | number)[] = [];
     private _dataWidth: number;
     private _lineHeight: number;
     private _label: GameButton;

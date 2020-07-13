@@ -59,8 +59,8 @@ abstract class ConsecutiveBaseConstraint extends Constraint<ConsecutiveConstrain
             clarificationText: `AT MOST ${this.consecutiveLimit - 1} IN A ROW`,
             statText: status.currentConsecutive.toString(),
             fullTexture: forMissionScreen
-                ? BitmapManager.getBitmapNamed(`Nova${EPars.nucleotideToString(this.baseType, false, false)}RowMissionReq`)
-                : BitmapManager.getBitmapNamed(`Nova${EPars.nucleotideToString(this.baseType, false, false)}RowReq`),
+                ? BitmapManager.rowMissionBitmapNucl(EPars.nucleotideToString(this.baseType, false, false)) // Nova${EPars.nucleotideToString(this.baseType, false, false)}RowMissionReq`)
+                : BitmapManager.rowBitmapNucl(EPars.nucleotideToString(this.baseType, false, false)),
             showOutline: true
         };
     }

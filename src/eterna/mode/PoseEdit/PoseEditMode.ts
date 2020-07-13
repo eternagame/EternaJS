@@ -90,7 +90,7 @@ interface MoveHistory {
     elapsed: string;
 }
 
-type Move = any;
+export type Move = any;
 
 export default class PoseEditMode extends GameMode {
     constructor(puzzle: Puzzle, params: PoseEditParams, autosaveData: any[] | null = null) {

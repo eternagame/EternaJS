@@ -1,7 +1,7 @@
 import {DisplayObject, Point} from 'pixi.js';
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
-import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
+import UndoBlock, {UndoBlockParam, TargetConditions} from 'eterna/UndoBlock';
 import Background from 'eterna/vfx/Background';
 import Molecule from 'eterna/pose2D/Molecule';
 import BaseGlow from 'eterna/vfx/BaseGlow';
@@ -46,6 +46,19 @@ type InteractionEvent = PIXI.interaction.InteractionEvent;
 export interface PuzzleEditPoseData {
     sequence: string;
     structure: string;
+}
+
+interface PostParams {
+    folder?: string;
+    title?: string;
+    secstruct?: string;
+    constraints?: string;
+    body?: string;
+    midimgdata?: string;
+    bigimgdata?: string;
+    lock?: string;
+    begin_sequence?: string;
+    objectives?: string;
 }
 
 export default class PuzzleEditMode extends GameMode {
@@ -548,9 +561,9 @@ export default class PuzzleEditMode extends GameMode {
             }
         }
 
-        let objectives: any[] = [];
+        let objectives: TargetConditions[] = [];
         for (let ii = 0; ii < this._poses.length; ii++) {
-            let objective: any = {};
+            let objective: TargetConditions | null = null;
             let bindingSite: boolean[] | null = this.getCurrentBindingSite(ii);
             let bindingBases: number[] = [];
             if (bindingSite !== null) {
@@ -561,21 +574,26 @@ export default class PuzzleEditMode extends GameMode {
                 }
             }
 
-            objective['secstruct'] = this._structureInputs[ii].structureString;
-
             if (bindingBases.length > 0) {
+                objective = {
+                    type: 'aptamer',
+                    secstruct: this._structureInputs[ii].structureString
+                };
                 objective['type'] = 'aptamer';
                 objective['site'] = bindingBases;
                 objective['concentration'] = 10000;
                 objective['fold_version'] = 2.0;
             } else {
-                objective['type'] = 'single';
+                objective = {
+                    type: 'single',
+                    secstruct: this._structureInputs[ii].structureString
+                };
             }
 
             objectives.push(objective);
         }
 
-        let postParams: any = {};
+        let postParams: PostParams = {};
 
         postParams['folder'] = this._folder.name;
         let paramsTitle: string;

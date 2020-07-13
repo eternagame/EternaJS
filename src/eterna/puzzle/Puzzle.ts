@@ -8,16 +8,20 @@ import Pose2D from 'eterna/pose2D/Pose2D';
 import Constraint, {BaseConstraintStatus} from 'eterna/constraints/Constraint';
 import ShapeConstraint from 'eterna/constraints/constraints/ShapeConstraint';
 import {TargetConditions, OligoDef} from 'eterna/UndoBlock';
+import {BoosterData} from 'eterna/mode/PoseEdit/Booster';
 
 export interface BoostersData {
-    mission?: any;
-    paint_tools?: any;
-    actions?: any;
+    mission?: Mission;
+    paint_tools?: BoosterData[];
+    actions?: BoosterData[];
     mission_cleared?: MissionCleared;
 }
 export interface MissionCleared {
     info: string;
     more: string;
+}
+export interface Mission {
+    text: string;
 }
 
 export enum PuzzleType {

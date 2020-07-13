@@ -89,7 +89,7 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
         status: ShapeConstraintStatus,
         forMissionScreen: boolean,
         undoBlocks: UndoBlock[],
-        targetConditions?: any[]
+        targetConditions?: TargetConditions[]
     ): ConstraintBoxConfig {
         return {
             satisfied: status.satisfied,
@@ -131,7 +131,7 @@ export default class ShapeConstraint extends BaseShapeConstraint {
 
         let targetAlignedConstraints: boolean[] | null = null;
         if (context.targetConditions != null && context.targetConditions[this.stateIndex] != null) {
-            let structureConstraints: any = context.targetConditions[this.stateIndex]['structure_constraints'];
+            let structureConstraints: boolean[] = context.targetConditions[this.stateIndex]['structure_constraints'];
             targetAlignedConstraints = this._targetAlignedConstraints(structureConstraints, undoBlock);
         }
 
@@ -226,7 +226,7 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
             throw new Error('Target condition not available for SHAPE constraint');
         }
 
-        let antiStructureConstraints: any[] = context.targetConditions[this.stateIndex]['anti_structure_constraints'];
+        let antiStructureConstraints: boolean[] = context.targetConditions[this.stateIndex]['anti_structure_constraints'];
 
         let pseudoknots: boolean = context.targetConditions[this.stateIndex]['type'] === 'pseudoknot';
         let naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);
@@ -289,7 +289,7 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
     }
 
     private _getWrongPairs(
-        naturalPairs: number[], structureConstraints: any[], satisfied: boolean
+        naturalPairs: number[], structureConstraints: boolean[], satisfied: boolean
     ): number[] {
         let wrongPairs: number[] = new Array(naturalPairs.length);
 
