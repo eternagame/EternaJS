@@ -88,7 +88,7 @@ export interface PoseEditParams {
 interface MoveHistory {
     beginFrom: string;
     numMoves: number;
-    moves: Move[];
+    moves: Move[][];
     elapsed: string;
 }
 
@@ -121,7 +121,7 @@ interface PostData {
 }
 
 export default class PoseEditMode extends GameMode {
-    constructor(puzzle: Puzzle, params: PoseEditParams, autosaveData: any[] | null = null) {
+    constructor(puzzle: Puzzle, params: PoseEditParams, autosaveData: SaveStoreItem | null = null) {
         super();
         this._puzzle = puzzle;
         this._params = params;

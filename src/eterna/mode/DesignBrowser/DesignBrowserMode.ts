@@ -581,7 +581,7 @@ export default class DesignBrowserMode extends GameMode {
         });
     }
 
-    private updateSortOption(category: DesignCategory, sortOrder: SortOrder, sortArgs: any[] | null = null): void {
+    private updateSortOption(category: DesignCategory, sortOrder: SortOrder, sortArgs?: string): void {
         if (sortOrder !== SortOrder.NONE) {
             this._sortOptions.addCriteria(category, sortOrder, sortArgs);
         } else {
