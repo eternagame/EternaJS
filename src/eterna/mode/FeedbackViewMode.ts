@@ -3,8 +3,8 @@ import {DisplayObject, Point, Text} from 'pixi.js';
 import Constants from 'eterna/Constants';
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
-import Feedback from 'eterna/Feedback';
-import UndoBlock from 'eterna/UndoBlock';
+import Feedback, {BrentTheoData} from 'eterna/Feedback';
+import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
 import Solution from 'eterna/puzzle/Solution';
 import Puzzle from 'eterna/puzzle/Puzzle';
 import Background from 'eterna/vfx/Background';
@@ -395,7 +395,7 @@ export default class FeedbackViewMode extends GameMode {
         Assert.assertIsDefined(this._feedback);
 
         let titleText = '';
-        let brentData: any = this._feedback.brentTheoData;
+        let brentData: BrentTheoData = this._feedback.brentTheoData;
         let score: number;
 
         if (brentData != null) {
@@ -560,7 +560,7 @@ export default class FeedbackViewMode extends GameMode {
     private _feedback: Feedback | null;
     private _sequence: number[];
     private _pairs: number[][] = [];
-    private _shapePairs: any[] = [];
-    protected _targetConditions: any[];
+    private _shapePairs: number[][] = [];
+    protected _targetConditions: TargetConditions[];
     private _isExpColor: boolean;
 }

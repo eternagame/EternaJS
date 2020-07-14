@@ -1,7 +1,7 @@
 import * as log from 'loglevel';
 import {Container, Point} from 'pixi.js';
 import Eterna from 'eterna/Eterna';
-import UndoBlock from 'eterna/UndoBlock';
+import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
 import EPars from 'eterna/EPars';
 import {
     AppMode, SceneObject, Flashbang, GameObjectRef, Assert
@@ -344,7 +344,7 @@ export default abstract class GameMode extends AppMode {
 
     protected _targetPairs: number[][];
 
-    protected _targetConditions: any;
+    protected _targetConditions: TargetConditions[];
 }
 
 class ContextMenuDialog extends Dialog<void> {

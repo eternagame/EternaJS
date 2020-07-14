@@ -53,6 +53,7 @@ import HelpScreen from 'eterna/ui/help/HelpScreen';
 import NucleotideFinder from 'eterna/ui/NucleotideFinder';
 import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
 import {HighlightInfo} from 'eterna/constraints/Constraint';
+import {AchievementData} from 'eterna/achievements/AchievementManager';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
@@ -60,7 +61,6 @@ import SubmitPoseDialog from './SubmitPoseDialog';
 import SubmitPoseDetails from './SubmitPoseDetails';
 import MissionIntroMode from './MissionIntroMode';
 import MissionClearedPanel from './MissionClearedPanel';
-import { AchievementData } from 'eterna/achievements/AchievementManager';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
