@@ -370,9 +370,9 @@ export default class DataCol extends ContainerObject {
                             if (brentData != null) {
                                 dataString += `${brentData['score'].toFixed(3)}x`;
                                 dataString += ` (${brentData['ribo_without_theo'].toFixed(3)} / ${brentData['ribo_with_theo'].toFixed(3)})\n`;
-                            } else if (this._rawData[ii] as number >= 0) {
+                            } else if ((this._rawData[ii] as number) >= 0) {
                                 dataString += `${rawstr} / 100\n`;
-                            } else if (this._rawData[ii] as number < 0) {
+                            } else if ((this._rawData[ii] as number) < 0) {
                                 dataString += `${Feedback.EXPDISPLAYS[Feedback.EXPCODES.indexOf(this._rawData[ii] as number)]}\n`;
                             } else {
                                 dataString += '-\n';

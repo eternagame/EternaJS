@@ -3627,7 +3627,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
 export interface Oligo {
     malus: number;
-    name: string;
+    name?: string;
     sequence: number[];
 }
 

@@ -1,6 +1,8 @@
 import {Texture} from 'pixi.js';
 import {TextureUtil, Assert, TextBuilder} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
+import EternaTextureUtil from 'eterna/util/EternaTextureUtil';
+import Base from 'eterna/pose2D/Base';
 import Bitmaps from './Bitmaps';
 
 export default class BitmapManager {
@@ -72,100 +74,124 @@ export default class BitmapManager {
         }
     }
 
-    public static getLBase(c: string): Texture {
+    public static getLBase(c: string): Texture[] {
+        let textures = [];
         if (c === 'A') {
-            return this.getBitmap(Bitmaps.LBaseA);
+            textures = [this.getBitmap(Bitmaps.LBaseA)];
         } else if (c === 'C') {
-            return this.getBitmap(Bitmaps.LBaseC);
+            textures = [this.getBitmap(Bitmaps.LBaseC)];
         } else if (c === 'G') {
-            return this.getBitmap(Bitmaps.LBaseG);
+            textures = [this.getBitmap(Bitmaps.LBaseG)];
         } else { // c === 'U'
-            return this.getBitmap(Bitmaps.LBaseU);
+            textures = [this.getBitmap(Bitmaps.LBaseU)];
         }
+        EternaTextureUtil.createScaled(textures, Base.ZOOM_SCALE_FACTOR, Base.NUM_ZOOM_LEVELS);
+        return textures;
     }
 
-    public static getLBasef(c: string): Texture {
+    public static getLBasef(c: string): Texture[] {
+        let textures = [];
         if (c === 'A') {
-            return this.getBitmap(Bitmaps.LBaseAf);
+            textures = [this.getBitmap(Bitmaps.LBaseAf)];
         } else if (c === 'C') {
-            return this.getBitmap(Bitmaps.LBaseCf);
+            textures = [this.getBitmap(Bitmaps.LBaseCf)];
         } else if (c === 'G') {
-            return this.getBitmap(Bitmaps.LBaseGf);
+            textures = [this.getBitmap(Bitmaps.LBaseGf)];
         } else { // c === 'U'
-            return this.getBitmap(Bitmaps.LBaseUf);
+            textures = [this.getBitmap(Bitmaps.LBaseUf)];
         }
+        EternaTextureUtil.createScaled(textures, Base.ZOOM_SCALE_FACTOR, Base.NUM_ZOOM_LEVELS);
+        return textures;
     }
 
-    public static getBaseLock(c: string): Texture {
+    public static getBaseLock(c: string): Texture[] {
+        let textures = [];
         if (c === 'A') {
-            return this.getBitmap(Bitmaps.BaseALock);
+            textures = [this.getBitmap(Bitmaps.BaseALock)];
         } else if (c === 'C') {
-            return this.getBitmap(Bitmaps.BaseCLock);
+            textures = [this.getBitmap(Bitmaps.BaseCLock)];
         } else if (c === 'G') {
-            return this.getBitmap(Bitmaps.BaseGLock);
+            textures = [this.getBitmap(Bitmaps.BaseGLock)];
         } else { // c === 'U'
-            return this.getBitmap(Bitmaps.BaseULock);
+            textures = [this.getBitmap(Bitmaps.BaseULock)];
         }
+        EternaTextureUtil.createScaled(textures, Base.ZOOM_SCALE_FACTOR, Base.NUM_ZOOM_LEVELS);
+        return textures;
     }
 
-    public static getBasefLock(c: string): Texture {
+    public static getBasefLock(c: string): Texture[] {
+        let textures = [];
         if (c === 'A') {
-            return this.getBitmap(Bitmaps.BaseAfLock);
+            textures = [this.getBitmap(Bitmaps.BaseAfLock)];
         } else if (c === 'C') {
-            return this.getBitmap(Bitmaps.BaseCfLock);
+            textures = [this.getBitmap(Bitmaps.BaseCfLock)];
         } else if (c === 'G') {
-            return this.getBitmap(Bitmaps.BaseGfLock);
+            textures = [this.getBitmap(Bitmaps.BaseGfLock)];
         } else { // c === 'U'
-            return this.getBitmap(Bitmaps.BaseUfLock);
+            textures = [this.getBitmap(Bitmaps.BaseUfLock)];
         }
+        EternaTextureUtil.createScaled(textures, Base.ZOOM_SCALE_FACTOR, Base.NUM_ZOOM_LEVELS);
+        return textures;
     }
 
-    public static getBaseMid(c: string): Texture {
+    public static getBaseMid(c: string): Texture[] {
+        let textures = [];
         if (c === 'A') {
-            return this.getBitmap(Bitmaps.BaseAMid);
+            textures = [this.getBitmap(Bitmaps.BaseAMid)];
         } else if (c === 'C') {
-            return this.getBitmap(Bitmaps.BaseCMid);
+            textures = [this.getBitmap(Bitmaps.BaseCMid)];
         } else if (c === 'G') {
-            return this.getBitmap(Bitmaps.BaseGMid);
+            textures = [this.getBitmap(Bitmaps.BaseGMid)];
         } else { // c === 'U'
-            return this.getBitmap(Bitmaps.BaseUMid);
+            textures = [this.getBitmap(Bitmaps.BaseUMid)];
         }
+        EternaTextureUtil.createScaled(textures, Base.ZOOM_SCALE_FACTOR, Base.NUM_ZOOM_LEVELS);
+        return textures;
     }
 
-    public static getBasefMid(c: string): Texture {
+    public static getBasefMid(c: string): Texture[] {
+        let textures = [];
         if (c === 'A') {
-            return this.getBitmap(Bitmaps.BaseAfMid);
+            textures = [this.getBitmap(Bitmaps.BaseAfMid)];
         } else if (c === 'C') {
-            return this.getBitmap(Bitmaps.BaseCfMid);
+            textures = [this.getBitmap(Bitmaps.BaseCfMid)];
         } else if (c === 'G') {
-            return this.getBitmap(Bitmaps.BaseGfMid);
+            textures = [this.getBitmap(Bitmaps.BaseGfMid)];
         } else { // c === 'U'
-            return this.getBitmap(Bitmaps.BaseUfMid);
+            textures = [this.getBitmap(Bitmaps.BaseUfMid)];
         }
+        EternaTextureUtil.createScaled(textures, Base.ZOOM_SCALE_FACTOR, Base.NUM_ZOOM_LEVELS);
+        return textures;
     }
 
-    public static getBaseMidLock(c: string): Texture {
+    public static getBaseMidLock(c: string): Texture[] {
+        let textures = [];
         if (c === 'A') {
-            return this.getBitmap(Bitmaps.BaseAMidLock);
+            textures = [this.getBitmap(Bitmaps.BaseAMidLock)];
         } else if (c === 'C') {
-            return this.getBitmap(Bitmaps.BaseCMidLock);
+            textures = [this.getBitmap(Bitmaps.BaseCMidLock)];
         } else if (c === 'G') {
-            return this.getBitmap(Bitmaps.BaseGMidLock);
+            textures = [this.getBitmap(Bitmaps.BaseGMidLock)];
         } else { // c === 'U'
-            return this.getBitmap(Bitmaps.BaseUMidLock);
+            textures = [this.getBitmap(Bitmaps.BaseUMidLock)];
         }
+        EternaTextureUtil.createScaled(textures, Base.ZOOM_SCALE_FACTOR, Base.NUM_ZOOM_LEVELS);
+        return textures;
     }
 
-    public static getBasefMidLock(c: string): Texture {
+    public static getBasefMidLock(c: string): Texture[] {
+        let textures = [];
         if (c === 'A') {
-            return this.getBitmap(Bitmaps.BaseAfMidLock);
+            textures = [this.getBitmap(Bitmaps.BaseAfMidLock)];
         } else if (c === 'C') {
-            return this.getBitmap(Bitmaps.BaseCfMidLock);
+            textures = [this.getBitmap(Bitmaps.BaseCfMidLock)];
         } else if (c === 'G') {
-            return this.getBitmap(Bitmaps.BaseGfMidLock);
+            textures = [this.getBitmap(Bitmaps.BaseGfMidLock)];
         } else { // c === 'U'
-            return this.getBitmap(Bitmaps.BaseUfMidLock);
+            textures = [this.getBitmap(Bitmaps.BaseUfMidLock)];
         }
+        EternaTextureUtil.createScaled(textures, Base.ZOOM_SCALE_FACTOR, Base.NUM_ZOOM_LEVELS);
+        return textures;
     }
 
     public static getTextBitmap(txt: string, color: number = 0xffffff): Texture {

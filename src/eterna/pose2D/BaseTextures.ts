@@ -34,16 +34,16 @@ export default class BaseTextures {
         this.baseType = baseType;
         this.letterData = BaseTextures.createLetterTextures(baseType, Base.ZOOM_SCALE_FACTOR);
 
-        this.bodyData = [BitmapManager.getLBase(BaseTextures.type2Letter(baseType))];
-        this.fBodyData = [BitmapManager.getLBasef(BaseTextures.type2Letter(baseType))];
-        this.lBodyData = [BitmapManager.getLBase(BaseTextures.type2Letter(baseType))];
-        this.lfBodyData = [BitmapManager.getLBasef(BaseTextures.type2Letter(baseType))];
-        this.lockData = [BitmapManager.getBaseLock(BaseTextures.type2Letter(baseType))];
-        this.fLockData = [BitmapManager.getBasefLock(BaseTextures.type2Letter(baseType))];
-        this.midData = [BitmapManager.getBaseMid(BaseTextures.type2Letter(baseType))];
-        this.fMidData = [BitmapManager.getBasefMid(BaseTextures.type2Letter(baseType))];
-        this.midLockData = [BitmapManager.getBaseMidLock(BaseTextures.type2Letter(baseType))];
-        this.fMidLockData = [BitmapManager.getBasefMidLock(BaseTextures.type2Letter(baseType))];
+        this.bodyData = BitmapManager.getLBase(BaseTextures.type2Letter(baseType));
+        this.fBodyData = BitmapManager.getLBasef(BaseTextures.type2Letter(baseType));
+        this.lBodyData = BitmapManager.getLBase(BaseTextures.type2Letter(baseType));
+        this.lfBodyData = BitmapManager.getLBasef(BaseTextures.type2Letter(baseType));
+        this.lockData = BitmapManager.getBaseLock(BaseTextures.type2Letter(baseType));
+        this.fLockData = BitmapManager.getBasefLock(BaseTextures.type2Letter(baseType));
+        this.midData = BitmapManager.getBaseMid(BaseTextures.type2Letter(baseType));
+        this.fMidData = BitmapManager.getBasefMid(BaseTextures.type2Letter(baseType));
+        this.midLockData = BitmapManager.getBaseMidLock(BaseTextures.type2Letter(baseType));
+        this.fMidLockData = BitmapManager.getBasefMidLock(BaseTextures.type2Letter(baseType));
         this.minData = BitmapManager.getBaseMin(BaseTextures.type2Letter(baseType));
     }
 

@@ -82,6 +82,8 @@ export enum UndoBlockParam {
     ANY_PAIR = 15,
 }
 
+type Param = (number | number[]);
+
 export default class UndoBlock {
     constructor(seq: number[]) {
         this._sequence = seq.slice();
@@ -243,10 +245,10 @@ export default class UndoBlock {
     }
 
     public getParam(index: UndoBlockParam, temp: number = 37, pseudoknots: boolean = false): number | number[] {
-        const parisArray = this._paramsArray.get(pseudoknots);
-        Assert.assertIsDefined(parisArray);
-        if (parisArray[temp] != null) {
-            return parisArray[temp][index];
+        const paramsArray = this._paramsArray.get(pseudoknots);
+        Assert.assertIsDefined(paramsArray);
+        if (paramsArray[temp] != null) {
+            return paramsArray[temp][index];
         } else {
             return undefined;
         }
@@ -438,7 +440,7 @@ export default class UndoBlock {
 
     private _sequence: number[];
     private _pairsArray: Map<boolean, number[][]> = new Map<boolean, number[][]>();
-    private _paramsArray: Map<boolean, (number | number[])[][]> = new Map<boolean, (number | number[])[][]>();
+    private _paramsArray: Map<boolean, (number | number[])[][]> = new Map<boolean, Param[][]>();
     private _stable: boolean = false;
     private _targetOligo: number[] | null = null;
     private _targetOligos: Oligo[] | null = null;

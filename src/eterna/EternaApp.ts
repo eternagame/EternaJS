@@ -6,6 +6,7 @@ import {
 import ChatManager from 'eterna/ChatManager';
 import Eterna from 'eterna/Eterna';
 import {isMobile} from 'is-mobile';
+import {SaveStoreItem} from 'flashbang/settings/SaveGameManager';
 import DesignBrowserMode, {DesignBrowserFilter} from './mode/DesignBrowser/DesignBrowserMode';
 import ExternalInterface, {ExternalInterfaceCtx} from './util/ExternalInterface';
 import EternaSettings from './settings/EternaSettings';
@@ -224,7 +225,7 @@ export default class EternaApp extends FlashbangApp {
     public async loadPoseEdit(puzzleOrID: number | Puzzle, params: PoseEditParams) {
         const puzzle = await this.loadPuzzle(puzzleOrID);
 
-        let autoSaveData: any | undefined;
+        let autoSaveData: SaveStoreItem | undefined;
 
         const hasRscript = Boolean(puzzle.rscript) && (puzzle.rscript.trim().length > 0);
         if (hasRscript) {
@@ -238,7 +239,7 @@ export default class EternaApp extends FlashbangApp {
     }
 
     /** Creates a PuzzleEditMode and removes all other modes from the stack */
-    public async loadPuzzleEditor(numTargets?: number, initialPoseData?: PuzzleEditPoseData[]): Promise<void> {
+    public async loadPuzzleEditor(numTargets?: number, initialPoseData?: SaveStoreItem): Promise<void> {
         if (this._params.puzzleEditNumTargets === undefined) {
             throw new Error("puzzleEditNumTargets can't be undefined here!");
         }

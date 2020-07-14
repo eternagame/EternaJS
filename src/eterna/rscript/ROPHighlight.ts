@@ -65,7 +65,7 @@ export default class ROPHighlight extends RScriptOp {
                 return;
             }
             // if (highlightParent instanceof PIXI.DisplayObject) {
-            //     log.warn(`ROPHighlight: highlight parent is a raw PIXI.DisplayObject [id='${this._uiElementString}']`);
+            //     log.warn(`ROPHighlight: highlight parent is a raw DisplayObject [id='${this._uiElementString}']`);
             //     return;
             // }
             // if (highlightParent instanceof GameObject) {

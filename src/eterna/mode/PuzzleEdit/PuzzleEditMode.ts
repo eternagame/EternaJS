@@ -36,6 +36,7 @@ import ConstraintBar from 'eterna/constraints/ConstraintBar';
 import Utility from 'eterna/util/Utility';
 import ShapeConstraint from 'eterna/constraints/constraints/ShapeConstraint';
 import ContraFold from 'eterna/folding/Contrafold';
+import {SaveStoreItem} from 'flashbang/settings/SaveGameManager';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
@@ -62,12 +63,18 @@ interface PostParams {
 }
 
 export default class PuzzleEditMode extends GameMode {
-    constructor(embedded: boolean, numTargets?: number, poses?: PuzzleEditPoseData[]) {
+    constructor(embedded: boolean, numTargets?: number, poses?: SaveStoreItem) {
         super();
         this._embedded = embedded;
 
         if (poses != null && poses.length > 0) {
-            this._initialPoseData = poses;
+            // this is a safe type assertion because only the first two
+            // items of SaveStoreItem are nonstring.
+            const justPoses: string[] = poses.slice(2) as string[];
+            this._initialPoseData = [];
+            for (let justPose of justPoses) {
+                this._initialPoseData.push(JSON.parse(justPose));
+            }
             this._numTargets = this._initialPoseData.length;
         } else {
             if (!numTargets) {
@@ -289,13 +296,13 @@ export default class PuzzleEditMode extends GameMode {
     }
 
     private saveData(): void {
-        let objs: PuzzleEditPoseData[] = [];
+        let objs: SaveStoreItem = [0, this._poses[0].sequence];
         for (let pose of this._poses) {
             Assert.assertIsDefined(pose.molecularStructure);
-            objs.push({
+            objs.push(JSON.stringify({
                 sequence: EPars.sequenceToString(pose.sequence),
                 structure: EPars.pairsToParenthesis(pose.molecularStructure)
-            });
+            }));
         }
 
         Eterna.saveManager.save(this.savedDataTokenName, objs);
