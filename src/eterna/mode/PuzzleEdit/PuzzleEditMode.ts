@@ -49,7 +49,9 @@ export interface PuzzleEditPoseData {
     structure: string;
 }
 
-interface PostParams {
+// AMW TODO: we need the "all optional" impl for piece by piece buildup.
+// Should be converted to an "all required" type for subsequent processing.
+type SubmitPuzzleParams = {
     folder?: string;
     title?: string;
     secstruct?: string;
@@ -60,7 +62,7 @@ interface PostParams {
     lock?: string;
     begin_sequence?: string;
     objectives?: string;
-}
+};
 
 export default class PuzzleEditMode extends GameMode {
     constructor(embedded: boolean, numTargets?: number, poses?: SaveStoreItem) {
@@ -600,7 +602,7 @@ export default class PuzzleEditMode extends GameMode {
             objectives.push(objective);
         }
 
-        let postParams: PostParams = {};
+        let postParams: SubmitPuzzleParams = {};
 
         postParams['folder'] = this._folder.name;
         let paramsTitle: string;

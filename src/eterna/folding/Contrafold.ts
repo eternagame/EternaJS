@@ -5,7 +5,7 @@ import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import * as ContrafoldLib from './engines/ContrafoldLib';
 import {FullEvalResult, FullFoldResult} from './engines/ContrafoldLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
-import Folder from './Folder';
+import Folder, {CacheKey} from './Folder';
 import FoldUtil from './FoldUtil';
 
 export default class ContraFold extends Folder {
@@ -14,12 +14,13 @@ export default class ContraFold extends Folder {
     /**
      * Asynchronously creates a new instance of the ContraFold folder.
      * @returns {Promise<ContraFold>}
+     * @description AMW TODO cannot annotate type of module/program; both are any.
      */
     public static create(): Promise<ContraFold | null> {
         // eslint-disable-next-line import/no-unresolved, import/no-extraneous-dependencies
         return import('engines-bin/contrafold')
-            .then((module: any) => EmscriptenUtil.loadProgram(module))
-            .then((program: any) => new ContraFold(program))
+            .then((module) => EmscriptenUtil.loadProgram(module))
+            .then((program) => new ContraFold(program))
             .catch((err) => null);
     }
 
@@ -47,7 +48,7 @@ export default class ContraFold extends Folder {
         temp: number = 37,
         outNodes: number[] = null
     ): number {
-        let key: any = {
+        let key: CacheKey = {
             primitive: 'score', seq, pairs, temp
         };
         let cache: FullEvalCache = this.getCache(key);
@@ -128,7 +129,7 @@ export default class ContraFold extends Folder {
         temp: number = 37,
         gamma: number = 6.0
     ): number[] {
-        let key: any = {
+        let key: CacheKey = {
             primitive: 'fold',
             seq,
             secondBestPairs,

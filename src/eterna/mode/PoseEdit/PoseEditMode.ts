@@ -101,7 +101,9 @@ export interface Move {
     sequence?: string;
 }
 
-interface PostData {
+// AMW TODO: we need the "all optional" impl for piece by piece buildup.
+// Should be converted to an "all required" type for subsequent processing.
+type SubmitSolutionData = {
     'next-puzzle'?: number;
     'recommend-puzzle'?: boolean;
     pointsrank?: boolean;
@@ -118,7 +120,7 @@ interface PostData {
     body?: string;
     melt?: number;
     'fold-data'?: string;
-}
+};
 
 export default class PoseEditMode extends GameMode {
     constructor(puzzle: Puzzle, params: PoseEditParams, autosaveData: SaveStoreItem | null = null) {
@@ -1854,7 +1856,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     /** Creates solution-submission data for shipping off to the server */
-    private createSubmitData(details: SubmitPoseDetails, undoBlock: UndoBlock): PostData {
+    private createSubmitData(details: SubmitPoseDetails, undoBlock: UndoBlock): SubmitSolutionData {
         if (!details.title || details.title.length === 0) {
             details.title = 'Default title';
         }
@@ -1863,7 +1865,7 @@ export default class PoseEditMode extends GameMode {
             details.comment = 'No comment';
         }
 
-        let postData: PostData = {};
+        let postData: SubmitSolutionData = {};
 
         if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL) {
             let nextPuzzle: number = this._puzzle.nextPuzzleID;

@@ -7,7 +7,7 @@ import RNALayout from 'eterna/pose2D/RNALayout';
 import * as Vienna2Lib from './engines/Vienna2Lib';
 import {DotPlotResult, FullEvalResult, FullFoldResult} from './engines/Vienna2Lib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
-import Folder from './Folder';
+import Folder, {CacheKey} from './Folder';
 import FoldUtil from './FoldUtil';
 
 export default class Vienna2 extends Folder {
@@ -16,12 +16,13 @@ export default class Vienna2 extends Folder {
     /**
      * Asynchronously creates a new instance of the Vienna folder.
      * @returns {Promise<Vienna2>}
+     * @description AMW TODO cannot annotate type of module/program; both are any.
      */
     public static create(): Promise<Vienna2 | null> {
         // eslint-disable-next-line import/no-unresolved, import/no-extraneous-dependencies
         return import('engines-bin/vienna2')
-            .then((module: any) => EmscriptenUtil.loadProgram(module))
-            .then((program: any) => new Vienna2(program))
+            .then((module) => EmscriptenUtil.loadProgram(module))
+            .then((program) => new Vienna2(program))
             .catch((err) => null);
     }
 
@@ -37,7 +38,7 @@ export default class Vienna2 extends Folder {
 
     /* override */
     public getDotPlot(seq: number[], pairs: number[], temp: number = 37): number[] {
-        let key: any = {
+        let key: CacheKey = {
             primitive: 'dotplot', seq, pairs, temp
         };
         let retArray: number[] = this.getCache(key);
@@ -109,7 +110,7 @@ export default class Vienna2 extends Folder {
         seq: number[], pairs: number[], pseudoknotted: boolean = false,
         temp: number = 37, outNodes: number[] | null = null
     ): number {
-        let key: any = {
+        let key: CacheKey = {
             primitive: 'score', seq, pairs, temp
         };
         let cache: FullEvalCache = this.getCache(key);
@@ -190,7 +191,7 @@ export default class Vienna2 extends Folder {
         seq: number[], secondBestPairs: number[] | null, desiredPairs: string | null = null,
         pseudoknotted: boolean = false, temp: number = 37
     ): number[] {
-        let key: any = {
+        let key: CacheKey = {
             primitive: 'fold',
             seq,
             secondBestPairs,
@@ -217,7 +218,7 @@ export default class Vienna2 extends Folder {
         seq: number[], targetPairs: number[] | null, bindingSite: number[], bonus: number,
         version: number = 1.0, temp: number = 37
     ): number[] {
-        let key: any = {
+        let key: CacheKey = {
             primitive: 'foldAptamer',
             seq,
             targetPairs,
@@ -295,7 +296,7 @@ export default class Vienna2 extends Folder {
             throw new Error('Missing cutting point');
         }
 
-        let key: any = {
+        let key: CacheKey = {
             primitive: 'cofold',
             seq,
             secondBestPairs,
@@ -348,7 +349,7 @@ export default class Vienna2 extends Folder {
             throw new Error('Missing cutting point');
         }
 
-        let key: any = {
+        let key: CacheKey = {
             primitive: 'cofoldAptamer',
             seq,
             malus,

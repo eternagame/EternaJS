@@ -4,10 +4,11 @@ import EPars from 'eterna/EPars';
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import PoseOp from 'eterna/pose2D/PoseOp';
 import int from 'eterna/util/int';
+import {Oligo} from 'eterna/pose2D/Pose2D';
 import * as NupackLib from './engines/NupackLib';
 import {DotPlotResult, FullEvalResult, FullFoldResult} from './engines/NupackLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
-import Folder from './Folder';
+import Folder, {MultiFoldResult, CacheKey} from './Folder';
 import FoldUtil from './FoldUtil';
 
 export default class NuPACK extends Folder {
@@ -16,12 +17,13 @@ export default class NuPACK extends Folder {
     /**
      * Asynchronously creates a new instance of the NuPACK folder.
      * @returns {Promise<NuPACK>}
+     * @description AMW TODO cannot annotate type of module/program; both are any.
      */
     public static create(): Promise<NuPACK | null> {
         // eslint-disable-next-line import/no-unresolved, import/no-extraneous-dependencies
         return import('engines-bin/nupack')
-            .then((module: any) => EmscriptenUtil.loadProgram(module))
-            .then((program: any) => new NuPACK(program))
+            .then((module) => EmscriptenUtil.loadProgram(module))
+            .then((program) => new NuPACK(program))
             .catch((err) => null);
     }
 
@@ -43,7 +45,7 @@ export default class NuPACK extends Folder {
     /* override */
     public getDotPlot(seq: number[], pairs: number[], temp: number = 37, pseudoknots: boolean = false): number[] {
         // AMW TODO: actually NOT pk aware yet
-        let key: any = {
+        let key: CacheKey = {
             primitive: 'dotplot', seq, pairs, temp
         };
         let retArray: number[] = this.getCache(key);
@@ -95,7 +97,7 @@ export default class NuPACK extends Folder {
         seq: number[], pairs: number[],
         pseudoknots: boolean = false, temp: number = 37, outNodes: number[] | null = null
     ): number {
-        let key: any = {
+        let key: CacheKey = {
             primitive: 'score', seq, pairs, pseudoknots, temp
         };
         let cache: FullEvalCache = this.getCache(key);
@@ -276,7 +278,7 @@ export default class NuPACK extends Folder {
             throw new Error('Missing cutting point');
         }
 
-        let key: any = {
+        let key: CacheKey = {
             primitive: 'cofold',
             seq,
             secondBestPairs,
@@ -329,7 +331,7 @@ export default class NuPACK extends Folder {
             throw new Error('Missing cutting point');
         }
 
-        let key: any = {
+        let key: CacheKey = {
             primitive: 'cofoldAptamer',
             seq,
             malus,
@@ -405,9 +407,9 @@ export default class NuPACK extends Folder {
 
     /* override */
     public multifold(
-        seq: number[], secondBestPairs: number[], oligos: any[], desiredPairs: string | null = null, temp: number = 37
-    ): any {
-        let key: any = {
+        seq: number[], secondBestPairs: number[], oligos: Oligo[], desiredPairs: string | null = null, temp: number = 37
+    ): MultiFoldResult {
+        let key: CacheKey = {
             primitive: 'multifold',
             seq,
             secondBestPairs,
@@ -415,17 +417,17 @@ export default class NuPACK extends Folder {
             desiredPairs,
             temp
         };
-        let mfold: any = this.getCache(key);
+        let mfold: MultiFoldResult = this.getCache(key);
         if (mfold != null) {
             // trace("multifold cache hit");
             return mfold;
         }
 
-        mfold = {};
-        mfold['pairs'] = null;
-        mfold['order'] = null;
-        mfold['count'] = -1;
-
+        mfold = {
+            pairs: [], // original had null
+            order: [], // original had null
+            count: -1
+        };
         let bestFE = 1000000;
         let order: number[] = [];
         let numOligo: number = oligos.length;
@@ -440,7 +442,7 @@ export default class NuPACK extends Folder {
                 let msSeq: number[] = seq.slice();
                 for (let jj = 0; jj < ii; jj++) {
                     msSeq.push(EPars.RNABASE_CUT);
-                    msSeq = msSeq.concat(oligos[order[jj]].seq);
+                    msSeq = msSeq.concat(oligos[order[jj]].sequence);
                 }
                 let msPairs: number[];
                 if (ii === 0) {
@@ -454,9 +456,9 @@ export default class NuPACK extends Folder {
                     msFE += oligos[order[jj]].malus;
                 }
                 for (let jj = ii; jj < numOligo; jj++) {
-                    let sPairs: number[] = this.foldSequence(oligos[order[jj]].seq, null, null, false, temp);
+                    let sPairs: number[] = this.foldSequence(oligos[order[jj]].sequence, null, null, false, temp);
                     let sNodes: number[] = [];
-                    let sFE: number = this.scoreStructures(oligos[order[jj]].seq, sPairs, false, temp, sNodes);
+                    let sFE: number = this.scoreStructures(oligos[order[jj]].sequence, sPairs, false, temp, sNodes);
 
                     let struc = `${EPars.pairsToParenthesis(msPairs)}&${EPars.pairsToParenthesis(sPairs)}`;
                     msPairs = EPars.parenthesisToPairs(struc);
@@ -479,7 +481,7 @@ export default class NuPACK extends Folder {
     }
 
     public multifoldUnroll(
-        seq: number[], secondBestPairs: number[], oligos: any[], desiredPairs: string | null = null, temp: number = 37
+        seq: number[], secondBestPairs: number[], oligos: Oligo[], desiredPairs: string | null = null, temp: number = 37
     ): PoseOp[] {
         let ops: PoseOp[] = [];
 
@@ -491,7 +493,7 @@ export default class NuPACK extends Folder {
         }
 
         for (let ii = 0; ii < numOligo; ii++) {
-            ops.push(new PoseOp(null, () => this.foldSequence(oligos[ii].seq, null, null, false, temp)));
+            ops.push(new PoseOp(null, () => this.foldSequence(oligos[ii].sequence, null, null, false, temp)));
         }
 
         let more: boolean;
@@ -500,7 +502,7 @@ export default class NuPACK extends Folder {
                 let msSeq: number[] = seq.slice();
                 for (let jj = 0; jj < ii; jj++) {
                     msSeq.push(EPars.RNABASE_CUT);
-                    msSeq = msSeq.concat(oligos[order[jj]].seq);
+                    msSeq = msSeq.concat(oligos[order[jj]].sequence);
                 }
 
                 if (ii === 0) {
@@ -610,7 +612,7 @@ export default class NuPACK extends Folder {
     private cofoldSeq2(
         seq: number[], secondBestPairs: number[] | null, desiredPairs: string | null = null, temp: number = 37
     ): number[] {
-        let key: any = {
+        let key: CacheKey = {
             primitive: 'cofold2',
             seq,
             secondBestPairs,

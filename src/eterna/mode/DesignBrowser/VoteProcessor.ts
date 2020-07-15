@@ -2,7 +2,7 @@ import Eterna from 'eterna/Eterna';
 import int from 'eterna/util/int';
 import SolutionManager from 'eterna/puzzle/SolutionManager';
 
-interface VoteData {
+export interface VoteData {
     solnid: string; // Numberable
     uid: string; // ditto
     count: number;
@@ -64,8 +64,8 @@ export default class VoteProcessor {
 
     public updateVotes(puznid: number, round: number): Promise<void> {
         return Eterna.client.getPuzzleVotes(puznid, round).then((json) => {
-            let data: any = json['data'];
-            this.processData(data['votes']);
+            // let data:  = json['data']['votes'];
+            this.processData(json.data.votes);
         });
     }
 

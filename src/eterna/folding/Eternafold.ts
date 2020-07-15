@@ -5,7 +5,7 @@ import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import * as EternafoldLib from './engines/EternafoldLib';
 import {FullEvalResult, FullFoldResult} from './engines/EternafoldLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
-import Folder from './Folder';
+import Folder, {CacheKey} from './Folder';
 import FoldUtil from './FoldUtil';
 
 export default class EternaFold extends Folder {
@@ -14,12 +14,13 @@ export default class EternaFold extends Folder {
     /**
      * Asynchronously creates a new instance of the Eternafold folder.
      * @returns {Promise<EternaFold>}
+     * @description AMW TODO cannot annotate type of module/program; both are any.
      */
     public static create(): Promise<EternaFold | null> {
         // eslint-disable-next-line import/no-unresolved, import/no-extraneous-dependencies
         return import('engines-bin/eternafold')
-            .then((module: any) => EmscriptenUtil.loadProgram(module))
-            .then((program: any) => new EternaFold(program))
+            .then((module) => EmscriptenUtil.loadProgram(module))
+            .then((program) => new EternaFold(program))
             .catch((err) => null);
     }
 
@@ -47,7 +48,7 @@ export default class EternaFold extends Folder {
         temp: number = 37, outNodes:
         number[] = null
     ): number {
-        let key: any = {
+        let key: CacheKey = {
             primitive: 'score', seq, pairs, temp
         };
         let cache: FullEvalCache = this.getCache(key);
@@ -128,7 +129,7 @@ export default class EternaFold extends Folder {
         temp: number = 37,
         gamma: number = 0.7
     ): number[] {
-        let key: any = {
+        let key: CacheKey = {
             primitive: 'fold',
             seq,
             secondBestPairs,
