@@ -935,7 +935,7 @@ export default class EPars {
         return diff;
     }
 
-    public static arePairsSame(aPairs: number[], bPairs: number[], constraints: any[] | null = null): boolean {
+    public static arePairsSame(aPairs: number[], bPairs: number[], constraints: boolean[] | null = null): boolean {
         if (aPairs.length !== bPairs.length) {
             return false;
         }

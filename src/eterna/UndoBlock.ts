@@ -260,7 +260,12 @@ export default class UndoBlock {
         pairsArray[temp] = pairs.slice();
     }
 
-    public setParam(index: UndoBlockParam, val: number | number[], temp: number = 37, pseudoknots: boolean = false): void {
+    public setParam(
+        index: UndoBlockParam,
+        val: number | number[],
+        temp: number = 37,
+        pseudoknots: boolean = false
+    ): void {
         const paramsArray = this._paramsArray.get(pseudoknots);
         Assert.assertIsDefined(paramsArray);
         if (paramsArray[temp] == null) {

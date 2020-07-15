@@ -16,7 +16,7 @@ import {
     VLayoutContainer, HAlign, HLayoutContainer, SceneObject, RepeatingTask, SerialTask, AlphaTask, Assert
 } from 'flashbang';
 import CopyTextDialogMode from '../CopyTextDialogMode';
-import LabComments from './LabComments';
+import LabComments, {CommentsData} from './LabComments';
 import GameMode from '../GameMode';
 
 export default class SolutionDescBox extends GamePanel {
@@ -103,7 +103,7 @@ export default class SolutionDescBox extends GamePanel {
         );
         this.addObject(loadingText, this.container);
 
-        this._comments.update().then((commentsData: any[]) => {
+        this._comments.update().then((commentsData: CommentsData[]) => {
             loadingText.destroySelf();
 
             this._commentInput.display.visible = true;
@@ -157,7 +157,7 @@ export default class SolutionDescBox extends GamePanel {
         }
     }
 
-    private updateDescriptionAndComments(commentsData?: any[]): void {
+    private updateDescriptionAndComments(commentsData?: CommentsData[]): void {
         let prevScroll = 0;
         if (this._descriptionAndComments != null) {
             prevScroll = this._descriptionAndComments.scrollProgress;

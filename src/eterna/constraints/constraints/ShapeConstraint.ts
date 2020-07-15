@@ -226,7 +226,7 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
             throw new Error('Target condition not available for SHAPE constraint');
         }
 
-        let antiStructureConstraints: boolean[] = context.targetConditions[this.stateIndex]['anti_structure_constraints'];
+        let antiStructureConstraints = context.targetConditions[this.stateIndex]['anti_structure_constraints'];
 
         let pseudoknots: boolean = context.targetConditions[this.stateIndex]['type'] === 'pseudoknot';
         let naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);

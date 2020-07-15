@@ -15,7 +15,7 @@ import RankRowLayout from './RankRowLayout';
 import RankBoard from './RankBoard';
 import PlayerRank from './PlayerRank';
 
-interface SubmissionResponse {
+export interface SubmissionResponse {
     'pointsrank-before': RankScrollData | null;
     'pointsrank-after': RankScrollData | null;
 }

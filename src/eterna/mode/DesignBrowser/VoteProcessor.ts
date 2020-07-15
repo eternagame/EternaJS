@@ -2,12 +2,18 @@ import Eterna from 'eterna/Eterna';
 import int from 'eterna/util/int';
 import SolutionManager from 'eterna/puzzle/SolutionManager';
 
+interface VoteData {
+    solnid: string; // Numberable
+    uid: string; // ditto
+    count: number;
+}
+
 export default class VoteProcessor {
     constructor(maxVotes: number) {
         this._maxVotes = maxVotes;
     }
 
-    public processData(data: any[]): void {
+    public processData(data: VoteData[]): void {
         let solutionIDs: number[] = [];
         let voteCounts: number[] = [];
         let myVoteCounts: number[] = [];
@@ -16,7 +22,7 @@ export default class VoteProcessor {
         this._votesLeft = 0;
 
         for (let ii = data.length - 1; ii >= 0; ii--) {
-            let obj: any = data[ii];
+            let obj: VoteData = data[ii];
 
             let nid = Number(obj['solnid']);
             let isMine: boolean = Eterna.playerID === Number(obj['uid']);

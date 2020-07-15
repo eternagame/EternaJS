@@ -47,7 +47,7 @@ export default class Eterna {
         this.playerID = id;
     }
 
-    public static onFatalError(err: any): void {
+    public static onFatalError(err: Error | ErrorEvent): void {
         log.error('Fatal error error', ErrorUtil.getErrorObj(err) || ErrorUtil.getErrString(err));
         if (Flashbang.app != null
             && Flashbang.app.modeStack != null

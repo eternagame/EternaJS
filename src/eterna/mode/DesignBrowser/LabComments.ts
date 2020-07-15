@@ -1,13 +1,19 @@
 import Eterna from 'eterna/Eterna';
 import Utility from 'eterna/util/Utility';
 
+export interface CommentsData {
+    name: string;
+    comment: string;
+    uid: number;
+}
+
 export default class LabComments {
     constructor(nid: number) {
         this._solutionNID = nid;
         this._commentsData = [];
     }
 
-    public update(): Promise<any[]> {
+    public update(): Promise<CommentsData[]> {
         return Eterna.client.getSolutionComments(this._solutionNID)
             .then((data) => {
                 this._commentsData = data['data']['comments'];
@@ -15,7 +21,7 @@ export default class LabComments {
             });
     }
 
-    public submitComment(body: string): Promise<any[]> {
+    public submitComment(body: string): Promise<CommentsData[]> {
         body = Utility.stripHtmlTags(body);
         body = Utility.stripQuotationsAndNewlines(body);
 
@@ -26,10 +32,10 @@ export default class LabComments {
             });
     }
 
-    public getComments(): any[] {
+    public getComments(): CommentsData[] {
         return this._commentsData;
     }
 
     private readonly _solutionNID: number;
-    private _commentsData: any[];
+    private _commentsData: CommentsData[];
 }

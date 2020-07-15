@@ -10,7 +10,7 @@ import Fonts from 'eterna/util/Fonts';
 import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import RankScroll from 'eterna/rank/RankScroll';
+import RankScroll, {SubmissionResponse} from 'eterna/rank/RankScroll';
 import Eterna from 'eterna/Eterna';
 
 export default class MissionClearedPanel extends ContainerObject implements MouseWheelListener {
@@ -224,7 +224,7 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
         }
     }
 
-    public createRankScroll(submissionRsp: any): void {
+    public createRankScroll(submissionRsp: SubmissionResponse): void {
         if (!RankScroll.hasRankScrollData(submissionRsp)) {
             return;
         }

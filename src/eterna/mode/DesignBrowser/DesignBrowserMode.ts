@@ -452,21 +452,23 @@ export default class DesignBrowserMode extends GameMode {
             this.closeCurDialog();
         };
 
-        Eterna.client.toggleSolutionVote(solution.nodeID, this._puzzle.nodeID, solution.getProperty('My Votes') as number)
-            .then((data) => {
-                this._voteProcessor.processData(data['votes']);
-                this.syncVotes();
+        Eterna.client.toggleSolutionVote(
+            solution.nodeID,
+            this._puzzle.nodeID,
+            solution.getProperty('My Votes') as number
+        ).then((data) => {
+            this._voteProcessor.processData(data['votes']);
+            this.syncVotes();
 
-                let cheevs: Map<string, AchievementData> = data['new_achievements'];
-                if (cheevs != null) {
-                    this._achievements.awardAchievements(cheevs).then(() => { /* ignore result */ });
-                }
-                cleanup();
-            })
-            .catch((err) => {
-                this.showNotification(`Vote failed: ${err}`);
-                cleanup();
-            });
+            let cheevs: Map<string, AchievementData> = data['new_achievements'];
+            if (cheevs != null) {
+                this._achievements.awardAchievements(cheevs).then(() => { /* ignore result */ });
+            }
+            cleanup();
+        }).catch((err) => {
+            this.showNotification(`Vote failed: ${err}`);
+            cleanup();
+        });
     }
 
     private onMouseDown(): void {
@@ -753,7 +755,7 @@ export default class DesignBrowserMode extends GameMode {
         let puz: Puzzle = this._puzzle;
 
         for (let dataCol of this._dataCols) {
-            let dataArray: any[] = [];
+            let dataArray: (string | number)[] = [];
 
             let {category} = dataCol;
             let feedbacks: (Feedback | null)[] = [];
@@ -787,7 +789,7 @@ export default class DesignBrowserMode extends GameMode {
                         dataArray.push(`${des.substr(0, 25)}...`);
                     }
                 } else {
-                    let rawdata: any = singleLineRawData.getProperty(category);
+                    let rawdata: string | number = singleLineRawData.getProperty(category);
                     dataArray.push(rawdata);
                 }
             }

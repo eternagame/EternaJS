@@ -346,12 +346,10 @@ export default class ConstraintBar extends ContainerObject {
 
     public serializeConstraints(): string | null {
         if (!this._constraints) return null;
-        // AMW: we have a cryptic ConcatArray<never>[] error if we don't
-        // explicitly cast current to any.
         return this._constraints.map(
             (constraint) => constraint.constraint.serialize()
         ).reduce(
-            (all, current) => all.concat(current as any),
+            (all, current) => all.concat(current as string[]),
             []
         ).join(',');
     }
