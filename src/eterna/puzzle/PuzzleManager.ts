@@ -28,6 +28,7 @@ import {
     MinimumAUConstraint, MinimumGCConstraint, MinimumGUConstraint, MinimumAnyPairConstraint
 } from 'eterna/constraints/constraints/MinimumPairConstraint';
 import MinimumStackLengthConstraint from 'eterna/constraints/constraints/MinimumStackLengthConstraint';
+import TargetExpectedAccuracyConstraint from 'eterna/constraints/TargetExpectedAccuracyConstraint';
 import ScriptConstraint from 'eterna/constraints/constraints/ScriptConstraint';
 import SynthesisConstraint from 'eterna/constraints/constraints/SynthesisConstraint';
 import BarcodeConstraint from 'eterna/constraints/constraints/BarcodeConstraint';
@@ -291,6 +292,9 @@ export default class PuzzleManager {
                         break;
                     case MinimumStackLengthConstraint.NAME:
                         constraints.push(new MinimumStackLengthConstraint(Number(parameter)));
+                        break;
+                    case TargetExpectedAccuracyConstraint.NAME:
+                        constraints.push(new TargetExpectedAccuracyConstraint(Number(parameter)));
                         break;
                     case ScriptConstraint.NAME:
                         constraints.push(new ScriptConstraint(Number(parameter)));

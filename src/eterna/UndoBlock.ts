@@ -4,6 +4,8 @@ import Plot, {PlotType} from 'eterna/Plot';
 import Pose2D, {Oligo} from './pose2D/Pose2D';
 import Folder from './folding/Folder';
 import Utility from './util/Utility';
+import Vienna from './folding/Vienna';
+import Vienna2 from './folding/Vienna2';
 
 export enum UndoBlockParam {
     GU = 0,
@@ -22,6 +24,12 @@ export enum UndoBlockParam {
     NNFE_ARRAY = 13,
     MAX = 14,
     ANY_PAIR = 15,
+    TARGET_EXPECTED_ACCURACY = 16,
+}
+
+export enum BasePairProbabilityTransform {
+    LEAVE_ALONE,
+    SQUARE
 }
 
 export default class UndoBlock {
@@ -74,6 +82,40 @@ export default class UndoBlock {
         } catch (e) {
             throw new Error(`Error parsing UndoBlock JSON: ${e}`);
         }
+    }
+
+    public targetExpectedAccuracy(
+        targetPairs: number[],
+        dotArray: number[],
+        behavior: BasePairProbabilityTransform
+    ): number {
+        let numBPs = 0;
+        let totProb = 0;
+        for (let ii = 0; ii < targetPairs.length; ++ii) {
+            if (ii > targetPairs[ii]) {
+                // Either we have seen this BP before, or it's unpaired
+                continue;
+            }
+            numBPs++;
+
+            // Look for equivalent entry in dotArray. data structure not optimized
+            // for this. v2 should uh, make a map first.
+            for (let jj = 0; jj < dotArray.length; jj += 3) {
+                if (targetPairs[ii] + 1 !== dotArray[jj] && targetPairs[ii] + 1 !== dotArray[jj + 1]) {
+                    continue;
+                }
+                if (ii + 1 !== dotArray[jj] && ii + 1 !== dotArray[jj + 1]) {
+                    continue;
+                }
+                if (behavior === BasePairProbabilityTransform.LEAVE_ALONE) {
+                    totProb += dotArray[jj + 2];
+                } else {
+                    totProb += (dotArray[jj + 2] * dotArray[jj + 2]);
+                }
+                break;
+            }
+        }
+        return totProb / numBPs;
     }
 
     public get targetOligos(): Oligo[] | null {
@@ -245,9 +287,19 @@ export default class UndoBlock {
     }
 
     public updateMeltingPointAndDotPlot(folder: Folder, pseudoknots: boolean = false): void {
+        let bppStatisticBehavior: BasePairProbabilityTransform = BasePairProbabilityTransform.LEAVE_ALONE;
+        if (folder.name === Vienna.NAME || folder.name === Vienna2.NAME) {
+            bppStatisticBehavior = BasePairProbabilityTransform.SQUARE;
+        }
         if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) == null) {
             let dotArray: number[] | null = folder.getDotPlot(this.sequence, this.getPairs(37), 37, pseudoknots);
             this.setParam(UndoBlockParam.DOTPLOT, dotArray, 37, pseudoknots);
+            this.setParam(
+                UndoBlockParam.TARGET_EXPECTED_ACCURACY,
+                this.targetExpectedAccuracy(this._targetPairs, dotArray, bppStatisticBehavior),
+                37,
+                pseudoknots
+            );
             this._dotPlotData = dotArray ? dotArray.slice() : null;
         }
 
