@@ -30,7 +30,7 @@ export default class SolutionManager {
         return this._solutions;
     }
 
-    public getSolutionBySequence(seq: string): Solution {
+    public getSolutionBySequence(seq: string): Solution | null {
         for (let solution of this._solutions) {
             if (solution.sequence === seq) {
                 return solution;
@@ -51,7 +51,7 @@ export default class SolutionManager {
     }
 
     public checkRedundancyByHairpin(seq: string): boolean {
-        let seqHairpin: string = EPars.getBarcodeHairpin(seq);
+        let seqHairpin: string | null = EPars.getBarcodeHairpin(seq);
         if (seqHairpin == null) {
             return true;
         }
@@ -80,7 +80,7 @@ export default class SolutionManager {
         newsol.sequence = obj['sequence'];
         newsol.title = obj['title'];
 
-        let newfb: Feedback = null;
+        let newfb: Feedback | null = null;
 
         let playerName = '';
         let playerID = -1;

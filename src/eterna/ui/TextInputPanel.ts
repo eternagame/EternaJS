@@ -93,7 +93,7 @@ export default class TextInputPanel extends GamePanel {
     }
 
     public setHotkeys(
-        okKey: string = null, okText: string = '', cancelKey: string = null, cancelText: string = ''
+        okKey?: string, okText: string = '', cancelKey?: string, cancelText: string = ''
     ): void {
         this._okButton.hotkey(okKey, false).tooltip(okText);
         this._cancelButton.hotkey(cancelKey, false).tooltip(cancelText);
@@ -118,8 +118,8 @@ export default class TextInputPanel extends GamePanel {
         }
     }
 
-    private readonly _okButton: GameButton;
-    private readonly _cancelButton: GameButton;
+    protected readonly _okButton: GameButton;
+    protected readonly _cancelButton: GameButton;
     private readonly _fontSize: number = 14;
 
     private _fields: InputField[] = [];

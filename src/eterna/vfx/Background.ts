@@ -1,4 +1,4 @@
-import {ContainerObject} from 'flashbang';
+import {ContainerObject, Assert} from 'flashbang';
 import Eterna from 'eterna/Eterna';
 import Bubble from './Bubble';
 
@@ -23,6 +23,7 @@ export default class Background extends ContainerObject {
             this._bubbles.push(bub);
         }
 
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(() => this.onResized()));
         this.regs.add(Eterna.settings.simpleGraphics.connectNotify((value) => this.disableBubbles(value)));
     }
@@ -56,8 +57,8 @@ export default class Background extends ContainerObject {
                 lightBlue = 'rgb(67, 93, 146) 0%';
                 darkBlue = 'rgb(10, 43, 87) 70%';
             } else {
-                lightBlue = 'rgb(45, 64, 102) 0%';
-                darkBlue = 'rgb(6, 26, 52) 70%';
+                lightBlue = 'rgb(2, 38, 76) 0%';
+                darkBlue = 'rgb(3, 27, 60) 70%';
             }
             Eterna.gameDiv.style.backgroundImage = `radial-gradient(ellipse, ${lightBlue}, ${darkBlue})`;
         }

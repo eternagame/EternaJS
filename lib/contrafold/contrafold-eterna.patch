@@ -1,0 +1,116 @@
+diff -X .gitignore -ur contrafold_stock/src/Config.hpp contrafold/src/Config.hpp
+--- contrafold_stock/src/Config.hpp	2008-08-13 20:08:31.000000000 -0400
++++ contrafold/src/Config.hpp	2020-06-24 19:56:42.963117903 -0400
+@@ -209,7 +209,7 @@
+ // (F) Miscellaneous model constants
+ //////////////////////////////////////////////////////////////////////
+ 
+-const int C_MIN_HAIRPIN_LENGTH = 0;
++const int C_MIN_HAIRPIN_LENGTH = 3;
+ const int C_MAX_SINGLE_LENGTH = 30;
+ 
+ const int D_MAX_HAIRPIN_LENGTH = 30;
+diff -X .gitignore -ur contrafold_stock/src/LBFGS.ipp contrafold/src/LBFGS.ipp
+--- contrafold_stock/src/LBFGS.ipp	2008-08-13 20:08:31.000000000 -0400
++++ contrafold/src/LBFGS.ipp	2020-06-24 19:56:42.959118079 -0400
+@@ -107,7 +107,7 @@
+ 
+         // perform line search, update f, and take step
+ 
+-        Real step = DoLineSearch(x[k%2], f[k%2], g[k%2], d,
++        Real step = this->DoLineSearch(x[k%2], f[k%2], g[k%2], d,
+                                  x[(k+1)%2], f[(k+1)%2], g[(k+1)%2],
+                                  Real(0), std::min(Real(10), MAX_STEP_NORM / std::max(Real(1), Norm(d))));
+         
+diff -X .gitignore -ur contrafold_stock/src/ParameterManager.ipp contrafold/src/ParameterManager.ipp
+--- contrafold_stock/src/ParameterManager.ipp	2008-08-13 20:08:31.000000000 -0400
++++ contrafold/src/ParameterManager.ipp	2020-06-24 19:56:42.955118255 -0400
+@@ -1,8 +1,13 @@
++#pragma once
++
+ //////////////////////////////////////////////////////////////////////
+ // ParameterManager.ipp
+ //////////////////////////////////////////////////////////////////////
+ 
+-#include "ParameterManager.hpp"
++#ifndef PARAMETERMANAGER_IPP
++#define PARAMETERMANAGER_IPP
++
++// #include "ParameterManager.hpp"
+ 
+ //////////////////////////////////////////////////////////////////////
+ // ParameterGroup::ParameterGroup()
+@@ -266,3 +271,5 @@
+     if (iter == physical_to_logical.end()) Error("Request for unknown physical parameter.");
+     return iter->second;
+ }
++
++#endif
+\ No newline at end of file
+diff -X .gitignore -ur contrafold_stock/src/SStruct.cpp contrafold/src/SStruct.cpp
+--- contrafold_stock/src/SStruct.cpp	2008-08-13 20:08:30.000000000 -0400
++++ contrafold/src/SStruct.cpp	2020-06-24 19:56:42.955118255 -0400
+@@ -61,6 +61,37 @@
+ }
+ 
+ //////////////////////////////////////////////////////////////////////
++// SStruct::LoadString()
++//
++// Load from string.
++//////////////////////////////////////////////////////////////////////
++
++void SStruct::LoadString(const std::string &string)
++{
++    // clear any previous data
++    std::vector<std::string>().swap(names);
++    std::vector<std::string>().swap(sequences);
++    std::vector<int>().swap(mapping);
++
++    // initialize
++    names.push_back("no_file");
++    sequences.push_back("@" + string);
++
++    // sanity-checks
++    if (sequences[0].length() == 1) Error("Zero-length sequence read.");
++
++    // initialize empty secondary structure
++    mapping.resize(sequences[0].length(), UNKNOWN);
++
++    // perform character conversions
++    for (size_t i = 0; i < sequences.size(); i++)
++        sequences[i] = FilterSequence(sequences[i]);
++
++    // error-checking
++    ValidateMapping(mapping);
++}
++
++//////////////////////////////////////////////////////////////////////
+ // SStruct::AnalyzeFormat()
+ //
+ // Determine file format.
+diff -X .gitignore -ur contrafold_stock/src/SStruct.hpp contrafold/src/SStruct.hpp
+--- contrafold_stock/src/SStruct.hpp	2008-08-13 20:08:31.000000000 -0400
++++ contrafold/src/SStruct.hpp	2020-06-24 19:56:42.955118255 -0400
+@@ -40,9 +40,11 @@
+     std::string FilterSequence(std::string sequence) const;
+     std::string FilterParens(std::string sequence) const;
+ 
++public:
+     // convert a pseudoknot-free parenthesized structure to a mapping and back
+     std::vector<int> ConvertParensToMapping(const std::string &parens) const;
+     std::string ConvertMappingToParens(const std::vector<int> &mapping) const;
++    void LoadString(const std::string &seq);
+ 
+     // check that a (possibly pseudoknotted) mapping is valid
+     void ValidateMapping(const std::vector<int> &mapping) const;
+diff -X .gitignore -ur contrafold_stock/src/Utilities.cpp contrafold/src/Utilities.cpp
+--- contrafold_stock/src/Utilities.cpp	2008-08-13 20:08:31.000000000 -0400
++++ contrafold/src/Utilities.cpp	2020-06-24 19:56:42.955118255 -0400
+@@ -2,6 +2,7 @@
+ // Utilities.cpp
+ //////////////////////////////////////////////////////////////////////
+ 
++#include <limits.h>
+ #include "Utilities.hpp"
+ 
+ bool toggle_error = false;

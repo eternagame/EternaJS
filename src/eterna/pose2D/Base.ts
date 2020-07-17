@@ -76,7 +76,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
         }
     }
 
-    public getOutXY(out: Point = null): Point {
+    public getOutXY(out: Point | null = null): Point {
         if (out == null) {
             out = new Point();
         }
@@ -107,7 +107,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
         this._needsRedraw = true;
 
         if (playSound) {
-            const soundName: string = BaseAssets.getBaseTypeSound(type);
+            const soundName: string | null = BaseAssets.getBaseTypeSound(type);
             if (soundName != null) {
                 Flashbang.sound.playSound(soundName);
             }
@@ -218,6 +218,10 @@ export default class Base extends ContainerObject implements LateUpdatable {
     }
 
     public isClicked(x: number, y: number, zoomlev: number, lenient: boolean): number {
+        if (!this.container.visible) {
+            return -1;
+        }
+
         let diffx: number; let
             diffy: number;
 
@@ -260,7 +264,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
 
     public setDrawParams(
         zoomLevel: number, offX: number, offY: number, currentTime: number, drawFlags: number,
-        numberTexture: Texture, highlightState: RNAHighlightState = null
+        numberTexture: Texture | null, highlightState?: RNAHighlightState
     ) {
         this._zoomLevel = zoomLevel;
         this._offX = offX;
@@ -284,7 +288,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
 
     private redraw(
         zoomLevel: number, offX: number, offY: number, currentTime: number, drawFlags: number,
-        numberTexture: Texture, highlightState: RNAHighlightState = null
+        numberTexture: Texture | null, highlightState?: RNAHighlightState
     ): void {
         this._body.visible = false;
         this._backbone.visible = false;
@@ -301,7 +305,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
         const lowperform: boolean = (drawFlags & BaseDrawFlags.LOW_PERFORM) !== 0;
 
         let bodyData: Texture = BaseAssets.getBodyTexture(this._baseType, this._colorLevel, zoomLevel, drawFlags);
-        const barcodeData: Texture = BaseAssets.getBarcodeTexture(zoomLevel, drawFlags);
+        const barcodeData: Texture | null = BaseAssets.getBarcodeTexture(zoomLevel, drawFlags);
 
         let randomX = 0;
         let randomY = 0;
@@ -375,7 +379,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
                 this._markers.position.set(offX, offY);
                 this._markers.scale.set((Base.MARKER_THICKNESS * Base.MARKER_RADIUS[this._zoomLevel]));
 
-                let letterdata: Texture = BaseAssets.getLetterTexture(this._baseType, zoomLevel, drawFlags);
+                let letterdata: Texture | null = BaseAssets.getLetterTexture(this._baseType, zoomLevel, drawFlags);
                 if (letterdata != null) {
                     Base.showSprite(this._letter, letterdata);
                     this._letter.x = randomX + offX;
@@ -402,7 +406,6 @@ export default class Base extends ContainerObject implements LateUpdatable {
                 let st0Angle: number = Math.PI / 5.2 + angleRand;
                 st0DiffDegree = ((goRadian + st0Angle) * 180) / Math.PI - 90.0;
                 st0DiffDegree = Base.toCanonicalRange(st0DiffDegree);
-
 
                 if (Math.trunc(st0DiffDegree / 5) < 0 || Math.trunc(st0DiffDegree / 5) > 71) {
                     if (Math.trunc(st0DiffDegree / 5) < -1 || Math.trunc(st0DiffDegree / 5) > 72) {
@@ -598,7 +601,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
         sprite.filters = null;
         sprite.alpha = 1;
 
-        if (highlightState != null && highlightState.isOn) {
+        if (highlightState !== undefined && highlightState.nuc && highlightState.isOn) {
             if (highlightState.nuc.indexOf(baseIdx) === -1) {
                 sprite.alpha = 0.55;
             } else {
@@ -697,6 +700,6 @@ export default class Base extends ContainerObject implements LateUpdatable {
     private _offY: number = 0;
     private _currentTime: number = 0;
     private _drawFlags: number = 0;
-    private _highlightState: RNAHighlightState;
-    private _numberTexture: Texture;
+    private _highlightState?: RNAHighlightState;
+    private _numberTexture: Texture | null;
 }

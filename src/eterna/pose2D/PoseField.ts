@@ -1,7 +1,7 @@
 import {Graphics, Point} from 'pixi.js';
 import {
     ContainerObject, KeyboardListener, MouseWheelListener, InputUtil, Flashbang,
-    Dragger, KeyboardEventType, KeyCode, GameObjectRef
+    KeyboardEventType, KeyCode, Assert
 } from 'flashbang';
 import ROPWait from 'eterna/rscript/ROPWait';
 import Pose2D from './Pose2D';
@@ -10,6 +10,8 @@ type InteractionEvent = PIXI.interaction.InteractionEvent;
 
 /** Wraps a Pose2D and handles resizing, masking, and input events */
 export default class PoseField extends ContainerObject implements KeyboardListener, MouseWheelListener {
+    private static readonly zoomThreshold = 5;
+
     constructor(edit: boolean) {
         super();
         this._pose = new Pose2D(this, edit);
@@ -24,9 +26,14 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
         this.addObject(this._pose, this.container);
 
-        this.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => this.onMouseDown(e));
-        this.pointerUp.filter(InputUtil.IsLeftMouse).connect(() => this.onMouseUp());
+        this.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => this.onPointerDown(e));
+        this.pointerUp.filter(InputUtil.IsLeftMouse).connect((e) => this.onPointerUp(e));
+        this.pointerMove.connect((e) => this.onPointerMove(e));
+        this.container.on('pointercancel', (e) => this.onPointerUp(e));
+        this.container.on('pointerout', (e) => this.onPointerUp(e));
+        this.container.on('pointerupoutside', (e) => this.onPointerUp(e));
 
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.keyboardInput.pushListener(this));
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));
     }
@@ -72,7 +79,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     /** true if our bounds contains the given global point */
     public containsPoint(screenX: number, screenY: number): boolean {
         PoseField.P.set(screenX, screenY);
-        this.container.toLocal(PoseField.P, null, PoseField.P);
+        this.container.toLocal(PoseField.P, undefined, PoseField.P);
         const x = PoseField.P.x;
         const y = PoseField.P.y;
         return (x >= 0 && x < this._width && y >= 0 && y < this._height);
@@ -102,37 +109,89 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         return this._pose;
     }
 
-    private onMouseDown(e: InteractionEvent): void {
-        if (!Flashbang.app.isControlKeyDown) {
-            this.cancelDrag();
+    private onPointerDown(e: InteractionEvent): void {
+        if (Flashbang.app.isControlKeyDown) {
+            return;
+        }
 
-            let dragger = new Dragger();
-            this._poseDraggerRef = this.addObject(dragger);
+        const pointerId = e.data.identifier;
+        const {x, y} = e.data.global;
+        this._interactionCache.set(pointerId, new Point(x, y));
 
-            let dragPoseStart = new Point(this._pose.xOffset, this._pose.yOffset);
-            dragger.dragged.connect(() => {
+        if (this._interactionCache.size === 1) {
+            this._dragStart = new Point(x, y);
+            this._dragPoseStart = new Point(this._pose.xOffset, this._pose.yOffset);
+        }
+        e.stopPropagation();
+    }
+
+    private onPointerMove(e: InteractionEvent) {
+        this._interactionCache.forEach((point, pointerId) => {
+            if (pointerId === e.data.identifier) {
+                const {x, y} = e.data.global;
+                this._interactionCache.set(pointerId, new Point(x, y));
+            }
+        });
+
+        if (this._interactionCache.size === 2) {
+            // Pinch zoom gesture
+            const [finger1, finger2] = Array.from(this._interactionCache.values());
+            const curDiff = Math.abs(finger1.x - finger2.x);
+            if (this._previousDragDiff > 0) {
+                const delta = Math.abs(curDiff - this._previousDragDiff);
+                if (delta > PoseField.zoomThreshold) {
+                    if (curDiff > this._previousDragDiff) {
+                        if (this._zoomDirection <= 0) {
+                            this.zoomIn();
+                            this._zoomDirection = 1;
+                        }
+                    } else if (this._zoomDirection >= 0) {
+                        this.zoomOut();
+                        this._zoomDirection = -1;
+                    }
+                    this._zoomGestureStarted = this._zoomDirection !== 0;
+                    this._previousDragDiff = curDiff;
+                }
+            } else {
+                this._previousDragDiff = curDiff;
+            }
+        } else if (this._interactionCache.size === 1) {
+            if (!this._zoomGestureStarted) {
+                // simple drag
                 ROPWait.notifyMoveCamera();
-                this._pose.setOffset(dragPoseStart.x + dragger.offsetX, dragPoseStart.y + dragger.offsetY);
-            });
-
-            e.stopPropagation();
+                const [finger] = Array.from(this._interactionCache.values());
+                const deltaX = finger.x - this._dragStart.x;
+                const deltaY = finger.y - this._dragStart.y;
+                this._pose.setOffset(this._dragPoseStart.x + deltaX, this._dragPoseStart.y + deltaY);
+            }
         }
     }
 
-    private onMouseUp(): void {
-        this.cancelDrag();
+    private onPointerUp(e: InteractionEvent): void {
         this._pose.doneColoring();
-        this._pose.onMouseMoved();
-    }
+        this._pose.onMouseMoved(e.data.global);
 
-    private cancelDrag(): void {
-        if (this._poseDraggerRef.isLive) {
-            this._poseDraggerRef.destroyObject();
+        const eventsToClear: number[] = [];
+        this._interactionCache.forEach((point, pointerId) => {
+            if (pointerId === e.data.identifier) {
+                eventsToClear.push(pointerId);
+            }
+        });
+        eventsToClear.forEach((pointerId) => this._interactionCache.delete(pointerId));
+
+        if (this._interactionCache.size < 2) {
+            this._previousDragDiff = -1;
+            this._zoomDirection = 0;
+        }
+
+        if (this._zoomGestureStarted) {
+            this._zoomGestureStarted = this._interactionCache.size > 0;
         }
     }
 
     public onMouseWheelEvent(e: WheelEvent): boolean {
         let mouse = Flashbang.globalMouse;
+        Assert.assertIsDefined(mouse);
         if (!this.display.visible || !this.containsPoint(mouse.x, mouse.y)) {
             return false;
         }
@@ -194,9 +253,14 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
     private _width: number = 0;
     private _height: number = 0;
-    private _mask: Graphics;
+    private _mask: Graphics | null;
 
-    private _poseDraggerRef: GameObjectRef = GameObjectRef.NULL;
+    private _interactionCache = new Map<number, Point>();
+    private _previousDragDiff = -1;
+    private _dragPoseStart = new Point();
+    private _dragStart = new Point();
+    private _zoomDirection = 0;
+    private _zoomGestureStarted = false;
 
     private static readonly P: Point = new Point();
 }

@@ -3,7 +3,7 @@ import {
     SerialTask, DelayTask, AlphaTask, TextureUtil, LocationTask, Easing, ParallelTask, ScaleTask, VisibleTask, Flashbang
 } from 'flashbang';
 import {
-    Graphics, Sprite, Text, Point, Texture
+    Graphics, Sprite, Text, Point, Texture, Container
 } from 'pixi.js';
 import MultiStyleText from 'pixi-multistyle-text';
 import Fonts from 'eterna/util/Fonts';
@@ -13,6 +13,7 @@ import EPars from 'eterna/EPars';
 import TextBalloon from 'eterna/ui/TextBalloon';
 import {RegistrationGroup} from 'signals';
 import Sounds from 'eterna/resources/Sounds';
+import UITheme from 'eterna/ui/UITheme';
 
 export interface ConstraintBoxConfig {
     // Toggle checkmark, green vs red outline
@@ -22,6 +23,7 @@ export interface ConstraintBoxConfig {
     // Show the green/red outline
     showOutline?: boolean;
     // Used when the constraint image includes a background
+    // Due to a type constraint from Pixi, we need this to be nullable, not optional
     fullTexture?: Texture;
     // Whether to draw the transparent background
     drawBG?: boolean;
@@ -53,6 +55,10 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._backlight = new Graphics();
         this._backlight.visible = false;
         this.container.addChild(this._backlight);
+
+        this._opaqueBackdrop = new Graphics();
+        this._opaqueBackdrop.visible = false;
+        this.container.addChild(this._opaqueBackdrop);
 
         this._req = new Sprite();
         this._req.visible = false;
@@ -116,16 +122,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._flag.visible = false;
 
         if (this._forMissionScreen) {
-            this._sideText = new MultiStyleText('', {
-                default: {
-                    fontFamily: Fonts.STDFONT_REGULAR,
-                    fontSize: 16,
-                    fill: 0xffffff,
-                    letterSpacing: -0.5,
-                    wordWrap: true,
-                    wordWrapWidth: 250
-                }
-            });
+            this._sideText = new MultiStyleText('', {});
             this.container.addChild(this._sideText);
         }
 
@@ -143,12 +140,26 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this.container.addChild(this._fglow);
     }
 
-    public setContent(config: ConstraintBoxConfig): void {
+    public setContent(config: ConstraintBoxConfig, toolTipContainer?: Container): void {
         this._check.visible = config.satisfied && !this._forMissionScreen;
 
-        this._req.visible = config.fullTexture != null;
-        if (this._req.visible) {
+        this._req.visible = config.fullTexture !== undefined;
+        if (config.fullTexture !== undefined) {
             this._req.texture = config.fullTexture;
+
+            // Add border
+            const border = new Graphics();
+            border.interactiveChildren = false;
+            border.lineStyle(UITheme.panel.borderSize, UITheme.constraints.borderColor, 1);
+            border.drawRoundedRect(
+                0,
+                0,
+                this._req.texture.width,
+                this._req.texture.height,
+                UITheme.constraints.borderRadius
+            );
+            this._req.addChild(border);
+            this.initOpaqueBackdrop(config.fullTexture.width, config.fullTexture.height);
         }
 
         this._outline.visible = config.showOutline || false;
@@ -158,8 +169,10 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                 : BitmapManager.getBitmap(Bitmaps.NovaFailOutline);
         }
 
-        this._reqClarifyText.visible = config.clarificationText != null;
-        if (this._reqClarifyText.visible) {
+        this._reqClarifyText.visible = config.clarificationText !== undefined;
+        if (config.clarificationText !== undefined) {
+            // We know config.clarificationText is not undefined because of the
+            // above condition, so we can type guard
             this.setPossiblyStyledText(config.clarificationText, this._reqClarifyText);
             DisplayUtil.positionRelative(
                 this._reqClarifyText, HAlign.CENTER, VAlign.TOP,
@@ -167,8 +180,9 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             );
         }
 
-        this._reqStatText.visible = config.statText != null && !this._forMissionScreen;
-        if (this._reqStatText.visible) {
+        this._reqStatText.visible = config.statText !== undefined && !this._forMissionScreen;
+        if (config.statText !== undefined && !this._forMissionScreen) {
+            // We know config.statText isn't undefined due to the above condition
             this.setPossiblyStyledText(config.statText, this._reqStatText);
             DisplayUtil.positionRelative(
                 this._reqStatText, HAlign.CENTER, VAlign.TOP,
@@ -185,19 +199,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
         let balloon = new TextBalloon('', 0x0, 0.8);
         balloon.styledText = tooltipText;
-        this.setMouseOverObject(balloon);
-
-        if (this._forMissionScreen) {
-            this._outline.visible = false;
-            tooltipText.apply(this._sideText);
-            if (this._req.visible) {
-                this._sideText.position = new Point(
-                    this._req.width + 18, this._req.height / 2 - this._sideText.height / 2
-                );
-            } else {
-                this._sideText.position = new Point(111 + 18, 55 / 2 - this._sideText.height / 2);
-            }
-        }
+        this.setMouseOverObject(balloon, toolTipContainer);
 
         this._bgGraphics.visible = config.drawBG || false;
         if (this._bgGraphics.visible) {
@@ -205,6 +207,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             this._bgGraphics.beginFill(0x1E314B, 0.5);
             this._bgGraphics.drawRoundedRect(0, 0, 111, this._forMissionScreen ? 55 : 75, 15);
             this._bgGraphics.endFill();
+            this.initOpaqueBackdrop(this._bgGraphics.width, this._bgGraphics.height);
         }
 
         this._bg.visible = config.thumbnailBG || false;
@@ -215,9 +218,18 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                 this._bg.texture = BitmapManager.getBitmap(Bitmaps.NovaPuzThumbSmallFail);
             }
 
+            this.initOpaqueBackdrop(this._bg.texture.width, this._bg.texture.height);
             this._check.position = new Point(55, 55);
             this._noText.position = new Point(35, 1);
             this._stateText.position = new Point(3, 45);
+        }
+
+        if (this._forMissionScreen) {
+            this._outline.visible = false;
+            tooltipText.apply(this._sideText);
+            // Make the icon look centered with respect to the text
+            const deltaWidth = Math.max(0, this._sideText.width - this._opaqueBackdrop.width);
+            this._sideText.position = new Point(-deltaWidth / 2, this._opaqueBackdrop.height + 10);
         }
 
         if (config.stateNumber && !this._forMissionScreen) {
@@ -235,7 +247,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         if (config.icon) {
             this._icon.visible = true;
             this._icon.removeChildren();
-            this._icon.texture = null;
+            this._icon.texture = Texture.EMPTY;
             if (config.icon instanceof Texture) {
                 this._icon.texture = config.icon;
                 this._icon.position = new Point((111 - this._icon.width) * 0.5, 2);
@@ -278,15 +290,27 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this.display.visible = value;
     }
 
+    public get width() {
+        if (this._forMissionScreen) {
+            return Math.max(this._sideText.width, this._opaqueBackdrop.width);
+        } else {
+            return this._opaqueBackdrop.width;
+        }
+    }
+
+    public get sideTextOffset() {
+        return this._sideText.position.x;
+    }
+
     /** Creates a StyledTextBuilder with the ConstraintBox's default settings */
     public static createTextStyle(): StyledTextBuilder {
         let style: StyledTextBuilder = new StyledTextBuilder({
             fontFamily: Fonts.STDFONT_REGULAR,
-            fontSize: 16,
+            fontSize: 14,
             fill: 0xffffff,
             letterSpacing: -0.5,
             wordWrap: true,
-            wordWrapWidth: 250
+            wordWrapWidth: UITheme.missionIntro.maxConstraintWidth
         }).addStyle('altText', {
             fontFamily: Fonts.STDFONT_MEDIUM,
             leading: 10
@@ -309,14 +333,16 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         }
     }
 
-    private setMouseOverObject(obj: SceneObject): void {
+    private setMouseOverObject(obj: SceneObject, container?: Container): void {
         const FADE_IN_DELAY = 1.0;
 
         if (this._mouseOverObject != null) {
             this._mouseOverObject.destroySelf();
             this._mouseOverObject = null;
-            this._mouseOverRegs.close();
-            this._mouseOverRegs = null;
+            if (this._mouseOverRegs != null) {
+                this._mouseOverRegs.close();
+                this._mouseOverRegs = null;
+            }
         }
 
         if (obj != null) {
@@ -324,7 +350,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             obj.display.y = 78;
             obj.display.visible = false;
             obj.display.interactive = false;
-            this.addObject(obj, this.container);
+            this.addObject(obj, container ?? this.container);
 
             this._mouseOverObject = obj;
 
@@ -337,6 +363,9 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                     isMouseOver = true;
                     obj.display.visible = true;
                     obj.display.alpha = 0;
+                    if (obj.display.parent !== this.container) {
+                        obj.display.x = this.display.x;
+                    }
                     obj.replaceNamedObject(MOUSE_OVER_ANIM, new SerialTask(
                         new DelayTask(FADE_IN_DELAY),
                         new AlphaTask(1, 0.1)
@@ -352,6 +381,13 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                 }
             }));
         }
+    }
+
+    private initOpaqueBackdrop(width: number, height: number) {
+        this._opaqueBackdrop.clear();
+        this._opaqueBackdrop.beginFill(0x142640, 1);
+        this._opaqueBackdrop.drawRoundedRect(0, 0, width, height, 15);
+        this._opaqueBackdrop.endFill();
     }
 
     public setLocation(p: Point, animate: boolean = false, animTime: number = 0.5): void {
@@ -434,6 +470,10 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         ));
     }
 
+    public setOpaqueBackdropVisible(visible: boolean) {
+        this._opaqueBackdrop.visible = visible;
+    }
+
     private _forMissionScreen: boolean;
 
     private _satisfied: boolean;
@@ -453,9 +493,10 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     private _check: Sprite;
     private _outline: Sprite;
     private _fglow: Graphics;
+    private _opaqueBackdrop: Graphics;
 
-    private _mouseOverRegs: RegistrationGroup;
-    private _mouseOverObject: SceneObject;
+    private _mouseOverRegs: RegistrationGroup | null;
+    private _mouseOverObject: SceneObject | null;
 
     private static readonly LOCATION_ANIM = 'AnimateLocation';
     private static readonly BACKLIGHT_ANIM = 'BacklightAnim';

@@ -24,14 +24,14 @@ export = Vienna2Lib;
 
 /*~ Write your module's methods and properties in this class */
 declare class Vienna2Lib {
-    FullEval (temperature_in: number, seqString: string, structString: string): Vienna2Lib.FullEvalResult;
+    FullEval (temperature_in: number, seqString: string, structString: string): Vienna2Lib.FullEvalResult | null;
 
-    FullFoldDefault(seqString: string, structString: string): Vienna2Lib.FullFoldResult;
-    FullFoldTemperature (temperature_in: number, seqString: string, structString: string): Vienna2Lib.FullFoldResult;
-    GetDotPlot (temperature_in: number, seqString: string, dotplotStructString: string): Vienna2Lib.DotPlotResult;
-    FullFoldWithBindingSite (seqString: string, structString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): Vienna2Lib.FullFoldResult;
-    CoFoldSequence (seqString: string, structString: string): Vienna2Lib.FullFoldResult;
-    CoFoldSequenceWithBindingSite (seqString: string, structString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): Vienna2Lib.FullFoldResult;
+    FullFoldDefault(seqString: string, structString: string): Vienna2Lib.FullFoldResult | null;
+    FullFoldTemperature (temperature_in: number, seqString: string, structString: string): Vienna2Lib.FullFoldResult | null;
+    GetDotPlot (temperature_in: number, seqString: string, dotplotStructString: string): Vienna2Lib.DotPlotResult | null;
+    FullFoldWithBindingSite (seqString: string, structString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): Vienna2Lib.FullFoldResult | null;
+    CoFoldSequence (seqString: string, structString: string): Vienna2Lib.FullFoldResult | null;
+    CoFoldSequenceWithBindingSite (seqString: string, structString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): Vienna2Lib.FullFoldResult | null;
 }
 
 /*~ If you want to expose types from your module as well, you can

@@ -2,7 +2,7 @@ import UndoBlock from 'eterna/UndoBlock';
 import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
-import Constraint, {BaseConstraintStatus} from '../Constraint';
+import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 
 interface BranchinessConstraintStatus extends BaseConstraintStatus {
     currentBranchiness: number;
@@ -16,9 +16,9 @@ export default class BranchinessConstraint extends Constraint<BranchinessConstra
         this.maxBranchiness = maxBranchiness;
     }
 
-    public evaluate(undoBlocks: UndoBlock[]): BranchinessConstraintStatus {
+    public evaluate(constraintContext: ConstraintContext): BranchinessConstraintStatus {
         // TODO: Multistate?
-        const branchiness = undoBlocks[0].branchiness(undoBlocks[0].getPairs(37));
+        const branchiness = constraintContext.undoBlocks[0].branchiness(constraintContext.undoBlocks[0].getPairs(37));
 
         return {
             satisfied: branchiness <= this.maxBranchiness,

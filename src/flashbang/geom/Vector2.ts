@@ -24,17 +24,17 @@ export default class Vector2 {
     }
 
     /** Converts Point p to a Vector2. */
-    public static fromPoint(p: Point, out: Vector2 = null): Vector2 {
+    public static fromPoint(p: Point, out: Vector2 | null = null): Vector2 {
         return (out || new Vector2()).set(p.x, p.y);
     }
 
     /** Creates a vector that points from a to b */
-    public static fromPoints(a: Point, b: Point, out: Vector2 = null): Vector2 {
+    public static fromPoints(a: Point, b: Point, out: Vector2 | null = null): Vector2 {
         return (out || new Vector2()).set(b.x - a.x, b.y - a.y);
     }
 
     /** Creates a vector from polar coordinates */
-    public static fromPolar(magnitude: number, angle: number, out: Vector2 = null): Vector2 {
+    public static fromPolar(magnitude: number, angle: number, out: Vector2 | null = null): Vector2 {
         return (out || new Vector2()).set(
             Math.cos(angle) * magnitude, // === mag * (cos(angle)*x - sin(angle)*y)
             Math.sin(angle) * magnitude
@@ -46,7 +46,7 @@ export default class Vector2 {
      * at proportion p, where p is in [0, 1], p = 0 means the result is equal to a,
      * and p = 1 means the result is equal to b.
      */
-    public static interpolate(a: Vector2, b: Vector2, p: number, out: Vector2 = null): Vector2 {
+    public static interpolate(a: Vector2, b: Vector2, p: number, out: Vector2 | null = null): Vector2 {
         out = (out || new Vector2());
         const q: number = 1 - p;
         return out.set(
@@ -94,7 +94,7 @@ export default class Vector2 {
     }
 
     /** Converts the Vector2 to a Point. */
-    public toPoint(out: Point = null): Point {
+    public toPoint(out: Point | null = null): Point {
         out = (out || new Point());
         out.set(this.x, this.y);
         return out;
@@ -104,7 +104,7 @@ export default class Vector2 {
      * Returns a copy of this Vector2.
      * If 'out' is not null, it will be used for the clone.
      */
-    public clone(out: Vector2 = null): Vector2 {
+    public clone(out: Vector2 | null = null): Vector2 {
         return (out || new Vector2()).set(this.x, this.y);
     }
 
@@ -146,7 +146,7 @@ export default class Vector2 {
     }
 
     /** Returns a rotated copy of this vector. */
-    public rotate(radians: number, out: Vector2 = null): Vector2 {
+    public rotate(radians: number, out: Vector2 | null = null): Vector2 {
         return this.clone(out).rotateLocal(radians);
     }
 
@@ -187,7 +187,7 @@ export default class Vector2 {
     }
 
     /** Returns a copy of this vector added to 'v'. */
-    public add(v: Vector2, out: Vector2 = null): Vector2 {
+    public add(v: Vector2, out: Vector2 | null = null): Vector2 {
         return this.clone(out).addLocal(v);
     }
 
@@ -202,7 +202,7 @@ export default class Vector2 {
     }
 
     /** Returns (this - v). */
-    public subtract(v: Vector2, out: Vector2 = null): Vector2 {
+    public subtract(v: Vector2, out: Vector2 | null = null): Vector2 {
         return this.clone(out).subtractLocal(v);
     }
 
@@ -217,7 +217,7 @@ export default class Vector2 {
     }
 
     /** Returns a copy of this Vector2, offset by the specified amount. */
-    public offset(xOffset: number, yOffset: number, out: Vector2 = null): Vector2 {
+    public offset(xOffset: number, yOffset: number, out: Vector2 | null = null): Vector2 {
         return this.clone(out).offsetLocal(xOffset, yOffset);
     }
 
@@ -226,7 +226,7 @@ export default class Vector2 {
      * If ccw = true, the perpendicular vector is rotated 90 degrees counter-clockwise from this
      * vector, otherwise it's rotated 90 degrees clockwise.
      */
-    public getPerp(ccw: boolean = true, out: Vector2 = null): Vector2 {
+    public getPerp(ccw: boolean = true, out: Vector2 | null = null): Vector2 {
         out = (out || new Vector2());
         if (ccw) {
             return out.set(-this.y, this.x);
@@ -243,7 +243,7 @@ export default class Vector2 {
     }
 
     /** Returns (this * value). */
-    public scale(value: number, out: Vector2 = null): Vector2 {
+    public scale(value: number, out: Vector2 | null = null): Vector2 {
         return this.clone(out).scaleLocal(value);
     }
 
@@ -255,7 +255,7 @@ export default class Vector2 {
     }
 
     /** Returns a copy of this vector, multiplied by the given vector's components. */
-    public mult(v: Vector2, out: Vector2 = null): Vector2 {
+    public mult(v: Vector2, out: Vector2 | null = null): Vector2 {
         return this.clone(out).multLocal(v);
     }
 
@@ -267,7 +267,7 @@ export default class Vector2 {
     }
 
     /** Returns a copy of the vector, inverted. */
-    public invert(out: Vector2 = null): Vector2 {
+    public invert(out: Vector2 | null = null): Vector2 {
         return this.clone(out).invertLocal();
     }
 

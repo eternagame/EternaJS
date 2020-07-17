@@ -1,0 +1,24 @@
+diff -X .gitignore -ur RNApuzzler_stock/src/ViennaRNA/RNApuzzler/resolveIntersections/handleConfigChanges.c RNApuzzler/src/ViennaRNA/RNApuzzler/resolveIntersections/handleConfigChanges.c
+--- RNApuzzler_stock/src/ViennaRNA/RNApuzzler/resolveIntersections/handleConfigChanges.c	2020-05-26 22:37:13.061874391 -0400
++++ RNApuzzler/src/ViennaRNA/RNApuzzler/resolveIntersections/handleConfigChanges.c	2020-05-26 22:40:52.066809107 -0400
+@@ -117,7 +117,7 @@
+         applyChangesToConfigAndBoundingBoxes(tree, deltaCfg, radiusNew, puzzler);
+ 
+         double newRadius = cfg->radius;
+-        logConfigChanges(getNodeID(tree), cfg, deltaCfg, oldRadius, newRadius, logTag, puzzler);
++        //logConfigChanges(getNodeID(tree), cfg, deltaCfg, oldRadius, newRadius, logTag, puzzler);
+ 
+         return 1;
+     } else {
+diff -X .gitignore -ur RNApuzzler_stock/src/ViennaRNA/RNApuzzler/resolveIntersections/optimize.c RNApuzzler/src/ViennaRNA/RNApuzzler/resolveIntersections/optimize.c
+--- RNApuzzler_stock/src/ViennaRNA/RNApuzzler/resolveIntersections/optimize.c	2020-05-26 22:37:13.061874391 -0400
++++ RNApuzzler/src/ViennaRNA/RNApuzzler/resolveIntersections/optimize.c	2020-05-26 22:40:34.995656620 -0400
+@@ -789,7 +789,7 @@
+             deltas[i] = getArcAngle(bestConfig, i) - getArcAngle(initialConfig, i);
+         }
+         (puzzler->numberOfChangesAppliedToConfig)++;
+-        logConfigChanges(getNodeID(node), cfg, deltas, initialConfig->radius, bestConfig->radius, "OPT", puzzler);
++        //logConfigChanges(getNodeID(node), cfg, deltas, initialConfig->radius, bestConfig->radius, "OPT", puzzler);
+ 
+         if (FANCY_PS) {
+             PS_printFancyTree(node, puzzler);

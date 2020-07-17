@@ -1,29 +1,43 @@
-import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
+import {UndoBlockParam} from 'eterna/UndoBlock';
 import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
-import Constraint, {BaseConstraintStatus} from '../Constraint';
+import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
+
+enum Pair {
+    GC = EPars.RNABASE_GC_PAIR,
+    AU = EPars.RNABASE_AU_PAIR,
+    GU = EPars.RNABASE_GU_PAIR,
+    ANY = EPars.RNABASE_PAIR
+}
+
+const PAIR_PARAM_MAP = new Map<Pair, UndoBlockParam>(
+    [
+        [Pair.GC, UndoBlockParam.GC],
+        [Pair.AU, UndoBlockParam.AU],
+        [Pair.GU, UndoBlockParam.GU],
+        [Pair.ANY, UndoBlockParam.ANY_PAIR]
+    ]
+);
 
 interface MinPairConstraintStatus extends BaseConstraintStatus {
     currentPairs: number;
 }
 
 abstract class MinimumPairConstraint extends Constraint<MinPairConstraintStatus> {
-    public readonly pairType: number;
+    public readonly pairType: Pair;
     public readonly minPairs: number;
 
-    constructor(pairType: number, minPairs: number) {
+    constructor(pairType: Pair, minPairs: number) {
         super();
         this.pairType = pairType;
         this.minPairs = minPairs;
     }
 
-    public evaluate(undoBlocks: UndoBlock[]): MinPairConstraintStatus {
+    public evaluate(context: ConstraintContext): MinPairConstraintStatus {
         // TODO: Multistate?
-        const currentPairs: number = undoBlocks[0].getParam(
-            UndoBlockParam[EPars.nucleotidePairToString(this.pairType)]
-        );
+        const currentPairs: number = context.undoBlocks[0].getParam(PAIR_PARAM_MAP.get(this.pairType));
         return {
             satisfied: (
                 currentPairs >= this.minPairs
@@ -55,7 +69,7 @@ abstract class MinimumPairConstraint extends Constraint<MinPairConstraintStatus>
         }
 
         tooltip.append('You must have ')
-            .append(`${this.minPairs} or more`)
+            .append(`${this.minPairs} or more `)
             .append(`${EPars.getColoredLetter(EPars.nucleotidePairToString(this.pairType).charAt(0))}-`)
             .append(`${EPars.getColoredLetter(EPars.nucleotidePairToString(this.pairType).charAt(1))} pairs.`);
 
@@ -74,7 +88,7 @@ export class MinimumGCConstraint extends MinimumPairConstraint {
     public static readonly NAME = 'GCMIN';
 
     constructor(count: number) {
-        super(EPars.RNABASE_GC_PAIR, count);
+        super(Pair.GC, count);
     }
 
     /** @override */
@@ -102,7 +116,7 @@ export class MinimumAUConstraint extends MinimumPairConstraint {
     public static readonly NAME = 'AU';
 
     constructor(count: number) {
-        super(EPars.RNABASE_AU_PAIR, count);
+        super(Pair.AU, count);
     }
 
     /** @override */
@@ -130,7 +144,7 @@ export class MinimumGUConstraint extends MinimumPairConstraint {
     public static readonly NAME = 'GU';
 
     constructor(count: number) {
-        super(EPars.RNABASE_GU_PAIR, count);
+        super(Pair.GU, count);
     }
 
     /** @override */
@@ -158,23 +172,7 @@ export class MinimumAnyPairConstraint extends MinimumPairConstraint {
     public static readonly NAME = 'PAIRS';
 
     constructor(count: number) {
-        super(null, count);
-    }
-
-    /** @override */
-    public evaluate(undoBlocks: UndoBlock[]): MinPairConstraintStatus {
-        // TODO: Multistate?
-        const currentPairs: number = (
-            undoBlocks[0].getParam(UndoBlockParam['GC'])
-            + undoBlocks[0].getParam(UndoBlockParam['AU'])
-            + undoBlocks[0].getParam(UndoBlockParam['GU'])
-        );
-        return {
-            satisfied: (
-                currentPairs >= this.minPairs
-            ),
-            currentPairs
-        };
+        super(Pair.ANY, count);
     }
 
     /** @override */

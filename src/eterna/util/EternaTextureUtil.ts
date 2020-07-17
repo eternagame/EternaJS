@@ -79,7 +79,6 @@ export default class EternaTextureUtil {
         return TextureUtil.renderToTexture(sprite);
     }
 
-
     public static scaleBy(texture: Texture, scale: number): Texture {
         return EternaTextureUtil.scaleByXY(texture, scale, scale);
     }

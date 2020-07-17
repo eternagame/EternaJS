@@ -8,7 +8,7 @@ import RScriptOp from './RScriptOp';
  * :: Note - Only one entry point.
  */
 export default class RScriptOpTree {
-    public addNode(node: RScriptOp): void {
+    public addNode(node: RScriptOp | null): void {
         if (!node) {
             return;
         }
@@ -26,7 +26,7 @@ export default class RScriptOpTree {
         this._curptr = this._head;
     }
 
-    public next(): RScriptOp {
+    public next(): RScriptOp | null {
         if (!this._curptr) {
             return null;
         }

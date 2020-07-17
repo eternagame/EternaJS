@@ -15,7 +15,7 @@ export default class GraphicsUtil {
      * with the arrow drawn.
      */
     public static drawArrow(
-        triSize: number, baseLength: number, outlineColor: number, fillColor: number, graphics: Graphics = null
+        triSize: number, baseLength: number, outlineColor: number, fillColor: number, graphics: Graphics | null = null
     ): Graphics {
         if (graphics == null) {
             graphics = new Graphics();

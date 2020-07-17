@@ -75,7 +75,7 @@ export default class BaseTextures {
         }
     }
 
-    public getLetterTexture(zoomLevel: number, drawFlags: number): Texture {
+    public getLetterTexture(zoomLevel: number, drawFlags: number): Texture | null {
         const lettermode: boolean = (drawFlags & BaseDrawFlags.LETTER_MODE) !== 0;
         const locked: boolean = (drawFlags & BaseDrawFlags.LOCKED) !== 0;
 

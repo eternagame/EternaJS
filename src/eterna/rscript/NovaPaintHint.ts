@@ -1,9 +1,10 @@
 import {Point, Sprite, Texture} from 'pixi.js';
-import {ContainerObject, Vector2, Updatable} from 'flashbang';
+import {
+    ContainerObject, Vector2, Updatable, Assert
+} from 'flashbang';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import Pose2D from 'eterna/pose2D/Pose2D';
-
 
 export default class NovaPaintHint extends ContainerObject implements Updatable {
     constructor(start: Point, end: Point, loop: boolean) {
@@ -37,6 +38,7 @@ export default class NovaPaintHint extends ContainerObject implements Updatable 
             return;
         }
 
+        Assert.assertIsDefined(this.mode);
         let currentTime = this.mode.time;
 
         let startPos: Point = this._startPoint;

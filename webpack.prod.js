@@ -4,13 +4,18 @@ const path = require('path');
 
 const common = require('./webpack.common.js');
 
+function ParseBool(value) {
+    return value.toLowerCase() === 'true';
+}
+
+const mobile_app = ParseBool(process.env.MOBILE_APP);
+
 module.exports = merge(common, {
-    devtool: "nosources-source-map",
     mode: 'production',
 
     output: {
         path: path.resolve(__dirname + "/dist/prod"),
-        publicPath: '/eternajs/dist/prod/'
+        publicPath: mobile_app ? '' : '/eternajs/dist/prod/'
     },
 
     plugins: [

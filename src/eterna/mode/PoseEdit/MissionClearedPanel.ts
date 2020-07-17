@@ -1,8 +1,9 @@
 import {
-    Container, Graphics, Point, Text
+    Container, Graphics, Point, Text, interaction
 } from 'pixi.js';
 import {
-    ContainerObject, VLayoutContainer, HAlign, DOMObject, AlphaTask, Flashbang, DisplayUtil, VAlign
+    ContainerObject, VLayoutContainer, HAlign, DOMObject, AlphaTask,
+    Flashbang, DisplayUtil, VAlign, Assert, MathUtil, MouseWheelListener
 } from 'flashbang';
 import GameButton from 'eterna/ui/GameButton';
 import Fonts from 'eterna/util/Fonts';
@@ -10,12 +11,28 @@ import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import RankScroll from 'eterna/rank/RankScroll';
+import Eterna from 'eterna/Eterna';
 
-export default class MissionClearedPanel extends ContainerObject {
+export default class MissionClearedPanel extends ContainerObject implements MouseWheelListener {
+    private static readonly theme = {
+        margin: {
+            top: 30,
+            left: 17
+        },
+        mask: {
+            top: 80,
+            bottom: 76
+        },
+        separator: {
+            separation: 15,
+            margin: 30
+        }
+    };
+
     public nextButton: GameButton;
     public closeButton: GameButton;
 
-    constructor(hasNextPuzzle: boolean, infoText: string = null, moreText: string = null) {
+    constructor(hasNextPuzzle: boolean, infoText: string | null = null, moreText: string | null = null) {
         super();
 
         this._hasNextPuzzle = hasNextPuzzle;
@@ -26,38 +43,81 @@ export default class MissionClearedPanel extends ContainerObject {
         this.container.addChild(this._bg);
     }
 
+    private static processHTML(input: string): string {
+        if (Eterna.MOBILE_APP && input) {
+            const regex = /<img(.*?)src=['"]\/(.*?)['"](.*?)>/gm;
+            const subst = `<img$1src="${Eterna.SERVER_URL}/$2"$3>`;
+            const output = input.replace(regex, subst);
+            return output;
+        } else {
+            return input;
+        }
+    }
+
     protected added(): void {
         super.added();
 
-        this._contentLayout = new VLayoutContainer(25, HAlign.CENTER);
+        const {theme} = MissionClearedPanel;
+        const panelWidth = MissionClearedPanel.calcWidth();
+
+        this._contentLayout = new VLayoutContainer(10, HAlign.CENTER);
+        this._contentLayout.position = new Point(theme.margin.left, theme.margin.top);
         this.container.addChild(this._contentLayout);
 
-        this._contentLayout.addChild(Fonts.stdLight('Mission Accomplished!', 36).color(0xFFCC00).build());
+        this._widthEnforcer = new Graphics();
+        this._contentLayout.addChild(this._widthEnforcer);
 
-        const infoText: string = this._infoText || 'You have solved the puzzle, congratulations!';
-        const infoObj = new HTMLTextObject(infoText, MissionClearedPanel.WIDTH - 60)
+        const title = Fonts.stdBold('MISSION ACCOMPLISHED!', 20).color(0xFFCC00).build();
+        this._contentLayout.addChild(title);
+
+        this._infoContainer = new VLayoutContainer(25, HAlign.LEFT);
+        this._contentLayout.addChild(this._infoContainer);
+        this._infoMask = new Graphics();
+        this._infoMask.interactive = true;
+        this._infoMask.position = new Point();
+        this.container.addChild(this._infoMask);
+        this._infoContainer.mask = this._infoMask;
+
+        this._infoMask
+            .on('pointerdown', this.maskPointerDown.bind(this))
+            .on('pointerup', this.maskPointerUp.bind(this))
+            .on('pointerupoutside', this.maskPointerUp.bind(this))
+            .on('pointermove', this.maskPointerMove.bind(this));
+
+        const overlayEl = document.getElementById(Eterna.OVERLAY_DIV_ID);
+        this._infoWrapper = document.createElement('div');
+        this._infoWrapper.style.position = 'absolute';
+        // assets/style.css ensures that links are still clickable
+        this._infoWrapper.style.pointerEvents = 'none';
+        overlayEl.appendChild(this._infoWrapper);
+
+        const infoText = MissionClearedPanel.processHTML(this._infoText)
+            || 'You have solved the puzzle, congratulations!';
+        const infoObj = new HTMLTextObject(infoText, panelWidth - MissionClearedPanel.PADDING_RIGHT, this._infoWrapper)
             .font(Fonts.STDFONT_REGULAR)
-            .fontSize(20)
+            .fontSize(Flashbang.stageHeight < 512 ? 14 : 18)
             .color(0xffffff)
             .lineHeight(1.2)
             .selectable(false);
         // Images should be centered, even if the HTML doesn't specify it
         DOMObject.applyStyleRecursive(infoObj.element, {display: 'block', margin: 'auto'}, false, ['img']);
-        this.addObject(infoObj, this._contentLayout);
+        this.addObject(infoObj, this._infoContainer);
 
         if (this._moreText != null) {
-            const moreTextObj = new HTMLTextObject(this._moreText, MissionClearedPanel.WIDTH - 60)
+            const moreTextObj = new HTMLTextObject(this._moreText, panelWidth - MissionClearedPanel.PADDING_RIGHT)
                 .font(Fonts.STDFONT_REGULAR)
                 .fontSize(16)
                 .color(0xffffff)
                 .lineHeight(1.2)
                 .selectable(false);
-            this.addObject(moreTextObj, this._contentLayout);
+            this.addObject(moreTextObj, this._infoContainer);
         }
+
+        this._infoContainer.addVSpacer(30);
 
         this._rankScrollContainer = new Container();
         this._rankScrollContainer.visible = false;
-        this._contentLayout.addChild(this._rankScrollContainer);
+        this._infoContainer.addChild(this._rankScrollContainer);
 
         this._rankScrollHeading = new GamePanel(GamePanelType.NORMAL, 1.0, 0x2D4159);
         this.addObject(this._rankScrollHeading, this._rankScrollContainer);
@@ -75,15 +135,93 @@ export default class MissionClearedPanel extends ContainerObject {
         this._rankScrollHeading.container.addChild(tfCoin);
 
         this.closeButton = new GameButton()
-            .allStates(Bitmaps.ImgCross)
+            .allStates(Bitmaps.ImgAchievementsClose)
             .tooltip('Stay in this puzzle and review your design');
         this.addObject(this.closeButton, this.container);
 
-        this.nextButton = new GameButton().label(this._hasNextPuzzle ? 'NEXT PUZZLE' : "WHAT'S NEXT?");
+        const nextButtonGraphic = new Graphics()
+            .beginFill(0x54B54E)
+            .drawRoundedRect(0, 0, 170, 40, 10)
+            .endFill();
+        this.nextButton = new GameButton()
+            .customStyleBox(nextButtonGraphic)
+            .label(this._hasNextPuzzle ? 'Next Puzzle' : "What's Next?");
         this.addObject(this.nextButton, this.container);
 
+        this._separator = new Graphics();
+        this.container.addChild(this._separator);
+
+        this.regs.add(this.mode.mouseWheelInput.pushListener(this));
+
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(() => this.onResize()));
         this.onResize();
+    }
+
+    protected dispose(): void {
+        const overlayEl = document.getElementById(Eterna.OVERLAY_DIV_ID);
+        overlayEl.removeChild(this._infoWrapper);
+
+        super.dispose();
+    }
+
+    private maskPointerDown(event: interaction.InteractionEvent) {
+        const {theme} = MissionClearedPanel;
+        if (this._infoContainer.height < MissionClearedPanel.calcScrollHeight()) {
+            return;
+        }
+        this._dragging = true;
+        this._dragPointData = event.data;
+        this._dragStartBoxY = this._infoContainer.y;
+        this._dragStartPointY = event.data.getLocalPosition(this._contentLayout).y;
+    }
+
+    private maskPointerUp(event: interaction.InteractionEvent) {
+        this._dragging = false;
+        this._dragPointData = null;
+        this._dragStartBoxY = 0;
+        this._dragStartPointY = 0;
+    }
+
+    private maskPointerMove(event: interaction.InteractionEvent) {
+        if (this._dragging) {
+            const dragRange = this._dragPointData.getLocalPosition(this._contentLayout).y - this._dragStartPointY;
+            this.scrollTo(this._dragStartBoxY + dragRange);
+        }
+    }
+
+    public onMouseWheelEvent(e: WheelEvent): boolean {
+        let pxdelta: number;
+        switch (e.deltaMode) {
+            case WheelEvent.DOM_DELTA_PIXEL:
+                pxdelta = e.deltaY;
+                break;
+            case WheelEvent.DOM_DELTA_LINE:
+                // 13 -> body font size
+                pxdelta = e.deltaY * 13;
+                break;
+            case WheelEvent.DOM_DELTA_PAGE:
+                pxdelta = e.deltaY * this.display.height;
+                break;
+            default:
+                throw new Error('Unhandled scroll delta mode');
+        }
+
+        this.scrollTo(this._infoContainer.y - pxdelta);
+
+        return true;
+    }
+
+    public scrollTo(yPos: number) {
+        const scrollHeight = Flashbang.stageHeight - (50 + 75);
+        const containerHeight = this._infoContainer.height + 40; // Add a bit of margin
+        if (containerHeight > scrollHeight) {
+            this._infoContainer.y = MathUtil.clamp(
+                yPos,
+                50 - (containerHeight - scrollHeight),
+                50
+            );
+        }
     }
 
     public createRankScroll(submissionRsp: any): void {
@@ -108,15 +246,36 @@ export default class MissionClearedPanel extends ContainerObject {
     private onResize(): void {
         this.drawBG();
         this.doLayout();
+        this.drawMask();
 
-        this.display.position.x = Flashbang.stageWidth - MissionClearedPanel.WIDTH;
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(Flashbang.stageHeight);
+        this.display.position.x = Flashbang.stageWidth - MissionClearedPanel.calcWidth();
+        this._infoWrapper.style.width = `${Flashbang.stageWidth}px`;
+        this._infoWrapper.style.height = `${Flashbang.stageHeight}px`;
+        const {theme} = MissionClearedPanel;
+        this._infoWrapper.style.clipPath = `inset(${theme.mask.top}px 0 ${theme.mask.bottom}px ${this.display.position.x}px)`;
     }
 
     private drawBG(): void {
         this._bg.clear();
         this._bg.beginFill(0x0, 0.8);
-        this._bg.drawRect(0, 0, MissionClearedPanel.WIDTH, Flashbang.stageHeight);
+        Assert.assertIsDefined(Flashbang.stageHeight);
+        this._bg.drawRect(0, 0, MissionClearedPanel.calcWidth(), Flashbang.stageHeight);
         this._bg.endFill();
+    }
+
+    private drawMask(): void {
+        const {theme} = MissionClearedPanel;
+        this._infoMask.clear();
+        this._infoMask.beginFill(0x00FF00, 0);
+        this._infoMask.drawRect(
+            0,
+            theme.mask.top,
+            MissionClearedPanel.calcWidth(),
+            MissionClearedPanel.calcScrollHeight()
+        );
+        this._infoMask.endFill();
     }
 
     private doLayout(): void {
@@ -124,65 +283,80 @@ export default class MissionClearedPanel extends ContainerObject {
         this.closeButton.display.visible = this._rankScrollContainer.visible;
         this.nextButton.display.visible = this._rankScrollContainer.visible;
 
+        const panelWidth = MissionClearedPanel.calcWidth();
+
         DisplayUtil.positionRelative(
             this.closeButton.display, HAlign.RIGHT, VAlign.TOP,
             this._bg, HAlign.RIGHT, VAlign.TOP,
-            -10, 10
-        );
-
-        DisplayUtil.positionRelative(
-            this.nextButton.display, HAlign.CENTER, VAlign.BOTTOM,
-            this._bg, HAlign.CENTER, VAlign.BOTTOM,
-            0, -25
+            -10, 15
         );
 
         if (this._rankScroll != null) {
             this._rankScrollHeading.setSize(310, this._tfPlayer.height + 6);
-            this._rankScrollHeading.display.position = new Point(
-                ((MissionClearedPanel.WIDTH - this._rankScroll.realWidth) * 0.5) + 10,
-                0
-            );
+            this._rankScrollHeading.display.position = new Point(0, 0);
+            this._rankScroll.display.position = new Point(10, 12 + this._tfPlayer.height);
 
-            this._rankScroll.display.position = new Point(
-                ((MissionClearedPanel.WIDTH - this._rankScroll.realWidth) * 0.5) + 20,
-                12 + this._tfPlayer.height
-            );
+            const rankScale = Math.min(1, panelWidth / (400 + 80));
+            this._rankScrollContainer.scale = new Point(rankScale, rankScale);
         }
 
-        this._contentLayout.scale = new Point(1, 1);
+        const {theme} = MissionClearedPanel;
+
+        this._widthEnforcer.clear();
+        this._widthEnforcer.beginFill(0x000000, 0);
+        this._widthEnforcer.drawRect(0, 0, panelWidth - (theme.margin.left * 2), 5);
+
         this._contentLayout.layout(true);
 
-        const maxHeight = Flashbang.stageHeight - 150;
-        if (this._contentLayout.height > maxHeight) {
-            const contentScale = maxHeight / this._contentLayout.height;
-            this._contentLayout.scale = new Point(contentScale, contentScale);
-        }
-
-        this._contentLayout.position = new Point(
-            (MissionClearedPanel.WIDTH - this._contentLayout.width) * 0.5,
-            (Flashbang.stageHeight - this._contentLayout.height) * 0.5
+        this.nextButton.display.position = new Point(
+            (panelWidth - this.nextButton.container.width) * 0.5,
+            Flashbang.stageHeight - 20 - this.nextButton.container.height
         );
 
-        this.nextButton.display.position = new Point(
-            (MissionClearedPanel.WIDTH - this.nextButton.container.width) * 0.5,
-            Flashbang.stageHeight - 20 - this.nextButton.container.height
+        const separatorPos = this.nextButton.display.position.y - theme.separator.separation;
+        this._separator.clear();
+        this._separator.lineStyle(1, 0x70707080);
+        this._separator.moveTo(theme.separator.margin, separatorPos);
+        this._separator.lineTo(panelWidth - theme.separator.margin, separatorPos);
+    }
+
+    private static calcWidth(): number {
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        return Math.min(
+            Flashbang.stageWidth,
+            MathUtil.clamp(Flashbang.stageWidth * 0.4, 400, 500)
         );
     }
 
-    private readonly _infoText: string;
-    private readonly _moreText: string;
+    private static calcScrollHeight() {
+        const {theme} = MissionClearedPanel;
+        return Flashbang.stageHeight - (theme.mask.top + theme.mask.bottom);
+    }
+
+    private static readonly PADDING_RIGHT = 80;
+
+    private readonly _infoText: string | null;
+    private readonly _moreText: string | null;
     private readonly _hasNextPuzzle: boolean;
 
     private readonly _bg: Graphics;
 
     private _contentLayout: VLayoutContainer;
+    private _widthEnforcer: Graphics;
+    private _infoWrapper: HTMLDivElement;
+    private _infoContainer: VLayoutContainer;
+    private _infoMask: Graphics;
+    private _separator: Graphics;
 
     // private _tfLoading: Text;
 
     private _rankScrollHeading: GamePanel;
     private _tfPlayer: Text;
     private _rankScrollContainer: Container;
-    private _rankScroll: RankScroll = null;
+    private _rankScroll: RankScroll | null = null;
 
-    private static readonly WIDTH: number = 480;
+    private _dragging = false;
+    private _dragPointData: interaction.InteractionData = null;
+    private _dragStartPointY = 0;
+    private _dragStartBoxY = 0;
 }

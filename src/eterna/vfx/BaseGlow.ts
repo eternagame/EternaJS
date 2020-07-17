@@ -3,7 +3,6 @@ import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import EternaTextureUtil from 'eterna/util/EternaTextureUtil';
 
-
 /**
  * With a color based on whether the bases are "right" or "wrong," and used for
  * aptamer binding sites, the BaseGlow implements a fun visual effect through

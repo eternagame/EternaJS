@@ -81,15 +81,21 @@ export default class GamePanel extends BaseGamePanel {
 
             if (this._title != null) {
                 if (this._titleText == null) {
-                    this._titleText = Fonts.stdMedium().fontSize(16).color(0xffffff).build();
-                    this._titleText.position = new Point(7, 6);
+                    this._titleText = Fonts.stdBold().fontSize(16).color(0xffffff).build();
                     this.container.addChild(this._titleText);
                 }
 
-                this._titleText.text = this._title;
-                this._background.lineStyle(2, 0xC0DCE7, 0.27); // 0xFEC942);
-                this._background.moveTo(0, 35);
-                this._background.lineTo(this._width, 35);
+                this._titleText.text = this._title.toUpperCase();
+                this._titleText.position = new Point((this._width - this._titleText.width) * 0.5, 6);
+                this._background.beginFill(this._borderColor, this._borderAlpha);
+                this._background
+                    .moveTo(0, 35)
+                    .lineTo(0, 5)
+                    .arcTo(0, 0, 5, 0, 5)
+                    .lineTo(this._width - 5, 0)
+                    .arcTo(this._width, 0, this._width, 5, 5)
+                    .lineTo(this._width, 35);
+                this._background.endFill();
             }
         }
     }
@@ -102,8 +108,8 @@ export default class GamePanel extends BaseGamePanel {
     protected _color: number = 0;
     protected _borderAlpha: number = 0;
     protected _borderColor: number = 0;
-    protected _title: string = null;
-    protected _titleText: Text = null;
+    protected _title: string | null = null;
+    protected _titleText: Text | null = null;
 
     protected _width: number = 0;
     protected _height: number = 0;

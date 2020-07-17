@@ -14,7 +14,7 @@ export default class FancyTextBalloon extends TextBalloon implements Updatable {
         showOutline = false, outlineColor = 0xFFFFFF,
         outlineAlpha = 0.70
     ) {
-        super(null, balloonColor, balloonAlpha);
+        super(undefined, balloonColor, balloonAlpha);
 
         this._balloonColor = balloonColor;
         this._balloonAlpha = balloonAlpha;

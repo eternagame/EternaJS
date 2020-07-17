@@ -1,6 +1,6 @@
 import {Graphics} from 'pixi.js';
 import {
-    ContainerObject, KeyboardListener, MouseWheelListener, DisplayObjectPointerTarget, InputUtil, Flashbang
+    ContainerObject, KeyboardListener, MouseWheelListener, DisplayObjectPointerTarget, InputUtil, Flashbang, Assert
 } from 'flashbang';
 
 /** Dialogs that expose a "confirmed" promise will reject with this error if the dialog is canceled */
@@ -22,7 +22,6 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
         let bg = new Graphics();
         this.container.addChild(bg);
 
-
         // Eat mouse events - make sure any objects created within the dialog should set
         // interactive to true and stop propogation if the event shouldn't be passed through to the bg
         let bgTarget = new DisplayObjectPointerTarget(bg);
@@ -36,10 +35,13 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
         bgTarget.pointerUp.connect((e) => e.stopPropagation());
         bgTarget.pointerMove.connect((e) => e.stopPropagation());
 
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.keyboardInput.pushListener(this));
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));
 
         let updateBG = () => {
+            Assert.assertIsDefined(Flashbang.stageWidth);
+            Assert.assertIsDefined(Flashbang.stageHeight);
             bg.clear()
                 .beginFill(0x0, this.bgAlpha)
                 .drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
@@ -56,7 +58,7 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
     protected onBGClicked(): void {
     }
 
-    protected close(value: T) {
+    protected close(value: T | null) {
         if (this._isClosed) {
             return;
         }
@@ -84,6 +86,6 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
         return true;
     }
 
-    protected _resolvePromise: (value: T) => void;
+    protected _resolvePromise: (value: T | null) => void;
     protected _isClosed: boolean;
 }

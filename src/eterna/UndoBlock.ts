@@ -1,13 +1,11 @@
-import {JSONUtil} from 'flashbang';
+import {JSONUtil, Assert} from 'flashbang';
 import EPars from 'eterna/EPars';
 import Plot, {PlotType} from 'eterna/Plot';
-import * as log from 'loglevel';
 import Pose2D, {Oligo} from './pose2D/Pose2D';
 import Folder from './folding/Folder';
 import Utility from './util/Utility';
 import Vienna from './folding/Vienna';
 import Vienna2 from './folding/Vienna2';
-
 
 export enum UndoBlockParam {
     GU = 0,
@@ -25,9 +23,10 @@ export enum UndoBlockParam {
     PAIR_SCORE = 12,
     NNFE_ARRAY = 13,
     MAX = 14,
-    MEANPUNP = 15,
-    SUMPUNP = 16,
-    BRANCHINESS = 17,
+    ANY_PAIR = 15,
+    MEANPUNP = 16,
+    SUMPUNP = 17,
+    BRANCHINESS = 18,
 }
 
 export enum BasePairProbabilityTransform {
@@ -87,19 +86,19 @@ export default class UndoBlock {
         }
     }
 
-    public get targetOligos(): Oligo[] {
+    public get targetOligos(): Oligo[] | null {
         return this._targetOligos;
     }
 
-    public set targetOligos(targetOligos: Oligo[]) {
+    public set targetOligos(targetOligos: Oligo[] | null) {
         this._targetOligos = targetOligos == null ? null : JSON.parse(JSON.stringify(targetOligos));
     }
 
-    public get targetOligo(): number[] {
+    public get targetOligo(): number[] | null {
         return this._targetOligo;
     }
 
-    public set targetOligo(targetOligo: number[]) {
+    public set targetOligo(targetOligo: number[] | null) {
         this._targetOligo = targetOligo == null ? null : targetOligo.slice();
     }
 
@@ -109,7 +108,7 @@ export default class UndoBlock {
         return tc['fold_mode'] == null ? Pose2D.OLIGO_MODE_DIMER : Number(tc['fold_mode']);
     }
 
-    public get oligoName(): string {
+    public get oligoName(): string | null {
         let tc: any = this.targetConditions;
         if (tc == null) {
             return null;
@@ -117,11 +116,11 @@ export default class UndoBlock {
         return Object.prototype.hasOwnProperty.call(tc, 'oligo_name') ? tc['oligo_name'] : null;
     }
 
-    public get oligoOrder(): number[] {
+    public get oligoOrder(): number[] | null {
         return this._oligoOrder;
     }
 
-    public set oligoOrder(oligoOrder: number[]) {
+    public set oligoOrder(oligoOrder: number[] | null) {
         this._oligoOrder = oligoOrder == null ? null : oligoOrder.slice();
     }
 
@@ -141,11 +140,11 @@ export default class UndoBlock {
         this._targetPairs = targetPairs.slice();
     }
 
-    public get targetOligoOrder(): number[] {
+    public get targetOligoOrder(): number[] | null {
         return this._targetOligoOrder;
     }
 
-    public set targetOligoOrder(oligoOrder: number[]) {
+    public set targetOligoOrder(oligoOrder: number[] | null) {
         this._targetOligoOrder = oligoOrder == null ? null : oligoOrder.slice();
     }
 
@@ -157,11 +156,11 @@ export default class UndoBlock {
         this._sequence = seq.slice();
     }
 
-    public get puzzleLocks(): boolean[] {
+    public get puzzleLocks(): boolean[] | null {
         return this._puzzleLocks;
     }
 
-    public set puzzleLocks(locks: boolean[]) {
+    public set puzzleLocks(locks: boolean[] | null) {
         this._puzzleLocks = locks;
     }
 
@@ -190,26 +189,34 @@ export default class UndoBlock {
     }
 
     public getPairs(temp: number = 37, pseudoknots: boolean = false): number[] {
-        return this._pairsArray.get(pseudoknots)[temp];
+        const pairsArray = this._pairsArray.get(pseudoknots);
+        Assert.assertIsDefined(pairsArray);
+        return pairsArray[temp];
     }
 
     public getParam(index: UndoBlockParam, temp: number = 37, pseudoknots: boolean = false): any {
-        if (this._paramsArray.get(pseudoknots)[temp] != null) {
-            return this._paramsArray.get(pseudoknots)[temp][index];
+        const parisArray = this._paramsArray.get(pseudoknots);
+        Assert.assertIsDefined(parisArray);
+        if (parisArray[temp] != null) {
+            return parisArray[temp][index];
         } else {
             return undefined;
         }
     }
 
     public setPairs(pairs: number[], temp: number = 37, pseudoknots: boolean = false): void {
-        this._pairsArray.get(pseudoknots)[temp] = pairs.slice();
+        const pairsArray = this._pairsArray.get(pseudoknots);
+        Assert.assertIsDefined(pairsArray);
+        pairsArray[temp] = pairs.slice();
     }
 
     public setParam(index: UndoBlockParam, val: any, temp: number = 37, pseudoknots: boolean = false): void {
-        if (this._paramsArray.get(pseudoknots)[temp] == null) {
-            this._paramsArray.get(pseudoknots)[temp] = [];
+        const pairsArray = this._paramsArray.get(pseudoknots);
+        Assert.assertIsDefined(pairsArray);
+        if (pairsArray[temp] == null) {
+            pairsArray[temp] = [];
         }
-        this._paramsArray.get(pseudoknots)[temp][index] = val;
+        pairsArray[temp][index] = val;
     }
 
     public setBasics(folder: Folder, temp: number = 37, pseudoknots: boolean = false): void {
@@ -219,6 +226,7 @@ export default class UndoBlock {
         this.setParam(UndoBlockParam.GU, EPars.numGUPairs(seq, bestPairs), temp, pseudoknots);
         this.setParam(UndoBlockParam.GC, EPars.numGCPairs(seq, bestPairs), temp, pseudoknots);
         this.setParam(UndoBlockParam.AU, EPars.numUAPairs(seq, bestPairs), temp, pseudoknots);
+        this.setParam(UndoBlockParam.ANY_PAIR, EPars.numPairs(bestPairs), temp, pseudoknots);
         this.setParam(UndoBlockParam.STACK, EPars.getLongestStackLength(bestPairs), temp, pseudoknots);
         this.setParam(UndoBlockParam.REPETITION, EPars.getSequenceRepetition(
             EPars.sequenceToString(seq), 5
@@ -233,6 +241,7 @@ export default class UndoBlock {
                 fullSeq = fullSeq.concat(this._targetOligo);
             }
         } else if (this._targetOligos) {
+            Assert.assertIsDefined(this._oligoOrder);
             for (let ii = 0; ii < this._targetOligos.length; ii++) {
                 fullSeq.push(EPars.RNABASE_CUT);
                 fullSeq = fullSeq.concat(this._targetOligos[this._oligoOrder[ii]].sequence);
@@ -337,7 +346,8 @@ export default class UndoBlock {
         }
 
         if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) == null) {
-            let dotArray: number[] = folder.getDotPlot(this.sequence, this.getPairs(37), 37, pseudoknots);
+            let dotArray: number[] | null = folder.getDotPlot(this.sequence, this.getPairs(37), 37, pseudoknots);
+            this.setParam(UndoBlockParam.DOTPLOT, dotArray, 37, pseudoknots);
             // mean+sum prob unpaired
             this.setParam(UndoBlockParam.SUMPUNP,
                 this.sumProbUnpaired(dotArray, bppStatisticBehavior), 37, pseudoknots);
@@ -346,18 +356,24 @@ export default class UndoBlock {
             // branchiness
             this.setParam(UndoBlockParam.BRANCHINESS,
                 this.ensembleBranchiness(dotArray, bppStatisticBehavior), 37, pseudoknots);
-
-            this.setParam(UndoBlockParam.DOTPLOT, dotArray, 37, pseudoknots);
-            this._dotPlotData = dotArray.slice();
+            this._dotPlotData = dotArray ? dotArray.slice() : null;
         }
 
         for (let ii = 37; ii < 100; ii += 10) {
             if (this.getPairs(ii) == null) {
-                this.setPairs(folder.foldSequence(this.sequence, null, null, pseudoknots, ii), ii, pseudoknots);
+                let pairs = folder.foldSequence(this.sequence, null, null, pseudoknots, ii);
+                Assert.assertIsDefined(pairs);
+                this.setPairs(pairs, ii, pseudoknots);
             }
 
             if (this.getParam(UndoBlockParam.DOTPLOT, ii) == null) {
-                let dotTempArray: number[] = folder.getDotPlot(this.sequence, this.getPairs(ii), ii, pseudoknots);
+                let dotTempArray: number[] | null = folder.getDotPlot(
+                    this.sequence,
+                    this.getPairs(ii),
+                    ii,
+                    pseudoknots
+                );
+                Assert.assertIsDefined(dotTempArray);
                 // mean+sum prob unpaired
                 this.setParam(UndoBlockParam.SUMPUNP,
                     this.sumProbUnpaired(dotTempArray, bppStatisticBehavior), ii, pseudoknots);
@@ -366,12 +382,11 @@ export default class UndoBlock {
                 // branchiness
                 this.setParam(UndoBlockParam.BRANCHINESS,
                     this.ensembleBranchiness(dotTempArray, bppStatisticBehavior), ii, pseudoknots);
-
                 this.setParam(UndoBlockParam.DOTPLOT, dotTempArray, ii, pseudoknots);
             }
         }
 
-        let refPairs: number[] = this.getPairs(37);
+        let refPairs: number[] = this.getPairs(37, pseudoknots);
 
         let pairScores: number[] = [];
         let maxPairScores: number[] = [];
@@ -460,7 +475,7 @@ export default class UndoBlock {
      * E.g., given oligos in order A B C, [1,2,0] means their new order should be C, A, B
      * (oligo A, with the old index of 0, should be at new index 1)
      */
-    public reorderedOligosIndexMap(otherOrder: number[]): number[] {
+    public reorderedOligosIndexMap(otherOrder: number[] | null): number[] | null {
         if (this._targetOligos == null) return null;
 
         let originalIndices: number[][] = [];
@@ -483,17 +498,17 @@ export default class UndoBlock {
     private _pairsArray: Map<boolean, number[][]> = new Map<boolean, number[][]>();
     private _paramsArray: Map<boolean, any[][]> = new Map<boolean, any[][]>();
     private _stable: boolean = false;
-    private _targetOligo: number[] = null;
-    private _targetOligos: Oligo[] = null;
-    private _oligoOrder: number[] = null;
+    private _targetOligo: number[] | null = null;
+    private _targetOligos: Oligo[] | null = null;
+    private _oligoOrder: number[] | null = null;
     private _oligosPaired: number = 0;
     private _targetPairs: number[] = [];
-    private _targetOligoOrder: number[] = null;
-    private _puzzleLocks: boolean[] = [];
+    private _targetOligoOrder: number[] | null = null;
+    private _puzzleLocks: boolean[] | null = [];
     private _forcedStruct: number[] = [];
-    private _targetConditions: string = null;
+    private _targetConditions: string | null = null;
 
-    private _dotPlotData: number[];
+    private _dotPlotData: number[] | null;
     private _meltPlotPairScores: number[];
     private _meltPlotMaxPairScores: number[];
 }

@@ -1,6 +1,6 @@
 import {Text} from 'pixi.js';
 import {
-    AppMode, ContainerObject, SerialTask, DelayTask, RepeatingTask, ObjectTask, ScaleTask, Easing, Flashbang
+    AppMode, ContainerObject, SerialTask, DelayTask, RepeatingTask, ObjectTask, ScaleTask, Easing, Flashbang, Assert
 } from 'flashbang';
 import Background from 'eterna/vfx/Background';
 import Fonts from 'eterna/util/Fonts';
@@ -10,7 +10,7 @@ import Eterna from 'eterna/Eterna';
 export default class LoadingMode extends AppMode {
     public extraBlurbText: string;
 
-    constructor(text: string, extraBlurbText: string) {
+    constructor(text: string, extraBlurbText: string | null) {
         super();
         this._text = text;
         if (extraBlurbText == null) this.extraBlurbText = this.getExtraBlurb();
@@ -61,21 +61,13 @@ export default class LoadingMode extends AppMode {
         ));
 
         let updateLoc = () => {
+            Assert.assertIsDefined(Flashbang.stageWidth);
+            Assert.assertIsDefined(Flashbang.stageHeight);
             container.display.x = Flashbang.stageWidth * 0.5;
             container.display.y = Flashbang.stageHeight * 0.5;
         };
         updateLoc();
         this.resized.connect(updateLoc);
-    }
-
-    protected enter(): void {
-        super.enter();
-        Eterna.chat.pushHideChat();
-    }
-
-    protected exit(): void {
-        Eterna.chat.popHideChat();
-        super.exit();
     }
 
     private getExtraBlurb(): string {
@@ -104,7 +96,6 @@ export default class LoadingMode extends AppMode {
         ];
         return ExtraBlurbs[Math.floor(Math.random() * ExtraBlurbs.length)];
     }
-
 
     private _text: string;
     private _textField: Text;

@@ -15,15 +15,15 @@ export default abstract class Folder {
 
     public scoreStructures(
         seq: number[], pairs: number[], pseudoknotted: boolean = false,
-        temp: number = 37, outNodes: number[] = null
+        temp: number = 37, outNodes: number[] | null = null
     ): number {
         return 0;
     }
 
     public foldSequence(
-        seq: number[], secondBestPairs: number[], desiredPairs: string = null,
+        seq: number[], secondBestPairs: number[] | null, desiredPairs: string | null = null,
         pseudoknotted: boolean = false, temp: number = 37
-    ): number[] {
+    ): number[] | null {
         return null;
     }
 
@@ -32,9 +32,9 @@ export default abstract class Folder {
     }
 
     public foldSequenceWithBindingSite(
-        seq: number[], targetPairs: number[], bindingSite: number[], bonus: number,
+        seq: number[], targetPairs: number[] | null, bindingSite: number[], bonus: number,
         version: number = 2.0, temp: number = 37
-    ): number[] {
+    ): number[] | null {
         return null;
     }
 
@@ -43,8 +43,9 @@ export default abstract class Folder {
     }
 
     public cofoldSequence(
-        seq: number[], secondBestPairs: number[], malus: number = 0, desiredPairs: string = null, temp: number = 37
-    ): number[] {
+        seq: number[], secondBestPairs: number[] | null, malus: number = 0,
+        desiredPairs: string | null = null, temp: number = 37
+    ): number[] | null {
         return null;
     }
 
@@ -53,9 +54,9 @@ export default abstract class Folder {
     }
 
     public cofoldSequenceWithBindingSite(
-        seq: number[], bindingSite: number[], bonus: number, desiredPairs: string = null,
+        seq: number[], bindingSite: number[], bonus: number, desiredPairs: string | null = null,
         malus: number = 0, temp: number = 37
-    ): number[] {
+    ): number[] | null {
         return null;
     }
 
@@ -67,7 +68,9 @@ export default abstract class Folder {
         return false;
     }
 
-    public getDotPlot(seq: number[], pairs: number[], temp: number = 37, pseudoknots: boolean = false): number[] {
+    public getDotPlot(
+        seq: number[], pairs: number[], temp: number = 37, pseudoknots: boolean = false
+    ): number[] | null {
         return null;
     }
 
@@ -76,14 +79,16 @@ export default abstract class Folder {
     }
 
     public multifold(
-        seq: number[], secondBestPairs: number[], oligos: any[], desiredPairs: string = null, temp: number = 37
+        seq: number[], secondBestPairs: number[] | null, oligos: any[],
+        desiredPairs: string | null = null, temp: number = 37
     ): any {
         return null;
     }
 
     public multifoldUnroll(
-        seq: number[], secondBestPairs: number[], oligos: any[], desiredPairs: string = null, temp: number = 37
-    ): PoseOp[] {
+        seq: number[], secondBestPairs: number[] | null, oligos: any[],
+        desiredPairs: string | null = null, temp: number = 37
+    ): PoseOp[] | null {
         return null;
     }
 

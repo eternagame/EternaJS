@@ -2,6 +2,7 @@ import * as log from 'loglevel';
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import EPars from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
+import {Assert} from 'flashbang';
 import * as LinearFoldLib from './engines/LinearFoldLib';
 import {DotPlotResult, FullFoldResult} from './engines/LinearFoldLib';
 import {FullEvalResult} from './engines/ViennaLib';
@@ -31,10 +32,11 @@ export default abstract class LinearFoldBase extends Folder {
 
         let seqStr: string = EPars.sequenceToString(seq);
 
-        let result: DotPlotResult = null;
+        let result: DotPlotResult | null = null;
         try {
             // we don't actually do anything with structstring here yet
             result = this._lib.GetDotPlot(temp, seqStr, EPars.pairsToParenthesis(pairs));
+            Assert.assertIsDefined(result, 'Linearfold returned a null result');
             retArray = EmscriptenUtil.stdVectorToArray(result.plot);
         } catch (e) {
             log.error('GetDotPlot error', e);
@@ -60,7 +62,7 @@ export default abstract class LinearFoldBase extends Folder {
 
     public scoreStructures(
         seq: number[], pairs: number[], pseudoknotted: boolean = false,
-        temp: number = 37, outNodes: number[] = null
+        temp: number = 37, outNodes: number[] | null = null
     ): number {
         let key: any = {
             primitive: 'score', seq, pairs, temp
@@ -76,12 +78,15 @@ export default abstract class LinearFoldBase extends Folder {
         }
 
         do {
-            let result: FullEvalResult = null;
+            let result: FullEvalResult | null = null;
             try {
                 result = this._lib.FullEval(
                     EPars.sequenceToString(seq),
                     EPars.pairsToParenthesis(pairs)
                 );
+                if (!result) {
+                    throw new Error('LinearFold returned a null result');
+                }
                 cache = {energy: result.energy, nodes: EmscriptenUtil.stdVectorToArray<number>(result.nodes)};
             } catch (e) {
                 log.error('FullEval error', e);
@@ -137,7 +142,7 @@ export default abstract class LinearFoldBase extends Folder {
     }
 
     public foldSequence(
-        seq: number[], secondBestPairs: number[], desiredPairs: string = null,
+        seq: number[], secondBestPairs: number[] | null, desiredPairs: string | null = null,
         pseudoknotted: boolean = false, temp: number = 37
     ): number[] {
         let key: any = {
@@ -159,10 +164,13 @@ export default abstract class LinearFoldBase extends Folder {
 
     private fullFoldDefault(seq: number[]): number[] {
         const seqStr = EPars.sequenceToString(seq, false, false);
-        let result: FullFoldResult;
+        let result: FullFoldResult | null = null;
 
         try {
             result = this._lib.FullFoldDefault(seqStr);
+            if (!result) {
+                throw new Error('LinearFold returned a null result');
+            }
             return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
             log.error('FullFoldDefault error', e);
@@ -192,7 +200,8 @@ export default abstract class LinearFoldBase extends Folder {
     }
 
     public cofoldSequence(
-        seq: number[], secondBestPairs: number[], malus: number = 0, desiredPairs: string = null, temp: number = 37
+        seq: number[], secondBestPairs: number[], malus: number = 0,
+        desiredPairs: string | null = null, temp: number = 37
     ): number[] {
         log.warn('LinearFold.cofoldSequence: unimplemented');
         return this.foldSequence(seq, null);
@@ -203,7 +212,7 @@ export default abstract class LinearFoldBase extends Folder {
     }
 
     public cofoldSequenceWithBindingSite(
-        seq: number[], bindingSite: number[], bonus: number, desiredPairs: string = null,
+        seq: number[], bindingSite: number[], bonus: number, desiredPairs: string | null = null,
         malus: number = 0, temp: number = 37
     ): number[] {
         log.warn('LinearFold.cofoldSequenceWithBindingSite: unimplemented');

@@ -15,6 +15,7 @@ export default class EternaMenu extends GamePanel implements Enableable {
 
     protected added() {
         super.added();
+        this._background.visible = false;
         this.needsLayout();
     }
 

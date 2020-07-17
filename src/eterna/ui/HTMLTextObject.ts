@@ -3,8 +3,8 @@ import Eterna from 'eterna/Eterna';
 
 /** A <p> object in the DOM that contains the given HTML. Floats on top of the PIXI canvas. */
 export default class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
-    constructor(htmlText: string, width?: number) {
-        super(Eterna.OVERLAY_DIV_ID, document.createElement('p'));
+    constructor(htmlText: string, width?: number, domParent?: string | HTMLElement) {
+        super(domParent ?? Eterna.OVERLAY_DIV_ID, document.createElement('p'));
         this._obj.innerHTML = htmlText;
         this._obj.style.margin = '0px';
         if (width) {
@@ -30,9 +30,8 @@ export default class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
     }
 
     public selectable(value: boolean): HTMLTextObject {
-        this._obj.style.userSelect = value ? undefined : 'none';
-        this._obj.style.webkitUserSelect = value ? undefined : 'none';
-        this._obj.style.msUserSelect = value ? undefined : 'none';
+        this._obj.style.userSelect = value ? 'auto' : 'none';
+        this._obj.style.webkitUserSelect = value ? 'auto' : 'none';
         return this;
     }
 

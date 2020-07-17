@@ -1,0 +1,118 @@
+diff -X .gitignore -ur EternaFold_stock/src/Config.hpp EternaFold/src/Config.hpp
+--- EternaFold_stock/src/Config.hpp	2020-06-24 14:51:01.315532154 -0400
++++ EternaFold/src/Config.hpp	2020-06-24 19:56:14.820353164 -0400
+@@ -210,7 +210,7 @@
+ // (F) Miscellaneous model constants
+ //////////////////////////////////////////////////////////////////////
+ 
+-const int C_MIN_HAIRPIN_LENGTH = 0;
++const int C_MIN_HAIRPIN_LENGTH = 3;
+ const int C_MAX_SINGLE_LENGTH = 30;
+ 
+ const int D_MAX_HAIRPIN_LENGTH = 30;
+diff -X .gitignore -ur EternaFold_stock/src/InferenceEngine.hpp EternaFold/src/InferenceEngine.hpp
+--- EternaFold_stock/src/InferenceEngine.hpp	2020-06-24 19:35:52.340381905 -0400
++++ EternaFold/src/InferenceEngine.hpp	2020-06-24 14:53:36.792429721 -0400
+@@ -21,7 +21,7 @@
+ template<class RealT>
+ class InferenceEngine
+ {
+-    static const double DATA_LOW_THRESH = 1e-7;  // used for the data so that log is not -Inf
++    constexpr static const double DATA_LOW_THRESH = 1e-7;  // used for the data so that log is not -Inf
+ 
+     const bool allow_noncomplementary;
+     unsigned char char_mapping[256];
+diff -X .gitignore -ur EternaFold_stock/src/ParameterManager.ipp EternaFold/src/ParameterManager.ipp
+--- EternaFold_stock/src/ParameterManager.ipp	2020-06-24 14:51:01.315532154 -0400
++++ EternaFold/src/ParameterManager.ipp	2020-06-24 14:53:36.792429721 -0400
+@@ -1,8 +1,13 @@
++#pragma once
++
+ //////////////////////////////////////////////////////////////////////
+ // ParameterManager.ipp
+ //////////////////////////////////////////////////////////////////////
+ 
+-//#include "ParameterManager.hpp"
++#ifndef PARAMETERMANAGER_IPP
++#define PARAMETERMANAGER_IPP
++
++// #include "ParameterManager.hpp"
+ 
+ //////////////////////////////////////////////////////////////////////
+ // ParameterGroup::ParameterGroup()
+@@ -268,3 +273,5 @@
+     if (iter == physical_to_logical.end()) Error("Request for unknown physical parameter.");
+     return iter->second;
+ }
++
++#endif
+\ No newline at end of file
+Binary files EternaFold_stock/src/score_prediction and EternaFold/src/score_prediction differ
+diff -X .gitignore -ur EternaFold_stock/src/SStruct.cpp EternaFold/src/SStruct.cpp
+--- EternaFold_stock/src/SStruct.cpp	2020-06-24 14:51:01.315532154 -0400
++++ EternaFold/src/SStruct.cpp	2020-06-24 14:53:36.792429721 -0400
+@@ -101,6 +101,37 @@
+ }
+ 
+ //////////////////////////////////////////////////////////////////////
++// SStruct::LoadString()
++//
++// Load from string.
++//////////////////////////////////////////////////////////////////////
++
++void SStruct::LoadString(const std::string &string)
++{
++    // clear any previous data
++    std::vector<std::string>().swap(names);
++    std::vector<std::string>().swap(sequences);
++    std::vector<int>().swap(mapping);
++
++    // initialize
++    names.push_back("no_file");
++    sequences.push_back("@" + string);
++
++    // sanity-checks
++    if (sequences[0].length() == 1) Error("Zero-length sequence read.");
++
++    // initialize empty secondary structure
++    mapping.resize(sequences[0].length(), UNKNOWN);
++
++    // perform character conversions
++    for (size_t i = 0; i < sequences.size(); i++)
++        sequences[i] = FilterSequence(sequences[i]);
++
++    // error-checking
++    ValidateMapping(mapping);
++}
++
++//////////////////////////////////////////////////////////////////////
+ // SStruct::AnalyzeFormat()
+ //
+ // Determine file format.
+diff -X .gitignore -ur EternaFold_stock/src/SStruct.hpp EternaFold/src/SStruct.hpp
+--- EternaFold_stock/src/SStruct.hpp	2020-06-24 14:51:01.315532154 -0400
++++ EternaFold/src/SStruct.hpp	2020-06-24 14:53:36.792429721 -0400
+@@ -52,9 +52,11 @@
+     std::string FilterSequence(std::string sequence) const;
+     std::string FilterParens(std::string sequence) const;
+ 
++public:
+     // convert a pseudoknot-free parenthesized structure to a mapping and back
+     std::vector<int> ConvertParensToMapping(const std::string &parens) const;
+     std::string ConvertMappingToParens(const std::vector<int> &mapping) const;
++    void LoadString(const std::string &seq);
+ 
+     // check that a (possibly pseudoknotted) mapping is valid
+     void ValidateMapping(const std::vector<int> &mapping) const;
+Binary files EternaFold_stock/src/SStruct.o and EternaFold/src/SStruct.o differ
+diff -X .gitignore -ur EternaFold_stock/src/Utilities.cpp EternaFold/src/Utilities.cpp
+--- EternaFold_stock/src/Utilities.cpp	2020-06-24 14:51:01.315532154 -0400
++++ EternaFold/src/Utilities.cpp	2020-06-24 14:53:36.792429721 -0400
+@@ -2,6 +2,7 @@
+ // Utilities.cpp
+ //////////////////////////////////////////////////////////////////////
+ 
++#include <limits.h>
+ #include "Utilities.hpp"
+ #include <unistd.h>
+ 

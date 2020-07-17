@@ -1,7 +1,7 @@
 import {
     Container, DisplayObject, Graphics, Sprite, Texture
 } from 'pixi.js';
-import {TextureUtil, DisplayUtil} from 'flashbang';
+import {TextureUtil, DisplayUtil, Assert} from 'flashbang';
 import Constants from 'eterna/Constants';
 import EPars from 'eterna/EPars';
 import ExpPainter from 'eterna/ExpPainter';
@@ -22,10 +22,10 @@ export default class PoseThumbnail {
         size: number = 1,
         type: PoseThumbnailType = PoseThumbnailType.BASE_COLORED,
         expStartIndex: number = 0,
-        wrongPairs: number[] = null,
+        wrongPairs: number[] | null = null,
         expUseThreshold: boolean = false,
         expThreshold: number = 0,
-        customLayout: Array<[number, number]> = null
+        customLayout: Array<[number, number] | [null, null]> | null = null
     ): Texture {
         let disp: DisplayObject = PoseThumbnail.create(
             sequence, pairs, size, type,
@@ -41,10 +41,10 @@ export default class PoseThumbnail {
         size: number = 1,
         type: PoseThumbnailType = PoseThumbnailType.BASE_COLORED,
         expStartIndex: number = 0,
-        wrongPairs: number[] = null,
+        wrongPairs: number[] | null = null,
         expUseThreshold: boolean = false,
         expThreshold: number = 0,
-        customLayout: Array<[number, number]> = null
+        customLayout: Array<[number, number] | [null, null]> | null = null
     ) {
         const graphics = new Graphics();
         PoseThumbnail.create(
@@ -65,10 +65,10 @@ export default class PoseThumbnail {
         size: number = 1,
         type: PoseThumbnailType = PoseThumbnailType.BASE_COLORED,
         expStartIndex: number = 0,
-        wrongPairs: number[] = null,
+        wrongPairs: number[] | null = null,
         expUseThreshold: boolean = false,
         expThreshold: number = 0,
-        customLayout: Array<[number, number]> = null
+        customLayout: Array<[number, number] | [null, null]> | null = null
     ): void {
         sprite.removeChildren();
         const graphics = new Graphics();
@@ -88,13 +88,13 @@ export default class PoseThumbnail {
         size: number,
         type: PoseThumbnailType,
         expStartIndex: number,
-        wrongPairs: number[],
+        wrongPairs: number[] | null,
         expUseThreshold: boolean,
         expThreshold: number,
-        canvas: Graphics = null,
-        customLayout: Array<[number, number]> = null
+        canvas: Graphics | null = null,
+        customLayout: Array<([number, number] | [null, null])> | null = null
     ): DisplayObject {
-        let frame: DisplayObject;
+        let frame: DisplayObject | null = null;
 
         if (size === 1) {
             frame = Sprite.fromImage(Bitmaps.SolutionSmallFrame);
@@ -112,6 +112,8 @@ export default class PoseThumbnail {
             frame = DisplayUtil.fillRect(300, 300, 0x0);
         }
 
+        Assert.assertIsDefined(frame,
+            `frame remains undefined because PoseThumbnail::create was passed a size other than 1-7: ${size}!`);
         let frameBounds = frame.getLocalBounds();
 
         let w: number = frameBounds.width * 0.8;
@@ -133,28 +135,10 @@ export default class PoseThumbnail {
         rnaDrawer.drawTree(customLayout);
         rnaDrawer.getCoords(xarray, yarray);
 
-        let xmin: number = xarray[0];
-        let xmax: number = xarray[0];
-        let ymin: number = yarray[0];
-        let ymax: number = yarray[0];
-
-        for (let ii = 0; ii < n; ii++) {
-            if (xarray[ii] < xmin) {
-                xmin = xarray[ii];
-            }
-
-            if (xarray[ii] > xmax) {
-                xmax = xarray[ii];
-            }
-
-            if (yarray[ii] < ymin) {
-                ymin = yarray[ii];
-            }
-
-            if (yarray[ii] > ymax) {
-                ymax = yarray[ii];
-            }
-        }
+        let xmin: number = Math.min(...xarray);
+        let xmax: number = Math.max(...xarray);
+        let ymin: number = Math.min(...yarray);
+        let ymax: number = Math.max(...yarray);
 
         let xdiff: number = xmax - xmin;
         let xscale = 1;
@@ -170,7 +154,7 @@ export default class PoseThumbnail {
         canvas.clear();
         canvas.lineStyle(0, 0x0, 0);
 
-        let expPainter: ExpPainter = null;
+        let expPainter: ExpPainter | null = null;
 
         if (type === PoseThumbnailType.EXP_COLORED) {
             expPainter = new ExpPainter(sequence, expStartIndex);
@@ -223,6 +207,8 @@ export default class PoseThumbnail {
             if (type === PoseThumbnailType.WHITE) {
                 color = COLOR_WHITE;
             } else if (type === PoseThumbnailType.WRONG_COLORED) {
+                Assert.assertIsDefined(wrongPairs,
+                    'wrongPairs must be defined if the type of thumbnail is WRONG_COLORED');
                 if (wrongPairs[ii] === 1) {
                     color = COLOR_WRONG;
 
@@ -330,6 +316,8 @@ export default class PoseThumbnail {
                     color = COLOR_WHITE;
                 }
             } else if (type === PoseThumbnailType.EXP_COLORED) {
+                Assert.assertIsDefined(expPainter,
+                    'expPainter must be defined if the type of thumbnail is EXP_COLORED');
                 if (expUseThreshold) color = expPainter.getColorWithMidpoint(ii, expThreshold);
                 else color = expPainter.getColor(ii);
             }

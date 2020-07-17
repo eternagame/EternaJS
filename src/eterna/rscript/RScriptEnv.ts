@@ -1,5 +1,7 @@
 import * as log from 'loglevel';
-import {Container, DisplayObject} from 'pixi.js';
+import {
+    Container, DisplayObject, Rectangle, Point
+} from 'pixi.js';
 import {ContainerObject, Enableable, GameObject} from 'flashbang';
 import EPars from 'eterna/EPars';
 import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
@@ -68,9 +70,9 @@ export default class RScriptEnv extends ContainerObject {
 
     /** Remove all stored highlights and hints and stuff. */
     public cleanup(): void {
-        for (let key of Object.keys(this._vars)) {
+        this._vars.forEach((value, key) => {
             this.deleteVar(key);
-        }
+        });
     }
 
     public get ui(): PoseEditMode {
@@ -88,9 +90,9 @@ export default class RScriptEnv extends ContainerObject {
     // Handles parsing the element ID and getting the right object.
     // Returns: UI Element, its UI ID, and the alternate parameter (integer) that may
     //  have been passed in.
-    public getUIElementFromID(key: string): [RScriptUIElement, RScriptUIElementID, number] {
+    public getUIElementFromID(key: string): [RScriptUIElement | null, RScriptUIElementID, number] {
         // Highlight UI.
-        let uiElement: RScriptUIElement;
+        let uiElement: RScriptUIElement | null;
 
         // Used UI Element ID.
         let splitId: string[] = key.split('-');
@@ -124,7 +126,37 @@ export default class RScriptEnv extends ContainerObject {
         return [uiElement, elementID, altParam];
     }
 
-    public get totalConstraints(): number {
+    public getUIElementBounds(key: string): Rectangle | null {
+        try {
+            const [uiElement] = this.getUIElementFromID(key);
+            if (uiElement instanceof Rectangle) {
+                // This is a rectangle whithin the palette
+                const [palette] = this.getUIElementFromID(RScriptUIElementID.PALETTE);
+                const obj = palette as GameObject;
+                const rect = uiElement as Rectangle;
+                const globalPos = obj.display.toGlobal(new Point());
+                return new Rectangle(
+                    globalPos.x + rect.x,
+                    globalPos.y + rect.y,
+                    rect.width,
+                    rect.height
+                );
+            } else {
+                const obj = uiElement as GameObject;
+                const globalPos = obj.display.toGlobal(new Point());
+                return new Rectangle(
+                    globalPos.x,
+                    globalPos.y,
+                    obj.display.getLocalBounds().width,
+                    obj.display.getLocalBounds().height
+                );
+            }
+        } catch (e) {
+            return null;
+        }
+    }
+
+    public get totalConstraints(): number | null {
         return this.ui.constraintCount;
     }
 
@@ -153,20 +185,22 @@ export default class RScriptEnv extends ContainerObject {
                 this.ui.toolbar.palette.changeNoPairMode();
             }
 
-            let obj: RScriptUIElement = this.getUIElementFromID(elementID)[0];
-            if (obj instanceof DisplayObject) {
-                obj.visible = visible;
-            } else if (obj instanceof GameObject && obj.display != null) {
-                obj.display.visible = visible;
-            }
+            let obj: RScriptUIElement | null = this.getUIElementFromID(elementID)[0];
+            if (obj) {
+                if (obj instanceof DisplayObject) {
+                    obj.visible = visible;
+                } else if (obj instanceof GameObject && obj.display != null) {
+                    obj.display.visible = visible;
+                }
 
-            if (((obj as any) as Enableable).enabled !== undefined) {
-                ((obj as any) as Enableable).enabled = visible && !disabled;
+                if (((obj as any) as Enableable).enabled !== undefined) {
+                    ((obj as any) as Enableable).enabled = visible && !disabled;
+                }
             }
         }
     }
 
-    public getUIElement(type: RScriptUIElementID, i: number = -1): RScriptUIElement {
+    public getUIElement(type: RScriptUIElementID, i: number = -1): RScriptUIElement | null {
         switch (type) {
             case RScriptUIElementID.ACTION_MENU:
                 return this.ui.toolbar.actionMenu;
@@ -210,6 +244,10 @@ export default class RScriptEnv extends ContainerObject {
                 return this.ui.toolbar.pairSwapButton;
             case RScriptUIElementID.PIP:
                 return this.ui.toolbar.pipButton;
+            case RScriptUIElementID.BASEMARKER:
+                return this.ui.toolbar.baseMarkerButton;
+            case RScriptUIElementID.MAGICGLUE:
+                return this.ui.toolbar.magicGlueButton;
             case RScriptUIElementID.A:
                 return this.ui.toolbar.palette.getTarget(PaletteTargetType.A);
             case RScriptUIElementID.U:
@@ -242,10 +280,10 @@ export default class RScriptEnv extends ContainerObject {
         this._vars.set(key, inValue);
     }
 
-    public getVar(key: string): RScriptVarType {
+    public getVar(key: string): RScriptVarType | undefined {
         let scriptVar = this._vars.get(key);
         if (scriptVar != null && scriptVar instanceof GameObject) {
-            return scriptVar.isLiveObject ? scriptVar : null;
+            return scriptVar.isLiveObject ? scriptVar : undefined;
         } else {
             return scriptVar;
         }

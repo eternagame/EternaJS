@@ -8,10 +8,12 @@ export default class LinearFoldC extends LinearFoldBase {
      * Asynchronously creates a new instance of the Vienna folder.
      * @returns {Promise<LinearFoldC>}
      */
-    public static create(): Promise<LinearFoldC> {
+    public static create(): Promise<LinearFoldC | null> {
+        // eslint-disable-next-line import/no-unresolved, import/no-extraneous-dependencies
         return import('engines-bin/LinearFoldC')
             .then((module: any) => EmscriptenUtil.loadProgram(module))
-            .then((program: any) => new LinearFoldC(program));
+            .then((program: any) => new LinearFoldC(program))
+            .catch((err) => null);
     }
 
     public get name(): string {

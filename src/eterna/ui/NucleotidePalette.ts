@@ -32,7 +32,7 @@ export function GetPaletteTargetBaseType(type: PaletteTargetType): number {
     }
 }
 
-export function StringToPaletteTargetType(value: string): PaletteTargetType {
+export function StringToPaletteTargetType(value: string): PaletteTargetType | null {
     switch (value.toUpperCase()) {
         case 'A': return PaletteTargetType.A;
         case 'U': return PaletteTargetType.U;
@@ -87,43 +87,43 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
 
         this._targets[PaletteTargetType.A] = new PaletteTarget(
             PaletteTargetType.A, RScriptUIElementID.A, false, KeyCode.Digit1,
-            [new Rectangle(9, 7, 25, 25)],
+            [new Rectangle(9, 4, 25, 25)],
             NucleotidePalette.createTooltip('Mutate to <A>A (Adenine)</A>. (1)')
         );
 
         this._targets[PaletteTargetType.U] = new PaletteTarget(
             PaletteTargetType.U, RScriptUIElementID.U, false, KeyCode.Digit2,
-            [new Rectangle(58, 7, 25, 25)],
+            [new Rectangle(58, 4, 25, 25)],
             NucleotidePalette.createTooltip('Mutate to <U>U (Uracil)</U>. (2)')
         );
 
         this._targets[PaletteTargetType.G] = new PaletteTarget(
             PaletteTargetType.G, RScriptUIElementID.G, false, KeyCode.Digit3,
-            [new Rectangle(107, 7, 25, 25)],
+            [new Rectangle(107, 4, 25, 25)],
             NucleotidePalette.createTooltip('Mutate to <G>G (Guanine)</G>. (3)')
         );
 
         this._targets[PaletteTargetType.C] = new PaletteTarget(
             PaletteTargetType.C, RScriptUIElementID.C, false, KeyCode.Digit4,
-            [new Rectangle(156, 7, 25, 25)],
+            [new Rectangle(156, 4, 25, 25)],
             NucleotidePalette.createTooltip('Mutate to <C>C (Cytosine)</C>. (4)')
         );
 
         this._targets[PaletteTargetType.AU] = new PaletteTarget(
             PaletteTargetType.AU, RScriptUIElementID.AU, true, KeyCode.KeyQ,
-            [new Rectangle(31, 29, 30, 20), new Rectangle(37, 15, 22, 20)],
+            [new Rectangle(31, 28, 30, 20), new Rectangle(37, 15, 22, 20)],
             NucleotidePalette.createTooltip('Mutate to pair (<A>A</A>, <U>U</U>). (Q)')
         );
 
         this._targets[PaletteTargetType.UG] = new PaletteTarget(
             PaletteTargetType.UG, RScriptUIElementID.UG, true, KeyCode.KeyW,
-            [new Rectangle(80, 29, 30, 20), new Rectangle(87, 15, 22, 20)],
+            [new Rectangle(80, 28, 30, 20), new Rectangle(87, 15, 22, 20)],
             NucleotidePalette.createTooltip('Mutate to pair (<G>G</G>, <U>U</U>). (W)')
         );
 
         this._targets[PaletteTargetType.GC] = new PaletteTarget(
             PaletteTargetType.GC, RScriptUIElementID.GC, true, KeyCode.KeyE,
-            [new Rectangle(129, 29, 30, 20), new Rectangle(137, 15, 22, 20)],
+            [new Rectangle(129, 28, 30, 20), new Rectangle(137, 15, 22, 20)],
             NucleotidePalette.createTooltip('Mutate to pair (<G>G</G>, <C>C</C>). (E)')
         );
     }
@@ -133,6 +133,7 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
 
         this.regs.add(this.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => this.onClick(e)));
         this.regs.add(this.pointerMove.connect((e) => this.onMoveMouse(e)));
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.keyboardInput.pushListener(this));
     }
 
@@ -242,15 +243,15 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
     public setPairCounts(au: number, ug: number, gc: number): void {
         if (this._targets[PaletteTargetType.AU].enabled) {
             this._numAU.text = au.toString();
-            this._numAU.position = new Point(57 - this._numAU.width, 1);
+            this._numAU.position = new Point(51 - this._numAU.width, 1);
         }
         if (this._targets[PaletteTargetType.UG].enabled) {
             this._numUG.text = ug.toString();
-            this._numUG.position = new Point(103 - this._numUG.width, 1);
+            this._numUG.position = new Point(101 - this._numUG.width, 1);
         }
         if (this._targets[PaletteTargetType.GC].enabled) {
             this._numGC.text = gc.toString();
-            this._numGC.position = new Point(155 - this._numGC.width, 1);
+            this._numGC.position = new Point(149 - this._numGC.width, 1);
         }
     }
 
@@ -275,7 +276,7 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
         }
 
         e.data.getLocalPosition(this.display, NucleotidePalette.P);
-        let target: PaletteTarget = this.getTargetAt(NucleotidePalette.P.x, NucleotidePalette.P.y);
+        let target: PaletteTarget | null = this.getTargetAt(NucleotidePalette.P.x, NucleotidePalette.P.y);
         if (target != null) {
             this.clickTarget(target.type);
         }
@@ -304,9 +305,10 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
         }
 
         e.data.getLocalPosition(this.display, NucleotidePalette.P);
-        let target: PaletteTarget = this.getTargetAt(NucleotidePalette.P.x, NucleotidePalette.P.y);
+        let target: PaletteTarget | null = this.getTargetAt(NucleotidePalette.P.x, NucleotidePalette.P.y);
 
         if (target !== this._lastTooltipTarget) {
+            Assert.assertIsDefined(Tooltips.instance);
             if (this._lastTooltipTarget != null) {
                 Tooltips.instance.removeTooltip(this._lastTooltipTarget);
             }
@@ -334,7 +336,7 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
     private _enabled: boolean = true;
     private _overrideDefaultMode: boolean = false;
     private _overrideNoPairMode: boolean = false;
-    private _lastTooltipTarget: PaletteTarget;
+    private _lastTooltipTarget: PaletteTarget | null;
 
     private readonly _targets: PaletteTarget[];
 

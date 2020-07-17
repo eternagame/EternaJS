@@ -40,7 +40,7 @@ export default class FolderManager {
         return null;
     }
 
-    public getNextFolder(folderName: string, filterCB: (folder: Folder) => boolean = null): Folder {
+    public getNextFolder(folderName: string, filterCB: ((folder: Folder) => boolean) | null = null): Folder {
         let curFolderIdx = -1;
         for (let ii = 0; ii < this._folders.length; ii++) {
             if (this._folders[ii].name.toLowerCase() === folderName.toLowerCase()) {
@@ -59,7 +59,6 @@ export default class FolderManager {
 
             if (folder.name.length === 0
                 || folder.name === RNAFoldBasic.NAME
-                || folder.name === LinearFoldC.NAME
                 || !folder.isFunctional
                 || (filterCB != null && filterCB(folder))) {
                 continue;

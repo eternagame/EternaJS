@@ -16,6 +16,8 @@ export default class Bitmaps {
     public static readonly ImgAddPairSelect: string = require('assets/NOVA/Edit/add_pair_selected.png');
     public static readonly NovaAUReq: string = require('assets/NOVA/Constraints/au-requirement-carrier.png');
     public static readonly NovaAUMissionReq: string = require('assets/NOVA/Mission/au-requirement.png');
+    public static readonly NovaNoAUReq: string = require('assets/NOVA/Constraints/no-AU-pairs-box.png');
+    public static readonly NovaNoAUMissionReq: string = require('assets/NOVA/Mission/no-AU-pairs-mission.png');
     public static readonly Backbone: string = require('assets/RNABase/backbone_new.png');
     public static readonly NovaBarcodeMissionReq: string = require('assets/NOVA/Mission/barcode-req-mission.png');
     public static readonly NovaBarcodeReq: string = require('assets/NOVA/Constraints/barcode-requirement-carrier.png');
@@ -113,9 +115,16 @@ export default class Bitmaps {
     public static readonly BaseCMidLock: string = require('assets/RNABase/green_mid_lock.png');
     public static readonly BaseCPattern: string = require('assets/RNABase/green_pattern.png');
     public static readonly BaseCMin: string = require('assets/RNABase/green_small.png');
-    public static readonly ImgHintOver: string = require('assets/NOVA/Hint/hint_active.png');
-    public static readonly ImgHintHit: string = require('assets/NOVA/Hint/hint_hit.png');
-    public static readonly ImgHint: string = require('assets/NOVA/Hint/hint_normal.png');
+    public static readonly ImgHintOver: string = require('assets/UI/hint-toggle-on-hover.png');
+    public static readonly ImgHintHit: string = require('assets/UI/hint-toggle-on.png');
+    public static readonly ImgHint: string = require('assets/UI/hint-toggle-on.png');
+    public static readonly ImgHelpOver: string = require('assets/UI/help-btn-hover.png');
+    public static readonly ImgHelpHit: string = require('assets/UI/help-btn-active.png');
+    public static readonly ImgHelp: string = require('assets/UI/help-btn.png');
+    public static readonly ImgHelpClose: string = require('assets/UI/help-btn-close.png');
+    public static readonly ImgHelpCloseOver: string = require('assets/UI/help-btn-close-hover.png');
+    public static readonly ImgChat: string = require('assets/UI/chat-btn.png');
+    public static readonly ImgChatHover: string = require('assets/UI/chat-btn-hover.png');
     public static readonly ImgKnob: string = require('assets/NOVA/Knob/knob_bg.png');
     public static readonly ImgNotch: string = require('assets/NOVA/Knob/knob_notch.png');
     public static readonly ImgBadge2: string = require('assets/Achievements/Lab-access.png');
@@ -185,6 +194,7 @@ export default class Bitmaps {
     public static readonly ImgPasteOver: string = require('assets/NOVA/Copy/paste_active.png');
     public static readonly ImgPasteHit: string = require('assets/NOVA/Copy/paste_hit.png');
     public static readonly ImgPaste: string = require('assets/NOVA/Copy/paste_normal.png');
+    public static readonly ImgFind: string = require('assets/find.png');
     public static readonly BonusSymbol: string = require('assets/penalty1.png');
     public static readonly ImgPipOver: string = require('assets/NOVA/Tile/pip_active.png');
     public static readonly ImgPipHit: string = require('assets/NOVA/Tile/pip_hit.png');
@@ -208,6 +218,8 @@ export default class Bitmaps {
     public static readonly MissionPuzzleIdImage: string = require('assets/NOVA/Mission/puzzle-id-carrier.png');
     public static readonly MissionPuzzleThumbnailImage: string = require('assets/NOVA/Mission/puzzle-thumbnail-background.png');
     public static readonly PuzzleImg: string = require('assets/puzzle.png');
+    public static readonly ImgHome: string = require('assets/UI/home-btn.png');
+    public static readonly ImgHomeArrow: string = require('assets/UI/home-arrow-right.png');
     public static readonly NovaPuzzleImg: string = require('assets/puzzle_icon.png');
     public static readonly NovaFailOutline: string = require('assets/NOVA/Constraints/red-outline.png');
     public static readonly BaseGLock: string = require('assets/RNABase/red_lock.png');
@@ -285,6 +297,21 @@ export default class Bitmaps {
     public static readonly BaseAPattern: string = require('assets/RNABase/yellow_pattern.png');
     public static readonly BaseAMin: string = require('assets/RNABase/yellow_small.png');
     public static readonly Turkey: string = require('assets/turkey.png');
+    public static readonly ImgArrowLeft = require('assets/UI/mission/arrow-left.png');
+    public static readonly ImgArrowRight = require('assets/UI/mission/arrow-right.png');
+    public static readonly ImgGoalBackground = require('assets/UI/mission/goal-bg.png');
+    public static readonly ImgPageDot = require('assets/UI/mission/page-dot.png');
+    public static readonly ImgPageActiveDot = require('assets/UI/mission/page-active-dot.png');
+    public static readonly ImgAchievementsClose: string = require('assets/Achievements/close-button.png');
+    public static readonly ImgAchievementsCheckmark: string = require('assets/Achievements/checkmark.png');
+    public static readonly ImgConstraintArrowUp: string = require('assets/UI/constraint-arrow-up.png');
+    public static readonly ImgConstraintDrawerTip: string = require('assets/UI/constraint-drawer-tip.png');
+    public static readonly ImgBaseMarker: string = require('assets/UI/base-marker-btn.png');
+    public static readonly ImgBaseMarkerOver: string = require('assets/UI/base-marker-btn-over.png');
+    public static readonly ImgMagicGlueOver: string = require('assets/UI/magic-glue-btn-over.png');
+    public static readonly ImgMagicGlue: string = require('assets/UI/magic-glue-btn.png');
+    public static readonly ImgToolbarArrow: string = require('assets/UI/toolbar-selection-arrow.png');
+    public static readonly ImgRankBubble: string = require('assets/UI/mission/rank-bubble.png');
 
     public static get all(): string[] {
         if (Bitmaps.ALL_URLS == null) {

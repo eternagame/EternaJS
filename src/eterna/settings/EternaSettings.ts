@@ -15,21 +15,22 @@ export default class EternaSettings extends Settings {
     public readonly useContinuousColors: Setting<boolean>;
     public readonly useExtendedColors: Setting<boolean>;
     public readonly displayAuxInfo: Setting<boolean>;
-    public readonly lastUsedFolder: Setting<string>;
+    public readonly lastUsedFolder: Setting<string> | Setting<null>;
     public readonly pipEnabled: Setting<boolean>;
     public readonly simpleGraphics: Setting<boolean>;
+    public readonly usePuzzlerLayout: Setting<boolean>;
 
     public readonly soundMute: Setting<boolean>;
     public readonly soundVolume: Setting<number>;
 
-    public readonly designBrowserColumnNames: Setting<DesignCategory[]>;
-    public readonly designBrowserSelectedSolutionIDs: Setting<number[]>;
+    public readonly designBrowserColumnNames: Setting<DesignCategory[]> | Setting<null>;
+    public readonly designBrowserSelectedSolutionIDs: Setting<number[]> | Setting<null>;
 
     public readonly saveGamesTransfered: Setting<boolean>;
 
     constructor() {
         super('EternaSettings');
-        this.showChat = this.setting<boolean>('showChat', true);
+        this.showChat = this.setting<boolean>('showChat', !Eterna.MOBILE_APP);
         this.showNumbers = this.setting<boolean>('showNumbers', true);
         this.showLetters = this.setting<boolean>('showLetters', false);
         this.showRope = this.setting<boolean>('showRope', false);
@@ -46,6 +47,7 @@ export default class EternaSettings extends Settings {
         this.lastUsedFolder = this.setting('lastUsedFolder', null);
         this.pipEnabled = this.setting<boolean>('pipEnabled', false);
         this.simpleGraphics = this.setting<boolean>('simpleGraphics', false);
+        this.usePuzzlerLayout = this.setting<boolean>('usePuzzlerLayout', false);
         this.designBrowserColumnNames = this.setting('designBrowserColumnNames', null);
         this.designBrowserSelectedSolutionIDs = this.setting('designBrowserSelectedSolutionIDs', null);
 

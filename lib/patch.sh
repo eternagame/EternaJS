@@ -22,6 +22,18 @@ pushd ViennaRNA-2.1.8
 popd
 popd
 
+### RNApuzzler layout engine
+################
+## This is how the patch file was created.
+## diff -X .gitignore -ur RNApuzzler_stock RNApuzzler > rnapuzzler-eterna.patch
+
+pushd RNApuzzler
+patch -t -p0 --forward < rnapuzzler-eterna.patch
+pushd RNApuzzler
+./configure
+popd
+popd
+
 ### NUPACK
 ##########
 ## This is how the patch file was created.
@@ -45,3 +57,25 @@ patch -t -p0 --forward < linearfold-eterna.patch
 patch -t -p0 --forward < linearpartition-eterna.patch
 popd
 
+### ContraFold
+##############
+## This is how the patch file was created.
+## diff -X .gitignore -ur contrafold_stock contrafold > contrafold-eterna.patch
+
+# With your fresh download, which untars into contrafold/...
+pushd contrafold 
+pushd contrafold/src/
+perl MakeDefaults.pl contrafold.params.complementary contrafold.params.noncomplementary contrafold.params.profile
+popd
+patch -t -p0 --forward < contrafold-eterna.patch
+popd
+
+### EternaFold
+##############
+## This is how the patch file was created.
+## diff -X .gitignore -ur EternaFold_stock EternaFold > eternafold-eterna.patch
+
+# With your fresh git checkout in EternaFold/EternaFold/...
+pushd EternaFold 
+patch -t -p0 --forward < eternafold-eterna.patch
+popd
