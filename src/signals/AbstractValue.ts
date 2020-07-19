@@ -10,7 +10,7 @@ import ValueView from './ValueView';
  * observable values, but must manage the maintenance and distribution of value updates themselves
  * (so that they may send them over the network, for example).
  */
-export default abstract class AbstractValue<T> extends Reactor implements ValueView<T> {
+export default abstract class AbstractValue<T> extends Reactor<T, T, undefined> implements ValueView<T> {
     public abstract get value(): T;
 
     /** Returns a "slot" Function which simply calls through to the Value's setter function. */
@@ -29,7 +29,7 @@ export default abstract class AbstractValue<T> extends Reactor implements ValueV
         // will expect to be notified of that change; however if onEmit throws a runtime exception,
         // we need to take care of disconnecting the listener because the returned connection
         // instance will never reach the caller
-        let cons: Cons = this.addConnection(listener);
+        let cons: Cons<T, T, undefined> = this.addConnection(listener);
         try {
             Assert.assertIsDefined(cons.listener);
             cons.listener(this.value);
