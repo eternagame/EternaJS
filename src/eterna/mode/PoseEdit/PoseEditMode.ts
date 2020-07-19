@@ -122,6 +122,11 @@ type SubmitSolutionData = {
     'fold-data'?: string;
 };
 
+interface SubmissionResponseData {
+    error?: string;
+    'solution-id'?: number;
+}
+
 export default class PoseEditMode extends GameMode {
     constructor(puzzle: Puzzle, params: PoseEditParams, autosaveData: SaveStoreItem | null = null) {
         super();
@@ -1991,8 +1996,7 @@ export default class PoseEditMode extends GameMode {
         }
 
         submittingRef.destroyObject();
-
-        let data: any = submissionResponse['data'];
+        let data: SubmissionResponseData = submissionResponse['data'];
 
         if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL) {
             this.showMissionClearedPanel(data);
@@ -2002,7 +2006,7 @@ export default class PoseEditMode extends GameMode {
             this._puzzle.transformSequence(undoBlock.sequence, 0)
         );
 
-        if (data['error'] != null) {
+        if (data['error'] !== undefined) {
             log.debug(`Got solution submission error: ${data['error']}`);
             if (data['error'].indexOf('barcode') >= 0) {
                 let dialog = this.showNotification(data['error'], 'More Information');
@@ -2018,7 +2022,7 @@ export default class PoseEditMode extends GameMode {
         } else {
             log.debug('Solution submitted');
 
-            if (data['solution-id'] != null) {
+            if (data['solution-id'] !== undefined) {
                 this.setAncestorId(data['solution-id']);
             }
 
