@@ -2,11 +2,11 @@
  * An exception thrown to communicate multiple listener failures.
  */
 export default class MultiFailureError extends Error {
-    public get failures(): any[] {
+    public get failures(): (Error | ErrorEvent)[] {
         return this._failures;
     }
 
-    public addFailure(e: any): void {
+    public addFailure(e: Error | ErrorEvent): void {
         if (e instanceof MultiFailureError) {
             this._failures = this._failures.concat((e as MultiFailureError).failures);
         } else {
@@ -38,7 +38,10 @@ export default class MultiFailureError extends Error {
             return (wantStackTrace ? e.stack : e.message || '');
         } else if (error instanceof ErrorEvent) {
             let ee: ErrorEvent = error;
-            return `${(ee as any).name
+            // AMW: I do not know why the strategy had been to cast the ErrorEvent
+            // to any and then ask for its name. It seems like asking for the error
+            // name is wiser.
+            return `${ee.error.name
             } [errorID=${ee.error
             }, type='${ee.type}'`
                 + `, text='${ee.message}']`;
@@ -47,5 +50,5 @@ export default class MultiFailureError extends Error {
         return `An error occurred: ${error}`;
     }
 
-    private _failures: any[] = [];
+    private _failures: (Error | ErrorEvent)[] = [];
 }
