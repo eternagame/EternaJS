@@ -70,7 +70,7 @@ export default class AppMode {
     }
 
     /** Removes the GameObject with the given id from the ObjectDB, if it exists. */
-    public destroyObjectWithId(id: any): void {
+    public destroyObjectWithId<T>(id: T): void {
         let obj: GameObjectBase | undefined = this.getObjectWithId(id);
         if (obj !== undefined) {
             obj.destroySelf();
@@ -78,7 +78,7 @@ export default class AppMode {
     }
 
     /** Returns the object in this mode with the given ID, or null if no such object exists. */
-    public getObjectWithId(id: any): GameObjectBase | undefined {
+    public getObjectWithId<T>(id: T): GameObjectBase | undefined {
         return this._idObjects ? this._idObjects.get(id) : undefined;
     }
 
@@ -341,6 +341,7 @@ export default class AppMode {
 
     protected _rootObject: RootObject | null;
 
+    // AMW TODO: can we decide what type AppMode should use for its ids?
     protected _idObjects: Map<any, GameObjectBase> | null = new Map();
 
     protected _regs: RegistrationGroup | null = new RegistrationGroup();
