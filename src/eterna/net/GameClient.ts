@@ -3,6 +3,10 @@ import {Base64} from 'flashbang';
 import {FoldData} from 'eterna/UndoBlock';
 import {VoteData} from 'eterna/mode/DesignBrowser/VoteProcessor';
 
+// we MUST do this, because we use a dom method that gives us
+// any. long term AMW TODO build interfaces for each get/post
+// response json.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type JSONData = any;
 
 interface VoteResponse {
