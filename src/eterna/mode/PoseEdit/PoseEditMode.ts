@@ -22,7 +22,7 @@ import Fonts from 'eterna/util/Fonts';
 import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
 import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
 import FolderManager from 'eterna/folding/FolderManager';
-import Folder, { MultiFoldResult, CacheKey } from 'eterna/folding/Folder';
+import Folder, {MultiFoldResult, CacheKey} from 'eterna/folding/Folder';
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
 import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import PoseField from 'eterna/pose2D/PoseField';
