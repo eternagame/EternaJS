@@ -13,7 +13,11 @@ import LateUpdatable from './LateUpdatable';
 import ModeStack from './ModeStack';
 import Updatable from './Updatable';
 
-type ObjectID = typeof Tooltips | string;
+// AMW: we are disabling the ban on Object (preferring Record<string, any>)
+// because Object is a clearer description of what we want and because we
+// can't use such a generic Record anyway due to eslint.
+// eslint-disable-next-line @typescript-eslint/ban-types
+type ObjectID = Object | string;
 
 export default class AppMode {
     /** Default keyboard input processor */
