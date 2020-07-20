@@ -42,7 +42,7 @@ import SpecBoxDialog from 'eterna/ui/SpecBoxDialog';
 import BubbleSweep from 'eterna/vfx/BubbleSweep';
 import Sounds from 'eterna/resources/Sounds';
 import EternaURL from 'eterna/net/EternaURL';
-import PuzzleManager from 'eterna/puzzle/PuzzleManager';
+import PuzzleManager, {PuzzleJSON} from 'eterna/puzzle/PuzzleManager';
 import FoldUtil from 'eterna/folding/FoldUtil';
 import ShapeConstraint, {AntiShapeConstraint} from 'eterna/constraints/constraints/ShapeConstraint';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
@@ -54,6 +54,7 @@ import NucleotideFinder from 'eterna/ui/NucleotideFinder';
 import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
 import {HighlightInfo} from 'eterna/constraints/Constraint';
 import {AchievementData} from 'eterna/achievements/AchievementManager';
+import {RankScrollData} from 'eterna/rank/RankScroll';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
@@ -103,8 +104,8 @@ export interface Move {
 
 // AMW TODO: we need the "all optional" impl for piece by piece buildup.
 // Should be converted to an "all required" type for subsequent processing.
-type SubmitSolutionData = {
-    'next-puzzle'?: number;
+export type SubmitSolutionData = {
+    'next-puzzle'?: PuzzleJSON | number | null;
     'recommend-puzzle'?: boolean;
     pointsrank?: boolean;
     'ancestor-id'?: number;
@@ -120,12 +121,11 @@ type SubmitSolutionData = {
     body?: string;
     melt?: number;
     'fold-data'?: string;
-};
-
-interface SubmissionResponseData {
     error?: string;
     'solution-id'?: number;
-}
+    'pointsrank-before'?: RankScrollData | null;
+    'pointsrank-after'?: RankScrollData | null;
+};
 
 export default class PoseEditMode extends GameMode {
     constructor(puzzle: Puzzle, params: PoseEditParams, autosaveData: SaveStoreItem | null = null) {
@@ -1996,7 +1996,7 @@ export default class PoseEditMode extends GameMode {
         }
 
         submittingRef.destroyObject();
-        let data: SubmissionResponseData = submissionResponse['data'];
+        let data: SubmitSolutionData = submissionResponse['data'];
 
         if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL) {
             this.showMissionClearedPanel(data);
@@ -2038,7 +2038,7 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    private showMissionClearedPanel(submitSolutionRspData: any): void {
+    private showMissionClearedPanel(submitSolutionRspData: SubmitSolutionData): void {
         this._submitSolutionRspData = submitSolutionRspData;
 
         // Hide some UI
@@ -2060,7 +2060,7 @@ export default class PoseEditMode extends GameMode {
             moreText = boostersData.mission_cleared['more'];
         }
 
-        let nextPuzzleData: any = submitSolutionRspData['next-puzzle'];
+        let nextPuzzleData: PuzzleJSON | number | null = submitSolutionRspData['next-puzzle'];
 
         // For some reason the backend returns 0 in the progression instead of just null
         // when we want to redirect back to the homepage...? I imagine we should change that
@@ -2097,7 +2097,7 @@ export default class PoseEditMode extends GameMode {
         if (hasNextPuzzle) {
             // Don't just await here nor initialize the call in the nextButton callback
             // so that we can load in the background
-            const nextPuzzlePromise = PuzzleManager.instance.parsePuzzle(nextPuzzleData);
+            const nextPuzzlePromise = PuzzleManager.instance.parsePuzzle(nextPuzzleData as PuzzleJSON);
             nextPuzzlePromise.then((puzzle) => log.info(`Loaded next puzzle [id=${puzzle.nodeID}]`));
 
             missionClearedPanel.nextButton.clicked.connect(async () => {

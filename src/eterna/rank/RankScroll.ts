@@ -11,16 +11,12 @@ import Fonts from 'eterna/util/Fonts';
 import VibrateTask from 'eterna/vfx/VibrateTask';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
+import {SubmitSolutionData} from 'eterna/mode/PoseEdit/PoseEditMode';
 import RankRowLayout from './RankRowLayout';
 import RankBoard from './RankBoard';
 import PlayerRank from './PlayerRank';
 
-export interface SubmissionResponse {
-    'pointsrank-before': RankScrollData | null;
-    'pointsrank-after': RankScrollData | null;
-}
-
-interface RankScrollData {
+export interface RankScrollData {
     points: number;
     rank: number;
     richer: PlayerRankData[];
@@ -35,12 +31,12 @@ interface PlayerRankData {
 }
 
 export default class RankScroll extends ContainerObject {
-    public static hasRankScrollData(submissionRsp: SubmissionResponse): boolean {
+    public static hasRankScrollData(submissionRsp: SubmitSolutionData): boolean {
         return (submissionRsp['pointsrank-before'] != null && submissionRsp['pointsrank-after'] != null);
     }
 
     /** Creates a RankScroll object with data returned from the submit-solution server response */
-    public static fromSubmissionResponse(submissionRsp: SubmissionResponse): RankScroll {
+    public static fromSubmissionResponse(submissionRsp: SubmitSolutionData): RankScroll {
         if (!RankScroll.hasRankScrollData(submissionRsp)) {
             throw new Error('No RankScroll data in submission response');
         }

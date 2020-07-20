@@ -37,7 +37,7 @@ import {Assert} from 'flashbang';
 import SolutionManager from './SolutionManager';
 import Puzzle, {PuzzleType} from './Puzzle';
 
-interface PuzzleJSON {
+export interface PuzzleJSON {
     id: string;
     title: string;
     type: PuzzleType; // AMW: worried this is actually stored as a string
