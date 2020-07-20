@@ -12,6 +12,7 @@
     "postbuild:dev": "node multiplatform/cpr ./website/frontend ./dist/dev/frontend && coffee -o ./dist/dev/frontend/jscripts -c ./website/frontend/coffee",
     "test": "jest --verbose",
     "lint": "eslint src --ext .ts"
+	"e2e": "node_modules/.bin/cypress open"
   },
   "repository": {
     "type": "git",
