@@ -5,7 +5,6 @@ import {
 import KeyboardInput from 'flashbang/input/KeyboardInput';
 import MouseWheelInput from 'flashbang/input/MouseWheelInput';
 import Assert from 'flashbang/util/Assert';
-import Tooltips from 'eterna/ui/Tooltips';
 import GameObject from './GameObject';
 import GameObjectBase from './GameObjectBase';
 import GameObjectRef from './GameObjectRef';
