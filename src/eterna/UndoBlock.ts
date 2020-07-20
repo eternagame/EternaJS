@@ -1,4 +1,4 @@
-import {JSONUtil, Assert} from 'flashbang';
+import {Assert} from 'flashbang';
 import EPars from 'eterna/EPars';
 import Plot, {PlotType} from 'eterna/Plot';
 import Pose2D, {Oligo} from './pose2D/Pose2D';
