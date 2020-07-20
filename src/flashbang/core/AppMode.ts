@@ -5,12 +5,15 @@ import {
 import KeyboardInput from 'flashbang/input/KeyboardInput';
 import MouseWheelInput from 'flashbang/input/MouseWheelInput';
 import Assert from 'flashbang/util/Assert';
+import Tooltips from 'eterna/ui/Tooltips';
 import GameObject from './GameObject';
 import GameObjectBase from './GameObjectBase';
 import GameObjectRef from './GameObjectRef';
 import LateUpdatable from './LateUpdatable';
 import ModeStack from './ModeStack';
 import Updatable from './Updatable';
+
+type ObjectID = typeof Tooltips | string;
 
 export default class AppMode {
     /** Default keyboard input processor */
@@ -70,7 +73,7 @@ export default class AppMode {
     }
 
     /** Removes the GameObject with the given id from the ObjectDB, if it exists. */
-    public destroyObjectWithId<T>(id: T): void {
+    public destroyObjectWithId(id: ObjectID): void {
         let obj: GameObjectBase | undefined = this.getObjectWithId(id);
         if (obj !== undefined) {
             obj.destroySelf();
@@ -78,7 +81,7 @@ export default class AppMode {
     }
 
     /** Returns the object in this mode with the given ID, or null if no such object exists. */
-    public getObjectWithId<T>(id: T): GameObjectBase | undefined {
+    public getObjectWithId(id: ObjectID): GameObjectBase | undefined {
         return this._idObjects ? this._idObjects.get(id) : undefined;
     }
 
@@ -342,7 +345,7 @@ export default class AppMode {
     protected _rootObject: RootObject | null;
 
     // AMW TODO: can we decide what type AppMode should use for its ids?
-    protected _idObjects: Map<any, GameObjectBase> | null = new Map();
+    protected _idObjects: Map<ObjectID, GameObjectBase> | null = new Map();
 
     protected _regs: RegistrationGroup | null = new RegistrationGroup();
 
