@@ -1,7 +1,7 @@
 import PoseOp from 'eterna/pose2D/PoseOp';
 import {Oligo} from 'eterna/pose2D/Pose2D';
 
-export type CacheItem = number[] | FullEvalCache | MultiFoldResult;
+export type CacheItem = number[] | FullEvalCache | MultiFoldResult | null;
 export type CacheKey = Record<string, string | number | number[] | boolean | Oligo[]>;
 
 export interface MultiFoldResult {

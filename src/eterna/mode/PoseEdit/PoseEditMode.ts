@@ -22,7 +22,7 @@ import Fonts from 'eterna/util/Fonts';
 import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
 import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
 import FolderManager from 'eterna/folding/FolderManager';
-import Folder from 'eterna/folding/Folder';
+import Folder, { MultiFoldResult, CacheKey } from 'eterna/folding/Folder';
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
 import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import PoseField from 'eterna/pose2D/PoseField';
@@ -2970,7 +2970,7 @@ export default class PoseEditMode extends GameMode {
             }
             log.debug('multifold');
 
-            let key: any = {
+            let key: CacheKey = {
                 primitive: 'multifold',
                 seq: this._puzzle.transformSequence(seq, ii),
                 secondBestPairs: null,
@@ -2978,9 +2978,9 @@ export default class PoseEditMode extends GameMode {
                 desiredPairs: null,
                 temp: 37
             };
-            let mfold: any = this._folder.getCache(key);
+            let mfold: MultiFoldResult = this._folder.getCache(key) as MultiFoldResult;
 
-            if (mfold == null && !this.forceSync) {
+            if (mfold === null && !this.forceSync) {
                 // multistrand folding can be really slow
                 // break it down to each permutation
                 let ops: PoseOp[] | null = this._folder.multifoldUnroll(
@@ -2998,7 +2998,7 @@ export default class PoseEditMode extends GameMode {
                 }
                 return;
             } else {
-                let best: any = this._folder.multifold(this._puzzle.transformSequence(seq, ii), null, oligos);
+                let best: MultiFoldResult = this._folder.multifold(this._puzzle.transformSequence(seq, ii), null, oligos);
                 bestPairs = best.pairs.slice();
                 oligoOrder = best.order.slice();
                 oligosPaired = best.count;
