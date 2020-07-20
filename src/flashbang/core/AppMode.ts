@@ -46,7 +46,7 @@ export default class AppMode {
         let objs: GameObject[] = [];
         for (let ref of objectRefs) {
             if (!ref.isNull) {
-                objs.push(ref.object);
+                objs.push(ref.object as GameObject);
             }
         }
 
