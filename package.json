@@ -41,6 +41,7 @@
     "babel-preset-minify": "^0.5.1",
     "coffeescript": "^1.12.7",
     "css-loader": "^3.4.0",
+    "cypress": "4.10.0",
     "dotenv": "^8.2.0",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.1.0",
@@ -66,6 +67,7 @@
   "dependencies": {
     "base64-js": "^1.3.1",
     "canvas-confetti": "^1.2.0",
+    "cypress": "^4.10.0",
     "eterna-chat-wrapper": "github:eternagame/eterna-chat-wrapper#abe53eca223948847b4f899f9de7119672adf3a2",
     "is-mobile": "^2.2.1",
     "js-polyfills": "^0.1.42",
