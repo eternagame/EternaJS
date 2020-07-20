@@ -15,7 +15,7 @@ export default class GameObjectRef {
         }
     }
 
-    public get object(): any {
+    public get object(): GameObjectBase | null {
         return this._obj;
     }
 
