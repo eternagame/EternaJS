@@ -16,7 +16,7 @@ import Updatable from './Updatable';
 // because Object is a clearer description of what we want and because we
 // can't use such a generic Record anyway due to eslint.
 // eslint-disable-next-line @typescript-eslint/ban-types
-type ObjectID = Object | string;
+export type ObjectID = Object | string;
 
 export default class AppMode {
     /** Default keyboard input processor */
