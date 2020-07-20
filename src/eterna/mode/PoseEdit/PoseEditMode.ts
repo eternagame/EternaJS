@@ -2998,7 +2998,11 @@ export default class PoseEditMode extends GameMode {
                 }
                 return;
             } else {
-                let best: MultiFoldResult = this._folder.multifold(this._puzzle.transformSequence(seq, ii), null, oligos);
+                let best: MultiFoldResult = this._folder.multifold(
+                    this._puzzle.transformSequence(seq, ii),
+                    null,
+                    oligos
+                );
                 bestPairs = best.pairs.slice();
                 oligoOrder = best.order.slice();
                 oligosPaired = best.count;
