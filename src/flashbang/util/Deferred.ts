@@ -25,8 +25,7 @@ export default class Deferred<T> {
         fn(value);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public reject(reason?: any): void {
+    public reject(reason?: Error): void {
         if (this.isSealed) {
             throw new Error("Can't reject sealed promise");
         }
@@ -38,6 +37,5 @@ export default class Deferred<T> {
     }
 
     private _resolve: (value?: PromiseLike<T> | T) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private _reject: (reason?: any) => void;
+    private _reject: (reason?: Error) => void;
 }
