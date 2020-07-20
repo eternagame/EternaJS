@@ -1,13 +1,18 @@
 import PoseOp from 'eterna/pose2D/PoseOp';
 import {Oligo} from 'eterna/pose2D/Pose2D';
 
-export type CacheItem = any;
+export type CacheItem = number[] | FullEvalCache | MultiFoldResult;
 export type CacheKey = Record<string, string | number | number[] | boolean | Oligo[]>;
 
 export interface MultiFoldResult {
     pairs: number[];
     order: number[];
     count: number;
+}
+
+export interface FullEvalCache {
+    nodes: number[];
+    energy: number;
 }
 
 export default abstract class Folder {

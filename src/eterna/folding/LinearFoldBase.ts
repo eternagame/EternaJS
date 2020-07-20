@@ -7,7 +7,7 @@ import * as LinearFoldLib from './engines/LinearFoldLib';
 import {DotPlotResult, FullFoldResult} from './engines/LinearFoldLib';
 import {FullEvalResult} from './engines/ViennaLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
-import Folder, {CacheKey} from './Folder';
+import Folder, {CacheKey, FullEvalCache} from './Folder';
 import FoldUtil from './FoldUtil';
 
 export default abstract class LinearFoldBase extends Folder {
@@ -24,7 +24,7 @@ export default abstract class LinearFoldBase extends Folder {
         let key: CacheKey = {
             primitive: 'dotplot', seq, pairs, temp
         };
-        let retArray: number[] = this.getCache(key);
+        let retArray: number[] = this.getCache(key) as number[];
         if (retArray != null) {
             // trace("dotplot cache hit");
             return retArray.slice();
@@ -67,7 +67,7 @@ export default abstract class LinearFoldBase extends Folder {
         let key: CacheKey = {
             primitive: 'score', seq, pairs, temp
         };
-        let cache: FullEvalCache = this.getCache(key);
+        let cache: FullEvalCache = this.getCache(key) as FullEvalCache;
 
         if (cache != null) {
             // log.debug("score cache hit");
@@ -153,7 +153,7 @@ export default abstract class LinearFoldBase extends Folder {
             temp
         };
 
-        let pairs: number[] = this.getCache(key);
+        let pairs: number[] = this.getCache(key) as number[];
         if (pairs == null) {
             pairs = this.fullFoldDefault(seq);
             this.putCache(key, pairs);
@@ -245,9 +245,4 @@ export default abstract class LinearFoldBase extends Folder {
     }
 
     private readonly _lib: LinearFoldLib;
-}
-
-interface FullEvalCache {
-    nodes: number[];
-    energy: number;
 }

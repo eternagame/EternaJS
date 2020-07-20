@@ -5,7 +5,7 @@ import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import * as EternafoldLib from './engines/EternafoldLib';
 import {FullEvalResult, FullFoldResult} from './engines/EternafoldLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
-import Folder, {CacheKey} from './Folder';
+import Folder, {CacheKey, FullEvalCache} from './Folder';
 import FoldUtil from './FoldUtil';
 
 export default class EternaFold extends Folder {
@@ -51,7 +51,7 @@ export default class EternaFold extends Folder {
         let key: CacheKey = {
             primitive: 'score', seq, pairs, temp
         };
-        let cache: FullEvalCache = this.getCache(key);
+        let cache: FullEvalCache = this.getCache(key) as FullEvalCache;
 
         if (cache != null) {
             // log.debug("score cache hit");
@@ -137,7 +137,7 @@ export default class EternaFold extends Folder {
             temp,
             gamma
         };
-        let pairs: number[] = this.getCache(key);
+        let pairs: number[] = this.getCache(key) as number[];
         if (pairs != null) {
             // log.debug("fold cache hit");
             return pairs.slice();
@@ -173,9 +173,4 @@ export default class EternaFold extends Folder {
     }
 
     private readonly _lib: EternafoldLib;
-}
-
-interface FullEvalCache {
-    nodes: number[];
-    energy: number;
 }

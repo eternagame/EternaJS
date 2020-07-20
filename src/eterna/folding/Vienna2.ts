@@ -7,7 +7,7 @@ import RNALayout from 'eterna/pose2D/RNALayout';
 import * as Vienna2Lib from './engines/Vienna2Lib';
 import {DotPlotResult, FullEvalResult, FullFoldResult} from './engines/Vienna2Lib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
-import Folder, {CacheKey} from './Folder';
+import Folder, {CacheKey, FullEvalCache} from './Folder';
 import FoldUtil from './FoldUtil';
 
 export default class Vienna2 extends Folder {
@@ -41,7 +41,7 @@ export default class Vienna2 extends Folder {
         let key: CacheKey = {
             primitive: 'dotplot', seq, pairs, temp
         };
-        let retArray: number[] = this.getCache(key);
+        let retArray: number[] = this.getCache(key) as number[];
         if (retArray != null) {
             return retArray.slice();
         }
@@ -113,7 +113,7 @@ export default class Vienna2 extends Folder {
         let key: CacheKey = {
             primitive: 'score', seq, pairs, temp
         };
-        let cache: FullEvalCache = this.getCache(key);
+        let cache: FullEvalCache = this.getCache(key) as FullEvalCache;
 
         if (cache != null) {
             // trace("score cache hit");
@@ -198,7 +198,7 @@ export default class Vienna2 extends Folder {
             desiredPairs,
             temp
         };
-        let pairs: number[] = this.getCache(key);
+        let pairs: number[] = this.getCache(key) as number[];
         if (pairs != null) {
             // trace("fold cache hit");
             return pairs.slice();
@@ -227,7 +227,7 @@ export default class Vienna2 extends Folder {
             version,
             temp
         };
-        let pairs: number[] = this.getCache(key);
+        let pairs: number[] = this.getCache(key) as number[];
         if (pairs != null) {
             // trace("foldAptamer cache hit");
             return pairs.slice();
@@ -304,7 +304,7 @@ export default class Vienna2 extends Folder {
             desiredPairs,
             temp
         };
-        let coPairs: number[] = this.getCache(key);
+        let coPairs: number[] = this.getCache(key) as number[];
         if (coPairs != null) {
             // trace("cofold cache hit");
             return coPairs.slice();
@@ -358,7 +358,7 @@ export default class Vienna2 extends Folder {
             bonus,
             temp
         };
-        let coPairs: number[] = this.getCache(key);
+        let coPairs: number[] = this.getCache(key) as number[];
         if (coPairs != null) {
             // trace("cofoldAptamer cache hit");
             return coPairs.slice();
@@ -834,9 +834,4 @@ export default class Vienna2 extends Folder {
     }
 
     private readonly _lib: Vienna2Lib;
-}
-
-interface FullEvalCache {
-    nodes: number[];
-    energy: number;
 }

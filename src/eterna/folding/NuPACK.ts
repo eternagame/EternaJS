@@ -8,7 +8,7 @@ import {Oligo} from 'eterna/pose2D/Pose2D';
 import * as NupackLib from './engines/NupackLib';
 import {DotPlotResult, FullEvalResult, FullFoldResult} from './engines/NupackLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
-import Folder, {MultiFoldResult, CacheKey} from './Folder';
+import Folder, {MultiFoldResult, CacheKey, FullEvalCache} from './Folder';
 import FoldUtil from './FoldUtil';
 
 export default class NuPACK extends Folder {
@@ -48,7 +48,7 @@ export default class NuPACK extends Folder {
         let key: CacheKey = {
             primitive: 'dotplot', seq, pairs, temp
         };
-        let retArray: number[] = this.getCache(key);
+        let retArray: number[] = this.getCache(key) as number[];
         if (retArray != null) {
             // trace("dotplot cache hit");
             return retArray.slice();
@@ -100,7 +100,7 @@ export default class NuPACK extends Folder {
         let key: CacheKey = {
             primitive: 'score', seq, pairs, pseudoknots, temp
         };
-        let cache: FullEvalCache = this.getCache(key);
+        let cache: FullEvalCache = this.getCache(key) as FullEvalCache;
         if (cache != null) {
             // trace("score cache hit");
             if (outNodes != null) {
@@ -200,7 +200,7 @@ export default class NuPACK extends Folder {
             pseudoknots,
             temp
         };
-        let pairs: number[] = this.getCache(key);
+        let pairs: number[] = this.getCache(key) as number[];
         if (pairs != null) {
             // trace("fold cache hit");
             return pairs.slice();
@@ -229,7 +229,7 @@ export default class NuPACK extends Folder {
             version,
             temp
         };
-        let pairs: number[] = this.getCache(key);
+        let pairs: number[] = this.getCache(key) as number[];
         if (pairs != null) {
             // trace("foldAptamer cache hit");
             return pairs.slice();
@@ -286,7 +286,7 @@ export default class NuPACK extends Folder {
             desiredPairs,
             temp
         };
-        let coPairs: number[] = this.getCache(key);
+        let coPairs: number[] = this.getCache(key) as number[];
         if (coPairs != null) {
             // trace("cofold cache hit");
             return coPairs.slice();
@@ -340,7 +340,7 @@ export default class NuPACK extends Folder {
             bonus,
             temp
         };
-        let coPairs: number[] = this.getCache(key);
+        let coPairs: number[] = this.getCache(key) as number[];
         if (coPairs != null) {
             // trace("cofoldAptamer cache hit");
             return coPairs.slice();
@@ -417,7 +417,7 @@ export default class NuPACK extends Folder {
             desiredPairs,
             temp
         };
-        let mfold: MultiFoldResult = this.getCache(key);
+        let mfold: MultiFoldResult = this.getCache(key) as MultiFoldResult;
         if (mfold != null) {
             // trace("multifold cache hit");
             return mfold;
@@ -619,7 +619,7 @@ export default class NuPACK extends Folder {
             desiredPairs,
             temp
         };
-        let coPairs: number[] = this.getCache(key);
+        let coPairs: number[] = this.getCache(key) as number[];
         if (coPairs != null) {
             // trace("cofold2 cache hit");
             return coPairs.slice();
@@ -632,9 +632,4 @@ export default class NuPACK extends Folder {
     }
 
     private readonly _lib: NupackLib;
-}
-
-interface FullEvalCache {
-    nodes: number[];
-    energy: number;
 }
