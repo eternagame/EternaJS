@@ -3292,7 +3292,7 @@ export default class PoseEditMode extends GameMode {
     private _rscript: RNAScript;
 
     // Will be non-null after we submit our solution to the server
-    private _submitSolutionRspData: any;
+    private _submitSolutionRspData: SubmitSolutionData | null;
 
     private _nucleotideRangeToShow: [number, number] | null = null;
 
