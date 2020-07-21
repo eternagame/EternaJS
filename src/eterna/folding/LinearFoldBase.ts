@@ -7,7 +7,7 @@ import * as LinearFoldLib from './engines/LinearFoldLib';
 import {DotPlotResult, FullFoldResult} from './engines/LinearFoldLib';
 import {FullEvalResult} from './engines/ViennaLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
-import Folder from './Folder';
+import Folder, {CacheKey, FullEvalCache} from './Folder';
 import FoldUtil from './FoldUtil';
 
 export default abstract class LinearFoldBase extends Folder {
@@ -21,10 +21,10 @@ export default abstract class LinearFoldBase extends Folder {
     }
 
     public getDotPlot(seq: number[], pairs: number[], temp: number = 37): number[] {
-        let key: any = {
+        let key: CacheKey = {
             primitive: 'dotplot', seq, pairs, temp
         };
-        let retArray: number[] = this.getCache(key);
+        let retArray: number[] = this.getCache(key) as number[];
         if (retArray != null) {
             // trace("dotplot cache hit");
             return retArray.slice();
@@ -64,10 +64,10 @@ export default abstract class LinearFoldBase extends Folder {
         seq: number[], pairs: number[], pseudoknotted: boolean = false,
         temp: number = 37, outNodes: number[] | null = null
     ): number {
-        let key: any = {
+        let key: CacheKey = {
             primitive: 'score', seq, pairs, temp
         };
-        let cache: FullEvalCache = this.getCache(key);
+        let cache: FullEvalCache = this.getCache(key) as FullEvalCache;
 
         if (cache != null) {
             // log.debug("score cache hit");
@@ -145,7 +145,7 @@ export default abstract class LinearFoldBase extends Folder {
         seq: number[], secondBestPairs: number[] | null, desiredPairs: string | null = null,
         pseudoknotted: boolean = false, temp: number = 37
     ): number[] {
-        let key: any = {
+        let key: CacheKey = {
             primitive: 'fold',
             seq,
             secondBestPairs,
@@ -153,7 +153,7 @@ export default abstract class LinearFoldBase extends Folder {
             temp
         };
 
-        let pairs: number[] = this.getCache(key);
+        let pairs: number[] = this.getCache(key) as number[];
         if (pairs == null) {
             pairs = this.fullFoldDefault(seq);
             this.putCache(key, pairs);
@@ -245,9 +245,4 @@ export default abstract class LinearFoldBase extends Folder {
     }
 
     private readonly _lib: LinearFoldLib;
-}
-
-interface FullEvalCache {
-    nodes: number[];
-    energy: number;
 }

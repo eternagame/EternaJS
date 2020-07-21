@@ -13,8 +13,16 @@ export enum BoosterType {
     ACTION = 2,
 }
 
+export interface BoosterData {
+    type?: string;
+    icons_b64?: string[];
+    label: string;
+    tooltip: string;
+    script: string;
+}
+
 export default class Booster {
-    public static create(mode: GameMode, data: any): Promise<Booster> {
+    public static create(mode: GameMode, data: BoosterData): Promise<Booster> {
         if (!data['type']) {
             return Promise.reject(new Error("Invalid booster definition (missing 'type')"));
         } else if (!data['icons_b64'] || data['icons_b64'].length !== 5) {

@@ -141,7 +141,7 @@ export default class SortOptionsDialog extends Dialog<void> {
             .lineTo(336, 24));
     }
 
-    private addCriteria(category: DesignCategory, order: SortOrder, args: any = null): void {
+    private addCriteria(category: DesignCategory, order: SortOrder, args?: string): void {
         let curIdx = this.options.getCriterionIdx(category);
         this.options.addCriteria(category, order, args);
 

@@ -12,6 +12,7 @@ import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import RankScroll from 'eterna/rank/RankScroll';
 import Eterna from 'eterna/Eterna';
+import {SubmitSolutionData} from './PoseEditMode';
 
 export default class MissionClearedPanel extends ContainerObject implements MouseWheelListener {
     private static readonly theme = {
@@ -228,7 +229,7 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
         }
     }
 
-    public createRankScroll(submissionRsp: any): void {
+    public createRankScroll(submissionRsp: SubmitSolutionData): void {
         if (!RankScroll.hasRankScrollData(submissionRsp)) {
             return;
         }

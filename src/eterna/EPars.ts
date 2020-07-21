@@ -416,18 +416,18 @@ export default class EPars {
      * @param strInput string inputted like 'ACUGU 11-12,,,16'
      * @returns array of Nucleotide enums like [RNABASE_ADENINE, ...]
      */
-    public static indexedStringToSequence(strInput: string, customNumbering: (number | null)[] | null = null):
-    number[] | null {
+    public static indexedStringToSequence(strInput: string, customNumbering?: (number | null)[]):
+    number[] | undefined {
         // make robust to blanks:
         let strChunks: string[] = strInput.trim().split(/\s+/); // spaces
         if (strChunks.length === 0) return []; // blank sequence, no op.
         let seqStr = strChunks[0]; // sequence like ACUGU
 
         // process rest of string like '11-14 16' to get indices for pasting
-        let indices: (number | null)[] | null = [];
+        let indices: (number | null)[] | undefined = [];
         if (strChunks.length > 1) {
             indices = Utility.getIndices(strChunks.slice(1).join());
-            if (indices === null) return null; // signal error
+            if (indices === undefined) return undefined; // signal error
         } else if (customNumbering != null && seqStr.length === customNumbering.length) {
             // no indices specified after sequence; can happen when copying from
             //  legacy puzzles or if player has noted down solutions from other software.
@@ -440,7 +440,7 @@ export default class EPars {
         }
 
         // remap indices to match puzzle's "custom numbering"
-        if (customNumbering != null) {
+        if (customNumbering !== undefined) {
             if (Arrays.shallowEqual(customNumbering, indices)) {
                 // assume player is copy/pasting into the same puzzle.
                 return this.stringToSequence(seqStr, true /* allowCut */, true /* allowUnknown */);
@@ -935,7 +935,7 @@ export default class EPars {
         return diff;
     }
 
-    public static arePairsSame(aPairs: number[], bPairs: number[], constraints: any[] | null = null): boolean {
+    public static arePairsSame(aPairs: number[], bPairs: number[], constraints: boolean[] | null = null): boolean {
         if (aPairs.length !== bPairs.length) {
             return false;
         }

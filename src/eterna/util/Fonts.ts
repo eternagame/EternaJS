@@ -10,7 +10,7 @@ export default class Fonts {
     public static readonly STDFONT_MEDIUM = 'OpenSans-SemiBold';
     public static readonly STDFONT_BOLD = 'OpenSans-Bold';
 
-    public static loadFonts(): Promise<any> {
+    public static loadFonts(): Promise<void> {
         log.info('Loading fonts...');
         let loaders = Fonts.LOCAL.map((fontFamily) => FontLoader.load(fontFamily));
 

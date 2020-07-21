@@ -35,7 +35,7 @@ import CopyTextDialogMode from '../CopyTextDialogMode';
 import ThumbnailAndTextButton from './ThumbnailAndTextButton';
 import GameMode from '../GameMode';
 import ButtonWithIcon from './ButtonWithIcon';
-import LabComments from './LabComments';
+import LabComments, {CommentsData} from './LabComments';
 
 interface ViewSolutionOverlayProps {
     solution: Solution;
@@ -295,7 +295,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
 
         // Play button
         const playThumbnail = new Sprite();
-        let customLayout: Array<[number, number] | [null, null]> | null = null;
+        let customLayout: Array<[number, number] | [null, null]> | undefined;
         if (this._props.puzzle.targetConditions && this._props.puzzle.targetConditions[0]) {
             customLayout = this._props.puzzle.targetConditions[0]['custom-layout'];
         }
@@ -532,7 +532,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         }
     }
 
-    private updateCommentsView(commentsData: any[]) {
+    private updateCommentsView(commentsData: CommentsData[]) {
         const {theme} = ViewSolutionOverlay;
         const commentsCount = commentsData?.length ?? 0;
         this._commentsTitle.text = `Comments (${commentsCount})`;

@@ -25,6 +25,7 @@ import URLButton from 'eterna/ui/URLButton';
 import int from 'eterna/util/int';
 import EternaURL from 'eterna/net/EternaURL';
 import UITheme from 'eterna/ui/UITheme';
+import {AchievementData} from 'eterna/achievements/AchievementManager';
 import VoteProcessor from './VoteProcessor';
 import ViewSolutionOverlay from './ViewSolutionOverlay';
 import SortOptionsDialog from './SortOptionsDialog';
@@ -35,6 +36,12 @@ import GridLines from './GridLines';
 import DotLine from './DotLine';
 import DataCol from './DataCol';
 import CustomizeColumnOrderDialog from './CustomizeColumnOrderDialog';
+
+export interface DBVote {
+    canVote: boolean;
+    voted: boolean;
+    solutionIndex: number;
+}
 
 export enum DesignBrowserDataType {
     INT = 0,
@@ -462,13 +469,14 @@ export default class DesignBrowserMode extends GameMode {
             this.closeCurDialog();
         };
 
-        const myVotes = solution.getProperty('My Votes');
+        // string | number => definitely a number
+        const myVotes = Number(solution.getProperty('My Votes'));
         Eterna.client.toggleSolutionVote(solution.nodeID, this._puzzle.nodeID, myVotes)
             .then((data) => {
                 this._voteProcessor.processData(data['votes']);
                 this.syncVotes();
 
-                let cheevs: any = data['new_achievements'];
+                let cheevs: Map<string, AchievementData> = data['new_achievements'];
                 if (cheevs != null) {
                     this._achievements.awardAchievements(cheevs).then(() => { /* ignore result */ });
                 }
@@ -656,7 +664,7 @@ export default class DesignBrowserMode extends GameMode {
         });
     }
 
-    private updateSortOption(category: DesignCategory, sortOrder: SortOrder, sortArgs: any[] | null = null): void {
+    private updateSortOption(category: DesignCategory, sortOrder: SortOrder, sortArgs?: string): void {
         if (sortOrder !== SortOrder.NONE) {
             this._sortOptions.addCriteria(category, sortOrder, sortArgs);
         } else {
@@ -834,7 +842,7 @@ export default class DesignBrowserMode extends GameMode {
         let puz: Puzzle = this._puzzle;
 
         for (let dataCol of this._dataCols) {
-            let dataArray: any[] = [];
+            let dataArray: (string | number | DBVote)[] = [];
 
             let {category} = dataCol;
 
@@ -849,14 +857,14 @@ export default class DesignBrowserMode extends GameMode {
                         dataCol.drawGridText();
                     }
                 } else if (category === DesignCategory.DESCRIPTION) {
-                    let des = singleLineRawData.getProperty('Description');
+                    let des = singleLineRawData.getProperty('Description') as string;
                     if (des.length < 45) {
                         dataArray.push(des);
                     } else {
                         dataArray.push(`${des.substr(0, 40)}...`);
                     }
                 } else if (category === DesignCategory.TITLE) {
-                    let des = singleLineRawData.getProperty('Title');
+                    let des = singleLineRawData.getProperty('Title') as string;
                     if (des.length < 30) {
                         dataArray.push(des);
                     } else {
@@ -867,7 +875,7 @@ export default class DesignBrowserMode extends GameMode {
                     const voted = singleLineRawData.getProperty('My Votes') > 0;
                     dataArray.push({canVote, voted, solutionIndex: ii});
                 } else {
-                    let rawdata: any = singleLineRawData.getProperty(category);
+                    let rawdata: string | number = singleLineRawData.getProperty(category);
                     dataArray.push(rawdata);
                 }
             }

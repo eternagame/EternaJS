@@ -12,9 +12,9 @@ export enum SortOrder {
 export class SortCriterion {
     public readonly category: DesignCategory;
     public sortOrder: SortOrder;
-    public arg: string | null;
+    public arg?: string;
 
-    constructor(category: DesignCategory, order: SortOrder, arg: string | null = null) {
+    constructor(category: DesignCategory, order: SortOrder, arg?: string) {
         this.category = category;
         this.sortOrder = order;
         this.arg = arg;
@@ -59,12 +59,12 @@ export default class SortOptions {
 
     public compareSolutions(a: Solution, b: Solution): number {
         for (let criterion of this._criteria) {
-            let aProperty: any;
-            let bProperty: any;
+            let aProperty: number | string;
+            let bProperty: number | string;
 
             if (criterion.category === DesignCategory.SEQUENCE) {
-                let anchorSequence: string | null = criterion.arg;
-                if (anchorSequence === null) {
+                let anchorSequence: string | undefined = criterion.arg;
+                if (anchorSequence === undefined) {
                     throw new Error('Cannot sort by sequence if the criterion argument is null!');
                 }
                 let aString: string = a.sequence;
@@ -117,7 +117,7 @@ export default class SortOptions {
         return 0;
     }
 
-    public addCriteria(category: DesignCategory, sortOrder: SortOrder, sortArgs: any = null): void {
+    public addCriteria(category: DesignCategory, sortOrder: SortOrder, sortArgs?: string): void {
         let cur = this.getCriterion(category);
         if (cur !== undefined) {
             cur.sortOrder = sortOrder;

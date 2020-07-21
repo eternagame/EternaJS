@@ -5,7 +5,7 @@ import {Signal, UnitSignal} from 'signals';
 import {
     ContainerObject, TextBuilder, Flashbang, Assert, VLayoutContainer, SceneObject, HAlign
 } from 'flashbang';
-import Feedback from 'eterna/Feedback';
+import Feedback, {BrentTheoData} from 'eterna/Feedback';
 import GameButton from 'eterna/ui/GameButton';
 import TextInputObject from 'eterna/ui/TextInputObject';
 import Fonts from 'eterna/util/Fonts';
@@ -17,7 +17,7 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import {SortOrder} from './SortOptions';
 import SequenceStringListView from './SequenceStringListView';
-import {DesignBrowserDataType, DesignCategory} from './DesignBrowserMode';
+import {DesignBrowserDataType, DesignCategory, DBVote} from './DesignBrowserMode';
 
 export default class DataCol extends ContainerObject {
     public readonly sortOrderChanged = new Signal<SortOrder>();
@@ -221,7 +221,8 @@ export default class DataCol extends ContainerObject {
                 return true;
             }
 
-            let targetLow: string = sol.getProperty(this.category).toLowerCase();
+            // Will convert number to string as needed, or will keep as string.
+            let targetLow: string = String(sol.getProperty(this.category)).toLowerCase();
 
             return (targetLow.search(queryString.toLowerCase()) >= 0);
         } else {
@@ -279,12 +280,12 @@ export default class DataCol extends ContainerObject {
         this._feedback = feedback;
     }
 
-    public setDataAndDisplay(raw: any[]): void {
+    public setDataAndDisplay(raw: (number | string | DBVote)[]): void {
         this._rawData = [];
 
         for (let ii = 0; ii < raw.length; ii++) {
             if (this._dataType === DesignBrowserDataType.INT) {
-                this._rawData.push(int(raw[ii]));
+                this._rawData.push(int(raw[ii] as number));
             } else if (this._dataType === DesignBrowserDataType.STRING) {
                 this._rawData.push(`${raw[ii]}`);
             } else if (this._dataType === DesignBrowserDataType.NUMBER) {
@@ -341,7 +342,7 @@ export default class DataCol extends ContainerObject {
     private updateView(): void {
         let dataString = '';
         let boardData: string[] = [];
-        let boardExpData: any[] = [];
+        let boardExpData: Feedback[] = [];
 
         if (this.category === DesignCategory.VOTE) {
             const {designBrowser: theme} = UITheme;
@@ -361,7 +362,7 @@ export default class DataCol extends ContainerObject {
                 if (ii >= this._rawData.length) {
                     break;
                 }
-                const {canVote, voted, solutionIndex} = this._rawData[ii];
+                const {canVote, voted, solutionIndex} = this._rawData[ii] as DBVote;
                 if (canVote) {
                     const voteSprite = voted ? Bitmaps.ImgUnvote : Bitmaps.ImgVote;
                     const voteButton = new GameButton().allStates(voteSprite);
@@ -396,10 +397,12 @@ export default class DataCol extends ContainerObject {
                 let rawstr = Utility.stripHtmlTags(`${this._rawData[ii]}`);
 
                 // trace(rawstr);
+                const fb = this._feedback[ii];
+                Assert.assertIsDefined(fb);
                 switch (this.category) {
                     case DesignCategory.SEQUENCE:
                         boardData.push(rawstr);
-                        boardExpData.push(this._feedback[ii]);
+                        boardExpData.push(fb);
 
                         break;
 
@@ -429,14 +432,14 @@ export default class DataCol extends ContainerObject {
                         if (exp == null) {
                             dataString += '-\n';
                         } else {
-                            let brentData: any = exp.brentTheoData;
-                            if (brentData != null) {
+                            let brentData: BrentTheoData | undefined = exp.brentTheoData;
+                            if (brentData !== undefined) {
                                 dataString += `${brentData['score'].toFixed(3)}x`;
                                 dataString += ` (${brentData['ribo_without_theo'].toFixed(3)} / ${brentData['ribo_with_theo'].toFixed(3)})\n`;
-                            } else if (this._rawData[ii] >= 0) {
+                            } else if ((this._rawData[ii] as number) >= 0) {
                                 dataString += `${rawstr} / 100\n`;
-                            } else if (this._rawData[ii] < 0) {
-                                dataString += `${Feedback.EXPDISPLAYS[Feedback.EXPCODES.indexOf(this._rawData[ii])]}\n`;
+                            } else if ((this._rawData[ii] as number) < 0) {
+                                dataString += `${Feedback.EXPDISPLAYS[Feedback.EXPCODES.indexOf(this._rawData[ii] as number)]}\n`;
                             } else {
                                 dataString += '-\n';
                             }
@@ -457,7 +460,7 @@ export default class DataCol extends ContainerObject {
 
                     case DesignCategory.GU_PAIRS:
                         if (pairsLength > 0) {
-                            dataString += `${rawstr} (${Math.round((this._rawData[ii] / pairsLength) * 100)}%)\n`;
+                            dataString += `${rawstr} (${Math.round((this._rawData[ii] as number / pairsLength) * 100)}%)\n`;
                         } else {
                             dataString += `${rawstr}\n`;
                         }
@@ -465,7 +468,7 @@ export default class DataCol extends ContainerObject {
 
                     case DesignCategory.GC_PAIRS:
                         if (pairsLength > 0) {
-                            dataString += `${rawstr} (${Math.round((this._rawData[ii] / pairsLength) * 100)}%)\n`;
+                            dataString += `${rawstr} (${Math.round((this._rawData[ii] as number / pairsLength) * 100)}%)\n`;
                         } else {
                             dataString += `${rawstr}\n`;
                         }
@@ -473,7 +476,7 @@ export default class DataCol extends ContainerObject {
 
                     case DesignCategory.UA_PAIRS:
                         if (pairsLength > 0) {
-                            dataString += `${rawstr} (${Math.round((this._rawData[ii] / pairsLength) * 100)}%)\n`;
+                            dataString += `${rawstr} (${Math.round((this._rawData[ii] as number / pairsLength) * 100)}%)\n`;
                         } else {
                             dataString += `${rawstr}\n`;
                         }
@@ -528,7 +531,7 @@ export default class DataCol extends ContainerObject {
     private _dataDisplay: Text;
     private _votesContainer: SceneObject<VLayoutContainer>;
 
-    private _rawData: any[] = [];
+    private _rawData: (string | number | DBVote)[] = [];
     private _dataWidth: number;
     private _lineHeight: number;
     private _label: GameButton;

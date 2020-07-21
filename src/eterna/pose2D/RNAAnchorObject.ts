@@ -7,7 +7,7 @@ export default class RNAAnchorObject {
     public offset: Point;
 
     public get object(): SceneObject {
-        return this.ref.object;
+        return this.ref.object as SceneObject;
     }
 
     public get isLive(): boolean {

@@ -344,7 +344,7 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
     private static readonly R = new Rectangle();
 }
 
-class PaletteTarget {
+export class PaletteTarget {
     public readonly type: PaletteTargetType;
     public readonly id: RScriptUIElementID;
     public readonly isPair: boolean;

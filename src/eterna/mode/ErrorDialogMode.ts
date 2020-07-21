@@ -7,9 +7,9 @@ import Fonts from 'eterna/util/Fonts';
 import GameButton from 'eterna/ui/GameButton';
 
 export default class ErrorDialogMode extends AppMode {
-    public readonly error: any;
+    public readonly error: Error | ErrorEvent;
 
-    constructor(error: any) {
+    constructor(error: Error | ErrorEvent) {
         super();
         this.error = error;
     }

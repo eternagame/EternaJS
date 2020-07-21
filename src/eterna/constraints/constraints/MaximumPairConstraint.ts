@@ -41,7 +41,7 @@ abstract class MaximumPairConstraint extends Constraint<MaxPairConstraintStatus>
         // AMW: This is non-null by definition.
         const param = PAIR_PARAM_MAP.get(this.pairType);
         Assert.assertIsDefined(param);
-        const currentPairs: number = context.undoBlocks[0].getParam(param);
+        const currentPairs: number = context.undoBlocks[0].getParam(param) as number;
         return {
             satisfied: (
                 currentPairs <= this.maxPairs

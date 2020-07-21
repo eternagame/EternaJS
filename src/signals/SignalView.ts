@@ -26,11 +26,11 @@ export default interface SignalView<T> {
      *
      * @return a connection instance which can be used to cancel the connection.
      */
-    connect(slot: (value: T) => void): Connection;
+    connect(slot: (value?: T) => void): Connection;
 
     /**
      * Disconnects the supplied function from this signal if connect was called with it.
      * If the slot has been connected multiple times, all connections are cancelled.
      */
-    disconnect(slot: (value: T) => void): void;
+    disconnect(slot: (value?: T) => void): void;
 }

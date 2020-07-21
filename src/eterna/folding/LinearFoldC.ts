@@ -5,14 +5,15 @@ export default class LinearFoldC extends LinearFoldBase {
     public static readonly NAME = 'LinearFoldC';
 
     /**
-     * Asynchronously creates a new instance of the Vienna folder.
+     * Asynchronously creates a new instance of the LinearFoldC folder.
      * @returns {Promise<LinearFoldC>}
+     * @description AMW TODO cannot annotate type of module/program; both are any.
      */
     public static create(): Promise<LinearFoldC | null> {
         // eslint-disable-next-line import/no-unresolved, import/no-extraneous-dependencies
         return import('engines-bin/LinearFoldC')
-            .then((module: any) => EmscriptenUtil.loadProgram(module))
-            .then((program: any) => new LinearFoldC(program))
+            .then((module) => EmscriptenUtil.loadProgram(module))
+            .then((program) => new LinearFoldC(program))
             .catch((err) => null);
     }
 

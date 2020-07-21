@@ -12,6 +12,8 @@ import GameButton from './GameButton';
 import UITheme from './UITheme';
 import HTMLTextObject from './HTMLTextObject';
 
+type InteractionEvent = PIXI.interaction.InteractionEvent;
+
 interface MultiPagePanelProps {
     title: string;
     pages: Array<HTMLTextObject|ContainerObject>;
@@ -118,7 +120,7 @@ export default class MultiPagePanel extends ContainerObject {
         this._background.drawRoundedRect(0, 0, this._props.width, this._panelHeight, theme.borderRadius);
         this._background.endFill();
         this._background.interactive = true;
-        this._background.on('click', (e: any) => e.stopPropagation());
+        this._background.on('click', (e: InteractionEvent) => e.stopPropagation());
 
         this._pageMask.beginFill(0x00FF00);
         const maskBeginY = theme.title.height;

@@ -2,6 +2,8 @@ import {ContainerObject, Assert} from 'flashbang';
 import {Graphics, Point, Rectangle} from 'pixi.js';
 import Fonts from 'eterna/util/Fonts';
 
+type InteractionEvent = PIXI.interaction.InteractionEvent;
+
 // AMW we have to be content to accept our positioner may
 // in fact return null (if we want to use getbounds() for
 // the purpose!)
@@ -85,7 +87,7 @@ export default class HelpToolTip extends ContainerObject {
 
         const background = new Graphics();
         background.interactive = true;
-        background.on('click', (e: any) => e.stopPropagation());
+        background.on('click', (e: InteractionEvent) => e.stopPropagation());
         background.beginFill(theme.colors.background, 1);
         background.drawRoundedRect(backgroundX, backgroundY, width, height, theme.borderRadius);
         textElem.position = new Point(

@@ -40,7 +40,7 @@ abstract class MinimumPairConstraint extends Constraint<MinPairConstraintStatus>
         // TODO: Multistate?
         const param = PAIR_PARAM_MAP.get(this.pairType);
         Assert.assertIsDefined(param);
-        const currentPairs: number = context.undoBlocks[0].getParam(param);
+        const currentPairs: number = context.undoBlocks[0].getParam(param) as number;
         return {
             satisfied: (
                 currentPairs >= this.minPairs

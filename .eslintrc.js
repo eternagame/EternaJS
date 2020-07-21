@@ -91,7 +91,8 @@ module.exports = {
       'no-cond-assign': ['error', 'except-parens'],
       // At least until the dynamic content changes to interfaces
       'dot-notation': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
+      // bring it on
+      '@typescript-eslint/no-explicit-any': 2,
       // Outparams are used in some places to reduce allocations, however it'd be nice to have in general...
       // Should probably reconfigure with ignorePropertyModificationsFor
       'no-param-reassign': 'off',

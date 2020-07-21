@@ -11,12 +11,13 @@ export default class RNApuzzler extends LayoutEngine {
     /**
      * Asynchronously creates a new instance of the RNApuzzler layout engine.
      * @returns {Promise<RNApuzzler>}
+     * @description AMW TODO cannot annotate type of module/program; both are any.
      */
     public static create(): Promise<RNApuzzler> {
         // eslint-disable-next-line import/no-extraneous-dependencies
         return import('engines-bin/rnapuzzler')
-            .then((module: any) => EmscriptenUtil.loadProgram(module))
-            .then((program: any) => new RNApuzzler(program));
+            .then((module) => EmscriptenUtil.loadProgram(module))
+            .then((program) => new RNApuzzler(program));
     }
 
     private constructor(lib: RNApuzzlerLib) {

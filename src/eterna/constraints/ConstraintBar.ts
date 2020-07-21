@@ -16,6 +16,8 @@ import ShapeConstraint, {AntiShapeConstraint} from './constraints/ShapeConstrain
 import ConstraintBox from './ConstraintBox';
 import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from './Constraint';
 
+type InteractionEvent = PIXI.interaction.InteractionEvent;
+
 interface ConstraintWrapper {
     constraint: Constraint<BaseConstraintStatus>;
     constraintBox: ConstraintBox;
@@ -84,12 +86,12 @@ export default class ConstraintBar extends ContainerObject {
                 const bg = new SceneObject(new Graphics());
                 this.addObject(bg, this.container);
 
-                bg.pointerDown.connect((e: any) => {
+                bg.pointerDown.connect((e: InteractionEvent) => {
                     this._backgroundDrag = true;
                     this._drag = true;
                     this._previousDragPos = e.data.global.x;
                 });
-                bg.pointerMove.connect((e: any) => {
+                bg.pointerMove.connect((e: InteractionEvent) => {
                     if (!this._drag) {
                         return;
                     }
@@ -97,11 +99,11 @@ export default class ConstraintBar extends ContainerObject {
                     this.scrollConstraints(deltaPos);
                     this._previousDragPos = e.data.global.x;
                 });
-                bg.pointerUp.connect((e: any) => {
+                bg.pointerUp.connect((e: InteractionEvent) => {
                     this._drag = false;
                     this._backgroundDrag = false;
                 });
-                bg.display.on('pointerupoutside', (e: any) => {
+                bg.display.on('pointerupoutside', (e: InteractionEvent) => {
                     this._drag = false;
                     this._backgroundDrag = false;
                 });
@@ -119,7 +121,7 @@ export default class ConstraintBar extends ContainerObject {
             this._drawerTip = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgConstraintDrawerTip));
             this._background.display.addChild(this._drawerTip);
             this._drawerTip.interactive = true;
-            this._drawerTip.on('pointertap', (e: any) => this.collapse());
+            this._drawerTip.on('pointertap', (e: InteractionEvent) => this.collapse());
             this._drawerTip.visible = false;
         }
 
@@ -148,12 +150,12 @@ export default class ConstraintBar extends ContainerObject {
             this.addObject(constraint.constraintBox, this._constraintsLayer);
 
             if (drawerEnabled) {
-                constraint.constraintBox.pointerDown.connect((e) => {
+                constraint.constraintBox.pointerDown.connect((e: InteractionEvent) => {
                     this._potentialDrag = true;
                     this._previousDragPos = e.data.global.x;
                 });
 
-                constraint.constraintBox.pointerMove.connect((e) => {
+                constraint.constraintBox.pointerMove.connect((e: InteractionEvent) => {
                     if (!this._potentialDrag) {
                         return;
                     }
@@ -170,7 +172,7 @@ export default class ConstraintBar extends ContainerObject {
                     this._previousDragPos = e.data.global.x;
                 });
 
-                constraint.constraintBox.pointerOut.connect((e) => {
+                constraint.constraintBox.pointerOut.connect((e: InteractionEvent) => {
                     if (this._backgroundDrag) {
                         return;
                     }
@@ -179,7 +181,7 @@ export default class ConstraintBar extends ContainerObject {
                 });
             }
 
-            constraint.constraintBox.pointerTap.connect((e) => {
+            constraint.constraintBox.pointerTap.connect((e: InteractionEvent) => {
                 this._potentialDrag = false;
                 if (this._drag) {
                     this._drag = false;
@@ -348,15 +350,12 @@ export default class ConstraintBar extends ContainerObject {
         )[0].constraintBox;
     }
 
-    public serializeConstraints(): string | null {
-        if (!this._constraints) return null;
-        // AMW: we have a cryptic ConcatArray<never>[] error if we don't
-        // explicitly cast current to any.
+    public serializeConstraints(): string | undefined {
+        if (!this._constraints) return undefined;
         return this._constraints.map(
             (constraint) => constraint.constraint.serialize()
         ).reduce(
-            (all, current) => all.concat(current as any),
-            []
+            (all, current) => (all as string[]).concat(current as string[]) as [string, string]
         ).join(',');
     }
 
