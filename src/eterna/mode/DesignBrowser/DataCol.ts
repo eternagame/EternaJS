@@ -97,7 +97,7 @@ export default class DataCol extends ContainerObject {
                 placeholder: 'Search',
                 bgColor: theme.colors.filterBackground,
                 borderColor: theme.colors.filterBorder
-            }).showFakeTextInputWhenNotFocused();
+            });
             this._filterField1.tabIndex = -1; // prevent tab-selection
             this._filterField1.display.position = new Point(11, theme.headerHeight + theme.filterPadding);
             this.addObject(this._filterField1, this.container);
@@ -110,7 +110,7 @@ export default class DataCol extends ContainerObject {
                 placeholder: 'min',
                 bgColor: theme.colors.filterBackground,
                 borderColor: theme.colors.filterBorder
-            }).showFakeTextInputWhenNotFocused();
+            });
             this._filterField1.tabIndex = -1; // prevent tab-selection
             this._filterField1.display.position = new Point(11, theme.headerHeight + theme.filterPadding);
             this.addObject(this._filterField1, this.container);
@@ -123,7 +123,7 @@ export default class DataCol extends ContainerObject {
                 placeholder: 'max',
                 bgColor: theme.colors.filterBackground,
                 borderColor: theme.colors.filterBorder
-            }).showFakeTextInputWhenNotFocused();
+            });
             this._filterField2.tabIndex = -1; // prevent tab-selection
             this._filterField2.display.position = new Point(11 + 40 + 12, theme.headerHeight + theme.filterPadding);
             this.addObject(this._filterField2, this.container);

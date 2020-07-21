@@ -31,7 +31,6 @@ export default class StructureInput extends GamePanel implements Updatable {
             .font(Fonts.ARIAL)
             .disallow(/[^.()]/g)
             .bold();
-        this._textInput.showFakeTextInputWhenNotFocused();
         this.addObject(this._textInput, this.container);
 
         this._errorText = new TextBalloon('', 0x0, 0.8);

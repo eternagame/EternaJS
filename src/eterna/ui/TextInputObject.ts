@@ -268,6 +268,6 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
     private _rows: number;
     private _hasFocus: boolean;
     private _fakeTextInput: Sprite | null;
-    private _showFakeTextInputWhenNotFocused: boolean = false;
+    private _showFakeTextInputWhenNotFocused: boolean = true;
     private _props: TextInputObjectProps;
 }

@@ -400,8 +400,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
             width: theme.width - theme.margin.left - theme.margin.right - 10 - SliderBar.THUMB_SIZE,
             rows: 3
         })
-            .placeholderText('Enter your comment here')
-            .showFakeTextInputWhenNotFocused();
+            .placeholderText('Enter your comment here');
         this._content.addObject(this._commentsInput, this._inputContainer);
 
         const commentButtonIcon = new Graphics()
