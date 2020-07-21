@@ -20,11 +20,13 @@ export default abstract class AbstractValue<T> extends Reactor<T, T, undefined> 
 
     public abstract map<U>(func: (value: T) => U): ValueView<U>;
 
-    public connect(listener: (value: T, ovalue: T) => void): Connection {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public connect(listener: (value: any, ovalue: any) => void): Connection {
         return this.addConnection(listener);
     }
 
-    public connectNotify(listener: (value: T, ovalue: T) => void): Connection {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public connectNotify(listener: (value: any, ovalue: any) => void): Connection {
         // connect before calling emit; if the listener changes the value in the body of onEmit, it
         // will expect to be notified of that change; however if onEmit throws a runtime exception,
         // we need to take care of disconnecting the listener because the returned connection
@@ -40,7 +42,8 @@ export default abstract class AbstractValue<T> extends Reactor<T, T, undefined> 
         return cons;
     }
 
-    public disconnect(listener: (value: T, ovalue: T) => void): void {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public disconnect(listener: (value: any, ovalue: any) => void): void {
         this.removeConnection(listener);
     }
 

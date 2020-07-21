@@ -12,11 +12,13 @@ export default abstract class AbstractSignal<T> extends Reactor<T, T, undefined>
 
     public abstract filter(pred: (value: T) => boolean): SignalView<T>;
 
-    public connect(slot: (value: T) => void): Connection {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public connect(slot: (value: any) => void): Connection {
         return this.addConnection(slot);
     }
 
-    public disconnect(slot: (value: T) => void): void {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public disconnect(slot: (value: any) => void): void {
         this.removeConnection(slot);
     }
 
