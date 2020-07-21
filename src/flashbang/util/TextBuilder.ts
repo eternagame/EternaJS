@@ -161,6 +161,11 @@ export default class TextBuilder {
         return this;
     }
 
+    public lineHeight(lineHeight: number) {
+        this._style.lineHeight = lineHeight;
+        return this;
+    }
+
     private _style: TextStyleOptions = {};
     private _text: string;
     private _scale = 1;

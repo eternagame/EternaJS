@@ -81,7 +81,11 @@ export default class TextInputPanel extends GamePanel {
             throw new Error('Add all fields before adding object to mode');
         }
 
-        let input = new TextInputObject(this._fontSize, width, multiline ? 3 : 1).font(Fonts.ARIAL);
+        let input = new TextInputObject({
+            fontSize: this._fontSize,
+            width,
+            rows: multiline ? 3 : 1
+        }).font(Fonts.ARIAL);
         this.addObject(input, this.container);
 
         let label: Text = Fonts.arial(name, this._fontSize).color(0xC0DCE7).build();

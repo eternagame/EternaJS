@@ -28,7 +28,11 @@ export default class ExplosionFactorPanel extends GamePanel {
 
         let widthWalker: number = ExplosionFactorPanel.WMARGIN;
 
-        let input: TextInputObject = new TextInputObject(14, 40, 1).font(Fonts.ARIAL);
+        let input: TextInputObject = new TextInputObject({
+            fontSize: 14,
+            width: 40,
+            rows: 1
+        }).font(Fonts.ARIAL);
         input.text = '1';
         input.display.position = new Point(widthWalker, heightWalker);
         this.addObject(input, this.container);

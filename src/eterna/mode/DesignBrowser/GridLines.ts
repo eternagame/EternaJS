@@ -1,4 +1,5 @@
 import {Graphics} from 'pixi.js';
+import UITheme from 'eterna/ui/UITheme';
 
 // GridLines class written by Jerry Fu
 // Draws any number of lines covering the entire width of the design browser at a specified interval,
@@ -20,10 +21,12 @@ export default class GridLines extends Graphics {
         this._height = height;
         this.clear();
 
+        const {designBrowser: theme} = UITheme;
         this.lineStyle(this._thickness, this._color);
-        for (let ii = 0; ii < Math.ceil(height / this._intervalSpacing); ii++) {
-            this.moveTo(5, ii * this._intervalSpacing);
-            this.lineTo(width - 5, ii * this._intervalSpacing);
+        for (let ii = 1; ii < Math.ceil(height / this._intervalSpacing); ii++) {
+            const y = ii * this._intervalSpacing - theme.dataPadding / 2;
+            this.moveTo(0, y);
+            this.lineTo(width, y);
         }
     }
 
