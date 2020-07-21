@@ -5,10 +5,8 @@ import {
 } from 'pixi.js';
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
-import Feedback from 'eterna/Feedback';
 import GameMode from 'eterna/mode/GameMode';
 import Puzzle from 'eterna/puzzle/Puzzle';
-import GamePanel from 'eterna/ui/GamePanel';
 import Fonts from 'eterna/util/Fonts';
 import SliderBar from 'eterna/ui/SliderBar';
 import {
@@ -21,7 +19,6 @@ import BitmapManager from 'eterna/resources/BitmapManager';
 import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import Solution from 'eterna/puzzle/Solution';
 import SolutionManager from 'eterna/puzzle/SolutionManager';
-import URLButton from 'eterna/ui/URLButton';
 import int from 'eterna/util/int';
 import EternaURL from 'eterna/net/EternaURL';
 import UITheme from 'eterna/ui/UITheme';
@@ -33,7 +30,6 @@ import SortOptions, {SortOrder} from './SortOptions';
 import SelectionBox from './SelectionBox';
 import MarkerBoxView from './MarkerBoxView';
 import GridLines from './GridLines';
-import DotLine from './DotLine';
 import DataCol from './DataCol';
 import CustomizeColumnOrderDialog from './CustomizeColumnOrderDialog';
 
@@ -188,34 +184,38 @@ export default class DesignBrowserMode extends GameMode {
         this._toolbarLayout = new HLayoutContainer();
         this.uiLayer.addChild(this._toolbarLayout);
 
-        const sortIcon = new GameButton()
-            .up(Bitmaps.BtnSort)
-            .over(Bitmaps.BtnSort)
-            .down(Bitmaps.BtnSort)
-            .tooltip('Editor sort options.');
-        this.addObject(sortIcon, this._toolbarLayout);
+        this._returnToGameButton = new GameButton()
+            .up(Bitmaps.ImgPrevious)
+            .over(Bitmaps.ImgPrevious)
+            .down(Bitmaps.ImgPrevious)
+            .tooltip('Return to game.')
+            .label('RETURN TO GAME', 12);
+        this.addObject(this._returnToGameButton, this._toolbarLayout);
         this._toolbarLayout.addHSpacer(5);
-        const sortLabel = new GameButton()
-            .label('SORT', 12, false)
-            .tooltip('Editor sort options.');
-        this.addObject(sortLabel, this._toolbarLayout);
-        sortIcon.clicked.connect(() => this.showSortDialog());
-        sortLabel.clicked.connect(() => this.showSortDialog());
+        this._returnToGameButton.clicked.connect(() => this.returnToGame());
 
         this._toolbarLayout.addHSpacer(20);
 
-        const configureIcon = new GameButton()
+        const sortButton = new GameButton()
+            .up(Bitmaps.BtnSort)
+            .over(Bitmaps.BtnSort)
+            .down(Bitmaps.BtnSort)
+            .tooltip('Editor sort options.')
+            .label('SORT', 12);
+        this.addObject(sortButton, this._toolbarLayout);
+        this._toolbarLayout.addHSpacer(5);
+        sortButton.clicked.connect(() => this.showSortDialog());
+
+        this._toolbarLayout.addHSpacer(20);
+
+        const configureButton = new GameButton()
             .up(Bitmaps.BtnConfigure)
             .over(Bitmaps.BtnConfigure)
             .down(Bitmaps.BtnConfigure)
-            .tooltip('Select and reorder columns.');
-        this.addObject(configureIcon, this._toolbarLayout);
-        this._toolbarLayout.addHSpacer(5);
-        const configureButton = new GameButton()
-            .label('CONFIGURE', 12, false)
-            .tooltip('Select and reorder columns.');
+            .tooltip('Select and reorder columns.')
+            .label('CONFIGURE', 12);
         this.addObject(configureButton, this._toolbarLayout);
-        configureIcon.clicked.connect(() => this.showCustomizeColumnOrderDialog());
+        this._toolbarLayout.addHSpacer(5);
         configureButton.clicked.connect(() => this.showCustomizeColumnOrderDialog());
 
         this._toolbarLayout.addHSpacer(20);
@@ -239,14 +239,6 @@ export default class DesignBrowserMode extends GameMode {
         this._expColorButton.toggled.value = false;
         this.addObject(this._expColorButton, this._toolbarLayout);
         this._expColorButton.clicked.connect(() => this.setSequenceExpColor());
-
-        // this._returnToGameButton = new GameButton()
-        //     .up(Bitmaps.ImgReturn)
-        //     .over(Bitmaps.ImgReturnOver)
-        //     .down(Bitmaps.ImgReturnHit)
-        //     .tooltip('Return to game.');
-        // this.addObject(this._returnToGameButton, this._toolbarLayout);
-        // this._returnToGameButton.clicked.connect(() => this.returnToGame());
 
         this._toolbarLayout.layout();
 
@@ -351,9 +343,9 @@ export default class DesignBrowserMode extends GameMode {
         super.enter();
         this.refreshSolutions();
         const {existingPoseEditMode} = Eterna.app;
-        // this._returnToGameButton.display.visible = (
-        //     existingPoseEditMode != null && existingPoseEditMode.puzzleID === this.puzzleID
-        // );
+        this._returnToGameButton.display.visible = (
+            existingPoseEditMode != null && existingPoseEditMode.puzzleID === this.puzzleID
+        );
         Eterna.chat.pushHideChat();
     }
 
@@ -983,7 +975,7 @@ export default class DesignBrowserMode extends GameMode {
 
     private _sortOptions: SortOptions;
     private _toolbarLayout: HLayoutContainer;
-    // private _returnToGameButton: GameButton;
+    private _returnToGameButton: GameButton;
     private _letterColorButton: GameButton;
     private _expColorButton: GameButton;
     private _votesText: MultiStyleText;
