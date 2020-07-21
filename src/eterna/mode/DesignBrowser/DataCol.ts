@@ -342,7 +342,7 @@ export default class DataCol extends ContainerObject {
     private updateView(): void {
         let dataString = '';
         let boardData: string[] = [];
-        let boardExpData: Feedback[] = [];
+        let boardExpData: (Feedback | null)[] = [];
 
         if (this.category === DesignCategory.VOTE) {
             const {designBrowser: theme} = UITheme;
@@ -396,9 +396,7 @@ export default class DataCol extends ContainerObject {
             } else {
                 let rawstr = Utility.stripHtmlTags(`${this._rawData[ii]}`);
 
-                // trace(rawstr);
-                const fb = this._feedback[ii];
-                Assert.assertIsDefined(fb);
+                const fb = this._feedback ? this._feedback[ii] : null;
                 switch (this.category) {
                     case DesignCategory.SEQUENCE:
                         boardData.push(rawstr);
@@ -543,7 +541,7 @@ export default class DataCol extends ContainerObject {
 
     private _numDisplay: number;
     private _sortOrder: SortOrder = SortOrder.NONE;
-    private _feedback: (Feedback | null)[];
+    private _feedback: (Feedback | null)[] | null;
     private _showExp: boolean = false;
     private _pairsArray: number[];
     private _fillColor: number = 0;
