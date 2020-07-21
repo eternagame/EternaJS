@@ -738,7 +738,7 @@ export default class PoseEditMode extends GameMode {
                 pose.clearRestrictedHighlight();
                 pose.clearUnstableHighlight();
                 pose.clearUserDefinedHighlight();
-                let poseState = this._isPipMode ? poseIdx : this._curTargetIndex;
+                let poseState = this._isPipMode || poseIdx !== 0 ? poseIdx : this._curTargetIndex;
                 for (let highlightInfo of highlightInfos) {
                     if (highlightInfo && (highlightInfo.stateIndex == null || poseState === highlightInfo.stateIndex)) {
                         let currBlock = this.getCurrentUndoBlock(poseState);
