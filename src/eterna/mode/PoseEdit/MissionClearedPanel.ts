@@ -36,7 +36,7 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
         super();
 
         this._hasNextPuzzle = hasNextPuzzle;
-        this._infoText = infoText;
+        this._infoText = infoText || 'You have solved the puzzle, congratulations!';
         this._moreText = moreText;
 
         this._bg = new Graphics();
@@ -92,10 +92,8 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
         this._infoWrapper.style.pointerEvents = 'none';
         overlayEl.appendChild(this._infoWrapper);
 
-        Assert.assertIsDefined(this._infoText);
         Assert.assertIsDefined(Flashbang.stageHeight);
-        const infoText = MissionClearedPanel.processHTML(this._infoText)
-            || 'You have solved the puzzle, congratulations!';
+        const infoText = MissionClearedPanel.processHTML(this._infoText);
         const infoObj = new HTMLTextObject(infoText, panelWidth - MissionClearedPanel.PADDING_RIGHT, this._infoWrapper)
             .font(Fonts.STDFONT_REGULAR)
             .fontSize(Flashbang.stageHeight < 512 ? 14 : 18)
@@ -345,7 +343,7 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
 
     private static readonly PADDING_RIGHT = 80;
 
-    private readonly _infoText: string | null;
+    private readonly _infoText: string;
     private readonly _moreText: string | null;
     private readonly _hasNextPuzzle: boolean;
 
