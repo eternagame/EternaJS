@@ -38,12 +38,6 @@ export default class TextureUtil {
     public static async loadTexture(tex: Texture): Promise<Texture> {
         let base: BaseTexture = tex.baseTexture;
         if (base.valid) return tex;
-        // if (!base.isLoading) {
-        //     // AMW hasLoaded => valid in v5
-        //     if (base.valid) return tex;
-        //     else throw new Error(`texture failed to load [url=${base.imageUrl}]`);
-        // } else {
-        // log.debug(`Loading image... [url=${base.imageUrl}]`);
         return new Promise<Texture>((resolve, reject) => {
             base.once('loaded', () => resolve(tex));
             base.once('error', () => reject(new Error('texture failed to load [url=temptemptemp]')));
