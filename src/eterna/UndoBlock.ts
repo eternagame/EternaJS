@@ -18,7 +18,7 @@ export interface FoldData {
     target_oligo_order_?: number[];
     puzzle_locks_?: boolean[];
     forced_struct_: number[];
-    target_conditions_?: TargetConditions;
+    target_conditions_?: string;
 }
 
 // amw fuck a lot of these are optional
@@ -111,7 +111,7 @@ export default class UndoBlock {
             target_oligo_order_: this._targetOligoOrder,
             puzzle_locks_: this._puzzleLocks,
             forced_struct_: this._forcedStruct,
-            target_conditions_: this.targetConditions // use the getter so we convert
+            target_conditions_: this._targetConditions
         };
         /* eslint-enable @typescript-eslint/camelcase */
     }
@@ -142,7 +142,7 @@ export default class UndoBlock {
             this._targetOligoOrder = json.target_oligo_order_; // JSONUtil.require(json, 'target_oligo_order_');
             this._puzzleLocks = json.puzzle_locks_;// JSONUtil.require(json, 'puzzle_locks_');
             this._forcedStruct = json.forced_struct_;// JSONUtil.require(json, 'forced_struct_');
-            this.targetConditions = json.target_conditions_;// JSONUtil.require(json, 'target_conditions_'); // setter
+            this._targetConditions = json.target_conditions_;// JSONUtil.require(json, 'target_conditions_'); // setter
         } catch (e) {
             throw new Error(`Error parsing UndoBlock JSON: ${e}`);
         }

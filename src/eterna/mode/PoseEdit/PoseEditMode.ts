@@ -2844,9 +2844,8 @@ export default class PoseEditMode extends GameMode {
                 this._seqStacks[this._stackLevel] = [];
 
                 for (let ii = 0; ii < this._poses.length; ii++) {
-                    let undoBlock: UndoBlock = new UndoBlock([]);
-                    undoBlock.fromJSON(fd[ii]);
-                    this._seqStacks[this._stackLevel][ii] = undoBlock;
+                    this._seqStacks[this._stackLevel][ii] = new UndoBlock([]);
+                    this._seqStacks[this._stackLevel][ii].fromJSON(fd[ii]);
                 }
 
                 this.savePosesMarkersContexts();
