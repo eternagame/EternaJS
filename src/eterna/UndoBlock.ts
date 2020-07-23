@@ -119,8 +119,20 @@ export default class UndoBlock {
     public fromJSON(json: FoldData): void {
         try {
             this._sequence = json.sequence_;// JSONUtil.require(json, 'sequence_');
-            this._pairsArray = json.pairs_array_;// JSONUtil.require(json, 'pairs_array_');
-            this._paramsArray = json.params_array_;// JSONUtil.require(json, 'params_array_');
+            // Legacy -- this wasn't always a map. So check typeof and put nonmaps
+            // into the pseudoknots false field.
+            if (Array.isArray(json.pairs_array_)) {
+                this._pairsArray = new Map<boolean, number[][]>();
+                this._pairsArray.set(false, json.pairs_array_);
+            } else {
+                this._pairsArray = json.pairs_array_;
+            }
+            if (Array.isArray(json.params_array_)) {
+                this._paramsArray = new Map<boolean, Param[][]>();
+                this._paramsArray.set(false, json.params_array_);
+            } else {
+                this._paramsArray = json.params_array_;
+            }
             this._stable = json.stable_;// JSONUtil.require(json, 'stable_');
             this._targetOligo = json.target_oligo_;// JSONUtil.require(json, 'target_oligo_');
             this._targetOligos = json.target_oligos_;// JSONUtil.require(json, 'target_oligos_');
