@@ -313,22 +313,24 @@ export default class DesignBrowserMode extends GameMode {
     }
 
     private updateLayout(): void {
+        const solDialogOffset = this._solutionView !== undefined && this._solutionView.container.visible
+            ? ViewSolutionOverlay.theme.width : 0;
         this._hSlider.display.position = new Point(30, this.contentHeight + 3);
-        this._hSlider.setSize(this.contentWidth - 60, 0);
+        this._hSlider.setSize(this.contentWidth - 60 - solDialogOffset, 0);
 
         this._vSlider.display.position = new Point(this.contentWidth + 5, 50);
-        this._vSlider.setSize(0, this.contentHeight - 70);
+        this._vSlider.setSize(0, this.contentHeight - 70 - solDialogOffset);
 
         this._gridLines.setSize(this.contentWidth - 10, this.contentHeight - this._gridLines.position.y);
-        this._maskBox.setSize(this.contentWidth - 14, this.contentHeight - 10);
-        this._markerBoxes.setSize(this.contentWidth - 14, this.contentHeight - 10);
+        this._maskBox.setSize(this.contentWidth - 14 - solDialogOffset, this.contentHeight - 10);
+        this._markerBoxes.setSize(this.contentWidth - 14 - solDialogOffset, this.contentHeight - 10);
 
         const {designBrowser: theme} = UITheme;
-        this._selectionBox.setSize(this.contentWidth - 14, theme.rowHeight);
+        this._selectionBox.setSize(this.contentWidth - 14 - solDialogOffset, theme.rowHeight);
 
         if (this._dataCols != null) {
             for (let col of this._dataCols) {
-                col.setSize(this.contentWidth, this.contentHeight);
+                col.setSize(this.contentWidth - solDialogOffset, this.contentHeight);
             }
         }
 
@@ -547,9 +549,11 @@ export default class DesignBrowserMode extends GameMode {
                         this._currentSolutionIndex + 1
                     );
                     switchSolution(nextSolutionIndex);
-                }
+                },
+                parentMode: (() => this)()
             });
             this.addObject(this._solutionView, this.dialogLayer);
+            this.updateLayout();
 
             // This just got newed, and this.addObject can't stop that.
             Assert.assertIsDefined(this._solutionView);

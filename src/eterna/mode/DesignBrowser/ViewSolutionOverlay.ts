@@ -36,6 +36,7 @@ import ThumbnailAndTextButton from './ThumbnailAndTextButton';
 import GameMode from '../GameMode';
 import ButtonWithIcon from './ButtonWithIcon';
 import LabComments, {CommentsData} from './LabComments';
+import DesignBrowserMode from './DesignBrowserMode';
 
 interface ViewSolutionOverlayProps {
     solution: Solution;
@@ -43,10 +44,11 @@ interface ViewSolutionOverlayProps {
     voteDisabled: boolean;
     onPrevious: () => void;
     onNext: () => void;
+    parentMode: GameMode;
 }
 
 export default class ViewSolutionOverlay extends ContainerObject {
-    private static readonly theme = {
+    public static readonly theme = {
         width: 427,
         margin: {
             left: 17,
@@ -104,6 +106,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         const closeButton = new GameButton().allStates(closeButtonIcon);
         closeButton.clicked.connect(() => {
             this.container.visible = false;
+            this._props.parentMode.onResized(); // public unlike updateLayout
         });
         closeButton.container.position = new Point(
             theme.width - theme.margin.right - closeButtonIcon.width,
