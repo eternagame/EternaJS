@@ -62,6 +62,7 @@ import SubmitPoseDialog from './SubmitPoseDialog';
 import SubmitPoseDetails from './SubmitPoseDetails';
 import MissionIntroMode from './MissionIntroMode';
 import MissionClearedPanel from './MissionClearedPanel';
+import ViewSolutionOverlay from '../DesignBrowser/ViewSolutionOverlay';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
@@ -140,6 +141,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     public get puzzleID(): number { return this._puzzle.nodeID; }
+    public get background(): Background { return this._background; }
 
     public get isOpaque(): boolean { return true; }
 
@@ -359,6 +361,9 @@ export default class PoseEditMode extends GameMode {
     }
 
     private updateUILayout(): void {
+        const solDialogOffset = this._solutionView !== undefined && this._solutionView.container.visible
+            ? ViewSolutionOverlay.theme.width : 0;
+
         DisplayUtil.positionRelativeToStage(
             this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
             HAlign.CENTER, VAlign.BOTTOM, 20, -20
@@ -378,12 +383,15 @@ export default class PoseEditMode extends GameMode {
 
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
-        this._exitButton.display.position = new Point(Flashbang.stageWidth - 85, Flashbang.stageHeight - 60);
-        this._undockSpecBoxButton.display.position = new Point(Flashbang.stageWidth - 22, 5);
+        this._exitButton.display.position = new Point(
+            Flashbang.stageWidth - 85 - solDialogOffset,
+            Flashbang.stageHeight - 60
+        );
+        this._undockSpecBoxButton.display.position = new Point(Flashbang.stageWidth - 22 - solDialogOffset, 5);
 
         this._constraintBar.layout();
 
-        this._dockedSpecBox.setSize(Flashbang.stageWidth, Flashbang.stageHeight - 340);
+        this._dockedSpecBox.setSize(Flashbang.stageWidth - solDialogOffset, Flashbang.stageHeight - 340);
         let s: number = this._dockedSpecBox.plotSize;
         this._dockedSpecBox.setSize(s + 55, s * 2 + 51);
     }
@@ -1350,7 +1358,7 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    public get constraintCount(): number | null{
+    public get constraintCount(): number | null {
         return this._puzzle.constraints ? this._puzzle.constraints.length : null;
     }
 
@@ -1364,6 +1372,14 @@ export default class PoseEditMode extends GameMode {
 
     public setAncestorId(id: number): void {
         this._ancestorId = id;
+    }
+
+    public set solutionView(foo: ViewSolutionOverlay | undefined) {
+        this._solutionView = foo;
+    }
+
+    public get solutionView(): ViewSolutionOverlay | undefined {
+        return this._solutionView;
     }
 
     /* override */
@@ -3324,6 +3340,8 @@ export default class PoseEditMode extends GameMode {
     private _submitSolutionRspData: SubmitSolutionData | null;
 
     private _nucleotideRangeToShow: [number, number] | null = null;
+
+    private _solutionView?: ViewSolutionOverlay;
 
     private static readonly FOLDING_LOCK = 'Folding';
 }

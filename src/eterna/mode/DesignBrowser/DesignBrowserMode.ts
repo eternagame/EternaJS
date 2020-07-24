@@ -950,7 +950,9 @@ export default class DesignBrowserMode extends GameMode {
         if (existingPoseEditMode != null && existingPoseEditMode.puzzleID === this.puzzleID) {
             this.pushUILock();
             Eterna.app.switchToPoseEdit(this._puzzle, true)
-                .then(() => this.popUILock())
+                .then(() => {
+                    this.popUILock();
+                })
                 .catch((e) => {
                     log.error(e);
                     this.popUILock();

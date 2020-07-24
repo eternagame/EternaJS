@@ -78,6 +78,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
     constructor(props: ViewSolutionOverlayProps) {
         super();
         this._props = props;
+        this._parentMode = props.parentMode;
     }
 
     public showSolution(solution: Solution) {
@@ -106,7 +107,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         const closeButton = new GameButton().allStates(closeButtonIcon);
         closeButton.clicked.connect(() => {
             this.container.visible = false;
-            this._props.parentMode.onResized(); // public unlike updateLayout
+            this._parentMode.onResized(); // public unlike updateLayout
         });
         closeButton.container.position = new Point(
             theme.width - theme.margin.right - closeButtonIcon.width,
@@ -167,6 +168,14 @@ export default class ViewSolutionOverlay extends ContainerObject {
         })();
         this._voteButton.updateView({text: {text}, icon});
         this._voteButton.tooltip(toolTip);
+    }
+
+    public set parentMode(foo: GameMode) {
+        this._parentMode = foo;
+    }
+
+    public get parentMode(): GameMode {
+        return this._parentMode;
     }
 
     private populate() {
@@ -651,4 +660,5 @@ export default class ViewSolutionOverlay extends ContainerObject {
     private _contentLayout: VLayoutContainer;
     private _voteButton: ButtonWithIcon;
     private _footer: VLayoutContainer;
+    private _parentMode: GameMode;
 }
