@@ -891,9 +891,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
         let mutated: number[];
         let segment: number[];
         if (ofs === 1) {
+            // obtain the segment you are trying to move, plus one 3' base
             segment = this._sequence.slice(first, last + 1 + 1);
+            // remove the base from the 3' end
             const base = segment.pop();
             Assert.assertIsDefined(base);
+            // put the base on the 5' end
             segment.unshift(base);
             mutated = this._sequence.slice(0, first)
                 .concat(segment)
@@ -910,6 +913,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._mutatedSequence = this.fullSequence.slice();
         this.setMutated(mutated);
         this.doneColoring();
+        this._shiftHighlightBox.clear();
         this._shiftHighlightBox.setHighlight([first + ofs, last + ofs]);
     }
 
