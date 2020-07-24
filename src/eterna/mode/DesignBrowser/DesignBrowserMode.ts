@@ -321,7 +321,10 @@ export default class DesignBrowserMode extends GameMode {
         this._vSlider.display.position = new Point(this.contentWidth + 5, 50);
         this._vSlider.setSize(0, this.contentHeight - 70 - solDialogOffset);
 
-        this._gridLines.setSize(this.contentWidth - 10, this.contentHeight - this._gridLines.position.y);
+        this._gridLines.setSize(
+            this.contentWidth - 10 - solDialogOffset,
+            this.contentHeight - this._gridLines.position.y
+        );
         this._maskBox.setSize(this.contentWidth - 14 - solDialogOffset, this.contentHeight - 10);
         this._markerBoxes.setSize(this.contentWidth - 14 - solDialogOffset, this.contentHeight - 10);
 
@@ -336,7 +339,7 @@ export default class DesignBrowserMode extends GameMode {
 
         DisplayUtil.positionRelativeToStage(
             this._toolbarLayout, HAlign.RIGHT, VAlign.TOP,
-            HAlign.RIGHT, VAlign.TOP, -24, 40
+            HAlign.RIGHT, VAlign.TOP, -24 - solDialogOffset, 40
         );
     }
 
