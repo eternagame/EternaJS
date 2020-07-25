@@ -32,6 +32,7 @@ import MarkerBoxView from './MarkerBoxView';
 import GridLines from './GridLines';
 import DataCol from './DataCol';
 import CustomizeColumnOrderDialog from './CustomizeColumnOrderDialog';
+import PoseEditMode from '../PoseEdit/PoseEditMode';
 
 export interface DBVote {
     canVote: boolean;
@@ -382,11 +383,42 @@ export default class DesignBrowserMode extends GameMode {
 
     private async switchToPoseEditForSolution(solution: Solution): Promise<void> {
         this.pushUILock();
-
+        const switchSolution = (newIndex: number) => {
+            const newSolution = this.getSolutionAtIndex(newIndex);
+            if (newSolution != null) {
+                this._currentSolutionIndex = newIndex;
+                Assert.assertIsDefined(this._solutionView);
+                this._solutionView.showSolution(newSolution);
+                const {designBrowser: theme} = UITheme;
+                const rowIndex = this._currentSolutionIndex - this._firstVisSolutionIdx;
+                if (rowIndex >= 0) {
+                    this.updateSelectionBoxPos(rowIndex);
+                }
+            }
+        };
         try {
             await Eterna.app.switchToPoseEdit(
                 this._puzzle, false, {initSolution: solution, solutions: this._filteredSolutions.slice()}
             );
+            const newPEM = Eterna.app.modeStack.topMode as PoseEditMode;
+
+            newPEM.solutionView = new ViewSolutionOverlay({
+                solution,
+                puzzle: this._puzzle,
+                voteDisabled: this._novote,
+                onPrevious: () => switchSolution(Math.max(0, this._currentSolutionIndex - 1)),
+                onNext: () => {
+                    const nextSolutionIndex = Math.min(
+                        this._filteredSolutions.length - 1,
+                        this._currentSolutionIndex + 1
+                    );
+                    switchSolution(nextSolutionIndex);
+                },
+                parentMode: (() => this)()
+            });
+            this.addObject(newPEM.solutionView, newPEM.contextMenuLayer);
+            newPEM.onResized();
+            newPEM.solutionView.showSolution(solution);
         } catch (e) {
             log.error(e);
         } finally {
