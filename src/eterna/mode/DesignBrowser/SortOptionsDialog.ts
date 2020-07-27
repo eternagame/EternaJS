@@ -55,7 +55,7 @@ export default class SortOptionsDialog extends Dialog<void> {
 
         this._curCategoryText = new FixedWidthTextField(
             this.options.validCategories[0],
-            Fonts.stdBold('', 17).color(0xffffff).style,
+            Fonts.std('', 17).bold().color(0xffffff).style,
             140, HAlign.CENTER
         );
         addCriterionLayout.addChild(this._curCategoryText);
@@ -109,7 +109,7 @@ export default class SortOptionsDialog extends Dialog<void> {
         this._sortCriteriaLayout.addChild(ui.container);
         Arrays.addAt(this._criteriaUI, ui, idx);
 
-        ui.categoryText = Fonts.stdBold(category, 14).color(0xffffff).build();
+        ui.categoryText = Fonts.std(category, 14).bold().color(0xffffff).build();
         ui.categoryText.position = new Point(10, 0);
         ui.container.addChild(ui.categoryText);
 

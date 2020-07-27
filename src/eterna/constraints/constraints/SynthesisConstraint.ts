@@ -46,7 +46,7 @@ export default class SynthesisConstraint extends Constraint<SynthConstraintStatu
             statText = 'ok';
         } else {
             statText = new StyledTextBuilder({
-                fontFamily: Fonts.ARIAL,
+                fontFamily: Fonts.STDFONT,
                 fontSize: 11,
                 fill: 0xC0DCE7,
                 letterSpacing: -0.5

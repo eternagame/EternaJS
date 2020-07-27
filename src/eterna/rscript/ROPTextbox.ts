@@ -54,7 +54,7 @@ export default class ROPTextbox extends RScriptOp {
         this._env.setVar(this._id, textBox);
 
         let textStyle: TextStyleExtended = {
-            fontFamily: Fonts.ARIAL,
+            fontFamily: Fonts.STDFONT,
             fontSize: 13,
             fill: 0xC0DCE7
 

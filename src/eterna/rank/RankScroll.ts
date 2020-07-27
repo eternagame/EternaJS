@@ -276,7 +276,7 @@ export default class RankScroll extends ContainerObject {
         this.addObject(this._playerRow, this.container);
 
         this._tfRankOffset = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgRankBubble));
-        const rankText = Fonts.stdRegular(`+${this._rankOffset}`, 20).color(0).bold().build();
+        const rankText = Fonts.std(`+${this._rankOffset}`, 20).color(0).bold().build();
         rankText.position = new Point(
             (this._tfRankOffset.width - rankText.width) / 2,
             (this._tfRankOffset.height - rankText.height) / 2

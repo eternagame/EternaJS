@@ -63,7 +63,7 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
 
         this._curCategoryText = new FixedWidthTextField(
             this._allColumnCategories[0],
-            Fonts.stdBold('', 17).color(0xffffff).style,
+            Fonts.std('', 17).bold().color(0xffffff).style,
             140, HAlign.CENTER
         );
         addCriterionLayout.addChild(this._curCategoryText);
@@ -122,7 +122,7 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
         this._columnUILayout.addChild(ui.container);
         Arrays.addAt(this._columnUIs, ui, idx);
 
-        ui.categoryText = Fonts.stdBold(category, 14).color(0xffffff).build();
+        ui.categoryText = Fonts.std(category, 14).bold().color(0xffffff).build();
         ui.categoryText.position = new Point(10, 0);
         ui.categoryText.alpha = this.isDisabled(category) ? 0.3 : 1;
         ui.container.addChild(ui.categoryText);

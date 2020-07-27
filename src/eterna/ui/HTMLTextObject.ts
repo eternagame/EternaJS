@@ -1,5 +1,6 @@
 import {DOMObject} from 'flashbang';
 import Eterna from 'eterna/Eterna';
+import {FontWeight} from 'flashbang/util/TextBuilder';
 
 /** A <p> object in the DOM that contains the given HTML. Floats on top of the PIXI canvas. */
 export default class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
@@ -60,7 +61,7 @@ export default class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
     }
 
     public bold(): HTMLTextObject {
-        return this.fontWeight('bold');
+        return this.fontWeight(FontWeight.BOLD);
     }
 
     public hAlign(align: 'left' | 'center' | 'right' | 'justify'): HTMLTextObject {

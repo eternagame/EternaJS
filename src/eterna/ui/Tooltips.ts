@@ -15,7 +15,7 @@ export type Tooltip = (() => DisplayObject) | string | StyledTextBuilder;
 export default class Tooltips extends GameObject {
     /** Default text style for tooltips */
     public static readonly DEFAULT_STYLE: TextStyleExtended = {
-        fontFamily: Fonts.ARIAL,
+        fontFamily: Fonts.STDFONT,
         fontSize: 15,
         fill: 0xC0DCE7
     };

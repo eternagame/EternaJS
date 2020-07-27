@@ -13,6 +13,7 @@ import {
 import Fonts from 'eterna/util/Fonts';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import EternaURL from 'eterna/net/EternaURL';
+import {FontWeight} from 'flashbang/util/TextBuilder';
 import GameButton from './GameButton';
 import GamePanel from './GamePanel';
 import HTMLTextObject from './HTMLTextObject';
@@ -40,14 +41,14 @@ export default class SpecBox extends ContainerObject {
         this._dotplotScaleLevel = 1;
 
         // / Dotplot h0
-        this._h0 = Fonts.arial('A', 12).color(0xffffff).build();
+        this._h0 = Fonts.std('A', 12).color(0xffffff).build();
 
         // / Meltplot h0
-        this._h0Melt = Fonts.arial('37°C', 12).color(0xffffff).build();
-        this._hnMelt = Fonts.arial('97°C', 12).color(0xffffff).build();
-        this._v0 = Fonts.arial('1', 12).color(0xffffff).build();
-        this._v0Melt = Fonts.arial('0%', 12).color(0xffffff).build();
-        this._vnMelt = Fonts.arial('100%', 12).color(0xffffff).build();
+        this._h0Melt = Fonts.std('37°C', 12).color(0xffffff).build();
+        this._hnMelt = Fonts.std('97°C', 12).color(0xffffff).build();
+        this._v0 = Fonts.std('1', 12).color(0xffffff).build();
+        this._v0Melt = Fonts.std('0%', 12).color(0xffffff).build();
+        this._vnMelt = Fonts.std('100%', 12).color(0xffffff).build();
 
         this.container.addChild(this._h0);
         this.container.addChild(this._h0Melt);
@@ -73,7 +74,7 @@ export default class SpecBox extends ContainerObject {
         } else {
             this._stattext = new MultiStyleText('', {
                 default: {
-                    fontFamily: Fonts.ARIAL,
+                    fontFamily: Fonts.STDFONT,
                     fontSize: 14,
                     fill: 0xffffff
                 }
@@ -82,13 +83,13 @@ export default class SpecBox extends ContainerObject {
 
             let url = EternaURL.createURL({page: 'manual'});
             let helpText = `<A HREF="${url}" target="_blank"><U><FONT COLOR="#FFFFFF"><B>What are these parameters?</B></FONT></U></A>`;
-            this._helpText = new HTMLTextObject(helpText).font(Fonts.ARIAL).fontSize(14).color(0xffffff);
+            this._helpText = new HTMLTextObject(helpText).font(Fonts.STDFONT).fontSize(14).color(0xffffff);
             this.addObject(this._helpText, this.container);
 
-            this._dotplottext = Fonts.arial('Pairing probabilities plot', 12).color(0xffffff).build();
+            this._dotplottext = Fonts.std('Pairing probabilities plot', 12).color(0xffffff).build();
             this.container.addChild(this._dotplottext);
 
-            this._meltplottext = Fonts.arial('Melt plot (% of unpaired bases)', 12).color(0xffffff).build();
+            this._meltplottext = Fonts.std('Melt plot (% of unpaired bases)', 12).color(0xffffff).build();
             this.container.addChild(this._meltplottext);
 
             this._zoomInButton = new GameButton()
@@ -144,7 +145,7 @@ export default class SpecBox extends ContainerObject {
 
         if (this._stattext !== undefined) {
             let statString = new StyledTextBuilder({
-                fontFamily: Fonts.ARIAL,
+                fontFamily: Fonts.STDFONT,
                 fontSize: 14,
                 fill: 0xffffff
             }).addStyle('bold', {
@@ -183,11 +184,11 @@ export default class SpecBox extends ContainerObject {
 
         // initialize h1 ~ hn-1, v1 ~ vn-1
         for (let ii = SpecBox.OFFSET; ii <= (this._datasize / SpecBox.OFFSET) * SpecBox.OFFSET; ii += SpecBox.OFFSET) {
-            let hnew: Text = Fonts.arial(String.fromCharCode(65 + (ii / SpecBox.OFFSET)), 12).color(0xffffff).build();
+            let hnew: Text = Fonts.std(String.fromCharCode(65 + (ii / SpecBox.OFFSET)), 12).color(0xffffff).build();
             this._hvec.push(hnew);
             this.container.addChild(hnew);
 
-            let vnew: Text = Fonts.arial(`${(ii / SpecBox.OFFSET) * 10}`, 12).color(0xffffff).build();
+            let vnew: Text = Fonts.std(`${(ii / SpecBox.OFFSET) * 10}`, 12).color(0xffffff).build();
             this._vvec.push(vnew);
             this.container.addChild(vnew);
         }

@@ -23,6 +23,7 @@ import int from 'eterna/util/int';
 import EternaURL from 'eterna/net/EternaURL';
 import UITheme from 'eterna/ui/UITheme';
 import {AchievementData} from 'eterna/achievements/AchievementManager';
+import {FontWeight} from 'flashbang/util/TextBuilder';
 import VoteProcessor from './VoteProcessor';
 import ViewSolutionOverlay from './ViewSolutionOverlay';
 import SortOptionsDialog from './SortOptionsDialog';
@@ -99,12 +100,12 @@ export default class DesignBrowserMode extends GameMode {
 
         this._votesText = new MultiStyleText('You have...', {
             default: {
-                fontFamily: Fonts.STDFONT_REGULAR,
+                fontFamily: Fonts.STDFONT,
                 fontSize: 14,
                 fill: 0xffffff
             },
             bold: {
-                fontStyle: 'bold'
+                fontStyle: FontWeight.BOLD
             }
         });
         this._votesText.position = new Point(59, 52);
@@ -262,7 +263,7 @@ export default class DesignBrowserMode extends GameMode {
         this.uiLayer.addChild(homeArrow);
 
         let puzzleTitle = new HTMLTextObject(this._puzzle.getName(true))
-            .font(Fonts.ARIAL)
+            .font(Fonts.STDFONT)
             .fontSize(14)
             .bold()
             .selectable(false)
@@ -449,7 +450,7 @@ export default class DesignBrowserMode extends GameMode {
     }
 
     private static createStatusText(text: string): SceneObject<Text> {
-        let statusText = new SceneObject<Text>(Fonts.arial(text, 22).color(0xffffff).bold().build());
+        let statusText = new SceneObject<Text>(Fonts.std(text, 22).color(0xffffff).bold().build());
         statusText.addObject(new RepeatingTask(() => new SerialTask(
             new AlphaTask(0, 0.3),
             new AlphaTask(1, 0.3)
@@ -785,7 +786,7 @@ export default class DesignBrowserMode extends GameMode {
     }
 
     private rebuildDataColumns(filters: DesignBrowserFilter[] | null = null): void {
-        const FONT = Fonts.STDFONT_REGULAR;
+        const FONT = Fonts.STDFONT;
         const FONT_SIZE = 12;
 
         if (this._dataCols != null) {

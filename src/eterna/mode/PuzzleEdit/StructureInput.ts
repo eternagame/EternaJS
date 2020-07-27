@@ -28,7 +28,7 @@ export default class StructureInput extends GamePanel implements Updatable {
         super.added();
 
         this._textInput = new TextInputObject({fontSize: 20})
-            .font(Fonts.ARIAL)
+            .font(Fonts.STDFONT)
             .disallow(/[^.()]/g)
             .bold();
         this.addObject(this._textInput, this.container);

@@ -55,7 +55,7 @@ export default class HelpToolTips {
                         };
 
                         const makeText = (text: string) => {
-                            const builder = Fonts.stdRegular(text).color(0);
+                            const builder = Fonts.std(text).color(0);
                             const metrics = PIXI.TextMetrics.measureText(text, builder.style);
                             const textElem = builder.build();
                             textElem.position = new Point(

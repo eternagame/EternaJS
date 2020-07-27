@@ -54,7 +54,7 @@ export default class HelpToolTip extends ContainerObject {
         this._positioner = props.positioner;
 
         // Text
-        const textBuilder = Fonts.stdBold(props.text).fontSize(theme.fontSize).color(0);
+        const textBuilder = Fonts.std(props.text, theme.fontSize).bold().color(0);
         const textMetrics = PIXI.TextMetrics.measureText(props.text, textBuilder.style);
         const textElem = textBuilder.build();
 

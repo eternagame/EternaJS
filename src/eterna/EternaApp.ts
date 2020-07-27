@@ -1,4 +1,4 @@
-import 'assets/styles.css'; // css-loader will pick up on this and embed our stylesheet
+import 'assets/Styles/styles.css'; // css-loader will pick up on this and embed our stylesheet
 import {settings, Application} from 'pixi.js';
 import * as log from 'loglevel';
 import {

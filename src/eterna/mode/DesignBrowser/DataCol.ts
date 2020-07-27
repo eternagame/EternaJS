@@ -261,7 +261,7 @@ export default class DataCol extends ContainerObject {
 
         for (let ii = 0; ii < this._dataWidth / 280; ii++) {
             let gridstring = `${ii * 20 + 20}`;
-            let gridtext = Fonts.arial(gridstring, 10).bold().build();
+            let gridtext = Fonts.std(gridstring, 10).bold().build();
             gridtext.position = new Point(300 + ii * 280 - gridstring.length * 3.5, 80);
             this._gridNumbers.addChild(gridtext);
         }

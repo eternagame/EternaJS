@@ -304,7 +304,7 @@ export default class PoseEditMode extends GameMode {
         Assert.assertIsDefined(this.regs);
         this.regs.add(this._exitButton.clicked.connect(() => this.exitPuzzle()));
 
-        this._targetName = Fonts.stdRegular('', 18).build();
+        this._targetName = Fonts.std('', 18).build();
         this._targetName.visible = false;
         this.uiLayer.addChild(this._targetName);
 
@@ -328,7 +328,7 @@ export default class PoseEditMode extends GameMode {
         this.container.addChild(homeArrow);
 
         // Async text shows above our UI lock, and right below all dialogs
-        this._asynchText = Fonts.arial('folding...', 12).bold().color(0xffffff).build();
+        this._asynchText = Fonts.std('folding...', 12).bold().color(0xffffff).build();
         this._asynchText.position = new Point(16, 200);
         this.dialogLayer.addChild(this._asynchText);
         this.hideAsyncText();
@@ -756,7 +756,7 @@ export default class PoseEditMode extends GameMode {
         this.addObject(this._exitButton, this.uiLayer);
 
         let puzzleTitle = new HTMLTextObject(this._puzzle.getName(!Eterna.MOBILE_APP))
-            .font(Fonts.STDFONT_BOLD)
+            .font(Fonts.STDFONT)
             .fontSize(14)
             .bold()
             .selectable(false)
@@ -765,7 +765,7 @@ export default class PoseEditMode extends GameMode {
         this.addObject(puzzleTitle, this.uiLayer);
         puzzleTitle.display.position = new Point(57, 8);
 
-        this._solutionNameText = Fonts.arial('', 14).bold().color(0xc0c0c0).build();
+        this._solutionNameText = Fonts.std('', 14).bold().color(0xc0c0c0).build();
         this.uiLayer.addChild(this._solutionNameText);
 
         this._constraintsLayer.visible = true;
@@ -1487,7 +1487,7 @@ export default class PoseEditMode extends GameMode {
             + `Puzzle ID: ${this._puzzle.nodeID}\n`
             + `Puzzle Title: ${this._puzzle.getName()}\n`
             + `Mode: ${this.toolbar.naturalButton.isSelected ? 'NativeMode' : 'TargetMode'}`;
-        let infoText = Fonts.arial(info).color(0xffffff).build();
+        let infoText = Fonts.std(info).color(0xffffff).build();
         this.container.addChild(infoText);
 
         let pngData = DisplayUtil.renderToPNG(this.container);

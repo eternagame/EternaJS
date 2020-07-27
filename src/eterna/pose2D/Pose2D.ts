@@ -1168,7 +1168,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         yPos /= stackLen * 2;
 
         let praiseText = stackLen > 1 ? 'Great Pairings!' : 'Great Pairing!';
-        let praiseObj = new SceneObject(Fonts.arial(praiseText, 20).bold().color(0xffffff).build());
+        let praiseObj = new SceneObject(Fonts.std(praiseText, 20).bold().color(0xffffff).build());
         praiseObj.display.position = new Point(xPos - DisplayUtil.width(praiseObj.display) * 0.5, yPos);
         this.addObject(praiseObj, this.container);
 

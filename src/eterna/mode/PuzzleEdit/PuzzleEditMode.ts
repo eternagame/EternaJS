@@ -438,7 +438,7 @@ export default class PuzzleEditMode extends GameMode {
 
         let info = `Player: ${Eterna.playerName}\n`
             + 'Player Puzzle Designer';
-        let infoText = Fonts.arial(info, 12).color(0xffffff).build();
+        let infoText = Fonts.std(info, 12).color(0xffffff).build();
         this.container.addChild(infoText);
 
         let pngData = DisplayUtil.renderToPNG(this.container);

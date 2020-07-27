@@ -11,7 +11,7 @@ export default class BitmapManager {
     }
 
     public static getNumberBitmap(ii: number, color: number = 0xffffff): Texture {
-        return BitmapManager.getTextBitmapImpl(ii.toString(), Fonts.ARIAL, 14, false, color);
+        return BitmapManager.getTextBitmapImpl(ii.toString(), Fonts.STDFONT, 14, false, color);
     }
 
     public static rowMissionBitmapNucl(c: string): Texture {
@@ -195,7 +195,7 @@ export default class BitmapManager {
     }
 
     public static getTextBitmap(txt: string, color: number = 0xffffff): Texture {
-        return BitmapManager.getTextBitmapImpl(txt, Fonts.ARIAL, 12, true, color);
+        return BitmapManager.getTextBitmapImpl(txt, Fonts.STDFONT, 12, true, color);
     }
 
     private static getTextBitmapImpl(

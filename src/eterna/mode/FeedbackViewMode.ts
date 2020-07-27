@@ -45,11 +45,11 @@ export default class FeedbackViewMode extends GameMode {
         let background = new Background();
         this.addObject(background, this.bgLayer);
 
-        this._puzzleTitle = Fonts.arial(this._puzzle.getName(false), 14).color(0xffffff).bold().build();
+        this._puzzleTitle = Fonts.std(this._puzzle.getName(false), 14).color(0xffffff).bold().build();
         this._puzzleTitle.position = new Point(33, 8);
         this.uiLayer.addChild(this._puzzleTitle);
 
-        this._title = Fonts.arial('', 12).color(0xffffff).bold().build();
+        this._title = Fonts.std('', 12).color(0xffffff).bold().build();
         this._title.position = new Point(33, 30);
         this.uiLayer.addChild(this._title);
 
@@ -275,7 +275,7 @@ export default class FeedbackViewMode extends GameMode {
         let info = `Designer: ${this._solution.playerName}\n`
             + `Design ID: ${this._solution.nodeID}\n`
             + `Design Title: ${this._solution.title}\n`;
-        let infoText = Fonts.arial(info).color(0xffffff).build();
+        let infoText = Fonts.std(info).color(0xffffff).build();
         this.container.addChild(infoText);
 
         DisplayUtil.positionRelativeToStage(

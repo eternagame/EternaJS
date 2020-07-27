@@ -80,7 +80,7 @@ export default class AchievementBox extends ContainerObject {
         this.container.addChild(background);
 
         // Title
-        const title = Fonts.stdBold('NEW ACHIEVEMENT', 20).color(0xFFFFFF).build();
+        const title = Fonts.std('NEW ACHIEVEMENT', 20).bold().color(0xFFFFFF).build();
         title.position = new Point(
             (theme.size.x - title.width) / 2,
             (theme.headerHeight - title.height) / 2
@@ -121,7 +121,7 @@ export default class AchievementBox extends ContainerObject {
 
         // Description
         this._descriptionTxt = new StyledTextBuilder({
-            fontFamily: Fonts.STDFONT_REGULAR,
+            fontFamily: Fonts.STDFONT,
             fill: 0xFFFFFF,
             fontSize: 18,
             wordWrap: true,
