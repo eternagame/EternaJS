@@ -408,25 +408,6 @@ export default class DesignBrowserMode extends GameMode {
             await Eterna.app.switchToPoseEdit(
                 this._puzzle, false, {initSolution: solution, solutions: this._filteredSolutions.slice()}
             );
-            const newPEM = Eterna.app.modeStack.topMode as PoseEditMode;
-
-            newPEM.solutionView = new ViewSolutionOverlay({
-                solution,
-                puzzle: this._puzzle,
-                voteDisabled: this._novote,
-                onPrevious: () => switchSolution(Math.max(0, this._currentSolutionIndex - 1)),
-                onNext: () => {
-                    const nextSolutionIndex = Math.min(
-                        this._filteredSolutions.length - 1,
-                        this._currentSolutionIndex + 1
-                    );
-                    switchSolution(nextSolutionIndex);
-                },
-                parentMode: (() => this)()
-            });
-            this.addObject(newPEM.solutionView, newPEM.contextMenuLayer);
-            newPEM.onResized();
-            newPEM.solutionView.showSolution(solution);
         } catch (e) {
             log.error(e);
         } finally {

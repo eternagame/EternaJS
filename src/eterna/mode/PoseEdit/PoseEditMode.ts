@@ -170,7 +170,13 @@ export default class PoseEditMode extends GameMode {
             onHelpClicked: () => this.onHelpClicked(),
             onChatClicked: () => {
                 Eterna.settings.showChat.value = !Eterna.settings.showChat.value;
-            }
+            },
+            onInfoClicked: this._params.initSolution ? () => {
+                if (this._solutionView) {
+                    this._solutionView.showSolution(this._curSolution);
+                    this.onResized();
+                }
+            } : undefined
         });
         this.addObject(this._helpBar, this.uiLayer);
 
@@ -360,10 +366,17 @@ export default class PoseEditMode extends GameMode {
         this._asynchText.visible = false;
     }
 
-    private updateUILayout(): void {
-        const solDialogOffset = this._solutionView !== undefined && this._solutionView.container.visible
+    private get _solDialogOffset() {
+        return this._solutionView !== undefined && this._solutionView.container.visible
             ? ViewSolutionOverlay.theme.width : 0;
+    }
 
+    protected get posesWidth() {
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        return Flashbang.stageWidth - this._solDialogOffset;
+    }
+
+    private updateUILayout(): void {
         DisplayUtil.positionRelativeToStage(
             this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
             HAlign.CENTER, VAlign.BOTTOM, 20, -20
@@ -384,14 +397,14 @@ export default class PoseEditMode extends GameMode {
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
         this._exitButton.display.position = new Point(
-            Flashbang.stageWidth - 85 - solDialogOffset,
+            Flashbang.stageWidth - 85 - this._solDialogOffset,
             Flashbang.stageHeight - 60
         );
-        this._undockSpecBoxButton.display.position = new Point(Flashbang.stageWidth - 22 - solDialogOffset, 5);
+        this._undockSpecBoxButton.display.position = new Point(Flashbang.stageWidth - 22 - this._solDialogOffset, 5);
 
         this._constraintBar.layout();
 
-        this._dockedSpecBox.setSize(Flashbang.stageWidth - solDialogOffset, Flashbang.stageHeight - 340);
+        this._dockedSpecBox.setSize(Flashbang.stageWidth - this._solDialogOffset, Flashbang.stageHeight - 340);
         let s: number = this._dockedSpecBox.plotSize;
         this._dockedSpecBox.setSize(s + 55, s * 2 + 51);
     }
@@ -873,6 +886,15 @@ export default class PoseEditMode extends GameMode {
             initialSequence = EPars.stringToSequence(this._params.initSolution.sequence);
             this._curSolution = this._params.initSolution;
             this.updateSolutionNameText(this._curSolution);
+            this._solutionView = new ViewSolutionOverlay({
+                solution: this._params.initSolution,
+                puzzle: this._puzzle,
+                voteDisabled: false,
+                onPrevious: () => this.showNextSolution(-1),
+                onNext: () => this.showNextSolution(1),
+                parentMode: (() => this)()
+            });
+            this.addObject(this._solutionView, this.dialogLayer);
         } else if (this._params.initSequence != null) {
             initialSequence = EPars.stringToSequence(this._params.initSequence);
         }
@@ -1310,6 +1332,9 @@ export default class PoseEditMode extends GameMode {
         const solution = this._params.solutions[nextSolutionIdx];
         Assert.notNull(solution);
         this.showSolution(solution);
+        if (this._solutionView && this._solutionView.container.visible) {
+            this._solutionView.showSolution(solution);
+        }
     }
 
     /* override */
@@ -1372,14 +1397,6 @@ export default class PoseEditMode extends GameMode {
 
     public setAncestorId(id: number): void {
         this._ancestorId = id;
-    }
-
-    public set solutionView(foo: ViewSolutionOverlay | undefined) {
-        this._solutionView = foo;
-    }
-
-    public get solutionView(): ViewSolutionOverlay | undefined {
-        return this._solutionView;
     }
 
     /* override */
