@@ -311,7 +311,7 @@ export default class DesignBrowserMode extends GameMode {
 
     private get contentHeight(): number {
         Assert.assertIsDefined(Flashbang.stageHeight);
-        return Flashbang.stageHeight - 170;
+        return Flashbang.stageHeight - 120;
     }
 
     private get _solDialogOffset() {
