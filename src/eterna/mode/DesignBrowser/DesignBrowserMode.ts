@@ -306,7 +306,7 @@ export default class DesignBrowserMode extends GameMode {
 
     private get contentWidth(): number {
         Assert.assertIsDefined(Flashbang.stageWidth);
-        return Flashbang.stageWidth - 40;
+        return Flashbang.stageWidth - this._solDialogOffset - 40;
     }
 
     private get contentHeight(): number {
@@ -314,34 +314,41 @@ export default class DesignBrowserMode extends GameMode {
         return Flashbang.stageHeight - 170;
     }
 
-    private updateLayout(): void {
-        const solDialogOffset = this._solutionView !== undefined && this._solutionView.container.visible
+    private get _solDialogOffset() {
+        return this._solutionView !== undefined && this._solutionView.container.visible
             ? ViewSolutionOverlay.theme.width : 0;
+    }
+
+    private updateLayout(): void {
         this._hSlider.display.position = new Point(30, this.contentHeight + 3);
-        this._hSlider.setSize(this.contentWidth - 60 - solDialogOffset, 0);
+        this._hSlider.setSize(this.contentWidth - 60, 0);
+        // If we don't do this, we can be in a situation where the horizontal position
+        // of the content won't be synced with the scrollbar, due to showing/hiding
+        // the solution sidebar
+        this._hSlider.setProgress(this._hSlider.getProgress());
 
         this._vSlider.display.position = new Point(this.contentWidth + 5, 50);
-        this._vSlider.setSize(0, this.contentHeight - 70 - solDialogOffset);
+        this._vSlider.setSize(0, this.contentHeight - 70);
 
         this._gridLines.setSize(
-            this.contentWidth - 10 - solDialogOffset,
+            this.contentWidth - 10,
             this.contentHeight - this._gridLines.position.y
         );
-        this._maskBox.setSize(this.contentWidth - 14 - solDialogOffset, this.contentHeight - 10);
-        this._markerBoxes.setSize(this.contentWidth - 14 - solDialogOffset, this.contentHeight - 10);
+        this._maskBox.setSize(this.contentWidth - 14, this.contentHeight - 10);
+        this._markerBoxes.setSize(this.contentWidth - 14, this.contentHeight - 10);
 
         const {designBrowser: theme} = UITheme;
-        this._selectionBox.setSize(this.contentWidth - 14 - solDialogOffset, theme.rowHeight);
+        this._selectionBox.setSize(this.contentWidth - 14, theme.rowHeight);
 
         if (this._dataCols != null) {
             for (let col of this._dataCols) {
-                col.setSize(this.contentWidth - solDialogOffset, this.contentHeight);
+                col.setSize(this.contentWidth, this.contentHeight);
             }
         }
 
         DisplayUtil.positionRelativeToStage(
             this._toolbarLayout, HAlign.RIGHT, VAlign.TOP,
-            HAlign.RIGHT, VAlign.TOP, -24 - solDialogOffset, 40
+            HAlign.RIGHT, VAlign.TOP, -24 - this._solDialogOffset, 40
         );
     }
 
@@ -566,7 +573,6 @@ export default class DesignBrowserMode extends GameMode {
                     this._currentSolutionIndex = newIndex;
                     Assert.assertIsDefined(this._solutionView);
                     this._solutionView.showSolution(newSolution);
-                    const {designBrowser: theme} = UITheme;
                     const rowIndex = this._currentSolutionIndex - this._firstVisSolutionIdx;
                     if (rowIndex >= 0) {
                         this.updateSelectionBoxPos(rowIndex);
@@ -589,7 +595,6 @@ export default class DesignBrowserMode extends GameMode {
                 parentMode: (() => this)()
             });
             this.addObject(this._solutionView, this.dialogLayer);
-            this.updateLayout();
 
             // This just got newed, and this.addObject can't stop that.
             Assert.assertIsDefined(this._solutionView);
@@ -605,6 +610,8 @@ export default class DesignBrowserMode extends GameMode {
         } else {
             this._solutionView.showSolution(solution);
         }
+
+        this.updateLayout();
     }
 
     private onMouseMove(): void {
