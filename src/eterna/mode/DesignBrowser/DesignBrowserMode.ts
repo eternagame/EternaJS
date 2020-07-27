@@ -787,7 +787,7 @@ export default class DesignBrowserMode extends GameMode {
 
     private rebuildDataColumns(filters: DesignBrowserFilter[] | null = null): void {
         const FONT = Fonts.STDFONT;
-        const FONT_SIZE = 12;
+        const FONT_SIZE = 15;
 
         if (this._dataCols != null) {
             for (let dataCol of this._dataCols) {
