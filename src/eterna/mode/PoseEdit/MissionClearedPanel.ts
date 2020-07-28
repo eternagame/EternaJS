@@ -68,7 +68,7 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
         this._widthEnforcer = new Graphics();
         this._contentLayout.addChild(this._widthEnforcer);
 
-        const title = Fonts.stdBold('MISSION ACCOMPLISHED!', 20).color(0xFFCC00).build();
+        const title = Fonts.std('MISSION ACCOMPLISHED!', 20).bold().color(0xFFCC00).build();
         this._contentLayout.addChild(title);
 
         this._infoContainer = new VLayoutContainer(25, HAlign.LEFT);
@@ -96,7 +96,7 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
         Assert.assertIsDefined(Flashbang.stageHeight);
         const infoText = MissionClearedPanel.processHTML(this._infoText);
         const infoObj = new HTMLTextObject(infoText, panelWidth - MissionClearedPanel.PADDING_RIGHT, this._infoWrapper)
-            .font(Fonts.STDFONT_REGULAR)
+            .font(Fonts.STDFONT)
             .fontSize(Flashbang.stageHeight < 512 ? 14 : 18)
             .color(0xffffff)
             .lineHeight(1.2)
@@ -107,7 +107,7 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
 
         if (this._moreText != null) {
             const moreTextObj = new HTMLTextObject(this._moreText, panelWidth - MissionClearedPanel.PADDING_RIGHT)
-                .font(Fonts.STDFONT_REGULAR)
+                .font(Fonts.STDFONT)
                 .fontSize(16)
                 .color(0xffffff)
                 .lineHeight(1.2)
@@ -124,15 +124,15 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
         this._rankScrollHeading = new GamePanel(GamePanelType.NORMAL, 1.0, 0x2D4159);
         this.addObject(this._rankScrollHeading, this._rankScrollContainer);
 
-        this._tfPlayer = Fonts.stdBold('PLAYER', 14).bold().color(0xffffff).build();
+        this._tfPlayer = Fonts.std('PLAYER', 14).bold().color(0xffffff).build();
         this._tfPlayer.position = new Point(10, 2);
         this._rankScrollHeading.container.addChild(this._tfPlayer);
 
-        let tfRank: Text = Fonts.stdBold('RANK', 14).bold().color(0xffffff).build();
+        let tfRank: Text = Fonts.std('RANK', 14).bold().color(0xffffff).build();
         tfRank.position = new Point(10 + 130, 2);
         this._rankScrollHeading.container.addChild(tfRank);
 
-        let tfCoin: Text = Fonts.stdBold('POINTS', 14).bold().color(0xffffff).build();
+        let tfCoin: Text = Fonts.std('POINTS', 14).bold().color(0xffffff).build();
         tfCoin.position = new Point(10 + 130 + 85, 2);
         this._rankScrollHeading.container.addChild(tfCoin);
 
@@ -273,7 +273,6 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
     private drawMask(): void {
         const {theme} = MissionClearedPanel;
         this._infoMask.clear();
-        this._infoMask.alpha = 0;
         this._infoMask.beginFill(0x00FF00);
         this._infoMask.drawRect(
             0,

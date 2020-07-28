@@ -140,11 +140,10 @@ export class MultistrandBindingsConstraint extends BindingsConstraint<Multistran
         }
 
         let stateCondition = context.targetConditions[this.stateIndex];
-
         Assert.assertIsDefined(stateCondition, 'Target condition not available for BINDINGS constraint');
 
         const oligos: OligoDef[] | undefined = stateCondition['oligos'];
-        Assert.assertIsDefined(oligos, 'Target condition not available for BINDINGS constraint');
+        Assert.assertIsDefined(oligos, 'OligoDefinition not available for BINDINGS constraint');
 
         const oligoOrder = undoBlock.oligoOrder;
         Assert.assertIsDefined(oligoOrder, 'Undo block does not specify oligos for BINDINGS constraint');

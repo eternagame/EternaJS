@@ -202,7 +202,7 @@ export default class Plot extends Container {
             for (let ii = 0; ii < this._labels.length; ii++) {
                 let labelString: string = this._labels[ii];
                 if (labelString.length > 0) {
-                    let label: Text = Fonts.arial(labelString).color(0xffffff).build();
+                    let label: Text = Fonts.std(labelString).color(0xffffff).build();
                     label.width = horizontalSpace;
                     label.x = Plot.W_MARGIN + (ii + 0.5) * horizontalSpace;
                     label.y = Plot.H_MARGIN + this._height;

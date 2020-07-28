@@ -62,6 +62,7 @@ import SubmitPoseDialog from './SubmitPoseDialog';
 import SubmitPoseDetails from './SubmitPoseDetails';
 import MissionIntroMode from './MissionIntroMode';
 import MissionClearedPanel from './MissionClearedPanel';
+import ViewSolutionOverlay from '../DesignBrowser/ViewSolutionOverlay';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
@@ -140,6 +141,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     public get puzzleID(): number { return this._puzzle.nodeID; }
+    public get background(): Background { return this._background; }
 
     public get isOpaque(): boolean { return true; }
 
@@ -168,7 +170,13 @@ export default class PoseEditMode extends GameMode {
             onHelpClicked: () => this.onHelpClicked(),
             onChatClicked: () => {
                 Eterna.settings.showChat.value = !Eterna.settings.showChat.value;
-            }
+            },
+            onInfoClicked: this._params.initSolution ? () => {
+                if (this._solutionView) {
+                    this._solutionView.showSolution(this._curSolution);
+                    this.onResized();
+                }
+            } : undefined
         });
         this.addObject(this._helpBar, this.uiLayer);
 
@@ -302,7 +310,7 @@ export default class PoseEditMode extends GameMode {
         Assert.assertIsDefined(this.regs);
         this.regs.add(this._exitButton.clicked.connect(() => this.exitPuzzle()));
 
-        this._targetName = Fonts.stdRegular('', 18).build();
+        this._targetName = Fonts.std('', 18).build();
         this._targetName.visible = false;
         this.uiLayer.addChild(this._targetName);
 
@@ -326,7 +334,7 @@ export default class PoseEditMode extends GameMode {
         this.container.addChild(homeArrow);
 
         // Async text shows above our UI lock, and right below all dialogs
-        this._asynchText = Fonts.arial('folding...', 12).bold().color(0xffffff).build();
+        this._asynchText = Fonts.std('folding...', 12).bold().color(0xffffff).build();
         this._asynchText.position = new Point(16, 200);
         this.dialogLayer.addChild(this._asynchText);
         this.hideAsyncText();
@@ -358,6 +366,16 @@ export default class PoseEditMode extends GameMode {
         this._asynchText.visible = false;
     }
 
+    private get _solDialogOffset() {
+        return this._solutionView !== undefined && this._solutionView.container.visible
+            ? ViewSolutionOverlay.theme.width : 0;
+    }
+
+    protected get posesWidth() {
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        return Flashbang.stageWidth - this._solDialogOffset;
+    }
+
     private updateUILayout(): void {
         DisplayUtil.positionRelativeToStage(
             this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
@@ -378,12 +396,15 @@ export default class PoseEditMode extends GameMode {
 
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
-        this._exitButton.display.position = new Point(Flashbang.stageWidth - 85, Flashbang.stageHeight - 60);
-        this._undockSpecBoxButton.display.position = new Point(Flashbang.stageWidth - 22, 5);
+        this._exitButton.display.position = new Point(
+            Flashbang.stageWidth - 85 - this._solDialogOffset,
+            Flashbang.stageHeight - 60
+        );
+        this._undockSpecBoxButton.display.position = new Point(Flashbang.stageWidth - 22 - this._solDialogOffset, 5);
 
         this._constraintBar.layout();
 
-        this._dockedSpecBox.setSize(Flashbang.stageWidth, Flashbang.stageHeight - 340);
+        this._dockedSpecBox.setSize(Flashbang.stageWidth - this._solDialogOffset, Flashbang.stageHeight - 340);
         let s: number = this._dockedSpecBox.plotSize;
         this._dockedSpecBox.setSize(s + 55, s * 2 + 51);
     }
@@ -748,7 +769,7 @@ export default class PoseEditMode extends GameMode {
         this.addObject(this._exitButton, this.uiLayer);
 
         let puzzleTitle = new HTMLTextObject(this._puzzle.getName(!Eterna.MOBILE_APP))
-            .font(Fonts.STDFONT_BOLD)
+            .font(Fonts.STDFONT)
             .fontSize(14)
             .bold()
             .selectable(false)
@@ -757,7 +778,7 @@ export default class PoseEditMode extends GameMode {
         this.addObject(puzzleTitle, this.uiLayer);
         puzzleTitle.display.position = new Point(57, 8);
 
-        this._solutionNameText = Fonts.arial('', 14).bold().color(0xc0c0c0).build();
+        this._solutionNameText = Fonts.std('', 14).bold().color(0xc0c0c0).build();
         this.uiLayer.addChild(this._solutionNameText);
 
         this._constraintsLayer.visible = true;
@@ -865,6 +886,15 @@ export default class PoseEditMode extends GameMode {
             initialSequence = EPars.stringToSequence(this._params.initSolution.sequence);
             this._curSolution = this._params.initSolution;
             this.updateSolutionNameText(this._curSolution);
+            this._solutionView = new ViewSolutionOverlay({
+                solution: this._params.initSolution,
+                puzzle: this._puzzle,
+                voteDisabled: false,
+                onPrevious: () => this.showNextSolution(-1),
+                onNext: () => this.showNextSolution(1),
+                parentMode: (() => this)()
+            });
+            this.addObject(this._solutionView, this.dialogLayer);
         } else if (this._params.initSequence != null) {
             initialSequence = EPars.stringToSequence(this._params.initSequence);
         }
@@ -1302,6 +1332,9 @@ export default class PoseEditMode extends GameMode {
         const solution = this._params.solutions[nextSolutionIdx];
         Assert.notNull(solution);
         this.showSolution(solution);
+        if (this._solutionView && this._solutionView.container.visible) {
+            this._solutionView.showSolution(solution);
+        }
     }
 
     /* override */
@@ -1350,7 +1383,7 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    public get constraintCount(): number | null{
+    public get constraintCount(): number | null {
         return this._puzzle.constraints ? this._puzzle.constraints.length : null;
     }
 
@@ -1471,7 +1504,7 @@ export default class PoseEditMode extends GameMode {
             + `Puzzle ID: ${this._puzzle.nodeID}\n`
             + `Puzzle Title: ${this._puzzle.getName()}\n`
             + `Mode: ${this.toolbar.naturalButton.isSelected ? 'NativeMode' : 'TargetMode'}`;
-        let infoText = Fonts.arial(info).color(0xffffff).build();
+        let infoText = Fonts.std(info).color(0xffffff).build();
         this.container.addChild(infoText);
 
         let pngData = DisplayUtil.renderToPNG(this.container);
@@ -2844,9 +2877,8 @@ export default class PoseEditMode extends GameMode {
                 this._seqStacks[this._stackLevel] = [];
 
                 for (let ii = 0; ii < this._poses.length; ii++) {
-                    let undoBlock: UndoBlock = new UndoBlock([]);
-                    undoBlock.fromJSON(fd[ii]);
-                    this._seqStacks[this._stackLevel][ii] = undoBlock;
+                    this._seqStacks[this._stackLevel][ii] = new UndoBlock([]);
+                    this._seqStacks[this._stackLevel][ii].fromJSON(fd[ii]);
                 }
 
                 this.savePosesMarkersContexts();
@@ -3325,6 +3357,8 @@ export default class PoseEditMode extends GameMode {
     private _submitSolutionRspData: SubmitSolutionData | null;
 
     private _nucleotideRangeToShow: [number, number] | null = null;
+
+    private _solutionView?: ViewSolutionOverlay;
 
     private static readonly FOLDING_LOCK = 'Folding';
 }

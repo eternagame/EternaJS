@@ -18,7 +18,7 @@ export interface FoldData {
     target_oligo_order_?: number[];
     puzzle_locks_?: boolean[];
     forced_struct_: number[];
-    target_conditions_?: TargetConditions;
+    target_conditions_?: string;
 }
 
 // amw fuck a lot of these are optional
@@ -111,7 +111,7 @@ export default class UndoBlock {
             target_oligo_order_: this._targetOligoOrder,
             puzzle_locks_: this._puzzleLocks,
             forced_struct_: this._forcedStruct,
-            target_conditions_: this.targetConditions // use the getter so we convert
+            target_conditions_: this._targetConditions
         };
         /* eslint-enable @typescript-eslint/camelcase */
     }
@@ -119,8 +119,20 @@ export default class UndoBlock {
     public fromJSON(json: FoldData): void {
         try {
             this._sequence = json.sequence_;// JSONUtil.require(json, 'sequence_');
-            this._pairsArray = json.pairs_array_;// JSONUtil.require(json, 'pairs_array_');
-            this._paramsArray = json.params_array_;// JSONUtil.require(json, 'params_array_');
+            // Legacy -- this wasn't always a map. So check typeof and put nonmaps
+            // into the pseudoknots false field.
+            if (Array.isArray(json.pairs_array_)) {
+                this._pairsArray = new Map<boolean, number[][]>();
+                this._pairsArray.set(false, json.pairs_array_);
+            } else {
+                this._pairsArray = json.pairs_array_;
+            }
+            if (Array.isArray(json.params_array_)) {
+                this._paramsArray = new Map<boolean, Param[][]>();
+                this._paramsArray.set(false, json.params_array_);
+            } else {
+                this._paramsArray = json.params_array_;
+            }
             this._stable = json.stable_;// JSONUtil.require(json, 'stable_');
             this._targetOligo = json.target_oligo_;// JSONUtil.require(json, 'target_oligo_');
             this._targetOligos = json.target_oligos_;// JSONUtil.require(json, 'target_oligos_');
@@ -130,7 +142,7 @@ export default class UndoBlock {
             this._targetOligoOrder = json.target_oligo_order_; // JSONUtil.require(json, 'target_oligo_order_');
             this._puzzleLocks = json.puzzle_locks_;// JSONUtil.require(json, 'puzzle_locks_');
             this._forcedStruct = json.forced_struct_;// JSONUtil.require(json, 'forced_struct_');
-            this.targetConditions = json.target_conditions_;// JSONUtil.require(json, 'target_conditions_'); // setter
+            this._targetConditions = json.target_conditions_;// JSONUtil.require(json, 'target_conditions_'); // setter
         } catch (e) {
             throw new Error(`Error parsing UndoBlock JSON: ${e}`);
         }

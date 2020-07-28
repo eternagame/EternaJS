@@ -87,7 +87,7 @@ export default class BaseTextures {
     }
 
     private static createLetterTextures(baseType: number, zoomScalar: number): Texture[] {
-        let bigLetter: Text = Fonts.arial(BaseTextures.type2Letter(baseType)).fontSize(18).bold().color(0x0)
+        let bigLetter: Text = Fonts.std(BaseTextures.type2Letter(baseType)).fontSize(18).bold().color(0x0)
             .build();
         let textures: Texture[] = [TextureUtil.renderToTexture(bigLetter)];
         EternaTextureUtil.createScaled(textures, zoomScalar, Base.NUM_ZOOM_LEVELS);

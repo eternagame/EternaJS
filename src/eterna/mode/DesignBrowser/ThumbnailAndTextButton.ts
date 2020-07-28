@@ -22,7 +22,7 @@ export default class ThumbnailAndTextButton extends GameButton {
         const view = new HLayoutContainer(10);
         this.container.addChild(view);
         view.addChild(thumbnailFrame);
-        view.addChild(Fonts.stdBold(props.text, 14).color(0xffffff).build());
+        view.addChild(Fonts.std(props.text, 14).bold().color(0xffffff).build());
         view.layout(true);
 
         this.allStates(view);

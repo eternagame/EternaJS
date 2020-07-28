@@ -8,6 +8,7 @@ import {
 } from 'pixi.js';
 import Eterna from 'eterna/Eterna';
 import Assert from 'flashbang/util/Assert';
+import {FontWeight} from 'flashbang/util/TextBuilder';
 import GameButton from './GameButton';
 import UITheme from './UITheme';
 import HTMLTextObject from './HTMLTextObject';
@@ -145,7 +146,8 @@ export default class MultiPagePanel extends ContainerObject {
             theme.borderRadius
         );
         this._background.endFill();
-        this._titleText = Fonts.stdMedium()
+        this._titleText = Fonts.std()
+            .fontWeight(FontWeight.SEMIBOLD)
             .fontSize(theme.title.fontSize)
             .color(UITheme.colors.background)
             .build();

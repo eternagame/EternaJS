@@ -5,10 +5,8 @@ import {
 } from 'pixi.js';
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
-import Feedback from 'eterna/Feedback';
 import GameMode from 'eterna/mode/GameMode';
 import Puzzle from 'eterna/puzzle/Puzzle';
-import GamePanel from 'eterna/ui/GamePanel';
 import Fonts from 'eterna/util/Fonts';
 import SliderBar from 'eterna/ui/SliderBar';
 import {
@@ -21,11 +19,11 @@ import BitmapManager from 'eterna/resources/BitmapManager';
 import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import Solution from 'eterna/puzzle/Solution';
 import SolutionManager from 'eterna/puzzle/SolutionManager';
-import URLButton from 'eterna/ui/URLButton';
 import int from 'eterna/util/int';
 import EternaURL from 'eterna/net/EternaURL';
 import UITheme from 'eterna/ui/UITheme';
 import {AchievementData} from 'eterna/achievements/AchievementManager';
+import {FontWeight} from 'flashbang/util/TextBuilder';
 import VoteProcessor from './VoteProcessor';
 import ViewSolutionOverlay from './ViewSolutionOverlay';
 import SortOptionsDialog from './SortOptionsDialog';
@@ -33,9 +31,9 @@ import SortOptions, {SortOrder} from './SortOptions';
 import SelectionBox from './SelectionBox';
 import MarkerBoxView from './MarkerBoxView';
 import GridLines from './GridLines';
-import DotLine from './DotLine';
 import DataCol from './DataCol';
 import CustomizeColumnOrderDialog from './CustomizeColumnOrderDialog';
+import PoseEditMode from '../PoseEdit/PoseEditMode';
 
 export interface DBVote {
     canVote: boolean;
@@ -102,12 +100,12 @@ export default class DesignBrowserMode extends GameMode {
 
         this._votesText = new MultiStyleText('You have...', {
             default: {
-                fontFamily: Fonts.STDFONT_REGULAR,
+                fontFamily: Fonts.STDFONT,
                 fontSize: 14,
                 fill: 0xffffff
             },
             bold: {
-                fontStyle: 'bold'
+                fontStyle: FontWeight.BOLD
             }
         });
         this._votesText.position = new Point(59, 52);
@@ -188,34 +186,38 @@ export default class DesignBrowserMode extends GameMode {
         this._toolbarLayout = new HLayoutContainer();
         this.uiLayer.addChild(this._toolbarLayout);
 
-        const sortIcon = new GameButton()
-            .up(Bitmaps.BtnSort)
-            .over(Bitmaps.BtnSort)
-            .down(Bitmaps.BtnSort)
-            .tooltip('Editor sort options.');
-        this.addObject(sortIcon, this._toolbarLayout);
+        this._returnToGameButton = new GameButton()
+            .up(Bitmaps.ImgPrevious)
+            .over(Bitmaps.ImgPrevious)
+            .down(Bitmaps.ImgPrevious)
+            .tooltip('Return to game.')
+            .label('RETURN TO GAME', 12);
+        this.addObject(this._returnToGameButton, this._toolbarLayout);
         this._toolbarLayout.addHSpacer(5);
-        const sortLabel = new GameButton()
-            .label('SORT', 12, false)
-            .tooltip('Editor sort options.');
-        this.addObject(sortLabel, this._toolbarLayout);
-        sortIcon.clicked.connect(() => this.showSortDialog());
-        sortLabel.clicked.connect(() => this.showSortDialog());
+        this._returnToGameButton.clicked.connect(() => this.returnToGame());
 
         this._toolbarLayout.addHSpacer(20);
 
-        const configureIcon = new GameButton()
+        const sortButton = new GameButton()
+            .up(Bitmaps.BtnSort)
+            .over(Bitmaps.BtnSort)
+            .down(Bitmaps.BtnSort)
+            .tooltip('Editor sort options.')
+            .label('SORT', 12);
+        this.addObject(sortButton, this._toolbarLayout);
+        this._toolbarLayout.addHSpacer(5);
+        sortButton.clicked.connect(() => this.showSortDialog());
+
+        this._toolbarLayout.addHSpacer(20);
+
+        const configureButton = new GameButton()
             .up(Bitmaps.BtnConfigure)
             .over(Bitmaps.BtnConfigure)
             .down(Bitmaps.BtnConfigure)
-            .tooltip('Select and reorder columns.');
-        this.addObject(configureIcon, this._toolbarLayout);
-        this._toolbarLayout.addHSpacer(5);
-        const configureButton = new GameButton()
-            .label('CONFIGURE', 12, false)
-            .tooltip('Select and reorder columns.');
+            .tooltip('Select and reorder columns.')
+            .label('CONFIGURE', 12);
         this.addObject(configureButton, this._toolbarLayout);
-        configureIcon.clicked.connect(() => this.showCustomizeColumnOrderDialog());
+        this._toolbarLayout.addHSpacer(5);
         configureButton.clicked.connect(() => this.showCustomizeColumnOrderDialog());
 
         this._toolbarLayout.addHSpacer(20);
@@ -240,14 +242,6 @@ export default class DesignBrowserMode extends GameMode {
         this.addObject(this._expColorButton, this._toolbarLayout);
         this._expColorButton.clicked.connect(() => this.setSequenceExpColor());
 
-        // this._returnToGameButton = new GameButton()
-        //     .up(Bitmaps.ImgReturn)
-        //     .over(Bitmaps.ImgReturnOver)
-        //     .down(Bitmaps.ImgReturnHit)
-        //     .tooltip('Return to game.');
-        // this.addObject(this._returnToGameButton, this._toolbarLayout);
-        // this._returnToGameButton.clicked.connect(() => this.returnToGame());
-
         this._toolbarLayout.layout();
 
         const homeButton = new GameButton()
@@ -256,12 +250,11 @@ export default class DesignBrowserMode extends GameMode {
             .down(Bitmaps.ImgHome);
         homeButton.display.position = new Point(18, 10);
         homeButton.clicked.connect(() => {
-            // TODO uncomment when mobile branch is merged
-            // if (Eterna.MOBILE_APP) {
-            //     window.frameElement.dispatchEvent(new CustomEvent('navigate', { detail: '/' }));
-            // } else {
-            window.location.href = EternaURL.createURL({page: 'lab_bench'});
-            // }
+            if (Eterna.MOBILE_APP) {
+                window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
+            } else {
+                window.location.href = EternaURL.createURL({page: 'lab_bench'});
+            }
         });
         this.addObject(homeButton, this.uiLayer);
 
@@ -270,7 +263,7 @@ export default class DesignBrowserMode extends GameMode {
         this.uiLayer.addChild(homeArrow);
 
         let puzzleTitle = new HTMLTextObject(this._puzzle.getName(true))
-            .font(Fonts.ARIAL)
+            .font(Fonts.STDFONT)
             .fontSize(14)
             .bold()
             .selectable(false)
@@ -313,22 +306,34 @@ export default class DesignBrowserMode extends GameMode {
 
     private get contentWidth(): number {
         Assert.assertIsDefined(Flashbang.stageWidth);
-        return Flashbang.stageWidth - 40;
+        return Flashbang.stageWidth - this._solDialogOffset - 40;
     }
 
     private get contentHeight(): number {
         Assert.assertIsDefined(Flashbang.stageHeight);
-        return Flashbang.stageHeight - 170;
+        return Flashbang.stageHeight - 120;
+    }
+
+    private get _solDialogOffset() {
+        return this._solutionView !== undefined && this._solutionView.container.visible
+            ? ViewSolutionOverlay.theme.width : 0;
     }
 
     private updateLayout(): void {
         this._hSlider.display.position = new Point(30, this.contentHeight + 3);
         this._hSlider.setSize(this.contentWidth - 60, 0);
+        // If we don't do this, we can be in a situation where the horizontal position
+        // of the content won't be synced with the scrollbar, due to showing/hiding
+        // the solution sidebar
+        this._hSlider.setProgress(this._hSlider.getProgress());
 
         this._vSlider.display.position = new Point(this.contentWidth + 5, 50);
         this._vSlider.setSize(0, this.contentHeight - 70);
 
-        this._gridLines.setSize(this.contentWidth - 10, this.contentHeight - this._gridLines.position.y);
+        this._gridLines.setSize(
+            this.contentWidth - 10,
+            this.contentHeight - this._gridLines.position.y
+        );
         this._maskBox.setSize(this.contentWidth - 14, this.contentHeight - 10);
         this._markerBoxes.setSize(this.contentWidth - 14, this.contentHeight - 10);
 
@@ -343,7 +348,7 @@ export default class DesignBrowserMode extends GameMode {
 
         DisplayUtil.positionRelativeToStage(
             this._toolbarLayout, HAlign.RIGHT, VAlign.TOP,
-            HAlign.RIGHT, VAlign.TOP, -24, 40
+            HAlign.RIGHT, VAlign.TOP, -24 - this._solDialogOffset, 40
         );
     }
 
@@ -351,9 +356,9 @@ export default class DesignBrowserMode extends GameMode {
         super.enter();
         this.refreshSolutions();
         const {existingPoseEditMode} = Eterna.app;
-        // this._returnToGameButton.display.visible = (
-        //     existingPoseEditMode != null && existingPoseEditMode.puzzleID === this.puzzleID
-        // );
+        this._returnToGameButton.display.visible = (
+            existingPoseEditMode != null && existingPoseEditMode.puzzleID === this.puzzleID
+        );
         Eterna.chat.pushHideChat();
     }
 
@@ -386,7 +391,19 @@ export default class DesignBrowserMode extends GameMode {
 
     private async switchToPoseEditForSolution(solution: Solution): Promise<void> {
         this.pushUILock();
-
+        const switchSolution = (newIndex: number) => {
+            const newSolution = this.getSolutionAtIndex(newIndex);
+            if (newSolution != null) {
+                this._currentSolutionIndex = newIndex;
+                Assert.assertIsDefined(this._solutionView);
+                this._solutionView.showSolution(newSolution);
+                const {designBrowser: theme} = UITheme;
+                const rowIndex = this._currentSolutionIndex - this._firstVisSolutionIdx;
+                if (rowIndex >= 0) {
+                    this.updateSelectionBoxPos(rowIndex);
+                }
+            }
+        };
         try {
             await Eterna.app.switchToPoseEdit(
                 this._puzzle, false, {initSolution: solution, solutions: this._filteredSolutions.slice()}
@@ -421,7 +438,7 @@ export default class DesignBrowserMode extends GameMode {
     }
 
     private static createStatusText(text: string): SceneObject<Text> {
-        let statusText = new SceneObject<Text>(Fonts.arial(text, 22).color(0xffffff).bold().build());
+        let statusText = new SceneObject<Text>(Fonts.std(text, 22).color(0xffffff).bold().build());
         statusText.addObject(new RepeatingTask(() => new SerialTask(
             new AlphaTask(0, 0.3),
             new AlphaTask(1, 0.3)
@@ -537,7 +554,6 @@ export default class DesignBrowserMode extends GameMode {
                     this._currentSolutionIndex = newIndex;
                     Assert.assertIsDefined(this._solutionView);
                     this._solutionView.showSolution(newSolution);
-                    const {designBrowser: theme} = UITheme;
                     const rowIndex = this._currentSolutionIndex - this._firstVisSolutionIdx;
                     if (rowIndex >= 0) {
                         this.updateSelectionBoxPos(rowIndex);
@@ -556,7 +572,8 @@ export default class DesignBrowserMode extends GameMode {
                         this._currentSolutionIndex + 1
                     );
                     switchSolution(nextSolutionIndex);
-                }
+                },
+                parentMode: (() => this)()
             });
             this.addObject(this._solutionView, this.dialogLayer);
 
@@ -574,6 +591,8 @@ export default class DesignBrowserMode extends GameMode {
         } else {
             this._solutionView.showSolution(solution);
         }
+
+        this.updateLayout();
     }
 
     private onMouseMove(): void {
@@ -755,8 +774,8 @@ export default class DesignBrowserMode extends GameMode {
     }
 
     private rebuildDataColumns(filters: DesignBrowserFilter[] | null = null): void {
-        const FONT = Fonts.STDFONT_REGULAR;
-        const FONT_SIZE = 12;
+        const FONT = Fonts.STDFONT;
+        const FONT_SIZE = 15;
 
         if (this._dataCols != null) {
             for (let dataCol of this._dataCols) {
@@ -955,7 +974,9 @@ export default class DesignBrowserMode extends GameMode {
         if (existingPoseEditMode != null && existingPoseEditMode.puzzleID === this.puzzleID) {
             this.pushUILock();
             Eterna.app.switchToPoseEdit(this._puzzle, true)
-                .then(() => this.popUILock())
+                .then(() => {
+                    this.popUILock();
+                })
                 .catch((e) => {
                     log.error(e);
                     this.popUILock();
@@ -983,7 +1004,7 @@ export default class DesignBrowserMode extends GameMode {
 
     private _sortOptions: SortOptions;
     private _toolbarLayout: HLayoutContainer;
-    // private _returnToGameButton: GameButton;
+    private _returnToGameButton: GameButton;
     private _letterColorButton: GameButton;
     private _expColorButton: GameButton;
     private _votesText: MultiStyleText;

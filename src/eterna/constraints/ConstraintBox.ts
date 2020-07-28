@@ -14,6 +14,7 @@ import TextBalloon from 'eterna/ui/TextBalloon';
 import {RegistrationGroup} from 'signals';
 import Sounds from 'eterna/resources/Sounds';
 import UITheme from 'eterna/ui/UITheme';
+import {FontWeight} from 'flashbang/util/TextBuilder';
 
 export interface ConstraintBoxConfig {
     // Toggle checkmark, green vs red outline
@@ -72,13 +73,13 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._icon.visible = false;
         this.container.addChild(this._icon);
 
-        this._noText = Fonts.arial('NO', 16).color(0xffffff).bold().letterSpacing(-0.5)
+        this._noText = Fonts.std('NO', 16).bold().color(0xffffff).letterSpacing(-0.5)
             .build();
         this._noText.position = new Point(35, 0);
         this._noText.visible = false;
         this.container.addChild(this._noText);
 
-        this._stateText = Fonts.arial('', 18).color(0xffffff).bold().letterSpacing(-0.5)
+        this._stateText = Fonts.std('', 18).bold().color(0xffffff).letterSpacing(-0.5)
             .build();
         this._stateText.position = new Point(3, 45);
         this._stateText.visible = false;
@@ -86,7 +87,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
         this._reqClarifyText = new MultiStyleText('', {
             default: {
-                fontFamily: Fonts.ARIAL,
+                fontFamily: Fonts.STDFONT,
                 fontSize: 11,
                 fill: 0xC0DCE7,
                 letterSpacing: -0.5
@@ -98,7 +99,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
         this._reqStatText = new MultiStyleText('', {
             default: {
-                fontFamily: Fonts.ARIAL,
+                fontFamily: Fonts.STDFONT,
                 fontSize: 11,
                 fill: 0xC0DCE7,
                 letterSpacing: -0.5
@@ -305,17 +306,18 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     /** Creates a StyledTextBuilder with the ConstraintBox's default settings */
     public static createTextStyle(): StyledTextBuilder {
         let style: StyledTextBuilder = new StyledTextBuilder({
-            fontFamily: Fonts.STDFONT_REGULAR,
+            fontFamily: Fonts.STDFONT,
             fontSize: 14,
             fill: 0xffffff,
             letterSpacing: -0.5,
             wordWrap: true,
             wordWrapWidth: UITheme.missionIntro.maxConstraintWidth
         }).addStyle('altText', {
-            fontFamily: Fonts.STDFONT_MEDIUM,
+            fontFamily: Fonts.STDFONT,
+            fontWeight: FontWeight.SEMIBOLD,
             leading: 10
         }).addStyle('altTextMain', {
-            fontFamily: Fonts.STDFONT_REGULAR,
+            fontFamily: Fonts.STDFONT,
             leading: 5
         });
 

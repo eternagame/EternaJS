@@ -24,7 +24,8 @@ export default class TestMode extends GameMode {
             puzzle,
             voteDisabled: false,
             onPrevious: () => {},
-            onNext: () => {}
+            onNext: () => {},
+            parentMode: (() => this)()
         });
         this.addObject(actionBox, this.dialogLayer);
     }

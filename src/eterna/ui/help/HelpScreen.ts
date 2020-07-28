@@ -115,7 +115,7 @@ export default class HelpScreen extends AppMode {
         Assert.assertIsDefined(this.container);
 
         // backdrop
-        this._backdrop = new PIXI.Graphics();
+        this._backdrop = new Graphics();
         this._backdrop.interactive = true;
         this._backdrop.once('tap', () => {
             Assert.assertIsDefined(this.modeStack);

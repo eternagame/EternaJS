@@ -38,11 +38,11 @@ export default class LoadingMode extends AppMode {
 
         this.addObject(new Background(0), this._container);
 
-        this._textField = Fonts.arial(this._text, 24).color(0xffffff).build();
+        this._textField = Fonts.std(this._text, 24).color(0xffffff).build();
         this._textField.x = -this._textField.width * 0.5;
         this._textField.y = -this._textField.height * 0.5;
 
-        this._extraBlurbTextField = Fonts.arial(this.extraBlurbText, 36).bold().color(0xffffff).hAlignCenter()
+        this._extraBlurbTextField = Fonts.std(this.extraBlurbText, 36).bold().color(0xffffff).hAlignCenter()
             .build();
         this._extraBlurbTextField.x = -this._extraBlurbTextField.width * 0.5;
         this._extraBlurbTextField.y = -this._textField.height - this._extraBlurbTextField.height;

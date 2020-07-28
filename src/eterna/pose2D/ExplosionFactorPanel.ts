@@ -20,7 +20,7 @@ export default class ExplosionFactorPanel extends GamePanel {
 
         let heightWalker: number = ExplosionFactorPanel.HMARGIN;
 
-        let label: Text = Fonts.arial('Explosion Factor', 14).color(0xC0DCE7).hAlignCenter().build();
+        let label: Text = Fonts.std('Explosion Factor', 14).color(0xC0DCE7).hAlignCenter().build();
         label.position = new Point(ExplosionFactorPanel.WMARGIN, heightWalker);
         this.container.addChild(label);
 
@@ -32,7 +32,7 @@ export default class ExplosionFactorPanel extends GamePanel {
             fontSize: 14,
             width: 40,
             rows: 1
-        }).font(Fonts.ARIAL);
+        }).font(Fonts.STDFONT);
         input.text = '1';
         input.display.position = new Point(widthWalker, heightWalker);
         this.addObject(input, this.container);

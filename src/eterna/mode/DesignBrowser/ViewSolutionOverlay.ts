@@ -31,6 +31,7 @@ import VScrollBox from 'eterna/ui/VScrollBox';
 import MultiStyleText from 'pixi-multistyle-text';
 import Feedback from 'eterna/Feedback';
 import SliderBar from 'eterna/ui/SliderBar';
+import {FontWeight} from 'flashbang/util/TextBuilder';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import ThumbnailAndTextButton from './ThumbnailAndTextButton';
 import GameMode from '../GameMode';
@@ -43,10 +44,11 @@ interface ViewSolutionOverlayProps {
     voteDisabled: boolean;
     onPrevious: () => void;
     onNext: () => void;
+    parentMode: GameMode;
 }
 
 export default class ViewSolutionOverlay extends ContainerObject {
-    private static readonly theme = {
+    public static readonly theme = {
         width: 427,
         margin: {
             left: 17,
@@ -76,6 +78,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
     constructor(props: ViewSolutionOverlayProps) {
         super();
         this._props = props;
+        this._parentMode = props.parentMode;
     }
 
     public showSolution(solution: Solution) {
@@ -104,6 +107,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         const closeButton = new GameButton().allStates(closeButtonIcon);
         closeButton.clicked.connect(() => {
             this.container.visible = false;
+            this._parentMode.onResized(); // public unlike updateLayout
         });
         closeButton.container.position = new Point(
             theme.width - theme.margin.right - closeButtonIcon.width,
@@ -166,6 +170,14 @@ export default class ViewSolutionOverlay extends ContainerObject {
         this._voteButton.tooltip(toolTip);
     }
 
+    public set parentMode(foo: GameMode) {
+        this._parentMode = foo;
+    }
+
+    public get parentMode(): GameMode {
+        return this._parentMode;
+    }
+
     private populate() {
         const {theme} = ViewSolutionOverlay;
 
@@ -193,7 +205,8 @@ export default class ViewSolutionOverlay extends ContainerObject {
         this._content.addObject(title, this._header);
         this._header.addVSpacer(20);
 
-        const solutionName = Fonts.stdBold()
+        const solutionName = Fonts.std()
+            .bold()
             .text(Utility.stripHtmlTags(this._props.solution.title))
             .fontSize(24)
             .color(0xffffff)
@@ -201,7 +214,8 @@ export default class ViewSolutionOverlay extends ContainerObject {
             .build();
         this._header.addChild(solutionName);
 
-        const playerName = Fonts.stdBold()
+        const playerName = Fonts.std()
+            .bold()
             .text(`By ${Utility.stripHtmlTags(this._props.solution.playerName)}`)
             .fontSize(18)
             .color(0xffffff)
@@ -386,7 +400,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
 
         this._contentLayout.addVSpacer(10);
         // Comment input
-        this._commentsTitle = Fonts.stdBold('Comments', 13).color(0xffffff).bold().build();
+        this._commentsTitle = Fonts.std('Comments', 13).color(0xffffff).bold().build();
         this._contentLayout.addChild(this._commentsTitle);
         this._inputContainer = new VLayoutContainer(10, HAlign.RIGHT);
         this._contentLayout.addChild(this._inputContainer);
@@ -400,8 +414,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
             width: theme.width - theme.margin.left - theme.margin.right - 10 - SliderBar.THUMB_SIZE,
             rows: 3
         })
-            .placeholderText('Enter your comment here')
-            .showFakeTextInputWhenNotFocused();
+            .placeholderText('Enter your comment here');
         this._content.addObject(this._commentsInput, this._inputContainer);
 
         const commentButtonIcon = new Graphics()
@@ -549,10 +562,16 @@ export default class ViewSolutionOverlay extends ContainerObject {
             // eslint-disable-next-line no-loop-func
             userButton.clicked.connect(() => window.open(url, '_blank'));
 
-            commentLayout.addChild(Fonts.stdLight(comment['created'], 10).color(0xffffff).build());
+            commentLayout.addChild(
+                Fonts.std(comment['created'], 10)
+                    .fontWeight(FontWeight.LIGHT)
+                    .color(0xffffff)
+                    .build()
+            );
             commentLayout.addVSpacer(6);
 
-            const comm = Fonts.stdLight(comment['comment'], 14)
+            const comm = Fonts.std(comment['comment'], 14)
+                .fontWeight(FontWeight.LIGHT)
                 .color(0xffffff)
                 .wordWrap(true, theme.width - 40)
                 .build();
@@ -597,7 +616,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         const {theme} = ViewSolutionOverlay;
         return new MultiStyleText(text, {
             default: {
-                fontFamily: Fonts.STDFONT_REGULAR,
+                fontFamily: Fonts.STDFONT,
                 fontSize: 13,
                 fill: 0xffffff,
                 wordWrap: true,
@@ -623,7 +642,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
     }
 
     private static createLoadingText(text: string): SceneObject<Text> {
-        let loadingText = new SceneObject(Fonts.stdBold(text, 14).color(0xffffff).build());
+        let loadingText = new SceneObject(Fonts.std(text, 14).bold().color(0xffffff).build());
         loadingText.addObject(new RepeatingTask(() => new SerialTask(
             new AlphaTask(0, 0.7),
             new AlphaTask(1, 0.7)
@@ -649,4 +668,5 @@ export default class ViewSolutionOverlay extends ContainerObject {
     private _contentLayout: VLayoutContainer;
     private _voteButton: ButtonWithIcon;
     private _footer: VLayoutContainer;
+    private _parentMode: GameMode;
 }

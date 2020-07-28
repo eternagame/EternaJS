@@ -81,7 +81,8 @@ export default class GamePanel extends BaseGamePanel {
 
             if (this._title != null) {
                 if (this._titleText == null) {
-                    this._titleText = Fonts.stdBold().fontSize(16).color(0xffffff).build();
+                    this._titleText = Fonts.std().bold().fontSize(16).color(0xffffff)
+                        .build();
                     this.container.addChild(this._titleText);
                 }
 

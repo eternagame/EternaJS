@@ -6,6 +6,19 @@ import {Text, TextStyle} from 'pixi.js';
 // has a ctor that takes an anonymous struct of args that follows that pattern.
 // So here, I'll define my own.
 
+// Using the terms used by Google Fonts
+export enum FontWeight {
+    THIN = '100',
+    ExTRALIGHT = '200',
+    LIGHT = '300',
+    REGULAR = '400',
+    MEDIUM = '500',
+    SEMIBOLD = '600',
+    BOLD = '700',
+    EXTRABOLD = '800',
+    BLACK = '900'
+}
+
 class TextStyleOptions {
     public align?: string;
     public breakWords?: boolean;
@@ -80,15 +93,15 @@ export default class TextBuilder {
         return this;
     }
 
-    public fontWeight(val: string): TextBuilder {
+    public fontWeight(val: FontWeight): TextBuilder {
         this._style.fontWeight = val;
         return this;
     }
 
     public bold(value = true): TextBuilder {
         if (value) {
-            this.fontWeight('bold');
-        } else if (this._style.fontWeight === 'bold') {
+            this.fontWeight(FontWeight.BOLD);
+        } else if (this._style.fontWeight === FontWeight.BOLD) {
             this._style.fontWeight = undefined;
         }
         return this;

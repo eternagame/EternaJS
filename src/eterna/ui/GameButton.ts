@@ -93,7 +93,7 @@ export default class GameButton extends Button implements KeyboardListener {
         customTextColors?: Map<ButtonState, number>
     ): GameButton {
         if (typeof (text) === 'string') {
-            this._labelBuilder = Fonts.arial(text as string).fontSize(fontSize || 22).bold().color(0xFFFFFF);
+            this._labelBuilder = Fonts.std(text as string).fontSize(fontSize || 22).bold().color(0xFFFFFF);
         } else {
             this._labelBuilder = text as TextBuilder;
         }

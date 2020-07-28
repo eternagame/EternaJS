@@ -68,7 +68,7 @@ export default class TextBalloon extends ContainerObject {
 
     public setText(text: string, fontsize: number = 15, fontColor: number = 0xC0DCE7): void {
         this.styledText = new StyledTextBuilder({
-            fontFamily: Fonts.ARIAL,
+            fontFamily: Fonts.STDFONT,
             fontSize: fontsize,
             fill: fontColor
         }).append(text);

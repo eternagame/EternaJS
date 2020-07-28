@@ -39,7 +39,8 @@ export default class ButtonWithIcon extends GameButton {
     public updateView(props: ButtonWithIconProps) {
         const {theme} = ButtonWithIcon;
         const icon = Sprite.from(props.icon);
-        const text = Fonts.stdBold(props.text.text, props.text.size ?? 14)
+        const text = Fonts.std(props.text.text, props.text.size ?? 14)
+            .bold()
             .color(props.text.color ?? 0xffffff)
             .build();
 

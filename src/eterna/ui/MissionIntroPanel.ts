@@ -40,7 +40,7 @@ export default class MissionIntroPanel extends ContainerObject {
         super();
         this._props = props;
 
-        this._titleLabel = Fonts.stdBold('GOAL', 24).color(0xFAC244).build();
+        this._titleLabel = Fonts.std('GOAL', 24).bold().color(0xFAC244).build();
         this.container.addChild(this._titleLabel);
 
         this._goalsBG = Sprite.from(Bitmaps.ImgGoalBackground);
@@ -97,7 +97,7 @@ export default class MissionIntroPanel extends ContainerObject {
                 this.container.removeChild(this._descriptionLabel);
             }
             this._descriptionLabel = new StyledTextBuilder({
-                fontFamily: Fonts.STDFONT_REGULAR,
+                fontFamily: Fonts.STDFONT,
                 fill: 0xFFFFFF,
                 fontSize: Math.min(Flashbang.stageWidth * 0.025, 24),
                 wordWrap: true,

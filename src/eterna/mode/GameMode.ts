@@ -227,14 +227,13 @@ export default abstract class GameMode extends AppMode {
     }
 
     protected layoutPoseFields(): void {
-        Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
         if (this._isPipMode) {
             let numFields: number = this._poseFields.length;
             for (let ii = 0; ii < numFields; ii++) {
                 let poseField = this._poseFields[ii];
-                poseField.display.position = new Point((Flashbang.stageWidth / numFields) * ii, 0);
-                poseField.setSize(Flashbang.stageWidth / numFields, Flashbang.stageHeight, true);
+                poseField.display.position = new Point((this.posesWidth / numFields) * ii, 0);
+                poseField.setSize(this.posesWidth / numFields, Flashbang.stageHeight, true);
                 poseField.display.visible = true;
             }
         } else {
@@ -242,13 +241,18 @@ export default abstract class GameMode extends AppMode {
                 let poseField = this._poseFields[ii];
                 if (ii === 0) {
                     poseField.display.position = new Point(0, 0);
-                    poseField.setSize(Flashbang.stageWidth, Flashbang.stageHeight, false);
+                    poseField.setSize(this.posesWidth, Flashbang.stageHeight, false);
                     poseField.display.visible = true;
                 } else {
                     poseField.display.visible = false;
                 }
             }
         }
+    }
+
+    protected get posesWidth(): number {
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        return Flashbang.stageWidth;
     }
 
     protected onSetPip(pipMode: boolean): void {

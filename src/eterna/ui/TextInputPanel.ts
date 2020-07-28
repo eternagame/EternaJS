@@ -85,10 +85,10 @@ export default class TextInputPanel extends GamePanel {
             fontSize: this._fontSize,
             width,
             rows: multiline ? 3 : 1
-        }).font(Fonts.ARIAL);
+        }).font(Fonts.STDFONT);
         this.addObject(input, this.container);
 
-        let label: Text = Fonts.arial(name, this._fontSize).color(0xC0DCE7).build();
+        let label: Text = Fonts.std(name, this._fontSize).color(0xC0DCE7).build();
         this.container.addChild(label);
 
         this._fields.push({input, label, name});

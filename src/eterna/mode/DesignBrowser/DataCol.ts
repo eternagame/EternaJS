@@ -97,7 +97,7 @@ export default class DataCol extends ContainerObject {
                 placeholder: 'Search',
                 bgColor: theme.colors.filterBackground,
                 borderColor: theme.colors.filterBorder
-            }).showFakeTextInputWhenNotFocused();
+            });
             this._filterField1.tabIndex = -1; // prevent tab-selection
             this._filterField1.display.position = new Point(11, theme.headerHeight + theme.filterPadding);
             this.addObject(this._filterField1, this.container);
@@ -110,7 +110,7 @@ export default class DataCol extends ContainerObject {
                 placeholder: 'min',
                 bgColor: theme.colors.filterBackground,
                 borderColor: theme.colors.filterBorder
-            }).showFakeTextInputWhenNotFocused();
+            });
             this._filterField1.tabIndex = -1; // prevent tab-selection
             this._filterField1.display.position = new Point(11, theme.headerHeight + theme.filterPadding);
             this.addObject(this._filterField1, this.container);
@@ -123,7 +123,7 @@ export default class DataCol extends ContainerObject {
                 placeholder: 'max',
                 bgColor: theme.colors.filterBackground,
                 borderColor: theme.colors.filterBorder
-            }).showFakeTextInputWhenNotFocused();
+            });
             this._filterField2.tabIndex = -1; // prevent tab-selection
             this._filterField2.display.position = new Point(11 + 40 + 12, theme.headerHeight + theme.filterPadding);
             this.addObject(this._filterField2, this.container);
@@ -259,10 +259,10 @@ export default class DataCol extends ContainerObject {
         this._gridNumbers = new Container();
         this.container.addChild(this._gridNumbers);
 
-        for (let ii = 0; ii < this._dataWidth / 280; ii++) {
+        for (let ii = 0; ii < this._dataWidth / 300; ii++) {
             let gridstring = `${ii * 20 + 20}`;
-            let gridtext = Fonts.arial(gridstring, 10).bold().build();
-            gridtext.position = new Point(300 + ii * 280 - gridstring.length * 3.5, 80);
+            let gridtext = Fonts.std(gridstring, 10).bold().color(0xFFFFFF).build();
+            gridtext.position = new Point(310 + ii * 300 - gridstring.length * 3.5, 80);
             this._gridNumbers.addChild(gridtext);
         }
     }
@@ -314,8 +314,8 @@ export default class DataCol extends ContainerObject {
         if (this.category === 'Sequence') {
             this._graphics.lineStyle(1, 0x92A8BB, 0.4);
             for (let ii = 0; ii < this._dataWidth / 70 + 1; ii++) {
-                this._graphics.moveTo(ii * 70 + 90, 85);
-                this._graphics.lineTo(ii * 70 + 90, this._height - 5);
+                this._graphics.moveTo(ii * 75 + 92, 85);
+                this._graphics.lineTo(ii * 75 + 92, this._height - 5);
             }
         }
     }
@@ -342,7 +342,7 @@ export default class DataCol extends ContainerObject {
     private updateView(): void {
         let dataString = '';
         let boardData: string[] = [];
-        let boardExpData: Feedback[] = [];
+        let boardExpData: (Feedback | null)[] = [];
 
         if (this.category === DesignCategory.VOTE) {
             const {designBrowser: theme} = UITheme;
@@ -396,9 +396,7 @@ export default class DataCol extends ContainerObject {
             } else {
                 let rawstr = Utility.stripHtmlTags(`${this._rawData[ii]}`);
 
-                // trace(rawstr);
-                const fb = this._feedback[ii];
-                Assert.assertIsDefined(fb);
+                const fb = this._feedback ? this._feedback[ii] : null;
                 switch (this.category) {
                     case DesignCategory.SEQUENCE:
                         boardData.push(rawstr);
@@ -543,7 +541,7 @@ export default class DataCol extends ContainerObject {
 
     private _numDisplay: number;
     private _sortOrder: SortOrder = SortOrder.NONE;
-    private _feedback: (Feedback | null)[];
+    private _feedback: (Feedback | null)[] | null;
     private _showExp: boolean = false;
     private _pairsArray: number[];
     private _fillColor: number = 0;

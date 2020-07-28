@@ -30,12 +30,13 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
             this.addObject(EternaViewOptionsDialog.createCheckbox(name, setting), settingsLayout);
         };
 
-        bind(Eterna.settings.showNumbers, `Show nucleotides numbers${showShortcuts ? ' (N)' : ''}`);
-        bind(Eterna.settings.showLetters, 'Show nucleotides letters');
+        bind(Eterna.settings.showNumbers, `Show nucleotide numbers${showShortcuts ? ' (N)' : ''}`);
+        bind(Eterna.settings.showLetters, 'Show nucleotide letters');
         bind(Eterna.settings.displayFreeEnergies, `Display free energies for all structures${showShortcuts ? ' (G)' : ''}`);
         bind(Eterna.settings.highlightRestricted, 'Highlight restricted sequences');
         bind(Eterna.settings.showChat, 'In-game chat');
         bind(Eterna.settings.simpleGraphics, `Use simpler, less animated graphics${showShortcuts ? ' (,)' : ''}`);
+        bind(Eterna.settings.usePuzzlerLayout, `Use clash-free layout for big structures${showShortcuts ? ' (L)' : ''}`);
         if (!Eterna.MOBILE_APP) {
             // NOTE(johannes): At the time of writing, auto-hide toolbar does not work with a touchscreen,
             // this option can be re-added once that works.

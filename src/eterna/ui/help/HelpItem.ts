@@ -1,5 +1,7 @@
+import {TextMetrics} from 'pixi.js';
 import {ContainerObject} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
+import {FontWeight} from 'flashbang/util/TextBuilder';
 import GameButton from '../GameButton';
 
 interface HelpItemProps {
@@ -24,21 +26,23 @@ export default class HelpItem extends ContainerObject {
             this.regs.add(button.clicked.connect(props.onClicked));
             this.addObject(button, this.container);
         } else {
-            const text = Fonts.stdMedium()
+            const text = Fonts.std()
                 .text(props.text)
                 .fontSize(theme.fontSize)
+                .fontWeight(FontWeight.SEMIBOLD)
                 .color(0xffffff)
                 .build();
             this.container.addChild(text);
         }
 
         if (props.label) {
-            const labelBuilder = Fonts.stdMedium()
+            const labelBuilder = Fonts.std()
                 .text(props.label)
                 .fontSize(theme.fontSize)
+                .fontWeight(FontWeight.SEMIBOLD)
                 .color(0xffffff);
 
-            const labelMetrics = PIXI.TextMetrics.measureText(props.label, labelBuilder.style);
+            const labelMetrics = TextMetrics.measureText(props.label, labelBuilder.style);
             const labelText = labelBuilder.build();
             labelText.x = props.width - labelMetrics.width;
             this.container.addChild(labelText);

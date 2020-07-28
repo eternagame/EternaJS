@@ -26,10 +26,10 @@ export default class UITheme {
             filterBackground: 0x021E46,
             filterBorder: 0x2F94D1
         },
-        rowHeight: 40,
+        rowHeight: 30,
         headerHeight: 36,
         filterHeight: 44,
         filterPadding: 8,
-        dataPadding: 24
+        dataPadding: 14
     };
 }
