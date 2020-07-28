@@ -1,3 +1,4 @@
+import {TextMetrics} from 'pixi.js';
 import {ContainerObject} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import {FontWeight} from 'flashbang/util/TextBuilder';
@@ -41,7 +42,7 @@ export default class HelpItem extends ContainerObject {
                 .fontWeight(FontWeight.SEMIBOLD)
                 .color(0xffffff);
 
-            const labelMetrics = PIXI.TextMetrics.measureText(props.label, labelBuilder.style);
+            const labelMetrics = TextMetrics.measureText(props.label, labelBuilder.style);
             const labelText = labelBuilder.build();
             labelText.x = props.width - labelMetrics.width;
             this.container.addChild(labelText);

@@ -1,5 +1,7 @@
 import {ContainerObject, Assert} from 'flashbang';
-import {Graphics, Point, Rectangle} from 'pixi.js';
+import {
+    Graphics, Point, Rectangle, TextMetrics
+} from 'pixi.js';
 import Fonts from 'eterna/util/Fonts';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
@@ -55,7 +57,7 @@ export default class HelpToolTip extends ContainerObject {
 
         // Text
         const textBuilder = Fonts.std(props.text, theme.fontSize).bold().color(0);
-        const textMetrics = PIXI.TextMetrics.measureText(props.text, textBuilder.style);
+        const textMetrics = TextMetrics.measureText(props.text, textBuilder.style);
         const textElem = textBuilder.build();
 
         // Background

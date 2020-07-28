@@ -2,7 +2,7 @@ import {ContainerObject, StyledTextBuilder} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import TextUtil from 'eterna/util/TextUtil';
 import {UnitSignal} from 'signals';
-import {Point} from 'pixi.js';
+import {Point, TextMetrics} from 'pixi.js';
 import {FontWeight} from 'flashbang/util/TextBuilder';
 import GameButton from '../GameButton';
 
@@ -40,7 +40,7 @@ export default class HelpPage extends ContainerObject {
             .fontWeight(FontWeight.SEMIBOLD)
             .color(0xffffff);
 
-        const titleMetrics = PIXI.TextMetrics.measureText(section, titleBuilder.style);
+        const titleMetrics = TextMetrics.measureText(section, titleBuilder.style);
         const titleElem = titleBuilder.build();
 
         const contentBuilder = new StyledTextBuilder({
