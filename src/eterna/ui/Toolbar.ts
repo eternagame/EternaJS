@@ -551,7 +551,8 @@ export default class Toolbar extends ContainerObject {
         this.baseMarkerButton = new ToolbarButton()
             .up(Bitmaps.ImgBaseMarker)
             .over(Bitmaps.ImgBaseMarkerOver)
-            .down(Bitmaps.ImgBaseMarker);
+            .down(Bitmaps.ImgBaseMarker)
+            .tooltip('Mark bases (hold ctrl)');
         this.addObject(this.baseMarkerButton, lowerToolbarLayout);
 
         this.regs.add(this.baseMarkerButton.clicked.connect(() => {
@@ -563,7 +564,8 @@ export default class Toolbar extends ContainerObject {
         this.magicGlueButton = new ToolbarButton()
             .up(Bitmaps.ImgMagicGlue)
             .over(Bitmaps.ImgMagicGlueOver)
-            .down(Bitmaps.ImgMagicGlue);
+            .down(Bitmaps.ImgMagicGlue)
+            .tooltip('Magic glue - change target structure in purple areas (hold alt)');
         if (this._showGlue) {
             this.addObject(this.magicGlueButton, lowerToolbarLayout);
             lowerToolbarLayout.addHSpacer(SPACE_NARROW);
