@@ -13,23 +13,6 @@
 
 static FullEvalResult* gEvalResult = NULL;
 
-
-// a callback that fills the array above with localized free energy contributions
-// static void _eos_cb(int index, int fe) {
-//     if (gEvalResult != NULL) {
-//         if (index < 0) {
-// #ifdef WATER_MOD
-//             if (index == -2) fe += water_mod;
-// #endif
-//             int to_insert[] = { index, fe };
-//             gEvalResult->nodes.insert(gEvalResult->nodes.begin(), to_insert, to_insert + 2);
-//         } else {
-//             gEvalResult->nodes.push_back(index);
-//             gEvalResult->nodes.push_back(fe);
-//         }
-//     }
-// }
-
 void _eos_cb(int index, int fe) {
     if (gEvalResult != NULL) {
         if (index < 0) {
@@ -60,57 +43,6 @@ FullEvalResult* FullEval (int temperature_in, const std::string& seqString, cons
 
     result->energy = energy;
     return result;
-
-    /*
-    FullEvalResult* result = new FullEvalResult();
-    gEvalResult = result;
-    eos_cb = _eos_cb;
-
-
-    ParameterManager<float> parameter_manager;
-    InferenceEngine<float> inference_engine(false);
-    inference_engine.RegisterParameters(parameter_manager);
-    // ComputationEngine<float> computation_engine(options, descriptions, inference_engine, parameter_manager);
-    // ComputationWrapper<float> computation_wrapper(computation_engine);
-
-    SStruct sstruct;
-    sstruct.LoadString(seqString);
-    sstruct.SetMapping(sstruct.ConvertParensToMapping("@" + structString));
-    inference_engine.LoadSequence(sstruct);
-
-    std::string newstr = "@" + structString;
-    printf("%s\n", newstr.c_str());
-    // inference_engine.UseConstraints(sstruct.GetMapping());
-
-    std::vector<float> w;
-    // alter for eternafold
-    w = GetDefaultComplementaryValues<float>();
-    inference_engine.LoadValues(w);// * 2.71);
-
-    // inference_engine.ComputeInside();
-    // float logZ_unconstrained = inference_engine.ComputeLogPartitionCoefficient();
-
-
-    // repeated just in case.
-    // sstruct.LoadString(seqString);
-    // sstruct.SetMapping(sstruct.ConvertParensToMapping("@" + structString));
-    // inference_engine.LoadSequence(sstruct);
-
-
-    inference_engine.UseConstraints(sstruct.GetMapping());
-
-    inference_engine.ComputeInside();
-
-    result->nodes;//
-    result->energy = /*logZ_unconstrained  -inference_engine.ComputeLogPartitionCoefficient();
-
-    // std::cout << "logZ_unconstrained (" << logZ_unconstrained
-    //     << ") - inference_engine.ComputeLogPartitionCoefficient() ("
-    //     << inference_engine.ComputeLogPartitionCoefficient() << ") = result->energy ("
-    //     << result->energy << ")." << std::endl;
-
-    eos_cb = NULL;
-    return result;*/
 }
 
 
@@ -120,8 +52,6 @@ FullFoldResult* FullFoldDefault (const std::string& seqString, double const gamm
     ParameterManager<float> parameter_manager;
     InferenceEngine<float> inference_engine(false, 0);
     inference_engine.RegisterParameters(parameter_manager);
-    // ComputationEngine<float> computation_engine(options, descriptions, inference_engine, parameter_manager);
-    // ComputationWrapper<float> computation_wrapper(computation_engine);
 
     SStruct sstruct;
     sstruct.LoadString(seqString);
