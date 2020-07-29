@@ -1,6 +1,11 @@
 import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
 import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
+import {TextureUtil} from 'flashbang';
+import {
+    Container, Texture, Sprite, Point
+} from 'pixi.js';
+import Bitmaps from 'eterna/resources/Bitmaps';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 
@@ -22,7 +27,7 @@ export default class TargetExpectedAccuracyConstraint extends Constraint<TargetE
             UndoBlockParam.TARGET_EXPECTED_ACCURACY,
             37,
             false
-        );
+        ) as number;
 
         return {
             satisfied: expectedAccuracy <= this.targetExpectedAccuracy,
@@ -57,8 +62,19 @@ export default class TargetExpectedAccuracyConstraint extends Constraint<TargetE
             clarificationText: `${this.targetExpectedAccuracy} OR MORE`,
             statText: status.targetExpectedAccuracy.toString(),
             showOutline: true,
-            fullTexture: BitmapManager.getBitmapNamed('Turkey')
+            drawBG: true,
+            icon: TargetExpectedAccuracyConstraint._icon
         };
+    }
+
+    private static get _icon(): Texture {
+        let icon = new Container();
+
+        let base1 = new Sprite(BitmapManager.getBitmap(Bitmaps.CleanDotPlotIcon));
+        base1.position = new Point(50, 50);
+        icon.addChild(base1);
+
+        return TextureUtil.renderToTexture(icon);
     }
 
     public static readonly NAME = 'TARGETEXPECTEDACCURACYMIN';

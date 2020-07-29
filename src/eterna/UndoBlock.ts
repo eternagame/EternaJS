@@ -158,9 +158,10 @@ export default class UndoBlock {
 
     public targetExpectedAccuracy(
         targetPairs: number[],
-        dotArray: number[],
+        dotArray: number[] | null,
         behavior: BasePairProbabilityTransform
     ): number {
+        if (dotArray === null) return 0;
         let numBPs = 0;
         let totProb = 0;
         for (let ii = 0; ii < targetPairs.length; ++ii) {
