@@ -166,7 +166,7 @@ export default class SpecBox extends ContainerObject {
                 .append(`${datablock.getParam(UndoBlockParam.MELTING_POINT, TEMPERATURE)}°C\n`)
                 .append('Mean P-unpaired : ', 'bold')
                 .append(`${Number(datablock.getParam(UndoBlockParam.MEANPUNP, TEMPERATURE)).toFixed(3)}\t\t`)
-                .append('Mean BP distance : ', 'bold')
+                .append('Branchiness : ', 'bold')
                 .append(`${Number(datablock.getParam(UndoBlockParam.BRANCHINESS, TEMPERATURE)).toFixed(1)}\n`)
                 .append('Target exp acc : ', 'bold')
                 .append(`${(datablock.getParam(UndoBlockParam.TARGET_EXPECTED_ACCURACY, 37) as number).toFixed(3)}\n`);

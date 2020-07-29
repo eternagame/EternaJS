@@ -164,34 +164,67 @@ export default class UndoBlock {
         dotArray: number[] | null,
         behavior: BasePairProbabilityTransform
     ): number {
-        if (dotArray === null) return 0;
-        let numBPs = 0;
-        let totProb = 0;
-        for (let ii = 0; ii < targetPairs.length; ++ii) {
-            if (ii > targetPairs[ii]) {
-                // Either we have seen this BP before, or it's unpaired
-                continue;
-            }
-            numBPs++;
+        if (dotArray === null || dotArray.length === 0) return 0;
+        let dotMap: Map<string, number> = new Map<string, number>();
+        let pairedPer: Map<number, number> = new Map<number, number>();
 
-            // Look for equivalent entry in dotArray. data structure not optimized
-            // for this. v2 should uh, make a map first.
-            for (let jj = 0; jj < dotArray.length; jj += 3) {
-                if (targetPairs[ii] + 1 !== dotArray[jj] && targetPairs[ii] + 1 !== dotArray[jj + 1]) {
-                    continue;
-                }
-                if (ii + 1 !== dotArray[jj] && ii + 1 !== dotArray[jj + 1]) {
-                    continue;
-                }
-                if (behavior === BasePairProbabilityTransform.LEAVE_ALONE) {
-                    totProb += dotArray[jj + 2];
-                } else {
-                    totProb += (dotArray[jj + 2] * dotArray[jj + 2]);
-                }
-                break;
+        for (let jj = 0; jj < dotArray.length; jj += 3) {
+            let prob: number;
+            if (behavior === BasePairProbabilityTransform.LEAVE_ALONE) {
+                prob = dotArray[jj + 2];
+            } else {
+                prob = (dotArray[jj + 2] * dotArray[jj + 2]);
+            }
+
+            if (dotArray[jj] < dotArray[jj + 1]) {
+                dotMap.set([dotArray[jj], dotArray[jj + 1]].join(','), prob);
+            } else if (dotArray[jj] > dotArray[jj + 1]) {
+                dotMap.set([dotArray[jj + 1], dotArray[jj]].join(','), prob);
+            }
+
+            let there = pairedPer.get(dotArray[jj]);
+            if (there !== undefined) {
+                pairedPer.set(dotArray[jj], there + prob);
+            } else {
+                pairedPer.set(dotArray[jj], prob);
+            }
+            there = pairedPer.get(dotArray[jj + 1]);
+            if (there !== undefined) {
+                pairedPer.set(dotArray[jj + 1], there + prob);
+            } else {
+                pairedPer.set(dotArray[jj + 1], prob);
             }
         }
-        return totProb / numBPs;
+
+        let TP = 1e-6;
+        // this is the remnant of a clever closed form solution irrelevant here
+        let TN = /* 0.5 * targetPairs.length * targetPairs.length - 1 + */ 1e-6;
+        let FP = 1e-6;
+        let FN = 1e-6;
+        let cFP = 1e-6;
+
+        // TP = np.sum(np.multiply(pred_m, probs)) + 1e-6
+        // TN = 0.5*N*N-1 - np.sum(pred_m) - np.sum(probs) + TP + 1e-6
+        // FP = np.sum(np.multiply(pred_m, 1-probs)) + 1e-6
+        // FN = np.sum(np.multiply(1-pred_m, probs)) + 1e-6
+
+        for (let ii = 0; ii < targetPairs.length; ++ii) {
+            for (let jj = ii + 1; jj < targetPairs.length; ++jj) {
+                let prob = dotMap.get([ii + 1, jj + 1].join(',')) ?? 0;
+                if (prob > 0) { // a bit of base pairing
+                    // Are ii and jj paired?
+                    if (targetPairs[ii] === jj) {
+                        TP += prob;
+                        FN += 1 - prob;
+                    } else {
+                        FP += prob;
+                        TN += 1 - prob;
+                    }
+                }
+            }
+        }
+
+        return (TP * TN - (FP - cFP) * FN) / Math.sqrt((TP + FP - cFP) * (TP + FN) * (TN + FP - cFP) * (TN + FN));
     }
 
     public get targetOligos(): Oligo[] | undefined {
@@ -372,7 +405,7 @@ export default class UndoBlock {
     }
 
     public sumProbUnpaired(dotArray: number[] | null, behavior: BasePairProbabilityTransform): number {
-        if (dotArray === null) return 0;
+        if (dotArray === null || dotArray.length === 0) return 0;
         // dotArray is organized as idx, idx, pairprob.
         let probUnpaired: number[] = Array<number>(this.sequence.length);
         for (let idx = 0; idx < this.sequence.length; ++idx) {
@@ -425,8 +458,7 @@ export default class UndoBlock {
     }
 
     public ensembleBranchiness(dotArray: number[] | null, behavior: BasePairProbabilityTransform) {
-        if (dotArray === null) return 0;
-
+        if (dotArray === null || dotArray.length === 0) return 0;
         // format of pairs is
         // '((.))' -> [4,3,-1,1,0]
         // note that if you calculate this average, it's fine to double count
