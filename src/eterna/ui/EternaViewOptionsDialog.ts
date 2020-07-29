@@ -30,12 +30,13 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
             this.addObject(EternaViewOptionsDialog.createCheckbox(name, setting), settingsLayout);
         };
 
-        bind(Eterna.settings.showNumbers, `Show nucleotides numbers${showShortcuts ? ' (N)' : ''}`);
-        bind(Eterna.settings.showLetters, 'Show nucleotides letters');
+        bind(Eterna.settings.showNumbers, `Show nucleotide numbers${showShortcuts ? ' (N)' : ''}`);
+        bind(Eterna.settings.showLetters, 'Show nucleotide letters');
         bind(Eterna.settings.displayFreeEnergies, `Display free energies for all structures${showShortcuts ? ' (G)' : ''}`);
         bind(Eterna.settings.highlightRestricted, 'Highlight restricted sequences');
         bind(Eterna.settings.showChat, 'In-game chat');
         bind(Eterna.settings.simpleGraphics, `Use simpler, less animated graphics${showShortcuts ? ' (,)' : ''}`);
+        bind(Eterna.settings.usePuzzlerLayout, `Use clash-free layout for big structures${showShortcuts ? ' (L)' : ''}`);
         if (!Eterna.MOBILE_APP) {
             // NOTE(johannes): At the time of writing, auto-hide toolbar does not work with a touchscreen,
             // this option can be re-added once that works.
@@ -125,13 +126,14 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
         closeButton.clicked.connect(() => this.close(null));
 
         let updateLocation = () => {
+            Assert.assertIsDefined(Flashbang.stageHeight);
             const idealHeight = this._viewLayout.height + 40 + this._panel.titleHeight;
             const maxHeight = Flashbang.stageHeight * 0.8;
             const panelHeight = Math.min(idealHeight, maxHeight);
             this._panel.setSize(this._viewLayout.width + 40, panelHeight);
 
             this._panelMask.clear();
-            this._panelMask.beginFill(0x00FF00, 0);
+            this._panelMask.beginFill(0x00FF00);
             this._panelMask.drawRect(
                 0, this._panel.titleHeight, this._viewLayout.width + 40, panelHeight - this._panel.titleHeight
             );
@@ -207,6 +209,7 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
 
     private maskPointerMove(event: interaction.InteractionEvent) {
         if (this._dragging) {
+            Assert.assertIsDefined(this._dragPointData);
             const dragRange = this._dragPointData.getLocalPosition(this._panelMask).y - this._dragStartPointY;
             this.scrollTo(this._dragStartBoxY + dragRange);
         }
@@ -255,7 +258,7 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
     private _volumeButtons: GameButton[] = [];
 
     private _dragging = false;
-    private _dragPointData: interaction.InteractionData = null;
+    private _dragPointData: interaction.InteractionData | null = null;
     private _dragStartPointY = 0;
     private _dragStartBoxY = 0;
 }

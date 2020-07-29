@@ -1,4 +1,4 @@
-import UndoBlock from 'eterna/UndoBlock';
+import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
 import EPars from 'eterna/EPars';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
@@ -63,7 +63,7 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
         if (targetMap != null) {
             // rawIndex => naturalAlignedIndex
             let naturalMap = ublk.reorderedOligosIndexMap(ublk.oligoOrder);
-            if (naturalMap !== null) {
+            if (naturalMap !== undefined) {
                 let targetAlignedNaturalPairs: number[] = [];
                 for (let [rawIndex, targetIndex] of Object.entries(targetMap)) {
                     let naturalIndex = naturalMap[Number(rawIndex)];
@@ -89,7 +89,7 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
         status: ShapeConstraintStatus,
         forMissionScreen: boolean,
         undoBlocks: UndoBlock[],
-        targetConditions?: any[]
+        targetConditions?: TargetConditions[]
     ): ConstraintBoxConfig {
         return {
             satisfied: status.satisfied,
@@ -129,14 +129,17 @@ export default class ShapeConstraint extends BaseShapeConstraint {
     public evaluate(context: ConstraintContext): ShapeConstraintStatus {
         let undoBlock = context.undoBlocks[this.stateIndex];
 
-        let targetAlignedConstraints: boolean[] | null = null;
-        if (context.targetConditions != null && context.targetConditions[this.stateIndex] != null) {
-            let structureConstraints: any = context.targetConditions[this.stateIndex]['structure_constraints'];
-            targetAlignedConstraints = this._targetAlignedConstraints(structureConstraints, undoBlock);
+        let targetAlignedConstraints: boolean[] | undefined;
+        if (context.targetConditions !== undefined && context.targetConditions[this.stateIndex] !== undefined) {
+            const tc = context.targetConditions[this.stateIndex] as TargetConditions;
+            let structureConstraints = tc['structure_constraints'];
+            if (structureConstraints) {
+                targetAlignedConstraints = this._targetAlignedConstraints(structureConstraints, undoBlock);
+            }
         }
 
         let pseudoknots = false;
-        if (undoBlock.targetConditions != null
+        if (undoBlock.targetConditions !== undefined
                 && undoBlock.targetConditions['type'] === 'pseudoknot') {
             pseudoknots = true;
         }
@@ -162,7 +165,7 @@ export default class ShapeConstraint extends BaseShapeConstraint {
         }
 
         let naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);
-        let customLayout: Array<[number, number] | [null, null]> | null = null;
+        let customLayout: Array<[number, number] | [null, null]> | undefined;
         if (undoBlock.targetConditions) customLayout = undoBlock.targetConditions['custom-layout'];
         return {
             ...details,
@@ -187,7 +190,7 @@ export default class ShapeConstraint extends BaseShapeConstraint {
     }
 
     private _getWrongPairs(
-        naturalPairs: number[], targetPairs: number[], structureConstraints: boolean[] | null
+        naturalPairs: number[], targetPairs: number[], structureConstraints: boolean[] | undefined
     ): number[] {
         let wrongPairs: number[] = new Array(naturalPairs.length);
 
@@ -196,12 +199,12 @@ export default class ShapeConstraint extends BaseShapeConstraint {
         }
         for (let ii = 0; ii < wrongPairs.length; ii++) {
             if (naturalPairs[ii] !== targetPairs[ii]) {
-                if (structureConstraints == null || structureConstraints[ii]) {
+                if (structureConstraints === undefined || structureConstraints[ii]) {
                     wrongPairs[ii] = 1;
                 } else {
                     wrongPairs[ii] = 0;
                 }
-            } else if (structureConstraints == null || structureConstraints[ii]) {
+            } else if (structureConstraints === undefined || structureConstraints[ii]) {
                 wrongPairs[ii] = -1;
             } else {
                 wrongPairs[ii] = 0;
@@ -218,22 +221,25 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
         let undoBlock = context.undoBlocks[this.stateIndex];
 
         // TODO: These checks should probably be in Puzzle
-        if (context.targetConditions == null) {
+        if (context.targetConditions === undefined) {
             throw new Error('Target object not available for SHAPE constraint');
         }
 
-        if (context.targetConditions[this.stateIndex] == null) {
+        if (context.targetConditions[this.stateIndex] === undefined) {
             throw new Error('Target condition not available for SHAPE constraint');
         }
 
-        let antiStructureConstraints: any[] = context.targetConditions[this.stateIndex]['anti_structure_constraints'];
+        const tc = context.targetConditions[this.stateIndex] as TargetConditions;
+        let antiStructureConstraints = tc['anti_structure_constraints'];
 
-        let pseudoknots: boolean = context.targetConditions[this.stateIndex]['type'] === 'pseudoknot';
+        let pseudoknots: boolean = tc['type'] === 'pseudoknot';
         let naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);
-        let targetAlignedConstraints = this._targetAlignedConstraints(antiStructureConstraints, undoBlock);
+        let targetAlignedConstraints = antiStructureConstraints
+            ? this._targetAlignedConstraints(antiStructureConstraints, undoBlock)
+            : undefined;
 
-        let antiStructureString: string = context.targetConditions[this.stateIndex]['anti_secstruct'];
-        if (antiStructureString == null) {
+        let antiStructureString = tc['anti_secstruct'];
+        if (antiStructureString === undefined) {
             throw new Error('Target structure not available for ANTISHAPE constraint');
         }
         let antiPairs: number[] = EPars.parenthesisToPairs(antiStructureString);
@@ -252,18 +258,22 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
         status: ShapeConstraintStatus,
         forMissionScreen: boolean,
         undoBlocks: UndoBlock[],
-        targetConditions: any[]
+        targetConditions: TargetConditions[]
     ): ConstraintBoxConfig {
         let details = super.getConstraintBoxConfig(status, forMissionScreen, undoBlocks);
         let undoBlock = undoBlocks[this.stateIndex];
         let pseudoknots = false;
-        if (undoBlock.targetConditions && undoBlock.targetConditions[this.stateIndex]
-                && undoBlock.targetConditions[this.stateIndex]['type'] === 'pseudoknot') {
+        if (undoBlock.targetConditions && undoBlock.targetConditions
+                && undoBlock.targetConditions['type'] === 'pseudoknot') {
             pseudoknots = true;
         }
         let naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);
-        let customLayout: Array<[number, number] | [null, null]> | null = null;
+        let customLayout: Array<[number, number] | [null, null]> | undefined;
         if (undoBlock.targetConditions) customLayout = undoBlock.targetConditions['custom-layout'];
+        const antiSS = targetConditions[this.stateIndex]['anti_secstruct'];
+        const wrongPairs = antiSS !== undefined
+            ? EPars.parenthesisToPairs(antiSS)
+            : undefined;
         return {
             ...details,
             tooltip: ConstraintBox.createTextStyle().append(
@@ -274,7 +284,7 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
             noText: true,
             thumbnail: PoseThumbnail.drawToGraphics(
                 new Array(naturalPairs.length).fill(EPars.RNABASE_ADENINE),
-                EPars.parenthesisToPairs(targetConditions[this.stateIndex]['anti_secstruct']),
+                wrongPairs as number[],
                 3, PoseThumbnailType.WRONG_COLORED, 0, status.wrongPairs, false, 0,
                 customLayout
             )
@@ -289,7 +299,7 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
     }
 
     private _getWrongPairs(
-        naturalPairs: number[], structureConstraints: any[], satisfied: boolean
+        naturalPairs: number[], structureConstraints: boolean[] | undefined, satisfied: boolean
     ): number[] {
         let wrongPairs: number[] = new Array(naturalPairs.length);
 
@@ -297,7 +307,7 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
             wrongPairs[ii] = 0;
         }
         for (let ii = 0; ii < wrongPairs.length; ii++) {
-            if (structureConstraints == null || structureConstraints[ii]) {
+            if (structureConstraints === undefined || structureConstraints[ii]) {
                 if (satisfied) {
                     wrongPairs[ii] = -1;
                 } else {

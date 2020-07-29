@@ -43,14 +43,14 @@ export default class ConfirmDialog extends Dialog<boolean> {
 
         if (this._useHTML) {
             let text = new HTMLTextObject(this._prompt)
-                .font(Fonts.ARIAL)
+                .font(Fonts.STDFONT)
                 .fontSize(15)
                 .selectable(false)
                 .color(0xC0DCE7)
                 .maxWidth(300);
             panel.addObject(text, panelLayout);
         } else {
-            let text = Fonts.arial(this._prompt, 15).color(0xC0DCE7).wordWrap(true, 300).build();
+            let text = Fonts.std(this._prompt, 15).color(0xC0DCE7).wordWrap(true, 300).build();
             panelLayout.addChild(text);
         }
 

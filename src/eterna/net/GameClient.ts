@@ -1,7 +1,24 @@
 import * as log from 'loglevel';
-import {Base64, Assert} from 'flashbang';
+import {Base64} from 'flashbang';
+import {FoldData} from 'eterna/UndoBlock';
+import {VoteData} from 'eterna/mode/DesignBrowser/VoteProcessor';
+import {RankScrollData} from 'eterna/rank/RankScroll';
+import {PuzzleJSON} from 'eterna/puzzle/PuzzleManager';
 
+// we MUST do this, because we use a dom method that gives us
+// any. long term AMW TODO build interfaces for each get/post
+// response json.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type JSONData = any;
+
+interface VoteResponse {
+    data: VoteDataWrapper;
+}
+interface VoteDataWrapper {
+    votes: VoteData[];
+}
+
+type Params = Record<string, string | number | boolean | PuzzleJSON | RankScrollData | null | undefined >;
 
 export default class GameClient {
     public readonly baseURL: string;
@@ -79,17 +96,17 @@ export default class GameClient {
             .then((rsp: Response) => rsp.json());
     }
 
-    public getPuzzleVotes(puznid: number, round: number): Promise<JSONData> {
+    public getPuzzleVotes<T extends VoteResponse>(puznid: number, round: number): Promise<T> {
         return this.get(GameClient.GET_URI, {type: 'votes', puznid, round})
             .then((rsp) => rsp.json());
     }
 
-    public submitSolution(params: any): Promise<JSONData> {
+    public submitSolution(params: Params): Promise<JSONData> {
         params['type'] = 'post_solution';
         return this.post(GameClient.POST_URI, params).then((rsp) => rsp.json());
     }
 
-    public submitPuzzle(params: any): Promise<void> {
+    public submitPuzzle(params: Params): Promise<void> {
         params['type'] = 'puzzle';
         return this.post(GameClient.POST_URI, params)
             .then((rsp) => rsp.json())
@@ -137,8 +154,8 @@ export default class GameClient {
             });
     }
 
-    public toggleSolutionVote(solutionID: number, puznid: number, myVotes: number): Promise<any> {
-        let postParams: any = {solnid: solutionID, puznid};
+    public toggleSolutionVote(solutionID: number, puznid: number, myVotes: number): Promise<JSONData> {
+        let postParams: Params = {solnid: solutionID, puznid};
         if (myVotes === 1) {
             postParams['type'] = 'unvote';
         } else if (myVotes === 0) {
@@ -159,7 +176,7 @@ export default class GameClient {
             });
     }
 
-    public updateSolutionFoldData(solutionID: number, foldData: any): Promise<string> {
+    public updateSolutionFoldData(solutionID: number, foldData: FoldData[]): Promise<string> {
         let dataString: string = JSON.stringify(foldData);
         return this.post(GameClient.POST_URI, {
             type: 'update_solution_fold_data',
@@ -185,12 +202,18 @@ export default class GameClient {
             });
     }
 
-    private get(urlString: string, params?: any): Promise<Response> {
+    private get(urlString: string, params?: Params): Promise<Response> {
         let url: URL = this.makeURL(urlString);
 
         if (params) {
             // GET requests put their parameters in the URL
-            Object.keys(params).forEach((key) => url.searchParams.append(key, params[key]));
+            Object.keys(params).forEach((key) => {
+                if (typeof params[key] === 'string') {
+                    url.searchParams.append(key, params[key] as string);
+                } else {
+                    url.searchParams.append(key, String(params[key]));
+                }
+            });
         }
 
         return fetch(url.toString(), {
@@ -206,13 +229,19 @@ export default class GameClient {
         });
     }
 
-    private post(urlString: string, params?: any): Promise<Response> {
+    private post(urlString: string, params?: Params): Promise<Response> {
         let url: URL = this.makeURL(urlString);
 
         let postParams = new URLSearchParams();
         if (params) {
             // POST requests pass params in the body
-            Object.keys(params).forEach((key) => postParams.append(key, params[key]));
+            Object.keys(params).forEach((key) => {
+                if (typeof params[key] === 'string') {
+                    postParams.append(key, params[key] as string);
+                } else {
+                    postParams.append(key, String(params[key]));
+                }
+            });
         }
 
         return fetch(url.toString(), {

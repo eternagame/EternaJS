@@ -79,7 +79,6 @@ export {default as Easing} from './util/Easing';
 export type {EasingFunc} from './util/Easing';
 export {default as ErrorUtil} from './util/ErrorUtil';
 export {default as EventSignal} from './util/EventSignal';
-export {default as JSONUtil} from './util/JSONUtil';
 export {default as LinkedList} from './util/LinkedList';
 export type {LinkedElement} from './util/LinkedList';
 export {default as MathUtil} from './util/MathUtil';

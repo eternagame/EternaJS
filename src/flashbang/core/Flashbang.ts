@@ -1,4 +1,3 @@
-import * as PIXI from 'pixi.js';
 import Assert from 'flashbang/util/Assert';
 import {SoundManager} from 'flashbang';
 import FlashbangApp from './FlashbangApp';

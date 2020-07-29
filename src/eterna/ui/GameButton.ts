@@ -86,13 +86,19 @@ export default class GameButton extends Button implements KeyboardListener {
         return this;
     }
 
-    public label(text: string | TextBuilder, fontSize?: number, background?: boolean): GameButton {
+    public label(
+        text: string | TextBuilder,
+        fontSize?: number,
+        background?: boolean,
+        customTextColors?: Map<ButtonState, number>
+    ): GameButton {
         if (typeof (text) === 'string') {
-            this._labelBuilder = Fonts.arial(text as string).fontSize(fontSize || 22).bold().color(0xFFFFFF);
+            this._labelBuilder = Fonts.std(text as string).fontSize(fontSize || 22).bold().color(0xFFFFFF);
         } else {
             this._labelBuilder = text as TextBuilder;
         }
         this._labelBackground = background;
+        this._customTextColors = customTextColors;
         this.needsRedraw();
         return this;
     }
@@ -176,17 +182,21 @@ export default class GameButton extends Button implements KeyboardListener {
         // Create label
         let label: Text | null = null;
         if (this._labelBuilder != null) {
-            label = this._labelBuilder.color(GameButton.TEXT_COLORS.get(state) || 0xffffff).build();
+            const textColor = this._customTextColors?.get(state) ?? GameButton.TEXT_COLORS.get(state);
+            label = this._labelBuilder.color(textColor ?? 0xffffff).build();
             this._content.addChild(label);
         }
 
         // Stylebox (shown when we have text and no background image)
         const drawStyleBox = this._customStyleBox == null
             && icon == null
-            && label != null
+            && label !== null
             && this._labelBackground !== false;
 
         if (drawStyleBox) {
+            // We can safely assert label is non-null because
+            // that is a requirement for drawStyleBox
+            Assert.assertIsDefined(label);
             const labelWidth = this._fixedLabelWidth > 0 ? this._fixedLabelWidth : label.width;
             let styleBox = new Graphics()
                 .beginFill(GameButton.STYLEBOX_COLORS.get(state) || 0x0)
@@ -293,7 +303,7 @@ export default class GameButton extends Button implements KeyboardListener {
         } else if (displayOrTex instanceof Texture) {
             return new Sprite(displayOrTex);
         } else if (typeof (displayOrTex) === 'string') {
-            return Sprite.fromImage(displayOrTex);
+            return Sprite.from(displayOrTex);
         } else {
             return null;
         }
@@ -311,6 +321,7 @@ export default class GameButton extends Button implements KeyboardListener {
     private _buttonIcons: (DisplayObject | null)[];
     private _selectedState: DisplayObject | null;
     private _customStyleBox?: Graphics;
+    private _customTextColors?: Map<ButtonState, number>;
 
     private _rscriptID: RScriptUIElementID;
     private _rscriptClickReg: Registration = Registrations.Null();

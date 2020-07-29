@@ -59,7 +59,7 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
         this._selectedHilite.endFill();
 
         for (let ii = 0; ii < this._numStates; ii++) {
-            this._labels[ii] = Fonts.arial(`${ii + 1}`, 12).color(ToggleBar.COLOR_TEXT).build();
+            this._labels[ii] = Fonts.std(`${ii + 1}`, 12).color(ToggleBar.COLOR_TEXT).build();
             this._labels[ii].position = new Point((ii * ToggleBar.BUTTON_SIZE) + 9, 5);
             this.container.addChild(this._labels[ii]);
         }

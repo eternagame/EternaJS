@@ -13,7 +13,8 @@ import {
     Easing,
     Flashbang,
     LocationTask,
-    StyledTextBuilder
+    StyledTextBuilder,
+    Assert
 } from 'flashbang';
 import GameButton from 'eterna/ui/GameButton';
 import Fonts from 'eterna/util/Fonts';
@@ -79,7 +80,7 @@ export default class AchievementBox extends ContainerObject {
         this.container.addChild(background);
 
         // Title
-        const title = Fonts.stdBold('NEW ACHIEVEMENT', 20).color(0xFFFFFF).build();
+        const title = Fonts.std('NEW ACHIEVEMENT', 20).bold().color(0xFFFFFF).build();
         title.position = new Point(
             (theme.size.x - title.width) / 2,
             (theme.headerHeight - title.height) / 2
@@ -120,7 +121,7 @@ export default class AchievementBox extends ContainerObject {
 
         // Description
         this._descriptionTxt = new StyledTextBuilder({
-            fontFamily: Fonts.STDFONT_REGULAR,
+            fontFamily: Fonts.STDFONT,
             fill: 0xFFFFFF,
             fontSize: 18,
             wordWrap: true,
@@ -145,16 +146,21 @@ export default class AchievementBox extends ContainerObject {
         this.container.addChild(checkmark);
 
         const updateLayout = () => {
+            Assert.assertIsDefined(Flashbang.stageHeight);
+            Assert.assertIsDefined(Flashbang.stageWidth);
             this.container.position = new Point(
                 (Flashbang.stageWidth - theme.size.x) / 2,
                 (Flashbang.stageHeight - theme.size.y) / 2
             );
         };
         updateLayout();
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(updateLayout));
     }
 
     public animate(): void {
+        Assert.assertIsDefined(Flashbang.stageHeight);
+        Assert.assertIsDefined(Flashbang.stageWidth);
         const ZOOM_DURATION = 0.5;
         const VIBRATE_DURATION = 0.3;
         const {theme} = AchievementBox;

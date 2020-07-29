@@ -68,7 +68,7 @@ export default class FancyGamePanel extends BaseGamePanel {
                 this._background.drawRoundedRect(-1, -25, this._width + 2, this._height + 26, 8);
                 this._background.endFill();
 
-                this._titleText = Fonts.arial(this._title, 13).bold().color(0x061F3A).build();
+                this._titleText = Fonts.std(this._title, 13).bold().color(0x061F3A).build();
                 this._titleText.position = new Point(5, -20);
                 this.container.addChild(this._titleText);
             } else {

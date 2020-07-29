@@ -50,7 +50,9 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
         }
 
         for (let ii = 0; ii < element.children.length; ++ii) {
-            let child = (element.children[ii] as any) as HTMLElement;
+            // AMW: we can now use the spread operator to cast HTMLCollection to
+            // an array.
+            let child = [...element.children][ii] as HTMLElement;
             if (child.accessKey !== undefined) {
                 this.applyStyleRecursive(child, styles, replaceIfExists, elementNames);
             }
@@ -86,13 +88,13 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
         return this._dummyDisp;
     }
 
-    public get domParent(): HTMLElement {
+    public get domParent(): HTMLElement | null {
         return this._domParent;
     }
 
-    public set domParent(value: HTMLElement) {
+    public set domParent(value: HTMLElement | null) {
         this._domParent = value;
-        if (this._added) {
+        if (this._added && this._domParent) {
             this._domParent.appendChild(this._obj);
         }
     }
@@ -161,7 +163,7 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
         let m = this.display.worldTransform;
         if (!MatrixUtil.equals(this._lastTransform, m)) {
             this._obj.style.transform = `matrix(${m.a}, ${m.b}, ${m.c}, ${m.d}, ${m.tx}, ${m.ty})`;
-            m.copy(this._lastTransform);
+            m.copyTo(this._lastTransform);
         }
 
         this._obj.style.visibility = this.display.worldVisible ? 'visible' : 'hidden';

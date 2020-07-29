@@ -11,33 +11,48 @@ import Fonts from 'eterna/util/Fonts';
 import VibrateTask from 'eterna/vfx/VibrateTask';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
+import {SubmitSolutionData} from 'eterna/mode/PoseEdit/PoseEditMode';
 import RankRowLayout from './RankRowLayout';
 import RankBoard from './RankBoard';
 import PlayerRank from './PlayerRank';
 
+export interface RankScrollData {
+    points: number;
+    rank: number;
+    richer: PlayerRankData[];
+    poorer: PlayerRankData[];
+}
+
+interface PlayerRankData {
+    name: string;
+    points: number | string;
+    rank: number;
+    uid: number;
+}
+
 export default class RankScroll extends ContainerObject {
-    public static hasRankScrollData(submissionRsp: any): boolean {
+    public static hasRankScrollData(submissionRsp: SubmitSolutionData): boolean {
         return (submissionRsp['pointsrank-before'] != null && submissionRsp['pointsrank-after'] != null);
     }
 
     /** Creates a RankScroll object with data returned from the submit-solution server response */
-    public static fromSubmissionResponse(submissionRsp: any): RankScroll {
+    public static fromSubmissionResponse(submissionRsp: SubmitSolutionData): RankScroll {
         if (!RankScroll.hasRankScrollData(submissionRsp)) {
             throw new Error('No RankScroll data in submission response');
         }
 
-        let pointsrankBefore: any = submissionRsp['pointsrank-before'];
-        let pointsrankAfter: any = submissionRsp['pointsrank-after'];
+        let pointsrankBefore: RankScrollData = submissionRsp['pointsrank-before'] as RankScrollData;
+        let pointsrankAfter: RankScrollData = submissionRsp['pointsrank-after'] as RankScrollData;
         let player: PlayerRank;
         let ranks: PlayerRank[] = [];
         let prevRank: number = pointsrankBefore['rank'];
         let newRank: number = pointsrankAfter['rank'];
         let prevPoints: number = pointsrankBefore['points'];
         let newPoints: number = pointsrankAfter['points'];
-        let prevRicher: any[] = pointsrankBefore['richer'];
-        let prevPoorer: any[] = pointsrankBefore['poorer'];
-        let newRicher: any[] = pointsrankAfter['richer'];
-        let newPoorer: any[] = pointsrankAfter['poorer'];
+        let prevRicher: PlayerRankData[] = pointsrankBefore['richer'];
+        let prevPoorer: PlayerRankData[] = pointsrankBefore['poorer'];
+        let newRicher: PlayerRankData[] = pointsrankAfter['richer'];
+        let newPoorer: PlayerRankData[] = pointsrankAfter['poorer'];
 
         // / Don't even need to move
         if (prevPoints >= newPoints || prevRank <= newRank) {
@@ -206,7 +221,7 @@ export default class RankScroll extends ContainerObject {
         }
 
         // Make rank data coming out of bottom (of player)
-        let rankDataBottom: any[] = [];
+        let rankDataBottom: PlayerRank[] = [];
         for (let ii = bottomStartingIdx; ii <= bottomEndingIndex; ii++) {
             if (ii < this._allRanks.length) {
                 let clone: PlayerRank = this._allRanks[ii].clone();
@@ -226,7 +241,7 @@ export default class RankScroll extends ContainerObject {
         // Set up rankboard according to above infos
         this._rankBoardTop = new RankBoard(topStartingIdx + 1, rankDataTop.reverse(), maxWidth);
         let maskTop: Graphics = new Graphics();
-        maskTop.beginFill(0x00FF00, 0);
+        maskTop.beginFill(0x00FF00);
         maskTop.drawRect(0, 0, RankBoard.ROW_WIDTH, sizeIndicator * RankBoard.ROW_HEIGHT);
         this.container.addChild(maskTop);
         this._rankBoardTop.display.mask = maskTop;
@@ -239,7 +254,7 @@ export default class RankScroll extends ContainerObject {
         this._rankBoardBottom = new RankBoard(this._newRank + 1, rankDataBottom.reverse(), maxWidth);
 
         let maskBottom: Graphics = new Graphics();
-        maskBottom.beginFill(0x00FF00, 0);
+        maskBottom.beginFill(0x00FF00);
         maskBottom.drawRect(
             0, sizeIndicator * RankBoard.ROW_HEIGHT + RankBoard.PLAYER_ROW_HEIGHT,
             RankBoard.ROW_WIDTH, sizeIndicator * RankBoard.ROW_HEIGHT
@@ -259,7 +274,7 @@ export default class RankScroll extends ContainerObject {
         this.addObject(this._playerRow, this.container);
 
         this._tfRankOffset = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgRankBubble));
-        const rankText = Fonts.stdRegular(`+${this._rankOffset}`, 20).color(0).bold().build();
+        const rankText = Fonts.std(`+${this._rankOffset}`, 20).color(0).bold().build();
         rankText.position = new Point(
             (this._tfRankOffset.width - rankText.width) / 2,
             (this._tfRankOffset.height - rankText.height) / 2

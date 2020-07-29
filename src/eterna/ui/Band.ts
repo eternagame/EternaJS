@@ -27,7 +27,7 @@ export default class Band extends ContainerObject implements Updatable {
         this._st1 = new Sprite();
         this.container.addChild(this._st1);
 
-        let scoreText: Text = Fonts.arial('', 10).bold().build();
+        let scoreText: Text = Fonts.std('', 10).bold().build();
         scoreText.position = new Point(2, 19);
         this.container.addChild(scoreText);
 

@@ -76,11 +76,11 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
         this._selection = new Sprite();
         this.container.addChild(this._selection);
 
-        this._numAU = Fonts.arial('', 12).color(0xffffff).bold().build();
+        this._numAU = Fonts.std('', 12).color(0xffffff).bold().build();
         this.container.addChild(this._numAU);
-        this._numUG = Fonts.arial('', 12).color(0xffffff).bold().build();
+        this._numUG = Fonts.std('', 12).color(0xffffff).bold().build();
         this.container.addChild(this._numUG);
-        this._numGC = Fonts.arial('', 12).color(0xffffff).bold().build();
+        this._numGC = Fonts.std('', 12).color(0xffffff).bold().build();
         this.container.addChild(this._numGC);
 
         this._targets = new Array(7);
@@ -344,7 +344,7 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
     private static readonly R = new Rectangle();
 }
 
-class PaletteTarget {
+export class PaletteTarget {
     public readonly type: PaletteTargetType;
     public readonly id: RScriptUIElementID;
     public readonly isPair: boolean;

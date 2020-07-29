@@ -2,7 +2,9 @@ import * as log from 'loglevel';
 import {
     Container, DisplayObject, Rectangle, Point
 } from 'pixi.js';
-import {ContainerObject, Enableable, GameObject} from 'flashbang';
+import {
+    ContainerObject, Enableable, GameObject, Assert
+} from 'flashbang';
 import EPars from 'eterna/EPars';
 import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
 import Puzzle from 'eterna/puzzle/Puzzle';
@@ -134,6 +136,7 @@ export default class RScriptEnv extends ContainerObject {
                 const [palette] = this.getUIElementFromID(RScriptUIElementID.PALETTE);
                 const obj = palette as GameObject;
                 const rect = uiElement as Rectangle;
+                Assert.assertIsDefined(obj.display);
                 const globalPos = obj.display.toGlobal(new Point());
                 return new Rectangle(
                     globalPos.x + rect.x,
@@ -143,6 +146,7 @@ export default class RScriptEnv extends ContainerObject {
                 );
             } else {
                 const obj = uiElement as GameObject;
+                Assert.assertIsDefined(obj.display);
                 const globalPos = obj.display.toGlobal(new Point());
                 return new Rectangle(
                     globalPos.x,
@@ -193,8 +197,10 @@ export default class RScriptEnv extends ContainerObject {
                     obj.display.visible = visible;
                 }
 
-                if (((obj as any) as Enableable).enabled !== undefined) {
-                    ((obj as any) as Enableable).enabled = visible && !disabled;
+                // AMW TODO: this concerns me. Neither DisplayObject nor GameObject
+                // seem to actually implement Enableable...
+                if (((obj as unknown) as Enableable).enabled !== undefined) {
+                    ((obj as unknown) as Enableable).enabled = visible && !disabled;
                 }
             }
         }
@@ -228,12 +234,12 @@ export default class RScriptEnv extends ContainerObject {
                 // NOTE: There is no longer a toggle bar...
                 return this.ui.toolbar.naturalButton;
             case RScriptUIElementID.ZOOMIN:
-                return this.ui.toolbar.zoomInButton;
+                return this.ui.toolbar.zoomInButton ? this.ui.toolbar.zoomInButton : null;
             case RScriptUIElementID.ZOOMOUT:
-                return this.ui.toolbar.zoomOutButton;
+                return this.ui.toolbar.zoomOutButton ? this.ui.toolbar.zoomOutButton : null;
             case RScriptUIElementID.ACTIONBAR:
                 // NOTE: There is no longer an action bar...
-                return this.ui.toolbar.zoomInButton;
+                return this.ui.toolbar.zoomInButton ? this.ui.toolbar.zoomInButton : null;
             case RScriptUIElementID.RESET:
                 return this.ui.toolbar.resetButton;
             case RScriptUIElementID.UNDO:

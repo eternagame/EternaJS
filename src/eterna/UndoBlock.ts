@@ -1,4 +1,4 @@
-import {JSONUtil, Assert} from 'flashbang';
+import {Assert} from 'flashbang';
 import EPars from 'eterna/EPars';
 import Plot, {PlotType} from 'eterna/Plot';
 import Pose2D, {Oligo} from './pose2D/Pose2D';
@@ -6,6 +6,64 @@ import Folder from './folding/Folder';
 import Utility from './util/Utility';
 import Vienna from './folding/Vienna';
 import Vienna2 from './folding/Vienna2';
+
+export interface FoldData {
+    sequence_: number[];
+    pairs_array_: Map<boolean, number[][]>;
+    params_array_: Map<boolean, Param[][]>;
+    stable_: boolean;
+    target_oligo_?: number[];
+    target_oligos_?: Oligo[];
+    oligo_order_?: number[];
+    oligos_paired_: number;
+    target_pairs_: number[];
+    target_oligo_order_?: number[];
+    puzzle_locks_?: boolean[];
+    forced_struct_: number[];
+    target_conditions_?: string;
+}
+
+// amw fuck a lot of these are optional
+export interface TargetConditions {
+    type: 'multistrand' | 'aptamer' | 'pseudoknot' | 'aptamer+oligo' | 'oligo' | 'single';
+    secstruct: string;
+    sequence?: string;
+    IUPAC?: string;
+    'custom-layout'?: [[number, number] | [null, null]];
+    'custom-reference'?: string;
+    'custom-numbering'?: string;
+    oligo_concentration?: string | number; // the strings have to be convertible
+    oligo_bind?: boolean;
+    oligo_sequence?: string;
+    oligo_label?: string; // really, 'T' | 'R'
+    oligo_name?: string;
+    concentration?: number;
+    oligos?: OligoDef[];
+    shift_locks?: string;
+    shift_limit?: number;
+    anti_secstruct?: string;
+    structure_constrained_bases?: number[];
+    anti_structure_constrained_bases?: number[];
+    structure_constraints?: boolean[];
+    anti_structure_constraints?: boolean[];
+    site?: number[];
+    fold_version?: number;
+    fold_mode?: string; // this time it's '3'
+    state_name?: string;
+    force_struct?: string;
+    binding_pairs?: number[];
+    bonus?: number;
+    malus?: number;
+}
+
+export interface OligoDef {
+    sequence: string;
+    malus: number;
+    name: string;
+    bind?: boolean;
+    concentration?: string; // a Numberable one
+    label?: string;
+}
 
 export enum UndoBlockParam {
     GU = 0,
@@ -32,6 +90,8 @@ export enum BasePairProbabilityTransform {
     SQUARE
 }
 
+type Param = (number | number[] | null);
+
 export default class UndoBlock {
     constructor(seq: number[]) {
         this._sequence = seq.slice();
@@ -41,7 +101,7 @@ export default class UndoBlock {
         this._paramsArray.set(true, []);
     }
 
-    public toJSON(): any {
+    public toJSON(): FoldData {
         // TODO: Updating this requires changing all content in the DB AND
         // migrating all autosave content on boot for however long we want to allow
         // players to migrate their autosaves
@@ -64,21 +124,33 @@ export default class UndoBlock {
         /* eslint-enable @typescript-eslint/camelcase */
     }
 
-    public fromJSON(json: any): void {
+    public fromJSON(json: FoldData): void {
         try {
-            this._sequence = JSONUtil.require(json, 'sequence_');
-            this._pairsArray = JSONUtil.require(json, 'pairs_array_');
-            this._paramsArray = JSONUtil.require(json, 'params_array_');
-            this._stable = JSONUtil.require(json, 'stable_');
-            this._targetOligo = JSONUtil.require(json, 'target_oligo_');
-            this._targetOligos = JSONUtil.require(json, 'target_oligos_');
-            this._oligoOrder = JSONUtil.require(json, 'oligo_order_');
-            this._oligosPaired = JSONUtil.require(json, 'oligos_paired_');
-            this._targetPairs = JSONUtil.require(json, 'target_pairs_');
-            this._targetOligoOrder = JSONUtil.require(json, 'target_oligo_order_');
-            this._puzzleLocks = JSONUtil.require(json, 'puzzle_locks_');
-            this._forcedStruct = JSONUtil.require(json, 'forced_struct_');
-            this._targetConditions = JSONUtil.require(json, 'target_conditions_');
+            this._sequence = json.sequence_;// JSONUtil.require(json, 'sequence_');
+            // Legacy -- this wasn't always a map. So check typeof and put nonmaps
+            // into the pseudoknots false field.
+            if (Array.isArray(json.pairs_array_)) {
+                this._pairsArray = new Map<boolean, number[][]>();
+                this._pairsArray.set(false, json.pairs_array_);
+            } else {
+                this._pairsArray = json.pairs_array_;
+            }
+            if (Array.isArray(json.params_array_)) {
+                this._paramsArray = new Map<boolean, Param[][]>();
+                this._paramsArray.set(false, json.params_array_);
+            } else {
+                this._paramsArray = json.params_array_;
+            }
+            this._stable = json.stable_;// JSONUtil.require(json, 'stable_');
+            this._targetOligo = json.target_oligo_;// JSONUtil.require(json, 'target_oligo_');
+            this._targetOligos = json.target_oligos_;// JSONUtil.require(json, 'target_oligos_');
+            this._oligoOrder = json.oligo_order_;// JSONUtil.require(json, 'oligo_order_');
+            this._oligosPaired = json.oligos_paired_;// JSONUtil.require(json, 'oligos_paired_');
+            this._targetPairs = json.target_pairs_;// JSONUtil.require(json, 'target_pairs_');
+            this._targetOligoOrder = json.target_oligo_order_; // JSONUtil.require(json, 'target_oligo_order_');
+            this._puzzleLocks = json.puzzle_locks_;// JSONUtil.require(json, 'puzzle_locks_');
+            this._forcedStruct = json.forced_struct_;// JSONUtil.require(json, 'forced_struct_');
+            this._targetConditions = json.target_conditions_;// JSONUtil.require(json, 'target_conditions_'); // setter
         } catch (e) {
             throw new Error(`Error parsing UndoBlock JSON: ${e}`);
         }
@@ -118,42 +190,42 @@ export default class UndoBlock {
         return totProb / numBPs;
     }
 
-    public get targetOligos(): Oligo[] | null {
+    public get targetOligos(): Oligo[] | undefined {
         return this._targetOligos;
     }
 
-    public set targetOligos(targetOligos: Oligo[] | null) {
-        this._targetOligos = targetOligos == null ? null : JSON.parse(JSON.stringify(targetOligos));
+    public set targetOligos(targetOligos: Oligo[] | undefined) {
+        this._targetOligos = targetOligos === undefined ? undefined : JSON.parse(JSON.stringify(targetOligos));
     }
 
-    public get targetOligo(): number[] | null {
+    public get targetOligo(): number[] | undefined {
         return this._targetOligo;
     }
 
-    public set targetOligo(targetOligo: number[] | null) {
-        this._targetOligo = targetOligo == null ? null : targetOligo.slice();
+    public set targetOligo(targetOligo: number[] | undefined) {
+        this._targetOligo = targetOligo === undefined ? undefined : targetOligo.slice();
     }
 
     public get oligoMode(): number {
-        let tc: any = this.targetConditions;
-        if (tc == null) return 0;
-        return tc['fold_mode'] == null ? Pose2D.OLIGO_MODE_DIMER : Number(tc['fold_mode']);
+        let tc: TargetConditions | undefined = this.targetConditions;
+        if (tc === undefined) return 0;
+        return tc['fold_mode'] === undefined ? Pose2D.OLIGO_MODE_DIMER : Number(tc['fold_mode']);
     }
 
-    public get oligoName(): string | null {
-        let tc: any = this.targetConditions;
-        if (tc == null) {
-            return null;
+    public get oligoName(): string | undefined {
+        let tc: TargetConditions | undefined = this.targetConditions;
+        if (tc === undefined) {
+            return undefined;
         }
-        return Object.prototype.hasOwnProperty.call(tc, 'oligo_name') ? tc['oligo_name'] : null;
+        return Object.prototype.hasOwnProperty.call(tc, 'oligo_name') ? tc['oligo_name'] : undefined;
     }
 
-    public get oligoOrder(): number[] | null {
+    public get oligoOrder(): number[] | undefined {
         return this._oligoOrder;
     }
 
-    public set oligoOrder(oligoOrder: number[] | null) {
-        this._oligoOrder = oligoOrder == null ? null : oligoOrder.slice();
+    public set oligoOrder(oligoOrder: number[] | undefined) {
+        this._oligoOrder = oligoOrder === undefined ? undefined : oligoOrder.slice();
     }
 
     public get oligosPaired(): number {
@@ -172,12 +244,12 @@ export default class UndoBlock {
         this._targetPairs = targetPairs.slice();
     }
 
-    public get targetOligoOrder(): number[] | null {
+    public get targetOligoOrder(): number[] | undefined {
         return this._targetOligoOrder;
     }
 
-    public set targetOligoOrder(oligoOrder: number[] | null) {
-        this._targetOligoOrder = oligoOrder == null ? null : oligoOrder.slice();
+    public set targetOligoOrder(oligoOrder: number[] | undefined) {
+        this._targetOligoOrder = oligoOrder === undefined || !oligoOrder ? undefined : oligoOrder.slice();
     }
 
     public get sequence(): number[] {
@@ -188,11 +260,11 @@ export default class UndoBlock {
         this._sequence = seq.slice();
     }
 
-    public get puzzleLocks(): boolean[] | null {
+    public get puzzleLocks(): boolean[] | undefined {
         return this._puzzleLocks;
     }
 
-    public set puzzleLocks(locks: boolean[] | null) {
+    public set puzzleLocks(locks: boolean[] | undefined) {
         this._puzzleLocks = locks;
     }
 
@@ -204,11 +276,11 @@ export default class UndoBlock {
         this._forcedStruct = forced;
     }
 
-    public get targetConditions(): any {
-        return (this._targetConditions == null ? null : JSON.parse(this._targetConditions));
+    public get targetConditions(): TargetConditions | undefined {
+        return (this._targetConditions === undefined ? undefined : JSON.parse(this._targetConditions));
     }
 
-    public set targetConditions(conditions: any) {
+    public set targetConditions(conditions: TargetConditions | undefined) {
         this._targetConditions = JSON.stringify(conditions);
     }
 
@@ -226,13 +298,17 @@ export default class UndoBlock {
         return pairsArray[temp];
     }
 
-    public getParam(index: UndoBlockParam, temp: number = 37, pseudoknots: boolean = false): any {
-        const parisArray = this._paramsArray.get(pseudoknots);
-        Assert.assertIsDefined(parisArray);
-        if (parisArray[temp] != null) {
-            return parisArray[temp][index];
+    public getParam(
+        index: UndoBlockParam,
+        temp: number = 37,
+        pseudoknots: boolean = false
+    ): number | number[] | null {
+        const paramsArray = this._paramsArray.get(pseudoknots);
+        Assert.assertIsDefined(paramsArray);
+        if (paramsArray[temp] != null) {
+            return paramsArray[temp][index];
         } else {
-            return undefined;
+            return null;
         }
     }
 
@@ -242,13 +318,18 @@ export default class UndoBlock {
         pairsArray[temp] = pairs.slice();
     }
 
-    public setParam(index: UndoBlockParam, val: any, temp: number = 37, pseudoknots: boolean = false): void {
-        const pairsArray = this._paramsArray.get(pseudoknots);
-        Assert.assertIsDefined(pairsArray);
-        if (pairsArray[temp] == null) {
-            pairsArray[temp] = [];
+    public setParam(
+        index: UndoBlockParam,
+        val: number | number[] | null,
+        temp: number = 37,
+        pseudoknots: boolean = false
+    ): void {
+        const paramsArray = this._paramsArray.get(pseudoknots);
+        Assert.assertIsDefined(paramsArray);
+        if (paramsArray[temp] == null) {
+            paramsArray[temp] = [];
         }
-        pairsArray[temp][index] = val;
+        paramsArray[temp][index] = val;
     }
 
     public setBasics(folder: Folder, temp: number = 37, pseudoknots: boolean = false): void {
@@ -329,11 +410,11 @@ export default class UndoBlock {
 
         for (let ii = 37; ii < 100; ii += 10) {
             if (this.getParam(UndoBlockParam.PROB_SCORE, ii)) {
-                pairScores.push(1 - this.getParam(UndoBlockParam.PAIR_SCORE, ii, pseudoknots));
+                pairScores.push(1 - (this.getParam(UndoBlockParam.PAIR_SCORE, ii, pseudoknots) as number));
                 maxPairScores.push(1.0);
                 continue;
             }
-            let curDat: number[] = this.getParam(UndoBlockParam.DOTPLOT, ii, pseudoknots);
+            let curDat: number[] = this.getParam(UndoBlockParam.DOTPLOT, ii, pseudoknots) as number[];
             let curPairs: number[] = this.getPairs(ii, pseudoknots);
             let probScore = 0;
             let scoreCount = 0;
@@ -377,11 +458,11 @@ export default class UndoBlock {
         this._meltPlotPairScores = pairScores;
         this._meltPlotMaxPairScores = maxPairScores;
 
-        let initScore: number = this.getParam(UndoBlockParam.PROB_SCORE, 37, pseudoknots);
+        let initScore: number = this.getParam(UndoBlockParam.PROB_SCORE, 37, pseudoknots) as number;
 
         let meltpoint = 107;
         for (let ii = 47; ii < 100; ii += 10) {
-            let currentScore: number = this.getParam(UndoBlockParam.PROB_SCORE, ii, pseudoknots);
+            let currentScore: number = this.getParam(UndoBlockParam.PROB_SCORE, ii, pseudoknots) as number;
             if (currentScore < initScore * 0.5) {
                 meltpoint = ii;
                 break;
@@ -411,8 +492,8 @@ export default class UndoBlock {
      * E.g., given oligos in order A B C, [1,2,0] means their new order should be C, A, B
      * (oligo A, with the old index of 0, should be at new index 1)
      */
-    public reorderedOligosIndexMap(otherOrder: number[] | null): number[] | null {
-        if (this._targetOligos == null) return null;
+    public reorderedOligosIndexMap(otherOrder: number[] | undefined): number[] | undefined {
+        if (this._targetOligos === undefined) return undefined;
 
         let originalIndices: number[][] = [];
         let oligoFirstBaseIndex = this._sequence.length;
@@ -432,17 +513,17 @@ export default class UndoBlock {
 
     private _sequence: number[];
     private _pairsArray: Map<boolean, number[][]> = new Map<boolean, number[][]>();
-    private _paramsArray: Map<boolean, any[][]> = new Map<boolean, any[][]>();
+    private _paramsArray: Map<boolean, Param[][]> = new Map<boolean, Param[][]>();
     private _stable: boolean = false;
-    private _targetOligo: number[] | null = null;
-    private _targetOligos: Oligo[] | null = null;
-    private _oligoOrder: number[] | null = null;
+    private _targetOligo: number[] | undefined = undefined;
+    private _targetOligos: Oligo[] | undefined = undefined;
+    private _oligoOrder: number[] | undefined = undefined;
     private _oligosPaired: number = 0;
     private _targetPairs: number[] = [];
-    private _targetOligoOrder: number[] | null = null;
-    private _puzzleLocks: boolean[] | null = [];
+    private _targetOligoOrder: number[] | undefined = undefined;
+    private _puzzleLocks: boolean[] | undefined = [];
     private _forcedStruct: number[] = [];
-    private _targetConditions: string | null = null;
+    private _targetConditions: string | undefined = undefined;
 
     private _dotPlotData: number[] | null;
     private _meltPlotPairScores: number[];

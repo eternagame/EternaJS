@@ -10,14 +10,14 @@ export default class RankRowLayout extends ContainerObject {
     ) {
         super();
 
-        this._tfName = Fonts.stdRegular('', fontSize).color(textColor).build();
+        this._tfName = Fonts.std('', fontSize).color(textColor).build();
         this.container.addChild(this._tfName);
 
-        this._tfRank = Fonts.stdRegular('', fontSize).color(textColor).build();
+        this._tfRank = Fonts.std('', fontSize).color(textColor).build();
         this._tfRank.position = new Point(130, 0);
         this.container.addChild(this._tfRank);
 
-        this._tfScore = Fonts.stdRegular('', fontSize).color(textColor).build();
+        this._tfScore = Fonts.std('', fontSize).color(textColor).build();
         this._tfScore.position = new Point(130 + rankScoreOffset, 0);
         this.container.addChild(this._tfScore);
 

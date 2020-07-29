@@ -101,12 +101,13 @@ test(`ContraFold:many_score_structures`, () => {
                 let struct = folder.foldSequence(
                     seq,
                     null);
-                expect(EPars.pairsToParenthesis(struct)).toEqual(str);
+                expect(struct).toBeDefined();
+                expect(EPars.pairsToParenthesis(struct!)).toEqual(str);
 
                 let outNNFE: number[] = [];
                 let score = folder.scoreStructures(
                     seq,
-                    struct,
+                    struct!,
                     false,
                     37,
                     outNNFE);

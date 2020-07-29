@@ -1,5 +1,5 @@
 import * as log from 'loglevel';
-import {ExtendedTextStyle} from 'pixi-multistyle-text';
+import {TextStyleExtended} from 'pixi-multistyle-text';
 import {Point} from 'pixi.js';
 import FancyTextBalloon from 'eterna/ui/FancyTextBalloon';
 import Fonts from 'eterna/util/Fonts';
@@ -53,8 +53,8 @@ export default class ROPTextbox extends RScriptOp {
 
         this._env.setVar(this._id, textBox);
 
-        let textStyle: ExtendedTextStyle = {
-            fontFamily: Fonts.ARIAL,
+        let textStyle: TextStyleExtended = {
+            fontFamily: Fonts.STDFONT,
             fontSize: 13,
             fill: 0xC0DCE7
 

@@ -1,7 +1,7 @@
 import {DisplayObject, Point} from 'pixi.js';
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
-import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
+import UndoBlock, {UndoBlockParam, TargetConditions} from 'eterna/UndoBlock';
 import Background from 'eterna/vfx/Background';
 import Molecule from 'eterna/pose2D/Molecule';
 import BaseGlow from 'eterna/vfx/BaseGlow';
@@ -36,6 +36,7 @@ import ConstraintBar from 'eterna/constraints/ConstraintBar';
 import Utility from 'eterna/util/Utility';
 import ShapeConstraint from 'eterna/constraints/constraints/ShapeConstraint';
 import ContraFold from 'eterna/folding/Contrafold';
+import {SaveStoreItem} from 'flashbang/settings/SaveGameManager';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
@@ -48,13 +49,34 @@ export interface PuzzleEditPoseData {
     structure: string;
 }
 
+// AMW TODO: we need the "all optional" impl for piece by piece buildup.
+// Should be converted to an "all required" type for subsequent processing.
+type SubmitPuzzleParams = {
+    folder?: string;
+    title?: string;
+    secstruct?: string;
+    constraints?: string;
+    body?: string;
+    midimgdata?: string;
+    bigimgdata?: string;
+    lock?: string;
+    begin_sequence?: string;
+    objectives?: string;
+};
+
 export default class PuzzleEditMode extends GameMode {
-    constructor(embedded: boolean, numTargets?: number, poses?: PuzzleEditPoseData[]) {
+    constructor(embedded: boolean, numTargets?: number, poses?: SaveStoreItem) {
         super();
         this._embedded = embedded;
 
         if (poses != null && poses.length > 0) {
-            this._initialPoseData = poses;
+            // this is a safe type assertion because only the first two
+            // items of SaveStoreItem are nonstring.
+            const justPoses: string[] = poses.slice(2) as string[];
+            this._initialPoseData = [];
+            for (let justPose of justPoses) {
+                this._initialPoseData.push(JSON.parse(justPose));
+            }
             this._numTargets = this._initialPoseData.length;
         } else {
             if (!numTargets) {
@@ -121,12 +143,14 @@ export default class PuzzleEditMode extends GameMode {
 
         this._toolbar.screenshotButton.clicked.connect(() => this.postScreenshot(this.createScreenshot()));
 
+        Assert.assertIsDefined(this._toolbar.zoomOutButton);
         this._toolbar.zoomOutButton.clicked.connect(() => {
             for (let poseField of this._poseFields) {
                 poseField.zoomOut();
             }
         });
 
+        Assert.assertIsDefined(this._toolbar.zoomInButton);
         this._toolbar.zoomInButton.clicked.connect(() => {
             for (let poseField of this._poseFields) {
                 poseField.zoomIn();
@@ -276,13 +300,13 @@ export default class PuzzleEditMode extends GameMode {
     }
 
     private saveData(): void {
-        let objs: PuzzleEditPoseData[] = [];
+        let objs: SaveStoreItem = [0, this._poses[0].sequence];
         for (let pose of this._poses) {
             Assert.assertIsDefined(pose.molecularStructure);
-            objs.push({
+            objs.push(JSON.stringify({
                 sequence: EPars.sequenceToString(pose.sequence),
                 structure: EPars.pairsToParenthesis(pose.molecularStructure)
-            });
+            }));
         }
 
         Eterna.saveManager.save(this.savedDataTokenName, objs);
@@ -316,7 +340,7 @@ export default class PuzzleEditMode extends GameMode {
     }
 
     public getLockString(): string {
-        let locks: boolean[] | null = this.getCurrentLock(0);
+        let locks: boolean[] | undefined = this.getCurrentLock(0);
         let len: number = this._poses[0].sequence.length;
         let lockString = '';
         for (let ii = 0; ii < len; ii++) {
@@ -414,7 +438,7 @@ export default class PuzzleEditMode extends GameMode {
 
         let info = `Player: ${Eterna.playerName}\n`
             + 'Player Puzzle Designer';
-        let infoText = Fonts.arial(info, 12).color(0xffffff).build();
+        let infoText = Fonts.std(info, 12).color(0xffffff).build();
         this.container.addChild(infoText);
 
         let pngData = DisplayUtil.renderToPNG(this.container);
@@ -448,7 +472,7 @@ export default class PuzzleEditMode extends GameMode {
                         }
                     }
 
-                    pose.puzzleLocks = null;
+                    pose.puzzleLocks = undefined;
                     pose.sequence = sequence;
                     pose.molecularBindingSite = null;
                 }
@@ -548,9 +572,9 @@ export default class PuzzleEditMode extends GameMode {
             }
         }
 
-        let objectives: any[] = [];
+        let objectives: TargetConditions[] = [];
         for (let ii = 0; ii < this._poses.length; ii++) {
-            let objective: any = {};
+            let objective: TargetConditions | null = null;
             let bindingSite: boolean[] | null = this.getCurrentBindingSite(ii);
             let bindingBases: number[] = [];
             if (bindingSite !== null) {
@@ -561,21 +585,26 @@ export default class PuzzleEditMode extends GameMode {
                 }
             }
 
-            objective['secstruct'] = this._structureInputs[ii].structureString;
-
             if (bindingBases.length > 0) {
+                objective = {
+                    type: 'aptamer',
+                    secstruct: this._structureInputs[ii].structureString
+                };
                 objective['type'] = 'aptamer';
                 objective['site'] = bindingBases;
                 objective['concentration'] = 10000;
                 objective['fold_version'] = 2.0;
             } else {
-                objective['type'] = 'single';
+                objective = {
+                    type: 'single',
+                    secstruct: this._structureInputs[ii].structureString
+                };
             }
 
             objectives.push(objective);
         }
 
-        let postParams: any = {};
+        let postParams: SubmitPuzzleParams = {};
 
         postParams['folder'] = this._folder.name;
         let paramsTitle: string;
@@ -695,7 +724,7 @@ export default class PuzzleEditMode extends GameMode {
         return this._targetPairsStack[this._stackLevel][index];
     }
 
-    private getCurrentLock(index: number): boolean[] | null {
+    private getCurrentLock(index: number): boolean[] | undefined {
         return this._lockStack[this._stackLevel][index];
     }
 
@@ -765,9 +794,9 @@ export default class PuzzleEditMode extends GameMode {
         }
 
         let undoblock: UndoBlock = this.getCurrentUndoBlock(this._poses.length - 1);
-        let numAU: number = undoblock.getParam(UndoBlockParam.AU);
-        let numGU: number = undoblock.getParam(UndoBlockParam.GU);
-        let numGC: number = undoblock.getParam(UndoBlockParam.GC);
+        let numAU: number = undoblock.getParam(UndoBlockParam.AU) as number;
+        let numGU: number = undoblock.getParam(UndoBlockParam.GU) as number;
+        let numGC: number = undoblock.getParam(UndoBlockParam.GC) as number;
 
         this._toolbar.palette.setPairCounts(numAU, numGU, numGC);
     }
@@ -790,7 +819,7 @@ export default class PuzzleEditMode extends GameMode {
         let noChange = true;
         let currentUndoBlocks: UndoBlock[] = [];
         let currentTargetPairs: number[][] = [];
-        let currentLock: (boolean[] | null)[] = [];
+        let currentLock: (boolean[] | undefined)[] = [];
         let currentBindingSites: (boolean[] | null)[] = [];
 
         let forceSequence = this._poses[index].sequence;
@@ -832,7 +861,7 @@ export default class PuzzleEditMode extends GameMode {
         for (let ii = 0; ii < this._poses.length; ii++) {
             let targetPairs: number[] = EPars.parenthesisToPairs(this._structureInputs[ii].structureString);
             let seq = this._poses[ii].sequence;
-            let lock: boolean[] | null = this._poses[ii].puzzleLocks;
+            let lock: boolean[] | undefined = this._poses[ii].puzzleLocks;
             let bindingSite = this._poses[ii].molecularBindingSite;
 
             if (this._stackLevel >= 0) {
@@ -846,7 +875,7 @@ export default class PuzzleEditMode extends GameMode {
                     noChange = false;
                 }
 
-                let lastLock: boolean[] | null = this._lockStack[this._stackLevel][ii];
+                let lastLock: boolean[] | undefined = this._lockStack[this._stackLevel][ii];
                 if (lock === null && lastLock !== null) {
                     noChange = false;
                 } else if (lock !== null && lastLock === null) {
@@ -949,7 +978,7 @@ export default class PuzzleEditMode extends GameMode {
     protected _folder: Folder;
     private _seqStack: UndoBlock[][];
     private _targetPairsStack: number[][][];
-    private _lockStack: (boolean[] | null)[][];
+    private _lockStack: (boolean[] | undefined)[][];
     private _bindingSiteStack: (boolean[] | null)[][];
     private _stackLevel: number;
     private _stackSize: number;

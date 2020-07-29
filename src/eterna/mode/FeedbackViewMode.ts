@@ -3,8 +3,8 @@ import {DisplayObject, Point, Text} from 'pixi.js';
 import Constants from 'eterna/Constants';
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
-import Feedback from 'eterna/Feedback';
-import UndoBlock from 'eterna/UndoBlock';
+import Feedback, {BrentTheoData} from 'eterna/Feedback';
+import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
 import Solution from 'eterna/puzzle/Solution';
 import Puzzle from 'eterna/puzzle/Puzzle';
 import Background from 'eterna/vfx/Background';
@@ -45,11 +45,11 @@ export default class FeedbackViewMode extends GameMode {
         let background = new Background();
         this.addObject(background, this.bgLayer);
 
-        this._puzzleTitle = Fonts.arial(this._puzzle.getName(false), 14).color(0xffffff).bold().build();
+        this._puzzleTitle = Fonts.std(this._puzzle.getName(false), 14).color(0xffffff).bold().build();
         this._puzzleTitle.position = new Point(33, 8);
         this.uiLayer.addChild(this._puzzleTitle);
 
-        this._title = Fonts.arial('', 12).color(0xffffff).bold().build();
+        this._title = Fonts.std('', 12).color(0xffffff).bold().build();
         this._title.position = new Point(33, 30);
         this.uiLayer.addChild(this._title);
 
@@ -60,12 +60,14 @@ export default class FeedbackViewMode extends GameMode {
         this._toolbar = new Toolbar(ToolbarType.FEEDBACK, {states: this._puzzle.getSecstructs().length});
         this.addObject(this._toolbar, this.uiLayer);
 
+        Assert.assertIsDefined(this._toolbar.zoomOutButton);
         this._toolbar.zoomOutButton.clicked.connect(() => {
             for (let poseField of this._poseFields) {
                 poseField.zoomOut();
             }
         });
 
+        Assert.assertIsDefined(this._toolbar.zoomInButton);
         this._toolbar.zoomInButton.clicked.connect(() => {
             for (let poseField of this._poseFields) {
                 poseField.zoomIn();
@@ -212,18 +214,21 @@ export default class FeedbackViewMode extends GameMode {
 
             for (let ii = 0; ii < this._poses.length; ii++) {
                 let field: PoseField = this._poseFields[ii];
-                if (this._targetConditions[ii] != null) {
-                    if (this._targetConditions[ii]['type'] === 'aptamer') {
+                if (this._targetConditions[ii] !== undefined) {
+                    const tc = this._targetConditions[ii] as TargetConditions;
+                    if (tc['type'] === 'aptamer') {
+                        // we know bonus will be present for any 'aptamer' puzzle
+                        // AMW TODO: encode as type constraint?
                         field.pose.setMolecularBinding(
-                            this._targetConditions[ii]['site'],
-                            this._targetConditions[ii]['binding_pairs'],
-                            this._targetConditions[ii]['bonus'] / 100.0
+                            tc['site'],
+                            tc['binding_pairs'],
+                            tc['bonus'] as number / 100.0
                         );
                     } else {
-                        field.pose.setMolecularBinding(null, null, null);
+                        field.pose.setMolecularBinding(undefined, undefined, undefined);
                     }
                 } else {
-                    field.pose.setMolecularBinding(null, null, 0);
+                    field.pose.setMolecularBinding(undefined, undefined, 0);
                 }
             }
 
@@ -270,7 +275,7 @@ export default class FeedbackViewMode extends GameMode {
         let info = `Designer: ${this._solution.playerName}\n`
             + `Design ID: ${this._solution.nodeID}\n`
             + `Design Title: ${this._solution.title}\n`;
-        let infoText = Fonts.arial(info).color(0xffffff).build();
+        let infoText = Fonts.std(info).color(0xffffff).build();
         this.container.addChild(infoText);
 
         DisplayUtil.positionRelativeToStage(
@@ -317,28 +322,34 @@ export default class FeedbackViewMode extends GameMode {
         this._toolbar.targetButton.toggled.value = false;
         if (this._isPipMode) {
             for (let ii = 0; ii < this._pairs.length; ii++) {
-                this._poseFields[ii].pose.pairs = this._shapePairs[ii];
+                if (this._shapePairs[ii] !== null) {
+                    this._poseFields[ii].pose.pairs = this._shapePairs[ii] as number[];
+                }
             }
-        } else {
-            this._poseFields[0].pose.pairs = this._shapePairs[this._currentIndex];
+        } else if (this._shapePairs[this._currentIndex] !== null) {
+            this._poseFields[0].pose.pairs = this._shapePairs[this._currentIndex] as number[];
         }
     }
 
     private changeTarget(targetIndex: number): void {
         this._currentIndex = targetIndex;
 
-        if (this._targetConditions[this._currentIndex] != null) {
-            if (this._targetConditions[this._currentIndex]['type'] === 'aptamer') {
+        if (this._targetConditions[this._currentIndex] !== undefined) {
+            const tc = this._targetConditions[this._currentIndex] as TargetConditions;
+            if (tc['type'] === 'aptamer') {
+                // we know bonus will be present for any 'aptamer' puzzle
+                // AMW TODO: encode as type constraint?
+                // AMW TODO: duplicates code from onSetPip?
                 this._poseFields[0].pose.setMolecularBinding(
-                    this._targetConditions[this._currentIndex]['site'],
-                    this._targetConditions[this._currentIndex]['binding_pairs'],
-                    this._targetConditions[this._currentIndex]['bonus'] / 100.0
+                    tc['site'],
+                    tc['binding_pairs'],
+                    tc['bonus'] as number / 100.0
                 );
             } else {
-                this._poseFields[0].pose.setMolecularBinding(null, null, null);
+                this._poseFields[0].pose.setMolecularBinding(undefined, undefined, undefined);
             }
         } else {
-            this._poseFields[0].pose.setMolecularBinding(null, null, 0);
+            this._poseFields[0].pose.setMolecularBinding(undefined, undefined, 0);
         }
 
         if (this._foldMode === PoseFoldMode.ESTIMATE) {
@@ -395,7 +406,7 @@ export default class FeedbackViewMode extends GameMode {
         Assert.assertIsDefined(this._feedback);
 
         let titleText = '';
-        let brentData: any = this._feedback.brentTheoData;
+        let brentData: BrentTheoData | undefined = this._feedback.brentTheoData;
         let score: number;
 
         if (brentData != null) {
@@ -560,7 +571,7 @@ export default class FeedbackViewMode extends GameMode {
     private _feedback: Feedback | null;
     private _sequence: number[];
     private _pairs: number[][] = [];
-    private _shapePairs: any[] = [];
-    protected _targetConditions: any[];
+    private _shapePairs: (number[] | null)[] = [];
+    protected _targetConditions: (TargetConditions | undefined)[];
     private _isExpColor: boolean;
 }

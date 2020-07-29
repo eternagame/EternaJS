@@ -219,13 +219,13 @@ export default class Utility {
      *
      * @returns array of integers (indices) like [11,12,13,14,12,16]
      */
-    public static getIndices(strInput: string): (number | null)[] | null {
+    public static getIndices(strInput: string): (number | null)[] | undefined {
         let indices: (number | null)[] = [];
         let splitted: string[] = strInput.split(' ');
         for (const str of splitted) {
             let ints: (number | null)[] | null = this.rangeStringToArray(str);
             if (ints === null) {
-                return null; // signal failure
+                return undefined; // signal failure
             }
             indices = indices.concat(ints);
         }
@@ -291,13 +291,14 @@ export default class Utility {
      *
      * @returns array of numbers
     */
-    public static numberingJSONToArray(numberingJSON: any): (number | null)[] | null {
-        if (numberingJSON === null) return null;
-        if (typeof numberingJSON === 'string') {
+    public static numberingJSONToArray(numberingJSON?: string): (number | null)[] | undefined {
+        if (numberingJSON === undefined) return undefined;
+        else { // if (typeof numberingJSON === 'string') {
             return this.getIndices(numberingJSON);
-        } else if (typeof numberingJSON === 'object') {
-            return numberingJSON;
         }
-        return numberingJSON;
+        //  else if (typeof numberingJSON === 'object') {
+        //     return numberingJSON;
+        // }
+        // return numberingJSON;
     }
 }

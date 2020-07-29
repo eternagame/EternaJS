@@ -1,10 +1,25 @@
 import PoseOp from 'eterna/pose2D/PoseOp';
+import {Oligo} from 'eterna/pose2D/Pose2D';
+
+export type CacheItem = number[] | FullEvalCache | MultiFoldResult | undefined;
+export type CacheKey = Record<string, string | number | number[] | boolean | Oligo[] | null>;
+
+export interface MultiFoldResult {
+    pairs: number[];
+    order: number[];
+    count: number;
+}
+
+export interface FullEvalCache {
+    nodes: number[];
+    energy: number;
+}
 
 export default abstract class Folder {
     public abstract get name (): string;
     public abstract get isFunctional (): boolean;
 
-    public getCache(key: Record< string, any >): any {
+    public getCache(key: CacheKey): CacheItem {
         let keyStr = JSON.stringify(key);
         return this._cache.get(keyStr);
     }
@@ -79,14 +94,14 @@ export default abstract class Folder {
     }
 
     public multifold(
-        seq: number[], secondBestPairs: number[] | null, oligos: any[],
+        seq: number[], secondBestPairs: number[] | null, oligos: Oligo[],
         desiredPairs: string | null = null, temp: number = 37
-    ): any {
-        return null;
+    ): MultiFoldResult | undefined {
+        return undefined;
     }
 
     public multifoldUnroll(
-        seq: number[], secondBestPairs: number[] | null, oligos: any[],
+        seq: number[], secondBestPairs: number[] | null, oligos: Oligo[],
         desiredPairs: string | null = null, temp: number = 37
     ): PoseOp[] | null {
         return null;
@@ -127,7 +142,7 @@ export default abstract class Folder {
         return 0;
     }
 
-    protected putCache(key: Record<string, any>, data: any): void {
+    protected putCache(key: CacheKey, data: CacheItem): void {
         let keyStr = JSON.stringify(key);
         this._cache.set(keyStr, data);
     }
@@ -136,5 +151,5 @@ export default abstract class Folder {
         this._cache.clear();
     }
 
-    private readonly _cache: Map<string, any> = new Map<string, any>();
+    private readonly _cache: Map<string, CacheItem> = new Map<string, CacheItem>();
 }

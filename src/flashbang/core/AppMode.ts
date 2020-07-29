@@ -12,6 +12,12 @@ import LateUpdatable from './LateUpdatable';
 import ModeStack from './ModeStack';
 import Updatable from './Updatable';
 
+// AMW: we are disabling the ban on Object (preferring Record<string, any>)
+// because Object is a clearer description of what we want and because we
+// can't use such a generic Record anyway due to eslint.
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type ObjectID = Object | string;
+
 export default class AppMode {
     /** Default keyboard input processor */
     public readonly keyboardInput: KeyboardInput = new KeyboardInput();
@@ -43,7 +49,7 @@ export default class AppMode {
         let objs: GameObject[] = [];
         for (let ref of objectRefs) {
             if (!ref.isNull) {
-                objs.push(ref.object);
+                objs.push(ref.object as GameObject);
             }
         }
 
@@ -70,7 +76,7 @@ export default class AppMode {
     }
 
     /** Removes the GameObject with the given id from the ObjectDB, if it exists. */
-    public destroyObjectWithId(id: any): void {
+    public destroyObjectWithId(id: ObjectID): void {
         let obj: GameObjectBase | undefined = this.getObjectWithId(id);
         if (obj !== undefined) {
             obj.destroySelf();
@@ -78,7 +84,7 @@ export default class AppMode {
     }
 
     /** Returns the object in this mode with the given ID, or null if no such object exists. */
-    public getObjectWithId(id: any): GameObjectBase | undefined {
+    public getObjectWithId(id: ObjectID): GameObjectBase | undefined {
         return this._idObjects ? this._idObjects.get(id) : undefined;
     }
 
@@ -304,12 +310,12 @@ export default class AppMode {
         }
 
         // Handle Updatable and LateUpdatable
-        let updatable: Updatable = (obj as any) as Updatable;
+        let updatable: Updatable = (obj as unknown) as Updatable;
         if (updatable.update !== undefined) {
             obj.regs.add(this.updateBegan.connect((dt) => updatable.update(dt)));
         }
 
-        let lateUpdatable: LateUpdatable = (obj as any) as LateUpdatable;
+        let lateUpdatable: LateUpdatable = (obj as unknown) as LateUpdatable;
         if (lateUpdatable.lateUpdate !== undefined) {
             obj.regs.add(this.lateUpdate.connect((dt) => lateUpdatable.lateUpdate(dt)));
         }
@@ -341,7 +347,8 @@ export default class AppMode {
 
     protected _rootObject: RootObject | null;
 
-    protected _idObjects: Map<any, GameObjectBase> | null = new Map();
+    // AMW TODO: can we decide what type AppMode should use for its ids?
+    protected _idObjects: Map<ObjectID, GameObjectBase> | null = new Map();
 
     protected _regs: RegistrationGroup | null = new RegistrationGroup();
 

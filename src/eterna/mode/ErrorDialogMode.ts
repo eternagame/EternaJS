@@ -7,9 +7,9 @@ import Fonts from 'eterna/util/Fonts';
 import GameButton from 'eterna/ui/GameButton';
 
 export default class ErrorDialogMode extends AppMode {
-    public readonly error: any;
+    public readonly error: Error | ErrorEvent;
 
-    constructor(error: any) {
+    constructor(error: Error | ErrorEvent) {
         super();
         this.error = error;
     }
@@ -32,7 +32,7 @@ export default class ErrorDialogMode extends AppMode {
 
         let panelLayout = new VLayoutContainer(0, HAlign.CENTER);
         panel.container.addChild(panelLayout);
-        panelLayout.addChild(Fonts.arial('', 15)
+        panelLayout.addChild(Fonts.std('', 15)
             .text(ErrorUtil.getErrString(this.error, false))
             .color(0xC0DCE7)
             .wordWrap(true, 300)
