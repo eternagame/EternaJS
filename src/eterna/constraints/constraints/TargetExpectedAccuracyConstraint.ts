@@ -30,7 +30,7 @@ export default class TargetExpectedAccuracyConstraint extends Constraint<TargetE
         ) as number;
 
         return {
-            satisfied: expectedAccuracy <= this.targetExpectedAccuracy,
+            satisfied: expectedAccuracy >= this.targetExpectedAccuracy,
             targetExpectedAccuracy: expectedAccuracy
         };
     }
@@ -45,11 +45,7 @@ export default class TargetExpectedAccuracyConstraint extends Constraint<TargetE
             tooltip.pushStyle('altTextMain');
         }
 
-        // Typical natural RNAs have a lot of branches in them. Often,
-        // artificial RNAs that are very stable have very few branches, like
-        // they are just one long hairpin. We want to encourage natural-looking,
-        // "branchy" RNAs by contraining the mean base pair distance.
-        tooltip.append('The average distance between paired bases must be at most', 'altText')
+        tooltip.append('The expected accuracy of the target structure must be at least', 'altText')
             .append(` ${this.targetExpectedAccuracy}.`);
 
         if (forMissionScreen) {
