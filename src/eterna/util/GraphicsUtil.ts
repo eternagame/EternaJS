@@ -56,9 +56,9 @@ export default class GraphicsUtil {
      * Draw a leftward-facing triangle.
      * @param scale scale factor for a triangle; default unity
      */
-    public static drawLeftTriangle(scale: number = 1): Graphics {
+    public static drawLeftTriangle(scale: number = 1, color = 0xFFFFFF): Graphics {
         let g = new Graphics()
-            .beginFill(0xFFFFFF, 0.8)
+            .beginFill(color, 0.8)
             .moveTo(0, 5)
             .lineTo(-7, 0)
             .lineTo(0, -5)
@@ -71,9 +71,9 @@ export default class GraphicsUtil {
      * Draw a rightward facing triangle.
      * @param scale scale factor for a triangle; default unity
      */
-    public static drawRightTriangle(scale: number = 1): Graphics {
+    public static drawRightTriangle(scale: number = 1, color = 0xFFFFFF): Graphics {
         let g = new Graphics()
-            .beginFill(0xFFFFFF, 0.8)
+            .beginFill(color, 0.8)
             .moveTo(0, 5)
             .lineTo(7, 0)
             .lineTo(0, -5)

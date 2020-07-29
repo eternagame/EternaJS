@@ -36,7 +36,7 @@ export default class Bubble extends SpriteObject implements Updatable {
         else if (this._bubbleSize === 2) bubbleType = 6;
         else bubbleType = 7;
 
-        this.display.texture = Texture.fromImage(Bubble.BUBBLE_NAMES[bubbleType]);
+        this.display.texture = Texture.from(Bubble.BUBBLE_NAMES[bubbleType]);
 
         this.autoHide = false;
     }

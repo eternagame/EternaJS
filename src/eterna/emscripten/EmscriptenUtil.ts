@@ -2,6 +2,7 @@
 import * as stdcpp from './stdcpp';
 
 export default class EmscriptenUtil {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     /**
      * Instantiates a program from an Emscripten module and calls its main() function if it has one.
      * @returns {Promise<any>} a promise that will resolve with the instantiated module.
@@ -26,6 +27,7 @@ export default class EmscriptenUtil {
             });
         });
     }
+    /* eslint-enable @typescript-eslint/no-explicit-any */
 
     /** Converts a C++ std::vector<T> to a T[] */
     public static stdVectorToArray<T>(vector: stdcpp.vector<T>): T[] {

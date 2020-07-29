@@ -73,7 +73,8 @@ export default class MissionIntroMode extends AppMode {
 
         Assert.assertIsDefined(Flashbang.stageWidth);
         const nameLabel = new HTMLTextObject(this._puzzleName)
-            .font(Fonts.STDFONT_BOLD)
+            .font(Fonts.STDFONT)
+            .bold()
             .fontSize(14)
             .color(0xC0DCE7)
             .selectable(false)

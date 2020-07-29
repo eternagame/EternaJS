@@ -491,6 +491,7 @@ input:focus, input.focus {
   font-family: 'Century Gothic', 'Didact Gothic', Arial, sans-serif;
   font-weight:300;
   font-size: 12px;
+  height: 20px;
 }
 
 input:not([type]), input[type="text"] {

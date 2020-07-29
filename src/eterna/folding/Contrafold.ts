@@ -5,7 +5,7 @@ import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import * as ContrafoldLib from './engines/ContrafoldLib';
 import {FullEvalResult, FullFoldResult} from './engines/ContrafoldLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
-import Folder from './Folder';
+import Folder, {CacheKey, FullEvalCache} from './Folder';
 import FoldUtil from './FoldUtil';
 
 export default class ContraFold extends Folder {
@@ -14,12 +14,13 @@ export default class ContraFold extends Folder {
     /**
      * Asynchronously creates a new instance of the ContraFold folder.
      * @returns {Promise<ContraFold>}
+     * @description AMW TODO cannot annotate type of module/program; both are any.
      */
     public static create(): Promise<ContraFold | null> {
         // eslint-disable-next-line import/no-unresolved, import/no-extraneous-dependencies
         return import('engines-bin/contrafold')
-            .then((module: any) => EmscriptenUtil.loadProgram(module))
-            .then((program: any) => new ContraFold(program))
+            .then((module) => EmscriptenUtil.loadProgram(module))
+            .then((program) => new ContraFold(program))
             .catch((err) => null);
     }
 
@@ -45,12 +46,12 @@ export default class ContraFold extends Folder {
         pairs: number[],
         pseudoknotted: boolean = false,
         temp: number = 37,
-        outNodes: number[] = null
+        outNodes: number[] | null = null
     ): number {
-        let key: any = {
+        let key: CacheKey = {
             primitive: 'score', seq, pairs, temp
         };
-        let cache: FullEvalCache = this.getCache(key);
+        let cache: FullEvalCache = this.getCache(key) as FullEvalCache;
 
         if (cache != null) {
             // log.debug("score cache hit");
@@ -61,7 +62,7 @@ export default class ContraFold extends Folder {
         }
 
         do {
-            let result: FullEvalResult = null;
+            let result: FullEvalResult | null = null;
             try {
                 result = this._lib.FullEval(temp,
                     EPars.sequenceToString(seq),
@@ -123,12 +124,12 @@ export default class ContraFold extends Folder {
     public foldSequence(
         seq: number[],
         secondBestPairs: number[],
-        desiredPairs: string = null,
+        desiredPairs: string | null = null,
         pseudoknotted: boolean = false,
         temp: number = 37,
         gamma: number = 6.0
     ): number[] {
-        let key: any = {
+        let key: CacheKey = {
             primitive: 'fold',
             seq,
             secondBestPairs,
@@ -136,7 +137,7 @@ export default class ContraFold extends Folder {
             temp,
             gamma
         };
-        let pairs: number[] = this.getCache(key);
+        let pairs: number[] = this.getCache(key) as number[];
         if (pairs != null) {
             // log.debug("fold cache hit");
             return pairs.slice();
@@ -149,12 +150,12 @@ export default class ContraFold extends Folder {
 
     private foldSequenceImpl(
         seq: number[],
-        structStr: string = null,
+        structStr: string | null = null,
         temp: number = 37,
         gamma: number = 0.7
     ): number[] {
         const seqStr = EPars.sequenceToString(seq, false, false);
-        let result: FullFoldResult;
+        let result: FullFoldResult | null = null;
 
         try {
             // can't do anything with structStr for now. constrained folding later.
@@ -172,9 +173,4 @@ export default class ContraFold extends Folder {
     }
 
     private readonly _lib: ContrafoldLib;
-}
-
-interface FullEvalCache {
-    nodes: number[];
-    energy: number;
 }

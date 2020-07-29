@@ -7,9 +7,13 @@ import {
     Graphics, Point, interaction, Matrix
 } from 'pixi.js';
 import Eterna from 'eterna/Eterna';
+import Assert from 'flashbang/util/Assert';
+import {FontWeight} from 'flashbang/util/TextBuilder';
 import GameButton from './GameButton';
 import UITheme from './UITheme';
 import HTMLTextObject from './HTMLTextObject';
+
+type InteractionEvent = PIXI.interaction.InteractionEvent;
 
 interface MultiPagePanelProps {
     title: string;
@@ -47,7 +51,7 @@ export default class MultiPagePanel extends ContainerObject {
 
     private _pageMask: Graphics;
     private _dragging = false;
-    private _dragPointData: interaction.InteractionData = null;
+    private _dragPointData: interaction.InteractionData | null = null;
     private _dragStartPointY = 0;
     private _dragStartBoxY = 0;
 
@@ -80,7 +84,9 @@ export default class MultiPagePanel extends ContainerObject {
         this._contentWrapper = document.createElement('div');
         this._contentWrapper.style.position = 'absolute';
         this._contentWrapper.style.pointerEvents = 'none';
-        overlayEl.appendChild(this._contentWrapper);
+        if (overlayEl) {
+            overlayEl.appendChild(this._contentWrapper);
+        }
 
         // Content
         this._pagesContainer = new ContainerObject();
@@ -115,9 +121,9 @@ export default class MultiPagePanel extends ContainerObject {
         this._background.drawRoundedRect(0, 0, this._props.width, this._panelHeight, theme.borderRadius);
         this._background.endFill();
         this._background.interactive = true;
-        this._background.on('click', (e) => e.stopPropagation());
+        this._background.on('click', (e: InteractionEvent) => e.stopPropagation());
 
-        this._pageMask.beginFill(0x00FF00, 0);
+        this._pageMask.beginFill(0x00FF00);
         const maskBeginY = theme.title.height;
         this._pageMask.drawRect(0, maskBeginY, this._props.width, this._panelHeight - maskBeginY);
         this._pageMask.endFill();
@@ -140,7 +146,8 @@ export default class MultiPagePanel extends ContainerObject {
             theme.borderRadius
         );
         this._background.endFill();
-        this._titleText = Fonts.stdMedium()
+        this._titleText = Fonts.std()
+            .fontWeight(FontWeight.SEMIBOLD)
             .fontSize(theme.title.fontSize)
             .color(UITheme.colors.background)
             .build();
@@ -182,13 +189,18 @@ export default class MultiPagePanel extends ContainerObject {
 
         this.setCurrentPage(this._currentPage);
 
+        Assert.assertIsDefined(this.mode);
+        Assert.assertIsDefined(Flashbang.pixi);
         this.regs.add(this.mode.resized.connect(() => { this._sizeChanged = true; }));
         Flashbang.pixi.renderer.addListener('postrender', this.updateDOMMask, this);
     }
 
     protected dispose(): void {
+        Assert.assertIsDefined(Flashbang.pixi);
         const overlayEl = document.getElementById(Eterna.OVERLAY_DIV_ID);
-        overlayEl.removeChild(this._contentWrapper);
+        if (overlayEl) {
+            overlayEl.removeChild(this._contentWrapper);
+        }
         Flashbang.pixi.renderer.removeListener('postrender', this.updateDOMMask, this);
 
         super.dispose();
@@ -199,9 +211,13 @@ export default class MultiPagePanel extends ContainerObject {
         if (this._sizeChanged || !MatrixUtil.equals(this._lastTransform, m)) {
             this._contentWrapper.style.width = `${Flashbang.stageWidth}px`;
             this._contentWrapper.style.height = `${Flashbang.stageHeight}px`;
+            Assert.assertIsDefined(Flashbang.stageWidth);
+            Assert.assertIsDefined(Flashbang.stageHeight);
             this._contentWrapper.style.clipPath = `inset(${m.ty + MultiPagePanel.theme.title.height}px ${Flashbang.stageWidth - (m.tx + this._props.width)}px ${Flashbang.stageHeight - (m.ty + this._panelHeight)}px ${m.tx}px)`;
             this._sizeChanged = false;
-            m.copy(this._lastTransform);
+            // AMW: Used to be copy in prior PIXI. clone doesn't make sense (has
+            // an arg); copyFrom doesn't make sense because m const.
+            m.copyTo(this._lastTransform);
         }
     }
 
@@ -239,6 +255,7 @@ export default class MultiPagePanel extends ContainerObject {
         const scrollHeight = this._panelHeight - (theme.title.height + theme.title.padding);
         const containerHeight = this._pagesContainer.display.height + theme.title.padding;
         if (this._dragging && containerHeight > scrollHeight) {
+            Assert.assertIsDefined(this._dragPointData);
             const dragRange = this._dragPointData.getLocalPosition(this.container).y - this._dragStartPointY;
             this._pagesContainer.display.y = MathUtil.clamp(
                 this._dragStartBoxY + dragRange,

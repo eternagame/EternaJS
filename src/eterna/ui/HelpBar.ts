@@ -7,6 +7,7 @@ interface HelpBarProps {
     onHintClicked?: () => void;
     onHelpClicked: () => void;
     onChatClicked: () => void;
+    onInfoClicked?: () => void;
 }
 
 export default class HelpBar extends ContainerObject {
@@ -27,6 +28,21 @@ export default class HelpBar extends ContainerObject {
         this.addObject(chat, this.container);
         this.regs.add(chat.clicked.connect(props.onChatClicked));
 
+        if (props.onInfoClicked) {
+            const onInfoClicked = props.onInfoClicked;
+            const info = new GameButton()
+                .up(Bitmaps.ImgInfoControl)
+                .over(Bitmaps.ImgInfoControlHover)
+                .down(Bitmaps.ImgInfoControl)
+                .hotkey(KeyCode.KeyI, true)
+                .tooltip('Design Information (ctrl+I/cmd+I)');
+
+            this.addObject(info, this.container);
+            this.regs.add(info.clicked.connect(() => {
+                onInfoClicked();
+            }));
+        }
+
         if (props.onHintClicked) {
             const onHintClicked = props.onHintClicked;
             const hints = new GameButton()
@@ -35,7 +51,7 @@ export default class HelpBar extends ContainerObject {
                 .down(Bitmaps.ImgHintHit)
                 .hotkey(KeyCode.KeyH)
                 .rscriptID(RScriptUIElementID.HINT)
-                .tooltip('Hints');
+                .tooltip('Hints (H)');
 
             this.addObject(hints, this.container);
             this.regs.add(hints.clicked.connect(() => {

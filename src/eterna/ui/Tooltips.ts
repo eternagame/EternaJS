@@ -1,4 +1,4 @@
-import {ExtendedTextStyle} from 'pixi-multistyle-text';
+import {TextStyleExtended} from 'pixi-multistyle-text';
 import {
     Container, DisplayObject, Graphics, Point, Rectangle, Text
 } from 'pixi.js';
@@ -6,6 +6,7 @@ import {Registration, RegistrationGroup} from 'signals';
 import {
     StyledTextBuilder, GameObject, Flashbang, SerialTask, Easing, AlphaTask, DelayTask, GameObjectRef, Button, Assert
 } from 'flashbang';
+import {PaletteTarget} from 'eterna/ui/NucleotidePalette';
 import Fonts from 'eterna/util/Fonts';
 
 /** A tooltip can be a string, styled text, or a function that creates a DisplayObject */
@@ -13,8 +14,8 @@ export type Tooltip = (() => DisplayObject) | string | StyledTextBuilder;
 
 export default class Tooltips extends GameObject {
     /** Default text style for tooltips */
-    public static readonly DEFAULT_STYLE: ExtendedTextStyle = {
-        fontFamily: Fonts.ARIAL,
+    public static readonly DEFAULT_STYLE: TextStyleExtended = {
+        fontFamily: Fonts.STDFONT,
         fontSize: 15,
         fill: 0xC0DCE7
     };
@@ -29,7 +30,7 @@ export default class Tooltips extends GameObject {
         this._layer = layer;
     }
 
-    public get ids(): any[] {
+    public get ids(): [typeof Tooltips] {
         return [Tooltips];
     }
 
@@ -38,7 +39,7 @@ export default class Tooltips extends GameObject {
         super.removed();
     }
 
-    public showTooltip(key: any, loc: Point, tooltip: Tooltip): void {
+    public showTooltip(key: Button | PaletteTarget, loc: Point, tooltip: Tooltip): void {
         if (this._curTooltipKey === key) {
             return;
         }
@@ -61,7 +62,7 @@ export default class Tooltips extends GameObject {
         ));
     }
 
-    public showTooltipFor(target: DisplayObject, key: any, tooltip: Tooltip): void {
+    public showTooltipFor(target: DisplayObject, key: Button | PaletteTarget, tooltip: Tooltip): void {
         if (this._curTooltipKey === key) {
             return;
         }
@@ -72,7 +73,7 @@ export default class Tooltips extends GameObject {
         this.showTooltip(key, p, tooltip);
     }
 
-    public removeTooltip(key: any): void {
+    public removeTooltip(key: Button | PaletteTarget): void {
         if (this._curTooltipKey === key) {
             this.removeCurTooltip();
         }
@@ -134,7 +135,7 @@ export default class Tooltips extends GameObject {
 
     private readonly _layer: Container;
 
-    private _curTooltipKey: any;
+    private _curTooltipKey: Button | PaletteTarget | null;
     private _curTooltip: DisplayObject | null;
     private _curTooltipFader: GameObjectRef = GameObjectRef.NULL;
 

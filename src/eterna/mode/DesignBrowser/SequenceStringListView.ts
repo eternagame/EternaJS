@@ -35,7 +35,7 @@ export default class SequenceStringListView extends Container {
         this._height = height;
     }
 
-    public setSequences(sequences: string[] | null, expData: Feedback[] | null, pairs: number[] | null): void {
+    public setSequences(sequences: string[] | null, expData: (Feedback | null)[] | null, pairs: number[] | null): void {
         this._graphics.clear();
         if (this._content != null) {
             this._content.destroy({children: true});
@@ -60,18 +60,19 @@ export default class SequenceStringListView extends Container {
             let shapeThreshold = 0;
             let shapeMax = 0;
 
-            if (expData != null && expData[ii] != null) {
-                shapeData = expData[ii].getShapeData();
-                shapeDataStart = expData[ii].getShapeStartIndex();
+            let seqExpData = expData ? expData[ii] : null;
+            if (seqExpData) {
+                shapeData = seqExpData.getShapeData();
+                shapeDataStart = seqExpData.getShapeStartIndex();
             }
 
-            if (shapeData != null && expData != null) {
+            if (shapeData != null && seqExpData) {
                 shapeData = ExpPainter.transformData(
-                    expData[ii].getShapeData(), expData[ii].getShapeMax(), expData[ii].getShapeMin()
+                    seqExpData.getShapeData(), seqExpData.getShapeMax(), seqExpData.getShapeMin()
                 );
                 isThereShapeThreshold = true;
-                shapeThreshold = expData[ii].getShapeThreshold();
-                shapeMax = expData[ii].getShapeMax();
+                shapeThreshold = seqExpData.getShapeThreshold();
+                shapeMax = seqExpData.getShapeMax();
 
                 expPainter = new ExpPainter(shapeData, shapeDataStart);
                 expPainter.continuous = Eterna.settings.useContinuousColors.value;

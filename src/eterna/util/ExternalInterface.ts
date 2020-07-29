@@ -25,6 +25,7 @@ export class ExternalInterfaceCtx {
     }
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface RunScriptOptions {
     params?: any;
     ctx?: ExternalInterfaceCtx;
@@ -345,6 +346,7 @@ interface PendingScript {
     resolve: (value?: any) => void;
     reject: (reason?: any) => void;
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 interface RegisteredCtx {
     ctx: ExternalInterfaceCtx;

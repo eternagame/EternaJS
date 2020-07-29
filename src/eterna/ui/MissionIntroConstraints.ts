@@ -169,8 +169,6 @@ export default class MissionIntroConstraints extends ContainerObject {
             + this._currentPage * (this._activePageDot.width + theme.dotSpacing);
 
         // Update right button position
-        this._rightButton.container.position.x = xWalker
-            - theme.spacing
-            + (lastVisibleConstraint?.sideTextOffset ?? 0) * 0;
+        this._rightButton.container.position.x = xWalker - theme.spacing;
     }
 }

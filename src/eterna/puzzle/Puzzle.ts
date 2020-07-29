@@ -7,12 +7,21 @@ import EternaURL from 'eterna/net/EternaURL';
 import Pose2D from 'eterna/pose2D/Pose2D';
 import Constraint, {BaseConstraintStatus} from 'eterna/constraints/Constraint';
 import ShapeConstraint from 'eterna/constraints/constraints/ShapeConstraint';
+import {TargetConditions, OligoDef} from 'eterna/UndoBlock';
+import {BoosterData} from 'eterna/mode/PoseEdit/Booster';
 
 export interface BoostersData {
-    mission?: any;
-    paint_tools?: any;
-    actions?: any;
-    mission_cleared?: any;
+    mission?: Mission;
+    paint_tools?: BoosterData[];
+    actions?: BoosterData[];
+    mission_cleared?: MissionCleared;
+}
+export interface MissionCleared {
+    info: string;
+    more: string;
+}
+export interface Mission {
+    text: string;
 }
 
 export enum PuzzleType {
@@ -138,11 +147,11 @@ export default class Puzzle {
         this._folder = folder;
     }
 
-    public get targetConditions(): any[] {
+    public get targetConditions(): (TargetConditions | undefined)[] {
         if (this._targetConditions == null) {
-            let targetConditions: any[] = [];
+            let targetConditions: (TargetConditions | undefined)[] = [];
             for (let ii = 0; ii < this._secstructs.length; ii++) {
-                targetConditions.push(null);
+                targetConditions.push(undefined);
             }
             return targetConditions;
         } else {
@@ -214,7 +223,7 @@ export default class Puzzle {
         this._secstructs = secstructs.slice();
     }
 
-    public set objective(objectives: any[]) {
+    public set objective(objectives: TargetConditions[]) {
         this._targetConditions = objectives.slice();
         this._secstructs = [];
         let concentration: number;
@@ -228,18 +237,20 @@ export default class Puzzle {
             let tcType: string = this._targetConditions[ii]['type'];
             // Aptamers
 
-            if (Puzzle.isAptamerType(tcType) && this._targetConditions[ii]['site'] != null) {
-                let bindingPairs: any[] = [];
-                let bindingSite: any[] = this._targetConditions[ii]['site'];
+            if (Puzzle.isAptamerType(tcType) && this._targetConditions[ii]['site'] !== undefined) {
+                let bindingPairs: number[] = [];
+                let bindingSite: number[] = this._targetConditions[ii]['site'] as number[];
                 let targetPairs: number[] = EPars.parenthesisToPairs(this.getSecstruct(ii));
 
                 for (let jj = 0; jj < bindingSite.length; jj++) {
                     bindingPairs.push(targetPairs[bindingSite[jj]]);
                 }
 
+                // AMW TODO: these do not exist in the schema defined by the JSON
+                // entered in the admin interface. Are they only defined here?
                 this._targetConditions[ii]['binding_pairs'] = bindingPairs;
                 this._targetConditions[ii]['bonus'] = (
-                    -0.6 * Math.log(this._targetConditions[ii]['concentration'] / 3) * 100
+                    -0.6 * Math.log(this._targetConditions[ii]['concentration'] as number / 3) * 100
                 );
             }
 
@@ -255,7 +266,9 @@ export default class Puzzle {
             if (Puzzle.isOligoType(tcType) && this._targetConditions[ii]['oligo_sequence'] != null) {
                 concentration = 0;
                 if (this._targetConditions[ii]['oligo_concentration'] != null) {
-                    concentration = this._targetConditions[ii]['oligo_concentration'];
+                    // AMW: consider altering the JSON online so it is always
+                    // a number, not a string-that-can-be-converted.
+                    concentration = Number(this._targetConditions[ii]['oligo_concentration']);
                 } else {
                     concentration = 1.0;
                 }
@@ -267,11 +280,11 @@ export default class Puzzle {
             // Multi-strands
 
             if (this._targetConditions[ii]['type'] === 'multistrand') {
-                let oligos: any[] = this._targetConditions[ii]['oligos'];
+                let oligos: OligoDef[] = this._targetConditions[ii]['oligos'] as OligoDef[];
                 for (let jj = 0; jj < oligos.length; jj++) {
                     concentration = 0;
                     if (oligos[jj]['concentration'] != null) {
-                        concentration = oligos[jj]['concentration'];
+                        concentration = Number(oligos[jj]['concentration']);
                     } else {
                         concentration = 1.0;
                     }
@@ -502,7 +515,7 @@ export default class Puzzle {
         return seq;
     }
 
-    public getSubsequenceWithoutBarcode(seq: any[]): any[] {
+    public getSubsequenceWithoutBarcode(seq: number[]): number[] {
         if (!this._useBarcode) {
             return seq.slice();
         }
@@ -521,8 +534,10 @@ export default class Puzzle {
 
     public transformSequence(seq: number[], targetIndex: number): number[] {
         if (this._targetConditions != null) {
-            if (this._targetConditions[targetIndex]['sequence'] != null) {
-                let targetSeqTemp: number[] = EPars.stringToSequence(this._targetConditions[targetIndex]['sequence']);
+            if (this._targetConditions[targetIndex]['sequence'] !== undefined) {
+                let targetSeqTemp: number[] = EPars.stringToSequence(
+                    this._targetConditions[targetIndex]['sequence'] as string
+                );
                 let targetSeq: number[] = [];
 
                 if (this._useTails) {
@@ -577,7 +592,7 @@ export default class Puzzle {
     private _useTails: boolean = false;
     private _useShortTails: boolean = false;
     private _useBarcode: boolean = false;
-    private _targetConditions: any[] | null = null;
+    private _targetConditions: TargetConditions[] | null = null;
     private _constraints: Constraint<BaseConstraintStatus>[] | null = null;
     private _round: number = -1;
     private _numSubmissions: number = 3;

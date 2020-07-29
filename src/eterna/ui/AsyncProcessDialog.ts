@@ -13,7 +13,7 @@ export default class AsyncProcessDialog extends Dialog<void> {
     }
 
     protected added(): void {
-        let textField = Fonts.arial(this._text, 20).color(0xffffff).bold().build();
+        let textField = Fonts.std(this._text, 20).color(0xffffff).bold().build();
         this.container.addChild(textField);
 
         textField.alpha = 0;

@@ -37,7 +37,8 @@ export default class PseudoknotLines extends GameObject implements LateUpdatable
     public redraw(forceBaseXY: boolean): void {
         if (!this._enabled) {
             // clear if not cleared.
-            if (this._graphics.currentPath !== null) this._graphics.clear();
+            // if (this._graphics.currentPath !== null)
+            this._graphics.clear();
             return;
         }
 
@@ -82,7 +83,7 @@ export default class PseudoknotLines extends GameObject implements LateUpdatable
 
         if (Arrays.shallowEqual(starts, this._laststarts)
             && Arrays.shallowEqual(ends, this._lastends)
-            && this._graphics.currentPath !== null) {
+            /* && this._graphics.currentPath !== null */) {
             // base positions haven't changed, and pseudoknotLines have not been cleared,
             // so no need to update -- just return.
             return;
@@ -98,8 +99,6 @@ export default class PseudoknotLines extends GameObject implements LateUpdatable
      *  draw lines to denote pseudoknotted base pairs.
      */
     private drawPseudoknotLines(starts: Point[], ends: Point[]): void {
-        // let interpBasePosXY = this.updateInterpBasePos(basePosX, basePosY);
-
         this._graphics.clear();
 
         const INNER_LINE_THICKNESS: number = 0.1 * Pose2D.ZOOM_SPACINGS[this._pose.zoomLevel];
@@ -108,10 +107,6 @@ export default class PseudoknotLines extends GameObject implements LateUpdatable
     }
 
     private drawPseudoknotLine(starts: Point[], ends: Point[]): void {
-        // this._graphics.moveTo(this._lastBasePosX[0], this._lastBasePosY[0]);
-        // for (let ii = 0; ii < interpBasePosXY.length; ii++) {
-        //     this._graphics.lineTo(interpBasePosXY[ii][0], interpBasePosXY[ii][1]);
-        // }
         for (let ii = 0; ii < starts.length; ii++) {
             this._graphics.moveTo(starts[ii].x, starts[ii].y);
             this._graphics.lineTo(ends[ii].x, ends[ii].y);

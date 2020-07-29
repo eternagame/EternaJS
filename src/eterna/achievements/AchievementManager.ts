@@ -24,11 +24,11 @@ export default class AchievementManager extends GameObject {
         }
     }
 
-    public awardAchievements(achievementData: any): Promise<void> {
+    public awardAchievements(achievementData: Map<string, AchievementData>): Promise<void> {
         if (achievementData != null) {
             for (let key of Object.keys(achievementData)) {
                 if (Object.prototype.hasOwnProperty.call(achievementData, key)) {
-                    let data: AchievementData = achievementData[key];
+                    let data: AchievementData | undefined = achievementData.get(key);
                     this._pending.push(data);
                 }
             }
@@ -73,10 +73,10 @@ export default class AchievementManager extends GameObject {
     }
 
     private _cur: GameObjectRef = GameObjectRef.NULL;
-    private readonly _pending: AchievementData[] = [];
+    private readonly _pending: (AchievementData | undefined)[] = [];
 }
 
-interface AchievementData {
+export interface AchievementData {
     level: number;
     image: string;
     desc: string;

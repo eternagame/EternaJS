@@ -12,8 +12,8 @@ function GetServerURL(): string {
     return (url != null && url !== '' ? url : window.location.origin);
 }
 
-function ParseBool(value: string): boolean {
-    return value.toLowerCase() === 'true';
+function ParseBool(value: string | undefined): boolean {
+    return value !== undefined && value.toLowerCase() === 'true';
 }
 
 /**
@@ -27,7 +27,7 @@ export default class Eterna {
     public static readonly MAX_PUZZLE_EDIT_LENGTH = 400; // max length of PuzzleEditMode input
 
     // If DEBUG is not set, dev mode isn't true.
-    public static readonly DEV_MODE: boolean = process.env['DEBUG'] ? ParseBool(process.env['DEBUG']) : false;
+    public static readonly DEV_MODE: boolean = ParseBool(process.env['DEBUG']);
     public static readonly SERVER_URL: string = GetServerURL();
     public static readonly MOBILE_APP: boolean = ParseBool(process.env['MOBILE_APP']);
 
@@ -47,7 +47,7 @@ export default class Eterna {
         this.playerID = id;
     }
 
-    public static onFatalError(err: any): void {
+    public static onFatalError(err: Error | ErrorEvent): void {
         log.error('Fatal error error', ErrorUtil.getErrorObj(err) || ErrorUtil.getErrString(err));
         if (Flashbang.app != null
             && Flashbang.app.modeStack != null

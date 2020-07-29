@@ -1,4 +1,4 @@
-import {DisplayObject} from 'pixi.js';
+import {DisplayObject, Container} from 'pixi.js';
 import Flashbang from 'flashbang/core/Flashbang';
 import {Assert} from 'flashbang';
 
@@ -6,7 +6,7 @@ type InteractionPointerEvents = PIXI.interaction.InteractionPointerEvents;
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
 export default class PointerCapture {
-    constructor(root: DisplayObject) {
+    constructor(root: Container) {
         this._root = root;
     }
 
@@ -69,7 +69,7 @@ export default class PointerCapture {
         return this._onEvent != null;
     }
 
-    private readonly _root: DisplayObject;
+    private readonly _root: Container;
     private _onEvent: ((e: InteractionEvent) => void) | null;
     private _rootWasInteractive: boolean;
 

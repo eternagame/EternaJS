@@ -29,14 +29,45 @@ import {
     MinimumAUConstraint, MinimumGCConstraint, MinimumGUConstraint, MinimumAnyPairConstraint
 } from 'eterna/constraints/constraints/MinimumPairConstraint';
 import MinimumStackLengthConstraint from 'eterna/constraints/constraints/MinimumStackLengthConstraint';
+import TargetExpectedAccuracyConstraint from 'eterna/constraints/constraints/TargetExpectedAccuracyConstraint';
 import ScriptConstraint from 'eterna/constraints/constraints/ScriptConstraint';
 import SynthesisConstraint from 'eterna/constraints/constraints/SynthesisConstraint';
 import BarcodeConstraint from 'eterna/constraints/constraints/BarcodeConstraint';
 import ExternalInterface from 'eterna/util/ExternalInterface';
 import BoostConstraint from 'eterna/constraints/constraints/BoostConstraint';
 import {Assert} from 'flashbang';
+import {TargetConditions} from 'eterna/UndoBlock';
 import SolutionManager from './SolutionManager';
-import Puzzle from './Puzzle';
+import Puzzle, {PuzzleType} from './Puzzle';
+
+export interface PuzzleJSON {
+    id: string;
+    title: string;
+    type: PuzzleType; // AMW: worried this is actually stored as a string
+    body: string;
+    locks?: string;
+    objective?: string;
+    beginseq?: string;
+    secstruct: string;
+    saved_sequence?: string;
+    usetails: string;
+    folder?: string; // AMW TODO: make a valid folder name somehow!
+    reward?: string;
+    'ui-specs'?: string;
+    'next-puzzle'?: string;
+    'last-round'?: string;
+    check_hairpin?: string;
+    'num-submissions'?: string;
+    rscript?: string;
+    events?: string;
+    hint?: string;
+    'max-votes'?: string;
+    constraints?: string; // AMW TODO: string formatting restrictions
+}
+
+interface ObjectiveString {
+    shift_limit: number;
+}
 
 export default class PuzzleManager {
     public static get instance(): PuzzleManager {
@@ -46,7 +77,7 @@ export default class PuzzleManager {
         return PuzzleManager._instance;
     }
 
-    public async parsePuzzle(json: any): Promise<Puzzle> {
+    public async parsePuzzle(json: PuzzleJSON): Promise<Puzzle> {
         let newpuz: Puzzle = new Puzzle(Number(json['id']), json['title'], json['type']);
 
         if (json['body']) {
@@ -72,7 +103,7 @@ export default class PuzzleManager {
         }
 
         if (json['objective']) {
-            let objective: any = JSON.parse(json['objective'])[0];
+            let objective: ObjectiveString = JSON.parse(json['objective'])[0];
             if (objective['shift_limit']) {
                 newpuz.shiftLimit = objective['shift_limit'];
             } else {
@@ -82,7 +113,7 @@ export default class PuzzleManager {
 
         if (json['beginseq'] && json['beginseq'].length > 0) {
             if (json['beginseq'].length !== json['secstruct'].length) {
-                throw new Error(`Beginning sequence length doesn't match pair length for puzzle ${json['Title']}`);
+                throw new Error(`Beginning sequence length doesn't match pair length for puzzle ${json['title']}`);
             }
             newpuz.beginningSequence = json['beginseq'];
         }
@@ -161,41 +192,42 @@ export default class PuzzleManager {
         }
 
         let {targetConditions} = newpuz;
-        if (targetConditions != null) {
+        if (targetConditions !== undefined) {
             for (let ii = 0; ii < targetConditions.length; ii++) {
-                if (targetConditions[ii] != null) {
-                    let constrainedBases: any[] = targetConditions[ii]['structure_constrained_bases'];
-                    if (constrainedBases != null) {
+                if (targetConditions[ii] !== undefined) {
+                    const tc = targetConditions[ii] as TargetConditions;
+                    let constrainedBases = tc['structure_constrained_bases'];
+                    if (constrainedBases !== undefined) {
                         if (constrainedBases.length % 2 === 0) {
-                            targetConditions[ii]['structure_constraints'] = [];
-                            for (let jj = 0; jj < targetConditions[ii]['secstruct'].length; jj++) {
-                                targetConditions[ii]['structure_constraints'][jj] = false;
+                            tc['structure_constraints'] = [];
+                            for (let jj = 0; jj < tc['secstruct'].length; jj++) {
+                                (tc['structure_constraints'] as boolean[])[jj] = false;
                             }
 
                             for (let jj = 0; jj < constrainedBases.length; jj += 2) {
                                 for (let kk = constrainedBases[jj]; kk <= constrainedBases[jj + 1]; kk++) {
-                                    targetConditions[ii]['structure_constraints'][kk] = true;
+                                    (tc['structure_constraints'] as boolean[])[kk] = true;
                                 }
                             }
                         }
                     }
 
-                    let antiConstrainedBases: any[] = targetConditions[ii]['anti_structure_constrained_bases'];
-                    if (antiConstrainedBases != null) {
+                    let aConstrainedBases = tc['anti_structure_constrained_bases'];
+                    if (aConstrainedBases !== undefined) {
                         if (
-                            targetConditions[ii]['anti_secstruct'] != null
-                            && targetConditions[ii]['anti_secstruct'].length
-                                === targetConditions[ii]['secstruct'].length
+                            tc['anti_secstruct'] !== undefined
+                            && (tc['anti_secstruct'] as string).length
+                                === tc['secstruct'].length
                         ) {
-                            if (antiConstrainedBases.length % 2 === 0) {
-                                targetConditions[ii]['anti_structure_constraints'] = [];
-                                for (let jj = 0; jj < targetConditions[ii]['secstruct'].length; jj++) {
-                                    targetConditions[ii]['anti_structure_constraints'][jj] = false;
+                            if (aConstrainedBases.length % 2 === 0) {
+                                tc['anti_structure_constraints'] = [];
+                                for (let jj = 0; jj < tc['secstruct'].length; jj++) {
+                                    (tc['anti_structure_constraints'] as boolean[])[jj] = false;
                                 }
 
-                                for (let jj = 0; jj < antiConstrainedBases.length; jj += 2) {
-                                    for (let kk = antiConstrainedBases[jj]; kk <= antiConstrainedBases[jj + 1]; kk++) {
-                                        targetConditions[ii]['anti_structure_constraints'][kk] = true;
+                                for (let jj = 0; jj < aConstrainedBases.length; jj += 2) {
+                                    for (let kk = aConstrainedBases[jj]; kk <= aConstrainedBases[jj + 1]; kk++) {
+                                        (tc['anti_structure_constraints'] as boolean[])[kk] = true;
                                     }
                                 }
                             }
@@ -295,6 +327,9 @@ export default class PuzzleManager {
                         break;
                     case MinimumStackLengthConstraint.NAME:
                         constraints.push(new MinimumStackLengthConstraint(Number(parameter)));
+                        break;
+                    case TargetExpectedAccuracyConstraint.NAME:
+                        constraints.push(new TargetExpectedAccuracyConstraint(Number(parameter)));
                         break;
                     case ScriptConstraint.NAME:
                         constraints.push(new ScriptConstraint(Number(parameter)));

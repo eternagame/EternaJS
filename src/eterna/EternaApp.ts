@@ -1,4 +1,5 @@
-import 'assets/styles.css'; // css-loader will pick up on this and embed our stylesheet
+import 'assets/Styles/styles.css'; // css-loader will pick up on this and embed our stylesheet
+import {settings, Application} from 'pixi.js';
 import * as log from 'loglevel';
 import {
     FlashbangApp, SaveGameManager, TextureUtil, ErrorUtil, Flashbang, Assert
@@ -6,6 +7,7 @@ import {
 import ChatManager from 'eterna/ChatManager';
 import Eterna from 'eterna/Eterna';
 import {isMobile} from 'is-mobile';
+import {SaveStoreItem} from 'flashbang/settings/SaveGameManager';
 import DesignBrowserMode, {DesignBrowserFilter} from './mode/DesignBrowser/DesignBrowserMode';
 import ExternalInterface, {ExternalInterfaceCtx} from './util/ExternalInterface';
 import EternaSettings from './settings/EternaSettings';
@@ -224,7 +226,7 @@ export default class EternaApp extends FlashbangApp {
     public async loadPoseEdit(puzzleOrID: number | Puzzle, params: PoseEditParams) {
         const puzzle = await this.loadPuzzle(puzzleOrID);
 
-        let autoSaveData: any | undefined;
+        let autoSaveData: SaveStoreItem | undefined;
 
         const hasRscript = Boolean(puzzle.rscript) && (puzzle.rscript.trim().length > 0);
         if (hasRscript) {
@@ -238,7 +240,7 @@ export default class EternaApp extends FlashbangApp {
     }
 
     /** Creates a PuzzleEditMode and removes all other modes from the stack */
-    public async loadPuzzleEditor(numTargets?: number, initialPoseData?: PuzzleEditPoseData[]): Promise<void> {
+    public async loadPuzzleEditor(numTargets?: number, initialPoseData?: SaveStoreItem): Promise<void> {
         if (this._params.puzzleEditNumTargets === undefined) {
             throw new Error("puzzleEditNumTargets can't be undefined here!");
         }
@@ -394,7 +396,7 @@ export default class EternaApp extends FlashbangApp {
         super.onKeyboardEvent(e);
     }
 
-    protected onUncaughtError(err: any): void {
+    protected onUncaughtError(err: ErrorEvent): void {
         let errstring = ErrorUtil.getErrString(err);
         if (errstring.startsWith("Error: Failed to set the 'buffer' property on 'AudioBufferSourceNode'")) {
             log.debug('pixi-sound is misbehaving again');
@@ -403,18 +405,21 @@ export default class EternaApp extends FlashbangApp {
         }
     }
 
-    protected createPixi(): PIXI.Application {
+    protected createPixi(): Application {
         // When roundPixels is true, the renderer floor()s pixel locations
         // to avoid pixel interpolation. This makes our text look much better,
         // though slow movement animation will end up looking a bit worse.
         // Eterna isn't an animation-heavy game, so the tradeoff seems worth it.
 
-        return new PIXI.Application(this._params.width, this._params.height, {
+        settings.ROUND_PIXELS = true;
+
+        return new Application({
+            width: this._params.width,
+            height: this._params.height,
             backgroundColor: 0x0,
             transparent: true,
             antialias: true,
-            roundPixels: true,
-            autoResize: true,
+            autoDensity: true,
             resolution: devicePixelRatio
         });
     }
