@@ -14,7 +14,7 @@
 
 using namespace std;
 
-typedef float ENERGY_TYPE;
+typedef int ENERGY_TYPE;
 
 void (*eos_cb)(int index, int fe) = NULL;
 
@@ -86,7 +86,7 @@ ENERGY_TYPE eval(string seq, string ref, bool is_verbose) {
             int nucj1 = (j+1) < seq_length ? eval_nucs[j+1] : -1; // only for calculating v_score_M1
 
             if (page == 0) { // hairpin
-                ENERGY_TYPE newscore = - 100.0 * score_hairpin(i, j, nuci, nuci1, nucj_1, nucj);
+                ENERGY_TYPE newscore = -100 * score_hairpin(i, j, nuci, nuci1, nucj_1, nucj);
                 if (eos_cb) (*eos_cb)(i+1, newscore);
                 if (is_verbose)
                     printf("Hairpin loop ( %d, %d) %c%c : %.2f\n", i+1, j+1, seq[i], seq[j], newscore);
@@ -100,11 +100,11 @@ ENERGY_TYPE eval(string seq, string ref, bool is_verbose) {
 
                 ENERGY_TYPE newscore = 0;
                 if ((p == i - 1 && q == j + 1) || (p == i + 1 && q == j - 1)) {
-                        newscore = -100.0 * score_helix(nuci, nuci1, nucj_1, nucj);
+                        newscore = -100 * score_helix(nuci, nuci1, nucj_1, nucj);
                 } else {
                     // single branch
 
-                        newscore = -100.0 * score_single(i, j, p, q, seq_length, nuci, nuci1, nucj_1, nucj, nucp_1, nucp, nucq, nucq1);
+                        newscore = -100 * score_single(i, j, p, q, seq_length, nuci, nuci1, nucj_1, nucj, nucp_1, nucp, nucq, nucq1);
                         //newscore = //score_junction_B(p, q, nucp, nucp_1, nucq1, nucq);// +
                             //score_junction_B(j, i, nucj, nucj1, nuci_1, nuci);// + // could move this part out
                             // score_single_without_junctionB(p, q, i, j, nuci_1, nuci, nucj, nucj1)
@@ -123,8 +123,8 @@ ENERGY_TYPE eval(string seq, string ref, bool is_verbose) {
             else { //multi
                 ENERGY_TYPE multi_score = 0;
                 multi_score += M1_energy[i];
-                multi_score += -100.0 * score_multi(i, j, nuci, nuci1, nucj_1, nucj, seq_length);
-                multi_score += -100.0 * score_multi_unpaired(i+1, i + multi_number_unpaired[i]); // current model is 0
+                multi_score += -100 * score_multi(i, j, nuci, nuci1, nucj_1, nucj, seq_length);
+                multi_score += -100 * score_multi_unpaired(i+1, i + multi_number_unpaired[i]); // current model is 0
                 if (eos_cb) (*eos_cb)(i+1, multi_score);
                 if (is_verbose)
                     printf("Multi loop ( %d, %d) %c%c : %.2f\n", i+1, j+1, seq[i], seq[j], multi_score);
@@ -136,7 +136,7 @@ ENERGY_TYPE eval(string seq, string ref, bool is_verbose) {
 
             // possible M
             if (!stk.empty()) {
-                M1_energy[stk.top().first] += -100.0 * score_M1(i, j, j, nuci_1, nuci, nucj, nucj1, seq_length);
+                M1_energy[stk.top().first] += -100 * score_M1(i, j, j, nuci_1, nuci, nucj, nucj1, seq_length);
             }
 
             // check if adding external energy
@@ -144,7 +144,7 @@ ENERGY_TYPE eval(string seq, string ref, bool is_verbose) {
                 int k = i - 1;
                 int nuck = k > -1 ? eval_nucs[k] : -1;
                 int nuck1 = eval_nucs[k+1];
-                external_energy +=  - 100.0 * score_external_paired(k+1, j, nuck, nuck1,
+                external_energy +=  -100 * score_external_paired(k+1, j, nuck, nuck1,
                                                             nucj, nucj1, seq_length);
                 if (is_verbose) {
                     printf("Adding external_paired ( %d, %d) %c %c %c %c %d : %.2f %.2f\n", k+1, j, nuck, nuck1, nucj, nucj1, seq_length, score_external_paired(k+1, j, nuck, nuck1,
@@ -157,7 +157,7 @@ ENERGY_TYPE eval(string seq, string ref, bool is_verbose) {
     }
 
     // accumulated external unpaired number
-    external_energy += -100.0 * num_external_unpaired * external_unpaired;
+    external_energy += -100 * num_external_unpaired * external_unpaired;
 
     if (is_verbose)
         printf("External loop : %.2f\n", external_energy);

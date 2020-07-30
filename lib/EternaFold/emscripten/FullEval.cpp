@@ -13,23 +13,6 @@
 
 static FullEvalResult* gEvalResult = NULL;
 
-
-// a callback that fills the array above with localized free energy contributions
-// static void _eos_cb(int index, int fe) {
-//     if (gEvalResult != NULL) {
-//         if (index < 0) {
-// #ifdef WATER_MOD
-//             if (index == -2) fe += water_mod;
-// #endif
-//             int to_insert[] = { index, fe };
-//             gEvalResult->nodes.insert(gEvalResult->nodes.begin(), to_insert, to_insert + 2);
-//         } else {
-//             gEvalResult->nodes.push_back(index);
-//             gEvalResult->nodes.push_back(fe);
-//         }
-//     }
-// }
-
 void _eos_cb(int index, int fe) {
     if (gEvalResult != NULL) {
         if (index < 0) {
@@ -60,57 +43,6 @@ FullEvalResult* FullEval (int temperature_in, const std::string& seqString, cons
 
     result->energy = energy;
     return result;
-
-    /*
-    FullEvalResult* result = new FullEvalResult();
-    gEvalResult = result;
-    eos_cb = _eos_cb;
-
-
-    ParameterManager<float> parameter_manager;
-    InferenceEngine<float> inference_engine(false);
-    inference_engine.RegisterParameters(parameter_manager);
-    // ComputationEngine<float> computation_engine(options, descriptions, inference_engine, parameter_manager);
-    // ComputationWrapper<float> computation_wrapper(computation_engine);
-
-    SStruct sstruct;
-    sstruct.LoadString(seqString);
-    sstruct.SetMapping(sstruct.ConvertParensToMapping("@" + structString));
-    inference_engine.LoadSequence(sstruct);
-
-    std::string newstr = "@" + structString;
-    printf("%s\n", newstr.c_str());
-    // inference_engine.UseConstraints(sstruct.GetMapping());
-
-    std::vector<float> w;
-    // alter for eternafold
-    w = GetDefaultComplementaryValues<float>();
-    inference_engine.LoadValues(w);// * 2.71);
-
-    // inference_engine.ComputeInside();
-    // float logZ_unconstrained = inference_engine.ComputeLogPartitionCoefficient();
-
-
-    // repeated just in case.
-    // sstruct.LoadString(seqString);
-    // sstruct.SetMapping(sstruct.ConvertParensToMapping("@" + structString));
-    // inference_engine.LoadSequence(sstruct);
-
-
-    inference_engine.UseConstraints(sstruct.GetMapping());
-
-    inference_engine.ComputeInside();
-
-    result->nodes;//
-    result->energy = /*logZ_unconstrained  -inference_engine.ComputeLogPartitionCoefficient();
-
-    // std::cout << "logZ_unconstrained (" << logZ_unconstrained
-    //     << ") - inference_engine.ComputeLogPartitionCoefficient() ("
-    //     << inference_engine.ComputeLogPartitionCoefficient() << ") = result->energy ("
-    //     << result->energy << ")." << std::endl;
-
-    eos_cb = NULL;
-    return result;*/
 }
 
 
@@ -120,8 +52,6 @@ FullFoldResult* FullFoldDefault (const std::string& seqString, double const gamm
     ParameterManager<float> parameter_manager;
     InferenceEngine<float> inference_engine(false, 0);
     inference_engine.RegisterParameters(parameter_manager);
-    // ComputationEngine<float> computation_engine(options, descriptions, inference_engine, parameter_manager);
-    // ComputationWrapper<float> computation_wrapper(computation_engine);
 
     SStruct sstruct;
     sstruct.LoadString(seqString);
@@ -166,45 +96,67 @@ FullFoldResult* FullFoldTemperature (double temperature_in, const std::string& s
     return FullFoldDefault(seqString, gamma);
 }
 
-#if false
 DotPlotResult* GetDotPlot (double temperature_in, const std::string& seqString) {
+
+    ParameterManager<float> parameter_manager;
+    InferenceEngine<float> inference_engine(false, 0);
+    inference_engine.RegisterParameters(parameter_manager);
+
+    SStruct sstruct;
+    sstruct.LoadString(seqString);
+    inference_engine.LoadSequence(sstruct);
+
+    std::vector<float> w;
+    // alter for eternafold
+    parameter_manager.ReadFromFile("EternaFoldParams.v1", w);
+    inference_engine.LoadValues(w);// * 2.71);
+
+
+    // MEA
+    inference_engine.ComputeInside();
+    // float logZ_unconstrained = inference_engine.ComputeLogPartitionCoefficient();
+
+    inference_engine.ComputeOutside();
+    inference_engine.ComputePosterior();
+
+    auto posterior = inference_engine.GetPosterior(1e-5);
+    
+    // ok, now how to index?
+
     auto autoSeqString = MakeCString(seqString);
     char* string = autoSeqString.get();
 
     double energy = 0;
 
-    int seqNum[MAXSEQLENGTH+1];
+    // int seqNum[MAXSEQLENGTH+1];
     int tmpLength;
 
     DotPlotResult* result = new DotPlotResult();
 
     tmpLength = strlen(string);
-    convertSeq(string, seqNum, tmpLength);
-
-    pairPr = (DBL_TYPE*) calloc( (tmpLength+1)*(tmpLength+1), sizeof(DBL_TYPE));
-
-    energy = pfuncFull( seqNum, 3, RNA, 1, temperature_in, 1, 1.0, 0.0, 0);
+    // auto pairPr = (double*) calloc( (tmpLength+1)*(tmpLength+1), sizeof(double));
 
     for (int i = 0; i < tmpLength; i++) {
         for (int j = i+1; j < tmpLength; j++) {
-            int k = (tmpLength+1)*i + j;
-            if (pairPr[k] < 1e-5) continue;
+            int k = i*(tmpLength+tmpLength-i-1)/2 + j;
+            if (posterior[k] < 1e-5) continue;
 
             result->plot.push_back(i + 1);
             result->plot.push_back(j + 1);
-            result->plot.push_back(pairPr[k]);
+            result->plot.push_back(posterior[k]);
         }
     }
 
-    if (pairPr) {
-        free(pairPr);
-        pairPr = NULL;
+    if (posterior) {
+        free(posterior);
+        posterior = NULL;
     }
 
     result->energy = energy;
     return result;
 }
 
+#if false
 // binding site data
 int g_site_i, g_site_j, g_site_p, g_site_q, g_site_bonus;
 int _binding_cb(int i, int j, int* d, int* e) {
