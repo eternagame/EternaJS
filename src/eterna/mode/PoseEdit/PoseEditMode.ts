@@ -855,7 +855,7 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
-        const allFolders = ['Vienna', 'Vienna2', 'NuPACK', 'LinearFoldC', 'LinearFoldV', 'LinearFoldV', 'EternaFold']
+        const allFolders = ['Vienna', 'Vienna2', 'NuPACK', 'LinearFoldC', 'LinearFoldV', 'LinearFoldE', 'EternaFold']
             .map((f) => FolderManager.instance.getFolder(f));
 
         this._dropdown = new GameDropdown(
