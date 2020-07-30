@@ -26,7 +26,7 @@ struct DotPlotResult {
 
 FullFoldResult* FullFoldDefault (const std::string& seqString, double const gamma = 0.7);
 FullFoldResult* FullFoldTemperature (double temperature_in, const std::string& seqString, double const gamma = 0.7);
-// DotPlotResult* GetDotPlot (double temperature_in, const std::string& seqString);
+DotPlotResult* GetDotPlot (double temperature_in, const std::string& seqString);
 // FullFoldResult* FullFoldWithBindingSite (const std::string& string, int site_i, int site_p, int site_j, int site_q, int site_bonus);
 // FullFoldResult* CoFoldSequence (const std::string& seqString);
 // FullFoldResult* CoFoldSequenceWithBindingSite (const std::string& seqString, int site_i, int site_p, int site_j, int site_q, int site_bonus);

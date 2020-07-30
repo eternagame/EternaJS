@@ -20,26 +20,27 @@
  */
 import * as stdcpp from "../../../emscripten/stdcpp";
 
-export = EternafoldLib;
+export = ContrafoldLib;
 
 /*~ Write your module's methods and properties in this class */
-declare class EternafoldLib {
-    FullEval (temperature_in: number, seqString: string, structString: string): EternafoldLib.FullEvalResult;
+declare class ContrafoldLib {
+    FullEval (temperature_in: number, seqString: string, structString: string): ContrafoldLib.FullEvalResult;
 
-    //FullFoldDefault(seqString: string, structString: string): EternafoldLib.FullFoldResult;
-    FullFoldDefault(seqString: string, gamma: number): EternafoldLib.FullFoldResult;
+    //FullFoldDefault(seqString: string, structString: string): ContrafoldLib.FullFoldResult;
+    FullFoldDefault(seqString: string, gamma: number): ContrafoldLib.FullFoldResult;
 
-    // FullFoldTemperature (temperature_in: number, seqString: string, structString: string): EternafoldLib.FullFoldResult;
-    // GetDotPlot (temperature_in: number, seqString: string, dotplotStructString: string): EternafoldLib.DotPlotResult;
-    // FullFoldWithBindingSite (seqString: string, structString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): EternafoldLib.FullFoldResult;
-    // CoFoldSequence (seqString: string, structString: string): EternafoldLib.FullFoldResult;
-    // CoFoldSequenceWithBindingSite (seqString: string, structString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): EternafoldLib.FullFoldResult;
+    // FullFoldTemperature (temperature_in: number, seqString: string, structString: string): ContrafoldLib.FullFoldResult;
+    // GetDotPlot (temperature_in: number, seqString: string, dotplotStructString: string): ContrafoldLib.DotPlotResult;
+    GetDotPlot (temperature_in: number, seqString: string): ContrafoldLib.DotPlotResult;
+    // FullFoldWithBindingSite (seqString: string, structString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): ContrafoldLib.FullFoldResult;
+    // CoFoldSequence (seqString: string, structString: string): ContrafoldLib.FullFoldResult;
+    // CoFoldSequenceWithBindingSite (seqString: string, structString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): ContrafoldLib.FullFoldResult;
 }
 
 /*~ If you want to expose types from your module as well, you can
  *~ place them in this block.
  */
-declare namespace EternafoldLib {
+declare namespace ContrafoldLib {
     export interface FullEvalResult {
         nodes: stdcpp.vector<number>;
         energy: number;
@@ -56,7 +57,7 @@ declare namespace EternafoldLib {
 
     export interface DotPlotResult {
         energy: number;
-        probabilitiesString: string;
+        plot: stdcpp.vector<number>;
 
         delete (): void;
     }
