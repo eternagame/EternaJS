@@ -858,7 +858,7 @@ export default class PoseEditMode extends GameMode {
         this._dropdown = new GameDropdown(
             16,
             ['Vienna', 'Vienna2', 'NuPACK', 'LinearFoldC', 'LinearFoldV', 'LinearFoldV', 'EternaFold'],
-            'Vienna',
+            this._folder.name,
             (e) => this.changeFolder(e)
         );
         this._dropdown.display.position = new Point(17, 175);
