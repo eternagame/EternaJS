@@ -38,7 +38,7 @@ export default class EternaSettings extends Settings {
         this.highlightRestricted = this.setting<boolean>('highlightRestricted', true);
         this.autohideToolbar = this.setting<boolean>('autohideToolbar', false);
         this.freezeButtonAlwaysVisible = this.setting<boolean>('freezeButtonAlwaysVisible', false);
-        this.multipleFoldingEngines = this.setting<boolean>('multipleFoldingEngines', false);
+        this.multipleFoldingEngines = this.setting<boolean>('multipleFoldingEngines', true);
         this.useContinuousColors = this.setting<boolean>('useContinuousColors', false);
         this.useExtendedColors = this.setting<boolean>('useExtendedColors', false);
         this.displayAuxInfo = this.setting<boolean>('displayAuxInfo', false);
