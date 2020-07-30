@@ -88,8 +88,8 @@ export default class TargetExpectedAccuracyConstraint extends Constraint<TargetE
         let icon = new Container();
 
         let base1 = new Sprite(BitmapManager.getBitmap(Bitmaps.CleanDotPlotIcon));
-        base1.width = 48;
-        base1.height = 48;
+        base1.width = 24;
+        base1.height = 24;
         base1.position = new Point(50, 50);
         icon.addChild(base1);
 

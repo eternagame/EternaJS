@@ -56,7 +56,7 @@ export default class BranchinessConstraint extends Constraint<BranchinessConstra
             satisfied: status.satisfied,
             tooltip,
             clarificationText: `${this.minBranchiness} OR MORE`,
-            statText: status.currentBranchiness.toString(),
+            statText: status.currentBranchiness.toFixed(3),
             showOutline: true,
             drawBG: true,
             icon: BranchinessConstraint._icon
@@ -67,6 +67,8 @@ export default class BranchinessConstraint extends Constraint<BranchinessConstra
         let icon = new Container();
 
         let base1 = new Sprite(BitmapManager.getBitmap(Bitmaps.BranchinessIcon));
+        base1.width = 24;
+        base1.height = 24;
         base1.position = new Point(50, 50);
         icon.addChild(base1);
 
