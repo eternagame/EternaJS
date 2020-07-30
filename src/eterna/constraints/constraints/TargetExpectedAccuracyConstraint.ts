@@ -6,11 +6,13 @@ import {
     Container, Texture, Sprite, Point
 } from 'pixi.js';
 import Bitmaps from 'eterna/resources/Bitmaps';
+import FolderManager from 'eterna/folding/FolderManager';
+import Folder from 'eterna/folding/Folder';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 
 interface TargetExpectedAccuracyConstraintStatus extends BaseConstraintStatus {
-    targetExpectedAccuracy: number;
+    currentExpectedAccuracy: number;
 }
 
 export default class TargetExpectedAccuracyConstraint extends Constraint<TargetExpectedAccuracyConstraintStatus> {
@@ -23,15 +25,34 @@ export default class TargetExpectedAccuracyConstraint extends Constraint<TargetE
 
     public evaluate(constraintContext: ConstraintContext): TargetExpectedAccuracyConstraintStatus {
         // TODO: Multistate? pseudoknots?
-        const expectedAccuracy = constraintContext.undoBlocks[0].getParam(
+
+        // If this gets called before any folding has happened it'll be
+        // undefined. Instead of forcing more folding, try saying it's
+        // zero.
+        // AMW: no
+        if (constraintContext.undoBlocks[0].getParam(
             UndoBlockParam.TARGET_EXPECTED_ACCURACY,
             37,
             false
-        ) as number;
+        ) === undefined) {
+            constraintContext.undoBlocks[0].updateMeltingPointAndDotPlot(
+                FolderManager.instance.getFolder(
+                    constraintContext.puzzle?.folderName as string
+                ) as Folder, false
+            );
+        }
+        let expectedAccuracy = constraintContext.undoBlocks[0].getParam(
+            UndoBlockParam.TARGET_EXPECTED_ACCURACY,
+            37,
+            false
+        ) as number | undefined;
+        if (expectedAccuracy === undefined) {
+            expectedAccuracy = 0;
+        }
 
         return {
             satisfied: expectedAccuracy >= this.targetExpectedAccuracy,
-            targetExpectedAccuracy: expectedAccuracy
+            currentExpectedAccuracy: expectedAccuracy
         };
     }
 
@@ -56,7 +77,7 @@ export default class TargetExpectedAccuracyConstraint extends Constraint<TargetE
             satisfied: status.satisfied,
             tooltip,
             clarificationText: `${this.targetExpectedAccuracy} OR MORE`,
-            statText: status.targetExpectedAccuracy.toString(),
+            statText: status.currentExpectedAccuracy.toFixed(3),
             showOutline: true,
             drawBG: true,
             icon: TargetExpectedAccuracyConstraint._icon
@@ -67,6 +88,8 @@ export default class TargetExpectedAccuracyConstraint extends Constraint<TargetE
         let icon = new Container();
 
         let base1 = new Sprite(BitmapManager.getBitmap(Bitmaps.CleanDotPlotIcon));
+        base1.width = 48;
+        base1.height = 48;
         base1.position = new Point(50, 50);
         icon.addChild(base1);
 

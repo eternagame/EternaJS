@@ -119,7 +119,7 @@ FullFoldResult* FullFoldTemperature (double temperature_in, const std::string& s
 DotPlotResult* GetDotPlot (double temperature_in, const std::string& seqString) {
 
     ParameterManager<float> parameter_manager;
-    InferenceEngine<float> inference_engine(false, 0);
+    InferenceEngine<float> inference_engine(false);
     inference_engine.RegisterParameters(parameter_manager);
 
     SStruct sstruct;
@@ -148,20 +148,17 @@ DotPlotResult* GetDotPlot (double temperature_in, const std::string& seqString) 
     double energy = 0;
 
     // int seqNum[MAXSEQLENGTH+1];
-    int tmpLength;
 
+    int tmpLength = strlen(string);
     DotPlotResult* result = new DotPlotResult();
-
-    tmpLength = strlen(string);
-    // auto pairPr = (double*) calloc( (tmpLength+1)*(tmpLength+1), sizeof(double));
 
     for (int i = 0; i < tmpLength; i++) {
         for (int j = i+1; j < tmpLength; j++) {
             int k = i*(tmpLength+tmpLength-i-1)/2 + j;
             if (posterior[k] < 1e-5) continue;
 
-            result->plot.push_back(i + 1);
-            result->plot.push_back(j + 1);
+            result->plot.push_back(i);
+            result->plot.push_back(j);
             result->plot.push_back(posterior[k]);
         }
     }
