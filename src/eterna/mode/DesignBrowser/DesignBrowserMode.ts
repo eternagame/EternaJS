@@ -114,7 +114,7 @@ export default class DesignBrowserMode extends GameMode {
                 fontStyle: FontWeight.BOLD
             }
         });
-        this._votesText.position = new Point(59, 52);
+        this._votesText.position = new Point(20, 52);
         this.uiLayer.addChild(this._votesText);
 
         this._vSlider = new SliderBar(true);
@@ -144,7 +144,7 @@ export default class DesignBrowserMode extends GameMode {
         this._dataColParent.display.mask = this._maskBox;
 
         this._markerBoxes = new MarkerBoxView(0xFF0000, theme.rowHeight);
-        this._markerBoxes.position = new Point(7, 88);
+        this._markerBoxes.position = new Point(7, theme.headerHeight + theme.filterHeight + 1);
         this._content.addChild(this._markerBoxes);
 
         const selectionBoxParent = new Container();
@@ -318,8 +318,6 @@ export default class DesignBrowserMode extends GameMode {
             return;
         }
         if (!this.isDialogOrNotifShowing && e.deltaY !== 0 && this._filteredSolutions != null) {
-            // const progress = (this._firstVisSolutionIdx + (e.deltaY * 0.25)) / this._filteredSolutions.length;
-            // this._vSlider.setProgress(MathUtil.clamp(progress, 0, 1));
             if (!this.container || !this.container.visible || e.x < this.container.position.x) {
                 return;
             }
@@ -330,9 +328,6 @@ export default class DesignBrowserMode extends GameMode {
             // convert back to lines
             const progress = (this._firstVisSolutionIdx + pxdelta / 14) / this._filteredSolutions.length;
             this._vSlider.setProgress(MathUtil.clamp(progress, 0, 1));
-            // this._scrollView.scrollTo(
-            //     this._scrollView.scrollProgress + pxdelta / this._scrollView.content.height
-            // );
         } else {
             super.onMouseWheelEvent(e);
         }
@@ -991,9 +986,9 @@ export default class DesignBrowserMode extends GameMode {
 
             const {designBrowser: theme} = UITheme;
             if (ii % 2 === 0) {
-                col.bgColor = theme.colors.background;
+                col.setBgColor(0xffffff, 0);
             } else {
-                col.bgColor = 0x132B47; // 0x1A324C; this adds 8 to each. not ideal.
+                col.setBgColor(0xffffff, 0.05);
             }
         }
     }

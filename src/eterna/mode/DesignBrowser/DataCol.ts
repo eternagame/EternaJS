@@ -150,7 +150,7 @@ export default class DataCol extends ContainerObject {
         this._sequencesView.setSize(this._width, this._height);
         this._numDisplay = Math.floor((this._height - 70 - 20) / this._lineHeight);
         this.updateView();
-        this.bgColor = this._fillColor;
+        this.drawBackground();
     }
 
     public setPairs(pairs: number[]): void {
@@ -308,16 +308,10 @@ export default class DataCol extends ContainerObject {
         }
     }
 
-    public set bgColor(color: number) {
+    public setBgColor(color: number, alpha: number) {
         this._fillColor = color;
+        this._fillAlpha = alpha;
         this.drawBackground();
-        if (this.category === 'Sequence') {
-            this._graphics.lineStyle(1, 0x92A8BB, 0.4);
-            for (let ii = 0; ii < this._dataWidth / 70 + 1; ii++) {
-                this._graphics.moveTo(ii * 75 + 92, 85);
-                this._graphics.lineTo(ii * 75 + 92, this._height - 5);
-            }
-        }
     }
 
     public setVoteStatus(index: number, voted: boolean) {
@@ -507,13 +501,28 @@ export default class DataCol extends ContainerObject {
     private drawBackground() {
         const {designBrowser: theme} = UITheme;
         this._graphics.clear();
-        this._graphics.beginFill(this._fillColor);
-        this._graphics.drawRect(0, 0, this._dataWidth, this._height);
+        // Data
+        this._graphics.beginFill(this._fillColor, this._fillAlpha);
+        this._graphics.drawRect(
+            1,
+            theme.headerHeight + theme.filterHeight + 1,
+            this._dataWidth - 1,
+            this._height - theme.headerHeight - theme.filterHeight - 1
+        );
+        // Header
         this._graphics.beginFill(0x043468);
         this._graphics.drawRect(1, 1, this._dataWidth - 1, theme.headerHeight - 1);
+        // Filters
         this._graphics.beginFill(0x043468, 0.5);
         this._graphics.drawRect(1, 1 + theme.headerHeight, this._dataWidth - 1, theme.filterHeight - 1);
         this._graphics.endFill();
+        if (this.category === 'Sequence') {
+            this._graphics.lineStyle(1, 0x92A8BB, 0.4);
+            for (let ii = 0; ii < this._dataWidth / 70 + 1; ii++) {
+                this._graphics.moveTo(ii * 75 + 92, 85);
+                this._graphics.lineTo(ii * 75 + 92, this._height - 5);
+            }
+        }
     }
 
     private readonly _fontType: string;
@@ -545,6 +554,7 @@ export default class DataCol extends ContainerObject {
     private _showExp: boolean = false;
     private _pairsArray: number[];
     private _fillColor: number = 0;
+    private _fillAlpha: number = 0;
 
     private _sequencesView: SequenceStringListView;
 }
