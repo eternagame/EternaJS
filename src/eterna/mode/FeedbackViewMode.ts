@@ -25,6 +25,7 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import GameButton from 'eterna/ui/GameButton';
 import GameMode from './GameMode';
 import ViewSolutionOverlay from './DesignBrowser/ViewSolutionOverlay';
+import DesignBrowserMode from './DesignBrowser/DesignBrowserMode';
 
 enum PoseFoldMode {
     ESTIMATE = 'ESTIMATE',
@@ -149,6 +150,8 @@ export default class FeedbackViewMode extends GameMode {
             parentMode: (() => this)()
         });
         this.addObject(this._solutionView, this.dialogLayer);
+        this._solutionView.playClicked.connect(() => this.switchToPoseEditForSolution(this._solution));
+        this._solutionView.sortClicked.connect(() => this.sortOnSolution());
 
         this._info = new GameButton()
             .up(Bitmaps.ImgInfoControl)
@@ -180,6 +183,38 @@ export default class FeedbackViewMode extends GameMode {
         this.setPip(false);
 
         this.updateUILayout();
+    }
+
+    private async switchToPoseEditForSolution(solution: Solution): Promise<void> {
+        this.pushUILock();
+        try {
+            // AMW: this is very similar to the DesignBrowserMode method, but we
+            // don't know about a bunch of solutions -- so instead we switch with
+            // only this one available.
+            await Eterna.app.switchToPoseEdit(
+                this._puzzle, false, {initSolution: solution, solutions: [solution]}
+            );
+        } catch (e) {
+            log.error(e);
+        } finally {
+            this.popUILock();
+        }
+    }
+
+    private async sortOnSolution(): Promise<void> {
+        this.pushUILock();
+        try {
+            // AMW: this is very similar to the DesignBrowserMode method, but we
+            // don't know about a bunch of solutions -- so instead we switch with
+            // only this one available.
+            await Eterna.app.switchToDesignBrowser(
+                this.puzzleID
+            );
+        } catch (e) {
+            log.error(e);
+        } finally {
+            this.popUILock();
+        }
     }
 
     public onResized(): void {

@@ -413,21 +413,6 @@ export default class DesignBrowserMode extends GameMode {
 
     private async switchToPoseEditForSolution(solution: Solution): Promise<void> {
         this.pushUILock();
-        const switchSolution = (newIndex: number) => {
-            const newSolution = this.getSolutionAtIndex(newIndex);
-            if (newSolution != null) {
-                this._currentSolutionIndex = newIndex;
-                Assert.assertIsDefined(this._solutionView);
-                this._solutionView.showSolution(newSolution);
-                const {designBrowser: theme} = UITheme;
-                const rowIndex = this._currentSolutionIndex - this._firstVisSolutionIdx;
-                if (rowIndex >= 0) {
-                    // this.updateSelectionBoxPos(rowIndex);
-                    this._clickedSelectionBox.visible = true;
-                    this.updateClickedSelectionBoxPos(rowIndex);
-                }
-            }
-        };
         try {
             await Eterna.app.switchToPoseEdit(
                 this._puzzle, false, {initSolution: solution, solutions: this._filteredSolutions.slice()}
@@ -455,7 +440,7 @@ export default class DesignBrowserMode extends GameMode {
         window.open(`/node/${solution.nodeID}/edit`, 'soleditwindow');
     }
 
-    private sortOnSolution(solution: Solution): void {
+    public sortOnSolution(solution: Solution): void {
         this.closeCurDialog();
         this._sortOptions.addCriteria(DesignCategory.SEQUENCE, SortOrder.INCREASING, solution.sequence);
         this.showSortDialog();
@@ -977,7 +962,11 @@ export default class DesignBrowserMode extends GameMode {
             this._wholeRowWidth += col.width;
 
             const {designBrowser: theme} = UITheme;
-            col.bgColor = theme.colors.background;
+            if (ii % 2 === 0) {
+                col.bgColor = theme.colors.background;
+            } else {
+                col.bgColor = 0x132B47; // 0x1A324C; this adds 8 to each. not ideal.
+            }
         }
     }
 

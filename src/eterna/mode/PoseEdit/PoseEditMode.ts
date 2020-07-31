@@ -899,6 +899,10 @@ export default class PoseEditMode extends GameMode {
                 parentMode: (() => this)()
             });
             this.addObject(this._solutionView, this.dialogLayer);
+            this._solutionView.seeResultClicked.connect(() => {
+                this.switchToFeedbackViewForSolution(this._curSolution);
+            });
+            this._solutionView.sortClicked.connect(() => this.sortOnSolution(this._curSolution));
         } else if (this._params.initSequence != null) {
             initialSequence = EPars.stringToSequence(this._params.initSequence);
         }
@@ -1014,6 +1018,11 @@ export default class PoseEditMode extends GameMode {
 
     public get folder(): Folder | null {
         return this._folder;
+    }
+
+    private sortOnSolution(sol: Solution): void {
+        this.openDesignBrowserForOurPuzzle();
+        // AMW: what to do with solution.
     }
 
     private buildScriptInterface(): void {
@@ -2176,6 +2185,17 @@ export default class PoseEditMode extends GameMode {
         }
 
         missionClearedPanel.closeButton.clicked.connect(() => keepPlaying());
+    }
+
+    private switchToFeedbackViewForSolution(solution: Solution): void {
+        this.pushUILock();
+
+        Eterna.app.switchToFeedbackView(this._puzzle, solution)
+            .then(() => this.popUILock())
+            .catch((e) => {
+                log.error(e);
+                this.popUILock();
+            });
     }
 
     public setPosesColor(paintColor: number): void {
