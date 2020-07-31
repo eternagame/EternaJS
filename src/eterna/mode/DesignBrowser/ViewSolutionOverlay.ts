@@ -385,12 +385,12 @@ export default class ViewSolutionOverlay extends ContainerObject {
                 thumbnail: new Graphics()
                     .beginFill(0, 0)
                     .lineStyle(2, 0xC0DCE7)
-                    .drawRoundedRect(0, 0, 75, 75, 10)
+                    .drawRoundedRect(0, 0, 52, 52, 10)
                     .endFill()
                     .moveTo(10, 10)
-                    .lineTo(65, 65)
-                    .moveTo(65, 10)
-                    .lineTo(10, 65),
+                    .lineTo(42, 42)
+                    .moveTo(42, 10)
+                    .lineTo(10, 42),
                 text: 'Delete'
             })
                 .tooltip('Delete this design to retrieve your slots for this round');
