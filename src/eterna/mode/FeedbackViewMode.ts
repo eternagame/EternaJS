@@ -142,7 +142,8 @@ export default class FeedbackViewMode extends GameMode {
             this.showExperimentalColors();
         }
 
-        this.scoreFeedback();
+        //
+        // this.scoreFeedback();
         this.changeTarget(0);
         this.setPip(false);
 
@@ -362,7 +363,7 @@ export default class FeedbackViewMode extends GameMode {
             this.showExperimentalColors();
         }
 
-        this.scoreFeedback();
+        // this.scoreFeedback();
     }
 
     private showExperimentalColors(): void {
