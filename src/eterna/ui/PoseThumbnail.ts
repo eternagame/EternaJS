@@ -101,7 +101,7 @@ export default class PoseThumbnail {
         } else if (size === 2) {
             frame = Sprite.from(Bitmaps.SolutionBigFrame);
         } else if (size === 3) {
-            frame = DisplayUtil.fillRect(62, 62, 0x0);
+            frame = DisplayUtil.fillRect(52, 52, 0x0);
         } else if (size === 4) {
             frame = DisplayUtil.fillRect(210, 125, 0x0);
         } else if (size === 5) {
