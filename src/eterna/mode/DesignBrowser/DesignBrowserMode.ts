@@ -356,11 +356,11 @@ export default class DesignBrowserMode extends GameMode {
             this.contentHeight - this._gridLines.position.y
         );
         this._maskBox.setSize(this.contentWidth - 14, this.contentHeight - 10);
-        this._markerBoxes.setSize(this.contentWidth - 14, this.contentHeight - 10);
+        this._markerBoxes.setSize(this.contentWidth - 14 - this._solDialogOffset, this.contentHeight - 10);
 
         const {designBrowser: theme} = UITheme;
-        this._selectionBox.setSize(this.contentWidth - 14, theme.rowHeight);
-        this._clickedSelectionBox.setSize(this.contentWidth - 14, theme.rowHeight);
+        this._selectionBox.setSize(this.contentWidth - 14 - this._solDialogOffset, theme.rowHeight);
+        this._clickedSelectionBox.setSize(this.contentWidth - 14 - this._solDialogOffset, theme.rowHeight);
 
         if (this._dataCols != null) {
             for (let col of this._dataCols) {
