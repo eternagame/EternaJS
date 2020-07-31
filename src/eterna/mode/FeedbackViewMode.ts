@@ -202,11 +202,9 @@ export default class FeedbackViewMode extends GameMode {
         this.addObject(this._info, this.uiLayer);
 
         this.setPoseFields(poseFields);
-
-        this.setupShape();
-
         let seeShape: boolean = (this._feedback !== null && this._feedback.getShapeData() != null);
         if (seeShape) {
+            this.setupShape();
             this.showExperimentalColors();
         }
 

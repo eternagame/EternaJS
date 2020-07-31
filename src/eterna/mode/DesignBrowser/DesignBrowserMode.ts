@@ -614,21 +614,21 @@ export default class DesignBrowserMode extends GameMode {
                 parentMode: (() => this)()
             });
             this.addObject(this._solutionView, this.dialogLayer);
-
-            // This just got newed, and this.addObject can't stop that.
-            Assert.assertIsDefined(this._solutionView);
-            const sol = this._solutionView.solution;
-            this._solutionView.playClicked.connect(() => this.switchToPoseEditForSolution(sol));
-            this._solutionView.seeResultClicked.connect(() => {
-                this.switchToFeedbackViewForSolution(sol);
-            });
-            this._solutionView.voteClicked.connect(() => this.vote(sol));
-            this._solutionView.sortClicked.connect(() => this.sortOnSolution(sol));
-            this._solutionView.editClicked.connect(() => this.navigateToSolution(sol));
-            this._solutionView.deleteClicked.connect(() => this.unpublish(sol));
         } else {
             this._solutionView.showSolution(solution);
         }
+
+        // This just got newed if it didn't exist.
+        Assert.assertIsDefined(this._solutionView);
+        const sol = this._solutionView.solution;
+        this._solutionView.playClicked.connect(() => this.switchToPoseEditForSolution(sol));
+        this._solutionView.seeResultClicked.connect(() => {
+            this.switchToFeedbackViewForSolution(sol);
+        });
+        this._solutionView.voteClicked.connect(() => this.vote(sol));
+        this._solutionView.sortClicked.connect(() => this.sortOnSolution(sol));
+        this._solutionView.editClicked.connect(() => this.navigateToSolution(sol));
+        this._solutionView.deleteClicked.connect(() => this.unpublish(sol));
 
         this.updateLayout();
     }
