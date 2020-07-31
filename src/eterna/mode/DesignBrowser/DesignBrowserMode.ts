@@ -78,7 +78,12 @@ export interface DesignBrowserFilter {
 }
 
 export default class DesignBrowserMode extends GameMode {
-    constructor(puzzle: Puzzle, novote = false, initialFilters: DesignBrowserFilter[] | null = null) {
+    constructor(
+        puzzle: Puzzle,
+        novote = false,
+        initialFilters: DesignBrowserFilter[] | null = null,
+        initialSolution?: Solution
+    ) {
         super();
 
         this._puzzle = puzzle;
@@ -86,6 +91,7 @@ export default class DesignBrowserMode extends GameMode {
         this._initialDataFilters = initialFilters;
         this._wholeRowWidth = 0;
         this._voteProcessor = new VoteProcessor(puzzle.maxVotes);
+        this._initialSolution = initialSolution;
     }
 
     public get puzzleID(): number { return this._puzzle.nodeID; }
@@ -290,6 +296,13 @@ export default class DesignBrowserMode extends GameMode {
             new DelayTask(300),
             new CallbackTask(() => this.refreshSolutions())
         )));
+
+        if (this._initialSolution !== undefined) {
+            // Sort on it.
+            this.sortOnSolution(this._initialSolution);
+            // Set _currentSolutionIndex
+            this._currentSolutionIndex = this.getSolutionIndex(this._initialSolution.nodeID);
+        }
 
         this.updateLayout();
     }
@@ -1076,6 +1089,8 @@ export default class DesignBrowserMode extends GameMode {
         DesignCategory.SYNTHESIS_SCORE,
         DesignCategory.SEQUENCE
     ];
+
+    private _initialSolution?: Solution;
 }
 
 class MaskBox extends Graphics {

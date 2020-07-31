@@ -354,26 +354,14 @@ export default class ViewSolutionOverlay extends ContainerObject {
         }
 
         // Sort button
-        // AMW: change the text etc. until we can guarantee seq sim sorting
-        // even though that seems silly.
         const sortImage = Sprite.from(Bitmaps.ImgSort);
-        if (!(this._parentMode instanceof DesignBrowserMode)) {
-            const sortButton = new ThumbnailAndTextButton({
-                thumbnail: sortImage,
-                text: 'Back to design browser'
-            })
-                .tooltip('Return to the design browser to see more solutions');
-            sortButton.clicked.connect(() => this.sortClicked.emit());
-            this._content.addObject(sortButton, this._contentLayout);
-        } else {
-            const sortButton = new ThumbnailAndTextButton({
-                thumbnail: sortImage,
-                text: 'Sort by sequence similarity'
-            })
-                .tooltip('Sort based on similarity to this design.');
-            sortButton.clicked.connect(() => this.sortClicked.emit());
-            this._content.addObject(sortButton, this._contentLayout);
-        }
+        const sortButton = new ThumbnailAndTextButton({
+            thumbnail: sortImage,
+            text: 'Sort by sequence similarity'
+        })
+            .tooltip('Sort based on similarity to this design.');
+        sortButton.clicked.connect(() => this.sortClicked.emit());
+        this._content.addObject(sortButton, this._contentLayout);
 
         // DELETE (only allowed if the puzzle belongs to us and has no votes)
         if (

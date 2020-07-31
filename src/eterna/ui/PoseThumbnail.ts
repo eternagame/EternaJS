@@ -181,7 +181,6 @@ export default class PoseThumbnail {
 
         let xOffset: number = ((w) - (smallXMax - smallXMin)) + frameBounds.width * 0.1;
         let yOffset: number = ((h) - (smallYMax - smallYMin)) + frameBounds.height * 0.1;
-        console.error(xOffset, yOffset);
 
         let wrongXCoords: number[] = [];
         let wrongYCoords: number[] = [];
