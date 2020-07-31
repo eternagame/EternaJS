@@ -578,7 +578,6 @@ export default class DesignBrowserMode extends GameMode {
                     this._solutionView.showSolution(newSolution);
                     const rowIndex = this._currentSolutionIndex - this._firstVisSolutionIdx;
                     if (rowIndex >= 0) {
-                        // this.updateSelectionBoxPos(rowIndex);
                         this._clickedSelectionBox.visible = true;
                         this.updateClickedSelectionBoxPos(index);
                     }
