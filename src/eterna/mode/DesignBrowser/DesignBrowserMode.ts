@@ -978,9 +978,9 @@ export default class DesignBrowserMode extends GameMode {
 
             const {designBrowser: theme} = UITheme;
             if (ii % 2 === 0) {
-                col.bgColor = theme.colors.background;
+                col.setBgColor(0xffffff, 0);
             } else {
-                col.bgColor = 0x132B47; // 0x1A324C; this adds 8 to each. not ideal.
+                col.setBgColor(0xffffff, 0.05);
             }
         }
     }
