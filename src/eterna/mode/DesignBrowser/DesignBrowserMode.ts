@@ -270,7 +270,7 @@ export default class DesignBrowserMode extends GameMode {
         homeArrow.position = new Point(45, 14);
         this.uiLayer.addChild(homeArrow);
 
-        let puzzleTitle = new HTMLTextObject(this._puzzle.getName(true))
+        let puzzleTitle = new HTMLTextObject(this._puzzle.getName(!Eterna.MOBILE_APP), undefined, undefined, true)
             .font(Fonts.STDFONT)
             .fontSize(14)
             .bold()

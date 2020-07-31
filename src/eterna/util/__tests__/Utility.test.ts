@@ -1,15 +1,6 @@
 import Utility from "../Utility";
 import { Point } from "pixi.js";
 
-test(`test_stripHtmlTags`, () => {
-    // Basic tests for stripping <>. Ensure it can do both or one at a time
-    // or doubles.
-    expect(Utility.stripHtmlTags("<foo>")).toBe("&lt;foo&gt;");
-    expect(Utility.stripHtmlTags("<foo")).toBe("&lt;foo");
-    expect(Utility.stripHtmlTags("foo>")).toBe("foo&gt;");
-    expect(Utility.stripHtmlTags("<<foo>>")).toBe("&lt;&lt;foo&gt;&gt;");
-});
-
 test(`test_stripQuotationsAndNewlines`, () => {
     expect(Utility.stripQuotationsAndNewlines("\"\n\"")).toBe("\' \'");
 });

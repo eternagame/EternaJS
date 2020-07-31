@@ -11,6 +11,10 @@
 
     <link type="text/css" rel="stylesheet" media="all" href="./frontend/themes/css/eterna.css" />
 
+    <script>
+        __comment_bak = Comment;
+    </script>
+
     <script src="./frontend/jscripts/jquery/jquery-1.7.2.min.js"></script>
     <script src="./frontend/jscripts/jquery/jquery-unselectable.js"></script>
     <script src="./frontend/jscripts/jquery-ui/jquery-ui-1.8.7.custom.min.js"></script>
@@ -27,6 +31,12 @@
     <script src="./frontend/jscripts/eterna/script-library.js"></script>
     <script src="./frontend/jscripts/eterna/script-interface.js"></script>
     <script src="./frontend/jscripts/eterna/presenter.js"></script>
+
+    <script>
+        // The Coffeescript code exposes a Comment object, which clobbers a browser global, which we do not use,
+        // but the browser global is used by DOMPurify
+        Comment = __comment_bak;
+    </script>
 </head>
 <body style="margin: 0; padding: 0; height: 100%;">
 

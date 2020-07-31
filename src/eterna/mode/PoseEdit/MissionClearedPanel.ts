@@ -95,8 +95,12 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
 
         Assert.assertIsDefined(Flashbang.stageHeight);
         const infoText = MissionClearedPanel.processHTML(this._infoText);
-        const infoObj = new HTMLTextObject(infoText, panelWidth - MissionClearedPanel.PADDING_RIGHT, this._infoWrapper)
-            .font(Fonts.STDFONT)
+        const infoObj = new HTMLTextObject(
+            infoText,
+            panelWidth - MissionClearedPanel.PADDING_RIGHT,
+            this._infoWrapper,
+            true
+        ).font(Fonts.STDFONT)
             .fontSize(Flashbang.stageHeight < 512 ? 14 : 18)
             .color(0xffffff)
             .lineHeight(1.2)
@@ -106,8 +110,12 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
         this.addObject(infoObj, this._infoContainer);
 
         if (this._moreText != null) {
-            const moreTextObj = new HTMLTextObject(this._moreText, panelWidth - MissionClearedPanel.PADDING_RIGHT)
-                .font(Fonts.STDFONT)
+            const moreTextObj = new HTMLTextObject(
+                this._moreText,
+                panelWidth - MissionClearedPanel.PADDING_RIGHT,
+                undefined,
+                true
+            ).font(Fonts.STDFONT)
                 .fontSize(16)
                 .color(0xffffff)
                 .lineHeight(1.2)

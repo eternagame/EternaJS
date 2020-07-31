@@ -197,7 +197,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
 
         const solutionName = Fonts.std()
             .bold()
-            .text(Utility.stripHtmlTags(this._props.solution.title))
+            .text(this._props.solution.title)
             .fontSize(24)
             .color(0xffffff)
             .wordWrap(true, theme.width - theme.margin.left - theme.margin.right)
@@ -206,7 +206,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
 
         const playerName = Fonts.std()
             .bold()
-            .text(`By ${Utility.stripHtmlTags(this._props.solution.playerName)}`)
+            .text(`By ${this._props.solution.playerName}`)
             .fontSize(18)
             .color(0xffffff)
             .wordWrap(true, theme.width - theme.margin.left - theme.margin.right)
@@ -616,7 +616,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
 
         // text += '<bold>Design description</bold>\n\n';
         if (solution.fullDescription !== ViewSolutionOverlay.config.nullDescription) {
-            text += Utility.stripHtmlTags(solution.fullDescription);
+            text += solution.fullDescription;
         }
 
         const {theme} = ViewSolutionOverlay;

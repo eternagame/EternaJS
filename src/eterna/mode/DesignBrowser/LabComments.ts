@@ -23,9 +23,6 @@ export default class LabComments {
     }
 
     public submitComment(body: string): Promise<CommentsData[]> {
-        body = Utility.stripHtmlTags(body);
-        body = Utility.stripQuotationsAndNewlines(body);
-
         return Eterna.client.submitSolutionComment(this._solutionNID, body)
             .then((data) => {
                 this._commentsData = data['data']['comments'];

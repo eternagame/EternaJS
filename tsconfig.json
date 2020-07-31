@@ -12,6 +12,7 @@
     "strictFunctionTypes": true,
     "strictPropertyInitialization": false,
     "strictNullChecks": true,
+    "allowSyntheticDefaultImports": true,
     "baseUrl": "./src",
     "paths": {
       "engines-bin/*": [

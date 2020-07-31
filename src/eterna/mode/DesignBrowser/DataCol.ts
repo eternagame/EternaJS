@@ -388,7 +388,7 @@ export default class DataCol extends ContainerObject {
             if (ii >= this._rawData.length) {
                 dataString += '\n';
             } else {
-                let rawstr = Utility.stripHtmlTags(`${this._rawData[ii]}`);
+                let rawstr = `${this._rawData[ii]}`;
 
                 const fb = this._feedback ? this._feedback[ii] : null;
                 switch (this.category) {
