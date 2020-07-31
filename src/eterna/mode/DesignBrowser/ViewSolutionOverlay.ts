@@ -17,7 +17,8 @@ import {
     VLayoutContainer,
     RepeatingTask,
     AlphaTask,
-    SerialTask
+    SerialTask,
+    InputUtil
 } from 'flashbang';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -127,21 +128,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         }
 
         // update scroll
-        let pxdelta: number;
-        switch (e.deltaMode) {
-            case WheelEvent.DOM_DELTA_PIXEL:
-                pxdelta = e.deltaY;
-                break;
-            case WheelEvent.DOM_DELTA_LINE:
-                // 13 -> body font size
-                pxdelta = e.deltaY * 13;
-                break;
-            case WheelEvent.DOM_DELTA_PAGE:
-                pxdelta = e.deltaY * this._scrollView.height;
-                break;
-            default:
-                throw new Error('Unhandled scroll delta mode');
-        }
+        let pxdelta: number = InputUtil.scrollAmount(e, 13, this._scrollView.height);
 
         this._scrollView.scrollTo(
             this._scrollView.scrollProgress + pxdelta / this._scrollView.content.height

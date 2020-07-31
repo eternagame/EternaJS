@@ -11,7 +11,7 @@ import Fonts from 'eterna/util/Fonts';
 import SliderBar from 'eterna/ui/SliderBar';
 import {
     ContainerObject, DisplayUtil, HAlign, VAlign, RepeatingTask, SerialTask, DelayTask, CallbackTask,
-    MathUtil, Flashbang, SceneObject, AlphaTask, LocationTask, Easing, HLayoutContainer, Assert
+    MathUtil, Flashbang, SceneObject, AlphaTask, LocationTask, Easing, HLayoutContainer, Assert, InputUtil
 } from 'flashbang';
 import GameButton from 'eterna/ui/GameButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -305,8 +305,21 @@ export default class DesignBrowserMode extends GameMode {
             return;
         }
         if (!this.isDialogOrNotifShowing && e.deltaY !== 0 && this._filteredSolutions != null) {
-            const progress = (this._firstVisSolutionIdx + (e.deltaY * 0.25)) / this._filteredSolutions.length;
+            // const progress = (this._firstVisSolutionIdx + (e.deltaY * 0.25)) / this._filteredSolutions.length;
+            // this._vSlider.setProgress(MathUtil.clamp(progress, 0, 1));
+            if (!this.container || !this.container.visible || e.x < this.container.position.x) {
+                return;
+            }
+
+            // update scroll
+            let pxdelta: number = InputUtil.scrollAmount(e, 14, this._vSlider.height);
+
+            // convert back to lines
+            const progress = (this._firstVisSolutionIdx + pxdelta / 14) / this._filteredSolutions.length;
             this._vSlider.setProgress(MathUtil.clamp(progress, 0, 1));
+            // this._scrollView.scrollTo(
+            //     this._scrollView.scrollProgress + pxdelta / this._scrollView.content.height
+            // );
         } else {
             super.onMouseWheelEvent(e);
         }

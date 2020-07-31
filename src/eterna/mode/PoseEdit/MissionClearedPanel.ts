@@ -3,7 +3,7 @@ import {
 } from 'pixi.js';
 import {
     ContainerObject, VLayoutContainer, HAlign, DOMObject, AlphaTask,
-    Flashbang, DisplayUtil, VAlign, Assert, MathUtil, MouseWheelListener
+    Flashbang, DisplayUtil, VAlign, Assert, MathUtil, MouseWheelListener, InputUtil
 } from 'flashbang';
 import GameButton from 'eterna/ui/GameButton';
 import Fonts from 'eterna/util/Fonts';
@@ -195,22 +195,7 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
     }
 
     public onMouseWheelEvent(e: WheelEvent): boolean {
-        let pxdelta: number;
-        switch (e.deltaMode) {
-            case WheelEvent.DOM_DELTA_PIXEL:
-                pxdelta = e.deltaY;
-                break;
-            case WheelEvent.DOM_DELTA_LINE:
-                // 13 -> body font size
-                pxdelta = e.deltaY * 13;
-                break;
-            case WheelEvent.DOM_DELTA_PAGE:
-                pxdelta = e.deltaY * this.display.height;
-                break;
-            default:
-                throw new Error('Unhandled scroll delta mode');
-        }
-
+        let pxdelta: number = InputUtil.scrollAmount(e, 13, this.display.height);
         this.scrollTo(this._infoContainer.y - pxdelta);
 
         return true;
