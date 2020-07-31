@@ -138,7 +138,7 @@ export default class DesignBrowserMode extends GameMode {
         this._dataColParent.display.mask = this._maskBox;
 
         this._markerBoxes = new MarkerBoxView(0xFF0000, theme.rowHeight);
-        this._markerBoxes.position = new Point(7, 88);
+        this._markerBoxes.position = new Point(7, theme.headerHeight + theme.filterHeight + 1);
         this._content.addChild(this._markerBoxes);
 
         const selectionBoxParent = new Container();
