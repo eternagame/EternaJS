@@ -455,6 +455,20 @@ export default class DesignBrowserMode extends GameMode {
         return statusText;
     }
 
+    private reloadCurrent(): void {
+        // get sol at current index again, wrapped around.
+        if (this._solutionView !== undefined) {
+            let newCurrentIdx = this._currentSolutionIndex;
+            if (newCurrentIdx >= this._filteredSolutions.length) {
+                newCurrentIdx = 0;
+            }
+            const newSolution = this.getSolutionAtIndex(newCurrentIdx);
+            if (newSolution != null) {
+                this._solutionView.showSolution(newSolution);
+            }
+        }
+    }
+
     private unpublish(solution: Solution): void {
         this.pushUILock();
 
@@ -473,6 +487,7 @@ export default class DesignBrowserMode extends GameMode {
 
         Eterna.client.deleteSolution(solution.nodeID)
             .then(() => SolutionManager.instance.getSolutionsForPuzzle(this._puzzle.nodeID))
+            .then(() => this.reloadCurrent())
             .then(cleanup)
             .catch((err) => {
                 this.showNotification(`Delete failed: ${err}`);
