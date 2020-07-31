@@ -108,7 +108,7 @@ export default class DesignBrowserMode extends GameMode {
                 fontStyle: FontWeight.BOLD
             }
         });
-        this._votesText.position = new Point(59, 52);
+        this._votesText.position = new Point(20, 52);
         this.uiLayer.addChild(this._votesText);
 
         this._vSlider = new SliderBar(true);
