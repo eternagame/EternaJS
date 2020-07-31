@@ -38,6 +38,9 @@ import ThumbnailAndTextButton from './ThumbnailAndTextButton';
 import GameMode from '../GameMode';
 import ButtonWithIcon from './ButtonWithIcon';
 import LabComments, {CommentsData} from './LabComments';
+import FeedbackViewMode from '../FeedbackViewMode';
+import PoseEditMode from '../PoseEdit/PoseEditMode';
+import DesignBrowserMode from './DesignBrowserMode';
 
 interface ViewSolutionOverlayProps {
     solution: Solution;
@@ -307,12 +310,14 @@ export default class ViewSolutionOverlay extends ContainerObject {
             3, PoseThumbnailType.BASE_COLORED,
             0, null, false, 0, customLayout
         );
-        const playButton = new ThumbnailAndTextButton({
-            thumbnail: playThumbnail,
-            text: 'View/Copy design'
-        }).tooltip('Click to view this design in the game.\nYou can also modify the design and create a new one.');
-        playButton.clicked.connect(() => this.playClicked.emit());
-        this._content.addObject(playButton, this._contentLayout);
+        if (!(this._parentMode instanceof PoseEditMode)) {
+            const playButton = new ThumbnailAndTextButton({
+                thumbnail: playThumbnail,
+                text: 'View/Copy design'
+            }).tooltip('Click to view this design in the game.\nYou can also modify the design and create a new one.');
+            playButton.clicked.connect(() => this.playClicked.emit());
+            this._content.addObject(playButton, this._contentLayout);
+        }
 
         // See result button
         if (this._props.solution.synthetized && this._props.solution.expFeedback) {
@@ -337,24 +342,38 @@ export default class ViewSolutionOverlay extends ContainerObject {
                 customLayout
             );
 
-            const seeResultButton = new ThumbnailAndTextButton({
-                thumbnail: resultThumbnail,
-                text: 'See Result'
-            })
-                .tooltip('Click to see the experimental result!');
-            seeResultButton.clicked.connect(() => this.seeResultClicked.emit());
-            this._content.addObject(seeResultButton, this._contentLayout);
+            if (!(this._parentMode instanceof FeedbackViewMode)) {
+                const seeResultButton = new ThumbnailAndTextButton({
+                    thumbnail: resultThumbnail,
+                    text: 'See Result'
+                })
+                    .tooltip('Click to see the experimental result!');
+                seeResultButton.clicked.connect(() => this.seeResultClicked.emit());
+                this._content.addObject(seeResultButton, this._contentLayout);
+            }
         }
 
         // Sort button
+        // AMW: change the text etc. until we can guarantee seq sim sorting
+        // even though that seems silly.
         const sortImage = Sprite.from(Bitmaps.ImgSort);
-        const sortButton = new ThumbnailAndTextButton({
-            thumbnail: sortImage,
-            text: 'Sort by sequence similarity'
-        })
-            .tooltip('Sort based on similarity to this design.');
-        sortButton.clicked.connect(() => this.sortClicked.emit());
-        this._content.addObject(sortButton, this._contentLayout);
+        if (!(this._parentMode instanceof DesignBrowserMode)) {
+            const sortButton = new ThumbnailAndTextButton({
+                thumbnail: sortImage,
+                text: 'Back to design browser'
+            })
+                .tooltip('Return to the design browser to see more solutions');
+            sortButton.clicked.connect(() => this.sortClicked.emit());
+            this._content.addObject(sortButton, this._contentLayout);
+        } else {
+            const sortButton = new ThumbnailAndTextButton({
+                thumbnail: sortImage,
+                text: 'Sort by sequence similarity'
+            })
+                .tooltip('Sort based on similarity to this design.');
+            sortButton.clicked.connect(() => this.sortClicked.emit());
+            this._content.addObject(sortButton, this._contentLayout);
+        }
 
         // DELETE (only allowed if the puzzle belongs to us and has no votes)
         if (
