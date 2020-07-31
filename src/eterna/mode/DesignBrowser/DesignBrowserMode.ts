@@ -305,8 +305,6 @@ export default class DesignBrowserMode extends GameMode {
             return;
         }
         if (!this.isDialogOrNotifShowing && e.deltaY !== 0 && this._filteredSolutions != null) {
-            // const progress = (this._firstVisSolutionIdx + (e.deltaY * 0.25)) / this._filteredSolutions.length;
-            // this._vSlider.setProgress(MathUtil.clamp(progress, 0, 1));
             if (!this.container || !this.container.visible || e.x < this.container.position.x) {
                 return;
             }
@@ -317,9 +315,6 @@ export default class DesignBrowserMode extends GameMode {
             // convert back to lines
             const progress = (this._firstVisSolutionIdx + pxdelta / 14) / this._filteredSolutions.length;
             this._vSlider.setProgress(MathUtil.clamp(progress, 0, 1));
-            // this._scrollView.scrollTo(
-            //     this._scrollView.scrollProgress + pxdelta / this._scrollView.content.height
-            // );
         } else {
             super.onMouseWheelEvent(e);
         }
