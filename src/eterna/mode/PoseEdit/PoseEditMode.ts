@@ -386,7 +386,7 @@ export default class PoseEditMode extends GameMode {
 
         DisplayUtil.positionRelativeToStage(
             this._helpBar.display, HAlign.RIGHT, VAlign.TOP,
-            HAlign.RIGHT, VAlign.TOP, 0, 0
+            HAlign.RIGHT, VAlign.TOP, 0 - this._solDialogOffset, 0
         );
 
         DisplayUtil.positionRelativeToStage(

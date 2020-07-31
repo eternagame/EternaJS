@@ -21,7 +21,10 @@ import Utility from 'eterna/util/Utility';
 import SpecBoxDialog from 'eterna/ui/SpecBoxDialog';
 import Folder from 'eterna/folding/Folder';
 import URLButton from 'eterna/ui/URLButton';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import GameButton from 'eterna/ui/GameButton';
 import GameMode from './GameMode';
+import ViewSolutionOverlay from './DesignBrowser/ViewSolutionOverlay';
 
 enum PoseFoldMode {
     ESTIMATE = 'ESTIMATE',
@@ -53,9 +56,9 @@ export default class FeedbackViewMode extends GameMode {
         this._title.position = new Point(33, 30);
         this.uiLayer.addChild(this._title);
 
-        this._homeButton = GameMode.createHomeButton();
-        this._homeButton.hideWhenModeInactive();
-        this.addObject(this._homeButton, this.uiLayer);
+        // this._homeButton = GameMode.createHomeButton();
+        // this._homeButton.hideWhenModeInactive();
+        // this.addObject(this._homeButton, this.uiLayer);
 
         this._toolbar = new Toolbar(ToolbarType.FEEDBACK, {states: this._puzzle.getSecstructs().length});
         this.addObject(this._toolbar, this.uiLayer);
@@ -133,6 +136,35 @@ export default class FeedbackViewMode extends GameMode {
             poseFields.push(poseField);
         }
 
+        // Unlike PoseEditMode, which might be constructed with PoseEditParams
+        // showing it a selection of many solutions, FeedbackViewMode cannot, so
+        // we can't go previous or next.
+        // AMW TODO: we need to make the other overlay buttons work in BOTH modes.
+        this._solutionView = new ViewSolutionOverlay({
+            solution: this._solution,
+            puzzle: this._puzzle,
+            voteDisabled: false,
+            onPrevious: () => {},
+            onNext: () => {},
+            parentMode: (() => this)()
+        });
+        this.addObject(this._solutionView, this.dialogLayer);
+
+        this._info = new GameButton()
+            .up(Bitmaps.ImgInfoControl)
+            .over(Bitmaps.ImgInfoControlHover)
+            .down(Bitmaps.ImgInfoControl)
+            .hotkey(KeyCode.KeyI, true)
+            .tooltip('Design Information (ctrl+I/cmd+I)');
+
+        this._info.clicked.connect(() => {
+            if (this._solutionView) {
+                this._solutionView.showSolution(this._solution);
+                this.onResized();
+            }
+        });
+        this.addObject(this._info, this.uiLayer);
+
         this.setPoseFields(poseFields);
 
         this.setupShape();
@@ -155,15 +187,25 @@ export default class FeedbackViewMode extends GameMode {
         super.onResized();
     }
 
+    private get _solDialogOffset() {
+        return this._solutionView !== undefined && this._solutionView.container.visible
+            ? ViewSolutionOverlay.theme.width : 0;
+    }
+
     private updateUILayout(): void {
         DisplayUtil.positionRelativeToStage(
             this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
             HAlign.CENTER, VAlign.BOTTOM, 20, -20
         );
 
+        // DisplayUtil.positionRelativeToStage(
+        //     this._homeButton.display, HAlign.RIGHT, VAlign.TOP,
+        //     HAlign.RIGHT, VAlign.TOP, 0 - this._solDialogOffset, 5
+        // );
+
         DisplayUtil.positionRelativeToStage(
-            this._homeButton.display, HAlign.RIGHT, VAlign.TOP,
-            HAlign.RIGHT, VAlign.TOP, 0, 5
+            this._info.display, HAlign.RIGHT, VAlign.TOP,
+            HAlign.RIGHT, VAlign.TOP, 0 - this._solDialogOffset, 0
         );
     }
 
@@ -561,7 +603,7 @@ export default class FeedbackViewMode extends GameMode {
     private readonly _puzzle: Puzzle;
 
     private _toolbar: Toolbar;
-    private _homeButton: URLButton;
+    // private _homeButton: URLButton;
 
     private _undoBlocks: UndoBlock[] = [];
     private _currentIndex: number;
@@ -575,4 +617,6 @@ export default class FeedbackViewMode extends GameMode {
     private _shapePairs: (number[] | null)[] = [];
     protected _targetConditions: (TargetConditions | undefined)[];
     private _isExpColor: boolean;
+    private _solutionView?: ViewSolutionOverlay;
+    private _info: GameButton;
 }
