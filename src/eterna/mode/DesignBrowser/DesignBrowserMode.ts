@@ -149,6 +149,14 @@ export default class DesignBrowserMode extends GameMode {
         selectionBoxParent.addChild(this._selectionBox);
         this._content.addChild(selectionBoxParent);
 
+        const clickedSelectionBoxParent = new Container();
+        clickedSelectionBoxParent.mask = this._maskBox;
+        this._clickedSelectionBox = new SelectionBox(0x2F44D1);
+        this._clickedSelectionBox.position = new Point(7, 0);
+        this._clickedSelectionBox.visible = false;
+        clickedSelectionBoxParent.addChild(this._clickedSelectionBox);
+        this._content.addChild(clickedSelectionBoxParent);
+
         this._dataColParent.pointerMove.connect(() => this.onMouseMove());
         this._dataColParent.pointerUp.connect(() => this.onMouseUp());
 
@@ -339,6 +347,7 @@ export default class DesignBrowserMode extends GameMode {
 
         const {designBrowser: theme} = UITheme;
         this._selectionBox.setSize(this.contentWidth - 14, theme.rowHeight);
+        this._clickedSelectionBox.setSize(this.contentWidth - 14, theme.rowHeight);
 
         if (this._dataCols != null) {
             for (let col of this._dataCols) {
@@ -400,7 +409,9 @@ export default class DesignBrowserMode extends GameMode {
                 const {designBrowser: theme} = UITheme;
                 const rowIndex = this._currentSolutionIndex - this._firstVisSolutionIdx;
                 if (rowIndex >= 0) {
-                    this.updateSelectionBoxPos(rowIndex);
+                    // this.updateSelectionBoxPos(rowIndex);
+                    this._clickedSelectionBox.visible = true;
+                    this.updateClickedSelectionBoxPos(rowIndex);
                 }
             }
         };
@@ -536,6 +547,9 @@ export default class DesignBrowserMode extends GameMode {
             return;
         }
 
+        this._clickedSelectionBox.visible = true;
+        this.updateClickedSelectionBoxPos(index);
+
         this.showSolutionDetailsDialog(index + this._firstVisSolutionIdx);
     }
 
@@ -556,7 +570,9 @@ export default class DesignBrowserMode extends GameMode {
                     this._solutionView.showSolution(newSolution);
                     const rowIndex = this._currentSolutionIndex - this._firstVisSolutionIdx;
                     if (rowIndex >= 0) {
-                        this.updateSelectionBoxPos(rowIndex);
+                        // this.updateSelectionBoxPos(rowIndex);
+                        this._clickedSelectionBox.visible = true;
+                        this.updateClickedSelectionBoxPos(index);
                     }
                 }
             };
@@ -613,6 +629,14 @@ export default class DesignBrowserMode extends GameMode {
     private updateSelectionBoxPos(index: number) {
         const {designBrowser: theme} = UITheme;
         this._selectionBox.position.y = theme.headerHeight
+            + theme.filterHeight
+            + index * theme.rowHeight
+            + theme.dataPadding / 2;
+    }
+
+    private updateClickedSelectionBoxPos(index: number) {
+        const {designBrowser: theme} = UITheme;
+        this._clickedSelectionBox.position.y = theme.headerHeight
             + theme.filterHeight
             + index * theme.rowHeight
             + theme.dataPadding / 2;
@@ -1009,6 +1033,7 @@ export default class DesignBrowserMode extends GameMode {
     private _expColorButton: GameButton;
     private _votesText: MultiStyleText;
     private _selectionBox: SelectionBox;
+    private _clickedSelectionBox: SelectionBox;
     private _markerBoxes: MarkerBoxView;
     private _categories: DesignCategory[] | null;
     private _voteProcessor: VoteProcessor;
