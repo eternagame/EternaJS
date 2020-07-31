@@ -1,5 +1,7 @@
 import * as log from 'loglevel';
-import {DisplayObject, Point, Text} from 'pixi.js';
+import {
+    DisplayObject, Point, Text, Sprite
+} from 'pixi.js';
 import Constants from 'eterna/Constants';
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
@@ -23,6 +25,9 @@ import Folder from 'eterna/folding/Folder';
 import URLButton from 'eterna/ui/URLButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import GameButton from 'eterna/ui/GameButton';
+import EternaURL from 'eterna/net/EternaURL';
+import BitmapManager from 'eterna/resources/BitmapManager';
+import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import GameMode from './GameMode';
 import ViewSolutionOverlay from './DesignBrowser/ViewSolutionOverlay';
 import DesignBrowserMode from './DesignBrowser/DesignBrowserMode';
@@ -49,17 +54,45 @@ export default class FeedbackViewMode extends GameMode {
         let background = new Background();
         this.addObject(background, this.bgLayer);
 
-        this._puzzleTitle = Fonts.std(this._puzzle.getName(false), 14).color(0xffffff).bold().build();
-        this._puzzleTitle.position = new Point(33, 8);
-        this.uiLayer.addChild(this._puzzleTitle);
+        // this._puzzleTitle = Fonts.std(this._puzzle.getName(false), 14).color(0xffffff).bold().build();
+        // this._puzzleTitle.position = new Point(33, 8);
+        // this.uiLayer.addChild(this._puzzleTitle);
 
         this._title = Fonts.std('', 12).color(0xffffff).bold().build();
         this._title.position = new Point(33, 30);
         this.uiLayer.addChild(this._title);
 
-        // this._homeButton = GameMode.createHomeButton();
-        // this._homeButton.hideWhenModeInactive();
-        // this.addObject(this._homeButton, this.uiLayer);
+        this._homeButton = new GameButton()
+            .up(Bitmaps.ImgHome)
+            .over(Bitmaps.ImgHome)
+            .down(Bitmaps.ImgHome);
+        this._homeButton.display.position = new Point(18, 10);
+        this._homeButton.clicked.connect(() => {
+            if (Eterna.MOBILE_APP) {
+                window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
+            } else {
+                window.location.href = EternaURL.createURL({page: 'lab_bench'});
+            }
+        });
+        this.addObject(this._homeButton, this.uiLayer);
+
+        const homeArrow = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgHomeArrow));
+        homeArrow.position = new Point(45, 14);
+        Assert.assertIsDefined(this.container);
+        this.container.addChild(homeArrow);
+
+        let puzzleTitle = new HTMLTextObject(this._puzzle.getName(true))
+            .font(Fonts.STDFONT)
+            .fontSize(14)
+            .bold()
+            .selectable(false)
+            .color(0xffffff);
+        puzzleTitle.hideWhenModeInactive();
+        this.addObject(puzzleTitle, this.uiLayer);
+        DisplayUtil.positionRelative(
+            puzzleTitle.display, HAlign.LEFT, VAlign.CENTER,
+            homeArrow, HAlign.RIGHT, VAlign.CENTER, 8, 0
+        );
 
         this._toolbar = new Toolbar(ToolbarType.FEEDBACK, {states: this._puzzle.getSecstructs().length});
         this.addObject(this._toolbar, this.uiLayer);
@@ -638,7 +671,7 @@ export default class FeedbackViewMode extends GameMode {
     private readonly _puzzle: Puzzle;
 
     private _toolbar: Toolbar;
-    // private _homeButton: URLButton;
+    private _homeButton: GameButton;
 
     private _undoBlocks: UndoBlock[] = [];
     private _currentIndex: number;

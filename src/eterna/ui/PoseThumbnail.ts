@@ -101,7 +101,7 @@ export default class PoseThumbnail {
         } else if (size === 2) {
             frame = Sprite.from(Bitmaps.SolutionBigFrame);
         } else if (size === 3) {
-            frame = DisplayUtil.fillRect(52, 52, 0x0);
+            frame = DisplayUtil.fillRect(62, 62, 0x0);
         } else if (size === 4) {
             frame = DisplayUtil.fillRect(210, 125, 0x0);
         } else if (size === 5) {
@@ -179,8 +179,9 @@ export default class PoseThumbnail {
             if (ypos < smallYMin) smallYMin = ypos;
         }
 
-        let xOffset: number = ((w) - (smallXMax - smallXMin)) / 2.0 + frameBounds.width * 0.1;
-        let yOffset: number = ((h) - (smallYMax - smallYMin)) / 2.0 + frameBounds.height * 0.1;
+        let xOffset: number = ((w) - (smallXMax - smallXMin)) + frameBounds.width * 0.1;
+        let yOffset: number = ((h) - (smallYMax - smallYMin)) + frameBounds.height * 0.1;
+        console.error(xOffset, yOffset);
 
         let wrongXCoords: number[] = [];
         let wrongYCoords: number[] = [];
