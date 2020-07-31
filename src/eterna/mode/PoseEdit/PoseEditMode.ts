@@ -645,7 +645,9 @@ export default class PoseEditMode extends GameMode {
             this.clearMoveTracking(solution.sequence);
             this.setAncestorId(solution.nodeID);
 
-            this.updateSolutionNameText(solution);
+            // AMW: I'm keeping the function around in case we want to call it
+            // in some other context, but we don't need it anymore.
+            // this.updateSolutionNameText(solution);
             this._curSolution = solution;
         };
 
@@ -885,7 +887,9 @@ export default class PoseEditMode extends GameMode {
         if (this._params.initSolution != null) {
             initialSequence = EPars.stringToSequence(this._params.initSolution.sequence);
             this._curSolution = this._params.initSolution;
-            this.updateSolutionNameText(this._curSolution);
+            // AMW: I'm keeping the function around in case we want to call it
+            // in some other context, but we don't need it anymore.
+            // this.updateSolutionNameText(this._curSolution);
             this._solutionView = new ViewSolutionOverlay({
                 solution: this._params.initSolution,
                 puzzle: this._puzzle,
