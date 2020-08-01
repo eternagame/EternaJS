@@ -37,6 +37,7 @@ import Utility from 'eterna/util/Utility';
 import ShapeConstraint from 'eterna/constraints/constraints/ShapeConstraint';
 import ContraFold from 'eterna/folding/Contrafold';
 import {SaveStoreItem} from 'flashbang/settings/SaveGameManager';
+import GameDropdown from 'eterna/ui/GameDropdown';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
@@ -106,19 +107,21 @@ export default class PuzzleEditMode extends GameMode {
         }
         this._folder = vienna;
 
-        this._folderButton = new GameButton()
-            .allStates(Bitmaps.ShapeImg)
-            .label(this._folder.name, 22)
-            .tooltip('Select the folding engine');
-        this._folderButton.display.scale = new Point(0.5, 0.5);
-        this._folderButton.display.position = new Point(17, 175);
-        this.addObject(this._folderButton, this.uiLayer);
+        this._dropdown = new GameDropdown(
+            16,
+            FolderManager.instance.getFolders(),
+            this._folder.name,
+            (e) => this.changeFolder(e),
+            0
+        );
 
-        this._folderButton.clicked.connect(() => this.changeFolder());
+        this._dropdown.display.scale = new Point(1, 1);
+        this._dropdown.display.position = new Point(17, 175);
+        this.addObject(this._dropdown, this.uiLayer);
 
         Assert.assertIsDefined(this.regs);
         this.regs.add(Eterna.settings.multipleFoldingEngines.connectNotify((value) => {
-            this._folderButton.display.visible = value;
+            this._dropdown.display.visible = value;
         }));
 
         this._homeButton = GameMode.createHomeButton();
@@ -690,14 +693,12 @@ export default class PuzzleEditMode extends GameMode {
         this.updateScore();
     }
 
-    private changeFolder(): void {
-        let currF: string = this._folder.name;
-        this._folder = FolderManager.instance.getNextFolder(currF, () => false);
-        if (this._folder.name === currF) {
+    private changeFolder(to: string): void {
+        if (this._folder.name === to) {
             return;
         }
 
-        this._folderButton.label(this._folder.name);
+        this._folder = FolderManager.instance.getFolder(to) || this._folder;
 
         for (let pose of this._poses) {
             pose.scoreFolder = this._folder;
@@ -985,7 +986,7 @@ export default class PuzzleEditMode extends GameMode {
     private _paused: boolean;
 
     private _toolbar: Toolbar;
-    private _folderButton: GameButton;
+    private _dropdown: GameDropdown;
     private _homeButton: URLButton;
     private _constraintBar: ConstraintBar;
 }

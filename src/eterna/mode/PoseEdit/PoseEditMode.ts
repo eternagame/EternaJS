@@ -55,6 +55,7 @@ import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
 import {HighlightInfo} from 'eterna/constraints/Constraint';
 import {AchievementData} from 'eterna/achievements/AchievementManager';
 import {RankScrollData} from 'eterna/rank/RankScroll';
+import GameDropdown from 'eterna/ui/GameDropdown';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
@@ -856,21 +857,23 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
-        this._folderButton = new GameButton()
-            .allStates(Bitmaps.ShapeImg)
-            .label(this._folder.name, 22)
-            .tooltip('Select the folding engine.');
-        this._folderButton.display.position = new Point(17, 175);
-        this._folderButton.display.scale = new Point(0.5, 0.5);
-        this.addObject(this._folderButton, this.uiLayer);
+        this._dropdown = new GameDropdown(
+            16,
+            FolderManager.instance.getFolders((folder) => this._puzzle.canUseFolder(folder)),
+            this._folder.name,
+            (e) => this.changeFolder(e),
+            0
+        );
+        this._dropdown.display.position = new Point(17, 175);
+        this._dropdown.display.scale = new Point(1, 1);
+        this.addObject(this._dropdown, this.uiLayer);
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
-            this._folderButton.clicked.connect(() => this.changeFolder());
             Assert.assertIsDefined(this.regs);
             this.regs.add(Eterna.settings.multipleFoldingEngines.connectNotify((multiEngine) => {
-                this._folderButton.display.visible = multiEngine;
+                this._dropdown.display.visible = multiEngine;
             }));
         } else {
-            this._folderButton.display.visible = false;
+            this._dropdown.display.visible = false;
         }
 
         if (this._folder.canScoreStructures) {
@@ -1811,10 +1814,6 @@ export default class PoseEditMode extends GameMode {
     }
 
     private onFolderUpdated(): void {
-        if (this._folder) {
-            this._folderButton.label(this._folder.name);
-        }
-
         let scoreFolder: Folder | null = this._folder && this._folder.canScoreStructures ? this._folder : null;
         for (let pose of this._poses) {
             pose.scoreFolder = scoreFolder;
@@ -1823,16 +1822,14 @@ export default class PoseEditMode extends GameMode {
         this.onChangeFolder();
     }
 
-    private changeFolder(): void {
-        if (!this._folder) {
-            throw new Error('Cannot change folders if the current folder is null!');
-        }
+    private changeFolder(to: string): void {
+        if (!this || !this.folder || this.folder.name === to) return;
 
-        let currF: string = this._folder.name;
-        this._folder = FolderManager.instance.getNextFolder(
-            currF, (folder: Folder) => !this._puzzle.canUseFolder(folder)
-        );
-        if (this._folder.name === currF) return;
+        let newFolder = FolderManager.instance.getFolder(to);
+
+        if (!newFolder || !this._puzzle.canUseFolder(newFolder)) return;
+
+        this._folder = FolderManager.instance.getFolder(to);
 
         this.onFolderUpdated();
     }
@@ -2220,7 +2217,7 @@ export default class PoseEditMode extends GameMode {
         this._toolbar.disableTools(disable);
         this._hintBoxRef.destroyObject();
 
-        this._folderButton.enabled = !disable;
+        this._dropdown.display.visible = !disable;
 
         for (let field of this._poseFields) {
             field.container.interactive = !disable;
@@ -3361,7 +3358,7 @@ export default class PoseEditMode extends GameMode {
     private _targetOligos: (Oligo[] | undefined)[] = [];
     private _targetOligosOrder: (number[] | undefined)[] = [];
 
-    private _folderButton: GameButton;
+    private _dropdown: GameDropdown;
     private _isDatabrowserMode: boolean;
     private _isFrozen: boolean = false;
     private _targetName: Text;

@@ -71,6 +71,13 @@ export default class FolderManager {
         return this._folders[curFolderIdx]; // use same one
     }
 
+    public getFolders(filterCB: ((folder: Folder) => boolean) | null = null): string[] {
+        return this._folders.filter((folder) => folder.name.length !== 0
+                && folder.name !== RNAFoldBasic.NAME
+                && folder.isFunctional
+                && (filterCB === null || filterCB(folder))).map((folder) => folder.name);
+    }
+
     public get lastUsedFolder(): string {
         return Eterna.settings.lastUsedFolder.value || Vienna.NAME;
     }
