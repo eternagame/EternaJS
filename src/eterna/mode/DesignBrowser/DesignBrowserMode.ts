@@ -11,7 +11,7 @@ import Fonts from 'eterna/util/Fonts';
 import SliderBar from 'eterna/ui/SliderBar';
 import {
     ContainerObject, DisplayUtil, HAlign, VAlign, RepeatingTask, SerialTask, DelayTask, CallbackTask,
-    MathUtil, Flashbang, SceneObject, AlphaTask, LocationTask, Easing, HLayoutContainer, Assert
+    MathUtil, Flashbang, SceneObject, AlphaTask, LocationTask, Easing, HLayoutContainer, Assert, InputUtil
 } from 'flashbang';
 import GameButton from 'eterna/ui/GameButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -78,7 +78,12 @@ export interface DesignBrowserFilter {
 }
 
 export default class DesignBrowserMode extends GameMode {
-    constructor(puzzle: Puzzle, novote = false, initialFilters: DesignBrowserFilter[] | null = null) {
+    constructor(
+        puzzle: Puzzle,
+        novote = false,
+        initialFilters: DesignBrowserFilter[] | null = null,
+        initialSolution?: Solution
+    ) {
         super();
 
         this._puzzle = puzzle;
@@ -86,6 +91,7 @@ export default class DesignBrowserMode extends GameMode {
         this._initialDataFilters = initialFilters;
         this._wholeRowWidth = 0;
         this._voteProcessor = new VoteProcessor(puzzle.maxVotes);
+        this._initialSolution = initialSolution;
     }
 
     public get puzzleID(): number { return this._puzzle.nodeID; }
@@ -108,7 +114,7 @@ export default class DesignBrowserMode extends GameMode {
                 fontStyle: FontWeight.BOLD
             }
         });
-        this._votesText.position = new Point(59, 52);
+        this._votesText.position = new Point(20, 52);
         this.uiLayer.addChild(this._votesText);
 
         this._vSlider = new SliderBar(true);
@@ -138,7 +144,7 @@ export default class DesignBrowserMode extends GameMode {
         this._dataColParent.display.mask = this._maskBox;
 
         this._markerBoxes = new MarkerBoxView(0xFF0000, theme.rowHeight);
-        this._markerBoxes.position = new Point(7, 88);
+        this._markerBoxes.position = new Point(7, theme.headerHeight + theme.filterHeight + 1);
         this._content.addChild(this._markerBoxes);
 
         const selectionBoxParent = new Container();
@@ -148,6 +154,14 @@ export default class DesignBrowserMode extends GameMode {
         this._selectionBox.visible = false;
         selectionBoxParent.addChild(this._selectionBox);
         this._content.addChild(selectionBoxParent);
+
+        const clickedSelectionBoxParent = new Container();
+        clickedSelectionBoxParent.mask = this._maskBox;
+        this._clickedSelectionBox = new SelectionBox(0x2F44D1);
+        this._clickedSelectionBox.position = new Point(7, 0);
+        this._clickedSelectionBox.visible = false;
+        clickedSelectionBoxParent.addChild(this._clickedSelectionBox);
+        this._content.addChild(clickedSelectionBoxParent);
 
         this._dataColParent.pointerMove.connect(() => this.onMouseMove());
         this._dataColParent.pointerUp.connect(() => this.onMouseUp());
@@ -262,7 +276,7 @@ export default class DesignBrowserMode extends GameMode {
         homeArrow.position = new Point(45, 14);
         this.uiLayer.addChild(homeArrow);
 
-        let puzzleTitle = new HTMLTextObject(this._puzzle.getName(true))
+        let puzzleTitle = new HTMLTextObject(this._puzzle.getName(!Eterna.MOBILE_APP), undefined, undefined, true)
             .font(Fonts.STDFONT)
             .fontSize(14)
             .bold()
@@ -283,6 +297,13 @@ export default class DesignBrowserMode extends GameMode {
             new CallbackTask(() => this.refreshSolutions())
         )));
 
+        if (this._initialSolution !== undefined) {
+            // Sort on it.
+            this.sortOnSolution(this._initialSolution);
+            // Set _currentSolutionIndex
+            this._currentSolutionIndex = this.getSolutionIndex(this._initialSolution.nodeID);
+        }
+
         this.updateLayout();
     }
 
@@ -297,7 +318,15 @@ export default class DesignBrowserMode extends GameMode {
             return;
         }
         if (!this.isDialogOrNotifShowing && e.deltaY !== 0 && this._filteredSolutions != null) {
-            const progress = (this._firstVisSolutionIdx + (e.deltaY * 0.25)) / this._filteredSolutions.length;
+            if (!this.container || !this.container.visible || e.x < this.container.position.x) {
+                return;
+            }
+
+            // update scroll
+            let pxdelta: number = InputUtil.scrollAmount(e, 14, this._vSlider.height);
+
+            // convert back to lines
+            const progress = (this._firstVisSolutionIdx + pxdelta / 14) / this._filteredSolutions.length;
             this._vSlider.setProgress(MathUtil.clamp(progress, 0, 1));
         } else {
             super.onMouseWheelEvent(e);
@@ -336,9 +365,11 @@ export default class DesignBrowserMode extends GameMode {
         );
         this._maskBox.setSize(this.contentWidth - 14, this.contentHeight - 10);
         this._markerBoxes.setSize(this.contentWidth - 14, this.contentHeight - 10);
+        this._markerBoxes.updateView(this._firstVisSolutionIdx);
 
         const {designBrowser: theme} = UITheme;
         this._selectionBox.setSize(this.contentWidth - 14, theme.rowHeight);
+        this._clickedSelectionBox.setSize(this.contentWidth - 14, theme.rowHeight);
 
         if (this._dataCols != null) {
             for (let col of this._dataCols) {
@@ -391,19 +422,6 @@ export default class DesignBrowserMode extends GameMode {
 
     private async switchToPoseEditForSolution(solution: Solution): Promise<void> {
         this.pushUILock();
-        const switchSolution = (newIndex: number) => {
-            const newSolution = this.getSolutionAtIndex(newIndex);
-            if (newSolution != null) {
-                this._currentSolutionIndex = newIndex;
-                Assert.assertIsDefined(this._solutionView);
-                this._solutionView.showSolution(newSolution);
-                const {designBrowser: theme} = UITheme;
-                const rowIndex = this._currentSolutionIndex - this._firstVisSolutionIdx;
-                if (rowIndex >= 0) {
-                    this.updateSelectionBoxPos(rowIndex);
-                }
-            }
-        };
         try {
             await Eterna.app.switchToPoseEdit(
                 this._puzzle, false, {initSolution: solution, solutions: this._filteredSolutions.slice()}
@@ -431,7 +449,7 @@ export default class DesignBrowserMode extends GameMode {
         window.open(`/node/${solution.nodeID}/edit`, 'soleditwindow');
     }
 
-    private sortOnSolution(solution: Solution): void {
+    public sortOnSolution(solution: Solution): void {
         this.closeCurDialog();
         this._sortOptions.addCriteria(DesignCategory.SEQUENCE, SortOrder.INCREASING, solution.sequence);
         this.showSortDialog();
@@ -444,6 +462,20 @@ export default class DesignBrowserMode extends GameMode {
             new AlphaTask(1, 0.3)
         )));
         return statusText;
+    }
+
+    private reloadCurrent(): void {
+        // get sol at current index again, wrapped around.
+        if (this._solutionView !== undefined) {
+            let newCurrentIdx = this._currentSolutionIndex;
+            if (newCurrentIdx >= this._filteredSolutions.length) {
+                newCurrentIdx = 0;
+            }
+            const newSolution = this.getSolutionAtIndex(newCurrentIdx);
+            if (newSolution != null) {
+                this._solutionView.showSolution(newSolution);
+            }
+        }
     }
 
     private unpublish(solution: Solution): void {
@@ -464,6 +496,7 @@ export default class DesignBrowserMode extends GameMode {
 
         Eterna.client.deleteSolution(solution.nodeID)
             .then(() => SolutionManager.instance.getSolutionsForPuzzle(this._puzzle.nodeID))
+            .then(() => this.reloadCurrent())
             .then(cleanup)
             .catch((err) => {
                 this.showNotification(`Delete failed: ${err}`);
@@ -536,6 +569,9 @@ export default class DesignBrowserMode extends GameMode {
             return;
         }
 
+        this._clickedSelectionBox.visible = true;
+        this.updateClickedSelectionBoxPos(index);
+
         this.showSolutionDetailsDialog(index + this._firstVisSolutionIdx);
     }
 
@@ -556,7 +592,8 @@ export default class DesignBrowserMode extends GameMode {
                     this._solutionView.showSolution(newSolution);
                     const rowIndex = this._currentSolutionIndex - this._firstVisSolutionIdx;
                     if (rowIndex >= 0) {
-                        this.updateSelectionBoxPos(rowIndex);
+                        this._clickedSelectionBox.visible = true;
+                        this.updateClickedSelectionBoxPos(index);
                     }
                 }
             };
@@ -576,21 +613,21 @@ export default class DesignBrowserMode extends GameMode {
                 parentMode: (() => this)()
             });
             this.addObject(this._solutionView, this.dialogLayer);
-
-            // This just got newed, and this.addObject can't stop that.
-            Assert.assertIsDefined(this._solutionView);
-            const sol = this._solutionView.solution;
-            this._solutionView.playClicked.connect(() => this.switchToPoseEditForSolution(sol));
-            this._solutionView.seeResultClicked.connect(() => {
-                this.switchToFeedbackViewForSolution(sol);
-            });
-            this._solutionView.voteClicked.connect(() => this.vote(sol));
-            this._solutionView.sortClicked.connect(() => this.sortOnSolution(sol));
-            this._solutionView.editClicked.connect(() => this.navigateToSolution(sol));
-            this._solutionView.deleteClicked.connect(() => this.unpublish(sol));
         } else {
             this._solutionView.showSolution(solution);
         }
+
+        // This just got newed if it didn't exist.
+        Assert.assertIsDefined(this._solutionView);
+        const sol = this._solutionView.solution;
+        this._solutionView.playClicked.connect(() => this.switchToPoseEditForSolution(sol));
+        this._solutionView.seeResultClicked.connect(() => {
+            this.switchToFeedbackViewForSolution(sol);
+        });
+        this._solutionView.voteClicked.connect(() => this.vote(sol));
+        this._solutionView.sortClicked.connect(() => this.sortOnSolution(sol));
+        this._solutionView.editClicked.connect(() => this.navigateToSolution(sol));
+        this._solutionView.deleteClicked.connect(() => this.unpublish(sol));
 
         this.updateLayout();
     }
@@ -613,6 +650,14 @@ export default class DesignBrowserMode extends GameMode {
     private updateSelectionBoxPos(index: number) {
         const {designBrowser: theme} = UITheme;
         this._selectionBox.position.y = theme.headerHeight
+            + theme.filterHeight
+            + index * theme.rowHeight
+            + theme.dataPadding / 2;
+    }
+
+    private updateClickedSelectionBoxPos(index: number) {
+        const {designBrowser: theme} = UITheme;
+        this._clickedSelectionBox.position.y = theme.headerHeight
             + theme.filterHeight
             + index * theme.rowHeight
             + theme.dataPadding / 2;
@@ -940,7 +985,11 @@ export default class DesignBrowserMode extends GameMode {
             this._wholeRowWidth += col.width;
 
             const {designBrowser: theme} = UITheme;
-            col.bgColor = theme.colors.background;
+            if (ii % 2 === 0) {
+                col.setBgColor(0xffffff, 0);
+            } else {
+                col.setBgColor(0xffffff, 0.05);
+            }
         }
     }
 
@@ -1009,6 +1058,7 @@ export default class DesignBrowserMode extends GameMode {
     private _expColorButton: GameButton;
     private _votesText: MultiStyleText;
     private _selectionBox: SelectionBox;
+    private _clickedSelectionBox: SelectionBox;
     private _markerBoxes: MarkerBoxView;
     private _categories: DesignCategory[] | null;
     private _voteProcessor: VoteProcessor;
@@ -1034,6 +1084,8 @@ export default class DesignBrowserMode extends GameMode {
         DesignCategory.SYNTHESIS_SCORE,
         DesignCategory.SEQUENCE
     ];
+
+    private _initialSolution?: Solution;
 }
 
 class MaskBox extends Graphics {

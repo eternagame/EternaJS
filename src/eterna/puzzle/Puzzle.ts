@@ -9,6 +9,7 @@ import Constraint, {BaseConstraintStatus} from 'eterna/constraints/Constraint';
 import ShapeConstraint from 'eterna/constraints/constraints/ShapeConstraint';
 import {TargetConditions, OligoDef} from 'eterna/UndoBlock';
 import {BoosterData} from 'eterna/mode/PoseEdit/Booster';
+import Utility from 'eterna/util/Utility';
 
 export interface BoostersData {
     mission?: Mission;
@@ -463,12 +464,15 @@ export default class Puzzle {
     }
 
     public getName(linked: boolean = false): string {
-        if (linked && this._puzzleType !== PuzzleType.EXPERIMENTAL) {
+        // The DOMObject will need to allow markup to allow the link,
+        // but we don't want users to be able to add markup to their puzzle titles
+        let plainName = Utility.sanitizeAndMarkup(this._name);
+        if (linked) {
             let url: string = EternaURL.createURL({page: 'puzzle', nid: this._nid});
-            return `<u><A HREF="${url}" TARGET="_blank">${this._name}</a></u>`;
+            return `<u><A HREF="${url}" TARGET="_blank">${plainName}</a></u>`;
         }
 
-        return this._name;
+        return plainName;
     }
 
     public hasTargetType(tcType: string): boolean {

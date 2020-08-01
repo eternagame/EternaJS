@@ -1,10 +1,11 @@
 import {Graphics} from 'pixi.js';
+import Utility from 'eterna/util/Utility';
 import HTMLTextObject from './HTMLTextObject';
 
 /** A DOM-based underlined text link with some background styling. */
 export default class URLButton extends HTMLTextObject {
     constructor(text: string, url: string) {
-        super(URLButton.createHTML(text, url));
+        super(URLButton.createHTML(text, url), undefined, undefined, true);
     }
 
     protected onSizeChanged(): void {
@@ -27,7 +28,9 @@ export default class URLButton extends HTMLTextObject {
     }
 
     private static createHTML(text: string, url: string): string {
-        return `<a href="${url}" style="color: white; font-size: 9pt; font-weight: bold"><u>${text}</u></a>`;
+        // Just in case we ever create one of these buttons with user-supplied text
+        const cleanText = Utility.sanitizeAndMarkup(text);
+        return `<a href="${url}" style="color: white; font-size: 9pt; font-weight: bold"><u>${cleanText}</u></a>`;
     }
 
     private _background: Graphics;

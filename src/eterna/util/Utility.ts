@@ -1,20 +1,49 @@
 import {Point} from 'pixi.js';
+import DOMPurify from 'dompurify';
+import Marked from 'marked';
 import {Assert} from 'flashbang';
+
+// Allow iframes to YouTube
+DOMPurify.addHook('uponSanitizeElement', (node, data) => {
+    if (data.tagName === 'iframe') {
+        const validSrc = (node as HTMLIFrameElement).src.match(/^(https:)?\/\/(www.)?(youtube.com)\/.*$/);
+        if (!validSrc) node.remove();
+    }
+});
+
+// Set target=_blank on all links
+DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+    // set all elements owning target to target=_blank
+    if ('target' in (node as Element)) {
+        node.setAttribute('target', '_blank');
+    }
+    // set non-HTML/MathML links to xlink:show=new
+    if (
+        !node.hasAttribute('target')
+      && (node.hasAttribute('xlink:href') || node.hasAttribute('href'))
+    ) {
+        node.setAttribute('xlink:show', 'new');
+    }
+});
 
 export default class Utility {
     /**
-     * Safely remove HTML tags from an input by replacing <> with escapes.
+     * Sanitize user input to be safe to put in the DOM, and optionally allow for markup to be
+     * applied
      *
-     * @param str - The string to be escaped
-     *
-     * @returns The string, with each <> replaced by regex.
+     * @param str String to be sanitized/markup applied
+     * @param markup When true, markdown rendering is applied and html is allowed
      */
-    public static stripHtmlTags(str: string): string {
-        let newlinereg = /</g;
-        str = str.replace(newlinereg, '&lt;');
-        newlinereg = />/g;
-        str = str.replace(newlinereg, '&gt;');
-        return str;
+    public static sanitizeAndMarkup(str: string, markup: boolean = false) {
+        let opts: DOMPurify.Config = {
+            FORBID_TAGS: ['style']
+        };
+
+        if (!markup) {
+            opts.ALLOWED_TAGS = [];
+        }
+
+        return DOMPurify.sanitize(markup ? Marked(str) : str, opts) as string;
     }
 
     /**

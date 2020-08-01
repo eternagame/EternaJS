@@ -17,7 +17,8 @@ import {
     VLayoutContainer,
     RepeatingTask,
     AlphaTask,
-    SerialTask
+    SerialTask,
+    InputUtil
 } from 'flashbang';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -32,11 +33,15 @@ import MultiStyleText from 'pixi-multistyle-text';
 import Feedback from 'eterna/Feedback';
 import SliderBar from 'eterna/ui/SliderBar';
 import {FontWeight} from 'flashbang/util/TextBuilder';
+import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import ThumbnailAndTextButton from './ThumbnailAndTextButton';
 import GameMode from '../GameMode';
 import ButtonWithIcon from './ButtonWithIcon';
 import LabComments, {CommentsData} from './LabComments';
+import FeedbackViewMode from '../FeedbackViewMode';
+import PoseEditMode from '../PoseEdit/PoseEditMode';
+import DesignBrowserMode from './DesignBrowserMode';
 
 interface ViewSolutionOverlayProps {
     solution: Solution;
@@ -127,21 +132,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         }
 
         // update scroll
-        let pxdelta: number;
-        switch (e.deltaMode) {
-            case WheelEvent.DOM_DELTA_PIXEL:
-                pxdelta = e.deltaY;
-                break;
-            case WheelEvent.DOM_DELTA_LINE:
-                // 13 -> body font size
-                pxdelta = e.deltaY * 13;
-                break;
-            case WheelEvent.DOM_DELTA_PAGE:
-                pxdelta = e.deltaY * this._scrollView.height;
-                break;
-            default:
-                throw new Error('Unhandled scroll delta mode');
-        }
+        let pxdelta: number = InputUtil.scrollAmount(e, 13, this._scrollView.height);
 
         this._scrollView.scrollTo(
             this._scrollView.scrollProgress + pxdelta / this._scrollView.content.height
@@ -207,7 +198,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
 
         const solutionName = Fonts.std()
             .bold()
-            .text(Utility.stripHtmlTags(this._props.solution.title))
+            .text(this._props.solution.title)
             .fontSize(24)
             .color(0xffffff)
             .wordWrap(true, theme.width - theme.margin.left - theme.margin.right)
@@ -216,7 +207,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
 
         const playerName = Fonts.std()
             .bold()
-            .text(`By ${Utility.stripHtmlTags(this._props.solution.playerName)}`)
+            .text(`By ${this._props.solution.playerName}`)
             .fontSize(18)
             .color(0xffffff)
             .wordWrap(true, theme.width - theme.margin.left - theme.margin.right)
@@ -291,8 +282,17 @@ export default class ViewSolutionOverlay extends ContainerObject {
         this._scrollView.content.addChild(this._contentLayout);
 
         // Solution description
-        const description = this.getSolutionText();
-        this._contentLayout.addChild(description);
+        const preDescription = this.getSolutionText();
+        this._contentLayout.addChild(preDescription);
+        if (this._props.solution.fullDescription !== ViewSolutionOverlay.config.nullDescription) {
+            const description = new HTMLTextObject(
+                this._props.solution.fullDescription,
+                theme.width - 40,
+                this._scrollView.htmlWrapper,
+                true
+            ).color(0xffffff).font(Fonts.STDFONT).fontSize(13);
+            this._content.addObject(description, this._contentLayout);
+        }
         this._contentLayout.addVSpacer(6);
 
         // Vote button
@@ -320,12 +320,14 @@ export default class ViewSolutionOverlay extends ContainerObject {
             3, PoseThumbnailType.BASE_COLORED,
             0, null, false, 0, customLayout
         );
-        const playButton = new ThumbnailAndTextButton({
-            thumbnail: playThumbnail,
-            text: 'View/Copy design'
-        }).tooltip('Click to view this design in the game.\nYou can also modify the design and create a new one.');
-        playButton.clicked.connect(() => this.playClicked.emit());
-        this._content.addObject(playButton, this._contentLayout);
+        if (!(this._parentMode instanceof PoseEditMode)) {
+            const playButton = new ThumbnailAndTextButton({
+                thumbnail: playThumbnail,
+                text: 'View/Copy design'
+            }).tooltip('Click to view this design in the game.\nYou can also modify the design and create a new one.');
+            playButton.clicked.connect(() => this.playClicked.emit());
+            this._content.addObject(playButton, this._contentLayout);
+        }
 
         // See result button
         if (this._props.solution.synthetized && this._props.solution.expFeedback) {
@@ -350,13 +352,15 @@ export default class ViewSolutionOverlay extends ContainerObject {
                 customLayout
             );
 
-            const seeResultButton = new ThumbnailAndTextButton({
-                thumbnail: resultThumbnail,
-                text: 'See Result'
-            })
-                .tooltip('Click to see the experimental result!');
-            seeResultButton.clicked.connect(() => this.seeResultClicked.emit());
-            this._content.addObject(seeResultButton, this._contentLayout);
+            if (!(this._parentMode instanceof FeedbackViewMode)) {
+                const seeResultButton = new ThumbnailAndTextButton({
+                    thumbnail: resultThumbnail,
+                    text: 'See Result'
+                })
+                    .tooltip('Click to see the experimental result!');
+                seeResultButton.clicked.connect(() => this.seeResultClicked.emit());
+                this._content.addObject(seeResultButton, this._contentLayout);
+            }
         }
 
         // Sort button
@@ -379,12 +383,12 @@ export default class ViewSolutionOverlay extends ContainerObject {
                 thumbnail: new Graphics()
                     .beginFill(0, 0)
                     .lineStyle(2, 0xC0DCE7)
-                    .drawRoundedRect(0, 0, 75, 75, 10)
+                    .drawRoundedRect(0, 0, 52, 52, 10)
                     .endFill()
                     .moveTo(10, 10)
-                    .lineTo(65, 65)
-                    .moveTo(65, 10)
-                    .lineTo(10, 65),
+                    .lineTo(42, 42)
+                    .moveTo(42, 10)
+                    .lineTo(10, 42),
                 text: 'Delete'
             })
                 .tooltip('Delete this design to retrieve your slots for this round');
@@ -550,6 +554,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         const commentsCount = commentsData?.length ?? 0;
         this._commentsTitle.text = `Comments (${commentsCount})`;
 
+        this._content.removeNamedObjects('comment');
         this._commentsContainer.removeChildren();
         for (const comment of commentsData) {
             const commentLayout = new VLayoutContainer(4, HAlign.LEFT);
@@ -570,12 +575,10 @@ export default class ViewSolutionOverlay extends ContainerObject {
             );
             commentLayout.addVSpacer(6);
 
-            const comm = Fonts.std(comment['comment'], 14)
-                .fontWeight(FontWeight.LIGHT)
+            const comm = new HTMLTextObject(comment['comment'], theme.width - 40, this._scrollView.htmlWrapper, true)
                 .color(0xffffff)
-                .wordWrap(true, theme.width - 40)
-                .build();
-            commentLayout.addChild(comm);
+                .fontWeight(FontWeight.LIGHT);
+            this._content.addNamedObject('comment', comm, commentLayout);
         }
 
         this._commentsContainer.layout(true);
@@ -606,11 +609,6 @@ export default class ViewSolutionOverlay extends ContainerObject {
                     + "<orange> You can't vote on designs from previous rounds."
                     + 'But you can use or resubmit this design by clicking on </orange>'
                     + '<bold>"Modify".</bold>\n';
-        }
-
-        // text += '<bold>Design description</bold>\n\n';
-        if (solution.fullDescription !== ViewSolutionOverlay.config.nullDescription) {
-            text += Utility.stripHtmlTags(solution.fullDescription);
         }
 
         const {theme} = ViewSolutionOverlay;

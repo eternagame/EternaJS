@@ -386,7 +386,7 @@ export default class PoseEditMode extends GameMode {
 
         DisplayUtil.positionRelativeToStage(
             this._helpBar.display, HAlign.RIGHT, VAlign.TOP,
-            HAlign.RIGHT, VAlign.TOP, 0, 0
+            HAlign.RIGHT, VAlign.TOP, 0 - this._solDialogOffset, 0
         );
 
         DisplayUtil.positionRelativeToStage(
@@ -645,7 +645,9 @@ export default class PoseEditMode extends GameMode {
             this.clearMoveTracking(solution.sequence);
             this.setAncestorId(solution.nodeID);
 
-            this.updateSolutionNameText(solution);
+            // AMW: I'm keeping the function around in case we want to call it
+            // in some other context, but we don't need it anymore.
+            // this.updateSolutionNameText(solution);
             this._curSolution = solution;
         };
 
@@ -768,7 +770,7 @@ export default class PoseEditMode extends GameMode {
         this._exitButton.display.visible = false;
         this.addObject(this._exitButton, this.uiLayer);
 
-        let puzzleTitle = new HTMLTextObject(this._puzzle.getName(!Eterna.MOBILE_APP))
+        let puzzleTitle = new HTMLTextObject(this._puzzle.getName(!Eterna.MOBILE_APP), undefined, undefined, true)
             .font(Fonts.STDFONT)
             .fontSize(14)
             .bold()
@@ -885,7 +887,9 @@ export default class PoseEditMode extends GameMode {
         if (this._params.initSolution != null) {
             initialSequence = EPars.stringToSequence(this._params.initSolution.sequence);
             this._curSolution = this._params.initSolution;
-            this.updateSolutionNameText(this._curSolution);
+            // AMW: I'm keeping the function around in case we want to call it
+            // in some other context, but we don't need it anymore.
+            // this.updateSolutionNameText(this._curSolution);
             this._solutionView = new ViewSolutionOverlay({
                 solution: this._params.initSolution,
                 puzzle: this._puzzle,
@@ -895,6 +899,10 @@ export default class PoseEditMode extends GameMode {
                 parentMode: (() => this)()
             });
             this.addObject(this._solutionView, this.dialogLayer);
+            this._solutionView.seeResultClicked.connect(() => {
+                this.switchToFeedbackViewForSolution(this._curSolution);
+            });
+            this._solutionView.sortClicked.connect(() => this.sortOnSolution(this._curSolution));
         } else if (this._params.initSequence != null) {
             initialSequence = EPars.stringToSequence(this._params.initSequence);
         }
@@ -1010,6 +1018,23 @@ export default class PoseEditMode extends GameMode {
 
     public get folder(): Folder | null {
         return this._folder;
+    }
+
+    private async sortOnSolution(solution: Solution): Promise<void> {
+        this.pushUILock();
+        try {
+            // AMW: this is very similar to the DesignBrowserMode method, but we
+            // don't know about a bunch of solutions -- so instead we switch with
+            // only this one available.
+            await Eterna.app.switchToDesignBrowser(
+                this.puzzleID,
+                solution
+            );
+        } catch (e) {
+            log.error(e);
+        } finally {
+            this.popUILock();
+        }
     }
 
     private buildScriptInterface(): void {
@@ -2172,6 +2197,17 @@ export default class PoseEditMode extends GameMode {
         }
 
         missionClearedPanel.closeButton.clicked.connect(() => keepPlaying());
+    }
+
+    private switchToFeedbackViewForSolution(solution: Solution): void {
+        this.pushUILock();
+
+        Eterna.app.switchToFeedbackView(this._puzzle, solution)
+            .then(() => this.popUILock())
+            .catch((e) => {
+                log.error(e);
+                this.popUILock();
+            });
     }
 
     public setPosesColor(paintColor: number): void {

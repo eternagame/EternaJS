@@ -1,3 +1,5 @@
+import Fonts from 'eterna/util/Fonts';
+
 export default class UITheme {
     public static readonly colors = {
         background: 0x122944,
@@ -26,10 +28,10 @@ export default class UITheme {
             filterBackground: 0x021E46,
             filterBorder: 0x2F94D1
         },
-        rowHeight: 30,
+        rowHeight: Fonts.std(' ', 14).computeLineHeight(), // had been 30,
         headerHeight: 36,
         filterHeight: 44,
         filterPadding: 8,
-        dataPadding: 14
+        dataPadding: 14 + (Fonts.std(' ', 14).computeLineHeight() - 30)
     };
 }

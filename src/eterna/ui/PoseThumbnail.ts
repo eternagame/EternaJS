@@ -179,8 +179,8 @@ export default class PoseThumbnail {
             if (ypos < smallYMin) smallYMin = ypos;
         }
 
-        let xOffset: number = ((w) - (smallXMax - smallXMin)) / 2.0 + frameBounds.width * 0.1;
-        let yOffset: number = ((h) - (smallYMax - smallYMin)) / 2.0 + frameBounds.height * 0.1;
+        let xOffset: number = ((w) - (smallXMax - smallXMin)) + frameBounds.width * 0.1;
+        let yOffset: number = ((h) - (smallYMax - smallYMin)) + frameBounds.height * 0.1;
 
         let wrongXCoords: number[] = [];
         let wrongYCoords: number[] = [];

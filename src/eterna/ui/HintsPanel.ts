@@ -33,7 +33,7 @@ export default class HintsPanel extends ContainerObject {
         }
 
         const pages = pagesContent.map((pageText, pageIndex) => {
-            const textElem = new HTMLTextObject(pageText, theme.width - 2 * UITheme.panel.padding)
+            const textElem = new HTMLTextObject(pageText, theme.width - 2 * UITheme.panel.padding, undefined, true)
                 .font(Fonts.STDFONT)
                 .color(0xffffff)
                 .fontSize(theme.fontSize);

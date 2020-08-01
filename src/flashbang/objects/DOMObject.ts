@@ -84,7 +84,7 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
         return this._obj;
     }
 
-    public get display(): DisplayObject {
+    public get display(): Graphics {
         return this._dummyDisp;
     }
 

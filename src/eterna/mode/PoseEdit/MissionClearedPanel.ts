@@ -3,7 +3,7 @@ import {
 } from 'pixi.js';
 import {
     ContainerObject, VLayoutContainer, HAlign, DOMObject, AlphaTask,
-    Flashbang, DisplayUtil, VAlign, Assert, MathUtil, MouseWheelListener
+    Flashbang, DisplayUtil, VAlign, Assert, MathUtil, MouseWheelListener, InputUtil
 } from 'flashbang';
 import GameButton from 'eterna/ui/GameButton';
 import Fonts from 'eterna/util/Fonts';
@@ -89,14 +89,18 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
         Assert.assertIsDefined(overlayEl);
         this._infoWrapper = document.createElement('div');
         this._infoWrapper.style.position = 'absolute';
-        // assets/style.css ensures that links are still clickable
+        // assets/Styles/style.css ensures that links are still clickable
         this._infoWrapper.style.pointerEvents = 'none';
         overlayEl.appendChild(this._infoWrapper);
 
         Assert.assertIsDefined(Flashbang.stageHeight);
         const infoText = MissionClearedPanel.processHTML(this._infoText);
-        const infoObj = new HTMLTextObject(infoText, panelWidth - MissionClearedPanel.PADDING_RIGHT, this._infoWrapper)
-            .font(Fonts.STDFONT)
+        const infoObj = new HTMLTextObject(
+            infoText,
+            panelWidth - MissionClearedPanel.PADDING_RIGHT,
+            this._infoWrapper,
+            true
+        ).font(Fonts.STDFONT)
             .fontSize(Flashbang.stageHeight < 512 ? 14 : 18)
             .color(0xffffff)
             .lineHeight(1.2)
@@ -106,8 +110,12 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
         this.addObject(infoObj, this._infoContainer);
 
         if (this._moreText != null) {
-            const moreTextObj = new HTMLTextObject(this._moreText, panelWidth - MissionClearedPanel.PADDING_RIGHT)
-                .font(Fonts.STDFONT)
+            const moreTextObj = new HTMLTextObject(
+                this._moreText,
+                panelWidth - MissionClearedPanel.PADDING_RIGHT,
+                undefined,
+                true
+            ).font(Fonts.STDFONT)
                 .fontSize(16)
                 .color(0xffffff)
                 .lineHeight(1.2)
@@ -195,22 +203,7 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
     }
 
     public onMouseWheelEvent(e: WheelEvent): boolean {
-        let pxdelta: number;
-        switch (e.deltaMode) {
-            case WheelEvent.DOM_DELTA_PIXEL:
-                pxdelta = e.deltaY;
-                break;
-            case WheelEvent.DOM_DELTA_LINE:
-                // 13 -> body font size
-                pxdelta = e.deltaY * 13;
-                break;
-            case WheelEvent.DOM_DELTA_PAGE:
-                pxdelta = e.deltaY * this.display.height;
-                break;
-            default:
-                throw new Error('Unhandled scroll delta mode');
-        }
-
+        let pxdelta: number = InputUtil.scrollAmount(e, 13, this.display.height);
         this.scrollTo(this._infoContainer.y - pxdelta);
 
         return true;

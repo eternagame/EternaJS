@@ -1,6 +1,6 @@
 import {Point, Graphics, interaction} from 'pixi.js';
 import {
-    VLayoutContainer, HAlign, Setting, HLayoutContainer, VAlign, DisplayUtil, Flashbang, Assert, MathUtil
+    VLayoutContainer, HAlign, Setting, HLayoutContainer, VAlign, DisplayUtil, Flashbang, Assert, MathUtil, InputUtil
 } from 'flashbang';
 import Eterna from 'eterna/Eterna';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -216,22 +216,7 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
     }
 
     public onMouseWheelEvent(e: WheelEvent): boolean {
-        let pxdelta: number;
-        switch (e.deltaMode) {
-            case WheelEvent.DOM_DELTA_PIXEL:
-                pxdelta = e.deltaY;
-                break;
-            case WheelEvent.DOM_DELTA_LINE:
-                // 13 -> body font size
-                pxdelta = e.deltaY * 13;
-                break;
-            case WheelEvent.DOM_DELTA_PAGE:
-                pxdelta = e.deltaY * this.display.height;
-                break;
-            default:
-                throw new Error('Unhandled scroll delta mode');
-        }
-
+        let pxdelta: number = InputUtil.scrollAmount(e, 13, this.display.height);
         this.scrollTo(this._viewLayout.y - pxdelta);
 
         return true;
