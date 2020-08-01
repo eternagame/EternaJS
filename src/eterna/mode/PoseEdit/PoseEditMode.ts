@@ -855,14 +855,9 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
-        const allFolders = ['Vienna', 'Vienna2', 'NuPACK', 'LinearFoldC', 'LinearFoldV', 'LinearFoldE', 'EternaFold']
-            .map((f) => FolderManager.instance.getFolder(f));
-
         this._dropdown = new GameDropdown(
             16,
-            allFolders
-                .filter((f) => f && this._puzzle.canUseFolder(f))
-                .map((f) => f?.name || ''),
+            FolderManager.instance.getFolders((folder) => this._puzzle.canUseFolder(folder)),
             this._folder.name,
             (e) => this.changeFolder(e),
             0

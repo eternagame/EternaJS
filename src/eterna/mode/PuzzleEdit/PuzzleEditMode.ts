@@ -107,9 +107,13 @@ export default class PuzzleEditMode extends GameMode {
         }
         this._folder = vienna;
 
-        let folders = ['Vienna', 'Vienna2', 'NuPACK', 'LinearFoldC', 'LinearFoldV', 'LinearFoldE', 'Eternafold'];
-
-        this._dropdown = new GameDropdown(16, folders, this._folder.name, (e) => this.changeFolder(e), 0);
+        this._dropdown = new GameDropdown(
+            16,
+            FolderManager.instance.getFolders(),
+            this._folder.name,
+            (e) => this.changeFolder(e),
+            0
+        );
 
         this._dropdown.display.scale = new Point(1, 1);
         this._dropdown.display.position = new Point(17, 175);
