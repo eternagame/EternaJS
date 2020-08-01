@@ -24,6 +24,7 @@ export default class GameDropdown extends ContainerObject {
         this._defaultOption = defaultOption || 'Select One...';
         this._onChange = onChange;
         this._borderWidth = borderWidth;
+        this._disabled = false;
     }
 
     protected added() {
@@ -57,10 +58,12 @@ export default class GameDropdown extends ContainerObject {
         );
         this._selectOption(this._defaultOption);
 
-        this.pointerTap.connect(() => {
-            if (this._popupVisible) this._hidePopup();
-            else this._showPopup();
-        });
+        if (!this._disabled) {
+            this.pointerTap.connect(() => {
+                if (this._popupVisible) this._hidePopup();
+                else this._showPopup();
+            });
+        }
 
         this._popup = new GamePanel(GamePanelType.NORMAL, 1, 0x152843, 1.0, 0xC0DCE7);
         this._setupPopup();
@@ -183,6 +186,10 @@ export default class GameDropdown extends ContainerObject {
         );
     }
 
+    public hideArrow() {
+        this._arrow.visible = false;
+    }
+
     public get height(): number {
         return this._fontSize + this._PADDING * 2;
     }
@@ -217,6 +224,10 @@ export default class GameDropdown extends ContainerObject {
         this._mask.endFill();
     }
 
+    public set disabled(foo: boolean) {
+        this._disabled = foo;
+    }
+
     private _onChange: (item: string) => void;
 
     private _fontSize: number;
@@ -233,6 +244,7 @@ export default class GameDropdown extends ContainerObject {
     private _selectedText: Text;
     private _mask: Graphics;
     private _popup: GamePanel;
+    private _disabled: boolean;
 
     private readonly _PADDING: number = 3;
     private readonly _ARROW_SIDE_SIZE = 8;

@@ -866,12 +866,17 @@ export default class PoseEditMode extends GameMode {
         );
         this._dropdown.display.position = new Point(17, 175);
         this._dropdown.display.scale = new Point(1, 1);
-        this.addObject(this._dropdown, this.uiLayer);
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
+            this.addObject(this._dropdown, this.uiLayer);
             Assert.assertIsDefined(this.regs);
             this.regs.add(Eterna.settings.multipleFoldingEngines.connectNotify((multiEngine) => {
                 this._dropdown.display.visible = multiEngine;
             }));
+        } else if (this._puzzle.puzzleType === PuzzleType.CHALLENGE) {
+            // Don't let it change!
+            this._dropdown.disabled = true;
+            this.addObject(this._dropdown, this.uiLayer);
+            this._dropdown.hideArrow();
         } else {
             this._dropdown.display.visible = false;
         }
