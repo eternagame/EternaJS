@@ -1020,9 +1020,21 @@ export default class PoseEditMode extends GameMode {
         return this._folder;
     }
 
-    private sortOnSolution(sol: Solution): void {
-        this.openDesignBrowserForOurPuzzle();
-        // AMW: what to do with solution.
+    private async sortOnSolution(solution: Solution): Promise<void> {
+        this.pushUILock();
+        try {
+            // AMW: this is very similar to the DesignBrowserMode method, but we
+            // don't know about a bunch of solutions -- so instead we switch with
+            // only this one available.
+            await Eterna.app.switchToDesignBrowser(
+                this.puzzleID,
+                solution
+            );
+        } catch (e) {
+            log.error(e);
+        } finally {
+            this.popUILock();
+        }
     }
 
     private buildScriptInterface(): void {

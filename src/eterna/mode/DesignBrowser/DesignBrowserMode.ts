@@ -78,7 +78,12 @@ export interface DesignBrowserFilter {
 }
 
 export default class DesignBrowserMode extends GameMode {
-    constructor(puzzle: Puzzle, novote = false, initialFilters: DesignBrowserFilter[] | null = null) {
+    constructor(
+        puzzle: Puzzle,
+        novote = false,
+        initialFilters: DesignBrowserFilter[] | null = null,
+        initialSolution?: Solution
+    ) {
         super();
 
         this._puzzle = puzzle;
@@ -86,6 +91,7 @@ export default class DesignBrowserMode extends GameMode {
         this._initialDataFilters = initialFilters;
         this._wholeRowWidth = 0;
         this._voteProcessor = new VoteProcessor(puzzle.maxVotes);
+        this._initialSolution = initialSolution;
     }
 
     public get puzzleID(): number { return this._puzzle.nodeID; }
@@ -291,6 +297,13 @@ export default class DesignBrowserMode extends GameMode {
             new CallbackTask(() => this.refreshSolutions())
         )));
 
+        if (this._initialSolution !== undefined) {
+            // Sort on it.
+            this.sortOnSolution(this._initialSolution);
+            // Set _currentSolutionIndex
+            this._currentSolutionIndex = this.getSolutionIndex(this._initialSolution.nodeID);
+        }
+
         this.updateLayout();
     }
 
@@ -351,11 +364,12 @@ export default class DesignBrowserMode extends GameMode {
             this.contentHeight - this._gridLines.position.y
         );
         this._maskBox.setSize(this.contentWidth - 14, this.contentHeight - 10);
-        this._markerBoxes.setSize(this.contentWidth - 14 - this._solDialogOffset, this.contentHeight - 10);
+        this._markerBoxes.setSize(this.contentWidth - 14, this.contentHeight - 10);
+        this._markerBoxes.updateView(this._firstVisSolutionIdx);
 
         const {designBrowser: theme} = UITheme;
-        this._selectionBox.setSize(this.contentWidth - 14 - this._solDialogOffset, theme.rowHeight);
-        this._clickedSelectionBox.setSize(this.contentWidth - 14 - this._solDialogOffset, theme.rowHeight);
+        this._selectionBox.setSize(this.contentWidth - 14, theme.rowHeight);
+        this._clickedSelectionBox.setSize(this.contentWidth - 14, theme.rowHeight);
 
         if (this._dataCols != null) {
             for (let col of this._dataCols) {
@@ -599,21 +613,21 @@ export default class DesignBrowserMode extends GameMode {
                 parentMode: (() => this)()
             });
             this.addObject(this._solutionView, this.dialogLayer);
-
-            // This just got newed, and this.addObject can't stop that.
-            Assert.assertIsDefined(this._solutionView);
-            const sol = this._solutionView.solution;
-            this._solutionView.playClicked.connect(() => this.switchToPoseEditForSolution(sol));
-            this._solutionView.seeResultClicked.connect(() => {
-                this.switchToFeedbackViewForSolution(sol);
-            });
-            this._solutionView.voteClicked.connect(() => this.vote(sol));
-            this._solutionView.sortClicked.connect(() => this.sortOnSolution(sol));
-            this._solutionView.editClicked.connect(() => this.navigateToSolution(sol));
-            this._solutionView.deleteClicked.connect(() => this.unpublish(sol));
         } else {
             this._solutionView.showSolution(solution);
         }
+
+        // This just got newed if it didn't exist.
+        Assert.assertIsDefined(this._solutionView);
+        const sol = this._solutionView.solution;
+        this._solutionView.playClicked.connect(() => this.switchToPoseEditForSolution(sol));
+        this._solutionView.seeResultClicked.connect(() => {
+            this.switchToFeedbackViewForSolution(sol);
+        });
+        this._solutionView.voteClicked.connect(() => this.vote(sol));
+        this._solutionView.sortClicked.connect(() => this.sortOnSolution(sol));
+        this._solutionView.editClicked.connect(() => this.navigateToSolution(sol));
+        this._solutionView.deleteClicked.connect(() => this.unpublish(sol));
 
         this.updateLayout();
     }
@@ -1070,6 +1084,8 @@ export default class DesignBrowserMode extends GameMode {
         DesignCategory.SYNTHESIS_SCORE,
         DesignCategory.SEQUENCE
     ];
+
+    private _initialSolution?: Solution;
 }
 
 class MaskBox extends Graphics {
