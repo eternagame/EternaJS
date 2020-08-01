@@ -286,7 +286,7 @@ export default class DesignBrowserMode extends GameMode {
         this.addObject(puzzleTitle, this.uiLayer);
         DisplayUtil.positionRelative(
             puzzleTitle.display, HAlign.LEFT, VAlign.CENTER,
-            homeArrow, HAlign.RIGHT, VAlign.CENTER, 8, 0
+            homeArrow, HAlign.RIGHT, VAlign.CENTER, 8, 8
         );
 
         // Refresh our data immediately, and then every 300 seconds
