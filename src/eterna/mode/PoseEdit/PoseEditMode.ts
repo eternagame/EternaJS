@@ -864,7 +864,8 @@ export default class PoseEditMode extends GameMode {
                 .filter((f) => f && this._puzzle.canUseFolder(f))
                 .map((f) => f?.name || ''),
             this._folder.name,
-            (e) => this.changeFolder(e)
+            (e) => this.changeFolder(e),
+            0
         );
         this._dropdown.display.position = new Point(17, 175);
         this._dropdown.display.scale = new Point(1, 1);

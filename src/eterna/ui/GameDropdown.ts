@@ -2,23 +2,28 @@ import {
     ContainerObject, DisplayUtil, HAlign, VAlign, DisplayObjectPointerTarget, InputUtil, Flashbang
 } from 'flashbang';
 import {
-    Graphics, Point, Text, Container, Texture, TextStyle
+    Graphics, Point, Text
 } from 'pixi.js';
 import Fonts from 'eterna/util/Fonts';
 import GamePanel, {GamePanelType} from './GamePanel';
-import GameButton from './GameButton';
 import TextBalloon from './TextBalloon';
-import FixedWidthTextField from './FixedWidthTextField';
 
 export default class GameDropdown extends ContainerObject {
     public text: string;
 
-    constructor(fontSize: number, options: string[], defaultOption: string, onChange: (item: string) => void) {
+    constructor(
+        fontSize: number,
+        options: string[],
+        defaultOption: string,
+        onChange: (item: string) => void,
+        borderWidth: number = 1
+    ) {
         super();
         this._fontSize = fontSize;
         this._options = options;
         this._defaultOption = defaultOption || 'Select One...';
         this._onChange = onChange;
+        this._borderWidth = borderWidth;
     }
 
     protected added() {
@@ -48,7 +53,7 @@ export default class GameDropdown extends ContainerObject {
         DisplayUtil.positionRelative(
             this._selectedText, HAlign.LEFT, VAlign.CENTER,
             this._box, HAlign.LEFT, VAlign.CENTER,
-            this._LINE_WIDTH + this._PADDING
+            this._borderWidth + this._PADDING
         );
         this._selectOption(this._defaultOption);
 
@@ -153,9 +158,9 @@ export default class GameDropdown extends ContainerObject {
         let width = this._width || (TEXT_WIDTH + ARROW_WIDTH + this._PADDING * 2);
 
         this._box.clear();
-        this._box.lineStyle(this._LINE_WIDTH, 0xC0DCE7);
-        this._box.beginFill(0x0, 0.5);
-        this._box.drawRect(0, 0, width, this._fontSize + this._PADDING * 2);
+        this._box.lineStyle(this._borderWidth, 0xC0DCE7);
+        this._box.beginFill(0x33465F, 0.5);
+        this._box.drawRoundedRect(0, 0, width, this._fontSize + this._PADDING * 2, 4);
         this._box.endFill();
     }
 
@@ -174,7 +179,7 @@ export default class GameDropdown extends ContainerObject {
         DisplayUtil.positionRelative(
             this._arrow, HAlign.RIGHT, VAlign.CENTER,
             this._box, HAlign.RIGHT, VAlign.CENTER,
-            -(this._PADDING + this._LINE_WIDTH)
+            -(this._PADDING + this._borderWidth)
         );
     }
 
@@ -204,11 +209,11 @@ export default class GameDropdown extends ContainerObject {
         this._drawBox(this._hovered);
         this._drawArrow();
 
-        const NEW_TEXT_WIDTH = width - this._LINE_WIDTH - this._PADDING * 2 - this._ARROW_SIDE_SIZE;
+        const NEW_TEXT_WIDTH = width - this._borderWidth - this._PADDING * 2 - this._ARROW_SIDE_SIZE;
 
         this._mask.clear();
         this._mask.beginFill(0x00FF00, 1);
-        this._mask.drawRect(0, 0, NEW_TEXT_WIDTH, this.height - this._LINE_WIDTH);
+        this._mask.drawRect(0, 0, NEW_TEXT_WIDTH, this.height - this._borderWidth);
         this._mask.endFill();
     }
 
@@ -221,6 +226,7 @@ export default class GameDropdown extends ContainerObject {
     private _width: number;
     private _hovered: boolean = false;
     private _popupVisible: boolean = false;
+    private _borderWidth: number;
 
     private _box: Graphics;
     private _arrow: Graphics;
@@ -228,7 +234,6 @@ export default class GameDropdown extends ContainerObject {
     private _mask: Graphics;
     private _popup: GamePanel;
 
-    private readonly _LINE_WIDTH: number = 2;
     private readonly _PADDING: number = 3;
     private readonly _ARROW_SIDE_SIZE = 8;
 }
