@@ -226,7 +226,7 @@ export default class EternaApp extends FlashbangApp {
     public async loadPoseEdit(puzzleOrID: number | Puzzle, params: PoseEditParams) {
         const puzzle = await this.loadPuzzle(puzzleOrID);
 
-        let autoSaveData: SaveStoreItem | undefined;
+        let autoSaveData: SaveStoreItem | null = null;
 
         const hasRscript = Boolean(puzzle.rscript) && (puzzle.rscript.trim().length > 0);
         if (hasRscript) {
@@ -246,7 +246,7 @@ export default class EternaApp extends FlashbangApp {
         }
         const initPoseData = initialPoseData
             || await Eterna.saveManager.load(PuzzleEditMode.savedDataTokenName(this._params.puzzleEditNumTargets))
-            || null;
+            || undefined;
         this._modeStack.unwindToMode(new PuzzleEditMode(false, numTargets, initPoseData));
         return Promise.resolve();
     }

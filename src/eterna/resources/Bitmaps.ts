@@ -298,6 +298,7 @@ export default class Bitmaps {
     public static readonly BaseAMid: string = require('assets/RNABase/yellow_middle.png');
     public static readonly BaseAPattern: string = require('assets/RNABase/yellow_pattern.png');
     public static readonly BaseAMin: string = require('assets/RNABase/yellow_small.png');
+    public static readonly Turkey: string = require('assets/turkey.png');
     public static readonly ImgArrowLeft = require('assets/UI/mission/arrow-left.png');
     public static readonly ImgArrowRight = require('assets/UI/mission/arrow-right.png');
     public static readonly ImgGoalBackground = require('assets/UI/mission/goal-bg.png');
@@ -332,6 +333,8 @@ export default class Bitmaps {
     public static readonly ImgRemove: string = require('assets/TangoIcons/remove.png');
     public static readonly ImgResetCriteria: string = require('assets/DesignBrowser/reset.png');
     public static readonly ImgAdd: string = require('assets/DesignBrowser/add.png');
+    public static readonly CleanDotPlotIcon: string = require('assets/cleandotplot.png');
+    public static readonly BranchinessIcon: string = require('assets/branchy.png');
     public static readonly Folder: string = require('assets/folder.png');
 
     public static get all(): string[] {
