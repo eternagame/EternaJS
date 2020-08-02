@@ -55,7 +55,7 @@ import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
 import {HighlightInfo} from 'eterna/constraints/Constraint';
 import {AchievementData} from 'eterna/achievements/AchievementManager';
 import {RankScrollData} from 'eterna/rank/RankScroll';
-import GameDropdown from 'eterna/ui/GameDropdown';
+import FolderSwitcher from 'eterna/ui/FolderSwitcher';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
@@ -503,19 +503,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     public selectFolder(folderName: string): boolean {
-        if (this._folder && this._folder.name === folderName) return true;
-        let folder: Folder | null = FolderManager.instance.getFolder(folderName);
-        if (!folder) {
-            return false;
-        }
-        // AMW TODO: shouldn't we have something similar here for pseudoknots??
-        if (this._puzzle.hasTargetType('multistrand') && !folder.canMultifold) {
-            return false;
-        }
-
-        this._folder = folder;
-        this.onFolderUpdated();
-        return true;
+        return this._folderSwitcher.changeFolder(folderName);
     }
 
     public onPaletteTargetSelected(type: PaletteTargetType): void {
@@ -840,8 +828,8 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
-        this._folder = initialFolder || FolderManager.instance.getFolder(this._puzzle.folderName);
-        if (!this._folder) {
+        initialFolder = initialFolder || FolderManager.instance.getFolder(this._puzzle.folderName);
+        if (!initialFolder) {
             throw new Error('Big problem; unable to initialize folder!');
         }
 
@@ -857,34 +845,27 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
-        this._dropdown = new GameDropdown(
-            16,
-            FolderManager.instance.getFolders((folder) => this._puzzle.canUseFolder(folder)),
-            this._folder.name,
-            (e) => this.changeFolder(e),
-            0
+        this._folderSwitcher = new FolderSwitcher(
+            (folder) => this._puzzle.canUseFolder(folder),
+            initialFolder,
+            this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
         );
-        this._dropdown.display.position = new Point(17, 175);
-        this._dropdown.display.scale = new Point(1, 1);
-        this.addObject(this._dropdown, this.uiLayer);
-        if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
-            Assert.assertIsDefined(this.regs);
-            this.regs.add(Eterna.settings.multipleFoldingEngines.connectNotify((multiEngine) => {
-                this._dropdown.display.visible = multiEngine;
-            }));
-        } else {
-            this._dropdown.display.visible = false;
-        }
+        this._folderSwitcher.display.position = new Point(17, 175);
+        this.addObject(this._folderSwitcher, this.uiLayer);
 
-        if (this._folder.canScoreStructures) {
-            for (let pose of this._poses) {
-                pose.scoreFolder = this._folder;
+        this._folderSwitcher.selectedFolder.connectNotify((folder) => {
+            if (folder.canScoreStructures) {
+                for (let pose of this._poses) {
+                    pose.scoreFolder = folder;
+                }
+            } else {
+                for (let pose of this._poses) {
+                    pose.scoreFolder = null;
+                }
             }
-        } else {
-            for (let pose of this._poses) {
-                pose.scoreFolder = null;
-            }
-        }
+
+            this.onChangeFolder();
+        });
 
         let initialSequence: number[] | null = null;
         if (this._params.initSolution != null) {
@@ -1017,10 +998,6 @@ export default class PoseEditMode extends GameMode {
 
         // RScript can set our initial poseState
         this._poseState = this._isDatabrowserMode ? PoseState.NATIVE : this._puzzle.defaultMode;
-    }
-
-    public get folder(): Folder | null {
-        return this._folder;
     }
 
     private async sortOnSolution(solution: Solution): Promise<void> {
@@ -1813,27 +1790,6 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    private onFolderUpdated(): void {
-        let scoreFolder: Folder | null = this._folder && this._folder.canScoreStructures ? this._folder : null;
-        for (let pose of this._poses) {
-            pose.scoreFolder = scoreFolder;
-        }
-
-        this.onChangeFolder();
-    }
-
-    private changeFolder(to: string): void {
-        if (!this || !this.folder || this.folder.name === to) return;
-
-        let newFolder = FolderManager.instance.getFolder(to);
-
-        if (!newFolder || !this._puzzle.canUseFolder(newFolder)) return;
-
-        this._folder = FolderManager.instance.getFolder(to);
-
-        this.onFolderUpdated();
-    }
-
     private showSpec(): void {
         this._dockedSpecBox.display.visible = false;
 
@@ -2217,7 +2173,7 @@ export default class PoseEditMode extends GameMode {
         this._toolbar.disableTools(disable);
         this._hintBoxRef.destroyObject();
 
-        this._dropdown.display.visible = !disable;
+        this._folderSwitcher.display.visible = !disable;
 
         for (let field of this._poseFields) {
             field.container.interactive = !disable;
@@ -3331,7 +3287,10 @@ export default class PoseEditMode extends GameMode {
     private _toolbar: Toolbar;
     private _helpBar: HelpBar;
 
-    protected _folder: Folder | null;
+    protected get _folder(): Folder {
+        return this._folderSwitcher.selectedFolder.value;
+    }
+
     // / Asynch folding
     private _opQueue: PoseOp[] = [];
     private _poseEditByTargetCb: (() => void) | null = null;
@@ -3358,7 +3317,7 @@ export default class PoseEditMode extends GameMode {
     private _targetOligos: (Oligo[] | undefined)[] = [];
     private _targetOligosOrder: (number[] | undefined)[] = [];
 
-    private _dropdown: GameDropdown;
+    private _folderSwitcher: FolderSwitcher;
     private _isDatabrowserMode: boolean;
     private _isFrozen: boolean = false;
     private _targetName: Text;
