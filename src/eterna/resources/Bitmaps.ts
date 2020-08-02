@@ -326,6 +326,7 @@ export default class Bitmaps {
     public static readonly ImgLink: string = require('assets/DesignBrowser/permalink-icon.png');
     public static readonly ImgVote: string = require('assets/DesignBrowser/vote-icon.png');
     public static readonly ImgUnvote: string = require('assets/DesignBrowser/unvote-icon.png');
+    public static readonly ImgVoteHalf: string = require('assets/DesignBrowser/vote-icon-half.png');
     public static readonly ImgInfo: string = require('assets/DesignBrowser/info-icon.png');
     public static readonly ImgSort: string = require('assets/DesignBrowser/sort-icon.png');
     public static readonly ImgPrevious: string = require('assets/DesignBrowser/previous-icon.png');

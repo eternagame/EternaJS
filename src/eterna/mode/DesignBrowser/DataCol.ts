@@ -89,7 +89,31 @@ export default class DataCol extends ContainerObject {
         const TEXT_INPUT_SIZE = 13;
 
         if (this._dataType === DesignBrowserDataType.VOTE) {
-            // Vote filtering goes here
+            // TODO: There's probably a better way to do this
+            this._filterField1 = new TextInputObject({fontSize: TEXT_INPUT_SIZE});
+            this.addObject(this._filterField1);
+            const voteButton = new GameButton().allStates(Bitmaps.ImgVoteHalf);
+            this.regs.add(
+                voteButton.pointerUp.connect((e) => {
+                    e.stopPropagation();
+                    if (this._filterField1.text === '') {
+                        this._filterField1.text = 'Y';
+                        voteButton.allStates(Bitmaps.ImgUnvote);
+                    } else if (this._filterField1.text === 'Y') {
+                        this._filterField1.text = 'N';
+                        voteButton.allStates(Bitmaps.ImgVote);
+                    } else if (this._filterField1.text === 'N') {
+                        this._filterField1.text = '';
+                        voteButton.allStates(Bitmaps.ImgVoteHalf);
+                    }
+                    this.filtersChanged.emit();
+                })
+            );
+            this.addObject(voteButton, this.container);
+            voteButton.display.position = new Point(
+                (this.width / 2) - (voteButton.display.width / 2),
+                theme.headerHeight + (theme.filterHeight / 2) - (voteButton.display.height / 2)
+            );
         } else if (this._dataType === DesignBrowserDataType.STRING) {
             this._filterField1 = new TextInputObject({
                 fontSize: TEXT_INPUT_SIZE,
@@ -102,7 +126,7 @@ export default class DataCol extends ContainerObject {
             this._filterField1.display.position = new Point(11, theme.headerHeight + theme.filterPadding);
             this.addObject(this._filterField1, this.container);
 
-            this._filterField1.valueChanged.connect(() => this.filtersChanged.emit());
+            this.regs.add(this._filterField1.valueChanged.connect(() => this.filtersChanged.emit()));
         } else {
             this._filterField1 = new TextInputObject({
                 fontSize: TEXT_INPUT_SIZE,
@@ -115,7 +139,7 @@ export default class DataCol extends ContainerObject {
             this._filterField1.display.position = new Point(11, theme.headerHeight + theme.filterPadding);
             this.addObject(this._filterField1, this.container);
 
-            this._filterField1.valueChanged.connect(() => this.filtersChanged.emit());
+            this.regs.add(this._filterField1.valueChanged.connect(() => this.filtersChanged.emit()));
 
             this._filterField2 = new TextInputObject({
                 fontSize: TEXT_INPUT_SIZE,
@@ -128,7 +152,7 @@ export default class DataCol extends ContainerObject {
             this._filterField2.display.position = new Point(11 + 40 + 12, theme.headerHeight + theme.filterPadding);
             this.addObject(this._filterField2, this.container);
 
-            this._filterField2.valueChanged.connect(() => this.filtersChanged.emit());
+            this.regs.add(this._filterField2.valueChanged.connect(() => this.filtersChanged.emit()));
         }
 
         this.updateLayout();
@@ -213,8 +237,11 @@ export default class DataCol extends ContainerObject {
     /** True if the solution passes our filter options */
     public shouldDisplay(sol: Solution): boolean {
         if (this._dataType === DesignBrowserDataType.VOTE) {
-            // Vote filtering goes here
-            return true;
+            const voted = sol.getProperty(DesignCategory.MY_VOTES) > 0;
+            const queryString: string = this._filterField1.text;
+            if (queryString === 'Y') return voted;
+            else if (queryString === 'N') return !voted;
+            else return true;
         } else if (this._dataType === DesignBrowserDataType.STRING) {
             let queryString: string = this._filterField1.text;
             if (queryString.length === 0) {
