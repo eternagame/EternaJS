@@ -332,6 +332,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
             3, PoseThumbnailType.BASE_COLORED,
             0, null, false, 0, customLayout
         );
+        playThumbnail.scale = new Point(0.8, 0.8);
         if (!(this._parentMode instanceof PoseEditMode)) {
             const playButton = new ThumbnailAndTextButton({
                 thumbnail: playThumbnail,
@@ -363,6 +364,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
                 expdata.getShapeThreshold(),
                 customLayout
             );
+            resultThumbnail.scale = new Point(0.8, 0.8);
 
             if (!(this._parentMode instanceof FeedbackViewMode)) {
                 const seeResultButton = new ThumbnailAndTextButton({

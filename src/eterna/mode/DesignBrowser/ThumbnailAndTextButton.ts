@@ -12,12 +12,17 @@ export default class ThumbnailAndTextButton extends GameButton {
     constructor(props: ThumbnailAndTextButtonProps) {
         super();
 
+        const SIZE = 52;
+
         const thumbnailFrame = new Graphics()
             .lineStyle(2, 0xC0DCE7)
             .beginFill(0x0f254a)
-            .drawRoundedRect(0, 0, 52, 52, 10)
+            .drawRoundedRect(0, 0, SIZE, SIZE, 10)
             .endFill();
         thumbnailFrame.addChild(props.thumbnail);
+        const {width, height} = props.thumbnail.getBounds();
+        props.thumbnail.x += (SIZE - width) / 2;
+        props.thumbnail.y += (SIZE - height) / 2;
 
         const view = new HLayoutContainer(10);
         this.container.addChild(view);
