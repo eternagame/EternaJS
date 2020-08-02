@@ -335,6 +335,7 @@ export default class Bitmaps {
     public static readonly ImgAdd: string = require('assets/DesignBrowser/add.png');
     public static readonly CleanDotPlotIcon: string = require('assets/cleandotplot.png');
     public static readonly BranchinessIcon: string = require('assets/branchy.png');
+    public static readonly Folder: string = require('assets/folder.png');
 
     public static get all(): string[] {
         if (Bitmaps.ALL_URLS == null) {

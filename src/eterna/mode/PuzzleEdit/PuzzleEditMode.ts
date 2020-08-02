@@ -6,9 +6,6 @@ import Background from 'eterna/vfx/Background';
 import Molecule from 'eterna/pose2D/Molecule';
 import BaseGlow from 'eterna/vfx/BaseGlow';
 import FolderManager from 'eterna/folding/FolderManager';
-import Vienna from 'eterna/folding/Vienna';
-import GameButton from 'eterna/ui/GameButton';
-import Bitmaps from 'eterna/resources/Bitmaps';
 import Toolbar, {ToolbarType} from 'eterna/ui/Toolbar';
 import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
 import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
@@ -37,6 +34,7 @@ import Utility from 'eterna/util/Utility';
 import ShapeConstraint from 'eterna/constraints/constraints/ShapeConstraint';
 import ContraFold from 'eterna/folding/Contrafold';
 import {SaveStoreItem} from 'flashbang/settings/SaveGameManager';
+import FolderSwitcher from 'eterna/ui/FolderSwitcher';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
@@ -100,26 +98,23 @@ export default class PuzzleEditMode extends GameMode {
         Molecule.initTextures();
         BaseGlow.initTextures();
 
-        let vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
-        if (vienna === null) {
-            throw new Error('PuzzleEditMode tried to instantiate a Vienna folder using FolderManager but could not!');
-        }
-        this._folder = vienna;
+        this._folderSwitcher = new FolderSwitcher();
+        this._folderSwitcher.selectedFolder.connect((folder) => {
+            if (folder.canScoreStructures) {
+                for (let pose of this._poses) {
+                    pose.scoreFolder = folder;
+                }
+            } else {
+                for (let pose of this._poses) {
+                    pose.scoreFolder = null;
+                }
+            }
 
-        this._folderButton = new GameButton()
-            .allStates(Bitmaps.ShapeImg)
-            .label(this._folder.name, 22)
-            .tooltip('Select the folding engine');
-        this._folderButton.display.scale = new Point(0.5, 0.5);
-        this._folderButton.display.position = new Point(17, 175);
-        this.addObject(this._folderButton, this.uiLayer);
-
-        this._folderButton.clicked.connect(() => this.changeFolder());
-
-        Assert.assertIsDefined(this.regs);
-        this.regs.add(Eterna.settings.multipleFoldingEngines.connectNotify((value) => {
-            this._folderButton.display.visible = value;
-        }));
+            this.clearUndoStack();
+            this.poseEditByTarget(0);
+        });
+        this._folderSwitcher.display.position = new Point(17, 175);
+        this.addObject(this._folderSwitcher, this.uiLayer);
 
         this._homeButton = GameMode.createHomeButton();
         this._homeButton.hideWhenModeInactive();
@@ -321,14 +316,7 @@ export default class PuzzleEditMode extends GameMode {
     }
 
     public static savedDataTokenName(numTargets: number): string {
-        return `puzedit_${numTargets}`;
-    }
-
-    public setFolder(engineName: string): void {
-        let newFolder: Folder | null = FolderManager.instance.getFolder(engineName);
-        if (newFolder) {
-            this._folder = newFolder;
-        }
+        return `puzeditv2_${numTargets}`;
     }
 
     public get structure(): string {
@@ -690,23 +678,6 @@ export default class PuzzleEditMode extends GameMode {
         this.updateScore();
     }
 
-    private changeFolder(): void {
-        let currF: string = this._folder.name;
-        this._folder = FolderManager.instance.getNextFolder(currF, () => false);
-        if (this._folder.name === currF) {
-            return;
-        }
-
-        this._folderButton.label(this._folder.name);
-
-        for (let pose of this._poses) {
-            pose.scoreFolder = this._folder;
-        }
-
-        this.clearUndoStack();
-        this.poseEditByTarget(0);
-    }
-
     private clearUndoStack(): void {
         this._stackLevel = -1;
         this._stackSize = 0;
@@ -975,7 +946,10 @@ export default class PuzzleEditMode extends GameMode {
     private readonly _scriptInterface: ExternalInterfaceCtx = new ExternalInterfaceCtx();
 
     private _structureInputs: StructureInput[];
-    protected _folder: Folder;
+    protected get _folder(): Folder {
+        return this._folderSwitcher.selectedFolder.value;
+    }
+
     private _seqStack: UndoBlock[][];
     private _targetPairsStack: number[][][];
     private _lockStack: (boolean[] | undefined)[][];
@@ -985,7 +959,7 @@ export default class PuzzleEditMode extends GameMode {
     private _paused: boolean;
 
     private _toolbar: Toolbar;
-    private _folderButton: GameButton;
+    private _folderSwitcher: FolderSwitcher;
     private _homeButton: URLButton;
     private _constraintBar: ConstraintBar;
 }

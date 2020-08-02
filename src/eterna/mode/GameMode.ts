@@ -336,7 +336,10 @@ export default abstract class GameMode extends AppMode {
     protected _isPipMode: boolean = false;
 
     // Things that might or might not be set in children so that getEnergyDelta can get set in setPoseFields
-    protected _folder: Folder | null;
+    protected get _folder(): Folder | null {
+        return null;
+    }
+
     protected _curTargetIndex: number;
     protected getCurrentUndoBlock(index: number): UndoBlock | undefined {
         return undefined;

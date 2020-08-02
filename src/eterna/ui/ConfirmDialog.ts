@@ -42,7 +42,7 @@ export default class ConfirmDialog extends Dialog<boolean> {
         panel.container.addChild(panelLayout);
 
         if (this._useHTML) {
-            let text = new HTMLTextObject(this._prompt)
+            let text = new HTMLTextObject(this._prompt, undefined, undefined, true)
                 .font(Fonts.STDFONT)
                 .fontSize(15)
                 .selectable(false)

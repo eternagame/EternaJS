@@ -83,7 +83,10 @@ export default class SpecBox extends ContainerObject {
 
             let url = EternaURL.createURL({page: 'manual'});
             let helpText = `<A HREF="${url}" target="_blank"><U><FONT COLOR="#FFFFFF"><B>What are these parameters?</B></FONT></U></A>`;
-            this._helpText = new HTMLTextObject(helpText).font(Fonts.STDFONT).fontSize(14).color(0xffffff);
+            this._helpText = new HTMLTextObject(helpText, undefined, undefined, true)
+                .font(Fonts.STDFONT)
+                .fontSize(14)
+                .color(0xffffff);
             this.addObject(this._helpText, this.container);
 
             this._dotplottext = Fonts.std('Pairing probabilities plot', 12).color(0xffffff).build();

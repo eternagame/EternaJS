@@ -1,12 +1,13 @@
 import {DOMObject} from 'flashbang';
 import Eterna from 'eterna/Eterna';
 import {FontWeight} from 'flashbang/util/TextBuilder';
+import Utility from 'eterna/util/Utility';
 
 /** A <p> object in the DOM that contains the given HTML. Floats on top of the PIXI canvas. */
 export default class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
-    constructor(htmlText: string, width?: number, domParent?: string | HTMLElement) {
+    constructor(htmlText: string, width?: number, domParent?: string | HTMLElement, markup: boolean = false) {
         super(domParent ?? Eterna.OVERLAY_DIV_ID, document.createElement('p'));
-        this._obj.innerHTML = htmlText;
+        this._obj.innerHTML = Utility.sanitizeAndMarkup(htmlText, markup);
         this._obj.style.margin = '0px';
         if (width) {
             this.width = width;

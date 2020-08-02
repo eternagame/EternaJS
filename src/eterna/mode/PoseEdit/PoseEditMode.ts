@@ -55,6 +55,7 @@ import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
 import {HighlightInfo} from 'eterna/constraints/Constraint';
 import {AchievementData} from 'eterna/achievements/AchievementManager';
 import {RankScrollData} from 'eterna/rank/RankScroll';
+import FolderSwitcher from 'eterna/ui/FolderSwitcher';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
@@ -386,7 +387,7 @@ export default class PoseEditMode extends GameMode {
 
         DisplayUtil.positionRelativeToStage(
             this._helpBar.display, HAlign.RIGHT, VAlign.TOP,
-            HAlign.RIGHT, VAlign.TOP, 0, 0
+            HAlign.RIGHT, VAlign.TOP, 0 - this._solDialogOffset, 0
         );
 
         DisplayUtil.positionRelativeToStage(
@@ -502,19 +503,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     public selectFolder(folderName: string): boolean {
-        if (this._folder && this._folder.name === folderName) return true;
-        let folder: Folder | null = FolderManager.instance.getFolder(folderName);
-        if (!folder) {
-            return false;
-        }
-        // AMW TODO: shouldn't we have something similar here for pseudoknots??
-        if (this._puzzle.hasTargetType('multistrand') && !folder.canMultifold) {
-            return false;
-        }
-
-        this._folder = folder;
-        this.onFolderUpdated();
-        return true;
+        return this._folderSwitcher.changeFolder(folderName);
     }
 
     public onPaletteTargetSelected(type: PaletteTargetType): void {
@@ -645,7 +634,9 @@ export default class PoseEditMode extends GameMode {
             this.clearMoveTracking(solution.sequence);
             this.setAncestorId(solution.nodeID);
 
-            this.updateSolutionNameText(solution);
+            // AMW: I'm keeping the function around in case we want to call it
+            // in some other context, but we don't need it anymore.
+            // this.updateSolutionNameText(solution);
             this._curSolution = solution;
         };
 
@@ -768,7 +759,7 @@ export default class PoseEditMode extends GameMode {
         this._exitButton.display.visible = false;
         this.addObject(this._exitButton, this.uiLayer);
 
-        let puzzleTitle = new HTMLTextObject(this._puzzle.getName(!Eterna.MOBILE_APP))
+        let puzzleTitle = new HTMLTextObject(this._puzzle.getName(!Eterna.MOBILE_APP), undefined, undefined, true)
             .font(Fonts.STDFONT)
             .fontSize(14)
             .bold()
@@ -837,8 +828,8 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
-        this._folder = initialFolder || FolderManager.instance.getFolder(this._puzzle.folderName);
-        if (!this._folder) {
+        initialFolder = initialFolder || FolderManager.instance.getFolder(this._puzzle.folderName);
+        if (!initialFolder) {
             throw new Error('Big problem; unable to initialize folder!');
         }
 
@@ -854,38 +845,35 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
-        this._folderButton = new GameButton()
-            .allStates(Bitmaps.ShapeImg)
-            .label(this._folder.name, 22)
-            .tooltip('Select the folding engine.');
-        this._folderButton.display.position = new Point(17, 175);
-        this._folderButton.display.scale = new Point(0.5, 0.5);
-        this.addObject(this._folderButton, this.uiLayer);
-        if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
-            this._folderButton.clicked.connect(() => this.changeFolder());
-            Assert.assertIsDefined(this.regs);
-            this.regs.add(Eterna.settings.multipleFoldingEngines.connectNotify((multiEngine) => {
-                this._folderButton.display.visible = multiEngine;
-            }));
-        } else {
-            this._folderButton.display.visible = false;
-        }
+        this._folderSwitcher = new FolderSwitcher(
+            (folder) => this._puzzle.canUseFolder(folder),
+            initialFolder,
+            this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
+        );
+        this._folderSwitcher.display.position = new Point(17, 175);
+        this.addObject(this._folderSwitcher, this.uiLayer);
 
-        if (this._folder.canScoreStructures) {
-            for (let pose of this._poses) {
-                pose.scoreFolder = this._folder;
+        this._folderSwitcher.selectedFolder.connectNotify((folder) => {
+            if (folder.canScoreStructures) {
+                for (let pose of this._poses) {
+                    pose.scoreFolder = folder;
+                }
+            } else {
+                for (let pose of this._poses) {
+                    pose.scoreFolder = null;
+                }
             }
-        } else {
-            for (let pose of this._poses) {
-                pose.scoreFolder = null;
-            }
-        }
+
+            this.onChangeFolder();
+        });
 
         let initialSequence: number[] | null = null;
         if (this._params.initSolution != null) {
             initialSequence = EPars.stringToSequence(this._params.initSolution.sequence);
             this._curSolution = this._params.initSolution;
-            this.updateSolutionNameText(this._curSolution);
+            // AMW: I'm keeping the function around in case we want to call it
+            // in some other context, but we don't need it anymore.
+            // this.updateSolutionNameText(this._curSolution);
             this._solutionView = new ViewSolutionOverlay({
                 solution: this._params.initSolution,
                 puzzle: this._puzzle,
@@ -895,6 +883,10 @@ export default class PoseEditMode extends GameMode {
                 parentMode: (() => this)()
             });
             this.addObject(this._solutionView, this.dialogLayer);
+            this._solutionView.seeResultClicked.connect(() => {
+                this.switchToFeedbackViewForSolution(this._curSolution);
+            });
+            this._solutionView.sortClicked.connect(() => this.sortOnSolution(this._curSolution));
         } else if (this._params.initSequence != null) {
             initialSequence = EPars.stringToSequence(this._params.initSequence);
         }
@@ -1008,8 +1000,21 @@ export default class PoseEditMode extends GameMode {
         this._poseState = this._isDatabrowserMode ? PoseState.NATIVE : this._puzzle.defaultMode;
     }
 
-    public get folder(): Folder | null {
-        return this._folder;
+    private async sortOnSolution(solution: Solution): Promise<void> {
+        this.pushUILock();
+        try {
+            // AMW: this is very similar to the DesignBrowserMode method, but we
+            // don't know about a bunch of solutions -- so instead we switch with
+            // only this one available.
+            await Eterna.app.switchToDesignBrowser(
+                this.puzzleID,
+                solution
+            );
+        } catch (e) {
+            log.error(e);
+        } finally {
+            this.popUILock();
+        }
     }
 
     private buildScriptInterface(): void {
@@ -1785,33 +1790,6 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    private onFolderUpdated(): void {
-        if (this._folder) {
-            this._folderButton.label(this._folder.name);
-        }
-
-        let scoreFolder: Folder | null = this._folder && this._folder.canScoreStructures ? this._folder : null;
-        for (let pose of this._poses) {
-            pose.scoreFolder = scoreFolder;
-        }
-
-        this.onChangeFolder();
-    }
-
-    private changeFolder(): void {
-        if (!this._folder) {
-            throw new Error('Cannot change folders if the current folder is null!');
-        }
-
-        let currF: string = this._folder.name;
-        this._folder = FolderManager.instance.getNextFolder(
-            currF, (folder: Folder) => !this._puzzle.canUseFolder(folder)
-        );
-        if (this._folder.name === currF) return;
-
-        this.onFolderUpdated();
-    }
-
     private showSpec(): void {
         this._dockedSpecBox.display.visible = false;
 
@@ -2174,6 +2152,17 @@ export default class PoseEditMode extends GameMode {
         missionClearedPanel.closeButton.clicked.connect(() => keepPlaying());
     }
 
+    private switchToFeedbackViewForSolution(solution: Solution): void {
+        this.pushUILock();
+
+        Eterna.app.switchToFeedbackView(this._puzzle, solution)
+            .then(() => this.popUILock())
+            .catch((e) => {
+                log.error(e);
+                this.popUILock();
+            });
+    }
+
     public setPosesColor(paintColor: number): void {
         for (let pose of this._poses) {
             pose.currentColor = paintColor;
@@ -2184,7 +2173,7 @@ export default class PoseEditMode extends GameMode {
         this._toolbar.disableTools(disable);
         this._hintBoxRef.destroyObject();
 
-        this._folderButton.enabled = !disable;
+        this._folderSwitcher.display.visible = !disable;
 
         for (let field of this._poseFields) {
             field.container.interactive = !disable;
@@ -3298,7 +3287,10 @@ export default class PoseEditMode extends GameMode {
     private _toolbar: Toolbar;
     private _helpBar: HelpBar;
 
-    protected _folder: Folder | null;
+    protected get _folder(): Folder {
+        return this._folderSwitcher.selectedFolder.value;
+    }
+
     // / Asynch folding
     private _opQueue: PoseOp[] = [];
     private _poseEditByTargetCb: (() => void) | null = null;
@@ -3325,7 +3317,7 @@ export default class PoseEditMode extends GameMode {
     private _targetOligos: (Oligo[] | undefined)[] = [];
     private _targetOligosOrder: (number[] | undefined)[] = [];
 
-    private _folderButton: GameButton;
+    private _folderSwitcher: FolderSwitcher;
     private _isDatabrowserMode: boolean;
     private _isFrozen: boolean = false;
     private _targetName: Text;
