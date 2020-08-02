@@ -152,18 +152,18 @@ export default class FeedbackViewMode extends GameMode {
                 secstructs[ii] = secs;
             }
             this._pairs.push(EPars.parenthesisToPairs(secstructs[ii]));
-            let datablock: UndoBlock = new UndoBlock(this._sequence);
+            let datablock: UndoBlock = new UndoBlock(this._sequence, Vienna.NAME);
             datablock.setPairs(this._pairs[ii]);
-            let vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
-            if (!vienna) {
-                throw new Error("Critical error: can't create a Vienna folder instance by name");
-            }
-            datablock.setBasics(vienna);
+            datablock.setBasics();
             this._undoBlocks.push(datablock);
 
             let poseField: PoseField = new PoseField(false);
             this.addObject(poseField, this.poseLayer);
 
+            let vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
+            if (!vienna) {
+                throw new Error("Critical error: can't create a Vienna folder instance by name");
+            }
             poseField.pose.scoreFolder = vienna;
             poseField.pose.sequence = this._sequence;
             poseField.pose.pairs = this._pairs[ii];
@@ -659,11 +659,7 @@ export default class FeedbackViewMode extends GameMode {
 
     private showSpec(): void {
         let puzzleState = this._undoBlocks[this._currentIndex];
-        let vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
-        if (!vienna) {
-            throw new Error("Critical error: can't create a Vienna folder instance by name");
-        }
-        puzzleState.updateMeltingPointAndDotPlot(vienna);
+        puzzleState.updateMeltingPointAndDotPlot();
         this.showDialog(new SpecBoxDialog(puzzleState, false));
     }
 

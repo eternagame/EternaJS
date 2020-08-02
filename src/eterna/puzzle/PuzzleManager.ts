@@ -21,6 +21,7 @@ import {
     MaximumGCConstraint,
     MaximumGUConstraint
 } from 'eterna/constraints/constraints/MaximumPairConstraint';
+import BranchinessConstraint from 'eterna/constraints/constraints/BranchinessConstraint';
 import {
     MinimumAConstraint, MinimumCConstraint, MinimumGConstraint, MinimumUConstraint
 } from 'eterna/constraints/constraints/MinimumBaseConstraint';
@@ -28,6 +29,7 @@ import {
     MinimumAUConstraint, MinimumGCConstraint, MinimumGUConstraint, MinimumAnyPairConstraint
 } from 'eterna/constraints/constraints/MinimumPairConstraint';
 import MinimumStackLengthConstraint from 'eterna/constraints/constraints/MinimumStackLengthConstraint';
+import TargetExpectedAccuracyConstraint from 'eterna/constraints/constraints/TargetExpectedAccuracyConstraint';
 import ScriptConstraint from 'eterna/constraints/constraints/ScriptConstraint';
 import SynthesisConstraint from 'eterna/constraints/constraints/SynthesisConstraint';
 import BarcodeConstraint from 'eterna/constraints/constraints/BarcodeConstraint';
@@ -272,6 +274,9 @@ export default class PuzzleManager {
                     case ConsecutiveUConstraint.NAME:
                         constraints.push(new ConsecutiveUConstraint(Number(parameter)));
                         break;
+                    case BranchinessConstraint.NAME:
+                        constraints.push(new BranchinessConstraint(Number(parameter)));
+                        break;
                     case MaximumAConstraint.NAME:
                         constraints.push(new MaximumAConstraint(Number(parameter)));
                         break;
@@ -322,6 +327,9 @@ export default class PuzzleManager {
                         break;
                     case MinimumStackLengthConstraint.NAME:
                         constraints.push(new MinimumStackLengthConstraint(Number(parameter)));
+                        break;
+                    case TargetExpectedAccuracyConstraint.NAME:
+                        constraints.push(new TargetExpectedAccuracyConstraint(Number(parameter)));
                         break;
                     case ScriptConstraint.NAME:
                         constraints.push(new ScriptConstraint(Number(parameter)));

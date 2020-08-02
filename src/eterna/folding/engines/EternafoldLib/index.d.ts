@@ -31,6 +31,7 @@ declare class EternafoldLib {
 
     // FullFoldTemperature (temperature_in: number, seqString: string, structString: string): EternafoldLib.FullFoldResult;
     // GetDotPlot (temperature_in: number, seqString: string, dotplotStructString: string): EternafoldLib.DotPlotResult;
+    GetDotPlot (temperature_in: number, seqString: string): EternafoldLib.DotPlotResult;
     // FullFoldWithBindingSite (seqString: string, structString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): EternafoldLib.FullFoldResult;
     // CoFoldSequence (seqString: string, structString: string): EternafoldLib.FullFoldResult;
     // CoFoldSequenceWithBindingSite (seqString: string, structString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): EternafoldLib.FullFoldResult;
@@ -54,10 +55,10 @@ declare namespace EternafoldLib {
         delete (): void;
     }
 
-    // export interface DotPlotResult {
-    //     energy: number;
-    //     probabilitiesString: string;
+    export interface DotPlotResult {
+        energy: number;
+        plot: stdcpp.vector<number>;
 
-    //     delete (): void;
-    // }
+        delete (): void;
+    }
 }

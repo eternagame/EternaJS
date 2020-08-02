@@ -2,8 +2,9 @@ import * as log from 'loglevel';
 import EPars from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
+import Assert from 'flashbang/util/Assert';
 import * as ContrafoldLib from './engines/ContrafoldLib';
-import {FullEvalResult, FullFoldResult} from './engines/ContrafoldLib';
+import {DotPlotResult, FullEvalResult, FullFoldResult} from './engines/ContrafoldLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
 import Folder, {CacheKey, FullEvalCache} from './Folder';
 import FoldUtil from './FoldUtil';
@@ -27,6 +28,11 @@ export default class ContraFold extends Folder {
     private constructor(lib: ContrafoldLib) {
         super();
         this._lib = lib;
+    }
+
+    /* override */
+    public get canDotPlot(): boolean {
+        return true;
     }
 
     public get name(): string {
@@ -170,6 +176,39 @@ export default class ContraFold extends Folder {
                 result = null;
             }
         }
+    }
+
+    /* override */
+    public getDotPlot(seq: number[], pairs: number[], temp: number = 37): number[] {
+        let key: CacheKey = {
+            primitive: 'dotplot', seq, pairs, temp
+        };
+        let retArray: number[] = this.getCache(key) as number[];
+        if (retArray != null) {
+            // trace("dotplot cache hit");
+            return retArray.slice();
+        }
+
+        let seqStr: string = EPars.sequenceToString(seq);
+
+        let result: DotPlotResult | null = null;
+        try {
+            // we don't actually do anything with structstring here yet
+            result = this._lib.GetDotPlot(temp, seqStr); // , EPars.pairsToParenthesis(pairs));
+            Assert.assertIsDefined(result, 'EternaFold returned a null result');
+            retArray = EmscriptenUtil.stdVectorToArray(result.plot);
+        } catch (e) {
+            log.error('GetDotPlot error', e);
+            return [];
+        } finally {
+            if (result != null) {
+                result.delete();
+                result = null;
+            }
+        }
+
+        this.putCache(key, retArray.slice());
+        return retArray;
     }
 
     private readonly _lib: ContrafoldLib;

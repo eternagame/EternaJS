@@ -4,8 +4,12 @@ import Plot, {PlotType} from 'eterna/Plot';
 import Pose2D, {Oligo} from './pose2D/Pose2D';
 import Folder from './folding/Folder';
 import Utility from './util/Utility';
+import Vienna from './folding/Vienna';
+import Vienna2 from './folding/Vienna2';
+import FolderManager from './folding/FolderManager';
 
 export interface FoldData {
+    folderName_: string;
     sequence_: number[];
     pairs_array_: Map<boolean, number[][]>;
     params_array_: Map<boolean, Param[][]>;
@@ -80,12 +84,22 @@ export enum UndoBlockParam {
     NNFE_ARRAY = 13,
     MAX = 14,
     ANY_PAIR = 15,
+    MEANPUNP = 16,
+    SUMPUNP = 17,
+    BRANCHINESS = 18,
+    TARGET_EXPECTED_ACCURACY = 19,
+}
+
+export enum BasePairProbabilityTransform {
+    LEAVE_ALONE,
+    SQUARE
 }
 
 type Param = (number | number[] | null);
 
 export default class UndoBlock {
-    constructor(seq: number[]) {
+    constructor(seq: number[], folderName: string) {
+        this._folderName = folderName;
         this._sequence = seq.slice();
         this._pairsArray.set(false, []);
         this._pairsArray.set(true, []);
@@ -99,6 +113,7 @@ export default class UndoBlock {
         // players to migrate their autosaves
         /* eslint-disable @typescript-eslint/camelcase */
         return {
+            folderName_: this._folderName,
             sequence_: this._sequence,
             pairs_array_: this._pairsArray,
             params_array_: this._paramsArray,
@@ -118,6 +133,7 @@ export default class UndoBlock {
 
     public fromJSON(json: FoldData): void {
         try {
+            this._folderName = json.folderName_;
             this._sequence = json.sequence_;// JSONUtil.require(json, 'sequence_');
             // Legacy -- this wasn't always a map. So check typeof and put nonmaps
             // into the pseudoknots false field.
@@ -146,6 +162,72 @@ export default class UndoBlock {
         } catch (e) {
             throw new Error(`Error parsing UndoBlock JSON: ${e}`);
         }
+    }
+
+    public targetExpectedAccuracy(
+        targetPairs: number[],
+        dotArray: number[] | null,
+        behavior: BasePairProbabilityTransform
+    ): number {
+        if (dotArray === null || dotArray.length === 0) return 0;
+        let dotMap: Map<string, number> = new Map<string, number>();
+        let pairedPer: Map<number, number> = new Map<number, number>();
+
+        for (let jj = 0; jj < dotArray.length; jj += 3) {
+            let prob: number;
+            if (behavior === BasePairProbabilityTransform.LEAVE_ALONE) {
+                prob = dotArray[jj + 2];
+            } else {
+                prob = (dotArray[jj + 2] * dotArray[jj + 2]);
+            }
+
+            if (dotArray[jj] < dotArray[jj + 1]) {
+                dotMap.set([dotArray[jj], dotArray[jj + 1]].join(','), prob);
+            } else if (dotArray[jj] > dotArray[jj + 1]) {
+                dotMap.set([dotArray[jj + 1], dotArray[jj]].join(','), prob);
+            }
+
+            let there = pairedPer.get(dotArray[jj]);
+            if (there !== undefined) {
+                pairedPer.set(dotArray[jj], there + prob);
+            } else {
+                pairedPer.set(dotArray[jj], prob);
+            }
+            there = pairedPer.get(dotArray[jj + 1]);
+            if (there !== undefined) {
+                pairedPer.set(dotArray[jj + 1], there + prob);
+            } else {
+                pairedPer.set(dotArray[jj + 1], prob);
+            }
+        }
+
+        let TP = 1e-6;
+        // this is the remnant of a clever closed form solution irrelevant here
+        let TN = /* 0.5 * targetPairs.length * targetPairs.length - 1 + */ 1e-6;
+        let FP = 1e-6;
+        let FN = 1e-6;
+        let cFP = 1e-6;
+
+        // TP = np.sum(np.multiply(pred_m, probs)) + 1e-6
+        // TN = 0.5*N*N-1 - np.sum(pred_m) - np.sum(probs) + TP + 1e-6
+        // FP = np.sum(np.multiply(pred_m, 1-probs)) + 1e-6
+        // FN = np.sum(np.multiply(1-pred_m, probs)) + 1e-6
+
+        for (let ii = 0; ii < targetPairs.length; ++ii) {
+            for (let jj = ii + 1; jj < targetPairs.length; ++jj) {
+                let prob = dotMap.get([ii + 1, jj + 1].join(',')) ?? 0;
+                // Are ii and jj paired?
+                if (targetPairs[ii] === jj) {
+                    TP += prob;
+                    FN += 1 - prob;
+                } else {
+                    FP += prob;
+                    TN += 1 - prob;
+                }
+            }
+        }
+
+        return (TP * TN - (FP - cFP) * FN) / Math.sqrt((TP + FP - cFP) * (TP + FN) * (TN + FP - cFP) * (TN + FN));
     }
 
     public get targetOligos(): Oligo[] | undefined {
@@ -290,7 +372,11 @@ export default class UndoBlock {
         paramsArray[temp][index] = val;
     }
 
-    public setBasics(folder: Folder, temp: number = 37, pseudoknots: boolean = false): void {
+    public setBasics(temp: number = 37, pseudoknots: boolean = false): void {
+        let folder: Folder | null = FolderManager.instance.getFolder(this._folderName);
+        if (!folder) {
+            throw new Error(`Critical error: can't create a ${this._folderName} folder instance by name`);
+        }
         let bestPairs: number[];
         let seq: number[] = this._sequence;
         bestPairs = this.getPairs(temp, pseudoknots);
@@ -325,16 +411,128 @@ export default class UndoBlock {
         this.setParam(UndoBlockParam.NNFE_ARRAY, nnfe, temp, pseudoknots);
     }
 
-    public updateMeltingPointAndDotPlot(folder: Folder, pseudoknots: boolean = false): void {
+    public sumProbUnpaired(dotArray: number[] | null, behavior: BasePairProbabilityTransform): number {
+        if (dotArray === null || dotArray.length === 0) return 0;
+        // dotArray is organized as idx, idx, pairprob.
+        let probUnpaired: number[] = Array<number>(this.sequence.length);
+        for (let idx = 0; idx < this.sequence.length; ++idx) {
+            probUnpaired[idx] = 1;
+            for (let ii = 0; ii < dotArray.length; ii += 3) {
+                if (dotArray[ii] === idx + 1 || dotArray[ii + 1] === idx + 1) {
+                    if (behavior === BasePairProbabilityTransform.LEAVE_ALONE) {
+                        probUnpaired[idx] -= (dotArray[ii + 2]);
+                    } else {
+                        probUnpaired[idx] -= (dotArray[ii + 2] * dotArray[ii + 2]);
+                    }
+                }
+            }
+        }
+        // for (let idx = 0; idx < this.sequence.length; ++idx) {
+        //     if (probUnpaired[idx] < 0) {
+        //         probUnpaired[idx] = 0;
+        //     }
+        // }
+
+        // mean prob unpaired
+        return probUnpaired.reduce((a, b) => a + b, 0);// / this.sequence.length;
+    }
+
+    public branchiness(pairs: number[]) {
+        // format of pairs is
+        // '((.))' -> [4,3,-1,1,0]
+        // note that if you calculate this average, it's fine to double count
+        // pairs for obvious reasons!
+        // so this is the average difference between idx and val
+        // over n-1
+        // 1- that
+
+        let totDist = 0;
+        let count = 0;
+        for (let ii = 0; ii < pairs.length; ++ii) {
+            if (pairs[ii] === -1) {
+                continue;
+            }
+
+            if (pairs[ii] > ii) {
+                totDist += pairs[ii] - ii;
+            } else {
+                totDist += ii - pairs[ii];
+            }
+            ++count;
+        }
+
+        return 1 - ((totDist / count) / (pairs.length - 1));
+    }
+
+    public ensembleBranchiness(dotArray: number[] | null, behavior: BasePairProbabilityTransform) {
+        if (dotArray === null || dotArray.length === 0) return 0;
+        // format of pairs is
+        // '((.))' -> [4,3,-1,1,0]
+        // note that if you calculate this average, it's fine to double count
+        // pairs for obvious reasons! so this is the average difference between
+        // idx and val
+
+        let totDist = 0;
+
+        // every bp adds jj - ii to totDist and prob to count.
+        let count = 0;
+
+        // dotArray is organized as idx, idx, pairprob.
+        if (behavior === BasePairProbabilityTransform.LEAVE_ALONE) {
+            for (let ii = 0; ii < dotArray.length; ii += 3) {
+                if (dotArray[ii] > dotArray[ii + 1]) {
+                    totDist += (dotArray[ii] - dotArray[ii + 1]) * dotArray[ii + 2];
+                } else {
+                    totDist += (dotArray[ii + 1] - dotArray[ii]) * dotArray[ii + 2];
+                }
+                count += (dotArray[ii + 2]);
+            }
+        } else {
+            for (let ii = 0; ii < dotArray.length; ii += 3) {
+                if (dotArray[ii] > dotArray[ii + 1]) {
+                    totDist += (dotArray[ii] - dotArray[ii + 1]) * dotArray[ii + 2] * dotArray[ii + 2];
+                } else {
+                    totDist += (dotArray[ii + 1] - dotArray[ii]) * dotArray[ii + 2] * dotArray[ii + 2];
+                }
+                count += (dotArray[ii + 2] * dotArray[ii + 2]);
+            }
+        }
+        return 1 - ((totDist / count) / (this.sequence.length - 1));
+    }
+
+    public updateMeltingPointAndDotPlot(pseudoknots: boolean = false): void {
+        let bppStatisticBehavior: BasePairProbabilityTransform = BasePairProbabilityTransform.LEAVE_ALONE;
+        if (this._folderName === Vienna.NAME || this._folderName === Vienna2.NAME) {
+            bppStatisticBehavior = BasePairProbabilityTransform.SQUARE;
+        }
+        const folder = FolderManager.instance.getFolder(this._folderName);
+        if (folder === null) {
+            throw new Error(`Critical error: can't create a ${this._folderName} folder instance by name`);
+        }
+
         if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) == null) {
             let dotArray: number[] | null = folder.getDotPlot(this.sequence, this.getPairs(37), 37, pseudoknots);
             this.setParam(UndoBlockParam.DOTPLOT, dotArray, 37, pseudoknots);
+            // mean+sum prob unpaired
+            this.setParam(UndoBlockParam.SUMPUNP,
+                this.sumProbUnpaired(dotArray, bppStatisticBehavior), 37, pseudoknots);
+            this.setParam(UndoBlockParam.MEANPUNP,
+                this.sumProbUnpaired(dotArray, bppStatisticBehavior) / this.sequence.length, 37, pseudoknots);
+            // branchiness
+            this.setParam(UndoBlockParam.BRANCHINESS,
+                this.ensembleBranchiness(dotArray, bppStatisticBehavior), 37, pseudoknots);
+            this.setParam(
+                UndoBlockParam.TARGET_EXPECTED_ACCURACY,
+                this.targetExpectedAccuracy(this._targetPairs, dotArray, bppStatisticBehavior),
+                37,
+                pseudoknots
+            );
             this._dotPlotData = dotArray ? dotArray.slice() : null;
         }
 
         for (let ii = 37; ii < 100; ii += 10) {
             if (this.getPairs(ii) == null) {
-                let pairs = folder.foldSequence(this.sequence, null, null, pseudoknots, ii);
+                const pairs: number[] | null = folder.foldSequence(this.sequence, null, null, pseudoknots, ii);
                 Assert.assertIsDefined(pairs);
                 this.setPairs(pairs, ii, pseudoknots);
             }
@@ -347,6 +545,14 @@ export default class UndoBlock {
                     pseudoknots
                 );
                 Assert.assertIsDefined(dotTempArray);
+                // mean+sum prob unpaired
+                this.setParam(UndoBlockParam.SUMPUNP,
+                    this.sumProbUnpaired(dotTempArray, bppStatisticBehavior), ii, pseudoknots);
+                this.setParam(UndoBlockParam.MEANPUNP,
+                    this.sumProbUnpaired(dotTempArray, bppStatisticBehavior) / this.sequence.length, ii, pseudoknots);
+                // branchiness
+                this.setParam(UndoBlockParam.BRANCHINESS,
+                    this.ensembleBranchiness(dotTempArray, bppStatisticBehavior), ii, pseudoknots);
                 this.setParam(UndoBlockParam.DOTPLOT, dotTempArray, ii, pseudoknots);
             }
         }
@@ -476,4 +682,5 @@ export default class UndoBlock {
     private _dotPlotData: number[] | null;
     private _meltPlotPairScores: number[];
     private _meltPlotMaxPairScores: number[];
+    private _folderName: string;
 }

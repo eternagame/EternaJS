@@ -1,6 +1,10 @@
 # EternaJS
 
-A ~~Javascript~~ TypeScript port of the Eterna game
+Eterna game/RNA design interface
+
+Interested in development? Join the discusson on the Eterna Discord!
+
+[![Eterna Discord](https://discord.com/api/guilds/702618517589065758/widget.png?style=banner2)](https://discord.gg/KYeTwux)
 
 ## Setup
 
@@ -44,4 +48,6 @@ For introductory material to this codebase and the technologies it is built with
 
  * When you're ready to merge into master for deployment, create a pull request at `https://github.com/Eternagame/EternaJS/pulls`. We will then perform a code review.
  
- Please note that for some reason or another, we may not approve of adding a feature you may have written. To avoid doing work we may reject later please [open an issue](https://github.com/eternagame/eternajs/issues) and we will triage it and/or initiate discussion about the feature. That said, feel free to work on changes for your own experimentation. Eternascript boosters are also a great way to add in extra tools you want to see added, without needing us to consider whether or not that feature makes sense as a first-class citizen, or the specifics of how it needs to be implemented for a consistent user experience.
+Please note that for some reason or another, we may not approve of adding a feature you may have written. To avoid doing work we may reject later please [open an issue](https://github.com/eternagame/eternajs/issues) and we will triage it and/or initiate discussion about the feature. That said, feel free to work on changes for your own experimentation. Eternascript boosters are also a great way to add in extra tools you want to see added, without needing us to consider whether or not that feature makes sense as a first-class citizen, or the specifics of how it needs to be implemented for a consistent user experience.
+
+We also recommend joining our [Discord](https://discord.gg/KYeTwux) to chat with other developers.

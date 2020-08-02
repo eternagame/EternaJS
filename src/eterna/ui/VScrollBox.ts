@@ -1,5 +1,5 @@
 import {Container} from 'pixi.js';
-import {SceneObject, MathUtil, ContainerObject} from 'flashbang';
+import {MathUtil, ContainerObject} from 'flashbang';
 import ScrollContainer from './ScrollContainer';
 import SliderBar from './SliderBar';
 
@@ -54,7 +54,7 @@ export default class VScrollBox extends ContainerObject {
         this._sliderBar.setProgress(MathUtil.clamp(value, 0, 1));
     }
 
-    get htmlWrapper() {
+    public get htmlWrapper() {
         return this._scrollContainer.htmlWrapper;
     }
 

@@ -163,10 +163,16 @@ export default class SpecBox extends ContainerObject {
                 .append(`${datablock.getParam(UndoBlockParam.GC, TEMPERATURE)}   `)
                 .append(`${EPars.getColoredLetter('G')}-${EPars.getColoredLetter('U')} pairs : `, 'bold')
                 .append(`${datablock.getParam(UndoBlockParam.GU, TEMPERATURE)}\n`)
+                .append('Free energy : ', 'bold')
+                .append(`${Number(datablock.getParam(UndoBlockParam.FE, TEMPERATURE) as number / 100).toFixed(1)} kcal\t\t`)
                 .append('Melting point : ', 'bold')
                 .append(`${datablock.getParam(UndoBlockParam.MELTING_POINT, TEMPERATURE)}°C\n`)
-                .append('Free energy : ', 'bold')
-                .append(`${Number(datablock.getParam(UndoBlockParam.FE, TEMPERATURE) as number / 100).toFixed(1)}kcal\n`);
+                .append('Mean P-unpaired : ', 'bold')
+                .append(`${Number(datablock.getParam(UndoBlockParam.MEANPUNP, TEMPERATURE)).toFixed(3)}\t\t`)
+                .append('Branchiness : ', 'bold')
+                .append(`${Number(datablock.getParam(UndoBlockParam.BRANCHINESS, TEMPERATURE)).toFixed(1)}\n`)
+                .append('Target exp acc : ', 'bold')
+                .append(`${(datablock.getParam(UndoBlockParam.TARGET_EXPECTED_ACCURACY, 37) as number).toFixed(3)}\n`);
 
             statString.apply(this._stattext);
         }
