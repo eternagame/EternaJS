@@ -42,6 +42,11 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
         this._obj.onfocus = () => this.onFocusChanged(true);
         this._obj.onblur = () => this.onFocusChanged(false);
         this._obj.onkeypress = (e) => this.keyPressed.emit(e.key);
+
+        // No one ever passes font weight to the ctor. To prevent it from being
+        // undefined and messing up TextBuilder chaining in the fake text gen.,
+        // we default to regular.
+        this._fontWeight = FontWeight.REGULAR;
     }
 
     protected added(): void {
@@ -228,8 +233,8 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
 
         let text = new TextBuilder(displayText)
             .font(this._fontFamily)
-            .fontSize(this._fontSize)
             .fontWeight(this._fontWeight)
+            .fontSize(this._fontSize)
             .color(textColor)
             .wordWrap(this._rows > 1, this.width - 20)
             .hAlignLeft()
