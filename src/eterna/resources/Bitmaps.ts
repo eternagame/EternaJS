@@ -332,6 +332,7 @@ export default class Bitmaps {
     public static readonly ImgRemove: string = require('assets/TangoIcons/remove.png');
     public static readonly ImgResetCriteria: string = require('assets/DesignBrowser/reset.png');
     public static readonly ImgAdd: string = require('assets/DesignBrowser/add.png');
+    public static readonly Folder: string = require('assets/folder.png');
 
     public static get all(): string[] {
         if (Bitmaps.ALL_URLS == null) {

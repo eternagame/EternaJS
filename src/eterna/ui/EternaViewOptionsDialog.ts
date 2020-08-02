@@ -46,10 +46,6 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
             bind(Eterna.settings.freezeButtonAlwaysVisible, 'Freeze button always visible');
         }
 
-        if (this._optionsMode !== EternaViewOptionsMode.PUZZLE) {
-            bind(Eterna.settings.multipleFoldingEngines, 'Multiple folding engines');
-        }
-
         if (this._optionsMode === EternaViewOptionsMode.LAB) {
             bind(Eterna.settings.useContinuousColors, 'Use continuous colors for the exp. data (advanced)');
             bind(Eterna.settings.useExtendedColors, 'Use extended 4-color scale for the exp. data (advanced)');

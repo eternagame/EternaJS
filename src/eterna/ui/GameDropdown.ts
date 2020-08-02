@@ -5,26 +5,26 @@ import {
     Graphics, Point, Text
 } from 'pixi.js';
 import Fonts from 'eterna/util/Fonts';
+import {Value} from 'signals';
 import GamePanel, {GamePanelType} from './GamePanel';
 import TextBalloon from './TextBalloon';
 
 export default class GameDropdown extends ContainerObject {
-    public text: string;
+    public readonly selectedOption: Value<string>;
+    public readonly options: string[];
 
     constructor(
         fontSize: number,
         options: string[],
-        defaultOption: string,
-        onChange: (item: string) => void,
+        defaultOption: string = 'Select One...',
         borderWidth: number = 1
     ) {
         super();
         this._fontSize = fontSize;
-        this._options = options;
-        this._defaultOption = defaultOption || 'Select One...';
-        this._onChange = onChange;
+        this.options = options;
         this._borderWidth = borderWidth;
-        this._disabled = false;
+
+        this.selectedOption = new Value(defaultOption);
     }
 
     protected added() {
@@ -41,7 +41,6 @@ export default class GameDropdown extends ContainerObject {
             this._drawBox(this._hovered);
         });
 
-        this._arrow = new Graphics();
         this.container.addChild(this._arrow);
         this._drawArrow();
 
@@ -56,14 +55,21 @@ export default class GameDropdown extends ContainerObject {
             this._box, HAlign.LEFT, VAlign.CENTER,
             this._borderWidth + this._PADDING
         );
-        this._selectOption(this._defaultOption);
 
-        if (!this._disabled) {
+        this.regs.add(
+            this.selectedOption.connectNotify((selected) => {
+                this._selectedText.text = selected;
+            })
+        );
+
+        this.regs.add(
             this.pointerTap.connect(() => {
-                if (this._popupVisible) this._hidePopup();
-                else this._showPopup();
-            });
-        }
+                if (!this.disabled) {
+                    if (this._popupVisible) this._hidePopup();
+                    else this._showPopup();
+                }
+            })
+        );
 
         this._popup = new GamePanel(GamePanelType.NORMAL, 1, 0x152843, 1.0, 0xC0DCE7);
         this._setupPopup();
@@ -105,14 +111,14 @@ export default class GameDropdown extends ContainerObject {
 
         let yWalker = 0;
         let maxWidth = this._box.width;
-        for (let option of this._options) {
+        for (let option of this.options) {
             let text = new TextBalloon(option, 0x152843);
             text.setText(option, this._fontSize, 0xC0DCE7);
             this._popup.addObject(text, this._popup.container);
             text.display.y = yWalker;
             yWalker += text.display.height;
             text.pointerTap.connect(() => {
-                this._selectOption(option);
+                this.selectedOption.value = option;
                 this._hidePopup();
             });
             // Same as GameButton colors
@@ -151,10 +157,10 @@ export default class GameDropdown extends ContainerObject {
     }
 
     private _drawBox(hover: boolean) {
-        const TEXT_WIDTH = (this._options.reduce(
+        const TEXT_WIDTH = (this.options.reduce(
             (max, opt) => Math.max(max, opt.length),
             0
-        ) * this._fontSize) / 1.75;
+        ) * this._fontSize) / 1.5;
         // There should be an extra _PADDING between the text and the arrow
         const ARROW_WIDTH = this._ARROW_SIDE_SIZE + this._PADDING;
 
@@ -186,22 +192,12 @@ export default class GameDropdown extends ContainerObject {
         );
     }
 
-    public hideArrow() {
-        this._arrow.visible = false;
-    }
-
     public get height(): number {
         return this._fontSize + this._PADDING * 2;
     }
 
     public get width(): number {
         return this.display.width;
-    }
-
-    private _selectOption(option: string) {
-        this._selectedText.text = option;
-        this.text = option;
-        if (this._onChange) this._onChange(option);
     }
 
     public overrideWidth(width: number) {
@@ -224,27 +220,28 @@ export default class GameDropdown extends ContainerObject {
         this._mask.endFill();
     }
 
-    public set disabled(foo: boolean) {
-        this._disabled = foo;
+    public set disabled(disabled: boolean) {
+        this._disabled = disabled;
+        this._arrow.visible = !disabled;
     }
 
-    private _onChange: (item: string) => void;
+    public get disabled() {
+        return this._disabled;
+    }
 
     private _fontSize: number;
-    private _options: string[];
-    private _defaultOption: string;
 
     private _width: number;
     private _hovered: boolean = false;
     private _popupVisible: boolean = false;
     private _borderWidth: number;
+    private _disabled: boolean = false;
 
     private _box: Graphics;
-    private _arrow: Graphics;
+    private _arrow: Graphics = new Graphics();
     private _selectedText: Text;
     private _mask: Graphics;
     private _popup: GamePanel;
-    private _disabled: boolean;
 
     private readonly _PADDING: number = 3;
     private readonly _ARROW_SIDE_SIZE = 8;
