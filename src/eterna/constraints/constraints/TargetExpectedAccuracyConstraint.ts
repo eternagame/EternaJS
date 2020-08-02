@@ -35,11 +35,7 @@ export default class TargetExpectedAccuracyConstraint extends Constraint<TargetE
             37,
             false
         ) === undefined) {
-            constraintContext.undoBlocks[0].updateMeltingPointAndDotPlot(
-                FolderManager.instance.getFolder(
-                    constraintContext.puzzle?.folderName as string
-                ) as Folder, false
-            );
+            constraintContext.undoBlocks[0].updateMeltingPointAndDotPlot(false);
         }
         let expectedAccuracy = constraintContext.undoBlocks[0].getParam(
             UndoBlockParam.TARGET_EXPECTED_ACCURACY,

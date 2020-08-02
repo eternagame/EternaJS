@@ -6,8 +6,10 @@ import Folder from './folding/Folder';
 import Utility from './util/Utility';
 import Vienna from './folding/Vienna';
 import Vienna2 from './folding/Vienna2';
+import FolderManager from './folding/FolderManager';
 
 export interface FoldData {
+    folderName_: string;
     sequence_: number[];
     pairs_array_: Map<boolean, number[][]>;
     params_array_: Map<boolean, Param[][]>;
@@ -96,7 +98,8 @@ export enum BasePairProbabilityTransform {
 type Param = (number | number[] | null);
 
 export default class UndoBlock {
-    constructor(seq: number[]) {
+    constructor(seq: number[], folderName: string) {
+        this._folderName = folderName;
         this._sequence = seq.slice();
         this._pairsArray.set(false, []);
         this._pairsArray.set(true, []);
@@ -110,6 +113,7 @@ export default class UndoBlock {
         // players to migrate their autosaves
         /* eslint-disable @typescript-eslint/camelcase */
         return {
+            folderName_: this._folderName,
             sequence_: this._sequence,
             pairs_array_: this._pairsArray,
             params_array_: this._paramsArray,
@@ -129,6 +133,7 @@ export default class UndoBlock {
 
     public fromJSON(json: FoldData): void {
         try {
+            this._folderName = json.folderName_;
             this._sequence = json.sequence_;// JSONUtil.require(json, 'sequence_');
             // Legacy -- this wasn't always a map. So check typeof and put nonmaps
             // into the pseudoknots false field.
@@ -211,15 +216,13 @@ export default class UndoBlock {
         for (let ii = 0; ii < targetPairs.length; ++ii) {
             for (let jj = ii + 1; jj < targetPairs.length; ++jj) {
                 let prob = dotMap.get([ii + 1, jj + 1].join(',')) ?? 0;
-                if (prob > 0) { // a bit of base pairing
-                    // Are ii and jj paired?
-                    if (targetPairs[ii] === jj) {
-                        TP += prob;
-                        FN += 1 - prob;
-                    } else {
-                        FP += prob;
-                        TN += 1 - prob;
-                    }
+                // Are ii and jj paired?
+                if (targetPairs[ii] === jj) {
+                    TP += prob;
+                    FN += 1 - prob;
+                } else {
+                    FP += prob;
+                    TN += 1 - prob;
                 }
             }
         }
@@ -369,7 +372,11 @@ export default class UndoBlock {
         paramsArray[temp][index] = val;
     }
 
-    public setBasics(folder: Folder, temp: number = 37, pseudoknots: boolean = false): void {
+    public setBasics(temp: number = 37, pseudoknots: boolean = false): void {
+        let folder: Folder | null = FolderManager.instance.getFolder(this._folderName);
+        if (!folder) {
+            throw new Error(`Critical error: can't create a ${this._folderName} folder instance by name`);
+        }
         let bestPairs: number[];
         let seq: number[] = this._sequence;
         bestPairs = this.getPairs(temp, pseudoknots);
@@ -493,10 +500,14 @@ export default class UndoBlock {
         return 1 - ((totDist / count) / (this.sequence.length - 1));
     }
 
-    public updateMeltingPointAndDotPlot(folder: Folder, pseudoknots: boolean = false): void {
+    public updateMeltingPointAndDotPlot(pseudoknots: boolean = false): void {
         let bppStatisticBehavior: BasePairProbabilityTransform = BasePairProbabilityTransform.LEAVE_ALONE;
-        if (folder.name === Vienna.NAME || folder.name === Vienna2.NAME) {
+        if (this._folderName === Vienna.NAME || this._folderName === Vienna2.NAME) {
             bppStatisticBehavior = BasePairProbabilityTransform.SQUARE;
+        }
+        const folder = FolderManager.instance.getFolder(this._folderName);
+        if (folder === null) {
+            throw new Error(`Critical error: can't create a ${this._folderName} folder instance by name`);
         }
 
         if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) == null) {
@@ -521,7 +532,7 @@ export default class UndoBlock {
 
         for (let ii = 37; ii < 100; ii += 10) {
             if (this.getPairs(ii) == null) {
-                let pairs = folder.foldSequence(this.sequence, null, null, pseudoknots, ii);
+                const pairs: number[] | null = folder.foldSequence(this.sequence, null, null, pseudoknots, ii);
                 Assert.assertIsDefined(pairs);
                 this.setPairs(pairs, ii, pseudoknots);
             }
@@ -671,4 +682,5 @@ export default class UndoBlock {
     private _dotPlotData: number[] | null;
     private _meltPlotPairScores: number[];
     private _meltPlotMaxPairScores: number[];
+    private _folderName: string;
 }

@@ -944,9 +944,9 @@ export default class PuzzleEditMode extends GameMode {
                 bestPairs = this._folder.foldSequenceWithBindingSite(seq, targetPairs, site, Number(bonus), 2.0);
             }
             Assert.assertIsDefined(bestPairs);
-            let undoBlock = new UndoBlock(seq);
+            let undoBlock = new UndoBlock(seq, this._folder.name);
             undoBlock.setPairs(bestPairs);
-            undoBlock.setBasics(this._folder);
+            undoBlock.setBasics();
             undoBlock.targetPairs = targetPairs;
             currentUndoBlocks.push(undoBlock);
             currentLock.push(lock);

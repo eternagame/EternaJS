@@ -627,7 +627,7 @@ export default class PoseEditMode extends GameMode {
                 this._seqStacks[this._stackLevel] = [];
 
                 for (let ii = 0; ii < this._poses.length; ii++) {
-                    let undoBlock: UndoBlock = new UndoBlock([]);
+                    let undoBlock: UndoBlock = new UndoBlock([], this.folder?.name ?? '');
                     undoBlock.fromJSON(foldData[ii]);
                     this._seqStacks[this._stackLevel][ii] = undoBlock;
                 }
@@ -1840,9 +1840,9 @@ export default class PoseEditMode extends GameMode {
         if (this._folder && this._folder.canDotPlot && datablock.sequence.length < 500) {
             if (this._targetConditions && this._targetConditions[0]
                 && this._targetConditions[0]['type'] === 'pseudoknot') {
-                datablock.updateMeltingPointAndDotPlot(this._folder, true);
+                datablock.updateMeltingPointAndDotPlot(true);
             } else {
-                datablock.updateMeltingPointAndDotPlot(this._folder);
+                datablock.updateMeltingPointAndDotPlot();
             }
         }
     }
@@ -2366,7 +2366,7 @@ export default class PoseEditMode extends GameMode {
         // meaning this is a save datum thing. [number, number[], ...string[]]
         for (let ii = 0; ii < this._poses.length; ++ii) {
             if (json[ii + 2] != null) {
-                let undoBlock: UndoBlock = new UndoBlock([]);
+                let undoBlock: UndoBlock = new UndoBlock([], '');
                 try {
                     undoBlock.fromJSON(JSON.parse(json[ii + 2] as string));
                 } catch (e) {
@@ -2877,7 +2877,7 @@ export default class PoseEditMode extends GameMode {
                 this._seqStacks[this._stackLevel] = [];
 
                 for (let ii = 0; ii < this._poses.length; ii++) {
-                    this._seqStacks[this._stackLevel][ii] = new UndoBlock([]);
+                    this._seqStacks[this._stackLevel][ii] = new UndoBlock([], '');
                     this._seqStacks[this._stackLevel][ii].fromJSON(fd[ii]);
                 }
 
@@ -3071,7 +3071,7 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
-        let undoBlock: UndoBlock = new UndoBlock(this._puzzle.transformSequence(seq, ii));
+        let undoBlock: UndoBlock = new UndoBlock(this._puzzle.transformSequence(seq, ii), this._folder.name);
         Assert.assertIsDefined(bestPairs);
         undoBlock.setPairs(bestPairs, 37, pseudoknots);
         undoBlock.targetOligos = this._targetOligos[ii];
@@ -3082,7 +3082,7 @@ export default class PoseEditMode extends GameMode {
         undoBlock.targetOligoOrder = this._targetOligosOrder[ii];
         undoBlock.puzzleLocks = this._poses[ii].puzzleLocks;
         undoBlock.targetConditions = this._targetConditions[ii];
-        undoBlock.setBasics(this._folder, 37, pseudoknots);
+        undoBlock.setBasics(37, pseudoknots);
         this._seqStacks[this._stackLevel][ii] = undoBlock;
     }
 
