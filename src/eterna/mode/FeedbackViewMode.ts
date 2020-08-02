@@ -185,6 +185,7 @@ export default class FeedbackViewMode extends GameMode {
         this.addObject(this._solutionView, this.dialogLayer);
         this._solutionView.playClicked.connect(() => this.switchToPoseEditForSolution(this._solution));
         this._solutionView.sortClicked.connect(() => this.sortOnSolution(this._solution));
+        this._solutionView.returnClicked.connect(() => this.sortOnSolution(undefined));
 
         this._info = new GameButton()
             .up(Bitmaps.ImgInfoControl)
@@ -232,7 +233,7 @@ export default class FeedbackViewMode extends GameMode {
         }
     }
 
-    private async sortOnSolution(solution: Solution): Promise<void> {
+    private async sortOnSolution(solution?: Solution): Promise<void> {
         this.pushUILock();
         try {
             // AMW: this is very similar to the DesignBrowserMode method, but we

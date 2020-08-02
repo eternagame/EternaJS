@@ -74,6 +74,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
     public readonly playClicked = new UnitSignal();
     public readonly seeResultClicked = new UnitSignal();
     public readonly sortClicked = new UnitSignal();
+    public readonly returnClicked = new UnitSignal();
     public readonly voteClicked = new UnitSignal();
     public readonly editClicked = new UnitSignal();
     public readonly deleteClicked = new UnitSignal();
@@ -183,6 +184,17 @@ export default class ViewSolutionOverlay extends ContainerObject {
         this._header = new VLayoutContainer(10, HAlign.LEFT);
         this._header.position = new Point(theme.margin.left, theme.margin.top);
         this._content.display.addChild(this._header);
+
+        if (!(this._parentMode instanceof DesignBrowserMode)) {
+            const returnToBrowserButton = new GameButton()
+                .up(Bitmaps.ImgPrevious)
+                .over(Bitmaps.ImgPrevious)
+                .down(Bitmaps.ImgPrevious)
+                .tooltip('Return to design browser')
+                .label('RETURN TO DESIGN BROWSER', 12);
+            returnToBrowserButton.clicked.connect(() => this.returnClicked.emit());
+            this._content.addObject(returnToBrowserButton, this._header);
+        }
 
         const title = new ButtonWithIcon({
             icon: Bitmaps.ImgInfo,

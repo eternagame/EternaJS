@@ -906,6 +906,7 @@ export default class PoseEditMode extends GameMode {
                 this.switchToFeedbackViewForSolution(this._curSolution);
             });
             this._solutionView.sortClicked.connect(() => this.sortOnSolution(this._curSolution));
+            this._solutionView.returnClicked.connect(() => this.sortOnSolution(undefined));
         } else if (this._params.initSequence != null) {
             initialSequence = EPars.stringToSequence(this._params.initSequence);
         }
@@ -1023,7 +1024,7 @@ export default class PoseEditMode extends GameMode {
         return this._folder;
     }
 
-    private async sortOnSolution(solution: Solution): Promise<void> {
+    private async sortOnSolution(solution?: Solution): Promise<void> {
         this.pushUILock();
         try {
             // AMW: this is very similar to the DesignBrowserMode method, but we
