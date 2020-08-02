@@ -276,7 +276,11 @@ export default class EternaApp extends FlashbangApp {
      * If a DesignBrowserMode for the given puzzle is already on the mode stack, move it to the top of the stack.
      * Otherwise, push a new DesignBrowserMode to the stack, retaining any existing modes.
      */
-    public switchToDesignBrowser(puzzleOrID: number | Puzzle, solution?: Solution): Promise<void> {
+    public switchToDesignBrowser(
+        puzzleOrID: number | Puzzle,
+        solution?: Solution,
+        sortOnSolution: boolean = false
+    ): Promise<void> {
         const puzzleID = (puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID);
         Assert.assertIsDefined(this.modeStack.modes);
         const existingBrowser = this.modeStack.modes.find(
@@ -284,7 +288,7 @@ export default class EternaApp extends FlashbangApp {
         ) as DesignBrowserMode;
         if (existingBrowser != null && existingBrowser.puzzleID === puzzleID) {
             this.modeStack.setModeIndex(existingBrowser, -1);
-            if (solution) {
+            if (sortOnSolution && solution) {
                 existingBrowser.sortOnSolution(solution);
             }
             return Promise.resolve();

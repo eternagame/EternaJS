@@ -886,8 +886,8 @@ export default class PoseEditMode extends GameMode {
             this._solutionView.seeResultClicked.connect(() => {
                 this.switchToFeedbackViewForSolution(this._curSolution);
             });
-            this._solutionView.sortClicked.connect(() => this.sortOnSolution(this._curSolution));
-            this._solutionView.returnClicked.connect(() => this.sortOnSolution(undefined));
+            this._solutionView.sortClicked.connect(() => this.switchToBrowser(this._curSolution, true));
+            this._solutionView.returnClicked.connect(() => this.switchToBrowser(this._curSolution));
         } else if (this._params.initSequence != null) {
             initialSequence = EPars.stringToSequence(this._params.initSequence);
         }
@@ -1001,7 +1001,7 @@ export default class PoseEditMode extends GameMode {
         this._poseState = this._isDatabrowserMode ? PoseState.NATIVE : this._puzzle.defaultMode;
     }
 
-    private async sortOnSolution(solution?: Solution): Promise<void> {
+    private async switchToBrowser(solution: Solution, sortOnSolution: boolean = false): Promise<void> {
         this.pushUILock();
         try {
             // AMW: this is very similar to the DesignBrowserMode method, but we
@@ -1009,7 +1009,8 @@ export default class PoseEditMode extends GameMode {
             // only this one available.
             await Eterna.app.switchToDesignBrowser(
                 this.puzzleID,
-                solution
+                solution,
+                sortOnSolution
             );
         } catch (e) {
             log.error(e);
