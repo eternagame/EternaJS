@@ -14,7 +14,7 @@ export default class SaveGameManager {
         });
     }
 
-    public async load(name: string): Promise<SaveStoreItem> {
+    public async load(name: string): Promise<SaveStoreItem | null> {
         return this._store.getItem(name);
     }
 
