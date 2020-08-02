@@ -165,6 +165,7 @@ export default class DesignBrowserMode extends GameMode {
 
         this._dataColParent.pointerMove.connect(() => this.onMouseMove());
         this._dataColParent.pointerUp.connect(() => this.onMouseUp());
+        this._dataColParent.pointerTap.connect(() => this.onMouseUp());
 
         this._categories = Eterna.settings.designBrowserColumnNames.value;
         if (this._categories == null) {
