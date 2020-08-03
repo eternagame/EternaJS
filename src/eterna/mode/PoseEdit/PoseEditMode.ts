@@ -1311,10 +1311,10 @@ export default class PoseEditMode extends GameMode {
             } else if (ctrl && key === KeyCode.KeyZ) {
                 this.moveUndoStackToLastStable();
                 handled = true;
-            } else if (this._stackLevel === 0 && key === KeyCode.KeyD && this._params.solutions != null) {
+            } else if (this._stackLevel <= 1 && key === KeyCode.KeyD && this._params.solutions != null) {
                 this.showNextSolution(1);
                 handled = true;
-            } else if (this._stackLevel === 0 && key === KeyCode.KeyU && this._params.solutions != null) {
+            } else if (this._stackLevel <= 1 && key === KeyCode.KeyU && this._params.solutions != null) {
                 this.showNextSolution(-1);
                 handled = true;
             }
