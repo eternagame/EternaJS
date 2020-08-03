@@ -177,8 +177,7 @@ export default class EternaApp extends FlashbangApp {
                 return Promise.all([
                     this.initFoldingEngines(),
                     this.initLayoutEngines(),
-                    TextureUtil.load(Bitmaps.all),
-                    Fonts.loadFonts()
+                    TextureUtil.load(Bitmaps.all)
                 ]);
             })
             .then(() => this.initScriptInterface())
