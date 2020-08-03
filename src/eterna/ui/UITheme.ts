@@ -21,6 +21,8 @@ export default class UITheme {
         borderRadius: 5
     };
 
+    private static readonly designBrowserFontSize = 15;
+
     public static readonly designBrowser = {
         colors: {
             background: 0x021E46,
@@ -28,10 +30,11 @@ export default class UITheme {
             filterBackground: 0x021E46,
             filterBorder: 0x2F94D1
         },
-        rowHeight: Fonts.std(' ', 14).computeLineHeight(), // had been 30,
+        fontSize: UITheme.designBrowserFontSize,
+        rowHeight: Fonts.std(' ', UITheme.designBrowserFontSize).computeLineHeight(), // had been 30,
         headerHeight: 36,
         filterHeight: 50,
         filterPadding: 10,
-        dataPadding: 14 + (Fonts.std(' ', 14).computeLineHeight() - 30)
+        dataPadding: 14 + (Fonts.std(' ', UITheme.designBrowserFontSize).computeLineHeight() - 30)
     };
 }

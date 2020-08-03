@@ -820,7 +820,7 @@ export default class DesignBrowserMode extends GameMode {
 
     private rebuildDataColumns(filters: DesignBrowserFilter[] | null = null): void {
         const FONT = Fonts.STDFONT;
-        const FONT_SIZE = 15;
+        const FONT_SIZE = UITheme.designBrowser.fontSize;
 
         if (this._dataCols != null) {
             for (let dataCol of this._dataCols) {
@@ -984,7 +984,6 @@ export default class DesignBrowserMode extends GameMode {
 
             this._wholeRowWidth += col.width;
 
-            const {designBrowser: theme} = UITheme;
             if (ii % 2 === 0) {
                 col.setBgColor(0xffffff, 0);
             } else {
