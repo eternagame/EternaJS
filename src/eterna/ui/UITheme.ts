@@ -30,8 +30,8 @@ export default class UITheme {
         },
         rowHeight: Fonts.std(' ', 14).computeLineHeight(), // had been 30,
         headerHeight: 36,
-        filterHeight: 44,
-        filterPadding: 8,
+        filterHeight: 50,
+        filterPadding: 10,
         dataPadding: 14 + (Fonts.std(' ', 14).computeLineHeight() - 30)
     };
 }
