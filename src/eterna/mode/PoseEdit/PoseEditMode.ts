@@ -2120,6 +2120,8 @@ export default class PoseEditMode extends GameMode {
                 this._exitButton.display.alpha = 0;
                 this._exitButton.display.visible = true;
                 this._exitButton.addObject(new AlphaTask(1, 0.3));
+
+                this._helpBar.display.visible = true;
             }
         };
 
