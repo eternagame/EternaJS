@@ -49,7 +49,7 @@ export default class StructureInput extends GamePanel implements Updatable {
         };
 
         let showError = () => {
-            if (this._errorText.text.text !== ' ') this._errorText.display.visible = true;
+            if (this._errorText.text.text !== '') this._errorText.display.visible = true;
         };
 
         let hideError = () => {
