@@ -11,7 +11,6 @@ import TextInputObject from 'eterna/ui/TextInputObject';
 import Fonts from 'eterna/util/Fonts';
 import Solution from 'eterna/puzzle/Solution';
 import int from 'eterna/util/int';
-import Utility from 'eterna/util/Utility';
 import UITheme from 'eterna/ui/UITheme';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import BitmapManager from 'eterna/resources/BitmapManager';
@@ -118,9 +117,7 @@ export default class DataCol extends ContainerObject {
             this._filterField1 = new TextInputObject({
                 fontSize: TEXT_INPUT_SIZE,
                 width: this._dataWidth - 22,
-                placeholder: 'Search',
-                bgColor: theme.colors.filterBackground,
-                borderColor: theme.colors.filterBorder
+                placeholder: 'Search'
             });
             this._filterField1.tabIndex = -1; // prevent tab-selection
             this._filterField1.display.position = new Point(11, theme.headerHeight + theme.filterPadding);
@@ -131,9 +128,7 @@ export default class DataCol extends ContainerObject {
             this._filterField1 = new TextInputObject({
                 fontSize: TEXT_INPUT_SIZE,
                 width: 40,
-                placeholder: 'min',
-                bgColor: theme.colors.filterBackground,
-                borderColor: theme.colors.filterBorder
+                placeholder: 'min'
             });
             this._filterField1.tabIndex = -1; // prevent tab-selection
             this._filterField1.display.position = new Point(11, theme.headerHeight + theme.filterPadding);
@@ -144,9 +139,7 @@ export default class DataCol extends ContainerObject {
             this._filterField2 = new TextInputObject({
                 fontSize: TEXT_INPUT_SIZE,
                 width: 40,
-                placeholder: 'max',
-                bgColor: theme.colors.filterBackground,
-                borderColor: theme.colors.filterBorder
+                placeholder: 'max'
             });
             this._filterField2.tabIndex = -1; // prevent tab-selection
             this._filterField2.display.position = new Point(11 + 40 + 12, theme.headerHeight + theme.filterPadding);

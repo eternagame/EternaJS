@@ -2,14 +2,14 @@ import {Rectangle} from 'pixi.js';
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import {
-    KeyCode, DisplayUtil, HAlign, VAlign, Updatable
+    KeyCode, DisplayUtil, HAlign, VAlign, Updatable, ContainerObject
 } from 'flashbang';
-import GamePanel from 'eterna/ui/GamePanel';
 import Pose2D from 'eterna/pose2D/Pose2D';
 import TextInputObject from 'eterna/ui/TextInputObject';
 import TextBalloon from 'eterna/ui/TextBalloon';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
 import Fonts from 'eterna/util/Fonts';
+import UITheme from 'eterna/ui/UITheme';
 
 function IsArrowKey(keyCode: string): boolean {
     return keyCode === KeyCode.ArrowRight
@@ -18,7 +18,7 @@ function IsArrowKey(keyCode: string): boolean {
         || keyCode === KeyCode.ArrowDown;
 }
 
-export default class StructureInput extends GamePanel implements Updatable {
+export default class StructureInput extends ContainerObject implements Updatable {
     constructor(pose: Pose2D) {
         super();
         this._pose = pose;
@@ -35,7 +35,7 @@ export default class StructureInput extends GamePanel implements Updatable {
 
         this._errorText = new TextBalloon('', 0x0, 0.8);
         this._errorText.display.visible = false;
-        this._errorText.display.position.y = -60;
+        this._errorText.display.position.y = -45;
         this.addObject(this._errorText, this.container);
 
         this.setSize(100, 50);
@@ -47,19 +47,6 @@ export default class StructureInput extends GamePanel implements Updatable {
                 e.stopPropagation();
             }
         };
-
-        let showError = () => {
-            if (this._errorText.text.text !== '') this._errorText.display.visible = true;
-        };
-
-        let hideError = () => {
-            this._errorText.display.visible = false;
-        };
-
-        this.pointerOver.connect(showError);
-        this.pointerOut.connect(hideError);
-        this._textInput.element.onmouseover = showError;
-        this._textInput.element.onmouseleave = hideError;
 
         // Prevent PoseField from adding a drag surface since we're not trying to drag
         this.pointerDown.connect((e) => { e.stopPropagation(); });
@@ -74,7 +61,6 @@ export default class StructureInput extends GamePanel implements Updatable {
     }
 
     public setSize(width: number, height: number): void {
-        super.setSize(width, height);
         this._textInput.width = width - 20;
         DisplayUtil.positionRelative(
             this._textInput.display, HAlign.CENTER, VAlign.CENTER,
@@ -257,12 +243,22 @@ export default class StructureInput extends GamePanel implements Updatable {
 
     public setWarning(warning: string): void {
         if (warning && warning.length > 0) {
-            this.setup(0, 0.5, 0xAA0000, 0.0, 0);
+            this._textInput.borderColor(0xAA0000);
             this._errorText.setText(warning);
+            this._errorText.display.visible = true;
         } else {
-            this.setup(0, 0.07, 0xFFFFFF, 0.0, 0);
+            this._textInput.borderColor(UITheme.textInput.colors.border);
             this._errorText.setText('');
+            this._errorText.display.visible = false;
         }
+    }
+
+    public get width() {
+        return this._textInput.width;
+    }
+
+    public get height() {
+        return this._textInput.height;
     }
 
     private readonly _pose: Pose2D;

@@ -202,6 +202,10 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
         return !Number.isNaN(size) ? size : 0;
     }
 
+    protected static colorToString(color: number): string {
+        return `#${color.toString(16).padStart(6, '0')}`;
+    }
+
     protected readonly _dummyDisp: Graphics = new Graphics();
     protected readonly _obj: T;
 
