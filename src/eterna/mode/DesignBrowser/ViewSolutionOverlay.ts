@@ -88,10 +88,15 @@ export default class ViewSolutionOverlay extends ContainerObject {
     }
 
     public showSolution(solution: Solution) {
-        this.container.visible = true;
         if (solution !== this._props.solution) {
             this._props.solution = solution;
             this.populate();
+            this.container.visible = true;
+        } else if (this.container.visible === false) {
+            this.container.visible = true;
+        } else {
+            // We've already shown this design, so toggle visibility off
+            this.container.visible = false;
         }
     }
 
