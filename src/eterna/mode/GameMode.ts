@@ -20,8 +20,6 @@ import EternaURL from 'eterna/net/EternaURL';
 import Folder from 'eterna/folding/Folder';
 import Dialog from 'eterna/ui/Dialog';
 
-import NuPACK from 'eterna/folding/NuPACK';
-
 export default abstract class GameMode extends AppMode {
     public readonly bgLayer = new Container();
     public readonly poseLayer = new Container();

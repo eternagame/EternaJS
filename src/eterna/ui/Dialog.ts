@@ -43,9 +43,10 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
             Assert.assertIsDefined(Flashbang.stageWidth);
             Assert.assertIsDefined(Flashbang.stageHeight);
             bg.clear()
-                .beginFill(0x0, this.bgAlpha)
+                .beginFill(0x0)
                 .drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
                 .endFill();
+            bg.alpha = this.bgAlpha;
         };
         updateBG();
         this.regs.add(this.mode.resized.connect(updateBG));
