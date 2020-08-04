@@ -38,11 +38,8 @@ export default class CopyTextDialogMode extends AppMode {
 
         inputPanel.cancelClicked.connect(() => this.close());
         inputPanel.okClicked.connect(() => {
-            setTimeout(() => {
-                textField.setFocus(true);
-                document.execCommand('copy');
-                this.close();
-            });
+            textField.copyToClipboard();
+            this.close();
         });
 
         const updateView = () => {

@@ -186,6 +186,16 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
         this._obj.tabIndex = value;
     }
 
+    public copyToClipboard(): void {
+        let wasFocused = document.activeElement === this._obj;
+        let wasVisible = this._obj.style.visibility === 'visible';
+        this._obj.style.visibility = 'visible';
+        this.setFocus(true);
+        document.execCommand('copy');
+        this.setFocus(wasFocused);
+        if (!wasVisible) this._obj.style.visibility = 'hidden';
+    }
+
     private onInput(): void {
         if (this._disallow != null) {
             let curValue = this.text;
