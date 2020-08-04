@@ -51,16 +51,13 @@ export default class Background extends ContainerObject {
 
     private updateBackground(): void {
         if (Eterna.gameDiv != null) {
-            let lightBlue: string; let
-                darkBlue: string;
             if (this._isFrozen) {
-                lightBlue = 'rgb(67, 93, 146) 0%';
-                darkBlue = 'rgb(10, 43, 87) 70%';
+                let lightBlue = 'rgb(67, 93, 146) 0%';
+                let darkBlue = 'rgb(10, 43, 87) 70%';
+                Eterna.gameDiv.style.backgroundImage = `radial-gradient(ellipse, ${lightBlue}, ${darkBlue})`;
             } else {
-                lightBlue = 'rgb(2, 38, 76) 0%';
-                darkBlue = 'rgb(3, 27, 60) 70%';
+                Eterna.gameDiv.style.backgroundImage = '';
             }
-            Eterna.gameDiv.style.backgroundImage = `radial-gradient(ellipse, ${lightBlue}, ${darkBlue})`;
         }
     }
 
