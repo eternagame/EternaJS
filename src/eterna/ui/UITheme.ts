@@ -31,10 +31,10 @@ export default class UITheme {
             filterBorder: 0x2F94D1
         },
         fontSize: UITheme.designBrowserFontSize,
-        rowHeight: Fonts.std(' ', UITheme.designBrowserFontSize).computeLineHeight(), // had been 30,
+        rowHeight: Fonts.std(' ', UITheme.designBrowserFontSize).computeLineHeight(),
         headerHeight: 36,
         filterHeight: 50,
         filterPadding: 10,
-        dataPadding: 14 + (Fonts.std(' ', UITheme.designBrowserFontSize).computeLineHeight() - 30)
+        dataPadding: Fonts.std(' ', UITheme.designBrowserFontSize).computeLineHeight() - 16
     };
 }
