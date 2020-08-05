@@ -91,7 +91,7 @@ export default class FeedbackViewMode extends GameMode {
         this.addObject(puzzleTitle, this.uiLayer);
         DisplayUtil.positionRelative(
             puzzleTitle.display, HAlign.LEFT, VAlign.CENTER,
-            homeArrow, HAlign.RIGHT, VAlign.CENTER, 8, 0
+            homeArrow, HAlign.RIGHT, VAlign.CENTER, 53, 13
         );
 
         this._toolbar = new Toolbar(ToolbarType.FEEDBACK, {states: this._puzzle.getSecstructs().length});
