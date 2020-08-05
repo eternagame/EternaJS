@@ -3,6 +3,8 @@ import EPars from 'eterna/EPars';
 import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
 import Dialog, {DialogCanceledError} from 'eterna/ui/Dialog';
 import TextInputPanel from 'eterna/ui/TextInputPanel';
+import TextInputObject from 'eterna/ui/TextInputObject';
+import {Signal} from 'signals';
 import GameMode from '../GameMode';
 
 function GetNumber(dict: Map<string, string>, name: string): number | undefined {
@@ -23,10 +25,11 @@ export interface SubmitPuzzleDetails {
 }
 
 export default class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
-    constructor(numPoses: number, puzzleState: UndoBlock) {
+    constructor(numPoses: number, puzzleState: UndoBlock, initialState: SubmitPuzzleDetails = {}) {
         super();
         this._numPoses = numPoses;
         this._puzzleState = puzzleState;
+        this._initialState = initialState;
     }
 
     /**
@@ -59,20 +62,41 @@ export default class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
         let inputPanel = new TextInputPanel();
         inputPanel.title = 'Publish your puzzle';
 
+        let inputFields: { [key: string]: TextInputObject} = {};
+
         let title = inputPanel.addField(TITLE, FIELD_WIDTH);
+        inputFields.title = title;
         if (this._numPoses === 1) {
-            inputPanel.addField(MIN_GU, FIELD_WIDTH);
-            inputPanel.addField(MAX_GC, FIELD_WIDTH);
-            inputPanel.addField(MIN_AU, FIELD_WIDTH);
+            inputFields.minGU = inputPanel.addField(MIN_GU, FIELD_WIDTH);
+            inputFields.maxGC = inputPanel.addField(MAX_GC, FIELD_WIDTH);
+            inputFields.minAU = inputPanel.addField(MIN_AU, FIELD_WIDTH);
         }
-        inputPanel.addField(DESCRIPTION, FIELD_WIDTH, true);
+        inputFields.description = inputPanel.addField(DESCRIPTION, FIELD_WIDTH, true);
+        // If the initial state for the field exists, set the text to that state
+        Object.keys(inputFields).forEach((input) => {
+            let state = this._initialState as { [key: string]: string | number};
+            // The keys for the initial state and the text fields are the same
+            if (state[input]) inputFields[input].text = state[input] as string;
+        });
+
         this.addObject(inputPanel, this.container);
 
         title.setFocus();
 
         inputPanel.setHotkeys(undefined, undefined, KeyCode.Escape, undefined);
 
-        inputPanel.cancelClicked.connect(() => this.close(null));
+        inputPanel.cancelClicked.connect(() => {
+            let dict = inputPanel.getFieldValues();
+            let details = {
+                title: dict.get(TITLE),
+                description: dict.get(DESCRIPTION),
+                minGU: GetNumber(dict, MIN_GU),
+                maxGC: GetNumber(dict, MAX_GC),
+                minAU: GetNumber(dict, MIN_AU)
+            };
+            this.saveInput.emit(details);
+            this.close(null);
+        });
         inputPanel.okClicked.connect(() => {
             let dict = inputPanel.getFieldValues();
             let details = {
@@ -82,6 +106,8 @@ export default class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
                 maxGC: GetNumber(dict, MAX_GC),
                 minAU: GetNumber(dict, MIN_AU)
             };
+
+            this.saveInput.emit(details);
 
             let errorString = this.validate(details);
             if (errorString != null) {
@@ -137,6 +163,9 @@ export default class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
         return null;
     }
 
+    public saveInput: Signal<SubmitPuzzleDetails> = new Signal();
+
     private readonly _numPoses: number;
     private readonly _puzzleState: UndoBlock;
+    private readonly _initialState: SubmitPuzzleDetails;
 }

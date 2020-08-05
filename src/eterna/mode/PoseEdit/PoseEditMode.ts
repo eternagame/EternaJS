@@ -1877,7 +1877,12 @@ export default class PoseEditMode extends GameMode {
 
         datablock.setParam(UndoBlockParam.MELTING_POINT, meltpoint, 37);
 
-        this.showDialog(new SubmitPoseDialog()).closed.then((submitDetails) => {
+        let dialog = new SubmitPoseDialog(this._savedInputs);
+        dialog.saveInputs.connect((e) => {
+            this._savedInputs = e;
+        });
+
+        this.showDialog(dialog).closed.then((submitDetails) => {
             if (submitDetails != null) {
                 // / Always submit the sequence in the first state
                 this.updateCurrentBlockWithDotAndMeltingPlot(0);
@@ -3283,6 +3288,7 @@ export default class PoseEditMode extends GameMode {
     private readonly _params: PoseEditParams;
     private readonly _scriptInterface = new ExternalInterfaceCtx();
     private readonly _autosaveData: SaveStoreItem | null;
+    private _savedInputs: SubmitPoseDetails;
 
     private _constraintsLayer: Container;
 
