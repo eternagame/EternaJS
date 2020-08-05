@@ -34,6 +34,9 @@ import ShapeConstraint from 'eterna/constraints/constraints/ShapeConstraint';
 import ContraFold from 'eterna/folding/Contrafold';
 import {SaveStoreItem} from 'flashbang/settings/SaveGameManager';
 import FolderSwitcher from 'eterna/ui/FolderSwitcher';
+import GameButton from 'eterna/ui/GameButton';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import EternaURL from 'eterna/net/EternaURL';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
@@ -115,8 +118,18 @@ export default class PuzzleEditMode extends GameMode {
         this._folderSwitcher.display.position = new Point(17, 175);
         this.addObject(this._folderSwitcher, this.uiLayer);
 
-        this._homeButton = GameMode.createHomeButton();
-        this._homeButton.hideWhenModeInactive();
+        this._homeButton = new GameButton()
+            .up(Bitmaps.ImgHome)
+            .over(Bitmaps.ImgHome)
+            .down(Bitmaps.ImgHome);
+        this._homeButton.display.position = new Point(18, 10);
+        this._homeButton.clicked.connect(() => {
+            if (Eterna.MOBILE_APP) {
+                window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
+            } else {
+                window.location.href = EternaURL.createURL({page: 'lab_bench'});
+            }
+        });
         this.addObject(this._homeButton, this.uiLayer);
 
         let toolbarType = this._embedded ? ToolbarType.PUZZLEMAKER_EMBEDDED : ToolbarType.PUZZLEMAKER;
@@ -362,11 +375,6 @@ export default class PuzzleEditMode extends GameMode {
         DisplayUtil.positionRelativeToStage(
             this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
             HAlign.CENTER, VAlign.BOTTOM, 20, -20
-        );
-
-        DisplayUtil.positionRelativeToStage(
-            this._homeButton.display, HAlign.RIGHT, VAlign.TOP,
-            HAlign.RIGHT, VAlign.TOP, 0, 5
         );
 
         let toolbarBounds = this._toolbar.display.getBounds();
@@ -966,6 +974,6 @@ export default class PuzzleEditMode extends GameMode {
 
     private _toolbar: Toolbar;
     private _folderSwitcher: FolderSwitcher;
-    private _homeButton: URLButton;
+    private _homeButton: GameButton;
     private _constraintBar: ConstraintBar;
 }
