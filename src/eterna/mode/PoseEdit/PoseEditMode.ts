@@ -851,7 +851,9 @@ export default class PoseEditMode extends GameMode {
             this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
         );
         this._folderSwitcher.display.position = new Point(17, 175);
-        this.addObject(this._folderSwitcher, this.uiLayer);
+        // If uiLayer, constraint tooltips overflow
+        // poseLayer means it's even with energy/delta labels, which do show properly
+        this.addObject(this._folderSwitcher, this.poseLayer);
 
         this._folderSwitcher.selectedFolder.connectNotify((folder) => {
             if (folder.canScoreStructures) {
