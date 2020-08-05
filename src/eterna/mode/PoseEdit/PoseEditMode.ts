@@ -152,9 +152,6 @@ export default class PoseEditMode extends GameMode {
         this._background = new Background();
         this.addObject(this._background, this.bgLayer);
 
-        this._constraintsLayer = new Container();
-        this.uiLayer.addChild(this._constraintsLayer);
-
         let toolbarType = this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL ? ToolbarType.LAB : ToolbarType.PUZZLE;
         this._toolbar = new Toolbar(toolbarType, {
             states: this._puzzle.getSecstructs().length,
@@ -772,6 +769,56 @@ export default class PoseEditMode extends GameMode {
         this._solutionNameText = Fonts.std('', 14).bold().color(0xc0c0c0).build();
         this.uiLayer.addChild(this._solutionNameText);
 
+        let initialFolder: Folder | null = null;
+        if (this._params.initialFolder != null) {
+            initialFolder = FolderManager.instance.getFolder(this._params.initialFolder);
+            if (initialFolder == null) {
+                log.warn(`No such folder '${this._params.initialFolder}'`);
+            }
+        }
+
+        initialFolder = initialFolder || FolderManager.instance.getFolder(this._puzzle.folderName);
+        if (!initialFolder) {
+            throw new Error('Big problem; unable to initialize folder!');
+        }
+
+        // now that we have made the folder check, we can set _targetPairs. Used to do this
+        // above but because NuPACK can handle pseudoknots, we shouldn't
+        for (let ii = 0; ii < targetSecstructs.length; ii++) {
+            if (this._targetConditions && this._targetConditions[0]
+                    && this._targetConditions[0]['type'] === 'pseudoknot') {
+                this._targetPairs.push(EPars.parenthesisToPairs(targetSecstructs[ii], true));
+                this._poseFields[ii].pose.pseudoknotted = true;
+            } else {
+                this._targetPairs.push(EPars.parenthesisToPairs(targetSecstructs[ii]));
+            }
+        }
+
+        this._folderSwitcher = new FolderSwitcher(
+            (folder) => this._puzzle.canUseFolder(folder),
+            initialFolder,
+            this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
+        );
+        this._folderSwitcher.display.position = new Point(17, 175);
+        this.addObject(this._folderSwitcher, this.uiLayer);
+
+        this._folderSwitcher.selectedFolder.connectNotify((folder) => {
+            if (folder.canScoreStructures) {
+                for (let pose of this._poses) {
+                    pose.scoreFolder = folder;
+                }
+            } else {
+                for (let pose of this._poses) {
+                    pose.scoreFolder = null;
+                }
+            }
+
+            this.onChangeFolder();
+        });
+
+        this._constraintsLayer = new Container();
+        this.uiLayer.addChild(this._constraintsLayer);
+
         this._constraintsLayer.visible = true;
 
         if (!this._puzzle.isPalleteAllowed) {
@@ -818,53 +865,6 @@ export default class PoseEditMode extends GameMode {
                     }
                 }
             }
-        });
-
-        let initialFolder: Folder | null = null;
-        if (this._params.initialFolder != null) {
-            initialFolder = FolderManager.instance.getFolder(this._params.initialFolder);
-            if (initialFolder == null) {
-                log.warn(`No such folder '${this._params.initialFolder}'`);
-            }
-        }
-
-        initialFolder = initialFolder || FolderManager.instance.getFolder(this._puzzle.folderName);
-        if (!initialFolder) {
-            throw new Error('Big problem; unable to initialize folder!');
-        }
-
-        // now that we have made the folder check, we can set _targetPairs. Used to do this
-        // above but because NuPACK can handle pseudoknots, we shouldn't
-        for (let ii = 0; ii < targetSecstructs.length; ii++) {
-            if (this._targetConditions && this._targetConditions[0]
-                    && this._targetConditions[0]['type'] === 'pseudoknot') {
-                this._targetPairs.push(EPars.parenthesisToPairs(targetSecstructs[ii], true));
-                this._poseFields[ii].pose.pseudoknotted = true;
-            } else {
-                this._targetPairs.push(EPars.parenthesisToPairs(targetSecstructs[ii]));
-            }
-        }
-
-        this._folderSwitcher = new FolderSwitcher(
-            (folder) => this._puzzle.canUseFolder(folder),
-            initialFolder,
-            this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
-        );
-        this._folderSwitcher.display.position = new Point(17, 175);
-        this.addObject(this._folderSwitcher, this.uiLayer);
-
-        this._folderSwitcher.selectedFolder.connectNotify((folder) => {
-            if (folder.canScoreStructures) {
-                for (let pose of this._poses) {
-                    pose.scoreFolder = folder;
-                }
-            } else {
-                for (let pose of this._poses) {
-                    pose.scoreFolder = null;
-                }
-            }
-
-            this.onChangeFolder();
         });
 
         let initialSequence: number[] | null = null;
