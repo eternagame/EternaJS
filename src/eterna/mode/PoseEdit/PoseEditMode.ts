@@ -2137,6 +2137,13 @@ export default class PoseEditMode extends GameMode {
                     Eterna.chat.popHideChat();
                     Assert.assertIsDefined(this.modeStack);
                     this.modeStack.changeMode(new PoseEditMode(nextPuzzle, {}));
+                    let oldURL = window.location.toString();
+                    let newURL = oldURL.replace(/\d+\/?$/, nextPuzzle.nodeID.toString());
+                    if (Eterna.DEV_MODE) {
+                        newURL = oldURL.replace(/puzzle=\d+?$/, `puzzle=${nextPuzzle.nodeID}`);
+                    }
+                    // eslint-disable-next-line no-restricted-globals
+                    if (!Eterna.MOBILE_APP) history.pushState(null, '', newURL);
                 } catch (err) {
                     log.error(err);
                     throw new Error(`Failed to load next puzzle - ${err}`);
