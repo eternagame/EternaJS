@@ -507,8 +507,16 @@ export default class PuzzleEditMode extends GameMode {
         let puzzleState = this.getCurrentUndoBlock(0);
         const PROMPT = 'You can only submit 3 puzzles per 24 hours.\nAre you sure you want to submit?';
         this.showConfirmDialog(PROMPT).confirmed
-            .then(() => this.showDialog(new SubmitPuzzleDialog(this._poses.length, puzzleState)).confirmed)
-            .then((details) => this.submitPuzzle(details))
+            .then(() => {
+                let dialog = new SubmitPuzzleDialog(this._poses.length, puzzleState, this._savedInputs);
+                dialog.saveInput.connect((e) => {
+                    this._savedInputs = e;
+                });
+                return this.showDialog(dialog).confirmed;
+            })
+            .then((details) => {
+                this.submitPuzzle(details);
+            })
             .catch((err) => {
                 if (!(err instanceof DialogCanceledError)) {
                     throw err;
@@ -954,6 +962,7 @@ export default class PuzzleEditMode extends GameMode {
     private _stackLevel: number;
     private _stackSize: number;
     private _paused: boolean;
+    private _savedInputs: SubmitPuzzleDetails;
 
     private _toolbar: Toolbar;
     private _folderSwitcher: FolderSwitcher;
