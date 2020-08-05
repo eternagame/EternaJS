@@ -474,7 +474,7 @@ export default class PuzzleEditMode extends GameMode {
         if (!this._constraintBar.updateConstraints({
             undoBlocks: this._seqStack[this._stackLevel],
             targetConditions: this._targetConditions
-        })) {
+        }) && !Eterna.DEV_MODE) {
             this.showNotification('You should first solve your puzzle before submitting it!');
             return;
         }
@@ -495,16 +495,6 @@ export default class PuzzleEditMode extends GameMode {
 
             if (secstruct.length !== firstSecstruct.length) {
                 this.showNotification("Structure lengths don't match");
-                return;
-            }
-
-            if (
-                !EPars.arePairsSame(
-                    this.getCurrentTargetPairs(ii),
-                    this.getCurrentUndoBlock(ii).getPairs(EPars.DEFAULT_TEMPERATURE)
-                ) && !Eterna.DEV_MODE
-            ) {
-                this.showNotification('You should first solve your puzzle before submitting it!');
                 return;
             }
 
