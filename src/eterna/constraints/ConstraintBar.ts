@@ -64,11 +64,11 @@ export default class ConstraintBar extends ContainerObject {
     private _drag = false;
     private _previousDragPos = -1;
 
-    constructor(constraints: Constraint<BaseConstraintStatus>[] | null) {
+    constructor(constraints: Constraint<BaseConstraintStatus>[] | null, states = 1) {
         super();
         this._constraints = constraints
             ? constraints.map(
-                (constraint) => ({constraint, constraintBox: new ConstraintBox(false), highlightCache: null})
+                (constraint) => ({constraint, constraintBox: new ConstraintBox(false, states), highlightCache: null})
             ) : [];
 
         Eterna.settings.highlightRestricted.connect(() => {
