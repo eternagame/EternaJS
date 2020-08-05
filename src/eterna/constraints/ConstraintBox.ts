@@ -45,9 +45,10 @@ export interface ConstraintBoxConfig {
 }
 
 export default class ConstraintBox extends ContainerObject implements Enableable {
-    constructor(forMissionScreen: boolean) {
+    constructor(forMissionScreen: boolean, states = 1) {
         super();
         this._forMissionScreen = forMissionScreen;
+        this._states = states;
 
         this._bgGraphics = new Graphics();
         this._bgGraphics.interactiveChildren = false;
@@ -233,7 +234,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             this._sideText.position = new Point(-deltaWidth / 2, this._opaqueBackdrop.height + 10);
         }
 
-        if (config.stateNumber && !this._forMissionScreen) {
+        if (config.stateNumber && !this._forMissionScreen && this._states > 1) {
             this._stateText.visible = true;
             this._stateText.text = config.stateNumber.toString();
         }
@@ -479,6 +480,8 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     private _forMissionScreen: boolean;
 
     private _satisfied: boolean;
+
+    private readonly _states: number;
 
     private _bgGraphics: Graphics;
     private _backlight: Graphics;

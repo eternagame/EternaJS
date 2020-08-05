@@ -782,7 +782,7 @@ export default class PoseEditMode extends GameMode {
             this._toolbar.palette.clickTarget(PaletteTargetType.A);
         }
 
-        this._constraintBar = new ConstraintBar(this._puzzle.constraints);
+        this._constraintBar = new ConstraintBar(this._puzzle.constraints, this._puzzle.getSecstructs.length);
         this._constraintBar.display.visible = false;
         this.addObject(this._constraintBar, this._constraintsLayer);
         this._constraintBar.sequenceHighlights.connect((highlightInfos: HighlightInfo[] | null) => {
@@ -2226,7 +2226,7 @@ export default class PoseEditMode extends GameMode {
                 (constraint) => !(constraint instanceof ShapeConstraint || constraint instanceof AntiShapeConstraint)
             ).map(
                 (constraint) => {
-                    let box = new ConstraintBox(true);
+                    let box = new ConstraintBox(true, this._puzzle.getSecstructs().length);
                     box.setContent(constraint.getConstraintBoxConfig(
                         constraint.evaluate({
                             undoBlocks: this._seqStacks[this._stackLevel],
