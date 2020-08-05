@@ -471,6 +471,14 @@ export default class PuzzleEditMode extends GameMode {
     private onSubmitPuzzle(): void {
         let firstSecstruct: string = this._structureInputs[0].structureString;
 
+        if (!this._constraintBar.updateConstraints({
+            undoBlocks: this._seqStack[this._stackLevel],
+            targetConditions: this._targetConditions
+        })) {
+            this.showNotification('You should first solve your puzzle before submitting it!');
+            return;
+        }
+
         for (let ii = 0; ii < this._poses.length; ii++) {
             let secstruct: string = this._structureInputs[ii].structureString;
 
