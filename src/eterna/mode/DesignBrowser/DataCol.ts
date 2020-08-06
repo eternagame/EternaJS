@@ -178,7 +178,7 @@ export default class DataCol extends ContainerObject {
         const {designBrowser: theme} = UITheme;
         const dataStart = theme.headerHeight + theme.filterHeight + theme.dataPadding / 2;
 
-        let mouseLoc = e?.data.getLocalPosition(this.container);
+        let mouseLoc = e.data.getLocalPosition(this.container);
         if (mouseLoc.y < dataStart) {
             return [-1, -1];
         }

@@ -556,7 +556,7 @@ export default class DesignBrowserMode extends GameMode {
 
     private onMouseUp(e: PIXI.interaction.InteractionEvent): void {
         if (Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown) {
-            this.mark();
+            this.mark(e);
             return;
         }
 
@@ -663,7 +663,7 @@ export default class DesignBrowserMode extends GameMode {
             + theme.dataPadding / 2;
     }
 
-    private mark(): void {
+    private mark(e: PIXI.interaction.InteractionEvent): void {
         if (this._dataCols == null) {
             this._markerBoxes.visible = false;
             return;
@@ -673,7 +673,7 @@ export default class DesignBrowserMode extends GameMode {
             return;
         }
 
-        let [index] = this._dataCols[0].getMouseIndex();
+        let [index] = this._dataCols[0].getMouseIndex(e);
         if (index < 0) {
             return;
         }
