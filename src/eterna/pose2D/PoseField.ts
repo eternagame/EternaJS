@@ -4,6 +4,7 @@ import {
     KeyboardEventType, KeyCode, Assert
 } from 'flashbang';
 import ROPWait from 'eterna/rscript/ROPWait';
+import debounce from 'lodash.debounce';
 import Pose2D from './Pose2D';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
@@ -204,17 +205,38 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         if (!this.display.visible || !this.containsPoint(mouse.x, mouse.y)) {
             return false;
         }
-
         if (e.deltaY < 0) {
-            this.zoomIn();
+            if (e.deltaY < -1) this._usesOtherMouse = true;
+            if (this._usesOtherMouse && e.deltaY < -2 && e.deltaY < this._lastDeltaY) this._debounceZoomIn();
+            else if (!this._usesOtherMouse) this.zoomIn();
+            this._lastDeltaY = e.deltaY;
             return true;
         } else if (e.deltaY > 0) {
-            this.zoomOut();
+            if (e.deltaY > 1) this._usesOtherMouse = true;
+            if (this._usesOtherMouse && e.deltaY > 2 && e.deltaY > this._lastDeltaY) this._debounceZoomOut();
+            else if (!this._usesOtherMouse) this.zoomOut();
+            this._lastDeltaY = e.deltaY;
             return true;
         }
 
         return false;
     }
+
+    // Whether the user's mouse is 'sensitive' to scrolls (e.g. Magic Mouse)
+    private _usesOtherMouse = false;
+    // Stores the previous delta
+    private _lastDeltaY = 0;
+
+    // Debounced zoom functions for 'sensitive' mice
+    private _debounceZoomIn = debounce(this.zoomIn, 200, {
+        leading: true,
+        trailing: false
+    });
+
+    private _debounceZoomOut = debounce(this.zoomOut, 200, {
+        leading: true,
+        trailing: false
+    });
 
     public onKeyboardEvent(e: KeyboardEvent): boolean {
         if (!this.display.visible || e.type !== KeyboardEventType.KEY_DOWN) {
