@@ -174,17 +174,11 @@ export default class DataCol extends ContainerObject {
         this._pairsArray = pairs.slice();
     }
 
-    // AMW TODO POINT IPOINT
-    private get mouseLoc(): IPoint {
-        Assert.assertIsDefined(Flashbang.globalMouse);
-        return this.container.toLocal(Flashbang.globalMouse);
-    }
-
-    public getMouseIndex(e: PIXI.interaction.InteractionEvent | null = null): [number, number] {
+    public getMouseIndex(e: PIXI.interaction.InteractionEvent): [number, number] {
         const {designBrowser: theme} = UITheme;
         const dataStart = theme.headerHeight + theme.filterHeight + theme.dataPadding / 2;
 
-        let mouseLoc = e?.data.getLocalPosition(this.container) || this.mouseLoc;
+        let mouseLoc = e?.data.getLocalPosition(this.container);
         if (mouseLoc.y < dataStart) {
             return [-1, -1];
         }
