@@ -206,15 +206,11 @@ export default class PoseField extends ContainerObject implements KeyboardListen
             return false;
         }
         if (e.deltaY < 0) {
-            if (e.deltaY < -1) this._usesOtherMouse = true;
-            if (this._usesOtherMouse && e.deltaY < -2 && e.deltaY < this._lastDeltaY) this._debounceZoomIn();
-            else if (!this._usesOtherMouse) this.zoomIn();
+            if (e.deltaY < -2 && e.deltaY < this._lastDeltaY) this._debounceZoomIn();
             this._lastDeltaY = e.deltaY;
             return true;
         } else if (e.deltaY > 0) {
-            if (e.deltaY > 1) this._usesOtherMouse = true;
-            if (this._usesOtherMouse && e.deltaY > 2 && e.deltaY > this._lastDeltaY) this._debounceZoomOut();
-            else if (!this._usesOtherMouse) this.zoomOut();
+            if (e.deltaY > 2 && e.deltaY > this._lastDeltaY) this._debounceZoomOut();
             this._lastDeltaY = e.deltaY;
             return true;
         }
@@ -222,8 +218,6 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         return false;
     }
 
-    // Whether the user's mouse is 'sensitive' to scrolls (e.g. Magic Mouse)
-    private _usesOtherMouse = false;
     // Stores the previous delta
     private _lastDeltaY = 0;
 
