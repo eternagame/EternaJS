@@ -66,7 +66,7 @@ export default class SortOptionsDialog extends Dialog<void> {
 
         addCriterionLayout.addHSpacer(10);
 
-        this._toggleCurSortOrderButton = new GameButton().label('increasing', 15, false);
+        this._toggleCurSortOrderButton = new GameButton().label('increasing', 14, false);
         this._toggleCurSortOrderButton.clicked.connect(() => this.toggleCurrentSortOrder());
         this.addObject(this._toggleCurSortOrderButton, addCriterionLayout);
 
@@ -114,7 +114,7 @@ export default class SortOptionsDialog extends Dialog<void> {
         ui.container.addChild(ui.categoryText);
 
         ui.sortOrderButton = new GameButton()
-            .label(sortOrder === SortOrder.INCREASING ? 'increasing' : 'decreasing', 15, false);
+            .label(sortOrder === SortOrder.INCREASING ? 'increasing' : 'decreasing', 14, false);
         ui.sortOrderButton.clicked.connect(() => this.toggleSort(category));
         ui.sortOrderButton.display.position = new Point(180, 0);
         this.addObject(ui.sortOrderButton, ui.container);
@@ -147,9 +147,9 @@ export default class SortOptionsDialog extends Dialog<void> {
 
         if (curIdx >= 0) {
             if (order === SortOrder.INCREASING) {
-                this._criteriaUI[curIdx].sortOrderButton.label('increasing', 15, false);
+                this._criteriaUI[curIdx].sortOrderButton.label('increasing', 14, false);
             } else {
-                this._criteriaUI[curIdx].sortOrderButton.label('decreasing', 15, false);
+                this._criteriaUI[curIdx].sortOrderButton.label('decreasing', 14, false);
             }
 
             if (curIdx > 0) {
@@ -182,9 +182,9 @@ export default class SortOptionsDialog extends Dialog<void> {
         this._addCriteriaSortOrder *= -1;
 
         if (this._addCriteriaSortOrder === SortOrder.INCREASING) {
-            this._toggleCurSortOrderButton.label('increasing', 15, false);
+            this._toggleCurSortOrderButton.label('increasing', 14, false);
         } else {
-            this._toggleCurSortOrderButton.label('decreasing', 15, false);
+            this._toggleCurSortOrderButton.label('decreasing', 14, false);
         }
     }
 
@@ -234,9 +234,9 @@ export default class SortOptionsDialog extends Dialog<void> {
         let ui = this._criteriaUI[index];
 
         if (newSortOrder === SortOrder.INCREASING) {
-            ui.sortOrderButton.label('increasing', 15, false);
+            ui.sortOrderButton.label('increasing', 14, false);
         } else {
-            ui.sortOrderButton.label('decreasing', 15, false);
+            ui.sortOrderButton.label('decreasing', 14, false);
         }
     }
 

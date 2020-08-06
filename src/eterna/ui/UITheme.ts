@@ -21,7 +21,7 @@ export default class UITheme {
         borderRadius: 5
     };
 
-    private static readonly designBrowserFontSize = 15;
+    private static readonly designBrowserFontSize = 14;
 
     public static readonly designBrowser = {
         colors: {
