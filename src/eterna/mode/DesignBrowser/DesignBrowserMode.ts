@@ -984,7 +984,7 @@ export default class DesignBrowserMode extends GameMode {
 
             this._wholeRowWidth += col.width;
 
-            if (ii % 2 === 0) {
+            if (ii % 2 === 0 || col.category === 'Sequence') {
                 col.setBgColor(0xffffff, 0);
             } else {
                 col.setBgColor(0xffffff, 0.05);
