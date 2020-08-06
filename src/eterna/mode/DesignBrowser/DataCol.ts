@@ -184,12 +184,7 @@ export default class DataCol extends ContainerObject {
         const {designBrowser: theme} = UITheme;
         const dataStart = theme.headerHeight + theme.filterHeight + theme.dataPadding / 2;
 
-        let {mouseLoc} = this;
-        // mouseLoc returns values of about -1000000 for touch devices, which obviously isn't accurate
-        // To make touches work, mouseLoc needs to be retrieved differently
-        if (e?.data.pointerType === 'touch') {
-            mouseLoc = e?.data.getLocalPosition(this.container);
-        }
+        let mouseLoc = e?.data.getLocalPosition(this.container) || this.mouseLoc;
         if (mouseLoc.y < dataStart) {
             return [-1, -1];
         }

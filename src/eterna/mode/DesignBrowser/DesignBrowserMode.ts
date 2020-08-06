@@ -163,8 +163,8 @@ export default class DesignBrowserMode extends GameMode {
         clickedSelectionBoxParent.addChild(this._clickedSelectionBox);
         this._content.addChild(clickedSelectionBoxParent);
 
-        this._dataColParent.pointerMove.connect(() => this.onMouseMove());
-        this._dataColParent.pointerUp.connect((e) => this.onMouseUp(e));
+        this._dataColParent.pointerMove.connect((e) => this.onMouseMove(e));
+        this._dataColParent.pointerTap.connect((e) => this.onMouseUp(e));
 
         this._categories = Eterna.settings.designBrowserColumnNames.value;
         if (this._categories == null) {
@@ -632,7 +632,7 @@ export default class DesignBrowserMode extends GameMode {
         this.updateLayout();
     }
 
-    private onMouseMove(): void {
+    private onMouseMove(e: PIXI.interaction.InteractionEvent): void {
         this._selectionBox.visible = false;
         Assert.assertIsDefined(Flashbang.globalMouse);
 
@@ -640,7 +640,7 @@ export default class DesignBrowserMode extends GameMode {
             return;
         }
 
-        const [index, yOffset] = this._dataCols[0].getMouseIndex();
+        const [index, yOffset] = this._dataCols[0].getMouseIndex(e);
         if (index >= 0 && index < this._filteredSolutions.length) {
             this._selectionBox.visible = true;
             this.updateSelectionBoxPos(index);
