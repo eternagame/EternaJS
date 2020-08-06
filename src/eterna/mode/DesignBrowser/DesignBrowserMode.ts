@@ -164,7 +164,7 @@ export default class DesignBrowserMode extends GameMode {
         this._content.addChild(clickedSelectionBoxParent);
 
         this._dataColParent.pointerMove.connect(() => this.onMouseMove());
-        this._dataColParent.pointerUp.connect(() => this.onMouseUp());
+        this._dataColParent.pointerUp.connect((e) => this.onMouseUp(e));
 
         this._categories = Eterna.settings.designBrowserColumnNames.value;
         if (this._categories == null) {
@@ -554,7 +554,7 @@ export default class DesignBrowserMode extends GameMode {
             });
     }
 
-    private onMouseUp(): void {
+    private onMouseUp(e: PIXI.interaction.InteractionEvent): void {
         if (Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown) {
             this.mark();
             return;
@@ -564,7 +564,7 @@ export default class DesignBrowserMode extends GameMode {
             return;
         }
 
-        const [index] = this._dataCols[0].getMouseIndex();
+        const [index] = this._dataCols[0].getMouseIndex(e);
         if (index < 0) {
             return;
         }
