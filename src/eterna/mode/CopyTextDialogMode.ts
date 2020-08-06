@@ -65,6 +65,10 @@ export default class CopyTextDialogMode extends AppMode {
         this.modeStack.removeMode(this);
     }
 
+    protected onBGClicked() {
+        this.close();
+    }
+
     private readonly _text: string;
     private readonly _dialogTitle: string | undefined;
 }
