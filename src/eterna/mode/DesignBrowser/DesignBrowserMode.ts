@@ -917,7 +917,7 @@ export default class DesignBrowserMode extends GameMode {
                 if (category === DesignCategory.SEQUENCE) {
                     dataArray.push(singleLineRawData.sequence);
                     if (ii === 0) {
-                        dataCol.setWidth(singleLineRawData.sequence.length * 14);
+                        dataCol.setWidth(singleLineRawData.sequence.length * 14 + UITheme.designBrowser.dataPadding);
                         dataCol.drawGridText();
                     }
                 } else if (category === DesignCategory.DESCRIPTION) {

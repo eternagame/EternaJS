@@ -266,7 +266,7 @@ export default class DataCol extends ContainerObject {
 
     public setWidth(w: number): void {
         this._dataWidth = w;
-        this._filterField1.width = this._dataWidth;
+        this._filterField1.width = this._dataWidth - 22;
         this.drawBackground();
     }
 
@@ -281,10 +281,10 @@ export default class DataCol extends ContainerObject {
 
         let increment = 20 * this._fontSize;
 
-        for (let ii = 0; ii < this._dataWidth / increment; ii++) {
+        for (let ii = 0; ii < Math.floor(this._dataWidth / increment); ii++) {
             let gridstring = `${ii * 20 + 20}`;
             let gridtext = Fonts.std(gridstring, 10).bold().color(0xFFFFFF).build();
-            // / let x = 310 + ii * increment - gridstring.length * 3.5;
+            // let x = 310 + ii * increment - gridstring.length * 3.5;
             let xIncrement = ii * increment;
             let offset = increment + UITheme.designBrowser.dataPadding;
             // Gets width of text (length * fontSize = length * 10), and uses it to center the text over the gridline
@@ -547,7 +547,7 @@ export default class DataCol extends ContainerObject {
         if (this.category === 'Sequence') {
             this._graphics.lineStyle(1, 0x92A8BB, 0.4);
             // This iterates every 5 characters (fontSize * 5) of the true data width (removing the padding)
-            for (let ii = 0; ii < (this._dataWidth - theme.dataPadding) / (this._fontSize * 5) + 1; ii++) {
+            for (let ii = 1; ii < Math.floor((this._dataWidth - theme.dataPadding) / (this._fontSize * 5) + 1); ii++) {
                 // Draw lines every 5 characters (fontSize * 5),
                 // adding back the padding plus a little extra to space the line from the last letter
                 let x = ii * (this._fontSize * 5) + theme.dataPadding + 2;
