@@ -56,4 +56,8 @@ export default class NucleotideFinder extends Dialog<NucleotideFinderResult> {
         updateLocation();
         this.regs.add(this.mode.resized.connect(updateLocation));
     }
+
+    protected onBGClicked() {
+        this.close(null);
+    }
 }

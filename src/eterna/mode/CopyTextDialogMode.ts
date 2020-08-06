@@ -1,6 +1,6 @@
 import {Graphics} from 'pixi.js';
 import {
-    AppMode, Flashbang, KeyCode, Assert
+    AppMode, Flashbang, KeyCode, Assert, DisplayObjectPointerTarget, InputUtil
 } from 'flashbang';
 import TextInputPanel from 'eterna/ui/TextInputPanel';
 
@@ -42,6 +42,15 @@ export default class CopyTextDialogMode extends AppMode {
             this.close();
         });
 
+        inputPanel.pointerDown.connect((e) => e.stopPropagation());
+        let target = new DisplayObjectPointerTarget(bg);
+        target.pointerDown.connect((e) => {
+            if (InputUtil.IsLeftMouse(e)) {
+                this.close();
+            }
+            e.stopPropagation();
+        });
+
         const updateView = () => {
             Assert.assertIsDefined(Flashbang.stageWidth);
             Assert.assertIsDefined(Flashbang.stageHeight);
@@ -63,10 +72,6 @@ export default class CopyTextDialogMode extends AppMode {
     private close(): void {
         Assert.assertIsDefined(this.modeStack);
         this.modeStack.removeMode(this);
-    }
-
-    protected onBGClicked() {
-        this.close();
     }
 
     private readonly _text: string;

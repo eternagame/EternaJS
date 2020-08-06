@@ -57,7 +57,8 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
      * Subclasses can override to e.g. close the dialog.
      */
     protected onBGClicked(): void {
-        // this.close(null);
+        // Is there a good reason not to enable this?
+        this.close(null);
     }
 
     protected close(value: T | null) {

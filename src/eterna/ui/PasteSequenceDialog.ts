@@ -65,5 +65,9 @@ export default class PasteSequenceDialog extends Dialog<number[]> {
         this.close(s as number[]);
     }
 
+    protected onBGClicked() {
+        this.close(null);
+    }
+
     private readonly _customNumbering: (number | null)[] | undefined;
 }
