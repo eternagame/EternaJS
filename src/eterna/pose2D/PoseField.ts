@@ -206,12 +206,18 @@ export default class PoseField extends ContainerObject implements KeyboardListen
             return false;
         }
         if (e.deltaY < 0) {
-            if (e.deltaY < -2 && e.deltaY < this._lastDeltaY) this._debounceZoomIn();
+            if (e.deltaY < -3 && e.deltaY < this._lastDeltaY) this._debounceZoomIn();
             this._lastDeltaY = e.deltaY;
+            setTimeout(() => {
+                this._lastDeltaY = 0;
+            }, 200);
             return true;
         } else if (e.deltaY > 0) {
-            if (e.deltaY > 2 && e.deltaY > this._lastDeltaY) this._debounceZoomOut();
+            if (e.deltaY > 3 && e.deltaY > this._lastDeltaY) this._debounceZoomOut();
             this._lastDeltaY = e.deltaY;
+            setTimeout(() => {
+                this._lastDeltaY = 0;
+            }, 200);
             return true;
         }
 
@@ -222,12 +228,12 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     private _lastDeltaY = 0;
 
     // Debounced zoom functions for 'sensitive' mice
-    private _debounceZoomIn = debounce(this.zoomIn, 200, {
+    private _debounceZoomIn = debounce(this.zoomIn, 50, {
         leading: true,
         trailing: false
     });
 
-    private _debounceZoomOut = debounce(this.zoomOut, 200, {
+    private _debounceZoomOut = debounce(this.zoomOut, 20, {
         leading: true,
         trailing: false
     });
