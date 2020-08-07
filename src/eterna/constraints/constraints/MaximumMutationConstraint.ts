@@ -49,7 +49,7 @@ export default class MaximumMutationConstraint extends Constraint<MaxMutationCon
             icon: MaximumMutationConstraint._icon,
             showOutline: true,
             statText,
-            clarificationText: `AT MOST ${this.maxMutations} CHANGES`
+            clarificationText: `AT MOST${this.maxMutations.toString().length > 2 ? ' \n' : ' '}${this.maxMutations} CHANGES`
         };
     }
 
