@@ -165,7 +165,9 @@ export default class GameDropdown extends ContainerObject {
         // There should be an extra _PADDING between the text and the arrow
         const ARROW_WIDTH = this._ARROW_SIDE_SIZE + this._PADDING;
 
-        let width = this._width || (TEXT_WIDTH + ARROW_WIDTH + this._PADDING * 2);
+        let width = this.disabled
+            ? TEXT_WIDTH - this._PADDING
+            : this._width || (TEXT_WIDTH + ARROW_WIDTH + this._PADDING * 2);
 
         this._box.clear();
         this._box.lineStyle(this._borderWidth, 0xC0DCE7);
