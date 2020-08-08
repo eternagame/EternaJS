@@ -1497,6 +1497,7 @@ export default class PoseEditMode extends GameMode {
         pushVisibleState(this.uiLayer);
         pushVisibleState(this.dialogLayer);
         pushVisibleState(this.achievementsLayer);
+        this._hintBoxRef.destroyObject();
 
         let explosionFactorVisible: boolean[] = [];
         for (let pose of this._poses) {
