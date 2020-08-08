@@ -91,7 +91,8 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                 fontFamily: Fonts.STDFONT,
                 fontSize: 11,
                 fill: 0xC0DCE7,
-                letterSpacing: -0.5
+                letterSpacing: -0.5,
+                align: 'center'
             }
         });
         this._reqClarifyText.position = new Point(50, 30);
@@ -145,6 +146,9 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     public setContent(config: ConstraintBoxConfig, toolTipContainer?: Container): void {
         this._check.visible = config.satisfied && !this._forMissionScreen;
 
+        let reqClarifyMultiLine = this._reqClarifyText.text.includes('\n')
+        || (config.clarificationText as string)?.includes('\n');
+
         this._req.visible = config.fullTexture !== undefined;
         if (config.fullTexture !== undefined) {
             this._req.texture = config.fullTexture;
@@ -176,19 +180,22 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             // We know config.clarificationText is not undefined because of the
             // above condition, so we can type guard
             this.setPossiblyStyledText(config.clarificationText, this._reqClarifyText);
+            let yOffset = reqClarifyMultiLine ? 27 : 32;
             DisplayUtil.positionRelative(
                 this._reqClarifyText, HAlign.CENTER, VAlign.TOP,
-                this._outline, HAlign.CENTER, VAlign.TOP, 2, 32
+                this._outline, HAlign.CENTER, VAlign.TOP, 2, yOffset
             );
+            this._check.position.y = reqClarifyMultiLine ? 55 : 50;
         }
 
         this._reqStatText.visible = config.statText !== undefined && !this._forMissionScreen;
         if (config.statText !== undefined && !this._forMissionScreen) {
             // We know config.statText isn't undefined due to the above condition
             this.setPossiblyStyledText(config.statText, this._reqStatText);
+            let yOffset = reqClarifyMultiLine ? 55 : 50;
             DisplayUtil.positionRelative(
                 this._reqStatText, HAlign.CENTER, VAlign.TOP,
-                this._outline, HAlign.CENTER, VAlign.TOP, 0, 50
+                this._outline, HAlign.CENTER, VAlign.TOP, 0, yOffset
             );
         }
 
@@ -221,7 +228,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             }
 
             this.initOpaqueBackdrop(this._bg.texture.width, this._bg.texture.height);
-            this._check.position = new Point(55, 55);
+            this._check.position = new Point(55, 50);
             this._noText.position = new Point(35, 1);
             this._stateText.position = new Point(3, 45);
         }
