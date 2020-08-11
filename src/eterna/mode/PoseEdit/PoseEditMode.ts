@@ -1962,7 +1962,7 @@ export default class PoseEditMode extends GameMode {
     private async submitSolution(details: SubmitPoseDetails, undoBlock: UndoBlock): Promise<void> {
         this._rscript.finishLevel();
 
-        if (this._puzzle.nodeID < 0 || this._puzzle.alreadySolved) {
+        if (this._puzzle.nodeID < 0) {
             return;
         }
 
@@ -1973,7 +1973,7 @@ export default class PoseEditMode extends GameMode {
             // Show a "Submitting now!" dialog
             submittingRef = this.showDialog(new SubmittingDialog()).ref;
             fxComplete = Promise.resolve();
-        } else {
+        } else if (!this._puzzle.alreadySolved) {
             // Kick off a BubbleSweep animation
             let bubbles = new BubbleSweep(800);
             this.addObject(bubbles, this.bgLayer);
