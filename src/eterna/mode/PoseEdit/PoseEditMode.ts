@@ -2312,11 +2312,14 @@ export default class PoseEditMode extends GameMode {
 
     private transferToPuzzlemaker(): void {
         let poseData: SaveStoreItem = [0, this._poses[0].sequence];
+        let i = 0;
         for (let pose of this._poses) {
             poseData.push(JSON.stringify({
                 sequence: EPars.sequenceToString(pose.sequence),
-                structure: EPars.pairsToParenthesis(pose.pairs)
+                // structure: EPars.pairsToParenthesis(pose.pairs),
+                structure: this._puzzle.getSecstruct(i)
             }));
+            i++;
         }
 
         Eterna.app.loadPuzzleEditor(1, poseData)
