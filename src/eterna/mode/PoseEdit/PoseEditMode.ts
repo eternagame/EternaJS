@@ -1962,7 +1962,7 @@ export default class PoseEditMode extends GameMode {
     private async submitSolution(details: SubmitPoseDetails, undoBlock: UndoBlock): Promise<void> {
         this._rscript.finishLevel();
 
-        if (this._puzzle.nodeID < 0) {
+        if (this._puzzle.nodeID < 0 || this._puzzle.alreadySolved) {
             return;
         }
 

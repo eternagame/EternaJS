@@ -584,6 +584,14 @@ export default class Puzzle {
         return seq;
     }
 
+    public get alreadySolved() {
+        return this._alreadySolved;
+    }
+
+    public set alreadySolved(alreadySolved: boolean) {
+        this._alreadySolved = alreadySolved;
+    }
+
     private readonly _nid: number;
     private readonly _name: string;
     private readonly _puzzleType: PuzzleType;
@@ -612,6 +620,7 @@ export default class Puzzle {
     private _isSoftConstraint: boolean = false;
     private _boosterDefs: BoostersData | null = null;
     private _maxVotes: number = 0;
+    private _alreadySolved: boolean = false;
 
     private static readonly T_APTAMER: string[] = ['aptamer', 'aptamer+oligo'];
     private static readonly T_OLIGO: string[] = ['oligo', 'aptamer+oligo'];

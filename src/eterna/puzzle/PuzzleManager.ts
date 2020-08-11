@@ -412,6 +412,12 @@ export default class PuzzleManager {
 
         let puzzle = await this.parsePuzzle(data['puzzle']);
 
+        let cleared = data.cleared as { nid: string }[];
+        let clearedNIDs = cleared.map((e) => e.nid);
+        if (clearedNIDs.some((e) => +e === puzzle.nodeID)) {
+            puzzle.alreadySolved = true;
+        }
+
         log.info(`Loaded puzzle [name=${puzzle.getName()}]`);
         return puzzle;
     }
