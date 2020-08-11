@@ -414,7 +414,7 @@ export default class PuzzleManager {
 
         let cleared = data.cleared as { nid: string }[];
         let clearedNIDs = cleared.map((e) => e.nid);
-        if (clearedNIDs.some((e) => +e === puzzle.nodeID)) {
+        if (clearedNIDs.some((e) => parseInt(e, 10) === puzzle.nodeID)) {
             puzzle.alreadySolved = true;
         }
 
