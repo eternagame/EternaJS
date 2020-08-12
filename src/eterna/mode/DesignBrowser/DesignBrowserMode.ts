@@ -328,6 +328,7 @@ export default class DesignBrowserMode extends GameMode {
             // convert back to lines
             const progress = (this._firstVisSolutionIdx + pxdelta / 14) / this._filteredSolutions.length;
             this._vSlider.setProgress(MathUtil.clamp(progress, 0, 1));
+            this.updateGridLines();
         } else {
             super.onMouseWheelEvent(e);
         }
@@ -358,11 +359,7 @@ export default class DesignBrowserMode extends GameMode {
 
         this._vSlider.display.position = new Point(this.contentWidth + 5, 50);
         this._vSlider.setSize(0, this.contentHeight - 70);
-
-        this._gridLines.setSize(
-            this.contentWidth - 10,
-            this.contentHeight - this._gridLines.position.y
-        );
+        this.updateGridLines();
         this._maskBox.setSize(this.contentWidth - 14, this.contentHeight - 10);
         this._markerBoxes.setSize(this.contentWidth - 14, this.contentHeight - 10);
         this._markerBoxes.updateView(this._firstVisSolutionIdx);
@@ -381,6 +378,25 @@ export default class DesignBrowserMode extends GameMode {
             this._toolbarLayout, HAlign.RIGHT, VAlign.TOP,
             HAlign.RIGHT, VAlign.TOP, -24 - this._solDialogOffset, 40
         );
+    }
+
+    private updateGridLines() {
+        const {designBrowser: theme} = UITheme;
+
+        const dataStart = theme.headerHeight + theme.filterHeight + theme.dataPadding;
+        // The position of the first gridline is placed wrt the first visible solution
+        let solutionOffset = (5 - (this._firstVisSolutionIdx % 5)) * theme.rowHeight;
+        let verticalOffset = theme.rowHeight * 5;
+        this._gridLines.position = new Point(
+            10,
+            dataStart + solutionOffset - verticalOffset
+        );
+        // Makes sure lines don't appear over/below horizontal scrollbar
+        let height = this.contentHeight - 70 + (this._firstVisSolutionIdx % 5);
+        // Don't show gridlines past the last visible solution
+        let visibleSolutionsHeight = (this._filteredSolutions?.length - this._firstVisSolutionIdx) * theme.rowHeight;
+        if (visibleSolutionsHeight < height) height = visibleSolutionsHeight;
+        this._gridLines.setSize(this.contentWidth, height);
     }
 
     protected enter(): void {
@@ -790,6 +806,7 @@ export default class DesignBrowserMode extends GameMode {
         }
 
         this._markerBoxes.updateView(this._firstVisSolutionIdx);
+        this.updateGridLines();
     }
 
     private refreshSolutions(): void {
