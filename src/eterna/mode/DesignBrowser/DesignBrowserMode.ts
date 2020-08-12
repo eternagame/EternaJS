@@ -92,6 +92,7 @@ export default class DesignBrowserMode extends GameMode {
         this._wholeRowWidth = 0;
         this._voteProcessor = new VoteProcessor(puzzle.maxVotes);
         this._initialSolution = initialSolution;
+        this._onlySelectedVisible = Eterna.settings.designBrowserOnlySelectedVisible.value;
     }
 
     public get puzzleID(): number { return this._puzzle.nodeID; }
@@ -726,6 +727,14 @@ export default class DesignBrowserMode extends GameMode {
             this.rebuildDataColumns(this._initialDataFilters);
             this.reorganize(true);
         });
+
+        dialog.currentSelectedFilterValue = Eterna.settings.designBrowserOnlySelectedVisible.value;
+
+        dialog.selectedFilterUpdate.connect((e) => {
+            this._onlySelectedVisible = e;
+            Eterna.settings.designBrowserOnlySelectedVisible.value = e;
+            this.reorganize(true);
+        });
     }
 
     private updateSortOption(category: DesignCategory, sortOrder: SortOrder, sortArgs?: string): void {
@@ -753,6 +762,10 @@ export default class DesignBrowserMode extends GameMode {
                     shouldAdd = false;
                     break;
                 }
+            }
+
+            if (this._onlySelectedVisible && !this._selectedSolutionIDs?.includes(sol.nodeID)) {
+                shouldAdd = false;
             }
 
             if (shouldAdd) {
@@ -1050,6 +1063,7 @@ export default class DesignBrowserMode extends GameMode {
     private _allSolutions: Solution[];
     private _filteredSolutions: Solution[];
 
+    private _onlySelectedVisible: boolean;
     private _sortOptions: SortOptions;
     private _toolbarLayout: HLayoutContainer;
     private _returnToGameButton: GameButton;
