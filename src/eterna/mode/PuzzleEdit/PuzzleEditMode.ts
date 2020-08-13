@@ -37,6 +37,8 @@ import FolderSwitcher from 'eterna/ui/FolderSwitcher';
 import GameButton from 'eterna/ui/GameButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import EternaURL from 'eterna/net/EternaURL';
+import Puzzle, {PuzzleType} from 'eterna/puzzle/Puzzle';
+import FolderManager from 'eterna/folding/FolderManager';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
@@ -100,7 +102,10 @@ export default class PuzzleEditMode extends GameMode {
         Molecule.initTextures();
         BaseGlow.initTextures();
 
-        this._folderSwitcher = new FolderSwitcher();
+        this._folderSwitcher = new FolderSwitcher((folder) => {
+            if (this._numTargets > 1 && !folder.canFoldWithBindingSite) return false;
+            return true;
+        });
         this._folderSwitcher.selectedFolder.connect((folder) => {
             if (folder.canScoreStructures) {
                 for (let pose of this._poses) {

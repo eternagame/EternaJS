@@ -136,7 +136,6 @@ export default class GameDropdown extends ContainerObject {
             });
             maxWidth = Math.max(text.display.width + this._PADDING, maxWidth);
         }
-
         this._popup.setSize(maxWidth, yWalker);
     }
 
@@ -157,14 +156,18 @@ export default class GameDropdown extends ContainerObject {
     }
 
     private _drawBox(hover: boolean) {
-        const TEXT_WIDTH = (this.options.reduce(
+        let TEXT_WIDTH = this.options.reduce(
             (max, opt) => Math.max(max, opt.length),
             0
-        ) * this._fontSize) / 1.5;
+        );
+        if (this.disabled) TEXT_WIDTH = this.selectedOption.value.length;
+        TEXT_WIDTH *= this._fontSize / 1.5;
         // There should be an extra _PADDING between the text and the arrow
         const ARROW_WIDTH = this._ARROW_SIDE_SIZE + this._PADDING;
 
-        let width = this._width || (TEXT_WIDTH + ARROW_WIDTH + this._PADDING * 2);
+        let width = this.disabled
+            ? TEXT_WIDTH - this._PADDING
+            : this._width || (TEXT_WIDTH + ARROW_WIDTH + this._PADDING * 2);
 
         this._box.clear();
         this._box.lineStyle(this._borderWidth, 0xC0DCE7);

@@ -1,6 +1,6 @@
 import {Graphics} from 'pixi.js';
 import {
-    AppMode, Flashbang, KeyCode, Assert
+    AppMode, Flashbang, KeyCode, Assert, DisplayObjectPointerTarget, InputUtil
 } from 'flashbang';
 import TextInputPanel from 'eterna/ui/TextInputPanel';
 
@@ -40,6 +40,15 @@ export default class CopyTextDialogMode extends AppMode {
         inputPanel.okClicked.connect(() => {
             textField.copyToClipboard();
             this.close();
+        });
+
+        inputPanel.pointerDown.connect((e) => e.stopPropagation());
+        let target = new DisplayObjectPointerTarget(bg);
+        target.pointerDown.connect((e) => {
+            if (InputUtil.IsLeftMouse(e)) {
+                this.close();
+            }
+            e.stopPropagation();
         });
 
         const updateView = () => {

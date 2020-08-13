@@ -174,17 +174,11 @@ export default class DataCol extends ContainerObject {
         this._pairsArray = pairs.slice();
     }
 
-    // AMW TODO POINT IPOINT
-    private get mouseLoc(): IPoint {
-        Assert.assertIsDefined(Flashbang.globalMouse);
-        return this.container.toLocal(Flashbang.globalMouse);
-    }
-
-    public getMouseIndex(): [number, number] {
+    public getMouseIndex(e: PIXI.interaction.InteractionEvent): [number, number] {
         const {designBrowser: theme} = UITheme;
         const dataStart = theme.headerHeight + theme.filterHeight + theme.dataPadding / 2;
 
-        let {mouseLoc} = this;
+        let mouseLoc = e.data.getLocalPosition(this.container);
         if (mouseLoc.y < dataStart) {
             return [-1, -1];
         }
@@ -266,7 +260,7 @@ export default class DataCol extends ContainerObject {
 
     public setWidth(w: number): void {
         this._dataWidth = w;
-        this._filterField1.width = this._dataWidth;
+        this._filterField1.width = this._dataWidth - 22;
         this.drawBackground();
     }
 
@@ -279,10 +273,18 @@ export default class DataCol extends ContainerObject {
         this._gridNumbers = new Container();
         this.container.addChild(this._gridNumbers);
 
-        for (let ii = 0; ii < this._dataWidth / 300; ii++) {
+        let increment = 20 * this._fontSize;
+
+        for (let ii = 0; ii < Math.floor(this._dataWidth / increment); ii++) {
             let gridstring = `${ii * 20 + 20}`;
             let gridtext = Fonts.std(gridstring, 10).bold().color(0xFFFFFF).build();
-            gridtext.position = new Point(310 + ii * 300 - gridstring.length * 3.5, 80);
+            // let x = 310 + ii * increment - gridstring.length * 3.5;
+            let xIncrement = ii * increment;
+            let offset = increment + UITheme.designBrowser.dataPadding;
+            // Gets width of text (length * fontSize = length * 10), and uses it to center the text over the gridline
+            let centerOffset = gridstring.length * 2.5;
+            let x = xIncrement + offset - centerOffset;
+            gridtext.position = new Point(x, 73);
             this._gridNumbers.addChild(gridtext);
         }
     }
@@ -512,7 +514,7 @@ export default class DataCol extends ContainerObject {
 
             const {designBrowser: theme} = UITheme;
             const dataStart = theme.headerHeight + theme.filterHeight + theme.dataPadding;
-            this._sequencesView.position = new Point(11 + this._dataDisplay.width + 5, dataStart);
+            this._sequencesView.position = new Point(this._dataDisplay.width + theme.dataPadding, dataStart);
         } else {
             this._sequencesView.setSequences(null, null, null);
         }
@@ -538,9 +540,13 @@ export default class DataCol extends ContainerObject {
         this._graphics.endFill();
         if (this.category === 'Sequence') {
             this._graphics.lineStyle(1, 0x92A8BB, 0.4);
-            for (let ii = 0; ii < this._dataWidth / 70 + 1; ii++) {
-                this._graphics.moveTo(ii * 75 + 92, 85);
-                this._graphics.lineTo(ii * 75 + 92, this._height - 5);
+            // This iterates every 5 characters (fontSize * 5) of the true data width (removing the padding)
+            for (let ii = 1; ii < Math.floor((this._dataWidth - theme.dataPadding) / (this._fontSize * 5) + 1); ii++) {
+                // Draw lines every 5 characters (fontSize * 5),
+                // adding back the padding plus a little extra to space the line from the last letter
+                let x = ii * (this._fontSize * 5) + theme.dataPadding + 2;
+                this._graphics.moveTo(x, 85);
+                this._graphics.lineTo(x, this._height - 5);
             }
         }
     }

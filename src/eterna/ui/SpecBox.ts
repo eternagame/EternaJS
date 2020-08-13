@@ -172,7 +172,7 @@ export default class SpecBox extends ContainerObject {
                 .append('Branchiness : ', 'bold')
                 .append(`${Number(datablock.getParam(UndoBlockParam.BRANCHINESS, TEMPERATURE)).toFixed(1)}\n`)
                 .append('Target exp acc : ', 'bold')
-                .append(`${(datablock.getParam(UndoBlockParam.TARGET_EXPECTED_ACCURACY, 37) as number).toFixed(3)}\n`);
+                .append(`${(datablock.getParam(UndoBlockParam.TARGET_EXPECTED_ACCURACY, 37) as number)?.toFixed(3) ?? 'Unavailable'}\n`);
 
             statString.apply(this._stattext);
         }

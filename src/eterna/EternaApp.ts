@@ -1,19 +1,17 @@
 import 'assets/Styles/styles.css'; // css-loader will pick up on this and embed our stylesheet
-import {settings, Application} from 'pixi.js';
+import {settings, Application, utils} from 'pixi.js';
 import * as log from 'loglevel';
 import {
     FlashbangApp, SaveGameManager, TextureUtil, ErrorUtil, Flashbang, Assert
 } from 'flashbang';
 import ChatManager from 'eterna/ChatManager';
 import Eterna from 'eterna/Eterna';
-import {isMobile} from 'is-mobile';
 import {SaveStoreItem} from 'flashbang/settings/SaveGameManager';
 import DesignBrowserMode, {DesignBrowserFilter} from './mode/DesignBrowser/DesignBrowserMode';
 import ExternalInterface, {ExternalInterfaceCtx} from './util/ExternalInterface';
 import EternaSettings from './settings/EternaSettings';
 import GameClient from './net/GameClient';
 import Bitmaps from './resources/Bitmaps';
-import Fonts from './util/Fonts';
 import TestMode from './debug/TestMode';
 import Puzzle from './puzzle/Puzzle';
 import PoseEditMode, {PoseEditParams} from './mode/PoseEdit/PoseEditMode';
@@ -147,6 +145,33 @@ export default class EternaApp extends FlashbangApp {
         });
 
         RSignals.popPuzzle.connect(() => this._modeStack.popMode());
+    }
+
+    public run(): void {
+        let wasmError = typeof WebAssembly === 'object' ? '' : 'WebAssembly';
+        let webGLError = utils.isWebGLSupported() ? '' : 'WebGL';
+        let unsupported = wasmError || webGLError;
+        if (unsupported) {
+            const errorEl = document.createElement('div');
+            errorEl.className = 'eterna-support-error';
+            const errorText = `
+                We're sorry, but your browser configuration is not supported by Eterna.
+                <br><br>
+                The following feature must be available in order to play: ${unsupported}
+                <br><br>
+                For troubleshooting tips, pelase visit:
+                <a href="https://forum.eternagame.org/t/eterna-browser-support-troubleshooting/3594">
+                    https://forum.eternagame.org/t/eterna-browser-support-troubleshooting/3594
+                </a>
+            `;
+            errorEl.innerHTML = errorText;
+
+            let eternaContainer = document.getElementById(this._params.containerID);
+            Assert.assertIsDefined(eternaContainer);
+            eternaContainer.appendChild(errorEl);
+        } else {
+            super.run();
+        }
     }
 
     /* override */

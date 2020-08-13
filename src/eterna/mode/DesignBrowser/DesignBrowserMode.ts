@@ -163,8 +163,8 @@ export default class DesignBrowserMode extends GameMode {
         clickedSelectionBoxParent.addChild(this._clickedSelectionBox);
         this._content.addChild(clickedSelectionBoxParent);
 
-        this._dataColParent.pointerMove.connect(() => this.onMouseMove());
-        this._dataColParent.pointerUp.connect(() => this.onMouseUp());
+        this._dataColParent.pointerMove.connect((e) => this.onMouseMove(e));
+        this._dataColParent.pointerTap.connect((e) => this.onMouseUp(e));
 
         this._categories = Eterna.settings.designBrowserColumnNames.value;
         if (this._categories == null) {
@@ -570,9 +570,9 @@ export default class DesignBrowserMode extends GameMode {
             });
     }
 
-    private onMouseUp(): void {
+    private onMouseUp(e: PIXI.interaction.InteractionEvent): void {
         if (Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown) {
-            this.mark();
+            this.mark(e);
             return;
         }
 
@@ -580,7 +580,7 @@ export default class DesignBrowserMode extends GameMode {
             return;
         }
 
-        const [index] = this._dataCols[0].getMouseIndex();
+        const [index] = this._dataCols[0].getMouseIndex(e);
         if (index < 0) {
             return;
         }
@@ -648,7 +648,7 @@ export default class DesignBrowserMode extends GameMode {
         this.updateLayout();
     }
 
-    private onMouseMove(): void {
+    private onMouseMove(e: PIXI.interaction.InteractionEvent): void {
         this._selectionBox.visible = false;
         Assert.assertIsDefined(Flashbang.globalMouse);
 
@@ -656,7 +656,7 @@ export default class DesignBrowserMode extends GameMode {
             return;
         }
 
-        const [index, yOffset] = this._dataCols[0].getMouseIndex();
+        const [index, yOffset] = this._dataCols[0].getMouseIndex(e);
         if (index >= 0 && index < this._filteredSolutions.length) {
             this._selectionBox.visible = true;
             this.updateSelectionBoxPos(index);
@@ -679,7 +679,7 @@ export default class DesignBrowserMode extends GameMode {
             + theme.dataPadding / 2;
     }
 
-    private mark(): void {
+    private mark(e: PIXI.interaction.InteractionEvent): void {
         if (this._dataCols == null) {
             this._markerBoxes.visible = false;
             return;
@@ -689,7 +689,7 @@ export default class DesignBrowserMode extends GameMode {
             return;
         }
 
-        let [index] = this._dataCols[0].getMouseIndex();
+        let [index] = this._dataCols[0].getMouseIndex(e);
         if (index < 0) {
             return;
         }
@@ -934,7 +934,8 @@ export default class DesignBrowserMode extends GameMode {
                 if (category === DesignCategory.SEQUENCE) {
                     dataArray.push(singleLineRawData.sequence);
                     if (ii === 0) {
-                        dataCol.setWidth(singleLineRawData.sequence.length * 16);
+                        dataCol.setWidth(singleLineRawData.sequence.length * 14
+                            + UITheme.designBrowser.dataPadding * 5);
                         dataCol.drawGridText();
                     }
                 } else if (category === DesignCategory.DESCRIPTION) {
@@ -1001,7 +1002,7 @@ export default class DesignBrowserMode extends GameMode {
 
             this._wholeRowWidth += col.width;
 
-            if (ii % 2 === 0) {
+            if (ii % 2 === 0 || col.category === 'Sequence') {
                 col.setBgColor(0xffffff, 0);
             } else {
                 col.setBgColor(0xffffff, 0.05);
