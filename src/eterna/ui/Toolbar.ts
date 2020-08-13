@@ -57,6 +57,9 @@ export default class Toolbar extends ContainerObject {
 
     public actionMenu: EternaMenu;
 
+    public leftArrow: GameButton;
+    public rightArrow: GameButton;
+
     // Pose Editing
     public palette: NucleotidePalette;
     public pairSwapButton: GameButton;
