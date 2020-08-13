@@ -360,7 +360,7 @@ export default class DesignBrowserMode extends GameMode {
         this._vSlider.setSize(0, this.contentHeight - 70);
 
         this._gridLines.setSize(
-            this.contentWidth - 10,
+            this.contentWidth - 18,
             this.contentHeight - this._gridLines.position.y
         );
         this._maskBox.setSize(this.contentWidth - 14, this.contentHeight - 10);
@@ -917,7 +917,8 @@ export default class DesignBrowserMode extends GameMode {
                 if (category === DesignCategory.SEQUENCE) {
                     dataArray.push(singleLineRawData.sequence);
                     if (ii === 0) {
-                        dataCol.setWidth(singleLineRawData.sequence.length * 16);
+                        dataCol.setWidth(singleLineRawData.sequence.length * 14
+                            + UITheme.designBrowser.dataPadding * 5);
                         dataCol.drawGridText();
                     }
                 } else if (category === DesignCategory.DESCRIPTION) {
