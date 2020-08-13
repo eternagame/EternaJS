@@ -54,6 +54,10 @@
     }
 }
 
+.eterna-input {
+    box-sizing: border-box;
+}
+
 .eterna-input::placeholder {
     /* If you update this, make sure to also change it in TextInputObject.ts */
     color: #777777;
