@@ -1,6 +1,6 @@
 import * as log from 'loglevel';
 import {
-    Container, DisplayObject, Point, Sprite, Text, Rectangle
+    Container, DisplayObject, Point, Sprite, Text, Rectangle, Texture, BaseTexture
 } from 'pixi.js';
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
@@ -16,7 +16,7 @@ import GameButton from 'eterna/ui/GameButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {
     KeyCode, SpriteObject, DisplayUtil, HAlign, VAlign, Flashbang, KeyboardEventType, Assert,
-    GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject
+    GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject, Base64
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
@@ -1497,6 +1497,8 @@ export default class PoseEditMode extends GameMode {
         pushVisibleState(this.uiLayer);
         pushVisibleState(this.dialogLayer);
         pushVisibleState(this.achievementsLayer);
+        let showingHint = this._hintBoxRef.isLive;
+        this._hintBoxRef.destroyObject();
 
         let explosionFactorVisible: boolean[] = [];
         for (let pose of this._poses) {
@@ -1525,6 +1527,11 @@ export default class PoseEditMode extends GameMode {
 
         for (let ii = 0; ii < this._poses.length; ++ii) {
             this._poses[ii].showExplosionFactor = explosionFactorVisible[ii];
+        }
+
+        if (showingHint) {
+            const panel = new HintsPanel(this._puzzle.hint || '');
+            this._hintBoxRef = this.addObject(panel, this.container);
         }
 
         return pngData;
