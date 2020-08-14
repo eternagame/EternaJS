@@ -1,4 +1,6 @@
-import {Graphics, Point, Sprite} from 'pixi.js';
+import {
+    Graphics, Point, Sprite, MaskData
+} from 'pixi.js';
 import {RegistrationGroup} from 'signals';
 import Eterna from 'eterna/Eterna';
 import Booster from 'eterna/mode/PoseEdit/Booster';
@@ -15,6 +17,7 @@ import NucleotidePalette from './NucleotidePalette';
 import GameButton from './GameButton';
 import ToggleBar from './ToggleBar';
 import EternaMenu, {EternaMenuStyle} from './EternaMenu';
+import ScrollContainer from './ScrollContainer';
 
 export enum ToolbarType {
     PUZZLE,
@@ -56,6 +59,8 @@ export default class Toolbar extends ContainerObject {
     public specButton: GameButton;
 
     public actionMenu: EternaMenu;
+
+    public lowerToolbarLayout: HLayoutContainer;
 
     public leftArrow: GameButton;
     public rightArrow: GameButton;
@@ -125,10 +130,29 @@ export default class Toolbar extends ContainerObject {
 
     public onResized() {
         Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(Flashbang.stageHeight);
         this.stateToggle.container.position = new Point(
             Flashbang.stageWidth / 2 - this.container.position.x,
             -this.container.position.y + 8
         );
+        if (Flashbang.stageWidth < this._content.width + this.rightArrow.display.width * 2 + 100) {
+            this.rightArrow.display.visible = true;
+            this.leftArrow.display.visible = true;
+            if (!this.lowerToolbarLayout.mask) {
+                let mask = new Graphics()
+                    .beginFill(0, 0)
+                    .drawRect(100, this.lowerToolbarLayout.y, Flashbang.stageWidth - 100, Flashbang.stageHeight)
+                    .endFill();
+                this.lowerToolbarLayout.mask = mask;
+            } else {
+                this.lowerToolbarLayout.mask.width = Flashbang.stageWidth - 100;
+            }
+        } else {
+            this.rightArrow.display.visible = false;
+            this.leftArrow.display.visible = false;
+            if (this.lowerToolbarLayout.mask) this.lowerToolbarLayout.mask = null;
+        }
+        this.updateLayout();
     }
 
     protected added(): void {
@@ -232,8 +256,8 @@ export default class Toolbar extends ContainerObject {
         }
 
         // LOWER TOOLBAR (palette, zoom, settings, etc)
-        let lowerToolbarLayout = new HLayoutContainer();
-        this._content.addChild(lowerToolbarLayout);
+        this.lowerToolbarLayout = new HLayoutContainer();
+        this._content.addChild(this.lowerToolbarLayout);
 
         if (
             this._states > 1
@@ -245,8 +269,15 @@ export default class Toolbar extends ContainerObject {
             this.addObject(this.stateToggle, this.container);
         }
 
+        this.leftArrow = new GameButton()
+            .allStates(Bitmaps.ImgUndo)
+            .disabled(undefined)
+            .tooltip('Scroll left')
+            .scaleBitmapToLabel();
+        this.addObject(this.leftArrow, this._content);
+
         this.actionMenu = new EternaMenu(EternaMenuStyle.PULLUP);
-        this.addObject(this.actionMenu, lowerToolbarLayout);
+        this.addObject(this.actionMenu, this.lowerToolbarLayout);
         this.actionMenu.addMenuButton(new GameButton().allStates(Bitmaps.NovaMenu).disabled(undefined));
 
         this.screenshotButton = new GameButton()
@@ -356,11 +387,11 @@ export default class Toolbar extends ContainerObject {
 
         if (this._type === ToolbarType.LAB) {
             this.submitButton.tooltip('Publish your solution!');
-            lowerToolbarLayout.addHSpacer(SPACE_NARROW);
-            this.addObject(this.submitButton, lowerToolbarLayout);
+            this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
+            this.addObject(this.submitButton, this.lowerToolbarLayout);
         }
 
-        lowerToolbarLayout.addHSpacer(SPACE_WIDE);
+        this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
 
         this.freezeButton = new ToolbarButton()
             .up(Bitmaps.ImgFreeze)
@@ -371,8 +402,8 @@ export default class Toolbar extends ContainerObject {
             .rscriptID(RScriptUIElementID.FREEZE);
 
         if (this._type === ToolbarType.LAB || this._type === ToolbarType.PUZZLE) {
-            this.addObject(this.freezeButton, lowerToolbarLayout);
-            lowerToolbarLayout.addHSpacer(SPACE_NARROW);
+            this.addObject(this.freezeButton, this.lowerToolbarLayout);
+            this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
             this.freezeButton.display.visible = Eterna.settings.freezeButtonAlwaysVisible.value;
             this.regs.add(Eterna.settings.freezeButtonAlwaysVisible.connect((visible) => {
                 this.freezeButton.display.visible = visible;
@@ -392,8 +423,8 @@ export default class Toolbar extends ContainerObject {
             this._states > 1
             && this._type !== ToolbarType.PUZZLEMAKER && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED
         ) {
-            this.addObject(this.pipButton, lowerToolbarLayout);
-            lowerToolbarLayout.addHSpacer(SPACE_NARROW);
+            this.addObject(this.pipButton, this.lowerToolbarLayout);
+            this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
         }
 
         this.naturalButton = new ToolbarButton()
@@ -421,12 +452,12 @@ export default class Toolbar extends ContainerObject {
 
         if (this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED) {
             if (this._type !== ToolbarType.FEEDBACK) {
-                this.addObject(this.naturalButton, lowerToolbarLayout);
+                this.addObject(this.naturalButton, this.lowerToolbarLayout);
             } else {
-                this.addObject(this.estimateButton, lowerToolbarLayout);
+                this.addObject(this.estimateButton, this.lowerToolbarLayout);
             }
 
-            this.addObject(this.targetButton, lowerToolbarLayout);
+            this.addObject(this.targetButton, this.lowerToolbarLayout);
         }
 
         this.letterColorButton = new ToolbarButton()
@@ -444,13 +475,13 @@ export default class Toolbar extends ContainerObject {
             .tooltip('Color sequences based on experimental data.');
 
         if (this._type === ToolbarType.FEEDBACK) {
-            lowerToolbarLayout.addHSpacer(SPACE_NARROW);
+            this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
 
             this.letterColorButton.toggled.value = false;
-            this.addObject(this.letterColorButton, lowerToolbarLayout);
+            this.addObject(this.letterColorButton, this.lowerToolbarLayout);
 
             this.expColorButton.toggled.value = true;
-            this.addObject(this.expColorButton, lowerToolbarLayout);
+            this.addObject(this.expColorButton, this.lowerToolbarLayout);
         }
 
         this.palette = new NucleotidePalette();
@@ -468,14 +499,14 @@ export default class Toolbar extends ContainerObject {
             .rscriptID(RScriptUIElementID.SWAP);
 
         if (this._type !== ToolbarType.FEEDBACK) {
-            lowerToolbarLayout.addHSpacer(SPACE_WIDE);
+            this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
 
-            this.addObject(this.palette, lowerToolbarLayout);
+            this.addObject(this.palette, this.lowerToolbarLayout);
             this.palette.changeDefaultMode();
 
-            lowerToolbarLayout.addHSpacer(SPACE_NARROW);
+            this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
 
-            this.addObject(this.pairSwapButton, lowerToolbarLayout);
+            this.addObject(this.pairSwapButton, this.lowerToolbarLayout);
 
             this.regs.add(this.pairSwapButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
@@ -485,8 +516,8 @@ export default class Toolbar extends ContainerObject {
             if (this._boostersData != null && this._boostersData.paint_tools != null) {
                 let mode: PoseEditMode = this.mode as PoseEditMode;
                 let boosterPaintToolsLayout = new HLayoutContainer();
-                lowerToolbarLayout.addHSpacer(SPACE_NARROW);
-                lowerToolbarLayout.addChild(boosterPaintToolsLayout);
+                this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
+                this.lowerToolbarLayout.addChild(boosterPaintToolsLayout);
                 for (let data of this._boostersData.paint_tools) {
                     Booster.create(mode, data).then((booster) => {
                         booster.onLoad();
@@ -503,7 +534,7 @@ export default class Toolbar extends ContainerObject {
             }
         }
 
-        lowerToolbarLayout.addHSpacer(SPACE_WIDE);
+        this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
 
         if (!Eterna.MOBILE_APP) {
             this.zoomInButton = new GameButton()
@@ -514,7 +545,7 @@ export default class Toolbar extends ContainerObject {
                 .tooltip('Zoom in')
                 .hotkey(KeyCode.Equal)
                 .rscriptID(RScriptUIElementID.ZOOMIN);
-            this.addObject(this.zoomInButton, lowerToolbarLayout);
+            this.addObject(this.zoomInButton, this.lowerToolbarLayout);
 
             this.zoomOutButton = new GameButton()
                 .up(Bitmaps.ImgZoomOut)
@@ -524,9 +555,9 @@ export default class Toolbar extends ContainerObject {
                 .tooltip('Zoom out')
                 .hotkey(KeyCode.Minus)
                 .rscriptID(RScriptUIElementID.ZOOMOUT);
-            this.addObject(this.zoomOutButton, lowerToolbarLayout);
+            this.addObject(this.zoomOutButton, this.lowerToolbarLayout);
 
-            lowerToolbarLayout.addHSpacer(SPACE_NARROW);
+            this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
         }
 
         this.undoButton = new GameButton()
@@ -546,32 +577,33 @@ export default class Toolbar extends ContainerObject {
             .rscriptID(RScriptUIElementID.REDO);
 
         if (this._type !== ToolbarType.FEEDBACK) {
-            this.addObject(this.undoButton, lowerToolbarLayout);
-            this.addObject(this.redoButton, lowerToolbarLayout);
+            this.addObject(this.undoButton, this.lowerToolbarLayout);
+            this.addObject(this.redoButton, this.lowerToolbarLayout);
         }
 
-        lowerToolbarLayout.addHSpacer(SPACE_WIDE);
+        this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
         this.baseMarkerButton = new ToolbarButton()
             .up(Bitmaps.ImgBaseMarker)
             .over(Bitmaps.ImgBaseMarkerOver)
             .down(Bitmaps.ImgBaseMarker)
             .tooltip('Mark bases (hold ctrl)');
-        this.addObject(this.baseMarkerButton, lowerToolbarLayout);
+        this.addObject(this.baseMarkerButton, this.lowerToolbarLayout);
 
         this.regs.add(this.baseMarkerButton.clicked.connect(() => {
             this._deselectAllPaintTools();
             this.baseMarkerButton.toggled.value = true;
         }));
 
-        lowerToolbarLayout.addHSpacer(SPACE_WIDE);
+        this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
         this.magicGlueButton = new ToolbarButton()
             .up(Bitmaps.ImgMagicGlue)
             .over(Bitmaps.ImgMagicGlueOver)
             .down(Bitmaps.ImgMagicGlue)
             .tooltip('Magic glue - change target structure in purple areas (hold alt)');
         if (this._showGlue) {
-            this.addObject(this.magicGlueButton, lowerToolbarLayout);
-            lowerToolbarLayout.addHSpacer(SPACE_NARROW);
+            this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
+            this.addObject(this.magicGlueButton, this.lowerToolbarLayout);
+            this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
         }
 
         this.regs.add(this.magicGlueButton.clicked.connect(() => {
@@ -582,9 +614,28 @@ export default class Toolbar extends ContainerObject {
         if (this._type === ToolbarType.PUZZLEMAKER) {
             this.submitButton.tooltip('Publish your puzzle!');
 
-            this.addObject(this.submitButton, lowerToolbarLayout);
+            this.addObject(this.submitButton, this.lowerToolbarLayout);
         }
 
+        this.rightArrow = new GameButton()
+            .allStates(Bitmaps.ImgRedo)
+            .disabled(undefined)
+            .tooltip('Scroll right')
+            .scaleBitmapToLabel();
+        this.addObject(this.rightArrow, this._content);
+
+        this.rightArrow.display.visible = false;
+        this.leftArrow.display.visible = false;
+        this.rightArrow.clicked.connect(() => {
+            this.lowerToolbarLayout.x += 5;
+            console.log(this.lowerToolbarLayout.x);
+        });
+        this.leftArrow.clicked.connect(() => {
+            this.lowerToolbarLayout.x -= 5;
+            console.log(this.lowerToolbarLayout.x);
+        });
+
+        this.onResized();
         this.updateLayout();
         this._uncollapsedContentLoc = new Point(this._content.position.x, this._content.position.y);
         this.regs.add(Eterna.settings.autohideToolbar.connectNotify((value) => {
