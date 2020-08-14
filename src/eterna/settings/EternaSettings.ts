@@ -24,7 +24,6 @@ export default class EternaSettings extends Settings {
 
     public readonly designBrowserColumnNames: Setting<DesignCategory[]> | Setting<null>;
     public readonly designBrowserSelectedSolutionIDs: Setting<number[]> | Setting<null>;
-    public readonly designBrowserOnlySelectedVisible: Setting<boolean>;
 
     public readonly saveGamesTransfered: Setting<boolean>;
 
@@ -49,7 +48,6 @@ export default class EternaSettings extends Settings {
         this.usePuzzlerLayout = this.setting<boolean>('usePuzzlerLayout', false);
         this.designBrowserColumnNames = this.setting('designBrowserColumnNames-2', null);
         this.designBrowserSelectedSolutionIDs = this.setting('designBrowserSelectedSolutionIDs', null);
-        this.designBrowserOnlySelectedVisible = this.setting<boolean>('designBrowserOnlySelectedVisible', false);
 
         // Denotes whether savegames have been transfered from localstorage/storeJS/EternaSettings to
         // indexedDB/localforage/SaveGameManager - eventually this might be able to be dropped,
