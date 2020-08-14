@@ -728,11 +728,10 @@ export default class DesignBrowserMode extends GameMode {
             this.reorganize(true);
         });
 
-        dialog.currentSelectedFilterValue = Eterna.settings.designBrowserOnlySelectedVisible.value;
+        dialog.currentSelectedFilterValue = this._onlySelectedVisible;
 
         dialog.selectedFilterUpdate.connect((e) => {
             this._onlySelectedVisible = e;
-            Eterna.settings.designBrowserOnlySelectedVisible.value = e;
             this.reorganize(true);
         });
     }
