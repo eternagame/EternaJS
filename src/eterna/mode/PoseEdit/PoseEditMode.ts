@@ -2031,7 +2031,7 @@ export default class PoseEditMode extends GameMode {
         let data: SubmitSolutionData = submissionResponse['data'];
 
         if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL) {
-            this.showMissionClearedPanel(data);
+            this.showMissionClearedPanel(data, this._puzzle.alreadySolved);
         }
 
         const seqString = EPars.sequenceToString(
@@ -2070,7 +2070,7 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    private showMissionClearedPanel(submitSolutionRspData: SubmitSolutionData): void {
+    private showMissionClearedPanel(submitSolutionRspData: SubmitSolutionData, onlyShowArrow = false): void {
         this._submitSolutionRspData = submitSolutionRspData;
 
         // Hide some UI
@@ -2164,7 +2164,9 @@ export default class PoseEditMode extends GameMode {
                 }
             });
         }
-
+        if (onlyShowArrow) {
+            keepPlaying();
+        }
         missionClearedPanel.closeButton.clicked.connect(() => keepPlaying());
     }
 
