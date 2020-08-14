@@ -2312,10 +2312,11 @@ export default class PoseEditMode extends GameMode {
 
     private transferToPuzzlemaker(): void {
         let poseData: SaveStoreItem = [0, this._poses[0].sequence];
-        for (let pose of this._poses) {
+        for (let [i, pose] of Object.entries(this._poses)) {
             poseData.push(JSON.stringify({
                 sequence: EPars.sequenceToString(pose.sequence),
-                structure: EPars.pairsToParenthesis(pose.pairs)
+                // structure: EPars.pairsToParenthesis(pose.pairs),
+                structure: this._puzzle.getSecstruct(parseInt(i, 10))
             }));
         }
 
