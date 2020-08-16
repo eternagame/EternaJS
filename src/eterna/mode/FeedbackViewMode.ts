@@ -31,7 +31,7 @@ import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import SolutionManager from 'eterna/puzzle/SolutionManager';
 import GameMode from './GameMode';
 import ViewSolutionOverlay from './DesignBrowser/ViewSolutionOverlay';
-import DesignBrowserMode from './DesignBrowser/DesignBrowserMode';
+import DesignBrowserMode, {DesignBrowserFilter, DesignCategory} from './DesignBrowser/DesignBrowserMode';
 
 enum PoseFoldMode {
     ESTIMATE = 'ESTIMATE',
@@ -39,10 +39,11 @@ enum PoseFoldMode {
 }
 
 export default class FeedbackViewMode extends GameMode {
-    constructor(solution: Solution, puzzle: Puzzle) {
+    constructor(solution: Solution, puzzle: Puzzle, solutions: Solution[] | null = null) {
         super();
         this._solution = solution;
         this._puzzle = puzzle;
+        if (solutions) this._cachedSolutions = solutions;
     }
 
     public get isOpaque(): boolean { return true; }
@@ -197,6 +198,7 @@ export default class FeedbackViewMode extends GameMode {
             this._sequence = EPars.stringToSequence(newSolution.sequence);
             // Update the game, so it's not showing an outdated sequence
             this.setPoseFields(getPoseFields());
+            console.log(2);
         };
         this._solutionView = new ViewSolutionOverlay({
             solution: this._solution,
@@ -210,6 +212,7 @@ export default class FeedbackViewMode extends GameMode {
                 }
                 let newSolution = solutionsToPuzzle[newSolutionIndex];
                 setNewSolution(newSolution);
+                console.log(1);
             },
             onNext: async () => {
                 let {currentSolutionIndex, solutionsToPuzzle} = await getCurrentSolutionIndex();
@@ -219,6 +222,7 @@ export default class FeedbackViewMode extends GameMode {
                 }
                 let newSolution = solutionsToPuzzle[newSolutionIndex];
                 setNewSolution(newSolution);
+                console.log(0);
             },
             parentMode: (() => this)()
         });
@@ -243,6 +247,7 @@ export default class FeedbackViewMode extends GameMode {
         this.addObject(this._info, this.uiLayer);
 
         this.setPoseFields(poseFields);
+        console.log(3);
         let seeShape: boolean = (this._feedback !== null && this._feedback.getShapeData() != null);
         if (seeShape) {
             this.setupShape();
@@ -258,7 +263,7 @@ export default class FeedbackViewMode extends GameMode {
 
         // Go ahead and fetch the solutions, so they should be ready by the time they're needed.
         // If not, they're fetched and awaited there.
-        this.setCachedSolutions();
+        if (!this._cachedSolutions) this.setCachedSolutions();
     }
 
     private async setCachedSolutions() {

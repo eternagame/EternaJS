@@ -281,11 +281,11 @@ export default class EternaApp extends FlashbangApp {
      */
     public loadSolutionViewer(puzzleID: number, solutionID: number, loadInPoseEdit: boolean = false): Promise<void> {
         return this.loadSolution(puzzleID, solutionID)
-            .then(([puzzle, solution]) => {
+            .then(([puzzle, solution, solutions]) => {
                 if (loadInPoseEdit) {
                     this._modeStack.unwindToMode(new PoseEditMode(puzzle, {initSolution: solution}));
                 } else {
-                    this._modeStack.unwindToMode(new FeedbackViewMode(solution, puzzle));
+                    this._modeStack.unwindToMode(new FeedbackViewMode(solution, puzzle, solutions));
                 }
             });
     }
@@ -351,7 +351,7 @@ export default class EternaApp extends FlashbangApp {
         }
     }
 
-    public switchToFeedbackView(puzzleOrID: number | Puzzle, solutionOrID: number | Solution): Promise<void> {
+    public switchToFeedbackView(puzzleOrID: number | Puzzle, solutionOrID: number | Solution, solutions: Solution[] | null = null): Promise<void> {
         const puzzleID = (puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID);
         const solutionID = (solutionOrID instanceof Solution ? solutionOrID.nodeID : solutionOrID);
 
@@ -361,12 +361,13 @@ export default class EternaApp extends FlashbangApp {
             this.modeStack.setModeIndex(existingMode, -1);
             return Promise.resolve();
         } else {
+            console.log(5);
             return this.loadSolution(puzzleOrID, solutionOrID)
-                .then(([puzzle, solution]) => {
+                .then(([puzzle, solution, allSolutions]) => {
                     if (existingMode != null) {
                         this.modeStack.removeMode(existingMode);
                     }
-                    this.modeStack.pushMode(new FeedbackViewMode(solution, puzzle));
+                    this.modeStack.pushMode(new FeedbackViewMode(solution, puzzle, solutions ?? allSolutions));
                 });
         }
     }
@@ -377,7 +378,7 @@ export default class EternaApp extends FlashbangApp {
         return this.modeStack.modes.find((mode) => mode instanceof PoseEditMode) as PoseEditMode;
     }
 
-    private loadSolution(puzzleOrID: number | Puzzle, solutionOrID: number | Solution): Promise<[Puzzle, Solution]> {
+    private loadSolution(puzzleOrID: number | Puzzle, solutionOrID: number | Solution): Promise<[Puzzle, Solution, Solution[]]> {
         const puzzleID = (puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID);
         const solutionID = (solutionOrID instanceof Solution ? solutionOrID.nodeID : solutionOrID);
 
@@ -400,8 +401,10 @@ export default class EternaApp extends FlashbangApp {
                     );
                 });
 
+        const solutionsPromise = SolutionManager.instance.getSolutionsForPuzzle(puzzleID);
+
         this.setLoadingText(`Loading solution ${solutionID}...`, null);
-        return Promise.all([puzzlePromise, solutionPromise])
+        return Promise.all([puzzlePromise, solutionPromise, solutionsPromise])
             .then((result) => {
                 this.popLoadingMode();
                 return result;
