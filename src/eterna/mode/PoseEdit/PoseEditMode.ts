@@ -1531,9 +1531,6 @@ export default class PoseEditMode extends GameMode {
     }
 
     private exitPuzzle(): void {
-        if (this._submitSolutionRspData == null) {
-            throw new Error('exit_puzzle was called before we submitted a solution');
-        }
         this.showMissionClearedPanel(this._submitSolutionRspData);
     }
 
@@ -2006,32 +2003,39 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
-        // submit our solution to the server
-        log.debug('Submitting solution...');
-        let submissionPromise = Eterna.client.submitSolution(this.createSubmitData(details, undoBlock));
+        let {alreadySolved} = this._puzzle;
+        alreadySolved = true;
+        let data: SubmitSolutionData;
 
-        // Wait for explosion completion
-        await fxComplete;
+        if (!alreadySolved) {
+            // submit our solution to the server
+            log.debug('Submitting solution...');
+            let submissionPromise = Eterna.client.submitSolution(this.createSubmitData(details, undoBlock));
 
-        // Wait for the submission to the server, and for the mode to be active.
-        // 'waitTillActive' is probably not necessary in practice, but if another mode is pushed onto this one
-        // during submission, we want to wait till we're the top-most mode before executing more view logic.
-        let allResults = await Promise.all([submissionPromise, this.waitTillActive()]);
+            // Wait for explosion completion
+            await fxComplete;
 
-        // 'allResults' contains the results of our submission, and the "waitTillActive" void promise
-        let submissionResponse = allResults[0];
+            // Wait for the submission to the server, and for the mode to be active.
+            // 'waitTillActive' is probably not necessary in practice, but if another mode is pushed onto this one
+            // during submission, we want to wait till we're the top-most mode before executing more view logic.
+            let allResults = await Promise.all([submissionPromise, this.waitTillActive()]);
 
-        // show achievements, if we were awarded any
-        let cheevs: Map< string, AchievementData > = submissionResponse['new_achievements'];
-        if (cheevs != null) {
-            await this._achievements.awardAchievements(cheevs);
-        }
+            // 'allResults' contains the results of our submission, and the "waitTillActive" void promise
+            let submissionResponse = allResults[0];
 
-        submittingRef.destroyObject();
-        let data: SubmitSolutionData = submissionResponse['data'];
+            // show achievements, if we were awarded any
+            let cheevs: Map< string, AchievementData > = submissionResponse['new_achievements'];
+            if (cheevs != null) {
+                await this._achievements.awardAchievements(cheevs);
+            }
 
-        if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL) {
-            this.showMissionClearedPanel(data, this._puzzle.alreadySolved);
+            submittingRef.destroyObject();
+            data = submissionResponse['data']; if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL) {
+                this.showMissionClearedPanel(data);
+            }
+        } else {
+            this.showMissionClearedPanel(null, true);
+            return;
         }
 
         const seqString = EPars.sequenceToString(
@@ -2070,7 +2074,7 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    private showMissionClearedPanel(submitSolutionRspData: SubmitSolutionData, onlyShowArrow = false): void {
+    private showMissionClearedPanel(submitSolutionRspData: SubmitSolutionData | null, onlyShowArrow = false): void {
         this._submitSolutionRspData = submitSolutionRspData;
 
         // Hide some UI
@@ -2092,7 +2096,7 @@ export default class PoseEditMode extends GameMode {
             moreText = boostersData.mission_cleared['more'];
         }
 
-        let nextPuzzleData: PuzzleJSON | number | null | undefined = submitSolutionRspData['next-puzzle'];
+        let nextPuzzleData: PuzzleJSON | number | null | undefined = submitSolutionRspData?.['next-puzzle'];
 
         // For some reason the backend returns 0 in the progression instead of just null
         // when we want to redirect back to the homepage...? I imagine we should change that
@@ -2105,7 +2109,7 @@ export default class PoseEditMode extends GameMode {
         missionClearedPanel.display.alpha = 0;
         missionClearedPanel.addObject(new AlphaTask(1, 0.3));
         this.addObject(missionClearedPanel, this.dialogLayer);
-        missionClearedPanel.createRankScroll(submitSolutionRspData);
+        if (submitSolutionRspData) missionClearedPanel.createRankScroll(submitSolutionRspData);
 
         const keepPlaying = () => {
             if (missionClearedPanel != null) {
@@ -2133,7 +2137,9 @@ export default class PoseEditMode extends GameMode {
         if (hasNextPuzzle) {
             // Don't just await here nor initialize the call in the nextButton callback
             // so that we can load in the background
-            const nextPuzzlePromise = PuzzleManager.instance.parsePuzzle(nextPuzzleData as PuzzleJSON);
+            const nextPuzzlePromise = nextPuzzleData
+                ? PuzzleManager.instance.parsePuzzle(nextPuzzleData as PuzzleJSON)
+                : PuzzleManager.instance.getPuzzleByID(this._puzzle.nextPuzzleID);
             nextPuzzlePromise.then((puzzle) => log.info(`Loaded next puzzle [id=${puzzle.nodeID}]`));
 
             missionClearedPanel.nextButton.clicked.connect(async () => {
@@ -2164,10 +2170,10 @@ export default class PoseEditMode extends GameMode {
                 }
             });
         }
+        missionClearedPanel.closeButton.clicked.connect(() => keepPlaying());
         if (onlyShowArrow) {
             keepPlaying();
         }
-        missionClearedPanel.closeButton.clicked.connect(() => keepPlaying());
     }
 
     private switchToFeedbackViewForSolution(solution: Solution): void {
