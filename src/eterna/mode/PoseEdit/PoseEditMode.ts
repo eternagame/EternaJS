@@ -67,13 +67,6 @@ import ViewSolutionOverlay from '../DesignBrowser/ViewSolutionOverlay';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
-export enum PuzzleState {
-    SETUP = -1,
-    COUNTDOWN = 0,
-    GAME = 1,
-    CLEARED = 2,
-}
-
 export interface PoseEditParams {
     isReset?: boolean;
     initialFolder?: string;
@@ -438,10 +431,6 @@ export default class PoseEditMode extends GameMode {
         let sequenceString = EPars.sequenceToString(this._poses[0].sequence);
         if (this._poses[0].customNumbering != null) sequenceString += ` ${Utility.arrayToRangeString(this._poses[0].customNumbering)}`;
         this.modeStack.pushMode(new CopyTextDialogMode(sequenceString, 'Current Sequence'));
-    }
-
-    public setPuzzleState(newstate: PuzzleState): void {
-        this._puzState = newstate;
     }
 
     public set puzzleDefaultMode(defaultMode: PoseState) {
@@ -966,7 +955,6 @@ export default class PoseEditMode extends GameMode {
 
         this.clearUndoStack();
 
-        this.setPuzzleState(PuzzleState.SETUP);
         this.disableTools(true);
 
         // reset lineage for experimental targets
@@ -1970,44 +1958,44 @@ export default class PoseEditMode extends GameMode {
             // Show a "Submitting now!" dialog
             submittingRef = this.showDialog(new SubmittingDialog()).ref;
             fxComplete = Promise.resolve();
-        } else if (!this._puzzle.alreadySolved) {
-            // Kick off a BubbleSweep animation
-            let bubbles = new BubbleSweep(800);
-            this.addObject(bubbles, this.bgLayer);
-            bubbles.start();
+        } else {
+            this._alreadyCleared = true;
+            if (!this._puzzle.alreadySolved) {
+                // Kick off a BubbleSweep animation
+                let bubbles = new BubbleSweep(800);
+                this.addObject(bubbles, this.bgLayer);
+                bubbles.start();
 
-            // Show an explosion animation
-            this.disableTools(true);
-            this.setPuzzleState(PuzzleState.CLEARED);
+                // Show an explosion animation
+                this.disableTools(true);
 
-            Flashbang.sound.playSound(Sounds.SoundPuzzleClear);
-            for (let pose of this._poses) {
-                pose.setZoomLevel(0, true, true);
-                let p = pose.startExplosion();
-                if (fxComplete == null) {
-                    fxComplete = p.then(() => {
-                        bubbles.decay();
-                        bubbles.addObject(new SerialTask(
-                            new AlphaTask(0, 5, Easing.easeIn),
-                            new SelfDestructTask()
-                        ));
+                Flashbang.sound.playSound(Sounds.SoundPuzzleClear);
+                for (let pose of this._poses) {
+                    pose.setZoomLevel(0, true, true);
+                    let p = pose.startExplosion();
+                    if (fxComplete == null) {
+                        fxComplete = p.then(() => {
+                            bubbles.decay();
+                            bubbles.addObject(new SerialTask(
+                                new AlphaTask(0, 5, Easing.easeIn),
+                                new SelfDestructTask()
+                            ));
 
-                        for (let poseToClear of this._poses) {
-                            poseToClear.showTotalEnergy = false;
-                            poseToClear.clearExplosion();
-                        }
+                            for (let poseToClear of this._poses) {
+                                poseToClear.showTotalEnergy = false;
+                                poseToClear.clearExplosion();
+                            }
 
-                        this._constraintsLayer.visible = false;
-                    });
+                            this._constraintsLayer.visible = false;
+                        });
+                    }
                 }
             }
         }
 
-        let {alreadySolved} = this._puzzle;
-        alreadySolved = true;
         let data: SubmitSolutionData;
 
-        if (!alreadySolved) {
+        if (!this._puzzle.alreadySolved || this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
             // submit our solution to the server
             log.debug('Submitting solution...');
             let submissionPromise = Eterna.client.submitSolution(this.createSubmitData(details, undoBlock));
@@ -2030,7 +2018,8 @@ export default class PoseEditMode extends GameMode {
             }
 
             submittingRef.destroyObject();
-            data = submissionResponse['data']; if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL) {
+            data = submissionResponse['data'];
+            if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL) {
                 this.showMissionClearedPanel(data);
             }
         } else {
@@ -2218,8 +2207,6 @@ export default class PoseEditMode extends GameMode {
         if (constraints == null || constraints.length === 0 || !this._showMissionScreen) {
             this.startPlaying();
         } else {
-            this.setPuzzleState(PuzzleState.COUNTDOWN);
-
             this._startSolvingTime = new Date().getTime();
             this.startPlaying();
             this.showIntroScreen();
@@ -2282,8 +2269,6 @@ export default class PoseEditMode extends GameMode {
 
         this._constraintBar.display.visible = true;
         this._constraintBar.layout();
-
-        this.setPuzzleState(PuzzleState.GAME);
     }
 
     private resetAutosaveData(): void {
@@ -2628,8 +2613,8 @@ export default class PoseEditMode extends GameMode {
         // / Update spec thumbnail if it is open
         this.updateDockedSpecBox();
 
-        if (constraintsSatisfied) {
-            if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL && this._puzState === PuzzleState.GAME) {
+        if (constraintsSatisfied || this._puzzle.alreadySolved) {
+            if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL && !this._alreadyCleared) {
                 this.submitCurrentPose();
             }
         }
@@ -3326,7 +3311,7 @@ export default class PoseEditMode extends GameMode {
     private _seqStacks: UndoBlock[][];
     private _stackLevel: number;
     private _stackSize: number;
-    private _puzState: PuzzleState;
+    private _alreadyCleared: boolean = false;
     private _paused: boolean;
     private _startSolvingTime: number;
     private _startingPoint: string;
