@@ -67,13 +67,6 @@ import ViewSolutionOverlay from '../DesignBrowser/ViewSolutionOverlay';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
-export enum PuzzleState {
-    SETUP = -1,
-    COUNTDOWN = 0,
-    GAME = 1,
-    CLEARED = 2,
-}
-
 export interface PoseEditParams {
     isReset?: boolean;
     initialFolder?: string;
@@ -438,10 +431,6 @@ export default class PoseEditMode extends GameMode {
         let sequenceString = EPars.sequenceToString(this._poses[0].sequence);
         if (this._poses[0].customNumbering != null) sequenceString += ` ${Utility.arrayToRangeString(this._poses[0].customNumbering)}`;
         this.modeStack.pushMode(new CopyTextDialogMode(sequenceString, 'Current Sequence'));
-    }
-
-    public setPuzzleState(newstate: PuzzleState): void {
-        this._puzState = newstate;
     }
 
     public set puzzleDefaultMode(defaultMode: PoseState) {
@@ -966,7 +955,6 @@ export default class PoseEditMode extends GameMode {
 
         this.clearUndoStack();
 
-        this.setPuzzleState(PuzzleState.SETUP);
         this.disableTools(true);
 
         // reset lineage for experimental targets
@@ -1538,9 +1526,6 @@ export default class PoseEditMode extends GameMode {
     }
 
     private exitPuzzle(): void {
-        if (this._submitSolutionRspData == null) {
-            throw new Error('exit_puzzle was called before we submitted a solution');
-        }
         this.showMissionClearedPanel(this._submitSolutionRspData);
     }
 
@@ -1981,64 +1966,72 @@ export default class PoseEditMode extends GameMode {
             submittingRef = this.showDialog(new SubmittingDialog()).ref;
             fxComplete = Promise.resolve();
         } else {
-            // Kick off a BubbleSweep animation
-            let bubbles = new BubbleSweep(800);
-            this.addObject(bubbles, this.bgLayer);
-            bubbles.start();
+            this._alreadyCleared = true;
+            if (!this._puzzle.alreadySolved) {
+                // Kick off a BubbleSweep animation
+                let bubbles = new BubbleSweep(800);
+                this.addObject(bubbles, this.bgLayer);
+                bubbles.start();
 
-            // Show an explosion animation
-            this.disableTools(true);
-            this.setPuzzleState(PuzzleState.CLEARED);
+                // Show an explosion animation
+                this.disableTools(true);
 
-            Flashbang.sound.playSound(Sounds.SoundPuzzleClear);
-            for (let pose of this._poses) {
-                pose.setZoomLevel(0, true, true);
-                let p = pose.startExplosion();
-                if (fxComplete == null) {
-                    fxComplete = p.then(() => {
-                        bubbles.decay();
-                        bubbles.addObject(new SerialTask(
-                            new AlphaTask(0, 5, Easing.easeIn),
-                            new SelfDestructTask()
-                        ));
+                Flashbang.sound.playSound(Sounds.SoundPuzzleClear);
+                for (let pose of this._poses) {
+                    pose.setZoomLevel(0, true, true);
+                    let p = pose.startExplosion();
+                    if (fxComplete == null) {
+                        fxComplete = p.then(() => {
+                            bubbles.decay();
+                            bubbles.addObject(new SerialTask(
+                                new AlphaTask(0, 5, Easing.easeIn),
+                                new SelfDestructTask()
+                            ));
 
-                        for (let poseToClear of this._poses) {
-                            poseToClear.showTotalEnergy = false;
-                            poseToClear.clearExplosion();
-                        }
+                            for (let poseToClear of this._poses) {
+                                poseToClear.showTotalEnergy = false;
+                                poseToClear.clearExplosion();
+                            }
 
-                        this._constraintsLayer.visible = false;
-                    });
+                            this._constraintsLayer.visible = false;
+                        });
+                    }
                 }
             }
         }
 
-        // submit our solution to the server
-        log.debug('Submitting solution...');
-        let submissionPromise = Eterna.client.submitSolution(this.createSubmitData(details, undoBlock));
+        let data: SubmitSolutionData;
 
-        // Wait for explosion completion
-        await fxComplete;
+        if (!this._puzzle.alreadySolved || this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
+            // submit our solution to the server
+            log.debug('Submitting solution...');
+            let submissionPromise = Eterna.client.submitSolution(this.createSubmitData(details, undoBlock));
 
-        // Wait for the submission to the server, and for the mode to be active.
-        // 'waitTillActive' is probably not necessary in practice, but if another mode is pushed onto this one
-        // during submission, we want to wait till we're the top-most mode before executing more view logic.
-        let allResults = await Promise.all([submissionPromise, this.waitTillActive()]);
+            // Wait for explosion completion
+            await fxComplete;
 
-        // 'allResults' contains the results of our submission, and the "waitTillActive" void promise
-        let submissionResponse = allResults[0];
+            // Wait for the submission to the server, and for the mode to be active.
+            // 'waitTillActive' is probably not necessary in practice, but if another mode is pushed onto this one
+            // during submission, we want to wait till we're the top-most mode before executing more view logic.
+            let allResults = await Promise.all([submissionPromise, this.waitTillActive()]);
 
-        // show achievements, if we were awarded any
-        let cheevs: Map< string, AchievementData > = submissionResponse['new_achievements'];
-        if (cheevs != null) {
-            await this._achievements.awardAchievements(cheevs);
-        }
+            // 'allResults' contains the results of our submission, and the "waitTillActive" void promise
+            let submissionResponse = allResults[0];
 
-        submittingRef.destroyObject();
-        let data: SubmitSolutionData = submissionResponse['data'];
+            // show achievements, if we were awarded any
+            let cheevs: Map< string, AchievementData > = submissionResponse['new_achievements'];
+            if (cheevs != null) {
+                await this._achievements.awardAchievements(cheevs);
+            }
 
-        if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL) {
-            this.showMissionClearedPanel(data);
+            submittingRef.destroyObject();
+            data = submissionResponse['data'];
+            if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL) {
+                this.showMissionClearedPanel(data);
+            }
+        } else {
+            this.showMissionClearedPanel(null, true);
+            return;
         }
 
         const seqString = EPars.sequenceToString(
@@ -2077,7 +2070,7 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    private showMissionClearedPanel(submitSolutionRspData: SubmitSolutionData): void {
+    private showMissionClearedPanel(submitSolutionRspData: SubmitSolutionData | null, onlyShowArrow = false): void {
         this._submitSolutionRspData = submitSolutionRspData;
 
         // Hide some UI
@@ -2099,7 +2092,7 @@ export default class PoseEditMode extends GameMode {
             moreText = boostersData.mission_cleared['more'];
         }
 
-        let nextPuzzleData: PuzzleJSON | number | null | undefined = submitSolutionRspData['next-puzzle'];
+        let nextPuzzleData: PuzzleJSON | number | null | undefined = submitSolutionRspData?.['next-puzzle'];
 
         // For some reason the backend returns 0 in the progression instead of just null
         // when we want to redirect back to the homepage...? I imagine we should change that
@@ -2112,7 +2105,7 @@ export default class PoseEditMode extends GameMode {
         missionClearedPanel.display.alpha = 0;
         missionClearedPanel.addObject(new AlphaTask(1, 0.3));
         this.addObject(missionClearedPanel, this.dialogLayer);
-        missionClearedPanel.createRankScroll(submitSolutionRspData);
+        if (submitSolutionRspData) missionClearedPanel.createRankScroll(submitSolutionRspData);
 
         const keepPlaying = () => {
             if (missionClearedPanel != null) {
@@ -2140,7 +2133,9 @@ export default class PoseEditMode extends GameMode {
         if (hasNextPuzzle) {
             // Don't just await here nor initialize the call in the nextButton callback
             // so that we can load in the background
-            const nextPuzzlePromise = PuzzleManager.instance.parsePuzzle(nextPuzzleData as PuzzleJSON);
+            const nextPuzzlePromise = nextPuzzleData
+                ? PuzzleManager.instance.parsePuzzle(nextPuzzleData as PuzzleJSON)
+                : PuzzleManager.instance.getPuzzleByID(this._puzzle.nextPuzzleID);
             nextPuzzlePromise.then((puzzle) => log.info(`Loaded next puzzle [id=${puzzle.nodeID}]`));
 
             missionClearedPanel.nextButton.clicked.connect(async () => {
@@ -2171,8 +2166,10 @@ export default class PoseEditMode extends GameMode {
                 }
             });
         }
-
         missionClearedPanel.closeButton.clicked.connect(() => keepPlaying());
+        if (onlyShowArrow) {
+            keepPlaying();
+        }
     }
 
     private switchToFeedbackViewForSolution(solution: Solution): void {
@@ -2217,8 +2214,6 @@ export default class PoseEditMode extends GameMode {
         if (constraints == null || constraints.length === 0 || !this._showMissionScreen) {
             this.startPlaying();
         } else {
-            this.setPuzzleState(PuzzleState.COUNTDOWN);
-
             this._startSolvingTime = new Date().getTime();
             this.startPlaying();
             this.showIntroScreen();
@@ -2281,8 +2276,6 @@ export default class PoseEditMode extends GameMode {
 
         this._constraintBar.display.visible = true;
         this._constraintBar.layout();
-
-        this.setPuzzleState(PuzzleState.GAME);
     }
 
     private resetAutosaveData(): void {
@@ -2628,8 +2621,8 @@ export default class PoseEditMode extends GameMode {
         // / Update spec thumbnail if it is open
         this.updateDockedSpecBox();
 
-        if (constraintsSatisfied) {
-            if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL && this._puzState === PuzzleState.GAME) {
+        if (constraintsSatisfied || this._puzzle.alreadySolved) {
+            if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL && !this._alreadyCleared) {
                 this.submitCurrentPose();
             }
         }
@@ -3326,7 +3319,7 @@ export default class PoseEditMode extends GameMode {
     private _seqStacks: UndoBlock[][];
     private _stackLevel: number;
     private _stackSize: number;
-    private _puzState: PuzzleState;
+    private _alreadyCleared: boolean = false;
     private _paused: boolean;
     private _startSolvingTime: number;
     private _startingPoint: string;
