@@ -127,6 +127,12 @@ export default class EternaMenu extends GamePanel implements Enableable {
         }
     }
 
+    public hideMenu() {
+        this._menus.forEach((menu) => {
+            menu.panel.display.visible = false;
+        });
+    }
+
     private createMenu(menuButton: GameButton): Menu {
         let menu: Menu = new Menu();
         menu.menuButton = menuButton;

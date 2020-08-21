@@ -13,7 +13,6 @@ import {BoostersData} from 'eterna/puzzle/Puzzle';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import BitmapManager from 'eterna/resources/BitmapManager';
-import SelectionBox from 'eterna/mode/DesignBrowser/SelectionBox';
 import NucleotidePalette from './NucleotidePalette';
 import GameButton from './GameButton';
 import ToggleBar from './ToggleBar';
@@ -138,8 +137,10 @@ export default class Toolbar extends ContainerObject {
             Flashbang.stageWidth / 2 - this.container.position.x,
             -this.container.position.y + 8
         );
+        // Update the scroll container size, accounting for buttons and a margin
         let buttonOffset = this.leftArrow.display.width * 2 + 100;
         this.scrollContainer.setSize(Flashbang.stageWidth - buttonOffset, Flashbang.stageHeight);
+        // maxScrollX being greater than 0 indicates that scrolling is possible and some content is covered up
         if (this.scrollContainer.maxScrollX > 0) {
             this.rightArrow.display.visible = true;
             this.leftArrow.display.visible = true;
@@ -147,6 +148,8 @@ export default class Toolbar extends ContainerObject {
             this.rightArrow.display.visible = false;
             this.leftArrow.display.visible = false;
         }
+        // Hiding the menu ensures that it doesn't push the rest of the toolbar to the side
+        this.actionMenu.hideMenu();
         this.updateLayout();
     }
 
@@ -251,12 +254,18 @@ export default class Toolbar extends ContainerObject {
         }
 
         // LOWER TOOLBAR (palette, zoom, settings, etc)
-        this.lowerToolbarLayout = new HLayoutContainer();
-        this.scrollContainerContainer = new HLayoutContainer();
+        this.lowerToolbarLayout = new HLayoutContainer(0, VAlign.BOTTOM);
+        this.scrollContainerContainer = new HLayoutContainer(0, VAlign.BOTTOM);
         Assert.assertIsDefined(Flashbang.stageHeight);
         this.scrollContainer = new ScrollContainer(Flashbang.stageWidth, Flashbang.stageHeight);
         this._content.addChild(this.scrollContainerContainer);
         this.lowerToolbarLayout.setParent(this.scrollContainer.content);
+
+        /*
+        The lower toolbar structure is a HLayoutContainer wrapped in ScrollContainer wrapped in another HLayoutContainer
+        The arrows are in the outer HLayoutContainer, along with the ScrollContainer
+        The actual toolbar content is in the innermost HLayoutContainer
+        */
 
         if (
             this._states > 1
@@ -273,12 +282,13 @@ export default class Toolbar extends ContainerObject {
             .disabled(undefined)
             .tooltip('Scroll left')
             .scaleBitmapToLabel();
-        this.addObject(this.leftArrow, this.scrollContainerContainer);
-
-        this.addObject(this.scrollContainer, this.scrollContainerContainer);
 
         this.actionMenu = new EternaMenu(EternaMenuStyle.PULLUP);
-        this.addObject(this.actionMenu, this.lowerToolbarLayout);
+        // The action menu needs to be outside of the inner HLayoutContainer to display the menu
+        this.addObject(this.actionMenu, this.scrollContainerContainer);
+        this.addObject(this.leftArrow, this.scrollContainerContainer);
+        this.addObject(this.scrollContainer, this.scrollContainerContainer);
+
         this.actionMenu.addMenuButton(new GameButton().allStates(Bitmaps.NovaMenu).disabled(undefined));
 
         this.screenshotButton = new GameButton()
@@ -625,32 +635,36 @@ export default class Toolbar extends ContainerObject {
             .scaleBitmapToLabel();
         this.addObject(this.rightArrow, this.scrollContainerContainer);
 
-        this.rightArrow.display.visible = false;
-        this.leftArrow.display.visible = false;
-
         let interval: NodeJS.Timeout;
         let endScroll = () => {
             if (interval) clearInterval(interval);
         };
         let scrollRight = () => {
-            this.scrollContainer.setScroll(this.scrollContainer.scrollX - 10, this.scrollContainer.scrollY);
-        };
-        let scrollLeft = () => {
             this.scrollContainer.setScroll(this.scrollContainer.scrollX + 10, this.scrollContainer.scrollY);
         };
+        let scrollLeft = () => {
+            this.scrollContainer.setScroll(this.scrollContainer.scrollX - 10, this.scrollContainer.scrollY);
+        };
         this.rightArrow.pointerDown.connect(() => {
+            endScroll();
             interval = setInterval(scrollRight, 100);
         });
         this.rightArrow.pointerUp.connect(() => endScroll());
         this.leftArrow.pointerDown.connect(() => {
+            endScroll();
             interval = setInterval(scrollLeft, 100);
         });
         this.leftArrow.pointerUp.connect(() => endScroll());
-        this.rightArrow.clicked.connect(() => clearInterval());
-        this.leftArrow.clicked.connect(() => scrollLeft());
+        this.rightArrow.clicked.connect(() => {
+            endScroll();
+            scrollRight();
+        });
+        this.leftArrow.clicked.connect(() => {
+            endScroll();
+            scrollLeft();
+        });
 
         this.onResized();
-        this.updateLayout();
 
         this._uncollapsedContentLoc = new Point(this._content.position.x, this._content.position.y);
         this.regs.add(Eterna.settings.autohideToolbar.connectNotify((value) => {
