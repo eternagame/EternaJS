@@ -670,6 +670,37 @@ export default class Toolbar extends ContainerObject {
         this.regs.add(Eterna.settings.autohideToolbar.connectNotify((value) => {
             this.setToolbarAutohide(value);
         }));
+        this._setupToolbarDrag();
+    }
+
+    private _setupToolbarDrag() {
+        let mouseDown = false;
+        let startingX: number;
+        let startingScroll: number;
+        this.pointerDown.connect((e) => {
+            let {x, y} = e.data.global;
+            if (this.lowerToolbarLayout.getBounds().contains(x, y)) {
+                mouseDown = true;
+                startingX = x;
+                startingScroll = this.scrollContainer.scrollX;
+            }
+        });
+        this.pointerUp.connect((e) => {
+            mouseDown = false;
+        });
+
+        this.scrollContainer.display.on('pointerupoutside', () => {
+            mouseDown = false;
+        });
+        this.pointerMove.connect((e) => {
+            let {x, y} = e.data.global;
+            if (e.data.buttons === 1 && mouseDown && this.lowerToolbarLayout.getBounds().contains(x, y)) {
+                let offset = x - startingX;
+                if (Math.abs(offset) > 15) {
+                    this.scrollContainer.scrollX = startingScroll - offset;
+                }
+            }
+        });
     }
 
     private updateLayout(): void {
