@@ -96,6 +96,12 @@ export default class HLayoutContainer extends LayoutContainer {
                     child.y += maxHeight - bounds.height;
                 }
 
+                // This is an incredibly hacky setup for making sure menus are handled correctly
+                if (child.name?.startsWith('EternaMenu')) {
+                    let w = parseInt(child.name.replace('EternaMenu', ''), 10);
+                    bounds.width = w;
+                }
+
                 x += bounds.width + this._hOffset;
             }
         }

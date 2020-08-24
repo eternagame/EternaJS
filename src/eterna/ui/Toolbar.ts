@@ -148,8 +148,6 @@ export default class Toolbar extends ContainerObject {
             this.rightArrow.display.visible = false;
             this.leftArrow.display.visible = false;
         }
-        // Hiding the menu ensures that it doesn't push the rest of the toolbar to the side
-        this.actionMenu.hideMenu();
         this.updateLayout();
     }
 
@@ -283,11 +281,17 @@ export default class Toolbar extends ContainerObject {
             .tooltip('Scroll left')
             .scaleBitmapToLabel();
 
-        this.actionMenu = new EternaMenu(EternaMenuStyle.PULLUP);
-        // The action menu needs to be outside of the inner HLayoutContainer to display the menu
-        this.addObject(this.actionMenu, this.scrollContainerContainer);
         this.addObject(this.leftArrow, this.scrollContainerContainer);
         this.addObject(this.scrollContainer, this.scrollContainerContainer);
+
+        this.actionMenu = new EternaMenu(EternaMenuStyle.PULLUP, true);
+        this.addObject(this.actionMenu, this.lowerToolbarLayout);
+
+        this.actionMenu.toolbarUpdateLayout.connect(() => {
+            // If only called once, the arrows fly up. Calling it twice fixes that issue
+            this.updateLayout();
+            this.updateLayout();
+        });
 
         this.actionMenu.addMenuButton(new GameButton().allStates(Bitmaps.NovaMenu).disabled(undefined));
 

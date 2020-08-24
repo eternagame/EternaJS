@@ -1,5 +1,6 @@
 import {Point} from 'pixi.js';
 import {Enableable, PointerCapture, DisplayUtil} from 'flashbang';
+import {UnitSignal} from 'signals';
 import GameButton from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';
 
@@ -8,15 +9,17 @@ export enum EternaMenuStyle {
 }
 
 export default class EternaMenu extends GamePanel implements Enableable {
-    constructor(menuStyle: EternaMenuStyle = EternaMenuStyle.DEFAULT) {
+    constructor(menuStyle: EternaMenuStyle = EternaMenuStyle.DEFAULT, inToolbar = false) {
         super();
         this._style = menuStyle;
+        this.inToolbar = inToolbar;
     }
 
     protected added() {
         super.added();
         this._background.visible = false;
         this.needsLayout();
+        if (this.inToolbar) this.display.name = 'EternaMenu';
     }
 
     public addItem(label: string, url: string): void {
@@ -127,10 +130,10 @@ export default class EternaMenu extends GamePanel implements Enableable {
         }
     }
 
-    public hideMenu() {
-        this._menus.forEach((menu) => {
-            menu.panel.display.visible = false;
-        });
+    private get menuButtonWidth() {
+        return this._menus
+            .map((menu) => menu.menuButton.display.width)
+            .reduce((prev, cur) => prev + cur);
     }
 
     private createMenu(menuButton: GameButton): Menu {
@@ -158,10 +161,12 @@ export default class EternaMenu extends GamePanel implements Enableable {
             if (this._enabled) {
                 showDialog();
             }
+            this.toolbarUpdateLayout.emit();
         });
 
         menuButton.pointerOut.connect(() => {
             menu.panel.display.visible = false;
+            this.toolbarUpdateLayout.emit();
         });
 
         menuButton.pointerTap.connect(() => {
@@ -179,6 +184,7 @@ export default class EternaMenu extends GamePanel implements Enableable {
                         }
                     });
                 }
+                this.toolbarUpdateLayout.emit();
             }
         });
 
@@ -243,6 +249,9 @@ export default class EternaMenu extends GamePanel implements Enableable {
         this._rightMargin = Math.max(lastButtonWidth, this._menus[lastIdx].panel.width) - lastButtonWidth;
 
         this.setSize(widthOffset, this._menuHeight + 1);
+        // A very hacky setup to signal to any HLayoutContainers that the width
+        // should be set to the width of the button (not the panel)
+        if (this.inToolbar) this.display.name = `EternaMenu${this.menuButtonWidth}`;
     }
 
     private readonly _style: EternaMenuStyle;
@@ -253,6 +262,8 @@ export default class EternaMenu extends GamePanel implements Enableable {
     private _rightMargin: number = 0;
     private _menuHeight: number = 0;
     private _activeCapture: PointerCapture;
+    public readonly inToolbar: boolean = false;
+    public toolbarUpdateLayout = new UnitSignal();
 }
 
 class Menu {
