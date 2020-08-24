@@ -3,6 +3,7 @@ import {Enableable, PointerCapture, DisplayUtil} from 'flashbang';
 import {UnitSignal} from 'signals';
 import GameButton from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';
+import TrueWidthDisplay from './TrueWidthDisplay';
 
 export enum EternaMenuStyle {
     DEFAULT = 0, PULLUP
@@ -19,7 +20,9 @@ export default class EternaMenu extends GamePanel implements Enableable {
         super.added();
         this._background.visible = false;
         this.needsLayout();
-        if (this.inToolbar) this.display.name = 'EternaMenu';
+        if (this.inToolbar) {
+            this.display.name = 'EternaMenu';
+        }
     }
 
     public addItem(label: string, url: string): void {
@@ -249,9 +252,9 @@ export default class EternaMenu extends GamePanel implements Enableable {
         this._rightMargin = Math.max(lastButtonWidth, this._menus[lastIdx].panel.width) - lastButtonWidth;
 
         this.setSize(widthOffset, this._menuHeight + 1);
-        // A very hacky setup to signal to any HLayoutContainers that the width
-        // should be set to the width of the button (not the panel)
-        if (this.inToolbar) this.display.name = `EternaMenu${this.menuButtonWidth}`;
+        if (this.inToolbar) {
+            (this.display as TrueWidthDisplay).trueWidth = this.menuButtonWidth;
+        }
     }
 
     private readonly _style: EternaMenuStyle;

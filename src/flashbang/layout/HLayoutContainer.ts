@@ -1,6 +1,7 @@
 import {Rectangle} from 'pixi.js';
 import {VAlign} from 'flashbang/core/Align';
 import DisplayUtil from 'flashbang/util/DisplayUtil';
+import TrueWidthDisplay from 'eterna/ui/TrueWidthDisplay';
 import LayoutContainer from './LayoutContainer';
 
 /**
@@ -97,9 +98,8 @@ export default class HLayoutContainer extends LayoutContainer {
                 }
 
                 // This is an incredibly hacky setup for making sure menus are handled correctly
-                if (child.name?.startsWith('EternaMenu')) {
-                    let w = parseInt(child.name.replace('EternaMenu', ''), 10);
-                    bounds.width = w;
+                if (child.name === 'EternaMenu') {
+                    bounds.width = (child as TrueWidthDisplay).trueWidth;
                 }
 
                 x += bounds.width + this._hOffset;
