@@ -351,7 +351,11 @@ export default class EternaApp extends FlashbangApp {
         }
     }
 
-    public switchToFeedbackView(puzzleOrID: number | Puzzle, solutionOrID: number | Solution, solutions: Solution[] | null = null): Promise<void> {
+    public switchToFeedbackView(
+        puzzleOrID: number | Puzzle,
+        solutionOrID: number | Solution,
+        solutions?: Solution[]
+    ): Promise<void> {
         const puzzleID = (puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID);
         const solutionID = (solutionOrID instanceof Solution ? solutionOrID.nodeID : solutionOrID);
 
@@ -361,7 +365,6 @@ export default class EternaApp extends FlashbangApp {
             this.modeStack.setModeIndex(existingMode, -1);
             return Promise.resolve();
         } else {
-            console.log(5);
             return this.loadSolution(puzzleOrID, solutionOrID)
                 .then(([puzzle, solution, allSolutions]) => {
                     if (existingMode != null) {
@@ -378,7 +381,10 @@ export default class EternaApp extends FlashbangApp {
         return this.modeStack.modes.find((mode) => mode instanceof PoseEditMode) as PoseEditMode;
     }
 
-    private loadSolution(puzzleOrID: number | Puzzle, solutionOrID: number | Solution): Promise<[Puzzle, Solution, Solution[]]> {
+    private loadSolution(
+        puzzleOrID: number | Puzzle,
+        solutionOrID: number | Solution
+    ): Promise<[Puzzle, Solution, Solution[]]> {
         const puzzleID = (puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID);
         const solutionID = (solutionOrID instanceof Solution ? solutionOrID.nodeID : solutionOrID);
 

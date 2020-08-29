@@ -198,7 +198,6 @@ export default class FeedbackViewMode extends GameMode {
             this._sequence = EPars.stringToSequence(newSolution.sequence);
             // Update the game, so it's not showing an outdated sequence
             this.setPoseFields(getPoseFields());
-            console.log(2);
         };
         this._solutionView = new ViewSolutionOverlay({
             solution: this._solution,
@@ -212,7 +211,6 @@ export default class FeedbackViewMode extends GameMode {
                 }
                 let newSolution = solutionsToPuzzle[newSolutionIndex];
                 setNewSolution(newSolution);
-                console.log(1);
             },
             onNext: async () => {
                 let {currentSolutionIndex, solutionsToPuzzle} = await getCurrentSolutionIndex();
@@ -222,7 +220,6 @@ export default class FeedbackViewMode extends GameMode {
                 }
                 let newSolution = solutionsToPuzzle[newSolutionIndex];
                 setNewSolution(newSolution);
-                console.log(0);
             },
             parentMode: (() => this)()
         });
@@ -247,7 +244,6 @@ export default class FeedbackViewMode extends GameMode {
         this.addObject(this._info, this.uiLayer);
 
         this.setPoseFields(poseFields);
-        console.log(3);
         let seeShape: boolean = (this._feedback !== null && this._feedback.getShapeData() != null);
         if (seeShape) {
             this.setupShape();
