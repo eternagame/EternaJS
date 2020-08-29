@@ -593,7 +593,8 @@ export default class DesignBrowserMode extends GameMode {
                     const rowIndex = this._currentSolutionIndex - this._firstVisSolutionIdx;
                     if (rowIndex >= 0) {
                         this._clickedSelectionBox.visible = true;
-                        this.updateClickedSelectionBoxPos(index);
+                        this.updateClickedSelectionBoxPos(newIndex);
+                        this._clickedSelectionBox.visible = true;
                     }
                 }
             };
@@ -657,10 +658,10 @@ export default class DesignBrowserMode extends GameMode {
 
     private updateClickedSelectionBoxPos(index: number) {
         const {designBrowser: theme} = UITheme;
-        this._clickedSelectionBox.position.y = theme.headerHeight
-            + theme.filterHeight
-            + index * theme.rowHeight
-            + theme.dataPadding / 2;
+        let start = theme.filterHeight + theme.dataPadding / 2 + theme.headerHeight;
+        let idxOffset = index - this._firstVisSolutionIdx;
+        this._clickedSelectionBox.position.y = start + idxOffset * theme.rowHeight;
+        this._clickedSelectionBox.visible = idxOffset > 0;
     }
 
     private mark(e: PIXI.interaction.InteractionEvent): void {
@@ -801,6 +802,7 @@ export default class DesignBrowserMode extends GameMode {
         }
 
         this._markerBoxes.updateView(this._firstVisSolutionIdx);
+        this.updateClickedSelectionBoxPos(this._currentSolutionIndex);
     }
 
     private refreshSolutions(): void {
