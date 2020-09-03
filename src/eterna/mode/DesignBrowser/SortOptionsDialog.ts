@@ -93,10 +93,9 @@ export default class SortOptionsDialog extends Dialog<void> {
         this.addObject(okButton, this._panelContent);
 
         // EXISTING SORT CRITERIA
-        for (let ii = 0; ii < this.options.sortCriteria.length; ++ii) {
-            const criterion = this.options.sortCriteria[ii];
-            this.addCriterionUI(criterion.category, criterion.sortOrder, ii);
-        }
+        this.options.sortCriteria.forEach(
+            (criterion, ii) => this.addCriterionUI(criterion.category, criterion.sortOrder, ii)
+        );
 
         this.validateCurCategoryIdx();
         this.layout();

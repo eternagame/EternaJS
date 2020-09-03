@@ -326,10 +326,10 @@ export default class ViewSolutionOverlay extends ContainerObject {
 
         // Play button
         const playThumbnail = new Sprite();
-        let customLayout: Array<[number, number] | [null, null]> | undefined;
-        if (this._props.puzzle.targetConditions && this._props.puzzle.targetConditions[0]) {
-            customLayout = this._props.puzzle.targetConditions[0]['custom-layout'];
-        }
+        const customLayout: Array<[number, number] | [null, null]> | undefined = (
+            this._props.puzzle.targetConditions && this._props.puzzle.targetConditions[0]
+                ? this._props.puzzle.targetConditions[0]['custom-layout'] : undefined
+        );
         PoseThumbnail.drawToSprite(
             playThumbnail,
             EPars.stringToSequence(this._props.solution.sequence),

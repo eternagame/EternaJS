@@ -37,14 +37,11 @@ export default class TargetExpectedAccuracyConstraint extends Constraint<TargetE
         ) === undefined) {
             constraintContext.undoBlocks[0].updateMeltingPointAndDotPlot(false);
         }
-        let expectedAccuracy = constraintContext.undoBlocks[0].getParam(
+        const expectedAccuracy = constraintContext.undoBlocks[0].getParam(
             UndoBlockParam.TARGET_EXPECTED_ACCURACY,
             37,
             false
-        ) as number | undefined;
-        if (expectedAccuracy === undefined) {
-            expectedAccuracy = 0;
-        }
+        ) as number | undefined ?? 0;
 
         return {
             satisfied: expectedAccuracy >= this.targetExpectedAccuracy,

@@ -150,10 +150,9 @@ export default class Puzzle {
 
     public get targetConditions(): (TargetConditions | undefined)[] {
         if (this._targetConditions == null) {
-            const targetConditions: (TargetConditions | undefined)[] = [];
-            for (let ii = 0; ii < this._secstructs.length; ii++) {
-                targetConditions.push(undefined);
-            }
+            const targetConditions: (TargetConditions | undefined)[] = this._secstructs.map(
+                (s) => undefined
+            );
             return targetConditions;
         } else {
             return this._targetConditions;
@@ -169,17 +168,12 @@ export default class Puzzle {
     }
 
     public get puzzleLocks(): boolean[] {
-        let puzlocks: boolean[];
-        let ii: number;
-
         if (this._puzzleLocks == null && !this._useTails) {
-            puzlocks = [];
-            for (ii = 0; ii < this._secstructs[0].length; ii++) {
-                puzlocks.push(false);
-            }
-            return puzlocks;
+            return this._secstructs[0].split('').map(
+                (ii) => false
+            );
         } else if (this._useTails) {
-            puzlocks = [];
+            const puzlocks = [];
 
             if (this._useShortTails) {
                 puzlocks.push(true);
@@ -191,7 +185,7 @@ export default class Puzzle {
                 puzlocks.push(true);
                 puzlocks.push(true);
             }
-            for (ii = 0; ii < this._secstructs[0].length; ii++) {
+            for (let ii = 0; ii < this._secstructs[0].length; ii++) {
                 if (this._puzzleLocks != null) {
                     puzlocks.push(this._puzzleLocks[ii]);
                 } else {
@@ -199,7 +193,7 @@ export default class Puzzle {
                 }
             }
 
-            for (ii = 0; ii < 20; ii++) {
+            for (let ii = 0; ii < 20; ii++) {
                 puzlocks.push(true);
             }
             return puzlocks;
@@ -239,13 +233,11 @@ export default class Puzzle {
             // Aptamers
 
             if (Puzzle.isAptamerType(tcType) && this._targetConditions[ii]['site'] !== undefined) {
-                const bindingPairs: number[] = [];
                 const bindingSite: number[] = this._targetConditions[ii]['site'] as number[];
                 const targetPairs: number[] = EPars.parenthesisToPairs(this.getSecstruct(ii));
-
-                for (let jj = 0; jj < bindingSite.length; jj++) {
-                    bindingPairs.push(targetPairs[bindingSite[jj]]);
-                }
+                const bindingPairs: number[] = bindingSite.map(
+                    (jj) => targetPairs[jj]
+                );
 
                 // AMW TODO: these do not exist in the schema defined by the JSON
                 // entered in the admin interface. Are they only defined here?
@@ -338,16 +330,14 @@ export default class Puzzle {
             return null;
         }
 
-        let ii: number;
-
         const barcodes: number[] = [];
         const secstruct: string = this.getSecstruct();
         if (this._useTails) {
-            for (ii = secstruct.length - 39; ii < secstruct.length - 20; ii++) {
+            for (let ii = secstruct.length - 39; ii < secstruct.length - 20; ii++) {
                 barcodes.push(ii);
             }
         } else {
-            for (ii = secstruct.length - 19; ii < secstruct.length; ii++) {
+            for (let ii = secstruct.length - 19; ii < secstruct.length; ii++) {
                 barcodes.push(ii);
             }
         }

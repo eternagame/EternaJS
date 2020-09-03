@@ -20,10 +20,8 @@ export default class Solution {
         this._desc = desc;
 
         if (this._desc) {
-            let newlinereg = /\n/g;
-            this._shortDesc = this._desc.replace(newlinereg, ' ');
-            newlinereg = /\r/g;
-            this._shortDesc = this._shortDesc.replace(newlinereg, ' ');
+            this._shortDesc = this._desc.replace(/\n/g, ' ');
+            this._shortDesc = this._shortDesc.replace(/\r/g, ' ');
         } else {
             this._shortDesc = 'No description available';
             this._desc = 'No description available';
@@ -44,10 +42,8 @@ export default class Solution {
     public set title(title: string) {
         this._title = title;
 
-        let newlinereg = /\n/g;
-        this._title = this._title.replace(newlinereg, ' ');
-        newlinereg = /\r/g;
-        this._title = this._title.replace(newlinereg, ' ');
+        this._title = this._title.replace(/\n/g, ' ');
+        this._title = this._title.replace(/\r/g, ' ');
     }
 
     public get nodeID(): number {

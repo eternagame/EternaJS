@@ -467,10 +467,10 @@ export default class DesignBrowserMode extends GameMode {
     private reloadCurrent(): void {
         // get sol at current index again, wrapped around.
         if (this._solutionView !== undefined) {
-            let newCurrentIdx = this._currentSolutionIndex;
-            if (newCurrentIdx >= this._filteredSolutions.length) {
-                newCurrentIdx = 0;
-            }
+            const newCurrentIdx = this._currentSolutionIndex >= this._filteredSolutions.length
+                ? 0
+                : this._currentSolutionIndex;
+
             const newSolution = this.getSolutionAtIndex(newCurrentIdx);
             if (newSolution != null) {
                 this._solutionView.showSolution(newSolution);
@@ -747,13 +747,10 @@ export default class DesignBrowserMode extends GameMode {
 
         const solutions: Solution[] = [];
         for (const sol of this._allSolutions) {
-            let shouldAdd = true;
-            for (const dataCol of this._dataCols) {
-                if (!dataCol.shouldDisplay(sol)) {
-                    shouldAdd = false;
-                    break;
-                }
-            }
+            // If any dataCol shouldn't display the solution, shouldAdd is false.
+            const shouldAdd = !this._dataCols.some(
+                (dataCol) => !dataCol.shouldDisplay(sol)
+            );
 
             if (shouldAdd) {
                 solutions.push(sol);

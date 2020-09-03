@@ -87,13 +87,10 @@ function detectLoops(targetPairs: number[], loops: Loop[]) {
                 examiningLoops = false;
             }
             if (loopStack.length > 0) {
-                for (let j = 0; j < loopStack[loopStack.length - 1].pairs.length; ++j) {
-                    // Closing off a pair that is part of the loop but is not the last loop.
-                    if (i === loopStack[loopStack.length - 1].pairs[j][1]) {
-                        examiningLoops = true;
-                        break;
-                    }
-                }
+                // Closing off a pair that is part of the loop but is not the last loop.
+                examiningLoops = loopStack[loopStack.length - 1].pairs.some(
+                    (elem) => i === elem[1]
+                );
             }
         }
     }
@@ -113,9 +110,8 @@ function countLoops(targetPairs: number[], currentTargetIndex: number, sequence:
         detectLoops(targetPairs, loops[currentTargetIndex]);
     }
 
-    for (let i = 0; i < loops[currentTargetIndex].length; ++i) {
+    for (const loop of loops[currentTargetIndex]) {
         // Check that the pairs are made first.
-        const loop = loops[currentTargetIndex][i];
 
         // There has to be at least one strand.
         if (loop.strands.length <= 0) {

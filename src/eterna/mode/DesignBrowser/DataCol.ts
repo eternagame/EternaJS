@@ -438,10 +438,7 @@ export default class DataCol extends ContainerObject {
                         break;
 
                     case DesignCategory.SYNTHESIS_SCORE: {
-                        let exp: Feedback | null = null;
-                        if (this._feedback != null) {
-                            exp = this._feedback[ii];
-                        }
+                        const exp: Feedback | null = this._feedback ? this._feedback[ii] : null;
 
                         if (exp == null) {
                             dataString += '-\n';

@@ -117,16 +117,8 @@ export default class SolutionManager {
 
         let newfb: Feedback | null = null;
 
-        let playerName = '';
-        let playerID = -1;
-
-        if (obj['name'] != null) {
-            playerName = obj['name'];
-        }
-
-        if (obj['uid'] != null) {
-            playerID = Number(obj['uid']);
-        }
+        const playerName = obj['name'] != null ? obj['name'] : '';
+        const playerID = obj['uid'] != null ? Number(obj['uid']) : -1;
 
         newsol.setPlayer(playerName, playerID);
         newsol.setNumPairs(Number(obj['gc']), Number(obj['gu']), Number(obj['au']));
@@ -141,14 +133,11 @@ export default class SolutionManager {
             if (Array.isArray(synthesisDataRaw)) {
                 const synthesisData: SynthesisData[] = synthesisDataRaw;
 
-                for (let ii = 0; ii < synthesisData.length; ii++) {
-                    const synthesis: SynthesisData = synthesisData[ii];
+                for (const synthesis of synthesisData) {
                     if (synthesis['reactive'] === 'SHAPE') {
-                        const peaks: number[] = [];
-                        peaks.push(Number(synthesis['start_index']));
-
-                        for (let ss = 0; ss < synthesis['peaks'].length; ss++) {
-                            peaks.push(Number(synthesis['peaks'][ss]));
+                        const peaks: number[] = [Number(synthesis['start_index'])];
+                        for (const val of synthesis['peaks']) {
+                            peaks.push(Number(synthesis['peaks']));
                         }
 
                         if (newfb == null) {
@@ -181,26 +170,21 @@ export default class SolutionManager {
                 newfb.setShapeData(null, 0, null, null, null, obj['SHAPE']);
             } else {
                 const protoshapeArray = obj['SHAPE'].split(',');
-                const shapeArray: number[] = [];
-                for (let kk = 0; kk < protoshapeArray.length; kk++) {
-                    shapeArray[kk] = Number(protoshapeArray[kk]);
-                }
+                const shapeArray: number[] = protoshapeArray.map(
+                    (val) => Number(val)
+                );
 
-                let max: number | null = null;
-                let min: number | null = null;
-                let threshold: number | null = null;
+                const threshold = obj['SHAPE-threshold'] != null && obj['SHAPE-threshold'] !== ''
+                    ? Number(obj['SHAPE-threshold'])
+                    : null;
 
-                if (obj['SHAPE-threshold'] != null && obj['SHAPE-threshold'] !== '') {
-                    threshold = Number(obj['SHAPE-threshold']);
-                }
+                const max = obj['SHAPE-max'] != null && obj['SHAPE-max'] !== ''
+                    ? Number(obj['SHAPE-max'])
+                    : null;
 
-                if (obj['SHAPE-max'] != null && obj['SHAPE-max'] !== '') {
-                    max = Number(obj['SHAPE-max']);
-                }
-
-                if (obj['SHAPE-min'] != null && obj['SHAPE-min'] !== '') {
-                    min = Number(obj['SHAPE-min']);
-                }
+                const min = obj['SHAPE-min'] != null && obj['SHAPE-min'] !== ''
+                    ? Number(obj['SHAPE-min'])
+                    : null;
 
                 newfb.setShapeData(shapeArray, 0, threshold, max, min, null);
             }
