@@ -91,7 +91,6 @@ export default class DisplayUtil {
     public static getTransformationMatrix(
         disp: DisplayObject, targetSpace: DisplayObject, out: Matrix | null = null
     ): Matrix {
-        let commonParent: DisplayObject;
         let currentObject: DisplayObject;
 
         if (out) {
@@ -125,7 +124,7 @@ export default class DisplayUtil {
 
         // 1. find a common parent of this and the target space
 
-        commonParent = DisplayUtil.findCommonParent(disp, targetSpace);
+        const commonParent: DisplayObject = DisplayUtil.findCommonParent(disp, targetSpace);
 
         // 2. move up from this to common parent
 

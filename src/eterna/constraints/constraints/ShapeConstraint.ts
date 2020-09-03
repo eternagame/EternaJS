@@ -30,11 +30,11 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
         // if (ublk.targetOligoOrder === null) {
         //     throw new Error('Target condition not available for shape constraint!');
         // }
-        let targetMap = ublk.reorderedOligosIndexMap(ublk.targetOligoOrder);
+        const targetMap = ublk.reorderedOligosIndexMap(ublk.targetOligoOrder);
 
         if (targetMap != null) {
-            let targetAlignedConstraints: boolean[] = [];
-            for (let [rawIndex, targetIndex] of Object.entries(targetMap)) {
+            const targetAlignedConstraints: boolean[] = [];
+            for (const [rawIndex, targetIndex] of Object.entries(targetMap)) {
                 targetAlignedConstraints[targetIndex] = constraints[Number(rawIndex)];
             }
             return targetAlignedConstraints;
@@ -56,19 +56,19 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
         // if (ublk.targetOligoOrder === null || ublk.oligoOrder === null) {
         //     throw new Error('Target condition not available for shape constraint!');
         // }
-        let naturalPairs = ublk.getPairs(37, pseudoknots);
+        const naturalPairs = ublk.getPairs(37, pseudoknots);
 
         // rawIndex => targetAlignedIndex
-        let targetMap = ublk.reorderedOligosIndexMap(ublk.targetOligoOrder);
+        const targetMap = ublk.reorderedOligosIndexMap(ublk.targetOligoOrder);
         if (targetMap != null) {
             // rawIndex => naturalAlignedIndex
-            let naturalMap = ublk.reorderedOligosIndexMap(ublk.oligoOrder);
+            const naturalMap = ublk.reorderedOligosIndexMap(ublk.oligoOrder);
             if (naturalMap !== undefined) {
-                let targetAlignedNaturalPairs: number[] = [];
-                for (let [rawIndex, targetIndex] of Object.entries(targetMap)) {
-                    let naturalIndex = naturalMap[Number(rawIndex)];
-                    let naturalPairedIndex = naturalPairs[naturalIndex];
-                    let rawPairedIndex = naturalMap.indexOf(naturalPairedIndex);
+                const targetAlignedNaturalPairs: number[] = [];
+                for (const [rawIndex, targetIndex] of Object.entries(targetMap)) {
+                    const naturalIndex = naturalMap[Number(rawIndex)];
+                    const naturalPairedIndex = naturalPairs[naturalIndex];
+                    const rawPairedIndex = naturalMap.indexOf(naturalPairedIndex);
 
                     // If unpaired, it's unpaired, otherwise we need to get the index of the paired base
                     // according to target mode
@@ -100,12 +100,12 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
     }
 
     public getHighlight(status: ShapeConstraintStatus): HighlightInfo {
-        let unstable: number[] = [];
+        const unstable: number[] = [];
         if (status.wrongPairs) {
             let curr = 0;
             let jj: number;
             for (jj = 0; jj < status.wrongPairs.length; jj++) {
-                let stat: number = (status.wrongPairs[jj] === 1 ? 1 : 0);
+                const stat: number = (status.wrongPairs[jj] === 1 ? 1 : 0);
                 if ((curr ^ stat) !== 0) {
                     unstable.push(jj - curr);
                     curr = stat;
@@ -127,12 +127,12 @@ export default class ShapeConstraint extends BaseShapeConstraint {
     public static readonly NAME = 'SHAPE';
 
     public evaluate(context: ConstraintContext): ShapeConstraintStatus {
-        let undoBlock = context.undoBlocks[this.stateIndex];
+        const undoBlock = context.undoBlocks[this.stateIndex];
 
         let targetAlignedConstraints: boolean[] | undefined;
         if (context.targetConditions !== undefined && context.targetConditions[this.stateIndex] !== undefined) {
             const tc = context.targetConditions[this.stateIndex] as TargetConditions;
-            let structureConstraints = tc['structure_constraints'];
+            const structureConstraints = tc['structure_constraints'];
             if (structureConstraints) {
                 targetAlignedConstraints = this._targetAlignedConstraints(structureConstraints, undoBlock);
             }
@@ -143,7 +143,7 @@ export default class ShapeConstraint extends BaseShapeConstraint {
                 && undoBlock.targetConditions['type'] === 'pseudoknot') {
             pseudoknots = true;
         }
-        let naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);
+        const naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);
 
         return {
             satisfied: EPars.arePairsSame(naturalPairs, undoBlock.targetPairs, targetAlignedConstraints),
@@ -156,15 +156,15 @@ export default class ShapeConstraint extends BaseShapeConstraint {
         forMissionScreen: boolean,
         undoBlocks: UndoBlock[]
     ): ConstraintBoxConfig {
-        let details = super.getConstraintBoxConfig(status, forMissionScreen, undoBlocks);
-        let undoBlock = undoBlocks[this.stateIndex];
+        const details = super.getConstraintBoxConfig(status, forMissionScreen, undoBlocks);
+        const undoBlock = undoBlocks[this.stateIndex];
         let pseudoknots = false;
         if (undoBlock.targetConditions != null
                 && undoBlock.targetConditions['type'] === 'pseudoknot') {
             pseudoknots = true;
         }
 
-        let naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);
+        const naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);
         let customLayout: Array<[number, number] | [null, null]> | undefined;
         if (undoBlock.targetConditions) customLayout = undoBlock.targetConditions['custom-layout'];
         return {
@@ -192,7 +192,7 @@ export default class ShapeConstraint extends BaseShapeConstraint {
     private _getWrongPairs(
         naturalPairs: number[], targetPairs: number[], structureConstraints: boolean[] | undefined
     ): number[] {
-        let wrongPairs: number[] = new Array(naturalPairs.length);
+        const wrongPairs: number[] = new Array(naturalPairs.length);
 
         for (let ii = 0; ii < wrongPairs.length; ii++) {
             wrongPairs[ii] = -1;
@@ -218,7 +218,7 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
     public static readonly NAME = 'ANTISHAPE';
 
     public evaluate(context: ConstraintContext): ShapeConstraintStatus {
-        let undoBlock = context.undoBlocks[this.stateIndex];
+        const undoBlock = context.undoBlocks[this.stateIndex];
 
         // TODO: These checks should probably be in Puzzle
         if (context.targetConditions === undefined) {
@@ -230,19 +230,19 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
         }
 
         const tc = context.targetConditions[this.stateIndex] as TargetConditions;
-        let antiStructureConstraints = tc['anti_structure_constraints'];
+        const antiStructureConstraints = tc['anti_structure_constraints'];
 
-        let pseudoknots: boolean = tc['type'] === 'pseudoknot';
-        let naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);
-        let targetAlignedConstraints = antiStructureConstraints
+        const pseudoknots: boolean = tc['type'] === 'pseudoknot';
+        const naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);
+        const targetAlignedConstraints = antiStructureConstraints
             ? this._targetAlignedConstraints(antiStructureConstraints, undoBlock)
             : undefined;
 
-        let antiStructureString = tc['anti_secstruct'];
+        const antiStructureString = tc['anti_secstruct'];
         if (antiStructureString === undefined) {
             throw new Error('Target structure not available for ANTISHAPE constraint');
         }
-        let antiPairs: number[] = EPars.parenthesisToPairs(antiStructureString);
+        const antiPairs: number[] = EPars.parenthesisToPairs(antiStructureString);
 
         return {
             satisfied: !EPars.arePairsSame(naturalPairs, antiPairs, targetAlignedConstraints),
@@ -260,14 +260,14 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
         undoBlocks: UndoBlock[],
         targetConditions: TargetConditions[]
     ): ConstraintBoxConfig {
-        let details = super.getConstraintBoxConfig(status, forMissionScreen, undoBlocks);
-        let undoBlock = undoBlocks[this.stateIndex];
+        const details = super.getConstraintBoxConfig(status, forMissionScreen, undoBlocks);
+        const undoBlock = undoBlocks[this.stateIndex];
         let pseudoknots = false;
         if (undoBlock.targetConditions && undoBlock.targetConditions
                 && undoBlock.targetConditions['type'] === 'pseudoknot') {
             pseudoknots = true;
         }
-        let naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);
+        const naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);
         let customLayout: Array<[number, number] | [null, null]> | undefined;
         if (undoBlock.targetConditions) customLayout = undoBlock.targetConditions['custom-layout'];
         const antiSS = targetConditions[this.stateIndex]['anti_secstruct'];
@@ -301,7 +301,7 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
     private _getWrongPairs(
         naturalPairs: number[], structureConstraints: boolean[] | undefined, satisfied: boolean
     ): number[] {
-        let wrongPairs: number[] = new Array(naturalPairs.length);
+        const wrongPairs: number[] = new Array(naturalPairs.length);
 
         for (let ii = 0; ii < wrongPairs.length; ii++) {
             wrongPairs[ii] = 0;

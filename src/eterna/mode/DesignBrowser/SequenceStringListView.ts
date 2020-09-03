@@ -18,7 +18,7 @@ export default class SequenceStringListView extends Container {
         this._graphics = new Graphics();
         this.addChild(this._graphics);
 
-        let textBuilder = new TextBuilder()
+        const textBuilder = new TextBuilder()
             .font(fontname)
             .fontSize(fontsize)
             .color(0xffffff)
@@ -49,10 +49,10 @@ export default class SequenceStringListView extends Container {
         this._content = new Container();
         this.addChild(this._content);
 
-        let useExp: boolean = expData != null;
+        const useExp: boolean = expData != null;
 
         for (let ii = 0; ii < sequences.length; ii++) {
-            let seq: string = sequences[ii];
+            const seq: string = sequences[ii];
             let shapeData: number[] | null = null;
             let shapeDataStart = 0;
             let expPainter: ExpPainter | null = null;
@@ -60,7 +60,7 @@ export default class SequenceStringListView extends Container {
             let shapeThreshold = 0;
             let shapeMax = 0;
 
-            let seqExpData = expData ? expData[ii] : null;
+            const seqExpData = expData ? expData[ii] : null;
             if (seqExpData) {
                 shapeData = seqExpData.getShapeData();
                 shapeDataStart = seqExpData.getShapeStartIndex();
@@ -97,7 +97,7 @@ export default class SequenceStringListView extends Container {
                 }
 
                 let letterIndex = 0;
-                let letter = seq.charAt(jj);
+                const letter = seq.charAt(jj);
 
                 if (letter === 'A') {
                     letterIndex = SequenceStringListView.A_INDEX;
@@ -137,7 +137,7 @@ export default class SequenceStringListView extends Container {
                     bdIndex = letterIndex * SequenceStringListView.NUM_DATA_PER_LETTER + 1 + colorIndex;
                 }
 
-                let letterSprite = new Sprite(this._letterTextures[bdIndex]);
+                const letterSprite = new Sprite(this._letterTextures[bdIndex]);
                 letterSprite.x = jj * this._letterWidth;
                 letterSprite.y = ii * this._letterHeight;
                 this._content.addChild(letterSprite);
@@ -146,12 +146,12 @@ export default class SequenceStringListView extends Container {
     }
 
     private static createLetterBitmaps(textBuilder: TextBuilder, letter: string): Texture[] {
-        let textures: Texture[] = [];
+        const textures: Texture[] = [];
 
-        let tf = textBuilder.text(letter).build();
-        let tfTex = TextureUtil.renderToTexture(tf);
+        const tf = textBuilder.text(letter).build();
+        const tfTex = TextureUtil.renderToTexture(tf);
 
-        let baseColor = EPars.getLetterColor(letter);
+        const baseColor = EPars.getLetterColor(letter);
         textures.push(EternaTextureUtil.colorTransform(
             tfTex,
             baseColor / (256 * 256),
@@ -160,7 +160,7 @@ export default class SequenceStringListView extends Container {
         ));
 
         for (let ii = -ExpPainter.NUM_COLORS; ii <= 2 * ExpPainter.NUM_COLORS + 1; ii++) {
-            let expColor = ExpPainter.getColorByLevel(ii);
+            const expColor = ExpPainter.getColorByLevel(ii);
             textures.push(EternaTextureUtil.colorTransform(
                 tfTex,
                 expColor / (256 * 256),

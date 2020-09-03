@@ -35,7 +35,7 @@ export default class BranchinessConstraint extends Constraint<BranchinessConstra
         status: BranchinessConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
-        let tooltip = ConstraintBox.createTextStyle();
+        const tooltip = ConstraintBox.createTextStyle();
 
         if (forMissionScreen) {
             tooltip.pushStyle('altTextMain');
@@ -64,9 +64,9 @@ export default class BranchinessConstraint extends Constraint<BranchinessConstra
     }
 
     private static get _icon(): Texture {
-        let icon = new Container();
+        const icon = new Container();
 
-        let base1 = new Sprite(BitmapManager.getBitmap(Bitmaps.BranchinessIcon));
+        const base1 = new Sprite(BitmapManager.getBitmap(Bitmaps.BranchinessIcon));
         base1.width = 24;
         base1.height = 24;
         base1.position = new Point(50, 50);

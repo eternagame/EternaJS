@@ -161,7 +161,7 @@ export default class RNALayout {
                 this.addNodesRecursive(biPairs, this._root, jj, biPairs[jj]);
                 jj = biPairs[jj];
             } else {
-                let newsubnode: RNATreeNode = new RNATreeNode();
+                const newsubnode: RNATreeNode = new RNATreeNode();
                 newsubnode.isPair = false;
                 newsubnode.indexA = jj;
                 this._root.children.push(newsubnode);
@@ -197,7 +197,7 @@ export default class RNALayout {
             //   This should be easy to unify, but why is circleRadius not updated along with circleLength?
             //    Need to think through an oligo case carefully -- rhiju
             let circleLength: number = (xarray.length + 1) * this._primarySpace + this._pairSpace;
-            let circleRadius: number = circleLength / (2 * Math.PI);
+            const circleRadius: number = circleLength / (2 * Math.PI);
             let oligoDisplacement = 0;
             for (let ii = 0; ii < xarray.length; ii++) {
                 if (this._exceptionIndices != null && this._exceptionIndices.indexOf(ii) >= 0) {
@@ -207,19 +207,19 @@ export default class RNALayout {
             circleLength += oligoDisplacement;
 
             let lengthWalker: number = this._pairSpace / 2.0;
-            let goX = 0;
-            let goY = 1;
-            let _rootX: number = goX * circleRadius;
-            let _rootY: number = goY * circleRadius;
-            let crossX: number = -goY;
-            let crossY: number = goX;
+            const goX = 0;
+            const goY = 1;
+            const _rootX: number = goX * circleRadius;
+            const _rootY: number = goY * circleRadius;
+            const crossX: number = -goY;
+            const crossY: number = goX;
             for (let ii = 0; ii < xarray.length; ii++) {
                 lengthWalker += this._primarySpace;
                 if (this._exceptionIndices != null && this._exceptionIndices.indexOf(ii) >= 0) {
                     lengthWalker += 2 * this._primarySpace;
                 }
 
-                let radAngle: number = (lengthWalker / circleLength) * 2 * Math.PI - Math.PI / 2.0;
+                const radAngle: number = (lengthWalker / circleLength) * 2 * Math.PI - Math.PI / 2.0;
                 xarray[ii] = (
                     _rootX + Math.cos(radAngle) * crossX * circleRadius + Math.sin(radAngle) * goX * circleRadius
                 );
@@ -264,7 +264,7 @@ export default class RNALayout {
             return;
         }
 
-        let nnfe: number[] = [];
+        const nnfe: number[] = [];
 
         if (this._targetPairs !== null
                 && (EPars.pairsToParenthesis(this._targetPairs).includes('{')
@@ -301,7 +301,7 @@ export default class RNALayout {
                     this.addNodesRecursive(biPairs, newnode, jj, biPairs[jj]);
                     jj = biPairs[jj];
                 } else {
-                    let newsubnode: RNATreeNode = new RNATreeNode();
+                    const newsubnode: RNATreeNode = new RNATreeNode();
                     newsubnode.isPair = false;
                     newsubnode.indexA = jj;
                     newnode.children.push(newsubnode);
@@ -314,8 +314,8 @@ export default class RNALayout {
 
     private getCoordsRecursive(rootnode: RNATreeNode, xarray: number[], yarray: number[]): void {
         if (rootnode.isPair) {
-            let crossX: number = -rootnode.goY * rootnode.rotationDirection;
-            let crossY: number = rootnode.goX * rootnode.rotationDirection;
+            const crossX: number = -rootnode.goY * rootnode.rotationDirection;
+            const crossY: number = rootnode.goX * rootnode.rotationDirection;
 
             xarray[rootnode.indexA] = rootnode.x + (crossX * this._pairSpace) / 2.0;
             xarray[rootnode.indexB] = rootnode.x - (crossX * this._pairSpace) / 2.0;
@@ -373,8 +373,8 @@ export default class RNALayout {
         startX: number, startY: number,
         goX: number, goY: number, rotationDirection: RotationDirection = RotationDirection.CW
     ): void {
-        let crossX: number = -goY * rotationDirection;
-        let crossY: number = goX * rotationDirection;
+        const crossX: number = -goY * rotationDirection;
+        const crossY: number = goX * rotationDirection;
 
         let oligoDisplacement = 0;
 
@@ -435,7 +435,7 @@ export default class RNALayout {
             let circleLength = (rootnode.children.length + 1) * this._primarySpace + (npairs + 1) * this._pairSpace;
             circleLength += oligoDisplacement;
 
-            let circleRadius = circleLength / (2 * Math.PI);
+            const circleRadius = circleLength / (2 * Math.PI);
             let lengthWalker = this._pairSpace / 2.0;
 
             if (parentnode == null) {
@@ -462,17 +462,17 @@ export default class RNALayout {
                     lengthWalker += this._pairSpace / 2.0;
                 }
 
-                let radAngle = (lengthWalker / circleLength) * 2 * Math.PI - Math.PI / 2.0;
-                let childX = (
+                const radAngle = (lengthWalker / circleLength) * 2 * Math.PI - Math.PI / 2.0;
+                const childX = (
                     rootnode.x + Math.cos(radAngle) * crossX * circleRadius + Math.sin(radAngle) * goX * circleRadius
                 );
-                let childY = (
+                const childY = (
                     rootnode.y + Math.cos(radAngle) * crossY * circleRadius + Math.sin(radAngle) * goY * circleRadius
                 );
 
-                let childGoX = childX - rootnode.x;
-                let childGoY = childY - rootnode.y;
-                let childGoLen = Math.sqrt(childGoX * childGoX + childGoY * childGoY);
+                const childGoX = childX - rootnode.x;
+                const childGoY = childY - rootnode.y;
+                const childGoLen = Math.sqrt(childGoX * childGoX + childGoY * childGoY);
 
                 this.drawTreeRecursive(rootnode.children[ii], rootnode, childX, childY,
                     childGoX / childGoLen, childGoY / childGoLen, rotationDirection);
@@ -511,8 +511,8 @@ export default class RNALayout {
         }
 
         let ii: number;
-        let crossX: number = -goY * rotationDirection;
-        let crossY: number = goX * rotationDirection;
+        const crossX: number = -goY * rotationDirection;
+        const crossY: number = goX * rotationDirection;
 
         rootnode.x = startX;
         rootnode.y = startY;
@@ -539,8 +539,8 @@ export default class RNALayout {
         if (anchornode != null) {
             anchorX = anchornode.x;
             anchorY = anchornode.y;
-            let customCoordA: [number, number] | [null, null] = this._customLayout[anchornode.indexA];
-            let customCoordB: [number, number] | [null, null] = this._customLayout[anchornode.indexB];
+            const customCoordA: [number, number] | [null, null] = this._customLayout[anchornode.indexA];
+            const customCoordB: [number, number] | [null, null] = this._customLayout[anchornode.indexB];
             if (
                 customCoordA[0] !== null
                 && customCoordA[1] !== null
@@ -558,11 +558,13 @@ export default class RNALayout {
             // are we rendering counterclockwise (default) or clockwise (non-default, rotationDirection = -1)
             // NOTE POTENTIAL ISSUE in edge case where anchornode.indexA is at edge of pairing...
             // basically checking dot product of next base after pair with putative go direction above.
-            let anchorCustomCoordNext: [number, number] | [null, null] = this._customLayout[anchornode.indexA + 1];
+            const anchorCustomCoordNext: [number, number] | [null, null] = this._customLayout[anchornode.indexA + 1];
             if (anchorCustomCoordNext[0] != null) {
-                let anchorCustomGoNextX: number | null = anchorCustomCoordNext[0] - anchorCustomX;
-                let anchorCustomGoNextY: number | null = anchorCustomCoordNext[1] - anchorCustomY;
-                let anchorCustomDotProd = anchorCustomGoNextX * anchorCustomGoX + anchorCustomGoNextY * anchorCustomGoY;
+                const anchorCustomGoNextX: number | null = anchorCustomCoordNext[0] - anchorCustomX;
+                const anchorCustomGoNextY: number | null = anchorCustomCoordNext[1] - anchorCustomY;
+                const anchorCustomDotProd = (
+                    anchorCustomGoNextX * anchorCustomGoX + anchorCustomGoNextY * anchorCustomGoY
+                );
                 anchorCustomRotationDirection = Math.sign(anchorCustomDotProd);
                 if (
                     anchorCustomRotationDirection === 0
@@ -580,10 +582,10 @@ export default class RNALayout {
             // read out where this point should be based on 'this._customLayout'. get coordinates in
             // "local coordinate frame" set by parent pair in this._customLayout.
             // This would be a lot easier to read if we had a notion of an (x,y) pair, dot products, and cross products.
-            let customCoord: number[] | null[] = this._customLayout[rootnode.children[ii].indexA].slice();
+            const customCoord: number[] | null[] = this._customLayout[rootnode.children[ii].indexA].slice();
             if (rootnode.children[ii].isPair) {
-                let customCoordA: [number, number] | [null, null] = this._customLayout[rootnode.children[ii].indexA];
-                let customCoordB: [number, number] | [null, null] = this._customLayout[rootnode.children[ii].indexB];
+                const customCoordA: [number, number] | [null, null] = this._customLayout[rootnode.children[ii].indexA];
+                const customCoordB: [number, number] | [null, null] = this._customLayout[rootnode.children[ii].indexB];
                 if (
                     customCoordA[0] !== null
                     && customCoordA[1] !== null
@@ -608,8 +610,8 @@ export default class RNALayout {
             }
             if (anchornode != null) {
                 if (customCoord[0] !== null && customCoord[1] !== null) {
-                    let devX: number = customCoord[0] - anchorCustomX;
-                    let devY: number = customCoord[1] - anchorCustomY;
+                    const devX: number = customCoord[0] - anchorCustomX;
+                    const devY: number = customCoord[1] - anchorCustomY;
                     let templateX: number = devX * anchorCustomCrossX + devY * anchorCustomCrossY;
                     let templateY: number = devX * anchorCustomGoX + devY * anchorCustomGoY;
                     templateX *= this._primarySpace;
@@ -622,14 +624,14 @@ export default class RNALayout {
 
             let childRotationDirection: number = rotationDirection;
             if (rootnode.children[ii].isPair) {
-                let customCoordA: [number, number] | [null, null] = this._customLayout[rootnode.children[ii].indexA];
-                let customCoordB: [number, number] | [null, null] = this._customLayout[rootnode.children[ii].indexB];
+                const customCoordA: [number, number] | [null, null] = this._customLayout[rootnode.children[ii].indexA];
+                const customCoordB: [number, number] | [null, null] = this._customLayout[rootnode.children[ii].indexB];
                 if (customCoordA[0] !== null && customCoordB[0] !== null) {
-                    let customCrossX: number = (customCoordA[0] - customCoordB[0]);
-                    let customCrossY: number = (customCoordA[1] - customCoordB[1]);
+                    const customCrossX: number = (customCoordA[0] - customCoordB[0]);
+                    const customCrossY: number = (customCoordA[1] - customCoordB[1]);
                     let customGoX: number = customCrossY;
                     let customGoY: number = -customCrossX;
-                    let customCoordNext = this._customLayout[rootnode.children[ii].indexA + 1];
+                    const customCoordNext = this._customLayout[rootnode.children[ii].indexA + 1];
                     let childCustomRotationDirection: RotationDirection = 0;
                     let childCustomDotProd = 0;
                     if (
@@ -638,8 +640,8 @@ export default class RNALayout {
                         && customCoord[0] !== null
                         && customCoord[1] !== null
                     ) {
-                        let customGoNextX: number = customCoordNext[0] - customCoord[0];
-                        let customGoNextY: number = customCoordNext[1] - customCoord[1];
+                        const customGoNextX: number = customCoordNext[0] - customCoord[0];
+                        const customGoNextY: number = customCoordNext[1] - customCoord[1];
                         childCustomDotProd = customGoNextX * customGoX + customGoNextY * customGoY;
                         childCustomRotationDirection = Math.sign(childCustomDotProd);
                     }
@@ -657,15 +659,15 @@ export default class RNALayout {
                     childRotationDirection = rotationDirection
                         * (childCustomRotationDirection / anchorCustomRotationDirection);
                     if (anchornode != null) {
-                        let templateGoX = customGoX * anchorCustomCrossX + customGoY * anchorCustomCrossY;
-                        let templateGoY = customGoX * anchorCustomGoX + customGoY * anchorCustomGoY;
+                        const templateGoX = customGoX * anchorCustomCrossX + customGoY * anchorCustomCrossY;
+                        const templateGoY = customGoX * anchorCustomGoX + customGoY * anchorCustomGoY;
                         childGoX = crossX * templateGoX + goX * templateGoY;
                         childGoY = crossY * templateGoX + goY * templateGoY;
                     }
                 }
             }
 
-            let childGoLength: number = Math.sqrt(childGoX * childGoX + childGoY * childGoY);
+            const childGoLength: number = Math.sqrt(childGoX * childGoX + childGoY * childGoY);
 
             this.drawTreeRecursive(rootnode.children[ii], rootnode, childX, childY,
                 childGoX / childGoLength, childGoY / childGoLength, childRotationDirection);
@@ -693,8 +695,8 @@ export default class RNALayout {
         goX: number, goY: number, rotationDirection: RotationDirection
     ): void {
         let ii: number;
-        let crossX: number = -goY * rotationDirection;
-        let crossY: number = goX * rotationDirection;
+        const crossX: number = -goY * rotationDirection;
+        const crossY: number = goX * rotationDirection;
 
         rootnode.x = startX;
         rootnode.y = startY;
@@ -721,8 +723,8 @@ export default class RNALayout {
         if (anchornode != null) {
             anchorX = anchornode.x;
             anchorY = anchornode.y;
-            let puzzlerCoordA: [number, number] = this._puzzlerLayout[anchornode.indexA];
-            let puzzlerCoordB: [number, number] = this._puzzlerLayout[anchornode.indexB];
+            const puzzlerCoordA: [number, number] = this._puzzlerLayout[anchornode.indexA];
+            const puzzlerCoordB: [number, number] = this._puzzlerLayout[anchornode.indexB];
             anchorPuzzlerX = (puzzlerCoordA[0] + puzzlerCoordB[0]) / 2;
             anchorPuzzlerY = (puzzlerCoordA[1] + puzzlerCoordB[1]) / 2;
             anchorPuzzlerCrossX = (puzzlerCoordA[0] - puzzlerCoordB[0]);
@@ -733,10 +735,10 @@ export default class RNALayout {
             // are we rendering counterclockwise (default) or clockwise (non-default, rotationDirection = -1)
             // NOTE POTENTIAL ISSUE in edge case where anchornode.indexA is at edge of pairing...
             // basically checking dot product of next base after pair with putative go direction above.
-            let anchorPuzzlerCoordNext: [number, number] = this._puzzlerLayout[anchornode.indexA + 1];
-            let anchorPuzzlerGoNextX: number = anchorPuzzlerCoordNext[0] - anchorPuzzlerX;
-            let anchorPuzzlerGoNextY: number = anchorPuzzlerCoordNext[1] - anchorPuzzlerY;
-            let anchorPuzzlerDotProd = anchorPuzzlerGoNextX * anchorPuzzlerGoX
+            const anchorPuzzlerCoordNext: [number, number] = this._puzzlerLayout[anchornode.indexA + 1];
+            const anchorPuzzlerGoNextX: number = anchorPuzzlerCoordNext[0] - anchorPuzzlerX;
+            const anchorPuzzlerGoNextY: number = anchorPuzzlerCoordNext[1] - anchorPuzzlerY;
+            const anchorPuzzlerDotProd = anchorPuzzlerGoNextX * anchorPuzzlerGoX
                 + anchorPuzzlerGoNextY * anchorPuzzlerGoY;
             anchorPuzzlerRotationDirection = Math.sign(anchorPuzzlerDotProd);
             if (anchorPuzzlerRotationDirection === 0
@@ -752,10 +754,10 @@ export default class RNALayout {
             // read out where this point should be based on 'this._puzzlerLayout'. get coordinates in
             // "local coordinate frame" set by parent pair in this._puzzlerLayout.
             // This would be a lot easier to read if we had a notion of an (x,y) pair, dot products, and cross products.
-            let puzzlerCoord: number[] = this._puzzlerLayout[rootnode.children[ii].indexA].slice();
+            const puzzlerCoord: number[] = this._puzzlerLayout[rootnode.children[ii].indexA].slice();
             if (rootnode.children[ii].isPair) {
-                let puzzlerCoordA: [number, number] = this._puzzlerLayout[rootnode.children[ii].indexA];
-                let puzzlerCoordB: [number, number] = this._puzzlerLayout[rootnode.children[ii].indexB];
+                const puzzlerCoordA: [number, number] = this._puzzlerLayout[rootnode.children[ii].indexA];
+                const puzzlerCoordB: [number, number] = this._puzzlerLayout[rootnode.children[ii].indexB];
                 puzzlerCoord[0] = (puzzlerCoordA[0] + puzzlerCoordB[0]) / 2;
                 puzzlerCoord[1] = (puzzlerCoordA[1] + puzzlerCoordB[1]) / 2;
             }
@@ -767,8 +769,8 @@ export default class RNALayout {
             childX = puzzlerCoord[0] * this._primarySpace;
             childY = puzzlerCoord[1] * this._primarySpace;
             if (anchornode != null) {
-                let devX: number = puzzlerCoord[0] - anchorPuzzlerX;
-                let devY: number = puzzlerCoord[1] - anchorPuzzlerY;
+                const devX: number = puzzlerCoord[0] - anchorPuzzlerX;
+                const devY: number = puzzlerCoord[1] - anchorPuzzlerY;
                 let templateX: number = devX * anchorPuzzlerCrossX + devY * anchorPuzzlerCrossY;
                 let templateY: number = devX * anchorPuzzlerGoX + devY * anchorPuzzlerGoY;
                 templateX *= this._primarySpace;
@@ -780,17 +782,17 @@ export default class RNALayout {
 
             let childRotationDirection: number = rotationDirection;
             if (rootnode.children[ii].isPair) {
-                let puzzlerCoordA: [number, number] = this._puzzlerLayout[rootnode.children[ii].indexA];
-                let puzzlerCoordB: [number, number] = this._puzzlerLayout[rootnode.children[ii].indexB];
-                let puzzlerCrossX: number = (puzzlerCoordA[0] - puzzlerCoordB[0]);
-                let puzzlerCrossY: number = (puzzlerCoordA[1] - puzzlerCoordB[1]);
+                const puzzlerCoordA: [number, number] = this._puzzlerLayout[rootnode.children[ii].indexA];
+                const puzzlerCoordB: [number, number] = this._puzzlerLayout[rootnode.children[ii].indexB];
+                const puzzlerCrossX: number = (puzzlerCoordA[0] - puzzlerCoordB[0]);
+                const puzzlerCrossY: number = (puzzlerCoordA[1] - puzzlerCoordB[1]);
                 let puzzlerGoX: number = puzzlerCrossY;
                 let puzzlerGoY: number = -puzzlerCrossX;
 
-                let puzzlerCoordNext: [number, number] = this._puzzlerLayout[rootnode.children[ii].indexA + 1];
-                let puzzlerGoNextX: number = puzzlerCoordNext[0] - puzzlerCoord[0];
-                let puzzlerGoNextY: number = puzzlerCoordNext[1] - puzzlerCoord[1];
-                let childPuzzlerDotProd = puzzlerGoNextX * puzzlerGoX + puzzlerGoNextY * puzzlerGoY;
+                const puzzlerCoordNext: [number, number] = this._puzzlerLayout[rootnode.children[ii].indexA + 1];
+                const puzzlerGoNextX: number = puzzlerCoordNext[0] - puzzlerCoord[0];
+                const puzzlerGoNextY: number = puzzlerCoordNext[1] - puzzlerCoord[1];
+                const childPuzzlerDotProd = puzzlerGoNextX * puzzlerGoX + puzzlerGoNextY * puzzlerGoY;
                 let childPuzzlerLayoutRotationDirection: RotationDirection = Math.sign(childPuzzlerDotProd);
                 if (puzzlerCoordNext[0] === null) {
                     childPuzzlerLayoutRotationDirection = anchorPuzzlerRotationDirection;
@@ -806,14 +808,14 @@ export default class RNALayout {
                 childRotationDirection = rotationDirection
                     * (childPuzzlerLayoutRotationDirection / anchorPuzzlerRotationDirection);
                 if (anchornode != null) {
-                    let templateGoX = puzzlerGoX * anchorPuzzlerCrossX + puzzlerGoY * anchorPuzzlerCrossY;
-                    let templateGoY = puzzlerGoX * anchorPuzzlerGoX + puzzlerGoY * anchorPuzzlerGoY;
+                    const templateGoX = puzzlerGoX * anchorPuzzlerCrossX + puzzlerGoY * anchorPuzzlerCrossY;
+                    const templateGoY = puzzlerGoX * anchorPuzzlerGoX + puzzlerGoY * anchorPuzzlerGoY;
                     childGoX = crossX * templateGoX + goX * templateGoY;
                     childGoY = crossY * templateGoX + goY * templateGoY;
                 }
             }
 
-            let childGoLength: number = Math.sqrt(childGoX * childGoX + childGoY * childGoY);
+            const childGoLength: number = Math.sqrt(childGoX * childGoX + childGoY * childGoY);
 
             this.drawTreeRecursive(rootnode.children[ii], rootnode, childX, childY,
                 childGoX / childGoLength, childGoY / childGoLength, childRotationDirection);
@@ -976,7 +978,7 @@ export default class RNALayout {
             this._customLayout = null;
             return;
         }
-        let scaleFactor = this.inferCustomLayoutScaleFactor(customLayout);
+        const scaleFactor = this.inferCustomLayoutScaleFactor(customLayout);
         this._customLayout = [];
         for (const coord of customLayout) {
             if (coord[0] === null || coord[1] === null) {
@@ -998,10 +1000,10 @@ export default class RNALayout {
         // oh, that means two things:
         // we encode pairs as -1 == unpaired, 0-indexed seqpos == paired
         // that means that EACH of their entries need to be ++ed
-        let pairTable: number[] = [this._nopseudoknotPairs.length,
+        const pairTable: number[] = [this._nopseudoknotPairs.length,
             ...this._nopseudoknotPairs.slice().map((value: number) => value + 1)];
 
-        let rnap = LayoutEngineManager.instance.getLayoutEngine(RNApuzzler.NAME);
+        const rnap = LayoutEngineManager.instance.getLayoutEngine(RNApuzzler.NAME);
 
         Assert.assertIsDefined(rnap, 'Attempted to use RNAPuzzler, but it was not able to be laoded');
 
@@ -1015,8 +1017,8 @@ export default class RNALayout {
      *
      */
     private initializePuzzlerLayout(): void {
-        let puzzlerLayout = this.generatePuzzlerLayout();
-        let scaleFactor = this.inferCustomLayoutScaleFactor(puzzlerLayout);
+        const puzzlerLayout = this.generatePuzzlerLayout();
+        const scaleFactor = this.inferCustomLayoutScaleFactor(puzzlerLayout);
         this._puzzlerLayout = [];
         for (const coord of puzzlerLayout) {
             this._puzzlerLayout.push([coord[0] * scaleFactor, coord[1] * scaleFactor]);
@@ -1053,9 +1055,9 @@ export default class RNALayout {
                     ) {
                         continue;
                     }
-                    let goX = customA[0] - customB[0];
-                    let goY = customA[1] - customB[1];
-                    let L = Math.sqrt(goX * goX + goY * goY);
+                    const goX = customA[0] - customB[0];
+                    const goY = customA[1] - customB[1];
+                    const L = Math.sqrt(goX * goX + goY * goY);
                     scaleFactor = 1.0 / L;
                     return scaleFactor;
                 }

@@ -108,12 +108,12 @@ export default class TextBalloon extends ContainerObject {
             return;
         }
 
-        let {width} = this;
-        let {height} = this;
+        const {width} = this;
+        const {height} = this;
         this._panel.setSize(width, height);
 
-        let wholeWidth: number = width - 2 * TextBalloon.W_MARGIN;
-        let titleSpace: number = this._panel.titleHeight;
+        const wholeWidth: number = width - 2 * TextBalloon.W_MARGIN;
+        const titleSpace: number = this._panel.titleHeight;
 
         if (!this._centered) {
             if (this._text != null) {

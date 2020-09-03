@@ -20,8 +20,8 @@ export default class PasteSequenceDialog extends Dialog<number[]> {
 
         const SEQUENCE = 'Sequence';
 
-        let inputPanel = new TextInputPanel();
-        let sequenceField = inputPanel.addField(SEQUENCE, 200);
+        const inputPanel = new TextInputPanel();
+        const sequenceField = inputPanel.addField(SEQUENCE, 200);
         inputPanel.title = 'Write down a sequence';
         this.addObject(inputPanel, this.container);
 
@@ -32,7 +32,7 @@ export default class PasteSequenceDialog extends Dialog<number[]> {
         inputPanel.cancelClicked.connect(() => this.close(null));
         inputPanel.okClicked.connect((values) => this.onSequenceEntered(values.get(SEQUENCE)));
 
-        let updateLocation = () => {
+        const updateLocation = () => {
             Assert.assertIsDefined(Flashbang.stageHeight);
             Assert.assertIsDefined(Flashbang.stageWidth);
             inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.width) * 0.5;
@@ -48,14 +48,14 @@ export default class PasteSequenceDialog extends Dialog<number[]> {
         Assert.assertIsDefined(sequence);
         sequence = sequence.toUpperCase().replace(/T/g, 'U');
         // make paste entry robust to blanks, and allow index specification after sequence.
-        let seq = sequence.split(' ')[0];
+        const seq = sequence.split(' ')[0];
         for (const char of seq) {
             if (char !== 'A' && char !== 'U' && char !== 'G' && char !== 'C') {
                 (this.mode as GameMode).showNotification('You can only use characters A, C, G, T, and U');
                 return;
             }
         }
-        let s = EPars.indexedStringToSequence(sequence, this._customNumbering);
+        const s = EPars.indexedStringToSequence(sequence, this._customNumbering);
         if (s === undefined && seq.length > 0) {
             (this.mode as GameMode).showNotification(
                 'Problem with how you formatted any input numbers after the sequence'

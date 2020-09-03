@@ -163,7 +163,7 @@ export default class StyledTextBuilder {
 
     private cloneStyles(): TextStyleSet {
         const out: TextStyleSet = {};
-        for (let [key, value] of Object.entries(this._styles)) {
+        for (const [key, value] of Object.entries(this._styles)) {
             out[key] = value;
         }
         return out;

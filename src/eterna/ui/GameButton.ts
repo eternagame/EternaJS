@@ -198,7 +198,7 @@ export default class GameButton extends Button implements KeyboardListener {
             // that is a requirement for drawStyleBox
             Assert.assertIsDefined(label);
             const labelWidth = this._fixedLabelWidth > 0 ? this._fixedLabelWidth : label.width;
-            let styleBox = new Graphics()
+            const styleBox = new Graphics()
                 .beginFill(GameButton.STYLEBOX_COLORS.get(state) || 0x0)
                 .drawRoundedRect(0, 0,
                     labelWidth + (GameButton.WMARGIN * 2),
@@ -215,7 +215,7 @@ export default class GameButton extends Button implements KeyboardListener {
         // Position label
         if (label != null) {
             if (this._scaleIconToLabel && icon != null) {
-                let scale: number = (1.5 * label.height) / this._content.height;
+                const scale: number = (1.5 * label.height) / this._content.height;
                 icon.scale = new Point(scale, scale);
             }
 
@@ -238,8 +238,8 @@ export default class GameButton extends Button implements KeyboardListener {
             if (icon != null) {
                 // if we have an icon, add an invisible hitbox to prevent unclickable pixels
                 // between the icon and the label
-                let bounds = this._content.getLocalBounds(GameButton.SCRATCH_RECT);
-                let hitbox = new Graphics()
+                const bounds = this._content.getLocalBounds(GameButton.SCRATCH_RECT);
+                const hitbox = new Graphics()
                     .beginFill(0xff0000, 0)
                     .drawRect(bounds.x, bounds.y, bounds.width, bounds.height)
                     .endFill();

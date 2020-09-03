@@ -40,7 +40,7 @@ export default class ROPHighlight extends RScriptOp {
 
         // Remove highlight with ID.
         if (this._env.hasVar(this._id)) {
-            let existing: RScriptVarType | undefined = this._env.getVar(this._id);
+            const existing: RScriptVarType | undefined = this._env.getVar(this._id);
             if (existing instanceof GameObject) {
                 existing.destroySelf();
             } else if (existing instanceof RNAHighlightState) {
@@ -51,11 +51,11 @@ export default class ROPHighlight extends RScriptOp {
 
         if (this._opVisible && this._mode === ROPHighlightMode.RNA) {
             // Highlight nucleotides.
-            let res: number[] = [];
+            const res: number[] = [];
             for (let i: number = this._startIdx; i <= this._endIdx; ++i) {
                 res.push(i);
             }
-            let rnaHighlight: RNAHighlightState = this._env.pose.createNewHighlight(res);
+            const rnaHighlight: RNAHighlightState = this._env.pose.createNewHighlight(res);
             this._env.setVar(this._id, rnaHighlight);
         } else if (this._opVisible && this._mode === ROPHighlightMode.UI) {
             const [uiElement, elementID, altParam] = this._env.getUIElementFromID(this._uiElementString);
@@ -147,11 +147,11 @@ export default class ROPHighlight extends RScriptOp {
 
         switch (key) {
             case RScriptUIElementID.OBJECTIVES: {
-                let n: number | null = this._env.ui.constraintCount;
+                const n: number | null = this._env.ui.constraintCount;
                 Assert.assertIsDefined(n);
-                let firstObj: ConstraintBox | null = this._env.ui.getConstraintBox(0);
+                const firstObj: ConstraintBox | null = this._env.ui.getConstraintBox(0);
                 Assert.assertIsDefined(firstObj);
-                let lastObj: ConstraintBox | null = this._env.ui.getConstraintBox(n - 1);
+                const lastObj: ConstraintBox | null = this._env.ui.getConstraintBox(n - 1);
                 Assert.assertIsDefined(lastObj);
                 size.x = lastObj.display.x - firstObj.display.x + lastObj.display.width + 2 * padding.x;
                 size.y = 84;

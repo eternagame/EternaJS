@@ -78,7 +78,7 @@ export default class PuzzleManager {
     }
 
     public async parsePuzzle(json: PuzzleJSON): Promise<Puzzle> {
-        let newpuz: Puzzle = new Puzzle(Number(json['id']), json['title'], json['type']);
+        const newpuz: Puzzle = new Puzzle(Number(json['id']), json['title'], json['type']);
 
         if (json['body']) {
             // Convention: mission texts are encapsulated by
@@ -86,15 +86,15 @@ export default class PuzzleManager {
             // This allows to reuse existing descriptions, just insert the span element where appropriate
             // Or one can add a new mission statement, and HTML-hide it if necessary using <!-- ... -->
 
-            let res: RegExpExecArray | null = PuzzleManager.RE_MISSION_TEXT.exec(json['body']);
+            const res: RegExpExecArray | null = PuzzleManager.RE_MISSION_TEXT.exec(json['body']);
             if (res != null && res.length >= 2) {
                 [, newpuz.missionText] = res;
             }
         }
 
         if (json['locks'] && json['locks'].length > 0) {
-            let lockStr: string = json['locks'];
-            let locks: boolean[] = [];
+            const lockStr: string = json['locks'];
+            const locks: boolean[] = [];
 
             for (let kk = 0; kk < lockStr.length; kk++) {
                 locks.push(lockStr.charAt(kk) === 'x');
@@ -103,7 +103,7 @@ export default class PuzzleManager {
         }
 
         if (json['objective']) {
-            let objective: ObjectiveString = JSON.parse(json['objective'])[0];
+            const objective: ObjectiveString = JSON.parse(json['objective'])[0];
             if (objective['shift_limit']) {
                 newpuz.shiftLimit = objective['shift_limit'];
             } else {
@@ -124,7 +124,7 @@ export default class PuzzleManager {
             }
         }
 
-        let usetails = Number(json['usetails']);
+        const usetails = Number(json['usetails']);
         newpuz.setUseTails(usetails > 0, usetails === 2);
 
         if (json['folder'] && json['folder'].length > 0) {
@@ -191,12 +191,12 @@ export default class PuzzleManager {
             newpuz.objective = JSON.parse(PuzzleManager.OBJECTIVE_1420804);
         }
 
-        let {targetConditions} = newpuz;
+        const {targetConditions} = newpuz;
         if (targetConditions !== undefined) {
             for (let ii = 0; ii < targetConditions.length; ii++) {
                 if (targetConditions[ii] !== undefined) {
                     const tc = targetConditions[ii] as TargetConditions;
-                    let constrainedBases = tc['structure_constrained_bases'];
+                    const constrainedBases = tc['structure_constrained_bases'];
                     if (constrainedBases !== undefined) {
                         if (constrainedBases.length % 2 === 0) {
                             tc['structure_constraints'] = [];
@@ -212,7 +212,7 @@ export default class PuzzleManager {
                         }
                     }
 
-                    let aConstrainedBases = tc['anti_structure_constrained_bases'];
+                    const aConstrainedBases = tc['anti_structure_constrained_bases'];
                     if (aConstrainedBases !== undefined) {
                         if (
                             tc['anti_secstruct'] !== undefined
@@ -237,15 +237,15 @@ export default class PuzzleManager {
             }
         }
 
-        let constraints: Constraint<BaseConstraintStatus>[] = [];
+        const constraints: Constraint<BaseConstraintStatus>[] = [];
         if (json['constraints'] && json['constraints'].length > 0) {
-            let constraintDefs: string[] = json['constraints'].split(',');
+            const constraintDefs: string[] = json['constraints'].split(',');
             if (constraintDefs.length % 2 === 1) {
                 throw new Error('Invalid constraint definition - uneven number of constraints and parameters');
             }
 
             for (let i = 0; i < constraintDefs.length; i += 2) {
-                let [name, parameter] = constraintDefs.slice(i, i + 2);
+                const [name, parameter] = constraintDefs.slice(i, i + 2);
                 switch (name) {
                     case 'SOFT':
                         newpuz.isSoftConstraint = true;
@@ -355,7 +355,7 @@ export default class PuzzleManager {
 
         newpuz.constraints = constraints;
 
-        let folder: Folder | null = FolderManager.instance.getFolder(newpuz.folderName);
+        const folder: Folder | null = FolderManager.instance.getFolder(newpuz.folderName);
         Assert.assertIsDefined(folder, `Folder ${newpuz.folderName} cannot be found`);
         if (!newpuz.canUseFolder(folder)) {
             newpuz.folderName = FolderManager.instance.getNextFolder(
@@ -378,7 +378,7 @@ export default class PuzzleManager {
             this._puzzles.push(newpuz);
         }
 
-        let isScriptConstraint = (
+        const isScriptConstraint = (
             constraint: Constraint<BaseConstraintStatus> | ScriptConstraint
         ): constraint is ScriptConstraint => constraint instanceof ScriptConstraint;
 
@@ -397,24 +397,24 @@ export default class PuzzleManager {
     }
 
     public async getPuzzleByID(puznid: number, scriptid: number = -1): Promise<Puzzle> {
-        for (let puzzle of this._puzzles) {
+        for (const puzzle of this._puzzles) {
             if (puzzle.nodeID === puznid) {
                 return puzzle;
             }
         }
 
         log.info(`Loading puzzle [nid=${puznid}, scriptid=${scriptid}...]`);
-        let json = await Eterna.client.getPuzzle(puznid, scriptid);
-        let data = json['data'];
+        const json = await Eterna.client.getPuzzle(puznid, scriptid);
+        const data = json['data'];
         if (data['hairpins']) {
             SolutionManager.instance.addHairpins(data['hairpins']);
         }
 
-        let puzzle = await this.parsePuzzle(data['puzzle']);
+        const puzzle = await this.parsePuzzle(data['puzzle']);
 
-        let cleared = data.cleared as { nid: string }[];
+        const cleared = data.cleared as { nid: string }[];
         if (cleared) {
-            let clearedNIDs = cleared.map((e) => e.nid);
+            const clearedNIDs = cleared.map((e) => e.nid);
             if (clearedNIDs.some((e) => parseInt(e, 10) === puzzle.nodeID)) {
                 puzzle.alreadySolved = true;
             }

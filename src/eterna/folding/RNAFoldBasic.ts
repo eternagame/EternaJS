@@ -41,16 +41,16 @@ export default class RNAFoldBasic extends Folder {
         seq: number[], secondBestPairs: number[], desiredPairs: string | null = null,
         pseudoknotted: boolean = false, temp: number = 37
     ): number[] {
-        let n: number = seq.length;
-        let pairs: number[] = new Array(n);
-        let dpArray: number[] = new Array(n * n);
-        let traceArray: number[] = new Array(n * n);
+        const n: number = seq.length;
+        const pairs: number[] = new Array(n);
+        const dpArray: number[] = new Array(n * n);
+        const traceArray: number[] = new Array(n * n);
 
         for (let ii = 0; ii < n; ii++) {
             pairs[ii] = -1;
 
             for (let jj = 0; jj < n; jj++) {
-                let index: number = ii * n + jj;
+                const index: number = ii * n + jj;
 
                 if (ii > jj + 1) {
                     dpArray[index] = -1;
@@ -143,7 +143,7 @@ export default class RNAFoldBasic extends Folder {
     }
 
     private tracePairs(traceArray: number[], pairs: number[], n: number, iiStart: number, jjStart: number): void {
-        let dir: number = traceArray[iiStart * n + jjStart];
+        const dir: number = traceArray[iiStart * n + jjStart];
 
         if (dir === 1) {
             pairs[iiStart] = jjStart;
@@ -155,7 +155,7 @@ export default class RNAFoldBasic extends Folder {
         } else if (dir === 3) {
             this.tracePairs(traceArray, pairs, n, iiStart, jjStart - 1);
         } else if (dir !== 0) {
-            let kk: number = -dir;
+            const kk: number = -dir;
             this.tracePairs(traceArray, pairs, n, iiStart, kk);
             this.tracePairs(traceArray, pairs, n, kk + 1, jjStart);
         }

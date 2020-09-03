@@ -6,7 +6,7 @@ export default class RScriptArrow extends SceneObject {
     constructor(
         triSize: number = 75, baseLength: number = 60, outlineColor: number = 0xDAE8F6, fillColor: number = 0xDAE8F6
     ) {
-        let graphics = new Graphics();
+        const graphics = new Graphics();
         super(graphics);
 
         this._graphics = graphics;

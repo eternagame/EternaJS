@@ -50,10 +50,10 @@ export default class SolutionManager {
     public getSolutionsForPuzzle(puzzleID: number): Promise<Solution[]> {
         log.info(`Loading solutions for puzzle ${puzzleID}...`);
         return Eterna.client.getSolutions(puzzleID).then((json) => {
-            let solutionsData = json['data']['solutions'];
+            const solutionsData = json['data']['solutions'];
             this._solutions = [];
 
-            for (let solution of solutionsData) {
+            for (const solution of solutionsData) {
                 this._solutions.push(SolutionManager.processData(solution));
             }
 
@@ -66,7 +66,7 @@ export default class SolutionManager {
     }
 
     public getSolutionBySequence(seq: string): Solution | null {
-        for (let solution of this._solutions) {
+        for (const solution of this._solutions) {
             if (solution.sequence === seq) {
                 return solution;
             }
@@ -80,18 +80,18 @@ export default class SolutionManager {
             return;
         }
 
-        for (let hairpin of hairpins) {
+        for (const hairpin of hairpins) {
             this._hairpins.push(hairpin);
         }
     }
 
     public checkRedundancyByHairpin(seq: string): boolean {
-        let seqHairpin: string | null = EPars.getBarcodeHairpin(seq);
+        const seqHairpin: string | null = EPars.getBarcodeHairpin(seq);
         if (seqHairpin == null) {
             return true;
         }
 
-        for (let hairpin of this._hairpins) {
+        for (const hairpin of this._hairpins) {
             if (hairpin === seqHairpin) {
                 return true;
             }
@@ -100,8 +100,8 @@ export default class SolutionManager {
     }
 
     public getMyCurrentSolutionTitles(round: number): string[] {
-        let titles: string[] = [];
-        for (let solution of this._solutions) {
+        const titles: string[] = [];
+        for (const solution of this._solutions) {
             if (solution.getProperty('Round') === round && solution.playerID === Eterna.playerID) {
                 titles.push(solution.title);
             }
@@ -111,7 +111,7 @@ export default class SolutionManager {
     }
 
     private static processData(obj: SolutionSpec): Solution {
-        let newsol: Solution = new Solution(Number(obj['id']), Number(obj['puznid']));
+        const newsol: Solution = new Solution(Number(obj['id']), Number(obj['puznid']));
         newsol.sequence = obj['sequence'];
         newsol.title = obj['title'];
 
@@ -137,14 +137,14 @@ export default class SolutionManager {
         newsol.setSynthesis(Number(obj['synthesis-round']), Number(obj['synthesis-score']));
 
         if (obj['synthesis-data'] && obj['synthesis-data'].length > 0) {
-            let synthesisDataRaw: SynthesisData[] | BrentTheoData = JSON.parse(obj['synthesis-data']);
+            const synthesisDataRaw: SynthesisData[] | BrentTheoData = JSON.parse(obj['synthesis-data']);
             if (Array.isArray(synthesisDataRaw)) {
-                let synthesisData: SynthesisData[] = synthesisDataRaw;
+                const synthesisData: SynthesisData[] = synthesisDataRaw;
 
                 for (let ii = 0; ii < synthesisData.length; ii++) {
-                    let synthesis: SynthesisData = synthesisData[ii];
+                    const synthesis: SynthesisData = synthesisData[ii];
                     if (synthesis['reactive'] === 'SHAPE') {
-                        let peaks: number[] = [];
+                        const peaks: number[] = [];
                         peaks.push(Number(synthesis['start_index']));
 
                         for (let ss = 0; ss < synthesis['peaks'].length; ss++) {
@@ -181,7 +181,7 @@ export default class SolutionManager {
                 newfb.setShapeData(null, 0, null, null, null, obj['SHAPE']);
             } else {
                 const protoshapeArray = obj['SHAPE'].split(',');
-                let shapeArray: number[] = [];
+                const shapeArray: number[] = [];
                 for (let kk = 0; kk < protoshapeArray.length; kk++) {
                     shapeArray[kk] = Number(protoshapeArray[kk]);
                 }

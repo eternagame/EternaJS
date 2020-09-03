@@ -23,7 +23,7 @@ export default class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
     }
 
     public lineHeight(percentOrString: number | string): HTMLTextObject {
-        let lineHeight: string = (typeof (percentOrString) === 'number')
+        const lineHeight: string = (typeof (percentOrString) === 'number')
             ? `${Math.floor(percentOrString * 100)}%`
             : percentOrString;
         DOMObject.applyStyleRecursive(this._obj, {'line-height': lineHeight}, false, HTMLTextObject.STYLE_NODE_NAMES);

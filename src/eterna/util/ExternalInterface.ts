@@ -38,7 +38,7 @@ function getDeepProperty(obj: any, name: string): [any, any] {
     } else {
         let prop = obj;
         let parent;
-        for (let component of name.split('.')) {
+        for (const component of name.split('.')) {
             if (prop === undefined) {
                 throw new Error(`'${name}' is not a property of ${obj}`);
             }
@@ -62,7 +62,7 @@ export default class ExternalInterface {
     }
 
     public static pushContext(ctx: ExternalInterfaceCtx): void {
-        let updateReg = ctx.changed.connect(() => this.updateCallbacks());
+        const updateReg = ctx.changed.connect(() => this.updateCallbacks());
         this._registeredContexts.push({ctx, reg: updateReg});
         if (ctx.callbacks.size > 0) {
             this.updateCallbacks();
@@ -70,9 +70,9 @@ export default class ExternalInterface {
     }
 
     public static popContext(ctx: ExternalInterfaceCtx): void {
-        let idx = this._registeredContexts.findIndex((registered) => registered.ctx === ctx);
+        const idx = this._registeredContexts.findIndex((registered) => registered.ctx === ctx);
         if (idx >= 0) {
-            let registered = this._registeredContexts[idx];
+            const registered = this._registeredContexts[idx];
             registered.reg.close();
             this._registeredContexts.splice(idx, 1);
             this.updateCallbacks();
@@ -176,7 +176,7 @@ export default class ExternalInterface {
 
     public static call(name: string, ...args: any[]): any {
         try {
-            let [thisVal, f] = getDeepProperty(window as any, name);
+            const [thisVal, f] = getDeepProperty(window as any, name);
             return (f as Function).apply(thisVal, args);
         } catch (e) {
             log.error(`ExternalInterface: error calling '${name}': ${e}`);
@@ -186,13 +186,13 @@ export default class ExternalInterface {
 
     private static maybeRunNextScript(): void {
         while (this._pendingScripts.length > 0 && this._curSyncScript == null) {
-            let nextScript = this._pendingScripts.shift();
+            const nextScript = this._pendingScripts.shift();
             Assert.assertIsDefined(nextScript);
             if (nextScript.options.checkValid != null && !nextScript.options.checkValid()) {
                 log.info(`Not running stale request for script ${nextScript.scriptID}`);
             } else {
                 this._curSyncScript = nextScript;
-                let cleanup = () => {
+                const cleanup = () => {
                     this._curSyncScript = null;
                     this.maybeRunNextScript();
                 };
@@ -216,7 +216,7 @@ export default class ExternalInterface {
         }
 
         if (!this.hasRunningScripts && this._noPendingScripts != null) {
-            let promise = this._noPendingScripts;
+            const promise = this._noPendingScripts;
             this._noPendingScripts = null;
             promise.resolve();
         }
@@ -244,7 +244,7 @@ export default class ExternalInterface {
         onSuccess: (result: any) => void,
         onError: (reason: any) => void
     ): void {
-        let ctx = options.ctx || new ExternalInterfaceCtx();
+        const ctx = options.ctx || new ExternalInterfaceCtx();
 
         let isComplete = false;
         let declaredAsync = false;
@@ -317,13 +317,13 @@ export default class ExternalInterface {
 
     private static updateCallbacks(): void {
         // Clear all existing callbacks and re-register them in context order
-        for (let name of this._currentCallbackNames) {
+        for (const name of this._currentCallbackNames) {
             delete this._scriptRoot[name];
         }
         this._currentCallbackNames.clear();
 
-        for (let ctx of this._registeredContexts) {
-            for (let [name, callback] of ctx.ctx.callbacks.entries()) {
+        for (const ctx of this._registeredContexts) {
+            for (const [name, callback] of ctx.ctx.callbacks.entries()) {
                 this._scriptRoot[name] = callback;
                 this._currentCallbackNames.add(name);
             }

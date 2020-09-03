@@ -43,9 +43,9 @@ export default class BaseRope extends GameObject implements LateUpdatable {
             return;
         }
 
-        let idx: number[] = [];
-        let basePosX: number[] = [];
-        let basePosY: number[] = [];
+        const idx: number[] = [];
+        const basePosX: number[] = [];
+        const basePosY: number[] = [];
         for (let i = 0; i < this._pose.fullSequence.length; i++) {
             let center: Point = this._pose.getBaseLoc(i);
             if (!forceBaseXY && !this._pose.getBase(i).needRedraw) {
@@ -83,7 +83,7 @@ export default class BaseRope extends GameObject implements LateUpdatable {
         //  for zooms, pans, and changes between target/natural mode,
         //   it might be better to compute smooth ropes for beginning and final, and then
         //   interpolate in between...
-        let interpBasePosXY = this.updateInterpBasePos(basePosX, basePosY);
+        const interpBasePosXY = this.updateInterpBasePos(basePosX, basePosY);
 
         this._graphics.clear();
         const OUTER_ROPE_THICKNESS: number = 0.30 * Pose2D.ZOOM_SPACINGS[this._pose.zoomLevel];
@@ -126,7 +126,7 @@ export default class BaseRope extends GameObject implements LateUpdatable {
      */
     private updateInterpBasePosCubic(smoothFactor: number, basePosX: number[], basePosY: number[]):
     Array<[number, number]> {
-        let interpBasePosXY: Array<[number, number]> = [];
+        const interpBasePosXY: Array<[number, number]> = [];
         for (let i = 1; i < this._pose.fullSequence.length * smoothFactor; i++) {
             interpBasePosXY.push([
                 this.cubicInterpolation(basePosX, i / smoothFactor),
@@ -146,17 +146,17 @@ export default class BaseRope extends GameObject implements LateUpdatable {
      */
     private updateInterpBasePosPchip(smoothFactor: number, basePosX: number[], basePosY: number[]):
     Array<[number, number]> {
-        let interpBasePosX = this.interpPchip(smoothFactor, basePosX);
-        let interpBasePosY = this.interpPchip(smoothFactor, basePosY);
-        let interpBasePosXY: Array<[number, number]> = interpBasePosX.map((x, idx) => [x, interpBasePosY[idx]]);
+        const interpBasePosX = this.interpPchip(smoothFactor, basePosX);
+        const interpBasePosY = this.interpPchip(smoothFactor, basePosY);
+        const interpBasePosXY: Array<[number, number]> = interpBasePosX.map((x, idx) => [x, interpBasePosY[idx]]);
         return interpBasePosXY;
     }
 
     private interpPchip(smoothFactor: number, points: number[]): number[] {
         // have to pack in ii for pchip.fit
-        let inputPoints = points.map((x, idx) => [idx, x]);
-        let pchipFitPoints: Array<[number, number]> = pchip.fit(inputPoints, smoothFactor, 'shape_preserving');
-        let interpBasePos = pchipFitPoints.map((x) => x[1]);
+        const inputPoints = points.map((x, idx) => [idx, x]);
+        const pchipFitPoints: Array<[number, number]> = pchip.fit(inputPoints, smoothFactor, 'shape_preserving');
+        const interpBasePos = pchipFitPoints.map((x) => x[1]);
         return interpBasePos;
     }
 
@@ -194,7 +194,7 @@ export default class BaseRope extends GameObject implements LateUpdatable {
     public makeVisibleIfLongSpacings(): void {
         if (this._enabled) return;
         for (let i = 1; i < this._pose.fullSequence.length; i++) {
-            let vec: Vector2 = Vector2.fromPoint(this._pose.getBaseLoc(i)).subtract(
+            const vec: Vector2 = Vector2.fromPoint(this._pose.getBaseLoc(i)).subtract(
                 Vector2.fromPoint(this._pose.getBaseLoc(i - 1))
             );
             if (vec.length > Pose2D.ZOOM_SPACINGS[0]) {

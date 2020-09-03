@@ -26,10 +26,10 @@ export default class ROPHint extends RScriptOp {
             return;
         }
 
-        let startPoint: Point = this._env.pose.getBaseLoc(this._startIdx);
-        let endPoint: Point = this._env.pose.getBaseLoc(this._endIdx);
+        const startPoint: Point = this._env.pose.getBaseLoc(this._startIdx);
+        const endPoint: Point = this._env.pose.getBaseLoc(this._endIdx);
 
-        let hint: NovaPaintHint = new NovaPaintHint(startPoint, endPoint, this._loop);
+        const hint: NovaPaintHint = new NovaPaintHint(startPoint, endPoint, this._loop);
         hint.setAnchorNucleotide(this._env.pose, this._startIdx);
         hint.initialize();
         this._env.ui.addObject(hint, this._env.ui.container);

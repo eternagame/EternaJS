@@ -36,12 +36,12 @@ export default class RNApuzzler extends LayoutEngine {
 
         // We get two vectors. mush them up.
 
-        let pts = pairTable.join(',');
-        let res = this._lib.GetLayout(pts);
-        let Xs = EmscriptenUtil.stdVectorToArray<number>(res.xs);
-        let Ys = EmscriptenUtil.stdVectorToArray<number>(res.ys);
+        const pts = pairTable.join(',');
+        const res = this._lib.GetLayout(pts);
+        const Xs = EmscriptenUtil.stdVectorToArray<number>(res.xs);
+        const Ys = EmscriptenUtil.stdVectorToArray<number>(res.ys);
 
-        let zip: [number, number][] = [];
+        const zip: [number, number][] = [];
         for (let ii = 0; ii < Xs.length; ++ii) {
             zip.push([Xs[ii], Ys[ii]]);
         }

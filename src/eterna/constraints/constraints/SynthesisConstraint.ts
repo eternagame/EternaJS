@@ -22,9 +22,9 @@ export default class SynthesisConstraint extends Constraint<SynthConstraintStatu
     public static readonly CMAX = 5;
 
     public evaluate(context: ConstraintContext): SynthConstraintStatus {
-        let aRet = this._consecutiveAConstraint.evaluate(context);
-        let gRet = this._consecutiveGConstraint.evaluate(context);
-        let cRet = this._consecutiveCConstraint.evaluate(context);
+        const aRet = this._consecutiveAConstraint.evaluate(context);
+        const gRet = this._consecutiveGConstraint.evaluate(context);
+        const cRet = this._consecutiveCConstraint.evaluate(context);
 
         return {
             satisfied: [aRet, gRet, cRet].every((ret) => ret.satisfied),
@@ -66,7 +66,7 @@ export default class SynthesisConstraint extends Constraint<SynthConstraintStatu
             }
         }
 
-        let tooltip = ConstraintBox.createTextStyle();
+        const tooltip = ConstraintBox.createTextStyle();
         if (forMissionScreen) {
             tooltip.pushStyle('altTextMain');
         }

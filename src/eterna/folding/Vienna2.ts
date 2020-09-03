@@ -38,7 +38,7 @@ export default class Vienna2 extends Folder {
 
     /* override */
     public getDotPlot(seq: number[], pairs: number[], temp: number = 37): number[] {
-        let key: CacheKey = {
+        const key: CacheKey = {
             primitive: 'dotplot', seq, pairs, temp
         };
         let retArray: number[] = this.getCache(key) as number[];
@@ -46,8 +46,8 @@ export default class Vienna2 extends Folder {
             return retArray.slice();
         }
 
-        let secstructStr: string = EPars.pairsToParenthesis(pairs);
-        let seqStr: string = EPars.sequenceToString(seq);
+        const secstructStr: string = EPars.pairsToParenthesis(pairs);
+        const seqStr: string = EPars.sequenceToString(seq);
 
         let probabilitiesString: string;
         let result: DotPlotResult | null = null;
@@ -67,7 +67,7 @@ export default class Vienna2 extends Folder {
             }
         }
 
-        let tempArray: string[] = Utility.splitOnWhitespace(probabilitiesString);
+        const tempArray: string[] = Utility.splitOnWhitespace(probabilitiesString);
         retArray = [];
 
         if (tempArray.length % 4 !== 0) {
@@ -110,7 +110,7 @@ export default class Vienna2 extends Folder {
         seq: number[], pairs: number[], pseudoknotted: boolean = false,
         temp: number = 37, outNodes: number[] | null = null
     ): number {
-        let key: CacheKey = {
+        const key: CacheKey = {
             primitive: 'score', seq, pairs, temp
         };
         let cache: FullEvalCache = this.getCache(key) as FullEvalCache;
@@ -143,21 +143,21 @@ export default class Vienna2 extends Folder {
             }
         } while (0);
 
-        let cut: number = seq.indexOf(EPars.RNABASE_CUT);
+        const cut: number = seq.indexOf(EPars.RNABASE_CUT);
         if (cut >= 0 && cache.nodes[0] !== -2) {
             // we just scored a duplex that wasn't one, so we have to redo it properly
-            let seqA: number[] = seq.slice(0, cut);
-            let pairsA: number[] = pairs.slice(0, cut);
-            let nodesA: number[] = [];
-            let retA: number = this.scoreStructures(seqA, pairsA, pseudoknotted, temp, nodesA);
+            const seqA: number[] = seq.slice(0, cut);
+            const pairsA: number[] = pairs.slice(0, cut);
+            const nodesA: number[] = [];
+            const retA: number = this.scoreStructures(seqA, pairsA, pseudoknotted, temp, nodesA);
 
-            let seqB: number[] = seq.slice(cut + 1);
-            let pairsB: number[] = pairs.slice(cut + 1);
+            const seqB: number[] = seq.slice(cut + 1);
+            const pairsB: number[] = pairs.slice(cut + 1);
             for (let ii = 0; ii < pairsB.length; ii++) {
                 if (pairsB[ii] >= 0) pairsB[ii] -= (cut + 1);
             }
-            let nodesB: number[] = [];
-            let retB: number = this.scoreStructures(seqB, pairsB, pseudoknotted, temp, nodesB);
+            const nodesB: number[] = [];
+            const retB: number = this.scoreStructures(seqB, pairsB, pseudoknotted, temp, nodesB);
 
             if (nodesA[0] !== -1 || nodesB[0] !== -1) {
                 throw new Error('Something went terribly wrong in scoreStructures()');
@@ -178,7 +178,7 @@ export default class Vienna2 extends Folder {
 
         this.putCache(key, cache);
 
-        let energy = cache.energy * 100;
+        const energy = cache.energy * 100;
         if (outNodes != null) {
             FoldUtil.arrayCopy(outNodes, cache.nodes);
         }
@@ -191,7 +191,7 @@ export default class Vienna2 extends Folder {
         seq: number[], secondBestPairs: number[] | null, desiredPairs: string | null = null,
         pseudoknotted: boolean = false, temp: number = 37
     ): number[] {
-        let key: CacheKey = {
+        const key: CacheKey = {
             primitive: 'fold',
             seq,
             secondBestPairs,
@@ -218,7 +218,7 @@ export default class Vienna2 extends Folder {
         seq: number[], targetPairs: number[] | null, bindingSite: number[], bonus: number,
         version: number = 1.0, temp: number = 37
     ): number[] {
-        let key: CacheKey = {
+        const key: CacheKey = {
             primitive: 'foldAptamer',
             seq,
             targetPairs,
@@ -242,7 +242,7 @@ export default class Vienna2 extends Folder {
             return pairs;
         }
 
-        let siteGroups: number[][] = [];
+        const siteGroups: number[][] = [];
         let lastIndex = -1;
         let currentGroup: number[] = [];
 
@@ -291,12 +291,12 @@ export default class Vienna2 extends Folder {
         seq: number[], secondBestPairs: number[], malus: number = 0,
         desiredPairs: string | null = null, temp: number = 37
     ): number[] {
-        let cut: number = seq.indexOf(EPars.RNABASE_CUT);
+        const cut: number = seq.indexOf(EPars.RNABASE_CUT);
         if (cut < 0) {
             throw new Error('Missing cutting point');
         }
 
-        let key: CacheKey = {
+        const key: CacheKey = {
             primitive: 'cofold',
             seq,
             secondBestPairs,
@@ -311,22 +311,22 @@ export default class Vienna2 extends Folder {
         }
 
         // FIXME: what about desiredPairs? (forced structure)
-        let seqA: number[] = seq.slice(0, cut);
-        let pairsA: number[] = this.foldSequence(seqA, null, null, false, temp);
-        let nodesA: number[] = [];
-        let feA: number = this.scoreStructures(seqA, pairsA, false, temp, nodesA);
+        const seqA: number[] = seq.slice(0, cut);
+        const pairsA: number[] = this.foldSequence(seqA, null, null, false, temp);
+        const nodesA: number[] = [];
+        const feA: number = this.scoreStructures(seqA, pairsA, false, temp, nodesA);
 
-        let seqB: number[] = seq.slice(cut + 1);
-        let pairsB: number[] = this.foldSequence(seqB, null, null, false, temp);
-        let nodesB: number[] = [];
-        let feB: number = this.scoreStructures(seqB, pairsB, false, temp, nodesB);
+        const seqB: number[] = seq.slice(cut + 1);
+        const pairsB: number[] = this.foldSequence(seqB, null, null, false, temp);
+        const nodesB: number[] = [];
+        const feB: number = this.scoreStructures(seqB, pairsB, false, temp, nodesB);
 
         coPairs = this.cofoldSequenceImpl(seq, desiredPairs);
-        let coNodes: number[] = [];
-        let coFE: number = this.scoreStructures(seq, coPairs, false, temp, coNodes);
+        const coNodes: number[] = [];
+        const coFE: number = this.scoreStructures(seq, coPairs, false, temp, coNodes);
 
         if (coFE + malus >= feA + feB) {
-            let struc = `${EPars.pairsToParenthesis(pairsA)}&${EPars.pairsToParenthesis(pairsB)}`;
+            const struc = `${EPars.pairsToParenthesis(pairsA)}&${EPars.pairsToParenthesis(pairsB)}`;
             coPairs = EPars.parenthesisToPairs(struc);
         }
 
@@ -344,12 +344,12 @@ export default class Vienna2 extends Folder {
         seq: number[], bindingSite: number[], bonus: number, desiredPairs: string | null = null,
         malus: number = 0, temp: number = 37
     ): number[] {
-        let cut: number = seq.indexOf(EPars.RNABASE_CUT);
+        const cut: number = seq.indexOf(EPars.RNABASE_CUT);
         if (cut < 0) {
             throw new Error('Missing cutting point');
         }
 
-        let key: CacheKey = {
+        const key: CacheKey = {
             primitive: 'cofoldAptamer',
             seq,
             malus,
@@ -367,7 +367,7 @@ export default class Vienna2 extends Folder {
         // IMPORTANT: assumption is that the binding site is in segment A
         // FIXME: what about desired_pairs? (forced structure)
 
-        let siteGroups: number[][] = [];
+        const siteGroups: number[][] = [];
         let lastIndex = -1;
         let currentGroup: number[] = [];
 
@@ -386,16 +386,16 @@ export default class Vienna2 extends Folder {
             siteGroups.push(currentGroup);
         }
 
-        let seqA: number[] = seq.slice(0, cut);
-        let pairsA: number[] = this.foldSequenceWithBindingSite(seqA, null, bindingSite, bonus, 2.5, temp);
-        let nodesA: number[] = [];
+        const seqA: number[] = seq.slice(0, cut);
+        const pairsA: number[] = this.foldSequenceWithBindingSite(seqA, null, bindingSite, bonus, 2.5, temp);
+        const nodesA: number[] = [];
         let feA: number = this.scoreStructures(seqA, pairsA, false, temp, nodesA);
         if (FoldUtil.bindingSiteFormed(pairsA, siteGroups)) feA += bonus;
 
-        let seqB: number[] = seq.slice(cut + 1);
-        let pairsB: number[] = this.foldSequence(seqB, null, null, false, temp);
-        let nodesB: number[] = [];
-        let feB: number = this.scoreStructures(seqB, pairsB, false, temp, nodesB);
+        const seqB: number[] = seq.slice(cut + 1);
+        const pairsB: number[] = this.foldSequence(seqB, null, null, false, temp);
+        const nodesB: number[] = [];
+        const feB: number = this.scoreStructures(seqB, pairsB, false, temp, nodesB);
 
         coPairs = this.cofoldSequenceWithBindingSiteImpl(
             seq,
@@ -407,12 +407,12 @@ export default class Vienna2 extends Folder {
             bonus
         );
 
-        let coNodes: number[] = [];
+        const coNodes: number[] = [];
         let coFE: number = this.scoreStructures(seq, coPairs, false, temp, coNodes);
         if (FoldUtil.bindingSiteFormed(coPairs, siteGroups)) coFE += bonus;
 
         if (coFE + malus >= feA + feB) {
-            let struc = `${EPars.pairsToParenthesis(pairsA)}&${EPars.pairsToParenthesis(pairsB)}`;
+            const struc = `${EPars.pairsToParenthesis(pairsA)}&${EPars.pairsToParenthesis(pairsB)}`;
             coPairs = EPars.parenthesisToPairs(struc);
         }
 
@@ -446,11 +446,11 @@ export default class Vienna2 extends Folder {
         let x: number;
         let type: number;
         let count: number;
-        let mlintern: number[] = new Array(EPars.NBPAIRS + 1);
+        const mlintern: number[] = new Array(EPars.NBPAIRS + 1);
         let mlclosing: number;
         let mlbase: number;
 
-        let dangles: number = EPars.DANGLES;
+        const dangles: number = EPars.DANGLES;
 
         if (isExtloop) {
             for (x = 0; x <= EPars.NBPAIRS; x++) {
@@ -470,7 +470,7 @@ export default class Vienna2 extends Folder {
         }
 
         for (count = 0; count < 2; count++) { /* do it twice */
-            let ld5 = 0;
+            const ld5 = 0;
             /* 5' dangle energy on prev pair (type) */
             if (i === 0) {
                 j = pairs[0] + 1;
@@ -492,8 +492,7 @@ export default class Vienna2 extends Folder {
 
             do { /* walk around the multi-loop */
                 let tt: number;
-                let newCx: number;
-                newCx = EPars.INF;
+                const newCx: number = EPars.INF;
 
                 /* hope over unpaired positions */
                 while (p <= pairs[0] && pairs[p] === 0) p++;
@@ -789,15 +788,15 @@ export default class Vienna2 extends Folder {
         seq: number[], targetpairs: number[], bindingSite: number[], bonus: number
     ): number[] {
         let bestPairs: number[];
-        let nativePairs: number[] = this.foldSequence(seq, null, null);
+        const nativePairs: number[] = this.foldSequence(seq, null, null);
 
-        let nativeTree: RNALayout = new RNALayout();
+        const nativeTree: RNALayout = new RNALayout();
         nativeTree.setupTree(nativePairs);
         nativeTree.scoreTree(seq, this);
         let nativeScore: number = nativeTree.totalScore;
 
-        let targetSatisfied: number[] = EPars.getSatisfiedPairs(targetpairs, seq);
-        let targetTree: RNALayout = new RNALayout();
+        const targetSatisfied: number[] = EPars.getSatisfiedPairs(targetpairs, seq);
+        const targetTree: RNALayout = new RNALayout();
         targetTree.setupTree(targetSatisfied);
         targetTree.scoreTree(seq, this);
         let targetScore: number = targetTree.totalScore;
@@ -806,7 +805,7 @@ export default class Vienna2 extends Folder {
         let targetBound = true;
 
         for (let bb = 0; bb < bindingSite.length; bb++) {
-            let bi: number = bindingSite[bb];
+            const bi: number = bindingSite[bb];
             if (targetpairs[bi] !== nativePairs[bi]) {
                 nativeBound = false;
             }

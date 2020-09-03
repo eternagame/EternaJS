@@ -20,7 +20,7 @@ export default class RankBoard extends ContainerObject implements Updatable {
 
         this._rows = [];
         for (let ii = 0; ii < numRows + 1; ii++) {
-            let row: RankRowLayout = new RankRowLayout(ii + startingRank, rankData[ii], offsetBtwRankCoin, 15, 100);
+            const row: RankRowLayout = new RankRowLayout(ii + startingRank, rankData[ii], offsetBtwRankCoin, 15, 100);
             row.container.height = RankBoard.ROW_HEIGHT;
             row.display.position = new Point(0, RankBoard.ROW_HEIGHT * ii);
             this.addObject(row, this.container);
@@ -34,13 +34,13 @@ export default class RankBoard extends ContainerObject implements Updatable {
     }
 
     public update(dt: number): void {
-        let parentOffset = this.container.y - this._startingPosition;
+        const parentOffset = this.container.y - this._startingPosition;
         for (let ii = 0; ii < this._rows.length; ii++) {
             // posOffset / RankBoard.ROW_HEIGHT = How many entries we have moved by
             // How many times a row has looped
-            let loopNum = Math.floor((parentOffset / RankBoard.ROW_HEIGHT - ii + 2) / 3);
+            const loopNum = Math.floor((parentOffset / RankBoard.ROW_HEIGHT - ii + 2) / 3);
             // This row's player index in the data array
-            let rankIdx = loopNum * this._rows.length + ii;
+            const rankIdx = loopNum * this._rows.length + ii;
             if (rankIdx < this._rankData.length) {
                 // Catch if entry doesn't exist (ie. rank 1)
                 const row = this._rows[ii];

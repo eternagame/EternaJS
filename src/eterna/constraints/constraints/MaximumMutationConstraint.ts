@@ -36,11 +36,11 @@ export default class MaximumMutationConstraint extends Constraint<MaxMutationCon
     }
 
     public getConstraintBoxConfig(status: MaxMutationConstraintStatus): ConstraintBoxConfig {
-        let statText = ConstraintBox.createTextStyle()
+        const statText = ConstraintBox.createTextStyle()
             .append(status.mutations.toString(), {fill: (status.satisfied ? 0x00aa00 : 0xaa0000)})
             .append(`/${this.maxMutations}`);
 
-        let tooltip = ConstraintBox.createTextStyle().append(`You can only mutate up to ${this.maxMutations} bases`);
+        const tooltip = ConstraintBox.createTextStyle().append(`You can only mutate up to ${this.maxMutations} bases`);
 
         return {
             satisfied: status.satisfied,
@@ -61,21 +61,21 @@ export default class MaximumMutationConstraint extends Constraint<MaxMutationCon
     }
 
     private static get _icon(): Texture {
-        let icon = new Container();
+        const icon = new Container();
 
-        let base1 = new Sprite(BitmapManager.getBitmap(Bitmaps.BaseAMid));
+        const base1 = new Sprite(BitmapManager.getBitmap(Bitmaps.BaseAMid));
         base1.position = new Point(28, 8);
         icon.addChild(base1);
 
-        let base2 = new Sprite(BitmapManager.getBitmap(Bitmaps.BaseGMid));
+        const base2 = new Sprite(BitmapManager.getBitmap(Bitmaps.BaseGMid));
         base2.position = new Point(36, 8);
         icon.addChild(base2);
 
-        let base3 = new Sprite(BitmapManager.getBitmap(Bitmaps.BaseUMid));
+        const base3 = new Sprite(BitmapManager.getBitmap(Bitmaps.BaseUMid));
         base3.position = new Point(44, 8);
         icon.addChild(base3);
 
-        let base4 = new Sprite(BitmapManager.getBitmap(Bitmaps.BaseCMid));
+        const base4 = new Sprite(BitmapManager.getBitmap(Bitmaps.BaseCMid));
         base4.position = new Point(52, 8);
         icon.addChild(base4);
 

@@ -136,11 +136,11 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
         this._tfPlayer.position = new Point(10, 2);
         this._rankScrollHeading.container.addChild(this._tfPlayer);
 
-        let tfRank: Text = Fonts.std('RANK', 14).bold().color(0xffffff).build();
+        const tfRank: Text = Fonts.std('RANK', 14).bold().color(0xffffff).build();
         tfRank.position = new Point(10 + 130, 2);
         this._rankScrollHeading.container.addChild(tfRank);
 
-        let tfCoin: Text = Fonts.std('POINTS', 14).bold().color(0xffffff).build();
+        const tfCoin: Text = Fonts.std('POINTS', 14).bold().color(0xffffff).build();
         tfCoin.position = new Point(10 + 130 + 85, 2);
         this._rankScrollHeading.container.addChild(tfCoin);
 
@@ -203,7 +203,7 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
     }
 
     public onMouseWheelEvent(e: WheelEvent): boolean {
-        let pxdelta: number = InputUtil.scrollAmount(e, 13, this.display.height);
+        const pxdelta: number = InputUtil.scrollAmount(e, 13, this.display.height);
         this.scrollTo(this._infoContainer.y - pxdelta);
 
         return true;

@@ -91,7 +91,7 @@ export default class EPars {
     }
 
     public static getBarcodeHairpin(seq: string): string | null {
-        let hairpinMatch: RegExpExecArray | null = (/[AGUC]{7}UUCG([AGUC]{7})AAAAGAAACAACAACAACAAC$/i).exec(seq);
+        const hairpinMatch: RegExpExecArray | null = (/[AGUC]{7}UUCG([AGUC]{7})AAAAGAAACAACAACAACAAC$/i).exec(seq);
         if (hairpinMatch == null) {
             return null;
         }
@@ -188,7 +188,7 @@ export default class EPars {
             return seq;
         }
 
-        let offset: number = expData[0];
+        const offset: number = expData[0];
         let maxmax: number = expData[1];
         let minmin: number = expData[1];
         for (let ii = 1; ii < expData.length; ii++) {
@@ -201,7 +201,7 @@ export default class EPars {
             }
         }
 
-        let avg: number = (maxmax + minmin) / 2.0;
+        const avg: number = (maxmax + minmin) / 2.0;
 
         let res = '';
         for (let ii = 0; ii < seq.length; ii++) {
@@ -258,7 +258,7 @@ export default class EPars {
     public static getRestrictedConsecutive(
         sequence: number[], letter: number, maxAllowed: number, locks: boolean[] | null = null
     ): number[] {
-        let restricted: number[] = [];
+        const restricted: number[] = [];
 
         let ii = 0;
         let startIndex = -1;
@@ -305,11 +305,11 @@ export default class EPars {
     }
 
     public static getSequenceRepetition(seqStr: string, n: number): number {
-        let dict: Set<string> = new Set<string>();
+        const dict: Set<string> = new Set<string>();
         let numRepeats = 0;
 
         for (let ii = 0; ii < seqStr.length - n; ii++) {
-            let substr: string = seqStr.substr(ii, n);
+            const substr: string = seqStr.substr(ii, n);
             if (dict.has(substr)) {
                 numRepeats++;
             } else {
@@ -377,7 +377,7 @@ export default class EPars {
     }
 
     public static stringToSequence(seq: string, allowCut: boolean = true, allowUnknown: boolean = true): number[] {
-        let seqArray: number[] = [];
+        const seqArray: number[] = [];
         for (const char of seq) {
             seqArray.push(this.stringToNucleotide(char, allowCut, allowUnknown));
         }
@@ -419,9 +419,9 @@ export default class EPars {
     public static indexedStringToSequence(strInput: string, customNumbering?: (number | null)[]):
     number[] | undefined {
         // make robust to blanks:
-        let strChunks: string[] = strInput.trim().split(/\s+/); // spaces
+        const strChunks: string[] = strInput.trim().split(/\s+/); // spaces
         if (strChunks.length === 0) return []; // blank sequence, no op.
-        let seqStr = strChunks[0]; // sequence like ACUGU
+        const seqStr = strChunks[0]; // sequence like ACUGU
 
         // process rest of string like '11-14 16' to get indices for pasting
         let indices: (number | null)[] | undefined = [];
@@ -448,14 +448,14 @@ export default class EPars {
             indices = indices.filter((n) => n !== null).map((n) => customNumbering.indexOf(n) + 1);
         }
 
-        let seqArray: number[] = Array(
+        const seqArray: number[] = Array(
             Math.max(...(indices.filter((n) => n !== null)) as number[])
         ).fill(EPars.RNABASE_UNDEFINED);
 
         for (let n = 0; n < indices.length; n++) {
-            let ii = indices[n];
+            const ii = indices[n];
             if (ii !== null && ii >= 0) {
-                let char = seqStr.charAt(n);
+                const char = seqStr.charAt(n);
                 seqArray[ii - 1] = this.stringToNucleotide(char, true /* allowCut */, true /* allowUnknown */);
             }
         }
@@ -464,7 +464,7 @@ export default class EPars {
 
     public static sequenceToString(sequence: number[], allowCut: boolean = true, allowUnknown: boolean = true): string {
         let str = '';
-        for (let value of sequence) {
+        for (const value of sequence) {
             str += EPars.nucleotideToString(value, allowCut, allowUnknown);
         }
         return str;
@@ -504,8 +504,8 @@ export default class EPars {
             return null;
         }
 
-        let thereStart: number = Math.min(pairStartThere, pairEndThere);
-        let thereEnd: number = Math.max(pairStartThere, pairEndThere);
+        const thereStart: number = Math.min(pairStartThere, pairEndThere);
+        const thereEnd: number = Math.max(pairStartThere, pairEndThere);
 
         if (pairStartHere === thereStart) {
             return null;
@@ -517,7 +517,7 @@ export default class EPars {
             }
         }
 
-        let bases: number[] = [];
+        const bases: number[] = [];
 
         for (let ii = pairStartHere; ii <= pairEndHere; ii++) {
             bases.push(ii);
@@ -533,7 +533,7 @@ export default class EPars {
     public static validateParenthesis(
         parenthesis: string, letteronly: boolean = true, lengthLimit: number = -1
     ): string | null {
-        let pairStack: number[] = [];
+        const pairStack: number[] = [];
 
         if (lengthLimit >= 0 && parenthesis.length > lengthLimit) {
             return `Structure length limit is ${lengthLimit}`;
@@ -576,8 +576,8 @@ export default class EPars {
     }
 
     public static parenthesisToPairs(parenthesis: string, pseudoknots: boolean = false): number[] {
-        let pairs: number[] = [];
-        let pairStack: number[] = [];
+        const pairs: number[] = [];
+        const pairStack: number[] = [];
 
         for (let jj = 0; jj < parenthesis.length; jj++) {
             pairs.push(-1);
@@ -646,7 +646,7 @@ export default class EPars {
     }
 
     public static getSatisfiedPairs(pairs: number[], seq: number[]): number[] {
-        let retPairs: number[] = new Array(pairs.length);
+        const retPairs: number[] = new Array(pairs.length);
 
         for (let ii = 0; ii < pairs.length; ii++) {
             if (pairs[ii] < 0) {
@@ -670,7 +670,7 @@ export default class EPars {
         if (pseudoknots) {
             // given partner-style array, writes dot-parens notation string. handles pseudoknots!
             // example of partner-style array: '((.))' -> [4,3,-1,1,0]
-            let bpList: number[] = new Array(pairs.length);
+            const bpList: number[] = new Array(pairs.length);
 
             for (let ii = 0; ii < pairs.length; ii++) {
                 bpList[ii] = -1;
@@ -683,14 +683,14 @@ export default class EPars {
                 }
             }
 
-            let bps: number[][] = [];
+            const bps: number[][] = [];
             for (let ii = 0; ii < bpList.length; ++ii) {
                 if (bpList[ii] !== -1 && bpList[ii] > ii) {
                     bps.push([ii, bpList[ii]]);
                 }
             }
 
-            let stems: number[][][] = [];
+            const stems: number[][][] = [];
             // #bps: list of bp lists
             // # i.e. '((.))' is [[0,4],[1,3]]
             // # Returns list of (list of bp lists), now sorted into stems
@@ -719,19 +719,19 @@ export default class EPars {
             }
             // if debug: print('stems', stems)
 
-            let dbn: string[] = new Array(pairs.length).fill('.');
-            let delimsL = [/\(/i, /\{/i, /\[/i, /</i];// ,'a','b','c']
-            let delimsR = [/\)/i, /\}/i, /\]/i, />/i];// ,'a','b','c']
-            let charsL = ['(', '{', '[', '<'];
-            let charsR = [')', '}', ']', '>'];
+            const dbn: string[] = new Array(pairs.length).fill('.');
+            const delimsL = [/\(/i, /\{/i, /\[/i, /</i];// ,'a','b','c']
+            const delimsR = [/\)/i, /\}/i, /\]/i, />/i];// ,'a','b','c']
+            const charsL = ['(', '{', '[', '<'];
+            const charsR = [')', '}', ']', '>'];
             if (stems.length === 0) {
                 return dbn.join('');
             } else {
                 for (let ii = 0; ii < stems.length; ++ii) {
-                    let stem = stems[ii];
+                    const stem = stems[ii];
 
                     let pkCtr = 0;
-                    let substring = dbn.join('').substring(stem[0][0] + 1, stem[0][1]);
+                    const substring = dbn.join('').substring(stem[0][0] + 1, stem[0][1]);
                     // check to see how many delimiter types exist in between where stem is going to go
                     // ah -- it's actually how many delimiters are only half-present, I think.
                     while ((substring.search(delimsL[pkCtr]) !== -1 && substring.search(delimsR[pkCtr]) === -1)
@@ -739,8 +739,8 @@ export default class EPars {
                         pkCtr += 1;
                     }
                     for (let jj = 0; jj < stem.length; ++jj) {
-                        let i = stem[jj][0];
-                        let j = stem[jj][1];
+                        const i = stem[jj][0];
+                        const j = stem[jj][1];
 
                         dbn[i] = charsL[pkCtr];
                         dbn[j] = charsR[pkCtr];
@@ -750,7 +750,7 @@ export default class EPars {
             }
         }
 
-        let biPairs: number[] = new Array(pairs.length);
+        const biPairs: number[] = new Array(pairs.length);
 
         for (let ii = 0; ii < pairs.length; ii++) {
             biPairs[ii] = -1;
@@ -782,7 +782,7 @@ export default class EPars {
 
     public static filterForPseudoknots(pairs: number[]): number[] {
         // Round-trip to remove all pseudoknots.
-        let filtered: string = EPars.pairsToParenthesis(pairs, null, true)
+        const filtered: string = EPars.pairsToParenthesis(pairs, null, true)
             .replace(/\{/g, '.')
             .replace(/\}/g, '.')
             .replace(/\[/g, '.')
@@ -794,7 +794,7 @@ export default class EPars {
 
     public static onlyPseudoknots(pairs: number[]): number[] {
         // Round-trip to remove all non-pseudoknots.
-        let filtered: string = EPars.pairsToParenthesis(pairs, null, true)
+        const filtered: string = EPars.pairsToParenthesis(pairs, null, true)
             .replace(/\(/g, '.')
             .replace(/\)/g, '.');
 
@@ -802,8 +802,8 @@ export default class EPars {
     }
 
     public static parenthesisToForcedArray(parenthesis: string): number[] {
-        let forced: number[] = [];
-        let pairStack: number[] = [];
+        const forced: number[] = [];
+        const pairStack: number[] = [];
 
         for (let jj = 0; jj < parenthesis.length; jj++) {
             forced.push(EPars.FORCE_IGNORE);
@@ -1010,7 +1010,7 @@ export default class EPars {
     }
 
     public static getDangle5Score(t1: number, s: number): number {
-        let ret: number = EPars.DANGLE5_37[t1 * 5 + s];
+        const ret: number = EPars.DANGLE5_37[t1 * 5 + s];
         if (ret > 0) {
             return 0;
         } else {
@@ -1019,7 +1019,7 @@ export default class EPars {
     }
 
     public static getDangle3Score(t1: number, s: number): number {
-        let ret: number = EPars.DANGLE3_37[t1 * 5 + s];
+        const ret: number = EPars.DANGLE3_37[t1 * 5 + s];
         if (ret > 0) {
             return 0;
         } else {

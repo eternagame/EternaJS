@@ -33,7 +33,7 @@ abstract class MaximumBaseConstraint extends Constraint<MaxBaseConstraintStatus>
         status: MaxBaseConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
-        let tooltip = ConstraintBox.createTextStyle();
+        const tooltip = ConstraintBox.createTextStyle();
 
         if (forMissionScreen) {
             tooltip.pushStyle('altTextMain');

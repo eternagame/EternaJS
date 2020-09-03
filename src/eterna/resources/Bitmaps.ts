@@ -341,7 +341,7 @@ export default class Bitmaps {
     public static get all(): string[] {
         if (Bitmaps.ALL_URLS == null) {
             Bitmaps.ALL_URLS = [];
-            for (let value of Object.values(Bitmaps)) {
+            for (const value of Object.values(Bitmaps)) {
                 if (typeof (value) === 'string') {
                     Bitmaps.ALL_URLS.push(value);
                 }

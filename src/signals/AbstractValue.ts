@@ -31,7 +31,7 @@ export default abstract class AbstractValue<T> extends Reactor<T, T, undefined> 
         // will expect to be notified of that change; however if onEmit throws a runtime exception,
         // we need to take care of disconnecting the listener because the returned connection
         // instance will never reach the caller
-        let cons: Cons<T, T, undefined> = this.addConnection(listener);
+        const cons: Cons<T, T, undefined> = this.addConnection(listener);
         try {
             Assert.assertIsDefined(cons.listener);
             cons.listener(this.value);
@@ -61,7 +61,7 @@ export default abstract class AbstractValue<T> extends Reactor<T, T, undefined> 
      */
     protected updateAndNotify(value: T, force: boolean = true): T {
         this.checkMutate();
-        let ovalue: T = this.updateLocal(value);
+        const ovalue: T = this.updateLocal(value);
         if (force || !this.valuesAreEqual(value, ovalue)) {
             this.emitChange(value, ovalue);
         }

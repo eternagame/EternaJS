@@ -20,7 +20,7 @@ export default class EternaMenu extends GamePanel implements Enableable {
     }
 
     public addItem(label: string, url: string): void {
-        let menuButton: GameButton = new GameButton();
+        const menuButton: GameButton = new GameButton();
 
         if (url != null && url.length > 0) {
             menuButton.label(`<A HREF="${url}"><U>${label}</U></A>`, 12);
@@ -36,7 +36,7 @@ export default class EternaMenu extends GamePanel implements Enableable {
     }
 
     public addMenuButton(menuButton: GameButton): number {
-        let existingIdx = this._menus.findIndex((menu): boolean => menu.menuButton === menuButton);
+        const existingIdx = this._menus.findIndex((menu): boolean => menu.menuButton === menuButton);
         if (existingIdx >= 0) {
             return existingIdx;
         }
@@ -47,7 +47,7 @@ export default class EternaMenu extends GamePanel implements Enableable {
     }
 
     public addSubMenuButton(menuIdx: number, itemButton: GameButton, atTop: boolean = false): void {
-        let menu: Menu = this._menus[menuIdx];
+        const menu: Menu = this._menus[menuIdx];
         if (menu.itemButtons.indexOf(itemButton) >= 0) {
             return;
         }
@@ -71,7 +71,7 @@ export default class EternaMenu extends GamePanel implements Enableable {
     }
 
     public addSubMenuButtonAt(menuIdx: number, itemButton: GameButton, pos: number): void {
-        let menu: Menu = this._menus[menuIdx];
+        const menu: Menu = this._menus[menuIdx];
         if (menu.itemButtons.indexOf(itemButton) >= 0) {
             return;
         }
@@ -90,8 +90,8 @@ export default class EternaMenu extends GamePanel implements Enableable {
     }
 
     public removeButton(itemButton: GameButton): void {
-        for (let menu of this._menus) {
-            let idx = menu.itemButtons.indexOf(itemButton);
+        for (const menu of this._menus) {
+            const idx = menu.itemButtons.indexOf(itemButton);
             if (idx >= 0) {
                 itemButton.destroySelf();
                 menu.itemButtons.splice(idx, 1);
@@ -119,7 +119,7 @@ export default class EternaMenu extends GamePanel implements Enableable {
 
     public set enabled(value: boolean) {
         this._enabled = value;
-        for (let menu of this._menus) {
+        for (const menu of this._menus) {
             menu.menuButton.enabled = value;
             if (!value) {
                 menu.panel.display.visible = false;
@@ -128,7 +128,7 @@ export default class EternaMenu extends GamePanel implements Enableable {
     }
 
     private createMenu(menuButton: GameButton): Menu {
-        let menu: Menu = new Menu();
+        const menu: Menu = new Menu();
         menu.menuButton = menuButton;
         this.addObject(menuButton, this.container);
         this._menus.push(menu);
@@ -140,7 +140,7 @@ export default class EternaMenu extends GamePanel implements Enableable {
         menu.panel.display.visible = false;
         menuButton.addObject(menu.panel, menuButton.container);
 
-        let showDialog = () => {
+        const showDialog = () => {
             menu.panel.display.visible = true;
             // Move the current menu button to the top layer so that other buttons don't overlap,
             // since in order to not have a gap between the flyout and the button, that's likely
@@ -191,7 +191,7 @@ export default class EternaMenu extends GamePanel implements Enableable {
             return;
         }
 
-        for (let menu of this._menus) {
+        for (const menu of this._menus) {
             if (menu.itemButtons.length === 0) {
                 menu.panel.setSize(0, 0);
                 continue;
@@ -200,7 +200,7 @@ export default class EternaMenu extends GamePanel implements Enableable {
             let heightWalker = 7;
             let widthWalker = 0;
 
-            for (let button of menu.itemButtons) {
+            for (const button of menu.itemButtons) {
                 if (button == null) {
                     continue;
                 }
@@ -213,13 +213,13 @@ export default class EternaMenu extends GamePanel implements Enableable {
             menu.panel.setSize(widthWalker, heightWalker);
         }
 
-        let space: number = (this._style === EternaMenuStyle.PULLUP ? 1 : 10);
+        const space: number = (this._style === EternaMenuStyle.PULLUP ? 1 : 10);
         let widthOffset: number = space;
         this._menuHeight = 0;
 
-        for (let menu of this._menus) {
-            let buttonWidth: number = menu.menuButton.container.width;
-            let buttonHeight: number = menu.menuButton.container.height;
+        for (const menu of this._menus) {
+            const buttonWidth: number = menu.menuButton.container.width;
+            const buttonHeight: number = menu.menuButton.container.height;
 
             menu.menuButton.display.position = new Point(widthOffset, 0);
             if (this._style === EternaMenuStyle.DEFAULT) {
@@ -231,8 +231,8 @@ export default class EternaMenu extends GamePanel implements Enableable {
             this._menuHeight = Math.max(this._menuHeight, buttonHeight);
         }
 
-        let lastIdx = this._menus.length - 1;
-        let lastButtonWidth = this._menus[lastIdx].menuButton.container.width;
+        const lastIdx = this._menus.length - 1;
+        const lastButtonWidth = this._menus[lastIdx].menuButton.container.width;
         this._menuWidth = (widthOffset + space);
         this._rightMargin = Math.max(lastButtonWidth, this._menus[lastIdx].panel.width) - lastButtonWidth;
 

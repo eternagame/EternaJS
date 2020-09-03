@@ -87,9 +87,9 @@ export default class BaseTextures {
     }
 
     private static createLetterTextures(baseType: number, zoomScalar: number): Texture[] {
-        let bigLetter: Text = Fonts.std(BaseTextures.type2Letter(baseType)).fontSize(18).bold().color(0x0)
+        const bigLetter: Text = Fonts.std(BaseTextures.type2Letter(baseType)).fontSize(18).bold().color(0x0)
             .build();
-        let textures: Texture[] = [TextureUtil.renderToTexture(bigLetter)];
+        const textures: Texture[] = [TextureUtil.renderToTexture(bigLetter)];
         EternaTextureUtil.createScaled(textures, zoomScalar, Base.NUM_ZOOM_LEVELS);
         return textures;
     }
@@ -115,7 +115,7 @@ export default class BaseTextures {
             throw new Error(`Invalid textures array length ${textures.length}`);
         }
 
-        let origLength: number = textures.length / Base.NUM_ZOOM_LEVELS;
+        const origLength: number = textures.length / Base.NUM_ZOOM_LEVELS;
         return textures[(origLength * sizeNum + ii)];
     }
 }

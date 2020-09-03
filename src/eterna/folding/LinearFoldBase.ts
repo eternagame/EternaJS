@@ -21,7 +21,7 @@ export default abstract class LinearFoldBase extends Folder {
     }
 
     public getDotPlot(seq: number[], pairs: number[], temp: number = 37): number[] {
-        let key: CacheKey = {
+        const key: CacheKey = {
             primitive: 'dotplot', seq, pairs, temp
         };
         let retArray: number[] = this.getCache(key) as number[];
@@ -30,7 +30,7 @@ export default abstract class LinearFoldBase extends Folder {
             return retArray.slice();
         }
 
-        let seqStr: string = EPars.sequenceToString(seq);
+        const seqStr: string = EPars.sequenceToString(seq);
 
         let result: DotPlotResult | null = null;
         try {
@@ -64,7 +64,7 @@ export default abstract class LinearFoldBase extends Folder {
         seq: number[], pairs: number[], pseudoknotted: boolean = false,
         temp: number = 37, outNodes: number[] | null = null
     ): number {
-        let key: CacheKey = {
+        const key: CacheKey = {
             primitive: 'score', seq, pairs, temp
         };
         let cache: FullEvalCache = this.getCache(key) as FullEvalCache;
@@ -98,21 +98,21 @@ export default abstract class LinearFoldBase extends Folder {
             }
         } while (0);
 
-        let cut: number = seq.indexOf(EPars.RNABASE_CUT);
+        const cut: number = seq.indexOf(EPars.RNABASE_CUT);
         if (cut >= 0 && cache.nodes[0] !== -2) {
             // we just scored a duplex that wasn't one, so we have to redo it properly
-            let seqA: number[] = seq.slice(0, cut);
-            let pairsA: number[] = pairs.slice(0, cut);
-            let nodesA: number[] = [];
-            let retA: number = this.scoreStructures(seqA, pairsA, pseudoknotted, temp, nodesA);
+            const seqA: number[] = seq.slice(0, cut);
+            const pairsA: number[] = pairs.slice(0, cut);
+            const nodesA: number[] = [];
+            const retA: number = this.scoreStructures(seqA, pairsA, pseudoknotted, temp, nodesA);
 
-            let seqB: number[] = seq.slice(cut + 1);
-            let pairsB: number[] = pairs.slice(cut + 1);
+            const seqB: number[] = seq.slice(cut + 1);
+            const pairsB: number[] = pairs.slice(cut + 1);
             for (let ii = 0; ii < pairsB.length; ii++) {
                 if (pairsB[ii] >= 0) pairsB[ii] -= (cut + 1);
             }
-            let nodesB: number[] = [];
-            let retB: number = this.scoreStructures(seqB, pairsB, pseudoknotted, temp, nodesB);
+            const nodesB: number[] = [];
+            const retB: number = this.scoreStructures(seqB, pairsB, pseudoknotted, temp, nodesB);
 
             if (nodesA[0] !== -1 || nodesB[0] !== -1) {
                 throw new Error('Something went terribly wrong in scoreStructures()');
@@ -133,7 +133,7 @@ export default abstract class LinearFoldBase extends Folder {
 
         this.putCache(key, cache);
 
-        let energy: number = cache.energy * 100;
+        const energy: number = cache.energy * 100;
         if (outNodes != null) {
             FoldUtil.arrayCopy(outNodes, cache.nodes);
         }
@@ -145,7 +145,7 @@ export default abstract class LinearFoldBase extends Folder {
         seq: number[], secondBestPairs: number[] | null, desiredPairs: string | null = null,
         pseudoknotted: boolean = false, temp: number = 37
     ): number[] {
-        let key: CacheKey = {
+        const key: CacheKey = {
             primitive: 'fold',
             seq,
             secondBestPairs,

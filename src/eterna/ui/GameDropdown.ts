@@ -77,11 +77,11 @@ export default class GameDropdown extends ContainerObject {
     }
 
     private _setupPopup() {
-        let bg = new Graphics();
+        const bg = new Graphics();
         if (this.mode?.container) this.mode.container.addChild(bg);
 
         // Eat mouse events (except pointerMove, the other buttons need it for pointerOut to fire)
-        let bgTarget = new DisplayObjectPointerTarget(bg);
+        const bgTarget = new DisplayObjectPointerTarget(bg);
 
         bgTarget.pointerDown.connect((e) => {
             if (InputUtil.IsLeftMouse(e)) {
@@ -92,7 +92,7 @@ export default class GameDropdown extends ContainerObject {
         bgTarget.pointerUp.connect((e) => e.stopPropagation());
         // bgTarget.pointerMove.connect((e) => e.stopPropagation());
 
-        let updateBG = () => {
+        const updateBG = () => {
             bg.clear()
                 .beginFill(0x0, 0)
                 .drawRect(-this._PADDING, 0, Flashbang.stageWidth || 0, Flashbang.stageHeight || 0)
@@ -103,7 +103,7 @@ export default class GameDropdown extends ContainerObject {
 
         if (!this.mode || !this.mode.container) return;
         this.addObject(this._popup, this.mode.container);
-        let globalBoxBounds = DisplayUtil.getBoundsRelative(this._box, this.mode.container);
+        const globalBoxBounds = DisplayUtil.getBoundsRelative(this._box, this.mode.container);
         DisplayUtil.positionRelativeToBounds(
             this._popup.container, HAlign.LEFT, VAlign.TOP,
             globalBoxBounds, HAlign.LEFT, VAlign.BOTTOM
@@ -111,8 +111,8 @@ export default class GameDropdown extends ContainerObject {
 
         let yWalker = 0;
         let maxWidth = this._box.width;
-        for (let option of this.options) {
-            let text = new TextBalloon(option, 0x152843);
+        for (const option of this.options) {
+            const text = new TextBalloon(option, 0x152843);
             text.setText(option, this._fontSize, 0xC0DCE7);
             this._popup.addObject(text, this._popup.container);
             text.display.y = yWalker;
@@ -143,7 +143,7 @@ export default class GameDropdown extends ContainerObject {
         this._popupVisible = true;
         this._popup.display.visible = true;
         if (!this.mode || !this.mode.container) return;
-        let globalBoxBounds = DisplayUtil.getBoundsRelative(this._box, this.mode.container);
+        const globalBoxBounds = DisplayUtil.getBoundsRelative(this._box, this.mode.container);
         DisplayUtil.positionRelativeToBounds(
             this._popup.container, HAlign.LEFT, VAlign.TOP,
             globalBoxBounds, HAlign.LEFT, VAlign.BOTTOM
@@ -165,7 +165,7 @@ export default class GameDropdown extends ContainerObject {
         // There should be an extra _PADDING between the text and the arrow
         const ARROW_WIDTH = this._ARROW_SIDE_SIZE + this._PADDING;
 
-        let width = this.disabled
+        const width = this.disabled
             ? TEXT_WIDTH - this._PADDING
             : this._width || (TEXT_WIDTH + ARROW_WIDTH + this._PADDING * 2);
 

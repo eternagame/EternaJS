@@ -40,7 +40,7 @@ export default class ScoreDisplayNode {
         let g = 0;
         let b = 0;
 
-        let score: number = this._score / 100.0;
+        const score: number = this._score / 100.0;
         let prog = 0;
 
         if (score > 0) {

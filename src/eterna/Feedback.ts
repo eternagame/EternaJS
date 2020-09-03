@@ -31,7 +31,7 @@ export default class Feedback {
                 continue;
             }
 
-            let char: string = secstruct.charAt(ii);
+            const char: string = secstruct.charAt(ii);
 
             if (char === '.') {
                 if (shapedata[ii - startIndex] > (threshold / 4 + (min / 4) * 3)) {
@@ -62,7 +62,7 @@ export default class Feedback {
             this._shapeStarts[index] = dat[0] - 1;
             dat.splice(0, 1);
             this._shapeData[index] = dat.slice();
-            let shapeData: number[] = this._shapeData[index];
+            const shapeData: number[] = this._shapeData[index];
 
             let smax: number = shapeData[0];
             let smin: number = shapeData[0];
@@ -110,7 +110,7 @@ export default class Feedback {
         if (this._shapeData[index] != null) {
             return this._shapeData[index];
         } else {
-            let shape: number[] = [];
+            const shape: number[] = [];
             shape.push(0.5);
             return shape;
         }

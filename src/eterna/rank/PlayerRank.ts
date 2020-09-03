@@ -10,7 +10,7 @@ export default class PlayerRank {
     }
 
     public clone(): PlayerRank {
-        let theClone = new PlayerRank(this.name, this.score);
+        const theClone = new PlayerRank(this.name, this.score);
         theClone.rank = this.rank;
         return theClone;
     }

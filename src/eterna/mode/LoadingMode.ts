@@ -47,7 +47,7 @@ export default class LoadingMode extends AppMode {
         this._extraBlurbTextField.x = -this._extraBlurbTextField.width * 0.5;
         this._extraBlurbTextField.y = -this._textField.height - this._extraBlurbTextField.height;
 
-        let container = new ContainerObject();
+        const container = new ContainerObject();
         container.container.addChild(this._textField);
         container.container.addChild(this._extraBlurbTextField);
         this.addObject(container, this.container);
@@ -60,7 +60,7 @@ export default class LoadingMode extends AppMode {
             ))
         ));
 
-        let updateLoc = () => {
+        const updateLoc = () => {
             Assert.assertIsDefined(Flashbang.stageWidth);
             Assert.assertIsDefined(Flashbang.stageHeight);
             container.display.x = Flashbang.stageWidth * 0.5;
@@ -71,7 +71,7 @@ export default class LoadingMode extends AppMode {
     }
 
     private getExtraBlurb(): string {
-        let ExtraBlurbs = [
+        const ExtraBlurbs = [
             'A good scientist will tell you\nthat being wrong can be just\n as interesting as being right.',
             'Developed by players for players',
             'Afraid of viral pandemics?\nStay calm and play Eterna.',

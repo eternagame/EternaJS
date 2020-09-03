@@ -255,18 +255,18 @@ export default class BaseAssets {
     }
 
     public static drawCircularBarcode(radius: number, lineThickness: number, lineAlpha: number): Texture {
-        let scratch = new Graphics();
+        const scratch = new Graphics();
 
         scratch.clear();
-        let centerX: number = radius;
-        let centerY: number = radius;
-        let twoPI: number = 2 * Math.PI;
+        const centerX: number = radius;
+        const centerY: number = radius;
+        const twoPI: number = 2 * Math.PI;
         let xx: number = centerX + Math.cos(0) * radius;
         let yy: number = centerY + Math.sin(0) * radius;
 
         scratch.moveTo(xx, yy);
 
-        let steps = 360;
+        const steps = 360;
 
         for (let i = 1; i <= steps; i++) {
             let color = 0x0;
@@ -284,12 +284,12 @@ export default class BaseAssets {
     }
 
     public static createSatelliteBitmaps(colorTransform: PIXI.filters.ColorMatrixFilter): Texture[] {
-        let baseImage: Texture = BitmapManager.getBitmap(Bitmaps.Satellite);
-        let sprite = new Sprite(baseImage);
+        const baseImage: Texture = BitmapManager.getBitmap(Bitmaps.Satellite);
+        const sprite = new Sprite(baseImage);
         sprite.filters = [colorTransform];
-        let texture: Texture = TextureUtil.renderToTexture(sprite);
+        const texture: Texture = TextureUtil.renderToTexture(sprite);
 
-        let textures: Texture[] = EternaTextureUtil.createRotated(texture, 5);
+        const textures: Texture[] = EternaTextureUtil.createRotated(texture, 5);
         EternaTextureUtil.createScaled(textures, 0.75, Base.NUM_ZOOM_LEVELS);
 
         return textures;
@@ -300,7 +300,7 @@ export default class BaseAssets {
             throw new Error(`Invalid textures array length ${textures.length}`);
         }
 
-        let origLength: number = textures.length / Base.NUM_ZOOM_LEVELS;
+        const origLength: number = textures.length / Base.NUM_ZOOM_LEVELS;
         return textures[(origLength * sizeNum + ii)];
     }
 

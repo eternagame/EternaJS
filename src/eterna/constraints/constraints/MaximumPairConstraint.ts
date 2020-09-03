@@ -54,7 +54,7 @@ abstract class MaximumPairConstraint extends Constraint<MaxPairConstraintStatus>
         status: MaxPairConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
-        let tooltip = ConstraintBox.createTextStyle();
+        const tooltip = ConstraintBox.createTextStyle();
 
         if (forMissionScreen) {
             tooltip.pushStyle('altTextMain');

@@ -146,7 +146,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     public setContent(config: ConstraintBoxConfig, toolTipContainer?: Container): void {
         this._check.visible = config.satisfied && !this._forMissionScreen;
 
-        let reqClarifyMultiLine = this._reqClarifyText.text.includes('\n')
+        const reqClarifyMultiLine = this._reqClarifyText.text.includes('\n')
         || (config.clarificationText as string)?.includes('\n');
 
         this._req.visible = config.fullTexture !== undefined;
@@ -180,7 +180,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             // We know config.clarificationText is not undefined because of the
             // above condition, so we can type guard
             this.setPossiblyStyledText(config.clarificationText, this._reqClarifyText);
-            let yOffset = reqClarifyMultiLine ? 27 : 32;
+            const yOffset = reqClarifyMultiLine ? 27 : 32;
             DisplayUtil.positionRelative(
                 this._reqClarifyText, HAlign.CENTER, VAlign.TOP,
                 this._outline, HAlign.CENTER, VAlign.TOP, 2, yOffset
@@ -192,7 +192,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         if (config.statText !== undefined && !this._forMissionScreen) {
             // We know config.statText isn't undefined due to the above condition
             this.setPossiblyStyledText(config.statText, this._reqStatText);
-            let yOffset = reqClarifyMultiLine ? 55 : 50;
+            const yOffset = reqClarifyMultiLine ? 55 : 50;
             DisplayUtil.positionRelative(
                 this._reqStatText, HAlign.CENTER, VAlign.TOP,
                 this._outline, HAlign.CENTER, VAlign.TOP, 0, yOffset
@@ -206,7 +206,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             tooltipText = tooltipText.clone().append('\n').append('Unsatisfied', {fill: 0xff0000});
         }
 
-        let balloon = new TextBalloon('', 0x0, 0.8);
+        const balloon = new TextBalloon('', 0x0, 0.8);
         balloon.styledText = tooltipText;
         this.setMouseOverObject(balloon, toolTipContainer);
 
@@ -313,7 +313,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
     /** Creates a StyledTextBuilder with the ConstraintBox's default settings */
     public static createTextStyle(): StyledTextBuilder {
-        let style: StyledTextBuilder = new StyledTextBuilder({
+        const style: StyledTextBuilder = new StyledTextBuilder({
             fontFamily: Fonts.STDFONT,
             fontSize: 14,
             fill: 0xffffff,
@@ -422,7 +422,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             return;
         }
 
-        let lineWidth = 6;
+        const lineWidth = 6;
 
         this._fglow.clear();
         this._fglow.lineStyle(lineWidth, satisfied ? 0x00FF00 : 0xFF0000, 1.0);

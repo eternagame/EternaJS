@@ -159,7 +159,7 @@ export default class Toolbar extends ContainerObject {
         this.stateToggle = new ToggleBar(this._states);
 
         // UPPER TOOLBAR (structure editing tools)
-        let upperToolbarLayout = new HLayoutContainer(SPACE_NARROW);
+        const upperToolbarLayout = new HLayoutContainer(SPACE_NARROW);
         if (this._type === ToolbarType.PUZZLEMAKER || this._type === ToolbarType.PUZZLEMAKER_EMBEDDED) {
             this._content.addChild(upperToolbarLayout);
         }
@@ -229,7 +229,7 @@ export default class Toolbar extends ContainerObject {
         }
 
         // LOWER TOOLBAR (palette, zoom, settings, etc)
-        let lowerToolbarLayout = new HLayoutContainer();
+        const lowerToolbarLayout = new HLayoutContainer();
         this._content.addChild(lowerToolbarLayout);
 
         if (
@@ -285,7 +285,7 @@ export default class Toolbar extends ContainerObject {
             this.actionMenu.addSubMenuButton(0, this.specButton);
         }
 
-        let resetTooltip = this._type === ToolbarType.PUZZLEMAKER || this._type === ToolbarType.PUZZLEMAKER_EMBEDDED
+        const resetTooltip = this._type === ToolbarType.PUZZLEMAKER || this._type === ToolbarType.PUZZLEMAKER_EMBEDDED
             ? 'Reset all bases to A' : 'Reset and try this puzzle again.';
 
         this.resetButton = new GameButton()
@@ -339,11 +339,11 @@ export default class Toolbar extends ContainerObject {
         this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters).disabled(undefined);
 
         if (this._boostersData != null && this._boostersData.actions != null) {
-            let boosterMenuIdx = this.actionMenu.addMenuButton(this.boostersMenu);
+            const boosterMenuIdx = this.actionMenu.addMenuButton(this.boostersMenu);
             for (let ii = 0; ii < this._boostersData.actions.length; ii++) {
-                let data = this._boostersData.actions[ii];
+                const data = this._boostersData.actions[ii];
                 Booster.create(this.mode as PoseEditMode, data).then((booster) => {
-                    let button: GameButton = booster.createButton(14);
+                    const button: GameButton = booster.createButton(14);
                     button.clicked.connect(() => booster.onRun());
                     this.actionMenu.addSubMenuButtonAt(boosterMenuIdx, button, ii);
                     this.dynActionTools.push(button);
@@ -480,14 +480,14 @@ export default class Toolbar extends ContainerObject {
             }));
 
             if (this._boostersData != null && this._boostersData.paint_tools != null) {
-                let mode: PoseEditMode = this.mode as PoseEditMode;
-                let boosterPaintToolsLayout = new HLayoutContainer();
+                const mode: PoseEditMode = this.mode as PoseEditMode;
+                const boosterPaintToolsLayout = new HLayoutContainer();
                 lowerToolbarLayout.addHSpacer(SPACE_NARROW);
                 lowerToolbarLayout.addChild(boosterPaintToolsLayout);
-                for (let data of this._boostersData.paint_tools) {
+                for (const data of this._boostersData.paint_tools) {
                     Booster.create(mode, data).then((booster) => {
                         booster.onLoad();
-                        let button: GameButton = booster.createButton();
+                        const button: GameButton = booster.createButton();
                         button.clicked.connect(() => {
                             mode.setPosesColor(booster.toolColor);
                             this._deselectAllPaintTools();
@@ -703,7 +703,7 @@ export default class Toolbar extends ContainerObject {
         this.magicGlueButton.toggled.value = false;
         this.baseMarkerButton.toggled.value = false;
 
-        for (let button of this.dynPaintTools) {
+        for (const button of this.dynPaintTools) {
             button.toggled.value = false;
         }
     }

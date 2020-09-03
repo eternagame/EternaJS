@@ -39,7 +39,7 @@ export default class RScriptEnv extends ContainerObject {
             return;
         }
 
-        let value = this.getVar(id);
+        const value = this.getVar(id);
         if (value instanceof TextBalloon) {
             value.display.visible = isVisible;
         } else {
@@ -60,7 +60,7 @@ export default class RScriptEnv extends ContainerObject {
         if (ref.indexOf('$$STRING_REF:') !== 0) {
             return ref;
         } else {
-            let value = this.getVar(ref);
+            const value = this.getVar(ref);
             if (typeof (value) === 'string') {
                 return value;
             } else {
@@ -97,14 +97,14 @@ export default class RScriptEnv extends ContainerObject {
         let uiElement: RScriptUIElement | null;
 
         // Used UI Element ID.
-        let splitId: string[] = key.split('-');
+        const splitId: string[] = key.split('-');
 
         // Detect a number if it is included in the ui element key.
         // So for the objectives: objective-### (format).
         // The input number will always come after the dash. The dash should be
         // included in the key that is passed.
-        let idString: string = splitId[0] + (splitId.length > 1 ? '-' : '');
-        let elementID: RScriptUIElementID = (idString.toUpperCase()) as RScriptUIElementID;
+        const idString: string = splitId[0] + (splitId.length > 1 ? '-' : '');
+        const elementID: RScriptUIElementID = (idString.toUpperCase()) as RScriptUIElementID;
 
         if (splitId.length > 2) {
             throw new Error('Invalid UI Element ID format');
@@ -189,7 +189,7 @@ export default class RScriptEnv extends ContainerObject {
                 this.ui.toolbar.palette.changeNoPairMode();
             }
 
-            let obj: RScriptUIElement | null = this.getUIElementFromID(elementID)[0];
+            const obj: RScriptUIElement | null = this.getUIElementFromID(elementID)[0];
             if (obj) {
                 if (obj instanceof DisplayObject) {
                     obj.visible = visible;
@@ -287,7 +287,7 @@ export default class RScriptEnv extends ContainerObject {
     }
 
     public getVar(key: string): RScriptVarType | undefined {
-        let scriptVar = this._vars.get(key);
+        const scriptVar = this._vars.get(key);
         if (scriptVar != null && scriptVar instanceof GameObject) {
             return scriptVar.isLiveObject ? scriptVar : undefined;
         } else {
@@ -296,7 +296,7 @@ export default class RScriptEnv extends ContainerObject {
     }
 
     public deleteVar(key: string): void {
-        let scriptVar = this._vars.get(key);
+        const scriptVar = this._vars.get(key);
         if (scriptVar == null) {
             return;
         }

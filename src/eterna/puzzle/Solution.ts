@@ -139,7 +139,7 @@ export default class Solution {
                 return Promise.resolve(this._foldData);
             } else {
                 return Eterna.client.getSolutionInfo(this._nid).then((json) => {
-                    let data = json['data'];
+                    const data = json['data'];
                     if (data['solution'] != null) {
                         this.foldData = JSON.parse(data['solution']['fold-data']);
                     }

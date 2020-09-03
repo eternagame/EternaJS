@@ -39,7 +39,7 @@ export default class NovaPaintHint extends ContainerObject implements Updatable 
         }
 
         Assert.assertIsDefined(this.mode);
-        let currentTime = this.mode.time;
+        const currentTime = this.mode.time;
 
         let startPos: Point = this._startPoint;
         if (this._anchorSet) {
@@ -55,8 +55,8 @@ export default class NovaPaintHint extends ContainerObject implements Updatable 
             this._startAnimTime = currentTime;
         }
 
-        let stageTime: number = (currentTime - this._startAnimTime);
-        let dir = new Vector2(this._endPoint.x - this._startPoint.x, this._endPoint.y - this._startPoint.y);
+        const stageTime: number = (currentTime - this._startAnimTime);
+        const dir = new Vector2(this._endPoint.x - this._startPoint.x, this._endPoint.y - this._startPoint.y);
         if (stageTime < 1.5 && this._curStage === 0) {
             if (stageTime >= 1.4) {
                 ++this._curStage;
@@ -64,9 +64,9 @@ export default class NovaPaintHint extends ContainerObject implements Updatable 
                 this._img.texture = this._clickImg;
             }
         } else if (this._curStage === 1) {
-            let deltaTime: number = currentTime - this._lastTimeTick;
+            const deltaTime: number = currentTime - this._lastTimeTick;
             // Move from our current position to the end
-            let stepDistance = deltaTime * NovaPaintHint.PAINT_HINT_SPEED;
+            const stepDistance = deltaTime * NovaPaintHint.PAINT_HINT_SPEED;
             this._totalDistance += stepDistance;
             if (
                 this._totalDistance
@@ -81,7 +81,7 @@ export default class NovaPaintHint extends ContainerObject implements Updatable 
                 return;
             }
 
-            let endTime: number = (currentTime - this._endAnimTime) / 1000.0;
+            const endTime: number = (currentTime - this._endAnimTime) / 1000.0;
             if (endTime > 1.0) {
                 this._startAnimTime = -1;
                 this._curStage = 0;

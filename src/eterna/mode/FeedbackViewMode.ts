@@ -51,7 +51,7 @@ export default class FeedbackViewMode extends GameMode {
     protected setup(): void {
         super.setup();
 
-        let background = new Background();
+        const background = new Background();
         this.addObject(background, this.bgLayer);
 
         // this._puzzleTitle = Fonts.std(this._puzzle.getName(false), 14).color(0xffffff).bold().build();
@@ -81,7 +81,7 @@ export default class FeedbackViewMode extends GameMode {
         Assert.assertIsDefined(this.container);
         this.container.addChild(homeArrow);
 
-        let puzzleTitle = new HTMLTextObject(this._puzzle.getName(true))
+        const puzzleTitle = new HTMLTextObject(this._puzzle.getName(true))
             .font(Fonts.STDFONT)
             .fontSize(14)
             .bold()
@@ -99,14 +99,14 @@ export default class FeedbackViewMode extends GameMode {
 
         Assert.assertIsDefined(this._toolbar.zoomOutButton);
         this._toolbar.zoomOutButton.clicked.connect(() => {
-            for (let poseField of this._poseFields) {
+            for (const poseField of this._poseFields) {
                 poseField.zoomOut();
             }
         });
 
         Assert.assertIsDefined(this._toolbar.zoomInButton);
         this._toolbar.zoomInButton.clicked.connect(() => {
-            for (let poseField of this._poseFields) {
+            for (const poseField of this._poseFields) {
                 poseField.zoomIn();
             }
         });
@@ -131,8 +131,8 @@ export default class FeedbackViewMode extends GameMode {
 
         this._sequence = EPars.stringToSequence(this._solution.sequence);
 
-        let secstructs: string[] = this._puzzle.getSecstructs();
-        let poseFields: PoseField[] = [];
+        const secstructs: string[] = this._puzzle.getSecstructs();
+        const poseFields: PoseField[] = [];
         for (let ii = 0; ii < secstructs.length; ii++) {
             let secs: string = secstructs[ii];
             if (secs != null && secs.length !== this._sequence.length) {
@@ -142,7 +142,7 @@ export default class FeedbackViewMode extends GameMode {
                     this._sequence.length
                 );
                 if (secs.length < this._sequence.length) {
-                    let diff: number = this._sequence.length - secs.length;
+                    const diff: number = this._sequence.length - secs.length;
                     for (let jj = 0; jj < diff; ++jj) {
                         secs += '.';
                     }
@@ -152,15 +152,15 @@ export default class FeedbackViewMode extends GameMode {
                 secstructs[ii] = secs;
             }
             this._pairs.push(EPars.parenthesisToPairs(secstructs[ii]));
-            let datablock: UndoBlock = new UndoBlock(this._sequence, Vienna.NAME);
+            const datablock: UndoBlock = new UndoBlock(this._sequence, Vienna.NAME);
             datablock.setPairs(this._pairs[ii]);
             datablock.setBasics();
             this._undoBlocks.push(datablock);
 
-            let poseField: PoseField = new PoseField(false);
+            const poseField: PoseField = new PoseField(false);
             this.addObject(poseField, this.poseLayer);
 
-            let vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
+            const vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
             if (!vienna) {
                 throw new Error("Critical error: can't create a Vienna folder instance by name");
             }
@@ -203,7 +203,7 @@ export default class FeedbackViewMode extends GameMode {
         this.addObject(this._info, this.uiLayer);
 
         this.setPoseFields(poseFields);
-        let seeShape: boolean = (this._feedback !== null && this._feedback.getShapeData() != null);
+        const seeShape: boolean = (this._feedback !== null && this._feedback.getShapeData() != null);
         if (seeShape) {
             this.setupShape();
             this.showExperimentalColors();
@@ -286,8 +286,8 @@ export default class FeedbackViewMode extends GameMode {
         let handled: boolean = this.keyboardInput.handleKeyboardEvent(e);
 
         if (!handled && e.type === KeyboardEventType.KEY_DOWN) {
-            let key = e.code;
-            let ctrl = e.ctrlKey;
+            const key = e.code;
+            const ctrl = e.ctrlKey;
 
             if (!ctrl && key === KeyCode.KeyN) {
                 Eterna.settings.showNumbers.value = !Eterna.settings.showNumbers.value;
@@ -320,12 +320,12 @@ export default class FeedbackViewMode extends GameMode {
             }
 
             let minZoom = -1;
-            for (let pose of this._poses) {
+            for (const pose of this._poses) {
                 minZoom = Math.max(minZoom, pose.computeDefaultZoomLevel());
             }
 
             for (let ii = 0; ii < this._poses.length; ii++) {
-                let field: PoseField = this._poseFields[ii];
+                const field: PoseField = this._poseFields[ii];
                 if (this._targetConditions[ii] !== undefined) {
                     const tc = this._targetConditions[ii] as TargetConditions;
                     if (tc['type'] === 'aptamer') {
@@ -344,7 +344,7 @@ export default class FeedbackViewMode extends GameMode {
                 }
             }
 
-            for (let pose of this._poses) {
+            for (const pose of this._poses) {
                 pose.setZoomLevel(minZoom, true, true);
             }
 
@@ -357,14 +357,14 @@ export default class FeedbackViewMode extends GameMode {
             }
 
             this.changeTarget(this._currentIndex);
-            let pose = this._poses[0];
+            const pose = this._poses[0];
             pose.setZoomLevel(pose.computeDefaultZoomLevel(), true, true);
         }
     }
 
     protected createScreenshot(): ArrayBuffer {
-        let visibleState: Map<DisplayObject, boolean> = new Map();
-        let pushVisibleState = (disp: DisplayObject) => {
+        const visibleState: Map<DisplayObject, boolean> = new Map();
+        const pushVisibleState = (disp: DisplayObject) => {
             visibleState.set(disp, disp.visible);
             disp.visible = false;
         };
@@ -374,20 +374,20 @@ export default class FeedbackViewMode extends GameMode {
         pushVisibleState(this.dialogLayer);
         pushVisibleState(this.achievementsLayer);
 
-        let energyVisible: boolean[] = [];
-        for (let pose of this._poses) {
+        const energyVisible: boolean[] = [];
+        for (const pose of this._poses) {
             energyVisible.push(pose.showTotalEnergy);
             pose.showTotalEnergy = false;
         }
 
         Assert.assertIsDefined(this.container);
-        let tempBG = DisplayUtil.fillStageRect(0x061A34);
+        const tempBG = DisplayUtil.fillStageRect(0x061A34);
         this.container.addChildAt(tempBG, 0);
 
-        let info = `Designer: ${this._solution.playerName}\n`
+        const info = `Designer: ${this._solution.playerName}\n`
             + `Design ID: ${this._solution.nodeID}\n`
             + `Design Title: ${this._solution.title}\n`;
-        let infoText = Fonts.std(info).color(0xffffff).build();
+        const infoText = Fonts.std(info).color(0xffffff).build();
         this.container.addChild(infoText);
 
         DisplayUtil.positionRelativeToStage(
@@ -395,12 +395,12 @@ export default class FeedbackViewMode extends GameMode {
             HAlign.RIGHT, VAlign.TOP, -3, 3
         );
 
-        let pngData = DisplayUtil.renderToPNG(this.container);
+        const pngData = DisplayUtil.renderToPNG(this.container);
 
         tempBG.destroy({children: true});
         infoText.destroy({children: true});
 
-        for (let [disp, wasVisible] of visibleState.entries()) {
+        for (const [disp, wasVisible] of visibleState.entries()) {
             disp.visible = wasVisible;
         }
 
@@ -518,7 +518,7 @@ export default class FeedbackViewMode extends GameMode {
         Assert.assertIsDefined(this._feedback);
 
         let titleText = '';
-        let brentData: BrentTheoData | undefined = this._feedback.brentTheoData;
+        const brentData: BrentTheoData | undefined = this._feedback.brentTheoData;
         let score: number;
 
         if (brentData != null) {
@@ -576,12 +576,12 @@ export default class FeedbackViewMode extends GameMode {
     private foldEstimate(index: number): void {
         // This won't work if _feedback is null
         Assert.assertIsDefined(this._feedback);
-        let shapeThreshold: number = this._feedback.getShapeThreshold(index);
-        let shapeData: number[] = this._feedback.getShapeData(index);
-        let startIndex: number = this._feedback.getShapeStartIndex(index);
-        let {puzzleLocks} = this._puzzle;
-        let shapeMax: number = this._feedback.getShapeMax(index);
-        let shapeMin: number = this._feedback.getShapeMin(index);
+        const shapeThreshold: number = this._feedback.getShapeThreshold(index);
+        const shapeData: number[] = this._feedback.getShapeData(index);
+        const startIndex: number = this._feedback.getShapeStartIndex(index);
+        const {puzzleLocks} = this._puzzle;
+        const shapeMax: number = this._feedback.getShapeMax(index);
+        const shapeMin: number = this._feedback.getShapeMin(index);
 
         let desiredPairs = '';
 
@@ -641,7 +641,7 @@ export default class FeedbackViewMode extends GameMode {
             }
         }
 
-        let folder: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
+        const folder: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
         if (!folder) {
             throw new Error("Critical error: can't create a Vienna folder instance by name");
         }
@@ -659,7 +659,7 @@ export default class FeedbackViewMode extends GameMode {
     }
 
     private showSpec(): void {
-        let puzzleState = this._undoBlocks[this._currentIndex];
+        const puzzleState = this._undoBlocks[this._currentIndex];
         puzzleState.updateMeltingPointAndDotPlot();
         this.showDialog(new SpecBoxDialog(puzzleState, false));
     }

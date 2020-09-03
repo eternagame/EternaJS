@@ -32,7 +32,7 @@ export default class MinimumStackLengthConstraint extends Constraint<MinStackCon
     }
 
     public getConstraintBoxConfig(status: MinStackConstraintStatus): ConstraintBoxConfig {
-        let statText = ConstraintBox.createTextStyle()
+        const statText = ConstraintBox.createTextStyle()
             .append(status.currentLength.toString(), {fill: status.satisfied ? 0x00aa00 : 0xaa0000})
             .append(`/${this.minLength}`);
 
@@ -52,30 +52,30 @@ export default class MinimumStackLengthConstraint extends Constraint<MinStackCon
     }
 
     private static get _icon(): Texture {
-        let icon = new Container();
-        let tex = BitmapManager.getBitmap(Bitmaps.BaseWMidPattern);
+        const icon = new Container();
+        const tex = BitmapManager.getBitmap(Bitmaps.BaseWMidPattern);
 
-        let base1 = new Sprite(tex);
+        const base1 = new Sprite(tex);
         base1.position = new Point(8, 1);
         icon.addChild(base1);
 
-        let base2 = new Sprite(tex);
+        const base2 = new Sprite(tex);
         base2.position = new Point(33, 1);
         icon.addChild(base2);
 
-        let base3 = new Sprite(tex);
+        const base3 = new Sprite(tex);
         base3.position = new Point(8, 15);
         icon.addChild(base3);
 
-        let base4 = new Sprite(tex);
+        const base4 = new Sprite(tex);
         base4.position = new Point(33, 15);
         icon.addChild(base4);
 
-        let bond1 = new Band(3, 3, 1);
+        const bond1 = new Band(3, 3, 1);
         bond1.display.position = new Point(22, 3);
         icon.addChild(bond1.container);
 
-        let bond2 = new Band(3, 3, 1);
+        const bond2 = new Band(3, 3, 1);
         bond2.display.position = new Point(22, 17);
         icon.addChild(bond2.container);
 

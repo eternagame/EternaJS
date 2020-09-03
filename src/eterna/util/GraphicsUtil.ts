@@ -22,16 +22,16 @@ export default class GraphicsUtil {
         }
 
         // draw an equilateral triangle
-        let triWidth = triSize;
-        let triHeight = (triWidth / 2) * Math.sqrt(2);
+        const triWidth = triSize;
+        const triHeight = (triWidth / 2) * Math.sqrt(2);
 
-        let dir = new Vector2(1, 0);
-        let perpDir = new Vector2(-1 * dir.y, dir.x);
-        let endPoint = new Vector2(0, 0);
+        const dir = new Vector2(1, 0);
+        const perpDir = new Vector2(-1 * dir.y, dir.x);
+        const endPoint = new Vector2(0, 0);
 
-        let basePoint = endPoint.offset(dir.x * triHeight, dir.y * triHeight);
-        let n1 = basePoint.offset(perpDir.x * triWidth * 0.5, perpDir.y * triWidth * 0.5);
-        let n2 = basePoint.offset(perpDir.x * triWidth * -0.5, perpDir.y * triWidth * -0.5);
+        const basePoint = endPoint.offset(dir.x * triHeight, dir.y * triHeight);
+        const n1 = basePoint.offset(perpDir.x * triWidth * 0.5, perpDir.y * triWidth * 0.5);
+        const n2 = basePoint.offset(perpDir.x * triWidth * -0.5, perpDir.y * triWidth * -0.5);
 
         graphics.clear();
         graphics.lineStyle(1, outlineColor);
@@ -40,7 +40,7 @@ export default class GraphicsUtil {
 
         // draw rectangle
         const rectHeight = triSize - 20;
-        let rStart = basePoint.offset(-perpDir.x * rectHeight * 0.5, -perpDir.y * rectHeight * 0.5);
+        const rStart = basePoint.offset(-perpDir.x * rectHeight * 0.5, -perpDir.y * rectHeight * 0.5);
         graphics.drawRect(rStart.x, rStart.y, baseLength, rectHeight);
         graphics.endFill();
 
@@ -57,7 +57,7 @@ export default class GraphicsUtil {
      * @param scale scale factor for a triangle; default unity
      */
     public static drawLeftTriangle(scale: number = 1, color = 0xFFFFFF): Graphics {
-        let g = new Graphics()
+        const g = new Graphics()
             .beginFill(color, 0.8)
             .moveTo(0, 5)
             .lineTo(-7, 0)
@@ -72,7 +72,7 @@ export default class GraphicsUtil {
      * @param scale scale factor for a triangle; default unity
      */
     public static drawRightTriangle(scale: number = 1, color = 0xFFFFFF): Graphics {
-        let g = new Graphics()
+        const g = new Graphics()
             .beginFill(color, 0.8)
             .moveTo(0, 5)
             .lineTo(7, 0)

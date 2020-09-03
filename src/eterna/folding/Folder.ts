@@ -20,7 +20,7 @@ export default abstract class Folder {
     public abstract get isFunctional (): boolean;
 
     public getCache(key: CacheKey): CacheItem {
-        let keyStr = JSON.stringify(key);
+        const keyStr = JSON.stringify(key);
         return this._cache.get(keyStr);
     }
 
@@ -143,7 +143,7 @@ export default abstract class Folder {
     }
 
     protected putCache(key: CacheKey, data: CacheItem): void {
-        let keyStr = JSON.stringify(key);
+        const keyStr = JSON.stringify(key);
         this._cache.set(keyStr, data);
     }
 

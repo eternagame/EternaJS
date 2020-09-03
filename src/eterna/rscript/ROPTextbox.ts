@@ -41,7 +41,7 @@ export default class ROPTextbox extends RScriptOp {
     }
 
     private showTextbox(): void {
-        let textBox = new FancyTextBalloon(0x122944, 1.0, true, 0xC0DCE7);
+        const textBox = new FancyTextBalloon(0x122944, 1.0, true, 0xC0DCE7);
         if (this._initialShow) {
             // if (this._forceTopmost && false) {
             // parent = Application.instance.get_front_object_container();
@@ -53,7 +53,7 @@ export default class ROPTextbox extends RScriptOp {
 
         this._env.setVar(this._id, textBox);
 
-        let textStyle: TextStyleExtended = {
+        const textStyle: TextStyleExtended = {
             fontFamily: Fonts.STDFONT,
             fontSize: 13,
             fill: 0xC0DCE7
@@ -81,7 +81,7 @@ export default class ROPTextbox extends RScriptOp {
             textBox.showButton(false);
         }
 
-        let updateLocation = () => {
+        const updateLocation = () => {
             if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
                 Assert.assertIsDefined(Flashbang.stageWidth);
                 Assert.assertIsDefined(Flashbang.stageHeight);
@@ -91,8 +91,8 @@ export default class ROPTextbox extends RScriptOp {
                 );
             } else if (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
                 // Get position of the textbox based on position of the nucleotide.
-                let p: Point = this._env.pose.getBaseLoc(this._targetIndex);
-                let offset = new Point(ROPTextbox.DEFAULT_X_OFFSET, -(textBox.container.height * 0.5) - 10);
+                const p: Point = this._env.pose.getBaseLoc(this._targetIndex);
+                const offset = new Point(ROPTextbox.DEFAULT_X_OFFSET, -(textBox.container.height * 0.5) - 10);
                 if (this._hasXOffset) {
                     offset.x = this._xOffset;
                 }
@@ -116,7 +116,7 @@ export default class ROPTextbox extends RScriptOp {
     private showArrow(): void {
         let parent: FancyTextBalloon | null = null;
         if (this._hasParent) {
-            let parentVal = this._env.getVar(this._parentID);
+            const parentVal = this._env.getVar(this._parentID);
             if (parentVal instanceof FancyTextBalloon) {
                 parent = parentVal;
             } else if (parentVal === undefined) {
@@ -128,10 +128,10 @@ export default class ROPTextbox extends RScriptOp {
         }
 
         // Draw Arrow.
-        let newArrow = new RScriptArrow(this._myWidth + 20, 60, this._outlineColor, this._fillColor);
+        const newArrow = new RScriptArrow(this._myWidth + 20, 60, this._outlineColor, this._fillColor);
         this._env.addObject(newArrow, this._env.container);
 
-        let updateLocation = () => {
+        const updateLocation = () => {
             if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
                 Assert.assertIsDefined(Flashbang.stageHeight);
                 Assert.assertIsDefined(Flashbang.stageWidth);
@@ -157,7 +157,7 @@ export default class ROPTextbox extends RScriptOp {
                 // Modify degree and length if textbox is present.
                 // We want the arrow to point to the area FROM the textbox and it should extend all the way to the
                 // textbox as well.
-                let xdiff: number = (parent.display.x + parent.container.width / 2) - newArrow.display.x;
+                const xdiff: number = (parent.display.x + parent.container.width / 2) - newArrow.display.x;
                 let ydiff: number = parent.display.y - newArrow.display.y;
                 if (ydiff < 0.0) {
                     ydiff += parent.container.height;
@@ -238,7 +238,7 @@ export default class ROPTextbox extends RScriptOp {
             if (ROPTextbox.isTextbox(this._mode)) {
                 this.removeTextbox();
             } else {
-                let prevArr = this._env.getVar(this._id);
+                const prevArr = this._env.getVar(this._id);
                 if (prevArr instanceof GameObject) {
                     this.removeArrow(prevArr);
                 } else {
@@ -256,7 +256,7 @@ export default class ROPTextbox extends RScriptOp {
 
     /* override */
     protected parseArgument(arg: string, i: number): void {
-        let rx = /^([^+-]*)((?:\+|-).+)$/g;
+        const rx = /^([^+-]*)((?:\+|-).+)$/g;
         let regResult: RegExpExecArray | null = null;
         switch (i) {
             case 0: // Always text in "Show". Is the ID in Hide and regular Show or for arrows.
@@ -445,7 +445,7 @@ export default class ROPTextbox extends RScriptOp {
     }
 
     private static processID(id: string, type: string): string {
-        let usePostfix: string = ROPTextbox.isArrow(type) ? ROPTextbox.ARROW_ID_POSTFIX : ROPTextbox.ID_POSTFIX;
+        const usePostfix: string = ROPTextbox.isArrow(type) ? ROPTextbox.ARROW_ID_POSTFIX : ROPTextbox.ID_POSTFIX;
         return id ? id + usePostfix : usePostfix;
     }
 

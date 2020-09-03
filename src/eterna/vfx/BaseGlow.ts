@@ -34,11 +34,11 @@ export default class BaseGlow extends Sprite {
         let diff: number = currentTime - this._animStartTime;
         diff -= Math.floor(diff / BaseGlow.ANIMATION_SPAN) * BaseGlow.ANIMATION_SPAN;
 
-        let prog: number = diff / BaseGlow.ANIMATION_SPAN;
+        const prog: number = diff / BaseGlow.ANIMATION_SPAN;
         let progInd: number = Math.floor(prog * BaseGlow.NUM_ANIMATION_STEPS) % BaseGlow.NUM_ANIMATION_STEPS;
         if (this._backward) progInd = BaseGlow.NUM_ANIMATION_STEPS - 1 - progInd;
 
-        let bodyTex: Texture = this._isWrong
+        const bodyTex: Texture = this._isWrong
             ? BaseGlow._texturesWrong[zoomLevel][progInd]
             : BaseGlow._textures[zoomLevel][progInd];
 
@@ -53,13 +53,13 @@ export default class BaseGlow extends Sprite {
 
         BaseGlow._textures = [];
         BaseGlow._texturesWrong = [];
-        let originalData: Texture = BitmapManager.getBitmap(Bitmaps.ImgBindingBaseGlow);
+        const originalData: Texture = BitmapManager.getBitmap(Bitmaps.ImgBindingBaseGlow);
 
         for (let zz = 0; zz < 5; zz++) {
-            let bitmapsInZoom: Texture[] = [];
-            let wrongBitmapsInZoom: Texture[] = [];
-            let zoomFactor: number = 1.0 - zz * 0.1;
-            let baseData: Texture = EternaTextureUtil.scaleBy(originalData, zoomFactor);
+            const bitmapsInZoom: Texture[] = [];
+            const wrongBitmapsInZoom: Texture[] = [];
+            const zoomFactor: number = 1.0 - zz * 0.1;
+            const baseData: Texture = EternaTextureUtil.scaleBy(originalData, zoomFactor);
 
             for (let ii = 0; ii < BaseGlow.NUM_ANIMATION_STEPS; ii++) {
                 let newBaseData: Texture = EternaTextureUtil.colorTransformAlpha(
@@ -68,7 +68,7 @@ export default class BaseGlow extends Sprite {
                 newBaseData = EternaTextureUtil.scaleBy(newBaseData, 0.5 + (ii + 1) / BaseGlow.NUM_ANIMATION_STEPS);
                 bitmapsInZoom.push(newBaseData);
 
-                let wrongNewBaseData: Texture = EternaTextureUtil.colorTransform(newBaseData, 255, 0, 0, 0, 0, 0);
+                const wrongNewBaseData: Texture = EternaTextureUtil.colorTransform(newBaseData, 255, 0, 0, 0, 0, 0);
                 wrongBitmapsInZoom.push(wrongNewBaseData);
             }
             BaseGlow._textures.push(bitmapsInZoom);

@@ -23,7 +23,7 @@ export default class ActionBar extends ContainerObject {
     }
 
     public clearItems(layout: boolean = true): void {
-        for (let item of this._items) {
+        for (const item of this._items) {
             item.destroySelf();
         }
 
@@ -40,8 +40,8 @@ export default class ActionBar extends ContainerObject {
             return;
         }
 
-        let itemSpace = 35;
-        let barSpace = 10;
+        const itemSpace = 35;
+        const barSpace = 10;
 
         let centerWidth = 0;
         for (let ii = 0; ii < this._items.length; ii++) {
@@ -49,12 +49,12 @@ export default class ActionBar extends ContainerObject {
         }
 
         centerWidth += (barSpace) * this._items.length + barSpace;
-        let wholeWidth: number = centerWidth;
+        const wholeWidth: number = centerWidth;
         let wholeHeight: number = this._height;
 
         if (wholeHeight < 1) {
             let maxHeight = 0;
-            let verticalMargin = 10;
+            const verticalMargin = 10;
             for (let ii = 0; ii < this._items.length; ii++) {
                 maxHeight = Math.max(maxHeight, DisplayUtil.height(this._items[ii].display));
             }
@@ -64,8 +64,8 @@ export default class ActionBar extends ContainerObject {
         let itemSpaceWalker = 0;
 
         for (let ii = 0; ii < this._items.length; ii++) {
-            let curSpace = Math.max(DisplayUtil.width(this._items[ii].display), itemSpace);
-            let itemY = wholeHeight / 2.0 - DisplayUtil.height(this._items[ii].display) / 2.0 + this._heightMods[ii];
+            const curSpace = Math.max(DisplayUtil.width(this._items[ii].display), itemSpace);
+            const itemY = wholeHeight / 2.0 - DisplayUtil.height(this._items[ii].display) / 2.0 + this._heightMods[ii];
 
             this._items[ii].display.position = new Point(
                 barSpace + barSpace / 2.0 + itemSpaceWalker + (barSpace) * ii,
@@ -84,7 +84,7 @@ export default class ActionBar extends ContainerObject {
             return 0;
         }
 
-        let barSpace = 10;
+        const barSpace = 10;
 
         let centerWidth = 0;
         for (let ii = 0; ii < this._items.length; ii++) {

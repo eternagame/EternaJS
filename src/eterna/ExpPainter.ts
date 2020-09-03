@@ -5,8 +5,8 @@ export default class ExpPainter {
     public static readonly NUM_COLORS = 5;
 
     public static transformData(data: number[], dataMax: number, dataMin: number): number[] {
-        let dataRet: number[] = data.slice();
-        let absMax: number = 2 * dataMax - dataMin;
+        const dataRet: number[] = data.slice();
+        const absMax: number = 2 * dataMax - dataMin;
 
         for (let ii = 0; ii < dataRet.length; ii++) {
             dataRet[ii] = MathUtil.clamp(dataRet[ii], dataMin, absMax);
@@ -20,7 +20,7 @@ export default class ExpPainter {
             return ExpPainter.EXPCOLOR_NODATA;
         }
 
-        let diff: number = (1.0 / ExpPainter.NUM_COLORS) * lev;
+        const diff: number = (1.0 / ExpPainter.NUM_COLORS) * lev;
 
         if (diff > 1) {
             return ColorUtil.blend(ExpPainter.EXPCOLOR_OVEREXPOSED, ExpPainter.EXPCOLOR_EXPOSED, diff - 1);

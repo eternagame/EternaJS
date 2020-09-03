@@ -138,7 +138,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         }
 
         // update scroll
-        let pxdelta: number = InputUtil.scrollAmount(e, 13, this._scrollView.height);
+        const pxdelta: number = InputUtil.scrollAmount(e, 13, this._scrollView.height);
 
         this._scrollView.scrollTo(
             this._scrollView.scrollProgress + pxdelta / this._scrollView.content.height
@@ -352,11 +352,11 @@ export default class ViewSolutionOverlay extends ContainerObject {
             // technically this._props.solution.expFeedback is guaranteed
             // if this._props.solution.synthesized, but it doesn't hurt to
             // make that explicit.
-            let expdata = this._props.solution.expFeedback;
-            let shapeData = ExpPainter.transformData(
+            const expdata = this._props.solution.expFeedback;
+            const shapeData = ExpPainter.transformData(
                 expdata.getShapeData(), expdata.getShapeMax(), expdata.getShapeMin()
             );
-            let resultThumbnail = new Sprite();
+            const resultThumbnail = new Sprite();
             PoseThumbnail.drawToSprite(
                 resultThumbnail,
                 shapeData,
@@ -614,7 +614,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
                     + '<orange>This design was synthesized with score </orange>'
                     + `<bold>${solution.getProperty('Synthesis score')} / 100</bold>\n`;
             } else {
-                let failureIdx = Feedback.EXPCODES.indexOf(solution.expFeedback.isFailed());
+                const failureIdx = Feedback.EXPCODES.indexOf(solution.expFeedback.isFailed());
                 text += `${Feedback.EXPDISPLAYS_LONG[failureIdx]
                 } Score : <bold>${Feedback.EXPSCORES[failureIdx]} / 100</bold>\n`;
             }
@@ -659,7 +659,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
     }
 
     private static createLoadingText(text: string): SceneObject<Text> {
-        let loadingText = new SceneObject(Fonts.std(text, 14).bold().color(0xffffff).build());
+        const loadingText = new SceneObject(Fonts.std(text, 14).bold().color(0xffffff).build());
         loadingText.addObject(new RepeatingTask(() => new SerialTask(
             new AlphaTask(0, 0.7),
             new AlphaTask(1, 0.7)

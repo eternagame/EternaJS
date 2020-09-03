@@ -25,11 +25,11 @@ export default class RegistrationGroup implements Registration {
     /** Closes all Registrations that have been added to the manager. */
     public close(): void {
         if (this._regs != null) {
-            let regs = this._regs;
+            const regs = this._regs;
             this._regs = null;
 
             let err: MultiFailureError | null = null;
-            for (let r of regs) {
+            for (const r of regs) {
                 try {
                     r.close();
                 } catch (e) {

@@ -26,7 +26,7 @@ export default class PoseUtil {
                 mutatedPairs[ii]++;
             }
         }
-        let parenthesis: string = EPars.pairsToParenthesis(mutatedPairs);
+        const parenthesis: string = EPars.pairsToParenthesis(mutatedPairs);
         return [parenthesis, PuzzleEditOp.ADD_BASE, mutatedPairs];
     }
 
@@ -40,7 +40,7 @@ export default class PoseUtil {
         let pindex: number = pairs[index];
         if (pindex >= 0) {
             if (index > pindex) {
-                let tmp: number = index;
+                const tmp: number = index;
                 index = pindex;
                 pindex = tmp;
             }
@@ -84,7 +84,6 @@ export default class PoseUtil {
 
     public static deleteNopairWithIndex(index: number, pairs: number[]): [string, PuzzleEditOp, number[]?] {
         let mutatedPairs: number[];
-        let parenthesis: string;
         mutatedPairs = pairs.slice(0, index);
         mutatedPairs = mutatedPairs.concat(pairs.slice(index + 1, pairs.length));
         for (let ii = 0; ii < mutatedPairs.length; ii++) {
@@ -93,7 +92,7 @@ export default class PoseUtil {
             }
         }
 
-        parenthesis = EPars.pairsToParenthesis(mutatedPairs);
+        const parenthesis = EPars.pairsToParenthesis(mutatedPairs);
         return [parenthesis, PuzzleEditOp.DELETE_BASE, mutatedPairs];
     }
 
@@ -104,10 +103,9 @@ export default class PoseUtil {
         }
 
         let mutatedPairs: number[];
-        let parenthesis: string;
 
         if (index > pindex) {
-            let tmp: number = index;
+            const tmp: number = index;
             index = pindex;
             pindex = tmp;
         }
@@ -122,7 +120,7 @@ export default class PoseUtil {
             }
         }
 
-        parenthesis = EPars.pairsToParenthesis(mutatedPairs);
+        const parenthesis = EPars.pairsToParenthesis(mutatedPairs);
         return [parenthesis, PuzzleEditOp.DELETE_PAIR];
     }
 

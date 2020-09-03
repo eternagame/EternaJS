@@ -20,7 +20,7 @@ export default class BarcodeConstraint extends Constraint<BaseConstraintStatus> 
         status: BaseConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
-        let tooltip = ConstraintBox.createTextStyle();
+        const tooltip = ConstraintBox.createTextStyle();
 
         if (forMissionScreen) {
             tooltip.pushStyle('altTextMain');

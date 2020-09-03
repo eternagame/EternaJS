@@ -26,9 +26,9 @@ export default class AchievementManager extends GameObject {
 
     public awardAchievements(achievementData: Map<string, AchievementData>): Promise<void> {
         if (achievementData != null) {
-            for (let key of Object.keys(achievementData)) {
+            for (const key of Object.keys(achievementData)) {
                 if (Object.prototype.hasOwnProperty.call(achievementData, key)) {
-                    let data: AchievementData | undefined = achievementData.get(key);
+                    const data: AchievementData | undefined = achievementData.get(key);
                     this._pending.push(data);
                 }
             }
@@ -46,11 +46,11 @@ export default class AchievementManager extends GameObject {
 
         (this.mode as GameMode).pushUILock('ShowAchievement');
 
-        let nextData: AchievementData | undefined = this._pending.shift();
+        const nextData: AchievementData | undefined = this._pending.shift();
         if (nextData === undefined) {
             throw new Error('nextData was undefined!');
         }
-        let view = new AchievementBox(nextData.image, nextData.past);
+        const view = new AchievementBox(nextData.image, nextData.past);
         this._cur = this.addObject(view, (this.mode as GameMode).achievementsLayer);
 
         view.animate();
@@ -61,7 +61,7 @@ export default class AchievementManager extends GameObject {
             (this.mode as GameMode).popUILock('ShowAchievement');
         });
 
-        let updateLoc = () => {
+        const updateLoc = () => {
             DisplayUtil.positionRelativeToStage(
                 view.display,
                 HAlign.CENTER, VAlign.CENTER,

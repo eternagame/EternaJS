@@ -145,7 +145,7 @@ export default class PoseEditMode extends GameMode {
         this._background = new Background();
         this.addObject(this._background, this.bgLayer);
 
-        let toolbarType = this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL ? ToolbarType.LAB : ToolbarType.PUZZLE;
+        const toolbarType = this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL ? ToolbarType.LAB : ToolbarType.PUZZLE;
         this._toolbar = new Toolbar(toolbarType, {
             states: this._puzzle.getSecstructs().length,
             showGlue: this._puzzle.targetConditions
@@ -175,14 +175,14 @@ export default class PoseEditMode extends GameMode {
         this._toolbar.redoButton.clicked.connect(() => this.moveUndoStackForward());
         if (this._toolbar.zoomOutButton) {
             this._toolbar.zoomOutButton.clicked.connect(() => {
-                for (let poseField of this._poseFields) {
+                for (const poseField of this._poseFields) {
                     poseField.zoomOut();
                 }
             });
         }
         if (this._toolbar.zoomInButton) {
             this._toolbar.zoomInButton.clicked.connect(() => {
-                for (let poseField of this._poseFields) {
+                for (const poseField of this._poseFields) {
                     poseField.zoomIn();
                 }
             });
@@ -396,7 +396,7 @@ export default class PoseEditMode extends GameMode {
         this._constraintBar.layout();
 
         this._dockedSpecBox.setSize(Flashbang.stageWidth - this._solDialogOffset, Flashbang.stageHeight - 340);
-        let s: number = this._dockedSpecBox.plotSize;
+        const s: number = this._dockedSpecBox.plotSize;
         this._dockedSpecBox.setSize(s + 55, s * 2 + 51);
     }
 
@@ -409,10 +409,10 @@ export default class PoseEditMode extends GameMode {
     }
 
     private showPasteSequenceDialog(): void {
-        let customNumbering = this._poses[0].customNumbering;
+        const customNumbering = this._poses[0].customNumbering;
         this.showDialog(new PasteSequenceDialog(customNumbering)).closed.then((sequence) => {
             if (sequence !== null) {
-                for (let pose of this._poses) {
+                for (const pose of this._poses) {
                     pose.pasteSequence(sequence);
                 }
             }
@@ -420,7 +420,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     private showViewOptionsDialog(): void {
-        let mode = this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
+        const mode = this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
             ? EternaViewOptionsMode.LAB
             : EternaViewOptionsMode.PUZZLE;
         this.showDialog(new EternaViewOptionsDialog(mode));
@@ -453,7 +453,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     public setDisplayScoreTexts(display: boolean): void {
-        for (let pose of this._poses) {
+        for (const pose of this._poses) {
             pose.displayScoreTexts = display;
         }
     }
@@ -463,7 +463,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     public setShowNumbering(show: boolean): void {
-        for (let pose of this._poses) {
+        for (const pose of this._poses) {
             pose.showNumbering = show;
         }
     }
@@ -473,13 +473,13 @@ export default class PoseEditMode extends GameMode {
     }
 
     public setShowRope(show: boolean): void {
-        for (let pose of this._poses) {
+        for (const pose of this._poses) {
             pose.showRope = show;
         }
     }
 
     public setShowTotalEnergy(show: boolean): void {
-        for (let pose of this._poses) {
+        for (const pose of this._poses) {
             pose.showTotalEnergy = show;
         }
     }
@@ -493,7 +493,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     public onPaletteTargetSelected(type: PaletteTargetType): void {
-        let baseType: number = GetPaletteTargetBaseType(type);
+        const baseType: number = GetPaletteTargetBaseType(type);
         this.setPosesColor(baseType);
     }
 
@@ -602,7 +602,7 @@ export default class PoseEditMode extends GameMode {
                 this._seqStacks[this._stackLevel] = [];
 
                 for (let ii = 0; ii < this._poses.length; ii++) {
-                    let undoBlock: UndoBlock = new UndoBlock([], this._folder?.name ?? '');
+                    const undoBlock: UndoBlock = new UndoBlock([], this._folder?.name ?? '');
                     undoBlock.fromJSON(foldData[ii]);
                     this._seqStacks[this._stackLevel][ii] = undoBlock;
                 }
@@ -613,7 +613,7 @@ export default class PoseEditMode extends GameMode {
                 this.transformPosesMarkers();
             } else {
                 const sequence = EPars.stringToSequence(solution.sequence);
-                for (let pose of this._poses) {
+                for (const pose of this._poses) {
                     pose.pasteSequence(sequence);
                 }
             }
@@ -644,10 +644,10 @@ export default class PoseEditMode extends GameMode {
     }
 
     private setPuzzle(): void {
-        let poseFields: PoseField[] = [];
+        const poseFields: PoseField[] = [];
 
-        let targetSecstructs: string[] = this._puzzle.getSecstructs();
-        let targetConditions = this._puzzle.targetConditions;
+        const targetSecstructs: string[] = this._puzzle.getSecstructs();
+        const targetConditions = this._puzzle.targetConditions;
 
         // TSC: this crashes, and doesn't seem to accomplish anything
         // let before_reset: number[] = null;
@@ -655,7 +655,7 @@ export default class PoseEditMode extends GameMode {
         //     before_reset = this._puzzle.transform_sequence(this.get_current_undo_block(0).get_sequence(), 0);
         // }
 
-        let bindAddbaseCB = (pose: Pose2D, kk: number) => {
+        const bindAddbaseCB = (pose: Pose2D, kk: number) => {
             pose.addBaseCallback = ((parenthesis: string | null, mode: PuzzleEditOp | null, index: number) => {
                 Assert.assertIsDefined(parenthesis);
                 Assert.assertIsDefined(mode);
@@ -664,12 +664,12 @@ export default class PoseEditMode extends GameMode {
             });
         };
 
-        let bindPoseEdit = (pose: Pose2D, index: number) => {
+        const bindPoseEdit = (pose: Pose2D, index: number) => {
             pose.poseEditCallback = (() => {
                 this.poseEditByTarget(index);
             });
         };
-        let bindTrackMoves = (pose: Pose2D, index: number) => {
+        const bindTrackMoves = (pose: Pose2D, index: number) => {
             pose.trackMovesCallback = ((count: number, moves: Move[]) => {
                 this._moveCount += count;
                 if (moves) {
@@ -678,11 +678,11 @@ export default class PoseEditMode extends GameMode {
             });
         };
 
-        let bindMousedownEvent = (pose: Pose2D, index: number) => {
+        const bindMousedownEvent = (pose: Pose2D, index: number) => {
             pose.startMousedownCallback = ((e: InteractionEvent, closestDist: number, closestIndex: number) => {
                 for (let ii = 0; ii < poseFields.length; ++ii) {
-                    let poseField: PoseField = poseFields[ii];
-                    let poseToNotify: Pose2D = poseField.pose;
+                    const poseField: PoseField = poseFields[ii];
+                    const poseToNotify: Pose2D = poseField.pose;
                     if (index === ii) {
                         poseToNotify.onPoseMouseDown(e, closestIndex);
                     } else {
@@ -693,9 +693,9 @@ export default class PoseEditMode extends GameMode {
         };
 
         for (let ii = 0; ii < targetConditions.length; ii++) {
-            let poseField: PoseField = new PoseField(true);
+            const poseField: PoseField = new PoseField(true);
             this.addObject(poseField, this.poseLayer);
-            let pose: Pose2D = poseField.pose;
+            const pose: Pose2D = poseField.pose;
             bindAddbaseCB(pose, ii);
             bindPoseEdit(pose, ii);
             bindTrackMoves(pose, ii);
@@ -728,8 +728,8 @@ export default class PoseEditMode extends GameMode {
                     this._oligoName[ii] = tc['oligo_name'];
                 }
                 if (tc['oligos']) {
-                    let odefs: OligoDef[] = tc['oligos'] as OligoDef[];
-                    let ndefs: Oligo[] = [];
+                    const odefs: OligoDef[] = tc['oligos'] as OligoDef[];
+                    const ndefs: Oligo[] = [];
                     for (let jj = 0; jj < odefs.length; jj++) {
                         ndefs.push({
                             sequence: EPars.stringToSequence(odefs[jj].sequence),
@@ -745,7 +745,7 @@ export default class PoseEditMode extends GameMode {
         this._exitButton.display.visible = false;
         this.addObject(this._exitButton, this.uiLayer);
 
-        let puzzleTitle = new HTMLTextObject(this._puzzle.getName(!Eterna.MOBILE_APP), undefined, undefined, true)
+        const puzzleTitle = new HTMLTextObject(this._puzzle.getName(!Eterna.MOBILE_APP), undefined, undefined, true)
             .font(Fonts.STDFONT)
             .fontSize(14)
             .bold()
@@ -793,11 +793,11 @@ export default class PoseEditMode extends GameMode {
 
         this._folderSwitcher.selectedFolder.connectNotify((folder) => {
             if (folder.canScoreStructures) {
-                for (let pose of this._poses) {
+                for (const pose of this._poses) {
                     pose.scoreFolder = folder;
                 }
             } else {
-                for (let pose of this._poses) {
+                for (const pose of this._poses) {
                     pose.scoreFolder = null;
                 }
             }
@@ -811,7 +811,7 @@ export default class PoseEditMode extends GameMode {
         this._constraintsLayer.visible = true;
 
         if (!this._puzzle.isPalleteAllowed) {
-            for (let pose of this._poses) {
+            for (const pose of this._poses) {
                 pose.currentColor = -1;
             }
         } else {
@@ -822,17 +822,17 @@ export default class PoseEditMode extends GameMode {
         this._constraintBar.display.visible = false;
         this.addObject(this._constraintBar, this._constraintsLayer);
         this._constraintBar.sequenceHighlights.connect((highlightInfos: HighlightInfo[] | null) => {
-            for (let [poseIdx, pose] of this._poses.entries()) {
+            for (const [poseIdx, pose] of this._poses.entries()) {
                 pose.clearRestrictedHighlight();
                 pose.clearUnstableHighlight();
                 pose.clearUserDefinedHighlight();
-                let poseState = this._isPipMode || poseIdx !== 0 ? poseIdx : this._curTargetIndex;
+                const poseState = this._isPipMode || poseIdx !== 0 ? poseIdx : this._curTargetIndex;
                 if (!highlightInfos) continue;
-                for (let highlightInfo of highlightInfos) {
+                for (const highlightInfo of highlightInfos) {
                     if (highlightInfo && (highlightInfo.stateIndex == null || poseState === highlightInfo.stateIndex)) {
-                        let currBlock = this.getCurrentUndoBlock(poseState);
-                        let naturalMap = currBlock.reorderedOligosIndexMap(currBlock.oligoOrder);
-                        let ranges = (this._poseState === PoseState.NATIVE && naturalMap != null)
+                        const currBlock = this.getCurrentUndoBlock(poseState);
+                        const naturalMap = currBlock.reorderedOligosIndexMap(currBlock.oligoOrder);
+                        const ranges = (this._poseState === PoseState.NATIVE && naturalMap != null)
                             ? highlightInfo.ranges.map((index: number) => {
                                 Assert.assertIsDefined(naturalMap);
                                 return naturalMap.indexOf(index);
@@ -886,7 +886,7 @@ export default class PoseEditMode extends GameMode {
             if (seq == null) {
                 seq = this._puzzle.getBeginningSequence(ii);
                 if (this._puzzle.puzzleType === PuzzleType.CHALLENGE && !this._params.isReset) {
-                    let savedSeq: number[] = this._puzzle.savedSequence;
+                    const savedSeq: number[] = this._puzzle.savedSequence;
                     if (savedSeq != null) {
                         if (savedSeq.length === seq.length) {
                             seq = savedSeq;
@@ -932,10 +932,10 @@ export default class PoseEditMode extends GameMode {
                         );
                         this._poses[ii].customNumbering = undefined;
                     } else {
-                        let x = customNumbering;
+                        const x = customNumbering;
                         for (let jj = 0; jj < x.length; jj++) {
                             if (x[jj] == null) continue;
-                            let kk = x.indexOf(x[jj]);
+                            const kk = x.indexOf(x[jj]);
                             if (kk !== jj) {
                                 log.warn(
                                     `custom-numbering field ${String(x[jj])} appears twice.`
@@ -1019,12 +1019,12 @@ export default class PoseEditMode extends GameMode {
         });
 
         this._scriptInterface.addCallback('get_locks', (): boolean[] | null => {
-            let pose: Pose2D = this.getPose(0);
+            const pose: Pose2D = this.getPose(0);
             return pose.puzzleLocks ? pose.puzzleLocks.slice(0, pose.sequence.length) : null;
         });
 
         this._scriptInterface.addCallback('get_targets', (): TargetConditions[] => {
-            let conditions = this._puzzle.targetConditions;
+            const conditions = this._puzzle.targetConditions;
             if (conditions.length === 0) {
                 conditions.push(undefined);
             }
@@ -1044,7 +1044,7 @@ export default class PoseEditMode extends GameMode {
 
         this._scriptInterface.addCallback('get_native_structure', (indx: number): string | null => {
             if (indx < 0 || indx >= this._poses.length) return null;
-            let nativepairs = this.getCurrentUndoBlock(indx).getPairs();
+            const nativepairs = this.getCurrentUndoBlock(indx).getPairs();
             return EPars.pairsToParenthesis(nativepairs);
         });
 
@@ -1053,8 +1053,8 @@ export default class PoseEditMode extends GameMode {
                 return null;
             }
 
-            let nativePairs: number[] = this.getCurrentUndoBlock(indx).getPairs();
-            let seqArr: number[] = this.getPose(indx).fullSequence;
+            const nativePairs: number[] = this.getCurrentUndoBlock(indx).getPairs();
+            const seqArr: number[] = this.getPose(indx).fullSequence;
             return EPars.pairsToParenthesis(nativePairs, seqArr);
         });
 
@@ -1094,14 +1094,14 @@ export default class PoseEditMode extends GameMode {
                 if (this._folder === null) {
                     return null;
                 }
-                let seqArr: number[] = EPars.stringToSequence(seq);
+                const seqArr: number[] = EPars.stringToSequence(seq);
                 if (this._targetConditions && this._targetConditions[0]
                         && this._targetConditions[0]['type'] === 'pseudoknot') {
-                    let folded: number[] | null = this._folder.foldSequence(seqArr, null, constraint, true);
+                    const folded: number[] | null = this._folder.foldSequence(seqArr, null, constraint, true);
                     Assert.assertIsDefined(folded);
                     return EPars.pairsToParenthesis(folded, null, true);
                 } else {
-                    let folded: number[] | null = this._folder.foldSequence(seqArr, null, constraint);
+                    const folded: number[] | null = this._folder.foldSequence(seqArr, null, constraint);
                     Assert.assertIsDefined(folded);
                     return EPars.pairsToParenthesis(folded);
                 }
@@ -1112,8 +1112,8 @@ export default class PoseEditMode extends GameMode {
                 if (this._folder === null) {
                     return null;
                 }
-                let seqArr: number[] = EPars.stringToSequence(seq);
-                let folded: number[] | null = this._folder.foldSequenceWithBindingSite(
+                const seqArr: number[] = EPars.stringToSequence(seq);
+                const folded: number[] | null = this._folder.foldSequenceWithBindingSite(
                     seqArr, null, site, Math.floor(bonus * 100), 2.5
                 );
                 if (folded === null) {
@@ -1126,8 +1126,8 @@ export default class PoseEditMode extends GameMode {
             if (this._folder === null) {
                 return null;
             }
-            let seqArr: number[] = EPars.stringToSequence(seq);
-            let structArr: number[] = EPars.parenthesisToPairs(secstruct);
+            const seqArr: number[] = EPars.stringToSequence(seq);
+            const structArr: number[] = EPars.parenthesisToPairs(secstruct);
             let freeEnergy = 0;
             if (this._targetConditions && this._targetConditions[0]
                     && this._targetConditions[0]['type'] === 'pseudoknot') {
@@ -1143,7 +1143,7 @@ export default class PoseEditMode extends GameMode {
                 if (this._folder === null) {
                     return null;
                 }
-                let seqArr: number[] = EPars.stringToSequence(seq);
+                const seqArr: number[] = EPars.stringToSequence(seq);
                 let folded: number[] | null;
                 if (secstruct) {
                     folded = EPars.parenthesisToPairs(secstruct);
@@ -1153,7 +1153,7 @@ export default class PoseEditMode extends GameMode {
                         return null;
                     }
                 }
-                let pp: number[] | null = this._folder.getDotPlot(seqArr, folded);
+                const pp: number[] | null = this._folder.getDotPlot(seqArr, folded);
                 Assert.assertIsDefined(pp);
                 return pp.slice();
             });
@@ -1163,10 +1163,10 @@ export default class PoseEditMode extends GameMode {
                 if (this._folder === null) {
                     return null;
                 }
-                let len: number = seq.length;
-                let cseq = `${seq}&${oligo}`;
-                let seqArr: number[] = EPars.stringToSequence(cseq);
-                let folded: number[] | null = this._folder.cofoldSequence(
+                const len: number = seq.length;
+                const cseq = `${seq}&${oligo}`;
+                const seqArr: number[] = EPars.stringToSequence(cseq);
+                const folded: number[] | null = this._folder.cofoldSequence(
                     seqArr, null, Math.floor(malus * 100), constraint
                 );
                 if (folded === null) {
@@ -1197,21 +1197,21 @@ export default class PoseEditMode extends GameMode {
         // Miscellanous
         this._scriptInterface.addCallback('sparks_effect', (from: number, to: number): void => {
             // FIXME: check PiP mode and handle accordingly
-            for (let pose of this._poses) {
+            for (const pose of this._poses) {
                 pose.praiseSequence(from, to);
             }
         });
 
         // Setters
         this._scriptInterface.addCallback('set_sequence_string', (seq: string): boolean => {
-            let seqArr: number[] = EPars.stringToSequence(seq);
+            const seqArr: number[] = EPars.stringToSequence(seq);
             if (seqArr.indexOf(EPars.RNABASE_UNDEFINED) >= 0 || seqArr.indexOf(EPars.RNABASE_CUT) >= 0) {
                 log.info(`Invalid characters in ${seq}`);
                 return false;
             }
-            let prevForceSync = this.forceSync;
+            const prevForceSync = this.forceSync;
             this.forceSync = true;
-            for (let pose of this._poses) {
+            for (const pose of this._poses) {
                 pose.pasteSequence(seqArr);
             }
             this.forceSync = prevForceSync;
@@ -1257,9 +1257,9 @@ export default class PoseEditMode extends GameMode {
                 }
 
                 for (let ii = 0; ii < this.numPoseFields; ii++) {
-                    let pose: Pose2D = this.getPose(ii);
+                    const pose: Pose2D = this.getPose(ii);
                     pose.clearTracking();
-                    for (let mark of standardizedMarks) {
+                    for (const mark of standardizedMarks) {
                         pose.addBaseMark(mark.baseIndex, mark.colors);
                     }
                 }
@@ -1278,8 +1278,8 @@ export default class PoseEditMode extends GameMode {
         let handled: boolean = this.keyboardInput.handleKeyboardEvent(e);
 
         if (!handled && e.type === KeyboardEventType.KEY_DOWN) {
-            let key = e.code;
-            let ctrl = e.ctrlKey;
+            const key = e.code;
+            const ctrl = e.ctrlKey;
 
             if (!ctrl && key === KeyCode.KeyN) {
                 Eterna.settings.showNumbers.value = !Eterna.settings.showNumbers.value;
@@ -1339,7 +1339,7 @@ export default class PoseEditMode extends GameMode {
         let elapsed = 0;
         while (this._opQueue.length > 0 && elapsed < 50) { // FIXME: arbitrary
             // We can ! guard because we know _opQueue.length > 0
-            let op = this._opQueue.shift();
+            const op = this._opQueue.shift();
             Assert.assertIsDefined(op);
             op.fn();
             if (op.sn) {
@@ -1418,11 +1418,11 @@ export default class PoseEditMode extends GameMode {
             }
 
             let minZoom = -1;
-            for (let pose of this._poses) {
+            for (const pose of this._poses) {
                 minZoom = Math.max(minZoom, pose.computeDefaultZoomLevel());
             }
 
-            for (let pose of this._poses) {
+            for (const pose of this._poses) {
                 pose.setZoomLevel(minZoom);
             }
         } else {
@@ -1443,7 +1443,7 @@ export default class PoseEditMode extends GameMode {
             return null;
         }
 
-        let menu = new ContextMenu();
+        const menu = new ContextMenu();
 
         menu.addItem('Preferences').clicked.connect(() => this.showViewOptionsDialog());
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
@@ -1474,8 +1474,8 @@ export default class PoseEditMode extends GameMode {
 
     private createScreenshot(): ArrayBuffer {
         Assert.assertIsDefined(this.container);
-        let visibleState: Map<DisplayObject, boolean> = new Map();
-        let pushVisibleState = (disp: DisplayObject) => {
+        const visibleState: Map<DisplayObject, boolean> = new Map();
+        const pushVisibleState = (disp: DisplayObject) => {
             visibleState.set(disp, disp.visible);
             disp.visible = false;
         };
@@ -1485,31 +1485,31 @@ export default class PoseEditMode extends GameMode {
         pushVisibleState(this.uiLayer);
         pushVisibleState(this.dialogLayer);
         pushVisibleState(this.achievementsLayer);
-        let showingHint = this._hintBoxRef.isLive;
+        const showingHint = this._hintBoxRef.isLive;
         this._hintBoxRef.destroyObject();
 
-        let explosionFactorVisible: boolean[] = [];
-        for (let pose of this._poses) {
+        const explosionFactorVisible: boolean[] = [];
+        for (const pose of this._poses) {
             explosionFactorVisible.push(pose.showExplosionFactor);
             pose.showExplosionFactor = false;
         }
 
-        let tempBG = DisplayUtil.fillStageRect(0x061A34);
+        const tempBG = DisplayUtil.fillStageRect(0x061A34);
         this.container.addChildAt(tempBG, 0);
 
-        let info = `Player: ${Eterna.playerName}\n`
+        const info = `Player: ${Eterna.playerName}\n`
             + `Puzzle ID: ${this._puzzle.nodeID}\n`
             + `Puzzle Title: ${this._puzzle.getName()}\n`
             + `Mode: ${this.toolbar.naturalButton.isSelected ? 'NativeMode' : 'TargetMode'}`;
-        let infoText = Fonts.std(info).color(0xffffff).build();
+        const infoText = Fonts.std(info).color(0xffffff).build();
         this.container.addChild(infoText);
 
-        let pngData = DisplayUtil.renderToPNG(this.container);
+        const pngData = DisplayUtil.renderToPNG(this.container);
 
         tempBG.destroy({children: true});
         infoText.destroy({children: true});
 
-        for (let [disp, wasVisible] of visibleState.entries()) {
+        for (const [disp, wasVisible] of visibleState.entries()) {
             disp.visible = wasVisible;
         }
 
@@ -1565,7 +1565,7 @@ export default class PoseEditMode extends GameMode {
 
         if (this._targetConditions && this._targetConditions[targetIndex] !== undefined) {
             const tc = this._targetConditions[targetIndex] as TargetConditions;
-            let maxLen: number = this._poses[targetIndex].sequence.length;
+            const maxLen: number = this._poses[targetIndex].sequence.length;
             for (let ii = 0; ii < this._poses.length; ii++) {
                 if (ii === targetIndex || tc['force_struct'] == null) {
                     continue;
@@ -1575,10 +1575,10 @@ export default class PoseEditMode extends GameMode {
                     elems = [];
                 }
                 let curr = 1;
-                let forced: number[] = EPars.parenthesisToForcedArray(tc['force_struct']);
+                const forced: number[] = EPars.parenthesisToForcedArray(tc['force_struct']);
                 let jj;
                 for (jj = 0; jj < maxLen && jj < forced.length; jj++) {
-                    let _stat: number = (forced[jj] === EPars.FORCE_IGNORE ? 1 : 0);
+                    const _stat: number = (forced[jj] === EPars.FORCE_IGNORE ? 1 : 0);
                     if ((curr ^ _stat) !== 0) {
                         elems.push(jj - _stat);
                         curr = _stat;
@@ -1599,11 +1599,11 @@ export default class PoseEditMode extends GameMode {
             this._poses[poseIndex].sequence = this._puzzle.transformSequence(
                 this._poses[targetIndex].sequence, targetIndex
             );
-            let tcType: string = tc['type'];
+            const tcType: string = tc['type'];
 
             if (tcType === 'multistrand') {
-                let odefs: OligoDef[] | undefined = tc['oligos'];
-                let ndefs: Oligo[] = [];
+                const odefs: OligoDef[] | undefined = tc['oligos'];
+                const ndefs: Oligo[] = [];
                 if (odefs !== undefined) {
                     for (let ii = 0; ii < odefs.length; ii++) {
                         ndefs.push({
@@ -1619,7 +1619,7 @@ export default class PoseEditMode extends GameMode {
             }
 
             if (Puzzle.isOligoType(tcType)) {
-                let foldMode: number = tc['fold_mode'] === undefined
+                const foldMode: number = tc['fold_mode'] === undefined
                     ? Pose2D.OLIGO_MODE_DIMER
                     : Number(tc['fold_mode']);
                 this._poses[poseIndex].setOligo(
@@ -1667,13 +1667,13 @@ export default class PoseEditMode extends GameMode {
     }
 
     private savePosesMarkersContexts(): void {
-        for (let pose of this._poses) {
+        for (const pose of this._poses) {
             pose.saveMarkersContext();
         }
     }
 
     private transformPosesMarkers(): void {
-        for (let pose of this._poses) {
+        for (const pose of this._poses) {
             pose.transformMarkers();
         }
     }
@@ -1724,7 +1724,7 @@ export default class PoseEditMode extends GameMode {
             this._poses[0].pairs = this._targetPairs[this._curTargetIndex];
             if (this._targetConditions != null && this._targetConditions[this._curTargetIndex] !== undefined) {
                 const tc = this._targetConditions[this._curTargetIndex] as TargetConditions;
-                let newConstraints = tc['structure_constraints'];
+                const newConstraints = tc['structure_constraints'];
                 this._poses[0].structConstraints = newConstraints;
             }
         }
@@ -1771,14 +1771,14 @@ export default class PoseEditMode extends GameMode {
     private onChangeFolder(): void {
         this.clearUndoStack();
         this.poseEditByTarget(0);
-        for (let pose of this._poses) {
+        for (const pose of this._poses) {
             pose.updateHighlightsAndScores();
         }
     }
 
     private ropPresets(): void {
         while (this._ropPresets.length) {
-            let func = this._ropPresets.pop();
+            const func = this._ropPresets.pop();
             Assert.assertIsDefined(func);
             func();
         }
@@ -1788,9 +1788,9 @@ export default class PoseEditMode extends GameMode {
         this._dockedSpecBox.display.visible = false;
 
         this.updateCurrentBlockWithDotAndMeltingPlot();
-        let puzzleState = this.getCurrentUndoBlock();
+        const puzzleState = this.getCurrentUndoBlock();
 
-        let dialog = this.showDialog(new SpecBoxDialog(puzzleState));
+        const dialog = this.showDialog(new SpecBoxDialog(puzzleState));
         dialog.closed.then((showDocked) => {
             if (showDocked) {
                 this._dockedSpecBox.setSpec(puzzleState);
@@ -1802,13 +1802,13 @@ export default class PoseEditMode extends GameMode {
     private updateDockedSpecBox(): void {
         if (this._dockedSpecBox.display.visible) {
             this.updateCurrentBlockWithDotAndMeltingPlot();
-            let datablock: UndoBlock = this.getCurrentUndoBlock();
+            const datablock: UndoBlock = this.getCurrentUndoBlock();
             this._dockedSpecBox.setSpec(datablock);
         }
     }
 
     private updateCurrentBlockWithDotAndMeltingPlot(index: number = -1): void {
-        let datablock: UndoBlock = this.getCurrentUndoBlock(index);
+        const datablock: UndoBlock = this.getCurrentUndoBlock(index);
         if (this._folder && this._folder.canDotPlot && datablock.sequence.length < 500) {
             if (this._targetConditions && this._targetConditions[0]
                 && this._targetConditions[0]['type'] === 'pseudoknot') {
@@ -1822,7 +1822,7 @@ export default class PoseEditMode extends GameMode {
     private submitCurrentPose(): void {
         if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL) {
             // / Always submit the sequence in the first state
-            let solToSubmit: UndoBlock = this.getCurrentUndoBlock(0);
+            const solToSubmit: UndoBlock = this.getCurrentUndoBlock(0);
             this.submitSolution({title: 'Cleared Solution', comment: 'No comment'}, solToSubmit);
         } else {
             const NOT_SATISFIED_PROMPT = 'Puzzle constraints are not satisfied.\n'
@@ -1851,16 +1851,16 @@ export default class PoseEditMode extends GameMode {
         this.updateCurrentBlockWithDotAndMeltingPlot();
 
         // / Generate dot and melting plot data
-        let datablock: UndoBlock = this.getCurrentUndoBlock();
+        const datablock: UndoBlock = this.getCurrentUndoBlock();
         if (datablock.getParam(UndoBlockParam.DOTPLOT_BITMAP) == null) {
             this.updateCurrentBlockWithDotAndMeltingPlot();
         }
 
-        let initScore: number = datablock.getParam(UndoBlockParam.PROB_SCORE, 37) as number;
+        const initScore: number = datablock.getParam(UndoBlockParam.PROB_SCORE, 37) as number;
 
         let meltpoint = 107;
         for (let ii = 47; ii < 100; ii += 10) {
-            let currentScore: number = datablock.getParam(UndoBlockParam.PROB_SCORE, ii) as number;
+            const currentScore: number = datablock.getParam(UndoBlockParam.PROB_SCORE, ii) as number;
             if (currentScore < initScore * 0.5) {
                 meltpoint = ii;
                 break;
@@ -1869,7 +1869,7 @@ export default class PoseEditMode extends GameMode {
 
         datablock.setParam(UndoBlockParam.MELTING_POINT, meltpoint, 37);
 
-        let dialog = new SubmitPoseDialog(this._savedInputs);
+        const dialog = new SubmitPoseDialog(this._savedInputs);
         dialog.saveInputs.connect((e) => {
             this._savedInputs = e;
         });
@@ -1878,7 +1878,7 @@ export default class PoseEditMode extends GameMode {
             if (submitDetails != null) {
                 // / Always submit the sequence in the first state
                 this.updateCurrentBlockWithDotAndMeltingPlot(0);
-                let solToSubmit: UndoBlock = this.getCurrentUndoBlock(0);
+                const solToSubmit: UndoBlock = this.getCurrentUndoBlock(0);
                 this.submitSolution(submitDetails, solToSubmit);
             }
         });
@@ -1894,10 +1894,10 @@ export default class PoseEditMode extends GameMode {
             details.comment = 'No comment';
         }
 
-        let postData: SubmitSolutionData = {};
+        const postData: SubmitSolutionData = {};
 
         if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL) {
-            let nextPuzzle: number = this._puzzle.nextPuzzleID;
+            const nextPuzzle: number = this._puzzle.nextPuzzleID;
 
             if (nextPuzzle > 0) {
                 postData['next-puzzle'] = nextPuzzle;
@@ -1911,8 +1911,8 @@ export default class PoseEditMode extends GameMode {
             postData['ancestor-id'] = this._ancestorId;
         }
 
-        let elapsed: number = (new Date().getTime() - this._startSolvingTime) / 1000;
-        let moveHistory: MoveHistory = {
+        const elapsed: number = (new Date().getTime() - this._startSolvingTime) / 1000;
+        const moveHistory: MoveHistory = {
             beginFrom: this._startingPoint,
             numMoves: this._moveCount,
             moves: this._moves.slice(),
@@ -1920,11 +1920,11 @@ export default class PoseEditMode extends GameMode {
         };
         postData['move-history'] = JSON.stringify(moveHistory);
 
-        let newlinereg = new RegExp('/"/g');
+        const newlinereg = new RegExp('/"/g');
         details.comment = details.comment.replace(newlinereg, "'");
         details.title = details.title.replace(newlinereg, "'");
 
-        let seqString: string = EPars.sequenceToString(this._puzzle.transformSequence(undoBlock.sequence, 0));
+        const seqString: string = EPars.sequenceToString(this._puzzle.transformSequence(undoBlock.sequence, 0));
 
         postData['title'] = details.title;
         postData['energy'] = undoBlock.getParam(UndoBlockParam.FE) as number / 100.0;
@@ -1940,7 +1940,7 @@ export default class PoseEditMode extends GameMode {
             postData['melt'] = undoBlock.getParam(UndoBlockParam.MELTING_POINT) as number;
 
             if (this._foldTotalTime >= 1000.0) {
-                let fd: FoldData[] = [];
+                const fd: FoldData[] = [];
                 for (let ii = 0; ii < this._poses.length; ii++) {
                     fd.push(this.getCurrentUndoBlock(ii).toJSON());
                 }
@@ -1969,7 +1969,7 @@ export default class PoseEditMode extends GameMode {
             this._alreadyCleared = true;
             if (!this._puzzle.alreadySolved) {
                 // Kick off a BubbleSweep animation
-                let bubbles = new BubbleSweep(800);
+                const bubbles = new BubbleSweep(800);
                 this.addObject(bubbles, this.bgLayer);
                 bubbles.start();
 
@@ -1977,9 +1977,9 @@ export default class PoseEditMode extends GameMode {
                 this.disableTools(true);
 
                 Flashbang.sound.playSound(Sounds.SoundPuzzleClear);
-                for (let pose of this._poses) {
+                for (const pose of this._poses) {
                     pose.setZoomLevel(0, true, true);
-                    let p = pose.startExplosion();
+                    const p = pose.startExplosion();
                     if (fxComplete == null) {
                         fxComplete = p.then(() => {
                             bubbles.decay();
@@ -1988,7 +1988,7 @@ export default class PoseEditMode extends GameMode {
                                 new SelfDestructTask()
                             ));
 
-                            for (let poseToClear of this._poses) {
+                            for (const poseToClear of this._poses) {
                                 poseToClear.showTotalEnergy = false;
                                 poseToClear.clearExplosion();
                             }
@@ -2005,7 +2005,7 @@ export default class PoseEditMode extends GameMode {
         if (!this._puzzle.alreadySolved || this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
             // submit our solution to the server
             log.debug('Submitting solution...');
-            let submissionPromise = Eterna.client.submitSolution(this.createSubmitData(details, undoBlock));
+            const submissionPromise = Eterna.client.submitSolution(this.createSubmitData(details, undoBlock));
 
             // Wait for explosion completion
             await fxComplete;
@@ -2013,13 +2013,13 @@ export default class PoseEditMode extends GameMode {
             // Wait for the submission to the server, and for the mode to be active.
             // 'waitTillActive' is probably not necessary in practice, but if another mode is pushed onto this one
             // during submission, we want to wait till we're the top-most mode before executing more view logic.
-            let allResults = await Promise.all([submissionPromise, this.waitTillActive()]);
+            const allResults = await Promise.all([submissionPromise, this.waitTillActive()]);
 
             // 'allResults' contains the results of our submission, and the "waitTillActive" void promise
-            let submissionResponse = allResults[0];
+            const submissionResponse = allResults[0];
 
             // show achievements, if we were awarded any
-            let cheevs: Map< string, AchievementData > = submissionResponse['new_achievements'];
+            const cheevs: Map< string, AchievementData > = submissionResponse['new_achievements'];
             if (cheevs != null) {
                 await this._achievements.awardAchievements(cheevs);
             }
@@ -2041,9 +2041,9 @@ export default class PoseEditMode extends GameMode {
         if (data['error'] !== undefined) {
             log.debug(`Got solution submission error: ${data['error']}`);
             if (data['error'].indexOf('barcode') >= 0) {
-                let dialog = this.showNotification(data['error'], 'More Information');
+                const dialog = this.showNotification(data['error'], 'More Information');
                 dialog.extraButton.clicked.connect(() => window.open(EternaURL.BARCODE_HELP, '_blank'));
-                let hairpin: string | null = EPars.getBarcodeHairpin(seqString);
+                const hairpin: string | null = EPars.getBarcodeHairpin(seqString);
                 if (hairpin != null) {
                     SolutionManager.instance.addHairpins([hairpin]);
                     this.checkConstraints();
@@ -2060,7 +2060,7 @@ export default class PoseEditMode extends GameMode {
 
             if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
                 if (this._puzzle.useBarcode) {
-                    let hairpin: string | null = EPars.getBarcodeHairpin(seqString);
+                    const hairpin: string | null = EPars.getBarcodeHairpin(seqString);
                     if (hairpin != null) {
                         SolutionManager.instance.addHairpins([hairpin]);
                         this.checkConstraints();
@@ -2078,7 +2078,7 @@ export default class PoseEditMode extends GameMode {
         this._constraintsLayer.visible = false;
         this._exitButton.display.visible = false;
         this._helpBar.display.visible = false;
-        for (let pose of this._poses) {
+        for (const pose of this._poses) {
             pose.showTotalEnergy = false;
         }
         Eterna.chat.pushHideChat();
@@ -2086,13 +2086,13 @@ export default class PoseEditMode extends GameMode {
         // Show the panel
         let infoText: string | null = null;
         let moreText: string | null = null;
-        let boostersData = this._puzzle.boosters;
+        const boostersData = this._puzzle.boosters;
         if (boostersData != null && boostersData.mission_cleared != null) {
             infoText = boostersData.mission_cleared['info'];
             moreText = boostersData.mission_cleared['more'];
         }
 
-        let nextPuzzleData: PuzzleJSON | number | null | undefined = submitSolutionRspData?.['next-puzzle'];
+        const nextPuzzleData: PuzzleJSON | number | null | undefined = submitSolutionRspData?.['next-puzzle'];
 
         // For some reason the backend returns 0 in the progression instead of just null
         // when we want to redirect back to the homepage...? I imagine we should change that
@@ -2118,7 +2118,7 @@ export default class PoseEditMode extends GameMode {
                 this._constraintsLayer.visible = true;
                 this.disableTools(false);
 
-                for (let pose of this._poses) {
+                for (const pose of this._poses) {
                     pose.showTotalEnergy = true;
                 }
 
@@ -2144,7 +2144,7 @@ export default class PoseEditMode extends GameMode {
                     Eterna.chat.popHideChat();
                     Assert.assertIsDefined(this.modeStack);
                     this.modeStack.changeMode(new PoseEditMode(nextPuzzle, {}));
-                    let oldURL = window.location.toString();
+                    const oldURL = window.location.toString();
                     let newURL = oldURL.replace(/\d+\/?$/, nextPuzzle.nodeID.toString());
                     if (Eterna.DEV_MODE) {
                         newURL = oldURL.replace(/puzzle=\d+?$/, `puzzle=${nextPuzzle.nodeID}`);
@@ -2184,7 +2184,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     public setPosesColor(paintColor: number): void {
-        for (let pose of this._poses) {
+        for (const pose of this._poses) {
             pose.currentColor = paintColor;
         }
     }
@@ -2195,13 +2195,13 @@ export default class PoseEditMode extends GameMode {
 
         this._folderSwitcher.display.visible = !disable;
 
-        for (let field of this._poseFields) {
+        for (const field of this._poseFields) {
             field.container.interactive = !disable;
             field.container.interactiveChildren = !disable;
         }
 
         if (disable) {
-            for (let pose of this._poses) {
+            for (const pose of this._poses) {
                 pose.clearMouse();
             }
         }
@@ -2229,7 +2229,7 @@ export default class PoseEditMode extends GameMode {
         this.hideAsyncText();
 
         let missionText = this._puzzle.missionText;
-        let boosters: BoostersData | null = this._puzzle.boosters;
+        const boosters: BoostersData | null = this._puzzle.boosters;
         if (boosters && boosters.mission != null) {
             missionText = boosters.mission['text'];
         }
@@ -2240,7 +2240,7 @@ export default class PoseEditMode extends GameMode {
                 (constraint) => !(constraint instanceof ShapeConstraint || constraint instanceof AntiShapeConstraint)
             ).map(
                 (constraint) => {
-                    let box = new ConstraintBox(true, this._puzzle.getSecstructs().length);
+                    const box = new ConstraintBox(true, this._puzzle.getSecstructs().length);
                     box.setContent(constraint.getConstraintBoxConfig(
                         constraint.evaluate({
                             undoBlocks: this._seqStacks[this._stackLevel],
@@ -2291,7 +2291,7 @@ export default class PoseEditMode extends GameMode {
             return;
         }
 
-        let objs: SaveStoreItem = [
+        const objs: SaveStoreItem = [
             0,
             this._seqStacks[this._stackLevel][0].sequence
         ];
@@ -2311,8 +2311,8 @@ export default class PoseEditMode extends GameMode {
     }
 
     private transferToPuzzlemaker(): void {
-        let poseData: SaveStoreItem = [0, this._poses[0].sequence];
-        for (let [i, pose] of Object.entries(this._poses)) {
+        const poseData: SaveStoreItem = [0, this._poses[0].sequence];
+        for (const [i, pose] of Object.entries(this._poses)) {
             poseData.push(JSON.stringify({
                 sequence: EPars.sequenceToString(pose.sequence),
                 // structure: EPars.pairsToParenthesis(pose.pairs),
@@ -2334,15 +2334,15 @@ export default class PoseEditMode extends GameMode {
         //     return false;
         // }
 
-        let beginningSequence: number[] = this._puzzle.getBeginningSequence();
-        let locks: boolean[] = this._puzzle.puzzleLocks;
+        const beginningSequence: number[] = this._puzzle.getBeginningSequence();
+        const locks: boolean[] = this._puzzle.puzzleLocks;
         let oligoLen = 0;
 
         if (this._targetConditions[0] && Puzzle.isOligoType(this._targetConditions[0]['type'])) {
             oligoLen = (this._targetConditions[0]['oligo_sequence'] as string).length;
             if (Number(this._targetConditions[0]['fold_mode']) === Pose2D.OLIGO_MODE_DIMER) oligoLen++;
         } else if (this._targetConditions[0] && this._targetConditions[0]['type'] === 'multistrand') {
-            let oligos: OligoDef[] = this._targetConditions[0]['oligos'] as OligoDef[];
+            const oligos: OligoDef[] = this._targetConditions[0]['oligos'] as OligoDef[];
             for (let ii = 0; ii < oligos.length; ii++) {
                 oligoLen += (oligos[ii]['sequence'].length + 1);
             }
@@ -2356,7 +2356,7 @@ export default class PoseEditMode extends GameMode {
         }
         this.clearUndoStack();
 
-        let json: SaveStoreItem | null = this._autosaveData;
+        const json: SaveStoreItem | null = this._autosaveData;
         // no saved data
         if (json == null) {
             // if (this.root.loaderInfo.parameters.inputsequence != null) {
@@ -2367,12 +2367,12 @@ export default class PoseEditMode extends GameMode {
             return false;
         }
 
-        let a: number[] = json[1];
+        const a: number[] = json[1];
         // AMW: this suggests it knows the iteration is from all-but-first-two
         // meaning this is a save datum thing. [number, number[], ...string[]]
         for (let ii = 0; ii < this._poses.length; ++ii) {
             if (json[ii + 2] != null) {
-                let undoBlock: UndoBlock = new UndoBlock([], '');
+                const undoBlock: UndoBlock = new UndoBlock([], '');
                 try {
                     undoBlock.fromJSON(JSON.parse(json[ii + 2] as string));
                 } catch (e) {
@@ -2420,7 +2420,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     private moveHistoryAddMutations(before: number[], after: number[]): void {
-        let muts: Move[] = [];
+        const muts: Move[] = [];
         for (let ii = 0; ii < after.length; ii++) {
             if (after[ii] !== before[ii]) {
                 muts.push({pos: ii + 1, base: EPars.sequenceToString([after[ii]])});
@@ -2432,7 +2432,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     private moveHistoryAddSequence(changeType: string, seq: string): void {
-        let muts: Move[] = [];
+        const muts: Move[] = [];
         muts.push({type: changeType, sequence: seq});
         this._moveCount++;
         this._moves.push(muts.slice());
@@ -2440,7 +2440,7 @@ export default class PoseEditMode extends GameMode {
 
     private setPuzzleEpilog(initSeq: number[] | null, isReset: boolean | undefined): void {
         if (isReset) {
-            let newSeq: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
+            const newSeq: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
             this.moveHistoryAddSequence('reset', EPars.sequenceToString(newSeq));
         } else {
             this._startSolvingTime = new Date().getTime();
@@ -2478,10 +2478,13 @@ export default class PoseEditMode extends GameMode {
         // let dn: GameObject = (<GameObject>Application.instance.get_application_gui("Design Name"));
         // if (dn != null) dn.visible = (this._stack_level === 0);
 
-        let undoBlock: UndoBlock = this.getCurrentUndoBlock();
+        const undoBlock: UndoBlock = this.getCurrentUndoBlock();
         let nnfe: number[];
-        let pseudoknots: boolean = this._targetConditions && this._targetConditions[this._curTargetIndex] !== undefined
-            && (this._targetConditions[this._curTargetIndex] as TargetConditions)['type'] === 'pseudoknot';
+        const pseudoknots: boolean = (
+            this._targetConditions
+            && this._targetConditions[this._curTargetIndex] !== undefined
+            && (this._targetConditions[this._curTargetIndex] as TargetConditions)['type'] === 'pseudoknot'
+        );
 
         if (!this._paused) {
             for (let ii = 0; ii < this._poses.length; ii++) {
@@ -2496,7 +2499,7 @@ export default class PoseEditMode extends GameMode {
                     if (this._targetConditions !== undefined
                             && this._targetConditions[this._curTargetIndex] !== undefined) {
                         const tc = this._targetConditions[this._curTargetIndex] as TargetConditions;
-                        let newConstraints = tc['structure_constraints'];
+                        const newConstraints = tc['structure_constraints'];
                         this._poses[0].structConstraints = newConstraints;
                     }
                     continue;
@@ -2526,7 +2529,7 @@ export default class PoseEditMode extends GameMode {
                     this._poses[0].pairs = this.getCurrentUndoBlock().targetPairs;
                     if (this._targetConditions != null && this._targetConditions[this._curTargetIndex] !== undefined) {
                         const tc = this._targetConditions[this._curTargetIndex] as TargetConditions;
-                        let newConstraints = tc['structure_constraints'];
+                        const newConstraints = tc['structure_constraints'];
                         this._poses[0].structConstraints = newConstraints;
                     }
                     this._targetOligos[0] = this.getCurrentUndoBlock(0).targetOligos;
@@ -2599,9 +2602,9 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
-        let numAU: number = undoBlock.getParam(UndoBlockParam.AU, 37, pseudoknots) as number;
-        let numGU: number = undoBlock.getParam(UndoBlockParam.GU, 37, pseudoknots) as number;
-        let numGC: number = undoBlock.getParam(UndoBlockParam.GC, 37, pseudoknots) as number;
+        const numAU: number = undoBlock.getParam(UndoBlockParam.AU, 37, pseudoknots) as number;
+        const numGU: number = undoBlock.getParam(UndoBlockParam.GU, 37, pseudoknots) as number;
+        const numGC: number = undoBlock.getParam(UndoBlockParam.GC, 37, pseudoknots) as number;
         this._toolbar.palette.setPairCounts(numAU, numGU, numGC);
 
         if (!this._isFrozen) {
@@ -2613,7 +2616,7 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
-        let constraintsSatisfied: boolean = this.checkConstraints();
+        const constraintsSatisfied: boolean = this.checkConstraints();
         for (let ii = 0; ii < this._poses.length; ii++) {
             this.getCurrentUndoBlock(ii).stable = constraintsSatisfied;
         }
@@ -2640,9 +2643,9 @@ export default class PoseEditMode extends GameMode {
     private poseEditByTarget(targetIndex: number): void {
         this.savePosesMarkersContexts();
 
-        let xx: number = this._isPipMode ? targetIndex : this._curTargetIndex;
+        const xx: number = this._isPipMode ? targetIndex : this._curTargetIndex;
         let segments: number[] = this._poses[targetIndex].designSegments;
-        let idxMap: number[] | null = this._poses[targetIndex].getOrderMap(this._targetOligosOrder[xx]);
+        const idxMap: number[] | null = this._poses[targetIndex].getOrderMap(this._targetOligosOrder[xx]);
         let structureConstraints: boolean[] | undefined;
 
         if (idxMap != null) {
@@ -2725,21 +2728,21 @@ export default class PoseEditMode extends GameMode {
                             const targetOligo = this._targetOligos[xx];
                             Assert.assertIsDefined(targetOligo);
                             if (targetOligo.length > 1) {
-                                let newOrder: number[] = [];
+                                const newOrder: number[] = [];
                                 for (let jj = 0; jj < targetOligo.length; jj++) newOrder.push(jj);
                                 let more: boolean;
                                 do {
                                     segments = this._poses[targetIndex].designSegments;
-                                    let newMap: number[] | null = this._poses[targetIndex].getOrderMap(newOrder);
-                                    let newPairs: number[] = [];
+                                    const newMap: number[] | null = this._poses[targetIndex].getOrderMap(newOrder);
+                                    const newPairs: number[] = [];
                                     // shouldn't be likely that newMap isn't null but idxMap is, but must add the check
                                     if (newMap != null && idxMap != null) {
                                         for (let jj = 0; jj < segments.length; jj++) {
                                             segments[jj] = newMap.indexOf(segments[jj]);
                                         }
                                         for (let jj = 0; jj < this._targetPairs[xx].length; jj++) {
-                                            let kk: number = idxMap.indexOf(newMap[jj]);
-                                            let pp: number = this._targetPairs[xx][kk];
+                                            const kk: number = idxMap.indexOf(newMap[jj]);
+                                            const pp: number = this._targetPairs[xx][kk];
                                             newPairs[jj] = pp < 0 ? pp : newMap.indexOf(idxMap[pp]);
                                         }
                                     }
@@ -2773,29 +2776,29 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
-        let lastShiftedIndex: number = this._poses[targetIndex].lastShiftedIndex;
-        let lastShiftedCommand: number = this._poses[targetIndex].lastShiftedCommand;
+        const lastShiftedIndex: number = this._poses[targetIndex].lastShiftedIndex;
+        const lastShiftedCommand: number = this._poses[targetIndex].lastShiftedCommand;
         for (let ii = 0; ii < this._poses.length; ii++) {
             if (lastShiftedIndex > 0 && lastShiftedCommand >= 0) {
                 if (ii !== targetIndex) {
                     this._poses[ii].baseShiftWithCommand(lastShiftedCommand, lastShiftedIndex);
                 }
 
-                let results: [string, PuzzleEditOp, number[]?] | null = this._poses[ii].parseCommandWithPairs(
+                const results: [string, PuzzleEditOp, number[]?] | null = this._poses[ii].parseCommandWithPairs(
                     lastShiftedCommand, lastShiftedIndex, this._targetPairs[ii]
                 );
                 if (results != null) {
-                    let parenthesis: string = results[0];
-                    let mode: PuzzleEditOp = results[1];
+                    const parenthesis: string = results[0];
+                    const mode: PuzzleEditOp = results[1];
                     this._targetPairs[ii] = EPars.parenthesisToPairs(parenthesis);
                 }
 
                 // Adjust indices for all constraints in TargetConditions
                 const tc = this._targetConditions[ii] as TargetConditions;
-                let antiStructureConstraints = tc['anti_structure_constraints'];
+                const antiStructureConstraints = tc['anti_structure_constraints'];
                 if (antiStructureConstraints !== undefined) {
                     if (lastShiftedCommand === EPars.RNABASE_ADD_BASE) {
-                        let antiStructureConstraint: boolean = antiStructureConstraints[lastShiftedIndex];
+                        const antiStructureConstraint: boolean = antiStructureConstraints[lastShiftedIndex];
                         antiStructureConstraints.splice(lastShiftedIndex, 0, antiStructureConstraint);
                     } else if (lastShiftedCommand === EPars.RNABASE_DELETE) {
                         antiStructureConstraints.splice(lastShiftedIndex, 1);
@@ -2804,7 +2807,7 @@ export default class PoseEditMode extends GameMode {
 
                 structureConstraints = tc['structure_constraints'];
                 if (structureConstraints !== undefined) {
-                    let constraintVal: boolean = structureConstraints[lastShiftedIndex];
+                    const constraintVal: boolean = structureConstraints[lastShiftedIndex];
                     let newConstraints: boolean[];
 
                     if (lastShiftedCommand === EPars.RNABASE_ADD_BASE) {
@@ -2822,18 +2825,18 @@ export default class PoseEditMode extends GameMode {
                     tc['structure_constraints'] = newConstraints;
                 }
 
-                let antiSecstruct: string | undefined = tc['anti_secstruct'];
+                const antiSecstruct: string | undefined = tc['anti_secstruct'];
                 if (antiSecstruct != null) {
-                    let antiPairs: number[] = EPars.parenthesisToPairs(antiSecstruct);
-                    let antiResult: [string, PuzzleEditOp, number[]?] | null = this._poses[ii].parseCommandWithPairs(
+                    const antiPairs: number[] = EPars.parenthesisToPairs(antiSecstruct);
+                    const antiResult: [string, PuzzleEditOp, number[]?] | null = this._poses[ii].parseCommandWithPairs(
                         lastShiftedCommand, lastShiftedIndex, antiPairs
                     );
                     if (antiResult) tc['anti_secstruct'] = antiResult[0];
                 }
 
                 if (tc['type'] === 'aptamer') {
-                    let bindingSite: number[] = (tc['site'] as number[]).slice(0);
-                    let bindingPairs: number[] = [];
+                    const bindingSite: number[] = (tc['site'] as number[]).slice(0);
+                    const bindingPairs: number[] = [];
                     if (lastShiftedCommand === EPars.RNABASE_ADD_BASE) {
                         for (let ss = 0; ss < bindingSite.length; ss++) {
                             if (bindingSite[ss] >= lastShiftedIndex) {
@@ -2873,7 +2876,7 @@ export default class PoseEditMode extends GameMode {
 
         const LOCK_NAME = 'ExecFold';
 
-        let execfoldCB = (fd: FoldData[] | null) => {
+        const execfoldCB = (fd: FoldData[] | null) => {
             this.hideAsyncText();
             this.popUILock(LOCK_NAME);
 
@@ -2902,7 +2905,7 @@ export default class PoseEditMode extends GameMode {
         };
 
         this.pushUILock(LOCK_NAME);
-        let sol: Solution | null = SolutionManager.instance.getSolutionBySequence(
+        const sol: Solution | null = SolutionManager.instance.getSolutionBySequence(
             this._poses[targetIndex].getSequenceString()
         );
         if (sol != null && this._puzzle.hasTargetType('multistrand')) {
@@ -2959,7 +2962,7 @@ export default class PoseEditMode extends GameMode {
         // re-queue itself without triggering the stack push coded above
         ii %= this._targetPairs.length;
 
-        let seq: number[] = this._poses[ii].sequence;
+        const seq: number[] = this._poses[ii].sequence;
 
         let pseudoknots = false;
         if (this._targetConditions && this._targetConditions[ii] !== undefined
@@ -3028,7 +3031,7 @@ export default class PoseEditMode extends GameMode {
                 );
             }
         } else if (tc['type'] === 'multistrand') {
-            let oligos: Oligo[] = [];
+            const oligos: Oligo[] = [];
             const odefs = tc['oligos'] as OligoDef[];
             for (let jj = 0; jj < odefs.length; jj++) {
                 oligos.push({
@@ -3038,7 +3041,7 @@ export default class PoseEditMode extends GameMode {
             }
             log.debug('multifold');
 
-            let key: CacheKey = {
+            const key: CacheKey = {
                 primitive: 'multifold',
                 seq: this._puzzle.transformSequence(seq, ii),
                 secondBestPairs: null,
@@ -3046,12 +3049,12 @@ export default class PoseEditMode extends GameMode {
                 desiredPairs: null,
                 temp: 37
             };
-            let mfold: MultiFoldResult = this._folder.getCache(key) as MultiFoldResult;
+            const mfold: MultiFoldResult = this._folder.getCache(key) as MultiFoldResult;
 
             if (mfold === null && !this.forceSync) {
                 // multistrand folding can be really slow
                 // break it down to each permutation
-                let ops: PoseOp[] | null = this._folder.multifoldUnroll(
+                const ops: PoseOp[] | null = this._folder.multifoldUnroll(
                     this._puzzle.transformSequence(seq, ii), null, oligos
                 );
                 this._opQueue.unshift(new PoseOp(
@@ -3066,7 +3069,7 @@ export default class PoseEditMode extends GameMode {
                 }
                 return;
             } else {
-                let best: MultiFoldResult = this._folder.multifold(
+                const best: MultiFoldResult = this._folder.multifold(
                     this._puzzle.transformSequence(seq, ii),
                     null,
                     oligos
@@ -3077,7 +3080,7 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
-        let undoBlock: UndoBlock = new UndoBlock(this._puzzle.transformSequence(seq, ii), this._folder.name);
+        const undoBlock: UndoBlock = new UndoBlock(this._puzzle.transformSequence(seq, ii), this._folder.name);
         Assert.assertIsDefined(bestPairs);
         undoBlock.setPairs(bestPairs, 37, pseudoknots);
         undoBlock.targetOligos = this._targetOligos[ii];
@@ -3116,18 +3119,18 @@ export default class PoseEditMode extends GameMode {
         // / JEEFIX
 
         let lastBestPairs: number[] = this._seqStacks[this._stackLevel][targetIndex].getPairs(37, pseudoknots);
-        let bestPairs: number[] = lastBestPairs;
+        const bestPairs: number[] = lastBestPairs;
 
         if (this._stackLevel > 0) {
             lastBestPairs = this._seqStacks[this._stackLevel - 1][targetIndex].getPairs(37, pseudoknots);
         }
 
         if (lastBestPairs != null) {
-            let isShapeConstrained = this._puzzle.constraints && this._puzzle.constraints.some(
+            const isShapeConstrained = this._puzzle.constraints && this._puzzle.constraints.some(
                 (constraint) => constraint instanceof ShapeConstraint
             );
 
-            let pairsDiff: number[] = [];
+            const pairsDiff: number[] = [];
 
             for (let ii = 0; ii < bestPairs.length; ii++) {
                 if (lastBestPairs[ii] === bestPairs[ii]) {
@@ -3177,11 +3180,11 @@ export default class PoseEditMode extends GameMode {
         }
 
         if (this._foldTotalTime >= 1000.0 && this._puzzle.hasTargetType('multistrand')) {
-            let sol: Solution | null = SolutionManager.instance.getSolutionBySequence(
+            const sol: Solution | null = SolutionManager.instance.getSolutionBySequence(
                 this._poses[targetIndex].getSequenceString()
             );
             if (sol != null && !sol.hasFoldData) {
-                let fd: FoldData[] = [];
+                const fd: FoldData[] = [];
                 for (let ii = 0; ii < this._poses.length; ii++) {
                     fd.push(this.getCurrentUndoBlock(ii).toJSON());
                 }
@@ -3226,12 +3229,12 @@ export default class PoseEditMode extends GameMode {
         }
         this.savePosesMarkersContexts();
 
-        let before: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
+        const before: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
 
         this._stackLevel++;
         this.moveUndoStack();
 
-        let after: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
+        const after: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
         this.moveHistoryAddMutations(before, after);
 
         this.updateScore();
@@ -3244,12 +3247,12 @@ export default class PoseEditMode extends GameMode {
         }
         this.savePosesMarkersContexts();
 
-        let before: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
+        const before: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
 
         this._stackLevel--;
         this.moveUndoStack();
 
-        let after: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
+        const after: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
         this.moveHistoryAddMutations(before, after);
 
         this.updateScore();
@@ -3258,14 +3261,14 @@ export default class PoseEditMode extends GameMode {
 
     private moveUndoStackToLastStable(): void {
         this.savePosesMarkersContexts();
-        let before: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
+        const before: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
 
-        let stackLevel: number = this._stackLevel;
+        const stackLevel: number = this._stackLevel;
         while (this._stackLevel >= 1) {
             if (this.getCurrentUndoBlock(0).stable) {
                 this.moveUndoStack();
 
-                let after: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
+                const after: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
                 this.moveHistoryAddMutations(before, after);
 
                 this.updateScore();
@@ -3279,7 +3282,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     private hideEndCurtain(): void {
-        for (let pose of this._poses) {
+        for (const pose of this._poses) {
             pose.showTotalEnergy = true;
             pose.clearExplosion();
         }

@@ -76,7 +76,7 @@ module.exports = {
       // This can be more readable depending on the situation
       'no-else-return': 'off',
       // const should really be used to indicate that something *shouldn't* change, not just that it doesn't
-      'prefer-const': 'off',
+      'prefer-const': 2,
       // This would be great if it could pick up when we reassign multiple properties, but it's all sorts of
       // painful/less readable in a large number of of cases
       'prefer-destructuring': 'off',

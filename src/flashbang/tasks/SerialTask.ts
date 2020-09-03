@@ -27,7 +27,7 @@ export default class SerialTask extends ObjectTask {
         }
 
         if (this._nextIdx < this._subtasks.length) {
-            let newTask: ObjectTask = this._subtasks[this._nextIdx++];
+            const newTask: ObjectTask = this._subtasks[this._nextIdx++];
             this.regs.add(newTask.destroyed.connect(() => {
                 this.nextTask();
             }));

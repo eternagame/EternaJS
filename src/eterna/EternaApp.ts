@@ -65,7 +65,7 @@ interface SolutionAndPuzzleID {
     solutionID: number;
 }
 
-let CloudLab19Solution: SolutionAndPuzzleID = {
+const CloudLab19Solution: SolutionAndPuzzleID = {
     puzzleID: 2333436,
     solutionID: 2694684
 };
@@ -123,17 +123,17 @@ export default class EternaApp extends FlashbangApp {
 
         this._params = params as ProcessedEternaAppParams;
 
-        let eternaContainer: HTMLElement | null = document.getElementById(params.containerID);
+        const eternaContainer: HTMLElement | null = document.getElementById(params.containerID);
         if (!eternaContainer) {
             throw new Error(`Could not find HTML element with ID ${params.containerID}`);
         }
         eternaContainer.style.position = 'relative';
 
-        let pixiContainer: HTMLElement = document.createElement('div');
+        const pixiContainer: HTMLElement = document.createElement('div');
         pixiContainer.id = Eterna.PIXI_CONTAINER_ID;
         eternaContainer.appendChild(pixiContainer);
 
-        let overlay: HTMLElement = document.createElement('div');
+        const overlay: HTMLElement = document.createElement('div');
         overlay.id = Eterna.OVERLAY_DIV_ID;
         eternaContainer.appendChild(overlay);
 
@@ -148,9 +148,9 @@ export default class EternaApp extends FlashbangApp {
     }
 
     public run(): void {
-        let wasmError = typeof WebAssembly === 'object' ? '' : 'WebAssembly';
-        let webGLError = utils.isWebGLSupported() ? '' : 'WebGL';
-        let unsupported = wasmError || webGLError;
+        const wasmError = typeof WebAssembly === 'object' ? '' : 'WebAssembly';
+        const webGLError = utils.isWebGLSupported() ? '' : 'WebGL';
+        const unsupported = wasmError || webGLError;
         if (unsupported) {
             const errorEl = document.createElement('div');
             errorEl.className = 'eterna-support-error';
@@ -166,7 +166,7 @@ export default class EternaApp extends FlashbangApp {
             `;
             errorEl.innerHTML = errorText;
 
-            let eternaContainer = document.getElementById(this._params.containerID);
+            const eternaContainer = document.getElementById(this._params.containerID);
             Assert.assertIsDefined(eternaContainer);
             eternaContainer.appendChild(errorEl);
         } else {
@@ -389,7 +389,7 @@ export default class EternaApp extends FlashbangApp {
             ? Promise.resolve(solutionOrID)
             : SolutionManager.instance.getSolutionsForPuzzle(puzzleID)
                 .then((solutions) => {
-                    for (let solution of solutions) {
+                    for (const solution of solutions) {
                         if (solution.nodeID === solutionID) {
                             return Promise.resolve(solution);
                         }
@@ -413,7 +413,7 @@ export default class EternaApp extends FlashbangApp {
             return puzzleOrID;
         } else {
             this.setLoadingText('Loading puzzle...', null);
-            let puzzle = await PuzzleManager.instance.getPuzzleByID(puzzleOrID);
+            const puzzle = await PuzzleManager.instance.getPuzzleByID(puzzleOrID);
             this.popLoadingMode();
             return puzzle;
         }
@@ -421,14 +421,14 @@ export default class EternaApp extends FlashbangApp {
 
     protected onKeyboardEvent(e: KeyboardEvent): void {
         // if a form element is focused, don't trigger hotkeys
-        let selected = document.body.querySelectorAll(':focus')[0];
+        const selected = document.body.querySelectorAll(':focus')[0];
         if (selected && (['INPUT', 'TEXTAREA', 'OPTION', 'SELECT', 'BUTTON'].includes(selected.tagName))) return;
 
         super.onKeyboardEvent(e);
     }
 
     protected onUncaughtError(err: ErrorEvent): void {
-        let errstring = ErrorUtil.getErrString(err);
+        const errstring = ErrorUtil.getErrString(err);
         if (errstring.startsWith("Error: Failed to set the 'buffer' property on 'AudioBufferSourceNode'")) {
             log.debug('pixi-sound is misbehaving again');
         } else {
@@ -492,7 +492,7 @@ export default class EternaApp extends FlashbangApp {
                     });
             }
 
-            let playerPassword = process.env['DEBUG_PLAYER_PASSWORD'];
+            const playerPassword = process.env['DEBUG_PLAYER_PASSWORD'];
             if (playerPassword === undefined || playerPassword.length === 0) {
                 return Eterna.client.logout()
                     .then(() => {
@@ -523,7 +523,7 @@ export default class EternaApp extends FlashbangApp {
             RNAFoldBasic.create()])
             .then((folders: (Folder | null)[]) => {
                 log.info('Folding engines intialized');
-                for (let folder of folders) {
+                for (const folder of folders) {
                     if (folder !== null) {
                         FolderManager.instance.addFolder(folder);
                     }
@@ -536,7 +536,7 @@ export default class EternaApp extends FlashbangApp {
         return Promise.all([RNApuzzler.create()])
             .then((layoutEngines: LayoutEngine[]) => {
                 log.info('Layout engines intialized');
-                for (let layoutEngine of layoutEngines) {
+                for (const layoutEngine of layoutEngines) {
                     LayoutEngineManager.instance.addLayoutEngine(layoutEngine);
                 }
             });

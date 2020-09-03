@@ -26,7 +26,7 @@ abstract class ConsecutiveBaseConstraint extends Constraint<ConsecutiveConstrain
     }
 
     public evaluate(context: ConstraintContext): ConsecutiveConstraintStatus {
-        let count = EPars.countConsecutive(
+        const count = EPars.countConsecutive(
             context.undoBlocks[0].sequence,
             this.baseType
         );
@@ -41,7 +41,7 @@ abstract class ConsecutiveBaseConstraint extends Constraint<ConsecutiveConstrain
         status: ConsecutiveConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
-        let tooltip = ConstraintBox.createTextStyle();
+        const tooltip = ConstraintBox.createTextStyle();
         if (forMissionScreen) {
             tooltip.pushStyle('altTextMain');
         }

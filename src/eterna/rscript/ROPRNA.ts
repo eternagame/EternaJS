@@ -33,11 +33,11 @@ export default class ROPRNA extends RScriptOp {
         } else if (this._type === ROPRNAType.ENABLEMODIFICATION) {
             this._env.pose.forceEditable(this._enabled, this._scope);
         } else if (this._type === ROPRNAType.SETPAINTER) {
-            let {ui} = this._env;
+            const {ui} = this._env;
             if (this._color === 'SWAP') {
                 ui.toolbar.pairSwapButton.click();
             } else {
-                let paletteTargetType = StringToPaletteTargetType(this._color);
+                const paletteTargetType = StringToPaletteTargetType(this._color);
                 if (paletteTargetType != null) {
                     ui.toolbar.palette.clickTarget(paletteTargetType);
                 }

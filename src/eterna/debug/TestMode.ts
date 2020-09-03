@@ -9,9 +9,9 @@ export default class TestMode extends GameMode {
     protected setup(): void {
         super.setup();
 
-        let puzzleID = 7656242;
-        let loadPuzzle = PuzzleManager.instance.getPuzzleByID(puzzleID);
-        let loadSolutions = SolutionManager.instance.getSolutionsForPuzzle(puzzleID);
+        const puzzleID = 7656242;
+        const loadPuzzle = PuzzleManager.instance.getPuzzleByID(puzzleID);
+        const loadSolutions = SolutionManager.instance.getSolutionsForPuzzle(puzzleID);
         Promise.all([loadPuzzle, loadSolutions])
             .then(([puzzle, solutions]) => {
                 this.showActionBox(puzzle, solutions[0]);

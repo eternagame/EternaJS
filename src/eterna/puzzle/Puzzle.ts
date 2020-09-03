@@ -61,7 +61,7 @@ export default class Puzzle {
         seq[0] = EPars.RNABASE_GUANINE;
         seq[1] = EPars.RNABASE_GUANINE;
 
-        let offset: number = seq.length - 20;
+        const offset: number = seq.length - 20;
         for (let ii = 0; ii < 20; ii++) {
             seq[offset + ii] = EPars.RNABASE_LAST20[ii];
         }
@@ -150,7 +150,7 @@ export default class Puzzle {
 
     public get targetConditions(): (TargetConditions | undefined)[] {
         if (this._targetConditions == null) {
-            let targetConditions: (TargetConditions | undefined)[] = [];
+            const targetConditions: (TargetConditions | undefined)[] = [];
             for (let ii = 0; ii < this._secstructs.length; ii++) {
                 targetConditions.push(undefined);
             }
@@ -235,13 +235,13 @@ export default class Puzzle {
             }
             this._secstructs.push(this._targetConditions[ii]['secstruct']);
 
-            let tcType: string = this._targetConditions[ii]['type'];
+            const tcType: string = this._targetConditions[ii]['type'];
             // Aptamers
 
             if (Puzzle.isAptamerType(tcType) && this._targetConditions[ii]['site'] !== undefined) {
-                let bindingPairs: number[] = [];
-                let bindingSite: number[] = this._targetConditions[ii]['site'] as number[];
-                let targetPairs: number[] = EPars.parenthesisToPairs(this.getSecstruct(ii));
+                const bindingPairs: number[] = [];
+                const bindingSite: number[] = this._targetConditions[ii]['site'] as number[];
+                const targetPairs: number[] = EPars.parenthesisToPairs(this.getSecstruct(ii));
 
                 for (let jj = 0; jj < bindingSite.length; jj++) {
                     bindingPairs.push(targetPairs[bindingSite[jj]]);
@@ -281,7 +281,7 @@ export default class Puzzle {
             // Multi-strands
 
             if (this._targetConditions[ii]['type'] === 'multistrand') {
-                let oligos: OligoDef[] = this._targetConditions[ii]['oligos'] as OligoDef[];
+                const oligos: OligoDef[] = this._targetConditions[ii]['oligos'] as OligoDef[];
                 for (let jj = 0; jj < oligos.length; jj++) {
                     concentration = 0;
                     if (oligos[jj]['concentration'] != null) {
@@ -340,8 +340,8 @@ export default class Puzzle {
 
         let ii: number;
 
-        let barcodes: number[] = [];
-        let secstruct: string = this.getSecstruct();
+        const barcodes: number[] = [];
+        const secstruct: string = this.getSecstruct();
         if (this._useTails) {
             for (ii = secstruct.length - 39; ii < secstruct.length - 20; ii++) {
                 barcodes.push(ii);
@@ -395,8 +395,8 @@ export default class Puzzle {
     }
 
     public get isPairBrushAllowed(): boolean {
-        let isBasic: boolean = (this._puzzleType !== PuzzleType.BASIC);
-        let hasTarget = this._constraints !== null && this._constraints.some(
+        const isBasic: boolean = (this._puzzleType !== PuzzleType.BASIC);
+        const hasTarget = this._constraints !== null && this._constraints.some(
             (constraint) => constraint instanceof ShapeConstraint
         );
 
@@ -456,7 +456,7 @@ export default class Puzzle {
     }
 
     public getSecstructs(index: number = 0): string[] {
-        let secstructs: string[] = [];
+        const secstructs: string[] = [];
         for (let ii = 0; ii < this._secstructs.length; ii++) {
             secstructs.push(this.getSecstruct(ii));
         }
@@ -466,9 +466,9 @@ export default class Puzzle {
     public getName(linked: boolean = false): string {
         // The DOMObject will need to allow markup to allow the link,
         // but we don't want users to be able to add markup to their puzzle titles
-        let plainName = Utility.sanitizeAndMarkup(this._name);
+        const plainName = Utility.sanitizeAndMarkup(this._name);
         if (linked) {
-            let url: string = EternaURL.createURL({page: 'puzzle', nid: this._nid});
+            const url: string = EternaURL.createURL({page: 'puzzle', nid: this._nid});
             return `<u><A HREF="${url}" TARGET="_blank">${plainName}</a></u>`;
         }
 
@@ -486,7 +486,7 @@ export default class Puzzle {
     }
 
     public getBeginningSequence(index: number = 0): number[] {
-        let seq: number[] = [];
+        const seq: number[] = [];
         if (this._useTails) {
             if (this._useShortTails) {
                 seq.push(EPars.RNABASE_GUANINE);
@@ -501,7 +501,7 @@ export default class Puzzle {
         }
 
         // FIXME: This needs revision, see https://github.com/EteRNAgame/eterna/blob/1e537defaad17674b189df697ee6f1c7cca070c0/flash-rna/flash-rna/PoseEdit.as#L2163
-        let len = this._beginningSequence != null ? this._beginningSequence.length : this._secstructs[index].length;
+        const len = this._beginningSequence != null ? this._beginningSequence.length : this._secstructs[index].length;
         for (let ii = 0; ii < len; ii++) {
             if (this._beginningSequence != null) {
                 seq.push(this._beginningSequence[ii]);
@@ -539,10 +539,10 @@ export default class Puzzle {
     public transformSequence(seq: number[], targetIndex: number): number[] {
         if (this._targetConditions != null) {
             if (this._targetConditions[targetIndex]['sequence'] !== undefined) {
-                let targetSeqTemp: number[] = EPars.stringToSequence(
+                const targetSeqTemp: number[] = EPars.stringToSequence(
                     this._targetConditions[targetIndex]['sequence'] as string
                 );
-                let targetSeq: number[] = [];
+                const targetSeq: number[] = [];
 
                 if (this._useTails) {
                     if (this._useShortTails) {
@@ -567,7 +567,7 @@ export default class Puzzle {
                     }
                 }
 
-                let locks: boolean[] = this.puzzleLocks;
+                const locks: boolean[] = this.puzzleLocks;
 
                 if (locks.length !== targetSeq.length || targetSeq.length !== seq.length) {
                     throw new Error("lock length doesn't match object sequence");

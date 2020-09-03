@@ -65,7 +65,7 @@ abstract class MinimumPairConstraint extends Constraint<MinPairConstraintStatus>
         status: MinPairConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
-        let tooltip = ConstraintBox.createTextStyle();
+        const tooltip = ConstraintBox.createTextStyle();
 
         if (forMissionScreen) {
             tooltip.pushStyle('altTextMain');
@@ -183,7 +183,7 @@ export class MinimumAnyPairConstraint extends MinimumPairConstraint {
         status: MinPairConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
-        let tooltip = ConstraintBox.createTextStyle();
+        const tooltip = ConstraintBox.createTextStyle();
 
         if (forMissionScreen) {
             tooltip.pushStyle('altTextMain');

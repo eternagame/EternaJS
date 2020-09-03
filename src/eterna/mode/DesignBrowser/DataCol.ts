@@ -52,7 +52,7 @@ export default class DataCol extends ContainerObject {
         this._lineHeight = theme.rowHeight;
 
         if (this._dataType !== DesignBrowserDataType.VOTE) {
-            let dataDisplayBuilder = new TextBuilder()
+            const dataDisplayBuilder = new TextBuilder()
                 .font(this._fontType)
                 .fontSize(this._fontSize)
                 .color(0xffffff)
@@ -178,12 +178,12 @@ export default class DataCol extends ContainerObject {
         const {designBrowser: theme} = UITheme;
         const dataStart = theme.headerHeight + theme.filterHeight + theme.dataPadding / 2;
 
-        let mouseLoc = e.data.getLocalPosition(this.container);
+        const mouseLoc = e.data.getLocalPosition(this.container);
         if (mouseLoc.y < dataStart) {
             return [-1, -1];
         }
 
-        let ii = int((mouseLoc.y - dataStart) / this._lineHeight);
+        const ii = int((mouseLoc.y - dataStart) / this._lineHeight);
         if (ii >= this._numDisplay) {
             return [-1, -1];
         }
@@ -230,24 +230,24 @@ export default class DataCol extends ContainerObject {
             else if (queryString === 'N') return !voted;
             else return true;
         } else if (this._dataType === DesignBrowserDataType.STRING) {
-            let queryString: string = this._filterField1.text;
+            const queryString: string = this._filterField1.text;
             if (queryString.length === 0) {
                 return true;
             }
 
             // Will convert number to string as needed, or will keep as string.
-            let targetLow: string = String(sol.getProperty(this.category)).toLowerCase();
+            const targetLow: string = String(sol.getProperty(this.category)).toLowerCase();
 
             return (targetLow.search(queryString.toLowerCase()) >= 0);
         } else {
-            let queryMin: string = this._filterField1.text;
+            const queryMin: string = this._filterField1.text;
             if (queryMin.length > 0) {
                 if (sol.getProperty(this.category) < Number(queryMin)) {
                     return false;
                 }
             }
 
-            let queryMax: string = this._filterField2.text;
+            const queryMax: string = this._filterField2.text;
             if (queryMax.length > 0) {
                 if (sol.getProperty(this.category) > Number(queryMax)) {
                     return false;
@@ -273,17 +273,17 @@ export default class DataCol extends ContainerObject {
         this._gridNumbers = new Container();
         this.container.addChild(this._gridNumbers);
 
-        let increment = 20 * this._fontSize;
+        const increment = 20 * this._fontSize;
 
         for (let ii = 0; ii < Math.floor(this._dataWidth / increment); ii++) {
-            let gridstring = `${ii * 20 + 20}`;
-            let gridtext = Fonts.std(gridstring, 10).bold().color(0xFFFFFF).build();
+            const gridstring = `${ii * 20 + 20}`;
+            const gridtext = Fonts.std(gridstring, 10).bold().color(0xFFFFFF).build();
             // let x = 310 + ii * increment - gridstring.length * 3.5;
-            let xIncrement = ii * increment;
-            let offset = increment + UITheme.designBrowser.dataPadding;
+            const xIncrement = ii * increment;
+            const offset = increment + UITheme.designBrowser.dataPadding;
             // Gets width of text (length * fontSize = length * 10), and uses it to center the text over the gridline
-            let centerOffset = gridstring.length * 2.5;
-            let x = xIncrement + offset - centerOffset;
+            const centerOffset = gridstring.length * 2.5;
+            const x = xIncrement + offset - centerOffset;
             gridtext.position = new Point(x, 73);
             this._gridNumbers.addChild(gridtext);
         }
@@ -357,8 +357,8 @@ export default class DataCol extends ContainerObject {
 
     private updateView(): void {
         let dataString = '';
-        let boardData: string[] = [];
-        let boardExpData: (Feedback | null)[] = [];
+        const boardData: string[] = [];
+        const boardExpData: (Feedback | null)[] = [];
 
         if (this.category === DesignCategory.VOTE) {
             const {designBrowser: theme} = UITheme;
@@ -398,7 +398,7 @@ export default class DataCol extends ContainerObject {
 
         let pairsLength = 0;
         if (this._pairsArray != null) {
-            for (let pair of this._pairsArray) {
+            for (const pair of this._pairsArray) {
                 if (pair >= 0) {
                     pairsLength++;
                 }
@@ -410,7 +410,7 @@ export default class DataCol extends ContainerObject {
             if (ii >= this._rawData.length) {
                 dataString += '\n';
             } else {
-                let rawstr = `${this._rawData[ii]}`;
+                const rawstr = `${this._rawData[ii]}`;
 
                 const fb = this._feedback ? this._feedback[ii] : null;
                 switch (this.category) {
@@ -446,7 +446,7 @@ export default class DataCol extends ContainerObject {
                         if (exp == null) {
                             dataString += '-\n';
                         } else {
-                            let brentData: BrentTheoData | undefined = exp.brentTheoData;
+                            const brentData: BrentTheoData | undefined = exp.brentTheoData;
                             if (brentData !== undefined) {
                                 dataString += `${brentData['score'].toFixed(3)}x`;
                                 dataString += ` (${brentData['ribo_without_theo'].toFixed(3)} / ${brentData['ribo_with_theo'].toFixed(3)})\n`;
@@ -544,7 +544,7 @@ export default class DataCol extends ContainerObject {
             for (let ii = 1; ii < Math.floor((this._dataWidth - theme.dataPadding) / (this._fontSize * 5) + 1); ii++) {
                 // Draw lines every 5 characters (fontSize * 5),
                 // adding back the padding plus a little extra to space the line from the last letter
-                let x = ii * (this._fontSize * 5) + theme.dataPadding + 2;
+                const x = ii * (this._fontSize * 5) + theme.dataPadding + 2;
                 this._graphics.moveTo(x, 85);
                 this._graphics.lineTo(x, this._height - 5);
             }

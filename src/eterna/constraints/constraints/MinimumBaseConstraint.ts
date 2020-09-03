@@ -33,7 +33,7 @@ abstract class MinimumBaseConstraint extends Constraint<MinBaseConstraintStatus>
         status: MinBaseConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
-        let tooltip = ConstraintBox.createTextStyle();
+        const tooltip = ConstraintBox.createTextStyle();
 
         if (forMissionScreen) {
             tooltip.pushStyle('altTextMain');

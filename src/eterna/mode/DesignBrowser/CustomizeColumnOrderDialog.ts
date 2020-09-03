@@ -40,7 +40,7 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
         this.container.addChild(this._panelContent);
 
         this._columnUILayout = new VLayoutContainer(4);
-        let addCriterionLayout = new HLayoutContainer(2);
+        const addCriterionLayout = new HLayoutContainer(2);
         addCriterionLayout.position.x = 10;
         this._panelContent.addVSpacer(30);
         this._panelContent.addChild(this._columnUILayout);
@@ -118,7 +118,7 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
     }
 
     private addColumnUI(category: DesignCategory, idx: number): void {
-        let ui = new ColumnUI(category);
+        const ui = new ColumnUI(category);
         this._columnUILayout.addChild(ui.container);
         Arrays.addAt(this._columnUIs, ui, idx);
 
@@ -162,7 +162,7 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
     }
 
     private addColumn(category: DesignCategory): void {
-        let curIdx = this.getColumnIdx(category);
+        const curIdx = this.getColumnIdx(category);
         if (curIdx >= 0) {
             this.setCriteriaIdx(category, 0);
         } else {
@@ -176,7 +176,7 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
     }
 
     private removeColumn(category: DesignCategory): void {
-        let idx = this.getColumnIdx(category);
+        const idx = this.getColumnIdx(category);
         if (idx < 0) {
             throw new Error(`Can't find sort_category ${category}`);
         }
@@ -191,7 +191,7 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
     }
 
     private reset(): void {
-        for (let ui of this._columnUIs) {
+        for (const ui of this._columnUIs) {
             ui.destroy();
         }
         this._columnUIs = [];
@@ -215,7 +215,7 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
     }
 
     private validateCurCategoryIdx(): void {
-        let unused = this.getUnusedColumns();
+        const unused = this.getUnusedColumns();
         if (unused.length > 0) {
             this._addColumnCategoryIdx %= unused.length;
             if (this._addColumnCategoryIdx < 0) {
@@ -237,7 +237,7 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
     }
 
     private addCurrentCriteria(): void {
-        let unusedCategories = this.getUnusedColumns();
+        const unusedCategories = this.getUnusedColumns();
         if (unusedCategories.length > 0) {
             this.addColumn(unusedCategories[this._addColumnCategoryIdx]);
         }
@@ -249,7 +249,7 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
     }
 
     private setCriteriaIdx(category: DesignCategory, newIdx: number): void {
-        let curIdx = this.getColumnIdx(category);
+        const curIdx = this.getColumnIdx(category);
         if (curIdx < 0) {
             throw new Error(`Can't find sort_category ${category}`);
         }
@@ -265,7 +265,7 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
 
     private layout(): void {
         this._columnUILayout.removeChildren();
-        for (let ui of this._columnUIs) {
+        for (const ui of this._columnUIs) {
             this._columnUILayout.addChild(ui.container);
         }
 

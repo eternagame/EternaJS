@@ -30,9 +30,9 @@ export default class Booster {
         }
 
         // load icons
-        let iconData: string[] = data['icons_b64'];
-        let buttonStateTextures: Texture[] = new Array(iconData.length);
-        let imageLoaders: Promise<void>[] = [];
+        const iconData: string[] = data['icons_b64'];
+        const buttonStateTextures: Texture[] = new Array(iconData.length);
+        const imageLoaders: Promise<void>[] = [];
         for (let ii = 0; ii < iconData.length; ++ii) {
             if (iconData[ii] == null) {
                 continue;
@@ -47,7 +47,7 @@ export default class Booster {
         return Promise.all(imageLoaders)
             .then(() => mode.waitTillActive())
             .then(() => {
-                let type: BoosterType = Number(data['type']);
+                const type: BoosterType = Number(data['type']);
                 let toolColor = -1;
                 if (type === BoosterType.PAINTER) {
                     toolColor = Booster._toolColorCounter++;
@@ -84,7 +84,7 @@ export default class Booster {
         this._buttonStateTextures = buttonStateTextures;
 
         for (let ii = 0; ii < this._view.numPoseFields; ii++) {
-            let pose: Pose2D = this._view.getPose(ii);
+            const pose: Pose2D = this._view.getPose(ii);
             pose.registerPaintTool(toolColor, this);
         }
     }
@@ -97,7 +97,7 @@ export default class Booster {
         if (this._buttonStateTextures[0] === null) {
             throw new Error('Cannot call createButton before setting at least the first button state texture!');
         }
-        let button: GameButton = new GameButton().allStates(this._buttonStateTextures[0]);
+        const button: GameButton = new GameButton().allStates(this._buttonStateTextures[0]);
         if (this._type === BoosterType.PAINTER) {
             if (this._buttonStateTextures[0] !== null) {
                 button.up(this._buttonStateTextures[0]);
@@ -141,10 +141,10 @@ export default class Booster {
     }
 
     private executeScript(pose: Pose2D | null, cmd: string | null, baseNum: number): void {
-        let scriptInterface = new ExternalInterfaceCtx();
+        const scriptInterface = new ExternalInterfaceCtx();
 
         scriptInterface.addCallback('set_sequence_string', (seq: string): boolean => {
-            let seqArr: number[] = EPars.stringToSequence(seq);
+            const seqArr: number[] = EPars.stringToSequence(seq);
             if (seqArr.indexOf(EPars.RNABASE_UNDEFINED) >= 0 || seqArr.indexOf(EPars.RNABASE_CUT) >= 0) {
                 log.info(`Invalid characters in ${seq}`);
                 return false;
@@ -153,7 +153,7 @@ export default class Booster {
             if (this._type === BoosterType.PAINTER && pose) {
                 pose.setMutated(seqArr);
             } else {
-                let prevForceSync = this._view.forceSync;
+                const prevForceSync = this._view.forceSync;
                 this._view.forceSync = true;
                 for (let ii = 0; ii < this._view.numPoseFields; ii++) {
                     pose = this._view.getPose(ii);

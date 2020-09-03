@@ -48,7 +48,7 @@ export default class FolderSwitcher extends ContainerObject {
     public changeFolder(folderName: string): boolean {
         if (this.selectedFolder.value.name === folderName) return true;
 
-        let folder = FolderManager.instance.getFolder(folderName);
+        const folder = FolderManager.instance.getFolder(folderName);
         if (!folder || (this._canUseFolder && !this._canUseFolder(folder))) return false;
 
         this._dropdown.selectedOption.value = folderName;

@@ -34,15 +34,15 @@ export default class ConfirmDialog extends Dialog<boolean> {
     protected added() {
         super.added();
 
-        let panel = new GamePanel(GamePanelType.NORMAL, 1.0, 0x152843, 0.27, 0xC0DCE7);
+        const panel = new GamePanel(GamePanelType.NORMAL, 1.0, 0x152843, 0.27, 0xC0DCE7);
         panel.title = 'Are you sure?';
         this.addObject(panel, this.container);
 
-        let panelLayout = new VLayoutContainer(0, HAlign.CENTER);
+        const panelLayout = new VLayoutContainer(0, HAlign.CENTER);
         panel.container.addChild(panelLayout);
 
         if (this._useHTML) {
-            let text = new HTMLTextObject(this._prompt, undefined, undefined, true)
+            const text = new HTMLTextObject(this._prompt, undefined, undefined, true)
                 .font(Fonts.STDFONT)
                 .fontSize(15)
                 .selectable(false)
@@ -50,19 +50,19 @@ export default class ConfirmDialog extends Dialog<boolean> {
                 .maxWidth(300);
             panel.addObject(text, panelLayout);
         } else {
-            let text = Fonts.std(this._prompt, 15).color(0xC0DCE7).wordWrap(true, 300).build();
+            const text = Fonts.std(this._prompt, 15).color(0xC0DCE7).wordWrap(true, 300).build();
             panelLayout.addChild(text);
         }
 
-        let buttonLayout = new HLayoutContainer(12);
+        const buttonLayout = new HLayoutContainer(12);
         panelLayout.addVSpacer(10);
         panelLayout.addChild(buttonLayout);
 
-        let yesButton: GameButton = new GameButton().label('Yes', 16);
+        const yesButton: GameButton = new GameButton().label('Yes', 16);
         panel.addObject(yesButton, buttonLayout);
         yesButton.clicked.connect(() => this.close(true));
 
-        let noButton: GameButton = new GameButton().label('No', 16);
+        const noButton: GameButton = new GameButton().label('No', 16);
         panel.addObject(noButton, buttonLayout);
         noButton.clicked.connect(() => this.close(false));
 
@@ -76,7 +76,7 @@ export default class ConfirmDialog extends Dialog<boolean> {
         panel.display.alpha = 0;
         panel.addObject(new AlphaTask(1, 0.3));
 
-        let updateLocation = () => {
+        const updateLocation = () => {
             Assert.assertIsDefined(Flashbang.stageWidth);
             Assert.assertIsDefined(Flashbang.stageHeight);
             panel.display.position = new Point(

@@ -27,7 +27,7 @@ export default class PoseThumbnail {
         expThreshold: number = 0,
         customLayout: Array<[number, number] | [null, null]> | null = null
     ): Texture {
-        let disp: DisplayObject = PoseThumbnail.create(
+        const disp: DisplayObject = PoseThumbnail.create(
             sequence, pairs, size, type,
             expStartIndex, wrongPairs, expUseThreshold, expThreshold,
             null, customLayout
@@ -52,7 +52,7 @@ export default class PoseThumbnail {
             customLayout
         );
         const newGraphics = graphics.clone();
-        let bounds = newGraphics.getLocalBounds();
+        const bounds = newGraphics.getLocalBounds();
         newGraphics.x = -bounds.left;
         newGraphics.y = -bounds.top;
         return newGraphics;
@@ -76,7 +76,7 @@ export default class PoseThumbnail {
             sequence, pairs, size, type, expStartIndex, wrongPairs, expUseThreshold, expThreshold, graphics,
             customLayout
         );
-        let bounds = graphics.getLocalBounds();
+        const bounds = graphics.getLocalBounds();
         graphics.x = -bounds.left;
         graphics.y = -bounds.top;
         sprite.addChild(graphics);
@@ -114,41 +114,41 @@ export default class PoseThumbnail {
 
         Assert.assertIsDefined(frame,
             `frame remains undefined because PoseThumbnail::create was passed a size other than 1-7: ${size}!`);
-        let frameBounds = frame.getLocalBounds();
+        const frameBounds = frame.getLocalBounds();
 
-        let w: number = frameBounds.width * 0.8;
-        let h: number = frameBounds.height * 0.8;
+        const w: number = frameBounds.width * 0.8;
+        const h: number = frameBounds.height * 0.8;
 
-        let bd: Container = new Container();
+        const bd: Container = new Container();
         bd.addChild(DisplayUtil.fillRect(frameBounds.width, frameBounds.height, 0x0));
-        let n: number = pairs.length;
+        const n: number = pairs.length;
 
         if (n === 0) {
             return bd;
         }
 
-        let xarray: number[] = new Array(n);
-        let yarray: number[] = new Array(n);
+        const xarray: number[] = new Array(n);
+        const yarray: number[] = new Array(n);
 
-        let rnaDrawer: RNALayout = new RNALayout(45, 45);
+        const rnaDrawer: RNALayout = new RNALayout(45, 45);
         rnaDrawer.setupTree(pairs);
         rnaDrawer.drawTree(customLayout);
         rnaDrawer.getCoords(xarray, yarray);
 
-        let xmin: number = Math.min(...xarray);
-        let xmax: number = Math.max(...xarray);
-        let ymin: number = Math.min(...yarray);
-        let ymax: number = Math.max(...yarray);
+        const xmin: number = Math.min(...xarray);
+        const xmax: number = Math.max(...xarray);
+        const ymin: number = Math.min(...yarray);
+        const ymax: number = Math.max(...yarray);
 
-        let xdiff: number = xmax - xmin;
+        const xdiff: number = xmax - xmin;
         let xscale = 1;
         if (xdiff > Constants.EPSILON) xscale = (w) / xdiff;
 
-        let ydiff: number = ymax - ymin;
+        const ydiff: number = ymax - ymin;
         let yscale = 1;
         if (ydiff > Constants.EPSILON) yscale = (h) / ydiff;
 
-        let scale: number = Math.min(xscale, yscale);
+        const scale: number = Math.min(xscale, yscale);
 
         canvas = canvas || new Graphics();
         canvas.clear();
@@ -179,15 +179,15 @@ export default class PoseThumbnail {
             if (ypos < smallYMin) smallYMin = ypos;
         }
 
-        let xOffset: number = ((w) - (smallXMax - smallXMin)) + frameBounds.width * 0.1;
-        let yOffset: number = ((h) - (smallYMax - smallYMin)) + frameBounds.height * 0.1;
+        const xOffset: number = ((w) - (smallXMax - smallXMin)) + frameBounds.width * 0.1;
+        const yOffset: number = ((h) - (smallYMax - smallYMin)) + frameBounds.height * 0.1;
 
-        let wrongXCoords: number[] = [];
-        let wrongYCoords: number[] = [];
-        let rightXCoords: number[] = [];
-        let rightYCoords: number[] = [];
-        let dontcareXCoords: number[] = [];
-        let dontcareYCoords: number[] = [];
+        const wrongXCoords: number[] = [];
+        const wrongYCoords: number[] = [];
+        const rightXCoords: number[] = [];
+        const rightYCoords: number[] = [];
+        const dontcareXCoords: number[] = [];
+        const dontcareYCoords: number[] = [];
 
         const COLOR_WHITE = 0xffffff;
 

@@ -56,7 +56,7 @@ export default class TargetExpectedAccuracyConstraint extends Constraint<TargetE
         status: TargetExpectedAccuracyConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
-        let tooltip = ConstraintBox.createTextStyle();
+        const tooltip = ConstraintBox.createTextStyle();
 
         if (forMissionScreen) {
             tooltip.pushStyle('altTextMain');
@@ -81,9 +81,9 @@ export default class TargetExpectedAccuracyConstraint extends Constraint<TargetE
     }
 
     private static get _icon(): Texture {
-        let icon = new Container();
+        const icon = new Container();
 
-        let base1 = new Sprite(BitmapManager.getBitmap(Bitmaps.CleanDotPlotIcon));
+        const base1 = new Sprite(BitmapManager.getBitmap(Bitmaps.CleanDotPlotIcon));
         base1.width = 24;
         base1.height = 24;
         base1.position = new Point(50, 50);

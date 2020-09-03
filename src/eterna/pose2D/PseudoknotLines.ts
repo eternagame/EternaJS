@@ -42,9 +42,9 @@ export default class PseudoknotLines extends GameObject implements LateUpdatable
             return;
         }
 
-        let idx: number[] = [];
-        let starts: Point[] = [];
-        let ends: Point[] = [];
+        const idx: number[] = [];
+        const starts: Point[] = [];
+        const ends: Point[] = [];
         // for (let i = 0; i < this._pose.fullSequence.length; i++) {
         //     let center: Point = this._pose.getBaseLoc(i);
         //     if (!forceBaseXY && !this._pose.getBase(i).needRedraw) {
@@ -138,17 +138,17 @@ export default class PseudoknotLines extends GameObject implements LateUpdatable
      */
     private updateInterpBasePosPchip(smoothFactor: number, basePosX: number[], basePosY: number[]):
     Array<[number, number]> {
-        let interpBasePosX = this.interpPchip(smoothFactor, basePosX);
-        let interpBasePosY = this.interpPchip(smoothFactor, basePosY);
-        let interpBasePosXY: Array<[number, number]> = interpBasePosX.map((x, idx) => [x, interpBasePosY[idx]]);
+        const interpBasePosX = this.interpPchip(smoothFactor, basePosX);
+        const interpBasePosY = this.interpPchip(smoothFactor, basePosY);
+        const interpBasePosXY: Array<[number, number]> = interpBasePosX.map((x, idx) => [x, interpBasePosY[idx]]);
         return interpBasePosXY;
     }
 
     private interpPchip(smoothFactor: number, points: number[]): number[] {
         // have to pack in ii for pchip.fit
-        let inputPoints = points.map((x, idx) => [idx, x]);
-        let pchipFitPoints: Array<[number, number]> = pchip.fit(inputPoints, smoothFactor, 'shape_preserving');
-        let interpBasePos = pchipFitPoints.map((x) => x[1]);
+        const inputPoints = points.map((x, idx) => [idx, x]);
+        const pchipFitPoints: Array<[number, number]> = pchip.fit(inputPoints, smoothFactor, 'shape_preserving');
+        const interpBasePos = pchipFitPoints.map((x) => x[1]);
         return interpBasePos;
     }
 

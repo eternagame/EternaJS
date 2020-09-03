@@ -31,8 +31,8 @@ class Loop {
 
 function detectLoops(targetPairs: number[], loops: Loop[]) {
     loops.splice(0);
-    let loopStack: Loop[] = [];
-    let tmpPairs = targetPairs.slice();
+    const loopStack: Loop[] = [];
+    const tmpPairs = targetPairs.slice();
     let lastPair: [number, number] | null = null;
     let examiningLoops = false;
 
@@ -41,11 +41,11 @@ function detectLoops(targetPairs: number[], loops: Loop[]) {
     for (let i = 0; i < tmpPairs.length; ++i) {
         if (tmpPairs[i] === -1 && !examiningLoops && lastPair !== null) {
             // Found a loop!
-            let l: Loop = new Loop([false], [], [clonePair(lastPair)]);
+            const l: Loop = new Loop([false], [], [clonePair(lastPair)]);
             lastPair = null;
 
             // Find the rest of the unpaired bases in the first strand.
-            let arr = [];
+            const arr = [];
             for (i; i < tmpPairs.length; ++i) {
                 if (tmpPairs[i] !== -1) break;
                 arr.push(i);
@@ -64,7 +64,7 @@ function detectLoops(targetPairs: number[], loops: Loop[]) {
             examiningLoops = true;
         } else if (tmpPairs[i] === -1 && examiningLoops) {
             // Add bases to a new strand in the current loop.
-            let arr = [];
+            const arr = [];
             for (i; i < tmpPairs.length; ++i) {
                 if (tmpPairs[i] !== -1) break;
                 arr.push(i);
@@ -101,7 +101,7 @@ function detectLoops(targetPairs: number[], loops: Loop[]) {
     return loops;
 }
 
-let loops: Loop[][] = [];
+const loops: Loop[][] = [];
 function countLoops(targetPairs: number[], currentTargetIndex: number, sequence: number[]) {
     if (!targetPairs) {
         return 0;
@@ -122,7 +122,7 @@ function countLoops(targetPairs: number[], currentTargetIndex: number, sequence:
             continue;
         }
 
-        let pairs = loop.pairs;
+        const pairs = loop.pairs;
         if (loop.strands.length === 2 && loop.strands[0].length === 1 && loop.strands[1].length === 1) {
             // 1-1 Loops. Need G-G terminal mismatch.
             if (sequence[loop.strands[0][0] as number] === EPars.RNABASE_GUANINE
@@ -196,7 +196,7 @@ export default class BoostConstraint extends Constraint<BaseConstraintStatus> {
         status: BoostConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
-        let tooltip = ConstraintBox.createTextStyle();
+        const tooltip = ConstraintBox.createTextStyle();
         if (forMissionScreen) {
             tooltip.pushStyle('altTextMain');
         }
