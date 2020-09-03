@@ -347,14 +347,9 @@ export default class PuzzleEditMode extends GameMode {
     public getLockString(): string {
         const locks: boolean[] | undefined = this.getCurrentLock(0);
         const len: number = this._poses[0].sequence.length;
-        let lockString = '';
-        for (let ii = 0; ii < len; ii++) {
-            if (locks && locks[ii]) {
-                lockString += 'x';
-            } else {
-                lockString += 'o';
-            }
-        }
+        const lockString = locks?.map(
+            (l) => (l ? 'x' : 'o')
+        ).join('') ?? 'o'.repeat(len);
 
         return lockString;
     }
@@ -495,10 +490,7 @@ export default class PuzzleEditMode extends GameMode {
         for (let ii = 0; ii < this._poses.length; ii++) {
             const secstruct: string = this._structureInputs[ii].structureString;
 
-            let lengthLimit = 400;
-            if (Eterna.DEV_MODE) {
-                lengthLimit = -1;
-            }
+            const lengthLimit = Eterna.DEV_MODE ? -1 : 400;
 
             const error: string | null = EPars.validateParenthesis(secstruct, false, lengthLimit);
             if (error != null) {
@@ -557,26 +549,13 @@ export default class PuzzleEditMode extends GameMode {
         }
 
         const len: number = this._poses[0].sequence.length;
-
         const locks = this.getCurrentLock(0);
-        let lockString = '';
-        for (let ii = 0; ii < len; ii++) {
-            if (locks && locks[ii]) {
-                lockString += 'x';
-            } else {
-                lockString += 'o';
-            }
-        }
+        const lockString = this.getLockString();
 
         const sequence: string = EPars.sequenceToString(this._poses[0].sequence);
-        let beginningSequence = '';
-        for (let ii = 0; ii < len; ii++) {
-            if (locks && locks[ii]) {
-                beginningSequence += sequence.substr(ii, 1);
-            } else {
-                beginningSequence += 'A';
-            }
-        }
+        const beginningSequence = locks?.map(
+            (l, ii) => (l ? sequence.substr(ii, 1) : 'A')
+        ).join('') ?? 'A'.repeat(len);
 
         const objectives: TargetConditions[] = [];
         for (let ii = 0; ii < this._poses.length; ii++) {
@@ -815,16 +794,18 @@ export default class PuzzleEditMode extends GameMode {
         const forceLock = this._poses[index].puzzleLocks;
 
         let differentStructures = false;
-        for (let ii = 0; ii < this._poses.length; ii++) {
-            if (ii !== index) {
-                if (this._poses[ii].sequence.length === forceSequence.length) {
-                    this._poses[ii].sequence = forceSequence;
-                    this._poses[ii].puzzleLocks = forceLock;
-                } else {
-                    differentStructures = true;
+        this._poses.forEach(
+            (pose: Pose2D, ii: number) => {
+                if (ii !== index) {
+                    if (pose.sequence.length === forceSequence.length) {
+                        pose.sequence = forceSequence;
+                        pose.puzzleLocks = forceLock;
+                    } else {
+                        differentStructures = true;
+                    }
                 }
             }
-        }
+        );
 
         if (differentStructures) {
             let lengths = '[';
@@ -905,15 +886,8 @@ export default class PuzzleEditMode extends GameMode {
                 }
             }
 
-            let isThereMolecule = false;
-            if (bindingSite != null) {
-                for (let bb = 0; bb < bindingSite.length; bb++) {
-                    if (bindingSite[bb]) {
-                        isThereMolecule = true;
-                        break;
-                    }
-                }
-            }
+            const isThereMolecule = bindingSite != null
+                && bindingSite.some((bb) => bb);
 
             let bestPairs: number[] | null = null;
             if (!isThereMolecule) {
@@ -921,14 +895,11 @@ export default class PuzzleEditMode extends GameMode {
                 bestPairs = this._folder.foldSequence(seq, null, null, false, EPars.DEFAULT_TEMPERATURE);
             } else {
                 const bonus = -486;
-                const site: number[] = [];
-                if (bindingSite !== null) {
-                    for (let bb = 0; bb < bindingSite.length; bb++) {
-                        if (bindingSite[bb]) {
-                            site.push(bb);
-                        }
-                    }
-                }
+                const site: number[] = bindingSite
+                    ? bindingSite
+                        .map((bb, idx) => (bb ? idx : -1))
+                        .filter((idx) => idx !== -1)
+                    : [];
 
                 bestPairs = this._folder.foldSequenceWithBindingSite(seq, targetPairs, site, Number(bonus), 2.0);
             }

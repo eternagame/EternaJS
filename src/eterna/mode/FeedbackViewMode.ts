@@ -319,10 +319,9 @@ export default class FeedbackViewMode extends GameMode {
                 this.setToTargetMode();
             }
 
-            let minZoom = -1;
-            for (const pose of this._poses) {
-                minZoom = Math.max(minZoom, pose.computeDefaultZoomLevel());
-            }
+            const minZoom = Math.max(...this._poses.map(
+                (pose) => pose.computeDefaultZoomLevel()
+            ));
 
             for (let ii = 0; ii < this._poses.length; ii++) {
                 const field: PoseField = this._poseFields[ii];
@@ -519,7 +518,6 @@ export default class FeedbackViewMode extends GameMode {
 
         let titleText = '';
         const brentData: BrentTheoData | undefined = this._feedback.brentTheoData;
-        let score: number;
 
         if (brentData != null) {
             // / Brent's theophylline data
@@ -530,7 +528,7 @@ export default class FeedbackViewMode extends GameMode {
         } else {
             // / Default fallback to usual SHAPE data
             if (Eterna.DEV_MODE) {
-                score = Feedback.scoreFeedback(
+                const score: number = Feedback.scoreFeedback(
                     this._feedback.getShapeData(this._currentIndex),
                     this._puzzle.getSecstruct(this._currentIndex),
                     this._feedback.getShapeStartIndex(this._currentIndex),
@@ -550,7 +548,7 @@ export default class FeedbackViewMode extends GameMode {
                         titleText += ', ';
                     }
 
-                    score = Feedback.scoreFeedback(
+                    const score: number = Feedback.scoreFeedback(
                         this._feedback.getShapeData(ii),
                         this._puzzle.getSecstruct(ii),
                         this._feedback.getShapeStartIndex(ii),

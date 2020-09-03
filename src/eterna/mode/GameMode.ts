@@ -175,25 +175,15 @@ export default abstract class GameMode extends AppMode {
                 if (this._folder !== null) {
                     const poseidx = this._isPipMode ? idx : this._curTargetIndex;
 
-                    let score = null;
                     const pseudoknots: boolean = this._targetConditions != null
                         && this._targetConditions[0] != null
                         && this._targetConditions[0]['type'] === 'pseudoknot';
-                    if (pseudoknots) {
-                        score = (pairs: number[]) => {
-                            Assert.assertIsDefined(this._folder);
-                            return this._folder.scoreStructures(
-                                newField.pose.fullSequence, pairs, true
-                            );
-                        };
-                    } else {
-                        score = (pairs: number[]) => {
-                            Assert.assertIsDefined(this._folder);
-                            return this._folder.scoreStructures(
-                                newField.pose.fullSequence, pairs
-                            );
-                        };
-                    }
+                    const score = (pairs: number[]) => {
+                        Assert.assertIsDefined(this._folder);
+                        return this._folder.scoreStructures(
+                            newField.pose.fullSequence, pairs, pseudoknots
+                        );
+                    };
 
                     const targetPairs: number[] | undefined = this._targetPairs
                         ? this._targetPairs[poseidx] : this.getCurrentTargetPairs(poseidx);
