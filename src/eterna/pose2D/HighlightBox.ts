@@ -62,8 +62,8 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
         this._dirty = false;
     }
 
-    public setHighlight(elems: number[] | null): void {
-        if (!elems || elems.length === 0) return;
+    public setHighlight(elems: number[]): void {
+        if (elems.length === 0) return;
 
         if (!this._queue) this._queue = [];
 

@@ -729,14 +729,13 @@ export default class PoseEditMode extends GameMode {
                 }
                 if (tc['oligos']) {
                     const odefs: OligoDef[] = tc['oligos'] as OligoDef[];
-                    const ndefs: Oligo[] = [];
-                    for (let jj = 0; jj < odefs.length; jj++) {
-                        ndefs.push({
-                            sequence: EPars.stringToSequence(odefs[jj].sequence),
-                            malus: odefs[jj].malus,
-                            name: odefs[jj]['name']
-                        });
-                    }
+                    const ndefs: Oligo[] = odefs.map(
+                        (odef) => ({
+                            sequence: EPars.stringToSequence(odef.sequence),
+                            malus: odef.malus,
+                            name: odef['name']
+                        })
+                    );
                     this._targetOligos[ii] = ndefs;
                 }
             }
@@ -1128,13 +1127,10 @@ export default class PoseEditMode extends GameMode {
             }
             const seqArr: number[] = EPars.stringToSequence(seq);
             const structArr: number[] = EPars.parenthesisToPairs(secstruct);
-            let freeEnergy = 0;
-            if (this._targetConditions && this._targetConditions[0]
-                    && this._targetConditions[0]['type'] === 'pseudoknot') {
-                freeEnergy = this._folder.scoreStructures(seqArr, structArr, true);
-            } else {
-                freeEnergy = this._folder.scoreStructures(seqArr, structArr);
-            }
+            const freeEnergy = (this._targetConditions && this._targetConditions[0]
+                    && this._targetConditions[0]['type'] === 'pseudoknot')
+                ? this._folder.scoreStructures(seqArr, structArr, true)
+                : this._folder.scoreStructures(seqArr, structArr);
             return 0.01 * freeEnergy;
         });
 
@@ -1417,10 +1413,9 @@ export default class PoseEditMode extends GameMode {
                 this.setToFrozenMode();
             }
 
-            let minZoom = -1;
-            for (const pose of this._poses) {
-                minZoom = Math.max(minZoom, pose.computeDefaultZoomLevel());
-            }
+            const minZoom = Math.max(...this._poses.map(
+                (pose) => pose.computeDefaultZoomLevel()
+            ));
 
             for (const pose of this._poses) {
                 pose.setZoomLevel(minZoom);
@@ -1560,8 +1555,8 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    private getForcedHighlights(targetIndex: number): number[] | null {
-        let elems: number[] | null = null;
+    private getForcedHighlights(targetIndex: number): number[] {
+        const elems: number[] = [];
 
         if (this._targetConditions && this._targetConditions[targetIndex] !== undefined) {
             const tc = this._targetConditions[targetIndex] as TargetConditions;
@@ -1571,9 +1566,6 @@ export default class PoseEditMode extends GameMode {
                     continue;
                 }
 
-                if (elems == null) {
-                    elems = [];
-                }
                 let curr = 1;
                 const forced: number[] = EPars.parenthesisToForcedArray(tc['force_struct']);
                 let jj;
@@ -2084,13 +2076,13 @@ export default class PoseEditMode extends GameMode {
         Eterna.chat.pushHideChat();
 
         // Show the panel
-        let infoText: string | null = null;
-        let moreText: string | null = null;
         const boostersData = this._puzzle.boosters;
-        if (boostersData != null && boostersData.mission_cleared != null) {
-            infoText = boostersData.mission_cleared['info'];
-            moreText = boostersData.mission_cleared['more'];
-        }
+        const infoText: string | null = (boostersData && boostersData.mission_cleared)
+            ? boostersData.mission_cleared['info']
+            : null;
+        const moreText: string | null = (boostersData && boostersData.mission_cleared)
+            ? boostersData.mission_cleared['more']
+            : null;
 
         const nextPuzzleData: PuzzleJSON | number | null | undefined = submitSolutionRspData?.['next-puzzle'];
 
@@ -2145,10 +2137,9 @@ export default class PoseEditMode extends GameMode {
                     Assert.assertIsDefined(this.modeStack);
                     this.modeStack.changeMode(new PoseEditMode(nextPuzzle, {}));
                     const oldURL = window.location.toString();
-                    let newURL = oldURL.replace(/\d+\/?$/, nextPuzzle.nodeID.toString());
-                    if (Eterna.DEV_MODE) {
-                        newURL = oldURL.replace(/puzzle=\d+?$/, `puzzle=${nextPuzzle.nodeID}`);
-                    }
+                    const newURL = Eterna.DEV_MODE
+                        ? oldURL.replace(/puzzle=\d+?$/, `puzzle=${nextPuzzle.nodeID}`)
+                        : oldURL.replace(/\d+\/?$/, nextPuzzle.nodeID.toString());
                     // eslint-disable-next-line no-restricted-globals
                     if (!Eterna.MOBILE_APP) history.pushState(null, '', newURL);
                 } catch (err) {
@@ -2219,8 +2210,8 @@ export default class PoseEditMode extends GameMode {
             this.showIntroScreen();
 
             // Fast-forward the intro-animation before mission screen
-            for (let i = 0; i < this._poses.length; ++i) {
-                this._poses[i].setAnimationProgress(1);
+            for (const pose of this._poses) {
+                pose.setAnimationProgress(1);
             }
         }
     }
@@ -2234,9 +2225,8 @@ export default class PoseEditMode extends GameMode {
             missionText = boosters.mission['text'];
         }
 
-        let introConstraintBoxes: ConstraintBox[] = [];
-        if (this._puzzle.constraints) {
-            introConstraintBoxes = this._puzzle.constraints.filter(
+        const introConstraintBoxes: ConstraintBox[] = this._puzzle.constraints
+            ? this._puzzle.constraints.filter(
                 (constraint) => !(constraint instanceof ShapeConstraint || constraint instanceof AntiShapeConstraint)
             ).map(
                 (constraint) => {
@@ -2253,13 +2243,13 @@ export default class PoseEditMode extends GameMode {
                     ));
                     return box;
                 }
-            );
-        }
+            )
+            : [];
 
-        let customLayout: Array<[number, number] | [null, null]> | undefined;
-        if (this._targetConditions && this._targetConditions[0]) {
-            customLayout = this._targetConditions[0]['custom-layout'];
-        }
+        const customLayout: Array<[number, number] | [null, null]> | undefined = (
+            (this._targetConditions && this._targetConditions[0])
+                ? this._targetConditions[0]['custom-layout'] : undefined
+        );
         Assert.assertIsDefined(this.modeStack);
         this.modeStack.pushMode(new MissionIntroMode(
             this._puzzle.getName(!Eterna.MOBILE_APP),
@@ -2343,8 +2333,8 @@ export default class PoseEditMode extends GameMode {
             if (Number(this._targetConditions[0]['fold_mode']) === Pose2D.OLIGO_MODE_DIMER) oligoLen++;
         } else if (this._targetConditions[0] && this._targetConditions[0]['type'] === 'multistrand') {
             const oligos: OligoDef[] = this._targetConditions[0]['oligos'] as OligoDef[];
-            for (let ii = 0; ii < oligos.length; ii++) {
-                oligoLen += (oligos[ii]['sequence'].length + 1);
+            for (const oligo of oligos) {
+                oligoLen += (oligo['sequence'].length + 1);
             }
         }
 

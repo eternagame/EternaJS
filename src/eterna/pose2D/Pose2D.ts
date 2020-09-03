@@ -799,7 +799,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._pseudoknotPairs;
     }
 
-    public set forcedHighlights(elems: number[] | null) {
+    public set forcedHighlights(elems: number[]) {
         this._forcedHighlightBox.clear();
         this._forcedHighlightBox.setHighlight(elems);
     }
