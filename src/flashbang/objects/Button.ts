@@ -181,7 +181,7 @@ export default abstract class Button extends ContainerObject implements Enableab
 
     protected setState(newState: ButtonState): void {
         if (this._state !== newState) {
-            let oldState: ButtonState = this._state;
+            const oldState: ButtonState = this._state;
             this._state = newState;
             if (this._state === ButtonState.DISABLED) {
                 this.endCapture();

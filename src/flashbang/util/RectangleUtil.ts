@@ -29,10 +29,10 @@ export default class RectangleUtil {
     public static intersect(rect1: Rectangle, rect2: Rectangle, out: Rectangle | null = null): Rectangle {
         if (out == null) out = new Rectangle();
 
-        let left: number = rect1.x > rect2.x ? rect1.x : rect2.x;
-        let right: number = rect1.right < rect2.right ? rect1.right : rect2.right;
-        let top: number = rect1.y > rect2.y ? rect1.y : rect2.y;
-        let bottom: number = rect1.bottom < rect2.bottom ? rect1.bottom : rect2.bottom;
+        const left: number = rect1.x > rect2.x ? rect1.x : rect2.x;
+        const right: number = rect1.right < rect2.right ? rect1.right : rect2.right;
+        const top: number = rect1.y > rect2.y ? rect1.y : rect2.y;
+        const bottom: number = rect1.bottom < rect2.bottom ? rect1.bottom : rect2.bottom;
 
         if (left > right || top > bottom) {
             RectangleUtil.setEmpty(out);
@@ -68,10 +68,10 @@ export default class RectangleUtil {
 
     /** Extends the rectangle in all four directions so that it is exactly on pixel bounds. */
     public static extendToWholePixels(rect: Rectangle, scaleFactor = 1): void {
-        let left: number = Math.floor(rect.x * scaleFactor) / scaleFactor;
-        let top: number = Math.floor(rect.y * scaleFactor) / scaleFactor;
-        let right: number = Math.ceil(rect.right * scaleFactor) / scaleFactor;
-        let bottom: number = Math.ceil(rect.bottom * scaleFactor) / scaleFactor;
+        const left: number = Math.floor(rect.x * scaleFactor) / scaleFactor;
+        const top: number = Math.floor(rect.y * scaleFactor) / scaleFactor;
+        const right: number = Math.ceil(rect.right * scaleFactor) / scaleFactor;
+        const bottom: number = Math.ceil(rect.bottom * scaleFactor) / scaleFactor;
 
         RectangleUtil.setTo(rect, left, top, right - left, bottom - top);
     }
@@ -86,7 +86,7 @@ export default class RectangleUtil {
         let maxX: number = -Number.MAX_VALUE;
         let minY: number = Number.MAX_VALUE;
         let maxY: number = -Number.MAX_VALUE;
-        let positions: Point[] = RectangleUtil.getPositions(rectangle, RectangleUtil.sPositions);
+        const positions: Point[] = RectangleUtil.getPositions(rectangle, RectangleUtil.sPositions);
 
         for (let i = 0; i < 4; ++i) {
             MatrixUtil.transformCoords(matrix, positions[i].x, positions[i].y, RectangleUtil.sPoint);

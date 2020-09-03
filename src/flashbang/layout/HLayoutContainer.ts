@@ -58,46 +58,35 @@ export default class HLayoutContainer extends LayoutContainer {
 
     /* override */
     protected doLayout(): void {
-        let maxHeight = 0;
-        if (this._vAlign !== VAlign.TOP) {
-            for (let child of this.children) {
-                if (child.visible) {
-                    let bounds = DisplayUtil.getBoundsRelative(child, this, HLayoutContainer.R);
-                    maxHeight = Math.max(bounds.height, maxHeight);
-                }
-            }
-        }
+        const maxHeight = this._vAlign === VAlign.TOP ? 0
+            : Math.max(...this.children.filter(
+                (child) => child.visible
+            ).map(
+                (child) => DisplayUtil.getBoundsRelative(child, this, HLayoutContainer.R).height
+            ));
 
-        let from: number;
-        let to: number;
-        let inc: number;
-        if (this._reversed) {
-            from = this.children.length - 1;
-            to = -1;
-            inc = -1;
-        } else {
-            from = 0;
-            to = this.children.length;
-            inc = 1;
-        }
+        const from: number = this._reversed ? this.children.length - 1 : 0;
+        const to: number = this._reversed ? -1 : this.children.length;
+        const inc: number = this._reversed ? -1 : 1;
 
         let x = 0;
         for (let ii = from; ii !== to; ii += inc) {
-            let child = this.getChildAt(ii);
-            if (child.visible) {
-                child.x = 0;
-                child.y = 0;
-                let bounds = DisplayUtil.getBoundsRelative(child, this, HLayoutContainer.R);
-                child.x = -bounds.left + x;
-                child.y = -bounds.top;
-                if (this._vAlign === VAlign.CENTER) {
-                    child.y += (maxHeight - bounds.height) * 0.5;
-                } else if (this._vAlign === VAlign.BOTTOM) {
-                    child.y += maxHeight - bounds.height;
-                }
-
-                x += bounds.width + this._hOffset;
+            const child = this.getChildAt(ii);
+            if (!child.visible) {
+                continue;
             }
+            child.x = 0;
+            child.y = 0;
+            const bounds = DisplayUtil.getBoundsRelative(child, this, HLayoutContainer.R);
+            child.x = -bounds.left + x;
+            child.y = -bounds.top;
+            if (this._vAlign === VAlign.CENTER) {
+                child.y += (maxHeight - bounds.height) * 0.5;
+            } else if (this._vAlign === VAlign.BOTTOM) {
+                child.y += maxHeight - bounds.height;
+            }
+
+            x += bounds.width + this._hOffset;
         }
     }
 

@@ -58,14 +58,14 @@ export default class TextBuilder {
 
     /** Creates the Text object */
     public build(): Text {
-        let text = new Text(this._text, this.style);
+        const text = new Text(this._text, this.style);
         text.scale.x = this._scale;
         text.scale.y = this._scale;
         return text;
     }
 
     public computeLineHeight(): number {
-        let dummy = this.build();
+        const dummy = this.build();
         dummy.text = 'A';
         return dummy.height;
     }

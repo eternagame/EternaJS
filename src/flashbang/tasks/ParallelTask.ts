@@ -20,7 +20,7 @@ export default class ParallelTask extends ObjectTask {
     protected added(): void {
         this._numActive = this._subtasks.length;
         Assert.assertIsDefined(this.parent);
-        for (let task of this._subtasks) {
+        for (const task of this._subtasks) {
             this.regs.add(task.destroyed.connect(() => {
                 this.onTaskComplete();
             }));
@@ -36,7 +36,7 @@ export default class ParallelTask extends ObjectTask {
 
     /* override */
     protected removed(): void {
-        for (let task of this._subtasks) {
+        for (const task of this._subtasks) {
             task.destroySelf();
         }
     }

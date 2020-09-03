@@ -37,7 +37,7 @@ export default class Setting<T> extends AbstractValue<T> {
 
     /* override */
     protected updateLocal(value: T): T {
-        let oldValue: T = this.value;
+        const oldValue: T = this.value;
         this._store.set(this._name, value);
         return oldValue;
     }

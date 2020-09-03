@@ -58,36 +58,24 @@ export default class VLayoutContainer extends LayoutContainer {
 
     /* override */
     protected doLayout(): void {
-        let maxWidth = 0;
-        if (this._hAlign !== HAlign.LEFT) {
-            for (let child of this.children) {
-                if (child.visible) {
-                    let bounds = DisplayUtil.getBoundsRelative(child, this, VLayoutContainer.R);
-                    maxWidth = Math.max(bounds.width, maxWidth);
-                }
-            }
-        }
+        const maxWidth = this._hAlign === HAlign.LEFT ? 0
+            : Math.max(...this.children.filter(
+                (child) => child.visible
+            ).map(
+                (child) => DisplayUtil.getBoundsRelative(child, this, VLayoutContainer.R).width
+            ));
 
-        let from: number;
-        let to: number;
-        let inc: number;
-        if (this._reversed) {
-            from = this.children.length - 1;
-            to = -1;
-            inc = -1;
-        } else {
-            from = 0;
-            to = this.children.length;
-            inc = 1;
-        }
+        const from: number = this._reversed ? this.children.length - 1 : 0;
+        const to: number = this._reversed ? 0 : this.children.length;
+        const inc: number = this._reversed ? -1 : 1;
 
         let y = 0;
         for (let ii = from; ii !== to; ii += inc) {
-            let child = this.getChildAt(ii);
+            const child = this.getChildAt(ii);
             if (child.visible) {
                 child.x = 0;
                 child.y = 0;
-                let bounds = DisplayUtil.getBoundsRelative(child, this, VLayoutContainer.R);
+                const bounds = DisplayUtil.getBoundsRelative(child, this, VLayoutContainer.R);
                 child.y = -bounds.top + y;
                 child.x = -bounds.left;
                 if (this._hAlign === HAlign.CENTER) {

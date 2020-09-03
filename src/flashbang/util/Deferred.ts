@@ -19,7 +19,7 @@ export default class Deferred<T> {
             throw new Error("Can't resolve sealed promise");
         }
 
-        let fn = this._resolve;
+        const fn = this._resolve;
         // this._resolve = null;
         // this._reject = null;
         fn(value);
@@ -30,7 +30,7 @@ export default class Deferred<T> {
             throw new Error("Can't reject sealed promise");
         }
 
-        let fn = this._reject;
+        const fn = this._reject;
         // this._resolve = null;
         // this._reject = null;
         fn(reason);

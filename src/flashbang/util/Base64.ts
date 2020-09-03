@@ -5,7 +5,7 @@ import DisplayUtil from './DisplayUtil';
 export default class Base64 {
     /** Renders a DisplayObject or Texture to a PNG and base64-encodes it */
     public static encodeDisplayObjectPNG(disp: DisplayObject | Texture) {
-        let target: DisplayObject = disp instanceof DisplayObject ? disp : new Sprite(disp);
+        const target: DisplayObject = disp instanceof DisplayObject ? disp : new Sprite(disp);
         return Base64.encodeBytes(DisplayUtil.renderToPNG(target));
     }
 

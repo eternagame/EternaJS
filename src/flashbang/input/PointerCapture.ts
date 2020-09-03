@@ -30,7 +30,7 @@ export default class PointerCapture {
 
         if (!PointerCapture._registeredEvents) {
             Assert.assertIsDefined(Flashbang.pixi);
-            for (let eventType of PointerCapture.POINTER_EVENTS) {
+            for (const eventType of PointerCapture.POINTER_EVENTS) {
                 Flashbang.pixi.renderer.plugins.interaction.addListener(eventType, PointerCapture.handleEvent);
             }
         }
@@ -38,7 +38,7 @@ export default class PointerCapture {
 
     private static handleEvent(e: InteractionEvent) {
         Assert.assertIsDefined(Flashbang.pixi);
-        for (let capture of PointerCapture._captures.reverse()) {
+        for (const capture of PointerCapture._captures.reverse()) {
             if (!Flashbang.pixi.renderer.plugins.interaction.hitTest(e.data.global, capture._root)) {
                 Assert.assertIsDefined(capture._onEvent);
                 capture._onEvent(e);
@@ -59,7 +59,7 @@ export default class PointerCapture {
 
         if (PointerCapture._captures.length === 0) {
             Assert.assertIsDefined(Flashbang.pixi);
-            for (let eventType of PointerCapture.POINTER_EVENTS) {
+            for (const eventType of PointerCapture.POINTER_EVENTS) {
                 Flashbang.pixi.renderer.plugins.interaction.removeListener(eventType, PointerCapture.handleEvent);
             }
         }

@@ -69,7 +69,7 @@ export default class FlashbangApp {
 
     public removeUpdatable(obj: Updatable): void {
         Assert.assertIsDefined(this._updatables);
-        let idx: number = this._updatables.indexOf(obj);
+        const idx: number = this._updatables.indexOf(obj);
         if (idx >= 0) {
             this._updatables.splice(idx, 1);
         }
@@ -124,11 +124,11 @@ export default class FlashbangApp {
 
         try {
             // convert PIXI's weird ticker delta into elapsed seconds
-            let dt = tickerDelta / (settings.TARGET_FPMS * 1000);
+            const dt = tickerDelta / (settings.TARGET_FPMS * 1000);
 
             // update all our updatables
             if (this._updatables) {
-                for (let updatable of this._updatables) {
+                for (const updatable of this._updatables) {
                     updatable.update(dt);
                 }
             }
@@ -165,21 +165,21 @@ export default class FlashbangApp {
             this._keyDown.set(e.code, false);
         }
 
-        let {topMode} = this._modeStack;
+        const {topMode} = this._modeStack;
         if (topMode != null) {
             topMode.onKeyboardEvent(e);
         }
     }
 
     protected onMouseWheelEvent(e: WheelEvent): void {
-        let {topMode} = this._modeStack;
+        const {topMode} = this._modeStack;
         if (topMode != null) {
             topMode.onMouseWheelEvent(e);
         }
     }
 
     protected onContextMenuEvent(e: Event): void {
-        let {topMode} = this._modeStack;
+        const {topMode} = this._modeStack;
         if (topMode != null) {
             topMode.onContextMenuEvent(e);
         }

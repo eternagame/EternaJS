@@ -32,7 +32,7 @@ export default class Dragger extends GameObject {
     protected added(): void {
         super.added();
 
-        let parent = this._displayParent || (this.mode && this.mode.container);
+        const parent = this._displayParent || (this.mode && this.mode.container);
         Assert.assertIsDefined(this._disp);
         if (parent) parent.addChild(this._disp);
         this.updateSize();
@@ -48,7 +48,7 @@ export default class Dragger extends GameObject {
             this.startY = -1;
         }
 
-        let touchable = new DisplayObjectPointerTarget(this._disp);
+        const touchable = new DisplayObjectPointerTarget(this._disp);
         this.regs.add(touchable.pointerMove.connect((e) => {
             const point = new Point(e.data.global.x, e.data.global.y);
             this.updateMouseLoc(point);
