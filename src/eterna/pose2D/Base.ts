@@ -347,41 +347,36 @@ export default class Base extends ContainerObject implements LateUpdatable {
             }
         }
 
-        let drawBody = false;
         if (bodyData) {
-            drawBody = true;
-
             this._lastCenterX = this.display.x + randomX + offX;
             this._lastCenterY = this.display.y + randomY + offY;
 
-            if (drawBody) {
-                if (barcodeData != null) {
-                    Base.showSprite(this._barcode, barcodeData);
-                    this._barcode.x = randomX + offX;
-                    this._barcode.y = randomY + offY;
-                }
+            if (barcodeData != null) {
+                Base.showSprite(this._barcode, barcodeData);
+                this._barcode.x = randomX + offX;
+                this._barcode.y = randomY + offY;
+            }
 
-                if (this._isForced) {
-                    // TODO
-                    // let temp_bd: Texture = body_data.clone();
-                    // temp_bd.colorTransform(base_rect, new ColorTransform(1, 1, 1, 0.2, 0, 0, 0, 0));
-                    // body_data = temp_bd;
-                }
+            if (this._isForced) {
+                // TODO
+                // let temp_bd: Texture = body_data.clone();
+                // temp_bd.colorTransform(base_rect, new ColorTransform(1, 1, 1, 0.2, 0, 0, 0, 0));
+                // body_data = temp_bd;
+            }
 
-                Base.showSprite(this._body, bodyData);
-                Base.showHighlightState(this._body, this._baseIdx, highlightState);
+            Base.showSprite(this._body, bodyData);
+            Base.showHighlightState(this._body, this._baseIdx, highlightState);
 
-                this._body.x = randomX + offX;
-                this._body.y = randomY + offY;
-                this._markers.position.set(offX, offY);
-                this._markers.scale.set((Base.MARKER_THICKNESS * Base.MARKER_RADIUS[this._zoomLevel]));
+            this._body.x = randomX + offX;
+            this._body.y = randomY + offY;
+            this._markers.position.set(offX, offY);
+            this._markers.scale.set((Base.MARKER_THICKNESS * Base.MARKER_RADIUS[this._zoomLevel]));
 
-                const letterdata: Texture | null = BaseAssets.getLetterTexture(this._baseType, zoomLevel, drawFlags);
-                if (letterdata != null) {
-                    Base.showSprite(this._letter, letterdata);
-                    this._letter.x = randomX + offX;
-                    this._letter.y = randomY + offY;
-                }
+            const letterdata: Texture | null = BaseAssets.getLetterTexture(this._baseType, zoomLevel, drawFlags);
+            if (letterdata != null) {
+                Base.showSprite(this._letter, letterdata);
+                this._letter.x = randomX + offX;
+                this._letter.y = randomY + offY;
             }
         }
 
@@ -394,8 +389,6 @@ export default class Base extends ContainerObject implements LateUpdatable {
             }
 
             const goRadian: number = Math.atan2(this._goY, this._goX);
-            let satelliteBodyData: Texture;
-
             if (zoomLevel < Base.NUM_ZOOM_LEVELS && !lowperform) {
                 const referenceBaseSize: number = BaseAssets.getSatelliteReferenceBaseSize(zoomLevel);
 
@@ -413,10 +406,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
                     st0DiffDegree = 0;
                 }
 
-                satelliteBodyData = BaseAssets.getSatellite0Texture(zoomLevel, st0DiffDegree);
-                if (satelliteBodyData == null) {
-                    satelliteBodyData = BaseAssets.getSatellite0Texture(zoomLevel, st0DiffDegree);
-                }
+                const satellite0BodyData = BaseAssets.getSatellite0Texture(zoomLevel, st0DiffDegree);
 
                 const drawSt0 = !this._forceUnpaired;
 
@@ -426,7 +416,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
                     const st0X: number = (this._goX / 2.5) * st0Cos - (this._goY / 2.5) * st0Sin + offX + randomX;
                     const st0Y: number = (this._goX / 2.5) * st0Sin + (this._goY / 2.5) * st0Cos + offY + randomY;
 
-                    Base.showSprite(this._sat0, satelliteBodyData);
+                    Base.showSprite(this._sat0, satellite0BodyData);
                     Base.showHighlightState(this._sat0, this._baseIdx, highlightState);
                     this._sat0.x = st0X;
                     this._sat0.y = st0Y;
@@ -482,16 +472,12 @@ export default class Base extends ContainerObject implements LateUpdatable {
                     st1DiffDegree = currentDegree - 90.0;
                     st1DiffDegree = Base.toCanonicalRange(st1DiffDegree);
 
-                    let pairR = 0;
-
-                    if (this._pairingCompleteTime >= 0) {
-                        pairR = (
+                    const pairR = this._pairingCompleteTime >= 0
+                        ? (
                             (Math.cos((currentTime - this._pairingCompleteTime) / 250.0 + Math.PI / 2)) * 2
                             + referenceBaseSize * 0.45
-                        );
-                    } else {
-                        pairR = pairingProg * (referenceBaseSize * 0.45) + (1 - pairingProg) * this._pairingStartRadius;
-                    }
+                        )
+                        : pairingProg * (referenceBaseSize * 0.45) + (1 - pairingProg) * this._pairingStartRadius;
 
                     st1X = Math.cos(currentRadian) * pairR + offX;
                     st1Y = Math.sin(currentRadian) * pairR + offY;
@@ -508,12 +494,12 @@ export default class Base extends ContainerObject implements LateUpdatable {
                     st1DiffDegree = 0;
                 }
 
-                satelliteBodyData = BaseAssets.getSatellite1Texture(zoomLevel, st1DiffDegree, this._pairType);
+                const satellite1BodyData = BaseAssets.getSatellite1Texture(zoomLevel, st1DiffDegree, this._pairType);
 
                 this._lastSatellite1AbsDegree = st1DiffDegree + 90.0;
 
                 if (drawSt1) {
-                    Base.showSprite(this._sat1, satelliteBodyData);
+                    Base.showSprite(this._sat1, satellite1BodyData);
                     Base.showHighlightState(this._sat1, this._baseIdx, highlightState);
                     this._sat1.x = st1X;
                     this._sat1.y = st1Y;
@@ -525,13 +511,11 @@ export default class Base extends ContainerObject implements LateUpdatable {
             this._unpairing = false;
         }
 
-        if (numberTexture != null && bodyData != null && drawBody) {
-            let desiredDist: number = Math.sqrt(
+        if (numberTexture != null && bodyData != null) {
+            const desiredDist: number = 0.8 * (Math.sqrt(
                 (numberTexture.width / 2) * (numberTexture.width / 2)
                 + (numberTexture.height / 2) * (numberTexture.height / 2)
-            );
-            desiredDist += Math.sqrt((this._outX / 2) * (this._outX / 2) + (this._outY / 2) * (this._outY / 2));
-            desiredDist *= 0.8;
+            ) + Math.sqrt((this._outX / 2) * (this._outX / 2) + (this._outY / 2) * (this._outY / 2)));
 
             const outDist: number = Math.sqrt(this._outX * this._outX + this._outY * this._outY);
             if (outDist > Constants.EPSILON) {
@@ -574,10 +558,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
         Base.showSprite(this._spark1, tex);
         Base.showSprite(this._spark2, tex);
 
-        let flyingDist = 70;
-        if (zoomLevel < Base.NUM_ZOOM_LEVELS) {
-            flyingDist = 100;
-        }
+        const flyingDist = (zoomLevel < Base.NUM_ZOOM_LEVELS) ? 100 : 70;
 
         this._spark1.position = new Point(
             offX + this._sparkDir.x * flyingDist * animProgress,

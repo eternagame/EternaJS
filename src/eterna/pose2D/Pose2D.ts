@@ -1972,9 +1972,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        let basesMoved = false;
-        if (this._baseToX && this._baseToY && this._baseFromX && this._baseFromY) {
-            basesMoved = true;
+        const basesMoved = this._baseToX && this._baseToY && this._baseFromX && this._baseFromY;
+        if (basesMoved) {
             // Update base locations
 
             if (this._foldStartTime < 0) {
@@ -2009,11 +2008,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.updateScoreNodeVisualization(this._offX !== this._prevOffsetX || this._offY !== this._prevOffsetY);
 
         // / Bitblt rendering
-        let needRedraw = false;
-
-        for (let ii = 0; ii < fullSeq.length && !needRedraw; ii++) {
-            needRedraw = needRedraw || this._bases[ii].needRedraw(this._simpleGraphicsMods);
-        }
+        const needRedraw = this._bases.some(
+            (base) => base.needRedraw(this._simpleGraphicsMods)
+        );
 
         if (needRedraw || this._redraw) {
             // Create highlight state to pass to bases.
@@ -2035,10 +2032,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     continue;
                 }
 
-                let useBarcode = false;
-                if (this._barcodes != null && this._barcodes.indexOf(ii) >= 0) {
-                    useBarcode = true;
-                }
+                const useBarcode = (this._barcodes != null && this._barcodes.indexOf(ii) >= 0);
 
                 this._bases[ii].forceUnpaired = (
                     this._forcedStruct != null && this._forcedStruct[ii] === EPars.FORCE_UNPAIRED
@@ -2136,11 +2130,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
             const boundLen: number = this.getBoundSequence().length;
             for (let ii = fullSeq.indexOf(EPars.RNABASE_CUT) + 1; ii < fullSeq.length; ii++) {
-                let baseglow = this._oligoBases[ii];
-                if (baseglow == null) {
-                    baseglow = new BaseGlow();
-                    this._oligoBases[ii] = baseglow;
-                }
+                const baseglow = this._oligoBases[ii];
                 if ((this._oligoPaired || (this._oligosPaired > 0 && ii < boundLen)) && this._pairs[ii] >= 0) {
                     baseglow.isWrong = this._restrictedHighlightBox.isInQueue(ii);
                     const pos = this._bases[ii].getLastDrawnPos();

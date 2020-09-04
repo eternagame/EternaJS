@@ -110,12 +110,7 @@ export default class EPars {
                     stackStart = ii;
                 }
 
-                let isContinued = false;
-                if (lastStackOther < 0) {
-                    isContinued = true;
-                } else if (pairs[ii] === lastStackOther - 1) {
-                    isContinued = true;
-                }
+                const isContinued = lastStackOther < 0 || pairs[ii] === lastStackOther - 1;
 
                 if (isContinued) {
                     lastStackOther = pairs[ii];
@@ -177,8 +172,8 @@ export default class EPars {
 
     public static getColoredSequence(seq: string): string {
         let res = '';
-        for (let ii = 0; ii < seq.length; ii++) {
-            res += EPars.getColoredLetter(seq[ii]);
+        for (const c of seq) {
+            res += EPars.getColoredLetter(c);
         }
         return res;
     }
@@ -189,17 +184,8 @@ export default class EPars {
         }
 
         const offset: number = expData[0];
-        let maxmax: number = expData[1];
-        let minmin: number = expData[1];
-        for (let ii = 1; ii < expData.length; ii++) {
-            if (expData[ii] > maxmax) {
-                maxmax = expData[ii];
-            }
-
-            if (expData[ii] < minmin) {
-                minmin = expData[ii];
-            }
-        }
+        const maxmax: number = Math.max(...expData.slice(1));
+        const minmin: number = Math.min(...expData.slice(1));
 
         const avg: number = (maxmax + minmin) / 2.0;
 
@@ -463,10 +449,9 @@ export default class EPars {
     }
 
     public static sequenceToString(sequence: number[], allowCut: boolean = true, allowUnknown: boolean = true): string {
-        let str = '';
-        for (const value of sequence) {
-            str += EPars.nucleotideToString(value, allowCut, allowUnknown);
-        }
+        const str = sequence.map(
+            (value) => EPars.nucleotideToString(value, allowCut, allowUnknown)
+        ).join('');
         return str;
     }
 
@@ -576,12 +561,8 @@ export default class EPars {
     }
 
     public static parenthesisToPairs(parenthesis: string, pseudoknots: boolean = false): number[] {
-        const pairs: number[] = [];
+        const pairs: number[] = new Array(parenthesis.length).fill(-1);
         const pairStack: number[] = [];
-
-        for (let jj = 0; jj < parenthesis.length; jj++) {
-            pairs.push(-1);
-        }
 
         for (let jj = 0; jj < parenthesis.length; jj++) {
             if (parenthesis.charAt(jj) === '(') {
@@ -670,11 +651,7 @@ export default class EPars {
         if (pseudoknots) {
             // given partner-style array, writes dot-parens notation string. handles pseudoknots!
             // example of partner-style array: '((.))' -> [4,3,-1,1,0]
-            const bpList: number[] = new Array(pairs.length);
-
-            for (let ii = 0; ii < pairs.length; ii++) {
-                bpList[ii] = -1;
-            }
+            const bpList: number[] = new Array(pairs.length).fill(-1);
 
             for (let ii = 0; ii < pairs.length; ii++) {
                 if (pairs[ii] > ii) {
@@ -750,12 +727,7 @@ export default class EPars {
             }
         }
 
-        const biPairs: number[] = new Array(pairs.length);
-
-        for (let ii = 0; ii < pairs.length; ii++) {
-            biPairs[ii] = -1;
-        }
-
+        const biPairs: number[] = new Array(pairs.length).fill(-1);
         for (let ii = 0; ii < pairs.length; ii++) {
             if (pairs[ii] > ii) {
                 biPairs[ii] = pairs[ii];
@@ -764,7 +736,6 @@ export default class EPars {
         }
 
         let str = '';
-
         for (let ii = 0; ii < biPairs.length; ii++) {
             if (biPairs[ii] > ii) {
                 str += '(';
@@ -802,12 +773,8 @@ export default class EPars {
     }
 
     public static parenthesisToForcedArray(parenthesis: string): number[] {
-        const forced: number[] = [];
+        const forced: number[] = new Array(parenthesis.length).fill(EPars.FORCE_IGNORE);
         const pairStack: number[] = [];
-
-        for (let jj = 0; jj < parenthesis.length; jj++) {
-            forced.push(EPars.FORCE_IGNORE);
-        }
 
         for (let jj = 0; jj < parenthesis.length; jj++) {
             if (parenthesis.charAt(jj) === '.') {
@@ -961,12 +928,9 @@ export default class EPars {
     }
 
     public static hasCut(seq: number[], from: number, to: number): boolean {
-        for (let ii: number = from; ii <= to; ii++) {
-            if (seq[ii] === EPars.RNABASE_CUT) {
-                return true;
-            }
-        }
-        return false;
+        return seq.slice(from, to + 1).some(
+            (c) => c === EPars.RNABASE_CUT
+        );
     }
 
     public static pairType(a: number, b: number): number {
