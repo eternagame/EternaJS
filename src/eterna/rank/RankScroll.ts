@@ -56,15 +56,15 @@ export default class RankScroll extends ContainerObject {
 
         // / Don't even need to move
         if (prevPoints >= newPoints || prevRank <= newRank) {
-            for (let ii = 0; ii < newRicher.length; ii++) {
-                const rank = new PlayerRank(newRicher[ii]['name'], newRicher[ii]['points']);
-                rank.rank = newRicher[ii]['rank'];
+            for (const newRich of newRicher) {
+                const rank = new PlayerRank(newRich['name'], newRich['points']);
+                rank.rank = newRich['rank'];
                 ranks.push(rank);
             }
 
-            for (let ii = 0; ii < newPoorer.length; ii++) {
-                const rank = new PlayerRank(newPoorer[ii]['name'], newPoorer[ii]['points']);
-                rank.rank = newPoorer[ii]['rank'];
+            for (const newPoor of newPoorer) {
+                const rank = new PlayerRank(newPoor['name'], newPoor['points']);
+                rank.rank = newPoor['rank'];
                 ranks.push(rank);
             }
 
@@ -73,18 +73,18 @@ export default class RankScroll extends ContainerObject {
             player.rank = newRank;
         } else {
             let lastAfterEntryUID = -1;
-            for (let ii = 0; ii < newRicher.length; ii++) {
-                const rank = new PlayerRank(newRicher[ii]['name'], newRicher[ii]['points']);
-                rank.rank = newRicher[ii]['rank'];
+            for (const newRich of newRicher) {
+                const rank = new PlayerRank(newRich['name'], newRich['points']);
+                rank.rank = newRich['rank'];
                 ranks.push(rank);
-                lastAfterEntryUID = newRicher[ii]['uid'];
+                lastAfterEntryUID = newRich['uid'];
             }
 
-            for (let ii = 0; ii < newPoorer.length; ii++) {
-                const rank = new PlayerRank(newPoorer[ii]['name'], newPoorer[ii]['points']);
-                rank.rank = newPoorer[ii]['rank'];
+            for (const newPoor of newPoorer) {
+                const rank = new PlayerRank(newPoor['name'], newPoor['points']);
+                rank.rank = newPoor['rank'];
                 ranks.push(rank);
-                lastAfterEntryUID = newPoorer[ii]['uid'];
+                lastAfterEntryUID = newPoor['uid'];
             }
 
             let commonEntry = false;
@@ -108,9 +108,9 @@ export default class RankScroll extends ContainerObject {
             }
 
             if (!commonEntry || commonIndex >= 0) {
-                for (let ii = commonIndex; ii < prevRicher.length; ii++) {
-                    const rank = new PlayerRank(prevRicher[ii]['name'], prevRicher[ii]['points']);
-                    rank.rank = prevRicher[ii]['rank'];
+                for (const prevRich of prevRicher) {
+                    const rank = new PlayerRank(prevRich['name'], prevRich['points']);
+                    rank.rank = prevRich['rank'];
                     ranks.push(rank);
                 }
             }

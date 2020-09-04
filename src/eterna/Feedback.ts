@@ -64,25 +64,11 @@ export default class Feedback {
             this._shapeData[index] = dat.slice();
             const shapeData: number[] = this._shapeData[index];
 
-            let smax: number = shapeData[0];
-            let smin: number = shapeData[0];
-            let savg: number = shapeData[0];
-
-            for (let ii = 0; ii < shapeData.length; ii++) {
-                if (shapeData[ii] > smax) {
-                    smax = shapeData[ii];
-                }
-
-                if (shapeData[ii] < smin) {
-                    smin = shapeData[ii];
-                }
-
-                savg += shapeData[ii];
-            }
-
-            if (shapeData.length > 0) {
-                savg /= shapeData.length;
-            }
+            const smax: number = Math.max(...shapeData);
+            const smin: number = Math.min(...shapeData);
+            const savg: number = shapeData.length > 0
+                ? shapeData.reduce((sum, item) => sum + item) / shapeData.length
+                : 0;
 
             if (threshold != null) {
                 this._shapeThresholds[index] = threshold;

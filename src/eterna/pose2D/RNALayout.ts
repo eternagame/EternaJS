@@ -326,8 +326,8 @@ export default class RNALayout {
             yarray[rootnode.indexA] = rootnode.y;
         }
 
-        for (let ii = 0; ii < rootnode.children.length; ii++) {
-            this.getCoordsRecursive(rootnode.children[ii], xarray, yarray);
+        for (const child of rootnode.children) {
+            this.getCoordsRecursive(child, xarray, yarray);
         }
     }
 
@@ -335,9 +335,7 @@ export default class RNALayout {
         if (this._root != null) {
             this.getRotationDirectionSignRecursive(this._root, rotationDirectionSign);
         } else {
-            for (let ii = 0; ii < rotationDirectionSign.length; ii++) {
-                rotationDirectionSign[ii] = 1;
-            }
+            rotationDirectionSign.fill(1);
         }
     }
 
@@ -348,8 +346,8 @@ export default class RNALayout {
         } else if (rootnode.indexA >= 0) {
             rotationDirectionSign[rootnode.indexA] = rootnode.rotationDirection;
         }
-        for (let ii = 0; ii < rootnode.children.length; ii++) {
-            this.getRotationDirectionSignRecursive(rootnode.children[ii], rotationDirectionSign);
+        for (const child of rootnode.children) {
+            this.getRotationDirectionSignRecursive(child, rotationDirectionSign);
         }
     }
 
@@ -414,9 +412,8 @@ export default class RNALayout {
                 );
             }
         } else if (rootnode.children.length > 1) {
-            let ii: number;
             let npairs = 0;
-            for (ii = 0; ii < rootnode.children.length; ii++) {
+            for (let ii = 0; ii < rootnode.children.length; ii++) {
                 if (rootnode.children[ii].isPair) {
                     npairs++;
                 }
@@ -445,19 +442,19 @@ export default class RNALayout {
                 rootnode.y = parentnode.y + goY * circleRadius;
             }
 
-            for (ii = 0; ii < rootnode.children.length; ii++) {
+            for (const child of rootnode.children) {
                 lengthWalker += this._primarySpace;
                 if (
                     this._exceptionIndices != null
                     && (
-                        this._exceptionIndices.indexOf(rootnode.children[ii].indexA) >= 0
-                        || this._exceptionIndices.indexOf(rootnode.children[ii].indexB) >= 0
+                        this._exceptionIndices.indexOf(child.indexA) >= 0
+                        || this._exceptionIndices.indexOf(child.indexB) >= 0
                     )
                 ) {
                     lengthWalker += 2 * this._primarySpace;
                 }
 
-                if (rootnode.children[ii].isPair) {
+                if (child.isPair) {
                     lengthWalker += this._pairSpace / 2.0;
                 }
 
@@ -473,10 +470,10 @@ export default class RNALayout {
                 const childGoY = childY - rootnode.y;
                 const childGoLen = Math.sqrt(childGoX * childGoX + childGoY * childGoY);
 
-                this.drawTreeRecursive(rootnode.children[ii], rootnode, childX, childY,
+                this.drawTreeRecursive(child, rootnode, childX, childY,
                     childGoX / childGoLen, childGoY / childGoLen, rotationDirection);
 
-                if (rootnode.children[ii].isPair) {
+                if (child.isPair) {
                     lengthWalker += this._pairSpace / 2.0;
                 }
             }
@@ -577,14 +574,14 @@ export default class RNALayout {
             }
         }
 
-        for (ii = 0; ii < rootnode.children.length; ii++) {
+        for (const child of rootnode.children) {
             // read out where this point should be based on 'this._customLayout'. get coordinates in
             // "local coordinate frame" set by parent pair in this._customLayout.
             // This would be a lot easier to read if we had a notion of an (x,y) pair, dot products, and cross products.
-            const customCoord: number[] | null[] = this._customLayout[rootnode.children[ii].indexA].slice();
-            if (rootnode.children[ii].isPair) {
-                const customCoordA: [number, number] | [null, null] = this._customLayout[rootnode.children[ii].indexA];
-                const customCoordB: [number, number] | [null, null] = this._customLayout[rootnode.children[ii].indexB];
+            const customCoord: number[] | null[] = this._customLayout[child.indexA].slice();
+            if (child.isPair) {
+                const customCoordA: [number, number] | [null, null] = this._customLayout[child.indexA];
+                const customCoordB: [number, number] | [null, null] = this._customLayout[child.indexB];
                 if (
                     customCoordA[0] !== null
                     && customCoordA[1] !== null
@@ -611,10 +608,10 @@ export default class RNALayout {
                 if (customCoord[0] !== null && customCoord[1] !== null) {
                     const devX: number = customCoord[0] - anchorCustomX;
                     const devY: number = customCoord[1] - anchorCustomY;
-                    let templateX: number = devX * anchorCustomCrossX + devY * anchorCustomCrossY;
-                    let templateY: number = devX * anchorCustomGoX + devY * anchorCustomGoY;
-                    templateX *= this._primarySpace;
-                    templateY *= this._primarySpace;
+                    const templateX: number = (devX * anchorCustomCrossX + devY * anchorCustomCrossY)
+                        * this._primarySpace;
+                    const templateY: number = (devX * anchorCustomGoX + devY * anchorCustomGoY)
+                        * this._primarySpace;
                     // go to Eterna RNALayout global frame.
                     childX = anchorX + crossX * templateX + goX * templateY;
                     childY = anchorY + crossY * templateX + goY * templateY;
@@ -622,15 +619,15 @@ export default class RNALayout {
             }
 
             let childRotationDirection: number = rotationDirection;
-            if (rootnode.children[ii].isPair) {
-                const customCoordA: [number, number] | [null, null] = this._customLayout[rootnode.children[ii].indexA];
-                const customCoordB: [number, number] | [null, null] = this._customLayout[rootnode.children[ii].indexB];
+            if (child.isPair) {
+                const customCoordA: [number, number] | [null, null] = this._customLayout[child.indexA];
+                const customCoordB: [number, number] | [null, null] = this._customLayout[child.indexB];
                 if (customCoordA[0] !== null && customCoordB[0] !== null) {
                     const customCrossX: number = (customCoordA[0] - customCoordB[0]);
                     const customCrossY: number = (customCoordA[1] - customCoordB[1]);
                     let customGoX: number = customCrossY;
                     let customGoY: number = -customCrossX;
-                    const customCoordNext = this._customLayout[rootnode.children[ii].indexA + 1];
+                    const customCoordNext = this._customLayout[child.indexA + 1];
                     let childCustomRotationDirection: RotationDirection = 0;
                     let childCustomDotProd = 0;
                     if (
@@ -668,7 +665,7 @@ export default class RNALayout {
 
             const childGoLength: number = Math.sqrt(childGoX * childGoX + childGoY * childGoY);
 
-            this.drawTreeRecursive(rootnode.children[ii], rootnode, childX, childY,
+            this.drawTreeRecursive(child, rootnode, childX, childY,
                 childGoX / childGoLength, childGoY / childGoLength, childRotationDirection);
         }
     }
@@ -693,7 +690,6 @@ export default class RNALayout {
         startX: number, startY: number,
         goX: number, goY: number, rotationDirection: RotationDirection
     ): void {
-        let ii: number;
         const crossX: number = -goY * rotationDirection;
         const crossY: number = goX * rotationDirection;
 
@@ -749,14 +745,14 @@ export default class RNALayout {
             anchorPuzzlerGoY *= anchorPuzzlerRotationDirection;
         }
 
-        for (ii = 0; ii < rootnode.children.length; ii++) {
+        for (const child of rootnode.children) {
             // read out where this point should be based on 'this._puzzlerLayout'. get coordinates in
             // "local coordinate frame" set by parent pair in this._puzzlerLayout.
             // This would be a lot easier to read if we had a notion of an (x,y) pair, dot products, and cross products.
-            const puzzlerCoord: number[] = this._puzzlerLayout[rootnode.children[ii].indexA].slice();
-            if (rootnode.children[ii].isPair) {
-                const puzzlerCoordA: [number, number] = this._puzzlerLayout[rootnode.children[ii].indexA];
-                const puzzlerCoordB: [number, number] = this._puzzlerLayout[rootnode.children[ii].indexB];
+            const puzzlerCoord: number[] = this._puzzlerLayout[child.indexA].slice();
+            if (child.isPair) {
+                const puzzlerCoordA: [number, number] = this._puzzlerLayout[child.indexA];
+                const puzzlerCoordB: [number, number] = this._puzzlerLayout[child.indexB];
                 puzzlerCoord[0] = (puzzlerCoordA[0] + puzzlerCoordB[0]) / 2;
                 puzzlerCoord[1] = (puzzlerCoordA[1] + puzzlerCoordB[1]) / 2;
             }
@@ -780,15 +776,15 @@ export default class RNALayout {
             }
 
             let childRotationDirection: number = rotationDirection;
-            if (rootnode.children[ii].isPair) {
-                const puzzlerCoordA: [number, number] = this._puzzlerLayout[rootnode.children[ii].indexA];
-                const puzzlerCoordB: [number, number] = this._puzzlerLayout[rootnode.children[ii].indexB];
+            if (child.isPair) {
+                const puzzlerCoordA: [number, number] = this._puzzlerLayout[child.indexA];
+                const puzzlerCoordB: [number, number] = this._puzzlerLayout[child.indexB];
                 const puzzlerCrossX: number = (puzzlerCoordA[0] - puzzlerCoordB[0]);
                 const puzzlerCrossY: number = (puzzlerCoordA[1] - puzzlerCoordB[1]);
                 let puzzlerGoX: number = puzzlerCrossY;
                 let puzzlerGoY: number = -puzzlerCrossX;
 
-                const puzzlerCoordNext: [number, number] = this._puzzlerLayout[rootnode.children[ii].indexA + 1];
+                const puzzlerCoordNext: [number, number] = this._puzzlerLayout[child.indexA + 1];
                 const puzzlerGoNextX: number = puzzlerCoordNext[0] - puzzlerCoord[0];
                 const puzzlerGoNextY: number = puzzlerCoordNext[1] - puzzlerCoord[1];
                 const childPuzzlerDotProd = puzzlerGoNextX * puzzlerGoX + puzzlerGoNextY * puzzlerGoY;
@@ -816,7 +812,7 @@ export default class RNALayout {
 
             const childGoLength: number = Math.sqrt(childGoX * childGoX + childGoY * childGoY);
 
-            this.drawTreeRecursive(rootnode.children[ii], rootnode, childX, childY,
+            this.drawTreeRecursive(child, rootnode, childX, childY,
                 childGoX / childGoLength, childGoY / childGoLength, childRotationDirection);
         }
     }
@@ -828,10 +824,12 @@ export default class RNALayout {
      * @returns the total score
      */
     private getTotalScoreRecursive(rootnode: RNATreeNode): number {
-        let score: number = rootnode.score;
-        for (let ii = 0; ii < rootnode.children.length; ii++) {
-            score += this.getTotalScoreRecursive(rootnode.children[ii]);
-        }
+        const score = rootnode.children.map(
+            (child) => this.getTotalScoreRecursive(child)
+        ).reduce(
+            (totScore, newScore) => totScore + newScore,
+            rootnode.score
+        );
         return score;
     }
 
@@ -872,11 +870,9 @@ export default class RNALayout {
                 throw new Error('Parent node must be a pair');
             }
 
-            let ii: number;
             let numStacks = 0;
             let firstStackIndex = -1;
-
-            for (ii = 0; ii < rootnode.children.length; ii++) {
+            for (let ii = 0; ii < rootnode.children.length; ii++) {
                 if (rootnode.children[ii].isPair) {
                     numStacks++;
                     if (firstStackIndex < 0) {
@@ -886,8 +882,6 @@ export default class RNALayout {
                     throw new Error('Virtual node should not have a virtual node child');
                 }
             }
-            let i: number; let j: number; let p: number; let
-                q: number;
 
             if (numStacks === 1 && parentnode != null) {
                 rootnode.score = RNALayout.lookupFe(nnfe, parentnode.indexA);
@@ -897,8 +891,8 @@ export default class RNALayout {
                 rootnode.score = RNALayout.lookupFe(nnfe, parentnode.indexA);
             }
 
-            for (ii = 0; ii < rootnode.children.length; ii++) {
-                this.scoreTreeRecursive(nnfe, rootnode.children[ii], rootnode);
+            for (const child of rootnode.children) {
+                this.scoreTreeRecursive(nnfe, child, rootnode);
             }
         }
     }
@@ -949,15 +943,15 @@ export default class RNALayout {
 
         if (rootnode.children.length === 1 && rootnode.children[0].indexA < 0) return false;
 
-        for (let ii = 0; ii < rootnode.children.length; ii++) {
-            if (this._customLayout[rootnode.children[ii].indexA][0] == null) return false;
-            if (this._customLayout[rootnode.children[ii].indexA][1] == null) return false;
-            if (rootnode.children[ii].isPair) {
+        for (const child of rootnode.children) {
+            if (this._customLayout[child.indexA][0] == null) return false;
+            if (this._customLayout[child.indexA][1] == null) return false;
+            if (child.isPair) {
                 // all other pairs of junction paired in target structure?
-                if (this._targetPairs[rootnode.children[ii].indexA] !== rootnode.children[ii].indexB) {
+                if (this._targetPairs[child.indexA] !== child.indexB) {
                     return false;
                 }
-            } else if (this._targetPairs[rootnode.children[ii].indexA] > 0) {
+            } else if (this._targetPairs[child.indexA] > 0) {
                 // all unpaired bases of junction also unpaired in target structure?
                 return false;
             }

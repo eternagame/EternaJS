@@ -67,8 +67,8 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
 
         if (!this._queue) this._queue = [];
 
-        for (let ii = 0; ii < elems.length; ii++) {
-            this._queue.push(elems[ii]);
+        for (const elem of elems) {
+            this._queue.push(elem);
         }
 
         this._dirty = true;
@@ -108,9 +108,6 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
     }
 
     private redraw(): void {
-        let color: number;
-        let baseSize: number;
-        let fadeTime = 0.85;
         const zoomLevel: number = this._pose.zoomLevel;
 
         this.display.alpha = 0;
@@ -126,6 +123,7 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
 
         const type: HighlightType = this._type;
 
+        let baseSize: number;
         if (type === HighlightType.STACK) {
             baseSize = 25;
         } else if (zoomLevel === 0) {
@@ -140,6 +138,8 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
             baseSize = 4;
         }
 
+        let color: number;
+        let fadeTime = 0.85;
         switch (type) {
             case HighlightType.STACK:
                 color = 0xFFFFFF;

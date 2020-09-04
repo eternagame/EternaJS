@@ -97,8 +97,8 @@ export default class BaseRope extends GameObject implements LateUpdatable {
 
     private drawBaseRopeLine(interpBasePosXY: Array<[number, number]>): void {
         this._graphics.moveTo(this._lastBasePosX[0], this._lastBasePosY[0]);
-        for (let ii = 0; ii < interpBasePosXY.length; ii++) {
-            this._graphics.lineTo(interpBasePosXY[ii][0], interpBasePosXY[ii][1]);
+        for (const pt of interpBasePosXY) {
+            this._graphics.lineTo(pt[0], pt[1]);
         }
     }
 

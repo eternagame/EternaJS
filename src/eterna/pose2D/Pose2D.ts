@@ -822,9 +822,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public clearDesignStruct(): void {
-        for (let jj = 0; jj < this.fullSequenceLength; jj++) {
-            this._designStruct[jj] = false;
-        }
+        this._designStruct.fill(false);
         this.updateDesignHighlight();
     }
 
@@ -1208,9 +1206,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         // If any of the nucleotides are part of a stack, highlight its pair as well.
         const addition: number[] = [];
-        for (let i = 0; i < nucleotides.length; ++i) {
-            if (this._pairs[nucleotides[i]] !== -1) {
-                addition.push(this._pairs[nucleotides[i]]);
+        for (const nuc of nucleotides) {
+            if (this._pairs[nuc] !== -1) {
+                addition.push(this._pairs[nuc]);
             }
         }
         nucleotides = nucleotides.concat(addition);
@@ -1641,15 +1639,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
         // base marks
         const indices = this.trackedIndices;
         this.clearTracking();
-        let ii: number;
-        for (ii = 0; ii < indices.length; ii++) {
-            indices[ii].baseIndex = idxMap[indices[ii].baseIndex];
-            this.addBaseMark(indices[ii].baseIndex, indices[ii].colors);
+        for (const index of indices) {
+            index.baseIndex = idxMap[index.baseIndex];
+            this.addBaseMark(index.baseIndex, index.colors);
         }
 
         // blue highlights ("magic glue")
         const newDesign: boolean[] = [];
-        for (ii = 0; ii < this.fullSequenceLength; ii++) {
+        for (let ii = 0; ii < this.fullSequenceLength; ii++) {
             newDesign[idxMap[ii]] = this._designStruct[ii];
         }
         this._designStruct = newDesign;
@@ -1735,8 +1732,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
             return len;
         }
         Assert.assertIsDefined(this._oligos);
-        for (let ii = 0; ii < this._oligos.length; ii++) {
-            len += 1 + this._oligos[ii].sequence.length;
+        for (const oligo of this._oligos) {
+            len += 1 + oligo.sequence.length;
         }
         return len;
     }

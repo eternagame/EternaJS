@@ -37,11 +37,13 @@ export default class TargetExpectedAccuracyConstraint extends Constraint<TargetE
         ) === undefined) {
             constraintContext.undoBlocks[0].updateMeltingPointAndDotPlot(false);
         }
+
+        // For some reason the null-coalescing operator ?? is not supported here.
         const expectedAccuracy = constraintContext.undoBlocks[0].getParam(
             UndoBlockParam.TARGET_EXPECTED_ACCURACY,
             37,
             false
-        ) as number | undefined ?? 0;
+        ) as number | undefined || 0;
 
         return {
             satisfied: expectedAccuracy >= this.targetExpectedAccuracy,
