@@ -171,6 +171,8 @@ export default class RScriptEnv extends ContainerObject {
             this.ui.setDisplayScoreTexts(visible);
         } else if (elementID === RScriptUIElementID.BASENUMBERING) {
             this.ui.setShowNumbering(visible);
+        } else if (elementID === RScriptUIElementID.BASELETTERING) {
+            this.ui.lettersVisible = visible;
         } else if (elementID === RScriptUIElementID.TOTALENERGY) {
             this.ui.setShowTotalEnergy(visible);
         } else if (elementID === RScriptUIElementID.HINT) {

@@ -3292,6 +3292,12 @@ export default class PoseEditMode extends GameMode {
         this._seqStacks = [];
     }
 
+    public set lettersVisible(value: boolean) {
+        this._poses.forEach((e) => {
+            e.lettermode = value;
+        });
+    }
+
     private readonly _puzzle: Puzzle;
     private readonly _params: PoseEditParams;
     private readonly _scriptInterface = new ExternalInterfaceCtx();
