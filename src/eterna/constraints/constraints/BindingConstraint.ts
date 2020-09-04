@@ -109,12 +109,9 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
         );
         const stateCondition = context.targetConditions[this.stateIndex];
 
-        let extraLen = 0;
-        if (stateCondition) {
-            if (stateCondition['oligo_sequence']) {
-                extraLen = stateCondition['oligo_sequence'].length;
-            }
-        }
+        const extraLen = stateCondition && stateCondition['oligo_sequence']
+            ? stateCondition['oligo_sequence'].length
+            : 0;
         return {
             ranges: [
                 undoBlock.sequence.length + 1,

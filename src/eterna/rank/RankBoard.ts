@@ -13,10 +13,9 @@ export default class RankBoard extends ContainerObject implements Updatable {
         this._rankData = rankData;
         this._startingPosition = 0;
 
-        let numRows = RankBoard.NUM_VISIBLE;
-        if (rankData.length < RankBoard.NUM_VISIBLE + 1) {
-            numRows = rankData.length - 1;
-        }
+        const numRows = rankData.length < RankBoard.NUM_VISIBLE + 1
+            ? rankData.length - 1
+            : RankBoard.NUM_VISIBLE;
 
         this._rows = [];
         for (let ii = 0; ii < numRows + 1; ii++) {

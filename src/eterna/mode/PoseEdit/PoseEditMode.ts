@@ -2469,7 +2469,6 @@ export default class PoseEditMode extends GameMode {
         // if (dn != null) dn.visible = (this._stack_level === 0);
 
         const undoBlock: UndoBlock = this.getCurrentUndoBlock();
-        let nnfe: number[];
         const pseudoknots: boolean = (
             this._targetConditions
             && this._targetConditions[this._curTargetIndex] !== undefined
@@ -2547,13 +2546,10 @@ export default class PoseEditMode extends GameMode {
         }
 
         for (let ii = 0; ii < this._poses.length; ii++) {
-            let jj: number;
+            const jj: number = (ii === 0 && !this._isPipMode)
+                ? this._curTargetIndex
+                : ii;
 
-            if (ii === 0 && !this._isPipMode) {
-                jj = this._curTargetIndex;
-            } else {
-                jj = ii;
-            }
             if (this._targetConditions == null || this._targetConditions[jj] === undefined
                 || (this._targetConditions[jj] as TargetConditions)['type'] === undefined) {
                 continue;
@@ -2572,7 +2568,7 @@ export default class PoseEditMode extends GameMode {
             }
             if (Puzzle.isOligoType(tcjj['type'])) {
                 this._poses[ii].oligoMalus = tcjj['malus'] as number;
-                nnfe = this.getCurrentUndoBlock(jj).getParam(
+                const nnfe = this.getCurrentUndoBlock(jj).getParam(
                     UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE, pseudoknots
                 ) as number[];
                 if (nnfe != null && nnfe[0] === -2) {
@@ -2583,7 +2579,7 @@ export default class PoseEditMode extends GameMode {
                 }
             }
             if (tcjj['type'] === 'multistrand') {
-                nnfe = this.getCurrentUndoBlock(jj).getParam(
+                const nnfe = this.getCurrentUndoBlock(jj).getParam(
                     UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE, pseudoknots
                 ) as number[];
                 if (nnfe != null && nnfe[0] === -2) {
@@ -2659,7 +2655,7 @@ export default class PoseEditMode extends GameMode {
                 structureConstraints = tc['structure_constraints'];
             }
 
-            if (structureConstraints != null) {
+            if (structureConstraints !== undefined) {
                 let numUnpaired = 0;
                 let numWrong = 0;
                 let dontcareOk = true;
@@ -2718,8 +2714,7 @@ export default class PoseEditMode extends GameMode {
                             const targetOligo = this._targetOligos[xx];
                             Assert.assertIsDefined(targetOligo);
                             if (targetOligo.length > 1) {
-                                const newOrder: number[] = [];
-                                for (let jj = 0; jj < targetOligo.length; jj++) newOrder.push(jj);
+                                const newOrder: number[] = targetOligo.map((value, idx) => idx);
                                 let more: boolean;
                                 do {
                                     segments = this._poses[targetIndex].designSegments;
@@ -2954,11 +2949,8 @@ export default class PoseEditMode extends GameMode {
 
         const seq: number[] = this._poses[ii].sequence;
 
-        let pseudoknots = false;
-        if (this._targetConditions && this._targetConditions[ii] !== undefined
-                && (this._targetConditions[ii] as TargetConditions)['type'] === 'pseudoknot') {
-            pseudoknots = true;
-        }
+        const pseudoknots = (this._targetConditions && this._targetConditions[ii] !== undefined
+                && (this._targetConditions[ii] as TargetConditions)['type'] === 'pseudoknot');
 
         if (!this._folder) {
             throw new Error('Cannot progress through poseEditByTargetFoldTarget with a null Folder!');
@@ -3021,14 +3013,13 @@ export default class PoseEditMode extends GameMode {
                 );
             }
         } else if (tc['type'] === 'multistrand') {
-            const oligos: Oligo[] = [];
             const odefs = tc['oligos'] as OligoDef[];
-            for (let jj = 0; jj < odefs.length; jj++) {
-                oligos.push({
-                    sequence: EPars.stringToSequence(odefs[jj]['sequence']),
-                    malus: int(odefs[jj]['malus'] * 100.0)
-                });
-            }
+            const oligos: Oligo[] = odefs.map(
+                (odef) => ({
+                    sequence: EPars.stringToSequence(odef['sequence']),
+                    malus: int(odef['malus'] * 100.0)
+                })
+            );
             log.debug('multifold');
 
             const key: CacheKey = {
@@ -3089,11 +3080,8 @@ export default class PoseEditMode extends GameMode {
         this.hideAsyncText();
         this.popUILock(PoseEditMode.FOLDING_LOCK);
 
-        let pseudoknots = false;
-        if (this._targetConditions && this._targetConditions[targetIndex] !== undefined
-                && (this._targetConditions[targetIndex] as TargetConditions)['type'] === 'pseudoknot') {
-            pseudoknots = true;
-        }
+        const pseudoknots = (this._targetConditions && this._targetConditions[targetIndex] !== undefined
+            && (this._targetConditions[targetIndex] as TargetConditions)['type'] === 'pseudoknot');
 
         // this._fold_total_time = new Date().getTime() - this._fold_start_time;
         // if (!this._tools_container.contains(this._freeze_button) && this._fold_total_time >= 1000.0) {
@@ -3115,56 +3103,54 @@ export default class PoseEditMode extends GameMode {
             lastBestPairs = this._seqStacks[this._stackLevel - 1][targetIndex].getPairs(37, pseudoknots);
         }
 
-        if (lastBestPairs != null) {
-            const isShapeConstrained = this._puzzle.constraints && this._puzzle.constraints.some(
-                (constraint) => constraint instanceof ShapeConstraint
-            );
+        const isShapeConstrained = this._puzzle.constraints && this._puzzle.constraints.some(
+            (constraint) => constraint instanceof ShapeConstraint
+        );
 
-            const pairsDiff: number[] = [];
+        const pairsDiff: number[] = [];
 
-            for (let ii = 0; ii < bestPairs.length; ii++) {
-                if (lastBestPairs[ii] === bestPairs[ii]) {
-                    pairsDiff[ii] = 0;
-                } else if (bestPairs[ii] < 0 && lastBestPairs[ii] >= 0) {
-                    pairsDiff[ii] = -1;
-                } else if (bestPairs[ii] > ii) {
-                    if (lastBestPairs[ii] >= 0) {
-                        pairsDiff[ii] = 1;
-                    } else {
-                        pairsDiff[ii] = 2;
-                    }
+        for (let ii = 0; ii < bestPairs.length; ii++) {
+            if (lastBestPairs[ii] === bestPairs[ii]) {
+                pairsDiff[ii] = 0;
+            } else if (bestPairs[ii] < 0 && lastBestPairs[ii] >= 0) {
+                pairsDiff[ii] = -1;
+            } else if (bestPairs[ii] > ii) {
+                if (lastBestPairs[ii] >= 0) {
+                    pairsDiff[ii] = 1;
                 } else {
-                    pairsDiff[ii] = 0;
+                    pairsDiff[ii] = 2;
                 }
+            } else {
+                pairsDiff[ii] = 0;
             }
+        }
 
-            if (!this._poses[targetIndex].useSimpleGraphics) {
-                let stackStart = -1;
-                let lastOtherStack = -1;
-                for (let ii = 0; ii < bestPairs.length; ii++) {
-                    if (
-                        pairsDiff[ii] > 0
-                        && (
-                            (!isShapeConstrained && this._poseState === PoseState.NATIVE)
-                            || (bestPairs[ii] === this._targetPairs[targetIndex][ii])
-                        )
-                    ) {
-                        if (stackStart < 0) {
+        if (!this._poses[targetIndex].useSimpleGraphics) {
+            let stackStart = -1;
+            let lastOtherStack = -1;
+            for (let ii = 0; ii < bestPairs.length; ii++) {
+                if (
+                    pairsDiff[ii] > 0
+                    && (
+                        (!isShapeConstrained && this._poseState === PoseState.NATIVE)
+                        || (bestPairs[ii] === this._targetPairs[targetIndex][ii])
+                    )
+                ) {
+                    if (stackStart < 0) {
+                        stackStart = ii;
+                        lastOtherStack = bestPairs[ii];
+                    } else {
+                        if (bestPairs[ii] !== lastOtherStack - 1) {
+                            this._poses[targetIndex].praiseStack(stackStart, ii - 1);
                             stackStart = ii;
-                            lastOtherStack = bestPairs[ii];
-                        } else {
-                            if (bestPairs[ii] !== lastOtherStack - 1) {
-                                this._poses[targetIndex].praiseStack(stackStart, ii - 1);
-                                stackStart = ii;
-                            }
-
-                            lastOtherStack = bestPairs[ii];
                         }
-                    } else if (stackStart >= 0) {
-                        this._poses[targetIndex].praiseStack(stackStart, ii - 1);
-                        stackStart = -1;
-                        lastOtherStack = -1;
+
+                        lastOtherStack = bestPairs[ii];
                     }
+                } else if (stackStart >= 0) {
+                    this._poses[targetIndex].praiseStack(stackStart, ii - 1);
+                    stackStart = -1;
+                    lastOtherStack = -1;
                 }
             }
         }

@@ -3,9 +3,9 @@ import UnitSignal from "../UnitSignal";
 import Counter from "./Counter";
 
 test("registrationGroup", () => {
-    let group: RegistrationGroup = new RegistrationGroup();
-    let sig: UnitSignal = new UnitSignal();
-    let counter: Counter = new Counter();
+    const group: RegistrationGroup = new RegistrationGroup();
+    const sig: UnitSignal = new UnitSignal();
+    const counter: Counter = new Counter();
     group.add(sig.connect((value) => counter.slot(value)));
     sig.emit();
     group.close();

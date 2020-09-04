@@ -94,7 +94,6 @@ export default class RNALayout {
      * comparison of pairs to targetPairs will influence application of the customLayout
      */
     public setupTree(pairs: number[], targetPairs: number[] | null = null): void {
-        let ii: number;
         let biPairs: number[] = new Array(pairs.length);
 
         // / Delete old tree
@@ -111,7 +110,7 @@ export default class RNALayout {
         // /   with the partner number for each paired base.
         biPairs.fill(-1);
 
-        for (ii = 0; ii < pairs.length; ii++) {
+        for (let ii = 0; ii < pairs.length; ii++) {
             if (ii < pairs[ii]) {
                 biPairs[ii] = pairs[ii];
                 biPairs[pairs[ii]] = ii;
@@ -122,7 +121,7 @@ export default class RNALayout {
         // / Shifted to be effectively 1-indexed
         // / with the zero-indexed length at index 0
         this._scoreBiPairs = new Array(biPairs.length + 1);
-        for (ii = 0; ii < biPairs.length; ii++) {
+        for (let ii = 0; ii < biPairs.length; ii++) {
             this._scoreBiPairs[ii + 1] = biPairs[ii] + 1;
         }
         this._scoreBiPairs[0] = biPairs.length;
@@ -133,7 +132,7 @@ export default class RNALayout {
         // / no tree if there are no pairs -- special case to be handled
         // /  separately in getCoords.
         let foundPair = false;
-        for (ii = 0; ii < biPairs.length; ii++) {
+        for (let ii = 0; ii < biPairs.length; ii++) {
             if (biPairs[ii] >= 0) {
                 foundPair = true;
                 break;

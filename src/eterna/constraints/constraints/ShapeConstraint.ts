@@ -2,7 +2,6 @@ import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
 import EPars from 'eterna/EPars';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
-import * as log from 'loglevel';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from '../Constraint';
 
@@ -138,11 +137,8 @@ export default class ShapeConstraint extends BaseShapeConstraint {
             }
         }
 
-        let pseudoknots = false;
-        if (undoBlock.targetConditions !== undefined
-                && undoBlock.targetConditions['type'] === 'pseudoknot') {
-            pseudoknots = true;
-        }
+        const pseudoknots = (undoBlock.targetConditions !== undefined
+                && undoBlock.targetConditions['type'] === 'pseudoknot');
         const naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);
 
         return {
@@ -158,15 +154,13 @@ export default class ShapeConstraint extends BaseShapeConstraint {
     ): ConstraintBoxConfig {
         const details = super.getConstraintBoxConfig(status, forMissionScreen, undoBlocks);
         const undoBlock = undoBlocks[this.stateIndex];
-        let pseudoknots = false;
-        if (undoBlock.targetConditions != null
-                && undoBlock.targetConditions['type'] === 'pseudoknot') {
-            pseudoknots = true;
-        }
+        const pseudoknots = (undoBlock.targetConditions != null
+                && undoBlock.targetConditions['type'] === 'pseudoknot');
 
         const naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);
-        let customLayout: Array<[number, number] | [null, null]> | undefined;
-        if (undoBlock.targetConditions) customLayout = undoBlock.targetConditions['custom-layout'];
+        const customLayout: Array<[number, number] | [null, null]> | undefined = (
+            undoBlock.targetConditions ? undoBlock.targetConditions['custom-layout'] : undefined
+        );
         return {
             ...details,
             tooltip: ConstraintBox.createTextStyle().append(
@@ -192,11 +186,7 @@ export default class ShapeConstraint extends BaseShapeConstraint {
     private _getWrongPairs(
         naturalPairs: number[], targetPairs: number[], structureConstraints: boolean[] | undefined
     ): number[] {
-        const wrongPairs: number[] = new Array(naturalPairs.length);
-
-        for (let ii = 0; ii < wrongPairs.length; ii++) {
-            wrongPairs[ii] = -1;
-        }
+        const wrongPairs: number[] = new Array(naturalPairs.length).fill(-1);
         for (let ii = 0; ii < wrongPairs.length; ii++) {
             if (naturalPairs[ii] !== targetPairs[ii]) {
                 if (structureConstraints === undefined || structureConstraints[ii]) {
@@ -262,14 +252,12 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
     ): ConstraintBoxConfig {
         const details = super.getConstraintBoxConfig(status, forMissionScreen, undoBlocks);
         const undoBlock = undoBlocks[this.stateIndex];
-        let pseudoknots = false;
-        if (undoBlock.targetConditions && undoBlock.targetConditions
-                && undoBlock.targetConditions['type'] === 'pseudoknot') {
-            pseudoknots = true;
-        }
+        const pseudoknots = (undoBlock.targetConditions !== undefined
+                && undoBlock.targetConditions['type'] === 'pseudoknot');
         const naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);
-        let customLayout: Array<[number, number] | [null, null]> | undefined;
-        if (undoBlock.targetConditions) customLayout = undoBlock.targetConditions['custom-layout'];
+        const customLayout: Array<[number, number] | [null, null]> | undefined = (
+            undoBlock.targetConditions ? undoBlock.targetConditions['custom-layout'] : undefined
+        );
         const antiSS = targetConditions[this.stateIndex]['anti_secstruct'];
         const wrongPairs = antiSS !== undefined
             ? EPars.parenthesisToPairs(antiSS)
@@ -301,11 +289,7 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
     private _getWrongPairs(
         naturalPairs: number[], structureConstraints: boolean[] | undefined, satisfied: boolean
     ): number[] {
-        const wrongPairs: number[] = new Array(naturalPairs.length);
-
-        for (let ii = 0; ii < wrongPairs.length; ii++) {
-            wrongPairs[ii] = 0;
-        }
+        const wrongPairs: number[] = new Array(naturalPairs.length).fill(0);
         for (let ii = 0; ii < wrongPairs.length; ii++) {
             if (structureConstraints === undefined || structureConstraints[ii]) {
                 if (satisfied) {

@@ -94,11 +94,9 @@ export default class PuzzleManager {
 
         if (json['locks'] && json['locks'].length > 0) {
             const lockStr: string = json['locks'];
-            const locks: boolean[] = [];
-
-            for (let kk = 0; kk < lockStr.length; kk++) {
-                locks.push(lockStr.charAt(kk) === 'x');
-            }
+            const locks: boolean[] = lockStr.split('').map(
+                (c) => c === 'x'
+            );
             newpuz.puzzleLocks = locks;
         }
 
@@ -194,43 +192,30 @@ export default class PuzzleManager {
         const {targetConditions} = newpuz;
         if (targetConditions !== undefined) {
             for (let ii = 0; ii < targetConditions.length; ii++) {
-                if (targetConditions[ii] !== undefined) {
-                    const tc = targetConditions[ii] as TargetConditions;
-                    const constrainedBases = tc['structure_constrained_bases'];
-                    if (constrainedBases !== undefined) {
-                        if (constrainedBases.length % 2 === 0) {
-                            tc['structure_constraints'] = [];
-                            for (let jj = 0; jj < tc['secstruct'].length; jj++) {
-                                (tc['structure_constraints'] as boolean[])[jj] = false;
-                            }
+                if (targetConditions[ii] === undefined) continue;
+                const tc = targetConditions[ii] as TargetConditions;
 
-                            for (let jj = 0; jj < constrainedBases.length; jj += 2) {
-                                for (let kk = constrainedBases[jj]; kk <= constrainedBases[jj + 1]; kk++) {
-                                    (tc['structure_constraints'] as boolean[])[kk] = true;
-                                }
-                            }
+                const constrainedBases = tc['structure_constrained_bases'];
+                if (constrainedBases !== undefined && constrainedBases.length % 2 === 0) {
+                    tc['structure_constraints'] = new Array(tc['secstruct'].length).fill(false);
+
+                    for (let jj = 0; jj < constrainedBases.length; jj += 2) {
+                        for (let kk = constrainedBases[jj]; kk <= constrainedBases[jj + 1]; kk++) {
+                            tc['structure_constraints'][kk] = true;
                         }
                     }
+                }
 
-                    const aConstrainedBases = tc['anti_structure_constrained_bases'];
-                    if (aConstrainedBases !== undefined) {
-                        if (
-                            tc['anti_secstruct'] !== undefined
-                            && (tc['anti_secstruct'] as string).length
-                                === tc['secstruct'].length
-                        ) {
-                            if (aConstrainedBases.length % 2 === 0) {
-                                tc['anti_structure_constraints'] = [];
-                                for (let jj = 0; jj < tc['secstruct'].length; jj++) {
-                                    (tc['anti_structure_constraints'] as boolean[])[jj] = false;
-                                }
+                const aConstrainedBases = tc['anti_structure_constrained_bases'];
+                if (aConstrainedBases !== undefined
+                        && tc['anti_secstruct'] !== undefined
+                        && tc['anti_secstruct'].length === tc['secstruct'].length
+                        && aConstrainedBases.length % 2 === 0) {
+                    tc['anti_structure_constraints'] = new Array(tc['secstruct'].length).fill(false);
 
-                                for (let jj = 0; jj < aConstrainedBases.length; jj += 2) {
-                                    for (let kk = aConstrainedBases[jj]; kk <= aConstrainedBases[jj + 1]; kk++) {
-                                        (tc['anti_structure_constraints'] as boolean[])[kk] = true;
-                                    }
-                                }
-                            }
+                    for (let jj = 0; jj < aConstrainedBases.length; jj += 2) {
+                        for (let kk = aConstrainedBases[jj]; kk <= aConstrainedBases[jj + 1]; kk++) {
+                            tc['anti_structure_constraints'][kk] = true;
                         }
                     }
                 }
