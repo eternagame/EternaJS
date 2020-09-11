@@ -53,7 +53,7 @@ export default class SpecBoxDialog extends Dialog<boolean> {
                 specBox.height - cancelButton.container.height - 20
             );
 
-            if (minimizeButton != null) {
+            if (minimizeButton != null && minimizeButton !== undefined) {
                 DisplayUtil.positionRelative(
                     minimizeButton.display, HAlign.RIGHT, VAlign.CENTER,
                     cancelButton.display, HAlign.LEFT, VAlign.CENTER,

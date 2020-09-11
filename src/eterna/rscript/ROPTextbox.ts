@@ -158,10 +158,9 @@ export default class ROPTextbox extends RScriptOp {
                 // We want the arrow to point to the area FROM the textbox and it should extend all the way to the
                 // textbox as well.
                 const xdiff: number = (parent.display.x + parent.container.width / 2) - newArrow.display.x;
-                let ydiff: number = parent.display.y - newArrow.display.y;
-                if (ydiff < 0.0) {
-                    ydiff += parent.container.height;
-                }
+                const ydiff: number = parent.display.y < newArrow.display.y
+                    ? parent.display.y - newArrow.display.y + parent.container.height
+                    : parent.display.y - newArrow.display.y;
 
                 if (xdiff !== 0) {
                     this._arrowRotation = (Math.atan(ydiff / xdiff) * 180) / Math.PI;

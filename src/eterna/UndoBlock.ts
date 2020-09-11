@@ -174,12 +174,9 @@ export default class UndoBlock {
         const pairedPer: Map<number, number> = new Map<number, number>();
 
         for (let jj = 0; jj < dotArray.length; jj += 3) {
-            let prob: number;
-            if (behavior === BasePairProbabilityTransform.LEAVE_ALONE) {
-                prob = dotArray[jj + 2];
-            } else {
-                prob = (dotArray[jj + 2] * dotArray[jj + 2]);
-            }
+            const prob: number = behavior === BasePairProbabilityTransform.LEAVE_ALONE
+                ? dotArray[jj + 2]
+                : (dotArray[jj + 2] * dotArray[jj + 2]);
 
             if (dotArray[jj] < dotArray[jj + 1]) {
                 dotMap.set([dotArray[jj], dotArray[jj + 1]].join(','), prob);
@@ -187,15 +184,15 @@ export default class UndoBlock {
                 dotMap.set([dotArray[jj + 1], dotArray[jj]].join(','), prob);
             }
 
-            let there = pairedPer.get(dotArray[jj]);
-            if (there !== undefined) {
-                pairedPer.set(dotArray[jj], there + prob);
+            const jjprob = pairedPer.get(dotArray[jj]);
+            if (jjprob !== undefined) {
+                pairedPer.set(dotArray[jj], jjprob + prob);
             } else {
                 pairedPer.set(dotArray[jj], prob);
             }
-            there = pairedPer.get(dotArray[jj + 1]);
-            if (there !== undefined) {
-                pairedPer.set(dotArray[jj + 1], there + prob);
+            const jjp1prob = pairedPer.get(dotArray[jj + 1]);
+            if (jjp1prob !== undefined) {
+                pairedPer.set(dotArray[jj + 1], jjp1prob + prob);
             } else {
                 pairedPer.set(dotArray[jj + 1], prob);
             }

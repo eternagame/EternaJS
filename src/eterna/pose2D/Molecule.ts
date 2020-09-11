@@ -29,8 +29,7 @@ export default class Molecule extends Container {
         }
 
         const elapsedTime = currentTime - this._animStartTime;
-        let prog = Math.sin((elapsedTime * Math.PI) / (Molecule.ANIMATION_SPAN)) + 0.95;
-        prog = Math.max(0, prog);
+        const prog = Math.max(0, Math.sin((elapsedTime * Math.PI) / (Molecule.ANIMATION_SPAN)) + 0.95);
         let progInd = int(int((prog / 2.0) * Molecule.NUM_ANIMATION_STEPS) % Molecule.NUM_ANIMATION_STEPS);
 
         const glowTex = this._isWrong

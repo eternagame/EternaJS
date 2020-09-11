@@ -243,13 +243,8 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
         const textMask = new Graphics().beginFill(0x0).drawRect(0, 0, this.width, this.height).endFill();
         this._fakeTextInput.addChild(textMask);
 
-        let displayText = this.text;
-        let textColor = this._textColor;
-        if (displayText.length === 0) {
-            displayText = this._obj.placeholder;
-            // We set this in assets/Styles/styles.css since there's no DOM API for it
-            textColor = 0x777777;
-        }
+        const displayText = this.text.length === 0 ? this._obj.placeholder : this.text;
+        const textColor = this.text.length === 0 ? 0x777777 : this._textColor;
 
         const text = new TextBuilder(displayText)
             .font(this._fontFamily)

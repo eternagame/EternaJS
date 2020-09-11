@@ -269,10 +269,7 @@ export default class BaseAssets {
         const steps = 360;
 
         for (let i = 1; i <= steps; i++) {
-            let color = 0x0;
-            if (i % 32 < 16) {
-                color = 0xFFFFFF;
-            }
+            const color = (i % 32 < 16) ? 0xFFFFFF : 0x0;
 
             scratch.lineStyle(lineThickness, color, lineAlpha);
             xx = centerX + Math.cos((i / steps) * twoPI) * radius;

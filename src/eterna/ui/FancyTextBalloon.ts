@@ -109,10 +109,9 @@ export default class FancyTextBalloon extends TextBalloon implements Updatable {
     public update(dt: number): void {
         for (const arrow of this._childrenArrows) {
             const xdiff: number = (this.display.x + this.container.width / 2) - arrow.display.x;
-            let ydiff: number = this.display.y - arrow.display.y;
-            if (ydiff < 0.0) {
-                ydiff += this.container.height;
-            }
+            const ydiff: number = this.display.y < arrow.display.y
+                ? this.display.y - arrow.display.y + this.container.height
+                : this.display.y - arrow.display.y;
 
             if (xdiff !== 0) {
                 arrow.rotation = (Math.atan(ydiff / xdiff) * 180) / Math.PI;

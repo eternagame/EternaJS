@@ -93,8 +93,7 @@ export default class TextBalloon extends ContainerObject {
     }
 
     public get height(): number {
-        let wholeHeight = 0;
-        wholeHeight += this._text != null ? this._text.height : 0;
+        let wholeHeight = this._text != null ? this._text.height : 0;
 
         if (this._button != null && this._button.display.visible) {
             wholeHeight = Math.max(wholeHeight, DisplayUtil.height(this._button.display));

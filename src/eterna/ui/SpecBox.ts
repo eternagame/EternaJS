@@ -226,16 +226,8 @@ export default class SpecBox extends ContainerObject {
     }
 
     public get plotSize(): number {
-        let plotW: number;
-        let plotH: number;
-
-        if (this._docked) {
-            plotW = this._width - 55;
-            plotH = (this._height - 51) / 2.0;
-        } else {
-            plotW = (this._width - 100) / 2.0;
-            plotH = this._height - 200;
-        }
+        const plotW: number = this._docked ? this._width - 55 : (this._width - 100) / 2.0;
+        const plotH: number = this._docked ? (this._height - 51) / 2.0 : this._height - 200;
 
         return Math.min(plotW, plotH);
     }

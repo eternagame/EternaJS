@@ -40,29 +40,22 @@ export default class ActionBar extends ContainerObject {
             return;
         }
 
-        const itemSpace = 35;
-        const barSpace = 10;
+        // Using width getter -- it uses the calculation.
+        const centerWidth = this.width;
 
-        let centerWidth = 0;
-        for (let ii = 0; ii < this._items.length; ii++) {
-            centerWidth += Math.max(DisplayUtil.width(this._items[ii].display), 35);
-        }
-
-        centerWidth += (barSpace) * this._items.length + barSpace;
         const wholeWidth: number = centerWidth;
         let wholeHeight: number = this._height;
 
         if (wholeHeight < 1) {
-            let maxHeight = 0;
+            const maxHeight = Math.max(...this._items.map((item) => DisplayUtil.height(item.display)));
             const verticalMargin = 10;
-            for (let ii = 0; ii < this._items.length; ii++) {
-                maxHeight = Math.max(maxHeight, DisplayUtil.height(this._items[ii].display));
-            }
             wholeHeight = maxHeight + verticalMargin;
         }
 
         let itemSpaceWalker = 0;
 
+        const itemSpace = 35;
+        const barSpace = 10;
         for (let ii = 0; ii < this._items.length; ii++) {
             const curSpace = Math.max(DisplayUtil.width(this._items[ii].display), itemSpace);
             const itemY = wholeHeight / 2.0 - DisplayUtil.height(this._items[ii].display) / 2.0 + this._heightMods[ii];
@@ -86,13 +79,10 @@ export default class ActionBar extends ContainerObject {
 
         const barSpace = 10;
 
-        let centerWidth = 0;
-        for (let ii = 0; ii < this._items.length; ii++) {
-            centerWidth += Math.max(DisplayUtil.width(this._items[ii].display), 35);
-        }
-
-        centerWidth += (barSpace) * this._items.length + barSpace;
-
+        const centerWidth = this._items.map((item) => DisplayUtil.width(item.display)).reduce(
+            (accum, current) => accum + Math.max(current, 35),
+            (barSpace) * this._items.length + barSpace
+        );
         return centerWidth;
     }
 

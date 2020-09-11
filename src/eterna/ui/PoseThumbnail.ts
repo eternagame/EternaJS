@@ -141,12 +141,9 @@ export default class PoseThumbnail {
         const ymax: number = Math.max(...yarray);
 
         const xdiff: number = xmax - xmin;
-        let xscale = 1;
-        if (xdiff > Constants.EPSILON) xscale = (w) / xdiff;
-
+        const xscale = xdiff > Constants.EPSILON ? (w) / xdiff : 1;
         const ydiff: number = ymax - ymin;
-        let yscale = 1;
-        if (ydiff > Constants.EPSILON) yscale = (h) / ydiff;
+        const yscale = ydiff > Constants.EPSILON ? (h) / ydiff : 1;
 
         const scale: number = Math.min(xscale, yscale);
 
@@ -154,30 +151,13 @@ export default class PoseThumbnail {
         canvas.clear();
         canvas.lineStyle(0, 0x0, 0);
 
-        let expPainter: ExpPainter | null = null;
+        const expPainter: ExpPainter | null = type === PoseThumbnailType.EXP_COLORED
+            ? new ExpPainter(sequence, expStartIndex) : null;
 
-        if (type === PoseThumbnailType.EXP_COLORED) {
-            expPainter = new ExpPainter(sequence, expStartIndex);
-        }
-
-        let smallXMax: number = (xarray[0] - xmin) * scale;
-        let smallXMin: number = (xarray[0] - xmin) * scale;
-        let smallYMax: number = (yarray[0] - ymin) * scale;
-        let smallYMin: number = (yarray[0] - ymin) * scale;
-
-        let xpos: number;
-        let ypos: number;
-
-        for (let ii = 0; ii < n; ii++) {
-            xpos = (xarray[ii] - xmin) * scale;
-            ypos = (yarray[ii] - ymin) * scale;
-
-            if (xpos > smallXMax) smallXMax = xpos;
-            if (xpos < smallXMin) smallXMin = xpos;
-
-            if (ypos > smallYMax) smallYMax = ypos;
-            if (ypos < smallYMin) smallYMin = ypos;
-        }
+        const smallXMax: number = Math.max(...xarray.map((x) => (x - xmin) * scale));
+        const smallXMin: number = Math.min(...xarray.map((x) => (x - xmin) * scale));
+        const smallYMax: number = Math.max(...yarray.map((y) => (y - ymin) * scale));
+        const smallYMin: number = Math.min(...yarray.map((y) => (y - ymin) * scale));
 
         const xOffset: number = ((w) - (smallXMax - smallXMin)) + frameBounds.width * 0.1;
         const yOffset: number = ((h) - (smallYMax - smallYMin)) + frameBounds.height * 0.1;
@@ -324,8 +304,8 @@ export default class PoseThumbnail {
 
             canvas.lineStyle(Math.min(size, 3), color, 1);
 
-            xpos = (xarray[ii] - xmin) * scale + xOffset;
-            ypos = (yarray[ii] - ymin) * scale + yOffset;
+            const xpos = (xarray[ii] - xmin) * scale + xOffset;
+            const ypos = (yarray[ii] - ymin) * scale + yOffset;
 
             if (ii === 0 || sequence[ii] === EPars.RNABASE_CUT) {
                 canvas.moveTo(xpos, ypos);

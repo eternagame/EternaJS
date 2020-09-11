@@ -41,10 +41,7 @@ export default class NovaPaintHint extends ContainerObject implements Updatable 
         Assert.assertIsDefined(this.mode);
         const currentTime = this.mode.time;
 
-        let startPos: Point = this._startPoint;
-        if (this._anchorSet) {
-            startPos = this._rna.getBaseLoc(this._base);
-        }
+        const startPos: Point = this._anchorSet ? this._rna.getBaseLoc(this._base) : this._startPoint;
 
         if (this._lastTimeTick === 0) {
             this._lastTimeTick = currentTime;

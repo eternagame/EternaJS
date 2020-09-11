@@ -113,12 +113,9 @@ export default class Tooltips extends GameObject {
 
     private static createTooltip(tooltip: Tooltip): DisplayObject {
         if (typeof (tooltip) === 'string' || tooltip instanceof StyledTextBuilder) {
-            let textField: Container;
-            if (typeof (tooltip) === 'string') {
-                textField = new Text(tooltip, Tooltips.DEFAULT_STYLE);
-            } else {
-                textField = tooltip.build();
-            }
+            const textField: Container = (typeof (tooltip) === 'string')
+                ? new Text(tooltip, Tooltips.DEFAULT_STYLE)
+                : tooltip.build();
 
             const disp = new Graphics()
                 .beginFill(0x0, 0.8)

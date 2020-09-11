@@ -47,14 +47,9 @@ export default class ExpPainter {
         this._continuous = false;
         this._extended = false;
 
-        for (let ii = 1; ii < this._data.length; ii++) {
-            this._dataMin = Math.min(this._dataMin, this._data[ii]);
-            this._dataMax = Math.max(this._dataMax, this._data[ii]);
-
-            this._dataAvg += this._data[ii];
-        }
-
-        this._dataAvg /= this._data.length;
+        this._dataMin = Math.min(...this._data);
+        this._dataMax = Math.max(...this._data);
+        this._dataAvg = this._data.reduce((a, b) => a + b) / this._data.length;
     }
 
     public getColor(ii: number): number {

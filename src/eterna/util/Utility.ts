@@ -54,10 +54,8 @@ export default class Utility {
      * @returns The string, with each " replaced by ' and "\n" by " ".
      */
     public static stripQuotationsAndNewlines(str: string): string {
-        let newlinereg = /\n/g;
-        str = str.replace(newlinereg, ' ');
-        newlinereg = /"/g;
-        str = str.replace(newlinereg, "'");
+        str = str.replace(/\n/g, ' ');
+        str = str.replace(/"/g, "'");
         return str;
     }
 
