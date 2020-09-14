@@ -1,7 +1,7 @@
 import * as log from 'loglevel';
 import {Texture} from 'pixi.js';
 import {TextureUtil, Flashbang} from 'flashbang';
-import EPars from 'eterna/EPars';
+import EPars, {RNABASE} from 'eterna/EPars';
 import Pose2D from 'eterna/pose2D/Pose2D';
 import GameButton from 'eterna/ui/GameButton';
 import Sounds from 'eterna/resources/Sounds';
@@ -145,7 +145,7 @@ export default class Booster {
 
         scriptInterface.addCallback('set_sequence_string', (seq: string): boolean => {
             const seqArr: number[] = EPars.stringToSequence(seq);
-            if (seqArr.indexOf(EPars.RNABASE_UNDEFINED) >= 0 || seqArr.indexOf(EPars.RNABASE_CUT) >= 0) {
+            if (seqArr.indexOf(RNABASE.UNDEFINED) >= 0 || seqArr.indexOf(RNABASE.CUT) >= 0) {
                 log.info(`Invalid characters in ${seq}`);
                 return false;
             }

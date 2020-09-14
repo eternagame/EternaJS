@@ -3,6 +3,33 @@ import Utility from 'eterna/util/Utility';
 import {StyledTextBuilder} from 'flashbang';
 import Arrays from 'flashbang/util/Arrays';
 
+export enum RNABASE {
+    UNDEFINED = 1,
+    GUANINE = 3,
+    ADENINE = 1,
+    URACIL = 4,
+    CYTOSINE = 2,
+    PAIR = 5,
+    SELECT = 6,
+    MAGIC = 7,
+    RANDOM = 8,
+    AU_PAIR = 9,
+    GU_PAIR = 10,
+    GC_PAIR = 11,
+
+    ADD_BASE = 12,
+    ADD_PAIR = 13,
+    DELETE = 14,
+    LOCK = 15,
+    BINDING_SITE = 16,
+
+    SHIFT = 17,
+    // public static readonly const RNABASE_ADD_ANNOTATION:int = 18; //Variable for adding an annotation by lullujune
+    CUT = 19,
+    MAGIC_GLUE = 20,
+    BASE_MARK = 21
+}
+
 export default class EPars {
     public static readonly INF: number = 1000000;
     public static readonly NST: number = 0;
@@ -20,31 +47,6 @@ export default class EPars {
 
     public static readonly DUPLEX_INIT: number = 4.1;
 
-    public static readonly RNABASE_UNDEFINED: number = 0;
-    public static readonly RNABASE_GUANINE: number = 3;
-    public static readonly RNABASE_ADENINE: number = 1;
-    public static readonly RNABASE_URACIL: number = 4;
-    public static readonly RNABASE_CYTOSINE: number = 2;
-    public static readonly RNABASE_PAIR: number = 5;
-    public static readonly RNABASE_SELECT: number = 6;
-    public static readonly RNABASE_MAGIC: number = 7;
-    public static readonly RNABASE_RANDOM: number = 8;
-    public static readonly RNABASE_AU_PAIR: number = 9;
-    public static readonly RNABASE_GU_PAIR: number = 10;
-    public static readonly RNABASE_GC_PAIR: number = 11;
-
-    public static readonly RNABASE_ADD_BASE: number = 12;
-    public static readonly RNABASE_ADD_PAIR: number = 13;
-    public static readonly RNABASE_DELETE: number = 14;
-    public static readonly RNABASE_LOCK: number = 15;
-    public static readonly RNABASE_BINDING_SITE: number = 16;
-
-    public static readonly RNABASE_SHIFT: number = 17;
-    // public static readonly const RNABASE_ADD_ANNOTATION:int = 18; //Variable for adding an annotation by lullujune
-    public static readonly RNABASE_CUT: number = 19;
-    public static readonly RNABASE_MAGIC_GLUE: number = 20;
-    public static readonly RNABASE_BASE_MARK: number = 21;
-
     // (almost) follows the Vienna convention for the BP array
     public static readonly FORCE_PAIRED: number = -1;
     public static readonly FORCE_PAIRED3P: number = -2;
@@ -60,11 +62,11 @@ export default class EPars {
     /* only F[2] used */
 
     public static readonly RNABASE_LAST20: number[] = [
-        EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE, EPars.RNABASE_GUANINE,
-        EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE, EPars.RNABASE_CYTOSINE,
-        EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE, EPars.RNABASE_CYTOSINE, EPars.RNABASE_ADENINE,
-        EPars.RNABASE_ADENINE, EPars.RNABASE_CYTOSINE, EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE,
-        EPars.RNABASE_CYTOSINE, EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE, EPars.RNABASE_CYTOSINE
+        RNABASE.ADENINE, RNABASE.ADENINE, RNABASE.ADENINE, RNABASE.GUANINE,
+        RNABASE.ADENINE, RNABASE.ADENINE, RNABASE.ADENINE, RNABASE.CYTOSINE,
+        RNABASE.ADENINE, RNABASE.ADENINE, RNABASE.CYTOSINE, RNABASE.ADENINE,
+        RNABASE.ADENINE, RNABASE.CYTOSINE, RNABASE.ADENINE, RNABASE.ADENINE,
+        RNABASE.CYTOSINE, RNABASE.ADENINE, RNABASE.ADENINE, RNABASE.CYTOSINE
     ];
 
     public static readonly HAIRPIN_37: number[] = [
@@ -307,15 +309,15 @@ export default class EPars {
     }
 
     public static nucleotideToString(value: number, allowCut: boolean, allowUnknown: boolean): string {
-        if (value === EPars.RNABASE_ADENINE) {
+        if (value === RNABASE.ADENINE) {
             return 'A';
-        } else if (value === EPars.RNABASE_URACIL) {
+        } else if (value === RNABASE.URACIL) {
             return 'U';
-        } else if (value === EPars.RNABASE_GUANINE) {
+        } else if (value === RNABASE.GUANINE) {
             return 'G';
-        } else if (value === EPars.RNABASE_CYTOSINE) {
+        } else if (value === RNABASE.CYTOSINE) {
             return 'C';
-        } else if (value === EPars.RNABASE_CUT) {
+        } else if (value === RNABASE.CUT) {
             if (allowCut) {
                 return '&';
             } else {
@@ -330,32 +332,32 @@ export default class EPars {
 
     public static stringToNucleotide(value: string, allowCut: boolean, allowUnknown: boolean): number {
         if (value === 'A' || value === 'a') {
-            return EPars.RNABASE_ADENINE;
+            return RNABASE.ADENINE;
         } else if (value === 'G' || value === 'g') {
-            return EPars.RNABASE_GUANINE;
+            return RNABASE.GUANINE;
         } else if (value === 'U' || value === 'u') {
-            return EPars.RNABASE_URACIL;
+            return RNABASE.URACIL;
         } else if (value === 'C' || value === 'c') {
-            return EPars.RNABASE_CYTOSINE;
+            return RNABASE.CYTOSINE;
         } else if (value === '&' || value === '-' || value === '+') {
             if (allowCut) {
-                return EPars.RNABASE_CUT;
+                return RNABASE.CUT;
             } else {
                 throw new Error(`Bad nucleotide '${value}`);
             }
         } else if (allowUnknown) {
-            return EPars.RNABASE_UNDEFINED;
+            return RNABASE.UNDEFINED;
         } else {
             throw new Error(`Bad nucleotide '${value}`);
         }
     }
 
     public static nucleotidePairToString(value: number): 'AU'|'GU'|'GC' {
-        if (value === EPars.RNABASE_AU_PAIR) {
+        if (value === RNABASE.AU_PAIR) {
             return 'AU';
-        } else if (value === EPars.RNABASE_GU_PAIR) {
+        } else if (value === RNABASE.GU_PAIR) {
             return 'GU';
-        } else if (value === EPars.RNABASE_GC_PAIR) {
+        } else if (value === RNABASE.GC_PAIR) {
             return 'GC';
         } else {
             throw new Error(`Bad nucleotide "${value}"`);
@@ -436,7 +438,7 @@ export default class EPars {
 
         const seqArray: number[] = Array(
             Math.max(...(indices.filter((n) => n !== null)) as number[])
-        ).fill(EPars.RNABASE_UNDEFINED);
+        ).fill(RNABASE.UNDEFINED);
 
         for (let n = 0; n < indices.length; n++) {
             const ii = indices[n];
@@ -741,7 +743,7 @@ export default class EPars {
                 str += '(';
             } else if (biPairs[ii] >= 0) {
                 str += ')';
-            } else if (seq != null && seq[ii] === EPars.RNABASE_CUT) {
+            } else if (seq != null && seq[ii] === RNABASE.CUT) {
                 str += '&';
             } else {
                 str += '.';
@@ -846,10 +848,10 @@ export default class EPars {
 
         for (let ii = 0; ii < pairs.length; ii++) {
             if (pairs[ii] > ii) {
-                if (sequence[ii] === EPars.RNABASE_GUANINE && sequence[pairs[ii]] === EPars.RNABASE_URACIL) {
+                if (sequence[ii] === RNABASE.GUANINE && sequence[pairs[ii]] === RNABASE.URACIL) {
                     ret++;
                 }
-                if (sequence[ii] === EPars.RNABASE_URACIL && sequence[pairs[ii]] === EPars.RNABASE_GUANINE) {
+                if (sequence[ii] === RNABASE.URACIL && sequence[pairs[ii]] === RNABASE.GUANINE) {
                     ret++;
                 }
             }
@@ -863,10 +865,10 @@ export default class EPars {
 
         for (let ii = 0; ii < pairs.length; ii++) {
             if (pairs[ii] > ii) {
-                if (sequence[ii] === EPars.RNABASE_GUANINE && sequence[pairs[ii]] === EPars.RNABASE_CYTOSINE) {
+                if (sequence[ii] === RNABASE.GUANINE && sequence[pairs[ii]] === RNABASE.CYTOSINE) {
                     ret++;
                 }
-                if (sequence[ii] === EPars.RNABASE_CYTOSINE && sequence[pairs[ii]] === EPars.RNABASE_GUANINE) {
+                if (sequence[ii] === RNABASE.CYTOSINE && sequence[pairs[ii]] === RNABASE.GUANINE) {
                     ret++;
                 }
             }
@@ -880,10 +882,10 @@ export default class EPars {
 
         for (let ii = 0; ii < pairs.length; ii++) {
             if (pairs[ii] > ii) {
-                if (sequence[ii] === EPars.RNABASE_ADENINE && sequence[pairs[ii]] === EPars.RNABASE_URACIL) {
+                if (sequence[ii] === RNABASE.ADENINE && sequence[pairs[ii]] === RNABASE.URACIL) {
                     ret++;
                 }
-                if (sequence[ii] === EPars.RNABASE_URACIL && sequence[pairs[ii]] === EPars.RNABASE_ADENINE) {
+                if (sequence[ii] === RNABASE.URACIL && sequence[pairs[ii]] === RNABASE.ADENINE) {
                     ret++;
                 }
             }
@@ -929,7 +931,7 @@ export default class EPars {
 
     public static hasCut(seq: number[], from: number, to: number): boolean {
         return seq.slice(from, to + 1).some(
-            (c) => c === EPars.RNABASE_CUT
+            (c) => c === RNABASE.CUT
         );
     }
 

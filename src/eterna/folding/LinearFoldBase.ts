@@ -1,6 +1,6 @@
 import * as log from 'loglevel';
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
-import EPars from 'eterna/EPars';
+import EPars, {RNABASE} from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import {Assert} from 'flashbang';
 import * as LinearFoldLib from './engines/LinearFoldLib';
@@ -98,7 +98,7 @@ export default abstract class LinearFoldBase extends Folder {
             }
         } while (0);
 
-        const cut: number = seq.indexOf(EPars.RNABASE_CUT);
+        const cut: number = seq.indexOf(RNABASE.CUT);
         if (cut >= 0 && cache.nodes[0] !== -2) {
             // we just scored a duplex that wasn't one, so we have to redo it properly
             const seqA: number[] = seq.slice(0, cut);

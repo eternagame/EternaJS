@@ -1,5 +1,5 @@
 import {UndoBlockParam} from 'eterna/UndoBlock';
-import EPars from 'eterna/EPars';
+import EPars, {RNABASE} from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import Assert from 'flashbang/util/Assert';
@@ -7,10 +7,10 @@ import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 
 enum Pair {
-    GC = EPars.RNABASE_GC_PAIR,
-    AU = EPars.RNABASE_AU_PAIR,
-    GU = EPars.RNABASE_GU_PAIR,
-    ANY = EPars.RNABASE_PAIR
+    GC = RNABASE.GC_PAIR,
+    AU = RNABASE.AU_PAIR,
+    GU = RNABASE.GU_PAIR,
+    ANY = RNABASE.PAIR
 }
 
 const PAIR_PARAM_MAP = new Map<Pair, UndoBlockParam>(

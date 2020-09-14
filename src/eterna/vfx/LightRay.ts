@@ -1,5 +1,5 @@
 import {Graphics} from 'pixi.js';
-import EPars from 'eterna/EPars';
+import {RNABASE} from 'eterna/EPars';
 import {
     SceneObject, SerialTask, AlphaTask, VisibleTask, Vector2
 } from 'flashbang';
@@ -45,13 +45,13 @@ export default class LightRay extends SceneObject<Graphics> {
     }
 
     private static getColor(baseType: number): number {
-        if (baseType === EPars.RNABASE_ADENINE) {
+        if (baseType === RNABASE.ADENINE) {
             return 0xFFFFAF;
-        } else if (baseType === EPars.RNABASE_URACIL) {
+        } else if (baseType === RNABASE.URACIL) {
             return 0xA5A6FF;
-        } else if (baseType === EPars.RNABASE_GUANINE) {
+        } else if (baseType === RNABASE.GUANINE) {
             return 0xFFB8B8;
-        } else if (baseType === EPars.RNABASE_CYTOSINE) {
+        } else if (baseType === RNABASE.CYTOSINE) {
             return 0xAFFFAF;
         } else {
             return 0xFFFFFF;

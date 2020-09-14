@@ -3,7 +3,7 @@ import {
 } from 'pixi.js';
 import {TextureUtil, DisplayUtil, Assert} from 'flashbang';
 import Constants from 'eterna/Constants';
-import EPars from 'eterna/EPars';
+import {RNABASE} from 'eterna/EPars';
 import ExpPainter from 'eterna/ExpPainter';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import RNALayout from 'eterna/pose2D/RNALayout';
@@ -192,7 +192,7 @@ export default class PoseThumbnail {
                 if (wrongPairs[ii] === 1) {
                     color = COLOR_WRONG;
 
-                    if (ii === 0 || (ii > 0 && sequence[ii - 1] === EPars.RNABASE_CUT)) {
+                    if (ii === 0 || (ii > 0 && sequence[ii - 1] === RNABASE.CUT)) {
                         wrongXCoords.push((xarray[ii] - xmin) * scale + xOffset);
                         wrongYCoords.push((yarray[ii] - ymin) * scale + yOffset);
 
@@ -201,7 +201,7 @@ export default class PoseThumbnail {
 
                         wrongXCoords.push(((xarray[ii] + xarray[ii + 1]) / 2.0 - xmin) * scale + xOffset);
                         wrongYCoords.push(((yarray[ii] + yarray[ii + 1]) / 2.0 - ymin) * scale + yOffset);
-                    } else if (ii === n - 1 || (ii < n - 1 && sequence[ii + 1] === EPars.RNABASE_CUT)) {
+                    } else if (ii === n - 1 || (ii < n - 1 && sequence[ii + 1] === RNABASE.CUT)) {
                         wrongXCoords.push(((xarray[ii] + xarray[ii - 1]) / 2.0 - xmin) * scale + xOffset);
                         wrongYCoords.push(((yarray[ii] + yarray[ii - 1]) / 2.0 - ymin) * scale + yOffset);
 
@@ -223,7 +223,7 @@ export default class PoseThumbnail {
                 } else if (wrongPairs[ii] === -1) {
                     color = COLOR_RIGHT;
 
-                    if (ii === 0 || (ii > 0 && sequence[ii - 1] === EPars.RNABASE_CUT)) {
+                    if (ii === 0 || (ii > 0 && sequence[ii - 1] === RNABASE.CUT)) {
                         rightXCoords.push((xarray[ii] - xmin) * scale + xOffset);
                         rightYCoords.push((yarray[ii] - ymin) * scale + yOffset);
 
@@ -232,7 +232,7 @@ export default class PoseThumbnail {
 
                         rightXCoords.push(((xarray[ii] + xarray[ii + 1]) / 2.0 - xmin) * scale + xOffset);
                         rightYCoords.push(((yarray[ii] + yarray[ii + 1]) / 2.0 - ymin) * scale + yOffset);
-                    } else if (ii === n - 1 || (ii < n - 1 && sequence[ii + 1] === EPars.RNABASE_CUT)) {
+                    } else if (ii === n - 1 || (ii < n - 1 && sequence[ii + 1] === RNABASE.CUT)) {
                         rightXCoords.push(((xarray[ii] + xarray[ii - 1]) / 2.0 - xmin) * scale + xOffset);
                         rightYCoords.push(((yarray[ii] + yarray[ii - 1]) / 2.0 - ymin) * scale + yOffset);
 
@@ -254,7 +254,7 @@ export default class PoseThumbnail {
                 } else {
                     color = COLOR_DONTCARE;
 
-                    if (ii === 0 || (ii > 0 && sequence[ii - 1] === EPars.RNABASE_CUT)) {
+                    if (ii === 0 || (ii > 0 && sequence[ii - 1] === RNABASE.CUT)) {
                         dontcareXCoords.push((xarray[ii] - xmin) * scale + xOffset);
                         dontcareYCoords.push((yarray[ii] - ymin) * scale + yOffset);
 
@@ -263,7 +263,7 @@ export default class PoseThumbnail {
 
                         dontcareXCoords.push(((xarray[ii] + xarray[ii + 1]) / 2.0 - xmin) * scale + xOffset);
                         dontcareYCoords.push(((yarray[ii] + yarray[ii + 1]) / 2.0 - ymin) * scale + yOffset);
-                    } else if (ii === n - 1 || (ii < n - 1 && sequence[ii + 1] === EPars.RNABASE_CUT)) {
+                    } else if (ii === n - 1 || (ii < n - 1 && sequence[ii + 1] === RNABASE.CUT)) {
                         dontcareXCoords.push(((xarray[ii] + xarray[ii - 1]) / 2.0 - xmin) * scale + xOffset);
                         dontcareYCoords.push(((yarray[ii] + yarray[ii - 1]) / 2.0 - ymin) * scale + yOffset);
 
@@ -284,13 +284,13 @@ export default class PoseThumbnail {
                     }
                 }
             } else if (type === PoseThumbnailType.BASE_COLORED) {
-                if (sequence[ii] === EPars.RNABASE_ADENINE) {
+                if (sequence[ii] === RNABASE.ADENINE) {
                     color = COLOR_ADENINE;
-                } else if (sequence[ii] === EPars.RNABASE_GUANINE) {
+                } else if (sequence[ii] === RNABASE.GUANINE) {
                     color = COLOR_GUANINE;
-                } else if (sequence[ii] === EPars.RNABASE_CYTOSINE) {
+                } else if (sequence[ii] === RNABASE.CYTOSINE) {
                     color = COLOR_CYTOSINE;
-                } else if (sequence[ii] === EPars.RNABASE_URACIL) {
+                } else if (sequence[ii] === RNABASE.URACIL) {
                     color = COLOR_URACIL;
                 } else {
                     color = COLOR_WHITE;
@@ -307,7 +307,7 @@ export default class PoseThumbnail {
             const xpos = (xarray[ii] - xmin) * scale + xOffset;
             const ypos = (yarray[ii] - ymin) * scale + yOffset;
 
-            if (ii === 0 || sequence[ii] === EPars.RNABASE_CUT) {
+            if (ii === 0 || sequence[ii] === RNABASE.CUT) {
                 canvas.moveTo(xpos, ypos);
             } else {
                 canvas.lineTo(xpos, ypos);
@@ -320,7 +320,7 @@ export default class PoseThumbnail {
 
             for (let jj = 0; jj < rightXCoords.length; jj++) {
                 if (jj % 3 === 0) {
-                    if (sequence[jj / 3] === EPars.RNABASE_CUT) {
+                    if (sequence[jj / 3] === RNABASE.CUT) {
                         jj += 2;
                     } else {
                         canvas.moveTo(rightXCoords[jj], rightYCoords[jj]);
@@ -335,7 +335,7 @@ export default class PoseThumbnail {
 
             for (let jj = 0; jj < wrongXCoords.length; jj++) {
                 if (jj % 3 === 0) {
-                    if (sequence[jj / 3] === EPars.RNABASE_CUT) {
+                    if (sequence[jj / 3] === RNABASE.CUT) {
                         jj += 2;
                     } else {
                         canvas.moveTo(wrongXCoords[jj], wrongYCoords[jj]);
@@ -350,7 +350,7 @@ export default class PoseThumbnail {
 
             for (let jj = 0; jj < dontcareXCoords.length; jj++) {
                 if (jj % 3 === 0) {
-                    if (sequence[jj / 3] === EPars.RNABASE_CUT) {
+                    if (sequence[jj / 3] === RNABASE.CUT) {
                         jj += 2;
                     } else {
                         canvas.moveTo(dontcareXCoords[jj], dontcareYCoords[jj]);

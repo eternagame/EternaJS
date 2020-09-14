@@ -1,4 +1,4 @@
-import EPars from 'eterna/EPars';
+import EPars, {RNABASE} from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
@@ -63,7 +63,7 @@ export class MinimumAConstraint extends MinimumBaseConstraint {
     public static readonly NAME = 'A';
 
     constructor(count: number) {
-        super(EPars.RNABASE_ADENINE, count);
+        super(RNABASE.ADENINE, count);
     }
 
     public serialize(): [string, string] {
@@ -78,7 +78,7 @@ export class MinimumUConstraint extends MinimumBaseConstraint {
     public static readonly NAME = 'U';
 
     constructor(count: number) {
-        super(EPars.RNABASE_URACIL, count);
+        super(RNABASE.URACIL, count);
     }
 
     public serialize(): [string, string] {
@@ -93,7 +93,7 @@ export class MinimumGConstraint extends MinimumBaseConstraint {
     public static readonly NAME = 'G';
 
     constructor(count: number) {
-        super(EPars.RNABASE_GUANINE, count);
+        super(RNABASE.GUANINE, count);
     }
 
     public serialize(): [string, string] {
@@ -108,7 +108,7 @@ export class MinimumCConstraint extends MinimumBaseConstraint {
     public static readonly NAME = 'C';
 
     constructor(count: number) {
-        super(EPars.RNABASE_CYTOSINE, count);
+        super(RNABASE.CYTOSINE, count);
     }
 
     public serialize(): [string, string] {

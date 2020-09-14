@@ -2,7 +2,7 @@ import * as log from 'loglevel';
 import {
     Container, DisplayObject, Point, Sprite, Text, Rectangle, Texture, BaseTexture
 } from 'pixi.js';
-import EPars from 'eterna/EPars';
+import EPars, {RNABASE} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import UndoBlock, {
     UndoBlockParam, FoldData, TargetConditions, OligoDef
@@ -266,11 +266,11 @@ export default class PoseEditMode extends GameMode {
         });
 
         this._toolbar.baseMarkerButton.clicked.connect(() => {
-            this.setPosesColor(EPars.RNABASE_BASE_MARK);
+            this.setPosesColor(RNABASE.BASE_MARK);
         });
 
         this._toolbar.magicGlueButton.clicked.connect(() => {
-            this.setPosesColor(EPars.RNABASE_MAGIC_GLUE);
+            this.setPosesColor(RNABASE.MAGIC_GLUE);
         });
 
         // Add our docked SpecBox at the bottom of uiLayer
@@ -498,7 +498,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     public onSwapClicked(): void {
-        this.setPosesColor(EPars.RNABASE_PAIR);
+        this.setPosesColor(RNABASE.PAIR);
     }
 
     public onHintClicked(): void {
@@ -1201,7 +1201,7 @@ export default class PoseEditMode extends GameMode {
         // Setters
         this._scriptInterface.addCallback('set_sequence_string', (seq: string): boolean => {
             const seqArr: number[] = EPars.stringToSequence(seq);
-            if (seqArr.indexOf(EPars.RNABASE_UNDEFINED) >= 0 || seqArr.indexOf(EPars.RNABASE_CUT) >= 0) {
+            if (seqArr.indexOf(RNABASE.UNDEFINED) >= 0 || seqArr.indexOf(RNABASE.CUT) >= 0) {
                 log.info(`Invalid characters in ${seq}`);
                 return false;
             }
@@ -2782,10 +2782,10 @@ export default class PoseEditMode extends GameMode {
                 const tc = this._targetConditions[ii] as TargetConditions;
                 const antiStructureConstraints = tc['anti_structure_constraints'];
                 if (antiStructureConstraints !== undefined) {
-                    if (lastShiftedCommand === EPars.RNABASE_ADD_BASE) {
+                    if (lastShiftedCommand === RNABASE.ADD_BASE) {
                         const antiStructureConstraint: boolean = antiStructureConstraints[lastShiftedIndex];
                         antiStructureConstraints.splice(lastShiftedIndex, 0, antiStructureConstraint);
-                    } else if (lastShiftedCommand === EPars.RNABASE_DELETE) {
+                    } else if (lastShiftedCommand === RNABASE.DELETE) {
                         antiStructureConstraints.splice(lastShiftedIndex, 1);
                     }
                 }
@@ -2795,7 +2795,7 @@ export default class PoseEditMode extends GameMode {
                     const constraintVal: boolean = structureConstraints[lastShiftedIndex];
                     let newConstraints: boolean[];
 
-                    if (lastShiftedCommand === EPars.RNABASE_ADD_BASE) {
+                    if (lastShiftedCommand === RNABASE.ADD_BASE) {
                         newConstraints = structureConstraints.slice(0, lastShiftedIndex);
                         newConstraints.push(constraintVal);
                         newConstraints = newConstraints.concat(
@@ -2822,7 +2822,7 @@ export default class PoseEditMode extends GameMode {
                 if (tc['type'] === 'aptamer') {
                     const bindingSite: number[] = (tc['site'] as number[]).slice(0);
                     const bindingPairs: number[] = [];
-                    if (lastShiftedCommand === EPars.RNABASE_ADD_BASE) {
+                    if (lastShiftedCommand === RNABASE.ADD_BASE) {
                         for (let ss = 0; ss < bindingSite.length; ss++) {
                             if (bindingSite[ss] >= lastShiftedIndex) {
                                 bindingSite[ss]++;

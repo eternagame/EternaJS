@@ -1,4 +1,4 @@
-import EPars from 'eterna/EPars';
+import EPars, {RNABASE} from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
@@ -65,7 +65,7 @@ export class MaximumAConstraint extends MaximumBaseConstraint {
     public static readonly NAME = 'AMAX';
 
     constructor(count: number) {
-        super(EPars.RNABASE_ADENINE, count);
+        super(RNABASE.ADENINE, count);
     }
 
     public serialize(): [string, string] {
@@ -80,7 +80,7 @@ export class MaximumUConstraint extends MaximumBaseConstraint {
     public static readonly NAME = 'UMAX';
 
     constructor(count: number) {
-        super(EPars.RNABASE_URACIL, count);
+        super(RNABASE.URACIL, count);
     }
 
     public serialize(): [string, string] {
@@ -95,7 +95,7 @@ export class MaximumGConstraint extends MaximumBaseConstraint {
     public static readonly NAME = 'GMAX';
 
     constructor(count: number) {
-        super(EPars.RNABASE_GUANINE, count);
+        super(RNABASE.GUANINE, count);
     }
 
     public serialize(): [string, string] {
@@ -110,7 +110,7 @@ export class MaximumCConstraint extends MaximumBaseConstraint {
     public static readonly NAME = 'CMAX';
 
     constructor(count: number) {
-        super(EPars.RNABASE_CYTOSINE, count);
+        super(RNABASE.CYTOSINE, count);
     }
 
     public serialize(): [string, string] {

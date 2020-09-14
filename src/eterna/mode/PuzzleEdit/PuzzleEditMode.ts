@@ -1,5 +1,5 @@
 import {DisplayObject, Point} from 'pixi.js';
-import EPars from 'eterna/EPars';
+import EPars, {RNABASE} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import UndoBlock, {UndoBlockParam, TargetConditions} from 'eterna/UndoBlock';
 import Background from 'eterna/vfx/Background';
@@ -141,12 +141,12 @@ export default class PuzzleEditMode extends GameMode {
         this._toolbar = new Toolbar(toolbarType, {states: this._numTargets});
         this.addObject(this._toolbar, this.uiLayer);
 
-        this._toolbar.addbaseButton.clicked.connect(() => this.onEditButtonClicked(EPars.RNABASE_ADD_BASE));
-        this._toolbar.addpairButton.clicked.connect(() => this.onEditButtonClicked(EPars.RNABASE_ADD_PAIR));
-        this._toolbar.deleteButton.clicked.connect(() => this.onEditButtonClicked(EPars.RNABASE_DELETE));
-        this._toolbar.lockButton.clicked.connect(() => this.onEditButtonClicked(EPars.RNABASE_LOCK));
-        this._toolbar.moleculeButton.clicked.connect(() => this.onEditButtonClicked(EPars.RNABASE_BINDING_SITE));
-        this._toolbar.pairSwapButton.clicked.connect(() => this.onEditButtonClicked(EPars.RNABASE_PAIR));
+        this._toolbar.addbaseButton.clicked.connect(() => this.onEditButtonClicked(RNABASE.ADD_BASE));
+        this._toolbar.addpairButton.clicked.connect(() => this.onEditButtonClicked(RNABASE.ADD_PAIR));
+        this._toolbar.deleteButton.clicked.connect(() => this.onEditButtonClicked(RNABASE.DELETE));
+        this._toolbar.lockButton.clicked.connect(() => this.onEditButtonClicked(RNABASE.LOCK));
+        this._toolbar.moleculeButton.clicked.connect(() => this.onEditButtonClicked(RNABASE.BINDING_SITE));
+        this._toolbar.pairSwapButton.clicked.connect(() => this.onEditButtonClicked(RNABASE.PAIR));
 
         this._toolbar.naturalButton.clicked.connect(() => this.setToNativeMode());
         this._toolbar.targetButton.clicked.connect(() => this.setToTargetMode());
@@ -463,7 +463,7 @@ export default class PuzzleEditMode extends GameMode {
                     const {sequence} = pose;
                     for (let ii = 0; ii < sequence.length; ii++) {
                         if (!pose.isLocked(ii)) {
-                            sequence[ii] = EPars.RNABASE_ADENINE;
+                            sequence[ii] = RNABASE.ADENINE;
                         }
                     }
 
