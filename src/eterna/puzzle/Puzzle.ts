@@ -1,5 +1,5 @@
 import Constants from 'eterna/Constants';
-import EPars, {RNABASE, Sequence} from 'eterna/EPars';
+import EPars, {RNABase, Sequence} from 'eterna/EPars';
 import FolderManager from 'eterna/folding/FolderManager';
 import Vienna from 'eterna/folding/Vienna';
 import Folder from 'eterna/folding/Folder';
@@ -58,12 +58,12 @@ export default class Puzzle {
             return null;
         }
 
-        seq[0] = RNABASE.GUANINE;
-        seq[1] = RNABASE.GUANINE;
+        seq[0] = RNABase.GUANINE;
+        seq[1] = RNABase.GUANINE;
 
         const offset: number = seq.length - 20;
         for (let ii = 0; ii < 20; ii++) {
-            seq[offset + ii] = EPars.RNABASE_LAST20[ii];
+            seq[offset + ii] = EPars.RNABase_LAST20[ii];
         }
 
         return seq;
@@ -479,14 +479,14 @@ export default class Puzzle {
         const seq: number[] = [];
         if (this._useTails) {
             if (this._useShortTails) {
-                seq.push(RNABASE.GUANINE);
-                seq.push(RNABASE.GUANINE);
+                seq.push(RNABase.GUANINE);
+                seq.push(RNABase.GUANINE);
             } else {
-                seq.push(RNABASE.GUANINE);
-                seq.push(RNABASE.GUANINE);
-                seq.push(RNABASE.ADENINE);
-                seq.push(RNABASE.ADENINE);
-                seq.push(RNABASE.ADENINE);
+                seq.push(RNABase.GUANINE);
+                seq.push(RNABase.GUANINE);
+                seq.push(RNABase.ADENINE);
+                seq.push(RNABase.ADENINE);
+                seq.push(RNABase.ADENINE);
             }
         }
 
@@ -496,13 +496,13 @@ export default class Puzzle {
             if (this._beginningSequence != null) {
                 seq.push(this._beginningSequence[ii]);
             } else {
-                seq.push(RNABASE.ADENINE);
+                seq.push(RNABase.ADENINE);
             }
         }
 
         if (this._useTails) {
             for (let ii = 0; ii < 20; ii++) {
-                seq.push(EPars.RNABASE_LAST20[ii]);
+                seq.push(EPars.RNABase_LAST20[ii]);
             }
         }
 
@@ -536,14 +536,14 @@ export default class Puzzle {
 
                 if (this._useTails) {
                     if (this._useShortTails) {
-                        targetSeq.push(RNABASE.GUANINE);
-                        targetSeq.push(RNABASE.GUANINE);
+                        targetSeq.push(RNABase.GUANINE);
+                        targetSeq.push(RNABase.GUANINE);
                     } else {
-                        targetSeq.push(RNABASE.GUANINE);
-                        targetSeq.push(RNABASE.GUANINE);
-                        targetSeq.push(RNABASE.ADENINE);
-                        targetSeq.push(RNABASE.ADENINE);
-                        targetSeq.push(RNABASE.ADENINE);
+                        targetSeq.push(RNABase.GUANINE);
+                        targetSeq.push(RNABase.GUANINE);
+                        targetSeq.push(RNABase.ADENINE);
+                        targetSeq.push(RNABase.ADENINE);
+                        targetSeq.push(RNABase.ADENINE);
                     }
                 }
 
@@ -553,7 +553,7 @@ export default class Puzzle {
 
                 if (this._useTails) {
                     for (let ii = 0; ii < 20; ii++) {
-                        targetSeq.push(EPars.RNABASE_LAST20[ii]);
+                        targetSeq.push(EPars.RNABase_LAST20[ii]);
                     }
                 }
 

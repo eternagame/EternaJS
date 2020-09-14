@@ -1,6 +1,6 @@
 import {Text, Texture} from 'pixi.js';
 import {TextureUtil} from 'flashbang';
-import {RNABASE} from 'eterna/EPars';
+import {RNABase} from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import EternaTextureUtil from 'eterna/util/EternaTextureUtil';
 import Fonts from 'eterna/util/Fonts';
@@ -97,13 +97,13 @@ export default class BaseTextures {
     // AMW TODO: isn't this just the EPars function?
     private static type2Letter(baseType: number): string {
         switch (baseType) {
-            case RNABASE.URACIL:
+            case RNABase.URACIL:
                 return 'U';
-            case RNABASE.ADENINE:
+            case RNABase.ADENINE:
                 return 'A';
-            case RNABASE.GUANINE:
+            case RNABase.GUANINE:
                 return 'G';
-            case RNABASE.CYTOSINE:
+            case RNABase.CYTOSINE:
                 return 'C';
             default:
                 throw new Error(`Bad baseType: ${baseType}`);

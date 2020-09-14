@@ -1,6 +1,6 @@
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import EPars, {RNABASE} from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 import {Assert} from 'flashbang';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
@@ -121,8 +121,8 @@ function countLoops(targetPairs: number[], currentTargetIndex: number, sequence:
         const pairs = loop.pairs;
         if (loop.strands.length === 2 && loop.strands[0].length === 1 && loop.strands[1].length === 1) {
             // 1-1 Loops. Need G-G terminal mismatch.
-            if (sequence[loop.strands[0][0] as number] === RNABASE.GUANINE
-                    && sequence[loop.strands[1][0] as number] === RNABASE.GUANINE) {
+            if (sequence[loop.strands[0][0] as number] === RNABase.GUANINE
+                    && sequence[loop.strands[1][0] as number] === RNABase.GUANINE) {
                 ++ret;
                 loop.isBoosted[0] = true;
             } else {
@@ -130,8 +130,8 @@ function countLoops(targetPairs: number[], currentTargetIndex: number, sequence:
             }
         } else if (pairs.length === 1 && loop.strands.length === 1) {
             // Hairpin loops. G-A terminal mismatch (with the G at the lowest index).
-            if (sequence[loop.strands[0][0] as number] === RNABASE.GUANINE
-                    && sequence[loop.strands[0][loop.strands[0].length - 1] as number] === RNABASE.ADENINE) {
+            if (sequence[loop.strands[0][0] as number] === RNABase.GUANINE
+                    && sequence[loop.strands[0][loop.strands[0].length - 1] as number] === RNABase.ADENINE) {
                 ++ret;
                 loop.isBoosted[0] = true;
             } else {
@@ -157,8 +157,8 @@ function countLoops(targetPairs: number[], currentTargetIndex: number, sequence:
                 }
 
                 // Check for G-A mismatch.
-                if ((sequence[idx1] === RNABASE.GUANINE && sequence[idx2] === RNABASE.ADENINE)
-                    || (sequence[idx2] === RNABASE.GUANINE && sequence[idx1] === RNABASE.ADENINE)) {
+                if ((sequence[idx1] === RNABase.GUANINE && sequence[idx2] === RNABase.ADENINE)
+                    || (sequence[idx2] === RNABase.GUANINE && sequence[idx1] === RNABase.ADENINE)) {
                     ++ret;
                     loop.isBoosted[j] = true;
                 } else {

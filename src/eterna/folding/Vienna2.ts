@@ -1,5 +1,5 @@
 import * as log from 'loglevel';
-import EPars, {RNABASE} from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import Utility from 'eterna/util/Utility';
@@ -143,7 +143,7 @@ export default class Vienna2 extends Folder {
             }
         } while (0);
 
-        const cut: number = seq.indexOf(RNABASE.CUT);
+        const cut: number = seq.indexOf(RNABase.CUT);
         if (cut >= 0 && cache.nodes[0] !== -2) {
             // we just scored a duplex that wasn't one, so we have to redo it properly
             const seqA: number[] = seq.slice(0, cut);
@@ -291,7 +291,7 @@ export default class Vienna2 extends Folder {
         seq: number[], secondBestPairs: number[], malus: number = 0,
         desiredPairs: string | null = null, temp: number = 37
     ): number[] {
-        const cut: number = seq.indexOf(RNABASE.CUT);
+        const cut: number = seq.indexOf(RNABase.CUT);
         if (cut < 0) {
             throw new Error('Missing cutting point');
         }
@@ -344,7 +344,7 @@ export default class Vienna2 extends Folder {
         seq: number[], bindingSite: number[], bonus: number, desiredPairs: string | null = null,
         malus: number = 0, temp: number = 37
     ): number[] {
-        const cut: number = seq.indexOf(RNABASE.CUT);
+        const cut: number = seq.indexOf(RNABase.CUT);
         if (cut < 0) {
             throw new Error('Missing cutting point');
         }
@@ -666,13 +666,13 @@ export default class Vienna2 extends Folder {
         if (size === 4) {
             let loopStr = '';
             for (let walker: number = i; walker <= j; walker++) {
-                if (sequence[walker] === RNABASE.ADENINE) {
+                if (sequence[walker] === RNABase.ADENINE) {
                     loopStr += 'A';
-                } else if (sequence[walker] === RNABASE.GUANINE) {
+                } else if (sequence[walker] === RNABase.GUANINE) {
                     loopStr += 'G';
-                } else if (sequence[walker] === RNABASE.URACIL) {
+                } else if (sequence[walker] === RNABase.URACIL) {
                     loopStr += 'U';
-                } else if (sequence[walker] === RNABASE.CYTOSINE) {
+                } else if (sequence[walker] === RNABase.CYTOSINE) {
                     loopStr += 'C';
                 }
             }

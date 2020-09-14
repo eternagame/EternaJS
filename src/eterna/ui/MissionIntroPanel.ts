@@ -5,7 +5,7 @@ import Fonts from 'eterna/util/Fonts';
 import {Sprite, Point} from 'pixi.js';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import ConstraintBox from 'eterna/constraints/ConstraintBox';
-import {RNABASE} from 'eterna/EPars';
+import {RNABase} from 'eterna/EPars';
 import MultiStyleText from 'pixi-multistyle-text';
 import Assert from 'flashbang/util/Assert';
 import MissionIntroConstraints from './MissionIntroConstraints';
@@ -58,7 +58,7 @@ export default class MissionIntroPanel extends ContainerObject {
 
         const setThumbnail = (targetPairs: number[]) => {
             const wrongPairs = new Array(targetPairs.length).fill(-1);
-            const sequence = new Array(targetPairs.length).fill(RNABASE.ADENINE);
+            const sequence = new Array(targetPairs.length).fill(RNABase.ADENINE);
             PoseThumbnail.drawToSprite(
                 this._thumbnail,
                 sequence,

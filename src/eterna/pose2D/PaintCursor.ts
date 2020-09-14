@@ -1,6 +1,6 @@
 import {Graphics, DisplayObject} from 'pixi.js';
 import {GameObject, Flashbang, Updatable} from 'flashbang';
-import EPars, {RNABASE} from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 
 export default class PaintCursor extends GameObject implements Updatable {
     constructor() {
@@ -21,44 +21,44 @@ export default class PaintCursor extends GameObject implements Updatable {
 
     public setShape(shape: number): void {
         switch (shape) {
-            case RNABASE.ADENINE:
+            case RNABase.ADENINE:
                 this._color = PaintCursor.YELLOW;
                 this._outColor = PaintCursor.NULL;
                 break;
 
-            case RNABASE.URACIL:
+            case RNABase.URACIL:
                 this._color = PaintCursor.BLUE;
                 this._outColor = PaintCursor.NULL;
                 break;
 
-            case RNABASE.DELETE:
-            case RNABASE.GUANINE:
+            case RNABase.DELETE:
+            case RNABase.GUANINE:
                 this._color = PaintCursor.RED;
                 this._outColor = PaintCursor.NULL;
                 break;
 
-            case RNABASE.CYTOSINE:
+            case RNABase.CYTOSINE:
                 this._color = PaintCursor.GREEN;
                 this._outColor = PaintCursor.NULL;
                 break;
 
-            case RNABASE.AU_PAIR:
+            case RNABase.AU_PAIR:
                 this._color = PaintCursor.YELLOW;
                 this._outColor = PaintCursor.BLUE;
                 break;
 
-            case RNABASE.GU_PAIR:
+            case RNABase.GU_PAIR:
                 this._color = PaintCursor.BLUE;
                 this._outColor = PaintCursor.RED;
                 break;
 
-            case RNABASE.GC_PAIR:
+            case RNABase.GC_PAIR:
                 this._color = PaintCursor.RED;
                 this._outColor = PaintCursor.GREEN;
                 break;
 
-            case RNABASE.ADD_BASE:
-            case RNABASE.ADD_PAIR:
+            case RNABase.ADD_BASE:
+            case RNABase.ADD_PAIR:
                 this._color = PaintCursor.YELLOW;
                 this._outColor = PaintCursor.NULL;
                 break;

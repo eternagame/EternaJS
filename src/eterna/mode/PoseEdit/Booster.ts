@@ -1,7 +1,7 @@
 import * as log from 'loglevel';
 import {Texture} from 'pixi.js';
 import {TextureUtil, Flashbang} from 'flashbang';
-import EPars, {RNABASE} from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 import Pose2D from 'eterna/pose2D/Pose2D';
 import GameButton from 'eterna/ui/GameButton';
 import Sounds from 'eterna/resources/Sounds';
@@ -145,7 +145,7 @@ export default class Booster {
 
         scriptInterface.addCallback('set_sequence_string', (seq: string): boolean => {
             const seqArr: number[] = EPars.stringToSequence(seq);
-            if (seqArr.indexOf(RNABASE.UNDEFINED) >= 0 || seqArr.indexOf(RNABASE.CUT) >= 0) {
+            if (seqArr.indexOf(RNABase.UNDEFINED) >= 0 || seqArr.indexOf(RNABase.CUT) >= 0) {
                 log.info(`Invalid characters in ${seq}`);
                 return false;
             }
@@ -203,5 +203,5 @@ export default class Booster {
     private readonly _scriptID: string;
     private readonly _buttonStateTextures: (Texture | null)[] = [null, null, null, null, null];
 
-    private static _toolColorCounter: number = EPars.RNABASE_DYNAMIC_FIRST;
+    private static _toolColorCounter: number = EPars.RNABase_DYNAMIC_FIRST;
 }

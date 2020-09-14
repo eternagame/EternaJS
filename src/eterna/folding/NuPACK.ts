@@ -1,5 +1,5 @@
 import * as log from 'loglevel';
-import EPars, {RNABASE} from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import PoseOp from 'eterna/pose2D/PoseOp';
@@ -129,7 +129,7 @@ export default class NuPACK extends Folder {
             }
         } while (0);
 
-        let cut: number = seq.lastIndexOf(RNABASE.CUT);
+        let cut: number = seq.lastIndexOf(RNABase.CUT);
         if (cut >= 0) {
             if (cache.nodes[0] !== -2 || cache.nodes.length === 2 || (cache.nodes[0] === -2 && cache.nodes[2] !== -1)) {
                 // we just scored a duplex that wasn't one, so we have to redo it properly
@@ -170,7 +170,7 @@ export default class NuPACK extends Folder {
             } else {
                 cut = 0;
                 for (let ii = 0; ii < cache.nodes.length; ii += 2) {
-                    if (seq[ii / 2] === RNABASE.CUT) {
+                    if (seq[ii / 2] === RNABase.CUT) {
                         cut++;
                     } else {
                         cache.nodes[ii] += cut;
@@ -273,7 +273,7 @@ export default class NuPACK extends Folder {
         seq: number[], secondBestPairs: number[], malus: number = 0,
         desiredPairs: string | null = null, temp: number = 37
     ): number[] {
-        const cut: number = seq.indexOf(RNABASE.CUT);
+        const cut: number = seq.indexOf(RNABase.CUT);
         if (cut < 0) {
             throw new Error('Missing cutting point');
         }
@@ -326,7 +326,7 @@ export default class NuPACK extends Folder {
         seq: number[], bindingSite: number[], bonus: number, desiredPairs: string | null = null,
         malus: number = 0, temp: number = 37
     ): number[] {
-        const cut: number = seq.indexOf(RNABASE.CUT);
+        const cut: number = seq.indexOf(RNABase.CUT);
         if (cut < 0) {
             throw new Error('Missing cutting point');
         }
@@ -441,7 +441,7 @@ export default class NuPACK extends Folder {
             for (let ii = numOligo; ii >= 0; ii--) {
                 let msSeq: number[] = seq.slice();
                 for (let jj = 0; jj < ii; jj++) {
-                    msSeq.push(RNABASE.CUT);
+                    msSeq.push(RNABase.CUT);
                     msSeq = msSeq.concat(oligos[order[jj]].sequence);
                 }
                 let msPairs: number[];
@@ -501,7 +501,7 @@ export default class NuPACK extends Folder {
             for (let ii = numOligo; ii >= 0; ii--) {
                 let msSeq: number[] = seq.slice();
                 for (let jj = 0; jj < ii; jj++) {
-                    msSeq.push(RNABASE.CUT);
+                    msSeq.push(RNABase.CUT);
                     msSeq = msSeq.concat(oligos[order[jj]].sequence);
                 }
 

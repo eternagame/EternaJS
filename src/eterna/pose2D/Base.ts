@@ -4,7 +4,7 @@ import {
 } from 'pixi.js';
 import {ContainerObject, LateUpdatable, Flashbang} from 'flashbang';
 import Constants from 'eterna/Constants';
-import {RNABASE} from 'eterna/EPars';
+import {RNABase} from 'eterna/EPars';
 import ROPWait from 'eterna/rscript/ROPWait';
 import BaseAssets from './BaseAssets';
 import BaseDrawFlags from './BaseDrawFlags';
@@ -136,7 +136,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
     }
 
     public needRedraw(isStatic: boolean): boolean {
-        if (!this.display.visible || this._baseType === RNABASE.CUT) {
+        if (!this.display.visible || this._baseType === RNABase.CUT) {
             return false;
         }
 
@@ -274,7 +274,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
     }
 
     public lateUpdate(dt: number): void {
-        if (this._needsRedraw && this.display.visible && this._baseType !== RNABASE.CUT) {
+        if (this._needsRedraw && this.display.visible && this._baseType !== RNABase.CUT) {
             this.redraw(
                 this._zoomLevel, this._offX, this._offY,
                 this._currentTime, this._drawFlags, this._numberTexture, this._highlightState

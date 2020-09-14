@@ -1,5 +1,5 @@
 import {Assert} from 'flashbang';
-import EPars, {RNABASE, Sequence} from 'eterna/EPars';
+import EPars, {RNABase, Sequence} from 'eterna/EPars';
 import Plot, {PlotType} from 'eterna/Plot';
 import Pose2D, {Oligo} from './pose2D/Pose2D';
 import Folder from './folding/Folder';
@@ -385,7 +385,7 @@ export default class UndoBlock {
 
         let fullSeq: number[] = seq.sequence.slice();
         if (this._targetOligo) {
-            if (this.oligoMode === Pose2D.OLIGO_MODE_DIMER) fullSeq.push(RNABASE.CUT);
+            if (this.oligoMode === Pose2D.OLIGO_MODE_DIMER) fullSeq.push(RNABase.CUT);
             if (this.oligoMode === Pose2D.OLIGO_MODE_EXT5P) {
                 fullSeq = this._targetOligo.concat(fullSeq);
             } else {
@@ -394,7 +394,7 @@ export default class UndoBlock {
         } else if (this._targetOligos) {
             Assert.assertIsDefined(this._oligoOrder);
             for (let ii = 0; ii < this._targetOligos.length; ii++) {
-                fullSeq.push(RNABASE.CUT);
+                fullSeq.push(RNABase.CUT);
                 fullSeq = fullSeq.concat(this._targetOligos[this._oligoOrder[ii]].sequence);
             }
         }

@@ -2,7 +2,7 @@ import {
     Container, Graphics, Sprite, Texture
 } from 'pixi.js';
 import {ColorUtil, TextureUtil} from 'flashbang';
-import {RNABASE} from 'eterna/EPars';
+import {RNABase} from 'eterna/EPars';
 import ExpPainter from 'eterna/ExpPainter';
 import Sounds from 'eterna/resources/Sounds';
 import BitmapManager from 'eterna/resources/BitmapManager';
@@ -33,7 +33,7 @@ export default class BaseAssets {
     public static getBodyTexture(baseType: number, colorLevel: number, zoomLevel: number, flags: number): Texture {
         if (BaseAssets.isBaseType(baseType) && colorLevel < 0) {
             return BaseAssets.getBaseBitmaps(baseType).getBodyTexture(zoomLevel, flags);
-        } else if (baseType === RNABASE.LOCK) {
+        } else if (baseType === RNABase.LOCK) {
             return BaseAssets.textureForSize(BaseAssets._backboneBodyData, 0, zoomLevel);
         } else if (colorLevel < 0) {
             if (zoomLevel < Base.NUM_ZOOM_LEVELS) {
@@ -118,23 +118,23 @@ export default class BaseAssets {
 
     public static getBaseTypeSound(type: number): string | null {
         switch (type) {
-            case RNABASE.ADENINE: return Sounds.SoundY;
-            case RNABASE.URACIL: return Sounds.SoundB;
-            case RNABASE.GUANINE: return Sounds.SoundR;
-            case RNABASE.CYTOSINE: return Sounds.SoundG;
+            case RNABase.ADENINE: return Sounds.SoundY;
+            case RNABase.URACIL: return Sounds.SoundB;
+            case RNABase.GUANINE: return Sounds.SoundR;
+            case RNABase.CYTOSINE: return Sounds.SoundG;
             default: return null;
         }
     }
 
     private static getBaseBitmaps(baseType: number): BaseTextures {
         switch (baseType) {
-            case RNABASE.URACIL:
+            case RNABase.URACIL:
                 return BaseAssets._baseUBitmaps;
-            case RNABASE.ADENINE:
+            case RNABase.ADENINE:
                 return BaseAssets._baseABitmaps;
-            case RNABASE.GUANINE:
+            case RNABase.GUANINE:
                 return BaseAssets._baseGBitmaps;
-            case RNABASE.CYTOSINE:
+            case RNABase.CYTOSINE:
                 return BaseAssets._baseCBitmaps;
             default:
                 throw new Error(`Bad base type: ${baseType}`);
@@ -143,10 +143,10 @@ export default class BaseAssets {
 
     private static isBaseType(baseType: number): boolean {
         switch (baseType) {
-            case RNABASE.URACIL:
-            case RNABASE.ADENINE:
-            case RNABASE.GUANINE:
-            case RNABASE.CYTOSINE:
+            case RNABase.URACIL:
+            case RNABase.ADENINE:
+            case RNABase.GUANINE:
+            case RNABase.CYTOSINE:
                 return true;
             default:
                 return false;
@@ -211,10 +211,10 @@ export default class BaseAssets {
         EternaTextureUtil.createScaled(BaseAssets._sphereMidData, 0.75, Base.NUM_ZOOM_LEVELS);
 
         // BASE BODY TEXTURES
-        BaseAssets._baseUBitmaps = new BaseTextures(RNABASE.URACIL);
-        BaseAssets._baseABitmaps = new BaseTextures(RNABASE.ADENINE);
-        BaseAssets._baseGBitmaps = new BaseTextures(RNABASE.GUANINE);
-        BaseAssets._baseCBitmaps = new BaseTextures(RNABASE.CYTOSINE);
+        BaseAssets._baseUBitmaps = new BaseTextures(RNABase.URACIL);
+        BaseAssets._baseABitmaps = new BaseTextures(RNABase.ADENINE);
+        BaseAssets._baseGBitmaps = new BaseTextures(RNABase.GUANINE);
+        BaseAssets._baseCBitmaps = new BaseTextures(RNABase.CYTOSINE);
 
         BaseAssets._backboneBodyData = [BitmapManager.getBitmap(Bitmaps.Backbone)];
         BaseAssets._backboneMidData = [BitmapManager.getBitmap(Bitmaps.BackboneMid)];

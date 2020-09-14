@@ -1,5 +1,5 @@
 import {Rectangle} from 'pixi.js';
-import EPars, {RNABASE} from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import {
     KeyCode, DisplayUtil, HAlign, VAlign, Updatable, ContainerObject
@@ -100,7 +100,7 @@ export default class StructureInput extends ContainerObject implements Updatable
         }
 
         for (let ii: number = sequence.length; ii < input.length; ii++) {
-            sequence.push(RNABASE.ADENINE);
+            sequence.push(RNABase.ADENINE);
             if (locks) locks.push(false);
             if (bindingSite) bindingSite.push(false);
         }
@@ -110,7 +110,7 @@ export default class StructureInput extends ContainerObject implements Updatable
             const afterIndex = sequence.slice(index);
             const afterLockIndex = locks ? locks.slice(index) : null;
             const afterBindingSiteIndex = bindingSite ? bindingSite.slice(index) : null;
-            sequence[index] = RNABASE.ADENINE;
+            sequence[index] = RNABase.ADENINE;
             if (locks) locks[index] = false;
             if (bindingSite) bindingSite[index] = false;
 
@@ -131,8 +131,8 @@ export default class StructureInput extends ContainerObject implements Updatable
             const afterLockIndex = locks ? locks.slice(index) : null;
             const afterBindingSiteIndex = bindingSite ? bindingSite.slice(index) : null;
 
-            sequence[index] = RNABASE.ADENINE;
-            sequence[pindex + 2] = RNABASE.ADENINE;
+            sequence[index] = RNABase.ADENINE;
+            sequence[pindex + 2] = RNABase.ADENINE;
             if (locks) locks[index] = false;
             if (locks) locks[pindex + 2] = false;
             if (bindingSite) bindingSite[index] = false;
@@ -155,11 +155,11 @@ export default class StructureInput extends ContainerObject implements Updatable
             const afterLockIndex = locks ? locks.slice(index) : null;
             const afterBindingSiteIndex = bindingSite ? bindingSite.slice(index) : null;
 
-            sequence[index] = RNABASE.ADENINE;
-            sequence[index + 1] = RNABASE.ADENINE;
-            sequence[index + 2] = RNABASE.ADENINE;
-            sequence[index + 3] = RNABASE.ADENINE;
-            sequence[index + 4] = RNABASE.ADENINE;
+            sequence[index] = RNABase.ADENINE;
+            sequence[index + 1] = RNABase.ADENINE;
+            sequence[index + 2] = RNABase.ADENINE;
+            sequence[index + 3] = RNABase.ADENINE;
+            sequence[index + 4] = RNABase.ADENINE;
 
             if (locks) {
                 locks[index] = false;

@@ -1,4 +1,4 @@
-import EPars, {RNABASE} from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
@@ -14,7 +14,7 @@ abstract class ConsecutiveBaseConstraint extends Constraint<ConsecutiveConstrain
 
     /**
      * Creates a ConsecutiveBaseConstraint which limits the number of consecutive bases
-     * @param baseType Base to limit, e.g. RNABASE.ADENINE
+     * @param baseType Base to limit, e.g. RNABase.ADENINE
      * @param limit Number of consectuive bases to constrain against.
      * This is the maxiumum allowed consecutive count  + 1.
      */
@@ -77,7 +77,7 @@ export class ConsecutiveAConstraint extends ConsecutiveBaseConstraint {
     public static readonly NAME = 'CONSECUTIVE_A';
 
     constructor(limit: number) {
-        super(RNABASE.ADENINE, limit);
+        super(RNABase.ADENINE, limit);
     }
 
     public serialize(): [string, string] {
@@ -92,7 +92,7 @@ export class ConsecutiveUConstraint extends ConsecutiveBaseConstraint {
     public static readonly NAME = 'CONSECUTIVE_U';
 
     constructor(limit: number) {
-        super(RNABASE.URACIL, limit);
+        super(RNABase.URACIL, limit);
     }
 
     public serialize(): [string, string] {
@@ -107,7 +107,7 @@ export class ConsecutiveGConstraint extends ConsecutiveBaseConstraint {
     public static readonly NAME = 'CONSECUTIVE_G';
 
     constructor(limit: number) {
-        super(RNABASE.GUANINE, limit);
+        super(RNABase.GUANINE, limit);
     }
 
     public serialize(): [string, string] {
@@ -122,7 +122,7 @@ export class ConsecutiveCConstraint extends ConsecutiveBaseConstraint {
     public static readonly NAME = 'CONSECUTIVE_C';
 
     constructor(limit: number) {
-        super(RNABASE.CYTOSINE, limit);
+        super(RNABase.CYTOSINE, limit);
     }
 
     public serialize(): [string, string] {

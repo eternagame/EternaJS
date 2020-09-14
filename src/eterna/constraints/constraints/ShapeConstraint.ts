@@ -1,5 +1,5 @@
 import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
-import EPars, {RNABASE} from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
@@ -169,7 +169,7 @@ export default class ShapeConstraint extends BaseShapeConstraint {
                     : 'Your RNA must fold into the outlined structure.'
             ),
             thumbnail: PoseThumbnail.drawToGraphics(
-                new Array(naturalPairs.length).fill(RNABASE.ADENINE),
+                new Array(naturalPairs.length).fill(RNABase.ADENINE),
                 undoBlock.targetPairs, 3, PoseThumbnailType.WRONG_COLORED, 0, status.wrongPairs, false, 0,
                 customLayout
             )
@@ -271,7 +271,7 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
             ),
             noText: true,
             thumbnail: PoseThumbnail.drawToGraphics(
-                new Array(naturalPairs.length).fill(RNABASE.ADENINE),
+                new Array(naturalPairs.length).fill(RNABase.ADENINE),
                 wrongPairs as number[],
                 3, PoseThumbnailType.WRONG_COLORED, 0, status.wrongPairs, false, 0,
                 customLayout

@@ -1,14 +1,14 @@
-import EPars, {RNABASE} from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 import PuzzleEditOp from './PuzzleEditOp';
 
 /** Utility functions for pose data */
 export default class PoseUtil {
     public static getPairStrength(s1: number, s2: number): number {
-        if (PoseUtil.isPair(s1, s2, RNABASE.ADENINE, RNABASE.URACIL)) {
+        if (PoseUtil.isPair(s1, s2, RNABase.ADENINE, RNABase.URACIL)) {
             return 2;
-        } else if (PoseUtil.isPair(s1, s2, RNABASE.GUANINE, RNABASE.URACIL)) {
+        } else if (PoseUtil.isPair(s1, s2, RNABase.GUANINE, RNABase.URACIL)) {
             return 1;
-        } else if (PoseUtil.isPair(s1, s2, RNABASE.GUANINE, RNABASE.CYTOSINE)) {
+        } else if (PoseUtil.isPair(s1, s2, RNABase.GUANINE, RNABase.CYTOSINE)) {
             return 3;
         } else {
             return -1;
