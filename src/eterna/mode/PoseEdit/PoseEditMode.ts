@@ -1019,7 +1019,7 @@ export default class PoseEditMode extends GameMode {
 
         this._scriptInterface.addCallback('get_locks', (): boolean[] | null => {
             const pose: Pose2D = this.getPose(0);
-            return pose.puzzleLocks ? pose.puzzleLocks.slice(0, pose.sequence.sequence.length) : null;
+            return pose.puzzleLocks ? pose.puzzleLocks.slice(0, pose.sequence.length) : null;
         });
 
         this._scriptInterface.addCallback('get_targets', (): TargetConditions[] => {
@@ -1560,7 +1560,7 @@ export default class PoseEditMode extends GameMode {
 
         if (this._targetConditions && this._targetConditions[targetIndex] !== undefined) {
             const tc = this._targetConditions[targetIndex] as TargetConditions;
-            const maxLen: number = this._poses[targetIndex].sequence.sequence.length;
+            const maxLen: number = this._poses[targetIndex].sequence.length;
             for (let ii = 0; ii < this._poses.length; ii++) {
                 if (ii === targetIndex || tc['force_struct'] == null) {
                     continue;
@@ -1801,7 +1801,7 @@ export default class PoseEditMode extends GameMode {
 
     private updateCurrentBlockWithDotAndMeltingPlot(index: number = -1): void {
         const datablock: UndoBlock = this.getCurrentUndoBlock(index);
-        if (this._folder && this._folder.canDotPlot && datablock.sequence.sequence.length < 500) {
+        if (this._folder && this._folder.canDotPlot && datablock.sequence.length < 500) {
             if (this._targetConditions && this._targetConditions[0]
                 && this._targetConditions[0]['type'] === 'pseudoknot') {
                 datablock.updateMeltingPointAndDotPlot(true);

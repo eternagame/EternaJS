@@ -1204,5 +1204,9 @@ export class Sequence {
         return this._sequence;
     }
 
+    public get length(): number {
+        return this._sequence.length;
+    }
+
     private _sequence: string;
 }

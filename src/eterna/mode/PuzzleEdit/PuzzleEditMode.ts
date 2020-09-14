@@ -346,7 +346,7 @@ export default class PuzzleEditMode extends GameMode {
 
     public getLockString(): string {
         const locks: boolean[] | undefined = this.getCurrentLock(0);
-        const len: number = this._poses[0].sequence.sequence.length;
+        const len: number = this._poses[0].sequence.length;
         const lockString = locks?.map(
             (l) => (l ? 'x' : 'o')
         ).join('') ?? 'o'.repeat(len);
@@ -461,7 +461,7 @@ export default class PuzzleEditMode extends GameMode {
             if (confirmed) {
                 for (const pose of this._poses) {
                     const {sequence} = pose;
-                    for (let ii = 0; ii < sequence.sequence.length; ii++) {
+                    for (let ii = 0; ii < sequence.length; ii++) {
                         if (!pose.isLocked(ii)) {
                             sequence.sequence[ii] = RNABASE.ADENINE;
                         }
@@ -548,7 +548,7 @@ export default class PuzzleEditMode extends GameMode {
             }
         }
 
-        const len: number = this._poses[0].sequence.sequence.length;
+        const len: number = this._poses[0].sequence.length;
         const locks = this.getCurrentLock(0);
         const lockString = this.getLockString();
 
@@ -746,7 +746,7 @@ export default class PuzzleEditMode extends GameMode {
             const targetPairs = this.getCurrentTargetPairs(ii);
             const bestPairs = undoblock.getPairs(EPars.DEFAULT_TEMPERATURE);
             const {sequence} = this._poses[ii];
-            if (sequence.sequence.length !== targetPairs.length) {
+            if (sequence.length !== targetPairs.length) {
                 throw new Error("sequence and design pairs lengths don't match");
             }
 
@@ -797,7 +797,7 @@ export default class PuzzleEditMode extends GameMode {
         this._poses.forEach(
             (pose: Pose2D, ii: number) => {
                 if (ii !== index) {
-                    if (pose.sequence.sequence.length === forceSequence.sequence.length) {
+                    if (pose.sequence.length === forceSequence.length) {
                         pose.sequence = forceSequence;
                         pose.puzzleLocks = forceLock;
                     } else {
@@ -813,7 +813,7 @@ export default class PuzzleEditMode extends GameMode {
                 if (ii > 0) {
                     lengths += ',';
                 }
-                lengths += this._poses[ii].sequence.sequence.length.toString();
+                lengths += this._poses[ii].sequence.length.toString();
             }
             lengths += ']';
 

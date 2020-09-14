@@ -114,8 +114,8 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
             : 0;
         return {
             ranges: [
-                undoBlock.sequence.sequence.length + 1,
-                undoBlock.sequence.sequence.length + 1 + extraLen - 1
+                undoBlock.sequence.length + 1,
+                undoBlock.sequence.length + 1 + extraLen - 1
             ],
             color: HighlightType.RESTRICTED,
             stateIndex: this.stateIndex
@@ -193,7 +193,7 @@ export class MultistrandBindingsConstraint extends BindingsConstraint<Multistran
 
         const highlightedIndices: number[] = [];
         // The + 1 is used to account for the "cut" base denoting split points between strands
-        let oligoFirstBaseIndex = undoBlock.sequence.sequence.length + 1;
+        let oligoFirstBaseIndex = undoBlock.sequence.length + 1;
         if (oligos) {
             for (const [idx, oligo] of oligos.entries()) {
                 if (status.unsatisfiedOligoIndexes.includes(idx)) {

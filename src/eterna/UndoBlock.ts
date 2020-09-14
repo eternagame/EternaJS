@@ -408,8 +408,8 @@ export default class UndoBlock {
     public sumProbUnpaired(dotArray: number[] | null, behavior: BasePairProbabilityTransform): number {
         if (dotArray === null || dotArray.length === 0) return 0;
         // dotArray is organized as idx, idx, pairprob.
-        const probUnpaired: number[] = Array<number>(this.sequence.sequence.length);
-        for (let idx = 0; idx < this.sequence.sequence.length; ++idx) {
+        const probUnpaired: number[] = Array<number>(this.sequence.length);
+        for (let idx = 0; idx < this.sequence.length; ++idx) {
             probUnpaired[idx] = 1;
             for (let ii = 0; ii < dotArray.length; ii += 3) {
                 if (dotArray[ii] === idx + 1 || dotArray[ii + 1] === idx + 1) {
@@ -491,7 +491,7 @@ export default class UndoBlock {
                 count += (dotArray[ii + 2] * dotArray[ii + 2]);
             }
         }
-        return 1 - ((totDist / count) / (this.sequence.sequence.length - 1));
+        return 1 - ((totDist / count) / (this.sequence.length - 1));
     }
 
     public updateMeltingPointAndDotPlot(pseudoknots: boolean = false): void {
@@ -513,7 +513,7 @@ export default class UndoBlock {
             this.setParam(UndoBlockParam.SUMPUNP,
                 this.sumProbUnpaired(dotArray, bppStatisticBehavior), 37, pseudoknots);
             this.setParam(UndoBlockParam.MEANPUNP,
-                this.sumProbUnpaired(dotArray, bppStatisticBehavior) / this.sequence.sequence.length, 37, pseudoknots);
+                this.sumProbUnpaired(dotArray, bppStatisticBehavior) / this.sequence.length, 37, pseudoknots);
             // branchiness
             this.setParam(UndoBlockParam.BRANCHINESS,
                 this.ensembleBranchiness(dotArray, bppStatisticBehavior), 37, pseudoknots);
@@ -547,7 +547,7 @@ export default class UndoBlock {
                 this.setParam(UndoBlockParam.MEANPUNP,
                     this.sumProbUnpaired(
                         dotTempArray, bppStatisticBehavior
-                    ) / this.sequence.sequence.length, ii, pseudoknots);
+                    ) / this.sequence.length, ii, pseudoknots);
                 // branchiness
                 this.setParam(UndoBlockParam.BRANCHINESS,
                     this.ensembleBranchiness(dotTempArray, bppStatisticBehavior), ii, pseudoknots);
@@ -626,7 +626,7 @@ export default class UndoBlock {
 
     public createDotPlot(): Plot {
         const plot = new Plot(PlotType.SCATTER);
-        plot.set2DData(this._dotPlotData, this._sequence.sequence.length);
+        plot.set2DData(this._dotPlotData, this._sequence.length);
         return plot;
     }
 
@@ -648,7 +648,7 @@ export default class UndoBlock {
         if (this._targetOligos === undefined) return undefined;
 
         const originalIndices: number[][] = [];
-        let oligoFirstBaseIndex = this._sequence.sequence.length;
+        let oligoFirstBaseIndex = this._sequence.length;
 
         for (const oligo of this._targetOligos) {
             // The + 1 is used to account for the "cut" base denoting split points between strands
@@ -658,7 +658,7 @@ export default class UndoBlock {
 
         const newOrder = otherOrder || Utility.range(this._targetOligos.length);
 
-        return Utility.range(this._sequence.sequence.length).concat(
+        return Utility.range(this._sequence.length).concat(
             ...Utility.range(this._targetOligos.length).map((idx) => originalIndices[newOrder.indexOf(idx)])
         );
     }

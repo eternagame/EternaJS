@@ -135,19 +135,19 @@ export default class FeedbackViewMode extends GameMode {
         const poseFields: PoseField[] = [];
         for (let ii = 0; ii < secstructs.length; ii++) {
             let secs: string = secstructs[ii];
-            if (secs != null && secs.length !== this._sequence.sequence.length) {
+            if (secs != null && secs.length !== this._sequence.length) {
                 log.warn(
                     "Solution secondary structure and sequence length doesn't match",
                     secs.length,
-                    this._sequence.sequence.length
+                    this._sequence.length
                 );
-                if (secs.length < this._sequence.sequence.length) {
-                    const diff: number = this._sequence.sequence.length - secs.length;
+                if (secs.length < this._sequence.length) {
+                    const diff: number = this._sequence.length - secs.length;
                     for (let jj = 0; jj < diff; ++jj) {
                         secs += '.';
                     }
                 } else {
-                    secs = secs.slice(0, this._sequence.sequence.length);
+                    secs = secs.slice(0, this._sequence.length);
                 }
                 secstructs[ii] = secs;
             }
@@ -592,7 +592,7 @@ export default class FeedbackViewMode extends GameMode {
         }
 
         for (let ii = 0; ii < shapeData.length; ii++) {
-            if (ii + startIndex >= this._sequence.sequence.length) {
+            if (ii + startIndex >= this._sequence.length) {
                 break;
             }
 
@@ -631,7 +631,7 @@ export default class FeedbackViewMode extends GameMode {
             }
         }
 
-        for (let ii = shapeData.length + startIndex; ii < this._sequence.sequence.length; ii++) {
+        for (let ii = shapeData.length + startIndex; ii < this._sequence.length; ii++) {
             if (puzzleLocks[ii]) {
                 desiredPairs += 'U0';
             } else {

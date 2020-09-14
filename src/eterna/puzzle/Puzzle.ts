@@ -518,7 +518,7 @@ export default class Puzzle {
             minus += 20;
         }
 
-        return new Sequence(EPars.sequenceToString(seq.sequence.slice(0, seq.sequence.length - minus)));
+        return new Sequence(EPars.sequenceToString(seq.sequence.slice(0, seq.length - minus)));
     }
 
     public setUseTails(useTails: boolean, useShortTails: boolean): void {
