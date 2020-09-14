@@ -181,7 +181,7 @@ export default class BoostConstraint extends Constraint<BaseConstraintStatus> {
 
     public evaluate(context: ConstraintContext): BoostConstraintStatus {
         const {targetPairs, sequence} = context.undoBlocks[0];
-        const boostCount = countLoops(targetPairs, 0, sequence);
+        const boostCount = countLoops(targetPairs, 0, sequence.sequence);
         return {
             satisfied: (boostCount >= this.minBoosts),
             boostCount

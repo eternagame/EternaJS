@@ -3,7 +3,7 @@ import {
     DisplayObject, Point, Text, Sprite
 } from 'pixi.js';
 import Constants from 'eterna/Constants';
-import EPars from 'eterna/EPars';
+import EPars, {Sequence} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import Feedback, {BrentTheoData} from 'eterna/Feedback';
 import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
@@ -129,30 +129,30 @@ export default class FeedbackViewMode extends GameMode {
         this._isExpColor = false;
         this._currentIndex = 0;
 
-        this._sequence = EPars.stringToSequence(this._solution.sequence);
+        this._sequence = this._solution.sequence;
 
         const secstructs: string[] = this._puzzle.getSecstructs();
         const poseFields: PoseField[] = [];
         for (let ii = 0; ii < secstructs.length; ii++) {
             let secs: string = secstructs[ii];
-            if (secs != null && secs.length !== this._sequence.length) {
+            if (secs != null && secs.length !== this._sequence.sequence.length) {
                 log.warn(
                     "Solution secondary structure and sequence length doesn't match",
                     secs.length,
-                    this._sequence.length
+                    this._sequence.sequence.length
                 );
-                if (secs.length < this._sequence.length) {
-                    const diff: number = this._sequence.length - secs.length;
+                if (secs.length < this._sequence.sequence.length) {
+                    const diff: number = this._sequence.sequence.length - secs.length;
                     for (let jj = 0; jj < diff; ++jj) {
                         secs += '.';
                     }
                 } else {
-                    secs = secs.slice(0, this._sequence.length);
+                    secs = secs.slice(0, this._sequence.sequence.length);
                 }
                 secstructs[ii] = secs;
             }
             this._pairs.push(EPars.parenthesisToPairs(secstructs[ii]));
-            const datablock: UndoBlock = new UndoBlock(this._sequence, Vienna.NAME);
+            const datablock: UndoBlock = new UndoBlock(this._sequence.sequence, Vienna.NAME);
             datablock.setPairs(this._pairs[ii]);
             datablock.setBasics();
             this._undoBlocks.push(datablock);
@@ -592,7 +592,7 @@ export default class FeedbackViewMode extends GameMode {
         }
 
         for (let ii = 0; ii < shapeData.length; ii++) {
-            if (ii + startIndex >= this._sequence.length) {
+            if (ii + startIndex >= this._sequence.sequence.length) {
                 break;
             }
 
@@ -631,7 +631,7 @@ export default class FeedbackViewMode extends GameMode {
             }
         }
 
-        for (let ii = shapeData.length + startIndex; ii < this._sequence.length; ii++) {
+        for (let ii = shapeData.length + startIndex; ii < this._sequence.sequence.length; ii++) {
             if (puzzleLocks[ii]) {
                 desiredPairs += 'U0';
             } else {
@@ -643,7 +643,7 @@ export default class FeedbackViewMode extends GameMode {
         if (!folder) {
             throw new Error("Critical error: can't create a Vienna folder instance by name");
         }
-        this._shapePairs[index] = folder.foldSequence(this._sequence, null, desiredPairs);
+        this._shapePairs[index] = folder.foldSequence(this._sequence.sequence, null, desiredPairs);
     }
 
     private loadDesignBrowser(): void {
@@ -675,7 +675,7 @@ export default class FeedbackViewMode extends GameMode {
     private _puzzleTitle: Text;
     private _title: Text;
     private _feedback: Feedback | null;
-    private _sequence: number[];
+    private _sequence: Sequence;
     private _pairs: number[][] = [];
     private _shapePairs: (number[] | null)[] = [];
     protected _targetConditions: (TargetConditions | undefined)[];

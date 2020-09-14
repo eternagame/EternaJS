@@ -86,10 +86,10 @@ export default class StructureInput extends ContainerObject implements Updatable
         this.setWarning(error || '');
         this._textInput.text = input;
 
-        let {sequence} = this._pose;
+        let sequence = this._pose.sequence.sequence;
         let locks = this._pose.puzzleLocks;
         let bindingSite = this._pose.molecularBindingSite;
-        const sequenceBackup = this._pose.sequence;
+        const sequenceBackup = this._pose.sequence.sequence;
         const locksBackup = this._pose.puzzleLocks;
         const bindingSiteBackup = this._pose.molecularBindingSite;
 
@@ -217,7 +217,7 @@ export default class StructureInput extends ContainerObject implements Updatable
                 if (bindingSite && afterBindingSiteIndex) bindingSite[ii + index] = afterBindingSiteIndex[ii];
             }
         }
-        this._pose.sequence = sequence;
+        this._pose.sequence.sequence = sequence;
         this._pose.puzzleLocks = locks;
         this._pose.molecularBindingSite = bindingSite;
         this._pose.trackCursor(this._textInput.caretPosition);

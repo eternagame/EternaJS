@@ -172,7 +172,7 @@ export default class PuzzleEditMode extends GameMode {
         this._toolbar.copyButton.clicked.connect(() => {
             Assert.assertIsDefined(this.modeStack);
             this.modeStack.pushMode(new CopyTextDialogMode(
-                EPars.sequenceToString(this._poses[0].sequence),
+                this._poses[0].sequence.sequenceString,
                 'Current Sequence'
             ));
         });
@@ -267,7 +267,7 @@ export default class PuzzleEditMode extends GameMode {
             pose.scoreFolder = this._folder;
             pose.molecularStructure = defaultPairs;
             pose.molecularBindingBonus = -4.86;
-            pose.sequence = EPars.stringToSequence(defaultSequence);
+            pose.sequence.sequence = EPars.stringToSequence(defaultSequence);
             poseFields.push(poseField);
 
             const structureInput = new StructureInput(pose);
@@ -312,11 +312,11 @@ export default class PuzzleEditMode extends GameMode {
     }
 
     private saveData(): void {
-        const objs: SaveStoreItem = [0, this._poses[0].sequence];
+        const objs: SaveStoreItem = [0, this._poses[0].sequence.sequence];
         for (const pose of this._poses) {
             Assert.assertIsDefined(pose.molecularStructure);
             objs.push(JSON.stringify({
-                sequence: EPars.sequenceToString(pose.sequence),
+                sequence: pose.sequence.sequenceString,
                 structure: EPars.pairsToParenthesis(pose.molecularStructure)
             }));
         }
@@ -341,12 +341,12 @@ export default class PuzzleEditMode extends GameMode {
     }
 
     public get sequence(): string {
-        return EPars.sequenceToString(this._poses[0].sequence);
+        return this._poses[0].sequence.sequenceString;
     }
 
     public getLockString(): string {
         const locks: boolean[] | undefined = this.getCurrentLock(0);
-        const len: number = this._poses[0].sequence.length;
+        const len: number = this._poses[0].sequence.sequence.length;
         const lockString = locks?.map(
             (l) => (l ? 'x' : 'o')
         ).join('') ?? 'o'.repeat(len);
@@ -360,7 +360,7 @@ export default class PuzzleEditMode extends GameMode {
 
     public getThumbnailBase64(): string {
         const img = PoseThumbnail.createFramedBitmap(
-            this._poses[0].sequence, this._poses[0].pairs, 6, PoseThumbnailType.WHITE,
+            this._poses[0].sequence.sequence, this._poses[0].pairs, 6, PoseThumbnailType.WHITE,
             0, null, false, 0, this._poses[0].customLayout
         );
         return Base64.encodeDisplayObjectPNG(img);
@@ -461,9 +461,9 @@ export default class PuzzleEditMode extends GameMode {
             if (confirmed) {
                 for (const pose of this._poses) {
                     const {sequence} = pose;
-                    for (let ii = 0; ii < sequence.length; ii++) {
+                    for (let ii = 0; ii < sequence.sequence.length; ii++) {
                         if (!pose.isLocked(ii)) {
-                            sequence[ii] = RNABASE.ADENINE;
+                            sequence.sequence[ii] = RNABASE.ADENINE;
                         }
                     }
 
@@ -548,11 +548,11 @@ export default class PuzzleEditMode extends GameMode {
             }
         }
 
-        const len: number = this._poses[0].sequence.length;
+        const len: number = this._poses[0].sequence.sequence.length;
         const locks = this.getCurrentLock(0);
         const lockString = this.getLockString();
 
-        const sequence: string = EPars.sequenceToString(this._poses[0].sequence);
+        const sequence: string = this._poses[0].sequence.sequenceString;
         const beginningSequence = locks?.map(
             (l, ii) => (l ? sequence.substr(ii, 1) : 'A')
         ).join('') ?? 'A'.repeat(len);
@@ -618,13 +618,13 @@ export default class PuzzleEditMode extends GameMode {
 
         // Render pose thumbnail images
         const midImageString = Base64.encodeDisplayObjectPNG(PoseThumbnail.createFramedBitmap(
-            this._poses[0].sequence, this._poses[0].pairs, 4, PoseThumbnailType.WHITE,
+            this._poses[0].sequence.sequence, this._poses[0].pairs, 4, PoseThumbnailType.WHITE,
             0, null, false, 0, this._poses[0].customLayout
         ));
 
         const bigImageString: string = Base64.encodeDisplayObjectPNG(
-            PoseThumbnail.createFramedBitmap(this._poses[0].sequence, this._poses[0].pairs, 2, PoseThumbnailType.WHITE,
-                0, null, false, 0, this._poses[0].customLayout)
+            PoseThumbnail.createFramedBitmap(this._poses[0].sequence.sequence, this._poses[0].pairs, 2,
+                PoseThumbnailType.WHITE, 0, null, false, 0, this._poses[0].customLayout)
         );
 
         postParams['title'] = paramsTitle;
@@ -746,7 +746,7 @@ export default class PuzzleEditMode extends GameMode {
             const targetPairs = this.getCurrentTargetPairs(ii);
             const bestPairs = undoblock.getPairs(EPars.DEFAULT_TEMPERATURE);
             const {sequence} = this._poses[ii];
-            if (sequence.length !== targetPairs.length) {
+            if (sequence.sequence.length !== targetPairs.length) {
                 throw new Error("sequence and design pairs lengths don't match");
             }
 
@@ -797,7 +797,7 @@ export default class PuzzleEditMode extends GameMode {
         this._poses.forEach(
             (pose: Pose2D, ii: number) => {
                 if (ii !== index) {
-                    if (pose.sequence.length === forceSequence.length) {
+                    if (pose.sequence.sequence.length === forceSequence.sequence.length) {
                         pose.sequence = forceSequence;
                         pose.puzzleLocks = forceLock;
                     } else {
@@ -813,7 +813,7 @@ export default class PuzzleEditMode extends GameMode {
                 if (ii > 0) {
                     lengths += ',';
                 }
-                lengths += this._poses[ii].sequence.length.toString();
+                lengths += this._poses[ii].sequence.sequence.length.toString();
             }
             lengths += ']';
 
@@ -838,9 +838,7 @@ export default class PuzzleEditMode extends GameMode {
                 if (
                     this._structureInputs[ii].structureString !== EPars.pairsToParenthesis(
                         this._targetPairsStack[this._stackLevel][ii]
-                    ) || EPars.sequenceToString(seq) !== EPars.sequenceToString(
-                        this._seqStack[this._stackLevel][ii].sequence
-                    )
+                    ) || seq.sequenceString !== this._seqStack[this._stackLevel][ii].sequence.sequenceString
                 ) {
                     noChange = false;
                 }
@@ -892,7 +890,7 @@ export default class PuzzleEditMode extends GameMode {
             let bestPairs: number[] | null = null;
             if (!isThereMolecule) {
                 // AMW: assuming no PKs
-                bestPairs = this._folder.foldSequence(seq, null, null, false, EPars.DEFAULT_TEMPERATURE);
+                bestPairs = this._folder.foldSequence(seq.sequence, null, null, false, EPars.DEFAULT_TEMPERATURE);
             } else {
                 const bonus = -486;
                 const site: number[] = bindingSite
@@ -901,10 +899,12 @@ export default class PuzzleEditMode extends GameMode {
                         .filter((idx) => idx !== -1)
                     : [];
 
-                bestPairs = this._folder.foldSequenceWithBindingSite(seq, targetPairs, site, Number(bonus), 2.0);
+                bestPairs = this._folder.foldSequenceWithBindingSite(
+                    seq.sequence, targetPairs, site, Number(bonus), 2.0
+                );
             }
             Assert.assertIsDefined(bestPairs);
-            const undoBlock = new UndoBlock(seq, this._folder.name);
+            const undoBlock = new UndoBlock(seq.sequence, this._folder.name);
             undoBlock.setPairs(bestPairs);
             undoBlock.setBasics();
             undoBlock.targetPairs = targetPairs;

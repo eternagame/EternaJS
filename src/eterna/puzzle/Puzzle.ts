@@ -1,5 +1,5 @@
 import Constants from 'eterna/Constants';
-import EPars, {RNABASE} from 'eterna/EPars';
+import EPars, {RNABASE, Sequence} from 'eterna/EPars';
 import FolderManager from 'eterna/folding/FolderManager';
 import Vienna from 'eterna/folding/Vienna';
 import Folder from 'eterna/folding/Folder';
@@ -475,7 +475,7 @@ export default class Puzzle {
         return false;
     }
 
-    public getBeginningSequence(index: number = 0): number[] {
+    public getBeginningSequence(index: number = 0): Sequence {
         const seq: number[] = [];
         if (this._useTails) {
             if (this._useShortTails) {
@@ -506,19 +506,19 @@ export default class Puzzle {
             }
         }
 
-        return seq;
+        return new Sequence(EPars.sequenceToString(seq));
     }
 
-    public getSubsequenceWithoutBarcode(seq: number[]): number[] {
+    public getSubsequenceWithoutBarcode(seq: Sequence): Sequence {
         if (!this._useBarcode) {
-            return seq.slice();
+            return new Sequence(EPars.sequenceToString(seq.sequence.slice()));
         }
         let minus = 19;
         if (this._useTails) {
             minus += 20;
         }
 
-        return seq.slice(0, seq.length - minus);
+        return new Sequence(EPars.sequenceToString(seq.sequence.slice(0, seq.sequence.length - minus)));
     }
 
     public setUseTails(useTails: boolean, useShortTails: boolean): void {

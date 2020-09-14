@@ -25,10 +25,7 @@ abstract class ConsecutiveBaseConstraint extends Constraint<ConsecutiveConstrain
     }
 
     public evaluate(context: ConstraintContext): ConsecutiveConstraintStatus {
-        const count = EPars.countConsecutive(
-            context.undoBlocks[0].sequence,
-            this.baseType
-        );
+        const count = context.undoBlocks[0].sequence.countConsecutive(this.baseType);
 
         return {
             satisfied: count < this.consecutiveLimit,
@@ -66,8 +63,7 @@ abstract class ConsecutiveBaseConstraint extends Constraint<ConsecutiveConstrain
 
     public getHighlight(status: ConsecutiveConstraintStatus, context: ConstraintContext): HighlightInfo {
         return {
-            ranges: EPars.getRestrictedConsecutive(
-                context.undoBlocks[0].sequence,
+            ranges: context.undoBlocks[0].sequence.getRestrictedConsecutive(
                 this.baseType,
                 this.consecutiveLimit - 1,
                 context.undoBlocks[0].puzzleLocks

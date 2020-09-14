@@ -11,7 +11,7 @@ export default class BarcodeConstraint extends Constraint<BaseConstraintStatus> 
     public evaluate(context: ConstraintContext): BaseConstraintStatus {
         return {
             satisfied: !SolutionManager.instance.checkRedundancyByHairpin(
-                EPars.sequenceToString(context.undoBlocks[0].sequence)
+                EPars.sequenceToString(context.undoBlocks[0].sequence.sequence)
             )
         };
     }

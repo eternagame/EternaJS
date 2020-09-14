@@ -172,142 +172,6 @@ export default class EPars {
         return '';
     }
 
-    public static getColoredSequence(seq: string): string {
-        let res = '';
-        for (const c of seq) {
-            res += EPars.getColoredLetter(c);
-        }
-        return res;
-    }
-
-    public static getExpColoredSequence(seq: string, expData: number[]): string {
-        if (expData == null) {
-            return seq;
-        }
-
-        const offset: number = expData[0];
-        const maxmax: number = Math.max(...expData.slice(1));
-        const minmin: number = Math.min(...expData.slice(1));
-
-        const avg: number = (maxmax + minmin) / 2.0;
-
-        let res = '';
-        for (let ii = 0; ii < seq.length; ii++) {
-            if (ii < offset - 1 || ii >= expData.length) {
-                res += seq[ii];
-            } else if (expData[ii] < avg) {
-                res += `<FONT COLOR='#7777FF'>${seq[ii]}</FONT>`;
-            } else {
-                res += `<FONT COLOR='#FF7777'>${seq[ii]}</FONT>`;
-            }
-        }
-
-        return res;
-    }
-
-    public static countConsecutive(sequence: number[], letter: number, locks: boolean[] | null = null): number {
-        let maxConsecutive = 0;
-
-        let ii = 0;
-        let startIndex = -1;
-        for (ii = 0; ii < sequence.length; ii++) {
-            if (sequence[ii] === letter) {
-                if (startIndex < 0) {
-                    startIndex = ii;
-                }
-            } else if (startIndex >= 0) {
-                if (maxConsecutive < ii - startIndex) {
-                    if (locks == null) {
-                        maxConsecutive = ii - startIndex;
-                    } else {
-                        let allLocked = true;
-                        let jj: number;
-                        for (jj = startIndex; jj < ii; jj++) {
-                            allLocked = allLocked && locks[jj];
-                        }
-                        if (allLocked === false) {
-                            maxConsecutive = ii - startIndex;
-                        }
-                    }
-                }
-                startIndex = -1;
-            }
-        }
-
-        if (startIndex >= 0) {
-            if (maxConsecutive < ii - startIndex) {
-                maxConsecutive = ii - startIndex;
-            }
-        }
-
-        return maxConsecutive;
-    }
-
-    public static getRestrictedConsecutive(
-        sequence: number[], letter: number, maxAllowed: number, locks: boolean[] | null = null
-    ): number[] {
-        const restricted: number[] = [];
-
-        let ii = 0;
-        let startIndex = -1;
-
-        if (maxAllowed <= 0) {
-            return restricted;
-        }
-
-        for (ii = 0; ii < sequence.length; ii++) {
-            if (sequence[ii] === letter) {
-                if (startIndex < 0) {
-                    startIndex = ii;
-                }
-            } else if (startIndex >= 0) {
-                if (maxAllowed < ii - startIndex) {
-                    if (locks == null) {
-                        restricted.push(startIndex);
-                        restricted.push(ii - 1);
-                    } else {
-                        let allLocked = true;
-                        let jj: number;
-                        for (jj = startIndex; jj < ii; jj++) {
-                            allLocked = allLocked && locks[jj];
-                        }
-                        if (allLocked === false) {
-                            restricted.push(startIndex);
-                            restricted.push(ii - 1);
-                        }
-                    }
-                }
-                startIndex = -1;
-            }
-        }
-
-        // gotta check if we found a startIndex without an end...
-        if (startIndex >= 0) {
-            if (maxAllowed < ii - startIndex) {
-                restricted.push(startIndex);
-                restricted.push(ii - 1);
-            }
-        }
-
-        return restricted;
-    }
-
-    public static getSequenceRepetition(seqStr: string, n: number): number {
-        const dict: Set<string> = new Set<string>();
-        let numRepeats = 0;
-
-        for (let ii = 0; ii < seqStr.length - n; ii++) {
-            const substr: string = seqStr.substr(ii, n);
-            if (dict.has(substr)) {
-                numRepeats++;
-            } else {
-                dict.add(substr);
-            }
-        }
-
-        return numRepeats++;
-    }
-
     public static nucleotideToString(value: number, allowCut: boolean, allowUnknown: boolean): string {
         if (value === RNABASE.ADENINE) {
             return 'A';
@@ -843,61 +707,10 @@ export default class EPars {
         return ret;
     }
 
-    public static numGUPairs(sequence: number[], pairs: number[]): number {
-        let ret = 0;
-
-        for (let ii = 0; ii < pairs.length; ii++) {
-            if (pairs[ii] > ii) {
-                if (sequence[ii] === RNABASE.GUANINE && sequence[pairs[ii]] === RNABASE.URACIL) {
-                    ret++;
-                }
-                if (sequence[ii] === RNABASE.URACIL && sequence[pairs[ii]] === RNABASE.GUANINE) {
-                    ret++;
-                }
-            }
-        }
-
-        return ret;
-    }
-
-    public static numGCPairs(sequence: number[], pairs: number[]): number {
-        let ret = 0;
-
-        for (let ii = 0; ii < pairs.length; ii++) {
-            if (pairs[ii] > ii) {
-                if (sequence[ii] === RNABASE.GUANINE && sequence[pairs[ii]] === RNABASE.CYTOSINE) {
-                    ret++;
-                }
-                if (sequence[ii] === RNABASE.CYTOSINE && sequence[pairs[ii]] === RNABASE.GUANINE) {
-                    ret++;
-                }
-            }
-        }
-
-        return ret;
-    }
-
-    public static numUAPairs(sequence: number[], pairs: number[]): number {
-        let ret = 0;
-
-        for (let ii = 0; ii < pairs.length; ii++) {
-            if (pairs[ii] > ii) {
-                if (sequence[ii] === RNABASE.ADENINE && sequence[pairs[ii]] === RNABASE.URACIL) {
-                    ret++;
-                }
-                if (sequence[ii] === RNABASE.URACIL && sequence[pairs[ii]] === RNABASE.ADENINE) {
-                    ret++;
-                }
-            }
-        }
-
-        return ret;
-    }
-
-    public static sequenceDiff(seq1: number[], seq2: number[]): number {
+    public static sequenceDiff(seq1: Sequence, seq2: Sequence): number {
         let diff = 0;
-        for (let ii = 0; ii < seq1.length; ii++) {
-            if (seq1[ii] !== seq2[ii]) {
+        for (let ii = 0; ii < seq1.sequence.length; ii++) {
+            if (seq1.sequence[ii] !== seq2.sequence[ii]) {
                 diff++;
             }
         }
@@ -1177,4 +990,219 @@ export default class EPars {
         'GGGGAC', 'GGUGAC', 'CGAAAG', 'GGAGAC', 'CGCAAG', 'GGAAAC', 'CGGAAG', 'CUUCGG', 'CGUGAG', 'CGAAGG',
         'CUACGG', 'GGCAAC', 'CGCGAG', 'UGAGAG', 'CGAGAG', 'AGAAAU', 'CGUAAG', 'CUAACG', 'UGAAAG', 'GGAAGC',
         'GGGAAC', 'UGAAAA', 'AGCAAU', 'AGUAAU', 'CGGGAG', 'AGUGAU', 'GGCGAC', 'GGGAGC', 'GUGAAC', 'UGGAAA'];
+}
+
+export class Sequence {
+    constructor(seq: string) {
+        this._sequence = seq;
+    }
+
+    public getColoredSequence(): string {
+        let res = '';
+        for (const c of this._sequence) {
+            res += EPars.getColoredLetter(c);
+        }
+        return res;
+    }
+
+    public getExpColoredSequence(expData: number[]): string {
+        // AMW TODO: how could this be?
+        if (expData == null) {
+            return this._sequence;
+        }
+
+        const offset: number = expData[0];
+        const maxmax: number = Math.max(...expData.slice(1));
+        const minmin: number = Math.min(...expData.slice(1));
+
+        const avg: number = (maxmax + minmin) / 2.0;
+
+        let res = '';
+        for (let ii = 0; ii < this._sequence.length; ii++) {
+            if (ii < offset - 1 || ii >= expData.length) {
+                res += this._sequence[ii];
+            } else if (expData[ii] < avg) {
+                res += `<FONT COLOR='#7777FF'>${this._sequence[ii]}</FONT>`;
+            } else {
+                res += `<FONT COLOR='#FF7777'>${this._sequence[ii]}</FONT>`;
+            }
+        }
+
+        return res;
+    }
+
+    public countConsecutive(letter: number, locks: boolean[] | null = null): number {
+        const sequence = EPars.stringToSequence(this._sequence);
+
+        let maxConsecutive = 0;
+
+        let ii = 0;
+        let startIndex = -1;
+        for (ii = 0; ii < sequence.length; ii++) {
+            if (sequence[ii] === letter) {
+                if (startIndex < 0) {
+                    startIndex = ii;
+                }
+            } else if (startIndex >= 0) {
+                if (maxConsecutive < ii - startIndex) {
+                    if (locks == null) {
+                        maxConsecutive = ii - startIndex;
+                    } else {
+                        let allLocked = true;
+                        let jj: number;
+                        for (jj = startIndex; jj < ii; jj++) {
+                            allLocked = allLocked && locks[jj];
+                        }
+                        if (allLocked === false) {
+                            maxConsecutive = ii - startIndex;
+                        }
+                    }
+                }
+                startIndex = -1;
+            }
+        }
+
+        if (startIndex >= 0) {
+            if (maxConsecutive < ii - startIndex) {
+                maxConsecutive = ii - startIndex;
+            }
+        }
+
+        return maxConsecutive;
+    }
+
+    public getRestrictedConsecutive(
+        letter: number, maxAllowed: number, locks: boolean[] | null = null
+    ): number[] {
+        const sequence = EPars.stringToSequence(this._sequence);
+
+        const restricted: number[] = [];
+
+        let ii = 0;
+        let startIndex = -1;
+
+        if (maxAllowed <= 0) {
+            return restricted;
+        }
+
+        for (ii = 0; ii < sequence.length; ii++) {
+            if (sequence[ii] === letter) {
+                if (startIndex < 0) {
+                    startIndex = ii;
+                }
+            } else if (startIndex >= 0) {
+                if (maxAllowed < ii - startIndex) {
+                    if (locks == null) {
+                        restricted.push(startIndex);
+                        restricted.push(ii - 1);
+                    } else {
+                        let allLocked = true;
+                        let jj: number;
+                        for (jj = startIndex; jj < ii; jj++) {
+                            allLocked = allLocked && locks[jj];
+                        }
+                        if (allLocked === false) {
+                            restricted.push(startIndex);
+                            restricted.push(ii - 1);
+                        }
+                    }
+                }
+                startIndex = -1;
+            }
+        }
+
+        // gotta check if we found a startIndex without an end...
+        if (startIndex >= 0) {
+            if (maxAllowed < ii - startIndex) {
+                restricted.push(startIndex);
+                restricted.push(ii - 1);
+            }
+        }
+
+        return restricted;
+    }
+
+    public getSequenceRepetition(n: number): number {
+        const dict: Set<string> = new Set<string>();
+        let numRepeats = 0;
+
+        for (let ii = 0; ii < this._sequence.length - n; ii++) {
+            const substr: string = this._sequence.substr(ii, n);
+            if (dict.has(substr)) {
+                numRepeats++;
+            } else {
+                dict.add(substr);
+            }
+        }
+
+        return numRepeats++;
+    }
+
+    public numGUPairs(pairs: number[]): number {
+        const sequence = EPars.stringToSequence(this._sequence);
+        let ret = 0;
+
+        for (let ii = 0; ii < pairs.length; ii++) {
+            if (pairs[ii] > ii) {
+                if (sequence[ii] === RNABASE.GUANINE && sequence[pairs[ii]] === RNABASE.URACIL) {
+                    ret++;
+                }
+                if (sequence[ii] === RNABASE.URACIL && sequence[pairs[ii]] === RNABASE.GUANINE) {
+                    ret++;
+                }
+            }
+        }
+
+        return ret;
+    }
+
+    public numGCPairs(pairs: number[]): number {
+        const sequence = EPars.stringToSequence(this._sequence);
+        let ret = 0;
+
+        for (let ii = 0; ii < pairs.length; ii++) {
+            if (pairs[ii] > ii) {
+                if (sequence[ii] === RNABASE.GUANINE && sequence[pairs[ii]] === RNABASE.CYTOSINE) {
+                    ret++;
+                }
+                if (sequence[ii] === RNABASE.CYTOSINE && sequence[pairs[ii]] === RNABASE.GUANINE) {
+                    ret++;
+                }
+            }
+        }
+
+        return ret;
+    }
+
+    public numUAPairs(pairs: number[]): number {
+        const sequence = EPars.stringToSequence(this._sequence);
+        let ret = 0;
+
+        for (let ii = 0; ii < pairs.length; ii++) {
+            if (pairs[ii] > ii) {
+                if (sequence[ii] === RNABASE.ADENINE && sequence[pairs[ii]] === RNABASE.URACIL) {
+                    ret++;
+                }
+                if (sequence[ii] === RNABASE.URACIL && sequence[pairs[ii]] === RNABASE.ADENINE) {
+                    ret++;
+                }
+            }
+        }
+
+        return ret;
+    }
+
+    public get sequence(): number[] {
+        return EPars.stringToSequence(this._sequence);
+    }
+
+    public set sequence(sequence: number[]) {
+        this._sequence = EPars.sequenceToString(sequence);
+    }
+
+    public get sequenceString(): string {
+        return this._sequence;
+    }
+
+    private _sequence: string;
 }

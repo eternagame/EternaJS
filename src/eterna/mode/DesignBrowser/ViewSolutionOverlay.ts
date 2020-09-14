@@ -332,7 +332,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         );
         PoseThumbnail.drawToSprite(
             playThumbnail,
-            EPars.stringToSequence(this._props.solution.sequence),
+            this._props.solution.sequence.sequence,
             EPars.parenthesisToPairs(this._props.puzzle.getSecstruct()),
             3, PoseThumbnailType.BASE_COLORED,
             0, null, false, 0, customLayout

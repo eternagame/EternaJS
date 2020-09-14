@@ -1,5 +1,5 @@
 import * as log from 'loglevel';
-import EPars from 'eterna/EPars';
+import EPars, {Sequence} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import Feedback, {BrentTheoData} from 'eterna/Feedback';
 import Solution from './Solution';
@@ -67,7 +67,7 @@ export default class SolutionManager {
 
     public getSolutionBySequence(seq: string): Solution | null {
         for (const solution of this._solutions) {
-            if (solution.sequence === seq) {
+            if (solution.sequence.sequenceString === seq) {
                 return solution;
             }
         }
@@ -112,7 +112,7 @@ export default class SolutionManager {
 
     private static processData(obj: SolutionSpec): Solution {
         const newsol: Solution = new Solution(Number(obj['id']), Number(obj['puznid']));
-        newsol.sequence = obj['sequence'];
+        newsol.sequence = new Sequence(obj['sequence']);
         newsol.title = obj['title'];
 
         let newfb: Feedback | null = null;

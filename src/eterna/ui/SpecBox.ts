@@ -141,7 +141,7 @@ export default class SpecBox extends ContainerObject {
     public setSpec(datablock: UndoBlock): void {
         const TEMPERATURE = 37;
 
-        this._datasize = datablock.sequence.length;
+        this._datasize = datablock.sequence.sequence.length;
 
         this._dotplot = datablock.createDotPlot();
         this._meltplot = datablock.createMeltPlot();

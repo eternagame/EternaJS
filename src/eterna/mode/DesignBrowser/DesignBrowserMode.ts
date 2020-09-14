@@ -451,7 +451,7 @@ export default class DesignBrowserMode extends GameMode {
 
     public sortOnSolution(solution: Solution): void {
         this.closeCurDialog();
-        this._sortOptions.addCriteria(DesignCategory.SEQUENCE, SortOrder.INCREASING, solution.sequence);
+        this._sortOptions.addCriteria(DesignCategory.SEQUENCE, SortOrder.INCREASING, solution.sequence.sequenceString);
         this.showSortDialog();
     }
 
@@ -912,9 +912,9 @@ export default class DesignBrowserMode extends GameMode {
                 const singleLineRawData: Solution = solutions[ii];
 
                 if (category === DesignCategory.SEQUENCE) {
-                    dataArray.push(singleLineRawData.sequence);
+                    dataArray.push(singleLineRawData.sequence.sequenceString);
                     if (ii === 0) {
-                        dataCol.setWidth(singleLineRawData.sequence.length * 14
+                        dataCol.setWidth(singleLineRawData.sequence.sequence.length * 14
                             + UITheme.designBrowser.dataPadding * 5);
                         dataCol.drawGridText();
                     }
@@ -937,7 +937,7 @@ export default class DesignBrowserMode extends GameMode {
                     const voted = singleLineRawData.getProperty('My Votes') > 0;
                     dataArray.push({canVote, voted, solutionIndex: ii});
                 } else {
-                    const rawdata: string | number = singleLineRawData.getProperty(category);
+                    const rawdata: string | number = singleLineRawData.getProperty(category) as string | number;
                     dataArray.push(rawdata);
                 }
             }

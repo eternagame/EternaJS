@@ -1,6 +1,7 @@
 import Eterna from 'eterna/Eterna';
 import Feedback from 'eterna/Feedback';
 import {FoldData} from 'eterna/UndoBlock';
+import {Sequence} from 'eterna/EPars';
 
 export default class Solution {
     constructor(nid: number, puzzleNID: number) {
@@ -54,11 +55,11 @@ export default class Solution {
         return this._puzzleNid;
     }
 
-    public get sequence(): string {
+    public get sequence(): Sequence {
         return this._sequence;
     }
 
-    public set sequence(sequence: string) {
+    public set sequence(sequence: Sequence) {
         this._sequence = sequence;
     }
 
@@ -149,7 +150,7 @@ export default class Solution {
     }
 
     // AMW TODO what why
-    public getProperty(keyword: string): string | number {
+    public getProperty(keyword: string): Sequence | string | number {
         if (keyword === 'Title') {
             return this._title;
         } else if (keyword === 'GU Pairs') {
@@ -204,7 +205,7 @@ export default class Solution {
     private readonly _nid: number;
     private readonly _puzzleNid: number;
 
-    private _sequence: string;
+    private _sequence: Sequence;
     private _title: string;
     private _playerID: number = -1;
     private _playerName: string = '';
