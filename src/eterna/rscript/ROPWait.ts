@@ -146,8 +146,8 @@ export default class ROPWait extends RScriptOp {
     /* override */
     public isPaused(): boolean {
         if (this._waitType === ROPWaitType.NUCLEOTIDEPAIR) {
-            const paired: number = this._env.pose.pairs[this._startIdx];
-            if (paired < 0) {
+            const partner: number = this._env.pose.pairs.pairingPartner(this._startIdx);
+            if (partner < 0) {
                 return true;
             }
 
@@ -155,7 +155,7 @@ export default class ROPWait extends RScriptOp {
                 this._env.pose.getBase(this._startIdx).type
             ).toUpperCase();
             const t2: string = RScriptEnv.convertNucleotideIntToString(
-                this._env.pose.getBase(paired).type
+                this._env.pose.getBase(partner).type
             ).toUpperCase();
 
             return !((t1 === this._color1 && t2 === this._color2) || (t2 === this._color1 && t1 === this._color2));

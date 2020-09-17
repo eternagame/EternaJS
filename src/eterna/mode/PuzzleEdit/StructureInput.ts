@@ -1,5 +1,5 @@
 import {Rectangle} from 'pixi.js';
-import EPars, {RNABase} from 'eterna/EPars';
+import EPars, {RNABase, SecStruct} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import {
     KeyCode, DisplayUtil, HAlign, VAlign, Updatable, ContainerObject
@@ -121,7 +121,7 @@ export default class StructureInput extends ContainerObject implements Updatable
             }
         } else if (op === PuzzleEditOp.ADD_PAIR) {
             // Add a pair
-            let pindex: number = (this._pose.pairs)[index];
+            let pindex: number = (this._pose.pairs).pairingPartner(index);
             if (index > pindex) {
                 const temp: number = index;
                 index = pindex;
@@ -184,7 +184,7 @@ export default class StructureInput extends ContainerObject implements Updatable
             }
         } else if (op === PuzzleEditOp.DELETE_PAIR) {
             // Delete a pair
-            let pindex = (this._pose.pairs)[index];
+            let pindex = (this._pose.pairs).pairingPartner(index);
             if (index > pindex) {
                 const temp = index;
                 index = pindex;
@@ -222,7 +222,7 @@ export default class StructureInput extends ContainerObject implements Updatable
         this._pose.molecularBindingSite = bindingSite;
         this._pose.trackCursor(this._textInput.caretPosition);
         try {
-            this._pose.molecularStructure = EPars.parenthesisToPairs(this.structureString);
+            this._pose.molecularStructure = SecStruct.fromParens(this.structureString);
         } catch (e) {
             // Invalid parenthesis notation error will warn the user per the earlier validateParenthesis call
             // Don't return to poseedit since it'll just break with the malformed structure

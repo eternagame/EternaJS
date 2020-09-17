@@ -1,3 +1,5 @@
+import {SecStruct} from 'eterna/EPars';
+
 export default class FoldUtil {
     public static nextPerm(v: number[]): boolean {
         let more = false;
@@ -29,14 +31,14 @@ export default class FoldUtil {
         return more;
     }
 
-    public static bindingSiteFormed(pairs: number[], groups: number[][]): boolean {
-        if (pairs[groups[0][0]] !== groups[1][groups[1].length - 1]) return false;
-        if (pairs[groups[0][groups[0].length - 1]] !== groups[1][0]) return false;
+    public static bindingSiteFormed(pairs: SecStruct, groups: number[][]): boolean {
+        if (pairs.pairingPartner(groups[0][0]) !== groups[1][groups[1].length - 1]) return false;
+        if (pairs.pairingPartner(groups[0][groups[0].length - 1]) !== groups[1][0]) return false;
         for (let ii = 1; ii < groups[0].length - 1; ii++) {
-            if (pairs[groups[0][ii]] !== -1) return false;
+            if (pairs.isPaired(groups[0][ii])) return false;
         }
         for (let ii = 1; ii < groups[1].length - 1; ii++) {
-            if (pairs[groups[1][ii]] !== -1) return false;
+            if (pairs.isPaired(groups[1][ii])) return false;
         }
 
         return true;

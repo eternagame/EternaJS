@@ -5,7 +5,7 @@ import Fonts from 'eterna/util/Fonts';
 import {Sprite, Point} from 'pixi.js';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import ConstraintBox from 'eterna/constraints/ConstraintBox';
-import {RNABase} from 'eterna/EPars';
+import {Sequence, SecStruct} from 'eterna/EPars';
 import MultiStyleText from 'pixi-multistyle-text';
 import Assert from 'flashbang/util/Assert';
 import MissionIntroConstraints from './MissionIntroConstraints';
@@ -15,7 +15,7 @@ import UITheme from './UITheme';
 
 interface MissionIntroPanelProps {
     description: string;
-    puzzleThumbnails: number[][];
+    puzzleThumbnails: SecStruct[];
     constraints: ConstraintBox[];
     customLayout: Array<[number, number] | [null, null]> | null;
 }
@@ -56,12 +56,12 @@ export default class MissionIntroPanel extends ContainerObject {
         this._thumbnail = new Sprite();
         this.container.addChild(this._thumbnail);
 
-        const setThumbnail = (targetPairs: number[]) => {
-            const wrongPairs = new Array(targetPairs.length).fill(-1);
-            const sequence = new Array(targetPairs.length).fill(RNABase.ADENINE);
+        const setThumbnail = (targetPairs: SecStruct) => {
+            const wrongPairs = new SecStruct(new Array(targetPairs.length).fill(-1));
+            const sequence = new Sequence(new Array(targetPairs.length).join('A'));
             PoseThumbnail.drawToSprite(
                 this._thumbnail,
-                sequence,
+                sequence.sequence,
                 targetPairs,
                 6,
                 PoseThumbnailType.WRONG_COLORED,

@@ -14,6 +14,7 @@ import int from 'eterna/util/int';
 import UITheme from 'eterna/ui/UITheme';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import BitmapManager from 'eterna/resources/BitmapManager';
+import {SecStruct} from 'eterna/EPars';
 import {SortOrder} from './SortOptions';
 import SequenceStringListView from './SequenceStringListView';
 import {DesignBrowserDataType, DesignCategory, DBVote} from './DesignBrowserMode';
@@ -170,8 +171,8 @@ export default class DataCol extends ContainerObject {
         this.drawBackground();
     }
 
-    public setPairs(pairs: number[]): void {
-        this._pairsArray = pairs.slice();
+    public setPairs(pairs: SecStruct): void {
+        this._pairsArray = pairs.slice(0);
     }
 
     public getMouseIndex(e: PIXI.interaction.InteractionEvent): [number, number] {
@@ -396,15 +397,9 @@ export default class DataCol extends ContainerObject {
             return;
         }
 
-        let pairsLength = 0;
-        if (this._pairsArray != null) {
-            for (const pair of this._pairsArray) {
-                if (pair >= 0) {
-                    pairsLength++;
-                }
-            }
-            pairsLength /= 2;
-        }
+        const pairsLength = this._pairsArray != null
+            ? this._pairsArray.numPairs()
+            : 0;
 
         for (let ii = this._offset; ii < this._offset + this._numDisplay; ii++) {
             if (ii >= this._rawData.length) {
@@ -575,7 +570,7 @@ export default class DataCol extends ContainerObject {
     private _sortOrder: SortOrder = SortOrder.NONE;
     private _feedback: (Feedback | null)[] | null;
     private _showExp: boolean = false;
-    private _pairsArray: number[];
+    private _pairsArray: SecStruct;
     private _fillColor: number = 0;
     private _fillAlpha: number = 0;
 

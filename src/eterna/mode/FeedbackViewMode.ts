@@ -3,7 +3,7 @@ import {
     DisplayObject, Point, Text, Sprite
 } from 'pixi.js';
 import Constants from 'eterna/Constants';
-import EPars, {Sequence} from 'eterna/EPars';
+import EPars, {Sequence, SecStruct} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import Feedback, {BrentTheoData} from 'eterna/Feedback';
 import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
@@ -151,8 +151,8 @@ export default class FeedbackViewMode extends GameMode {
                 }
                 secstructs[ii] = secs;
             }
-            this._pairs.push(EPars.parenthesisToPairs(secstructs[ii]));
-            const datablock: UndoBlock = new UndoBlock(this._sequence.sequence, Vienna.NAME);
+            this._pairs.push(SecStruct.fromParens(secstructs[ii]));
+            const datablock: UndoBlock = new UndoBlock(this._sequence, Vienna.NAME);
             datablock.setPairs(this._pairs[ii]);
             datablock.setBasics();
             this._undoBlocks.push(datablock);
@@ -434,11 +434,11 @@ export default class FeedbackViewMode extends GameMode {
         if (this._isPipMode) {
             for (let ii = 0; ii < this._pairs.length; ii++) {
                 if (this._shapePairs[ii] !== null) {
-                    this._poseFields[ii].pose.pairs = this._shapePairs[ii] as number[];
+                    this._poseFields[ii].pose.pairs = this._shapePairs[ii] as SecStruct;
                 }
             }
         } else if (this._shapePairs[this._currentIndex] !== null) {
-            this._poseFields[0].pose.pairs = this._shapePairs[this._currentIndex] as number[];
+            this._poseFields[0].pose.pairs = this._shapePairs[this._currentIndex] as SecStruct;
         }
     }
 
@@ -643,7 +643,10 @@ export default class FeedbackViewMode extends GameMode {
         if (!folder) {
             throw new Error("Critical error: can't create a Vienna folder instance by name");
         }
-        this._shapePairs[index] = folder.foldSequence(this._sequence.sequence, null, desiredPairs);
+        // AMW TODO: I don't know if this will still work, but Vienna depends on
+        // desiredPairs working differently from ANY OTHER PAIR CONSTRAINT which is
+        // not a string.
+        this._shapePairs[index] = folder.foldSequence(this._sequence, null, desiredPairs);
     }
 
     private loadDesignBrowser(): void {
@@ -676,8 +679,8 @@ export default class FeedbackViewMode extends GameMode {
     private _title: Text;
     private _feedback: Feedback | null;
     private _sequence: Sequence;
-    private _pairs: number[][] = [];
-    private _shapePairs: (number[] | null)[] = [];
+    private _pairs: SecStruct[] = [];
+    private _shapePairs: (SecStruct | null)[] = [];
     protected _targetConditions: (TargetConditions | undefined)[];
     private _isExpColor: boolean;
     private _solutionView?: ViewSolutionOverlay;

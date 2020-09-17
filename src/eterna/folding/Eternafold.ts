@@ -1,5 +1,5 @@
 import * as log from 'loglevel';
-import EPars, {RNABase} from 'eterna/EPars';
+import EPars, {RNABase, SecStruct, Sequence} from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import {Assert} from 'flashbang';
@@ -48,14 +48,14 @@ export default class EternaFold extends Folder {
     }
 
     public scoreStructures(
-        seq: number[],
-        pairs: number[],
+        seq: Sequence,
+        pairs: SecStruct,
         pseudoknotted: boolean = false,
         temp: number = 37,
         outNodes: number[] | null = null
     ): number {
         const key: CacheKey = {
-            primitive: 'score', seq, pairs, temp
+            primitive: 'score', seq: seq.sequence, pairs: pairs.pairs, temp
         };
         let cache: FullEvalCache = this.getCache(key) as FullEvalCache;
 
@@ -71,8 +71,8 @@ export default class EternaFold extends Folder {
             let result: FullEvalResult | null = null;
             try {
                 result = this._lib.FullEval(temp,
-                    EPars.sequenceToString(seq),
-                    EPars.pairsToParenthesis(pairs));
+                    seq.sequenceString,
+                    pairs.getParenthesis());
                 cache = {energy: result.energy, nodes: EmscriptenUtil.stdVectorToArray<number>(result.nodes)};
             } catch (e) {
                 log.error('FullEval error', e);
@@ -84,18 +84,18 @@ export default class EternaFold extends Folder {
             }
         } while (0);
 
-        const cut: number = seq.indexOf(RNABase.CUT);
+        const cut: number = seq.sequence.indexOf(RNABase.CUT);
         if (cut >= 0 && cache.nodes[0] !== -2) {
             // we just scored a duplex that wasn't one, so we have to redo it properly
-            const seqA: number[] = seq.slice(0, cut);
-            const pairsA: number[] = pairs.slice(0, cut);
+            const seqA: Sequence = seq.slice(0, cut);
+            const pairsA: SecStruct = pairs.slice(0, cut);
             const nodesA: number[] = [];
             const retA: number = this.scoreStructures(seqA, pairsA, pseudoknotted, temp, nodesA);
 
-            const seqB: number[] = seq.slice(cut + 1);
-            const pairsB: number[] = pairs.slice(cut + 1);
+            const seqB: Sequence = seq.slice(cut + 1);
+            const pairsB: SecStruct = pairs.slice(cut + 1);
             for (let ii = 0; ii < pairsB.length; ii++) {
-                if (pairsB[ii] >= 0) pairsB[ii] -= (cut + 1);
+                if (pairsB.isPaired(ii)) pairsB.pairs[ii] -= (cut + 1);
             }
             const nodesB: number[] = [];
             const retB: number = this.scoreStructures(seqB, pairsB, pseudoknotted, temp, nodesB);
@@ -128,48 +128,48 @@ export default class EternaFold extends Folder {
     }
 
     public foldSequence(
-        seq: number[],
-        secondBestPairs: number[],
+        seq: Sequence,
+        secondBestPairs: SecStruct,
         desiredPairs: string | null = null,
         pseudoknotted: boolean = false,
         temp: number = 37,
         gamma: number = 0.7
-    ): number[] {
+    ): SecStruct {
         const key: CacheKey = {
             primitive: 'fold',
-            seq,
-            secondBestPairs,
+            seq: seq.sequenceString,
+            secondBestPairs: secondBestPairs.pairs,
             desiredPairs,
             temp,
             gamma
         };
-        let pairs: number[] = this.getCache(key) as number[];
+        let pairs: SecStruct = this.getCache(key) as SecStruct;
         if (pairs != null) {
             // log.debug("fold cache hit");
-            return pairs.slice();
+            return pairs.slice(0);
         }
 
         pairs = this.foldSequenceImpl(seq, desiredPairs, temp, gamma);
-        this.putCache(key, pairs.slice());
+        this.putCache(key, pairs.slice(0));
         return pairs;
     }
 
     private foldSequenceImpl(
-        seq: number[],
+        seq: Sequence,
         structStr: string | null = null,
         temp: number = 37,
         gamma: number = 6.0
-    ): number[] {
-        const seqStr = EPars.sequenceToString(seq, false, false);
+    ): SecStruct {
+        const seqStr = EPars.sequenceToString(seq.sequence, false, false);
         let result: FullFoldResult | null = null;
 
         try {
             // can't do anything with structStr for now. constrained folding later.
             result = this._lib.FullFoldDefault(seqStr, gamma);// , structStr || '');
-            return EPars.parenthesisToPairs(result.structure);
+            return SecStruct.fromParens(result.structure);
         } catch (e) {
             log.error('FullFoldTemperature error', e);
-            return [];
+            return new SecStruct();
         } finally {
             if (result != null) {
                 result.delete();
@@ -179,9 +179,9 @@ export default class EternaFold extends Folder {
     }
 
     /* override */
-    public getDotPlot(seq: number[], pairs: number[], temp: number = 37): number[] {
+    public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = 37): number[] {
         const key: CacheKey = {
-            primitive: 'dotplot', seq, pairs, temp
+            primitive: 'dotplot', seq: seq.sequence, pairs: pairs.pairs, temp
         };
         let retArray: number[] = this.getCache(key) as number[];
         if (retArray != null) {
@@ -189,7 +189,7 @@ export default class EternaFold extends Folder {
             return retArray.slice();
         }
 
-        const seqStr: string = EPars.sequenceToString(seq);
+        const seqStr: string = seq.sequenceString;
 
         let result: DotPlotResult | null = null;
         try {

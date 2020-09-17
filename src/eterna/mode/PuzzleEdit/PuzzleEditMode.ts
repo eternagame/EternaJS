@@ -1,5 +1,5 @@
 import {DisplayObject, Point} from 'pixi.js';
-import EPars, {RNABase} from 'eterna/EPars';
+import EPars, {RNABase, SecStruct} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import UndoBlock, {UndoBlockParam, TargetConditions} from 'eterna/UndoBlock';
 import Background from 'eterna/vfx/Background';
@@ -247,7 +247,7 @@ export default class PuzzleEditMode extends GameMode {
         const initialPoseData = this._initialPoseData;
         for (let ii = 0; ii < this._numTargets; ii++) {
             let defaultStructure = '.....((((((((....)))))))).....';
-            let defaultPairs: number[] = EPars.parenthesisToPairs(defaultStructure);
+            let defaultPairs: SecStruct = SecStruct.fromParens(defaultStructure);
             let defaultSequence = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
 
             if (initialPoseData != null
@@ -258,7 +258,7 @@ export default class PuzzleEditMode extends GameMode {
             ) {
                 defaultStructure = initialPoseData[ii]['structure'];
                 defaultSequence = initialPoseData[ii]['sequence'];
-                defaultPairs = EPars.parenthesisToPairs(defaultStructure);
+                defaultPairs = SecStruct.fromParens(defaultStructure);
             }
 
             const poseField: PoseField = new PoseField(true);
@@ -317,7 +317,7 @@ export default class PuzzleEditMode extends GameMode {
             Assert.assertIsDefined(pose.molecularStructure);
             objs.push(JSON.stringify({
                 sequence: pose.sequence.sequenceString,
-                structure: EPars.pairsToParenthesis(pose.molecularStructure)
+                structure: pose.molecularStructure.pairs
             }));
         }
 
@@ -360,7 +360,7 @@ export default class PuzzleEditMode extends GameMode {
 
     public getThumbnailBase64(): string {
         const img = PoseThumbnail.createFramedBitmap(
-            this._poses[0].sequence.sequence, this._poses[0].pairs, 6, PoseThumbnailType.WHITE,
+            this._poses[0].sequence, this._poses[0].pairs, 6, PoseThumbnailType.WHITE,
             0, null, false, 0, this._poses[0].customLayout
         );
         return Base64.encodeDisplayObjectPNG(img);
@@ -533,7 +533,7 @@ export default class PuzzleEditMode extends GameMode {
         let constraints = this._constraintBar.serializeConstraints();
 
         if (this._poses.length === 1) {
-            const numPairs: number = EPars.numPairs(this.getCurrentTargetPairs(0));
+            const numPairs: number = this.getCurrentTargetPairs(0).numPairs();
 
             if (details.minGU !== undefined && details.minGU > 0) {
                 constraints += `,GU,${details.minGU.toString()}`;
@@ -618,17 +618,17 @@ export default class PuzzleEditMode extends GameMode {
 
         // Render pose thumbnail images
         const midImageString = Base64.encodeDisplayObjectPNG(PoseThumbnail.createFramedBitmap(
-            this._poses[0].sequence.sequence, this._poses[0].pairs, 4, PoseThumbnailType.WHITE,
+            this._poses[0].sequence, this._poses[0].pairs, 4, PoseThumbnailType.WHITE,
             0, null, false, 0, this._poses[0].customLayout
         ));
 
         const bigImageString: string = Base64.encodeDisplayObjectPNG(
-            PoseThumbnail.createFramedBitmap(this._poses[0].sequence.sequence, this._poses[0].pairs, 2,
+            PoseThumbnail.createFramedBitmap(this._poses[0].sequence, this._poses[0].pairs, 2,
                 PoseThumbnailType.WHITE, 0, null, false, 0, this._poses[0].customLayout)
         );
 
         postParams['title'] = paramsTitle;
-        postParams['secstruct'] = EPars.pairsToParenthesis(this.getCurrentTargetPairs(0));
+        postParams['secstruct'] = this.getCurrentTargetPairs(0).getParenthesis();
         postParams['constraints'] = constraints;
         postParams['body'] = details.description;
         postParams['midimgdata'] = midImageString;
@@ -668,7 +668,7 @@ export default class PuzzleEditMode extends GameMode {
         this._toolbar.targetButton.hotkey();
 
         for (let ii = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].pairs = EPars.parenthesisToPairs(this._structureInputs[ii].structureString);
+            this._poses[ii].pairs = SecStruct.fromParens(this._structureInputs[ii].structureString);
         }
         this._paused = true;
 
@@ -688,7 +688,7 @@ export default class PuzzleEditMode extends GameMode {
         return this._seqStack[this._stackLevel][index];
     }
 
-    protected getCurrentTargetPairs(index: number): number[] {
+    protected getCurrentTargetPairs(index: number): SecStruct {
         return this._targetPairsStack[this._stackLevel][index];
     }
 
@@ -712,9 +712,7 @@ export default class PuzzleEditMode extends GameMode {
             this._poses[ii].puzzleLocks = this._lockStack[this._stackLevel][ii];
             this._poses[ii].molecularStructure = this._targetPairsStack[this._stackLevel][ii];
             this._poses[ii].molecularBindingSite = this._bindingSiteStack[this._stackLevel][ii];
-            this._structureInputs[ii].structureString = EPars.pairsToParenthesis(
-                this._targetPairsStack[this._stackLevel][ii]
-            );
+            this._structureInputs[ii].structureString = this._targetPairsStack[this._stackLevel][ii].getParenthesis();
         }
 
         this.updateScore();
@@ -731,9 +729,7 @@ export default class PuzzleEditMode extends GameMode {
             this._poses[ii].puzzleLocks = this._lockStack[this._stackLevel][ii];
             this._poses[ii].molecularStructure = this._targetPairsStack[this._stackLevel][ii];
             this._poses[ii].molecularBindingSite = this._bindingSiteStack[this._stackLevel][ii];
-            this._structureInputs[ii].structureString = EPars.pairsToParenthesis(
-                this._targetPairsStack[this._stackLevel][ii]
-            );
+            this._structureInputs[ii].structureString = this._targetPairsStack[this._stackLevel][ii].getParenthesis();
         }
         this.updateScore();
     }
@@ -786,7 +782,7 @@ export default class PuzzleEditMode extends GameMode {
     private poseEditByTarget(index: number): void {
         let noChange = true;
         const currentUndoBlocks: UndoBlock[] = [];
-        const currentTargetPairs: number[][] = [];
+        const currentTargetPairs: SecStruct[] = [];
         const currentLock: (boolean[] | undefined)[] = [];
         const currentBindingSites: (boolean[] | null)[] = [];
 
@@ -829,15 +825,15 @@ export default class PuzzleEditMode extends GameMode {
         }
 
         for (let ii = 0; ii < this._poses.length; ii++) {
-            const targetPairs: number[] = EPars.parenthesisToPairs(this._structureInputs[ii].structureString);
+            const targetPairs: SecStruct = SecStruct.fromParens(this._structureInputs[ii].structureString);
             const seq = this._poses[ii].sequence;
             const lock: boolean[] | undefined = this._poses[ii].puzzleLocks;
             const bindingSite = this._poses[ii].molecularBindingSite;
 
             if (this._stackLevel >= 0) {
                 if (
-                    this._structureInputs[ii].structureString !== EPars.pairsToParenthesis(
-                        this._targetPairsStack[this._stackLevel][ii]
+                    this._structureInputs[ii].structureString !== (
+                        this._targetPairsStack[this._stackLevel][ii].getParenthesis()
                     ) || seq.sequenceString !== this._seqStack[this._stackLevel][ii].sequence.sequenceString
                 ) {
                     noChange = false;
@@ -887,10 +883,10 @@ export default class PuzzleEditMode extends GameMode {
             const isThereMolecule = bindingSite != null
                 && bindingSite.some((bb) => bb);
 
-            let bestPairs: number[] | null = null;
+            let bestPairs: SecStruct | null = null;
             if (!isThereMolecule) {
                 // AMW: assuming no PKs
-                bestPairs = this._folder.foldSequence(seq.sequence, null, null, false, EPars.DEFAULT_TEMPERATURE);
+                bestPairs = this._folder.foldSequence(seq, null, null, false, EPars.DEFAULT_TEMPERATURE);
             } else {
                 const bonus = -486;
                 const site: number[] = bindingSite
@@ -900,11 +896,11 @@ export default class PuzzleEditMode extends GameMode {
                     : [];
 
                 bestPairs = this._folder.foldSequenceWithBindingSite(
-                    seq.sequence, targetPairs, site, Number(bonus), 2.0
+                    seq, targetPairs, site, Number(bonus), 2.0
                 );
             }
             Assert.assertIsDefined(bestPairs);
-            const undoBlock = new UndoBlock(seq.sequence, this._folder.name);
+            const undoBlock = new UndoBlock(seq, this._folder.name);
             undoBlock.setPairs(bestPairs);
             undoBlock.setBasics();
             undoBlock.targetPairs = targetPairs;
@@ -940,7 +936,7 @@ export default class PuzzleEditMode extends GameMode {
     }
 
     private _seqStack: UndoBlock[][];
-    private _targetPairsStack: number[][][];
+    private _targetPairsStack: SecStruct[][];
     private _lockStack: (boolean[] | undefined)[][];
     private _bindingSiteStack: (boolean[] | null)[][];
     private _stackLevel: number;

@@ -2,7 +2,6 @@ import {DisplayObject, Graphics, Point} from 'pixi.js';
 import {
     GameObject, LateUpdatable, Vector2, Arrays
 } from 'flashbang';
-import pchip from 'pchip';
 import Pose2D from './Pose2D';
 
 /** PseudoknotLines: A class for drawing a smooth 'rope' through bases. * */
@@ -11,7 +10,7 @@ export default class PseudoknotLines extends GameObject implements LateUpdatable
         super();
         this._pose = pose;
         this._graphics = new Graphics();
-        this._enabled = (this._pose.pseudoknotPairs.filter((it) => it !== -1).length !== 0);
+        this._enabled = (this._pose.pseudoknotPairs.pairs.some((it) => it !== -1));
     }
 
     public get display(): DisplayObject {
@@ -60,17 +59,18 @@ export default class PseudoknotLines extends GameObject implements LateUpdatable
         // Iterate over this._pose.pseudoknotPairs. If val isn't -1 and val is > idx,
         // push back idx's coords onto start and val's coords onto end.
         for (let ii = 0; ii < this._pose.pseudoknotPairs.length; ++ii) {
-            if (this._pose.pseudoknotPairs[ii] === -1
-                    || this._pose.pseudoknotPairs[ii] < ii) {
+            if (!this._pose.pseudoknotPairs.isPaired(ii)
+                    || this._pose.pseudoknotPairs.pairingPartner(ii) < ii) {
                 continue;
             }
 
             const start: Point = !forceBaseXY && !this._pose.getBase(ii).needRedraw
                 ? this._pose.getBase(ii).getLastDrawnPos()
                 : this._pose.getBaseLoc(ii);
-            const end: Point = !forceBaseXY && !this._pose.getBase(this._pose.pseudoknotPairs[ii]).needRedraw
-                ? this._pose.getBase(this._pose.pseudoknotPairs[ii]).getLastDrawnPos()
-                : this._pose.getBaseLoc(this._pose.pseudoknotPairs[ii]);
+            const end: Point = !forceBaseXY
+                && !this._pose.getBase(this._pose.pseudoknotPairs.pairingPartner(ii)).needRedraw
+                ? this._pose.getBase(this._pose.pseudoknotPairs.pairingPartner(ii)).getLastDrawnPos()
+                : this._pose.getBaseLoc(this._pose.pseudoknotPairs.pairingPartner(ii));
 
             if (start) {
                 idx.push(ii);

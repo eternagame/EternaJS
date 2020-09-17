@@ -1,5 +1,5 @@
 import * as log from 'loglevel';
-import EPars from 'eterna/EPars';
+import EPars, {Sequence, SecStruct} from 'eterna/EPars';
 import Folder from './Folder';
 
 export default class RNAFoldBasic extends Folder {
@@ -19,7 +19,7 @@ export default class RNAFoldBasic extends Folder {
     }
 
     public scoreStructures(
-        seq: number[], pairs: number[], pseudoknotted: boolean = false,
+        seq: Sequence, pairs: SecStruct, pseudoknotted: boolean = false,
         temp: number = 37, outNodes: number[] | null = null
     ): number {
         let score = 0;
@@ -29,7 +29,7 @@ export default class RNAFoldBasic extends Folder {
         }
 
         for (let ii = 0; ii < pairs.length; ii++) {
-            if (pairs[ii] > ii) {
+            if (pairs.pairingPartner(ii) > ii) {
                 score++;
             }
         }
@@ -38,16 +38,16 @@ export default class RNAFoldBasic extends Folder {
     }
 
     public foldSequence(
-        seq: number[], secondBestPairs: number[], desiredPairs: string | null = null,
+        seq: Sequence, secondBestPairs: SecStruct, desiredPairs: string | null = null,
         pseudoknotted: boolean = false, temp: number = 37
-    ): number[] {
+    ): SecStruct {
         const n: number = seq.length;
-        const pairs: number[] = new Array(n);
+        const pairs: SecStruct = new SecStruct(new Array(n));
         const dpArray: number[] = new Array(n * n);
         const traceArray: number[] = new Array(n * n);
 
         for (let ii = 0; ii < n; ii++) {
-            pairs[ii] = -1;
+            pairs.pairs[ii] = -1;
 
             for (let jj = 0; jj < n; jj++) {
                 const index: number = ii * n + jj;
@@ -74,7 +74,7 @@ export default class RNAFoldBasic extends Folder {
                 let currentVal = 0;
 
                 if (iiWalker < n - 1 && jjWalker > 0 && iiWalker < jjWalker - 1) {
-                    if (EPars.pairType(seq[iiWalker], seq[jjWalker])) {
+                    if (EPars.pairType(seq.sequence[iiWalker], seq.sequence[jjWalker])) {
                         currentVal = dpArray[(iiWalker + 1) * n + jjWalker - 1] + 1;
 
                         if (currentVal < 1) {
@@ -142,12 +142,12 @@ export default class RNAFoldBasic extends Folder {
         return pairs;
     }
 
-    private tracePairs(traceArray: number[], pairs: number[], n: number, iiStart: number, jjStart: number): void {
+    private tracePairs(traceArray: number[], pairs: SecStruct, n: number, iiStart: number, jjStart: number): void {
         const dir: number = traceArray[iiStart * n + jjStart];
 
         if (dir === 1) {
-            pairs[iiStart] = jjStart;
-            pairs[jjStart] = iiStart;
+            pairs.pairs[iiStart] = jjStart;
+            pairs.pairs[jjStart] = iiStart;
 
             this.tracePairs(traceArray, pairs, n, iiStart + 1, jjStart - 1);
         } else if (dir === 2) {

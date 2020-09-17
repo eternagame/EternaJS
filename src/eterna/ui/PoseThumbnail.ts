@@ -3,7 +3,7 @@ import {
 } from 'pixi.js';
 import {TextureUtil, DisplayUtil, Assert} from 'flashbang';
 import Constants from 'eterna/Constants';
-import {RNABase} from 'eterna/EPars';
+import {RNABase, Sequence, SecStruct} from 'eterna/EPars';
 import ExpPainter from 'eterna/ExpPainter';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import RNALayout from 'eterna/pose2D/RNALayout';
@@ -17,18 +17,18 @@ export enum PoseThumbnailType {
 
 export default class PoseThumbnail {
     public static createFramedBitmap(
-        sequence: number[],
-        pairs: number[],
+        sequence: Sequence,
+        pairs: SecStruct,
         size: number = 1,
         type: PoseThumbnailType = PoseThumbnailType.BASE_COLORED,
         expStartIndex: number = 0,
-        wrongPairs: number[] | null = null,
+        wrongPairs: SecStruct | null = null,
         expUseThreshold: boolean = false,
         expThreshold: number = 0,
         customLayout: Array<[number, number] | [null, null]> | null = null
     ): Texture {
         const disp: DisplayObject = PoseThumbnail.create(
-            sequence, pairs, size, type,
+            sequence.sequence, pairs, size, type,
             expStartIndex, wrongPairs, expUseThreshold, expThreshold,
             null, customLayout
         );
@@ -36,19 +36,19 @@ export default class PoseThumbnail {
     }
 
     public static drawToGraphics(
-        sequence: number[],
-        pairs: number[],
+        sequence: Sequence,
+        pairs: SecStruct,
         size: number = 1,
         type: PoseThumbnailType = PoseThumbnailType.BASE_COLORED,
         expStartIndex: number = 0,
-        wrongPairs: number[] | null = null,
+        wrongPairs: SecStruct | null = null,
         expUseThreshold: boolean = false,
         expThreshold: number = 0,
         customLayout: Array<[number, number] | [null, null]> | null = null
     ) {
         const graphics = new Graphics();
         PoseThumbnail.create(
-            sequence, pairs, size, type, expStartIndex, wrongPairs, expUseThreshold, expThreshold, graphics,
+            sequence.sequence, pairs, size, type, expStartIndex, wrongPairs, expUseThreshold, expThreshold, graphics,
             customLayout
         );
         const newGraphics = graphics.clone();
@@ -61,11 +61,11 @@ export default class PoseThumbnail {
     public static drawToSprite(
         sprite: Sprite,
         sequence: number[],
-        pairs: number[],
+        pairs: SecStruct,
         size: number = 1,
         type: PoseThumbnailType = PoseThumbnailType.BASE_COLORED,
         expStartIndex: number = 0,
-        wrongPairs: number[] | null = null,
+        wrongPairs: SecStruct | null = null,
         expUseThreshold: boolean = false,
         expThreshold: number = 0,
         customLayout: Array<[number, number] | [null, null]> | null = null
@@ -84,11 +84,11 @@ export default class PoseThumbnail {
 
     private static create(
         sequence: number[],
-        pairs: number[],
+        pairs: SecStruct,
         size: number,
         type: PoseThumbnailType,
         expStartIndex: number,
-        wrongPairs: number[] | null,
+        wrongPairs: SecStruct | null,
         expUseThreshold: boolean,
         expThreshold: number,
         canvas: Graphics | null = null,
@@ -189,7 +189,7 @@ export default class PoseThumbnail {
             } else if (type === PoseThumbnailType.WRONG_COLORED) {
                 Assert.assertIsDefined(wrongPairs,
                     'wrongPairs must be defined if the type of thumbnail is WRONG_COLORED');
-                if (wrongPairs[ii] === 1) {
+                if (wrongPairs.pairs[ii] === 1) {
                     color = COLOR_WRONG;
 
                     if (ii === 0 || (ii > 0 && sequence[ii - 1] === RNABase.CUT)) {
@@ -220,7 +220,7 @@ export default class PoseThumbnail {
                         wrongXCoords.push(((xarray[ii] + xarray[ii + 1]) / 2.0 - xmin) * scale + xOffset);
                         wrongYCoords.push(((yarray[ii] + yarray[ii + 1]) / 2.0 - ymin) * scale + yOffset);
                     }
-                } else if (wrongPairs[ii] === -1) {
+                } else if (wrongPairs.pairs[ii] === -1) {
                     color = COLOR_RIGHT;
 
                     if (ii === 0 || (ii > 0 && sequence[ii - 1] === RNABase.CUT)) {

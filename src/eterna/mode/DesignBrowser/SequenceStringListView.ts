@@ -2,7 +2,7 @@ import {
     Container, Graphics, Sprite, Texture
 } from 'pixi.js';
 import {TextBuilder, TextureUtil} from 'flashbang';
-import EPars from 'eterna/EPars';
+import EPars, {SecStruct} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import ExpPainter from 'eterna/ExpPainter';
 import Feedback from 'eterna/Feedback';
@@ -35,7 +35,11 @@ export default class SequenceStringListView extends Container {
         this._height = height;
     }
 
-    public setSequences(sequences: string[] | null, expData: (Feedback | null)[] | null, pairs: number[] | null): void {
+    public setSequences(
+        sequences: string[] | null,
+        expData: (Feedback | null)[] | null,
+        pairs: SecStruct | null
+    ): void {
         this._graphics.clear();
         if (this._content != null) {
             this._content.destroy({children: true});
@@ -81,7 +85,7 @@ export default class SequenceStringListView extends Container {
 
             for (let jj = 0; jj < seq.length; jj++) {
                 if (ii === 0 && expData != null && pairs !== null) {
-                    if (pairs[jj] < 0) {
+                    if (!pairs.isPaired(jj)) {
                         this._graphics.beginFill(0xCCCC00, 0.5);
                     } else {
                         this._graphics.beginFill(0x0000FF, 0.2);

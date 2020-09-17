@@ -1,5 +1,5 @@
 import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
-import EPars, {RNABase} from 'eterna/EPars';
+import EPars, {RNABase, SecStruct, Sequence} from 'eterna/EPars';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
@@ -51,7 +51,7 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
      * @param constraints
      * @param ublk
      */
-    protected _targetAlignedNaturalPairs(ublk: UndoBlock, pseudoknots: boolean): number[] {
+    protected _targetAlignedNaturalPairs(ublk: UndoBlock, pseudoknots: boolean): SecStruct {
         // if (ublk.targetOligoOrder === null || ublk.oligoOrder === null) {
         //     throw new Error('Target condition not available for shape constraint!');
         // }
@@ -63,15 +63,15 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
             // rawIndex => naturalAlignedIndex
             const naturalMap = ublk.reorderedOligosIndexMap(ublk.oligoOrder);
             if (naturalMap !== undefined) {
-                const targetAlignedNaturalPairs: number[] = [];
+                const targetAlignedNaturalPairs: SecStruct = new SecStruct();
                 for (const [rawIndex, targetIndex] of Object.entries(targetMap)) {
                     const naturalIndex = naturalMap[Number(rawIndex)];
-                    const naturalPairedIndex = naturalPairs[naturalIndex];
+                    const naturalPairedIndex = naturalPairs.pairingPartner(naturalIndex);
                     const rawPairedIndex = naturalMap.indexOf(naturalPairedIndex);
 
                     // If unpaired, it's unpaired, otherwise we need to get the index of the paired base
                     // according to target mode
-                    targetAlignedNaturalPairs[targetIndex] = naturalPairedIndex < 0
+                    targetAlignedNaturalPairs.pairs[targetIndex] = naturalPairedIndex < 0
                         ? naturalPairedIndex : targetMap[rawPairedIndex];
                 }
 
@@ -169,8 +169,14 @@ export default class ShapeConstraint extends BaseShapeConstraint {
                     : 'Your RNA must fold into the outlined structure.'
             ),
             thumbnail: PoseThumbnail.drawToGraphics(
-                new Array(naturalPairs.length).fill(RNABase.ADENINE),
-                undoBlock.targetPairs, 3, PoseThumbnailType.WRONG_COLORED, 0, status.wrongPairs, false, 0,
+                new Sequence(new Array(naturalPairs.length).join('A')),
+                undoBlock.targetPairs,
+                3,
+                PoseThumbnailType.WRONG_COLORED,
+                0,
+                new SecStruct(status.wrongPairs),
+                false,
+                0,
                 customLayout
             )
         };
@@ -184,11 +190,11 @@ export default class ShapeConstraint extends BaseShapeConstraint {
     }
 
     private _getWrongPairs(
-        naturalPairs: number[], targetPairs: number[], structureConstraints: boolean[] | undefined
+        naturalPairs: SecStruct, targetPairs: SecStruct, structureConstraints: boolean[] | undefined
     ): number[] {
         const wrongPairs: number[] = new Array(naturalPairs.length).fill(-1);
         for (let ii = 0; ii < wrongPairs.length; ii++) {
-            if (naturalPairs[ii] !== targetPairs[ii]) {
+            if (naturalPairs.pairingPartner(ii) !== targetPairs.pairingPartner(ii)) {
                 if (structureConstraints === undefined || structureConstraints[ii]) {
                     wrongPairs[ii] = 1;
                 } else {
@@ -232,7 +238,7 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
         if (antiStructureString === undefined) {
             throw new Error('Target structure not available for ANTISHAPE constraint');
         }
-        const antiPairs: number[] = EPars.parenthesisToPairs(antiStructureString);
+        const antiPairs: SecStruct = SecStruct.fromParens(antiStructureString);
 
         return {
             satisfied: !EPars.arePairsSame(naturalPairs, antiPairs, targetAlignedConstraints),
@@ -260,7 +266,7 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
         );
         const antiSS = targetConditions[this.stateIndex]['anti_secstruct'];
         const wrongPairs = antiSS !== undefined
-            ? EPars.parenthesisToPairs(antiSS)
+            ? SecStruct.fromParens(antiSS)
             : undefined;
         return {
             ...details,
@@ -271,9 +277,9 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
             ),
             noText: true,
             thumbnail: PoseThumbnail.drawToGraphics(
-                new Array(naturalPairs.length).fill(RNABase.ADENINE),
-                wrongPairs as number[],
-                3, PoseThumbnailType.WRONG_COLORED, 0, status.wrongPairs, false, 0,
+                new Sequence(new Array(naturalPairs.length).join('A')),
+                wrongPairs as SecStruct,
+                3, PoseThumbnailType.WRONG_COLORED, 0, new SecStruct(status.wrongPairs), false, 0,
                 customLayout
             )
         };
@@ -287,7 +293,7 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
     }
 
     private _getWrongPairs(
-        naturalPairs: number[], structureConstraints: boolean[] | undefined, satisfied: boolean
+        naturalPairs: SecStruct, structureConstraints: boolean[] | undefined, satisfied: boolean
     ): number[] {
         const wrongPairs: number[] = new Array(naturalPairs.length).fill(0);
         for (let ii = 0; ii < wrongPairs.length; ii++) {

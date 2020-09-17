@@ -2,7 +2,7 @@ import * as log from 'loglevel';
 import {Container, Point} from 'pixi.js';
 import Eterna from 'eterna/Eterna';
 import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
-import EPars from 'eterna/EPars';
+import {SecStruct, Sequence} from 'eterna/EPars';
 import {
     AppMode, SceneObject, Flashbang, GameObjectRef, Assert
 } from 'flashbang';
@@ -178,14 +178,14 @@ export default abstract class GameMode extends AppMode {
                     const pseudoknots: boolean = this._targetConditions != null
                         && this._targetConditions[0] != null
                         && this._targetConditions[0]['type'] === 'pseudoknot';
-                    const score = (pairs: number[]) => {
+                    const score = (pairs: SecStruct) => {
                         Assert.assertIsDefined(this._folder);
                         return this._folder.scoreStructures(
-                            newField.pose.fullSequence, pairs, pseudoknots
+                            Sequence.fromSequence(newField.pose.fullSequence), pairs, pseudoknots
                         );
                     };
 
-                    const targetPairs: number[] | undefined = this._targetPairs
+                    const targetPairs: SecStruct | undefined = this._targetPairs
                         ? this._targetPairs[poseidx] : this.getCurrentTargetPairs(poseidx);
                     Assert.assertIsDefined(
                         targetPairs,
@@ -193,8 +193,8 @@ export default abstract class GameMode extends AppMode {
                     );
                     const ublk = this.getCurrentUndoBlock(poseidx);
                     Assert.assertIsDefined(ublk, 'getEnergyDelta is being called where UndoBlocks are unavailable!');
-                    const nativePairs: number[] = ublk.getPairs(37, pseudoknots);
-                    return score(EPars.getSatisfiedPairs(targetPairs, newField.pose.fullSequence))
+                    const nativePairs: SecStruct = ublk.getPairs(37, pseudoknots);
+                    return score(targetPairs.getSatisfiedPairs(Sequence.fromSequence(newField.pose.fullSequence)))
                         - score(nativePairs);
                 }
                 return -1;
@@ -333,11 +333,11 @@ export default abstract class GameMode extends AppMode {
         return undefined;
     }
 
-    protected getCurrentTargetPairs(index: number): number[] | undefined {
+    protected getCurrentTargetPairs(index: number): SecStruct | undefined {
         return undefined;
     }
 
-    protected _targetPairs: number[][];
+    protected _targetPairs: SecStruct[];
 
     protected _targetConditions: (TargetConditions | undefined)[];
 }

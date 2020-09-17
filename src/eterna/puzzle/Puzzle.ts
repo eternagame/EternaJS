@@ -1,5 +1,5 @@
 import Constants from 'eterna/Constants';
-import EPars, {RNABase, Sequence} from 'eterna/EPars';
+import EPars, {RNABase, Sequence, SecStruct} from 'eterna/EPars';
 import FolderManager from 'eterna/folding/FolderManager';
 import Vienna from 'eterna/folding/Vienna';
 import Folder from 'eterna/folding/Folder';
@@ -234,7 +234,7 @@ export default class Puzzle {
 
             if (Puzzle.isAptamerType(tcType) && this._targetConditions[ii]['site'] !== undefined) {
                 const bindingSite: number[] = this._targetConditions[ii]['site'] as number[];
-                const targetPairs: number[] = EPars.parenthesisToPairs(this.getSecstruct(ii));
+                const targetPairs: number[] = SecStruct.fromParens(this.getSecstruct(ii)).pairs;
                 const bindingPairs: number[] = bindingSite.map(
                     (jj) => targetPairs[jj]
                 );
@@ -526,52 +526,55 @@ export default class Puzzle {
         this._useShortTails = useShortTails;
     }
 
-    public transformSequence(seq: number[], targetIndex: number): number[] {
-        if (this._targetConditions != null) {
-            if (this._targetConditions[targetIndex]['sequence'] !== undefined) {
-                const targetSeqTemp: number[] = EPars.stringToSequence(
-                    this._targetConditions[targetIndex]['sequence'] as string
-                );
-                const targetSeq: number[] = [];
+    public transformSequence(seq: Sequence, targetIndex: number): Sequence {
+        if (this._targetConditions == null) {
+            return seq;
+        }
+        if (this._targetConditions[targetIndex]['sequence'] === undefined) {
+            return seq;
+        }
 
-                if (this._useTails) {
-                    if (this._useShortTails) {
-                        targetSeq.push(RNABase.GUANINE);
-                        targetSeq.push(RNABase.GUANINE);
-                    } else {
-                        targetSeq.push(RNABase.GUANINE);
-                        targetSeq.push(RNABase.GUANINE);
-                        targetSeq.push(RNABase.ADENINE);
-                        targetSeq.push(RNABase.ADENINE);
-                        targetSeq.push(RNABase.ADENINE);
-                    }
-                }
+        const targetSeqTemp: number[] = EPars.stringToSequence(
+            this._targetConditions[targetIndex]['sequence'] as string
+        );
+        const targetSeq: number[] = [];
 
-                for (let ii = 0; ii < targetSeqTemp.length; ii++) {
-                    targetSeq.push(targetSeqTemp[ii]);
-                }
-
-                if (this._useTails) {
-                    for (let ii = 0; ii < 20; ii++) {
-                        targetSeq.push(EPars.RNABase_LAST20[ii]);
-                    }
-                }
-
-                const locks: boolean[] = this.puzzleLocks;
-
-                if (locks.length !== targetSeq.length || targetSeq.length !== seq.length) {
-                    throw new Error("lock length doesn't match object sequence");
-                }
-
-                for (let ii = 0; ii < targetSeq.length; ii++) {
-                    if (!locks[ii]) {
-                        targetSeq[ii] = seq[ii];
-                    }
-                }
-                return targetSeq;
+        if (this._useTails) {
+            if (this._useShortTails) {
+                targetSeq.push(RNABase.GUANINE);
+                targetSeq.push(RNABase.GUANINE);
+            } else {
+                targetSeq.push(RNABase.GUANINE);
+                targetSeq.push(RNABase.GUANINE);
+                targetSeq.push(RNABase.ADENINE);
+                targetSeq.push(RNABase.ADENINE);
+                targetSeq.push(RNABase.ADENINE);
             }
         }
-        return seq;
+
+        for (let ii = 0; ii < targetSeqTemp.length; ii++) {
+            targetSeq.push(targetSeqTemp[ii]);
+        }
+
+        if (this._useTails) {
+            for (let ii = 0; ii < 20; ii++) {
+                targetSeq.push(EPars.RNABase_LAST20[ii]);
+            }
+        }
+
+        const locks: boolean[] = this.puzzleLocks;
+
+        if (locks.length !== targetSeq.length || targetSeq.length !== seq.length) {
+            throw new Error("lock length doesn't match object sequence");
+        }
+
+        for (let ii = 0; ii < targetSeq.length; ii++) {
+            if (!locks[ii]) {
+                targetSeq[ii] = seq.sequence[ii];
+            }
+        }
+
+        return Sequence.fromSequence(targetSeq);
     }
 
     public get alreadySolved() {

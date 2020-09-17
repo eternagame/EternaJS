@@ -1,11 +1,12 @@
 import PoseOp from 'eterna/pose2D/PoseOp';
 import {Oligo} from 'eterna/pose2D/Pose2D';
+import {Sequence, SecStruct} from 'eterna/EPars';
 
-export type CacheItem = number[] | FullEvalCache | MultiFoldResult | undefined;
+export type CacheItem = SecStruct | number[] | FullEvalCache | MultiFoldResult | undefined;
 export type CacheKey = Record<string, string | number | number[] | boolean | Oligo[] | null>;
 
 export interface MultiFoldResult {
-    pairs: number[];
+    pairs: SecStruct;
     order: number[];
     count: number;
 }
@@ -29,16 +30,16 @@ export default abstract class Folder {
     }
 
     public scoreStructures(
-        seq: number[], pairs: number[], pseudoknotted: boolean = false,
+        seq: Sequence, secstruct: SecStruct, pseudoknotted: boolean = false,
         temp: number = 37, outNodes: number[] | null = null
     ): number {
         return 0;
     }
 
     public foldSequence(
-        seq: number[], secondBestPairs: number[] | null, desiredPairs: string | null = null,
+        seq: Sequence, secstruct: SecStruct | null, desiredPairs: string | null = null,
         pseudoknotted: boolean = false, temp: number = 37
-    ): number[] | null {
+    ): SecStruct | null {
         return null;
     }
 
@@ -47,9 +48,9 @@ export default abstract class Folder {
     }
 
     public foldSequenceWithBindingSite(
-        seq: number[], targetPairs: number[] | null, bindingSite: number[], bonus: number,
+        seq: Sequence, secstruct: SecStruct | null, bindingSite: number[], bonus: number,
         version: number = 2.0, temp: number = 37
-    ): number[] | null {
+    ): SecStruct | null {
         return null;
     }
 
@@ -58,9 +59,9 @@ export default abstract class Folder {
     }
 
     public cofoldSequence(
-        seq: number[], secondBestPairs: number[] | null, malus: number = 0,
+        seq: Sequence, secstruct: SecStruct | null, malus: number = 0,
         desiredPairs: string | null = null, temp: number = 37
-    ): number[] | null {
+    ): SecStruct | null {
         return null;
     }
 
@@ -69,9 +70,9 @@ export default abstract class Folder {
     }
 
     public cofoldSequenceWithBindingSite(
-        seq: number[], bindingSite: number[], bonus: number, desiredPairs: string | null = null,
+        seq: Sequence, bindingSite: number[], bonus: number, desiredPairs: string | null = null,
         malus: number = 0, temp: number = 37
-    ): number[] | null {
+    ): SecStruct | null {
         return null;
     }
 
@@ -84,7 +85,7 @@ export default abstract class Folder {
     }
 
     public getDotPlot(
-        seq: number[], pairs: number[], temp: number = 37, pseudoknots: boolean = false
+        seq: Sequence, secstruct: SecStruct, temp: number = 37, pseudoknots: boolean = false
     ): number[] | null {
         return null;
     }
@@ -94,14 +95,14 @@ export default abstract class Folder {
     }
 
     public multifold(
-        seq: number[], secondBestPairs: number[] | null, oligos: Oligo[],
+        seq: Sequence, secstruct: SecStruct | null, oligos: Oligo[],
         desiredPairs: string | null = null, temp: number = 37
     ): MultiFoldResult | undefined {
         return undefined;
     }
 
     public multifoldUnroll(
-        seq: number[], secondBestPairs: number[] | null, oligos: Oligo[],
+        seq: Sequence, secstruct: SecStruct | null, oligos: Oligo[],
         desiredPairs: string | null = null, temp: number = 37
     ): PoseOp[] | null {
         return null;

@@ -3,7 +3,7 @@ import MultiStyleText from 'pixi-multistyle-text';
 import {
     Container, Graphics, Point, Sprite, Text
 } from 'pixi.js';
-import EPars from 'eterna/EPars';
+import {SecStruct} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import GameMode from 'eterna/mode/GameMode';
 import Puzzle from 'eterna/puzzle/Puzzle';
@@ -945,7 +945,7 @@ export default class DesignBrowserMode extends GameMode {
             if (category === DesignCategory.SEQUENCE || category === DesignCategory.SYNTHESIS_SCORE) {
                 dataCol.expFeedback = solutions.map((solution) => solution.expFeedback);
             }
-            dataCol.setPairs(EPars.parenthesisToPairs(puz.getSecstruct()));
+            dataCol.setPairs(SecStruct.fromParens(puz.getSecstruct()));
 
             // Setting and Displaying all raw data for each column
             dataCol.setDataAndDisplay(dataArray);

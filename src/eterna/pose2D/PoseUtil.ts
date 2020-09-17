@@ -1,4 +1,4 @@
-import EPars, {RNABase} from 'eterna/EPars';
+import EPars, {RNABase, SecStruct} from 'eterna/EPars';
 import PuzzleEditOp from './PuzzleEditOp';
 
 /** Utility functions for pose data */
@@ -15,36 +15,36 @@ export default class PoseUtil {
         }
     }
 
-    public static addBaseWithIndex(index: number, pairs: number[]): [string, PuzzleEditOp, number[]?] {
+    public static addBaseWithIndex(index: number, pairs: SecStruct): [string, PuzzleEditOp, number[]?] {
         let mutatedPairs: number[];
-        mutatedPairs = pairs.slice(0, index);
+        mutatedPairs = pairs.pairs.slice(0, index);
         mutatedPairs.push(-1);
-        mutatedPairs = mutatedPairs.concat(pairs.slice(index, pairs.length));
+        mutatedPairs = mutatedPairs.concat(pairs.pairs.slice(index, pairs.length));
 
         for (let ii = 0; ii < mutatedPairs.length; ii++) {
             if (mutatedPairs[ii] >= index) {
                 mutatedPairs[ii]++;
             }
         }
-        const parenthesis: string = EPars.pairsToParenthesis(mutatedPairs);
+        const parenthesis: string = new SecStruct(mutatedPairs).getParenthesis();
         return [parenthesis, PuzzleEditOp.ADD_BASE, mutatedPairs];
     }
 
-    public static addPairWithIndex(index: number, pairs: number[]): [string, PuzzleEditOp, number[]?] {
+    public static addPairWithIndex(index: number, pairs: SecStruct): [string, PuzzleEditOp, number[]?] {
         // if index is paired
         // add another pair before index
-        let pindex: number = pairs[index];
-        if (pindex >= 0) {
+        let pindex: number = pairs.pairingPartner(index);
+        if (pairs.isPaired(index)) {
             if (index > pindex) {
                 const tmp: number = index;
                 index = pindex;
                 pindex = tmp;
             }
-            let mutatedPairs = pairs.slice(0, index);
+            let mutatedPairs = pairs.pairs.slice(0, index);
             mutatedPairs.push(-1);
-            mutatedPairs = mutatedPairs.concat(pairs.slice(index, pindex + 1));
+            mutatedPairs = mutatedPairs.concat(pairs.pairs.slice(index, pindex + 1));
             mutatedPairs.push(-1);
-            mutatedPairs = mutatedPairs.concat(pairs.slice(pindex + 1, pairs.length));
+            mutatedPairs = mutatedPairs.concat(pairs.pairs.slice(pindex + 1, pairs.length));
 
             for (let ii = 0; ii < mutatedPairs.length; ii++) {
                 if (mutatedPairs[ii] > pindex) {
@@ -56,15 +56,15 @@ export default class PoseUtil {
             mutatedPairs[index] = pindex + 2;
             mutatedPairs[pindex + 2] = index;
 
-            const parenthesis = EPars.pairsToParenthesis(mutatedPairs);
+            const parenthesis: string = new SecStruct(mutatedPairs).getParenthesis();
             return [parenthesis, PuzzleEditOp.ADD_PAIR];
         } else {
             // add a cycle of length 3
-            let mutatedPairs = pairs.slice(0, index);
+            let mutatedPairs = pairs.pairs.slice(0, index);
             for (let ii = 0; ii < 5; ii++) {
                 mutatedPairs.push(-1);
             }
-            mutatedPairs = mutatedPairs.concat(pairs.slice(index, pairs.length));
+            mutatedPairs = mutatedPairs.concat(pairs.pairs.slice(index, pairs.length));
             for (let ii = 0; ii < mutatedPairs.length; ii++) {
                 if (mutatedPairs[ii] >= index) {
                     mutatedPairs[ii] += 5;
@@ -73,27 +73,27 @@ export default class PoseUtil {
             mutatedPairs[index] = index + 4;
             mutatedPairs[index + 4] = index;
 
-            const parenthesis = EPars.pairsToParenthesis(mutatedPairs);
+            const parenthesis: string = new SecStruct(mutatedPairs).getParenthesis();
             return [parenthesis, PuzzleEditOp.ADD_CYCLE];
         }
     }
 
-    public static deleteNopairWithIndex(index: number, pairs: number[]): [string, PuzzleEditOp, number[]?] {
+    public static deleteNopairWithIndex(index: number, pairs: SecStruct): [string, PuzzleEditOp, number[]?] {
         let mutatedPairs: number[];
-        mutatedPairs = pairs.slice(0, index);
-        mutatedPairs = mutatedPairs.concat(pairs.slice(index + 1, pairs.length));
+        mutatedPairs = pairs.pairs.slice(0, index);
+        mutatedPairs = mutatedPairs.concat(pairs.pairs.slice(index + 1, pairs.length));
         for (let ii = 0; ii < mutatedPairs.length; ii++) {
             if (mutatedPairs[ii] >= index) {
                 mutatedPairs[ii] -= 1;
             }
         }
 
-        const parenthesis = EPars.pairsToParenthesis(mutatedPairs);
+        const parenthesis: string = new SecStruct(mutatedPairs).getParenthesis();
         return [parenthesis, PuzzleEditOp.DELETE_BASE, mutatedPairs];
     }
 
-    public static deletePairWithIndex(index: number, pairs: number[]): [string, PuzzleEditOp, number[]?] {
-        let pindex: number = pairs[index];
+    public static deletePairWithIndex(index: number, pairs: SecStruct): [string, PuzzleEditOp, number[]?] {
+        let pindex: number = pairs.pairingPartner(index);
         if (pindex < 0) {
             throw new Error("base doesn't have pair");
         }
@@ -103,9 +103,9 @@ export default class PoseUtil {
             index = pindex;
             pindex = tmp;
         }
-        let mutatedPairs = pairs.slice(0, index);
-        mutatedPairs = mutatedPairs.concat(pairs.slice(index + 1, pindex));
-        mutatedPairs = mutatedPairs.concat(pairs.slice(pindex + 1, pairs.length));
+        let mutatedPairs = pairs.pairs.slice(0, index);
+        mutatedPairs = mutatedPairs.concat(pairs.pairs.slice(index + 1, pindex));
+        mutatedPairs = mutatedPairs.concat(pairs.pairs.slice(pindex + 1, pairs.length));
         for (let ii = 0; ii < mutatedPairs.length; ii++) {
             if (mutatedPairs[ii] > pindex) {
                 mutatedPairs[ii] -= 2;
@@ -114,7 +114,7 @@ export default class PoseUtil {
             }
         }
 
-        const parenthesis = EPars.pairsToParenthesis(mutatedPairs);
+        const parenthesis: string = new SecStruct(mutatedPairs).getParenthesis();
         return [parenthesis, PuzzleEditOp.DELETE_PAIR];
     }
 

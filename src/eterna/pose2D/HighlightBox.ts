@@ -2,6 +2,7 @@ import {DisplayObject, Graphics, Point} from 'pixi.js';
 import {
     GameObject, LateUpdatable, Assert, RepeatingTask, ObjectTask, SerialTask, AlphaTask, Vector2
 } from 'flashbang';
+import {SecStruct} from 'eterna/EPars';
 import Pose2D from './Pose2D';
 
 export enum HighlightType {
@@ -185,19 +186,19 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
     }
 
     private renderStack(color: number, baseSize: number): void {
-        const pairs: number[] = this._pose.pairs;
+        const pairs: SecStruct = this._pose.pairs;
 
         if (!this._queue) return;
         for (let ii = 0; ii < this._queue.length; ii += 2) {
             const stackStart: number = this._queue[ii];
             const stackEnd: number = this._queue[ii + 1];
 
-            if (pairs[stackStart] < 0 || pairs[stackEnd] < 0) {
+            if (!pairs.isPaired(stackStart) || !pairs.isPaired(stackEnd)) {
                 throw new Error(`Invalid stack highlight from ${stackStart.toString()} to ${stackEnd.toString()}`);
             }
 
             const p0: Point = this._pose.getBaseLoc(stackStart);
-            const p1: Point = this._pose.getBaseLoc(pairs[stackEnd]);
+            const p1: Point = this._pose.getBaseLoc(pairs.pairingPartner(stackEnd));
 
             const maxX = Math.max(p0.x, p1.x);
             const minX = Math.min(p0.x, p1.x);
@@ -216,7 +217,7 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
     }
 
     private renderLoop(_color: number, baseSize: number): void {
-        const pairs: number[] = this._pose.pairs;
+        const pairs: SecStruct = this._pose.pairs;
         const fullLen: number = this._pose.fullSequence.length;
         const strict: boolean = (this._type === HighlightType.LOOP);
 
@@ -225,7 +226,7 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
             const loopStart: number = this._queue[i];
             const loopEnd: number = this._queue[i + 1];
 
-            if (strict && (pairs[loopStart] >= 0 || pairs[loopEnd] >= 0)) {
+            if (strict && (pairs.isPaired(loopStart) || pairs.isPaired(loopEnd))) {
                 throw new Error(`Invalid loop highlight from ${loopStart.toString()} to ${loopEnd.toString()}`);
             }
 

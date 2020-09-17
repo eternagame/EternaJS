@@ -1,4 +1,4 @@
-import EPars from 'eterna/EPars';
+import EPars, {Sequence, SecStruct} from 'eterna/EPars';
 import Folder from 'eterna/folding/Folder';
 import NuPACK from 'eterna/folding/NuPACK';
 import LayoutEngineManager from 'eterna/layout/LayoutEngineManager';
@@ -80,7 +80,7 @@ export default class RNALayout {
         return this._root;
     }
 
-    public get pseudoknotPairs(): number[] {
+    public get pseudoknotPairs(): SecStruct {
         return this._pseudoknotPairs;
     }
 
@@ -93,13 +93,13 @@ export default class RNALayout {
      * the structure of the puzzle "goal." A
      * comparison of pairs to targetPairs will influence application of the customLayout
      */
-    public setupTree(pairs: number[], targetPairs: number[] | null = null): void {
+    public setupTree(pairs: SecStruct, targetPairs: SecStruct | null = null): void {
         let biPairs: number[] = new Array(pairs.length);
 
         // / Delete old tree
         this._root = null;
         // / save for later
-        this._origPairs = pairs.slice();
+        this._origPairs = new SecStruct(pairs.pairs);
         this._targetPairs = targetPairs;
 
         if (targetPairs == null) this._targetPairs = pairs;
@@ -111,9 +111,9 @@ export default class RNALayout {
         biPairs.fill(-1);
 
         for (let ii = 0; ii < pairs.length; ii++) {
-            if (ii < pairs[ii]) {
-                biPairs[ii] = pairs[ii];
-                biPairs[pairs[ii]] = ii;
+            if (ii < pairs.pairs[ii]) {
+                biPairs[ii] = pairs.pairs[ii];
+                biPairs[pairs.pairs[ii]] = ii;
             }
         }
 
@@ -126,8 +126,8 @@ export default class RNALayout {
         }
         this._scoreBiPairs[0] = biPairs.length;
 
-        this._pseudoknotPairs = (new Array(biPairs.length)).fill(-1);
-        this._nopseudoknotPairs = (new Array(biPairs.length)).fill(-1);
+        this._pseudoknotPairs = new SecStruct((new Array(biPairs.length)).fill(-1));
+        this._nopseudoknotPairs = new SecStruct((new Array(biPairs.length)).fill(-1));
 
         // / no tree if there are no pairs -- special case to be handled
         // /  separately in getCoords.
@@ -146,11 +146,13 @@ export default class RNALayout {
         // need to have PKs removed.
         // AMW TODO: Rhiju, we should eventually be able to remove this condition,
         // once you work out how layouts can handle pseudoknots.
-        this._pseudoknotPairs = EPars.onlyPseudoknots(biPairs);
-        this._nopseudoknotPairs = EPars.filterForPseudoknots(biPairs);
-        biPairs = EPars.filterForPseudoknots(biPairs);
+        // AMW TODO: I can't say for sure if we can make biPairs a secstruct or not
+        // but for now we are keeping these objects as number[]
+        this._pseudoknotPairs = (new SecStruct(biPairs)).onlyPseudoknots();
+        this._nopseudoknotPairs = (new SecStruct(biPairs)).filterForPseudoknots();
+        biPairs = (new SecStruct(biPairs)).filterForPseudoknots().pairs;
         if (this._targetPairs !== null) {
-            this._targetPairs = EPars.filterForPseudoknots(this._targetPairs);
+            this._targetPairs = this._targetPairs.filterForPseudoknots();
         }
 
         this._root = new RNATreeNode();
@@ -254,7 +256,7 @@ export default class RNALayout {
         return this.getTotalScoreRecursive(this._root);
     }
 
-    public scoreTree(seq: number[], folder: Folder): void {
+    public scoreTree(seq: Sequence, folder: Folder): void {
         if (this._scoreBiPairs == null) {
             throw new Error('Layout tree is not properly setup for scoring');
         }
@@ -266,8 +268,8 @@ export default class RNALayout {
         const nnfe: number[] = [];
 
         if (this._targetPairs !== null
-                && (EPars.pairsToParenthesis(this._targetPairs).includes('{')
-                || EPars.pairsToParenthesis(this._targetPairs).includes('['))
+                && (this._targetPairs.getParenthesis().includes('{')
+                || this._targetPairs.getParenthesis().includes('['))
                 && folder.name === NuPACK.NAME) {
             folder.scoreStructures(seq, this._origPairs, true, EPars.DEFAULT_TEMPERATURE, nnfe);
         } else {
@@ -929,14 +931,14 @@ export default class RNALayout {
 
         if (parentnode && parentnode.isPair) {
             // is initial pair of junction paired in target structure?
-            if (this._targetPairs[parentnode.indexA] !== parentnode.indexB) {
+            if (this._targetPairs.pairs[parentnode.indexA] !== parentnode.indexB) {
                 return false;
             }
         }
 
         if (rootnode && rootnode.isPair) {
             // is initial pair of a stacked pair also paired in target structure?
-            if (this._targetPairs[rootnode.indexA] !== rootnode.indexB) {
+            if (this._targetPairs.pairs[rootnode.indexA] !== rootnode.indexB) {
                 return false;
             }
         }
@@ -948,10 +950,10 @@ export default class RNALayout {
             if (this._customLayout[child.indexA][1] == null) return false;
             if (child.isPair) {
                 // all other pairs of junction paired in target structure?
-                if (this._targetPairs[child.indexA] !== child.indexB) {
+                if (this._targetPairs.pairs[child.indexA] !== child.indexB) {
                     return false;
                 }
-            } else if (this._targetPairs[child.indexA] > 0) {
+            } else if (this._targetPairs.pairs[child.indexA] > 0) {
                 // all unpaired bases of junction also unpaired in target structure?
                 return false;
             }
@@ -994,7 +996,7 @@ export default class RNALayout {
         // we encode pairs as -1 == unpaired, 0-indexed seqpos == paired
         // that means that EACH of their entries need to be ++ed
         const pairTable: number[] = [this._nopseudoknotPairs.length,
-            ...this._nopseudoknotPairs.slice().map((value: number) => value + 1)];
+            ...this._nopseudoknotPairs.pairs.slice().map((value: number) => value + 1)];
 
         const rnap = LayoutEngineManager.instance.getLayoutEngine(RNApuzzler.NAME);
 
@@ -1037,7 +1039,7 @@ export default class RNALayout {
         if (this._targetPairs !== null) {
             for (let ii = 0; ii < this._targetPairs.length - 1; ii++) {
                 // look for a stacked pair
-                if (this._targetPairs[ii] === this._targetPairs[ii + 1] + 1) {
+                if (this._targetPairs.pairs[ii] === this._targetPairs.pairs[ii + 1] + 1) {
                     const customA = customLayout[ii];
                     const customB = customLayout[ii + 1];
                     if (
@@ -1065,10 +1067,10 @@ export default class RNALayout {
     private readonly _exceptionIndices: number[];
 
     private _root: RNATreeNode | null;
-    private _origPairs: number[];
-    private _targetPairs: number[] | null;
-    private _pseudoknotPairs: number[];
-    private _nopseudoknotPairs: number[];
+    private _origPairs: SecStruct;
+    private _targetPairs: SecStruct | null;
+    private _pseudoknotPairs: SecStruct;
+    private _nopseudoknotPairs: SecStruct;
     private _customLayout: Array<[number, number] | [null, null]> | null;
     private _puzzlerLayout: Array<[number, number]>;
 

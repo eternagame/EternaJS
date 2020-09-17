@@ -1,5 +1,5 @@
 import {Assert} from 'flashbang';
-import EPars, {RNABase, Sequence} from 'eterna/EPars';
+import EPars, {RNABase, Sequence, SecStruct} from 'eterna/EPars';
 import Plot, {PlotType} from 'eterna/Plot';
 import Pose2D, {Oligo} from './pose2D/Pose2D';
 import Folder from './folding/Folder';
@@ -98,13 +98,23 @@ export enum BasePairProbabilityTransform {
 type Param = (number | number[] | null);
 
 export default class UndoBlock {
-    constructor(seq: number[], folderName: string) {
+    constructor(seq: Sequence, folderName: string) {
         this._folderName = folderName;
-        this._sequence.sequence = seq.slice();
+        this._sequence = new Sequence(seq.sequenceString);
         this._pairsArray.set(false, []);
         this._pairsArray.set(true, []);
         this._paramsArray.set(false, []);
         this._paramsArray.set(true, []);
+    }
+
+    public pairsOfPairs(pa: Map<boolean, SecStruct[]>) {
+        // Map an array of secondary structures to just pairs because then it
+        // can be nicely serialized.
+        const m = new Map<boolean, number[][]>();
+        pa.forEach((v: SecStruct[], k: boolean, map: Map<boolean, SecStruct[]>) => {
+            m.set(k, v.map((it) => it.pairs));
+        });
+        return m;
     }
 
     public toJSON(): FoldData {
@@ -115,14 +125,14 @@ export default class UndoBlock {
         return {
             folderName_: this._folderName,
             sequence_: this._sequence.sequence,
-            pairs_array_: this._pairsArray,
+            pairs_array_: this.pairsOfPairs(this._pairsArray),
             params_array_: this._paramsArray,
             stable_: this._stable,
             target_oligo_: this._targetOligo,
             target_oligos_: this._targetOligos,
             oligo_order_: this._oligoOrder,
             oligos_paired_: this._oligosPaired,
-            target_pairs_: this._targetPairs,
+            target_pairs_: this._targetPairs.pairs,
             target_oligo_order_: this._targetOligoOrder,
             puzzle_locks_: this._puzzleLocks,
             forced_struct_: this._forcedStruct,
@@ -138,10 +148,18 @@ export default class UndoBlock {
             // Legacy -- this wasn't always a map. So check typeof and put nonmaps
             // into the pseudoknots false field.
             if (Array.isArray(json.pairs_array_)) {
-                this._pairsArray = new Map<boolean, number[][]>();
+                this._pairsArray = new Map<boolean, SecStruct[]>();
                 this._pairsArray.set(false, json.pairs_array_);
             } else {
-                this._pairsArray = json.pairs_array_;
+                this._pairsArray = new Map<boolean, SecStruct[]>();
+                const f = json.pairs_array_.get(false);
+                if (f) {
+                    this._pairsArray.set(false, f.map((v) => new SecStruct(v)));
+                }
+                const g = json.pairs_array_.get(true);
+                if (g) {
+                    this._pairsArray.set(true, g.map((v) => new SecStruct(v)));
+                }
             }
             if (Array.isArray(json.params_array_)) {
                 this._paramsArray = new Map<boolean, Param[][]>();
@@ -154,7 +172,7 @@ export default class UndoBlock {
             this._targetOligos = json.target_oligos_;// JSONUtil.require(json, 'target_oligos_');
             this._oligoOrder = json.oligo_order_;// JSONUtil.require(json, 'oligo_order_');
             this._oligosPaired = json.oligos_paired_;// JSONUtil.require(json, 'oligos_paired_');
-            this._targetPairs = json.target_pairs_;// JSONUtil.require(json, 'target_pairs_');
+            this._targetPairs = new SecStruct(json.target_pairs_);// JSONUtil.require(json, 'target_pairs_');
             this._targetOligoOrder = json.target_oligo_order_; // JSONUtil.require(json, 'target_oligo_order_');
             this._puzzleLocks = json.puzzle_locks_;// JSONUtil.require(json, 'puzzle_locks_');
             this._forcedStruct = json.forced_struct_;// JSONUtil.require(json, 'forced_struct_');
@@ -165,7 +183,7 @@ export default class UndoBlock {
     }
 
     public targetExpectedAccuracy(
-        targetPairs: number[],
+        targetPairs: SecStruct,
         dotArray: number[] | null,
         behavior: BasePairProbabilityTransform
     ): number {
@@ -214,7 +232,7 @@ export default class UndoBlock {
             for (let jj = ii + 1; jj < targetPairs.length; ++jj) {
                 const prob = dotMap.get([ii + 1, jj + 1].join(',')) ?? 0;
                 // Are ii and jj paired?
-                if (targetPairs[ii] === jj) {
+                if (targetPairs.pairingPartner(ii) === jj) {
                     TP += prob;
                     FN += 1 - prob;
                 } else {
@@ -273,12 +291,12 @@ export default class UndoBlock {
         this._oligosPaired = oligosPaired;
     }
 
-    public get targetPairs(): number[] {
+    public get targetPairs(): SecStruct {
         return this._targetPairs;
     }
 
-    public set targetPairs(targetPairs: number[]) {
-        this._targetPairs = targetPairs.slice();
+    public set targetPairs(targetPairs: SecStruct) {
+        this._targetPairs = new SecStruct(targetPairs.pairs);
     }
 
     public get targetOligoOrder(): number[] | undefined {
@@ -329,10 +347,10 @@ export default class UndoBlock {
         this._stable = stable;
     }
 
-    public getPairs(temp: number = 37, pseudoknots: boolean = false): number[] {
+    public getPairs(temp: number = 37, pseudoknots: boolean = false): SecStruct {
         const pairsArray = this._pairsArray.get(pseudoknots);
         Assert.assertIsDefined(pairsArray);
-        return pairsArray[temp];
+        return new SecStruct(pairsArray[temp].pairs);
     }
 
     public getParam(
@@ -349,10 +367,10 @@ export default class UndoBlock {
         }
     }
 
-    public setPairs(pairs: number[], temp: number = 37, pseudoknots: boolean = false): void {
+    public setPairs(pairs: SecStruct, temp: number = 37, pseudoknots: boolean = false): void {
         const pairsArray = this._pairsArray.get(pseudoknots);
         Assert.assertIsDefined(pairsArray);
-        pairsArray[temp] = pairs.slice();
+        pairsArray[temp] = new SecStruct(pairs.pairs);
     }
 
     public setParam(
@@ -379,8 +397,8 @@ export default class UndoBlock {
         this.setParam(UndoBlockParam.GU, seq.numGUPairs(bestPairs), temp, pseudoknots);
         this.setParam(UndoBlockParam.GC, seq.numGCPairs(bestPairs), temp, pseudoknots);
         this.setParam(UndoBlockParam.AU, seq.numUAPairs(bestPairs), temp, pseudoknots);
-        this.setParam(UndoBlockParam.ANY_PAIR, EPars.numPairs(bestPairs), temp, pseudoknots);
-        this.setParam(UndoBlockParam.STACK, EPars.getLongestStackLength(bestPairs), temp, pseudoknots);
+        this.setParam(UndoBlockParam.ANY_PAIR, bestPairs.numPairs(), temp, pseudoknots);
+        this.setParam(UndoBlockParam.STACK, bestPairs.getLongestStackLength(), temp, pseudoknots);
         this.setParam(UndoBlockParam.REPETITION, seq.getSequenceRepetition(5), temp, pseudoknots);
 
         let fullSeq: number[] = seq.sequence.slice();
@@ -399,7 +417,7 @@ export default class UndoBlock {
             }
         }
         const nnfe: number[] = [];
-        const totalFE = folder.scoreStructures(fullSeq, bestPairs, pseudoknots, temp, nnfe);
+        const totalFE = folder.scoreStructures(Sequence.fromSequence(fullSeq), bestPairs, pseudoknots, temp, nnfe);
 
         this.setParam(UndoBlockParam.FE, totalFE, temp, pseudoknots);
         this.setParam(UndoBlockParam.NNFE_ARRAY, nnfe, temp, pseudoknots);
@@ -408,8 +426,8 @@ export default class UndoBlock {
     public sumProbUnpaired(dotArray: number[] | null, behavior: BasePairProbabilityTransform): number {
         if (dotArray === null || dotArray.length === 0) return 0;
         // dotArray is organized as idx, idx, pairprob.
-        const probUnpaired: number[] = Array<number>(this.sequence.length);
-        for (let idx = 0; idx < this.sequence.length; ++idx) {
+        const probUnpaired: number[] = Array<number>(this.sequence.sequence.length);
+        for (let idx = 0; idx < this.sequence.sequence.length; ++idx) {
             probUnpaired[idx] = 1;
             for (let ii = 0; ii < dotArray.length; ii += 3) {
                 if (dotArray[ii] === idx + 1 || dotArray[ii + 1] === idx + 1) {
@@ -431,7 +449,7 @@ export default class UndoBlock {
         return probUnpaired.reduce((a, b) => a + b, 0);// / this.sequence.length;
     }
 
-    public branchiness(pairs: number[]) {
+    public branchiness(pairs: SecStruct) {
         // format of pairs is
         // '((.))' -> [4,3,-1,1,0]
         // note that if you calculate this average, it's fine to double count
@@ -443,14 +461,14 @@ export default class UndoBlock {
         let totDist = 0;
         let count = 0;
         for (let ii = 0; ii < pairs.length; ++ii) {
-            if (pairs[ii] === -1) {
+            if (!pairs.isPaired(ii)) {
                 continue;
             }
 
-            if (pairs[ii] > ii) {
-                totDist += pairs[ii] - ii;
+            if (pairs.pairingPartner(ii) > ii) {
+                totDist += pairs.pairingPartner(ii) - ii;
             } else {
-                totDist += ii - pairs[ii];
+                totDist += ii - pairs.pairingPartner(ii);
             }
             ++count;
         }
@@ -491,7 +509,7 @@ export default class UndoBlock {
                 count += (dotArray[ii + 2] * dotArray[ii + 2]);
             }
         }
-        return 1 - ((totDist / count) / (this.sequence.length - 1));
+        return 1 - ((totDist / count) / (this.sequence.sequence.length - 1));
     }
 
     public updateMeltingPointAndDotPlot(pseudoknots: boolean = false): void {
@@ -506,14 +524,14 @@ export default class UndoBlock {
 
         if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) == null) {
             const dotArray: number[] | null = folder.getDotPlot(
-                this.sequence.sequence, this.getPairs(37), 37, pseudoknots
+                this.sequence, this.getPairs(37), 37, pseudoknots
             );
             this.setParam(UndoBlockParam.DOTPLOT, dotArray, 37, pseudoknots);
             // mean+sum prob unpaired
             this.setParam(UndoBlockParam.SUMPUNP,
                 this.sumProbUnpaired(dotArray, bppStatisticBehavior), 37, pseudoknots);
             this.setParam(UndoBlockParam.MEANPUNP,
-                this.sumProbUnpaired(dotArray, bppStatisticBehavior) / this.sequence.length, 37, pseudoknots);
+                this.sumProbUnpaired(dotArray, bppStatisticBehavior) / this.sequence.sequence.length, 37, pseudoknots);
             // branchiness
             this.setParam(UndoBlockParam.BRANCHINESS,
                 this.ensembleBranchiness(dotArray, bppStatisticBehavior), 37, pseudoknots);
@@ -528,14 +546,14 @@ export default class UndoBlock {
 
         for (let ii = 37; ii < 100; ii += 10) {
             if (this.getPairs(ii) == null) {
-                const pairs: number[] | null = folder.foldSequence(this.sequence.sequence, null, null, pseudoknots, ii);
+                const pairs: SecStruct | null = folder.foldSequence(this.sequence, null, null, pseudoknots, ii);
                 Assert.assertIsDefined(pairs);
                 this.setPairs(pairs, ii, pseudoknots);
             }
 
             if (this.getParam(UndoBlockParam.DOTPLOT, ii) == null) {
                 const dotTempArray: number[] | null = folder.getDotPlot(
-                    this.sequence.sequence,
+                    this.sequence,
                     this.getPairs(ii),
                     ii,
                     pseudoknots
@@ -547,7 +565,7 @@ export default class UndoBlock {
                 this.setParam(UndoBlockParam.MEANPUNP,
                     this.sumProbUnpaired(
                         dotTempArray, bppStatisticBehavior
-                    ) / this.sequence.length, ii, pseudoknots);
+                    ) / this.sequence.sequence.length, ii, pseudoknots);
                 // branchiness
                 this.setParam(UndoBlockParam.BRANCHINESS,
                     this.ensembleBranchiness(dotTempArray, bppStatisticBehavior), ii, pseudoknots);
@@ -555,7 +573,7 @@ export default class UndoBlock {
             }
         }
 
-        const refPairs: number[] = this.getPairs(37, pseudoknots);
+        const refPairs: SecStruct = this.getPairs(37, pseudoknots);
 
         const pairScores: number[] = [];
         const maxPairScores: number[] = [];
@@ -567,7 +585,7 @@ export default class UndoBlock {
                 continue;
             }
             const curDat: number[] = this.getParam(UndoBlockParam.DOTPLOT, ii, pseudoknots) as number[];
-            const curPairs: number[] = this.getPairs(ii, pseudoknots);
+            const curPairs: SecStruct = this.getPairs(ii, pseudoknots);
             let probScore = 0;
             let scoreCount = 0;
 
@@ -576,12 +594,12 @@ export default class UndoBlock {
                 const indexJ: number = curDat[jj + 1] - 1;
 
                 if (indexI < indexJ) {
-                    if (refPairs[indexI] === indexJ) {
+                    if (refPairs.pairs[indexI] === indexJ) {
                         probScore += Number(curDat[jj + 2]);
                         scoreCount++;
                     }
                 } else if (indexJ < indexI) {
-                    if (refPairs[indexJ] === indexI) {
+                    if (refPairs.pairs[indexJ] === indexI) {
                         probScore += Number(curDat[jj + 2]);
                         scoreCount++;
                     }
@@ -594,7 +612,7 @@ export default class UndoBlock {
 
             let numPaired = 0;
             for (let jj = 0; jj < curPairs.length; jj++) {
-                if (curPairs[jj] > jj) {
+                if (curPairs.pairs[jj] > jj) {
                     numPaired += 2;
                 }
             }
@@ -626,7 +644,7 @@ export default class UndoBlock {
 
     public createDotPlot(): Plot {
         const plot = new Plot(PlotType.SCATTER);
-        plot.set2DData(this._dotPlotData, this._sequence.length);
+        plot.set2DData(this._dotPlotData, this._sequence.sequence.length);
         return plot;
     }
 
@@ -648,7 +666,7 @@ export default class UndoBlock {
         if (this._targetOligos === undefined) return undefined;
 
         const originalIndices: number[][] = [];
-        let oligoFirstBaseIndex = this._sequence.length;
+        let oligoFirstBaseIndex = this._sequence.sequence.length;
 
         for (const oligo of this._targetOligos) {
             // The + 1 is used to account for the "cut" base denoting split points between strands
@@ -658,20 +676,20 @@ export default class UndoBlock {
 
         const newOrder = otherOrder || Utility.range(this._targetOligos.length);
 
-        return Utility.range(this._sequence.length).concat(
+        return Utility.range(this._sequence.sequence.length).concat(
             ...Utility.range(this._targetOligos.length).map((idx) => originalIndices[newOrder.indexOf(idx)])
         );
     }
 
     private _sequence: Sequence = new Sequence('');
-    private _pairsArray: Map<boolean, number[][]> = new Map<boolean, number[][]>();
+    private _pairsArray: Map<boolean, SecStruct[]> = new Map<boolean, SecStruct[]>();
     private _paramsArray: Map<boolean, Param[][]> = new Map<boolean, Param[][]>();
     private _stable: boolean = false;
     private _targetOligo: number[] | undefined = undefined;
     private _targetOligos: Oligo[] | undefined = undefined;
     private _oligoOrder: number[] | undefined = undefined;
     private _oligosPaired: number = 0;
-    private _targetPairs: number[] = [];
+    private _targetPairs: SecStruct = new SecStruct();
     private _targetOligoOrder: number[] | undefined = undefined;
     private _puzzleLocks: boolean[] | undefined = [];
     private _forcedStruct: number[] = [];

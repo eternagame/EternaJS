@@ -1,6 +1,6 @@
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import EPars, {RNABase} from 'eterna/EPars';
+import EPars, {RNABase, SecStruct} from 'eterna/EPars';
 import {Assert} from 'flashbang';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
@@ -29,17 +29,17 @@ class Loop {
     }
 }
 
-function detectLoops(targetPairs: number[], loops: Loop[]) {
+function detectLoops(targetPairs: SecStruct, loops: Loop[]) {
     loops.splice(0);
     const loopStack: Loop[] = [];
-    const tmpPairs = targetPairs.slice();
+    const tmpPairs = targetPairs.slice(0);
     let lastPair: [number, number] | null = null;
     let examiningLoops = false;
 
     const clonePair = (obj: [number, number]) => [obj[0], obj[1]] as [number, number];
 
     for (let i = 0; i < tmpPairs.length; ++i) {
-        if (tmpPairs[i] === -1 && !examiningLoops && lastPair !== null) {
+        if (!tmpPairs.isPaired(i) && !examiningLoops && lastPair !== null) {
             // Found a loop!
             const l: Loop = new Loop([false], [], [clonePair(lastPair)]);
             lastPair = null;
@@ -47,32 +47,33 @@ function detectLoops(targetPairs: number[], loops: Loop[]) {
             // Find the rest of the unpaired bases in the first strand.
             const arr = [];
             for (i; i < tmpPairs.length; ++i) {
-                if (tmpPairs[i] !== -1) break;
+                if (!tmpPairs.isPaired(i)) break;
                 arr.push(i);
             }
             --i;
             l.strands.push(arr.slice());
             loopStack.push(l);
             examiningLoops = true;
-        } else if (tmpPairs[i] >= 0 && tmpPairs[i + 1] >= 0
-                     && Math.abs(tmpPairs[i] - tmpPairs[i + 1]) > 1 && lastPair !== null && !examiningLoops) {
+        } else if (tmpPairs.isPaired(i) && tmpPairs.isPaired(i + 1)
+                && Math.abs(tmpPairs.pairingPartner(i) - tmpPairs.pairingPartner(i + 1)) > 1
+                && lastPair !== null && !examiningLoops) {
             // Special case where the free bases are on the OTHER side while on initial strand, we have
             // two pairs in a row.
-            const l: Loop = new Loop([false], [], [[i, tmpPairs[i]]]);
+            const l: Loop = new Loop([false], [], [[i, tmpPairs.pairingPartner(i)]]);
             lastPair = null;
             loopStack.push(l);
             examiningLoops = true;
-        } else if (tmpPairs[i] === -1 && examiningLoops) {
+        } else if (!tmpPairs.isPaired(i) && examiningLoops) {
             // Add bases to a new strand in the current loop.
             const arr = [];
             for (i; i < tmpPairs.length; ++i) {
-                if (tmpPairs[i] !== -1) break;
+                if (tmpPairs.isPaired(i)) break;
                 arr.push(i);
             }
             --i;
             loopStack[loopStack.length - 1].strands.push(arr.slice());
-        } else if (i < tmpPairs[i]) { // Make sure we don't count pairs twice
-            lastPair = [i, tmpPairs[i]];
+        } else if (i < tmpPairs.pairingPartner(i)) { // Make sure we don't count pairs twice
+            lastPair = [i, tmpPairs.pairingPartner(i)];
             if (examiningLoops) {
                 loopStack[loopStack.length - 1].pairs.push(clonePair(lastPair));
             }
@@ -99,7 +100,7 @@ function detectLoops(targetPairs: number[], loops: Loop[]) {
 }
 
 const loops: Loop[][] = [];
-function countLoops(targetPairs: number[], currentTargetIndex: number, sequence: number[]) {
+function countLoops(targetPairs: SecStruct, currentTargetIndex: number, sequence: number[]) {
     if (!targetPairs) {
         return 0;
     }
@@ -151,8 +152,8 @@ function countLoops(targetPairs: number[], currentTargetIndex: number, sequence:
                 }
 
                 // Make sure that both of these indices are unpaired in target mode.
-                if (targetPairs[idx1] !== -1
-                         || targetPairs[idx2] !== -1) {
+                if (targetPairs.isPaired(idx1)
+                         || targetPairs.isPaired(idx2)) {
                     continue;
                 }
 

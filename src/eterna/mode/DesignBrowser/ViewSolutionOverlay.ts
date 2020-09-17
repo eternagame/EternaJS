@@ -2,7 +2,7 @@ import {
     Container, Graphics, Point, Sprite, Text
 } from 'pixi.js';
 import {UnitSignal} from 'signals';
-import EPars from 'eterna/EPars';
+import {SecStruct} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import ExpPainter from 'eterna/ExpPainter';
 import Solution from 'eterna/puzzle/Solution';
@@ -333,7 +333,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         PoseThumbnail.drawToSprite(
             playThumbnail,
             this._props.solution.sequence.sequence,
-            EPars.parenthesisToPairs(this._props.puzzle.getSecstruct()),
+            SecStruct.fromParens(this._props.puzzle.getSecstruct()),
             3, PoseThumbnailType.BASE_COLORED,
             0, null, false, 0, customLayout
         );
@@ -360,7 +360,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
             PoseThumbnail.drawToSprite(
                 resultThumbnail,
                 shapeData,
-                EPars.parenthesisToPairs(this._props.puzzle.getSecstruct()),
+                SecStruct.fromParens(this._props.puzzle.getSecstruct()),
                 3,
                 PoseThumbnailType.EXP_COLORED,
                 expdata.getShapeStartIndex(),
