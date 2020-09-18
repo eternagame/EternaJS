@@ -2017,7 +2017,7 @@ export default class PoseEditMode extends GameMode {
         let submissionResponse = allResults[0];
 
         // show achievements, if we were awarded any
-        let cheevs: Map< string, AchievementData > = submissionResponse['new_achievements'];
+        let cheevs: {[name: string]: AchievementData} = submissionResponse['new_achievements'];
         if (cheevs != null) {
             await this._achievements.awardAchievements(cheevs);
         }

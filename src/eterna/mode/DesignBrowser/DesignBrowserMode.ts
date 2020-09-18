@@ -526,7 +526,7 @@ export default class DesignBrowserMode extends GameMode {
                 this._voteProcessor.processData(data['votes']);
                 this.syncVotes();
 
-                let cheevs: Map<string, AchievementData> = data['new_achievements'];
+                let cheevs: {[name: string]: AchievementData} = data['new_achievements'];
                 if (cheevs != null) {
                     this._achievements.awardAchievements(cheevs).then(() => { /* ignore result */ });
                 }
