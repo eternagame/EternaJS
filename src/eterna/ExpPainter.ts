@@ -1,5 +1,8 @@
 import {MathUtil, ColorUtil} from 'flashbang';
 import Constants from 'eterna/Constants';
+import {Tensor, InferenceSession} from 'onnxjs';
+import EPars from './EPars';
+// import {score} from './prediction/xgbr_deg_1day_pH10';
 
 export default class ExpPainter {
     public static readonly NUM_COLORS = 5;
@@ -215,6 +218,155 @@ export default class ExpPainter {
                 return Math.round(ExpPainter.NUM_COLORS * diff) * -1 + ExpPainter.NUM_COLORS;
             }
         }
+    }
+
+    private static getMotifs(pairs: number[]) {
+        // set all paired bases to S
+        // set unpaired bases to the appropriate motif
+        let motifs = [];
+        let base = 0;
+        let endbase = pairs.length - 1;
+        while (pairs[endbase] === -1) {
+            motifs[endbase] = 'E';
+            endbase--;
+        }
+        while (pairs[base] === -1) {
+            motifs[base] = 'E';
+            base++;
+        }
+        let xbase = base;
+        while (xbase < endbase) {
+            if (pairs[xbase] > -1) {
+                xbase = pairs[xbase] + 1;
+            } else {
+                motifs[xbase] = 'X';
+                xbase++;
+            }
+        }
+        while (base <= endbase) {
+            if (pairs[base] > -1) {
+                motifs[base] = 'S';
+                base++;
+            } else {
+                xbase = base;
+                // eslint-disable-next-line no-empty
+                while (pairs[++base] === -1) {}
+                // eslint-disable-next-line no-empty
+                if (motifs[xbase] === 'X') {
+                // check if this is a hairpin
+                } else if (pairs[base] === xbase - 1) {
+                    while (xbase < base) { motifs[xbase] = 'H'; xbase++; }
+                // check if this is a bulge
+                } else if (pairs[pairs[base] + 1] === xbase - 1) {
+                    while (xbase < base) { motifs[xbase] = 'B'; xbase++; }
+                // this is either an internal loop or a multiloop
+                } else {
+                    let ibase = pairs[base];
+                    // eslint-disable-next-line no-empty
+                    while (pairs[++ibase] === -1) {}
+                    // check if this is an internal loop
+                    if (pairs[ibase] === xbase - 1) {
+                        while (xbase < base) {
+                            motifs[xbase] = 'I';
+                            xbase++;
+                        }
+                    // must be a multiloop
+                    } else {
+                        while (xbase < base) {
+                            motifs[xbase] = 'M';
+                            xbase++;
+                        }
+                    }
+                }
+            }
+        }
+
+        return motifs;
+    }
+
+    public static windowedOhe(seq: string, struct: string, windowSize: number) {
+        // feature_kernel=[]
+        // if seq:
+        //     feature_kernel.extend(['A','U','G','C'])
+        // if struct:
+        //     feature_kernel.extend(['H','E','I','M','B','S','X'])
+        // if use_bpps:
+        //     feature_kernel.extend(list(range(pad, MAX_LEN)))
+
+        // feature_names = ['%s_%d' % (k, val) for val in range(-1*window_size, window_size+1) for k in feature_kernel]
+        const MAX_LEN = 68;
+        const pad = 10;
+
+        const bpRNA = ExpPainter.getMotifs(EPars.parenthesisToPairs(struct));
+
+        const arr = new Array(MAX_LEN).fill(0).map(() => new Array(11).fill(0));
+        // np.zeros([MAX_LEN,len(feature_kernel)])
+        // seq_bpps = get_bpps(row['ID'])
+
+        for (let index = pad; index < MAX_LEN; ++index) {
+            let ctr = 0;
+
+            for (let char of ['A', 'U', 'G', 'C']) {
+                if (seq[index] === char) {
+                    arr[index][ctr] = 1;
+                }
+                ctr += 1;
+            }
+
+            for (let char of ['H', 'E', 'I', 'M', 'B', 'S', 'X']) {
+                if (bpRNA[index] === char) {
+                    arr[index][ctr] += 1;
+                }
+                ctr += 1;
+            }
+
+            // if use_bpps:
+            //     for ii in range(pad,MAX_LEN):
+            //         arr[index, ctr] = seq_bpps[index, ii]
+            //         ctr += 1
+        }
+
+        // add zero padding to the side
+        const padding: number[][] = new Array(windowSize).fill(0).map(() => new Array(11).fill(0));
+        const paddedArr: number[][] = [];
+        for (const row of padding) {
+            paddedArr.push(row);
+        }
+        for (const row of arr.slice(pad)) {
+            paddedArr.push(row);
+        }
+        for (const row of padding) {
+            paddedArr.push(row);
+        }
+        // padded_arr = np.vstack([np.zeros([windowSize,11]),arr[pad:], np.zeros([windowSize,11])])
+
+        let inpts: number[][] = [];
+        for (let index = pad; index < MAX_LEN; ++index) {
+            const newIndex = index + windowSize - pad;
+            let tmp = paddedArr.slice(newIndex - windowSize, newIndex + windowSize + 1);
+            // inpts.push(tmp.flat());
+            // outpts.append(row[data_type][index])
+            // inpts.push([].concat(...tmp));
+            inpts.push(tmp.reduce((acc, val) => acc.concat(val), []));
+        }
+
+        return inpts; // .reduce((acc, val) => acc.concat(val), []); // np.array(inpts), outpts, feature_names
+    }
+
+    // public static async getDegData(seq: string, struct: string): Promise<number[]> {
+    public static getDegData(seq: string, struct: string): number[] {
+        // ohe seq + string in windows
+        const vec = ExpPainter.windowedOhe(seq, struct, 20);
+        return [0]; // vec.map((v) => score(v));
+        // const session = new InferenceSession();
+        // const url = 'assets/HGBR_deg_1week_50C.onnx';
+        // await session.loadModel(url);
+        // const inputs = [
+        //     new Tensor(new Float32Array(vec), 'float32', [58, 451])
+        // ];
+        // const outputMap = await session.run(inputs);
+        // const outputTensorData = outputMap.values().next().value.data;
+        // return outputTensorData;
     }
 
     public set continuous(continuous: boolean) {

@@ -76,6 +76,7 @@
     "lodash.debounce": "^4.0.8",
     "loglevel": "^1.6.6",
     "marked": "^1.1.1",
+    "onnxjs": "^0.1.8",
     "pchip": "^1.0.2",
     "pixi-filters": "^3.1.1",
     "pixi-multistyle-text": "^0.10.0",
