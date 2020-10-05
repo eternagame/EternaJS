@@ -18,7 +18,8 @@ import {
     RepeatingTask,
     AlphaTask,
     SerialTask,
-    InputUtil
+    InputUtil,
+    KeyCode
 } from 'flashbang';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -482,6 +483,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
             frame: null
         });
         previous.clicked.connect(() => this._props.onPrevious());
+        previous.hotkey(KeyCode.KeyD);
         this._content.addObject(previous, footerLinks);
 
         // Next
@@ -497,6 +499,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         });
         next.clicked.connect(() => this._props.onNext());
         next.container.position.x = theme.width - theme.margin.right - theme.margin.left - next.container.width;
+        next.hotkey(KeyCode.KeyU);
         this._content.addObject(next, footerLinks);
 
         this._footer.addVSpacer(20);
