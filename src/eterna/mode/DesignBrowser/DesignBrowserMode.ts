@@ -727,6 +727,13 @@ export default class DesignBrowserMode extends GameMode {
             this.rebuildDataColumns(this._initialDataFilters);
             this.reorganize(true);
         });
+
+        dialog.currentSelectedFilterValue = this._onlySelectedVisible;
+
+        dialog.selectedFilterUpdate.connect((e) => {
+            this._onlySelectedVisible = e;
+            this.reorganize(true);
+        });
     }
 
     private updateSortOption(category: DesignCategory, sortOrder: SortOrder, sortArgs?: string): void {
@@ -754,6 +761,10 @@ export default class DesignBrowserMode extends GameMode {
                     shouldAdd = false;
                     break;
                 }
+            }
+
+            if (this._onlySelectedVisible && !this._selectedSolutionIDs?.includes(sol.nodeID)) {
+                shouldAdd = false;
             }
 
             if (shouldAdd) {
@@ -1053,6 +1064,7 @@ export default class DesignBrowserMode extends GameMode {
     private _allSolutions: Solution[];
     private _filteredSolutions: Solution[];
 
+    private _onlySelectedVisible = false;
     private _sortOptions: SortOptions;
     private _toolbarLayout: HLayoutContainer;
     private _returnToGameButton: GameButton;
