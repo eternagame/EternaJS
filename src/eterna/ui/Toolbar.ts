@@ -1,5 +1,5 @@
 import {
-    Graphics, Point, Sprite, MaskData, Texture
+    Graphics, Point, Sprite, MaskData, Texture, Container, Rectangle
 } from 'pixi.js';
 import {RegistrationGroup} from 'signals';
 import Eterna from 'eterna/Eterna';
@@ -132,22 +132,10 @@ export default class Toolbar extends ContainerObject {
 
     public onResized() {
         Assert.assertIsDefined(Flashbang.stageWidth);
-        Assert.assertIsDefined(Flashbang.stageHeight);
         this.stateToggle.container.position = new Point(
             Flashbang.stageWidth / 2 - this.container.position.x,
             -this.container.position.y + 8
         );
-        // Update the scroll container size, accounting for buttons and a margin
-        let buttonOffset = this.leftArrow.display.width * 2 + 100;
-        this.scrollContainer.setSize(Flashbang.stageWidth - buttonOffset, Flashbang.stageHeight);
-        // maxScrollX being greater than 0 indicates that scrolling is possible and some content is covered up
-        if (this.scrollContainer.maxScrollX > 0) {
-            this.rightArrow.display.visible = true;
-            this.leftArrow.display.visible = true;
-        } else {
-            this.rightArrow.display.visible = false;
-            this.leftArrow.display.visible = false;
-        }
         this.updateLayout();
     }
 
@@ -155,7 +143,9 @@ export default class Toolbar extends ContainerObject {
         super.added();
 
         const APPROX_ITEM_COUNT = 12;
-        const APPROX_ITEM_WIDTH = 55;
+        const APPROX_ITEM_HEIGHT = 52;
+        // For some reason there's a 2px margin on either side of our UI elements baked in... because.
+        const APPROX_ITEM_WIDTH = APPROX_ITEM_HEIGHT + (2 * 2);
         Assert.assertIsDefined(Flashbang.stageWidth);
         const SPACE_WIDE = Math.min((Flashbang.stageWidth / APPROX_ITEM_COUNT) - APPROX_ITEM_WIDTH, 13);
         const SPACE_NARROW = SPACE_WIDE * 0.28;
@@ -275,11 +265,7 @@ export default class Toolbar extends ContainerObject {
             this.addObject(this.stateToggle, this.container);
         }
 
-        this.leftArrow = new GameButton()
-            .allStates(Bitmaps.ImgUndo)
-            .disabled(undefined)
-            .tooltip('Scroll left')
-            .scaleBitmapToLabel();
+        this.leftArrow = this.makeArrowButton('left');
 
         this.addObject(this.leftArrow, this.scrollContainerContainer);
         this.addObject(this.scrollContainer, this.scrollContainerContainer);
@@ -632,11 +618,7 @@ export default class Toolbar extends ContainerObject {
             this.addObject(this.submitButton, this.lowerToolbarLayout);
         }
 
-        this.rightArrow = new GameButton()
-            .allStates(Bitmaps.ImgRedo)
-            .disabled(undefined)
-            .tooltip('Scroll right')
-            .scaleBitmapToLabel();
+        this.rightArrow = this.makeArrowButton('right');
         this.addObject(this.rightArrow, this.scrollContainerContainer);
 
         let interval: NodeJS.Timeout;
@@ -645,9 +627,11 @@ export default class Toolbar extends ContainerObject {
         };
         let scrollRight = () => {
             this.scrollContainer.setScroll(this.scrollContainer.scrollX + 10, this.scrollContainer.scrollY);
+            this.updateArrowVisibility();
         };
         let scrollLeft = () => {
             this.scrollContainer.setScroll(this.scrollContainer.scrollX - 10, this.scrollContainer.scrollY);
+            this.updateArrowVisibility();
         };
         this.rightArrow.pointerDown.connect(() => {
             endScroll();
@@ -675,6 +659,35 @@ export default class Toolbar extends ContainerObject {
             this.setToolbarAutohide(value);
         }));
         this._setupToolbarDrag();
+    }
+
+    private makeArrowButton(direction: 'left' | 'right'): GameButton {
+        // Height of the rest of the toolbar elements
+        const HEIGHT = 52;
+
+        const arrowImg = new Sprite(BitmapManager.getBitmap(
+            direction === 'left' ? Bitmaps.ImgArrowLeft : Bitmaps.ImgArrowRight
+        ));
+        // GameButton resets location/scale/etc, so we have to wrap it in a container and then
+        // create an invisible object to force the height to be what we want, then position
+        // our thing in the center. Ugh.
+        const arrowContainer = new Container();
+        const arrowFrame = new Graphics()
+            .beginFill(0x0)
+            .drawRect(0, 0, 1, HEIGHT)
+            .endFill();
+        arrowFrame.alpha = 0;
+        arrowContainer.addChild(arrowImg);
+        arrowContainer.addChild(arrowFrame);
+        DisplayUtil.positionRelative(
+            arrowImg, HAlign.LEFT, VAlign.CENTER,
+            arrowFrame, HAlign.LEFT, VAlign.CENTER
+        );
+
+        return new GameButton()
+            .allStates(arrowContainer)
+            .disabled(undefined)
+            .tooltip(`Scroll ${direction}`);
     }
 
     private _setupToolbarDrag() {
@@ -708,14 +721,47 @@ export default class Toolbar extends ContainerObject {
     }
 
     private updateLayout(): void {
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(Flashbang.stageHeight);
+        // Update the scroll container size, accounting for buttons
+        let buttonOffset = this.leftArrow.display.width + this.rightArrow.display.width;
+        this.scrollContainer.setSize(Flashbang.stageWidth - buttonOffset, Flashbang.stageHeight);
+
         this._content.layout(true);
         this.lowerToolbarLayout.layout(true);
+
+        this.updateArrowVisibility();
 
         DisplayUtil.positionRelative(
             this._content, HAlign.CENTER, VAlign.BOTTOM,
             this._invisibleBackground, HAlign.CENTER, VAlign.BOTTOM,
             -25, 0
         );
+    }
+
+    private updateArrowVisibility() {
+        this.rightArrow.display.visible = true;
+        this.leftArrow.display.visible = true;
+
+        // maxScrollX being greater than 0 indicates that scrolling is possible and some content is covered up
+        // Alpha is used here since we don't want to shift the scrollcontainer around the screen
+        // when the arrows get shown/hidden - reserve some space for them!
+        if (this.scrollContainer.maxScrollX > 0) {
+            if (this.scrollContainer.scrollX > 0) {
+                this.leftArrow.display.alpha = 1;
+            } else {
+                this.leftArrow.display.alpha = 0;
+            }
+
+            if (this.scrollContainer.scrollX < this.scrollContainer.maxScrollX) {
+                this.rightArrow.display.alpha = 1;
+            } else {
+                this.rightArrow.display.alpha = 0;
+            }
+        } else {
+            this.rightArrow.display.visible = false;
+            this.leftArrow.display.visible = false;
+        }
     }
 
     private setToolbarAutohide(enabled: boolean): void {
