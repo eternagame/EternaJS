@@ -1,6 +1,8 @@
 import {Point} from 'pixi.js';
-import {Enableable, PointerCapture, DisplayUtil} from 'flashbang';
-import {UnitSignal} from 'signals';
+import {
+    Enableable, PointerCapture, DisplayUtil, HAlign, VAlign, Flashbang, Assert
+} from 'flashbang';
+import {RegistrationGroup, UnitSignal} from 'signals';
 import GameButton from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';
 import TrueWidthDisplay from './TrueWidthDisplay';
@@ -150,25 +152,43 @@ export default class EternaMenu extends GamePanel implements Enableable {
             menu.panel.setup(GamePanelType.NORMAL, 1.0, 0x152843, 1.0, 0xC0DCE7);
         }
         menu.panel.display.visible = false;
-        menuButton.addObject(menu.panel, menuButton.container);
+        menuButton.addObject(menu.panel, this.mode?.container);
 
         let showDialog = () => {
             menu.panel.display.visible = true;
-            // Move the current menu button to the top layer so that other buttons don't overlap,
-            // since in order to not have a gap between the flyout and the button, that's likely
-            this.container.removeChild(menuButton.display);
-            this.container.addChild(menuButton.display);
+            // Ensure the panel is on top of absolutely everything - if we're triggering a flyout,
+            // there's no reason why we would expect something else currently on the display stack
+            // to be displayed over it - it would just appear as being obstructed
+            Assert.assertIsDefined(this.mode);
+            Assert.assertIsDefined(this.mode.container);
+            this.mode.container.removeChild(menu.panel.container);
+            this.mode.container.addChild(menu.panel.container);
         };
 
         menuButton.pointerOver.connect((e) => {
             if (this._enabled) {
-                showDialog();
-            }
-            this.toolbarUpdateLayout.emit();
-        });
+                if (!menu.panel.display.visible) {
+                    showDialog();
 
-        menuButton.pointerOut.connect(() => {
-            menu.panel.display.visible = false;
+                    let regs = new RegistrationGroup();
+
+                    regs.add(menu.panel.pointerOut.connect(() => {
+                        Assert.assertIsDefined(Flashbang.globalMouse);
+                        if (!DisplayUtil.hitTest(menuButton.display, Flashbang.globalMouse)) {
+                            menu.panel.display.visible = false;
+                            regs.close();
+                        }
+                    }));
+
+                    regs.add(menuButton.pointerOut.connect(() => {
+                        Assert.assertIsDefined(Flashbang.globalMouse);
+                        if (!DisplayUtil.hitTest(menu.panel.display, Flashbang.globalMouse)) {
+                            menu.panel.display.visible = false;
+                            regs.close();
+                        }
+                    }));
+                }
+            }
             this.toolbarUpdateLayout.emit();
         });
 
@@ -238,9 +258,16 @@ export default class EternaMenu extends GamePanel implements Enableable {
 
             menu.menuButton.display.position = new Point(widthOffset, 0);
             if (this._style === EternaMenuStyle.DEFAULT) {
-                menu.panel.display.position = new Point(0, buttonHeight - 1);
+                DisplayUtil.positionRelative(
+                    menu.panel.container, HAlign.LEFT, VAlign.TOP,
+                    menu.menuButton.container, HAlign.LEFT, VAlign.BOTTOM,
+                    0, -1
+                );
             } else if (this._style === EternaMenuStyle.PULLUP) {
-                menu.panel.display.position = new Point(0, -menu.panel.height);
+                DisplayUtil.positionRelative(
+                    menu.panel.container, HAlign.LEFT, VAlign.BOTTOM,
+                    menu.menuButton.container, HAlign.LEFT, VAlign.TOP
+                );
             }
             widthOffset += buttonWidth + space;
             this._menuHeight = Math.max(this._menuHeight, buttonHeight);
