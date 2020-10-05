@@ -1,16 +1,11 @@
-import {Point} from 'pixi.js';
 import {UnitSignal} from 'signals';
 import SerialTask from 'flashbang/tasks/SerialTask';
 import CallbackTask from 'flashbang/tasks/CallbackTask';
 import DelayTask from 'flashbang/tasks/DelayTask';
-import PointerCapture from 'flashbang/input/PointerCapture';
 import InputUtil from 'flashbang/input/InputUtil';
-import DisplayUtil from 'flashbang/util/DisplayUtil';
 import Flashbang from 'flashbang/core/Flashbang';
 import Enableable from './Enableable';
 import ContainerObject from './ContainerObject';
-
-type InteractionEvent = PIXI.interaction.InteractionEvent;
 
 export enum ButtonState {
     UP = 0, OVER, DOWN, DISABLED
@@ -36,21 +31,29 @@ export default abstract class Button extends ContainerObject implements Enableab
 
         this.showState(this._state);
 
-        this.regs.add(this.pointerOver.connect(() => this.onPointerOver()));
-        this.regs.add(this.pointerOut.connect(() => this.onPointerOut()));
-        this.regs.add(this.pointerDown.filter(InputUtil.IsLeftMouse).connect(() => this.onPointerDown()));
-        this.regs.add(this.pointerUp.filter(InputUtil.IsLeftMouse).connect(() => this.onPointerUp(false)));
-        this.regs.add(this.pointerTap.filter(InputUtil.IsLeftMouse).connect(() => {
+        this.regs.add(this.pointerOver.connect(() => {
+            this.isPointerOver = true;
+        }));
+        this.regs.add(this.pointerOut.connect(() => {
+            this.isPointerOver = false;
+        }));
+        this.regs.add(this.pointerCancel.connect(() => {
+            this.isPointerOver = false;
+            this.isPointerDown = false;
+        }));
+        this.regs.add(this.pointerDown.filter(InputUtil.IsLeftMouse).connect(() => {
             if (this.enabled) {
-                this.clicked.emit();
+                this.isPointerDown = true;
+            } else if (!this.enabled && this.disabledSound != null) {
+                this.playDisabledSound();
             }
         }));
-    }
-
-    /* override */
-    protected dispose(): void {
-        this.endCapture();
-        super.dispose();
+        this.regs.add(this.pointerUp.filter(InputUtil.IsLeftMouse).connect(() => {
+            this.isPointerDown = false;
+        }));
+        this.regs.add(this.pointerTap.filter(InputUtil.IsLeftMouse).connect(() => {
+            if (this.enabled) this.clicked.emit();
+        }));
     }
 
     public get enabled(): boolean {
@@ -90,84 +93,21 @@ export default abstract class Button extends ContainerObject implements Enableab
     /** Subclasses override this to display the appropriate state */
     protected abstract showState(state: ButtonState): void;
 
-    protected onPointerOver(): void {
-        this.isPointerOver = true;
-    }
-
-    protected onPointerOut(): void {
-        this.isPointerOver = false;
-    }
-
-    protected onPointerDown(): void {
-        if (this.enabled && this._pointerCapture == null) {
-            if (!Flashbang.supportsTouch) {
-                this.beginCapture();
-            }
-            this._isPointerDown = true;
-            this._isPointerOver = true;
-            this.updateEnabledState();
-        } else if (!this.enabled && this.disabledSound != null) {
-            this.playDisabledSound();
-        }
-    }
-
-    protected onPointerUp(wasClicked: boolean): void {
-        this._isPointerDown = false;
-        this._isPointerOver = wasClicked;
-        this.updateEnabledState();
-        this.endCapture();
-    }
-
-    protected beginCapture(): void {
-        if (this._pointerCapture != null) {
-            return;
-        }
-
-        this._pointerCapture = new PointerCapture(this.display);
-        this._pointerCapture.beginCapture((e: InteractionEvent) => {
-            e.stopPropagation();
-
-            if (InputUtil.IsLeftMouse(e) && (e.type === 'pointerup' || e.type === 'pointerupoutside')) {
-                this.onPointerUp(false);
-            } else if (e.type === 'pointercancel') {
-                this.endCapture(true);
-            } else {
-                this.onPointerMove(e);
-            }
-        });
-    }
-
-    protected endCapture(emitCancelEvent: boolean = false): void {
-        if (this._pointerCapture == null) {
-            return;
-        }
-
-        this._pointerCapture.endCapture();
-        this._pointerCapture = null;
-        if (emitCancelEvent) {
-            this.clickCanceled.emit();
-        }
-    }
-
-    protected onPointerMove(e: InteractionEvent): void {
-        this.isPointerOver = this.hitTest(e.data.global);
-    }
-
-    protected set isPointerDown(val: boolean) {
+    private set isPointerDown(val: boolean) {
         if (this._isPointerDown !== val) {
             this._isPointerDown = val;
             this.updateEnabledState();
         }
     }
 
-    protected set isPointerOver(val: boolean) {
+    private set isPointerOver(val: boolean) {
         if (this._isPointerOver !== val) {
             this._isPointerOver = val;
             this.updateEnabledState();
         }
     }
 
-    protected updateEnabledState(): void {
+    private updateEnabledState(): void {
         if (this._state === ButtonState.DISABLED) {
             return;
         }
@@ -179,20 +119,13 @@ export default abstract class Button extends ContainerObject implements Enableab
         }
     }
 
-    protected setState(newState: ButtonState): void {
+    private setState(newState: ButtonState): void {
         if (this._state !== newState) {
             let oldState: ButtonState = this._state;
             this._state = newState;
-            if (this._state === ButtonState.DISABLED) {
-                this.endCapture();
-            }
             this.showState(this._state);
             this.playStateTransitionSound(oldState, this._state);
         }
-    }
-
-    protected hitTest(globalLoc: Point): boolean {
-        return this.isLiveObject && DisplayUtil.hitTest(this.display, globalLoc);
     }
 
     /**
@@ -200,14 +133,13 @@ export default abstract class Button extends ContainerObject implements Enableab
      * By default, it plays the sound named "sfx_button_down", if it exists, when transitioning
      * to the DOWN state. Subclasses can override to customize the behavior.
      */
-    protected playStateTransitionSound(fromState: ButtonState, toState: ButtonState): void {
-        // TODO: make SoundManager part of Flashbang
+    private playStateTransitionSound(fromState: ButtonState, toState: ButtonState): void {
         if (toState === ButtonState.DOWN && this.downSound != null) {
             Flashbang.sound.playSound(this.downSound);
         }
     }
 
-    protected playDisabledSound(): void {
+    private playDisabledSound(): void {
         if (this.disabledSound != null) {
             Flashbang.sound.playSound(this.disabledSound);
         }
@@ -216,5 +148,4 @@ export default abstract class Button extends ContainerObject implements Enableab
     protected _state: ButtonState = ButtonState.UP;
     protected _isPointerOver: boolean;
     protected _isPointerDown: boolean;
-    protected _pointerCapture: PointerCapture | null;
 }
