@@ -1,6 +1,6 @@
 import PoseOp from 'eterna/pose2D/PoseOp';
 import {Oligo} from 'eterna/pose2D/Pose2D';
-import {Sequence, SecStruct} from 'eterna/EPars';
+import {Sequence, SecStruct, DotPlot} from 'eterna/EPars';
 
 export type CacheItem = SecStruct | number[] | FullEvalCache | MultiFoldResult | undefined;
 export type CacheKey = Record<string, string | number | number[] | boolean | Oligo[] | null>;
@@ -86,7 +86,7 @@ export default abstract class Folder {
 
     public getDotPlot(
         seq: Sequence, secstruct: SecStruct, temp: number = 37, pseudoknots: boolean = false
-    ): number[] | null {
+    ): DotPlot | null {
         return null;
     }
 

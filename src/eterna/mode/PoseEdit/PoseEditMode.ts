@@ -2,7 +2,9 @@ import * as log from 'loglevel';
 import {
     Container, DisplayObject, Point, Sprite, Text, Rectangle, Texture, BaseTexture
 } from 'pixi.js';
-import EPars, {RNABase, SecStruct, Sequence} from 'eterna/EPars';
+import EPars, {
+    DotPlot, RNABase, SecStruct, Sequence
+} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import UndoBlock, {
     UndoBlockParam, FoldData, TargetConditions, OligoDef
@@ -1134,6 +1136,7 @@ export default class PoseEditMode extends GameMode {
             return 0.01 * freeEnergy;
         });
 
+        // AMW: still give number[] back because external scripts may rely on it
         this._scriptInterface.addCallback('pairing_probabilities',
             (seq: string, secstruct: string | null = null): number[] | null => {
                 if (this._folder === null) {
@@ -1149,9 +1152,9 @@ export default class PoseEditMode extends GameMode {
                         return null;
                     }
                 }
-                const pp: number[] | null = this._folder.getDotPlot(seqArr, folded);
+                const pp: DotPlot | null = this._folder.getDotPlot(seqArr, folded);
                 Assert.assertIsDefined(pp);
-                return pp.slice();
+                return pp.data;
             });
 
         this._scriptInterface.addCallback('cofold',

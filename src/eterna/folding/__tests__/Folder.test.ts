@@ -8,6 +8,7 @@ import LinearFoldV from '../LinearFoldV';
 import './jest-matcher-deep-close-to';
 import EternaFold from '../Eternafold';
 import ContraFold from '../Contrafold';
+import { Assert } from 'flashbang';
 
 const SNOWFLAKE_SEQ = new Sequence('GUGGACAAGAUGAAACAUCAGUAACAAGCGCAAAGCGCGGGCAAAGCCCCCGGAAACCGGAAGUUACAGAACAAAGUUCAAGUUUACAAGUGGACAAGUUGAAACAACAGUUACAAGACGAAACGUCGGCCAAAGGCCCCAUAAAAUGGAAGUAACACUUGAAACAAGAAGUUUACAAGUUGACAAGUUCAAAGAACAGUUACAAGUGGAAACCACGCGCAAAGCGCCUCCAAAGGAGAAGUAACAGAAGAAACUUCAAGUUAGCAAGUGGUCAAGUACAAAGUACAGUAACAACAUCAAAGAUGGCGCAAAGCGCGAGCAAAGCUCAAGUUACAGAACAAAGUUCAAGAUUACAAGAGUGCAAGAAGAAACUUCAGAUAGAACUGCAAAGCAGCACCAAAGGUGGGGCAAAGCCCAACUAUCAGUUGAAACAACAAGUAUUCAAGAGGUCAAGAUCAAAGAUCAGUAACAAGUGCAAAGCACGGGCAAAGCCCGACCAAAGGUCAAGUUACAGUUCAAAGAACAAGAUUUC');
 const SNOWFLAKE_STRUCT = SecStruct.fromParens('((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))');
@@ -140,11 +141,13 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldV]) {
                     return;
                 }
 
-                expect(folder.getDotPlot(
+                const calcdResult = folder.getDotPlot(
                     SEQ,
                     STRUCT,
                     37
-                )).toEqual([]);
+                );
+
+                expect(calcdResult?.data).toEqual([]);
             }))
             .resolves.toBeUndefined();
     });
@@ -170,11 +173,13 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldV]) {
                     return;
                 }
                 
-                expect(folder.getDotPlot(
+                const calcdResult = folder.getDotPlot(
                     SEQ,
                     STRUCT,
                     37
-                )).toBeDeepCloseTo(expectedResult, 5);
+                );
+
+                expect(calcdResult?.data).toBeDeepCloseTo(expectedResult, 5);
             }))
             .resolves.toBeUndefined();
     });

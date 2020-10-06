@@ -1,4 +1,5 @@
 import {SecStruct, Sequence} from 'eterna/EPars';
+import { Assert } from 'flashbang';
 import Folder from '../Folder';
 import LinearFoldC from '../LinearFoldC';
 import LinearFoldE from '../LinearFoldE'; // debugging matching dot plots?
@@ -197,11 +198,13 @@ test(`LinearFoldC:get_dot_plot(complex)`, () => {
                 return;
             }
             
-            expect(folder.getDotPlot(
+            const calcdResult = folder.getDotPlot(
                 new Sequence(SEQ),
                 SecStruct.fromParens(STRUCT),
                 37
-            )).toBeDeepCloseTo(expectedResults[0], 5);
+            );
+
+            expect(calcdResult?.data).toBeDeepCloseTo(expectedResults[0], 5);
         }))
         .resolves.toBeUndefined();
 });
@@ -246,11 +249,13 @@ test(`LinearFoldE:get_dot_plot(complex)`, () => {
                 return;
             }
             
-            expect(folder.getDotPlot(
+            const calcdResult = folder.getDotPlot(
                 new Sequence(SEQ),
                 SecStruct.fromParens(STRUCT),
                 37
-            )).toBeDeepCloseTo(expectedResults[0], 5);
+            );
+            
+            expect(calcdResult?.data).toBeDeepCloseTo(expectedResults[0], 5);
         }))
         .resolves.toBeUndefined();
 });

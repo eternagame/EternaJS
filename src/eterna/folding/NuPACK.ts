@@ -1,5 +1,7 @@
 import * as log from 'loglevel';
-import EPars, {RNABase, SecStruct, Sequence} from 'eterna/EPars';
+import EPars, {
+    RNABase, SecStruct, Sequence, DotPlot
+} from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import PoseOp from 'eterna/pose2D/PoseOp';
@@ -43,7 +45,7 @@ export default class NuPACK extends Folder {
     }
 
     /* override */
-    public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = 37, pseudoknots: boolean = false): number[] {
+    public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = 37, pseudoknots: boolean = false): DotPlot {
         // AMW TODO: actually NOT pk aware yet
         const key: CacheKey = {
             primitive: 'dotplot', seq: seq.sequence, pairs: pairs.pairs, temp
@@ -51,7 +53,7 @@ export default class NuPACK extends Folder {
         let retArray: number[] = this.getCache(key) as number[];
         if (retArray != null) {
             // trace("dotplot cache hit");
-            return retArray.slice();
+            return new DotPlot(retArray);
         }
 
         const seqStr: string = seq.sequenceString;
@@ -65,7 +67,7 @@ export default class NuPACK extends Folder {
             retArray = EmscriptenUtil.stdVectorToArray(result.plot);
         } catch (e) {
             log.error('GetDotPlot error', e);
-            return [];
+            return new DotPlot([]);
         } finally {
             if (result != null) {
                 result.delete();
@@ -74,7 +76,7 @@ export default class NuPACK extends Folder {
         }
 
         this.putCache(key, retArray.slice());
-        return retArray;
+        return new DotPlot(retArray);
     }
 
     /* override */

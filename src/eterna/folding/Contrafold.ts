@@ -1,5 +1,7 @@
 import * as log from 'loglevel';
-import EPars, {RNABase, SecStruct, Sequence} from 'eterna/EPars';
+import EPars, {
+    RNABase, SecStruct, Sequence, DotPlot
+} from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import Assert from 'flashbang/util/Assert';
@@ -166,7 +168,6 @@ export default class ContraFold extends Folder {
         try {
             // can't do anything with structStr for now. constrained folding later.
             result = this._lib.FullFoldDefault(seqStr, gamma);// , structStr || '');
-            console.error('res', result.structure);
             return SecStruct.fromParens(result.structure);
         } catch (e) {
             log.error('FullFoldTemperature error', e);
@@ -180,14 +181,14 @@ export default class ContraFold extends Folder {
     }
 
     /* override */
-    public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = 37): number[] {
+    public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = 37): DotPlot {
         const key: CacheKey = {
             primitive: 'dotplot', seq: seq.sequence, pairs: pairs.pairs, temp
         };
         let retArray: number[] = this.getCache(key) as number[];
         if (retArray != null) {
             // trace("dotplot cache hit");
-            return retArray.slice();
+            return new DotPlot(retArray);
         }
 
         const seqStr: string = seq.sequenceString;
@@ -200,7 +201,7 @@ export default class ContraFold extends Folder {
             retArray = EmscriptenUtil.stdVectorToArray(result.plot);
         } catch (e) {
             log.error('GetDotPlot error', e);
-            return [];
+            return new DotPlot([]);
         } finally {
             if (result != null) {
                 result.delete();
@@ -209,7 +210,7 @@ export default class ContraFold extends Folder {
         }
 
         this.putCache(key, retArray.slice());
-        return retArray;
+        return new DotPlot(retArray);
     }
 
     private readonly _lib: ContrafoldLib;

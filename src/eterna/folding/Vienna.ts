@@ -1,5 +1,7 @@
 import * as log from 'loglevel';
-import EPars, {RNABase, Sequence, SecStruct} from 'eterna/EPars';
+import EPars, {
+    RNABase, Sequence, SecStruct, DotPlot
+} from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import Utility from 'eterna/util/Utility';
@@ -35,14 +37,14 @@ export default class Vienna extends Folder {
         return true;
     }
 
-    public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = 37): number[] {
+    public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = 37): DotPlot {
         const key: CacheKey = {
             primitive: 'dotplot', seq: seq.sequence, pairs: pairs.pairs, temp
         };
         let retArray: number[] = this.getCache(key) as number[];
         if (retArray != null) {
             // log.debug("dotplot cache hit");
-            return retArray.slice();
+            return new DotPlot(retArray);
         }
 
         const secstructStr: string = pairs.getParenthesis();
@@ -58,7 +60,7 @@ export default class Vienna extends Folder {
             probabilitiesString = result.probabilitiesString;
         } catch (e) {
             log.error('GetDotPlot error', e);
-            return [];
+            return new DotPlot([]);
         } finally {
             if (result != null) {
                 result.delete();
@@ -86,7 +88,7 @@ export default class Vienna extends Folder {
         }
 
         this.putCache(key, retArray.slice());
-        return retArray;
+        return new DotPlot(retArray);
     }
 
     public get name(): string {

@@ -1,6 +1,8 @@
 import * as log from 'loglevel';
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
-import EPars, {RNABase, Sequence, SecStruct} from 'eterna/EPars';
+import EPars, {
+    RNABase, Sequence, SecStruct, DotPlot
+} from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import {Assert} from 'flashbang';
 import * as LinearFoldLib from './engines/LinearFoldLib';
@@ -20,14 +22,14 @@ export default abstract class LinearFoldBase extends Folder {
         return true;
     }
 
-    public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = 37): number[] {
+    public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = 37): DotPlot {
         const key: CacheKey = {
             primitive: 'dotplot', seq: seq.sequence, pairs: pairs.pairs, temp
         };
         let retArray: number[] = this.getCache(key) as number[];
         if (retArray != null) {
             // trace("dotplot cache hit");
-            return retArray.slice();
+            return new DotPlot(retArray);
         }
 
         const seqStr: string = seq.sequenceString;
@@ -40,7 +42,7 @@ export default abstract class LinearFoldBase extends Folder {
             retArray = EmscriptenUtil.stdVectorToArray(result.plot);
         } catch (e) {
             log.error('GetDotPlot error', e);
-            return [];
+            return new DotPlot([]);
         } finally {
             if (result != null) {
                 result.delete();
@@ -49,7 +51,7 @@ export default abstract class LinearFoldBase extends Folder {
         }
 
         this.putCache(key, retArray.slice());
-        return retArray;
+        return new DotPlot(retArray);
     }
 
     public get isFunctional(): boolean {
