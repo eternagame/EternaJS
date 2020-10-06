@@ -232,8 +232,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.removeObject(this._feedbackObjs[ii]);
         }
 
-        this._feedbackObjsNum = dat.length;
-        this._feedbackObjsStartInd = startIndex;
         this.printFeedback(dat);
         this.updatePrintFeedback();
     }
@@ -2497,7 +2495,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.puzzleLocks = locks;
         this.molecularStructure = SecStruct.fromParens(parenthesis);
         this.molecularBindingSite = bindingSite;
-        this.parenthesis = parenthesis;
     }
 
     public registerPaintTool(paintColor: number, tool: Booster): void {
@@ -2511,10 +2508,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public get lastShiftedCommand(): number {
         return this._lastShiftedCommand;
-    }
-
-    public set parenthesis(parenthesis: string) {
-        this._parenthesis = parenthesis;
     }
 
     public setBaseColor(seq: number, inColor: number): void {
@@ -3460,7 +3453,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _moleculeIsBoundReal: boolean = false;
     private _molecularBindingBonus: number | undefined = 0;
     private _moleculeTargetPairs: SecStruct | null;
-    private _parenthesis: string;
     private _shiftLimit: number;
     private _customLayout: Array<[number, number] | [null, null]> | undefined = undefined;
     private _pseudoknotted: boolean = false;
@@ -3617,8 +3609,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _auxTextballoon: TextBalloon;
 
     private _feedbackObjs: SceneObject[] = [];
-    private _feedbackObjsNum: number;
-    private _feedbackObjsStartInd: number;
 
     private _anchoredObjects: RNAAnchorObject[] = [];
     private _highlightEnergyText: boolean = false;
