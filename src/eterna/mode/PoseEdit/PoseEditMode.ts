@@ -1015,7 +1015,7 @@ export default class PoseEditMode extends GameMode {
             if (indx < 0 || indx >= this._poses.length) {
                 return null;
             } else {
-                return EPars.sequenceToString(this.getPose(indx).fullSequence);
+                return this.getPose(indx).fullSequence.sequenceString;
             }
         });
 
@@ -1055,8 +1055,8 @@ export default class PoseEditMode extends GameMode {
             }
 
             const nativePairs: SecStruct = this.getCurrentUndoBlock(indx).getPairs();
-            const seqArr: number[] = this.getPose(indx).fullSequence;
-            return nativePairs.getParenthesis(seqArr);
+            const seqArr: Sequence = this.getPose(indx).fullSequence;
+            return nativePairs.getParenthesis(seqArr.sequence);
         });
 
         this._scriptInterface.addCallback('get_free_energy', (indx: number): number => {
@@ -2644,7 +2644,7 @@ export default class PoseEditMode extends GameMode {
         if (segments.length === 4
             && segments[1] - segments[0] === segments[3] - segments[2]
             && (segments[2] - segments[1] > 3
-                || EPars.hasCut(this._poses[targetIndex].fullSequence, segments[1], segments[2]))) {
+                || this._poses[targetIndex].fullSequence.hasCut(segments[1], segments[2]))) {
             /*
             - get design_segments
             - if (2 groups) and (all paired/unpaired in _target_pairs) and (all as dontcare)

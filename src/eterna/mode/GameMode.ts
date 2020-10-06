@@ -181,7 +181,7 @@ export default abstract class GameMode extends AppMode {
                     const score = (pairs: SecStruct) => {
                         Assert.assertIsDefined(this._folder);
                         return this._folder.scoreStructures(
-                            Sequence.fromSequence(newField.pose.fullSequence), pairs, pseudoknots
+                            newField.pose.fullSequence, pairs, pseudoknots
                         );
                     };
 
@@ -194,7 +194,7 @@ export default abstract class GameMode extends AppMode {
                     const ublk = this.getCurrentUndoBlock(poseidx);
                     Assert.assertIsDefined(ublk, 'getEnergyDelta is being called where UndoBlocks are unavailable!');
                     const nativePairs: SecStruct = ublk.getPairs(37, pseudoknots);
-                    return score(targetPairs.getSatisfiedPairs(Sequence.fromSequence(newField.pose.fullSequence)))
+                    return score(targetPairs.getSatisfiedPairs(newField.pose.fullSequence))
                         - score(nativePairs);
                 }
                 return -1;

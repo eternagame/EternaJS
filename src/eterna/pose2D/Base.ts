@@ -98,7 +98,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
         this.display.y = y;
     }
 
-    public setType(type: number, playSound: boolean = false): void {
+    public setType(type: RNABase, playSound: boolean = false): void {
         if (this._baseType === type) {
             return;
         }

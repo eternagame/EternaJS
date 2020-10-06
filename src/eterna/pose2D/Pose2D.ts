@@ -374,9 +374,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
         ) ? this._oligo.length : 0;
         let ii: number;
         for (ii = 0; ii < this._sequence.length; ii++) {
-            if (this._sequence.sequence[ii] !== this._mutatedSequence[ii + ofs]) {
+            if (this._sequence.sequence[ii] !== this._mutatedSequence.sequence[ii + ofs]) {
                 numMut++;
-                this._sequence.sequence[ii] = this._mutatedSequence[ii + ofs];
+                this._sequence.sequence[ii] = this._mutatedSequence.sequence[ii + ofs];
                 muts.push({pos: ii + 1, base: EPars.sequenceToString([this._sequence.sequence[ii]])});
                 needUpdate = true;
             }
@@ -406,8 +406,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         ) ? this._oligo.length : 0;
 
         for (let ii = 0; ii < n; ii++) {
-            if (this._mutatedSequence[ii] !== seqArr[ii] && !this.isLocked(ofs + ii)) {
-                this._mutatedSequence[ii] = seqArr[ii];
+            if (this._mutatedSequence.sequence[ii] !== seqArr[ii] && !this.isLocked(ofs + ii)) {
+                this._mutatedSequence.sequence[ii] = seqArr[ii];
                 this._bases[ofs + ii].setType(seqArr[ii]);
             }
         }
@@ -838,7 +838,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return (segments.length === 4
             && segments[1] - segments[0] === segments[3] - segments[2]
             && (segments[2] - segments[1] > 3
-                || EPars.hasCut(this.fullSequence, segments[1], segments[2])));
+                || this.fullSequence.hasCut(segments[1], segments[2])));
     }
 
     public get designSegments(): number[] {
@@ -914,7 +914,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        this._mutatedSequence = this.fullSequence.slice();
+        this._mutatedSequence = this.fullSequence.slice(0);
         this.setMutated(mutated);
         this.doneColoring();
         this._shiftHighlightBox.clear();
@@ -973,7 +973,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        this._mutatedSequence = this.fullSequence.slice();
+        this._mutatedSequence = this.fullSequence.slice(0);
         this.setMutated(mutated);
         this.doneColoring();
         this._shiftHighlightBox.clear();
@@ -1392,7 +1392,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public get satisfiedPairs(): SecStruct {
         // AMW TODO: this is built up in the getter to append the oligos, so
         // maybe it's not a Sequence. So we should definitely change that later.
-        return this._pairs.getSatisfiedPairs(Sequence.fromSequence(this.fullSequence));
+        return this._pairs.getSatisfiedPairs(this.fullSequence.slice(0));
     }
 
     public set molecularBindingBonus(bonus: number) {
@@ -1560,7 +1560,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
         this._oligosPaired = numPaired;
 
-        const seq: number[] = this.fullSequence;
+        const seq: Sequence = this.fullSequence;
         if (seq.length > this._bases.length) {
             const diff: number = (seq.length - this._bases.length);
             for (let k = 0; k < diff; k++) {
@@ -1570,7 +1570,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         const n: number = seq.length;
         for (let k = 0; k < n; k++) {
-            this._bases[k].setType(seq[k]);
+            this._bases[k].setType(seq.sequence[k]);
             this._bases[k].baseIndex = k;
         }
 
@@ -1680,7 +1680,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         // Puzzle JSON encodes oligoMode as a string, for some reason
         this._oligoMode = typeof (mode) === 'number' ? mode : Number(mode);
 
-        const seq: number[] = this.fullSequence;
+        const seq: Sequence = this.fullSequence;
         if (seq.length > this._bases.length) {
             const diff: number = (seq.length - this._bases.length);
             for (let i = 0; i < diff; i++) {
@@ -1690,7 +1690,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         const n: number = seq.length;
         for (let k = 0; k < n; k++) {
-            this._bases[k].setType(seq[k]);
+            this._bases[k].setType(seq.sequence[k]);
             this._bases[k].baseIndex = k;
         }
     }
@@ -1709,9 +1709,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (changed) this.updateScoreNodeGui();
     }
 
-    public get fullSequence(): number[] {
+    public get fullSequence(): Sequence {
         if (this._oligo == null && this._oligos === undefined) {
-            return this._sequence.sequence;
+            return this._sequence.slice(0);
         }
         let seq: number[] = this._sequence.sequence.slice();
         if (this._oligos === undefined || this._oligosOrder === undefined) {
@@ -1722,14 +1722,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 if (this._oligoMode === Pose2D.OLIGO_MODE_DIMER) seq.push(RNABase.CUT);
                 seq = seq.concat(this._oligo);
             }
-            return seq;
+            return Sequence.fromSequence(seq);
         }
         // _oligos != null, we have a multistrand target
         for (let ii = 0; ii < this._oligos.length; ii++) {
             seq.push(RNABase.CUT);
             seq = seq.concat(this._oligos[this._oligosOrder[ii]].sequence);
         }
-        return seq;
+        return Sequence.fromSequence(seq);
     }
 
     public get fullSequenceLength(): number {
@@ -1781,6 +1781,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public isPairSatisfied(a: number, b: number): boolean {
+        // AMW TODO
         if (b < a) {
             const temp: number = a;
             a = b;
@@ -1791,7 +1792,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             return false;
         }
 
-        const fullSeq: number[] = this.fullSequence;
+        const fullSeq: number[] = this.fullSequence.sequence;
         return (EPars.pairType(fullSeq[a], fullSeq[b]) !== 0);
     }
 
@@ -1845,7 +1846,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public set pairs(pairs: SecStruct) {
-        const seq: number[] = this.fullSequence;
+        const seq: number[] = this.fullSequence.sequence;
         if (pairs.length !== seq.length) {
             log.debug(pairs.length, seq.length);
             throw new Error("Pair length doesn't match sequence length");
@@ -1974,7 +1975,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        const fullSeq: number[] = this.fullSequence;
+        const fullSeq: Sequence = this.fullSequence;
         let center: Point;
 
         // Hide bases that aren't part of our current sequence
@@ -2040,7 +2041,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
             for (let ii = 0; ii < fullSeq.length; ii++) {
                 // skip the oligo separator
-                if (fullSeq[ii] === RNABase.CUT) {
+                if (fullSeq.sequence[ii] === RNABase.CUT) {
                     continue;
                 }
 
@@ -2135,13 +2136,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._moleculeLayer.visible = true;
         }
 
-        if (fullSeq.indexOf(RNABase.CUT) >= 0) {
+        if (fullSeq.sequence.indexOf(RNABase.CUT) >= 0) {
             if (this._oligoBases == null) {
                 this._oligoBases = new Array(fullSeq.length);
             }
 
             const boundLen: number = this.getBoundSequence().length;
-            for (let ii = fullSeq.indexOf(RNABase.CUT) + 1; ii < fullSeq.length; ii++) {
+            for (let ii = fullSeq.sequence.indexOf(RNABase.CUT) + 1; ii < fullSeq.length; ii++) {
                 const baseglow = this._oligoBases[ii];
                 if ((this._oligoPaired || (this._oligosPaired > 0 && ii < boundLen)) && this._pairs.pairs[ii] >= 0) {
                     baseglow.isWrong = this._restrictedHighlightBox.isInQueue(ii);
@@ -2517,8 +2518,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public setBaseColor(seq: number, inColor: number): void {
-        this._mutatedSequence = this._sequence.sequence.slice();
-        this._mutatedSequence[seq] = inColor;
+        this._mutatedSequence = this._sequence.slice(0);
+        this._mutatedSequence.sequence[seq] = inColor;
         this._bases[seq].setType(inColor, true);
 
         this._lastColoredIndex = seq;
@@ -2578,7 +2579,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     private computeLayout(fast: boolean = false): void {
-        const fullSeq: number[] = this.fullSequence;
+        const fullSeq: Sequence = this.fullSequence;
 
         if (fullSeq.length > this._bases.length) {
             log.debug(fullSeq.length, this._bases.length);
@@ -2593,13 +2594,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
         let yarray: number[] = new Array(n);
 
         let exceptionIndices: number[] | undefined;
-        if (fullSeq.indexOf(RNABase.CUT) >= 0) {
+        if (fullSeq.sequence.indexOf(RNABase.CUT) >= 0) {
             exceptionIndices = [];
             exceptionIndices.push(0);
             let oligoIndex = -1;
             // array of positions of connectors "&"
-            while (fullSeq.indexOf(RNABase.CUT, oligoIndex + 1) >= 0) {
-                oligoIndex = fullSeq.indexOf(RNABase.CUT, oligoIndex + 1);
+            while (fullSeq.sequence.indexOf(RNABase.CUT, oligoIndex + 1) >= 0) {
+                oligoIndex = fullSeq.sequence.indexOf(RNABase.CUT, oligoIndex + 1);
                 exceptionIndices.push(oligoIndex);
             }
         }
@@ -2718,7 +2719,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         if (!togglelock && this.isEditable(seqnum)) {
             this._coloring = true;
-            this._mutatedSequence = this.fullSequence.slice();
+            this._mutatedSequence = this.fullSequence.slice(0);
 
             if (this._currentColor === RNABase.LOCK) {
                 if (!this._locks) {
@@ -2763,12 +2764,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 }
             } else if (!this.isLocked(seqnum)) {
                 if (this._currentColor >= 1 && this._currentColor <= 4) {
-                    this._mutatedSequence[seqnum] = this._currentColor;
+                    this._mutatedSequence.sequence[seqnum] = this._currentColor;
                     ROPWait.notifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
                     this._bases[seqnum].setType(this._currentColor, true);
                 } else if (this._currentColor === RNABase.RANDOM) {
                     const randbase: number = (Math.floor(Math.random() * 4) % 4) + 1;
-                    this._mutatedSequence[seqnum] = randbase;
+                    this._mutatedSequence.sequence[seqnum] = randbase;
                     this._bases[seqnum].setType(randbase, true);
                 } else if (this._currentColor === RNABase.PAIR) {
                     if (this._pairs.pairs[seqnum] >= 0) {
@@ -2778,16 +2779,16 @@ export default class Pose2D extends ContainerObject implements Updatable {
                             return;
                         }
 
-                        const clickBase: number = this._mutatedSequence[seqnum];
+                        const clickBase: number = this._mutatedSequence.sequence[seqnum];
 
-                        this._mutatedSequence[seqnum] = this._mutatedSequence[pi];
-                        this._mutatedSequence[pi] = clickBase;
+                        this._mutatedSequence.sequence[seqnum] = this._mutatedSequence.sequence[pi];
+                        this._mutatedSequence.sequence[pi] = clickBase;
 
-                        this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
-                        this._bases[pi].setType(this._mutatedSequence[pi], true);
+                        this._bases[seqnum].setType(this._mutatedSequence.sequence[seqnum], true);
+                        this._bases[pi].setType(this._mutatedSequence.sequence[pi], true);
                     }
                 } else if (this._currentColor === RNABase.MAGIC_GLUE) {
-                    this._mutatedSequence[seqnum] = this._currentColor;
+                    this._mutatedSequence.sequence[seqnum] = this._currentColor;
                     this._bases[seqnum].setType(this._currentColor);
                 } else if (this._currentColor === RNABase.AU_PAIR) {
                     if (this._pairs.pairs[seqnum] >= 0) {
@@ -2797,11 +2798,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
                             return;
                         }
 
-                        this._mutatedSequence[seqnum] = RNABase.ADENINE;
-                        this._mutatedSequence[pi] = RNABase.URACIL;
+                        this._mutatedSequence.sequence[seqnum] = RNABase.ADENINE;
+                        this._mutatedSequence.sequence[pi] = RNABase.URACIL;
 
-                        this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
-                        this._bases[pi].setType(this._mutatedSequence[pi], true);
+                        this._bases[seqnum].setType(this._mutatedSequence.sequence[seqnum], true);
+                        this._bases[pi].setType(this._mutatedSequence.sequence[pi], true);
                     }
                 } else if (this._currentColor === RNABase.GC_PAIR) {
                     if (this._pairs.pairs[seqnum] >= 0) {
@@ -2811,11 +2812,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
                             return;
                         }
 
-                        this._mutatedSequence[seqnum] = RNABase.GUANINE;
-                        this._mutatedSequence[pi] = RNABase.CYTOSINE;
+                        this._mutatedSequence.sequence[seqnum] = RNABase.GUANINE;
+                        this._mutatedSequence.sequence[pi] = RNABase.CYTOSINE;
 
-                        this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
-                        this._bases[pi].setType(this._mutatedSequence[pi], true);
+                        this._bases[seqnum].setType(this._mutatedSequence.sequence[seqnum], true);
+                        this._bases[pi].setType(this._mutatedSequence.sequence[pi], true);
                     }
                 } else if (this._currentColor === RNABase.GU_PAIR) {
                     if (this._pairs.pairs[seqnum] >= 0) {
@@ -2825,11 +2826,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
                             return;
                         }
 
-                        this._mutatedSequence[seqnum] = RNABase.URACIL;
-                        this._mutatedSequence[pi] = RNABase.GUANINE;
+                        this._mutatedSequence.sequence[seqnum] = RNABase.URACIL;
+                        this._mutatedSequence.sequence[pi] = RNABase.GUANINE;
 
-                        this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
-                        this._bases[pi].setType(this._mutatedSequence[pi], true);
+                        this._bases[seqnum].setType(this._mutatedSequence.sequence[seqnum], true);
+                        this._bases[pi].setType(this._mutatedSequence.sequence[pi], true);
                     }
                 } else if (this._dynPaintColors.indexOf(this._currentColor) >= 0) {
                     const index: number = this._dynPaintColors.indexOf(this._currentColor);
@@ -2868,12 +2869,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 throw new Error('The clicked base is not locked, but the mutated sequence is null: critical error!');
             }
             if (this._currentColor >= 1 && this._currentColor <= 4) {
-                this._mutatedSequence[seqnum] = this._currentColor;
+                this._mutatedSequence.sequence[seqnum] = this._currentColor;
                 ROPWait.notifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
                 this._bases[seqnum].setType(this._currentColor, true);
             } else if (this._currentColor === RNABase.RANDOM) {
                 const randbase: number = (Math.floor(Math.random() * 4) % 4) + 1;
-                this._mutatedSequence[seqnum] = randbase;
+                this._mutatedSequence.sequence[seqnum] = randbase;
                 this._bases[seqnum].setType(randbase, true);
             } else if (this._currentColor === RNABase.PAIR) {
                 if (this._pairs.pairs[seqnum] >= 0) {
@@ -2885,17 +2886,17 @@ export default class Pose2D extends ContainerObject implements Updatable {
                             return;
                         }
 
-                        const clickBase: number = this._mutatedSequence[seqnum];
+                        const clickBase: number = this._mutatedSequence.sequence[seqnum];
 
-                        this._mutatedSequence[seqnum] = this._mutatedSequence[pi];
-                        this._mutatedSequence[pi] = clickBase;
+                        this._mutatedSequence.sequence[seqnum] = this._mutatedSequence.sequence[pi];
+                        this._mutatedSequence.sequence[pi] = clickBase;
 
-                        this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
-                        this._bases[pi].setType(this._mutatedSequence[pi], true);
+                        this._bases[seqnum].setType(this._mutatedSequence.sequence[seqnum], true);
+                        this._bases[pi].setType(this._mutatedSequence.sequence[pi], true);
                     }
                 }
             } else if (this._currentColor === RNABase.MAGIC_GLUE) {
-                this._mutatedSequence[seqnum] = this._currentColor;
+                this._mutatedSequence.sequence[seqnum] = this._currentColor;
                 this._bases[seqnum].setType(this._currentColor);
             } else if (this._currentColor === RNABase.AU_PAIR) {
                 if (this._pairs.pairs[seqnum] >= 0) {
@@ -2905,11 +2906,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
                         return;
                     }
 
-                    this._mutatedSequence[seqnum] = RNABase.ADENINE;
-                    this._mutatedSequence[pi] = RNABase.URACIL;
+                    this._mutatedSequence.sequence[seqnum] = RNABase.ADENINE;
+                    this._mutatedSequence.sequence[pi] = RNABase.URACIL;
 
-                    this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
-                    this._bases[pi].setType(this._mutatedSequence[pi], true);
+                    this._bases[seqnum].setType(this._mutatedSequence.sequence[seqnum], true);
+                    this._bases[pi].setType(this._mutatedSequence.sequence[pi], true);
                 }
             } else if (this._currentColor === RNABase.GC_PAIR) {
                 if (this._pairs.pairs[seqnum] >= 0) {
@@ -2919,11 +2920,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
                         return;
                     }
 
-                    this._mutatedSequence[seqnum] = RNABase.GUANINE;
-                    this._mutatedSequence[pi] = RNABase.CYTOSINE;
+                    this._mutatedSequence.sequence[seqnum] = RNABase.GUANINE;
+                    this._mutatedSequence.sequence[pi] = RNABase.CYTOSINE;
 
-                    this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
-                    this._bases[pi].setType(this._mutatedSequence[pi], true);
+                    this._bases[seqnum].setType(this._mutatedSequence.sequence[seqnum], true);
+                    this._bases[pi].setType(this._mutatedSequence.sequence[pi], true);
                 }
             } else if (this._currentColor === RNABase.GU_PAIR) {
                 if (this._pairs.pairs[seqnum] >= 0) {
@@ -2933,11 +2934,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
                         return;
                     }
 
-                    this._mutatedSequence[seqnum] = RNABase.URACIL;
-                    this._mutatedSequence[pi] = RNABase.GUANINE;
+                    this._mutatedSequence.sequence[seqnum] = RNABase.URACIL;
+                    this._mutatedSequence.sequence[pi] = RNABase.GUANINE;
 
-                    this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
-                    this._bases[pi].setType(this._mutatedSequence[pi], true);
+                    this._bases[seqnum].setType(this._mutatedSequence.sequence[seqnum], true);
+                    this._bases[pi].setType(this._mutatedSequence.sequence[pi], true);
                 }
             } else if (this._dynPaintColors.indexOf(this._currentColor) >= 0) {
                 const index: number = this._dynPaintColors.indexOf(this._currentColor);
@@ -3036,11 +3037,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     private checkPairs(): void {
-        const fullSeq: number[] = this.fullSequence;
+        const fullSeq = this.fullSequence;
 
         for (let ii = 0; ii < this._pairs.length; ii++) {
             if (this._pairs.pairs[ii] >= 0 && this.isPairSatisfied(ii, this._pairs.pairs[ii])) {
-                const pairStr: number = Pose2D.getPairStrength(fullSeq[ii], fullSeq[this._pairs.pairs[ii]]);
+                const pairStr: number = Pose2D.getPairStrength(
+                    fullSeq.sequence[ii], fullSeq.sequence[this._pairs.pairingPartner(ii)]
+                );
 
                 if (this._baseToX && this._baseToY) {
                     this._bases[ii].setPairing(true,
@@ -3306,7 +3309,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         scoreTree.setupTree(this.satisfiedPairs);
 
         const treeroot: RNATreeNode | null = scoreTree.root;
-        scoreTree.scoreTree(Sequence.fromSequence(this.fullSequence), this._scoreFolder);
+        scoreTree.scoreTree(this.fullSequence, this._scoreFolder);
 
         const scoreNodes: ScoreDisplayNode[] = [];
         const rootCoords: number[] = [];
@@ -3441,7 +3444,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     // Array of sequence/pairs
     private _sequence: Sequence = new Sequence('');
-    private _mutatedSequence: number[] | null;
+    private _mutatedSequence: Sequence | null;
     private _pairs: SecStruct = new SecStruct();
     private _targetPairs: SecStruct = new SecStruct();
     private _pseudoknotPairs: SecStruct = new SecStruct();

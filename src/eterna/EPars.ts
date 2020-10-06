@@ -422,12 +422,6 @@ export default class EPars {
         return true;
     }
 
-    public static hasCut(seq: number[], from: number, to: number): boolean {
-        return seq.slice(from, to + 1).some(
-            (c) => c === RNABase.CUT
-        );
-    }
-
     public static pairType(a: number, b: number): number {
         return EPars.PAIR_TYPE_MAT[a * (EPars.NBPAIRS + 1) + b];
     }
@@ -675,6 +669,12 @@ export default class EPars {
 export class Sequence {
     constructor(seq: string) {
         this._sequence = seq;
+    }
+
+    public hasCut(from: number, to: number): boolean {
+        return this.sequence.slice(from, to + 1).some(
+            (c) => c === RNABase.CUT
+        );
     }
 
     public static fromSequence(seq: number[]) {
