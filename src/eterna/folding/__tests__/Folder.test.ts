@@ -7,13 +7,13 @@ import './jest-matcher-deep-close-to';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 
-const SNOWFLAKE_SEQ = new Sequence('GUGGACAAGAUGAAACAUCAGUAACAAGCGCAAAGCGCGGGCAAAGCCCCCGGAAACCGGAAGUUACAGAACAAAGUUCAAGUUUACAAGUGGACAAGUUGAAACAACAGUUACAAGACGAAACGUCGGCCAAAGGCCCCAUAAAAUGGAAGUAACACUUGAAACAAGAAGUUUACAAGUUGACAAGUUCAAAGAACAGUUACAAGUGGAAACCACGCGCAAAGCGCCUCCAAAGGAGAAGUAACAGAAGAAACUUCAAGUUAGCAAGUGGUCAAGUACAAAGUACAGUAACAACAUCAAAGAUGGCGCAAAGCGCGAGCAAAGCUCAAGUUACAGAACAAAGUUCAAGAUUACAAGAGUGCAAGAAGAAACUUCAGAUAGAACUGCAAAGCAGCACCAAAGGUGGGGCAAAGCCCAACUAUCAGUUGAAACAACAAGUAUUCAAGAGGUCAAGAUCAAAGAUCAGUAACAAGUGCAAAGCACGGGCAAAGCCCGACCAAAGGUCAAGUUACAGUUCAAAGAACAAGAUUUC');
+const SNOWFLAKE_SEQ = Sequence.fromSequenceString('GUGGACAAGAUGAAACAUCAGUAACAAGCGCAAAGCGCGGGCAAAGCCCCCGGAAACCGGAAGUUACAGAACAAAGUUCAAGUUUACAAGUGGACAAGUUGAAACAACAGUUACAAGACGAAACGUCGGCCAAAGGCCCCAUAAAAUGGAAGUAACACUUGAAACAAGAAGUUUACAAGUUGACAAGUUCAAAGAACAGUUACAAGUGGAAACCACGCGCAAAGCGCCUCCAAAGGAGAAGUAACAGAAGAAACUUCAAGUUAGCAAGUGGUCAAGUACAAAGUACAGUAACAACAUCAAAGAUGGCGCAAAGCGCGAGCAAAGCUCAAGUUACAGAACAAAGUUCAAGAUUACAAGAGUGCAAGAAGAAACUUCAGAUAGAACUGCAAAGCAGCACCAAAGGUGGGGCAAAGCCCAACUAUCAGUUGAAACAACAAGUAUUCAAGAGGUCAAGAUCAAAGAUCAGUAACAAGUGCAAAGCACGGGCAAAGCCCGACCAAAGGUCAAGUUACAGUUCAAAGAACAAGAUUUC');
 const SNOWFLAKE_STRUCT = SecStruct.fromParens('((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))');
 
-const BASIC_SEQ = new Sequence('AAAAAAAAAAAAAA');
+const BASIC_SEQ = Sequence.fromSequenceString('AAAAAAAAAAAAAA');
 const BASIC_RESULT = new SecStruct([-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]);
 
-const ZIPPERS_SEQ = new Sequence('AAAAAGGGGAAAAAAAAACCCCAGCGGAAAAAACUGCAAA');
+const ZIPPERS_SEQ = Sequence.fromSequenceString('AAAAAGGGGAAAAAAAAACCCCAGCGGAAAAAACUGCAAA');
 const ZIPPERS_BEST_PAIRS = SecStruct.fromParens('.....((((.........)))).((((......))))...');
 const ZIPPERS_TEMP = 37;
 
@@ -129,7 +129,7 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldV]) {
 
     test(`${folderType.NAME}:get_dot_plot(simple)`, () => {
         expect.assertions(2);
-        const SEQ = new Sequence('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
+        const SEQ = Sequence.fromSequenceString('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
         const STRUCT = SecStruct.fromParens('........................................');
         return expect(CreateFolder(folderType)
             .then((folder) => {
@@ -151,7 +151,7 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldV]) {
 
     test(`${folderType.NAME}:get_dot_plot(complex)`, () => {
         expect.assertions(2);
-        const SEQ = new Sequence('AAAAACCCCAAAAAAAAAGGGGACCCCAAAAAAGGGGAAA');
+        const SEQ = Sequence.fromSequenceString('AAAAACCCCAAAAAAAAAGGGGACCCCAAAAAAGGGGAAA');
         const STRUCT = SecStruct.fromParens('.....((((.........)))).((((......))))...');
 
         const RESULT: Map<string, number[]> = new Map([

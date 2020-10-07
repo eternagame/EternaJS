@@ -52,14 +52,14 @@ test('linearfoldC:MFETests', () => {
             
         ];
         let sequences: Sequence[] = [
-            new Sequence(  "GGGGGAAAAAAAACCCCC"),
-            new Sequence(  "CCAGGAAAAAAAACCUGG"),
-            new Sequence(  "GGGGGGGGAAAACGGAAAGCCACCCCCC"),
-            new Sequence(  "ACGCUGUCUGUACUUGUAUCAGUACACUGACGAGUCCCUAAAGGACGAAACAGCGC"),
-            new Sequence(  "GGGGAUGUAGCUCAUAUGGUAGAGCGCUCGCUUUGCAUGCGAGAGGCACAGGGUUCGAUUCCCUGCAUCUCCA"),
-            new Sequence(  "AAGGUAACUAAGGGGGGUUCCCCAAACUUGAUCUCCACAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCAAAAGGGAAAAAAAAA"),
-            new Sequence(  "CCUACUAGGGGAGCCAAAAGGCUGAGAUGAAUGUAUUCAGACCCUUAUAACCUGAUUUGGUUAAUACCAACGUAGGAAAGUAGUUAUUAACUAUUCGUCAUUGAGAUGUCUUGGUCUAACUACUUUCUUCGCUGGGAAGUAGUU"),
-            new Sequence(  "GGGGUAACUAUUCGGGGUUGAGCCCCCUUGAUCUCCCC"),
+            Sequence.fromSequenceString(  "GGGGGAAAAAAAACCCCC"),
+            Sequence.fromSequenceString(  "CCAGGAAAAAAAACCUGG"),
+            Sequence.fromSequenceString(  "GGGGGGGGAAAACGGAAAGCCACCCCCC"),
+            Sequence.fromSequenceString(  "ACGCUGUCUGUACUUGUAUCAGUACACUGACGAGUCCCUAAAGGACGAAACAGCGC"),
+            Sequence.fromSequenceString(  "GGGGAUGUAGCUCAUAUGGUAGAGCGCUCGCUUUGCAUGCGAGAGGCACAGGGUUCGAUUCCCUGCAUCUCCA"),
+            Sequence.fromSequenceString(  "AAGGUAACUAAGGGGGGUUCCCCAAACUUGAUCUCCACAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCAAAAGGGAAAAAAAAA"),
+            Sequence.fromSequenceString(  "CCUACUAGGGGAGCCAAAAGGCUGAGAUGAAUGUAUUCAGACCCUUAUAACCUGAUUUGGUUAAUACCAACGUAGGAAAGUAGUUAUUAACUAUUCGUCAUUGAGAUGUCUUGGUCUAACUACUUUCUUCGCUGGGAAGUAGUU"),
+            Sequence.fromSequenceString(  "GGGGUAACUAUUCGGGGUUGAGCCCCCUUGAUCUCCCC"),
         ];
 
         for (let ii: number = 0; ii < sequences.length; ++ii ) {
@@ -116,11 +116,11 @@ test('linearfoldC:SubOptTests', () => {
             
         ];
         let sequences: Sequence[] = [
-            new Sequence(  "GGGGAAAACC"),
-            new Sequence(  "GGGGAAAACC"),
-            new Sequence(  "GGGCGGCAAGGCGAAGCCAAGCCCCCAAAAGGGGGCAAGCCGGCAAAGCCGGCAAGCCGCCC"),
-            new Sequence(  "GGGCGGCAAAGCGAAGCUAAGCCCCCAAAAGGGGGCAAGCCGGCAAAGCCGGCAAGCCGCCC"),
-            new Sequence(  "GGGCGGCAAGGCAAAGCCAAGCCCCCAAAAGGGGGCAAGCCGGCAAAGCCGGCAAGCCGCCC"),
+            Sequence.fromSequenceString(  "GGGGAAAACC"),
+            Sequence.fromSequenceString(  "GGGGAAAACC"),
+            Sequence.fromSequenceString(  "GGGCGGCAAGGCGAAGCCAAGCCCCCAAAAGGGGGCAAGCCGGCAAAGCCGGCAAGCCGCCC"),
+            Sequence.fromSequenceString(  "GGGCGGCAAAGCGAAGCUAAGCCCCCAAAAGGGGGCAAGCCGGCAAAGCCGGCAAGCCGCCC"),
+            Sequence.fromSequenceString(  "GGGCGGCAAGGCAAAGCCAAGCCCCCAAAAGGGGGCAAGCCGGCAAAGCCGGCAAGCCGCCC"),
         ];
 
         for (let ii: number = 0; ii < sequences.length; ++ii ) {
@@ -199,7 +199,7 @@ test(`LinearFoldC:get_dot_plot(complex)`, () => {
             }
             
             const calcdResult = folder.getDotPlot(
-                new Sequence(SEQ),
+                Sequence.fromSequenceString(SEQ),
                 SecStruct.fromParens(STRUCT),
                 37
             );
@@ -250,7 +250,7 @@ test(`LinearFoldE:get_dot_plot(complex)`, () => {
             }
             
             const calcdResult = folder.getDotPlot(
-                new Sequence(SEQ),
+                Sequence.fromSequenceString(SEQ),
                 SecStruct.fromParens(STRUCT),
                 37
             );

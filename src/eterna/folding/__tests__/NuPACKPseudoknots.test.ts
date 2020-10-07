@@ -25,7 +25,7 @@ test(`NuPACK:PK_score_structures`, () => {
 
             let outNNFE: number[] = [];
             let totalFe = folder.scoreStructures(
-                new Sequence("GUUUUUAAACGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"),
+                Sequence.fromSequenceString("GUUUUUAAACGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"),
                 SecStruct.fromParens("...............(((((((((((...{{{{{{{)))))))))))((((((((.........))).)))))...}}.}}}}}....", true),
                 true,
                 37,
@@ -37,7 +37,7 @@ test(`NuPACK:PK_score_structures`, () => {
 
             // This could realistically be the target structure because we're in fact fine with the hairpin at 5'
             let totalFe2 = folder.scoreStructures(
-                new Sequence(  "GUUUUUAAACGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"),
+                Sequence.fromSequenceString(  "GUUUUUAAACGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"),
                 SecStruct.fromParens("(((....))).......(((((((((...{{{{{{{)))))))))..((((((((.........))).)))))...}}.}}}}}....", true),
                 true,
                 37,
@@ -47,8 +47,8 @@ test(`NuPACK:PK_score_structures`, () => {
             // NNFE doesn't change because we don't do anything pseudoknotty about it?                         last two we added?
             // expect(outNNFE).toEqual([-1,-190,54,290,53,-170,52,-180,51,180,50,-180,49,-210,48,-140,47,-200,17,-3320,2,260,1,-90,0,-210]);
             
-            let seq = new Sequence(  "GUUUUUAAACGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG");
-            expect(seq).toEqual(Sequence.fromBaseArray([3, 4, 4, 4, 4, 4, 1, 1, 1, 2, 3, 3, 3, 4, 4, 4, 3, 2, 3, 3, 4, 3, 4, 1, 1, 3, 4, 3, 2, 1, 3, 2, 2, 2, 3,
+            let seq = Sequence.fromSequenceString(  "GUUUUUAAACGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG");
+            expect(seq).toEqual(new Sequence([3, 4, 4, 4, 4, 4, 1, 1, 1, 2, 3, 3, 3, 4, 4, 4, 3, 2, 3, 3, 4, 3, 4, 1, 1, 3, 4, 3, 2, 1, 3, 2, 2, 2, 3,
                 4, 2, 4, 4, 1, 2, 1, 2, 2, 3, 4, 3, 2, 3, 3, 2, 1, 2, 1, 3, 3, 2, 1, 2, 4, 1, 3, 4, 1, 2, 4, 3, 1, 4, 3, 4, 2, 3, 4, 1, 4,
                 1, 2, 1, 3, 3, 3, 2, 4, 4, 4, 4, 3]));
             let totalFe3 = folder.scoreStructures(
@@ -62,7 +62,7 @@ test(`NuPACK:PK_score_structures`, () => {
 
 
             totalFe3 = folder.scoreStructures(
-                new Sequence(  "GUUUUUAAACGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"), 
+                Sequence.fromSequenceString(  "GUUUUUAAACGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"), 
                 SecStruct.fromParens(".................(((((((((...{{{{{{{)))))))))..((((((((.........))).)))))...}}.}}}}}....", true),
                 true, 37, 
                 outNNFE);
@@ -74,7 +74,7 @@ test(`NuPACK:PK_score_structures`, () => {
 
             // This is the MFE structure, I think., with a longer PK with a bulge
             let totalFe4 = folder.scoreStructures(
-                new Sequence(  "GUUUUUAAACGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"),
+                Sequence.fromSequenceString(  "GUUUUUAAACGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"),
                 SecStruct.fromParens("(((....))).......(((((((((...{{{{{{{)))))))))((((((((((.........))).))))))).}}.}}}}}....", true),
                 true,
                 37,
@@ -83,7 +83,7 @@ test(`NuPACK:PK_score_structures`, () => {
 
             // This is the true MFE structure maybe. It's at least coming up as native in EteRNA.
             let totalFe5 = folder.scoreStructures(
-                new Sequence(  "GUUUUUAAACGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"),
+                Sequence.fromSequenceString(  "GUUUUUAAACGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"),
                 SecStruct.fromParens("(((....))).......(((((((((...{{{{{..)))))))))((((((((((.........))).)))))))....}}}}}....", true),
                 true,
                 37,
@@ -92,7 +92,7 @@ test(`NuPACK:PK_score_structures`, () => {
 
             let totalFe6 = folder.scoreStructures(
                 //                               **
-                new Sequence(  "GUUUUUAGGCGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"),
+                Sequence.fromSequenceString(  "GUUUUUAGGCGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"),
                 SecStruct.fromParens("......(((((((.(((({{{{{{...)))))))))))}}}}}}.{{{{{{{.[[[[.[[.[[[....}}}}}}}]]].]]]]]]...", true),
                 true,
                 37,
@@ -103,7 +103,7 @@ test(`NuPACK:PK_score_structures`, () => {
             // is being found and then a bad score is returned for it.
             let totalFe7 = folder.scoreStructures(
                 //                               **
-                new Sequence(  "GUUUUUAGGCGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"),
+                Sequence.fromSequenceString(  "GUUUUUAGGCGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"),
                 SecStruct.fromParens("......(((((((.(((({{{{{{...)))))))))))}}}}}}.(((((((.{{{{.{{........)))))))....}}}}}}...", true),
                 true,
                 37,
@@ -132,7 +132,7 @@ test(`NuPACK:PK_foldSequence`, () => {
             }
 
             let pairs = folder.foldSequence(
-                new Sequence("GUUUUUAAACGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"),
+                Sequence.fromSequenceString("GUUUUUAAACGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"),
                 null, null, true, 37);
 
             expect(pairs).toBeDefined();
@@ -158,7 +158,7 @@ test(`NuPACK:PK_fold1L2X`, () => {
             }
 
             let pairs = folder.foldSequence(
-                new Sequence("GGCGCGGCACCGUCCGCGGAACAAACGG"),
+                Sequence.fromSequenceString("GGCGCGGCACCGUCCGCGGAACAAACGG"),
                 null, null, true, 37);
 
             expect(pairs).toBeDefined();
@@ -184,7 +184,7 @@ test(`NuPACK:PK_score1L2X`, () => {
 
             let outNNFE: number[] = [];
             let score = folder.scoreStructures(
-                new Sequence("GGCGCGGCACCGUCCGCGGAACAAACGG"),
+                Sequence.fromSequenceString("GGCGCGGCACCGUCCGCGGAACAAACGG"),
                 SecStruct.fromParens("..(((((..{{{{)))))......}}}}", true),
                 true, 37, outNNFE);
 

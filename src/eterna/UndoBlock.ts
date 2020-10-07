@@ -103,7 +103,7 @@ type Param = (number | number[] | null);
 export default class UndoBlock {
     constructor(seq: Sequence, folderName: string) {
         this._folderName = folderName;
-        this._sequence = new Sequence(seq.sequenceString);
+        this._sequence = seq.slice(0);
         this._pairsArray.set(false, []);
         this._pairsArray.set(true, []);
         this._paramsArray.set(false, []);
@@ -420,7 +420,7 @@ export default class UndoBlock {
             }
         }
         const nnfe: number[] = [];
-        const totalFE = folder.scoreStructures(Sequence.fromBaseArray(fullSeq), bestPairs, pseudoknots, temp, nnfe);
+        const totalFE = folder.scoreStructures(new Sequence(fullSeq), bestPairs, pseudoknots, temp, nnfe);
 
         this.setParam(UndoBlockParam.FE, totalFE, temp, pseudoknots);
         this.setParam(UndoBlockParam.NNFE_ARRAY, nnfe, temp, pseudoknots);
@@ -686,7 +686,7 @@ export default class UndoBlock {
         );
     }
 
-    private _sequence: Sequence = new Sequence('');
+    private _sequence: Sequence = new Sequence([]);
     private _pairsArray: Map<boolean, SecStruct[]> = new Map<boolean, SecStruct[]>();
     private _paramsArray: Map<boolean, Param[][]> = new Map<boolean, Param[][]>();
     private _stable: boolean = false;

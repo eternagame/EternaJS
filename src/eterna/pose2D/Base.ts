@@ -4,7 +4,7 @@ import {
 } from 'pixi.js';
 import {ContainerObject, LateUpdatable, Flashbang} from 'flashbang';
 import Constants from 'eterna/Constants';
-import {RNABase} from 'eterna/EPars';
+import {RNABase, RNAPaint} from 'eterna/EPars';
 import ROPWait from 'eterna/rscript/ROPWait';
 import BaseAssets from './BaseAssets';
 import BaseDrawFlags from './BaseDrawFlags';
@@ -98,7 +98,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
         this.display.y = y;
     }
 
-    public setType(type: RNABase, playSound: boolean = false): void {
+    public setType(type: RNABase | RNAPaint, playSound: boolean = false): void {
         if (this._baseType === type) {
             return;
         }

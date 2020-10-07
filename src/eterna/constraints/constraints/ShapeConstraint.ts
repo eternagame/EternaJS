@@ -171,7 +171,7 @@ export default class ShapeConstraint extends BaseShapeConstraint {
                     : 'Your RNA must fold into the outlined structure.'
             ),
             thumbnail: PoseThumbnail.drawToGraphics(
-                new Sequence(new Array(naturalPairs.length).join('A')),
+                Sequence.fromSequenceString(new Array(naturalPairs.length).join('A')),
                 undoBlock.targetPairs,
                 3,
                 PoseThumbnailType.WRONG_COLORED,
@@ -279,7 +279,7 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
             ),
             noText: true,
             thumbnail: PoseThumbnail.drawToGraphics(
-                new Sequence(new Array(naturalPairs.length).join('A')),
+                Sequence.fromSequenceString(new Array(naturalPairs.length).join('A')),
                 wrongPairs as SecStruct,
                 3, PoseThumbnailType.WRONG_COLORED, 0, new SecStruct(status.wrongPairs), false, 0,
                 customLayout

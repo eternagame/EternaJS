@@ -5,20 +5,27 @@ import Arrays from 'flashbang/util/Arrays';
 import SecStruct from './rnatypes/SecStruct';
 import Sequence from './rnatypes/Sequence';
 
+// These numbers can appear in a sequence
 export enum RNABase {
     UNDEFINED = 1,
     GUANINE = 3,
     ADENINE = 1,
     URACIL = 4,
     CYTOSINE = 2,
+    RANDOM = 8,
+    CUT = 19,
+}
+
+// These are operations that can occur when altering a puzzle (say, in
+// PuzzleEditMode) or when applying glue or markings. There's a sense of change
+// here, at least for some of them. They can't appear in sequences, either.
+export enum RNAPaint {
     PAIR = 5,
     SELECT = 6,
     MAGIC = 7,
-    RANDOM = 8,
     AU_PAIR = 9,
     GU_PAIR = 10,
     GC_PAIR = 11,
-
     ADD_BASE = 12,
     ADD_PAIR = 13,
     DELETE = 14,
@@ -27,7 +34,6 @@ export enum RNABase {
 
     SHIFT = 17,
     // public static readonly const RNABase_ADD_ANNOTATION:int = 18; //Variable for adding an annotation by lullujune
-    CUT = 19,
     MAGIC_GLUE = 20,
     BASE_MARK = 21
 }
@@ -182,11 +188,11 @@ export default class EPars {
     }
 
     public static nucleotidePairToString(value: number): 'AU'|'GU'|'GC' {
-        if (value === RNABase.AU_PAIR) {
+        if (value === RNAPaint.AU_PAIR) {
             return 'AU';
-        } else if (value === RNABase.GU_PAIR) {
+        } else if (value === RNAPaint.GU_PAIR) {
             return 'GU';
-        } else if (value === RNABase.GC_PAIR) {
+        } else if (value === RNAPaint.GC_PAIR) {
             return 'GC';
         } else {
             throw new Error(`Bad nucleotide "${value}"`);

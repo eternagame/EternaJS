@@ -125,7 +125,7 @@ export default class SolutionManager {
 
     private static processData(obj: SolutionSpec): Solution {
         const newsol: Solution = new Solution(Number(obj['id']), Number(obj['puznid']));
-        newsol.sequence = new Sequence(obj['sequence']);
+        newsol.sequence = Sequence.fromSequenceString(obj['sequence']);
         newsol.title = obj['title'];
 
         let newfb: Feedback | null = null;

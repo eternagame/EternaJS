@@ -508,19 +508,19 @@ export default class Puzzle {
             }
         }
 
-        return new Sequence(EPars.sequenceToString(seq));
+        return new Sequence(seq);
     }
 
     public getSubsequenceWithoutBarcode(seq: Sequence): Sequence {
         if (!this._useBarcode) {
-            return new Sequence(EPars.sequenceToString(seq.baseArray.slice()));
+            return new Sequence(seq.baseArray.slice());
         }
         let minus = 19;
         if (this._useTails) {
             minus += 20;
         }
 
-        return new Sequence(EPars.sequenceToString(seq.baseArray.slice(0, seq.length - minus)));
+        return new Sequence(seq.baseArray.slice(0, seq.length - minus));
     }
 
     public setUseTails(useTails: boolean, useShortTails: boolean): void {
@@ -576,7 +576,7 @@ export default class Puzzle {
             }
         }
 
-        return Sequence.fromBaseArray(targetSeq);
+        return new Sequence(targetSeq);
     }
 
     public get alreadySolved() {

@@ -51,13 +51,13 @@ test('linearfoldE:MFETests', () => {
             SecStruct.fromParens(".(((((((((.((((....))))..................))))..(((((......)))))...(((.((.(((((((((((((...((((..((((.....))))...)))).))))))))))))))).)))..))))).."),  
         ];
         let sequences: Sequence[] = [
-            new Sequence(  "GGGGGAAAAAAAACCCCC"),
-            new Sequence(  "GGGAAACCC"),
-            new Sequence(  "CCAGGAAAAAAAACCUGG"),
-            new Sequence(  "GGGGGGGGAAAACGGAAAGCCACCCCCC"),
-            new Sequence(  "ACGCUGUCUGUACUUGUAUCAGUACACUGACGAGUCCCUAAAGGACGAAACAGCGC"),
-            new Sequence(  "GGGGAUGUAGCUCAUAUGGUAGAGCGCUCGCUUUGCAUGCGAGAGGCACAGGGUUCGAUUCCCUGCAUCUCCA"),
-            new Sequence(  "CCUACUAGGGGAGCCAAAAGGCUGAGAUGAAUGUAUUCAGACCCUUAUAACCUGAUUUGGUUAAUACCAACGUAGGAAAGUAGUUAUUAACUAUUCGUCAUUGAGAUGUCUUGGUCUAACUACUUUCUUCGCUGGGAAGUAGUU"),
+            Sequence.fromSequenceString(  "GGGGGAAAAAAAACCCCC"),
+            Sequence.fromSequenceString(  "GGGAAACCC"),
+            Sequence.fromSequenceString(  "CCAGGAAAAAAAACCUGG"),
+            Sequence.fromSequenceString(  "GGGGGGGGAAAACGGAAAGCCACCCCCC"),
+            Sequence.fromSequenceString(  "ACGCUGUCUGUACUUGUAUCAGUACACUGACGAGUCCCUAAAGGACGAAACAGCGC"),
+            Sequence.fromSequenceString(  "GGGGAUGUAGCUCAUAUGGUAGAGCGCUCGCUUUGCAUGCGAGAGGCACAGGGUUCGAUUCCCUGCAUCUCCA"),
+            Sequence.fromSequenceString(  "CCUACUAGGGGAGCCAAAAGGCUGAGAUGAAUGUAUUCAGACCCUUAUAACCUGAUUUGGUUAAUACCAACGUAGGAAAGUAGUUAUUAACUAUUCGUCAUUGAGAUGUCUUGGUCUAACUACUUUCUUCGCUGGGAAGUAGUU"),
         ];
 
         for (let ii: number = 0; ii < sequences.length; ++ii ) {

@@ -72,13 +72,13 @@ test(`EternaFold:many_score_structures`, () => {
             ];
     
             for (let ii: number = 0; ii < sequences.length; ++ii ) {
-                let struct = folder.foldSequence(new Sequence(sequences[ii]), new SecStruct());
+                let struct = folder.foldSequence(Sequence.fromSequenceString(sequences[ii]), new SecStruct());
                 expect(struct).toBeDefined();
                 expect(struct!.getParenthesis()).toEqual(structures[ii])
     
                 let outNNFE: number[] = [];
                 let FE = folder.scoreStructures(
-                    new Sequence(sequences[ii]),
+                    Sequence.fromSequenceString(sequences[ii]),
                     SecStruct.fromParens(structures[ii]),
                     false,
                     37,
@@ -190,7 +190,7 @@ test(`EternaFold:get_dot_plot`, () => {
             }
             
             expect(folder.getDotPlot(
-                new Sequence(SEQ),
+                Sequence.fromSequenceString(SEQ),
                 SecStruct.fromParens(STRUCT),
                 37
             )).toBeDeepCloseTo(expectedResult[0], 5);

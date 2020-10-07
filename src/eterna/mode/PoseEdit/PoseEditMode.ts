@@ -2,7 +2,7 @@ import * as log from 'loglevel';
 import {
     Container, DisplayObject, Point, Sprite, Text, Rectangle, Texture, BaseTexture
 } from 'pixi.js';
-import EPars, {RNABase} from 'eterna/EPars';
+import EPars, {RNABase, RNAPaint} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import UndoBlock, {
     UndoBlockParam, FoldData, TargetConditions, OligoDef
@@ -269,11 +269,11 @@ export default class PoseEditMode extends GameMode {
         });
 
         this._toolbar.baseMarkerButton.clicked.connect(() => {
-            this.setPosesColor(RNABase.BASE_MARK);
+            this.setPosesColor(RNAPaint.BASE_MARK);
         });
 
         this._toolbar.magicGlueButton.clicked.connect(() => {
-            this.setPosesColor(RNABase.MAGIC_GLUE);
+            this.setPosesColor(RNAPaint.MAGIC_GLUE);
         });
 
         // Add our docked SpecBox at the bottom of uiLayer
@@ -501,7 +501,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     public onSwapClicked(): void {
-        this.setPosesColor(RNABase.PAIR);
+        this.setPosesColor(RNAPaint.PAIR);
     }
 
     public onHintClicked(): void {
@@ -605,7 +605,7 @@ export default class PoseEditMode extends GameMode {
                 this._seqStacks[this._stackLevel] = [];
 
                 for (let ii = 0; ii < this._poses.length; ii++) {
-                    const undoBlock: UndoBlock = new UndoBlock(new Sequence(''), this._folder?.name ?? '');
+                    const undoBlock: UndoBlock = new UndoBlock(new Sequence([]), this._folder?.name ?? '');
                     undoBlock.fromJSON(foldData[ii]);
                     this._seqStacks[this._stackLevel][ii] = undoBlock;
                 }
@@ -900,7 +900,7 @@ export default class PoseEditMode extends GameMode {
             }
 
             Assert.assertIsDefined(seq);
-            this._poses[ii].sequence = this._puzzle.transformSequence(Sequence.fromBaseArray(seq), ii);
+            this._poses[ii].sequence = this._puzzle.transformSequence(new Sequence(seq), ii);
             if (this._puzzle.barcodeIndices != null) {
                 this._poses[ii].barcodes = this._puzzle.barcodeIndices;
             }
@@ -1096,7 +1096,7 @@ export default class PoseEditMode extends GameMode {
                 if (this._folder === null) {
                     return null;
                 }
-                const seqArr: Sequence = new Sequence(seq);
+                const seqArr: Sequence = Sequence.fromSequenceString(seq);
                 if (this._targetConditions && this._targetConditions[0]
                         && this._targetConditions[0]['type'] === 'pseudoknot') {
                     const folded: SecStruct | null = this._folder.foldSequence(seqArr, null, constraint, true);
@@ -1114,7 +1114,7 @@ export default class PoseEditMode extends GameMode {
                 if (this._folder === null) {
                     return null;
                 }
-                const seqArr: Sequence = new Sequence(seq);
+                const seqArr: Sequence = Sequence.fromSequenceString(seq);
                 const folded: SecStruct | null = this._folder.foldSequenceWithBindingSite(
                     seqArr, null, site, Math.floor(bonus * 100), 2.5
                 );
@@ -1128,7 +1128,7 @@ export default class PoseEditMode extends GameMode {
             if (this._folder === null) {
                 return null;
             }
-            const seqArr: Sequence = new Sequence(seq);
+            const seqArr: Sequence = Sequence.fromSequenceString(seq);
             const structArr: SecStruct = SecStruct.fromParens(secstruct);
             const freeEnergy = (this._targetConditions && this._targetConditions[0]
                     && this._targetConditions[0]['type'] === 'pseudoknot')
@@ -1143,7 +1143,7 @@ export default class PoseEditMode extends GameMode {
                 if (this._folder === null) {
                     return null;
                 }
-                const seqArr: Sequence = new Sequence(seq);
+                const seqArr: Sequence = Sequence.fromSequenceString(seq);
                 let folded: SecStruct | null;
                 if (secstruct) {
                     folded = SecStruct.fromParens(secstruct);
@@ -1165,7 +1165,7 @@ export default class PoseEditMode extends GameMode {
                 }
                 const len: number = seq.length;
                 const cseq = `${seq}&${oligo}`;
-                const seqArr: Sequence = new Sequence(cseq);
+                const seqArr: Sequence = Sequence.fromSequenceString(cseq);
                 const folded: SecStruct | null = this._folder.cofoldSequence(
                     seqArr, null, Math.floor(malus * 100), constraint
                 );
@@ -2364,7 +2364,7 @@ export default class PoseEditMode extends GameMode {
         // meaning this is a save datum thing. [number, number[], ...string[]]
         for (let ii = 0; ii < this._poses.length; ++ii) {
             if (json[ii + 2] != null) {
-                const undoBlock: UndoBlock = new UndoBlock(new Sequence(''), '');
+                const undoBlock: UndoBlock = new UndoBlock(new Sequence([]), '');
                 try {
                     undoBlock.fromJSON(JSON.parse(json[ii + 2] as string));
                 } catch (e) {
@@ -2397,7 +2397,7 @@ export default class PoseEditMode extends GameMode {
         }
 
         for (let ii = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].sequence = this._puzzle.transformSequence(Sequence.fromBaseArray(a), ii);
+            this._poses[ii].sequence = this._puzzle.transformSequence(new Sequence(a), ii);
             this._poses[ii].puzzleLocks = locks;
         }
         this.poseEditByTarget(0);
@@ -2786,10 +2786,10 @@ export default class PoseEditMode extends GameMode {
                 const tc = this._targetConditions[ii] as TargetConditions;
                 const antiStructureConstraints = tc['anti_structure_constraints'];
                 if (antiStructureConstraints !== undefined) {
-                    if (lastShiftedCommand === RNABase.ADD_BASE) {
+                    if (lastShiftedCommand === RNAPaint.ADD_BASE) {
                         const antiStructureConstraint: boolean = antiStructureConstraints[lastShiftedIndex];
                         antiStructureConstraints.splice(lastShiftedIndex, 0, antiStructureConstraint);
-                    } else if (lastShiftedCommand === RNABase.DELETE) {
+                    } else if (lastShiftedCommand === RNAPaint.DELETE) {
                         antiStructureConstraints.splice(lastShiftedIndex, 1);
                     }
                 }
@@ -2799,7 +2799,7 @@ export default class PoseEditMode extends GameMode {
                     const constraintVal: boolean = structureConstraints[lastShiftedIndex];
                     let newConstraints: boolean[];
 
-                    if (lastShiftedCommand === RNABase.ADD_BASE) {
+                    if (lastShiftedCommand === RNAPaint.ADD_BASE) {
                         newConstraints = structureConstraints.slice(0, lastShiftedIndex);
                         newConstraints.push(constraintVal);
                         newConstraints = newConstraints.concat(
@@ -2826,7 +2826,7 @@ export default class PoseEditMode extends GameMode {
                 if (tc['type'] === 'aptamer') {
                     const bindingSite: number[] = (tc['site'] as number[]).slice(0);
                     const bindingPairs: number[] = [];
-                    if (lastShiftedCommand === RNABase.ADD_BASE) {
+                    if (lastShiftedCommand === RNAPaint.ADD_BASE) {
                         for (let ss = 0; ss < bindingSite.length; ss++) {
                             if (bindingSite[ss] >= lastShiftedIndex) {
                                 bindingSite[ss]++;
@@ -2875,7 +2875,7 @@ export default class PoseEditMode extends GameMode {
                 this._seqStacks[this._stackLevel] = [];
 
                 for (let ii = 0; ii < this._poses.length; ii++) {
-                    this._seqStacks[this._stackLevel][ii] = new UndoBlock(new Sequence(''), '');
+                    this._seqStacks[this._stackLevel][ii] = new UndoBlock(new Sequence([]), '');
                     this._seqStacks[this._stackLevel][ii].fromJSON(fd[ii]);
                 }
 
@@ -2986,13 +2986,13 @@ export default class PoseEditMode extends GameMode {
                 log.debug('cofold');
                 fullSeq = seq.baseArray.concat(EPars.stringToSequence(`&${tc['oligo_sequence']}`));
                 malus = int(tc['malus'] as number * 100);
-                bestPairs = this._folder.cofoldSequence(Sequence.fromBaseArray(fullSeq), null, malus, forceStruct);
+                bestPairs = this._folder.cofoldSequence(new Sequence(fullSeq), null, malus, forceStruct);
             } else if (foldMode === Pose2D.OLIGO_MODE_EXT5P) {
                 fullSeq = EPars.stringToSequence(tc['oligo_sequence'] as string).concat(seq.baseArray);
-                bestPairs = this._folder.foldSequence(Sequence.fromBaseArray(fullSeq), null, forceStruct);
+                bestPairs = this._folder.foldSequence(new Sequence(fullSeq), null, forceStruct);
             } else {
                 fullSeq = seq.baseArray.concat(EPars.stringToSequence(tc['oligo_sequence'] as string));
-                bestPairs = this._folder.foldSequence(Sequence.fromBaseArray(fullSeq), null, forceStruct);
+                bestPairs = this._folder.foldSequence(new Sequence(fullSeq), null, forceStruct);
             }
         } else if (tc['type'] === 'aptamer+oligo') {
             bonus = tc['bonus'] as number;
@@ -3005,17 +3005,17 @@ export default class PoseEditMode extends GameMode {
                 fullSeq = seq.baseArray.concat(EPars.stringToSequence(`&${tc['oligo_sequence']}`));
                 malus = int(tc['malus'] as number * 100);
                 bestPairs = this._folder.cofoldSequenceWithBindingSite(
-                    Sequence.fromBaseArray(fullSeq), sites, bonus, forceStruct, malus
+                    new Sequence(fullSeq), sites, bonus, forceStruct, malus
                 );
             } else if (foldMode === Pose2D.OLIGO_MODE_EXT5P) {
                 fullSeq = EPars.stringToSequence(tc['oligo_sequence'] as string).concat(seq.baseArray);
                 bestPairs = this._folder.foldSequenceWithBindingSite(
-                    Sequence.fromBaseArray(fullSeq), this._targetPairs[ii], sites, Number(bonus), tc['fold_version']
+                    new Sequence(fullSeq), this._targetPairs[ii], sites, Number(bonus), tc['fold_version']
                 );
             } else {
                 fullSeq = seq.baseArray.concat(EPars.stringToSequence(tc['oligo_sequence'] as string));
                 bestPairs = this._folder.foldSequenceWithBindingSite(
-                    Sequence.fromBaseArray(fullSeq), this._targetPairs[ii], sites, Number(bonus), tc['fold_version']
+                    new Sequence(fullSeq), this._targetPairs[ii], sites, Number(bonus), tc['fold_version']
                 );
             }
         } else if (tc['type'] === 'multistrand') {

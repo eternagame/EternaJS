@@ -1,6 +1,6 @@
 import {Graphics, DisplayObject} from 'pixi.js';
 import {GameObject, Flashbang, Updatable} from 'flashbang';
-import EPars, {RNABase} from 'eterna/EPars';
+import EPars, {RNABase, RNAPaint} from 'eterna/EPars';
 
 export default class PaintCursor extends GameObject implements Updatable {
     constructor() {
@@ -31,7 +31,7 @@ export default class PaintCursor extends GameObject implements Updatable {
                 this._outColor = PaintCursor.NULL;
                 break;
 
-            case RNABase.DELETE:
+            case RNAPaint.DELETE:
             case RNABase.GUANINE:
                 this._color = PaintCursor.RED;
                 this._outColor = PaintCursor.NULL;
@@ -42,23 +42,23 @@ export default class PaintCursor extends GameObject implements Updatable {
                 this._outColor = PaintCursor.NULL;
                 break;
 
-            case RNABase.AU_PAIR:
+            case RNAPaint.AU_PAIR:
                 this._color = PaintCursor.YELLOW;
                 this._outColor = PaintCursor.BLUE;
                 break;
 
-            case RNABase.GU_PAIR:
+            case RNAPaint.GU_PAIR:
                 this._color = PaintCursor.BLUE;
                 this._outColor = PaintCursor.RED;
                 break;
 
-            case RNABase.GC_PAIR:
+            case RNAPaint.GC_PAIR:
                 this._color = PaintCursor.RED;
                 this._outColor = PaintCursor.GREEN;
                 break;
 
-            case RNABase.ADD_BASE:
-            case RNABase.ADD_PAIR:
+            case RNAPaint.ADD_BASE:
+            case RNAPaint.ADD_PAIR:
                 this._color = PaintCursor.YELLOW;
                 this._outColor = PaintCursor.NULL;
                 break;

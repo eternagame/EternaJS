@@ -2,7 +2,7 @@ import {
     Container, Graphics, Sprite, Texture
 } from 'pixi.js';
 import {ColorUtil, TextureUtil} from 'flashbang';
-import {RNABase} from 'eterna/EPars';
+import {RNABase, RNAPaint} from 'eterna/EPars';
 import ExpPainter from 'eterna/ExpPainter';
 import Sounds from 'eterna/resources/Sounds';
 import BitmapManager from 'eterna/resources/BitmapManager';
@@ -33,7 +33,7 @@ export default class BaseAssets {
     public static getBodyTexture(baseType: number, colorLevel: number, zoomLevel: number, flags: number): Texture {
         if (BaseAssets.isBaseType(baseType) && colorLevel < 0) {
             return BaseAssets.getBaseBitmaps(baseType).getBodyTexture(zoomLevel, flags);
-        } else if (baseType === RNABase.LOCK) {
+        } else if (baseType === RNAPaint.LOCK) {
             return BaseAssets.textureForSize(BaseAssets._backboneBodyData, 0, zoomLevel);
         } else if (colorLevel < 0) {
             if (zoomLevel < Base.NUM_ZOOM_LEVELS) {

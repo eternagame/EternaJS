@@ -5,7 +5,7 @@ import {Signal} from 'signals';
 import {
     ContainerObject, KeyboardListener, Enableable, StyledTextBuilder, KeyCode, InputUtil, KeyboardEventType, Assert
 } from 'flashbang';
-import EPars, {RNABase} from 'eterna/EPars';
+import EPars, {RNABase, RNAPaint} from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import Fonts from 'eterna/util/Fonts';
@@ -19,15 +19,15 @@ export enum PaletteTargetType {
     A = 0, U, G, C, AU, UG, GC
 }
 
-export function GetPaletteTargetBaseType(type: PaletteTargetType): number {
+export function GetPaletteTargetBaseType(type: PaletteTargetType): RNABase | RNAPaint {
     switch (type) {
         case PaletteTargetType.A: return RNABase.ADENINE;
         case PaletteTargetType.U: return RNABase.URACIL;
         case PaletteTargetType.G: return RNABase.GUANINE;
         case PaletteTargetType.C: return RNABase.CYTOSINE;
-        case PaletteTargetType.AU: return RNABase.AU_PAIR;
-        case PaletteTargetType.UG: return RNABase.GU_PAIR;
-        case PaletteTargetType.GC: return RNABase.GC_PAIR;
+        case PaletteTargetType.AU: return RNAPaint.AU_PAIR;
+        case PaletteTargetType.UG: return RNAPaint.GU_PAIR;
+        case PaletteTargetType.GC: return RNAPaint.GC_PAIR;
         default: return Assert.unreachable(type);
     }
 }

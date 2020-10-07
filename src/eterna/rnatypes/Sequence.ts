@@ -2,8 +2,8 @@ import EPars, {RNABase} from 'eterna/EPars';
 import SecStruct from './SecStruct';
 
 export default class Sequence {
-    constructor(seq: string) {
-        this._sequenceString = seq;
+    constructor(baseArray: RNABase[]) {
+        this._baseArray = baseArray;
     }
 
     public hasCut(from: number, to?: number): boolean {
@@ -15,13 +15,13 @@ export default class Sequence {
         );
     }
 
-    public static fromBaseArray(seq: number[]) {
-        return new Sequence(EPars.sequenceToString(seq));
+    public static fromSequenceString(seq: string) {
+        return new Sequence(EPars.stringToSequence(seq));
     }
 
     public getColoredSequence(): string {
         let res = '';
-        for (const c of this._sequenceString) {
+        for (const c of this.sequenceString) {
             res += EPars.getColoredLetter(c);
         }
         return res;
@@ -30,7 +30,7 @@ export default class Sequence {
     public getExpColoredSequence(expData: number[]): string {
         // AMW TODO: how could this be?
         if (expData == null) {
-            return this._sequenceString;
+            return this.sequenceString;
         }
 
         const offset: number = expData[0];
@@ -40,13 +40,13 @@ export default class Sequence {
         const avg: number = (maxmax + minmin) / 2.0;
 
         let res = '';
-        for (let ii = 0; ii < this._sequenceString.length; ii++) {
+        for (let ii = 0; ii < this.sequenceString.length; ii++) {
             if (ii < offset - 1 || ii >= expData.length) {
-                res += this._sequenceString[ii];
+                res += this.sequenceString[ii];
             } else if (expData[ii] < avg) {
-                res += `<FONT COLOR='#7777FF'>${this._sequenceString[ii]}</FONT>`;
+                res += `<FONT COLOR='#7777FF'>${this.sequenceString[ii]}</FONT>`;
             } else {
-                res += `<FONT COLOR='#FF7777'>${this._sequenceString[ii]}</FONT>`;
+                res += `<FONT COLOR='#FF7777'>${this.sequenceString[ii]}</FONT>`;
             }
         }
 
@@ -54,14 +54,12 @@ export default class Sequence {
     }
 
     public countConsecutive(letter: number, locks: boolean[] | null = null): number {
-        const sequence = EPars.stringToSequence(this._sequenceString);
-
         let maxConsecutive = 0;
 
         let ii = 0;
         let startIndex = -1;
-        for (ii = 0; ii < sequence.length; ii++) {
-            if (sequence[ii] === letter) {
+        for (ii = 0; ii < this._baseArray.length; ii++) {
+            if (this._baseArray[ii] === letter) {
                 if (startIndex < 0) {
                     startIndex = ii;
                 }
@@ -96,8 +94,6 @@ export default class Sequence {
     public getRestrictedConsecutive(
         letter: number, maxAllowed: number, locks: boolean[] | null = null
     ): number[] {
-        const sequence = EPars.stringToSequence(this._sequenceString);
-
         const restricted: number[] = [];
 
         let ii = 0;
@@ -107,8 +103,8 @@ export default class Sequence {
             return restricted;
         }
 
-        for (ii = 0; ii < sequence.length; ii++) {
-            if (sequence[ii] === letter) {
+        for (ii = 0; ii < this._baseArray.length; ii++) {
+            if (this._baseArray[ii] === letter) {
                 if (startIndex < 0) {
                     startIndex = ii;
                 }
@@ -148,8 +144,8 @@ export default class Sequence {
         const dict: Set<string> = new Set<string>();
         let numRepeats = 0;
 
-        for (let ii = 0; ii < this._sequenceString.length - n; ii++) {
-            const substr: string = this._sequenceString.substr(ii, n);
+        for (let ii = 0; ii < this.sequenceString.length - n; ii++) {
+            const substr: string = this.sequenceString.substr(ii, n);
             if (dict.has(substr)) {
                 numRepeats++;
             } else {
@@ -161,15 +157,14 @@ export default class Sequence {
     }
 
     public numGUPairs(pairs: SecStruct): number {
-        const sequence = EPars.stringToSequence(this._sequenceString);
         let ret = 0;
 
         for (let ii = 0; ii < pairs.length; ii++) {
             if (pairs.pairs[ii] > ii) {
-                if (sequence[ii] === RNABase.GUANINE && sequence[pairs.pairs[ii]] === RNABase.URACIL) {
+                if (this._baseArray[ii] === RNABase.GUANINE && this._baseArray[pairs.pairs[ii]] === RNABase.URACIL) {
                     ret++;
                 }
-                if (sequence[ii] === RNABase.URACIL && sequence[pairs.pairs[ii]] === RNABase.GUANINE) {
+                if (this._baseArray[ii] === RNABase.URACIL && this._baseArray[pairs.pairs[ii]] === RNABase.GUANINE) {
                     ret++;
                 }
             }
@@ -179,15 +174,14 @@ export default class Sequence {
     }
 
     public numGCPairs(pairs: SecStruct): number {
-        const sequence = EPars.stringToSequence(this._sequenceString);
         let ret = 0;
 
         for (let ii = 0; ii < pairs.length; ii++) {
             if (pairs.pairs[ii] > ii) {
-                if (sequence[ii] === RNABase.GUANINE && sequence[pairs.pairs[ii]] === RNABase.CYTOSINE) {
+                if (this._baseArray[ii] === RNABase.GUANINE && this._baseArray[pairs.pairs[ii]] === RNABase.CYTOSINE) {
                     ret++;
                 }
-                if (sequence[ii] === RNABase.CYTOSINE && sequence[pairs.pairs[ii]] === RNABase.GUANINE) {
+                if (this._baseArray[ii] === RNABase.CYTOSINE && this._baseArray[pairs.pairs[ii]] === RNABase.GUANINE) {
                     ret++;
                 }
             }
@@ -197,15 +191,14 @@ export default class Sequence {
     }
 
     public numUAPairs(pairs: SecStruct): number {
-        const sequence = EPars.stringToSequence(this._sequenceString);
         let ret = 0;
 
         for (let ii = 0; ii < pairs.length; ii++) {
             if (pairs.pairs[ii] > ii) {
-                if (sequence[ii] === RNABase.ADENINE && sequence[pairs.pairs[ii]] === RNABase.URACIL) {
+                if (this._baseArray[ii] === RNABase.ADENINE && this._baseArray[pairs.pairs[ii]] === RNABase.URACIL) {
                     ret++;
                 }
-                if (sequence[ii] === RNABase.URACIL && sequence[pairs.pairs[ii]] === RNABase.ADENINE) {
+                if (this._baseArray[ii] === RNABase.URACIL && this._baseArray[pairs.pairs[ii]] === RNABase.ADENINE) {
                     ret++;
                 }
             }
@@ -214,20 +207,20 @@ export default class Sequence {
         return ret;
     }
 
-    public get baseArray(): number[] {
-        return EPars.stringToSequence(this._sequenceString);
+    public get baseArray(): RNABase[] {
+        return this._baseArray;
     }
 
-    public set baseArray(sequence: number[]) {
-        this._sequenceString = EPars.sequenceToString(sequence);
+    public set baseArray(sequence: RNABase[]) {
+        this._baseArray = sequence;
     }
 
     public get sequenceString(): string {
-        return this._sequenceString;
+        return EPars.sequenceToString(this._baseArray);
     }
 
     public get length(): number {
-        return this._sequenceString.length;
+        return this._baseArray.length;
     }
 
     /**
@@ -238,11 +231,11 @@ export default class Sequence {
      */
     public slice(start: number, end: number = -1): Sequence {
         if (end === -1) {
-            return new Sequence(this._sequenceString.substr(start));
+            return new Sequence(this._baseArray.slice(start));
         } else {
-            return new Sequence(this._sequenceString.substr(start, end));
+            return new Sequence(this._baseArray.slice(start, end));
         }
     }
 
-    private _sequenceString: string;
+    private _baseArray: RNABase[];
 }

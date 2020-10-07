@@ -453,22 +453,22 @@ export default class NuPACK extends Folder {
                 }
                 let msPairs: SecStruct;
                 if (ii === 0) {
-                    msPairs = this.foldSequence(Sequence.fromBaseArray(msSeq), null, null, false, temp);
+                    msPairs = this.foldSequence(new Sequence(msSeq), null, null, false, temp);
                 } else {
-                    msPairs = this.cofoldSeq2(Sequence.fromBaseArray(msSeq), null, null, temp);
+                    msPairs = this.cofoldSeq2(new Sequence(msSeq), null, null, temp);
                 }
                 const msNodes: number[] = [];
-                let msFE: number = this.scoreStructures(Sequence.fromBaseArray(msSeq), msPairs, false, temp, msNodes);
+                let msFE: number = this.scoreStructures(new Sequence(msSeq), msPairs, false, temp, msNodes);
                 for (let jj = 0; jj < ii; jj++) {
                     msFE += oligos[order[jj]].malus;
                 }
                 for (let jj = ii; jj < numOligo; jj++) {
                     const sPairs: SecStruct = this.foldSequence(
-                        Sequence.fromBaseArray(oligos[order[jj]].sequence), null, null, false, temp
+                        new Sequence(oligos[order[jj]].sequence), null, null, false, temp
                     );
                     const sNodes: number[] = [];
                     const sFE: number = this.scoreStructures(
-                        Sequence.fromBaseArray(oligos[order[jj]].sequence), sPairs, false, temp, sNodes
+                        new Sequence(oligos[order[jj]].sequence), sPairs, false, temp, sNodes
                     );
 
                     const struc = `${msPairs.getParenthesis()}&${sPairs.getParenthesis()}`;
@@ -509,7 +509,7 @@ export default class NuPACK extends Folder {
 
         for (let ii = 0; ii < numOligo; ii++) {
             ops.push(new PoseOp(
-                null, () => this.foldSequence(Sequence.fromBaseArray(oligos[ii].sequence), null, null, false, temp)
+                null, () => this.foldSequence(new Sequence(oligos[ii].sequence), null, null, false, temp)
             ));
         }
 
@@ -524,11 +524,11 @@ export default class NuPACK extends Folder {
 
                 if (ii === 0) {
                     ops.push(new PoseOp(
-                        null, () => this.foldSequence(Sequence.fromBaseArray(msSeq), null, null, false, temp)
+                        null, () => this.foldSequence(new Sequence(msSeq), null, null, false, temp)
                     ));
                 } else {
                     ops.push(new PoseOp(
-                        null, () => this.cofoldSeq2(Sequence.fromBaseArray(msSeq), null, null, temp)
+                        null, () => this.cofoldSeq2(new Sequence(msSeq), null, null, temp)
                     ));
                 }
             }
