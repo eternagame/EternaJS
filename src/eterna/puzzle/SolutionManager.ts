@@ -29,7 +29,8 @@ interface SolutionSpec {
     'fold-data': string;
 }
 
-interface SynthesisData {
+interface ShapeData {
+    condition: string;
     reactive: string;
     start_index: string;
     peaks: string[];
@@ -37,6 +38,17 @@ interface SynthesisData {
     threshold: string;
     max: string;
     min: string;
+}
+
+interface DegradationData {
+    condition: string;
+    reactive: string;
+    start_index: string;
+    target_index: string;
+    peaks: string[];
+    error: string[];
+    signal_to_noise_category: string;
+    signal_to_noise: string;
 }
 
 export default class SolutionManager {
@@ -137,13 +149,16 @@ export default class SolutionManager {
         newsol.setSynthesis(Number(obj['synthesis-round']), Number(obj['synthesis-score']));
 
         if (obj['synthesis-data'] && obj['synthesis-data'].length > 0) {
-            let synthesisDataRaw: SynthesisData[] | BrentTheoData = JSON.parse(obj['synthesis-data']);
+            let synthesisDataRaw: (ShapeData | DegradationData)[] | BrentTheoData = JSON.parse(obj['synthesis-data']);
             if (Array.isArray(synthesisDataRaw)) {
-                let synthesisData: SynthesisData[] = synthesisDataRaw;
+                let synthesisData: (ShapeData | DegradationData)[] = synthesisDataRaw;
 
                 for (let ii = 0; ii < synthesisData.length; ii++) {
-                    let synthesis: SynthesisData = synthesisData[ii];
+                    let synthesis: ShapeData | DegradationData = synthesisData[ii];
                     if (synthesis['reactive'] === 'SHAPE') {
+                        // This means that it's a ShapeData.
+                        // Ugh: this is better than the alternative but still a little ridiculous
+                        synthesis = synthesis as ShapeData;
                         let peaks: number[] = [];
                         peaks.push(Number(synthesis['start_index']));
 
@@ -157,10 +172,46 @@ export default class SolutionManager {
 
                         newfb.setShapeData(
                             peaks,
+                            'SHAPE', // condition
                             Number(synthesis['target_index']),
                             Number(synthesis['threshold']),
                             Number(synthesis['max']),
                             Number(synthesis['min']),
+                            null
+                        );
+                    }
+                    if (synthesis['reactive'] === 'Degradation') {
+                        // This means that it's a ShapeData.
+                        // Ugh: this is better than the alternative but still a little ridiculous
+                        synthesis = synthesis as DegradationData;
+                        let condition = synthesis['condition'];
+                        let peaks: number[] = [];
+                        peaks.push(Number(synthesis['start_index']));
+
+                        for (let ss = 0; ss < synthesis['peaks'].length; ss++) {
+                            peaks.push(Number(synthesis['peaks'][ss]));
+                        }
+
+                        let error: number[] = [];
+                        error.push(Number(synthesis['start_index']));
+
+                        for (let ss = 0; ss < synthesis['error'].length; ss++) {
+                            error.push(Number(synthesis['error'][ss]));
+                        }
+
+                        let stnCategory: string = synthesis['signal_to_noise_category'];
+                        let stn: string = synthesis['signal_to_noise'];
+
+                        if (newfb == null) {
+                            newfb = new Feedback();
+                        }
+                        newfb.setDegradationData(
+                            peaks,
+                            condition,
+                            Number(synthesis['target_index']),
+                            error,
+                            stnCategory,
+                            Number(stn),
                             null
                         );
                     }
@@ -178,7 +229,7 @@ export default class SolutionManager {
             }
 
             if (Feedback.EXPSTRINGS.indexOf(obj['SHAPE']) >= 0) {
-                newfb.setShapeData(null, 0, null, null, null, obj['SHAPE']);
+                newfb.setShapeData(null, 'SHAPE', 0, null, null, null, obj['SHAPE']);
             } else {
                 const protoshapeArray = obj['SHAPE'].split(',');
                 let shapeArray: number[] = [];
@@ -202,7 +253,7 @@ export default class SolutionManager {
                     min = Number(obj['SHAPE-min']);
                 }
 
-                newfb.setShapeData(shapeArray, 0, threshold, max, min, null);
+                newfb.setShapeData(shapeArray, 'SHAPE', 0, threshold, max, min, null);
             }
         }
 

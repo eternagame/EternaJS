@@ -19,15 +19,15 @@ import {
     VAlign, HAlign, DisplayUtil, KeyboardEventType, KeyCode, Assert
 } from 'flashbang';
 import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
-import Utility from 'eterna/util/Utility';
 import SpecBoxDialog from 'eterna/ui/SpecBoxDialog';
 import Folder from 'eterna/folding/Folder';
-import URLButton from 'eterna/ui/URLButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import GameButton from 'eterna/ui/GameButton';
 import EternaURL from 'eterna/net/EternaURL';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import HTMLTextObject from 'eterna/ui/HTMLTextObject';
+import GameDropdown from 'eterna/ui/GameDropdown';
+import {MappedValue, ValueView} from 'signals';
 import SolutionManager from 'eterna/puzzle/SolutionManager';
 import GameMode from './GameMode';
 import ViewSolutionOverlay from './DesignBrowser/ViewSolutionOverlay';
@@ -244,6 +244,28 @@ export default class FeedbackViewMode extends GameMode {
         this.addObject(this._info, this.uiLayer);
 
         this.setPoseFields(poseFields);
+
+        this._dropdown = new GameDropdown(
+            14,
+            this._solution.expFeedback?.conditions ?? ['SHAPE'],
+            'SHAPE',
+            0
+        );
+
+        this._dropdown.disabled = false;
+        this._dropdown.selectedOption.connect(() => this.showExperimentalColors());
+
+        // for now this is fine; we turn the dropdown options
+        // into themselves. that's all we need to access the JSON
+        // of data we will receive (or not)
+        this._dataOption = MappedValue.create(
+            this._dropdown.selectedOption,
+            (name) => name
+        );
+
+        this.addObject(this._dropdown, this.uiLayer);
+        this._dropdown.display.position = new Point(18, 50);
+
         let seeShape: boolean = (this._feedback !== null && this._feedback.getShapeData() != null);
         if (seeShape) {
             this.setupShape();
@@ -537,23 +559,44 @@ export default class FeedbackViewMode extends GameMode {
         this._toolbar.letterColorButton.toggled.value = false;
         this._toolbar.expColorButton.toggled.value = true;
 
-        if (this._isPipMode) {
+        console.error(this._dataOption.value);
+        if (this._dataOption.value === 'SHAPE') {
+            if (this._isPipMode) {
+                for (let ii = 0; ii < this._poseFields.length; ii++) {
+                    this._poseFields[ii].pose.visualizeFeedback(
+                        this._feedback.getShapeData(ii, this._dataOption.value),
+                        this._feedback.getShapeThreshold(ii, this._dataOption.value),
+                        this._feedback.getShapeMin(ii, this._dataOption.value),
+                        this._feedback.getShapeMax(ii, this._dataOption.value),
+                        this._feedback.getShapeStartIndex(ii, this._dataOption.value)
+                    );
+                }
+            } else {
+                this._poseFields[0].pose.visualizeFeedback(
+                    this._feedback.getShapeData(this._currentIndex, this._dataOption.value),
+                    this._feedback.getShapeThreshold(this._currentIndex, this._dataOption.value),
+                    this._feedback.getShapeMin(this._currentIndex, this._dataOption.value),
+                    this._feedback.getShapeMax(this._currentIndex, this._dataOption.value),
+                    this._feedback.getShapeStartIndex(this._currentIndex, this._dataOption.value)
+                );
+            }
+        } else if (this._isPipMode) {
             for (let ii = 0; ii < this._poseFields.length; ii++) {
                 this._poseFields[ii].pose.visualizeFeedback(
-                    this._feedback.getShapeData(ii),
-                    this._feedback.getShapeThreshold(ii),
-                    this._feedback.getShapeMin(ii),
-                    this._feedback.getShapeMax(ii),
-                    this._feedback.getShapeStartIndex(ii)
+                    this._feedback.getDegradationData(ii, this._dataOption.value),
+                    this._feedback.getDegradationThreshold(ii, this._dataOption.value),
+                    this._feedback.getDegradationMin(ii, this._dataOption.value),
+                    this._feedback.getDegradationMax(ii, this._dataOption.value),
+                    this._feedback.getDegradationStartIndex(ii, this._dataOption.value)
                 );
             }
         } else {
             this._poseFields[0].pose.visualizeFeedback(
-                this._feedback.getShapeData(this._currentIndex),
-                this._feedback.getShapeThreshold(this._currentIndex),
-                this._feedback.getShapeMin(this._currentIndex),
-                this._feedback.getShapeMax(this._currentIndex),
-                this._feedback.getShapeStartIndex(this._currentIndex)
+                this._feedback.getDegradationData(this._currentIndex, this._dataOption.value),
+                this._feedback.getDegradationThreshold(this._currentIndex, this._dataOption.value),
+                this._feedback.getDegradationMin(this._currentIndex, this._dataOption.value),
+                this._feedback.getDegradationMax(this._currentIndex, this._dataOption.value),
+                this._feedback.getDegradationStartIndex(this._currentIndex, this._dataOption.value)
             );
         }
     }
@@ -584,12 +627,12 @@ export default class FeedbackViewMode extends GameMode {
             // / Default fallback to usual SHAPE data
             if (Eterna.DEV_MODE) {
                 score = Feedback.scoreFeedback(
-                    this._feedback.getShapeData(this._currentIndex),
+                    this._feedback.getShapeData(this._currentIndex, this._dataOption.value),
                     this._puzzle.getSecstruct(this._currentIndex),
-                    this._feedback.getShapeStartIndex(this._currentIndex),
-                    this._feedback.getShapeMin(this._currentIndex),
-                    this._feedback.getShapeThreshold(this._currentIndex),
-                    this._feedback.getShapeMax(this._currentIndex)
+                    this._feedback.getShapeStartIndex(this._currentIndex, this._dataOption.value),
+                    this._feedback.getShapeMin(this._currentIndex, this._dataOption.value),
+                    this._feedback.getShapeThreshold(this._currentIndex, this._dataOption.value),
+                    this._feedback.getShapeMax(this._currentIndex, this._dataOption.value)
                 );
                 titleText += (`${this._solution.title}\nSynthesis score : ${score} / 100`);
             } else {
@@ -604,12 +647,12 @@ export default class FeedbackViewMode extends GameMode {
                     }
 
                     score = Feedback.scoreFeedback(
-                        this._feedback.getShapeData(ii),
+                        this._feedback.getShapeData(ii, this._dataOption.value),
                         this._puzzle.getSecstruct(ii),
-                        this._feedback.getShapeStartIndex(ii),
-                        this._feedback.getShapeMin(ii),
-                        this._feedback.getShapeThreshold(ii),
-                        this._feedback.getShapeMax(ii)
+                        this._feedback.getShapeStartIndex(ii, this._dataOption.value),
+                        this._feedback.getShapeMin(ii, this._dataOption.value),
+                        this._feedback.getShapeThreshold(ii, this._dataOption.value),
+                        this._feedback.getShapeMax(ii, this._dataOption.value)
                     );
 
                     titleText += `state ${ii + 1} : ${score} / 100`;
@@ -738,4 +781,6 @@ export default class FeedbackViewMode extends GameMode {
     private _isExpColor: boolean;
     private _solutionView?: ViewSolutionOverlay;
     private _info: GameButton;
+    private _dropdown: GameDropdown;
+    private _dataOption: ValueView<string>;
 }
