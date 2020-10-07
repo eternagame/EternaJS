@@ -2,7 +2,7 @@ import {DisplayObject, Graphics, Point} from 'pixi.js';
 import {
     GameObject, LateUpdatable, Assert, RepeatingTask, ObjectTask, SerialTask, AlphaTask, Vector2
 } from 'flashbang';
-import {SecStruct} from 'eterna/EPars';
+import SecStruct from 'eterna/rnatypes/SecStruct';
 import Pose2D from './Pose2D';
 
 export enum HighlightType {

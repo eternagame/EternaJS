@@ -14,7 +14,7 @@ import int from 'eterna/util/int';
 import UITheme from 'eterna/ui/UITheme';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import BitmapManager from 'eterna/resources/BitmapManager';
-import {SecStruct} from 'eterna/EPars';
+import SecStruct from 'eterna/rnatypes/SecStruct';
 import {SortOrder} from './SortOptions';
 import SequenceStringListView from './SequenceStringListView';
 import {DesignBrowserDataType, DesignCategory, DBVote} from './DesignBrowserMode';

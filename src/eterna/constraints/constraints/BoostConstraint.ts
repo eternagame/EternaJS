@@ -1,7 +1,8 @@
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import EPars, {RNABase, SecStruct} from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 import {Assert} from 'flashbang';
+import SecStruct from 'eterna/rnatypes/SecStruct';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 

@@ -1,7 +1,9 @@
 import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
-import EPars, {RNABase, SecStruct, Sequence} from 'eterna/EPars';
+import EPars from 'eterna/EPars';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from '../Constraint';
 

@@ -1,9 +1,10 @@
 import UndoBlock, {BasePairProbabilityTransform} from "../UndoBlock";
-import EPars, {Sequence, SecStruct, DotPlot} from "../EPars";
 import Folder from "../folding/Folder";
 import Vienna2 from "../folding/Vienna2";
-import LinearFoldV from "eterna/folding/LinearFoldV";
 import EternaFold from "eterna/folding/Eternafold";
+import DotPlot from "eterna/rnatypes/DotPlot";
+import SecStruct from "eterna/rnatypes/SecStruct";
+import Sequence from "eterna/rnatypes/Sequence";
 
 function CreateFolder(type: any): Promise<Folder> {
     return type.create();

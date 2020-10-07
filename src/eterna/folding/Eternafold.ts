@@ -1,10 +1,11 @@
 import * as log from 'loglevel';
-import EPars, {
-    DotPlot, RNABase, SecStruct, Sequence
-} from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import {Assert} from 'flashbang';
+import DotPlot from 'eterna/rnatypes/DotPlot';
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 import * as EternafoldLib from './engines/EternafoldLib';
 import {DotPlotResult, FullEvalResult, FullFoldResult} from './engines/EternafoldLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */

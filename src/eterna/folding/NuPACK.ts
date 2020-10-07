@@ -1,12 +1,13 @@
 import * as log from 'loglevel';
-import EPars, {
-    RNABase, SecStruct, Sequence, DotPlot
-} from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import PoseOp from 'eterna/pose2D/PoseOp';
 import int from 'eterna/util/int';
 import {Oligo} from 'eterna/pose2D/Pose2D';
+import DotPlot from 'eterna/rnatypes/DotPlot';
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 import * as NupackLib from './engines/NupackLib';
 import {DotPlotResult, FullEvalResult, FullFoldResult} from './engines/NupackLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */

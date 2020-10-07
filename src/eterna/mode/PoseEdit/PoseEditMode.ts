@@ -2,9 +2,7 @@ import * as log from 'loglevel';
 import {
     Container, DisplayObject, Point, Sprite, Text, Rectangle, Texture, BaseTexture
 } from 'pixi.js';
-import EPars, {
-    DotPlot, RNABase, SecStruct, Sequence
-} from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import UndoBlock, {
     UndoBlockParam, FoldData, TargetConditions, OligoDef
@@ -58,6 +56,9 @@ import {HighlightInfo} from 'eterna/constraints/Constraint';
 import {AchievementData} from 'eterna/achievements/AchievementManager';
 import {RankScrollData} from 'eterna/rank/RankScroll';
 import FolderSwitcher from 'eterna/ui/FolderSwitcher';
+import DotPlot from 'eterna/rnatypes/DotPlot';
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';

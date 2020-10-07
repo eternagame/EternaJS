@@ -3,10 +3,12 @@ import {
 } from 'pixi.js';
 import {TextureUtil, DisplayUtil, Assert} from 'flashbang';
 import Constants from 'eterna/Constants';
-import {RNABase, Sequence, SecStruct} from 'eterna/EPars';
+import {RNABase} from 'eterna/EPars';
 import ExpPainter from 'eterna/ExpPainter';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import RNALayout from 'eterna/pose2D/RNALayout';
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 
 export enum PoseThumbnailType {
     BASE_COLORED = 'BASE_COLORED',

@@ -1,5 +1,5 @@
 import Constants from 'eterna/Constants';
-import EPars, {RNABase, Sequence, SecStruct} from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 import FolderManager from 'eterna/folding/FolderManager';
 import Vienna from 'eterna/folding/Vienna';
 import Folder from 'eterna/folding/Folder';
@@ -10,6 +10,8 @@ import ShapeConstraint from 'eterna/constraints/constraints/ShapeConstraint';
 import {TargetConditions, OligoDef} from 'eterna/UndoBlock';
 import {BoosterData} from 'eterna/mode/PoseEdit/Booster';
 import Utility from 'eterna/util/Utility';
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 
 export interface BoostersData {
     mission?: Mission;

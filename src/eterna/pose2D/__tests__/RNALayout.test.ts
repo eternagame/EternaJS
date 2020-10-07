@@ -1,5 +1,5 @@
 import RNALayout from '../RNALayout';
-import {SecStruct} from 'eterna/EPars';
+import SecStruct from 'eterna/rnatypes/SecStruct';
 
 test(`RNALayout:setupTree`, () => {
     const rnalayout: RNALayout = new RNALayout();

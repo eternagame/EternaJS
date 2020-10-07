@@ -2,7 +2,7 @@ import * as log from 'loglevel';
 import {Container, Point} from 'pixi.js';
 import Eterna from 'eterna/Eterna';
 import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
-import {SecStruct, Sequence} from 'eterna/EPars';
+import SecStruct from 'eterna/rnatypes/SecStruct';
 import {
     AppMode, SceneObject, Flashbang, GameObjectRef, Assert
 } from 'flashbang';

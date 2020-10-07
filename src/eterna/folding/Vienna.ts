@@ -1,11 +1,14 @@
 import * as log from 'loglevel';
 import EPars, {
-    RNABase, Sequence, SecStruct, DotPlot
+    RNABase
 } from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import Utility from 'eterna/util/Utility';
 import RNALayout from 'eterna/pose2D/RNALayout';
+import DotPlot from 'eterna/rnatypes/DotPlot';
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 import * as ViennaLib from './engines/ViennaLib';
 import {DotPlotResult, FullEvalResult, FullFoldResult} from './engines/ViennaLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */

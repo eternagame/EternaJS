@@ -1,4 +1,4 @@
-import {SecStruct} from 'eterna/EPars';
+import SecStruct from 'eterna/rnatypes/SecStruct';
 
 export default class FoldUtil {
     public static nextPerm(v: number[]): boolean {

@@ -1,4 +1,4 @@
-import EPars, {SecStruct} from "../EPars";
+import SecStruct from "eterna/rnatypes/SecStruct";
 
 test(`EPars:filterForPseudoknots`, () => {
     const pairs = SecStruct.fromParens("...............(((((((((((...{{{{{{{)))))))))))((((((((.........))).)))))...}}.}}}}}....", true);

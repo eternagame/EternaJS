@@ -1,4 +1,5 @@
-import EPars, {RNABase, SecStruct} from 'eterna/EPars';
+import {RNABase} from 'eterna/EPars';
+import SecStruct from 'eterna/rnatypes/SecStruct';
 import PuzzleEditOp from './PuzzleEditOp';
 
 /** Utility functions for pose data */

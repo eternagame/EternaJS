@@ -1,10 +1,12 @@
-import EPars, {Sequence, SecStruct} from 'eterna/EPars';
+import EPars from 'eterna/EPars';
 import Folder from 'eterna/folding/Folder';
 import NuPACK from 'eterna/folding/NuPACK';
 import LayoutEngineManager from 'eterna/layout/LayoutEngineManager';
 import RNApuzzler from 'eterna/layout/RNApuzzler';
 import Eterna from 'eterna/Eterna';
 import {Assert} from 'flashbang';
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 
 enum RotationDirection {
     CCW = -1, // counterclockwise

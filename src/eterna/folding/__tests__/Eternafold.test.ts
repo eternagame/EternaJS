@@ -1,12 +1,8 @@
-import EPars, {SecStruct, Sequence} from 'eterna/EPars';
 import Folder from '../Folder';
 import './jest-matcher-deep-close-to';
 import EternaFold from '../Eternafold';
-import Vienna2 from '../Vienna2';
-
-function FoldSequence(folder: Folder, seq: Sequence, struct: SecStruct): SecStruct | null {
-    return folder.foldSequence(seq, null, struct.getParenthesis());
-}
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 
 function CreateFolder(type: any): Promise<Folder | null> {
     return type.create();

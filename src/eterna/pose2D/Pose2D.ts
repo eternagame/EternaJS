@@ -3,7 +3,7 @@ import {
     Container, Graphics, Point, Sprite, Texture, Rectangle
 } from 'pixi.js';
 import {Registration} from 'signals';
-import EPars, {RNABase, Sequence, SecStruct} from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import ExpPainter from 'eterna/ExpPainter';
 import {
@@ -23,7 +23,8 @@ import Booster from 'eterna/mode/PoseEdit/Booster';
 import GameMode from 'eterna/mode/GameMode';
 import Utility from 'eterna/util/Utility';
 import Folder from 'eterna/folding/Folder';
-import Puzzle from 'eterna/puzzle/Puzzle';
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 import Base from './Base';
 import BaseDrawFlags from './BaseDrawFlags';
 import EnergyScoreDisplay from './EnergyScoreDisplay';

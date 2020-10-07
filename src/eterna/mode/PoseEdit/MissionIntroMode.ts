@@ -14,7 +14,7 @@ import EternaURL from 'eterna/net/EternaURL';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import MissionIntroPanel from 'eterna/ui/MissionIntroPanel';
 import UITheme from 'eterna/ui/UITheme';
-import {SecStruct} from 'eterna/EPars';
+import SecStruct from 'eterna/rnatypes/SecStruct';
 
 export default class MissionIntroMode extends AppMode {
     constructor(

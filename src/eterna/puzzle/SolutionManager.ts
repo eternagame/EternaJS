@@ -1,7 +1,8 @@
 import * as log from 'loglevel';
-import EPars, {Sequence} from 'eterna/EPars';
+import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import Feedback, {BrentTheoData} from 'eterna/Feedback';
+import Sequence from 'eterna/rnatypes/Sequence';
 import Solution from './Solution';
 
 interface SolutionSpec {

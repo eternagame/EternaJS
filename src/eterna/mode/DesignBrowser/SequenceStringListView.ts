@@ -2,11 +2,12 @@ import {
     Container, Graphics, Sprite, Texture
 } from 'pixi.js';
 import {TextBuilder, TextureUtil} from 'flashbang';
-import EPars, {SecStruct} from 'eterna/EPars';
+import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import ExpPainter from 'eterna/ExpPainter';
 import Feedback from 'eterna/Feedback';
 import EternaTextureUtil from 'eterna/util/EternaTextureUtil';
+import SecStruct from 'eterna/rnatypes/SecStruct';
 
 export default class SequenceStringListView extends Container {
     constructor(fontname: string, fontsize: number, fontbold: boolean, letterWidth: number, letterHeight: number) {

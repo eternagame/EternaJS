@@ -1,5 +1,5 @@
 import {Rectangle} from 'pixi.js';
-import EPars, {RNABase, SecStruct} from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import {
     KeyCode, DisplayUtil, HAlign, VAlign, Updatable, ContainerObject
@@ -10,6 +10,7 @@ import TextBalloon from 'eterna/ui/TextBalloon';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
 import Fonts from 'eterna/util/Fonts';
 import UITheme from 'eterna/ui/UITheme';
+import SecStruct from 'eterna/rnatypes/SecStruct';
 
 function IsArrowKey(keyCode: string): boolean {
     return keyCode === KeyCode.ArrowRight

@@ -1,5 +1,5 @@
-import {SecStruct, Sequence} from 'eterna/EPars';
-import { Assert } from 'flashbang';
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 import Folder from '../Folder';
 import LinearFoldC from '../LinearFoldC';
 import LinearFoldE from '../LinearFoldE'; // debugging matching dot plots?

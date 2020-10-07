@@ -3,7 +3,7 @@ import MultiStyleText from 'pixi-multistyle-text';
 import {
     Container, Graphics, Point, Sprite, Text
 } from 'pixi.js';
-import {SecStruct} from 'eterna/EPars';
+import SecStruct from 'eterna/rnatypes/SecStruct';
 import Eterna from 'eterna/Eterna';
 import GameMode from 'eterna/mode/GameMode';
 import Puzzle from 'eterna/puzzle/Puzzle';

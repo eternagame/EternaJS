@@ -1,6 +1,8 @@
 import PoseOp from 'eterna/pose2D/PoseOp';
 import {Oligo} from 'eterna/pose2D/Pose2D';
-import {Sequence, SecStruct, DotPlot} from 'eterna/EPars';
+import DotPlot from 'eterna/rnatypes/DotPlot';
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 
 export type CacheItem = SecStruct | number[] | FullEvalCache | MultiFoldResult | undefined;
 export type CacheKey = Record<string, string | number | number[] | boolean | Oligo[] | null>;

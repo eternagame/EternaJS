@@ -1,10 +1,13 @@
 import * as log from 'loglevel';
 import EPars, {
-    RNABase, SecStruct, Sequence, DotPlot
+    RNABase
 } from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import Assert from 'flashbang/util/Assert';
+import DotPlot from 'eterna/rnatypes/DotPlot';
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 import * as ContrafoldLib from './engines/ContrafoldLib';
 import {DotPlotResult, FullEvalResult, FullFoldResult} from './engines/ContrafoldLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */

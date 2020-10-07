@@ -3,7 +3,6 @@ import {
     DisplayObject, Point, Text, Sprite
 } from 'pixi.js';
 import Constants from 'eterna/Constants';
-import EPars, {Sequence, SecStruct} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import Feedback, {BrentTheoData} from 'eterna/Feedback';
 import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
@@ -29,9 +28,10 @@ import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import GameDropdown from 'eterna/ui/GameDropdown';
 import {MappedValue, ValueView} from 'signals';
 import SolutionManager from 'eterna/puzzle/SolutionManager';
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 import GameMode from './GameMode';
 import ViewSolutionOverlay from './DesignBrowser/ViewSolutionOverlay';
-import DesignBrowserMode, {DesignBrowserFilter, DesignCategory} from './DesignBrowser/DesignBrowserMode';
 
 enum PoseFoldMode {
     ESTIMATE = 'ESTIMATE',

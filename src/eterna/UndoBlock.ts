@@ -1,7 +1,5 @@
 import {Assert} from 'flashbang';
-import EPars, {
-    RNABase, Sequence, SecStruct, DotPlot
-} from 'eterna/EPars';
+import {RNABase} from 'eterna/EPars';
 import Plot, {PlotType} from 'eterna/Plot';
 import Pose2D, {Oligo} from './pose2D/Pose2D';
 import Folder from './folding/Folder';
@@ -9,6 +7,9 @@ import Utility from './util/Utility';
 import Vienna from './folding/Vienna';
 import Vienna2 from './folding/Vienna2';
 import FolderManager from './folding/FolderManager';
+import DotPlot from './rnatypes/DotPlot';
+import SecStruct from './rnatypes/SecStruct';
+import Sequence from './rnatypes/Sequence';
 
 export interface FoldData {
     folderName_: string;

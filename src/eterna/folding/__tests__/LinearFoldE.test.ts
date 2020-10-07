@@ -1,4 +1,5 @@
-import {Sequence, SecStruct} from 'eterna/EPars';
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 import Folder from '../Folder';
 import LinearFoldE from '../LinearFoldE';
 import './jest-matcher-deep-close-to';

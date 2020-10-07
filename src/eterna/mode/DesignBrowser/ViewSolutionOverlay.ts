@@ -2,7 +2,7 @@ import {
     Container, Graphics, Point, Sprite, Text
 } from 'pixi.js';
 import {UnitSignal} from 'signals';
-import {SecStruct} from 'eterna/EPars';
+import SecStruct from 'eterna/rnatypes/SecStruct';
 import Eterna from 'eterna/Eterna';
 import ExpPainter from 'eterna/ExpPainter';
 import Solution from 'eterna/puzzle/Solution';

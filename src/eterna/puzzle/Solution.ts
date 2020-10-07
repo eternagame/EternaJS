@@ -1,7 +1,7 @@
 import Eterna from 'eterna/Eterna';
 import Feedback from 'eterna/Feedback';
 import {FoldData} from 'eterna/UndoBlock';
-import {Sequence} from 'eterna/EPars';
+import Sequence from 'eterna/rnatypes/Sequence';
 
 export default class Solution {
     constructor(nid: number, puzzleNID: number) {
