@@ -48,6 +48,20 @@ export default class DisplayObjectPointerTarget implements PointerTarget {
         return this._pointerUp;
     }
 
+    public get pointerUpOutside(): SignalView<InteractionEvent> {
+        if (this._pointerUpOutside == null) {
+            this._pointerUpOutside = new EventSignal(this.target, 'pointerupoutside');
+        }
+        return this._pointerUpOutside;
+    }
+
+    public get pointerCancel(): SignalView<InteractionEvent> {
+        if (this._pointerCancel == null) {
+            this._pointerCancel = new EventSignal(this.target, 'pointerupcancel');
+        }
+        return this._pointerCancel;
+    }
+
     public get pointerTap(): SignalView<InteractionEvent> {
         if (this._pointerTap == null) {
             this._pointerTap = new EventSignal(this.target, 'pointertap');
@@ -61,5 +75,7 @@ export default class DisplayObjectPointerTarget implements PointerTarget {
     private _pointerDown: EventSignal;
     private _pointerMoved: EventSignal;
     private _pointerUp: EventSignal;
+    private _pointerUpOutside: EventSignal;
+    private _pointerCancel: EventSignal;
     private _pointerTap: EventSignal;
 }

@@ -18,7 +18,8 @@ import {
     RepeatingTask,
     AlphaTask,
     SerialTask,
-    InputUtil
+    InputUtil,
+    KeyCode
 } from 'flashbang';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -34,6 +35,7 @@ import Feedback from 'eterna/Feedback';
 import SliderBar from 'eterna/ui/SliderBar';
 import {FontWeight} from 'flashbang/util/TextBuilder';
 import HTMLTextObject from 'eterna/ui/HTMLTextObject';
+import GraphicsObject from 'flashbang/objects/GraphicsObject';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import ThumbnailAndTextButton from './ThumbnailAndTextButton';
 import GameMode from '../GameMode';
@@ -105,7 +107,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         const {theme} = ViewSolutionOverlay;
 
         // Background
-        this._panelBG = new SceneObject(new Graphics());
+        this._panelBG = new GraphicsObject();
         this._panelBG.pointerMove.connect((e) => {
             if (e.data.getLocalPosition(this._panelBG.display).x > 0) {
                 e.stopPropagation();
@@ -182,7 +184,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
             this._content.destroySelf();
         }
 
-        this._content = new SceneObject(new Container());
+        this._content = new ContainerObject();
         this.addObject(this._content, this.container);
 
         // Header
@@ -482,6 +484,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
             frame: null
         });
         previous.clicked.connect(() => this._props.onPrevious());
+        previous.hotkey(KeyCode.KeyD);
         this._content.addObject(previous, footerLinks);
 
         // Next
@@ -497,6 +500,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         });
         next.clicked.connect(() => this._props.onNext());
         next.container.position.x = theme.width - theme.margin.right - theme.margin.left - next.container.width;
+        next.hotkey(KeyCode.KeyU);
         this._content.addObject(next, footerLinks);
 
         this._footer.addVSpacer(20);
@@ -669,8 +673,8 @@ export default class ViewSolutionOverlay extends ContainerObject {
 
     private readonly _props: ViewSolutionOverlayProps;
 
-    private _content: SceneObject<Container>;
-    private _panelBG: SceneObject<Graphics>;
+    private _content: ContainerObject;
+    private _panelBG: GraphicsObject;
 
     private _inputContainer: VLayoutContainer;
     private _commentsTitle: Text;

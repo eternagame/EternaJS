@@ -28,8 +28,10 @@ import BitmapManager from 'eterna/resources/BitmapManager';
 import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import GameDropdown from 'eterna/ui/GameDropdown';
 import {MappedValue, ValueView} from 'signals';
+import SolutionManager from 'eterna/puzzle/SolutionManager';
 import GameMode from './GameMode';
 import ViewSolutionOverlay from './DesignBrowser/ViewSolutionOverlay';
+import DesignBrowserMode, {DesignBrowserFilter, DesignCategory} from './DesignBrowser/DesignBrowserMode';
 
 enum PoseFoldMode {
     ESTIMATE = 'ESTIMATE',
@@ -37,10 +39,11 @@ enum PoseFoldMode {
 }
 
 export default class FeedbackViewMode extends GameMode {
-    constructor(solution: Solution, puzzle: Puzzle) {
+    constructor(solution: Solution, puzzle: Puzzle, solutions: Solution[] | null = null) {
         super();
         this._solution = solution;
         this._puzzle = puzzle;
+        if (solutions) this._cachedSolutions = solutions;
     }
 
     public get isOpaque(): boolean { return true; }
@@ -130,55 +133,94 @@ export default class FeedbackViewMode extends GameMode {
 
         this._sequence = EPars.stringToSequence(this._solution.sequence);
 
-        let secstructs: string[] = this._puzzle.getSecstructs();
-        let poseFields: PoseField[] = [];
-        for (let ii = 0; ii < secstructs.length; ii++) {
-            let secs: string = secstructs[ii];
-            if (secs != null && secs.length !== this._sequence.length) {
-                log.warn(
-                    "Solution secondary structure and sequence length doesn't match",
-                    secs.length,
-                    this._sequence.length
-                );
-                if (secs.length < this._sequence.length) {
-                    let diff: number = this._sequence.length - secs.length;
-                    for (let jj = 0; jj < diff; ++jj) {
-                        secs += '.';
+        let getPoseFields = () => {
+            let secstructs: string[] = this._puzzle.getSecstructs();
+            let poseFields: PoseField[] = [];
+            for (let ii = 0; ii < secstructs.length; ii++) {
+                let secs: string = secstructs[ii];
+                if (secs != null && secs.length !== this._sequence.length) {
+                    log.warn(
+                        "Solution secondary structure and sequence length doesn't match",
+                        secs.length,
+                        this._sequence.length
+                    );
+                    if (secs.length < this._sequence.length) {
+                        let diff: number = this._sequence.length - secs.length;
+                        for (let jj = 0; jj < diff; ++jj) {
+                            secs += '.';
+                        }
+                    } else {
+                        secs = secs.slice(0, this._sequence.length);
                     }
-                } else {
-                    secs = secs.slice(0, this._sequence.length);
+                    secstructs[ii] = secs;
                 }
-                secstructs[ii] = secs;
-            }
-            this._pairs.push(EPars.parenthesisToPairs(secstructs[ii]));
-            let datablock: UndoBlock = new UndoBlock(this._sequence, Vienna.NAME);
-            datablock.setPairs(this._pairs[ii]);
-            datablock.setBasics();
-            this._undoBlocks.push(datablock);
+                this._pairs.push(EPars.parenthesisToPairs(secstructs[ii]));
+                let datablock: UndoBlock = new UndoBlock(this._sequence, Vienna.NAME);
+                datablock.setPairs(this._pairs[ii]);
+                datablock.setBasics();
+                this._undoBlocks.push(datablock);
 
-            let poseField: PoseField = new PoseField(false);
-            this.addObject(poseField, this.poseLayer);
+                let poseField: PoseField = new PoseField(false);
+                this.addObject(poseField, this.poseLayer);
 
-            let vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
-            if (!vienna) {
-                throw new Error("Critical error: can't create a Vienna folder instance by name");
+                let vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
+                if (!vienna) {
+                    throw new Error("Critical error: can't create a Vienna folder instance by name");
+                }
+                poseField.pose.scoreFolder = vienna;
+                poseField.pose.sequence = this._sequence;
+                poseField.pose.pairs = this._pairs[ii];
+                poseFields.push(poseField);
             }
-            poseField.pose.scoreFolder = vienna;
-            poseField.pose.sequence = this._sequence;
-            poseField.pose.pairs = this._pairs[ii];
-            poseFields.push(poseField);
-        }
+            return poseFields;
+        };
+
+        let poseFields = getPoseFields();
 
         // Unlike PoseEditMode, which might be constructed with PoseEditParams
         // showing it a selection of many solutions, FeedbackViewMode cannot, so
         // we can't go previous or next.
         // AMW TODO: we need to make the other overlay buttons work in BOTH modes.
+        let getCurrentSolutionIndex = async () => {
+            // If the cached solutions are available, use those
+            // If not, grab them and store them
+            let solutionsToPuzzle;
+            if (this._cachedSolutions) solutionsToPuzzle = this._cachedSolutions;
+            else solutionsToPuzzle = await this.setCachedSolutions();
+            let currentSolutionIndex = solutionsToPuzzle.findIndex((sol) => sol.nodeID === this.solutionID);
+            return {currentSolutionIndex, solutionsToPuzzle};
+        };
+        let setNewSolution = async (newSolution: Solution) => {
+            // This function is called by the solutionView (a few layers back), so it is definitely defined
+            Assert.assertIsDefined(this._solutionView);
+            this._solutionView.showSolution(newSolution);
+            this._solution = newSolution;
+            this._sequence = EPars.stringToSequence(newSolution.sequence);
+            // Update the game, so it's not showing an outdated sequence
+            this.setPoseFields(getPoseFields());
+        };
         this._solutionView = new ViewSolutionOverlay({
             solution: this._solution,
             puzzle: this._puzzle,
             voteDisabled: false,
-            onPrevious: () => {},
-            onNext: () => {},
+            onPrevious: async () => {
+                let {currentSolutionIndex, solutionsToPuzzle} = await getCurrentSolutionIndex();
+                let newSolutionIndex = currentSolutionIndex - 1;
+                if (newSolutionIndex <= 0) {
+                    newSolutionIndex = solutionsToPuzzle.length - 1;
+                }
+                let newSolution = solutionsToPuzzle[newSolutionIndex];
+                setNewSolution(newSolution);
+            },
+            onNext: async () => {
+                let {currentSolutionIndex, solutionsToPuzzle} = await getCurrentSolutionIndex();
+                let newSolutionIndex = currentSolutionIndex + 1;
+                if (newSolutionIndex >= solutionsToPuzzle.length) {
+                    newSolutionIndex = 0;
+                }
+                let newSolution = solutionsToPuzzle[newSolutionIndex];
+                setNewSolution(newSolution);
+            },
             parentMode: (() => this)()
         });
         this.addObject(this._solutionView, this.dialogLayer);
@@ -236,6 +278,16 @@ export default class FeedbackViewMode extends GameMode {
         this.setPip(false);
 
         this.updateUILayout();
+
+        // Go ahead and fetch the solutions, so they should be ready by the time they're needed.
+        // If not, they're fetched and awaited there.
+        if (!this._cachedSolutions) this.setCachedSolutions();
+    }
+
+    private async setCachedSolutions() {
+        // Cache solutions so they don't need to be regenerated when the user navigates to the next/previous solution
+        this._cachedSolutions = await SolutionManager.instance.getSolutionsForPuzzle(this.puzzleID);
+        return this._cachedSolutions;
     }
 
     private async switchToPoseEditForSolution(solution: Solution): Promise<void> {
@@ -244,8 +296,10 @@ export default class FeedbackViewMode extends GameMode {
             // AMW: this is very similar to the DesignBrowserMode method, but we
             // don't know about a bunch of solutions -- so instead we switch with
             // only this one available.
+            // AH: This loads the cached solutions if they're available (they should be)
+            // and falls back to the current solution if they're not
             await Eterna.app.switchToPoseEdit(
-                this._puzzle, false, {initSolution: solution, solutions: [solution]}
+                this._puzzle, false, {initSolution: solution, solutions: [...this._cachedSolutions || solution]}
             );
         } catch (e) {
             log.error(e);
@@ -706,8 +760,9 @@ export default class FeedbackViewMode extends GameMode {
         this.showDialog(new SpecBoxDialog(puzzleState, false));
     }
 
-    private readonly _solution: Solution;
+    private _solution: Solution;
     private readonly _puzzle: Puzzle;
+    private _cachedSolutions: Solution[];
 
     private _toolbar: Toolbar;
     private _homeButton: GameButton;
