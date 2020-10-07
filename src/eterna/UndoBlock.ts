@@ -404,7 +404,7 @@ export default class UndoBlock {
         this.setParam(UndoBlockParam.STACK, bestPairs.getLongestStackLength(), temp, pseudoknots);
         this.setParam(UndoBlockParam.REPETITION, seq.getSequenceRepetition(5), temp, pseudoknots);
 
-        let fullSeq: number[] = seq.baseArray.slice();
+        let fullSeq: RNABase[] = seq.baseArray.slice();
         if (this._targetOligo) {
             if (this.oligoMode === Pose2D.OLIGO_MODE_DIMER) fullSeq.push(RNABase.CUT);
             if (this.oligoMode === Pose2D.OLIGO_MODE_EXT5P) {
@@ -429,8 +429,8 @@ export default class UndoBlock {
     public sumProbUnpaired(dotArray: DotPlot | null, behavior: BasePairProbabilityTransform): number {
         if (dotArray === null || dotArray.data.length === 0) return 0;
         // dotArray is organized as idx, idx, pairprob.
-        const probUnpaired: number[] = Array<number>(this.sequence.baseArray.length);
-        for (let idx = 0; idx < this.sequence.baseArray.length; ++idx) {
+        const probUnpaired: number[] = Array<number>(this.sequence.length);
+        for (let idx = 0; idx < this.sequence.length; ++idx) {
             probUnpaired[idx] = 1;
             for (let ii = 0; ii < dotArray.data.length; ii += 3) {
                 if (dotArray.data[ii] === idx + 1 || dotArray.data[ii + 1] === idx + 1) {
@@ -514,7 +514,7 @@ export default class UndoBlock {
                 count += (dotArray.data[ii + 2] * dotArray.data[ii + 2]);
             }
         }
-        return 1 - ((totDist / count) / (this.sequence.baseArray.length - 1));
+        return 1 - ((totDist / count) / (this.sequence.length - 1));
     }
 
     public updateMeltingPointAndDotPlot(pseudoknots: boolean = false): void {
@@ -536,7 +536,7 @@ export default class UndoBlock {
             this.setParam(UndoBlockParam.SUMPUNP,
                 this.sumProbUnpaired(dotArray, bppStatisticBehavior), 37, pseudoknots);
             this.setParam(UndoBlockParam.MEANPUNP,
-                this.sumProbUnpaired(dotArray, bppStatisticBehavior) / this.sequence.baseArray.length, 37, pseudoknots);
+                this.sumProbUnpaired(dotArray, bppStatisticBehavior) / this.sequence.length, 37, pseudoknots);
             // branchiness
             this.setParam(UndoBlockParam.BRANCHINESS,
                 this.ensembleBranchiness(dotArray, bppStatisticBehavior), 37, pseudoknots);
@@ -570,7 +570,7 @@ export default class UndoBlock {
                 this.setParam(UndoBlockParam.MEANPUNP,
                     this.sumProbUnpaired(
                         dotTempArray, bppStatisticBehavior
-                    ) / this.sequence.baseArray.length, ii, pseudoknots);
+                    ) / this.sequence.length, ii, pseudoknots);
                 // branchiness
                 this.setParam(UndoBlockParam.BRANCHINESS,
                     this.ensembleBranchiness(dotTempArray, bppStatisticBehavior), ii, pseudoknots);
@@ -649,7 +649,7 @@ export default class UndoBlock {
 
     public createDotPlot(): Plot {
         const plot = new Plot(PlotType.SCATTER);
-        plot.set2DData(this._dotPlotData?.data ?? null, this._sequence.baseArray.length);
+        plot.set2DData(this._dotPlotData?.data ?? null, this._sequence.length);
         return plot;
     }
 
@@ -671,7 +671,7 @@ export default class UndoBlock {
         if (this._targetOligos === undefined) return undefined;
 
         const originalIndices: number[][] = [];
-        let oligoFirstBaseIndex = this._sequence.baseArray.length;
+        let oligoFirstBaseIndex = this._sequence.length;
 
         for (const oligo of this._targetOligos) {
             // The + 1 is used to account for the "cut" base denoting split points between strands
@@ -681,7 +681,7 @@ export default class UndoBlock {
 
         const newOrder = otherOrder || Utility.range(this._targetOligos.length);
 
-        return Utility.range(this._sequence.baseArray.length).concat(
+        return Utility.range(this._sequence.length).concat(
             ...Utility.range(this._targetOligos.length).map((idx) => originalIndices[newOrder.indexOf(idx)])
         );
     }

@@ -215,6 +215,10 @@ export default class Sequence {
         this._baseArray = sequence;
     }
 
+    public nt(ii: number): RNABase {
+        return this._baseArray[ii];
+    }
+
     public get sequenceString(): string {
         return EPars.sequenceToString(this._baseArray);
     }

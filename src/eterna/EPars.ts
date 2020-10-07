@@ -21,8 +21,6 @@ export enum RNABase {
 // here, at least for some of them. They can't appear in sequences, either.
 export enum RNAPaint {
     PAIR = 5,
-    SELECT = 6,
-    MAGIC = 7,
     AU_PAIR = 9,
     GU_PAIR = 10,
     GC_PAIR = 11,
@@ -352,8 +350,8 @@ export default class EPars {
 
     public static sequenceDiff(seq1: Sequence, seq2: Sequence): number {
         let diff = 0;
-        for (let ii = 0; ii < seq1.baseArray.length; ii++) {
-            if (seq1.baseArray[ii] !== seq2.baseArray[ii]) {
+        for (let ii = 0; ii < seq1.length; ii++) {
+            if (seq1.nt(ii) !== seq2.nt(ii)) {
                 diff++;
             }
         }

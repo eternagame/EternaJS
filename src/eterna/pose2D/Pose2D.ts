@@ -2889,9 +2889,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
                         this._bases[pi].setType(this._mutatedSequence.baseArray[pi], true);
                     }
                 }
-            } else if (this._currentColor === RNAPaint.MAGIC_GLUE) {
-                // this._mutatedSequence.baseArray[seqnum] = this._currentColor;
-                this._bases[seqnum].setType(this._currentColor);
             } else if (this._currentColor === RNAPaint.AU_PAIR) {
                 if (this._pairs.pairs[seqnum] >= 0) {
                     const pi = this._pairs.pairs[seqnum];

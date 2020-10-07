@@ -101,7 +101,7 @@ function detectLoops(targetPairs: SecStruct, loops: Loop[]) {
 }
 
 const loops: Loop[][] = [];
-function countLoops(targetPairs: SecStruct, currentTargetIndex: number, sequence: number[]) {
+function countLoops(targetPairs: SecStruct, currentTargetIndex: number, sequence: RNABase[]) {
     if (!targetPairs) {
         return 0;
     }
