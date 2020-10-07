@@ -23,10 +23,10 @@ export default interface PointerTarget {
     /** Fired when a 'pointerup' event is dispatched on the object */
     pointerUp: SignalView<InteractionEvent>;
 
-    /** Fired when a 'pointerup' event is dispatched on the object */
+    /** Fired when a 'pointerupoutside' event is dispatched on the object */
     pointerUpOutside: SignalView<InteractionEvent>;
 
-    /** Fired when a 'pointerup' event is dispatched on the object */
+    /** Fired when a 'pointercancel' event is dispatched on the object */
     pointerCancel: SignalView<InteractionEvent>;
 
     /** Fired when a 'pointertap' event is dispatched on the object */

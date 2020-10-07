@@ -25,6 +25,9 @@ export default class EternaMenu extends GamePanel implements Enableable {
         if (this.inToolbar) {
             this.display.name = 'EternaMenu';
         }
+        Assert.assertIsDefined(this.mode);
+        // Since the submenu panels are positioned relative to the stage
+        this.regs.add(this.mode.resized.connect(() => this.needsLayout()));
     }
 
     public addItem(label: string, url: string): void {
@@ -68,12 +71,13 @@ export default class EternaMenu extends GamePanel implements Enableable {
         }
 
         // Clicking a submenu item hides the panel
-        // The setTimeout is required since clicking a button could get registered as a pointerTap and reopen
-        // the panel if we close it immediately
-        itemButton.clicked.connect(() => setTimeout(() => {
+        itemButton.pointerTap.connect(() => {
             menu.panel.display.visible = false;
-            if (this._activeCapture) this._activeCapture.endCapture();
-        }, 100));
+            if (this._activeCapture) {
+                menu.panel.removeObject(this._activeCapture);
+                this._activeCapture = null;
+            }
+        });
 
         this.needsLayout();
     }
@@ -87,12 +91,14 @@ export default class EternaMenu extends GamePanel implements Enableable {
         menu.panel.addObject(itemButton, menu.panel.container);
         menu.itemButtons.splice(pos, 0, itemButton);
 
-        // The setTimeout is required since clicking a button could get registered as a pointerTap and reopen
-        // the panel if we close it immediately
-        itemButton.clicked.connect(() => setTimeout(() => {
+        // Clicking a submenu item hides the panel
+        itemButton.pointerTap.connect(() => {
             menu.panel.display.visible = false;
-            if (this._activeCapture) this._activeCapture.endCapture();
-        }, 100));
+            if (this._activeCapture) {
+                menu.panel.removeObject(this._activeCapture);
+                this._activeCapture = null;
+            }
+        });
 
         this.needsLayout();
     }
@@ -197,15 +203,17 @@ export default class EternaMenu extends GamePanel implements Enableable {
                 if (!menu.panel.display.visible) {
                     showDialog();
 
-                    this._activeCapture = new PointerCapture(menu.panel.display);
-                    this._activeCapture.beginCapture((e) => {
-                        if (e.type === 'pointerdown') {
-                            // Wait a bit before closing, so that if we tapped the button,
-                            // we don't just reopen the flyout
-                            setTimeout(() => { menu.panel.display.visible = false; }, 100);
-                            this._activeCapture.endCapture();
+                    this._activeCapture = new PointerCapture(menu.panel.display, (e) => {
+                        if (e.type === 'pointertap') {
+                            menu.panel.display.visible = false;
+                            if (this._activeCapture) {
+                                menu.panel.removeObject(this._activeCapture);
+                                this._activeCapture = null;
+                            }
                         }
+                        e.stopPropagation();
                     });
+                    menu.panel.addObject(this._activeCapture);
                 }
                 this.toolbarUpdateLayout.emit();
             }
@@ -291,7 +299,7 @@ export default class EternaMenu extends GamePanel implements Enableable {
     private _menuWidth: number = 0;
     private _rightMargin: number = 0;
     private _menuHeight: number = 0;
-    private _activeCapture: PointerCapture;
+    private _activeCapture: PointerCapture | null;
     public readonly inToolbar: boolean = false;
     public toolbarUpdateLayout = new UnitSignal();
 }
