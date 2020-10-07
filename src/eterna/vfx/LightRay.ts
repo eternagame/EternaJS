@@ -1,14 +1,10 @@
-import {Graphics} from 'pixi.js';
 import {RNABase} from 'eterna/EPars';
 import {
-    SceneObject, SerialTask, AlphaTask, VisibleTask, Vector2
+    SerialTask, AlphaTask, VisibleTask, Vector2
 } from 'flashbang';
+import GraphicsObject from 'flashbang/objects/GraphicsObject';
 
-export default class LightRay extends SceneObject<Graphics> {
-    constructor() {
-        super(new Graphics());
-    }
-
+export default class LightRay extends GraphicsObject {
     public fadeIn(): void {
         this.display.alpha = 0;
         this.replaceNamedObject(LightRay.ANIM, new AlphaTask(1, 0.5));

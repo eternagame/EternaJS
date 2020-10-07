@@ -29,7 +29,8 @@ interface SolutionSpec {
     'fold-data': string;
 }
 
-interface SynthesisData {
+interface ShapeData {
+    condition: string;
     reactive: string;
     start_index: string;
     peaks: string[];
@@ -37,6 +38,17 @@ interface SynthesisData {
     threshold: string;
     max: string;
     min: string;
+}
+
+interface DegradationData {
+    condition: string;
+    reactive: string;
+    start_index: string;
+    target_index: string;
+    peaks: string[];
+    error: string[];
+    signal_to_noise_category: string;
+    signal_to_noise: string;
 }
 
 export default class SolutionManager {
@@ -129,15 +141,21 @@ export default class SolutionManager {
         newsol.setSynthesis(Number(obj['synthesis-round']), Number(obj['synthesis-score']));
 
         if (obj['synthesis-data'] && obj['synthesis-data'].length > 0) {
-            const synthesisDataRaw: SynthesisData[] | BrentTheoData = JSON.parse(obj['synthesis-data']);
+            const synthesisDataRaw: (ShapeData | DegradationData)[] | BrentTheoData = JSON.parse(obj['synthesis-data']);
             if (Array.isArray(synthesisDataRaw)) {
-                const synthesisData: SynthesisData[] = synthesisDataRaw;
+                const synthesisData: (ShapeData | DegradationData)[] = synthesisDataRaw;
 
-                for (const synthesis of synthesisData) {
+                for (let ii = 0; ii < synthesisData.length; ii++) {
+                    let synthesis: ShapeData | DegradationData = synthesisData[ii];
                     if (synthesis['reactive'] === 'SHAPE') {
-                        const peaks: number[] = [Number(synthesis['start_index'])];
+                        // This means that it's a ShapeData.
+                        // Ugh: this is better than the alternative but still a little ridiculous
+                        synthesis = synthesis as ShapeData;
+                        const peaks: number[] = [];
+                        peaks.push(Number(synthesis['start_index']));
+
                         for (const val of synthesis['peaks']) {
-                            peaks.push(Number(synthesis['peaks']));
+                            peaks.push(Number(val));
                         }
 
                         if (newfb == null) {
@@ -146,10 +164,46 @@ export default class SolutionManager {
 
                         newfb.setShapeData(
                             peaks,
+                            'SHAPE', // condition
                             Number(synthesis['target_index']),
                             Number(synthesis['threshold']),
                             Number(synthesis['max']),
                             Number(synthesis['min']),
+                            null
+                        );
+                    }
+                    if (synthesis['reactive'] === 'Degradation') {
+                        // This means that it's a ShapeData.
+                        // Ugh: this is better than the alternative but still a little ridiculous
+                        synthesis = synthesis as DegradationData;
+                        const condition = synthesis['condition'];
+                        const peaks: number[] = [];
+                        peaks.push(Number(synthesis['start_index']));
+
+                        for (const val of synthesis['peaks']) {
+                            peaks.push(Number(val));
+                        }
+
+                        const error: number[] = [];
+                        error.push(Number(synthesis['start_index']));
+
+                        for (const val of synthesis['error']) {
+                            error.push(Number(val));
+                        }
+
+                        const stnCategory: string = synthesis['signal_to_noise_category'];
+                        const stn: string = synthesis['signal_to_noise'];
+
+                        if (newfb == null) {
+                            newfb = new Feedback();
+                        }
+                        newfb.setDegradationData(
+                            peaks,
+                            condition,
+                            Number(synthesis['target_index']),
+                            error,
+                            stnCategory,
+                            Number(stn),
                             null
                         );
                     }
@@ -167,7 +221,7 @@ export default class SolutionManager {
             }
 
             if (Feedback.EXPSTRINGS.indexOf(obj['SHAPE']) >= 0) {
-                newfb.setShapeData(null, 0, null, null, null, obj['SHAPE']);
+                newfb.setShapeData(null, 'SHAPE', 0, null, null, null, obj['SHAPE']);
             } else {
                 const protoshapeArray = obj['SHAPE'].split(',');
                 const shapeArray: number[] = protoshapeArray.map(
@@ -186,7 +240,7 @@ export default class SolutionManager {
                     ? Number(obj['SHAPE-min'])
                     : null;
 
-                newfb.setShapeData(shapeArray, 0, threshold, max, min, null);
+                newfb.setShapeData(shapeArray, 'SHAPE', 0, threshold, max, min, null);
             }
         }
 

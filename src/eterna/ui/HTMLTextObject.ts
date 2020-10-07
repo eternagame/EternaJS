@@ -9,6 +9,7 @@ export default class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
         super(domParent ?? Eterna.OVERLAY_DIV_ID, document.createElement('p'));
         this._obj.innerHTML = Utility.sanitizeAndMarkup(htmlText, markup);
         this._obj.style.margin = '0px';
+        this._obj.style.overflowWrap = 'break-word';
         if (width) {
             this.width = width;
         } else {

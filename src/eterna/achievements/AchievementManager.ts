@@ -24,11 +24,11 @@ export default class AchievementManager extends GameObject {
         }
     }
 
-    public awardAchievements(achievementData: Map<string, AchievementData>): Promise<void> {
+    public awardAchievements(achievementData: {[name: string]: AchievementData}): Promise<void> {
         if (achievementData != null) {
             for (const key of Object.keys(achievementData)) {
                 if (Object.prototype.hasOwnProperty.call(achievementData, key)) {
-                    const data: AchievementData | undefined = achievementData.get(key);
+                    const data: AchievementData | undefined = achievementData[key];
                     this._pending.push(data);
                 }
             }

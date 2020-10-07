@@ -2014,7 +2014,7 @@ export default class PoseEditMode extends GameMode {
             const submissionResponse = allResults[0];
 
             // show achievements, if we were awarded any
-            const cheevs: Map< string, AchievementData > = submissionResponse['new_achievements'];
+            const cheevs: {[name: string]: AchievementData} = submissionResponse['new_achievements'];
             if (cheevs != null) {
                 await this._achievements.awardAchievements(cheevs);
             }
@@ -3276,6 +3276,12 @@ export default class PoseEditMode extends GameMode {
         this._stackLevel = -1;
         this._stackSize = 0;
         this._seqStacks = [];
+    }
+
+    public set lettersVisible(value: boolean) {
+        this._poses.forEach((e) => {
+            e.lettermode = value;
+        });
     }
 
     private readonly _puzzle: Puzzle;

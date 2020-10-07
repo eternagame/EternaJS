@@ -41,6 +41,14 @@ export default class SceneObject<T extends DisplayObject = DisplayObject> extend
         return this.getPointerTarget().pointerUp;
     }
 
+    public get pointerUpOutside(): SignalView<InteractionEvent> {
+        return this.getPointerTarget().pointerUpOutside;
+    }
+
+    public get pointerCancel(): SignalView<InteractionEvent> {
+        return this.getPointerTarget().pointerCancel;
+    }
+
     public get pointerTap(): SignalView<InteractionEvent> {
         return this.getPointerTarget().pointerTap;
     }

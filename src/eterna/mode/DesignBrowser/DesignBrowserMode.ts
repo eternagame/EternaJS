@@ -436,7 +436,7 @@ export default class DesignBrowserMode extends GameMode {
     private switchToFeedbackViewForSolution(solution: Solution): void {
         this.pushUILock();
 
-        Eterna.app.switchToFeedbackView(this._puzzle, solution)
+        Eterna.app.switchToFeedbackView(this._puzzle, solution, this._filteredSolutions)
             .then(() => this.popUILock())
             .catch((e) => {
                 log.error(e);
@@ -526,7 +526,7 @@ export default class DesignBrowserMode extends GameMode {
                 this._voteProcessor.processData(data['votes']);
                 this.syncVotes();
 
-                const cheevs: Map<string, AchievementData> = data['new_achievements'];
+                const cheevs: {[name: string]: AchievementData} = data['new_achievements'];
                 if (cheevs != null) {
                     this._achievements.awardAchievements(cheevs).then(() => { /* ignore result */ });
                 }
@@ -593,7 +593,8 @@ export default class DesignBrowserMode extends GameMode {
                     const rowIndex = this._currentSolutionIndex - this._firstVisSolutionIdx;
                     if (rowIndex >= 0) {
                         this._clickedSelectionBox.visible = true;
-                        this.updateClickedSelectionBoxPos(index);
+                        this.updateClickedSelectionBoxPos(newIndex);
+                        this._clickedSelectionBox.visible = true;
                     }
                 }
             };
@@ -657,10 +658,10 @@ export default class DesignBrowserMode extends GameMode {
 
     private updateClickedSelectionBoxPos(index: number) {
         const {designBrowser: theme} = UITheme;
-        this._clickedSelectionBox.position.y = theme.headerHeight
-            + theme.filterHeight
-            + index * theme.rowHeight
-            + theme.dataPadding / 2;
+        const start = theme.filterHeight + theme.dataPadding / 2 + theme.headerHeight;
+        const idxOffset = index - this._firstVisSolutionIdx;
+        this._clickedSelectionBox.position.y = start + idxOffset * theme.rowHeight;
+        this._clickedSelectionBox.visible = idxOffset > 0;
     }
 
     private mark(e: PIXI.interaction.InteractionEvent): void {
@@ -726,6 +727,13 @@ export default class DesignBrowserMode extends GameMode {
             this.rebuildDataColumns(this._initialDataFilters);
             this.reorganize(true);
         });
+
+        dialog.currentSelectedFilterValue = this._onlySelectedVisible;
+
+        dialog.selectedFilterUpdate.connect((e) => {
+            this._onlySelectedVisible = e;
+            this.reorganize(true);
+        });
     }
 
     private updateSortOption(category: DesignCategory, sortOrder: SortOrder, sortArgs?: string): void {
@@ -748,9 +756,13 @@ export default class DesignBrowserMode extends GameMode {
         const solutions: Solution[] = [];
         for (const sol of this._allSolutions) {
             // If any dataCol shouldn't display the solution, shouldAdd is false.
-            const shouldAdd = !this._dataCols.some(
+            let shouldAdd = !this._dataCols.some(
                 (dataCol) => !dataCol.shouldDisplay(sol)
             );
+
+            if (this._onlySelectedVisible && !this._selectedSolutionIDs?.includes(sol.nodeID)) {
+                shouldAdd = false;
+            }
 
             if (shouldAdd) {
                 solutions.push(sol);
@@ -787,6 +799,7 @@ export default class DesignBrowserMode extends GameMode {
         }
 
         this._markerBoxes.updateView(this._firstVisSolutionIdx);
+        this.updateClickedSelectionBoxPos(this._currentSolutionIndex);
     }
 
     private refreshSolutions(): void {
@@ -1048,6 +1061,7 @@ export default class DesignBrowserMode extends GameMode {
     private _allSolutions: Solution[];
     private _filteredSolutions: Solution[];
 
+    private _onlySelectedVisible = false;
     private _sortOptions: SortOptions;
     private _toolbarLayout: HLayoutContainer;
     private _returnToGameButton: GameButton;

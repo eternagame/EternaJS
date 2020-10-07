@@ -1,5 +1,5 @@
 import {
-    ContainerObject, Flashbang, ParallelTask, LocationTask, Easing, AlphaTask, SceneObject
+    ContainerObject, Flashbang, ParallelTask, LocationTask, Easing, AlphaTask
 } from 'flashbang';
 import {
     Point, Graphics, Container, Sprite
@@ -12,6 +12,7 @@ import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import Assert from 'flashbang/util/Assert';
+import GraphicsObject from 'flashbang/objects/GraphicsObject';
 import ShapeConstraint, {AntiShapeConstraint} from './constraints/ShapeConstraint';
 import ConstraintBox from './ConstraintBox';
 import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from './Constraint';
@@ -48,7 +49,7 @@ export default class ConstraintBar extends ContainerObject {
     public sequenceHighlights: Value<HighlightInfo[]> | Value<null> = new Value(null);
 
     private _collapsed = false;
-    private _background: SceneObject<Graphics>;
+    private _background: GraphicsObject;
     private _mask: Graphics;
     private _constraintsRoot: Container;
     private _constraintsLayer: Container;
@@ -83,7 +84,7 @@ export default class ConstraintBar extends ContainerObject {
         if (drawerEnabled) {
             // Background
             this._background = (() => {
-                const bg = new SceneObject(new Graphics());
+                const bg = new GraphicsObject();
                 this.addObject(bg, this.container);
 
                 bg.pointerDown.connect((e: InteractionEvent) => {

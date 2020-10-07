@@ -12,11 +12,13 @@ import GraphicsUtil from 'eterna/util/GraphicsUtil';
 import FixedWidthTextField from 'eterna/ui/FixedWidthTextField';
 import Fonts from 'eterna/util/Fonts';
 import Bitmaps from 'eterna/resources/Bitmaps';
+import GameCheckbox from 'eterna/ui/GameCheckbox';
 import {DesignCategory} from './DesignBrowserMode';
 import ButtonWithIcon from './ButtonWithIcon';
 
 export default class CustomizeColumnOrderDialog extends Dialog<void> {
     public readonly columnsReorganized = new Signal<DesignCategory[]>();
+    public readonly selectedFilterUpdate = new Signal<boolean>();
 
     constructor(
         allCategories: DesignCategory[],
@@ -92,6 +94,14 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
         this.addObject(resetButton, addCriterionLayout);
 
         addCriterionLayout.layout();
+
+        this._panelContent.addVSpacer(20);
+
+        this._currentSelectedFilterCheckbox = new GameCheckbox(12, 'Only show designs selected with control+click');
+        this._currentSelectedFilterCheckbox.toggled.connect((e) => {
+            this.selectedFilterUpdate.emit(e);
+        });
+        this.addObject(this._currentSelectedFilterCheckbox, this._panelContent);
 
         this._panelContent.addVSpacer(20);
 
@@ -303,6 +313,13 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
 
     private _columnUIs: ColumnUI[] = [];
     private _addColumnCategoryIdx: number = 0;
+
+    private _currentSelectedFilterCheckbox: GameCheckbox;
+    private _currentSelectedFilterValue: boolean;
+    public set currentSelectedFilterValue(newValue: boolean) {
+        this._currentSelectedFilterValue = newValue;
+        this._currentSelectedFilterCheckbox.toggled.value = newValue;
+    }
 }
 
 class ColumnUI {
