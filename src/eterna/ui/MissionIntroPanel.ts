@@ -62,7 +62,7 @@ export default class MissionIntroPanel extends ContainerObject {
             const sequence = new Sequence(new Array(targetPairs.length).join('A'));
             PoseThumbnail.drawToSprite(
                 this._thumbnail,
-                sequence.sequence,
+                sequence.baseArray,
                 targetPairs,
                 6,
                 PoseThumbnailType.WRONG_COLORED,

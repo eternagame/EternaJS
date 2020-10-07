@@ -58,7 +58,7 @@ export default class EternaFold extends Folder {
         outNodes: number[] | null = null
     ): number {
         const key: CacheKey = {
-            primitive: 'score', seq: seq.sequence, pairs: pairs.pairs, temp
+            primitive: 'score', seq: seq.baseArray, pairs: pairs.pairs, temp
         };
         let cache: FullEvalCache = this.getCache(key) as FullEvalCache;
 
@@ -87,7 +87,7 @@ export default class EternaFold extends Folder {
             }
         } while (0);
 
-        const cut: number = seq.sequence.indexOf(RNABase.CUT);
+        const cut: number = seq.baseArray.indexOf(RNABase.CUT);
         if (cut >= 0 && cache.nodes[0] !== -2) {
             // we just scored a duplex that wasn't one, so we have to redo it properly
             const seqA: Sequence = seq.slice(0, cut);
@@ -163,7 +163,7 @@ export default class EternaFold extends Folder {
         temp: number = 37,
         gamma: number = 6.0
     ): SecStruct {
-        const seqStr = EPars.sequenceToString(seq.sequence, false, false);
+        const seqStr = EPars.sequenceToString(seq.baseArray, false, false);
         let result: FullFoldResult | null = null;
 
         try {
@@ -184,7 +184,7 @@ export default class EternaFold extends Folder {
     /* override */
     public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = 37): DotPlot {
         const key: CacheKey = {
-            primitive: 'dotplot', seq: seq.sequence, pairs: pairs.pairs, temp
+            primitive: 'dotplot', seq: seq.baseArray, pairs: pairs.pairs, temp
         };
         let retArray: number[] = this.getCache(key) as number[];
         if (retArray != null) {

@@ -31,7 +31,7 @@ export default class PointerCapture extends GameObject {
         this._surface.display.alpha = 0;
     }
 
-    added() {
+    protected added() {
         Assert.assertIsDefined(this.mode?.container);
         this.regs.add(this.mode.resized.connect(() => this.onModeResized()));
         this.onModeResized();

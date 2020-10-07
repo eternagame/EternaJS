@@ -42,7 +42,7 @@ export default class Vienna2 extends Folder {
     /* override */
     public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = 37): DotPlot {
         const key: CacheKey = {
-            primitive: 'dotplot', seq: seq.sequence, pairs: pairs.pairs, temp
+            primitive: 'dotplot', seq: seq.baseArray, pairs: pairs.pairs, temp
         };
         let retArray: number[] = this.getCache(key) as number[];
         if (retArray != null) {
@@ -115,7 +115,7 @@ export default class Vienna2 extends Folder {
         temp: number = 37, outNodes: number[] | null = null
     ): number {
         const key: CacheKey = {
-            primitive: 'score', seq: seq.sequence, pairs: pairs.pairs, temp
+            primitive: 'score', seq: seq.baseArray, pairs: pairs.pairs, temp
         };
         let cache: FullEvalCache = this.getCache(key) as FullEvalCache;
 
@@ -147,7 +147,7 @@ export default class Vienna2 extends Folder {
             }
         } while (0);
 
-        const cut: number = seq.sequence.indexOf(RNABase.CUT);
+        const cut: number = seq.baseArray.indexOf(RNABase.CUT);
         if (cut >= 0 && cache.nodes[0] !== -2) {
             // we just scored a duplex that wasn't one, so we have to redo it properly
             const seqA: Sequence = seq.slice(0, cut);
@@ -197,7 +197,7 @@ export default class Vienna2 extends Folder {
     ): SecStruct {
         const key: CacheKey = {
             primitive: 'fold',
-            seq: seq.sequence,
+            seq: seq.baseArray,
             secondBestPairs: secondBestPairs ? secondBestPairs.pairs : null,
             desiredPairs,
             temp
@@ -224,7 +224,7 @@ export default class Vienna2 extends Folder {
     ): SecStruct {
         const key: CacheKey = {
             primitive: 'foldAptamer',
-            seq: seq.sequence,
+            seq: seq.baseArray,
             targetPairs: targetPairs ? targetPairs.pairs : null,
             bindingSite,
             bonus,
@@ -295,14 +295,14 @@ export default class Vienna2 extends Folder {
         seq: Sequence, secondBestPairs: SecStruct, malus: number = 0,
         desiredPairs: string | null = null, temp: number = 37
     ): SecStruct {
-        const cut: number = seq.sequence.indexOf(RNABase.CUT);
+        const cut: number = seq.baseArray.indexOf(RNABase.CUT);
         if (cut < 0) {
             throw new Error('Missing cutting point');
         }
 
         const key: CacheKey = {
             primitive: 'cofold',
-            seq: seq.sequence,
+            seq: seq.baseArray,
             secondBestPairs: secondBestPairs.pairs,
             malus,
             desiredPairs,
@@ -348,14 +348,14 @@ export default class Vienna2 extends Folder {
         seq: Sequence, bindingSite: number[], bonus: number, desiredPairs: string | null = null,
         malus: number = 0, temp: number = 37
     ): SecStruct {
-        const cut: number = seq.sequence.indexOf(RNABase.CUT);
+        const cut: number = seq.baseArray.indexOf(RNABase.CUT);
         if (cut < 0) {
             throw new Error('Missing cutting point');
         }
 
         const key: CacheKey = {
             primitive: 'cofoldAptamer',
-            seq: seq.sequence,
+            seq: seq.baseArray,
             malus,
             desiredPairs,
             bindingSite,
@@ -719,7 +719,7 @@ export default class Vienna2 extends Folder {
     private foldSequenceWithBindingSiteImpl(
         seq: Sequence, i: number, p: number, j: number, q: number, bonus: number
     ): SecStruct {
-        const seqStr = EPars.sequenceToString(seq.sequence, false, false);
+        const seqStr = EPars.sequenceToString(seq.baseArray, false, false);
         const structStr = '';
         let result: FullFoldResult | null = null;
 
@@ -741,7 +741,7 @@ export default class Vienna2 extends Folder {
     }
 
     private cofoldSequenceImpl(seq: Sequence, str: string | null = null): SecStruct {
-        const seqStr = EPars.sequenceToString(seq.sequence, true, false);
+        const seqStr = EPars.sequenceToString(seq.baseArray, true, false);
         const structStr: string = str || '';
         let result: FullFoldResult | null = null;
 
@@ -766,7 +766,7 @@ export default class Vienna2 extends Folder {
     private cofoldSequenceWithBindingSiteImpl(
         seq: Sequence, str: string | null, i: number, p: number, j: number, q: number, bonus: number
     ): SecStruct {
-        const seqStr = EPars.sequenceToString(seq.sequence, true, false);
+        const seqStr = EPars.sequenceToString(seq.baseArray, true, false);
         const structStr: string = str || '';
         let result: FullFoldResult | null = null;
 

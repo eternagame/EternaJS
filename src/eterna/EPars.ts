@@ -346,8 +346,8 @@ export default class EPars {
 
     public static sequenceDiff(seq1: Sequence, seq2: Sequence): number {
         let diff = 0;
-        for (let ii = 0; ii < seq1.sequence.length; ii++) {
-            if (seq1.sequence[ii] !== seq2.sequence[ii]) {
+        for (let ii = 0; ii < seq1.baseArray.length; ii++) {
+            if (seq1.baseArray[ii] !== seq2.baseArray[ii]) {
                 diff++;
             }
         }

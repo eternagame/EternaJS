@@ -29,7 +29,7 @@ export default class SecStruct {
             if (this.pairs[ii] < 0) {
                 retPairs[ii] = -1;
             } else if (this.pairs[ii] > ii) {
-                if (EPars.pairType(seq.sequence[ii], seq.sequence[this.pairs[ii]]) !== 0) {
+                if (EPars.pairType(seq.baseArray[ii], seq.baseArray[this.pairs[ii]]) !== 0) {
                     retPairs[ii] = this.pairs[ii];
                     retPairs[this.pairs[ii]] = ii;
                 } else {
@@ -218,7 +218,7 @@ export default class SecStruct {
         }
     }
 
-    public getParenthesis(seq: number[] | null = null,
+    public getParenthesis(seq: Sequence | null = null,
         pseudoknots: boolean = false): string {
         if (pseudoknots) {
             // given partner-style array, writes dot-parens notation string. handles pseudoknots!
@@ -313,7 +313,7 @@ export default class SecStruct {
                 str += '(';
             } else if (biPairs[ii] >= 0) {
                 str += ')';
-            } else if (seq != null && seq[ii] === RNABase.CUT) {
+            } else if (seq != null && seq.hasCut(ii)) {
                 str += '&';
             } else {
                 str += '.';

@@ -513,14 +513,14 @@ export default class Puzzle {
 
     public getSubsequenceWithoutBarcode(seq: Sequence): Sequence {
         if (!this._useBarcode) {
-            return new Sequence(EPars.sequenceToString(seq.sequence.slice()));
+            return new Sequence(EPars.sequenceToString(seq.baseArray.slice()));
         }
         let minus = 19;
         if (this._useTails) {
             minus += 20;
         }
 
-        return new Sequence(EPars.sequenceToString(seq.sequence.slice(0, seq.length - minus)));
+        return new Sequence(EPars.sequenceToString(seq.baseArray.slice(0, seq.length - minus)));
     }
 
     public setUseTails(useTails: boolean, useShortTails: boolean): void {
@@ -572,11 +572,11 @@ export default class Puzzle {
 
         for (let ii = 0; ii < targetSeq.length; ii++) {
             if (!locks[ii]) {
-                targetSeq[ii] = seq.sequence[ii];
+                targetSeq[ii] = seq.baseArray[ii];
             }
         }
 
-        return Sequence.fromSequence(targetSeq);
+        return Sequence.fromBaseArray(targetSeq);
     }
 
     public get alreadySolved() {

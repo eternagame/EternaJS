@@ -615,7 +615,7 @@ export default class PoseEditMode extends GameMode {
                 this.updateScore();
                 this.transformPosesMarkers();
             } else {
-                const sequence = solution.sequence.sequence;
+                const sequence = solution.sequence.baseArray;
                 for (const pose of this._poses) {
                     pose.pasteSequence(sequence);
                 }
@@ -860,7 +860,7 @@ export default class PoseEditMode extends GameMode {
 
         let initialSequence: number[] | null = null;
         if (this._params.initSolution != null) {
-            initialSequence = this._params.initSolution.sequence.sequence;
+            initialSequence = this._params.initSolution.sequence.baseArray;
             this._curSolution = this._params.initSolution;
             // AMW: I'm keeping the function around in case we want to call it
             // in some other context, but we don't need it anymore.
@@ -886,7 +886,7 @@ export default class PoseEditMode extends GameMode {
         for (let ii = 0; ii < this._poses.length; ii++) {
             let seq = initialSequence;
             if (seq == null) {
-                seq = this._puzzle.getBeginningSequence(ii).sequence;
+                seq = this._puzzle.getBeginningSequence(ii).baseArray;
                 if (this._puzzle.puzzleType === PuzzleType.CHALLENGE && !this._params.isReset) {
                     const savedSeq: number[] = this._puzzle.savedSequence;
                     if (savedSeq != null) {
@@ -900,7 +900,7 @@ export default class PoseEditMode extends GameMode {
             }
 
             Assert.assertIsDefined(seq);
-            this._poses[ii].sequence = this._puzzle.transformSequence(Sequence.fromSequence(seq), ii);
+            this._poses[ii].sequence = this._puzzle.transformSequence(Sequence.fromBaseArray(seq), ii);
             if (this._puzzle.barcodeIndices != null) {
                 this._poses[ii].barcodes = this._puzzle.barcodeIndices;
             }
@@ -1056,8 +1056,8 @@ export default class PoseEditMode extends GameMode {
             }
 
             const nativePairs: SecStruct = this.getCurrentUndoBlock(indx).getPairs();
-            const seqArr: Sequence = this.getPose(indx).fullSequence;
-            return nativePairs.getParenthesis(seqArr.sequence);
+            const seq: Sequence = this.getPose(indx).fullSequence;
+            return nativePairs.getParenthesis(seq);
         });
 
         this._scriptInterface.addCallback('get_free_energy', (indx: number): number => {
@@ -2285,7 +2285,7 @@ export default class PoseEditMode extends GameMode {
 
         const objs: SaveStoreItem = [
             0,
-            this._seqStacks[this._stackLevel][0].sequence.sequence
+            this._seqStacks[this._stackLevel][0].sequence.baseArray
         ];
         for (let ii = 0; ii < this._poses.length; ++ii) {
             objs.push(JSON.stringify(this._seqStacks[this._stackLevel][ii].toJSON()));
@@ -2303,7 +2303,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     private transferToPuzzlemaker(): void {
-        const poseData: SaveStoreItem = [0, this._poses[0].sequence.sequence];
+        const poseData: SaveStoreItem = [0, this._poses[0].sequence.baseArray];
         for (const [i, pose] of Object.entries(this._poses)) {
             poseData.push(JSON.stringify({
                 sequence: pose.sequence.sequenceString,
@@ -2326,7 +2326,7 @@ export default class PoseEditMode extends GameMode {
         //     return false;
         // }
 
-        const beginningSequence: number[] = this._puzzle.getBeginningSequence().sequence;
+        const beginningSequence: number[] = this._puzzle.getBeginningSequence().baseArray;
         const locks: boolean[] = this._puzzle.puzzleLocks;
         let oligoLen = 0;
 
@@ -2397,7 +2397,7 @@ export default class PoseEditMode extends GameMode {
         }
 
         for (let ii = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].sequence = this._puzzle.transformSequence(Sequence.fromSequence(a), ii);
+            this._poses[ii].sequence = this._puzzle.transformSequence(Sequence.fromBaseArray(a), ii);
             this._poses[ii].puzzleLocks = locks;
         }
         this.poseEditByTarget(0);
@@ -2414,8 +2414,8 @@ export default class PoseEditMode extends GameMode {
     private moveHistoryAddMutations(before: Sequence, after: Sequence): void {
         const muts: Move[] = [];
         for (let ii = 0; ii < after.length; ii++) {
-            if (after.sequence[ii] !== before.sequence[ii]) {
-                muts.push({pos: ii + 1, base: EPars.sequenceToString([after.sequence[ii]])});
+            if (after.baseArray[ii] !== before.baseArray[ii]) {
+                muts.push({pos: ii + 1, base: EPars.sequenceToString([after.baseArray[ii]])});
             }
         }
         if (muts.length === 0) return;
@@ -2984,15 +2984,15 @@ export default class PoseEditMode extends GameMode {
                 : Number(tc['fold_mode']);
             if (foldMode === Pose2D.OLIGO_MODE_DIMER) {
                 log.debug('cofold');
-                fullSeq = seq.sequence.concat(EPars.stringToSequence(`&${tc['oligo_sequence']}`));
+                fullSeq = seq.baseArray.concat(EPars.stringToSequence(`&${tc['oligo_sequence']}`));
                 malus = int(tc['malus'] as number * 100);
-                bestPairs = this._folder.cofoldSequence(Sequence.fromSequence(fullSeq), null, malus, forceStruct);
+                bestPairs = this._folder.cofoldSequence(Sequence.fromBaseArray(fullSeq), null, malus, forceStruct);
             } else if (foldMode === Pose2D.OLIGO_MODE_EXT5P) {
-                fullSeq = EPars.stringToSequence(tc['oligo_sequence'] as string).concat(seq.sequence);
-                bestPairs = this._folder.foldSequence(Sequence.fromSequence(fullSeq), null, forceStruct);
+                fullSeq = EPars.stringToSequence(tc['oligo_sequence'] as string).concat(seq.baseArray);
+                bestPairs = this._folder.foldSequence(Sequence.fromBaseArray(fullSeq), null, forceStruct);
             } else {
-                fullSeq = seq.sequence.concat(EPars.stringToSequence(tc['oligo_sequence'] as string));
-                bestPairs = this._folder.foldSequence(Sequence.fromSequence(fullSeq), null, forceStruct);
+                fullSeq = seq.baseArray.concat(EPars.stringToSequence(tc['oligo_sequence'] as string));
+                bestPairs = this._folder.foldSequence(Sequence.fromBaseArray(fullSeq), null, forceStruct);
             }
         } else if (tc['type'] === 'aptamer+oligo') {
             bonus = tc['bonus'] as number;
@@ -3002,20 +3002,20 @@ export default class PoseEditMode extends GameMode {
                 : Number(tc['fold_mode']);
             if (foldMode === Pose2D.OLIGO_MODE_DIMER) {
                 log.debug('cofold');
-                fullSeq = seq.sequence.concat(EPars.stringToSequence(`&${tc['oligo_sequence']}`));
+                fullSeq = seq.baseArray.concat(EPars.stringToSequence(`&${tc['oligo_sequence']}`));
                 malus = int(tc['malus'] as number * 100);
                 bestPairs = this._folder.cofoldSequenceWithBindingSite(
-                    Sequence.fromSequence(fullSeq), sites, bonus, forceStruct, malus
+                    Sequence.fromBaseArray(fullSeq), sites, bonus, forceStruct, malus
                 );
             } else if (foldMode === Pose2D.OLIGO_MODE_EXT5P) {
-                fullSeq = EPars.stringToSequence(tc['oligo_sequence'] as string).concat(seq.sequence);
+                fullSeq = EPars.stringToSequence(tc['oligo_sequence'] as string).concat(seq.baseArray);
                 bestPairs = this._folder.foldSequenceWithBindingSite(
-                    Sequence.fromSequence(fullSeq), this._targetPairs[ii], sites, Number(bonus), tc['fold_version']
+                    Sequence.fromBaseArray(fullSeq), this._targetPairs[ii], sites, Number(bonus), tc['fold_version']
                 );
             } else {
-                fullSeq = seq.sequence.concat(EPars.stringToSequence(tc['oligo_sequence'] as string));
+                fullSeq = seq.baseArray.concat(EPars.stringToSequence(tc['oligo_sequence'] as string));
                 bestPairs = this._folder.foldSequenceWithBindingSite(
-                    Sequence.fromSequence(fullSeq), this._targetPairs[ii], sites, Number(bonus), tc['fold_version']
+                    Sequence.fromBaseArray(fullSeq), this._targetPairs[ii], sites, Number(bonus), tc['fold_version']
                 );
             }
         } else if (tc['type'] === 'multistrand') {
@@ -3030,7 +3030,7 @@ export default class PoseEditMode extends GameMode {
 
             const key: CacheKey = {
                 primitive: 'multifold',
-                seq: this._puzzle.transformSequence(seq, ii).sequence,
+                seq: this._puzzle.transformSequence(seq, ii).baseArray,
                 secondBestPairs: null,
                 oligos,
                 desiredPairs: null,

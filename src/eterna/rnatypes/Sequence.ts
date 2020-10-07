@@ -3,22 +3,25 @@ import SecStruct from './SecStruct';
 
 export default class Sequence {
     constructor(seq: string) {
-        this._sequence = seq;
+        this._sequenceString = seq;
     }
 
-    public hasCut(from: number, to: number): boolean {
-        return this.sequence.slice(from, to + 1).some(
+    public hasCut(from: number, to?: number): boolean {
+        if (to === undefined) {
+            to = from;
+        }
+        return this.baseArray.slice(from, to + 1).some(
             (c) => c === RNABase.CUT
         );
     }
 
-    public static fromSequence(seq: number[]) {
+    public static fromBaseArray(seq: number[]) {
         return new Sequence(EPars.sequenceToString(seq));
     }
 
     public getColoredSequence(): string {
         let res = '';
-        for (const c of this._sequence) {
+        for (const c of this._sequenceString) {
             res += EPars.getColoredLetter(c);
         }
         return res;
@@ -27,7 +30,7 @@ export default class Sequence {
     public getExpColoredSequence(expData: number[]): string {
         // AMW TODO: how could this be?
         if (expData == null) {
-            return this._sequence;
+            return this._sequenceString;
         }
 
         const offset: number = expData[0];
@@ -37,13 +40,13 @@ export default class Sequence {
         const avg: number = (maxmax + minmin) / 2.0;
 
         let res = '';
-        for (let ii = 0; ii < this._sequence.length; ii++) {
+        for (let ii = 0; ii < this._sequenceString.length; ii++) {
             if (ii < offset - 1 || ii >= expData.length) {
-                res += this._sequence[ii];
+                res += this._sequenceString[ii];
             } else if (expData[ii] < avg) {
-                res += `<FONT COLOR='#7777FF'>${this._sequence[ii]}</FONT>`;
+                res += `<FONT COLOR='#7777FF'>${this._sequenceString[ii]}</FONT>`;
             } else {
-                res += `<FONT COLOR='#FF7777'>${this._sequence[ii]}</FONT>`;
+                res += `<FONT COLOR='#FF7777'>${this._sequenceString[ii]}</FONT>`;
             }
         }
 
@@ -51,7 +54,7 @@ export default class Sequence {
     }
 
     public countConsecutive(letter: number, locks: boolean[] | null = null): number {
-        const sequence = EPars.stringToSequence(this._sequence);
+        const sequence = EPars.stringToSequence(this._sequenceString);
 
         let maxConsecutive = 0;
 
@@ -93,7 +96,7 @@ export default class Sequence {
     public getRestrictedConsecutive(
         letter: number, maxAllowed: number, locks: boolean[] | null = null
     ): number[] {
-        const sequence = EPars.stringToSequence(this._sequence);
+        const sequence = EPars.stringToSequence(this._sequenceString);
 
         const restricted: number[] = [];
 
@@ -145,8 +148,8 @@ export default class Sequence {
         const dict: Set<string> = new Set<string>();
         let numRepeats = 0;
 
-        for (let ii = 0; ii < this._sequence.length - n; ii++) {
-            const substr: string = this._sequence.substr(ii, n);
+        for (let ii = 0; ii < this._sequenceString.length - n; ii++) {
+            const substr: string = this._sequenceString.substr(ii, n);
             if (dict.has(substr)) {
                 numRepeats++;
             } else {
@@ -158,7 +161,7 @@ export default class Sequence {
     }
 
     public numGUPairs(pairs: SecStruct): number {
-        const sequence = EPars.stringToSequence(this._sequence);
+        const sequence = EPars.stringToSequence(this._sequenceString);
         let ret = 0;
 
         for (let ii = 0; ii < pairs.length; ii++) {
@@ -176,7 +179,7 @@ export default class Sequence {
     }
 
     public numGCPairs(pairs: SecStruct): number {
-        const sequence = EPars.stringToSequence(this._sequence);
+        const sequence = EPars.stringToSequence(this._sequenceString);
         let ret = 0;
 
         for (let ii = 0; ii < pairs.length; ii++) {
@@ -194,7 +197,7 @@ export default class Sequence {
     }
 
     public numUAPairs(pairs: SecStruct): number {
-        const sequence = EPars.stringToSequence(this._sequence);
+        const sequence = EPars.stringToSequence(this._sequenceString);
         let ret = 0;
 
         for (let ii = 0; ii < pairs.length; ii++) {
@@ -211,20 +214,20 @@ export default class Sequence {
         return ret;
     }
 
-    public get sequence(): number[] {
-        return EPars.stringToSequence(this._sequence);
+    public get baseArray(): number[] {
+        return EPars.stringToSequence(this._sequenceString);
     }
 
-    public set sequence(sequence: number[]) {
-        this._sequence = EPars.sequenceToString(sequence);
+    public set baseArray(sequence: number[]) {
+        this._sequenceString = EPars.sequenceToString(sequence);
     }
 
     public get sequenceString(): string {
-        return this._sequence;
+        return this._sequenceString;
     }
 
     public get length(): number {
-        return this._sequence.length;
+        return this._sequenceString.length;
     }
 
     /**
@@ -235,11 +238,11 @@ export default class Sequence {
      */
     public slice(start: number, end: number = -1): Sequence {
         if (end === -1) {
-            return new Sequence(this._sequence.substr(start));
+            return new Sequence(this._sequenceString.substr(start));
         } else {
-            return new Sequence(this._sequence.substr(start, end));
+            return new Sequence(this._sequenceString.substr(start, end));
         }
     }
 
-    private _sequence: string;
+    private _sequenceString: string;
 }

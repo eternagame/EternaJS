@@ -19,7 +19,7 @@ abstract class MinimumBaseConstraint extends Constraint<MinBaseConstraintStatus>
 
     public evaluate(context: ConstraintContext): MinBaseConstraintStatus {
         // TODO: Multistate?
-        const count = context.undoBlocks[0].sequence.sequence.reduce(
+        const count = context.undoBlocks[0].sequence.baseArray.reduce(
             (acc, curr) => acc + (curr === this.baseType ? 1 : 0), 0
         );
 

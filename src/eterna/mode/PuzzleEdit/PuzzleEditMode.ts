@@ -265,7 +265,7 @@ export default class PuzzleEditMode extends GameMode {
             pose.scoreFolder = this._folder;
             pose.molecularStructure = defaultPairs;
             pose.molecularBindingBonus = -4.86;
-            pose.sequence.sequence = EPars.stringToSequence(defaultSequence);
+            pose.sequence.baseArray = EPars.stringToSequence(defaultSequence);
             poseFields.push(poseField);
 
             const structureInput = new StructureInput(pose);
@@ -310,7 +310,7 @@ export default class PuzzleEditMode extends GameMode {
     }
 
     private saveData(): void {
-        const objs: SaveStoreItem = [0, this._poses[0].sequence.sequence];
+        const objs: SaveStoreItem = [0, this._poses[0].sequence.baseArray];
         for (const pose of this._poses) {
             Assert.assertIsDefined(pose.molecularStructure);
             objs.push(JSON.stringify({
@@ -461,7 +461,7 @@ export default class PuzzleEditMode extends GameMode {
                     const {sequence} = pose;
                     for (let ii = 0; ii < sequence.length; ii++) {
                         if (!pose.isLocked(ii)) {
-                            sequence.sequence[ii] = RNABase.ADENINE;
+                            sequence.baseArray[ii] = RNABase.ADENINE;
                         }
                     }
 

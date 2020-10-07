@@ -30,7 +30,7 @@ export default class PoseThumbnail {
         customLayout: Array<[number, number] | [null, null]> | null = null
     ): Texture {
         const disp: DisplayObject = PoseThumbnail.create(
-            sequence.sequence, pairs, size, type,
+            sequence.baseArray, pairs, size, type,
             expStartIndex, wrongPairs, expUseThreshold, expThreshold,
             null, customLayout
         );
@@ -50,7 +50,7 @@ export default class PoseThumbnail {
     ) {
         const graphics = new Graphics();
         PoseThumbnail.create(
-            sequence.sequence, pairs, size, type, expStartIndex, wrongPairs, expUseThreshold, expThreshold, graphics,
+            sequence.baseArray, pairs, size, type, expStartIndex, wrongPairs, expUseThreshold, expThreshold, graphics,
             customLayout
         );
         const newGraphics = graphics.clone();

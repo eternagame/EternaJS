@@ -25,7 +25,7 @@ export default abstract class LinearFoldBase extends Folder {
 
     public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = 37): DotPlot {
         const key: CacheKey = {
-            primitive: 'dotplot', seq: seq.sequence, pairs: pairs.pairs, temp
+            primitive: 'dotplot', seq: seq.baseArray, pairs: pairs.pairs, temp
         };
         let retArray: number[] = this.getCache(key) as number[];
         if (retArray != null) {
@@ -68,7 +68,7 @@ export default abstract class LinearFoldBase extends Folder {
         temp: number = 37, outNodes: number[] | null = null
     ): number {
         const key: CacheKey = {
-            primitive: 'score', seq: seq.sequence, pairs: pairs.pairs, temp
+            primitive: 'score', seq: seq.baseArray, pairs: pairs.pairs, temp
         };
         let cache: FullEvalCache = this.getCache(key) as FullEvalCache;
 
@@ -101,7 +101,7 @@ export default abstract class LinearFoldBase extends Folder {
             }
         } while (0);
 
-        const cut: number = seq.sequence.indexOf(RNABase.CUT);
+        const cut: number = seq.baseArray.indexOf(RNABase.CUT);
         if (cut >= 0 && cache.nodes[0] !== -2) {
             // we just scored a duplex that wasn't one, so we have to redo it properly
             const seqA: Sequence = seq.slice(0, cut);
@@ -150,7 +150,7 @@ export default abstract class LinearFoldBase extends Folder {
     ): SecStruct {
         const key: CacheKey = {
             primitive: 'fold',
-            seq: seq.sequence,
+            seq: seq.baseArray,
             secondBestPairs: secondBestPairs?.pairs ?? null,
             desiredPairs,
             temp
@@ -166,7 +166,7 @@ export default abstract class LinearFoldBase extends Folder {
     }
 
     private fullFoldDefault(seq: Sequence): SecStruct {
-        const seqStr = EPars.sequenceToString(seq.sequence, false, false);
+        const seqStr = EPars.sequenceToString(seq.baseArray, false, false);
         let result: FullFoldResult | null = null;
 
         try {
