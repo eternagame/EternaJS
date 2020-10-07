@@ -559,7 +559,6 @@ export default class FeedbackViewMode extends GameMode {
         this._toolbar.letterColorButton.toggled.value = false;
         this._toolbar.expColorButton.toggled.value = true;
 
-        console.error(this._dataOption.value);
         if (this._dataOption.value === 'SHAPE') {
             if (this._isPipMode) {
                 for (let ii = 0; ii < this._poseFields.length; ii++) {
