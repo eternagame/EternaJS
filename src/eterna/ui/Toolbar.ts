@@ -273,11 +273,9 @@ export default class Toolbar extends ContainerObject {
         this.actionMenu = new EternaMenu(EternaMenuStyle.PULLUP, true);
         this.addObject(this.actionMenu, this.lowerToolbarLayout);
 
-        this.actionMenu.toolbarUpdateLayout.connect(() => {
-            // If only called once, the arrows fly up. Calling it twice fixes that issue
+        this.regs.add(this.actionMenu.toolbarUpdateLayout.connect(() => {
             this.updateLayout();
-            this.updateLayout();
-        });
+        }));
 
         this.actionMenu.addMenuButton(new GameButton().allStates(Bitmaps.NovaMenu).disabled(undefined));
 
@@ -379,7 +377,7 @@ export default class Toolbar extends ContainerObject {
                 let data = this._boostersData.actions[ii];
                 Booster.create(this.mode as PoseEditMode, data).then((booster) => {
                     let button: GameButton = booster.createButton(14);
-                    button.clicked.connect(() => booster.onRun());
+                    this.regs.add(button.clicked.connect(() => booster.onRun()));
                     this.actionMenu.addSubMenuButtonAt(boosterMenuIdx, button, ii);
                     this.dynActionTools.push(button);
                 });
@@ -523,10 +521,10 @@ export default class Toolbar extends ContainerObject {
                     Booster.create(mode, data).then((booster) => {
                         booster.onLoad();
                         let button: GameButton = booster.createButton();
-                        button.clicked.connect(() => {
+                        this.regs.add(button.clicked.connect(() => {
                             mode.setPosesColor(booster.toolColor);
                             this._deselectAllPaintTools();
-                        });
+                        }));
                         this.dynPaintTools.push(button);
                         this.addObject(button, boosterPaintToolsLayout);
                         this.updateLayout();
@@ -633,24 +631,24 @@ export default class Toolbar extends ContainerObject {
             this.scrollContainer.setScroll(this.scrollContainer.scrollX - 10, this.scrollContainer.scrollY);
             this.updateArrowVisibility();
         };
-        this.rightArrow.pointerDown.connect(() => {
+        this.regs.add(this.rightArrow.pointerDown.connect(() => {
             endScroll();
             interval = setInterval(scrollRight, 100);
-        });
-        this.rightArrow.pointerUp.connect(() => endScroll());
-        this.leftArrow.pointerDown.connect(() => {
+        }));
+        this.regs.add(this.rightArrow.pointerUp.connect(() => endScroll()));
+        this.regs.add(this.leftArrow.pointerDown.connect(() => {
             endScroll();
             interval = setInterval(scrollLeft, 100);
-        });
-        this.leftArrow.pointerUp.connect(() => endScroll());
-        this.rightArrow.clicked.connect(() => {
+        }));
+        this.regs.add(this.leftArrow.pointerUp.connect(() => endScroll()));
+        this.regs.add(this.rightArrow.pointerTap.connect(() => {
             endScroll();
             scrollRight();
-        });
-        this.leftArrow.clicked.connect(() => {
+        }));
+        this.regs.add(this.leftArrow.pointerTap.connect(() => {
             endScroll();
             scrollLeft();
-        });
+        }));
 
         this.onResized();
 
@@ -694,22 +692,24 @@ export default class Toolbar extends ContainerObject {
         let mouseDown = false;
         let startingX: number;
         let startingScroll: number;
-        this.pointerDown.connect((e) => {
+        this.regs.add(this.pointerDown.connect((e) => {
             let {x, y} = e.data.global;
             if (this.lowerToolbarLayout.getBounds().contains(x, y)) {
                 mouseDown = true;
                 startingX = x;
                 startingScroll = this.scrollContainer.scrollX;
             }
-        });
-        this.pointerUp.connect((e) => {
-            mouseDown = false;
-        });
+        }));
 
-        this.scrollContainer.display.on('pointerupoutside', () => {
+        this.regs.add(this.pointerUp.connect((e) => {
             mouseDown = false;
-        });
-        this.pointerMove.connect((e) => {
+        }));
+
+        this.regs.add(this.scrollContainer.pointerUpOutside.connect(() => {
+            mouseDown = false;
+        }));
+
+        this.regs.add(this.pointerMove.connect((e) => {
             let {x, y} = e.data.global;
             if (e.data.buttons === 1 && mouseDown && this.lowerToolbarLayout.getBounds().contains(x, y)) {
                 let offset = x - startingX;
@@ -717,7 +717,7 @@ export default class Toolbar extends ContainerObject {
                     this.scrollContainer.scrollX = startingScroll - offset;
                 }
             }
-        });
+        }));
     }
 
     private updateLayout(): void {
