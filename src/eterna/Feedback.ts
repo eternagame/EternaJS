@@ -323,8 +323,7 @@ export default class Feedback {
     }
 
     public get conditions(): string[] {
-        const conds = ['SHAPE'];
-        // console.error(this._degradationData.keys());
+        let conds = ['SHAPE'];
         return Array.prototype.concat(conds, Array.from(this._degradationData.keys()));
     }
 
