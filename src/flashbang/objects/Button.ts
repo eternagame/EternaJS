@@ -121,7 +121,7 @@ export default abstract class Button extends ContainerObject implements Enableab
 
     private setState(newState: ButtonState): void {
         if (this._state !== newState) {
-            let oldState: ButtonState = this._state;
+            const oldState: ButtonState = this._state;
             this._state = newState;
             this.showState(this._state);
             this.playStateTransitionSound(oldState, this._state);

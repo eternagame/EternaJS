@@ -24,9 +24,9 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
 
         const showShortcuts = !Eterna.MOBILE_APP;
 
-        let settingsLayout: VLayoutContainer = new VLayoutContainer(15, HAlign.LEFT);
+        const settingsLayout: VLayoutContainer = new VLayoutContainer(15, HAlign.LEFT);
 
-        let bind = (setting: Setting<boolean>, name: string) => {
+        const bind = (setting: Setting<boolean>, name: string) => {
             this.addObject(EternaViewOptionsDialog.createCheckbox(name, setting), settingsLayout);
         };
 
@@ -54,7 +54,7 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
 
         const NUM_VOLUME_BUTTONS = 5;
 
-        let soundButtonLayout = new HLayoutContainer(4);
+        const soundButtonLayout = new HLayoutContainer(4);
         settingsLayout.addChild(soundButtonLayout);
 
         this._muteButton = new GameButton().allStates(Bitmaps.AudioNormal);
@@ -70,7 +70,7 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
         this.addObject(this._muteButton, soundButtonLayout);
 
         for (let ii = 0; ii < NUM_VOLUME_BUTTONS; ++ii) {
-            let volumeButton = new GameButton().allStates(Bitmaps.Audio_Vol_On);
+            const volumeButton = new GameButton().allStates(Bitmaps.Audio_Vol_On);
             volumeButton.display.scale = new Point(0.3, 0.3);
             volumeButton.downSound = null;
             volumeButton.clicked.connect(() => {
@@ -121,7 +121,7 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
         this.addObject(closeButton, this.container);
         closeButton.clicked.connect(() => this.close(null));
 
-        let updateLocation = () => {
+        const updateLocation = () => {
             Assert.assertIsDefined(Flashbang.stageHeight);
             const idealHeight = this._viewLayout.height + 40 + this._panel.titleHeight;
             const maxHeight = Flashbang.stageHeight * 0.8;
@@ -173,16 +173,16 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
 
         this._muteButton.allStates(mute ? Bitmaps.AudioMute : Bitmaps.AudioNormal);
 
-        let numVolumeButtons = this._volumeButtons.length;
+        const numVolumeButtons = this._volumeButtons.length;
         for (let ii = 0; ii < numVolumeButtons; ++ii) {
-            let volumeButton = this._volumeButtons[ii];
-            let on = !mute && volume >= (ii + 1) / numVolumeButtons;
+            const volumeButton = this._volumeButtons[ii];
+            const on = !mute && volume >= (ii + 1) / numVolumeButtons;
             volumeButton.allStates(on ? Bitmaps.Audio_Vol_On : Bitmaps.Audio_Vol_Off);
         }
     }
 
     private static createCheckbox(title: string, setting: Setting<boolean>): GameCheckbox {
-        let checkbox = new GameCheckbox(18, title);
+        const checkbox = new GameCheckbox(18, title);
         checkbox.toggled.value = setting.value;
         checkbox.regs.add(setting.connect(checkbox.toggled.slot));
         checkbox.regs.add(checkbox.toggled.connect(setting.slot));
@@ -212,7 +212,7 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
     }
 
     public onMouseWheelEvent(e: WheelEvent): boolean {
-        let pxdelta: number = InputUtil.scrollAmount(e, 13, this.display.height);
+        const pxdelta: number = InputUtil.scrollAmount(e, 13, this.display.height);
         this.scrollTo(this._viewLayout.y - pxdelta);
 
         return true;

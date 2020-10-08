@@ -42,7 +42,7 @@ export default abstract class Reactor<T1, T2, T3> {
             throw new Error('Initiated notify while notifying');
         }
 
-        let lners: Cons<T1, T2, T3> = this._listeners;
+        const lners: Cons<T1, T2, T3> = this._listeners;
         this._listeners = this.DISPATCHING;
 
         let error: Error | null = null;

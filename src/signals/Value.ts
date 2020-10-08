@@ -37,7 +37,7 @@ export default class Value<T> extends AbstractValue<T> implements ValueView<T> {
 
     /* override */
     protected updateLocal(value: T): T {
-        let oldValue: T = this._value;
+        const oldValue: T = this._value;
         this._value = value;
         return oldValue;
     }

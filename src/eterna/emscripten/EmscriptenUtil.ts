@@ -31,8 +31,8 @@ export default class EmscriptenUtil {
 
     /** Converts a C++ std::vector<T> to a T[] */
     public static stdVectorToArray<T>(vector: stdcpp.vector<T>): T[] {
-        let n = vector.size();
-        let array: T[] = new Array(n);
+        const n = vector.size();
+        const array: T[] = new Array(n);
         for (let ii = 0; ii < n; ++ii) {
             array[ii] = vector.get(ii);
         }

@@ -35,7 +35,7 @@ export default class ROPWait extends RScriptOp {
             return;
         }
 
-        let newColor: string = RScriptEnv.convertNucleotideIntToString(inColor);
+        const newColor: string = RScriptEnv.convertNucleotideIntToString(inColor);
 
         ROPWait.genericNotifyClear(
             ROPWaitType.NUCLEOTIDECHANGE, (op: ROPWait): boolean => op.addNucleotideCompletion(i, newColor)
@@ -55,8 +55,8 @@ export default class ROPWait extends RScriptOp {
     }
 
     public static notifyPaint(i: number, inColor: number, newColor: number): void {
-        let previousColor: string = RScriptEnv.convertNucleotideIntToString(inColor);
-        let changeColor: string = RScriptEnv.convertNucleotideIntToString(newColor);
+        const previousColor: string = RScriptEnv.convertNucleotideIntToString(inColor);
+        const changeColor: string = RScriptEnv.convertNucleotideIntToString(newColor);
         ROPWait.genericNotifyClear(ROPWaitType.PAINT, (op: ROPWait): boolean => {
             op.addPreviousColor(previousColor, i);
             return op.addNucleotideCompletion(i, changeColor);
@@ -68,12 +68,12 @@ export default class ROPWait extends RScriptOp {
         // then reset the player's progress on those nucleotides. And (if specified), show
         // a textbox.
         Assert.assertIsDefined(ROPWait._allROPWaitOps);
-        let list: ROPWait[] | undefined = ROPWait._allROPWaitOps.get(ROPWaitType.PAINT);
+        const list: ROPWait[] | undefined = ROPWait._allROPWaitOps.get(ROPWaitType.PAINT);
         if (list === undefined) {
             return;
         }
 
-        for (let op of list) {
+        for (const op of list) {
             if (!op.isWaitActive()) {
                 continue;
             }
@@ -146,16 +146,16 @@ export default class ROPWait extends RScriptOp {
     /* override */
     public isPaused(): boolean {
         if (this._waitType === ROPWaitType.NUCLEOTIDEPAIR) {
-            let paired: number = this._env.pose.pairs[this._startIdx];
-            if (paired < 0) {
+            const partner: number = this._env.pose.pairs.pairingPartner(this._startIdx);
+            if (partner < 0) {
                 return true;
             }
 
-            let t1: string = RScriptEnv.convertNucleotideIntToString(
+            const t1: string = RScriptEnv.convertNucleotideIntToString(
                 this._env.pose.getBase(this._startIdx).type
             ).toUpperCase();
-            let t2: string = RScriptEnv.convertNucleotideIntToString(
-                this._env.pose.getBase(paired).type
+            const t2: string = RScriptEnv.convertNucleotideIntToString(
+                this._env.pose.getBase(partner).type
             ).toUpperCase();
 
             return !((t1 === this._color1 && t2 === this._color2) || (t2 === this._color1 && t1 === this._color2));
@@ -169,7 +169,7 @@ export default class ROPWait extends RScriptOp {
             }
             return false;
         } else if (this._waitType === ROPWaitType.TIME && !this._conditionClear) {
-            let now: number = new Date().getTime();
+            const now: number = new Date().getTime();
             if (now < this._startTime + this._delay) {
                 return true;
             }
@@ -336,16 +336,16 @@ export default class ROPWait extends RScriptOp {
     }
 
     private static batchDeregister(ops: ROPWait[]): void {
-        for (let op of ops) {
+        for (const op of ops) {
             ROPWait.deregisterROPWait(op);
         }
     }
 
     private static deregisterROPWait(op: ROPWait): void {
         Assert.assertIsDefined(ROPWait._allROPWaitOps);
-        let array: ROPWait[] | undefined = ROPWait._allROPWaitOps.get(op.waitType);
+        const array: ROPWait[] | undefined = ROPWait._allROPWaitOps.get(op.waitType);
         if (array !== undefined) {
-            let idx: number = array.indexOf(op);
+            const idx: number = array.indexOf(op);
             array.splice(idx, 1);
         }
     }
@@ -363,11 +363,11 @@ export default class ROPWait extends RScriptOp {
             return;
         }
 
-        let list: ROPWait[] | undefined = ROPWait._allROPWaitOps.get(inType);
-        let clearOps: ROPWait[] = [];
+        const list: ROPWait[] | undefined = ROPWait._allROPWaitOps.get(inType);
+        const clearOps: ROPWait[] = [];
 
         if (list !== undefined) {
-            for (let op of list) {
+            for (const op of list) {
                 if (op.isWaitActive() && clearCheck(op)) {
                     clearOps.push(op);
                     op.clearCondition();

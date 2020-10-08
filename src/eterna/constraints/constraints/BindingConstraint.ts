@@ -29,16 +29,16 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
         undoBlocks: UndoBlock[],
         targetConditions: TargetConditions[]
     ): ConstraintBoxConfig {
-        let oligos = this._getOligoInfo(targetConditions);
+        const oligos = this._getOligoInfo(targetConditions);
 
-        let tooltip = ConstraintBox.createTextStyle();
+        const tooltip = ConstraintBox.createTextStyle();
         if (forMissionScreen) {
             tooltip.pushStyle('altTextMain');
         }
 
         tooltip.append(`In state ${this.stateIndex + 1}, your RNA must:\n`);
 
-        for (let oligo of oligos) {
+        for (const oligo of oligos) {
             if (!oligo) continue;
 
             tooltip.append('- ');
@@ -56,7 +56,7 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
             tooltip.popStyle();
         }
 
-        let clarifyTextBuilder = new StyledTextBuilder();
+        const clarifyTextBuilder = new StyledTextBuilder();
         for (let ii = 0; ii < oligos.length; ii++) {
             if (!oligos[ii]) continue;
             if (ii > 0) {
@@ -69,20 +69,20 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
             );
         }
 
-        let twUpper: number = Math.min(101, 15 * (2 * oligos.length - 1));
-        let origUpper: number = (111 - twUpper) * 0.5;
-        let twLower = oligos.length === 1 ? 45 : twUpper;
-        let origLower = (111 - twLower) * 0.5;
-        let step: number = twUpper / (2 * oligos.length - 1);
+        const twUpper: number = Math.min(101, 15 * (2 * oligos.length - 1));
+        const origUpper: number = (111 - twUpper) * 0.5;
+        const twLower = oligos.length === 1 ? 45 : twUpper;
+        const origLower = (111 - twLower) * 0.5;
+        const step: number = twUpper / (2 * oligos.length - 1);
 
-        let iconGraphics = new Graphics();
+        const iconGraphics = new Graphics();
         iconGraphics.lineStyle(2.5, 0xFFFFFF, 0.9);
         iconGraphics.moveTo(origLower, 27);
         iconGraphics.lineTo(origLower + twLower, 27);
 
         for (let ii = 0; ii < oligos.length; ii++) {
             if (!oligos[ii]) continue;
-            let ctrlY: number = (oligos[ii].bind ? 22 : 14);
+            const ctrlY: number = (oligos[ii].bind ? 22 : 14);
             iconGraphics.moveTo(origUpper + (ii * 2) * step, ctrlY);
             iconGraphics.lineTo(origUpper + (ii * 2 + 1) * step, ctrlY);
         }
@@ -102,19 +102,16 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
         status: BaseConstraintStatus,
         context: ConstraintContext
     ): HighlightInfo {
-        let undoBlock = context.undoBlocks[this.stateIndex];
+        const undoBlock = context.undoBlocks[this.stateIndex];
         Assert.assertIsDefined(
             context.targetConditions,
             'BINDING constraint specified, but no oligo definitions are present'
         );
-        let stateCondition = context.targetConditions[this.stateIndex];
+        const stateCondition = context.targetConditions[this.stateIndex];
 
-        let extraLen = 0;
-        if (stateCondition) {
-            if (stateCondition['oligo_sequence']) {
-                extraLen = stateCondition['oligo_sequence'].length;
-            }
-        }
+        const extraLen = stateCondition && stateCondition['oligo_sequence']
+            ? stateCondition['oligo_sequence'].length
+            : 0;
         return {
             ranges: [
                 undoBlock.sequence.length + 1,
@@ -134,12 +131,12 @@ export class MultistrandBindingsConstraint extends BindingsConstraint<Multistran
     public static readonly NAME = 'BINDINGS';
 
     public evaluate(context: ConstraintContext): MultistrandConstraintStatus {
-        let undoBlock = context.undoBlocks[this.stateIndex];
+        const undoBlock = context.undoBlocks[this.stateIndex];
         if (context.targetConditions === undefined) {
             throw new Error('Target object not available for BINDINGS constraint');
         }
 
-        let stateCondition = context.targetConditions[this.stateIndex];
+        const stateCondition = context.targetConditions[this.stateIndex];
         Assert.assertIsDefined(stateCondition, 'Target condition not available for BINDINGS constraint');
 
         const oligos: OligoDef[] | undefined = stateCondition['oligos'];
@@ -150,11 +147,11 @@ export class MultistrandBindingsConstraint extends BindingsConstraint<Multistran
 
         // Unbound oligos are always at the end of the natural mode oligo order, so to know if it's bound according to
         // target mode ordering, check if its index in natural mode is less than the number bound
-        let bindMap = Utility.range(oligoOrder.length).map(
+        const bindMap = Utility.range(oligoOrder.length).map(
             (targetIdx) => oligoOrder.indexOf(targetIdx) < undoBlock.oligosPaired
         );
 
-        let unsatisfiedOligoIndexes = oligos ? oligos.map(
+        const unsatisfiedOligoIndexes = oligos ? oligos.map(
             (oligoDef, index) => (
                 (oligoDef['bind'] != null && oligoDef['bind'] !== bindMap[index]) ? index : -1)
         ).filter((val) => val !== -1) : [];
@@ -182,7 +179,7 @@ export class MultistrandBindingsConstraint extends BindingsConstraint<Multistran
         status: MultistrandConstraintStatus,
         context: ConstraintContext
     ): HighlightInfo {
-        let undoBlock = context.undoBlocks[this.stateIndex];
+        const undoBlock = context.undoBlocks[this.stateIndex];
         Assert.assertIsDefined(
             context.targetConditions,
             'BINDING constraint specified, but no oligo definitions are present'
@@ -194,11 +191,11 @@ export class MultistrandBindingsConstraint extends BindingsConstraint<Multistran
         const tc = context.targetConditions[this.stateIndex] as TargetConditions;
         const oligos: OligoDef[] | undefined = tc['oligos'];
 
-        let highlightedIndices: number[] = [];
+        const highlightedIndices: number[] = [];
         // The + 1 is used to account for the "cut" base denoting split points between strands
         let oligoFirstBaseIndex = undoBlock.sequence.length + 1;
         if (oligos) {
-            for (let [idx, oligo] of oligos.entries()) {
+            for (const [idx, oligo] of oligos.entries()) {
                 if (status.unsatisfiedOligoIndexes.includes(idx)) {
                     highlightedIndices.push(oligoFirstBaseIndex, oligoFirstBaseIndex + oligo.sequence.length - 1);
                 }
@@ -225,7 +222,7 @@ export class OligoBoundConstraint extends BindingsConstraint<BaseConstraintStatu
     public static readonly NAME = 'OLIGO_BOUND';
 
     public evaluate(context: ConstraintContext): BaseConstraintStatus {
-        let nnfe: number[] = context.undoBlocks[this.stateIndex]
+        const nnfe: number[] = context.undoBlocks[this.stateIndex]
             .getParam(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE) as number[];
 
         return {
@@ -253,7 +250,7 @@ export class OligoUnboundConstraint extends BindingsConstraint<BaseConstraintSta
     public static readonly NAME = 'OLIGO_UNBOUND';
 
     public evaluate(context: ConstraintContext): BaseConstraintStatus {
-        let nnfe: number[] = context.undoBlocks[this.stateIndex]
+        const nnfe: number[] = context.undoBlocks[this.stateIndex]
             .getParam(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE) as number[];
 
         return {

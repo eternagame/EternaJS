@@ -2,6 +2,7 @@ import * as log from 'loglevel';
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import Feedback, {BrentTheoData} from 'eterna/Feedback';
+import Sequence from 'eterna/rnatypes/Sequence';
 import Solution from './Solution';
 
 interface SolutionSpec {
@@ -62,10 +63,10 @@ export default class SolutionManager {
     public getSolutionsForPuzzle(puzzleID: number): Promise<Solution[]> {
         log.info(`Loading solutions for puzzle ${puzzleID}...`);
         return Eterna.client.getSolutions(puzzleID).then((json) => {
-            let solutionsData = json['data']['solutions'];
+            const solutionsData = json['data']['solutions'];
             this._solutions = [];
 
-            for (let solution of solutionsData) {
+            for (const solution of solutionsData) {
                 this._solutions.push(SolutionManager.processData(solution));
             }
 
@@ -78,8 +79,8 @@ export default class SolutionManager {
     }
 
     public getSolutionBySequence(seq: string): Solution | null {
-        for (let solution of this._solutions) {
-            if (solution.sequence === seq) {
+        for (const solution of this._solutions) {
+            if (solution.sequence.sequenceString() === seq) {
                 return solution;
             }
         }
@@ -92,18 +93,18 @@ export default class SolutionManager {
             return;
         }
 
-        for (let hairpin of hairpins) {
+        for (const hairpin of hairpins) {
             this._hairpins.push(hairpin);
         }
     }
 
     public checkRedundancyByHairpin(seq: string): boolean {
-        let seqHairpin: string | null = EPars.getBarcodeHairpin(seq);
+        const seqHairpin: string | null = EPars.getBarcodeHairpin(seq);
         if (seqHairpin == null) {
             return true;
         }
 
-        for (let hairpin of this._hairpins) {
+        for (const hairpin of this._hairpins) {
             if (hairpin === seqHairpin) {
                 return true;
             }
@@ -112,8 +113,8 @@ export default class SolutionManager {
     }
 
     public getMyCurrentSolutionTitles(round: number): string[] {
-        let titles: string[] = [];
-        for (let solution of this._solutions) {
+        const titles: string[] = [];
+        for (const solution of this._solutions) {
             if (solution.getProperty('Round') === round && solution.playerID === Eterna.playerID) {
                 titles.push(solution.title);
             }
@@ -123,22 +124,14 @@ export default class SolutionManager {
     }
 
     private static processData(obj: SolutionSpec): Solution {
-        let newsol: Solution = new Solution(Number(obj['id']), Number(obj['puznid']));
-        newsol.sequence = obj['sequence'];
+        const newsol: Solution = new Solution(Number(obj['id']), Number(obj['puznid']));
+        newsol.sequence = Sequence.fromSequenceString(obj['sequence']);
         newsol.title = obj['title'];
 
         let newfb: Feedback | null = null;
 
-        let playerName = '';
-        let playerID = -1;
-
-        if (obj['name'] != null) {
-            playerName = obj['name'];
-        }
-
-        if (obj['uid'] != null) {
-            playerID = Number(obj['uid']);
-        }
+        const playerName = obj['name'] != null ? obj['name'] : '';
+        const playerID = obj['uid'] != null ? Number(obj['uid']) : -1;
 
         newsol.setPlayer(playerName, playerID);
         newsol.setNumPairs(Number(obj['gc']), Number(obj['gu']), Number(obj['au']));
@@ -149,9 +142,9 @@ export default class SolutionManager {
         newsol.setSynthesis(Number(obj['synthesis-round']), Number(obj['synthesis-score']));
 
         if (obj['synthesis-data'] && obj['synthesis-data'].length > 0) {
-            let synthesisDataRaw: (ShapeData | DegradationData)[] | BrentTheoData = JSON.parse(obj['synthesis-data']);
+            const synthesisDataRaw: (ShapeData | DegradationData)[] | BrentTheoData = JSON.parse(obj['synthesis-data']);
             if (Array.isArray(synthesisDataRaw)) {
-                let synthesisData: (ShapeData | DegradationData)[] = synthesisDataRaw;
+                const synthesisData: (ShapeData | DegradationData)[] = synthesisDataRaw;
 
                 for (let ii = 0; ii < synthesisData.length; ii++) {
                     let synthesis: ShapeData | DegradationData = synthesisData[ii];
@@ -159,11 +152,11 @@ export default class SolutionManager {
                         // This means that it's a ShapeData.
                         // Ugh: this is better than the alternative but still a little ridiculous
                         synthesis = synthesis as ShapeData;
-                        let peaks: number[] = [];
+                        const peaks: number[] = [];
                         peaks.push(Number(synthesis['start_index']));
 
-                        for (let ss = 0; ss < synthesis['peaks'].length; ss++) {
-                            peaks.push(Number(synthesis['peaks'][ss]));
+                        for (const val of synthesis['peaks']) {
+                            peaks.push(Number(val));
                         }
 
                         if (newfb == null) {
@@ -184,23 +177,23 @@ export default class SolutionManager {
                         // This means that it's a ShapeData.
                         // Ugh: this is better than the alternative but still a little ridiculous
                         synthesis = synthesis as DegradationData;
-                        let condition = synthesis['condition'];
-                        let peaks: number[] = [];
+                        const condition = synthesis['condition'];
+                        const peaks: number[] = [];
                         peaks.push(Number(synthesis['start_index']));
 
-                        for (let ss = 0; ss < synthesis['peaks'].length; ss++) {
-                            peaks.push(Number(synthesis['peaks'][ss]));
+                        for (const val of synthesis['peaks']) {
+                            peaks.push(Number(val));
                         }
 
-                        let error: number[] = [];
+                        const error: number[] = [];
                         error.push(Number(synthesis['start_index']));
 
-                        for (let ss = 0; ss < synthesis['error'].length; ss++) {
-                            error.push(Number(synthesis['error'][ss]));
+                        for (const val of synthesis['error']) {
+                            error.push(Number(val));
                         }
 
-                        let stnCategory: string = synthesis['signal_to_noise_category'];
-                        let stn: string = synthesis['signal_to_noise'];
+                        const stnCategory: string = synthesis['signal_to_noise_category'];
+                        const stn: string = synthesis['signal_to_noise'];
 
                         if (newfb == null) {
                             newfb = new Feedback();
@@ -232,26 +225,21 @@ export default class SolutionManager {
                 newfb.setShapeData(null, 'SHAPE', 0, null, null, null, obj['SHAPE']);
             } else {
                 const protoshapeArray = obj['SHAPE'].split(',');
-                let shapeArray: number[] = [];
-                for (let kk = 0; kk < protoshapeArray.length; kk++) {
-                    shapeArray[kk] = Number(protoshapeArray[kk]);
-                }
+                const shapeArray: number[] = protoshapeArray.map(
+                    (val) => Number(val)
+                );
 
-                let max: number | null = null;
-                let min: number | null = null;
-                let threshold: number | null = null;
+                const threshold = obj['SHAPE-threshold'] != null && obj['SHAPE-threshold'] !== ''
+                    ? Number(obj['SHAPE-threshold'])
+                    : null;
 
-                if (obj['SHAPE-threshold'] != null && obj['SHAPE-threshold'] !== '') {
-                    threshold = Number(obj['SHAPE-threshold']);
-                }
+                const max = obj['SHAPE-max'] != null && obj['SHAPE-max'] !== ''
+                    ? Number(obj['SHAPE-max'])
+                    : null;
 
-                if (obj['SHAPE-max'] != null && obj['SHAPE-max'] !== '') {
-                    max = Number(obj['SHAPE-max']);
-                }
-
-                if (obj['SHAPE-min'] != null && obj['SHAPE-min'] !== '') {
-                    min = Number(obj['SHAPE-min']);
-                }
+                const min = obj['SHAPE-min'] != null && obj['SHAPE-min'] !== ''
+                    ? Number(obj['SHAPE-min'])
+                    : null;
 
                 newfb.setShapeData(shapeArray, 'SHAPE', 0, threshold, max, min, null);
             }

@@ -1,10 +1,11 @@
-import EPars from 'eterna/EPars';
 import Folder from '../Folder';
 import './jest-matcher-deep-close-to';
 import ContraFold from '../Contrafold';
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 
-function FoldSequence(folder: Folder, seq: string, struct: string): any[] | null {
-    return folder.foldSequence(EPars.stringToSequence(seq), null, struct);
+function FoldSequence(folder: Folder, seq: Sequence, struct: SecStruct): SecStruct | null {
+    return folder.foldSequence(seq, null, struct.getParenthesis());
 }
 
 function CreateFolder(type: any): Promise<Folder | null> {
@@ -31,18 +32,18 @@ test(`ContraFold:many_score_structures`, () => {
         .then((folder) => {
             if (folder === null) return;
             
-            const seqs: number[][] = [
-                EPars.stringToSequence('ACGCUGUCUGUACUUGUAUCAGUACACUGACGAGUCCCUAAAGGACGAAACAGCGC'),
-                EPars.stringToSequence('GGACAAUCAGCUAGAAUGCAAAGUGACGGGCGAUGAAGGCCAAUGAGGUGAUGUCCCAUG'),
-                EPars.stringToSequence('CAUAUGUAUAUGCUCACCAUAGUUGACAGUGCCAGAACGAAGCUGACUAGCUCUGUCUGC'),
-                EPars.stringToSequence('AUUCUGCUUAUAGGGUUAUUAGAUCAUAUCUCUGUUCGGCCGAGCGUCUGAUCUAGGCGA'),
-                EPars.stringToSequence('UAAAGGUGAUACACUGCUCCCCAGGGGCGUCGCCUGACGAUAAUUGCAUCCGUAGGCGAA'),
-                EPars.stringToSequence('GUGAACUUAGAGGGAAGUAUUCCGCGACCGACAUUUUGUCGCGACGGAGGAUUCCUUUAU'),
-                EPars.stringToSequence('UGGCGGUCAAGUUGGGACGAUCUUUAUAACACAGCAGAAUAAACGCCUAACAUUUAUAGG'),
-                EPars.stringToSequence('UACGCGGCGCCGGGUAGUACGGCACUGCGGCAAGAUCUACCUCUUGAUCAGCAGAUUAAU'),
-                EPars.stringToSequence('AGAGACCCAGUAGGGGAUUCUCUGGGGCAAACGGGGCUCAUUUAGCGUCCUCUAGCUCCA'),
-                EPars.stringToSequence('AUAUUUUAAAGGGCCAAUCUAUUACAUUCGGCACUUCUUCUCACGACAAUAGACAUGUCA'),
-                EPars.stringToSequence('CGGCACGGCCUGCUCUACUAGUUAUUGGUAAAUCUGAAAAUAAGGCCGACAGAACUACAC'),
+            const seqs: Sequence[] = [
+                Sequence.fromSequenceString('ACGCUGUCUGUACUUGUAUCAGUACACUGACGAGUCCCUAAAGGACGAAACAGCGC'),
+                Sequence.fromSequenceString('GGACAAUCAGCUAGAAUGCAAAGUGACGGGCGAUGAAGGCCAAUGAGGUGAUGUCCCAUG'),
+                Sequence.fromSequenceString('CAUAUGUAUAUGCUCACCAUAGUUGACAGUGCCAGAACGAAGCUGACUAGCUCUGUCUGC'),
+                Sequence.fromSequenceString('AUUCUGCUUAUAGGGUUAUUAGAUCAUAUCUCUGUUCGGCCGAGCGUCUGAUCUAGGCGA'),
+                Sequence.fromSequenceString('UAAAGGUGAUACACUGCUCCCCAGGGGCGUCGCCUGACGAUAAUUGCAUCCGUAGGCGAA'),
+                Sequence.fromSequenceString('GUGAACUUAGAGGGAAGUAUUCCGCGACCGACAUUUUGUCGCGACGGAGGAUUCCUUUAU'),
+                Sequence.fromSequenceString('UGGCGGUCAAGUUGGGACGAUCUUUAUAACACAGCAGAAUAAACGCCUAACAUUUAUAGG'),
+                Sequence.fromSequenceString('UACGCGGCGCCGGGUAGUACGGCACUGCGGCAAGAUCUACCUCUUGAUCAGCAGAUUAAU'),
+                Sequence.fromSequenceString('AGAGACCCAGUAGGGGAUUCUCUGGGGCAAACGGGGCUCAUUUAGCGUCCUCUAGCUCCA'),
+                Sequence.fromSequenceString('AUAUUUUAAAGGGCCAAUCUAUUACAUUCGGCACUUCUUCUCACGACAAUAGACAUGUCA'),
+                Sequence.fromSequenceString('CGGCACGGCCUGCUCUACUAGUUAUUGGUAAAUCUGAAAAUAAGGCCGACAGAACUACAC'),
             ];
     
             const strs: string[] = [
@@ -98,11 +99,12 @@ test(`ContraFold:many_score_structures`, () => {
                 let scr = scores[ii];
                 let NNFE = NNFEs[ii];
 
-                let struct = folder.foldSequence(
+                const struct = folder.foldSequence(
                     seq,
-                    null);
+                    new SecStruct());
+                
                 expect(struct).toBeDefined();
-                expect(EPars.pairsToParenthesis(struct!)).toEqual(str);
+                expect(struct?.getParenthesis()).toEqual(str);
 
                 let outNNFE: number[] = [];
                 let score = folder.scoreStructures(

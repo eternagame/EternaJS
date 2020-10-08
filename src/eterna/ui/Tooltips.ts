@@ -49,7 +49,7 @@ export default class Tooltips extends GameObject {
         this._curTooltipKey = key;
         this._curTooltip = Tooltips.createTooltip(tooltip);
 
-        let layerLoc = this._layer.toLocal(loc);
+        const layerLoc = this._layer.toLocal(loc);
         this._curTooltip.x = layerLoc.x;
         this._curTooltip.y = layerLoc.y;
         this._curTooltip.alpha = 0;
@@ -67,8 +67,8 @@ export default class Tooltips extends GameObject {
             return;
         }
 
-        let r = target.getBounds(false, Tooltips.TARGET_BOUNDS);
-        let p = Tooltips.P;
+        const r = target.getBounds(false, Tooltips.TARGET_BOUNDS);
+        const p = Tooltips.P;
         p.set(r.x + (r.width * 0.5), r.y + (r.height * 0.5));
         this.showTooltip(key, p, tooltip);
     }
@@ -89,15 +89,15 @@ export default class Tooltips extends GameObject {
     }
 
     public addButtonTooltip(button: Button, tooltip: Tooltip): Registration {
-        let show = (): void => {
+        const show = (): void => {
             if (button.enabled) {
                 this.showTooltipFor(button.display, button, tooltip);
             }
         };
 
-        let hide = (): void => this.removeTooltip(button);
+        const hide = (): void => this.removeTooltip(button);
 
-        let regs = new RegistrationGroup();
+        const regs = new RegistrationGroup();
 
         regs.add(button.pointerDown.connect(show));
         regs.add(button.clicked.connect(hide));
@@ -113,14 +113,11 @@ export default class Tooltips extends GameObject {
 
     private static createTooltip(tooltip: Tooltip): DisplayObject {
         if (typeof (tooltip) === 'string' || tooltip instanceof StyledTextBuilder) {
-            let textField: Container;
-            if (typeof (tooltip) === 'string') {
-                textField = new Text(tooltip, Tooltips.DEFAULT_STYLE);
-            } else {
-                textField = tooltip.build();
-            }
+            const textField: Container = (typeof (tooltip) === 'string')
+                ? new Text(tooltip, Tooltips.DEFAULT_STYLE)
+                : tooltip.build();
 
-            let disp = new Graphics()
+            const disp = new Graphics()
                 .beginFill(0x0, 0.8)
                 .drawRoundedRect(0, 0, textField.width + 20, textField.height + 20, 5)
                 .endFill();

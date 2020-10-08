@@ -80,8 +80,8 @@ export default class FancyTextBalloon extends TextBalloon implements Updatable {
     protected updateView(): void {
         this._panel.setSize(this.width, this.height);
 
-        let innerWidth = this.width - 2 * TextBalloon.W_MARGIN;
-        let outerWidth = this.width;
+        const innerWidth = this.width - 2 * TextBalloon.W_MARGIN;
+        const outerWidth = this.width;
 
         if (!this._centered) {
             if (this._text != null) {
@@ -107,12 +107,11 @@ export default class FancyTextBalloon extends TextBalloon implements Updatable {
     }
 
     public update(dt: number): void {
-        for (let arrow of this._childrenArrows) {
-            let xdiff: number = (this.display.x + this.container.width / 2) - arrow.display.x;
-            let ydiff: number = this.display.y - arrow.display.y;
-            if (ydiff < 0.0) {
-                ydiff += this.container.height;
-            }
+        for (const arrow of this._childrenArrows) {
+            const xdiff: number = (this.display.x + this.container.width / 2) - arrow.display.x;
+            const ydiff: number = this.display.y < arrow.display.y
+                ? this.display.y - arrow.display.y + this.container.height
+                : this.display.y - arrow.display.y;
 
             if (xdiff !== 0) {
                 arrow.rotation = (Math.atan(ydiff / xdiff) * 180) / Math.PI;

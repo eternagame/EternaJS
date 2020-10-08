@@ -34,7 +34,7 @@ export default class SortOptionsDialog extends Dialog<void> {
         this.container.addChild(this._panelContent);
 
         this._sortCriteriaLayout = new VLayoutContainer(4);
-        let addCriterionLayout = new HLayoutContainer(2);
+        const addCriterionLayout = new HLayoutContainer(2);
         addCriterionLayout.position.x = 20;
         this._panelContent.addVSpacer(26);
         this._panelContent.addChild(this._sortCriteriaLayout);
@@ -93,10 +93,9 @@ export default class SortOptionsDialog extends Dialog<void> {
         this.addObject(okButton, this._panelContent);
 
         // EXISTING SORT CRITERIA
-        for (let ii = 0; ii < this.options.sortCriteria.length; ++ii) {
-            let criterion = this.options.sortCriteria[ii];
-            this.addCriterionUI(criterion.category, criterion.sortOrder, ii);
-        }
+        this.options.sortCriteria.forEach(
+            (criterion, ii) => this.addCriterionUI(criterion.category, criterion.sortOrder, ii)
+        );
 
         this.validateCurCategoryIdx();
         this.layout();
@@ -105,7 +104,7 @@ export default class SortOptionsDialog extends Dialog<void> {
     }
 
     private addCriterionUI(category: DesignCategory, sortOrder: SortOrder, idx: number): void {
-        let ui = new CriterionUI();
+        const ui = new CriterionUI();
         this._sortCriteriaLayout.addChild(ui.container);
         Arrays.addAt(this._criteriaUI, ui, idx);
 
@@ -142,7 +141,7 @@ export default class SortOptionsDialog extends Dialog<void> {
     }
 
     private addCriteria(category: DesignCategory, order: SortOrder, args?: string): void {
-        let curIdx = this.options.getCriterionIdx(category);
+        const curIdx = this.options.getCriterionIdx(category);
         this.options.addCriteria(category, order, args);
 
         if (curIdx >= 0) {
@@ -164,7 +163,7 @@ export default class SortOptionsDialog extends Dialog<void> {
     }
 
     private removeCriteria(category: DesignCategory): void {
-        let idx = this.options.getCriterionIdx(category);
+        const idx = this.options.getCriterionIdx(category);
         if (idx < 0) {
             throw new Error(`Can't find sort_category ${category}`);
         }
@@ -194,7 +193,7 @@ export default class SortOptionsDialog extends Dialog<void> {
     }
 
     private validateCurCategoryIdx(): void {
-        let unused = this.options.getUnusedCategories();
+        const unused = this.options.getUnusedCategories();
         if (unused.length > 0) {
             this._addCriteriaCategoryIdx %= unused.length;
             if (this._addCriteriaCategoryIdx < 0) {
@@ -218,20 +217,20 @@ export default class SortOptionsDialog extends Dialog<void> {
     }
 
     private addCurrentCriteria(): void {
-        let unusedCategories = this.options.getUnusedCategories();
+        const unusedCategories = this.options.getUnusedCategories();
         if (unusedCategories.length > 0) {
             this.addCriteria(unusedCategories[this._addCriteriaCategoryIdx], this._addCriteriaSortOrder);
         }
     }
 
     private toggleSort(category: DesignCategory): void {
-        let index = this.options.getCriterionIdx(category);
+        const index = this.options.getCriterionIdx(category);
         if (index < 0) {
             throw new Error(`Can't find sort_category ${category}`);
         }
 
-        let newSortOrder = this.options.toggleSort(category);
-        let ui = this._criteriaUI[index];
+        const newSortOrder = this.options.toggleSort(category);
+        const ui = this._criteriaUI[index];
 
         if (newSortOrder === SortOrder.INCREASING) {
             ui.sortOrderButton.label('increasing', 14, false);
@@ -241,12 +240,12 @@ export default class SortOptionsDialog extends Dialog<void> {
     }
 
     private moveCriteria(category: DesignCategory, displacement: number): void {
-        let curIdx = this.options.getCriterionIdx(category);
+        const curIdx = this.options.getCriterionIdx(category);
         this.setCriteriaIdx(category, curIdx + displacement);
     }
 
     private setCriteriaIdx(category: DesignCategory, newIdx: number): void {
-        let curIdx = this.options.getCriterionIdx(category);
+        const curIdx = this.options.getCriterionIdx(category);
         if (curIdx < 0) {
             throw new Error(`Can't find sort_category ${category}`);
         }
@@ -263,7 +262,7 @@ export default class SortOptionsDialog extends Dialog<void> {
 
     private layout(): void {
         this._sortCriteriaLayout.removeChildren();
-        for (let ui of this._criteriaUI) {
+        for (const ui of this._criteriaUI) {
             this._sortCriteriaLayout.addChild(ui.container);
         }
 

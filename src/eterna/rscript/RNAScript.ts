@@ -17,7 +17,7 @@ import ROPUITooltip from './ROPUITooltip';
 
 export default class RNAScript {
     constructor(puz: Puzzle, ui: PoseEditMode) {
-        let strData: string = puz.rscript;
+        const strData: string = puz.rscript;
 
         this._env = new RScriptEnv(ui, puz);
         ui.addObject(this._env, ui.container);
@@ -27,11 +27,11 @@ export default class RNAScript {
         // Convert string into instructions by splitting at semicolons.
         // If we ever make "Blocks" (i.e for IF conditionals), we'll need to make this a little
         // more complex
-        let instructions: string[] = strData.split(';');
+        const instructions: string[] = strData.split(';');
 
         // For each instruction, make it into an RScriptOp (OP).
         // Give it to the OpTree to handle placing it where it should go.
-        for (let instruction of instructions) {
+        for (const instruction of instructions) {
             this._ops.addNode(this.createOpFromInstruction(instruction));
         }
         this._ops.finishCreation();
@@ -77,10 +77,10 @@ export default class RNAScript {
         const instRegex = /(#PRE-)?(\w+)\s*(.*)/ig;
         let regResult: RegExpExecArray | null;
         if ((regResult = instRegex.exec(instruction)) != null) {
-            let op: string = (regResult[1] ? regResult[1] : '') + regResult[2];
-            let args: string = regResult[3];
+            const op: string = (regResult[1] ? regResult[1] : '') + regResult[2];
+            const args: string = regResult[3];
             // Based on the OP, create the proper RScriptOp.
-            let ret: RScriptOp | null = this.opToRScriptOp(op, args);
+            const ret: RScriptOp | null = this.opToRScriptOp(op, args);
             if (ret) {
                 ret.initialize(op, args);
             }
@@ -96,13 +96,13 @@ export default class RNAScript {
         op = op.replace(/\s*$/, '');
 
         // Regex to detect the various commands
-        let textboxRegex = /(Show|Hide)(Textbox|Arrow)(Location|Nucleotide|Energy)?/ig;
-        let highlightRegex = /(Show|Hide)(UI)?Highlight/ig;
-        let uiRegex = /(Show|Hide|Enable|Disable)UI$/ig;
-        let hintRegex = /(Show|Hide)(Paint)?Hint/ig;
-        let waitRegex = /WaitFor(.*)/ig;
-        let preRegex = /#PRE-(.*)/g;
-        let rnaRegex = /^RNA(SetBase|ChangeMode|EnableModification|SetPainter|ChangeState|SetZoom|SetPIP)$/ig;
+        const textboxRegex = /(Show|Hide)(Textbox|Arrow)(Location|Nucleotide|Energy)?/ig;
+        const highlightRegex = /(Show|Hide)(UI)?Highlight/ig;
+        const uiRegex = /(Show|Hide|Enable|Disable)UI$/ig;
+        const hintRegex = /(Show|Hide)(Paint)?Hint/ig;
+        const waitRegex = /WaitFor(.*)/ig;
+        const preRegex = /#PRE-(.*)/g;
+        const rnaRegex = /^RNA(SetBase|ChangeMode|EnableModification|SetPainter|ChangeState|SetZoom|SetPIP)$/ig;
         const popPuzzle = /PopPuzzle/;
         const showMissionScreen = /ShowMissionScreen/;
         const uiArrow = /(Show|Hide)UIArrow/;
@@ -110,7 +110,7 @@ export default class RNAScript {
 
         let regResult: RegExpExecArray | null;
         if ((regResult = preRegex.exec(op)) != null) {
-            let rop: ROPPre = new ROPPre(regResult[1], this._env);
+            const rop: ROPPre = new ROPPre(regResult[1], this._env);
             rop.initArgs(args);
             rop.exec();
             // DOES NOT RETURN. WE DO NOT ADD THIS TO THE OP TREE.
@@ -143,7 +143,7 @@ export default class RNAScript {
                 textboxMode = ROPTextboxMode.TEXTBOX_DEFAULT;
             }
 
-            let show: boolean = regResult[1].toUpperCase() === 'SHOW';
+            const show: boolean = regResult[1].toUpperCase() === 'SHOW';
             return new ROPTextbox(this._env, show, textboxMode);
         } else if ((regResult = highlightRegex.exec(op))) {
             return new ROPHighlight(
@@ -160,12 +160,12 @@ export default class RNAScript {
         } else if ((regResult = waitRegex.exec(op))) {
             // AMW: We have to coerce this string. I wish this regResult[1] was provably
             // coercable!
-            let waitType: ROPWaitType = (regResult[1].toUpperCase() as ROPWaitType);
+            const waitType: ROPWaitType = (regResult[1].toUpperCase() as ROPWaitType);
             return new ROPWait(waitType, this._env);
         } else if ((regResult = rnaRegex.exec(op))) {
             // AMW: We have to coerce this string. I wish this regResult[1] was provably
             // coercable!
-            let ropRNAType: ROPRNAType = (regResult[1].toUpperCase() as ROPRNAType);
+            const ropRNAType: ROPRNAType = (regResult[1].toUpperCase() as ROPRNAType);
             return new ROPRNA(ropRNAType, this._env);
         } else if ((regResult = popPuzzle.exec(op))) {
             return new ROPPopPuzzle(this._env);

@@ -17,16 +17,16 @@ export default class CopyTextDialogMode extends AppMode {
         Assert.assertIsDefined(this.container);
         Assert.assertIsDefined(Flashbang.stageWidth);
 
-        let bg = new Graphics();
+        const bg = new Graphics();
         this.container.addChild(bg);
 
-        let inputPanel = new TextInputPanel(18);
+        const inputPanel = new TextInputPanel(18);
         if (this._dialogTitle != null) {
             inputPanel.title = this._dialogTitle;
         }
         inputPanel.okButtonLabel = 'Copy';
 
-        let textField = inputPanel.addField('Text', Math.min(400, Math.max(200, Flashbang.stageWidth - 200)), false);
+        const textField = inputPanel.addField('Text', Math.min(400, Math.max(200, Flashbang.stageWidth - 200)), false);
         textField.text = this._text;
         textField.readOnly = true;
 
@@ -43,7 +43,7 @@ export default class CopyTextDialogMode extends AppMode {
         });
 
         inputPanel.pointerDown.connect((e) => e.stopPropagation());
-        let target = new DisplayObjectPointerTarget(bg);
+        const target = new DisplayObjectPointerTarget(bg);
         target.pointerDown.connect((e) => {
             if (InputUtil.IsLeftMouse(e)) {
                 this.close();

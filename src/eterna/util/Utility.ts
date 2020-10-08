@@ -35,7 +35,7 @@ export default class Utility {
      * @param markup When true, markdown rendering is applied and html is allowed
      */
     public static sanitizeAndMarkup(str: string, markup: boolean = false) {
-        let opts: DOMPurify.Config = {
+        const opts: DOMPurify.Config = {
             FORBID_TAGS: ['style']
         };
 
@@ -54,10 +54,8 @@ export default class Utility {
      * @returns The string, with each " replaced by ' and "\n" by " ".
      */
     public static stripQuotationsAndNewlines(str: string): string {
-        let newlinereg = /\n/g;
-        str = str.replace(newlinereg, ' ');
-        newlinereg = /"/g;
-        str = str.replace(newlinereg, "'");
+        str = str.replace(/\n/g, ' ');
+        str = str.replace(/"/g, "'");
         return str;
     }
 
@@ -75,11 +73,11 @@ export default class Utility {
     public static isPointWithin(p: Point, polygon: Point[], stretchLength: number = 10000): boolean {
         let hitCount = 0;
 
-        let pTo: Point = new Point(p.x + stretchLength, p.y + stretchLength);
+        const pTo: Point = new Point(p.x + stretchLength, p.y + stretchLength);
 
         for (let ii = 0; ii < polygon.length; ii++) {
-            let a: Point = polygon[ii];
-            let b: Point = polygon[(ii + 1) % polygon.length];
+            const a: Point = polygon[ii];
+            const b: Point = polygon[(ii + 1) % polygon.length];
 
             if (Utility.findIntersection(a, b, p, pTo) != null) {
                 hitCount++;
@@ -103,27 +101,19 @@ export default class Utility {
      * @returns true if the point is in the polygon; false otherwise.
      */
     public static findIntersection(A: Point, B: Point, E: Point, F: Point, asSeg: boolean = true): Point | null {
-        let ip: Point;
-        let a1: number;
-        let a2: number;
-        let b1: number;
-        let b2: number;
-        let c1: number;
-        let c2: number;
+        const a1 = B.y - A.y;
+        const b1 = A.x - B.x;
+        const c1 = B.x * A.y - A.x * B.y;
+        const a2 = F.y - E.y;
+        const b2 = E.x - F.x;
+        const c2 = F.x * E.y - E.x * F.y;
 
-        a1 = B.y - A.y;
-        b1 = A.x - B.x;
-        c1 = B.x * A.y - A.x * B.y;
-        a2 = F.y - E.y;
-        b2 = E.x - F.x;
-        c2 = F.x * E.y - E.x * F.y;
-
-        let denom: number = a1 * b2 - a2 * b1;
+        const denom: number = a1 * b2 - a2 * b1;
         if (denom === 0) {
             return null;
         }
 
-        ip = new Point();
+        const ip = new Point();
         ip.x = (b1 * c2 - b2 * c1) / denom;
         ip.y = (a2 * c1 - a1 * c2) / denom;
 
@@ -157,8 +147,8 @@ export default class Utility {
     public static range(length: number): number[];
 
     public static range(a: number, b?: number): number[] {
-        let start = b ? a : 0;
-        let stop = b || a;
+        const start = b ? a : 0;
+        const stop = b || a;
 
         return new Array(stop - start).fill(0).map((_, i) => i + start);
     }
@@ -174,7 +164,7 @@ export default class Utility {
      * @returns string array
      */
     public static splitOnWhitespace(csl: string): string[] {
-        let vals: string[] = [];
+        const vals: string[] = [];
         let lastComma = -1;
         let ii: number;
 
@@ -208,10 +198,10 @@ export default class Utility {
      * @returns array of integers like [-1,0,1,2,3,4,7,8,12,16]
      */
     public static rangeStringToArray(rangeString: string): (number | null)[] | null {
-        let vals: (number | null)[] = [];
+        const vals: (number | null)[] = [];
         const nullStrings = ['', 'null', 'NaN', 'NULL', 'NAN'];
         for (const str of rangeString.split(',')) {
-            let foundDash = str.indexOf('-', 1); // look for a dash (ignoring an initial minus sign)
+            const foundDash = str.indexOf('-', 1); // look for a dash (ignoring an initial minus sign)
             if (foundDash < 0) {
                 if (nullStrings.indexOf(str) > -1) {
                     vals.push(null);
@@ -224,8 +214,8 @@ export default class Utility {
                     }
                 }
             } else {
-                let startVal = parseInt(str.slice(0, foundDash), 10);
-                let endVal = parseInt(str.slice(foundDash + 1, str.length), 10);
+                const startVal = parseInt(str.slice(0, foundDash), 10);
+                const endVal = parseInt(str.slice(foundDash + 1, str.length), 10);
                 if (Number.isNaN(startVal)) return null;
                 if (Number.isNaN(endVal)) return null;
                 for (let n = startVal; n <= endVal; n++) vals.push(n);
@@ -250,9 +240,9 @@ export default class Utility {
      */
     public static getIndices(strInput: string): (number | null)[] | undefined {
         let indices: (number | null)[] = [];
-        let splitted: string[] = strInput.split(' ');
+        const splitted: string[] = strInput.split(' ');
         for (const str of splitted) {
-            let ints: (number | null)[] | null = this.rangeStringToArray(str);
+            const ints: (number | null)[] | null = this.rangeStringToArray(str);
             if (ints === null) {
                 return undefined; // signal failure
             }

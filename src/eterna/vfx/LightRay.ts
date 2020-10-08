@@ -1,4 +1,4 @@
-import EPars from 'eterna/EPars';
+import {RNABase} from 'eterna/EPars';
 import {
     SerialTask, AlphaTask, VisibleTask, Vector2
 } from 'flashbang';
@@ -17,7 +17,7 @@ export default class LightRay extends GraphicsObject {
         ));
     }
 
-    public draw(v: Vector2, baseType: number): void {
+    public draw(v: Vector2, baseType: RNABase): void {
         const color = LightRay.getColor(baseType);
 
         const len: number = v.length;
@@ -29,7 +29,7 @@ export default class LightRay extends GraphicsObject {
         this._display.moveTo(0, 2);
         this._display.lineTo(len, 30);
         for (let ii = 1; ii <= 7; ii++) {
-            let lineAngle: number = (Math.PI * (ii - 4)) / 8;
+            const lineAngle: number = (Math.PI * (ii - 4)) / 8;
             this._display.lineTo(len + Math.cos(lineAngle) * 30, -Math.sin(lineAngle) * 30);
         }
 
@@ -41,13 +41,13 @@ export default class LightRay extends GraphicsObject {
     }
 
     private static getColor(baseType: number): number {
-        if (baseType === EPars.RNABASE_ADENINE) {
+        if (baseType === RNABase.ADENINE) {
             return 0xFFFFAF;
-        } else if (baseType === EPars.RNABASE_URACIL) {
+        } else if (baseType === RNABase.URACIL) {
             return 0xA5A6FF;
-        } else if (baseType === EPars.RNABASE_GUANINE) {
+        } else if (baseType === RNABase.GUANINE) {
             return 0xFFB8B8;
-        } else if (baseType === EPars.RNABASE_CYTOSINE) {
+        } else if (baseType === RNABase.CYTOSINE) {
             return 0xAFFFAF;
         } else {
             return 0xFFFFFF;

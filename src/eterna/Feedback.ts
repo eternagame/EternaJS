@@ -31,7 +31,7 @@ export default class Feedback {
                 continue;
             }
 
-            let char: string = secstruct.charAt(ii);
+            const char: string = secstruct.charAt(ii);
 
             if (char === '.') {
                 if (shapedata[ii - startIndex] > (threshold / 4 + (min / 4) * 3)) {
@@ -71,32 +71,18 @@ export default class Feedback {
             if (this._shapeData.get(condition) === undefined) {
                 this._shapeData.set(condition, []);
             }
-            let shapeDatas = this._shapeData.get(condition);
+            const shapeDatas = this._shapeData.get(condition);
             let shapeData: number[] = [];
             if (shapeDatas !== undefined) {
                 shapeDatas[index] = dat.slice();
                 shapeData = shapeDatas[index];
             }
 
-            let smax: number = shapeData[0];
-            let smin: number = shapeData[0];
-            let savg: number = shapeData[0];
-
-            for (let ii = 0; ii < shapeData.length; ii++) {
-                if (shapeData[ii] > smax) {
-                    smax = shapeData[ii];
-                }
-
-                if (shapeData[ii] < smin) {
-                    smin = shapeData[ii];
-                }
-
-                savg += shapeData[ii];
-            }
-
-            if (shapeData.length > 0) {
-                savg /= shapeData.length;
-            }
+            const smax: number = Math.max(...shapeData);
+            const smin: number = Math.min(...shapeData);
+            const savg: number = shapeData.length > 0
+                ? shapeData.reduce((sum, item) => sum + item) / shapeData.length
+                : 0;
 
             if (this._shapeThresholds.get(condition) === undefined) {
                 this._shapeThresholds.set(condition, []);
@@ -236,7 +222,7 @@ export default class Feedback {
         if (shapeData[index] != null) {
             return shapeData[index];
         } else {
-            let shape: number[] = [];
+            const shape: number[] = [];
             shape.push(0.5);
             return shape;
         }
@@ -286,7 +272,7 @@ export default class Feedback {
         if (degradationData[index] != null) {
             return degradationData[index];
         } else {
-            let shape: number[] = [];
+            const shape: number[] = [];
             shape.push(0.5);
             return shape;
         }

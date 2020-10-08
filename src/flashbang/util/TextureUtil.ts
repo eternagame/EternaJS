@@ -9,10 +9,10 @@ export default class TextureUtil {
         // <img> elements can be created from base64 strings.
         // We create an img, set its src data to the base64 string,
         // and then use that as the source for a new PIXI texture.
-        let img = document.createElement('img');
+        const img = document.createElement('img');
         img.src = `data:image/png;base64, ${base64PNG}`;
-        let baseTex = new BaseTexture(img);
-        let tex = new Texture(baseTex);
+        const baseTex = new BaseTexture(img);
+        const tex = new Texture(baseTex);
 
         if (baseTex.valid) {
             // The image may already be loaded
@@ -36,7 +36,7 @@ export default class TextureUtil {
 
     /** Returns a promise that will resolve when the texture is loaded */
     public static async loadTexture(tex: Texture): Promise<Texture> {
-        let base: BaseTexture = tex.baseTexture;
+        const base: BaseTexture = tex.baseTexture;
         if (base.valid) return tex;
         return new Promise<Texture>((resolve, reject) => {
             base.once('loaded', () => resolve(tex));
@@ -64,13 +64,13 @@ export default class TextureUtil {
     public static renderToTexture(disp: DisplayObject): Texture {
         Assert.isTrue(disp.parent == null, 'TODO');
 
-        let wrap: Container = new Container();
+        const wrap: Container = new Container();
         wrap.addChild(disp);
 
         wrap.getLocalBounds(TextureUtil.R);
         wrap.x = -TextureUtil.R.x;
         wrap.y = -TextureUtil.R.y;
-        let tex: RenderTexture = new RenderTexture(new BaseRenderTexture({
+        const tex: RenderTexture = new RenderTexture(new BaseRenderTexture({
             width: TextureUtil.R.width,
             height: TextureUtil.R.height
         }));

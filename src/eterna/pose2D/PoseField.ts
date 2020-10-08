@@ -100,7 +100,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     }
 
     public zoomIn(): void {
-        let prevZoom: number = this._pose.zoomLevel;
+        const prevZoom: number = this._pose.zoomLevel;
 
         if (prevZoom === 0) return;
 
@@ -108,7 +108,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     }
 
     public zoomOut(): void {
-        let prevZoom: number = this._pose.zoomLevel;
+        const prevZoom: number = this._pose.zoomLevel;
 
         if (prevZoom === Pose2D.ZOOM_SPACINGS.length - 1) return;
 
@@ -200,7 +200,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     }
 
     public onMouseWheelEvent(e: WheelEvent): boolean {
-        let mouse = Flashbang.globalMouse;
+        const mouse = Flashbang.globalMouse;
         Assert.assertIsDefined(mouse);
         if (!this.display.visible || !this.containsPoint(mouse.x, mouse.y)) {
             return false;

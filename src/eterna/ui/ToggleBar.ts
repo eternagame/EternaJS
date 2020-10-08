@@ -123,7 +123,7 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
     }
 
     private onMouseClick(e: InteractionEvent): void {
-        let state: number = this.getStateUnderMouse(e);
+        const state: number = this.getStateUnderMouse(e);
         if ((state === this._selectedState) || (state < 0) || (state >= this._numStates)) {
             return;
         }
@@ -150,7 +150,7 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
             return;
         }
 
-        let state: number = this.getStateUnderMouse(e);
+        const state: number = this.getStateUnderMouse(e);
         if ((state === this._hoveredState) || (state < 0) || (state >= this._numStates)) {
             return;
         }

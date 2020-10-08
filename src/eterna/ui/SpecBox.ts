@@ -81,8 +81,8 @@ export default class SpecBox extends ContainerObject {
             });
             this.container.addChild(this._stattext);
 
-            let url = EternaURL.createURL({page: 'manual'});
-            let helpText = `<A HREF="${url}" target="_blank"><U><FONT COLOR="#FFFFFF"><B>What are these parameters?</B></FONT></U></A>`;
+            const url = EternaURL.createURL({page: 'manual'});
+            const helpText = `<A HREF="${url}" target="_blank"><U><FONT COLOR="#FFFFFF"><B>What are these parameters?</B></FONT></U></A>`;
             this._helpText = new HTMLTextObject(helpText, undefined, undefined, true)
                 .font(Fonts.STDFONT)
                 .fontSize(14)
@@ -109,7 +109,7 @@ export default class SpecBox extends ContainerObject {
             this._zoomOutButton.clicked.connect(() => this.dotPlotZoomOut());
             this.addObject(this._zoomOutButton, this.container);
 
-            let pointerTarget = new DisplayObjectPointerTarget(this._dotPlotSprite);
+            const pointerTarget = new DisplayObjectPointerTarget(this._dotPlotSprite);
             pointerTarget.pointerMove.connect((e) => this.onDotPlotMouseMove(e));
             pointerTarget.pointerOver.connect(() => this.onDotPlotMouseEnter());
             pointerTarget.pointerOut.connect(() => this.onDotPlotMouseExit());
@@ -147,7 +147,7 @@ export default class SpecBox extends ContainerObject {
         this._meltplot = datablock.createMeltPlot();
 
         if (this._stattext !== undefined) {
-            let statString = new StyledTextBuilder({
+            const statString = new StyledTextBuilder({
                 fontFamily: Fonts.STDFONT,
                 fontSize: 14,
                 fill: 0xffffff
@@ -178,14 +178,14 @@ export default class SpecBox extends ContainerObject {
         }
 
         if (this._hvec != null) {
-            for (let disp of this._hvec) {
+            for (const disp of this._hvec) {
                 disp.destroy({children: true});
             }
         }
         this._hvec = [];
 
         if (this._vvec != null) {
-            for (let disp of this._vvec) {
+            for (const disp of this._vvec) {
                 disp.destroy({children: true});
             }
         }
@@ -193,11 +193,11 @@ export default class SpecBox extends ContainerObject {
 
         // initialize h1 ~ hn-1, v1 ~ vn-1
         for (let ii = SpecBox.OFFSET; ii <= (this._datasize / SpecBox.OFFSET) * SpecBox.OFFSET; ii += SpecBox.OFFSET) {
-            let hnew: Text = Fonts.std(String.fromCharCode(65 + (ii / SpecBox.OFFSET)), 12).color(0xffffff).build();
+            const hnew: Text = Fonts.std(String.fromCharCode(65 + (ii / SpecBox.OFFSET)), 12).color(0xffffff).build();
             this._hvec.push(hnew);
             this.container.addChild(hnew);
 
-            let vnew: Text = Fonts.std(`${(ii / SpecBox.OFFSET) * 10}`, 12).color(0xffffff).build();
+            const vnew: Text = Fonts.std(`${(ii / SpecBox.OFFSET) * 10}`, 12).color(0xffffff).build();
             this._vvec.push(vnew);
             this.container.addChild(vnew);
         }
@@ -226,16 +226,8 @@ export default class SpecBox extends ContainerObject {
     }
 
     public get plotSize(): number {
-        let plotW: number;
-        let plotH: number;
-
-        if (this._docked) {
-            plotW = this._width - 55;
-            plotH = (this._height - 51) / 2.0;
-        } else {
-            plotW = (this._width - 100) / 2.0;
-            plotH = this._height - 200;
-        }
+        const plotW: number = this._docked ? this._width - 55 : (this._width - 100) / 2.0;
+        const plotH: number = this._docked ? (this._height - 51) / 2.0 : this._height - 200;
 
         return Math.min(plotW, plotH);
     }
@@ -252,8 +244,8 @@ export default class SpecBox extends ContainerObject {
             this._dotplotOriginY = 0;
         }
 
-        let {plotSize} = this;
-        let plotSizeLevel: number = plotSize * level;
+        const {plotSize} = this;
+        const plotSizeLevel: number = plotSize * level;
         if (this._dotplot != null && plotSize > 0 && plotSizeLevel > 0) {
             this._dotplotOriginX += (-this._dotplotOriginX) / level;
             this._dotplotOriginY += (-this._dotplotOriginY) / level;
@@ -265,7 +257,7 @@ export default class SpecBox extends ContainerObject {
                 this._dotPlotSprite.mask = null;
             }
 
-            let mask = new Graphics().beginFill(0).drawRect(0, 0, plotSize, plotSize).endFill();
+            const mask = new Graphics().beginFill(0).drawRect(0, 0, plotSize, plotSize).endFill();
             this._dotPlotSprite.addChild(mask);
             this._dotPlotSprite.mask = mask;
 
@@ -308,7 +300,7 @@ export default class SpecBox extends ContainerObject {
         // Redraw our dotplot
         this.scaleDotPlot(this._dotplotScaleLevel);
 
-        let {plotSize} = this;
+        const {plotSize} = this;
         if (this._meltplot != null && plotSize > 0) {
             this._meltplot.setSize(plotSize, plotSize);
             this._meltplot.replot();
@@ -374,11 +366,11 @@ export default class SpecBox extends ContainerObject {
                 this._coordBalloon.display.visible = false;
             }
 
-            let diffX: number = e.data.global.x - this._dragBeginX;
-            let diffY: number = e.data.global.y - this._dragBeginY;
+            const diffX: number = e.data.global.x - this._dragBeginX;
+            const diffY: number = e.data.global.y - this._dragBeginY;
 
-            let {plotSize} = this;
-            let plotSizeLevel: number = plotSize * this._dotplotScaleLevel;
+            const {plotSize} = this;
+            const plotSizeLevel: number = plotSize * this._dotplotScaleLevel;
 
             this._dotplotX = this._dotplotOriginX + diffX;
             this._dotplotY = this._dotplotOriginY + diffY;
@@ -392,15 +384,15 @@ export default class SpecBox extends ContainerObject {
             this._dotPlotSprite.addChild(this._dotplot);
             this.updateDotplotLabel(this._dotplotX, this._dotplotY);
         } else if (this._mouseOverDotPlot) {
-            let localPoint = e.data.getLocalPosition(this._dotPlotSprite);
-            let blockLength: number = this.dotplotOffsetSize;
-            let x: number = (localPoint.x - this._dotplotOriginX) / blockLength;
+            const localPoint = e.data.getLocalPosition(this._dotPlotSprite);
+            const blockLength: number = this.dotplotOffsetSize;
+            const x: number = (localPoint.x - this._dotplotOriginX) / blockLength;
             let y: number = (localPoint.y - this._dotplotOriginY) / blockLength;
             if (y === 0 || Number.isNaN(y)) {
                 y = 1;
             }
 
-            let msg: string = `${String.fromCharCode(65 + x)},${Math.floor(y * 10)}`
+            const msg: string = `${String.fromCharCode(65 + x)},${Math.floor(y * 10)}`
                 + ` - (${Math.floor(x * 10)}, ${Math.floor(y * 10)})`;
             if (this._coordBalloon != null) {
                 this._coordBalloon.setText(msg);
@@ -419,10 +411,10 @@ export default class SpecBox extends ContainerObject {
 
     // calculate it's origin and axis by from and to
     private calculateCoordPosition(from: Text, index: number, d: number): Point {
-        let posFrom: Point = new Point();
+        const posFrom: Point = new Point();
         posFrom.copyFrom(from.position);
-        let diffX: number = this.dotplotOffsetSize;
-        let diffY: number = this.dotplotOffsetSize;
+        const diffX: number = this.dotplotOffsetSize;
+        const diffY: number = this.dotplotOffsetSize;
         if (d === SpecBox.HORIZONTAL) {
             return new Point(posFrom.x + diffX * (index + 1), posFrom.y);
         } else {
@@ -431,34 +423,34 @@ export default class SpecBox extends ContainerObject {
     }
 
     private updateDotplotLabel(refX: number, refY: number): void {
-        let {plotSize} = this;
-        let h0DefaultX: number = this._docked ? 20 : SpecBox.H0_DEFAULT_X;
-        let h0DefaultY: number = this._docked ? 0 : SpecBox.H0_DEFAULT_Y;
+        const {plotSize} = this;
+        const h0DefaultX: number = this._docked ? 20 : SpecBox.H0_DEFAULT_X;
+        const h0DefaultY: number = this._docked ? 0 : SpecBox.H0_DEFAULT_Y;
 
-        let h0XStart: number = h0DefaultX + refX;
-        let h0YStart: number = h0DefaultY;
+        const h0XStart: number = h0DefaultX + refX;
+        const h0YStart: number = h0DefaultY;
 
         this._h0.position = new Point(h0XStart, h0YStart);
         this._h0.visible = !(h0XStart < h0DefaultX);
 
         for (let ii = 0; ii < this._hvec.length; ++ii) {
-            let pos = this.calculateCoordPosition(this._h0, ii, SpecBox.HORIZONTAL);
+            const pos = this.calculateCoordPosition(this._h0, ii, SpecBox.HORIZONTAL);
             this._hvec[ii].position = pos;
             this._hvec[ii].visible = !(pos.x >= plotSize + h0DefaultX - this._hvec[ii].width || pos.x < h0DefaultX);
         }
 
-        let v0DefaultX: number = this._docked ? 10 : SpecBox.V0_DEFAULT_X;
-        let v0DefaultY: number = this._docked ? 15 : SpecBox.V0_DEFAULT_Y;
+        const v0DefaultX: number = this._docked ? 10 : SpecBox.V0_DEFAULT_X;
+        const v0DefaultY: number = this._docked ? 15 : SpecBox.V0_DEFAULT_Y;
 
-        let v0XStart: number = v0DefaultX;
-        let v0YStart: number = v0DefaultY + refY;
+        const v0XStart: number = v0DefaultX;
+        const v0YStart: number = v0DefaultY + refY;
 
         this._v0.position = new Point(v0XStart, v0YStart);
 
         this._v0.visible = !(v0YStart < v0DefaultY);
 
         for (let ii = 0; ii < this._vvec.length; ++ii) {
-            let pos = this.calculateCoordPosition(this._v0, ii, SpecBox.VERTICAL);
+            const pos = this.calculateCoordPosition(this._v0, ii, SpecBox.VERTICAL);
             pos.set(pos.x - this._vvec[ii].width, pos.y);
             this._vvec[ii].position = pos;
             this._vvec[ii].visible = !((pos.y >= plotSize + v0DefaultY - this._vvec[ii].height || pos.y < v0DefaultY));

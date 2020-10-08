@@ -27,7 +27,7 @@ export default class Band extends ContainerObject implements Updatable {
         this._st1 = new Sprite();
         this.container.addChild(this._st1);
 
-        let scoreText: Text = Fonts.std('', 10).bold().build();
+        const scoreText: Text = Fonts.std('', 10).bold().build();
         scoreText.position = new Point(2, 19);
         this.container.addChild(scoreText);
 
@@ -53,7 +53,7 @@ export default class Band extends ContainerObject implements Updatable {
             this._startTime = dt;
         }
 
-        let pairR: number = Math.cos((dt - this._startTime) * 4) * this._movDist + this._midDist;
+        const pairR: number = Math.cos((dt - this._startTime) * 4) * this._movDist + this._midDist;
 
         this._st0.x = -pairR;
         this._st0.y = 0;
@@ -76,10 +76,10 @@ export default class Band extends ContainerObject implements Updatable {
 
         const satTex: Texture = BitmapManager.getBitmap(Bitmaps.Satellite);
         const render = (rotation: number, colorTransform: ColorMatrixFilter | null = null): Texture => {
-            let disp = new Graphics();
+            const disp = new Graphics();
             disp.beginFill(0).drawRect(0, 0, 20, 20).endFill();
 
-            let sat = new Sprite(satTex);
+            const sat = new Sprite(satTex);
             sat.pivot = new Point(10, 10);
             sat.rotation = MathUtil.deg2Rad * -rotation;
             if (colorTransform != null) {

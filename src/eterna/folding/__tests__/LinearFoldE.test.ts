@@ -1,10 +1,11 @@
-import EPars from 'eterna/EPars';
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 import Folder from '../Folder';
 import LinearFoldE from '../LinearFoldE';
 import './jest-matcher-deep-close-to';
 
-function FoldSequence(folder: Folder, seq: string, struct: string): any[] | null {
-    return folder.foldSequence(EPars.stringToSequence(seq), null, struct);
+function FoldSequence(folder: Folder, seq: Sequence, struct: SecStruct): SecStruct | null {
+    return folder.foldSequence(seq, null, struct.getParenthesis());
 }
 
 function CreateFolder(type: any): Promise<Folder | null> {
@@ -40,29 +41,27 @@ test('linearfoldE:MFETests', () => {
                 73, 25, 71, 259, 70, -251, 68, 118, 67, -97, 66, -315, 5, 1052, 4, -100, 3, -259, 2, -107, 1, -100, 
                 -1, 175]
         ];
-        let structures: number[][] = [
-            EPars.parenthesisToPairs("(((((........)))))"),
-            EPars.parenthesisToPairs("(((...)))"),
-            EPars.parenthesisToPairs("(((((........)))))"),
-            EPars.parenthesisToPairs("((((((((...........)).))))))"),
-            EPars.parenthesisToPairs(".((((((.((((((......)))))).......((((.....))))...))))))."),
-            EPars.parenthesisToPairs("(((((((..((((........)))).(((((.......))))).....(((((.......))))))))))))."),
-            EPars.parenthesisToPairs(".(((((((((.((((....))))..................))))..(((((......)))))...(((.((.(((((((((((((...((((..((((.....))))...)))).))))))))))))))).)))..))))).."),  
+        let structures: SecStruct[] = [
+            SecStruct.fromParens("(((((........)))))"),
+            SecStruct.fromParens("(((...)))"),
+            SecStruct.fromParens("(((((........)))))"),
+            SecStruct.fromParens("((((((((...........)).))))))"),
+            SecStruct.fromParens(".((((((.((((((......)))))).......((((.....))))...))))))."),
+            SecStruct.fromParens("(((((((..((((........)))).(((((.......))))).....(((((.......))))))))))))."),
+            SecStruct.fromParens(".(((((((((.((((....))))..................))))..(((((......)))))...(((.((.(((((((((((((...((((..((((.....))))...)))).))))))))))))))).)))..))))).."),  
         ];
-        let sequences: number[][] = [
-            EPars.stringToSequence(  "GGGGGAAAAAAAACCCCC"),
-            EPars.stringToSequence(  "GGGAAACCC"),
-            EPars.stringToSequence(  "CCAGGAAAAAAAACCUGG"),
-            EPars.stringToSequence(  "GGGGGGGGAAAACGGAAAGCCACCCCCC"),
-            EPars.stringToSequence(  "ACGCUGUCUGUACUUGUAUCAGUACACUGACGAGUCCCUAAAGGACGAAACAGCGC"),
-            EPars.stringToSequence(  "GGGGAUGUAGCUCAUAUGGUAGAGCGCUCGCUUUGCAUGCGAGAGGCACAGGGUUCGAUUCCCUGCAUCUCCA"),
-            EPars.stringToSequence(  "CCUACUAGGGGAGCCAAAAGGCUGAGAUGAAUGUAUUCAGACCCUUAUAACCUGAUUUGGUUAAUACCAACGUAGGAAAGUAGUUAUUAACUAUUCGUCAUUGAGAUGUCUUGGUCUAACUACUUUCUUCGCUGGGAAGUAGUU"),
+        let sequences: Sequence[] = [
+            Sequence.fromSequenceString(  "GGGGGAAAAAAAACCCCC"),
+            Sequence.fromSequenceString(  "GGGAAACCC"),
+            Sequence.fromSequenceString(  "CCAGGAAAAAAAACCUGG"),
+            Sequence.fromSequenceString(  "GGGGGGGGAAAACGGAAAGCCACCCCCC"),
+            Sequence.fromSequenceString(  "ACGCUGUCUGUACUUGUAUCAGUACACUGACGAGUCCCUAAAGGACGAAACAGCGC"),
+            Sequence.fromSequenceString(  "GGGGAUGUAGCUCAUAUGGUAGAGCGCUCGCUUUGCAUGCGAGAGGCACAGGGUUCGAUUCCCUGCAUCUCCA"),
+            Sequence.fromSequenceString(  "CCUACUAGGGGAGCCAAAAGGCUGAGAUGAAUGUAUUCAGACCCUUAUAACCUGAUUUGGUUAAUACCAACGUAGGAAAGUAGUUAUUAACUAUUCGUCAUUGAGAUGUCUUGGUCUAACUACUUUCUUCGCUGGGAAGUAGUU"),
         ];
 
         for (let ii: number = 0; ii < sequences.length; ++ii ) {
-            // console.log(EPars.sequenceToString(sequences[ii]));
-            // console.log(EPars.pairsToParenthesis(folder.foldSequence(sequences[ii], [])));
-            expect(folder.foldSequence(sequences[ii], [])).toEqual(structures[ii])
+            expect(folder.foldSequence(sequences[ii], new SecStruct())).toEqual(structures[ii])
 
             let outNNFE: number[] = [];
             let FE = folder.scoreStructures(

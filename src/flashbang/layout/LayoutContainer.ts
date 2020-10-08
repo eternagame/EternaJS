@@ -51,7 +51,7 @@ export default abstract class LayoutContainer extends Container {
         this._isLayingOut = true;
 
         // Recursively lay out our children if they need it.
-        for (let child of this.children) {
+        for (const child of this.children) {
             if (child instanceof LayoutContainer) {
                 (child as LayoutContainer).layout(force);
             }
@@ -63,7 +63,7 @@ export default abstract class LayoutContainer extends Container {
         // If our parent is a layout sprite, force it to re-layout, since our size has
         // likely changed.
         if (this.parent instanceof LayoutContainer) {
-            let layoutParent: LayoutContainer = this.parent as LayoutContainer;
+            const layoutParent: LayoutContainer = this.parent as LayoutContainer;
             if (!layoutParent._isLayingOut) {
                 layoutParent.layout(true);
             }
@@ -88,7 +88,7 @@ class Spacer extends Container {
 
         // For some reasons, spacers have zero-width bounds
         // unless they're wrapped in a Container
-        let sprite = new Sprite();
+        const sprite = new Sprite();
         sprite.width = width;
         sprite.height = height;
         this.addChild(sprite);

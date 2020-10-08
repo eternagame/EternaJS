@@ -13,7 +13,7 @@ export default class AsyncProcessDialog extends Dialog<void> {
     }
 
     protected added(): void {
-        let textField = Fonts.std(this._text, 20).color(0xffffff).bold().build();
+        const textField = Fonts.std(this._text, 20).color(0xffffff).bold().build();
         this.container.addChild(textField);
 
         textField.alpha = 0;
@@ -22,7 +22,7 @@ export default class AsyncProcessDialog extends Dialog<void> {
             new AlphaTask(0, 0.3, Easing.linear, textField)
         )));
 
-        let updateLocation = () => {
+        const updateLocation = () => {
             Assert.assertIsDefined(Flashbang.stageWidth);
             Assert.assertIsDefined(Flashbang.stageHeight);
             textField.position = new Point(

@@ -18,7 +18,7 @@ export default class NotificationDialog extends Dialog<void> {
     protected added() {
         super.added();
 
-        let box = new TextBalloon('', 0x152843, 1.0, 0xC0DCE7, 0.27);
+        const box = new TextBalloon('', 0x152843, 1.0, 0xC0DCE7, 0.27);
         box.title = 'Notice';
         box.setText(`${this._message}\n\n\n`);
         this.addObject(box, this.container);
@@ -27,9 +27,9 @@ export default class NotificationDialog extends Dialog<void> {
         // box.display.alpha = 0;
         // box.addObject(new AlphaTask(1, 0.3, Easing.easeIn));
 
-        let buttonLayout: HLayoutContainer = new HLayoutContainer(2);
+        const buttonLayout: HLayoutContainer = new HLayoutContainer(2);
 
-        let okButton = new GameButton().label(this._okButtonTitle, 14);
+        const okButton = new GameButton().label(this._okButtonTitle, 14);
         box.addObject(okButton, buttonLayout);
         okButton.clicked.connect(() => this.close());
 
@@ -46,7 +46,7 @@ export default class NotificationDialog extends Dialog<void> {
 
         box.container.addChild(buttonLayout);
 
-        let updateLocation = () => {
+        const updateLocation = () => {
             Assert.assertIsDefined(Flashbang.stageWidth);
             Assert.assertIsDefined(Flashbang.stageHeight);
             box.display.position = new Point(

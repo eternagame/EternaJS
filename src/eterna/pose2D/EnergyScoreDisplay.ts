@@ -27,7 +27,7 @@ export default class EnergyScoreDisplay extends Container {
         this.addChild(this._bg);
         this.updateBG();
 
-        let textLayout: VLayoutContainer = new VLayoutContainer(2, HAlign.LEFT);
+        const textLayout: VLayoutContainer = new VLayoutContainer(2, HAlign.LEFT);
 
         this._labelText = new MultiStyleText('Total', {
             default: {

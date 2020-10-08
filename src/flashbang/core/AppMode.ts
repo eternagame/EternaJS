@@ -46,8 +46,8 @@ export default class AppMode {
         // Array.map would be appropriate here, except that the resultant
         // Array might contain fewer entries than the source.
 
-        let objs: GameObject[] = [];
-        for (let ref of objectRefs) {
+        const objs: GameObject[] = [];
+        for (const ref of objectRefs) {
             if (!ref.isNull) {
                 objs.push(ref.object as GameObject);
             }
@@ -77,7 +77,7 @@ export default class AppMode {
 
     /** Removes the GameObject with the given id from the ObjectDB, if it exists. */
     public destroyObjectWithId(id: ObjectID): void {
-        let obj: GameObjectBase | undefined = this.getObjectWithId(id);
+        const obj: GameObjectBase | undefined = this.getObjectWithId(id);
         if (obj !== undefined) {
             obj.destroySelf();
         }
@@ -113,7 +113,7 @@ export default class AppMode {
             return new Promise((resolve, reject) => {
                 this._entered.connect(() => {
                     // if (resolve != null) {
-                    let fn = resolve;
+                    const fn = resolve;
                     // resolve = null;
                     // reject = null;
                     fn();
@@ -122,7 +122,7 @@ export default class AppMode {
 
                 this._disposed.connect(() => {
                     // if (reject != null) {
-                    let fn = reject;
+                    const fn = reject;
                     // resolve = null;
                     // reject = null;
                     fn('Mode was disposed');
@@ -293,16 +293,16 @@ export default class AppMode {
         obj._mode = this;
 
         // Handle IDs
-        let {ids} = obj;
+        const {ids} = obj;
         if (ids.length > 0) {
             this._regs.add(obj.destroyed.connect(() => {
                 Assert.assertIsDefined(this._idObjects);
-                for (let id of ids) {
+                for (const id of ids) {
                     this._idObjects.delete(id);
                 }
             }));
 
-            for (let id of ids) {
+            for (const id of ids) {
                 Assert.assertIsDefined(this._idObjects);
                 Assert.isFalse(this._idObjects.has(id), 'two objects with the same ID added to the AppMode');
                 this._idObjects.set(id, obj);
@@ -310,12 +310,12 @@ export default class AppMode {
         }
 
         // Handle Updatable and LateUpdatable
-        let updatable: Updatable = (obj as unknown) as Updatable;
+        const updatable: Updatable = (obj as unknown) as Updatable;
         if (updatable.update !== undefined) {
             obj.regs.add(this.updateBegan.connect((dt) => updatable.update(dt)));
         }
 
-        let lateUpdatable: LateUpdatable = (obj as unknown) as LateUpdatable;
+        const lateUpdatable: LateUpdatable = (obj as unknown) as LateUpdatable;
         if (lateUpdatable.lateUpdate !== undefined) {
             obj.regs.add(this.lateUpdate.connect((dt) => lateUpdatable.lateUpdate(dt)));
         }

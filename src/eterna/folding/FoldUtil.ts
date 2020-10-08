@@ -1,3 +1,5 @@
+import SecStruct from 'eterna/rnatypes/SecStruct';
+
 export default class FoldUtil {
     public static nextPerm(v: number[]): boolean {
         let more = false;
@@ -5,17 +7,17 @@ export default class FoldUtil {
         if (ii <= 1) return more;
         ii--;
         while (true) {
-            let jj: number = ii;
+            const jj: number = ii;
             ii--;
             if (v[ii] < v[jj]) {
                 let kk: number = v.length;
                 do {
                     kk--;
                 } while (v[ii] >= v[kk]);
-                let vv: number = v[ii];
+                const vv: number = v[ii];
                 v[ii] = v[kk];
                 v[kk] = vv;
-                let r: number[] = v.slice(jj).reverse();
+                const r: number[] = v.slice(jj).reverse();
                 v.splice(jj, v.length);
                 for (kk = 0; kk < r.length; kk++) v.push(r[kk]);
                 more = true;
@@ -29,14 +31,14 @@ export default class FoldUtil {
         return more;
     }
 
-    public static bindingSiteFormed(pairs: number[], groups: number[][]): boolean {
-        if (pairs[groups[0][0]] !== groups[1][groups[1].length - 1]) return false;
-        if (pairs[groups[0][groups[0].length - 1]] !== groups[1][0]) return false;
+    public static bindingSiteFormed(pairs: SecStruct, groups: number[][]): boolean {
+        if (pairs.pairingPartner(groups[0][0]) !== groups[1][groups[1].length - 1]) return false;
+        if (pairs.pairingPartner(groups[0][groups[0].length - 1]) !== groups[1][0]) return false;
         for (let ii = 1; ii < groups[0].length - 1; ii++) {
-            if (pairs[groups[0][ii]] !== -1) return false;
+            if (pairs.isPaired(groups[0][ii])) return false;
         }
         for (let ii = 1; ii < groups[1].length - 1; ii++) {
-            if (pairs[groups[1][ii]] !== -1) return false;
+            if (pairs.isPaired(groups[1][ii])) return false;
         }
 
         return true;
@@ -51,7 +53,7 @@ export default class FoldUtil {
      */
     public static arrayCopy<T>(dst: T[], src: T[]) {
         dst.length = 0;
-        for (let value of src) {
+        for (const value of src) {
             dst.push(value);
         }
     }

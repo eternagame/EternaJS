@@ -1,6 +1,6 @@
 import {Text, Texture} from 'pixi.js';
 import {TextureUtil} from 'flashbang';
-import EPars from 'eterna/EPars';
+import {RNABase} from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import EternaTextureUtil from 'eterna/util/EternaTextureUtil';
 import Fonts from 'eterna/util/Fonts';
@@ -87,9 +87,9 @@ export default class BaseTextures {
     }
 
     private static createLetterTextures(baseType: number, zoomScalar: number): Texture[] {
-        let bigLetter: Text = Fonts.std(BaseTextures.type2Letter(baseType)).fontSize(18).bold().color(0x0)
+        const bigLetter: Text = Fonts.std(BaseTextures.type2Letter(baseType)).fontSize(18).bold().color(0x0)
             .build();
-        let textures: Texture[] = [TextureUtil.renderToTexture(bigLetter)];
+        const textures: Texture[] = [TextureUtil.renderToTexture(bigLetter)];
         EternaTextureUtil.createScaled(textures, zoomScalar, Base.NUM_ZOOM_LEVELS);
         return textures;
     }
@@ -97,13 +97,13 @@ export default class BaseTextures {
     // AMW TODO: isn't this just the EPars function?
     private static type2Letter(baseType: number): string {
         switch (baseType) {
-            case EPars.RNABASE_URACIL:
+            case RNABase.URACIL:
                 return 'U';
-            case EPars.RNABASE_ADENINE:
+            case RNABase.ADENINE:
                 return 'A';
-            case EPars.RNABASE_GUANINE:
+            case RNABase.GUANINE:
                 return 'G';
-            case EPars.RNABASE_CYTOSINE:
+            case RNABase.CYTOSINE:
                 return 'C';
             default:
                 throw new Error(`Bad baseType: ${baseType}`);
@@ -115,7 +115,7 @@ export default class BaseTextures {
             throw new Error(`Invalid textures array length ${textures.length}`);
         }
 
-        let origLength: number = textures.length / Base.NUM_ZOOM_LEVELS;
+        const origLength: number = textures.length / Base.NUM_ZOOM_LEVELS;
         return textures[(origLength * sizeNum + ii)];
     }
 }

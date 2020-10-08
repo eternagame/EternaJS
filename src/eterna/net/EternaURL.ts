@@ -79,7 +79,7 @@ export default class EternaURL {
         } else if (params['page'] === 'lab_browser') {
             return `/web/browse/${params['nid']}/`;
         } else if (params['page'] === 'browse_solution' || params['page'] === 'browse_player') {
-            let url = `/game/browse/${params['puznid']}/?`;
+            const url = `/game/browse/${params['puznid']}/?`;
             delete params['page'];
             delete params['puznid'];
             return url + new URLSearchParams({

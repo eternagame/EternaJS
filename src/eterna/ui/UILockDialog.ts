@@ -20,7 +20,7 @@ export default class UILockDialog extends Dialog<void> {
 
     public releaseRef(name?: string): void {
         if (name != null) {
-            let idx = this._namedRefs.indexOf(name);
+            const idx = this._namedRefs.indexOf(name);
             if (idx >= 0) {
                 this._namedRefs.splice(idx, 1);
             } else {

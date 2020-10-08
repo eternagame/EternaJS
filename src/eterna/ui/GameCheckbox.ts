@@ -14,7 +14,7 @@ export default class GameCheckbox extends ToggleButton {
         // setting cacheAsBitmap on these Graphics objects
         // breaks interactivity :( (PIXI bug?)
 
-        let box = new Graphics();
+        const box = new Graphics();
         box.lineStyle(2, 0xC0DCE7);
         box.beginFill(0x0, 0.5);
         box.drawRect(0, 0, size, size);
@@ -31,7 +31,7 @@ export default class GameCheckbox extends ToggleButton {
         this._check.visible = false;
         this.container.addChild(this._check);
 
-        let label = Fonts.std(txt, size).color(0xC0DCE7).build();
+        const label = Fonts.std(txt, size).color(0xC0DCE7).build();
         this.container.addChild(label);
         DisplayUtil.positionRelative(
             label, HAlign.LEFT, VAlign.CENTER,

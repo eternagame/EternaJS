@@ -1,5 +1,5 @@
 import {Rectangle} from 'pixi.js';
-import EPars from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import {
     KeyCode, DisplayUtil, HAlign, VAlign, Updatable, ContainerObject
@@ -10,6 +10,7 @@ import TextBalloon from 'eterna/ui/TextBalloon';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
 import Fonts from 'eterna/util/Fonts';
 import UITheme from 'eterna/ui/UITheme';
+import SecStruct from 'eterna/rnatypes/SecStruct';
 
 function IsArrowKey(keyCode: string): boolean {
     return keyCode === KeyCode.ArrowRight
@@ -82,16 +83,16 @@ export default class StructureInput extends ContainerObject implements Updatable
         // Replace () with (.) -- () is illegal and causes an error
         input = input.replace(/\(\)/g, '(.)');
 
-        let error: string | null = EPars.validateParenthesis(input, false, Eterna.MAX_PUZZLE_EDIT_LENGTH);
+        const error: string | null = EPars.validateParenthesis(input, false, Eterna.MAX_PUZZLE_EDIT_LENGTH);
         this.setWarning(error || '');
         this._textInput.text = input;
 
-        let {sequence} = this._pose;
+        let sequence = this._pose.sequence.baseArray;
         let locks = this._pose.puzzleLocks;
         let bindingSite = this._pose.molecularBindingSite;
-        let sequenceBackup = this._pose.sequence;
-        let locksBackup = this._pose.puzzleLocks;
-        let bindingSiteBackup = this._pose.molecularBindingSite;
+        const sequenceBackup = this._pose.sequence.baseArray;
+        const locksBackup = this._pose.puzzleLocks;
+        const bindingSiteBackup = this._pose.molecularBindingSite;
 
         if (sequence.length > input.length) {
             sequence = sequence.slice(0, input.length);
@@ -100,17 +101,17 @@ export default class StructureInput extends ContainerObject implements Updatable
         }
 
         for (let ii: number = sequence.length; ii < input.length; ii++) {
-            sequence.push(EPars.RNABASE_ADENINE);
+            sequence.push(RNABase.ADENINE);
             if (locks) locks.push(false);
             if (bindingSite) bindingSite.push(false);
         }
 
         if (op === PuzzleEditOp.ADD_BASE) {
             // Add a base
-            let afterIndex = sequence.slice(index);
-            let afterLockIndex = locks ? locks.slice(index) : null;
-            let afterBindingSiteIndex = bindingSite ? bindingSite.slice(index) : null;
-            sequence[index] = EPars.RNABASE_ADENINE;
+            const afterIndex = sequence.slice(index);
+            const afterLockIndex = locks ? locks.slice(index) : null;
+            const afterBindingSiteIndex = bindingSite ? bindingSite.slice(index) : null;
+            sequence[index] = RNABase.ADENINE;
             if (locks) locks[index] = false;
             if (bindingSite) bindingSite[index] = false;
 
@@ -121,18 +122,18 @@ export default class StructureInput extends ContainerObject implements Updatable
             }
         } else if (op === PuzzleEditOp.ADD_PAIR) {
             // Add a pair
-            let pindex: number = (this._pose.pairs)[index];
+            let pindex: number = (this._pose.pairs).pairingPartner(index);
             if (index > pindex) {
-                let temp: number = index;
+                const temp: number = index;
                 index = pindex;
                 pindex = temp;
             }
-            let afterIndex = sequence.slice(index);
-            let afterLockIndex = locks ? locks.slice(index) : null;
-            let afterBindingSiteIndex = bindingSite ? bindingSite.slice(index) : null;
+            const afterIndex = sequence.slice(index);
+            const afterLockIndex = locks ? locks.slice(index) : null;
+            const afterBindingSiteIndex = bindingSite ? bindingSite.slice(index) : null;
 
-            sequence[index] = EPars.RNABASE_ADENINE;
-            sequence[pindex + 2] = EPars.RNABASE_ADENINE;
+            sequence[index] = RNABase.ADENINE;
+            sequence[pindex + 2] = RNABase.ADENINE;
             if (locks) locks[index] = false;
             if (locks) locks[pindex + 2] = false;
             if (bindingSite) bindingSite[index] = false;
@@ -151,15 +152,15 @@ export default class StructureInput extends ContainerObject implements Updatable
             }
         } else if (op === PuzzleEditOp.ADD_CYCLE) {
             // Add a cycle of length 3
-            let afterIndex = sequence.slice(index);
-            let afterLockIndex = locks ? locks.slice(index) : null;
-            let afterBindingSiteIndex = bindingSite ? bindingSite.slice(index) : null;
+            const afterIndex = sequence.slice(index);
+            const afterLockIndex = locks ? locks.slice(index) : null;
+            const afterBindingSiteIndex = bindingSite ? bindingSite.slice(index) : null;
 
-            sequence[index] = EPars.RNABASE_ADENINE;
-            sequence[index + 1] = EPars.RNABASE_ADENINE;
-            sequence[index + 2] = EPars.RNABASE_ADENINE;
-            sequence[index + 3] = EPars.RNABASE_ADENINE;
-            sequence[index + 4] = EPars.RNABASE_ADENINE;
+            sequence[index] = RNABase.ADENINE;
+            sequence[index + 1] = RNABase.ADENINE;
+            sequence[index + 2] = RNABase.ADENINE;
+            sequence[index + 3] = RNABase.ADENINE;
+            sequence[index + 4] = RNABase.ADENINE;
 
             if (locks) {
                 locks[index] = false;
@@ -184,15 +185,15 @@ export default class StructureInput extends ContainerObject implements Updatable
             }
         } else if (op === PuzzleEditOp.DELETE_PAIR) {
             // Delete a pair
-            let pindex = (this._pose.pairs)[index];
+            let pindex = (this._pose.pairs).pairingPartner(index);
             if (index > pindex) {
-                let temp = index;
+                const temp = index;
                 index = pindex;
                 pindex = temp;
             }
-            let afterIndex = sequenceBackup.slice(index + 1);
-            let afterLockIndex = locksBackup ? locksBackup.slice(index + 1) : null;
-            let afterBindingSiteIndex = bindingSiteBackup ? bindingSiteBackup.slice(index + 1) : null;
+            const afterIndex = sequenceBackup.slice(index + 1);
+            const afterLockIndex = locksBackup ? locksBackup.slice(index + 1) : null;
+            const afterBindingSiteIndex = bindingSiteBackup ? bindingSiteBackup.slice(index + 1) : null;
 
             for (let ii = 0; ii < afterIndex.length - 1; ii++) {
                 if (ii + index >= pindex - 1) {
@@ -207,9 +208,9 @@ export default class StructureInput extends ContainerObject implements Updatable
             }
         } else if (op === PuzzleEditOp.DELETE_BASE) {
             // Delete a base
-            let afterIndex = sequenceBackup.slice(index + 1);
-            let afterLockIndex = locksBackup ? locksBackup.slice(index + 1) : null;
-            let afterBindingSiteIndex = bindingSiteBackup ? bindingSiteBackup.slice(index + 1) : null;
+            const afterIndex = sequenceBackup.slice(index + 1);
+            const afterLockIndex = locksBackup ? locksBackup.slice(index + 1) : null;
+            const afterBindingSiteIndex = bindingSiteBackup ? bindingSiteBackup.slice(index + 1) : null;
 
             for (let ii = 0; ii < afterIndex.length; ii++) {
                 sequence[ii + index] = afterIndex[ii];
@@ -217,12 +218,12 @@ export default class StructureInput extends ContainerObject implements Updatable
                 if (bindingSite && afterBindingSiteIndex) bindingSite[ii + index] = afterBindingSiteIndex[ii];
             }
         }
-        this._pose.sequence = sequence;
+        this._pose.sequence.baseArray = sequence;
         this._pose.puzzleLocks = locks;
         this._pose.molecularBindingSite = bindingSite;
         this._pose.trackCursor(this._textInput.caretPosition);
         try {
-            this._pose.molecularStructure = EPars.parenthesisToPairs(this.structureString);
+            this._pose.molecularStructure = SecStruct.fromParens(this.structureString);
         } catch (e) {
             // Invalid parenthesis notation error will warn the user per the earlier validateParenthesis call
             // Don't return to poseedit since it'll just break with the malformed structure
@@ -232,7 +233,7 @@ export default class StructureInput extends ContainerObject implements Updatable
     }
 
     public get structureString(): string {
-        let secstruct: string = this._textInput.text;
+        const secstruct: string = this._textInput.text;
         return secstruct.replace(/[^.()]/g, '');
     }
 

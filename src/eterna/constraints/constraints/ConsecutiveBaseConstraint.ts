@@ -1,5 +1,4 @@
-import UndoBlock from 'eterna/UndoBlock';
-import EPars from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
@@ -15,7 +14,7 @@ abstract class ConsecutiveBaseConstraint extends Constraint<ConsecutiveConstrain
 
     /**
      * Creates a ConsecutiveBaseConstraint which limits the number of consecutive bases
-     * @param baseType Base to limit, e.g. EPars.RNABASE_ADENINE
+     * @param baseType Base to limit, e.g. RNABase.ADENINE
      * @param limit Number of consectuive bases to constrain against.
      * This is the maxiumum allowed consecutive count  + 1.
      */
@@ -26,10 +25,7 @@ abstract class ConsecutiveBaseConstraint extends Constraint<ConsecutiveConstrain
     }
 
     public evaluate(context: ConstraintContext): ConsecutiveConstraintStatus {
-        let count = EPars.countConsecutive(
-            context.undoBlocks[0].sequence,
-            this.baseType
-        );
+        const count = context.undoBlocks[0].sequence.countConsecutive(this.baseType);
 
         return {
             satisfied: count < this.consecutiveLimit,
@@ -41,7 +37,7 @@ abstract class ConsecutiveBaseConstraint extends Constraint<ConsecutiveConstrain
         status: ConsecutiveConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
-        let tooltip = ConstraintBox.createTextStyle();
+        const tooltip = ConstraintBox.createTextStyle();
         if (forMissionScreen) {
             tooltip.pushStyle('altTextMain');
         }
@@ -67,8 +63,7 @@ abstract class ConsecutiveBaseConstraint extends Constraint<ConsecutiveConstrain
 
     public getHighlight(status: ConsecutiveConstraintStatus, context: ConstraintContext): HighlightInfo {
         return {
-            ranges: EPars.getRestrictedConsecutive(
-                context.undoBlocks[0].sequence,
+            ranges: context.undoBlocks[0].sequence.getRestrictedConsecutive(
                 this.baseType,
                 this.consecutiveLimit - 1,
                 context.undoBlocks[0].puzzleLocks
@@ -82,7 +77,7 @@ export class ConsecutiveAConstraint extends ConsecutiveBaseConstraint {
     public static readonly NAME = 'CONSECUTIVE_A';
 
     constructor(limit: number) {
-        super(EPars.RNABASE_ADENINE, limit);
+        super(RNABase.ADENINE, limit);
     }
 
     public serialize(): [string, string] {
@@ -97,7 +92,7 @@ export class ConsecutiveUConstraint extends ConsecutiveBaseConstraint {
     public static readonly NAME = 'CONSECUTIVE_U';
 
     constructor(limit: number) {
-        super(EPars.RNABASE_URACIL, limit);
+        super(RNABase.URACIL, limit);
     }
 
     public serialize(): [string, string] {
@@ -112,7 +107,7 @@ export class ConsecutiveGConstraint extends ConsecutiveBaseConstraint {
     public static readonly NAME = 'CONSECUTIVE_G';
 
     constructor(limit: number) {
-        super(EPars.RNABASE_GUANINE, limit);
+        super(RNABase.GUANINE, limit);
     }
 
     public serialize(): [string, string] {
@@ -127,7 +122,7 @@ export class ConsecutiveCConstraint extends ConsecutiveBaseConstraint {
     public static readonly NAME = 'CONSECUTIVE_C';
 
     constructor(limit: number) {
-        super(EPars.RNABASE_CYTOSINE, limit);
+        super(RNABase.CYTOSINE, limit);
     }
 
     public serialize(): [string, string] {

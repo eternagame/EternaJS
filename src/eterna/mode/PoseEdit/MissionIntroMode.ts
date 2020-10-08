@@ -14,10 +14,11 @@ import EternaURL from 'eterna/net/EternaURL';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import MissionIntroPanel from 'eterna/ui/MissionIntroPanel';
 import UITheme from 'eterna/ui/UITheme';
+import SecStruct from 'eterna/rnatypes/SecStruct';
 
 export default class MissionIntroMode extends AppMode {
     constructor(
-        puzzleName: string, puzzleDescription: string, puzzleThumbnails: number[][], constraintBoxes: ConstraintBox[],
+        puzzleName: string, puzzleDescription: string, puzzleThumbnails: SecStruct[], constraintBoxes: ConstraintBox[],
         customLayout: Array<[number, number] | [null, null]> | null = null
     ) {
         super();
@@ -148,7 +149,7 @@ export default class MissionIntroMode extends AppMode {
 
     private readonly _puzzleName: string;
     private readonly _puzzleDescription: string;
-    private readonly _puzzleThumbnails: number[][];
+    private readonly _puzzleThumbnails: SecStruct[];
     private readonly _constraintBoxes: ConstraintBox[];
 
     private _closed: boolean = false;

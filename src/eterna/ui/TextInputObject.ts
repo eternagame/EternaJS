@@ -197,8 +197,8 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
     }
 
     public copyToClipboard(): void {
-        let wasFocused = document.activeElement === this._obj;
-        let wasVisible = this._obj.style.visibility === 'visible';
+        const wasFocused = document.activeElement === this._obj;
+        const wasVisible = this._obj.style.visibility === 'visible';
         this._obj.style.visibility = 'visible';
         this.setFocus(true);
         document.execCommand('copy');
@@ -208,7 +208,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
 
     private onInput(): void {
         if (this._disallow != null) {
-            let curValue = this.text;
+            const curValue = this.text;
             this._obj.value = this._obj.value.replace(this._disallow, '');
             if (this.text !== curValue) {
                 return;
@@ -233,25 +233,20 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
 
         this._fakeTextInput = new Sprite();
 
-        let bg = new Graphics()
+        const bg = new Graphics()
             .lineStyle(1, this._borderColor)
             .beginFill(this._bgColor)
             .drawRoundedRect(0, 0, this.width, this.height, this._borderRadius)
             .endFill();
         this._fakeTextInput.addChild(bg);
 
-        let textMask = new Graphics().beginFill(0x0).drawRect(0, 0, this.width, this.height).endFill();
+        const textMask = new Graphics().beginFill(0x0).drawRect(0, 0, this.width, this.height).endFill();
         this._fakeTextInput.addChild(textMask);
 
-        let displayText = this.text;
-        let textColor = this._textColor;
-        if (displayText.length === 0) {
-            displayText = this._obj.placeholder;
-            // We set this in assets/Styles/styles.css since there's no DOM API for it
-            textColor = 0x777777;
-        }
+        const displayText = this.text.length === 0 ? this._obj.placeholder : this.text;
+        const textColor = this.text.length === 0 ? 0x777777 : this._textColor;
 
-        let text = new TextBuilder(displayText)
+        const text = new TextBuilder(displayText)
             .font(this._fontFamily)
             .fontWeight(this._fontWeight)
             .fontSize(this._fontSize)
@@ -272,7 +267,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
     }
 
     private static createTextArea(rows: number): HTMLTextAreaElement {
-        let element = document.createElement('textarea');
+        const element = document.createElement('textarea');
         element.rows = rows;
         element.title = '';
         element.style.resize = 'none';
@@ -281,7 +276,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
     }
 
     private static createTextInput(placeholder?: string): HTMLInputElement {
-        let element = document.createElement('input');
+        const element = document.createElement('input');
         element.type = 'text';
         element.title = '';
         element.placeholder = placeholder ?? '';

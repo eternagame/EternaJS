@@ -76,22 +76,22 @@ export default class ROPPre extends RScriptOp {
                 this._env.ui.showConstraints(false);
                 break;
             case ROPPreType.DISABLE_UI_ELEMENT:
-                for (let i = 0; i < this._allArgs.length; ++i) {
-                    if (this._allArgs[i].toUpperCase() === 'ENERGY') {
+                for (const arg of this._allArgs) {
+                    if (arg.toUpperCase() === 'ENERGY') {
                         this._env.ui.ropSetDisplayScoreTexts(this._doVisible);
                         continue;
                     }
-                    if (this._allArgs[i].toUpperCase() === 'BASENUMBERING') {
+                    if (arg.toUpperCase() === 'BASENUMBERING') {
                         this._env.ui.ropSetShowNumbering(this._doVisible);
                         continue;
                     }
-                    if (this._allArgs[i].toUpperCase() === 'TOTALENERGY') {
+                    if (arg.toUpperCase() === 'TOTALENERGY') {
                         this._env.ui.ropSetShowTotalEnergy(this._doVisible);
                         continue;
                     }
-                    this._env.showHideUI(this._allArgs[i], this._doVisible, this._doDisable);
+                    this._env.showHideUI(arg, this._doVisible, this._doDisable);
                     if (!this._doVisible) {
-                        if (this._allArgs[i].toUpperCase() === 'OBJECTIVES') {
+                        if (arg.toUpperCase() === 'OBJECTIVES') {
                             this._env.ui.showConstraints(false);
                         }
                     }

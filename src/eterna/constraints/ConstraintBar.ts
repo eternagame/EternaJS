@@ -256,8 +256,8 @@ export default class ConstraintBar extends ContainerObject {
 
     public updateHighlights(): void {
         if (!this._constraints) return;
-        let highlights: HighlightInfo[] = [];
-        for (let constraint of this._constraints) {
+        const highlights: HighlightInfo[] = [];
+        for (const constraint of this._constraints) {
             if (constraint.highlightCache != null && (
                 (
                     constraint.highlightCache.color === HighlightType.UNSTABLE
@@ -301,8 +301,8 @@ export default class ConstraintBar extends ContainerObject {
     public updateConstraints(context: ConstraintContext): boolean {
         let satisfied = true;
 
-        for (let constraint of this._constraints) {
-            let status = constraint.constraint.evaluate(context);
+        for (const constraint of this._constraints) {
+            const status = constraint.constraint.evaluate(context);
             constraint.constraintBox.setContent(
                 constraint.constraint.getConstraintBoxConfig(
                     status,
@@ -328,8 +328,8 @@ export default class ConstraintBar extends ContainerObject {
      */
     public highlightState(stateIndex: number): void {
         if (!this._constraints) return;
-        let stateConstraints = this._constraints.filter(isSSCW);
-        for (let constraint of stateConstraints) {
+        const stateConstraints = this._constraints.filter(isSSCW);
+        for (const constraint of stateConstraints) {
             constraint.constraintBox.display.alpha = (
                 constraint.constraint.stateIndex === stateIndex || stateIndex === -1
             ) ? 1.0 : 0.3;

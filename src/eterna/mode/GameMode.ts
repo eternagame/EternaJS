@@ -2,7 +2,7 @@ import * as log from 'loglevel';
 import {Container, Point} from 'pixi.js';
 import Eterna from 'eterna/Eterna';
 import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
-import EPars from 'eterna/EPars';
+import SecStruct from 'eterna/rnatypes/SecStruct';
 import {
     AppMode, SceneObject, Flashbang, GameObjectRef, Assert
 } from 'flashbang';
@@ -103,7 +103,7 @@ export default abstract class GameMode extends AppMode {
             this._notifRef.destroyObject();
         }
 
-        let notif = new NotificationDialog(message, extraButtonTitle);
+        const notif = new NotificationDialog(message, extraButtonTitle);
         this._notifRef = this.addObject(notif, this.notifLayer);
 
         // Hide dialogs while a notification is showing
@@ -159,7 +159,7 @@ export default abstract class GameMode extends AppMode {
 
     protected setPoseFields(newPoseFields: PoseField[]): void {
         if (this._poseFields != null) {
-            for (let poseField of this._poseFields) {
+            for (const poseField of this._poseFields) {
                 poseField.destroySelf();
             }
         }
@@ -173,29 +173,19 @@ export default abstract class GameMode extends AppMode {
             newField.pose.getEnergyDelta = () => {
                 // Sanity check
                 if (this._folder !== null) {
-                    let poseidx = this._isPipMode ? idx : this._curTargetIndex;
+                    const poseidx = this._isPipMode ? idx : this._curTargetIndex;
 
-                    let score = null;
-                    let pseudoknots: boolean = this._targetConditions != null
+                    const pseudoknots: boolean = this._targetConditions != null
                         && this._targetConditions[0] != null
                         && this._targetConditions[0]['type'] === 'pseudoknot';
-                    if (pseudoknots) {
-                        score = (pairs: number[]) => {
-                            Assert.assertIsDefined(this._folder);
-                            return this._folder.scoreStructures(
-                                newField.pose.fullSequence, pairs, true
-                            );
-                        };
-                    } else {
-                        score = (pairs: number[]) => {
-                            Assert.assertIsDefined(this._folder);
-                            return this._folder.scoreStructures(
-                                newField.pose.fullSequence, pairs
-                            );
-                        };
-                    }
+                    const score = (pairs: SecStruct) => {
+                        Assert.assertIsDefined(this._folder);
+                        return this._folder.scoreStructures(
+                            newField.pose.fullSequence, pairs, pseudoknots
+                        );
+                    };
 
-                    let targetPairs: number[] | undefined = this._targetPairs
+                    const targetPairs: SecStruct | undefined = this._targetPairs
                         ? this._targetPairs[poseidx] : this.getCurrentTargetPairs(poseidx);
                     Assert.assertIsDefined(
                         targetPairs,
@@ -203,8 +193,8 @@ export default abstract class GameMode extends AppMode {
                     );
                     const ublk = this.getCurrentUndoBlock(poseidx);
                     Assert.assertIsDefined(ublk, 'getEnergyDelta is being called where UndoBlocks are unavailable!');
-                    let nativePairs: number[] = ublk.getPairs(37, pseudoknots);
-                    return score(EPars.getSatisfiedPairs(targetPairs, newField.pose.fullSequence))
+                    const nativePairs: SecStruct = ublk.getPairs(37, pseudoknots);
+                    return score(targetPairs.getSatisfiedPairs(newField.pose.fullSequence))
                         - score(nativePairs);
                 }
                 return -1;
@@ -227,16 +217,16 @@ export default abstract class GameMode extends AppMode {
     protected layoutPoseFields(): void {
         Assert.assertIsDefined(Flashbang.stageHeight);
         if (this._isPipMode) {
-            let numFields: number = this._poseFields.length;
+            const numFields: number = this._poseFields.length;
             for (let ii = 0; ii < numFields; ii++) {
-                let poseField = this._poseFields[ii];
+                const poseField = this._poseFields[ii];
                 poseField.display.position = new Point((this.posesWidth / numFields) * ii, 0);
                 poseField.setSize(this.posesWidth / numFields, Flashbang.stageHeight, true);
                 poseField.display.visible = true;
             }
         } else {
             for (let ii = 0; ii < this._poseFields.length; ii++) {
-                let poseField = this._poseFields[ii];
+                const poseField = this._poseFields[ii];
                 if (ii === 0) {
                     poseField.display.position = new Point(0, 0);
                     poseField.setSize(this.posesWidth, Flashbang.stageHeight, false);
@@ -261,8 +251,8 @@ export default abstract class GameMode extends AppMode {
 
         Eterna.client.postScreenshot(screenshot)
             .then((filename) => {
-                let url = new URL(filename, Eterna.SERVER_URL);
-                let prompt = `Do you want to post <u><a href="${url.href}" target="_blank">this</a></u> screenshot in chat?`;
+                const url = new URL(filename, Eterna.SERVER_URL);
+                const prompt = `Do you want to post <u><a href="${url.href}" target="_blank">this</a></u> screenshot in chat?`;
                 this.showConfirmDialog(prompt, true).closed.then((confirmed) => {
                     if (confirmed) {
                         Eterna.chat.postText(url.href);
@@ -285,7 +275,7 @@ export default abstract class GameMode extends AppMode {
                 this._contextMenuDialogRef.destroyObject();
                 handled = true;
             } else {
-                let menu = this.createContextMenu();
+                const menu = this.createContextMenu();
                 if (menu != null) {
                     this._contextMenuDialogRef = this.addObject(
                         new ContextMenuDialog(menu, Flashbang.globalMouse),
@@ -315,7 +305,7 @@ export default abstract class GameMode extends AppMode {
     }
 
     protected static createHomeButton(): URLButton {
-        let button = new URLButton('Go to Home', EternaURL.createURL({page: 'lab_bench'}));
+        const button = new URLButton('Go to Home', EternaURL.createURL({page: 'lab_bench'}));
         button.selectable(false);
         return button;
     }
@@ -343,11 +333,11 @@ export default abstract class GameMode extends AppMode {
         return undefined;
     }
 
-    protected getCurrentTargetPairs(index: number): number[] | undefined {
+    protected getCurrentTargetPairs(index: number): SecStruct | undefined {
         return undefined;
     }
 
-    protected _targetPairs: number[][];
+    protected _targetPairs: SecStruct[];
 
     protected _targetConditions: (TargetConditions | undefined)[];
 }

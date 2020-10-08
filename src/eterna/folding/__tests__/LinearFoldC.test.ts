@@ -1,11 +1,12 @@
-import EPars from 'eterna/EPars';
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 import Folder from '../Folder';
 import LinearFoldC from '../LinearFoldC';
 import LinearFoldE from '../LinearFoldE'; // debugging matching dot plots?
 import './jest-matcher-deep-close-to';
 
-function FoldSequence(folder: Folder, seq: string, struct: string): any[] | null {
-    return folder.foldSequence(EPars.stringToSequence(seq), null, struct);
+function FoldSequence(folder: Folder, seq: Sequence, struct: SecStruct): SecStruct | null {
+    return folder.foldSequence(seq, null, struct.getParenthesis());
 }
 
 function CreateFolder(type: any): Promise<Folder | null> {
@@ -39,30 +40,30 @@ test('linearfoldC:MFETests', () => {
             [14, 492, 13, -239, 12, -204, 11, -225, 98, 551, 97, -209, 96, -76, 95, 19, 85, 461, 84, -98, 83, -74, 82, -103, 81, -225, 80, -98, 79, -103, 78, -225, 77, -74, 76, -74, 75, -115, 74, -202, 73, 11, 71, 330, 70, -202, 68, 139, 67, -108, 66, -239, -1, 28],
             [16, 598, 15, -239, 14, -239, 13, -239, 3, 453, 2, -239, 1, -239, 0, -239, -1, -108],
         ];
-        let structures: number[][] = [
-            EPars.parenthesisToPairs("(((((........)))))"),
-            EPars.parenthesisToPairs("(((((........)))))"),
-            EPars.parenthesisToPairs("((((((((...........)).))))))"),
-            EPars.parenthesisToPairs(".((((((.((((((......)))))).......((((.....))))...))))))."),
-            EPars.parenthesisToPairs("(((((((..((((........)))).(((((.......))))).....(((((.......))))))))))))."),
-            EPars.parenthesisToPairs("...........((((....))))...........................................(((....)))........."),
-            EPars.parenthesisToPairs("...........((((....))))...........................................(((.((.(((((((((((((.........((((.....))))........))))))))))))))).)))........."),
-            EPars.parenthesisToPairs("((((.........((((.....))))........))))"),
+        let structures: SecStruct[] = [
+            SecStruct.fromParens("(((((........)))))"),
+            SecStruct.fromParens("(((((........)))))"),
+            SecStruct.fromParens("((((((((...........)).))))))"),
+            SecStruct.fromParens(".((((((.((((((......)))))).......((((.....))))...))))))."),
+            SecStruct.fromParens("(((((((..((((........)))).(((((.......))))).....(((((.......))))))))))))."),
+            SecStruct.fromParens("...........((((....))))...........................................(((....)))........."),
+            SecStruct.fromParens("...........((((....))))...........................................(((.((.(((((((((((((.........((((.....))))........))))))))))))))).)))........."),
+            SecStruct.fromParens("((((.........((((.....))))........))))"),
             
         ];
-        let sequences: number[][] = [
-            EPars.stringToSequence(  "GGGGGAAAAAAAACCCCC"),
-            EPars.stringToSequence(  "CCAGGAAAAAAAACCUGG"),
-            EPars.stringToSequence(  "GGGGGGGGAAAACGGAAAGCCACCCCCC"),
-            EPars.stringToSequence(  "ACGCUGUCUGUACUUGUAUCAGUACACUGACGAGUCCCUAAAGGACGAAACAGCGC"),
-            EPars.stringToSequence(  "GGGGAUGUAGCUCAUAUGGUAGAGCGCUCGCUUUGCAUGCGAGAGGCACAGGGUUCGAUUCCCUGCAUCUCCA"),
-            EPars.stringToSequence(  "AAGGUAACUAAGGGGGGUUCCCCAAACUUGAUCUCCACAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCAAAAGGGAAAAAAAAA"),
-            EPars.stringToSequence(  "CCUACUAGGGGAGCCAAAAGGCUGAGAUGAAUGUAUUCAGACCCUUAUAACCUGAUUUGGUUAAUACCAACGUAGGAAAGUAGUUAUUAACUAUUCGUCAUUGAGAUGUCUUGGUCUAACUACUUUCUUCGCUGGGAAGUAGUU"),
-            EPars.stringToSequence(  "GGGGUAACUAUUCGGGGUUGAGCCCCCUUGAUCUCCCC"),
+        let sequences: Sequence[] = [
+            Sequence.fromSequenceString(  "GGGGGAAAAAAAACCCCC"),
+            Sequence.fromSequenceString(  "CCAGGAAAAAAAACCUGG"),
+            Sequence.fromSequenceString(  "GGGGGGGGAAAACGGAAAGCCACCCCCC"),
+            Sequence.fromSequenceString(  "ACGCUGUCUGUACUUGUAUCAGUACACUGACGAGUCCCUAAAGGACGAAACAGCGC"),
+            Sequence.fromSequenceString(  "GGGGAUGUAGCUCAUAUGGUAGAGCGCUCGCUUUGCAUGCGAGAGGCACAGGGUUCGAUUCCCUGCAUCUCCA"),
+            Sequence.fromSequenceString(  "AAGGUAACUAAGGGGGGUUCCCCAAACUUGAUCUCCACAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCAAAAGGGAAAAAAAAA"),
+            Sequence.fromSequenceString(  "CCUACUAGGGGAGCCAAAAGGCUGAGAUGAAUGUAUUCAGACCCUUAUAACCUGAUUUGGUUAAUACCAACGUAGGAAAGUAGUUAUUAACUAUUCGUCAUUGAGAUGUCUUGGUCUAACUACUUUCUUCGCUGGGAAGUAGUU"),
+            Sequence.fromSequenceString(  "GGGGUAACUAUUCGGGGUUGAGCCCCCUUGAUCUCCCC"),
         ];
 
         for (let ii: number = 0; ii < sequences.length; ++ii ) {
-            expect(folder.foldSequence(sequences[ii], [])).toEqual(structures[ii])
+            expect(folder.foldSequence(sequences[ii], new SecStruct())).toEqual(structures[ii])
 
             let outNNFE: number[] = [];
             let FE = folder.scoreStructures(
@@ -77,7 +78,7 @@ test('linearfoldC:MFETests', () => {
         }
     })).resolves.toBeUndefined();
     // toEqual([
-    //     EPars.parenthesisToPairs("(((((........)))))")
+    //     SecStruct.fromParens("(((((........)))))")
     // ]);
 });
 
@@ -106,20 +107,20 @@ test('linearfoldC:SubOptTests', () => {
                 41, -239, 40, -202, 39, -239, 38, -204, 6,  254,  5, -204, 4, -239, 3, -202, 2, -204, 1, -239, 0, -239,
                 -1, -108]
         ];
-        let structures: number[][] = [
-            EPars.parenthesisToPairs("((......))"),
-            EPars.parenthesisToPairs(".........."),
-            EPars.parenthesisToPairs("(((((((..(((...)))..((((((....))))))..((((((...))))))..)))))))"),
-            EPars.parenthesisToPairs("(((((((..(((...)))..((((((....))))))..((((((...))))))..)))))))"),
-            EPars.parenthesisToPairs("(((((((..(((...)))..((((((....))))))..((((((...))))))..)))))))"),
+        let structures: SecStruct[] = [
+            SecStruct.fromParens("((......))"),
+            SecStruct.fromParens(".........."),
+            SecStruct.fromParens("(((((((..(((...)))..((((((....))))))..((((((...))))))..)))))))"),
+            SecStruct.fromParens("(((((((..(((...)))..((((((....))))))..((((((...))))))..)))))))"),
+            SecStruct.fromParens("(((((((..(((...)))..((((((....))))))..((((((...))))))..)))))))"),
             
         ];
-        let sequences: number[][] = [
-            EPars.stringToSequence(  "GGGGAAAACC"),
-            EPars.stringToSequence(  "GGGGAAAACC"),
-            EPars.stringToSequence(  "GGGCGGCAAGGCGAAGCCAAGCCCCCAAAAGGGGGCAAGCCGGCAAAGCCGGCAAGCCGCCC"),
-            EPars.stringToSequence(  "GGGCGGCAAAGCGAAGCUAAGCCCCCAAAAGGGGGCAAGCCGGCAAAGCCGGCAAGCCGCCC"),
-            EPars.stringToSequence(  "GGGCGGCAAGGCAAAGCCAAGCCCCCAAAAGGGGGCAAGCCGGCAAAGCCGGCAAGCCGCCC"),
+        let sequences: Sequence[] = [
+            Sequence.fromSequenceString(  "GGGGAAAACC"),
+            Sequence.fromSequenceString(  "GGGGAAAACC"),
+            Sequence.fromSequenceString(  "GGGCGGCAAGGCGAAGCCAAGCCCCCAAAAGGGGGCAAGCCGGCAAAGCCGGCAAGCCGCCC"),
+            Sequence.fromSequenceString(  "GGGCGGCAAAGCGAAGCUAAGCCCCCAAAAGGGGGCAAGCCGGCAAAGCCGGCAAGCCGCCC"),
+            Sequence.fromSequenceString(  "GGGCGGCAAGGCAAAGCCAAGCCCCCAAAAGGGGGCAAGCCGGCAAAGCCGGCAAGCCGCCC"),
         ];
 
         for (let ii: number = 0; ii < sequences.length; ++ii ) {
@@ -149,7 +150,7 @@ test('linearfoldC:SubOptTests', () => {
         }
     })).resolves.toBeUndefined();
     // toEqual([
-    //     EPars.parenthesisToPairs("(((((........)))))")
+    //     SecStruct.fromParens("(((((........)))))")
     // ]);
 });
 
@@ -197,11 +198,13 @@ test(`LinearFoldC:get_dot_plot(complex)`, () => {
                 return;
             }
             
-            expect(folder.getDotPlot(
-                EPars.stringToSequence(SEQ),
-                EPars.parenthesisToPairs(STRUCT),
+            const calcdResult = folder.getDotPlot(
+                Sequence.fromSequenceString(SEQ),
+                SecStruct.fromParens(STRUCT),
                 37
-            )).toBeDeepCloseTo(expectedResults[0], 5);
+            );
+
+            expect(calcdResult?.data).toBeDeepCloseTo(expectedResults[0], 5);
         }))
         .resolves.toBeUndefined();
 });
@@ -246,11 +249,13 @@ test(`LinearFoldE:get_dot_plot(complex)`, () => {
                 return;
             }
             
-            expect(folder.getDotPlot(
-                EPars.stringToSequence(SEQ),
-                EPars.parenthesisToPairs(STRUCT),
+            const calcdResult = folder.getDotPlot(
+                Sequence.fromSequenceString(SEQ),
+                SecStruct.fromParens(STRUCT),
                 37
-            )).toBeDeepCloseTo(expectedResults[0], 5);
+            );
+            
+            expect(calcdResult?.data).toBeDeepCloseTo(expectedResults[0], 5);
         }))
         .resolves.toBeUndefined();
 });

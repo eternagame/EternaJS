@@ -3,7 +3,6 @@ import {
     DisplayObject, Point, Text, Sprite
 } from 'pixi.js';
 import Constants from 'eterna/Constants';
-import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import Feedback, {BrentTheoData} from 'eterna/Feedback';
 import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
@@ -29,9 +28,10 @@ import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import GameDropdown from 'eterna/ui/GameDropdown';
 import {MappedValue, ValueView} from 'signals';
 import SolutionManager from 'eterna/puzzle/SolutionManager';
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 import GameMode from './GameMode';
 import ViewSolutionOverlay from './DesignBrowser/ViewSolutionOverlay';
-import DesignBrowserMode, {DesignBrowserFilter, DesignCategory} from './DesignBrowser/DesignBrowserMode';
 
 enum PoseFoldMode {
     ESTIMATE = 'ESTIMATE',
@@ -53,7 +53,7 @@ export default class FeedbackViewMode extends GameMode {
     protected setup(): void {
         super.setup();
 
-        let background = new Background();
+        const background = new Background();
         this.addObject(background, this.bgLayer);
 
         // this._puzzleTitle = Fonts.std(this._puzzle.getName(false), 14).color(0xffffff).bold().build();
@@ -83,7 +83,7 @@ export default class FeedbackViewMode extends GameMode {
         Assert.assertIsDefined(this.container);
         this.container.addChild(homeArrow);
 
-        let puzzleTitle = new HTMLTextObject(this._puzzle.getName(true))
+        const puzzleTitle = new HTMLTextObject(this._puzzle.getName(true))
             .font(Fonts.STDFONT)
             .fontSize(14)
             .bold()
@@ -101,14 +101,14 @@ export default class FeedbackViewMode extends GameMode {
 
         Assert.assertIsDefined(this._toolbar.zoomOutButton);
         this._toolbar.zoomOutButton.clicked.connect(() => {
-            for (let poseField of this._poseFields) {
+            for (const poseField of this._poseFields) {
                 poseField.zoomOut();
             }
         });
 
         Assert.assertIsDefined(this._toolbar.zoomInButton);
         this._toolbar.zoomInButton.clicked.connect(() => {
-            for (let poseField of this._poseFields) {
+            for (const poseField of this._poseFields) {
                 poseField.zoomIn();
             }
         });
@@ -131,11 +131,11 @@ export default class FeedbackViewMode extends GameMode {
         this._isExpColor = false;
         this._currentIndex = 0;
 
-        this._sequence = EPars.stringToSequence(this._solution.sequence);
+        this._sequence = this._solution.sequence;
 
-        let getPoseFields = () => {
-            let secstructs: string[] = this._puzzle.getSecstructs();
-            let poseFields: PoseField[] = [];
+        const getPoseFields = () => {
+            const secstructs: string[] = this._puzzle.getSecstructs();
+            const poseFields: PoseField[] = [];
             for (let ii = 0; ii < secstructs.length; ii++) {
                 let secs: string = secstructs[ii];
                 if (secs != null && secs.length !== this._sequence.length) {
@@ -145,7 +145,7 @@ export default class FeedbackViewMode extends GameMode {
                         this._sequence.length
                     );
                     if (secs.length < this._sequence.length) {
-                        let diff: number = this._sequence.length - secs.length;
+                        const diff: number = this._sequence.length - secs.length;
                         for (let jj = 0; jj < diff; ++jj) {
                             secs += '.';
                         }
@@ -154,16 +154,16 @@ export default class FeedbackViewMode extends GameMode {
                     }
                     secstructs[ii] = secs;
                 }
-                this._pairs.push(EPars.parenthesisToPairs(secstructs[ii]));
-                let datablock: UndoBlock = new UndoBlock(this._sequence, Vienna.NAME);
+                this._pairs.push(SecStruct.fromParens(secstructs[ii]));
+                const datablock: UndoBlock = new UndoBlock(this._sequence, Vienna.NAME);
                 datablock.setPairs(this._pairs[ii]);
                 datablock.setBasics();
                 this._undoBlocks.push(datablock);
 
-                let poseField: PoseField = new PoseField(false);
+                const poseField: PoseField = new PoseField(false);
                 this.addObject(poseField, this.poseLayer);
 
-                let vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
+                const vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
                 if (!vienna) {
                     throw new Error("Critical error: can't create a Vienna folder instance by name");
                 }
@@ -175,27 +175,27 @@ export default class FeedbackViewMode extends GameMode {
             return poseFields;
         };
 
-        let poseFields = getPoseFields();
+        const poseFields = getPoseFields();
 
         // Unlike PoseEditMode, which might be constructed with PoseEditParams
         // showing it a selection of many solutions, FeedbackViewMode cannot, so
         // we can't go previous or next.
         // AMW TODO: we need to make the other overlay buttons work in BOTH modes.
-        let getCurrentSolutionIndex = async () => {
+        const getCurrentSolutionIndex = async () => {
             // If the cached solutions are available, use those
             // If not, grab them and store them
             let solutionsToPuzzle;
             if (this._cachedSolutions) solutionsToPuzzle = this._cachedSolutions;
             else solutionsToPuzzle = await this.setCachedSolutions();
-            let currentSolutionIndex = solutionsToPuzzle.findIndex((sol) => sol.nodeID === this.solutionID);
+            const currentSolutionIndex = solutionsToPuzzle.findIndex((sol) => sol.nodeID === this.solutionID);
             return {currentSolutionIndex, solutionsToPuzzle};
         };
-        let setNewSolution = async (newSolution: Solution) => {
+        const setNewSolution = async (newSolution: Solution) => {
             // This function is called by the solutionView (a few layers back), so it is definitely defined
             Assert.assertIsDefined(this._solutionView);
             this._solutionView.showSolution(newSolution);
             this._solution = newSolution;
-            this._sequence = EPars.stringToSequence(newSolution.sequence);
+            this._sequence = newSolution.sequence.slice(0);
             // Update the game, so it's not showing an outdated sequence
             this.setPoseFields(getPoseFields());
         };
@@ -204,21 +204,19 @@ export default class FeedbackViewMode extends GameMode {
             puzzle: this._puzzle,
             voteDisabled: false,
             onPrevious: async () => {
-                let {currentSolutionIndex, solutionsToPuzzle} = await getCurrentSolutionIndex();
-                let newSolutionIndex = currentSolutionIndex - 1;
-                if (newSolutionIndex <= 0) {
-                    newSolutionIndex = solutionsToPuzzle.length - 1;
-                }
-                let newSolution = solutionsToPuzzle[newSolutionIndex];
+                const {currentSolutionIndex, solutionsToPuzzle} = await getCurrentSolutionIndex();
+                const newSolutionIndex = currentSolutionIndex - 1 <= 0
+                    ? solutionsToPuzzle.length - 1
+                    : currentSolutionIndex - 1;
+                const newSolution = solutionsToPuzzle[newSolutionIndex];
                 setNewSolution(newSolution);
             },
             onNext: async () => {
-                let {currentSolutionIndex, solutionsToPuzzle} = await getCurrentSolutionIndex();
-                let newSolutionIndex = currentSolutionIndex + 1;
-                if (newSolutionIndex >= solutionsToPuzzle.length) {
-                    newSolutionIndex = 0;
-                }
-                let newSolution = solutionsToPuzzle[newSolutionIndex];
+                const {currentSolutionIndex, solutionsToPuzzle} = await getCurrentSolutionIndex();
+                const newSolutionIndex = currentSolutionIndex + 1 >= solutionsToPuzzle.length
+                    ? 0
+                    : currentSolutionIndex + 1;
+                const newSolution = solutionsToPuzzle[newSolutionIndex];
                 setNewSolution(newSolution);
             },
             parentMode: (() => this)()
@@ -266,7 +264,7 @@ export default class FeedbackViewMode extends GameMode {
         this.addObject(this._dropdown, this.uiLayer);
         this._dropdown.display.position = new Point(18, 50);
 
-        let seeShape: boolean = (this._feedback !== null && this._feedback.getShapeData() != null);
+        const seeShape: boolean = (this._feedback !== null && this._feedback.getShapeData() != null);
         if (seeShape) {
             this.setupShape();
             this.showExperimentalColors();
@@ -361,8 +359,8 @@ export default class FeedbackViewMode extends GameMode {
         let handled: boolean = this.keyboardInput.handleKeyboardEvent(e);
 
         if (!handled && e.type === KeyboardEventType.KEY_DOWN) {
-            let key = e.code;
-            let ctrl = e.ctrlKey;
+            const key = e.code;
+            const ctrl = e.ctrlKey;
 
             if (!ctrl && key === KeyCode.KeyN) {
                 Eterna.settings.showNumbers.value = !Eterna.settings.showNumbers.value;
@@ -394,13 +392,12 @@ export default class FeedbackViewMode extends GameMode {
                 this.setToTargetMode();
             }
 
-            let minZoom = -1;
-            for (let pose of this._poses) {
-                minZoom = Math.max(minZoom, pose.computeDefaultZoomLevel());
-            }
+            const minZoom = Math.max(...this._poses.map(
+                (pose) => pose.computeDefaultZoomLevel()
+            ));
 
             for (let ii = 0; ii < this._poses.length; ii++) {
-                let field: PoseField = this._poseFields[ii];
+                const field: PoseField = this._poseFields[ii];
                 if (this._targetConditions[ii] !== undefined) {
                     const tc = this._targetConditions[ii] as TargetConditions;
                     if (tc['type'] === 'aptamer') {
@@ -419,7 +416,7 @@ export default class FeedbackViewMode extends GameMode {
                 }
             }
 
-            for (let pose of this._poses) {
+            for (const pose of this._poses) {
                 pose.setZoomLevel(minZoom, true, true);
             }
 
@@ -432,14 +429,14 @@ export default class FeedbackViewMode extends GameMode {
             }
 
             this.changeTarget(this._currentIndex);
-            let pose = this._poses[0];
+            const pose = this._poses[0];
             pose.setZoomLevel(pose.computeDefaultZoomLevel(), true, true);
         }
     }
 
     protected createScreenshot(): ArrayBuffer {
-        let visibleState: Map<DisplayObject, boolean> = new Map();
-        let pushVisibleState = (disp: DisplayObject) => {
+        const visibleState: Map<DisplayObject, boolean> = new Map();
+        const pushVisibleState = (disp: DisplayObject) => {
             visibleState.set(disp, disp.visible);
             disp.visible = false;
         };
@@ -449,20 +446,20 @@ export default class FeedbackViewMode extends GameMode {
         pushVisibleState(this.dialogLayer);
         pushVisibleState(this.achievementsLayer);
 
-        let energyVisible: boolean[] = [];
-        for (let pose of this._poses) {
+        const energyVisible: boolean[] = [];
+        for (const pose of this._poses) {
             energyVisible.push(pose.showTotalEnergy);
             pose.showTotalEnergy = false;
         }
 
         Assert.assertIsDefined(this.container);
-        let tempBG = DisplayUtil.fillStageRect(0x061A34);
+        const tempBG = DisplayUtil.fillStageRect(0x061A34);
         this.container.addChildAt(tempBG, 0);
 
-        let info = `Designer: ${this._solution.playerName}\n`
+        const info = `Designer: ${this._solution.playerName}\n`
             + `Design ID: ${this._solution.nodeID}\n`
             + `Design Title: ${this._solution.title}\n`;
-        let infoText = Fonts.std(info).color(0xffffff).build();
+        const infoText = Fonts.std(info).color(0xffffff).build();
         this.container.addChild(infoText);
 
         DisplayUtil.positionRelativeToStage(
@@ -470,12 +467,12 @@ export default class FeedbackViewMode extends GameMode {
             HAlign.RIGHT, VAlign.TOP, -3, 3
         );
 
-        let pngData = DisplayUtil.renderToPNG(this.container);
+        const pngData = DisplayUtil.renderToPNG(this.container);
 
         tempBG.destroy({children: true});
         infoText.destroy({children: true});
 
-        for (let [disp, wasVisible] of visibleState.entries()) {
+        for (const [disp, wasVisible] of visibleState.entries()) {
             disp.visible = wasVisible;
         }
 
@@ -510,11 +507,11 @@ export default class FeedbackViewMode extends GameMode {
         if (this._isPipMode) {
             for (let ii = 0; ii < this._pairs.length; ii++) {
                 if (this._shapePairs[ii] !== null) {
-                    this._poseFields[ii].pose.pairs = this._shapePairs[ii] as number[];
+                    this._poseFields[ii].pose.pairs = this._shapePairs[ii] as SecStruct;
                 }
             }
         } else if (this._shapePairs[this._currentIndex] !== null) {
-            this._poseFields[0].pose.pairs = this._shapePairs[this._currentIndex] as number[];
+            this._poseFields[0].pose.pairs = this._shapePairs[this._currentIndex] as SecStruct;
         }
     }
 
@@ -613,8 +610,7 @@ export default class FeedbackViewMode extends GameMode {
         Assert.assertIsDefined(this._feedback);
 
         let titleText = '';
-        let brentData: BrentTheoData | undefined = this._feedback.brentTheoData;
-        let score: number;
+        const brentData: BrentTheoData | undefined = this._feedback.brentTheoData;
 
         if (brentData != null) {
             // / Brent's theophylline data
@@ -625,7 +621,7 @@ export default class FeedbackViewMode extends GameMode {
         } else {
             // / Default fallback to usual SHAPE data
             if (Eterna.DEV_MODE) {
-                score = Feedback.scoreFeedback(
+                const score: number = Feedback.scoreFeedback(
                     this._feedback.getShapeData(this._currentIndex, this._dataOption.value),
                     this._puzzle.getSecstruct(this._currentIndex),
                     this._feedback.getShapeStartIndex(this._currentIndex, this._dataOption.value),
@@ -645,7 +641,7 @@ export default class FeedbackViewMode extends GameMode {
                         titleText += ', ';
                     }
 
-                    score = Feedback.scoreFeedback(
+                    const score: number = Feedback.scoreFeedback(
                         this._feedback.getShapeData(ii, this._dataOption.value),
                         this._puzzle.getSecstruct(ii),
                         this._feedback.getShapeStartIndex(ii, this._dataOption.value),
@@ -671,12 +667,12 @@ export default class FeedbackViewMode extends GameMode {
     private foldEstimate(index: number): void {
         // This won't work if _feedback is null
         Assert.assertIsDefined(this._feedback);
-        let shapeThreshold: number = this._feedback.getShapeThreshold(index);
-        let shapeData: number[] = this._feedback.getShapeData(index);
-        let startIndex: number = this._feedback.getShapeStartIndex(index);
-        let {puzzleLocks} = this._puzzle;
-        let shapeMax: number = this._feedback.getShapeMax(index);
-        let shapeMin: number = this._feedback.getShapeMin(index);
+        const shapeThreshold: number = this._feedback.getShapeThreshold(index);
+        const shapeData: number[] = this._feedback.getShapeData(index);
+        const startIndex: number = this._feedback.getShapeStartIndex(index);
+        const {puzzleLocks} = this._puzzle;
+        const shapeMax: number = this._feedback.getShapeMax(index);
+        const shapeMin: number = this._feedback.getShapeMin(index);
 
         let desiredPairs = '';
 
@@ -736,10 +732,13 @@ export default class FeedbackViewMode extends GameMode {
             }
         }
 
-        let folder: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
+        const folder: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
         if (!folder) {
             throw new Error("Critical error: can't create a Vienna folder instance by name");
         }
+        // AMW TODO: I don't know if this will still work, but Vienna depends on
+        // desiredPairs working differently from ANY OTHER PAIR CONSTRAINT which is
+        // not a string.
         this._shapePairs[index] = folder.foldSequence(this._sequence, null, desiredPairs);
     }
 
@@ -754,7 +753,7 @@ export default class FeedbackViewMode extends GameMode {
     }
 
     private showSpec(): void {
-        let puzzleState = this._undoBlocks[this._currentIndex];
+        const puzzleState = this._undoBlocks[this._currentIndex];
         puzzleState.updateMeltingPointAndDotPlot();
         this.showDialog(new SpecBoxDialog(puzzleState, false));
     }
@@ -773,9 +772,9 @@ export default class FeedbackViewMode extends GameMode {
     private _puzzleTitle: Text;
     private _title: Text;
     private _feedback: Feedback | null;
-    private _sequence: number[];
-    private _pairs: number[][] = [];
-    private _shapePairs: (number[] | null)[] = [];
+    private _sequence: Sequence;
+    private _pairs: SecStruct[] = [];
+    private _shapePairs: (SecStruct | null)[] = [];
     protected _targetConditions: (TargetConditions | undefined)[];
     private _isExpColor: boolean;
     private _solutionView?: ViewSolutionOverlay;

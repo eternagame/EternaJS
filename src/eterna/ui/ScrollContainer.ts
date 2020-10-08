@@ -81,8 +81,8 @@ export default class ScrollContainer extends ContainerObject {
     }
 
     private _doLayout() {
-        let prevScrollX = this.scrollX;
-        let prevScrollY = this.scrollY;
+        const prevScrollX = this.scrollX;
+        const prevScrollY = this.scrollY;
 
         this._contentMask.clear().beginFill(0x00ff00).drawRect(0, 0, this._width, this._height).endFill();
 

@@ -67,7 +67,7 @@ export default class StyledTextBuilder {
         if (this._styleStack.length === 0) {
             log.warn('Unbalanced popStyle');
         } else {
-            let lastStyle = this._styleStack.pop();
+            const lastStyle = this._styleStack.pop();
             this._text += `</${lastStyle}>`;
         }
         return this;
@@ -96,7 +96,7 @@ export default class StyledTextBuilder {
             rawText: string, openTag: RegExp, closeTag: RegExp, createStyle: CreateStyleCallback
         ): string => {
             while (true) {
-                let openMatch = openTag.exec(rawText);
+                const openMatch = openTag.exec(rawText);
                 if (openMatch == null) {
                     break;
                 }
@@ -108,7 +108,7 @@ export default class StyledTextBuilder {
 
                 rawText = `${rawText.slice(0, openMatch.index)}<${styleName}>${rawText.slice(openMatch.index + openMatch[0].length)}`;
 
-                let closeMatch = closeTag.exec(rawText);
+                const closeMatch = closeTag.exec(rawText);
                 if (closeMatch == null) {
                     break;
                 }
@@ -123,7 +123,7 @@ export default class StyledTextBuilder {
         const FONT_OPEN = /<font\s*color\s*=\s*["']#(\w*)["']>/i;
         const FONT_CLOSE = /<\/font>/i;
         text = parseHTMLStyle(text, FONT_OPEN, FONT_CLOSE, (openMatch) => {
-            let colorString = openMatch[1];
+            const colorString = openMatch[1];
             let color: number;
             try {
                 color = ColorUtil.fromString(`#${colorString}`);
@@ -154,7 +154,7 @@ export default class StyledTextBuilder {
     }
 
     public clone(): StyledTextBuilder {
-        let out: StyledTextBuilder = new StyledTextBuilder();
+        const out: StyledTextBuilder = new StyledTextBuilder();
         out._styleStack = this._styleStack.slice();
         out._text = this._text;
         out._styles = this.cloneStyles();
@@ -162,8 +162,8 @@ export default class StyledTextBuilder {
     }
 
     private cloneStyles(): TextStyleSet {
-        let out: TextStyleSet = {};
-        for (let [key, value] of Object.entries(this._styles)) {
+        const out: TextStyleSet = {};
+        for (const [key, value] of Object.entries(this._styles)) {
             out[key] = value;
         }
         return out;

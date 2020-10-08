@@ -37,14 +37,13 @@ export default class TargetExpectedAccuracyConstraint extends Constraint<TargetE
         ) === undefined) {
             constraintContext.undoBlocks[0].updateMeltingPointAndDotPlot(false);
         }
-        let expectedAccuracy = constraintContext.undoBlocks[0].getParam(
+
+        // For some reason the null-coalescing operator ?? is not supported here.
+        const expectedAccuracy = constraintContext.undoBlocks[0].getParam(
             UndoBlockParam.TARGET_EXPECTED_ACCURACY,
             37,
             false
-        ) as number | undefined;
-        if (expectedAccuracy === undefined) {
-            expectedAccuracy = 0;
-        }
+        ) as number | undefined || 0;
 
         return {
             satisfied: expectedAccuracy >= this.targetExpectedAccuracy,
@@ -56,7 +55,7 @@ export default class TargetExpectedAccuracyConstraint extends Constraint<TargetE
         status: TargetExpectedAccuracyConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
-        let tooltip = ConstraintBox.createTextStyle();
+        const tooltip = ConstraintBox.createTextStyle();
 
         if (forMissionScreen) {
             tooltip.pushStyle('altTextMain');
@@ -81,9 +80,9 @@ export default class TargetExpectedAccuracyConstraint extends Constraint<TargetE
     }
 
     private static get _icon(): Texture {
-        let icon = new Container();
+        const icon = new Container();
 
-        let base1 = new Sprite(BitmapManager.getBitmap(Bitmaps.CleanDotPlotIcon));
+        const base1 = new Sprite(BitmapManager.getBitmap(Bitmaps.CleanDotPlotIcon));
         base1.width = 24;
         base1.height = 24;
         base1.position = new Point(50, 50);

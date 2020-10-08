@@ -22,12 +22,12 @@ export default class SpecBoxDialog extends Dialog<boolean> {
     protected added(): void {
         super.added();
 
-        let specBox = new SpecBox();
+        const specBox = new SpecBox();
         this.addObject(specBox, this.container);
 
         specBox.setSpec(this._datablock);
 
-        let cancelButton = new GameButton().label('Ok', 14).hotkey(KeyCode.KeyS);
+        const cancelButton = new GameButton().label('Ok', 14).hotkey(KeyCode.KeyS);
         specBox.addObject(cancelButton, specBox.container);
         cancelButton.clicked.connect(() => this.close(false));
 
@@ -41,7 +41,7 @@ export default class SpecBoxDialog extends Dialog<boolean> {
             minimizeButton.clicked.connect(() => this.close(true));
         }
 
-        let updateBounds = () => {
+        const updateBounds = () => {
             Assert.assertIsDefined(Flashbang.stageWidth);
             Assert.assertIsDefined(Flashbang.stageHeight);
             specBox.setSize(Flashbang.stageWidth * 0.7, Flashbang.stageHeight * 0.7);
@@ -53,7 +53,7 @@ export default class SpecBoxDialog extends Dialog<boolean> {
                 specBox.height - cancelButton.container.height - 20
             );
 
-            if (minimizeButton != null) {
+            if (minimizeButton != null && minimizeButton !== undefined) {
                 DisplayUtil.positionRelative(
                     minimizeButton.display, HAlign.RIGHT, VAlign.CENTER,
                     cancelButton.display, HAlign.LEFT, VAlign.CENTER,

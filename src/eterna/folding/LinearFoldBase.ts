@@ -1,8 +1,11 @@
 import * as log from 'loglevel';
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
-import EPars from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import {Assert} from 'flashbang';
+import DotPlot from 'eterna/rnatypes/DotPlot';
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 import * as LinearFoldLib from './engines/LinearFoldLib';
 import {DotPlotResult, FullFoldResult} from './engines/LinearFoldLib';
 import {FullEvalResult} from './engines/ViennaLib';
@@ -20,27 +23,27 @@ export default abstract class LinearFoldBase extends Folder {
         return true;
     }
 
-    public getDotPlot(seq: number[], pairs: number[], temp: number = 37): number[] {
-        let key: CacheKey = {
-            primitive: 'dotplot', seq, pairs, temp
+    public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = 37): DotPlot {
+        const key: CacheKey = {
+            primitive: 'dotplot', seq: seq.baseArray, pairs: pairs.pairs, temp
         };
         let retArray: number[] = this.getCache(key) as number[];
         if (retArray != null) {
             // trace("dotplot cache hit");
-            return retArray.slice();
+            return new DotPlot(retArray);
         }
 
-        let seqStr: string = EPars.sequenceToString(seq);
+        const seqStr: string = seq.sequenceString();
 
         let result: DotPlotResult | null = null;
         try {
             // we don't actually do anything with structstring here yet
-            result = this._lib.GetDotPlot(temp, seqStr, EPars.pairsToParenthesis(pairs));
+            result = this._lib.GetDotPlot(temp, seqStr, pairs.getParenthesis());
             Assert.assertIsDefined(result, 'Linearfold returned a null result');
             retArray = EmscriptenUtil.stdVectorToArray(result.plot);
         } catch (e) {
             log.error('GetDotPlot error', e);
-            return [];
+            return new DotPlot([]);
         } finally {
             if (result != null) {
                 result.delete();
@@ -49,7 +52,7 @@ export default abstract class LinearFoldBase extends Folder {
         }
 
         this.putCache(key, retArray.slice());
-        return retArray;
+        return new DotPlot(retArray);
     }
 
     public get isFunctional(): boolean {
@@ -61,11 +64,11 @@ export default abstract class LinearFoldBase extends Folder {
     }
 
     public scoreStructures(
-        seq: number[], pairs: number[], pseudoknotted: boolean = false,
+        seq: Sequence, pairs: SecStruct, pseudoknotted: boolean = false,
         temp: number = 37, outNodes: number[] | null = null
     ): number {
-        let key: CacheKey = {
-            primitive: 'score', seq, pairs, temp
+        const key: CacheKey = {
+            primitive: 'score', seq: seq.baseArray, pairs: pairs.pairs, temp
         };
         let cache: FullEvalCache = this.getCache(key) as FullEvalCache;
 
@@ -81,8 +84,8 @@ export default abstract class LinearFoldBase extends Folder {
             let result: FullEvalResult | null = null;
             try {
                 result = this._lib.FullEval(
-                    EPars.sequenceToString(seq),
-                    EPars.pairsToParenthesis(pairs)
+                    seq.sequenceString(),
+                    pairs.getParenthesis()
                 );
                 if (!result) {
                     throw new Error('LinearFold returned a null result');
@@ -98,21 +101,21 @@ export default abstract class LinearFoldBase extends Folder {
             }
         } while (0);
 
-        let cut: number = seq.indexOf(EPars.RNABASE_CUT);
+        const cut: number = seq.findCut();
         if (cut >= 0 && cache.nodes[0] !== -2) {
             // we just scored a duplex that wasn't one, so we have to redo it properly
-            let seqA: number[] = seq.slice(0, cut);
-            let pairsA: number[] = pairs.slice(0, cut);
-            let nodesA: number[] = [];
-            let retA: number = this.scoreStructures(seqA, pairsA, pseudoknotted, temp, nodesA);
+            const seqA: Sequence = seq.slice(0, cut);
+            const pairsA: SecStruct = pairs.slice(0, cut);
+            const nodesA: number[] = [];
+            const retA: number = this.scoreStructures(seqA, pairsA, pseudoknotted, temp, nodesA);
 
-            let seqB: number[] = seq.slice(cut + 1);
-            let pairsB: number[] = pairs.slice(cut + 1);
+            const seqB: Sequence = seq.slice(cut + 1);
+            const pairsB: SecStruct = pairs.slice(cut + 1);
             for (let ii = 0; ii < pairsB.length; ii++) {
-                if (pairsB[ii] >= 0) pairsB[ii] -= (cut + 1);
+                if (pairsB.isPaired(ii)) pairsB.pairs[ii] -= (cut + 1);
             }
-            let nodesB: number[] = [];
-            let retB: number = this.scoreStructures(seqB, pairsB, pseudoknotted, temp, nodesB);
+            const nodesB: number[] = [];
+            const retB: number = this.scoreStructures(seqB, pairsB, pseudoknotted, temp, nodesB);
 
             if (nodesA[0] !== -1 || nodesB[0] !== -1) {
                 throw new Error('Something went terribly wrong in scoreStructures()');
@@ -133,7 +136,7 @@ export default abstract class LinearFoldBase extends Folder {
 
         this.putCache(key, cache);
 
-        let energy: number = cache.energy * 100;
+        const energy: number = cache.energy * 100;
         if (outNodes != null) {
             FoldUtil.arrayCopy(outNodes, cache.nodes);
         }
@@ -142,28 +145,28 @@ export default abstract class LinearFoldBase extends Folder {
     }
 
     public foldSequence(
-        seq: number[], secondBestPairs: number[] | null, desiredPairs: string | null = null,
+        seq: Sequence, secondBestPairs: SecStruct | null, desiredPairs: string | null = null,
         pseudoknotted: boolean = false, temp: number = 37
-    ): number[] {
-        let key: CacheKey = {
+    ): SecStruct {
+        const key: CacheKey = {
             primitive: 'fold',
-            seq,
-            secondBestPairs,
+            seq: seq.baseArray,
+            secondBestPairs: secondBestPairs?.pairs ?? null,
             desiredPairs,
             temp
         };
 
-        let pairs: number[] = this.getCache(key) as number[];
+        let pairs: SecStruct = this.getCache(key) as SecStruct;
         if (pairs == null) {
             pairs = this.fullFoldDefault(seq);
             this.putCache(key, pairs);
         }
 
-        return pairs.slice();
+        return pairs.slice(0);
     }
 
-    private fullFoldDefault(seq: number[]): number[] {
-        const seqStr = EPars.sequenceToString(seq, false, false);
+    private fullFoldDefault(seq: Sequence): SecStruct {
+        const seqStr = seq.sequenceString(false, false);
         let result: FullFoldResult | null = null;
 
         try {
@@ -171,10 +174,10 @@ export default abstract class LinearFoldBase extends Folder {
             if (!result) {
                 throw new Error('LinearFold returned a null result');
             }
-            return EPars.parenthesisToPairs(result.structure);
+            return SecStruct.fromParens(result.structure);
         } catch (e) {
             log.error('FullFoldDefault error', e);
-            return [];
+            return new SecStruct();
         } finally {
             if (result != null) {
                 result.delete();
@@ -188,9 +191,9 @@ export default abstract class LinearFoldBase extends Folder {
     }
 
     public foldSequenceWithBindingSite(
-        seq: number[], targetPairs: number[], bindingSite: number[], bonus: number,
+        seq: Sequence, targetPairs: SecStruct, bindingSite: number[], bonus: number,
         version: number = 1.0, temp: number = 37
-    ): number[] {
+    ): SecStruct {
         log.warn('LinearFold.foldSequenceWithBindingSite: unimplemented');
         return this.foldSequence(seq, null);
     }
@@ -200,9 +203,9 @@ export default abstract class LinearFoldBase extends Folder {
     }
 
     public cofoldSequence(
-        seq: number[], secondBestPairs: number[], malus: number = 0,
+        seq: Sequence, secondBestPairs: SecStruct, malus: number = 0,
         desiredPairs: string | null = null, temp: number = 37
-    ): number[] {
+    ): SecStruct {
         log.warn('LinearFold.cofoldSequence: unimplemented');
         return this.foldSequence(seq, null);
     }
@@ -212,9 +215,9 @@ export default abstract class LinearFoldBase extends Folder {
     }
 
     public cofoldSequenceWithBindingSite(
-        seq: number[], bindingSite: number[], bonus: number, desiredPairs: string | null = null,
+        seq: Sequence, bindingSite: number[], bonus: number, desiredPairs: string | null = null,
         malus: number = 0, temp: number = 37
-    ): number[] {
+    ): SecStruct {
         log.warn('LinearFold.cofoldSequenceWithBindingSite: unimplemented');
         return this.foldSequence(seq, null);
     }

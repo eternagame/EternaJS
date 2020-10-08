@@ -111,7 +111,7 @@ export default class GameClient {
         return this.post(GameClient.POST_URI, params)
             .then((rsp) => rsp.json())
             .then((json) => {
-                let data = json['data'];
+                const data = json['data'];
                 if (data['success']) {
                     return Promise.resolve();
                 } else {
@@ -145,7 +145,7 @@ export default class GameClient {
         return this.post(GameClient.POST_URI, {type: 'delete_solution', nid: solutionID})
             .then((rsp) => rsp.json())
             .then((json) => {
-                let data = json['data'];
+                const data = json['data'];
                 if (data['success']) {
                     return Promise.resolve();
                 } else {
@@ -155,7 +155,7 @@ export default class GameClient {
     }
 
     public toggleSolutionVote(solutionID: number, puznid: number, myVotes: number): Promise<JSONData> {
-        let postParams: Params = {solnid: solutionID, puznid};
+        const postParams: Params = {solnid: solutionID, puznid};
         if (myVotes === 1) {
             postParams['type'] = 'unvote';
         } else if (myVotes === 0) {
@@ -167,7 +167,7 @@ export default class GameClient {
         return this.post(GameClient.POST_URI, postParams)
             .then((rsp) => rsp.json())
             .then((json) => {
-                let data = json['data'];
+                const data = json['data'];
                 if (data['success']) {
                     return data;
                 } else {
@@ -177,7 +177,7 @@ export default class GameClient {
     }
 
     public updateSolutionFoldData(solutionID: number, foldData: FoldData[]): Promise<string> {
-        let dataString: string = JSON.stringify(foldData);
+        const dataString: string = JSON.stringify(foldData);
         return this.post(GameClient.POST_URI, {
             type: 'update_solution_fold_data',
             nid: solutionID,
@@ -187,13 +187,13 @@ export default class GameClient {
 
     /** Resolves with the screenshot's hosted filename, on success */
     public postScreenshot(imgBytes: ArrayBuffer): Promise<string> {
-        let encoded = Base64.encodeBytes(imgBytes);
+        const encoded = Base64.encodeBytes(imgBytes);
         return this.post(GameClient.POST_URI, {
             type: 'screenshot',
             data: encoded
         }).then((rsp) => rsp.json())
             .then((jsonData) => {
-                let data = jsonData['data'];
+                const data = jsonData['data'];
                 if (data['success']) {
                     return data['filename'];
                 } else {
@@ -203,7 +203,7 @@ export default class GameClient {
     }
 
     private get(urlString: string, params?: Params): Promise<Response> {
-        let url: URL = this.makeURL(urlString);
+        const url: URL = this.makeURL(urlString);
 
         if (params) {
             // GET requests put their parameters in the URL
@@ -230,9 +230,9 @@ export default class GameClient {
     }
 
     private post(urlString: string, params?: Params): Promise<Response> {
-        let url: URL = this.makeURL(urlString);
+        const url: URL = this.makeURL(urlString);
 
-        let postParams = new URLSearchParams();
+        const postParams = new URLSearchParams();
         if (params) {
             // POST requests pass params in the body
             Object.keys(params).forEach((key) => {

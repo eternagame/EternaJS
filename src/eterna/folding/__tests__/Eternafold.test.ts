@@ -1,12 +1,8 @@
-import EPars from 'eterna/EPars';
 import Folder from '../Folder';
 import './jest-matcher-deep-close-to';
 import EternaFold from '../Eternafold';
-import Vienna2 from '../Vienna2';
-
-function FoldSequence(folder: Folder, seq: string, struct: string): any[] | null {
-    return folder.foldSequence(EPars.stringToSequence(seq), null, struct);
-}
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 
 function CreateFolder(type: any): Promise<Folder | null> {
     return type.create();
@@ -76,14 +72,14 @@ test(`EternaFold:many_score_structures`, () => {
             ];
     
             for (let ii: number = 0; ii < sequences.length; ++ii ) {
-                let struct = folder.foldSequence(EPars.stringToSequence(sequences[ii]), []);
+                let struct = folder.foldSequence(Sequence.fromSequenceString(sequences[ii]), new SecStruct());
                 expect(struct).toBeDefined();
-                expect(EPars.pairsToParenthesis(struct!)).toEqual(structures[ii])
+                expect(struct!.getParenthesis()).toEqual(structures[ii])
     
                 let outNNFE: number[] = [];
                 let FE = folder.scoreStructures(
-                    EPars.stringToSequence(sequences[ii]),
-                    EPars.parenthesisToPairs(structures[ii]),
+                    Sequence.fromSequenceString(sequences[ii]),
+                    SecStruct.fromParens(structures[ii]),
                     false,
                     37,
                     outNNFE);
@@ -103,17 +99,17 @@ test(`EternaFold:many_score_structures`, () => {
             }
 
             // const seqs: number[][] = [
-            //     EPars.stringToSequence('ACGCUGUCUGUACUUGUAUCAGUACACUGACGAGUCCCUAAAGGACGAAACAGCGC'),
-            //     EPars.stringToSequence('GGACAAUCAGCUAGAAUGCAAAGUGACGGGCGAUGAAGGCCAAUGAGGUGAUGUCCCAUG'),
-            //     // EPars.stringToSequence('CAUAUGUAUAUGCUCACCAUAGUUGACAGUGCCAGAACGAAGCUGACUAGCUCUGUCUGC'),
-            //     // EPars.stringToSequence('AUUCUGCUUAUAGGGUUAUUAGAUCAUAUCUCUGUUCGGCCGAGCGUCUGAUCUAGGCGA'),
-            //     // EPars.stringToSequence('UAAAGGUGAUACACUGCUCCCCAGGGGCGUCGCCUGACGAUAAUUGCAUCCGUAGGCGAA'),
-            //     // EPars.stringToSequence('GUGAACUUAGAGGGAAGUAUUCCGCGACCGACAUUUUGUCGCGACGGAGGAUUCCUUUAU'),
-            //     // EPars.stringToSequence('UGGCGGUCAAGUUGGGACGAUCUUUAUAACACAGCAGAAUAAACGCCUAACAUUUAUAGG'),
-            //     // EPars.stringToSequence('UACGCGGCGCCGGGUAGUACGGCACUGCGGCAAGAUCUACCUCUUGAUCAGCAGAUUAAU'),
-            //     // EPars.stringToSequence('AGAGACCCAGUAGGGGAUUCUCUGGGGCAAACGGGGCUCAUUUAGCGUCCUCUAGCUCCA'),
-            //     // EPars.stringToSequence('AUAUUUUAAAGGGCCAAUCUAUUACAUUCGGCACUUCUUCUCACGACAAUAGACAUGUCA'),
-            //     // EPars.stringToSequence('CGGCACGGCCUGCUCUACUAGUUAUUGGUAAAUCUGAAAAUAAGGCCGACAGAACUACAC'),
+            //     new Sequence('ACGCUGUCUGUACUUGUAUCAGUACACUGACGAGUCCCUAAAGGACGAAACAGCGC'),
+            //     new Sequence('GGACAAUCAGCUAGAAUGCAAAGUGACGGGCGAUGAAGGCCAAUGAGGUGAUGUCCCAUG'),
+            //     // new Sequence('CAUAUGUAUAUGCUCACCAUAGUUGACAGUGCCAGAACGAAGCUGACUAGCUCUGUCUGC'),
+            //     // new Sequence('AUUCUGCUUAUAGGGUUAUUAGAUCAUAUCUCUGUUCGGCCGAGCGUCUGAUCUAGGCGA'),
+            //     // new Sequence('UAAAGGUGAUACACUGCUCCCCAGGGGCGUCGCCUGACGAUAAUUGCAUCCGUAGGCGAA'),
+            //     // new Sequence('GUGAACUUAGAGGGAAGUAUUCCGCGACCGACAUUUUGUCGCGACGGAGGAUUCCUUUAU'),
+            //     // new Sequence('UGGCGGUCAAGUUGGGACGAUCUUUAUAACACAGCAGAAUAAACGCCUAACAUUUAUAGG'),
+            //     // new Sequence('UACGCGGCGCCGGGUAGUACGGCACUGCGGCAAGAUCUACCUCUUGAUCAGCAGAUUAAU'),
+            //     // new Sequence('AGAGACCCAGUAGGGGAUUCUCUGGGGCAAACGGGGCUCAUUUAGCGUCCUCUAGCUCCA'),
+            //     // new Sequence('AUAUUUUAAAGGGCCAAUCUAUUACAUUCGGCACUUCUUCUCACGACAAUAGACAUGUCA'),
+            //     // new Sequence('CGGCACGGCCUGCUCUACUAGUUAUUGGUAAAUCUGAAAAUAAGGCCGACAGAACUACAC'),
             // ];
     
             // const strs: string[] = [
@@ -194,8 +190,8 @@ test(`EternaFold:get_dot_plot`, () => {
             }
             
             expect(folder.getDotPlot(
-                EPars.stringToSequence(SEQ),
-                EPars.parenthesisToPairs(STRUCT),
+                Sequence.fromSequenceString(SEQ),
+                SecStruct.fromParens(STRUCT),
                 37
             )).toBeDeepCloseTo(expectedResult[0], 5);
         }))

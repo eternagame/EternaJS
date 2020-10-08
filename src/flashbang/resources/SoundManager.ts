@@ -25,7 +25,7 @@ export default class SoundManager {
         }
 
         try {
-            let tsound = this.getSound(name);
+            const tsound = this.getSound(name);
             tsound.play({volume: this.volume, start: startTime});
         } catch (e) {
             log.error(`Failed to play sound ${name}`, e);

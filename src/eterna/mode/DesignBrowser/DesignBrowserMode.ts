@@ -3,7 +3,7 @@ import MultiStyleText from 'pixi-multistyle-text';
 import {
     Container, Graphics, Point, Sprite, Text
 } from 'pixi.js';
-import EPars from 'eterna/EPars';
+import SecStruct from 'eterna/rnatypes/SecStruct';
 import Eterna from 'eterna/Eterna';
 import GameMode from 'eterna/mode/GameMode';
 import Puzzle from 'eterna/puzzle/Puzzle';
@@ -176,7 +176,7 @@ export default class DesignBrowserMode extends GameMode {
             this._selectedSolutionIDs = [];
         }
 
-        let sortableCategories = [
+        const sortableCategories = [
             DesignCategory.ID,
             DesignCategory.TITLE,
             DesignCategory.DESIGNER,
@@ -276,7 +276,7 @@ export default class DesignBrowserMode extends GameMode {
         homeArrow.position = new Point(45, 14);
         this.uiLayer.addChild(homeArrow);
 
-        let puzzleTitle = new HTMLTextObject(this._puzzle.getName(!Eterna.MOBILE_APP), undefined, undefined, true)
+        const puzzleTitle = new HTMLTextObject(this._puzzle.getName(!Eterna.MOBILE_APP), undefined, undefined, true)
             .font(Fonts.STDFONT)
             .fontSize(14)
             .bold()
@@ -323,7 +323,7 @@ export default class DesignBrowserMode extends GameMode {
             }
 
             // update scroll
-            let pxdelta: number = InputUtil.scrollAmount(e, 14, this._vSlider.height);
+            const pxdelta: number = InputUtil.scrollAmount(e, 14, this._vSlider.height);
 
             // convert back to lines
             const progress = (this._firstVisSolutionIdx + pxdelta / 14) / this._filteredSolutions.length;
@@ -372,7 +372,7 @@ export default class DesignBrowserMode extends GameMode {
         this._clickedSelectionBox.setSize(this.contentWidth - 14, theme.rowHeight);
 
         if (this._dataCols != null) {
-            for (let col of this._dataCols) {
+            for (const col of this._dataCols) {
                 col.setSize(this.contentWidth, this.contentHeight);
             }
         }
@@ -402,7 +402,7 @@ export default class DesignBrowserMode extends GameMode {
         this._letterColorButton.toggled.value = true;
         this._expColorButton.toggled.value = false;
 
-        for (let dataCol of this._dataCols) {
+        for (const dataCol of this._dataCols) {
             if (dataCol.category === DesignCategory.SEQUENCE) {
                 dataCol.showExp = false;
             }
@@ -413,7 +413,7 @@ export default class DesignBrowserMode extends GameMode {
         this._letterColorButton.toggled.value = false;
         this._expColorButton.toggled.value = true;
 
-        for (let dataCol of this._dataCols) {
+        for (const dataCol of this._dataCols) {
             if (dataCol.category === DesignCategory.SEQUENCE) {
                 dataCol.showExp = true;
             }
@@ -451,12 +451,16 @@ export default class DesignBrowserMode extends GameMode {
 
     public sortOnSolution(solution: Solution): void {
         this.closeCurDialog();
-        this._sortOptions.addCriteria(DesignCategory.SEQUENCE, SortOrder.INCREASING, solution.sequence);
+        this._sortOptions.addCriteria(
+            DesignCategory.SEQUENCE,
+            SortOrder.INCREASING,
+            solution.sequence.sequenceString()
+        );
         this.showSortDialog();
     }
 
     private static createStatusText(text: string): SceneObject<Text> {
-        let statusText = new SceneObject<Text>(Fonts.std(text, 22).color(0xffffff).bold().build());
+        const statusText = new SceneObject<Text>(Fonts.std(text, 22).color(0xffffff).bold().build());
         statusText.addObject(new RepeatingTask(() => new SerialTask(
             new AlphaTask(0, 0.3),
             new AlphaTask(1, 0.3)
@@ -467,10 +471,10 @@ export default class DesignBrowserMode extends GameMode {
     private reloadCurrent(): void {
         // get sol at current index again, wrapped around.
         if (this._solutionView !== undefined) {
-            let newCurrentIdx = this._currentSolutionIndex;
-            if (newCurrentIdx >= this._filteredSolutions.length) {
-                newCurrentIdx = 0;
-            }
+            const newCurrentIdx = this._currentSolutionIndex >= this._filteredSolutions.length
+                ? 0
+                : this._currentSolutionIndex;
+
             const newSolution = this.getSolutionAtIndex(newCurrentIdx);
             if (newSolution != null) {
                 this._solutionView.showSolution(newSolution);
@@ -481,7 +485,7 @@ export default class DesignBrowserMode extends GameMode {
     private unpublish(solution: Solution): void {
         this.pushUILock();
 
-        let statusText = DesignBrowserMode.createStatusText('Deleting...');
+        const statusText = DesignBrowserMode.createStatusText('Deleting...');
         this.addObject(statusText, this.notifLayer);
         DisplayUtil.positionRelativeToStage(statusText.display,
             HAlign.CENTER, VAlign.CENTER,
@@ -507,7 +511,7 @@ export default class DesignBrowserMode extends GameMode {
     private vote(solution: Solution): void {
         this.pushUILock();
 
-        let statusText = DesignBrowserMode.createStatusText('Submitting...');
+        const statusText = DesignBrowserMode.createStatusText('Submitting...');
         this.addObject(statusText, this.notifLayer);
         DisplayUtil.positionRelativeToStage(statusText.display,
             HAlign.CENTER, VAlign.CENTER,
@@ -526,7 +530,7 @@ export default class DesignBrowserMode extends GameMode {
                 this._voteProcessor.processData(data['votes']);
                 this.syncVotes();
 
-                let cheevs: {[name: string]: AchievementData} = data['new_achievements'];
+                const cheevs: {[name: string]: AchievementData} = data['new_achievements'];
                 if (cheevs != null) {
                     this._achievements.awardAchievements(cheevs).then(() => { /* ignore result */ });
                 }
@@ -658,8 +662,8 @@ export default class DesignBrowserMode extends GameMode {
 
     private updateClickedSelectionBoxPos(index: number) {
         const {designBrowser: theme} = UITheme;
-        let start = theme.filterHeight + theme.dataPadding / 2 + theme.headerHeight;
-        let idxOffset = index - this._firstVisSolutionIdx;
+        const start = theme.filterHeight + theme.dataPadding / 2 + theme.headerHeight;
+        const idxOffset = index - this._firstVisSolutionIdx;
         this._clickedSelectionBox.position.y = start + idxOffset * theme.rowHeight;
         this._clickedSelectionBox.visible = idxOffset > 0;
     }
@@ -681,12 +685,12 @@ export default class DesignBrowserMode extends GameMode {
 
         index += this._firstVisSolutionIdx;
 
-        let solution = this.getSolutionAtIndex(index);
+        const solution = this.getSolutionAtIndex(index);
         if (solution == null) {
             return;
         }
 
-        let solutionID = solution.nodeID;
+        const solutionID = solution.nodeID;
         this._markerBoxes.visible = true;
 
         Assert.assertIsDefined(this._selectedSolutionIDs);
@@ -696,7 +700,7 @@ export default class DesignBrowserMode extends GameMode {
             this._selectedSolutionIDs.push(solutionID);
         } else {
             this._markerBoxes.removeMarker(index);
-            let removeIdx = this._selectedSolutionIDs.indexOf(solutionID);
+            const removeIdx = this._selectedSolutionIDs.indexOf(solutionID);
             if (removeIdx >= 0) {
                 this._selectedSolutionIDs.splice(removeIdx, 1);
             }
@@ -712,13 +716,13 @@ export default class DesignBrowserMode extends GameMode {
     }
 
     private showCustomizeColumnOrderDialog(): void {
-        let disabledCategories = new Set<DesignCategory>();
+        const disabledCategories = new Set<DesignCategory>();
         if (this._novote) {
             disabledCategories.add(DesignCategory.VOTES);
             disabledCategories.add(DesignCategory.MY_VOTES);
         }
 
-        let dialog = this.showDialog(
+        const dialog = this.showDialog(
             new CustomizeColumnOrderDialog(AllCategories(), this._categories, disabledCategories)
         );
         dialog.columnsReorganized.connect((columnNames) => {
@@ -748,20 +752,17 @@ export default class DesignBrowserMode extends GameMode {
         if (sort) {
             this._allSolutions.sort((a, b) => this._sortOptions.compareSolutions(a, b));
 
-            for (let dataCol of this._dataCols) {
+            for (const dataCol of this._dataCols) {
                 dataCol.setSortState(this._sortOptions.getSortOrder(dataCol.category));
             }
         }
 
-        let solutions: Solution[] = [];
-        for (let sol of this._allSolutions) {
-            let shouldAdd = true;
-            for (let dataCol of this._dataCols) {
-                if (!dataCol.shouldDisplay(sol)) {
-                    shouldAdd = false;
-                    break;
-                }
-            }
+        const solutions: Solution[] = [];
+        for (const sol of this._allSolutions) {
+            // If any dataCol shouldn't display the solution, shouldAdd is false.
+            let shouldAdd = !this._dataCols.some(
+                (dataCol) => !dataCol.shouldDisplay(sol)
+            );
 
             if (this._onlySelectedVisible && !this._selectedSolutionIDs?.includes(sol.nodeID)) {
                 shouldAdd = false;
@@ -797,7 +798,7 @@ export default class DesignBrowserMode extends GameMode {
             this._firstVisSolutionIdx = int(this._filteredSolutions.length * progress);
         }
 
-        for (let dataCol of this._dataCols) {
+        for (const dataCol of this._dataCols) {
             dataCol.scrollProgress = this._firstVisSolutionIdx;
         }
 
@@ -816,10 +817,10 @@ export default class DesignBrowserMode extends GameMode {
     }
 
     private syncVotes(): void {
-        let {votesLeft} = this._voteProcessor;
-        let {round} = this._puzzle;
-        let available: number = this._puzzle.numSubmissions;
-        let mySolutionTitles: string[] = SolutionManager.instance.getMyCurrentSolutionTitles(round);
+        const {votesLeft} = this._voteProcessor;
+        const {round} = this._puzzle;
+        const available: number = this._puzzle.numSubmissions;
+        const mySolutionTitles: string[] = SolutionManager.instance.getMyCurrentSolutionTitles(round);
 
         if (!this._novote) {
             this._votesText.text = `You have <bold>${votesLeft} votes</bold> and `
@@ -836,14 +837,14 @@ export default class DesignBrowserMode extends GameMode {
         const FONT_SIZE = UITheme.designBrowser.fontSize;
 
         if (this._dataCols != null) {
-            for (let dataCol of this._dataCols) {
+            for (const dataCol of this._dataCols) {
                 dataCol.destroySelf();
             }
         }
 
         this._dataCols = [];
         if (this._categories !== null) {
-            for (let category of this._categories) {
+            for (const category of this._categories) {
                 if (this._novote && (category === DesignCategory.VOTES || category === DesignCategory.MY_VOTES)) {
                     continue;
                 }
@@ -894,7 +895,7 @@ export default class DesignBrowserMode extends GameMode {
                 this._dataColParent.addObject(column, this._dataColParent.container);
 
                 if (filters != null) {
-                    for (let filter of filters) {
+                    for (const filter of filters) {
                         if (filter.category === category) {
                             column.setFilter(filter.arg1, filter.arg2);
                             break;
@@ -916,33 +917,33 @@ export default class DesignBrowserMode extends GameMode {
             return;
         }
 
-        let puz: Puzzle = this._puzzle;
+        const puz: Puzzle = this._puzzle;
 
-        for (let dataCol of this._dataCols) {
-            let dataArray: (string | number | DBVote)[] = [];
+        for (const dataCol of this._dataCols) {
+            const dataArray: (string | number | DBVote)[] = [];
 
-            let {category} = dataCol;
+            const {category} = dataCol;
 
             for (let ii = 0; ii < solutions.length; ii++) {
                 // single row of raw data
-                let singleLineRawData: Solution = solutions[ii];
+                const singleLineRawData: Solution = solutions[ii];
 
                 if (category === DesignCategory.SEQUENCE) {
-                    dataArray.push(singleLineRawData.sequence);
+                    dataArray.push(singleLineRawData.sequence.sequenceString());
                     if (ii === 0) {
                         dataCol.setWidth(singleLineRawData.sequence.length * 14
                             + UITheme.designBrowser.dataPadding * 5);
                         dataCol.drawGridText();
                     }
                 } else if (category === DesignCategory.DESCRIPTION) {
-                    let des = singleLineRawData.getProperty('Description') as string;
+                    const des = singleLineRawData.getProperty('Description') as string;
                     if (des.length < 45) {
                         dataArray.push(des);
                     } else {
                         dataArray.push(`${des.substr(0, 40)}...`);
                     }
                 } else if (category === DesignCategory.TITLE) {
-                    let des = singleLineRawData.getProperty('Title') as string;
+                    const des = singleLineRawData.getProperty('Title') as string;
                     if (des.length < 30) {
                         dataArray.push(des);
                     } else {
@@ -953,7 +954,7 @@ export default class DesignBrowserMode extends GameMode {
                     const voted = singleLineRawData.getProperty('My Votes') > 0;
                     dataArray.push({canVote, voted, solutionIndex: ii});
                 } else {
-                    let rawdata: string | number = singleLineRawData.getProperty(category);
+                    const rawdata: string | number = singleLineRawData.getProperty(category) as string | number;
                     dataArray.push(rawdata);
                 }
             }
@@ -961,7 +962,7 @@ export default class DesignBrowserMode extends GameMode {
             if (category === DesignCategory.SEQUENCE || category === DesignCategory.SYNTHESIS_SCORE) {
                 dataCol.expFeedback = solutions.map((solution) => solution.expFeedback);
             }
-            dataCol.setPairs(EPars.parenthesisToPairs(puz.getSecstruct()));
+            dataCol.setPairs(SecStruct.fromParens(puz.getSecstruct()));
 
             // Setting and Displaying all raw data for each column
             dataCol.setDataAndDisplay(dataArray);
@@ -988,7 +989,7 @@ export default class DesignBrowserMode extends GameMode {
         this._wholeRowWidth = 0;
 
         for (let ii = 0; ii < this._dataCols.length; ii++) {
-            let col: DataCol = this._dataCols[ii];
+            const col: DataCol = this._dataCols[ii];
             if (animate) {
                 col.replaceNamedObject('AnimateLocation',
                     new LocationTask(this._wholeRowWidth, 0, 0.5, Easing.easeOut));
@@ -1009,8 +1010,8 @@ export default class DesignBrowserMode extends GameMode {
     private refreshMarkingBoxes(): void {
         this._markerBoxes.clear();
         if (this._selectedSolutionIDs !== null) {
-            for (let solutionID of this._selectedSolutionIDs) {
-                let index = this.getSolutionIndex(solutionID);
+            for (const solutionID of this._selectedSolutionIDs) {
+                const index = this.getSolutionIndex(solutionID);
                 if (index >= 0 && index < this._filteredSolutions.length) {
                     this._markerBoxes.addMarker(index);
                 }
@@ -1020,7 +1021,7 @@ export default class DesignBrowserMode extends GameMode {
     }
 
     private updateDataColumns(): void {
-        let {solutions} = SolutionManager.instance;
+        const {solutions} = SolutionManager.instance;
 
         this.setData(solutions, false, true);
 

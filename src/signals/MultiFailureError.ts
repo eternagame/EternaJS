@@ -17,7 +17,7 @@ export default class MultiFailureError extends Error {
 
     public getMessage(): string {
         let buf = '';
-        for (let failure of this._failures) {
+        for (const failure of this._failures) {
             if (buf.length > 0) {
                 buf += ', ';
             }
@@ -34,10 +34,10 @@ export default class MultiFailureError extends Error {
         if (typeof (error) === 'string') {
             return error as string;
         } else if (error instanceof Error) {
-            let e: Error = error;
+            const e: Error = error;
             return (wantStackTrace ? e.stack : e.message || '');
         } else if (error instanceof ErrorEvent) {
-            let ee: ErrorEvent = error;
+            const ee: ErrorEvent = error;
             // AMW: I do not know why the strategy had been to cast the ErrorEvent
             // to any and then ask for its name. It seems like asking for the error
             // name is wiser.

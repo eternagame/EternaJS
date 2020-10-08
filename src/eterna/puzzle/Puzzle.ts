@@ -1,5 +1,5 @@
 import Constants from 'eterna/Constants';
-import EPars from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 import FolderManager from 'eterna/folding/FolderManager';
 import Vienna from 'eterna/folding/Vienna';
 import Folder from 'eterna/folding/Folder';
@@ -10,6 +10,8 @@ import ShapeConstraint from 'eterna/constraints/constraints/ShapeConstraint';
 import {TargetConditions, OligoDef} from 'eterna/UndoBlock';
 import {BoosterData} from 'eterna/mode/PoseEdit/Booster';
 import Utility from 'eterna/util/Utility';
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 
 export interface BoostersData {
     mission?: Mission;
@@ -53,17 +55,17 @@ export default class Puzzle {
         return (Puzzle.T_OLIGO.indexOf(tcType) >= 0);
     }
 
-    public static probeTail(seq: number[]): number[] | null {
+    public static probeTail(seq: Sequence): Sequence | null {
         if (seq == null) {
             return null;
         }
 
-        seq[0] = EPars.RNABASE_GUANINE;
-        seq[1] = EPars.RNABASE_GUANINE;
+        seq.setNt(0, RNABase.GUANINE);
+        seq.setNt(1, RNABase.GUANINE);
 
-        let offset: number = seq.length - 20;
+        const offset: number = seq.length - 20;
         for (let ii = 0; ii < 20; ii++) {
-            seq[offset + ii] = EPars.RNABASE_LAST20[ii];
+            seq.setNt(offset + ii, EPars.RNABase_LAST20[ii]);
         }
 
         return seq;
@@ -150,10 +152,9 @@ export default class Puzzle {
 
     public get targetConditions(): (TargetConditions | undefined)[] {
         if (this._targetConditions == null) {
-            let targetConditions: (TargetConditions | undefined)[] = [];
-            for (let ii = 0; ii < this._secstructs.length; ii++) {
-                targetConditions.push(undefined);
-            }
+            const targetConditions: (TargetConditions | undefined)[] = this._secstructs.map(
+                (s) => undefined
+            );
             return targetConditions;
         } else {
             return this._targetConditions;
@@ -169,17 +170,12 @@ export default class Puzzle {
     }
 
     public get puzzleLocks(): boolean[] {
-        let puzlocks: boolean[];
-        let ii: number;
-
         if (this._puzzleLocks == null && !this._useTails) {
-            puzlocks = [];
-            for (ii = 0; ii < this._secstructs[0].length; ii++) {
-                puzlocks.push(false);
-            }
-            return puzlocks;
+            return this._secstructs[0].split('').map(
+                (ii) => false
+            );
         } else if (this._useTails) {
-            puzlocks = [];
+            const puzlocks = [];
 
             if (this._useShortTails) {
                 puzlocks.push(true);
@@ -191,7 +187,7 @@ export default class Puzzle {
                 puzlocks.push(true);
                 puzlocks.push(true);
             }
-            for (ii = 0; ii < this._secstructs[0].length; ii++) {
+            for (let ii = 0; ii < this._secstructs[0].length; ii++) {
                 if (this._puzzleLocks != null) {
                     puzlocks.push(this._puzzleLocks[ii]);
                 } else {
@@ -199,7 +195,7 @@ export default class Puzzle {
                 }
             }
 
-            for (ii = 0; ii < 20; ii++) {
+            for (let ii = 0; ii < 20; ii++) {
                 puzlocks.push(true);
             }
             return puzlocks;
@@ -235,17 +231,15 @@ export default class Puzzle {
             }
             this._secstructs.push(this._targetConditions[ii]['secstruct']);
 
-            let tcType: string = this._targetConditions[ii]['type'];
+            const tcType: string = this._targetConditions[ii]['type'];
             // Aptamers
 
             if (Puzzle.isAptamerType(tcType) && this._targetConditions[ii]['site'] !== undefined) {
-                let bindingPairs: number[] = [];
-                let bindingSite: number[] = this._targetConditions[ii]['site'] as number[];
-                let targetPairs: number[] = EPars.parenthesisToPairs(this.getSecstruct(ii));
-
-                for (let jj = 0; jj < bindingSite.length; jj++) {
-                    bindingPairs.push(targetPairs[bindingSite[jj]]);
-                }
+                const bindingSite: number[] = this._targetConditions[ii]['site'] as number[];
+                const targetPairs: number[] = SecStruct.fromParens(this.getSecstruct(ii)).pairs;
+                const bindingPairs: number[] = bindingSite.map(
+                    (jj) => targetPairs[jj]
+                );
 
                 // AMW TODO: these do not exist in the schema defined by the JSON
                 // entered in the admin interface. Are they only defined here?
@@ -281,7 +275,7 @@ export default class Puzzle {
             // Multi-strands
 
             if (this._targetConditions[ii]['type'] === 'multistrand') {
-                let oligos: OligoDef[] = this._targetConditions[ii]['oligos'] as OligoDef[];
+                const oligos: OligoDef[] = this._targetConditions[ii]['oligos'] as OligoDef[];
                 for (let jj = 0; jj < oligos.length; jj++) {
                     concentration = 0;
                     if (oligos[jj]['concentration'] != null) {
@@ -296,11 +290,11 @@ export default class Puzzle {
     }
 
     public set beginningSequence(seq: string) {
-        this._beginningSequence = EPars.stringToSequence(seq);
+        this._beginningSequence = Sequence.fromSequenceString(seq);
     }
 
     public set savedSequenceString(seq: string) {
-        this._savedSequence = EPars.stringToSequence(seq);
+        this._savedSequence = Sequence.fromSequenceString(seq);
     }
 
     public set uiSpecs(uiSpec: string[]) {
@@ -329,7 +323,7 @@ export default class Puzzle {
         this._boosterDefs = obj;
     }
 
-    public get savedSequence(): number[] {
+    public get savedSequence(): Sequence {
         return this._savedSequence;
     }
 
@@ -338,16 +332,14 @@ export default class Puzzle {
             return null;
         }
 
-        let ii: number;
-
-        let barcodes: number[] = [];
-        let secstruct: string = this.getSecstruct();
+        const barcodes: number[] = [];
+        const secstruct: string = this.getSecstruct();
         if (this._useTails) {
-            for (ii = secstruct.length - 39; ii < secstruct.length - 20; ii++) {
+            for (let ii = secstruct.length - 39; ii < secstruct.length - 20; ii++) {
                 barcodes.push(ii);
             }
         } else {
-            for (ii = secstruct.length - 19; ii < secstruct.length; ii++) {
+            for (let ii = secstruct.length - 19; ii < secstruct.length; ii++) {
                 barcodes.push(ii);
             }
         }
@@ -395,8 +387,8 @@ export default class Puzzle {
     }
 
     public get isPairBrushAllowed(): boolean {
-        let isBasic: boolean = (this._puzzleType !== PuzzleType.BASIC);
-        let hasTarget = this._constraints !== null && this._constraints.some(
+        const isBasic: boolean = (this._puzzleType !== PuzzleType.BASIC);
+        const hasTarget = this._constraints !== null && this._constraints.some(
             (constraint) => constraint instanceof ShapeConstraint
         );
 
@@ -456,7 +448,7 @@ export default class Puzzle {
     }
 
     public getSecstructs(index: number = 0): string[] {
-        let secstructs: string[] = [];
+        const secstructs: string[] = [];
         for (let ii = 0; ii < this._secstructs.length; ii++) {
             secstructs.push(this.getSecstruct(ii));
         }
@@ -466,9 +458,9 @@ export default class Puzzle {
     public getName(linked: boolean = false): string {
         // The DOMObject will need to allow markup to allow the link,
         // but we don't want users to be able to add markup to their puzzle titles
-        let plainName = Utility.sanitizeAndMarkup(this._name);
+        const plainName = Utility.sanitizeAndMarkup(this._name);
         if (linked) {
-            let url: string = EternaURL.createURL({page: 'puzzle', nid: this._nid});
+            const url: string = EternaURL.createURL({page: 'puzzle', nid: this._nid});
             return `<u><A HREF="${url}" TARGET="_blank">${plainName}</a></u>`;
         }
 
@@ -485,43 +477,43 @@ export default class Puzzle {
         return false;
     }
 
-    public getBeginningSequence(index: number = 0): number[] {
-        let seq: number[] = [];
+    public getBeginningSequence(index: number = 0): Sequence {
+        const seq: RNABase[] = [];
         if (this._useTails) {
             if (this._useShortTails) {
-                seq.push(EPars.RNABASE_GUANINE);
-                seq.push(EPars.RNABASE_GUANINE);
+                seq.push(RNABase.GUANINE);
+                seq.push(RNABase.GUANINE);
             } else {
-                seq.push(EPars.RNABASE_GUANINE);
-                seq.push(EPars.RNABASE_GUANINE);
-                seq.push(EPars.RNABASE_ADENINE);
-                seq.push(EPars.RNABASE_ADENINE);
-                seq.push(EPars.RNABASE_ADENINE);
+                seq.push(RNABase.GUANINE);
+                seq.push(RNABase.GUANINE);
+                seq.push(RNABase.ADENINE);
+                seq.push(RNABase.ADENINE);
+                seq.push(RNABase.ADENINE);
             }
         }
 
         // FIXME: This needs revision, see https://github.com/EteRNAgame/eterna/blob/1e537defaad17674b189df697ee6f1c7cca070c0/flash-rna/flash-rna/PoseEdit.as#L2163
-        let len = this._beginningSequence != null ? this._beginningSequence.length : this._secstructs[index].length;
+        const len = this._beginningSequence != null ? this._beginningSequence.length : this._secstructs[index].length;
         for (let ii = 0; ii < len; ii++) {
             if (this._beginningSequence != null) {
-                seq.push(this._beginningSequence[ii]);
+                seq.push(this._beginningSequence.nt(ii));
             } else {
-                seq.push(EPars.RNABASE_ADENINE);
+                seq.push(RNABase.ADENINE);
             }
         }
 
         if (this._useTails) {
             for (let ii = 0; ii < 20; ii++) {
-                seq.push(EPars.RNABASE_LAST20[ii]);
+                seq.push(EPars.RNABase_LAST20[ii]);
             }
         }
 
-        return seq;
+        return new Sequence(seq);
     }
 
-    public getSubsequenceWithoutBarcode(seq: number[]): number[] {
+    public getSubsequenceWithoutBarcode(seq: Sequence): Sequence {
         if (!this._useBarcode) {
-            return seq.slice();
+            return seq.slice(0);
         }
         let minus = 19;
         if (this._useTails) {
@@ -536,52 +528,55 @@ export default class Puzzle {
         this._useShortTails = useShortTails;
     }
 
-    public transformSequence(seq: number[], targetIndex: number): number[] {
-        if (this._targetConditions != null) {
-            if (this._targetConditions[targetIndex]['sequence'] !== undefined) {
-                let targetSeqTemp: number[] = EPars.stringToSequence(
-                    this._targetConditions[targetIndex]['sequence'] as string
-                );
-                let targetSeq: number[] = [];
+    public transformSequence(seq: Sequence, targetIndex: number): Sequence {
+        if (this._targetConditions == null) {
+            return seq;
+        }
+        if (this._targetConditions[targetIndex]['sequence'] === undefined) {
+            return seq;
+        }
 
-                if (this._useTails) {
-                    if (this._useShortTails) {
-                        targetSeq.push(EPars.RNABASE_GUANINE);
-                        targetSeq.push(EPars.RNABASE_GUANINE);
-                    } else {
-                        targetSeq.push(EPars.RNABASE_GUANINE);
-                        targetSeq.push(EPars.RNABASE_GUANINE);
-                        targetSeq.push(EPars.RNABASE_ADENINE);
-                        targetSeq.push(EPars.RNABASE_ADENINE);
-                        targetSeq.push(EPars.RNABASE_ADENINE);
-                    }
-                }
+        const targetSeqTemp: Sequence = Sequence.fromSequenceString(
+            this._targetConditions[targetIndex]['sequence'] as string
+        );
+        const targetSeq: RNABase[] = [];
 
-                for (let ii = 0; ii < targetSeqTemp.length; ii++) {
-                    targetSeq.push(targetSeqTemp[ii]);
-                }
-
-                if (this._useTails) {
-                    for (let ii = 0; ii < 20; ii++) {
-                        targetSeq.push(EPars.RNABASE_LAST20[ii]);
-                    }
-                }
-
-                let locks: boolean[] = this.puzzleLocks;
-
-                if (locks.length !== targetSeq.length || targetSeq.length !== seq.length) {
-                    throw new Error("lock length doesn't match object sequence");
-                }
-
-                for (let ii = 0; ii < targetSeq.length; ii++) {
-                    if (!locks[ii]) {
-                        targetSeq[ii] = seq[ii];
-                    }
-                }
-                return targetSeq;
+        if (this._useTails) {
+            if (this._useShortTails) {
+                targetSeq.push(RNABase.GUANINE);
+                targetSeq.push(RNABase.GUANINE);
+            } else {
+                targetSeq.push(RNABase.GUANINE);
+                targetSeq.push(RNABase.GUANINE);
+                targetSeq.push(RNABase.ADENINE);
+                targetSeq.push(RNABase.ADENINE);
+                targetSeq.push(RNABase.ADENINE);
             }
         }
-        return seq;
+
+        for (let ii = 0; ii < targetSeqTemp.length; ii++) {
+            targetSeq.push(targetSeqTemp.nt(ii));
+        }
+
+        if (this._useTails) {
+            for (let ii = 0; ii < 20; ii++) {
+                targetSeq.push(EPars.RNABase_LAST20[ii]);
+            }
+        }
+
+        const locks: boolean[] = this.puzzleLocks;
+
+        if (locks.length !== targetSeq.length || targetSeq.length !== seq.length) {
+            throw new Error("lock length doesn't match object sequence");
+        }
+
+        for (let ii = 0; ii < targetSeq.length; ii++) {
+            if (!locks[ii]) {
+                targetSeq[ii] = seq.nt(ii);
+            }
+        }
+
+        return new Sequence(targetSeq);
     }
 
     public get alreadySolved() {
@@ -599,8 +594,8 @@ export default class Puzzle {
     private _missionText: string = Puzzle.DEFAULT_MISSION_TEXT;
     private _puzzleLocks: boolean[];
     private _shiftLimit: number;
-    private _beginningSequence: number[];
-    private _savedSequence: number[];
+    private _beginningSequence: Sequence;
+    private _savedSequence: Sequence;
     private _useTails: boolean = false;
     private _useShortTails: boolean = false;
     private _useBarcode: boolean = false;

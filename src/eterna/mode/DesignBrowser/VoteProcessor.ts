@@ -14,21 +14,21 @@ export default class VoteProcessor {
     }
 
     public processData(data: VoteData[]): void {
-        let solutionIDs: number[] = [];
-        let voteCounts: number[] = [];
-        let myVoteCounts: number[] = [];
+        const solutionIDs: number[] = [];
+        const voteCounts: number[] = [];
+        const myVoteCounts: number[] = [];
         let totalMyVotes = 0;
 
         this._votesLeft = 0;
 
         for (let ii = data.length - 1; ii >= 0; ii--) {
-            let obj: VoteData = data[ii];
+            const obj: VoteData = data[ii];
 
-            let nid = Number(obj['solnid']);
-            let isMine: boolean = Eterna.playerID === Number(obj['uid']);
-            let voteCount: number = int(obj['count']);
+            const nid = Number(obj['solnid']);
+            const isMine: boolean = Eterna.playerID === Number(obj['uid']);
+            const voteCount: number = int(obj['count']);
 
-            let index = solutionIDs.indexOf(nid);
+            const index = solutionIDs.indexOf(nid);
 
             if (index < 0) {
                 solutionIDs.push(nid);
@@ -48,8 +48,8 @@ export default class VoteProcessor {
             }
         }
 
-        for (let solution of SolutionManager.instance.solutions) {
-            let idx = solutionIDs.indexOf(solution.nodeID);
+        for (const solution of SolutionManager.instance.solutions) {
+            const idx = solutionIDs.indexOf(solution.nodeID);
             if (idx >= 0) {
                 solution.setNumVotes(voteCounts[idx], myVoteCounts[idx]);
             }
