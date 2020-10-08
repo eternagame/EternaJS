@@ -6,6 +6,11 @@ export default class Sequence {
         this._baseArray = baseArray;
     }
 
+    /**
+     * Checks if the sequence has a cut.
+     * @param from 0-indexed sequence index to start from
+     * @param to 0-indexed sequence index to search to (inclusive)
+     */
     public hasCut(from: number, to?: number): boolean {
         if (to === undefined) {
             to = from;
@@ -15,18 +20,45 @@ export default class Sequence {
         );
     }
 
-    public static fromSequenceString(seq: string, allowCut?: boolean, allowUnknown?: boolean) {
-        return new Sequence(EPars.stringToSequence(seq, allowCut, allowUnknown));
+    /**
+     * Constructs a new sequence from a sequence string representation.
+     * @param seq The input sequence string
+     * @param allowCut Allow a cutpoint in the sequence
+     * @param allowUnknown Allow "unknown" positions in the sequence.
+     */
+    public static fromSequenceString(seq: string, allowCut: boolean = true, allowUnknown: boolean = true) {
+        const seqArray: RNABase[] = [];
+        for (const char of seq) {
+            seqArray.push(EPars.stringToNucleotide(char, allowCut, allowUnknown));
+        }
+        return new Sequence(seqArray);
     }
 
+    /**
+     * Concatenate two sequences
+     * @param seq2 the second sequence to be concatenated.
+     */
+    public concat(seq2: Sequence): Sequence {
+        return new Sequence(this._baseArray.concat(seq2.baseArray));
+    }
+
+    /**
+     * Return a "colored letter" representation, which basically brackets each
+     * letter with HTML-like syntax.
+     */
     public getColoredSequence(): string {
         let res = '';
-        for (const c of this.sequenceString()) {
+        const str = this.sequenceString();
+        for (const c of str) {
             res += EPars.getColoredLetter(c);
         }
         return res;
     }
 
+    /**
+     * Return a "colored letter" representation, but colored by an array of
+     * experimental data.
+     */
     public getExpColoredSequence(expData: number[]): string {
         // AMW TODO: how could this be?
         if (expData == null) {
@@ -40,20 +72,28 @@ export default class Sequence {
         const avg: number = (maxmax + minmin) / 2.0;
 
         let res = '';
-        for (let ii = 0; ii < this.sequenceString.length; ii++) {
+        const str = this.sequenceString();
+        for (let ii = 0; ii < this.length; ii++) {
             if (ii < offset - 1 || ii >= expData.length) {
-                res += this.sequenceString()[ii];
+                res += str[ii];
             } else if (expData[ii] < avg) {
-                res += `<FONT COLOR='#7777FF'>${this.sequenceString()[ii]}</FONT>`;
+                res += `<FONT COLOR='#7777FF'>${str[ii]}</FONT>`;
             } else {
-                res += `<FONT COLOR='#FF7777'>${this.sequenceString()[ii]}</FONT>`;
+                res += `<FONT COLOR='#FF7777'>${str[ii]}</FONT>`;
             }
         }
 
         return res;
     }
 
-    public countConsecutive(letter: number, locks: boolean[] | null = null): number {
+    /**
+     * Count the number of consecutive bases of a particular type, with some
+     * allowances made for a possible locked sequence. (An all-locked sequence
+     * that's all G shouldn't be counted against you.)
+     * @param letter A particular base identity.
+     * @param locks An optional locks-array.
+     */
+    public countConsecutive(letter: RNABase, locks: boolean[] | null = null): number {
         let maxConsecutive = 0;
 
         let ii = 0;
@@ -91,8 +131,15 @@ export default class Sequence {
         return maxConsecutive;
     }
 
+    /**
+     * Calculate a big list of all the stretches of `letter` that are longer
+     * than `maxAllowed`, ignoring all-locked stretches.
+     * @param letter An RNA base letter
+     * @param maxAllowed You're allowed this many repeats
+     * @param locks An optional locks array
+     */
     public getRestrictedConsecutive(
-        letter: number, maxAllowed: number, locks: boolean[] | null = null
+        letter: RNABase, maxAllowed: number, locks: boolean[] | null = null
     ): number[] {
         const restricted: number[] = [];
 
@@ -140,6 +187,10 @@ export default class Sequence {
         return restricted;
     }
 
+    /**
+     * The total number of repeats of any n-mer in the sequence.
+     * @param n The length of repeat of interest.
+     */
     public getSequenceRepetition(n: number): number {
         const dict: Set<string> = new Set<string>();
         let numRepeats = 0;
@@ -156,6 +207,10 @@ export default class Sequence {
         return numRepeats++;
     }
 
+    /**
+     * Returns the number of GU base pairs in this Sequence, given a SecStruct
+     * @param pairs A given secondary structure corresponding to the Sequence.
+     */
     public numGUPairs(pairs: SecStruct): number {
         let ret = 0;
 
@@ -175,6 +230,10 @@ export default class Sequence {
         return ret;
     }
 
+    /**
+     * Returns the number of GC base pairs in this Sequence, given a SecStruct
+     * @param pairs A given secondary structure corresponding to the Sequence.
+     */
     public numGCPairs(pairs: SecStruct): number {
         let ret = 0;
 
@@ -194,6 +253,10 @@ export default class Sequence {
         return ret;
     }
 
+    /**
+     * Returns the number of UA base pairs in this Sequence, given a SecStruct
+     * @param pairs A given secondary structure corresponding to the Sequence.
+     */
     public numUAPairs(pairs: SecStruct): number {
         let ret = 0;
 
@@ -213,20 +276,34 @@ export default class Sequence {
         return ret;
     }
 
+    /**
+     * The number of appearances of a certain letter
+     * @param baseType A letter of interest
+     */
     public count(baseType: RNABase) {
         return this._baseArray.reduce(
             (acc, curr) => acc + (curr === baseType ? 1 : 0), 0
         );
     }
 
+    /**
+     * The first index where a cut may be found, starting at `startIdx`
+     * @param startIdx Starting index for the search
+     */
     public findCut(startIdx: number = 0): number {
         return this._baseArray.indexOf(RNABase.CUT, startIdx);
     }
 
+    /**
+     * The first index where an undefined residue may be found
+     */
     public findUndefined(): number {
         return this._baseArray.indexOf(RNABase.UNDEFINED);
     }
 
+    /**
+     * The last index where a cut may be found
+     */
     public lastCut(): number {
         return this._baseArray.lastIndexOf(RNABase.CUT);
     }
@@ -239,16 +316,27 @@ export default class Sequence {
         this._baseArray = sequence;
     }
 
+    /**
+     * Return one sequence position
+     * @param ii Sequence position to return
+     */
     public nt(ii: number): RNABase {
         return this._baseArray[ii];
     }
 
+    /**
+     * Set one sequence position to a new identity
+     * @param ii The position
+     * @param rb The new identity
+     */
     public setNt(ii: number, rb: RNABase) {
         this._baseArray[ii] = rb;
     }
 
     public sequenceString(allowCut: boolean = true, allowUnknown: boolean = true): string {
-        return EPars.sequenceToString(this._baseArray, allowCut, allowUnknown);
+        return this._baseArray.map(
+            (value) => EPars.nucleotideToString(value, allowCut, allowUnknown)
+        ).join('');
     }
 
     public get length(): number {
@@ -269,5 +357,8 @@ export default class Sequence {
         }
     }
 
+    /**
+     * The underlying data, an array of RNABase.
+     */
     private _baseArray: RNABase[];
 }

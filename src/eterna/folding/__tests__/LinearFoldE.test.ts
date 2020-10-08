@@ -61,8 +61,6 @@ test('linearfoldE:MFETests', () => {
         ];
 
         for (let ii: number = 0; ii < sequences.length; ++ii ) {
-            // console.log(EPars.sequenceToString(sequences[ii]));
-            // console.log(EPars.pairsToParenthesis(folder.foldSequence(sequences[ii], [])));
             expect(folder.foldSequence(sequences[ii], new SecStruct())).toEqual(structures[ii])
 
             let outNNFE: number[] = [];

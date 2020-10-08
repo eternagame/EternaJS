@@ -661,7 +661,7 @@ export default class Vienna extends Folder {
     }
 
     private foldSequenceImpl(seq: Sequence, structStr: string | null = null, temp: number = 37): SecStruct {
-        const seqStr = seq.sequenceString(); // EPars.sequenceToString(seq, false, false);
+        const seqStr = seq.sequenceString(false, false);
         let result: FullFoldResult | null = null;
 
         try {

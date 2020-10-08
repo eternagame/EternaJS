@@ -724,7 +724,7 @@ export default class PoseEditMode extends GameMode {
             if (targetConditions[ii] !== undefined) {
                 const tc = targetConditions[ii] as TargetConditions;
                 if (tc['oligo_sequence']) {
-                    this._targetOligo[ii] = EPars.stringToSequence(tc['oligo_sequence'] as string);
+                    this._targetOligo[ii] = Sequence.fromSequenceString(tc['oligo_sequence'] as string).baseArray;
                     this._oligoMode[ii] = tc['fold_mode'] == null
                         ? Pose2D.OLIGO_MODE_DIMER
                         : Number(tc['fold_mode']);
@@ -734,7 +734,7 @@ export default class PoseEditMode extends GameMode {
                     const odefs: OligoDef[] = tc['oligos'] as OligoDef[];
                     const ndefs: Oligo[] = odefs.map(
                         (odef) => ({
-                            sequence: EPars.stringToSequence(odef.sequence),
+                            sequence: Sequence.fromSequenceString(odef.sequence).baseArray,
                             malus: odef.malus,
                             name: odef['name']
                         })
@@ -888,10 +888,10 @@ export default class PoseEditMode extends GameMode {
             if (seq == null) {
                 seq = this._puzzle.getBeginningSequence(ii);
                 if (this._puzzle.puzzleType === PuzzleType.CHALLENGE && !this._params.isReset) {
-                    const savedSeq: RNABase[] = this._puzzle.savedSequence;
+                    const savedSeq: Sequence = this._puzzle.savedSequence;
                     if (savedSeq != null) {
                         if (savedSeq.length === seq.length) {
-                            seq = new Sequence(savedSeq);
+                            seq = savedSeq;
                         }
                     }
                 }
@@ -1603,7 +1603,7 @@ export default class PoseEditMode extends GameMode {
                 if (odefs !== undefined) {
                     for (let ii = 0; ii < odefs.length; ii++) {
                         ndefs.push({
-                            sequence: EPars.stringToSequence(odefs[ii].sequence),
+                            sequence: Sequence.fromSequenceString(odefs[ii].sequence).baseArray,
                             malus: odefs[ii].malus,
                             name: odefs[ii]['name']
                         });
@@ -1619,7 +1619,7 @@ export default class PoseEditMode extends GameMode {
                     ? Pose2D.OLIGO_MODE_DIMER
                     : Number(tc['fold_mode']);
                 this._poses[poseIndex].setOligo(
-                    EPars.stringToSequence(tc['oligo_sequence'] as string),
+                    Sequence.fromSequenceString(tc['oligo_sequence'] as string).baseArray,
                     foldMode,
                     tc['oligo_name']
                 );
@@ -2941,7 +2941,7 @@ export default class PoseEditMode extends GameMode {
         let oligosPaired = 0;
         let forceStruct: string | undefined;
         let foldMode: number;
-        let fullSeq: number[];
+        let fullSeq: Sequence;
         let malus: number;
         let bonus: number;
         let sites: number[];
@@ -2988,15 +2988,15 @@ export default class PoseEditMode extends GameMode {
                 : Number(tc['fold_mode']);
             if (foldMode === Pose2D.OLIGO_MODE_DIMER) {
                 log.debug('cofold');
-                fullSeq = seq.baseArray.concat(EPars.stringToSequence(`&${tc['oligo_sequence']}`));
+                fullSeq = seq.concat(Sequence.fromSequenceString(`&${tc['oligo_sequence']}`));
                 malus = int(tc['malus'] as number * 100);
-                bestPairs = this._folder.cofoldSequence(new Sequence(fullSeq), null, malus, forceStruct);
+                bestPairs = this._folder.cofoldSequence(fullSeq, null, malus, forceStruct);
             } else if (foldMode === Pose2D.OLIGO_MODE_EXT5P) {
-                fullSeq = EPars.stringToSequence(tc['oligo_sequence'] as string).concat(seq.baseArray);
-                bestPairs = this._folder.foldSequence(new Sequence(fullSeq), null, forceStruct);
+                fullSeq = Sequence.fromSequenceString(tc['oligo_sequence'] as string).concat(seq);
+                bestPairs = this._folder.foldSequence(fullSeq, null, forceStruct);
             } else {
-                fullSeq = seq.baseArray.concat(EPars.stringToSequence(tc['oligo_sequence'] as string));
-                bestPairs = this._folder.foldSequence(new Sequence(fullSeq), null, forceStruct);
+                fullSeq = seq.concat(Sequence.fromSequenceString(tc['oligo_sequence'] as string));
+                bestPairs = this._folder.foldSequence(fullSeq, null, forceStruct);
             }
         } else if (tc['type'] === 'aptamer+oligo') {
             bonus = tc['bonus'] as number;
@@ -3006,27 +3006,27 @@ export default class PoseEditMode extends GameMode {
                 : Number(tc['fold_mode']);
             if (foldMode === Pose2D.OLIGO_MODE_DIMER) {
                 log.debug('cofold');
-                fullSeq = seq.baseArray.concat(EPars.stringToSequence(`&${tc['oligo_sequence']}`));
+                fullSeq = seq.concat(Sequence.fromSequenceString(`&${tc['oligo_sequence']}`));
                 malus = int(tc['malus'] as number * 100);
                 bestPairs = this._folder.cofoldSequenceWithBindingSite(
-                    new Sequence(fullSeq), sites, bonus, forceStruct, malus
+                    fullSeq, sites, bonus, forceStruct, malus
                 );
             } else if (foldMode === Pose2D.OLIGO_MODE_EXT5P) {
-                fullSeq = EPars.stringToSequence(tc['oligo_sequence'] as string).concat(seq.baseArray);
+                fullSeq = Sequence.fromSequenceString(tc['oligo_sequence'] as string).concat(seq);
                 bestPairs = this._folder.foldSequenceWithBindingSite(
-                    new Sequence(fullSeq), this._targetPairs[ii], sites, Number(bonus), tc['fold_version']
+                    fullSeq, this._targetPairs[ii], sites, Number(bonus), tc['fold_version']
                 );
             } else {
-                fullSeq = seq.baseArray.concat(EPars.stringToSequence(tc['oligo_sequence'] as string));
+                fullSeq = seq.concat(Sequence.fromSequenceString(tc['oligo_sequence'] as string));
                 bestPairs = this._folder.foldSequenceWithBindingSite(
-                    new Sequence(fullSeq), this._targetPairs[ii], sites, Number(bonus), tc['fold_version']
+                    fullSeq, this._targetPairs[ii], sites, Number(bonus), tc['fold_version']
                 );
             }
         } else if (tc['type'] === 'multistrand') {
             const odefs = tc['oligos'] as OligoDef[];
             const oligos: Oligo[] = odefs.map(
                 (odef) => ({
-                    sequence: EPars.stringToSequence(odef['sequence']),
+                    sequence: Sequence.fromSequenceString(odef['sequence']).baseArray,
                     malus: int(odef['malus'] * 100.0)
                 })
             );
@@ -3326,7 +3326,7 @@ export default class PoseEditMode extends GameMode {
     private _poseState: PoseState = PoseState.NATIVE;
     protected _targetPairs: SecStruct[] = [];
     protected _targetConditions: (TargetConditions | undefined)[] = [];
-    private _targetOligo: (number[] | undefined)[] = [];
+    private _targetOligo: (RNABase[] | undefined)[] = [];
     private _oligoMode: (number | undefined)[] = [];
     private _oligoName: (string | undefined)[] = [];
     private _targetOligos: (Oligo[] | undefined)[] = [];

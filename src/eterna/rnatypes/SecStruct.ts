@@ -1,7 +1,11 @@
-import EPars, {RNABase} from 'eterna/EPars';
+import EPars from 'eterna/EPars';
 import Sequence from './Sequence';
 
 export default class SecStruct {
+    constructor(pairs: number[] = []) {
+        this._pairs = pairs.slice();
+    }
+
     public get length(): number {
         return this._pairs.length;
     }
@@ -10,18 +14,22 @@ export default class SecStruct {
         return this._pairs;
     }
 
-    constructor(pairs: number[] = []) {
-        this._pairs = pairs.slice();
-    }
-
+    /**
+     * A static creator that starts from a dot-bracket notation string.
+     * @param str A string in dot-bracket notation
+     * @param pseudoknots If true, run through other ()-like characters too, to
+     * represent pseudoknots.
+     */
     public static fromParens(str: string, pseudoknots: boolean = false): SecStruct {
         const s = new SecStruct();
         s.setPairs(str, pseudoknots);
         return s;
     }
 
-    private _pairs: number[] = [];
-
+    /**
+     * Filter a SecStruct for only the pairs compatible with the sequence given.
+     * @param seq A Sequence against which to compare the structure.
+     */
     public getSatisfiedPairs(seq: Sequence): SecStruct {
         const retPairs: number[] = new Array(this.length);
 
@@ -42,19 +50,43 @@ export default class SecStruct {
         return new SecStruct(retPairs);
     }
 
+    /**
+     * Is the sequence position paired?
+     * @param index
+     */
     public isPaired(index: number): boolean {
         return (this._pairs[index] >= 0);
     }
 
+    /**
+     * What's the sequence position's pairing partner?
+     * @param index
+     */
     public pairingPartner(index: number): number {
         return this._pairs[index];
     }
 
+    /**
+     * Set the pairing partner to a particular value. If the position was
+     * paired to begin with, unpair it first so we don't have an inconsistent
+     * state.
+     * @param index
+     * @param pi
+     */
     public setPairingPartner(index: number, pi: number): void {
         if (this.isPaired(index)) {
             this._pairs[this.pairingPartner(index)] = -1;
         }
         this._pairs[index] = pi;
+    }
+
+    /**
+     * Set the position, as well as its former pairing partner, to unpaired.
+     * @param index
+     */
+    public setUnpaired(index: number): void {
+        this._pairs[this._pairs[index]] = -1;
+        this._pairs[index] = -1;
     }
 
     /**
@@ -64,11 +96,11 @@ export default class SecStruct {
         return this._pairs.filter((it) => it !== -1).length !== 0;
     }
 
-    public setUnpaired(index: number): void {
-        this._pairs[this._pairs[index]] = -1;
-        this._pairs[index] = -1;
-    }
-
+    /**
+     * Returns null if index is not part of an internal loop; returns all the
+     * loop indices otherwise.
+     * @param index
+     */
     public isInternal(index: number): number[] | null {
         let pairStartHere = -1;
         let pairEndHere = -1;
@@ -129,6 +161,9 @@ export default class SecStruct {
         return bases;
     }
 
+    /**
+     * Return the longest stack length.
+     */
     public getLongestStackLength(): number {
         let longlen = 0;
 
@@ -166,7 +201,12 @@ export default class SecStruct {
         return longlen;
     }
 
-    // You may need to make this basically... a setter?
+    /**
+     * Set the pairs based on a passed in dot-bracket string, with or without
+     * pseudoknots. Used both by the filtering functions and the constructor.
+     * @param parenthesis
+     * @param pseudoknots
+     */
     public setPairs(parenthesis: string, pseudoknots: boolean = false) {
         this._pairs = new Array(parenthesis.length).fill(-1);
         const pairStack: number[] = [];
@@ -231,6 +271,12 @@ export default class SecStruct {
         }
     }
 
+    /**
+     * Return the dot-bracket notation.
+     * @param seq Sequence passed just for the sake of locating the cutpoint, if
+     * there is one.
+     * @param pseudoknots Pseudoknots, to help look for places for [] {} <>
+     */
     public getParenthesis(seq: Sequence | null = null,
         pseudoknots: boolean = false): string {
         if (pseudoknots) {
@@ -336,6 +382,10 @@ export default class SecStruct {
         return str;
     }
 
+    /**
+     * Return a version of the secondary structure with no pseudoknots, useful
+     * for visualization.
+     */
     public filterForPseudoknots(): SecStruct {
         // Round-trip to remove all pseudoknots.
         const filtered: string = this.getParenthesis(null, true)
@@ -351,6 +401,10 @@ export default class SecStruct {
         return ss;
     }
 
+    /**
+     * Return a version of the secondary structure with only pseudoknots, useful
+     * for visualization.
+     */
     public onlyPseudoknots(): SecStruct {
         // Round-trip to remove all non-pseudoknots.
         const filtered: string = this.getParenthesis(null, true)
@@ -362,6 +416,9 @@ export default class SecStruct {
         return ss;
     }
 
+    /**
+     * Return the number of base pairs in total.
+     */
     public numPairs(): number {
         let ret = 0;
 
@@ -373,6 +430,12 @@ export default class SecStruct {
         return ret;
     }
 
+    /**
+     * Return a copy of the SecStruct based on a copy of its underlying data.
+     * Importantly, this requires reindexing much of the SecStruct!!
+     * @param start
+     * @param end
+     */
     public slice(start: number, end?: number): SecStruct {
         const pairsB = this._pairs.slice(start, end);
 
@@ -382,4 +445,11 @@ export default class SecStruct {
 
         return new SecStruct(pairsB);
     }
+
+    /**
+     * The underlying data: an array of numbers. These numbers correspond to the
+     * base paired index at each position. -1 means unpaired, and a number from
+     * zero to len-1 indicates a pairing partner.
+     */
+    private _pairs: number[] = [];
 }

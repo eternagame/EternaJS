@@ -376,7 +376,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (this._sequence.nt(ii) !== this._mutatedSequence.nt(ii + ofs)) {
                 numMut++;
                 this._sequence.setNt(ii, this._mutatedSequence.nt(ii + ofs));
-                muts.push({pos: ii + 1, base: EPars.sequenceToString([this._sequence.nt(ii)])});
+                muts.push({pos: ii + 1, base: EPars.nucleotideToString(this._sequence.nt(ii))});
                 needUpdate = true;
             }
         }
@@ -431,7 +431,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (this._sequence.nt(ii) !== sequence.nt(ii) && !this.isLocked(ofs + ii)) {
                 numMut++;
                 this._sequence.setNt(ii, sequence.nt(ii));
-                muts.push({pos: ii + 1, base: EPars.sequenceToString([this._sequence.nt(ii)])});
+                muts.push({pos: ii + 1, base: EPars.nucleotideToString(this._sequence.nt(ii))});
                 this._bases[ofs + ii].setType(sequence.nt(ii));
                 needUpdate = true;
             }
@@ -2765,10 +2765,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     this._mutatedSequence.setNt(seqnum, this._currentColor);
                     ROPWait.notifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
                     this._bases[seqnum].setType(this._currentColor, true);
-                } else if (this._currentColor === RNABase.RANDOM) {
-                    const randbase: number = (Math.floor(Math.random() * 4) % 4) + 1;
-                    this._mutatedSequence.setNt(seqnum, randbase);
-                    this._bases[seqnum].setType(randbase, true);
                 } else if (this._currentColor === RNAPaint.PAIR) {
                     if (this._pairs.isPaired(seqnum)) {
                         const pi = this._pairs.pairingPartner(seqnum);
@@ -2867,10 +2863,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this._mutatedSequence.setNt(seqnum, this._currentColor);
                 ROPWait.notifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
                 this._bases[seqnum].setType(this._currentColor, true);
-            } else if (this._currentColor === RNABase.RANDOM) {
-                const randbase: number = (Math.floor(Math.random() * 4) % 4) + 1;
-                this._mutatedSequence.setNt(seqnum, randbase);
-                this._bases[seqnum].setType(randbase, true);
             } else if (this._currentColor === RNAPaint.PAIR) {
                 if (this._pairs.isPaired(seqnum)) {
                     const pi = this._pairs.pairingPartner(seqnum);

@@ -5,20 +5,24 @@ import Arrays from 'flashbang/util/Arrays';
 import SecStruct from './rnatypes/SecStruct';
 import Sequence from './rnatypes/Sequence';
 
-// These numbers can appear in a sequence
+/**
+ * These numbers can appear in a sequence: basically, ?ACGU&
+ */
 export enum RNABase {
     UNDEFINED = 1,
     GUANINE = 3,
     ADENINE = 1,
     URACIL = 4,
     CYTOSINE = 2,
-    RANDOM = 8,
     CUT = 19,
 }
 
-// These are operations that can occur when altering a puzzle (say, in
-// PuzzleEditMode) or when applying glue or markings. There's a sense of change
-// here, at least for some of them. They can't appear in sequences, either.
+/**
+ * These are operations that can occur when altering a puzzle (say, in
+ * PuzzleEditMode) or when applying glue or markings. Generally but not
+ * exclusively, these either alter or depend on the structure as well as the
+ * sequence.
+ */
 export enum RNAPaint {
     PAIR = 5,
     AU_PAIR = 9,
@@ -141,7 +145,7 @@ export default class EPars {
         return '';
     }
 
-    public static nucleotideToString(value: number, allowCut: boolean, allowUnknown: boolean): string {
+    public static nucleotideToString(value: number, allowCut: boolean = true, allowUnknown: boolean = true): string {
         if (value === RNABase.ADENINE) {
             return 'A';
         } else if (value === RNABase.URACIL) {
@@ -163,7 +167,7 @@ export default class EPars {
         }
     }
 
-    public static stringToNucleotide(value: string, allowCut: boolean, allowUnknown: boolean): number {
+    public static stringToNucleotide(value: string, allowCut: boolean = true, allowUnknown: boolean = true): number {
         if (value === 'A' || value === 'a') {
             return RNABase.ADENINE;
         } else if (value === 'G' || value === 'g') {
@@ -195,14 +199,6 @@ export default class EPars {
         } else {
             throw new Error(`Bad nucleotide "${value}"`);
         }
-    }
-
-    public static stringToSequence(seq: string, allowCut: boolean = true, allowUnknown: boolean = true): number[] {
-        const seqArray: number[] = [];
-        for (const char of seq) {
-            seqArray.push(this.stringToNucleotide(char, allowCut, allowUnknown));
-        }
-        return seqArray;
     }
 
     /**
@@ -281,13 +277,6 @@ export default class EPars {
             }
         }
         return new Sequence(seqArray);
-    }
-
-    public static sequenceToString(sequence: number[], allowCut: boolean = true, allowUnknown: boolean = true): string {
-        const str = sequence.map(
-            (value) => EPars.nucleotideToString(value, allowCut, allowUnknown)
-        ).join('');
-        return str;
     }
 
     public static parenthesisToForcedArray(parenthesis: string): number[] {

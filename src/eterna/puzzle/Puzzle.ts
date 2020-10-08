@@ -290,11 +290,11 @@ export default class Puzzle {
     }
 
     public set beginningSequence(seq: string) {
-        this._beginningSequence = EPars.stringToSequence(seq);
+        this._beginningSequence = Sequence.fromSequenceString(seq);
     }
 
     public set savedSequenceString(seq: string) {
-        this._savedSequence = EPars.stringToSequence(seq);
+        this._savedSequence = Sequence.fromSequenceString(seq);
     }
 
     public set uiSpecs(uiSpec: string[]) {
@@ -323,7 +323,7 @@ export default class Puzzle {
         this._boosterDefs = obj;
     }
 
-    public get savedSequence(): RNABase[] {
+    public get savedSequence(): Sequence {
         return this._savedSequence;
     }
 
@@ -478,7 +478,7 @@ export default class Puzzle {
     }
 
     public getBeginningSequence(index: number = 0): Sequence {
-        const seq: number[] = [];
+        const seq: RNABase[] = [];
         if (this._useTails) {
             if (this._useShortTails) {
                 seq.push(RNABase.GUANINE);
@@ -496,7 +496,7 @@ export default class Puzzle {
         const len = this._beginningSequence != null ? this._beginningSequence.length : this._secstructs[index].length;
         for (let ii = 0; ii < len; ii++) {
             if (this._beginningSequence != null) {
-                seq.push(this._beginningSequence[ii]);
+                seq.push(this._beginningSequence.nt(ii));
             } else {
                 seq.push(RNABase.ADENINE);
             }
@@ -536,10 +536,10 @@ export default class Puzzle {
             return seq;
         }
 
-        const targetSeqTemp: number[] = EPars.stringToSequence(
+        const targetSeqTemp: Sequence = Sequence.fromSequenceString(
             this._targetConditions[targetIndex]['sequence'] as string
         );
-        const targetSeq: number[] = [];
+        const targetSeq: RNABase[] = [];
 
         if (this._useTails) {
             if (this._useShortTails) {
@@ -555,7 +555,7 @@ export default class Puzzle {
         }
 
         for (let ii = 0; ii < targetSeqTemp.length; ii++) {
-            targetSeq.push(targetSeqTemp[ii]);
+            targetSeq.push(targetSeqTemp.nt(ii));
         }
 
         if (this._useTails) {
@@ -594,8 +594,8 @@ export default class Puzzle {
     private _missionText: string = Puzzle.DEFAULT_MISSION_TEXT;
     private _puzzleLocks: boolean[];
     private _shiftLimit: number;
-    private _beginningSequence: number[];
-    private _savedSequence: number[];
+    private _beginningSequence: Sequence;
+    private _savedSequence: Sequence;
     private _useTails: boolean = false;
     private _useShortTails: boolean = false;
     private _useBarcode: boolean = false;
