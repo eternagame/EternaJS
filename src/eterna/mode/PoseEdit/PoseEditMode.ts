@@ -615,7 +615,7 @@ export default class PoseEditMode extends GameMode {
                 this.updateScore();
                 this.transformPosesMarkers();
             } else {
-                const sequence = solution.sequence.baseArray;
+                const sequence = solution.sequence;
                 for (const pose of this._poses) {
                     pose.pasteSequence(sequence);
                 }
@@ -858,9 +858,9 @@ export default class PoseEditMode extends GameMode {
             }
         });
 
-        let initialSequence: number[] | null = null;
+        let initialSequence: Sequence | null = null;
         if (this._params.initSolution != null) {
-            initialSequence = this._params.initSolution.sequence.baseArray;
+            initialSequence = this._params.initSolution.sequence;
             this._curSolution = this._params.initSolution;
             // AMW: I'm keeping the function around in case we want to call it
             // in some other context, but we don't need it anymore.
@@ -880,18 +880,18 @@ export default class PoseEditMode extends GameMode {
             this._solutionView.sortClicked.connect(() => this.switchToBrowser(this._curSolution, true));
             this._solutionView.returnClicked.connect(() => this.switchToBrowser(this._curSolution));
         } else if (this._params.initSequence != null) {
-            initialSequence = EPars.stringToSequence(this._params.initSequence);
+            initialSequence = Sequence.fromSequenceString(this._params.initSequence);
         }
 
         for (let ii = 0; ii < this._poses.length; ii++) {
             let seq = initialSequence;
             if (seq == null) {
-                seq = this._puzzle.getBeginningSequence(ii).baseArray;
+                seq = this._puzzle.getBeginningSequence(ii);
                 if (this._puzzle.puzzleType === PuzzleType.CHALLENGE && !this._params.isReset) {
-                    const savedSeq: number[] = this._puzzle.savedSequence;
+                    const savedSeq: RNABase[] = this._puzzle.savedSequence;
                     if (savedSeq != null) {
                         if (savedSeq.length === seq.length) {
-                            seq = savedSeq;
+                            seq = new Sequence(savedSeq);
                         }
                     }
                 }
@@ -900,7 +900,7 @@ export default class PoseEditMode extends GameMode {
             }
 
             Assert.assertIsDefined(seq);
-            this._poses[ii].sequence = this._puzzle.transformSequence(new Sequence(seq), ii);
+            this._poses[ii].sequence = this._puzzle.transformSequence(seq, ii);
             if (this._puzzle.barcodeIndices != null) {
                 this._poses[ii].barcodes = this._puzzle.barcodeIndices;
             }
@@ -1204,15 +1204,15 @@ export default class PoseEditMode extends GameMode {
 
         // Setters
         this._scriptInterface.addCallback('set_sequence_string', (seq: string): boolean => {
-            const seqArr: number[] = EPars.stringToSequence(seq);
-            if (seqArr.indexOf(RNABase.UNDEFINED) >= 0 || seqArr.indexOf(RNABase.CUT) >= 0) {
+            const sequence: Sequence = Sequence.fromSequenceString(seq);
+            if (sequence.findUndefined() >= 0 || sequence.findCut() >= 0) {
                 log.info(`Invalid characters in ${seq}`);
                 return false;
             }
             const prevForceSync = this.forceSync;
             this.forceSync = true;
             for (const pose of this._poses) {
-                pose.pasteSequence(seqArr);
+                pose.pasteSequence(sequence);
             }
             this.forceSync = prevForceSync;
             this.moveHistoryAddSequence('paste', seq);
@@ -2326,7 +2326,7 @@ export default class PoseEditMode extends GameMode {
         //     return false;
         // }
 
-        const beginningSequence: number[] = this._puzzle.getBeginningSequence().baseArray;
+        const beginningSequence: Sequence = this._puzzle.getBeginningSequence();
         const locks: boolean[] = this._puzzle.puzzleLocks;
         let oligoLen = 0;
 
@@ -2392,7 +2392,7 @@ export default class PoseEditMode extends GameMode {
 
         for (let ii = 0; ii < this._targetPairs[0].length; ii++) {
             if (locks[ii]) {
-                a[ii] = beginningSequence[ii];
+                a[ii] = beginningSequence.nt(ii);
             }
         }
 
@@ -2415,7 +2415,7 @@ export default class PoseEditMode extends GameMode {
         const muts: Move[] = [];
         for (let ii = 0; ii < after.length; ii++) {
             if (after.baseArray[ii] !== before.baseArray[ii]) {
-                muts.push({pos: ii + 1, base: EPars.sequenceToString([after.baseArray[ii]])});
+                muts.push({pos: ii + 1, base: new Sequence([after.baseArray[ii]]).sequenceString()});
             }
         }
         if (muts.length === 0) return;
@@ -2430,7 +2430,7 @@ export default class PoseEditMode extends GameMode {
         this._moves.push(muts.slice());
     }
 
-    private setPuzzleEpilog(initSeq: number[] | null, isReset: boolean | undefined): void {
+    private setPuzzleEpilog(initSeq: Sequence | null, isReset: boolean | undefined): void {
         if (isReset) {
             const newSeq: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
             this.moveHistoryAddSequence('reset', newSeq.sequenceString());

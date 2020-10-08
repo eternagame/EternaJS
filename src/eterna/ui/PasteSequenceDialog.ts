@@ -1,6 +1,7 @@
 import {KeyCode, Flashbang, Assert} from 'flashbang';
 import GameMode from 'eterna/mode/GameMode';
 import EPars from 'eterna/EPars';
+import Sequence from 'eterna/rnatypes/Sequence';
 import Dialog from './Dialog';
 import TextInputPanel from './TextInputPanel';
 
@@ -9,7 +10,7 @@ import TextInputPanel from './TextInputPanel';
  * If OK is pressed, the dialog will be closed with array of numbers (ADENOSINE,...)
  *  corresponding to sequence string.
  */
-export default class PasteSequenceDialog extends Dialog<number[]> {
+export default class PasteSequenceDialog extends Dialog<Sequence> {
     constructor(customNumbering?: (number | null)[] | undefined) {
         super();
         this._customNumbering = customNumbering;
@@ -62,7 +63,7 @@ export default class PasteSequenceDialog extends Dialog<number[]> {
             );
             return;
         }
-        this.close(s as number[]);
+        this.close(s as Sequence);
     }
 
     private readonly _customNumbering: (number | null)[] | undefined;

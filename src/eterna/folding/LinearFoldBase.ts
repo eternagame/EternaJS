@@ -166,7 +166,7 @@ export default abstract class LinearFoldBase extends Folder {
     }
 
     private fullFoldDefault(seq: Sequence): SecStruct {
-        const seqStr = EPars.sequenceToString(seq.baseArray, false, false);
+        const seqStr = seq.sequenceString(false, false);
         let result: FullFoldResult | null = null;
 
         try {

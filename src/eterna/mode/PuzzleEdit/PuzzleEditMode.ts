@@ -37,6 +37,7 @@ import GameButton from 'eterna/ui/GameButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import EternaURL from 'eterna/net/EternaURL';
 import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
@@ -265,7 +266,7 @@ export default class PuzzleEditMode extends GameMode {
             pose.scoreFolder = this._folder;
             pose.molecularStructure = defaultPairs;
             pose.molecularBindingBonus = -4.86;
-            pose.sequence.baseArray = EPars.stringToSequence(defaultSequence);
+            pose.sequence = Sequence.fromSequenceString(defaultSequence);
             poseFields.push(poseField);
 
             const structureInput = new StructureInput(pose);
@@ -461,7 +462,7 @@ export default class PuzzleEditMode extends GameMode {
                     const {sequence} = pose;
                     for (let ii = 0; ii < sequence.length; ii++) {
                         if (!pose.isLocked(ii)) {
-                            sequence.baseArray[ii] = RNABase.ADENINE;
+                            sequence.setNt(ii, RNABase.ADENINE);
                         }
                     }
 

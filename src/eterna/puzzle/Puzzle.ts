@@ -55,17 +55,17 @@ export default class Puzzle {
         return (Puzzle.T_OLIGO.indexOf(tcType) >= 0);
     }
 
-    public static probeTail(seq: number[]): number[] | null {
+    public static probeTail(seq: Sequence): Sequence | null {
         if (seq == null) {
             return null;
         }
 
-        seq[0] = RNABase.GUANINE;
-        seq[1] = RNABase.GUANINE;
+        seq.setNt(0, RNABase.GUANINE);
+        seq.setNt(1, RNABase.GUANINE);
 
         const offset: number = seq.length - 20;
         for (let ii = 0; ii < 20; ii++) {
-            seq[offset + ii] = EPars.RNABase_LAST20[ii];
+            seq.setNt(offset + ii, EPars.RNABase_LAST20[ii]);
         }
 
         return seq;
@@ -323,7 +323,7 @@ export default class Puzzle {
         this._boosterDefs = obj;
     }
 
-    public get savedSequence(): number[] {
+    public get savedSequence(): RNABase[] {
         return this._savedSequence;
     }
 
@@ -513,14 +513,14 @@ export default class Puzzle {
 
     public getSubsequenceWithoutBarcode(seq: Sequence): Sequence {
         if (!this._useBarcode) {
-            return new Sequence(seq.baseArray.slice());
+            return seq.slice(0);
         }
         let minus = 19;
         if (this._useTails) {
             minus += 20;
         }
 
-        return new Sequence(seq.baseArray.slice(0, seq.length - minus));
+        return seq.slice(0, seq.length - minus);
     }
 
     public setUseTails(useTails: boolean, useShortTails: boolean): void {
@@ -572,7 +572,7 @@ export default class Puzzle {
 
         for (let ii = 0; ii < targetSeq.length; ii++) {
             if (!locks[ii]) {
-                targetSeq[ii] = seq.baseArray[ii];
+                targetSeq[ii] = seq.nt(ii);
             }
         }
 

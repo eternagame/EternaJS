@@ -6,6 +6,7 @@ import Pose2D from 'eterna/pose2D/Pose2D';
 import GameButton from 'eterna/ui/GameButton';
 import Sounds from 'eterna/resources/Sounds';
 import ExternalInterface, {ExternalInterfaceCtx} from 'eterna/util/ExternalInterface';
+import Sequence from 'eterna/rnatypes/Sequence';
 import GameMode from '../GameMode';
 
 export enum BoosterType {
@@ -144,8 +145,8 @@ export default class Booster {
         const scriptInterface = new ExternalInterfaceCtx();
 
         scriptInterface.addCallback('set_sequence_string', (seq: string): boolean => {
-            const seqArr: number[] = EPars.stringToSequence(seq);
-            if (seqArr.indexOf(RNABase.UNDEFINED) >= 0 || seqArr.indexOf(RNABase.CUT) >= 0) {
+            const seqArr: Sequence = Sequence.fromSequenceString(seq);
+            if (seqArr.findUndefined() >= 0 || seqArr.findCut() >= 0) {
                 log.info(`Invalid characters in ${seq}`);
                 return false;
             }

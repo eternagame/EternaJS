@@ -295,7 +295,7 @@ export default class Vienna2 extends Folder {
         seq: Sequence, secondBestPairs: SecStruct, malus: number = 0,
         desiredPairs: string | null = null, temp: number = 37
     ): SecStruct {
-        const cut: number = seq.baseArray.indexOf(RNABase.CUT);
+        const cut: number = seq.findCut();
         if (cut < 0) {
             throw new Error('Missing cutting point');
         }
@@ -348,7 +348,7 @@ export default class Vienna2 extends Folder {
         seq: Sequence, bindingSite: number[], bonus: number, desiredPairs: string | null = null,
         malus: number = 0, temp: number = 37
     ): SecStruct {
-        const cut: number = seq.baseArray.indexOf(RNABase.CUT);
+        const cut: number = seq.findCut();
         if (cut < 0) {
             throw new Error('Missing cutting point');
         }
@@ -741,7 +741,7 @@ export default class Vienna2 extends Folder {
     }
 
     private cofoldSequenceImpl(seq: Sequence, str: string | null = null): SecStruct {
-        const seqStr = EPars.sequenceToString(seq.baseArray, true, false);
+        const seqStr = seq.sequenceString(true, false);
         const structStr: string = str || '';
         let result: FullFoldResult | null = null;
 
@@ -766,7 +766,7 @@ export default class Vienna2 extends Folder {
     private cofoldSequenceWithBindingSiteImpl(
         seq: Sequence, str: string | null, i: number, p: number, j: number, q: number, bonus: number
     ): SecStruct {
-        const seqStr = EPars.sequenceToString(seq.baseArray, true, false);
+        const seqStr = seq.sequenceString(true, false);
         const structStr: string = str || '';
         let result: FullFoldResult | null = null;
 

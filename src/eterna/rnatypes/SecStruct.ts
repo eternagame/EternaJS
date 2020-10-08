@@ -29,7 +29,7 @@ export default class SecStruct {
             if (this.pairs[ii] < 0) {
                 retPairs[ii] = -1;
             } else if (this.pairs[ii] > ii) {
-                if (EPars.pairType(seq.baseArray[ii], seq.baseArray[this.pairs[ii]]) !== 0) {
+                if (EPars.pairType(seq.nt(ii), seq.nt(this.pairs[ii])) !== 0) {
                     retPairs[ii] = this.pairs[ii];
                     retPairs[this.pairs[ii]] = ii;
                 } else {

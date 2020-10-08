@@ -163,7 +163,7 @@ export default class EternaFold extends Folder {
         temp: number = 37,
         gamma: number = 6.0
     ): SecStruct {
-        const seqStr = EPars.sequenceToString(seq.baseArray, false, false);
+        const seqStr = seq.sequenceString(false, false);
         let result: FullFoldResult | null = null;
 
         try {

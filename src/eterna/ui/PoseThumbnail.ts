@@ -84,6 +84,23 @@ export default class PoseThumbnail {
         sprite.addChild(graphics);
     }
 
+    /**
+     * You know what's really awful? This function takes a number[] that is
+     * usually a sequence, but sometimes not. That means that these numbers
+     * could ACCIDENTALLY be compared to RNABase.CUT and the wrong conclusion
+     * is drawn, but we happen to use the same param for per-nt coloration OR for
+     * per-data coloration. --AMW
+     * @param sequence
+     * @param pairs
+     * @param size
+     * @param type
+     * @param expStartIndex
+     * @param wrongPairs
+     * @param expUseThreshold
+     * @param expThreshold
+     * @param canvas
+     * @param customLayout
+     */
     private static create(
         sequence: number[],
         pairs: SecStruct,

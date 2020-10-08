@@ -17,7 +17,7 @@ export default class LightRay extends GraphicsObject {
         ));
     }
 
-    public draw(v: Vector2, baseType: number): void {
+    public draw(v: Vector2, baseType: RNABase): void {
         const color = LightRay.getColor(baseType);
 
         const len: number = v.length;

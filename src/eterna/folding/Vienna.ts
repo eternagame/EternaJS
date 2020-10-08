@@ -143,7 +143,7 @@ export default class Vienna extends Folder {
             }
         } while (0);
 
-        const cut: number = seq.baseArray.indexOf(RNABase.CUT);
+        const cut: number = seq.findCut();
         if (cut >= 0 && cache.nodes[0] !== -2) {
             // we just scored a duplex that wasn't one, so we have to redo it properly
             const seqA: Sequence = seq.slice(0, cut);
@@ -335,7 +335,7 @@ export default class Vienna extends Folder {
         seq: Sequence, bindingSite: number[], bonus: number, desiredPairs: string | null = null,
         malus: number = 0, temp: number = 37
     ): SecStruct {
-        const cut: number = seq.baseArray.indexOf(RNABase.CUT);
+        const cut: number = seq.findCut();
         if (cut < 0) {
             throw new Error('Missing cutting point');
         }
@@ -706,7 +706,7 @@ export default class Vienna extends Folder {
     }
 
     private cofoldSequenceImpl(seq: Sequence, str: string | null = null, temp: number = 37): SecStruct {
-        const seqStr = EPars.sequenceToString(seq.baseArray, true, false);
+        const seqStr = seq.sequenceString(true, false);
         const structStr: string = str || '';
         let result: FullFoldResult | null = null;
 
@@ -738,7 +738,7 @@ export default class Vienna extends Folder {
         bonus: number,
         temp: number = 37
     ): SecStruct {
-        const seqStr = EPars.sequenceToString(seq.baseArray, true, false);
+        const seqStr = seq.sequenceString(true, false);
         const structStr: string = str || '';
         let result: FullFoldResult | null = null;
 

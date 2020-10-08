@@ -238,10 +238,10 @@ export default class EPars {
      * @returns array of Nucleotide enums like [RNABase_ADENINE, ...]
      */
     public static indexedStringToSequence(strInput: string, customNumbering?: (number | null)[]):
-    number[] | undefined {
+    Sequence | undefined {
         // make robust to blanks:
         const strChunks: string[] = strInput.trim().split(/\s+/); // spaces
-        if (strChunks.length === 0) return []; // blank sequence, no op.
+        if (strChunks.length === 0) return new Sequence([]); // blank sequence, no op.
         const seqStr = strChunks[0]; // sequence like ACUGU
 
         // process rest of string like '11-14 16' to get indices for pasting
@@ -264,7 +264,7 @@ export default class EPars {
         if (customNumbering !== undefined) {
             if (Arrays.shallowEqual(customNumbering, indices)) {
                 // assume player is copy/pasting into the same puzzle.
-                return this.stringToSequence(seqStr, true /* allowCut */, true /* allowUnknown */);
+                return Sequence.fromSequenceString(seqStr, true /* allowCut */, true /* allowUnknown */);
             }
             indices = indices.filter((n) => n !== null).map((n) => customNumbering.indexOf(n) + 1);
         }
@@ -280,7 +280,7 @@ export default class EPars {
                 seqArray[ii - 1] = this.stringToNucleotide(char, true /* allowCut */, true /* allowUnknown */);
             }
         }
-        return seqArray;
+        return new Sequence(seqArray);
     }
 
     public static sequenceToString(sequence: number[], allowCut: boolean = true, allowUnknown: boolean = true): string {

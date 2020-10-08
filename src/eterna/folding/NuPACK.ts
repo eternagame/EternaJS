@@ -132,7 +132,7 @@ export default class NuPACK extends Folder {
             }
         } while (0);
 
-        let cut: number = seq.baseArray.lastIndexOf(RNABase.CUT);
+        let cut: number = seq.lastCut();
         if (cut >= 0) {
             if (cache.nodes[0] !== -2 || cache.nodes.length === 2 || (cache.nodes[0] === -2 && cache.nodes[2] !== -1)) {
                 // we just scored a duplex that wasn't one, so we have to redo it properly
@@ -276,7 +276,7 @@ export default class NuPACK extends Folder {
         seq: Sequence, secondBestPairs: SecStruct, malus: number = 0,
         desiredPairs: string | null = null, temp: number = 37
     ): SecStruct {
-        const cut: number = seq.baseArray.indexOf(RNABase.CUT);
+        const cut: number = seq.findCut();
         if (cut < 0) {
             throw new Error('Missing cutting point');
         }
@@ -329,7 +329,7 @@ export default class NuPACK extends Folder {
         seq: Sequence, bindingSite: number[], bonus: number, desiredPairs: string | null = null,
         malus: number = 0, temp: number = 37
     ): SecStruct {
-        const cut: number = seq.baseArray.indexOf(RNABase.CUT);
+        const cut: number = seq.findCut();
         if (cut < 0) {
             throw new Error('Missing cutting point');
         }
@@ -541,7 +541,7 @@ export default class NuPACK extends Folder {
     }
 
     private foldSequenceImpl(seq: Sequence, temp: number = 37, pseudoknots: boolean = false): SecStruct {
-        const seqStr = EPars.sequenceToString(seq.baseArray, false, false);
+        const seqStr = seq.sequenceString(false, false);
 
         let result: FullFoldResult | null = null;
         try {
@@ -564,7 +564,7 @@ export default class NuPACK extends Folder {
     private foldSequenceWithBindingSiteImpl(
         seq: Sequence, i: number, p: number, j: number, q: number, bonus: number, temp: number = 37
     ): SecStruct {
-        const seqStr = EPars.sequenceToString(seq.baseArray, false, false);
+        const seqStr = seq.sequenceString(false, false);
 
         let result: FullFoldResult | null = null;
         try {
@@ -585,7 +585,7 @@ export default class NuPACK extends Folder {
     }
 
     private cofoldSequenceImpl(seq: Sequence): SecStruct {
-        const seqStr = EPars.sequenceToString(seq.baseArray, true, false);
+        const seqStr = seq.sequenceString(true, false);
 
         let result: FullFoldResult | null = null;
         try {
@@ -618,7 +618,7 @@ export default class NuPACK extends Folder {
         bonus: number,
         temp: number = 37
     ): SecStruct {
-        const seqStr = EPars.sequenceToString(seq.baseArray, true, false);
+        const seqStr = seq.sequenceString(true, false);
 
         let result: FullFoldResult | null = null;
         try {

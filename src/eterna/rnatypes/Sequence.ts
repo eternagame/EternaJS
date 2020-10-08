@@ -15,8 +15,8 @@ export default class Sequence {
         );
     }
 
-    public static fromSequenceString(seq: string) {
-        return new Sequence(EPars.stringToSequence(seq));
+    public static fromSequenceString(seq: string, allowCut?: boolean, allowUnknown?: boolean) {
+        return new Sequence(EPars.stringToSequence(seq, allowCut, allowUnknown));
     }
 
     public getColoredSequence(): string {
@@ -213,8 +213,16 @@ export default class Sequence {
         );
     }
 
-    public findCut(): number {
-        return this._baseArray.indexOf(RNABase.CUT);
+    public findCut(startIdx: number = 0): number {
+        return this._baseArray.indexOf(RNABase.CUT, startIdx);
+    }
+
+    public findUndefined(): number {
+        return this._baseArray.indexOf(RNABase.UNDEFINED);
+    }
+
+    public lastCut(): number {
+        return this._baseArray.lastIndexOf(RNABase.CUT);
     }
 
     public get baseArray(): RNABase[] {
@@ -227,6 +235,10 @@ export default class Sequence {
 
     public nt(ii: number): RNABase {
         return this._baseArray[ii];
+    }
+
+    public setNt(ii: number, rb: RNABase) {
+        this._baseArray[ii] = rb;
     }
 
     public sequenceString(allowCut: boolean = true, allowUnknown: boolean = true): string {
