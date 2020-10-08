@@ -101,7 +101,7 @@ export default class RNALayout {
         // / Delete old tree
         this._root = null;
         // / save for later
-        this._origPairs = new SecStruct(pairs.pairs);
+        this._origPairs = pairs.slice(0);
         this._targetPairs = targetPairs;
 
         if (targetPairs == null) this._targetPairs = pairs;
@@ -113,9 +113,9 @@ export default class RNALayout {
         biPairs.fill(-1);
 
         for (let ii = 0; ii < pairs.length; ii++) {
-            if (ii < pairs.pairs[ii]) {
-                biPairs[ii] = pairs.pairs[ii];
-                biPairs[pairs.pairs[ii]] = ii;
+            if (ii < pairs.pairingPartner(ii)) {
+                biPairs[ii] = pairs.pairingPartner(ii);
+                biPairs[pairs.pairingPartner(ii)] = ii;
             }
         }
 
@@ -933,14 +933,14 @@ export default class RNALayout {
 
         if (parentnode && parentnode.isPair) {
             // is initial pair of junction paired in target structure?
-            if (this._targetPairs.pairs[parentnode.indexA] !== parentnode.indexB) {
+            if (this._targetPairs.pairingPartner(parentnode.indexA) !== parentnode.indexB) {
                 return false;
             }
         }
 
         if (rootnode && rootnode.isPair) {
             // is initial pair of a stacked pair also paired in target structure?
-            if (this._targetPairs.pairs[rootnode.indexA] !== rootnode.indexB) {
+            if (this._targetPairs.pairingPartner(rootnode.indexA) !== rootnode.indexB) {
                 return false;
             }
         }
@@ -952,10 +952,10 @@ export default class RNALayout {
             if (this._customLayout[child.indexA][1] == null) return false;
             if (child.isPair) {
                 // all other pairs of junction paired in target structure?
-                if (this._targetPairs.pairs[child.indexA] !== child.indexB) {
+                if (this._targetPairs.pairingPartner(child.indexA) !== child.indexB) {
                     return false;
                 }
-            } else if (this._targetPairs.pairs[child.indexA] > 0) {
+            } else if (this._targetPairs.pairingPartner(child.indexA) > 0) {
                 // all unpaired bases of junction also unpaired in target structure?
                 return false;
             }
@@ -1041,7 +1041,7 @@ export default class RNALayout {
         if (this._targetPairs !== null) {
             for (let ii = 0; ii < this._targetPairs.length - 1; ii++) {
                 // look for a stacked pair
-                if (this._targetPairs.pairs[ii] === this._targetPairs.pairs[ii + 1] + 1) {
+                if (this._targetPairs.pairingPartner(ii) === this._targetPairs.pairingPartner(ii + 1) - 1) {
                     const customA = customLayout[ii];
                     const customB = customLayout[ii + 1];
                     if (

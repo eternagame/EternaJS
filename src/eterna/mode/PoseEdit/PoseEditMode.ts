@@ -2731,8 +2731,12 @@ export default class PoseEditMode extends GameMode {
                                         }
                                         for (let jj = 0; jj < this._targetPairs[xx].length; jj++) {
                                             const kk: number = idxMap.indexOf(newMap[jj]);
-                                            const pp: number = this._targetPairs[xx].pairingPartner(kk);
-                                            newPairs.pairs[jj] = pp < 0 ? pp : newMap.indexOf(idxMap[pp]);
+                                            if (!this._targetPairs[xx].isPaired(kk)) {
+                                                newPairs.setUnpaired(jj);
+                                            } else {
+                                                const pp: number = this._targetPairs[xx].pairingPartner(kk);
+                                                newPairs.setPairingPartner(jj, newMap.indexOf(idxMap[pp]));
+                                            }
                                         }
                                     }
                                     if (

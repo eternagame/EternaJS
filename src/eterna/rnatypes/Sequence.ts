@@ -160,11 +160,13 @@ export default class Sequence {
         let ret = 0;
 
         for (let ii = 0; ii < pairs.length; ii++) {
-            if (pairs.pairs[ii] > ii) {
-                if (this._baseArray[ii] === RNABase.GUANINE && this._baseArray[pairs.pairs[ii]] === RNABase.URACIL) {
+            if (pairs.pairingPartner(ii) > ii) {
+                if (this._baseArray[ii] === RNABase.GUANINE
+                    && this._baseArray[pairs.pairingPartner(ii)] === RNABase.URACIL) {
                     ret++;
                 }
-                if (this._baseArray[ii] === RNABase.URACIL && this._baseArray[pairs.pairs[ii]] === RNABase.GUANINE) {
+                if (this._baseArray[ii] === RNABase.URACIL
+                    && this._baseArray[pairs.pairingPartner(ii)] === RNABase.GUANINE) {
                     ret++;
                 }
             }
@@ -177,11 +179,13 @@ export default class Sequence {
         let ret = 0;
 
         for (let ii = 0; ii < pairs.length; ii++) {
-            if (pairs.pairs[ii] > ii) {
-                if (this._baseArray[ii] === RNABase.GUANINE && this._baseArray[pairs.pairs[ii]] === RNABase.CYTOSINE) {
+            if (pairs.pairingPartner(ii) > ii) {
+                if (this._baseArray[ii] === RNABase.GUANINE
+                    && this._baseArray[pairs.pairingPartner(ii)] === RNABase.CYTOSINE) {
                     ret++;
                 }
-                if (this._baseArray[ii] === RNABase.CYTOSINE && this._baseArray[pairs.pairs[ii]] === RNABase.GUANINE) {
+                if (this._baseArray[ii] === RNABase.CYTOSINE
+                    && this._baseArray[pairs.pairingPartner(ii)] === RNABase.GUANINE) {
                     ret++;
                 }
             }
@@ -194,11 +198,13 @@ export default class Sequence {
         let ret = 0;
 
         for (let ii = 0; ii < pairs.length; ii++) {
-            if (pairs.pairs[ii] > ii) {
-                if (this._baseArray[ii] === RNABase.ADENINE && this._baseArray[pairs.pairs[ii]] === RNABase.URACIL) {
+            if (pairs.pairingPartner(ii) > ii) {
+                if (this._baseArray[ii] === RNABase.ADENINE
+                    && this._baseArray[pairs.pairingPartner(ii)] === RNABase.URACIL) {
                     ret++;
                 }
-                if (this._baseArray[ii] === RNABase.URACIL && this._baseArray[pairs.pairs[ii]] === RNABase.ADENINE) {
+                if (this._baseArray[ii] === RNABase.URACIL
+                    && this._baseArray[pairs.pairingPartner(ii)] === RNABase.ADENINE) {
                     ret++;
                 }
             }

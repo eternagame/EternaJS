@@ -58,7 +58,7 @@ export default class MissionIntroPanel extends ContainerObject {
         this.container.addChild(this._thumbnail);
 
         const setThumbnail = (targetPairs: SecStruct) => {
-            const wrongPairs = new SecStruct(new Array(targetPairs.length).fill(-1));
+            const wrongPairs = new Array(targetPairs.length).fill(-1);
             const sequence = Sequence.fromSequenceString(new Array(targetPairs.length).join('A'));
             PoseThumbnail.drawToSprite(
                 this._thumbnail,

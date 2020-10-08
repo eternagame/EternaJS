@@ -299,7 +299,7 @@ export default class UndoBlock {
     }
 
     public set targetPairs(targetPairs: SecStruct) {
-        this._targetPairs = new SecStruct(targetPairs.pairs);
+        this._targetPairs = targetPairs.slice(0);
     }
 
     public get targetOligoOrder(): number[] | undefined {
@@ -373,7 +373,7 @@ export default class UndoBlock {
     public setPairs(pairs: SecStruct, temp: number = 37, pseudoknots: boolean = false): void {
         const pairsArray = this._pairsArray.get(pseudoknots);
         Assert.assertIsDefined(pairsArray);
-        pairsArray[temp] = new SecStruct(pairs.pairs);
+        pairsArray[temp] = pairs.slice(0);
     }
 
     public setParam(
@@ -599,12 +599,12 @@ export default class UndoBlock {
                 const indexJ: number = curDat.data[jj + 1] - 1;
 
                 if (indexI < indexJ) {
-                    if (refPairs.pairs[indexI] === indexJ) {
+                    if (refPairs.pairingPartner(indexI) === indexJ) {
                         probScore += Number(curDat.data[jj + 2]);
                         scoreCount++;
                     }
                 } else if (indexJ < indexI) {
-                    if (refPairs.pairs[indexJ] === indexI) {
+                    if (refPairs.pairingPartner(indexJ) === indexI) {
                         probScore += Number(curDat.data[jj + 2]);
                         scoreCount++;
                     }
@@ -617,7 +617,7 @@ export default class UndoBlock {
 
             let numPaired = 0;
             for (let jj = 0; jj < curPairs.length; jj++) {
-                if (curPairs.pairs[jj] > jj) {
+                if (curPairs.pairingPartner(jj) > jj) {
                     numPaired += 2;
                 }
             }

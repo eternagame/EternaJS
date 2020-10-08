@@ -8,7 +8,7 @@ import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from '../Constraint';
 
 interface ShapeConstraintStatus extends BaseConstraintStatus {
-    wrongPairs: number[];
+    wrongPairs: (-1 | 0 | 1)[];
 }
 
 abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
@@ -68,13 +68,15 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
                 const targetAlignedNaturalPairs: SecStruct = new SecStruct();
                 for (const [rawIndex, targetIndex] of Object.entries(targetMap)) {
                     const naturalIndex = naturalMap[Number(rawIndex)];
-                    const naturalPairedIndex = naturalPairs.pairingPartner(naturalIndex);
-                    const rawPairedIndex = naturalMap.indexOf(naturalPairedIndex);
-
                     // If unpaired, it's unpaired, otherwise we need to get the index of the paired base
                     // according to target mode
-                    targetAlignedNaturalPairs.pairs[targetIndex] = naturalPairedIndex < 0
-                        ? naturalPairedIndex : targetMap[rawPairedIndex];
+                    if (!naturalPairs.isPaired(naturalIndex)) {
+                        targetAlignedNaturalPairs.setUnpaired(targetIndex);
+                    } else {
+                        const naturalPairedIndex = naturalPairs.pairingPartner(naturalIndex);
+                        const rawPairedIndex = naturalMap.indexOf(naturalPairedIndex);
+                        targetAlignedNaturalPairs.setPairingPartner(targetIndex, targetMap[rawPairedIndex]);
+                    }
                 }
 
                 return targetAlignedNaturalPairs;
@@ -176,7 +178,7 @@ export default class ShapeConstraint extends BaseShapeConstraint {
                 3,
                 PoseThumbnailType.WRONG_COLORED,
                 0,
-                new SecStruct(status.wrongPairs),
+                status.wrongPairs,
                 false,
                 0,
                 customLayout
@@ -193,8 +195,8 @@ export default class ShapeConstraint extends BaseShapeConstraint {
 
     private _getWrongPairs(
         naturalPairs: SecStruct, targetPairs: SecStruct, structureConstraints: boolean[] | undefined
-    ): number[] {
-        const wrongPairs: number[] = new Array(naturalPairs.length).fill(-1);
+    ): (-1 | 0 | 1)[] {
+        const wrongPairs: (-1 | 0 | 1)[] = new Array(naturalPairs.length).fill(-1);
         for (let ii = 0; ii < wrongPairs.length; ii++) {
             if (naturalPairs.pairingPartner(ii) !== targetPairs.pairingPartner(ii)) {
                 if (structureConstraints === undefined || structureConstraints[ii]) {
@@ -281,7 +283,7 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
             thumbnail: PoseThumbnail.drawToGraphics(
                 Sequence.fromSequenceString(new Array(naturalPairs.length).join('A')),
                 wrongPairs as SecStruct,
-                3, PoseThumbnailType.WRONG_COLORED, 0, new SecStruct(status.wrongPairs), false, 0,
+                3, PoseThumbnailType.WRONG_COLORED, 0, status.wrongPairs, false, 0,
                 customLayout
             )
         };
@@ -296,8 +298,8 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
 
     private _getWrongPairs(
         naturalPairs: SecStruct, structureConstraints: boolean[] | undefined, satisfied: boolean
-    ): number[] {
-        const wrongPairs: number[] = new Array(naturalPairs.length).fill(0);
+    ): (-1 | 0 | 1)[] {
+        const wrongPairs: (-1 | 0 | 1)[] = new Array(naturalPairs.length).fill(0);
         for (let ii = 0; ii < wrongPairs.length; ii++) {
             if (structureConstraints === undefined || structureConstraints[ii]) {
                 if (satisfied) {

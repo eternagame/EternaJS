@@ -10,7 +10,7 @@ export default class PseudoknotLines extends GameObject implements LateUpdatable
         super();
         this._pose = pose;
         this._graphics = new Graphics();
-        this._enabled = (this._pose.pseudoknotPairs.pairs.some((it) => it !== -1));
+        this._enabled = (this._pose.pseudoknotPairs.nonempty());
     }
 
     public get display(): DisplayObject {

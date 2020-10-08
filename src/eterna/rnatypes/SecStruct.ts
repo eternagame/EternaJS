@@ -50,8 +50,21 @@ export default class SecStruct {
         return this._pairs[index];
     }
 
+    public setPairingPartner(index: number, pi: number): void {
+        if (this.isPaired(index)) {
+            this._pairs[this.pairingPartner(index)] = -1;
+        }
+        this._pairs[index] = pi;
+    }
+
+    /**
+     * Returns true if there are any pairs.
+     */
+    public nonempty(): boolean {
+        return this._pairs.filter((it) => it !== -1).length !== 0;
+    }
+
     public setUnpaired(index: number): void {
-        // AMW TODO: Indeed, we should also set the former pairing partner as unpaired.
         this._pairs[this._pairs[index]] = -1;
         this._pairs[index] = -1;
     }

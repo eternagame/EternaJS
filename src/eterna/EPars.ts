@@ -409,16 +409,16 @@ export default class EPars {
         }
 
         for (let ii = 0; ii < aPairs.length; ii++) {
-            if (bPairs.pairs[ii] >= 0) {
-                if (bPairs.pairs[ii] !== aPairs.pairs[ii]) {
+            if (bPairs.isPaired(ii)) {
+                if (bPairs.pairingPartner(ii) !== aPairs.pairingPartner(ii)) {
                     if (constraints == null || constraints[ii]) {
                         return false;
                     }
                 }
             }
 
-            if (aPairs.pairs[ii] >= 0) {
-                if (bPairs.pairs[ii] !== aPairs.pairs[ii]) {
+            if (aPairs.isPaired(ii)) {
+                if (bPairs.pairingPartner(ii) !== aPairs.pairingPartner(ii)) {
                     if (constraints == null || constraints[ii]) {
                         return false;
                     }

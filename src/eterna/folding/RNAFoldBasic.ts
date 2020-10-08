@@ -44,13 +44,11 @@ export default class RNAFoldBasic extends Folder {
         pseudoknotted: boolean = false, temp: number = 37
     ): SecStruct {
         const n: number = seq.length;
-        const pairs: SecStruct = new SecStruct(new Array(n));
+        const pairs: SecStruct = new SecStruct(new Array(n).fill(-1));
         const dpArray: number[] = new Array(n * n);
         const traceArray: number[] = new Array(n * n);
 
         for (let ii = 0; ii < n; ii++) {
-            pairs.pairs[ii] = -1;
-
             for (let jj = 0; jj < n; jj++) {
                 const index: number = ii * n + jj;
 
@@ -148,8 +146,9 @@ export default class RNAFoldBasic extends Folder {
         const dir: number = traceArray[iiStart * n + jjStart];
 
         if (dir === 1) {
-            pairs.pairs[iiStart] = jjStart;
-            pairs.pairs[jjStart] = iiStart;
+            pairs.setPairingPartner(iiStart, jjStart);
+            // Unneeded: this function is naturally reciprocal.
+            // pairs.setPairingPartner(jjStart, iiStart);
 
             this.tracePairs(traceArray, pairs, n, iiStart + 1, jjStart - 1);
         } else if (dir === 2) {

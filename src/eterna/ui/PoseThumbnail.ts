@@ -24,7 +24,7 @@ export default class PoseThumbnail {
         size: number = 1,
         type: PoseThumbnailType = PoseThumbnailType.BASE_COLORED,
         expStartIndex: number = 0,
-        wrongPairs: SecStruct | null = null,
+        wrongPairs: (-1 | 0 | 1)[] | null = null,
         expUseThreshold: boolean = false,
         expThreshold: number = 0,
         customLayout: Array<[number, number] | [null, null]> | null = null
@@ -43,7 +43,7 @@ export default class PoseThumbnail {
         size: number = 1,
         type: PoseThumbnailType = PoseThumbnailType.BASE_COLORED,
         expStartIndex: number = 0,
-        wrongPairs: SecStruct | null = null,
+        wrongPairs: (-1 | 0 | 1)[] | null = null,
         expUseThreshold: boolean = false,
         expThreshold: number = 0,
         customLayout: Array<[number, number] | [null, null]> | null = null
@@ -67,7 +67,7 @@ export default class PoseThumbnail {
         size: number = 1,
         type: PoseThumbnailType = PoseThumbnailType.BASE_COLORED,
         expStartIndex: number = 0,
-        wrongPairs: SecStruct | null = null,
+        wrongPairs: (-1 | 0 | 1)[] | null = null,
         expUseThreshold: boolean = false,
         expThreshold: number = 0,
         customLayout: Array<[number, number] | [null, null]> | null = null
@@ -107,7 +107,7 @@ export default class PoseThumbnail {
         size: number,
         type: PoseThumbnailType,
         expStartIndex: number,
-        wrongPairs: SecStruct | null,
+        wrongPairs: (1 | -1 | 0)[] | null,
         expUseThreshold: boolean,
         expThreshold: number,
         canvas: Graphics | null = null,
@@ -208,7 +208,7 @@ export default class PoseThumbnail {
             } else if (type === PoseThumbnailType.WRONG_COLORED) {
                 Assert.assertIsDefined(wrongPairs,
                     'wrongPairs must be defined if the type of thumbnail is WRONG_COLORED');
-                if (wrongPairs.pairs[ii] === 1) {
+                if (wrongPairs[ii] === 1) {
                     color = COLOR_WRONG;
 
                     if (ii === 0 || (ii > 0 && sequence[ii - 1] === RNABase.CUT)) {
@@ -239,7 +239,7 @@ export default class PoseThumbnail {
                         wrongXCoords.push(((xarray[ii] + xarray[ii + 1]) / 2.0 - xmin) * scale + xOffset);
                         wrongYCoords.push(((yarray[ii] + yarray[ii + 1]) / 2.0 - ymin) * scale + yOffset);
                     }
-                } else if (wrongPairs.pairs[ii] === -1) {
+                } else if (wrongPairs[ii] === -1) {
                     color = COLOR_RIGHT;
 
                     if (ii === 0 || (ii > 0 && sequence[ii - 1] === RNABase.CUT)) {
