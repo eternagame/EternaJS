@@ -170,7 +170,7 @@ export default class PuzzleEditMode extends GameMode {
         this._toolbar.copyButton.clicked.connect(() => {
             Assert.assertIsDefined(this.modeStack);
             this.modeStack.pushMode(new CopyTextDialogMode(
-                this._poses[0].sequence.sequenceString,
+                this._poses[0].sequence.sequenceString(),
                 'Current Sequence'
             ));
         });
@@ -314,7 +314,7 @@ export default class PuzzleEditMode extends GameMode {
         for (const pose of this._poses) {
             Assert.assertIsDefined(pose.molecularStructure);
             objs.push(JSON.stringify({
-                sequence: pose.sequence.sequenceString,
+                sequence: pose.sequence.sequenceString(),
                 structure: pose.molecularStructure.pairs
             }));
         }
@@ -339,7 +339,7 @@ export default class PuzzleEditMode extends GameMode {
     }
 
     public get sequence(): string {
-        return this._poses[0].sequence.sequenceString;
+        return this._poses[0].sequence.sequenceString();
     }
 
     public getLockString(): string {
@@ -550,7 +550,7 @@ export default class PuzzleEditMode extends GameMode {
         const locks = this.getCurrentLock(0);
         const lockString = this.getLockString();
 
-        const sequence: string = this._poses[0].sequence.sequenceString;
+        const sequence: string = this._poses[0].sequence.sequenceString();
         const beginningSequence = locks?.map(
             (l, ii) => (l ? sequence.substr(ii, 1) : 'A')
         ).join('') ?? 'A'.repeat(len);

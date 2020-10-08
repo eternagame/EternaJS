@@ -431,7 +431,7 @@ export default class PoseEditMode extends GameMode {
 
     private showCopySequenceDialog(): void {
         Assert.assertIsDefined(this.modeStack);
-        let sequenceString = this._poses[0].sequence.sequenceString;
+        let sequenceString = this._poses[0].sequence.sequenceString();
         if (this._poses[0].customNumbering != null) sequenceString += ` ${Utility.arrayToRangeString(this._poses[0].customNumbering)}`;
         this.modeStack.pushMode(new CopyTextDialogMode(sequenceString, 'Current Sequence'));
     }
@@ -620,7 +620,7 @@ export default class PoseEditMode extends GameMode {
                     pose.pasteSequence(sequence);
                 }
             }
-            this.clearMoveTracking(solution.sequence.sequenceString);
+            this.clearMoveTracking(solution.sequence.sequenceString());
             this.setAncestorId(solution.nodeID);
 
             // AMW: I'm keeping the function around in case we want to call it
@@ -1016,7 +1016,7 @@ export default class PoseEditMode extends GameMode {
             if (indx < 0 || indx >= this._poses.length) {
                 return null;
             } else {
-                return this.getPose(indx).fullSequence.sequenceString;
+                return this.getPose(indx).fullSequence.sequenceString();
             }
         });
 
@@ -1920,7 +1920,7 @@ export default class PoseEditMode extends GameMode {
         details.comment = details.comment.replace(newlinereg, "'");
         details.title = details.title.replace(newlinereg, "'");
 
-        const seqString: string = this._puzzle.transformSequence(undoBlock.sequence, 0).sequenceString;
+        const seqString: string = this._puzzle.transformSequence(undoBlock.sequence, 0).sequenceString();
 
         postData['title'] = details.title;
         postData['energy'] = undoBlock.getParam(UndoBlockParam.FE) as number / 100.0;
@@ -2037,7 +2037,7 @@ export default class PoseEditMode extends GameMode {
             if (data['error'].indexOf('barcode') >= 0) {
                 const dialog = this.showNotification(data['error'], 'More Information');
                 dialog.extraButton.clicked.connect(() => window.open(EternaURL.BARCODE_HELP, '_blank'));
-                const hairpin: string | null = EPars.getBarcodeHairpin(seqString);
+                const hairpin: string | null = EPars.getBarcodeHairpin(seqString());
                 if (hairpin != null) {
                     SolutionManager.instance.addHairpins([hairpin]);
                     this.checkConstraints();
@@ -2054,7 +2054,7 @@ export default class PoseEditMode extends GameMode {
 
             if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
                 if (this._puzzle.useBarcode) {
-                    const hairpin: string | null = EPars.getBarcodeHairpin(seqString);
+                    const hairpin: string | null = EPars.getBarcodeHairpin(seqString());
                     if (hairpin != null) {
                         SolutionManager.instance.addHairpins([hairpin]);
                         this.checkConstraints();
@@ -2433,12 +2433,12 @@ export default class PoseEditMode extends GameMode {
     private setPuzzleEpilog(initSeq: number[] | null, isReset: boolean | undefined): void {
         if (isReset) {
             const newSeq: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
-            this.moveHistoryAddSequence('reset', newSeq.sequenceString);
+            this.moveHistoryAddSequence('reset', newSeq.sequenceString());
         } else {
             this._startSolvingTime = new Date().getTime();
             this._startingPoint = this._puzzle.transformSequence(
                 this.getCurrentUndoBlock(0).sequence, 0
-            ).sequenceString;
+            ).sequenceString();
         }
 
         if (isReset || this._isDatabrowserMode) {

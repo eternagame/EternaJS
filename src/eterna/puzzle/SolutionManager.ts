@@ -80,7 +80,7 @@ export default class SolutionManager {
 
     public getSolutionBySequence(seq: string): Solution | null {
         for (const solution of this._solutions) {
-            if (solution.sequence.sequenceString === seq) {
+            if (solution.sequence.sequenceString() === seq) {
                 return solution;
             }
         }

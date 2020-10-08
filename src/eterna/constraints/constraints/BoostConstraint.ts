@@ -1,8 +1,9 @@
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import EPars, {RNABase} from 'eterna/EPars';
+import {RNABase} from 'eterna/EPars';
 import {Assert} from 'flashbang';
 import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 
@@ -12,10 +13,10 @@ interface BoostConstraintStatus extends BaseConstraintStatus {
 
 class Loop {
     public isBoosted: boolean[];
-    public strands: EPars[][];
+    public strands: number[][];
     public pairs: [number, number][];
 
-    constructor(boosted: boolean[], strands: EPars[][], pairs: [number, number][]) {
+    constructor(boosted: boolean[], strands: number[][], pairs: [number, number][]) {
         this.isBoosted = boosted;
         this.strands = strands;
         this.pairs = pairs;
@@ -101,7 +102,7 @@ function detectLoops(targetPairs: SecStruct, loops: Loop[]) {
 }
 
 const loops: Loop[][] = [];
-function countLoops(targetPairs: SecStruct, currentTargetIndex: number, sequence: RNABase[]) {
+function countLoops(targetPairs: SecStruct, currentTargetIndex: number, sequence: Sequence) {
     if (!targetPairs) {
         return 0;
     }
@@ -123,8 +124,8 @@ function countLoops(targetPairs: SecStruct, currentTargetIndex: number, sequence
         const pairs = loop.pairs;
         if (loop.strands.length === 2 && loop.strands[0].length === 1 && loop.strands[1].length === 1) {
             // 1-1 Loops. Need G-G terminal mismatch.
-            if (sequence[loop.strands[0][0] as number] === RNABase.GUANINE
-                    && sequence[loop.strands[1][0] as number] === RNABase.GUANINE) {
+            if (sequence.nt(loop.strands[0][0] as number) === RNABase.GUANINE
+                    && sequence.nt(loop.strands[1][0] as number) === RNABase.GUANINE) {
                 ++ret;
                 loop.isBoosted[0] = true;
             } else {
@@ -132,8 +133,8 @@ function countLoops(targetPairs: SecStruct, currentTargetIndex: number, sequence
             }
         } else if (pairs.length === 1 && loop.strands.length === 1) {
             // Hairpin loops. G-A terminal mismatch (with the G at the lowest index).
-            if (sequence[loop.strands[0][0] as number] === RNABase.GUANINE
-                    && sequence[loop.strands[0][loop.strands[0].length - 1] as number] === RNABase.ADENINE) {
+            if (sequence.nt(loop.strands[0][0] as number) === RNABase.GUANINE
+                    && sequence.nt(loop.strands[0][loop.strands[0].length - 1] as number) === RNABase.ADENINE) {
                 ++ret;
                 loop.isBoosted[0] = true;
             } else {
@@ -159,8 +160,8 @@ function countLoops(targetPairs: SecStruct, currentTargetIndex: number, sequence
                 }
 
                 // Check for G-A mismatch.
-                if ((sequence[idx1] === RNABase.GUANINE && sequence[idx2] === RNABase.ADENINE)
-                    || (sequence[idx2] === RNABase.GUANINE && sequence[idx1] === RNABase.ADENINE)) {
+                if ((sequence.nt(idx1) === RNABase.GUANINE && sequence.nt(idx2) === RNABase.ADENINE)
+                    || (sequence.nt(idx2) === RNABase.GUANINE && sequence.nt(idx1) === RNABase.ADENINE)) {
                     ++ret;
                     loop.isBoosted[j] = true;
                 } else {
@@ -183,7 +184,7 @@ export default class BoostConstraint extends Constraint<BaseConstraintStatus> {
 
     public evaluate(context: ConstraintContext): BoostConstraintStatus {
         const {targetPairs, sequence} = context.undoBlocks[0];
-        const boostCount = countLoops(targetPairs, 0, sequence.baseArray);
+        const boostCount = countLoops(targetPairs, 0, sequence);
         return {
             satisfied: (boostCount >= this.minBoosts),
             boostCount

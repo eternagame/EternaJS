@@ -360,8 +360,8 @@ export default class SecStruct {
         return ret;
     }
 
-    public slice(start: number, end: number = -1): SecStruct {
-        const pairsB = this._pairs.slice(start, end === -1 ? undefined : end);
+    public slice(start: number, end?: number): SecStruct {
+        const pairsB = this._pairs.slice(start, end);
 
         for (let ii = 0; ii < pairsB.length; ii++) {
             if (pairsB[ii] >= 0) pairsB[ii] -= start;

@@ -67,9 +67,9 @@ export default class SortOptions {
                 if (anchorSequence === undefined) {
                     throw new Error('Cannot sort by sequence if the criterion argument is null!');
                 }
-                const aString: string = a.sequence.sequenceString;
+                const aString: string = a.sequence.sequenceString();
                 if (aString == null) throw new Error(`solution ${a.nodeID} invalid`);
-                const bString: string = b.sequence.sequenceString;
+                const bString: string = b.sequence.sequenceString();
                 if (bString == null) throw new Error(`solution ${b.nodeID} invalid`);
                 if (aString.length !== anchorSequence.length || bString.length !== anchorSequence.length) {
                     throw new Error('Wrong anchor sequence length');

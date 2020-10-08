@@ -76,7 +76,7 @@ export default class ContraFold extends Folder {
             let result: FullEvalResult | null = null;
             try {
                 result = this._lib.FullEval(temp,
-                    seq.sequenceString,
+                    seq.sequenceString(),
                     pairs.getParenthesis());
                 cache = {energy: result.energy, nodes: EmscriptenUtil.stdVectorToArray<number>(result.nodes)};
             } catch (e) {
@@ -89,7 +89,7 @@ export default class ContraFold extends Folder {
             }
         } while (0);
 
-        const cut: number = seq.baseArray.indexOf(RNABase.CUT);
+        const cut: number = seq.findCut();
         if (cut >= 0 && cache.nodes[0] !== -2) {
             // we just scored a duplex that wasn't one, so we have to redo it properly
             const seqA: Sequence = seq.slice(0, cut);
@@ -165,7 +165,7 @@ export default class ContraFold extends Folder {
         temp: number = 37,
         gamma: number = 0.7
     ): SecStruct {
-        const seqStr = EPars.sequenceToString(seq.baseArray, false, false);
+        const seqStr = seq.sequenceString(false, false);
         let result: FullFoldResult | null = null;
 
         try {
@@ -194,7 +194,7 @@ export default class ContraFold extends Folder {
             return new DotPlot(retArray);
         }
 
-        const seqStr: string = seq.sequenceString;
+        const seqStr: string = seq.sequenceString();
 
         let result: DotPlotResult | null = null;
         try {

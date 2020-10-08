@@ -21,7 +21,7 @@ export default class Sequence {
 
     public getColoredSequence(): string {
         let res = '';
-        for (const c of this.sequenceString) {
+        for (const c of this.sequenceString()) {
             res += EPars.getColoredLetter(c);
         }
         return res;
@@ -30,7 +30,7 @@ export default class Sequence {
     public getExpColoredSequence(expData: number[]): string {
         // AMW TODO: how could this be?
         if (expData == null) {
-            return this.sequenceString;
+            return this.sequenceString();
         }
 
         const offset: number = expData[0];
@@ -42,11 +42,11 @@ export default class Sequence {
         let res = '';
         for (let ii = 0; ii < this.sequenceString.length; ii++) {
             if (ii < offset - 1 || ii >= expData.length) {
-                res += this.sequenceString[ii];
+                res += this.sequenceString()[ii];
             } else if (expData[ii] < avg) {
-                res += `<FONT COLOR='#7777FF'>${this.sequenceString[ii]}</FONT>`;
+                res += `<FONT COLOR='#7777FF'>${this.sequenceString()[ii]}</FONT>`;
             } else {
-                res += `<FONT COLOR='#FF7777'>${this.sequenceString[ii]}</FONT>`;
+                res += `<FONT COLOR='#FF7777'>${this.sequenceString()[ii]}</FONT>`;
             }
         }
 
@@ -145,7 +145,7 @@ export default class Sequence {
         let numRepeats = 0;
 
         for (let ii = 0; ii < this.sequenceString.length - n; ii++) {
-            const substr: string = this.sequenceString.substr(ii, n);
+            const substr: string = this.sequenceString().substr(ii, n);
             if (dict.has(substr)) {
                 numRepeats++;
             } else {
@@ -207,6 +207,16 @@ export default class Sequence {
         return ret;
     }
 
+    public count(baseType: RNABase) {
+        return this._baseArray.reduce(
+            (acc, curr) => acc + (curr === baseType ? 1 : 0), 0
+        );
+    }
+
+    public findCut(): number {
+        return this._baseArray.indexOf(RNABase.CUT);
+    }
+
     public get baseArray(): RNABase[] {
         return this._baseArray;
     }
@@ -219,8 +229,8 @@ export default class Sequence {
         return this._baseArray[ii];
     }
 
-    public get sequenceString(): string {
-        return EPars.sequenceToString(this._baseArray);
+    public sequenceString(allowCut: boolean = true, allowUnknown: boolean = true): string {
+        return EPars.sequenceToString(this._baseArray, allowCut, allowUnknown);
     }
 
     public get length(): number {

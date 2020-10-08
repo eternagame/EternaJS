@@ -51,7 +51,7 @@ export default class Vienna extends Folder {
         }
 
         const secstructStr: string = pairs.getParenthesis();
-        const seqStr: string = seq.sequenceString;
+        const seqStr: string = seq.sequenceString();
 
         let probabilitiesString: string;
         let result: DotPlotResult | null = null;
@@ -127,7 +127,7 @@ export default class Vienna extends Folder {
             let result: FullEvalResult | null = null;
             try {
                 result = this._lib.FullEval(temp,
-                    seq.sequenceString,
+                    seq.sequenceString(),
                     pairs.getParenthesis());
                 if (!result) {
                     throw new Error('FullEval returned null!');
@@ -194,14 +194,15 @@ export default class Vienna extends Folder {
             desiredPairs,
             temp
         };
-        const pairs: number[] | null = this.getCache(key) as number[];
+        const pairs: SecStruct | null = this.getCache(key) as SecStruct | null;
         if (pairs != null) {
             // log.debug("fold cache hit");
-            return new SecStruct(pairs.slice());
+            return pairs.slice(0);
         }
 
         const secstruct = this.foldSequenceImpl(seq, desiredPairs, temp);
-        this.putCache(key, secstruct.pairs.slice());
+        console.error(secstruct.pairs);
+        this.putCache(key, secstruct.slice(0));
         return secstruct;
     }
 
@@ -222,10 +223,10 @@ export default class Vienna extends Folder {
             version,
             temp
         };
-        const pairs: number[] = this.getCache(key) as number[];
+        const pairs: SecStruct = this.getCache(key) as SecStruct;
         if (pairs != null) {
             // log.debug("foldAptamer cache hit");
-            return new SecStruct(pairs.slice());
+            return pairs.slice(0);
         }
 
         if (!(version >= 2.0)) {
@@ -233,7 +234,7 @@ export default class Vienna extends Folder {
                 throw new Error("Can't fold with binding site and version < 2.0 if targetPairs is null!");
             }
             const struct = this.foldSequenceWithBindingSiteOld(seq, targetPairs, bindingSite, bonus);
-            this.putCache(key, struct.pairs.slice());
+            this.putCache(key, struct.slice(0));
             return struct;
         }
 
@@ -271,7 +272,7 @@ export default class Vienna extends Folder {
             secstruct = this.foldSequenceWithBindingSiteOld(seq, targetPairs, bindingSite, bonus);
         }
 
-        this.putCache(key, secstruct.pairs.slice());
+        this.putCache(key, secstruct.slice(0));
         return secstruct;
     }
 
@@ -283,7 +284,7 @@ export default class Vienna extends Folder {
         seq: Sequence, secondBestPairs: SecStruct, malus: number = 0,
         desiredPairs: string | null = null, temp: number = 37
     ): SecStruct {
-        const cut: number = seq.baseArray.indexOf(RNABase.CUT);
+        const cut: number = seq.findCut();
         if (cut < 0) {
             throw new Error('Missing cutting point');
         }
@@ -660,7 +661,7 @@ export default class Vienna extends Folder {
     }
 
     private foldSequenceImpl(seq: Sequence, structStr: string | null = null, temp: number = 37): SecStruct {
-        const seqStr = seq.sequenceString; // EPars.sequenceToString(seq, false, false);
+        const seqStr = seq.sequenceString(); // EPars.sequenceToString(seq, false, false);
         let result: FullFoldResult | null = null;
 
         try {
@@ -683,7 +684,7 @@ export default class Vienna extends Folder {
     private foldSequenceWithBindingSiteImpl(
         seq: Sequence, i: number, p: number, j: number, q: number, bonus: number, temp: number = 37
     ): SecStruct {
-        const seqStr = seq.sequenceString; // (false, false);
+        const seqStr = seq.sequenceString(false, false);
         const structStr = '';
         let result: FullFoldResult | null = null;
 

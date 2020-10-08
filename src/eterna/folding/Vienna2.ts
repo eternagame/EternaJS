@@ -51,7 +51,7 @@ export default class Vienna2 extends Folder {
         }
 
         const secstructStr: string = pairs.getParenthesis();
-        const seqStr: string = seq.sequenceString;
+        const seqStr: string = seq.sequenceString();
 
         let probabilitiesString: string;
         let result: DotPlotResult | null = null;
@@ -131,7 +131,7 @@ export default class Vienna2 extends Folder {
             let result: FullEvalResult | null = null;
             try {
                 result = this._lib.FullEval(temp,
-                    seq.sequenceString,
+                    seq.sequenceString(),
                     pairs.getParenthesis());
                 if (!result) {
                     throw new Error('Vienna2 returned a null result');
@@ -147,7 +147,7 @@ export default class Vienna2 extends Folder {
             }
         } while (0);
 
-        const cut: number = seq.baseArray.indexOf(RNABase.CUT);
+        const cut: number = seq.findCut();
         if (cut >= 0 && cache.nodes[0] !== -2) {
             // we just scored a duplex that wasn't one, so we have to redo it properly
             const seqA: Sequence = seq.slice(0, cut);
@@ -696,7 +696,7 @@ export default class Vienna2 extends Folder {
     }
 
     private foldSequenceImpl(seq: Sequence, structStr: string | null = null, temp: number = 37): SecStruct {
-        const seqStr = seq.sequenceString; // EPars.sequenceToString(seq, false, false);
+        const seqStr = seq.sequenceString(false, false);
         let result: FullFoldResult | null = null;
 
         try {
@@ -719,7 +719,7 @@ export default class Vienna2 extends Folder {
     private foldSequenceWithBindingSiteImpl(
         seq: Sequence, i: number, p: number, j: number, q: number, bonus: number
     ): SecStruct {
-        const seqStr = EPars.sequenceToString(seq.baseArray, false, false);
+        const seqStr = seq.sequenceString(false, false);
         const structStr = '';
         let result: FullFoldResult | null = null;
 

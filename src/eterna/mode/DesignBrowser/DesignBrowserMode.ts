@@ -451,7 +451,11 @@ export default class DesignBrowserMode extends GameMode {
 
     public sortOnSolution(solution: Solution): void {
         this.closeCurDialog();
-        this._sortOptions.addCriteria(DesignCategory.SEQUENCE, SortOrder.INCREASING, solution.sequence.sequenceString);
+        this._sortOptions.addCriteria(
+            DesignCategory.SEQUENCE,
+            SortOrder.INCREASING,
+            solution.sequence.sequenceString()
+        );
         this.showSortDialog();
     }
 
@@ -925,7 +929,7 @@ export default class DesignBrowserMode extends GameMode {
                 const singleLineRawData: Solution = solutions[ii];
 
                 if (category === DesignCategory.SEQUENCE) {
-                    dataArray.push(singleLineRawData.sequence.sequenceString);
+                    dataArray.push(singleLineRawData.sequence.sequenceString());
                     if (ii === 0) {
                         dataCol.setWidth(singleLineRawData.sequence.length * 14
                             + UITheme.designBrowser.dataPadding * 5);

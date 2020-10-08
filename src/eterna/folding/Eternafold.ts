@@ -74,7 +74,7 @@ export default class EternaFold extends Folder {
             let result: FullEvalResult | null = null;
             try {
                 result = this._lib.FullEval(temp,
-                    seq.sequenceString,
+                    seq.sequenceString(),
                     pairs.getParenthesis());
                 cache = {energy: result.energy, nodes: EmscriptenUtil.stdVectorToArray<number>(result.nodes)};
             } catch (e) {
@@ -87,7 +87,7 @@ export default class EternaFold extends Folder {
             }
         } while (0);
 
-        const cut: number = seq.baseArray.indexOf(RNABase.CUT);
+        const cut: number = seq.findCut();
         if (cut >= 0 && cache.nodes[0] !== -2) {
             // we just scored a duplex that wasn't one, so we have to redo it properly
             const seqA: Sequence = seq.slice(0, cut);
@@ -140,7 +140,7 @@ export default class EternaFold extends Folder {
     ): SecStruct {
         const key: CacheKey = {
             primitive: 'fold',
-            seq: seq.sequenceString,
+            seq: seq.sequenceString(),
             secondBestPairs: secondBestPairs.pairs,
             desiredPairs,
             temp,
@@ -192,7 +192,7 @@ export default class EternaFold extends Folder {
             return new DotPlot(retArray);
         }
 
-        const seqStr: string = seq.sequenceString;
+        const seqStr: string = seq.sequenceString();
 
         let result: DotPlotResult | null = null;
         try {

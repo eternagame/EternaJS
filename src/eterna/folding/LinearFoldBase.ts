@@ -33,7 +33,7 @@ export default abstract class LinearFoldBase extends Folder {
             return new DotPlot(retArray);
         }
 
-        const seqStr: string = seq.sequenceString;
+        const seqStr: string = seq.sequenceString();
 
         let result: DotPlotResult | null = null;
         try {
@@ -84,7 +84,7 @@ export default abstract class LinearFoldBase extends Folder {
             let result: FullEvalResult | null = null;
             try {
                 result = this._lib.FullEval(
-                    seq.sequenceString,
+                    seq.sequenceString(),
                     pairs.getParenthesis()
                 );
                 if (!result) {
@@ -101,7 +101,7 @@ export default abstract class LinearFoldBase extends Folder {
             }
         } while (0);
 
-        const cut: number = seq.baseArray.indexOf(RNABase.CUT);
+        const cut: number = seq.findCut();
         if (cut >= 0 && cache.nodes[0] !== -2) {
             // we just scored a duplex that wasn't one, so we have to redo it properly
             const seqA: Sequence = seq.slice(0, cut);

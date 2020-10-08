@@ -57,7 +57,7 @@ export default class NuPACK extends Folder {
             return new DotPlot(retArray);
         }
 
-        const seqStr: string = seq.sequenceString;
+        const seqStr: string = seq.sequenceString();
 
         let result: DotPlotResult | null = null;
         try {
@@ -116,7 +116,7 @@ export default class NuPACK extends Folder {
             let result: FullEvalResult | null = null;
             try {
                 result = this._lib.FullEval(temp,
-                    seq.sequenceString,
+                    seq.sequenceString(),
                     pairs.getParenthesis(null, pseudoknots));
                 if (!result) {
                     throw new Error('NuPACK returned a null result');
@@ -644,7 +644,7 @@ export default class NuPACK extends Folder {
     ): SecStruct {
         const key: CacheKey = {
             primitive: 'cofold2',
-            seq: seq.sequenceString,
+            seq: seq.sequenceString(),
             secondBestPairs: secondBestPairs?.pairs ?? null,
             desiredPairs,
             temp
