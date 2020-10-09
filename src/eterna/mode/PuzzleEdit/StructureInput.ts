@@ -221,7 +221,7 @@ export default class StructureInput extends ContainerObject implements Updatable
                 if (bindingSite && afterBindingSiteIndex) bindingSite[ii + index] = afterBindingSiteIndex[ii];
             }
         }
-
+        // AMW NOTES.
         // AH! WE NEED TO USE THE ACTUAL SETTER. BECAUSE THE POSE2D SEQUENCE SETTER IS
         // VERY IMPORTANT. IT MAINTAINS SOME CONSISTENCY WITH THE BASES ARRAY AND MAYBE
         // MORE STUFF.

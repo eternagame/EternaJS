@@ -217,6 +217,7 @@ export default class PuzzleEditMode extends GameMode {
                 Assert.assertIsDefined(parenthesis);
                 const secInput: StructureInput = this._structureInputs[kk];
                 secInput.structureString = parenthesis;
+                console.error(this._poses[kk].pairs);
                 secInput.setPose(op, index);
             };
         };
@@ -826,6 +827,7 @@ export default class PuzzleEditMode extends GameMode {
         for (let ii = 0; ii < this._poses.length; ii++) {
             const targetPairs: SecStruct = SecStruct.fromParens(this._structureInputs[ii].structureString);
             const seq = this._poses[ii].sequence;
+            console.error('look:', targetPairs.length, seq.length, this._poses[ii].pairs.length);
             const lock: boolean[] | undefined = this._poses[ii].puzzleLocks;
             const bindingSite = this._poses[ii].molecularBindingSite;
 
