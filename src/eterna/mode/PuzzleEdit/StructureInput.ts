@@ -31,7 +31,7 @@ export default class StructureInput extends ContainerObject implements Updatable
 
         this._textInput = new TextInputObject({fontSize: 20})
             .font(Fonts.STDFONT)
-            .disallow(/[^.()]/g)
+            .disallow(/[^.(){}[\]]/g)
             .bold();
         this.addObject(this._textInput, this.container);
 
@@ -80,10 +80,13 @@ export default class StructureInput extends ContainerObject implements Updatable
      */
     public setPose(op: PuzzleEditOp | null = null, index: number = -1): void {
         let input = this._textInput.text;
-        input = input.replace(/[^.()]/g, '');
+        input = input.replace(/[^.(){}[\]]/g, '');
         // Replace () with (.) -- () is illegal and causes an error
         input = input.replace(/\(\)/g, '(.)');
+        input = input.replace(/\[\]/g, '[.]');
+        input = input.replace(/\{\}/g, '{.}');
 
+        console.error(input);
         const error: string | null = EPars.validateParenthesis(input, false, Eterna.MAX_PUZZLE_EDIT_LENGTH);
         this.setWarning(error || '');
         this._textInput.text = input;
@@ -241,7 +244,7 @@ export default class StructureInput extends ContainerObject implements Updatable
 
     public get structureString(): string {
         const secstruct: string = this._textInput.text;
-        return secstruct.replace(/[^.()]/g, '');
+        return secstruct.replace(/[^.(){}[\]]/g, '');
     }
 
     public set structureString(struct: string) {

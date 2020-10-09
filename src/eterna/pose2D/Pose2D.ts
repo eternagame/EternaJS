@@ -1799,7 +1799,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public set sequence(sequence: Sequence) {
-        console.error('in sequence setter', this._sequence.length, sequence.length);
         if (Arrays.shallowEqual(this._sequence.baseArray, sequence.baseArray)) {
             return;
         }
