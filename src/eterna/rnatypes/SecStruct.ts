@@ -74,7 +74,7 @@ export default class SecStruct {
      * @param pi
      */
     public setPairingPartner(index: number, pi: number): void {
-        if (this.isPaired(index)) {
+        if (this.isPaired(index) && this.pairingPartner(index) !== pi) {
             this._pairs[this.pairingPartner(index)] = -1;
         }
         this._pairs[index] = pi;

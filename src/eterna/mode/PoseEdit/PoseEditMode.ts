@@ -2306,7 +2306,7 @@ export default class PoseEditMode extends GameMode {
         const poseData: SaveStoreItem = [0, this._poses[0].sequence.baseArray];
         for (const [i, pose] of Object.entries(this._poses)) {
             poseData.push(JSON.stringify({
-                sequence: pose.sequence.sequenceString,
+                sequence: pose.sequence.sequenceString(),
                 // structure: EPars.pairsToParenthesis(pose.pairs),
                 structure: this._puzzle.getSecstruct(parseInt(i, 10))
             }));
@@ -2414,8 +2414,8 @@ export default class PoseEditMode extends GameMode {
     private moveHistoryAddMutations(before: Sequence, after: Sequence): void {
         const muts: Move[] = [];
         for (let ii = 0; ii < after.length; ii++) {
-            if (after.baseArray[ii] !== before.baseArray[ii]) {
-                muts.push({pos: ii + 1, base: new Sequence([after.baseArray[ii]]).sequenceString()});
+            if (after.nt(ii) !== before.nt(ii)) {
+                muts.push({pos: ii + 1, base: EPars.nucleotideToString(after.nt(ii))});
             }
         }
         if (muts.length === 0) return;

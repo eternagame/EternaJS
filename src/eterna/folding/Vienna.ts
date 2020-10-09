@@ -201,7 +201,6 @@ export default class Vienna extends Folder {
         }
 
         const secstruct = this.foldSequenceImpl(seq, desiredPairs, temp);
-        console.error(secstruct.pairs);
         this.putCache(key, secstruct.slice(0));
         return secstruct;
     }

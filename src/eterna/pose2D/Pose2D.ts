@@ -482,7 +482,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._strandLabel.display.visible = false;
     }
 
-    public parseCommand(command: number, closestIndex: number): [string, PuzzleEditOp, number[]?] | null {
+    public parseCommand(command: RNAPaint, closestIndex: number): [string, PuzzleEditOp, RNABase[]?] | null {
         switch (command) {
             case RNAPaint.ADD_BASE:
                 return PoseUtil.addBaseWithIndex(closestIndex, this._pairs);
@@ -499,8 +499,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public parseCommandWithPairs(
-        command: number, closestIndex: number, pairs: SecStruct
-    ): [string, PuzzleEditOp, number[]?] | null {
+        command: RNAPaint, closestIndex: number, pairs: SecStruct
+    ): [string, PuzzleEditOp, RNABase[]?] | null {
         switch (command) {
             case RNAPaint.ADD_BASE:
                 return PoseUtil.addBaseWithIndex(closestIndex, pairs);
@@ -681,7 +681,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         ROPWait.notifyEndPaint();
     }
 
-    public deleteBaseWithIndexPairs(index: number, pairs: SecStruct): [string, PuzzleEditOp, number[]?] {
+    public deleteBaseWithIndexPairs(index: number, pairs: SecStruct): [string, PuzzleEditOp, RNABase[]?] {
         if (this.isTrackedIndex(index)) {
             this.toggleBaseMark(index);
         }
@@ -1569,7 +1569,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         const n: number = seq.length;
         for (let k = 0; k < n; k++) {
-            this._bases[k].setType(seq.baseArray[k]);
+            this._bases[k].setType(seq.nt(k));
             this._bases[k].baseIndex = k;
         }
 
@@ -1689,7 +1689,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         const n: number = seq.length;
         for (let k = 0; k < n; k++) {
-            this._bases[k].setType(seq.baseArray[k]);
+            this._bases[k].setType(seq.nt(k));
             this._bases[k].baseIndex = k;
         }
     }
@@ -1791,8 +1791,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             return false;
         }
 
-        const fullSeq: number[] = this.fullSequence.baseArray;
-        return (EPars.pairType(fullSeq[a], fullSeq[b]) !== 0);
+        return (EPars.pairType(this.fullSequence.nt(a), this.fullSequence.nt(b)) !== 0);
     }
 
     public get sequenceLength(): number {
@@ -2496,7 +2495,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        this.sequence.baseArray = sequence;
+        this.sequence = new Sequence(sequence);
         this.puzzleLocks = locks;
         this.molecularStructure = SecStruct.fromParens(parenthesis);
         this.molecularBindingSite = bindingSite;
@@ -3429,7 +3428,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _pairs: SecStruct = new SecStruct();
     private _targetPairs: SecStruct = new SecStruct();
     private _pseudoknotPairs: SecStruct = new SecStruct();
-    private _bases: Base[] = [];
+    public _bases: Base[] = [];
     private _locks: boolean[] | undefined = [];
     private _forcedStruct: number[] | null = [];
     private _designStruct: boolean[] = [];
