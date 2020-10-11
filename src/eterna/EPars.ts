@@ -368,15 +368,12 @@ export default class EPars {
             }
         }
 
-        console.error('Looking at order 1 PKs');
         // order 1 PKs
         const pkStack: number[] = [];
         for (let jj = 0; jj < parenthesis.length; jj++) {
-            console.error(jj, parenthesis.charAt(jj), pkStack.length);
             if (parenthesis.charAt(jj) === '[') {
                 pkStack.push(jj);
             } else if (parenthesis.charAt(jj) === ']') {
-                console.error(pkStack.length);
                 if (pkStack.length === 0) {
                     return 'Unbalanced parenthesis notation []';
                 }
@@ -400,7 +397,7 @@ export default class EPars {
         }
 
         for (let jj = 0; jj < parenthesis.length; ++jj) {
-            if (!'.[]{}'.includes(parenthesis.charAt(jj))) {
+            if (!'.()[]{}'.includes(parenthesis.charAt(jj))) {
                 return `Unrecognized character ${parenthesis.charAt(jj)}`;
             }
         }

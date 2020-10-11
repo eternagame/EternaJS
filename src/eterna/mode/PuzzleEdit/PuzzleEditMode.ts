@@ -515,8 +515,9 @@ export default class PuzzleEditMode extends GameMode {
             }
         }
 
+        console.error(SecStruct.fromParens(this._structureInputs[0].structureString, true).onlyPseudoknots());
         if (this._structureInputs.some(
-            (si) => SecStruct.fromParens(si.structureString).onlyPseudoknots().nonempty()
+            (si) => SecStruct.fromParens(si.structureString, true).onlyPseudoknots().nonempty()
         ) && !this._folder.canPseudoknot) {
             this.showNotification('You need to select the NuPACK folder, because '
                 + 'your puzzle specification has a pseudoknot.');
@@ -584,9 +585,12 @@ export default class PuzzleEditMode extends GameMode {
                 }
             }
 
-            const pseudoknots: boolean = SecStruct.fromParens(this._structureInputs[ii].structureString)
+            const pseudoknots: boolean = SecStruct.fromParens(this._structureInputs[ii].structureString, true)
                 .onlyPseudoknots().nonempty();
 
+            if (this._targetConditions[ii] !== undefined) {
+                objective = this._targetConditions[ii] as TargetConditions;
+            }
             if (bindingBases.length > 0) {
                 objective = {
                     type: 'aptamer',

@@ -976,6 +976,7 @@ export default class RNALayout {
             return;
         }
         const scaleFactor = this.inferCustomLayoutScaleFactor(customLayout);
+        console.error(scaleFactor);
         this._customLayout = [];
         for (const coord of customLayout) {
             if (coord[0] === null || coord[1] === null) {

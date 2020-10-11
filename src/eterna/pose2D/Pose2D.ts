@@ -531,8 +531,20 @@ export default class Pose2D extends ContainerObject implements Updatable {
         const shiftDown: boolean = Flashbang.app.isShiftKeyDown;
         const ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
 
+        // ctrl + shift: drag base around; ctrl: base mark; shift: shift highlight
         if (closestIndex >= 0) {
             this._mouseDownAltKey = altDown;
+            if (ctrlDown && shiftDown) {
+                const dragger = new Dragger();
+                this.addObject(dragger);
+                dragger.dragged.connect((p) => {
+                    this.onMouseMoved(p as Point, closestIndex);
+                });
+                dragger.dragComplete.connect(() => {
+                    this.onMouseUp();
+                });
+                return;
+            }
             if ((ctrlDown || this.currentColor === RNAPaint.BASE_MARK) && closestIndex < this.fullSequenceLength) {
                 this.toggleBaseMark(closestIndex);
                 return;
@@ -605,7 +617,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._bases[index].isMarked();
     }
 
-    public onMouseMoved(point: Point): void {
+    public onMouseMoved(point: Point, startIdx?: number): void {
         if (!this._poseField.containsPoint(point.x, point.y)) {
             this.onMouseOut();
             return;
@@ -618,6 +630,51 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.container.toLocal(point, undefined, Pose2D.P);
         const mouseX = Pose2D.P.x;
         const mouseY = Pose2D.P.y;
+
+        // First, handle the case where you have supplied startIdx, indicating
+        // that you are dragging a base to a new location.
+        if (startIdx !== undefined) {
+            if (this.customLayout === undefined) {
+                const rnaCoords: RNALayout = new RNALayout(Pose2D.ZOOM_SPACINGS[0], Pose2D.ZOOM_SPACINGS[0]);
+                rnaCoords.setupTree(this._pairs, this._targetPairs);
+                rnaCoords.drawTree(this._customLayout);
+                const xarray: number[] = new Array(this._bases.length);
+                const yarray: number[] = new Array(this._bases.length);
+                rnaCoords.getCoords(xarray, yarray);
+                this.customLayout = [];
+                for (let ii = 0; ii < this._bases.length; ++ii) {
+                    this.customLayout.push([xarray[ii] - this._offX, yarray[ii] - this._offY]);
+                }
+            }
+            Assert.assertIsDefined(this._customLayout);
+            // Ooh, you should drag a helix as a unit.
+            if (!this._targetPairs.isPaired(startIdx)) {
+                this._customLayout[startIdx] = [mouseX, mouseY];
+                this._bases[startIdx].setXY(mouseX - this._offX, mouseY - this._offY);
+                this._bases[startIdx].setDirty();
+            } else {
+                // Find each nt in helix and apply same offset.
+                const stem = this._targetPairs.stemWith(startIdx);
+                console.error(...stem);
+                const origX = this._bases[startIdx].x;
+                const origY = this._bases[startIdx].y;
+                for (const bp of stem) {
+                    for (const idx of bp) {
+                        this._customLayout[idx] = [
+                            mouseX + this._bases[idx].x - origX,
+                            mouseY + this._bases[idx].y - origY
+                        ];
+                        this._bases[idx].setXY(
+                            mouseX + this._bases[idx].x - origX - this._offX,
+                            mouseY + this._bases[idx].y - origY - this._offY
+                        );
+                        this._bases[idx].setDirty();
+                        // console.error(idx, this._bases[idx].x, this._bases[idx].y);
+                    }
+                }
+            }
+            return;
+        }
 
         this._paintCursor.display.x = mouseX;
         this._paintCursor.display.y = mouseY;
