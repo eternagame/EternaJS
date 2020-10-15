@@ -288,6 +288,13 @@ export default class PoseEditMode extends GameMode {
             this.setPosesLayoutTool(Layout.FLIP_STEM);
         });
 
+        this._toolbar.downloadSVGButton.clicked.connect(() => {
+            this.downloadSVG();
+        });
+        this._toolbar.downloadHKWSButton.clicked.connect(() => {
+            this.downloadHKWS();
+        });
+
         // Add our docked SpecBox at the bottom of uiLayer
         this._dockedSpecBox = new SpecBox(true);
         this._dockedSpecBox.display.position = new Point(15, 190);

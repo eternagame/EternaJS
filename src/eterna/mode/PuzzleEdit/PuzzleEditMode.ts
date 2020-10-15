@@ -166,6 +166,13 @@ export default class PuzzleEditMode extends GameMode {
             this.setPosesLayoutTool(Layout.FLIP_STEM);
         });
 
+        this._toolbar.downloadSVGButton.clicked.connect(() => {
+            this.downloadSVG();
+        });
+        this._toolbar.downloadHKWSButton.clicked.connect(() => {
+            this.downloadHKWS();
+        });
+
         this._toolbar.naturalButton.clicked.connect(() => this.setToNativeMode());
         this._toolbar.targetButton.clicked.connect(() => this.setToTargetMode());
         this._toolbar.undoButton.clicked.connect(() => this.moveUndoStackBackward());
