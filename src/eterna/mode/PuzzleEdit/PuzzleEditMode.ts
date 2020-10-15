@@ -614,7 +614,8 @@ export default class PuzzleEditMode extends GameMode {
             } else {
                 objective = {
                     type: pseudoknots ? 'pseudoknot' : 'single',
-                    secstruct: this._structureInputs[ii].structureString
+                    secstruct: this._structureInputs[ii].structureString,
+                    'custom-layout': this._poses[ii].customLayout
                 };
             }
 

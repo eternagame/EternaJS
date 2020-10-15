@@ -86,7 +86,6 @@ export default class StructureInput extends ContainerObject implements Updatable
         input = input.replace(/\[\]/g, '[.]');
         input = input.replace(/\{\}/g, '{.}');
 
-        console.error(input);
         const error: string | null = EPars.validateParenthesis(input, false, Eterna.MAX_PUZZLE_EDIT_LENGTH);
         this.setWarning(error || '');
         this._textInput.text = input;

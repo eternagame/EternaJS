@@ -34,7 +34,7 @@ export interface TargetConditions {
     secstruct: string;
     sequence?: string;
     IUPAC?: string;
-    'custom-layout'?: [[number, number] | [null, null]];
+    'custom-layout'?: ([number, number] | [null, null])[];
     'custom-reference'?: string;
     'custom-numbering'?: string;
     oligo_concentration?: string | number; // the strings have to be convertible

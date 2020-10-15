@@ -27,7 +27,7 @@ export default class PoseThumbnail {
         wrongPairs: (-1 | 0 | 1)[] | null = null,
         expUseThreshold: boolean = false,
         expThreshold: number = 0,
-        customLayout: Array<[number, number] | [null, null]> | null = null
+        customLayout: ([number, number] | [null, null])[] | null = null
     ): Texture {
         const disp: DisplayObject = PoseThumbnail.create(
             sequence.baseArray, pairs, size, type,
@@ -46,7 +46,7 @@ export default class PoseThumbnail {
         wrongPairs: (-1 | 0 | 1)[] | null = null,
         expUseThreshold: boolean = false,
         expThreshold: number = 0,
-        customLayout: Array<[number, number] | [null, null]> | null = null
+        customLayout: ([number, number] | [null, null])[] | null = null
     ) {
         const graphics = new Graphics();
         PoseThumbnail.create(
@@ -111,7 +111,7 @@ export default class PoseThumbnail {
         expUseThreshold: boolean,
         expThreshold: number,
         canvas: Graphics | null = null,
-        customLayout: Array<([number, number] | [null, null])> | null = null
+        customLayout: ([number, number] | [null, null])[] | null = null
     ): DisplayObject {
         let frame: DisplayObject | null = null;
 

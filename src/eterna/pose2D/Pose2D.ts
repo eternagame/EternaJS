@@ -561,26 +561,20 @@ export default class Pose2D extends ContainerObject implements Updatable {
             Pose2D.ZOOM_SPACINGS[this._zoomLevel], Pose2D.ZOOM_SPACINGS[this._zoomLevel]
         );
         // rnaCoords.setupTree(this._pairs.filterForPseudoknots(), this._targetPairs.filterForPseudoknots());
-        console.error(this._targetPairs);
         rnaCoords.setupTree(this._pairs, this._targetPairs);
         rnaCoords.drawTree(this._customLayout);
         const xarray: number[] = new Array(this._bases.length);
         const yarray: number[] = new Array(this._bases.length);
         rnaCoords.getCoords(xarray, yarray);
-        console.error('back in rotateStem', xarray);
 
         this._customLayout = [];
         for (let ii = 0; ii < this._bases.length; ++ii) {
             if (xarray[ii] === undefined || yarray[ii] === undefined) continue;
-            console.error(xarray[ii], yarray[ii]);
             this._customLayout.push([
                 xarray[ii],
                 yarray[ii]
             ]);
-            console.error(this._customLayout[0], this._customLayout[ii]);
         }
-        // Assert.assertIsDefined(this._customLayout);
-        console.error('this._customLayout', this._customLayout);
 
         // id stem
         const stem = this._targetPairs.stemWith(startIdx);
@@ -599,7 +593,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
             return [x / (s.length * 2), y / (s.length * 2)];
         })(stem);
-        console.error('center of stem', stem, 'is', center);
 
         // Determine stem orientation. Really we only care about the "next"
         // orientation, the one we want to impose. We do this by orienting the
@@ -710,7 +703,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 ];
             }
         }
-        console.error('this._customLayout', this._customLayout);
     }
 
     /**
@@ -731,7 +723,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         const rnaCoords: RNALayout = new RNALayout(
             Pose2D.ZOOM_SPACINGS[this._zoomLevel], Pose2D.ZOOM_SPACINGS[this._zoomLevel]
         );
-        rnaCoords.setupTree(this._pairs, this._targetPairs.filterForPseudoknots());
+        rnaCoords.setupTree(this._pairs, this._targetPairs);
         rnaCoords.drawTree(this._customLayout);
         const xarray: number[] = new Array(this._bases.length);
         const yarray: number[] = new Array(this._bases.length);
@@ -903,7 +895,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             const rnaCoords: RNALayout = new RNALayout(
                 Pose2D.ZOOM_SPACINGS[this._zoomLevel], Pose2D.ZOOM_SPACINGS[this._zoomLevel]
             );
-            rnaCoords.setupTree(this._pairs.filterForPseudoknots(), this._targetPairs.filterForPseudoknots());
+            rnaCoords.setupTree(this._pairs, this._targetPairs);
             rnaCoords.drawTree(this._customLayout);
             const xarray: number[] = new Array(this._bases.length);
             const yarray: number[] = new Array(this._bases.length);
@@ -960,7 +952,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     }
                 }
             }
-            console.error(this._customLayout);
             return;
         }
 

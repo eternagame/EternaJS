@@ -339,7 +339,7 @@ export default abstract class GameMode extends AppMode {
 
     protected _targetPairs: SecStruct[];
 
-    protected _targetConditions: (TargetConditions | undefined)[];
+    protected _targetConditions: (TargetConditions | undefined)[] = [];
 }
 
 class ContextMenuDialog extends Dialog<void> {
