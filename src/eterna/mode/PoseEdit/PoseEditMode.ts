@@ -26,7 +26,7 @@ import Folder, {MultiFoldResult, CacheKey} from 'eterna/folding/Folder';
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
 import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import PoseField from 'eterna/pose2D/PoseField';
-import Pose2D, {Oligo} from 'eterna/pose2D/Pose2D';
+import Pose2D, {Oligo, Layout} from 'eterna/pose2D/Pose2D';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import ConstraintBar from 'eterna/constraints/ConstraintBar';
@@ -274,6 +274,14 @@ export default class PoseEditMode extends GameMode {
 
         this._toolbar.magicGlueButton.clicked.connect(() => {
             this.setPosesColor(RNAPaint.MAGIC_GLUE);
+        });
+
+        this._toolbar.rotateStemButton.clicked.connect(() => {
+            this.setPosesLayoutTool(Layout.ROTATE_STEM);
+        });
+
+        this._toolbar.moveButton.clicked.connect(() => {
+            this.setPosesLayoutTool(Layout.MOVE);
         });
 
         // Add our docked SpecBox at the bottom of uiLayer
@@ -2176,9 +2184,15 @@ export default class PoseEditMode extends GameMode {
             });
     }
 
-    public setPosesColor(paintColor: number): void {
+    public setPosesColor(paintColor: RNAPaint): void {
         for (const pose of this._poses) {
             pose.currentColor = paintColor;
+        }
+    }
+
+    public setPosesLayoutTool(paintColor: Layout): void {
+        for (const pose of this._poses) {
+            pose.currentArrangementTool = paintColor;
         }
     }
 

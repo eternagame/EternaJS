@@ -976,7 +976,6 @@ export default class RNALayout {
             return;
         }
         const scaleFactor = this.inferCustomLayoutScaleFactor(customLayout);
-        console.error(scaleFactor);
         this._customLayout = [];
         for (const coord of customLayout) {
             if (coord[0] === null || coord[1] === null) {
@@ -1042,7 +1041,7 @@ export default class RNALayout {
         if (this._targetPairs !== null) {
             for (let ii = 0; ii < this._targetPairs.length - 1; ii++) {
                 // look for a stacked pair
-                if (this._targetPairs.pairingPartner(ii) === this._targetPairs.pairingPartner(ii + 1) - 1) {
+                if (this._targetPairs.pairingPartner(ii) === this._targetPairs.pairingPartner(ii + 1) + 1) {
                     const customA = customLayout[ii];
                     const customB = customLayout[ii + 1];
                     if (

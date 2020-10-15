@@ -87,6 +87,8 @@ export default class Toolbar extends ContainerObject {
 
     public baseMarkerButton: GameButton;
     public magicGlueButton: GameButton;
+    public rotateStemButton: GameButton;
+    public moveButton: GameButton;
 
     public dynPaintTools: GameButton[] = [];
     public dynActionTools: GameButton[] = [];
@@ -609,6 +611,21 @@ export default class Toolbar extends ContainerObject {
             this._deselectAllPaintTools();
             this.magicGlueButton.toggled.value = true;
         }));
+
+        this.rotateStemButton = new ToolbarButton()
+            .up(Bitmaps.ImgMagicGlue)
+            .over(Bitmaps.ImgMagicGlueOver)
+            .down(Bitmaps.ImgMagicGlue)
+            .tooltip('Rotate stem (ctrl+shift)');
+        this.moveButton = new ToolbarButton()
+            .up(Bitmaps.ImgMagicGlue)
+            .over(Bitmaps.ImgMagicGlueOver)
+            .down(Bitmaps.ImgMagicGlue)
+            .tooltip('Move nt(ctrl+shift)');
+        this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
+        this.addObject(this.moveButton, this.lowerToolbarLayout);
+        this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
+        this.addObject(this.rotateStemButton, this.lowerToolbarLayout);
 
         if (this._type === ToolbarType.PUZZLEMAKER) {
             this.submitButton.tooltip('Publish your puzzle!');

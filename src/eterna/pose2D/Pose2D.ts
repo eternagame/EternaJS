@@ -9,7 +9,7 @@ import ExpPainter from 'eterna/ExpPainter';
 import {
     ContainerObject, InputUtil, Flashbang, Dragger, DisplayUtil, SceneObject, SerialTask, Easing,
     ParallelTask, AlphaTask, LocationTask, DelayTask, SelfDestructTask, Vector2, Arrays,
-    RepeatingTask, Updatable, Assert
+    RepeatingTask, Updatable, Assert, LayoutContainer
 } from 'flashbang';
 import {Move} from 'eterna/mode/PoseEdit/PoseEditMode';
 import LightRay from 'eterna/vfx/LightRay';
@@ -51,6 +51,11 @@ interface Mut {
 
 interface AuxInfo {
     cleavingSite?: number;
+}
+
+export enum Layout {
+    MOVE,
+    ROTATE_STEM
 }
 
 export type PoseMouseDownCallback = (e: InteractionEvent, closestDist: number, closestIndex: number) => void;
@@ -336,12 +341,20 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public set currentColor(col: number) {
+    public set currentColor(col: RNAPaint) {
         this._currentColor = col;
     }
 
-    public get currentColor(): number {
+    public get currentColor(): RNAPaint {
         return this._currentColor;
+    }
+
+    public set currentArrangementTool(col: Layout) {
+        this._currentArrangementTool = col;
+    }
+
+    public get currentArrangementTool(): Layout {
+        return this._currentArrangementTool;
     }
 
     public doneColoring(): void {
@@ -526,6 +539,223 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
+    /**
+     * Rotate the stem containing nucleotide idx. Save your results in the
+     * customLayout. To achieve this: figure out what stem you're in (helper);
+     * find its center (for an axis of rotation); figure out what orientation
+     * is clockwise of its current orientation, then get there. We do not store
+     * persistent stem orientations, because we would then have to reset them
+     * elsewhere with every refold.
+     *
+     * @param idx
+     */
+    public rotateStem(startIdx: number): void {
+        // If this idx is not paired, it won't be in a stem; return.
+        if (!this._targetPairs.isPaired(startIdx)) {
+            return;
+        }
+
+        // 1. Get coords and set up a customLayout
+        const rnaCoords: RNALayout = new RNALayout(
+            Pose2D.ZOOM_SPACINGS[this._zoomLevel], Pose2D.ZOOM_SPACINGS[this._zoomLevel]
+        );
+        rnaCoords.setupTree(this._pairs, this._targetPairs);
+        rnaCoords.drawTree(this._customLayout);
+        const xarray: number[] = new Array(this._bases.length);
+        const yarray: number[] = new Array(this._bases.length);
+        rnaCoords.getCoords(xarray, yarray);
+
+        this.customLayout = [];
+        for (let ii = 0; ii < this._bases.length; ++ii) {
+            this.customLayout.push([
+                (xarray[ii]), // * (Pose2D.ZOOM_SPACINGS[0] / Pose2D.ZOOM_SPACINGS[this._zoomLevel]),
+                (yarray[ii])// * (Pose2D.ZOOM_SPACINGS[0] / Pose2D.ZOOM_SPACINGS[this._zoomLevel])
+            ]);
+        }
+        Assert.assertIsDefined(this._customLayout);
+
+        // id stem
+        const stem = this._targetPairs.stemWith(startIdx);
+
+        // What is center of stem? Average coordinate. Could simplify calculation
+        // a little by finding the bases of median index first or something, but
+        // that itself takes a bit of work. Unlikely to become bottleneck.
+        const center = ((s: [number, number][]) => {
+            let x = 0;
+            let y = 0;
+            for (const bp of s) {
+                for (const idx of bp) {
+                    x += this._bases[idx].x;
+                    y += this._bases[idx].y;
+                }
+            }
+            return [x / (s.length * 2), y / (s.length * 2)];
+        })(stem);
+        console.error('center of stem', stem, 'is', center);
+
+        // Determine stem orientation. Really we only care about the "next"
+        // orientation, the one we want to impose. We do this by orienting the
+        // single bp that is kind of a minimal stem, guaranteed to be there.
+        // If the vector from smaller to larger index has +x and -y, we rotate
+        // to be +x0y. That goes to 0x+y, to -x0y, to 0x-y.
+        const vecBP = ((s: [number, number][], n: number) => {
+            for (const bp of s) {
+                if (bp[0] === n || bp[1] === n) {
+                    if (bp[0] < bp[1]) {
+                        return [
+                            this._bases[bp[1]].x - this._bases[bp[0]].x,
+                            this._bases[bp[1]].y - this._bases[bp[0]].y
+                        ];
+                    } else {
+                        return [
+                            this._bases[bp[1]].x - this._bases[bp[0]].x,
+                            this._bases[bp[1]].y - this._bases[bp[0]].y
+                        ];
+                    }
+                }
+            }
+            return [0, 0];
+        })(stem, startIdx);
+
+        // Find and sort the (smallest, largest) bp. Let's assume it's first.
+        const firstbp = stem[0][0] < stem[0][1]
+            ? stem[0]
+            : [stem[0][1], stem[0][0]];
+        const pairSpace = Pose2D.ZOOM_SPACINGS[this._zoomLevel];
+        const primSpace = Pose2D.ZOOM_SPACINGS[this._zoomLevel];
+
+        // Calculate new stem positions
+        if (vecBP[1] < 0) {
+            // new orientation is bottom-to-top
+            for (const bp of stem) {
+                // First work with smaller value, which is either smaller or
+                // bigger than the center bp
+                this._bases[bp[0]].setXY(
+                    center[0] - pairSpace / 2,
+                    center[1] + (bp[0] - firstbp[0] + 0.5 - stem.length / 2) * primSpace
+                );
+                this._bases[bp[0]].setDirty();
+                this._bases[bp[1]].setXY(
+                    center[0] + pairSpace / 2,
+                    center[1] + (bp[0] - firstbp[0] + 0.5 - stem.length / 2) * primSpace
+                );
+                this._bases[bp[1]].setDirty();
+
+                for (let ii = 0; ii < this._customLayout.length; ++ii) {
+                    this._customLayout[bp[0]] = [
+                        this._customLayout[ii][0] as number + this._bases[bp[0]].x - this._bases[ii].x,
+                        this._customLayout[ii][1] as number + this._bases[bp[0]].y - this._bases[ii].y
+                    ];
+                    this._customLayout[bp[1]] = [
+                        this._customLayout[ii][0] as number + this._bases[bp[1]].x - this._bases[ii].x,
+                        this._customLayout[ii][1] as number + this._bases[bp[1]].y - this._bases[ii].y
+                    ];
+                }
+            }
+        } else if (vecBP[0] > 0) {
+            // new orientation is right-to-left
+            for (const bp of stem) {
+                // First work with smaller value, which is either smaller or
+                // bigger than the center bp
+                this._bases[bp[0]].setXY(
+                    center[0] - (bp[0] - firstbp[0] + 0.5 - stem.length / 2) * primSpace,
+                    center[1] - pairSpace / 2
+                );
+                this._bases[bp[0]].setDirty();
+                this._bases[bp[1]].setXY(
+                    center[0] - (bp[0] - firstbp[0] + 0.5 - stem.length / 2) * primSpace,
+                    center[1] + pairSpace / 2
+                );
+                this._bases[bp[1]].setDirty();
+
+                for (let ii = 0; ii < this._customLayout.length; ++ii) {
+                    this._customLayout[bp[0]] = [
+                        this._customLayout[ii][0] as number + this._bases[bp[0]].x - this._bases[ii].x,
+                        this._customLayout[ii][1] as number + this._bases[bp[0]].y - this._bases[ii].y
+                    ];
+                    this._customLayout[bp[1]] = [
+                        this._customLayout[ii][0] as number + this._bases[bp[1]].x - this._bases[ii].x,
+                        this._customLayout[ii][1] as number + this._bases[bp[1]].y - this._bases[ii].y
+                    ];
+                }
+            }
+        } else if (vecBP[1] > 0) {
+            // new orientation is top-to-bottom
+            for (const bp of stem) {
+                // First work with smaller value, which is either smaller or
+                // bigger than the center bp
+                this._bases[bp[0]].setXY(
+                    center[0] + pairSpace / 2,
+                    center[1] - (bp[0] - firstbp[0] + 0.5 - stem.length / 2) * primSpace
+                );
+                this._bases[bp[0]].setDirty();
+                this._bases[bp[1]].setXY(
+                    center[0] - pairSpace / 2,
+                    center[1] - (bp[0] - firstbp[0] + 0.5 - stem.length / 2) * primSpace
+                );
+                this._bases[bp[1]].setDirty();
+
+                for (let ii = 0; ii < this._customLayout.length; ++ii) {
+                    this._customLayout[bp[0]] = [
+                        this._customLayout[ii][0] as number + this._bases[bp[0]].x - this._bases[ii].x,
+                        this._customLayout[ii][1] as number + this._bases[bp[0]].y - this._bases[ii].y
+                    ];
+                    this._customLayout[bp[1]] = [
+                        this._customLayout[ii][0] as number + this._bases[bp[1]].x - this._bases[ii].x,
+                        this._customLayout[ii][1] as number + this._bases[bp[1]].y - this._bases[ii].y
+                    ];
+                }
+            }
+        } else if (vecBP[0] < 0) {
+            // new orientation is left-to-right
+            for (const bp of stem) {
+                // First work with smaller value, which is either smaller or
+                // bigger than the center bp
+                this._bases[bp[0]].setXY(
+                    center[0] + (bp[0] - firstbp[0] + 0.5 - stem.length / 2) * primSpace,
+                    center[1] + pairSpace / 2
+                );
+                this._bases[bp[0]].setDirty();
+                this._bases[bp[1]].setXY(
+                    center[0] + (bp[0] - firstbp[0] + 0.5 - stem.length / 2) * primSpace,
+                    center[1] - pairSpace / 2
+                );
+                this._bases[bp[1]].setDirty();
+
+                for (let ii = 0; ii < this._customLayout.length; ++ii) {
+                    this._customLayout[bp[0]] = [
+                        this._customLayout[ii][0] as number + this._bases[bp[0]].x - this._bases[ii].x,
+                        this._customLayout[ii][1] as number + this._bases[bp[0]].y - this._bases[ii].y
+                    ];
+                    this._customLayout[bp[1]] = [
+                        this._customLayout[ii][0] as number + this._bases[bp[1]].x - this._bases[ii].x,
+                        this._customLayout[ii][1] as number + this._bases[bp[1]].y - this._bases[ii].y
+                    ];
+                }
+            }
+        }
+
+        // Find each nt in helix and apply same offset.
+        // const origX = this._bases[startIdx].x;
+        // const origY = this._bases[startIdx].y;
+        // for (const bp of stem) {
+        //     for (const idx of bp) {
+        //         this._bases[idx].setXY(
+        //             mouseX + this._bases[idx].x - origX - this._offX,
+        //             mouseY + this._bases[idx].y - origY - this._offY
+        //         );
+        //         this._bases[idx].setDirty();
+
+        //         for (let ii = 0; ii < this._customLayout.length; ++ii) {
+        //             this._customLayout[idx] = [
+        //                 this._customLayout[ii][0] as number + this._bases[idx].x - this._bases[ii].x,
+        //                 this._customLayout[ii][1] as number + this._bases[idx].y - this._bases[ii].y
+        //             ];
+        //         }
+        //     }
+        // }
+    }
+
     public onPoseMouseDown(e: InteractionEvent, closestIndex: number): void {
         const altDown: boolean = Flashbang.app.isAltKeyDown;
         const shiftDown: boolean = Flashbang.app.isShiftKeyDown;
@@ -537,9 +767,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (ctrlDown && shiftDown) {
                 const dragger = new Dragger();
                 this.addObject(dragger);
-                dragger.dragged.connect((p) => {
-                    this.onMouseMoved(p as Point, closestIndex);
-                });
+
+                if (this._currentArrangementTool === Layout.MOVE) {
+                    dragger.dragged.connect((p) => {
+                        this.onMouseMoved(p as Point, closestIndex);
+                    });
+                } else if (this._currentArrangementTool === Layout.ROTATE_STEM) {
+                    this.rotateStem(closestIndex);
+                }
                 dragger.dragComplete.connect(() => {
                     this.onMouseUp();
                 });
@@ -634,42 +869,63 @@ export default class Pose2D extends ContainerObject implements Updatable {
         // First, handle the case where you have supplied startIdx, indicating
         // that you are dragging a base to a new location.
         if (startIdx !== undefined) {
-            if (this.customLayout === undefined) {
-                const rnaCoords: RNALayout = new RNALayout(Pose2D.ZOOM_SPACINGS[0], Pose2D.ZOOM_SPACINGS[0]);
-                rnaCoords.setupTree(this._pairs, this._targetPairs);
-                rnaCoords.drawTree(this._customLayout);
-                const xarray: number[] = new Array(this._bases.length);
-                const yarray: number[] = new Array(this._bases.length);
-                rnaCoords.getCoords(xarray, yarray);
-                this.customLayout = [];
-                for (let ii = 0; ii < this._bases.length; ++ii) {
-                    this.customLayout.push([xarray[ii] - this._offX, yarray[ii] - this._offY]);
-                }
+            // if (this.customLayout === undefined) {
+            const rnaCoords: RNALayout = new RNALayout(
+                Pose2D.ZOOM_SPACINGS[this._zoomLevel], Pose2D.ZOOM_SPACINGS[this._zoomLevel]
+            );
+            rnaCoords.setupTree(this._pairs, this._targetPairs);
+            rnaCoords.drawTree(this._customLayout);
+            const xarray: number[] = new Array(this._bases.length);
+            const yarray: number[] = new Array(this._bases.length);
+            rnaCoords.getCoords(xarray, yarray);
+            // The simplest thing to do is to use the x/y coords as the new customLayout.
+            // This minimizes the calculations you have to do later.
+            this.customLayout = [];
+            for (let ii = 0; ii < this._bases.length; ++ii) {
+                this.customLayout.push([
+                    (xarray[ii]), // * (Pose2D.ZOOM_SPACINGS[0] / Pose2D.ZOOM_SPACINGS[this._zoomLevel]),
+                    (yarray[ii])// * (Pose2D.ZOOM_SPACINGS[0] / Pose2D.ZOOM_SPACINGS[this._zoomLevel])
+                ]);
             }
+            // }
             Assert.assertIsDefined(this._customLayout);
             // Ooh, you should drag a helix as a unit.
             if (!this._targetPairs.isPaired(startIdx)) {
-                this._customLayout[startIdx] = [mouseX, mouseY];
-                this._bases[startIdx].setXY(mouseX - this._offX, mouseY - this._offY);
+                // Update individual base coordinates.
+                this._bases[startIdx].setXY(
+                    (mouseX - this._offX),
+                    (mouseY - this._offY)
+                );
+
+                // Update the customLayout in the same way.
+                // Actually, after writing this, I no longer know why it works.
+                for (let ii = 0; ii < this._customLayout.length; ++ii) {
+                    this._customLayout[startIdx] = [
+                        this._customLayout[ii][0] as number + (mouseX - this._offX) - this._bases[ii].x,
+                        this._customLayout[ii][1] as number + (mouseY - this._offY) - this._bases[ii].y
+                    ];
+                }
+
                 this._bases[startIdx].setDirty();
             } else {
                 // Find each nt in helix and apply same offset.
                 const stem = this._targetPairs.stemWith(startIdx);
-                console.error(...stem);
                 const origX = this._bases[startIdx].x;
                 const origY = this._bases[startIdx].y;
                 for (const bp of stem) {
                     for (const idx of bp) {
-                        this._customLayout[idx] = [
-                            mouseX + this._bases[idx].x - origX,
-                            mouseY + this._bases[idx].y - origY
-                        ];
                         this._bases[idx].setXY(
                             mouseX + this._bases[idx].x - origX - this._offX,
                             mouseY + this._bases[idx].y - origY - this._offY
                         );
                         this._bases[idx].setDirty();
-                        // console.error(idx, this._bases[idx].x, this._bases[idx].y);
+
+                        for (let ii = 0; ii < this._customLayout.length; ++ii) {
+                            this._customLayout[idx] = [
+                                this._customLayout[ii][0] as number + this._bases[idx].x - this._bases[ii].x,
+                                this._customLayout[ii][1] as number + this._bases[idx].y - this._bases[ii].y
+                            ];
+                        }
                     }
                 }
             }
@@ -3485,7 +3741,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _pairs: SecStruct = new SecStruct();
     private _targetPairs: SecStruct = new SecStruct();
     private _pseudoknotPairs: SecStruct = new SecStruct();
-    public _bases: Base[] = [];
+    private _bases: Base[] = [];
     private _locks: boolean[] | undefined = [];
     private _forcedStruct: number[] | null = [];
     private _designStruct: boolean[] = [];
@@ -3527,6 +3783,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _lockUpdated: boolean;
     private _bindingSiteUpdated: boolean;
     private _designStructUpdated: boolean;
+
+    private _currentArrangementTool: Layout = Layout.MOVE;
 
     // Rope connecting bases for crazy user-defined layouts
     private _baseRope: BaseRope;
