@@ -640,17 +640,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     center[1] + (bp[0] - firstbp[0] + 0.5 - stem.length / 2) * primSpace
                 );
                 this._bases[bp[1]].setDirty();
-
-                for (let ii = 0; ii < this._customLayout.length; ++ii) {
-                    this._customLayout[bp[0]] = [
-                        this._customLayout[ii][0] as number + this._bases[bp[0]].x - this._bases[ii].x,
-                        this._customLayout[ii][1] as number + this._bases[bp[0]].y - this._bases[ii].y
-                    ];
-                    this._customLayout[bp[1]] = [
-                        this._customLayout[ii][0] as number + this._bases[bp[1]].x - this._bases[ii].x,
-                        this._customLayout[ii][1] as number + this._bases[bp[1]].y - this._bases[ii].y
-                    ];
-                }
             }
         } else if (vecBP[0] > 0) {
             // new orientation is right-to-left
@@ -667,17 +656,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     center[1] + pairSpace / 2
                 );
                 this._bases[bp[1]].setDirty();
-
-                for (let ii = 0; ii < this._customLayout.length; ++ii) {
-                    this._customLayout[bp[0]] = [
-                        this._customLayout[ii][0] as number + this._bases[bp[0]].x - this._bases[ii].x,
-                        this._customLayout[ii][1] as number + this._bases[bp[0]].y - this._bases[ii].y
-                    ];
-                    this._customLayout[bp[1]] = [
-                        this._customLayout[ii][0] as number + this._bases[bp[1]].x - this._bases[ii].x,
-                        this._customLayout[ii][1] as number + this._bases[bp[1]].y - this._bases[ii].y
-                    ];
-                }
             }
         } else if (vecBP[1] > 0) {
             // new orientation is top-to-bottom
@@ -694,17 +672,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     center[1] - (bp[0] - firstbp[0] + 0.5 - stem.length / 2) * primSpace
                 );
                 this._bases[bp[1]].setDirty();
-
-                for (let ii = 0; ii < this._customLayout.length; ++ii) {
-                    this._customLayout[bp[0]] = [
-                        this._customLayout[ii][0] as number + this._bases[bp[0]].x - this._bases[ii].x,
-                        this._customLayout[ii][1] as number + this._bases[bp[0]].y - this._bases[ii].y
-                    ];
-                    this._customLayout[bp[1]] = [
-                        this._customLayout[ii][0] as number + this._bases[bp[1]].x - this._bases[ii].x,
-                        this._customLayout[ii][1] as number + this._bases[bp[1]].y - this._bases[ii].y
-                    ];
-                }
             }
         } else if (vecBP[0] < 0) {
             // new orientation is left-to-right
@@ -721,39 +688,20 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     center[1] - pairSpace / 2
                 );
                 this._bases[bp[1]].setDirty();
-
-                for (let ii = 0; ii < this._customLayout.length; ++ii) {
-                    this._customLayout[bp[0]] = [
-                        this._customLayout[ii][0] as number + this._bases[bp[0]].x - this._bases[ii].x,
-                        this._customLayout[ii][1] as number + this._bases[bp[0]].y - this._bases[ii].y
-                    ];
-                    this._customLayout[bp[1]] = [
-                        this._customLayout[ii][0] as number + this._bases[bp[1]].x - this._bases[ii].x,
-                        this._customLayout[ii][1] as number + this._bases[bp[1]].y - this._bases[ii].y
-                    ];
-                }
             }
         }
-
-        // Find each nt in helix and apply same offset.
-        // const origX = this._bases[startIdx].x;
-        // const origY = this._bases[startIdx].y;
-        // for (const bp of stem) {
-        //     for (const idx of bp) {
-        //         this._bases[idx].setXY(
-        //             mouseX + this._bases[idx].x - origX - this._offX,
-        //             mouseY + this._bases[idx].y - origY - this._offY
-        //         );
-        //         this._bases[idx].setDirty();
-
-        //         for (let ii = 0; ii < this._customLayout.length; ++ii) {
-        //             this._customLayout[idx] = [
-        //                 this._customLayout[ii][0] as number + this._bases[idx].x - this._bases[ii].x,
-        //                 this._customLayout[ii][1] as number + this._bases[idx].y - this._bases[ii].y
-        //             ];
-        //         }
-        //     }
-        // }
+        for (const bp of stem) {
+            for (let ii = 0; ii < this._customLayout.length; ++ii) {
+                this._customLayout[bp[0]] = [
+                    this._customLayout[ii][0] as number + this._bases[bp[0]].x - this._bases[ii].x,
+                    this._customLayout[ii][1] as number + this._bases[bp[0]].y - this._bases[ii].y
+                ];
+                this._customLayout[bp[1]] = [
+                    this._customLayout[ii][0] as number + this._bases[bp[1]].x - this._bases[ii].x,
+                    this._customLayout[ii][1] as number + this._bases[bp[1]].y - this._bases[ii].y
+                ];
+            }
+        }
     }
 
     public onPoseMouseDown(e: InteractionEvent, closestIndex: number): void {
