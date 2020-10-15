@@ -231,6 +231,7 @@ export default class RNALayout {
                 );
             }
         }
+        console.error('final', xarray);
     }
 
     /**
@@ -325,9 +326,13 @@ export default class RNALayout {
 
             yarray[rootnode.indexA] = rootnode.y + (crossY * this._pairSpace) / 2.0;
             yarray[rootnode.indexB] = rootnode.y - (crossY * this._pairSpace) / 2.0;
+            console.error('set', rootnode.indexA, rootnode.indexB);
+            console.error(xarray);
         } else if (rootnode.indexA >= 0) {
             xarray[rootnode.indexA] = rootnode.x;
             yarray[rootnode.indexA] = rootnode.y;
+            console.error('set', rootnode.indexA);
+            console.error(xarray);
         }
 
         for (const child of rootnode.children) {

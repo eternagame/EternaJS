@@ -10,7 +10,7 @@ import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
 import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
 import PoseField from 'eterna/pose2D/PoseField';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
-import Pose2D from 'eterna/pose2D/Pose2D';
+import Pose2D, {Layout} from 'eterna/pose2D/Pose2D';
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
 import Folder from 'eterna/folding/Folder';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
@@ -153,6 +153,18 @@ export default class PuzzleEditMode extends GameMode {
         this._toolbar.lockButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.LOCK));
         this._toolbar.moleculeButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.BINDING_SITE));
         this._toolbar.pairSwapButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.PAIR));
+
+        this._toolbar.moveButton.clicked.connect(() => {
+            this.setPosesLayoutTool(Layout.MOVE);
+        });
+
+        this._toolbar.rotateStemButton.clicked.connect(() => {
+            this.setPosesLayoutTool(Layout.ROTATE_STEM);
+        });
+
+        this._toolbar.flipStemButton.clicked.connect(() => {
+            this.setPosesLayoutTool(Layout.FLIP_STEM);
+        });
 
         this._toolbar.naturalButton.clicked.connect(() => this.setToNativeMode());
         this._toolbar.targetButton.clicked.connect(() => this.setToTargetMode());
@@ -515,7 +527,6 @@ export default class PuzzleEditMode extends GameMode {
             }
         }
 
-        console.error(SecStruct.fromParens(this._structureInputs[0].structureString, true).onlyPseudoknots());
         if (this._structureInputs.some(
             (si) => SecStruct.fromParens(si.structureString, true).onlyPseudoknots().nonempty()
         ) && !this._folder.canPseudoknot) {
@@ -795,9 +806,16 @@ export default class PuzzleEditMode extends GameMode {
         }
     }
 
+    // AMW TODO: called "setPosesColor" in PoseEditMode
     private onEditButtonClicked(poseColor: number): void {
         for (const pose of this._poses) {
             pose.currentColor = poseColor;
+        }
+    }
+
+    public setPosesLayoutTool(paintColor: Layout): void {
+        for (const pose of this._poses) {
+            pose.currentArrangementTool = paintColor;
         }
     }
 
@@ -849,6 +867,8 @@ export default class PuzzleEditMode extends GameMode {
 
         for (let ii = 0; ii < this._poses.length; ii++) {
             const targetPairs: SecStruct = SecStruct.fromParens(this._structureInputs[ii].structureString, true);
+            // The pose needs to be able to use this for visualization editing
+            this._poses[ii].targetPairs = targetPairs.slice(0);
             const pseudoknots: boolean = targetPairs.onlyPseudoknots().nonempty();
             const seq = this._poses[ii].sequence;
             const lock: boolean[] | undefined = this._poses[ii].puzzleLocks;

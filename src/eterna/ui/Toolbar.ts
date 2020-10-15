@@ -88,6 +88,7 @@ export default class Toolbar extends ContainerObject {
     public baseMarkerButton: GameButton;
     public magicGlueButton: GameButton;
     public rotateStemButton: GameButton;
+    public flipStemButton: GameButton;
     public moveButton: GameButton;
 
     public dynPaintTools: GameButton[] = [];
@@ -612,20 +613,27 @@ export default class Toolbar extends ContainerObject {
             this.magicGlueButton.toggled.value = true;
         }));
 
+        this.moveButton = new ToolbarButton()
+            .up(Bitmaps.ImgMagicGlue)
+            .over(Bitmaps.ImgMagicGlueOver)
+            .down(Bitmaps.ImgMagicGlue)
+            .tooltip('Move nt (ctrl+shift)');
         this.rotateStemButton = new ToolbarButton()
             .up(Bitmaps.ImgMagicGlue)
             .over(Bitmaps.ImgMagicGlueOver)
             .down(Bitmaps.ImgMagicGlue)
             .tooltip('Rotate stem (ctrl+shift)');
-        this.moveButton = new ToolbarButton()
+        this.flipStemButton = new ToolbarButton()
             .up(Bitmaps.ImgMagicGlue)
             .over(Bitmaps.ImgMagicGlueOver)
             .down(Bitmaps.ImgMagicGlue)
-            .tooltip('Move nt(ctrl+shift)');
+            .tooltip('Flip stem (ctrl+shift)');
         this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
         this.addObject(this.moveButton, this.lowerToolbarLayout);
         this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
         this.addObject(this.rotateStemButton, this.lowerToolbarLayout);
+        this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
+        this.addObject(this.flipStemButton, this.lowerToolbarLayout);
 
         if (this._type === ToolbarType.PUZZLEMAKER) {
             this.submitButton.tooltip('Publish your puzzle!');

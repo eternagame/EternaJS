@@ -477,7 +477,7 @@ export default class SecStruct {
             .replace(/>/g, '.');
 
         const ss = new SecStruct();
-        ss.setPairs(filtered, true);
+        ss.setPairs(filtered, false);
         return ss;
     }
 

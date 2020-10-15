@@ -55,7 +55,8 @@ interface AuxInfo {
 
 export enum Layout {
     MOVE,
-    ROTATE_STEM
+    ROTATE_STEM,
+    FLIP_STEM
 }
 
 export type PoseMouseDownCallback = (e: InteractionEvent, closestDist: number, closestIndex: number) => void;
@@ -559,20 +560,27 @@ export default class Pose2D extends ContainerObject implements Updatable {
         const rnaCoords: RNALayout = new RNALayout(
             Pose2D.ZOOM_SPACINGS[this._zoomLevel], Pose2D.ZOOM_SPACINGS[this._zoomLevel]
         );
+        // rnaCoords.setupTree(this._pairs.filterForPseudoknots(), this._targetPairs.filterForPseudoknots());
+        console.error(this._targetPairs);
         rnaCoords.setupTree(this._pairs, this._targetPairs);
         rnaCoords.drawTree(this._customLayout);
         const xarray: number[] = new Array(this._bases.length);
         const yarray: number[] = new Array(this._bases.length);
         rnaCoords.getCoords(xarray, yarray);
+        console.error('back in rotateStem', xarray);
 
-        this.customLayout = [];
+        this._customLayout = [];
         for (let ii = 0; ii < this._bases.length; ++ii) {
-            this.customLayout.push([
-                (xarray[ii]), // * (Pose2D.ZOOM_SPACINGS[0] / Pose2D.ZOOM_SPACINGS[this._zoomLevel]),
-                (yarray[ii])// * (Pose2D.ZOOM_SPACINGS[0] / Pose2D.ZOOM_SPACINGS[this._zoomLevel])
+            if (xarray[ii] === undefined || yarray[ii] === undefined) continue;
+            console.error(xarray[ii], yarray[ii]);
+            this._customLayout.push([
+                xarray[ii],
+                yarray[ii]
             ]);
+            console.error(this._customLayout[0], this._customLayout[ii]);
         }
-        Assert.assertIsDefined(this._customLayout);
+        // Assert.assertIsDefined(this._customLayout);
+        console.error('this._customLayout', this._customLayout);
 
         // id stem
         const stem = this._targetPairs.stemWith(startIdx);
@@ -702,6 +710,78 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 ];
             }
         }
+        console.error('this._customLayout', this._customLayout);
+    }
+
+    /**
+     * Flip the stem containing nucleotide idx. Save your results in the
+     * customLayout. To achieve this: swap the position of each nt with its bp
+     * partner. We do not store persistent stem orientations, because we would
+     * then have to reset them elsewhere with every refold.
+     *
+     * @param idx
+     */
+    public flipStem(startIdx: number): void {
+        // If this idx is not paired, it won't be in a stem; return.
+        if (!this._targetPairs.isPaired(startIdx)) {
+            return;
+        }
+
+        // 1. Get coords and set up a customLayout
+        const rnaCoords: RNALayout = new RNALayout(
+            Pose2D.ZOOM_SPACINGS[this._zoomLevel], Pose2D.ZOOM_SPACINGS[this._zoomLevel]
+        );
+        rnaCoords.setupTree(this._pairs, this._targetPairs.filterForPseudoknots());
+        rnaCoords.drawTree(this._customLayout);
+        const xarray: number[] = new Array(this._bases.length);
+        const yarray: number[] = new Array(this._bases.length);
+        rnaCoords.getCoords(xarray, yarray);
+
+        this.customLayout = [];
+        for (let ii = 0; ii < this._bases.length; ++ii) {
+            if (xarray[ii] === undefined || yarray[ii] === undefined) continue;
+            this.customLayout.push([
+                (xarray[ii]), // * (Pose2D.ZOOM_SPACINGS[0] / Pose2D.ZOOM_SPACINGS[this._zoomLevel]),
+                (yarray[ii])// * (Pose2D.ZOOM_SPACINGS[0] / Pose2D.ZOOM_SPACINGS[this._zoomLevel])
+            ]);
+        }
+        Assert.assertIsDefined(this._customLayout);
+
+        // id stem
+        const stem = this._targetPairs.stemWith(startIdx);
+
+        // Calculate new stem positions
+        for (const bp of stem) {
+            // First work with smaller value, which is either smaller or
+            // bigger than the center bp
+            const tmp = [
+                this._bases[bp[0]].x,
+                this._bases[bp[0]].y
+            ];
+            this._bases[bp[0]].setXY(
+                this._bases[bp[1]].x,
+                this._bases[bp[1]].y
+            );
+            this._bases[bp[0]].setDirty();
+            this._bases[bp[1]].setXY(
+                tmp[0],
+                tmp[1]
+            );
+            this._bases[bp[1]].setDirty();
+        }
+
+        for (const bp of stem) {
+            for (let ii = 0; ii < this._customLayout.length; ++ii) {
+                this._customLayout[bp[0]] = [
+                    this._customLayout[ii][0] as number + this._bases[bp[0]].x - this._bases[ii].x,
+                    this._customLayout[ii][1] as number + this._bases[bp[0]].y - this._bases[ii].y
+                ];
+                this._customLayout[bp[1]] = [
+                    this._customLayout[ii][0] as number + this._bases[bp[1]].x - this._bases[ii].x,
+                    this._customLayout[ii][1] as number + this._bases[bp[1]].y - this._bases[ii].y
+                ];
+            }
+        }
     }
 
     public onPoseMouseDown(e: InteractionEvent, closestIndex: number): void {
@@ -722,6 +802,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     });
                 } else if (this._currentArrangementTool === Layout.ROTATE_STEM) {
                     this.rotateStem(closestIndex);
+                } else if (this._currentArrangementTool === Layout.FLIP_STEM) {
+                    this.flipStem(closestIndex);
                 }
                 dragger.dragComplete.connect(() => {
                     this.onMouseUp();
@@ -821,7 +903,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             const rnaCoords: RNALayout = new RNALayout(
                 Pose2D.ZOOM_SPACINGS[this._zoomLevel], Pose2D.ZOOM_SPACINGS[this._zoomLevel]
             );
-            rnaCoords.setupTree(this._pairs, this._targetPairs);
+            rnaCoords.setupTree(this._pairs.filterForPseudoknots(), this._targetPairs.filterForPseudoknots());
             rnaCoords.drawTree(this._customLayout);
             const xarray: number[] = new Array(this._bases.length);
             const yarray: number[] = new Array(this._bases.length);
@@ -830,6 +912,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             // This minimizes the calculations you have to do later.
             this.customLayout = [];
             for (let ii = 0; ii < this._bases.length; ++ii) {
+                if (xarray[ii] === undefined || yarray[ii] === undefined) continue;
                 this.customLayout.push([
                     (xarray[ii]), // * (Pose2D.ZOOM_SPACINGS[0] / Pose2D.ZOOM_SPACINGS[this._zoomLevel]),
                     (yarray[ii])// * (Pose2D.ZOOM_SPACINGS[0] / Pose2D.ZOOM_SPACINGS[this._zoomLevel])
@@ -877,6 +960,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     }
                 }
             }
+            console.error(this._customLayout);
             return;
         }
 

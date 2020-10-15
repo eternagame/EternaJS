@@ -276,12 +276,16 @@ export default class PoseEditMode extends GameMode {
             this.setPosesColor(RNAPaint.MAGIC_GLUE);
         });
 
+        this._toolbar.moveButton.clicked.connect(() => {
+            this.setPosesLayoutTool(Layout.MOVE);
+        });
+
         this._toolbar.rotateStemButton.clicked.connect(() => {
             this.setPosesLayoutTool(Layout.ROTATE_STEM);
         });
 
-        this._toolbar.moveButton.clicked.connect(() => {
-            this.setPosesLayoutTool(Layout.MOVE);
+        this._toolbar.flipStemButton.clicked.connect(() => {
+            this.setPosesLayoutTool(Layout.FLIP_STEM);
         });
 
         // Add our docked SpecBox at the bottom of uiLayer
