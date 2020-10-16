@@ -172,9 +172,12 @@ export default class EternaMenu extends GamePanel implements Enableable {
         };
 
         menuButton.pointerOver.connect((e) => {
+            console.error('enabled?', this._enabled);
             if (this._enabled) {
+                console.error('is menu.panel.display.visible?', menu.panel.display.visible);
                 if (!menu.panel.display.visible) {
                     showDialog();
+                    console.error('is menu.panel.display.visible?', menu.panel.display.visible);
 
                     const regs = new RegistrationGroup();
 

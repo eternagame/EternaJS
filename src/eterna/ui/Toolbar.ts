@@ -84,7 +84,6 @@ export default class Toolbar extends ContainerObject {
     public freezeButton: GameButton;
 
     public boostersMenu: GameButton;
-    public alterMenu: GameButton;
 
     public baseMarkerButton: GameButton;
     public magicGlueButton: GameButton;
@@ -146,7 +145,7 @@ export default class Toolbar extends ContainerObject {
     protected added(): void {
         super.added();
 
-        const APPROX_ITEM_COUNT = 12;
+        const APPROX_ITEM_COUNT = 13;
         const APPROX_ITEM_HEIGHT = 52;
         // For some reason there's a 2px margin on either side of our UI elements baked in... because.
         const APPROX_ITEM_WIDTH = APPROX_ITEM_HEIGHT + (2 * 2);
@@ -388,6 +387,35 @@ export default class Toolbar extends ContainerObject {
             }
         }
 
+        const alterMenuIdx = 0;
+        // this.actionMenu.addMenuButton(
+        //     new GameButton().allStates(Bitmaps.CustomLayout).disabled(undefined)
+        // );
+
+        this.moveButton = new GameButton()
+            .allStates(Bitmaps.CustomLayout)
+            .disabled(undefined)
+            .label('Move', 14)
+            .scaleBitmapToLabel()
+            .tooltip('Move a nucleotide or stem by ctrl-shift-click');
+        this.actionMenu.addSubMenuButton(alterMenuIdx, this.moveButton);
+
+        this.rotateStemButton = new GameButton()
+            .allStates(Bitmaps.CustomLayout)
+            .disabled(undefined)
+            .label('Rotate stem', 14)
+            .scaleBitmapToLabel()
+            .tooltip('Rotate stem clockwise 1/4 turn by ctrl-shift-click');
+        this.actionMenu.addSubMenuButton(alterMenuIdx, this.rotateStemButton);
+
+        this.flipStemButton = new GameButton()
+            .allStates(Bitmaps.CustomLayout)
+            .disabled(undefined)
+            .label('Flip stem', 14)
+            .scaleBitmapToLabel()
+            .tooltip('Flip stem by ctrl-shift-click');
+        this.actionMenu.addSubMenuButton(alterMenuIdx, this.flipStemButton);
+
         if (this._type === ToolbarType.LAB) {
             this.submitButton.tooltip('Publish your solution!');
             this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
@@ -613,33 +641,6 @@ export default class Toolbar extends ContainerObject {
             this._deselectAllPaintTools();
             this.magicGlueButton.toggled.value = true;
         }));
-
-        // this.alterMenu = new GameButton().allStates(Bitmaps.CustomLayout).disabled(undefined);
-        // const boosterMenuIdx = this.actionMenu.addMenuButton(this.alterMenu);
-
-        this.moveButton = new GameButton()
-            .allStates(Bitmaps.CustomLayout)
-            .disabled(undefined)
-            .label('Move', 14)
-            .scaleBitmapToLabel()
-            .tooltip('Move a nucleotide or stem by ctrl-shift-click');
-        // this.actionMenu.addSubMenuButton(boosterMenuIdx, this.moveButton);
-
-        this.rotateStemButton = new GameButton()
-            .allStates(Bitmaps.CustomLayout)
-            .disabled(undefined)
-            .label('Rotate stem', 14)
-            .scaleBitmapToLabel()
-            .tooltip('Rotate stem clockwise 1/4 turn by ctrl-shift-click');
-        // this.actionMenu.addSubMenuButton(boosterMenuIdx, this.rotateStemButton);
-
-        this.flipStemButton = new GameButton()
-            .allStates(Bitmaps.CustomLayout)
-            .disabled(undefined)
-            .label('Flip stem', 14)
-            .scaleBitmapToLabel()
-            .tooltip('Flip stem by ctrl-shift-click');
-        // this.actionMenu.addSubMenuButton(boosterMenuIdx, this.flipStemButton);
 
         if (this._type === ToolbarType.PUZZLEMAKER) {
             this.submitButton.tooltip('Publish your puzzle!');
@@ -880,6 +881,10 @@ export default class Toolbar extends ContainerObject {
         this.deleteButton.enabled = !disable;
         this.lockButton.enabled = !disable;
         this.moleculeButton.enabled = !disable;
+
+        this.moveButton.enabled = !disable;
+        this.rotateStemButton.enabled = !disable;
+        this.flipStemButton.enabled = !disable;
 
         this.estimateButton.enabled = !disable;
         this.letterColorButton.enabled = !disable;

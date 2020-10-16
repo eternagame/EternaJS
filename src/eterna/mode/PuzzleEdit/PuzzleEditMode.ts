@@ -15,7 +15,7 @@ import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotideP
 import Folder from 'eterna/folding/Folder';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import {
-    Base64, DisplayUtil, HAlign, VAlign, KeyCode, Assert
+    Base64, DisplayUtil, HAlign, VAlign, KeyCode, Assert, KeyboardEventType
 } from 'flashbang';
 import {DialogCanceledError} from 'eterna/ui/Dialog';
 import Vienna2 from 'eterna/folding/Vienna2';
@@ -103,13 +103,6 @@ export default class PuzzleEditMode extends GameMode {
 
         this._folderSwitcher = new FolderSwitcher((folder) => {
             if (this._numTargets > 1 && !folder.canFoldWithBindingSite) return false;
-            // We actually don't want this. It won't have any effect -- because
-            // the StructureInputs get populated later -- and it won't update
-            // upon change.
-            // We do want to check that you can't SUBMIT such a puzzle.
-            // if (this._structureInputs.some(
-            //     (si) => SecStruct.fromParens(si.structureString).onlyPseudoknots().nonempty()
-            // ) && !folder.canPseudoknot) return false;
             return true;
         });
         this._folderSwitcher.selectedFolder.connect((folder) => {
@@ -203,6 +196,18 @@ export default class PuzzleEditMode extends GameMode {
         this._toolbar.submitButton.clicked.connect(() => this.onSubmitPuzzle());
 
         this._toolbar.palette.targetClicked.connect((type) => this.onPaletteTargetSelected(type));
+
+        this._toolbar.moveButton.clicked.connect(() => {
+            this.setPosesLayoutTool(Layout.MOVE);
+        });
+
+        this._toolbar.rotateStemButton.clicked.connect(() => {
+            this.setPosesLayoutTool(Layout.ROTATE_STEM);
+        });
+
+        this._toolbar.flipStemButton.clicked.connect(() => {
+            this.setPosesLayoutTool(Layout.FLIP_STEM);
+        });
 
         if (this._embedded) {
             this._scriptInterface.addCallback('get_secstruct', () => this.structure);
@@ -315,6 +320,27 @@ export default class PuzzleEditMode extends GameMode {
         this.registerScriptInterface(this._scriptInterface);
 
         this.updateUILayout();
+    }
+
+    public onKeyboardEvent(e: KeyboardEvent): void {
+        let handled: boolean = this.keyboardInput.handleKeyboardEvent(e);
+
+        if (!handled && e.type === KeyboardEventType.KEY_DOWN) {
+            const key = e.code;
+            const ctrl = e.ctrlKey;
+
+            if (ctrl && key === KeyCode.KeyS) {
+                this.downloadSVG();
+                handled = true;
+            } else if (ctrl && key === KeyCode.KeyH) {
+                this.downloadHKWS();
+                handled = true;
+            }
+        }
+
+        if (handled) {
+            e.stopPropagation();
+        }
     }
 
     private saveData(): void {
@@ -802,9 +828,9 @@ export default class PuzzleEditMode extends GameMode {
         }
     }
 
-    public setPosesLayoutTool(paintColor: Layout): void {
+    public setPosesLayoutTool(layoutTool: Layout): void {
         for (const pose of this._poses) {
-            pose.currentArrangementTool = paintColor;
+            pose.currentArrangementTool = layoutTool;
         }
     }
 

@@ -322,33 +322,6 @@ export default class SecStruct {
             }
         }
         return [];
-        /* const pi = this.pairingPartner(idx);
-        const indices: number[] = [idx, pi];
-        // Check offsets until you can't find a pair anymore.
-        let breakLeft = false;
-        let breakRight = false;
-        for (let offset = 1; offset < this._pairs.length; ++offset) {
-            // If ii and this.pairingPartner(ii) are both 'next to' indices, add
-            // them in.
-            if (offset <= idx && !breakLeft) {
-                if (this.pairingPartner(idx - offset) === pi + offset) {
-                    indices.push(idx - offset);
-                    indices.push(pi + offset);
-                } else {
-                    breakLeft = true;
-                }
-            } else if (offset <= pi && !breakRight) {
-                if (this.pairingPartner(pi - offset) === idx + offset) {
-                    indices.push(pi - offset);
-                    indices.push(idx + offset);
-                } else {
-                    breakRight = true;
-                }
-            } else {
-                break;
-            }
-        }
-        return indices; */
     }
 
     /**

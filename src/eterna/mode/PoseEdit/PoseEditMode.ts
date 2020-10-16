@@ -2200,9 +2200,9 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    public setPosesLayoutTool(paintColor: Layout): void {
+    public setPosesLayoutTool(layoutTool: Layout): void {
         for (const pose of this._poses) {
-            pose.currentArrangementTool = paintColor;
+            pose.currentArrangementTool = layoutTool;
         }
     }
 
