@@ -84,14 +84,13 @@ export default class Toolbar extends ContainerObject {
     public freezeButton: GameButton;
 
     public boostersMenu: GameButton;
+    public alterMenu: GameButton;
 
     public baseMarkerButton: GameButton;
     public magicGlueButton: GameButton;
     public moveButton: GameButton;
     public rotateStemButton: GameButton;
     public flipStemButton: GameButton;
-    public downloadSVGButton: GameButton;
-    public downloadHKWSButton: GameButton;
 
     public dynPaintTools: GameButton[] = [];
     public dynActionTools: GameButton[] = [];
@@ -615,41 +614,32 @@ export default class Toolbar extends ContainerObject {
             this.magicGlueButton.toggled.value = true;
         }));
 
-        this.moveButton = new ToolbarButton()
-            .up(Bitmaps.ImgMagicGlue)
-            .over(Bitmaps.ImgMagicGlueOver)
-            .down(Bitmaps.ImgMagicGlue)
-            .tooltip('Move nt (ctrl+shift)');
-        this.rotateStemButton = new ToolbarButton()
-            .up(Bitmaps.ImgMagicGlue)
-            .over(Bitmaps.ImgMagicGlueOver)
-            .down(Bitmaps.ImgMagicGlue)
-            .tooltip('Rotate stem (ctrl+shift)');
-        this.flipStemButton = new ToolbarButton()
-            .up(Bitmaps.ImgMagicGlue)
-            .over(Bitmaps.ImgMagicGlueOver)
-            .down(Bitmaps.ImgMagicGlue)
-            .tooltip('Flip stem (ctrl+shift)');
-        this.downloadSVGButton = new ToolbarButton()
-            .up(Bitmaps.ImgMagicGlue)
-            .over(Bitmaps.ImgMagicGlueOver)
-            .down(Bitmaps.ImgMagicGlue)
-            .tooltip('Download SVG');
-        this.downloadHKWSButton = new ToolbarButton()
-            .up(Bitmaps.ImgMagicGlue)
-            .over(Bitmaps.ImgMagicGlueOver)
-            .down(Bitmaps.ImgMagicGlue)
-            .tooltip('Download HKWS');
-        this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
-        this.addObject(this.moveButton, this.lowerToolbarLayout);
-        this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
-        this.addObject(this.rotateStemButton, this.lowerToolbarLayout);
-        this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
-        this.addObject(this.flipStemButton, this.lowerToolbarLayout);
-        this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
-        this.addObject(this.downloadSVGButton, this.lowerToolbarLayout);
-        this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
-        this.addObject(this.downloadHKWSButton, this.lowerToolbarLayout);
+        // this.alterMenu = new GameButton().allStates(Bitmaps.CustomLayout).disabled(undefined);
+        // const boosterMenuIdx = this.actionMenu.addMenuButton(this.alterMenu);
+
+        this.moveButton = new GameButton()
+            .allStates(Bitmaps.CustomLayout)
+            .disabled(undefined)
+            .label('Move', 14)
+            .scaleBitmapToLabel()
+            .tooltip('Move a nucleotide or stem by ctrl-shift-click');
+        // this.actionMenu.addSubMenuButton(boosterMenuIdx, this.moveButton);
+
+        this.rotateStemButton = new GameButton()
+            .allStates(Bitmaps.CustomLayout)
+            .disabled(undefined)
+            .label('Rotate stem', 14)
+            .scaleBitmapToLabel()
+            .tooltip('Rotate stem clockwise 1/4 turn by ctrl-shift-click');
+        // this.actionMenu.addSubMenuButton(boosterMenuIdx, this.rotateStemButton);
+
+        this.flipStemButton = new GameButton()
+            .allStates(Bitmaps.CustomLayout)
+            .disabled(undefined)
+            .label('Flip stem', 14)
+            .scaleBitmapToLabel()
+            .tooltip('Flip stem by ctrl-shift-click');
+        // this.actionMenu.addSubMenuButton(boosterMenuIdx, this.flipStemButton);
 
         if (this._type === ToolbarType.PUZZLEMAKER) {
             this.submitButton.tooltip('Publish your puzzle!');

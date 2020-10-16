@@ -288,13 +288,6 @@ export default class PoseEditMode extends GameMode {
             this.setPosesLayoutTool(Layout.FLIP_STEM);
         });
 
-        this._toolbar.downloadSVGButton.clicked.connect(() => {
-            this.downloadSVG();
-        });
-        this._toolbar.downloadHKWSButton.clicked.connect(() => {
-            this.downloadHKWS();
-        });
-
         // Add our docked SpecBox at the bottom of uiLayer
         this._dockedSpecBox = new SpecBox(true);
         this._dockedSpecBox.display.position = new Point(15, 190);
@@ -1317,6 +1310,12 @@ export default class PoseEditMode extends GameMode {
                 handled = true;
             } else if (ctrl && key === KeyCode.KeyZ) {
                 this.moveUndoStackToLastStable();
+                handled = true;
+            } else if (ctrl && key === KeyCode.KeyS) {
+                this.downloadSVG();
+                handled = true;
+            } else if (ctrl && key === KeyCode.KeyH) {
+                this.downloadHKWS();
                 handled = true;
             } else if (this._stackLevel <= 1 && key === KeyCode.KeyD && this._params.solutions != null) {
                 this.showNextSolution(1);
