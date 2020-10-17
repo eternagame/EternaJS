@@ -349,7 +349,7 @@ export default class PuzzleEditMode extends GameMode {
             Assert.assertIsDefined(pose.molecularStructure);
             objs.push(JSON.stringify({
                 sequence: pose.sequence.sequenceString(),
-                structure: pose.molecularStructure.pairs
+                structure: pose.molecularStructure.getParenthesis(null, true)
             }));
         }
 
