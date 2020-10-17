@@ -1972,8 +1972,6 @@ export default class PoseEditMode extends GameMode {
     }
 
     private async submitSolution(details: SubmitPoseDetails, undoBlock: UndoBlock): Promise<void> {
-        this._rscript.finishLevel();
-
         if (this._puzzle.nodeID < 0) {
             return;
         }
@@ -2158,6 +2156,7 @@ export default class PoseEditMode extends GameMode {
 
             missionClearedPanel.nextButton.clicked.connect(async () => {
                 try {
+                    this._rscript.finishLevel();
                     const nextPuzzle = await nextPuzzlePromise;
                     Eterna.chat.popHideChat();
                     Assert.assertIsDefined(this.modeStack);
