@@ -288,6 +288,12 @@ export default class PoseEditMode extends GameMode {
             this.setPosesLayoutTool(Layout.FLIP_STEM);
         });
 
+        this._toolbar.snapToGridButton.clicked.connect(() => {
+            for (const pose of this._poses) {
+                pose.snapToGrid();
+            }
+        });
+
         // Add our docked SpecBox at the bottom of uiLayer
         this._dockedSpecBox = new SpecBox(true);
         this._dockedSpecBox.display.position = new Point(15, 190);

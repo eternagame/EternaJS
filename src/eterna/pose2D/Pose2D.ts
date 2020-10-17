@@ -25,6 +25,7 @@ import Utility from 'eterna/util/Utility';
 import Folder from 'eterna/folding/Folder';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
+import {isIP} from 'net';
 import Base from './Base';
 import BaseDrawFlags from './BaseDrawFlags';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
@@ -703,6 +704,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 ];
             }
         }
+        this._baseRope.enabled = true;
+        this._baseRope.redraw(true);
     }
 
     /**
@@ -774,6 +777,72 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 ];
             }
         }
+        this._baseRope.enabled = true;
+        this._baseRope.redraw(true);
+    }
+
+    /**
+     * Snap every base to a grid of size pairSpace/5. This is a nice even number
+     * such that you get SOME gradations that are smaller than the space between
+     * paired bases, but not so much that the whole thing feels sloppy. Also
+     * permits nice tetraloop layouts. Only affects paired nucleotides.
+     *
+     * @param idx
+     */
+    public snapToGrid(): void {
+        const pairSpace = Pose2D.ZOOM_SPACINGS[this._zoomLevel];
+        const gridSpace = pairSpace;
+
+        // 1. Get coords and set up a customLayout
+        const rnaCoords: RNALayout = new RNALayout(
+            pairSpace, pairSpace
+        );
+        rnaCoords.setupTree(this._pairs, this._targetPairs);
+        rnaCoords.drawTree(this._customLayout);
+        const xarray: number[] = new Array(this._bases.length);
+        const yarray: number[] = new Array(this._bases.length);
+        rnaCoords.getCoords(xarray, yarray);
+
+        this.customLayout = [];
+        for (let ii = 0; ii < this._bases.length; ++ii) {
+            if (xarray[ii] === undefined || yarray[ii] === undefined) continue;
+            this.customLayout.push([
+                (xarray[ii]), // * (Pose2D.ZOOM_SPACINGS[0] / Pose2D.ZOOM_SPACINGS[this._zoomLevel]),
+                (yarray[ii])// * (Pose2D.ZOOM_SPACINGS[0] / Pose2D.ZOOM_SPACINGS[this._zoomLevel])
+            ]);
+        }
+        Assert.assertIsDefined(this._customLayout);
+
+        // Calculate new base positions
+        for (let ii = 0; ii < this._bases.length; ++ii) {
+            if (!this._pairs.isPaired(ii)) continue;
+            // First work with smaller value, which is either smaller or
+            // bigger than the center bp
+            this._bases[ii].setXY(
+                Math.round(this._bases[ii].x / gridSpace) * gridSpace,
+                Math.round(this._bases[ii].y / gridSpace) * gridSpace
+            );
+            this._bases[ii].setDirty();
+        }
+        for (let ii = 0; ii < this._bases.length; ++ii) {
+            if (!this._pairs.isPaired(ii)) continue;
+            for (let jj = 0; jj < this._customLayout.length; ++jj) {
+                this._customLayout[jj] = [
+                    this._customLayout[jj][0] as number + this._bases[jj].x - this._bases[ii].x,
+                    this._customLayout[jj][1] as number + this._bases[jj].y - this._bases[ii].y
+                ];
+            }
+        }
+        this._baseRope.enabled = true;
+        this._baseRope.redraw(true);
+        // for (const bp of stem) {
+        // for (let ii = 0; ii < this._customLayout.length; ++ii) {
+        // this._customLayout[bp[1]] = [
+        //     this._customLayout[ii][0] as number + this._bases[bp[1]].x - this._bases[ii].x,
+        //     this._customLayout[ii][1] as number + this._bases[bp[1]].y - this._bases[ii].y
+        // ];
+        // }
+        // }
     }
 
     public onPoseMouseDown(e: InteractionEvent, closestIndex: number): void {
@@ -952,6 +1021,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     }
                 }
             }
+            this._baseRope.enabled = true;
+            this._baseRope.redraw(true);
             return;
         }
 

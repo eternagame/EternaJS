@@ -203,7 +203,7 @@ export default abstract class LinearFoldBase extends Folder {
     }
 
     public cofoldSequence(
-        seq: Sequence, secondBestPairs: SecStruct, malus: number = 0,
+        seq: Sequence, secondBestPairs: SecStruct | null, malus: number = 0,
         desiredPairs: string | null = null, temp: number = 37
     ): SecStruct {
         log.warn('LinearFold.cofoldSequence: unimplemented');

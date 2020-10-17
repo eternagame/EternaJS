@@ -90,6 +90,7 @@ export default class Toolbar extends ContainerObject {
     public moveButton: GameButton;
     public rotateStemButton: GameButton;
     public flipStemButton: GameButton;
+    public snapToGridButton: GameButton;
 
     public dynPaintTools: GameButton[] = [];
     public dynActionTools: GameButton[] = [];
@@ -415,6 +416,14 @@ export default class Toolbar extends ContainerObject {
             .scaleBitmapToLabel()
             .tooltip('Flip stem by ctrl-shift-click');
         this.actionMenu.addSubMenuButton(alterMenuIdx, this.flipStemButton);
+
+        this.snapToGridButton = new GameButton()
+            .allStates(Bitmaps.CustomLayout)
+            .disabled(undefined)
+            .label('Snap to grid', 14)
+            .scaleBitmapToLabel()
+            .tooltip('Snap current layout to a grid');
+        this.actionMenu.addSubMenuButton(alterMenuIdx, this.snapToGridButton);
 
         if (this._type === ToolbarType.LAB) {
             this.submitButton.tooltip('Publish your solution!');

@@ -134,7 +134,7 @@ export default class ContraFold extends Folder {
 
     public foldSequence(
         seq: Sequence,
-        secondBestPairs: SecStruct,
+        secondBestPairs: SecStruct | null,
         desiredPairs: string | null = null,
         pseudoknotted: boolean = false,
         temp: number = 37,
@@ -143,7 +143,7 @@ export default class ContraFold extends Folder {
         const key: CacheKey = {
             primitive: 'fold',
             seq: seq.baseArray,
-            secondBestPairs: secondBestPairs.pairs,
+            secondBestPairs: secondBestPairs?.pairs ?? null,
             desiredPairs,
             temp,
             gamma

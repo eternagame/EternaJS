@@ -284,7 +284,7 @@ export default class NuPACK extends Folder {
         const key: CacheKey = {
             primitive: 'cofold',
             seq: seq.baseArray,
-            secondBestPairs: secondBestPairs.pairs,
+            secondBestPairs: secondBestPairs?.pairs ?? null,
             malus,
             desiredPairs,
             temp
@@ -419,7 +419,7 @@ export default class NuPACK extends Folder {
         const key: CacheKey = {
             primitive: 'multifold',
             seq: seq.baseArray,
-            secondBestPairs: secondBestPairs.pairs,
+            secondBestPairs: secondBestPairs?.pairs ?? null,
             oligos,
             desiredPairs,
             temp

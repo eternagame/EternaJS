@@ -209,6 +209,12 @@ export default class PuzzleEditMode extends GameMode {
             this.setPosesLayoutTool(Layout.FLIP_STEM);
         });
 
+        this._toolbar.snapToGridButton.clicked.connect(() => {
+            for (const pose of this._poses) {
+                pose.snapToGrid();
+            }
+        });
+
         if (this._embedded) {
             this._scriptInterface.addCallback('get_secstruct', () => this.structure);
             this._scriptInterface.addCallback('get_sequence', () => this.sequence);

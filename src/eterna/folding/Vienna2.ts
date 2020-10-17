@@ -292,7 +292,7 @@ export default class Vienna2 extends Folder {
 
     /* override */
     public cofoldSequence(
-        seq: Sequence, secondBestPairs: SecStruct, malus: number = 0,
+        seq: Sequence, secondBestPairs: SecStruct | null, malus: number = 0,
         desiredPairs: string | null = null, temp: number = 37
     ): SecStruct {
         const cut: number = seq.findCut();
@@ -303,7 +303,7 @@ export default class Vienna2 extends Folder {
         const key: CacheKey = {
             primitive: 'cofold',
             seq: seq.baseArray,
-            secondBestPairs: secondBestPairs.pairs,
+            secondBestPairs: secondBestPairs?.pairs ?? null,
             malus,
             desiredPairs,
             temp
