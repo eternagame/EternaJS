@@ -251,7 +251,7 @@ export default class Toolbar extends ContainerObject {
         Assert.assertIsDefined(Flashbang.stageHeight);
         this.scrollContainer = new ScrollContainer(Flashbang.stageWidth, Flashbang.stageHeight);
         this._content.addChild(this.scrollContainerContainer);
-        this.lowerToolbarLayout.setParent(this.scrollContainer.content);
+        this.scrollContainer.container.addChild(this.lowerToolbarLayout);
 
         /*
         The lower toolbar structure is a HLayoutContainer wrapped in ScrollContainer wrapped in another HLayoutContainer
@@ -276,10 +276,6 @@ export default class Toolbar extends ContainerObject {
 
         this.actionMenu = new EternaMenu(EternaMenuStyle.PULLUP, true);
         this.addObject(this.actionMenu, this.lowerToolbarLayout);
-
-        this.regs.add(this.actionMenu.toolbarUpdateLayout.connect(() => {
-            this.updateLayout();
-        }));
 
         this.actionMenu.addMenuButton(new GameButton().allStates(Bitmaps.NovaMenu).disabled(undefined));
 
@@ -768,8 +764,11 @@ export default class Toolbar extends ContainerObject {
         const buttonOffset = this.leftArrow.display.width + this.rightArrow.display.width;
         this.scrollContainer.setSize(Flashbang.stageWidth - buttonOffset, Flashbang.stageHeight);
 
+        // lowerToolbarLayout isn't a child of another LayoutContainer (since we have the ScrollContainer)
+        // so we'll need to play some games to make sure both are updated when their sizes change
         this._content.layout(true);
         this.lowerToolbarLayout.layout(true);
+        this._content.layout(true);
 
         this.updateArrowVisibility();
 

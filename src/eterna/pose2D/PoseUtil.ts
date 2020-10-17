@@ -18,11 +18,9 @@ export default class PoseUtil {
 
     public static addBaseWithIndex(index: number, pairs: SecStruct): [string, PuzzleEditOp, RNABase[]?] {
         let mutatedPairs: number[];
-        console.error(pairs.pairs);
         mutatedPairs = pairs.pairs.slice(0, index);
         mutatedPairs.push(-1);
         mutatedPairs = mutatedPairs.concat(pairs.pairs.slice(index, pairs.length));
-        console.error(mutatedPairs);
 
         for (let ii = 0; ii < mutatedPairs.length; ii++) {
             if (mutatedPairs[ii] >= index) {

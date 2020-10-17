@@ -169,15 +169,32 @@ export default class EternaMenu extends GamePanel implements Enableable {
             Assert.assertIsDefined(this.mode.container);
             this.mode.container.removeChild(menu.panel.container);
             this.mode.container.addChild(menu.panel.container);
+
+            // Note that we are making an assumption here - that the position of the button will
+            // never change while the menu is open. This seems like a safe bet - the user shouldn't
+            // be resizing the screen, nothing should be animating, menus shouldn't otherwise be actively
+            // changing, etc. There isn't really a foolproof way I can think of to listen for changes
+            // in the global position of a DisplayObject, otherwise I would have done that. If for
+            // some reason you need different behavior, first rethink if it's really necessary. Following
+            // that, do something smarter than what I've done here.
+            if (this._style === EternaMenuStyle.DEFAULT) {
+                DisplayUtil.positionRelative(
+                    menu.panel.container, HAlign.LEFT, VAlign.TOP,
+                    menu.menuButton.container, HAlign.LEFT, VAlign.BOTTOM,
+                    0, -1
+                );
+            } else if (this._style === EternaMenuStyle.PULLUP) {
+                DisplayUtil.positionRelative(
+                    menu.panel.container, HAlign.LEFT, VAlign.BOTTOM,
+                    menu.menuButton.container, HAlign.LEFT, VAlign.TOP
+                );
+            }
         };
 
         menuButton.pointerOver.connect((e) => {
-            console.error('enabled?', this._enabled);
             if (this._enabled) {
-                console.error('is menu.panel.display.visible?', menu.panel.display.visible);
                 if (!menu.panel.display.visible) {
                     showDialog();
-                    console.error('is menu.panel.display.visible?', menu.panel.display.visible);
 
                     const regs = new RegistrationGroup();
 
@@ -198,7 +215,6 @@ export default class EternaMenu extends GamePanel implements Enableable {
                     }));
                 }
             }
-            this.toolbarUpdateLayout.emit();
         });
 
         menuButton.pointerTap.connect(() => {
@@ -218,7 +234,6 @@ export default class EternaMenu extends GamePanel implements Enableable {
                     });
                     menu.panel.addObject(this._activeCapture);
                 }
-                this.toolbarUpdateLayout.emit();
             }
         });
 
@@ -268,18 +283,6 @@ export default class EternaMenu extends GamePanel implements Enableable {
             const buttonHeight: number = menu.menuButton.container.height;
 
             menu.menuButton.display.position = new Point(widthOffset, 0);
-            if (this._style === EternaMenuStyle.DEFAULT) {
-                DisplayUtil.positionRelative(
-                    menu.panel.container, HAlign.LEFT, VAlign.TOP,
-                    menu.menuButton.container, HAlign.LEFT, VAlign.BOTTOM,
-                    0, -1
-                );
-            } else if (this._style === EternaMenuStyle.PULLUP) {
-                DisplayUtil.positionRelative(
-                    menu.panel.container, HAlign.LEFT, VAlign.BOTTOM,
-                    menu.menuButton.container, HAlign.LEFT, VAlign.TOP
-                );
-            }
             widthOffset += buttonWidth + space;
             this._menuHeight = Math.max(this._menuHeight, buttonHeight);
         }
@@ -304,7 +307,6 @@ export default class EternaMenu extends GamePanel implements Enableable {
     private _menuHeight: number = 0;
     private _activeCapture: PointerCapture | null;
     public readonly inToolbar: boolean = false;
-    public toolbarUpdateLayout = new UnitSignal();
 }
 
 class Menu {
