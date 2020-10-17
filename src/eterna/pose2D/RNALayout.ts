@@ -998,7 +998,19 @@ export default class RNALayout {
         // we encode pairs as -1 == unpaired, 0-indexed seqpos == paired
         // that means that EACH of their entries need to be ++ed
         const pairTable: number[] = [this._nopseudoknotPairs.length,
-            ...this._nopseudoknotPairs.pairs.slice().map((value: number) => value + 1)];
+            ...this._nopseudoknotPairs.pairs.slice().map((value: number, ii: number) => {
+                if (value === ii + 2) {
+                    return 0;
+                } else if (value === ii + 3) {
+                    return 0;
+                } else if (value === ii - 2) {
+                    return 0;
+                } else if (value === ii - 3) {
+                    return 0;
+                } else {
+                    return value + 1;
+                }
+            })];
 
         const rnap = LayoutEngineManager.instance.getLayoutEngine(RNApuzzler.NAME);
 
