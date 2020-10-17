@@ -278,6 +278,7 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
 
     private doLayout(): void {
         this._rankScrollContainer.visible = (this._rankScroll != null);
+        this.closeButton.display.visible = this._rankScrollContainer.visible;
         this.nextButton.display.visible = this._rankScrollContainer.visible;
 
         const panelWidth = MissionClearedPanel.calcWidth();
