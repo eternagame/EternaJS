@@ -192,8 +192,29 @@ export default class FeedbackViewMode extends GameMode {
         };
         const setNewSolution = async (newSolution: Solution) => {
             // This function is called by the solutionView (a few layers back), so it is definitely defined
-            Assert.assertIsDefined(this._solutionView);
-            this._solutionView.showSolution(newSolution);
+            if (this._solutionView) {
+                this.removeObject(this._solutionView);
+            }
+            this._solutionView = new ViewSolutionOverlay({
+                solution: newSolution,
+                puzzle: this._puzzle,
+                voteDisabled: false,
+                onPrevious: async () => {
+                    const {currentSolutionIndex, solutionsToPuzzle} = await getCurrentSolutionIndex();
+                    const newSolutionIndex = currentSolutionIndex - 1 <= 0
+                        ? solutionsToPuzzle.length - 1
+                        : currentSolutionIndex - 1;
+                    setNewSolution(solutionsToPuzzle[newSolutionIndex]);
+                },
+                onNext: async () => {
+                    const {currentSolutionIndex, solutionsToPuzzle} = await getCurrentSolutionIndex();
+                    const newSolutionIndex = currentSolutionIndex + 1 >= solutionsToPuzzle.length
+                        ? 0
+                        : currentSolutionIndex + 1;
+                    setNewSolution(solutionsToPuzzle[newSolutionIndex]);
+                },
+                parentMode: (() => this)()
+            });
             this._solution = newSolution;
             this._sequence = newSolution.sequence.slice(0);
             // Update the game, so it's not showing an outdated sequence
@@ -208,16 +229,14 @@ export default class FeedbackViewMode extends GameMode {
                 const newSolutionIndex = currentSolutionIndex - 1 <= 0
                     ? solutionsToPuzzle.length - 1
                     : currentSolutionIndex - 1;
-                const newSolution = solutionsToPuzzle[newSolutionIndex];
-                setNewSolution(newSolution);
+                setNewSolution(solutionsToPuzzle[newSolutionIndex]);
             },
             onNext: async () => {
                 const {currentSolutionIndex, solutionsToPuzzle} = await getCurrentSolutionIndex();
                 const newSolutionIndex = currentSolutionIndex + 1 >= solutionsToPuzzle.length
                     ? 0
                     : currentSolutionIndex + 1;
-                const newSolution = solutionsToPuzzle[newSolutionIndex];
-                setNewSolution(newSolution);
+                setNewSolution(solutionsToPuzzle[newSolutionIndex]);
             },
             parentMode: (() => this)()
         });
@@ -233,6 +252,8 @@ export default class FeedbackViewMode extends GameMode {
             .hotkey(KeyCode.KeyI, true)
             .tooltip('Design Information (ctrl+I/cmd+I)');
 
+        // Here, we don't need to reconstruct the ViewSolutionOverlay, because
+        // we are not changing the solution.
         this._info.clicked.connect(() => {
             if (this._solutionView) {
                 this._solutionView.showSolution(this._solution);
