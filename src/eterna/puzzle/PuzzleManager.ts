@@ -35,6 +35,7 @@ import SynthesisConstraint from 'eterna/constraints/constraints/SynthesisConstra
 import BarcodeConstraint from 'eterna/constraints/constraints/BarcodeConstraint';
 import ExternalInterface from 'eterna/util/ExternalInterface';
 import BoostConstraint from 'eterna/constraints/constraints/BoostConstraint';
+import RangePairedMaxConstraint from 'eterna/constraints/constraints/RangePairedMaxConstraint';
 import {Assert} from 'flashbang';
 import {TargetConditions} from 'eterna/UndoBlock';
 import SolutionManager from './SolutionManager';
@@ -327,6 +328,9 @@ export default class PuzzleManager {
                         break;
                     case BoostConstraint.NAME:
                         constraints.push(new BoostConstraint(Number(parameter)));
+                        break;
+                    case RangePairedMaxConstraint.NAME:
+                        constraints.push(new RangePairedMaxConstraint(parameter));
                         break;
                     default:
                         log.warn(`Unknown constraint ${name} - skipping`);

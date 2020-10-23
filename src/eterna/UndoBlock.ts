@@ -98,7 +98,7 @@ export enum BasePairProbabilityTransform {
     SQUARE
 }
 
-type Param = (number | number[] | null);
+type Param = (number | number[] | DotPlot | null);
 
 export default class UndoBlock {
     constructor(seq: Sequence, folderName: string) {
@@ -360,7 +360,7 @@ export default class UndoBlock {
         index: UndoBlockParam,
         temp: number = 37,
         pseudoknots: boolean = false
-    ): number | number[] | null {
+    ): number | number[] | DotPlot | null {
         const paramsArray = this._paramsArray.get(pseudoknots);
         Assert.assertIsDefined(paramsArray);
         if (paramsArray[temp] != null) {
