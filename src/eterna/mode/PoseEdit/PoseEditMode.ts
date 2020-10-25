@@ -726,7 +726,6 @@ export default class PoseEditMode extends GameMode {
 
         this.setPoseFields(poseFields);
 
-        this._isDatabrowserMode = false;
         // if (this.root.loaderInfo.parameters.databrowser
         //     && this.root.loaderInfo.parameters.databrowser === "true") {
         //     this._is_databrowser_mode = true;
@@ -1000,7 +999,7 @@ export default class PoseEditMode extends GameMode {
         this._rscript.tick();
 
         // RScript can set our initial poseState
-        this._poseState = this._isDatabrowserMode ? PoseState.NATIVE : this._puzzle.defaultMode;
+        this._poseState = this._puzzle.defaultMode;
     }
 
     private async switchToBrowser(solution: Solution, sortOnSolution: boolean = false): Promise<void> {
@@ -2464,7 +2463,7 @@ export default class PoseEditMode extends GameMode {
             ).sequenceString();
         }
 
-        if (isReset || this._isDatabrowserMode) {
+        if (isReset) {
             this.startPlaying();
         } else if (initSeq == null) {
             this.startCountdown();
@@ -3356,7 +3355,6 @@ export default class PoseEditMode extends GameMode {
     private _targetOligosOrder: (number[] | undefined)[] = [];
 
     private _folderSwitcher: FolderSwitcher;
-    private _isDatabrowserMode: boolean;
     private _isFrozen: boolean = false;
     private _targetName: Text;
 
