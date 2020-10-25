@@ -656,6 +656,41 @@ export default class PoseEditMode extends GameMode {
         );
     }
 
+    private highlightSequences(highlightInfos: HighlightInfo[] | null) {
+        for (const [poseIdx, pose] of this._poses.entries()) {
+            pose.clearRestrictedHighlight();
+            pose.clearUnstableHighlight();
+            pose.clearUserDefinedHighlight();
+            const poseState = this._isPipMode || poseIdx !== 0 ? poseIdx : this._curTargetIndex;
+            if (!highlightInfos) continue;
+            for (const highlightInfo of highlightInfos) {
+                if (highlightInfo && (highlightInfo.stateIndex == null || poseState === highlightInfo.stateIndex)) {
+                    const currBlock = this.getCurrentUndoBlock(poseState);
+                    const naturalMap = currBlock.reorderedOligosIndexMap(currBlock.oligoOrder);
+                    const ranges = (this._poseState === PoseState.NATIVE && naturalMap != null)
+                        ? highlightInfo.ranges.map((index: number) => {
+                            Assert.assertIsDefined(naturalMap);
+                            return naturalMap.indexOf(index);
+                        }) : highlightInfo.ranges;
+
+                    switch (highlightInfo.color) {
+                        case HighlightType.RESTRICTED:
+                            pose.highlightRestrictedSequence(ranges);
+                            break;
+                        case HighlightType.UNSTABLE:
+                            pose.highlightUnstableSequence(ranges);
+                            break;
+                        case HighlightType.USER_DEFINED:
+                            pose.highlightUserDefinedSequence(ranges);
+                            break;
+                        default:
+                            log.error(`Invalid highlight type: ${highlightInfo.color}`);
+                    }
+                }
+            }
+        }
+    }
+
     private setPuzzle(): void {
         const poseFields: PoseField[] = [];
 
@@ -791,6 +826,7 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
+        // We can only set up the folderSwitcher once we have set up the poses
         this._folderSwitcher = new FolderSwitcher(
             (folder) => this._puzzle.canUseFolder(folder),
             initialFolder,
@@ -820,44 +856,15 @@ export default class PoseEditMode extends GameMode {
 
         this._toolbar.palette.clickTarget(PaletteTargetType.A);
 
+        // Set up the constraintBar
         this._constraintBar = new ConstraintBar(this._puzzle.constraints, this._puzzle.getSecstructs.length);
         this._constraintBar.display.visible = false;
         this.addObject(this._constraintBar, this._constraintsLayer);
-        this._constraintBar.sequenceHighlights.connect((highlightInfos: HighlightInfo[] | null) => {
-            for (const [poseIdx, pose] of this._poses.entries()) {
-                pose.clearRestrictedHighlight();
-                pose.clearUnstableHighlight();
-                pose.clearUserDefinedHighlight();
-                const poseState = this._isPipMode || poseIdx !== 0 ? poseIdx : this._curTargetIndex;
-                if (!highlightInfos) continue;
-                for (const highlightInfo of highlightInfos) {
-                    if (highlightInfo && (highlightInfo.stateIndex == null || poseState === highlightInfo.stateIndex)) {
-                        const currBlock = this.getCurrentUndoBlock(poseState);
-                        const naturalMap = currBlock.reorderedOligosIndexMap(currBlock.oligoOrder);
-                        const ranges = (this._poseState === PoseState.NATIVE && naturalMap != null)
-                            ? highlightInfo.ranges.map((index: number) => {
-                                Assert.assertIsDefined(naturalMap);
-                                return naturalMap.indexOf(index);
-                            }) : highlightInfo.ranges;
+        this._constraintBar.sequenceHighlights.connect(
+            (highlightInfos: HighlightInfo[] | null) => this.highlightSequences(highlightInfos)
+        );
 
-                        switch (highlightInfo.color) {
-                            case HighlightType.RESTRICTED:
-                                pose.highlightRestrictedSequence(ranges);
-                                break;
-                            case HighlightType.UNSTABLE:
-                                pose.highlightUnstableSequence(ranges);
-                                break;
-                            case HighlightType.USER_DEFINED:
-                                pose.highlightUserDefinedSequence(ranges);
-                                break;
-                            default:
-                                log.error(`Invalid highlight type: ${highlightInfo.color}`);
-                        }
-                    }
-                }
-            }
-        });
-
+        // Initialize sequence and/or solution as relevant
         let initialSequence: Sequence | null = null;
         if (this._params.initSolution != null) {
             initialSequence = this._params.initSolution.sequence;
@@ -883,7 +890,11 @@ export default class PoseEditMode extends GameMode {
             initialSequence = Sequence.fromSequenceString(this._params.initSequence);
         }
 
+        // Load elements from targetConditions into poses.
         for (let ii = 0; ii < this._poses.length; ii++) {
+            // If the initialSequence (from a starting solution or other source)
+            // isn't available, load in a cached sequence. Otherwise, apply the
+            // fixed tails if necessary.
             let seq = initialSequence;
             if (seq == null) {
                 seq = this._puzzle.getBeginningSequence(ii);
