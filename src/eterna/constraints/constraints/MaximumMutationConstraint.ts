@@ -22,7 +22,7 @@ export default class MaximumMutationConstraint extends Constraint<MaxMutationCon
     }
 
     public evaluate(context: ConstraintContext): MaxMutationConstraintStatus {
-        if (!context.puzzle) throw new Error('Mutaiton constraint requires beginning sequence, which is unavailable');
+        if (!context.puzzle) throw new Error('Mutation constraint requires beginning sequence, which is unavailable');
 
         const mutations: number = EPars.sequenceDiff(
             context.puzzle.getSubsequenceWithoutBarcode(context.undoBlocks[0].sequence),

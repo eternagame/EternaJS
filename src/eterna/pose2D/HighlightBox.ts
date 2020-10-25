@@ -186,7 +186,7 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
     }
 
     private renderStack(color: number, baseSize: number): void {
-        const pairs: SecStruct = this._pose.pairs;
+        const pairs: SecStruct = this._pose.secstruct;
 
         if (!this._queue) return;
         for (let ii = 0; ii < this._queue.length; ii += 2) {
@@ -217,7 +217,7 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
     }
 
     private renderLoop(_color: number, baseSize: number): void {
-        const pairs: SecStruct = this._pose.pairs;
+        const pairs: SecStruct = this._pose.secstruct;
         const fullLen: number = this._pose.fullSequence.length;
         const strict: boolean = (this._type === HighlightType.LOOP);
 

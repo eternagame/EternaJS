@@ -127,7 +127,7 @@ export default class StructureInput extends ContainerObject implements Updatable
             }
         } else if (op === PuzzleEditOp.ADD_PAIR) {
             // Add a pair
-            let pindex: number = (this._pose.pairs).pairingPartner(index);
+            let pindex: number = (this._pose.secstruct).pairingPartner(index);
             if (index > pindex) {
                 const temp: number = index;
                 index = pindex;
@@ -190,7 +190,7 @@ export default class StructureInput extends ContainerObject implements Updatable
             }
         } else if (op === PuzzleEditOp.DELETE_PAIR) {
             // Delete a pair
-            let pindex = (this._pose.pairs).pairingPartner(index);
+            let pindex = (this._pose.secstruct).pairingPartner(index);
             if (index > pindex) {
                 const temp = index;
                 index = pindex;

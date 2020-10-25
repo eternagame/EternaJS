@@ -354,14 +354,14 @@ export default abstract class GameMode extends AppMode {
             // Maybe set default font size based on distance between letters.
             // Yes -- using pairSpace
             let pairSpace = 45;
-            for (let jj = 0; jj < this._poses[ii].pairs.length; ++jj) {
-                if (this._poses[ii].pairs.isPaired(jj)) {
+            for (let jj = 0; jj < this._poses[ii].secstruct.length; ++jj) {
+                if (this._poses[ii].secstruct.isPaired(jj)) {
                     const x1 = cl[jj][0];
                     const y1 = cl[jj][1];
                     if (x1 === null) continue;
                     if (y1 === null) continue;
-                    const x2 = cl[this._poses[ii].pairs.pairingPartner(jj)][0];
-                    const y2 = cl[this._poses[ii].pairs.pairingPartner(jj)][1];
+                    const x2 = cl[this._poses[ii].secstruct.pairingPartner(jj)][0];
+                    const y2 = cl[this._poses[ii].secstruct.pairingPartner(jj)][1];
                     if (x2 === null) continue;
                     if (y2 === null) continue;
                     pairSpace = Math.sqrt(
@@ -386,13 +386,13 @@ export default abstract class GameMode extends AppMode {
 
             // Base pairs
             for (let jj = 0; jj < this._poses[ii].sequence.length; ++jj) {
-                if (this._poses[ii].pairs.isPaired(jj)) {
+                if (this._poses[ii].secstruct.isPaired(jj)) {
                     const x1 = cl[jj][0];
                     const y1 = cl[jj][1];
                     if (x1 === null) continue;
                     if (y1 === null) continue;
-                    const x2 = cl[this._poses[ii].pairs.pairingPartner(jj)][0];
-                    const y2 = cl[this._poses[ii].pairs.pairingPartner(jj)][1];
+                    const x2 = cl[this._poses[ii].secstruct.pairingPartner(jj)][0];
+                    const y2 = cl[this._poses[ii].secstruct.pairingPartner(jj)][1];
                     if (x2 === null) continue;
                     if (y2 === null) continue;
 
@@ -424,7 +424,7 @@ export default abstract class GameMode extends AppMode {
             Assert.assertIsDefined(cl);
             let hkwsText = 'idx,x,y,seq,partner\n';
             for (let jj = 0; jj < this._poses[ii].sequence.length; ++jj) {
-                hkwsText += `${jj},${cl[jj][0]},${cl[jj][1]},${this._poses[ii].sequence.sequenceString()[jj]},${this._poses[ii].pairs.pairs[jj]}\n`;
+                hkwsText += `${jj},${cl[jj][0]},${cl[jj][1]},${this._poses[ii].sequence.sequenceString()[jj]},${this._poses[ii].secstruct.pairs[jj]}\n`;
             }
             this.download(`${ii}.hkws`, hkwsText);
         }

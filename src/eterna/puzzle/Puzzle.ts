@@ -407,7 +407,7 @@ export default class Puzzle {
         }
     }
 
-    public getSecstructs(index: number = 0): string[] {
+    public getSecstructs(): string[] {
         const secstructs: string[] = [];
         for (let ii = 0; ii < this._secstructs.length; ii++) {
             secstructs.push(this.getSecstruct(ii));

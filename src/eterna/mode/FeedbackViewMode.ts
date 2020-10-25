@@ -154,9 +154,9 @@ export default class FeedbackViewMode extends GameMode {
                     }
                     secstructs[ii] = secs;
                 }
-                this._pairs.push(SecStruct.fromParens(secstructs[ii]));
+                this._secstructs.push(SecStruct.fromParens(secstructs[ii]));
                 const datablock: UndoBlock = new UndoBlock(this._sequence, Vienna.NAME);
-                datablock.setPairs(this._pairs[ii]);
+                datablock.setPairs(this._secstructs[ii]);
                 datablock.setBasics();
                 this._undoBlocks.push(datablock);
 
@@ -169,7 +169,7 @@ export default class FeedbackViewMode extends GameMode {
                 }
                 poseField.pose.scoreFolder = vienna;
                 poseField.pose.sequence = this._sequence;
-                poseField.pose.pairs = this._pairs[ii];
+                poseField.pose.secstruct = this._secstructs[ii];
                 poseFields.push(poseField);
             }
             return poseFields;
@@ -490,11 +490,11 @@ export default class FeedbackViewMode extends GameMode {
         this._toolbar.estimateButton.toggled.value = false;
         this._toolbar.targetButton.toggled.value = true;
         if (this._isPipMode) {
-            for (let ii = 0; ii < this._pairs.length; ii++) {
-                this._poseFields[ii].pose.pairs = this._pairs[ii];
+            for (let ii = 0; ii < this._secstructs.length; ii++) {
+                this._poseFields[ii].pose.secstruct = this._secstructs[ii];
             }
         } else {
-            this._poseFields[0].pose.pairs = this._pairs[this._currentIndex];
+            this._poseFields[0].pose.secstruct = this._secstructs[this._currentIndex];
         }
     }
 
@@ -505,13 +505,13 @@ export default class FeedbackViewMode extends GameMode {
         this._toolbar.estimateButton.toggled.value = true;
         this._toolbar.targetButton.toggled.value = false;
         if (this._isPipMode) {
-            for (let ii = 0; ii < this._pairs.length; ii++) {
+            for (let ii = 0; ii < this._secstructs.length; ii++) {
                 if (this._shapePairs[ii] !== null) {
-                    this._poseFields[ii].pose.pairs = this._shapePairs[ii] as SecStruct;
+                    this._poseFields[ii].pose.secstruct = this._shapePairs[ii] as SecStruct;
                 }
             }
         } else if (this._shapePairs[this._currentIndex] !== null) {
-            this._poseFields[0].pose.pairs = this._shapePairs[this._currentIndex] as SecStruct;
+            this._poseFields[0].pose.secstruct = this._shapePairs[this._currentIndex] as SecStruct;
         }
     }
 
@@ -677,11 +677,7 @@ export default class FeedbackViewMode extends GameMode {
         let desiredPairs = '';
 
         for (let ii = 0; ii < startIndex; ii++) {
-            if (puzzleLocks[ii]) {
-                desiredPairs += 'U0';
-            } else {
-                desiredPairs += 'P0';
-            }
+            desiredPairs += (puzzleLocks[ii]) ? 'U0' : 'P0';
         }
 
         for (let ii = 0; ii < shapeData.length; ii++) {
@@ -725,11 +721,7 @@ export default class FeedbackViewMode extends GameMode {
         }
 
         for (let ii = shapeData.length + startIndex; ii < this._sequence.length; ii++) {
-            if (puzzleLocks[ii]) {
-                desiredPairs += 'U0';
-            } else {
-                desiredPairs += 'P0';
-            }
+            desiredPairs += (puzzleLocks[ii]) ? 'U0' : 'P0';
         }
 
         const folder: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
@@ -773,7 +765,7 @@ export default class FeedbackViewMode extends GameMode {
     private _title: Text;
     private _feedback: Feedback | null;
     private _sequence: Sequence;
-    private _pairs: SecStruct[] = [];
+    private _secstructs: SecStruct[] = [];
     private _shapePairs: (SecStruct | null)[] = [];
     protected _targetConditions: (TargetConditions | undefined)[];
     private _isExpColor: boolean;

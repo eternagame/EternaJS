@@ -398,7 +398,7 @@ export default class PuzzleEditMode extends GameMode {
 
     public getThumbnailBase64(): string {
         const img = PoseThumbnail.createFramedBitmap(
-            this._poses[0].sequence, this._poses[0].pairs, 6, PoseThumbnailType.WHITE,
+            this._poses[0].sequence, this._poses[0].secstruct, 6, PoseThumbnailType.WHITE,
             0, null, false, 0, this._poses[0].customLayout
         );
         return Base64.encodeDisplayObjectPNG(img);
@@ -671,12 +671,12 @@ export default class PuzzleEditMode extends GameMode {
 
         // Render pose thumbnail images
         const midImageString = Base64.encodeDisplayObjectPNG(PoseThumbnail.createFramedBitmap(
-            this._poses[0].sequence, this._poses[0].pairs, 4, PoseThumbnailType.WHITE,
+            this._poses[0].sequence, this._poses[0].secstruct, 4, PoseThumbnailType.WHITE,
             0, null, false, 0, this._poses[0].customLayout
         ));
 
         const bigImageString: string = Base64.encodeDisplayObjectPNG(
-            PoseThumbnail.createFramedBitmap(this._poses[0].sequence, this._poses[0].pairs, 2,
+            PoseThumbnail.createFramedBitmap(this._poses[0].sequence, this._poses[0].secstruct, 2,
                 PoseThumbnailType.WHITE, 0, null, false, 0, this._poses[0].customLayout)
         );
 
@@ -721,7 +721,7 @@ export default class PuzzleEditMode extends GameMode {
         this._toolbar.targetButton.hotkey();
 
         for (let ii = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].pairs = SecStruct.fromParens(this._structureInputs[ii].structureString, true);
+            this._poses[ii].secstruct = SecStruct.fromParens(this._structureInputs[ii].structureString, true);
         }
         this._paused = true;
 
@@ -802,9 +802,9 @@ export default class PuzzleEditMode extends GameMode {
             }
 
             if (this._paused) {
-                this._poses[ii].pairs = targetPairs;
+                this._poses[ii].secstruct = targetPairs;
             } else {
-                this._poses[ii].pairs = bestPairs;
+                this._poses[ii].secstruct = bestPairs;
             }
 
             this._constraintBar.updateConstraints({

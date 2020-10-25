@@ -2250,7 +2250,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._sequence.nt(seq);
     }
 
-    public set pairs(pairs: SecStruct) {
+    public set secstruct(pairs: SecStruct) {
         const seq: Sequence = this.fullSequence;
         if (pairs.length !== seq.length) {
             log.debug(pairs.length, seq.length);
@@ -2278,7 +2278,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.generateScoreNodes();
     }
 
-    public get pairs(): SecStruct {
+    public get secstruct(): SecStruct {
         return this._pairs.slice(0);
     }
 
@@ -2815,7 +2815,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         } else if (op === PuzzleEditOp.ADD_PAIR) {
             // Add a pair
-            pindex = this.pairs.pairingPartner(index);
+            pindex = this.secstruct.pairingPartner(index);
             const afterIndex = sequence.slice(index);
             const afterLockIndex = locks ? locks.slice(index) : null;
             const afterBindingSiteIndex = bindingSite ? bindingSite.slice(index) : null;
@@ -2873,7 +2873,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         } else if (op === PuzzleEditOp.DELETE_PAIR) {
             // Delete a pair
-            pindex = this.pairs.pairingPartner(index);
+            pindex = this.secstruct.pairingPartner(index);
             const afterIndex = sequenceBackup.slice(index + 1);
             const afterLockIndex = locksBackup ? locksBackup.slice(index + 1) : null;
             const afterBindingSiteIndex = bindingSiteBackup ? bindingSiteBackup.slice(index + 1) : null;

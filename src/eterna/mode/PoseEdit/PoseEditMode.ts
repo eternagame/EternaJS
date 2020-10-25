@@ -918,7 +918,7 @@ export default class PoseEditMode extends GameMode {
             }
             this._poses[ii].setOligos(this._targetOligos[ii], this._targetOligosOrder[ii]);
             this._poses[ii].setOligo(this._targetOligo[ii], this._oligoMode[ii], this._oligoName[ii]);
-            this._poses[ii].pairs = this._targetPairs[ii];
+            this._poses[ii].secstruct = this._targetPairs[ii];
             this._poses[ii].targetPairs = this._targetPairs[ii];
             if (this._targetConditions[ii] !== undefined) {
                 const tc = this._targetConditions[ii] as TargetConditions;
@@ -1720,7 +1720,7 @@ export default class PoseEditMode extends GameMode {
             for (let ii = 0; ii < this._poses.length; ii++) {
                 this._poses[ii].setOligos(this._targetOligos[ii], this._targetOligosOrder[ii]);
                 this._poses[ii].setOligo(this._targetOligo[ii], this._oligoMode[ii], this._oligoName[ii]);
-                this._poses[ii].pairs = this._targetPairs[ii];
+                this._poses[ii].secstruct = this._targetPairs[ii];
                 if (this._targetConditions != null && this._targetConditions[ii] !== undefined) {
                     const tc = this._targetConditions[ii] as TargetConditions;
                     this._poses[ii].structConstraints = tc['structure_constraints'];
@@ -1735,7 +1735,7 @@ export default class PoseEditMode extends GameMode {
                 this._oligoMode[this._curTargetIndex],
                 this._oligoName[this._curTargetIndex]
             );
-            this._poses[0].pairs = this._targetPairs[this._curTargetIndex];
+            this._poses[0].secstruct = this._targetPairs[this._curTargetIndex];
             if (this._targetConditions != null && this._targetConditions[this._curTargetIndex] !== undefined) {
                 const tc = this._targetConditions[this._curTargetIndex] as TargetConditions;
                 const newConstraints = tc['structure_constraints'];
@@ -2509,7 +2509,7 @@ export default class PoseEditMode extends GameMode {
                     this._poses[0].setOligo(this.getCurrentUndoBlock().targetOligo,
                         this.getCurrentUndoBlock().oligoMode,
                         this.getCurrentUndoBlock().oligoName);
-                    this._poses[0].pairs = this.getCurrentUndoBlock().getPairs(37, pseudoknots);
+                    this._poses[0].secstruct = this.getCurrentUndoBlock().getPairs(37, pseudoknots);
                     if (this._targetConditions !== undefined
                             && this._targetConditions[this._curTargetIndex] !== undefined) {
                         const tc = this._targetConditions[this._curTargetIndex] as TargetConditions;
@@ -2524,7 +2524,7 @@ export default class PoseEditMode extends GameMode {
                 this._poses[ii].setOligo(this.getCurrentUndoBlock(ii).targetOligo,
                     this.getCurrentUndoBlock(ii).oligoMode,
                     this.getCurrentUndoBlock(ii).oligoName);
-                this._poses[ii].pairs = this.getCurrentUndoBlock(ii).getPairs(37, pseudoknots);
+                this._poses[ii].secstruct = this.getCurrentUndoBlock(ii).getPairs(37, pseudoknots);
 
                 if (this._targetConditions != null && this._targetConditions[ii] !== undefined) {
                     const tc = this._targetConditions[ii] as TargetConditions;
@@ -2540,7 +2540,7 @@ export default class PoseEditMode extends GameMode {
                     this._poses[0].setOligo(this.getCurrentUndoBlock().targetOligo,
                         this.getCurrentUndoBlock().oligoMode,
                         this.getCurrentUndoBlock().oligoName);
-                    this._poses[0].pairs = this.getCurrentUndoBlock().targetPairs;
+                    this._poses[0].secstruct = this.getCurrentUndoBlock().targetPairs;
                     if (this._targetConditions != null && this._targetConditions[this._curTargetIndex] !== undefined) {
                         const tc = this._targetConditions[this._curTargetIndex] as TargetConditions;
                         const newConstraints = tc['structure_constraints'];
@@ -2562,7 +2562,7 @@ export default class PoseEditMode extends GameMode {
                 this._targetPairs[ii] = this.getCurrentUndoBlock(ii).targetPairs;
                 this._poses[ii].setOligos(this._targetOligos[ii], this._targetOligosOrder[ii]);
                 this._poses[ii].setOligo(this._targetOligo[ii], this._oligoMode[ii], this._oligoName[ii]);
-                this._poses[ii].pairs = this._targetPairs[ii];
+                this._poses[ii].secstruct = this._targetPairs[ii];
                 if (this._targetConditions != null && this._targetConditions[ii] !== undefined) {
                     const tc = this._targetConditions[ii] as TargetConditions;
                     this._poses[ii].structConstraints = tc['structure_constraints'];
