@@ -191,15 +191,7 @@ export default class PoseEditMode extends GameMode {
             });
         }
         this._toolbar.submitButton.clicked.connect(() => this.submitCurrentPose());
-        this._toolbar.viewSolutionsButton.clicked.connect(() => {
-            this.pushUILock();
-            Eterna.app.switchToDesignBrowser(this._puzzle)
-                .then(() => this.popUILock())
-                .catch((e) => {
-                    log.error(e);
-                    this.popUILock();
-                });
-        });
+        this._toolbar.viewSolutionsButton.clicked.connect(() => this.openDesignBrowserForOurPuzzle());
         this._toolbar.resetButton.clicked.connect(() => this.showResetPrompt());
         this._toolbar.naturalButton.clicked.connect(() => this.togglePoseState());
         this._toolbar.targetButton.clicked.connect(() => this.togglePoseState());
