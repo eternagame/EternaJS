@@ -2,6 +2,7 @@ import {DOMObject} from 'flashbang';
 import Eterna from 'eterna/Eterna';
 import {FontWeight} from 'flashbang/util/TextBuilder';
 import Utility from 'eterna/util/Utility';
+import Fonts from 'eterna/util/Fonts';
 
 /** A <p> object in the DOM that contains the given HTML. Floats on top of the PIXI canvas. */
 export default class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
@@ -21,6 +22,15 @@ export default class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
             //     "width: max-content;" +
             //     "width: -moz-max-content;";
         }
+    }
+
+    public static makeTitle(title: string, color: number) {
+        return new HTMLTextObject(title, undefined, undefined, true)
+            .font(Fonts.STDFONT)
+            .fontSize(14)
+            .bold()
+            .selectable(false)
+            .color(color);
     }
 
     public lineHeight(percentOrString: number | string): HTMLTextObject {

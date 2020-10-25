@@ -677,10 +677,10 @@ export default class PoseEditMode extends GameMode {
         // }
 
         const bindAddbaseCB = (pose: Pose2D, kk: number) => {
-            pose.addBaseCallback = ((parenthesis: string | null, mode: PuzzleEditOp | null, index: number) => {
+            pose.addBaseCallback = ((parenthesis: string | null, op: PuzzleEditOp | null, index: number) => {
                 Assert.assertIsDefined(parenthesis);
-                Assert.assertIsDefined(mode);
-                pose.baseShift(parenthesis, mode, index);
+                Assert.assertIsDefined(op);
+                pose.baseShift(parenthesis, op, index);
                 this.poseEditByTarget(kk);
             });
         };
@@ -731,6 +731,8 @@ export default class PoseEditMode extends GameMode {
         //     this._is_databrowser_mode = true;
         // }
 
+        // Unroll a lot of the data in the puzzle's TargetConditions into members
+        // that PoseEditMode handles itself
         for (let ii = 0; ii < targetSecstructs.length; ii++) {
             this._targetConditions.push(targetConditions[ii]);
             this._targetOligos.push(undefined);
@@ -748,15 +750,15 @@ export default class PoseEditMode extends GameMode {
                     this._oligoName[ii] = tc['oligo_name'];
                 }
                 if (tc['oligos']) {
-                    const odefs: OligoDef[] = tc['oligos'] as OligoDef[];
-                    const ndefs: Oligo[] = odefs.map(
+                    // Map from OligoDef to Oligo, basically requires turning
+                    // a sequence string into a baseArray.
+                    this._targetOligos[ii] = tc['oligos'].map(
                         (odef) => ({
                             sequence: Sequence.fromSequenceString(odef.sequence).baseArray,
                             malus: odef.malus,
-                            name: odef['name']
+                            name: odef.name
                         })
                     );
-                    this._targetOligos[ii] = ndefs;
                 }
             }
         }
@@ -764,12 +766,7 @@ export default class PoseEditMode extends GameMode {
         this._exitButton.display.visible = false;
         this.addObject(this._exitButton, this.uiLayer);
 
-        const puzzleTitle = new HTMLTextObject(this._puzzle.getName(!Eterna.MOBILE_APP), undefined, undefined, true)
-            .font(Fonts.STDFONT)
-            .fontSize(14)
-            .bold()
-            .selectable(false)
-            .color(0xC0DCE7);
+        const puzzleTitle = HTMLTextObject.makeTitle(this._puzzle.getName(!Eterna.MOBILE_APP), 0xC0DCE7);
         puzzleTitle.hideWhenModeInactive();
         this.addObject(puzzleTitle, this.uiLayer);
         puzzleTitle.display.position = new Point(57, 8);

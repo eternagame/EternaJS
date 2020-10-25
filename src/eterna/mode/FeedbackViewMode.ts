@@ -83,12 +83,7 @@ export default class FeedbackViewMode extends GameMode {
         Assert.assertIsDefined(this.container);
         this.container.addChild(homeArrow);
 
-        const puzzleTitle = new HTMLTextObject(this._puzzle.getName(true))
-            .font(Fonts.STDFONT)
-            .fontSize(14)
-            .bold()
-            .selectable(false)
-            .color(0xffffff);
+        const puzzleTitle = HTMLTextObject.makeTitle(this._puzzle.getName(true), 0xffffff);
         puzzleTitle.hideWhenModeInactive();
         this.addObject(puzzleTitle, this.uiLayer);
         DisplayUtil.positionRelative(
