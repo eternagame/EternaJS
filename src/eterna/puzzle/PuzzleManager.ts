@@ -135,12 +135,7 @@ export default class PuzzleManager {
 
         if (json['ui-specs']) {
             // New style UI elements (scripted) are identified as JSON objects
-            if (json['ui-specs'].substr(0, 1) === '{') {
-                newpuz.boosters = JSON.parse(json['ui-specs']);
-            } else {
-                // Fallback for the old tutorials
-                newpuz.uiSpecs = json['ui-specs'].split(',');
-            }
+            newpuz.boosters = JSON.parse(json['ui-specs']);
         }
 
         if (json['next-puzzle']) {

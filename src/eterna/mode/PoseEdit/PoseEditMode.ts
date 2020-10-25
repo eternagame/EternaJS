@@ -830,13 +830,7 @@ export default class PoseEditMode extends GameMode {
 
         this._constraintsLayer.visible = true;
 
-        if (!this._puzzle.isPalleteAllowed) {
-            for (const pose of this._poses) {
-                pose.currentColor = -1;
-            }
-        } else {
-            this._toolbar.palette.clickTarget(PaletteTargetType.A);
-        }
+        this._toolbar.palette.clickTarget(PaletteTargetType.A);
 
         this._constraintBar = new ConstraintBar(this._puzzle.constraints, this._puzzle.getSecstructs.length);
         this._constraintBar.display.visible = false;
