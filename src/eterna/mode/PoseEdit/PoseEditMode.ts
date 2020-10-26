@@ -2324,7 +2324,6 @@ export default class PoseEditMode extends GameMode {
         for (const [i, pose] of Object.entries(this._poses)) {
             poseData.push(JSON.stringify({
                 sequence: pose.sequence.sequenceString(),
-                // structure: EPars.pairsToParenthesis(pose.pairs),
                 structure: this._puzzle.getSecstruct(parseInt(i, 10))
             }));
         }
@@ -2491,7 +2490,7 @@ export default class PoseEditMode extends GameMode {
         const pseudoknots: boolean = (
             this._targetConditions
             && this._targetConditions[this._curTargetIndex] !== undefined
-            && (this._targetConditions[this._curTargetIndex] as TargetConditions)['type'] === 'pseudoknot'
+            && (this._targetConditions[this._curTargetIndex] as TargetConditions).type === 'pseudoknot'
         );
 
         if (!this._paused) {
@@ -2507,8 +2506,7 @@ export default class PoseEditMode extends GameMode {
                     if (this._targetConditions !== undefined
                             && this._targetConditions[this._curTargetIndex] !== undefined) {
                         const tc = this._targetConditions[this._curTargetIndex] as TargetConditions;
-                        const newConstraints = tc['structure_constraints'];
-                        this._poses[0].structConstraints = newConstraints;
+                        this._poses[0].structConstraints = tc['structure_constraints'];
                     }
                     continue;
                 }
@@ -2537,8 +2535,7 @@ export default class PoseEditMode extends GameMode {
                     this._poses[0].secstruct = this.getCurrentUndoBlock().targetPairs;
                     if (this._targetConditions != null && this._targetConditions[this._curTargetIndex] !== undefined) {
                         const tc = this._targetConditions[this._curTargetIndex] as TargetConditions;
-                        const newConstraints = tc['structure_constraints'];
-                        this._poses[0].structConstraints = newConstraints;
+                        this._poses[0].structConstraints = tc['structure_constraints'];
                     }
                     this._targetOligos[0] = this.getCurrentUndoBlock(0).targetOligos;
                     this._targetOligosOrder[0] = this.getCurrentUndoBlock(0).targetOligoOrder;
@@ -2645,13 +2642,10 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    private poseEditByTarget(targetIndex: number): void {
-        this.savePosesMarkersContexts();
-
+    private establishTargetPairs(targetIndex: number): void {
         const xx: number = this._isPipMode ? targetIndex : this._curTargetIndex;
         let segments: number[] = this._poses[targetIndex].designSegments;
         const idxMap: number[] | null = this._poses[targetIndex].getOrderMap(this._targetOligosOrder[xx]);
-        let structureConstraints: boolean[] | undefined;
 
         if (idxMap != null) {
             for (let jj = 0; jj < segments.length; jj++) {
@@ -2669,6 +2663,7 @@ export default class PoseEditMode extends GameMode {
                 set _target_pairs
                 clear design
             */
+            let structureConstraints: boolean[] | undefined;
             if (this._targetConditions[xx] !== undefined) {
                 const tc = this._targetConditions[xx] as TargetConditions;
                 structureConstraints = tc['structure_constraints'];
@@ -2705,10 +2700,10 @@ export default class PoseEditMode extends GameMode {
                 if (dontcareOk && numWrong === 0) {
                     if (numUnpaired === 0) {
                         for (let jj = segments[0]; jj <= segments[1]; jj++) {
-                            this._targetPairs[xx].setUnpaired(jj); // [jj] = -1;
+                            this._targetPairs[xx].setUnpaired(jj);
                         }
                         for (let jj = segments[2]; jj <= segments[3]; jj++) {
-                            this._targetPairs[xx].setUnpaired(jj); // [jj] = -1;
+                            this._targetPairs[xx].setUnpaired(jj);
                         }
                         Flashbang.sound.playSound(Sounds.SoundRY);
                         this.flashConstraintForTarget(xx);
@@ -2785,7 +2780,9 @@ export default class PoseEditMode extends GameMode {
                 }
             }
         }
+    }
 
+    private processBaseShifts(targetIndex: number): void {
         const lastShiftedIndex: number = this._poses[targetIndex].lastShiftedIndex;
         const lastShiftedCommand: number = this._poses[targetIndex].lastShiftedCommand;
         for (let ii = 0; ii < this._poses.length; ii++) {
@@ -2815,7 +2812,7 @@ export default class PoseEditMode extends GameMode {
                     }
                 }
 
-                structureConstraints = tc['structure_constraints'];
+                const structureConstraints = tc['structure_constraints'];
                 if (structureConstraints !== undefined) {
                     const constraintVal: boolean = structureConstraints[lastShiftedIndex];
                     let newConstraints: boolean[];
@@ -2877,6 +2874,15 @@ export default class PoseEditMode extends GameMode {
             this._poses[ii].sequence = this._poses[targetIndex].sequence;
             this._poses[ii].puzzleLocks = this._poses[targetIndex].puzzleLocks;
         }
+    }
+
+    private poseEditByTarget(targetIndex: number): void {
+        this.savePosesMarkersContexts();
+
+        // Reorder oligos and reorganize structure constraints as needed
+        this.establishTargetPairs(targetIndex);
+        // Ditto but for base shifts
+        this.processBaseShifts(targetIndex);
 
         this._foldTotalTime = 0;
 
