@@ -373,15 +373,15 @@ export default class Pose2D extends ContainerObject implements Updatable {
             div = 2;
         }
 
-        const ofs: number = (
+        const offset: number = (
             this._oligo != null
             && this._oligoMode === Pose2D.OLIGO_MODE_EXT5P
         ) ? this._oligo.length : 0;
         let ii: number;
         for (ii = 0; ii < this._sequence.length; ii++) {
-            if (this._sequence.nt(ii) !== this._mutatedSequence.nt(ii + ofs)) {
+            if (this._sequence.nt(ii) !== this._mutatedSequence.nt(ii + offset)) {
                 numMut++;
-                this._sequence.setNt(ii, this._mutatedSequence.nt(ii + ofs));
+                this._sequence.setNt(ii, this._mutatedSequence.nt(ii + offset));
                 muts.push({pos: ii + 1, base: EPars.nucleotideToString(this._sequence.nt(ii))});
                 needUpdate = true;
             }
@@ -406,14 +406,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public setMutated(seqArr: Sequence): void {
         Assert.assertIsDefined(this._mutatedSequence);
         const n: number = Math.min(this._mutatedSequence.length, seqArr.length);
-        const ofs: number = (
+        const offset: number = (
             this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_EXT5P
         ) ? this._oligo.length : 0;
 
         for (let ii = 0; ii < n; ii++) {
-            if (this._mutatedSequence.nt(ii) !== seqArr.nt(ii) && !this.isLocked(ofs + ii)) {
+            if (this._mutatedSequence.nt(ii) !== seqArr.nt(ii) && !this.isLocked(offset + ii)) {
                 this._mutatedSequence.setNt(ii, seqArr.nt(ii));
-                this._bases[ofs + ii].setType(seqArr.nt(ii));
+                this._bases[offset + ii].setType(seqArr.nt(ii));
             }
         }
     }
@@ -428,17 +428,17 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         const n: number = Math.min(sequence.length, this._sequence.length);
         let needUpdate = false;
-        const ofs: number = (
+        const offset: number = (
             this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_EXT5P
         ) ? this._oligo.length : 0;
 
         for (let ii = 0; ii < n; ii++) {
             if (sequence.nt(ii) === RNABase.UNDEFINED) continue;
-            if (this._sequence.nt(ii) !== sequence.nt(ii) && !this.isLocked(ofs + ii)) {
+            if (this._sequence.nt(ii) !== sequence.nt(ii) && !this.isLocked(offset + ii)) {
                 numMut++;
                 this._sequence.setNt(ii, sequence.nt(ii));
                 muts.push({pos: ii + 1, base: EPars.nucleotideToString(this._sequence.nt(ii))});
-                this._bases[ofs + ii].setType(sequence.nt(ii));
+                this._bases[offset + ii].setType(sequence.nt(ii));
                 needUpdate = true;
             }
         }
@@ -1260,27 +1260,27 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
         // find the next acceptable spot
-        let ofs = 1;
+        let offset = 1;
         const len: number = this.sequenceLength;
-        while (last + ofs < len) {
-            for (ii = first + ofs; ii <= last + ofs; ii++) {
+        while (last + offset < len) {
+            for (ii = first + offset; ii <= last + offset; ii++) {
                 if (this._locks && this._locks[ii]) {
                     break;
                 }
             }
-            if (ii > last + ofs) {
+            if (ii > last + offset) {
                 break;
             }
-            ofs++;
+            offset++;
         }
         // if not found, give up
-        if (last + ofs >= len) {
+        if (last + offset >= len) {
             return;
         }
 
         let mutated: RNABase[];
         let segment: RNABase[];
-        if (ofs === 1) {
+        if (offset === 1) {
             // obtain the segment you are trying to move, plus one 3' base
             segment = this._sequence.baseArray.slice(first, last + 1 + 1);
             // remove the base from the 3' end
@@ -1294,8 +1294,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         } else {
             mutated = this._sequence.baseArray.slice();
             for (ii = first; ii <= last; ii++) {
-                const xx: number = mutated[ii + ofs];
-                mutated[ii + ofs] = mutated[ii];
+                const xx: number = mutated[ii + offset];
+                mutated[ii + offset] = mutated[ii];
                 mutated[ii] = xx;
             }
         }
@@ -1304,7 +1304,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.setMutated(new Sequence(mutated));
         this.doneColoring();
         this._shiftHighlightBox.clear();
-        this._shiftHighlightBox.setHighlight([first + ofs, last + ofs]);
+        this._shiftHighlightBox.setHighlight([first + offset, last + offset]);
     }
 
     public shift5Prime(): void {
@@ -1776,8 +1776,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public get satisfiedPairs(): SecStruct {
-        // AMW TODO: this is built up in the getter to append the oligos, so
-        // maybe it's not a Sequence. So we should definitely change that later.
         return this._pairs.getSatisfiedPairs(this.fullSequence.slice(0));
     }
 
@@ -2167,7 +2165,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public isPairSatisfied(a: number, b: number): boolean {
-        // AMW TODO
+        // AMW TODO why swap? do we assume asymmetrical pairs
         if (b < a) {
             const temp: number = a;
             a = b;
@@ -2465,6 +2463,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
+        // AMW TODO: this means that PuzzleEditMode can get a baserope showing
+        // if the custom layout tools are used.
         this._baseRope.enabled = this._showBaseRope || (this._customLayout != null);
         this._pseudoknotLines.enabled = this._pseudoknotPairs
             && this._pseudoknotPairs.nonempty();
@@ -3056,7 +3056,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.updateScoreNodeGui();
     }
 
-    private deleteBaseWithIndex(index: number): [string, PuzzleEditOp, number[]?] {
+    private deleteBaseWithIndex(index: number): [string, PuzzleEditOp, RNABase[]?] {
         if (this.isTrackedIndex(index)) {
             this.toggleBaseMark(index);
         }
