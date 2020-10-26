@@ -841,7 +841,6 @@ export default class PuzzleEditMode extends GameMode {
         }
     }
 
-    // AMW TODO: PK awareness.
     private poseEditByTarget(index: number): void {
         let noChange = true;
         const currentUndoBlocks: UndoBlock[] = [];
@@ -946,8 +945,7 @@ export default class PuzzleEditMode extends GameMode {
                 }
             }
 
-            const isThereMolecule = bindingSite != null
-                && bindingSite.some((bb) => bb);
+            const isThereMolecule = bindingSite != null && bindingSite.some((bb) => bb);
 
             let bestPairs: SecStruct | null = null;
             if (!isThereMolecule) {
