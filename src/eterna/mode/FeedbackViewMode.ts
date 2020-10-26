@@ -4,7 +4,7 @@ import {
 } from 'pixi.js';
 import Constants from 'eterna/Constants';
 import Eterna from 'eterna/Eterna';
-import Feedback, {BrentTheoData} from 'eterna/Feedback';
+import Feedback from 'eterna/Feedback';
 import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
 import Solution from 'eterna/puzzle/Solution';
 import Puzzle from 'eterna/puzzle/Puzzle';
@@ -265,8 +265,6 @@ export default class FeedbackViewMode extends GameMode {
             this.showExperimentalColors();
         }
 
-        //
-        // this.scoreFeedback();
         this.changeTarget(0);
         this.setPip(false);
 
@@ -540,8 +538,6 @@ export default class FeedbackViewMode extends GameMode {
         if (this._isExpColor) {
             this.showExperimentalColors();
         }
-
-        // this.scoreFeedback();
     }
 
     private showExperimentalColors(): void {
@@ -599,58 +595,6 @@ export default class FeedbackViewMode extends GameMode {
         for (let ii = 0; ii < this._poseFields.length; ii++) {
             this._poseFields[ii].pose.clearFeedback();
         }
-    }
-
-    private scoreFeedback(): void {
-        Assert.assertIsDefined(this._feedback);
-
-        let titleText = '';
-        const brentData: BrentTheoData | undefined = this._feedback.brentTheoData;
-
-        if (brentData != null) {
-            // / Brent's theophylline data
-            titleText += (`${this._solution.title}\n`);
-            titleText += `Cleavage suppression : x ${brentData['score'].toFixed(2)}\n`;
-            titleText += `(Cleavage without Theophylline molecule : ${brentData['ribo_without_theo'].toFixed(2)}`;
-            titleText += ` / with Theophylline : ${brentData['ribo_with_theo'].toFixed(2)})`;
-        } else {
-            // / Default fallback to usual SHAPE data
-            if (Eterna.DEV_MODE) {
-                const score: number = Feedback.scoreFeedback(
-                    this._feedback.getShapeData(this._currentIndex, this._dataOption.value),
-                    this._puzzle.getSecstruct(this._currentIndex),
-                    this._feedback.getShapeStartIndex(this._currentIndex, this._dataOption.value),
-                    this._feedback.getShapeMin(this._currentIndex, this._dataOption.value),
-                    this._feedback.getShapeThreshold(this._currentIndex, this._dataOption.value),
-                    this._feedback.getShapeMax(this._currentIndex, this._dataOption.value)
-                );
-                titleText += (`${this._solution.title}\nSynthesis score : ${score} / 100`);
-            } else {
-                titleText += (`${this._solution.title}\nSynthesis score : ${this._solution.getProperty('Synthesis score')} / 100`);
-            }
-
-            if (this._targetConditions.length > 1) {
-                titleText += '\n(';
-                for (let ii = 0; ii < this._targetConditions.length; ii++) {
-                    if (ii > 0) {
-                        titleText += ', ';
-                    }
-
-                    const score: number = Feedback.scoreFeedback(
-                        this._feedback.getShapeData(ii, this._dataOption.value),
-                        this._puzzle.getSecstruct(ii),
-                        this._feedback.getShapeStartIndex(ii, this._dataOption.value),
-                        this._feedback.getShapeMin(ii, this._dataOption.value),
-                        this._feedback.getShapeThreshold(ii, this._dataOption.value),
-                        this._feedback.getShapeMax(ii, this._dataOption.value)
-                    );
-
-                    titleText += `state ${ii + 1} : ${score} / 100`;
-                }
-                titleText += ')';
-            }
-        }
-        this._title.text = titleText;
     }
 
     private setupShape(): void {
