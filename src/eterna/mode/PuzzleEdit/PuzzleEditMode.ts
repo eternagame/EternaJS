@@ -53,16 +53,16 @@ export interface PuzzleEditPoseData {
 // AMW TODO: we need the "all optional" impl for piece by piece buildup.
 // Should be converted to an "all required" type for subsequent processing.
 type SubmitPuzzleParams = {
-    folder?: string;
-    title?: string;
-    secstruct?: string;
+    folder: string;
+    title: string;
+    secstruct: string;
     constraints?: string;
     body?: string;
-    midimgdata?: string;
-    bigimgdata?: string;
-    lock?: string;
-    begin_sequence?: string;
-    objectives?: string;
+    midimgdata: string;
+    bigimgdata: string;
+    lock: string;
+    begin_sequence: string;
+    objectives: string;
 };
 
 export default class PuzzleEditMode extends GameMode {
@@ -228,17 +228,6 @@ export default class PuzzleEditMode extends GameMode {
         const poseFields: PoseField[] = [];
         this._structureInputs = [];
 
-        const setCB = (kk: number): void => {
-            this._poses[kk].addBaseCallback = (
-                parenthesis: string | null, op: PuzzleEditOp | null, index: number
-            ): void => {
-                Assert.assertIsDefined(parenthesis);
-                const secInput: StructureInput = this._structureInputs[kk];
-                secInput.structureString = parenthesis;
-                secInput.setPose(op, index);
-            };
-        };
-
         const poseEditSetter = (index: number, poseToSet: Pose2D): void => {
             poseToSet.poseEditCallback = () => this.poseEditByTarget(index);
         };
@@ -308,6 +297,16 @@ export default class PuzzleEditMode extends GameMode {
         this.setPoseFields(poseFields);
         this.poseEditByTarget(0);
 
+        const setCB = (kk: number): void => {
+            this._poses[kk].addBaseCallback = (
+                parenthesis: string | null, op: PuzzleEditOp | null, index: number
+            ): void => {
+                Assert.assertIsDefined(parenthesis);
+                const secInput: StructureInput = this._structureInputs[kk];
+                secInput.structureString = parenthesis;
+                secInput.setPose(op, index);
+            };
+        };
         for (let ii = 0; ii < this._numTargets; ii++) {
             setCB(ii);
             poseEditSetter(ii, this._poses[ii]);
@@ -575,6 +574,26 @@ export default class PuzzleEditMode extends GameMode {
             });
     }
 
+    private folderNameMap(name: string): string {
+        if (name === Vienna2.NAME) {
+            return '[VRNA_2]';
+        } else if (name === NuPACK.NAME) {
+            return '[NuPACK]';
+        } else if (name === LinearFoldC.NAME) {
+            return '[LFC]';
+        } else if (name === LinearFoldV.NAME) {
+            return '[LFV]';
+        } else if (name === LinearFoldE.NAME) {
+            return '[LFE]';
+        } else if (name === EternaFold.NAME) {
+            return '[EFOLD]';
+        } else if (name === ContraFold.NAME) {
+            return '[CONTRA]';
+        } else {
+            return '';
+        }
+    }
+
     private submitPuzzle(details: SubmitPuzzleDetails): void {
         let constraints = this._constraintBar.serializeConstraints();
 
@@ -605,7 +624,6 @@ export default class PuzzleEditMode extends GameMode {
 
         const objectives: TargetConditions[] = [];
         for (let ii = 0; ii < this._poses.length; ii++) {
-            let objective: TargetConditions | null = null;
             const bindingSite: boolean[] | null = this.getCurrentBindingSite(ii);
             const bindingBases: number[] = [];
             if (bindingSite !== null) {
@@ -619,9 +637,7 @@ export default class PuzzleEditMode extends GameMode {
             const pseudoknots: boolean = SecStruct.fromParens(this._structureInputs[ii].structureString, true)
                 .onlyPseudoknots().nonempty();
 
-            if (this._targetConditions[ii] !== undefined) {
-                objective = this._targetConditions[ii] as TargetConditions;
-            }
+            let objective = this._targetConditions[ii];
             if (bindingBases.length > 0) {
                 objective = {
                     type: 'aptamer',
@@ -642,27 +658,8 @@ export default class PuzzleEditMode extends GameMode {
             objectives.push(objective);
         }
 
-        const postParams: SubmitPuzzleParams = {};
+        let paramsTitle: string = this.folderNameMap(this._folder.name);
 
-        postParams['folder'] = this._folder.name;
-        let paramsTitle: string;
-        if (this._folder.name === Vienna2.NAME) {
-            paramsTitle = '[VRNA_2]';
-        } else if (this._folder.name === NuPACK.NAME) {
-            paramsTitle = '[NuPACK]';
-        } else if (this._folder.name === LinearFoldC.NAME) {
-            paramsTitle = '[LFC]';
-        } else if (this._folder.name === LinearFoldV.NAME) {
-            paramsTitle = '[LFV]';
-        } else if (this._folder.name === LinearFoldE.NAME) {
-            paramsTitle = '[LFE]';
-        } else if (this._folder.name === EternaFold.NAME) {
-            paramsTitle = '[EFOLD]';
-        } else if (this._folder.name === ContraFold.NAME) {
-            paramsTitle = '[CONTRA]';
-        } else {
-            paramsTitle = '';
-        }
         if (this._poses.length > 1) {
             paramsTitle += `[switch2.5][${this._poses.length} states] ${details.title}`;
         } else {
@@ -680,15 +677,19 @@ export default class PuzzleEditMode extends GameMode {
                 PoseThumbnailType.WHITE, 0, null, false, 0, this._poses[0].customLayout)
         );
 
-        postParams['title'] = paramsTitle;
-        postParams['secstruct'] = this.getCurrentTargetPairs(0).getParenthesis(undefined, true);
-        postParams['constraints'] = constraints;
-        postParams['body'] = details.description;
-        postParams['midimgdata'] = midImageString;
-        postParams['bigimgdata'] = bigImageString;
-        postParams['lock'] = lockString;
-        postParams['begin_sequence'] = beginningSequence;
-        postParams['objectives'] = JSON.stringify(objectives);
+        const postParams: SubmitPuzzleParams = {
+            folder: this._folder.name,
+            title: paramsTitle,
+            secstruct: this.getCurrentTargetPairs(0).getParenthesis(undefined, true),
+            constraints,
+            body: details.description,
+            midimgdata: midImageString,
+            bigimgdata: bigImageString,
+            lock: lockString,
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            begin_sequence: beginningSequence,
+            objectives: JSON.stringify(objectives)
+        };
 
         const submitText = this.showDialog(new AsyncProcessDialog('Submitting...')).ref;
         Eterna.client.submitPuzzle(postParams)
