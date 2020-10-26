@@ -2467,7 +2467,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         if (needRedraw || this._redraw) {
             // Create highlight state to pass to bases, then set up draw params.
-            // let hlState: RNAHighlightState | undefined = ;
             this.setAllDrawParams(fullSeq, currentTime, this.makeHighlightState());
         }
 
@@ -3012,44 +3011,18 @@ export default class Pose2D extends ContainerObject implements Updatable {
             yarray = tmp;
         }
 
-        let xmin: number = xarray[0];
-        let xmax: number = xarray[0];
-        let ymin: number = yarray[0];
-        let ymax: number = yarray[0];
-
-        for (let ii = 0; ii < n; ii++) {
-            if (xarray[ii] < xmin) {
-                xmin = xarray[ii];
-            }
-
-            if (xarray[ii] > xmax) {
-                xmax = xarray[ii];
-            }
-
-            if (yarray[ii] < ymin) {
-                ymin = yarray[ii];
-            }
-
-            if (yarray[ii] > ymax) {
-                ymax = yarray[ii];
-            }
-        }
+        const xmin: number = Math.min(...xarray);
+        const xmax: number = Math.max(...xarray);
+        const ymin: number = Math.min(...yarray);
+        const ymax: number = Math.max(...yarray);
 
         xMid = (xmax + xmin) / 2.0;
         yMid = (ymax + ymin) / 2.0;
 
-        this._baseFromX = new Array(n);
-        this._baseFromY = new Array(n);
-        this._baseToX = new Array(n);
-        this._baseToY = new Array(n);
-
-        for (let ii = 0; ii < n; ii++) {
-            this._baseFromX[ii] = this._bases[ii].x;
-            this._baseFromY[ii] = this._bases[ii].y;
-
-            this._baseToX[ii] = xarray[ii] - xMid;
-            this._baseToY[ii] = yarray[ii] - yMid;
-        }
+        this._baseFromX = this._bases.map((b) => b.x);
+        this._baseFromY = this._bases.map((b) => b.y);
+        this._baseToX = xarray.map((x) => x - xMid);
+        this._baseToY = yarray.map((y) => y - yMid);
 
         this._foldStartTime = -1;
         if (fast) {
@@ -3385,20 +3358,21 @@ export default class Pose2D extends ContainerObject implements Updatable {
         const fullSeq = this.fullSequence;
 
         for (let ii = 0; ii < this._pairs.length; ii++) {
-            if (this._pairs.isPaired(ii) && this.isPairSatisfied(ii, this._pairs.pairingPartner(ii))) {
+            const pi = this._pairs.pairingPartner(ii);
+            if (this._pairs.isPaired(ii) && this.isPairSatisfied(ii, pi)) {
                 const pairStr: number = Pose2D.getPairStrength(
-                    fullSeq.nt(ii), fullSeq.nt(this._pairs.pairingPartner(ii))
+                    fullSeq.nt(ii), fullSeq.nt(pi)
                 );
 
                 if (this._baseToX && this._baseToY) {
                     this._bases[ii].setPairing(true,
-                        this._baseToX[this._pairs.pairingPartner(ii)] - this._baseToX[ii],
-                        this._baseToY[this._pairs.pairingPartner(ii)] - this._baseToY[ii],
+                        this._baseToX[pi] - this._baseToX[ii],
+                        this._baseToY[pi] - this._baseToY[ii],
                         0.5, pairStr);
                 } else {
                     this._bases[ii].setPairing(true,
-                        this._bases[this._pairs.pairingPartner(ii)].x - this._bases[ii].x,
-                        this._bases[this._pairs.pairingPartner(ii)].y - this._bases[ii].y,
+                        this._bases[pi].x - this._bases[ii].x,
+                        this._bases[pi].y - this._bases[ii].y,
                         0.5, pairStr);
                 }
             } else {
@@ -3692,8 +3666,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        let childCoords: number[];
-
         if (root.isPair) {
             if (root.children.length > 1) {
                 throw new Error("Something's wrong with score tree");
@@ -3701,7 +3673,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
             if (root.children.length !== 0) {
                 if (root.children[0].isPair) {
-                    childCoords = [];
+                    const childCoords = [];
 
                     childCoords.push(root.indexA);
                     childCoords.push(root.indexB);
@@ -3715,7 +3687,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
                     this.generateScoreNodesRecursive(root.children[0], null, nodes);
                 } else {
-                    childCoords = [];
+                    const childCoords = [];
 
                     childCoords.push(root.indexB);
                     childCoords.push(root.indexA);
@@ -3813,7 +3785,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _oligo: number[] | null = null;
     private _oligoMode: number = Pose2D.OLIGO_MODE_DIMER;
     private _oligoName: string | null = null;
-    private _duplexCost: number = EPars.DUPLEX_INIT; // total for all strands
+    private _duplexCost: number = 4.1; // total for all strands
     private _oligoMalus: number = 0; // concentration related penalty
     private _oligoBases: BaseGlow[] | null = null; // for glows
     private _oligoPaired: boolean = false;

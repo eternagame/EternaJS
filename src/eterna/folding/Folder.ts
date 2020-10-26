@@ -124,24 +124,7 @@ export default abstract class Folder {
         return false;
     }
 
-    public hairpinEnergy(
-        size: number, type: number, si1: number, sj1: number, sequence: number[], i: number, j: number
-    ): number {
-        return 0;
-    }
-
-    public loopEnergy(
-        n1: number, n2: number, type: number,
-        type2: number, si1: number, sj1: number, sp1: number, sq1: number, b1: boolean, b2: boolean
-    ): number {
-        return 0;
-    }
-
     public cutInLoop(i: number): number {
-        return 0;
-    }
-
-    public mlEnergy(pairs: number[], S: number[], i: number, isExtloop: boolean): number {
         return 0;
     }
 

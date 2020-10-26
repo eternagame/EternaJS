@@ -222,28 +222,8 @@ export default abstract class LinearFoldBase extends Folder {
         return this.foldSequence(seq, null);
     }
 
-    public mlEnergy(pairs: number[], S: number[], i: number, isExtloop: boolean): number {
-        log.warn('LinearFold.mlEnergy: unimplemented');
-        return 0;
-    }
-
     public cutInLoop(i: number): number {
         log.warn('LinearFold.cutInLoop: unimplemented');
-        return 0;
-    }
-
-    public loopEnergy(
-        n1: number, n2: number, type: number, type2: number,
-        si1: number, sj1: number, sp1: number, sq1: number, b1: boolean, b2: boolean
-    ): number {
-        log.warn('LinearFold.loopEnergy: unimplemented');
-        return 0;
-    }
-
-    public hairpinEnergy(
-        size: number, type: number, si1: number, sj1: number, sequence: number[], i: number, j: number
-    ): number {
-        log.warn('LinearFold.hairpinEnergy: unimplemented');
         return 0;
     }
 
