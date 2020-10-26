@@ -9,7 +9,7 @@ import ExpPainter from 'eterna/ExpPainter';
 import {
     ContainerObject, InputUtil, Flashbang, Dragger, DisplayUtil, SceneObject, SerialTask, Easing,
     ParallelTask, AlphaTask, LocationTask, DelayTask, SelfDestructTask, Vector2, Arrays,
-    RepeatingTask, Updatable, Assert, LayoutContainer
+    RepeatingTask, Updatable, Assert
 } from 'flashbang';
 import {Move} from 'eterna/mode/PoseEdit/PoseEditMode';
 import LightRay from 'eterna/vfx/LightRay';
@@ -25,7 +25,6 @@ import Utility from 'eterna/util/Utility';
 import Folder from 'eterna/folding/Folder';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
-import {isIP} from 'net';
 import Base from './Base';
 import BaseDrawFlags from './BaseDrawFlags';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
@@ -234,14 +233,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._expMid = mid;
         this._expHi = hi;
         this.paintFeedback();
-
-        // print feedback score
-        for (let ii = 0; ii < this._feedbackObjs.length; ii++) {
-            this.removeObject(this._feedbackObjs[ii]);
-        }
-
-        this.printFeedback(dat);
-        this.updatePrintFeedback();
     }
 
     public paintFeedback(): void {
@@ -1068,17 +1059,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         if (!this._coloring) {
             this.updateScoreNodeGui();
-            if (this._feedbackObjs.length > 0) {
-                for (let ii = 0; ii < this._feedbackObjs.length; ii++) {
-                    if (ii === closestIndex) {
-                        continue;
-                    }
-                    this._feedbackObjs[ii].display.visible = false;
-                }
-                if (closestIndex >= 0) {
-                    this._feedbackObjs[closestIndex].display.visible = true;
-                }
-            }
         }
     }
 
@@ -2483,10 +2463,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (this._displayAuxInfo) {
                 this.renderAuxInfo();
             }
-
-            if (this._feedbackObjs.length > 0) {
-                this.updatePrintFeedback(false);
-            }
         }
 
         this._baseRope.enabled = this._showBaseRope || (this._customLayout != null);
@@ -3073,32 +3049,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         } else {
             this._foldDuration = 0.7;
         }
-    }
-
-    private printFeedback(dat: number[]): void {
-        // for (let i: number = 0; i < dat.length; i++) {
-        //     let feedback_obj: GameText = null;
-        //     feedback_obj = new GameText(Fonts.arial(12, true));
-        //     feedback_obj.set_text(dat[i]);
-        //     this._feedback_objs.push(feedback_obj);
-        //     this.addObject(this._feedback_objs[i]);
-        // }
-    }
-
-    private updatePrintFeedback(hide: boolean = true): void {
-        // for (let ii: number = 0; ii < this._feedback_objs_num; ii++) {
-        //     let obj_p: Point = this.get_base_xy(ii + this._feedback_objs_start_ind);
-        //     let out_p: Point = this.get_base_out_xy(ii + this._feedback_objs_start_ind);
-        //     obj_p.x += 1.6 * (out_p.x - this._off_x) - this._feedback_objs[ii].text_width() / 2;
-        //     obj_p.y += 1.6 * (out_p.y - this._off_y) - this._feedback_objs[ii].text_height() / 2;
-        //     if (hide) this._feedback_objs[ii].visible = false;
-        //     this._feedback_objs[ii].set_pos(new UDim(0, 0, obj_p.x, obj_p.y));
-        //     this._feedback_objs[ii].graphics.clear();
-        //     this._feedback_objs[ii].graphics.beginFill(0x000000, 0.35);
-        //     this._feedback_objs[ii].graphics.drawRoundRect(
-        //         0, 0, this._feedback_objs[ii].text_width(), this._feedback_objs[ii].text_height(), 12
-        //     );
-        // }
     }
 
     private onMouseOut(): void {
@@ -4003,8 +3953,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _auxInfo: AuxInfo | null;
     private _auxInfoCanvas: Graphics;
     private _auxTextballoon: TextBalloon;
-
-    private _feedbackObjs: SceneObject[] = [];
 
     private _anchoredObjects: RNAAnchorObject[] = [];
     private _highlightEnergyText: boolean = false;
