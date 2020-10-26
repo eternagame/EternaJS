@@ -384,10 +384,9 @@ export default class Toolbar extends ContainerObject {
             }
         }
 
-        const alterMenuIdx = 0;
-        // this.actionMenu.addMenuButton(
-        //     new GameButton().allStates(Bitmaps.CustomLayout).disabled(undefined)
-        // );
+        const alterMenuIdx = this.actionMenu.addMenuButton(
+            new GameButton().allStates(Bitmaps.CustomLayout).disabled(undefined)
+        );
 
         this.moveButton = new GameButton()
             .allStates(Bitmaps.CustomLayout)
