@@ -2669,115 +2669,119 @@ export default class PoseEditMode extends GameMode {
                 structureConstraints = tc['structure_constraints'];
             }
 
-            if (structureConstraints !== undefined) {
-                let numUnpaired = 0;
-                let numWrong = 0;
-                let dontcareOk = true;
-                for (let jj = segments[0]; jj <= segments[1] && dontcareOk; jj++) {
-                    if (structureConstraints[jj]) {
-                        dontcareOk = false;
+            if (structureConstraints === undefined) return;
+
+            let numUnpaired = 0;
+            let numWrong = 0;
+            let dontcareOk = true;
+            for (let jj = segments[0]; jj <= segments[1] && dontcareOk; jj++) {
+                if (structureConstraints[jj]) {
+                    dontcareOk = false;
+                    continue;
+                }
+                if (!this._targetPairs[xx].isPaired(jj)) {
+                    numUnpaired++;
+                } else if (this._targetPairs[xx].pairingPartner(jj) < segments[2]
+                        || this._targetPairs[xx].pairingPartner(jj) > segments[3]) {
+                    numWrong++;
+                }
+            }
+            for (let jj = segments[2]; jj <= segments[3] && dontcareOk; jj++) {
+                if (structureConstraints[jj]) {
+                    dontcareOk = false;
+                    continue;
+                }
+                if (!this._targetPairs[xx].isPaired(jj)) {
+                    numUnpaired++;
+                } else if (this._targetPairs[xx].pairingPartner(jj) < segments[0]
+                        || this._targetPairs[xx].pairingPartner(jj) > segments[1]) {
+                    numWrong++;
+                }
+            }
+            if (!dontcareOk || numWrong !== 0) return;
+
+            if (numUnpaired === 0) {
+                for (let jj = segments[0]; jj <= segments[1]; jj++) {
+                    this._targetPairs[xx].setUnpaired(jj);
+                }
+                for (let jj = segments[2]; jj <= segments[3]; jj++) {
+                    this._targetPairs[xx].setUnpaired(jj);
+                }
+                Flashbang.sound.playSound(Sounds.SoundRY);
+                this.flashConstraintForTarget(xx);
+                this._poses[targetIndex].clearDesignStruct();
+            } else if (numUnpaired === segments[1] - segments[0] + segments[3] - segments[2] + 2) {
+                // breaking pairs is safe, but adding them may not always be
+                if (
+                    EPars.validateParenthesis(
+                        this._targetPairs[xx].getParenthesis().slice(segments[1] + 1, segments[2]),
+                        false
+                    ) == null
+                ) {
+                    for (let jj = segments[0]; jj <= segments[1]; jj++) {
+                        this._targetPairs[xx].pairs[jj] = segments[3] - (jj - segments[0]);
+                    }
+                    for (let jj = segments[2]; jj <= segments[3]; jj++) {
+                        this._targetPairs[xx].pairs[jj] = segments[1] - (jj - segments[2]);
+                    }
+                    Flashbang.sound.playSound(Sounds.SoundGB);
+                    this.flashConstraintForTarget(xx);
+                    this._poses[targetIndex].clearDesignStruct();
+                    return;
+                }
+
+                // if the above fails, and we have multi-oligos, there may be a permutation where it works
+                if (this._targetOligos[xx] === null) return;
+
+                const targetOligo = this._targetOligos[xx];
+                Assert.assertIsDefined(targetOligo);
+                if (targetOligo.length <= 1) return;
+
+                const newOrder: number[] = targetOligo.map((value, idx) => idx);
+                let more: boolean;
+                do {
+                    segments = this._poses[targetIndex].designSegments;
+                    const newMap: number[] | null = this._poses[targetIndex].getOrderMap(newOrder);
+                    const newPairs: SecStruct = new SecStruct();
+                    // shouldn't be likely that newMap isn't null but idxMap is, but must add the check
+                    if (newMap != null && idxMap != null) {
+                        for (let jj = 0; jj < segments.length; jj++) {
+                            segments[jj] = newMap.indexOf(segments[jj]);
+                        }
+                        for (let jj = 0; jj < this._targetPairs[xx].length; jj++) {
+                            const kk: number = idxMap.indexOf(newMap[jj]);
+                            if (!this._targetPairs[xx].isPaired(kk)) {
+                                newPairs.setUnpaired(jj);
+                            } else {
+                                const pp: number = this._targetPairs[xx].pairingPartner(kk);
+                                newPairs.setPairingPartner(jj, newMap.indexOf(idxMap[pp]));
+                            }
+                        }
+                    }
+                    if (
+                        EPars.validateParenthesis(
+                            newPairs.getParenthesis().slice(segments[1] + 1, segments[2]),
+                            false
+                        ) != null
+                    ) {
+                        more = FoldUtil.nextPerm(newOrder);
                         continue;
                     }
-                    if (!this._targetPairs[xx].isPaired(jj)) {
-                        numUnpaired++;
-                    } else if (this._targetPairs[xx].pairingPartner(jj) < segments[2]
-                            || this._targetPairs[xx].pairingPartner(jj) > segments[3]) {
-                        numWrong++;
+
+                    // Finally, a compatible permutation
+                    this._targetPairs[xx] = newPairs;
+                    this._targetOligosOrder[xx] = newOrder;
+                    for (let jj = segments[0]; jj <= segments[1]; jj++) {
+                        this._targetPairs[xx].pairs[jj] = segments[3] - (jj - segments[0]);
                     }
-                }
-                for (let jj = segments[2]; jj <= segments[3] && dontcareOk; jj++) {
-                    if (structureConstraints[jj]) {
-                        dontcareOk = false;
-                        continue;
+                    for (let jj = segments[2]; jj <= segments[3]; jj++) {
+                        this._targetPairs[xx].pairs[jj] = segments[1] - (jj - segments[2]);
                     }
-                    if (!this._targetPairs[xx].isPaired(jj)) {
-                        numUnpaired++;
-                    } else if (this._targetPairs[xx].pairingPartner(jj) < segments[0]
-                            || this._targetPairs[xx].pairingPartner(jj) > segments[1]) {
-                        numWrong++;
-                    }
-                }
-                if (dontcareOk && numWrong === 0) {
-                    if (numUnpaired === 0) {
-                        for (let jj = segments[0]; jj <= segments[1]; jj++) {
-                            this._targetPairs[xx].setUnpaired(jj);
-                        }
-                        for (let jj = segments[2]; jj <= segments[3]; jj++) {
-                            this._targetPairs[xx].setUnpaired(jj);
-                        }
-                        Flashbang.sound.playSound(Sounds.SoundRY);
-                        this.flashConstraintForTarget(xx);
-                        this._poses[targetIndex].clearDesignStruct();
-                    } else if (numUnpaired === segments[1] - segments[0] + segments[3] - segments[2] + 2) {
-                        // breaking pairs is safe, but adding them may not always be
-                        if (
-                            EPars.validateParenthesis(
-                                this._targetPairs[xx].getParenthesis().slice(segments[1] + 1, segments[2]),
-                                false
-                            ) == null
-                        ) {
-                            for (let jj = segments[0]; jj <= segments[1]; jj++) {
-                                this._targetPairs[xx].pairs[jj] = segments[3] - (jj - segments[0]);
-                            }
-                            for (let jj = segments[2]; jj <= segments[3]; jj++) {
-                                this._targetPairs[xx].pairs[jj] = segments[1] - (jj - segments[2]);
-                            }
-                            Flashbang.sound.playSound(Sounds.SoundGB);
-                            this.flashConstraintForTarget(xx);
-                            this._poses[targetIndex].clearDesignStruct();
-                            // if the above fails, and we have multi-oligos, there may be a permutation where it works
-                        } else if (this._targetOligos[xx] != null) {
-                            const targetOligo = this._targetOligos[xx];
-                            Assert.assertIsDefined(targetOligo);
-                            if (targetOligo.length > 1) {
-                                const newOrder: number[] = targetOligo.map((value, idx) => idx);
-                                let more: boolean;
-                                do {
-                                    segments = this._poses[targetIndex].designSegments;
-                                    const newMap: number[] | null = this._poses[targetIndex].getOrderMap(newOrder);
-                                    const newPairs: SecStruct = new SecStruct();
-                                    // shouldn't be likely that newMap isn't null but idxMap is, but must add the check
-                                    if (newMap != null && idxMap != null) {
-                                        for (let jj = 0; jj < segments.length; jj++) {
-                                            segments[jj] = newMap.indexOf(segments[jj]);
-                                        }
-                                        for (let jj = 0; jj < this._targetPairs[xx].length; jj++) {
-                                            const kk: number = idxMap.indexOf(newMap[jj]);
-                                            if (!this._targetPairs[xx].isPaired(kk)) {
-                                                newPairs.setUnpaired(jj);
-                                            } else {
-                                                const pp: number = this._targetPairs[xx].pairingPartner(kk);
-                                                newPairs.setPairingPartner(jj, newMap.indexOf(idxMap[pp]));
-                                            }
-                                        }
-                                    }
-                                    if (
-                                        EPars.validateParenthesis(
-                                            newPairs.getParenthesis().slice(segments[1] + 1, segments[2]),
-                                            false
-                                        ) == null
-                                    ) {
-                                        // compatible permutation
-                                        this._targetPairs[xx] = newPairs;
-                                        this._targetOligosOrder[xx] = newOrder;
-                                        for (let jj = segments[0]; jj <= segments[1]; jj++) {
-                                            this._targetPairs[xx].pairs[jj] = segments[3] - (jj - segments[0]);
-                                        }
-                                        for (let jj = segments[2]; jj <= segments[3]; jj++) {
-                                            this._targetPairs[xx].pairs[jj] = segments[1] - (jj - segments[2]);
-                                        }
-                                        Flashbang.sound.playSound(Sounds.SoundGB);
-                                        this.flashConstraintForTarget(xx);
-                                        this._poses[targetIndex].clearDesignStruct();
-                                        more = false;
-                                    } else {
-                                        more = FoldUtil.nextPerm(newOrder);
-                                    }
-                                } while (more);
-                            }
-                        }
-                    }
-                }
+                    Flashbang.sound.playSound(Sounds.SoundGB);
+                    this.flashConstraintForTarget(xx);
+                    this._poses[targetIndex].clearDesignStruct();
+                    more = false;
+                } while (more);
             }
         }
     }
