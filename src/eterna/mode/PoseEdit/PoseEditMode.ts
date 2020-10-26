@@ -1615,18 +1615,13 @@ export default class PoseEditMode extends GameMode {
             const tcType: string = tc['type'];
 
             if (tcType === 'multistrand') {
-                const odefs: OligoDef[] | undefined = tc['oligos'];
-                const ndefs: Oligo[] = [];
-                if (odefs !== undefined) {
-                    for (let ii = 0; ii < odefs.length; ii++) {
-                        ndefs.push({
-                            sequence: Sequence.fromSequenceString(odefs[ii].sequence).baseArray,
-                            malus: odefs[ii].malus,
-                            name: odefs[ii]['name']
-                        });
-                    }
+                if (tc['oligos'] !== undefined) {
+                    this._poses[poseIndex].setOligos(tc['oligos'].map((odef) => ({
+                        sequence: Sequence.fromSequenceString(odef.sequence).baseArray,
+                        malus: odef.malus,
+                        name: odef.name
+                    })));
                 }
-                this._poses[poseIndex].setOligos(ndefs, this._targetOligosOrder[targetIndex]);
             } else {
                 this._poses[poseIndex].setOligos(undefined);
             }
