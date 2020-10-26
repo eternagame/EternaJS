@@ -2963,16 +2963,6 @@ export default class PoseEditMode extends GameMode {
     }
 
     private poseEditByTargetFoldTarget(ii: number): void {
-        let bestPairs: SecStruct | null = null;
-        let oligoOrder: number[] | undefined;
-        let oligosPaired = 0;
-        let forceStruct: string | undefined;
-        let foldMode: number;
-        let fullSeq: Sequence;
-        let malus: number;
-        let bonus: number;
-        let sites: number[];
-
         if (ii === 0) {
             // / Pushing undo block
             this._stackLevel++;
@@ -2990,19 +2980,27 @@ export default class PoseEditMode extends GameMode {
         if (!this._folder) {
             throw new Error('Cannot progress through poseEditByTargetFoldTarget with a null Folder!');
         }
-        const tc = this._targetConditions[ii];
-        if (tc !== undefined) {
-            forceStruct = (this._targetConditions[ii] as TargetConditions)['force_struct'];
-        }
 
+        const tc = this._targetConditions[ii];
+
+        // The rest of this function basically takes tc and a couple other forms
+        // of data and turns them into an UndoBlock. Maybe we can factor this out.
+        let bestPairs: SecStruct | null = null;
+        let bonus: number;
+        let sites: number[];
+        let foldMode: number;
+        let malus: number;
+        let oligoOrder: number[] | undefined;
+        let oligosPaired = 0;
+        const forceStruct = tc ? tc['force_struct'] : undefined;
         if (tc === undefined
-                || (tc as TargetConditions)['type'] === 'single') {
+                || (tc && tc['type'] === 'single')) {
             bestPairs = this._folder.foldSequence(this._puzzle.transformSequence(seq, ii), null, forceStruct);
-        } else if ((tc as TargetConditions)['type'] === 'pseudoknot') {
+        } else if (tc['type'] === 'pseudoknot') {
             bestPairs = this._folder.foldSequence(this._puzzle.transformSequence(seq, ii), null, forceStruct, true);
-        } else if ((tc as TargetConditions)['type'] === 'aptamer') {
-            bonus = (tc as TargetConditions)['bonus'] as number;
-            sites = (tc as TargetConditions)['site'] as number[];
+        } else if (tc['type'] === 'aptamer') {
+            bonus = tc['bonus'] as number;
+            sites = tc['site'] as number[];
             bestPairs = this._folder.foldSequenceWithBindingSite(
                 this._puzzle.transformSequence(seq, ii),
                 this._targetPairs[ii],
@@ -3015,14 +3013,14 @@ export default class PoseEditMode extends GameMode {
                 : Number(tc['fold_mode']);
             if (foldMode === Pose2D.OLIGO_MODE_DIMER) {
                 log.debug('cofold');
-                fullSeq = seq.concat(Sequence.fromSequenceString(`&${tc['oligo_sequence']}`));
+                const fullSeq = seq.concat(Sequence.fromSequenceString(`&${tc['oligo_sequence']}`));
                 malus = int(tc['malus'] as number * 100);
                 bestPairs = this._folder.cofoldSequence(fullSeq, null, malus, forceStruct);
             } else if (foldMode === Pose2D.OLIGO_MODE_EXT5P) {
-                fullSeq = Sequence.fromSequenceString(tc['oligo_sequence'] as string).concat(seq);
+                const fullSeq = Sequence.fromSequenceString(tc['oligo_sequence'] as string).concat(seq);
                 bestPairs = this._folder.foldSequence(fullSeq, null, forceStruct);
             } else {
-                fullSeq = seq.concat(Sequence.fromSequenceString(tc['oligo_sequence'] as string));
+                const fullSeq = seq.concat(Sequence.fromSequenceString(tc['oligo_sequence'] as string));
                 bestPairs = this._folder.foldSequence(fullSeq, null, forceStruct);
             }
         } else if (tc['type'] === 'aptamer+oligo') {
@@ -3033,18 +3031,18 @@ export default class PoseEditMode extends GameMode {
                 : Number(tc['fold_mode']);
             if (foldMode === Pose2D.OLIGO_MODE_DIMER) {
                 log.debug('cofold');
-                fullSeq = seq.concat(Sequence.fromSequenceString(`&${tc['oligo_sequence']}`));
+                const fullSeq = seq.concat(Sequence.fromSequenceString(`&${tc['oligo_sequence']}`));
                 malus = int(tc['malus'] as number * 100);
                 bestPairs = this._folder.cofoldSequenceWithBindingSite(
                     fullSeq, sites, bonus, forceStruct, malus
                 );
             } else if (foldMode === Pose2D.OLIGO_MODE_EXT5P) {
-                fullSeq = Sequence.fromSequenceString(tc['oligo_sequence'] as string).concat(seq);
+                const fullSeq = Sequence.fromSequenceString(tc['oligo_sequence'] as string).concat(seq);
                 bestPairs = this._folder.foldSequenceWithBindingSite(
                     fullSeq, this._targetPairs[ii], sites, Number(bonus), tc['fold_version']
                 );
             } else {
-                fullSeq = seq.concat(Sequence.fromSequenceString(tc['oligo_sequence'] as string));
+                const fullSeq = seq.concat(Sequence.fromSequenceString(tc['oligo_sequence'] as string));
                 bestPairs = this._folder.foldSequenceWithBindingSite(
                     fullSeq, this._targetPairs[ii], sites, Number(bonus), tc['fold_version']
                 );
