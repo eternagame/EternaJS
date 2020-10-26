@@ -2345,6 +2345,61 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._cursorIndex;
     }
 
+    private makeHighlightState() {
+        let hlState: RNAHighlightState | undefined;
+        if (this._allNewHighlights.length > 0) {
+            hlState = new RNAHighlightState();
+            hlState.nuc = [];
+            hlState.isOn = true;
+            for (const existingHighlight of this._allNewHighlights) {
+                if (existingHighlight.nuc !== null) {
+                    hlState.nuc = hlState.nuc.concat(existingHighlight.nuc);
+                }
+            }
+        }
+        return hlState;
+    }
+
+    private setAllDrawParams(fullSeq: Sequence, currentTime: number, hlState?: RNAHighlightState): void {
+        for (let ii = 0; ii < fullSeq.length; ii++) {
+            // skip the oligo separator
+            if (fullSeq.nt(ii) === RNABase.CUT) {
+                continue;
+            }
+
+            const useBarcode = (this._barcodes != null && this._barcodes.indexOf(ii) >= 0);
+
+            this._bases[ii].forceUnpaired = (
+                this._forcedStruct != null && this._forcedStruct[ii] === EPars.FORCE_UNPAIRED
+            );
+
+            const drawFlags: number = BaseDrawFlags.builder()
+                .locked(this.isLocked(ii))
+                .letterMode(this._lettermode)
+                .lowPerform(this._simpleGraphicsMods)
+                .useBarcode(useBarcode)
+                .result();
+
+            let numberBitmap: Texture | null = null;
+            if (this._numberingMode) {
+                let displayNumber: number | null = ii + 1;
+                if (this._customNumbering != null) displayNumber = this._customNumbering[ii];
+                if ((displayNumber != null)
+                    && (ii === 0 || displayNumber % 5 === 0 || ii === fullSeq.length - 1)) {
+                    numberBitmap = BitmapManager.getNumberBitmap(displayNumber);
+                }
+            }
+
+            this._bases[ii].setDrawParams(
+                this._zoomLevel, this._offX, this._offY, currentTime, drawFlags, numberBitmap, hlState
+            );
+        }
+
+        if (this._displayAuxInfo) {
+            this.renderAuxInfo();
+        }
+    }
+
     /* override */
     public update(dt: number): void {
         if (!this.display.worldVisible) {
@@ -2411,56 +2466,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
         );
 
         if (needRedraw || this._redraw) {
-            // Create highlight state to pass to bases.
-            let hlState: RNAHighlightState | undefined;
-            if (this._allNewHighlights.length > 0) {
-                hlState = new RNAHighlightState();
-                hlState.nuc = [];
-                hlState.isOn = true;
-                for (const existingHighlight of this._allNewHighlights) {
-                    if (existingHighlight.nuc !== null) {
-                        hlState.nuc = hlState.nuc.concat(existingHighlight.nuc);
-                    }
-                }
-            }
-
-            for (let ii = 0; ii < fullSeq.length; ii++) {
-                // skip the oligo separator
-                if (fullSeq.nt(ii) === RNABase.CUT) {
-                    continue;
-                }
-
-                const useBarcode = (this._barcodes != null && this._barcodes.indexOf(ii) >= 0);
-
-                this._bases[ii].forceUnpaired = (
-                    this._forcedStruct != null && this._forcedStruct[ii] === EPars.FORCE_UNPAIRED
-                );
-
-                const drawFlags: number = BaseDrawFlags.builder()
-                    .locked(this.isLocked(ii))
-                    .letterMode(this._lettermode)
-                    .lowPerform(this._simpleGraphicsMods)
-                    .useBarcode(useBarcode)
-                    .result();
-
-                let numberBitmap: Texture | null = null;
-                if (this._numberingMode) {
-                    let displayNumber: number | null = ii + 1;
-                    if (this._customNumbering != null) displayNumber = this._customNumbering[ii];
-                    if ((displayNumber != null)
-                        && (ii === 0 || displayNumber % 5 === 0 || ii === fullSeq.length - 1)) {
-                        numberBitmap = BitmapManager.getNumberBitmap(displayNumber);
-                    }
-                }
-
-                this._bases[ii].setDrawParams(
-                    this._zoomLevel, this._offX, this._offY, currentTime, drawFlags, numberBitmap, hlState
-                );
-            }
-
-            if (this._displayAuxInfo) {
-                this.renderAuxInfo();
-            }
+            // Create highlight state to pass to bases, then set up draw params.
+            // let hlState: RNAHighlightState | undefined = ;
+            this.setAllDrawParams(fullSeq, currentTime, this.makeHighlightState());
         }
 
         // AMW TODO: this means that PuzzleEditMode can get a baserope showing
