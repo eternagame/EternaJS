@@ -35,7 +35,7 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
 
         if (targetMap != null) {
             const targetAlignedConstraints: boolean[] = [];
-            for (const [rawIndex, targetIndex] of Object.entries(targetMap)) {
+            for (const [rawIndex, targetIndex] of targetMap.entries()) {
                 targetAlignedConstraints[targetIndex] = constraints[Number(rawIndex)];
             }
             return targetAlignedConstraints;
@@ -66,8 +66,8 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
             const naturalMap = ublk.reorderedOligosIndexMap(ublk.oligoOrder);
             if (naturalMap !== undefined) {
                 const targetAlignedNaturalPairs: SecStruct = new SecStruct();
-                for (const [rawIndex, targetIndex] of Object.entries(targetMap)) {
-                    const naturalIndex = naturalMap[Number(rawIndex)];
+                for (const [rawIndex, targetIndex] of targetMap.entries()) {
+                    const naturalIndex = naturalMap[rawIndex];
                     // If unpaired, it's unpaired, otherwise we need to get the index of the paired base
                     // according to target mode
                     if (!naturalPairs.isPaired(naturalIndex)) {
