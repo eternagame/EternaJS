@@ -25,7 +25,7 @@ export default abstract class LayoutContainer extends Container {
     /* override */
     public removeChildAt<T extends DisplayObject = Container>(index: number): DisplayObject {
         this._needsLayout = true;
-        return super.removeChildAt(index);
+        return super.removeChildAt(index) as T;
     }
 
     /* override */
@@ -38,9 +38,9 @@ export default abstract class LayoutContainer extends Container {
     public removeChildren<T extends DisplayObject = Container>(
         beginIndex?: number,
         endIndex?: number
-    ): DisplayObject[] {
+    ): T[] {
         this._needsLayout = true;
-        return super.removeChildren(beginIndex, endIndex);
+        return super.removeChildren(beginIndex, endIndex) as T[];
     }
 
     public layout(force: boolean = false): void {

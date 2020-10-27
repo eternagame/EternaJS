@@ -700,7 +700,6 @@ export default class FeedbackViewMode extends GameMode {
     private _currentIndex: number;
 
     private _foldMode: PoseFoldMode;
-    private _puzzleTitle: Text;
     private _title: Text;
     private _feedback: Feedback | null;
     private _sequence: Sequence;

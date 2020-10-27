@@ -1,7 +1,4 @@
 import * as log from 'loglevel';
-import EPars, {
-    RNABase
-} from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import Utility from 'eterna/util/Utility';
@@ -28,7 +25,7 @@ export default class Vienna extends Folder {
         return import('engines-bin/vienna')
             .then((module) => EmscriptenUtil.loadProgram(module))
             .then((program) => new Vienna(program))
-            .catch((err) => null);
+            .catch(() => null);
     }
 
     private constructor(lib: ViennaLib) {
@@ -185,7 +182,7 @@ export default class Vienna extends Folder {
 
     public foldSequence(
         seq: Sequence, secondBestPairs: SecStruct | null, desiredPairs: string | null = null,
-        pseudoknotted: boolean = false, temp: number = 37
+        _pseudoknotted: boolean = false, temp: number = 37
     ): SecStruct {
         const key: CacheKey = {
             primitive: 'fold',
@@ -404,10 +401,6 @@ export default class Vienna extends Folder {
         return coPairs;
     }
 
-    public cutInLoop(i: number): number {
-        return 0;
-    }
-
     private foldSequenceImpl(seq: Sequence, structStr: string | null = null, temp: number = 37): SecStruct {
         const seqStr = seq.sequenceString(false, false);
         let result: FullFoldResult | null = null;
@@ -430,7 +423,7 @@ export default class Vienna extends Folder {
     }
 
     private foldSequenceWithBindingSiteImpl(
-        seq: Sequence, i: number, p: number, j: number, q: number, bonus: number, temp: number = 37
+        seq: Sequence, i: number, p: number, j: number, q: number, bonus: number, _temp: number = 37
     ): SecStruct {
         const seqStr = seq.sequenceString(false, false);
         const structStr = '';
@@ -453,7 +446,7 @@ export default class Vienna extends Folder {
         }
     }
 
-    private cofoldSequenceImpl(seq: Sequence, str: string | null = null, temp: number = 37): SecStruct {
+    private cofoldSequenceImpl(seq: Sequence, str: string | null = null, _temp: number = 37): SecStruct {
         const seqStr = seq.sequenceString(true, false);
         const structStr: string = str || '';
         let result: FullFoldResult | null = null;
@@ -484,7 +477,7 @@ export default class Vienna extends Folder {
         j: number,
         q: number,
         bonus: number,
-        temp: number = 37
+        _temp: number = 37
     ): SecStruct {
         const seqStr = seq.sequenceString(true, false);
         const structStr: string = str || '';
@@ -509,7 +502,7 @@ export default class Vienna extends Folder {
     }
 
     private foldSequenceWithBindingSiteOld(
-        seq: Sequence, targetPairs: SecStruct, bindingSite: number[], bonus: number, temp: number = 37
+        seq: Sequence, targetPairs: SecStruct, bindingSite: number[], bonus: number, _temp: number = 37
     ): SecStruct {
         let bestPairs: SecStruct;
         const nativePairs: SecStruct = this.foldSequence(seq, null, null);

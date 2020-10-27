@@ -33,7 +33,6 @@ import MarkerBoxView from './MarkerBoxView';
 import GridLines from './GridLines';
 import DataCol from './DataCol';
 import CustomizeColumnOrderDialog from './CustomizeColumnOrderDialog';
-import PoseEditMode from '../PoseEdit/PoseEditMode';
 
 export interface DBVote {
     canVote: boolean;
@@ -640,7 +639,7 @@ export default class DesignBrowserMode extends GameMode {
             return;
         }
 
-        const [index, yOffset] = this._dataCols[0].getMouseIndex(e);
+        const [index] = this._dataCols[0].getMouseIndex(e);
         if (index >= 0 && index < this._filteredSolutions.length) {
             this._selectionBox.visible = true;
             this.updateSelectionBoxPos(index);

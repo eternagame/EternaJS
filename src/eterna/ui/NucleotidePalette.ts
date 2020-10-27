@@ -341,7 +341,6 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
     private readonly _targets: PaletteTarget[];
 
     private static readonly P = new Point();
-    private static readonly R = new Rectangle();
 }
 
 export class PaletteTarget {

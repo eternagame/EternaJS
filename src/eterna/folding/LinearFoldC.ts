@@ -14,7 +14,7 @@ export default class LinearFoldC extends LinearFoldBase {
         return import('engines-bin/LinearFoldC')
             .then((module) => EmscriptenUtil.loadProgram(module))
             .then((program) => new LinearFoldC(program))
-            .catch((err) => null);
+            .catch(() => null);
     }
 
     public get name(): string {

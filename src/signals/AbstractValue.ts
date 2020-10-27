@@ -86,7 +86,7 @@ export default abstract class AbstractValue<T> extends Reactor<T, T, undefined> 
      * Updates our locally stored value. Default implementation throws IllegalOperationError.
      * @return the previously stored value.
      */
-    protected updateLocal(value: T): T {
+    protected updateLocal(_value: T): T {
         throw new Error('IllegalOperationError');
     }
 

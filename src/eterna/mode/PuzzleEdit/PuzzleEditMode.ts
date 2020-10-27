@@ -233,7 +233,7 @@ export default class PuzzleEditMode extends GameMode {
         };
 
         const bindMousedownEvent = (pose: Pose2D, index: number): void => {
-            pose.startMousedownCallback = (e: InteractionEvent, closestDist: number, closestIndex: number): void => {
+            pose.startMousedownCallback = (e: InteractionEvent, closestIndex: number): void => {
                 for (let ii = 0; ii < this._numTargets; ++ii) {
                     const poseField: PoseField = poseFields[ii];
                     const poseToNotify = poseField.pose;
@@ -359,10 +359,6 @@ export default class PuzzleEditMode extends GameMode {
         }
 
         Eterna.saveManager.save(this.savedDataTokenName, objs);
-    }
-
-    private resetSavedData(): void {
-        Eterna.saveManager.remove(this.savedDataTokenName);
     }
 
     private get savedDataTokenName(): string {

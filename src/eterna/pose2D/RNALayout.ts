@@ -510,7 +510,6 @@ export default class RNALayout {
             throw new Error('Made it to drawTreeCustomLayout, but the _customLayout is null!');
         }
 
-        let ii: number;
         const crossX: number = -goY * rotationDirection;
         const crossY: number = goX * rotationDirection;
 
