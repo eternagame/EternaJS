@@ -16,7 +16,6 @@ import {
 import GameButton from 'eterna/ui/GameButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import BitmapManager from 'eterna/resources/BitmapManager';
-import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import Solution from 'eterna/puzzle/Solution';
 import SolutionManager from 'eterna/puzzle/SolutionManager';
 import int from 'eterna/util/int';
@@ -275,7 +274,7 @@ export default class DesignBrowserMode extends GameMode {
         homeArrow.position = new Point(45, 14);
         this.uiLayer.addChild(homeArrow);
 
-        const puzzleTitle = HTMLTextObject.makeTitle(this._puzzle.getName(!Eterna.MOBILE_APP), 0xffffff);
+        const puzzleTitle = UITheme.makeTitle(this._puzzle.getName(!Eterna.MOBILE_APP), 0xffffff);
         puzzleTitle.hideWhenModeInactive();
         this.addObject(puzzleTitle, this.uiLayer);
         DisplayUtil.positionRelative(

@@ -24,12 +24,12 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import GameButton from 'eterna/ui/GameButton';
 import EternaURL from 'eterna/net/EternaURL';
 import BitmapManager from 'eterna/resources/BitmapManager';
-import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import GameDropdown from 'eterna/ui/GameDropdown';
 import {MappedValue, ValueView} from 'signals';
 import SolutionManager from 'eterna/puzzle/SolutionManager';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
+import UITheme from 'eterna/ui/UITheme';
 import GameMode from './GameMode';
 import ViewSolutionOverlay from './DesignBrowser/ViewSolutionOverlay';
 
@@ -83,7 +83,7 @@ export default class FeedbackViewMode extends GameMode {
         Assert.assertIsDefined(this.container);
         this.container.addChild(homeArrow);
 
-        const puzzleTitle = HTMLTextObject.makeTitle(this._puzzle.getName(true), 0xffffff);
+        const puzzleTitle = UITheme.makeTitle(this._puzzle.getName(true), 0xffffff);
         puzzleTitle.hideWhenModeInactive();
         this.addObject(puzzleTitle, this.uiLayer);
         DisplayUtil.positionRelative(
