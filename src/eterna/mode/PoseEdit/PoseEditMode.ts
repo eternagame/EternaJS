@@ -209,56 +209,8 @@ export default class PoseEditMode extends GameMode {
         this._toolbar.palette.targetClicked.connect((targetType) => this.onPaletteTargetSelected(targetType));
         this._toolbar.pairSwapButton.clicked.connect(() => this.onSwapClicked());
 
-        this._toolbar.nucleotideFindButton.clicked.connect(() => {
-            this.showDialog(new NucleotideFinder()).closed.then((result) => {
-                if (result != null) {
-                    if (this._isPipMode) {
-                        this._poses.forEach((p) => p.focusNucleotide(result.nucleotideIndex));
-                    } else {
-                        this._poses[this._curTargetIndex].focusNucleotide(result.nucleotideIndex);
-                    }
-                }
-            });
-        });
-
-        this._toolbar.nucleotideRangeButton.clicked.connect(() => {
-            const initialRange = this._nucleotideRangeToShow
-                ?? (() => {
-                    if (this._isPipMode) {
-                        return [
-                            1,
-                            Math.min(...this._poses.map((p) => p.fullSequenceLength))
-                        ];
-                    } else {
-                        return [1, this._poses[this._curTargetIndex].fullSequenceLength];
-                    }
-                })() as [number, number];
-
-            this.showDialog(
-                new NucleotideRangeSelector({
-                    initialRange,
-                    isPartialRange: Boolean(this._nucleotideRangeToShow)
-                })
-            )
-                .closed
-                .then((result) => {
-                    if (result === null) {
-                        return;
-                    }
-
-                    if (result.clearRange) {
-                        this._nucleotideRangeToShow = null;
-                    } else {
-                        this._nucleotideRangeToShow = [result.startIndex, result.endIndex];
-                    }
-
-                    if (this._isPipMode) {
-                        this._poses.forEach((p) => p.showNucleotideRange(this._nucleotideRangeToShow));
-                    } else {
-                        this._poses[this._curTargetIndex].showNucleotideRange(this._nucleotideRangeToShow);
-                    }
-                });
-        });
+        this._toolbar.nucleotideFindButton.clicked.connect(() => this.findNucleotide());
+        this._toolbar.nucleotideRangeButton.clicked.connect(() => this.showNucleotideRange());
 
         this._toolbar.baseMarkerButton.clicked.connect(() => {
             this.setPosesColor(RNAPaint.BASE_MARK);
@@ -370,14 +322,63 @@ export default class PoseEditMode extends GameMode {
         this._asynchText.visible = false;
     }
 
-    private get _solDialogOffset() {
+    private get _solDialogOffset(): number {
         return this._solutionView !== undefined && this._solutionView.container.visible
             ? ViewSolutionOverlay.theme.width : 0;
     }
 
-    protected get posesWidth() {
+    protected get posesWidth(): number {
         Assert.assertIsDefined(Flashbang.stageWidth);
         return Flashbang.stageWidth - this._solDialogOffset;
+    }
+
+    private findNucleotide(): void {
+        this.showDialog(new NucleotideFinder()).closed.then((result) => {
+            if (result != null) {
+                if (this._isPipMode) {
+                    this._poses.forEach((p) => p.focusNucleotide(result.nucleotideIndex));
+                } else {
+                    this._poses[this._curTargetIndex].focusNucleotide(result.nucleotideIndex);
+                }
+            }
+        });
+    }
+
+    private showNucleotideRange(): void {
+        const initialRange = this._nucleotideRangeToShow
+            ?? (() => {
+                if (this._isPipMode) {
+                    return [
+                        1,
+                        Math.min(...this._poses.map((p) => p.fullSequenceLength))
+                    ];
+                } else {
+                    return [1, this._poses[this._curTargetIndex].fullSequenceLength];
+                }
+            })() as [number, number];
+
+        this.showDialog(
+            new NucleotideRangeSelector({
+                initialRange,
+                isPartialRange: Boolean(this._nucleotideRangeToShow)
+            })
+        ).closed.then((result) => {
+            if (result === null) {
+                return;
+            }
+
+            if (result.clearRange) {
+                this._nucleotideRangeToShow = null;
+            } else {
+                this._nucleotideRangeToShow = [result.startIndex, result.endIndex];
+            }
+
+            if (this._isPipMode) {
+                this._poses.forEach((p) => p.showNucleotideRange(this._nucleotideRangeToShow));
+            } else {
+                this._poses[this._curTargetIndex].showNucleotideRange(this._nucleotideRangeToShow);
+            }
+        });
     }
 
     private updateUILayout(): void {
