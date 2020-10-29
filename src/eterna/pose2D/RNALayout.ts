@@ -242,7 +242,9 @@ export default class RNALayout {
      */
     public drawTree(customLayout: Array<[number, number] | [null, null]> | null = null): void {
         this.initializeCustomLayout(customLayout);
-        if (Eterna.settings.usePuzzlerLayout.value) {
+        // Grotesque override: the puzzler layout sadly generates structures that can't
+        // be navigated for very long RNAs. We need a minimap and a better zoom feature.
+        if (Eterna.settings.usePuzzlerLayout.value && this._origPairs.length <= 2904) {
             this.initializePuzzlerLayout();
         }
         if (this._root != null) {
