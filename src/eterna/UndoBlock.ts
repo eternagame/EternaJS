@@ -10,6 +10,7 @@ import FolderManager from './folding/FolderManager';
 import DotPlot from './rnatypes/DotPlot';
 import SecStruct from './rnatypes/SecStruct';
 import Sequence from './rnatypes/Sequence';
+import {TargetType} from './puzzle/Puzzle';
 
 export interface FoldData {
     folderName_: string;
@@ -30,7 +31,7 @@ export interface FoldData {
 
 // amw fuck a lot of these are optional
 export interface TargetConditions {
-    type: 'multistrand' | 'aptamer' | 'pseudoknot' | 'aptamer+oligo' | 'oligo' | 'single';
+    type: TargetType;
     secstruct: string;
     sequence?: string;
     IUPAC?: string;

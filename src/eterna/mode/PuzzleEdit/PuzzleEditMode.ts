@@ -48,6 +48,10 @@ type InteractionEvent = PIXI.interaction.InteractionEvent;
 export interface PuzzleEditPoseData {
     sequence: string;
     structure: string;
+    startingFolder: string;
+    site?: number[];
+    bindingPairs?: number[];
+    bonus?: number;
 }
 
 // AMW TODO: we need the "all optional" impl for piece by piece buildup.
@@ -267,6 +271,18 @@ export default class PuzzleEditMode extends GameMode {
             pose.molecularStructure = defaultPairs;
             pose.molecularBindingBonus = -4.86;
             pose.sequence = Sequence.fromSequenceString(defaultSequence);
+
+            if (initialPoseData != null
+                && initialPoseData[ii] != null
+                && initialPoseData[ii]['sequence'] != null
+                && initialPoseData[ii]['structure'] != null
+                && initialPoseData[ii]['bindingPairs'] !== undefined) {
+                pose.setMolecularBinding(
+                    initialPoseData[ii]['site'],
+                    initialPoseData[ii]['bindingPairs'],
+                    initialPoseData[ii]['bonus'] as number / 100.0
+                );
+            }
             poseFields.push(poseField);
 
             const structureInput = new StructureInput(pose);
@@ -288,6 +304,12 @@ export default class PuzzleEditMode extends GameMode {
         this._constraintBar.layout();
 
         this.setPoseFields(poseFields);
+        // Must do this AFTER pose initialization
+        if (initialPoseData != null
+            && initialPoseData[0] != null
+            && initialPoseData[0]['startingFolder'] != null) {
+            this._folderSwitcher.changeFolder(initialPoseData[0].startingFolder);
+        }
         this.poseEditByTarget(0);
 
         for (let ii = 0; ii < this._numTargets; ii++) {
