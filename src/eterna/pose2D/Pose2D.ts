@@ -3103,64 +3103,52 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this._mutatedSequence.setNt(seqnum, this._currentColor);
                 ROPWait.notifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
                 this._bases[seqnum].setType(this._currentColor, true);
-            } else if (this._currentColor === RNAPaint.PAIR) {
-                if (this._pairs.isPaired(seqnum)) {
-                    const pi = this._pairs.pairingPartner(seqnum);
-
-                    if (this.isLocked(pi)) {
-                        return;
-                    }
-
-                    const clickBase: RNABase = this._mutatedSequence.nt(seqnum);
-
-                    this._mutatedSequence.setNt(seqnum, this._mutatedSequence.nt(pi));
-                    this._mutatedSequence.setNt(pi, clickBase);
-
-                    this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
-                    this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
+            } else if (this._currentColor === RNAPaint.PAIR && this._pairs.isPaired(seqnum)) {
+                const pi = this._pairs.pairingPartner(seqnum);
+                if (this.isLocked(pi)) {
+                    return;
                 }
-            } else if (this._currentColor === RNAPaint.AU_PAIR) {
-                if (this._pairs.isPaired(seqnum)) {
-                    const pi = this._pairs.pairingPartner(seqnum);
 
-                    if (this.isLocked(pi)) {
-                        return;
-                    }
+                const clickBase: RNABase = this._mutatedSequence.nt(seqnum);
 
-                    this._mutatedSequence.setNt(seqnum, RNABase.ADENINE);
-                    this._mutatedSequence.setNt(pi, RNABase.URACIL);
+                this._mutatedSequence.setNt(seqnum, this._mutatedSequence.nt(pi));
+                this._mutatedSequence.setNt(pi, clickBase);
 
-                    this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
-                    this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
+                this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
+                this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
+            } else if (this._currentColor === RNAPaint.AU_PAIR && this._pairs.isPaired(seqnum)) {
+                const pi = this._pairs.pairingPartner(seqnum);
+                if (this.isLocked(pi)) {
+                    return;
                 }
-            } else if (this._currentColor === RNAPaint.GC_PAIR) {
-                if (this._pairs.isPaired(seqnum)) {
-                    const pi = this._pairs.pairingPartner(seqnum);
 
-                    if (this.isLocked(pi)) {
-                        return;
-                    }
+                this._mutatedSequence.setNt(seqnum, RNABase.ADENINE);
+                this._mutatedSequence.setNt(pi, RNABase.URACIL);
 
-                    this._mutatedSequence.setNt(seqnum, RNABase.GUANINE);
-                    this._mutatedSequence.setNt(pi, RNABase.CYTOSINE);
-
-                    this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
-                    this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
+                this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
+                this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
+            } else if (this._currentColor === RNAPaint.GC_PAIR && this._pairs.isPaired(seqnum)) {
+                const pi = this._pairs.pairingPartner(seqnum);
+                if (this.isLocked(pi)) {
+                    return;
                 }
-            } else if (this._currentColor === RNAPaint.GU_PAIR) {
-                if (this._pairs.isPaired(seqnum)) {
-                    const pi = this._pairs.pairingPartner(seqnum);
 
-                    if (this.isLocked(pi)) {
-                        return;
-                    }
+                this._mutatedSequence.setNt(seqnum, RNABase.GUANINE);
+                this._mutatedSequence.setNt(pi, RNABase.CYTOSINE);
 
-                    this._mutatedSequence.setNt(seqnum, RNABase.URACIL);
-                    this._mutatedSequence.setNt(pi, RNABase.GUANINE);
-
-                    this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
-                    this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
+                this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
+                this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
+            } else if (this._currentColor === RNAPaint.GU_PAIR && this._pairs.isPaired(seqnum)) {
+                const pi = this._pairs.pairingPartner(seqnum);
+                if (this.isLocked(pi)) {
+                    return;
                 }
+
+                this._mutatedSequence.setNt(seqnum, RNABase.URACIL);
+                this._mutatedSequence.setNt(pi, RNABase.GUANINE);
+
+                this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
+                this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
             } else if (this._dynPaintColors.indexOf(this._currentColor) >= 0) {
                 const index: number = this._dynPaintColors.indexOf(this._currentColor);
                 this._dynPaintTools[index].onPaint(this, seqnum);
@@ -3364,7 +3352,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     fullSeq.nt(ii), fullSeq.nt(pi)
                 );
 
-                if (this._baseToX && this._baseToY) {
+                if (this.isAnimating) {
+                    Assert.assertIsDefined(this._baseToX);
+                    Assert.assertIsDefined(this._baseToY);
                     this._bases[ii].setPairing(true,
                         this._baseToX[pi] - this._baseToX[ii],
                         this._baseToY[pi] - this._baseToY[ii],
@@ -3387,7 +3377,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             return;
         }
 
-        if (this._baseToX != null) {
+        if (this.isAnimating) {
             this._scoreNodeIndex = -1;
         }
 
