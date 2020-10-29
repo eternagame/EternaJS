@@ -7,6 +7,9 @@ import {
 import Bitmaps from 'eterna/resources/Bitmaps';
 import Utility from 'eterna/util/Utility';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
+import DotPlot from 'eterna/rnatypes/DotPlot';
+import Vienna from 'eterna/folding/Vienna';
+import Vienna2 from 'eterna/folding/Vienna2';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext, HighlightInfo} from '../Constraint';
 
@@ -24,6 +27,7 @@ interface RangePairedMaxConstraintStatus extends BaseConstraintStatus {
 export default class RangePairedMaxConstraint extends Constraint<RangePairedMaxConstraintStatus> {
     public readonly maxMeanPairedProb: number;
     public readonly indices: number[];
+    private _evalIndices: number[] | null = null;
 
     constructor(def: string) {
         super();
@@ -51,31 +55,64 @@ export default class RangePairedMaxConstraint extends Constraint<RangePairedMaxC
             constraintContext.undoBlocks[0].updateMeltingPointAndDotPlot(false);
         }
 
+        if (!this._evalIndices) {
+            this._evalIndices = this.indices.map((ii) => {
+                if (constraintContext.undoBlocks[0].targetConditions
+                    && 'custom-numbering' in constraintContext.undoBlocks[0].targetConditions) {
+                    const cn = Utility.numberingJSONToArray(
+                        constraintContext.undoBlocks[0].targetConditions['custom-numbering'] as string
+                    ) as (number | null)[];
+                    for (let jj = 0; jj < cn.length; ++jj) {
+                        if (ii === cn[jj]) {
+                            return jj;
+                        }
+                    }
+                    return 0;
+                } else {
+                    return ii;
+                }
+            });
+        }
+
         // For some reason the null-coalescing operator ?? is not supported here.
         const dotplot = constraintContext.undoBlocks[0].getParam(
             UndoBlockParam.DOTPLOT,
             37,
             false
-        ) as number[] | undefined || [];
+        ) as number[];
+        console.error('dotplot', dotplot);
 
         // Look through the dotplot and find any pairs involving the implicated
         // residues.
         const probForResidues = new Map<number, number>();
-        for (const idx of this.indices) {
+        for (const idx of this._evalIndices) {
             probForResidues.set(idx, 0.0);
         }
-        for (let ii = 0; ii < dotplot.length; ii += 3) {
+
+        const square: boolean = (constraintContext.undoBlocks[0].folderName === Vienna.NAME
+            || constraintContext.undoBlocks[0].folderName === Vienna2.NAME);
+
+        const finalOffset = (
+            (constraintContext.undoBlocks[0].getPairs()?.numPairs() ?? 0) * 3
+        );
+
+        for (let ii = 0; ii < dotplot.length - finalOffset; ii += 3) {
             // if either index is a number-of-interest, add probability in.
             // Dotplot indices are zero-indexed
-            if (this.indices.includes(dotplot[ii] + 1) && this.indices.includes(dotplot[ii + 1] + 1)) {
+            if (this._evalIndices.includes(dotplot[ii] + 1)
+                && this._evalIndices.includes(dotplot[ii + 1] + 1)) {
                 continue;
             }
 
-            if (this.indices.includes(dotplot[ii] + 1)) {
-                probForResidues.set(dotplot[ii], probForResidues.get(dotplot[ii]) as number + dotplot[ii + 2]);
+            if (this._evalIndices.includes(dotplot[ii] + 1)) {
+                probForResidues.set(dotplot[ii] + 1,
+                    probForResidues.get(dotplot[ii] + 1) as number
+                        + (square ? dotplot[ii + 2] * dotplot[ii + 2] : dotplot[ii + 2]));
             }
-            if (this.indices.includes(dotplot[ii + 1] + 1)) {
-                probForResidues.set(dotplot[ii + 1], probForResidues.get(dotplot[ii + 1]) as number + dotplot[ii + 2]);
+            if (this._evalIndices.includes(dotplot[ii + 1] + 1)) {
+                probForResidues.set(dotplot[ii + 1] + 1,
+                    probForResidues.get(dotplot[ii + 1] + 1) as number
+                        + (square ? dotplot[ii + 2] * dotplot[ii + 2] : dotplot[ii + 2]));
             }
         }
 
@@ -85,8 +122,8 @@ export default class RangePairedMaxConstraint extends Constraint<RangePairedMaxC
         }
 
         return {
-            satisfied: totProb / this.indices.length >= this.maxMeanPairedProb,
-            currentMeanPairedProb: totProb / this.indices.length
+            satisfied: totProb / this._evalIndices.length <= this.maxMeanPairedProb,
+            currentMeanPairedProb: totProb / this._evalIndices.length
         };
     }
 
@@ -123,9 +160,25 @@ export default class RangePairedMaxConstraint extends Constraint<RangePairedMaxC
         _context: ConstraintContext
     ): HighlightInfo {
         return {
-            ranges: this.indices,
+            ranges: this.toRanges(this._evalIndices ?? []),
             color: HighlightType.RESTRICTED
         };
+    }
+
+    private toRanges(idxs: number[]): number[] {
+        // Return contiguous ranges of indices.
+        const ret: number[] = [];
+        ret.push(idxs[0]);
+        for (let ii = 1; ii < idxs.length; ++ii) {
+            if (idxs[ii] !== idxs[ii - 1] + 1) {
+                ret.push(idxs[ii - 1]);
+                ret.push(idxs[ii]);
+            }
+        }
+        if (ret.length % 2 === 1) {
+            ret.push(idxs[idxs.length - 1]);
+        }
+        return ret;
     }
 
     private static get _icon(): Texture {

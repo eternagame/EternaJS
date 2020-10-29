@@ -527,7 +527,7 @@ export default class UndoBlock {
             throw new Error(`Critical error: can't create a ${this._folderName} folder instance by name`);
         }
 
-        if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) == null) {
+        if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) === undefined) {
             const dotArray: DotPlot | null = folder.getDotPlot(
                 this.sequence, this.getPairs(37), 37, pseudoknots
             );
@@ -579,7 +579,6 @@ export default class UndoBlock {
         }
 
         const refPairs: SecStruct = this.getPairs(37, pseudoknots);
-
         const pairScores: number[] = [];
         const maxPairScores: number[] = [];
 
@@ -684,6 +683,10 @@ export default class UndoBlock {
         return Utility.range(this._sequence.length).concat(
             ...Utility.range(this._targetOligos.length).map((idx) => originalIndices[newOrder.indexOf(idx)])
         );
+    }
+
+    public get folderName(): string {
+        return this._folderName;
     }
 
     private _sequence: Sequence = new Sequence([]);
