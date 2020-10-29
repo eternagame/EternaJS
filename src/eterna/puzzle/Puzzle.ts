@@ -34,6 +34,8 @@ export enum PuzzleType {
     EXPERIMENTAL = 'Experimental'
 }
 
+export type TargetType = 'multistrand' | 'aptamer' | 'pseudoknot' | 'aptamer+oligo' | 'oligo' | 'single';
+
 export enum PoseState {
     NATIVE = 'NATIVE',
     FROZEN = 'FROZEN',
@@ -47,11 +49,11 @@ export enum PoseState {
 }
 
 export default class Puzzle {
-    public static isAptamerType(tcType: string): boolean {
+    public static isAptamerType(tcType: TargetType): boolean {
         return (Puzzle.T_APTAMER.indexOf(tcType) >= 0);
     }
 
-    public static isOligoType(tcType: string): boolean {
+    public static isOligoType(tcType: TargetType): boolean {
         return (Puzzle.T_OLIGO.indexOf(tcType) >= 0);
     }
 
@@ -231,7 +233,7 @@ export default class Puzzle {
             }
             this._secstructs.push(this._targetConditions[ii]['secstruct']);
 
-            const tcType: string = this._targetConditions[ii]['type'];
+            const tcType: TargetType = this._targetConditions[ii]['type'];
             // Aptamers
 
             if (Puzzle.isAptamerType(tcType) && this._targetConditions[ii]['site'] !== undefined) {

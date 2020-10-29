@@ -8,7 +8,9 @@ import UndoBlock, {
     UndoBlockParam, FoldData, TargetConditions, OligoDef
 } from 'eterna/UndoBlock';
 import Solution from 'eterna/puzzle/Solution';
-import Puzzle, {PuzzleType, PoseState, BoostersData} from 'eterna/puzzle/Puzzle';
+import Puzzle, {
+    PuzzleType, PoseState, BoostersData, TargetType
+} from 'eterna/puzzle/Puzzle';
 import Background from 'eterna/vfx/Background';
 import Toolbar, {ToolbarType} from 'eterna/ui/Toolbar';
 import SpecBox from 'eterna/ui/SpecBox';
@@ -67,6 +69,7 @@ import SubmitPoseDetails from './SubmitPoseDetails';
 import MissionIntroMode from './MissionIntroMode';
 import MissionClearedPanel from './MissionClearedPanel';
 import ViewSolutionOverlay from '../DesignBrowser/ViewSolutionOverlay';
+import {PuzzleEditPoseData} from '../PuzzleEdit/PuzzleEditMode';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
@@ -1595,7 +1598,7 @@ export default class PoseEditMode extends GameMode {
             this._poses[poseIndex].sequence = this._puzzle.transformSequence(
                 this._poses[targetIndex].sequence, targetIndex
             );
-            const tcType: string = tc['type'];
+            const tcType: TargetType = tc['type'];
 
             if (tcType === 'multistrand') {
                 const odefs: OligoDef[] | undefined = tc['oligos'];
@@ -2304,12 +2307,20 @@ export default class PoseEditMode extends GameMode {
 
     private transferToPuzzlemaker(): void {
         const poseData: SaveStoreItem = [0, this._poses[0].sequence.baseArray];
-        for (const [i, pose] of Object.entries(this._poses)) {
-            poseData.push(JSON.stringify({
-                sequence: pose.sequence.sequenceString,
-                // structure: EPars.pairsToParenthesis(pose.pairs),
-                structure: this._puzzle.getSecstruct(parseInt(i, 10))
-            }));
+        for (const [i, pose] of this._poses.entries()) {
+            const tc = this._targetConditions[i];
+            Assert.assertIsDefined(tc);
+            const puzzledef: PuzzleEditPoseData = {
+                sequence: pose.sequence.sequenceString(),
+                structure: this._puzzle.getSecstruct(i),
+                startingFolder: this._folder.name
+            };
+            if (Puzzle.isAptamerType(tc['type'])) {
+                puzzledef.site = tc['site'];
+                puzzledef.bindingPairs = tc['binding_pairs'];
+                puzzledef.bonus = tc['bonus'];
+            }
+            poseData.push(JSON.stringify(puzzledef));
         }
 
         Eterna.app.loadPuzzleEditor(1, poseData)
