@@ -42,9 +42,9 @@ export default abstract class GameMode extends AppMode {
         this.container.addChild(this.uiLayer);
         this.container.addChild(this.dialogLayer);
         this.container.addChild(this.notifLayer);
-        this.container.addChild(this.tooltipLayer);
         this.container.addChild(this.achievementsLayer);
         this.container.addChild(this.contextMenuLayer);
+        this.container.addChild(this.tooltipLayer);
 
         this._achievements = new AchievementManager();
         this.addObject(this._achievements);

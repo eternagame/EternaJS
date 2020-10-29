@@ -60,6 +60,10 @@ export default class Tooltips extends GameObject {
             new DelayTask(Tooltips.TOOLTIP_DELAY),
             new AlphaTask(1, 0.1, Easing.linear, this._curTooltip)
         ));
+
+        const p = this._layer.parent;
+        p.removeChild(this._layer);
+        p.addChild(this._layer);
     }
 
     public showTooltipFor(target: DisplayObject, key: Button | PaletteTarget, tooltip: Tooltip): void {

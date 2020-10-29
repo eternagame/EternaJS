@@ -165,10 +165,10 @@ export default class EternaMenu extends GamePanel implements Enableable {
             // Ensure the panel is on top of absolutely everything - if we're triggering a flyout,
             // there's no reason why we would expect something else currently on the display stack
             // to be displayed over it - it would just appear as being obstructed
-            Assert.assertIsDefined(this.mode);
-            Assert.assertIsDefined(this.mode.container);
-            this.mode.container.removeChild(menu.panel.container);
-            this.mode.container.addChild(menu.panel.container);
+            // Assert.assertIsDefined(this.mode);
+            // Assert.assertIsDefined(this.mode.container);
+            // this.mode.container.removeChild(menu.panel.container);
+            // this.mode.container.addChild(menu.panel.container);
 
             // Note that we are making an assumption here - that the position of the button will
             // never change while the menu is open. This seems like a safe bet - the user shouldn't
