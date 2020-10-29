@@ -248,7 +248,6 @@ export default class PuzzleEditMode extends GameMode {
         Eterna.settings.usePuzzlerLayout.value = false;
 
         const initialPoseData = this._initialPoseData;
-        this._folderSwitcher.changeFolder(initialPoseData[0].startingFolder);
         for (let ii = 0; ii < this._numTargets; ii++) {
             let defaultStructure = '.....((((((((....)))))))).....';
             let defaultPairs: SecStruct = SecStruct.fromParens(defaultStructure);
@@ -272,7 +271,12 @@ export default class PuzzleEditMode extends GameMode {
             pose.molecularStructure = defaultPairs;
             pose.molecularBindingBonus = -4.86;
             pose.sequence = Sequence.fromSequenceString(defaultSequence);
-            if (initialPoseData[ii]['bindingPairs'] !== undefined) {
+
+            if (initialPoseData != null
+                && initialPoseData[ii] != null
+                && initialPoseData[ii]['sequence'] != null
+                && initialPoseData[ii]['structure'] != null
+                && initialPoseData[ii]['bindingPairs'] !== undefined) {
                 pose.setMolecularBinding(
                     initialPoseData[ii]['site'],
                     initialPoseData[ii]['bindingPairs'],
@@ -300,6 +304,12 @@ export default class PuzzleEditMode extends GameMode {
         this._constraintBar.layout();
 
         this.setPoseFields(poseFields);
+        // Must do this AFTER pose initialization
+        if (initialPoseData != null
+            && initialPoseData[0] != null
+            && initialPoseData[0]['startingFolder'] != null) {
+            this._folderSwitcher.changeFolder(initialPoseData[0].startingFolder);
+        }
         this.poseEditByTarget(0);
 
         for (let ii = 0; ii < this._numTargets; ii++) {
