@@ -36,6 +36,7 @@ import LinearFoldE from './folding/LinearFoldE';
 import LinearFoldV from './folding/LinearFoldV';
 import Folder from './folding/Folder';
 import RSignals from './rscript/RSignals';
+import Fonts from './util/Fonts';
 
 enum PuzzleID {
     FunAndEasy = 4350940,
@@ -192,19 +193,20 @@ export default class EternaApp extends FlashbangApp {
             Flashbang.sound.volume = volume;
         }));
 
-        this.setLoadingText('Authenticating...', null);
-
-        this.authenticate()
-            .then(() => {
-                // We can only do this now, since we need the username and UID to connect
-                Eterna.chat = new ChatManager(this._params.chatboxID, Eterna.settings);
-                this.setLoadingText('Loading game...', null);
-                return Promise.all([
-                    this.initFoldingEngines(),
-                    this.initLayoutEngines(),
-                    TextureUtil.load(Bitmaps.all)
-                ]);
-            })
+        // Load fonts before setting any text to make sure it's, you know, the right font
+        Fonts.loadFonts().then(() => {
+            this.setLoadingText('Authenticating...', null);
+            return this.authenticate();
+        }).then(() => {
+            // We can only do this now, since we need the username and UID to connect
+            Eterna.chat = new ChatManager(this._params.chatboxID, Eterna.settings);
+            this.setLoadingText('Loading game...', null);
+            return Promise.all([
+                this.initFoldingEngines(),
+                this.initLayoutEngines(),
+                TextureUtil.load(Bitmaps.all)
+            ]);
+        })
             .then(() => this.initScriptInterface())
             .then(() => {
                 switch (this._params.mode) {
