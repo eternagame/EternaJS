@@ -3052,118 +3052,118 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private onBaseMouseDown(seqnum: number, togglelock: boolean): void {
         this._lastColoredIndex = seqnum;
 
-        if (!togglelock && this.isEditable(seqnum)) {
-            this._coloring = true;
-            this._mutatedSequence = this.fullSequence.slice(0);
+        if (togglelock || !this.isEditable(seqnum)) return;
 
-            if (this._currentColor === RNAPaint.LOCK) {
-                if (!this._locks) {
-                    this._locks = [];
-                    for (let ii = 0; ii < this._sequence.length; ii++) {
-                        this._locks.push(false);
-                    }
+        this._coloring = true;
+        this._mutatedSequence = this.fullSequence.slice(0);
+
+        if (this._currentColor === RNAPaint.LOCK) {
+            if (!this._locks) {
+                this._locks = [];
+                for (let ii = 0; ii < this._sequence.length; ii++) {
+                    this._locks.push(false);
                 }
-                this._locks[seqnum] = !this._locks[seqnum];
-                this._bases[seqnum].setDirty();
-                this._lockUpdated = true;
-            } else if (this._currentColor === RNAPaint.BINDING_SITE) {
-                if (this._bindingSite != null && this._bindingSite[seqnum]) {
+            }
+            this._locks[seqnum] = !this._locks[seqnum];
+            this._bases[seqnum].setDirty();
+            this._lockUpdated = true;
+        } else if (this._currentColor === RNAPaint.BINDING_SITE) {
+            if (this._bindingSite != null && this._bindingSite[seqnum]) {
+                this._bindingSite = [];
+                for (let ii = 0; ii < this._sequence.length; ii++) {
+                    this._bindingSite.push(false);
+                }
+                this.molecularBindingSite = this._bindingSite;
+                this._bindingSiteUpdated = true;
+            } else {
+                const bindingBases: number[] | null = this._pairs.isInternal(seqnum);
+                if (bindingBases != null && bindingBases.length > 4) {
                     this._bindingSite = [];
                     for (let ii = 0; ii < this._sequence.length; ii++) {
                         this._bindingSite.push(false);
                     }
+
+                    for (let ii = 0; ii < bindingBases.length; ii++) {
+                        this._bindingSite[bindingBases[ii]] = true;
+                    }
                     this.molecularBindingSite = this._bindingSite;
                     this._bindingSiteUpdated = true;
                 } else {
-                    const bindingBases: number[] | null = this._pairs.isInternal(seqnum);
-                    if (bindingBases != null && bindingBases.length > 4) {
-                        this._bindingSite = [];
-                        for (let ii = 0; ii < this._sequence.length; ii++) {
-                            this._bindingSite.push(false);
-                        }
-
-                        for (let ii = 0; ii < bindingBases.length; ii++) {
-                            this._bindingSite[bindingBases[ii]] = true;
-                        }
-                        this.molecularBindingSite = this._bindingSite;
-                        this._bindingSiteUpdated = true;
-                    } else {
-                        (this.mode as GameMode).showNotification(
-                            'Binding site can be only formed at loops between 2 stacks\n(Internal loops and Bulges)'
-                        );
-                    }
+                    (this.mode as GameMode).showNotification(
+                        'Binding site can be only formed at loops between 2 stacks\n(Internal loops and Bulges)'
+                    );
                 }
-            } else if (this._mouseDownAltKey || this._currentColor === RNAPaint.MAGIC_GLUE) {
-                if (this.toggleDesignStruct(seqnum)) {
-                    this._designStructUpdated = true;
+            }
+        } else if (this._mouseDownAltKey || this._currentColor === RNAPaint.MAGIC_GLUE) {
+            if (this.toggleDesignStruct(seqnum)) {
+                this._designStructUpdated = true;
+            }
+        } else if (!this.isLocked(seqnum)) {
+            if (this._currentColor >= 1 && this._currentColor <= 4) {
+                this._mutatedSequence.setNt(seqnum, this._currentColor);
+                ROPWait.notifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
+                this._bases[seqnum].setType(this._currentColor, true);
+            } else if (this._currentColor === RNAPaint.PAIR) {
+                if (this._pairs.isPaired(seqnum)) {
+                    const pi = this._pairs.pairingPartner(seqnum);
+
+                    if (this.isLocked(pi)) {
+                        return;
+                    }
+
+                    const clickBase: RNABase = this._mutatedSequence.nt(seqnum);
+
+                    this._mutatedSequence.setNt(seqnum, this._mutatedSequence.nt(pi));
+                    this._mutatedSequence.setNt(pi, clickBase);
+
+                    this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
+                    this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
                 }
-            } else if (!this.isLocked(seqnum)) {
-                if (this._currentColor >= 1 && this._currentColor <= 4) {
-                    this._mutatedSequence.setNt(seqnum, this._currentColor);
-                    ROPWait.notifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
-                    this._bases[seqnum].setType(this._currentColor, true);
-                } else if (this._currentColor === RNAPaint.PAIR) {
-                    if (this._pairs.isPaired(seqnum)) {
-                        const pi = this._pairs.pairingPartner(seqnum);
+            } else if (this._currentColor === RNAPaint.AU_PAIR) {
+                if (this._pairs.isPaired(seqnum)) {
+                    const pi = this._pairs.pairingPartner(seqnum);
 
-                        if (this.isLocked(pi)) {
-                            return;
-                        }
-
-                        const clickBase: RNABase = this._mutatedSequence.nt(seqnum);
-
-                        this._mutatedSequence.setNt(seqnum, this._mutatedSequence.nt(pi));
-                        this._mutatedSequence.setNt(pi, clickBase);
-
-                        this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
-                        this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
+                    if (this.isLocked(pi)) {
+                        return;
                     }
-                } else if (this._currentColor === RNAPaint.AU_PAIR) {
-                    if (this._pairs.isPaired(seqnum)) {
-                        const pi = this._pairs.pairingPartner(seqnum);
 
-                        if (this.isLocked(pi)) {
-                            return;
-                        }
+                    this._mutatedSequence.setNt(seqnum, RNABase.ADENINE);
+                    this._mutatedSequence.setNt(pi, RNABase.URACIL);
 
-                        this._mutatedSequence.setNt(seqnum, RNABase.ADENINE);
-                        this._mutatedSequence.setNt(pi, RNABase.URACIL);
-
-                        this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
-                        this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
-                    }
-                } else if (this._currentColor === RNAPaint.GC_PAIR) {
-                    if (this._pairs.isPaired(seqnum)) {
-                        const pi = this._pairs.pairingPartner(seqnum);
-
-                        if (this.isLocked(pi)) {
-                            return;
-                        }
-
-                        this._mutatedSequence.setNt(seqnum, RNABase.GUANINE);
-                        this._mutatedSequence.setNt(pi, RNABase.CYTOSINE);
-
-                        this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
-                        this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
-                    }
-                } else if (this._currentColor === RNAPaint.GU_PAIR) {
-                    if (this._pairs.isPaired(seqnum)) {
-                        const pi = this._pairs.pairingPartner(seqnum);
-
-                        if (this.isLocked(pi)) {
-                            return;
-                        }
-
-                        this._mutatedSequence.setNt(seqnum, RNABase.URACIL);
-                        this._mutatedSequence.setNt(pi, RNABase.GUANINE);
-
-                        this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
-                        this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
-                    }
-                } else if (this._dynPaintColors.indexOf(this._currentColor) >= 0) {
-                    const index: number = this._dynPaintColors.indexOf(this._currentColor);
-                    this._dynPaintTools[index].onPaint(this, seqnum);
+                    this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
+                    this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
                 }
+            } else if (this._currentColor === RNAPaint.GC_PAIR) {
+                if (this._pairs.isPaired(seqnum)) {
+                    const pi = this._pairs.pairingPartner(seqnum);
+
+                    if (this.isLocked(pi)) {
+                        return;
+                    }
+
+                    this._mutatedSequence.setNt(seqnum, RNABase.GUANINE);
+                    this._mutatedSequence.setNt(pi, RNABase.CYTOSINE);
+
+                    this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
+                    this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
+                }
+            } else if (this._currentColor === RNAPaint.GU_PAIR) {
+                if (this._pairs.isPaired(seqnum)) {
+                    const pi = this._pairs.pairingPartner(seqnum);
+
+                    if (this.isLocked(pi)) {
+                        return;
+                    }
+
+                    this._mutatedSequence.setNt(seqnum, RNABase.URACIL);
+                    this._mutatedSequence.setNt(pi, RNABase.GUANINE);
+
+                    this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
+                    this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
+                }
+            } else if (this._dynPaintColors.indexOf(this._currentColor) >= 0) {
+                const index: number = this._dynPaintColors.indexOf(this._currentColor);
+                this._dynPaintTools[index].onPaint(this, seqnum);
             }
         }
     }
@@ -3333,25 +3333,25 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         const cleavingSite: number = this._auxInfo[Pose2D.CLEAVING_SITE] as number;
-        if (cleavingSite < this._bases.length - 1) {
-            const bX: number = this._bases[cleavingSite].x + this._offX;
-            const bY: number = this._bases[cleavingSite].y + this._offY;
+        if (cleavingSite >= this._bases.length - 1) return;
 
-            const bNextX: number = this._bases[cleavingSite + 1].x + this._offX;
-            const bNextY: number = this._bases[cleavingSite + 1].y + this._offY;
+        const bX: number = this._bases[cleavingSite].x + this._offX;
+        const bY: number = this._bases[cleavingSite].y + this._offY;
 
-            const cX: number = (bX + bNextX) / 2.0;
-            const cY: number = (bY + bNextY) / 2.0;
+        const bNextX: number = this._bases[cleavingSite + 1].x + this._offX;
+        const bNextY: number = this._bases[cleavingSite + 1].y + this._offY;
 
-            const goX: number = bNextY - bY;
-            const goY: number = -(bNextX - bX);
+        const cX: number = (bX + bNextX) / 2.0;
+        const cY: number = (bY + bNextY) / 2.0;
 
-            this._auxInfoCanvas.lineStyle(3, 0xFF0000, 0.9);
-            this._auxInfoCanvas.moveTo(cX + goX / 2.0, cY + goY / 2.0);
-            this._auxInfoCanvas.lineTo(cX - goX / 2.0, cY - goY / 2.0);
+        const goX: number = bNextY - bY;
+        const goY: number = -(bNextX - bX);
 
-            this._auxTextballoon.display.position = new Point(cX + goX / 2.0, cY + goY / 2.0);
-        }
+        this._auxInfoCanvas.lineStyle(3, 0xFF0000, 0.9);
+        this._auxInfoCanvas.moveTo(cX + goX / 2.0, cY + goY / 2.0);
+        this._auxInfoCanvas.lineTo(cX - goX / 2.0, cY - goY / 2.0);
+
+        this._auxTextballoon.display.position = new Point(cX + goX / 2.0, cY + goY / 2.0);
     }
 
     private checkPairs(): void {
@@ -3422,31 +3422,31 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._lastScoreNodeIndex = this._scoreNodeIndex;
         }
 
-        if (this._scoreTexts != null) {
-            for (let ii = 0; ii < this._scoreNodes.length; ii++) {
-                const indices: number[] | null = this._scoreNodes[ii].baseIndices;
-                Assert.assertIsDefined(indices);
-                let xAvg = 0;
-                let yAvg = 0;
+        if (this._scoreTexts == null) return;
 
-                for (let jj = 0; jj < indices.length; jj++) {
-                    const p: Point = this.getBaseLoc(indices[jj]);
-                    xAvg += p.x;
-                    yAvg += p.y;
-                }
+        for (let ii = 0; ii < this._scoreNodes.length; ii++) {
+            const indices: number[] | null = this._scoreNodes[ii].baseIndices;
+            Assert.assertIsDefined(indices);
+            let xAvg = 0;
+            let yAvg = 0;
 
-                if (indices.length > 0) {
-                    xAvg /= indices.length;
-                    yAvg /= indices.length;
-                }
-
-                xAvg -= this._scoreTexts[ii].width / 2;
-                yAvg -= this._scoreTexts[ii].height / 2;
-
-                this._scoreTexts[ii].position = new Point(xAvg, yAvg);
-                this._scoreTexts[ii].visible = (this._zoomLevel < 4);
-                this.updateEnergyHighlight(this._scoreTexts[ii], ii, this._scoreTexts[ii].visible);
+            for (let jj = 0; jj < indices.length; jj++) {
+                const p: Point = this.getBaseLoc(indices[jj]);
+                xAvg += p.x;
+                yAvg += p.y;
             }
+
+            if (indices.length > 0) {
+                xAvg /= indices.length;
+                yAvg /= indices.length;
+            }
+
+            xAvg -= this._scoreTexts[ii].width / 2;
+            yAvg -= this._scoreTexts[ii].height / 2;
+
+            this._scoreTexts[ii].position = new Point(xAvg, yAvg);
+            this._scoreTexts[ii].visible = (this._zoomLevel < 4);
+            this.updateEnergyHighlight(this._scoreTexts[ii], ii, this._scoreTexts[ii].visible);
         }
     }
 
@@ -3466,7 +3466,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
             Assert.assertIsDefined(Flashbang.globalMouse);
             if (this._poseField.containsPoint(Flashbang.globalMouse.x, Flashbang.globalMouse.y)) {
-                // AMW TODO POINT IPOINT
                 let mouseP: Point = new Point(0, 0);
                 mouseP = mouseP.copyFrom(this.display.toLocal(Flashbang.globalMouse, undefined, Pose2D.MOUSE_LOC));
                 const baseXys: Point[] = [];

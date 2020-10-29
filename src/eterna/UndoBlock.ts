@@ -173,18 +173,18 @@ export default class UndoBlock {
             } else {
                 this._paramsArray = json.params_array_;
             }
-            this._stable = json.stable_;// JSONUtil.require(json, 'stable_');
-            this._targetOligo = json.target_oligo_;// JSONUtil.require(json, 'target_oligo_');
-            this._targetOligos = json.target_oligos_;// JSONUtil.require(json, 'target_oligos_');
-            this._oligoOrder = json.oligo_order_;// JSONUtil.require(json, 'oligo_order_');
-            this._oligosPaired = json.oligos_paired_;// JSONUtil.require(json, 'oligos_paired_');
-            this._targetPairs = new SecStruct(json.target_pairs_);// JSONUtil.require(json, 'target_pairs_');
-            this._targetOligoOrder = json.target_oligo_order_; // JSONUtil.require(json, 'target_oligo_order_');
-            this._puzzleLocks = json.puzzle_locks_;// JSONUtil.require(json, 'puzzle_locks_');
-            this._forcedStruct = json.forced_struct_;// JSONUtil.require(json, 'forced_struct_');
+            this._stable = json.stable_;
+            this._targetOligo = json.target_oligo_;
+            this._targetOligos = json.target_oligos_;
+            this._oligoOrder = json.oligo_order_;
+            this._oligosPaired = json.oligos_paired_;
+            this._targetPairs = new SecStruct(json.target_pairs_);
+            this._targetOligoOrder = json.target_oligo_order_;
+            this._puzzleLocks = json.puzzle_locks_;
+            this._forcedStruct = json.forced_struct_;
             this._targetConditions = json.target_conditions_
                 ? json.target_conditions_
-                : undefined;// JSONUtil.require(json, 'target_conditions_'); // setter
+                : undefined;
         } catch (e) {
             throw new Error(`Error parsing UndoBlock JSON: ${e}`);
         }
@@ -211,17 +211,10 @@ export default class UndoBlock {
             }
 
             const jjprob = pairedPer.get(dotArray.data[jj]);
-            if (jjprob !== undefined) {
-                pairedPer.set(dotArray.data[jj], jjprob + prob);
-            } else {
-                pairedPer.set(dotArray.data[jj], prob);
-            }
+            pairedPer.set(dotArray.data[jj], jjprob ? jjprob + prob : prob);
+
             const jjp1prob = pairedPer.get(dotArray.data[jj + 1]);
-            if (jjp1prob !== undefined) {
-                pairedPer.set(dotArray.data[jj + 1], jjp1prob + prob);
-            } else {
-                pairedPer.set(dotArray.data[jj + 1], prob);
-            }
+            pairedPer.set(dotArray.data[jj + 1], jjp1prob ? jjp1prob + prob : prob);
         }
 
         let TP = 1e-6;
