@@ -1,7 +1,7 @@
 import * as log from 'loglevel';
 import MultiStyleText from 'pixi-multistyle-text';
 import {
-    Container, Graphics, Point, Sprite, Text
+    Container, Graphics, Point, Sprite, Text, NineSlicePlane
 } from 'pixi.js';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Eterna from 'eterna/Eterna';
@@ -477,7 +477,52 @@ export default class DesignBrowserMode extends GameMode {
 
             const newSolution = this.getSolutionAtIndex(newCurrentIdx);
             if (newSolution != null) {
-                this._solutionView.showSolution(newSolution);
+                const switchSolution = (newIndex: number) => {
+                    const ns = this.getSolutionAtIndex(newIndex);
+                    if (ns != null) {
+                        this._currentSolutionIndex = newIndex;
+                        Assert.assertIsDefined(this._solutionView);
+                        this.removeObject(this._solutionView);
+                        this._solutionView = new ViewSolutionOverlay({
+                            solution: ns,
+                            puzzle: this._puzzle,
+                            voteDisabled: this._novote,
+                            onPrevious: () => switchSolution(Math.max(0, this._currentSolutionIndex - 1)),
+                            onNext: () => {
+                                const nextSolutionIndex = Math.min(
+                                    this._filteredSolutions.length - 1,
+                                    this._currentSolutionIndex + 1
+                                );
+                                switchSolution(nextSolutionIndex);
+                            },
+                            parentMode: (() => this)()
+                        });
+                        this.addObject(this._solutionView, this.dialogLayer);
+                        const rowIndex = this._currentSolutionIndex - this._firstVisSolutionIdx;
+                        if (rowIndex >= 0) {
+                            this._clickedSelectionBox.visible = true;
+                            this.updateClickedSelectionBoxPos(newIndex);
+                            this._clickedSelectionBox.visible = true;
+                        }
+                    }
+                };
+
+                this.removeObject(this._solutionView);
+                this._solutionView = new ViewSolutionOverlay({
+                    solution: newSolution,
+                    puzzle: this._puzzle,
+                    voteDisabled: this._novote,
+                    onPrevious: () => switchSolution(Math.max(0, newCurrentIdx - 1)),
+                    onNext: () => {
+                        const nextSolutionIndex = Math.min(
+                            this._filteredSolutions.length - 1,
+                            newCurrentIdx + 1
+                        );
+                        switchSolution(nextSolutionIndex);
+                    },
+                    parentMode: (() => this)()
+                });
+                this.addObject(this._solutionView, this.dialogLayer);
             }
         }
     }
@@ -587,43 +632,55 @@ export default class DesignBrowserMode extends GameMode {
 
         this._currentSolutionIndex = index;
 
-        if (!this._solutionView) {
-            const switchSolution = (newIndex: number) => {
-                const newSolution = this.getSolutionAtIndex(newIndex);
-                if (newSolution != null) {
-                    this._currentSolutionIndex = newIndex;
-                    Assert.assertIsDefined(this._solutionView);
-                    this._solutionView.showSolution(newSolution);
-                    const rowIndex = this._currentSolutionIndex - this._firstVisSolutionIdx;
-                    if (rowIndex >= 0) {
-                        this._clickedSelectionBox.visible = true;
-                        this.updateClickedSelectionBoxPos(newIndex);
-                        this._clickedSelectionBox.visible = true;
-                    }
+        const switchSolution = (newIndex: number) => {
+            const newSolution = this.getSolutionAtIndex(newIndex);
+            if (newSolution != null) {
+                this._currentSolutionIndex = newIndex;
+                Assert.assertIsDefined(this._solutionView);
+                this.removeObject(this._solutionView);
+                this._solutionView = new ViewSolutionOverlay({
+                    solution: newSolution,
+                    puzzle: this._puzzle,
+                    voteDisabled: this._novote,
+                    onPrevious: () => switchSolution(Math.max(0, this._currentSolutionIndex - 1)),
+                    onNext: () => {
+                        const nextSolutionIndex = Math.min(
+                            this._filteredSolutions.length - 1,
+                            this._currentSolutionIndex + 1
+                        );
+                        switchSolution(nextSolutionIndex);
+                    },
+                    parentMode: (() => this)()
+                });
+                this.addObject(this._solutionView, this.dialogLayer);
+                const rowIndex = this._currentSolutionIndex - this._firstVisSolutionIdx;
+                if (rowIndex >= 0) {
+                    this._clickedSelectionBox.visible = true;
+                    this.updateClickedSelectionBoxPos(newIndex);
+                    this._clickedSelectionBox.visible = true;
                 }
-            };
+            }
+        };
 
-            this._solutionView = new ViewSolutionOverlay({
-                solution,
-                puzzle: this._puzzle,
-                voteDisabled: this._novote,
-                onPrevious: () => switchSolution(Math.max(0, this._currentSolutionIndex - 1)),
-                onNext: () => {
-                    const nextSolutionIndex = Math.min(
-                        this._filteredSolutions.length - 1,
-                        this._currentSolutionIndex + 1
-                    );
-                    switchSolution(nextSolutionIndex);
-                },
-                parentMode: (() => this)()
-            });
-            this.addObject(this._solutionView, this.dialogLayer);
-        } else {
-            this._solutionView.showSolution(solution);
+        if (this._solutionView) {
+            this.removeObject(this._solutionView);
         }
+        this._solutionView = new ViewSolutionOverlay({
+            solution,
+            puzzle: this._puzzle,
+            voteDisabled: this._novote,
+            onPrevious: () => switchSolution(Math.max(0, this._currentSolutionIndex - 1)),
+            onNext: () => {
+                const nextSolutionIndex = Math.min(
+                    this._filteredSolutions.length - 1,
+                    this._currentSolutionIndex + 1
+                );
+                switchSolution(nextSolutionIndex);
+            },
+            parentMode: (() => this)()
+        });
+        this.addObject(this._solutionView, this.dialogLayer);
 
-        // This just got newed if it didn't exist.
-        Assert.assertIsDefined(this._solutionView);
         const sol = this._solutionView.solution;
         this._solutionView.playClicked.connect(() => this.switchToPoseEditForSolution(sol));
         this._solutionView.seeResultClicked.connect(() => {

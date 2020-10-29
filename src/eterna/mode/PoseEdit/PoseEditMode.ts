@@ -865,6 +865,9 @@ export default class PoseEditMode extends GameMode {
             // AMW: I'm keeping the function around in case we want to call it
             // in some other context, but we don't need it anymore.
             // this.updateSolutionNameText(this._curSolution);
+            if (this._solutionView) {
+                this.removeObject(this._solutionView);
+            }
             this._solutionView = new ViewSolutionOverlay({
                 solution: this._params.initSolution,
                 puzzle: this._puzzle,
@@ -1328,7 +1331,21 @@ export default class PoseEditMode extends GameMode {
         Assert.notNull(solution);
         this.showSolution(solution);
         if (this._solutionView && this._solutionView.container.visible) {
-            this._solutionView.showSolution(solution);
+            this.removeObject(this._solutionView);
+            this._solutionView = new ViewSolutionOverlay({
+                solution,
+                puzzle: this._puzzle,
+                voteDisabled: false,
+                onPrevious: () => this.showNextSolution(-1),
+                onNext: () => this.showNextSolution(1),
+                parentMode: (() => this)()
+            });
+            this.addObject(this._solutionView, this.dialogLayer);
+            this._solutionView.seeResultClicked.connect(() => {
+                this.switchToFeedbackViewForSolution(this._curSolution);
+            });
+            this._solutionView.sortClicked.connect(() => this.switchToBrowser(this._curSolution, true));
+            this._solutionView.returnClicked.connect(() => this.switchToBrowser(this._curSolution));
         }
     }
 

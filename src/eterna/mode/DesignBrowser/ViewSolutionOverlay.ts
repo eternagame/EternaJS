@@ -483,7 +483,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
             },
             frame: null
         });
-        previous.clicked.connect(() => this._props.onPrevious());
+        this.regs.add(previous.clicked.connect(() => this._props.onPrevious()));
         previous.hotkey(KeyCode.KeyD);
         this._content.addObject(previous, footerLinks);
 
@@ -498,7 +498,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
             },
             frame: null
         });
-        next.clicked.connect(() => this._props.onNext());
+        this.regs.add(next.clicked.connect(() => this._props.onNext()));
         next.container.position.x = theme.width - theme.margin.right - theme.margin.left - next.container.width;
         next.hotkey(KeyCode.KeyU);
         this._content.addObject(next, footerLinks);
@@ -511,6 +511,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         this._comments = new LabComments(this._props.solution.nodeID);
         this._inputContainer.visible = false;
         this.loadComments().then(() => {
+            if (!this.isLiveObject) return;
             this._inputContainer.visible = true;
             this._commentsInput.text = '';
             this.updateLayout();
@@ -652,6 +653,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         const {theme} = ViewSolutionOverlay;
         const width = theme.width - theme.margin.left;
         Assert.assertIsDefined(Flashbang.stageHeight);
+        if (!this.isLiveObject) return;
         let height = Flashbang.stageHeight - this._scrollViewContainer.y - this._footer.height - 20;
 
         // Based on previous code, it seems the scrollbox only updates the bar if it receives a different height
