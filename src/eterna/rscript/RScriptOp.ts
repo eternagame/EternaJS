@@ -93,7 +93,7 @@ export default abstract class RScriptOp {
         return arg;
     }
 
-    protected parseArgument(_arg: string, _i: number): void {
+    protected parseArgument(arg: string, i: number): void {
     }
 
     protected readonly _env: RScriptEnv;

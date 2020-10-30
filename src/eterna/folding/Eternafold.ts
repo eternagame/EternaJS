@@ -1,4 +1,5 @@
 import * as log from 'loglevel';
+import EPars, {RNABase} from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import {Assert} from 'flashbang';
@@ -24,7 +25,7 @@ export default class EternaFold extends Folder {
         return import('engines-bin/eternafold')
             .then((module) => EmscriptenUtil.loadProgram(module))
             .then((program) => new EternaFold(program))
-            .catch(() => null);
+            .catch((err) => null);
     }
 
     private constructor(lib: EternafoldLib) {
@@ -133,7 +134,7 @@ export default class EternaFold extends Folder {
         seq: Sequence,
         secondBestPairs: SecStruct | null,
         desiredPairs: string | null = null,
-        _pseudoknotted: boolean = false,
+        pseudoknotted: boolean = false,
         temp: number = 37,
         gamma: number = 0.7
     ): SecStruct {
@@ -158,8 +159,8 @@ export default class EternaFold extends Folder {
 
     private foldSequenceImpl(
         seq: Sequence,
-        _structStr: string | null = null,
-        _temp: number = 37,
+        structStr: string | null = null,
+        temp: number = 37,
         gamma: number = 6.0
     ): SecStruct {
         const seqStr = seq.sequenceString(false, false);

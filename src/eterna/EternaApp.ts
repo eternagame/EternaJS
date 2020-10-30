@@ -15,7 +15,7 @@ import Bitmaps from './resources/Bitmaps';
 import TestMode from './debug/TestMode';
 import Puzzle from './puzzle/Puzzle';
 import PoseEditMode, {PoseEditParams} from './mode/PoseEdit/PoseEditMode';
-import PuzzleEditMode from './mode/PuzzleEdit/PuzzleEditMode';
+import PuzzleEditMode, {PuzzleEditPoseData} from './mode/PuzzleEdit/PuzzleEditMode';
 import FeedbackViewMode from './mode/FeedbackViewMode';
 import Solution from './puzzle/Solution';
 import PuzzleManager from './puzzle/PuzzleManager';

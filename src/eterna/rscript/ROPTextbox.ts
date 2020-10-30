@@ -43,7 +43,12 @@ export default class ROPTextbox extends RScriptOp {
     private showTextbox(): void {
         const textBox = new FancyTextBalloon(0x122944, 1.0, true, 0xC0DCE7);
         if (this._initialShow) {
+            // if (this._forceTopmost && false) {
+            // parent = Application.instance.get_front_object_container();
+            // Application.instance.get_front_object_container().add_object(textBox);
+            // } else {
             this._env.addObject(textBox, this._env.container);
+            // }
         }
 
         this._env.setVar(this._id, textBox);
@@ -387,7 +392,7 @@ export default class ROPTextbox extends RScriptOp {
                 } else if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
                     this._fixedSize = ROPTextbox.parseBool(arg);
                 } else if (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
-                    // forceTopmost was never used
+                    this._forceTopmost = ROPTextbox.parseBool(arg);
                 }
                 break;
             case 8:
@@ -396,7 +401,7 @@ export default class ROPTextbox extends RScriptOp {
                 } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
                     this._outlineColor = ColorUtil.fromString(`#${this._env.getStringRef(arg)}`);
                 } else if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
-                    // forceTopmost was never used
+                    this._forceTopmost = ROPTextbox.parseBool(arg);
                 } else if (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
                     this._hasXOffset = true;
                     this._xOffset = Number(arg);
@@ -478,6 +483,7 @@ export default class ROPTextbox extends RScriptOp {
     private _fillColor: number = 0xFF0000;
     private _outlineColor: number = 0x000000;
     private _fixedSize: boolean = true;
+    private _forceTopmost: boolean = false;
     private _hasXOffset: boolean = false;
     private _xOffset: number;
     private _hasYOffset: boolean = false;

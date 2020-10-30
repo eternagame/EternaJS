@@ -33,7 +33,7 @@ export default class NovaPaintHint extends ContainerObject implements Updatable 
         this._anchorSet = true;
     }
 
-    public update(_dt: number): void {
+    public update(dt: number): void {
         if (!this._active) {
             return;
         }

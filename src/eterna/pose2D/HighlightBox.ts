@@ -58,6 +58,7 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
         this._graphics.clear();
         this._queue = null;
         this._lastKnownQueue = null;
+        this._on = false;
         this._prevPosition = null;
         this._dirty = false;
     }
@@ -82,7 +83,7 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
         return false;
     }
 
-    public lateUpdate(_dt: number): void {
+    public lateUpdate(dt: number): void {
         if (this._pose.isAnimating || !this.enabled) {
             // Hide when we're disabled or the Pose is animating
             this.display.visible = false;
@@ -180,6 +181,8 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
             new AlphaTask(1, fadeTime),
             new AlphaTask(0.2, fadeTime)
         )));
+
+        this._on = true;
     }
 
     private renderStack(color: number, baseSize: number): void {
@@ -326,6 +329,7 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
     private _enabled: boolean = true;
     private _queue: number[] | null;
     private _lastKnownQueue: number[] | null;
+    private _on: boolean;
     private _prevPosition: Point | null;
     private _prevZoomLevel: number = -1;
 

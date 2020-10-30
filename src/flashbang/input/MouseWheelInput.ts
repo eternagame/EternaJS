@@ -1,5 +1,5 @@
 import {Registration} from 'signals';
-import LinkedList from 'flashbang/util/LinkedList';
+import LinkedList, {LinkedElement} from 'flashbang/util/LinkedList';
 import {Assert} from 'flashbang';
 
 export interface MouseWheelListener {

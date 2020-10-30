@@ -8,7 +8,7 @@ export default class FrameDelayTask extends ObjectTask implements Updatable {
         this._frames = frames;
     }
 
-    public update(_dt: number): void {
+    public update(dt: number): void {
         if (this._frames-- <= 0) {
             this.destroySelf();
         }

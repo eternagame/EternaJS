@@ -1,5 +1,5 @@
 import * as log from 'loglevel';
-import {RNABase} from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import PoseOp from 'eterna/pose2D/PoseOp';
@@ -27,7 +27,7 @@ export default class NuPACK extends Folder {
         return import('engines-bin/nupack')
             .then((module) => EmscriptenUtil.loadProgram(module))
             .then((program) => new NuPACK(program))
-            .catch(() => null);
+            .catch((err) => null);
     }
 
     private constructor(lib: NupackLib) {
@@ -46,7 +46,7 @@ export default class NuPACK extends Folder {
     }
 
     /* override */
-    public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = 37, _pseudoknots: boolean = false): DotPlot {
+    public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = 37, pseudoknots: boolean = false): DotPlot {
         // AMW TODO: actually NOT pk aware yet
         const key: CacheKey = {
             primitive: 'dotplot', seq: seq.baseArray, pairs: pairs.pairs, temp
@@ -562,7 +562,7 @@ export default class NuPACK extends Folder {
     }
 
     private foldSequenceWithBindingSiteImpl(
-        seq: Sequence, i: number, p: number, j: number, q: number, bonus: number, _temp: number = 37
+        seq: Sequence, i: number, p: number, j: number, q: number, bonus: number, temp: number = 37
     ): SecStruct {
         const seqStr = seq.sequenceString(false, false);
 
@@ -610,13 +610,13 @@ export default class NuPACK extends Folder {
     // pass a structure constraint to this function it is simply ignored silently.
     private cofoldSequenceWithBindingSiteImpl(
         seq: Sequence,
-        _str: string | null,
+        str: string | null,
         i: number,
         p: number,
         j: number,
         q: number,
         bonus: number,
-        _temp: number = 37
+        temp: number = 37
     ): SecStruct {
         const seqStr = seq.sequenceString(true, false);
 

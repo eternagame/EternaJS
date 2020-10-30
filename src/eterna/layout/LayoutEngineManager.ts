@@ -1,3 +1,5 @@
+import Eterna from 'eterna/Eterna';
+import RNApuzzler from './RNApuzzler';
 import LayoutEngine from './LayoutEngine';
 
 export default class LayoutEngineManager {

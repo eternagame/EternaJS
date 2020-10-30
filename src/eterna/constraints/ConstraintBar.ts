@@ -100,11 +100,11 @@ export default class ConstraintBar extends ContainerObject {
                     this.scrollConstraints(deltaPos);
                     this._previousDragPos = e.data.global.x;
                 });
-                bg.pointerUp.connect((_e: InteractionEvent) => {
+                bg.pointerUp.connect((e: InteractionEvent) => {
                     this._drag = false;
                     this._backgroundDrag = false;
                 });
-                bg.display.on('pointerupoutside', (_e: InteractionEvent) => {
+                bg.display.on('pointerupoutside', (e: InteractionEvent) => {
                     this._drag = false;
                     this._backgroundDrag = false;
                 });
@@ -122,7 +122,7 @@ export default class ConstraintBar extends ContainerObject {
             this._drawerTip = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgConstraintDrawerTip));
             this._background.display.addChild(this._drawerTip);
             this._drawerTip.interactive = true;
-            this._drawerTip.on('pointertap', (_e: InteractionEvent) => this.collapse());
+            this._drawerTip.on('pointertap', (e: InteractionEvent) => this.collapse());
             this._drawerTip.visible = false;
         }
 
@@ -173,7 +173,7 @@ export default class ConstraintBar extends ContainerObject {
                     this._previousDragPos = e.data.global.x;
                 });
 
-                constraint.constraintBox.pointerOut.connect((_e: InteractionEvent) => {
+                constraint.constraintBox.pointerOut.connect((e: InteractionEvent) => {
                     if (this._backgroundDrag) {
                         return;
                     }
@@ -182,7 +182,7 @@ export default class ConstraintBar extends ContainerObject {
                 });
             }
 
-            constraint.constraintBox.pointerTap.connect((_e: InteractionEvent) => {
+            constraint.constraintBox.pointerTap.connect((e: InteractionEvent) => {
                 this._potentialDrag = false;
                 if (this._drag) {
                     this._drag = false;
@@ -207,6 +207,7 @@ export default class ConstraintBar extends ContainerObject {
         }
 
         // Drawer elements
+        const constraintHeight = this.getConstraintBox(0)?.container.height;
         if (this._background && this.display.visible) {
             Assert.assertIsDefined(Flashbang.stageWidth);
             const drawerWidth = Math.min(Flashbang.stageWidth * config.maxWidth, positioning.totalWidth);

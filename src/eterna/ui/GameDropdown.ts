@@ -171,12 +171,7 @@ export default class GameDropdown extends ContainerObject {
 
         this._box.clear();
         this._box.lineStyle(this._borderWidth, 0xC0DCE7);
-        // These colors echo the background contrast used in NOVA/Eye/
-        if (hover) {
-            this._box.beginFill(0x3e566a, 0.454902);
-        } else {
-            this._box.beginFill(0x1c304c, 0.603922);
-        }
+        this._box.beginFill(0x33465F, 0.5);
         this._box.drawRoundedRect(0, 0, width, this._fontSize + this._PADDING * 2, 4);
         this._box.endFill();
     }

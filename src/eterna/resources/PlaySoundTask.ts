@@ -1,4 +1,5 @@
 import {ObjectTask, Flashbang} from 'flashbang';
+import Eterna from 'eterna/Eterna';
 
 export default class PlaySoundTask extends ObjectTask {
     constructor(name: string) {

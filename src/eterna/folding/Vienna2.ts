@@ -1,4 +1,5 @@
 import * as log from 'loglevel';
+import EPars, {RNABase} from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import Utility from 'eterna/util/Utility';
@@ -25,7 +26,7 @@ export default class Vienna2 extends Folder {
         return import('engines-bin/vienna2')
             .then((module) => EmscriptenUtil.loadProgram(module))
             .then((program) => new Vienna2(program))
-            .catch(() => null);
+            .catch((err) => null);
     }
 
     private constructor(lib: Vienna2Lib) {
@@ -192,7 +193,7 @@ export default class Vienna2 extends Folder {
     /* override */
     public foldSequence(
         seq: Sequence, secondBestPairs: SecStruct | null, desiredPairs: string | null = null,
-        _pseudoknotted: boolean = false, temp: number = 37
+        pseudoknotted: boolean = false, temp: number = 37
     ): SecStruct {
         const key: CacheKey = {
             primitive: 'fold',
@@ -433,6 +434,11 @@ export default class Vienna2 extends Folder {
         //     return success;
         // }
         // return false;
+    }
+
+    /* override */
+    public cutInLoop(i: number): number {
+        return 0;
     }
 
     private foldSequenceImpl(seq: Sequence, structStr: string | null = null, temp: number = 37): SecStruct {

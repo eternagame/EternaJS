@@ -78,7 +78,7 @@ export default class StringUtil {
      *        or the String begins with "0" in which case it will be 8.
      */
     public static parseInteger(str: string, radix = 0): number {
-        return Number(StringUtil.parseInt0(str, radix));
+        return Number(StringUtil.parseInt0(str, radix, true));
     }
 
     /**
@@ -93,7 +93,7 @@ export default class StringUtil {
      *        or the String begins with "0" in which case it will be 8.
      */
     public static parseUnsignedInteger(str: string, radix = 0): number {
-        const result: number = StringUtil.parseInt0(str, radix);
+        const result: number = StringUtil.parseInt0(str, radix, false);
         if (result < 0) {
             throw new Error(`parseUnsignedInteger parsed negative value [value=${str}]`);
         }
@@ -182,6 +182,8 @@ export default class StringUtil {
      * @param str the String to parse.
      */
     public static parseBoolean(str: string): boolean {
+        const originalString: string = str;
+
         if (str != null) {
             str = str.toLowerCase();
             if (str === 'true' || str === '1') {
@@ -369,7 +371,7 @@ export default class StringUtil {
     /**
      * Internal helper function for parseInteger and parseUnsignedInteger.
      */
-    private static parseInt0(str: string, radix: number): number {
+    private static parseInt0(str: string, radix: number, allowNegative: boolean): number {
         if (str == null) {
             throw new Error('Cannot parseInt(null)');
         }

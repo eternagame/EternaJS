@@ -1,6 +1,6 @@
 import * as log from 'loglevel';
 import {
-    Container, DisplayObject, Point, Sprite, Text, Rectangle
+    Container, DisplayObject, Point, Sprite, Text, Rectangle, Texture, BaseTexture
 } from 'pixi.js';
 import EPars, {RNABase, RNAPaint} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
@@ -18,7 +18,7 @@ import GameButton from 'eterna/ui/GameButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {
     KeyCode, SpriteObject, DisplayUtil, HAlign, VAlign, Flashbang, KeyboardEventType, Assert,
-    GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject
+    GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject, Base64
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
@@ -651,6 +651,15 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
+    private updateSolutionNameText(solution: Solution): void {
+        this._solutionNameText.text = `${solution.title} (${solution.playerName})`;
+        this._solutionNameText.visible = true;
+        DisplayUtil.positionRelativeToStage(
+            this._solutionNameText, HAlign.CENTER, VAlign.TOP,
+            HAlign.CENTER, VAlign.TOP, 0, 8
+        );
+    }
+
     private highlightSequences(highlightInfos: HighlightInfo[] | null) {
         for (const [poseIdx, pose] of this._poses.entries()) {
             pose.clearRestrictedHighlight();
@@ -712,7 +721,7 @@ export default class PoseEditMode extends GameMode {
                 this.poseEditByTarget(index);
             });
         };
-        const bindTrackMoves = (pose: Pose2D) => {
+        const bindTrackMoves = (pose: Pose2D, index: number) => {
             pose.trackMovesCallback = ((count: number, moves: Move[]) => {
                 this._moveCount += count;
                 if (moves) {
@@ -722,7 +731,7 @@ export default class PoseEditMode extends GameMode {
         };
 
         const bindMousedownEvent = (pose: Pose2D, index: number) => {
-            pose.startMousedownCallback = ((e: InteractionEvent, closestIndex: number) => {
+            pose.startMousedownCallback = ((e: InteractionEvent, closestDist: number, closestIndex: number) => {
                 for (let ii = 0; ii < poseFields.length; ++ii) {
                     const poseField: PoseField = poseFields[ii];
                     const poseToNotify: Pose2D = poseField.pose;
@@ -741,7 +750,7 @@ export default class PoseEditMode extends GameMode {
             const pose: Pose2D = poseField.pose;
             bindAddbaseCB(pose, ii);
             bindPoseEdit(pose, ii);
-            bindTrackMoves(pose);
+            bindTrackMoves(pose, ii);
             bindMousedownEvent(pose, ii);
             poseFields.push(poseField);
         }
@@ -1190,9 +1199,16 @@ export default class PoseEditMode extends GameMode {
                 'select_folder', (folderName: string): boolean => this.selectFolder(folderName)
             );
 
-            this._scriptInterface.addCallback('load_parameters_from_buffer', (): boolean => {
+            this._scriptInterface.addCallback('load_parameters_from_buffer', (str: string): boolean => {
                 log.info('TODO: load_parameters_from_buffer');
                 return false;
+                // let buf: ByteArray = new ByteArray;
+                // buf.writeUTFBytes(str);
+                // let res: boolean = folder.load_parameters_from_buffer(buf);
+                // if (res) {
+                //     this.on_change_folder();
+                // }
+                // return res;
             });
         }
 
@@ -1267,8 +1283,10 @@ export default class PoseEditMode extends GameMode {
                 }
             });
 
-        this._scriptInterface.addCallback('set_design_title', (): void => {
+        this._scriptInterface.addCallback('set_design_title', (designTitle: string): void => {
             log.info('TODO: set_design_title');
+            // Application.instance.get_application_gui("Design Name").set_text(design_title);
+            // Application.instance.get_application_gui("Design Name").visible = true;
             this.clearUndoStack();
             this.poseEditByTarget(0);
         });
@@ -2801,6 +2819,7 @@ export default class PoseEditMode extends GameMode {
                 );
                 if (results != null) {
                     const parenthesis: string = results[0];
+                    const mode: PuzzleEditOp = results[1];
                     this._targetPairs[ii] = SecStruct.fromParens(parenthesis);
                 }
 
@@ -2937,6 +2956,8 @@ export default class PoseEditMode extends GameMode {
     }
 
     private poseEditByTargetDoFold(targetIndex: number): void {
+        this._foldStartTime = new Date().getTime();
+
         this.showAsyncText('folding...');
         this.pushUILock(PoseEditMode.FOLDING_LOCK);
 
@@ -3292,6 +3313,14 @@ export default class PoseEditMode extends GameMode {
         this._stackLevel = stackLevel;
     }
 
+    private hideEndCurtain(): void {
+        for (const pose of this._poses) {
+            pose.showTotalEnergy = true;
+            pose.clearExplosion();
+        }
+        this.disableTools(false);
+    }
+
     private clearUndoStack(): void {
         this._stackLevel = -1;
         this._stackSize = 0;
@@ -3325,6 +3354,7 @@ export default class PoseEditMode extends GameMode {
     private _opQueue: PoseOp[] = [];
     private _poseEditByTargetCb: (() => void) | null = null;
     private _asynchText: Text;
+    private _foldStartTime: number;
     private _foldTotalTime: number;
     // / Undo stack
     private _seqStacks: UndoBlock[][];

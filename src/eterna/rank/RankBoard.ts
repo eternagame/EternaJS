@@ -32,7 +32,7 @@ export default class RankBoard extends ContainerObject implements Updatable {
         this._startingPosition = this.container.y;
     }
 
-    public update(_dt: number): void {
+    public update(dt: number): void {
         const parentOffset = this.container.y - this._startingPosition;
         for (let ii = 0; ii < this._rows.length; ii++) {
             // posOffset / RankBoard.ROW_HEIGHT = How many entries we have moved by

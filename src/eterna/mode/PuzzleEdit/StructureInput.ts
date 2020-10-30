@@ -54,7 +54,7 @@ export default class StructureInput extends ContainerObject implements Updatable
         this.pointerDown.connect((e) => { e.stopPropagation(); });
     }
 
-    public update(_dt: number): void {
+    public update(dt: number): void {
         // Update the cursor highlight when our caret position changes
         if (this._prevCaretPostion !== this._textInput.caretPosition) {
             this._prevCaretPostion = this._textInput.caretPosition;

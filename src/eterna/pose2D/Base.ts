@@ -8,7 +8,7 @@ import {RNABase, RNAPaint} from 'eterna/EPars';
 import ROPWait from 'eterna/rscript/ROPWait';
 import BaseAssets from './BaseAssets';
 import BaseDrawFlags from './BaseDrawFlags';
-import {RNAHighlightState} from './Pose2D';
+import Pose2D, {RNAHighlightState} from './Pose2D';
 
 type ColorMatrixFilter = PIXI.filters.ColorMatrixFilter;
 
@@ -18,9 +18,10 @@ export default class Base extends ContainerObject implements LateUpdatable {
     public static readonly MARKER_THICKNESS: number = 0.4; // Relative to the radius
     public static readonly MARKER_RADIUS: number[] = [15, 10, 7, 5, 3];
 
-    constructor(type: number) {
+    constructor(pose: Pose2D, type: number) {
         super();
         BaseAssets._init();
+        this._pose = pose;
         this.setType(type);
 
         // build our display hierarchy
@@ -272,7 +273,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
         this._needsRedraw = true;
     }
 
-    public lateUpdate(_dt: number): void {
+    public lateUpdate(dt: number): void {
         if (this._needsRedraw && this.display.visible && this._baseType !== RNABase.CUT) {
             this.redraw(
                 this._zoomLevel, this._offX, this._offY,
@@ -625,6 +626,8 @@ export default class Base extends ContainerObject implements LateUpdatable {
 
         return deg;
     }
+
+    private readonly _pose: Pose2D;
 
     private readonly _barcode: Sprite = new Sprite();
     private readonly _body: Sprite = new Sprite();

@@ -82,6 +82,10 @@ export default class ExplosionFactorPanel extends GamePanel {
         );
     }
 
+    private readonly _input: TextInputObject;
+    private readonly _decreaseButton: GameButton;
+    private readonly _increaseButton: GameButton;
+
     private static readonly WMARGIN: number = 20;
     private static readonly HMARGIN: number = 20;
 }

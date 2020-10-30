@@ -191,7 +191,7 @@ export default class AppMode {
     }
 
     /** Called when a ContextMenu event is fired while this mode is active */
-    public onContextMenuEvent(_e: Event): void {
+    public onContextMenuEvent(e: Event): void {
     }
 
     /** Called when the app is resized while this mode is active */
@@ -224,7 +224,7 @@ export default class AppMode {
     }
 
     /** Called when an object is registered with the mode */
-    protected registerObject(_obj: GameObjectBase): void {
+    protected registerObject(obj: GameObjectBase): void {
     }
 
     /* internal */

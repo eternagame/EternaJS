@@ -27,7 +27,7 @@ export default class GameButton extends Button implements KeyboardListener {
     protected added(): void {
         super.added();
 
-        this.toggled.connect(() => this.onToggledChanged());
+        this.toggled.connect((toggled) => this.onToggledChanged(toggled));
         this.clicked.connect(() => {
             if (this._selectedState != null) {
                 this.toggle();
@@ -156,7 +156,7 @@ export default class GameButton extends Button implements KeyboardListener {
         this.toggled.value = !this.toggled.value;
     }
 
-    protected onToggledChanged(): void {
+    protected onToggledChanged(toggled: boolean): void {
         this.showState(this._state);
     }
 

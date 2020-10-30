@@ -21,8 +21,8 @@ export default class RNAFoldBasic extends Folder {
     }
 
     public scoreStructures(
-        seq: Sequence, pairs: SecStruct, _pseudoknotted: boolean = false,
-        _temp: number = 37, _outNodes: number[] | null = null
+        seq: Sequence, pairs: SecStruct, pseudoknotted: boolean = false,
+        temp: number = 37, outNodes: number[] | null = null
     ): number {
         let score = 0;
 
@@ -40,8 +40,8 @@ export default class RNAFoldBasic extends Folder {
     }
 
     public foldSequence(
-        seq: Sequence, _secondBestPairs: SecStruct | null, _desiredPairs: string | null = null,
-        _pseudoknotted: boolean = false, _temp: number = 37
+        seq: Sequence, secondBestPairs: SecStruct | null, desiredPairs: string | null = null,
+        pseudoknotted: boolean = false, temp: number = 37
     ): SecStruct {
         const n: number = seq.length;
         const pairs: SecStruct = new SecStruct(new Array(n).fill(-1));

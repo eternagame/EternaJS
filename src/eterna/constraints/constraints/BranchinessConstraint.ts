@@ -1,3 +1,5 @@
+import UndoBlock from 'eterna/UndoBlock';
+import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import {
     Texture, Container, Sprite, Point

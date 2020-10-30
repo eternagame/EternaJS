@@ -11,7 +11,7 @@ function vertexCallback(data: number[], polyVertArray: number[]): void {
     polyVertArray[polyVertArray.length] = data[1];
 }
 
-function combinecallback(coords: number[], _data: number[], _weight: number): number[] {
+function combinecallback(coords: number[], data: number[], weight: number): number[] {
     // callback for when segments intersect and must be split
     return [coords[0], coords[1], coords[2]];
 }

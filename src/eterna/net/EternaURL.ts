@@ -1,4 +1,5 @@
 import Eterna from 'eterna/Eterna';
+import Utility from 'eterna/util/Utility';
 
 interface EternaURLParams {
     page: string;

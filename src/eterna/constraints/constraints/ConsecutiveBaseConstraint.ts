@@ -61,7 +61,7 @@ abstract class ConsecutiveBaseConstraint extends Constraint<ConsecutiveConstrain
         };
     }
 
-    public getHighlight(_status: ConsecutiveConstraintStatus, context: ConstraintContext): HighlightInfo {
+    public getHighlight(status: ConsecutiveConstraintStatus, context: ConstraintContext): HighlightInfo {
         return {
             ranges: context.undoBlocks[0].sequence.getRestrictedConsecutive(
                 this.baseType,

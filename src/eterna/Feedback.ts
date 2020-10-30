@@ -101,7 +101,7 @@ export default class Feedback {
 
     public setDegradationData(
         dat: number[] | null, condition: string, index: number,
-        _error: number[] | null, _stnCat: string | null, _stn: number | null, failed: string | null
+        error: number[] | null, stnCat: string | null, stn: number | null, failed: string | null
     ): void {
         if (dat != null) {
             if (this._degradationStarts.get(condition) === undefined) {
@@ -311,9 +311,9 @@ export default class Feedback {
     private _degradationThresholds: Map<string, number[]> = new Map<string, number[]>();
     private _degradationMaxs: Map<string, number[]> = new Map<string, number[]>();
     private _degradationMins: Map<string, number[]> = new Map<string, number[]>();
-    // private _degradationErrors: Map<string, number[][]> = new Map<string, number[][]>();
-    // private _degradationStnCats: Map<string, string[]> = new Map<string, string[]>();
-    // private _degradationStns: Map<string, number[]> = new Map<string, number[]>();
+    private _degradationErrors: Map<string, number[][]> = new Map<string, number[][]>();
+    private _degradationStnCats: Map<string, string[]> = new Map<string, string[]>();
+    private _degradationStns: Map<string, number[]> = new Map<string, number[]>();
 
     private _faileds: Map<string, number[]> = new Map<string, number[]>();
     // / Ad-hoc data storage object for Brent's theophylline puzzle

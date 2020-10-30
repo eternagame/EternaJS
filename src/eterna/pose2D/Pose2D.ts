@@ -2401,7 +2401,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     /* override */
-    public update(_dt: number): void {
+    public update(dt: number): void {
         if (!this.display.worldVisible) {
             // update is expensive, so don't bother doing it if we're not visible
             return;
@@ -3451,6 +3451,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (this._scoreNodes != null) {
             let totalScore = 0;
             let nodeFound = false;
+            let nodeTxt = '';
             let nodeLabel = '';
             let nodeScore = '';
 
@@ -3473,6 +3474,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     }
 
                     if (!nodeFound && Utility.isPointWithin(mouseP, nodePoints)) {
+                        nodeTxt = this._scoreNodes[ii].text;
                         nodeLabel = this._scoreNodes[ii].textLabel;
                         nodeScore = this._scoreNodes[ii].textScore;
                         nodeFound = true;
@@ -3706,7 +3708,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     private createBase(): Base {
-        const base: Base = new Base(RNABase.GUANINE);
+        const base: Base = new Base(this, RNABase.GUANINE);
         this.addObject(base, this._baseLayer);
         this._bases.push(base);
         return base;

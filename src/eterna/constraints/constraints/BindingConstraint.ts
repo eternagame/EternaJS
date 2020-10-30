@@ -26,7 +26,7 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
     public getConstraintBoxConfig(
         status: BaseConstraintStatus,
         forMissionScreen: boolean,
-        _undoBlocks: UndoBlock[],
+        undoBlocks: UndoBlock[],
         targetConditions: TargetConditions[]
     ): ConstraintBoxConfig {
         const oligos = this._getOligoInfo(targetConditions);
@@ -99,7 +99,7 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
     }
 
     public getHighlight(
-        _status: BaseConstraintStatus,
+        status: BaseConstraintStatus,
         context: ConstraintContext
     ): HighlightInfo {
         const undoBlock = context.undoBlocks[this.stateIndex];

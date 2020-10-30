@@ -12,8 +12,6 @@ module.exports = {
         }
     },
     'rules': {
-        'no-unused-vars': 'off',
-        '@typescript-eslint/no-unused-vars': ['error'],
         // Broken
         // This rule frequently throws up false positives with subclasses https://github.com/typescript-eslint/typescript-eslint/issues/52
         'class-methods-use-this': 'off',

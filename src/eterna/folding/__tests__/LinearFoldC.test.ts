@@ -5,6 +5,10 @@ import LinearFoldC from '../LinearFoldC';
 import LinearFoldE from '../LinearFoldE'; // debugging matching dot plots?
 import './jest-matcher-deep-close-to';
 
+function FoldSequence(folder: Folder, seq: Sequence, struct: SecStruct): SecStruct | null {
+    return folder.foldSequence(seq, null, struct.getParenthesis());
+}
+
 function CreateFolder(type: any): Promise<Folder | null> {
     return type.create();
 }

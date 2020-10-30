@@ -2,7 +2,7 @@ import {Point} from 'pixi.js';
 import {
     Enableable, PointerCapture, DisplayUtil, HAlign, VAlign, Flashbang, Assert
 } from 'flashbang';
-import {RegistrationGroup} from 'signals';
+import {RegistrationGroup, UnitSignal} from 'signals';
 import GameButton from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';
 import TrueWidthDisplay from './TrueWidthDisplay';
@@ -191,7 +191,7 @@ export default class EternaMenu extends GamePanel implements Enableable {
             }
         };
 
-        menuButton.pointerOver.connect((_e) => {
+        menuButton.pointerOver.connect((e) => {
             if (this._enabled) {
                 if (!menu.panel.display.visible) {
                     showDialog();

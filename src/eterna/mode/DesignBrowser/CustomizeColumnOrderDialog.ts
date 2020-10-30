@@ -315,8 +315,9 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
     private _addColumnCategoryIdx: number = 0;
 
     private _currentSelectedFilterCheckbox: GameCheckbox;
-
+    private _currentSelectedFilterValue: boolean;
     public set currentSelectedFilterValue(newValue: boolean) {
+        this._currentSelectedFilterValue = newValue;
         this._currentSelectedFilterCheckbox.toggled.value = newValue;
     }
 }

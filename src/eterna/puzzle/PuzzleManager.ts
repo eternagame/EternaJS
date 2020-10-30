@@ -372,7 +372,7 @@ export default class PuzzleManager {
         );
 
         // Pre-load secondary puzzle
-        const [, secondaryPuzzleId] = newpuz.rscript.match(/#PRE-PushPuzzle ([0-9]+);/) ?? [null, null];
+        const [m, secondaryPuzzleId] = newpuz.rscript.match(/#PRE-PushPuzzle ([0-9]+);/) ?? [null, null];
         if (secondaryPuzzleId) {
             await this.getPuzzleByID(parseInt(secondaryPuzzleId, 10));
         }
@@ -419,4 +419,8 @@ export default class PuzzleManager {
     /* eslint-enable max-len */
 
     private static readonly RE_MISSION_TEXT = /<span id="mission">(.*?)<\/span>/s;
+}
+
+interface Array<T> {
+    filter<U extends T>(pred: (a: T) => a is U): U[];
 }

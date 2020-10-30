@@ -1,10 +1,13 @@
-import {UndoBlockParam} from 'eterna/UndoBlock';
+import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
+import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import {TextureUtil} from 'flashbang';
 import {
     Container, Texture, Sprite, Point
 } from 'pixi.js';
 import Bitmaps from 'eterna/resources/Bitmaps';
+import FolderManager from 'eterna/folding/FolderManager';
+import Folder from 'eterna/folding/Folder';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 

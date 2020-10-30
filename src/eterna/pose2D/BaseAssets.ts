@@ -180,31 +180,31 @@ export default class BaseAssets {
 
             const colorTransform = ColorUtil.colorTransform(0, 0, 0, 1, r, g, b, 0);
 
-            {
+            do {
                 const sphereBitmap: Container = new Container();
                 sphereBitmap.addChild(new Sprite(baseWOutline));
                 const pattern = new Sprite(baseWPattern);
                 pattern.filters = [colorTransform];
                 sphereBitmap.addChild(pattern);
                 BaseAssets._sphereData.push(TextureUtil.renderToTexture(sphereBitmap));
-            }
+            } while (0);
 
-            {
+            do {
                 const sphereBitmapMid: Container = new Container();
                 sphereBitmapMid.addChild(new Sprite(baseWMidOutline));
                 const pattern = new Sprite(baseWMidPattern);
                 pattern.filters = [colorTransform];
                 sphereBitmapMid.addChild(pattern);
                 BaseAssets._sphereMidData.push(TextureUtil.renderToTexture(sphereBitmapMid));
-            }
+            } while (0);
 
-            {
+            do {
                 const sphereBitmapMin: Container = new Container();
                 const pattern = new Sprite(baseWMin);
                 pattern.filters = [colorTransform];
                 sphereBitmapMin.addChild(pattern);
                 BaseAssets._sphereMinData.push(TextureUtil.renderToTexture(sphereBitmapMin));
-            }
+            } while (0);
         }
 
         EternaTextureUtil.createScaled(BaseAssets._sphereData, 0.75, Base.NUM_ZOOM_LEVELS);

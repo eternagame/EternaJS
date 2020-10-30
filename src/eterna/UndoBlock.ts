@@ -118,7 +118,7 @@ export default class UndoBlock {
         // Map an array of secondary structures to just pairs because then it
         // can be nicely serialized.
         const m = new Map<boolean, number[][]>();
-        pa.forEach((v: SecStruct[], k: boolean, _map: Map<boolean, SecStruct[]>) => {
+        pa.forEach((v: SecStruct[], k: boolean, map: Map<boolean, SecStruct[]>) => {
             m.set(k, v.map((it) => it.pairs));
         });
         return m;

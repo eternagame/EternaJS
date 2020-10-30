@@ -155,7 +155,7 @@ export default class Puzzle {
     public get targetConditions(): (TargetConditions | undefined)[] {
         if (this._targetConditions == null) {
             const targetConditions: (TargetConditions | undefined)[] = this._secstructs.map(
-                () => undefined
+                (s) => undefined
             );
             return targetConditions;
         } else {
@@ -174,7 +174,7 @@ export default class Puzzle {
     public get puzzleLocks(): boolean[] {
         if (this._puzzleLocks == null && !this._useTails) {
             return this._secstructs[0].split('').map(
-                () => false
+                (ii) => false
             );
         } else if (this._useTails) {
             const puzlocks = [];

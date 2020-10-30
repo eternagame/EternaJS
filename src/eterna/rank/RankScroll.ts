@@ -1,5 +1,5 @@
 import {
-    Graphics, Point, Sprite
+    Graphics, Point, Text, Sprite
 } from 'pixi.js';
 import {
     ContainerObject, LocationTask, Easing, SerialTask, VisibleTask, DelayTask,

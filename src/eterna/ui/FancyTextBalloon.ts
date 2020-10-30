@@ -106,7 +106,7 @@ export default class FancyTextBalloon extends TextBalloon implements Updatable {
         }
     }
 
-    public update(_dt: number): void {
+    public update(dt: number): void {
         for (const arrow of this._childrenArrows) {
             const xdiff: number = (this.display.x + this.container.width / 2) - arrow.display.x;
             const ydiff: number = this.display.y < arrow.display.y

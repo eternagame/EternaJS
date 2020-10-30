@@ -1,4 +1,5 @@
 import ObjectTask from 'flashbang/core/ObjectTask';
+import Assert from 'flashbang/util/Assert';
 
 type TaskCreator = () => ObjectTask | null;
 

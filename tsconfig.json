@@ -13,8 +13,6 @@
     "strictPropertyInitialization": false,
     "strictNullChecks": true,
     "allowSyntheticDefaultImports": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
     "baseUrl": "./src",
     "paths": {
       "engines-bin/*": [
