@@ -105,6 +105,11 @@ export default class StructureInput extends ContainerObject implements Updatable
             if (bindingSite) bindingSite = bindingSite.slice(0, input.length);
         }
 
+        // If we alter the pose, the old customLayout just can't be consistently
+        // or meaningfully applied.
+        if (this._pose.customLayout) {
+            this._pose.customLayout = undefined;
+        }
         for (let ii: number = sequence.length; ii < input.length; ii++) {
             sequence.push(RNABase.ADENINE);
             if (locks) locks.push(false);
@@ -232,7 +237,8 @@ export default class StructureInput extends ContainerObject implements Updatable
         this._pose.molecularBindingSite = bindingSite;
         this._pose.trackCursor(this._textInput.caretPosition);
         try {
-            this._pose.molecularStructure = SecStruct.fromParens(this.structureString);
+            // You have to be PKs-aware.
+            this._pose.molecularStructure = SecStruct.fromParens(this.structureString, true);
         } catch (e) {
             // Invalid parenthesis notation error will warn the user per the earlier validateParenthesis call
             // Don't return to poseedit since it'll just break with the malformed structure

@@ -820,6 +820,7 @@ export default class PoseEditMode extends GameMode {
 
         // now that we have made the folder check, we can set _targetPairs. Used to do this
         // above but because NuPACK can handle pseudoknots, we shouldn't
+        console.error('targetSecstructs', targetSecstructs);
         for (let ii = 0; ii < targetSecstructs.length; ii++) {
             if (this._targetConditions && this._targetConditions[0]
                     && this._targetConditions[0]['type'] === 'pseudoknot') {

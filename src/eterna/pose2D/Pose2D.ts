@@ -697,6 +697,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
         this._baseRope.enabled = true;
         this._baseRope.redraw(true);
+        this._pseudoknotLines.redraw(true);
     }
 
     /**
@@ -770,6 +771,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
         this._baseRope.enabled = true;
         this._baseRope.redraw(true);
+        this._pseudoknotLines.redraw(true);
     }
 
     /**
@@ -826,6 +828,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
         this._baseRope.enabled = true;
         this._baseRope.redraw(true);
+        this._pseudoknotLines.redraw(true);
         // for (const bp of stem) {
         // for (let ii = 0; ii < this._customLayout.length; ++ii) {
         // this._customLayout[bp[1]] = [
@@ -1014,6 +1017,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
             this._baseRope.enabled = true;
             this._baseRope.redraw(true);
+            this._pseudoknotLines.redraw(true);
             return;
         }
 
