@@ -24,8 +24,6 @@ export default class ScrollContainer extends ContainerObject {
         Assert.assertIsDefined(overlayEl);
         this._htmlWrapper = document.createElement('div');
         this._htmlWrapper.style.position = 'absolute';
-        // assets/Styles/style.css ensures that links are still clickable
-        this._htmlWrapper.style.pointerEvents = 'none';
         overlayEl.appendChild(this._htmlWrapper);
 
         this.doLayout();

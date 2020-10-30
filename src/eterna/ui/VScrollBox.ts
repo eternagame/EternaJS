@@ -1,4 +1,4 @@
-import {Container, Graphics, interaction} from 'pixi.js';
+import {Container, interaction} from 'pixi.js';
 import {
     MathUtil, ContainerObject, Assert, InputUtil, MouseWheelListener
 } from 'flashbang';
@@ -27,7 +27,12 @@ export default class VScrollBox extends ContainerObject implements MouseWheelLis
         this._dragSurface.pointerDown.connect((e) => this.onDragPointerDown(e));
         this._dragSurface.pointerUp.connect(() => this.onDragPointerUp());
         this._dragSurface.pointerUpOutside.connect(() => this.onDragPointerUp());
-        this._dragSurface.pointerMove.connect(() => this.onDragPointerMove());
+        this._dragSurface.pointerMove.connect((e) => this.onDragPointerMove(e));
+
+        this.htmlWrapper.onpointerdown = (e) => this.onDragPointerDown(e);
+        this.htmlWrapper.onpointerup = () => this.onDragPointerUp();
+        // this.htmlWrapper.onpointerupoutside = () => this.onDragPointerUp();
+        this.htmlWrapper.onpointermove = (e) => this.onDragPointerMove(e);
 
         Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));
@@ -79,25 +84,29 @@ export default class VScrollBox extends ContainerObject implements MouseWheelLis
         return this._scrollContainer.htmlWrapper;
     }
 
-    private onDragPointerDown(event: interaction.InteractionEvent) {
+    private onDragPointerDown(event: interaction.InteractionEvent | PointerEvent) {
         this._dragging = true;
-        this._dragPointData = event.data;
-        this._dragStartBoxY = this.scrollLocation;
-        this._dragStartPointY = event.data.getLocalPosition(this._dragSurface.display).y;
+        if (event instanceof interaction.InteractionEvent) {
+            this._dragStartPoint = event.data.global.y;
+        } else {
+            if (event.pointerType === 'mouse') {
+                this._dragging = false;
+                return;
+            }
+            this._dragStartPoint = event.y;
+        }
+        this._dragStartScroll = this.scrollLocation;
     }
 
     private onDragPointerUp() {
         this._dragging = false;
-        this._dragPointData = null;
-        this._dragStartBoxY = 0;
-        this._dragStartPointY = 0;
     }
 
-    private onDragPointerMove() {
+    private onDragPointerMove(event: interaction.InteractionEvent | PointerEvent) {
         if (this._dragging) {
-            Assert.assertIsDefined(this._dragPointData);
-            const dragRange = this._dragPointData.getLocalPosition(this._dragSurface.display).y - this._dragStartPointY;
-            this.scrollLocation = this._dragStartBoxY - dragRange;
+            const currY = event instanceof interaction.InteractionEvent ? event.data.global.y : event.y;
+            const dragRange = currY - this._dragStartPoint;
+            this.scrollLocation = this._dragStartScroll - dragRange;
         }
     }
 
@@ -112,9 +121,8 @@ export default class VScrollBox extends ContainerObject implements MouseWheelLis
     private _dragSurface: GraphicsObject;
 
     private _dragging: boolean = false;
-    private _dragPointData: interaction.InteractionData | null = null;
-    private _dragStartPointY = 0;
-    private _dragStartBoxY = 0;
+    private _dragStartPoint = 0;
+    private _dragStartScroll = 0;
 
     private _width: number;
     private _height: number;
