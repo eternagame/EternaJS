@@ -2346,13 +2346,12 @@ export default class PoseEditMode extends GameMode {
         const poseData: SaveStoreItem = [0, this._poses[0].sequence.baseArray];
         for (const [i, pose] of this._poses.entries()) {
             const tc = this._targetConditions[i];
-            Assert.assertIsDefined(tc);
             const puzzledef: PuzzleEditPoseData = {
                 sequence: pose.sequence.sequenceString(),
                 structure: this._puzzle.getSecstruct(i),
                 startingFolder: this._folder.name
             };
-            if (Puzzle.isAptamerType(tc['type'])) {
+            if (tc && Puzzle.isAptamerType(tc['type'])) {
                 puzzledef.site = tc['site'];
                 puzzledef.bindingPairs = tc['binding_pairs'];
                 puzzledef.bonus = tc['bonus'];
