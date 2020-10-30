@@ -4,7 +4,6 @@ import {
 } from 'flashbang';
 import Background from 'eterna/vfx/Background';
 import Fonts from 'eterna/util/Fonts';
-import Eterna from 'eterna/Eterna';
 
 /** Displays a simple animation while we're loading assets */
 export default class LoadingMode extends AppMode {

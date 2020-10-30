@@ -72,7 +72,7 @@ export default class RScriptEnv extends ContainerObject {
 
     /** Remove all stored highlights and hints and stuff. */
     public cleanup(): void {
-        this._vars.forEach((value, key) => {
+        this._vars.forEach((_value, key) => {
             this.deleteVar(key);
         });
     }

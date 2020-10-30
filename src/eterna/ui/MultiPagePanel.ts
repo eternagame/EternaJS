@@ -243,14 +243,14 @@ export default class MultiPagePanel extends ContainerObject {
         this._dragStartPointY = event.data.getLocalPosition(this.container).y;
     }
 
-    private maskPointerUp(event: interaction.InteractionEvent) {
+    private maskPointerUp() {
         this._dragging = false;
         this._dragPointData = null;
         this._dragStartBoxY = 0;
         this._dragStartPointY = 0;
     }
 
-    private maskPointerMove(event: interaction.InteractionEvent) {
+    private maskPointerMove() {
         const {theme} = MultiPagePanel;
         const scrollHeight = this._panelHeight - (theme.title.height + theme.title.padding);
         const containerHeight = this._pagesContainer.display.height + theme.title.padding;

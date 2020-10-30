@@ -177,7 +177,6 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
     }
 
     private maskPointerDown(event: interaction.InteractionEvent) {
-        const {theme} = MissionClearedPanel;
         if (this._infoContainer.height < MissionClearedPanel.calcScrollHeight()) {
             return;
         }
@@ -187,14 +186,14 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
         this._dragStartPointY = event.data.getLocalPosition(this._contentLayout).y;
     }
 
-    private maskPointerUp(event: interaction.InteractionEvent) {
+    private maskPointerUp(_event: interaction.InteractionEvent) {
         this._dragging = false;
         this._dragPointData = null;
         this._dragStartBoxY = 0;
         this._dragStartPointY = 0;
     }
 
-    private maskPointerMove(event: interaction.InteractionEvent) {
+    private maskPointerMove(_event: interaction.InteractionEvent) {
         if (this._dragging) {
             Assert.assertIsDefined(this._dragPointData);
             const dragRange = this._dragPointData.getLocalPosition(this._contentLayout).y - this._dragStartPointY;

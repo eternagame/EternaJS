@@ -4,10 +4,6 @@ import ContraFold from '../Contrafold';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 
-function FoldSequence(folder: Folder, seq: Sequence, struct: SecStruct): SecStruct | null {
-    return folder.foldSequence(seq, null, struct.getParenthesis());
-}
-
 function CreateFolder(type: any): Promise<Folder | null> {
     return type.create();
 }

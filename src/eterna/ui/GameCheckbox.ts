@@ -39,7 +39,7 @@ export default class GameCheckbox extends ToggleButton {
         );
     }
 
-    protected showState(state: ButtonState): void {
+    protected showState(_state: ButtonState): void {
         this._check.visible = this.toggled.value;
     }
 

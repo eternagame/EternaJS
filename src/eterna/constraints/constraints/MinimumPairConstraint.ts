@@ -51,7 +51,7 @@ abstract class MinimumPairConstraint extends Constraint<MinPairConstraintStatus>
 
     protected _getBaseConstraintBoxConfig(
         status: MinPairConstraintStatus,
-        forMissionScreen: boolean
+        _forMissionScreen: boolean
     ): Omit<ConstraintBoxConfig, 'tooltip'> {
         return {
             satisfied: status.satisfied,

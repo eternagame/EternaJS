@@ -146,7 +146,7 @@ export default class ROPWait extends RScriptOp {
     /* override */
     public isPaused(): boolean {
         if (this._waitType === ROPWaitType.NUCLEOTIDEPAIR) {
-            const partner: number = this._env.pose.pairs.pairingPartner(this._startIdx);
+            const partner: number = this._env.pose.secstruct.pairingPartner(this._startIdx);
             if (partner < 0) {
                 return true;
             }

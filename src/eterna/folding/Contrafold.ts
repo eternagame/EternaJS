@@ -1,7 +1,4 @@
 import * as log from 'loglevel';
-import EPars, {
-    RNABase
-} from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import Assert from 'flashbang/util/Assert';
@@ -27,7 +24,7 @@ export default class ContraFold extends Folder {
         return import('engines-bin/contrafold')
             .then((module) => EmscriptenUtil.loadProgram(module))
             .then((program) => new ContraFold(program))
-            .catch((err) => null);
+            .catch(() => null);
     }
 
     private constructor(lib: ContrafoldLib) {
@@ -136,7 +133,7 @@ export default class ContraFold extends Folder {
         seq: Sequence,
         secondBestPairs: SecStruct | null,
         desiredPairs: string | null = null,
-        pseudoknotted: boolean = false,
+        _pseudoknotted: boolean = false,
         temp: number = 37,
         gamma: number = 6.0
     ): SecStruct {
@@ -161,8 +158,8 @@ export default class ContraFold extends Folder {
 
     private foldSequenceImpl(
         seq: Sequence,
-        structStr: string | null = null,
-        temp: number = 37,
+        _structStr: string | null = null,
+        _temp: number = 37,
         gamma: number = 0.7
     ): SecStruct {
         const seqStr = seq.sequenceString(false, false);

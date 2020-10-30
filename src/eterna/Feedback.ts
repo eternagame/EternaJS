@@ -18,33 +18,6 @@ export default class Feedback {
 
     public static readonly EXPSCORES: number[] = [0, 10, 15];
 
-    public static scoreFeedback(
-        shapedata: number[], secstruct: string, startIndex: number, min: number, threshold: number, max: number
-    ): number {
-        let score = 0;
-
-        for (let ii = 0; ii < secstruct.length; ii++) {
-            if (ii < startIndex) {
-                continue;
-            }
-            if (ii - startIndex >= shapedata.length) {
-                continue;
-            }
-
-            const char: string = secstruct.charAt(ii);
-
-            if (char === '.') {
-                if (shapedata[ii - startIndex] > (threshold / 4 + (min / 4) * 3)) {
-                    score++;
-                }
-            } else if (shapedata[ii - startIndex] < threshold) {
-                score++;
-            }
-        }
-
-        return Math.round((score / shapedata.length) * 100);
-    }
-
     // / Ad-hoc object for Brent's theophylline puzzle
     public set brentTheoData(dat: BrentTheoData | undefined) {
         this._brentTheoData = dat;
@@ -128,7 +101,7 @@ export default class Feedback {
 
     public setDegradationData(
         dat: number[] | null, condition: string, index: number,
-        error: number[] | null, stnCat: string | null, stn: number | null, failed: string | null
+        _error: number[] | null, _stnCat: string | null, _stn: number | null, failed: string | null
     ): void {
         if (dat != null) {
             if (this._degradationStarts.get(condition) === undefined) {
@@ -338,9 +311,9 @@ export default class Feedback {
     private _degradationThresholds: Map<string, number[]> = new Map<string, number[]>();
     private _degradationMaxs: Map<string, number[]> = new Map<string, number[]>();
     private _degradationMins: Map<string, number[]> = new Map<string, number[]>();
-    private _degradationErrors: Map<string, number[][]> = new Map<string, number[][]>();
-    private _degradationStnCats: Map<string, string[]> = new Map<string, string[]>();
-    private _degradationStns: Map<string, number[]> = new Map<string, number[]>();
+    // private _degradationErrors: Map<string, number[][]> = new Map<string, number[][]>();
+    // private _degradationStnCats: Map<string, string[]> = new Map<string, string[]>();
+    // private _degradationStns: Map<string, number[]> = new Map<string, number[]>();
 
     private _faileds: Map<string, number[]> = new Map<string, number[]>();
     // / Ad-hoc data storage object for Brent's theophylline puzzle

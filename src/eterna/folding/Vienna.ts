@@ -1,7 +1,4 @@
 import * as log from 'loglevel';
-import EPars, {
-    RNABase
-} from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import Utility from 'eterna/util/Utility';
@@ -28,7 +25,7 @@ export default class Vienna extends Folder {
         return import('engines-bin/vienna')
             .then((module) => EmscriptenUtil.loadProgram(module))
             .then((program) => new Vienna(program))
-            .catch((err) => null);
+            .catch(() => null);
     }
 
     private constructor(lib: ViennaLib) {
@@ -185,7 +182,7 @@ export default class Vienna extends Folder {
 
     public foldSequence(
         seq: Sequence, secondBestPairs: SecStruct | null, desiredPairs: string | null = null,
-        pseudoknotted: boolean = false, temp: number = 37
+        _pseudoknotted: boolean = false, temp: number = 37
     ): SecStruct {
         const key: CacheKey = {
             primitive: 'fold',
@@ -404,261 +401,6 @@ export default class Vienna extends Folder {
         return coPairs;
     }
 
-    public mlEnergy(pairs: number[], S: number[], i: number, isExtloop: boolean): number {
-        let energy: number;
-        let cxEnergy: number;
-        let bestEnergy: number;
-        bestEnergy = EPars.INF;
-        let i1: number;
-        let j: number;
-        let p: number;
-        let q: number;
-        let u = 0;
-        let x: number;
-        let type: number;
-        let count: number;
-        const mlintern: number[] = new Array(EPars.NBPAIRS + 1);
-        let mlclosing: number;
-        let mlbase: number;
-
-        const dangles: number = EPars.DANGLES;
-
-        if (isExtloop) {
-            for (x = 0; x <= EPars.NBPAIRS; x++) {
-                mlintern[x] = EPars.mlIntern(x) - EPars.mlIntern(1);
-                /* 0 or TerminalAU */
-            }
-
-            mlbase = 0;
-            mlclosing = 0;
-        } else {
-            for (x = 0; x <= EPars.NBPAIRS; x++) {
-                mlintern[x] = EPars.mlIntern(x);
-            }
-
-            mlclosing = EPars.ML_CLOSING37;
-            mlbase = EPars.ML_BASE37;
-        }
-
-        for (count = 0; count < 2; count++) { /* do it twice */
-            const ld5 = 0;
-            /* 5' dangle energy on prev pair (type) */
-            if (i === 0) {
-                j = pairs[0] + 1;
-                type = 0;
-                /* no pair */
-            } else {
-                j = pairs[i];
-                type = EPars.pairType(S[j], S[i]);
-
-                if (type === 0) {
-                    type = 7;
-                }
-            }
-            i1 = i;
-            p = i + 1;
-            u = 0;
-            energy = 0;
-            cxEnergy = EPars.INF;
-
-            do { /* walk around the multi-loop */
-                let tt: number;
-                const newCx: number = EPars.INF;
-
-                /* hope over unpaired positions */
-                while (p <= pairs[0] && pairs[p] === 0) p++;
-
-                /* memorize number of unpaired positions */
-                u += p - i1 - 1;
-                /* get position of pairing partner */
-                if (p === pairs[0] + 1) {
-                    tt = 0;
-                    q = 0;
-                    /* virtual root pair */
-                } else {
-                    q = pairs[p];
-                    /* get type of base pair P->q */
-                    tt = EPars.pairType(S[p], S[q]);
-                    if (tt === 0) tt = 7;
-                }
-
-                energy += mlintern[tt];
-                cxEnergy += mlintern[tt];
-
-                if (dangles) {
-                    let dang5 = 0;
-                    let dang3 = 0;
-                    let dang = 0;
-                    if ((p > 1)) {
-                        dang5 = EPars.getDangle5Score(tt, S[p - 1]);
-                        /* 5'dangle of pq pair */
-                    }
-                    if ((i1 < S[0])) {
-                        dang3 = EPars.getDangle3Score(type, S[i1 + 1]);
-                        /* 3'dangle of previous pair */
-                    }
-
-                    switch (p - i1 - 1) {
-                        case 0: /* adjacent helices */
-                        case 1: /* 1 unpaired base between helices */
-                            dang = (dangles === 2) ? (dang3 + dang5) : Math.min(dang3, dang5);
-                            energy += dang;
-                            break;
-
-                        default: /* many unpaired base between helices */
-                            energy += dang5 + dang3;
-                    }
-                    type = tt;
-                }
-
-                i1 = q;
-                p = q + 1;
-            } while (q !== i);
-
-            bestEnergy = Math.min(energy, bestEnergy);
-            /* don't use cxEnergy here */
-
-            if (dangles !== 3 || isExtloop) {
-                break;
-                /* may break cofold with co-ax */
-            }
-            /* skip a helix and start again */
-            while (pairs[p] === 0) {
-                p++;
-            }
-            if (i === pairs[p]) break;
-            i = pairs[p];
-        }
-
-        energy = bestEnergy;
-        energy += mlclosing;
-
-        energy += mlbase * u;
-
-        return energy;
-    }
-
-    public cutInLoop(i: number): number {
-        return 0;
-    }
-
-    public loopEnergy(
-        n1: number, n2: number,
-        type: number, type2: number,
-        si1: number, sj1: number, sp1: number, sq1: number, b1: boolean, b2: boolean
-    ): number {
-        let loopScore = 0;
-
-        /* compute energy of degree 2 loop (stack bulge or interior) */
-        let nl: number;
-        let ns: number;
-
-        if (n1 > n2) {
-            nl = n1;
-            ns = n2;
-        } else {
-            nl = n2;
-            ns = n1;
-        }
-
-        if (nl === 0) {
-            return EPars.getStackScore(type, type2, b1, b2);
-            /* stack */
-        }
-
-        if (ns === 0) { /* bulge */
-            if (nl <= EPars.MAXLOOP) {
-                loopScore = EPars.BULGE_37[nl];
-            } else {
-                loopScore = EPars.getBulge(nl);
-            }
-            if (nl === 1) {
-                loopScore += EPars.getStackScore(type, type2, b1, b2);
-            } else {
-                if (type > 2) {
-                    loopScore += EPars.TERM_AU;
-                }
-                if (type2 > 2) {
-                    loopScore += EPars.TERM_AU;
-                }
-            }
-            return loopScore;
-        } else {
-            /* interior loop */
-            if (ns === 1) {
-                if (nl === 1) {
-                    // 1x1 loop
-                    return EPars.getInt11(type, type2, si1, sj1);
-                }
-
-                if (nl === 2) {
-                    // 2x1 loop
-                    if (n1 === 1) {
-                        loopScore = EPars.getInt21(type, type2, si1, sq1, sj1);
-                    } else {
-                        loopScore = EPars.getInt21(type2, type, sq1, si1, sp1);
-                    }
-
-                    return loopScore;
-                }
-            } else if (n1 === 2 && n2 === 2) {
-                // 2x2 loop
-                return EPars.getInt22(type, type2, si1, sp1, sq1, sj1);
-            }
-
-            /* generic interior loop (no else here!) */
-            if ((n1 + n2 <= EPars.MAXLOOP)) {
-                loopScore = EPars.INTERNAL_37[n1 + n2];
-            } else {
-                loopScore = EPars.getInternal(n1 + n2);
-            }
-
-            loopScore += Math.min(EPars.MAX_NINIO, (nl - ns) * EPars.F_ninio37[2]);
-            loopScore += EPars.internalMismatch(type, si1, sj1) + EPars.internalMismatch(type2, sq1, sp1);
-        }
-
-        return loopScore;
-    }
-
-    public hairpinEnergy(
-        size: number, type: number, si1: number, sj1: number, sequence: number[], i: number, j: number
-    ): number {
-        let hairpinScore = 0;
-
-        if (size <= 30) {
-            hairpinScore = EPars.HAIRPIN_37[size];
-        } else {
-            hairpinScore = EPars.HAIRPIN_37[30] + Number(EPars.LXC * Math.log((size) / 30.0));
-        }
-
-        if (size === 4) {
-            let loopStr = '';
-            for (let walker: number = i; walker <= j; walker++) {
-                if (sequence[walker] === RNABase.ADENINE) {
-                    loopStr += 'A';
-                } else if (sequence[walker] === RNABase.GUANINE) {
-                    loopStr += 'G';
-                } else if (sequence[walker] === RNABase.URACIL) {
-                    loopStr += 'U';
-                } else if (sequence[walker] === RNABase.CYTOSINE) {
-                    loopStr += 'C';
-                }
-            }
-
-            hairpinScore += EPars.getTetraLoopBonus(loopStr);
-        }
-
-        if (size === 3) {
-            if (type > 2) {
-                hairpinScore += EPars.TERM_AU;
-            }
-        } else {
-            hairpinScore += EPars.hairpinMismatch(type, si1, sj1);
-        }
-
-        return hairpinScore;
-    }
-
     private foldSequenceImpl(seq: Sequence, structStr: string | null = null, temp: number = 37): SecStruct {
         const seqStr = seq.sequenceString(false, false);
         let result: FullFoldResult | null = null;
@@ -681,7 +423,7 @@ export default class Vienna extends Folder {
     }
 
     private foldSequenceWithBindingSiteImpl(
-        seq: Sequence, i: number, p: number, j: number, q: number, bonus: number, temp: number = 37
+        seq: Sequence, i: number, p: number, j: number, q: number, bonus: number, _temp: number = 37
     ): SecStruct {
         const seqStr = seq.sequenceString(false, false);
         const structStr = '';
@@ -704,7 +446,7 @@ export default class Vienna extends Folder {
         }
     }
 
-    private cofoldSequenceImpl(seq: Sequence, str: string | null = null, temp: number = 37): SecStruct {
+    private cofoldSequenceImpl(seq: Sequence, str: string | null = null, _temp: number = 37): SecStruct {
         const seqStr = seq.sequenceString(true, false);
         const structStr: string = str || '';
         let result: FullFoldResult | null = null;
@@ -735,7 +477,7 @@ export default class Vienna extends Folder {
         j: number,
         q: number,
         bonus: number,
-        temp: number = 37
+        _temp: number = 37
     ): SecStruct {
         const seqStr = seq.sequenceString(true, false);
         const structStr: string = str || '';
@@ -760,7 +502,7 @@ export default class Vienna extends Folder {
     }
 
     private foldSequenceWithBindingSiteOld(
-        seq: Sequence, targetPairs: SecStruct, bindingSite: number[], bonus: number, temp: number = 37
+        seq: Sequence, targetPairs: SecStruct, bindingSite: number[], bonus: number, _temp: number = 37
     ): SecStruct {
         let bestPairs: SecStruct;
         const nativePairs: SecStruct = this.foldSequence(seq, null, null);

@@ -172,10 +172,10 @@ export default class RNAScript {
         } else if ((regResult = showMissionScreen.exec(op))) {
             return new ROPShowMissionScreen(this._env);
         } else if ((regResult = uiArrow.exec(op))) {
-            const [match, show] = regResult;
+            const [, show] = regResult;
             return new ROPUIArrow(this._env, show.toUpperCase() === 'SHOW');
         } else if ((regResult = uiTooltip.exec(op))) {
-            const [match, show] = regResult;
+            const [, show] = regResult;
             return new ROPUITooltip(this._env, show.toUpperCase() === 'SHOW');
         }
         // Shouldn't reach here ever.

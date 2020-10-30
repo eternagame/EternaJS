@@ -4,7 +4,7 @@ import {
 } from 'pixi.js';
 import Constants from 'eterna/Constants';
 import Eterna from 'eterna/Eterna';
-import Feedback, {BrentTheoData} from 'eterna/Feedback';
+import Feedback from 'eterna/Feedback';
 import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
 import Solution from 'eterna/puzzle/Solution';
 import Puzzle from 'eterna/puzzle/Puzzle';
@@ -24,12 +24,12 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import GameButton from 'eterna/ui/GameButton';
 import EternaURL from 'eterna/net/EternaURL';
 import BitmapManager from 'eterna/resources/BitmapManager';
-import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import GameDropdown from 'eterna/ui/GameDropdown';
 import {MappedValue, ValueView} from 'signals';
 import SolutionManager from 'eterna/puzzle/SolutionManager';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
+import UITheme from 'eterna/ui/UITheme';
 import GameMode from './GameMode';
 import ViewSolutionOverlay from './DesignBrowser/ViewSolutionOverlay';
 
@@ -83,12 +83,7 @@ export default class FeedbackViewMode extends GameMode {
         Assert.assertIsDefined(this.container);
         this.container.addChild(homeArrow);
 
-        const puzzleTitle = new HTMLTextObject(this._puzzle.getName(true))
-            .font(Fonts.STDFONT)
-            .fontSize(14)
-            .bold()
-            .selectable(false)
-            .color(0xffffff);
+        const puzzleTitle = UITheme.makeTitle(this._puzzle.getName(true), 0xffffff);
         puzzleTitle.hideWhenModeInactive();
         this.addObject(puzzleTitle, this.uiLayer);
         DisplayUtil.positionRelative(
@@ -154,9 +149,9 @@ export default class FeedbackViewMode extends GameMode {
                     }
                     secstructs[ii] = secs;
                 }
-                this._pairs.push(SecStruct.fromParens(secstructs[ii]));
+                this._secstructs.push(SecStruct.fromParens(secstructs[ii]));
                 const datablock: UndoBlock = new UndoBlock(this._sequence, Vienna.NAME);
-                datablock.setPairs(this._pairs[ii]);
+                datablock.setPairs(this._secstructs[ii]);
                 datablock.setBasics();
                 this._undoBlocks.push(datablock);
 
@@ -169,7 +164,7 @@ export default class FeedbackViewMode extends GameMode {
                 }
                 poseField.pose.scoreFolder = vienna;
                 poseField.pose.sequence = this._sequence;
-                poseField.pose.pairs = this._pairs[ii];
+                poseField.pose.secstruct = this._secstructs[ii];
                 poseFields.push(poseField);
             }
             return poseFields;
@@ -291,8 +286,6 @@ export default class FeedbackViewMode extends GameMode {
             this.showExperimentalColors();
         }
 
-        //
-        // this.scoreFeedback();
         this.changeTarget(0);
         this.setPip(false);
 
@@ -511,11 +504,11 @@ export default class FeedbackViewMode extends GameMode {
         this._toolbar.estimateButton.toggled.value = false;
         this._toolbar.targetButton.toggled.value = true;
         if (this._isPipMode) {
-            for (let ii = 0; ii < this._pairs.length; ii++) {
-                this._poseFields[ii].pose.pairs = this._pairs[ii];
+            for (let ii = 0; ii < this._secstructs.length; ii++) {
+                this._poseFields[ii].pose.secstruct = this._secstructs[ii];
             }
         } else {
-            this._poseFields[0].pose.pairs = this._pairs[this._currentIndex];
+            this._poseFields[0].pose.secstruct = this._secstructs[this._currentIndex];
         }
     }
 
@@ -526,13 +519,13 @@ export default class FeedbackViewMode extends GameMode {
         this._toolbar.estimateButton.toggled.value = true;
         this._toolbar.targetButton.toggled.value = false;
         if (this._isPipMode) {
-            for (let ii = 0; ii < this._pairs.length; ii++) {
+            for (let ii = 0; ii < this._secstructs.length; ii++) {
                 if (this._shapePairs[ii] !== null) {
-                    this._poseFields[ii].pose.pairs = this._shapePairs[ii] as SecStruct;
+                    this._poseFields[ii].pose.secstruct = this._shapePairs[ii] as SecStruct;
                 }
             }
         } else if (this._shapePairs[this._currentIndex] !== null) {
-            this._poseFields[0].pose.pairs = this._shapePairs[this._currentIndex] as SecStruct;
+            this._poseFields[0].pose.secstruct = this._shapePairs[this._currentIndex] as SecStruct;
         }
     }
 
@@ -566,8 +559,6 @@ export default class FeedbackViewMode extends GameMode {
         if (this._isExpColor) {
             this.showExperimentalColors();
         }
-
-        // this.scoreFeedback();
     }
 
     private showExperimentalColors(): void {
@@ -627,58 +618,6 @@ export default class FeedbackViewMode extends GameMode {
         }
     }
 
-    private scoreFeedback(): void {
-        Assert.assertIsDefined(this._feedback);
-
-        let titleText = '';
-        const brentData: BrentTheoData | undefined = this._feedback.brentTheoData;
-
-        if (brentData != null) {
-            // / Brent's theophylline data
-            titleText += (`${this._solution.title}\n`);
-            titleText += `Cleavage suppression : x ${brentData['score'].toFixed(2)}\n`;
-            titleText += `(Cleavage without Theophylline molecule : ${brentData['ribo_without_theo'].toFixed(2)}`;
-            titleText += ` / with Theophylline : ${brentData['ribo_with_theo'].toFixed(2)})`;
-        } else {
-            // / Default fallback to usual SHAPE data
-            if (Eterna.DEV_MODE) {
-                const score: number = Feedback.scoreFeedback(
-                    this._feedback.getShapeData(this._currentIndex, this._dataOption.value),
-                    this._puzzle.getSecstruct(this._currentIndex),
-                    this._feedback.getShapeStartIndex(this._currentIndex, this._dataOption.value),
-                    this._feedback.getShapeMin(this._currentIndex, this._dataOption.value),
-                    this._feedback.getShapeThreshold(this._currentIndex, this._dataOption.value),
-                    this._feedback.getShapeMax(this._currentIndex, this._dataOption.value)
-                );
-                titleText += (`${this._solution.title}\nSynthesis score : ${score} / 100`);
-            } else {
-                titleText += (`${this._solution.title}\nSynthesis score : ${this._solution.getProperty('Synthesis score')} / 100`);
-            }
-
-            if (this._targetConditions.length > 1) {
-                titleText += '\n(';
-                for (let ii = 0; ii < this._targetConditions.length; ii++) {
-                    if (ii > 0) {
-                        titleText += ', ';
-                    }
-
-                    const score: number = Feedback.scoreFeedback(
-                        this._feedback.getShapeData(ii, this._dataOption.value),
-                        this._puzzle.getSecstruct(ii),
-                        this._feedback.getShapeStartIndex(ii, this._dataOption.value),
-                        this._feedback.getShapeMin(ii, this._dataOption.value),
-                        this._feedback.getShapeThreshold(ii, this._dataOption.value),
-                        this._feedback.getShapeMax(ii, this._dataOption.value)
-                    );
-
-                    titleText += `state ${ii + 1} : ${score} / 100`;
-                }
-                titleText += ')';
-            }
-        }
-        this._title.text = titleText;
-    }
-
     private setupShape(): void {
         for (let ss = 0; ss < this._puzzle.getSecstructs().length; ss++) {
             this.foldEstimate(ss);
@@ -698,11 +637,7 @@ export default class FeedbackViewMode extends GameMode {
         let desiredPairs = '';
 
         for (let ii = 0; ii < startIndex; ii++) {
-            if (puzzleLocks[ii]) {
-                desiredPairs += 'U0';
-            } else {
-                desiredPairs += 'P0';
-            }
+            desiredPairs += (puzzleLocks[ii]) ? 'U0' : 'P0';
         }
 
         for (let ii = 0; ii < shapeData.length; ii++) {
@@ -746,11 +681,7 @@ export default class FeedbackViewMode extends GameMode {
         }
 
         for (let ii = shapeData.length + startIndex; ii < this._sequence.length; ii++) {
-            if (puzzleLocks[ii]) {
-                desiredPairs += 'U0';
-            } else {
-                desiredPairs += 'P0';
-            }
+            desiredPairs += (puzzleLocks[ii]) ? 'U0' : 'P0';
         }
 
         const folder: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
@@ -790,11 +721,10 @@ export default class FeedbackViewMode extends GameMode {
     private _currentIndex: number;
 
     private _foldMode: PoseFoldMode;
-    private _puzzleTitle: Text;
     private _title: Text;
     private _feedback: Feedback | null;
     private _sequence: Sequence;
-    private _pairs: SecStruct[] = [];
+    private _secstructs: SecStruct[] = [];
     private _shapePairs: (SecStruct | null)[] = [];
     protected _targetConditions: (TargetConditions | undefined)[];
     private _isExpColor: boolean;

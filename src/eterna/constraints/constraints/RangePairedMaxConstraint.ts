@@ -7,7 +7,6 @@ import {
 import Bitmaps from 'eterna/resources/Bitmaps';
 import Utility from 'eterna/util/Utility';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
-import DotPlot from 'eterna/rnatypes/DotPlot';
 import Vienna from 'eterna/folding/Vienna';
 import Vienna2 from 'eterna/folding/Vienna2';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';

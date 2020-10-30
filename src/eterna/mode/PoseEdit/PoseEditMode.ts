@@ -1,6 +1,6 @@
 import * as log from 'loglevel';
 import {
-    Container, DisplayObject, Point, Sprite, Text, Rectangle, Texture, BaseTexture
+    Container, DisplayObject, Point, Sprite, Text, Rectangle
 } from 'pixi.js';
 import EPars, {RNABase, RNAPaint} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
@@ -18,7 +18,7 @@ import GameButton from 'eterna/ui/GameButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {
     KeyCode, SpriteObject, DisplayUtil, HAlign, VAlign, Flashbang, KeyboardEventType, Assert,
-    GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject, Base64
+    GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
@@ -26,7 +26,6 @@ import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaVi
 import FolderManager from 'eterna/folding/FolderManager';
 import Folder, {MultiFoldResult, CacheKey} from 'eterna/folding/Folder';
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
-import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import PoseField from 'eterna/pose2D/PoseField';
 import Pose2D, {Oligo, Layout} from 'eterna/pose2D/Pose2D';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
@@ -61,6 +60,7 @@ import FolderSwitcher from 'eterna/ui/FolderSwitcher';
 import DotPlot from 'eterna/rnatypes/DotPlot';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
+import UITheme from 'eterna/ui/UITheme';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
@@ -194,15 +194,7 @@ export default class PoseEditMode extends GameMode {
             });
         }
         this._toolbar.submitButton.clicked.connect(() => this.submitCurrentPose());
-        this._toolbar.viewSolutionsButton.clicked.connect(() => {
-            this.pushUILock();
-            Eterna.app.switchToDesignBrowser(this._puzzle)
-                .then(() => this.popUILock())
-                .catch((e) => {
-                    log.error(e);
-                    this.popUILock();
-                });
-        });
+        this._toolbar.viewSolutionsButton.clicked.connect(() => this.openDesignBrowserForOurPuzzle());
         this._toolbar.resetButton.clicked.connect(() => this.showResetPrompt());
         this._toolbar.naturalButton.clicked.connect(() => this.togglePoseState());
         this._toolbar.targetButton.clicked.connect(() => this.togglePoseState());
@@ -220,56 +212,8 @@ export default class PoseEditMode extends GameMode {
         this._toolbar.palette.targetClicked.connect((targetType) => this.onPaletteTargetSelected(targetType));
         this._toolbar.pairSwapButton.clicked.connect(() => this.onSwapClicked());
 
-        this._toolbar.nucleotideFindButton.clicked.connect(() => {
-            this.showDialog(new NucleotideFinder()).closed.then((result) => {
-                if (result != null) {
-                    if (this._isPipMode) {
-                        this._poses.forEach((p) => p.focusNucleotide(result.nucleotideIndex));
-                    } else {
-                        this._poses[this._curTargetIndex].focusNucleotide(result.nucleotideIndex);
-                    }
-                }
-            });
-        });
-
-        this._toolbar.nucleotideRangeButton.clicked.connect(() => {
-            const initialRange = this._nucleotideRangeToShow
-                ?? (() => {
-                    if (this._isPipMode) {
-                        return [
-                            1,
-                            Math.min(...this._poses.map((p) => p.fullSequenceLength))
-                        ];
-                    } else {
-                        return [1, this._poses[this._curTargetIndex].fullSequenceLength];
-                    }
-                })() as [number, number];
-
-            this.showDialog(
-                new NucleotideRangeSelector({
-                    initialRange,
-                    isPartialRange: Boolean(this._nucleotideRangeToShow)
-                })
-            )
-                .closed
-                .then((result) => {
-                    if (result === null) {
-                        return;
-                    }
-
-                    if (result.clearRange) {
-                        this._nucleotideRangeToShow = null;
-                    } else {
-                        this._nucleotideRangeToShow = [result.startIndex, result.endIndex];
-                    }
-
-                    if (this._isPipMode) {
-                        this._poses.forEach((p) => p.showNucleotideRange(this._nucleotideRangeToShow));
-                    } else {
-                        this._poses[this._curTargetIndex].showNucleotideRange(this._nucleotideRangeToShow);
-                    }
-                });
-        });
+        this._toolbar.nucleotideFindButton.clicked.connect(() => this.findNucleotide());
+        this._toolbar.nucleotideRangeButton.clicked.connect(() => this.showNucleotideRange());
 
         this._toolbar.baseMarkerButton.clicked.connect(() => {
             this.setPosesColor(RNAPaint.BASE_MARK);
@@ -381,14 +325,63 @@ export default class PoseEditMode extends GameMode {
         this._asynchText.visible = false;
     }
 
-    private get _solDialogOffset() {
+    private get _solDialogOffset(): number {
         return this._solutionView !== undefined && this._solutionView.container.visible
             ? ViewSolutionOverlay.theme.width : 0;
     }
 
-    protected get posesWidth() {
+    protected get posesWidth(): number {
         Assert.assertIsDefined(Flashbang.stageWidth);
         return Flashbang.stageWidth - this._solDialogOffset;
+    }
+
+    private findNucleotide(): void {
+        this.showDialog(new NucleotideFinder()).closed.then((result) => {
+            if (result != null) {
+                if (this._isPipMode) {
+                    this._poses.forEach((p) => p.focusNucleotide(result.nucleotideIndex));
+                } else {
+                    this._poses[this._curTargetIndex].focusNucleotide(result.nucleotideIndex);
+                }
+            }
+        });
+    }
+
+    private showNucleotideRange(): void {
+        const initialRange = this._nucleotideRangeToShow
+            ?? (() => {
+                if (this._isPipMode) {
+                    return [
+                        1,
+                        Math.min(...this._poses.map((p) => p.fullSequenceLength))
+                    ];
+                } else {
+                    return [1, this._poses[this._curTargetIndex].fullSequenceLength];
+                }
+            })() as [number, number];
+
+        this.showDialog(
+            new NucleotideRangeSelector({
+                initialRange,
+                isPartialRange: Boolean(this._nucleotideRangeToShow)
+            })
+        ).closed.then((result) => {
+            if (result === null) {
+                return;
+            }
+
+            if (result.clearRange) {
+                this._nucleotideRangeToShow = null;
+            } else {
+                this._nucleotideRangeToShow = [result.startIndex, result.endIndex];
+            }
+
+            if (this._isPipMode) {
+                this._poses.forEach((p) => p.showNucleotideRange(this._nucleotideRangeToShow));
+            } else {
+                this._poses[this._curTargetIndex].showNucleotideRange(this._nucleotideRangeToShow);
+            }
+        });
     }
 
     private updateUILayout(): void {
@@ -658,13 +651,39 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    private updateSolutionNameText(solution: Solution): void {
-        this._solutionNameText.text = `${solution.title} (${solution.playerName})`;
-        this._solutionNameText.visible = true;
-        DisplayUtil.positionRelativeToStage(
-            this._solutionNameText, HAlign.CENTER, VAlign.TOP,
-            HAlign.CENTER, VAlign.TOP, 0, 8
-        );
+    private highlightSequences(highlightInfos: HighlightInfo[] | null) {
+        for (const [poseIdx, pose] of this._poses.entries()) {
+            pose.clearRestrictedHighlight();
+            pose.clearUnstableHighlight();
+            pose.clearUserDefinedHighlight();
+            const poseState = this._isPipMode || poseIdx !== 0 ? poseIdx : this._curTargetIndex;
+            if (!highlightInfos) continue;
+            for (const highlightInfo of highlightInfos) {
+                if (highlightInfo && (highlightInfo.stateIndex == null || poseState === highlightInfo.stateIndex)) {
+                    const currBlock = this.getCurrentUndoBlock(poseState);
+                    const naturalMap = currBlock.reorderedOligosIndexMap(currBlock.oligoOrder);
+                    const ranges = (this._poseState === PoseState.NATIVE && naturalMap != null)
+                        ? highlightInfo.ranges.map((index: number) => {
+                            Assert.assertIsDefined(naturalMap);
+                            return naturalMap.indexOf(index);
+                        }) : highlightInfo.ranges;
+
+                    switch (highlightInfo.color) {
+                        case HighlightType.RESTRICTED:
+                            pose.highlightRestrictedSequence(ranges);
+                            break;
+                        case HighlightType.UNSTABLE:
+                            pose.highlightUnstableSequence(ranges);
+                            break;
+                        case HighlightType.USER_DEFINED:
+                            pose.highlightUserDefinedSequence(ranges);
+                            break;
+                        default:
+                            log.error(`Invalid highlight type: ${highlightInfo.color}`);
+                    }
+                }
+            }
+        }
     }
 
     private setPuzzle(): void {
@@ -680,10 +699,10 @@ export default class PoseEditMode extends GameMode {
         // }
 
         const bindAddbaseCB = (pose: Pose2D, kk: number) => {
-            pose.addBaseCallback = ((parenthesis: string | null, mode: PuzzleEditOp | null, index: number) => {
+            pose.addBaseCallback = ((parenthesis: string | null, op: PuzzleEditOp | null, index: number) => {
                 Assert.assertIsDefined(parenthesis);
-                Assert.assertIsDefined(mode);
-                pose.baseShift(parenthesis, mode, index);
+                Assert.assertIsDefined(op);
+                pose.baseShift(parenthesis, op, index);
                 this.poseEditByTarget(kk);
             });
         };
@@ -693,7 +712,7 @@ export default class PoseEditMode extends GameMode {
                 this.poseEditByTarget(index);
             });
         };
-        const bindTrackMoves = (pose: Pose2D, index: number) => {
+        const bindTrackMoves = (pose: Pose2D) => {
             pose.trackMovesCallback = ((count: number, moves: Move[]) => {
                 this._moveCount += count;
                 if (moves) {
@@ -703,7 +722,7 @@ export default class PoseEditMode extends GameMode {
         };
 
         const bindMousedownEvent = (pose: Pose2D, index: number) => {
-            pose.startMousedownCallback = ((e: InteractionEvent, closestDist: number, closestIndex: number) => {
+            pose.startMousedownCallback = ((e: InteractionEvent, closestIndex: number) => {
                 for (let ii = 0; ii < poseFields.length; ++ii) {
                     const poseField: PoseField = poseFields[ii];
                     const poseToNotify: Pose2D = poseField.pose;
@@ -722,19 +741,20 @@ export default class PoseEditMode extends GameMode {
             const pose: Pose2D = poseField.pose;
             bindAddbaseCB(pose, ii);
             bindPoseEdit(pose, ii);
-            bindTrackMoves(pose, ii);
+            bindTrackMoves(pose);
             bindMousedownEvent(pose, ii);
             poseFields.push(poseField);
         }
 
         this.setPoseFields(poseFields);
 
-        this._isDatabrowserMode = false;
         // if (this.root.loaderInfo.parameters.databrowser
         //     && this.root.loaderInfo.parameters.databrowser === "true") {
         //     this._is_databrowser_mode = true;
         // }
 
+        // Unroll a lot of the data in the puzzle's TargetConditions into members
+        // that PoseEditMode handles itself
         for (let ii = 0; ii < targetSecstructs.length; ii++) {
             this._targetConditions.push(targetConditions[ii]);
             this._targetOligos.push(undefined);
@@ -752,15 +772,15 @@ export default class PoseEditMode extends GameMode {
                     this._oligoName[ii] = tc['oligo_name'];
                 }
                 if (tc['oligos']) {
-                    const odefs: OligoDef[] = tc['oligos'] as OligoDef[];
-                    const ndefs: Oligo[] = odefs.map(
+                    // Map from OligoDef to Oligo, basically requires turning
+                    // a sequence string into a baseArray.
+                    this._targetOligos[ii] = tc['oligos'].map(
                         (odef) => ({
                             sequence: Sequence.fromSequenceString(odef.sequence).baseArray,
                             malus: odef.malus,
-                            name: odef['name']
+                            name: odef.name
                         })
                     );
-                    this._targetOligos[ii] = ndefs;
                 }
             }
         }
@@ -768,12 +788,7 @@ export default class PoseEditMode extends GameMode {
         this._exitButton.display.visible = false;
         this.addObject(this._exitButton, this.uiLayer);
 
-        const puzzleTitle = new HTMLTextObject(this._puzzle.getName(!Eterna.MOBILE_APP), undefined, undefined, true)
-            .font(Fonts.STDFONT)
-            .fontSize(14)
-            .bold()
-            .selectable(false)
-            .color(0xC0DCE7);
+        const puzzleTitle = UITheme.makeTitle(this._puzzle.getName(!Eterna.MOBILE_APP), 0xC0DCE7);
         puzzleTitle.hideWhenModeInactive();
         this.addObject(puzzleTitle, this.uiLayer);
         puzzleTitle.display.position = new Point(57, 8);
@@ -806,6 +821,7 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
+        // We can only set up the folderSwitcher once we have set up the poses
         this._folderSwitcher = new FolderSwitcher(
             (folder) => this._puzzle.canUseFolder(folder),
             initialFolder,
@@ -833,52 +849,17 @@ export default class PoseEditMode extends GameMode {
 
         this._constraintsLayer.visible = true;
 
-        if (!this._puzzle.isPalleteAllowed) {
-            for (const pose of this._poses) {
-                pose.currentColor = -1;
-            }
-        } else {
-            this._toolbar.palette.clickTarget(PaletteTargetType.A);
-        }
+        this._toolbar.palette.clickTarget(PaletteTargetType.A);
 
+        // Set up the constraintBar
         this._constraintBar = new ConstraintBar(this._puzzle.constraints, this._puzzle.getSecstructs.length);
         this._constraintBar.display.visible = false;
         this.addObject(this._constraintBar, this._constraintsLayer);
-        this._constraintBar.sequenceHighlights.connect((highlightInfos: HighlightInfo[] | null) => {
-            for (const [poseIdx, pose] of this._poses.entries()) {
-                pose.clearRestrictedHighlight();
-                pose.clearUnstableHighlight();
-                pose.clearUserDefinedHighlight();
-                const poseState = this._isPipMode || poseIdx !== 0 ? poseIdx : this._curTargetIndex;
-                if (!highlightInfos) continue;
-                for (const highlightInfo of highlightInfos) {
-                    if (highlightInfo && (highlightInfo.stateIndex == null || poseState === highlightInfo.stateIndex)) {
-                        const currBlock = this.getCurrentUndoBlock(poseState);
-                        const naturalMap = currBlock.reorderedOligosIndexMap(currBlock.oligoOrder);
-                        const ranges = (this._poseState === PoseState.NATIVE && naturalMap != null)
-                            ? highlightInfo.ranges.map((index: number) => {
-                                Assert.assertIsDefined(naturalMap);
-                                return naturalMap.indexOf(index);
-                            }) : highlightInfo.ranges;
+        this._constraintBar.sequenceHighlights.connect(
+            (highlightInfos: HighlightInfo[] | null) => this.highlightSequences(highlightInfos)
+        );
 
-                        switch (highlightInfo.color) {
-                            case HighlightType.RESTRICTED:
-                                pose.highlightRestrictedSequence(ranges);
-                                break;
-                            case HighlightType.UNSTABLE:
-                                pose.highlightUnstableSequence(ranges);
-                                break;
-                            case HighlightType.USER_DEFINED:
-                                pose.highlightUserDefinedSequence(ranges);
-                                break;
-                            default:
-                                log.error(`Invalid highlight type: ${highlightInfo.color}`);
-                        }
-                    }
-                }
-            }
-        });
-
+        // Initialize sequence and/or solution as relevant
         let initialSequence: Sequence | null = null;
         if (this._params.initSolution != null) {
             initialSequence = this._params.initSolution.sequence;
@@ -907,7 +888,11 @@ export default class PoseEditMode extends GameMode {
             initialSequence = Sequence.fromSequenceString(this._params.initSequence);
         }
 
+        // Load elements from targetConditions into poses.
         for (let ii = 0; ii < this._poses.length; ii++) {
+            // If the initialSequence (from a starting solution or other source)
+            // isn't available, load in a cached sequence. Otherwise, apply the
+            // fixed tails if necessary.
             let seq = initialSequence;
             if (seq == null) {
                 seq = this._puzzle.getBeginningSequence(ii);
@@ -930,7 +915,7 @@ export default class PoseEditMode extends GameMode {
             }
             this._poses[ii].setOligos(this._targetOligos[ii], this._targetOligosOrder[ii]);
             this._poses[ii].setOligo(this._targetOligo[ii], this._oligoMode[ii], this._oligoName[ii]);
-            this._poses[ii].pairs = this._targetPairs[ii];
+            this._poses[ii].secstruct = this._targetPairs[ii];
             this._poses[ii].targetPairs = this._targetPairs[ii];
             if (this._targetConditions[ii] !== undefined) {
                 const tc = this._targetConditions[ii] as TargetConditions;
@@ -1012,7 +997,7 @@ export default class PoseEditMode extends GameMode {
         this._rscript.tick();
 
         // RScript can set our initial poseState
-        this._poseState = this._isDatabrowserMode ? PoseState.NATIVE : this._puzzle.defaultMode;
+        this._poseState = this._puzzle.defaultMode;
     }
 
     private async switchToBrowser(solution: Solution, sortOnSolution: boolean = false): Promise<void> {
@@ -1205,16 +1190,9 @@ export default class PoseEditMode extends GameMode {
                 'select_folder', (folderName: string): boolean => this.selectFolder(folderName)
             );
 
-            this._scriptInterface.addCallback('load_parameters_from_buffer', (str: string): boolean => {
+            this._scriptInterface.addCallback('load_parameters_from_buffer', (): boolean => {
                 log.info('TODO: load_parameters_from_buffer');
                 return false;
-                // let buf: ByteArray = new ByteArray;
-                // buf.writeUTFBytes(str);
-                // let res: boolean = folder.load_parameters_from_buffer(buf);
-                // if (res) {
-                //     this.on_change_folder();
-                // }
-                // return res;
             });
         }
 
@@ -1289,10 +1267,8 @@ export default class PoseEditMode extends GameMode {
                 }
             });
 
-        this._scriptInterface.addCallback('set_design_title', (designTitle: string): void => {
+        this._scriptInterface.addCallback('set_design_title', (): void => {
             log.info('TODO: set_design_title');
-            // Application.instance.get_application_gui("Design Name").set_text(design_title);
-            // Application.instance.get_application_gui("Design Name").visible = true;
             this.clearUndoStack();
             this.poseEditByTarget(0);
         });
@@ -1642,18 +1618,13 @@ export default class PoseEditMode extends GameMode {
             const tcType: TargetType = tc['type'];
 
             if (tcType === 'multistrand') {
-                const odefs: OligoDef[] | undefined = tc['oligos'];
-                const ndefs: Oligo[] = [];
-                if (odefs !== undefined) {
-                    for (let ii = 0; ii < odefs.length; ii++) {
-                        ndefs.push({
-                            sequence: Sequence.fromSequenceString(odefs[ii].sequence).baseArray,
-                            malus: odefs[ii].malus,
-                            name: odefs[ii]['name']
-                        });
-                    }
+                if (tc['oligos'] !== undefined) {
+                    this._poses[poseIndex].setOligos(tc['oligos'].map((odef) => ({
+                        sequence: Sequence.fromSequenceString(odef.sequence).baseArray,
+                        malus: odef.malus,
+                        name: odef.name
+                    })));
                 }
-                this._poses[poseIndex].setOligos(ndefs, this._targetOligosOrder[targetIndex]);
             } else {
                 this._poses[poseIndex].setOligos(undefined);
             }
@@ -1746,7 +1717,7 @@ export default class PoseEditMode extends GameMode {
             for (let ii = 0; ii < this._poses.length; ii++) {
                 this._poses[ii].setOligos(this._targetOligos[ii], this._targetOligosOrder[ii]);
                 this._poses[ii].setOligo(this._targetOligo[ii], this._oligoMode[ii], this._oligoName[ii]);
-                this._poses[ii].pairs = this._targetPairs[ii];
+                this._poses[ii].secstruct = this._targetPairs[ii];
                 if (this._targetConditions != null && this._targetConditions[ii] !== undefined) {
                     const tc = this._targetConditions[ii] as TargetConditions;
                     this._poses[ii].structConstraints = tc['structure_constraints'];
@@ -1761,7 +1732,7 @@ export default class PoseEditMode extends GameMode {
                 this._oligoMode[this._curTargetIndex],
                 this._oligoName[this._curTargetIndex]
             );
-            this._poses[0].pairs = this._targetPairs[this._curTargetIndex];
+            this._poses[0].secstruct = this._targetPairs[this._curTargetIndex];
             if (this._targetConditions != null && this._targetConditions[this._curTargetIndex] !== undefined) {
                 const tc = this._targetConditions[this._curTargetIndex] as TargetConditions;
                 const newConstraints = tc['structure_constraints'];
@@ -2500,7 +2471,7 @@ export default class PoseEditMode extends GameMode {
             ).sequenceString();
         }
 
-        if (isReset || this._isDatabrowserMode) {
+        if (isReset) {
             this.startPlaying();
         } else if (initSeq == null) {
             this.startCountdown();
@@ -2533,7 +2504,7 @@ export default class PoseEditMode extends GameMode {
         const pseudoknots: boolean = (
             this._targetConditions
             && this._targetConditions[this._curTargetIndex] !== undefined
-            && (this._targetConditions[this._curTargetIndex] as TargetConditions)['type'] === 'pseudoknot'
+            && (this._targetConditions[this._curTargetIndex] as TargetConditions).type === 'pseudoknot'
         );
 
         if (!this._paused) {
@@ -2545,13 +2516,10 @@ export default class PoseEditMode extends GameMode {
                     this._poses[0].setOligo(this.getCurrentUndoBlock().targetOligo,
                         this.getCurrentUndoBlock().oligoMode,
                         this.getCurrentUndoBlock().oligoName);
-                    this._poses[0].pairs = this.getCurrentUndoBlock().getPairs(37, pseudoknots);
-                    if (this._targetConditions !== undefined
-                            && this._targetConditions[this._curTargetIndex] !== undefined) {
-                        const tc = this._targetConditions[this._curTargetIndex] as TargetConditions;
-                        const newConstraints = tc['structure_constraints'];
-                        this._poses[0].structConstraints = newConstraints;
-                    }
+                    this._poses[0].secstruct = this.getCurrentUndoBlock().getPairs(37, pseudoknots);
+                    this._poses[0].structConstraints = (
+                        this._targetConditions?.[this._curTargetIndex]?.['structure_constraints']
+                    );
                     continue;
                 }
                 this._poses[ii].setOligos(this.getCurrentUndoBlock(ii).targetOligos,
@@ -2560,12 +2528,10 @@ export default class PoseEditMode extends GameMode {
                 this._poses[ii].setOligo(this.getCurrentUndoBlock(ii).targetOligo,
                     this.getCurrentUndoBlock(ii).oligoMode,
                     this.getCurrentUndoBlock(ii).oligoName);
-                this._poses[ii].pairs = this.getCurrentUndoBlock(ii).getPairs(37, pseudoknots);
-
-                if (this._targetConditions != null && this._targetConditions[ii] !== undefined) {
-                    const tc = this._targetConditions[ii] as TargetConditions;
-                    this._poses[ii].structConstraints = tc['structure_constraints'];
-                }
+                this._poses[ii].secstruct = this.getCurrentUndoBlock(ii).getPairs(37, pseudoknots);
+                this._poses[ii].structConstraints = (
+                    this._targetConditions?.[ii]?.['structure_constraints']
+                );
             }
         } else {
             for (let ii = 0; ii < this._poses.length; ++ii) {
@@ -2576,12 +2542,10 @@ export default class PoseEditMode extends GameMode {
                     this._poses[0].setOligo(this.getCurrentUndoBlock().targetOligo,
                         this.getCurrentUndoBlock().oligoMode,
                         this.getCurrentUndoBlock().oligoName);
-                    this._poses[0].pairs = this.getCurrentUndoBlock().targetPairs;
-                    if (this._targetConditions != null && this._targetConditions[this._curTargetIndex] !== undefined) {
-                        const tc = this._targetConditions[this._curTargetIndex] as TargetConditions;
-                        const newConstraints = tc['structure_constraints'];
-                        this._poses[0].structConstraints = newConstraints;
-                    }
+                    this._poses[0].secstruct = this.getCurrentUndoBlock().targetPairs;
+                    this._poses[0].structConstraints = (
+                        this._targetConditions?.[this._curTargetIndex]?.['structure_constraints']
+                    );
                     this._targetOligos[0] = this.getCurrentUndoBlock(0).targetOligos;
                     this._targetOligosOrder[0] = this.getCurrentUndoBlock(0).targetOligoOrder;
                     this._targetOligo[0] = this.getCurrentUndoBlock(0).targetOligo;
@@ -2598,11 +2562,10 @@ export default class PoseEditMode extends GameMode {
                 this._targetPairs[ii] = this.getCurrentUndoBlock(ii).targetPairs;
                 this._poses[ii].setOligos(this._targetOligos[ii], this._targetOligosOrder[ii]);
                 this._poses[ii].setOligo(this._targetOligo[ii], this._oligoMode[ii], this._oligoName[ii]);
-                this._poses[ii].pairs = this._targetPairs[ii];
-                if (this._targetConditions != null && this._targetConditions[ii] !== undefined) {
-                    const tc = this._targetConditions[ii] as TargetConditions;
-                    this._poses[ii].structConstraints = tc['structure_constraints'];
-                }
+                this._poses[ii].secstruct = this._targetPairs[ii];
+                this._poses[ii].structConstraints = (
+                    this._targetConditions?.[ii]?.['structure_constraints']
+                );
             }
         }
 
@@ -2687,147 +2650,144 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    private poseEditByTarget(targetIndex: number): void {
-        this.savePosesMarkersContexts();
-
+    private establishTargetPairs(targetIndex: number): void {
         const xx: number = this._isPipMode ? targetIndex : this._curTargetIndex;
+        const pairsxx = this._targetPairs[xx];
         let segments: number[] = this._poses[targetIndex].designSegments;
         const idxMap: number[] | null = this._poses[targetIndex].getOrderMap(this._targetOligosOrder[xx]);
-        let structureConstraints: boolean[] | undefined;
-
         if (idxMap != null) {
-            for (let jj = 0; jj < segments.length; jj++) {
-                segments[jj] = idxMap.indexOf(segments[jj]);
-            }
+            segments = segments.map((s) => idxMap.indexOf(s));
         }
+        const structureConstraints = this._targetConditions[xx]?.['structure_constraints'];
+        if (structureConstraints === undefined) return;
+
         // we want 2 blocks (2x2) && same length && separated by at least 3 bases
-        if (segments.length === 4
-            && segments[1] - segments[0] === segments[3] - segments[2]
-            && (segments[2] - segments[1] > 3
-                || this._poses[targetIndex].fullSequence.hasCut(segments[1], segments[2]))) {
-            /*
-            - get design_segments
-            - if (2 groups) and (all paired/unpaired in _target_pairs) and (all as dontcare)
-                set _target_pairs
-                clear design
-            */
-            if (this._targetConditions[xx] !== undefined) {
-                const tc = this._targetConditions[xx] as TargetConditions;
-                structureConstraints = tc['structure_constraints'];
-            }
-
-            if (structureConstraints !== undefined) {
-                let numUnpaired = 0;
-                let numWrong = 0;
-                let dontcareOk = true;
-                for (let jj = segments[0]; jj <= segments[1] && dontcareOk; jj++) {
-                    if (structureConstraints[jj]) {
-                        dontcareOk = false;
-                        continue;
-                    }
-                    if (!this._targetPairs[xx].isPaired(jj)) {
-                        numUnpaired++;
-                    } else if (this._targetPairs[xx].pairingPartner(jj) < segments[2]
-                            || this._targetPairs[xx].pairingPartner(jj) > segments[3]) {
-                        numWrong++;
-                    }
-                }
-                for (let jj = segments[2]; jj <= segments[3] && dontcareOk; jj++) {
-                    if (structureConstraints[jj]) {
-                        dontcareOk = false;
-                        continue;
-                    }
-                    if (!this._targetPairs[xx].isPaired(jj)) {
-                        numUnpaired++;
-                    } else if (this._targetPairs[xx].pairingPartner(jj) < segments[0]
-                            || this._targetPairs[xx].pairingPartner(jj) > segments[1]) {
-                        numWrong++;
-                    }
-                }
-                if (dontcareOk && numWrong === 0) {
-                    if (numUnpaired === 0) {
-                        for (let jj = segments[0]; jj <= segments[1]; jj++) {
-                            this._targetPairs[xx].setUnpaired(jj); // [jj] = -1;
-                        }
-                        for (let jj = segments[2]; jj <= segments[3]; jj++) {
-                            this._targetPairs[xx].setUnpaired(jj); // [jj] = -1;
-                        }
-                        Flashbang.sound.playSound(Sounds.SoundRY);
-                        this.flashConstraintForTarget(xx);
-                        this._poses[targetIndex].clearDesignStruct();
-                    } else if (numUnpaired === segments[1] - segments[0] + segments[3] - segments[2] + 2) {
-                        // breaking pairs is safe, but adding them may not always be
-                        if (
-                            EPars.validateParenthesis(
-                                this._targetPairs[xx].getParenthesis().slice(segments[1] + 1, segments[2]),
-                                false
-                            ) == null
-                        ) {
-                            for (let jj = segments[0]; jj <= segments[1]; jj++) {
-                                this._targetPairs[xx].pairs[jj] = segments[3] - (jj - segments[0]);
-                            }
-                            for (let jj = segments[2]; jj <= segments[3]; jj++) {
-                                this._targetPairs[xx].pairs[jj] = segments[1] - (jj - segments[2]);
-                            }
-                            Flashbang.sound.playSound(Sounds.SoundGB);
-                            this.flashConstraintForTarget(xx);
-                            this._poses[targetIndex].clearDesignStruct();
-                            // if the above fails, and we have multi-oligos, there may be a permutation where it works
-                        } else if (this._targetOligos[xx] != null) {
-                            const targetOligo = this._targetOligos[xx];
-                            Assert.assertIsDefined(targetOligo);
-                            if (targetOligo.length > 1) {
-                                const newOrder: number[] = targetOligo.map((value, idx) => idx);
-                                let more: boolean;
-                                do {
-                                    segments = this._poses[targetIndex].designSegments;
-                                    const newMap: number[] | null = this._poses[targetIndex].getOrderMap(newOrder);
-                                    const newPairs: SecStruct = new SecStruct();
-                                    // shouldn't be likely that newMap isn't null but idxMap is, but must add the check
-                                    if (newMap != null && idxMap != null) {
-                                        for (let jj = 0; jj < segments.length; jj++) {
-                                            segments[jj] = newMap.indexOf(segments[jj]);
-                                        }
-                                        for (let jj = 0; jj < this._targetPairs[xx].length; jj++) {
-                                            const kk: number = idxMap.indexOf(newMap[jj]);
-                                            if (!this._targetPairs[xx].isPaired(kk)) {
-                                                newPairs.setUnpaired(jj);
-                                            } else {
-                                                const pp: number = this._targetPairs[xx].pairingPartner(kk);
-                                                newPairs.setPairingPartner(jj, newMap.indexOf(idxMap[pp]));
-                                            }
-                                        }
-                                    }
-                                    if (
-                                        EPars.validateParenthesis(
-                                            newPairs.getParenthesis().slice(segments[1] + 1, segments[2]),
-                                            false
-                                        ) == null
-                                    ) {
-                                        // compatible permutation
-                                        this._targetPairs[xx] = newPairs;
-                                        this._targetOligosOrder[xx] = newOrder;
-                                        for (let jj = segments[0]; jj <= segments[1]; jj++) {
-                                            this._targetPairs[xx].pairs[jj] = segments[3] - (jj - segments[0]);
-                                        }
-                                        for (let jj = segments[2]; jj <= segments[3]; jj++) {
-                                            this._targetPairs[xx].pairs[jj] = segments[1] - (jj - segments[2]);
-                                        }
-                                        Flashbang.sound.playSound(Sounds.SoundGB);
-                                        this.flashConstraintForTarget(xx);
-                                        this._poses[targetIndex].clearDesignStruct();
-                                        more = false;
-                                    } else {
-                                        more = FoldUtil.nextPerm(newOrder);
-                                    }
-                                } while (more);
-                            }
-                        }
-                    }
-                }
-            }
+        if (segments.length !== 4
+            || segments[1] - segments[0] !== segments[3] - segments[2]
+            || (segments[2] - segments[1] <= 3
+                && !this._poses[targetIndex].fullSequence.hasCut(segments[1], segments[2]))) {
+            return;
         }
 
+        /*
+        - get design_segments
+        - if (2 groups) and (all paired/unpaired in _target_pairs) and (all as dontcare)
+            set _target_pairs
+            clear design
+        */
+        let numUnpaired = 0;
+        let numWrong = 0;
+        let dontcareOk = true;
+        for (let jj = segments[0]; jj <= segments[1] && dontcareOk; jj++) {
+            if (structureConstraints[jj]) {
+                dontcareOk = false;
+                continue;
+            }
+            if (!pairsxx.isPaired(jj)) {
+                numUnpaired++;
+            } else if (pairsxx.pairingPartner(jj) < segments[2]
+                    || pairsxx.pairingPartner(jj) > segments[3]) {
+                numWrong++;
+            }
+        }
+        for (let jj = segments[2]; jj <= segments[3] && dontcareOk; jj++) {
+            if (structureConstraints[jj]) {
+                dontcareOk = false;
+                continue;
+            }
+            if (!pairsxx.isPaired(jj)) {
+                numUnpaired++;
+            } else if (pairsxx.pairingPartner(jj) < segments[0]
+                    || pairsxx.pairingPartner(jj) > segments[1]) {
+                numWrong++;
+            }
+        }
+        if (!dontcareOk || numWrong !== 0) return;
+
+        if (numUnpaired === 0) {
+            for (let jj = segments[0]; jj <= segments[1]; jj++) {
+                pairsxx.setUnpaired(jj);
+            }
+            for (let jj = segments[2]; jj <= segments[3]; jj++) {
+                pairsxx.setUnpaired(jj);
+            }
+            Flashbang.sound.playSound(Sounds.SoundRY);
+            this.flashConstraintForTarget(xx);
+            this._poses[targetIndex].clearDesignStruct();
+        } else if (numUnpaired === segments[1] - segments[0] + segments[3] - segments[2] + 2) {
+            // breaking pairs is safe, but adding them may not always be
+            if (
+                EPars.validateParenthesis(
+                    pairsxx.getParenthesis().slice(segments[1] + 1, segments[2]),
+                    false
+                ) == null
+            ) {
+                for (let jj = segments[0]; jj <= segments[1]; jj++) {
+                    pairsxx.setPairingPartner(jj, segments[3] - (jj - segments[0]));
+                }
+                for (let jj = segments[2]; jj <= segments[3]; jj++) {
+                    pairsxx.setPairingPartner(jj, segments[1] - (jj - segments[2]));
+                }
+                Flashbang.sound.playSound(Sounds.SoundGB);
+                this.flashConstraintForTarget(xx);
+                this._poses[targetIndex].clearDesignStruct();
+                return;
+            }
+
+            // if the above fails, and we have multi-oligos, there may be a permutation where it works
+            if (this._targetOligos[xx] === null) return;
+
+            const targetOligo = this._targetOligos[xx];
+            Assert.assertIsDefined(targetOligo);
+            if (targetOligo.length <= 1) return;
+
+            const newOrder: number[] = targetOligo.map((_value, idx) => idx);
+            let more: boolean;
+            do {
+                segments = this._poses[targetIndex].designSegments;
+                const newMap: number[] | null = this._poses[targetIndex].getOrderMap(newOrder);
+                const newPairs: SecStruct = new SecStruct();
+                // shouldn't be likely that newMap isn't null but idxMap is, but must add the check
+                if (newMap != null && idxMap != null) {
+                    segments = segments.map((s) => newMap.indexOf(s));
+                    for (let jj = 0; jj < pairsxx.length; jj++) {
+                        const kk: number = idxMap.indexOf(newMap[jj]);
+                        if (!pairsxx.isPaired(kk)) {
+                            newPairs.setUnpaired(jj);
+                        } else {
+                            const pp: number = pairsxx.pairingPartner(kk);
+                            newPairs.setPairingPartner(jj, newMap.indexOf(idxMap[pp]));
+                        }
+                    }
+                }
+                if (
+                    EPars.validateParenthesis(
+                        newPairs.getParenthesis().slice(segments[1] + 1, segments[2]),
+                        false
+                    ) != null
+                ) {
+                    more = FoldUtil.nextPerm(newOrder);
+                    continue;
+                }
+
+                // Finally, a compatible permutation
+                this._targetPairs[xx] = newPairs;
+                this._targetOligosOrder[xx] = newOrder;
+                for (let jj = segments[0]; jj <= segments[1]; jj++) {
+                    this._targetPairs[xx].setPairingPartner(jj, segments[3] - (jj - segments[0]));
+                }
+                for (let jj = segments[2]; jj <= segments[3]; jj++) {
+                    this._targetPairs[xx].setPairingPartner(jj, segments[1] - (jj - segments[2]));
+                }
+                Flashbang.sound.playSound(Sounds.SoundGB);
+                this.flashConstraintForTarget(xx);
+                this._poses[targetIndex].clearDesignStruct();
+                more = false;
+            } while (more);
+        }
+    }
+
+    private processBaseShifts(targetIndex: number): void {
         const lastShiftedIndex: number = this._poses[targetIndex].lastShiftedIndex;
         const lastShiftedCommand: number = this._poses[targetIndex].lastShiftedCommand;
         for (let ii = 0; ii < this._poses.length; ii++) {
@@ -2841,7 +2801,6 @@ export default class PoseEditMode extends GameMode {
                 );
                 if (results != null) {
                     const parenthesis: string = results[0];
-                    const mode: PuzzleEditOp = results[1];
                     this._targetPairs[ii] = SecStruct.fromParens(parenthesis);
                 }
 
@@ -2857,7 +2816,7 @@ export default class PoseEditMode extends GameMode {
                     }
                 }
 
-                structureConstraints = tc['structure_constraints'];
+                const structureConstraints = tc['structure_constraints'];
                 if (structureConstraints !== undefined) {
                     const constraintVal: boolean = structureConstraints[lastShiftedIndex];
                     let newConstraints: boolean[];
@@ -2919,6 +2878,15 @@ export default class PoseEditMode extends GameMode {
             this._poses[ii].sequence = this._poses[targetIndex].sequence;
             this._poses[ii].puzzleLocks = this._poses[targetIndex].puzzleLocks;
         }
+    }
+
+    private poseEditByTarget(targetIndex: number): void {
+        this.savePosesMarkersContexts();
+
+        // Reorder oligos and reorganize structure constraints as needed
+        this.establishTargetPairs(targetIndex);
+        // Ditto but for base shifts
+        this.processBaseShifts(targetIndex);
 
         this._foldTotalTime = 0;
 
@@ -2969,8 +2937,6 @@ export default class PoseEditMode extends GameMode {
     }
 
     private poseEditByTargetDoFold(targetIndex: number): void {
-        this._foldStartTime = new Date().getTime();
-
         this.showAsyncText('folding...');
         this.pushUILock(PoseEditMode.FOLDING_LOCK);
 
@@ -2995,16 +2961,6 @@ export default class PoseEditMode extends GameMode {
     }
 
     private poseEditByTargetFoldTarget(ii: number): void {
-        let bestPairs: SecStruct | null = null;
-        let oligoOrder: number[] | undefined;
-        let oligosPaired = 0;
-        let forceStruct: string | undefined;
-        let foldMode: number;
-        let fullSeq: Sequence;
-        let malus: number;
-        let bonus: number;
-        let sites: number[];
-
         if (ii === 0) {
             // / Pushing undo block
             this._stackLevel++;
@@ -3022,19 +2978,27 @@ export default class PoseEditMode extends GameMode {
         if (!this._folder) {
             throw new Error('Cannot progress through poseEditByTargetFoldTarget with a null Folder!');
         }
-        const tc = this._targetConditions[ii];
-        if (tc !== undefined) {
-            forceStruct = (this._targetConditions[ii] as TargetConditions)['force_struct'];
-        }
 
+        const tc = this._targetConditions[ii];
+
+        // The rest of this function basically takes tc and a couple other forms
+        // of data and turns them into an UndoBlock. Maybe we can factor this out.
+        let bestPairs: SecStruct | null = null;
+        let bonus: number;
+        let sites: number[];
+        let foldMode: number;
+        let malus: number;
+        let oligoOrder: number[] | undefined;
+        let oligosPaired = 0;
+        const forceStruct = tc ? tc['force_struct'] : undefined;
         if (tc === undefined
-                || (tc as TargetConditions)['type'] === 'single') {
+                || (tc && tc['type'] === 'single')) {
             bestPairs = this._folder.foldSequence(this._puzzle.transformSequence(seq, ii), null, forceStruct);
-        } else if ((tc as TargetConditions)['type'] === 'pseudoknot') {
+        } else if (tc['type'] === 'pseudoknot') {
             bestPairs = this._folder.foldSequence(this._puzzle.transformSequence(seq, ii), null, forceStruct, true);
-        } else if ((tc as TargetConditions)['type'] === 'aptamer') {
-            bonus = (tc as TargetConditions)['bonus'] as number;
-            sites = (tc as TargetConditions)['site'] as number[];
+        } else if (tc['type'] === 'aptamer') {
+            bonus = tc['bonus'] as number;
+            sites = tc['site'] as number[];
             bestPairs = this._folder.foldSequenceWithBindingSite(
                 this._puzzle.transformSequence(seq, ii),
                 this._targetPairs[ii],
@@ -3047,14 +3011,14 @@ export default class PoseEditMode extends GameMode {
                 : Number(tc['fold_mode']);
             if (foldMode === Pose2D.OLIGO_MODE_DIMER) {
                 log.debug('cofold');
-                fullSeq = seq.concat(Sequence.fromSequenceString(`&${tc['oligo_sequence']}`));
+                const fullSeq = seq.concat(Sequence.fromSequenceString(`&${tc['oligo_sequence']}`));
                 malus = int(tc['malus'] as number * 100);
                 bestPairs = this._folder.cofoldSequence(fullSeq, null, malus, forceStruct);
             } else if (foldMode === Pose2D.OLIGO_MODE_EXT5P) {
-                fullSeq = Sequence.fromSequenceString(tc['oligo_sequence'] as string).concat(seq);
+                const fullSeq = Sequence.fromSequenceString(tc['oligo_sequence'] as string).concat(seq);
                 bestPairs = this._folder.foldSequence(fullSeq, null, forceStruct);
             } else {
-                fullSeq = seq.concat(Sequence.fromSequenceString(tc['oligo_sequence'] as string));
+                const fullSeq = seq.concat(Sequence.fromSequenceString(tc['oligo_sequence'] as string));
                 bestPairs = this._folder.foldSequence(fullSeq, null, forceStruct);
             }
         } else if (tc['type'] === 'aptamer+oligo') {
@@ -3065,18 +3029,18 @@ export default class PoseEditMode extends GameMode {
                 : Number(tc['fold_mode']);
             if (foldMode === Pose2D.OLIGO_MODE_DIMER) {
                 log.debug('cofold');
-                fullSeq = seq.concat(Sequence.fromSequenceString(`&${tc['oligo_sequence']}`));
+                const fullSeq = seq.concat(Sequence.fromSequenceString(`&${tc['oligo_sequence']}`));
                 malus = int(tc['malus'] as number * 100);
                 bestPairs = this._folder.cofoldSequenceWithBindingSite(
                     fullSeq, sites, bonus, forceStruct, malus
                 );
             } else if (foldMode === Pose2D.OLIGO_MODE_EXT5P) {
-                fullSeq = Sequence.fromSequenceString(tc['oligo_sequence'] as string).concat(seq);
+                const fullSeq = Sequence.fromSequenceString(tc['oligo_sequence'] as string).concat(seq);
                 bestPairs = this._folder.foldSequenceWithBindingSite(
                     fullSeq, this._targetPairs[ii], sites, Number(bonus), tc['fold_version']
                 );
             } else {
-                fullSeq = seq.concat(Sequence.fromSequenceString(tc['oligo_sequence'] as string));
+                const fullSeq = seq.concat(Sequence.fromSequenceString(tc['oligo_sequence'] as string));
                 bestPairs = this._folder.foldSequenceWithBindingSite(
                     fullSeq, this._targetPairs[ii], sites, Number(bonus), tc['fold_version']
                 );
@@ -3328,14 +3292,6 @@ export default class PoseEditMode extends GameMode {
         this._stackLevel = stackLevel;
     }
 
-    private hideEndCurtain(): void {
-        for (const pose of this._poses) {
-            pose.showTotalEnergy = true;
-            pose.clearExplosion();
-        }
-        this.disableTools(false);
-    }
-
     private clearUndoStack(): void {
         this._stackLevel = -1;
         this._stackSize = 0;
@@ -3369,7 +3325,6 @@ export default class PoseEditMode extends GameMode {
     private _opQueue: PoseOp[] = [];
     private _poseEditByTargetCb: (() => void) | null = null;
     private _asynchText: Text;
-    private _foldStartTime: number;
     private _foldTotalTime: number;
     // / Undo stack
     private _seqStacks: UndoBlock[][];
@@ -3392,7 +3347,6 @@ export default class PoseEditMode extends GameMode {
     private _targetOligosOrder: (number[] | undefined)[] = [];
 
     private _folderSwitcher: FolderSwitcher;
-    private _isDatabrowserMode: boolean;
     private _isFrozen: boolean = false;
     private _targetName: Text;
 

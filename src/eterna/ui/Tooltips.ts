@@ -60,6 +60,11 @@ export default class Tooltips extends GameObject {
             new DelayTask(Tooltips.TOOLTIP_DELAY),
             new AlphaTask(1, 0.1, Easing.linear, this._curTooltip)
         ));
+
+        Assert.assertIsDefined(this.mode);
+        Assert.assertIsDefined(this.mode.container);
+        this.mode.container.removeChild(this._curTooltip);
+        this.mode.container.addChild(this._curTooltip);
     }
 
     public showTooltipFor(target: DisplayObject, key: Button | PaletteTarget, tooltip: Tooltip): void {

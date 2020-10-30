@@ -173,7 +173,7 @@ class PriorityTestSlot {
         this.counter = counter;
     }
 
-    public onEmit(event: any = null): void {
+    public onEmit(_event: any = null): void {
         this.order = ++(this.counter.val);
     }
 }
