@@ -87,6 +87,10 @@ export default class Toolbar extends ContainerObject {
 
     public baseMarkerButton: GameButton;
     public magicGlueButton: GameButton;
+    public moveButton: GameButton;
+    public rotateStemButton: GameButton;
+    public flipStemButton: GameButton;
+    public snapToGridButton: GameButton;
 
     public dynPaintTools: GameButton[] = [];
     public dynActionTools: GameButton[] = [];
@@ -142,7 +146,7 @@ export default class Toolbar extends ContainerObject {
     protected added(): void {
         super.added();
 
-        const APPROX_ITEM_COUNT = 12;
+        const APPROX_ITEM_COUNT = 13;
         const APPROX_ITEM_HEIGHT = 52;
         // For some reason there's a 2px margin on either side of our UI elements baked in... because.
         const APPROX_ITEM_WIDTH = APPROX_ITEM_HEIGHT + (2 * 2);
@@ -247,7 +251,7 @@ export default class Toolbar extends ContainerObject {
         Assert.assertIsDefined(Flashbang.stageHeight);
         this.scrollContainer = new ScrollContainer(Flashbang.stageWidth, Flashbang.stageHeight);
         this._content.addChild(this.scrollContainerContainer);
-        this.lowerToolbarLayout.setParent(this.scrollContainer.content);
+        this.scrollContainer.container.addChild(this.lowerToolbarLayout);
 
         /*
         The lower toolbar structure is a HLayoutContainer wrapped in ScrollContainer wrapped in another HLayoutContainer
@@ -272,10 +276,6 @@ export default class Toolbar extends ContainerObject {
 
         this.actionMenu = new EternaMenu(EternaMenuStyle.PULLUP, true);
         this.addObject(this.actionMenu, this.lowerToolbarLayout);
-
-        this.regs.add(this.actionMenu.toolbarUpdateLayout.connect(() => {
-            this.updateLayout();
-        }));
 
         this.actionMenu.addMenuButton(new GameButton().allStates(Bitmaps.NovaMenu).disabled(undefined));
 
@@ -383,6 +383,42 @@ export default class Toolbar extends ContainerObject {
                 });
             }
         }
+
+        const alterMenuIdx = this.actionMenu.addMenuButton(
+            new GameButton().allStates(Bitmaps.CustomLayout).disabled(undefined)
+        );
+
+        this.moveButton = new GameButton()
+            .allStates(Bitmaps.CustomLayout)
+            .disabled(undefined)
+            .label('Move', 14)
+            .scaleBitmapToLabel()
+            .tooltip('Move a nucleotide or stem by ctrl-shift-click');
+        this.actionMenu.addSubMenuButton(alterMenuIdx, this.moveButton);
+
+        this.rotateStemButton = new GameButton()
+            .allStates(Bitmaps.CustomLayout)
+            .disabled(undefined)
+            .label('Rotate stem', 14)
+            .scaleBitmapToLabel()
+            .tooltip('Rotate stem clockwise 1/4 turn by ctrl-shift-click');
+        this.actionMenu.addSubMenuButton(alterMenuIdx, this.rotateStemButton);
+
+        this.flipStemButton = new GameButton()
+            .allStates(Bitmaps.CustomLayout)
+            .disabled(undefined)
+            .label('Flip stem', 14)
+            .scaleBitmapToLabel()
+            .tooltip('Flip stem by ctrl-shift-click');
+        this.actionMenu.addSubMenuButton(alterMenuIdx, this.flipStemButton);
+
+        this.snapToGridButton = new GameButton()
+            .allStates(Bitmaps.CustomLayout)
+            .disabled(undefined)
+            .label('Snap to grid', 14)
+            .scaleBitmapToLabel()
+            .tooltip('Snap current layout to a grid');
+        this.actionMenu.addSubMenuButton(alterMenuIdx, this.snapToGridButton);
 
         if (this._type === ToolbarType.LAB) {
             this.submitButton.tooltip('Publish your solution!');
@@ -727,8 +763,11 @@ export default class Toolbar extends ContainerObject {
         const buttonOffset = this.leftArrow.display.width + this.rightArrow.display.width;
         this.scrollContainer.setSize(Flashbang.stageWidth - buttonOffset, Flashbang.stageHeight);
 
+        // lowerToolbarLayout isn't a child of another LayoutContainer (since we have the ScrollContainer)
+        // so we'll need to play some games to make sure both are updated when their sizes change
         this._content.layout(true);
         this.lowerToolbarLayout.layout(true);
+        this._content.layout(true);
 
         this.updateArrowVisibility();
 
@@ -849,6 +888,10 @@ export default class Toolbar extends ContainerObject {
         this.deleteButton.enabled = !disable;
         this.lockButton.enabled = !disable;
         this.moleculeButton.enabled = !disable;
+
+        this.moveButton.enabled = !disable;
+        this.rotateStemButton.enabled = !disable;
+        this.flipStemButton.enabled = !disable;
 
         this.estimateButton.enabled = !disable;
         this.letterColorButton.enabled = !disable;

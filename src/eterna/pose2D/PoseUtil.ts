@@ -16,7 +16,7 @@ export default class PoseUtil {
         }
     }
 
-    public static addBaseWithIndex(index: number, pairs: SecStruct): [string, PuzzleEditOp, number[]?] {
+    public static addBaseWithIndex(index: number, pairs: SecStruct): [string, PuzzleEditOp, RNABase[]?] {
         let mutatedPairs: number[];
         mutatedPairs = pairs.pairs.slice(0, index);
         mutatedPairs.push(-1);
@@ -31,7 +31,7 @@ export default class PoseUtil {
         return [parenthesis, PuzzleEditOp.ADD_BASE, mutatedPairs];
     }
 
-    public static addPairWithIndex(index: number, pairs: SecStruct): [string, PuzzleEditOp, number[]?] {
+    public static addPairWithIndex(index: number, pairs: SecStruct): [string, PuzzleEditOp, RNABase[]?] {
         // if index is paired
         // add another pair before index
         let pindex: number = pairs.pairingPartner(index);
@@ -79,7 +79,7 @@ export default class PoseUtil {
         }
     }
 
-    public static deleteNopairWithIndex(index: number, pairs: SecStruct): [string, PuzzleEditOp, number[]?] {
+    public static deleteNopairWithIndex(index: number, pairs: SecStruct): [string, PuzzleEditOp, RNABase[]?] {
         let mutatedPairs: number[];
         mutatedPairs = pairs.pairs.slice(0, index);
         mutatedPairs = mutatedPairs.concat(pairs.pairs.slice(index + 1, pairs.length));
@@ -93,7 +93,7 @@ export default class PoseUtil {
         return [parenthesis, PuzzleEditOp.DELETE_BASE, mutatedPairs];
     }
 
-    public static deletePairWithIndex(index: number, pairs: SecStruct): [string, PuzzleEditOp, number[]?] {
+    public static deletePairWithIndex(index: number, pairs: SecStruct): [string, PuzzleEditOp, RNABase[]?] {
         let pindex: number = pairs.pairingPartner(index);
         if (pindex < 0) {
             throw new Error("base doesn't have pair");

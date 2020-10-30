@@ -40,7 +40,7 @@ export default class RNAFoldBasic extends Folder {
     }
 
     public foldSequence(
-        seq: Sequence, secondBestPairs: SecStruct, desiredPairs: string | null = null,
+        seq: Sequence, secondBestPairs: SecStruct | null, desiredPairs: string | null = null,
         pseudoknotted: boolean = false, temp: number = 37
     ): SecStruct {
         const n: number = seq.length;

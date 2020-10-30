@@ -11,6 +11,7 @@ import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
 import Fonts from 'eterna/util/Fonts';
 import UITheme from 'eterna/ui/UITheme';
 import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 
 function IsArrowKey(keyCode: string): boolean {
     return keyCode === KeyCode.ArrowRight
@@ -30,7 +31,7 @@ export default class StructureInput extends ContainerObject implements Updatable
 
         this._textInput = new TextInputObject({fontSize: 20})
             .font(Fonts.STDFONT)
-            .disallow(/[^.()]/g)
+            .disallow(/[^.(){}[\]]/g)
             .bold();
         this.addObject(this._textInput, this.container);
 
@@ -79,15 +80,19 @@ export default class StructureInput extends ContainerObject implements Updatable
      */
     public setPose(op: PuzzleEditOp | null = null, index: number = -1): void {
         let input = this._textInput.text;
-        input = input.replace(/[^.()]/g, '');
+        input = input.replace(/[^.(){}[\]]/g, '');
         // Replace () with (.) -- () is illegal and causes an error
         input = input.replace(/\(\)/g, '(.)');
+        input = input.replace(/\[\]/g, '[.]');
+        input = input.replace(/\{\}/g, '{.}');
 
         const error: string | null = EPars.validateParenthesis(input, false, Eterna.MAX_PUZZLE_EDIT_LENGTH);
         this.setWarning(error || '');
         this._textInput.text = input;
 
-        let sequence = this._pose.sequence.baseArray;
+        // PERFIDY. Not slicing this meant I was modifying the array in place.
+        // This is why we can't ahve ncie things.
+        let sequence = this._pose.sequence.baseArray.slice();
         let locks = this._pose.puzzleLocks;
         let bindingSite = this._pose.molecularBindingSite;
         const sequenceBackup = this._pose.sequence.baseArray;
@@ -218,7 +223,11 @@ export default class StructureInput extends ContainerObject implements Updatable
                 if (bindingSite && afterBindingSiteIndex) bindingSite[ii + index] = afterBindingSiteIndex[ii];
             }
         }
-        this._pose.sequence.baseArray = sequence;
+        // AMW NOTES.
+        // AH! WE NEED TO USE THE ACTUAL SETTER. BECAUSE THE POSE2D SEQUENCE SETTER IS
+        // VERY IMPORTANT. IT MAINTAINS SOME CONSISTENCY WITH THE BASES ARRAY AND MAYBE
+        // MORE STUFF.
+        this._pose.sequence = new Sequence(sequence);
         this._pose.puzzleLocks = locks;
         this._pose.molecularBindingSite = bindingSite;
         this._pose.trackCursor(this._textInput.caretPosition);
@@ -234,7 +243,7 @@ export default class StructureInput extends ContainerObject implements Updatable
 
     public get structureString(): string {
         const secstruct: string = this._textInput.text;
-        return secstruct.replace(/[^.()]/g, '');
+        return secstruct.replace(/[^.(){}[\]]/g, '');
     }
 
     public set structureString(struct: string) {

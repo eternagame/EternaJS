@@ -10,12 +10,12 @@ import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
 import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
 import PoseField from 'eterna/pose2D/PoseField';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
-import Pose2D from 'eterna/pose2D/Pose2D';
+import Pose2D, {Layout} from 'eterna/pose2D/Pose2D';
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
 import Folder from 'eterna/folding/Folder';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import {
-    Base64, DisplayUtil, HAlign, VAlign, KeyCode, Assert
+    Base64, DisplayUtil, HAlign, VAlign, KeyCode, Assert, KeyboardEventType
 } from 'flashbang';
 import {DialogCanceledError} from 'eterna/ui/Dialog';
 import Vienna2 from 'eterna/folding/Vienna2';
@@ -201,6 +201,24 @@ export default class PuzzleEditMode extends GameMode {
 
         this._toolbar.palette.targetClicked.connect((type) => this.onPaletteTargetSelected(type));
 
+        this._toolbar.moveButton.clicked.connect(() => {
+            this.setPosesLayoutTool(Layout.MOVE);
+        });
+
+        this._toolbar.rotateStemButton.clicked.connect(() => {
+            this.setPosesLayoutTool(Layout.ROTATE_STEM);
+        });
+
+        this._toolbar.flipStemButton.clicked.connect(() => {
+            this.setPosesLayoutTool(Layout.FLIP_STEM);
+        });
+
+        this._toolbar.snapToGridButton.clicked.connect(() => {
+            for (const pose of this._poses) {
+                pose.snapToGrid();
+            }
+        });
+
         if (this._embedded) {
             this._scriptInterface.addCallback('get_secstruct', () => this.structure);
             this._scriptInterface.addCallback('get_sequence', () => this.sequence);
@@ -332,13 +350,34 @@ export default class PuzzleEditMode extends GameMode {
         this.updateUILayout();
     }
 
+    public onKeyboardEvent(e: KeyboardEvent): void {
+        let handled: boolean = this.keyboardInput.handleKeyboardEvent(e);
+
+        if (!handled && e.type === KeyboardEventType.KEY_DOWN) {
+            const key = e.code;
+            const ctrl = e.ctrlKey;
+
+            if (ctrl && key === KeyCode.KeyS) {
+                this.downloadSVG();
+                handled = true;
+            } else if (ctrl && key === KeyCode.KeyH) {
+                this.downloadHKWS();
+                handled = true;
+            }
+        }
+
+        if (handled) {
+            e.stopPropagation();
+        }
+    }
+
     private saveData(): void {
         const objs: SaveStoreItem = [0, this._poses[0].sequence.baseArray];
         for (const pose of this._poses) {
             Assert.assertIsDefined(pose.molecularStructure);
             objs.push(JSON.stringify({
                 sequence: pose.sequence.sequenceString(),
-                structure: pose.molecularStructure.pairs
+                structure: pose.molecularStructure.getParenthesis(null, true)
             }));
         }
 
@@ -530,6 +569,14 @@ export default class PuzzleEditMode extends GameMode {
             }
         }
 
+        if (this._structureInputs.some(
+            (si) => SecStruct.fromParens(si.structureString, true).onlyPseudoknots().nonempty()
+        ) && !this._folder.canPseudoknot) {
+            this.showNotification('You need to select the NuPACK folder, because '
+                + 'your puzzle specification has a pseudoknot.');
+            return;
+        }
+
         const puzzleState = this.getCurrentUndoBlock(0);
         const PROMPT = 'You can only submit 3 puzzles per 24 hours.\nAre you sure you want to submit?';
         this.showConfirmDialog(PROMPT).confirmed
@@ -591,6 +638,12 @@ export default class PuzzleEditMode extends GameMode {
                 }
             }
 
+            const pseudoknots: boolean = SecStruct.fromParens(this._structureInputs[ii].structureString, true)
+                .onlyPseudoknots().nonempty();
+
+            if (this._targetConditions[ii] !== undefined) {
+                objective = this._targetConditions[ii] as TargetConditions;
+            }
             if (bindingBases.length > 0) {
                 objective = {
                     type: 'aptamer',
@@ -602,8 +655,9 @@ export default class PuzzleEditMode extends GameMode {
                 objective['fold_version'] = 2.0;
             } else {
                 objective = {
-                    type: 'single',
-                    secstruct: this._structureInputs[ii].structureString
+                    type: pseudoknots ? 'pseudoknot' : 'single',
+                    secstruct: this._structureInputs[ii].structureString,
+                    'custom-layout': this._poses[ii].customLayout
                 };
             }
 
@@ -649,7 +703,7 @@ export default class PuzzleEditMode extends GameMode {
         );
 
         postParams['title'] = paramsTitle;
-        postParams['secstruct'] = this.getCurrentTargetPairs(0).getParenthesis();
+        postParams['secstruct'] = this.getCurrentTargetPairs(0).getParenthesis(undefined, true);
         postParams['constraints'] = constraints;
         postParams['body'] = details.description;
         postParams['midimgdata'] = midImageString;
@@ -689,7 +743,7 @@ export default class PuzzleEditMode extends GameMode {
         this._toolbar.targetButton.hotkey();
 
         for (let ii = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].pairs = SecStruct.fromParens(this._structureInputs[ii].structureString);
+            this._poses[ii].pairs = SecStruct.fromParens(this._structureInputs[ii].structureString, true);
         }
         this._paused = true;
 
@@ -733,7 +787,8 @@ export default class PuzzleEditMode extends GameMode {
             this._poses[ii].puzzleLocks = this._lockStack[this._stackLevel][ii];
             this._poses[ii].molecularStructure = this._targetPairsStack[this._stackLevel][ii];
             this._poses[ii].molecularBindingSite = this._bindingSiteStack[this._stackLevel][ii];
-            this._structureInputs[ii].structureString = this._targetPairsStack[this._stackLevel][ii].getParenthesis();
+            this._structureInputs[ii].structureString = this._targetPairsStack[this._stackLevel][ii]
+                .getParenthesis(undefined, true);
         }
 
         this.updateScore();
@@ -750,7 +805,8 @@ export default class PuzzleEditMode extends GameMode {
             this._poses[ii].puzzleLocks = this._lockStack[this._stackLevel][ii];
             this._poses[ii].molecularStructure = this._targetPairsStack[this._stackLevel][ii];
             this._poses[ii].molecularBindingSite = this._bindingSiteStack[this._stackLevel][ii];
-            this._structureInputs[ii].structureString = this._targetPairsStack[this._stackLevel][ii].getParenthesis();
+            this._structureInputs[ii].structureString = this._targetPairsStack[this._stackLevel][ii]
+                .getParenthesis(undefined, true);
         }
         this.updateScore();
     }
@@ -793,9 +849,16 @@ export default class PuzzleEditMode extends GameMode {
         }
     }
 
+    // AMW TODO: called "setPosesColor" in PoseEditMode
     private onEditButtonClicked(poseColor: number): void {
         for (const pose of this._poses) {
             pose.currentColor = poseColor;
+        }
+    }
+
+    public setPosesLayoutTool(layoutTool: Layout): void {
+        for (const pose of this._poses) {
+            pose.currentArrangementTool = layoutTool;
         }
     }
 
@@ -846,7 +909,10 @@ export default class PuzzleEditMode extends GameMode {
         }
 
         for (let ii = 0; ii < this._poses.length; ii++) {
-            const targetPairs: SecStruct = SecStruct.fromParens(this._structureInputs[ii].structureString);
+            const targetPairs: SecStruct = SecStruct.fromParens(this._structureInputs[ii].structureString, true);
+            // The pose needs to be able to use this for visualization editing
+            this._poses[ii].targetPairs = targetPairs.slice(0);
+            const pseudoknots: boolean = targetPairs.onlyPseudoknots().nonempty();
             const seq = this._poses[ii].sequence;
             const lock: boolean[] | undefined = this._poses[ii].puzzleLocks;
             const bindingSite = this._poses[ii].molecularBindingSite;
@@ -854,7 +920,7 @@ export default class PuzzleEditMode extends GameMode {
             if (this._stackLevel >= 0) {
                 if (
                     this._structureInputs[ii].structureString !== (
-                        this._targetPairsStack[this._stackLevel][ii].getParenthesis()
+                        this._targetPairsStack[this._stackLevel][ii].getParenthesis(undefined, true)
                     ) || seq.sequenceString !== this._seqStack[this._stackLevel][ii].sequence.sequenceString
                 ) {
                     noChange = false;
@@ -906,8 +972,7 @@ export default class PuzzleEditMode extends GameMode {
 
             let bestPairs: SecStruct | null = null;
             if (!isThereMolecule) {
-                // AMW: assuming no PKs
-                bestPairs = this._folder.foldSequence(seq, null, null, false, EPars.DEFAULT_TEMPERATURE);
+                bestPairs = this._folder.foldSequence(seq, null, null, pseudoknots, EPars.DEFAULT_TEMPERATURE);
             } else {
                 const bonus = -486;
                 const site: number[] = bindingSite
@@ -951,7 +1016,7 @@ export default class PuzzleEditMode extends GameMode {
 
     private readonly _scriptInterface: ExternalInterfaceCtx = new ExternalInterfaceCtx();
 
-    private _structureInputs: StructureInput[];
+    private _structureInputs: StructureInput[] = [];
     protected get _folder(): Folder {
         return this._folderSwitcher.selectedFolder.value;
     }

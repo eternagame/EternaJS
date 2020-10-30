@@ -365,7 +365,39 @@ export default class EPars {
                 }
 
                 pairStack.pop();
-            } else if (parenthesis.charAt(jj) !== '.') {
+            }
+        }
+
+        // order 1 PKs
+        const pkStack: number[] = [];
+        for (let jj = 0; jj < parenthesis.length; jj++) {
+            if (parenthesis.charAt(jj) === '[') {
+                pkStack.push(jj);
+            } else if (parenthesis.charAt(jj) === ']') {
+                if (pkStack.length === 0) {
+                    return 'Unbalanced parenthesis notation []';
+                }
+
+                pkStack.pop();
+            }
+        }
+
+        // order 2 PKs
+        const pkStack2: number[] = [];
+        for (let jj = 0; jj < parenthesis.length; jj++) {
+            if (parenthesis.charAt(jj) === '{') {
+                pkStack2.push(jj);
+            } else if (parenthesis.charAt(jj) === '}') {
+                if (pkStack2.length === 0) {
+                    return 'Unbalanced parenthesis notation {}';
+                }
+
+                pkStack2.pop();
+            }
+        }
+
+        for (let jj = 0; jj < parenthesis.length; ++jj) {
+            if (!'.()[]{}'.includes(parenthesis.charAt(jj))) {
                 return `Unrecognized character ${parenthesis.charAt(jj)}`;
             }
         }

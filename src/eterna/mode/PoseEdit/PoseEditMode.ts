@@ -28,7 +28,7 @@ import Folder, {MultiFoldResult, CacheKey} from 'eterna/folding/Folder';
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
 import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import PoseField from 'eterna/pose2D/PoseField';
-import Pose2D, {Oligo} from 'eterna/pose2D/Pose2D';
+import Pose2D, {Oligo, Layout} from 'eterna/pose2D/Pose2D';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import ConstraintBar from 'eterna/constraints/ConstraintBar';
@@ -277,6 +277,24 @@ export default class PoseEditMode extends GameMode {
 
         this._toolbar.magicGlueButton.clicked.connect(() => {
             this.setPosesColor(RNAPaint.MAGIC_GLUE);
+        });
+
+        this._toolbar.moveButton.clicked.connect(() => {
+            this.setPosesLayoutTool(Layout.MOVE);
+        });
+
+        this._toolbar.rotateStemButton.clicked.connect(() => {
+            this.setPosesLayoutTool(Layout.ROTATE_STEM);
+        });
+
+        this._toolbar.flipStemButton.clicked.connect(() => {
+            this.setPosesLayoutTool(Layout.FLIP_STEM);
+        });
+
+        this._toolbar.snapToGridButton.clicked.connect(() => {
+            for (const pose of this._poses) {
+                pose.snapToGrid();
+            }
         });
 
         // Add our docked SpecBox at the bottom of uiLayer
@@ -1305,6 +1323,12 @@ export default class PoseEditMode extends GameMode {
             } else if (ctrl && key === KeyCode.KeyZ) {
                 this.moveUndoStackToLastStable();
                 handled = true;
+            } else if (ctrl && key === KeyCode.KeyS) {
+                this.downloadSVG();
+                handled = true;
+            } else if (ctrl && key === KeyCode.KeyH) {
+                this.downloadHKWS();
+                handled = true;
             } else if (this._stackLevel <= 1 && key === KeyCode.KeyD && this._params.solutions != null) {
                 this.showNextSolution(1);
                 handled = true;
@@ -1968,8 +1992,6 @@ export default class PoseEditMode extends GameMode {
     }
 
     private async submitSolution(details: SubmitPoseDetails, undoBlock: UndoBlock): Promise<void> {
-        this._rscript.finishLevel();
-
         if (this._puzzle.nodeID < 0) {
             return;
         }
@@ -2156,6 +2178,7 @@ export default class PoseEditMode extends GameMode {
 
             missionClearedPanel.nextButton.clicked.connect(async () => {
                 try {
+                    this._rscript.finishLevel();
                     const nextPuzzle = await nextPuzzlePromise;
                     Eterna.chat.popHideChat();
                     Assert.assertIsDefined(this.modeStack);
@@ -2198,9 +2221,15 @@ export default class PoseEditMode extends GameMode {
             });
     }
 
-    public setPosesColor(paintColor: number): void {
+    public setPosesColor(paintColor: RNAPaint): void {
         for (const pose of this._poses) {
             pose.currentColor = paintColor;
+        }
+    }
+
+    public setPosesLayoutTool(layoutTool: Layout): void {
+        for (const pose of this._poses) {
+            pose.currentArrangementTool = layoutTool;
         }
     }
 
@@ -2444,8 +2473,8 @@ export default class PoseEditMode extends GameMode {
     private moveHistoryAddMutations(before: Sequence, after: Sequence): void {
         const muts: Move[] = [];
         for (let ii = 0; ii < after.length; ii++) {
-            if (after.baseArray[ii] !== before.baseArray[ii]) {
-                muts.push({pos: ii + 1, base: new Sequence([after.baseArray[ii]]).sequenceString()});
+            if (after.nt(ii) !== before.nt(ii)) {
+                muts.push({pos: ii + 1, base: EPars.nucleotideToString(after.nt(ii))});
             }
         }
         if (muts.length === 0) return;

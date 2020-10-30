@@ -162,7 +162,7 @@ export default class ShapeConstraint extends BaseShapeConstraint {
                 && undoBlock.targetConditions['type'] === 'pseudoknot');
 
         const naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);
-        const customLayout: Array<[number, number] | [null, null]> | undefined = (
+        const customLayout: ([number, number] | [null, null])[] | undefined = (
             undoBlock.targetConditions ? undoBlock.targetConditions['custom-layout'] : undefined
         );
         return {
