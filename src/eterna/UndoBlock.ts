@@ -99,7 +99,7 @@ export enum BasePairProbabilityTransform {
     SQUARE
 }
 
-type Param = (number | number[] | null);
+type Param = (number | number[] | DotPlot | null);
 
 export default class UndoBlock {
     constructor(seq: Sequence, folderName: string) {
@@ -354,14 +354,14 @@ export default class UndoBlock {
     public getPairs(temp: number = 37, pseudoknots: boolean = false): SecStruct {
         const pairsArray = this._pairsArray.get(pseudoknots);
         Assert.assertIsDefined(pairsArray);
-        return new SecStruct(pairsArray[temp].pairs);
+        return new SecStruct(pairsArray[temp]?.pairs) ?? null;
     }
 
     public getParam(
         index: UndoBlockParam,
         temp: number = 37,
         pseudoknots: boolean = false
-    ): number | number[] | null {
+    ): number | number[] | DotPlot | null {
         const paramsArray = this._paramsArray.get(pseudoknots);
         Assert.assertIsDefined(paramsArray);
         if (paramsArray[temp] != null) {
@@ -528,28 +528,6 @@ export default class UndoBlock {
             throw new Error(`Critical error: can't create a ${this._folderName} folder instance by name`);
         }
 
-        if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) == null) {
-            const dotArray: DotPlot | null = folder.getDotPlot(
-                this.sequence, this.getPairs(37), 37, pseudoknots
-            );
-            this.setParam(UndoBlockParam.DOTPLOT, dotArray?.data ?? null, 37, pseudoknots);
-            // mean+sum prob unpaired
-            this.setParam(UndoBlockParam.SUMPUNP,
-                this.sumProbUnpaired(dotArray, bppStatisticBehavior), 37, pseudoknots);
-            this.setParam(UndoBlockParam.MEANPUNP,
-                this.sumProbUnpaired(dotArray, bppStatisticBehavior) / this.sequence.length, 37, pseudoknots);
-            // branchiness
-            this.setParam(UndoBlockParam.BRANCHINESS,
-                this.ensembleBranchiness(dotArray, bppStatisticBehavior), 37, pseudoknots);
-            this.setParam(
-                UndoBlockParam.TARGET_EXPECTED_ACCURACY,
-                this.targetExpectedAccuracy(this._targetPairs, dotArray, bppStatisticBehavior),
-                37,
-                pseudoknots
-            );
-            this._dotPlotData = dotArray;
-        }
-
         for (let ii = 37; ii < 100; ii += 10) {
             if (this.getPairs(ii) == null) {
                 const pairs: SecStruct | null = folder.foldSequence(this.sequence, null, null, pseudoknots, ii);
@@ -579,8 +557,29 @@ export default class UndoBlock {
             }
         }
 
-        const refPairs: SecStruct = this.getPairs(37, pseudoknots);
+        if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) === undefined) {
+            const dotArray: DotPlot | null = folder.getDotPlot(
+                this.sequence, this.getPairs(37), 37, pseudoknots
+            );
+            this.setParam(UndoBlockParam.DOTPLOT, dotArray?.data ?? null, 37, pseudoknots);
+            // mean+sum prob unpaired
+            this.setParam(UndoBlockParam.SUMPUNP,
+                this.sumProbUnpaired(dotArray, bppStatisticBehavior), 37, pseudoknots);
+            this.setParam(UndoBlockParam.MEANPUNP,
+                this.sumProbUnpaired(dotArray, bppStatisticBehavior) / this.sequence.length, 37, pseudoknots);
+            // branchiness
+            this.setParam(UndoBlockParam.BRANCHINESS,
+                this.ensembleBranchiness(dotArray, bppStatisticBehavior), 37, pseudoknots);
+            this.setParam(
+                UndoBlockParam.TARGET_EXPECTED_ACCURACY,
+                this.targetExpectedAccuracy(this._targetPairs, dotArray, bppStatisticBehavior),
+                37,
+                pseudoknots
+            );
+            this._dotPlotData = dotArray;
+        }
 
+        const refPairs: SecStruct = this.getPairs(37, pseudoknots);
         const pairScores: number[] = [];
         const maxPairScores: number[] = [];
 
@@ -685,6 +684,10 @@ export default class UndoBlock {
         return Utility.range(this._sequence.length).concat(
             ...Utility.range(this._targetOligos.length).map((idx) => originalIndices[newOrder.indexOf(idx)])
         );
+    }
+
+    public get folderName(): string {
+        return this._folderName;
     }
 
     private _sequence: Sequence = new Sequence([]);
