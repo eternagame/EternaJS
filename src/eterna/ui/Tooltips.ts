@@ -61,9 +61,10 @@ export default class Tooltips extends GameObject {
             new AlphaTask(1, 0.1, Easing.linear, this._curTooltip)
         ));
 
-        const p = this._layer.parent;
-        p.removeChild(this._layer);
-        p.addChild(this._layer);
+        Assert.assertIsDefined(this.mode);
+        Assert.assertIsDefined(this.mode.container);
+        this.mode.container.removeChild(this._curTooltip);
+        this.mode.container.addChild(this._curTooltip);
     }
 
     public showTooltipFor(target: DisplayObject, key: Button | PaletteTarget, tooltip: Tooltip): void {
