@@ -140,10 +140,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
 
         // update scroll
         const pxdelta: number = InputUtil.scrollAmount(e, 13, this._scrollView.height);
-
-        this._scrollView.scrollTo(
-            this._scrollView.scrollProgress + pxdelta / this._scrollView.content.height
-        );
+        this._scrollView.scrollLocation += pxdelta;
 
         return true;
     }
@@ -505,6 +502,8 @@ export default class ViewSolutionOverlay extends ContainerObject {
         this._footer.addVSpacer(20);
 
         this.updateLayout();
+
+        this._scrollView.doLayout();
 
         // Load comments
         this._comments = new LabComments(this._props.solution.nodeID);

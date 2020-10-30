@@ -46,8 +46,7 @@ export default class HintsPanel extends ContainerObject {
         const panel = new MultiPagePanel({
             title: 'Hint',
             pages,
-            width: theme.width,
-            maxHeight: Flashbang.stageHeight * 0.8
+            width: theme.width
         });
         this.addObject(panel, this.container);
     }

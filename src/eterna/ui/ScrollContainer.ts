@@ -24,11 +24,9 @@ export default class ScrollContainer extends ContainerObject {
         Assert.assertIsDefined(overlayEl);
         this._htmlWrapper = document.createElement('div');
         this._htmlWrapper.style.position = 'absolute';
-        // assets/Styles/style.css ensures that links are still clickable
-        this._htmlWrapper.style.pointerEvents = 'none';
         overlayEl.appendChild(this._htmlWrapper);
 
-        this._doLayout();
+        this.doLayout();
     }
 
     protected dispose(): void {
@@ -77,10 +75,10 @@ export default class ScrollContainer extends ContainerObject {
         this._width = width;
         this._height = height;
 
-        this._doLayout();
+        this.doLayout();
     }
 
-    private _doLayout() {
+    public doLayout() {
         const prevScrollX = this.scrollX;
         const prevScrollY = this.scrollY;
 

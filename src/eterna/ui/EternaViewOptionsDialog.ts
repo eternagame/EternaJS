@@ -8,6 +8,7 @@ import Dialog from './Dialog';
 import GameButton from './GameButton';
 import GameCheckbox from './GameCheckbox';
 import GamePanel, {GamePanelType} from './GamePanel';
+import VScrollBox from './VScrollBox';
 
 export enum EternaViewOptionsMode {
     PUZZLE = 0, PUZZLEMAKER, LAB
@@ -103,18 +104,9 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
         this._panel.title = 'Settings';
         this.addObject(this._panel, this.container);
 
-        this.container.addChild(this._viewLayout);
-
-        this._panelMask = new Graphics();
-        this._panelMask.interactive = true;
-        this._panel.container.addChild(this._panelMask);
-        this._viewLayout.mask = this._panelMask;
-
-        this._panelMask
-            .on('pointerdown', this.maskPointerDown.bind(this))
-            .on('pointerup', this.maskPointerUp.bind(this))
-            .on('pointerupoutside', this.maskPointerUp.bind(this))
-            .on('pointermove', this.maskPointerMove.bind(this));
+        const scrollBox = new VScrollBox(0, 0);
+        this.addObject(scrollBox, this.container);
+        scrollBox.content.addChild(this._viewLayout);
 
         const closeButton = new GameButton()
             .allStates(Bitmaps.ImgAchievementsClose);
@@ -126,14 +118,11 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
             const idealHeight = this._viewLayout.height + 40 + this._panel.titleHeight;
             const maxHeight = Flashbang.stageHeight * 0.8;
             const panelHeight = Math.min(idealHeight, maxHeight);
-            this._panel.setSize(this._viewLayout.width + 40, panelHeight);
 
-            this._panelMask.clear();
-            this._panelMask.beginFill(0x00FF00);
-            this._panelMask.drawRect(
-                0, this._panel.titleHeight, this._viewLayout.width + 40, panelHeight - this._panel.titleHeight
-            );
-            this._panelMask.endFill();
+            scrollBox.setSize(this._viewLayout.width, panelHeight - 40 - this._panel.titleHeight);
+            scrollBox.doLayout();
+
+            this._panel.setSize(this._viewLayout.width + 40, panelHeight);
 
             DisplayUtil.positionRelativeToStage(
                 this._panel.display,
@@ -142,10 +131,9 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
             );
 
             DisplayUtil.positionRelative(
-                this._viewLayout, HAlign.CENTER, VAlign.TOP,
+                scrollBox.display, HAlign.CENTER, VAlign.TOP,
                 this._panel.display, HAlign.CENTER, VAlign.TOP, 0, this._panel.titleHeight + 10
             );
-            this._viewLayoutTop = this._viewLayout.y;
 
             DisplayUtil.positionRelative(
                 closeButton.display, HAlign.RIGHT, VAlign.TOP,
@@ -189,57 +177,9 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
         return checkbox;
     }
 
-    private maskPointerDown(event: interaction.InteractionEvent) {
-        this._dragging = true;
-        this._dragPointData = event.data;
-        this._dragStartBoxY = this._viewLayout.y;
-        this._dragStartPointY = event.data.getLocalPosition(this._panelMask).y;
-    }
-
-    private maskPointerUp(_event: interaction.InteractionEvent) {
-        this._dragging = false;
-        this._dragPointData = null;
-        this._dragStartBoxY = 0;
-        this._dragStartPointY = 0;
-    }
-
-    private maskPointerMove(_event: interaction.InteractionEvent) {
-        if (this._dragging) {
-            Assert.assertIsDefined(this._dragPointData);
-            const dragRange = this._dragPointData.getLocalPosition(this._panelMask).y - this._dragStartPointY;
-            this.scrollTo(this._dragStartBoxY + dragRange);
-        }
-    }
-
-    public onMouseWheelEvent(e: WheelEvent): boolean {
-        const pxdelta: number = InputUtil.scrollAmount(e, 13, this.display.height);
-        this.scrollTo(this._viewLayout.y - pxdelta);
-
-        return true;
-    }
-
-    public scrollTo(yPos: number) {
-        const scrollHeight = this._panelMask.height;
-        const containerHeight = this._viewLayout.height + 20; // Add a bit of margin
-        if (containerHeight > scrollHeight) {
-            this._viewLayout.y = MathUtil.clamp(
-                yPos,
-                this._viewLayoutTop - (containerHeight - scrollHeight),
-                this._viewLayoutTop
-            );
-        }
-    }
-
     private _panel: GamePanel;
     private _viewLayout: VLayoutContainer;
-    private _viewLayoutTop: number;
-    private _panelMask: Graphics;
     private readonly _optionsMode: EternaViewOptionsMode;
     private _muteButton: GameButton;
     private _volumeButtons: GameButton[] = [];
-
-    private _dragging = false;
-    private _dragPointData: interaction.InteractionData | null = null;
-    private _dragStartPointY = 0;
-    private _dragStartBoxY = 0;
 }
