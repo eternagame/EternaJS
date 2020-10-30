@@ -1,6 +1,6 @@
 import {Graphics, DisplayObject} from 'pixi.js';
 import {GameObject, Flashbang, Updatable} from 'flashbang';
-import EPars, {RNABase, RNAPaint} from 'eterna/EPars';
+import {RNABase, RNAPaint} from 'eterna/EPars';
 
 export default class PaintCursor extends GameObject implements Updatable {
     constructor() {
@@ -70,7 +70,7 @@ export default class PaintCursor extends GameObject implements Updatable {
     }
 
     /* override */
-    public update(dt: number): void {
+    public update(_dt: number): void {
         this._graphics.clear();
 
         let ic: number = this._color;

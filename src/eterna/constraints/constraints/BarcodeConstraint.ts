@@ -1,5 +1,4 @@
 import SolutionManager from 'eterna/puzzle/SolutionManager';
-import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';

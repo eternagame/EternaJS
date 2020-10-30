@@ -53,6 +53,12 @@ interface AuxInfo {
     cleavingSite?: number;
 }
 
+export enum Layout {
+    MOVE,
+    ROTATE_STEM,
+    FLIP_STEM
+}
+
 export type PoseMouseDownCallback = (e: InteractionEvent, closestDist: number, closestIndex: number) => void;
 
 export default class Pose2D extends ContainerObject implements Updatable {
@@ -227,14 +233,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._expMid = mid;
         this._expHi = hi;
         this.paintFeedback();
-
-        // print feedback score
-        for (let ii = 0; ii < this._feedbackObjs.length; ii++) {
-            this.removeObject(this._feedbackObjs[ii]);
-        }
-
-        this.printFeedback(dat);
-        this.updatePrintFeedback();
     }
 
     public paintFeedback(): void {
@@ -336,12 +334,20 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public set currentColor(col: number) {
+    public set currentColor(col: RNAPaint) {
         this._currentColor = col;
     }
 
-    public get currentColor(): number {
+    public get currentColor(): RNAPaint {
         return this._currentColor;
+    }
+
+    public set currentArrangementTool(col: Layout) {
+        this._currentArrangementTool = col;
+    }
+
+    public get currentArrangementTool(): Layout {
+        return this._currentArrangementTool;
     }
 
     public doneColoring(): void {
@@ -367,15 +373,15 @@ export default class Pose2D extends ContainerObject implements Updatable {
             div = 2;
         }
 
-        const ofs: number = (
+        const offset: number = (
             this._oligo != null
             && this._oligoMode === Pose2D.OLIGO_MODE_EXT5P
         ) ? this._oligo.length : 0;
         let ii: number;
         for (ii = 0; ii < this._sequence.length; ii++) {
-            if (this._sequence.nt(ii) !== this._mutatedSequence.nt(ii + ofs)) {
+            if (this._sequence.nt(ii) !== this._mutatedSequence.nt(ii + offset)) {
                 numMut++;
-                this._sequence.setNt(ii, this._mutatedSequence.nt(ii + ofs));
+                this._sequence.setNt(ii, this._mutatedSequence.nt(ii + offset));
                 muts.push({pos: ii + 1, base: EPars.nucleotideToString(this._sequence.nt(ii))});
                 needUpdate = true;
             }
@@ -400,14 +406,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public setMutated(seqArr: Sequence): void {
         Assert.assertIsDefined(this._mutatedSequence);
         const n: number = Math.min(this._mutatedSequence.length, seqArr.length);
-        const ofs: number = (
+        const offset: number = (
             this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_EXT5P
         ) ? this._oligo.length : 0;
 
         for (let ii = 0; ii < n; ii++) {
-            if (this._mutatedSequence.nt(ii) !== seqArr.nt(ii) && !this.isLocked(ofs + ii)) {
+            if (this._mutatedSequence.nt(ii) !== seqArr.nt(ii) && !this.isLocked(offset + ii)) {
                 this._mutatedSequence.setNt(ii, seqArr.nt(ii));
-                this._bases[ofs + ii].setType(seqArr.nt(ii));
+                this._bases[offset + ii].setType(seqArr.nt(ii));
             }
         }
     }
@@ -422,17 +428,17 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         const n: number = Math.min(sequence.length, this._sequence.length);
         let needUpdate = false;
-        const ofs: number = (
+        const offset: number = (
             this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_EXT5P
         ) ? this._oligo.length : 0;
 
         for (let ii = 0; ii < n; ii++) {
             if (sequence.nt(ii) === RNABase.UNDEFINED) continue;
-            if (this._sequence.nt(ii) !== sequence.nt(ii) && !this.isLocked(ofs + ii)) {
+            if (this._sequence.nt(ii) !== sequence.nt(ii) && !this.isLocked(offset + ii)) {
                 numMut++;
                 this._sequence.setNt(ii, sequence.nt(ii));
                 muts.push({pos: ii + 1, base: EPars.nucleotideToString(this._sequence.nt(ii))});
-                this._bases[ofs + ii].setType(sequence.nt(ii));
+                this._bases[offset + ii].setType(sequence.nt(ii));
                 needUpdate = true;
             }
         }
@@ -482,7 +488,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._strandLabel.display.visible = false;
     }
 
-    public parseCommand(command: number, closestIndex: number): [string, PuzzleEditOp, number[]?] | null {
+    public parseCommand(command: RNAPaint, closestIndex: number): [string, PuzzleEditOp, RNABase[]?] | null {
         switch (command) {
             case RNAPaint.ADD_BASE:
                 return PoseUtil.addBaseWithIndex(closestIndex, this._pairs);
@@ -499,8 +505,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public parseCommandWithPairs(
-        command: number, closestIndex: number, pairs: SecStruct
-    ): [string, PuzzleEditOp, number[]?] | null {
+        command: RNAPaint, closestIndex: number, pairs: SecStruct
+    ): [string, PuzzleEditOp, RNABase[]?] | null {
         switch (command) {
             case RNAPaint.ADD_BASE:
                 return PoseUtil.addBaseWithIndex(closestIndex, pairs);
@@ -526,13 +532,336 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
+    /**
+     * Rotate the stem containing nucleotide idx. Save your results in the
+     * customLayout. To achieve this: figure out what stem you're in (helper);
+     * find its center (for an axis of rotation); figure out what orientation
+     * is clockwise of its current orientation, then get there. We do not store
+     * persistent stem orientations, because we would then have to reset them
+     * elsewhere with every refold.
+     *
+     * @param idx
+     */
+    public rotateStem(startIdx: number): void {
+        // If this idx is not paired, it won't be in a stem; return.
+        if (!this._targetPairs.isPaired(startIdx)) {
+            return;
+        }
+
+        // 1. Get coords and set up a customLayout
+        const rnaCoords: RNALayout = new RNALayout(
+            Pose2D.ZOOM_SPACINGS[this._zoomLevel], Pose2D.ZOOM_SPACINGS[this._zoomLevel]
+        );
+        // rnaCoords.setupTree(this._pairs.filterForPseudoknots(), this._targetPairs.filterForPseudoknots());
+        rnaCoords.setupTree(this._pairs, this._targetPairs);
+        rnaCoords.drawTree(this._customLayout);
+        const xarray: number[] = new Array(this._bases.length);
+        const yarray: number[] = new Array(this._bases.length);
+        rnaCoords.getCoords(xarray, yarray);
+
+        this._customLayout = [];
+        for (let ii = 0; ii < this._bases.length; ++ii) {
+            if (xarray[ii] === undefined || yarray[ii] === undefined) continue;
+            this._customLayout.push([
+                xarray[ii],
+                yarray[ii]
+            ]);
+        }
+
+        // id stem
+        const stem = this._targetPairs.stemWith(startIdx);
+
+        // What is center of stem? Average coordinate. Could simplify calculation
+        // a little by finding the bases of median index first or something, but
+        // that itself takes a bit of work. Unlikely to become bottleneck.
+        const center = ((s: [number, number][]) => {
+            let x = 0;
+            let y = 0;
+            for (const bp of s) {
+                for (const idx of bp) {
+                    x += this._bases[idx].x;
+                    y += this._bases[idx].y;
+                }
+            }
+            return [x / (s.length * 2), y / (s.length * 2)];
+        })(stem);
+
+        // Determine stem orientation. Really we only care about the "next"
+        // orientation, the one we want to impose. We do this by orienting the
+        // single bp that is kind of a minimal stem, guaranteed to be there.
+        // If the vector from smaller to larger index has +x and -y, we rotate
+        // to be +x0y. That goes to 0x+y, to -x0y, to 0x-y.
+        const vecBP = ((s: [number, number][], n: number) => {
+            for (const bp of s) {
+                if (bp[0] === n || bp[1] === n) {
+                    if (bp[0] < bp[1]) {
+                        return [
+                            this._bases[bp[1]].x - this._bases[bp[0]].x,
+                            this._bases[bp[1]].y - this._bases[bp[0]].y
+                        ];
+                    } else {
+                        return [
+                            this._bases[bp[1]].x - this._bases[bp[0]].x,
+                            this._bases[bp[1]].y - this._bases[bp[0]].y
+                        ];
+                    }
+                }
+            }
+            return [0, 0];
+        })(stem, startIdx);
+
+        // Find and sort the (smallest, largest) bp. Let's assume it's first.
+        const firstbp = stem[0][0] < stem[0][1]
+            ? stem[0]
+            : [stem[0][1], stem[0][0]];
+        const pairSpace = Pose2D.ZOOM_SPACINGS[this._zoomLevel];
+        const primSpace = Pose2D.ZOOM_SPACINGS[this._zoomLevel];
+
+        // Calculate new stem positions
+        if (vecBP[1] < 0) {
+            // new orientation is bottom-to-top
+            for (const bp of stem) {
+                // First work with smaller value, which is either smaller or
+                // bigger than the center bp
+                this._bases[bp[0]].setXY(
+                    center[0] - pairSpace / 2,
+                    center[1] + (bp[0] - firstbp[0] + 0.5 - stem.length / 2) * primSpace
+                );
+                this._bases[bp[0]].setDirty();
+                this._bases[bp[1]].setXY(
+                    center[0] + pairSpace / 2,
+                    center[1] + (bp[0] - firstbp[0] + 0.5 - stem.length / 2) * primSpace
+                );
+                this._bases[bp[1]].setDirty();
+            }
+        } else if (vecBP[0] > 0) {
+            // new orientation is right-to-left
+            for (const bp of stem) {
+                // First work with smaller value, which is either smaller or
+                // bigger than the center bp
+                this._bases[bp[0]].setXY(
+                    center[0] - (bp[0] - firstbp[0] + 0.5 - stem.length / 2) * primSpace,
+                    center[1] - pairSpace / 2
+                );
+                this._bases[bp[0]].setDirty();
+                this._bases[bp[1]].setXY(
+                    center[0] - (bp[0] - firstbp[0] + 0.5 - stem.length / 2) * primSpace,
+                    center[1] + pairSpace / 2
+                );
+                this._bases[bp[1]].setDirty();
+            }
+        } else if (vecBP[1] > 0) {
+            // new orientation is top-to-bottom
+            for (const bp of stem) {
+                // First work with smaller value, which is either smaller or
+                // bigger than the center bp
+                this._bases[bp[0]].setXY(
+                    center[0] + pairSpace / 2,
+                    center[1] - (bp[0] - firstbp[0] + 0.5 - stem.length / 2) * primSpace
+                );
+                this._bases[bp[0]].setDirty();
+                this._bases[bp[1]].setXY(
+                    center[0] - pairSpace / 2,
+                    center[1] - (bp[0] - firstbp[0] + 0.5 - stem.length / 2) * primSpace
+                );
+                this._bases[bp[1]].setDirty();
+            }
+        } else if (vecBP[0] < 0) {
+            // new orientation is left-to-right
+            for (const bp of stem) {
+                // First work with smaller value, which is either smaller or
+                // bigger than the center bp
+                this._bases[bp[0]].setXY(
+                    center[0] + (bp[0] - firstbp[0] + 0.5 - stem.length / 2) * primSpace,
+                    center[1] + pairSpace / 2
+                );
+                this._bases[bp[0]].setDirty();
+                this._bases[bp[1]].setXY(
+                    center[0] + (bp[0] - firstbp[0] + 0.5 - stem.length / 2) * primSpace,
+                    center[1] - pairSpace / 2
+                );
+                this._bases[bp[1]].setDirty();
+            }
+        }
+        for (const bp of stem) {
+            for (let ii = 0; ii < this._customLayout.length; ++ii) {
+                this._customLayout[bp[0]] = [
+                    this._customLayout[ii][0] as number + this._bases[bp[0]].x - this._bases[ii].x,
+                    this._customLayout[ii][1] as number + this._bases[bp[0]].y - this._bases[ii].y
+                ];
+                this._customLayout[bp[1]] = [
+                    this._customLayout[ii][0] as number + this._bases[bp[1]].x - this._bases[ii].x,
+                    this._customLayout[ii][1] as number + this._bases[bp[1]].y - this._bases[ii].y
+                ];
+            }
+        }
+        this._baseRope.enabled = true;
+        this._baseRope.redraw(true);
+    }
+
+    /**
+     * Flip the stem containing nucleotide idx. Save your results in the
+     * customLayout. To achieve this: swap the position of each nt with its bp
+     * partner. We do not store persistent stem orientations, because we would
+     * then have to reset them elsewhere with every refold.
+     *
+     * @param idx
+     */
+    public flipStem(startIdx: number): void {
+        // If this idx is not paired, it won't be in a stem; return.
+        if (!this._targetPairs.isPaired(startIdx)) {
+            return;
+        }
+
+        // 1. Get coords and set up a customLayout
+        const rnaCoords: RNALayout = new RNALayout(
+            Pose2D.ZOOM_SPACINGS[this._zoomLevel], Pose2D.ZOOM_SPACINGS[this._zoomLevel]
+        );
+        rnaCoords.setupTree(this._pairs, this._targetPairs);
+        rnaCoords.drawTree(this._customLayout);
+        const xarray: number[] = new Array(this._bases.length);
+        const yarray: number[] = new Array(this._bases.length);
+        rnaCoords.getCoords(xarray, yarray);
+
+        this.customLayout = [];
+        for (let ii = 0; ii < this._bases.length; ++ii) {
+            if (xarray[ii] === undefined || yarray[ii] === undefined) continue;
+            this.customLayout.push([
+                (xarray[ii]), // * (Pose2D.ZOOM_SPACINGS[0] / Pose2D.ZOOM_SPACINGS[this._zoomLevel]),
+                (yarray[ii])// * (Pose2D.ZOOM_SPACINGS[0] / Pose2D.ZOOM_SPACINGS[this._zoomLevel])
+            ]);
+        }
+        Assert.assertIsDefined(this._customLayout);
+
+        // id stem
+        const stem = this._targetPairs.stemWith(startIdx);
+
+        // Calculate new stem positions
+        for (const bp of stem) {
+            // First work with smaller value, which is either smaller or
+            // bigger than the center bp
+            const tmp = [
+                this._bases[bp[0]].x,
+                this._bases[bp[0]].y
+            ];
+            this._bases[bp[0]].setXY(
+                this._bases[bp[1]].x,
+                this._bases[bp[1]].y
+            );
+            this._bases[bp[0]].setDirty();
+            this._bases[bp[1]].setXY(
+                tmp[0],
+                tmp[1]
+            );
+            this._bases[bp[1]].setDirty();
+        }
+
+        for (const bp of stem) {
+            for (let ii = 0; ii < this._customLayout.length; ++ii) {
+                this._customLayout[bp[0]] = [
+                    this._customLayout[ii][0] as number + this._bases[bp[0]].x - this._bases[ii].x,
+                    this._customLayout[ii][1] as number + this._bases[bp[0]].y - this._bases[ii].y
+                ];
+                this._customLayout[bp[1]] = [
+                    this._customLayout[ii][0] as number + this._bases[bp[1]].x - this._bases[ii].x,
+                    this._customLayout[ii][1] as number + this._bases[bp[1]].y - this._bases[ii].y
+                ];
+            }
+        }
+        this._baseRope.enabled = true;
+        this._baseRope.redraw(true);
+    }
+
+    /**
+     * Snap every base to a grid of size pairSpace/5. This is a nice even number
+     * such that you get SOME gradations that are smaller than the space between
+     * paired bases, but not so much that the whole thing feels sloppy. Also
+     * permits nice tetraloop layouts. Only affects paired nucleotides.
+     *
+     * @param idx
+     */
+    public snapToGrid(): void {
+        const pairSpace = Pose2D.ZOOM_SPACINGS[this._zoomLevel];
+        const gridSpace = pairSpace;
+
+        // 1. Get coords and set up a customLayout
+        const rnaCoords: RNALayout = new RNALayout(
+            pairSpace, pairSpace
+        );
+        rnaCoords.setupTree(this._pairs, this._targetPairs);
+        rnaCoords.drawTree(this._customLayout);
+        const xarray: number[] = new Array(this._bases.length);
+        const yarray: number[] = new Array(this._bases.length);
+        rnaCoords.getCoords(xarray, yarray);
+
+        this.customLayout = [];
+        for (let ii = 0; ii < this._bases.length; ++ii) {
+            if (xarray[ii] === undefined || yarray[ii] === undefined) continue;
+            this.customLayout.push([
+                (xarray[ii]), // * (Pose2D.ZOOM_SPACINGS[0] / Pose2D.ZOOM_SPACINGS[this._zoomLevel]),
+                (yarray[ii])// * (Pose2D.ZOOM_SPACINGS[0] / Pose2D.ZOOM_SPACINGS[this._zoomLevel])
+            ]);
+        }
+        Assert.assertIsDefined(this._customLayout);
+
+        // Calculate new base positions
+        for (let ii = 0; ii < this._bases.length; ++ii) {
+            if (!this._pairs.isPaired(ii)) continue;
+            // First work with smaller value, which is either smaller or
+            // bigger than the center bp
+            this._bases[ii].setXY(
+                Math.round(this._bases[ii].x / gridSpace) * gridSpace,
+                Math.round(this._bases[ii].y / gridSpace) * gridSpace
+            );
+            this._bases[ii].setDirty();
+        }
+        for (let ii = 0; ii < this._bases.length; ++ii) {
+            if (!this._pairs.isPaired(ii)) continue;
+            for (let jj = 0; jj < this._customLayout.length; ++jj) {
+                this._customLayout[jj] = [
+                    this._customLayout[jj][0] as number + this._bases[jj].x - this._bases[ii].x,
+                    this._customLayout[jj][1] as number + this._bases[jj].y - this._bases[ii].y
+                ];
+            }
+        }
+        this._baseRope.enabled = true;
+        this._baseRope.redraw(true);
+        // for (const bp of stem) {
+        // for (let ii = 0; ii < this._customLayout.length; ++ii) {
+        // this._customLayout[bp[1]] = [
+        //     this._customLayout[ii][0] as number + this._bases[bp[1]].x - this._bases[ii].x,
+        //     this._customLayout[ii][1] as number + this._bases[bp[1]].y - this._bases[ii].y
+        // ];
+        // }
+        // }
+    }
+
     public onPoseMouseDown(e: InteractionEvent, closestIndex: number): void {
         const altDown: boolean = Flashbang.app.isAltKeyDown;
         const shiftDown: boolean = Flashbang.app.isShiftKeyDown;
         const ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
 
+        // ctrl + shift: drag base around; ctrl: base mark; shift: shift highlight
         if (closestIndex >= 0) {
             this._mouseDownAltKey = altDown;
+            if (ctrlDown && shiftDown) {
+                const dragger = new Dragger();
+                this.addObject(dragger);
+
+                if (this._currentArrangementTool === Layout.MOVE) {
+                    dragger.dragged.connect((p) => {
+                        this.onMouseMoved(p as Point, closestIndex);
+                    });
+                } else if (this._currentArrangementTool === Layout.ROTATE_STEM) {
+                    this.rotateStem(closestIndex);
+                } else if (this._currentArrangementTool === Layout.FLIP_STEM) {
+                    this.flipStem(closestIndex);
+                }
+                dragger.dragComplete.connect(() => {
+                    this.onMouseUp();
+                });
+                return;
+            }
             if ((ctrlDown || this.currentColor === RNAPaint.BASE_MARK) && closestIndex < this.fullSequenceLength) {
                 this.toggleBaseMark(closestIndex);
                 return;
@@ -605,7 +934,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._bases[index].isMarked();
     }
 
-    public onMouseMoved(point: Point): void {
+    public onMouseMoved(point: Point, startIdx?: number): void {
         if (!this._poseField.containsPoint(point.x, point.y)) {
             this.onMouseOut();
             return;
@@ -618,6 +947,75 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.container.toLocal(point, undefined, Pose2D.P);
         const mouseX = Pose2D.P.x;
         const mouseY = Pose2D.P.y;
+
+        // First, handle the case where you have supplied startIdx, indicating
+        // that you are dragging a base to a new location.
+        if (startIdx !== undefined) {
+            // if (this.customLayout === undefined) {
+            const rnaCoords: RNALayout = new RNALayout(
+                Pose2D.ZOOM_SPACINGS[this._zoomLevel], Pose2D.ZOOM_SPACINGS[this._zoomLevel]
+            );
+            rnaCoords.setupTree(this._pairs, this._targetPairs);
+            rnaCoords.drawTree(this._customLayout);
+            const xarray: number[] = new Array(this._bases.length);
+            const yarray: number[] = new Array(this._bases.length);
+            rnaCoords.getCoords(xarray, yarray);
+            // The simplest thing to do is to use the x/y coords as the new customLayout.
+            // This minimizes the calculations you have to do later.
+            this.customLayout = [];
+            for (let ii = 0; ii < this._bases.length; ++ii) {
+                if (xarray[ii] === undefined || yarray[ii] === undefined) continue;
+                this.customLayout.push([
+                    (xarray[ii]), // * (Pose2D.ZOOM_SPACINGS[0] / Pose2D.ZOOM_SPACINGS[this._zoomLevel]),
+                    (yarray[ii])// * (Pose2D.ZOOM_SPACINGS[0] / Pose2D.ZOOM_SPACINGS[this._zoomLevel])
+                ]);
+            }
+            // }
+            Assert.assertIsDefined(this._customLayout);
+            // Ooh, you should drag a helix as a unit.
+            if (!this._targetPairs.isPaired(startIdx)) {
+                // Update individual base coordinates.
+                this._bases[startIdx].setXY(
+                    (mouseX - this._offX),
+                    (mouseY - this._offY)
+                );
+
+                // Update the customLayout in the same way.
+                // Actually, after writing this, I no longer know why it works.
+                for (let ii = 0; ii < this._customLayout.length; ++ii) {
+                    this._customLayout[startIdx] = [
+                        this._customLayout[ii][0] as number + (mouseX - this._offX) - this._bases[ii].x,
+                        this._customLayout[ii][1] as number + (mouseY - this._offY) - this._bases[ii].y
+                    ];
+                }
+
+                this._bases[startIdx].setDirty();
+            } else {
+                // Find each nt in helix and apply same offset.
+                const stem = this._targetPairs.stemWith(startIdx);
+                const origX = this._bases[startIdx].x;
+                const origY = this._bases[startIdx].y;
+                for (const bp of stem) {
+                    for (const idx of bp) {
+                        this._bases[idx].setXY(
+                            mouseX + this._bases[idx].x - origX - this._offX,
+                            mouseY + this._bases[idx].y - origY - this._offY
+                        );
+                        this._bases[idx].setDirty();
+
+                        for (let ii = 0; ii < this._customLayout.length; ++ii) {
+                            this._customLayout[idx] = [
+                                this._customLayout[ii][0] as number + this._bases[idx].x - this._bases[ii].x,
+                                this._customLayout[ii][1] as number + this._bases[idx].y - this._bases[ii].y
+                            ];
+                        }
+                    }
+                }
+            }
+            this._baseRope.enabled = true;
+            this._baseRope.redraw(true);
+            return;
+        }
 
         this._paintCursor.display.x = mouseX;
         this._paintCursor.display.y = mouseY;
@@ -661,17 +1059,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         if (!this._coloring) {
             this.updateScoreNodeGui();
-            if (this._feedbackObjs.length > 0) {
-                for (let ii = 0; ii < this._feedbackObjs.length; ii++) {
-                    if (ii === closestIndex) {
-                        continue;
-                    }
-                    this._feedbackObjs[ii].display.visible = false;
-                }
-                if (closestIndex >= 0) {
-                    this._feedbackObjs[closestIndex].display.visible = true;
-                }
-            }
         }
     }
 
@@ -681,7 +1068,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         ROPWait.notifyEndPaint();
     }
 
-    public deleteBaseWithIndexPairs(index: number, pairs: SecStruct): [string, PuzzleEditOp, number[]?] {
+    public deleteBaseWithIndexPairs(index: number, pairs: SecStruct): [string, PuzzleEditOp, RNABase[]?] {
         if (this.isTrackedIndex(index)) {
             this.toggleBaseMark(index);
         }
@@ -873,27 +1260,27 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
         // find the next acceptable spot
-        let ofs = 1;
+        let offset = 1;
         const len: number = this.sequenceLength;
-        while (last + ofs < len) {
-            for (ii = first + ofs; ii <= last + ofs; ii++) {
+        while (last + offset < len) {
+            for (ii = first + offset; ii <= last + offset; ii++) {
                 if (this._locks && this._locks[ii]) {
                     break;
                 }
             }
-            if (ii > last + ofs) {
+            if (ii > last + offset) {
                 break;
             }
-            ofs++;
+            offset++;
         }
         // if not found, give up
-        if (last + ofs >= len) {
+        if (last + offset >= len) {
             return;
         }
 
         let mutated: RNABase[];
         let segment: RNABase[];
-        if (ofs === 1) {
+        if (offset === 1) {
             // obtain the segment you are trying to move, plus one 3' base
             segment = this._sequence.baseArray.slice(first, last + 1 + 1);
             // remove the base from the 3' end
@@ -907,8 +1294,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         } else {
             mutated = this._sequence.baseArray.slice();
             for (ii = first; ii <= last; ii++) {
-                const xx: number = mutated[ii + ofs];
-                mutated[ii + ofs] = mutated[ii];
+                const xx: number = mutated[ii + offset];
+                mutated[ii + offset] = mutated[ii];
                 mutated[ii] = xx;
             }
         }
@@ -917,7 +1304,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.setMutated(new Sequence(mutated));
         this.doneColoring();
         this._shiftHighlightBox.clear();
-        this._shiftHighlightBox.setHighlight([first + ofs, last + ofs]);
+        this._shiftHighlightBox.setHighlight([first + offset, last + offset]);
     }
 
     public shift5Prime(): void {
@@ -1389,8 +1776,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public get satisfiedPairs(): SecStruct {
-        // AMW TODO: this is built up in the getter to append the oligos, so
-        // maybe it's not a Sequence. So we should definitely change that later.
         return this._pairs.getSatisfiedPairs(this.fullSequence.slice(0));
     }
 
@@ -1569,7 +1954,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         const n: number = seq.length;
         for (let k = 0; k < n; k++) {
-            this._bases[k].setType(seq.baseArray[k]);
+            this._bases[k].setType(seq.nt(k));
             this._bases[k].baseIndex = k;
         }
 
@@ -1689,7 +2074,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         const n: number = seq.length;
         for (let k = 0; k < n; k++) {
-            this._bases[k].setType(seq.baseArray[k]);
+            this._bases[k].setType(seq.nt(k));
             this._bases[k].baseIndex = k;
         }
     }
@@ -1780,7 +2165,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public isPairSatisfied(a: number, b: number): boolean {
-        // AMW TODO
+        // AMW TODO why swap? do we assume asymmetrical pairs
         if (b < a) {
             const temp: number = a;
             a = b;
@@ -1791,8 +2176,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             return false;
         }
 
-        const fullSeq: number[] = this.fullSequence.baseArray;
-        return (EPars.pairType(fullSeq[a], fullSeq[b]) !== 0);
+        return (EPars.pairType(this.fullSequence.nt(a), this.fullSequence.nt(b)) !== 0);
     }
 
     public get sequenceLength(): number {
@@ -1844,7 +2228,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._sequence.nt(seq);
     }
 
-    public set pairs(pairs: SecStruct) {
+    public set secstruct(pairs: SecStruct) {
         const seq: Sequence = this.fullSequence;
         if (pairs.length !== seq.length) {
             log.debug(pairs.length, seq.length);
@@ -1872,7 +2256,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.generateScoreNodes();
     }
 
-    public get pairs(): SecStruct {
+    public get secstruct(): SecStruct {
         return this._pairs.slice(0);
     }
 
@@ -1961,8 +2345,63 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._cursorIndex;
     }
 
+    private makeHighlightState() {
+        let hlState: RNAHighlightState | undefined;
+        if (this._allNewHighlights.length > 0) {
+            hlState = new RNAHighlightState();
+            hlState.nuc = [];
+            hlState.isOn = true;
+            for (const existingHighlight of this._allNewHighlights) {
+                if (existingHighlight.nuc !== null) {
+                    hlState.nuc = hlState.nuc.concat(existingHighlight.nuc);
+                }
+            }
+        }
+        return hlState;
+    }
+
+    private setAllDrawParams(fullSeq: Sequence, currentTime: number, hlState?: RNAHighlightState): void {
+        for (let ii = 0; ii < fullSeq.length; ii++) {
+            // skip the oligo separator
+            if (fullSeq.nt(ii) === RNABase.CUT) {
+                continue;
+            }
+
+            const useBarcode = (this._barcodes != null && this._barcodes.indexOf(ii) >= 0);
+
+            this._bases[ii].forceUnpaired = (
+                this._forcedStruct != null && this._forcedStruct[ii] === EPars.FORCE_UNPAIRED
+            );
+
+            const drawFlags: number = BaseDrawFlags.builder()
+                .locked(this.isLocked(ii))
+                .letterMode(this._lettermode)
+                .lowPerform(this._simpleGraphicsMods)
+                .useBarcode(useBarcode)
+                .result();
+
+            let numberBitmap: Texture | null = null;
+            if (this._numberingMode) {
+                let displayNumber: number | null = ii + 1;
+                if (this._customNumbering != null) displayNumber = this._customNumbering[ii];
+                if ((displayNumber != null)
+                    && (ii === 0 || displayNumber % 5 === 0 || ii === fullSeq.length - 1)) {
+                    numberBitmap = BitmapManager.getNumberBitmap(displayNumber);
+                }
+            }
+
+            this._bases[ii].setDrawParams(
+                this._zoomLevel, this._offX, this._offY, currentTime, drawFlags, numberBitmap, hlState
+            );
+        }
+
+        if (this._displayAuxInfo) {
+            this.renderAuxInfo();
+        }
+    }
+
     /* override */
-    public update(dt: number): void {
+    public update(_dt: number): void {
         if (!this.display.worldVisible) {
             // update is expensive, so don't bother doing it if we're not visible
             return;
@@ -2027,62 +2466,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
         );
 
         if (needRedraw || this._redraw) {
-            // Create highlight state to pass to bases.
-            let hlState: RNAHighlightState | undefined;
-            if (this._allNewHighlights.length > 0) {
-                hlState = new RNAHighlightState();
-                hlState.nuc = [];
-                hlState.isOn = true;
-                for (const existingHighlight of this._allNewHighlights) {
-                    if (existingHighlight.nuc !== null) {
-                        hlState.nuc = hlState.nuc.concat(existingHighlight.nuc);
-                    }
-                }
-            }
-
-            for (let ii = 0; ii < fullSeq.length; ii++) {
-                // skip the oligo separator
-                if (fullSeq.nt(ii) === RNABase.CUT) {
-                    continue;
-                }
-
-                const useBarcode = (this._barcodes != null && this._barcodes.indexOf(ii) >= 0);
-
-                this._bases[ii].forceUnpaired = (
-                    this._forcedStruct != null && this._forcedStruct[ii] === EPars.FORCE_UNPAIRED
-                );
-
-                const drawFlags: number = BaseDrawFlags.builder()
-                    .locked(this.isLocked(ii))
-                    .letterMode(this._lettermode)
-                    .lowPerform(this._simpleGraphicsMods)
-                    .useBarcode(useBarcode)
-                    .result();
-
-                let numberBitmap: Texture | null = null;
-                if (this._numberingMode) {
-                    let displayNumber: number | null = ii + 1;
-                    if (this._customNumbering != null) displayNumber = this._customNumbering[ii];
-                    if ((displayNumber != null)
-                        && (ii === 0 || displayNumber % 5 === 0 || ii === fullSeq.length - 1)) {
-                        numberBitmap = BitmapManager.getNumberBitmap(displayNumber);
-                    }
-                }
-
-                this._bases[ii].setDrawParams(
-                    this._zoomLevel, this._offX, this._offY, currentTime, drawFlags, numberBitmap, hlState
-                );
-            }
-
-            if (this._displayAuxInfo) {
-                this.renderAuxInfo();
-            }
-
-            if (this._feedbackObjs.length > 0) {
-                this.updatePrintFeedback(false);
-            }
+            // Create highlight state to pass to bases, then set up draw params.
+            this.setAllDrawParams(fullSeq, currentTime, this.makeHighlightState());
         }
 
+        // AMW TODO: this means that PuzzleEditMode can get a baserope showing
+        // if the custom layout tools are used.
         this._baseRope.enabled = this._showBaseRope || (this._customLayout != null);
         this._pseudoknotLines.enabled = this._pseudoknotPairs
             && this._pseudoknotPairs.nonempty();
@@ -2409,7 +2798,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         } else if (op === PuzzleEditOp.ADD_PAIR) {
             // Add a pair
-            pindex = this.pairs.pairingPartner(index);
+            pindex = this.secstruct.pairingPartner(index);
             const afterIndex = sequence.slice(index);
             const afterLockIndex = locks ? locks.slice(index) : null;
             const afterBindingSiteIndex = bindingSite ? bindingSite.slice(index) : null;
@@ -2467,7 +2856,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         } else if (op === PuzzleEditOp.DELETE_PAIR) {
             // Delete a pair
-            pindex = this.pairs.pairingPartner(index);
+            pindex = this.secstruct.pairingPartner(index);
             const afterIndex = sequenceBackup.slice(index + 1);
             const afterLockIndex = locksBackup ? locksBackup.slice(index + 1) : null;
             const afterBindingSiteIndex = bindingSiteBackup ? bindingSiteBackup.slice(index + 1) : null;
@@ -2496,7 +2885,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        this.sequence.baseArray = sequence;
+        this.sequence = new Sequence(sequence);
         this.puzzleLocks = locks;
         this.molecularStructure = SecStruct.fromParens(parenthesis);
         this.molecularBindingSite = bindingSite;
@@ -2622,44 +3011,18 @@ export default class Pose2D extends ContainerObject implements Updatable {
             yarray = tmp;
         }
 
-        let xmin: number = xarray[0];
-        let xmax: number = xarray[0];
-        let ymin: number = yarray[0];
-        let ymax: number = yarray[0];
-
-        for (let ii = 0; ii < n; ii++) {
-            if (xarray[ii] < xmin) {
-                xmin = xarray[ii];
-            }
-
-            if (xarray[ii] > xmax) {
-                xmax = xarray[ii];
-            }
-
-            if (yarray[ii] < ymin) {
-                ymin = yarray[ii];
-            }
-
-            if (yarray[ii] > ymax) {
-                ymax = yarray[ii];
-            }
-        }
+        const xmin: number = Math.min(...xarray);
+        const xmax: number = Math.max(...xarray);
+        const ymin: number = Math.min(...yarray);
+        const ymax: number = Math.max(...yarray);
 
         xMid = (xmax + xmin) / 2.0;
         yMid = (ymax + ymin) / 2.0;
 
-        this._baseFromX = new Array(n);
-        this._baseFromY = new Array(n);
-        this._baseToX = new Array(n);
-        this._baseToY = new Array(n);
-
-        for (let ii = 0; ii < n; ii++) {
-            this._baseFromX[ii] = this._bases[ii].x;
-            this._baseFromY[ii] = this._bases[ii].y;
-
-            this._baseToX[ii] = xarray[ii] - xMid;
-            this._baseToY[ii] = yarray[ii] - yMid;
-        }
+        this._baseFromX = this._bases.map((b) => b.x);
+        this._baseFromY = this._bases.map((b) => b.y);
+        this._baseToX = xarray.map((x) => x - xMid);
+        this._baseToY = yarray.map((y) => y - yMid);
 
         this._foldStartTime = -1;
         if (fast) {
@@ -2669,38 +3032,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    private printFeedback(dat: number[]): void {
-        // for (let i: number = 0; i < dat.length; i++) {
-        //     let feedback_obj: GameText = null;
-        //     feedback_obj = new GameText(Fonts.arial(12, true));
-        //     feedback_obj.set_text(dat[i]);
-        //     this._feedback_objs.push(feedback_obj);
-        //     this.addObject(this._feedback_objs[i]);
-        // }
-    }
-
-    private updatePrintFeedback(hide: boolean = true): void {
-        // for (let ii: number = 0; ii < this._feedback_objs_num; ii++) {
-        //     let obj_p: Point = this.get_base_xy(ii + this._feedback_objs_start_ind);
-        //     let out_p: Point = this.get_base_out_xy(ii + this._feedback_objs_start_ind);
-        //     obj_p.x += 1.6 * (out_p.x - this._off_x) - this._feedback_objs[ii].text_width() / 2;
-        //     obj_p.y += 1.6 * (out_p.y - this._off_y) - this._feedback_objs[ii].text_height() / 2;
-        //     if (hide) this._feedback_objs[ii].visible = false;
-        //     this._feedback_objs[ii].set_pos(new UDim(0, 0, obj_p.x, obj_p.y));
-        //     this._feedback_objs[ii].graphics.clear();
-        //     this._feedback_objs[ii].graphics.beginFill(0x000000, 0.35);
-        //     this._feedback_objs[ii].graphics.drawRoundRect(
-        //         0, 0, this._feedback_objs[ii].text_width(), this._feedback_objs[ii].text_height(), 12
-        //     );
-        // }
-    }
-
     private onMouseOut(): void {
         this.clearMouse();
         this.updateScoreNodeGui();
     }
 
-    private deleteBaseWithIndex(index: number): [string, PuzzleEditOp, number[]?] {
+    private deleteBaseWithIndex(index: number): [string, PuzzleEditOp, RNABase[]?] {
         if (this.isTrackedIndex(index)) {
             this.toggleBaseMark(index);
         }
@@ -2715,118 +3052,106 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private onBaseMouseDown(seqnum: number, togglelock: boolean): void {
         this._lastColoredIndex = seqnum;
 
-        if (!togglelock && this.isEditable(seqnum)) {
-            this._coloring = true;
-            this._mutatedSequence = this.fullSequence.slice(0);
+        if (togglelock || !this.isEditable(seqnum)) return;
 
-            if (this._currentColor === RNAPaint.LOCK) {
-                if (!this._locks) {
-                    this._locks = [];
-                    for (let ii = 0; ii < this._sequence.length; ii++) {
-                        this._locks.push(false);
-                    }
+        this._coloring = true;
+        this._mutatedSequence = this.fullSequence.slice(0);
+
+        if (this._currentColor === RNAPaint.LOCK) {
+            if (!this._locks) {
+                this._locks = [];
+                for (let ii = 0; ii < this._sequence.length; ii++) {
+                    this._locks.push(false);
                 }
-                this._locks[seqnum] = !this._locks[seqnum];
-                this._bases[seqnum].setDirty();
-                this._lockUpdated = true;
-            } else if (this._currentColor === RNAPaint.BINDING_SITE) {
-                if (this._bindingSite != null && this._bindingSite[seqnum]) {
+            }
+            this._locks[seqnum] = !this._locks[seqnum];
+            this._bases[seqnum].setDirty();
+            this._lockUpdated = true;
+        } else if (this._currentColor === RNAPaint.BINDING_SITE) {
+            if (this._bindingSite != null && this._bindingSite[seqnum]) {
+                this._bindingSite = [];
+                for (let ii = 0; ii < this._sequence.length; ii++) {
+                    this._bindingSite.push(false);
+                }
+                this.molecularBindingSite = this._bindingSite;
+                this._bindingSiteUpdated = true;
+            } else {
+                const bindingBases: number[] | null = this._pairs.isInternal(seqnum);
+                if (bindingBases != null && bindingBases.length > 4) {
                     this._bindingSite = [];
                     for (let ii = 0; ii < this._sequence.length; ii++) {
                         this._bindingSite.push(false);
                     }
+
+                    for (let ii = 0; ii < bindingBases.length; ii++) {
+                        this._bindingSite[bindingBases[ii]] = true;
+                    }
                     this.molecularBindingSite = this._bindingSite;
                     this._bindingSiteUpdated = true;
                 } else {
-                    const bindingBases: number[] | null = this._pairs.isInternal(seqnum);
-                    if (bindingBases != null && bindingBases.length > 4) {
-                        this._bindingSite = [];
-                        for (let ii = 0; ii < this._sequence.length; ii++) {
-                            this._bindingSite.push(false);
-                        }
-
-                        for (let ii = 0; ii < bindingBases.length; ii++) {
-                            this._bindingSite[bindingBases[ii]] = true;
-                        }
-                        this.molecularBindingSite = this._bindingSite;
-                        this._bindingSiteUpdated = true;
-                    } else {
-                        (this.mode as GameMode).showNotification(
-                            'Binding site can be only formed at loops between 2 stacks\n(Internal loops and Bulges)'
-                        );
-                    }
+                    (this.mode as GameMode).showNotification(
+                        'Binding site can be only formed at loops between 2 stacks\n(Internal loops and Bulges)'
+                    );
                 }
-            } else if (this._mouseDownAltKey || this._currentColor === RNAPaint.MAGIC_GLUE) {
-                if (this.toggleDesignStruct(seqnum)) {
-                    this._designStructUpdated = true;
+            }
+        } else if (this._mouseDownAltKey || this._currentColor === RNAPaint.MAGIC_GLUE) {
+            if (this.toggleDesignStruct(seqnum)) {
+                this._designStructUpdated = true;
+            }
+        } else if (!this.isLocked(seqnum)) {
+            if (this._currentColor >= 1 && this._currentColor <= 4) {
+                this._mutatedSequence.setNt(seqnum, this._currentColor);
+                ROPWait.notifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
+                this._bases[seqnum].setType(this._currentColor, true);
+            } else if (this._currentColor === RNAPaint.PAIR && this._pairs.isPaired(seqnum)) {
+                const pi = this._pairs.pairingPartner(seqnum);
+                if (this.isLocked(pi)) {
+                    return;
                 }
-            } else if (!this.isLocked(seqnum)) {
-                if (this._currentColor >= 1 && this._currentColor <= 4) {
-                    this._mutatedSequence.setNt(seqnum, this._currentColor);
-                    ROPWait.notifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
-                    this._bases[seqnum].setType(this._currentColor, true);
-                } else if (this._currentColor === RNAPaint.PAIR) {
-                    if (this._pairs.isPaired(seqnum)) {
-                        const pi = this._pairs.pairingPartner(seqnum);
 
-                        if (this.isLocked(pi)) {
-                            return;
-                        }
+                const clickBase: RNABase = this._mutatedSequence.nt(seqnum);
 
-                        const clickBase: RNABase = this._mutatedSequence.nt(seqnum);
+                this._mutatedSequence.setNt(seqnum, this._mutatedSequence.nt(pi));
+                this._mutatedSequence.setNt(pi, clickBase);
 
-                        this._mutatedSequence.setNt(seqnum, this._mutatedSequence.nt(pi));
-                        this._mutatedSequence.setNt(pi, clickBase);
-
-                        this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
-                        this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
-                    }
-                } else if (this._currentColor === RNAPaint.AU_PAIR) {
-                    if (this._pairs.isPaired(seqnum)) {
-                        const pi = this._pairs.pairingPartner(seqnum);
-
-                        if (this.isLocked(pi)) {
-                            return;
-                        }
-
-                        this._mutatedSequence.setNt(seqnum, RNABase.ADENINE);
-                        this._mutatedSequence.setNt(pi, RNABase.URACIL);
-
-                        this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
-                        this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
-                    }
-                } else if (this._currentColor === RNAPaint.GC_PAIR) {
-                    if (this._pairs.isPaired(seqnum)) {
-                        const pi = this._pairs.pairingPartner(seqnum);
-
-                        if (this.isLocked(pi)) {
-                            return;
-                        }
-
-                        this._mutatedSequence.setNt(seqnum, RNABase.GUANINE);
-                        this._mutatedSequence.setNt(pi, RNABase.CYTOSINE);
-
-                        this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
-                        this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
-                    }
-                } else if (this._currentColor === RNAPaint.GU_PAIR) {
-                    if (this._pairs.isPaired(seqnum)) {
-                        const pi = this._pairs.pairingPartner(seqnum);
-
-                        if (this.isLocked(pi)) {
-                            return;
-                        }
-
-                        this._mutatedSequence.setNt(seqnum, RNABase.URACIL);
-                        this._mutatedSequence.setNt(pi, RNABase.GUANINE);
-
-                        this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
-                        this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
-                    }
-                } else if (this._dynPaintColors.indexOf(this._currentColor) >= 0) {
-                    const index: number = this._dynPaintColors.indexOf(this._currentColor);
-                    this._dynPaintTools[index].onPaint(this, seqnum);
+                this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
+                this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
+            } else if (this._currentColor === RNAPaint.AU_PAIR && this._pairs.isPaired(seqnum)) {
+                const pi = this._pairs.pairingPartner(seqnum);
+                if (this.isLocked(pi)) {
+                    return;
                 }
+
+                this._mutatedSequence.setNt(seqnum, RNABase.ADENINE);
+                this._mutatedSequence.setNt(pi, RNABase.URACIL);
+
+                this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
+                this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
+            } else if (this._currentColor === RNAPaint.GC_PAIR && this._pairs.isPaired(seqnum)) {
+                const pi = this._pairs.pairingPartner(seqnum);
+                if (this.isLocked(pi)) {
+                    return;
+                }
+
+                this._mutatedSequence.setNt(seqnum, RNABase.GUANINE);
+                this._mutatedSequence.setNt(pi, RNABase.CYTOSINE);
+
+                this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
+                this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
+            } else if (this._currentColor === RNAPaint.GU_PAIR && this._pairs.isPaired(seqnum)) {
+                const pi = this._pairs.pairingPartner(seqnum);
+                if (this.isLocked(pi)) {
+                    return;
+                }
+
+                this._mutatedSequence.setNt(seqnum, RNABase.URACIL);
+                this._mutatedSequence.setNt(pi, RNABase.GUANINE);
+
+                this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
+                this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
+            } else if (this._dynPaintColors.indexOf(this._currentColor) >= 0) {
+                const index: number = this._dynPaintColors.indexOf(this._currentColor);
+                this._dynPaintTools[index].onPaint(this, seqnum);
             }
         }
     }
@@ -2996,45 +3321,48 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         const cleavingSite: number = this._auxInfo[Pose2D.CLEAVING_SITE] as number;
-        if (cleavingSite < this._bases.length - 1) {
-            const bX: number = this._bases[cleavingSite].x + this._offX;
-            const bY: number = this._bases[cleavingSite].y + this._offY;
+        if (cleavingSite >= this._bases.length - 1) return;
 
-            const bNextX: number = this._bases[cleavingSite + 1].x + this._offX;
-            const bNextY: number = this._bases[cleavingSite + 1].y + this._offY;
+        const bX: number = this._bases[cleavingSite].x + this._offX;
+        const bY: number = this._bases[cleavingSite].y + this._offY;
 
-            const cX: number = (bX + bNextX) / 2.0;
-            const cY: number = (bY + bNextY) / 2.0;
+        const bNextX: number = this._bases[cleavingSite + 1].x + this._offX;
+        const bNextY: number = this._bases[cleavingSite + 1].y + this._offY;
 
-            const goX: number = bNextY - bY;
-            const goY: number = -(bNextX - bX);
+        const cX: number = (bX + bNextX) / 2.0;
+        const cY: number = (bY + bNextY) / 2.0;
 
-            this._auxInfoCanvas.lineStyle(3, 0xFF0000, 0.9);
-            this._auxInfoCanvas.moveTo(cX + goX / 2.0, cY + goY / 2.0);
-            this._auxInfoCanvas.lineTo(cX - goX / 2.0, cY - goY / 2.0);
+        const goX: number = bNextY - bY;
+        const goY: number = -(bNextX - bX);
 
-            this._auxTextballoon.display.position = new Point(cX + goX / 2.0, cY + goY / 2.0);
-        }
+        this._auxInfoCanvas.lineStyle(3, 0xFF0000, 0.9);
+        this._auxInfoCanvas.moveTo(cX + goX / 2.0, cY + goY / 2.0);
+        this._auxInfoCanvas.lineTo(cX - goX / 2.0, cY - goY / 2.0);
+
+        this._auxTextballoon.display.position = new Point(cX + goX / 2.0, cY + goY / 2.0);
     }
 
     private checkPairs(): void {
         const fullSeq = this.fullSequence;
 
         for (let ii = 0; ii < this._pairs.length; ii++) {
-            if (this._pairs.isPaired(ii) && this.isPairSatisfied(ii, this._pairs.pairingPartner(ii))) {
+            const pi = this._pairs.pairingPartner(ii);
+            if (this._pairs.isPaired(ii) && this.isPairSatisfied(ii, pi)) {
                 const pairStr: number = Pose2D.getPairStrength(
-                    fullSeq.nt(ii), fullSeq.nt(this._pairs.pairingPartner(ii))
+                    fullSeq.nt(ii), fullSeq.nt(pi)
                 );
 
-                if (this._baseToX && this._baseToY) {
+                if (this.isAnimating) {
+                    Assert.assertIsDefined(this._baseToX);
+                    Assert.assertIsDefined(this._baseToY);
                     this._bases[ii].setPairing(true,
-                        this._baseToX[this._pairs.pairingPartner(ii)] - this._baseToX[ii],
-                        this._baseToY[this._pairs.pairingPartner(ii)] - this._baseToY[ii],
+                        this._baseToX[pi] - this._baseToX[ii],
+                        this._baseToY[pi] - this._baseToY[ii],
                         0.5, pairStr);
                 } else {
                     this._bases[ii].setPairing(true,
-                        this._bases[this._pairs.pairingPartner(ii)].x - this._bases[ii].x,
-                        this._bases[this._pairs.pairingPartner(ii)].y - this._bases[ii].y,
+                        this._bases[pi].x - this._bases[ii].x,
+                        this._bases[pi].y - this._bases[ii].y,
                         0.5, pairStr);
                 }
             } else {
@@ -3049,7 +3377,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             return;
         }
 
-        if (this._baseToX != null) {
+        if (this.isAnimating) {
             this._scoreNodeIndex = -1;
         }
 
@@ -3084,31 +3412,31 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._lastScoreNodeIndex = this._scoreNodeIndex;
         }
 
-        if (this._scoreTexts != null) {
-            for (let ii = 0; ii < this._scoreNodes.length; ii++) {
-                const indices: number[] | null = this._scoreNodes[ii].baseIndices;
-                Assert.assertIsDefined(indices);
-                let xAvg = 0;
-                let yAvg = 0;
+        if (this._scoreTexts == null) return;
 
-                for (let jj = 0; jj < indices.length; jj++) {
-                    const p: Point = this.getBaseLoc(indices[jj]);
-                    xAvg += p.x;
-                    yAvg += p.y;
-                }
+        for (let ii = 0; ii < this._scoreNodes.length; ii++) {
+            const indices: number[] | null = this._scoreNodes[ii].baseIndices;
+            Assert.assertIsDefined(indices);
+            let xAvg = 0;
+            let yAvg = 0;
 
-                if (indices.length > 0) {
-                    xAvg /= indices.length;
-                    yAvg /= indices.length;
-                }
-
-                xAvg -= this._scoreTexts[ii].width / 2;
-                yAvg -= this._scoreTexts[ii].height / 2;
-
-                this._scoreTexts[ii].position = new Point(xAvg, yAvg);
-                this._scoreTexts[ii].visible = (this._zoomLevel < 4);
-                this.updateEnergyHighlight(this._scoreTexts[ii], ii, this._scoreTexts[ii].visible);
+            for (let jj = 0; jj < indices.length; jj++) {
+                const p: Point = this.getBaseLoc(indices[jj]);
+                xAvg += p.x;
+                yAvg += p.y;
             }
+
+            if (indices.length > 0) {
+                xAvg /= indices.length;
+                yAvg /= indices.length;
+            }
+
+            xAvg -= this._scoreTexts[ii].width / 2;
+            yAvg -= this._scoreTexts[ii].height / 2;
+
+            this._scoreTexts[ii].position = new Point(xAvg, yAvg);
+            this._scoreTexts[ii].visible = (this._zoomLevel < 4);
+            this.updateEnergyHighlight(this._scoreTexts[ii], ii, this._scoreTexts[ii].visible);
         }
     }
 
@@ -3123,13 +3451,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (this._scoreNodes != null) {
             let totalScore = 0;
             let nodeFound = false;
-            let nodeTxt = '';
             let nodeLabel = '';
             let nodeScore = '';
 
             Assert.assertIsDefined(Flashbang.globalMouse);
             if (this._poseField.containsPoint(Flashbang.globalMouse.x, Flashbang.globalMouse.y)) {
-                // AMW TODO POINT IPOINT
                 let mouseP: Point = new Point(0, 0);
                 mouseP = mouseP.copyFrom(this.display.toLocal(Flashbang.globalMouse, undefined, Pose2D.MOUSE_LOC));
                 const baseXys: Point[] = [];
@@ -3147,7 +3473,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     }
 
                     if (!nodeFound && Utility.isPointWithin(mouseP, nodePoints)) {
-                        nodeTxt = this._scoreNodes[ii].text;
                         nodeLabel = this._scoreNodes[ii].textLabel;
                         nodeScore = this._scoreNodes[ii].textScore;
                         nodeFound = true;
@@ -3328,8 +3653,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        let childCoords: number[];
-
         if (root.isPair) {
             if (root.children.length > 1) {
                 throw new Error("Something's wrong with score tree");
@@ -3337,7 +3660,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
             if (root.children.length !== 0) {
                 if (root.children[0].isPair) {
-                    childCoords = [];
+                    const childCoords = [];
 
                     childCoords.push(root.indexA);
                     childCoords.push(root.indexB);
@@ -3351,7 +3674,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
                     this.generateScoreNodesRecursive(root.children[0], null, nodes);
                 } else {
-                    childCoords = [];
+                    const childCoords = [];
 
                     childCoords.push(root.indexB);
                     childCoords.push(root.indexA);
@@ -3383,7 +3706,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     private createBase(): Base {
-        const base: Base = new Base(this, RNABase.GUANINE);
+        const base: Base = new Base(RNABase.GUANINE);
         this.addObject(base, this._baseLayer);
         this._bases.push(base);
         return base;
@@ -3449,7 +3772,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _oligo: number[] | null = null;
     private _oligoMode: number = Pose2D.OLIGO_MODE_DIMER;
     private _oligoName: string | null = null;
-    private _duplexCost: number = EPars.DUPLEX_INIT; // total for all strands
+    private _duplexCost: number = 4.1; // total for all strands
     private _oligoMalus: number = 0; // concentration related penalty
     private _oligoBases: BaseGlow[] | null = null; // for glows
     private _oligoPaired: boolean = false;
@@ -3471,6 +3794,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _lockUpdated: boolean;
     private _bindingSiteUpdated: boolean;
     private _designStructUpdated: boolean;
+
+    private _currentArrangementTool: Layout = Layout.MOVE;
 
     // Rope connecting bases for crazy user-defined layouts
     private _baseRope: BaseRope;
@@ -3595,8 +3920,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _auxInfo: AuxInfo | null;
     private _auxInfoCanvas: Graphics;
     private _auxTextballoon: TextBalloon;
-
-    private _feedbackObjs: SceneObject[] = [];
 
     private _anchoredObjects: RNAAnchorObject[] = [];
     private _highlightEnergyText: boolean = false;

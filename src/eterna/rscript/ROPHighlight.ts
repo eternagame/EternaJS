@@ -1,5 +1,5 @@
 import * as log from 'loglevel';
-import {Graphics, Point, Rectangle} from 'pixi.js';
+import {Graphics, Point} from 'pixi.js';
 import {
     GameObject, RepeatingTask, SceneObject, SerialTask, Easing, AlphaTask, ColorUtil, Assert
 } from 'flashbang';

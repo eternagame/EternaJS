@@ -12,6 +12,9 @@ import SecStruct from './rnatypes/SecStruct';
 import Sequence from './rnatypes/Sequence';
 import {TargetType} from './puzzle/Puzzle';
 
+/**
+ * FoldData is a schema for JSON-ified UndoBlocks.
+ */
 export interface FoldData {
     folderName_: string;
     sequence_: number[];
@@ -26,7 +29,7 @@ export interface FoldData {
     target_oligo_order_?: number[];
     puzzle_locks_?: boolean[];
     forced_struct_: number[];
-    target_conditions_?: string;
+    target_conditions_?: TargetConditions;
 }
 
 // amw fuck a lot of these are optional
@@ -35,7 +38,7 @@ export interface TargetConditions {
     secstruct: string;
     sequence?: string;
     IUPAC?: string;
-    'custom-layout'?: [[number, number] | [null, null]];
+    'custom-layout'?: ([number, number] | [null, null])[];
     'custom-reference'?: string;
     'custom-numbering'?: string;
     oligo_concentration?: string | number; // the strings have to be convertible
@@ -99,7 +102,7 @@ export enum BasePairProbabilityTransform {
     SQUARE
 }
 
-type Param = (number | number[] | null);
+type Param = (number | number[] | DotPlot | null);
 
 export default class UndoBlock {
     constructor(seq: Sequence, folderName: string) {
@@ -115,7 +118,7 @@ export default class UndoBlock {
         // Map an array of secondary structures to just pairs because then it
         // can be nicely serialized.
         const m = new Map<boolean, number[][]>();
-        pa.forEach((v: SecStruct[], k: boolean, map: Map<boolean, SecStruct[]>) => {
+        pa.forEach((v: SecStruct[], k: boolean, _map: Map<boolean, SecStruct[]>) => {
             m.set(k, v.map((it) => it.pairs));
         });
         return m;
@@ -171,16 +174,18 @@ export default class UndoBlock {
             } else {
                 this._paramsArray = json.params_array_;
             }
-            this._stable = json.stable_;// JSONUtil.require(json, 'stable_');
-            this._targetOligo = json.target_oligo_;// JSONUtil.require(json, 'target_oligo_');
-            this._targetOligos = json.target_oligos_;// JSONUtil.require(json, 'target_oligos_');
-            this._oligoOrder = json.oligo_order_;// JSONUtil.require(json, 'oligo_order_');
-            this._oligosPaired = json.oligos_paired_;// JSONUtil.require(json, 'oligos_paired_');
-            this._targetPairs = new SecStruct(json.target_pairs_);// JSONUtil.require(json, 'target_pairs_');
-            this._targetOligoOrder = json.target_oligo_order_; // JSONUtil.require(json, 'target_oligo_order_');
-            this._puzzleLocks = json.puzzle_locks_;// JSONUtil.require(json, 'puzzle_locks_');
-            this._forcedStruct = json.forced_struct_;// JSONUtil.require(json, 'forced_struct_');
-            this._targetConditions = json.target_conditions_;// JSONUtil.require(json, 'target_conditions_'); // setter
+            this._stable = json.stable_;
+            this._targetOligo = json.target_oligo_;
+            this._targetOligos = json.target_oligos_;
+            this._oligoOrder = json.oligo_order_;
+            this._oligosPaired = json.oligos_paired_;
+            this._targetPairs = new SecStruct(json.target_pairs_);
+            this._targetOligoOrder = json.target_oligo_order_;
+            this._puzzleLocks = json.puzzle_locks_;
+            this._forcedStruct = json.forced_struct_;
+            this._targetConditions = json.target_conditions_
+                ? json.target_conditions_
+                : undefined;
         } catch (e) {
             throw new Error(`Error parsing UndoBlock JSON: ${e}`);
         }
@@ -207,17 +212,10 @@ export default class UndoBlock {
             }
 
             const jjprob = pairedPer.get(dotArray.data[jj]);
-            if (jjprob !== undefined) {
-                pairedPer.set(dotArray.data[jj], jjprob + prob);
-            } else {
-                pairedPer.set(dotArray.data[jj], prob);
-            }
+            pairedPer.set(dotArray.data[jj], jjprob ? jjprob + prob : prob);
+
             const jjp1prob = pairedPer.get(dotArray.data[jj + 1]);
-            if (jjp1prob !== undefined) {
-                pairedPer.set(dotArray.data[jj + 1], jjp1prob + prob);
-            } else {
-                pairedPer.set(dotArray.data[jj + 1], prob);
-            }
+            pairedPer.set(dotArray.data[jj + 1], jjp1prob ? jjp1prob + prob : prob);
         }
 
         let TP = 1e-6;
@@ -336,11 +334,11 @@ export default class UndoBlock {
     }
 
     public get targetConditions(): TargetConditions | undefined {
-        return (this._targetConditions === undefined ? undefined : JSON.parse(this._targetConditions));
+        return (this._targetConditions === undefined ? undefined : this._targetConditions);
     }
 
     public set targetConditions(conditions: TargetConditions | undefined) {
-        this._targetConditions = JSON.stringify(conditions);
+        this._targetConditions = conditions;
     }
 
     public get stable(): boolean {
@@ -354,14 +352,14 @@ export default class UndoBlock {
     public getPairs(temp: number = 37, pseudoknots: boolean = false): SecStruct {
         const pairsArray = this._pairsArray.get(pseudoknots);
         Assert.assertIsDefined(pairsArray);
-        return new SecStruct(pairsArray[temp].pairs);
+        return new SecStruct(pairsArray[temp]?.pairs) ?? null;
     }
 
     public getParam(
         index: UndoBlockParam,
         temp: number = 37,
         pseudoknots: boolean = false
-    ): number | number[] | null {
+    ): number | number[] | DotPlot | null {
         const paramsArray = this._paramsArray.get(pseudoknots);
         Assert.assertIsDefined(paramsArray);
         if (paramsArray[temp] != null) {
@@ -528,28 +526,6 @@ export default class UndoBlock {
             throw new Error(`Critical error: can't create a ${this._folderName} folder instance by name`);
         }
 
-        if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) == null) {
-            const dotArray: DotPlot | null = folder.getDotPlot(
-                this.sequence, this.getPairs(37), 37, pseudoknots
-            );
-            this.setParam(UndoBlockParam.DOTPLOT, dotArray?.data ?? null, 37, pseudoknots);
-            // mean+sum prob unpaired
-            this.setParam(UndoBlockParam.SUMPUNP,
-                this.sumProbUnpaired(dotArray, bppStatisticBehavior), 37, pseudoknots);
-            this.setParam(UndoBlockParam.MEANPUNP,
-                this.sumProbUnpaired(dotArray, bppStatisticBehavior) / this.sequence.length, 37, pseudoknots);
-            // branchiness
-            this.setParam(UndoBlockParam.BRANCHINESS,
-                this.ensembleBranchiness(dotArray, bppStatisticBehavior), 37, pseudoknots);
-            this.setParam(
-                UndoBlockParam.TARGET_EXPECTED_ACCURACY,
-                this.targetExpectedAccuracy(this._targetPairs, dotArray, bppStatisticBehavior),
-                37,
-                pseudoknots
-            );
-            this._dotPlotData = dotArray;
-        }
-
         for (let ii = 37; ii < 100; ii += 10) {
             if (this.getPairs(ii) == null) {
                 const pairs: SecStruct | null = folder.foldSequence(this.sequence, null, null, pseudoknots, ii);
@@ -579,8 +555,29 @@ export default class UndoBlock {
             }
         }
 
-        const refPairs: SecStruct = this.getPairs(37, pseudoknots);
+        if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) === undefined) {
+            const dotArray: DotPlot | null = folder.getDotPlot(
+                this.sequence, this.getPairs(37), 37, pseudoknots
+            );
+            this.setParam(UndoBlockParam.DOTPLOT, dotArray?.data ?? null, 37, pseudoknots);
+            // mean+sum prob unpaired
+            this.setParam(UndoBlockParam.SUMPUNP,
+                this.sumProbUnpaired(dotArray, bppStatisticBehavior), 37, pseudoknots);
+            this.setParam(UndoBlockParam.MEANPUNP,
+                this.sumProbUnpaired(dotArray, bppStatisticBehavior) / this.sequence.length, 37, pseudoknots);
+            // branchiness
+            this.setParam(UndoBlockParam.BRANCHINESS,
+                this.ensembleBranchiness(dotArray, bppStatisticBehavior), 37, pseudoknots);
+            this.setParam(
+                UndoBlockParam.TARGET_EXPECTED_ACCURACY,
+                this.targetExpectedAccuracy(this._targetPairs, dotArray, bppStatisticBehavior),
+                37,
+                pseudoknots
+            );
+            this._dotPlotData = dotArray;
+        }
 
+        const refPairs: SecStruct = this.getPairs(37, pseudoknots);
         const pairScores: number[] = [];
         const maxPairScores: number[] = [];
 
@@ -687,6 +684,10 @@ export default class UndoBlock {
         );
     }
 
+    public get folderName(): string {
+        return this._folderName;
+    }
+
     private _sequence: Sequence = new Sequence([]);
     private _pairsArray: Map<boolean, SecStruct[]> = new Map<boolean, SecStruct[]>();
     private _paramsArray: Map<boolean, Param[][]> = new Map<boolean, Param[][]>();
@@ -699,7 +700,7 @@ export default class UndoBlock {
     private _targetOligoOrder: number[] | undefined = undefined;
     private _puzzleLocks: boolean[] | undefined = [];
     private _forcedStruct: number[] = [];
-    private _targetConditions: string | undefined = undefined;
+    private _targetConditions: TargetConditions | undefined = undefined;
 
     private _dotPlotData: DotPlot | null;
     private _meltPlotPairScores: number[];

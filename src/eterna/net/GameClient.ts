@@ -91,7 +91,13 @@ export default class GameClient {
 
     // / PUZZLES
 
-    public getPuzzle(puznid: number, scriptid: number): Promise<JSONData> {
+    public getPuzzle(puznid: number, scriptid: number): Promise<{
+        data: {
+            hairpins: string[];
+            puzzle: PuzzleJSON;
+            cleared: { nid: string }[];
+        };
+    }> {
         return this.get(GameClient.GET_URI, {type: 'puzzle', nid: puznid, script: scriptid})
             .then((rsp: Response) => rsp.json());
     }

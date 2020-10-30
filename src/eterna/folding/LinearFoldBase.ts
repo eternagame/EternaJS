@@ -1,6 +1,5 @@
 import * as log from 'loglevel';
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
-import EPars, {RNABase} from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import {Assert} from 'flashbang';
 import DotPlot from 'eterna/rnatypes/DotPlot';
@@ -146,7 +145,7 @@ export default abstract class LinearFoldBase extends Folder {
 
     public foldSequence(
         seq: Sequence, secondBestPairs: SecStruct | null, desiredPairs: string | null = null,
-        pseudoknotted: boolean = false, temp: number = 37
+        _pseudoknotted: boolean = false, temp: number = 37
     ): SecStruct {
         const key: CacheKey = {
             primitive: 'fold',
@@ -191,8 +190,8 @@ export default abstract class LinearFoldBase extends Folder {
     }
 
     public foldSequenceWithBindingSite(
-        seq: Sequence, targetPairs: SecStruct, bindingSite: number[], bonus: number,
-        version: number = 1.0, temp: number = 37
+        seq: Sequence, _targetPairs: SecStruct, _bindingSite: number[], _bonus: number,
+        _version: number = 1.0, _temp: number = 37
     ): SecStruct {
         log.warn('LinearFold.foldSequenceWithBindingSite: unimplemented');
         return this.foldSequence(seq, null);
@@ -203,8 +202,8 @@ export default abstract class LinearFoldBase extends Folder {
     }
 
     public cofoldSequence(
-        seq: Sequence, secondBestPairs: SecStruct, malus: number = 0,
-        desiredPairs: string | null = null, temp: number = 37
+        seq: Sequence, _secondBestPairs: SecStruct | null, _malus: number = 0,
+        _desiredPairs: string | null = null, _temp: number = 37
     ): SecStruct {
         log.warn('LinearFold.cofoldSequence: unimplemented');
         return this.foldSequence(seq, null);
@@ -215,36 +214,11 @@ export default abstract class LinearFoldBase extends Folder {
     }
 
     public cofoldSequenceWithBindingSite(
-        seq: Sequence, bindingSite: number[], bonus: number, desiredPairs: string | null = null,
-        malus: number = 0, temp: number = 37
+        seq: Sequence, _bindingSite: number[], _bonus: number, _desiredPairs: string | null = null,
+        _malus: number = 0, _temp: number = 37
     ): SecStruct {
         log.warn('LinearFold.cofoldSequenceWithBindingSite: unimplemented');
         return this.foldSequence(seq, null);
-    }
-
-    public mlEnergy(pairs: number[], S: number[], i: number, isExtloop: boolean): number {
-        log.warn('LinearFold.mlEnergy: unimplemented');
-        return 0;
-    }
-
-    public cutInLoop(i: number): number {
-        log.warn('LinearFold.cutInLoop: unimplemented');
-        return 0;
-    }
-
-    public loopEnergy(
-        n1: number, n2: number, type: number, type2: number,
-        si1: number, sj1: number, sp1: number, sq1: number, b1: boolean, b2: boolean
-    ): number {
-        log.warn('LinearFold.loopEnergy: unimplemented');
-        return 0;
-    }
-
-    public hairpinEnergy(
-        size: number, type: number, si1: number, sj1: number, sequence: number[], i: number, j: number
-    ): number {
-        log.warn('LinearFold.hairpinEnergy: unimplemented');
-        return 0;
     }
 
     private readonly _lib: LinearFoldLib;

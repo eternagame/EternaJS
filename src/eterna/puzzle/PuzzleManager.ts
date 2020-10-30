@@ -35,6 +35,7 @@ import SynthesisConstraint from 'eterna/constraints/constraints/SynthesisConstra
 import BarcodeConstraint from 'eterna/constraints/constraints/BarcodeConstraint';
 import ExternalInterface from 'eterna/util/ExternalInterface';
 import BoostConstraint from 'eterna/constraints/constraints/BoostConstraint';
+import RangePairedMaxConstraint from 'eterna/constraints/constraints/RangePairedMaxConstraint';
 import {Assert} from 'flashbang';
 import {TargetConditions} from 'eterna/UndoBlock';
 import SolutionManager from './SolutionManager';
@@ -135,12 +136,7 @@ export default class PuzzleManager {
 
         if (json['ui-specs']) {
             // New style UI elements (scripted) are identified as JSON objects
-            if (json['ui-specs'].substr(0, 1) === '{') {
-                newpuz.boosters = JSON.parse(json['ui-specs']);
-            } else {
-                // Fallback for the old tutorials
-                newpuz.uiSpecs = json['ui-specs'].split(',');
-            }
+            newpuz.boosters = JSON.parse(json['ui-specs']);
         }
 
         if (json['next-puzzle']) {
@@ -328,6 +324,9 @@ export default class PuzzleManager {
                     case BoostConstraint.NAME:
                         constraints.push(new BoostConstraint(Number(parameter)));
                         break;
+                    case RangePairedMaxConstraint.NAME:
+                        constraints.push(new RangePairedMaxConstraint(parameter));
+                        break;
                     default:
                         log.warn(`Unknown constraint ${name} - skipping`);
                 }
@@ -373,7 +372,7 @@ export default class PuzzleManager {
         );
 
         // Pre-load secondary puzzle
-        const [m, secondaryPuzzleId] = newpuz.rscript.match(/#PRE-PushPuzzle ([0-9]+);/) ?? [null, null];
+        const [, secondaryPuzzleId] = newpuz.rscript.match(/#PRE-PushPuzzle ([0-9]+);/) ?? [null, null];
         if (secondaryPuzzleId) {
             await this.getPuzzleByID(parseInt(secondaryPuzzleId, 10));
         }
@@ -420,8 +419,4 @@ export default class PuzzleManager {
     /* eslint-enable max-len */
 
     private static readonly RE_MISSION_TEXT = /<span id="mission">(.*?)<\/span>/s;
-}
-
-interface Array<T> {
-    filter<U extends T>(pred: (a: T) => a is U): U[];
 }

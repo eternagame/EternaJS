@@ -1,4 +1,3 @@
-import IntLoopPars from 'eterna/IntLoopPars';
 import Utility from 'eterna/util/Utility';
 import {StyledTextBuilder} from 'flashbang';
 import Arrays from 'flashbang/util/Arrays';
@@ -41,22 +40,6 @@ export enum RNAPaint {
 }
 
 export default class EPars {
-    public static readonly INF: number = 1000000;
-    public static readonly NST: number = 0;
-    public static readonly MAXLOOP: number = 30;
-    public static readonly MAX_NINIO: number = 300;
-    public static readonly LXC: number = 107.856;
-    public static readonly TERM_AU: number = 50;
-    public static readonly NBPAIRS: number = 7;
-    public static readonly ML_INTERN37: number = 40;
-    public static readonly TURN: number = 3;
-    public static readonly DANGLES: number = 1;
-
-    public static readonly ML_BASE37: number = 0;
-    public static readonly ML_CLOSING37: number = 340;
-
-    public static readonly DUPLEX_INIT: number = 4.1;
-
     // (almost) follows the Vienna convention for the BP array
     public static readonly FORCE_PAIRED: number = -1;
     public static readonly FORCE_PAIRED3P: number = -2;
@@ -68,9 +51,6 @@ export default class EPars {
 
     public static readonly DEFAULT_TEMPERATURE: number = 37;
 
-    public static readonly F_ninio37: number[] = [0, 40, 50, 20, 10];
-    /* only F[2] used */
-
     public static readonly RNABase_LAST20: number[] = [
         RNABase.ADENINE, RNABase.ADENINE, RNABase.ADENINE, RNABase.GUANINE,
         RNABase.ADENINE, RNABase.ADENINE, RNABase.ADENINE, RNABase.CYTOSINE,
@@ -78,29 +58,6 @@ export default class EPars {
         RNABase.ADENINE, RNABase.CYTOSINE, RNABase.ADENINE, RNABase.ADENINE,
         RNABase.CYTOSINE, RNABase.ADENINE, RNABase.ADENINE, RNABase.CYTOSINE
     ];
-
-    public static readonly HAIRPIN_37: number[] = [
-        EPars.INF, EPars.INF, EPars.INF, 570, 560, 560, 540, 590, 560, 640, 650,
-        660, 670, 678, 686, 694, 701, 707, 713, 719, 725,
-        730, 735, 740, 744, 749, 753, 757, 761, 765, 769];
-
-    public static readonly BULGE_37: number[] = [
-        EPars.INF, 380, 280, 320, 360, 400, 440, 459, 470, 480, 490,
-        500, 510, 519, 527, 534, 541, 548, 554, 560, 565,
-        571, 576, 580, 585, 589, 594, 598, 602, 605, 609];
-
-    public static readonly INTERNAL_37: number[] = [
-        EPars.INF, EPars.INF, 410, 510, 170, 180, 200, 220, 230, 240, 250,
-        260, 270, 278, 286, 294, 301, 307, 313, 319, 325,
-        330, 335, 340, 345, 349, 353, 357, 361, 365, 369];
-
-    public static mlIntern(i: number): number {
-        if (i > 2) {
-            return EPars.ML_INTERN37 + EPars.TERM_AU;
-        } else {
-            return EPars.ML_INTERN37;
-        }
-    }
 
     public static getBarcodeHairpin(seq: string): string | null {
         const hairpinMatch: RegExpExecArray | null = (/[AGUC]{7}UUCG([AGUC]{7})AAAAGAAACAACAACAACAAC$/i).exec(seq);
@@ -365,7 +322,39 @@ export default class EPars {
                 }
 
                 pairStack.pop();
-            } else if (parenthesis.charAt(jj) !== '.') {
+            }
+        }
+
+        // order 1 PKs
+        const pkStack: number[] = [];
+        for (let jj = 0; jj < parenthesis.length; jj++) {
+            if (parenthesis.charAt(jj) === '[') {
+                pkStack.push(jj);
+            } else if (parenthesis.charAt(jj) === ']') {
+                if (pkStack.length === 0) {
+                    return 'Unbalanced parenthesis notation []';
+                }
+
+                pkStack.pop();
+            }
+        }
+
+        // order 2 PKs
+        const pkStack2: number[] = [];
+        for (let jj = 0; jj < parenthesis.length; jj++) {
+            if (parenthesis.charAt(jj) === '{') {
+                pkStack2.push(jj);
+            } else if (parenthesis.charAt(jj) === '}') {
+                if (pkStack2.length === 0) {
+                    return 'Unbalanced parenthesis notation {}';
+                }
+
+                pkStack2.pop();
+            }
+        }
+
+        for (let jj = 0; jj < parenthesis.length; ++jj) {
+            if (!'.()[]{}'.includes(parenthesis.charAt(jj))) {
                 return `Unrecognized character ${parenthesis.charAt(jj)}`;
             }
         }
@@ -418,89 +407,7 @@ export default class EPars {
     }
 
     public static pairType(a: number, b: number): number {
-        return EPars.PAIR_TYPE_MAT[a * (EPars.NBPAIRS + 1) + b];
-    }
-
-    public static getBulge(i: number): number {
-        return EPars.BULGE_37[30] + (Number)(EPars.LXC * Math.log((Number)(i) / 30.0));
-    }
-
-    public static getInternal(i: number): number {
-        return EPars.INTERNAL_37[30] + (Number)(EPars.LXC * Math.log((Number)(i) / 30.0));
-    }
-
-    public static hairpinMismatch(type: number, s1: number, s2: number): number {
-        return EPars.MISMATCH_H37[type * 25 + s1 * 5 + s2];
-    }
-
-    public static internalMismatch(type: number, s1: number, s2: number): number {
-        return EPars.MISMATCH_I37[type * 25 + s1 * 5 + s2];
-    }
-
-    public static getStackScore(t1: number, t2: number, b1: boolean, b2: boolean): number {
-        if (b1 && b2) {
-            return EPars.STACK_37[t1 * (EPars.NBPAIRS + 1) + t2];
-        } else if ((!b1) && (!b2)) {
-            return EPars.STACK_37[t1 * (EPars.NBPAIRS + 1) + t2] + 200;
-        } else {
-            return EPars.STACK_37[t1 * (EPars.NBPAIRS + 1) + t2] + 100;
-        }
-    }
-
-    public static getTetraLoopBonus(loop: string): number {
-        for (let ii = 0; ii < EPars.TETRA_LOOPS.length; ii++) {
-            if (EPars.TETRA_LOOPS[ii] === loop) {
-                return EPars.TETRA_ENERGY_37[ii];
-            }
-        }
-
-        return 0;
-    }
-
-    public static getDangle5Score(t1: number, s: number): number {
-        const ret: number = EPars.DANGLE5_37[t1 * 5 + s];
-        if (ret > 0) {
-            return 0;
-        } else {
-            return ret;
-        }
-    }
-
-    public static getDangle3Score(t1: number, s: number): number {
-        const ret: number = EPars.DANGLE3_37[t1 * 5 + s];
-        if (ret > 0) {
-            return 0;
-        } else {
-            return ret;
-        }
-    }
-
-    public static getInt11(t1: number, t2: number, s1: number, s2: number): number {
-        return IntLoopPars.int11_37[s2 + s1 * 5 + t2 * 25 + t1 * (EPars.NBPAIRS + 1) * 25];
-    }
-
-    public static getInt21(t1: number, t2: number, s1: number, s2: number, s3: number): number {
-        return IntLoopPars.int21_37[s3 + s2 * 5 + s1 * 25 + t2 * 125 + t1 * (EPars.NBPAIRS + 1) * 125];
-    }
-
-    public static getInt22(t1: number, t2: number, s1: number, s2: number, s3: number, s4: number): number {
-        if (t1 === 0) {
-            return 0;
-        } else if (t1 === 1) {
-            return IntLoopPars.int22_37_1[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
-        } else if (t1 === 2) {
-            return IntLoopPars.int22_37_2[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
-        } else if (t1 === 3) {
-            return IntLoopPars.int22_37_3[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
-        } else if (t1 === 4) {
-            return IntLoopPars.int22_37_4[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
-        } else if (t1 === 5) {
-            return IntLoopPars.int22_37_5[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
-        } else if (t1 === 6) {
-            return IntLoopPars.int22_37_6[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
-        } else {
-            return IntLoopPars.int22_37_7[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
-        }
+        return EPars.PAIR_TYPE_MAT[a * 8 + b];
     }
 
     private static readonly PAIR_TYPE_MAT: number[] = [
@@ -513,150 +420,4 @@ export default class EPars {
         0, 0, 0, 0, 0, 0, 2, 0,
         0, 0, 0, 0, 0, 1, 0, 0,
         0, 6, 0, 0, 5, 0, 0, 0];
-
-    private static readonly MISMATCH_I37: number[] = [
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-
-        /* CG */
-        0, 0, 0, 0, 0, /* @@  @A  @C  @G  @U */
-        0, 0, 0, -110, 0, /* A@  AA  AC  AG  AU */
-        0, 0, 0, 0, 0, /* C@  CA  CC  CG  CU */
-        0, -110, 0, 0, 0, /* G@  GA  GC  GG  GU */
-        0, 0, 0, 0, -70, /* U@  UA  UC  UG  UU */
-
-        /* GC */
-        0, 0, 0, 0, 0, /* @@  @A  @C  @G  @U */
-        0, 0, 0, -110, 0, /* A@  AA  AC  AG  AU */
-        0, 0, 0, 0, 0, /* C@  CA  CC  CG  CU */
-        0, -110, 0, 0, 0, /* G@  GA  GC  GG  GU */
-        0, 0, 0, 0, -70, /* U@  UA  UC  UG  UU */
-
-        /* GU */
-        0, 0, 0, 0, 0, /* @@  @A  @C  @G  @U */
-        0, 70, 70, -40, 70, /* A@  AA  AC  AG  AU */
-        0, 70, 70, 70, 70, /* C@  CA  CC  CG  CU */
-        0, -40, 70, 70, 70, /* G@  GA  GC  GG  GU */
-        0, 70, 70, 70, 0, /* U@  UA  UC  UG  UU */
-
-        /* UG */
-        0, 0, 0, 0, 0, /* @@  @A  @C  @G  @U */
-        0, 70, 70, -40, 70, /* A@  AA  AC  AG  AU */
-        0, 70, 70, 70, 70, /* C@  CA  CC  CG  CU */
-        0, -40, 70, 70, 70, /* G@  GA  GC  GG  GU */
-        0, 70, 70, 70, 0, /* U@  UA  UC  UG  UU */
-
-        /* AU */
-        0, 0, 0, 0, 0, /* @@  @A  @C  @G  @U */
-        0, 70, 70, -40, 70, /* A@  AA  AC  AG  AU */
-        0, 70, 70, 70, 70, /* C@  CA  CC  CG  CU */
-        0, -40, 70, 70, 70, /* G@  GA  GC  GG  GU */
-        0, 70, 70, 70, 0, /* U@  UA  UC  UG  UU */
-
-        /* UA */
-        0, 0, 0, 0, 0, /* @@  @A  @C  @G  @U */
-        0, 70, 70, -40, 70, /* A@  AA  AC  AG  AU */
-        0, 70, 70, 70, 70, /* C@  CA  CC  CG  CU */
-        0, -40, 70, 70, 70, /* G@  GA  GC  GG  GU */
-        0, 70, 70, 70, 0, /* U@  UA  UC  UG  UU */
-
-        /* @@ */
-        90, 90, 90, 90, 90,
-        90, 90, 90, 90, -20,
-        90, 90, 90, 90, 90,
-        90, -20, 90, 90, 90,
-        90, 90, 90, 90, 20
-    ];
-
-    private static readonly MISMATCH_H37: number[] = [
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-
-        /* CG */
-        0, 0, 0, 0, 0, /* @@  @A  @C  @G  @U */
-        -90, -150, -150, -140, -180, /* A@  AA  AC  AG  AU */
-        -90, -100, -90, -290, -80, /* C@  CA  CC  CG  CU */
-        -90, -220, -200, -160, -110, /* G@  GA  GC  GG  GU */
-        -90, -170, -140, -180, -200, /* U@  UA  UC  UG  UU */
-        /* GC */
-        0, 0, 0, 0, 0, /* @@  @A  @C  @G  @U */
-        -70, -110, -150, -130, -210, /* A@  AA  AC  AG  AU */
-        -70, -110, -70, -240, -50, /* C@  CA  CC  CG  CU */
-        -70, -240, -290, -140, -120, /* G@  GA  GC  GG  GU */
-        -70, -190, -100, -220, -150, /* U@  UA  UC  UG  UU */
-        /* GU */
-        0, 0, 0, 0, 0, /* @@  @A  @C  @G  @U */
-        0, 20, -50, -30, -30, /* A@  AA  AC  AG  AU */
-        0, -10, -20, -150, -20, /* C@  CA  CC  CG  CU */
-        0, -90, -110, -30, 0, /* G@  GA  GC  GG  GU */
-        0, -30, -30, -40, -110, /* U@  UA  UC  UG  UU */
-        /* UG */
-        0, 0, 0, 0, 0, /* @@  @A  @C  @G  @U */
-        0, -50, -30, -60, -50, /* A@  AA  AC  AG  AU */
-        0, -20, -10, -170, 0, /* C@  CA  CC  CG  CU */
-        0, -80, -120, -30, -70, /* G@  GA  GC  GG  GU */
-        0, -60, -10, -60, -80, /* U@  UA  UC  UG  UU */
-        /* AU */
-        0, 0, 0, 0, 0, /* @@  @A  @C  @G  @U */
-        0, -30, -50, -30, -30, /* A@  AA  AC  AG  AU */
-        0, -10, -20, -150, -20, /* C@  CA  CC  CG  CU */
-        0, -110, -120, -20, 20, /* G@  GA  GC  GG  GU */
-        0, -30, -30, -60, -110, /* U@  UA  UC  UG  UU */
-        /* UA */
-        0, 0, 0, 0, 0, /* @@  @A  @C  @G  @U */
-        0, -50, -30, -60, -50, /* A@  AA  AC  AG  AU */
-        0, -20, -10, -120, -0, /* C@  CA  CC  CG  CU */
-        0, -140, -120, -70, -20, /* G@  GA  GC  GG  GU */
-        0, -30, -10, -50, -80, /* U@  UA  UC  UG  UU */
-        /* @@ */
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    ];
-
-    private static readonly STACK_37: number[] = [
-        /*          CG     GC     GU     UG     AU     UA  */
-        EPars.INF, EPars.INF, EPars.INF, EPars.INF, EPars.INF, EPars.INF, EPars.INF, EPars.INF,
-        EPars.INF, -240, -330, -210, -140, -210, -210, EPars.NST,
-        EPars.INF, -330, -340, -250, -150, -220, -240, EPars.NST,
-        EPars.INF, -210, -250, 130, -50, -140, -130, EPars.NST,
-        EPars.INF, -140, -150, -50, 30, -60, -100, EPars.NST,
-        EPars.INF, -210, -220, -140, -60, -110, -90, EPars.NST,
-        EPars.INF, -210, -240, -130, -100, -90, -130, EPars.NST,
-        EPars.INF, EPars.NST, EPars.NST, EPars.NST, EPars.NST, EPars.NST, EPars.NST, EPars.NST
-    ];
-
-    private static readonly DANGLE5_37: number[] = [
-        EPars.INF, EPars.INF, EPars.INF, EPars.INF, EPars.INF, /* no pair */
-        EPars.INF, -50, -30, -20, -10, /* CG  (stacks on C) */
-        EPars.INF, -20, -30, -0, -0, /* GC  (stacks on G) */
-        EPars.INF, -30, -30, -40, -20, /* GU */
-        EPars.INF, -30, -10, -20, -20, /* UG */
-        EPars.INF, -30, -30, -40, -20, /* AU */
-        EPars.INF, -30, -10, -20, -20, /* UA */
-        0, 0, 0, 0, 0 /*  @ */
-    ];
-
-    private static readonly DANGLE3_37: number[] = [
-        /*   @     A     C     G     U   */
-        EPars.INF, EPars.INF, EPars.INF, EPars.INF, EPars.INF, /* no pair */
-        EPars.INF, -110, -40, -130, -60, /* CG  (stacks on G) */
-        EPars.INF, -170, -80, -170, -120, /* GC */
-        EPars.INF, -70, -10, -70, -10, /* GU */
-        EPars.INF, -80, -50, -80, -60, /* UG */
-        EPars.INF, -70, -10, -70, -10, /* AU */
-        EPars.INF, -80, -50, -80, -60, /* UA */
-        0, 0, 0, 0, 0 /*  @ */
-    ];
-
-    private static readonly TETRA_ENERGY_37: number[] = [
-        300, -300, -300, -300, -300, -300, -300, -300, -300, -250, -250, -250,
-        -250, -250, -200, -200, -200, -200, -200, -150, -150, -150, -150, -150,
-        -150, -150, -150, -150, -150, -150];
-
-    private static readonly TETRA_LOOPS: string[] = [
-        'GGGGAC', 'GGUGAC', 'CGAAAG', 'GGAGAC', 'CGCAAG', 'GGAAAC', 'CGGAAG', 'CUUCGG', 'CGUGAG', 'CGAAGG',
-        'CUACGG', 'GGCAAC', 'CGCGAG', 'UGAGAG', 'CGAGAG', 'AGAAAU', 'CGUAAG', 'CUAACG', 'UGAAAG', 'GGAAGC',
-        'GGGAAC', 'UGAAAA', 'AGCAAU', 'AGUAAU', 'CGGGAG', 'AGUGAU', 'GGCGAC', 'GGGAGC', 'GUGAAC', 'UGGAAA'];
 }

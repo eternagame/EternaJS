@@ -32,15 +32,15 @@ export default abstract class Folder {
     }
 
     public scoreStructures(
-        seq: Sequence, secstruct: SecStruct, pseudoknotted: boolean = false,
-        temp: number = 37, outNodes: number[] | null = null
+        _seq: Sequence, _secstruct: SecStruct, _pseudoknotted: boolean = false,
+        _temp: number = 37, _outNodes: number[] | null = null
     ): number {
         return 0;
     }
 
     public foldSequence(
-        seq: Sequence, secstruct: SecStruct | null, desiredPairs: string | null = null,
-        pseudoknotted: boolean = false, temp: number = 37
+        _seq: Sequence, _secstruct: SecStruct | null, _desiredPairs: string | null = null,
+        _pseudoknotted: boolean = false, _temp: number = 37
     ): SecStruct | null {
         return null;
     }
@@ -50,8 +50,8 @@ export default abstract class Folder {
     }
 
     public foldSequenceWithBindingSite(
-        seq: Sequence, secstruct: SecStruct | null, bindingSite: number[], bonus: number,
-        version: number = 2.0, temp: number = 37
+        _seq: Sequence, _secstruct: SecStruct | null, _bindingSite: number[], _bonus: number,
+        _version: number = 2.0, _temp: number = 37
     ): SecStruct | null {
         return null;
     }
@@ -61,8 +61,8 @@ export default abstract class Folder {
     }
 
     public cofoldSequence(
-        seq: Sequence, secstruct: SecStruct | null, malus: number = 0,
-        desiredPairs: string | null = null, temp: number = 37
+        _seq: Sequence, _secstruct: SecStruct | null, _malus: number = 0,
+        _desiredPairs: string | null = null, _temp: number = 37
     ): SecStruct | null {
         return null;
     }
@@ -72,8 +72,8 @@ export default abstract class Folder {
     }
 
     public cofoldSequenceWithBindingSite(
-        seq: Sequence, bindingSite: number[], bonus: number, desiredPairs: string | null = null,
-        malus: number = 0, temp: number = 37
+        _seq: Sequence, _bindingSite: number[], _bonus: number, _desiredPairs: string | null = null,
+        _malus: number = 0, _temp: number = 37
     ): SecStruct | null {
         return null;
     }
@@ -87,7 +87,7 @@ export default abstract class Folder {
     }
 
     public getDotPlot(
-        seq: Sequence, secstruct: SecStruct, temp: number = 37, pseudoknots: boolean = false
+        _seq: Sequence, _secstruct: SecStruct, _temp: number = 37, _pseudoknots: boolean = false
     ): DotPlot | null {
         return null;
     }
@@ -97,15 +97,15 @@ export default abstract class Folder {
     }
 
     public multifold(
-        seq: Sequence, secstruct: SecStruct | null, oligos: Oligo[],
-        desiredPairs: string | null = null, temp: number = 37
+        _seq: Sequence, _secstruct: SecStruct | null, _oligos: Oligo[],
+        _desiredPairs: string | null = null, _temp: number = 37
     ): MultiFoldResult | undefined {
         return undefined;
     }
 
     public multifoldUnroll(
-        seq: Sequence, secstruct: SecStruct | null, oligos: Oligo[],
-        desiredPairs: string | null = null, temp: number = 37
+        _seq: Sequence, _secstruct: SecStruct | null, _oligos: Oligo[],
+        _desiredPairs: string | null = null, _temp: number = 37
     ): PoseOp[] | null {
         return null;
     }
@@ -122,27 +122,6 @@ export default abstract class Folder {
 
     protected loadCustomParams(): boolean {
         return false;
-    }
-
-    public hairpinEnergy(
-        size: number, type: number, si1: number, sj1: number, sequence: number[], i: number, j: number
-    ): number {
-        return 0;
-    }
-
-    public loopEnergy(
-        n1: number, n2: number, type: number,
-        type2: number, si1: number, sj1: number, sp1: number, sq1: number, b1: boolean, b2: boolean
-    ): number {
-        return 0;
-    }
-
-    public cutInLoop(i: number): number {
-        return 0;
-    }
-
-    public mlEnergy(pairs: number[], S: number[], i: number, isExtloop: boolean): number {
-        return 0;
     }
 
     protected putCache(key: CacheKey, data: CacheItem): void {

@@ -1,7 +1,7 @@
 import {ContainerObject} from 'flashbang';
 import ConstraintBox from 'eterna/constraints/ConstraintBox';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import {Point, Sprite, Graphics} from 'pixi.js';
+import {Point, Sprite} from 'pixi.js';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import GameButton from './GameButton';
 import UITheme from './UITheme';
@@ -26,7 +26,6 @@ export default class MissionIntroConstraints extends ContainerObject {
     private _leftButton: GameButton;
     private _rightButton: GameButton;
     private _activePageDot: Sprite;
-    private _separators: Graphics;
 
     public get actualWidth() {
         return this._actualWidth;
@@ -150,7 +149,6 @@ export default class MissionIntroConstraints extends ContainerObject {
         const pageEnd = (this._currentPage + 1) * this._maxItemsPerPage;
         let xWalker = this._leftButton.container.width;
 
-        let lastVisibleConstraint: ConstraintBox | null = null;
         this._props.constraints.forEach((constraint, index) => {
             const visible = index >= pageStart && index < pageEnd;
             constraint.container.visible = visible;
@@ -160,7 +158,6 @@ export default class MissionIntroConstraints extends ContainerObject {
                 xWalker += constraint.width
                     + constraint.sideTextOffset
                     + theme.spacing;
-                lastVisibleConstraint = constraint;
             }
         });
 

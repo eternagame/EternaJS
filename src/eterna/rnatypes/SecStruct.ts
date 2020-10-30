@@ -74,7 +74,7 @@ export default class SecStruct {
      * @param pi
      */
     public setPairingPartner(index: number, pi: number): void {
-        if (this.isPaired(index)) {
+        if (this.isPaired(index) && this.pairingPartner(index) !== pi) {
             this._pairs[this.pairingPartner(index)] = -1;
         }
         this._pairs[index] = pi;
@@ -271,6 +271,59 @@ export default class SecStruct {
         }
     }
 
+    public stems(): [number, number][][] {
+        const stems: [number, number][][] = [];
+
+        for (let ii = 0; ii < this.length; ++ii) {
+            const pi = this.pairingPartner(ii);
+            if (ii > pi) {
+                continue;
+            }
+
+            if (this.isPaired(ii)) {
+                // look through stems
+                let broke = false;
+                for (const stem of stems) {
+                    // if there is an adjacent pair, put it on
+                    for (const bp of stem) {
+                        if ((bp[0] === ii - 1 && bp[1] === pi + 1)
+                                || (bp[0] === ii + 1 && bp[1] === pi - 1)
+                                || (bp[1] === ii - 1 && bp[0] === pi + 1)
+                                || (bp[1] === ii + 1 && bp[0] === pi - 1)) {
+                            stem.push([ii, pi]);
+                            broke = true;
+                            break;
+                        }
+                    }
+                    if (broke) break;
+                }
+                if (!broke) {
+                    stems.push([[ii, pi]]);
+                }
+            }
+        }
+
+        return stems;
+    }
+
+    /**
+     * Return all the nt that are in a stem with this nt
+     * @param idx
+     */
+    public stemWith(idx: number): [number, number][] {
+        const stems = this.stems();
+        const pi = this.pairingPartner(idx);
+        for (const stem of stems) {
+            for (const bp of stem) {
+                if ((bp[0] === idx && bp[1] === pi)
+                        || (bp[1] === idx && bp[0] === pi)) {
+                    return stem;
+                }
+            }
+        }
+        return [];
+    }
+
     /**
      * Return the dot-bracket notation.
      * @param seq Sequence passed just for the sake of locating the cutpoint, if
@@ -397,7 +450,7 @@ export default class SecStruct {
             .replace(/>/g, '.');
 
         const ss = new SecStruct();
-        ss.setPairs(filtered, true);
+        ss.setPairs(filtered, false);
         return ss;
     }
 

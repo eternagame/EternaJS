@@ -1,9 +1,9 @@
 import {
-    Container, Graphics, Point, IPoint, Text, Sprite, Texture
+    Container, Graphics, Point, Text, Sprite
 } from 'pixi.js';
 import {Signal, UnitSignal} from 'signals';
 import {
-    ContainerObject, TextBuilder, Flashbang, Assert, VLayoutContainer, SceneObject, HAlign
+    ContainerObject, TextBuilder, VLayoutContainer, SceneObject
 } from 'flashbang';
 import Feedback, {BrentTheoData} from 'eterna/Feedback';
 import GameButton from 'eterna/ui/GameButton';

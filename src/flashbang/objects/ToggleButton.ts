@@ -8,7 +8,7 @@ export default abstract class ToggleButton extends Button {
     protected constructor() {
         super();
 
-        this.toggled.connect((toggled: boolean) => this.onToggledChanged(toggled));
+        this.toggled.connect(() => this.onToggledChanged());
 
         this.clicked.connect(() => {
             if (this.enabled) {
@@ -21,7 +21,7 @@ export default abstract class ToggleButton extends Button {
         this.toggled.value = !this.toggled.value;
     }
 
-    protected onToggledChanged(toggled: boolean): void {
+    protected onToggledChanged(): void {
         this.showState(this._state);
     }
 }

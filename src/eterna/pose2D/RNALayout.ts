@@ -512,7 +512,6 @@ export default class RNALayout {
             throw new Error('Made it to drawTreeCustomLayout, but the _customLayout is null!');
         }
 
-        let ii: number;
         const crossX: number = -goY * rotationDirection;
         const crossY: number = goX * rotationDirection;
 
@@ -1000,7 +999,19 @@ export default class RNALayout {
         // we encode pairs as -1 == unpaired, 0-indexed seqpos == paired
         // that means that EACH of their entries need to be ++ed
         const pairTable: number[] = [this._nopseudoknotPairs.length,
-            ...this._nopseudoknotPairs.pairs.slice().map((value: number) => value + 1)];
+            ...this._nopseudoknotPairs.pairs.slice().map((value: number, ii: number) => {
+                if (value === ii + 2) {
+                    return 0;
+                } else if (value === ii + 3) {
+                    return 0;
+                } else if (value === ii - 2) {
+                    return 0;
+                } else if (value === ii - 3) {
+                    return 0;
+                } else {
+                    return value + 1;
+                }
+            })];
 
         const rnap = LayoutEngineManager.instance.getLayoutEngine(RNApuzzler.NAME);
 
@@ -1043,7 +1054,7 @@ export default class RNALayout {
         if (this._targetPairs !== null) {
             for (let ii = 0; ii < this._targetPairs.length - 1; ii++) {
                 // look for a stacked pair
-                if (this._targetPairs.pairingPartner(ii) === this._targetPairs.pairingPartner(ii + 1) - 1) {
+                if (this._targetPairs.pairingPartner(ii) === this._targetPairs.pairingPartner(ii + 1) + 1) {
                     const customA = customLayout[ii];
                     const customB = customLayout[ii + 1];
                     if (

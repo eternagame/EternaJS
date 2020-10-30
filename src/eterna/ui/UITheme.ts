@@ -1,4 +1,5 @@
 import Fonts from 'eterna/util/Fonts';
+import HTMLTextObject from './HTMLTextObject';
 
 export default class UITheme {
     public static readonly colors = {
@@ -43,4 +44,13 @@ export default class UITheme {
             text: 0xFFFFFF
         }
     };
+
+    public static makeTitle(title: string, color: number) {
+        return new HTMLTextObject(title, undefined, undefined, true)
+            .font(Fonts.STDFONT)
+            .fontSize(14)
+            .bold()
+            .selectable(false)
+            .color(color);
+    }
 }

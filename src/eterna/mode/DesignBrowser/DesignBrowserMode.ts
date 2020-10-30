@@ -1,7 +1,7 @@
 import * as log from 'loglevel';
 import MultiStyleText from 'pixi-multistyle-text';
 import {
-    Container, Graphics, Point, Sprite, Text, NineSlicePlane
+    Container, Graphics, Point, Sprite, Text
 } from 'pixi.js';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Eterna from 'eterna/Eterna';
@@ -16,7 +16,6 @@ import {
 import GameButton from 'eterna/ui/GameButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import BitmapManager from 'eterna/resources/BitmapManager';
-import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import Solution from 'eterna/puzzle/Solution';
 import SolutionManager from 'eterna/puzzle/SolutionManager';
 import int from 'eterna/util/int';
@@ -33,7 +32,6 @@ import MarkerBoxView from './MarkerBoxView';
 import GridLines from './GridLines';
 import DataCol from './DataCol';
 import CustomizeColumnOrderDialog from './CustomizeColumnOrderDialog';
-import PoseEditMode from '../PoseEdit/PoseEditMode';
 
 export interface DBVote {
     canVote: boolean;
@@ -276,12 +274,7 @@ export default class DesignBrowserMode extends GameMode {
         homeArrow.position = new Point(45, 14);
         this.uiLayer.addChild(homeArrow);
 
-        const puzzleTitle = new HTMLTextObject(this._puzzle.getName(!Eterna.MOBILE_APP), undefined, undefined, true)
-            .font(Fonts.STDFONT)
-            .fontSize(14)
-            .bold()
-            .selectable(false)
-            .color(0xffffff);
+        const puzzleTitle = UITheme.makeTitle(this._puzzle.getName(!Eterna.MOBILE_APP), 0xffffff);
         puzzleTitle.hideWhenModeInactive();
         this.addObject(puzzleTitle, this.uiLayer);
         DisplayUtil.positionRelative(
@@ -702,7 +695,7 @@ export default class DesignBrowserMode extends GameMode {
             return;
         }
 
-        const [index, yOffset] = this._dataCols[0].getMouseIndex(e);
+        const [index] = this._dataCols[0].getMouseIndex(e);
         if (index >= 0 && index < this._filteredSolutions.length) {
             this._selectionBox.visible = true;
             this.updateSelectionBoxPos(index);

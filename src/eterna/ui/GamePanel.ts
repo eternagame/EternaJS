@@ -1,5 +1,5 @@
 import {
-    Graphics, Point, Text, Rectangle
+    Graphics, Point, Text
 } from 'pixi.js';
 import Fonts from 'eterna/util/Fonts';
 import BaseGamePanel from './BaseGamePanel';

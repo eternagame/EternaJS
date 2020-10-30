@@ -13,7 +13,6 @@ import {
 import Fonts from 'eterna/util/Fonts';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import EternaURL from 'eterna/net/EternaURL';
-import {FontWeight} from 'flashbang/util/TextBuilder';
 import GameButton from './GameButton';
 import GamePanel from './GamePanel';
 import HTMLTextObject from './HTMLTextObject';

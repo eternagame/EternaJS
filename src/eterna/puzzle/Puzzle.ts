@@ -155,7 +155,7 @@ export default class Puzzle {
     public get targetConditions(): (TargetConditions | undefined)[] {
         if (this._targetConditions == null) {
             const targetConditions: (TargetConditions | undefined)[] = this._secstructs.map(
-                (s) => undefined
+                () => undefined
             );
             return targetConditions;
         } else {
@@ -174,7 +174,7 @@ export default class Puzzle {
     public get puzzleLocks(): boolean[] {
         if (this._puzzleLocks == null && !this._useTails) {
             return this._secstructs[0].split('').map(
-                (ii) => false
+                () => false
             );
         } else if (this._useTails) {
             const puzlocks = [];
@@ -299,24 +299,6 @@ export default class Puzzle {
         this._savedSequence = Sequence.fromSequenceString(seq);
     }
 
-    public set uiSpecs(uiSpec: string[]) {
-        this._defaultPoseState = null;
-        this._useModes = 0;
-
-        for (let ii = 0; ii < uiSpec.length; ii++) {
-            if (uiSpec[ii] === 'NOMODES') {
-                this._useModes = Puzzle.BOOL_FALSE;
-            } else if (uiSpec[ii] === 'STARTSTATE') {
-                this._defaultPoseState = uiSpec[ii + 1].toUpperCase() as PoseState;
-                ii++;
-            } else if (uiSpec[ii] === 'NOTOOLS') {
-                this._useTools = Puzzle.BOOL_FALSE;
-            } else if (uiSpec[ii] === 'NOPALLETE') {
-                this._usePallete = Puzzle.BOOL_FALSE;
-            }
-        }
-    }
-
     public get boosters(): BoostersData | null {
         return this._boosterDefs;
     }
@@ -380,14 +362,6 @@ export default class Puzzle {
         this._useBarcode = useBarcode;
     }
 
-    public get isUndoZoomAllowed(): boolean {
-        if (this._useTools !== 0) {
-            return this._useTools === Puzzle.BOOL_TRUE;
-        }
-
-        return true;
-    }
-
     public get isPairBrushAllowed(): boolean {
         const isBasic: boolean = (this._puzzleType !== PuzzleType.BASIC);
         const hasTarget = this._constraints !== null && this._constraints.some(
@@ -395,20 +369,6 @@ export default class Puzzle {
         );
 
         return isBasic || hasTarget;
-    }
-
-    public get areModesAvailable(): boolean {
-        if (this._useModes !== 0) {
-            return this._useModes === Puzzle.BOOL_TRUE;
-        }
-        return true;
-    }
-
-    public get isPalleteAllowed(): boolean {
-        if (this._usePallete !== 0) {
-            return this._usePallete === Puzzle.BOOL_TRUE;
-        }
-        return true;
     }
 
     public get defaultMode(): PoseState {
@@ -449,7 +409,7 @@ export default class Puzzle {
         }
     }
 
-    public getSecstructs(index: number = 0): string[] {
+    public getSecstructs(): string[] {
         const secstructs: string[] = [];
         for (let ii = 0; ii < this._secstructs.length; ii++) {
             secstructs.push(this.getSecstruct(ii));
@@ -609,9 +569,6 @@ export default class Puzzle {
     private _reward: number = 0;
     private _rscriptOps: string = '';
     private _defaultPoseState: PoseState | null;
-    private _useTools: number = 0;
-    private _usePallete: number = 0;
-    private _useModes: number = 0;
     private _nextPuzzle: number = -1;
     private _hint: string | null = null;
     private _isSoftConstraint: boolean = false;
@@ -621,9 +578,6 @@ export default class Puzzle {
 
     private static readonly T_APTAMER: string[] = ['aptamer', 'aptamer+oligo'];
     private static readonly T_OLIGO: string[] = ['oligo', 'aptamer+oligo'];
-
-    private static readonly BOOL_TRUE: number = 1;
-    private static readonly BOOL_FALSE: number = 2;
 
     private static readonly DEFAULT_MISSION_TEXT: string = 'Match the desired RNA shape!';
 }
