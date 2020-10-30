@@ -395,7 +395,7 @@ export default class PoseEditMode extends GameMode {
         Assert.assertIsDefined(Flashbang.stageHeight);
         this._exitButton.display.position = new Point(
             Flashbang.stageWidth - 85 - this._solDialogOffset,
-            Flashbang.stageHeight - 60
+            Flashbang.stageHeight - 120
         );
         this._undockSpecBoxButton.display.position = new Point(Flashbang.stageWidth - 22 - this._solDialogOffset, 5);
 

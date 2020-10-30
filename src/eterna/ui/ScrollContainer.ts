@@ -28,7 +28,7 @@ export default class ScrollContainer extends ContainerObject {
         this._htmlWrapper.style.pointerEvents = 'none';
         overlayEl.appendChild(this._htmlWrapper);
 
-        this._doLayout();
+        this.doLayout();
     }
 
     protected dispose(): void {
@@ -77,10 +77,10 @@ export default class ScrollContainer extends ContainerObject {
         this._width = width;
         this._height = height;
 
-        this._doLayout();
+        this.doLayout();
     }
 
-    private _doLayout() {
+    public doLayout() {
         const prevScrollX = this.scrollX;
         const prevScrollY = this.scrollY;
 

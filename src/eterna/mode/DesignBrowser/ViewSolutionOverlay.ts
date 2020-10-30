@@ -26,7 +26,6 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import GameButton from 'eterna/ui/GameButton';
 import Fonts from 'eterna/util/Fonts';
 import BitmapManager from 'eterna/resources/BitmapManager';
-import Utility from 'eterna/util/Utility';
 import EternaURL from 'eterna/net/EternaURL';
 import TextInputObject from 'eterna/ui/TextInputObject';
 import VScrollBox from 'eterna/ui/VScrollBox';
@@ -141,10 +140,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
 
         // update scroll
         const pxdelta: number = InputUtil.scrollAmount(e, 13, this._scrollView.height);
-
-        this._scrollView.scrollTo(
-            this._scrollView.scrollProgress + pxdelta / this._scrollView.content.height
-        );
+        this._scrollView.scrollLocation += pxdelta;
 
         return true;
     }
@@ -506,6 +502,8 @@ export default class ViewSolutionOverlay extends ContainerObject {
         this._footer.addVSpacer(20);
 
         this.updateLayout();
+
+        this._scrollView.doLayout();
 
         // Load comments
         this._comments = new LabComments(this._props.solution.nodeID);
