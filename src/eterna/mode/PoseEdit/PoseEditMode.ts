@@ -2018,7 +2018,9 @@ export default class PoseEditMode extends GameMode {
 
         let data: SubmitSolutionData;
 
-        if (!this._puzzle.alreadySolved || this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
+        if (!this._puzzle.alreadySolved
+            || this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
+            || this._puzzle.rscript !== '') {
             // submit our solution to the server
             log.debug('Submitting solution...');
             const submissionPromise = Eterna.client.submitSolution(this.createSubmitData(details, undoBlock));
