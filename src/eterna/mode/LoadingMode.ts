@@ -46,6 +46,7 @@ export default class LoadingMode extends AppMode {
             .build();
         this._extraBlurbTextField.x = -this._extraBlurbTextField.width * 0.5;
         this._extraBlurbTextField.y = -this._textField.height - this._extraBlurbTextField.height;
+        this.originalTextWidth = this._extraBlurbTextField.width;
 
         const container = new ContainerObject();
         container.container.addChild(this._textField);
@@ -61,6 +62,7 @@ export default class LoadingMode extends AppMode {
         ));
 
         const updateLoc = () => {
+            this._resizeBlurb();
             Assert.assertIsDefined(Flashbang.stageWidth);
             Assert.assertIsDefined(Flashbang.stageHeight);
             container.display.x = Flashbang.stageWidth * 0.5;
@@ -72,33 +74,61 @@ export default class LoadingMode extends AppMode {
 
     private getExtraBlurb(): string {
         const ExtraBlurbs = [
-            'A good scientist will tell you\nthat being wrong can be just\n as interesting as being right.',
+            'A good scientist will tell you that being wrong can be just as interesting as being right.',
             'Developed by players for players',
-            'Afraid of viral pandemics?\nStay calm and play Eterna.',
+            'Afraid of viral pandemics? Stay calm and play Eterna.',
             'Played by Humans, Scored by Nature.',
             'Empowering citizen scientists to invent medicine',
             "Heard of CRISPR therapies? That's RNA medicine",
-            'The only videogame with real\nexperiments in the loop',
+            'The only videogame with real experiments in the loop',
             'No computer can solve the entire Eterna100',
             'Player-made bot NEMO crushes deep learning.',
             'Twenty scientific publications and counting...',
             'Top Eterna players still crush all bots.',
-            'Science is much more about the\nquestions than the facts',
-            'Citizen science works because\nwe are a curious species.',
+            'Science is much more about the questions than the facts',
+            'Citizen science works because we are a curious species.',
             'Can we invent our own medicine?',
-            'Just hang in there and\nyou will eventually\nget the hang of it.',
-            'The ribosome makes life.\nYou can re-design it.',
+            'Just hang in there and you will eventually get the hang of it.',
+            'The ribosome makes life.You can re-design it.',
             'First treatment for spinal muscular atrophy is RNA',
-            'Evolution is a tinkerer.\nYou can accelerate it.'
+            'Evolution is a tinkerer. You can accelerate it.'
             //           "RNA design is provably intractable for computers.",
             // eslint-disable-next-line max-len
             //            "Beware this game is addicting...\n...at least this addiction is for a noble cause.\n     -- Eterna player hoglahoo",
         ];
-        return ExtraBlurbs[Math.floor(Math.random() * ExtraBlurbs.length)];
+
+        const blurb = ExtraBlurbs[Math.floor(Math.random() * ExtraBlurbs.length)];
+
+        return blurb;
+    }
+
+    private _resizeBlurb(): void {
+        const blurbText = this._extraBlurbTextField;
+        const blurbWidth = this.originalTextWidth;
+
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        const expandsOffscreen = blurbWidth > Flashbang.stageWidth;
+        if (expandsOffscreen) {
+            const timesToBreak = Math.floor(blurbWidth / Flashbang.stageWidth);
+            const currentText = this.extraBlurbText;
+            const words = currentText.split(' ');
+            const wordBreakIncrement = Math.ceil(words.length / (timesToBreak + 1));
+
+            // Adds a newline every wordBreakIncrement words
+            for (let i = wordBreakIncrement; i < words.length; i += wordBreakIncrement) {
+                words.splice(i, 0, '\n');
+            }
+
+            // Update text and recalculate position
+            blurbText.text = words.join(' ');
+            this._extraBlurbTextField.x = -this._extraBlurbTextField.width * 0.5;
+            this._extraBlurbTextField.y = -this._textField.height - this._extraBlurbTextField.height;
+        }
     }
 
     private _text: string;
     private _textField: Text;
 
     private _extraBlurbTextField: Text;
+    private originalTextWidth: number;
 }
