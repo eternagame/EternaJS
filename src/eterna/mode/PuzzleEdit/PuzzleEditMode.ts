@@ -242,6 +242,7 @@ export default class PuzzleEditMode extends GameMode {
                     const poseField: PoseField = poseFields[ii];
                     const poseToNotify = poseField.pose;
                     if (ii === index) {
+                        console.debug('closestDist', closestDist);
                         poseToNotify.onPoseMouseDown(e, closestIndex);
                     } else {
                         poseToNotify.onPoseMouseDownPropagate(e, closestIndex);

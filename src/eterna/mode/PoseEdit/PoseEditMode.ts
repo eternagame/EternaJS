@@ -2352,7 +2352,7 @@ export default class PoseEditMode extends GameMode {
                 structure: this._puzzle.getSecstruct(i),
                 startingFolder: this._folder.name
             };
-            if (tc && Puzzle.isAptamerType(tc['type'])) {
+            if (tc !== undefined && Puzzle.isAptamerType(tc['type'])) {
                 puzzledef.site = tc['site'];
                 puzzledef.bindingPairs = tc['binding_pairs'];
                 puzzledef.bonus = tc['bonus'];
