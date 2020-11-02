@@ -2537,6 +2537,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
             const boundLen: number = this.getBoundSequence().length;
             for (let ii = fullSeq.findCut() + 1; ii < fullSeq.length; ii++) {
+                if (this._oligoBases[ii] === undefined) {
+                    this._oligoBases[ii] = new BaseGlow();
+                }
                 const baseglow = this._oligoBases[ii];
                 if ((this._oligoPaired || (this._oligosPaired > 0 && ii < boundLen)) && this._pairs.isPaired(ii)) {
                     baseglow.isWrong = this._restrictedHighlightBox.isInQueue(ii);
