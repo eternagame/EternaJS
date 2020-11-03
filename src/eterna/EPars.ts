@@ -8,7 +8,7 @@ import Sequence from './rnatypes/Sequence';
  * These numbers can appear in a sequence: basically, ?ACGU&
  */
 export enum RNABase {
-    UNDEFINED = 1,
+    UNDEFINED = 0,
     GUANINE = 3,
     ADENINE = 1,
     URACIL = 4,
