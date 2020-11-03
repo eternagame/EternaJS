@@ -92,7 +92,7 @@ export default class Solution {
     }
 
     public get synthetized() {
-        return this.expFeedback?.isFailed() === 0;
+        return this.expFeedback && this.expFeedback.isFailed() === 0;
     }
 
     public canVote(round: number) {
