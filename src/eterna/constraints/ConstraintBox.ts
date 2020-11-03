@@ -146,8 +146,12 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     public setContent(config: ConstraintBoxConfig, toolTipContainer?: Container): void {
         this._check.visible = config.satisfied && !this._forMissionScreen;
 
+        // If clarificationText is a string we're fine; if it's a StyledTextBuilder
+        // we need to get .text from it to check this.
         const reqClarifyMultiLine = this._reqClarifyText.text.includes('\n')
-        || (config.clarificationText as string)?.includes('\n');
+            || (config.clarificationText instanceof StyledTextBuilder
+                ? (config.clarificationText as StyledTextBuilder).text.includes('\n')
+                : (config.clarificationText as string)?.includes('\n'));
 
         this._req.visible = config.fullTexture !== undefined;
         if (config.fullTexture !== undefined) {
