@@ -820,7 +820,6 @@ export default class PoseEditMode extends GameMode {
 
         // now that we have made the folder check, we can set _targetPairs. Used to do this
         // above but because NuPACK can handle pseudoknots, we shouldn't
-        console.error('targetSecstructs', targetSecstructs);
         for (let ii = 0; ii < targetSecstructs.length; ii++) {
             if (this._targetConditions && this._targetConditions[0]
                     && this._targetConditions[0]['type'] === 'pseudoknot') {
@@ -950,6 +949,10 @@ export default class PoseEditMode extends GameMode {
                         log.warn(
                             'custom-numbering field from puzzle objective json does not match target length.'
                             + ' Ignoring custom-numbering'
+                        );
+                        log.warn(
+                            `custom-numbering length ${customNumbering.length} vs. target length `
+                            + `${targetSecstructs[ii].length}`
                         );
                         this._poses[ii].customNumbering = undefined;
                     } else {
