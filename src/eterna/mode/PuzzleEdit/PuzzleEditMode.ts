@@ -922,7 +922,7 @@ export default class PuzzleEditMode extends GameMode {
                 if (
                     this._structureInputs[ii].structureString !== (
                         this._targetPairsStack[this._stackLevel][ii].getParenthesis(undefined, true)
-                    ) || seq.sequenceString !== this._seqStack[this._stackLevel][ii].sequence.sequenceString
+                    ) || seq.sequenceString() !== this._seqStack[this._stackLevel][ii].sequence.sequenceString()
                 ) {
                     noChange = false;
                 }

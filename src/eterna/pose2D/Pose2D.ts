@@ -363,8 +363,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
             throw new Error("Mutated sequence and original sequence lengths don't match");
         }
 
-        let numMut = 0;
-        const muts: Mut[] = [];
         let div = 1;
         if (this._currentColor === RNAPaint.PAIR
             || this._currentColor === RNAPaint.GC_PAIR
@@ -377,8 +375,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._oligo != null
             && this._oligoMode === Pose2D.OLIGO_MODE_EXT5P
         ) ? this._oligo.length : 0;
-        let ii: number;
-        for (ii = 0; ii < this._sequence.length; ii++) {
+        let numMut = 0;
+        const muts: Mut[] = [];
+        for (let ii = 0; ii < this._sequence.length; ii++) {
             if (this._sequence.nt(ii) !== this._mutatedSequence.nt(ii + offset)) {
                 numMut++;
                 this._sequence.setNt(ii, this._mutatedSequence.nt(ii + offset));
@@ -389,7 +388,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (needUpdate) {
             this.callTrackMovesCallback(numMut / div, muts);
         }
-
         if (needUpdate || this._lockUpdated || this._bindingSiteUpdated || this._designStructUpdated) {
             this.checkPairs();
             this.updateMolecule();
