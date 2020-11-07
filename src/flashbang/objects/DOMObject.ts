@@ -1,4 +1,4 @@
-import {DisplayObject, Graphics, Matrix} from 'pixi.js';
+import {Graphics, Matrix} from 'pixi.js';
 import GameObject from 'flashbang/core/GameObject';
 import Flashbang from 'flashbang/core/Flashbang';
 import MatrixUtil from 'flashbang/util/MatrixUtil';
