@@ -136,7 +136,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     }
 
     private onPointerMove(e: InteractionEvent) {
-        this._interactionCache.forEach((point, pointerId) => {
+        this._interactionCache.forEach((_point, pointerId) => {
             if (pointerId === e.data.identifier) {
                 const {x, y} = e.data.global;
                 this._interactionCache.set(pointerId, new Point(x, y));
@@ -182,7 +182,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this._pose.onMouseMoved(e.data.global);
 
         const eventsToClear: number[] = [];
-        this._interactionCache.forEach((point, pointerId) => {
+        this._interactionCache.forEach((_point, pointerId) => {
             if (pointerId === e.data.identifier) {
                 eventsToClear.push(pointerId);
             }
