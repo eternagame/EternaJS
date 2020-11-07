@@ -25,7 +25,7 @@ export default class BaseRope extends GameObject implements LateUpdatable {
         this._enabled = value;
     }
 
-    public lateUpdate(dt: number): void {
+    public lateUpdate(_dt: number): void {
         for (let i = 0; i < this._pose.fullSequence.length; i++) {
             if (this._pose.getBase(i).isAnimating) {
                 this.redraw(false);
@@ -118,25 +118,6 @@ export default class BaseRope extends GameObject implements LateUpdatable {
     }
 
     /**
-     * Use Cubic interpolation between points. Smooth, but can get wiggly if segments are far apart.
-     *  get rid of this in mid-2020 if we do not restore it.
-     * @param smoothFactor number of interpolation points between each input point
-     * @param basePosX input points' X values
-     * @param basePosY input points' Y values
-     */
-    private updateInterpBasePosCubic(smoothFactor: number, basePosX: number[], basePosY: number[]):
-    Array<[number, number]> {
-        const interpBasePosXY: Array<[number, number]> = [];
-        for (let i = 1; i < this._pose.fullSequence.length * smoothFactor; i++) {
-            interpBasePosXY.push([
-                this.cubicInterpolation(basePosX, i / smoothFactor),
-                this.cubicInterpolation(basePosY, i / smoothFactor)
-            ]);
-        }
-        return interpBasePosXY;
-    }
-
-    /**
      * PCHIP ( Piecewise Cubic Hermite Interpolating Polynomial) interpolation between points.
      * A little choppier, but keeps lines in stacks straight.
      *  Note that this function updates the _interpBasePosX and _interpBasePosY class variables.
@@ -158,50 +139,6 @@ export default class BaseRope extends GameObject implements LateUpdatable {
         const pchipFitPoints: Array<[number, number]> = pchip.fit(inputPoints, smoothFactor, 'shape_preserving');
         const interpBasePos = pchipFitPoints.map((x) => x[1]);
         return interpBasePos;
-    }
-
-    /**
-     * adapted directly from  demo
-     *         https://pixijs.io/examples/#/demos-advanced/mouse-trail.js
-     *  Cubic interpolation based on https://github.com/osuushi/Smooth.js
-     *
-     * Note: This is way faster than cubic-interpolation.js available through NPM.
-     * @param array input points
-     * @param t     point at which to interpolate
-     *
-     */
-    private cubicInterpolation(array: number[], t: number, tangentFactor: number = 1) {
-        const k = Math.floor(t);
-        const m = [this.getTangent(k, tangentFactor, array), this.getTangent(k + 1, tangentFactor, array)];
-        const p = [this.clipInput(k, array), this.clipInput(k + 1, array)];
-        t -= k;
-        const t2 = t * t;
-        const t3 = t * t2;
-        return (2 * t3 - 3 * t2 + 1) * p[0] + (t3 - 2 * t2 + t) * m[0] + (-2 * t3 + 3 * t2) * p[1] + (t3 - t2) * m[1];
-    }
-
-    private getTangent(k: number, factor: number, array: number[]) {
-        return (factor * (this.clipInput(k + 1, array) - this.clipInput(k - 1, array))) / 2;
-    }
-
-    private clipInput(k: number, arr: number[]) {
-        if (k < 0) k = 0;
-        if (k > arr.length - 1) k = arr.length - 1;
-        return arr[k];
-    }
-
-    // following not in use -- delete if still not in use in 2020.
-    public makeVisibleIfLongSpacings(): void {
-        if (this._enabled) return;
-        for (let i = 1; i < this._pose.fullSequence.length; i++) {
-            const vec: Vector2 = Vector2.fromPoint(this._pose.getBaseLoc(i)).subtract(
-                Vector2.fromPoint(this._pose.getBaseLoc(i - 1))
-            );
-            if (vec.length > Pose2D.ZOOM_SPACINGS[0]) {
-                this._enabled = true;
-                return;
-            }
-        }
     }
 
     private readonly _pose: Pose2D;
