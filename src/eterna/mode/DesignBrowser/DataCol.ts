@@ -165,7 +165,7 @@ export default class DataCol extends ContainerObject {
     }
 
     private updateLayout(): void {
-        this._sequencesView.setSize(this._width, this._height);
+        this._sequencesView.setSize(this._height);
         this._numDisplay = Math.floor((this._height - 70 - 20) / this._lineHeight);
         this.updateView();
         this.drawBackground();
