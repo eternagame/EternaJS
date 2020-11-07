@@ -483,7 +483,6 @@ export default class ROPTextbox extends RScriptOp {
     private _fillColor: number = 0xFF0000;
     private _outlineColor: number = 0x000000;
     private _fixedSize: boolean = true;
-    private _forceTopmost: boolean = false;
     private _hasXOffset: boolean = false;
     private _xOffset: number;
     private _hasYOffset: boolean = false;
