@@ -392,7 +392,7 @@ export default class ROPTextbox extends RScriptOp {
                 } else if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
                     this._fixedSize = ROPTextbox.parseBool(arg);
                 } else if (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
-                    this._forceTopmost = ROPTextbox.parseBool(arg);
+                    // never used: this._forceTopmost = ROPTextbox.parseBool(arg);
                 }
                 break;
             case 8:
@@ -401,7 +401,7 @@ export default class ROPTextbox extends RScriptOp {
                 } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
                     this._outlineColor = ColorUtil.fromString(`#${this._env.getStringRef(arg)}`);
                 } else if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
-                    this._forceTopmost = ROPTextbox.parseBool(arg);
+                    // never used: this._forceTopmost = ROPTextbox.parseBool(arg);
                 } else if (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
                     this._hasXOffset = true;
                     this._xOffset = Number(arg);
