@@ -1,6 +1,6 @@
 import {DisplayObject, Graphics, Point} from 'pixi.js';
 import {
-    GameObject, LateUpdatable, Vector2, Arrays
+    GameObject, LateUpdatable, Arrays
 } from 'flashbang';
 import Pose2D from './Pose2D';
 
@@ -24,7 +24,7 @@ export default class PseudoknotLines extends GameObject implements LateUpdatable
         this._enabled = value;
     }
 
-    public lateUpdate(dt: number): void {
+    public lateUpdate(_dt: number): void {
         for (let i = 0; i < this._pose.fullSequence.length; i++) {
             if (this._pose.getBase(i).isAnimating) {
                 this.redraw(false);
