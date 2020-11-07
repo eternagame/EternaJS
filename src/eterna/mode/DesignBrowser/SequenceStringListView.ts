@@ -31,8 +31,7 @@ export default class SequenceStringListView extends Container {
             .concat(SequenceStringListView.createLetterBitmaps(textBuilder, 'C'));
     }
 
-    public setSize(width: number, height: number): void {
-        this._width = width;
+    public setSize(height: number): void {
         this._height = height;
     }
 
