@@ -20,7 +20,7 @@ export default class ScriptConstraint extends Constraint<ScriptConstraintStatus>
         this.scriptID = scriptID;
     }
 
-    public evaluate(context: ConstraintContext): ScriptConstraintStatus {
+    public evaluate(_context: ConstraintContext): ScriptConstraintStatus {
         const result = ExternalInterface.runScriptSync(this.scriptID, {});
 
         return {
