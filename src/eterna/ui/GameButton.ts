@@ -156,7 +156,7 @@ export default class GameButton extends Button implements KeyboardListener {
         this.toggled.value = !this.toggled.value;
     }
 
-    protected onToggledChanged(toggled: boolean): void {
+    protected onToggledChanged(_toggled: boolean): void {
         this.showState(this._state);
     }
 
