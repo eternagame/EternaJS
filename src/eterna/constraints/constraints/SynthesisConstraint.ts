@@ -97,7 +97,7 @@ export default class SynthesisConstraint extends Constraint<SynthConstraintStatu
         };
     }
 
-    public getHighlight(status: SynthConstraintStatus, context: ConstraintContext): HighlightInfo {
+    public getHighlight(_status: SynthConstraintStatus, context: ConstraintContext): HighlightInfo {
         return {
             ranges: [
                 ...this._consecutiveAConstraint.getHighlight(
