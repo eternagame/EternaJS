@@ -14,7 +14,7 @@ export default class LinearFoldE extends LinearFoldBase {
         return import('engines-bin/LinearFoldE')
             .then((module) => EmscriptenUtil.loadProgram(module))
             .then((program) => new LinearFoldE(program))
-            .catch((err) => null);
+            .catch((_err) => null);
     }
 
     public get name(): string {
