@@ -18,7 +18,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
     public static readonly MARKER_THICKNESS: number = 0.4; // Relative to the radius
     public static readonly MARKER_RADIUS: number[] = [15, 10, 7, 5, 3];
 
-    constructor(_pose: Pose2D, type: number) {
+    constructor(type: number) {
         super();
         BaseAssets._init();
         this.setType(type);

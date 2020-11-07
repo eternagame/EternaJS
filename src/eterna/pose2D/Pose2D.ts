@@ -3713,7 +3713,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     private createBase(): Base {
-        const base: Base = new Base(this, RNABase.GUANINE);
+        const base: Base = new Base(RNABase.GUANINE);
         this.addObject(base, this._baseLayer);
         this._bases.push(base);
         return base;
