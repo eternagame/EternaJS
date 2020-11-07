@@ -384,10 +384,6 @@ export default class PuzzleEditMode extends GameMode {
         Eterna.saveManager.save(this.savedDataTokenName, objs);
     }
 
-    private resetSavedData(): void {
-        Eterna.saveManager.remove(this.savedDataTokenName);
-    }
-
     private get savedDataTokenName(): string {
         return PuzzleEditMode.savedDataTokenName(this._numTargets);
     }
