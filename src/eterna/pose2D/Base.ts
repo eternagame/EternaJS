@@ -8,7 +8,7 @@ import {RNABase, RNAPaint} from 'eterna/EPars';
 import ROPWait from 'eterna/rscript/ROPWait';
 import BaseAssets from './BaseAssets';
 import BaseDrawFlags from './BaseDrawFlags';
-import Pose2D, {RNAHighlightState} from './Pose2D';
+import {RNAHighlightState} from './Pose2D';
 
 type ColorMatrixFilter = PIXI.filters.ColorMatrixFilter;
 
