@@ -471,15 +471,16 @@ export default class PuzzleEditMode extends GameMode {
         const energyVisible: boolean[] = [];
         const trackedCursorIdx: (number | null)[] = [];
         const explosionFactorVisible: boolean[] = [];
-        for (const pose of this._poses) {
-            energyVisible.push(pose.showTotalEnergy);
-            pose.showTotalEnergy = false;
+        for (const poseField of this._poseFields) {
+            energyVisible.push(poseField.showTotalEnergy);
+            poseField.showTotalEnergy = false;
 
+            explosionFactorVisible.push(poseField.showExplosionFactor);
+            poseField.showExplosionFactor = false;
+        }
+        for (const pose of this._poses) {
             trackedCursorIdx.push(pose.trackedCursorIdx);
             pose.trackCursor(-1);
-
-            explosionFactorVisible.push(pose.showExplosionFactor);
-            pose.showExplosionFactor = false;
         }
 
         const tempBG = DisplayUtil.fillStageRect(0x061A34);
@@ -501,10 +502,12 @@ export default class PuzzleEditMode extends GameMode {
             disp.visible = wasVisible;
         }
 
+        for (let ii = 0; ii < this._poseFields.length; ++ii) {
+            this._poseFields[ii].showTotalEnergy = energyVisible[ii];
+            this._poseFields[ii].showExplosionFactor = explosionFactorVisible[ii];
+        }
         for (let ii = 0; ii < this._poses.length; ++ii) {
-            this._poses[ii].showTotalEnergy = energyVisible[ii];
             this._poses[ii].trackCursor(trackedCursorIdx[ii]);
-            this._poses[ii].showExplosionFactor = explosionFactorVisible[ii];
         }
 
         return pngData;

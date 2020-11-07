@@ -6,12 +6,16 @@ import {
 import ROPWait from 'eterna/rscript/ROPWait';
 import debounce from 'lodash.debounce';
 import Pose2D from './Pose2D';
+import EnergyScoreDisplay from './EnergyScoreDisplay';
+import ExplosionFactorPanel from './ExplosionFactorPanel';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
 /** Wraps a Pose2D and handles resizing, masking, and input events */
 export default class PoseField extends ContainerObject implements KeyboardListener, MouseWheelListener {
     private static readonly zoomThreshold = 5;
+
+    private static readonly SCORES_POSITION_Y = 128;
 
     constructor(edit: boolean) {
         super();
@@ -46,6 +50,38 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.keyboardInput.pushListener(this));
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));
+
+        this._primaryScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
+        this._primaryScoreEnergyDisplay.position = new Point(17, PoseField.SCORES_POSITION_Y);
+        this.container.addChild(this._primaryScoreEnergyDisplay);
+
+        this._deltaScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
+        this._deltaScoreEnergyDisplay.position = new Point(17 + 119, PoseField.SCORES_POSITION_Y);
+        this._deltaScoreEnergyDisplay.visible = false;
+        this.container.addChild(this._deltaScoreEnergyDisplay);
+
+        this._secondaryScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
+        this._secondaryScoreEnergyDisplay.position = new Point(17 + 119 * 2, PoseField.SCORES_POSITION_Y);
+        this._secondaryScoreEnergyDisplay.visible = false;
+        this.container.addChild(this._secondaryScoreEnergyDisplay);
+
+        this._explosionFactorPanel = new ExplosionFactorPanel();
+        this._explosionFactorPanel.display.position = new Point(17, PoseField.SCORES_POSITION_Y + 82);
+        this._explosionFactorPanel.display.visible = false;
+        this._explosionFactorPanel.factorUpdated.connect((factor: number) => {
+            this._explosionFactor = factor;
+            this.pose.fastLayout();
+            this.pose.redraw = true;
+        });
+        this.addObject(this._explosionFactorPanel, this.container);
+    }
+
+    public get primaryScoreDisplay(): EnergyScoreDisplay {
+        return this._primaryScoreEnergyDisplay;
+    }
+
+    public get secondaryScoreDisplay(): EnergyScoreDisplay {
+        return this._secondaryScoreEnergyDisplay;
     }
 
     public get width(): number {
@@ -175,6 +211,74 @@ export default class PoseField extends ContainerObject implements KeyboardListen
                 this._pose.setOffset(this._dragPoseStart.x + deltaX, this._dragPoseStart.y + deltaY);
             }
         }
+
+        if (this._pose.checkOverlap()) {
+            // If overlaps have been introduced, make sure the explosion factor input is shown
+            this._explosionFactorPanel.display.visible = true;
+        } else if (this._explosionFactorPanel.display.visible === true) {
+            // If all overlaps have been removed, remove the explosion
+            this._explosionFactor = 1;
+            this._explosionFactorPanel.display.visible = false;
+            this.pose.fastLayout();
+            this.pose.redraw = true;
+        }
+    }
+
+    public updateEnergyGui(
+        factor: number,
+        scoreLabel: string,
+        scoreScore: string,
+        nodeLabel: string,
+        nodeScore: string,
+        nodeFound: boolean,
+        deltaFn: () => number
+    ): void {
+        this.updateEnergyDisplaySizeLocation(factor);
+
+        this._primaryScoreEnergyDisplay.setEnergyText(scoreLabel, scoreScore);
+        this._secondaryScoreEnergyDisplay.setEnergyText(nodeLabel, nodeScore);
+        this._secondaryScoreEnergyDisplay.visible = (this._showTotalEnergy && nodeFound);
+
+        // This is because the undo stack isn't populated yet when this is run on puzzle boot/changing folders,
+        // which is needed for the delta - TODO: Handle this in a less hacky way
+        const attemptSetDelta = () => {
+            try {
+                this._deltaScoreEnergyDisplay.setEnergyText(
+                    'Natural/Target Delta',
+                    `${Math.round(deltaFn()) / 100} kcal`
+                );
+                this._deltaScoreEnergyDisplay.visible = (this._showTotalEnergy && this.pose.scoreFolder != null);
+            } catch (e) {
+                this._deltaScoreEnergyDisplay.visible = false;
+                setTimeout(attemptSetDelta, 1000);
+            }
+        };
+        setTimeout(attemptSetDelta, 50);
+    }
+
+    public get showTotalEnergy(): boolean {
+        return this._showTotalEnergy;
+    }
+
+    public set showTotalEnergy(show: boolean) {
+        this._showTotalEnergy = show;
+        this._primaryScoreEnergyDisplay.visible = (show && this.pose.scoreFolder != null);
+        this._secondaryScoreEnergyDisplay.visible = (
+            show && this.pose.scoreFolder != null && this._secondaryScoreEnergyDisplay.hasText
+        );
+        this._deltaScoreEnergyDisplay.visible = show && this.pose.scoreFolder != null;
+    }
+
+    public get showExplosionFactor(): boolean {
+        return this._explosionFactorPanel.display.visible;
+    }
+
+    public set showExplosionFactor(show: boolean) {
+        this._explosionFactorPanel.display.visible = show;
+    }
+
+    public get explosionFactor(): number {
+        return this._explosionFactor;
     }
 
     private onPointerUp(e: InteractionEvent): void {
@@ -222,6 +326,17 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         }
 
         return false;
+    }
+
+    private updateEnergyDisplaySizeLocation(factor: number): void {
+        this._primaryScoreEnergyDisplay.position = new Point(17, PoseField.SCORES_POSITION_Y);
+        this._primaryScoreEnergyDisplay.setSize(111 + factor * 59, 40);
+
+        this._deltaScoreEnergyDisplay.position = new Point(17 + 119 + factor * 59, PoseField.SCORES_POSITION_Y);
+        this._deltaScoreEnergyDisplay.setSize(111, 40);
+
+        this._secondaryScoreEnergyDisplay.position = new Point(17 + 119 * 2 + factor * 59, PoseField.SCORES_POSITION_Y);
+        this._secondaryScoreEnergyDisplay.setSize(111, 40);
     }
 
     // Stores the previous delta
@@ -294,4 +409,14 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     private _zoomGestureStarted = false;
 
     private static readonly P: Point = new Point();
+
+    // New Score Display panels
+    private _primaryScoreEnergyDisplay: EnergyScoreDisplay;
+    private _secondaryScoreEnergyDisplay: EnergyScoreDisplay;
+    private _deltaScoreEnergyDisplay: EnergyScoreDisplay;
+    private _showTotalEnergy: boolean = true;
+
+    // Explosion Factor (RNALayout pairSpace multiplier)
+    private _explosionFactor: number = 1;
+    private _explosionFactorPanel: ExplosionFactorPanel;
 }

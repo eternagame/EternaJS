@@ -12,6 +12,7 @@ import TextBalloon from 'eterna/ui/TextBalloon';
 import Pose2D, {RNAHighlightState} from 'eterna/pose2D/Pose2D';
 import {PaletteTargetType} from 'eterna/ui/NucleotidePalette';
 import ToggleBar from 'eterna/ui/ToggleBar';
+import PoseField from 'eterna/pose2D/PoseField';
 import {RScriptUIElement, RScriptUIElementID} from './RScriptUIElement';
 
 /**
@@ -83,6 +84,10 @@ export default class RScriptEnv extends ContainerObject {
 
     public get puzzle(): Puzzle {
         return this._puz;
+    }
+
+    public get poseField(): PoseField {
+        return this._ui.getPoseField(0);
     }
 
     public get pose(): Pose2D {
@@ -222,9 +227,9 @@ export default class RScriptEnv extends ContainerObject {
                 return this.ui.toolbar.stateToggle;
             case RScriptUIElementID.TOTALENERGY:
             case RScriptUIElementID.PRIMARY_ENERGY:
-                return this.pose.primaryScoreDisplay;
+                return this.poseField.primaryScoreDisplay;
             case RScriptUIElementID.SECONDARY_ENERGY:
-                return this.pose.secondaryScoreDisplay;
+                return this.poseField.secondaryScoreDisplay;
             case RScriptUIElementID.PALETTE:
             case RScriptUIElementID.PALETTEALT:
                 return this.ui.toolbar.palette;

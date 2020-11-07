@@ -69,6 +69,10 @@ export default abstract class GameMode extends AppMode {
         return this._poses[i];
     }
 
+    public getPoseField(i: number): PoseField {
+        return this._poseFields[i];
+    }
+
     public showConfirmDialog(prompt: string, promptIsHTML: boolean = false): ConfirmDialog {
         return this.showDialog(new ConfirmDialog(prompt, promptIsHTML));
     }

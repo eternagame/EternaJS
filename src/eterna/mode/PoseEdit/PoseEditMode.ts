@@ -496,8 +496,8 @@ export default class PoseEditMode extends GameMode {
     }
 
     public setShowTotalEnergy(show: boolean): void {
-        for (const pose of this._poses) {
-            pose.showTotalEnergy = show;
+        for (const poseField of this._poseFields) {
+            poseField.showTotalEnergy = show;
         }
     }
 
@@ -1521,9 +1521,9 @@ export default class PoseEditMode extends GameMode {
         this._hintBoxRef.destroyObject();
 
         const explosionFactorVisible: boolean[] = [];
-        for (const pose of this._poses) {
-            explosionFactorVisible.push(pose.showExplosionFactor);
-            pose.showExplosionFactor = false;
+        for (const poseField of this._poseFields) {
+            explosionFactorVisible.push(poseField.showExplosionFactor);
+            poseField.showExplosionFactor = false;
         }
 
         const tempBG = DisplayUtil.fillStageRect(0x061A34);
@@ -1545,8 +1545,8 @@ export default class PoseEditMode extends GameMode {
             disp.visible = wasVisible;
         }
 
-        for (let ii = 0; ii < this._poses.length; ++ii) {
-            this._poses[ii].showExplosionFactor = explosionFactorVisible[ii];
+        for (let ii = 0; ii < this._poseFields.length; ++ii) {
+            this._poseFields[ii].showExplosionFactor = explosionFactorVisible[ii];
         }
 
         if (showingHint) {
@@ -2010,9 +2010,11 @@ export default class PoseEditMode extends GameMode {
                                 new SelfDestructTask()
                             ));
 
-                            for (const poseToClear of this._poses) {
-                                poseToClear.showTotalEnergy = false;
-                                poseToClear.clearExplosion();
+                            for (const poseFieldToClear of this._poseFields) {
+                                poseFieldToClear.showTotalEnergy = false;
+                            }
+                            for (const poseExplosion of this._poses) {
+                                poseExplosion.clearExplosion();
                             }
 
                             this._constraintsLayer.visible = false;
@@ -2100,8 +2102,8 @@ export default class PoseEditMode extends GameMode {
         this._constraintsLayer.visible = false;
         this._exitButton.display.visible = false;
         this._helpBar.display.visible = false;
-        for (const pose of this._poses) {
-            pose.showTotalEnergy = false;
+        for (const poseField of this._poseFields) {
+            poseField.showTotalEnergy = false;
         }
         Eterna.chat.pushHideChat();
 
@@ -2140,8 +2142,8 @@ export default class PoseEditMode extends GameMode {
                 this._constraintsLayer.visible = true;
                 this.disableTools(false);
 
-                for (const pose of this._poses) {
-                    pose.showTotalEnergy = true;
+                for (const poseField of this._poseFields) {
+                    poseField.showTotalEnergy = true;
                 }
 
                 this._exitButton.display.alpha = 0;

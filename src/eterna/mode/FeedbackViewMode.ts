@@ -461,9 +461,9 @@ export default class FeedbackViewMode extends GameMode {
         pushVisibleState(this.achievementsLayer);
 
         const energyVisible: boolean[] = [];
-        for (const pose of this._poses) {
-            energyVisible.push(pose.showTotalEnergy);
-            pose.showTotalEnergy = false;
+        for (const poseField of this._poseFields) {
+            energyVisible.push(poseField.showTotalEnergy);
+            poseField.showTotalEnergy = false;
         }
 
         Assert.assertIsDefined(this.container);
@@ -490,8 +490,8 @@ export default class FeedbackViewMode extends GameMode {
             disp.visible = wasVisible;
         }
 
-        for (let ii = 0; ii < this._poses.length; ++ii) {
-            this._poses[ii].showTotalEnergy = energyVisible[ii];
+        for (let ii = 0; ii < this._poseFields.length; ++ii) {
+            this._poseFields[ii].showTotalEnergy = energyVisible[ii];
         }
 
         return pngData;
