@@ -737,7 +737,7 @@ export default class Toolbar extends ContainerObject {
             }
         }));
 
-        this.regs.add(this.pointerUp.connect((e) => {
+        this.regs.add(this.pointerUp.connect((_e) => {
             mouseDown = false;
         }));
 
