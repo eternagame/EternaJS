@@ -1,5 +1,5 @@
 import {Texture} from 'pixi.js';
-import {TextureUtil, Assert, TextBuilder} from 'flashbang';
+import {TextureUtil, TextBuilder} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import EternaTextureUtil from 'eterna/util/EternaTextureUtil';
 import Base from 'eterna/pose2D/Base';
