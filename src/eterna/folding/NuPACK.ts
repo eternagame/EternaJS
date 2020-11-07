@@ -562,7 +562,7 @@ export default class NuPACK extends Folder {
     }
 
     private foldSequenceWithBindingSiteImpl(
-        seq: Sequence, i: number, p: number, j: number, q: number, bonus: number, temp: number = 37
+        seq: Sequence, i: number, p: number, j: number, q: number, bonus: number, _temp: number = 37
     ): SecStruct {
         const seqStr = seq.sequenceString(false, false);
 
@@ -610,13 +610,13 @@ export default class NuPACK extends Folder {
     // pass a structure constraint to this function it is simply ignored silently.
     private cofoldSequenceWithBindingSiteImpl(
         seq: Sequence,
-        str: string | null,
+        _str: string | null,
         i: number,
         p: number,
         j: number,
         q: number,
         bonus: number,
-        temp: number = 37
+        _temp: number = 37
     ): SecStruct {
         const seqStr = seq.sequenceString(true, false);
 
