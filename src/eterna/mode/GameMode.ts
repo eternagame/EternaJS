@@ -19,7 +19,6 @@ import URLButton from 'eterna/ui/URLButton';
 import EternaURL from 'eterna/net/EternaURL';
 import Folder from 'eterna/folding/Folder';
 import Dialog from 'eterna/ui/Dialog';
-import EPars from 'eterna/EPars';
 
 export default abstract class GameMode extends AppMode {
     public readonly bgLayer = new Container();
@@ -244,7 +243,7 @@ export default abstract class GameMode extends AppMode {
         return Flashbang.stageWidth;
     }
 
-    protected onSetPip(pipMode: boolean): void {
+    protected onSetPip(_pipMode: boolean): void {
     }
 
     protected postScreenshot(screenshot: ArrayBuffer): void {
@@ -449,11 +448,11 @@ export default abstract class GameMode extends AppMode {
     }
 
     protected _curTargetIndex: number;
-    protected getCurrentUndoBlock(index: number): UndoBlock | undefined {
+    protected getCurrentUndoBlock(_index: number): UndoBlock | undefined {
         return undefined;
     }
 
-    protected getCurrentTargetPairs(index: number): SecStruct | undefined {
+    protected getCurrentTargetPairs(_index: number): SecStruct | undefined {
         return undefined;
     }
 
