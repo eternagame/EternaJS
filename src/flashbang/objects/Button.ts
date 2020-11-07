@@ -133,7 +133,7 @@ export default abstract class Button extends ContainerObject implements Enableab
      * By default, it plays the sound named "sfx_button_down", if it exists, when transitioning
      * to the DOWN state. Subclasses can override to customize the behavior.
      */
-    private playStateTransitionSound(fromState: ButtonState, toState: ButtonState): void {
+    private playStateTransitionSound(_fromState: ButtonState, toState: ButtonState): void {
         if (toState === ButtonState.DOWN && this.downSound != null) {
             Flashbang.sound.playSound(this.downSound);
         }
