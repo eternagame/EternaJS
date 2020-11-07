@@ -62,13 +62,6 @@ export default class Band extends ContainerObject implements Updatable {
         this._st1.y = 0;
     }
 
-    private static rotate(mat: Matrix, x: number, y: number, degrees: number): void {
-        // Rotate around point https://stackoverflow.com/a/1787534/5557208
-        mat.translate(-x, -y);
-        mat.rotate(degrees * (Math.PI / 180));
-        mat.translate(x, y);
-    }
-
     private static initTextures() {
         if (Band._satelliteBitmap != null) {
             return;
