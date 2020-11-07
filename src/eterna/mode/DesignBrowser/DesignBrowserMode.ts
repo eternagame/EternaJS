@@ -32,7 +32,6 @@ import MarkerBoxView from './MarkerBoxView';
 import GridLines from './GridLines';
 import DataCol from './DataCol';
 import CustomizeColumnOrderDialog from './CustomizeColumnOrderDialog';
-import PoseEditMode from '../PoseEdit/PoseEditMode';
 
 export interface DBVote {
     canVote: boolean;
