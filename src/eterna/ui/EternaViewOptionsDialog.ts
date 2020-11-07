@@ -1,6 +1,6 @@
-import {Point, Graphics, interaction} from 'pixi.js';
+import {Point, Graphics} from 'pixi.js';
 import {
-    VLayoutContainer, HAlign, Setting, HLayoutContainer, VAlign, DisplayUtil, Flashbang, Assert, MathUtil, InputUtil
+    VLayoutContainer, HAlign, Setting, HLayoutContainer, VAlign, DisplayUtil, Flashbang, Assert
 } from 'flashbang';
 import Eterna from 'eterna/Eterna';
 import Bitmaps from 'eterna/resources/Bitmaps';
