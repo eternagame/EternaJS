@@ -1,5 +1,5 @@
 import {
-    Graphics, Matrix, Point, Sprite, Text, Texture
+    Graphics, Point, Sprite, Text, Texture
 } from 'pixi.js';
 import {
     ContainerObject, MathUtil, TextureUtil, ColorUtil, Updatable
