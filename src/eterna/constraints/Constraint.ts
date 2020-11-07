@@ -58,8 +58,8 @@ export default abstract class Constraint<ConstraintStatus extends BaseConstraint
     ): ConstraintBoxConfig;
 
     public getHighlight(
-        status: ConstraintStatus,
-        context: ConstraintContext
+        _status: ConstraintStatus,
+        _context: ConstraintContext
     ): HighlightInfo | null {
         return null;
     }
