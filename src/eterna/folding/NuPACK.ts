@@ -1,6 +1,5 @@
 import * as log from 'loglevel';
-import EPars, {RNABase} from 'eterna/EPars';
-/* eslint-disable import/no-duplicates, import/no-unresolved */
+import {RNABase} from 'eterna/EPars';
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import PoseOp from 'eterna/pose2D/PoseOp';
 import int from 'eterna/util/int';
@@ -8,6 +7,7 @@ import {Oligo} from 'eterna/pose2D/Pose2D';
 import DotPlot from 'eterna/rnatypes/DotPlot';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
+/* eslint-disable import/no-duplicates, import/no-unresolved */
 import * as NupackLib from './engines/NupackLib';
 import {DotPlotResult, FullEvalResult, FullFoldResult} from './engines/NupackLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
@@ -27,7 +27,7 @@ export default class NuPACK extends Folder {
         return import('engines-bin/nupack')
             .then((module) => EmscriptenUtil.loadProgram(module))
             .then((program) => new NuPACK(program))
-            .catch((err) => null);
+            .catch((_err) => null);
     }
 
     private constructor(lib: NupackLib) {
@@ -46,7 +46,7 @@ export default class NuPACK extends Folder {
     }
 
     /* override */
-    public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = 37, pseudoknots: boolean = false): DotPlot {
+    public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = 37, _pseudoknots: boolean = false): DotPlot {
         // AMW TODO: actually NOT pk aware yet
         const key: CacheKey = {
             primitive: 'dotplot', seq: seq.baseArray, pairs: pairs.pairs, temp
