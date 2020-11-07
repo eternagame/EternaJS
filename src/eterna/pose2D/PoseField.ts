@@ -8,6 +8,7 @@ import debounce from 'lodash.debounce';
 import Pose2D from './Pose2D';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
 import ExplosionFactorPanel from './ExplosionFactorPanel';
+import RNAAnchorObject from './RNAAnchorObject';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
@@ -74,6 +75,34 @@ export default class PoseField extends ContainerObject implements KeyboardListen
             this.pose.redraw = true;
         });
         this.addObject(this._explosionFactorPanel, this.container);
+    }
+
+    /* override */
+    public update(_dt: number): void {
+        if (!this.display.worldVisible) {
+            // update is expensive, so don't bother doing it if we're not visible
+            return;
+        }
+        Assert.assertIsDefined(this.mode);
+        for (const anchor of this._anchoredObjects) {
+            if (anchor.isLive) {
+                const p: Point = this.pose.getBaseLoc(anchor.base);
+                anchor.object.display.position = new Point(p.x + anchor.offset.x, p.y + anchor.offset.y);
+            }
+        }
+    }
+
+    public addAnchoredObject(obj: RNAAnchorObject): void {
+        this._anchoredObjects.push(obj);
+    }
+
+    public removeAnchoredObject(obj: RNAAnchorObject): void {
+        for (let ii = 0; ii < this._anchoredObjects.length; ++ii) {
+            if (obj === this._anchoredObjects[ii]) {
+                this._anchoredObjects.splice(ii, 1);
+                break;
+            }
+        }
     }
 
     public get primaryScoreDisplay(): EnergyScoreDisplay {
@@ -419,4 +448,6 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     // Explosion Factor (RNALayout pairSpace multiplier)
     private _explosionFactor: number = 1;
     private _explosionFactorPanel: ExplosionFactorPanel;
+
+    private _anchoredObjects: RNAAnchorObject[] = [];
 }

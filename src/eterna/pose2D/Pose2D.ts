@@ -36,7 +36,6 @@ import PaintCursor from './PaintCursor';
 import PoseField from './PoseField';
 import PoseUtil from './PoseUtil';
 import PuzzleEditOp from './PuzzleEditOp';
-import RNAAnchorObject from './RNAAnchorObject';
 import RNALayout, {RNATreeNode} from './RNALayout';
 import ScoreDisplayNode, {ScoreDisplayNodeType} from './ScoreDisplayNode';
 import triangulate from './triangulate';
@@ -172,19 +171,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public set redraw(setting: boolean) {
         this._redraw = setting;
-    }
-
-    public addAnchoredObject(obj: RNAAnchorObject): void {
-        this._anchoredObjects.push(obj);
-    }
-
-    public removeAnchoredObject(obj: RNAAnchorObject): void {
-        for (let ii = 0; ii < this._anchoredObjects.length; ++ii) {
-            if (obj === this._anchoredObjects[ii]) {
-                this._anchoredObjects.splice(ii, 1);
-                break;
-            }
-        }
     }
 
     public get isAnimating(): boolean {
@@ -2379,12 +2365,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
         Assert.assertIsDefined(this.mode);
         const currentTime: number = this.mode.time;
-        for (const anchor of this._anchoredObjects) {
-            if (anchor.isLive) {
-                const p: Point = this.getBaseLoc(anchor.base);
-                anchor.object.display.position = new Point(p.x + anchor.offset.x, p.y + anchor.offset.y);
-            }
-        }
 
         const fullSeq: Sequence = this.fullSequence;
         let center: Point;
@@ -3829,7 +3809,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _auxInfoCanvas: Graphics;
     private _auxTextballoon: TextBalloon;
 
-    private _anchoredObjects: RNAAnchorObject[] = [];
     private _highlightEnergyText: boolean = false;
     private _energyHighlights: SceneObject[] = [];
 
