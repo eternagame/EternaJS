@@ -1,6 +1,6 @@
 import {DisplayObject, Graphics, Point} from 'pixi.js';
 import {
-    GameObject, LateUpdatable, Vector2, Arrays
+    GameObject, LateUpdatable, Arrays
 } from 'flashbang';
 import pchip from 'pchip';
 import Pose2D from './Pose2D';
