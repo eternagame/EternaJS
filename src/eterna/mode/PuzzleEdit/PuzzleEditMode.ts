@@ -219,6 +219,14 @@ export default class PuzzleEditMode extends GameMode {
             }
         });
 
+        this._toolbar.downloadHKWSButton.clicked.connect(() => {
+            this.downloadHKWS();
+        });
+
+        this._toolbar.downloadSVGButton.clicked.connect(() => {
+            this.downloadSVG();
+        });
+
         if (this._embedded) {
             this._scriptInterface.addCallback('get_secstruct', () => this.structure);
             this._scriptInterface.addCallback('get_sequence', () => this.sequence);

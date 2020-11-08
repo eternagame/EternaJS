@@ -241,6 +241,14 @@ export default class PoseEditMode extends GameMode {
             }
         });
 
+        this._toolbar.downloadHKWSButton.clicked.connect(() => {
+            this.downloadHKWS();
+        });
+
+        this._toolbar.downloadSVGButton.clicked.connect(() => {
+            this.downloadSVG();
+        });
+
         // Add our docked SpecBox at the bottom of uiLayer
         this._dockedSpecBox = new SpecBox(true);
         this._dockedSpecBox.display.position = new Point(15, 190);
