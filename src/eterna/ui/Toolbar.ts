@@ -91,6 +91,8 @@ export default class Toolbar extends ContainerObject {
     public rotateStemButton: GameButton;
     public flipStemButton: GameButton;
     public snapToGridButton: GameButton;
+    public downloadHKWSButton: GameButton;
+    public downloadSVGButton: GameButton;
 
     public dynPaintTools: GameButton[] = [];
     public dynActionTools: GameButton[] = [];
@@ -419,6 +421,22 @@ export default class Toolbar extends ContainerObject {
             .scaleBitmapToLabel()
             .tooltip('Snap current layout to a grid');
         this.actionMenu.addSubMenuButton(alterMenuIdx, this.snapToGridButton);
+
+        this.downloadHKWSButton = new GameButton()
+            .allStates(Bitmaps.CustomLayout)
+            .disabled(undefined)
+            .label('Download HKWS format', 14)
+            .scaleBitmapToLabel()
+            .tooltip('Download a draw_rna input file for the current layout');
+        this.actionMenu.addSubMenuButton(alterMenuIdx, this.downloadHKWSButton);
+
+        this.downloadSVGButton = new GameButton()
+            .allStates(Bitmaps.CustomLayout)
+            .disabled(undefined)
+            .label('Download SVG format', 14)
+            .scaleBitmapToLabel()
+            .tooltip('Download an SVG of the current RNA layout');
+        this.actionMenu.addSubMenuButton(alterMenuIdx, this.downloadSVGButton);
 
         if (this._type === ToolbarType.LAB) {
             this.submitButton.tooltip('Publish your solution!');
@@ -892,6 +910,8 @@ export default class Toolbar extends ContainerObject {
         this.moveButton.enabled = !disable;
         this.rotateStemButton.enabled = !disable;
         this.flipStemButton.enabled = !disable;
+        this.downloadHKWSButton.enabled = !disable;
+        this.downloadSVGButton.enabled = !disable;
 
         this.estimateButton.enabled = !disable;
         this.letterColorButton.enabled = !disable;

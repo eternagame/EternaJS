@@ -7,6 +7,7 @@ import Eterna from 'eterna/Eterna';
 import {Assert} from 'flashbang';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
+import Pose2D from './Pose2D';
 
 enum RotationDirection {
     CCW = -1, // counterclockwise
@@ -244,7 +245,7 @@ export default class RNALayout {
         this.initializeCustomLayout(customLayout);
         // Grotesque override: the puzzler layout sadly generates structures that can't
         // be navigated for very long RNAs. We need a minimap and a better zoom feature.
-        if (Eterna.settings.usePuzzlerLayout.value && this._origPairs.length <= 2904) {
+        if (Eterna.settings.usePuzzlerLayout.value) {
             this.initializePuzzlerLayout();
         }
         if (this._root != null) {
@@ -1051,27 +1052,47 @@ export default class RNALayout {
         if (customLayout === null) {
             return scaleFactor;
         }
-        if (this._targetPairs !== null) {
-            for (let ii = 0; ii < this._targetPairs.length - 1; ii++) {
-                // look for a stacked pair
-                if (this._targetPairs.pairingPartner(ii) === this._targetPairs.pairingPartner(ii + 1) + 1) {
-                    const customA = customLayout[ii];
-                    const customB = customLayout[ii + 1];
-                    if (
-                        customA[0] === null
-                        || customA[1] === null
-                        || customB[0] === null
-                        || customB[1] === null
-                    ) {
-                        continue;
-                    }
-                    const goX = customA[0] - customB[0];
-                    const goY = customA[1] - customB[1];
-                    const L = Math.sqrt(goX * goX + goY * goY);
-                    scaleFactor = 1.0 / L;
-                    return scaleFactor;
-                }
+        if (this._targetPairs === null) {
+            console.error('this._targetPairs is null');
+            return scaleFactor;
+        }
+        for (let ii = 0; ii < this._targetPairs.length - 1; ii++) {
+            // look for a stacked pair
+            if (this._targetPairs.pairingPartner(ii) !== this._targetPairs.pairingPartner(ii + 1) + 1) continue;
+
+            const customA = customLayout[ii];
+            const customB = customLayout[ii + 1];
+            if (
+                customA[0] === null
+                || customA[1] === null
+                || customB[0] === null
+                || customB[1] === null
+            ) {
+                continue;
             }
+            const goX = customA[0] - customB[0];
+            const goY = customA[1] - customB[1];
+            const L = Math.sqrt(goX * goX + goY * goY);
+            scaleFactor = 1.0 / L;
+            return scaleFactor;
+        }
+        // If and only if there are no stacked pairs, instead scale to i => i+1
+        for (let ii = 0; ii < this._targetPairs.length - 1; ii++) {
+            const customA = customLayout[ii];
+            const customB = customLayout[ii + 1];
+            if (
+                customA[0] === null
+                || customA[1] === null
+                || customB[0] === null
+                || customB[1] === null
+            ) {
+                continue;
+            }
+            const goX = customA[0] - customB[0];
+            const goY = customA[1] - customB[1];
+            const L = Math.sqrt(goX * goX + goY * goY);
+            scaleFactor = 1 / L;
+            return scaleFactor;
         }
         return scaleFactor;
     }

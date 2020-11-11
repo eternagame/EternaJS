@@ -310,6 +310,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         let needUpdate = false;
 
+        if (this._customLayoutChanged) {
+            this.checkPairs();
+            this.updateMolecule();
+            this.generateScoreNodes();
+            this.callPoseEditCallback();
+            return;
+        }
+
         if (this._mutatedSequence == null) {
             return;
         }
@@ -343,7 +351,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (needUpdate) {
             this.callTrackMovesCallback(numMut / div, muts);
         }
-        if (needUpdate || this._lockUpdated || this._bindingSiteUpdated || this._designStructUpdated) {
+        if (
+            needUpdate
+            || this._lockUpdated
+            || this._bindingSiteUpdated
+            || this._designStructUpdated
+        ) {
             this.checkPairs();
             this.updateMolecule();
             this.generateScoreNodes();
@@ -512,10 +525,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
         const yarray: number[] = new Array(this._bases.length);
         rnaCoords.getCoords(xarray, yarray);
 
-        this._customLayout = [];
+        const localCustomLayout: ([number, number] | [null, null])[] = [];
         for (let ii = 0; ii < this._bases.length; ++ii) {
             if (xarray[ii] === undefined || yarray[ii] === undefined) continue;
-            this._customLayout.push([
+            localCustomLayout.push([
                 xarray[ii],
                 yarray[ii]
             ]);
@@ -637,20 +650,24 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
         for (const bp of stem) {
-            for (let ii = 0; ii < this._customLayout.length; ++ii) {
-                this._customLayout[bp[0]] = [
-                    this._customLayout[ii][0] as number + this._bases[bp[0]].x - this._bases[ii].x,
-                    this._customLayout[ii][1] as number + this._bases[bp[0]].y - this._bases[ii].y
+            for (let ii = 0; ii < localCustomLayout.length; ++ii) {
+                localCustomLayout[bp[0]] = [
+                    localCustomLayout[ii][0] as number + this._bases[bp[0]].x - this._bases[ii].x,
+                    localCustomLayout[ii][1] as number + this._bases[bp[0]].y - this._bases[ii].y
                 ];
-                this._customLayout[bp[1]] = [
-                    this._customLayout[ii][0] as number + this._bases[bp[1]].x - this._bases[ii].x,
-                    this._customLayout[ii][1] as number + this._bases[bp[1]].y - this._bases[ii].y
+                localCustomLayout[bp[1]] = [
+                    localCustomLayout[ii][0] as number + this._bases[bp[1]].x - this._bases[ii].x,
+                    localCustomLayout[ii][1] as number + this._bases[bp[1]].y - this._bases[ii].y
                 ];
             }
         }
+
+        // Use setter to force redraw
+        this.customLayout = localCustomLayout;
         this._baseRope.enabled = true;
         this._baseRope.redraw(true);
         this._pseudoknotLines.redraw(true);
+        this._customLayoutChanged = true;
     }
 
     /**
@@ -677,15 +694,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
         const yarray: number[] = new Array(this._bases.length);
         rnaCoords.getCoords(xarray, yarray);
 
-        this.customLayout = [];
+        const localCustomLayout: ([number, number] | [null, null])[] = [];
         for (let ii = 0; ii < this._bases.length; ++ii) {
             if (xarray[ii] === undefined || yarray[ii] === undefined) continue;
-            this.customLayout.push([
+            localCustomLayout.push([
                 (xarray[ii]), // * (Pose2D.ZOOM_SPACINGS[0] / Pose2D.ZOOM_SPACINGS[this._zoomLevel]),
                 (yarray[ii])// * (Pose2D.ZOOM_SPACINGS[0] / Pose2D.ZOOM_SPACINGS[this._zoomLevel])
             ]);
         }
-        Assert.assertIsDefined(this._customLayout);
 
         // id stem
         const stem = this._targetPairs.stemWith(startIdx);
@@ -711,20 +727,23 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         for (const bp of stem) {
-            for (let ii = 0; ii < this._customLayout.length; ++ii) {
-                this._customLayout[bp[0]] = [
-                    this._customLayout[ii][0] as number + this._bases[bp[0]].x - this._bases[ii].x,
-                    this._customLayout[ii][1] as number + this._bases[bp[0]].y - this._bases[ii].y
+            for (let ii = 0; ii < localCustomLayout.length; ++ii) {
+                localCustomLayout[bp[0]] = [
+                    localCustomLayout[ii][0] as number + this._bases[bp[0]].x - this._bases[ii].x,
+                    localCustomLayout[ii][1] as number + this._bases[bp[0]].y - this._bases[ii].y
                 ];
-                this._customLayout[bp[1]] = [
-                    this._customLayout[ii][0] as number + this._bases[bp[1]].x - this._bases[ii].x,
-                    this._customLayout[ii][1] as number + this._bases[bp[1]].y - this._bases[ii].y
+                localCustomLayout[bp[1]] = [
+                    localCustomLayout[ii][0] as number + this._bases[bp[1]].x - this._bases[ii].x,
+                    localCustomLayout[ii][1] as number + this._bases[bp[1]].y - this._bases[ii].y
                 ];
             }
         }
+        // Use setter to ensure structure update.
+        this.customLayout = localCustomLayout;
         this._baseRope.enabled = true;
         this._baseRope.redraw(true);
         this._pseudoknotLines.redraw(true);
+        this._customLayoutChanged = true;
     }
 
     /**
@@ -749,15 +768,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
         const yarray: number[] = new Array(this._bases.length);
         rnaCoords.getCoords(xarray, yarray);
 
-        this.customLayout = [];
+        const localCustomLayout: ([number, number] | [null, null])[] = [];
         for (let ii = 0; ii < this._bases.length; ++ii) {
             if (xarray[ii] === undefined || yarray[ii] === undefined) continue;
-            this.customLayout.push([
+            localCustomLayout.push([
                 (xarray[ii]), // * (Pose2D.ZOOM_SPACINGS[0] / Pose2D.ZOOM_SPACINGS[this._zoomLevel]),
                 (yarray[ii])// * (Pose2D.ZOOM_SPACINGS[0] / Pose2D.ZOOM_SPACINGS[this._zoomLevel])
             ]);
         }
-        Assert.assertIsDefined(this._customLayout);
 
         // Calculate new base positions
         for (let ii = 0; ii < this._bases.length; ++ii) {
@@ -772,24 +790,19 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
         for (let ii = 0; ii < this._bases.length; ++ii) {
             if (!this._pairs.isPaired(ii)) continue;
-            for (let jj = 0; jj < this._customLayout.length; ++jj) {
-                this._customLayout[jj] = [
-                    this._customLayout[jj][0] as number + this._bases[jj].x - this._bases[ii].x,
-                    this._customLayout[jj][1] as number + this._bases[jj].y - this._bases[ii].y
+            for (let jj = 0; jj < localCustomLayout.length; ++jj) {
+                localCustomLayout[jj] = [
+                    localCustomLayout[jj][0] as number + this._bases[jj].x - this._bases[ii].x,
+                    localCustomLayout[jj][1] as number + this._bases[jj].y - this._bases[ii].y
                 ];
             }
         }
+        // Use setter to force redraw
+        this.customLayout = localCustomLayout;
         this._baseRope.enabled = true;
         this._baseRope.redraw(true);
         this._pseudoknotLines.redraw(true);
-        // for (const bp of stem) {
-        // for (let ii = 0; ii < this._customLayout.length; ++ii) {
-        // this._customLayout[bp[1]] = [
-        //     this._customLayout[ii][0] as number + this._bases[bp[1]].x - this._bases[ii].x,
-        //     this._customLayout[ii][1] as number + this._bases[bp[1]].y - this._bases[ii].y
-        // ];
-        // }
-        // }
+        this._customLayoutChanged = true;
     }
 
     public onPoseMouseDown(e: InteractionEvent, closestIndex: number): void {
@@ -918,16 +931,15 @@ export default class Pose2D extends ContainerObject implements Updatable {
             rnaCoords.getCoords(xarray, yarray);
             // The simplest thing to do is to use the x/y coords as the new customLayout.
             // This minimizes the calculations you have to do later.
-            this.customLayout = [];
+            const localCustomLayout: ([number, number] | [null, null])[] = [];
             for (let ii = 0; ii < this._bases.length; ++ii) {
                 if (xarray[ii] === undefined || yarray[ii] === undefined) continue;
-                this.customLayout.push([
+                localCustomLayout.push([
                     (xarray[ii]), // * (Pose2D.ZOOM_SPACINGS[0] / Pose2D.ZOOM_SPACINGS[this._zoomLevel]),
                     (yarray[ii])// * (Pose2D.ZOOM_SPACINGS[0] / Pose2D.ZOOM_SPACINGS[this._zoomLevel])
                 ]);
             }
-            // }
-            Assert.assertIsDefined(this._customLayout);
+
             // Ooh, you should drag a helix as a unit.
             if (!this._targetPairs.isPaired(startIdx)) {
                 // Update individual base coordinates.
@@ -938,10 +950,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
                 // Update the customLayout in the same way.
                 // Actually, after writing this, I no longer know why it works.
-                for (let ii = 0; ii < this._customLayout.length; ++ii) {
-                    this._customLayout[startIdx] = [
-                        this._customLayout[ii][0] as number + (mouseX - this._offX) - this._bases[ii].x,
-                        this._customLayout[ii][1] as number + (mouseY - this._offY) - this._bases[ii].y
+                for (let ii = 0; ii < localCustomLayout.length; ++ii) {
+                    localCustomLayout[startIdx] = [
+                        localCustomLayout[ii][0] as number + (mouseX - this._offX) - this._bases[ii].x,
+                        localCustomLayout[ii][1] as number + (mouseY - this._offY) - this._bases[ii].y
                     ];
                 }
 
@@ -959,18 +971,21 @@ export default class Pose2D extends ContainerObject implements Updatable {
                         );
                         this._bases[idx].setDirty();
 
-                        for (let ii = 0; ii < this._customLayout.length; ++ii) {
-                            this._customLayout[idx] = [
-                                this._customLayout[ii][0] as number + this._bases[idx].x - this._bases[ii].x,
-                                this._customLayout[ii][1] as number + this._bases[idx].y - this._bases[ii].y
+                        for (let ii = 0; ii < localCustomLayout.length; ++ii) {
+                            localCustomLayout[idx] = [
+                                localCustomLayout[ii][0] as number + this._bases[idx].x - this._bases[ii].x,
+                                localCustomLayout[ii][1] as number + this._bases[idx].y - this._bases[ii].y
                             ];
                         }
                     }
                 }
             }
+            // Use setter to force redraw
+            this.customLayout = localCustomLayout;
             this._baseRope.enabled = true;
             this._baseRope.redraw(true);
             this._pseudoknotLines.redraw(true);
+            this._customLayoutChanged = true;
             return;
         }
 
@@ -1020,6 +1035,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public onMouseUp(): void {
+        console.error('please');
         this.doneColoring();
         this._mouseDownAltKey = false;
         ROPWait.notifyEndPaint();
@@ -1260,6 +1276,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._mutatedSequence = this.fullSequence.slice(0);
         this.setMutated(new Sequence(mutated));
         this.doneColoring();
+        this._customLayoutChanged = false;
         this._shiftHighlightBox.clear();
         this._shiftHighlightBox.setHighlight([first + offset, last + offset]);
     }
@@ -2228,7 +2245,27 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public set customLayout(setting: Array<[number, number] | [null, null]> | undefined) {
-        this._customLayout = setting;
+        // Compare first
+        if (setting === undefined) {
+            if (this.customLayout !== undefined) {
+                this._customLayout = setting;
+                this.computeLayout(false);
+            }
+        } else if (this.customLayout === undefined) {
+            this._customLayout = setting;
+            this.computeLayout(false);
+        } else {
+            let diff = false;
+            for (let ii = 0; ii < setting.length; ++ii) {
+                if (setting[ii] !== this._customLayout?.[ii] ?? null) {
+                    diff = true;
+                    break;
+                }
+            }
+            if (!diff) return;
+            this._customLayout = setting;
+            this.computeLayout(false);
+        }
     }
 
     public get customLayout(): Array<[number, number] | [null, null]> | undefined {
@@ -3664,6 +3701,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _moleculeTargetPairs: SecStruct | null;
     private _shiftLimit: number;
     private _customLayout: Array<[number, number] | [null, null]> | undefined = undefined;
+    private _customLayoutChanged: boolean = false;
     private _pseudoknotted: boolean = false;
 
     // Oligos
