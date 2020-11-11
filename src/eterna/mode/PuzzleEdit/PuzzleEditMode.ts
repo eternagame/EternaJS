@@ -242,7 +242,6 @@ export default class PuzzleEditMode extends GameMode {
                     const poseField: PoseField = poseFields[ii];
                     const poseToNotify = poseField.pose;
                     if (ii === index) {
-                        console.debug('closestDist', closestDist);
                         poseToNotify.onPoseMouseDown(e, closestIndex);
                     } else {
                         poseToNotify.onPoseMouseDownPropagate(e, closestIndex);
@@ -776,10 +775,6 @@ export default class PuzzleEditMode extends GameMode {
 
     private getCurrentBindingSite(index: number): boolean[] | null {
         return this._bindingSiteStack[this._stackLevel][index];
-    }
-
-    private getCurrentCustomLayout(index: number): ([number, number] | [null, null])[] | null {
-        return this._customLayoutStack[this._stackLevel][index];
     }
 
     private moveUndoStackForward(): void {
