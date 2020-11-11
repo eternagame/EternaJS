@@ -60,8 +60,18 @@ export default class TextInputPanel extends GamePanel {
             heightWalker += 35;
         }
 
+        const tmpwidth = Fonts
+            .std()
+            .bold()
+            .fontSize(16)
+            .color(0xffffff)
+            .text(this._title ?? '')
+            .build()
+            .width;
         const width = (
-            TextInputPanel.W_MARGIN + fieldStart + TextInputPanel.W_MARGIN + maxWidth + TextInputPanel.W_MARGIN
+            fieldStart + maxWidth + TextInputPanel.W_MARGIN > tmpwidth
+                ? TextInputPanel.W_MARGIN + fieldStart + TextInputPanel.W_MARGIN + maxWidth + TextInputPanel.W_MARGIN
+                : TextInputPanel.W_MARGIN + tmpwidth + TextInputPanel.W_MARGIN
         );
         const height = heightWalker + 20 + TextInputPanel.H_MARGIN;
         this.setSize(width, height);
