@@ -250,7 +250,6 @@ export default class PuzzleEditMode extends GameMode {
                     const poseField: PoseField = poseFields[ii];
                     const poseToNotify = poseField.pose;
                     if (ii === index) {
-                        console.debug('closestDist', closestDist);
                         poseToNotify.onPoseMouseDown(e, closestIndex);
                     } else {
                         poseToNotify.onPoseMouseDownPropagate(e, closestIndex);
@@ -767,6 +766,7 @@ export default class PuzzleEditMode extends GameMode {
         this._targetPairsStack = [];
         this._lockStack = [];
         this._bindingSiteStack = [];
+        this._customLayoutStack = [];
     }
 
     protected getCurrentUndoBlock(index: number): UndoBlock {
@@ -797,6 +797,7 @@ export default class PuzzleEditMode extends GameMode {
             this._poses[ii].puzzleLocks = this._lockStack[this._stackLevel][ii];
             this._poses[ii].molecularStructure = this._targetPairsStack[this._stackLevel][ii];
             this._poses[ii].molecularBindingSite = this._bindingSiteStack[this._stackLevel][ii];
+            this._poses[ii].customLayout = this._customLayoutStack[this._stackLevel][ii] ?? undefined;
             this._structureInputs[ii].structureString = this._targetPairsStack[this._stackLevel][ii]
                 .getParenthesis(undefined, true);
         }
@@ -815,6 +816,7 @@ export default class PuzzleEditMode extends GameMode {
             this._poses[ii].puzzleLocks = this._lockStack[this._stackLevel][ii];
             this._poses[ii].molecularStructure = this._targetPairsStack[this._stackLevel][ii];
             this._poses[ii].molecularBindingSite = this._bindingSiteStack[this._stackLevel][ii];
+            this._poses[ii].customLayout = this._customLayoutStack[this._stackLevel][ii] ?? undefined;
             this._structureInputs[ii].structureString = this._targetPairsStack[this._stackLevel][ii]
                 .getParenthesis(undefined, true);
         }
@@ -878,6 +880,7 @@ export default class PuzzleEditMode extends GameMode {
         const currentTargetPairs: SecStruct[] = [];
         const currentLock: (boolean[] | undefined)[] = [];
         const currentBindingSites: (boolean[] | null)[] = [];
+        const currentCustomLayouts: (([number, number] | [null, null])[] | null)[] = [];
 
         const forceSequence = this._poses[index].sequence;
         const forceLock = this._poses[index].puzzleLocks;
@@ -925,6 +928,7 @@ export default class PuzzleEditMode extends GameMode {
             const seq = this._poses[ii].sequence;
             const lock: boolean[] | undefined = this._poses[ii].puzzleLocks;
             const bindingSite = this._poses[ii].molecularBindingSite;
+            const customLayout = this._poses[ii].customLayout;
 
             if (this._stackLevel >= 0) {
                 if (
@@ -950,6 +954,24 @@ export default class PuzzleEditMode extends GameMode {
                     } else {
                         for (let ll = 0; ll < lock.length; ll++) {
                             if (lock[ll] !== lastLock[ll]) {
+                                noChange = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                const lastCustomLayout = this._customLayoutStack[this._stackLevel][ii];
+                if (lastCustomLayout == null && customLayout != null) {
+                    noChange = false;
+                } else if (lastCustomLayout != null && customLayout == null) {
+                    noChange = false;
+                } else if (lastCustomLayout != null && customLayout != null) {
+                    if (lastCustomLayout.length !== customLayout.length) {
+                        noChange = false;
+                    } else {
+                        for (let ll = 0; ll < customLayout.length; ll++) {
+                            if (customLayout[ll] !== lastCustomLayout[ll]) {
                                 noChange = false;
                                 break;
                             }
@@ -1001,6 +1023,7 @@ export default class PuzzleEditMode extends GameMode {
             currentUndoBlocks.push(undoBlock);
             currentLock.push(lock);
             currentBindingSites.push(bindingSite);
+            currentCustomLayouts.push(customLayout || null);
             currentTargetPairs.push(targetPairs);
         }
         if (noChange && this._stackLevel >= 0) {
@@ -1013,6 +1036,7 @@ export default class PuzzleEditMode extends GameMode {
         this._targetPairsStack[this._stackLevel] = currentTargetPairs;
         this._lockStack[this._stackLevel] = currentLock;
         this._bindingSiteStack[this._stackLevel] = currentBindingSites;
+        this._customLayoutStack[this._stackLevel] = currentCustomLayouts;
         this._stackSize = this._stackLevel + 1;
 
         this.updateScore();
@@ -1033,6 +1057,7 @@ export default class PuzzleEditMode extends GameMode {
     private _targetPairsStack: SecStruct[][];
     private _lockStack: (boolean[] | undefined)[][];
     private _bindingSiteStack: (boolean[] | null)[][];
+    private _customLayoutStack: (([number, number] | [null, null])[] | null)[][];
     private _stackLevel: number;
     private _stackSize: number;
     private _paused: boolean;
