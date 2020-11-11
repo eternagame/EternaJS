@@ -39,7 +39,7 @@ export default class TextInputPanel extends GamePanel {
         super.added();
 
         const fieldStart = Math.max(...this._fields.map((field) => field.label.width));
-        const maxWidth = Math.max(...this._fields.map((field) => field.label.width));
+        const maxWidth = Math.max(...this._fields.map((field) => field.input.width));
         let heightWalker = 0;
 
         if (this._fields.length > 0) {
