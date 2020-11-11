@@ -388,7 +388,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (needUpdate) {
             this.callTrackMovesCallback(numMut / div, muts);
         }
-        if (needUpdate || this._lockUpdated || this._bindingSiteUpdated || this._designStructUpdated) {
+        if (
+            needUpdate
+            || this._lockUpdated
+            || this._bindingSiteUpdated
+            || this._designStructUpdated
+            || this._customLayoutChanged
+        ) {
             this.checkPairs();
             this.updateMolecule();
             this.generateScoreNodes();
@@ -696,6 +702,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._baseRope.enabled = true;
         this._baseRope.redraw(true);
         this._pseudoknotLines.redraw(true);
+        this._customLayoutChanged = true;
     }
 
     /**
@@ -770,6 +777,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._baseRope.enabled = true;
         this._baseRope.redraw(true);
         this._pseudoknotLines.redraw(true);
+        this._customLayoutChanged = true;
     }
 
     /**
@@ -827,14 +835,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._baseRope.enabled = true;
         this._baseRope.redraw(true);
         this._pseudoknotLines.redraw(true);
-        // for (const bp of stem) {
-        // for (let ii = 0; ii < this._customLayout.length; ++ii) {
-        // this._customLayout[bp[1]] = [
-        //     this._customLayout[ii][0] as number + this._bases[bp[1]].x - this._bases[ii].x,
-        //     this._customLayout[ii][1] as number + this._bases[bp[1]].y - this._bases[ii].y
-        // ];
-        // }
-        // }
+        this._customLayoutChanged = true;
     }
 
     public onPoseMouseDown(e: InteractionEvent, closestIndex: number): void {
@@ -1016,6 +1017,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._baseRope.enabled = true;
             this._baseRope.redraw(true);
             this._pseudoknotLines.redraw(true);
+            this._customLayoutChanged = true;
             return;
         }
 
@@ -1305,6 +1307,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._mutatedSequence = this.fullSequence.slice(0);
         this.setMutated(new Sequence(mutated));
         this.doneColoring();
+        this._customLayoutChanged = false;
         this._shiftHighlightBox.clear();
         this._shiftHighlightBox.setHighlight([first + offset, last + offset]);
     }
@@ -3773,6 +3776,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _moleculeTargetPairs: SecStruct | null;
     private _shiftLimit: number;
     private _customLayout: Array<[number, number] | [null, null]> | undefined = undefined;
+    private _customLayoutChanged: boolean = false;
     private _pseudoknotted: boolean = false;
 
     // Oligos
