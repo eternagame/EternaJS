@@ -770,26 +770,26 @@ export default class PoseEditMode extends GameMode {
             this._targetOligo.push(undefined);
             this._oligoMode.push(undefined);
             this._oligoName.push(undefined);
-            if (targetConditions[ii] !== undefined) {
-                const tc = targetConditions[ii] as TargetConditions;
-                if (tc['oligo_sequence']) {
-                    this._targetOligo[ii] = Sequence.fromSequenceString(tc['oligo_sequence'] as string).baseArray;
-                    this._oligoMode[ii] = tc['fold_mode'] == null
-                        ? Pose2D.OLIGO_MODE_DIMER
-                        : Number(tc['fold_mode']);
-                    this._oligoName[ii] = tc['oligo_name'];
-                }
-                if (tc['oligos']) {
-                    // Map from OligoDef to Oligo, basically requires turning
-                    // a sequence string into a baseArray.
-                    this._targetOligos[ii] = tc['oligos'].map(
-                        (odef) => ({
-                            sequence: Sequence.fromSequenceString(odef.sequence).baseArray,
-                            malus: odef.malus,
-                            name: odef.name
-                        })
-                    );
-                }
+            if (targetConditions[ii] === undefined) continue;
+
+            const tc = targetConditions[ii] as TargetConditions;
+            if (tc['oligo_sequence']) {
+                this._targetOligo[ii] = Sequence.fromSequenceString(tc['oligo_sequence'] as string).baseArray;
+                this._oligoMode[ii] = tc['fold_mode'] == null
+                    ? Pose2D.OLIGO_MODE_DIMER
+                    : Number(tc['fold_mode']);
+                this._oligoName[ii] = tc['oligo_name'];
+            }
+            if (tc['oligos']) {
+                // Map from OligoDef to Oligo, basically requires turning
+                // a sequence string into a baseArray.
+                this._targetOligos[ii] = tc['oligos'].map(
+                    (odef) => ({
+                        sequence: Sequence.fromSequenceString(odef.sequence).baseArray,
+                        malus: odef.malus,
+                        name: odef.name
+                    })
+                );
             }
         }
 
