@@ -775,7 +775,7 @@ export default class PoseEditMode extends GameMode {
             const tc = targetConditions[ii] as TargetConditions;
             if (tc['oligo_sequence']) {
                 this._targetOligo[ii] = Sequence.fromSequenceString(tc['oligo_sequence'] as string).baseArray;
-                this._oligoMode[ii] = tc['fold_mode'] == null
+                this._oligoMode[ii] = tc['fold_mode'] === undefined
                     ? Pose2D.OLIGO_MODE_DIMER
                     : Number(tc['fold_mode']);
                 this._oligoName[ii] = tc['oligo_name'];
