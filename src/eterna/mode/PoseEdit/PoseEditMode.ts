@@ -2141,26 +2141,25 @@ export default class PoseEditMode extends GameMode {
         if (submitSolutionRspData) missionClearedPanel.createRankScroll(submitSolutionRspData);
 
         const keepPlaying = () => {
-            if (missionClearedPanel != null) {
-                Eterna.chat.popHideChat();
+            if (missionClearedPanel === null) return;
+            Eterna.chat.popHideChat();
 
-                missionClearedPanel.destroySelf();
-                missionClearedPanel = null;
+            missionClearedPanel.destroySelf();
+            missionClearedPanel = null;
 
-                // Restore UI
-                this._constraintsLayer.visible = true;
-                this.disableTools(false);
+            // Restore UI
+            this._constraintsLayer.visible = true;
+            this.disableTools(false);
 
-                for (const poseField of this._poseFields) {
-                    poseField.showTotalEnergy = true;
-                }
-
-                this._exitButton.display.alpha = 0;
-                this._exitButton.display.visible = true;
-                this._exitButton.addObject(new AlphaTask(1, 0.3));
-
-                this._helpBar.display.visible = true;
+            for (const poseField of this._poseFields) {
+                poseField.showTotalEnergy = true;
             }
+
+            this._exitButton.display.alpha = 0;
+            this._exitButton.display.visible = true;
+            this._exitButton.addObject(new AlphaTask(1, 0.3));
+
+            this._helpBar.display.visible = true;
         };
 
         if (hasNextPuzzle) {
