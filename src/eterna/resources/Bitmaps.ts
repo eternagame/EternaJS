@@ -5,9 +5,6 @@ export default class Bitmaps {
     public static readonly NovaAReq: string = require('assets/NOVA/Constraints/a-requirement-box.png');
     public static readonly NovaARowMissionReq: string = require('assets/NOVA/Mission/a-row-box.png');
     public static readonly NovaARowReq: string = require('assets/NOVA/Constraints/a-row-req-box.png');
-    public static readonly ActionbarCenterImg: string = require('assets/Actionbar/actionbar_center.png');
-    public static readonly ActionbarLeftImg: string = require('assets/Actionbar/actionbar_left.png');
-    public static readonly ActionbarRightImg: string = require('assets/Actionbar/actionbar_right.png');
     public static readonly ImgAddBaseOver: string = require('assets/NOVA/Edit/add_base_active.png');
     public static readonly ImgAddBase: string = require('assets/NOVA/Edit/add_base_normal.png');
     public static readonly ImgAddBaseSelect: string = require('assets/NOVA/Edit/add_base_selected.png');
@@ -72,7 +69,6 @@ export default class Bitmaps {
     public static readonly ImgCopyHit: string = require('assets/NOVA/Copy/copy-hit.png');
     public static readonly ImgCopyOver: string = require('assets/NOVA/Copy/copy-over.png');
     public static readonly ImgCross: string = require('assets/cross.png');
-    public static readonly ActionbarDividerImg: string = require('assets/divider.png');
     public static readonly ImgDownArrow: string = require('assets/down_arrow.png');
     public static readonly CancelImg: string = require('assets/TangoIcons/emblem-unreadable.png');
     public static readonly ImgEndBoard: string = require('assets/endboard.png');

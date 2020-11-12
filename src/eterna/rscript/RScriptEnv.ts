@@ -244,9 +244,6 @@ export default class RScriptEnv extends ContainerObject {
                 return this.ui.toolbar.zoomInButton ? this.ui.toolbar.zoomInButton : null;
             case RScriptUIElementID.ZOOMOUT:
                 return this.ui.toolbar.zoomOutButton ? this.ui.toolbar.zoomOutButton : null;
-            case RScriptUIElementID.ACTIONBAR:
-                // NOTE: There is no longer an action bar...
-                return this.ui.toolbar.zoomInButton ? this.ui.toolbar.zoomInButton : null;
             case RScriptUIElementID.RESET:
                 return this.ui.toolbar.resetButton;
             case RScriptUIElementID.UNDO:
