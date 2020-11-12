@@ -2091,14 +2091,11 @@ export default class PoseEditMode extends GameMode {
                 this.setAncestorId(data['solution-id']);
             }
 
-            if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
-                if (this._puzzle.useBarcode) {
-                    const hairpin: string | null = EPars.getBarcodeHairpin(seqString());
-                    if (hairpin != null) {
-                        SolutionManager.instance.addHairpins([hairpin]);
-                        this.checkConstraints();
-                    }
-                }
+            if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
+                && this._puzzle.useBarcode
+                && EPars.getBarcodeHairpin(seqString()) !== null) {
+                SolutionManager.instance.addHairpins([EPars.getBarcodeHairpin(seqString()) as string]);
+                this.checkConstraints();
             }
         }
     }
