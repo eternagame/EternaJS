@@ -2374,11 +2374,6 @@ export default class PoseEditMode extends GameMode {
             return false;
         }
 
-        // if (this.root.loaderInfo.parameters.autoload
-        //     && Number(this.root.loaderInfo.parameters.autoload) === 0) {
-        //     return false;
-        // }
-
         const beginningSequence: Sequence = this._puzzle.getBeginningSequence();
         const locks: boolean[] = this._puzzle.puzzleLocks;
         let oligoLen = 0;
@@ -2404,11 +2399,6 @@ export default class PoseEditMode extends GameMode {
         const json: SaveStoreItem | null = this._autosaveData;
         // no saved data
         if (json == null) {
-            // if (this.root.loaderInfo.parameters.inputsequence != null) {
-            //     a = EPars.string_to_sequence_array(this.root.loaderInfo.parameters.inputsequence);
-            // } else {
-            //     return false;
-            // }
             return false;
         }
 
