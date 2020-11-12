@@ -2814,88 +2814,92 @@ export default class PoseEditMode extends GameMode {
         const lastShiftedIndex: number = this._poses[targetIndex].lastShiftedIndex;
         const lastShiftedCommand: number = this._poses[targetIndex].lastShiftedCommand;
         for (let ii = 0; ii < this._poses.length; ii++) {
-            if (lastShiftedIndex > 0 && lastShiftedCommand >= 0) {
-                if (ii !== targetIndex) {
-                    this._poses[ii].baseShiftWithCommand(lastShiftedCommand, lastShiftedIndex);
+            if (lastShiftedIndex <= 0 || lastShiftedCommand < 0) {
+                this._poses[ii].sequence = this._poses[targetIndex].sequence;
+                this._poses[ii].puzzleLocks = this._poses[targetIndex].puzzleLocks;
+                continue;
+            }
+
+            if (ii !== targetIndex) {
+                this._poses[ii].baseShiftWithCommand(lastShiftedCommand, lastShiftedIndex);
+            }
+
+            const results: [string, PuzzleEditOp, number[]?] | null = this._poses[ii].parseCommandWithPairs(
+                lastShiftedCommand, lastShiftedIndex, this._targetPairs[ii]
+            );
+            if (results != null) {
+                const parenthesis: string = results[0];
+                this._targetPairs[ii] = SecStruct.fromParens(parenthesis);
+            }
+
+            // Adjust indices for all constraints in TargetConditions
+            const tc = this._targetConditions[ii] as TargetConditions;
+            const antiStructureConstraints = tc['anti_structure_constraints'];
+            if (antiStructureConstraints !== undefined) {
+                if (lastShiftedCommand === RNAPaint.ADD_BASE) {
+                    const antiStructureConstraint: boolean = antiStructureConstraints[lastShiftedIndex];
+                    antiStructureConstraints.splice(lastShiftedIndex, 0, antiStructureConstraint);
+                } else if (lastShiftedCommand === RNAPaint.DELETE) {
+                    antiStructureConstraints.splice(lastShiftedIndex, 1);
                 }
+            }
 
-                const results: [string, PuzzleEditOp, number[]?] | null = this._poses[ii].parseCommandWithPairs(
-                    lastShiftedCommand, lastShiftedIndex, this._targetPairs[ii]
-                );
-                if (results != null) {
-                    const parenthesis: string = results[0];
-                    this._targetPairs[ii] = SecStruct.fromParens(parenthesis);
-                }
+            const structureConstraints = tc['structure_constraints'];
+            if (structureConstraints !== undefined) {
+                const constraintVal: boolean = structureConstraints[lastShiftedIndex];
+                let newConstraints: boolean[];
 
-                // Adjust indices for all constraints in TargetConditions
-                const tc = this._targetConditions[ii] as TargetConditions;
-                const antiStructureConstraints = tc['anti_structure_constraints'];
-                if (antiStructureConstraints !== undefined) {
-                    if (lastShiftedCommand === RNAPaint.ADD_BASE) {
-                        const antiStructureConstraint: boolean = antiStructureConstraints[lastShiftedIndex];
-                        antiStructureConstraints.splice(lastShiftedIndex, 0, antiStructureConstraint);
-                    } else if (lastShiftedCommand === RNAPaint.DELETE) {
-                        antiStructureConstraints.splice(lastShiftedIndex, 1);
-                    }
-                }
-
-                const structureConstraints = tc['structure_constraints'];
-                if (structureConstraints !== undefined) {
-                    const constraintVal: boolean = structureConstraints[lastShiftedIndex];
-                    let newConstraints: boolean[];
-
-                    if (lastShiftedCommand === RNAPaint.ADD_BASE) {
-                        newConstraints = structureConstraints.slice(0, lastShiftedIndex);
-                        newConstraints.push(constraintVal);
-                        newConstraints = newConstraints.concat(
-                            structureConstraints.slice(lastShiftedIndex, structureConstraints.length)
-                        );
-                    } else {
-                        newConstraints = structureConstraints.slice(0, lastShiftedIndex);
-                        newConstraints = newConstraints.concat(
-                            structureConstraints.slice(lastShiftedIndex + 1, structureConstraints.length)
-                        );
-                    }
-                    tc['structure_constraints'] = newConstraints;
-                }
-
-                const antiSecstruct: string | undefined = tc['anti_secstruct'];
-                if (antiSecstruct != null) {
-                    const antiPairs: SecStruct = SecStruct.fromParens(antiSecstruct);
-                    const antiResult: [string, PuzzleEditOp, number[]?] | null = this._poses[ii].parseCommandWithPairs(
-                        lastShiftedCommand, lastShiftedIndex, antiPairs
+                if (lastShiftedCommand === RNAPaint.ADD_BASE) {
+                    newConstraints = structureConstraints.slice(0, lastShiftedIndex);
+                    newConstraints.push(constraintVal);
+                    newConstraints = newConstraints.concat(
+                        structureConstraints.slice(lastShiftedIndex, structureConstraints.length)
                     );
-                    if (antiResult) tc['anti_secstruct'] = antiResult[0];
+                } else {
+                    newConstraints = structureConstraints.slice(0, lastShiftedIndex);
+                    newConstraints = newConstraints.concat(
+                        structureConstraints.slice(lastShiftedIndex + 1, structureConstraints.length)
+                    );
                 }
+                tc['structure_constraints'] = newConstraints;
+            }
 
-                if (tc['type'] === 'aptamer') {
-                    const bindingSite: number[] = (tc['site'] as number[]).slice(0);
-                    const bindingPairs: number[] = [];
-                    if (lastShiftedCommand === RNAPaint.ADD_BASE) {
-                        for (let ss = 0; ss < bindingSite.length; ss++) {
-                            if (bindingSite[ss] >= lastShiftedIndex) {
-                                bindingSite[ss]++;
-                            }
-                        }
+            const antiSecstruct: string | undefined = tc['anti_secstruct'];
+            if (antiSecstruct != null) {
+                const antiPairs: SecStruct = SecStruct.fromParens(antiSecstruct);
+                const antiResult: [string, PuzzleEditOp, number[]?] | null = this._poses[ii].parseCommandWithPairs(
+                    lastShiftedCommand, lastShiftedIndex, antiPairs
+                );
+                if (antiResult) tc['anti_secstruct'] = antiResult[0];
+            }
 
-                        for (let jj = 0; jj < bindingSite.length; jj++) {
-                            bindingPairs.push(this._targetPairs[ii].pairingPartner(bindingSite[jj]));
-                        }
-                    } else {
-                        for (let ss = 0; ss < bindingSite.length; ss++) {
-                            if (bindingSite[ss] >= lastShiftedIndex) {
-                                bindingSite[ss]--;
-                            }
-                        }
-
-                        for (let jj = 0; jj < bindingSite.length; jj++) {
-                            bindingPairs.push(this._targetPairs[ii].pairingPartner(bindingSite[jj]));
+            if (tc['type'] === 'aptamer') {
+                const bindingSite: number[] = (tc['site'] as number[]).slice(0);
+                const bindingPairs: number[] = [];
+                if (lastShiftedCommand === RNAPaint.ADD_BASE) {
+                    for (let ss = 0; ss < bindingSite.length; ss++) {
+                        if (bindingSite[ss] >= lastShiftedIndex) {
+                            bindingSite[ss]++;
                         }
                     }
 
-                    tc['site'] = bindingSite;
-                    tc['binding_pairs'] = bindingPairs;
+                    for (let jj = 0; jj < bindingSite.length; jj++) {
+                        bindingPairs.push(this._targetPairs[ii].pairingPartner(bindingSite[jj]));
+                    }
+                } else {
+                    for (let ss = 0; ss < bindingSite.length; ss++) {
+                        if (bindingSite[ss] >= lastShiftedIndex) {
+                            bindingSite[ss]--;
+                        }
+                    }
+
+                    for (let jj = 0; jj < bindingSite.length; jj++) {
+                        bindingPairs.push(this._targetPairs[ii].pairingPartner(bindingSite[jj]));
+                    }
                 }
+
+                tc['site'] = bindingSite;
+                tc['binding_pairs'] = bindingPairs;
             }
 
             this._poses[ii].sequence = this._poses[targetIndex].sequence;
