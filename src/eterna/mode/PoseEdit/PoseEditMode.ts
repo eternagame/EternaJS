@@ -3344,7 +3344,6 @@ export default class PoseEditMode extends GameMode {
     private _asynchText: Text;
     private _foldTotalTime: number;
     // / Undo stack
-    private _seqStacks: UndoBlock[][];
     private _stackLevel: number;
     private _stackSize: number;
     private _alreadyCleared: boolean = false;
@@ -3355,6 +3354,8 @@ export default class PoseEditMode extends GameMode {
     private _moves: Move[][] = [];
     protected _curTargetIndex: number = 0;
     private _poseState: PoseState = PoseState.NATIVE;
+
+    private _seqStacks: UndoBlock[][];
     protected _targetPairs: SecStruct[] = [];
     protected _targetConditions: (TargetConditions | undefined)[] = [];
     private _targetOligo: (RNABase[] | undefined)[] = [];
