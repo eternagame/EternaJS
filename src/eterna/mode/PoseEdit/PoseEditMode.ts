@@ -667,28 +667,30 @@ export default class PoseEditMode extends GameMode {
             const poseState = this._isPipMode || poseIdx !== 0 ? poseIdx : this._curTargetIndex;
             if (!highlightInfos) continue;
             for (const highlightInfo of highlightInfos) {
-                if (highlightInfo && (highlightInfo.stateIndex == null || poseState === highlightInfo.stateIndex)) {
-                    const currBlock = this.getCurrentUndoBlock(poseState);
-                    const naturalMap = currBlock.reorderedOligosIndexMap(currBlock.oligoOrder);
-                    const ranges = (this._poseState === PoseState.NATIVE && naturalMap != null)
-                        ? highlightInfo.ranges.map((index: number) => {
-                            Assert.assertIsDefined(naturalMap);
-                            return naturalMap.indexOf(index);
-                        }) : highlightInfo.ranges;
+                if (highlightInfo.stateIndex !== undefined && poseState !== highlightInfo.stateIndex) {
+                    continue;
+                }
 
-                    switch (highlightInfo.color) {
-                        case HighlightType.RESTRICTED:
-                            pose.highlightRestrictedSequence(ranges);
-                            break;
-                        case HighlightType.UNSTABLE:
-                            pose.highlightUnstableSequence(ranges);
-                            break;
-                        case HighlightType.USER_DEFINED:
-                            pose.highlightUserDefinedSequence(ranges);
-                            break;
-                        default:
-                            log.error(`Invalid highlight type: ${highlightInfo.color}`);
-                    }
+                const currBlock = this.getCurrentUndoBlock(poseState);
+                const naturalMap = currBlock.reorderedOligosIndexMap(currBlock.oligoOrder);
+                const ranges = (this._poseState === PoseState.NATIVE && naturalMap !== undefined)
+                    ? highlightInfo.ranges.map((index: number) => {
+                        Assert.assertIsDefined(naturalMap);
+                        return naturalMap.indexOf(index);
+                    }) : highlightInfo.ranges;
+
+                switch (highlightInfo.color) {
+                    case HighlightType.RESTRICTED:
+                        pose.highlightRestrictedSequence(ranges);
+                        break;
+                    case HighlightType.UNSTABLE:
+                        pose.highlightUnstableSequence(ranges);
+                        break;
+                    case HighlightType.USER_DEFINED:
+                        pose.highlightUserDefinedSequence(ranges);
+                        break;
+                    default:
+                        log.error(`Invalid highlight type: ${highlightInfo.color}`);
                 }
             }
         }
