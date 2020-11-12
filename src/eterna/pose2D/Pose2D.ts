@@ -3311,7 +3311,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         for (let ii = 0; ii < this._pairs.length; ii++) {
             const pi = this._pairs.pairingPartner(ii);
             if (this._pairs.isPaired(ii) && this.isPairSatisfied(ii, pi)) {
-                const pairStr: number = Pose2D.getPairStrength(
+                const pairStr: number = PoseUtil.getPairStrength(
                     fullSeq.nt(ii), fullSeq.nt(pi)
                 );
 
@@ -3657,22 +3657,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
             locks[ii] = false;
         }
         return locks;
-    }
-
-    private static getPairStrength(s1: number, s2: number): number {
-        if (Pose2D.isPair(s1, s2, RNABase.ADENINE, RNABase.URACIL)) {
-            return 2;
-        } else if (Pose2D.isPair(s1, s2, RNABase.GUANINE, RNABase.URACIL)) {
-            return 1;
-        } else if (Pose2D.isPair(s1, s2, RNABase.GUANINE, RNABase.CYTOSINE)) {
-            return 3;
-        } else {
-            return -1;
-        }
-    }
-
-    private static isPair(s1: number, s2: number, type1: number, type2: number): boolean {
-        return (s1 === type1 && s2 === type2) || (s1 === type2 && s2 === type1);
     }
 
     private readonly _baseLayer: Container = new Container();
