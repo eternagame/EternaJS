@@ -2011,24 +2011,24 @@ export default class PoseEditMode extends GameMode {
                 for (const pose of this._poses) {
                     pose.setZoomLevel(0, true, true);
                     const p = pose.startExplosion();
-                    if (fxComplete == null) {
-                        fxComplete = p.then(() => {
-                            bubbles.decay();
-                            bubbles.addObject(new SerialTask(
-                                new AlphaTask(0, 5, Easing.easeIn),
-                                new SelfDestructTask()
-                            ));
+                    if (fxComplete != null) continue;
 
-                            for (const poseFieldToClear of this._poseFields) {
-                                poseFieldToClear.showTotalEnergy = false;
-                            }
-                            for (const poseExplosion of this._poses) {
-                                poseExplosion.clearExplosion();
-                            }
+                    fxComplete = p.then(() => {
+                        bubbles.decay();
+                        bubbles.addObject(new SerialTask(
+                            new AlphaTask(0, 5, Easing.easeIn),
+                            new SelfDestructTask()
+                        ));
 
-                            this._constraintsLayer.visible = false;
-                        });
-                    }
+                        for (const poseFieldToClear of this._poseFields) {
+                            poseFieldToClear.showTotalEnergy = false;
+                        }
+                        for (const poseExplosion of this._poses) {
+                            poseExplosion.clearExplosion();
+                        }
+
+                        this._constraintsLayer.visible = false;
+                    });
                 }
             }
         }
