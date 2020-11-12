@@ -1689,6 +1689,7 @@ export default class PoseEditMode extends GameMode {
         }
         this._poses[poseIndex].forcedHighlights = this.getForcedHighlights(targetIndex);
 
+        // AMW TODO: this is awful
         if (this._puzzle.nodeID === 2390140) {
             if (targetIndex === 1) {
                 this._poses[poseIndex].auxInfo = null;
