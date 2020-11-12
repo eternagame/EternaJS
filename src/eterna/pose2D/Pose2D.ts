@@ -3652,11 +3652,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     private static createDefaultLocks(sequenceLength: number): boolean[] {
-        const locks: boolean[] = new Array<boolean>(sequenceLength);
-        for (let ii = 0; ii < sequenceLength; ++ii) {
-            locks[ii] = false;
-        }
-        return locks;
+        return new Array<boolean>(sequenceLength).fill(false);
     }
 
     private readonly _baseLayer: Container = new Container();
