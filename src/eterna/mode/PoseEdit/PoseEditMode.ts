@@ -1603,27 +1603,29 @@ export default class PoseEditMode extends GameMode {
     private getForcedHighlights(targetIndex: number): number[] {
         const elems: number[] = [];
 
-        if (this._targetConditions && this._targetConditions[targetIndex] !== undefined) {
-            const tc = this._targetConditions[targetIndex] as TargetConditions;
-            const maxLen: number = this._poses[targetIndex].sequence.length;
-            for (let ii = 0; ii < this._poses.length; ii++) {
-                if (ii === targetIndex || tc['force_struct'] == null) {
-                    continue;
-                }
+        if (this._targetConditions[targetIndex] === undefined) {
+            return elems;
+        }
 
-                let curr = 1;
-                const forced: number[] = EPars.parenthesisToForcedArray(tc['force_struct']);
-                let jj;
-                for (jj = 0; jj < maxLen && jj < forced.length; jj++) {
-                    const _stat: number = (forced[jj] === EPars.FORCE_IGNORE ? 1 : 0);
-                    if ((curr ^ _stat) !== 0) {
-                        elems.push(jj - _stat);
-                        curr = _stat;
-                    }
+        const tc = this._targetConditions[targetIndex] as TargetConditions;
+        const maxLen: number = this._poses[targetIndex].sequence.length;
+        for (let ii = 0; ii < this._poses.length; ii++) {
+            if (ii === targetIndex || tc['force_struct'] == null) {
+                continue;
+            }
+
+            let curr = 1;
+            const forced: number[] = EPars.parenthesisToForcedArray(tc['force_struct']);
+            let jj;
+            for (jj = 0; jj < maxLen && jj < forced.length; jj++) {
+                const _stat: number = (forced[jj] === EPars.FORCE_IGNORE ? 1 : 0);
+                if ((curr ^ _stat) !== 0) {
+                    elems.push(jj - _stat);
+                    curr = _stat;
                 }
-                if ((elems.length % 2) === 1) {
-                    elems.push(jj - 1);
-                }
+            }
+            if ((elems.length % 2) === 1) {
+                elems.push(jj - 1);
             }
         }
 
