@@ -90,9 +90,9 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
 
     public getConstraintBoxConfig(
         status: ShapeConstraintStatus,
-        forMissionScreen: boolean,
+        _forMissionScreen: boolean,
         undoBlocks: UndoBlock[],
-        targetConditions?: TargetConditions[]
+        _targetConditions?: TargetConditions[]
     ): ConstraintBoxConfig {
         return {
             satisfied: status.satisfied,

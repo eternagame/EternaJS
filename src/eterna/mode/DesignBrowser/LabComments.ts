@@ -1,5 +1,4 @@
 import Eterna from 'eterna/Eterna';
-import Utility from 'eterna/util/Utility';
 
 export interface CommentsData {
     name: string;

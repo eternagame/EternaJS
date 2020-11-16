@@ -2,7 +2,7 @@ import {Point} from 'pixi.js';
 import {
     Enableable, PointerCapture, DisplayUtil, HAlign, VAlign, Flashbang, Assert
 } from 'flashbang';
-import {RegistrationGroup, UnitSignal} from 'signals';
+import {RegistrationGroup} from 'signals';
 import GameButton from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';
 import TrueWidthDisplay from './TrueWidthDisplay';
@@ -191,50 +191,48 @@ export default class EternaMenu extends GamePanel implements Enableable {
             }
         };
 
-        menuButton.pointerOver.connect((e) => {
-            if (this._enabled) {
-                if (!menu.panel.display.visible) {
-                    showDialog();
+        menuButton.pointerOver.connect((_e) => {
+            if (!this._enabled) return;
+            if (menu.panel.display.visible) return;
 
-                    const regs = new RegistrationGroup();
+            showDialog();
 
-                    regs.add(menu.panel.pointerOut.connect(() => {
-                        Assert.assertIsDefined(Flashbang.globalMouse);
-                        if (!DisplayUtil.hitTest(menuButton.display, Flashbang.globalMouse)) {
-                            menu.panel.display.visible = false;
-                            regs.close();
-                        }
-                    }));
+            const regs = new RegistrationGroup();
 
-                    regs.add(menuButton.pointerOut.connect(() => {
-                        Assert.assertIsDefined(Flashbang.globalMouse);
-                        if (!DisplayUtil.hitTest(menu.panel.display, Flashbang.globalMouse)) {
-                            menu.panel.display.visible = false;
-                            regs.close();
-                        }
-                    }));
+            regs.add(menu.panel.pointerOut.connect(() => {
+                Assert.assertIsDefined(Flashbang.globalMouse);
+                if (!DisplayUtil.hitTest(menuButton.display, Flashbang.globalMouse)) {
+                    menu.panel.display.visible = false;
+                    regs.close();
                 }
-            }
+            }));
+
+            regs.add(menuButton.pointerOut.connect(() => {
+                Assert.assertIsDefined(Flashbang.globalMouse);
+                if (!DisplayUtil.hitTest(menu.panel.display, Flashbang.globalMouse)) {
+                    menu.panel.display.visible = false;
+                    regs.close();
+                }
+            }));
         });
 
         menuButton.pointerTap.connect(() => {
-            if (this._enabled) {
-                if (!menu.panel.display.visible) {
-                    showDialog();
+            if (!this._enabled) return;
+            if (menu.panel.display.visible) return;
 
-                    this._activeCapture = new PointerCapture(menu.panel.display, (e) => {
-                        if (e.type === 'pointertap') {
-                            menu.panel.display.visible = false;
-                            if (this._activeCapture) {
-                                menu.panel.removeObject(this._activeCapture);
-                                this._activeCapture = null;
-                            }
-                        }
-                        e.stopPropagation();
-                    });
-                    menu.panel.addObject(this._activeCapture);
+            showDialog();
+
+            this._activeCapture = new PointerCapture(menu.panel.display, (e) => {
+                if (e.type === 'pointertap') {
+                    menu.panel.display.visible = false;
+                    if (this._activeCapture) {
+                        menu.panel.removeObject(this._activeCapture);
+                        this._activeCapture = null;
+                    }
                 }
-            }
+                e.stopPropagation();
+            });
+            menu.panel.addObject(this._activeCapture);
         });
 
         return menu;

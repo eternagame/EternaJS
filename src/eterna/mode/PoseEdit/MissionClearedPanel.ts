@@ -1,9 +1,9 @@
 import {
-    Container, Graphics, Point, Text, interaction
+    Container, Graphics, Point, Text
 } from 'pixi.js';
 import {
     ContainerObject, VLayoutContainer, HAlign, DOMObject, AlphaTask,
-    Flashbang, DisplayUtil, VAlign, Assert, MathUtil, MouseWheelListener, InputUtil
+    Flashbang, DisplayUtil, VAlign, Assert, MathUtil
 } from 'flashbang';
 import GameButton from 'eterna/ui/GameButton';
 import Fonts from 'eterna/util/Fonts';

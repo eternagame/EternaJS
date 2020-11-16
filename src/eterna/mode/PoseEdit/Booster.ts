@@ -1,7 +1,7 @@
 import * as log from 'loglevel';
 import {Texture} from 'pixi.js';
 import {TextureUtil, Flashbang} from 'flashbang';
-import EPars, {RNABase} from 'eterna/EPars';
+import EPars from 'eterna/EPars';
 import Pose2D from 'eterna/pose2D/Pose2D';
 import GameButton from 'eterna/ui/GameButton';
 import Sounds from 'eterna/resources/Sounds';

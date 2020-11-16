@@ -1,5 +1,5 @@
 import {
-    Graphics, Point, Sprite, MaskData, Texture, Container, Rectangle
+    Graphics, Point, Sprite, Container
 } from 'pixi.js';
 import {RegistrationGroup} from 'signals';
 import Eterna from 'eterna/Eterna';
@@ -755,7 +755,7 @@ export default class Toolbar extends ContainerObject {
             }
         }));
 
-        this.regs.add(this.pointerUp.connect((e) => {
+        this.regs.add(this.pointerUp.connect((_e) => {
             mouseDown = false;
         }));
 

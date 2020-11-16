@@ -1,6 +1,5 @@
 import {Graphics, Point, Text} from 'pixi.js';
 import {Signal} from 'signals';
-import Eterna from 'eterna/Eterna';
 import {
     ContainerObject, KeyboardListener, Enableable, LocationTask, Easing, KeyboardEventType, KeyCode, Flashbang, Assert
 } from 'flashbang';

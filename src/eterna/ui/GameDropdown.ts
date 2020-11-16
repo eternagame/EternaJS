@@ -155,7 +155,7 @@ export default class GameDropdown extends ContainerObject {
         this._popup.display.visible = false;
     }
 
-    private _drawBox(hover: boolean) {
+    private _drawBox(_hover: boolean) {
         let TEXT_WIDTH = this.options.reduce(
             (max, opt) => Math.max(max, opt.length),
             0

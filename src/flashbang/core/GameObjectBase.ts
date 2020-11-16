@@ -114,7 +114,7 @@ export default class GameObjectBase {
     }
 
     /* internal */
-    public _attachToDisplayList(displayParent: Container, displayIdx: number): void {
+    public _attachToDisplayList(_displayParent: Container, _displayIdx: number): void {
         // implemented by subclasses
     }
 

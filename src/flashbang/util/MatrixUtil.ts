@@ -130,7 +130,6 @@ export default class MatrixUtil {
     private static formatRawData(data: number[], numCols: number, numRows: number,
         precision: number, indent = '  '): string {
         let result: string = indent;
-        const numValues: number = numCols * numRows;
         const highestValue = Math.max(...data.map((k) => Math.abs(k)));
         const numChars: number = highestValue.toFixed(precision).length + 1;
 
