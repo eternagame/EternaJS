@@ -2,12 +2,12 @@ import {Container, DisplayObject} from 'pixi.js';
 import {Assert, Flashbang, GameObject} from 'flashbang';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
 
-type InteractionEvent = PIXI.interaction.InteractionEvent;
+type InteractionEvent = PIXI.InteractionEvent;
 
 /**
  * Begins capturing pointer input. All pointer events not related to the passed Container will be
  * routed to the given callback function before they reach their intended target. The callback
- * can call {@link PIXI.interaction.InteractionEvent.stopPropagation} to prevent the event from
+ * can call {@link PIXI.InteractionEvent.stopPropagation} to prevent the event from
  * being processed further.
  *
  * Capture begins when this object is added as the child of another GameObject via GameObject#addObject,

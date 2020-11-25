@@ -4,7 +4,7 @@ import GameObject from 'flashbang/core/GameObject';
 import PointerTarget from 'flashbang/input/PointerTarget';
 import DisplayObjectPointerTarget from 'flashbang/input/DisplayObjectPointerTarget';
 
-type InteractionEvent = PIXI.interaction.InteractionEvent;
+type InteractionEvent = PIXI.InteractionEvent;
 
 /** A convenience class that manages a DisplayObject directly. */
 export default class SceneObject<T extends DisplayObject = DisplayObject> extends GameObject implements PointerTarget {

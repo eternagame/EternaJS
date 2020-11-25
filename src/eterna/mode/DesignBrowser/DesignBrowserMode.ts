@@ -596,7 +596,7 @@ export default class DesignBrowserMode extends GameMode {
             });
     }
 
-    private onMouseUp(e: PIXI.interaction.InteractionEvent): void {
+    private onMouseUp(e: PIXI.InteractionEvent): void {
         if (Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown) {
             this.mark(e);
             return;
@@ -687,7 +687,7 @@ export default class DesignBrowserMode extends GameMode {
         this.updateLayout();
     }
 
-    private onMouseMove(e: PIXI.interaction.InteractionEvent): void {
+    private onMouseMove(e: PIXI.InteractionEvent): void {
         this._selectionBox.visible = false;
         Assert.assertIsDefined(Flashbang.globalMouse);
 
@@ -718,7 +718,7 @@ export default class DesignBrowserMode extends GameMode {
         this._clickedSelectionBox.visible = idxOffset > 0;
     }
 
-    private mark(e: PIXI.interaction.InteractionEvent): void {
+    private mark(e: PIXI.InteractionEvent): void {
         if (this._dataCols == null) {
             this._markerBoxes.visible = false;
             return;

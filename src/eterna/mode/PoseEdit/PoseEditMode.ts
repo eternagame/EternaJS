@@ -71,7 +71,7 @@ import MissionClearedPanel from './MissionClearedPanel';
 import ViewSolutionOverlay from '../DesignBrowser/ViewSolutionOverlay';
 import {PuzzleEditPoseData} from '../PuzzleEdit/PuzzleEditMode';
 
-type InteractionEvent = PIXI.interaction.InteractionEvent;
+type InteractionEvent = PIXI.InteractionEvent;
 
 export interface PoseEditParams {
     isReset?: boolean;

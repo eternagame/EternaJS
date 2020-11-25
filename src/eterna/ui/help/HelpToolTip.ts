@@ -4,7 +4,7 @@ import {
 } from 'pixi.js';
 import Fonts from 'eterna/util/Fonts';
 
-type InteractionEvent = PIXI.interaction.InteractionEvent;
+type InteractionEvent = PIXI.InteractionEvent;
 
 // AMW we have to be content to accept our positioner may
 // in fact return null (if we want to use getbounds() for

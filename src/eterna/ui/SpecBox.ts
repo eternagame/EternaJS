@@ -18,7 +18,7 @@ import GamePanel from './GamePanel';
 import HTMLTextObject from './HTMLTextObject';
 import TextBalloon from './TextBalloon';
 
-type InteractionEvent = PIXI.interaction.InteractionEvent;
+type InteractionEvent = PIXI.InteractionEvent;
 
 export default class SpecBox extends ContainerObject {
     /** Emitted when a docked SpecBox's maximize button is clicked */
@@ -252,7 +252,10 @@ export default class SpecBox extends ContainerObject {
             this._dotplot.replotWithBase(this._dotplotOriginX, this._dotplotOriginY);
 
             if (this._dotPlotSprite.mask != null) {
-                this._dotPlotSprite.mask.destroy();
+                if (this._dotPlotSprite.mask instanceof PIXI.Container) {
+                    // Can't do this for a PIXI.MaskData
+                    this._dotPlotSprite.mask.destroy();
+                }
                 this._dotPlotSprite.mask = null;
             }
 

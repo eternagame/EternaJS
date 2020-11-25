@@ -78,7 +78,7 @@
     "marked": "^1.1.1",
     "pchip": "^1.0.2",
     "pixi-filters": "^3.1.1",
-    "pixi-multistyle-text": "github:eternagame/pixi-multistyle-text#0cf5db745b699884e2d3c65ccd6c156ae3fec36a",
+    "pixi-multistyle-text": "github:eternagame/pixi-multistyle-text#45a514d8b6234a2a0292f12c8cddebf1b1270a48",
     "pixi-sound": "^3.0.5",
     "pixi.js": "^5.3.3",
     "store": "^2.0.12",

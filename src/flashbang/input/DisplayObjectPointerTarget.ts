@@ -3,7 +3,7 @@ import {SignalView} from 'signals';
 import EventSignal from 'flashbang/util/EventSignal';
 import PointerTarget from './PointerTarget';
 
-type InteractionEvent = PIXI.interaction.InteractionEvent;
+type InteractionEvent = PIXI.InteractionEvent;
 
 export default class DisplayObjectPointerTarget implements PointerTarget {
     public readonly target: DisplayObject;

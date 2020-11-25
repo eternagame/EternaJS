@@ -2,7 +2,7 @@ import {
     AbstractSignal, FilteredSignal, MappedSignal, SignalView
 } from 'signals';
 
-type InteractionEvent = PIXI.interaction.InteractionEvent;
+type InteractionEvent = PIXI.InteractionEvent;
 type EventEmitter = PIXI.utils.EventEmitter;
 
 /** Redispatches a pixi InteractionEvent as a Signal */

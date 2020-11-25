@@ -8,7 +8,7 @@ import Sounds from 'eterna/resources/Sounds';
 import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import ROPWait from 'eterna/rscript/ROPWait';
 
-type InteractionEvent = PIXI.interaction.InteractionEvent;
+type InteractionEvent = PIXI.InteractionEvent;
 
 export default class ToggleBar extends ContainerObject implements KeyboardListener, Enableable {
     /** Emitted when our state changes */
