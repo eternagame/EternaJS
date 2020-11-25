@@ -1033,22 +1033,33 @@ export default class PoseEditMode extends GameMode {
     private buildScriptInterface(): void {
         this._scriptInterface.addCallback('get_sequence_string', (): string => this.getPose(0).getSequenceString());
 
-        this._scriptInterface.addCallback('get_custom_numbering',
-            (): [{[serialIndex: number]: number | null}, {[customNumber: number]: number}] | undefined => {
+        this._scriptInterface.addCallback('get_custom_numbering_to_index',
+            (): {[customNumber: number]: number} | undefined => {
+                const customNumbering = this.getPose(0).customNumbering;
+                if (customNumbering === undefined) return undefined;
+
+                // At Omei's request, create maps both ways
+                const numberingToIdx: {[customNumber: number]: number} = {};
+                for (let ii = 0; ii < customNumbering.length; ++ii) {
+                    const cn: number | null = customNumbering[ii];
+                    if (cn !== null) {
+                        numberingToIdx[cn] = ii;
+                    }
+                }
+                return numberingToIdx;
+            });
+
+        this._scriptInterface.addCallback('get_index_to_custom_numbering',
+            (): {[serialIndex: number]: number | null} | undefined => {
                 const customNumbering = this.getPose(0).customNumbering;
                 if (customNumbering === undefined) return undefined;
 
                 // At Omei's request, create maps both ways
                 const idxToNumbering: {[serialIndex: number]: number | null} = {};
-                const numberingToIdx: {[customNumber: number]: number} = {};
                 for (let ii = 0; ii < customNumbering.length; ++ii) {
-                    const cn: number | null = customNumbering[ii];
-                    if (cn !== null) {
-                        Assert.assertIsDefined(cn);
-                        numberingToIdx[cn] = ii;
-                    }
+                    idxToNumbering[ii] = customNumbering[ii];
                 }
-                return [idxToNumbering, numberingToIdx];
+                return idxToNumbering;
             });
 
         this._scriptInterface.addCallback('get_full_sequence', (indx: number): string | null => {
