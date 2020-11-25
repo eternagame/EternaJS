@@ -68,3 +68,12 @@
     font-weight: bold;
     text-align: center;
 }
+.scroll-container-wrapper {
+    pointer-events: none;
+}
+
+.scroll-container-wrapper > * {
+    pointer-events: all;
+    touch-action: none;
+}
+

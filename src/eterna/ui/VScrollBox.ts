@@ -29,10 +29,9 @@ export default class VScrollBox extends ContainerObject implements MouseWheelLis
         this._dragSurface.pointerUpOutside.connect(() => this.onDragPointerUp());
         this._dragSurface.pointerMove.connect((e) => this.onDragPointerMove(e));
 
-        this.htmlWrapper.onpointerdown = (e) => this.onDragPointerDown(e);
-        this.htmlWrapper.onpointerup = () => this.onDragPointerUp();
-        // this.htmlWrapper.onpointerupoutside = () => this.onDragPointerUp();
-        this.htmlWrapper.onpointermove = (e) => this.onDragPointerMove(e);
+        this.htmlWrapper.addEventListener('pointerdown', (e) => this.onDragPointerDown(e));
+        this.htmlWrapper.addEventListener('pointerup', () => this.onDragPointerUp());
+        this.htmlWrapper.addEventListener('pointermove', (e) => this.onDragPointerMove(e));
 
         Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));
