@@ -17,7 +17,7 @@ import ShapeConstraint, {AntiShapeConstraint} from './constraints/ShapeConstrain
 import ConstraintBox from './ConstraintBox';
 import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from './Constraint';
 
-type InteractionEvent = PIXI.interaction.InteractionEvent;
+type InteractionEvent = PIXI.InteractionEvent;
 
 interface ConstraintWrapper {
     constraint: Constraint<BaseConstraintStatus>;

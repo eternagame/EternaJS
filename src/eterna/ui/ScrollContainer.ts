@@ -24,6 +24,9 @@ export default class ScrollContainer extends ContainerObject {
         Assert.assertIsDefined(overlayEl);
         this._htmlWrapper = document.createElement('div');
         this._htmlWrapper.style.position = 'absolute';
+        // Turn off pointer events for the wrapper, but keep them on for children
+        // (handled via) our stylesheet
+        this._htmlWrapper.classList.add('scroll-container-wrapper');
         overlayEl.appendChild(this._htmlWrapper);
 
         this.doLayout();

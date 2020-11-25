@@ -1,4 +1,4 @@
-import {Container, interaction} from 'pixi.js';
+import {Container, InteractionEvent} from 'pixi.js';
 import {
     MathUtil, ContainerObject, Assert, InputUtil, MouseWheelListener
 } from 'flashbang';
@@ -29,10 +29,9 @@ export default class VScrollBox extends ContainerObject implements MouseWheelLis
         this._dragSurface.pointerUpOutside.connect(() => this.onDragPointerUp());
         this._dragSurface.pointerMove.connect((e) => this.onDragPointerMove(e));
 
-        this.htmlWrapper.onpointerdown = (e) => this.onDragPointerDown(e);
-        this.htmlWrapper.onpointerup = () => this.onDragPointerUp();
-        // this.htmlWrapper.onpointerupoutside = () => this.onDragPointerUp();
-        this.htmlWrapper.onpointermove = (e) => this.onDragPointerMove(e);
+        this.htmlWrapper.addEventListener('pointerdown', (e) => this.onDragPointerDown(e));
+        this.htmlWrapper.addEventListener('pointerup', () => this.onDragPointerUp());
+        this.htmlWrapper.addEventListener('pointermove', (e) => this.onDragPointerMove(e));
 
         Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));
@@ -84,9 +83,9 @@ export default class VScrollBox extends ContainerObject implements MouseWheelLis
         return this._scrollContainer.htmlWrapper;
     }
 
-    private onDragPointerDown(event: interaction.InteractionEvent | PointerEvent) {
+    private onDragPointerDown(event: InteractionEvent | PointerEvent) {
         this._dragging = true;
-        if (event instanceof interaction.InteractionEvent) {
+        if (event instanceof InteractionEvent) {
             this._dragStartPoint = event.data.global.y;
         } else {
             if (event.pointerType === 'mouse') {
@@ -102,9 +101,9 @@ export default class VScrollBox extends ContainerObject implements MouseWheelLis
         this._dragging = false;
     }
 
-    private onDragPointerMove(event: interaction.InteractionEvent | PointerEvent) {
+    private onDragPointerMove(event: InteractionEvent | PointerEvent) {
         if (this._dragging) {
-            const currY = event instanceof interaction.InteractionEvent ? event.data.global.y : event.y;
+            const currY = event instanceof InteractionEvent ? event.data.global.y : event.y;
             const dragRange = currY - this._dragStartPoint;
             this.scrollLocation = this._dragStartScroll - dragRange;
         }

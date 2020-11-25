@@ -175,7 +175,7 @@ export default class DataCol extends ContainerObject {
         this._pairsArray = pairs.slice(0);
     }
 
-    public getMouseIndex(e: PIXI.interaction.InteractionEvent): [number, number] {
+    public getMouseIndex(e: PIXI.InteractionEvent): [number, number] {
         const {designBrowser: theme} = UITheme;
         const dataStart = theme.headerHeight + theme.filterHeight + theme.dataPadding / 2;
 

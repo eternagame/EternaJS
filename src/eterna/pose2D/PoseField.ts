@@ -7,7 +7,7 @@ import ROPWait from 'eterna/rscript/ROPWait';
 import debounce from 'lodash.debounce';
 import Pose2D from './Pose2D';
 
-type InteractionEvent = PIXI.interaction.InteractionEvent;
+type InteractionEvent = PIXI.InteractionEvent;
 
 /** Wraps a Pose2D and handles resizing, masking, and input events */
 export default class PoseField extends ContainerObject implements KeyboardListener, MouseWheelListener {
@@ -28,20 +28,20 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this.addObject(this._pose, this.container);
 
         this.pointerDown.filter(InputUtil.IsLeftMouse).connect(
-            (e: PIXI.interaction.InteractionEvent) => this.onPointerDown(e)
+            (e: PIXI.InteractionEvent) => this.onPointerDown(e)
         );
         this.pointerUp.filter(InputUtil.IsLeftMouse).connect(
-            (e: PIXI.interaction.InteractionEvent) => this.onPointerUp(e)
+            (e: PIXI.InteractionEvent) => this.onPointerUp(e)
         );
         this.pointerMove.connect(
-            (e: PIXI.interaction.InteractionEvent) => this.onPointerMove(e)
+            (e: PIXI.InteractionEvent) => this.onPointerMove(e)
         );
         this.container.on('pointercancel',
-            (e: PIXI.interaction.InteractionEvent) => this.onPointerUp(e));
+            (e: PIXI.InteractionEvent) => this.onPointerUp(e));
         this.container.on('pointerout',
-            (e: PIXI.interaction.InteractionEvent) => this.onPointerUp(e));
+            (e: PIXI.InteractionEvent) => this.onPointerUp(e));
         this.container.on('pointerupoutside',
-            (e: PIXI.interaction.InteractionEvent) => this.onPointerUp(e));
+            (e: PIXI.InteractionEvent) => this.onPointerUp(e));
 
         Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.keyboardInput.pushListener(this));

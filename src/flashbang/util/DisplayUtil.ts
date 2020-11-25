@@ -77,7 +77,7 @@ export default class DisplayUtil {
 
     /** Transforms a point from one DisplayObject's coordinate space to another's. */
     public static transformPoint(
-        p: IPoint, from: DisplayObject, to: DisplayObject, out: IPoint | undefined = undefined
+        p: IPoint, from: DisplayObject, to: DisplayObject, out: Point | undefined = undefined
     ): IPoint {
         return to.toLocal(from.toGlobal(p, DisplayUtil.P), undefined, out);
     }
