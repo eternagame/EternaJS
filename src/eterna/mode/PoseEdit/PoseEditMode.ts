@@ -1033,6 +1033,24 @@ export default class PoseEditMode extends GameMode {
     private buildScriptInterface(): void {
         this._scriptInterface.addCallback('get_sequence_string', (): string => this.getPose(0).getSequenceString());
 
+        this._scriptInterface.addCallback('get_custom_numbering',
+            (): [{[serialIndex: number]: number | null}, {[customNumber: number]: number}] | undefined => {
+                const customNumbering = this.getPose(0).customNumbering;
+                if (customNumbering === undefined) return undefined;
+
+                // At Omei's request, create maps both ways
+                const idxToNumbering: {[serialIndex: number]: number | null} = {};
+                const numberingToIdx: {[customNumber: number]: number} = {};
+                for (let ii = 0; ii < customNumbering.length; ++ii) {
+                    const cn: number | null = customNumbering[ii];
+                    if (cn !== null) {
+                        Assert.assertIsDefined(cn);
+                        numberingToIdx[cn] = ii;
+                    }
+                }
+                return [idxToNumbering, numberingToIdx];
+            });
+
         this._scriptInterface.addCallback('get_full_sequence', (indx: number): string | null => {
             if (indx < 0 || indx >= this._poses.length) {
                 return null;

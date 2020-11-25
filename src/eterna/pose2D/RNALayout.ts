@@ -7,7 +7,6 @@ import Eterna from 'eterna/Eterna';
 import {Assert} from 'flashbang';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
-import Pose2D from './Pose2D';
 
 enum RotationDirection {
     CCW = -1, // counterclockwise
