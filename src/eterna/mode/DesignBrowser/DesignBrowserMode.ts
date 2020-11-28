@@ -80,7 +80,8 @@ export default class DesignBrowserMode extends GameMode {
         puzzle: Puzzle,
         novote = false,
         initialFilters: DesignBrowserFilter[] | null = null,
-        initialSolution?: Solution
+        initialSolution?: Solution,
+        sortOnSolution: boolean = false
     ) {
         super();
 
@@ -90,6 +91,7 @@ export default class DesignBrowserMode extends GameMode {
         this._wholeRowWidth = 0;
         this._voteProcessor = new VoteProcessor(puzzle.maxVotes);
         this._initialSolution = initialSolution;
+        this._initSortOnSolution = sortOnSolution;
     }
 
     public get puzzleID(): number { return this._puzzle.nodeID; }
@@ -265,7 +267,7 @@ export default class DesignBrowserMode extends GameMode {
             if (Eterna.MOBILE_APP) {
                 window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
             } else {
-                window.location.href = EternaURL.createURL({page: 'lab_bench'});
+                window.location.href = EternaURL.createURL({page: 'home'});
             }
         });
         this.addObject(homeButton, this.uiLayer);
@@ -283,19 +285,20 @@ export default class DesignBrowserMode extends GameMode {
         );
 
         // Refresh our data immediately, and then every 300 seconds
-        this.refreshSolutions();
+        this.refreshSolutions().then(() => {
+            if (this._initialSolution) {
+                this.showSolutionDetailsDialog(this._initialSolution);
+            }
+            if (this._initialSolution && this._initSortOnSolution) {
+                // Sort on it.
+                this.sortOnSolution(this._initialSolution);
+            }
+        });
 
         this.addObject(new RepeatingTask(() => new SerialTask(
             new DelayTask(300),
             new CallbackTask(() => this.refreshSolutions())
         )));
-
-        if (this._initialSolution !== undefined) {
-            // Sort on it.
-            this.sortOnSolution(this._initialSolution);
-            // Set _currentSolutionIndex
-            this._currentSolutionIndex = this.getSolutionIndex(this._initialSolution.nodeID);
-        }
 
         this.updateLayout();
     }
@@ -435,11 +438,6 @@ export default class DesignBrowserMode extends GameMode {
                 log.error(e);
                 this.popUILock();
             });
-    }
-
-    private navigateToSolution(solution: Solution): void {
-        this.closeCurDialog();
-        window.open(`/node/${solution.nodeID}/edit`, 'soleditwindow');
     }
 
     public sortOnSolution(solution: Solution): void {
@@ -614,75 +612,49 @@ export default class DesignBrowserMode extends GameMode {
         this._clickedSelectionBox.visible = true;
         this.updateClickedSelectionBoxPos(index);
 
-        this.showSolutionDetailsDialog(index + this._firstVisSolutionIdx);
+        this.showSolutionDetailsDialog(this.getSolutionAtIndex(index + this._firstVisSolutionIdx));
     }
 
-    private showSolutionDetailsDialog(index: number): void {
-        const solution = this.getSolutionAtIndex(index);
-        if (!solution) {
-            return;
-        }
+    public showSolutionDetailsDialog(solution: Solution | null): void {
+        if (!solution) return;
 
+        const index = this.getSolutionIndex(solution.nodeID);
         this._currentSolutionIndex = index;
 
-        const switchSolution = (newIndex: number) => {
-            const newSolution = this.getSolutionAtIndex(newIndex);
-            if (newSolution != null) {
-                this._currentSolutionIndex = newIndex;
-                Assert.assertIsDefined(this._solutionView);
-                this.removeObject(this._solutionView);
-                this._solutionView = new ViewSolutionOverlay({
-                    solution: newSolution,
-                    puzzle: this._puzzle,
-                    voteDisabled: this._novote,
-                    onPrevious: () => switchSolution(Math.max(0, this._currentSolutionIndex - 1)),
-                    onNext: () => {
-                        const nextSolutionIndex = Math.min(
-                            this._filteredSolutions.length - 1,
-                            this._currentSolutionIndex + 1
-                        );
-                        switchSolution(nextSolutionIndex);
-                    },
-                    parentMode: (() => this)()
-                });
-                this.addObject(this._solutionView, this.dialogLayer);
-                const rowIndex = this._currentSolutionIndex - this._firstVisSolutionIdx;
-                if (rowIndex >= 0) {
-                    this._clickedSelectionBox.visible = true;
-                    this.updateClickedSelectionBoxPos(newIndex);
-                    this._clickedSelectionBox.visible = true;
-                }
-            }
-        };
-
-        if (this._solutionView) {
-            this.removeObject(this._solutionView);
-        }
+        if (this._solutionView) this.removeObject(this._solutionView);
         this._solutionView = new ViewSolutionOverlay({
             solution,
             puzzle: this._puzzle,
             voteDisabled: this._novote,
-            onPrevious: () => switchSolution(Math.max(0, this._currentSolutionIndex - 1)),
+            onPrevious: () => {
+                this.showSolutionDetailsDialog(
+                    this.getSolutionAtIndex(Math.max(0, this._currentSolutionIndex - 1))
+                );
+            },
             onNext: () => {
                 const nextSolutionIndex = Math.min(
                     this._filteredSolutions.length - 1,
                     this._currentSolutionIndex + 1
                 );
-                switchSolution(nextSolutionIndex);
+                this.showSolutionDetailsDialog(this.getSolutionAtIndex(nextSolutionIndex));
             },
             parentMode: (() => this)()
         });
         this.addObject(this._solutionView, this.dialogLayer);
+        const rowIndex = this._currentSolutionIndex - this._firstVisSolutionIdx;
+        if (rowIndex >= 0) {
+            this._clickedSelectionBox.visible = true;
+            this.updateClickedSelectionBoxPos(index);
+            this._clickedSelectionBox.visible = true;
+        }
 
-        const sol = this._solutionView.solution;
-        this._solutionView.playClicked.connect(() => this.switchToPoseEditForSolution(sol));
+        this._solutionView.playClicked.connect(() => this.switchToPoseEditForSolution(solution));
         this._solutionView.seeResultClicked.connect(() => {
-            this.switchToFeedbackViewForSolution(sol);
+            this.switchToFeedbackViewForSolution(solution);
         });
-        this._solutionView.voteClicked.connect(() => this.vote(sol));
-        this._solutionView.sortClicked.connect(() => this.sortOnSolution(sol));
-        this._solutionView.editClicked.connect(() => this.navigateToSolution(sol));
-        this._solutionView.deleteClicked.connect(() => this.unpublish(sol));
+        this._solutionView.voteClicked.connect(() => this.vote(solution));
+        this._solutionView.sortClicked.connect(() => this.sortOnSolution(solution));
+        this._solutionView.deleteClicked.connect(() => this.unpublish(solution));
 
         this.updateLayout();
     }
@@ -856,8 +828,8 @@ export default class DesignBrowserMode extends GameMode {
         this.updateClickedSelectionBoxPos(this._currentSolutionIndex);
     }
 
-    private refreshSolutions(): void {
-        SolutionManager.instance.getSolutionsForPuzzle(this._puzzle.nodeID)
+    private refreshSolutions(): Promise<void> {
+        return SolutionManager.instance.getSolutionsForPuzzle(this._puzzle.nodeID)
             .then(() => this.updateDataColumns());
     }
 
@@ -1023,12 +995,7 @@ export default class DesignBrowserMode extends GameMode {
     }
 
     private getSolutionIndex(solutionID: number): number {
-        for (let ii = 0; ii < this._filteredSolutions.length; ii++) {
-            if (this._filteredSolutions[ii].nodeID === solutionID) {
-                return ii;
-            }
-        }
-        return -1;
+        return this._filteredSolutions.findIndex((solution) => solution.nodeID === solutionID);
     }
 
     private getSolutionAtIndex(idx: number): Solution | null {
@@ -1073,9 +1040,9 @@ export default class DesignBrowserMode extends GameMode {
     private updateDataColumns(): void {
         const {solutions} = SolutionManager.instance;
 
-        this.setData(solutions, false, true);
-
+        if (!this._dataCols) this.setData(solutions, false, true);
         this._allSolutions = solutions;
+        this.reorganize(true);
         this.updateVotes();
         this.setScrollVertical(-1);
 
@@ -1151,6 +1118,7 @@ export default class DesignBrowserMode extends GameMode {
     ];
 
     private _initialSolution?: Solution;
+    private _initSortOnSolution: boolean;
 }
 
 class MaskBox extends Graphics {

@@ -77,7 +77,6 @@ export default class ViewSolutionOverlay extends ContainerObject {
     public readonly sortClicked = new UnitSignal();
     public readonly returnClicked = new UnitSignal();
     public readonly voteClicked = new UnitSignal();
-    public readonly editClicked = new UnitSignal();
     public readonly deleteClicked = new UnitSignal();
 
     public get solution() { return this._props.solution; }
@@ -86,19 +85,6 @@ export default class ViewSolutionOverlay extends ContainerObject {
         super();
         this._props = props;
         this._parentMode = props.parentMode;
-    }
-
-    public showSolution(solution: Solution) {
-        if (solution !== this._props.solution) {
-            this._props.solution = solution;
-            this.populate();
-            this.container.visible = true;
-        } else if (this.container.visible === false) {
-            this.container.visible = true;
-        } else {
-            // We've already shown this design, so toggle visibility off
-            this.container.visible = false;
-        }
     }
 
     protected added(): void {
@@ -416,7 +402,9 @@ export default class ViewSolutionOverlay extends ContainerObject {
         if (Eterna.DEV_MODE) {
             const editButton = new GameButton().label('Edit', 12);
             this._content.addObject(editButton, this._contentLayout);
-            editButton.clicked.connect(() => this.editClicked.emit());
+            editButton.clicked.connect(() => {
+                window.open(`${Eterna.SERVER_URL}/node/${this.solution.nodeID}/edit`, 'soleditwindow');
+            });
         }
 
         this._contentLayout.addVSpacer(10);
@@ -566,7 +554,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
 
         const commentsData = await this._comments.update();
         loadingText.destroySelf();
-        if (commentsData) {
+        if (commentsData && this.isLiveObject) {
             this.updateCommentsView(commentsData);
         }
     }
@@ -651,7 +639,6 @@ export default class ViewSolutionOverlay extends ContainerObject {
         const {theme} = ViewSolutionOverlay;
         const width = theme.width - theme.margin.left;
         Assert.assertIsDefined(Flashbang.stageHeight);
-        if (!this.isLiveObject) return;
         let height = Flashbang.stageHeight - this._scrollViewContainer.y - this._footer.height - 20;
 
         // Based on previous code, it seems the scrollbox only updates the bar if it receives a different height

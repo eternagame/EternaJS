@@ -314,7 +314,10 @@ export default class EternaApp extends FlashbangApp {
         ) as DesignBrowserMode;
         if (existingBrowser != null && existingBrowser.puzzleID === puzzleID) {
             this.modeStack.setModeIndex(existingBrowser, -1);
-            if (sortOnSolution && solution) {
+            if (solution) {
+                existingBrowser.showSolutionDetailsDialog(solution);
+            }
+            if (solution && sortOnSolution) {
                 existingBrowser.sortOnSolution(solution);
             }
             return Promise.resolve();
@@ -324,7 +327,7 @@ export default class EternaApp extends FlashbangApp {
                     if (existingBrowser != null) {
                         this.modeStack.removeMode(existingBrowser);
                     }
-                    this.modeStack.pushMode(new DesignBrowserMode(puzzle, false, null, solution));
+                    this.modeStack.pushMode(new DesignBrowserMode(puzzle, false, null, solution, sortOnSolution));
                 });
         }
     }

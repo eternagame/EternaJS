@@ -305,7 +305,7 @@ export default abstract class GameMode extends AppMode {
     }
 
     protected static createHomeButton(): URLButton {
-        const button = new URLButton('Go to Home', EternaURL.createURL({page: 'lab_bench'}));
+        const button = new URLButton('Go to Home', EternaURL.createURL({page: 'home'}));
         button.selectable(false);
         return button;
     }

@@ -156,7 +156,8 @@ export default class PoseEditMode extends GameMode {
             states: this._puzzle.getSecstructs().length,
             showGlue: this._puzzle.targetConditions
                 ?.some((condition) => condition?.structure_constrained_bases),
-            boosters: this._puzzle.boosters ? this._puzzle.boosters : undefined
+            boosters: this._puzzle.boosters ? this._puzzle.boosters : undefined,
+            showAdvancedMenus: this._puzzle.puzzleType !== PuzzleType.PROGRESSION
         });
         this.addObject(this._toolbar, this.uiLayer);
 
@@ -170,7 +171,7 @@ export default class PoseEditMode extends GameMode {
             },
             onInfoClicked: this._params.initSolution ? () => {
                 if (this._solutionView) {
-                    this._solutionView.showSolution(this._curSolution);
+                    this._solutionView.container.visible = !this._solutionView.container.visible;
                     this.onResized();
                 }
             } : undefined
@@ -290,7 +291,7 @@ export default class PoseEditMode extends GameMode {
             if (Eterna.MOBILE_APP) {
                 window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
             } else {
-                window.location.href = EternaURL.createURL({page: 'lab_bench'});
+                window.location.href = EternaURL.createURL({page: 'home'});
             }
         });
         this.addObject(this._homeButton, this.uiLayer);
@@ -1532,7 +1533,7 @@ export default class PoseEditMode extends GameMode {
     private openDesignBrowserForOurPuzzle(): void {
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
             this.pushUILock();
-            Eterna.app.switchToDesignBrowser(this._puzzle)
+            Eterna.app.switchToDesignBrowser(this._puzzle, this._curSolution, false)
                 .then(() => this.popUILock())
                 .catch((e) => {
                     log.error(e);
@@ -2026,7 +2027,7 @@ export default class PoseEditMode extends GameMode {
             fxComplete = Promise.resolve();
         } else {
             this._alreadyCleared = true;
-            if (!this._puzzle.alreadySolved) {
+            if (!this._puzzle.alreadySolved || this._puzzle.rscript !== '') {
                 // Kick off a BubbleSweep animation
                 const bubbles = new BubbleSweep(800);
                 this.addObject(bubbles, this.bgLayer);
@@ -2061,9 +2062,11 @@ export default class PoseEditMode extends GameMode {
 
         let data: SubmitSolutionData;
 
-        if (!this._puzzle.alreadySolved
+        if (
+            !this._puzzle.alreadySolved
             || this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
-            || this._puzzle.rscript !== '') {
+            || this._puzzle.rscript !== ''
+        ) {
             // submit our solution to the server
             log.debug('Submitting solution...');
             const submissionPromise = Eterna.client.submitSolution(this.createSubmitData(details, undoBlock));
@@ -2683,7 +2686,7 @@ export default class PoseEditMode extends GameMode {
         // / Update spec thumbnail if it is open
         this.updateDockedSpecBox();
 
-        if (constraintsSatisfied || this._puzzle.alreadySolved) {
+        if (constraintsSatisfied || (this._puzzle.alreadySolved && this._puzzle.rscript === '')) {
             if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL && !this._alreadyCleared) {
                 this.submitCurrentPose();
             }
