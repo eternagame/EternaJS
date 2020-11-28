@@ -625,64 +625,38 @@ export default class DesignBrowserMode extends GameMode {
 
         this._currentSolutionIndex = index;
 
-        const switchSolution = (newIndex: number) => {
-            const newSolution = this.getSolutionAtIndex(newIndex);
-            if (newSolution != null) {
-                this._currentSolutionIndex = newIndex;
-                Assert.assertIsDefined(this._solutionView);
-                this.removeObject(this._solutionView);
-                this._solutionView = new ViewSolutionOverlay({
-                    solution: newSolution,
-                    puzzle: this._puzzle,
-                    voteDisabled: this._novote,
-                    onPrevious: () => switchSolution(Math.max(0, this._currentSolutionIndex - 1)),
-                    onNext: () => {
-                        const nextSolutionIndex = Math.min(
-                            this._filteredSolutions.length - 1,
-                            this._currentSolutionIndex + 1
-                        );
-                        switchSolution(nextSolutionIndex);
-                    },
-                    parentMode: (() => this)()
-                });
-                this.addObject(this._solutionView, this.dialogLayer);
-                const rowIndex = this._currentSolutionIndex - this._firstVisSolutionIdx;
-                if (rowIndex >= 0) {
-                    this._clickedSelectionBox.visible = true;
-                    this.updateClickedSelectionBoxPos(newIndex);
-                    this._clickedSelectionBox.visible = true;
-                }
-            }
-        };
+        if (this._solutionView) this.removeObject(this._solutionView);
 
-        if (this._solutionView) {
-            this.removeObject(this._solutionView);
-        }
         this._solutionView = new ViewSolutionOverlay({
             solution,
             puzzle: this._puzzle,
             voteDisabled: this._novote,
-            onPrevious: () => switchSolution(Math.max(0, this._currentSolutionIndex - 1)),
+            onPrevious: () => this.showSolutionDetailsDialog(Math.max(0, this._currentSolutionIndex - 1)),
             onNext: () => {
                 const nextSolutionIndex = Math.min(
                     this._filteredSolutions.length - 1,
                     this._currentSolutionIndex + 1
                 );
-                switchSolution(nextSolutionIndex);
+                this.showSolutionDetailsDialog(nextSolutionIndex);
             },
             parentMode: (() => this)()
         });
         this.addObject(this._solutionView, this.dialogLayer);
+        const rowIndex = this._currentSolutionIndex - this._firstVisSolutionIdx;
+        if (rowIndex >= 0) {
+            this._clickedSelectionBox.visible = true;
+            this.updateClickedSelectionBoxPos(index);
+            this._clickedSelectionBox.visible = true;
+        }
 
-        const sol = this._solutionView.solution;
-        this._solutionView.playClicked.connect(() => this.switchToPoseEditForSolution(sol));
+        this._solutionView.playClicked.connect(() => this.switchToPoseEditForSolution(solution));
         this._solutionView.seeResultClicked.connect(() => {
-            this.switchToFeedbackViewForSolution(sol);
+            this.switchToFeedbackViewForSolution(solution);
         });
-        this._solutionView.voteClicked.connect(() => this.vote(sol));
-        this._solutionView.sortClicked.connect(() => this.sortOnSolution(sol));
-        this._solutionView.editClicked.connect(() => this.navigateToSolution(sol));
-        this._solutionView.deleteClicked.connect(() => this.unpublish(sol));
+        this._solutionView.voteClicked.connect(() => this.vote(solution));
+        this._solutionView.sortClicked.connect(() => this.sortOnSolution(solution));
+        this._solutionView.editClicked.connect(() => this.navigateToSolution(solution));
+        this._solutionView.deleteClicked.connect(() => this.unpublish(solution));
 
         this.updateLayout();
     }
