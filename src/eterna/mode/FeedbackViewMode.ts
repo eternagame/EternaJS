@@ -242,7 +242,7 @@ export default class FeedbackViewMode extends GameMode {
         // we are not changing the solution.
         this._info.clicked.connect(() => {
             if (this._solutionView) {
-                this._solutionView.showSolution(this._solution);
+                this._solutionView.container.visible = !this._solutionView.container.visible;
                 this.onResized();
             }
         });

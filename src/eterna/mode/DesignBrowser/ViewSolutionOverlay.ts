@@ -88,19 +88,6 @@ export default class ViewSolutionOverlay extends ContainerObject {
         this._parentMode = props.parentMode;
     }
 
-    public showSolution(solution: Solution) {
-        if (solution !== this._props.solution) {
-            this._props.solution = solution;
-            this.populate();
-            this.container.visible = true;
-        } else if (this.container.visible === false) {
-            this.container.visible = true;
-        } else {
-            // We've already shown this design, so toggle visibility off
-            this.container.visible = false;
-        }
-    }
-
     protected added(): void {
         super.added();
         const {theme} = ViewSolutionOverlay;

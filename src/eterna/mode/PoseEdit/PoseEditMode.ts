@@ -170,7 +170,7 @@ export default class PoseEditMode extends GameMode {
             },
             onInfoClicked: this._params.initSolution ? () => {
                 if (this._solutionView) {
-                    this._solutionView.showSolution(this._curSolution);
+                    this._solutionView.container.visible = !this._solutionView.container.visible;
                     this.onResized();
                 }
             } : undefined
