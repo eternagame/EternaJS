@@ -71,7 +71,7 @@ export default class EternaMenu extends GamePanel implements Enableable {
         }
 
         // Clicking a submenu item hides the panel
-        itemButton.pointerTap.connect(() => {
+        itemButton.clicked.connect(() => {
             menu.panel.display.visible = false;
             if (this._activeCapture) {
                 menu.panel.removeObject(this._activeCapture);
@@ -92,7 +92,7 @@ export default class EternaMenu extends GamePanel implements Enableable {
         menu.itemButtons.splice(pos, 0, itemButton);
 
         // Clicking a submenu item hides the panel
-        itemButton.pointerTap.connect(() => {
+        itemButton.clicked.connect(() => {
             menu.panel.display.visible = false;
             if (this._activeCapture) {
                 menu.panel.removeObject(this._activeCapture);
@@ -216,7 +216,7 @@ export default class EternaMenu extends GamePanel implements Enableable {
             }));
         });
 
-        menuButton.pointerTap.connect(() => {
+        menuButton.clicked.connect(() => {
             if (!this._enabled) return;
             if (menu.panel.display.visible) return;
 
