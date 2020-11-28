@@ -687,7 +687,7 @@ export default class FeedbackViewMode extends GameMode {
 
     private loadDesignBrowser(): void {
         this.pushUILock();
-        Eterna.app.switchToDesignBrowser(this._puzzle.nodeID, this._solution)
+        Eterna.app.switchToDesignBrowser(this._puzzle.nodeID, this._solution, false)
             .then(() => this.popUILock())
             .catch((e) => {
                 log.error(e);

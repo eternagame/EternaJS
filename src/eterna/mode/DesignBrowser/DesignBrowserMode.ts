@@ -80,7 +80,8 @@ export default class DesignBrowserMode extends GameMode {
         puzzle: Puzzle,
         novote = false,
         initialFilters: DesignBrowserFilter[] | null = null,
-        initialSolution?: Solution
+        initialSolution?: Solution,
+        sortOnSolution: boolean = false
     ) {
         super();
 
@@ -90,6 +91,7 @@ export default class DesignBrowserMode extends GameMode {
         this._wholeRowWidth = 0;
         this._voteProcessor = new VoteProcessor(puzzle.maxVotes);
         this._initialSolution = initialSolution;
+        this._initSortOnSolution = sortOnSolution;
     }
 
     public get puzzleID(): number { return this._puzzle.nodeID; }
@@ -283,19 +285,20 @@ export default class DesignBrowserMode extends GameMode {
         );
 
         // Refresh our data immediately, and then every 300 seconds
-        this.refreshSolutions();
+        this.refreshSolutions().then(() => {
+            if (this._initialSolution) {
+                this.showSolutionDetailsDialog(this._initialSolution);
+            }
+            if (this._initialSolution && this._initSortOnSolution) {
+                // Sort on it.
+                this.sortOnSolution(this._initialSolution);
+            }
+        });
 
         this.addObject(new RepeatingTask(() => new SerialTask(
             new DelayTask(300),
             new CallbackTask(() => this.refreshSolutions())
         )));
-
-        if (this._initialSolution !== undefined) {
-            // Sort on it.
-            this.sortOnSolution(this._initialSolution);
-            // Set _currentSolutionIndex
-            this._currentSolutionIndex = this.getSolutionIndex(this._initialSolution.nodeID);
-        }
 
         this.updateLayout();
     }
@@ -825,8 +828,8 @@ export default class DesignBrowserMode extends GameMode {
         this.updateClickedSelectionBoxPos(this._currentSolutionIndex);
     }
 
-    private refreshSolutions(): void {
-        SolutionManager.instance.getSolutionsForPuzzle(this._puzzle.nodeID)
+    private refreshSolutions(): Promise<void> {
+        return SolutionManager.instance.getSolutionsForPuzzle(this._puzzle.nodeID)
             .then(() => this.updateDataColumns());
     }
 
@@ -1037,9 +1040,9 @@ export default class DesignBrowserMode extends GameMode {
     private updateDataColumns(): void {
         const {solutions} = SolutionManager.instance;
 
-        this.setData(solutions, false, true);
-
+        if (!this._dataCols) this.setData(solutions, false, true);
         this._allSolutions = solutions;
+        this.reorganize(true);
         this.updateVotes();
         this.setScrollVertical(-1);
 
@@ -1115,6 +1118,7 @@ export default class DesignBrowserMode extends GameMode {
     ];
 
     private _initialSolution?: Solution;
+    private _initSortOnSolution: boolean;
 }
 
 class MaskBox extends Graphics {

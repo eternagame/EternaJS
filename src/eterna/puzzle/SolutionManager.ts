@@ -63,13 +63,8 @@ export default class SolutionManager {
     public getSolutionsForPuzzle(puzzleID: number): Promise<Solution[]> {
         log.info(`Loading solutions for puzzle ${puzzleID}...`);
         return Eterna.client.getSolutions(puzzleID).then((json) => {
-            const solutionsData = json['data']['solutions'];
-            this._solutions = [];
-
-            for (const solution of solutionsData) {
-                this._solutions.push(SolutionManager.processData(solution));
-            }
-
+            const solutionsData = json['data']['solutions'] as SolutionSpec[];
+            this._solutions = solutionsData.map((solution) => SolutionManager.processData(solution));
             return this._solutions;
         });
     }

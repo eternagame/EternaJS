@@ -1532,7 +1532,7 @@ export default class PoseEditMode extends GameMode {
     private openDesignBrowserForOurPuzzle(): void {
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
             this.pushUILock();
-            Eterna.app.switchToDesignBrowser(this._puzzle, this._curSolution)
+            Eterna.app.switchToDesignBrowser(this._puzzle, this._curSolution, false)
                 .then(() => this.popUILock())
                 .catch((e) => {
                     log.error(e);
