@@ -121,18 +121,21 @@ export default class Toolbar extends ContainerObject {
         type: ToolbarType,
         {
             states = 1,
+            boosters,
             showGlue = false,
-            boosters
+            showAdvancedMenus = true
         }: {
             states?: number;
-            showGlue?: boolean;
             boosters?: BoostersData;
+            showGlue?: boolean;
+            showAdvancedMenus?: boolean;
         }
     ) {
         super();
         this._type = type;
         this._states = states;
         this._showGlue = showGlue;
+        this._showAdvancedMenus = showAdvancedMenus;
         this._boostersData = boosters ?? null;
     }
 
@@ -373,7 +376,7 @@ export default class Toolbar extends ContainerObject {
 
         this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters).disabled(undefined);
 
-        if (this._boostersData != null && this._boostersData.actions != null) {
+        if (this._boostersData != null && this._boostersData.actions != null && this._showAdvancedMenus) {
             const boosterMenuIdx = this.actionMenu.addMenuButton(this.boostersMenu);
             for (let ii = 0; ii < this._boostersData.actions.length; ii++) {
                 const data = this._boostersData.actions[ii];
@@ -428,10 +431,7 @@ export default class Toolbar extends ContainerObject {
             .scaleBitmapToLabel()
             .tooltip('Download an SVG of the current RNA layout');
 
-        if (this._boostersData != null && this._boostersData.actions != null) {
-            // We're tying this stuff to the existance of boosters as an easy way to get them
-            // not to show up in the tutorials, since boosters don't show until you've completed
-            // the tutorials. TODO: come up with a better way to figure this out.
+        if (this._showAdvancedMenus) {
             const alterMenuIdx = this.actionMenu.addMenuButton(
                 new GameButton().allStates(Bitmaps.CustomLayout).disabled(undefined)
             );
@@ -945,6 +945,7 @@ export default class Toolbar extends ContainerObject {
     private readonly _type: ToolbarType;
     private readonly _states: number;
     private readonly _showGlue: boolean;
+    private readonly _showAdvancedMenus: boolean;
     private readonly _boostersData: BoostersData | null;
 
     private _invisibleBackground: Graphics;

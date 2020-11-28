@@ -156,7 +156,8 @@ export default class PoseEditMode extends GameMode {
             states: this._puzzle.getSecstructs().length,
             showGlue: this._puzzle.targetConditions
                 ?.some((condition) => condition?.structure_constrained_bases),
-            boosters: this._puzzle.boosters ? this._puzzle.boosters : undefined
+            boosters: this._puzzle.boosters ? this._puzzle.boosters : undefined,
+            showAdvancedMenus: this._puzzle.puzzleType !== PuzzleType.PROGRESSION
         });
         this.addObject(this._toolbar, this.uiLayer);
 

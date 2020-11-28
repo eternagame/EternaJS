@@ -31,7 +31,8 @@ export enum PuzzleType {
     BASIC = 'Basic',
     SWITCH_BASIC = 'SwitchBasic',
     CHALLENGE = 'Challenge',
-    EXPERIMENTAL = 'Experimental'
+    EXPERIMENTAL = 'Experimental',
+    PROGRESSION = 'Progression'
 }
 
 export type TargetType = 'multistrand' | 'aptamer' | 'pseudoknot' | 'aptamer+oligo' | 'oligo' | 'single';
