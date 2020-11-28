@@ -77,7 +77,6 @@ export default class ViewSolutionOverlay extends ContainerObject {
     public readonly sortClicked = new UnitSignal();
     public readonly returnClicked = new UnitSignal();
     public readonly voteClicked = new UnitSignal();
-    public readonly editClicked = new UnitSignal();
     public readonly deleteClicked = new UnitSignal();
 
     public get solution() { return this._props.solution; }
@@ -403,7 +402,9 @@ export default class ViewSolutionOverlay extends ContainerObject {
         if (Eterna.DEV_MODE) {
             const editButton = new GameButton().label('Edit', 12);
             this._content.addObject(editButton, this._contentLayout);
-            editButton.clicked.connect(() => this.editClicked.emit());
+            editButton.clicked.connect(() => {
+                window.open(`${Eterna.SERVER_URL}/node/${this.solution.nodeID}/edit`, 'soleditwindow');
+            });
         }
 
         this._contentLayout.addVSpacer(10);

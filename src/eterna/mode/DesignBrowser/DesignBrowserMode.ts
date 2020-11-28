@@ -437,11 +437,6 @@ export default class DesignBrowserMode extends GameMode {
             });
     }
 
-    private navigateToSolution(solution: Solution): void {
-        this.closeCurDialog();
-        window.open(`/node/${solution.nodeID}/edit`, 'soleditwindow');
-    }
-
     public sortOnSolution(solution: Solution): void {
         this.closeCurDialog();
         this._sortOptions.addCriteria(
@@ -655,7 +650,6 @@ export default class DesignBrowserMode extends GameMode {
         });
         this._solutionView.voteClicked.connect(() => this.vote(solution));
         this._solutionView.sortClicked.connect(() => this.sortOnSolution(solution));
-        this._solutionView.editClicked.connect(() => this.navigateToSolution(solution));
         this._solutionView.deleteClicked.connect(() => this.unpublish(solution));
 
         this.updateLayout();
