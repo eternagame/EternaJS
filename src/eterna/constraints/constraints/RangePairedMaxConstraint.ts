@@ -79,7 +79,6 @@ export default class RangePairedMaxConstraint extends Constraint<RangePairedMaxC
             37,
             false
         ) as number[];
-        console.error('dotplot', dotplot);
 
         // Look through the dotplot and find any pairs involving the implicated
         // residues.

@@ -1080,7 +1080,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public onMouseUp(): void {
-        console.error('please');
         this.doneColoring();
         this._mouseDownAltKey = false;
         ROPWait.notifyEndPaint();

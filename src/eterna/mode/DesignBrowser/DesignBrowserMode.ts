@@ -609,30 +609,31 @@ export default class DesignBrowserMode extends GameMode {
         this._clickedSelectionBox.visible = true;
         this.updateClickedSelectionBoxPos(index);
 
-        this.showSolutionDetailsDialog(index + this._firstVisSolutionIdx);
+        this.showSolutionDetailsDialog(this.getSolutionAtIndex(index + this._firstVisSolutionIdx));
     }
 
-    private showSolutionDetailsDialog(index: number): void {
-        const solution = this.getSolutionAtIndex(index);
-        if (!solution) {
-            return;
-        }
+    public showSolutionDetailsDialog(solution: Solution | null): void {
+        if (!solution) return;
 
+        const index = this.getSolutionIndex(solution.nodeID);
         this._currentSolutionIndex = index;
 
         if (this._solutionView) this.removeObject(this._solutionView);
-
         this._solutionView = new ViewSolutionOverlay({
             solution,
             puzzle: this._puzzle,
             voteDisabled: this._novote,
-            onPrevious: () => this.showSolutionDetailsDialog(Math.max(0, this._currentSolutionIndex - 1)),
+            onPrevious: () => {
+                this.showSolutionDetailsDialog(
+                    this.getSolutionAtIndex(Math.max(0, this._currentSolutionIndex - 1))
+                );
+            },
             onNext: () => {
                 const nextSolutionIndex = Math.min(
                     this._filteredSolutions.length - 1,
                     this._currentSolutionIndex + 1
                 );
-                this.showSolutionDetailsDialog(nextSolutionIndex);
+                this.showSolutionDetailsDialog(this.getSolutionAtIndex(nextSolutionIndex));
             },
             parentMode: (() => this)()
         });
@@ -991,12 +992,7 @@ export default class DesignBrowserMode extends GameMode {
     }
 
     private getSolutionIndex(solutionID: number): number {
-        for (let ii = 0; ii < this._filteredSolutions.length; ii++) {
-            if (this._filteredSolutions[ii].nodeID === solutionID) {
-                return ii;
-            }
-        }
-        return -1;
+        return this._filteredSolutions.findIndex((solution) => solution.nodeID === solutionID);
     }
 
     private getSolutionAtIndex(idx: number): Solution | null {

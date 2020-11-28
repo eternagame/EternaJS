@@ -314,6 +314,9 @@ export default class EternaApp extends FlashbangApp {
         ) as DesignBrowserMode;
         if (existingBrowser != null && existingBrowser.puzzleID === puzzleID) {
             this.modeStack.setModeIndex(existingBrowser, -1);
+            if (solution) {
+                existingBrowser.showSolutionDetailsDialog(solution);
+            }
             if (sortOnSolution && solution) {
                 existingBrowser.sortOnSolution(solution);
             }
