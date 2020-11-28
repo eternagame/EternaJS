@@ -566,7 +566,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
 
         const commentsData = await this._comments.update();
         loadingText.destroySelf();
-        if (commentsData) {
+        if (commentsData && this.isLiveObject) {
             this.updateCommentsView(commentsData);
         }
     }
@@ -651,7 +651,6 @@ export default class ViewSolutionOverlay extends ContainerObject {
         const {theme} = ViewSolutionOverlay;
         const width = theme.width - theme.margin.left;
         Assert.assertIsDefined(Flashbang.stageHeight);
-        if (!this.isLiveObject) return;
         let height = Flashbang.stageHeight - this._scrollViewContainer.y - this._footer.height - 20;
 
         // Based on previous code, it seems the scrollbox only updates the bar if it receives a different height
