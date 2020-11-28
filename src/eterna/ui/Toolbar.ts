@@ -386,17 +386,12 @@ export default class Toolbar extends ContainerObject {
             }
         }
 
-        const alterMenuIdx = this.actionMenu.addMenuButton(
-            new GameButton().allStates(Bitmaps.CustomLayout).disabled(undefined)
-        );
-
         this.moveButton = new GameButton()
             .allStates(Bitmaps.CustomLayout)
             .disabled(undefined)
             .label('Move', 14)
             .scaleBitmapToLabel()
             .tooltip('Move a nucleotide or stem by ctrl-shift-click');
-        this.actionMenu.addSubMenuButton(alterMenuIdx, this.moveButton);
 
         this.rotateStemButton = new GameButton()
             .allStates(Bitmaps.CustomLayout)
@@ -404,7 +399,6 @@ export default class Toolbar extends ContainerObject {
             .label('Rotate stem', 14)
             .scaleBitmapToLabel()
             .tooltip('Rotate stem clockwise 1/4 turn by ctrl-shift-click');
-        this.actionMenu.addSubMenuButton(alterMenuIdx, this.rotateStemButton);
 
         this.flipStemButton = new GameButton()
             .allStates(Bitmaps.CustomLayout)
@@ -412,7 +406,6 @@ export default class Toolbar extends ContainerObject {
             .label('Flip stem', 14)
             .scaleBitmapToLabel()
             .tooltip('Flip stem by ctrl-shift-click');
-        this.actionMenu.addSubMenuButton(alterMenuIdx, this.flipStemButton);
 
         this.snapToGridButton = new GameButton()
             .allStates(Bitmaps.CustomLayout)
@@ -420,7 +413,6 @@ export default class Toolbar extends ContainerObject {
             .label('Snap to grid', 14)
             .scaleBitmapToLabel()
             .tooltip('Snap current layout to a grid');
-        this.actionMenu.addSubMenuButton(alterMenuIdx, this.snapToGridButton);
 
         this.downloadHKWSButton = new GameButton()
             .allStates(Bitmaps.CustomLayout)
@@ -428,7 +420,6 @@ export default class Toolbar extends ContainerObject {
             .label('Download HKWS format', 14)
             .scaleBitmapToLabel()
             .tooltip('Download a draw_rna input file for the current layout');
-        this.actionMenu.addSubMenuButton(alterMenuIdx, this.downloadHKWSButton);
 
         this.downloadSVGButton = new GameButton()
             .allStates(Bitmaps.CustomLayout)
@@ -436,7 +427,22 @@ export default class Toolbar extends ContainerObject {
             .label('Download SVG format', 14)
             .scaleBitmapToLabel()
             .tooltip('Download an SVG of the current RNA layout');
-        this.actionMenu.addSubMenuButton(alterMenuIdx, this.downloadSVGButton);
+
+        if (this._boostersData != null && this._boostersData.actions != null) {
+            // We're tying this stuff to the existance of boosters as an easy way to get them
+            // not to show up in the tutorials, since boosters don't show until you've completed
+            // the tutorials. TODO: come up with a better way to figure this out.
+            const alterMenuIdx = this.actionMenu.addMenuButton(
+                new GameButton().allStates(Bitmaps.CustomLayout).disabled(undefined)
+            );
+
+            this.actionMenu.addSubMenuButton(alterMenuIdx, this.moveButton);
+            this.actionMenu.addSubMenuButton(alterMenuIdx, this.rotateStemButton);
+            this.actionMenu.addSubMenuButton(alterMenuIdx, this.flipStemButton);
+            this.actionMenu.addSubMenuButton(alterMenuIdx, this.snapToGridButton);
+            this.actionMenu.addSubMenuButton(alterMenuIdx, this.downloadHKWSButton);
+            this.actionMenu.addSubMenuButton(alterMenuIdx, this.downloadSVGButton);
+        }
 
         if (this._type === ToolbarType.LAB) {
             this.submitButton.tooltip('Publish your solution!');
