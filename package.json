@@ -1,8 +1,8 @@
 {
   "name": "eternajs",
-  "version": "1.9.1",
+  "version": "1.10.0",
   "license": "SEE LICENSE IN LICENSE",
-  "description": "TypeScript port of the Eterna ActionScript game",
+  "description": "Eterna game/RNA design interface",
   "scripts": {
     "start": "node multiplatform/mkdirp dist/dev && npm run postbuild:dev && webpack-dev-server --config webpack.dev.js",
     "clean": "node multiplatform/rmrf dist && node multiplatform/rmrf node_modules/.cache",
