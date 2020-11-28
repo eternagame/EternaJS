@@ -290,7 +290,7 @@ export default class PoseEditMode extends GameMode {
             if (Eterna.MOBILE_APP) {
                 window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
             } else {
-                window.location.href = EternaURL.createURL({page: 'lab_bench'});
+                window.location.href = EternaURL.createURL({page: 'home'});
             }
         });
         this.addObject(this._homeButton, this.uiLayer);
