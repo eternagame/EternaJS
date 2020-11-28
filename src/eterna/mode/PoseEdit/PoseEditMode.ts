@@ -2026,7 +2026,7 @@ export default class PoseEditMode extends GameMode {
             fxComplete = Promise.resolve();
         } else {
             this._alreadyCleared = true;
-            if (!this._puzzle.alreadySolved) {
+            if (!this._puzzle.alreadySolved || this._puzzle.rscript !== '') {
                 // Kick off a BubbleSweep animation
                 const bubbles = new BubbleSweep(800);
                 this.addObject(bubbles, this.bgLayer);
@@ -2061,9 +2061,11 @@ export default class PoseEditMode extends GameMode {
 
         let data: SubmitSolutionData;
 
-        if (!this._puzzle.alreadySolved
+        if (
+            !this._puzzle.alreadySolved
             || this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
-            || this._puzzle.rscript !== '') {
+            || this._puzzle.rscript !== ''
+        ) {
             // submit our solution to the server
             log.debug('Submitting solution...');
             const submissionPromise = Eterna.client.submitSolution(this.createSubmitData(details, undoBlock));
@@ -2683,7 +2685,7 @@ export default class PoseEditMode extends GameMode {
         // / Update spec thumbnail if it is open
         this.updateDockedSpecBox();
 
-        if (constraintsSatisfied || this._puzzle.alreadySolved) {
+        if (constraintsSatisfied || (this._puzzle.alreadySolved && this._puzzle.rscript === '')) {
             if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL && !this._alreadyCleared) {
                 this.submitCurrentPose();
             }
