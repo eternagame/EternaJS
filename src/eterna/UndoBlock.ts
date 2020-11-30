@@ -310,7 +310,7 @@ export default class UndoBlock {
     }
 
     public get sequence(): Sequence {
-        return this._sequence;
+        return this._sequence.slice(0);
     }
 
     public set sequence(seq: Sequence) {

@@ -2239,7 +2239,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public get sequence(): Sequence {
-        return this._sequence; // .slice();
+        return this._sequence.slice(0);
     }
 
     public getSequenceAt(seq: number): RNABase {
