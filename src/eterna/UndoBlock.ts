@@ -526,6 +526,28 @@ export default class UndoBlock {
             throw new Error(`Critical error: can't create a ${this._folderName} folder instance by name`);
         }
 
+        if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) === undefined) {
+            const dotArray: DotPlot | null = folder.getDotPlot(
+                this.sequence, this.getPairs(37), 37, pseudoknots
+            );
+            this.setParam(UndoBlockParam.DOTPLOT, dotArray?.data ?? null, 37, pseudoknots);
+            // mean+sum prob unpaired
+            this.setParam(UndoBlockParam.SUMPUNP,
+                this.sumProbUnpaired(dotArray, bppStatisticBehavior), 37, pseudoknots);
+            this.setParam(UndoBlockParam.MEANPUNP,
+                this.sumProbUnpaired(dotArray, bppStatisticBehavior) / this.sequence.length, 37, pseudoknots);
+            // branchiness
+            this.setParam(UndoBlockParam.BRANCHINESS,
+                this.ensembleBranchiness(dotArray, bppStatisticBehavior), 37, pseudoknots);
+            this.setParam(
+                UndoBlockParam.TARGET_EXPECTED_ACCURACY,
+                this.targetExpectedAccuracy(this._targetPairs, dotArray, bppStatisticBehavior),
+                37,
+                pseudoknots
+            );
+            this._dotPlotData = dotArray;
+        }
+
         for (let ii = 37; ii < 100; ii += 10) {
             if (this.getPairs(ii) == null) {
                 const pairs: SecStruct | null = folder.foldSequence(this.sequence, null, null, pseudoknots, ii);
@@ -553,28 +575,6 @@ export default class UndoBlock {
                     this.ensembleBranchiness(dotTempArray, bppStatisticBehavior), ii, pseudoknots);
                 this.setParam(UndoBlockParam.DOTPLOT, dotTempArray.data, ii, pseudoknots);
             }
-        }
-
-        if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) === undefined) {
-            const dotArray: DotPlot | null = folder.getDotPlot(
-                this.sequence, this.getPairs(37), 37, pseudoknots
-            );
-            this.setParam(UndoBlockParam.DOTPLOT, dotArray?.data ?? null, 37, pseudoknots);
-            // mean+sum prob unpaired
-            this.setParam(UndoBlockParam.SUMPUNP,
-                this.sumProbUnpaired(dotArray, bppStatisticBehavior), 37, pseudoknots);
-            this.setParam(UndoBlockParam.MEANPUNP,
-                this.sumProbUnpaired(dotArray, bppStatisticBehavior) / this.sequence.length, 37, pseudoknots);
-            // branchiness
-            this.setParam(UndoBlockParam.BRANCHINESS,
-                this.ensembleBranchiness(dotArray, bppStatisticBehavior), 37, pseudoknots);
-            this.setParam(
-                UndoBlockParam.TARGET_EXPECTED_ACCURACY,
-                this.targetExpectedAccuracy(this._targetPairs, dotArray, bppStatisticBehavior),
-                37,
-                pseudoknots
-            );
-            this._dotPlotData = dotArray;
         }
 
         const refPairs: SecStruct = this.getPairs(37, pseudoknots);
