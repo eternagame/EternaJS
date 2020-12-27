@@ -1,11 +1,29 @@
 import PoseOp from 'eterna/pose2D/PoseOp';
+import {Oligo} from 'eterna/pose2D/Pose2D';
+import DotPlot from 'eterna/rnatypes/DotPlot';
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
+
+export type CacheItem = SecStruct | number[] | FullEvalCache | MultiFoldResult | undefined;
+export type CacheKey = Record<string, string | number | number[] | boolean | Oligo[] | null>;
+
+export interface MultiFoldResult {
+    pairs: SecStruct;
+    order: number[];
+    count: number;
+}
+
+export interface FullEvalCache {
+    nodes: number[];
+    energy: number;
+}
 
 export default abstract class Folder {
     public abstract get name (): string;
     public abstract get isFunctional (): boolean;
 
-    public getCache(key: Record< string, any >): any {
-        let keyStr = JSON.stringify(key);
+    public getCache(key: CacheKey): CacheItem {
+        const keyStr = JSON.stringify(key);
         return this._cache.get(keyStr);
     }
 
@@ -14,16 +32,16 @@ export default abstract class Folder {
     }
 
     public scoreStructures(
-        seq: number[], pairs: number[], pseudoknotted: boolean = false,
-        temp: number = 37, outNodes: number[] | null = null
+        _seq: Sequence, _secstruct: SecStruct, _pseudoknotted: boolean = false,
+        _temp: number = 37, _outNodes: number[] | null = null
     ): number {
         return 0;
     }
 
     public foldSequence(
-        seq: number[], secondBestPairs: number[] | null, desiredPairs: string | null = null,
-        pseudoknotted: boolean = false, temp: number = 37
-    ): number[] | null {
+        _seq: Sequence, _secstruct: SecStruct | null, _desiredPairs: string | null = null,
+        _pseudoknotted: boolean = false, _temp: number = 37
+    ): SecStruct | null {
         return null;
     }
 
@@ -32,9 +50,9 @@ export default abstract class Folder {
     }
 
     public foldSequenceWithBindingSite(
-        seq: number[], targetPairs: number[] | null, bindingSite: number[], bonus: number,
-        version: number = 2.0, temp: number = 37
-    ): number[] | null {
+        _seq: Sequence, _secstruct: SecStruct | null, _bindingSite: number[], _bonus: number,
+        _version: number = 2.0, _temp: number = 37
+    ): SecStruct | null {
         return null;
     }
 
@@ -43,9 +61,9 @@ export default abstract class Folder {
     }
 
     public cofoldSequence(
-        seq: number[], secondBestPairs: number[] | null, malus: number = 0,
-        desiredPairs: string | null = null, temp: number = 37
-    ): number[] | null {
+        _seq: Sequence, _secstruct: SecStruct | null, _malus: number = 0,
+        _desiredPairs: string | null = null, _temp: number = 37
+    ): SecStruct | null {
         return null;
     }
 
@@ -54,9 +72,9 @@ export default abstract class Folder {
     }
 
     public cofoldSequenceWithBindingSite(
-        seq: number[], bindingSite: number[], bonus: number, desiredPairs: string | null = null,
-        malus: number = 0, temp: number = 37
-    ): number[] | null {
+        _seq: Sequence, _bindingSite: number[], _bonus: number, _desiredPairs: string | null = null,
+        _malus: number = 0, _temp: number = 37
+    ): SecStruct | null {
         return null;
     }
 
@@ -69,8 +87,8 @@ export default abstract class Folder {
     }
 
     public getDotPlot(
-        seq: number[], pairs: number[], temp: number = 37, pseudoknots: boolean = false
-    ): number[] | null {
+        _seq: Sequence, _secstruct: SecStruct, _temp: number = 37, _pseudoknots: boolean = false
+    ): DotPlot | null {
         return null;
     }
 
@@ -79,15 +97,15 @@ export default abstract class Folder {
     }
 
     public multifold(
-        seq: number[], secondBestPairs: number[] | null, oligos: any[],
-        desiredPairs: string | null = null, temp: number = 37
-    ): any {
-        return null;
+        _seq: Sequence, _secstruct: SecStruct | null, _oligos: Oligo[],
+        _desiredPairs: string | null = null, _temp: number = 37
+    ): MultiFoldResult | undefined {
+        return undefined;
     }
 
     public multifoldUnroll(
-        seq: number[], secondBestPairs: number[] | null, oligos: any[],
-        desiredPairs: string | null = null, temp: number = 37
+        _seq: Sequence, _secstruct: SecStruct | null, _oligos: Oligo[],
+        _desiredPairs: string | null = null, _temp: number = 37
     ): PoseOp[] | null {
         return null;
     }
@@ -106,29 +124,12 @@ export default abstract class Folder {
         return false;
     }
 
-    public hairpinEnergy(
-        size: number, type: number, si1: number, sj1: number, sequence: number[], i: number, j: number
-    ): number {
+    public cutInLoop(_i: number): number {
         return 0;
     }
 
-    public loopEnergy(
-        n1: number, n2: number, type: number,
-        type2: number, si1: number, sj1: number, sp1: number, sq1: number, b1: boolean, b2: boolean
-    ): number {
-        return 0;
-    }
-
-    public cutInLoop(i: number): number {
-        return 0;
-    }
-
-    public mlEnergy(pairs: number[], S: number[], i: number, isExtloop: boolean): number {
-        return 0;
-    }
-
-    protected putCache(key: Record<string, any>, data: any): void {
-        let keyStr = JSON.stringify(key);
+    protected putCache(key: CacheKey, data: CacheItem): void {
+        const keyStr = JSON.stringify(key);
         this._cache.set(keyStr, data);
     }
 
@@ -136,5 +137,5 @@ export default abstract class Folder {
         this._cache.clear();
     }
 
-    private readonly _cache: Map<string, any> = new Map<string, any>();
+    private readonly _cache: Map<string, CacheItem> = new Map<string, CacheItem>();
 }

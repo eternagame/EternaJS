@@ -1,5 +1,5 @@
 import {
-    Graphics, Point, Text, Sprite
+    Graphics, Point, Sprite
 } from 'pixi.js';
 import {
     ContainerObject, LocationTask, Easing, SerialTask, VisibleTask, DelayTask,
@@ -11,65 +11,80 @@ import Fonts from 'eterna/util/Fonts';
 import VibrateTask from 'eterna/vfx/VibrateTask';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
+import {SubmitSolutionData} from 'eterna/mode/PoseEdit/PoseEditMode';
 import RankRowLayout from './RankRowLayout';
 import RankBoard from './RankBoard';
 import PlayerRank from './PlayerRank';
 
+export interface RankScrollData {
+    points: number;
+    rank: number;
+    richer: PlayerRankData[];
+    poorer: PlayerRankData[];
+}
+
+interface PlayerRankData {
+    name: string;
+    points: number | string;
+    rank: number;
+    uid: number;
+}
+
 export default class RankScroll extends ContainerObject {
-    public static hasRankScrollData(submissionRsp: any): boolean {
+    public static hasRankScrollData(submissionRsp: SubmitSolutionData): boolean {
         return (submissionRsp['pointsrank-before'] != null && submissionRsp['pointsrank-after'] != null);
     }
 
     /** Creates a RankScroll object with data returned from the submit-solution server response */
-    public static fromSubmissionResponse(submissionRsp: any): RankScroll {
+    public static fromSubmissionResponse(submissionRsp: SubmitSolutionData): RankScroll {
         if (!RankScroll.hasRankScrollData(submissionRsp)) {
             throw new Error('No RankScroll data in submission response');
         }
 
-        let pointsrankBefore: any = submissionRsp['pointsrank-before'];
-        let pointsrankAfter: any = submissionRsp['pointsrank-after'];
+        const pointsrankBefore: RankScrollData = submissionRsp['pointsrank-before'] as RankScrollData;
+        const pointsrankAfter: RankScrollData = submissionRsp['pointsrank-after'] as RankScrollData;
         let player: PlayerRank;
-        let ranks: PlayerRank[] = [];
-        let prevRank: number = pointsrankBefore['rank'];
-        let newRank: number = pointsrankAfter['rank'];
-        let prevPoints: number = pointsrankBefore['points'];
-        let newPoints: number = pointsrankAfter['points'];
-        let prevRicher: any[] = pointsrankBefore['richer'];
-        let prevPoorer: any[] = pointsrankBefore['poorer'];
-        let newRicher: any[] = pointsrankAfter['richer'];
-        let newPoorer: any[] = pointsrankAfter['poorer'];
+        const ranks: PlayerRank[] = [];
+        const prevRank: number = pointsrankBefore['rank'];
+        const newRank: number = pointsrankAfter['rank'];
+        const prevPoints: number = pointsrankBefore['points'];
+        const newPoints: number = pointsrankAfter['points'];
+        const prevRicher: PlayerRankData[] = pointsrankBefore['richer'];
+        const prevPoorer: PlayerRankData[] = pointsrankBefore['poorer'];
+        const newRicher: PlayerRankData[] = pointsrankAfter['richer'];
+        const newPoorer: PlayerRankData[] = pointsrankAfter['poorer'];
 
         // / Don't even need to move
         if (prevPoints >= newPoints || prevRank <= newRank) {
-            for (let ii = 0; ii < newRicher.length; ii++) {
-                let rank = new PlayerRank(newRicher[ii]['name'], newRicher[ii]['points']);
-                rank.rank = newRicher[ii]['rank'];
+            for (const newRich of newRicher) {
+                const rank = new PlayerRank(newRich['name'], newRich['points']);
+                rank.rank = newRich['rank'];
                 ranks.push(rank);
             }
 
-            for (let ii = 0; ii < newPoorer.length; ii++) {
-                let rank = new PlayerRank(newPoorer[ii]['name'], newPoorer[ii]['points']);
-                rank.rank = newPoorer[ii]['rank'];
+            for (const newPoor of newPoorer) {
+                const rank = new PlayerRank(newPoor['name'], newPoor['points']);
+                rank.rank = newPoor['rank'];
                 ranks.push(rank);
             }
 
-            let playername = Eterna.playerName || 'You';
+            const playername = Eterna.playerName || 'You';
             player = new PlayerRank(playername, prevPoints);
             player.rank = newRank;
         } else {
             let lastAfterEntryUID = -1;
-            for (let ii = 0; ii < newRicher.length; ii++) {
-                let rank = new PlayerRank(newRicher[ii]['name'], newRicher[ii]['points']);
-                rank.rank = newRicher[ii]['rank'];
+            for (const newRich of newRicher) {
+                const rank = new PlayerRank(newRich['name'], newRich['points']);
+                rank.rank = newRich['rank'];
                 ranks.push(rank);
-                lastAfterEntryUID = newRicher[ii]['uid'];
+                lastAfterEntryUID = newRich['uid'];
             }
 
-            for (let ii = 0; ii < newPoorer.length; ii++) {
-                let rank = new PlayerRank(newPoorer[ii]['name'], newPoorer[ii]['points']);
-                rank.rank = newPoorer[ii]['rank'];
+            for (const newPoor of newPoorer) {
+                const rank = new PlayerRank(newPoor['name'], newPoor['points']);
+                rank.rank = newPoor['rank'];
                 ranks.push(rank);
-                lastAfterEntryUID = newPoorer[ii]['uid'];
+                lastAfterEntryUID = newPoor['uid'];
             }
 
             let commonEntry = false;
@@ -93,9 +108,9 @@ export default class RankScroll extends ContainerObject {
             }
 
             if (!commonEntry || commonIndex >= 0) {
-                for (let ii = commonIndex; ii < prevRicher.length; ii++) {
-                    let rank = new PlayerRank(prevRicher[ii]['name'], prevRicher[ii]['points']);
-                    rank.rank = prevRicher[ii]['rank'];
+                for (const prevRich of prevRicher) {
+                    const rank = new PlayerRank(prevRich['name'], prevRich['points']);
+                    rank.rank = prevRich['rank'];
                     ranks.push(rank);
                 }
             }
@@ -105,12 +120,12 @@ export default class RankScroll extends ContainerObject {
             }
 
             for (let ii = -commonIndex; ii < prevPoorer.length; ii++) {
-                let rank = new PlayerRank(prevPoorer[ii]['name'], prevPoorer[ii]['points']);
+                const rank = new PlayerRank(prevPoorer[ii]['name'], prevPoorer[ii]['points']);
                 rank.rank = prevPoorer[ii]['rank'];
                 ranks.push(rank);
             }
 
-            let playername = Eterna.playerName || 'You';
+            const playername = Eterna.playerName || 'You';
             player = new PlayerRank(playername, prevPoints);
             player.rank = prevRank;
         }
@@ -132,8 +147,8 @@ export default class RankScroll extends ContainerObject {
         // How many rows other than player's will show for each top/bottom side
         const sizeIndicator = 1;
 
-        let startScore: number = this._playerRank.score;
-        let startRank: number = this._playerRank.rank;
+        const startScore: number = this._playerRank.score;
+        const startRank: number = this._playerRank.rank;
 
         let topStartingIdx = 0;
         let bottomStartingIdx = 0;
@@ -190,10 +205,10 @@ export default class RankScroll extends ContainerObject {
         this._scoreOffset = this._newScore - startScore;
         this._moveOffset = startIdx - endIdx;
 
-        let maxWidth = 85;
+        const maxWidth = 85;
 
         // Make rank data coming down from top (of player)
-        let rankDataTop: PlayerRank[] = [];
+        const rankDataTop: PlayerRank[] = [];
 
         for (let ii = topStartingIdx; ii <= topEndingIndex; ii++) {
             if (ii < 0) {
@@ -206,10 +221,10 @@ export default class RankScroll extends ContainerObject {
         }
 
         // Make rank data coming out of bottom (of player)
-        let rankDataBottom: any[] = [];
+        const rankDataBottom: PlayerRank[] = [];
         for (let ii = bottomStartingIdx; ii <= bottomEndingIndex; ii++) {
             if (ii < this._allRanks.length) {
-                let clone: PlayerRank = this._allRanks[ii].clone();
+                const clone: PlayerRank = this._allRanks[ii].clone();
                 rankDataBottom.push(clone);
             } else {
                 const dummyrank = new PlayerRank('', -1);
@@ -218,15 +233,15 @@ export default class RankScroll extends ContainerObject {
             }
         }
 
-        let bg = new GamePanel(0, 0.9, 0x152843);
+        const bg = new GamePanel(0, 0.9, 0x152843);
         bg.setSize(310, 88);
         bg.display.position = new Point(-10, -10);
         this.addObject(bg, this.container);
 
         // Set up rankboard according to above infos
         this._rankBoardTop = new RankBoard(topStartingIdx + 1, rankDataTop.reverse(), maxWidth);
-        let maskTop: Graphics = new Graphics();
-        maskTop.beginFill(0x00FF00, 0);
+        const maskTop: Graphics = new Graphics();
+        maskTop.beginFill(0x00FF00);
         maskTop.drawRect(0, 0, RankBoard.ROW_WIDTH, sizeIndicator * RankBoard.ROW_HEIGHT);
         this.container.addChild(maskTop);
         this._rankBoardTop.display.mask = maskTop;
@@ -238,8 +253,8 @@ export default class RankScroll extends ContainerObject {
 
         this._rankBoardBottom = new RankBoard(this._newRank + 1, rankDataBottom.reverse(), maxWidth);
 
-        let maskBottom: Graphics = new Graphics();
-        maskBottom.beginFill(0x00FF00, 0);
+        const maskBottom: Graphics = new Graphics();
+        maskBottom.beginFill(0x00FF00);
         maskBottom.drawRect(
             0, sizeIndicator * RankBoard.ROW_HEIGHT + RankBoard.PLAYER_ROW_HEIGHT,
             RankBoard.ROW_WIDTH, sizeIndicator * RankBoard.ROW_HEIGHT
@@ -259,7 +274,7 @@ export default class RankScroll extends ContainerObject {
         this.addObject(this._playerRow, this.container);
 
         this._tfRankOffset = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgRankBubble));
-        const rankText = Fonts.stdRegular(`+${this._rankOffset}`, 20).color(0).bold().build();
+        const rankText = Fonts.std(`+${this._rankOffset}`, 20).color(0).bold().build();
         rankText.position = new Point(
             (this._tfRankOffset.width - rankText.width) / 2,
             (this._tfRankOffset.height - rankText.height) / 2

@@ -1,5 +1,5 @@
 import {
-    DisplayObject, Graphics, Matrix, Point, Rectangle
+    DisplayObject, Graphics, Matrix, Point, IPoint, Rectangle
 } from 'pixi.js';
 import * as UPNG from 'upng-js';
 import Flashbang from 'flashbang/core/Flashbang';
@@ -10,7 +10,7 @@ import Assert from './Assert';
 export default class DisplayUtil {
     public static renderToPNG(target: DisplayObject): ArrayBuffer {
         Assert.assertIsDefined(Flashbang.app.pixi);
-        let pixels = Flashbang.app.pixi.renderer.extract.pixels(target);
+        const pixels = Flashbang.app.pixi.renderer.extract.pixels(target);
         // Floor our target width/height - UPNG.encode doesn't handle fractional sizes
         return UPNG.encode(
             [pixels.buffer],
@@ -54,7 +54,7 @@ export default class DisplayUtil {
 
     /** Returns a rectangle filled with the given color */
     public static fillRect(width: number, height: number, color: number, alpha: number = 1): Graphics {
-        let r: Graphics = new Graphics();
+        const r: Graphics = new Graphics();
         r.beginFill(color, alpha);
         r.drawRect(0, 0, width, height);
         r.endFill();
@@ -77,8 +77,8 @@ export default class DisplayUtil {
 
     /** Transforms a point from one DisplayObject's coordinate space to another's. */
     public static transformPoint(
-        p: Point, from: DisplayObject, to: DisplayObject, out: Point | undefined = undefined
-    ): Point {
+        p: IPoint, from: DisplayObject, to: DisplayObject, out: Point | undefined = undefined
+    ): IPoint {
         return to.toLocal(from.toGlobal(p, DisplayUtil.P), undefined, out);
     }
 
@@ -91,7 +91,6 @@ export default class DisplayUtil {
     public static getTransformationMatrix(
         disp: DisplayObject, targetSpace: DisplayObject, out: Matrix | null = null
     ): Matrix {
-        let commonParent: DisplayObject;
         let currentObject: DisplayObject;
 
         if (out) {
@@ -103,7 +102,7 @@ export default class DisplayUtil {
         if (targetSpace === disp) {
             return out;
         } else if (targetSpace === disp.parent || (targetSpace == null && disp.parent == null)) {
-            disp.localTransform.copy(out);
+            disp.localTransform.copyTo(out);
             return out;
         } else if (targetSpace == null || targetSpace === DisplayUtil.base(disp)) {
             // targetCoordinateSpace 'null' represents the target space of the base object.
@@ -125,7 +124,7 @@ export default class DisplayUtil {
 
         // 1. find a common parent of this and the target space
 
-        commonParent = DisplayUtil.findCommonParent(disp, targetSpace);
+        const commonParent: DisplayObject = DisplayUtil.findCommonParent(disp, targetSpace);
 
         // 2. move up from this to common parent
 
@@ -171,8 +170,8 @@ export default class DisplayUtil {
             disp.getLocalBounds(out);
         } else if (targetSpace === disp.parent && !DisplayUtil.isRotated(disp)) {
             // optimization
-            let scaleX: number = disp.scale.x;
-            let scaleY: number = disp.scale.y;
+            const scaleX: number = disp.scale.x;
+            const scaleY: number = disp.scale.y;
 
             disp.getLocalBounds(out);
 
@@ -342,7 +341,9 @@ export default class DisplayUtil {
 
         disp.x = 0;
         disp.y = 0;
-        let dispBounds = DisplayUtil.getBoundsRelative(disp, disp.parent, DisplayUtil.POSITION_RELATIVE_TO_BOUNDS_RECT);
+        const dispBounds = DisplayUtil.getBoundsRelative(
+            disp, disp.parent, DisplayUtil.POSITION_RELATIVE_TO_BOUNDS_RECT
+        );
         // should this be relative to self or parent?
         // let dispBounds = DisplayUtil.getBoundsRelative(disp, disp, DisplayUtil.POSITION_RELATIVE_TO_BOUNDS_RECT);
         switch (dispHAlign) {

@@ -1,5 +1,4 @@
 import SolutionManager from 'eterna/puzzle/SolutionManager';
-import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
@@ -11,7 +10,7 @@ export default class BarcodeConstraint extends Constraint<BaseConstraintStatus> 
     public evaluate(context: ConstraintContext): BaseConstraintStatus {
         return {
             satisfied: !SolutionManager.instance.checkRedundancyByHairpin(
-                EPars.sequenceToString(context.undoBlocks[0].sequence)
+                context.undoBlocks[0].sequence.sequenceString()
             )
         };
     }
@@ -20,7 +19,7 @@ export default class BarcodeConstraint extends Constraint<BaseConstraintStatus> 
         status: BaseConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
-        let tooltip = ConstraintBox.createTextStyle();
+        const tooltip = ConstraintBox.createTextStyle();
 
         if (forMissionScreen) {
             tooltip.pushStyle('altTextMain');

@@ -1,5 +1,3 @@
-import Eterna from 'eterna/Eterna';
-import RNApuzzler from './RNApuzzler';
 import LayoutEngine from './LayoutEngine';
 
 export default class LayoutEngineManager {
@@ -11,7 +9,7 @@ export default class LayoutEngineManager {
     }
 
     public addLayoutEngine(layoutEngine: LayoutEngine): void {
-        for (let other of this._layoutEngines) {
+        for (const other of this._layoutEngines) {
             if (other.name === layoutEngine.name) {
                 throw new Error(`Trying to generate layout engines with duplicate names ('${layoutEngine.name}')`);
             }
@@ -20,7 +18,7 @@ export default class LayoutEngineManager {
     }
 
     public isLayoutEngine(name: string): boolean {
-        for (let layoutEngine of this._layoutEngines) {
+        for (const layoutEngine of this._layoutEngines) {
             if (layoutEngine.name.toLowerCase() === name.toLowerCase()) {
                 return true;
             }
@@ -29,7 +27,7 @@ export default class LayoutEngineManager {
     }
 
     public getLayoutEngine(name: string): LayoutEngine | null {
-        for (let layoutEngine of this._layoutEngines) {
+        for (const layoutEngine of this._layoutEngines) {
             if (layoutEngine.name.toLowerCase() === name.toLowerCase()) {
                 return layoutEngine;
             }

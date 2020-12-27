@@ -53,9 +53,9 @@ export default class GameObject extends GameObjectBase {
         }
 
         // remove from the list
-        let ref: GameObjectRef = obj._ref;
-        let prev: GameObjectRef = ref._prev;
-        let next: GameObjectRef = ref._next;
+        const ref: GameObjectRef = obj._ref;
+        const prev: GameObjectRef = ref._prev;
+        const next: GameObjectRef = ref._next;
 
         if (prev != null) {
             prev._next = next;
@@ -84,8 +84,8 @@ export default class GameObject extends GameObjectBase {
     protected removeObjects(pred: (obj: GameObjectBase) => boolean): void {
         let cur: GameObjectRef | null = this._children;
         while (cur != null) {
-            let next: GameObjectRef = cur._next;
-            let obj: GameObjectBase | null = cur._obj;
+            const next: GameObjectRef = cur._next;
+            const obj: GameObjectBase | null = cur._obj;
             if (obj != null && pred(obj)) {
                 this.removeObject(obj);
             }
@@ -114,11 +114,11 @@ export default class GameObject extends GameObjectBase {
         }
 
         // create a new GameObjectRef
-        let ref: GameObjectRef = new GameObjectRef();
+        const ref: GameObjectRef = new GameObjectRef();
         ref._obj = obj;
 
         // add the ref to the list
-        let oldListHead: GameObjectRef | null = this._children;
+        const oldListHead: GameObjectRef | null = this._children;
         this._children = ref;
 
         if (oldListHead != null) {
@@ -173,7 +173,7 @@ export default class GameObject extends GameObjectBase {
     public _addedInternal(): void {
         // Add pending children first
         if (this._pendingChildren != null) {
-            for (let ref of this._pendingChildren) {
+            for (const ref of this._pendingChildren) {
                 this._registerObject(ref._obj);
             }
         }
@@ -194,7 +194,7 @@ export default class GameObject extends GameObjectBase {
         let cur: GameObjectRef | null = this._children;
         this._children = null;
         while (cur != null) {
-            let next: GameObjectRef = cur._next;
+            const next: GameObjectRef = cur._next;
             if (cur._obj != null) {
                 // call _removedInternal directly - we don't need to tear down
                 // our child list piece by piece
@@ -215,7 +215,7 @@ export default class GameObject extends GameObjectBase {
         let cur: GameObjectRef | null = this._children;
         this._children = null;
         while (cur != null) {
-            let next: GameObjectRef = cur._next;
+            const next: GameObjectRef = cur._next;
             if (cur._obj != null) {
                 cur._obj._disposeInternal();
             }

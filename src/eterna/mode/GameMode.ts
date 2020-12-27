@@ -1,8 +1,8 @@
 import * as log from 'loglevel';
 import {Container, Point} from 'pixi.js';
 import Eterna from 'eterna/Eterna';
-import UndoBlock from 'eterna/UndoBlock';
-import EPars from 'eterna/EPars';
+import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
+import SecStruct from 'eterna/rnatypes/SecStruct';
 import {
     AppMode, SceneObject, Flashbang, GameObjectRef, Assert
 } from 'flashbang';
@@ -19,8 +19,6 @@ import URLButton from 'eterna/ui/URLButton';
 import EternaURL from 'eterna/net/EternaURL';
 import Folder from 'eterna/folding/Folder';
 import Dialog from 'eterna/ui/Dialog';
-
-import NuPACK from 'eterna/folding/NuPACK';
 
 export default abstract class GameMode extends AppMode {
     public readonly bgLayer = new Container();
@@ -44,9 +42,9 @@ export default abstract class GameMode extends AppMode {
         this.container.addChild(this.uiLayer);
         this.container.addChild(this.dialogLayer);
         this.container.addChild(this.notifLayer);
-        this.container.addChild(this.tooltipLayer);
         this.container.addChild(this.achievementsLayer);
         this.container.addChild(this.contextMenuLayer);
+        this.container.addChild(this.tooltipLayer);
 
         this._achievements = new AchievementManager();
         this.addObject(this._achievements);
@@ -105,7 +103,7 @@ export default abstract class GameMode extends AppMode {
             this._notifRef.destroyObject();
         }
 
-        let notif = new NotificationDialog(message, extraButtonTitle);
+        const notif = new NotificationDialog(message, extraButtonTitle);
         this._notifRef = this.addObject(notif, this.notifLayer);
 
         // Hide dialogs while a notification is showing
@@ -161,7 +159,7 @@ export default abstract class GameMode extends AppMode {
 
     protected setPoseFields(newPoseFields: PoseField[]): void {
         if (this._poseFields != null) {
-            for (let poseField of this._poseFields) {
+            for (const poseField of this._poseFields) {
                 poseField.destroySelf();
             }
         }
@@ -175,29 +173,19 @@ export default abstract class GameMode extends AppMode {
             newField.pose.getEnergyDelta = () => {
                 // Sanity check
                 if (this._folder !== null) {
-                    let poseidx = this._isPipMode ? idx : this._curTargetIndex;
+                    const poseidx = this._isPipMode ? idx : this._curTargetIndex;
 
-                    let score = null;
-                    let pseudoknots: boolean = this._targetConditions != null
+                    const pseudoknots: boolean = this._targetConditions != null
                         && this._targetConditions[0] != null
                         && this._targetConditions[0]['type'] === 'pseudoknot';
-                    if (pseudoknots) {
-                        score = (pairs: number[]) => {
-                            Assert.assertIsDefined(this._folder);
-                            return this._folder.scoreStructures(
-                                newField.pose.fullSequence, pairs, true
-                            );
-                        };
-                    } else {
-                        score = (pairs: number[]) => {
-                            Assert.assertIsDefined(this._folder);
-                            return this._folder.scoreStructures(
-                                newField.pose.fullSequence, pairs
-                            );
-                        };
-                    }
+                    const score = (pairs: SecStruct) => {
+                        Assert.assertIsDefined(this._folder);
+                        return this._folder.scoreStructures(
+                            newField.pose.fullSequence, pairs, pseudoknots
+                        );
+                    };
 
-                    let targetPairs: number[] | undefined = this._targetPairs
+                    const targetPairs: SecStruct | undefined = this._targetPairs
                         ? this._targetPairs[poseidx] : this.getCurrentTargetPairs(poseidx);
                     Assert.assertIsDefined(
                         targetPairs,
@@ -205,8 +193,8 @@ export default abstract class GameMode extends AppMode {
                     );
                     const ublk = this.getCurrentUndoBlock(poseidx);
                     Assert.assertIsDefined(ublk, 'getEnergyDelta is being called where UndoBlocks are unavailable!');
-                    let nativePairs: number[] = ublk.getPairs(37, pseudoknots);
-                    return score(EPars.getSatisfiedPairs(targetPairs, newField.pose.fullSequence))
+                    const nativePairs: SecStruct = ublk.getPairs(37, pseudoknots);
+                    return score(targetPairs.getSatisfiedPairs(newField.pose.fullSequence))
                         - score(nativePairs);
                 }
                 return -1;
@@ -227,22 +215,21 @@ export default abstract class GameMode extends AppMode {
     }
 
     protected layoutPoseFields(): void {
-        Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
         if (this._isPipMode) {
-            let numFields: number = this._poseFields.length;
+            const numFields: number = this._poseFields.length;
             for (let ii = 0; ii < numFields; ii++) {
-                let poseField = this._poseFields[ii];
-                poseField.display.position = new Point((Flashbang.stageWidth / numFields) * ii, 0);
-                poseField.setSize(Flashbang.stageWidth / numFields, Flashbang.stageHeight, true);
+                const poseField = this._poseFields[ii];
+                poseField.display.position = new Point((this.posesWidth / numFields) * ii, 0);
+                poseField.setSize(this.posesWidth / numFields, Flashbang.stageHeight, true);
                 poseField.display.visible = true;
             }
         } else {
             for (let ii = 0; ii < this._poseFields.length; ii++) {
-                let poseField = this._poseFields[ii];
+                const poseField = this._poseFields[ii];
                 if (ii === 0) {
                     poseField.display.position = new Point(0, 0);
-                    poseField.setSize(Flashbang.stageWidth, Flashbang.stageHeight, false);
+                    poseField.setSize(this.posesWidth, Flashbang.stageHeight, false);
                     poseField.display.visible = true;
                 } else {
                     poseField.display.visible = false;
@@ -251,7 +238,12 @@ export default abstract class GameMode extends AppMode {
         }
     }
 
-    protected onSetPip(pipMode: boolean): void {
+    protected get posesWidth(): number {
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        return Flashbang.stageWidth;
+    }
+
+    protected onSetPip(_pipMode: boolean): void {
     }
 
     protected postScreenshot(screenshot: ArrayBuffer): void {
@@ -259,8 +251,8 @@ export default abstract class GameMode extends AppMode {
 
         Eterna.client.postScreenshot(screenshot)
             .then((filename) => {
-                let url = new URL(filename, Eterna.SERVER_URL);
-                let prompt = `Do you want to post <u><a href="${url.href}" target="_blank">this</a></u> screenshot in chat?`;
+                const url = new URL(filename, Eterna.SERVER_URL);
+                const prompt = `Do you want to post <u><a href="${url.href}" target="_blank">this</a></u> screenshot in chat?`;
                 this.showConfirmDialog(prompt, true).closed.then((confirmed) => {
                     if (confirmed) {
                         Eterna.chat.postText(url.href);
@@ -283,7 +275,7 @@ export default abstract class GameMode extends AppMode {
                 this._contextMenuDialogRef.destroyObject();
                 handled = true;
             } else {
-                let menu = this.createContextMenu();
+                const menu = this.createContextMenu();
                 if (menu != null) {
                     this._contextMenuDialogRef = this.addObject(
                         new ContextMenuDialog(menu, Flashbang.globalMouse),
@@ -313,9 +305,128 @@ export default abstract class GameMode extends AppMode {
     }
 
     protected static createHomeButton(): URLButton {
-        let button = new URLButton('Go to Home', EternaURL.createURL({page: 'lab_bench'}));
+        const button = new URLButton('Go to Home', EternaURL.createURL({page: 'home'}));
         button.selectable(false);
         return button;
+    }
+
+    private download(filename: string, text: string) {
+        const element = document.createElement('a');
+        element.setAttribute('href', `data:text/plain;charset=utf-8,${encodeURIComponent(text)}`);
+        element.setAttribute('download', filename);
+
+        element.style.display = 'none';
+        document.body.appendChild(element);
+
+        element.click();
+
+        document.body.removeChild(element);
+    }
+
+    private letterColorName(letter: string): string {
+        if (letter === 'G') {
+            return '#FF3333';
+        } else if (letter === 'A') {
+            return '#FFFF33';
+        } else if (letter === 'U') {
+            return '#7777FF';
+        } else if (letter === 'C') {
+            return '#33FF33';
+        }
+        return '#000000';
+    }
+
+    protected downloadSVG(): void {
+        for (let ii = 0; ii < this._poses.length; ++ii) {
+            if (this._poses[ii].customLayout === undefined) continue;
+            const cl = this._poses[ii].customLayout;
+            // width and height: xmax-xmin+20
+            // each coord is x-xmin+10
+            Assert.assertIsDefined(cl);
+            const xmin = Math.min(...cl.map((v) => (v[0] ? v[0] : 0)));
+            const xmax = Math.max(...cl.map((v) => (v[0] ? v[0] : 0)));
+            const ymin = Math.min(...cl.map((v) => (v[1] ? v[1] : 0)));
+            const ymax = Math.max(...cl.map((v) => (v[1] ? v[1] : 0)));
+            const width = xmax - xmin + 20;
+            const height = ymax - ymin + 20;
+
+            // Maybe set default font size based on distance between letters.
+            // Yes -- using pairSpace
+            let pairSpace = 45;
+            for (let jj = 0; jj < this._poses[ii].secstruct.length; ++jj) {
+                if (this._poses[ii].secstruct.isPaired(jj)) {
+                    const x1 = cl[jj][0];
+                    const y1 = cl[jj][1];
+                    if (x1 === null) continue;
+                    if (y1 === null) continue;
+                    const x2 = cl[this._poses[ii].secstruct.pairingPartner(jj)][0];
+                    const y2 = cl[this._poses[ii].secstruct.pairingPartner(jj)][1];
+                    if (x2 === null) continue;
+                    if (y2 === null) continue;
+                    pairSpace = Math.sqrt(
+                        (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1)
+                    );
+                }
+            }
+
+            let svgText = `<svg width="${width}" height="${height}" >\n`;
+
+            // Add in all letters.
+            for (let jj = 0; jj < this._poses[ii].sequence.length; ++jj) {
+                const x = cl[jj][0];
+                const y = cl[jj][1];
+                if (x === null) continue;
+                if (y === null) continue;
+                const s = this._poses[ii].sequence.sequenceString()[jj];
+
+                svgText += `\t<text text-anchor="middle" x="${x - xmin + 10}" y="${y - ymin + 10}" font-size="${pairSpace / 2}" fill="${this.letterColorName(s)}">${s}</text>\n`;
+                // ,${this._poses[ii].sequence.sequenceString()[jj]},${this._poses[ii].targetPairs.pairs[jj]}\n`;
+            }
+
+            // Base pairs
+            for (let jj = 0; jj < this._poses[ii].sequence.length; ++jj) {
+                if (this._poses[ii].secstruct.isPaired(jj)) {
+                    const x1 = cl[jj][0];
+                    const y1 = cl[jj][1];
+                    if (x1 === null) continue;
+                    if (y1 === null) continue;
+                    const x2 = cl[this._poses[ii].secstruct.pairingPartner(jj)][0];
+                    const y2 = cl[this._poses[ii].secstruct.pairingPartner(jj)][1];
+                    if (x2 === null) continue;
+                    if (y2 === null) continue;
+
+                    // OK: line from "10% to 90%"
+                    const p1 = [
+                        x1 * 0.8 + x2 * 0.2,
+                        y1 * 0.8 + y2 * 0.2
+                    ];
+                    const p2 = [
+                        x1 * 0.2 + x2 * 0.8,
+                        y1 * 0.2 + y2 * 0.8
+                    ];
+
+                    const d = y1 === y2 ? 0 : pairSpace / 4;
+
+                    svgText += `\t<line x1="${p1[0] - xmin + 10}" y1="${p1[1] - d - ymin + 10}" x2="${p2[0] - xmin + 10}" y2="${p2[1] - d - ymin + 10}" style="stroke:rgb(0,0,0);stroke-width:${pairSpace / 20}" />\n`;
+                }
+            }
+
+            svgText += '</svg>\n';
+            this.download(`${ii}.svg`, svgText);
+        }
+    }
+
+    protected downloadHKWS(): void {
+        for (let ii = 0; ii < this._poses.length; ++ii) {
+            if (this._poses[ii].customLayout === undefined) continue;
+            const cl = this._poses[ii].customLayout;
+            Assert.assertIsDefined(cl);
+            let hkwsText = 'idx,x,y,seq,partner\n';
+            for (let jj = 0; jj < this._poses[ii].sequence.length; ++jj) {
+                hkwsText += `${jj},${cl[jj][0]},${cl[jj][1]},${this._poses[ii].sequence.sequenceString()[jj]},${this._poses[ii].secstruct.pairs[jj]}\n`;
+            }
+            this.download(`${ii}.hkws`, hkwsText);
+        }
     }
 
     protected _achievements: AchievementManager;
@@ -332,19 +443,22 @@ export default abstract class GameMode extends AppMode {
     protected _isPipMode: boolean = false;
 
     // Things that might or might not be set in children so that getEnergyDelta can get set in setPoseFields
-    protected _folder: Folder | null;
+    protected get _folder(): Folder | null {
+        return null;
+    }
+
     protected _curTargetIndex: number;
-    protected getCurrentUndoBlock(index: number): UndoBlock | undefined {
+    protected getCurrentUndoBlock(_index: number): UndoBlock | undefined {
         return undefined;
     }
 
-    protected getCurrentTargetPairs(index: number): number[] | undefined {
+    protected getCurrentTargetPairs(_index: number): SecStruct | undefined {
         return undefined;
     }
 
-    protected _targetPairs: number[][];
+    protected _targetPairs: SecStruct[];
 
-    protected _targetConditions: any;
+    protected _targetConditions: (TargetConditions | undefined)[] = [];
 }
 
 class ContextMenuDialog extends Dialog<void> {

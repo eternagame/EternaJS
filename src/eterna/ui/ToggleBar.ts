@@ -1,6 +1,5 @@
 import {Graphics, Point, Text} from 'pixi.js';
 import {Signal} from 'signals';
-import Eterna from 'eterna/Eterna';
 import {
     ContainerObject, KeyboardListener, Enableable, LocationTask, Easing, KeyboardEventType, KeyCode, Flashbang, Assert
 } from 'flashbang';
@@ -9,7 +8,7 @@ import Sounds from 'eterna/resources/Sounds';
 import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import ROPWait from 'eterna/rscript/ROPWait';
 
-type InteractionEvent = PIXI.interaction.InteractionEvent;
+type InteractionEvent = PIXI.InteractionEvent;
 
 export default class ToggleBar extends ContainerObject implements KeyboardListener, Enableable {
     /** Emitted when our state changes */
@@ -59,7 +58,7 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
         this._selectedHilite.endFill();
 
         for (let ii = 0; ii < this._numStates; ii++) {
-            this._labels[ii] = Fonts.arial(`${ii + 1}`, 12).color(ToggleBar.COLOR_TEXT).build();
+            this._labels[ii] = Fonts.std(`${ii + 1}`, 12).color(ToggleBar.COLOR_TEXT).build();
             this._labels[ii].position = new Point((ii * ToggleBar.BUTTON_SIZE) + 9, 5);
             this.container.addChild(this._labels[ii]);
         }
@@ -123,7 +122,7 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
     }
 
     private onMouseClick(e: InteractionEvent): void {
-        let state: number = this.getStateUnderMouse(e);
+        const state: number = this.getStateUnderMouse(e);
         if ((state === this._selectedState) || (state < 0) || (state >= this._numStates)) {
             return;
         }
@@ -150,7 +149,7 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
             return;
         }
 
-        let state: number = this.getStateUnderMouse(e);
+        const state: number = this.getStateUnderMouse(e);
         if ((state === this._hoveredState) || (state < 0) || (state >= this._numStates)) {
             return;
         }

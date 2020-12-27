@@ -9,7 +9,7 @@ export default class SubmittingDialog extends Dialog<void> {
     protected added(): void {
         super.added();
 
-        let text = Fonts.arial('Submitting...', 20).color(0xffffff).bold().build();
+        const text = Fonts.std('Submitting...', 20).color(0xffffff).bold().build();
         this.container.addChild(text);
 
         text.alpha = 0;
@@ -18,7 +18,7 @@ export default class SubmittingDialog extends Dialog<void> {
             new AlphaTask(0, 0.3, Easing.linear, text)
         )));
 
-        let updateLocation = () => {
+        const updateLocation = () => {
             Assert.assertIsDefined(Flashbang.stageHeight);
             Assert.assertIsDefined(Flashbang.stageWidth);
             text.position = new Point(

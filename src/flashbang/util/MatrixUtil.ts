@@ -48,10 +48,10 @@ export default class MatrixUtil {
      *  </pre>
      */
     public static skew(matrix: Matrix, skewX: number, skewY: number): void {
-        let sinX: number = Math.sin(skewX);
-        let cosX: number = Math.cos(skewX);
-        let sinY: number = Math.sin(skewY);
-        let cosY: number = Math.cos(skewY);
+        const sinX: number = Math.sin(skewX);
+        const cosX: number = Math.cos(skewX);
+        const sinY: number = Math.sin(skewY);
+        const cosY: number = Math.cos(skewY);
 
         matrix.set(matrix.a * cosY - matrix.b * sinX,
             matrix.a * sinY + matrix.b * cosX,
@@ -86,8 +86,8 @@ export default class MatrixUtil {
 
     /** Prepends an incremental rotation to a Matrix object (angle in radians). */
     public static prependRotation(matrix: Matrix, angle: number): void {
-        let sin: number = Math.sin(angle);
-        let cos: number = Math.cos(angle);
+        const sin: number = Math.sin(angle);
+        const cos: number = Math.cos(angle);
 
         matrix.set(matrix.a * cos + matrix.c * sin, matrix.b * cos + matrix.d * sin,
             matrix.c * cos - matrix.a * sin, matrix.d * cos - matrix.b * sin,
@@ -103,10 +103,10 @@ export default class MatrixUtil {
      *  </pre>
      */
     public static prependSkew(matrix: Matrix, skewX: number, skewY: number): void {
-        let sinX: number = Math.sin(skewX);
-        let cosX: number = Math.cos(skewX);
-        let sinY: number = Math.sin(skewY);
-        let cosY: number = Math.cos(skewY);
+        const sinX: number = Math.sin(skewX);
+        const cosX: number = Math.cos(skewX);
+        const sinY: number = Math.sin(skewY);
+        const cosY: number = Math.cos(skewY);
 
         matrix.set(matrix.a * cosY + matrix.c * sinY,
             matrix.b * cosY + matrix.d * sinY,
@@ -130,22 +130,13 @@ export default class MatrixUtil {
     private static formatRawData(data: number[], numCols: number, numRows: number,
         precision: number, indent = '  '): string {
         let result: string = indent;
-        let numValues: number = numCols * numRows;
-        let highestValue = 0.0;
-        let valueString: string;
-        let value: number;
-
-        for (let i = 0; i < numValues; ++i) {
-            value = Math.abs(data[i]);
-            if (value > highestValue) highestValue = value;
-        }
-
-        let numChars: number = highestValue.toFixed(precision).length + 1;
+        const highestValue = Math.max(...data.map((k) => Math.abs(k)));
+        const numChars: number = highestValue.toFixed(precision).length + 1;
 
         for (let y = 0; y < numRows; ++y) {
             for (let x = 0; x < numCols; ++x) {
-                value = data[numCols * y + x];
-                valueString = value.toFixed(precision);
+                const value = data[numCols * y + x];
+                let valueString: string = value.toFixed(precision);
 
                 while (valueString.length < numChars) valueString = ` ${valueString}`;
 
@@ -173,21 +164,16 @@ export default class MatrixUtil {
         const E = 0.0001;
 
         let doSnap = false;
-        let aSq: number;
-        let bSq: number;
-        let cSq: number;
-        let dSq: number;
-
         if (matrix.b + E > 0 && matrix.b - E < 0 && matrix.c + E > 0 && matrix.c - E < 0) {
             // what we actually want is 'Math.abs(matrix.a)', but squaring
             // the value works just as well for our needs & is faster.
 
-            aSq = matrix.a * matrix.a;
-            dSq = matrix.d * matrix.d;
+            const aSq = matrix.a * matrix.a;
+            const dSq = matrix.d * matrix.d;
             doSnap = aSq + E > 1 && aSq - E < 1 && dSq + E > 1 && dSq - E < 1;
         } else if (matrix.a + E > 0 && matrix.a - E < 0 && matrix.d + E > 0 && matrix.d - E < 0) {
-            bSq = matrix.b * matrix.b;
-            cSq = matrix.c * matrix.c;
+            const bSq = matrix.b * matrix.b;
+            const cSq = matrix.c * matrix.c;
             doSnap = bSq + E > 1 && bSq - E < 1 && cSq + E > 1 && cSq - E < 1;
         }
 

@@ -21,7 +21,7 @@ export default class MarkerBoxView extends Container {
     }
 
     public clear(): void {
-        for (let marker of this._markers) {
+        for (const marker of this._markers) {
             marker.destroy({children: true});
         }
 
@@ -34,7 +34,7 @@ export default class MarkerBoxView extends Container {
             return;
         }
 
-        let box = new SelectionBox(this._color);
+        const box = new SelectionBox(this._color);
         box.setSize(this._width, this._markerHeight);
         box.position = new Point(0, index * this._markerHeight);
         this.addChild(box);
@@ -56,7 +56,7 @@ export default class MarkerBoxView extends Container {
             }
         }
 
-        let marker = this._markers[removeIndex];
+        const marker = this._markers[removeIndex];
         marker.destroy({children: true});
 
         this._markers.splice(removeIndex, 1);
@@ -69,11 +69,11 @@ export default class MarkerBoxView extends Container {
         }
 
         for (let ii = 0; ii < this._indices.length; ii++) {
-            let box = this._markers[ii];
+            const box = this._markers[ii];
 
             box.visible = false;
             if (this._indices[ii] >= firstVisIdx) {
-                let yPos = (this._indices[ii] - firstVisIdx) * this._markerHeight;
+                const yPos = (this._indices[ii] - firstVisIdx) * this._markerHeight;
                 if (yPos + this._markerHeight < this._height) {
                     box.visible = true;
                     box.position = new Point(0, yPos);

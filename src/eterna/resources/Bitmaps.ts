@@ -125,6 +125,8 @@ export default class Bitmaps {
     public static readonly ImgHelpCloseOver: string = require('assets/UI/help-btn-close-hover.png');
     public static readonly ImgChat: string = require('assets/UI/chat-btn.png');
     public static readonly ImgChatHover: string = require('assets/UI/chat-btn-hover.png');
+    public static readonly ImgInfoControl: string = require('assets/UI/info-btn.png');
+    public static readonly ImgInfoControlHover: string = require('assets/UI/info-btn-hover.png');
     public static readonly ImgKnob: string = require('assets/NOVA/Knob/knob_bg.png');
     public static readonly ImgNotch: string = require('assets/NOVA/Knob/knob_notch.png');
     public static readonly ImgBadge2: string = require('assets/Achievements/Lab-access.png');
@@ -296,6 +298,7 @@ export default class Bitmaps {
     public static readonly BaseAMid: string = require('assets/RNABase/yellow_middle.png');
     public static readonly BaseAPattern: string = require('assets/RNABase/yellow_pattern.png');
     public static readonly BaseAMin: string = require('assets/RNABase/yellow_small.png');
+    public static readonly Turkey: string = require('assets/turkey.png');
     public static readonly ImgArrowLeft = require('assets/UI/mission/arrow-left.png');
     public static readonly ImgArrowRight = require('assets/UI/mission/arrow-right.png');
     public static readonly ImgGoalBackground = require('assets/UI/mission/goal-bg.png');
@@ -311,11 +314,35 @@ export default class Bitmaps {
     public static readonly ImgMagicGlue: string = require('assets/UI/magic-glue-btn.png');
     public static readonly ImgToolbarArrow: string = require('assets/UI/toolbar-selection-arrow.png');
     public static readonly ImgRankBubble: string = require('assets/UI/mission/rank-bubble.png');
+    public static readonly BtnPalette: string = require('assets/DesignBrowser/palette-btn.png');
+    public static readonly BtnPaletteOver: string = require('assets/DesignBrowser/palette-btn-over.png');
+    public static readonly BtnPaletteSelected: string = require('assets/DesignBrowser/palette-btn-selected.png');
+    public static readonly BtnFlask: string = require('assets/DesignBrowser/flask-btn.png');
+    public static readonly BtnFlaskOver: string = require('assets/DesignBrowser/flask-btn-over.png');
+    public static readonly BtnFlaskSelected: string = require('assets/DesignBrowser/flask-btn-selected.png');
+    public static readonly BtnSort: string = require('assets/DesignBrowser/sort-btn.png');
+    public static readonly BtnConfigure: string = require('assets/DesignBrowser/configure-btn.png');
+    public static readonly BtnClose: string = require('assets/DesignBrowser/close-button.png');
+    public static readonly ImgLink: string = require('assets/DesignBrowser/permalink-icon.png');
+    public static readonly ImgVote: string = require('assets/DesignBrowser/vote-icon.png');
+    public static readonly ImgUnvote: string = require('assets/DesignBrowser/unvote-icon.png');
+    public static readonly ImgVoteHalf: string = require('assets/DesignBrowser/vote-icon-half.png');
+    public static readonly ImgInfo: string = require('assets/DesignBrowser/info-icon.png');
+    public static readonly ImgSort: string = require('assets/DesignBrowser/sort-icon.png');
+    public static readonly ImgPrevious: string = require('assets/DesignBrowser/previous-icon.png');
+    public static readonly ImgNext: string = require('assets/DesignBrowser/next-icon.png');
+    public static readonly ImgRemove: string = require('assets/TangoIcons/remove.png');
+    public static readonly ImgResetCriteria: string = require('assets/DesignBrowser/reset.png');
+    public static readonly ImgAdd: string = require('assets/DesignBrowser/add.png');
+    public static readonly CleanDotPlotIcon: string = require('assets/cleandotplot.png');
+    public static readonly BranchinessIcon: string = require('assets/branchy.png');
+    public static readonly Folder: string = require('assets/folder.png');
+    public static readonly CustomLayout: string = require('assets/UI/custom-layout-small.png');
 
     public static get all(): string[] {
         if (Bitmaps.ALL_URLS == null) {
             Bitmaps.ALL_URLS = [];
-            for (let value of Object.values(Bitmaps)) {
+            for (const value of Object.values(Bitmaps)) {
                 if (typeof (value) === 'string') {
                     Bitmaps.ALL_URLS.push(value);
                 }

@@ -2,7 +2,9 @@ import * as log from 'loglevel';
 import {
     Container, DisplayObject, Rectangle, Point
 } from 'pixi.js';
-import {ContainerObject, Enableable, GameObject} from 'flashbang';
+import {
+    ContainerObject, Enableable, GameObject, Assert
+} from 'flashbang';
 import EPars from 'eterna/EPars';
 import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
 import Puzzle from 'eterna/puzzle/Puzzle';
@@ -37,7 +39,7 @@ export default class RScriptEnv extends ContainerObject {
             return;
         }
 
-        let value = this.getVar(id);
+        const value = this.getVar(id);
         if (value instanceof TextBalloon) {
             value.display.visible = isVisible;
         } else {
@@ -58,7 +60,7 @@ export default class RScriptEnv extends ContainerObject {
         if (ref.indexOf('$$STRING_REF:') !== 0) {
             return ref;
         } else {
-            let value = this.getVar(ref);
+            const value = this.getVar(ref);
             if (typeof (value) === 'string') {
                 return value;
             } else {
@@ -70,7 +72,7 @@ export default class RScriptEnv extends ContainerObject {
 
     /** Remove all stored highlights and hints and stuff. */
     public cleanup(): void {
-        this._vars.forEach((value, key) => {
+        this._vars.forEach((_value, key) => {
             this.deleteVar(key);
         });
     }
@@ -95,14 +97,14 @@ export default class RScriptEnv extends ContainerObject {
         let uiElement: RScriptUIElement | null;
 
         // Used UI Element ID.
-        let splitId: string[] = key.split('-');
+        const splitId: string[] = key.split('-');
 
         // Detect a number if it is included in the ui element key.
         // So for the objectives: objective-### (format).
         // The input number will always come after the dash. The dash should be
         // included in the key that is passed.
-        let idString: string = splitId[0] + (splitId.length > 1 ? '-' : '');
-        let elementID: RScriptUIElementID = (idString.toUpperCase()) as RScriptUIElementID;
+        const idString: string = splitId[0] + (splitId.length > 1 ? '-' : '');
+        const elementID: RScriptUIElementID = (idString.toUpperCase()) as RScriptUIElementID;
 
         if (splitId.length > 2) {
             throw new Error('Invalid UI Element ID format');
@@ -134,6 +136,7 @@ export default class RScriptEnv extends ContainerObject {
                 const [palette] = this.getUIElementFromID(RScriptUIElementID.PALETTE);
                 const obj = palette as GameObject;
                 const rect = uiElement as Rectangle;
+                Assert.assertIsDefined(obj.display);
                 const globalPos = obj.display.toGlobal(new Point());
                 return new Rectangle(
                     globalPos.x + rect.x,
@@ -143,6 +146,7 @@ export default class RScriptEnv extends ContainerObject {
                 );
             } else {
                 const obj = uiElement as GameObject;
+                Assert.assertIsDefined(obj.display);
                 const globalPos = obj.display.toGlobal(new Point());
                 return new Rectangle(
                     globalPos.x,
@@ -167,6 +171,8 @@ export default class RScriptEnv extends ContainerObject {
             this.ui.setDisplayScoreTexts(visible);
         } else if (elementID === RScriptUIElementID.BASENUMBERING) {
             this.ui.setShowNumbering(visible);
+        } else if (elementID === RScriptUIElementID.BASELETTERING) {
+            this.ui.lettersVisible = visible;
         } else if (elementID === RScriptUIElementID.TOTALENERGY) {
             this.ui.setShowTotalEnergy(visible);
         } else if (elementID === RScriptUIElementID.HINT) {
@@ -185,7 +191,7 @@ export default class RScriptEnv extends ContainerObject {
                 this.ui.toolbar.palette.changeNoPairMode();
             }
 
-            let obj: RScriptUIElement | null = this.getUIElementFromID(elementID)[0];
+            const obj: RScriptUIElement | null = this.getUIElementFromID(elementID)[0];
             if (obj) {
                 if (obj instanceof DisplayObject) {
                     obj.visible = visible;
@@ -193,8 +199,10 @@ export default class RScriptEnv extends ContainerObject {
                     obj.display.visible = visible;
                 }
 
-                if (((obj as any) as Enableable).enabled !== undefined) {
-                    ((obj as any) as Enableable).enabled = visible && !disabled;
+                // AMW TODO: this concerns me. Neither DisplayObject nor GameObject
+                // seem to actually implement Enableable...
+                if (((obj as unknown) as Enableable).enabled !== undefined) {
+                    ((obj as unknown) as Enableable).enabled = visible && !disabled;
                 }
             }
         }
@@ -228,12 +236,12 @@ export default class RScriptEnv extends ContainerObject {
                 // NOTE: There is no longer a toggle bar...
                 return this.ui.toolbar.naturalButton;
             case RScriptUIElementID.ZOOMIN:
-                return this.ui.toolbar.zoomInButton;
+                return this.ui.toolbar.zoomInButton ? this.ui.toolbar.zoomInButton : null;
             case RScriptUIElementID.ZOOMOUT:
-                return this.ui.toolbar.zoomOutButton;
+                return this.ui.toolbar.zoomOutButton ? this.ui.toolbar.zoomOutButton : null;
             case RScriptUIElementID.ACTIONBAR:
                 // NOTE: There is no longer an action bar...
-                return this.ui.toolbar.zoomInButton;
+                return this.ui.toolbar.zoomInButton ? this.ui.toolbar.zoomInButton : null;
             case RScriptUIElementID.RESET:
                 return this.ui.toolbar.resetButton;
             case RScriptUIElementID.UNDO:
@@ -281,7 +289,7 @@ export default class RScriptEnv extends ContainerObject {
     }
 
     public getVar(key: string): RScriptVarType | undefined {
-        let scriptVar = this._vars.get(key);
+        const scriptVar = this._vars.get(key);
         if (scriptVar != null && scriptVar instanceof GameObject) {
             return scriptVar.isLiveObject ? scriptVar : undefined;
         } else {
@@ -290,7 +298,7 @@ export default class RScriptEnv extends ContainerObject {
     }
 
     public deleteVar(key: string): void {
-        let scriptVar = this._vars.get(key);
+        const scriptVar = this._vars.get(key);
         if (scriptVar == null) {
             return;
         }

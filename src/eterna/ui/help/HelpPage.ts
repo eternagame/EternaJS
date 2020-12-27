@@ -2,7 +2,8 @@ import {ContainerObject, StyledTextBuilder} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import TextUtil from 'eterna/util/TextUtil';
 import {UnitSignal} from 'signals';
-import {Point} from 'pixi.js';
+import {Point, TextMetrics} from 'pixi.js';
+import {FontWeight} from 'flashbang/util/TextBuilder';
 import GameButton from '../GameButton';
 
 interface HelpPageProps {
@@ -33,17 +34,17 @@ export default class HelpPage extends ContainerObject {
         const {theme} = HelpPage;
 
         this.container.removeChildren();
-        const titleBuilder = Fonts.stdMedium()
+        const titleBuilder = Fonts.std()
             .text(section)
             .fontSize(theme.titleSize)
-            .bold()
+            .fontWeight(FontWeight.SEMIBOLD)
             .color(0xffffff);
 
-        const titleMetrics = PIXI.TextMetrics.measureText(section, titleBuilder.style);
+        const titleMetrics = TextMetrics.measureText(section, titleBuilder.style);
         const titleElem = titleBuilder.build();
 
         const contentBuilder = new StyledTextBuilder({
-            fontFamily: Fonts.ARIAL,
+            fontFamily: Fonts.STDFONT,
             fontSize: theme.fontSize,
             fill: 0xffffff,
             wordWrap: true,
@@ -55,9 +56,9 @@ export default class HelpPage extends ContainerObject {
         contentElem.position = new Point(0, titleMetrics.height + theme.padding);
 
         const back = new GameButton().label(
-            Fonts.stdMedium()
+            Fonts.std()
                 .text('BACK')
-                .bold()
+                .fontWeight(FontWeight.SEMIBOLD)
                 .fontSize(theme.fontSize)
                 .color(0x4A90E2),
             undefined,

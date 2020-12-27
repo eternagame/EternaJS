@@ -23,7 +23,7 @@ export default class ContextMenu extends ContainerObject {
     }
 
     public addItem(item: string): GameButton {
-        let button = new GameButton().label(item, 14);
+        const button = new GameButton().label(item, 14);
         this.addObject(button, this._buttonLayout);
         this._buttons.push(button);
 
@@ -41,15 +41,15 @@ export default class ContextMenu extends ContainerObject {
 
     private doLayout(): void {
         let maxButtonWidth = 0;
-        for (let button of this._buttons) {
+        for (const button of this._buttons) {
             button.fixedLabelWidth(0);
             maxButtonWidth = Math.max(button.container.width, maxButtonWidth);
         }
 
         const MIN_LABEL_WIDTH = 200;
-        let labelWidth = Math.max(maxButtonWidth, MIN_LABEL_WIDTH);
+        const labelWidth = Math.max(maxButtonWidth, MIN_LABEL_WIDTH);
 
-        for (let button of this._buttons) {
+        for (const button of this._buttons) {
             button.fixedLabelWidth(labelWidth);
         }
 

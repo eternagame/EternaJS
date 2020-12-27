@@ -11,6 +11,10 @@
 
     <link type="text/css" rel="stylesheet" media="all" href="./frontend/themes/css/eterna.css" />
 
+    <script>
+        __comment_bak = Comment;
+    </script>
+
     <script src="./frontend/jscripts/jquery/jquery-1.7.2.min.js"></script>
     <script src="./frontend/jscripts/jquery/jquery-unselectable.js"></script>
     <script src="./frontend/jscripts/jquery-ui/jquery-ui-1.8.7.custom.min.js"></script>
@@ -27,11 +31,17 @@
     <script src="./frontend/jscripts/eterna/script-library.js"></script>
     <script src="./frontend/jscripts/eterna/script-interface.js"></script>
     <script src="./frontend/jscripts/eterna/presenter.js"></script>
+
+    <script>
+        // The Coffeescript code exposes a Comment object, which clobbers a browser global, which we do not use,
+        // but the browser global is used by DOMPurify
+        Comment = __comment_bak;
+    </script>
 </head>
 <body style="margin: 0; padding: 0; height: 100%;">
 
 <!-- Scripts expect that an element with "maingame" will exist, so this name shouldn't be changed -->
-<div id="maingame" style="width: 100%; height: 100%; overflow: hidden; background-image: radial-gradient(circle, rgb(50, 69, 109) 0%, rgb(6, 26, 52) 75%)"></div>
+<div id="maingame"></div>
 
 <!-- In-game chat. Hidden to begin with; the game is in charge of displaying it -->
 <div id="chat-container" class="ingame-chat hidden">

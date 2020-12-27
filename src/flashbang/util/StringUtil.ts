@@ -26,11 +26,11 @@ export default class StringUtil {
 
     /** Does the specified string end with any of the specified substrings. */
     public static endsWith(str: string, substr: string, ...additionalSubstrs: string[]): boolean {
-        let startDex: number = str.length - substr.length;
+        const startDex: number = str.length - substr.length;
         if ((startDex >= 0) && (str.indexOf(substr, startDex) >= 0)) {
             return true;
         }
-        for (let additional of additionalSubstrs) {
+        for (const additional of additionalSubstrs) {
             if (StringUtil.endsWith(str, additional)) {
                 // Call the non-vararg version of ourselves to keep from repeating the logic
                 return true;
@@ -44,7 +44,7 @@ export default class StringUtil {
         if (str.indexOf(substr, 0) === 0) {
             return true;
         }
-        for (let additional of additionalSubstrs) {
+        for (const additional of additionalSubstrs) {
             if (str.indexOf(additional, 0) === 0) {
                 return true;
             }
@@ -54,14 +54,14 @@ export default class StringUtil {
 
     /** Return true iff the first character is a lower-case character. */
     public static isLowerCase(str: string): boolean {
-        let firstChar: string = str.charAt(0);
+        const firstChar: string = str.charAt(0);
         return (firstChar.toUpperCase() !== firstChar)
             && (firstChar.toLowerCase() === firstChar);
     }
 
     /** Return true iff the first character is an upper-case character. */
     public static isUpperCase(str: string): boolean {
-        let firstChar: string = str.charAt(0);
+        const firstChar: string = str.charAt(0);
         return (firstChar.toUpperCase() === firstChar)
             && (firstChar.toLowerCase() !== firstChar);
     }
@@ -78,7 +78,7 @@ export default class StringUtil {
      *        or the String begins with "0" in which case it will be 8.
      */
     public static parseInteger(str: string, radix = 0): number {
-        return Number(StringUtil.parseInt0(str, radix, true));
+        return Number(StringUtil.parseInt0(str, radix));
     }
 
     /**
@@ -93,7 +93,7 @@ export default class StringUtil {
      *        or the String begins with "0" in which case it will be 8.
      */
     public static parseUnsignedInteger(str: string, radix = 0): number {
-        let result: number = StringUtil.parseInt0(str, radix, false);
+        const result: number = StringUtil.parseInt0(str, radix);
         if (result < 0) {
             throw new Error(`parseUnsignedInteger parsed negative value [value=${str}]`);
         }
@@ -133,7 +133,7 @@ export default class StringUtil {
         }
 
         // hackily add commas
-        let prefixLength: number = (n < 0) ? 1 : 0;
+        const prefixLength: number = (n < 0) ? 1 : 0;
         while (s.length - prefixLength > 3) {
             postfix = `,${s.substring(s.length - 3)}${postfix}`;
             s = s.substring(0, s.length - 3);
@@ -182,8 +182,6 @@ export default class StringUtil {
      * @param str the String to parse.
      */
     public static parseBoolean(str: string): boolean {
-        let originalString: string = str;
-
         if (str != null) {
             str = str.toLowerCase();
             if (str === 'true' || str === '1') {
@@ -230,7 +228,7 @@ export default class StringUtil {
      * Substitute "{n}" tokens for the corresponding passed-in arguments.
      */
     public static substitute(str: string, ...args: string[]): string {
-        let len: number = args.length;
+        const len: number = args.length;
         // TODO: FIXME: this might be wrong, if your {0} replacement has a {1} in it, then
         // that'll get replaced next iteration.
         for (let ii = 0; ii < len; ii++) {
@@ -335,14 +333,14 @@ export default class StringUtil {
      * may be an empty string.
      */
     public static parseURLs(s: string): string[] {
-        let array: string[] = [];
+        const array: string[] = [];
         while (true) {
-            let result: RegExpExecArray | null = StringUtil.URL_REGEXP.exec(s);
+            const result: RegExpExecArray | null = StringUtil.URL_REGEXP.exec(s);
             if (result == null) {
                 break;
             }
 
-            let {index} = result;
+            const {index} = result;
             let url: string = result[0];
             array.push(s.substring(0, index));
             s = s.substring(index + url.length);
@@ -371,12 +369,12 @@ export default class StringUtil {
     /**
      * Internal helper function for parseInteger and parseUnsignedInteger.
      */
-    private static parseInt0(str: string, radix: number, allowNegative: boolean): number {
+    private static parseInt0(str: string, radix: number): number {
         if (str == null) {
             throw new Error('Cannot parseInt(null)');
         }
 
-        let negative: boolean = (str.charAt(0) === '-');
+        const negative: boolean = (str.charAt(0) === '-');
         if (negative) {
             str = str.substring(1);
         }
@@ -405,7 +403,7 @@ export default class StringUtil {
 
         // now verify that str only contains valid chars for the radix
         for (let ii = 0; ii < str.length; ii++) {
-            let dex: number = StringUtil.HEX.indexOf(str.charAt(ii).toLowerCase());
+            const dex: number = StringUtil.HEX.indexOf(str.charAt(ii).toLowerCase());
             if (dex === -1 || dex >= radix) {
                 throw new Error(`Invalid characters in String [string=${str}, radix=${radix}`);
             }

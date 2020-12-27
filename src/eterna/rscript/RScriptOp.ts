@@ -36,7 +36,7 @@ export default abstract class RScriptOp {
         args = args.replace(/<newline>/g, '\n');
         args = this.createStrings(args);
 
-        let param: string[] = args.split(',');
+        const param: string[] = args.split(',');
         for (let i = 0; i < param.length; ++i) {
             let arg: string = param[i];
             arg = arg.replace(/^\s*/, '');
@@ -62,11 +62,11 @@ export default abstract class RScriptOp {
         // Identify strings marked by "" or '' and store them in the environment.
         while (true) {
             // Find the first matching pair of quotation marks. Single or double.
-            let sIdx: number = arg.indexOf("'");
-            let sMatchIdx: number = arg.indexOf("'", sIdx + 1);
+            const sIdx: number = arg.indexOf("'");
+            const sMatchIdx: number = arg.indexOf("'", sIdx + 1);
 
-            let dIdx: number = arg.indexOf('"');
-            let dMatchIdx: number = arg.indexOf('"', dIdx + 1);
+            const dIdx: number = arg.indexOf('"');
+            const dMatchIdx: number = arg.indexOf('"', dIdx + 1);
 
             let idx = -1;
             let matchIdx = -1;
@@ -82,9 +82,9 @@ export default abstract class RScriptOp {
                 break;
             }
 
-            let refStr: string = arg.slice(idx, matchIdx + 1);
-            let storeStr: string = arg.slice(idx + 1, matchIdx);
-            let key: string = this._env.generateStringRefName();
+            const refStr: string = arg.slice(idx, matchIdx + 1);
+            const storeStr: string = arg.slice(idx + 1, matchIdx);
+            const key: string = this._env.generateStringRefName();
             this._env.setVar(key, storeStr);
             // TSC: string.replace is dropping the first $ in the $$STRINGREF token... ???
             // arg = arg.replace(refStr, key);
@@ -93,7 +93,7 @@ export default abstract class RScriptOp {
         return arg;
     }
 
-    protected parseArgument(arg: string, i: number): void {
+    protected parseArgument(_arg: string, _i: number): void {
     }
 
     protected readonly _env: RScriptEnv;

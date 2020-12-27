@@ -1,5 +1,5 @@
 import {
-    Point, Graphics, Container
+    Point, Graphics, Container, TextMetrics
 } from 'pixi.js';
 import TextUtil from 'eterna/util/TextUtil';
 import Fonts from 'eterna/util/Fonts';
@@ -55,8 +55,8 @@ export default class HelpToolTips {
                         };
 
                         const makeText = (text: string) => {
-                            const builder = Fonts.stdRegular(text).color(0);
-                            const metrics = PIXI.TextMetrics.measureText(text, builder.style);
+                            const builder = Fonts.std(text).color(0);
+                            const metrics = TextMetrics.measureText(text, builder.style);
                             const textElem = builder.build();
                             textElem.position = new Point(
                                 (elemW - metrics.width) / 2,

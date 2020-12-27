@@ -1,25 +1,25 @@
 import Cons from './Cons';
 
-export type RListener = (arg1?: any, arg2?: any, arg3?: any) => void;
+export type RListener<T1, T2, T3> = (arg1?: T1, arg2?: T2, arg3?: T3) => void;
 
 /**
  * A base class for all reactive classes. This is an implementation detail, but is public so that
  * third parties may use it to create their own reactive classes, if desired.
  */
-export default abstract class Reactor {
+export default abstract class Reactor<T1, T2, T3> {
     /** true if this reactor has at least one connection. */
     public get hasConnections(): boolean {
         return this._listeners != null;
     }
 
-    protected addConnection(listener: RListener): Cons {
+    protected addConnection(listener: RListener<T1, T2, T3>): Cons<T1, T2, T3> {
         if (listener == null) {
             throw new Error('Null listener');
         }
         return this._addCons(new Cons(this, listener));
     }
 
-    protected removeConnection(listener: RListener): void {
+    protected removeConnection(listener: RListener<T1, T2, T3>): void {
         if (this.isDispatching) {
             this._pendingRuns = Reactor.insert(this._pendingRuns, new Runs((): void => {
                 this._listeners = Cons._removeAll(this._listeners, listener);
@@ -34,20 +34,20 @@ export default abstract class Reactor {
     /**
      * Emits the supplied event to all connected slots.
      */
-    protected notify(a1?: any, a2?: any, a3?: any): void {
+    protected notify(a1?: T1, a2?: T2, a3?: T3): void {
         if (this._listeners == null) {
             // Bail early if we have no listeners
             return;
-        } else if (this._listeners === Reactor.DISPATCHING) {
+        } else if (this._listeners === this.DISPATCHING) {
             throw new Error('Initiated notify while notifying');
         }
 
-        let lners: Cons = this._listeners;
-        this._listeners = Reactor.DISPATCHING;
+        const lners: Cons<T1, T2, T3> = this._listeners;
+        this._listeners = this.DISPATCHING;
 
         let error: Error | null = null;
         try {
-            for (let cons: Cons | null = lners; cons != null; cons = cons.next) {
+            for (let cons: Cons<T1, T2, T3> | null = lners; cons != null; cons = cons.next) {
                 // cons.listener will be null if Cons was closed after iteration started
                 if (cons && cons.listener != null) {
                     try {
@@ -101,7 +101,7 @@ export default abstract class Reactor {
     }
 
     /* internal */
-    public _addCons(cons: Cons): Cons {
+    public _addCons(cons: Cons<T1, T2, T3>): Cons<T1, T2, T3> {
         if (this.isDispatching) {
             this._pendingRuns = Reactor.insert(this._pendingRuns, new Runs(() => {
                 this._listeners = Cons._insert(this._listeners, cons);
@@ -115,7 +115,7 @@ export default abstract class Reactor {
     }
 
     /* internal */
-    public _removeCons(cons: Cons): void {
+    public _removeCons(cons: Cons<T1, T2, T3>): void {
         if (this.isDispatching) {
             this._pendingRuns = Reactor.insert(this._pendingRuns, new Runs(() => {
                 this._listeners = Cons._remove(this._listeners, cons);
@@ -128,7 +128,7 @@ export default abstract class Reactor {
     }
 
     private get isDispatching(): boolean {
-        return this._listeners === Reactor.DISPATCHING;
+        return this._listeners === this.DISPATCHING;
     }
 
     protected static insert(head: Runs, action: Runs): Runs {
@@ -140,10 +140,14 @@ export default abstract class Reactor {
         }
     }
 
-    protected _listeners: Cons | null;
+    protected _listeners: Cons<T1, T2, T3> | null;
     protected _pendingRuns: Runs;
 
-    protected static DISPATCHING: Cons = new Cons(null, null);
+    // AMW: this shouldn't be static. then it can't match up with template
+    // params...
+    // TODO: if this breaks things, maybe that's a sign that we need this... to
+    // be nullable or something.
+    protected DISPATCHING: Cons<T1, T2, T3> = new Cons<T1, T2, T3>(null, null);
 }
 
 class Runs {

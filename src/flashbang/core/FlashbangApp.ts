@@ -1,4 +1,5 @@
 import * as log from 'loglevel';
+import {settings, Application, SCALE_MODES} from 'pixi.js';
 import {RegistrationGroup, Value} from 'signals';
 import KeyboardEventType from 'flashbang/input/KeyboardEventType';
 import KeyCode from 'flashbang/input/KeyCode';
@@ -14,7 +15,7 @@ export default class FlashbangApp {
     /** True if the app is foregrounded */
     public readonly isActive: Value<boolean> = new Value<boolean>(true);
 
-    public get pixi(): PIXI.Application | null {
+    public get pixi(): Application | null {
         return this._pixi;
     }
 
@@ -68,7 +69,7 @@ export default class FlashbangApp {
 
     public removeUpdatable(obj: Updatable): void {
         Assert.assertIsDefined(this._updatables);
-        let idx: number = this._updatables.indexOf(obj);
+        const idx: number = this._updatables.indexOf(obj);
         if (idx >= 0) {
             this._updatables.splice(idx, 1);
         }
@@ -108,9 +109,9 @@ export default class FlashbangApp {
      * Creates a PIXI.Application instance.
      * Subclasses can override to do custom initialization.
      */
-    protected createPixi(): PIXI.Application {
-        PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR;
-        return new PIXI.Application(800, 600, {backgroundColor: 0x1099bb});
+    protected createPixi(): Application {
+        settings.SCALE_MODE = SCALE_MODES.LINEAR;
+        return new Application({width: 800, height: 600, backgroundColor: 0x1099bb});
     }
 
     /** The HTMLElement that the PIXI application will be added to. */
@@ -123,11 +124,11 @@ export default class FlashbangApp {
 
         try {
             // convert PIXI's weird ticker delta into elapsed seconds
-            let dt = tickerDelta / (PIXI.settings.TARGET_FPMS * 1000);
+            const dt = tickerDelta / (settings.TARGET_FPMS * 1000);
 
             // update all our updatables
             if (this._updatables) {
-                for (let updatable of this._updatables) {
+                for (const updatable of this._updatables) {
                     updatable.update(dt);
                 }
             }
@@ -164,21 +165,21 @@ export default class FlashbangApp {
             this._keyDown.set(e.code, false);
         }
 
-        let {topMode} = this._modeStack;
+        const {topMode} = this._modeStack;
         if (topMode != null) {
             topMode.onKeyboardEvent(e);
         }
     }
 
     protected onMouseWheelEvent(e: WheelEvent): void {
-        let {topMode} = this._modeStack;
+        const {topMode} = this._modeStack;
         if (topMode != null) {
             topMode.onMouseWheelEvent(e);
         }
     }
 
     protected onContextMenuEvent(e: Event): void {
-        let {topMode} = this._modeStack;
+        const {topMode} = this._modeStack;
         if (topMode != null) {
             topMode.onContextMenuEvent(e);
         }
@@ -197,11 +198,11 @@ export default class FlashbangApp {
      * Called when an uncaught error is thrown. No assumptions should be made about the state
      * of the application when this is called!
      */
-    protected onUncaughtError(e: any): void {
+    protected onUncaughtError(e: ErrorEvent): void {
         log.error(e);
     }
 
-    protected _pixi: PIXI.Application | null;
+    protected _pixi: Application | null;
     protected _regs: RegistrationGroup | null = new RegistrationGroup();
 
     protected _isUpdating: boolean;

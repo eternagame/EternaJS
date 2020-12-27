@@ -14,10 +14,11 @@ import EternaURL from 'eterna/net/EternaURL';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import MissionIntroPanel from 'eterna/ui/MissionIntroPanel';
 import UITheme from 'eterna/ui/UITheme';
+import SecStruct from 'eterna/rnatypes/SecStruct';
 
 export default class MissionIntroMode extends AppMode {
     constructor(
-        puzzleName: string, puzzleDescription: string, puzzleThumbnails: number[][], constraintBoxes: ConstraintBox[],
+        puzzleName: string, puzzleDescription: string, puzzleThumbnails: SecStruct[], constraintBoxes: ConstraintBox[],
         customLayout: Array<[number, number] | [null, null]> | null = null
     ) {
         super();
@@ -62,7 +63,7 @@ export default class MissionIntroMode extends AppMode {
             if (Eterna.MOBILE_APP) {
                 window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
             } else {
-                window.location.href = EternaURL.createURL({page: 'lab_bench'});
+                window.location.href = EternaURL.createURL({page: 'home'});
             }
         });
         this.addObject(homeButton, this.container);
@@ -73,7 +74,8 @@ export default class MissionIntroMode extends AppMode {
 
         Assert.assertIsDefined(Flashbang.stageWidth);
         const nameLabel = new HTMLTextObject(this._puzzleName)
-            .font(Fonts.STDFONT_BOLD)
+            .font(Fonts.STDFONT)
+            .bold()
             .fontSize(14)
             .color(0xC0DCE7)
             .selectable(false)
@@ -147,7 +149,7 @@ export default class MissionIntroMode extends AppMode {
 
     private readonly _puzzleName: string;
     private readonly _puzzleDescription: string;
-    private readonly _puzzleThumbnails: number[][];
+    private readonly _puzzleThumbnails: SecStruct[];
     private readonly _constraintBoxes: ConstraintBox[];
 
     private _closed: boolean = false;

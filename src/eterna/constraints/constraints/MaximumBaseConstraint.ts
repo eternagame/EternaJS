@@ -1,4 +1,4 @@
-import EPars from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
@@ -8,10 +8,10 @@ interface MaxBaseConstraintStatus extends BaseConstraintStatus {
 }
 
 abstract class MaximumBaseConstraint extends Constraint<MaxBaseConstraintStatus> {
-    public readonly baseType: number;
+    public readonly baseType: RNABase;
     public readonly maxCount: number;
 
-    constructor(baseType: number, maxCount: number) {
+    constructor(baseType: RNABase, maxCount: number) {
         super();
         this.baseType = baseType;
         this.maxCount = maxCount;
@@ -19,10 +19,7 @@ abstract class MaximumBaseConstraint extends Constraint<MaxBaseConstraintStatus>
 
     public evaluate(context: ConstraintContext): MaxBaseConstraintStatus {
         // TODO: Multistate?
-        const count = context.undoBlocks[0].sequence.reduce(
-            (acc, curr) => acc + (curr === this.baseType ? 1 : 0), 0
-        );
-
+        const count = context.undoBlocks[0].sequence.count(this.baseType);
         return {
             satisfied: count <= this.maxCount,
             currentCount: count
@@ -33,7 +30,7 @@ abstract class MaximumBaseConstraint extends Constraint<MaxBaseConstraintStatus>
         status: MaxBaseConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
-        let tooltip = ConstraintBox.createTextStyle();
+        const tooltip = ConstraintBox.createTextStyle();
 
         if (forMissionScreen) {
             tooltip.pushStyle('altTextMain');
@@ -55,8 +52,8 @@ abstract class MaximumBaseConstraint extends Constraint<MaxBaseConstraintStatus>
             statText: status.currentCount.toString(),
             showOutline: true,
             fullTexture: forMissionScreen
-                ? BitmapManager.getBitmapNamed(`Nova${EPars.nucleotideToString(this.baseType, false, false)}MissionReq`)
-                : BitmapManager.getBitmapNamed(`Nova${EPars.nucleotideToString(this.baseType, false, false)}Req`)
+                ? BitmapManager.missionBitmapNucl(EPars.nucleotideToString(this.baseType, false, false))
+                : BitmapManager.bitmapNucl(EPars.nucleotideToString(this.baseType, false, false))
         };
     }
 }
@@ -65,7 +62,7 @@ export class MaximumAConstraint extends MaximumBaseConstraint {
     public static readonly NAME = 'AMAX';
 
     constructor(count: number) {
-        super(EPars.RNABASE_ADENINE, count);
+        super(RNABase.ADENINE, count);
     }
 
     public serialize(): [string, string] {
@@ -80,7 +77,7 @@ export class MaximumUConstraint extends MaximumBaseConstraint {
     public static readonly NAME = 'UMAX';
 
     constructor(count: number) {
-        super(EPars.RNABASE_URACIL, count);
+        super(RNABase.URACIL, count);
     }
 
     public serialize(): [string, string] {
@@ -95,7 +92,7 @@ export class MaximumGConstraint extends MaximumBaseConstraint {
     public static readonly NAME = 'GMAX';
 
     constructor(count: number) {
-        super(EPars.RNABASE_GUANINE, count);
+        super(RNABase.GUANINE, count);
     }
 
     public serialize(): [string, string] {
@@ -110,7 +107,7 @@ export class MaximumCConstraint extends MaximumBaseConstraint {
     public static readonly NAME = 'CMAX';
 
     constructor(count: number) {
-        super(EPars.RNABASE_CYTOSINE, count);
+        super(RNABase.CYTOSINE, count);
     }
 
     public serialize(): [string, string] {

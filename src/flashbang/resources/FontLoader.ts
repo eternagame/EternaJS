@@ -12,8 +12,8 @@ export default class FontLoader {
                     families: [fontFamily],
                     urls: cssURL ? [cssURL] : undefined
                 },
-                fontactive: (familyName, fvd) => resolve(),
-                fontinactive: (familyName, fvd) => reject(
+                fontactive: (_familyName, _fvd) => resolve(),
+                fontinactive: (familyName, _fvd) => reject(
                     new Error(`Font load failure [css=${cssURL}, family=${familyName}]`)
                 )
             });

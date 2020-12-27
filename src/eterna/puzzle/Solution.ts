@@ -1,5 +1,7 @@
 import Eterna from 'eterna/Eterna';
 import Feedback from 'eterna/Feedback';
+import {FoldData} from 'eterna/UndoBlock';
+import Sequence from 'eterna/rnatypes/Sequence';
 
 export default class Solution {
     constructor(nid: number, puzzleNID: number) {
@@ -19,17 +21,15 @@ export default class Solution {
         this._desc = desc;
 
         if (this._desc) {
-            let newlinereg = /\n/g;
-            this._shortDesc = this._desc.replace(newlinereg, ' ');
-            newlinereg = /\r/g;
-            this._shortDesc = this._shortDesc.replace(newlinereg, ' ');
+            this._shortDesc = this._desc.replace(/\n/g, ' ');
+            this._shortDesc = this._shortDesc.replace(/\r/g, ' ');
         } else {
             this._shortDesc = 'No description available';
             this._desc = 'No description available';
         }
     }
 
-    public set foldData(fd: any[]) {
+    public set foldData(fd: FoldData[]) {
         this._foldData = fd;
         if (this._foldData != null) {
             this._hasFoldData = true;
@@ -43,10 +43,8 @@ export default class Solution {
     public set title(title: string) {
         this._title = title;
 
-        let newlinereg = /\n/g;
-        this._title = this._title.replace(newlinereg, ' ');
-        newlinereg = /\r/g;
-        this._title = this._title.replace(newlinereg, ' ');
+        this._title = this._title.replace(/\n/g, ' ');
+        this._title = this._title.replace(/\r/g, ' ');
     }
 
     public get nodeID(): number {
@@ -57,11 +55,11 @@ export default class Solution {
         return this._puzzleNid;
     }
 
-    public get sequence(): string {
+    public get sequence(): Sequence {
         return this._sequence;
     }
 
-    public set sequence(sequence: string) {
+    public set sequence(sequence: Sequence) {
         this._sequence = sequence;
     }
 
@@ -93,6 +91,16 @@ export default class Solution {
         this._hasFoldData = avail;
     }
 
+    public get synthetized() {
+        return this.expFeedback && this.expFeedback.isFailed() === 0;
+    }
+
+    public canVote(round: number) {
+        return !this.synthetized
+            && this.getProperty('Synthesized') === 'n'
+            && this.getProperty('Round') === round;
+    }
+
     public setNumPairs(gc: number, gu: number, ua: number): void {
         this._numGCs = gc;
         this._numGUs = gu;
@@ -122,13 +130,13 @@ export default class Solution {
         }
     }
 
-    public queryFoldData(): Promise<any[] | null> {
+    public queryFoldData(): Promise<FoldData[] | null> {
         if (this._hasFoldData) {
             if (this._foldData != null) {
                 return Promise.resolve(this._foldData);
             } else {
                 return Eterna.client.getSolutionInfo(this._nid).then((json) => {
-                    let data = json['data'];
+                    const data = json['data'];
                     if (data['solution'] != null) {
                         this.foldData = JSON.parse(data['solution']['fold-data']);
                     }
@@ -141,7 +149,8 @@ export default class Solution {
         }
     }
 
-    public getProperty(keyword: string): any {
+    // AMW TODO what why
+    public getProperty(keyword: string): Sequence | string | number {
         if (keyword === 'Title') {
             return this._title;
         } else if (keyword === 'GU Pairs') {
@@ -196,7 +205,7 @@ export default class Solution {
     private readonly _nid: number;
     private readonly _puzzleNid: number;
 
-    private _sequence: string;
+    private _sequence: Sequence;
     private _title: string;
     private _playerID: number = -1;
     private _playerName: string = '';
@@ -214,5 +223,5 @@ export default class Solution {
     private _expFeedback: Feedback | null;
     private _shortDesc: string;
     private _hasFoldData: boolean = false;
-    private _foldData: any[] | null = null;
+    private _foldData: FoldData[] | null = null;
 }

@@ -29,7 +29,7 @@ class FunctionRegistration implements Registration {
 
     public close(): void {
         if (this._f != null) {
-            let f = this._f;
+            const f = this._f;
             this._f = null;
             f();
         }

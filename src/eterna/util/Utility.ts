@@ -1,20 +1,49 @@
 import {Point} from 'pixi.js';
+import DOMPurify from 'dompurify';
+import Marked from 'marked';
 import {Assert} from 'flashbang';
+
+// Allow iframes to YouTube
+DOMPurify.addHook('uponSanitizeElement', (node, data) => {
+    if (data.tagName === 'iframe') {
+        const validSrc = (node as HTMLIFrameElement).src.match(/^(https:)?\/\/(www.)?(youtube.com)\/.*$/);
+        if (!validSrc) node.remove();
+    }
+});
+
+// Set target=_blank on all links
+DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+    // set all elements owning target to target=_blank
+    if ('target' in (node as Element)) {
+        node.setAttribute('target', '_blank');
+    }
+    // set non-HTML/MathML links to xlink:show=new
+    if (
+        !node.hasAttribute('target')
+      && (node.hasAttribute('xlink:href') || node.hasAttribute('href'))
+    ) {
+        node.setAttribute('xlink:show', 'new');
+    }
+});
 
 export default class Utility {
     /**
-     * Safely remove HTML tags from an input by replacing <> with escapes.
+     * Sanitize user input to be safe to put in the DOM, and optionally allow for markup to be
+     * applied
      *
-     * @param str - The string to be escaped
-     *
-     * @returns The string, with each <> replaced by regex.
+     * @param str String to be sanitized/markup applied
+     * @param markup When true, markdown rendering is applied and html is allowed
      */
-    public static stripHtmlTags(str: string): string {
-        let newlinereg = /</g;
-        str = str.replace(newlinereg, '&lt;');
-        newlinereg = />/g;
-        str = str.replace(newlinereg, '&gt;');
-        return str;
+    public static sanitizeAndMarkup(str: string, markup: boolean = false) {
+        const opts: DOMPurify.Config = {
+            FORBID_TAGS: ['style']
+        };
+
+        if (!markup) {
+            opts.ALLOWED_TAGS = [];
+        }
+
+        return DOMPurify.sanitize(markup ? Marked(str) : str, opts) as string;
     }
 
     /**
@@ -25,10 +54,8 @@ export default class Utility {
      * @returns The string, with each " replaced by ' and "\n" by " ".
      */
     public static stripQuotationsAndNewlines(str: string): string {
-        let newlinereg = /\n/g;
-        str = str.replace(newlinereg, ' ');
-        newlinereg = /"/g;
-        str = str.replace(newlinereg, "'");
+        str = str.replace(/\n/g, ' ');
+        str = str.replace(/"/g, "'");
         return str;
     }
 
@@ -46,11 +73,11 @@ export default class Utility {
     public static isPointWithin(p: Point, polygon: Point[], stretchLength: number = 10000): boolean {
         let hitCount = 0;
 
-        let pTo: Point = new Point(p.x + stretchLength, p.y + stretchLength);
+        const pTo: Point = new Point(p.x + stretchLength, p.y + stretchLength);
 
         for (let ii = 0; ii < polygon.length; ii++) {
-            let a: Point = polygon[ii];
-            let b: Point = polygon[(ii + 1) % polygon.length];
+            const a: Point = polygon[ii];
+            const b: Point = polygon[(ii + 1) % polygon.length];
 
             if (Utility.findIntersection(a, b, p, pTo) != null) {
                 hitCount++;
@@ -74,27 +101,19 @@ export default class Utility {
      * @returns true if the point is in the polygon; false otherwise.
      */
     public static findIntersection(A: Point, B: Point, E: Point, F: Point, asSeg: boolean = true): Point | null {
-        let ip: Point;
-        let a1: number;
-        let a2: number;
-        let b1: number;
-        let b2: number;
-        let c1: number;
-        let c2: number;
+        const a1 = B.y - A.y;
+        const b1 = A.x - B.x;
+        const c1 = B.x * A.y - A.x * B.y;
+        const a2 = F.y - E.y;
+        const b2 = E.x - F.x;
+        const c2 = F.x * E.y - E.x * F.y;
 
-        a1 = B.y - A.y;
-        b1 = A.x - B.x;
-        c1 = B.x * A.y - A.x * B.y;
-        a2 = F.y - E.y;
-        b2 = E.x - F.x;
-        c2 = F.x * E.y - E.x * F.y;
-
-        let denom: number = a1 * b2 - a2 * b1;
+        const denom: number = a1 * b2 - a2 * b1;
         if (denom === 0) {
             return null;
         }
 
-        ip = new Point();
+        const ip = new Point();
         ip.x = (b1 * c2 - b2 * c1) / denom;
         ip.y = (a2 * c1 - a1 * c2) / denom;
 
@@ -128,8 +147,8 @@ export default class Utility {
     public static range(length: number): number[];
 
     public static range(a: number, b?: number): number[] {
-        let start = b ? a : 0;
-        let stop = b || a;
+        const start = b ? a : 0;
+        const stop = b || a;
 
         return new Array(stop - start).fill(0).map((_, i) => i + start);
     }
@@ -145,7 +164,7 @@ export default class Utility {
      * @returns string array
      */
     public static splitOnWhitespace(csl: string): string[] {
-        let vals: string[] = [];
+        const vals: string[] = [];
         let lastComma = -1;
         let ii: number;
 
@@ -179,10 +198,10 @@ export default class Utility {
      * @returns array of integers like [-1,0,1,2,3,4,7,8,12,16]
      */
     public static rangeStringToArray(rangeString: string): (number | null)[] | null {
-        let vals: (number | null)[] = [];
+        const vals: (number | null)[] = [];
         const nullStrings = ['', 'null', 'NaN', 'NULL', 'NAN'];
         for (const str of rangeString.split(',')) {
-            let foundDash = str.indexOf('-', 1); // look for a dash (ignoring an initial minus sign)
+            const foundDash = str.indexOf('-', 1); // look for a dash (ignoring an initial minus sign)
             if (foundDash < 0) {
                 if (nullStrings.indexOf(str) > -1) {
                     vals.push(null);
@@ -195,8 +214,8 @@ export default class Utility {
                     }
                 }
             } else {
-                let startVal = parseInt(str.slice(0, foundDash), 10);
-                let endVal = parseInt(str.slice(foundDash + 1, str.length), 10);
+                const startVal = parseInt(str.slice(0, foundDash), 10);
+                const endVal = parseInt(str.slice(foundDash + 1, str.length), 10);
                 if (Number.isNaN(startVal)) return null;
                 if (Number.isNaN(endVal)) return null;
                 for (let n = startVal; n <= endVal; n++) vals.push(n);
@@ -219,13 +238,13 @@ export default class Utility {
      *
      * @returns array of integers (indices) like [11,12,13,14,12,16]
      */
-    public static getIndices(strInput: string): (number | null)[] | null {
+    public static getIndices(strInput: string): (number | null)[] | undefined {
         let indices: (number | null)[] = [];
-        let splitted: string[] = strInput.split(' ');
+        const splitted: string[] = strInput.split(' ');
         for (const str of splitted) {
-            let ints: (number | null)[] | null = this.rangeStringToArray(str);
+            const ints: (number | null)[] | null = this.rangeStringToArray(str);
             if (ints === null) {
-                return null; // signal failure
+                return undefined; // signal failure
             }
             indices = indices.concat(ints);
         }
@@ -291,13 +310,14 @@ export default class Utility {
      *
      * @returns array of numbers
     */
-    public static numberingJSONToArray(numberingJSON: any): (number | null)[] | null {
-        if (numberingJSON === null) return null;
-        if (typeof numberingJSON === 'string') {
+    public static numberingJSONToArray(numberingJSON?: string): (number | null)[] | undefined {
+        if (numberingJSON === undefined) return undefined;
+        else { // if (typeof numberingJSON === 'string') {
             return this.getIndices(numberingJSON);
-        } else if (typeof numberingJSON === 'object') {
-            return numberingJSON;
         }
-        return numberingJSON;
+        //  else if (typeof numberingJSON === 'object') {
+        //     return numberingJSON;
+        // }
+        // return numberingJSON;
     }
 }

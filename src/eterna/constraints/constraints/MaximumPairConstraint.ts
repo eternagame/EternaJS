@@ -1,15 +1,16 @@
 import {UndoBlockParam} from 'eterna/UndoBlock';
-import EPars from 'eterna/EPars';
+import EPars, {RNAPaint} from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
+import Assert from 'flashbang/util/Assert';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 
 enum Pair {
-    GC = EPars.RNABASE_GC_PAIR,
-    AU = EPars.RNABASE_AU_PAIR,
-    GU = EPars.RNABASE_GU_PAIR,
-    ANY = EPars.RNABASE_PAIR
+    GC = RNAPaint.GC_PAIR,
+    AU = RNAPaint.AU_PAIR,
+    GU = RNAPaint.GU_PAIR,
+    ANY = RNAPaint.PAIR
 }
 
 const PAIR_PARAM_MAP = new Map<Pair, UndoBlockParam>(
@@ -37,7 +38,10 @@ abstract class MaximumPairConstraint extends Constraint<MaxPairConstraintStatus>
 
     public evaluate(context: ConstraintContext): MaxPairConstraintStatus {
         // TODO: Multistate?
-        const currentPairs: number = context.undoBlocks[0].getParam(PAIR_PARAM_MAP.get(this.pairType));
+        // AMW: This is non-null by definition.
+        const param = PAIR_PARAM_MAP.get(this.pairType);
+        Assert.assertIsDefined(param);
+        const currentPairs: number = context.undoBlocks[0].getParam(param) as number;
         return {
             satisfied: (
                 currentPairs <= this.maxPairs
@@ -50,7 +54,7 @@ abstract class MaximumPairConstraint extends Constraint<MaxPairConstraintStatus>
         status: MaxPairConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
-        let tooltip = ConstraintBox.createTextStyle();
+        const tooltip = ConstraintBox.createTextStyle();
 
         if (forMissionScreen) {
             tooltip.pushStyle('altTextMain');

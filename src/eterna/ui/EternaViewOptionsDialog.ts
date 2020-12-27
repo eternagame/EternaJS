@@ -1,6 +1,6 @@
-import {Point, Graphics, interaction} from 'pixi.js';
+import {Point, Graphics} from 'pixi.js';
 import {
-    VLayoutContainer, HAlign, Setting, HLayoutContainer, VAlign, DisplayUtil, Flashbang, Assert, MathUtil
+    VLayoutContainer, HAlign, Setting, HLayoutContainer, VAlign, DisplayUtil, Flashbang, Assert
 } from 'flashbang';
 import Eterna from 'eterna/Eterna';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -8,6 +8,7 @@ import Dialog from './Dialog';
 import GameButton from './GameButton';
 import GameCheckbox from './GameCheckbox';
 import GamePanel, {GamePanelType} from './GamePanel';
+import VScrollBox from './VScrollBox';
 
 export enum EternaViewOptionsMode {
     PUZZLE = 0, PUZZLEMAKER, LAB
@@ -24,18 +25,19 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
 
         const showShortcuts = !Eterna.MOBILE_APP;
 
-        let settingsLayout: VLayoutContainer = new VLayoutContainer(15, HAlign.LEFT);
+        const settingsLayout: VLayoutContainer = new VLayoutContainer(15, HAlign.LEFT);
 
-        let bind = (setting: Setting<boolean>, name: string) => {
+        const bind = (setting: Setting<boolean>, name: string) => {
             this.addObject(EternaViewOptionsDialog.createCheckbox(name, setting), settingsLayout);
         };
 
-        bind(Eterna.settings.showNumbers, `Show nucleotides numbers${showShortcuts ? ' (N)' : ''}`);
-        bind(Eterna.settings.showLetters, 'Show nucleotides letters');
+        bind(Eterna.settings.showNumbers, `Show nucleotide numbers${showShortcuts ? ' (N)' : ''}`);
+        bind(Eterna.settings.showLetters, 'Show nucleotide letters');
         bind(Eterna.settings.displayFreeEnergies, `Display free energies for all structures${showShortcuts ? ' (G)' : ''}`);
         bind(Eterna.settings.highlightRestricted, 'Highlight restricted sequences');
         bind(Eterna.settings.showChat, 'In-game chat');
         bind(Eterna.settings.simpleGraphics, `Use simpler, less animated graphics${showShortcuts ? ' (,)' : ''}`);
+        bind(Eterna.settings.usePuzzlerLayout, `Use clash-free layout for big structures${showShortcuts ? ' (L)' : ''}`);
         if (!Eterna.MOBILE_APP) {
             // NOTE(johannes): At the time of writing, auto-hide toolbar does not work with a touchscreen,
             // this option can be re-added once that works.
@@ -43,10 +45,6 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
         }
         if (this._optionsMode !== EternaViewOptionsMode.PUZZLEMAKER) {
             bind(Eterna.settings.freezeButtonAlwaysVisible, 'Freeze button always visible');
-        }
-
-        if (this._optionsMode !== EternaViewOptionsMode.PUZZLE) {
-            bind(Eterna.settings.multipleFoldingEngines, 'Multiple folding engines');
         }
 
         if (this._optionsMode === EternaViewOptionsMode.LAB) {
@@ -57,7 +55,7 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
 
         const NUM_VOLUME_BUTTONS = 5;
 
-        let soundButtonLayout = new HLayoutContainer(4);
+        const soundButtonLayout = new HLayoutContainer(4);
         settingsLayout.addChild(soundButtonLayout);
 
         this._muteButton = new GameButton().allStates(Bitmaps.AudioNormal);
@@ -73,7 +71,7 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
         this.addObject(this._muteButton, soundButtonLayout);
 
         for (let ii = 0; ii < NUM_VOLUME_BUTTONS; ++ii) {
-            let volumeButton = new GameButton().allStates(Bitmaps.Audio_Vol_On);
+            const volumeButton = new GameButton().allStates(Bitmaps.Audio_Vol_On);
             volumeButton.display.scale = new Point(0.3, 0.3);
             volumeButton.downSound = null;
             volumeButton.clicked.connect(() => {
@@ -106,36 +104,25 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
         this._panel.title = 'Settings';
         this.addObject(this._panel, this.container);
 
-        this.container.addChild(this._viewLayout);
-
-        this._panelMask = new Graphics();
-        this._panelMask.interactive = true;
-        this._panel.container.addChild(this._panelMask);
-        this._viewLayout.mask = this._panelMask;
-
-        this._panelMask
-            .on('pointerdown', this.maskPointerDown.bind(this))
-            .on('pointerup', this.maskPointerUp.bind(this))
-            .on('pointerupoutside', this.maskPointerUp.bind(this))
-            .on('pointermove', this.maskPointerMove.bind(this));
+        const scrollBox = new VScrollBox(0, 0);
+        this.addObject(scrollBox, this.container);
+        scrollBox.content.addChild(this._viewLayout);
 
         const closeButton = new GameButton()
             .allStates(Bitmaps.ImgAchievementsClose);
         this.addObject(closeButton, this.container);
         closeButton.clicked.connect(() => this.close(null));
 
-        let updateLocation = () => {
+        const updateLocation = () => {
+            Assert.assertIsDefined(Flashbang.stageHeight);
             const idealHeight = this._viewLayout.height + 40 + this._panel.titleHeight;
             const maxHeight = Flashbang.stageHeight * 0.8;
             const panelHeight = Math.min(idealHeight, maxHeight);
-            this._panel.setSize(this._viewLayout.width + 40, panelHeight);
 
-            this._panelMask.clear();
-            this._panelMask.beginFill(0x00FF00, 0);
-            this._panelMask.drawRect(
-                0, this._panel.titleHeight, this._viewLayout.width + 40, panelHeight - this._panel.titleHeight
-            );
-            this._panelMask.endFill();
+            scrollBox.setSize(this._viewLayout.width, panelHeight - 40 - this._panel.titleHeight);
+            scrollBox.doLayout();
+
+            this._panel.setSize(this._viewLayout.width + 40, panelHeight);
 
             DisplayUtil.positionRelativeToStage(
                 this._panel.display,
@@ -144,10 +131,9 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
             );
 
             DisplayUtil.positionRelative(
-                this._viewLayout, HAlign.CENTER, VAlign.TOP,
+                scrollBox.display, HAlign.CENTER, VAlign.TOP,
                 this._panel.display, HAlign.CENTER, VAlign.TOP, 0, this._panel.titleHeight + 10
             );
-            this._viewLayoutTop = this._viewLayout.y;
 
             DisplayUtil.positionRelative(
                 closeButton.display, HAlign.RIGHT, VAlign.TOP,
@@ -175,87 +161,25 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
 
         this._muteButton.allStates(mute ? Bitmaps.AudioMute : Bitmaps.AudioNormal);
 
-        let numVolumeButtons = this._volumeButtons.length;
+        const numVolumeButtons = this._volumeButtons.length;
         for (let ii = 0; ii < numVolumeButtons; ++ii) {
-            let volumeButton = this._volumeButtons[ii];
-            let on = !mute && volume >= (ii + 1) / numVolumeButtons;
+            const volumeButton = this._volumeButtons[ii];
+            const on = !mute && volume >= (ii + 1) / numVolumeButtons;
             volumeButton.allStates(on ? Bitmaps.Audio_Vol_On : Bitmaps.Audio_Vol_Off);
         }
     }
 
     private static createCheckbox(title: string, setting: Setting<boolean>): GameCheckbox {
-        let checkbox = new GameCheckbox(18, title);
+        const checkbox = new GameCheckbox(18, title);
         checkbox.toggled.value = setting.value;
         checkbox.regs.add(setting.connect(checkbox.toggled.slot));
         checkbox.regs.add(checkbox.toggled.connect(setting.slot));
         return checkbox;
     }
 
-    private maskPointerDown(event: interaction.InteractionEvent) {
-        this._dragging = true;
-        this._dragPointData = event.data;
-        this._dragStartBoxY = this._viewLayout.y;
-        this._dragStartPointY = event.data.getLocalPosition(this._panelMask).y;
-    }
-
-    private maskPointerUp(event: interaction.InteractionEvent) {
-        this._dragging = false;
-        this._dragPointData = null;
-        this._dragStartBoxY = 0;
-        this._dragStartPointY = 0;
-    }
-
-    private maskPointerMove(event: interaction.InteractionEvent) {
-        if (this._dragging) {
-            const dragRange = this._dragPointData.getLocalPosition(this._panelMask).y - this._dragStartPointY;
-            this.scrollTo(this._dragStartBoxY + dragRange);
-        }
-    }
-
-    public onMouseWheelEvent(e: WheelEvent): boolean {
-        let pxdelta: number;
-        switch (e.deltaMode) {
-            case WheelEvent.DOM_DELTA_PIXEL:
-                pxdelta = e.deltaY;
-                break;
-            case WheelEvent.DOM_DELTA_LINE:
-                // 13 -> body font size
-                pxdelta = e.deltaY * 13;
-                break;
-            case WheelEvent.DOM_DELTA_PAGE:
-                pxdelta = e.deltaY * this.display.height;
-                break;
-            default:
-                throw new Error('Unhandled scroll delta mode');
-        }
-
-        this.scrollTo(this._viewLayout.y - pxdelta);
-
-        return true;
-    }
-
-    public scrollTo(yPos: number) {
-        const scrollHeight = this._panelMask.height;
-        const containerHeight = this._viewLayout.height + 20; // Add a bit of margin
-        if (containerHeight > scrollHeight) {
-            this._viewLayout.y = MathUtil.clamp(
-                yPos,
-                this._viewLayoutTop - (containerHeight - scrollHeight),
-                this._viewLayoutTop
-            );
-        }
-    }
-
     private _panel: GamePanel;
     private _viewLayout: VLayoutContainer;
-    private _viewLayoutTop: number;
-    private _panelMask: Graphics;
     private readonly _optionsMode: EternaViewOptionsMode;
     private _muteButton: GameButton;
     private _volumeButtons: GameButton[] = [];
-
-    private _dragging = false;
-    private _dragPointData: interaction.InteractionData = null;
-    private _dragStartPointY = 0;
-    private _dragStartBoxY = 0;
 }

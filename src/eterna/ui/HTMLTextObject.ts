@@ -1,12 +1,15 @@
 import {DOMObject} from 'flashbang';
 import Eterna from 'eterna/Eterna';
+import {FontWeight} from 'flashbang/util/TextBuilder';
+import Utility from 'eterna/util/Utility';
 
 /** A <p> object in the DOM that contains the given HTML. Floats on top of the PIXI canvas. */
 export default class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
-    constructor(htmlText: string, width?: number, domParent?: string | HTMLElement) {
+    constructor(htmlText: string, width?: number, domParent?: string | HTMLElement, markup: boolean = false) {
         super(domParent ?? Eterna.OVERLAY_DIV_ID, document.createElement('p'));
-        this._obj.innerHTML = htmlText;
+        this._obj.innerHTML = Utility.sanitizeAndMarkup(htmlText, markup);
         this._obj.style.margin = '0px';
+        this._obj.style.overflowWrap = 'break-word';
         if (width) {
             this.width = width;
         } else {
@@ -21,7 +24,7 @@ export default class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
     }
 
     public lineHeight(percentOrString: number | string): HTMLTextObject {
-        let lineHeight: string = (typeof (percentOrString) === 'number')
+        const lineHeight: string = (typeof (percentOrString) === 'number')
             ? `${Math.floor(percentOrString * 100)}%`
             : percentOrString;
         DOMObject.applyStyleRecursive(this._obj, {'line-height': lineHeight}, false, HTMLTextObject.STYLE_NODE_NAMES);
@@ -60,7 +63,7 @@ export default class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
     }
 
     public bold(): HTMLTextObject {
-        return this.fontWeight('bold');
+        return this.fontWeight(FontWeight.BOLD);
     }
 
     public hAlign(align: 'left' | 'center' | 'right' | 'justify'): HTMLTextObject {

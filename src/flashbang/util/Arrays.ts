@@ -7,17 +7,11 @@ export default class Arrays {
             return false;
         }
 
-        for (let ii = 0; ii < a.length; ++ii) {
-            if (a[ii] !== b[ii]) {
-                return false;
-            }
-        }
-
-        return true;
+        return a.every((value, index) => value === b[index]);
     }
 
     public static swap<T>(array: T[], i: number, j: number): void {
-        let temp = array[i];
+        const temp = array[i];
         array[i] = array[j];
         array[j] = temp;
     }

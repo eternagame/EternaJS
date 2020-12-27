@@ -33,7 +33,7 @@ export default class RScriptOpTree {
 
         if (this._curptr instanceof ROPWait) {
             this._curptr.exec();
-            let waitRet: RScriptOp = this._curptr.getPauseNext();
+            const waitRet: RScriptOp = this._curptr.getPauseNext();
             if (waitRet !== this._curptr && this._curptr.isPaused() && waitRet instanceof ROPWait) {
                 // If the next instruction can be executed (as determined by ROPWait),
                 // then execute it.
@@ -52,13 +52,13 @@ export default class RScriptOpTree {
             }
         }
 
-        let ret: RScriptOp = this._curptr;
+        const ret: RScriptOp = this._curptr;
         this._curptr = this._curptr.next();
         return ret;
     }
 
     private checkWaitQueueContinue(): boolean {
-        for (let op of this._waitQueue) {
+        for (const op of this._waitQueue) {
             if (op.isPaused()) {
                 return false;
             }

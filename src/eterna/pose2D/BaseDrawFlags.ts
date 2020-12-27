@@ -23,7 +23,7 @@ export default class BaseDrawFlags {
 
     /** Fluent builder functions */
     public static builder(initialFlags: number = 0): BaseDrawFlags {
-        let out: BaseDrawFlags = new BaseDrawFlags();
+        const out: BaseDrawFlags = new BaseDrawFlags();
         out._flags = initialFlags;
         return out;
     }

@@ -19,23 +19,23 @@ export default class Deferred<T> {
             throw new Error("Can't resolve sealed promise");
         }
 
-        let fn = this._resolve;
+        const fn = this._resolve;
         // this._resolve = null;
         // this._reject = null;
         fn(value);
     }
 
-    public reject(reason?: any): void {
+    public reject(reason?: Error): void {
         if (this.isSealed) {
             throw new Error("Can't reject sealed promise");
         }
 
-        let fn = this._reject;
+        const fn = this._reject;
         // this._resolve = null;
         // this._reject = null;
         fn(reason);
     }
 
     private _resolve: (value?: PromiseLike<T> | T) => void;
-    private _reject: (reason?: any) => void;
+    private _reject: (reason?: Error) => void;
 }

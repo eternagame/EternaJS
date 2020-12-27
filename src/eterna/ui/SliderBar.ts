@@ -30,8 +30,8 @@ export default class SliderBar extends ContainerObject {
 
         this._currentVal = 1;
 
-        let barPointerTarget = new DisplayObjectPointerTarget(this._barRect);
-        let linePointerTarget = new DisplayObjectPointerTarget(this._sliderLine);
+        const barPointerTarget = new DisplayObjectPointerTarget(this._barRect);
+        const linePointerTarget = new DisplayObjectPointerTarget(this._sliderLine);
 
         barPointerTarget.pointerDown.connect(() => this.onMouseDown());
         linePointerTarget.pointerDown.connect(() => this.onSliderLineClicked());
@@ -49,6 +49,10 @@ export default class SliderBar extends ContainerObject {
 
     public getProgress(): number {
         return this._currentVal;
+    }
+
+    public get height(): number {
+        return this._height;
     }
 
     public setProgress(prog: number): void {
@@ -90,12 +94,12 @@ export default class SliderBar extends ContainerObject {
     private onMouseDown(): void {
         this._draggerRef.destroyObject();
 
-        let dragger = new Dragger();
+        const dragger = new Dragger();
         this._draggerRef = this.addObject(dragger);
 
         dragger.dragComplete.connect(() => dragger.destroySelf());
         dragger.dragged.connect(() => {
-            let mouse = this.container.toLocal(new Point(dragger.curX, dragger.curY));
+            const mouse = this.container.toLocal(new Point(dragger.curX, dragger.curY));
             if (this._vertical) {
                 if (mouse.y < 0) {
                     this._currentVal = 0;
@@ -128,7 +132,7 @@ export default class SliderBar extends ContainerObject {
 
     private onSliderLineClicked(): void {
         Assert.assertIsDefined(Flashbang.globalMouse);
-        let mouse = this.container.toLocal(Flashbang.globalMouse);
+        const mouse = this.container.toLocal(Flashbang.globalMouse);
 
         if (this._vertical) {
             if (this._height > 0) {

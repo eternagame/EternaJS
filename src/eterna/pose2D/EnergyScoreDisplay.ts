@@ -2,6 +2,7 @@ import MultiStyleText from 'pixi-multistyle-text';
 import {Container, Graphics, Point} from 'pixi.js';
 import {VLayoutContainer, HAlign} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
+import {FontWeight} from 'flashbang/util/TextBuilder';
 
 export default class EnergyScoreDisplay extends Container {
     public static grey(text: string): string {
@@ -26,11 +27,11 @@ export default class EnergyScoreDisplay extends Container {
         this.addChild(this._bg);
         this.updateBG();
 
-        let textLayout: VLayoutContainer = new VLayoutContainer(2, HAlign.LEFT);
+        const textLayout: VLayoutContainer = new VLayoutContainer(2, HAlign.LEFT);
 
         this._labelText = new MultiStyleText('Total', {
             default: {
-                fontFamily: Fonts.STDFONT_REGULAR,
+                fontFamily: Fonts.STDFONT,
                 fontSize: 11,
                 fill: 0xffffff
             },
@@ -42,7 +43,8 @@ export default class EnergyScoreDisplay extends Container {
 
         this._energyText = new MultiStyleText('5.2 kcal', {
             default: {
-                fontFamily: Fonts.STDFONT_MEDIUM,
+                fontFamily: Fonts.STDFONT,
+                fontWeight: FontWeight.SEMIBOLD,
                 fontSize: 13,
                 fill: 0xffffff
             },

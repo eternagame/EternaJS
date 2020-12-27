@@ -5,7 +5,7 @@ import {Signal} from 'signals';
 import {
     ContainerObject, KeyboardListener, Enableable, StyledTextBuilder, KeyCode, InputUtil, KeyboardEventType, Assert
 } from 'flashbang';
-import EPars from 'eterna/EPars';
+import EPars, {RNABase, RNAPaint} from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import Fonts from 'eterna/util/Fonts';
@@ -13,21 +13,21 @@ import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import ROPWait from 'eterna/rscript/ROPWait';
 import Tooltips from './Tooltips';
 
-type InteractionEvent = PIXI.interaction.InteractionEvent;
+type InteractionEvent = PIXI.InteractionEvent;
 
 export enum PaletteTargetType {
     A = 0, U, G, C, AU, UG, GC
 }
 
-export function GetPaletteTargetBaseType(type: PaletteTargetType): number {
+export function GetPaletteTargetBaseType(type: PaletteTargetType): RNABase | RNAPaint {
     switch (type) {
-        case PaletteTargetType.A: return EPars.RNABASE_ADENINE;
-        case PaletteTargetType.U: return EPars.RNABASE_URACIL;
-        case PaletteTargetType.G: return EPars.RNABASE_GUANINE;
-        case PaletteTargetType.C: return EPars.RNABASE_CYTOSINE;
-        case PaletteTargetType.AU: return EPars.RNABASE_AU_PAIR;
-        case PaletteTargetType.UG: return EPars.RNABASE_GU_PAIR;
-        case PaletteTargetType.GC: return EPars.RNABASE_GC_PAIR;
+        case PaletteTargetType.A: return RNABase.ADENINE;
+        case PaletteTargetType.U: return RNABase.URACIL;
+        case PaletteTargetType.G: return RNABase.GUANINE;
+        case PaletteTargetType.C: return RNABase.CYTOSINE;
+        case PaletteTargetType.AU: return RNAPaint.AU_PAIR;
+        case PaletteTargetType.UG: return RNAPaint.GU_PAIR;
+        case PaletteTargetType.GC: return RNAPaint.GC_PAIR;
         default: return Assert.unreachable(type);
     }
 }
@@ -54,7 +54,7 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
     public readonly targetClicked: Signal<PaletteTargetType> = new Signal();
 
     private static createTooltip(text: string): StyledTextBuilder {
-        let builder = new StyledTextBuilder(Tooltips.DEFAULT_STYLE);
+        const builder = new StyledTextBuilder(Tooltips.DEFAULT_STYLE);
         EPars.addLetterStyles(builder);
         builder.append(text);
         return builder;
@@ -76,11 +76,11 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
         this._selection = new Sprite();
         this.container.addChild(this._selection);
 
-        this._numAU = Fonts.arial('', 12).color(0xffffff).bold().build();
+        this._numAU = Fonts.std('', 12).color(0xffffff).bold().build();
         this.container.addChild(this._numAU);
-        this._numUG = Fonts.arial('', 12).color(0xffffff).bold().build();
+        this._numUG = Fonts.std('', 12).color(0xffffff).bold().build();
         this.container.addChild(this._numUG);
-        this._numGC = Fonts.arial('', 12).color(0xffffff).bold().build();
+        this._numGC = Fonts.std('', 12).color(0xffffff).bold().build();
         this.container.addChild(this._numGC);
 
         this._targets = new Array(7);
@@ -226,7 +226,7 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
     }
 
     public clickTarget(type: PaletteTargetType): void {
-        let target: PaletteTarget = this._targets[type];
+        const target: PaletteTarget = this._targets[type];
         if (!target.enabled) {
             return;
         }
@@ -243,15 +243,15 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
     public setPairCounts(au: number, ug: number, gc: number): void {
         if (this._targets[PaletteTargetType.AU].enabled) {
             this._numAU.text = au.toString();
-            this._numAU.position = new Point(51 - this._numAU.width, 1);
+            this._numAU.position = new Point(51 - 4 - 0.50 * this._numAU.width, 1);
         }
         if (this._targets[PaletteTargetType.UG].enabled) {
             this._numUG.text = ug.toString();
-            this._numUG.position = new Point(101 - this._numUG.width, 1);
+            this._numUG.position = new Point(100 - 4 - 0.50 * this._numUG.width, 1);
         }
         if (this._targets[PaletteTargetType.GC].enabled) {
             this._numGC.text = gc.toString();
-            this._numGC.position = new Point(149 - this._numGC.width, 1);
+            this._numGC.position = new Point(149 - 4 - 0.50 * this._numGC.width, 1);
         }
     }
 
@@ -276,7 +276,7 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
         }
 
         e.data.getLocalPosition(this.display, NucleotidePalette.P);
-        let target: PaletteTarget | null = this.getTargetAt(NucleotidePalette.P.x, NucleotidePalette.P.y);
+        const target: PaletteTarget | null = this.getTargetAt(NucleotidePalette.P.x, NucleotidePalette.P.y);
         if (target != null) {
             this.clickTarget(target.type);
         }
@@ -284,12 +284,12 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
 
     /** Returns the enabled target whose hitbox contains the given location */
     private getTargetAt(localX: number, localY: number): PaletteTarget | null {
-        for (let target of this._targets) {
+        for (const target of this._targets) {
             if (!target.enabled) {
                 continue;
             }
 
-            for (let hitbox of target.hitboxes) {
+            for (const hitbox of target.hitboxes) {
                 if (hitbox.contains(localX, localY)) {
                     return target;
                 }
@@ -305,7 +305,7 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
         }
 
         e.data.getLocalPosition(this.display, NucleotidePalette.P);
-        let target: PaletteTarget | null = this.getTargetAt(NucleotidePalette.P.x, NucleotidePalette.P.y);
+        const target: PaletteTarget | null = this.getTargetAt(NucleotidePalette.P.x, NucleotidePalette.P.y);
 
         if (target !== this._lastTooltipTarget) {
             Assert.assertIsDefined(Tooltips.instance);
@@ -341,10 +341,9 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
     private readonly _targets: PaletteTarget[];
 
     private static readonly P = new Point();
-    private static readonly R = new Rectangle();
 }
 
-class PaletteTarget {
+export class PaletteTarget {
     public readonly type: PaletteTargetType;
     public readonly id: RScriptUIElementID;
     public readonly isPair: boolean;

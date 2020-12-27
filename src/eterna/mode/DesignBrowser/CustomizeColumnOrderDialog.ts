@@ -1,4 +1,6 @@
-import {Container, Point, Text} from 'pixi.js';
+import {
+    Container, Point, Text, Graphics
+} from 'pixi.js';
 import {Signal} from 'signals';
 import Dialog from 'eterna/ui/Dialog';
 import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
@@ -10,10 +12,13 @@ import GraphicsUtil from 'eterna/util/GraphicsUtil';
 import FixedWidthTextField from 'eterna/ui/FixedWidthTextField';
 import Fonts from 'eterna/util/Fonts';
 import Bitmaps from 'eterna/resources/Bitmaps';
+import GameCheckbox from 'eterna/ui/GameCheckbox';
 import {DesignCategory} from './DesignBrowserMode';
+import ButtonWithIcon from './ButtonWithIcon';
 
 export default class CustomizeColumnOrderDialog extends Dialog<void> {
     public readonly columnsReorganized = new Signal<DesignCategory[]>();
+    public readonly selectedFilterUpdate = new Signal<boolean>();
 
     constructor(
         allCategories: DesignCategory[],
@@ -29,41 +34,62 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
     protected added(): void {
         super.added();
 
-        this._bg = new GamePanel(GamePanelType.NORMAL, 1.0, 0x152843, 0.27, 0xC0DCE7);
+        this._bg = new GamePanel(GamePanelType.NORMAL, 1.0, 0x043468, 1, 0x4A90E2);
+        this._bg.title = 'CONFIGURE COLUMNS';
         this.addObject(this._bg, this.container);
 
         this._panelContent = new VLayoutContainer(0, HAlign.CENTER);
         this.container.addChild(this._panelContent);
 
-        this._columnUILayout = new VLayoutContainer();
-        let addCriterionLayout = new HLayoutContainer(2);
+        this._columnUILayout = new VLayoutContainer(4);
+        const addCriterionLayout = new HLayoutContainer(2);
+        addCriterionLayout.position.x = 10;
+        this._panelContent.addVSpacer(30);
         this._panelContent.addChild(this._columnUILayout);
-        this._panelContent.addVSpacer(10);
-        this._panelContent.addChild(addCriterionLayout);
+        this._panelContent.addVSpacer(20);
 
         // ADD CRITERION LAYOUT
-        this._prevCategoryButton = new GameButton().allStates(GraphicsUtil.drawLeftTriangle(2));
+        const criterionContainer = new Container();
+        criterionContainer.addChild(new Graphics()
+            .beginFill(0x19508D)
+            .drawRoundedRect(0, -6, 316, 33, 6)
+            .endFill());
+        criterionContainer.addChild(addCriterionLayout);
+
+        this._panelContent.addChild(criterionContainer);
+        this._prevCategoryButton = new GameButton().allStates(
+            GraphicsUtil.drawLeftTriangle(2, 0x2F94D1)
+        );
         this._prevCategoryButton.clicked.connect(() => this.offsetCurCategoryIdx(-1));
         this.addObject(this._prevCategoryButton, addCriterionLayout);
 
         this._curCategoryText = new FixedWidthTextField(
             this._allColumnCategories[0],
-            Fonts.arial('', 17).color(0xffffff).style,
+            Fonts.std('', 17).bold().color(0xffffff).style,
             140, HAlign.CENTER
         );
         addCriterionLayout.addChild(this._curCategoryText);
 
-        this._nextCategoryButton = new GameButton().allStates(GraphicsUtil.drawRightTriangle(2));
+        this._nextCategoryButton = new GameButton().allStates(GraphicsUtil.drawRightTriangle(2, 0x2F94D1));
         this._nextCategoryButton.clicked.connect(() => this.offsetCurCategoryIdx(1));
         this.addObject(this._nextCategoryButton, addCriterionLayout);
 
-        addCriterionLayout.addHSpacer(10);
+        addCriterionLayout.addHSpacer(20);
 
-        this._addCriterionButton = new GameButton().label('Add', 15);
+        this._addCriterionButton = new ButtonWithIcon({
+            icon: Bitmaps.ImgAdd,
+            text: {text: 'Add', size: 12},
+            frame: null
+        });
         this._addCriterionButton.clicked.connect(() => this.addCurrentCriteria());
         this.addObject(this._addCriterionButton, addCriterionLayout);
 
-        let resetButton = new GameButton().label('Reset', 15);
+        addCriterionLayout.addHSpacer(10);
+        const resetButton = new ButtonWithIcon({
+            icon: Bitmaps.ImgResetCriteria,
+            text: {text: 'Reset', size: 12},
+            frame: null
+        });
         resetButton.clicked.connect(() => this.reset());
         this.addObject(resetButton, addCriterionLayout);
 
@@ -71,9 +97,22 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
 
         this._panelContent.addVSpacer(20);
 
-        let okButton = new GameButton().label('Ok', 20);
-        okButton.clicked.connect(() => this.close());
-        this.addObject(okButton, this._panelContent);
+        this._currentSelectedFilterCheckbox = new GameCheckbox(12, 'Only show designs selected with control+click');
+        this._currentSelectedFilterCheckbox.toggled.connect((e) => {
+            this.selectedFilterUpdate.emit(e);
+        });
+        this.addObject(this._currentSelectedFilterCheckbox, this._panelContent);
+
+        this._panelContent.addVSpacer(20);
+
+        const saveButton = new GameButton()
+            .label('Save', 16)
+            .customStyleBox(new Graphics()
+                .beginFill(0x54B54E)
+                .drawRoundedRect(0, 0, 80, 36, 6)
+                .endFill());
+        saveButton.clicked.connect(() => this.close());
+        this.addObject(saveButton, this._panelContent);
 
         // EXISTING SORT CRITERIA
         if (this._initialColumns !== null) {
@@ -89,11 +128,11 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
     }
 
     private addColumnUI(category: DesignCategory, idx: number): void {
-        let ui = new ColumnUI(category);
+        const ui = new ColumnUI(category);
         this._columnUILayout.addChild(ui.container);
         Arrays.addAt(this._columnUIs, ui, idx);
 
-        ui.categoryText = Fonts.arial(category, 14).color(0xffffff).build();
+        ui.categoryText = Fonts.std(category, 14).bold().color(0xffffff).build();
         ui.categoryText.position = new Point(10, 0);
         ui.categoryText.alpha = this.isDisabled(category) ? 0.3 : 1;
         ui.container.addChild(ui.categoryText);
@@ -108,10 +147,16 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
         ui.moveDownButton.display.position = new Point(300, 5);
         this.addObject(ui.moveDownButton, ui.container);
 
-        ui.removeButton = new GameButton().allStates(Bitmaps.CancelImg);
+        ui.removeButton = new GameButton().allStates(Bitmaps.ImgRemove);
         ui.removeButton.clicked.connect(() => this.removeColumn(category));
         ui.removeButton.display.position = new Point(320, 5);
         this.addObject(ui.removeButton, ui.container);
+
+        // Separator line
+        ui.container.addChild(new Graphics()
+            .lineStyle(1, 0x4A90E2)
+            .moveTo(8, 24)
+            .lineTo(336, 24));
     }
 
     private getColumnIdx(category: DesignCategory): number {
@@ -127,7 +172,7 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
     }
 
     private addColumn(category: DesignCategory): void {
-        let curIdx = this.getColumnIdx(category);
+        const curIdx = this.getColumnIdx(category);
         if (curIdx >= 0) {
             this.setCriteriaIdx(category, 0);
         } else {
@@ -141,7 +186,7 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
     }
 
     private removeColumn(category: DesignCategory): void {
-        let idx = this.getColumnIdx(category);
+        const idx = this.getColumnIdx(category);
         if (idx < 0) {
             throw new Error(`Can't find sort_category ${category}`);
         }
@@ -156,7 +201,7 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
     }
 
     private reset(): void {
-        for (let ui of this._columnUIs) {
+        for (const ui of this._columnUIs) {
             ui.destroy();
         }
         this._columnUIs = [];
@@ -180,7 +225,7 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
     }
 
     private validateCurCategoryIdx(): void {
-        let unused = this.getUnusedColumns();
+        const unused = this.getUnusedColumns();
         if (unused.length > 0) {
             this._addColumnCategoryIdx %= unused.length;
             if (this._addColumnCategoryIdx < 0) {
@@ -202,7 +247,7 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
     }
 
     private addCurrentCriteria(): void {
-        let unusedCategories = this.getUnusedColumns();
+        const unusedCategories = this.getUnusedColumns();
         if (unusedCategories.length > 0) {
             this.addColumn(unusedCategories[this._addColumnCategoryIdx]);
         }
@@ -214,7 +259,7 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
     }
 
     private setCriteriaIdx(category: DesignCategory, newIdx: number): void {
-        let curIdx = this.getColumnIdx(category);
+        const curIdx = this.getColumnIdx(category);
         if (curIdx < 0) {
             throw new Error(`Can't find sort_category ${category}`);
         }
@@ -230,7 +275,7 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
 
     private layout(): void {
         this._columnUILayout.removeChildren();
-        for (let ui of this._columnUIs) {
+        for (const ui of this._columnUIs) {
             this._columnUILayout.addChild(ui.container);
         }
 
@@ -268,6 +313,11 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
 
     private _columnUIs: ColumnUI[] = [];
     private _addColumnCategoryIdx: number = 0;
+
+    private _currentSelectedFilterCheckbox: GameCheckbox;
+    public set currentSelectedFilterValue(newValue: boolean) {
+        this._currentSelectedFilterCheckbox.toggled.value = newValue;
+    }
 }
 
 class ColumnUI {

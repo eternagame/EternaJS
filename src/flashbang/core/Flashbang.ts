@@ -1,10 +1,9 @@
-import * as PIXI from 'pixi.js';
 import Assert from 'flashbang/util/Assert';
 import {SoundManager} from 'flashbang';
 import FlashbangApp from './FlashbangApp';
 import AppMode from './AppMode';
 
-type InteractionManager = PIXI.interaction.InteractionManager;
+type InteractionManager = PIXI.InteractionManager;
 
 export default class Flashbang {
     public static get app(): FlashbangApp {

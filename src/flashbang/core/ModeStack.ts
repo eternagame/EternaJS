@@ -51,7 +51,7 @@ export default class ModeStack {
      * (Mode changes take effect between game updates.)
      */
     public doModeTransition(type: ModeTransition, mode: AppMode | null = null, index: number = 0): void {
-        let transition: PendingTransition = new PendingTransition();
+        const transition: PendingTransition = new PendingTransition();
         transition.type = type;
         transition.mode = mode;
         transition.index = index;
@@ -151,7 +151,7 @@ export default class ModeStack {
     /** Called when the app is resized */
     public onResized(): void {
         Assert.assertIsDefined(this._modeStack);
-        for (let mode of this._modeStack) {
+        for (const mode of this._modeStack) {
             mode._resizeInternal();
         }
     }
@@ -232,7 +232,7 @@ export default class ModeStack {
             index = MathUtil.clamp(index, 0, this._modeStack.length - 1);
 
             // if the top mode is removed, make sure it's exited first
-            let mode: AppMode = this._modeStack[index];
+            const mode: AppMode = this._modeStack[index];
             if (mode === initialTopMode) {
                 initialTopMode._exitInternal();
                 initialTopMode = null;
@@ -248,7 +248,7 @@ export default class ModeStack {
                 throw new Error("Can't insert a null mode in the mode stack");
             }
 
-            let prevIdx = this._modeStack.indexOf(mode);
+            const prevIdx = this._modeStack.indexOf(mode);
             if (prevIdx < 0) {
                 doInsertMode(mode, newIdx);
             } else {
@@ -272,11 +272,11 @@ export default class ModeStack {
         // create a new _pendingModeTransitionQueue right now
         // so that we can properly handle mode transition requests
         // that occur during the processing of the current queue
-        let transitionQueue = this._pendingModeTransitionQueue;
+        const transitionQueue = this._pendingModeTransitionQueue;
         this._pendingModeTransitionQueue = [];
 
-        for (let transition of transitionQueue) {
-            let {mode} = transition;
+        for (const transition of transitionQueue) {
+            const {mode} = transition;
             switch (transition.type) {
                 case ModeTransition.PUSH:
                     doPushMode(mode);
@@ -325,7 +325,7 @@ export default class ModeStack {
         let hasOpaqueMode = false;
         if (this._modeStack) {
             for (let ii = this._modeStack.length - 1; ii >= 0; --ii) {
-                let mode: AppMode = this._modeStack[ii];
+                const mode: AppMode = this._modeStack[ii];
                 Assert.assertIsDefined(mode.container);
                 mode.container.visible = !hasOpaqueMode;
                 if (mode.isOpaque) {
@@ -334,7 +334,7 @@ export default class ModeStack {
             }
         }
 
-        let newTopMode = this.topMode;
+        const newTopMode = this.topMode;
         if (newTopMode !== initialTopMode) {
             if (initialTopMode != null) {
                 initialTopMode._exitInternal();

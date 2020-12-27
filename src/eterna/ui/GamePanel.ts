@@ -1,5 +1,5 @@
 import {
-    Graphics, Point, Text, Rectangle
+    Graphics, Point, Text
 } from 'pixi.js';
 import Fonts from 'eterna/util/Fonts';
 import BaseGamePanel from './BaseGamePanel';
@@ -81,12 +81,13 @@ export default class GamePanel extends BaseGamePanel {
 
             if (this._title != null) {
                 if (this._titleText == null) {
-                    this._titleText = Fonts.stdBold().fontSize(16).color(0xffffff).build();
+                    this._titleText = Fonts.std().bold().fontSize(16).color(0xffffff)
+                        .build();
                     this.container.addChild(this._titleText);
                 }
 
                 this._titleText.text = this._title.toUpperCase();
-                this._titleText.position = new Point((this._width - this._titleText.width) * 0.5, 6);
+                this._titleText.position = new Point((this._width - this._titleText.width) * 0.5, 10);
                 this._background.beginFill(this._borderColor, this._borderAlpha);
                 this._background
                     .moveTo(0, 35)

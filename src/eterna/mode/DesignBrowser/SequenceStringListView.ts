@@ -7,6 +7,7 @@ import Eterna from 'eterna/Eterna';
 import ExpPainter from 'eterna/ExpPainter';
 import Feedback from 'eterna/Feedback';
 import EternaTextureUtil from 'eterna/util/EternaTextureUtil';
+import SecStruct from 'eterna/rnatypes/SecStruct';
 
 export default class SequenceStringListView extends Container {
     constructor(fontname: string, fontsize: number, fontbold: boolean, letterWidth: number, letterHeight: number) {
@@ -18,7 +19,7 @@ export default class SequenceStringListView extends Container {
         this._graphics = new Graphics();
         this.addChild(this._graphics);
 
-        let textBuilder = new TextBuilder()
+        const textBuilder = new TextBuilder()
             .font(fontname)
             .fontSize(fontsize)
             .color(0xffffff)
@@ -30,12 +31,15 @@ export default class SequenceStringListView extends Container {
             .concat(SequenceStringListView.createLetterBitmaps(textBuilder, 'C'));
     }
 
-    public setSize(width: number, height: number): void {
-        this._width = width;
+    public setSize(height: number): void {
         this._height = height;
     }
 
-    public setSequences(sequences: string[] | null, expData: Feedback[] | null, pairs: number[] | null): void {
+    public setSequences(
+        sequences: string[] | null,
+        expData: (Feedback | null)[] | null,
+        pairs: SecStruct | null
+    ): void {
         this._graphics.clear();
         if (this._content != null) {
             this._content.destroy({children: true});
@@ -49,10 +53,10 @@ export default class SequenceStringListView extends Container {
         this._content = new Container();
         this.addChild(this._content);
 
-        let useExp: boolean = expData != null;
+        const useExp: boolean = expData != null;
 
         for (let ii = 0; ii < sequences.length; ii++) {
-            let seq: string = sequences[ii];
+            const seq: string = sequences[ii];
             let shapeData: number[] | null = null;
             let shapeDataStart = 0;
             let expPainter: ExpPainter | null = null;
@@ -60,18 +64,19 @@ export default class SequenceStringListView extends Container {
             let shapeThreshold = 0;
             let shapeMax = 0;
 
-            if (expData != null && expData[ii] != null) {
-                shapeData = expData[ii].getShapeData();
-                shapeDataStart = expData[ii].getShapeStartIndex();
+            const seqExpData = expData ? expData[ii] : null;
+            if (seqExpData) {
+                shapeData = seqExpData.getShapeData();
+                shapeDataStart = seqExpData.getShapeStartIndex();
             }
 
-            if (shapeData != null && expData != null) {
+            if (shapeData != null && seqExpData) {
                 shapeData = ExpPainter.transformData(
-                    expData[ii].getShapeData(), expData[ii].getShapeMax(), expData[ii].getShapeMin()
+                    seqExpData.getShapeData(), seqExpData.getShapeMax(), seqExpData.getShapeMin()
                 );
                 isThereShapeThreshold = true;
-                shapeThreshold = expData[ii].getShapeThreshold();
-                shapeMax = expData[ii].getShapeMax();
+                shapeThreshold = seqExpData.getShapeThreshold();
+                shapeMax = seqExpData.getShapeMax();
 
                 expPainter = new ExpPainter(shapeData, shapeDataStart);
                 expPainter.continuous = Eterna.settings.useContinuousColors.value;
@@ -80,7 +85,7 @@ export default class SequenceStringListView extends Container {
 
             for (let jj = 0; jj < seq.length; jj++) {
                 if (ii === 0 && expData != null && pairs !== null) {
-                    if (pairs[jj] < 0) {
+                    if (!pairs.isPaired(jj)) {
                         this._graphics.beginFill(0xCCCC00, 0.5);
                     } else {
                         this._graphics.beginFill(0x0000FF, 0.2);
@@ -96,7 +101,7 @@ export default class SequenceStringListView extends Container {
                 }
 
                 let letterIndex = 0;
-                let letter = seq.charAt(jj);
+                const letter = seq.charAt(jj);
 
                 if (letter === 'A') {
                     letterIndex = SequenceStringListView.A_INDEX;
@@ -136,7 +141,7 @@ export default class SequenceStringListView extends Container {
                     bdIndex = letterIndex * SequenceStringListView.NUM_DATA_PER_LETTER + 1 + colorIndex;
                 }
 
-                let letterSprite = new Sprite(this._letterTextures[bdIndex]);
+                const letterSprite = new Sprite(this._letterTextures[bdIndex]);
                 letterSprite.x = jj * this._letterWidth;
                 letterSprite.y = ii * this._letterHeight;
                 this._content.addChild(letterSprite);
@@ -145,12 +150,12 @@ export default class SequenceStringListView extends Container {
     }
 
     private static createLetterBitmaps(textBuilder: TextBuilder, letter: string): Texture[] {
-        let textures: Texture[] = [];
+        const textures: Texture[] = [];
 
-        let tf = textBuilder.text(letter).build();
-        let tfTex = TextureUtil.renderToTexture(tf);
+        const tf = textBuilder.text(letter).build();
+        const tfTex = TextureUtil.renderToTexture(tf);
 
-        let baseColor = EPars.getLetterColor(letter);
+        const baseColor = EPars.getLetterColor(letter);
         textures.push(EternaTextureUtil.colorTransform(
             tfTex,
             baseColor / (256 * 256),
@@ -159,7 +164,7 @@ export default class SequenceStringListView extends Container {
         ));
 
         for (let ii = -ExpPainter.NUM_COLORS; ii <= 2 * ExpPainter.NUM_COLORS + 1; ii++) {
-            let expColor = ExpPainter.getColorByLevel(ii);
+            const expColor = ExpPainter.getColorByLevel(ii);
             textures.push(EternaTextureUtil.colorTransform(
                 tfTex,
                 expColor / (256 * 256),
@@ -178,7 +183,6 @@ export default class SequenceStringListView extends Container {
 
     private _content: Container | null;
 
-    private _width: number;
     private _height: number;
 
     private static readonly NUM_DATA_PER_LETTER = 18;

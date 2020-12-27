@@ -16,7 +16,7 @@ export default class Background extends ContainerObject {
 
         this._bubbles = [];
         for (let ii = 0; ii < this._bubbleCount; ii++) {
-            let bub: Bubble = new Bubble(this._foreground);
+            const bub: Bubble = new Bubble(this._foreground);
             // bub.sprite.visible = false;
             bub.init();
             this.addObject(bub, this.container);
@@ -29,7 +29,7 @@ export default class Background extends ContainerObject {
     }
 
     public disableBubbles(disable: boolean): void {
-        for (let bubble of this._bubbles) {
+        for (const bubble of this._bubbles) {
             if (!disable && !bubble.display.visible) {
                 bubble.init();
             }
@@ -38,7 +38,7 @@ export default class Background extends ContainerObject {
     }
 
     private freezeBubbles(freeze: boolean): void {
-        for (let bubble of this._bubbles) {
+        for (const bubble of this._bubbles) {
             bubble.isPaused = freeze;
         }
     }
@@ -51,21 +51,18 @@ export default class Background extends ContainerObject {
 
     private updateBackground(): void {
         if (Eterna.gameDiv != null) {
-            let lightBlue: string; let
-                darkBlue: string;
             if (this._isFrozen) {
-                lightBlue = 'rgb(67, 93, 146) 0%';
-                darkBlue = 'rgb(10, 43, 87) 70%';
+                const lightBlue = 'rgb(67, 93, 146) 0%';
+                const darkBlue = 'rgb(10, 43, 87) 70%';
+                Eterna.gameDiv.style.backgroundImage = `radial-gradient(ellipse, ${lightBlue}, ${darkBlue})`;
             } else {
-                lightBlue = 'rgb(2, 38, 76) 0%';
-                darkBlue = 'rgb(3, 27, 60) 70%';
+                Eterna.gameDiv.style.backgroundImage = '';
             }
-            Eterna.gameDiv.style.backgroundImage = `radial-gradient(ellipse, ${lightBlue}, ${darkBlue})`;
         }
     }
 
     private onResized(): void {
-        for (let bubble of this._bubbles) {
+        for (const bubble of this._bubbles) {
             bubble.init();
         }
     }

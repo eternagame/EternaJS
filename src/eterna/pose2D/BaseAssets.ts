@@ -2,7 +2,7 @@ import {
     Container, Graphics, Sprite, Texture
 } from 'pixi.js';
 import {ColorUtil, TextureUtil} from 'flashbang';
-import EPars from 'eterna/EPars';
+import {RNABase, RNAPaint} from 'eterna/EPars';
 import ExpPainter from 'eterna/ExpPainter';
 import Sounds from 'eterna/resources/Sounds';
 import BitmapManager from 'eterna/resources/BitmapManager';
@@ -33,7 +33,7 @@ export default class BaseAssets {
     public static getBodyTexture(baseType: number, colorLevel: number, zoomLevel: number, flags: number): Texture {
         if (BaseAssets.isBaseType(baseType) && colorLevel < 0) {
             return BaseAssets.getBaseBitmaps(baseType).getBodyTexture(zoomLevel, flags);
-        } else if (baseType === EPars.RNABASE_LOCK) {
+        } else if (baseType === RNAPaint.LOCK) {
             return BaseAssets.textureForSize(BaseAssets._backboneBodyData, 0, zoomLevel);
         } else if (colorLevel < 0) {
             if (zoomLevel < Base.NUM_ZOOM_LEVELS) {
@@ -118,23 +118,23 @@ export default class BaseAssets {
 
     public static getBaseTypeSound(type: number): string | null {
         switch (type) {
-            case EPars.RNABASE_ADENINE: return Sounds.SoundY;
-            case EPars.RNABASE_URACIL: return Sounds.SoundB;
-            case EPars.RNABASE_GUANINE: return Sounds.SoundR;
-            case EPars.RNABASE_CYTOSINE: return Sounds.SoundG;
+            case RNABase.ADENINE: return Sounds.SoundY;
+            case RNABase.URACIL: return Sounds.SoundB;
+            case RNABase.GUANINE: return Sounds.SoundR;
+            case RNABase.CYTOSINE: return Sounds.SoundG;
             default: return null;
         }
     }
 
     private static getBaseBitmaps(baseType: number): BaseTextures {
         switch (baseType) {
-            case EPars.RNABASE_URACIL:
+            case RNABase.URACIL:
                 return BaseAssets._baseUBitmaps;
-            case EPars.RNABASE_ADENINE:
+            case RNABase.ADENINE:
                 return BaseAssets._baseABitmaps;
-            case EPars.RNABASE_GUANINE:
+            case RNABase.GUANINE:
                 return BaseAssets._baseGBitmaps;
-            case EPars.RNABASE_CYTOSINE:
+            case RNABase.CYTOSINE:
                 return BaseAssets._baseCBitmaps;
             default:
                 throw new Error(`Bad base type: ${baseType}`);
@@ -143,10 +143,10 @@ export default class BaseAssets {
 
     private static isBaseType(baseType: number): boolean {
         switch (baseType) {
-            case EPars.RNABASE_URACIL:
-            case EPars.RNABASE_ADENINE:
-            case EPars.RNABASE_GUANINE:
-            case EPars.RNABASE_CYTOSINE:
+            case RNABase.URACIL:
+            case RNABase.ADENINE:
+            case RNABase.GUANINE:
+            case RNABase.CYTOSINE:
                 return true;
             default:
                 return false;
@@ -211,10 +211,10 @@ export default class BaseAssets {
         EternaTextureUtil.createScaled(BaseAssets._sphereMidData, 0.75, Base.NUM_ZOOM_LEVELS);
 
         // BASE BODY TEXTURES
-        BaseAssets._baseUBitmaps = new BaseTextures(EPars.RNABASE_URACIL);
-        BaseAssets._baseABitmaps = new BaseTextures(EPars.RNABASE_ADENINE);
-        BaseAssets._baseGBitmaps = new BaseTextures(EPars.RNABASE_GUANINE);
-        BaseAssets._baseCBitmaps = new BaseTextures(EPars.RNABASE_CYTOSINE);
+        BaseAssets._baseUBitmaps = new BaseTextures(RNABase.URACIL);
+        BaseAssets._baseABitmaps = new BaseTextures(RNABase.ADENINE);
+        BaseAssets._baseGBitmaps = new BaseTextures(RNABase.GUANINE);
+        BaseAssets._baseCBitmaps = new BaseTextures(RNABase.CYTOSINE);
 
         BaseAssets._backboneBodyData = [BitmapManager.getBitmap(Bitmaps.Backbone)];
         BaseAssets._backboneMidData = [BitmapManager.getBitmap(Bitmaps.BackboneMid)];
@@ -255,24 +255,21 @@ export default class BaseAssets {
     }
 
     public static drawCircularBarcode(radius: number, lineThickness: number, lineAlpha: number): Texture {
-        let scratch = new Graphics();
+        const scratch = new Graphics();
 
         scratch.clear();
-        let centerX: number = radius;
-        let centerY: number = radius;
-        let twoPI: number = 2 * Math.PI;
+        const centerX: number = radius;
+        const centerY: number = radius;
+        const twoPI: number = 2 * Math.PI;
         let xx: number = centerX + Math.cos(0) * radius;
         let yy: number = centerY + Math.sin(0) * radius;
 
         scratch.moveTo(xx, yy);
 
-        let steps = 360;
+        const steps = 360;
 
         for (let i = 1; i <= steps; i++) {
-            let color = 0x0;
-            if (i % 32 < 16) {
-                color = 0xFFFFFF;
-            }
+            const color = (i % 32 < 16) ? 0xFFFFFF : 0x0;
 
             scratch.lineStyle(lineThickness, color, lineAlpha);
             xx = centerX + Math.cos((i / steps) * twoPI) * radius;
@@ -284,12 +281,12 @@ export default class BaseAssets {
     }
 
     public static createSatelliteBitmaps(colorTransform: PIXI.filters.ColorMatrixFilter): Texture[] {
-        let baseImage: Texture = BitmapManager.getBitmap(Bitmaps.Satellite);
-        let sprite = new Sprite(baseImage);
+        const baseImage: Texture = BitmapManager.getBitmap(Bitmaps.Satellite);
+        const sprite = new Sprite(baseImage);
         sprite.filters = [colorTransform];
-        let texture: Texture = TextureUtil.renderToTexture(sprite);
+        const texture: Texture = TextureUtil.renderToTexture(sprite);
 
-        let textures: Texture[] = EternaTextureUtil.createRotated(texture, 5);
+        const textures: Texture[] = EternaTextureUtil.createRotated(texture, 5);
         EternaTextureUtil.createScaled(textures, 0.75, Base.NUM_ZOOM_LEVELS);
 
         return textures;
@@ -300,7 +297,7 @@ export default class BaseAssets {
             throw new Error(`Invalid textures array length ${textures.length}`);
         }
 
-        let origLength: number = textures.length / Base.NUM_ZOOM_LEVELS;
+        const origLength: number = textures.length / Base.NUM_ZOOM_LEVELS;
         return textures[(origLength * sizeNum + ii)];
     }
 

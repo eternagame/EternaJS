@@ -19,12 +19,12 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
     protected added() {
         super.added();
 
-        let bg = new Graphics();
+        const bg = new Graphics();
         this.container.addChild(bg);
 
         // Eat mouse events - make sure any objects created within the dialog should set
         // interactive to true and stop propogation if the event shouldn't be passed through to the bg
-        let bgTarget = new DisplayObjectPointerTarget(bg);
+        const bgTarget = new DisplayObjectPointerTarget(bg);
 
         bgTarget.pointerDown.connect((e) => {
             if (InputUtil.IsLeftMouse(e)) {
@@ -39,13 +39,14 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
         this.regs.add(this.mode.keyboardInput.pushListener(this));
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));
 
-        let updateBG = () => {
+        const updateBG = () => {
             Assert.assertIsDefined(Flashbang.stageWidth);
             Assert.assertIsDefined(Flashbang.stageHeight);
             bg.clear()
-                .beginFill(0x0, this.bgAlpha)
+                .beginFill(0x0)
                 .drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
                 .endFill();
+            bg.alpha = this.bgAlpha;
         };
         updateBG();
         this.regs.add(this.mode.resized.connect(updateBG));
@@ -56,6 +57,8 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
      * Subclasses can override to e.g. close the dialog.
      */
     protected onBGClicked(): void {
+        // Is there a good reason not to enable this?
+        this.close(null);
     }
 
     protected close(value: T | null) {
@@ -76,12 +79,12 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
         return 0.7;
     }
 
-    public onKeyboardEvent(e: KeyboardEvent): boolean {
+    public onKeyboardEvent(_e: KeyboardEvent): boolean {
         // By default, dialogs eat all keyboard input
         return true;
     }
 
-    public onMouseWheelEvent(e: MouseWheelEvent): boolean {
+    public onMouseWheelEvent(_e: MouseWheelEvent): boolean {
         // By default, dialogs eat all mousewheel input
         return true;
     }

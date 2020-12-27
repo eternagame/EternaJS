@@ -20,7 +20,7 @@ export default class Bubble extends SpriteObject implements Updatable {
         } else {
             useBlueBubble = (Math.random() < 0.5);
 
-            let sizeNumber: number = Math.random();
+            const sizeNumber: number = Math.random();
             if (sizeNumber < 0.33) this._bubbleSize = 0;
             else if (sizeNumber < 0.66) this._bubbleSize = 1;
             else this._bubbleSize = 2;
@@ -36,7 +36,7 @@ export default class Bubble extends SpriteObject implements Updatable {
         else if (this._bubbleSize === 2) bubbleType = 6;
         else bubbleType = 7;
 
-        this.display.texture = Texture.fromImage(Bubble.BUBBLE_NAMES[bubbleType]);
+        this.display.texture = Texture.from(Bubble.BUBBLE_NAMES[bubbleType]);
 
         this.autoHide = false;
     }
@@ -90,10 +90,10 @@ export default class Bubble extends SpriteObject implements Updatable {
         }
 
         Assert.assertIsDefined(Flashbang.globalMouse);
-        let mouseLoc = this.display.toLocal(Flashbang.globalMouse, undefined, Bubble.P);
-        let mX = mouseLoc.x - tex.width / 2.0;
-        let mY = mouseLoc.y - tex.height / 2.0;
-        let dist = Math.max(mX * mX + mY * mY, 0.01);
+        const mouseLoc = this.display.toLocal(Flashbang.globalMouse, undefined, Bubble.P);
+        const mX = mouseLoc.x - tex.width / 2.0;
+        const mY = mouseLoc.y - tex.height / 2.0;
+        const dist = Math.max(mX * mX + mY * mY, 0.01);
         if (dist < 10000) {
             if (this._foreground) {
                 this._accX += (-500 * mX * 2) / dist;
@@ -120,8 +120,8 @@ export default class Bubble extends SpriteObject implements Updatable {
             this._accX += NormalDistPRNG.random() * 5;
         }
 
-        let dvx: number = dt * this._accX;
-        let dvy: number = dt * this._accY;
+        const dvx: number = dt * this._accX;
+        const dvy: number = dt * this._accY;
 
         this.display.y += dvy;
         this.display.x += dvx;

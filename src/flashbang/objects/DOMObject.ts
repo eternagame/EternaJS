@@ -1,4 +1,4 @@
-import {DisplayObject, Graphics, Matrix} from 'pixi.js';
+import {Graphics, Matrix} from 'pixi.js';
 import GameObject from 'flashbang/core/GameObject';
 import Flashbang from 'flashbang/core/Flashbang';
 import MatrixUtil from 'flashbang/util/MatrixUtil';
@@ -21,27 +21,16 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
         replaceIfExists: boolean = false,
         elementNames: string[] | null = null
     ): void {
-        let isValidElement = true;
-        if (elementNames != null) {
-            isValidElement = false;
-            let thisName = element.nodeName.toUpperCase();
-            for (let allowedName of elementNames) {
-                if (allowedName.toUpperCase() === thisName) {
-                    isValidElement = true;
-                    break;
-                }
-            }
-        }
+        // If elementNames isn't null, then isValidElement is only true if
+        // element.nodeName one/some of elementNames (case-insensitive).
+        const isValidElement = elementNames == null
+            || elementNames.some((allowedName) => allowedName.toUpperCase() === element.nodeName.toUpperCase());
 
         if (isValidElement) {
-            for (let [property, value] of Object.entries(styles)) {
-                let applyStyle = true;
-                if (!replaceIfExists) {
-                    let cur = element.style.getPropertyValue(property);
-                    if (cur != null && cur.length > 0) {
-                        applyStyle = false;
-                    }
-                }
+            for (const [property, value] of Object.entries(styles)) {
+                const applyStyle = replaceIfExists
+                    || element.style.getPropertyValue(property) == null
+                    || element.style.getPropertyValue(property).length === 0;
 
                 if (applyStyle) {
                     element.style.setProperty(property, value);
@@ -50,7 +39,9 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
         }
 
         for (let ii = 0; ii < element.children.length; ++ii) {
-            let child = (element.children[ii] as any) as HTMLElement;
+            // AMW: we can now use the spread operator to cast HTMLCollection to
+            // an array.
+            const child = [...element.children][ii] as HTMLElement;
             if (child.accessKey !== undefined) {
                 this.applyStyleRecursive(child, styles, replaceIfExists, elementNames);
             }
@@ -82,17 +73,17 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
         return this._obj;
     }
 
-    public get display(): DisplayObject {
+    public get display(): Graphics {
         return this._dummyDisp;
     }
 
-    public get domParent(): HTMLElement {
+    public get domParent(): HTMLElement | null {
         return this._domParent;
     }
 
-    public set domParent(value: HTMLElement) {
+    public set domParent(value: HTMLElement | null) {
         this._domParent = value;
-        if (this._added) {
+        if (this._added && this._domParent) {
             this._domParent.appendChild(this._obj);
         }
     }
@@ -158,10 +149,10 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
     }
 
     protected updateElementProperties(): void {
-        let m = this.display.worldTransform;
+        const m = this.display.worldTransform;
         if (!MatrixUtil.equals(this._lastTransform, m)) {
             this._obj.style.transform = `matrix(${m.a}, ${m.b}, ${m.c}, ${m.d}, ${m.tx}, ${m.ty})`;
-            m.copy(this._lastTransform);
+            m.copyTo(this._lastTransform);
         }
 
         this._obj.style.visibility = this.display.worldVisible ? 'visible' : 'hidden';
@@ -174,10 +165,10 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
      */
     protected onSizeChanged(): void {
         if (this.isLiveObject) {
-            let transfom: string = this._obj.style.transform;
+            const transfom: string = this._obj.style.transform;
             this._obj.style.transform = 'initial';
 
-            let r = this._obj.getBoundingClientRect();
+            const r = this._obj.getBoundingClientRect();
             this._dummyDisp.clear()
                 .beginFill(0x0, 0)
                 .drawRect(0, 0, r.width, r.height)
@@ -192,12 +183,16 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
     }
 
     protected static stringToSize(value: string): number {
-        let idx = value.indexOf('px');
+        const idx = value.indexOf('px');
         if (idx >= 0) {
             value = value.substr(0, idx);
         }
-        let size = Number(value);
+        const size = Number(value);
         return !Number.isNaN(size) ? size : 0;
+    }
+
+    protected static colorToString(color: number): string {
+        return `#${color.toString(16).padStart(6, '0')}`;
     }
 
     protected readonly _dummyDisp: Graphics = new Graphics();

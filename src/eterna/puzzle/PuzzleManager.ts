@@ -21,6 +21,7 @@ import {
     MaximumGCConstraint,
     MaximumGUConstraint
 } from 'eterna/constraints/constraints/MaximumPairConstraint';
+import BranchinessConstraint from 'eterna/constraints/constraints/BranchinessConstraint';
 import {
     MinimumAConstraint, MinimumCConstraint, MinimumGConstraint, MinimumUConstraint
 } from 'eterna/constraints/constraints/MinimumBaseConstraint';
@@ -28,14 +29,46 @@ import {
     MinimumAUConstraint, MinimumGCConstraint, MinimumGUConstraint, MinimumAnyPairConstraint
 } from 'eterna/constraints/constraints/MinimumPairConstraint';
 import MinimumStackLengthConstraint from 'eterna/constraints/constraints/MinimumStackLengthConstraint';
+import TargetExpectedAccuracyConstraint from 'eterna/constraints/constraints/TargetExpectedAccuracyConstraint';
 import ScriptConstraint from 'eterna/constraints/constraints/ScriptConstraint';
 import SynthesisConstraint from 'eterna/constraints/constraints/SynthesisConstraint';
 import BarcodeConstraint from 'eterna/constraints/constraints/BarcodeConstraint';
 import ExternalInterface from 'eterna/util/ExternalInterface';
 import BoostConstraint from 'eterna/constraints/constraints/BoostConstraint';
+import RangePairedMaxConstraint from 'eterna/constraints/constraints/RangePairedMaxConstraint';
 import {Assert} from 'flashbang';
+import {TargetConditions} from 'eterna/UndoBlock';
 import SolutionManager from './SolutionManager';
-import Puzzle from './Puzzle';
+import Puzzle, {PuzzleType} from './Puzzle';
+
+export interface PuzzleJSON {
+    id: string;
+    title: string;
+    type: PuzzleType; // AMW: worried this is actually stored as a string
+    body: string;
+    locks?: string;
+    objective?: string;
+    beginseq?: string;
+    secstruct: string;
+    saved_sequence?: string;
+    usetails: string;
+    folder?: string; // AMW TODO: make a valid folder name somehow!
+    reward?: string;
+    'ui-specs'?: string;
+    'next-puzzle'?: string;
+    'last-round'?: string;
+    check_hairpin?: string;
+    'num-submissions'?: string;
+    rscript?: string;
+    events?: string;
+    hint?: string;
+    'max-votes'?: string;
+    constraints?: string; // AMW TODO: string formatting restrictions
+}
+
+interface ObjectiveString {
+    shift_limit: number;
+}
 
 export default class PuzzleManager {
     public static get instance(): PuzzleManager {
@@ -45,8 +78,8 @@ export default class PuzzleManager {
         return PuzzleManager._instance;
     }
 
-    public async parsePuzzle(json: any): Promise<Puzzle> {
-        let newpuz: Puzzle = new Puzzle(Number(json['id']), json['title'], json['type']);
+    public async parsePuzzle(json: PuzzleJSON): Promise<Puzzle> {
+        const newpuz: Puzzle = new Puzzle(Number(json['id']), json['title'], json['type']);
 
         if (json['body']) {
             // Convention: mission texts are encapsulated by
@@ -54,24 +87,22 @@ export default class PuzzleManager {
             // This allows to reuse existing descriptions, just insert the span element where appropriate
             // Or one can add a new mission statement, and HTML-hide it if necessary using <!-- ... -->
 
-            let res: RegExpExecArray | null = PuzzleManager.RE_MISSION_TEXT.exec(json['body']);
+            const res: RegExpExecArray | null = PuzzleManager.RE_MISSION_TEXT.exec(json['body']);
             if (res != null && res.length >= 2) {
                 [, newpuz.missionText] = res;
             }
         }
 
         if (json['locks'] && json['locks'].length > 0) {
-            let lockStr: string = json['locks'];
-            let locks: boolean[] = [];
-
-            for (let kk = 0; kk < lockStr.length; kk++) {
-                locks.push(lockStr.charAt(kk) === 'x');
-            }
+            const lockStr: string = json['locks'];
+            const locks: boolean[] = lockStr.split('').map(
+                (c) => c === 'x'
+            );
             newpuz.puzzleLocks = locks;
         }
 
         if (json['objective']) {
-            let objective: any = JSON.parse(json['objective'])[0];
+            const objective: ObjectiveString = JSON.parse(json['objective'])[0];
             if (objective['shift_limit']) {
                 newpuz.shiftLimit = objective['shift_limit'];
             } else {
@@ -81,7 +112,7 @@ export default class PuzzleManager {
 
         if (json['beginseq'] && json['beginseq'].length > 0) {
             if (json['beginseq'].length !== json['secstruct'].length) {
-                throw new Error(`Beginning sequence length doesn't match pair length for puzzle ${json['Title']}`);
+                throw new Error(`Beginning sequence length doesn't match pair length for puzzle ${json['title']}`);
             }
             newpuz.beginningSequence = json['beginseq'];
         }
@@ -92,7 +123,7 @@ export default class PuzzleManager {
             }
         }
 
-        let usetails = Number(json['usetails']);
+        const usetails = Number(json['usetails']);
         newpuz.setUseTails(usetails > 0, usetails === 2);
 
         if (json['folder'] && json['folder'].length > 0) {
@@ -105,12 +136,7 @@ export default class PuzzleManager {
 
         if (json['ui-specs']) {
             // New style UI elements (scripted) are identified as JSON objects
-            if (json['ui-specs'].substr(0, 1) === '{') {
-                newpuz.boosters = JSON.parse(json['ui-specs']);
-            } else {
-                // Fallback for the old tutorials
-                newpuz.uiSpecs = json['ui-specs'].split(',');
-            }
+            newpuz.boosters = JSON.parse(json['ui-specs']);
         }
 
         if (json['next-puzzle']) {
@@ -159,60 +185,48 @@ export default class PuzzleManager {
             newpuz.objective = JSON.parse(PuzzleManager.OBJECTIVE_1420804);
         }
 
-        let {targetConditions} = newpuz;
-        if (targetConditions != null) {
+        const {targetConditions} = newpuz;
+        if (targetConditions !== undefined) {
             for (let ii = 0; ii < targetConditions.length; ii++) {
-                if (targetConditions[ii] != null) {
-                    let constrainedBases: any[] = targetConditions[ii]['structure_constrained_bases'];
-                    if (constrainedBases != null) {
-                        if (constrainedBases.length % 2 === 0) {
-                            targetConditions[ii]['structure_constraints'] = [];
-                            for (let jj = 0; jj < targetConditions[ii]['secstruct'].length; jj++) {
-                                targetConditions[ii]['structure_constraints'][jj] = false;
-                            }
+                if (targetConditions[ii] === undefined) continue;
+                const tc = targetConditions[ii] as TargetConditions;
 
-                            for (let jj = 0; jj < constrainedBases.length; jj += 2) {
-                                for (let kk = constrainedBases[jj]; kk <= constrainedBases[jj + 1]; kk++) {
-                                    targetConditions[ii]['structure_constraints'][kk] = true;
-                                }
-                            }
+                const constrainedBases = tc['structure_constrained_bases'];
+                if (constrainedBases !== undefined && constrainedBases.length % 2 === 0) {
+                    tc['structure_constraints'] = new Array(tc['secstruct'].length).fill(false);
+
+                    for (let jj = 0; jj < constrainedBases.length; jj += 2) {
+                        for (let kk = constrainedBases[jj]; kk <= constrainedBases[jj + 1]; kk++) {
+                            tc['structure_constraints'][kk] = true;
                         }
                     }
+                }
 
-                    let antiConstrainedBases: any[] = targetConditions[ii]['anti_structure_constrained_bases'];
-                    if (antiConstrainedBases != null) {
-                        if (
-                            targetConditions[ii]['anti_secstruct'] != null
-                            && targetConditions[ii]['anti_secstruct'].length
-                                === targetConditions[ii]['secstruct'].length
-                        ) {
-                            if (antiConstrainedBases.length % 2 === 0) {
-                                targetConditions[ii]['anti_structure_constraints'] = [];
-                                for (let jj = 0; jj < targetConditions[ii]['secstruct'].length; jj++) {
-                                    targetConditions[ii]['anti_structure_constraints'][jj] = false;
-                                }
+                const aConstrainedBases = tc['anti_structure_constrained_bases'];
+                if (aConstrainedBases !== undefined
+                        && tc['anti_secstruct'] !== undefined
+                        && tc['anti_secstruct'].length === tc['secstruct'].length
+                        && aConstrainedBases.length % 2 === 0) {
+                    tc['anti_structure_constraints'] = new Array(tc['secstruct'].length).fill(false);
 
-                                for (let jj = 0; jj < antiConstrainedBases.length; jj += 2) {
-                                    for (let kk = antiConstrainedBases[jj]; kk <= antiConstrainedBases[jj + 1]; kk++) {
-                                        targetConditions[ii]['anti_structure_constraints'][kk] = true;
-                                    }
-                                }
-                            }
+                    for (let jj = 0; jj < aConstrainedBases.length; jj += 2) {
+                        for (let kk = aConstrainedBases[jj]; kk <= aConstrainedBases[jj + 1]; kk++) {
+                            tc['anti_structure_constraints'][kk] = true;
                         }
                     }
                 }
             }
         }
 
-        let constraints: Constraint<BaseConstraintStatus>[] = [];
+        const constraints: Constraint<BaseConstraintStatus>[] = [];
         if (json['constraints'] && json['constraints'].length > 0) {
-            let constraintDefs: string[] = json['constraints'].split(',');
+            const constraintDefs: string[] = json['constraints'].split(',');
             if (constraintDefs.length % 2 === 1) {
                 throw new Error('Invalid constraint definition - uneven number of constraints and parameters');
             }
 
             for (let i = 0; i < constraintDefs.length; i += 2) {
-                let [name, parameter] = constraintDefs.slice(i, i + 2);
+                const [name, parameter] = constraintDefs.slice(i, i + 2);
                 switch (name) {
                     case 'SOFT':
                         newpuz.isSoftConstraint = true;
@@ -240,6 +254,9 @@ export default class PuzzleManager {
                         break;
                     case ConsecutiveUConstraint.NAME:
                         constraints.push(new ConsecutiveUConstraint(Number(parameter)));
+                        break;
+                    case BranchinessConstraint.NAME:
+                        constraints.push(new BranchinessConstraint(Number(parameter)));
                         break;
                     case MaximumAConstraint.NAME:
                         constraints.push(new MaximumAConstraint(Number(parameter)));
@@ -292,6 +309,9 @@ export default class PuzzleManager {
                     case MinimumStackLengthConstraint.NAME:
                         constraints.push(new MinimumStackLengthConstraint(Number(parameter)));
                         break;
+                    case TargetExpectedAccuracyConstraint.NAME:
+                        constraints.push(new TargetExpectedAccuracyConstraint(Number(parameter)));
+                        break;
                     case ScriptConstraint.NAME:
                         constraints.push(new ScriptConstraint(Number(parameter)));
                         break;
@@ -303,6 +323,9 @@ export default class PuzzleManager {
                         break;
                     case BoostConstraint.NAME:
                         constraints.push(new BoostConstraint(Number(parameter)));
+                        break;
+                    case RangePairedMaxConstraint.NAME:
+                        constraints.push(new RangePairedMaxConstraint(parameter));
                         break;
                     default:
                         log.warn(`Unknown constraint ${name} - skipping`);
@@ -316,7 +339,7 @@ export default class PuzzleManager {
 
         newpuz.constraints = constraints;
 
-        let folder: Folder | null = FolderManager.instance.getFolder(newpuz.folderName);
+        const folder: Folder | null = FolderManager.instance.getFolder(newpuz.folderName);
         Assert.assertIsDefined(folder, `Folder ${newpuz.folderName} cannot be found`);
         if (!newpuz.canUseFolder(folder)) {
             newpuz.folderName = FolderManager.instance.getNextFolder(
@@ -339,7 +362,7 @@ export default class PuzzleManager {
             this._puzzles.push(newpuz);
         }
 
-        let isScriptConstraint = (
+        const isScriptConstraint = (
             constraint: Constraint<BaseConstraintStatus> | ScriptConstraint
         ): constraint is ScriptConstraint => constraint instanceof ScriptConstraint;
 
@@ -349,7 +372,7 @@ export default class PuzzleManager {
         );
 
         // Pre-load secondary puzzle
-        const [m, secondaryPuzzleId] = newpuz.rscript.match(/#PRE-PushPuzzle ([0-9]+);/) ?? [null, null];
+        const [, secondaryPuzzleId] = newpuz.rscript.match(/#PRE-PushPuzzle ([0-9]+);/) ?? [null, null];
         if (secondaryPuzzleId) {
             await this.getPuzzleByID(parseInt(secondaryPuzzleId, 10));
         }
@@ -358,20 +381,28 @@ export default class PuzzleManager {
     }
 
     public async getPuzzleByID(puznid: number, scriptid: number = -1): Promise<Puzzle> {
-        for (let puzzle of this._puzzles) {
+        for (const puzzle of this._puzzles) {
             if (puzzle.nodeID === puznid) {
                 return puzzle;
             }
         }
 
         log.info(`Loading puzzle [nid=${puznid}, scriptid=${scriptid}...]`);
-        let json = await Eterna.client.getPuzzle(puznid, scriptid);
-        let data = json['data'];
+        const json = await Eterna.client.getPuzzle(puznid, scriptid);
+        const data = json['data'];
         if (data['hairpins']) {
             SolutionManager.instance.addHairpins(data['hairpins']);
         }
 
-        let puzzle = await this.parsePuzzle(data['puzzle']);
+        const puzzle = await this.parsePuzzle(data['puzzle']);
+
+        const cleared = data.cleared as { nid: string }[];
+        if (cleared) {
+            const clearedNIDs = cleared.map((e) => e.nid);
+            if (clearedNIDs.some((e) => parseInt(e, 10) === puzzle.nodeID)) {
+                puzzle.alreadySolved = true;
+            }
+        }
 
         log.info(`Loaded puzzle [name=${puzzle.getName()}]`);
         return puzzle;
@@ -388,8 +419,4 @@ export default class PuzzleManager {
     /* eslint-enable max-len */
 
     private static readonly RE_MISSION_TEXT = /<span id="mission">(.*?)<\/span>/s;
-}
-
-interface Array<T> {
-    filter<U extends T>(pred: (a: T) => a is U): U[];
 }

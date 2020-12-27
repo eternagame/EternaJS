@@ -4,9 +4,10 @@ import {
     KeyboardEventType, KeyCode, Assert
 } from 'flashbang';
 import ROPWait from 'eterna/rscript/ROPWait';
+import debounce from 'lodash.debounce';
 import Pose2D from './Pose2D';
 
-type InteractionEvent = PIXI.interaction.InteractionEvent;
+type InteractionEvent = PIXI.InteractionEvent;
 
 /** Wraps a Pose2D and handles resizing, masking, and input events */
 export default class PoseField extends ContainerObject implements KeyboardListener, MouseWheelListener {
@@ -26,12 +27,21 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
         this.addObject(this._pose, this.container);
 
-        this.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => this.onPointerDown(e));
-        this.pointerUp.filter(InputUtil.IsLeftMouse).connect((e) => this.onPointerUp(e));
-        this.pointerMove.connect((e) => this.onPointerMove(e));
-        this.container.on('pointercancel', (e) => this.onPointerUp(e));
-        this.container.on('pointerout', (e) => this.onPointerUp(e));
-        this.container.on('pointerupoutside', (e) => this.onPointerUp(e));
+        this.pointerDown.filter(InputUtil.IsLeftMouse).connect(
+            (e: PIXI.InteractionEvent) => this.onPointerDown(e)
+        );
+        this.pointerUp.filter(InputUtil.IsLeftMouse).connect(
+            (e: PIXI.InteractionEvent) => this.onPointerUp(e)
+        );
+        this.pointerMove.connect(
+            (e: PIXI.InteractionEvent) => this.onPointerMove(e)
+        );
+        this.container.on('pointercancel',
+            (e: PIXI.InteractionEvent) => this.onPointerUp(e));
+        this.container.on('pointerout',
+            (e: PIXI.InteractionEvent) => this.onPointerUp(e));
+        this.container.on('pointerupoutside',
+            (e: PIXI.InteractionEvent) => this.onPointerUp(e));
 
         Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.keyboardInput.pushListener(this));
@@ -66,7 +76,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this.container.mask = null;
 
         if (useMask) {
-            this._mask = new Graphics().beginFill(0x0, 0).drawRect(0, 0, width, height).endFill();
+            this._mask = new Graphics().beginFill(0x0).drawRect(0, 0, width, height).endFill();
             this.container.addChild(this._mask);
             this.container.mask = this._mask;
         }
@@ -90,7 +100,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     }
 
     public zoomIn(): void {
-        let prevZoom: number = this._pose.zoomLevel;
+        const prevZoom: number = this._pose.zoomLevel;
 
         if (prevZoom === 0) return;
 
@@ -98,7 +108,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     }
 
     public zoomOut(): void {
-        let prevZoom: number = this._pose.zoomLevel;
+        const prevZoom: number = this._pose.zoomLevel;
 
         if (prevZoom === Pose2D.ZOOM_SPACINGS.length - 1) return;
 
@@ -126,7 +136,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     }
 
     private onPointerMove(e: InteractionEvent) {
-        this._interactionCache.forEach((point, pointerId) => {
+        this._interactionCache.forEach((_point, pointerId) => {
             if (pointerId === e.data.identifier) {
                 const {x, y} = e.data.global;
                 this._interactionCache.set(pointerId, new Point(x, y));
@@ -172,7 +182,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this._pose.onMouseMoved(e.data.global);
 
         const eventsToClear: number[] = [];
-        this._interactionCache.forEach((point, pointerId) => {
+        this._interactionCache.forEach((_point, pointerId) => {
             if (pointerId === e.data.identifier) {
                 eventsToClear.push(pointerId);
             }
@@ -190,22 +200,43 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     }
 
     public onMouseWheelEvent(e: WheelEvent): boolean {
-        let mouse = Flashbang.globalMouse;
+        const mouse = Flashbang.globalMouse;
         Assert.assertIsDefined(mouse);
         if (!this.display.visible || !this.containsPoint(mouse.x, mouse.y)) {
             return false;
         }
-
         if (e.deltaY < 0) {
-            this.zoomIn();
+            if (e.deltaY < -2 && e.deltaY < this._lastDeltaY) this._debounceZoomIn();
+            this._lastDeltaY = e.deltaY;
+            setTimeout(() => {
+                this._lastDeltaY = 0;
+            }, 200);
             return true;
         } else if (e.deltaY > 0) {
-            this.zoomOut();
+            if (e.deltaY > 2 && e.deltaY > this._lastDeltaY) this._debounceZoomOut();
+            this._lastDeltaY = e.deltaY;
+            setTimeout(() => {
+                this._lastDeltaY = 0;
+            }, 200);
             return true;
         }
 
         return false;
     }
+
+    // Stores the previous delta
+    private _lastDeltaY = 0;
+
+    // Debounced zoom functions for 'sensitive' mice
+    private _debounceZoomIn = debounce(this.zoomIn, 100, {
+        leading: true,
+        trailing: false
+    });
+
+    private _debounceZoomOut = debounce(this.zoomOut, 100, {
+        leading: true,
+        trailing: false
+    });
 
     public onKeyboardEvent(e: KeyboardEvent): boolean {
         if (!this.display.visible || e.type !== KeyboardEventType.KEY_DOWN) {

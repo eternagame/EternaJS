@@ -14,6 +14,7 @@ import TextBalloon from 'eterna/ui/TextBalloon';
 import {RegistrationGroup} from 'signals';
 import Sounds from 'eterna/resources/Sounds';
 import UITheme from 'eterna/ui/UITheme';
+import {FontWeight} from 'flashbang/util/TextBuilder';
 
 export interface ConstraintBoxConfig {
     // Toggle checkmark, green vs red outline
@@ -44,9 +45,10 @@ export interface ConstraintBoxConfig {
 }
 
 export default class ConstraintBox extends ContainerObject implements Enableable {
-    constructor(forMissionScreen: boolean) {
+    constructor(forMissionScreen: boolean, states = 1) {
         super();
         this._forMissionScreen = forMissionScreen;
+        this._states = states;
 
         this._bgGraphics = new Graphics();
         this._bgGraphics.interactiveChildren = false;
@@ -72,13 +74,13 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._icon.visible = false;
         this.container.addChild(this._icon);
 
-        this._noText = Fonts.arial('NO', 16).color(0xffffff).bold().letterSpacing(-0.5)
+        this._noText = Fonts.std('NO', 16).bold().color(0xffffff).letterSpacing(-0.5)
             .build();
         this._noText.position = new Point(35, 0);
         this._noText.visible = false;
         this.container.addChild(this._noText);
 
-        this._stateText = Fonts.arial('', 18).color(0xffffff).bold().letterSpacing(-0.5)
+        this._stateText = Fonts.std('', 18).bold().color(0xffffff).letterSpacing(-0.5)
             .build();
         this._stateText.position = new Point(3, 45);
         this._stateText.visible = false;
@@ -86,10 +88,11 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
         this._reqClarifyText = new MultiStyleText('', {
             default: {
-                fontFamily: Fonts.ARIAL,
+                fontFamily: Fonts.STDFONT,
                 fontSize: 11,
                 fill: 0xC0DCE7,
-                letterSpacing: -0.5
+                letterSpacing: -0.5,
+                align: 'center'
             }
         });
         this._reqClarifyText.position = new Point(50, 30);
@@ -98,7 +101,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
         this._reqStatText = new MultiStyleText('', {
             default: {
-                fontFamily: Fonts.ARIAL,
+                fontFamily: Fonts.STDFONT,
                 fontSize: 11,
                 fill: 0xC0DCE7,
                 letterSpacing: -0.5
@@ -143,6 +146,13 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     public setContent(config: ConstraintBoxConfig, toolTipContainer?: Container): void {
         this._check.visible = config.satisfied && !this._forMissionScreen;
 
+        // If clarificationText is a string we're fine; if it's a StyledTextBuilder
+        // we need to get .text from it to check this.
+        const reqClarifyMultiLine = this._reqClarifyText.text.includes('\n')
+            || (config.clarificationText instanceof StyledTextBuilder
+                ? (config.clarificationText as StyledTextBuilder).text.includes('\n')
+                : (config.clarificationText as string)?.includes('\n'));
+
         this._req.visible = config.fullTexture !== undefined;
         if (config.fullTexture !== undefined) {
             this._req.texture = config.fullTexture;
@@ -174,19 +184,22 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             // We know config.clarificationText is not undefined because of the
             // above condition, so we can type guard
             this.setPossiblyStyledText(config.clarificationText, this._reqClarifyText);
+            const yOffset = reqClarifyMultiLine ? 27 : 32;
             DisplayUtil.positionRelative(
                 this._reqClarifyText, HAlign.CENTER, VAlign.TOP,
-                this._outline, HAlign.CENTER, VAlign.TOP, 2, 32
+                this._outline, HAlign.CENTER, VAlign.TOP, 2, yOffset
             );
+            this._check.position.y = reqClarifyMultiLine ? 55 : 50;
         }
 
         this._reqStatText.visible = config.statText !== undefined && !this._forMissionScreen;
         if (config.statText !== undefined && !this._forMissionScreen) {
             // We know config.statText isn't undefined due to the above condition
             this.setPossiblyStyledText(config.statText, this._reqStatText);
+            const yOffset = reqClarifyMultiLine ? 55 : 50;
             DisplayUtil.positionRelative(
                 this._reqStatText, HAlign.CENTER, VAlign.TOP,
-                this._outline, HAlign.CENTER, VAlign.TOP, 0, 50
+                this._outline, HAlign.CENTER, VAlign.TOP, 0, yOffset
             );
         }
 
@@ -197,7 +210,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             tooltipText = tooltipText.clone().append('\n').append('Unsatisfied', {fill: 0xff0000});
         }
 
-        let balloon = new TextBalloon('', 0x0, 0.8);
+        const balloon = new TextBalloon('', 0x0, 0.8);
         balloon.styledText = tooltipText;
         this.setMouseOverObject(balloon, toolTipContainer);
 
@@ -219,7 +232,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             }
 
             this.initOpaqueBackdrop(this._bg.texture.width, this._bg.texture.height);
-            this._check.position = new Point(55, 55);
+            this._check.position = new Point(55, 50);
             this._noText.position = new Point(35, 1);
             this._stateText.position = new Point(3, 45);
         }
@@ -232,7 +245,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             this._sideText.position = new Point(-deltaWidth / 2, this._opaqueBackdrop.height + 10);
         }
 
-        if (config.stateNumber && !this._forMissionScreen) {
+        if (config.stateNumber && !this._forMissionScreen && this._states > 1) {
             this._stateText.visible = true;
             this._stateText.text = config.stateNumber.toString();
         }
@@ -304,18 +317,19 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
     /** Creates a StyledTextBuilder with the ConstraintBox's default settings */
     public static createTextStyle(): StyledTextBuilder {
-        let style: StyledTextBuilder = new StyledTextBuilder({
-            fontFamily: Fonts.STDFONT_REGULAR,
+        const style: StyledTextBuilder = new StyledTextBuilder({
+            fontFamily: Fonts.STDFONT,
             fontSize: 14,
             fill: 0xffffff,
             letterSpacing: -0.5,
             wordWrap: true,
             wordWrapWidth: UITheme.missionIntro.maxConstraintWidth
         }).addStyle('altText', {
-            fontFamily: Fonts.STDFONT_MEDIUM,
+            fontFamily: Fonts.STDFONT,
+            fontWeight: FontWeight.SEMIBOLD,
             leading: 10
         }).addStyle('altTextMain', {
-            fontFamily: Fonts.STDFONT_REGULAR,
+            fontFamily: Fonts.STDFONT,
             leading: 5
         });
 
@@ -412,7 +426,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             return;
         }
 
-        let lineWidth = 6;
+        const lineWidth = 6;
 
         this._fglow.clear();
         this._fglow.lineStyle(lineWidth, satisfied ? 0x00FF00 : 0xFF0000, 1.0);
@@ -477,6 +491,8 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     private _forMissionScreen: boolean;
 
     private _satisfied: boolean;
+
+    private readonly _states: number;
 
     private _bgGraphics: Graphics;
     private _backlight: Graphics;

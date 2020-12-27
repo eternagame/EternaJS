@@ -11,7 +11,7 @@ function vertexCallback(data: number[], polyVertArray: number[]): void {
     polyVertArray[polyVertArray.length] = data[1];
 }
 
-function combinecallback(coords: number[], data: number[], weight: number): number[] {
+function combinecallback(coords: number[], _data: number[], _weight: number): number[] {
     // callback for when segments intersect and must be split
     return [coords[0], coords[1], coords[2]];
 }
@@ -30,11 +30,11 @@ tessy.gluTessCallback(libtess.gluEnum.GLU_TESS_COMBINE, combinecallback);
  */
 export default function triangulate(contour: number[]): number[] {
     tessy.gluTessNormal(0, 0, 1);
-    let triangleVerts: number[] = [];
+    const triangleVerts: number[] = [];
     tessy.gluTessBeginPolygon(triangleVerts);
     tessy.gluTessBeginContour();
     for (let ii = 0; ii < contour.length; ii += 2) {
-        let coords = [contour[ii], contour[ii + 1], 0];
+        const coords = [contour[ii], contour[ii + 1], 0];
         tessy.gluTessVertex(coords, coords);
     }
     tessy.gluTessEndContour();

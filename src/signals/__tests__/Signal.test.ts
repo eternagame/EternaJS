@@ -2,8 +2,8 @@ import {Connection, Signal, SignalView, UnitSignal} from "signals";
 import Counter from "./Counter";
 
 test("signalToSlot", () => {
-    let signal: Signal<number> = new Signal();
-    let slot: AccSlot = new AccSlot();
+    const signal: Signal<number> = new Signal();
+    const slot: AccSlot = new AccSlot();
     signal.connect((value) => slot.onEmit(value));
     signal.emit(1);
     signal.emit(2);
@@ -12,8 +12,8 @@ test("signalToSlot", () => {
 });
 
 test("oneShotSlot", () => {
-    let signal: Signal<number> = new Signal();
-    let slot: AccSlot = new AccSlot();
+    const signal: Signal<number> = new Signal();
+    const slot: AccSlot = new AccSlot();
     signal.connect((value) => slot.onEmit(value)).once();
     signal.emit(1); // slot should be removed after this emit
     signal.emit(2);
@@ -22,13 +22,13 @@ test("oneShotSlot", () => {
 });
 
 test("slotPriority", () => {
-    let counter: any = {val: 0};
-    let slot1: PriorityTestSlot = new PriorityTestSlot(counter);
-    let slot2: PriorityTestSlot = new PriorityTestSlot(counter);
-    let slot3: PriorityTestSlot = new PriorityTestSlot(counter);
-    let slot4: PriorityTestSlot = new PriorityTestSlot(counter);
+    const counter: any = {val: 0};
+    const slot1: PriorityTestSlot = new PriorityTestSlot(counter);
+    const slot2: PriorityTestSlot = new PriorityTestSlot(counter);
+    const slot3: PriorityTestSlot = new PriorityTestSlot(counter);
+    const slot4: PriorityTestSlot = new PriorityTestSlot(counter);
 
-    let signal: UnitSignal = new UnitSignal();
+    const signal: UnitSignal = new UnitSignal();
     signal.connect(() => slot3.onEmit()).atPriority(3);
     signal.connect(() => slot1.onEmit()).atPriority(1);
     signal.connect(() => slot2.onEmit()).atPriority(2);
@@ -41,8 +41,8 @@ test("slotPriority", () => {
 });
 
 test("addDuringDispatch", () => {
-    let signal: Signal<number> = new Signal();
-    let toAdd: AccSlot = new AccSlot();
+    const signal: Signal<number> = new Signal();
+    const toAdd: AccSlot = new AccSlot();
 
     signal.connect(() => {
         signal.connect((value) => toAdd.onEmit(value));
@@ -58,9 +58,9 @@ test("addDuringDispatch", () => {
 });
 
 test("removeDuringDispatch", () => {
-    let signal: Signal<number> = new Signal();
-    let toRemove: AccSlot = new AccSlot();
-    let rconn: Connection = signal.connect((value) => {
+    const signal: Signal<number> = new Signal();
+    const toRemove: AccSlot = new AccSlot();
+    const rconn: Connection = signal.connect((value) => {
         toRemove.onEmit(value)
     });
 
@@ -80,10 +80,10 @@ test("removeDuringDispatch", () => {
 });
 
 test("addAndRemoveDuringDispatch", () => {
-    let signal: Signal<number> = new Signal();
-    let toAdd: AccSlot = new AccSlot();
-    let toRemove: AccSlot = new AccSlot();
-    let rconn: Connection = signal.connect((value) => toRemove.onEmit(value));
+    const signal: Signal<number> = new Signal();
+    const toAdd: AccSlot = new AccSlot();
+    const toRemove: AccSlot = new AccSlot();
+    const rconn: Connection = signal.connect((value) => toRemove.onEmit(value));
 
     // dispatch one event and make sure it's received by toRemove
     signal.emit(5);
@@ -106,7 +106,7 @@ test("addAndRemoveDuringDispatch", () => {
 });
 
 test("unitSlot", () => {
-    let signal: Signal<number> = new Signal();
+    const signal: Signal<number> = new Signal();
     let fired: boolean = false;
     signal.connect(() => {
         fired = true;
@@ -117,7 +117,7 @@ test("unitSlot", () => {
 
 test("singleFailure", () => {
     expect(() => {
-        let signal: UnitSignal = new UnitSignal();
+        const signal: UnitSignal = new UnitSignal();
         signal.connect(() => {
             throw new Error("Bang!");
         });
@@ -127,7 +127,7 @@ test("singleFailure", () => {
 
 test("multiFailure", () => {
     expect(() => {
-        let signal: UnitSignal = new UnitSignal();
+        const signal: UnitSignal = new UnitSignal();
         signal.connect(() => {
             throw new Error("Bing!");
         });
@@ -139,12 +139,12 @@ test("multiFailure", () => {
 });
 
 test("mappedSignal", () => {
-    let signal: Signal<number> = new Signal();
-    let mapped: SignalView<string> = signal.map((value) => "" + value);
+    const signal: Signal<number> = new Signal();
+    const mapped: SignalView<string> = signal.map((value) => "" + value);
 
-    let counter: Counter = new Counter();
-    let c1: Connection = mapped.connect((value) => counter.onEmit(value));
-    let c2: Connection = mapped.connect((value) => expect(value).toEqual("15"));
+    const counter: Counter = new Counter();
+    const c1: Connection = mapped.connect((value) => counter.onEmit(value));
+    const c2: Connection = mapped.connect((value) => expect(value).toEqual("15"));
 
     signal.emit(15);
     counter.assertTriggered(1);
@@ -173,7 +173,7 @@ class PriorityTestSlot {
         this.counter = counter;
     }
 
-    public onEmit(event: any = null): void {
+    public onEmit(_event: any = null): void {
         this.order = ++(this.counter.val);
     }
 }

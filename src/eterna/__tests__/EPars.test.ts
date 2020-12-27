@@ -1,8 +1,8 @@
-import EPars from "../EPars";
+import SecStruct from "eterna/rnatypes/SecStruct";
 
 test(`EPars:filterForPseudoknots`, () => {
-    let pairs = EPars.parenthesisToPairs("...............(((((((((((...{{{{{{{)))))))))))((((((((.........))).)))))...}}.}}}}}....", true);
-    let filtered = EPars.filterForPseudoknots(pairs);
-    let newStruct = EPars.pairsToParenthesis(filtered, null, true);
+    const pairs = SecStruct.fromParens("...............(((((((((((...{{{{{{{)))))))))))((((((((.........))).)))))...}}.}}}}}....", true);
+    const filtered = pairs.filterForPseudoknots();
+    const newStruct = filtered.getParenthesis( null, true);
     expect(newStruct).toEqual("...............(((((((((((..........)))))))))))((((((((.........))).)))))...............");
 });

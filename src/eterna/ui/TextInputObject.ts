@@ -1,8 +1,19 @@
 import {Graphics, Point, Sprite} from 'pixi.js';
-import {Signal, UnitSignal} from 'signals';
+import {Signal} from 'signals';
 import {DOMObject, DisplayObjectPointerTarget, TextBuilder} from 'flashbang';
 import Eterna from 'eterna/Eterna';
 import Fonts from 'eterna/util/Fonts';
+import {FontWeight} from 'flashbang/util/TextBuilder';
+import UITheme from './UITheme';
+
+interface TextInputObjectProps {
+    fontSize: number;
+    width?: number;
+    rows?: number;
+    placeholder?: string;
+    bgColor?: number;
+    borderColor?: number;
+}
 
 /**
  * A text input object in the DOM. Floats on top of the PIXI canvas.
@@ -12,21 +23,25 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
     public readonly valueChanged: Signal<string> = new Signal();
     public readonly keyPressed = new Signal<string>();
 
-    constructor(fontSize: number, width = 100, rows = 1) {
+    constructor(props: TextInputObjectProps) {
         super(
-            Eterna.OVERLAY_DIV_ID, rows === 1
-                ? TextInputObject.createTextInput() : TextInputObject.createTextArea(rows)
+            Eterna.OVERLAY_DIV_ID, (props.rows ?? 1) === 1
+                ? TextInputObject.createTextInput(props.placeholder)
+                : TextInputObject.createTextArea(props.rows ?? 1)
         );
 
-        this._fontSize = fontSize;
-        this._rows = rows;
+        // Defaults
+        this._fontSize = props.fontSize;
+        this._rows = props.rows ?? 1;
+        this._fontFamily = Fonts.STDFONT;
+        this._fontWeight = FontWeight.REGULAR;
+        this._bgColor = props.bgColor ?? UITheme.textInput.colors.background;
+        this._borderColor = props.borderColor ?? UITheme.textInput.colors.border;
+        this._textColor = UITheme.textInput.colors.text;
+        this._borderRadius = 5;
+        this.width = props.width ?? 100;
 
-        this.width = width;
-        this.font(Fonts.ARIAL);
-
-        this._obj.style.fontSize = DOMObject.sizeToString(fontSize);
         this._obj.oninput = () => this.onInput();
-
         this._obj.onfocus = () => this.onFocusChanged(true);
         this._obj.onblur = () => this.onFocusChanged(false);
         this._obj.onkeypress = (e) => this.keyPressed.emit(e.key);
@@ -72,6 +87,14 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
     }
 
     protected onSizeChanged(): void {
+        this._obj.style.fontSize = DOMObject.sizeToString(this._fontSize);
+        this._obj.style.fontFamily = this._fontFamily;
+        this._obj.style.fontWeight = this._fontWeight;
+        this._obj.style.color = DOMObject.colorToString(this._textColor);
+        this._obj.style.backgroundColor = DOMObject.colorToString(this._bgColor);
+        this._obj.style.borderColor = DOMObject.colorToString(this._borderColor);
+        this._obj.style.borderRadius = this._borderRadius.toString();
+
         super.onSizeChanged();
         if (this._fakeTextInput != null) {
             // recreate our fake text input when our properties change
@@ -100,23 +123,28 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
 
     public font(fontFamily: string): TextInputObject {
         this._fontFamily = fontFamily;
-        this._obj.style.fontFamily = fontFamily;
         this.onSizeChanged();
         return this;
     }
 
-    public fontWeight(weight: string): TextInputObject {
-        this._obj.style.fontWeight = weight;
+    public fontWeight(weight: FontWeight): TextInputObject {
+        this._fontWeight = weight;
         this.onSizeChanged();
         return this;
     }
 
     public bold(): TextInputObject {
-        return this.fontWeight('bold');
+        return this.fontWeight(FontWeight.BOLD);
     }
 
     public placeholderText(value: string): TextInputObject {
         this._obj.placeholder = value;
+        return this;
+    }
+
+    public borderColor(value: number): TextInputObject {
+        this._borderColor = value;
+        this.onSizeChanged();
         return this;
     }
 
@@ -168,9 +196,19 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
         this._obj.tabIndex = value;
     }
 
+    public copyToClipboard(): void {
+        const wasFocused = document.activeElement === this._obj;
+        const wasVisible = this._obj.style.visibility === 'visible';
+        this._obj.style.visibility = 'visible';
+        this.setFocus(true);
+        document.execCommand('copy');
+        this.setFocus(wasFocused);
+        if (!wasVisible) this._obj.style.visibility = 'hidden';
+    }
+
     private onInput(): void {
         if (this._disallow != null) {
-            let curValue = this.text;
+            const curValue = this.text;
             this._obj.value = this._obj.value.replace(this._disallow, '');
             if (this.text !== curValue) {
                 return;
@@ -195,28 +233,23 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
 
         this._fakeTextInput = new Sprite();
 
-        let bg = new Graphics()
-            .lineStyle(1, 0x0)
-            .beginFill(0xffffff)
-            .drawRect(0, 0, this.width, this.height)
+        const bg = new Graphics()
+            .lineStyle(1, this._borderColor)
+            .beginFill(this._bgColor)
+            .drawRoundedRect(0, 0, this.width, this.height, this._borderRadius)
             .endFill();
         this._fakeTextInput.addChild(bg);
 
-        let textMask = new Graphics().beginFill(0x0, 0).drawRect(0, 0, this.width, this.height).endFill();
+        const textMask = new Graphics().beginFill(0x0).drawRect(0, 0, this.width, this.height).endFill();
         this._fakeTextInput.addChild(textMask);
 
-        let displayText = this.text;
-        let textColor = 0x0;
-        if (displayText.length === 0) {
-            displayText = this._obj.placeholder;
-            // This color is probably browser dependent!
-            textColor = 0x777777;
-        }
+        const displayText = this.text.length === 0 ? this._obj.placeholder : this.text;
+        const textColor = this.text.length === 0 ? 0x777777 : this._textColor;
 
-        let text = new TextBuilder(displayText)
+        const text = new TextBuilder(displayText)
             .font(this._fontFamily)
+            .fontWeight(this._fontWeight)
             .fontSize(this._fontSize)
-            .fontWeight(this._obj.style.fontWeight)
             .color(textColor)
             .wordWrap(this._rows > 1, this.width - 20)
             .hAlignLeft()
@@ -224,7 +257,9 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
         text.mask = textMask;
         text.position = new Point(
             parseFloat(window.getComputedStyle(this._obj, null).getPropertyValue('padding-left')),
-            parseFloat(window.getComputedStyle(this._obj, null).getPropertyValue('padding-right'))
+            this._rows === 1
+                ? (this.height - this._fontSize) / 2
+                : parseFloat(window.getComputedStyle(this._obj, null).getPropertyValue('padding-left'))
         );
         this._fakeTextInput.addChild(text);
 
@@ -232,7 +267,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
     }
 
     private static createTextArea(rows: number): HTMLTextAreaElement {
-        let element = document.createElement('textarea');
+        const element = document.createElement('textarea');
         element.rows = rows;
         element.title = '';
         element.style.resize = 'none';
@@ -240,10 +275,12 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
         return element;
     }
 
-    private static createTextInput(): HTMLInputElement {
-        let element = document.createElement('input');
+    private static createTextInput(placeholder?: string): HTMLInputElement {
+        const element = document.createElement('input');
         element.type = 'text';
         element.title = '';
+        element.placeholder = placeholder ?? '';
+        element.className = 'eterna-input';
         return element;
     }
 
@@ -251,8 +288,14 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
 
     private _disallow: RegExp;
     private _fontFamily: string;
+    private _fontWeight: FontWeight;
     private _rows: number;
+    private _textColor: number;
+    private _bgColor: number;
+    private _borderColor: number;
+    private _borderRadius: number;
+
     private _hasFocus: boolean;
     private _fakeTextInput: Sprite | null;
-    private _showFakeTextInputWhenNotFocused: boolean = false;
+    private _showFakeTextInputWhenNotFocused: boolean = true;
 }

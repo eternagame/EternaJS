@@ -1,25 +1,56 @@
-import {Container} from 'pixi.js';
-import {SceneObject, MathUtil} from 'flashbang';
+import {Container, InteractionEvent} from 'pixi.js';
+import {
+    MathUtil, ContainerObject, Assert, InputUtil, MouseWheelListener
+} from 'flashbang';
+import GraphicsObject from 'flashbang/objects/GraphicsObject';
 import ScrollContainer from './ScrollContainer';
-import SliderBar from './SliderBar';
 
 /** Contains scrollable content and a vertical sliderbar */
-export default class VScrollBox extends SceneObject<ScrollContainer> {
+export default class VScrollBox extends ContainerObject implements MouseWheelListener {
     constructor(width: number, height: number) {
-        super(new ScrollContainer(width - SliderBar.THUMB_SIZE, height));
+        super();
         this._width = width;
         this._height = height;
+    }
 
-        this._sliderBar = new SliderBar(true);
-        this.addObject(this._sliderBar, this._display);
-        this._sliderBar.setProgress(0);
-        this._sliderBar.scrollChanged.connect((progress) => { this.scrollProgress = progress; });
+    protected added() {
+        super.added();
+
+        this._dragSurface = new GraphicsObject();
+        this._dragSurface.display.interactive = true;
+        this._dragSurface.display.alpha = 0;
+        this.addObject(this._dragSurface, this.display);
+
+        this._scrollContainer = new ScrollContainer(this._width, this._height);
+        this.addObject(this._scrollContainer, this.display);
+
+        this._dragSurface.pointerDown.connect((e) => this.onDragPointerDown(e));
+        this._dragSurface.pointerUp.connect(() => this.onDragPointerUp());
+        this._dragSurface.pointerUpOutside.connect(() => this.onDragPointerUp());
+        this._dragSurface.pointerMove.connect((e) => this.onDragPointerMove(e));
+
+        this.htmlWrapper.addEventListener('pointerdown', (e) => this.onDragPointerDown(e));
+        this.htmlWrapper.addEventListener('pointerup', () => this.onDragPointerUp());
+        this.htmlWrapper.addEventListener('pointermove', (e) => this.onDragPointerMove(e));
+
+        Assert.assertIsDefined(this.mode);
+        this.regs.add(this.mode.mouseWheelInput.pushListener(this));
+
+        this.doLayout();
+
+        // Whenever the mode resizes, the HTML mask gets off
+        Assert.assertIsDefined(this.mode);
+        this.mode.resized.connect(() => {
+            if (this.isLiveObject) this.doLayout();
+        });
     }
 
     /** Attach scrollable content here */
     public get content(): Container {
-        return this.display.content;
+        return this._scrollContainer.content;
     }
+
+    public get height() { return this._height; }
 
     public setSize(width: number, height: number): void {
         if (this._width === width && this._height === height) {
@@ -28,27 +59,69 @@ export default class VScrollBox extends SceneObject<ScrollContainer> {
 
         this._width = width;
         this._height = height;
-        this._display.setSize(width - SliderBar.THUMB_SIZE, height);
-
-        this._sliderBar.setSize(0, height);
-        this._sliderBar.display.position.x = width - SliderBar.THUMB_SIZE;
-        this._sliderBar.display.visible = this._display.maxScrollY > 0;
+        this._scrollContainer.setSize(width, height);
     }
 
-    public get scrollProgress(): number {
-        return this.display.maxScrollY > 0 ? this.display.scrollY / this.display.maxScrollY : 0;
+    public doLayout() {
+        this._scrollContainer.doLayout();
+
+        this._dragSurface.display.clear();
+        this._dragSurface.display.beginFill(0x00FF00);
+        this._dragSurface.display.drawRect(0, 0, this._width, this._height);
+        this._dragSurface.display.endFill();
     }
 
-    /** A value between 0 and 1 */
-    public set scrollProgress(value: number) {
-        this.display.setScroll(0, MathUtil.clamp(value, 0, 1) * this.display.maxScrollY);
+    public get scrollLocation(): number {
+        return this._scrollContainer.scrollY;
     }
 
-    public scrollTo(value: number) {
-        this._sliderBar.setProgress(MathUtil.clamp(value, 0, 1));
+    public set scrollLocation(value: number) {
+        this._scrollContainer.setScroll(0, MathUtil.clamp(value, 0, this._scrollContainer.maxScrollY));
     }
 
-    private readonly _sliderBar: SliderBar;
+    public get htmlWrapper() {
+        return this._scrollContainer.htmlWrapper;
+    }
+
+    private onDragPointerDown(event: InteractionEvent | PointerEvent) {
+        this._dragging = true;
+        if (event instanceof InteractionEvent) {
+            this._dragStartPoint = event.data.global.y;
+        } else {
+            if (event.pointerType === 'mouse') {
+                this._dragging = false;
+                return;
+            }
+            this._dragStartPoint = event.y;
+        }
+        this._dragStartScroll = this.scrollLocation;
+    }
+
+    private onDragPointerUp() {
+        this._dragging = false;
+    }
+
+    private onDragPointerMove(event: InteractionEvent | PointerEvent) {
+        if (this._dragging) {
+            const currY = event instanceof InteractionEvent ? event.data.global.y : event.y;
+            const dragRange = currY - this._dragStartPoint;
+            this.scrollLocation = this._dragStartScroll - dragRange;
+        }
+    }
+
+    public onMouseWheelEvent(e: WheelEvent): boolean {
+        const pxdelta: number = InputUtil.scrollAmount(e, 13, this._scrollContainer.maxScrollY);
+        this.scrollLocation += pxdelta;
+
+        return true;
+    }
+
+    private _scrollContainer: ScrollContainer;
+    private _dragSurface: GraphicsObject;
+
+    private _dragging: boolean = false;
+    private _dragStartPoint = 0;
+    private _dragStartScroll = 0;
 
     private _width: number;
     private _height: number;

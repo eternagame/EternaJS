@@ -38,19 +38,14 @@ export default class TextInputPanel extends GamePanel {
     protected added(): void {
         super.added();
 
-        let fieldStart = 0;
-        let maxWidth = 0;
+        const fieldStart = Math.max(...this._fields.map((field) => field.label.width));
+        const maxWidth = Math.max(...this._fields.map((field) => field.input.width));
         let heightWalker = 0;
 
         if (this._fields.length > 0) {
-            for (let field of this._fields) {
-                fieldStart = Math.max(fieldStart, field.label.width);
-                maxWidth = Math.max(maxWidth, field.input.width);
-            }
-
             heightWalker = 26 + TextInputPanel.H_MARGIN;
 
-            for (let field of this._fields) {
+            for (const field of this._fields) {
                 heightWalker += 4;
 
                 field.input.display.x = fieldStart + (TextInputPanel.W_MARGIN * 2);
@@ -65,8 +60,20 @@ export default class TextInputPanel extends GamePanel {
             heightWalker += 35;
         }
 
-        let width = TextInputPanel.W_MARGIN + fieldStart + TextInputPanel.W_MARGIN + maxWidth + TextInputPanel.W_MARGIN;
-        let height = heightWalker + 20 + TextInputPanel.H_MARGIN;
+        const tmpwidth = Fonts
+            .std()
+            .bold()
+            .fontSize(16)
+            .color(0xffffff)
+            .text(this._title ?? '')
+            .build()
+            .width;
+        const width = (
+            fieldStart + maxWidth + TextInputPanel.W_MARGIN > tmpwidth
+                ? TextInputPanel.W_MARGIN + fieldStart + TextInputPanel.W_MARGIN + maxWidth + TextInputPanel.W_MARGIN
+                : TextInputPanel.W_MARGIN + tmpwidth + TextInputPanel.W_MARGIN
+        );
+        const height = heightWalker + 20 + TextInputPanel.H_MARGIN;
         this.setSize(width, height);
 
         this._okButton.display.position = new Point(
@@ -81,10 +88,14 @@ export default class TextInputPanel extends GamePanel {
             throw new Error('Add all fields before adding object to mode');
         }
 
-        let input = new TextInputObject(this._fontSize, width, multiline ? 3 : 1).font(Fonts.ARIAL);
+        const input = new TextInputObject({
+            fontSize: this._fontSize,
+            width,
+            rows: multiline ? 3 : 1
+        }).font(Fonts.STDFONT);
         this.addObject(input, this.container);
 
-        let label: Text = Fonts.arial(name, this._fontSize).color(0xC0DCE7).build();
+        const label: Text = Fonts.std(name, this._fontSize).color(0xC0DCE7).build();
         this.container.addChild(label);
 
         this._fields.push({input, label, name});
@@ -104,8 +115,8 @@ export default class TextInputPanel extends GamePanel {
     }
 
     public getFieldValues(): Map<string, string> {
-        let dict: Map<string, string> = new Map();
-        for (let field of this._fields) {
+        const dict: Map<string, string> = new Map();
+        for (const field of this._fields) {
             dict.set(field.name, field.input.text);
         }
 
@@ -113,7 +124,7 @@ export default class TextInputPanel extends GamePanel {
     }
 
     public clearFields(): void {
-        for (let field of this._fields) {
+        for (const field of this._fields) {
             field.input.text = '';
         }
     }

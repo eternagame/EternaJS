@@ -1,9 +1,78 @@
-import {JSONUtil, Assert} from 'flashbang';
-import EPars from 'eterna/EPars';
+import {Assert} from 'flashbang';
+import {RNABase} from 'eterna/EPars';
 import Plot, {PlotType} from 'eterna/Plot';
 import Pose2D, {Oligo} from './pose2D/Pose2D';
 import Folder from './folding/Folder';
 import Utility from './util/Utility';
+import Vienna from './folding/Vienna';
+import Vienna2 from './folding/Vienna2';
+import FolderManager from './folding/FolderManager';
+import DotPlot from './rnatypes/DotPlot';
+import SecStruct from './rnatypes/SecStruct';
+import Sequence from './rnatypes/Sequence';
+import {TargetType} from './puzzle/Puzzle';
+
+/**
+ * FoldData is a schema for JSON-ified UndoBlocks.
+ */
+export interface FoldData {
+    folderName_: string;
+    sequence_: number[];
+    pairs_array_: Map<boolean, number[][]>;
+    params_array_: Map<boolean, Param[][]>;
+    stable_: boolean;
+    target_oligo_?: number[];
+    target_oligos_?: Oligo[];
+    oligo_order_?: number[];
+    oligos_paired_: number;
+    target_pairs_: number[];
+    target_oligo_order_?: number[];
+    puzzle_locks_?: boolean[];
+    forced_struct_: number[];
+    target_conditions_?: TargetConditions;
+}
+
+// amw fuck a lot of these are optional
+export interface TargetConditions {
+    type: TargetType;
+    secstruct: string;
+    sequence?: string;
+    IUPAC?: string;
+    'custom-layout'?: ([number, number] | [null, null])[];
+    'custom-reference'?: string;
+    'custom-numbering'?: string;
+    oligo_concentration?: string | number; // the strings have to be convertible
+    oligo_bind?: boolean;
+    oligo_sequence?: string;
+    oligo_label?: string; // really, 'T' | 'R'
+    oligo_name?: string;
+    concentration?: number;
+    oligos?: OligoDef[];
+    shift_locks?: string;
+    shift_limit?: number;
+    anti_secstruct?: string;
+    structure_constrained_bases?: number[];
+    anti_structure_constrained_bases?: number[];
+    structure_constraints?: boolean[];
+    anti_structure_constraints?: boolean[];
+    site?: number[];
+    fold_version?: number;
+    fold_mode?: string; // this time it's '3'
+    state_name?: string;
+    force_struct?: string;
+    binding_pairs?: number[];
+    bonus?: number;
+    malus?: number;
+}
+
+export interface OligoDef {
+    sequence: string;
+    malus: number;
+    name: string;
+    bind?: boolean;
+    concentration?: string; // a Numberable one
+    label?: string;
+}
 
 export enum UndoBlockParam {
     GU = 0,
@@ -22,32 +91,55 @@ export enum UndoBlockParam {
     NNFE_ARRAY = 13,
     MAX = 14,
     ANY_PAIR = 15,
+    MEANPUNP = 16,
+    SUMPUNP = 17,
+    BRANCHINESS = 18,
+    TARGET_EXPECTED_ACCURACY = 19,
 }
 
+export enum BasePairProbabilityTransform {
+    LEAVE_ALONE,
+    SQUARE
+}
+
+type Param = (number | number[] | DotPlot | null);
+
 export default class UndoBlock {
-    constructor(seq: number[]) {
-        this._sequence = seq.slice();
+    constructor(seq: Sequence, folderName: string) {
+        this._folderName = folderName;
+        this._sequence = seq.slice(0);
         this._pairsArray.set(false, []);
         this._pairsArray.set(true, []);
         this._paramsArray.set(false, []);
         this._paramsArray.set(true, []);
     }
 
-    public toJSON(): any {
+    public pairsOfPairs(pa: Map<boolean, SecStruct[]>) {
+        // Map an array of secondary structures to just pairs because then it
+        // can be nicely serialized.
+        const m = new Map<boolean, number[][]>();
+        pa.forEach((v: SecStruct[], k: boolean) => {
+            m.set(k, v.map((it) => it.pairs));
+        });
+        return m;
+    }
+
+    public toJSON(): FoldData {
         // TODO: Updating this requires changing all content in the DB AND
         // migrating all autosave content on boot for however long we want to allow
         // players to migrate their autosaves
         /* eslint-disable @typescript-eslint/camelcase */
         return {
-            sequence_: this._sequence,
-            pairs_array_: this._pairsArray,
+            folderName_: this._folderName,
+            sequence_: this._sequence.baseArray,
+            pairs_array_: this.pairsOfPairs(this._pairsArray),
             params_array_: this._paramsArray,
             stable_: this._stable,
             target_oligo_: this._targetOligo,
             target_oligos_: this._targetOligos,
             oligo_order_: this._oligoOrder,
             oligos_paired_: this._oligosPaired,
-            target_pairs_: this._targetPairs,
+            target_pairs_: this._targetPairs.pairs,
             target_oligo_order_: this._targetOligoOrder,
             puzzle_locks_: this._puzzleLocks,
             forced_struct_: this._forcedStruct,
@@ -56,62 +148,141 @@ export default class UndoBlock {
         /* eslint-enable @typescript-eslint/camelcase */
     }
 
-    public fromJSON(json: any): void {
+    public fromJSON(json: FoldData): void {
         try {
-            this._sequence = JSONUtil.require(json, 'sequence_');
-            this._pairsArray = JSONUtil.require(json, 'pairs_array_');
-            this._paramsArray = JSONUtil.require(json, 'params_array_');
-            this._stable = JSONUtil.require(json, 'stable_');
-            this._targetOligo = JSONUtil.require(json, 'target_oligo_');
-            this._targetOligos = JSONUtil.require(json, 'target_oligos_');
-            this._oligoOrder = JSONUtil.require(json, 'oligo_order_');
-            this._oligosPaired = JSONUtil.require(json, 'oligos_paired_');
-            this._targetPairs = JSONUtil.require(json, 'target_pairs_');
-            this._targetOligoOrder = JSONUtil.require(json, 'target_oligo_order_');
-            this._puzzleLocks = JSONUtil.require(json, 'puzzle_locks_');
-            this._forcedStruct = JSONUtil.require(json, 'forced_struct_');
-            this._targetConditions = JSONUtil.require(json, 'target_conditions_');
+            this._folderName = json.folderName_;
+            this._sequence.baseArray = json.sequence_;// JSONUtil.require(json, 'sequence_');
+            // Legacy -- this wasn't always a map. So check typeof and put nonmaps
+            // into the pseudoknots false field.
+            if (Array.isArray(json.pairs_array_)) {
+                this._pairsArray = new Map<boolean, SecStruct[]>();
+                this._pairsArray.set(false, json.pairs_array_);
+            } else {
+                this._pairsArray = new Map<boolean, SecStruct[]>();
+                const f = json.pairs_array_.get(false);
+                if (f) {
+                    this._pairsArray.set(false, f.map((v) => new SecStruct(v)));
+                }
+                const g = json.pairs_array_.get(true);
+                if (g) {
+                    this._pairsArray.set(true, g.map((v) => new SecStruct(v)));
+                }
+            }
+            if (Array.isArray(json.params_array_)) {
+                this._paramsArray = new Map<boolean, Param[][]>();
+                this._paramsArray.set(false, json.params_array_);
+            } else {
+                this._paramsArray = json.params_array_;
+            }
+            this._stable = json.stable_;
+            this._targetOligo = json.target_oligo_;
+            this._targetOligos = json.target_oligos_;
+            this._oligoOrder = json.oligo_order_;
+            this._oligosPaired = json.oligos_paired_;
+            this._targetPairs = new SecStruct(json.target_pairs_);
+            this._targetOligoOrder = json.target_oligo_order_;
+            this._puzzleLocks = json.puzzle_locks_;
+            this._forcedStruct = json.forced_struct_;
+            this._targetConditions = json.target_conditions_
+                ? json.target_conditions_
+                : undefined;
         } catch (e) {
             throw new Error(`Error parsing UndoBlock JSON: ${e}`);
         }
     }
 
-    public get targetOligos(): Oligo[] | null {
+    public targetExpectedAccuracy(
+        targetPairs: SecStruct,
+        dotArray: DotPlot | null,
+        behavior: BasePairProbabilityTransform
+    ): number {
+        if (dotArray === null || dotArray.data.length === 0) return 0;
+        const dotMap: Map<string, number> = new Map<string, number>();
+        const pairedPer: Map<number, number> = new Map<number, number>();
+
+        for (let jj = 0; jj < dotArray.data.length; jj += 3) {
+            const prob: number = behavior === BasePairProbabilityTransform.LEAVE_ALONE
+                ? dotArray.data[jj + 2]
+                : (dotArray.data[jj + 2] * dotArray.data[jj + 2]);
+
+            if (dotArray.data[jj] < dotArray.data[jj + 1]) {
+                dotMap.set([dotArray.data[jj], dotArray.data[jj + 1]].join(','), prob);
+            } else if (dotArray.data[jj] > dotArray.data[jj + 1]) {
+                dotMap.set([dotArray.data[jj + 1], dotArray.data[jj]].join(','), prob);
+            }
+
+            const jjprob = pairedPer.get(dotArray.data[jj]);
+            pairedPer.set(dotArray.data[jj], jjprob ? jjprob + prob : prob);
+
+            const jjp1prob = pairedPer.get(dotArray.data[jj + 1]);
+            pairedPer.set(dotArray.data[jj + 1], jjp1prob ? jjp1prob + prob : prob);
+        }
+
+        let TP = 1e-6;
+        // this is the remnant of a clever closed form solution irrelevant here
+        let TN = /* 0.5 * targetPairs.length * targetPairs.length - 1 + */ 1e-6;
+        let FP = 1e-6;
+        let FN = 1e-6;
+        const cFP = 1e-6;
+
+        // TP = np.sum(np.multiply(pred_m, probs)) + 1e-6
+        // TN = 0.5*N*N-1 - np.sum(pred_m) - np.sum(probs) + TP + 1e-6
+        // FP = np.sum(np.multiply(pred_m, 1-probs)) + 1e-6
+        // FN = np.sum(np.multiply(1-pred_m, probs)) + 1e-6
+
+        for (let ii = 0; ii < targetPairs.length; ++ii) {
+            for (let jj = ii + 1; jj < targetPairs.length; ++jj) {
+                const prob = dotMap.get([ii + 1, jj + 1].join(',')) ?? 0;
+                // Are ii and jj paired?
+                if (targetPairs.pairingPartner(ii) === jj) {
+                    TP += prob;
+                    FN += 1 - prob;
+                } else {
+                    FP += prob;
+                    TN += 1 - prob;
+                }
+            }
+        }
+
+        return (TP * TN - (FP - cFP) * FN) / Math.sqrt((TP + FP - cFP) * (TP + FN) * (TN + FP - cFP) * (TN + FN));
+    }
+
+    public get targetOligos(): Oligo[] | undefined {
         return this._targetOligos;
     }
 
-    public set targetOligos(targetOligos: Oligo[] | null) {
-        this._targetOligos = targetOligos == null ? null : JSON.parse(JSON.stringify(targetOligos));
+    public set targetOligos(targetOligos: Oligo[] | undefined) {
+        this._targetOligos = targetOligos === undefined ? undefined : JSON.parse(JSON.stringify(targetOligos));
     }
 
-    public get targetOligo(): number[] | null {
+    public get targetOligo(): number[] | undefined {
         return this._targetOligo;
     }
 
-    public set targetOligo(targetOligo: number[] | null) {
-        this._targetOligo = targetOligo == null ? null : targetOligo.slice();
+    public set targetOligo(targetOligo: number[] | undefined) {
+        this._targetOligo = targetOligo === undefined ? undefined : targetOligo.slice();
     }
 
     public get oligoMode(): number {
-        let tc: any = this.targetConditions;
-        if (tc == null) return 0;
-        return tc['fold_mode'] == null ? Pose2D.OLIGO_MODE_DIMER : Number(tc['fold_mode']);
+        const tc: TargetConditions | undefined = this.targetConditions;
+        if (tc === undefined) return 0;
+        return tc['fold_mode'] === undefined ? Pose2D.OLIGO_MODE_DIMER : Number(tc['fold_mode']);
     }
 
-    public get oligoName(): string | null {
-        let tc: any = this.targetConditions;
-        if (tc == null) {
-            return null;
+    public get oligoName(): string | undefined {
+        const tc: TargetConditions | undefined = this.targetConditions;
+        if (tc === undefined) {
+            return undefined;
         }
-        return Object.prototype.hasOwnProperty.call(tc, 'oligo_name') ? tc['oligo_name'] : null;
+        return Object.prototype.hasOwnProperty.call(tc, 'oligo_name') ? tc['oligo_name'] : undefined;
     }
 
-    public get oligoOrder(): number[] | null {
+    public get oligoOrder(): number[] | undefined {
         return this._oligoOrder;
     }
 
-    public set oligoOrder(oligoOrder: number[] | null) {
-        this._oligoOrder = oligoOrder == null ? null : oligoOrder.slice();
+    public set oligoOrder(oligoOrder: number[] | undefined) {
+        this._oligoOrder = oligoOrder === undefined ? undefined : oligoOrder.slice();
     }
 
     public get oligosPaired(): number {
@@ -122,35 +293,35 @@ export default class UndoBlock {
         this._oligosPaired = oligosPaired;
     }
 
-    public get targetPairs(): number[] {
+    public get targetPairs(): SecStruct {
         return this._targetPairs;
     }
 
-    public set targetPairs(targetPairs: number[]) {
-        this._targetPairs = targetPairs.slice();
+    public set targetPairs(targetPairs: SecStruct) {
+        this._targetPairs = targetPairs.slice(0);
     }
 
-    public get targetOligoOrder(): number[] | null {
+    public get targetOligoOrder(): number[] | undefined {
         return this._targetOligoOrder;
     }
 
-    public set targetOligoOrder(oligoOrder: number[] | null) {
-        this._targetOligoOrder = oligoOrder == null ? null : oligoOrder.slice();
+    public set targetOligoOrder(oligoOrder: number[] | undefined) {
+        this._targetOligoOrder = oligoOrder === undefined || !oligoOrder ? undefined : oligoOrder.slice();
     }
 
-    public get sequence(): number[] {
-        return this._sequence;
+    public get sequence(): Sequence {
+        return this._sequence.slice(0);
     }
 
-    public set sequence(seq: number[]) {
-        this._sequence = seq.slice();
+    public set sequence(seq: Sequence) {
+        this._sequence = seq;
     }
 
-    public get puzzleLocks(): boolean[] | null {
+    public get puzzleLocks(): boolean[] | undefined {
         return this._puzzleLocks;
     }
 
-    public set puzzleLocks(locks: boolean[] | null) {
+    public set puzzleLocks(locks: boolean[] | undefined) {
         this._puzzleLocks = locks;
     }
 
@@ -162,12 +333,12 @@ export default class UndoBlock {
         this._forcedStruct = forced;
     }
 
-    public get targetConditions(): any {
-        return (this._targetConditions == null ? null : JSON.parse(this._targetConditions));
+    public get targetConditions(): TargetConditions | undefined {
+        return (this._targetConditions === undefined ? undefined : this._targetConditions);
     }
 
-    public set targetConditions(conditions: any) {
-        this._targetConditions = JSON.stringify(conditions);
+    public set targetConditions(conditions: TargetConditions | undefined) {
+        this._targetConditions = conditions;
     }
 
     public get stable(): boolean {
@@ -178,53 +349,63 @@ export default class UndoBlock {
         this._stable = stable;
     }
 
-    public getPairs(temp: number = 37, pseudoknots: boolean = false): number[] {
+    public getPairs(temp: number = 37, pseudoknots: boolean = false): SecStruct {
         const pairsArray = this._pairsArray.get(pseudoknots);
         Assert.assertIsDefined(pairsArray);
-        return pairsArray[temp];
+        return new SecStruct(pairsArray[temp]?.pairs) ?? null;
     }
 
-    public getParam(index: UndoBlockParam, temp: number = 37, pseudoknots: boolean = false): any {
-        const parisArray = this._paramsArray.get(pseudoknots);
-        Assert.assertIsDefined(parisArray);
-        if (parisArray[temp] != null) {
-            return parisArray[temp][index];
+    public getParam(
+        index: UndoBlockParam,
+        temp: number = 37,
+        pseudoknots: boolean = false
+    ): number | number[] | DotPlot | null {
+        const paramsArray = this._paramsArray.get(pseudoknots);
+        Assert.assertIsDefined(paramsArray);
+        if (paramsArray[temp] != null) {
+            return paramsArray[temp][index];
         } else {
-            return undefined;
+            return null;
         }
     }
 
-    public setPairs(pairs: number[], temp: number = 37, pseudoknots: boolean = false): void {
+    public setPairs(pairs: SecStruct, temp: number = 37, pseudoknots: boolean = false): void {
         const pairsArray = this._pairsArray.get(pseudoknots);
         Assert.assertIsDefined(pairsArray);
-        pairsArray[temp] = pairs.slice();
+        pairsArray[temp] = pairs.slice(0);
     }
 
-    public setParam(index: UndoBlockParam, val: any, temp: number = 37, pseudoknots: boolean = false): void {
-        const pairsArray = this._paramsArray.get(pseudoknots);
-        Assert.assertIsDefined(pairsArray);
-        if (pairsArray[temp] == null) {
-            pairsArray[temp] = [];
+    public setParam(
+        index: UndoBlockParam,
+        val: Param,
+        temp: number = 37,
+        pseudoknots: boolean = false
+    ): void {
+        const paramsArray = this._paramsArray.get(pseudoknots);
+        Assert.assertIsDefined(paramsArray);
+        if (paramsArray[temp] == null) {
+            paramsArray[temp] = [];
         }
-        pairsArray[temp][index] = val;
+        paramsArray[temp][index] = val;
     }
 
-    public setBasics(folder: Folder, temp: number = 37, pseudoknots: boolean = false): void {
-        let bestPairs: number[];
-        let seq: number[] = this._sequence;
-        bestPairs = this.getPairs(temp, pseudoknots);
-        this.setParam(UndoBlockParam.GU, EPars.numGUPairs(seq, bestPairs), temp, pseudoknots);
-        this.setParam(UndoBlockParam.GC, EPars.numGCPairs(seq, bestPairs), temp, pseudoknots);
-        this.setParam(UndoBlockParam.AU, EPars.numUAPairs(seq, bestPairs), temp, pseudoknots);
-        this.setParam(UndoBlockParam.ANY_PAIR, EPars.numPairs(bestPairs), temp, pseudoknots);
-        this.setParam(UndoBlockParam.STACK, EPars.getLongestStackLength(bestPairs), temp, pseudoknots);
-        this.setParam(UndoBlockParam.REPETITION, EPars.getSequenceRepetition(
-            EPars.sequenceToString(seq), 5
-        ), temp, pseudoknots);
+    public setBasics(temp: number = 37, pseudoknots: boolean = false): void {
+        const folder: Folder | null = FolderManager.instance.getFolder(this._folderName);
+        if (!folder) {
+            throw new Error(`Critical error: can't create a ${this._folderName} folder instance by name`);
+        }
+        const seq: Sequence = this._sequence;
+        const bestPairs = this.getPairs(temp, pseudoknots);
+        this.setParam(UndoBlockParam.GU, seq.numGUPairs(bestPairs), temp, pseudoknots);
+        this.setParam(UndoBlockParam.GC, seq.numGCPairs(bestPairs), temp, pseudoknots);
+        this.setParam(UndoBlockParam.AU, seq.numUAPairs(bestPairs), temp, pseudoknots);
+        this.setParam(UndoBlockParam.ANY_PAIR, bestPairs.numPairs(), temp, pseudoknots);
+        this.setParam(UndoBlockParam.STACK, bestPairs.getLongestStackLength(), temp, pseudoknots);
+        this.setParam(UndoBlockParam.REPETITION, seq.getSequenceRepetition(5), temp, pseudoknots);
 
-        let fullSeq: number[] = seq.slice();
+        let fullSeq: RNABase[] = seq.baseArray.slice();
         if (this._targetOligo) {
-            if (this.oligoMode === Pose2D.OLIGO_MODE_DIMER) fullSeq.push(EPars.RNABASE_CUT);
+            if (this.oligoMode === Pose2D.OLIGO_MODE_DIMER) fullSeq.push(RNABase.CUT);
             if (this.oligoMode === Pose2D.OLIGO_MODE_EXT5P) {
                 fullSeq = this._targetOligo.concat(fullSeq);
             } else {
@@ -233,71 +414,196 @@ export default class UndoBlock {
         } else if (this._targetOligos) {
             Assert.assertIsDefined(this._oligoOrder);
             for (let ii = 0; ii < this._targetOligos.length; ii++) {
-                fullSeq.push(EPars.RNABASE_CUT);
+                fullSeq.push(RNABase.CUT);
                 fullSeq = fullSeq.concat(this._targetOligos[this._oligoOrder[ii]].sequence);
             }
         }
-        let nnfe: number[] = [];
-        let totalFE = folder.scoreStructures(fullSeq, bestPairs, pseudoknots, temp, nnfe);
+        const nnfe: number[] = [];
+        const totalFE = folder.scoreStructures(new Sequence(fullSeq), bestPairs, pseudoknots, temp, nnfe);
 
         this.setParam(UndoBlockParam.FE, totalFE, temp, pseudoknots);
         this.setParam(UndoBlockParam.NNFE_ARRAY, nnfe, temp, pseudoknots);
     }
 
-    public updateMeltingPointAndDotPlot(folder: Folder, pseudoknots: boolean = false): void {
-        if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) == null) {
-            let dotArray: number[] | null = folder.getDotPlot(this.sequence, this.getPairs(37), 37, pseudoknots);
-            this.setParam(UndoBlockParam.DOTPLOT, dotArray, 37, pseudoknots);
-            this._dotPlotData = dotArray ? dotArray.slice() : null;
+    public sumProbUnpaired(dotArray: DotPlot | null, behavior: BasePairProbabilityTransform): number {
+        if (dotArray === null || dotArray.data.length === 0) return 0;
+        // dotArray is organized as idx, idx, pairprob.
+        const probUnpaired: number[] = Array<number>(this.sequence.length);
+        for (let idx = 0; idx < this.sequence.length; ++idx) {
+            probUnpaired[idx] = 1;
+            for (let ii = 0; ii < dotArray.data.length; ii += 3) {
+                if (dotArray.data[ii] === idx + 1 || dotArray.data[ii + 1] === idx + 1) {
+                    if (behavior === BasePairProbabilityTransform.LEAVE_ALONE) {
+                        probUnpaired[idx] -= (dotArray.data[ii + 2]);
+                    } else {
+                        probUnpaired[idx] -= (dotArray.data[ii + 2] * dotArray.data[ii + 2]);
+                    }
+                }
+            }
+        }
+        // for (let idx = 0; idx < this.sequence.length; ++idx) {
+        //     if (probUnpaired[idx] < 0) {
+        //         probUnpaired[idx] = 0;
+        //     }
+        // }
+
+        // mean prob unpaired
+        return probUnpaired.reduce((a, b) => a + b, 0);// / this.sequence.length;
+    }
+
+    public branchiness(pairs: SecStruct) {
+        // format of pairs is
+        // '((.))' -> [4,3,-1,1,0]
+        // note that if you calculate this average, it's fine to double count
+        // pairs for obvious reasons!
+        // so this is the average difference between idx and val
+        // over n-1
+        // 1- that
+
+        let totDist = 0;
+        let count = 0;
+        for (let ii = 0; ii < pairs.length; ++ii) {
+            if (!pairs.isPaired(ii)) {
+                continue;
+            }
+
+            if (pairs.pairingPartner(ii) > ii) {
+                totDist += pairs.pairingPartner(ii) - ii;
+            } else {
+                totDist += ii - pairs.pairingPartner(ii);
+            }
+            ++count;
+        }
+
+        return 1 - ((totDist / count) / (pairs.length - 1));
+    }
+
+    public ensembleBranchiness(dotArray: DotPlot | null, behavior: BasePairProbabilityTransform) {
+        if (dotArray === null || dotArray.data.length === 0) return 0;
+        // format of pairs is
+        // '((.))' -> [4,3,-1,1,0]
+        // note that if you calculate this average, it's fine to double count
+        // pairs for obvious reasons! so this is the average difference between
+        // idx and val
+
+        let totDist = 0;
+
+        // every bp adds jj - ii to totDist and prob to count.
+        let count = 0;
+
+        // dotArray is organized as idx, idx, pairprob.
+        if (behavior === BasePairProbabilityTransform.LEAVE_ALONE) {
+            for (let ii = 0; ii < dotArray.data.length; ii += 3) {
+                if (dotArray.data[ii] > dotArray.data[ii + 1]) {
+                    totDist += (dotArray.data[ii] - dotArray.data[ii + 1]) * dotArray.data[ii + 2];
+                } else {
+                    totDist += (dotArray.data[ii + 1] - dotArray.data[ii]) * dotArray.data[ii + 2];
+                }
+                count += (dotArray.data[ii + 2]);
+            }
+        } else {
+            for (let ii = 0; ii < dotArray.data.length; ii += 3) {
+                if (dotArray.data[ii] > dotArray.data[ii + 1]) {
+                    totDist += (dotArray.data[ii] - dotArray.data[ii + 1])
+                        * dotArray.data[ii + 2] * dotArray.data[ii + 2];
+                } else {
+                    totDist += (dotArray.data[ii + 1] - dotArray.data[ii])
+                        * dotArray.data[ii + 2] * dotArray.data[ii + 2];
+                }
+                count += (dotArray.data[ii + 2] * dotArray.data[ii + 2]);
+            }
+        }
+        return 1 - ((totDist / count) / (this.sequence.length - 1));
+    }
+
+    public updateMeltingPointAndDotPlot(pseudoknots: boolean = false): void {
+        let bppStatisticBehavior: BasePairProbabilityTransform = BasePairProbabilityTransform.LEAVE_ALONE;
+        if (this._folderName === Vienna.NAME || this._folderName === Vienna2.NAME) {
+            bppStatisticBehavior = BasePairProbabilityTransform.SQUARE;
+        }
+        const folder = FolderManager.instance.getFolder(this._folderName);
+        if (folder === null) {
+            throw new Error(`Critical error: can't create a ${this._folderName} folder instance by name`);
         }
 
         for (let ii = 37; ii < 100; ii += 10) {
             if (this.getPairs(ii) == null) {
-                let pairs = folder.foldSequence(this.sequence, null, null, pseudoknots, ii);
+                const pairs: SecStruct | null = folder.foldSequence(this.sequence, null, null, pseudoknots, ii);
                 Assert.assertIsDefined(pairs);
                 this.setPairs(pairs, ii, pseudoknots);
             }
 
             if (this.getParam(UndoBlockParam.DOTPLOT, ii) == null) {
-                let dotTempArray: number[] | null = folder.getDotPlot(
+                const dotTempArray: DotPlot | null = folder.getDotPlot(
                     this.sequence,
                     this.getPairs(ii),
                     ii,
                     pseudoknots
                 );
                 Assert.assertIsDefined(dotTempArray);
-                this.setParam(UndoBlockParam.DOTPLOT, dotTempArray, ii, pseudoknots);
+                // mean+sum prob unpaired
+                this.setParam(UndoBlockParam.SUMPUNP,
+                    this.sumProbUnpaired(dotTempArray, bppStatisticBehavior), ii, pseudoknots);
+                this.setParam(UndoBlockParam.MEANPUNP,
+                    this.sumProbUnpaired(
+                        dotTempArray, bppStatisticBehavior
+                    ) / this.sequence.length, ii, pseudoknots);
+                // branchiness
+                this.setParam(UndoBlockParam.BRANCHINESS,
+                    this.ensembleBranchiness(dotTempArray, bppStatisticBehavior), ii, pseudoknots);
+                this.setParam(UndoBlockParam.DOTPLOT, dotTempArray.data, ii, pseudoknots);
             }
         }
 
-        let refPairs: number[] = this.getPairs(37, pseudoknots);
+        if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) === undefined) {
+            const dotArray: DotPlot | null = folder.getDotPlot(
+                this.sequence, this.getPairs(37), 37, pseudoknots
+            );
+            this.setParam(UndoBlockParam.DOTPLOT, dotArray?.data ?? null, 37, pseudoknots);
+            // mean+sum prob unpaired
+            this.setParam(UndoBlockParam.SUMPUNP,
+                this.sumProbUnpaired(dotArray, bppStatisticBehavior), 37, pseudoknots);
+            this.setParam(UndoBlockParam.MEANPUNP,
+                this.sumProbUnpaired(dotArray, bppStatisticBehavior) / this.sequence.length, 37, pseudoknots);
+            // branchiness
+            this.setParam(UndoBlockParam.BRANCHINESS,
+                this.ensembleBranchiness(dotArray, bppStatisticBehavior), 37, pseudoknots);
+            this.setParam(
+                UndoBlockParam.TARGET_EXPECTED_ACCURACY,
+                this.targetExpectedAccuracy(this._targetPairs, dotArray, bppStatisticBehavior),
+                37,
+                pseudoknots
+            );
+            this._dotPlotData = dotArray;
+        }
 
-        let pairScores: number[] = [];
-        let maxPairScores: number[] = [];
+        const refPairs: SecStruct = this.getPairs(37, pseudoknots);
+        const pairScores: number[] = [];
+        const maxPairScores: number[] = [];
 
         for (let ii = 37; ii < 100; ii += 10) {
             if (this.getParam(UndoBlockParam.PROB_SCORE, ii)) {
-                pairScores.push(1 - this.getParam(UndoBlockParam.PAIR_SCORE, ii, pseudoknots));
+                pairScores.push(1 - (this.getParam(UndoBlockParam.PAIR_SCORE, ii, pseudoknots) as number));
                 maxPairScores.push(1.0);
                 continue;
             }
-            let curDat: number[] = this.getParam(UndoBlockParam.DOTPLOT, ii, pseudoknots);
-            let curPairs: number[] = this.getPairs(ii, pseudoknots);
+            const curDat: DotPlot = new DotPlot(this.getParam(UndoBlockParam.DOTPLOT, ii, pseudoknots) as number[]);
+            const curPairs: SecStruct = this.getPairs(ii, pseudoknots);
             let probScore = 0;
             let scoreCount = 0;
 
-            for (let jj = 0; jj < curDat.length; jj += 3) {
-                let indexI: number = curDat[jj] - 1;
-                let indexJ: number = curDat[jj + 1] - 1;
+            for (let jj = 0; jj < curDat.data.length; jj += 3) {
+                const indexI: number = curDat.data[jj] - 1;
+                const indexJ: number = curDat.data[jj + 1] - 1;
 
                 if (indexI < indexJ) {
-                    if (refPairs[indexI] === indexJ) {
-                        probScore += Number(curDat[jj + 2]);
+                    if (refPairs.pairingPartner(indexI) === indexJ) {
+                        probScore += Number(curDat.data[jj + 2]);
                         scoreCount++;
                     }
                 } else if (indexJ < indexI) {
-                    if (refPairs[indexJ] === indexI) {
-                        probScore += Number(curDat[jj + 2]);
+                    if (refPairs.pairingPartner(indexJ) === indexI) {
+                        probScore += Number(curDat.data[jj + 2]);
                         scoreCount++;
                     }
                 }
@@ -309,11 +615,11 @@ export default class UndoBlock {
 
             let numPaired = 0;
             for (let jj = 0; jj < curPairs.length; jj++) {
-                if (curPairs[jj] > jj) {
+                if (curPairs.pairingPartner(jj) > jj) {
                     numPaired += 2;
                 }
             }
-            let pairScore: number = Number(numPaired) / refPairs.length;
+            const pairScore: number = Number(numPaired) / refPairs.length;
 
             pairScores.push(1 - pairScore);
             maxPairScores.push(1.0);
@@ -325,11 +631,11 @@ export default class UndoBlock {
         this._meltPlotPairScores = pairScores;
         this._meltPlotMaxPairScores = maxPairScores;
 
-        let initScore: number = this.getParam(UndoBlockParam.PROB_SCORE, 37, pseudoknots);
+        const initScore: number = this.getParam(UndoBlockParam.PROB_SCORE, 37, pseudoknots) as number;
 
         let meltpoint = 107;
         for (let ii = 47; ii < 100; ii += 10) {
-            let currentScore: number = this.getParam(UndoBlockParam.PROB_SCORE, ii, pseudoknots);
+            const currentScore: number = this.getParam(UndoBlockParam.PROB_SCORE, ii, pseudoknots) as number;
             if (currentScore < initScore * 0.5) {
                 meltpoint = ii;
                 break;
@@ -340,13 +646,13 @@ export default class UndoBlock {
     }
 
     public createDotPlot(): Plot {
-        let plot = new Plot(PlotType.SCATTER);
-        plot.set2DData(this._dotPlotData, this._sequence.length);
+        const plot = new Plot(PlotType.SCATTER);
+        plot.set2DData(this._dotPlotData?.data ?? null, this._sequence.length);
         return plot;
     }
 
     public createMeltPlot(): Plot {
-        let plot = new Plot(PlotType.LINE);
+        const plot = new Plot(PlotType.LINE);
         plot.setData(this._meltPlotPairScores, this._meltPlotMaxPairScores);
         return plot;
     }
@@ -359,40 +665,45 @@ export default class UndoBlock {
      * E.g., given oligos in order A B C, [1,2,0] means their new order should be C, A, B
      * (oligo A, with the old index of 0, should be at new index 1)
      */
-    public reorderedOligosIndexMap(otherOrder: number[] | null): number[] | null {
-        if (this._targetOligos == null) return null;
+    public reorderedOligosIndexMap(otherOrder: number[] | undefined): number[] | undefined {
+        if (this._targetOligos === undefined) return undefined;
 
-        let originalIndices: number[][] = [];
+        const originalIndices: number[][] = [];
         let oligoFirstBaseIndex = this._sequence.length;
 
-        for (let oligo of this._targetOligos) {
+        for (const oligo of this._targetOligos) {
             // The + 1 is used to account for the "cut" base denoting split points between strands
             originalIndices.push(Utility.range(oligoFirstBaseIndex, oligoFirstBaseIndex + oligo.sequence.length + 1));
             oligoFirstBaseIndex += oligo.sequence.length + 1;
         }
 
-        let newOrder = otherOrder || Utility.range(this._targetOligos.length);
+        const newOrder = otherOrder || Utility.range(this._targetOligos.length);
 
         return Utility.range(this._sequence.length).concat(
             ...Utility.range(this._targetOligos.length).map((idx) => originalIndices[newOrder.indexOf(idx)])
         );
     }
 
-    private _sequence: number[];
-    private _pairsArray: Map<boolean, number[][]> = new Map<boolean, number[][]>();
-    private _paramsArray: Map<boolean, any[][]> = new Map<boolean, any[][]>();
-    private _stable: boolean = false;
-    private _targetOligo: number[] | null = null;
-    private _targetOligos: Oligo[] | null = null;
-    private _oligoOrder: number[] | null = null;
-    private _oligosPaired: number = 0;
-    private _targetPairs: number[] = [];
-    private _targetOligoOrder: number[] | null = null;
-    private _puzzleLocks: boolean[] | null = [];
-    private _forcedStruct: number[] = [];
-    private _targetConditions: string | null = null;
+    public get folderName(): string {
+        return this._folderName;
+    }
 
-    private _dotPlotData: number[] | null;
+    private _sequence: Sequence = new Sequence([]);
+    private _pairsArray: Map<boolean, SecStruct[]> = new Map<boolean, SecStruct[]>();
+    private _paramsArray: Map<boolean, Param[][]> = new Map<boolean, Param[][]>();
+    private _stable: boolean = false;
+    private _targetOligo: number[] | undefined = undefined;
+    private _targetOligos: Oligo[] | undefined = undefined;
+    private _oligoOrder: number[] | undefined = undefined;
+    private _oligosPaired: number = 0;
+    private _targetPairs: SecStruct = new SecStruct();
+    private _targetOligoOrder: number[] | undefined = undefined;
+    private _puzzleLocks: boolean[] | undefined = [];
+    private _forcedStruct: number[] = [];
+    private _targetConditions: TargetConditions | undefined = undefined;
+
+    private _dotPlotData: DotPlot | null;
     private _meltPlotPairScores: number[];
     private _meltPlotMaxPairScores: number[];
+    private _folderName: string;
 }

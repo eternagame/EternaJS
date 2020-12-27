@@ -86,13 +86,19 @@ export default class GameButton extends Button implements KeyboardListener {
         return this;
     }
 
-    public label(text: string | TextBuilder, fontSize?: number, background?: boolean): GameButton {
+    public label(
+        text: string | TextBuilder,
+        fontSize?: number,
+        background?: boolean,
+        customTextColors?: Map<ButtonState, number>
+    ): GameButton {
         if (typeof (text) === 'string') {
-            this._labelBuilder = Fonts.arial(text as string).fontSize(fontSize || 22).bold().color(0xFFFFFF);
+            this._labelBuilder = Fonts.std(text as string).fontSize(fontSize || 22).bold().color(0xFFFFFF);
         } else {
             this._labelBuilder = text as TextBuilder;
         }
         this._labelBackground = background;
+        this._customTextColors = customTextColors;
         this.needsRedraw();
         return this;
     }
@@ -150,7 +156,7 @@ export default class GameButton extends Button implements KeyboardListener {
         this.toggled.value = !this.toggled.value;
     }
 
-    protected onToggledChanged(toggled: boolean): void {
+    protected onToggledChanged(_toggled: boolean): void {
         this.showState(this._state);
     }
 
@@ -176,19 +182,23 @@ export default class GameButton extends Button implements KeyboardListener {
         // Create label
         let label: Text | null = null;
         if (this._labelBuilder != null) {
-            label = this._labelBuilder.color(GameButton.TEXT_COLORS.get(state) || 0xffffff).build();
+            const textColor = this._customTextColors?.get(state) ?? GameButton.TEXT_COLORS.get(state);
+            label = this._labelBuilder.color(textColor ?? 0xffffff).build();
             this._content.addChild(label);
         }
 
         // Stylebox (shown when we have text and no background image)
         const drawStyleBox = this._customStyleBox == null
             && icon == null
-            && label != null
+            && label !== null
             && this._labelBackground !== false;
 
         if (drawStyleBox) {
+            // We can safely assert label is non-null because
+            // that is a requirement for drawStyleBox
+            Assert.assertIsDefined(label);
             const labelWidth = this._fixedLabelWidth > 0 ? this._fixedLabelWidth : label.width;
-            let styleBox = new Graphics()
+            const styleBox = new Graphics()
                 .beginFill(GameButton.STYLEBOX_COLORS.get(state) || 0x0)
                 .drawRoundedRect(0, 0,
                     labelWidth + (GameButton.WMARGIN * 2),
@@ -205,7 +215,7 @@ export default class GameButton extends Button implements KeyboardListener {
         // Position label
         if (label != null) {
             if (this._scaleIconToLabel && icon != null) {
-                let scale: number = (1.5 * label.height) / this._content.height;
+                const scale: number = (1.5 * label.height) / this._content.height;
                 icon.scale = new Point(scale, scale);
             }
 
@@ -228,8 +238,8 @@ export default class GameButton extends Button implements KeyboardListener {
             if (icon != null) {
                 // if we have an icon, add an invisible hitbox to prevent unclickable pixels
                 // between the icon and the label
-                let bounds = this._content.getLocalBounds(GameButton.SCRATCH_RECT);
-                let hitbox = new Graphics()
+                const bounds = this._content.getLocalBounds(GameButton.SCRATCH_RECT);
+                const hitbox = new Graphics()
                     .beginFill(0xff0000, 0)
                     .drawRect(bounds.x, bounds.y, bounds.width, bounds.height)
                     .endFill();
@@ -256,7 +266,7 @@ export default class GameButton extends Button implements KeyboardListener {
             this._tooltipReg = null;
         }
 
-        if (this._tooltip != null && Tooltips.instance != null) {
+        if (this._tooltip != null && this._tooltip !== '' && Tooltips.instance != null) {
             this._tooltipReg = this.regs.add(Tooltips.instance.addButtonTooltip(this, this._tooltip));
         }
     }
@@ -293,7 +303,7 @@ export default class GameButton extends Button implements KeyboardListener {
         } else if (displayOrTex instanceof Texture) {
             return new Sprite(displayOrTex);
         } else if (typeof (displayOrTex) === 'string') {
-            return Sprite.fromImage(displayOrTex);
+            return Sprite.from(displayOrTex);
         } else {
             return null;
         }
@@ -311,6 +321,7 @@ export default class GameButton extends Button implements KeyboardListener {
     private _buttonIcons: (DisplayObject | null)[];
     private _selectedState: DisplayObject | null;
     private _customStyleBox?: Graphics;
+    private _customTextColors?: Map<ButtonState, number>;
 
     private _rscriptID: RScriptUIElementID;
     private _rscriptClickReg: Registration = Registrations.Null();

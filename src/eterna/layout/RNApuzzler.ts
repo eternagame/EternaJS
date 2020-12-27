@@ -11,12 +11,13 @@ export default class RNApuzzler extends LayoutEngine {
     /**
      * Asynchronously creates a new instance of the RNApuzzler layout engine.
      * @returns {Promise<RNApuzzler>}
+     * @description AMW TODO cannot annotate type of module/program; both are any.
      */
     public static create(): Promise<RNApuzzler> {
         // eslint-disable-next-line import/no-extraneous-dependencies
         return import('engines-bin/rnapuzzler')
-            .then((module: any) => EmscriptenUtil.loadProgram(module))
-            .then((program: any) => new RNApuzzler(program));
+            .then((module) => EmscriptenUtil.loadProgram(module))
+            .then((program) => new RNApuzzler(program));
     }
 
     private constructor(lib: RNApuzzlerLib) {
@@ -35,12 +36,12 @@ export default class RNApuzzler extends LayoutEngine {
 
         // We get two vectors. mush them up.
 
-        let pts = pairTable.join(',');
-        let res = this._lib.GetLayout(pts);
-        let Xs = EmscriptenUtil.stdVectorToArray<number>(res.xs);
-        let Ys = EmscriptenUtil.stdVectorToArray<number>(res.ys);
+        const pts = pairTable.join(',');
+        const res = this._lib.GetLayout(pts);
+        const Xs = EmscriptenUtil.stdVectorToArray<number>(res.xs);
+        const Ys = EmscriptenUtil.stdVectorToArray<number>(res.ys);
 
-        let zip: [number, number][] = [];
+        const zip: [number, number][] = [];
         for (let ii = 0; ii < Xs.length; ++ii) {
             zip.push([Xs[ii], Ys[ii]]);
         }

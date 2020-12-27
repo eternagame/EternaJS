@@ -36,26 +36,20 @@ export default class ScoreDisplayNode {
     }
 
     public get scoreColor(): number {
-        let r = 0;
-        let g = 0;
-        let b = 0;
-
-        let score: number = this._score / 100.0;
-        let prog = 0;
-
+        const score: number = this._score / 100.0;
         if (score > 0) {
-            prog = MathUtil.clamp(score / 5.0, 0, 1);
-            r = 1;
-            g = (1 - prog) + (30 / 255) * prog;
-            b = (1 - prog) + (30 / 255) * prog;
+            const prog = MathUtil.clamp(score / 5.0, 0, 1);
+            const r = 1;
+            const g = (1 - prog) + (30 / 255) * prog;
+            const b = (1 - prog) + (30 / 255) * prog;
+            return ColorUtil.compose(r, g, b);
         } else {
-            prog = MathUtil.clamp(score / -5.0, 0, 1);
-            g = 1;
-            r = (1 - prog) + (30 / 255) * prog;
-            b = (1 - prog) + (30 / 255) * prog;
+            const prog = MathUtil.clamp(score / -5.0, 0, 1);
+            const g = 1;
+            const r = (1 - prog) + (30 / 255) * prog;
+            const b = (1 - prog) + (30 / 255) * prog;
+            return ColorUtil.compose(r, g, b);
         }
-
-        return ColorUtil.compose(r, g, b);
     }
 
     public get scoreString(): string {

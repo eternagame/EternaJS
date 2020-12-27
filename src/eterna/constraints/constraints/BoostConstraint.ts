@@ -1,7 +1,9 @@
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import EPars from 'eterna/EPars';
+import {RNABase} from 'eterna/EPars';
 import {Assert} from 'flashbang';
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 
@@ -11,10 +13,10 @@ interface BoostConstraintStatus extends BaseConstraintStatus {
 
 class Loop {
     public isBoosted: boolean[];
-    public strands: EPars[][];
+    public strands: number[][];
     public pairs: [number, number][];
 
-    constructor(boosted: boolean[], strands: EPars[][], pairs: [number, number][]) {
+    constructor(boosted: boolean[], strands: number[][], pairs: [number, number][]) {
         this.isBoosted = boosted;
         this.strands = strands;
         this.pairs = pairs;
@@ -29,50 +31,51 @@ class Loop {
     }
 }
 
-function detectLoops(targetPairs: number[], loops: Loop[]) {
+function detectLoops(targetPairs: SecStruct, loops: Loop[]) {
     loops.splice(0);
-    let loopStack: Loop[] = [];
-    let tmpPairs = targetPairs.slice();
+    const loopStack: Loop[] = [];
+    const tmpPairs = targetPairs.slice(0);
     let lastPair: [number, number] | null = null;
     let examiningLoops = false;
 
     const clonePair = (obj: [number, number]) => [obj[0], obj[1]] as [number, number];
 
     for (let i = 0; i < tmpPairs.length; ++i) {
-        if (tmpPairs[i] === -1 && !examiningLoops && lastPair !== null) {
+        if (!tmpPairs.isPaired(i) && !examiningLoops && lastPair !== null) {
             // Found a loop!
-            let l: Loop = new Loop([false], [], [clonePair(lastPair)]);
+            const l: Loop = new Loop([false], [], [clonePair(lastPair)]);
             lastPair = null;
 
             // Find the rest of the unpaired bases in the first strand.
-            let arr = [];
+            const arr = [];
             for (i; i < tmpPairs.length; ++i) {
-                if (tmpPairs[i] !== -1) break;
+                if (!tmpPairs.isPaired(i)) break;
                 arr.push(i);
             }
             --i;
             l.strands.push(arr.slice());
             loopStack.push(l);
             examiningLoops = true;
-        } else if (tmpPairs[i] >= 0 && tmpPairs[i + 1] >= 0
-                     && Math.abs(tmpPairs[i] - tmpPairs[i + 1]) > 1 && lastPair !== null && !examiningLoops) {
+        } else if (tmpPairs.isPaired(i) && tmpPairs.isPaired(i + 1)
+                && Math.abs(tmpPairs.pairingPartner(i) - tmpPairs.pairingPartner(i + 1)) > 1
+                && lastPair !== null && !examiningLoops) {
             // Special case where the free bases are on the OTHER side while on initial strand, we have
             // two pairs in a row.
-            const l: Loop = new Loop([false], [], [[i, tmpPairs[i]]]);
+            const l: Loop = new Loop([false], [], [[i, tmpPairs.pairingPartner(i)]]);
             lastPair = null;
             loopStack.push(l);
             examiningLoops = true;
-        } else if (tmpPairs[i] === -1 && examiningLoops) {
+        } else if (!tmpPairs.isPaired(i) && examiningLoops) {
             // Add bases to a new strand in the current loop.
-            let arr = [];
+            const arr = [];
             for (i; i < tmpPairs.length; ++i) {
-                if (tmpPairs[i] !== -1) break;
+                if (tmpPairs.isPaired(i)) break;
                 arr.push(i);
             }
             --i;
             loopStack[loopStack.length - 1].strands.push(arr.slice());
-        } else if (i < tmpPairs[i]) { // Make sure we don't count pairs twice
-            lastPair = [i, tmpPairs[i]];
+        } else if (i < tmpPairs.pairingPartner(i)) { // Make sure we don't count pairs twice
+            lastPair = [i, tmpPairs.pairingPartner(i)];
             if (examiningLoops) {
                 loopStack[loopStack.length - 1].pairs.push(clonePair(lastPair));
             }
@@ -87,13 +90,10 @@ function detectLoops(targetPairs: number[], loops: Loop[]) {
                 examiningLoops = false;
             }
             if (loopStack.length > 0) {
-                for (let j = 0; j < loopStack[loopStack.length - 1].pairs.length; ++j) {
-                    // Closing off a pair that is part of the loop but is not the last loop.
-                    if (i === loopStack[loopStack.length - 1].pairs[j][1]) {
-                        examiningLoops = true;
-                        break;
-                    }
-                }
+                // Closing off a pair that is part of the loop but is not the last loop.
+                examiningLoops = loopStack[loopStack.length - 1].pairs.some(
+                    (elem) => i === elem[1]
+                );
             }
         }
     }
@@ -101,8 +101,8 @@ function detectLoops(targetPairs: number[], loops: Loop[]) {
     return loops;
 }
 
-let loops: Loop[][] = [];
-function countLoops(targetPairs: number[], currentTargetIndex: number, sequence: number[]) {
+const loops: Loop[][] = [];
+function countLoops(targetPairs: SecStruct, currentTargetIndex: number, sequence: Sequence) {
     if (!targetPairs) {
         return 0;
     }
@@ -113,20 +113,19 @@ function countLoops(targetPairs: number[], currentTargetIndex: number, sequence:
         detectLoops(targetPairs, loops[currentTargetIndex]);
     }
 
-    for (let i = 0; i < loops[currentTargetIndex].length; ++i) {
+    for (const loop of loops[currentTargetIndex]) {
         // Check that the pairs are made first.
-        const loop = loops[currentTargetIndex][i];
 
         // There has to be at least one strand.
         if (loop.strands.length <= 0) {
             continue;
         }
 
-        let pairs = loop.pairs;
+        const pairs = loop.pairs;
         if (loop.strands.length === 2 && loop.strands[0].length === 1 && loop.strands[1].length === 1) {
             // 1-1 Loops. Need G-G terminal mismatch.
-            if (sequence[loop.strands[0][0] as number] === EPars.RNABASE_GUANINE
-                    && sequence[loop.strands[1][0] as number] === EPars.RNABASE_GUANINE) {
+            if (sequence.nt(loop.strands[0][0] as number) === RNABase.GUANINE
+                    && sequence.nt(loop.strands[1][0] as number) === RNABase.GUANINE) {
                 ++ret;
                 loop.isBoosted[0] = true;
             } else {
@@ -134,8 +133,8 @@ function countLoops(targetPairs: number[], currentTargetIndex: number, sequence:
             }
         } else if (pairs.length === 1 && loop.strands.length === 1) {
             // Hairpin loops. G-A terminal mismatch (with the G at the lowest index).
-            if (sequence[loop.strands[0][0] as number] === EPars.RNABASE_GUANINE
-                    && sequence[loop.strands[0][loop.strands[0].length - 1] as number] === EPars.RNABASE_ADENINE) {
+            if (sequence.nt(loop.strands[0][0] as number) === RNABase.GUANINE
+                    && sequence.nt(loop.strands[0][loop.strands[0].length - 1] as number) === RNABase.ADENINE) {
                 ++ret;
                 loop.isBoosted[0] = true;
             } else {
@@ -155,14 +154,14 @@ function countLoops(targetPairs: number[], currentTargetIndex: number, sequence:
                 }
 
                 // Make sure that both of these indices are unpaired in target mode.
-                if (targetPairs[idx1] !== -1
-                         || targetPairs[idx2] !== -1) {
+                if (targetPairs.isPaired(idx1)
+                         || targetPairs.isPaired(idx2)) {
                     continue;
                 }
 
                 // Check for G-A mismatch.
-                if ((sequence[idx1] === EPars.RNABASE_GUANINE && sequence[idx2] === EPars.RNABASE_ADENINE)
-                    || (sequence[idx2] === EPars.RNABASE_GUANINE && sequence[idx1] === EPars.RNABASE_ADENINE)) {
+                if ((sequence.nt(idx1) === RNABase.GUANINE && sequence.nt(idx2) === RNABase.ADENINE)
+                    || (sequence.nt(idx2) === RNABase.GUANINE && sequence.nt(idx1) === RNABase.ADENINE)) {
                     ++ret;
                     loop.isBoosted[j] = true;
                 } else {
@@ -196,7 +195,7 @@ export default class BoostConstraint extends Constraint<BaseConstraintStatus> {
         status: BoostConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
-        let tooltip = ConstraintBox.createTextStyle();
+        const tooltip = ConstraintBox.createTextStyle();
         if (forMissionScreen) {
             tooltip.pushStyle('altTextMain');
         }

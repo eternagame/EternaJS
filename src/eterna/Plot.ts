@@ -80,7 +80,7 @@ export default class Plot extends Container {
             Assert.assertIsDefined(this._data);
             Assert.assertIsDefined(this._upperBounds);
             for (let ii = 0; ii < this._data.length; ii++) {
-                let len: number = (this._data[ii] / this._upperBounds[ii]) * this._height;
+                const len: number = (this._data[ii] / this._upperBounds[ii]) * this._height;
 
                 if (this._ghostData == null) {
                     this._graphics.beginFill(0x00AA00);
@@ -89,7 +89,7 @@ export default class Plot extends Container {
                         Plot.H_MARGIN + this._height - len, horizontalSpace / 2.0, len
                     );
                 } else {
-                    let ghostlen: number = (this._ghostData[ii] / this._upperBounds[ii]) * this._height;
+                    const ghostlen: number = (this._ghostData[ii] / this._upperBounds[ii]) * this._height;
                     this._graphics.beginFill(0x00AA00);
                     this._graphics.drawRect(
                         Plot.W_MARGIN + (ii + 1) * horizontalSpace - horizontalSpace / 2.0,
@@ -106,13 +106,13 @@ export default class Plot extends Container {
             this._graphics.lineStyle(1, 0xAAAAAA, 1);
             Assert.assertIsDefined(this._data);
             for (let ii = 0; ii < this._data.length; ii++) {
-                let xCoord = Plot.W_MARGIN + (ii + 1) * horizontalSpace - horizontalSpace / 2.0 + x;
+                const xCoord = Plot.W_MARGIN + (ii + 1) * horizontalSpace - horizontalSpace / 2.0 + x;
                 this._graphics.moveTo(xCoord, 0);
                 this._graphics.lineTo(xCoord, this._height);
             }
 
             for (let ii = 0; ii < 10; ii++) {
-                let yCoord = (ii / 10) * (this._height - Plot.H_MARGIN) + y;
+                const yCoord = (ii / 10) * (this._height - Plot.H_MARGIN) + y;
                 this._graphics.moveTo(0, yCoord + Plot.H_MARGIN);
                 this._graphics.lineTo(this._width, yCoord + Plot.H_MARGIN);
             }
@@ -120,7 +120,7 @@ export default class Plot extends Container {
             this._graphics.lineStyle(2, 0x00AA00);
             Assert.assertIsDefined(this._upperBounds);
             for (let ii = 0; ii < this._data.length; ii++) {
-                let hlen: number = (this._data[ii] / (this._upperBounds[ii])) * (this._height - Plot.H_MARGIN);
+                const hlen: number = (this._data[ii] / (this._upperBounds[ii])) * (this._height - Plot.H_MARGIN);
                 if (ii === 0) {
                     this._graphics.moveTo(
                         Plot.W_MARGIN + (ii + 1) * horizontalSpace - horizontalSpace / 2.0,
@@ -137,7 +137,7 @@ export default class Plot extends Container {
             if (this._ghostData != null) {
                 this._graphics.lineStyle(2, 0xAA0000);
                 for (let ii = 0; ii < this._ghostData.length; ii++) {
-                    let ghosthlen: number = (this._ghostData[ii] / this._upperBounds[ii]) * this._height;
+                    const ghosthlen: number = (this._ghostData[ii] / this._upperBounds[ii]) * this._height;
                     if (ii === 0) {
                         this._graphics.moveTo(
                             Plot.W_MARGIN + (ii + 1) * horizontalSpace - horizontalSpace / 2.0,
@@ -154,8 +154,8 @@ export default class Plot extends Container {
         } else if (this.type === PlotType.SCATTER) {
             this._graphics.lineStyle(1, 0xAAAAAA, 1);
             for (let ii = 10; ii < this._numBases; ii += 10) {
-                let xCoord = (ii / this._numBases) * this._width + x;
-                let yCoord = (ii / this._numBases) * this._height + y;
+                const xCoord = (ii / this._numBases) * this._width + x;
+                const yCoord = (ii / this._numBases) * this._height + y;
 
                 this._graphics.moveTo(xCoord, 0);
                 this._graphics.lineTo(xCoord, this._height);
@@ -165,15 +165,15 @@ export default class Plot extends Container {
             }
 
             for (let ii = 0; ii < this._data2D.length; ii += 3) {
-                let xCoord = ((this._data2D[ii + 1])) * horizontalSpace + x;
-                let yCoord = ((this._data2D[ii])) * verticalSpace - 1 + y;
+                const xCoord = ((this._data2D[ii + 1])) * horizontalSpace + x;
+                const yCoord = ((this._data2D[ii])) * verticalSpace - 1 + y;
 
-                let minCol = 0.1;
-                let probR: number = 1.0 - ((this._data2D[ii + 2]) * (1 - minCol) + minCol);
-                let probG: number = 1.0 - ((this._data2D[ii + 2]) * (1 - minCol) + minCol);
-                let probB: number = 1.0 - ((this._data2D[ii + 2]) * (1 - minCol) + minCol);
+                const minCol = 0.1;
+                const probR: number = 1.0 - ((this._data2D[ii + 2]) * (1 - minCol) + minCol);
+                const probG: number = 1.0 - ((this._data2D[ii + 2]) * (1 - minCol) + minCol);
+                const probB: number = 1.0 - ((this._data2D[ii + 2]) * (1 - minCol) + minCol);
 
-                let probColor: number = ColorUtil.compose(probR, probG, probB);
+                const probColor: number = ColorUtil.compose(probR, probG, probB);
 
                 this._graphics.lineStyle(0, 0, 0);
                 this._graphics.beginFill(probColor);
@@ -190,7 +190,7 @@ export default class Plot extends Container {
         this._graphics.drawRect(0, 0, this._width, this._height);
 
         if (this._labelFields != null) {
-            for (let label of this._labelFields) {
+            for (const label of this._labelFields) {
                 this.removeChild(label);
             }
             this._labelFields = null;
@@ -200,9 +200,9 @@ export default class Plot extends Container {
             this._labelFields = [];
 
             for (let ii = 0; ii < this._labels.length; ii++) {
-                let labelString: string = this._labels[ii];
+                const labelString: string = this._labels[ii];
                 if (labelString.length > 0) {
-                    let label: Text = Fonts.arial(labelString).color(0xffffff).build();
+                    const label: Text = Fonts.std(labelString).color(0xffffff).build();
                     label.width = horizontalSpace;
                     label.x = Plot.W_MARGIN + (ii + 0.5) * horizontalSpace;
                     label.y = Plot.H_MARGIN + this._height;

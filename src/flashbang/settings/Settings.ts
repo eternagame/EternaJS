@@ -12,7 +12,7 @@ export default abstract class Settings {
     }
 
     /** Saves an object to this Settings namespace */
-    public saveObject(name: string, obj: any): void {
+    public saveObject<T>(name: string, obj: T): void {
         if (this._allSettings.has(name)) {
             throw new Error(`'${name}' is used by a setting`);
         }
@@ -21,7 +21,7 @@ export default abstract class Settings {
     }
 
     /** Loads an object from this Settings, if it exists */
-    public loadObject(name: string): any {
+    public loadObject<T>(name: string): T {
         return this._namespace.get(name);
     }
 

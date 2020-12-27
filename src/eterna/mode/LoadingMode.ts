@@ -4,7 +4,6 @@ import {
 } from 'flashbang';
 import Background from 'eterna/vfx/Background';
 import Fonts from 'eterna/util/Fonts';
-import Eterna from 'eterna/Eterna';
 
 /** Displays a simple animation while we're loading assets */
 export default class LoadingMode extends AppMode {
@@ -38,16 +37,16 @@ export default class LoadingMode extends AppMode {
 
         this.addObject(new Background(0), this._container);
 
-        this._textField = Fonts.arial(this._text, 24).color(0xffffff).build();
+        this._textField = Fonts.std(this._text, 24).color(0xffffff).build();
         this._textField.x = -this._textField.width * 0.5;
         this._textField.y = -this._textField.height * 0.5;
 
-        this._extraBlurbTextField = Fonts.arial(this.extraBlurbText, 36).bold().color(0xffffff).hAlignCenter()
+        this._extraBlurbTextField = Fonts.std(this.extraBlurbText, 36).bold().color(0xffffff).hAlignCenter()
             .build();
         this._extraBlurbTextField.x = -this._extraBlurbTextField.width * 0.5;
         this._extraBlurbTextField.y = -this._textField.height - this._extraBlurbTextField.height;
 
-        let container = new ContainerObject();
+        const container = new ContainerObject();
         container.container.addChild(this._textField);
         container.container.addChild(this._extraBlurbTextField);
         this.addObject(container, this.container);
@@ -60,7 +59,7 @@ export default class LoadingMode extends AppMode {
             ))
         ));
 
-        let updateLoc = () => {
+        const updateLoc = () => {
             Assert.assertIsDefined(Flashbang.stageWidth);
             Assert.assertIsDefined(Flashbang.stageHeight);
             container.display.x = Flashbang.stageWidth * 0.5;
@@ -71,7 +70,7 @@ export default class LoadingMode extends AppMode {
     }
 
     private getExtraBlurb(): string {
-        let ExtraBlurbs = [
+        const ExtraBlurbs = [
             'A good scientist will tell you\nthat being wrong can be just\n as interesting as being right.',
             'Developed by players for players',
             'Afraid of viral pandemics?\nStay calm and play Eterna.',

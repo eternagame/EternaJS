@@ -1,21 +1,21 @@
-import 'assets/styles.css'; // css-loader will pick up on this and embed our stylesheet
+import 'assets/Styles/styles.css'; // css-loader will pick up on this and embed our stylesheet
+import {settings, Application, utils} from 'pixi.js';
 import * as log from 'loglevel';
 import {
     FlashbangApp, SaveGameManager, TextureUtil, ErrorUtil, Flashbang, Assert
 } from 'flashbang';
 import ChatManager from 'eterna/ChatManager';
 import Eterna from 'eterna/Eterna';
-import {isMobile} from 'is-mobile';
+import {SaveStoreItem} from 'flashbang/settings/SaveGameManager';
 import DesignBrowserMode, {DesignBrowserFilter} from './mode/DesignBrowser/DesignBrowserMode';
 import ExternalInterface, {ExternalInterfaceCtx} from './util/ExternalInterface';
 import EternaSettings from './settings/EternaSettings';
 import GameClient from './net/GameClient';
 import Bitmaps from './resources/Bitmaps';
-import Fonts from './util/Fonts';
 import TestMode from './debug/TestMode';
 import Puzzle from './puzzle/Puzzle';
 import PoseEditMode, {PoseEditParams} from './mode/PoseEdit/PoseEditMode';
-import PuzzleEditMode, {PuzzleEditPoseData} from './mode/PuzzleEdit/PuzzleEditMode';
+import PuzzleEditMode from './mode/PuzzleEdit/PuzzleEditMode';
 import FeedbackViewMode from './mode/FeedbackViewMode';
 import Solution from './puzzle/Solution';
 import PuzzleManager from './puzzle/PuzzleManager';
@@ -36,6 +36,7 @@ import LinearFoldE from './folding/LinearFoldE';
 import LinearFoldV from './folding/LinearFoldV';
 import Folder from './folding/Folder';
 import RSignals from './rscript/RSignals';
+import Fonts from './util/Fonts';
 
 enum PuzzleID {
     FunAndEasy = 4350940,
@@ -65,7 +66,7 @@ interface SolutionAndPuzzleID {
     solutionID: number;
 }
 
-let CloudLab19Solution: SolutionAndPuzzleID = {
+const CloudLab19Solution: SolutionAndPuzzleID = {
     puzzleID: 2333436,
     solutionID: 2694684
 };
@@ -123,17 +124,17 @@ export default class EternaApp extends FlashbangApp {
 
         this._params = params as ProcessedEternaAppParams;
 
-        let eternaContainer: HTMLElement | null = document.getElementById(params.containerID);
+        const eternaContainer: HTMLElement | null = document.getElementById(params.containerID);
         if (!eternaContainer) {
             throw new Error(`Could not find HTML element with ID ${params.containerID}`);
         }
         eternaContainer.style.position = 'relative';
 
-        let pixiContainer: HTMLElement = document.createElement('div');
+        const pixiContainer: HTMLElement = document.createElement('div');
         pixiContainer.id = Eterna.PIXI_CONTAINER_ID;
         eternaContainer.appendChild(pixiContainer);
 
-        let overlay: HTMLElement = document.createElement('div');
+        const overlay: HTMLElement = document.createElement('div');
         overlay.id = Eterna.OVERLAY_DIV_ID;
         eternaContainer.appendChild(overlay);
 
@@ -145,6 +146,33 @@ export default class EternaApp extends FlashbangApp {
         });
 
         RSignals.popPuzzle.connect(() => this._modeStack.popMode());
+    }
+
+    public run(): void {
+        const wasmError = typeof WebAssembly === 'object' ? '' : 'WebAssembly';
+        const webGLError = utils.isWebGLSupported() ? '' : 'WebGL';
+        const unsupported = wasmError || webGLError;
+        if (unsupported) {
+            const errorEl = document.createElement('div');
+            errorEl.className = 'eterna-support-error';
+            const errorText = `
+                We're sorry, but your browser configuration is not supported by Eterna.
+                <br><br>
+                The following feature must be available in order to play: ${unsupported}
+                <br><br>
+                For troubleshooting tips, pelase visit:
+                <a href="https://forum.eternagame.org/t/eterna-browser-support-troubleshooting/3594">
+                    https://forum.eternagame.org/t/eterna-browser-support-troubleshooting/3594
+                </a>
+            `;
+            errorEl.innerHTML = errorText;
+
+            const eternaContainer = document.getElementById(this._params.containerID);
+            Assert.assertIsDefined(eternaContainer);
+            eternaContainer.appendChild(errorEl);
+        } else {
+            super.run();
+        }
     }
 
     /* override */
@@ -165,20 +193,20 @@ export default class EternaApp extends FlashbangApp {
             Flashbang.sound.volume = volume;
         }));
 
-        this.setLoadingText('Authenticating...', null);
-
-        this.authenticate()
-            .then(() => {
-                // We can only do this now, since we need the username and UID to connect
-                Eterna.chat = new ChatManager(this._params.chatboxID, Eterna.settings);
-                this.setLoadingText('Loading game...', null);
-                return Promise.all([
-                    this.initFoldingEngines(),
-                    this.initLayoutEngines(),
-                    TextureUtil.load(Bitmaps.all),
-                    Fonts.loadFonts()
-                ]);
-            })
+        // Load fonts before setting any text to make sure it's, you know, the right font
+        Fonts.loadFonts().then(() => {
+            this.setLoadingText('Authenticating...', null);
+            return this.authenticate();
+        }).then(() => {
+            // We can only do this now, since we need the username and UID to connect
+            Eterna.chat = new ChatManager(this._params.chatboxID, Eterna.settings);
+            this.setLoadingText('Loading game...', null);
+            return Promise.all([
+                this.initFoldingEngines(),
+                this.initLayoutEngines(),
+                TextureUtil.load(Bitmaps.all)
+            ]);
+        })
             .then(() => this.initScriptInterface())
             .then(() => {
                 switch (this._params.mode) {
@@ -224,7 +252,7 @@ export default class EternaApp extends FlashbangApp {
     public async loadPoseEdit(puzzleOrID: number | Puzzle, params: PoseEditParams) {
         const puzzle = await this.loadPuzzle(puzzleOrID);
 
-        let autoSaveData: any | undefined;
+        let autoSaveData: SaveStoreItem | null = null;
 
         const hasRscript = Boolean(puzzle.rscript) && (puzzle.rscript.trim().length > 0);
         if (hasRscript) {
@@ -238,13 +266,13 @@ export default class EternaApp extends FlashbangApp {
     }
 
     /** Creates a PuzzleEditMode and removes all other modes from the stack */
-    public async loadPuzzleEditor(numTargets?: number, initialPoseData?: PuzzleEditPoseData[]): Promise<void> {
+    public async loadPuzzleEditor(numTargets?: number, initialPoseData?: SaveStoreItem): Promise<void> {
         if (this._params.puzzleEditNumTargets === undefined) {
             throw new Error("puzzleEditNumTargets can't be undefined here!");
         }
         const initPoseData = initialPoseData
             || await Eterna.saveManager.load(PuzzleEditMode.savedDataTokenName(this._params.puzzleEditNumTargets))
-            || null;
+            || undefined;
         this._modeStack.unwindToMode(new PuzzleEditMode(false, numTargets, initPoseData));
         return Promise.resolve();
     }
@@ -255,11 +283,11 @@ export default class EternaApp extends FlashbangApp {
      */
     public loadSolutionViewer(puzzleID: number, solutionID: number, loadInPoseEdit: boolean = false): Promise<void> {
         return this.loadSolution(puzzleID, solutionID)
-            .then(([puzzle, solution]) => {
+            .then(([puzzle, solution, solutions]) => {
                 if (loadInPoseEdit) {
                     this._modeStack.unwindToMode(new PoseEditMode(puzzle, {initSolution: solution}));
                 } else {
-                    this._modeStack.unwindToMode(new FeedbackViewMode(solution, puzzle));
+                    this._modeStack.unwindToMode(new FeedbackViewMode(solution, puzzle, solutions));
                 }
             });
     }
@@ -274,7 +302,11 @@ export default class EternaApp extends FlashbangApp {
      * If a DesignBrowserMode for the given puzzle is already on the mode stack, move it to the top of the stack.
      * Otherwise, push a new DesignBrowserMode to the stack, retaining any existing modes.
      */
-    public switchToDesignBrowser(puzzleOrID: number | Puzzle): Promise<void> {
+    public switchToDesignBrowser(
+        puzzleOrID: number | Puzzle,
+        solution?: Solution,
+        sortOnSolution: boolean = false
+    ): Promise<void> {
         const puzzleID = (puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID);
         Assert.assertIsDefined(this.modeStack.modes);
         const existingBrowser = this.modeStack.modes.find(
@@ -282,6 +314,12 @@ export default class EternaApp extends FlashbangApp {
         ) as DesignBrowserMode;
         if (existingBrowser != null && existingBrowser.puzzleID === puzzleID) {
             this.modeStack.setModeIndex(existingBrowser, -1);
+            if (solution) {
+                existingBrowser.showSolutionDetailsDialog(solution);
+            }
+            if (solution && sortOnSolution) {
+                existingBrowser.sortOnSolution(solution);
+            }
             return Promise.resolve();
         } else {
             return this.loadPuzzle(puzzleOrID)
@@ -289,7 +327,7 @@ export default class EternaApp extends FlashbangApp {
                     if (existingBrowser != null) {
                         this.modeStack.removeMode(existingBrowser);
                     }
-                    this.modeStack.pushMode(new DesignBrowserMode(puzzle));
+                    this.modeStack.pushMode(new DesignBrowserMode(puzzle, false, null, solution, sortOnSolution));
                 });
         }
     }
@@ -318,7 +356,11 @@ export default class EternaApp extends FlashbangApp {
         }
     }
 
-    public switchToFeedbackView(puzzleOrID: number | Puzzle, solutionOrID: number | Solution): Promise<void> {
+    public switchToFeedbackView(
+        puzzleOrID: number | Puzzle,
+        solutionOrID: number | Solution,
+        solutions?: Solution[]
+    ): Promise<void> {
         const puzzleID = (puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID);
         const solutionID = (solutionOrID instanceof Solution ? solutionOrID.nodeID : solutionOrID);
 
@@ -329,11 +371,11 @@ export default class EternaApp extends FlashbangApp {
             return Promise.resolve();
         } else {
             return this.loadSolution(puzzleOrID, solutionOrID)
-                .then(([puzzle, solution]) => {
+                .then(([puzzle, solution, allSolutions]) => {
                     if (existingMode != null) {
                         this.modeStack.removeMode(existingMode);
                     }
-                    this.modeStack.pushMode(new FeedbackViewMode(solution, puzzle));
+                    this.modeStack.pushMode(new FeedbackViewMode(solution, puzzle, solutions ?? allSolutions));
                 });
         }
     }
@@ -344,7 +386,10 @@ export default class EternaApp extends FlashbangApp {
         return this.modeStack.modes.find((mode) => mode instanceof PoseEditMode) as PoseEditMode;
     }
 
-    private loadSolution(puzzleOrID: number | Puzzle, solutionOrID: number | Solution): Promise<[Puzzle, Solution]> {
+    private loadSolution(
+        puzzleOrID: number | Puzzle,
+        solutionOrID: number | Solution
+    ): Promise<[Puzzle, Solution, Solution[]]> {
         const puzzleID = (puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID);
         const solutionID = (solutionOrID instanceof Solution ? solutionOrID.nodeID : solutionOrID);
 
@@ -356,7 +401,7 @@ export default class EternaApp extends FlashbangApp {
             ? Promise.resolve(solutionOrID)
             : SolutionManager.instance.getSolutionsForPuzzle(puzzleID)
                 .then((solutions) => {
-                    for (let solution of solutions) {
+                    for (const solution of solutions) {
                         if (solution.nodeID === solutionID) {
                             return Promise.resolve(solution);
                         }
@@ -367,8 +412,10 @@ export default class EternaApp extends FlashbangApp {
                     );
                 });
 
+        const solutionsPromise = SolutionManager.instance.getSolutionsForPuzzle(puzzleID);
+
         this.setLoadingText(`Loading solution ${solutionID}...`, null);
-        return Promise.all([puzzlePromise, solutionPromise])
+        return Promise.all([puzzlePromise, solutionPromise, solutionsPromise])
             .then((result) => {
                 this.popLoadingMode();
                 return result;
@@ -380,7 +427,7 @@ export default class EternaApp extends FlashbangApp {
             return puzzleOrID;
         } else {
             this.setLoadingText('Loading puzzle...', null);
-            let puzzle = await PuzzleManager.instance.getPuzzleByID(puzzleOrID);
+            const puzzle = await PuzzleManager.instance.getPuzzleByID(puzzleOrID);
             this.popLoadingMode();
             return puzzle;
         }
@@ -388,14 +435,14 @@ export default class EternaApp extends FlashbangApp {
 
     protected onKeyboardEvent(e: KeyboardEvent): void {
         // if a form element is focused, don't trigger hotkeys
-        let selected = document.body.querySelectorAll(':focus')[0];
+        const selected = document.body.querySelectorAll(':focus')[0];
         if (selected && (['INPUT', 'TEXTAREA', 'OPTION', 'SELECT', 'BUTTON'].includes(selected.tagName))) return;
 
         super.onKeyboardEvent(e);
     }
 
-    protected onUncaughtError(err: any): void {
-        let errstring = ErrorUtil.getErrString(err);
+    protected onUncaughtError(err: ErrorEvent): void {
+        const errstring = ErrorUtil.getErrString(err);
         if (errstring.startsWith("Error: Failed to set the 'buffer' property on 'AudioBufferSourceNode'")) {
             log.debug('pixi-sound is misbehaving again');
         } else {
@@ -403,18 +450,21 @@ export default class EternaApp extends FlashbangApp {
         }
     }
 
-    protected createPixi(): PIXI.Application {
+    protected createPixi(): Application {
         // When roundPixels is true, the renderer floor()s pixel locations
         // to avoid pixel interpolation. This makes our text look much better,
         // though slow movement animation will end up looking a bit worse.
         // Eterna isn't an animation-heavy game, so the tradeoff seems worth it.
 
-        return new PIXI.Application(this._params.width, this._params.height, {
+        settings.ROUND_PIXELS = true;
+
+        return new Application({
+            width: this._params.width,
+            height: this._params.height,
             backgroundColor: 0x0,
             transparent: true,
             antialias: true,
-            roundPixels: true,
-            autoResize: true,
+            autoDensity: true,
             resolution: devicePixelRatio
         });
     }
@@ -456,7 +506,7 @@ export default class EternaApp extends FlashbangApp {
                     });
             }
 
-            let playerPassword = process.env['DEBUG_PLAYER_PASSWORD'];
+            const playerPassword = process.env['DEBUG_PLAYER_PASSWORD'];
             if (playerPassword === undefined || playerPassword.length === 0) {
                 return Eterna.client.logout()
                     .then(() => {
@@ -487,7 +537,7 @@ export default class EternaApp extends FlashbangApp {
             RNAFoldBasic.create()])
             .then((folders: (Folder | null)[]) => {
                 log.info('Folding engines intialized');
-                for (let folder of folders) {
+                for (const folder of folders) {
                     if (folder !== null) {
                         FolderManager.instance.addFolder(folder);
                     }
@@ -500,7 +550,7 @@ export default class EternaApp extends FlashbangApp {
         return Promise.all([RNApuzzler.create()])
             .then((layoutEngines: LayoutEngine[]) => {
                 log.info('Layout engines intialized');
-                for (let layoutEngine of layoutEngines) {
+                for (const layoutEngine of layoutEngines) {
                     LayoutEngineManager.instance.addLayoutEngine(layoutEngine);
                 }
             });

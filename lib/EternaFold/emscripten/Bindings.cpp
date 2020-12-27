@@ -48,11 +48,11 @@ EMSCRIPTEN_BINDINGS(EmscriptenBridge) {
     // function("CoFoldSequence", &CoFoldSequence, allow_raw_pointers());
     // function("CoFoldSequenceWithBindingSite", &CoFoldSequenceWithBindingSite, allow_raw_pointers());
 
-    // class_<DotPlotResult>("DotPlotResult")
-    //     .property("energy", &DotPlotResult::energy)
-    //     .property("plot", &DotPlotResult::plot);
+    class_<DotPlotResult>("DotPlotResult")
+        .property("energy", &DotPlotResult::energy)
+        .property("plot", &DotPlotResult::plot);
 
-    // function("GetDotPlot", &GetDotPlot, allow_raw_pointers());
+    function("GetDotPlot", &GetDotPlot, allow_raw_pointers());
 }
 
 #endif

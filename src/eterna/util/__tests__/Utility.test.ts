@@ -1,27 +1,18 @@
 import Utility from "../Utility";
 import { Point } from "pixi.js";
 
-test(`test_stripHtmlTags`, () => {
-    // Basic tests for stripping <>. Ensure it can do both or one at a time
-    // or doubles.
-    expect(Utility.stripHtmlTags("<foo>")).toBe("&lt;foo&gt;");
-    expect(Utility.stripHtmlTags("<foo")).toBe("&lt;foo");
-    expect(Utility.stripHtmlTags("foo>")).toBe("foo&gt;");
-    expect(Utility.stripHtmlTags("<<foo>>")).toBe("&lt;&lt;foo&gt;&gt;");
-});
-
 test(`test_stripQuotationsAndNewlines`, () => {
     expect(Utility.stripQuotationsAndNewlines("\"\n\"")).toBe("\' \'");
 });
 
 
 test(`test_isPointWithin`, () => {
-    let poly: Point[] = [new Point(0,0), new Point(1,0), new Point(1,1), new Point(0,1)];
-    let p1: Point = new Point(0.6, 0.5);
-    let pBAD: Point = new Point(0.5, 0.5);
-    let p2: Point = new Point(1.2, 0.5);
-    let p3: Point = new Point(0.5, 1.2);
-    let p4: Point = new Point(1.2, 1.2);
+    const poly: Point[] = [new Point(0,0), new Point(1,0), new Point(1,1), new Point(0,1)];
+    const p1: Point = new Point(0.6, 0.5);
+    const pBAD: Point = new Point(0.5, 0.5);
+    const p2: Point = new Point(1.2, 0.5);
+    const p3: Point = new Point(0.5, 1.2);
+    const p4: Point = new Point(1.2, 1.2);
 
     expect(Utility.isPointWithin(p1, poly)).toBe(true);
     expect(Utility.isPointWithin(p2, poly)).toBe(false);
@@ -36,10 +27,10 @@ test(`test_isPointWithin`, () => {
 
 
 test(`test_findIntersection`, () => {
-    let A: Point = new Point(0,0);
-    let B: Point = new Point(1,0);
-    let E: Point = new Point(1,1);
-    let F: Point = new Point(0,1);
+    const A: Point = new Point(0,0);
+    const B: Point = new Point(1,0);
+    const E: Point = new Point(1,1);
+    const F: Point = new Point(0,1);
 
     // AMW: no careful testing yet of whether asSeg false is distinct from true.
     // Consider comparing intersection behavior of (0,0) => (0.5, 0.5) and (1,0) => (1,1)

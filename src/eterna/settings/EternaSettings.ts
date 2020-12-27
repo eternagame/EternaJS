@@ -11,7 +11,6 @@ export default class EternaSettings extends Settings {
     public readonly highlightRestricted: Setting<boolean>;
     public readonly autohideToolbar: Setting<boolean>;
     public readonly freezeButtonAlwaysVisible: Setting<boolean>;
-    public readonly multipleFoldingEngines: Setting<boolean>;
     public readonly useContinuousColors: Setting<boolean>;
     public readonly useExtendedColors: Setting<boolean>;
     public readonly displayAuxInfo: Setting<boolean>;
@@ -32,13 +31,12 @@ export default class EternaSettings extends Settings {
         super('EternaSettings');
         this.showChat = this.setting<boolean>('showChat', !Eterna.MOBILE_APP);
         this.showNumbers = this.setting<boolean>('showNumbers', true);
-        this.showLetters = this.setting<boolean>('showLetters', false);
+        this.showLetters = this.setting<boolean>('showLetters', true);
         this.showRope = this.setting<boolean>('showRope', false);
         this.displayFreeEnergies = this.setting<boolean>('displayFreeEnergies', false);
         this.highlightRestricted = this.setting<boolean>('highlightRestricted', true);
         this.autohideToolbar = this.setting<boolean>('autohideToolbar', false);
         this.freezeButtonAlwaysVisible = this.setting<boolean>('freezeButtonAlwaysVisible', false);
-        this.multipleFoldingEngines = this.setting<boolean>('multipleFoldingEngines', false);
         this.useContinuousColors = this.setting<boolean>('useContinuousColors', false);
         this.useExtendedColors = this.setting<boolean>('useExtendedColors', false);
         this.displayAuxInfo = this.setting<boolean>('displayAuxInfo', false);
@@ -48,7 +46,7 @@ export default class EternaSettings extends Settings {
         this.pipEnabled = this.setting<boolean>('pipEnabled', false);
         this.simpleGraphics = this.setting<boolean>('simpleGraphics', false);
         this.usePuzzlerLayout = this.setting<boolean>('usePuzzlerLayout', false);
-        this.designBrowserColumnNames = this.setting('designBrowserColumnNames', null);
+        this.designBrowserColumnNames = this.setting('designBrowserColumnNames-2', null);
         this.designBrowserSelectedSolutionIDs = this.setting('designBrowserSelectedSolutionIDs', null);
 
         // Denotes whether savegames have been transfered from localstorage/storeJS/EternaSettings to

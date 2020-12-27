@@ -3,7 +3,7 @@
 
 using namespace std;
 
-typedef float ENERGY_TYPE;
+typedef int ENERGY_TYPE;
 
 // void (*eos_cb)(int index, int fe) = NULL;
 

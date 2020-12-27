@@ -3,7 +3,7 @@ import {Connection, Value, ValueView} from "signals";
 import Counter from "./Counter";
 
 test("simpleListener", () => {
-    let value: Value<number> = new Value(42);
+    const value: Value<number> = new Value(42);
     let fired: boolean = false;
     value.connect((nvalue: number, ovalue: number) => {
         expect(ovalue).toEqual(42);
@@ -17,7 +17,7 @@ test("simpleListener", () => {
 });
 
 test("valueAsSignal", () => {
-    let value: Value<number> = new Value(42);
+    const value: Value<number> = new Value(42);
     let fired: boolean = false;
     value.connect((value: number) => {
         expect(value).toEqual(15);
@@ -28,8 +28,8 @@ test("valueAsSignal", () => {
 });
 
 test("valueAsOnceSignal", () => {
-    let value: Value<number> = new Value(42);
-    let counter: Counter = new Counter();
+    const value: Value<number> = new Value(42);
+    const counter: Counter = new Counter();
     value.connect((value) => counter.onEmit(value)).once();
     value.value = 15;
     value.value = 42;
@@ -37,12 +37,12 @@ test("valueAsOnceSignal", () => {
 });
 
 test("mappedValue", () => {
-    let value: Value<number> = new Value(42);
-    let mapped: ValueView<string> = value.map((value) => value.toString());
+    const value: Value<number> = new Value(42);
+    const mapped: ValueView<string> = value.map((value) => value.toString());
 
-    let counter: Counter = new Counter();
-    let c1: Connection = mapped.connect((value) => counter.onEmit(value));
-    let c2: Connection = mapped.connect((value) => expect(value).toEqual("15"));
+    const counter: Counter = new Counter();
+    const c1: Connection = mapped.connect((value) => counter.onEmit(value));
+    const c2: Connection = mapped.connect((value) => expect(value).toEqual("15"));
 
     value.value = 15;
     counter.assertTriggered(1);
@@ -58,7 +58,7 @@ test("mappedValue", () => {
 });
 
 test("connectNotify", () => {
-    let value: Value<number> = new Value(42);
+    const value: Value<number> = new Value(42);
     let fired: boolean = false;
     value.connectNotify((val: number) => {
         expect(val).toEqual(42);
@@ -68,22 +68,22 @@ test("connectNotify", () => {
 });
 
 test("disconnect", () => {
-    let value: Value<number> = new Value(42);
+    const value: Value<number> = new Value(42);
     let expectedValue: number = value.value;
     let fired: number = 0;
 
-    let listener = (newValue: number) => {
+    const listener = (newValue: number) => {
         expect(newValue).toEqual(expectedValue);
         fired += 1;
         value.disconnect(listener);
     };
 
-    let conn: Connection = value.connectNotify(listener);
+    const conn: Connection = value.connectNotify(listener);
     value.value = expectedValue = 12;
     assert.strictEqual(fired, 1, "Disconnecting in listenNotify disconnects");
     conn.close(); // Ensure no error when calling close while already closed
 
-    let dummy = new Counter();
+    const dummy = new Counter();
 
     value.connect(listener);
     value.connect(() => dummy.onEmit(value));
@@ -98,10 +98,10 @@ test("disconnect", () => {
 });
 
 test("slot", () => {
-    let value: Value<number> = new Value(42);
+    const value: Value<number> = new Value(42);
     let expectedValue: number = value.value;
     let fired: number = 0;
-    let listener = (newValue: number) => {
+    const listener = (newValue: number) => {
         expect(newValue).toEqual(expectedValue);
         fired += 1;
         value.disconnect(listener);

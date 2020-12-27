@@ -12,9 +12,9 @@ export enum SortOrder {
 export class SortCriterion {
     public readonly category: DesignCategory;
     public sortOrder: SortOrder;
-    public arg: string | null;
+    public arg?: string;
 
-    constructor(category: DesignCategory, order: SortOrder, arg: string | null = null) {
+    constructor(category: DesignCategory, order: SortOrder, arg?: string) {
         this.category = category;
         this.sortOrder = order;
         this.arg = arg;
@@ -53,23 +53,23 @@ export default class SortOptions {
     }
 
     public getSortOrder(category: DesignCategory): SortOrder {
-        let criterion = this.getCriterion(category);
+        const criterion = this.getCriterion(category);
         return criterion !== undefined ? criterion.sortOrder : SortOrder.NONE;
     }
 
     public compareSolutions(a: Solution, b: Solution): number {
-        for (let criterion of this._criteria) {
-            let aProperty: any;
-            let bProperty: any;
+        for (const criterion of this._criteria) {
+            let aProperty: number | string;
+            let bProperty: number | string;
 
             if (criterion.category === DesignCategory.SEQUENCE) {
-                let anchorSequence: string | null = criterion.arg;
-                if (anchorSequence === null) {
+                const anchorSequence: string | undefined = criterion.arg;
+                if (anchorSequence === undefined) {
                     throw new Error('Cannot sort by sequence if the criterion argument is null!');
                 }
-                let aString: string = a.sequence;
+                const aString: string = a.sequence.sequenceString();
                 if (aString == null) throw new Error(`solution ${a.nodeID} invalid`);
-                let bString: string = b.sequence;
+                const bString: string = b.sequence.sequenceString();
                 if (bString == null) throw new Error(`solution ${b.nodeID} invalid`);
                 if (aString.length !== anchorSequence.length || bString.length !== anchorSequence.length) {
                     throw new Error('Wrong anchor sequence length');
@@ -91,8 +91,8 @@ export default class SortOptions {
                 aProperty = aScore;
                 bProperty = bScore;
             } else {
-                aProperty = a.getProperty(criterion.category);
-                bProperty = b.getProperty(criterion.category);
+                aProperty = a.getProperty(criterion.category) as number | string;
+                bProperty = b.getProperty(criterion.category) as number | string;
             }
 
             if (criterion.sortOrder < 0) {
@@ -117,8 +117,8 @@ export default class SortOptions {
         return 0;
     }
 
-    public addCriteria(category: DesignCategory, sortOrder: SortOrder, sortArgs: any = null): void {
-        let cur = this.getCriterion(category);
+    public addCriteria(category: DesignCategory, sortOrder: SortOrder, sortArgs?: string): void {
+        const cur = this.getCriterion(category);
         if (cur !== undefined) {
             cur.sortOrder = sortOrder;
             cur.arg = sortArgs;
@@ -131,7 +131,7 @@ export default class SortOptions {
     }
 
     public removeCriteria(category: DesignCategory): void {
-        let idx = this.getCriterionIdx(category);
+        const idx = this.getCriterionIdx(category);
         if (idx < 0) {
             throw new Error(`Can't find sort_category ${category}`);
         }
@@ -142,7 +142,7 @@ export default class SortOptions {
     }
 
     public toggleSort(category: DesignCategory): SortOrder {
-        let criterion = this.getCriterion(category);
+        const criterion = this.getCriterion(category);
         if (criterion === undefined) {
             throw new Error(`Can't find category ${category}`);
         }
@@ -154,7 +154,7 @@ export default class SortOptions {
     }
 
     public setCriteriaIdx(category: DesignCategory, newIdx: number): void {
-        let curIdx = this.getCriterionIdx(category);
+        const curIdx = this.getCriterionIdx(category);
         if (curIdx < 0) {
             throw new Error(`Can't find sort_category ${category}`);
         }

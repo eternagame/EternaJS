@@ -1,5 +1,7 @@
 import * as localforage from 'localforage';
 
+export type SaveStoreItem = [number, number[], ...string[]];
+
 export default class SaveGameManager {
     constructor(namespace: string) {
         if (SaveGameManager.ALL_NAMESPACES.has(namespace)) {
@@ -12,11 +14,11 @@ export default class SaveGameManager {
         });
     }
 
-    public async load(name: string): Promise<any> {
+    public async load(name: string): Promise<SaveStoreItem | null> {
         return this._store.getItem(name);
     }
 
-    public async save(name: string, obj: any): Promise<any> {
+    public async save(name: string, obj: SaveStoreItem): Promise<SaveStoreItem> {
         return this._store.setItem(name, obj);
     }
 

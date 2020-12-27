@@ -2,6 +2,7 @@ import {DisplayObject, Graphics, Point} from 'pixi.js';
 import {
     GameObject, LateUpdatable, Assert, RepeatingTask, ObjectTask, SerialTask, AlphaTask, Vector2
 } from 'flashbang';
+import SecStruct from 'eterna/rnatypes/SecStruct';
 import Pose2D from './Pose2D';
 
 export enum HighlightType {
@@ -57,18 +58,17 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
         this._graphics.clear();
         this._queue = null;
         this._lastKnownQueue = null;
-        this._on = false;
         this._prevPosition = null;
         this._dirty = false;
     }
 
-    public setHighlight(elems: number[] | null): void {
-        if (!elems || elems.length === 0) return;
+    public setHighlight(elems: number[]): void {
+        if (elems.length === 0) return;
 
         if (!this._queue) this._queue = [];
 
-        for (let ii = 0; ii < elems.length; ii++) {
-            this._queue.push(elems[ii]);
+        for (const elem of elems) {
+            this._queue.push(elem);
         }
 
         this._dirty = true;
@@ -82,7 +82,7 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
         return false;
     }
 
-    public lateUpdate(dt: number): void {
+    public lateUpdate(_dt: number): void {
         if (this._pose.isAnimating || !this.enabled) {
             // Hide when we're disabled or the Pose is animating
             this.display.visible = false;
@@ -103,15 +103,12 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
             return false;
         }
 
-        let pos: Point = this._pose.getBaseLoc(this._queue[0], HighlightBox.P);
+        const pos: Point = this._pose.getBaseLoc(this._queue[0], HighlightBox.P);
         return !this._prevPosition || this._prevPosition.x !== pos.x || this._prevPosition.y !== pos.y;
     }
 
     private redraw(): void {
-        let color: number;
-        let baseSize: number;
-        let fadeTime = 0.85;
-        let zoomLevel: number = this._pose.zoomLevel;
+        const zoomLevel: number = this._pose.zoomLevel;
 
         this.display.alpha = 0;
         this.display.visible = true;
@@ -124,8 +121,9 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
         this._prevPosition = this._pose.getBaseLoc(this._queue[0], this._prevPosition);
         this._lastKnownQueue = this._queue;
 
-        let type: HighlightType = this._type;
+        const type: HighlightType = this._type;
 
+        let baseSize: number;
         if (type === HighlightType.STACK) {
             baseSize = 25;
         } else if (zoomLevel === 0) {
@@ -140,6 +138,8 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
             baseSize = 4;
         }
 
+        let color: number;
+        let fadeTime = 0.85;
         switch (type) {
             case HighlightType.STACK:
                 color = 0xFFFFFF;
@@ -180,30 +180,28 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
             new AlphaTask(1, fadeTime),
             new AlphaTask(0.2, fadeTime)
         )));
-
-        this._on = true;
     }
 
     private renderStack(color: number, baseSize: number): void {
-        let pairs: number[] = this._pose.pairs;
+        const pairs: SecStruct = this._pose.secstruct;
 
         if (!this._queue) return;
         for (let ii = 0; ii < this._queue.length; ii += 2) {
-            let stackStart: number = this._queue[ii];
-            let stackEnd: number = this._queue[ii + 1];
+            const stackStart: number = this._queue[ii];
+            const stackEnd: number = this._queue[ii + 1];
 
-            if (pairs[stackStart] < 0 || pairs[stackEnd] < 0) {
+            if (!pairs.isPaired(stackStart) || !pairs.isPaired(stackEnd)) {
                 throw new Error(`Invalid stack highlight from ${stackStart.toString()} to ${stackEnd.toString()}`);
             }
 
-            let p0: Point = this._pose.getBaseLoc(stackStart);
-            let p1: Point = this._pose.getBaseLoc(pairs[stackEnd]);
+            const p0: Point = this._pose.getBaseLoc(stackStart);
+            const p1: Point = this._pose.getBaseLoc(pairs.pairingPartner(stackEnd));
 
-            let maxX = Math.max(p0.x, p1.x);
-            let minX = Math.min(p0.x, p1.x);
+            const maxX = Math.max(p0.x, p1.x);
+            const minX = Math.min(p0.x, p1.x);
 
-            let maxY = Math.max(p0.y, p1.y);
-            let minY = Math.min(p0.y, p1.y);
+            const maxY = Math.max(p0.y, p1.y);
+            const minY = Math.min(p0.y, p1.y);
 
             this._graphics.lineStyle(5, color, 0.7);
             this._graphics.drawRoundedRect(
@@ -216,20 +214,20 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
     }
 
     private renderLoop(_color: number, baseSize: number): void {
-        let pairs: number[] = this._pose.pairs;
-        let fullLen: number = this._pose.fullSequence.length;
-        let strict: boolean = (this._type === HighlightType.LOOP);
+        const pairs: SecStruct = this._pose.secstruct;
+        const fullLen: number = this._pose.fullSequence.length;
+        const strict: boolean = (this._type === HighlightType.LOOP);
 
         if (!this._queue) return;
         for (let i = 0; i < this._queue.length; i += 2) {
-            let loopStart: number = this._queue[i];
-            let loopEnd: number = this._queue[i + 1];
+            const loopStart: number = this._queue[i];
+            const loopEnd: number = this._queue[i + 1];
 
-            if (strict && (pairs[loopStart] >= 0 || pairs[loopEnd] >= 0)) {
+            if (strict && (pairs.isPaired(loopStart) || pairs.isPaired(loopEnd))) {
                 throw new Error(`Invalid loop highlight from ${loopStart.toString()} to ${loopEnd.toString()}`);
             }
 
-            let axes: Point[] = [];
+            const axes: Point[] = [];
             let baseLoc: Point;
 
             let startFrom: Point = new Point();
@@ -237,12 +235,12 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
 
             for (let ii: number = loopStart; ii <= loopEnd; ii++) {
                 let numGos = 0;
-                let axis = new Vector2(0, 0);
+                const axis = new Vector2(0, 0);
                 baseLoc = this._pose.getBaseLoc(ii);
 
                 if (ii > 0) {
-                    let prevBaseLoc: Point = this._pose.getBaseLoc(ii - 1);
-                    let fromPrev: Vector2 = new Vector2((baseLoc.x - prevBaseLoc.x), (baseLoc.y - prevBaseLoc.y));
+                    const prevBaseLoc: Point = this._pose.getBaseLoc(ii - 1);
+                    const fromPrev: Vector2 = new Vector2((baseLoc.x - prevBaseLoc.x), (baseLoc.y - prevBaseLoc.y));
                     fromPrev.normalizeLocal();
                     axis.x += fromPrev.x;
                     axis.y += fromPrev.y;
@@ -250,8 +248,8 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
                 }
 
                 if (ii < fullLen - 1) {
-                    let nextBaseLoc: Point = this._pose.getBaseLoc(ii + 1);
-                    let toNext: Vector2 = new Vector2((nextBaseLoc.x - baseLoc.x), (nextBaseLoc.y - baseLoc.y));
+                    const nextBaseLoc: Point = this._pose.getBaseLoc(ii + 1);
+                    const toNext: Vector2 = new Vector2((nextBaseLoc.x - baseLoc.x), (nextBaseLoc.y - baseLoc.y));
                     toNext.normalizeLocal();
                     axis.x += toNext.x;
                     axis.y += toNext.y;
@@ -273,10 +271,10 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
                 }
             }
 
-            let loopStartLoc: Point = this._pose.getBaseLoc(loopStart);
-            let loopEndLoc: Point = this._pose.getBaseLoc(loopEnd);
-            let loopStartAxis: Point = axes[0];
-            let loopEndAxis: Point = axes[loopEnd - loopStart];
+            const loopStartLoc: Point = this._pose.getBaseLoc(loopStart);
+            const loopEndLoc: Point = this._pose.getBaseLoc(loopEnd);
+            const loopStartAxis: Point = axes[0];
+            const loopEndAxis: Point = axes[loopEnd - loopStart];
 
             this._graphics.lineStyle(5, _color, 0.7);
             this._graphics.moveTo(
@@ -328,7 +326,6 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
     private _enabled: boolean = true;
     private _queue: number[] | null;
     private _lastKnownQueue: number[] | null;
-    private _on: boolean;
     private _prevPosition: Point | null;
     private _prevZoomLevel: number = -1;
 

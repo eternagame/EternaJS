@@ -2,7 +2,6 @@ import Eterna from 'eterna/Eterna';
 import Folder from './Folder';
 import RNAFoldBasic from './RNAFoldBasic';
 import Vienna from './Vienna';
-import LinearFoldC from './LinearFoldC';
 
 export default class FolderManager {
     public static get instance(): FolderManager {
@@ -13,7 +12,7 @@ export default class FolderManager {
     }
 
     public addFolder(folder: Folder): void {
-        for (let other of this._folders) {
+        for (const other of this._folders) {
             if (other.name === folder.name) {
                 throw new Error(`Trying to generate folders with duplicate names ('${folder.name}')`);
             }
@@ -22,7 +21,7 @@ export default class FolderManager {
     }
 
     public isFolder(name: string): boolean {
-        for (let folder of this._folders) {
+        for (const folder of this._folders) {
             if (folder.name.toLowerCase() === name.toLowerCase()) {
                 return true;
             }
@@ -31,7 +30,7 @@ export default class FolderManager {
     }
 
     public getFolder(name: string): Folder | null {
-        for (let folder of this._folders) {
+        for (const folder of this._folders) {
             if (folder.name.toLowerCase() === name.toLowerCase()) {
                 return folder;
             }
@@ -54,8 +53,8 @@ export default class FolderManager {
         }
 
         for (let jj = 1; jj < this._folders.length; jj++) {
-            let idx: number = (curFolderIdx + jj) % this._folders.length;
-            let folder: Folder = this._folders[idx];
+            const idx: number = (curFolderIdx + jj) % this._folders.length;
+            const folder: Folder = this._folders[idx];
 
             if (folder.name.length === 0
                 || folder.name === RNAFoldBasic.NAME
@@ -69,6 +68,13 @@ export default class FolderManager {
         }
 
         return this._folders[curFolderIdx]; // use same one
+    }
+
+    public getFolders(filterCB: ((folder: Folder) => boolean) | null = null): string[] {
+        return this._folders.filter((folder) => folder.name.length !== 0
+                && folder.name !== RNAFoldBasic.NAME
+                && folder.isFunctional
+                && (filterCB === null || filterCB(folder))).map((folder) => folder.name);
     }
 
     public get lastUsedFolder(): string {

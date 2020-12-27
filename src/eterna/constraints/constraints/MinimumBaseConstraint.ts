@@ -1,4 +1,4 @@
-import EPars from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
@@ -19,10 +19,7 @@ abstract class MinimumBaseConstraint extends Constraint<MinBaseConstraintStatus>
 
     public evaluate(context: ConstraintContext): MinBaseConstraintStatus {
         // TODO: Multistate?
-        const count = context.undoBlocks[0].sequence.reduce(
-            (acc, curr) => acc + (curr === this.baseType ? 1 : 0), 0
-        );
-
+        const count = context.undoBlocks[0].sequence.count(this.baseType);
         return {
             satisfied: count >= this.minCount,
             currentCount: count
@@ -33,7 +30,7 @@ abstract class MinimumBaseConstraint extends Constraint<MinBaseConstraintStatus>
         status: MinBaseConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
-        let tooltip = ConstraintBox.createTextStyle();
+        const tooltip = ConstraintBox.createTextStyle();
 
         if (forMissionScreen) {
             tooltip.pushStyle('altTextMain');
@@ -53,8 +50,8 @@ abstract class MinimumBaseConstraint extends Constraint<MinBaseConstraintStatus>
             statText: status.currentCount.toString(),
             showOutline: true,
             fullTexture: forMissionScreen
-                ? BitmapManager.getBitmapNamed(`Nova${EPars.nucleotideToString(this.baseType, false, false)}MissionReq`)
-                : BitmapManager.getBitmapNamed(`Nova${EPars.nucleotideToString(this.baseType, false, false)}Req`)
+                ? BitmapManager.missionBitmapNucl(EPars.nucleotideToString(this.baseType, false, false))
+                : BitmapManager.bitmapNucl(EPars.nucleotideToString(this.baseType, false, false))
         };
     }
 }
@@ -63,7 +60,7 @@ export class MinimumAConstraint extends MinimumBaseConstraint {
     public static readonly NAME = 'A';
 
     constructor(count: number) {
-        super(EPars.RNABASE_ADENINE, count);
+        super(RNABase.ADENINE, count);
     }
 
     public serialize(): [string, string] {
@@ -78,7 +75,7 @@ export class MinimumUConstraint extends MinimumBaseConstraint {
     public static readonly NAME = 'U';
 
     constructor(count: number) {
-        super(EPars.RNABASE_URACIL, count);
+        super(RNABase.URACIL, count);
     }
 
     public serialize(): [string, string] {
@@ -93,7 +90,7 @@ export class MinimumGConstraint extends MinimumBaseConstraint {
     public static readonly NAME = 'G';
 
     constructor(count: number) {
-        super(EPars.RNABASE_GUANINE, count);
+        super(RNABase.GUANINE, count);
     }
 
     public serialize(): [string, string] {
@@ -108,7 +105,7 @@ export class MinimumCConstraint extends MinimumBaseConstraint {
     public static readonly NAME = 'C';
 
     constructor(count: number) {
-        super(EPars.RNABASE_CYTOSINE, count);
+        super(RNABase.CYTOSINE, count);
     }
 
     public serialize(): [string, string] {

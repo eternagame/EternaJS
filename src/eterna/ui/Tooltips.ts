@@ -1,4 +1,4 @@
-import {ExtendedTextStyle} from 'pixi-multistyle-text';
+import {TextStyleExtended} from 'pixi-multistyle-text';
 import {
     Container, DisplayObject, Graphics, Point, Rectangle, Text
 } from 'pixi.js';
@@ -6,6 +6,7 @@ import {Registration, RegistrationGroup} from 'signals';
 import {
     StyledTextBuilder, GameObject, Flashbang, SerialTask, Easing, AlphaTask, DelayTask, GameObjectRef, Button, Assert
 } from 'flashbang';
+import {PaletteTarget} from 'eterna/ui/NucleotidePalette';
 import Fonts from 'eterna/util/Fonts';
 
 /** A tooltip can be a string, styled text, or a function that creates a DisplayObject */
@@ -13,8 +14,8 @@ export type Tooltip = (() => DisplayObject) | string | StyledTextBuilder;
 
 export default class Tooltips extends GameObject {
     /** Default text style for tooltips */
-    public static readonly DEFAULT_STYLE: ExtendedTextStyle = {
-        fontFamily: Fonts.ARIAL,
+    public static readonly DEFAULT_STYLE: TextStyleExtended = {
+        fontFamily: Fonts.STDFONT,
         fontSize: 15,
         fill: 0xC0DCE7
     };
@@ -29,7 +30,7 @@ export default class Tooltips extends GameObject {
         this._layer = layer;
     }
 
-    public get ids(): any[] {
+    public get ids(): [typeof Tooltips] {
         return [Tooltips];
     }
 
@@ -38,7 +39,7 @@ export default class Tooltips extends GameObject {
         super.removed();
     }
 
-    public showTooltip(key: any, loc: Point, tooltip: Tooltip): void {
+    public showTooltip(key: Button | PaletteTarget, loc: Point, tooltip: Tooltip): void {
         if (this._curTooltipKey === key) {
             return;
         }
@@ -48,7 +49,7 @@ export default class Tooltips extends GameObject {
         this._curTooltipKey = key;
         this._curTooltip = Tooltips.createTooltip(tooltip);
 
-        let layerLoc = this._layer.toLocal(loc);
+        const layerLoc = this._layer.toLocal(loc);
         this._curTooltip.x = layerLoc.x;
         this._curTooltip.y = layerLoc.y;
         this._curTooltip.alpha = 0;
@@ -59,20 +60,25 @@ export default class Tooltips extends GameObject {
             new DelayTask(Tooltips.TOOLTIP_DELAY),
             new AlphaTask(1, 0.1, Easing.linear, this._curTooltip)
         ));
+
+        Assert.assertIsDefined(this.mode);
+        Assert.assertIsDefined(this.mode.container);
+        this.mode.container.removeChild(this._curTooltip);
+        this.mode.container.addChild(this._curTooltip);
     }
 
-    public showTooltipFor(target: DisplayObject, key: any, tooltip: Tooltip): void {
+    public showTooltipFor(target: DisplayObject, key: Button | PaletteTarget, tooltip: Tooltip): void {
         if (this._curTooltipKey === key) {
             return;
         }
 
-        let r = target.getBounds(false, Tooltips.TARGET_BOUNDS);
-        let p = Tooltips.P;
+        const r = target.getBounds(false, Tooltips.TARGET_BOUNDS);
+        const p = Tooltips.P;
         p.set(r.x + (r.width * 0.5), r.y + (r.height * 0.5));
         this.showTooltip(key, p, tooltip);
     }
 
-    public removeTooltip(key: any): void {
+    public removeTooltip(key: Button | PaletteTarget): void {
         if (this._curTooltipKey === key) {
             this.removeCurTooltip();
         }
@@ -88,15 +94,15 @@ export default class Tooltips extends GameObject {
     }
 
     public addButtonTooltip(button: Button, tooltip: Tooltip): Registration {
-        let show = (): void => {
+        const show = (): void => {
             if (button.enabled) {
                 this.showTooltipFor(button.display, button, tooltip);
             }
         };
 
-        let hide = (): void => this.removeTooltip(button);
+        const hide = (): void => this.removeTooltip(button);
 
-        let regs = new RegistrationGroup();
+        const regs = new RegistrationGroup();
 
         regs.add(button.pointerDown.connect(show));
         regs.add(button.clicked.connect(hide));
@@ -112,14 +118,11 @@ export default class Tooltips extends GameObject {
 
     private static createTooltip(tooltip: Tooltip): DisplayObject {
         if (typeof (tooltip) === 'string' || tooltip instanceof StyledTextBuilder) {
-            let textField: Container;
-            if (typeof (tooltip) === 'string') {
-                textField = new Text(tooltip, Tooltips.DEFAULT_STYLE);
-            } else {
-                textField = tooltip.build();
-            }
+            const textField: Container = (typeof (tooltip) === 'string')
+                ? new Text(tooltip, Tooltips.DEFAULT_STYLE)
+                : tooltip.build();
 
-            let disp = new Graphics()
+            const disp = new Graphics()
                 .beginFill(0x0, 0.8)
                 .drawRoundedRect(0, 0, textField.width + 20, textField.height + 20, 5)
                 .endFill();
@@ -134,7 +137,7 @@ export default class Tooltips extends GameObject {
 
     private readonly _layer: Container;
 
-    private _curTooltipKey: any;
+    private _curTooltipKey: Button | PaletteTarget | null;
     private _curTooltip: DisplayObject | null;
     private _curTooltipFader: GameObjectRef = GameObjectRef.NULL;
 

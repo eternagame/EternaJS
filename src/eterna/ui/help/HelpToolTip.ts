@@ -1,8 +1,15 @@
-import {ContainerObject} from 'flashbang';
-import {Graphics, Point, Rectangle} from 'pixi.js';
+import {ContainerObject, Assert} from 'flashbang';
+import {
+    Graphics, Point, Rectangle, TextMetrics
+} from 'pixi.js';
 import Fonts from 'eterna/util/Fonts';
 
-export type ToolTipPositioner = [() => Rectangle, number];
+type InteractionEvent = PIXI.InteractionEvent;
+
+// AMW we have to be content to accept our positioner may
+// in fact return null (if we want to use getbounds() for
+// the purpose!)
+export type ToolTipPositioner = [() => Rectangle | null, number];
 
 export type HelpToolTipSide = 'top' | 'bottom';
 
@@ -32,6 +39,7 @@ export default class HelpToolTip extends ContainerObject {
     public updatePosition() {
         const [getBounds, offset] = this._positioner;
         const bounds = getBounds();
+        Assert.assertIsDefined(bounds);
         this.container.position.x = bounds.x + bounds.width / 2 + offset;
         if (this._side === 'top') {
             this.container.position.y = bounds.y;
@@ -48,8 +56,8 @@ export default class HelpToolTip extends ContainerObject {
         this._positioner = props.positioner;
 
         // Text
-        const textBuilder = Fonts.stdBold(props.text).fontSize(theme.fontSize).color(0);
-        const textMetrics = PIXI.TextMetrics.measureText(props.text, textBuilder.style);
+        const textBuilder = Fonts.std(props.text, theme.fontSize).bold().color(0);
+        const textMetrics = TextMetrics.measureText(props.text, textBuilder.style);
         const textElem = textBuilder.build();
 
         // Background
@@ -81,7 +89,7 @@ export default class HelpToolTip extends ContainerObject {
 
         const background = new Graphics();
         background.interactive = true;
-        background.on('click', (e) => e.stopPropagation());
+        background.on('click', (e: InteractionEvent) => e.stopPropagation());
         background.beginFill(theme.colors.background, 1);
         background.drawRoundedRect(backgroundX, backgroundY, width, height, theme.borderRadius);
         textElem.position = new Point(

@@ -7,7 +7,7 @@ export default class Counter {
         this._count++;
     }
 
-    public assertTriggered(count: number, message: string = ""): void {
+    public assertTriggered(count: number, _message: string = ""): void {
         expect(count).toBe(this._count);
     }
 
@@ -15,7 +15,7 @@ export default class Counter {
         this._count = 0;
     }
 
-    public onEmit(value: any = null): void {
+    public onEmit(_value: any = null): void {
         this.trigger();
     }
 

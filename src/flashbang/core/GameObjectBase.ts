@@ -1,6 +1,6 @@
 import {Container} from 'pixi.js';
 import {RegistrationGroup, UnitSignal} from 'signals';
-import AppMode from './AppMode';
+import AppMode, {ObjectID} from './AppMode';
 import ModeStack from './ModeStack';
 import GameObject from './GameObject';
 import GameObjectRef from './GameObjectRef';
@@ -24,7 +24,7 @@ export default class GameObjectBase {
      * }
      * </code>
      */
-    public get ids(): any[] {
+    public get ids(): ObjectID[] {
         return GameObjectBase.EMPTY_ARRAY;
     }
 
@@ -114,7 +114,7 @@ export default class GameObjectBase {
     }
 
     /* internal */
-    public _attachToDisplayList(displayParent: Container, displayIdx: number): void {
+    public _attachToDisplayList(_displayParent: Container, _displayIdx: number): void {
         // implemented by subclasses
     }
 
@@ -160,5 +160,5 @@ export default class GameObjectBase {
     /* internal */ public _parent: GameObject | null;
     /* internal */ public _mode: AppMode | null;
 
-    private static readonly EMPTY_ARRAY: any[] = [];
+    private static readonly EMPTY_ARRAY: ObjectID[] = [];
 }

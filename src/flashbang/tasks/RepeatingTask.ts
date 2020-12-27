@@ -1,5 +1,4 @@
 import ObjectTask from 'flashbang/core/ObjectTask';
-import Assert from 'flashbang/util/Assert';
 
 type TaskCreator = () => ObjectTask | null;
 
@@ -42,7 +41,9 @@ export default class RepeatingTask extends ObjectTask {
         this.regs.add(this._curTask.destroyed.connect(() => {
             this.restart();
         }));
-        this.parent.addObject(this._curTask);
+        if (this.parent) {
+            this.parent.addObject(this._curTask);
+        }
     }
 
     protected _taskCreator: TaskCreator;

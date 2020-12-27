@@ -1,4 +1,4 @@
-import {GameObject} from 'flashbang';
+import {GameObject, Assert} from 'flashbang';
 import RScriptEnv from './RScriptEnv';
 import RScriptOp from './RScriptOp';
 import RScriptArrow from './RScriptArrow';
@@ -38,6 +38,7 @@ export default class ROPUIArrow extends RScriptOp {
 
                 const updatePosition = () => {
                     const bounds = getBounds();
+                    Assert.assertIsDefined(bounds);
                     arrow.display.position.x = bounds.x + bounds.width / 2;
                     if (this._side === 'bottom') {
                         arrow.display.position.y = bounds.y + bounds.height;
@@ -51,6 +52,7 @@ export default class ROPUIArrow extends RScriptOp {
                 updatePosition();
                 this._env.addObject(arrow, this._env.container);
                 this._env.setVar(ROPUIArrow.id, arrow);
+                Assert.assertIsDefined(this._env.mode);
                 arrow.regs.add(this._env.mode.resized.connect(updatePosition));
             }
         } else {

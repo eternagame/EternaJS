@@ -5,8 +5,10 @@ import Fonts from 'eterna/util/Fonts';
 import {Sprite, Point} from 'pixi.js';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import ConstraintBox from 'eterna/constraints/ConstraintBox';
-import EPars from 'eterna/EPars';
 import MultiStyleText from 'pixi-multistyle-text';
+import Assert from 'flashbang/util/Assert';
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
 import MissionIntroConstraints from './MissionIntroConstraints';
 import GameButton from './GameButton';
 import PoseThumbnail, {PoseThumbnailType} from './PoseThumbnail';
@@ -14,9 +16,9 @@ import UITheme from './UITheme';
 
 interface MissionIntroPanelProps {
     description: string;
-    puzzleThumbnails: number[][];
+    puzzleThumbnails: SecStruct[];
     constraints: ConstraintBox[];
-    customLayout?: Array<[number, number]>;
+    customLayout: Array<[number, number] | [null, null]> | null;
 }
 
 export default class MissionIntroPanel extends ContainerObject {
@@ -39,10 +41,10 @@ export default class MissionIntroPanel extends ContainerObject {
         super();
         this._props = props;
 
-        this._titleLabel = Fonts.stdBold('GOAL', 24).color(0xFAC244).build();
+        this._titleLabel = Fonts.std('GOAL', 24).bold().color(0xFAC244).build();
         this.container.addChild(this._titleLabel);
 
-        this._goalsBG = Sprite.fromImage(Bitmaps.ImgGoalBackground);
+        this._goalsBG = Sprite.from(Bitmaps.ImgGoalBackground);
         this.container.addChild(this._goalsBG);
 
         // Constraints
@@ -55,12 +57,12 @@ export default class MissionIntroPanel extends ContainerObject {
         this._thumbnail = new Sprite();
         this.container.addChild(this._thumbnail);
 
-        const setThumbnail = (targetPairs: number[]) => {
+        const setThumbnail = (targetPairs: SecStruct) => {
             const wrongPairs = new Array(targetPairs.length).fill(-1);
-            const sequence = new Array(targetPairs.length).fill(EPars.RNABASE_ADENINE);
+            const sequence = Sequence.fromSequenceString(new Array(targetPairs.length).join('A'));
             PoseThumbnail.drawToSprite(
                 this._thumbnail,
-                sequence,
+                sequence.baseArray,
                 targetPairs,
                 6,
                 PoseThumbnailType.WRONG_COLORED,
@@ -87,6 +89,7 @@ export default class MissionIntroPanel extends ContainerObject {
     protected added() {
         const updateLayout = () => {
             const {theme} = MissionIntroPanel;
+            Assert.assertIsDefined(Flashbang.stageWidth);
             this._constraints.updateLayout(Flashbang.stageWidth - (this._goalsBG.width + theme.spacing));
             const width = this._goalsBG.width + theme.spacing + this._constraints.actualWidth;
 
@@ -95,7 +98,7 @@ export default class MissionIntroPanel extends ContainerObject {
                 this.container.removeChild(this._descriptionLabel);
             }
             this._descriptionLabel = new StyledTextBuilder({
-                fontFamily: Fonts.STDFONT_REGULAR,
+                fontFamily: Fonts.STDFONT,
                 fill: 0xFFFFFF,
                 fontSize: Math.min(Flashbang.stageWidth * 0.025, 24),
                 wordWrap: true,
@@ -130,6 +133,7 @@ export default class MissionIntroPanel extends ContainerObject {
                 + (this._thumbnailButtons ? (this._thumbnailButtons[0].container.height + theme.spacing) : 0);
 
             const {headerHeight} = UITheme.missionIntro;
+            Assert.assertIsDefined(Flashbang.stageHeight);
             this.container.position = new Point(
                 Math.max(Flashbang.stageWidth - width, 0) / 2,
                 headerHeight + Math.max(Flashbang.stageHeight - headerHeight - height, 0) / 2
@@ -138,6 +142,7 @@ export default class MissionIntroPanel extends ContainerObject {
             this._size = new Point(width, height);
         };
         updateLayout();
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(updateLayout));
     }
 }

@@ -33,8 +33,8 @@ export default class HintsPanel extends ContainerObject {
         }
 
         const pages = pagesContent.map((pageText, pageIndex) => {
-            const textElem = new HTMLTextObject(pageText, theme.width - 2 * UITheme.panel.padding)
-                .font(Fonts.ARIAL)
+            const textElem = new HTMLTextObject(pageText, theme.width - 2 * UITheme.panel.padding, undefined, true)
+                .font(Fonts.STDFONT)
                 .color(0xffffff)
                 .fontSize(theme.fontSize);
 
@@ -42,11 +42,11 @@ export default class HintsPanel extends ContainerObject {
             return textElem;
         });
 
+        Assert.assertIsDefined(Flashbang.stageHeight);
         const panel = new MultiPagePanel({
             title: 'Hint',
             pages,
-            width: theme.width,
-            maxHeight: Flashbang.stageHeight * 0.8
+            width: theme.width
         });
         this.addObject(panel, this.container);
     }
@@ -64,6 +64,7 @@ export default class HintsPanel extends ContainerObject {
             );
         };
         onResize();
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(onResize));
     }
 }

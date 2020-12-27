@@ -75,8 +75,6 @@ module.exports = {
       'object-curly-spacing': ['error', 'never'],
       // This can be more readable depending on the situation
       'no-else-return': 'off',
-      // const should really be used to indicate that something *shouldn't* change, not just that it doesn't
-      'prefer-const': 'off',
       // This would be great if it could pick up when we reassign multiple properties, but it's all sorts of
       // painful/less readable in a large number of of cases
       'prefer-destructuring': 'off',
@@ -91,7 +89,8 @@ module.exports = {
       'no-cond-assign': ['error', 'except-parens'],
       // At least until the dynamic content changes to interfaces
       'dot-notation': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
+      // bring it on
+      '@typescript-eslint/no-explicit-any': 2,
       // Outparams are used in some places to reduce allocations, however it'd be nice to have in general...
       // Should probably reconfigure with ignorePropertyModificationsFor
       'no-param-reassign': 'off',
