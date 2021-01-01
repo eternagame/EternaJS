@@ -19,6 +19,9 @@ import URLButton from 'eterna/ui/URLButton';
 import EternaURL from 'eterna/net/EternaURL';
 import Folder from 'eterna/folding/Folder';
 import Dialog from 'eterna/ui/Dialog';
+import Utility from 'eterna/util/Utility';
+import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
+import CopyTextDialogMode from './CopyTextDialogMode';
 
 export default abstract class GameMode extends AppMode {
     public readonly bgLayer = new Container();
@@ -427,6 +430,24 @@ export default abstract class GameMode extends AppMode {
             }
             this.download(`${ii}.hkws`, hkwsText);
         }
+    }
+
+    protected showCopySequenceDialog(): void {
+        Assert.assertIsDefined(this.modeStack);
+        let sequenceString = this._poses[0].sequence.sequenceString();
+        if (this._poses[0].customNumbering != null) sequenceString += ` ${Utility.arrayToRangeString(this._poses[0].customNumbering)}`;
+        this.modeStack.pushMode(new CopyTextDialogMode(sequenceString, 'Current Sequence'));
+    }
+
+    protected showPasteSequenceDialog(): void {
+        const customNumbering = this._poses[0].customNumbering;
+        this.showDialog(new PasteSequenceDialog(customNumbering)).closed.then((sequence) => {
+            if (sequence !== null) {
+                for (const pose of this._poses) {
+                    pose.pasteSequence(sequence);
+                }
+            }
+        });
     }
 
     protected _achievements: AchievementManager;

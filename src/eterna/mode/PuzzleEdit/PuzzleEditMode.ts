@@ -38,6 +38,7 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import EternaURL from 'eterna/net/EternaURL';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
+import ContextMenu from 'eterna/ui/ContextMenu';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
@@ -191,10 +192,7 @@ export default class PuzzleEditMode extends GameMode {
             });
         });
 
-        this._toolbar.viewOptionsButton.clicked.connect(() => {
-            const dialog: EternaViewOptionsDialog = new EternaViewOptionsDialog(EternaViewOptionsMode.PUZZLEMAKER);
-            this.showDialog(dialog);
-        });
+        this._toolbar.viewOptionsButton.clicked.connect(() => this.showViewOptionsDialog());
 
         this._toolbar.resetButton.clicked.connect(() => this.promptForReset());
         this._toolbar.submitButton.clicked.connect(() => this.onSubmitPuzzle());
@@ -456,6 +454,27 @@ export default class PuzzleEditMode extends GameMode {
                 );
             }
         }
+    }
+
+    /* override */
+    protected createContextMenu(): ContextMenu | null {
+        if (this.isDialogOrNotifShowing || this.hasUILock) {
+            return null;
+        }
+
+        const menu = new ContextMenu();
+
+        menu.addItem('Preferences').clicked.connect(() => this.showViewOptionsDialog());
+        menu.addItem('Reset').clicked.connect(() => this.promptForReset());
+        menu.addItem('Copy Sequence').clicked.connect(() => this.showCopySequenceDialog());
+        menu.addItem('Paste Sequence').clicked.connect(() => this.showPasteSequenceDialog());
+
+        return menu;
+    }
+
+    protected showViewOptionsDialog() {
+        const dialog: EternaViewOptionsDialog = new EternaViewOptionsDialog(EternaViewOptionsMode.PUZZLEMAKER);
+        this.showDialog(dialog);
     }
 
     protected createScreenshot(): ArrayBuffer {

@@ -21,7 +21,6 @@ import {
     GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
-import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
 import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
 import FolderManager from 'eterna/folding/FolderManager';
 import Folder, {MultiFoldResult, CacheKey} from 'eterna/folding/Folder';
@@ -61,7 +60,6 @@ import DotPlot from 'eterna/rnatypes/DotPlot';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 import UITheme from 'eterna/ui/UITheme';
-import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -434,29 +432,11 @@ export default class PoseEditMode extends GameMode {
         return this._constraintsLayer;
     }
 
-    private showPasteSequenceDialog(): void {
-        const customNumbering = this._poses[0].customNumbering;
-        this.showDialog(new PasteSequenceDialog(customNumbering)).closed.then((sequence) => {
-            if (sequence !== null) {
-                for (const pose of this._poses) {
-                    pose.pasteSequence(sequence);
-                }
-            }
-        });
-    }
-
     private showViewOptionsDialog(): void {
         const mode = this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
             ? EternaViewOptionsMode.LAB
             : EternaViewOptionsMode.PUZZLE;
         this.showDialog(new EternaViewOptionsDialog(mode));
-    }
-
-    private showCopySequenceDialog(): void {
-        Assert.assertIsDefined(this.modeStack);
-        let sequenceString = this._poses[0].sequence.sequenceString();
-        if (this._poses[0].customNumbering != null) sequenceString += ` ${Utility.arrayToRangeString(this._poses[0].customNumbering)}`;
-        this.modeStack.pushMode(new CopyTextDialogMode(sequenceString, 'Current Sequence'));
     }
 
     public set puzzleDefaultMode(defaultMode: PoseState) {
