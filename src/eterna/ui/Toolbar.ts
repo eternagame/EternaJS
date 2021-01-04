@@ -81,6 +81,10 @@ export default class Toolbar extends ContainerObject {
     public nucleotideFindButton: GameButton;
     public nucleotideRangeButton: GameButton;
 
+    // Annotations
+    public annotationModeButton: GameButton;
+    public annotationLayersButton: GameButton;
+
     public freezeButton: GameButton;
 
     public boostersMenu: GameButton;
@@ -670,6 +674,22 @@ export default class Toolbar extends ContainerObject {
             this.magicGlueButton.toggled.value = true;
         }));
 
+        this.annotationModeButton = new ToolbarButton()
+            .up(Bitmaps.ImgAnnotationMode)
+            .over(Bitmaps.ImgAnnotationModeOver)
+            .down(Bitmaps.ImgAnnotationModeSelected)
+            .selected(Bitmaps.ImgAnnotationModeSelected)
+            .tooltip('Toggle activation of Annotation Editor');
+        this.addObject(this.annotationModeButton, this.lowerToolbarLayout);
+
+        this.annotationLayersButton = new ToolbarButton()
+            .up(Bitmaps.ImgAnnotationLayer)
+            .over(Bitmaps.ImgAnnotationLayerOver)
+            .down(Bitmaps.ImgAnnotationLayerSelected)
+            .selected(Bitmaps.ImgAnnotationLayerSelected)
+            .tooltip('Reveal/Hide Annotation Layers Panel');
+        this.addObject(this.annotationLayersButton, this.lowerToolbarLayout);
+
         if (this._type === ToolbarType.PUZZLEMAKER) {
             this.submitButton.tooltip('Publish your puzzle!');
 
@@ -902,6 +922,9 @@ export default class Toolbar extends ContainerObject {
 
         this.undoButton.enabled = !disable;
         this.redoButton.enabled = !disable;
+
+        this.annotationModeButton.enabled = !disable;
+        this.annotationLayersButton.enabled = !disable;
 
         this.freezeButton.enabled = !disable;
 

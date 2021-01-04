@@ -100,7 +100,13 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
 
         this._viewLayout.layout();
 
-        this._panel = new GamePanel(GamePanelType.NORMAL, 1, 0x21508C, 1, 0x4A90E2);
+        this._panel = new GamePanel({
+            type: GamePanelType.NORMAL,
+            alpha: 1,
+            color: 0x21508C,
+            borderAlpha: 1,
+            borderColor: 0x4A90E2
+        });
         this._panel.title = 'Settings';
         this.addObject(this._panel, this.container);
 

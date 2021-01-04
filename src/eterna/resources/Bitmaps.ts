@@ -338,6 +338,13 @@ export default class Bitmaps {
     public static readonly BranchinessIcon: string = require('assets/branchy.png');
     public static readonly Folder: string = require('assets/folder.png');
     public static readonly CustomLayout: string = require('assets/UI/custom-layout-small.png');
+    // Annotations
+    public static readonly ImgAnnotationMode: string = require('assets/UI/annotation-mode-btn.png');
+    public static readonly ImgAnnotationModeOver: string = require('assets/UI/annotation-mode-btn-over.png');
+    public static readonly ImgAnnotationModeSelected: string = require('assets/UI/annotation-mode-btn-selected.png');
+    public static readonly ImgAnnotationLayer: string = require('assets/UI/annotation-layers-btn.png');
+    public static readonly ImgAnnotationLayerOver: string = require('assets/UI/annotation-layers-btn-over.png');
+    public static readonly ImgAnnotationLayerSelected: string = require('assets/UI/annotation-layers-btn-selected.png');
 
     public static get all(): string[] {
         if (Bitmaps.ALL_URLS == null) {

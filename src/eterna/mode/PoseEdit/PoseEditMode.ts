@@ -53,6 +53,7 @@ import HelpBar from 'eterna/ui/HelpBar';
 import HelpScreen from 'eterna/ui/help/HelpScreen';
 import NucleotideFinder from 'eterna/ui/NucleotideFinder';
 import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
+import AnnotationDialog from 'eterna/ui/AnnotationDialog';
 import {HighlightInfo} from 'eterna/constraints/Constraint';
 import {AchievementData} from 'eterna/achievements/AchievementManager';
 import {RankScrollData} from 'eterna/rank/RankScroll';
@@ -248,6 +249,26 @@ export default class PoseEditMode extends GameMode {
 
         this._toolbar.downloadSVGButton.clicked.connect(() => {
             this.downloadSVG();
+        });
+
+        // this._toolbar.annotationModeButton.toggled.connect((value) => {
+        //     if (value) {
+
+        //     } else {
+
+        //     }
+        // });
+
+        this._toolbar.annotationLayersButton.toggled.connect((visible) => {
+            if (visible) {
+                this.showDialog(
+                    new AnnotationDialog(true, null)
+                ).closed.then(() => {
+                    this._toolbar.annotationLayersButton.toggled.value = false;
+                });
+            } else {
+                this.closeCurDialog();
+            }
         });
 
         // Add our docked SpecBox at the bottom of uiLayer

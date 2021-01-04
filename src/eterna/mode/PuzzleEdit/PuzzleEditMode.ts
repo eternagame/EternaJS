@@ -33,6 +33,7 @@ import ShapeConstraint from 'eterna/constraints/constraints/ShapeConstraint';
 import ContraFold from 'eterna/folding/Contrafold';
 import {SaveStoreItem} from 'flashbang/settings/SaveGameManager';
 import FolderSwitcher from 'eterna/ui/FolderSwitcher';
+import AnnotationDialog from 'eterna/ui/AnnotationDialog';
 import GameButton from 'eterna/ui/GameButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import EternaURL from 'eterna/net/EternaURL';
@@ -234,6 +235,26 @@ export default class PuzzleEditMode extends GameMode {
             this._scriptInterface.addCallback('get_thumbnail', () => this.getThumbnailBase64);
             this._scriptInterface.addCallback('get_shift_limit', () => this.shiftLimitString);
         }
+
+        // this._toolbar.annotationModeButton.toggled.connect((value) => {
+        //     if (value) {
+
+        //     } else {
+
+        //     }
+        // });
+
+        this._toolbar.annotationLayersButton.toggled.connect((visible) => {
+            if (visible) {
+                this.showDialog(
+                    new AnnotationDialog(true, null)
+                ).closed.then(() => {
+                    this._toolbar.annotationLayersButton.toggled.value = false;
+                });
+            } else {
+                this.closeCurDialog();
+            }
+        });
 
         this.clearUndoStack();
 

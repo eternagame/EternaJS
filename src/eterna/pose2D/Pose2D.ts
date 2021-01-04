@@ -53,6 +53,25 @@ interface AuxInfo {
     cleavingSite?: number;
 }
 
+// will an annotation need to know if it's a member of a layer?
+export interface Annotation {
+    id: string;
+    timestamp: number;
+    playerID: number;
+    title: string;
+    body?: string;
+    ranges?: number[][];
+    type: AnnotationType;
+    visibility: boolean;
+    focused: boolean;
+}
+
+export enum AnnotationType {
+    RNA = 'RNA',
+    PLAYER = 'Player',
+    SOLUTION = 'Solution'
+}
+
 export enum Layout {
     MOVE,
     ROTATE_STEM,

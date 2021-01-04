@@ -10,7 +10,7 @@ export default class TextInputPanel extends GamePanel {
     public readonly okClicked: Signal<Map<string, string>> = new Signal();
 
     constructor(inputFontSize: number = 14) {
-        super();
+        super({});
 
         this._fontSize = inputFontSize;
 
@@ -139,7 +139,7 @@ export default class TextInputPanel extends GamePanel {
     private static readonly H_MARGIN = 20;
 }
 
-interface InputField {
+export interface InputField {
     input: TextInputObject;
     name: string;
     label: Text;

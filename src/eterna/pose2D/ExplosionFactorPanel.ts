@@ -10,7 +10,7 @@ export default class ExplosionFactorPanel extends GamePanel {
     public readonly factorUpdated: Signal<number> = new Signal();
 
     constructor() {
-        super();
+        super({});
 
         this.setup(0, 1.0, 0x152843, 0.27, 0xC0DCE7);
     }
