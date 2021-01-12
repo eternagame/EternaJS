@@ -634,7 +634,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
     ): HTMLDivElement | HTMLInputElement {
         if (characterLimit) {
             const container = document.createElement('div');
-            container.style.position = 'relative';
+            container.classList.add('eterna-character-limited-input-container');
             const input = document.createElement('input');
             input.type = 'text';
             input.title = '';
@@ -644,19 +644,15 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
             input.style.paddingRight = `${2 * TextInputObject._TEXT_INPUT_PADDING + TextInputObject._PROGRESS_BAR_HEIGHT}px`;
             container.appendChild(input);
             const radialProgressBarContainer = document.createElement('div');
-            radialProgressBarContainer.style.position = 'absolute';
+            radialProgressBarContainer.classList.add('eterna-character-limited-input-radial-progress-bar');
             radialProgressBarContainer.style.top = `${(height - TextInputObject._PROGRESS_BAR_HEIGHT) / 2}px`;
             radialProgressBarContainer.style.right = `${TextInputObject._TEXT_INPUT_PADDING}px`;
-            radialProgressBarContainer.style.display = 'flex';
-            radialProgressBarContainer.style.alignItems = 'center';
-            radialProgressBarContainer.style.justifyContent = 'center';
             container.appendChild(radialProgressBarContainer);
             const radialProgressBar = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
             radialProgressBar.setAttribute('height', `${TextInputObject._PROGRESS_BAR_HEIGHT}`);
             radialProgressBar.setAttribute('width', `${TextInputObject._PROGRESS_BAR_HEIGHT}`);
             radialProgressBar.style.width = `${TextInputObject._PROGRESS_BAR_HEIGHT}px`;
             radialProgressBar.style.height = `${TextInputObject._PROGRESS_BAR_HEIGHT}px`;
-            radialProgressBar.style.backgroundColor = '#E8E8E8';
             radialProgressBar.style.borderRadius = `${TextInputObject._PROGRESS_BAR_HEIGHT / 2}px`;
             radialProgressBarContainer.appendChild(radialProgressBar);
             const progressArc = document.createElementNS('http://www.w3.org/2000/svg', 'circle');

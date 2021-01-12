@@ -18,6 +18,7 @@ import GameButton from './GameButton';
 import ToggleBar from './ToggleBar';
 import EternaMenu, {EternaMenuStyle} from './EternaMenu';
 import ScrollContainer from './ScrollContainer';
+import AnnotationLayersPanel from './AnnotationLayersPanel';
 
 export enum ToolbarType {
     PUZZLE,
@@ -84,6 +85,7 @@ export default class Toolbar extends ContainerObject {
     // Annotations
     public annotationModeButton: GameButton;
     public annotationLayersButton: GameButton;
+    public annotationsLayerPanel: AnnotationLayersPanel;
 
     public freezeButton: GameButton;
 
@@ -688,6 +690,8 @@ export default class Toolbar extends ContainerObject {
             .down(Bitmaps.ImgAnnotationLayerSelected)
             .selected(Bitmaps.ImgAnnotationLayerSelected)
             .tooltip('Reveal/Hide Annotation Layers Panel');
+        this.annotationsLayerPanel = new AnnotationLayersPanel(this.annotationLayersButton);
+        this.addObject(this.annotationsLayerPanel, this.mode?.container);
         this.addObject(this.annotationLayersButton, this.lowerToolbarLayout);
 
         if (this._type === ToolbarType.PUZZLEMAKER) {

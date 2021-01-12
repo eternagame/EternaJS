@@ -14,8 +14,7 @@ export default class ContextMenu extends ContainerObject {
             type: GamePanelType.NORMAL,
             alpha: 1.0,
             color: 0x152843,
-            borderAlpha: 1.0,
-            borderColor: 0xffffff
+            dropShadow: true
         });
         this.addObject(this._panel, this.container, 0);
 

@@ -37,26 +37,31 @@ export default class VScrollBox extends ContainerObject implements MouseWheelLis
         this.addObject(this._scrollContainer, this.display);
 
         // Scroll thumb
-        const thumbHeight = (
-            this._height * (this._height / this._scrollContainer.content.height)
-        ) - 2 * this._SCROLL_THUMB_PADDING;
-        const scrollDistance = (this._height - 2 * this._SCROLL_THUMB_PADDING)
-            * (this._scrollContainer.scrollY / (this._scrollContainer.content.height - thumbHeight));
-        this._scrollThumb = new Graphics()
-            .beginFill(0x4A90E2)
-            .drawRoundedRect(
-                0,
-                0,
-                this._SCROLL_THUMB_WIDTH,
-                thumbHeight,
-                this._SCROLL_THUMB_WIDTH / 2
-            ).endFill();
-        this.display.addChild(this._scrollThumb);
-        DisplayUtil.positionRelative(
-            this._scrollThumb, HAlign.RIGHT, VAlign.TOP,
-            this._scrollContainer.container, HAlign.RIGHT, VAlign.TOP,
-            -this._SCROLL_THUMB_PADDING, this._SCROLL_THUMB_PADDING + scrollDistance
-        );
+
+        if (this._scrollContainer.content.height > 0 && this._scrollContainer.content.height > this._height) {
+            const thumbHeight = (
+                this._height * (this._height / this._scrollContainer.content.height)
+            ) - 2 * this._SCROLL_THUMB_PADDING;
+
+            const scrollDistance = (this._height - 2 * this._SCROLL_THUMB_PADDING)
+                * (this._scrollContainer.scrollY / this._scrollContainer.content.height);
+            this._scrollThumb = new Graphics()
+                .beginFill(0xFFFFFF)
+                .drawRoundedRect(
+                    0,
+                    0,
+                    this._SCROLL_THUMB_WIDTH,
+                    thumbHeight,
+                    this._SCROLL_THUMB_WIDTH / 2
+                ).endFill();
+            this._scrollThumb.alpha = 0.4;
+            this.display.addChild(this._scrollThumb);
+            DisplayUtil.positionRelative(
+                this._scrollThumb, HAlign.RIGHT, VAlign.TOP,
+                this._scrollContainer.container, HAlign.RIGHT, VAlign.TOP,
+                -this._SCROLL_THUMB_PADDING, this._SCROLL_THUMB_PADDING + scrollDistance
+            );
+        }
 
         this._dragSurface.pointerDown.connect((e) => this.onDragPointerDown(e));
         this._dragSurface.pointerUp.connect(() => this.onDragPointerUp());
@@ -106,26 +111,71 @@ export default class VScrollBox extends ContainerObject implements MouseWheelLis
     }
 
     public updateScrollThumb() {
-        const thumbHeight = (
-            this._height * (this._height / this._scrollContainer.content.height)
-        ) - 2 * this._SCROLL_THUMB_PADDING;
-        const scrollDistance = (this._height - 2 * this._SCROLL_THUMB_PADDING)
-            * (this._scrollContainer.scrollY / (this._scrollContainer.content.height - thumbHeight));
-        this._scrollThumb.clear();
-        this._scrollThumb.beginFill(0x4A90E2);
-        this._scrollThumb.drawRoundedRect(
-            0,
-            0,
-            this._SCROLL_THUMB_WIDTH,
-            thumbHeight,
-            this._SCROLL_THUMB_WIDTH / 2
-        );
-        this._scrollThumb.endFill();
-        DisplayUtil.positionRelative(
-            this._scrollThumb, HAlign.RIGHT, VAlign.TOP,
-            this._scrollContainer.container, HAlign.RIGHT, VAlign.TOP,
-            -this._SCROLL_THUMB_PADDING, this._SCROLL_THUMB_PADDING + scrollDistance
-        );
+        // Add scroll thumb if eligible but not present
+        if (
+            this._scrollContainer.content.height > 0
+            && this._scrollContainer.content.height > this._height
+            && this._scrollThumb == null
+        ) {
+            const thumbHeight = (
+                this._height * (this._height / this._scrollContainer.content.height)
+            ) - 2 * this._SCROLL_THUMB_PADDING;
+
+            const scrollDistance = (this._height - 2 * this._SCROLL_THUMB_PADDING)
+                * (this._scrollContainer.scrollY / this._scrollContainer.content.height);
+            this._scrollThumb = new Graphics()
+                .beginFill(0xFFFFFF)
+                .drawRoundedRect(
+                    0,
+                    0,
+                    this._SCROLL_THUMB_WIDTH,
+                    thumbHeight,
+                    this._SCROLL_THUMB_WIDTH / 2
+                ).endFill();
+            this._scrollThumb.alpha = 0.4;
+            this.display.addChild(this._scrollThumb);
+            DisplayUtil.positionRelative(
+                this._scrollThumb, HAlign.RIGHT, VAlign.TOP,
+                this._scrollContainer.container, HAlign.RIGHT, VAlign.TOP,
+                -this._SCROLL_THUMB_PADDING, this._SCROLL_THUMB_PADDING + scrollDistance
+            );
+        }
+
+        // Update scroll position
+        if (
+            this._scrollContainer.content.height > 0
+            && this._scrollContainer.content.height > this._height
+            && this._scrollThumb
+        ) {
+            const thumbHeight = (
+                this._height * (this._height / this._scrollContainer.content.height)
+            ) - 2 * this._SCROLL_THUMB_PADDING;
+            const scrollDistance = (this._height - 2 * this._SCROLL_THUMB_PADDING)
+                * (this._scrollContainer.scrollY / this._scrollContainer.content.height);
+            this._scrollThumb.clear();
+            this._scrollThumb.beginFill(0x4A90E2);
+            this._scrollThumb.drawRoundedRect(
+                0,
+                0,
+                this._SCROLL_THUMB_WIDTH,
+                thumbHeight,
+                this._SCROLL_THUMB_WIDTH / 2
+            );
+            this._scrollThumb.endFill();
+            DisplayUtil.positionRelative(
+                this._scrollThumb, HAlign.RIGHT, VAlign.TOP,
+                this._scrollContainer.container, HAlign.RIGHT, VAlign.TOP,
+                -this._SCROLL_THUMB_PADDING, this._SCROLL_THUMB_PADDING + scrollDistance
+            );
+        } else if (
+            (this._scrollContainer.content.height <= 0
+            || this._scrollContainer.content.height <= this._height)
+            && this._scrollThumb
+        ) {
+            // remove scroll thumb if no longer can scroll
+            this._scrollThumb.destroy();
+            this._scrollThumb = null;
+        }
     }
 
     public get scrollLocation(): number {
@@ -176,7 +226,7 @@ export default class VScrollBox extends ContainerObject implements MouseWheelLis
 
     private _scrollContainer: ScrollContainer;
     private _dragSurface: GraphicsObject;
-    private _scrollThumb: Graphics;
+    private _scrollThumb: Graphics | null;
 
     private _dragging: boolean = false;
     private _dragStartPoint = 0;
