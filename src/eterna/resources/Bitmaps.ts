@@ -345,6 +345,11 @@ export default class Bitmaps {
     public static readonly ImgAnnotationLayer: string = require('assets/UI/annotation-layers-btn.png');
     public static readonly ImgAnnotationLayerOver: string = require('assets/UI/annotation-layers-btn-over.png');
     public static readonly ImgAnnotationLayerSelected: string = require('assets/UI/annotation-layers-btn-selected.png');
+    public static readonly ImgFolder: string = require('assets/UI/folder.png');
+    public static readonly ImgTrash: string = require('assets/UI/trash.png');
+    public static readonly ImgEye: string = require('assets/UI/eye.png');
+    public static readonly ImgChevronDown: string = require('assets/UI/chevron-down.png');
+    public static readonly ImgChevronRight: string = require('assets/UI/chevron-right.png');
 
     public static get all(): string[] {
         if (Bitmaps.ALL_URLS == null) {

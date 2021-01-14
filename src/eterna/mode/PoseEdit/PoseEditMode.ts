@@ -251,15 +251,7 @@ export default class PoseEditMode extends GameMode {
             this.downloadSVG();
         });
 
-        // this._toolbar.annotationModeButton.toggled.connect((value) => {
-        //     if (value) {
-
-        //     } else {
-
-        //     }
-        // });
-
-        this._toolbar.annotationLayersButton.toggled.connect((visible) => {
+        this._toolbar.annotationModeButton.toggled.connect((visible) => {
             if (visible) {
                 this.showDialog(
                     new AnnotationDialog(true, null)
@@ -268,6 +260,14 @@ export default class PoseEditMode extends GameMode {
                 });
             } else {
                 this.closeCurDialog();
+            }
+        });
+
+        this._toolbar.annotationLayersButton.toggled.connect((visible) => {
+            if (visible) {
+                this._toolbar.annotationsLayerPanel.isVisible = true;
+            } else {
+                this._toolbar.annotationsLayerPanel.isVisible = false;
             }
         });
 

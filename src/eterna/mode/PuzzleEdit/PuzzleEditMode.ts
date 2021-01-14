@@ -236,15 +236,7 @@ export default class PuzzleEditMode extends GameMode {
             this._scriptInterface.addCallback('get_shift_limit', () => this.shiftLimitString);
         }
 
-        // this._toolbar.annotationModeButton.toggled.connect((value) => {
-        //     if (value) {
-
-        //     } else {
-
-        //     }
-        // });
-
-        this._toolbar.annotationLayersButton.toggled.connect((visible) => {
+        this._toolbar.annotationModeButton.toggled.connect((visible) => {
             if (visible) {
                 this.showDialog(
                     new AnnotationDialog(true, null)
@@ -253,6 +245,14 @@ export default class PuzzleEditMode extends GameMode {
                 });
             } else {
                 this.closeCurDialog();
+            }
+        });
+
+        this._toolbar.annotationLayersButton.toggled.connect((visible) => {
+            if (visible) {
+                this._toolbar.annotationsLayerPanel.isVisible = true;
+            } else {
+                this._toolbar.annotationsLayerPanel.isVisible = false;
             }
         });
 

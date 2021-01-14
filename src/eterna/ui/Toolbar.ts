@@ -690,7 +690,7 @@ export default class Toolbar extends ContainerObject {
             .down(Bitmaps.ImgAnnotationLayerSelected)
             .selected(Bitmaps.ImgAnnotationLayerSelected)
             .tooltip('Reveal/Hide Annotation Layers Panel');
-        this.annotationsLayerPanel = new AnnotationLayersPanel(this.annotationLayersButton);
+        this.annotationsLayerPanel = new AnnotationLayersPanel(this._type, this.annotationLayersButton);
         this.addObject(this.annotationsLayerPanel, this.mode?.container);
         this.addObject(this.annotationLayersButton, this.lowerToolbarLayout);
 

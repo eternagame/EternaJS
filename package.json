@@ -30,10 +30,11 @@
     "@types/dompurify": "^2.0.3",
     "@types/jest": "^25.1.4",
     "@types/loglevel": "^1.6.3",
-    "@types/node": "^12.12.53",
     "@types/marked": "^1.1.0",
+    "@types/node": "^12.12.53",
     "@types/storejs": "^2.0.3",
     "@types/upng-js": "^2.1.1",
+    "@types/uuid": "^8.3.0",
     "@types/webfontloader": "^1.6.29",
     "@typescript-eslint/eslint-plugin": "^2.25.0",
     "@typescript-eslint/parser": "^2.25.0",
@@ -84,6 +85,7 @@
     "pixi.js": "^5.3.3",
     "store": "^2.0.12",
     "upng-js": "^2.1.0",
+    "uuid": "^8.3.2",
     "webfontloader": "^1.6.28"
   },
   "lint-staged": {

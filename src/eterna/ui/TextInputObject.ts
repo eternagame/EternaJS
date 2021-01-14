@@ -90,12 +90,22 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
                 input.onfocus = () => this.onFocusChanged(true);
                 input.onblur = () => this.onFocusChanged(false);
                 input.onkeypress = (e) => this.keyPressed.emit(e.key);
+                document.addEventListener('keydown', ({key}) => {
+                    if (key === 'Escape') {
+                        this.keyPressed.emit('Escape');
+                    }
+                });
             }
         } else if (this._obj instanceof HTMLInputElement || this._obj instanceof HTMLTextAreaElement) {
             this._obj.oninput = () => this.onInput();
             this._obj.onfocus = () => this.onFocusChanged(true);
             this._obj.onblur = () => this.onFocusChanged(false);
             this._obj.onkeypress = (e) => this.keyPressed.emit(e.key);
+            document.addEventListener('keydown', ({key}) => {
+                if (key === 'Escape') {
+                    this.keyPressed.emit('Escape');
+                }
+            });
         }
     }
 
