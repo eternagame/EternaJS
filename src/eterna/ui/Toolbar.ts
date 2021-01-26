@@ -969,6 +969,10 @@ export default class Toolbar extends ContainerObject {
         }
     }
 
+    public get annotationLayersPanel() {
+        return this.annotationsLayerPanel;
+    }
+
     private readonly _type: ToolbarType;
     private readonly _states: number;
     private readonly _showGlue: boolean;

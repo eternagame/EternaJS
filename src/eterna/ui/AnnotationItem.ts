@@ -15,10 +15,11 @@ import TextBuilder, {FontWeight} from 'flashbang/util/TextBuilder';
 import GameButton from './GameButton';
 import DragDropper, {DragDropType, Item} from './DragDropper';
 import TextInputObject from './TextInputObject';
+import AnnotationDialog from './AnnotationDialog';
 
-export interface AnnotationCategory {
-    name: string;
-    children: AnnotationItemChild[];
+export interface AnnotationRange {
+    start: number;
+    end: number;
 }
 
 export interface AnnotationItemChild {
@@ -28,7 +29,7 @@ export interface AnnotationItemChild {
     playerID?: number;
     title: string;
     body?: string;
-    ranges?: number[][];
+    ranges?: AnnotationRange[];
     children?: AnnotationItemChild[];
 }
 
@@ -39,16 +40,17 @@ export interface Annotation {
     playerID: number;
     title: string;
     body?: string;
-    ranges?: number[][];
+    ranges: AnnotationRange[];
+    layer?: AnnotationLayer;
 }
 
 export interface AnnotationLayer {
-    id: string;
+    id: string | number;
     title: string;
-    children: AnnotationItemChild[];
+    children?: AnnotationItemChild[];
 }
 
-export enum AnnotationType {
+export enum AnnotationCategory {
     STRUCTURE = 'Structure',
     PUZZLE = 'Puzzle',
     SOLUTION = 'Solution'
@@ -72,7 +74,7 @@ interface AnnotationItemProps {
     dividerThickness: number;
     type: ItemType;
     title: string;
-    annotationType: AnnotationType;
+    category: AnnotationCategory;
     inLayer?: boolean;
     children?: AnnotationItemChild[];
     updateTitle: (itemPath: number[], text: string) => void;
@@ -81,12 +83,11 @@ interface AnnotationItemProps {
 }
 
 export default class AnnotationItem extends ContainerObject {
-    /** Emitted when the user interacts with the menu. */
     public readonly isVisible: Value<boolean> = new Value<boolean>(true);
     public readonly isSelected: Value<boolean> = new Value<boolean>(false);
     public readonly isExpanded: Value<boolean> = new Value<boolean>(true);
     public readonly isEditingTitle: Value<boolean> = new Value<boolean>(false);
-    public readonly updatePanel = new UnitSignal();
+    public readonly onUpdatePanel = new UnitSignal();
     constructor(props: AnnotationItemProps) {
         super();
         this._id = props.id;
@@ -96,7 +97,7 @@ export default class AnnotationItem extends ContainerObject {
         this._dividerThickness = props.dividerThickness;
         this._type = props.type;
         this._inLayer = props.inLayer || false;
-        this._annotationType = props.annotationType;
+        this._category = props.category;
         this._updateTitle = props.updateTitle;
         this._updateAnnotationLayer = props.updateAnnotationLayer;
         this._updateAnnotationPosition = props.updateAnnotationPosition;
@@ -113,7 +114,7 @@ export default class AnnotationItem extends ContainerObject {
                     dividerThickness: this._dividerThickness,
                     title: child.title,
                     type: child.type,
-                    annotationType: this._annotationType,
+                    category: this._category,
                     children: child.children,
                     inLayer: this._type === ItemType.LAYER,
                     updateTitle: this._updateTitle,
@@ -142,7 +143,7 @@ export default class AnnotationItem extends ContainerObject {
                     this._itemStack.layout();
 
                     // Notify that annotation layer panel that needs to be updated
-                    this.updatePanel.emit();
+                    this.onUpdatePanel.emit();
                 });
 
                 itemChildren.push(item);
@@ -240,10 +241,10 @@ export default class AnnotationItem extends ContainerObject {
 
         // Set up item ribbon
         let ribbonColor: number;
-        if (this._annotationType === AnnotationType.STRUCTURE) {
+        if (this._category === AnnotationCategory.STRUCTURE) {
             // RNA Annotation or Layer
             ribbonColor = AnnotationItem.STRUCTURE_RIBBON_COLOR;
-        } else if (this._annotationType === AnnotationType.PUZZLE) {
+        } else if (this._category === AnnotationCategory.PUZZLE) {
             // PLAYER Annotation or Layer
             ribbonColor = AnnotationItem.PUZZLE_RIBBON_COLOR;
         } else {
@@ -313,7 +314,7 @@ export default class AnnotationItem extends ContainerObject {
                 if (this._type === ItemType.CATEGORY) {
                     // Notify that annotation layer panel that needs to be updated
                     // if we expand or close category accordion
-                    this.updatePanel.emit();
+                    this.onUpdatePanel.emit();
                 }
             });
             this.addObject(this._chevronButton, accordionChevronContainer);
@@ -412,7 +413,8 @@ export default class AnnotationItem extends ContainerObject {
                 width: itemWidth - 2 * AnnotationItem.INPUT_MARGIN,
                 height: length - 2 * AnnotationItem.INPUT_MARGIN,
                 rows: 1,
-                placeholder: this._title
+                placeholder: this._title,
+                characterLimit: AnnotationDialog.ANNOTATION_TEXT_CHARACTER_LIMIT
             }).font(Fonts.STDFONT);
             this._itemNameInput.keyPressed.connect((key) => {
                 if (key === 'Enter' || key === 'Escape') {
@@ -759,6 +761,10 @@ export default class AnnotationItem extends ContainerObject {
         }
     }
 
+    public get id() {
+        return this._id;
+    }
+
     public get itemChildren() {
         return this._itemChildren;
     }
@@ -798,7 +804,7 @@ export default class AnnotationItem extends ContainerObject {
     private _width: number;
     private _dividerThickness: number;
     private _type: ItemType;
-    private _annotationType: AnnotationType;
+    private _category: AnnotationCategory;
     private _itemStack: VLayoutContainer;
     private _itemContainer: HLayoutContainer;
     private _itemIndent: Graphics;
@@ -817,7 +823,7 @@ export default class AnnotationItem extends ContainerObject {
     private _itemChildren: AnnotationItem[];
     private _dropTarget: DragDropper;
     private _dragSource: DragDropper;
-    private _observeDragSources: DragDropper[];
+    private _observeDragSources: DragDropper[] = [];
     private _updateTitle: (itemPath: number[], text: string) => void;
     private _updateAnnotationLayer: (annotation: Item, layerPath: number[]) => void;
     private _updateAnnotationPosition: (firstAnnotation: Item, secondAnnotationPath: number[]) => void;

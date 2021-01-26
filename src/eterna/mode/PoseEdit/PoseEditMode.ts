@@ -27,7 +27,7 @@ import FolderManager from 'eterna/folding/FolderManager';
 import Folder, {MultiFoldResult, CacheKey} from 'eterna/folding/Folder';
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
 import PoseField from 'eterna/pose2D/PoseField';
-import Pose2D, {Oligo, Layout} from 'eterna/pose2D/Pose2D';
+import Pose2D, {Oligo, Layout, AnnotationArguments} from 'eterna/pose2D/Pose2D';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import ConstraintBar from 'eterna/constraints/ConstraintBar';
@@ -62,6 +62,7 @@ import DotPlot from 'eterna/rnatypes/DotPlot';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 import UITheme from 'eterna/ui/UITheme';
+import {Annotation, AnnotationCategory, AnnotationLayer} from 'eterna/ui/AnnotationItem';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
@@ -251,16 +252,8 @@ export default class PoseEditMode extends GameMode {
             this.downloadSVG();
         });
 
-        this._toolbar.annotationModeButton.toggled.connect((visible) => {
-            if (visible) {
-                this.showDialog(
-                    new AnnotationDialog(true, null)
-                ).closed.then(() => {
-                    this._toolbar.annotationLayersButton.toggled.value = false;
-                });
-            } else {
-                this.closeCurDialog();
-            }
+        this._toolbar.annotationModeButton.toggled.connect((active) => {
+            Eterna.settings.annotationModeActive.value = active;
         });
 
         this._toolbar.annotationLayersButton.toggled.connect((visible) => {
@@ -268,6 +261,11 @@ export default class PoseEditMode extends GameMode {
                 this._toolbar.annotationsLayerPanel.isVisible = true;
             } else {
                 this._toolbar.annotationsLayerPanel.isVisible = false;
+            }
+        });
+        this._toolbar.annotationLayersPanel.onUpdateLayers.connect((layers: AnnotationLayer[]) => {
+            if (this._annotationDialog) {
+                this._annotationDialog.setLayers(layers);
             }
         });
 
@@ -774,6 +772,27 @@ export default class PoseEditMode extends GameMode {
             bindTrackMoves(pose, ii);
             bindMousedownEvent(pose, ii);
             poseFields.push(poseField);
+            pose.onCreateAnnotation.connect((args: AnnotationArguments) => {
+                this._annotationDialog = new AnnotationDialog(
+                    false,
+                    pose.fullSequenceLength,
+                    args.ranges,
+                    this._toolbar.annotationLayersPanel.layers
+                );
+                this.showDialog(
+                    this._annotationDialog
+                ).closed.then((annotation: Annotation | null) => {
+                    if (annotation) {
+                        this._toolbar.annotationLayersPanel.addAnnotation(annotation, AnnotationCategory.SOLUTION);
+                    }
+
+                    // Clear annotation dialog reference
+                    this._annotationDialog = null;
+
+                    // Remove annotation highlighting
+                    pose.clearAnnotationRanges();
+                });
+            });
         }
 
         this.setPoseFields(poseFields);
@@ -3452,6 +3471,9 @@ export default class PoseEditMode extends GameMode {
     private _nucleotideRangeToShow: [number, number] | null = null;
 
     private _solutionView?: ViewSolutionOverlay;
+
+    // Annotations
+    private _annotationDialog: AnnotationDialog | null = null;
 
     private static readonly FOLDING_LOCK = 'Folding';
 }

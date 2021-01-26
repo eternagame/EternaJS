@@ -10,7 +10,7 @@ import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
 import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
 import PoseField from 'eterna/pose2D/PoseField';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
-import Pose2D, {Layout} from 'eterna/pose2D/Pose2D';
+import Pose2D, {Layout, AnnotationArguments} from 'eterna/pose2D/Pose2D';
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
 import Folder from 'eterna/folding/Folder';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
@@ -39,6 +39,7 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import EternaURL from 'eterna/net/EternaURL';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
+import {Annotation, AnnotationCategory, AnnotationLayer} from 'eterna/ui/AnnotationItem';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
@@ -236,16 +237,8 @@ export default class PuzzleEditMode extends GameMode {
             this._scriptInterface.addCallback('get_shift_limit', () => this.shiftLimitString);
         }
 
-        this._toolbar.annotationModeButton.toggled.connect((visible) => {
-            if (visible) {
-                this.showDialog(
-                    new AnnotationDialog(true, null)
-                ).closed.then(() => {
-                    this._toolbar.annotationLayersButton.toggled.value = false;
-                });
-            } else {
-                this.closeCurDialog();
-            }
+        this._toolbar.annotationModeButton.toggled.connect((active) => {
+            Eterna.settings.annotationModeActive.value = active;
         });
 
         this._toolbar.annotationLayersButton.toggled.connect((visible) => {
@@ -253,6 +246,11 @@ export default class PuzzleEditMode extends GameMode {
                 this._toolbar.annotationsLayerPanel.isVisible = true;
             } else {
                 this._toolbar.annotationsLayerPanel.isVisible = false;
+            }
+        });
+        this._toolbar.annotationLayersPanel.onUpdateLayers.connect((layers: AnnotationLayer[]) => {
+            if (this._annotationDialog) {
+                this._annotationDialog.setLayers(layers);
             }
         });
 
@@ -320,6 +318,27 @@ export default class PuzzleEditMode extends GameMode {
                 );
             }
             poseFields.push(poseField);
+            pose.onCreateAnnotation.connect((args: AnnotationArguments) => {
+                this._annotationDialog = new AnnotationDialog(
+                    false,
+                    pose.fullSequenceLength,
+                    args.ranges,
+                    this._toolbar.annotationLayersPanel.layers
+                );
+                this.showDialog(
+                    this._annotationDialog
+                ).closed.then((annotation: Annotation | null) => {
+                    if (annotation) {
+                        this._toolbar.annotationLayersPanel.addAnnotation(annotation, AnnotationCategory.PUZZLE);
+                    }
+
+                    // Clear annotation dialog reference
+                    this._annotationDialog = null;
+
+                    // Remove annotation highlighting
+                    pose.clearAnnotationRanges();
+                });
+            });
 
             const structureInput = new StructureInput(pose);
             poseField.addObject(structureInput, poseField.container);
@@ -1084,4 +1103,7 @@ export default class PuzzleEditMode extends GameMode {
     private _folderSwitcher: FolderSwitcher;
     private _homeButton: GameButton;
     private _constraintBar: ConstraintBar;
+
+    // Annotations
+    private _annotationDialog: AnnotationDialog | null = null;
 }

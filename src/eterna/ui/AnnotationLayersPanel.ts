@@ -7,20 +7,26 @@ import {
     HAlign,
     HLayoutContainer
 } from 'flashbang';
+import {Value} from 'signals';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {ToolbarType} from 'eterna/ui/Toolbar';
 import {v4 as uuidv4} from 'uuid';
+import AnnotationItem, {
+    Annotation,
+    ItemType,
+    AnnotationItemChild,
+    AnnotationCategory,
+    AnnotationLayer
+} from 'eterna/ui/AnnotationItem';
 import GameButton from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';
 import VScrollBox from './VScrollBox';
-import AnnotationItem, {
-    AnnotationType,
-    ItemType,
-    AnnotationItemChild
-} from './AnnotationItem';
+
 import {Item} from './DragDropper';
 
 export default class AnnotationLayersPanel extends ContainerObject {
+    public readonly onUpdateLayers: Value<AnnotationLayer[]> = new Value<AnnotationLayer[]>([]);
+
     constructor(toolbarType: ToolbarType, button: GameButton) {
         super();
         this._toolbarType = toolbarType;
@@ -104,7 +110,7 @@ export default class AnnotationLayersPanel extends ContainerObject {
             dividerThickness: AnnotationLayersPanel.DIVIDER_THICKNESS,
             type: ItemType.CATEGORY,
             title: 'Structure Annotations',
-            annotationType: AnnotationType.STRUCTURE,
+            category: AnnotationCategory.STRUCTURE,
             children: this._rnaChildren,
             updateTitle: (itemPath: number[], text: string) => {
                 this.updateTitle(itemPath, text);
@@ -116,7 +122,7 @@ export default class AnnotationLayersPanel extends ContainerObject {
                 this.updateAnnotationPosition(firstAnnotation, secondAnnotationPath);
             }
         });
-        this.addItem(this._rnaCategory);
+        this.addCategory(this._rnaCategory);
         this._puzzleCategory = new AnnotationItem({
             id: uuidv4(),
             indexPath: [1],
@@ -124,7 +130,7 @@ export default class AnnotationLayersPanel extends ContainerObject {
             dividerThickness: AnnotationLayersPanel.DIVIDER_THICKNESS,
             type: ItemType.CATEGORY,
             title: 'Puzzle Annotations',
-            annotationType: AnnotationType.PUZZLE,
+            category: AnnotationCategory.PUZZLE,
             children: this._puzzleChildren,
             updateTitle: (itemPath: number[], text: string) => {
                 this.updateTitle(itemPath, text);
@@ -136,7 +142,7 @@ export default class AnnotationLayersPanel extends ContainerObject {
                 this.updateAnnotationPosition(firstAnnotation, secondAnnotationPath);
             }
         });
-        this.addItem(this._puzzleCategory);
+        this.addCategory(this._puzzleCategory);
         this._solutionCategory = new AnnotationItem({
             id: uuidv4(),
             indexPath: [2],
@@ -144,7 +150,7 @@ export default class AnnotationLayersPanel extends ContainerObject {
             dividerThickness: AnnotationLayersPanel.DIVIDER_THICKNESS,
             type: ItemType.CATEGORY,
             title: 'Solution Annotations',
-            annotationType: AnnotationType.SOLUTION,
+            category: AnnotationCategory.SOLUTION,
             children: this._solutionChildren,
             updateTitle: (itemPath: number[], text: string) => {
                 this.updateTitle(itemPath, text);
@@ -156,18 +162,18 @@ export default class AnnotationLayersPanel extends ContainerObject {
                 this.updateAnnotationPosition(firstAnnotation, secondAnnotationPath);
             }
         });
-        this.addItem(this._solutionCategory);
+        this.addCategory(this._solutionCategory);
 
         this.doLayout();
         this._scrollView.doLayout();
         this._scrollView.updateScrollThumb();
     }
 
-    public addItem(item: AnnotationItem) {
+    private addCategory(item: AnnotationItem) {
         this.addObject(item, this._contentLayout);
         // Registers to receive updates about when panel should be updated
         // Typically occurs when a layer accordion is expanded/closed
-        item.updatePanel.connect(() => {
+        item.onUpdatePanel.connect(() => {
             this.doLayout();
             this._scrollView.doLayout();
             this._scrollView.updateScrollThumb();
@@ -183,6 +189,81 @@ export default class AnnotationLayersPanel extends ContainerObject {
         this.registerAnnotationSelectedObservers(annotationItems);
 
         this.needsLayout();
+    }
+
+    public addAnnotation(annotation: Annotation, type: AnnotationCategory) {
+        if (type === AnnotationCategory.PUZZLE) {
+            if (annotation.layer) {
+                for (const child of this._puzzleChildren) {
+                    if (child.id === annotation.layer.id && !child.children) {
+                        child['children'] = [
+                            {
+                                id: annotation.id,
+                                type: ItemType.ANNOTATION,
+                                timestamp: annotation.timestamp,
+                                playerID: annotation.playerID,
+                                title: annotation.title,
+                                ranges: annotation.ranges
+                            }
+                        ];
+                    } else if (child.id === annotation.layer.id && child.children) {
+                        child.children.push({
+                            id: annotation.id,
+                            type: ItemType.ANNOTATION,
+                            timestamp: annotation.timestamp,
+                            playerID: annotation.playerID,
+                            title: annotation.title,
+                            ranges: annotation.ranges
+                        });
+                    }
+                }
+            } else {
+                this._puzzleChildren.push({
+                    id: annotation.id,
+                    type: ItemType.ANNOTATION,
+                    timestamp: annotation.timestamp,
+                    playerID: annotation.playerID,
+                    title: annotation.title,
+                    ranges: annotation.ranges
+                });
+            }
+        } else if (type === AnnotationCategory.SOLUTION) {
+            if (annotation.layer) {
+                for (const child of this._solutionChildren) {
+                    if (child.id === annotation.layer.id && !child.children) {
+                        child['children'] = [
+                            {
+                                id: annotation.id,
+                                type: ItemType.ANNOTATION,
+                                timestamp: annotation.timestamp,
+                                playerID: annotation.playerID,
+                                title: annotation.title,
+                                ranges: annotation.ranges
+                            }
+                        ];
+                    } else if (child.id === annotation.layer.id && child.children) {
+                        child.children.push({
+                            id: annotation.id,
+                            type: ItemType.ANNOTATION,
+                            timestamp: annotation.timestamp,
+                            playerID: annotation.playerID,
+                            title: annotation.title,
+                            ranges: annotation.ranges
+                        });
+                    }
+                }
+            } else {
+                this._solutionChildren.push({
+                    id: annotation.id,
+                    type: ItemType.ANNOTATION,
+                    timestamp: annotation.timestamp,
+                    playerID: annotation.playerID,
+                    title: annotation.title,
+                    ranges: annotation.ranges
+                });
+            }
+        }
+        this.updateLayers();
     }
 
     private needsLayout(): void {
@@ -253,7 +334,7 @@ export default class AnnotationLayersPanel extends ContainerObject {
             DisplayUtil.positionRelative(
                 this._upperToolbar, HAlign.RIGHT, VAlign.TOP,
                 this._panel.container, HAlign.RIGHT, VAlign.TOP,
-                -this._deleteButton.display.width / 2, 0
+                -this._deleteButton.display.width, 0
             );
         } else {
             DisplayUtil.positionRelative(
@@ -271,7 +352,10 @@ export default class AnnotationLayersPanel extends ContainerObject {
             children: []
         };
 
-        if (this._toolbarType === ToolbarType.LAB || this._toolbarType === ToolbarType.PUZZLE) {
+        if (
+            this._toolbarType === ToolbarType.PUZZLEMAKER_EMBEDDED
+            || this._toolbarType === ToolbarType.PUZZLEMAKER
+        ) {
             // Place new layer in puzzle category
             let layerIndex = 0;
             for (let i = 0; i < this._puzzleChildren.length; i++) {
@@ -292,8 +376,8 @@ export default class AnnotationLayersPanel extends ContainerObject {
 
             this._puzzleChildren.splice(layerIndex, 0, newLayer);
         } else if (
-            this._toolbarType === ToolbarType.PUZZLEMAKER_EMBEDDED
-            || this._toolbarType === ToolbarType.PUZZLEMAKER
+            this._toolbarType === ToolbarType.LAB
+            || this._toolbarType === ToolbarType.PUZZLE
         ) {
             // Place new layer in solution category
             let layerIndex = 0;
@@ -318,6 +402,8 @@ export default class AnnotationLayersPanel extends ContainerObject {
 
         // Repaint layers
         this.updateLayers();
+
+        this.onUpdateLayers.value = this.layers;
     }
 
     private deleteSelectedItem() {
@@ -445,6 +531,35 @@ export default class AnnotationLayersPanel extends ContainerObject {
     }
 
     private updateAnnotationLayer(annotation: Item, layerPath: number[]) {
+        // IMPORTANT:
+        // If a user drops an annotation onto
+        // another annotation in a layer three drop events occur in this order:
+        // 1) Category Drop (which calls updateAnnotationLayer)
+        // 2) Layer Drop (which calls updateAnnotationLayer)
+        // 3) Position Drop (which calls updateAnnotationPosition)
+        //
+        // In such a scenario, we don't want to process both #1 and #2,
+        // But there is no way to distinguish that event from a user dropping
+        // an annotation onto a category (to presumably remove it from a layer)
+        // apart from anticipating a second call to this method, which is what we do here.
+        //
+        // A timeout is set that waits 100 ms before executing layer update.
+        // If there is no second call within that time we continue unabated
+        // But if there is we clear the timeout and execute only the layer call
+        // (ignoring the initial category call)
+        if (this._updateLayerTimeout) {
+            clearTimeout(this._updateLayerTimeout);
+            this._updateLayerTimeout = null;
+            this.executeLayerUpdate(annotation, layerPath);
+        } else {
+            this._updateLayerTimeout = setTimeout(() => {
+                this.executeLayerUpdate(annotation, layerPath);
+                this._updateLayerTimeout = null;
+            }, AnnotationLayersPanel.LAYER_UPDATE_DELAY);
+        }
+    }
+
+    private executeLayerUpdate(annotation: Item, layerPath: number[]) {
         // locate annotation and remove from current layer
         let annotationData: AnnotationItemChild | null = null;
         const path = annotation.index as number[];
@@ -459,12 +574,6 @@ export default class AnnotationLayersPanel extends ContainerObject {
             default:
                 category = this._solutionChildren;
                 break;
-        }
-
-        if (path.length === layerPath.length + 1) {
-            // We escape method if we're attempting to move annotation to
-            // existing layer.
-            return;
         }
 
         if (path.length === 2) {
@@ -522,7 +631,7 @@ export default class AnnotationLayersPanel extends ContainerObject {
         // 2) Layer Drop (which calls updateAnnotationLayer)
         // 3) Position Drop (which calls updateAnnotationPosition)
         //
-        // The outcome of the first who methods will often move the annotation
+        // The outcome of the first two methods will often move the annotation
         // to the desired layer.
         // As a result, we merely need to find the annotation in that layer
         // And move it to the correct layer index
@@ -592,6 +701,23 @@ export default class AnnotationLayersPanel extends ContainerObject {
         this._isVisible = visible;
     }
 
+    public get layers() {
+        const annotationItems: AnnotationItem[] = [];
+        AnnotationLayersPanel.collectAnnotationItems(this._items, annotationItems);
+        const layers: AnnotationLayer[] = annotationItems.reduce(
+            (allLayers: AnnotationLayer[], item: AnnotationItem) => {
+                if (item.type === ItemType.LAYER) {
+                    allLayers.push({
+                        id: item.id,
+                        title: item.title
+                    });
+                }
+                return allLayers;
+            }, []
+        );
+        return layers;
+    }
+
     private _panel: GamePanel;
     private _scrollView: VScrollBox;
     private _items: AnnotationItem[] = [];
@@ -605,53 +731,22 @@ export default class AnnotationLayersPanel extends ContainerObject {
     private _deleteButton: GameButton;
     private _selectedPath: number[] | null;
     private _selectedDisplay: Container | null;
+    private _updateLayerTimeout: ReturnType<typeof setTimeout> | null;
 
     private _rnaCategory: AnnotationItem;
     private _puzzleCategory: AnnotationItem;
     private _solutionCategory: AnnotationItem;
     private _rnaChildren: AnnotationItemChild[] = [];
-    private _puzzleChildren: AnnotationItemChild[] = [
-        {
-            id: uuidv4(),
-            type: ItemType.LAYER,
-            title: 'Layer',
-            children: [
-                {
-                    id: uuidv4(),
-                    type: ItemType.ANNOTATION,
-                    timestamp: 0,
-                    playerID: 1,
-                    title: 'This is a Really Long Annotation',
-                    ranges: [[1, 2]]
-                }
-
-            ]
-        },
-        {
-            id: uuidv4(),
-            type: ItemType.ANNOTATION,
-            timestamp: 0,
-            playerID: 1,
-            title: 'Annotation #1',
-            ranges: [[1, 2]]
-        },
-        {
-            id: uuidv4(),
-            type: ItemType.ANNOTATION,
-            timestamp: 0,
-            playerID: 1,
-            title: 'Annotation #2',
-            ranges: [[1, 2]]
-        }
-    ];
+    private _puzzleChildren: AnnotationItemChild[] = [];
 
     private _solutionChildren: AnnotationItemChild[] = [];
 
     private static readonly PANEL_WIDTH = 240;
-    private static readonly PANEL_HEIGHT = 250;
+    private static readonly PANEL_HEIGHT = 200;
     private static readonly UPPER_TOOLBAR_HEIGHT = 30;
     private static readonly DIVIDER_THICKNESS = 2;
     private static readonly BORDER_RADIUS = 7.5;
     private static readonly DROP_SHADOW_X_OFFSET = -0.25;
     private static readonly DROP_SHADOW_Y_OFFSET = 2;
+    private static readonly LAYER_UPDATE_DELAY = 100;
 }

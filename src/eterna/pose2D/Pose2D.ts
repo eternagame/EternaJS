@@ -2,7 +2,7 @@ import * as log from 'loglevel';
 import {
     Container, Graphics, Point, Sprite, Texture, Rectangle
 } from 'pixi.js';
-import {Registration} from 'signals';
+import {Registration, Value} from 'signals';
 import EPars, {RNABase, RNAPaint} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import ExpPainter from 'eterna/ExpPainter';
@@ -41,6 +41,7 @@ import RNALayout, {RNATreeNode} from './RNALayout';
 import ScoreDisplayNode, {ScoreDisplayNodeType} from './ScoreDisplayNode';
 import ExplosionFactorPanel from './ExplosionFactorPanel';
 import triangulate from './triangulate';
+import {AnnotationRange} from '../ui/AnnotationItem';
 
 type InteractionEvent = PIXI.InteractionEvent;
 
@@ -70,6 +71,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public static readonly OLIGO_MODE_EXT5P: number = 3;
 
     private static readonly SCORES_POSITION_Y = 128;
+
+    public readonly onCreateAnnotation: Value<AnnotationArguments> = new Value<AnnotationArguments>({ranges: []});
 
     constructor(poseField: PoseField, editable: boolean) {
         super();
@@ -151,6 +154,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._shiftHighlightBox = new HighlightBox(this, HighlightType.SHIFT);
         this.addObject(this._shiftHighlightBox, this.container);
 
+        this._annotationHighlightBox = new HighlightBox(this, HighlightType.ANNOTATION);
+        this.addObject(this._annotationHighlightBox, this.container);
+
         if (!this._editable) {
             this._currentColor = -1;
         }
@@ -187,6 +193,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
         );
         this.regs.add(Eterna.settings.displayAuxInfo.connectNotify((value) => { this.displayAuxInfo = value; }));
         this.regs.add(Eterna.settings.simpleGraphics.connectNotify((value) => { this.useSimpleGraphics = value; }));
+        this.regs.add(Eterna.settings.annotationModeActive.connectNotify((value) => {
+            this.annotationModeActive = value;
+        }));
         this.regs.add(Eterna.settings.usePuzzlerLayout.connect(() => this.computeLayout()));
     }
 
@@ -876,11 +885,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 });
                 return;
             }
-            if ((ctrlDown || this.currentColor === RNAPaint.BASE_MARK) && closestIndex < this.fullSequenceLength) {
+            if (
+                (ctrlDown || this.currentColor === RNAPaint.BASE_MARK)
+                && closestIndex < this.fullSequenceLength
+                && !this.annotationModeActive) {
                 this.toggleBaseMark(closestIndex);
                 return;
             }
-            if (shiftDown) {
+            if (shiftDown && !this.annotationModeActive) {
                 if (closestIndex < this.sequenceLength) {
                     this._shiftStart = closestIndex;
                     this._shiftEnd = closestIndex;
@@ -892,6 +904,43 @@ export default class Pose2D extends ContainerObject implements Updatable {
                         this._shiftEnd = -1;
                         if (reg) reg.close();
                     });
+                }
+                e.stopPropagation();
+                return;
+            } else if (this.annotationModeActive) {
+                if (closestIndex < this.sequenceLength) {
+                    let clickedHighlight = false;
+                    for (const range of this._annotationRanges) {
+                        if (closestIndex >= range.start && closestIndex <= range.end) {
+                            clickedHighlight = true;
+                            break;
+                        } else if (closestIndex <= range.start && closestIndex >= range.end) {
+                            clickedHighlight = true;
+                            break;
+                        }
+                    }
+
+                    if (!clickedHighlight) {
+                        this._editingAnnotation = true;
+
+                        this._annotationRanges.push({
+                            start: closestIndex,
+                            end: closestIndex
+                        });
+
+                        this.updateAnnotationHighlight();
+
+                        let reg: Registration | null = null;
+                        reg = this.pointerUp.connect(() => {
+                            this._editingAnnotation = false;
+                            if (reg) reg.close();
+                        });
+                    } else {
+                        // Informs others to open dialog
+                        this.onCreateAnnotation.value = {
+                            ranges: this._annotationRanges
+                        };
+                    }
                 }
                 e.stopPropagation();
                 return;
@@ -916,10 +965,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
 
             e.stopPropagation();
-        } else if (shiftDown) {
+        } else if (shiftDown && !this.annotationModeActive) {
             this._shiftStart = -1;
             this._shiftEnd = -1;
             this.updateShiftHighlight();
+        } else if (this.annotationModeActive) {
+            this._annotationRanges = [];
+            this._editingAnnotation = false;
+            this.updateAnnotationHighlight();
         }
     }
 
@@ -1054,8 +1107,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (closestIndex >= 0 && this._currentColor >= 0) {
             this.onBaseMouseMove(closestIndex);
             // document.getElementById(Eterna.PIXI_CONTAINER_ID).style.cursor = 'none';
-            this._paintCursor.display.visible = true;
-            this._paintCursor.setShape(this._currentColor);
+
+            if (!this._annotationModeActive) {
+                this._paintCursor.display.visible = true;
+                this._paintCursor.setShape(this._currentColor);
+            }
 
             const strandName: string | null = this.getStrandName(closestIndex);
             if (strandName != null) {
@@ -1439,6 +1495,27 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._simpleGraphicsMods;
     }
 
+    public set annotationModeActive(active: boolean) {
+        this._annotationModeActive = active;
+        this._redraw = true;
+        if (!active) {
+            this.clearAnnotationHighlight();
+            // Change base cursors
+            for (const base of this._bases) {
+                base.container.alpha = 1;
+            }
+        } else {
+            // Change base cursors
+            for (const base of this._bases) {
+                base.container.alpha = Pose2D.ANNOTATION_UNHIGHLIGHTED_OPACITY;
+            }
+        }
+    }
+
+    public get annotationModeActive(): boolean {
+        return this._annotationModeActive;
+    }
+
     public set highlightRestricted(highlight: boolean) {
         this._highlightRestricted = highlight;
         this._restrictedHighlightBox.enabled = highlight;
@@ -1517,6 +1594,21 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public clearShiftHighlight(): void {
         this._shiftHighlightBox.clear();
+    }
+
+    public clearAnnotationRanges(): void {
+        this._annotationRanges = [];
+        this.clearAnnotationHighlight();
+    }
+
+    public clearAnnotationHighlight(): void {
+        this._annotationHighlightBox.clear();
+
+        if (this._annotationModeActive) {
+            for (const base of this._bases) {
+                base.container.alpha = Pose2D.ANNOTATION_UNHIGHLIGHTED_OPACITY;
+            }
+        }
     }
 
     public praiseStack(stackStart: number, stackEnd: number): void {
@@ -2496,7 +2588,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         // / Update score node
-        this.updateScoreNodeVisualization(this._offX !== this._prevOffsetX || this._offY !== this._prevOffsetY);
+        if (!this._annotationModeActive) {
+            this.updateScoreNodeVisualization(this._offX !== this._prevOffsetX || this._offY !== this._prevOffsetY);
+        }
 
         // / Bitblt rendering
         const needRedraw = this._bases.some(
@@ -3201,6 +3295,15 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (!this._coloring && this._shiftStart >= 0 && seqnum < this.sequenceLength) {
             this._shiftEnd = seqnum;
             this.updateShiftHighlight();
+        } else if (
+            !this._coloring
+            && this.annotationModeActive
+            && this._annotationRanges.length > 0
+            && this._editingAnnotation
+            && seqnum < this.sequenceLength
+        ) {
+            this._annotationRanges[this._annotationRanges.length - 1].end = seqnum;
+            this.updateAnnotationHighlight();
         }
 
         if (!this._coloring || (seqnum === this._lastColoredIndex)) {
@@ -3309,6 +3412,35 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this._shiftEnd < this._shiftStart
                     ? [this._shiftEnd, this._shiftStart] : [this._shiftStart, this._shiftEnd]
             );
+        }
+    }
+
+    private updateAnnotationHighlight(): void {
+        this._annotationHighlightBox.clear();
+
+        if (this._annotationModeActive) {
+            for (let i = 0; i < this._bases.length; i++) {
+                this._bases[i].container.alpha = Pose2D.ANNOTATION_UNHIGHLIGHTED_OPACITY;
+            }
+        }
+
+        if (this._annotationRanges.length > 0) {
+            for (const range of this._annotationRanges) {
+                this._annotationHighlightBox.setHighlight(
+                    range.end < range.start
+                        ? [range.end, range.start] : [range.start, range.end]
+                );
+
+                if (range.end >= range.start) {
+                    for (let i = range.start; i <= range.end; i++) {
+                        this._bases[i].container.alpha = 1;
+                    }
+                } else {
+                    for (let i = range.end; i <= range.start; i++) {
+                        this._bases[i].container.alpha = 1;
+                    }
+                }
+            }
         }
     }
 
@@ -3914,6 +4046,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _shiftHighlightBox: HighlightBox;
     private _shiftStart: number = -1;
     private _shiftEnd: number = -1;
+    private _annotationHighlightBox: HighlightBox;
+    private _annotationRanges: AnnotationRange[] = [];
+    private _editingAnnotation: boolean = false;
 
     // For praising stacks
     private _praiseQueue: number[] = [];
@@ -3948,6 +4083,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _showBaseRope: boolean = false;
     private _showPseudoknots: boolean = false;
     private _simpleGraphicsMods: boolean = false;
+    private _annotationModeActive: boolean = false;
 
     // customNumbering
     private _customNumbering: (number | null)[] | undefined = undefined;
@@ -3967,7 +4103,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _highlightEnergyText: boolean = false;
     private _energyHighlights: SceneObject[] = [];
 
-    private _showNucleotideRange = false;
+    private _showNucleotideRange: boolean = false;
 
     /*
      * NEW HIGHLIGHT.
@@ -3980,12 +4116,18 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private static readonly CLEAVING_SITE = 'cleavingSite';
 
     private static readonly P: Point = new Point();
+
+    private static readonly ANNOTATION_UNHIGHLIGHTED_OPACITY = 0.5;
 }
 
 export interface Oligo {
     malus: number;
     name?: string;
     sequence: number[];
+}
+
+export interface AnnotationArguments {
+    ranges: AnnotationRange[];
 }
 
 export class RNAHighlightState {

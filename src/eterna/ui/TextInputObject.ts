@@ -614,7 +614,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
         if (this._characterLimit) {
             const percent = 100 * (this.text.length / this._characterLimit);
             this._progressArc.setAttribute('stroke', percent > 100 ? '#D73832' : '#4A90E2');
-            this._progressArc.setAttribute('style', `stroke-dashoffset: ${TextInputObject.computeRadialProgress(percent)}; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 0.3s;`);
+            this._progressArc.setAttribute('style', `stroke-dashoffset: ${TextInputObject.computeRadialProgress(this.height, percent)}; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 0.3s;`);
 
             const charactersLeft = this._characterLimit - this.text.length;
             if (charactersLeft < TextInputObject._SHOW_CHARACTERS_LEFT_THRESHOLD) {
@@ -643,6 +643,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
         bgColor?: string
     ): HTMLDivElement | HTMLInputElement {
         if (characterLimit) {
+            const progressRingHeight = TextInputObject.progressRingHeight(height);
             const container = document.createElement('div');
             container.classList.add('eterna-character-limited-input-container');
             const input = document.createElement('input');
@@ -650,39 +651,39 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
             input.title = '';
             input.placeholder = placeholder ?? '';
             input.className = 'eterna-input';
-            input.style.paddingLeft = `${TextInputObject._TEXT_INPUT_PADDING}px`;
-            input.style.paddingRight = `${2 * TextInputObject._TEXT_INPUT_PADDING + TextInputObject._PROGRESS_BAR_HEIGHT}px`;
+            input.style.paddingLeft = `${TextInputObject.textInputPadding(height)}px`;
+            input.style.paddingRight = `${2 * TextInputObject.textInputPadding(height) + progressRingHeight}px`;
             container.appendChild(input);
             const radialProgressBarContainer = document.createElement('div');
             radialProgressBarContainer.classList.add('eterna-character-limited-input-radial-progress-bar');
-            radialProgressBarContainer.style.top = `${(height - TextInputObject._PROGRESS_BAR_HEIGHT) / 2}px`;
-            radialProgressBarContainer.style.right = `${TextInputObject._TEXT_INPUT_PADDING}px`;
+            radialProgressBarContainer.style.top = `${(height - progressRingHeight) / 2}px`;
+            radialProgressBarContainer.style.right = `${TextInputObject.textInputPadding(height)}px`;
             container.appendChild(radialProgressBarContainer);
             const radialProgressBar = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            radialProgressBar.setAttribute('height', `${TextInputObject._PROGRESS_BAR_HEIGHT}`);
-            radialProgressBar.setAttribute('width', `${TextInputObject._PROGRESS_BAR_HEIGHT}`);
-            radialProgressBar.style.width = `${TextInputObject._PROGRESS_BAR_HEIGHT}px`;
-            radialProgressBar.style.height = `${TextInputObject._PROGRESS_BAR_HEIGHT}px`;
-            radialProgressBar.style.borderRadius = `${TextInputObject._PROGRESS_BAR_HEIGHT / 2}px`;
+            radialProgressBar.setAttribute('height', `${progressRingHeight}`);
+            radialProgressBar.setAttribute('width', `${progressRingHeight}`);
+            radialProgressBar.style.width = `${progressRingHeight}px`;
+            radialProgressBar.style.height = `${progressRingHeight}px`;
+            radialProgressBar.style.borderRadius = `${progressRingHeight / 2}px`;
             radialProgressBarContainer.appendChild(radialProgressBar);
             const progressArc = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             progressArc.id = TextInputObject._PROGRESS_ARC_ID;
             progressArc.setAttribute('stroke', '#4A90E2');
             progressArc.setAttribute('fill', 'transparent');
-            progressArc.setAttribute('stroke-width', `${TextInputObject._PROGRESS_BAR_ARC_WIDTH}`);
-            progressArc.setAttribute('stroke-dasharray', `${TextInputObject._PROGRESS_BAR_CIRCUMFERENCE} ${TextInputObject._PROGRESS_BAR_CIRCUMFERENCE}`);
-            progressArc.setAttribute('r', `${TextInputObject._PROGRESS_BAR_RADIUS}`);
-            progressArc.setAttribute('cx', `${TextInputObject._PROGRESS_BAR_HEIGHT / 2}`);
-            progressArc.setAttribute('cy', `${TextInputObject._PROGRESS_BAR_HEIGHT / 2}`);
-            progressArc.setAttribute('style', `stroke-dashoffset: ${TextInputObject.computeRadialProgress(0)}; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 0.3s;`);
+            progressArc.setAttribute('stroke-width', `${TextInputObject.progressRingThickness(height)}`);
+            progressArc.setAttribute('stroke-dasharray', `${TextInputObject.progressRingCircumference(height)} ${TextInputObject.progressRingCircumference(height)}`);
+            progressArc.setAttribute('r', `${TextInputObject.progressRingRadius(height)}`);
+            progressArc.setAttribute('cx', `${progressRingHeight / 2}`);
+            progressArc.setAttribute('cy', `${progressRingHeight / 2}`);
+            progressArc.setAttribute('style', `stroke-dashoffset: ${TextInputObject.computeRadialProgress(height, 0)}; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 0.3s;`);
             radialProgressBar.appendChild(progressArc);
             const innerCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             if (bgColor) {
                 innerCircle.setAttribute('fill', bgColor);
             }
-            innerCircle.setAttribute('r', `${TextInputObject._PROGRESS_BAR_RADIUS - (TextInputObject._PROGRESS_BAR_ARC_WIDTH) / 2}`);
-            innerCircle.setAttribute('cx', `${TextInputObject._PROGRESS_BAR_HEIGHT / 2}`);
-            innerCircle.setAttribute('cy', `${TextInputObject._PROGRESS_BAR_HEIGHT / 2}`);
+            innerCircle.setAttribute('r', `${TextInputObject.progressRingRadius(height) - TextInputObject.progressRingThickness(height) / 2}`);
+            innerCircle.setAttribute('cx', `${progressRingHeight / 2}`);
+            innerCircle.setAttribute('cy', `${progressRingHeight / 2}`);
             radialProgressBar.appendChild(innerCircle);
             const characterText = document.createElement('span');
             characterText.style.position = 'absolute';
@@ -704,10 +705,30 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
         }
     }
 
-    private static computeRadialProgress(percent: number): number {
-        const circumference = TextInputObject._PROGRESS_BAR_RADIUS * 2 * Math.PI;
+    private static computeRadialProgress(height: number, percent: number): number {
+        const circumference = TextInputObject.progressRingRadius(height) * 2 * Math.PI;
         const offset = circumference - (circumference * (Math.min(percent, 100) / 100));
         return offset;
+    }
+
+    private static progressRingRadius(height: number): number {
+        return (TextInputObject.progressRingHeight(height) - TextInputObject.progressRingThickness(height)) / 2;
+    }
+
+    private static progressRingThickness(height: number): number {
+        return (3 / 45) * height;
+    }
+
+    private static progressRingHeight(height: number): number {
+        return Math.max((30 / 45) * height, 13);
+    }
+
+    private static textInputPadding(height: number): number {
+        return Math.max((10 / 45) * height, 7);
+    }
+
+    private static progressRingCircumference(height: number): number {
+        return TextInputObject.progressRingRadius(height) * 2 * Math.PI;
     }
 
     private readonly _fontSize: number;
@@ -721,20 +742,12 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
     private _borderColor: number;
     private _borderRadius: number;
     private _characterLimit: number | null;
-
     private _hasFocus: boolean;
     private _fakeTextInput: Sprite | null;
     private _showFakeTextInputWhenNotFocused: boolean = true;
     private _progressArc: SVGCircleElement;
     private _characterText: HTMLSpanElement;
 
-    private static _TEXT_INPUT_PADDING = 10;
-    private static _PROGRESS_BAR_HEIGHT = 30;
-    private static _PROGRESS_BAR_ARC_WIDTH = 3;
-    private static _PROGRESS_BAR_RADIUS = (TextInputObject._PROGRESS_BAR_HEIGHT
-        - TextInputObject._PROGRESS_BAR_ARC_WIDTH) / 2;
-
-    private static _PROGRESS_BAR_CIRCUMFERENCE = TextInputObject._PROGRESS_BAR_RADIUS * 2 * Math.PI;
     private static _PROGRESS_ARC_ID = 'progress-arc';
     private static _SHOW_CHARACTERS_LEFT_THRESHOLD = 10;
 }

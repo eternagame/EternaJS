@@ -104,7 +104,7 @@ export default class GameDropdown extends ContainerObject {
         DisplayUtil.positionRelative(
             this._selectedText, HAlign.LEFT, VAlign.CENTER,
             this._box, HAlign.LEFT, VAlign.CENTER,
-            this._borderWidth + this._HORIZONTAL_PADDING
+            this._borderWidth + GameDropdown._HORIZONTAL_PADDING
         );
 
         this.regs.add(
@@ -146,10 +146,10 @@ export default class GameDropdown extends ContainerObject {
             bg.clear()
                 .beginFill(0x0, 0)
                 .drawRoundedRect(
-                    -this._HORIZONTAL_PADDING,
+                    -GameDropdown._HORIZONTAL_PADDING,
                     0,
                     Flashbang.stageWidth || 0,
-                    Flashbang.stageHeight || 0, this._BORDER_RADIUS
+                    Flashbang.stageHeight || 0, GameDropdown._BORDER_RADIUS
                 ).endFill();
         };
         updateBG();
@@ -169,7 +169,11 @@ export default class GameDropdown extends ContainerObject {
             dropShadowPanel.display.filters = [new DropShadowFilter()];
         }
         this._popup.addObject(dropShadowPanel, scrollViewContainer);
-        this._scrollView = new VScrollBox(this._box.width, this._POPUP_VERTICAL_HEIGHT, this._BORDER_RADIUS);
+        this._scrollView = new VScrollBox(
+            this._box.width,
+            GameDropdown._POPUP_VERTICAL_HEIGHT,
+            GameDropdown._BORDER_RADIUS
+        );
         this._popup.addObject(this._scrollView, scrollViewContainer);
         const contentLayout = new VLayoutContainer(0, HAlign.CENTER);
         this._scrollView.content.addChild(contentLayout);
@@ -185,7 +189,7 @@ export default class GameDropdown extends ContainerObject {
         DisplayUtil.positionRelativeToBounds(
             this._popup.container, HAlign.LEFT, VAlign.TOP,
             globalBoxBounds, HAlign.LEFT, VAlign.BOTTOM,
-            0, this._POPUP_VERTICAL_OFFSET
+            0, GameDropdown._POPUP_VERTICAL_OFFSET
         );
 
         let yWalker = 0;
@@ -201,10 +205,10 @@ export default class GameDropdown extends ContainerObject {
                     0,
                     0,
                     this._width,
-                    this._POPUP_ITEM_HEIGHT,
+                    GameDropdown._POPUP_ITEM_HEIGHT,
                     0,
                     this._checkboxes
-                        ? this._POPUP_CHECKBOX_HEIGHT + 2 * this._POPUP_CHECKBOX_PADDING
+                        ? GameDropdown._POPUP_CHECKBOX_HEIGHT + 2 * GameDropdown._POPUP_CHECKBOX_PADDING
                         : 0
                 );
             } else {
@@ -218,7 +222,7 @@ export default class GameDropdown extends ContainerObject {
                     null,
                     0,
                     this._checkboxes
-                        ? this._POPUP_CHECKBOX_HEIGHT + 2 * this._POPUP_CHECKBOX_PADDING
+                        ? GameDropdown._POPUP_CHECKBOX_HEIGHT + 2 * GameDropdown._POPUP_CHECKBOX_PADDING
                         : 0
                 );
             }
@@ -227,11 +231,11 @@ export default class GameDropdown extends ContainerObject {
 
             let checkbox: GameCheckbox | null;
             if (this._checkboxes) {
-                checkbox = new GameCheckbox(this._POPUP_CHECKBOX_HEIGHT, '', true);
+                checkbox = new GameCheckbox(GameDropdown._POPUP_CHECKBOX_HEIGHT, '', true);
                 checkbox.enabled = false;
                 checkbox.toggled.value = option === this.selectedOption.value;
-                checkbox.display.x = this._POPUP_CHECKBOX_HEIGHT + 2;
-                checkbox.display.y = this._POPUP_CHECKBOX_HEIGHT + 2;
+                checkbox.display.x = GameDropdown._POPUP_CHECKBOX_HEIGHT + 2;
+                checkbox.display.y = GameDropdown._POPUP_CHECKBOX_HEIGHT + 2;
                 this.addObject(checkbox, text.display);
 
                 // Save to option item array
@@ -283,10 +287,15 @@ export default class GameDropdown extends ContainerObject {
             text.pointerDown.connect(() => {
                 text.setText(option, this._fontSize, 0x333333);
             });
-            maxWidth = Math.max(text.display.width + this._HORIZONTAL_PADDING, maxWidth);
+            maxWidth = Math.max(text.display.width + GameDropdown._HORIZONTAL_PADDING, maxWidth);
         }
         popupPanel.setSize(this._box.width, yWalker);
-        dropShadowPanel.setSize(this._box.width, this._POPUP_VERTICAL_HEIGHT);
+        let popupPanelHeight = GameDropdown._POPUP_VERTICAL_HEIGHT;
+        if (GameDropdown._POPUP_VERTICAL_HEIGHT / this.options.length > GameDropdown._POPUP_ITEM_HEIGHT) {
+            // Make popup panel height shorter if there aren't enough items in it fill default height
+            popupPanelHeight = this.options.length * GameDropdown._POPUP_ITEM_HEIGHT;
+        }
+        dropShadowPanel.setSize(this._box.width, popupPanelHeight);
         this._scrollView.updateScrollThumb();
     }
 
@@ -298,7 +307,7 @@ export default class GameDropdown extends ContainerObject {
         DisplayUtil.positionRelativeToBounds(
             this._popup.container, HAlign.LEFT, VAlign.TOP,
             globalBoxBounds, HAlign.LEFT, VAlign.BOTTOM,
-            0, this._POPUP_VERTICAL_OFFSET
+            0, GameDropdown._POPUP_VERTICAL_OFFSET
         );
     }
 
@@ -315,52 +324,52 @@ export default class GameDropdown extends ContainerObject {
         if (this.disabled) TEXT_WIDTH = this.selectedOption.value.length;
         TEXT_WIDTH *= this._fontSize / 1.5;
         // There should be an extra _PADDING between the text and the arrow
-        const ARROW_WIDTH = this._ARROW_SIDE_SIZE + this._HORIZONTAL_PADDING;
+        const ARROW_WIDTH = GameDropdown._ARROW_SIDE_SIZE + GameDropdown._HORIZONTAL_PADDING;
 
         let width = 0;
         if (this.disabled) {
-            width = TEXT_WIDTH + this._HORIZONTAL_PADDING;
+            width = TEXT_WIDTH + GameDropdown._HORIZONTAL_PADDING;
         } else if (!this.disabled && this._width && this._width !== 0) {
             width = this._width;
         } else {
-            width = TEXT_WIDTH + ARROW_WIDTH + this._HORIZONTAL_PADDING;
+            width = TEXT_WIDTH + ARROW_WIDTH + GameDropdown._HORIZONTAL_PADDING;
         }
 
         let height = 0;
         if (this._height && this._height !== 0) {
             height = this._height;
         } else {
-            height = this._fontSize + this._VERTICAL_PADDING * 2;
+            height = this._fontSize + GameDropdown._VERTICAL_PADDING * 2;
         }
 
         this._box.clear();
         this._box.lineStyle(this._borderWidth, this._borderColor);
         this._box.beginFill(this._boxColor, 1);
-        this._box.drawRoundedRect(0, 0, width, height, this._BORDER_RADIUS);
+        this._box.drawRoundedRect(0, 0, width, height, GameDropdown._BORDER_RADIUS);
         this._box.endFill();
     }
 
     private _drawArrow() {
-        const ARROW_HEIGHT = (this._ARROW_SIDE_SIZE * Math.sqrt(3)) / 3;
+        const ARROW_HEIGHT = (GameDropdown._ARROW_SIDE_SIZE * Math.sqrt(3)) / 3;
 
         this._arrow.clear();
         this._arrow.beginFill(this._textColor);
         this._arrow.drawPolygon([
             new Point(0, 0),
-            new Point(this._ARROW_SIDE_SIZE, 0),
-            new Point(this._ARROW_SIDE_SIZE / 2, ARROW_HEIGHT)
+            new Point(GameDropdown._ARROW_SIDE_SIZE, 0),
+            new Point(GameDropdown._ARROW_SIDE_SIZE / 2, ARROW_HEIGHT)
         ]);
         this._arrow.endFill();
 
         DisplayUtil.positionRelative(
             this._arrow, HAlign.RIGHT, VAlign.CENTER,
             this._box, HAlign.RIGHT, VAlign.CENTER,
-            -(this._HORIZONTAL_PADDING + this._borderWidth)
+            -(GameDropdown._HORIZONTAL_PADDING + this._borderWidth)
         );
     }
 
     public get height(): number {
-        return this._fontSize + this._VERTICAL_PADDING * 2;
+        return this._fontSize + GameDropdown._VERTICAL_PADDING * 2;
     }
 
     public get width(): number {
@@ -404,13 +413,13 @@ export default class GameDropdown extends ContainerObject {
 
     private _optionItems: OptionItem[] = [];
 
-    private readonly _HORIZONTAL_PADDING: number = 10;
-    private readonly _VERTICAL_PADDING: number = 3;
-    private readonly _BORDER_RADIUS: number = 4;
-    private readonly _ARROW_SIDE_SIZE = 10;
-    private readonly _POPUP_VERTICAL_OFFSET = 5;
-    private readonly _POPUP_VERTICAL_HEIGHT = 100;
-    private readonly _POPUP_ITEM_HEIGHT = 40;
-    private readonly _POPUP_CHECKBOX_HEIGHT = 18;
-    private readonly _POPUP_CHECKBOX_PADDING = 5;
+    private static readonly _HORIZONTAL_PADDING: number = 10;
+    private static readonly _VERTICAL_PADDING: number = 3;
+    private static readonly _BORDER_RADIUS: number = 4;
+    private static readonly _ARROW_SIDE_SIZE = 10;
+    private static readonly _POPUP_VERTICAL_OFFSET = 5;
+    private static readonly _POPUP_VERTICAL_HEIGHT = 100;
+    private static readonly _POPUP_ITEM_HEIGHT = 40;
+    private static readonly _POPUP_CHECKBOX_HEIGHT = 18;
+    private static readonly _POPUP_CHECKBOX_PADDING = 5;
 }

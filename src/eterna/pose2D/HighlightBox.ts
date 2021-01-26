@@ -14,6 +14,7 @@ export enum HighlightType {
     UNSTABLE = 5,
     SHIFT = 6,
     USER_DEFINED = 7,
+    ANNOTATION = 8,
 }
 
 /** A class for highlighting groups of bases in a Pose2D */
@@ -166,6 +167,9 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
                 color = 0x32CD32;
                 fadeTime = 1.0;
                 break;
+            case HighlightType.ANNOTATION:
+                color = HighlightBox.ANNOTATION_COLOR;
+                break;
             default:
                 Assert.unreachable(type);
         }
@@ -176,10 +180,14 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
             this.renderLoop(color, baseSize);
         }
 
-        this.replaceNamedObject(HighlightBox.ANIM, new RepeatingTask((): ObjectTask => new SerialTask(
-            new AlphaTask(1, fadeTime),
-            new AlphaTask(0.2, fadeTime)
-        )));
+        if (type !== HighlightType.ANNOTATION) {
+            this.replaceNamedObject(HighlightBox.ANIM, new RepeatingTask((): ObjectTask => new SerialTask(
+                new AlphaTask(1, fadeTime),
+                new AlphaTask(0.2, fadeTime)
+            )));
+        } else {
+            this.replaceNamedObject(HighlightBox.ANIM, new AlphaTask(1, fadeTime));
+        }
     }
 
     private renderStack(color: number, baseSize: number): void {
@@ -203,7 +211,10 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
             const maxY = Math.max(p0.y, p1.y);
             const minY = Math.min(p0.y, p1.y);
 
-            this._graphics.lineStyle(5, color, 0.7);
+            const lineThickness = this._type === HighlightType.ANNOTATION
+                ? HighlightBox.ANNOTATION_LINE_THICKNESS
+                : HighlightBox.STANDARD_LINE_THICKNESS;
+            this._graphics.lineStyle(lineThickness, color, 0.7);
             this._graphics.drawRoundedRect(
                 minX - baseSize,
                 minY - baseSize,
@@ -276,17 +287,29 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
             const loopStartAxis: Point = axes[0];
             const loopEndAxis: Point = axes[loopEnd - loopStart];
 
-            this._graphics.lineStyle(5, _color, 0.7);
+            const lineThickness = this._type === HighlightType.ANNOTATION
+                ? HighlightBox.ANNOTATION_LINE_THICKNESS
+                : HighlightBox.STANDARD_LINE_THICKNESS;
+            this._graphics.lineStyle(lineThickness, _color, 0.7);
+            if (this._type === HighlightType.ANNOTATION) {
+                this._graphics.beginFill(HighlightBox.ANNOTATION_COLOR, 0.3);
+            }
             this._graphics.moveTo(
                 loopStartLoc.x + loopStartAxis.x * baseSize - startFrom.x * baseSize,
                 loopStartLoc.y + loopStartAxis.y * baseSize - startFrom.y * baseSize
             );
 
+            // let lastLoc = this._pose.getBaseLoc(loopStart);
+            // let lastX = lastLoc.x + axes[0].x * baseSize;
+            // let lastY = lastLoc.y + axes[0].y * baseSize;
             for (let ii = loopStart; ii <= loopEnd; ii++) {
                 baseLoc = this._pose.getBaseLoc(ii);
                 this._graphics.lineTo(
-                    baseLoc.x + axes[ii - loopStart].x * baseSize, baseLoc.y + axes[ii - loopStart].y * baseSize
+                    baseLoc.x + axes[ii - loopStart].x * baseSize,
+                    baseLoc.y + axes[ii - loopStart].y * baseSize
                 );
+                // lastX = baseLoc.x + axes[ii - loopStart].x * baseSize;
+                // lastY = baseLoc.y + axes[ii - loopStart].y * baseSize;
             }
 
             if (this._type !== HighlightType.USER_DEFINED) {
@@ -314,6 +337,10 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
                     loopStartLoc.x + loopStartAxis.x * baseSize - startFrom.x * baseSize,
                     loopStartLoc.y + loopStartAxis.y * baseSize - startFrom.y * baseSize
                 );
+
+                if (this._type === HighlightType.ANNOTATION) {
+                    this._graphics.endFill();
+                }
             }
         }
     }
@@ -330,4 +357,8 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
     private _prevZoomLevel: number = -1;
 
     private static readonly ANIM = 'anim';
+
+    private static readonly STANDARD_LINE_THICKNESS = 5;
+    private static readonly ANNOTATION_LINE_THICKNESS = 2;
+    private static readonly ANNOTATION_COLOR = 0x2F94D1;
 }
