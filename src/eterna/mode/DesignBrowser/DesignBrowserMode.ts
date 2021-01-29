@@ -1,7 +1,7 @@
 import * as log from 'loglevel';
 import MultiStyleText from 'pixi-multistyle-text';
 import {
-    Container, Graphics, Point, Sprite, Text
+    Container, Point, Sprite, Text
 } from 'pixi.js';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Eterna from 'eterna/Eterna';
@@ -23,6 +23,7 @@ import EternaURL from 'eterna/net/EternaURL';
 import UITheme from 'eterna/ui/UITheme';
 import {AchievementData} from 'eterna/achievements/AchievementManager';
 import {FontWeight} from 'flashbang/util/TextBuilder';
+import ScrollContainer from 'eterna/ui/ScrollContainer';
 import VoteProcessor from './VoteProcessor';
 import ViewSolutionOverlay from './ViewSolutionOverlay';
 import SortOptionsDialog from './SortOptionsDialog';
@@ -127,8 +128,12 @@ export default class DesignBrowserMode extends GameMode {
         this._hSlider.scrollChanged.connect((scrollValue) => this.setScrollHorizontal(scrollValue));
         this.addObject(this._hSlider, this._content);
 
+        this._scrollContainer = new ScrollContainer(1, 1);
+        this._scrollContainer.display.position = new Point(17, 85);
+        this.addObject(this._scrollContainer, this.container);
+
         this._dataColParent = new ContainerObject();
-        this.addObject(this._dataColParent, this._content);
+        this._scrollContainer.addObject(this._dataColParent, this._scrollContainer.content);
 
         const {designBrowser: theme} = UITheme;
         this._firstVisSolutionIdx = 0;
@@ -137,31 +142,23 @@ export default class DesignBrowserMode extends GameMode {
         this._gridLines.position = new Point(10, dataStart);
         this._content.addChild(this._gridLines);
 
-        this._maskBox = new MaskBox();
-        this._maskBox.position = new Point(7, 5);
-        this._content.addChild(this._maskBox);
-
-        this._dataColParent.display.mask = this._maskBox;
-
         this._markerBoxes = new MarkerBoxView(0xFF0000, theme.rowHeight);
         this._markerBoxes.position = new Point(7, theme.headerHeight + theme.filterHeight + 1);
         this._content.addChild(this._markerBoxes);
 
         const selectionBoxParent = new Container();
-        selectionBoxParent.mask = this._maskBox;
         this._selectionBox = new SelectionBox(0x2F94D1);
         this._selectionBox.position = new Point(7, 0);
         this._selectionBox.visible = false;
         selectionBoxParent.addChild(this._selectionBox);
-        this._content.addChild(selectionBoxParent);
+        this._scrollContainer.content.addChild(selectionBoxParent);
 
         const clickedSelectionBoxParent = new Container();
-        clickedSelectionBoxParent.mask = this._maskBox;
         this._clickedSelectionBox = new SelectionBox(0x2F44D1);
         this._clickedSelectionBox.position = new Point(7, 0);
         this._clickedSelectionBox.visible = false;
         clickedSelectionBoxParent.addChild(this._clickedSelectionBox);
-        this._content.addChild(clickedSelectionBoxParent);
+        this._scrollContainer.content.addChild(clickedSelectionBoxParent);
 
         this._dataColParent.pointerMove.connect((e) => this.onMouseMove(e));
         this._dataColParent.pointerTap.connect((e) => this.onMouseUp(e));
@@ -359,7 +356,10 @@ export default class DesignBrowserMode extends GameMode {
             this.contentWidth - 18,
             this.contentHeight - this._gridLines.position.y
         );
-        this._maskBox.setSize(this.contentWidth - 14, this.contentHeight - 10);
+        this._scrollContainer.setSize(this.contentWidth - 14, this.contentHeight - 10);
+        // The content inside may have changed size even though the width hasnt, so force it to
+        // re-layout
+        this._scrollContainer.doLayout();
         this._markerBoxes.setSize(this.contentWidth - 14, this.contentHeight - 10);
         this._markerBoxes.updateView(this._firstVisSolutionIdx);
 
@@ -872,9 +872,20 @@ export default class DesignBrowserMode extends GameMode {
                 }
 
                 let column: DataCol;
+                const baseParams = {
+                    category,
+                    domParent: this._scrollContainer.htmlWrapper,
+                    fonttype: FONT,
+                    fontSize: FONT_SIZE
+                };
                 switch (category) {
                     case DesignCategory.VOTE:
-                        column = new DataCol(DesignBrowserDataType.VOTE, category, 60, FONT, FONT_SIZE, false);
+                        column = new DataCol({
+                            ...baseParams,
+                            dataType: DesignBrowserDataType.VOTE,
+                            dataWidth: 60,
+                            sortable: false
+                        });
                         column.voteChanged.connect((solutionIndex) => {
                             const solution = this._allSolutions[solutionIndex];
                             Assert.assertIsDefined(solution);
@@ -884,28 +895,68 @@ export default class DesignBrowserMode extends GameMode {
                         });
                         break;
                     case DesignCategory.TITLE:
-                        column = new DataCol(DesignBrowserDataType.STRING, category, 250, FONT, FONT_SIZE, true);
+                        column = new DataCol({
+                            ...baseParams,
+                            dataType: DesignBrowserDataType.STRING,
+                            dataWidth: 250,
+                            sortable: true
+                        });
                         break;
                     case DesignCategory.DESIGNER:
-                        column = new DataCol(DesignBrowserDataType.STRING, category, 220, FONT, FONT_SIZE, true);
+                        column = new DataCol({
+                            ...baseParams,
+                            dataType: DesignBrowserDataType.STRING,
+                            dataWidth: 220,
+                            sortable: true
+                        });
                         break;
                     case DesignCategory.DESCRIPTION:
-                        column = new DataCol(DesignBrowserDataType.STRING, category, 300, FONT, FONT_SIZE, true);
+                        column = new DataCol({
+                            ...baseParams,
+                            dataType: DesignBrowserDataType.STRING,
+                            dataWidth: 300,
+                            sortable: true
+                        });
                         break;
                     case DesignCategory.SEQUENCE:
-                        column = new DataCol(DesignBrowserDataType.STRING, category, 0, FONT, FONT_SIZE, false);
+                        column = new DataCol({
+                            ...baseParams,
+                            dataType: DesignBrowserDataType.STRING,
+                            dataWidth: 0,
+                            sortable: false
+                        });
                         break;
                     case DesignCategory.SYNTHESIZED:
-                        column = new DataCol(DesignBrowserDataType.STRING, category, 100, FONT, FONT_SIZE, true);
+                        column = new DataCol({
+                            ...baseParams,
+                            dataType: DesignBrowserDataType.STRING,
+                            dataWidth: 100,
+                            sortable: true
+                        });
                         break;
                     case DesignCategory.VOTES:
-                        column = new DataCol(DesignBrowserDataType.NUMBER, category, 125, FONT, FONT_SIZE, true);
+                        column = new DataCol({
+                            ...baseParams,
+                            dataType: DesignBrowserDataType.NUMBER,
+                            dataWidth: 125,
+                            sortable: true
+                        });
                         break;
                     case DesignCategory.SYNTHESIS_SCORE:
-                        column = new DataCol(DesignBrowserDataType.NUMBER, category, 170, FONT, FONT_SIZE, true);
+                        column = new DataCol({
+                            ...baseParams,
+                            dataType: DesignBrowserDataType.NUMBER,
+                            dataWidth: 170,
+                            sortable: true
+                        });
                         break;
                     default:
-                        column = new DataCol(DesignBrowserDataType.NUMBER, category, 125, FONT, FONT_SIZE, true);
+                        column = new DataCol({
+                            ...baseParams,
+                            dataType: DesignBrowserDataType.NUMBER,
+                            dataWidth: 125,
+                            sortable: true
+                        });
                         break;
                 }
 
@@ -1070,7 +1121,7 @@ export default class DesignBrowserMode extends GameMode {
     private readonly _content = new Container();
 
     private _gridLines: GridLines;
-    private _maskBox: MaskBox;
+    private _scrollContainer: ScrollContainer;
 
     private _selectedSolutionIDs: number[] | null;
     private _vSlider: SliderBar;
@@ -1119,23 +1170,4 @@ export default class DesignBrowserMode extends GameMode {
 
     private _initialSolution?: Solution;
     private _initSortOnSolution: boolean;
-}
-
-class MaskBox extends Graphics {
-    public setSize(width: number, height: number): void {
-        if (this._width === width && this._height === height) {
-            return;
-        }
-
-        this._width = width;
-        this._height = height;
-
-        this.clear();
-        this.beginFill(0x18202b, 0.9);
-        this.drawRect(0, 0, this._width, this._height);
-        this.endFill();
-    }
-
-    private _width: number = 0;
-    private _height: number = 0;
 }
