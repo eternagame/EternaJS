@@ -63,6 +63,7 @@ import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 import UITheme from 'eterna/ui/UITheme';
 import {Annotation, AnnotationCategory, AnnotationLayer} from 'eterna/ui/AnnotationItem';
+import {v4 as uuidv4} from 'uuid';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
@@ -793,6 +794,44 @@ export default class PoseEditMode extends GameMode {
                     pose.clearAnnotationRanges();
                 });
             });
+            pose.onSelectAnnotation.connect((annotation: Annotation) => {
+                this._toolbar.annotationLayersPanel.selectAnnotationItem(annotation);
+            });
+            pose.onSelectLayer.connect((layer: AnnotationLayer) => {
+                this._toolbar.annotationLayersPanel.selectAnnotationItem(layer);
+            });
+            pose.onEditAnnotation.connect((annotation: Annotation | null) => {
+                if (annotation) {
+                    this._annotationDialog = new AnnotationDialog(
+                        true,
+                        pose.fullSequenceLength,
+                        annotation.ranges,
+                        this._toolbar.annotationLayersPanel.layers,
+                        annotation
+                    );
+                    this.showDialog(
+                        this._annotationDialog
+                    ).closed.then((editedAnnotation: Annotation | null) => {
+                        if (editedAnnotation) {
+                            this._toolbar.annotationLayersPanel.editAnnotation(editedAnnotation);
+                        } else {
+                            // We interpret null argument as delete intent when editing
+                            this._toolbar.annotationLayersPanel.deleteAnnotation(annotation);
+                        }
+
+                        // Clear annotation dialog reference
+                        this._annotationDialog = null;
+                    });
+                }
+            });
+            this._toolbar.annotationLayersPanel.onUpdateAnnotations.connect((annotations: Annotation[]) => {
+                pose.updateAnnotations(annotations);
+            });
+            this._toolbar.annotationLayersPanel.onUpdateLayers.connect((layers: AnnotationLayer[]) => {
+                pose.updateLayers(layers);
+            });
+            pose.puzzleAnnotationsEditable = this._toolbar.type === ToolbarType.PUZZLEMAKER_EMBEDDED
+            || this._toolbar.type === ToolbarType.PUZZLEMAKER;
         }
 
         this.setPoseFields(poseFields);
@@ -1760,10 +1799,22 @@ export default class PoseEditMode extends GameMode {
         this._poses[poseIndex].forcedHighlights = this.getForcedHighlights(targetIndex);
 
         if (this._puzzle.nodeID === 2390140) {
+            const annotation: Annotation = {
+                id: uuidv4(),
+                category: AnnotationCategory.PUZZLE,
+                timestamp: (new Date()).getTime(),
+                playerID: 12345,
+                title: 'Ribozyme cleaving site',
+                ranges: [{
+                    start: 28,
+                    end: 28
+                }],
+                visible: true
+            };
             if (targetIndex === 1) {
-                this._poses[poseIndex].auxInfo = null;
+                this._toolbar.annotationLayersPanel.deleteAnnotation(annotation);
             } else {
-                this._poses[poseIndex].auxInfo = {cleavingSite: 28};
+                this._toolbar.annotationLayersPanel.addAnnotation(annotation, AnnotationCategory.PUZZLE);
             }
         }
     }
@@ -1791,6 +1842,9 @@ export default class PoseEditMode extends GameMode {
         this.savePosesMarkersContexts();
         this._paused = false;
         this.updateScore();
+        for (const pose of this._poses) {
+            pose.eraseAnnotations(true);
+        }
         this.transformPosesMarkers();
     }
 
@@ -1833,6 +1887,9 @@ export default class PoseEditMode extends GameMode {
 
         this._paused = true;
         this.updateScore();
+        for (const pose of this._poses) {
+            pose.eraseAnnotations(true);
+        }
         this.transformPosesMarkers();
     }
 

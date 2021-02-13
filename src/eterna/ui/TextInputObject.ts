@@ -93,6 +93,8 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
                 document.addEventListener('keydown', ({key}) => {
                     if (key === 'Escape') {
                         this.keyPressed.emit('Escape');
+                    } else if (key === 'Enter') {
+                        this.keyPressed.emit('Enter');
                     }
                 });
             }
@@ -104,6 +106,8 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
             document.addEventListener('keydown', ({key}) => {
                 if (key === 'Escape') {
                     this.keyPressed.emit('Escape');
+                } else if (key === 'Enter') {
+                    this.keyPressed.emit('Enter');
                 }
             });
         }

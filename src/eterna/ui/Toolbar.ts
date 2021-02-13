@@ -969,8 +969,12 @@ export default class Toolbar extends ContainerObject {
         }
     }
 
-    public get annotationLayersPanel() {
+    public get annotationLayersPanel(): AnnotationLayersPanel {
         return this.annotationsLayerPanel;
+    }
+
+    public get type(): ToolbarType {
+        return this._type;
     }
 
     private readonly _type: ToolbarType;

@@ -267,7 +267,7 @@ export default class GameButton extends Button implements KeyboardListener {
         }
 
         if (this._tooltip != null && this._tooltip !== '' && Tooltips.instance != null) {
-            this._tooltipReg = this.regs.add(Tooltips.instance.addButtonTooltip(this, this._tooltip));
+            this._tooltipReg = this.regs.add(Tooltips.instance.addTooltip(this, this._tooltip));
         }
     }
 

@@ -132,6 +132,11 @@ export default class PoseField extends ContainerObject implements KeyboardListen
             this._dragStart = new Point(x, y);
             this._dragPoseStart = new Point(this._pose.xOffset, this._pose.yOffset);
         }
+
+        if (this._pose.annotations.length > 0) {
+            this._pose.eraseAnnotations(true);
+        }
+
         e.stopPropagation();
     }
 
@@ -196,6 +201,11 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
         if (this._zoomGestureStarted) {
             this._zoomGestureStarted = this._interactionCache.size > 0;
+        }
+
+        if (this._pose.annotations.length > 0) {
+            this._pose.eraseAnnotations(true);
+            this._pose.drawAnnotations();
         }
     }
 

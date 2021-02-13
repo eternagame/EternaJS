@@ -350,6 +350,7 @@ export default class Bitmaps {
     public static readonly ImgEye: string = require('assets/UI/eye.png');
     public static readonly ImgChevronDown: string = require('assets/UI/chevron-down.png');
     public static readonly ImgChevronRight: string = require('assets/UI/chevron-right.png');
+    public static readonly ImgPencil: string = require('assets/UI/pencil.png');
 
     public static get all(): string[] {
         if (Bitmaps.ALL_URLS == null) {

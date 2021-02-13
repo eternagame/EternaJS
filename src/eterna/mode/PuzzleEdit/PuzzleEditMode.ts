@@ -339,6 +339,44 @@ export default class PuzzleEditMode extends GameMode {
                     pose.clearAnnotationRanges();
                 });
             });
+            pose.onSelectAnnotation.connect((annotation: Annotation) => {
+                this._toolbar.annotationLayersPanel.selectAnnotationItem(annotation);
+            });
+            pose.onSelectLayer.connect((layer: AnnotationLayer) => {
+                this._toolbar.annotationLayersPanel.selectAnnotationItem(layer);
+            });
+            pose.onEditAnnotation.connect((annotation: Annotation | null) => {
+                if (annotation) {
+                    this._annotationDialog = new AnnotationDialog(
+                        true,
+                        pose.fullSequenceLength,
+                        annotation.ranges,
+                        this._toolbar.annotationLayersPanel.layers,
+                        annotation
+                    );
+                    this.showDialog(
+                        this._annotationDialog
+                    ).closed.then((editedAnnotation: Annotation | null) => {
+                        if (editedAnnotation) {
+                            this._toolbar.annotationLayersPanel.editAnnotation(editedAnnotation);
+                        } else {
+                            // We interpret null argument as delete intent when editing
+                            this._toolbar.annotationLayersPanel.deleteAnnotation(annotation);
+                        }
+
+                        // Clear annotation dialog reference
+                        this._annotationDialog = null;
+                    });
+                }
+            });
+            this._toolbar.annotationLayersPanel.onUpdateAnnotations.connect((annotations: Annotation[]) => {
+                pose.updateAnnotations(annotations);
+            });
+            this._toolbar.annotationLayersPanel.onUpdateLayers.connect((layers: AnnotationLayer[]) => {
+                pose.updateLayers(layers);
+            });
+            pose.puzzleAnnotationsEditable = this._toolbar.type === ToolbarType.PUZZLEMAKER_EMBEDDED
+            || this._toolbar.type === ToolbarType.PUZZLEMAKER;
 
             const structureInput = new StructureInput(pose);
             poseField.addObject(structureInput, poseField.container);
@@ -778,6 +816,9 @@ export default class PuzzleEditMode extends GameMode {
 
         this._paused = false;
         this.updateScore();
+        for (const pose of this._poses) {
+            pose.eraseAnnotations(true);
+        }
     }
 
     private setToTargetMode(): void {
@@ -793,6 +834,9 @@ export default class PuzzleEditMode extends GameMode {
         this._paused = true;
 
         this.updateScore();
+        for (const pose of this._poses) {
+            pose.eraseAnnotations(true);
+        }
     }
 
     private clearUndoStack(): void {

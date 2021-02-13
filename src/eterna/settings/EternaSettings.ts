@@ -13,7 +13,6 @@ export default class EternaSettings extends Settings {
     public readonly freezeButtonAlwaysVisible: Setting<boolean>;
     public readonly useContinuousColors: Setting<boolean>;
     public readonly useExtendedColors: Setting<boolean>;
-    public readonly displayAuxInfo: Setting<boolean>;
     public readonly lastUsedFolder: Setting<string> | Setting<null>;
     public readonly pipEnabled: Setting<boolean>;
     public readonly simpleGraphics: Setting<boolean>;
@@ -40,14 +39,13 @@ export default class EternaSettings extends Settings {
         this.freezeButtonAlwaysVisible = this.setting<boolean>('freezeButtonAlwaysVisible', false);
         this.useContinuousColors = this.setting<boolean>('useContinuousColors', false);
         this.useExtendedColors = this.setting<boolean>('useExtendedColors', false);
-        this.displayAuxInfo = this.setting<boolean>('displayAuxInfo', false);
         this.soundMute = this.setting<boolean>('soundMute', false);
         this.soundVolume = this.setting('soundVolume', 0.6);
         this.lastUsedFolder = this.setting('lastUsedFolder', null);
         this.pipEnabled = this.setting<boolean>('pipEnabled', false);
         this.simpleGraphics = this.setting<boolean>('simpleGraphics', false);
         this.usePuzzlerLayout = this.setting<boolean>('usePuzzlerLayout', false);
-        this.annotationModeActive = this.setting<boolean>('annotationModeActive', true);
+        this.annotationModeActive = this.setting<boolean>('annotationModeActive', false);
         this.designBrowserColumnNames = this.setting('designBrowserColumnNames-2', null);
         this.designBrowserSelectedSolutionIDs = this.setting('designBrowserSelectedSolutionIDs', null);
 

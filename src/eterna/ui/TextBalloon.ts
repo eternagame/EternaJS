@@ -4,6 +4,7 @@ import {StyledTextBuilder, DisplayUtil, ContainerObject} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import GameButton from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';
+import {FontWeight} from '../../flashbang/util/TextBuilder';
 
 export default class TextBalloon extends ContainerObject {
     constructor(
@@ -15,7 +16,9 @@ export default class TextBalloon extends ContainerObject {
         width: number | null = null,
         height: number | null = null,
         borderRadius: number | undefined = undefined,
-        textOffset: number = 0
+        textOffset: number = 0,
+        textColor: number = TextBalloon.DEFAULT_FONT_COLOR,
+        textWeight: string = FontWeight.REGULAR
     ) {
         super();
 
@@ -40,7 +43,7 @@ export default class TextBalloon extends ContainerObject {
         this._button.display.visible = false;
 
         if (text != null && text.length > 0) {
-            this.setText(text);
+            this.setText(text, TextBalloon.DEFAULT_FONT_SIZE, textColor, textWeight);
         }
     }
 
@@ -82,11 +85,17 @@ export default class TextBalloon extends ContainerObject {
         }
     }
 
-    public setText(text: string, fontsize: number = 15, fontColor: number = 0xC0DCE7): void {
+    public setText(
+        text: string,
+        fontsize: number = 15,
+        fontColor: number = TextBalloon.DEFAULT_FONT_COLOR,
+        fontWeight: string = FontWeight.REGULAR
+    ): void {
         this.styledText = new StyledTextBuilder({
             fontFamily: Fonts.STDFONT,
             fontSize: fontsize,
-            fill: fontColor
+            fill: fontColor,
+            fontWeight
         }).append(text);
     }
 
@@ -188,4 +197,6 @@ export default class TextBalloon extends ContainerObject {
 
     protected static readonly W_MARGIN = 10;
     protected static readonly H_MARGIN = 10;
+    public static readonly DEFAULT_FONT_SIZE = 15;
+    public static readonly DEFAULT_FONT_COLOR = 0xC0DCE7;
 }

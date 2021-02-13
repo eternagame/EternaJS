@@ -50,7 +50,6 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
         if (this._optionsMode === EternaViewOptionsMode.LAB) {
             bind(Eterna.settings.useContinuousColors, 'Use continuous colors for the exp. data (advanced)');
             bind(Eterna.settings.useExtendedColors, 'Use extended 4-color scale for the exp. data (advanced)');
-            bind(Eterna.settings.displayAuxInfo, 'Display auxiliary information about RNAs');
         }
 
         const NUM_VOLUME_BUTTONS = 5;

@@ -11,7 +11,6 @@ import {
 import Bitmaps from 'eterna/resources/Bitmaps';
 import Fonts from 'eterna/util/Fonts';
 import {FontWeight} from 'flashbang/util/TextBuilder';
-// import {AnnotationType} from 'eterna/pose2D/Pose2D';
 import {v4 as uuidv4} from 'uuid';
 import Eterna from 'eterna/Eterna';
 import Dialog from './Dialog';
@@ -28,13 +27,17 @@ export default class AnnotationDialog extends Dialog<Annotation> {
         edit: boolean,
         sequenceLength: number,
         initialRanges: AnnotationRange[],
-        initialLayers: AnnotationLayer[]
+        initialLayers: AnnotationLayer[],
+        initialAnnotation: Annotation | null = null
     ) {
         super();
         this._edit = edit;
         this._sequenceLength = sequenceLength;
         this._initialRanges = initialRanges.sort((firstRange, secondRange) => firstRange.start - secondRange.start);
         this._layers = initialLayers;
+        if (initialAnnotation) {
+            this._initialAnnotation = initialAnnotation;
+        }
     }
 
     protected added(): void {
@@ -77,6 +80,15 @@ export default class AnnotationDialog extends Dialog<Annotation> {
             const isValid = this.isValidAnnotation();
             this._saveButton.enabled = isValid;
         });
+        this._titleField.input.keyPressed.connect((key) => {
+            if (key === 'Enter') {
+                this._saveButton.click();
+            }
+        });
+        if (this._initialAnnotation) {
+            // If we're editing annotation, insert initial text
+            this._titleField.input.text = this._initialAnnotation.title;
+        }
         this._textInputLayout.addChild(this._titleField.label);
         this.addObject(this._titleField.input, this._textInputLayout);
 
@@ -95,6 +107,11 @@ export default class AnnotationDialog extends Dialog<Annotation> {
         this._basesField.input.valueChanged.connect(() => {
             const isValid = this.isValidAnnotation();
             this._saveButton.enabled = isValid;
+        });
+        this._basesField.input.keyPressed.connect((key) => {
+            if (key === 'Enter') {
+                this._saveButton.click();
+            }
         });
         this._textInputLayout.addChild(this._basesField.label);
         this.addObject(this._basesField.input, this._textInputLayout);
@@ -128,7 +145,7 @@ export default class AnnotationDialog extends Dialog<Annotation> {
             .customStyleBox(cancelButtonGraphic)
             .label('Cancel', AnnotationDialog.ACTION_BUTTON_FONT_SIZE);
         cancelButton.clicked.connect(() => {
-            this.close(null);
+            this.close(this._initialAnnotation || null);
         });
         this.addObject(cancelButton, this._actionButtonLayout);
         // 2) Save Button
@@ -147,7 +164,7 @@ export default class AnnotationDialog extends Dialog<Annotation> {
         this._saveButton.enabled = false; // Start save button as false
         this._saveButton.clicked.connect(() => {
             const annotation: Annotation = {
-                id: uuidv4(),
+                id: this._initialAnnotation?.id || uuidv4(),
                 timestamp: (new Date()).getTime(),
                 title: this._titleField.input.text,
                 ranges: AnnotationDialog.stringToAnnotationRange(this._basesField.input.text),
@@ -187,7 +204,9 @@ export default class AnnotationDialog extends Dialog<Annotation> {
             const deleteButton = new GameButton()
                 .customStyleBox(deleteButtonGraphic)
                 .label('Delete Annotation', AnnotationDialog.DELETE_BUTTON_FONT_SIZE);
-            deleteButton.clicked.connect(() => this.close(null));
+            deleteButton.clicked.connect(() => {
+                this.close(null); // Returning null will be interpreted as delete
+            });
             this.addObject(deleteButton, this._deleteButtonLayout);
             this._deleteButtonLayout.x = (AnnotationDialog.FIELD_WIDTH - AnnotationDialog.DELETE_BUTTON_WIDTH) / 2;
             this._deleteButtonLayout.y = this._textInputLayout.height
@@ -431,21 +450,15 @@ export default class AnnotationDialog extends Dialog<Annotation> {
         return true;
     }
 
-    protected onBGClicked(): void {
-        this.close(null);
-    }
-
-    protected get bgAlpha(): number {
-        return 0.3;
-    }
-
     public static annotationRangeToString(ranges: AnnotationRange[]): string {
         let baseRanges = '';
         for (const range of ranges) {
             if (range.start <= range.end) {
-                baseRanges += `${range.start}-${range.end}, `;
+                // We add one because frontend numbers bases from 1
+                baseRanges += `${range.start + 1}-${range.end + 1}, `;
             } else {
-                baseRanges += `${range.end}-${range.start}, `;
+                // We add one because frontend numbers bases from 1
+                baseRanges += `${range.end + 1}-${range.start + 1}, `;
             }
         }
         // remove last comma
@@ -461,8 +474,10 @@ export default class AnnotationDialog extends Dialog<Annotation> {
             s.replace(' ', '');
             const extents = s.split('-');
             ranges.push({
-                start: parseInt(extents[0], 10),
-                end: parseInt(extents[1], 10)
+                // We remove one because backend is zero-indexed
+                start: parseInt(extents[0], 10) - 1,
+                // We remve one because backend is zero-indexed
+                end: parseInt(extents[1], 10) - 1
             });
         }
 
@@ -509,6 +524,7 @@ export default class AnnotationDialog extends Dialog<Annotation> {
 
     private _edit: boolean = false;
     private _sequenceLength: number;
+    private _initialAnnotation: Annotation | null = null;
     private _initialRanges: AnnotationRange[] | null = null;
     private _layers: AnnotationLayer[] = [];
     private _selectedLayer: AnnotationLayer | null = null;

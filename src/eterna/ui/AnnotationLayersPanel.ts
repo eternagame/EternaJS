@@ -13,19 +13,20 @@ import {ToolbarType} from 'eterna/ui/Toolbar';
 import {v4 as uuidv4} from 'uuid';
 import AnnotationItem, {
     Annotation,
-    ItemType,
+    AnnotationItemType,
     AnnotationItemChild,
     AnnotationCategory,
     AnnotationLayer
 } from 'eterna/ui/AnnotationItem';
+import Eterna from 'eterna/Eterna';
 import GameButton from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';
 import VScrollBox from './VScrollBox';
-
 import {Item} from './DragDropper';
 
 export default class AnnotationLayersPanel extends ContainerObject {
     public readonly onUpdateLayers: Value<AnnotationLayer[]> = new Value<AnnotationLayer[]>([]);
+    public readonly onUpdateAnnotations: Value<Annotation[]> = new Value<Annotation[]>([]);
 
     constructor(toolbarType: ToolbarType, button: GameButton) {
         super();
@@ -105,10 +106,11 @@ export default class AnnotationLayersPanel extends ContainerObject {
 
         this._rnaCategory = new AnnotationItem({
             id: uuidv4(),
+            playerID: Eterna.playerID,
             indexPath: [0],
             width: AnnotationLayersPanel.PANEL_WIDTH,
             dividerThickness: AnnotationLayersPanel.DIVIDER_THICKNESS,
-            type: ItemType.CATEGORY,
+            type: AnnotationItemType.CATEGORY,
             title: 'Structure Annotations',
             category: AnnotationCategory.STRUCTURE,
             children: this._rnaChildren,
@@ -125,10 +127,11 @@ export default class AnnotationLayersPanel extends ContainerObject {
         this.addCategory(this._rnaCategory);
         this._puzzleCategory = new AnnotationItem({
             id: uuidv4(),
+            playerID: Eterna.playerID,
             indexPath: [1],
             width: AnnotationLayersPanel.PANEL_WIDTH,
             dividerThickness: AnnotationLayersPanel.DIVIDER_THICKNESS,
-            type: ItemType.CATEGORY,
+            type: AnnotationItemType.CATEGORY,
             title: 'Puzzle Annotations',
             category: AnnotationCategory.PUZZLE,
             children: this._puzzleChildren,
@@ -145,10 +148,11 @@ export default class AnnotationLayersPanel extends ContainerObject {
         this.addCategory(this._puzzleCategory);
         this._solutionCategory = new AnnotationItem({
             id: uuidv4(),
+            playerID: Eterna.playerID,
             indexPath: [2],
             width: AnnotationLayersPanel.PANEL_WIDTH,
             dividerThickness: AnnotationLayersPanel.DIVIDER_THICKNESS,
-            type: ItemType.CATEGORY,
+            type: AnnotationItemType.CATEGORY,
             title: 'Solution Annotations',
             category: AnnotationCategory.SOLUTION,
             children: this._solutionChildren,
@@ -186,7 +190,7 @@ export default class AnnotationLayersPanel extends ContainerObject {
         // Register annotation items to observe drag events
         this.registerDragObservers(annotationItems);
         // Register panel to respond to annotation selection events
-        this.registerAnnotationSelectedObservers(annotationItems);
+        this.registerAnnotationObservers(annotationItems);
 
         this.needsLayout();
     }
@@ -199,7 +203,7 @@ export default class AnnotationLayersPanel extends ContainerObject {
                         child['children'] = [
                             {
                                 id: annotation.id,
-                                type: ItemType.ANNOTATION,
+                                type: AnnotationItemType.ANNOTATION,
                                 timestamp: annotation.timestamp,
                                 playerID: annotation.playerID,
                                 title: annotation.title,
@@ -209,7 +213,7 @@ export default class AnnotationLayersPanel extends ContainerObject {
                     } else if (child.id === annotation.layer.id && child.children) {
                         child.children.push({
                             id: annotation.id,
-                            type: ItemType.ANNOTATION,
+                            type: AnnotationItemType.ANNOTATION,
                             timestamp: annotation.timestamp,
                             playerID: annotation.playerID,
                             title: annotation.title,
@@ -220,7 +224,7 @@ export default class AnnotationLayersPanel extends ContainerObject {
             } else {
                 this._puzzleChildren.push({
                     id: annotation.id,
-                    type: ItemType.ANNOTATION,
+                    type: AnnotationItemType.ANNOTATION,
                     timestamp: annotation.timestamp,
                     playerID: annotation.playerID,
                     title: annotation.title,
@@ -234,7 +238,7 @@ export default class AnnotationLayersPanel extends ContainerObject {
                         child['children'] = [
                             {
                                 id: annotation.id,
-                                type: ItemType.ANNOTATION,
+                                type: AnnotationItemType.ANNOTATION,
                                 timestamp: annotation.timestamp,
                                 playerID: annotation.playerID,
                                 title: annotation.title,
@@ -244,7 +248,7 @@ export default class AnnotationLayersPanel extends ContainerObject {
                     } else if (child.id === annotation.layer.id && child.children) {
                         child.children.push({
                             id: annotation.id,
-                            type: ItemType.ANNOTATION,
+                            type: AnnotationItemType.ANNOTATION,
                             timestamp: annotation.timestamp,
                             playerID: annotation.playerID,
                             title: annotation.title,
@@ -255,7 +259,7 @@ export default class AnnotationLayersPanel extends ContainerObject {
             } else {
                 this._solutionChildren.push({
                     id: annotation.id,
-                    type: ItemType.ANNOTATION,
+                    type: AnnotationItemType.ANNOTATION,
                     timestamp: annotation.timestamp,
                     playerID: annotation.playerID,
                     title: annotation.title,
@@ -264,6 +268,40 @@ export default class AnnotationLayersPanel extends ContainerObject {
             }
         }
         this.updateLayers();
+
+        // Inform layer panel observers of update
+        this.onUpdateAnnotations.value = this.annotations;
+        this.onUpdateLayers.value = this.layers;
+    }
+
+    public editAnnotation(annotation: Annotation): void {
+        const annotationItems: AnnotationItem[] = [];
+        AnnotationLayersPanel.collectAnnotationItems(this._items, annotationItems);
+
+        for (const item of annotationItems) {
+            if (item.id === annotation.id) {
+                item.setTitle(annotation.title);
+                item.setRanges(annotation.ranges);
+            }
+        }
+
+        // Inform layer panel observers of update
+        this.onUpdateAnnotations.value = this.annotations;
+    }
+
+    public deleteAnnotation(annotation: Annotation): void {
+        const annotationItems: AnnotationItem[] = [];
+        AnnotationLayersPanel.collectAnnotationItems(this._items, annotationItems);
+
+        for (const item of annotationItems) {
+            if (item.id === annotation.id) {
+                // Select item
+                item.select();
+
+                // Delete selected item
+                this.deleteSelectedItem();
+            }
+        }
     }
 
     private needsLayout(): void {
@@ -347,9 +385,10 @@ export default class AnnotationLayersPanel extends ContainerObject {
     private createNewLayer() {
         const newLayer: AnnotationItemChild = {
             id: uuidv4(),
-            type: ItemType.LAYER,
+            type: AnnotationItemType.LAYER,
             title: 'Untitled Layer',
-            children: []
+            children: [],
+            playerID: Eterna.playerID
         };
 
         if (
@@ -361,7 +400,7 @@ export default class AnnotationLayersPanel extends ContainerObject {
             for (let i = 0; i < this._puzzleChildren.length; i++) {
                 // We want the index of first "layerless" annotation
                 // Which will be where we insert new layer
-                if (this._puzzleChildren[i].type === ItemType.ANNOTATION) {
+                if (this._puzzleChildren[i].type === AnnotationItemType.ANNOTATION) {
                     layerIndex = i;
                     break;
                 }
@@ -384,7 +423,7 @@ export default class AnnotationLayersPanel extends ContainerObject {
             for (let i = 0; i < this._solutionChildren.length; i++) {
                 // We want the index of first "layerless" annotation
                 // Which will be where we insert new layer
-                if (this._solutionChildren[i].type === ItemType.ANNOTATION) {
+                if (this._solutionChildren[i].type === AnnotationItemType.ANNOTATION) {
                     layerIndex = i;
                     break;
                 }
@@ -406,6 +445,7 @@ export default class AnnotationLayersPanel extends ContainerObject {
         this.onUpdateLayers.value = this.layers;
     }
 
+    // Delete layer or annotation
     private deleteSelectedItem() {
         if (this._selectedPath && this._selectedDisplay) {
             // Find category
@@ -424,7 +464,7 @@ export default class AnnotationLayersPanel extends ContainerObject {
 
             // Remove from model
             if (this._selectedPath.length === 2) {
-                // Annotation not in layer
+                // Annotation not in layer or is layer
                 category.splice(this._selectedPath[1], 1);
             } else if (this._selectedPath.length === 3) {
                 // Annotation in layer
@@ -446,6 +486,10 @@ export default class AnnotationLayersPanel extends ContainerObject {
 
             // Repaint layers
             this.updateLayers();
+
+            // Inform layer panel observers of update
+            this.onUpdateAnnotations.value = this.annotations;
+            this.onUpdateLayers.value = this.layers;
         }
     }
 
@@ -472,11 +516,11 @@ export default class AnnotationLayersPanel extends ContainerObject {
         }
     }
 
-    private registerAnnotationSelectedObservers(items: AnnotationItem[]) {
+    private registerAnnotationObservers(items: AnnotationItem[]) {
         for (let i = 0; i < items.length; i++) {
             const annotation = items[i];
             annotation.isSelected.connect((isSelected) => {
-                if (isSelected && annotation.type !== ItemType.CATEGORY) {
+                if (isSelected && annotation.type !== AnnotationItemType.CATEGORY) {
                     this._selectedPath = annotation.indexPath;
                     this._selectedDisplay = annotation.display;
 
@@ -493,10 +537,32 @@ export default class AnnotationLayersPanel extends ContainerObject {
                     this.updateUpperToolbar(false);
                 }
             });
+            annotation.isVisible.connect(() => {
+                // Inform layer panel observers of update
+                this.onUpdateAnnotations.value = this.annotations;
+                this.onUpdateLayers.value = this.layers;
+            });
+
+            annotation.isSelected.connect(() => {
+                // Inform layer panel observers of update
+                this.onUpdateAnnotations.value = this.annotations;
+                this.onUpdateLayers.value = this.layers;
+            });
         }
     }
 
-    private static deselectItem(items: AnnotationItem[], index: number): (value: boolean, ovalue: boolean) => void {
+    public selectAnnotationItem(item: Annotation | AnnotationLayer): void {
+        const annotationItems: AnnotationItem[] = [];
+        AnnotationLayersPanel.collectAnnotationItems(this._items, annotationItems);
+
+        for (const val of annotationItems) {
+            if (val.id === item.id) {
+                val.select();
+            }
+        }
+    }
+
+    public static deselectItem(items: AnnotationItem[], index: number): (value: boolean, ovalue: boolean) => void {
         return (selected: boolean): void => {
             if (selected) {
                 items[index].deselect();
@@ -519,7 +585,7 @@ export default class AnnotationLayersPanel extends ContainerObject {
         }
 
         if (itemPath.length === 2) {
-            // Annotation not in layer
+            // Annotation not in layer or is layer
             category[itemPath[1]].title = text;
         } else if (itemPath.length === 3) {
             // Annotation in layer
@@ -528,6 +594,10 @@ export default class AnnotationLayersPanel extends ContainerObject {
                 layerChildren[itemPath[2]].title = text;
             }
         }
+
+        // Inform layer panel observers of update
+        this.onUpdateAnnotations.value = this.annotations;
+        this.onUpdateLayers.value = this.layers;
     }
 
     private updateAnnotationLayer(annotation: Item, layerPath: number[]) {
@@ -557,6 +627,10 @@ export default class AnnotationLayersPanel extends ContainerObject {
                 this._updateLayerTimeout = null;
             }, AnnotationLayersPanel.LAYER_UPDATE_DELAY);
         }
+
+        // Inform layer panel observers of update
+        this.onUpdateAnnotations.value = this.annotations;
+        this.onUpdateLayers.value = this.layers;
     }
 
     private executeLayerUpdate(annotation: Item, layerPath: number[]) {
@@ -682,6 +756,10 @@ export default class AnnotationLayersPanel extends ContainerObject {
             // Repaint layers
             this.updateLayers();
         }
+
+        // Inform layer panel observers of update
+        this.onUpdateAnnotations.value = this.annotations;
+        this.onUpdateLayers.value = this.layers;
     }
 
     public set isVisible(visible: boolean) {
@@ -706,16 +784,47 @@ export default class AnnotationLayersPanel extends ContainerObject {
         AnnotationLayersPanel.collectAnnotationItems(this._items, annotationItems);
         const layers: AnnotationLayer[] = annotationItems.reduce(
             (allLayers: AnnotationLayer[], item: AnnotationItem) => {
-                if (item.type === ItemType.LAYER) {
+                if (item.type === AnnotationItemType.LAYER) {
                     allLayers.push({
                         id: item.id,
-                        title: item.title
+                        category: item.category,
+                        playerID: item.playerID,
+                        title: item.title,
+                        children: item.itemChildren,
+                        visible: item.isVisible.value,
+                        selected: item.isSelected.value
                     });
                 }
                 return allLayers;
             }, []
         );
         return layers;
+    }
+
+    public get annotations() {
+        const annotationItems: AnnotationItem[] = [];
+        AnnotationLayersPanel.collectAnnotationItems(this._items, annotationItems);
+        const annotations: Annotation[] = annotationItems.reduce(
+            (allAnnotations: Annotation[], item: AnnotationItem) => {
+                if (item.type === AnnotationItemType.ANNOTATION) {
+                    allAnnotations.push({
+                        id: item.id,
+                        category: item.category,
+                        timestamp: item.timestamp,
+                        playerID: item.playerID,
+                        body: item.body,
+                        title: item.title,
+                        ranges: item.ranges,
+                        layer: item.layer,
+                        visible: item.isVisible.value,
+                        selected: item.isSelected.value
+                    });
+                }
+                return allAnnotations;
+            }, []
+        );
+
+        return annotations;
     }
 
     private _panel: GamePanel;
@@ -742,7 +851,7 @@ export default class AnnotationLayersPanel extends ContainerObject {
     private _solutionChildren: AnnotationItemChild[] = [];
 
     private static readonly PANEL_WIDTH = 240;
-    private static readonly PANEL_HEIGHT = 200;
+    private static readonly PANEL_HEIGHT = 250;
     private static readonly UPPER_TOOLBAR_HEIGHT = 30;
     private static readonly DIVIDER_THICKNESS = 2;
     private static readonly BORDER_RADIUS = 7.5;

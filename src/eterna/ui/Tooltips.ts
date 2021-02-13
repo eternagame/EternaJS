@@ -4,7 +4,17 @@ import {
 } from 'pixi.js';
 import {Registration, RegistrationGroup} from 'signals';
 import {
-    StyledTextBuilder, GameObject, Flashbang, SerialTask, Easing, AlphaTask, DelayTask, GameObjectRef, Button, Assert
+    StyledTextBuilder,
+    GameObject,
+    Flashbang,
+    SerialTask,
+    Easing,
+    AlphaTask,
+    DelayTask,
+    GameObjectRef,
+    Button,
+    Assert,
+    ContainerObject
 } from 'flashbang';
 import {PaletteTarget} from 'eterna/ui/NucleotidePalette';
 import Fonts from 'eterna/util/Fonts';
@@ -39,7 +49,7 @@ export default class Tooltips extends GameObject {
         super.removed();
     }
 
-    public showTooltip(key: Button | PaletteTarget, loc: Point, tooltip: Tooltip): void {
+    public showTooltip(key: Button | PaletteTarget | ContainerObject, loc: Point, tooltip: Tooltip): void {
         if (this._curTooltipKey === key) {
             return;
         }
@@ -67,7 +77,11 @@ export default class Tooltips extends GameObject {
         this.mode.container.addChild(this._curTooltip);
     }
 
-    public showTooltipFor(target: DisplayObject, key: Button | PaletteTarget, tooltip: Tooltip): void {
+    public showTooltipFor(
+        target: DisplayObject,
+        key: Button | PaletteTarget | ContainerObject,
+        tooltip: Tooltip
+    ): void {
         if (this._curTooltipKey === key) {
             return;
         }
@@ -78,7 +92,7 @@ export default class Tooltips extends GameObject {
         this.showTooltip(key, p, tooltip);
     }
 
-    public removeTooltip(key: Button | PaletteTarget): void {
+    public removeTooltip(key: Button | PaletteTarget | ContainerObject): void {
         if (this._curTooltipKey === key) {
             this.removeCurTooltip();
         }
@@ -93,25 +107,27 @@ export default class Tooltips extends GameObject {
         }
     }
 
-    public addButtonTooltip(button: Button, tooltip: Tooltip): Registration {
+    public addTooltip(ele: Button | ContainerObject, tooltip: Tooltip): Registration {
         const show = (): void => {
-            if (button.enabled) {
-                this.showTooltipFor(button.display, button, tooltip);
+            if ((ele instanceof Button && ele.enabled) || !(ele instanceof Button)) {
+                this.showTooltipFor(ele.display, ele, tooltip);
             }
         };
 
-        const hide = (): void => this.removeTooltip(button);
+        const hide = (): void => this.removeTooltip(ele);
 
         const regs = new RegistrationGroup();
 
-        regs.add(button.pointerDown.connect(show));
-        regs.add(button.clicked.connect(hide));
-        regs.add(button.clickCanceled.connect(hide));
+        regs.add(ele.pointerDown.connect(show));
+        if (ele instanceof Button) {
+            regs.add(ele.clicked.connect(hide));
+            regs.add(ele.clickCanceled.connect(hide));
+        }
 
-        regs.add(button.pointerOver.connect(show));
-        regs.add(button.pointerOut.connect(hide));
+        regs.add(ele.pointerOver.connect(show));
+        regs.add(ele.pointerOut.connect(hide));
 
-        regs.add(button.destroyed.connect(hide));
+        regs.add(ele.destroyed.connect(hide));
 
         return regs;
     }
@@ -137,7 +153,7 @@ export default class Tooltips extends GameObject {
 
     private readonly _layer: Container;
 
-    private _curTooltipKey: Button | PaletteTarget | null;
+    private _curTooltipKey: Button | PaletteTarget | ContainerObject | null;
     private _curTooltip: DisplayObject | null;
     private _curTooltipFader: GameObjectRef = GameObjectRef.NULL;
 
