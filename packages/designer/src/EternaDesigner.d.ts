@@ -1,4 +1,5 @@
 import { FlashbangApp } from "@eternagame/flashbang";
+import { DesignBrowserFilter } from "./mode/DesignBrowserMode";
 import PuzzleDefinition from "./state/PuzzleDefinition";
 import Solution from "./state/Solution";
 
@@ -28,7 +29,7 @@ export default class EternaDesigner extends FlashbangApp {
     public loadPuzzleSolver(puzzleDefinition: PuzzleDefinition, initialSolution: Solution): void;
 
     /** Load puzzle maker mode */
-    public loadPuzzleMaker(puzzleDefinition?: PuzzleDefinition, initialSolution: Solution): void;
+    public loadPuzzleMaker(puzzleDefinition?: PuzzleDefinition, initialSolution?: Solution): void;
 
     /** Load design browser */
     public loadDesignBrowser(designBrowserFilters?: DesignBrowserFilter[]): void;

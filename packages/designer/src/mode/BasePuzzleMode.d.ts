@@ -5,19 +5,18 @@ export default abstract class BasePuzzleMode extends AppMode {
     constructor();
     
     /** Initialize state and UI */
-    protected setup();
+    protected setup(): void;
 
     /** keyboard handlers */
 
     /** Write out a solution/puzzle state to JSON via the save manager */
-    saveData();
+    saveData(): void;
     
     /** export to PNG or SVG or other formats */
-    createScreenshot();
+    createScreenshot(): ArrayBuffer;
 
-    /** export the player's current game state (can be base64 encoded for
-     *  HELP links) */
-    exportState();
+    /** export the player's current game state (can be base64 encoded for HELP links) */
+    exportState(): string;
 
     // toolbar
     // help bar (top right)
