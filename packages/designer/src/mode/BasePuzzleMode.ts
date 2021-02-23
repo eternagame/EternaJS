@@ -1,5 +1,6 @@
-import {AppMode} from "flashbang";
+import {AppMode} from "@eternagame/flashbang";
 
+/** Mode for visualization/interaction with a puzzle */
 export default abstract class BasePuzzleMode extends AppMode {
     constructor();
     

@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "module": "esnext",
+    "target": "es2018",
+    "allowJs": true,
+    "moduleResolution": "node",
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": false,
+    "strictNullChecks": true,
+    "allowSyntheticDefaultImports": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "baseUrl": ".",
+    "paths": {
+      "@eternagame/*": [
+        "packages/*/src"
+      ]
+    }
+  },
+  "include": [
+    "./packages/**/*.ts"
+  ],
+  "exclude": [
+    "./node_modules"
+  ]
+}

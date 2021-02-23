@@ -1,35 +1,22 @@
+import { FlashbangApp } from "@eternagame/flashbang";
 import PuzzleDefinition from "./state/PuzzleDefinition";
 import Solution from "./state/Solution";
 
-export enum InitialAppMode {
-    // load a puzzle
-    PUZZLE = 'puzzle',
-    // load the puzzlemaker
-    PUZZLEMAKER = 'puzzlemaker',
-    // load a solution into FeedbackViewMode
-    SOLUTION_SEE_RESULT = 'solution_see_result',
-    // load a solution into PoseEditMode
-    SOLUTION_COPY_AND_VIEW = 'solution_copy_and_view',
-    // load a puzzle into DesignBrowserMode
-    DESIGN_BROWSER = 'design_browser',
-    // load the debugging test mode
-    TEST = 'test',
-}
-
-interface InitialState {}
-
-interface EternaAppParams {
+interface EternaDesignerParams {
     container: HTMLElement;
-    onSolutionChanged?: (solution: Solution): void;
+    onSolutionChanged?: (solution: Solution) => void;
     /** If not present, no submit button will be shown */
     onSolutionSubmit?: (solution: Solution) => void;
     onConstraintsSatisfied?: (solution: Solution) => void;
     getRemoteSolutions?: () => Solution[];
 }
 
-export default class EternaApp {
+/** Core application class/entry point for the Eterna design application */
+export default class EternaDesigner extends FlashbangApp {
+    private params: EternaDesignerParams;
+
     /** Create & mount Eterna app */
-    constructor(private params: EternaAppParams);
+    constructor(params: EternaDesignerParams);
 
     /** Bootstrap app and Flashbang */
     public run(): void;
