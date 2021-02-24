@@ -12,21 +12,28 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import {ToolbarType} from 'eterna/ui/Toolbar';
 import {v4 as uuidv4} from 'uuid';
 import AnnotationItem, {
-    Annotation,
+    AnnotationData,
     AnnotationItemType,
-    AnnotationItemChild,
     AnnotationCategory,
-    AnnotationLayer
+    AnnotationGraphNode,
+    AnnotationDataCollection
 } from 'eterna/ui/AnnotationItem';
 import Eterna from 'eterna/Eterna';
+import Flashbang from 'flashbang/core/Flashbang';
 import GameButton from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';
 import VScrollBox from './VScrollBox';
 import {Item} from './DragDropper';
 
 export default class AnnotationLayersPanel extends ContainerObject {
-    public readonly onUpdateLayers: Value<AnnotationLayer[]> = new Value<AnnotationLayer[]>([]);
-    public readonly onUpdateAnnotations: Value<Annotation[]> = new Value<Annotation[]>([]);
+    public readonly onUpdateLayers: Value<AnnotationData[]> = new Value<AnnotationData[]>([]);
+    public readonly onUpdateAnnotations: Value<AnnotationData[]> = new Value<AnnotationData[]>([]);
+    public readonly onUpdateGraph: Value<AnnotationDataCollection> = new Value<AnnotationDataCollection>({
+        puzzle: [],
+        solution: []
+    });
+
+    public readonly onEditAnnotation: Value<AnnotationData | null> = new Value<AnnotationData | null>(null);
 
     constructor(toolbarType: ToolbarType, button: GameButton) {
         super();
@@ -65,7 +72,9 @@ export default class AnnotationLayersPanel extends ContainerObject {
         upperToolbarBottomDivider.y = AnnotationLayersPanel.UPPER_TOOLBAR_HEIGHT;
         this._panel.container.addChild(upperToolbarBottomDivider);
 
-        this.updateUpperToolbar(false);
+        const withEdit = false;
+        const withDelete = false;
+        this.updateUpperToolbar(withDelete, withEdit);
 
         this._scrollView = new VScrollBox(AnnotationLayersPanel.PANEL_WIDTH, AnnotationLayersPanel.PANEL_HEIGHT);
         this.addObject(this._scrollView, this._panel.container);
@@ -92,8 +101,8 @@ export default class AnnotationLayersPanel extends ContainerObject {
             this._items = [];
         }
 
-        if (this._rnaCategory) {
-            this._rnaCategory.display.destroy();
+        if (this._structureCategory) {
+            this._structureCategory.display.destroy();
         }
 
         if (this._puzzleCategory) {
@@ -104,27 +113,28 @@ export default class AnnotationLayersPanel extends ContainerObject {
             this._solutionCategory.display.destroy();
         }
 
-        this._rnaCategory = new AnnotationItem({
-            id: uuidv4(),
-            playerID: Eterna.playerID,
-            indexPath: [0],
-            width: AnnotationLayersPanel.PANEL_WIDTH,
-            dividerThickness: AnnotationLayersPanel.DIVIDER_THICKNESS,
-            type: AnnotationItemType.CATEGORY,
-            title: 'Structure Annotations',
-            category: AnnotationCategory.STRUCTURE,
-            children: this._rnaChildren,
-            updateTitle: (itemPath: number[], text: string) => {
-                this.updateTitle(itemPath, text);
-            },
-            updateAnnotationLayer: (annotation: Item, layerPath: number[]) => {
-                this.updateAnnotationLayer(annotation, layerPath);
-            },
-            updateAnnotationPosition: (firstAnnotation: Item, secondAnnotationPath: number[]) => {
-                this.updateAnnotationPosition(firstAnnotation, secondAnnotationPath);
-            }
-        });
-        this.addCategory(this._rnaCategory);
+        // this._structureCategory = new AnnotationItem({
+        //     id: uuidv4(),
+        //     playerID: Eterna.playerID,
+        //     indexPath: [0],
+        //     width: AnnotationLayersPanel.PANEL_WIDTH,
+        //     dividerThickness: AnnotationLayersPanel.DIVIDER_THICKNESS,
+        //     type: AnnotationItemType.CATEGORY,
+        //     title: 'Structure Annotations',
+        //     category: AnnotationCategory.STRUCTURE,
+        //     titleEditable: false,
+        //     children: this._structureChildren,
+        //     updateTitle: (itemPath: number[], text: string) => {
+        //         this.updateTitle(itemPath, text);
+        //     },
+        //     updateAnnotationLayer: (annotation: Item, layerPath: number[]) => {
+        //         this.updateAnnotationLayer(annotation, layerPath);
+        //     },
+        //     updateAnnotationPosition: (firstAnnotation: Item, secondAnnotationPath: number[]) => {
+        //         this.updateAnnotationPosition(firstAnnotation, secondAnnotationPath);
+        //     }
+        // });
+        // this.addCategory(this._rnaCategory);
         this._puzzleCategory = new AnnotationItem({
             id: uuidv4(),
             playerID: Eterna.playerID,
@@ -134,6 +144,7 @@ export default class AnnotationLayersPanel extends ContainerObject {
             type: AnnotationItemType.CATEGORY,
             title: 'Puzzle Annotations',
             category: AnnotationCategory.PUZZLE,
+            titleEditable: this.activeCategory === AnnotationCategory.PUZZLE,
             children: this._puzzleChildren,
             updateTitle: (itemPath: number[], text: string) => {
                 this.updateTitle(itemPath, text);
@@ -155,6 +166,7 @@ export default class AnnotationLayersPanel extends ContainerObject {
             type: AnnotationItemType.CATEGORY,
             title: 'Solution Annotations',
             category: AnnotationCategory.SOLUTION,
+            titleEditable: this.activeCategory === AnnotationCategory.SOLUTION,
             children: this._solutionChildren,
             updateTitle: (itemPath: number[], text: string) => {
                 this.updateTitle(itemPath, text);
@@ -195,7 +207,11 @@ export default class AnnotationLayersPanel extends ContainerObject {
         this.needsLayout();
     }
 
-    public addAnnotation(annotation: Annotation, type: AnnotationCategory) {
+    public addAnnotation(annotation: AnnotationData, type: AnnotationCategory) {
+        if (annotation.type !== AnnotationItemType.ANNOTATION) {
+            return;
+        }
+
         if (type === AnnotationCategory.PUZZLE) {
             if (annotation.layer) {
                 for (const child of this._puzzleChildren) {
@@ -270,16 +286,31 @@ export default class AnnotationLayersPanel extends ContainerObject {
         this.updateLayers();
 
         // Inform layer panel observers of update
-        this.onUpdateAnnotations.value = this.annotations;
         this.onUpdateLayers.value = this.layers;
+        this.onUpdateAnnotations.value = this.annotations;
+        this.onUpdateGraph.value = this.graph;
     }
 
-    public editAnnotation(annotation: Annotation): void {
+    public editAnnotation(annotation: AnnotationData): void {
+        if (annotation.type !== AnnotationItemType.ANNOTATION) {
+            return;
+        }
+
         const annotationItems: AnnotationItem[] = [];
-        AnnotationLayersPanel.collectAnnotationItems(this._items, annotationItems);
+        if (this.activeCategory === AnnotationCategory.PUZZLE) {
+            // Puzzle Annotations
+            AnnotationLayersPanel.collectAnnotationItems([this._puzzleCategory], annotationItems);
+        } else {
+            // Solution Annotations
+            AnnotationLayersPanel.collectAnnotationItems([this._solutionCategory], annotationItems);
+        }
 
         for (const item of annotationItems) {
-            if (item.id === annotation.id) {
+            if (
+                item.type === AnnotationItemType.ANNOTATION
+                && item.id === annotation.id
+                && annotation.ranges
+            ) {
                 item.setTitle(annotation.title);
                 item.setRanges(annotation.ranges);
             }
@@ -289,12 +320,25 @@ export default class AnnotationLayersPanel extends ContainerObject {
         this.onUpdateAnnotations.value = this.annotations;
     }
 
-    public deleteAnnotation(annotation: Annotation): void {
+    public deleteAnnotation(annotation: AnnotationData): void {
+        if (annotation.type !== AnnotationItemType.ANNOTATION) {
+            return;
+        }
+
         const annotationItems: AnnotationItem[] = [];
-        AnnotationLayersPanel.collectAnnotationItems(this._items, annotationItems);
+        if (this.activeCategory === AnnotationCategory.PUZZLE) {
+            // Puzzle Annotations
+            AnnotationLayersPanel.collectAnnotationItems([this._puzzleCategory], annotationItems);
+        } else {
+            // Solution Annotations
+            AnnotationLayersPanel.collectAnnotationItems([this._solutionCategory], annotationItems);
+        }
 
         for (const item of annotationItems) {
-            if (item.id === annotation.id) {
+            if (
+                item.type === AnnotationItemType.ANNOTATION
+                && item.id === annotation.id
+            ) {
                 // Select item
                 item.select();
 
@@ -339,62 +383,98 @@ export default class AnnotationLayersPanel extends ContainerObject {
         }
     };
 
-    private updateUpperToolbar(withDelete: boolean) {
+    private updateUpperToolbar(withDelete: boolean, withEdit: boolean) {
         if (this._newLayerButton) {
             this._newLayerButton.destroySelf();
         }
         if (this._deleteButton) {
             this._deleteButton.destroySelf();
         }
+        if (this._editButton) {
+            this._editButton.destroySelf();
+        }
 
         this._newLayerButton = new GameButton()
             .allStates(Bitmaps.ImgFolder)
             .tooltip('Add layer');
-        this._newLayerButton.clicked.connect(() => this.createNewLayer());
+        this._newLayerButton.pointerDown.connect(() => {
+            this.createNewLayer();
+            // There is an odd bug where pointerUp does not trigger
+            // on Button sometimes.
+            // As a result, pointerTap is not always called, resulting
+            // in incosistent clicked.connect() emissions.
+            //
+            // We fix this by connecting to pointerDown and playing button
+            // sound here.
+            Flashbang.sound.playSound(GameButton.DEFAULT_DOWN_SOUND);
+        });
         this._panel.addObject(this._newLayerButton, this._upperToolbar);
+
+        let offset = 0;
+        if (withEdit) {
+            this._editButton = new GameButton()
+                .allStates(Bitmaps.ImgPencil)
+                .tooltip('Edit');
+            this._editButton.pointerDown.connect(() => {
+                this.editSelectedAnnotation();
+                // There is an odd bug where pointerUp does not trigger
+                // on Button sometimes.
+                // As a result, pointerTap is not always called, resulting
+                // in incosistent clicked.connect() emissions.
+                //
+                // We fix this by connecting to pointerDown and playing button
+                // sound here.
+                Flashbang.sound.playSound(GameButton.DEFAULT_DOWN_SOUND);
+            });
+            this._panel.addObject(this._editButton, this._upperToolbar);
+            offset += this._editButton.display.width;
+        }
 
         if (withDelete) {
             this._deleteButton = new GameButton()
                 .allStates(Bitmaps.ImgTrash)
                 .tooltip('Delete');
-            this._deleteButton.clicked.connect(() => this.deleteSelectedItem());
+            this._deleteButton.pointerDown.connect(() => {
+                this.deleteSelectedItem();
+                // There is an odd bug where pointerUp does not trigger
+                // on Button sometimes.
+                // As a result, pointerTap is not always called, resulting
+                // in incosistent clicked.connect() emissions.
+                //
+                // We fix this by connecting to pointerDown and playing button
+                // sound here.
+                Flashbang.sound.playSound(GameButton.DEFAULT_DOWN_SOUND);
+            });
             this._panel.addObject(this._deleteButton, this._upperToolbar);
+            offset += this._deleteButton.display.width;
+        }
+
+        if (this.activeCategory === AnnotationCategory.PUZZLE) {
+            // For some odd reason the offset is 2x too large in the puzzle maker
+            // but not the puzzle solver
+            offset /= 2;
         }
 
         this._upperToolbar.layout();
 
-        if (withDelete) {
-            // There's an odd bug where the relative
-            // position when we add the delete button
-            // does not right-align, hence this odd patch
-            //
-            // If you find the issue, do fix this.
-            DisplayUtil.positionRelative(
-                this._upperToolbar, HAlign.RIGHT, VAlign.TOP,
-                this._panel.container, HAlign.RIGHT, VAlign.TOP,
-                -this._deleteButton.display.width, 0
-            );
-        } else {
-            DisplayUtil.positionRelative(
-                this._upperToolbar, HAlign.RIGHT, VAlign.TOP,
-                this._panel.container, HAlign.RIGHT, VAlign.TOP
-            );
-        }
+        DisplayUtil.positionRelative(
+            this._upperToolbar, HAlign.RIGHT, VAlign.TOP,
+            this._panel.container, HAlign.RIGHT, VAlign.TOP,
+            -offset, 0
+        );
     }
 
     private createNewLayer() {
-        const newLayer: AnnotationItemChild = {
+        const newLayer: AnnotationData = {
             id: uuidv4(),
             type: AnnotationItemType.LAYER,
             title: 'Untitled Layer',
+            timestamp: (new Date()).getTime(),
             children: [],
             playerID: Eterna.playerID
         };
 
-        if (
-            this._toolbarType === ToolbarType.PUZZLEMAKER_EMBEDDED
-            || this._toolbarType === ToolbarType.PUZZLEMAKER
-        ) {
+        if (this.activeCategory === AnnotationCategory.PUZZLE) {
             // Place new layer in puzzle category
             let layerIndex = 0;
             for (let i = 0; i < this._puzzleChildren.length; i++) {
@@ -442,17 +522,40 @@ export default class AnnotationLayersPanel extends ContainerObject {
         // Repaint layers
         this.updateLayers();
 
+        // Hide delete + edit button
+        const withEdit = false;
+        const withDelete = false;
+        this.updateUpperToolbar(withDelete, withEdit);
+
         this.onUpdateLayers.value = this.layers;
+        this.onUpdateGraph.value = this.graph;
+    }
+
+    private editSelectedAnnotation() {
+        if (
+            this._selectedPath
+            && this._selectedDisplay
+            && this._selectedItem
+        ) {
+            if (this._selectedItem.type === AnnotationItemType.ANNOTATION) {
+                this.onEditAnnotation.value = this._selectedItem;
+                this.onEditAnnotation.value = null;
+            }
+        }
     }
 
     // Delete layer or annotation
     private deleteSelectedItem() {
-        if (this._selectedPath && this._selectedDisplay) {
+        if (
+            this._selectedPath
+            && this._selectedDisplay
+            && this._selectedItem
+        ) {
             // Find category
-            let category: AnnotationItemChild[];
+            let category: AnnotationData[];
             switch (this._selectedPath[0]) {
                 case 0:
-                    category = this._rnaChildren;
+                    category = this._structureChildren;
                     break;
                 case 1:
                     category = this._puzzleChildren;
@@ -481,15 +584,18 @@ export default class AnnotationLayersPanel extends ContainerObject {
             this._selectedPath = null;
             this._selectedDisplay = null;
 
-            // Hide delete button
-            this.updateUpperToolbar(false);
+            // Hide delete + edit button
+            const withEdit = false;
+            const withDelete = false;
+            this.updateUpperToolbar(withDelete, withEdit);
 
             // Repaint layers
             this.updateLayers();
 
             // Inform layer panel observers of update
-            this.onUpdateAnnotations.value = this.annotations;
             this.onUpdateLayers.value = this.layers;
+            this.onUpdateAnnotations.value = this.annotations;
+            this.onUpdateGraph.value = this.graph;
         }
     }
 
@@ -522,36 +628,53 @@ export default class AnnotationLayersPanel extends ContainerObject {
             annotation.isSelected.connect((isSelected) => {
                 if (isSelected && annotation.type !== AnnotationItemType.CATEGORY) {
                     this._selectedPath = annotation.indexPath;
+                    this._selectedItem = annotation;
                     this._selectedDisplay = annotation.display;
 
-                    // Show delete button
-                    this.updateUpperToolbar(true);
+                    // Show delete + edit button
+                    const withEdit = Eterna.playerID === annotation.playerID
+                        && (
+                            annotation.category !== AnnotationCategory.PUZZLE
+                            || this._puzzleAnnotationsEditable
+                        )
+                        && annotation.category !== AnnotationCategory.STRUCTURE
+                        && annotation.type === AnnotationItemType.ANNOTATION;
+                    const withDelete = Eterna.playerID === annotation.playerID
+                    && (
+                        annotation.category !== AnnotationCategory.PUZZLE
+                        || this._puzzleAnnotationsEditable
+                    )
+                    && annotation.category !== AnnotationCategory.STRUCTURE;
+                    this.updateUpperToolbar(withDelete, withEdit);
                 } else if (
                     this._selectedPath
                     && annotation.indexPath.toString() === this._selectedPath.toString()
                 ) {
                     this._selectedPath = null;
+                    this._selectedItem = null;
                     this._selectedDisplay = null;
 
-                    // Hide delete button
-                    this.updateUpperToolbar(false);
+                    // Hide delete + edit button
+                    const withEdit = false;
+                    const withDelete = false;
+                    this.updateUpperToolbar(withDelete, withEdit);
                 }
+
+                // Inform layer panel observers of update
+                this.onUpdateLayers.value = this.layers;
+                this.onUpdateAnnotations.value = this.annotations;
+                this.onUpdateGraph.value = this.graph;
             });
             annotation.isVisible.connect(() => {
                 // Inform layer panel observers of update
-                this.onUpdateAnnotations.value = this.annotations;
                 this.onUpdateLayers.value = this.layers;
-            });
-
-            annotation.isSelected.connect(() => {
-                // Inform layer panel observers of update
                 this.onUpdateAnnotations.value = this.annotations;
-                this.onUpdateLayers.value = this.layers;
+                this.onUpdateGraph.value = this.graph;
             });
         }
     }
 
-    public selectAnnotationItem(item: Annotation | AnnotationLayer): void {
+    public selectAnnotationItem(item: AnnotationData): void {
         const annotationItems: AnnotationItem[] = [];
         AnnotationLayersPanel.collectAnnotationItems(this._items, annotationItems);
 
@@ -571,10 +694,10 @@ export default class AnnotationLayersPanel extends ContainerObject {
     }
 
     private updateTitle(itemPath: number[], text: string) {
-        let category: AnnotationItemChild[];
+        let category: AnnotationData[];
         switch (itemPath[0]) {
             case 0:
-                category = this._rnaChildren;
+                category = this._structureChildren;
                 break;
             case 1:
                 category = this._puzzleChildren;
@@ -596,8 +719,9 @@ export default class AnnotationLayersPanel extends ContainerObject {
         }
 
         // Inform layer panel observers of update
-        this.onUpdateAnnotations.value = this.annotations;
         this.onUpdateLayers.value = this.layers;
+        this.onUpdateAnnotations.value = this.annotations;
+        this.onUpdateGraph.value = this.graph;
     }
 
     private updateAnnotationLayer(annotation: Item, layerPath: number[]) {
@@ -628,19 +752,25 @@ export default class AnnotationLayersPanel extends ContainerObject {
             }, AnnotationLayersPanel.LAYER_UPDATE_DELAY);
         }
 
+        // Hide delete + edit button
+        const withEdit = false;
+        const withDelete = false;
+        this.updateUpperToolbar(withDelete, withEdit);
+
         // Inform layer panel observers of update
-        this.onUpdateAnnotations.value = this.annotations;
         this.onUpdateLayers.value = this.layers;
+        this.onUpdateAnnotations.value = this.annotations;
+        this.onUpdateGraph.value = this.graph;
     }
 
     private executeLayerUpdate(annotation: Item, layerPath: number[]) {
         // locate annotation and remove from current layer
-        let annotationData: AnnotationItemChild | null = null;
+        let annotationData: AnnotationData | null = null;
         const path = annotation.index as number[];
-        let category: AnnotationItemChild[];
+        let category: AnnotationData[];
         switch (path[0]) {
             case 0:
-                category = this._rnaChildren;
+                category = this._structureChildren;
                 break;
             case 1:
                 category = this._puzzleChildren;
@@ -652,13 +782,13 @@ export default class AnnotationLayersPanel extends ContainerObject {
 
         if (path.length === 2) {
             // Annotation not in layer
-            annotationData = category[path[1]] as AnnotationItemChild;
+            annotationData = category[path[1]] as AnnotationData;
             category.splice(path[1], 1);
         } else if (path.length === 3) {
             // Annotation in layer
             const layerChildren = category[path[1]].children;
             if (layerChildren) {
-                annotationData = layerChildren[path[2]] as AnnotationItemChild;
+                annotationData = layerChildren[path[2]] as AnnotationData;
                 // Remove annotation
                 layerChildren.splice(path[2], 1);
             }
@@ -684,11 +814,11 @@ export default class AnnotationLayersPanel extends ContainerObject {
 
     private updateAnnotationPosition(firstAnnotation: Item, secondAnnotationPath: number[]) {
         // remove from current layer
-        let firstAnnotationData: AnnotationItemChild | null = null;
-        let category: AnnotationItemChild[];
+        let firstAnnotationData: AnnotationData | null = null;
+        let category: AnnotationData[];
         switch (secondAnnotationPath[0]) {
             case 0:
-                category = this._rnaChildren;
+                category = this._structureChildren;
                 break;
             case 1:
                 category = this._puzzleChildren;
@@ -717,7 +847,7 @@ export default class AnnotationLayersPanel extends ContainerObject {
             for (let i = 0; i < category.length; i++) {
                 if (category[i].id === firstAnnotation.id) {
                     // Get data
-                    firstAnnotationData = category[i] as AnnotationItemChild;
+                    firstAnnotationData = category[i] as AnnotationData;
 
                     // Remove annotation
                     category.splice(i, 1);
@@ -731,7 +861,7 @@ export default class AnnotationLayersPanel extends ContainerObject {
                 for (let i = 0; i < layerChildren.length; i++) {
                     if (layerChildren[i].id === firstAnnotation.id) {
                         // Get data
-                        firstAnnotationData = layerChildren[i] as AnnotationItemChild;
+                        firstAnnotationData = layerChildren[i] as AnnotationData;
 
                         // Remove annotation
                         layerChildren.splice(i, 1);
@@ -757,9 +887,15 @@ export default class AnnotationLayersPanel extends ContainerObject {
             this.updateLayers();
         }
 
+        // Hide delete + edit button
+        const withEdit = false;
+        const withDelete = false;
+        this.updateUpperToolbar(withDelete, withEdit);
+
         // Inform layer panel observers of update
-        this.onUpdateAnnotations.value = this.annotations;
         this.onUpdateLayers.value = this.layers;
+        this.onUpdateAnnotations.value = this.annotations;
+        this.onUpdateGraph.value = this.graph;
     }
 
     public set isVisible(visible: boolean) {
@@ -781,12 +917,29 @@ export default class AnnotationLayersPanel extends ContainerObject {
 
     public get layers() {
         const annotationItems: AnnotationItem[] = [];
-        AnnotationLayersPanel.collectAnnotationItems(this._items, annotationItems);
-        const layers: AnnotationLayer[] = annotationItems.reduce(
-            (allLayers: AnnotationLayer[], item: AnnotationItem) => {
+        if (this.activeCategory === AnnotationCategory.PUZZLE) {
+            // Puzzle Annotations
+            AnnotationLayersPanel.collectAnnotationItems(
+                [this._puzzleCategory],
+                annotationItems
+            );
+        } else {
+            // Solution Annotations
+            AnnotationLayersPanel.collectAnnotationItems(
+                [
+                    this._puzzleCategory,
+                    this._solutionCategory
+                ],
+                annotationItems
+            );
+        }
+
+        const layers: AnnotationData[] = annotationItems.reduce(
+            (allLayers: AnnotationData[], item: AnnotationItem) => {
                 if (item.type === AnnotationItemType.LAYER) {
                     allLayers.push({
                         id: item.id,
+                        type: AnnotationItemType.LAYER,
                         category: item.category,
                         playerID: item.playerID,
                         title: item.title,
@@ -803,16 +956,32 @@ export default class AnnotationLayersPanel extends ContainerObject {
 
     public get annotations() {
         const annotationItems: AnnotationItem[] = [];
-        AnnotationLayersPanel.collectAnnotationItems(this._items, annotationItems);
-        const annotations: Annotation[] = annotationItems.reduce(
-            (allAnnotations: Annotation[], item: AnnotationItem) => {
+        if (this.activeCategory === AnnotationCategory.PUZZLE) {
+            // Puzzle Annotations
+            AnnotationLayersPanel.collectAnnotationItems(
+                [this._puzzleCategory],
+                annotationItems
+            );
+        } else {
+            // Solution Annotations
+            AnnotationLayersPanel.collectAnnotationItems(
+                [
+                    this._puzzleCategory,
+                    this._solutionCategory
+                ],
+                annotationItems
+            );
+        }
+
+        const annotations: AnnotationData[] = annotationItems.reduce(
+            (allAnnotations: AnnotationData[], item: AnnotationItem) => {
                 if (item.type === AnnotationItemType.ANNOTATION) {
                     allAnnotations.push({
                         id: item.id,
+                        type: AnnotationItemType.ANNOTATION,
                         category: item.category,
                         timestamp: item.timestamp,
                         playerID: item.playerID,
-                        body: item.body,
                         title: item.title,
                         ranges: item.ranges,
                         layer: item.layer,
@@ -827,6 +996,81 @@ export default class AnnotationLayersPanel extends ContainerObject {
         return annotations;
     }
 
+    public get graph() {
+        return {
+            puzzle: this._puzzleChildren,
+            solution: this._solutionChildren
+        };
+    }
+
+    public set puzzleAnnotations(annotations: AnnotationGraphNode[]) {
+        const puzzleChildren: AnnotationData[] = [];
+        for (const annotation of annotations) {
+            const strippedAnnotation = this.stripGraphNode(annotation);
+            puzzleChildren.push(strippedAnnotation);
+        }
+
+        this._puzzleChildren = puzzleChildren;
+
+        this.updateLayers();
+
+        // Inform layer panel observers of update
+        this.onUpdateLayers.value = this.layers;
+        this.onUpdateAnnotations.value = this.annotations;
+        this.onUpdateGraph.value = this.graph;
+    }
+
+    public set solutionAnnotations(annotations: AnnotationGraphNode[]) {
+        const solutionChildren: AnnotationData[] = [];
+        for (const annotation of annotations) {
+            const strippedAnnotation = this.stripGraphNode(annotation);
+            solutionChildren.push(strippedAnnotation);
+        }
+
+        this._solutionChildren = solutionChildren;
+        this.updateLayers();
+
+        // Inform layer panel observers of update
+        this.onUpdateLayers.value = this.layers;
+        this.onUpdateAnnotations.value = this.annotations;
+        this.onUpdateGraph.value = this.graph;
+    }
+
+    private stripGraphNode = (node: AnnotationGraphNode): AnnotationData => {
+        const children: AnnotationData[] = [];
+        if (node.children) {
+            for (const child of node.children) {
+                children.push(this.stripGraphNode(child));
+            }
+        }
+
+        const strippedNode: AnnotationData = {...node.data};
+        if (children.length > 0) {
+            strippedNode.children = children;
+        }
+
+        return strippedNode;
+    };
+
+    public set puzzleAnnotationsEditable(editable: boolean) {
+        this._puzzleAnnotationsEditable = editable;
+    }
+
+    public get puzzleAnnotationsEditable(): boolean {
+        return this._puzzleAnnotationsEditable;
+    }
+
+    public get activeCategory(): AnnotationCategory {
+        if (
+            this._toolbarType === ToolbarType.PUZZLEMAKER_EMBEDDED
+            || this._toolbarType === ToolbarType.PUZZLEMAKER
+        ) {
+            return AnnotationCategory.PUZZLE;
+        } else {
+            return AnnotationCategory.SOLUTION;
+        }
+    }
+
     private _panel: GamePanel;
     private _scrollView: VScrollBox;
     private _items: AnnotationItem[] = [];
@@ -838,17 +1082,19 @@ export default class AnnotationLayersPanel extends ContainerObject {
     private _upperToolbar: HLayoutContainer;
     private _newLayerButton: GameButton;
     private _deleteButton: GameButton;
+    private _editButton: GameButton;
     private _selectedPath: number[] | null;
+    private _selectedItem: AnnotationItem | null;
     private _selectedDisplay: Container | null;
     private _updateLayerTimeout: ReturnType<typeof setTimeout> | null;
+    private _puzzleAnnotationsEditable: boolean = false;
 
-    private _rnaCategory: AnnotationItem;
+    private _structureCategory: AnnotationItem;
     private _puzzleCategory: AnnotationItem;
     private _solutionCategory: AnnotationItem;
-    private _rnaChildren: AnnotationItemChild[] = [];
-    private _puzzleChildren: AnnotationItemChild[] = [];
-
-    private _solutionChildren: AnnotationItemChild[] = [];
+    private _structureChildren: AnnotationData[] = [];
+    private _puzzleChildren: AnnotationData[] = [];
+    private _solutionChildren: AnnotationData[] = [];
 
     private static readonly PANEL_WIDTH = 240;
     private static readonly PANEL_HEIGHT = 250;

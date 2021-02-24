@@ -681,7 +681,7 @@ export default class Toolbar extends ContainerObject {
             .over(Bitmaps.ImgAnnotationModeOver)
             .down(Bitmaps.ImgAnnotationModeSelected)
             .selected(Bitmaps.ImgAnnotationModeSelected)
-            .tooltip('Toggle activation of Annotation Editor');
+            .tooltip('Annotation Mode');
         this.addObject(this.annotationModeButton, this.lowerToolbarLayout);
 
         this.annotationLayersButton = new ToolbarButton()
@@ -689,14 +689,14 @@ export default class Toolbar extends ContainerObject {
             .over(Bitmaps.ImgAnnotationLayerOver)
             .down(Bitmaps.ImgAnnotationLayerSelected)
             .selected(Bitmaps.ImgAnnotationLayerSelected)
-            .tooltip('Reveal/Hide Annotation Layers Panel');
+            .tooltip('Annotations Panel');
         this.annotationsLayerPanel = new AnnotationLayersPanel(this._type, this.annotationLayersButton);
         this.addObject(this.annotationsLayerPanel, this.mode?.container);
         this.addObject(this.annotationLayersButton, this.lowerToolbarLayout);
 
         if (this._type === ToolbarType.PUZZLEMAKER) {
             this.submitButton.tooltip('Publish your puzzle!');
-
+            this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
             this.addObject(this.submitButton, this.lowerToolbarLayout);
         }
 

@@ -1,6 +1,6 @@
 import {UnitSignal, Value} from 'signals';
 import {
-    Container, Graphics, Sprite, Text
+    Container, Graphics, Sprite, Text, Point, Rectangle
 } from 'pixi.js';
 import {
     ContainerObject,
@@ -16,46 +16,94 @@ import GameButton from './GameButton';
 import DragDropper, {DragDropType, Item} from './DragDropper';
 import TextInputObject from './TextInputObject';
 import AnnotationDialog from './AnnotationDialog';
+import AnnotationCard from './AnnotationCard';
+
+export interface AnnotationData {
+    id: string | number;
+    type: AnnotationItemType;
+    category?: AnnotationCategory;
+    timestamp?: number;
+    playerID: number;
+    title: string;
+    ranges?: AnnotationRange[];
+    layer?: AnnotationData;
+    children?: AnnotationData[];
+    visible?: boolean;
+    selected?: boolean;
+}
+
+export interface AnnotationArguments {
+    ranges: AnnotationRange[];
+}
+
+export interface AnnotationDataCollection {
+    puzzle: AnnotationData[];
+    solution: AnnotationData[];
+}
+
+export interface AnnotationDisplayObject {
+    data: AnnotationData;
+    type: AnnotationItemType;
+    positions: AnnotationPosition[];
+    displays: AnnotationCard[];
+}
+
+export interface AnnotationPositionConflict {
+    bounds: Rectangle;
+    placement: AnnotationPlacement;
+}
+
+export interface AnnotationBaseConflict {
+    bounds: Rectangle;
+    resolvable: boolean;
+    correction?: Point;
+}
+
+export enum AnnotationPlacement {
+    TOP_LEFT = 'top-left',
+    TOP_CENTER = 'top-center',
+    TOP_RIGHT = 'top-right',
+    LEFT_CENTER = 'left-center',
+    RIGHT_CENTER = 'right-center',
+    BOTTOM_LEFT = 'bottom-left',
+    BOTTOM_CENTER = 'bottom-center',
+    BOTTOM_RIGHT = 'bottom-right',
+}
+
+export interface AnnotationBaseConflicts {
+    [AnnotationPlacement.TOP_LEFT]: AnnotationBaseConflict | null;
+    [AnnotationPlacement.TOP_CENTER]: AnnotationBaseConflict | null;
+    [AnnotationPlacement.TOP_RIGHT]: AnnotationBaseConflict | null;
+    [AnnotationPlacement.LEFT_CENTER]: AnnotationBaseConflict | null;
+    [AnnotationPlacement.RIGHT_CENTER]: AnnotationBaseConflict | null;
+    [AnnotationPlacement.BOTTOM_LEFT]: AnnotationBaseConflict | null;
+    [AnnotationPlacement.BOTTOM_CENTER]: AnnotationBaseConflict | null;
+    [AnnotationPlacement.BOTTOM_RIGHT]: AnnotationBaseConflict | null;
+}
+
+export interface AnnotationPosition {
+    anchorIndex: number;
+    zoomLevel: number;
+    relPosition: Point;
+    placement?: AnnotationPlacement;
+    custom: boolean;
+}
+
+export interface AnnotationGraphNode {
+    data: AnnotationData;
+    type: AnnotationItemType;
+    positions: AnnotationPosition[];
+    children: AnnotationGraphNode[];
+}
+
+export interface AnnotationGraph {
+    puzzle: AnnotationGraphNode[];
+    solution: AnnotationGraphNode[];
+}
 
 export interface AnnotationRange {
     start: number;
     end: number;
-}
-
-export interface AnnotationItemChild {
-    id: string | number;
-    type: AnnotationItemType;
-    timestamp?: number;
-    playerID: number;
-    title: string;
-    body?: string;
-    ranges?: AnnotationRange[];
-    children?: AnnotationItemChild[];
-    layer?: AnnotationLayer;
-}
-
-// will an annotation need to know if it's a member of a layer?
-export interface Annotation {
-    id: string | number;
-    category?: AnnotationCategory;
-    timestamp: number;
-    playerID: number;
-    title: string;
-    body?: string;
-    ranges: AnnotationRange[];
-    layer?: AnnotationLayer;
-    visible?: boolean;
-    selected?: boolean;
-}
-
-export interface AnnotationLayer {
-    id: string | number;
-    category?: AnnotationCategory;
-    playerID: number;
-    title: string;
-    children?: AnnotationItemChild[];
-    visible?: boolean;
-    selected?: boolean;
 }
 
 export enum AnnotationCategory {
@@ -83,12 +131,13 @@ interface AnnotationItemProps {
     type: AnnotationItemType;
     title: string;
     category: AnnotationCategory;
-    children?: AnnotationItemChild[];
+    children?: AnnotationData[];
     timestamp?: number;
     playerID: number;
     ranges?: AnnotationRange[];
-    layer?: AnnotationLayer;
+    layer?: AnnotationData;
     body?: string;
+    titleEditable: boolean;
     updateTitle: (itemPath: number[], text: string) => void;
     updateAnnotationLayer: (annotation: Item, layerPath: number[]) => void;
     updateAnnotationPosition: (firstAnnotation: Item, secondAnnotationPath: number[]) => void;
@@ -109,6 +158,7 @@ export default class AnnotationItem extends ContainerObject {
         this._dividerThickness = props.dividerThickness;
         this._type = props.type;
         this._category = props.category;
+        this._titleEditable = props.titleEditable;
         if (props.timestamp) {
             this._timestamp = props.timestamp;
         }
@@ -133,17 +183,26 @@ export default class AnnotationItem extends ContainerObject {
         if (this._type === AnnotationItemType.LAYER) {
             layer = {
                 id: props.id,
+                type: props.type,
                 title: props.title,
                 children: props.children,
-                playerID: props.playerID
+                playerID: props.playerID,
+                timestamp: props.timestamp
             };
         }
 
         if (props.children) {
             // Lay out annotation item children
+            let numAnnotationChildren = 0;
             const itemChildren: AnnotationItem[] = [];
             for (let i = 0; i < props.children.length; i++) {
                 const child = props.children[i];
+                if (child.type === AnnotationItemType.LAYER) {
+                    numAnnotationChildren += child.children?.length || 0;
+                } else if (child.type === AnnotationItemType.ANNOTATION) {
+                    numAnnotationChildren += 1;
+                }
+
                 const item = new AnnotationItem({
                     id: child.id,
                     indexPath: [...this._indexPath, i],
@@ -157,7 +216,7 @@ export default class AnnotationItem extends ContainerObject {
                     playerID: child.playerID,
                     ranges: child.ranges,
                     layer,
-                    body: child.body,
+                    titleEditable: this._titleEditable,
                     updateTitle: this._updateTitle,
                     updateAnnotationLayer: this._updateAnnotationLayer,
                     updateAnnotationPosition: this._updateAnnotationPosition
@@ -193,6 +252,7 @@ export default class AnnotationItem extends ContainerObject {
 
                 itemChildren.push(item);
             }
+            this._numAnnotationChildren = numAnnotationChildren;
             this._itemChildren = itemChildren;
         }
 
@@ -403,9 +463,9 @@ export default class AnnotationItem extends ContainerObject {
         this.addObject(this._itemButton, textContainer);
 
         // Retrieve label that fits within remaining item container
-        const truncateLabelText = this.truncateLabelText(this._title, this._itemWidth);
-        const labelText = truncateLabelText.object;
-        const truncatedText = truncateLabelText.string;
+        const preparedLabelText = this.prepareLabelText(this._title, this._itemWidth);
+        const labelText = preparedLabelText.object;
+        const truncatedText = preparedLabelText.string;
 
         if (this._type === AnnotationItemType.CATEGORY) {
             // Create immutable label
@@ -435,20 +495,32 @@ export default class AnnotationItem extends ContainerObject {
                 .label(itemTextButtonTextBuilder)
                 .tooltip(this._title);
 
-            this._itemTextButton.clicked.connect(() => {
-                this.isEditingTitle.value = !this.isEditingTitle.value;
+            if (this._titleEditable) {
+                // Edit title
+                this._itemTextButton.clicked.connect(() => {
+                    this.isEditingTitle.value = !this.isEditingTitle.value;
 
-                if (this.isEditingTitle.value) {
-                    this._itemNameInput.display.visible = true;
-                    this._itemTextButton.display.visible = false;
+                    if (this.isEditingTitle.value) {
+                        this._itemNameInput.display.visible = true;
+                        this._itemTextButton.display.visible = false;
 
-                    // Add text to input
-                    this._itemNameInput.text = this._title;
-                } else {
-                    this._itemNameInput.display.visible = false;
-                    this._itemTextButton.display.visible = true;
-                }
-            });
+                        // Add text to input
+                        this._itemNameInput.text = this._title;
+                    } else {
+                        this._itemNameInput.display.visible = false;
+                        this._itemTextButton.display.visible = true;
+                    }
+                });
+            } else {
+                // Select item
+                this._itemTextButton.clicked.connect(() => {
+                    if (!this.isSelected.value) {
+                        this.select();
+                    } else {
+                        this.deselect();
+                    }
+                });
+            }
 
             this._itemTextButton.display.y = (length - labelText.height) / 2;
             if (
@@ -481,9 +553,9 @@ export default class AnnotationItem extends ContainerObject {
                     const newTitle = this.itemNameInput.text;
                     if (key === 'Enter' && newTitle.length > 0 && newTitle !== this._title) {
                         this._title = newTitle;
-                        const truncLabelText = this.truncateLabelText(this._title, this._itemWidth);
-                        const text = truncLabelText.object;
-                        const truncText = truncLabelText.string;
+                        const editedPreparedLabelText = this.prepareLabelText(this._title, this._itemWidth);
+                        const text = editedPreparedLabelText.object;
+                        const truncText = editedPreparedLabelText.string;
                         const textBuilder = new TextBuilder(truncText)
                             .font(Fonts.STDFONT)
                             .fontSize(AnnotationItem.FONT_SIZE)
@@ -636,28 +708,36 @@ export default class AnnotationItem extends ContainerObject {
         }
     }
 
-    private truncateLabelText(text: string, maxWidth: number): TruncatedLabelText {
-        let labelText = new TextBuilder(text)
+    private prepareLabelText(text: string, maxWidth: number): TruncatedLabelText {
+        let fullText = this._numAnnotationChildren != null
+            ? `${text} (${this._numAnnotationChildren})` : text;
+        let labelText = new TextBuilder(fullText)
             .font(Fonts.STDFONT)
             .fontSize(AnnotationItem.FONT_SIZE)
             .fontWeight(FontWeight.REGULAR)
             .color(0xFFFFFF)
             .hAlignLeft()
             .build();
+        let finalText = fullText;
 
         let truncatedText = text;
         while (labelText.width > maxWidth) {
             truncatedText = truncatedText.substring(0, truncatedText.length - 1);
-            labelText = new TextBuilder(truncatedText)
+            fullText = this._numAnnotationChildren != null
+                ? `${truncatedText} (${this._numAnnotationChildren})` : truncatedText;
+            labelText = new TextBuilder(fullText)
                 .font(Fonts.STDFONT)
                 .fontSize(AnnotationItem.FONT_SIZE)
                 .fontWeight(FontWeight.REGULAR)
                 .color(0xFFFFFF)
                 .hAlignLeft()
                 .build();
+            finalText = truncatedText;
         }
         if (truncatedText.length < text.length) {
-            truncatedText = `${truncatedText.substring(0, truncatedText.length - 3)}...`;
+            truncatedText = this._numAnnotationChildren != null
+                ? `${truncatedText.substring(0, truncatedText.length - 4)}... (${this._numAnnotationChildren})`
+                : `${truncatedText.substring(0, truncatedText.length - 3)}...`;
             labelText = new TextBuilder(truncatedText)
                 .font(Fonts.STDFONT)
                 .fontSize(AnnotationItem.FONT_SIZE)
@@ -665,11 +745,12 @@ export default class AnnotationItem extends ContainerObject {
                 .color(0xFFFFFF)
                 .hAlignLeft()
                 .build();
+            finalText = truncatedText;
         }
 
         return {
             object: labelText,
-            string: truncatedText
+            string: finalText
         };
     }
 
@@ -733,9 +814,9 @@ export default class AnnotationItem extends ContainerObject {
 
     public setTitle(title: string): void {
         this._title = title;
-        const truncLabelText = this.truncateLabelText(this._title, this._itemWidth);
-        const text = truncLabelText.object;
-        const truncText = truncLabelText.string;
+        const preparedLabelText = this.prepareLabelText(this._title, this._itemWidth);
+        const text = preparedLabelText.object;
+        const truncText = preparedLabelText.string;
         const textBuilder = new TextBuilder(truncText)
             .font(Fonts.STDFONT)
             .fontSize(AnnotationItem.FONT_SIZE)
@@ -914,6 +995,7 @@ export default class AnnotationItem extends ContainerObject {
     private _dividerThickness: number;
     private _type: AnnotationItemType;
     private _category: AnnotationCategory;
+    private _titleEditable: boolean;
     private _itemStack: VLayoutContainer;
     private _itemContainer: HLayoutContainer;
     private _itemIndent: Graphics;
@@ -930,6 +1012,7 @@ export default class AnnotationItem extends ContainerObject {
     private _itemTextButton: GameButton;
     private _itemNameInput: TextInputObject;
     private _itemChildren: AnnotationItem[];
+    private _numAnnotationChildren: number | null = null;
     private _itemWidth: number;
     private _dropTarget: DragDropper;
     private _dragSource: DragDropper;
@@ -942,7 +1025,7 @@ export default class AnnotationItem extends ContainerObject {
     private _timestamp: number;
     private _playerID: number;
     private _ranges: AnnotationRange[];
-    private _layer: AnnotationLayer;
+    private _layer: AnnotationData;
     private _body: string;
 
     private static readonly CATEGORY_HEIGHT = 40;

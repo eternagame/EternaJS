@@ -20,15 +20,15 @@ import {InputField} from './TextInputPanel';
 import GamePanel, {GamePanelType} from './GamePanel';
 import VScrollBox from './VScrollBox';
 import GameDropdown from './GameDropdown';
-import {AnnotationRange, Annotation, AnnotationLayer} from './AnnotationItem';
+import {AnnotationRange, AnnotationData, AnnotationItemType} from './AnnotationItem';
 
-export default class AnnotationDialog extends Dialog<Annotation> {
+export default class AnnotationDialog extends Dialog<AnnotationData> {
     constructor(
         edit: boolean,
         sequenceLength: number,
         initialRanges: AnnotationRange[],
-        initialLayers: AnnotationLayer[],
-        initialAnnotation: Annotation | null = null
+        initialLayers: AnnotationData[],
+        initialAnnotation: AnnotationData | null = null
     ) {
         super();
         this._edit = edit;
@@ -59,7 +59,7 @@ export default class AnnotationDialog extends Dialog<Annotation> {
             .allStates(Bitmaps.ImgAchievementsClose);
         this.addObject(closeButton, this.container);
         closeButton.clicked.connect(() => {
-            this.close(null);
+            this.close(this._initialAnnotation || null);
         });
 
         // Generate Dialog Body
@@ -163,8 +163,9 @@ export default class AnnotationDialog extends Dialog<Annotation> {
             .label('Save', AnnotationDialog.ACTION_BUTTON_FONT_SIZE);
         this._saveButton.enabled = false; // Start save button as false
         this._saveButton.clicked.connect(() => {
-            const annotation: Annotation = {
+            const annotation: AnnotationData = {
                 id: this._initialAnnotation?.id || uuidv4(),
+                type: AnnotationItemType.ANNOTATION,
                 timestamp: (new Date()).getTime(),
                 title: this._titleField.input.text,
                 ranges: AnnotationDialog.stringToAnnotationRange(this._basesField.input.text),
@@ -231,8 +232,8 @@ export default class AnnotationDialog extends Dialog<Annotation> {
             // Add Annotation Layer Dropdown
             this._dropdown = new GameDropdown({
                 fontSize: 14,
-                options: this._layers.map((layer: AnnotationLayer) => layer.title),
-                defaultOption: 'Select a Layer',
+                options: this._layers.map((layer: AnnotationData) => layer.title),
+                defaultOption: this._initialAnnotation?.layer?.title || 'Select a Layer',
                 borderWidth: 0,
                 borderColor: 0xC0DCE7,
                 color: 0x043468,
@@ -392,7 +393,7 @@ export default class AnnotationDialog extends Dialog<Annotation> {
         return inputField;
     }
 
-    public setLayers(layers: AnnotationLayer[]): void {
+    public setLayers(layers: AnnotationData[]): void {
         this._layers = layers;
     }
 
@@ -524,10 +525,10 @@ export default class AnnotationDialog extends Dialog<Annotation> {
 
     private _edit: boolean = false;
     private _sequenceLength: number;
-    private _initialAnnotation: Annotation | null = null;
+    private _initialAnnotation: AnnotationData | null = null;
     private _initialRanges: AnnotationRange[] | null = null;
-    private _layers: AnnotationLayer[] = [];
-    private _selectedLayer: AnnotationLayer | null = null;
+    private _layers: AnnotationData[] = [];
+    private _selectedLayer: AnnotationData | null = null;
     private _panel: GamePanel;
     private _textInputLayout: VLayoutContainer;
     private _actionButtonLayout: HLayoutContainer;
@@ -558,6 +559,6 @@ export default class AnnotationDialog extends Dialog<Annotation> {
     private static readonly DELETE_BUTTON_HEIGHT = 20;
     private static readonly DELETE_BUTTON_FONT_SIZE = 14;
     private static readonly DROPDOWN_HEIGHT = 35;
-    public static readonly ANNOTATION_TEXT_CHARACTER_LIMIT = 30;
+    public static readonly ANNOTATION_TEXT_CHARACTER_LIMIT = 50;
     public static readonly RANGE_REGEX: RegExp = /(\d+\s*-\s*\d+)(,\s*\d+\s*-\s*\d+)*/g;
 }

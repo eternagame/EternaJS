@@ -18,7 +18,8 @@ export default class TextBalloon extends ContainerObject {
         borderRadius: number | undefined = undefined,
         textOffset: number = 0,
         textColor: number = TextBalloon.DEFAULT_FONT_COLOR,
-        textWeight: string = FontWeight.REGULAR
+        textWeight: string = FontWeight.REGULAR,
+        maxWidth: number | null = null
     ) {
         super();
 
@@ -36,6 +37,11 @@ export default class TextBalloon extends ContainerObject {
             this._height = height;
             this._panel.setSize(width, height);
         }
+
+        if (maxWidth) {
+            this._maxWidth = maxWidth;
+        }
+
         this.addObject(this._panel, this.container);
 
         this._button = new GameButton().label('Next', 12);
@@ -95,7 +101,9 @@ export default class TextBalloon extends ContainerObject {
             fontFamily: Fonts.STDFONT,
             fontSize: fontsize,
             fill: fontColor,
-            fontWeight
+            fontWeight,
+            wordWrap: !!this._maxWidth,
+            wordWrapWidth: this._maxWidth
         }).append(text);
     }
 
@@ -190,8 +198,9 @@ export default class TextBalloon extends ContainerObject {
     protected _centered: boolean = false;
     protected _hasTitle: boolean = false;
 
-    private _width: number | null;
-    private _height: number | null;
+    private _width: number | undefined;
+    private _height: number | undefined;
+    private _maxWidth: number | undefined = undefined;
 
     private _textOffset: number = 0;
 

@@ -351,6 +351,9 @@ export default class Bitmaps {
     public static readonly ImgChevronDown: string = require('assets/UI/chevron-down.png');
     public static readonly ImgChevronRight: string = require('assets/UI/chevron-right.png');
     public static readonly ImgPencil: string = require('assets/UI/pencil.png');
+    public static readonly ImgPointerHand: string = require('assets/UI/pointer-hand.png');
+    public static readonly ImgAnnotationCheckmark: string = require('assets/UI/annotation-checkmark.png');
+    public static readonly ImgAnnotationCross: string = require('assets/UI/annotation-cross.png');
 
     public static get all(): string[] {
         if (Bitmaps.ALL_URLS == null) {

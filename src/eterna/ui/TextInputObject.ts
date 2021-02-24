@@ -146,6 +146,8 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
         if (this._showFakeTextInputWhenNotFocused) {
             this.onFocusChanged(this._hasFocus);
         }
+
+        this.updateCharacterCounter();
     }
 
     private onFocusChanged(focused: boolean): void {

@@ -3,6 +3,7 @@ import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import Feedback, {BrentTheoData} from 'eterna/Feedback';
 import Sequence from 'eterna/rnatypes/Sequence';
+import {AnnotationGraph} from 'eterna/ui/AnnotationItem';
 import Solution from './Solution';
 
 interface SolutionSpec {
@@ -28,6 +29,7 @@ interface SolutionSpec {
     'SHAPE-min': string;
     'has-fold-data': number | null;
     'fold-data': string;
+    'annotations': AnnotationGraph;
 }
 
 interface ShapeData {
@@ -249,6 +251,10 @@ export default class SolutionManager {
 
         if (obj['fold-data'] != null) {
             newsol.foldData = JSON.parse(obj['fold-data']);
+        }
+
+        if (obj['annotations'] != null) {
+            newsol.annotations = obj['annotations'] as AnnotationGraph;
         }
 
         return newsol;

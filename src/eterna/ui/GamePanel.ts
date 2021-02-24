@@ -17,6 +17,7 @@ interface GamePanelProps {
     borderColor?: number;
     dropShadow?: boolean;
     borderRadius?: number;
+    borderThickness?: number;
 }
 
 export default class GamePanel extends BaseGamePanel {
@@ -30,6 +31,8 @@ export default class GamePanel extends BaseGamePanel {
         const borderColor = props.borderColor !== undefined ? props.borderColor : 0;
         const dropShadow = props.dropShadow || false;
         const borderRadius = props.borderRadius !== undefined ? props.borderRadius : 5;
+        const borderThickness = props.borderThickness !== undefined
+            ? props.borderThickness : GamePanel.DEFAULT_BORDER_THICKNESS;
 
         // Clicks should not pass through the panel
         this.pointerDown.connect((e) => {
@@ -42,7 +45,15 @@ export default class GamePanel extends BaseGamePanel {
         }
         this.container.addChild(this._background);
 
-        this.setup(type, alpha, color, borderAlpha, borderColor, borderRadius);
+        this.setup(
+            type,
+            alpha,
+            color,
+            borderAlpha,
+            borderColor,
+            borderRadius,
+            borderThickness
+        );
     }
 
     public setup(
@@ -51,7 +62,8 @@ export default class GamePanel extends BaseGamePanel {
         color: number,
         borderAlpha: number,
         borderColor: number,
-        borderRadius: number = 0
+        borderRadius: number = 0,
+        borderThickness: number = 0
     ): void {
         this._type = type;
         this._alpha = alpha;
@@ -59,6 +71,7 @@ export default class GamePanel extends BaseGamePanel {
         this._borderAlpha = borderAlpha;
         this._borderColor = borderColor;
         this._borderRadius = borderRadius;
+        this._borderThickness = borderThickness;
         this.updateView();
     }
 
@@ -69,8 +82,18 @@ export default class GamePanel extends BaseGamePanel {
         this.updateView();
     }
 
+    public setBorderThickness(thickness: number = GamePanel.DEFAULT_BORDER_THICKNESS): void {
+        this._borderThickness = thickness;
+        this.updateView();
+    }
+
     public set color(color: number) {
         this._color = color;
+        this.updateView();
+    }
+
+    public set alpha(alpha: number) {
+        this._alpha = alpha;
         this.updateView();
     }
 
@@ -103,7 +126,7 @@ export default class GamePanel extends BaseGamePanel {
             this._background.drawRect(0, 0, this._width, this._height);
             this._background.endFill();
         } else {
-            this._background.lineStyle(1.5, this._borderColor, this._borderAlpha);
+            this._background.lineStyle(this._borderThickness, this._borderColor, this._borderAlpha);
             this._background.beginFill(this._color, this._alpha);
             this._background.drawRoundedRect(0, 0, this._width, this._height, this._borderRadius);
             this._background.endFill();
@@ -139,9 +162,12 @@ export default class GamePanel extends BaseGamePanel {
     protected _borderAlpha: number = 0;
     protected _borderColor: number = 0;
     protected _borderRadius: number = 5;
+    protected _borderThickness: number = 0;
     protected _title: string | null = null;
     protected _titleText: Text | null = null;
 
     protected _width: number = 0;
     protected _height: number = 0;
+
+    private static DEFAULT_BORDER_THICKNESS: number = 1.5;
 }
