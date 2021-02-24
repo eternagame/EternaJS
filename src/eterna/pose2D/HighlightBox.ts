@@ -316,17 +316,12 @@ export default class HighlightBox extends ContainerObject implements LateUpdatab
                 loopStartLoc.y + loopStartAxis.y * baseSize - startFrom.y * baseSize
             );
 
-            // let lastLoc = this._pose.getBaseLoc(loopStart);
-            // let lastX = lastLoc.x + axes[0].x * baseSize;
-            // let lastY = lastLoc.y + axes[0].y * baseSize;
             for (let ii = loopStart; ii <= loopEnd; ii++) {
                 baseLoc = this._pose.getBaseLoc(ii);
                 this._graphics.lineTo(
                     baseLoc.x + axes[ii - loopStart].x * baseSize,
                     baseLoc.y + axes[ii - loopStart].y * baseSize
                 );
-                // lastX = baseLoc.x + axes[ii - loopStart].x * baseSize;
-                // lastY = baseLoc.y + axes[ii - loopStart].y * baseSize;
             }
 
             if (this._type !== HighlightType.USER_DEFINED) {
