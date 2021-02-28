@@ -18,7 +18,7 @@ interface VoteDataWrapper {
     votes: VoteData[];
 }
 
-type Params = Record<string, string | number | boolean | PuzzleJSON | RankScrollData | null | undefined >;
+type Params = Record<string, string | number | number[] | boolean | PuzzleJSON | RankScrollData | null | undefined >;
 
 export default class GameClient {
     public readonly baseURL: string;

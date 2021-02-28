@@ -126,6 +126,7 @@ export type SubmitSolutionData = {
     'solution-id'?: number;
     'pointsrank-before'?: RankScrollData | null;
     'pointsrank-after'?: RankScrollData | null;
+    'library_nt'?: number[];
 };
 
 export default class PoseEditMode extends GameMode {
@@ -2008,6 +2009,9 @@ export default class PoseEditMode extends GameMode {
                 }
                 postData['fold-data'] = JSON.stringify(fd);
             }
+
+            // Record designStruct numbers, used for library puzzles.
+            postData['library_nt'] = this._poses[0].designStructNumbers();
         }
 
         return postData;
@@ -2543,7 +2547,8 @@ export default class PoseEditMode extends GameMode {
         return this._constraintBar.updateConstraints({
             undoBlocks: this._seqStacks[this._stackLevel],
             targetConditions: this._targetConditions,
-            puzzle: this._puzzle
+            puzzle: this._puzzle,
+            pose: this._poses[0] // temporary? library constraints depend on pose highlights
         });
     }
 
