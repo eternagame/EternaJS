@@ -12,6 +12,7 @@ import {
 import Bitmaps from 'eterna/resources/Bitmaps';
 import Fonts from 'eterna/util/Fonts';
 import TextBuilder, {FontWeight} from 'flashbang/util/TextBuilder';
+import Eterna from 'eterna/Eterna';
 import GameButton from './GameButton';
 import DragDropper, {DragDropType, Item} from './DragDropper';
 import TextInputObject from './TextInputObject';
@@ -216,7 +217,7 @@ export default class AnnotationItem extends ContainerObject {
                     playerID: child.playerID,
                     ranges: child.ranges,
                     layer,
-                    titleEditable: this._titleEditable,
+                    titleEditable: this._titleEditable && child.playerID === Eterna.playerID,
                     updateTitle: this._updateTitle,
                     updateAnnotationLayer: this._updateAnnotationLayer,
                     updateAnnotationPosition: this._updateAnnotationPosition

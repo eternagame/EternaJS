@@ -3680,8 +3680,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public updateAnnotationSpaceAvailability(): void {
         // Set annotation space availability to true
-        this._annotationSpaceAvailability = Array(this._baseLayer.height).fill(0).map(
-            () => Array(this._baseLayer.width).fill(true)
+        this._annotationSpaceAvailability = Array(Math.ceil(this._baseLayer.height)).fill(0).map(
+            () => Array(Math.ceil(this._baseLayer.width)).fill(true)
         );
 
         const baseLayerBounds = DisplayUtil.getBoundsRelative(this._baseLayer, this.container);
@@ -4083,8 +4083,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
      * system with the anchor point as the origin until it finds a place
      * @param originalAnchorIndex the index of the base associated with the initial call
      * @param currentAnchorIndex the index of the base currently being used as the anchor
-     * @param anchorPoint mid-point of anchor that defines the origin on which calculations are made
-     * relative from. We use the mid-point and not the top-left corner, as is convention in pixi,
+     * @param anchorPoint center-point of base/annotation card that defines the origin on which calculations are made
+     * relative from. We use the center-point and not the top-left corner, as is convention in pixi,
      * because bases in Eterna.js have their position saved as a central point
      * @param anchorDisplay display object of anchor
      * @param annotationCard annotation to be placed
@@ -4201,7 +4201,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
             /**
              * Searches for any corrections (minor position shifts) that could be applied
-             * to resolve a placement confict
+             * to resolve a placement conflict
              *
              * @param conflict bounds where conflict occurs
              * @param startRow pixel row from which to begin vertical inspection
@@ -4242,22 +4242,22 @@ export default class Pose2D extends ContainerObject implements Updatable {
                             )
                         );
                         row++) {
-                        for (let col = Math.floor(
+                        const startPixel = Math.floor(
                             Math.min(
                                 Math.max(0, startCol + xShift),
                                 this._annotationSpaceAvailability[0].length
                             )
                         );
-                            col < Math.ceil(
-                                Math.min(
-                                    Math.max(0, stopCol + xShift),
-                                    this._annotationSpaceAvailability[0].length
-                                )
-                            );
-                            col++) {
-                            if (!this._annotationSpaceAvailability[row][col]) {
-                                return false;
-                            }
+                        const stopPixel = Math.ceil(
+                            Math.min(
+                                Math.max(0, stopCol + xShift),
+                                this._annotationSpaceAvailability[0].length
+                            )
+                        );
+                        const pixels = this._annotationSpaceAvailability[row].slice(startPixel, stopPixel);
+                        const occupiedPixelIndex = pixels.findIndex((pixel: boolean) => !pixel);
+                        if (occupiedPixelIndex !== -1) {
+                            return false;
                         }
                     }
 
