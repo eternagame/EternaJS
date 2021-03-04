@@ -20,7 +20,7 @@ export enum DragDropType {
 
 export interface Item {
     id: number | string;
-    index: number | number[];
+    index: number[];
     type: string;
     globalX?: number;
     globalY?: number;
@@ -127,7 +127,8 @@ export default class DragDropper extends ContainerObject {
                     this._tempItem = item;
                 }
 
-                if (!this.mode || !this.mode.container) return;
+                // The last condition ensures the source and target are from the same parent
+                if (!this.mode || !this.mode.container || source._item.index[0] !== this._item.index[0]) return;
                 const globalBoxBounds = DisplayUtil.getBoundsRelative(this._displayObject, this.mode.container);
 
                 // Update isOver value: i.e. if drag source is above drop target

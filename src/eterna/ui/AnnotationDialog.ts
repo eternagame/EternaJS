@@ -13,6 +13,12 @@ import Fonts from 'eterna/util/Fonts';
 import {FontWeight} from 'flashbang/util/TextBuilder';
 import {v4 as uuidv4} from 'uuid';
 import Eterna from 'eterna/Eterna';
+import {
+    AnnotationRange,
+    AnnotationData,
+    AnnotationHierarchyType,
+    AnnotationCategory
+} from 'eterna/AnnotationManager';
 import Dialog from './Dialog';
 import GameButton from './GameButton';
 import TextInputObject from './TextInputObject';
@@ -20,7 +26,6 @@ import {InputField} from './TextInputPanel';
 import GamePanel, {GamePanelType} from './GamePanel';
 import VScrollBox from './VScrollBox';
 import GameDropdown from './GameDropdown';
-import {AnnotationRange, AnnotationData, AnnotationItemType} from './AnnotationItem';
 
 export default class AnnotationDialog extends Dialog<AnnotationData> {
     constructor(
@@ -164,17 +169,21 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
         this._saveButton.enabled = false; // Start save button as false
         this._saveButton.clicked.connect(() => {
             const annotation: AnnotationData = {
+                ...this._initialAnnotation,
                 id: this._initialAnnotation?.id || uuidv4(),
-                type: AnnotationItemType.ANNOTATION,
+                type: AnnotationHierarchyType.ANNOTATION,
+                category: this._initialAnnotation?.category || AnnotationCategory.UNDEFINED,
                 timestamp: (new Date()).getTime(),
                 title: this._titleField.input.text,
                 ranges: AnnotationDialog.stringToAnnotationRange(this._basesField.input.text),
-                playerID: Eterna.playerID
+                playerID: Eterna.playerID,
+                positions: [],
+                children: []
             };
 
             // If we selected layer, include in annotation payload
             if (this._selectedLayer) {
-                annotation['layer'] = this._selectedLayer;
+                annotation['layerId'] = this._selectedLayer.id;
             }
 
             this.close(annotation);
@@ -229,11 +238,15 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
         this.container.addChild(this._divider);
 
         if (this._layers.length > 0) {
+            const initialLayer = this._layers.find(
+                (layer: AnnotationData) => layer.id === this._initialAnnotation?.layerId
+            );
+
             // Add Annotation Layer Dropdown
             this._dropdown = new GameDropdown({
                 fontSize: 14,
                 options: this._layers.map((layer: AnnotationData) => layer.title),
-                defaultOption: this._initialAnnotation?.layer?.title || 'Select a Layer',
+                defaultOption: initialLayer?.title || 'Select a Layer',
                 borderWidth: 0,
                 borderColor: 0xC0DCE7,
                 color: 0x043468,
@@ -422,7 +435,6 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
             // Meaning there should be an even count
             return false;
         } else {
-            // There is an invalid number in the array
             // Numbers must not be larger than the sequence length
             for (const numText of rangeNumbers) {
                 const num = parseInt(numText, 10);

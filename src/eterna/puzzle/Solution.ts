@@ -2,7 +2,7 @@ import Eterna from 'eterna/Eterna';
 import Feedback from 'eterna/Feedback';
 import {FoldData} from 'eterna/UndoBlock';
 import Sequence from 'eterna/rnatypes/Sequence';
-import {AnnotationGraph} from 'eterna/ui/AnnotationItem';
+import {AnnotationDataBundle} from 'eterna/AnnotationManager';
 
 export default class Solution {
     constructor(nid: number, puzzleNID: number) {
@@ -92,11 +92,11 @@ export default class Solution {
         this._hasFoldData = avail;
     }
 
-    public set annotations(annotations: AnnotationGraph | undefined) {
+    public set annotations(annotations: AnnotationDataBundle | undefined) {
         this._annotations = annotations;
     }
 
-    public get annotations(): AnnotationGraph | undefined {
+    public get annotations(): AnnotationDataBundle | undefined {
         return this._annotations;
     }
 
@@ -233,5 +233,5 @@ export default class Solution {
     private _shortDesc: string;
     private _hasFoldData: boolean = false;
     private _foldData: FoldData[] | null = null;
-    private _annotations: AnnotationGraph | undefined = undefined;
+    private _annotations: AnnotationDataBundle | undefined = undefined;
 }

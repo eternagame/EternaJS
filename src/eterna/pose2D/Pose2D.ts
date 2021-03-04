@@ -2,7 +2,7 @@ import * as log from 'loglevel';
 import {
     Container, Graphics, Point, Sprite, Texture, Rectangle
 } from 'pixi.js';
-import {Registration, Value} from 'signals';
+import {Registration} from 'signals';
 import EPars, {RNABase, RNAPaint} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import ExpPainter from 'eterna/ExpPainter';
@@ -25,6 +25,7 @@ import Utility from 'eterna/util/Utility';
 import Folder from 'eterna/folding/Folder';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
+import AnnotationManager, {AnnotationRange} from 'eterna/AnnotationManager';
 import Base from './Base';
 import BaseDrawFlags from './BaseDrawFlags';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
@@ -42,23 +43,6 @@ import ScoreDisplayNode, {ScoreDisplayNodeType} from './ScoreDisplayNode';
 import ExplosionFactorPanel from './ExplosionFactorPanel';
 import triangulate from './triangulate';
 import Tooltips from '../ui/Tooltips';
-import AnnotationItem, {
-    AnnotationData,
-    AnnotationDataCollection,
-    AnnotationCategory,
-    AnnotationRange,
-    AnnotationItemType,
-    AnnotationDisplayObject,
-    AnnotationGraph,
-    AnnotationGraphNode,
-    AnnotationPlacement,
-    AnnotationPosition,
-    AnnotationBaseConflict,
-    AnnotationPositionConflict,
-    AnnotationArguments,
-    AnnotationBaseConflicts
-} from '../ui/AnnotationItem';
-import AnnotationCard from '../ui/AnnotationCard';
 
 type InteractionEvent = PIXI.InteractionEvent;
 
@@ -84,25 +68,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public static readonly OLIGO_MODE_EXT5P: number = 3;
 
     private static readonly SCORES_POSITION_Y = 128;
-
-    public readonly onCreateAnnotation: Value<AnnotationArguments> = new Value<AnnotationArguments>({ranges: []});
-    public readonly onSelectAnnotation: Value<AnnotationData> = new Value<AnnotationData>({
-        id: '',
-        type: AnnotationItemType.ANNOTATION,
-        timestamp: 0,
-        playerID: Eterna.playerID,
-        title: '',
-        ranges: []
-    });
-
-    public readonly onSelectLayer: Value<AnnotationData> = new Value<AnnotationData>({
-        id: '',
-        type: AnnotationItemType.LAYER,
-        title: '',
-        playerID: Eterna.playerID
-    });
-
-    public readonly onEditAnnotation: Value<AnnotationData | null> = new Value<AnnotationData | null>(null);
 
     constructor(poseField: PoseField, editable: boolean) {
         super();
@@ -195,7 +160,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._currentColor = -1;
         }
 
-        this.annotationCanvas = new Graphics();
+        this._annotationCanvas = new Graphics();
         this.container.addChild(this.annotationCanvas);
 
         this._strandLabel = new TextBalloon('', 0x0, 0.8);
@@ -221,9 +186,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
             Eterna.settings.highlightRestricted.connectNotify((value) => { this.highlightRestricted = value; })
         );
         this.regs.add(Eterna.settings.simpleGraphics.connectNotify((value) => { this.useSimpleGraphics = value; }));
-        this.regs.add(Eterna.settings.annotationModeActive.connectNotify((value) => {
-            this.annotationModeActive = value;
-        }));
         this.regs.add(Eterna.settings.usePuzzlerLayout.connect(() => this.computeLayout()));
     }
 
@@ -232,6 +194,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._height = height;
 
         this.container.hitArea = new Rectangle(0, 0, width, height);
+    }
+
+    public get baseLayer(): Container {
+        return this._baseLayer;
     }
 
     public get primaryScoreDisplay(): EnergyScoreDisplay {
@@ -261,14 +227,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public get isFolding(): boolean {
         return (this.lastSampledTime - this._foldStartTime < this._foldDuration);
-    }
-
-    public get annotations(): AnnotationDisplayObject[] {
-        return this._annotations;
-    }
-
-    public get layers(): AnnotationDisplayObject[] {
-        return this._layers;
     }
 
     public visualizeFeedback(dat: number[], mid: number, lo: number, hi: number, startIndex: number): void {
@@ -315,12 +273,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 }
             }
 
-            // Update Annotations
-            if (this._annotations.length > 0) {
+            if (this.annotationManager.allAnnotations.length > 0) {
                 this.updateAnnotationSpaceAvailability();
-                this.eraseAnnotations(true);
-                this.drawAnnotations();
             }
+            this.annotationManager.refreshAnnotations(this, true);
 
             this._startOffsetX = this._offX;
             this._startOffsetY = this._offY;
@@ -412,12 +368,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.updateMolecule();
             this.generateScoreNodes();
             this.callPoseEditCallback();
-
-            // Update Annotations
-            if (this._annotations.length > 0) {
-                this.eraseAnnotations(false);
-                this.drawAnnotations();
-            }
+            this.annotationManager.refreshAnnotations(this, false);
             return;
         }
 
@@ -464,12 +415,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.updateMolecule();
             this.generateScoreNodes();
             this.callPoseEditCallback();
-
-            // Update Annotations
-            if (this._annotations.length > 0) {
-                this.eraseAnnotations();
-                this.drawAnnotations();
-            }
+            this.annotationManager.refreshAnnotations(this);
         }
 
         this._mutatedSequence = null;
@@ -525,13 +471,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.updateMolecule();
             this.generateScoreNodes();
             this.callPoseEditCallback();
-
-            // Update Annotations
-            if (this._annotations.length > 0) {
-                this.updateAnnotationSpaceAvailability();
-                this.eraseAnnotations(true);
-                this.drawAnnotations();
-            }
+            this.updateAnnotationSpaceAvailability();
+            this.annotationManager.refreshAnnotations(this, true);
         }
     }
 
@@ -926,7 +867,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         const shiftDown: boolean = Flashbang.app.isShiftKeyDown;
         const ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
 
-        if (this.movingAnnotation) {
+        if (this.annotationManager.isMovingAnnotation) {
             return;
         }
 
@@ -954,11 +895,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (
                 (ctrlDown || this.currentColor === RNAPaint.BASE_MARK)
                 && closestIndex < this.fullSequenceLength
-                && !this.annotationModeActive) {
+                && !this.annotationManager.annotationModeActive
+            ) {
                 this.toggleBaseMark(closestIndex);
                 return;
             }
-            if (shiftDown && !this.annotationModeActive) {
+            if (shiftDown && !this.annotationManager.annotationModeActive) {
                 if (closestIndex < this.sequenceLength) {
                     this._shiftStart = closestIndex;
                     this._shiftEnd = closestIndex;
@@ -973,21 +915,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 }
                 e.stopPropagation();
                 return;
-            } else if (this.annotationModeActive) {
+            } else if (this.annotationManager.annotationModeActive) {
                 if (closestIndex < this.sequenceLength) {
-                    let clickedHighlight = false;
-                    for (const range of this._annotationRanges) {
-                        if (closestIndex >= range.start && closestIndex <= range.end) {
-                            clickedHighlight = true;
-                            break;
-                        } else if (closestIndex <= range.start && closestIndex >= range.end) {
-                            clickedHighlight = true;
-                            break;
-                        }
-                    }
+                    const clickedHighlight = this._annotationRanges.some((range) => (
+                        closestIndex >= range.start && closestIndex <= range.end)
+                        || (closestIndex <= range.start && closestIndex >= range.end));
 
                     if (!clickedHighlight) {
-                        this._editingAnnotation = true;
+                        this._selectingAnnotationRange = true;
 
                         this._annotationRanges.push({
                             start: closestIndex,
@@ -998,14 +933,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
                         let reg: Registration | null = null;
                         reg = this.pointerUp.connect(() => {
-                            this._editingAnnotation = false;
+                            this._selectingAnnotationRange = false;
                             if (reg) reg.close();
                         });
                     } else {
-                        // Informs others to open dialog
-                        this.onCreateAnnotation.value = {
-                            ranges: this._annotationRanges
-                        };
+                        this.annotationManager.createAnnotation(this._annotationRanges);
                     }
                 }
                 e.stopPropagation();
@@ -1031,13 +963,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
 
             e.stopPropagation();
-        } else if (shiftDown && !this.annotationModeActive) {
+        } else if (shiftDown && !this.annotationManager.annotationModeActive) {
             this._shiftStart = -1;
             this._shiftEnd = -1;
             this.updateShiftHighlight();
-        } else if (this.annotationModeActive) {
+        } else if (this.annotationManager.annotationModeActive) {
             this._annotationRanges = [];
-            this._editingAnnotation = false;
+            this._selectingAnnotationRange = false;
             this.updateAnnotationRangeHighlight();
         }
     }
@@ -1174,7 +1106,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.onBaseMouseMove(closestIndex);
             // document.getElementById(Eterna.PIXI_CONTAINER_ID).style.cursor = 'none';
 
-            if (!this._annotationModeActive) {
+            if (!this.annotationManager.annotationModeActive) {
                 this._paintCursor.display.visible = true;
                 this._paintCursor.setShape(this._currentColor);
             }
@@ -1650,9 +1582,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public clearAnnotationHighlight(): void {
         this._annotationHighlightBox.clear();
 
-        if (this._annotationModeActive) {
+        if (this.annotationManager.annotationModeActive) {
             for (const base of this._bases) {
-                base.container.alpha = Pose2D.ANNOTATION_UNHIGHLIGHTED_OPACITY;
+                base.container.alpha = AnnotationManager.ANNOTATION_UNHIGHLIGHTED_OPACITY;
             }
         }
     }
@@ -2360,13 +2292,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.checkPairs();
         this.updateMolecule();
         this.generateScoreNodes();
-
-        // Update Annotations
-        if (this._annotations.length > 0) {
-            this.updateAnnotationSpaceAvailability();
-            this.eraseAnnotations(true);
-            this.drawAnnotations();
-        }
+        this.updateAnnotationSpaceAvailability();
+        this.annotationManager.refreshAnnotations(this, true);
     }
 
     public get sequence(): Sequence {
@@ -2403,13 +2330,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.checkPairs();
         this.updateMolecule();
         this.generateScoreNodes();
-
-        // Update Annotations
-        if (this._annotations.length > 0) {
-            this.updateAnnotationSpaceAvailability();
-            this.eraseAnnotations(true);
-            this.drawAnnotations();
-        }
+        this.updateAnnotationSpaceAvailability();
+        this.annotationManager.refreshAnnotations(this, true);
     }
 
     public get secstruct(): SecStruct {
@@ -2611,12 +2533,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 prog = 1;
                 this._offsetTranslating = false;
 
-                // Update Annotations
-                if (this._annotations.length > 0) {
-                    this.updateAnnotationSpaceAvailability();
-                    this.eraseAnnotations(true);
-                    this.drawAnnotations();
-                }
+                this.updateAnnotationSpaceAvailability();
+                this.annotationManager.refreshAnnotations(this, true);
             }
 
             if (this._offsetTranslating) {
@@ -2636,10 +2554,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        // / Update score node
-        if (!this._annotationModeActive) {
-            this.updateScoreNodeVisualization(this._offX !== this._prevOffsetX || this._offY !== this._prevOffsetY);
-        }
+        // Update score node
+        this.updateScoreNodeVisualization(this._offX !== this._prevOffsetX || this._offY !== this._prevOffsetY);
 
         // / Bitblt rendering
         const needRedraw = this._bases.some(
@@ -3346,9 +3262,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.updateShiftHighlight();
         } else if (
             !this._coloring
-            && this.annotationModeActive
+            && this.annotationManager.annotationModeActive
             && this._annotationRanges.length > 0
-            && this._editingAnnotation
+            && this._selectingAnnotationRange
             && seqnum < this.sequenceLength
         ) {
             this._annotationRanges[this._annotationRanges.length - 1].end = seqnum;
@@ -3464,218 +3380,62 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    private setAnnotationRangeHighlight(ranges: AnnotationRange[]): void {
+    public setAnnotationRangeHighlight(ranges: AnnotationRange[]): void {
         this._annotationHighlightBox.clear();
         for (const range of ranges) {
             this._annotationHighlightBox.setHighlight([range.start, range.end]);
         }
     }
 
-    private updateAnnotationRangeHighlight(): void {
+    public updateAnnotationRangeHighlight(): void {
         this._annotationHighlightBox.clear();
 
-        if (this._annotationModeActive) {
+        if (this.annotationManager.annotationModeActive) {
             for (let i = 0; i < this._bases.length; i++) {
-                this._bases[i].container.alpha = Pose2D.ANNOTATION_UNHIGHLIGHTED_OPACITY;
+                this._bases[i].container.alpha = AnnotationManager.ANNOTATION_UNHIGHLIGHTED_OPACITY;
             }
         }
 
-        if (this._annotationRanges.length > 0) {
-            for (const range of this._annotationRanges) {
-                this._annotationHighlightBox.setHighlight(
-                    range.end < range.start
-                        ? [range.end, range.start] : [range.start, range.end]
-                );
+        for (const range of this._annotationRanges) {
+            const highlightExtents: number[] = range.end < range.start
+                ? [range.end, range.start]
+                : [range.start, range.end];
+            this._annotationHighlightBox.setHighlight(highlightExtents);
 
-                if (range.end >= range.start) {
-                    for (let i = range.start; i <= range.end; i++) {
-                        this._bases[i].container.alpha = 1;
-                    }
-                } else {
-                    for (let i = range.end; i <= range.start; i++) {
-                        this._bases[i].container.alpha = 1;
-                    }
-                }
+            for (let i = highlightExtents[0]; i <= highlightExtents[1]; i++) {
+                this._bases[i].container.alpha = 1;
             }
         }
     }
 
-    public updateAnnotations(annotations: AnnotationData[]): void {
-        this.clearAnnotationHighlight();
+    public get annotationSpaceAvailability(): boolean[][] {
+        return this._annotationSpaceAvailability;
+    }
 
-        const updatedAnnotations = [];
-        for (const annotation of annotations) {
-            const existingAnnotationIndex = this._annotations.findIndex(
-                (obj: AnnotationDisplayObject) => annotation.id === obj.data.id
-            );
-            if (existingAnnotationIndex !== -1) {
-                // Keep existing positions in case we have custom positioning
-                updatedAnnotations.push({
-                    data: annotation,
-                    type: AnnotationItemType.ANNOTATION,
-                    positions: this._annotations[existingAnnotationIndex].positions,
-                    displays: []
-                });
-            } else {
-                updatedAnnotations.push({
-                    data: annotation,
-                    type: AnnotationItemType.ANNOTATION,
-                    positions: [],
-                    displays: []
-                });
-            }
+    public get annotationCanvas(): Graphics {
+        return this._annotationCanvas;
+    }
 
-            if (annotation.selected && annotation.visible && annotation.ranges) {
-                this.setAnnotationRangeHighlight(annotation.ranges);
-            }
+    public setBasesOpacity(opacity: number): void {
+        for (const base of this._bases) {
+            base.container.alpha = opacity;
         }
-
-        this._annotations = updatedAnnotations;
-
-        // Update Annotations
-        // We don't check for annotations.length > 0 because
-        // we want to account for scenario where to go
-        // from non-zero to zero annotation
-        if (this._annotationSpaceAvailability.length === 0) {
-            this.updateAnnotationSpaceAvailability();
-        }
-        this.eraseAnnotations(true);
-        this.drawAnnotations();
     }
 
-    public updateLayers(layers: AnnotationData[]): void {
-        this.clearAnnotationHighlight();
-
-        this._layers = [];
-        for (const layer of layers) {
-            this._layers.push({
-                data: layer,
-                type: AnnotationItemType.LAYER,
-                positions: [],
-                displays: []
-            });
-
-            let ranges: AnnotationRange[] = [];
-            if (layer.children) {
-                for (const annotation of layer.children) {
-                    if (annotation.ranges) {
-                        ranges = ranges.concat(annotation.ranges);
-                    }
-                }
-            }
-
-            if (layer.selected) {
-                this.setAnnotationRangeHighlight(ranges);
-            }
-        }
-
-        // Update Annotations
-        // We don't check for annotations.length > 0 because
-        // we want to account for scenario where to go
-        // from non-zero to zero annotation
-        this.eraseAnnotations();
-        this.drawAnnotations();
+    public setAnnotationCanvasOpacity(opacity: number): void {
+        this.annotationCanvas.alpha = opacity;
     }
 
-    public updateGraph(collection: AnnotationDataCollection): void {
-        const structurePath = (node: AnnotationData): AnnotationGraphNode => {
-            let positions: AnnotationPosition[] = [];
-            if (node.type === AnnotationItemType.ANNOTATION) {
-                // Annotation
-                const annotationIndex = this._annotations.findIndex(
-                    (obj: AnnotationDisplayObject) => node.id === obj.data.id
-                );
-
-                if (annotationIndex !== -1) {
-                    positions = this._annotations[annotationIndex].positions;
-                }
-            } else {
-                // Layer
-                const annotationIndex = this._layers.findIndex(
-                    (obj: AnnotationDisplayObject) => node.id === obj.data.id
-                );
-
-                if (annotationIndex !== -1) {
-                    positions = this._annotations[annotationIndex].positions;
-                }
-            }
-
-            const children: AnnotationGraphNode[] = [];
-            if (node.children) {
-                for (const child of node.children) {
-                    children.push(structurePath(child));
-                }
-            }
-
-            return {
-                data: node,
-                type: node.type,
-                positions,
-                children
-            };
-        };
-
-        const annotationGraph: AnnotationGraph = {
-            puzzle: [],
-            solution: []
-        };
-        const puzzleGraph: AnnotationGraphNode[] = [];
-        for (const child of collection.puzzle) {
-            const path = structurePath(child);
-            puzzleGraph.push(path);
-        }
-        annotationGraph.puzzle = puzzleGraph;
-        const solutionGraph: AnnotationGraphNode[] = [];
-        for (const child of collection.solution) {
-            const path = structurePath(child);
-            solutionGraph.push(path);
-        }
-        annotationGraph.solution = solutionGraph;
-
-        this._annotationGraph = annotationGraph;
-    }
-
-    public get annotationGraph() {
-        return this._annotationGraph;
-    }
-
-    public set puzzleAnnotationsEditable(editable: boolean) {
-        this._puzzleAnnotationsEditable = editable;
-    }
-
-    public get puzzleAnnotationsEditable(): boolean {
-        return this._puzzleAnnotationsEditable;
-    }
-
-    public set annotationModeActive(active: boolean) {
-        this._annotationModeActive = active;
+    public triggerRedraw(): void {
         this._redraw = true;
-        if (!active) {
-            this.clearAnnotationHighlight();
-            // Change base cursors
-            for (const base of this._bases) {
-                base.container.alpha = 1;
-            }
-
-            // Make annotation canvas opaque
-            if (this._annotations.length > 0) {
-                this.annotationCanvas.alpha = 1;
-            }
-        } else {
-            // Change base cursors
-            for (const base of this._bases) {
-                base.container.alpha = Pose2D.ANNOTATION_UNHIGHLIGHTED_OPACITY;
-            }
-
-            // Make annotation canvas translucent
-            if (this._annotations.length > 0) {
-                this.annotationCanvas.alpha = Pose2D.ANNOTATION_UNHIGHLIGHTED_OPACITY;
-            }
-        }
     }
 
-    public get annotationModeActive(): boolean {
-        return this._annotationModeActive;
+    public clearAnnotationCanvas(): void {
+        if (this.annotationCanvas.children.length > 0) {
+            // Remove from any remaining artifacts from canvas
+            this.annotationCanvas.removeChildren();
+            this.annotationCanvas.clear();
+        }
     }
 
     public updateAnnotationSpaceAvailability(): void {
@@ -3752,1707 +3512,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         this._energyHighlights = [];
-    }
-
-    public eraseAnnotations(reset: boolean = false, ignoreCustom: boolean = false): void {
-        if (this.annotationCanvas.children.length > 0) {
-            // Clear prior annotation displays
-            this._annotations.forEach((annotation) => {
-                annotation.displays.forEach((display) => display.destroySelf);
-                annotation.displays = [];
-            });
-
-            this._resetAnnotationPositions = reset;
-            this._ignoreCustomAnnotationPositions = ignoreCustom;
-
-            // Remove from any remaining artifacts from canvas
-            this.annotationCanvas.removeChildren();
-            this.annotationCanvas.clear();
-        }
-    }
-
-    /**
-     * Renders annotation cards near ranges of interest
-     */
-    public drawAnnotations(): void {
-        const getAnnotationCard = (item: AnnotationDisplayObject): AnnotationCard => {
-            let textColor;
-            switch (item.data.category) {
-                case AnnotationCategory.STRUCTURE:
-                    textColor = AnnotationItem.STRUCTURE_RIBBON_COLOR;
-                    break;
-                case AnnotationCategory.PUZZLE:
-                    textColor = AnnotationItem.PUZZLE_RIBBON_COLOR;
-                    break;
-                default:
-                    textColor = AnnotationItem.SOLUTION_RIBBON_COLOR;
-                    break;
-            }
-
-            const card = new AnnotationCard(
-                item.type,
-                item.data,
-                this._puzzleAnnotationsEditable,
-                textColor
-            );
-
-            card.pointerOver.connect(() => {
-                // highlight associated range
-                if (item.type === AnnotationItemType.ANNOTATION) {
-                    const annotation = item.data as AnnotationData;
-                    if (annotation.ranges) {
-                        this.setAnnotationRangeHighlight(annotation.ranges);
-                    }
-                } else if (item.type === AnnotationItemType.LAYER) {
-                    const layer = item.data as AnnotationData;
-                    let ranges: AnnotationRange[] = [];
-                    if (layer.children) {
-                        for (const annotation of layer.children) {
-                            if (annotation.ranges) {
-                                ranges = ranges.concat(annotation.ranges);
-                            }
-                        }
-                    }
-                    this.setAnnotationRangeHighlight(ranges);
-                }
-            });
-            card.pointerOut.connect(() => {
-                // remove associated range
-                if (!item.data.selected) {
-                    this.clearAnnotationHighlight();
-                }
-            });
-
-            card.pointerDown.connect(() => {
-                if (item.type === AnnotationItemType.ANNOTATION) {
-                    this.onSelectAnnotation.value = item.data as AnnotationData;
-                } else if (item.type === AnnotationItemType.LAYER) {
-                    this.onSelectLayer.value = item.data as AnnotationData;
-                }
-            });
-            card.isMoving.connect((moving: boolean) => {
-                this.movingAnnotation = moving;
-            });
-
-            if (item.type === AnnotationItemType.ANNOTATION) {
-                // We don't need to apply access control logic here
-                // This is handled in AnnotationCard
-                card.onEditButtonPressed.connect(() => {
-                    this.onEditAnnotation.value = item.data as AnnotationData;
-                    this.onEditAnnotation.value = null;
-                });
-            }
-
-            return card;
-        };
-
-        /**
-         * Attempts to place a single annotation item
-         *
-         * @param item display object data with positioning and annotation metadata
-         * @param itemIndex index of item within parent array
-         */
-        const placeItem = (item: AnnotationDisplayObject, itemIndex: number): void => {
-            // Skip if annotation is marked as hidden
-            if (!item.data.visible) return;
-
-            // If annotation positions have been computed already
-            // use cached value
-            if (
-                item.positions.length > 0
-                && !this._resetAnnotationPositions
-                && !this._ignoreCustomAnnotationPositions
-            ) {
-                for (let i = 0; i < item.positions.length; i++) {
-                    const position = item.positions[i];
-                    const card = getAnnotationCard(item);
-                    if (item.type === AnnotationItemType.ANNOTATION) {
-                        card.onMovedAnnotation.connect((point: Point) => {
-                            const anchorIndex = this._annotations[itemIndex].positions[i].anchorIndex;
-                            const anchorPoint = new Point(
-                                this._bases[anchorIndex].x + this._offX,
-                                this._bases[anchorIndex].y + this._offY
-                            );
-                            // Compute relative position
-                            this._annotations[itemIndex].positions[i].relPosition = new Point(
-                                point.x - anchorPoint.x,
-                                point.y - anchorPoint.y
-                            );
-                            this._annotations[itemIndex].positions[i].custom = true;
-                        });
-                    }
-                    item.displays.push(card);
-                    this.addObject(card, this.annotationCanvas);
-
-                    const anchorIndex = position.anchorIndex;
-                    const anchorPoint = new Point(
-                        this._bases[anchorIndex].x + this._offX,
-                        this._bases[anchorIndex].y + this._offY
-                    );
-                    card.display.position = new Point(
-                        position.relPosition.x + anchorPoint.x,
-                        position.relPosition.y + anchorPoint.y
-                    );
-                }
-
-                return;
-            }
-
-            let ranges: AnnotationRange[] = [];
-            if (item.type === AnnotationItemType.LAYER) {
-                // We only want one layer label for each item, so we pick the first range we find
-                //
-                // An improvement that could be made is to find the
-                // "center of mass" of all the ranges in a layer
-                // and place the layer label at an appropriate base closest to
-                // the center of mass point
-                const layerData = item.data as AnnotationData;
-
-                if (layerData.children) {
-                    for (const annotation of layerData.children) {
-                        if (annotation.ranges) {
-                            ranges.push(annotation.ranges[0]);
-                            break;
-                        }
-                    }
-                }
-            } else {
-                const annotationData = item.data as AnnotationData;
-                if (annotationData.ranges) {
-                    ranges = annotationData.ranges;
-                }
-            }
-
-            // Future Improvement:
-            // A single annotation or layer can be associated with multiple ranges
-            // We handle this by generating a label for each range, regardless
-            // of the proximity of the ranges
-            //
-            // An improvement that can be made is to only "duplicate" labels
-            // if range positions exceed some defined threshold to avoid unnecessary
-            // label duplicates.
-            for (let i = 0; i < ranges.length; i++) {
-                const range = ranges[i];
-                const prevPosition = item.positions.length > i ? item.positions[i] : null;
-
-                const card = getAnnotationCard(item);
-                if (item.type === AnnotationItemType.ANNOTATION) {
-                    card.onMovedAnnotation.connect((point: Point) => {
-                        const anchorIndex = this._annotations[itemIndex].positions[i].anchorIndex;
-                        const anchorPoint = new Point(
-                            this._bases[anchorIndex].x + this._offX,
-                            this._bases[anchorIndex].y + this._offY
-                        );
-                        // Compute relative position
-                        this._annotations[itemIndex].positions[i].relPosition = new Point(
-                            point.x - anchorPoint.x,
-                            point.y - anchorPoint.y
-                        );
-                        this._annotations[itemIndex].positions[i].custom = true;
-                    });
-                }
-                // We need to prematruely add this to the display object graph
-                // so that we can read it's dimensions/position
-                this.addObject(card, this.annotationCanvas);
-
-                let absolutePosition: Point | null = null;
-                let relPosition: Point | null = null;
-                let anchorIndex: number | null = null;
-                let customPosition = false;
-                let zoomLevel: number = this._zoomLevel;
-                let preventCustomPositionOverwrite = false;
-                if (prevPosition?.custom && !this._ignoreCustomAnnotationPositions) {
-                    relPosition = prevPosition.relPosition;
-                    anchorIndex = prevPosition.anchorIndex;
-                    const zoomScaling = 1
-                    + 2 * ((prevPosition.zoomLevel - this._zoomLevel) / Pose2D.ZOOM_SPACINGS.length);
-                    const anchorPoint = new Point(
-                        this._bases[anchorIndex].x + this._offX,
-                        this._bases[anchorIndex].y + this._offY
-                    );
-                    absolutePosition = new Point(
-                        relPosition.x * zoomScaling + anchorPoint.x,
-                        relPosition.y * zoomScaling + anchorPoint.y
-                    );
-                    zoomLevel = prevPosition.zoomLevel;
-                    customPosition = true;
-                } else {
-                    // Make anchor midpoint of range
-                    // Account for reverse ranges
-                    if (range.start < range.end) {
-                        anchorIndex = range.start + Math.floor((range.end - range.start) / 2);
-                    } else {
-                        anchorIndex = range.end + Math.floor((range.start - range.end) / 2);
-                    }
-
-                    // Make sure anchor sits within sequence length
-                    if (anchorIndex >= this._bases.length - 1) continue;
-
-                    const anchorPoint = new Point(
-                        this._bases[anchorIndex].x + this._offX,
-                        this._bases[anchorIndex].y + this._offY
-                    );
-
-                    // Run a search to find best place to locate
-                    // annotation within available space
-                    relPosition = this.computeAnnotationPositionPoint(
-                        anchorIndex,
-                        anchorIndex,
-                        anchorPoint,
-                        this._bases[anchorIndex].display,
-                        card,
-                        0
-                    );
-
-                    if (relPosition) {
-                        absolutePosition = new Point(
-                            relPosition.x + anchorPoint.x,
-                            relPosition.y + anchorPoint.y
-                        );
-                    }
-
-                    if (prevPosition?.custom && this._ignoreCustomAnnotationPositions) {
-                        // If we're ignoring custom annotation positions
-                        // we still want to differentiate between custom and non-custom
-                        // but we don't want to overwrite the position as we would
-                        // when not ignoring
-                        preventCustomPositionOverwrite = true;
-                    }
-                }
-
-                // Handle position
-                if (relPosition && absolutePosition) {
-                    // Set position
-                    card.display.position = absolutePosition;
-                    // Save display
-                    item.displays.push(card);
-
-                    // Cache position
-                    if (item.displays.length > item.positions.length) {
-                        item.positions.push({
-                            anchorIndex,
-                            relPosition,
-                            zoomLevel,
-                            custom: customPosition
-                        });
-                    } else if (!preventCustomPositionOverwrite) {
-                        // We don't want to over
-                        item.positions[i] = {
-                            anchorIndex,
-                            relPosition,
-                            zoomLevel,
-                            custom: customPosition
-                        };
-                    }
-                } else {
-                    // We should ideally always receive a position
-                    //
-                    // In cases we dont, remove annotation card from view
-                    card.destroySelf();
-                }
-            }
-        };
-
-        if (this._zoomLevel > Pose2D.ANNOTATION_LAYER_THRESHOLD) {
-            // visualize layers
-            for (let i = 0; i < this._layers.length; i++) {
-                placeItem(this._layers[i], i);
-            }
-        } else {
-            // visualize annotations
-            for (let i = 0; i < this._annotations.length; i++) {
-                placeItem(this._annotations[i], i);
-            }
-        }
-
-        // Make canvas translucent if we have annotation mode active
-        if (this._annotationModeActive) {
-            this.annotationCanvas.alpha = Pose2D.ANNOTATION_UNHIGHLIGHTED_OPACITY;
-        } else {
-            this.annotationCanvas.alpha = 1;
-        }
-
-        this._resetAnnotationPositions = false;
-    }
-
-    /**
-     * Searches for spot in available space around annnotation range
-     * to place annotation card
-     *
-     * Runs a recursive/iterative search on each place defined about the co-ordinate
-     * system with the anchor point as the origin until it finds a place
-     * @param originalAnchorIndex the index of the base associated with the initial call
-     * @param currentAnchorIndex the index of the base currently being used as the anchor
-     * @param anchorPoint center-point of base/annotation card that defines the origin on which calculations are made
-     * relative from. We use the center-point and not the top-left corner, as is convention in pixi,
-     * because bases in Eterna.js have their position saved as a central point
-     * @param anchorDisplay display object of anchor
-     * @param annotationCard annotation to be placed
-     * @param numSearchAttempts the number of new search attempts undergone
-     * @param anchorOffsetX the x-offset applied to the anchor point when attempting a recursive call.
-     * The effect is to treat an annotation card as the new anchor while still maintaining reference
-     * to the anchor of interest.
-     * @param anchorOffsetY the y-offset applied to the anchor point when attempting a recursive call.
-     * The effect is to treat an annotation card as the new anchor while still maintaining reference
-     * to the anchor of interest.
-     * @param includeCenters whether we attempt to place the annotation vertically centered on the
-     * left or right of origin
-     * @return relative position (to anchor) of annotation relative computed from the annotation's
-     * top-left corner
-     */
-    private computeAnnotationPositionPoint(
-        originalAnchorIndex: number,
-        currentAnchorIndex: number,
-        anchorPoint: Point,
-        anchorDisplay: Container,
-        annotationCard: AnnotationCard,
-        numSearchAttempts: number,
-        anchorOffsetX: number = 0,
-        anchorOffsetY: number = 0,
-        includeCenters: boolean = true
-    ): Point | null {
-        // DEBUG SETTINGS:
-        // In order to visualize placement conflicts, you can toggle these variables
-        // RED RECTANGLES = Placement conflicts with bases
-        // ORANGE RECTANGLES = Placement conflicts with existing annotations
-        // GREEN RECTANGLES = Placement availability
-        const DEBUG_ANNOTATION_PLACEMENT = false;
-        const DEBUG_FROM_SEARCH_ATTEMPT = 0;
-        const BASE_CONFLICT_COLOR = 0xFF0000;
-        const ANNOTATION_CONFLICT_COLOR = 0xFF6500;
-        const POSSIBLE_PLACEMENT_AVAILABILITY_COLOR = 0x00FF00;
-
-        // x and y offsets that create space between annotations
-        const xOffset: number = Pose2D.DEFAULT_ANNOTATION_SHIFT;
-        const yOffset = 0;
-
-        /**
-         * Determines which place defined about a co-ordinate
-         * system with an anchor point as the origin are occupied by bases
-         *
-         *                   top center
-         *     top-left   --------------- top-right
-         *               |       |       |
-         *               |       |       |
-         *               |       |       |
-         *   left-center  ---- Anchor ---  right-center
-         *               |       |       |
-         *               |       |       |
-         *               |       |       |
-         *   bottom-left  ---------------  bottom-right
-         *                 bottom center
-         *
-         * @return array of occupied places
-         */
-        const findBaseConflicts = (): AnnotationBaseConflicts => {
-            /**
-             * Inspects a particular place for placement availability
-             *
-             * @param startRow pixel row from which to begin vertical inspection
-             * @param stopRow pixel row from which to end vertical inspection
-             * @param startCol pixel column from which to begin horizontal inspection
-             * @param stopCol pixel column from which to end horizontal inspection
-             */
-            const inspectRegion = (
-                startRow: number,
-                stopRow: number,
-                startCol: number,
-                stopCol: number
-            ): AnnotationBaseConflict | null => {
-                let conflict: AnnotationBaseConflict | null = null;
-                for (let row = Math.floor(
-                    Math.min(Math.max(0, startRow), this._annotationSpaceAvailability.length)
-                );
-                    row < Math.ceil(
-                        Math.min(Math.max(0, stopRow), this._annotationSpaceAvailability.length)
-                    );
-                    row++) {
-                    for (let col = Math.floor(
-                        Math.min(Math.max(0, startCol), this._annotationSpaceAvailability[0].length)
-                    );
-                        col < Math.ceil(
-                            Math.min(Math.max(0, stopCol), this._annotationSpaceAvailability[0].length)
-                        );
-                        col++) {
-                        // build out conflict bounds
-                        if (!this._annotationSpaceAvailability[row][col] && !conflict) {
-                            conflict = {
-                                bounds: new Rectangle(
-                                    col,
-                                    row,
-                                    1,
-                                    1
-                                ),
-                                resolvable: false
-                            };
-                        } else if (!this._annotationSpaceAvailability[row][col] && conflict) {
-                            conflict.bounds = new Rectangle(
-                                conflict.bounds.x,
-                                conflict.bounds.y,
-                                Math.max(conflict.bounds.width, col - conflict.bounds.x),
-                                Math.max(conflict.bounds.height, row - conflict.bounds.y)
-                            );
-                        }
-                    }
-                }
-
-                return conflict;
-            };
-
-            /**
-             * Searches for any corrections (minor position shifts) that could be applied
-             * to resolve a placement conflict
-             *
-             * @param conflict bounds where conflict occurs
-             * @param startRow pixel row from which to begin vertical inspection
-             * @param stopRow pixel row from which to end vertical inspection
-             * @param startCol pixel column from which to begin horizontal inspection
-             * @param stopCol pixel column from which to end horizontal inspection
-             * @param testUp whether to search in the upwards direction
-             * @param testDown whether to search in the downwards direction
-             * @param testLeft whether to search in the leftwards direction
-             * @param testRight whether to search in the rightwards direction
-             */
-            const testForConflictCorrection = (
-                conflict: AnnotationBaseConflict,
-                startRow: number,
-                stopRow: number,
-                startCol: number,
-                stopCol: number,
-                testUp: boolean,
-                testDown: boolean,
-                testLeft: boolean,
-                testRight: boolean
-            ): Point | null => {
-                const CONFLICT_RESOLUTION_OFFSET = 5;
-                const neighboringSpaceVacant = (
-                    xShift: number,
-                    yShift: number
-                ): boolean => {
-                    for (let row = Math.floor(
-                        Math.min(
-                            Math.max(0, startRow + yShift),
-                            this._annotationSpaceAvailability.length
-                        )
-                    );
-                        row < Math.ceil(
-                            Math.min(
-                                Math.max(0, stopRow + yShift),
-                                this._annotationSpaceAvailability.length
-                            )
-                        );
-                        row++) {
-                        const startPixel = Math.floor(
-                            Math.min(
-                                Math.max(0, startCol + xShift),
-                                this._annotationSpaceAvailability[0].length
-                            )
-                        );
-                        const stopPixel = Math.ceil(
-                            Math.min(
-                                Math.max(0, stopCol + xShift),
-                                this._annotationSpaceAvailability[0].length
-                            )
-                        );
-                        const pixels = this._annotationSpaceAvailability[row].slice(startPixel, stopPixel);
-                        const occupiedPixelIndex = pixels.findIndex((pixel: boolean) => !pixel);
-                        if (occupiedPixelIndex !== -1) {
-                            return false;
-                        }
-                    }
-
-                    return true;
-                };
-
-                let resolveMovingUp = testUp;
-                if (testUp) {
-                    resolveMovingUp = neighboringSpaceVacant(
-                        0,
-                        -conflict.bounds.height - CONFLICT_RESOLUTION_OFFSET
-                    );
-
-                    if (resolveMovingUp) {
-                        return new Point(
-                            0,
-                            -conflict.bounds.height - CONFLICT_RESOLUTION_OFFSET
-                        );
-                    }
-                }
-
-                let resolveMovingDown = testDown;
-                if (testDown) {
-                    resolveMovingDown = neighboringSpaceVacant(
-                        0,
-                        conflict.bounds.height + CONFLICT_RESOLUTION_OFFSET
-                    );
-
-                    if (resolveMovingDown) {
-                        return new Point(
-                            0,
-                            conflict.bounds.height + CONFLICT_RESOLUTION_OFFSET
-                        );
-                    }
-                }
-
-                let resolveMovingLeft = testLeft;
-                if (testLeft) {
-                    resolveMovingLeft = neighboringSpaceVacant(
-                        -conflict.bounds.width - CONFLICT_RESOLUTION_OFFSET,
-                        0
-                    );
-
-                    if (resolveMovingLeft) {
-                        return new Point(
-                            -conflict.bounds.width - CONFLICT_RESOLUTION_OFFSET,
-                            0
-                        );
-                    }
-                }
-
-                let resolveMovingRight = testRight;
-                if (testRight) {
-                    resolveMovingRight = neighboringSpaceVacant(
-                        conflict.bounds.width + CONFLICT_RESOLUTION_OFFSET,
-                        0
-                    );
-
-                    if (resolveMovingRight) {
-                        return new Point(
-                            conflict.bounds.width + CONFLICT_RESOLUTION_OFFSET,
-                            0
-                        );
-                    }
-                }
-
-                let resolveMovingUpLeft = testUp && testLeft;
-                if (testUp && testLeft) {
-                    resolveMovingUpLeft = neighboringSpaceVacant(
-                        -conflict.bounds.width - CONFLICT_RESOLUTION_OFFSET,
-                        -conflict.bounds.height - CONFLICT_RESOLUTION_OFFSET
-                    );
-
-                    if (resolveMovingUpLeft) {
-                        return new Point(
-                            -conflict.bounds.width - CONFLICT_RESOLUTION_OFFSET,
-                            -conflict.bounds.height - CONFLICT_RESOLUTION_OFFSET
-                        );
-                    }
-                }
-
-                let resolveMovingUpRight = testUp && testRight;
-                if (testUp && testRight) {
-                    resolveMovingUpRight = neighboringSpaceVacant(
-                        conflict.bounds.width + CONFLICT_RESOLUTION_OFFSET,
-                        -conflict.bounds.height - CONFLICT_RESOLUTION_OFFSET
-                    );
-
-                    if (resolveMovingUpRight) {
-                        return new Point(
-                            conflict.bounds.width + CONFLICT_RESOLUTION_OFFSET,
-                            -conflict.bounds.height - CONFLICT_RESOLUTION_OFFSET
-                        );
-                    }
-                }
-
-                let resolveMovingDownLeft = testDown && testLeft;
-                if (testDown && testLeft) {
-                    resolveMovingDownLeft = neighboringSpaceVacant(
-                        -conflict.bounds.width - CONFLICT_RESOLUTION_OFFSET,
-                        conflict.bounds.height + CONFLICT_RESOLUTION_OFFSET
-                    );
-
-                    if (resolveMovingDownLeft) {
-                        return new Point(
-                            -conflict.bounds.width - CONFLICT_RESOLUTION_OFFSET,
-                            conflict.bounds.height + CONFLICT_RESOLUTION_OFFSET
-                        );
-                    }
-                }
-
-                let resolveMovingDownRight = testDown && testRight;
-                if (testDown && testRight) {
-                    resolveMovingDownRight = neighboringSpaceVacant(
-                        conflict.bounds.width + CONFLICT_RESOLUTION_OFFSET,
-                        conflict.bounds.height + CONFLICT_RESOLUTION_OFFSET
-                    );
-
-                    if (resolveMovingDownRight) {
-                        return new Point(
-                            conflict.bounds.width + CONFLICT_RESOLUTION_OFFSET,
-                            conflict.bounds.height + CONFLICT_RESOLUTION_OFFSET
-                        );
-                    }
-                }
-
-                return null;
-            };
-
-            let topLeftConflict: AnnotationBaseConflict | null = null;
-            let topCenterConflict: AnnotationBaseConflict | null = null;
-            let topRightConflict: AnnotationBaseConflict | null = null;
-            let leftCenterConflict: AnnotationBaseConflict | null = null;
-            let rightCenterConflict: AnnotationBaseConflict | null = null;
-            let bottomLeftConflict: AnnotationBaseConflict | null = null;
-            let bottomCenterConflict: AnnotationBaseConflict | null = null;
-            let bottomRightConflict: AnnotationBaseConflict | null = null;
-
-            // Get base layer bounds relative to Pose2D container
-            const baseLayerBounds = DisplayUtil.getBoundsRelative(this._baseLayer, this.container);
-
-            // Determine anchor co-ordinates relative to base layer
-            // we subtract (width / 2) from X to compute value relative to left edge versus midpoint
-            // we subtract (height / 2) from Y to compute value relative to top edge versus midpoint
-            const anchorBaseX: number = (anchorPoint.x + anchorOffsetX) - baseLayerBounds.x - anchorDisplay.width / 2;
-            const anchorBaseY: number = (anchorPoint.y + anchorOffsetY) - baseLayerBounds.y;
-
-            // Compute extents used to iterate across places:
-            // - Center Row = Left Center and Right Center
-            // - Top Row = Top Left and Top Right
-            // - Bottom Row = Bottom Left and Bottom Right
-            // - Center Column = Top and Bottom
-            // - Left Column = Top Left, Bottom Left, Left Center
-            // - Right Column = Top Rigth, Bottom right, Right Center
-            const startCenterRow = anchorBaseY - annotationCard.display.height / 2;
-            const stopCenterRow = anchorBaseY + annotationCard.display.height / 2;
-            const startCenterColumn = anchorBaseX - annotationCard.display.width / 2 + anchorDisplay.width / 2;
-            const stopCenterColumn = anchorBaseX + annotationCard.display.width / 2 + anchorDisplay.width / 2;
-            const startTopRow = anchorBaseY - anchorDisplay.height / 2 - (yOffset + annotationCard.display.height);
-            const stopTopRow = anchorBaseY - anchorDisplay.height / 2 - yOffset;
-            const startLeftColumn = anchorBaseX - (xOffset + annotationCard.display.width);
-            const stopLeftColumn = anchorBaseX - xOffset;
-            const startBottomRow = anchorBaseY + anchorDisplay.height / 2 + yOffset;
-            const stopBottomRow = anchorBaseY + anchorDisplay.height / 2 + yOffset + annotationCard.display.height;
-            const startRightColumn = anchorBaseX + anchorDisplay.width + xOffset;
-            const stopRightColumn = anchorBaseX + anchorDisplay.width + xOffset + annotationCard.display.width;
-
-            // Top Left
-            topLeftConflict = inspectRegion(
-                startTopRow,
-                stopTopRow,
-                startLeftColumn,
-                stopLeftColumn
-            );
-
-            // determine if any conflict is resolvable
-            if (topLeftConflict) {
-                if (DEBUG_ANNOTATION_PLACEMENT) {
-                    const debugRect = new Graphics().lineStyle(1, BASE_CONFLICT_COLOR).drawRect(
-                        baseLayerBounds.x + topLeftConflict.bounds.x,
-                        baseLayerBounds.y + topLeftConflict.bounds.y,
-                        topLeftConflict.bounds.width,
-                        topLeftConflict.bounds.height
-                    );
-                    if (numSearchAttempts >= DEBUG_FROM_SEARCH_ATTEMPT) {
-                        this._baseLayer.addChild(debugRect);
-                    }
-                }
-
-                const correction = testForConflictCorrection(
-                    topLeftConflict,
-                    startTopRow,
-                    stopTopRow,
-                    startLeftColumn,
-                    stopLeftColumn,
-                    true,
-                    false,
-                    true,
-                    false
-                );
-
-                if (correction) {
-                    topLeftConflict.resolvable = true;
-                    topLeftConflict.correction = correction;
-                }
-            } else if (DEBUG_ANNOTATION_PLACEMENT) {
-                const debugRect = new Graphics().lineStyle(1, POSSIBLE_PLACEMENT_AVAILABILITY_COLOR).drawRect(
-                    startLeftColumn + baseLayerBounds.x,
-                    startTopRow + baseLayerBounds.y,
-                    annotationCard.display.width,
-                    annotationCard.display.height
-                );
-                if (numSearchAttempts >= DEBUG_FROM_SEARCH_ATTEMPT) {
-                    this._baseLayer.addChild(debugRect);
-                }
-            }
-
-            // Top Center
-            topCenterConflict = inspectRegion(
-                startTopRow,
-                stopTopRow,
-                startCenterColumn,
-                stopCenterColumn
-            );
-
-            // determine if any conflict is resolvable
-            if (topCenterConflict) {
-                if (DEBUG_ANNOTATION_PLACEMENT) {
-                    const debugRect = new Graphics().lineStyle(1, BASE_CONFLICT_COLOR).drawRect(
-                        baseLayerBounds.x + topCenterConflict.bounds.x,
-                        baseLayerBounds.y + topCenterConflict.bounds.y,
-                        topCenterConflict.bounds.width,
-                        topCenterConflict.bounds.height
-                    );
-                    if (numSearchAttempts >= DEBUG_FROM_SEARCH_ATTEMPT) {
-                        this._baseLayer.addChild(debugRect);
-                    }
-                }
-
-                const correction = testForConflictCorrection(
-                    topCenterConflict,
-                    startTopRow,
-                    stopTopRow,
-                    startCenterColumn,
-                    stopCenterColumn,
-                    true,
-                    false,
-                    false,
-                    false
-                );
-
-                if (correction) {
-                    topCenterConflict.resolvable = true;
-                    topCenterConflict.correction = correction;
-                }
-            } else if (DEBUG_ANNOTATION_PLACEMENT) {
-                const debugRect = new Graphics().lineStyle(1, POSSIBLE_PLACEMENT_AVAILABILITY_COLOR).drawRect(
-                    startCenterColumn + baseLayerBounds.x,
-                    startTopRow + baseLayerBounds.y,
-                    annotationCard.display.width,
-                    annotationCard.display.height
-                );
-                if (numSearchAttempts >= DEBUG_FROM_SEARCH_ATTEMPT) {
-                    this._baseLayer.addChild(debugRect);
-                }
-            }
-
-            // Top Right
-            topRightConflict = inspectRegion(
-                startTopRow,
-                stopTopRow,
-                startRightColumn,
-                stopRightColumn
-            );
-
-            // determine if any conflict is resolvable
-            if (topRightConflict) {
-                if (DEBUG_ANNOTATION_PLACEMENT) {
-                    const debugRect = new Graphics().lineStyle(1, BASE_CONFLICT_COLOR).drawRect(
-                        baseLayerBounds.x + topRightConflict.bounds.x,
-                        baseLayerBounds.y + topRightConflict.bounds.y,
-                        topRightConflict.bounds.width,
-                        topRightConflict.bounds.height
-                    );
-                    if (numSearchAttempts >= DEBUG_FROM_SEARCH_ATTEMPT) {
-                        this._baseLayer.addChild(debugRect);
-                    }
-                }
-
-                const correction = testForConflictCorrection(
-                    topRightConflict,
-                    startTopRow,
-                    stopTopRow,
-                    startRightColumn,
-                    stopRightColumn,
-                    true,
-                    false,
-                    false,
-                    true
-                );
-
-                if (correction) {
-                    topRightConflict.resolvable = true;
-                    topRightConflict.correction = correction;
-                }
-            } else if (DEBUG_ANNOTATION_PLACEMENT) {
-                const debugRect = new Graphics().lineStyle(1, POSSIBLE_PLACEMENT_AVAILABILITY_COLOR).drawRect(
-                    startRightColumn + baseLayerBounds.x,
-                    startTopRow + baseLayerBounds.y,
-                    annotationCard.display.width,
-                    annotationCard.display.height
-                );
-                if (numSearchAttempts >= DEBUG_FROM_SEARCH_ATTEMPT) {
-                    this._baseLayer.addChild(debugRect);
-                }
-            }
-
-            // Left Center
-            leftCenterConflict = inspectRegion(
-                startCenterRow,
-                stopCenterRow,
-                startLeftColumn,
-                stopLeftColumn
-            );
-
-            // determine if any conflict is resolvable
-            if (leftCenterConflict) {
-                if (DEBUG_ANNOTATION_PLACEMENT) {
-                    const debugRect = new Graphics().lineStyle(1, BASE_CONFLICT_COLOR).drawRect(
-                        baseLayerBounds.x + leftCenterConflict.bounds.x,
-                        baseLayerBounds.y + leftCenterConflict.bounds.y,
-                        leftCenterConflict.bounds.width,
-                        leftCenterConflict.bounds.height
-                    );
-                    if (numSearchAttempts >= DEBUG_FROM_SEARCH_ATTEMPT) {
-                        this._baseLayer.addChild(debugRect);
-                    }
-                }
-
-                const correction = testForConflictCorrection(
-                    leftCenterConflict,
-                    startCenterRow,
-                    stopCenterRow,
-                    startLeftColumn,
-                    stopLeftColumn,
-                    false,
-                    false,
-                    true,
-                    false
-                );
-
-                if (correction) {
-                    leftCenterConflict.resolvable = true;
-                    leftCenterConflict.correction = correction;
-                }
-            } else if (DEBUG_ANNOTATION_PLACEMENT) {
-                const debugRect = new Graphics().lineStyle(1, POSSIBLE_PLACEMENT_AVAILABILITY_COLOR).drawRect(
-                    startLeftColumn + baseLayerBounds.x,
-                    startCenterRow + baseLayerBounds.y,
-                    annotationCard.display.width,
-                    annotationCard.display.height
-                );
-                if (numSearchAttempts >= DEBUG_FROM_SEARCH_ATTEMPT) {
-                    this._baseLayer.addChild(debugRect);
-                }
-            }
-
-            // Right Center
-            rightCenterConflict = inspectRegion(
-                startCenterRow,
-                stopCenterRow,
-                startRightColumn,
-                stopRightColumn
-            );
-
-            // determine if any conflict is resolvable
-            if (rightCenterConflict) {
-                if (DEBUG_ANNOTATION_PLACEMENT) {
-                    const debugRect = new Graphics().lineStyle(1, BASE_CONFLICT_COLOR).drawRect(
-                        baseLayerBounds.x + rightCenterConflict.bounds.x,
-                        baseLayerBounds.y + rightCenterConflict.bounds.y,
-                        rightCenterConflict.bounds.width,
-                        rightCenterConflict.bounds.height
-                    );
-                    if (numSearchAttempts >= DEBUG_FROM_SEARCH_ATTEMPT) {
-                        this._baseLayer.addChild(debugRect);
-                    }
-                }
-
-                const correction = testForConflictCorrection(
-                    rightCenterConflict,
-                    startCenterRow,
-                    stopCenterRow,
-                    startRightColumn,
-                    stopRightColumn,
-                    false,
-                    false,
-                    false,
-                    true
-                );
-
-                if (correction) {
-                    rightCenterConflict.resolvable = true;
-                    rightCenterConflict.correction = correction;
-                }
-            } else if (DEBUG_ANNOTATION_PLACEMENT) {
-                const debugRect = new Graphics().lineStyle(1, POSSIBLE_PLACEMENT_AVAILABILITY_COLOR).drawRect(
-                    startRightColumn + baseLayerBounds.x,
-                    startCenterRow + baseLayerBounds.y,
-                    annotationCard.display.width,
-                    annotationCard.display.height
-                );
-                if (numSearchAttempts >= DEBUG_FROM_SEARCH_ATTEMPT) {
-                    this._baseLayer.addChild(debugRect);
-                }
-            }
-
-            // Bottom Right
-            bottomRightConflict = inspectRegion(
-                startBottomRow,
-                stopBottomRow,
-                startRightColumn,
-                stopRightColumn
-            );
-
-            // determine if any conflict is resolvable
-            if (bottomRightConflict) {
-                if (DEBUG_ANNOTATION_PLACEMENT) {
-                    const debugRect = new Graphics().lineStyle(1, BASE_CONFLICT_COLOR).drawRect(
-                        baseLayerBounds.x + bottomRightConflict.bounds.x,
-                        baseLayerBounds.y + bottomRightConflict.bounds.y,
-                        bottomRightConflict.bounds.width,
-                        bottomRightConflict.bounds.height
-                    );
-                    if (numSearchAttempts >= DEBUG_FROM_SEARCH_ATTEMPT) {
-                        this._baseLayer.addChild(debugRect);
-                    }
-                }
-
-                const correction = testForConflictCorrection(
-                    bottomRightConflict,
-                    startBottomRow,
-                    stopBottomRow,
-                    startRightColumn,
-                    stopRightColumn,
-                    false,
-                    true,
-                    false,
-                    true
-                );
-
-                if (correction) {
-                    bottomRightConflict.resolvable = true;
-                    bottomRightConflict.correction = correction;
-                }
-            } else if (DEBUG_ANNOTATION_PLACEMENT) {
-                const debugRect = new Graphics().lineStyle(1, POSSIBLE_PLACEMENT_AVAILABILITY_COLOR).drawRect(
-                    startRightColumn + baseLayerBounds.x,
-                    startBottomRow + baseLayerBounds.y,
-                    annotationCard.display.width,
-                    annotationCard.display.height
-                );
-                if (numSearchAttempts >= DEBUG_FROM_SEARCH_ATTEMPT) {
-                    this._baseLayer.addChild(debugRect);
-                }
-            }
-
-            // Bottom Center
-            bottomCenterConflict = inspectRegion(
-                startBottomRow,
-                stopBottomRow,
-                startCenterColumn,
-                stopCenterColumn
-            );
-
-            // determine if any conflict is resolvable
-            if (bottomCenterConflict) {
-                if (DEBUG_ANNOTATION_PLACEMENT) {
-                    const debugRect = new Graphics().lineStyle(1, BASE_CONFLICT_COLOR).drawRect(
-                        baseLayerBounds.x + bottomCenterConflict.bounds.x,
-                        baseLayerBounds.y + bottomCenterConflict.bounds.y,
-                        bottomCenterConflict.bounds.width,
-                        bottomCenterConflict.bounds.height
-                    );
-                    if (numSearchAttempts >= DEBUG_FROM_SEARCH_ATTEMPT) {
-                        this._baseLayer.addChild(debugRect);
-                    }
-                }
-
-                const correction = testForConflictCorrection(
-                    bottomCenterConflict,
-                    startBottomRow,
-                    stopBottomRow,
-                    startCenterColumn,
-                    stopCenterColumn,
-                    false,
-                    true,
-                    false,
-                    false
-                );
-
-                if (correction) {
-                    bottomCenterConflict.resolvable = true;
-                    bottomCenterConflict.correction = correction;
-                }
-            } else if (DEBUG_ANNOTATION_PLACEMENT) {
-                const debugRect = new Graphics().lineStyle(1, POSSIBLE_PLACEMENT_AVAILABILITY_COLOR).drawRect(
-                    startCenterColumn + baseLayerBounds.x,
-                    startBottomRow + baseLayerBounds.y,
-                    annotationCard.display.width,
-                    annotationCard.display.height
-                );
-                if (numSearchAttempts >= DEBUG_FROM_SEARCH_ATTEMPT) {
-                    this._baseLayer.addChild(debugRect);
-                }
-            }
-
-            // Bottom Left
-            bottomLeftConflict = inspectRegion(
-                startBottomRow,
-                stopBottomRow,
-                startLeftColumn,
-                stopLeftColumn
-            );
-
-            // determine if any conflict is resolvable
-            if (bottomLeftConflict) {
-                if (DEBUG_ANNOTATION_PLACEMENT) {
-                    const debugRect = new Graphics().lineStyle(1, BASE_CONFLICT_COLOR).drawRect(
-                        baseLayerBounds.x + bottomLeftConflict.bounds.x,
-                        baseLayerBounds.y + bottomLeftConflict.bounds.y,
-                        bottomLeftConflict.bounds.width,
-                        bottomLeftConflict.bounds.height
-                    );
-                    if (numSearchAttempts >= DEBUG_FROM_SEARCH_ATTEMPT) {
-                        this._baseLayer.addChild(debugRect);
-                    }
-                }
-
-                const correction = testForConflictCorrection(
-                    bottomLeftConflict,
-                    startBottomRow,
-                    stopBottomRow,
-                    startLeftColumn,
-                    stopLeftColumn,
-                    false,
-                    true,
-                    true,
-                    false
-                );
-
-                if (correction) {
-                    bottomLeftConflict.resolvable = true;
-                    bottomLeftConflict.correction = correction;
-                }
-            } else if (DEBUG_ANNOTATION_PLACEMENT) {
-                const debugRect = new Graphics().lineStyle(1, POSSIBLE_PLACEMENT_AVAILABILITY_COLOR).drawRect(
-                    startLeftColumn + baseLayerBounds.x,
-                    startBottomRow + baseLayerBounds.y,
-                    annotationCard.display.width,
-                    annotationCard.display.height
-                );
-                if (numSearchAttempts >= DEBUG_FROM_SEARCH_ATTEMPT) {
-                    this._baseLayer.addChild(debugRect);
-                }
-            }
-
-            return {
-                [AnnotationPlacement.TOP_LEFT]: topLeftConflict,
-                [AnnotationPlacement.TOP_CENTER]: topCenterConflict,
-                [AnnotationPlacement.TOP_RIGHT]: topRightConflict,
-                [AnnotationPlacement.LEFT_CENTER]: leftCenterConflict,
-                [AnnotationPlacement.RIGHT_CENTER]: rightCenterConflict,
-                [AnnotationPlacement.BOTTOM_LEFT]: bottomLeftConflict,
-                [AnnotationPlacement.BOTTOM_CENTER]: bottomCenterConflict,
-                [AnnotationPlacement.BOTTOM_RIGHT]: bottomRightConflict
-            };
-        };
-
-        /**
-         * Helper function that searches for a suitable region to attempt to place annotation
-         *
-         *                      top
-         *     top-left   --------------- top-right
-         *               |       |       |
-         *               |       |       |
-         *               |       |       |
-         *   left-center  ---- Anchor ---  right-center
-         *               |       |       |
-         *               |       |       |
-         *               |       |       |
-         *   bottom-left  ---------------  bottom-right
-         *                    bottom
-         *
-         * @param baseConflicts an object with the conflict (or lack thereof) at each placement region
-         * @param includeCentersPosition whether to include central locations as suitable regions
-         * @return relative position of existing annotion (if one exists) or null (if position is vacant)
-         */
-        const findProposedPosition = (
-            baseConflicts: AnnotationBaseConflicts,
-            includeTopLeft: boolean,
-            includeTopCenter: boolean,
-            includeTopRight: boolean,
-            includeLeftCenter: boolean,
-            includeRightCenter: boolean,
-            includeBottomLeft: boolean,
-            includeBottomCenter: boolean,
-            includeBottomRight: boolean
-        ): AnnotationPosition | null => {
-            // IMPORTANT: The conditional statements that follow
-            // have been ordered intentionally to
-            // attempt to present the annotations in
-            // this specific priority list
-
-            if (
-                includeRightCenter
-                && !baseConflicts[AnnotationPlacement.RIGHT_CENTER]
-            ) {
-                // Place at right-center
-                return {
-                    anchorIndex: currentAnchorIndex,
-                    relPosition: new Point(
-                        anchorDisplay.width / 2 + xOffset + anchorOffsetX,
-                        -annotationCard.display.height / 2 + anchorOffsetY
-                    ),
-                    zoomLevel: this._zoomLevel,
-                    placement: AnnotationPlacement.RIGHT_CENTER,
-                    custom: false
-                };
-            }
-
-            if (
-                includeLeftCenter
-                && !baseConflicts[AnnotationPlacement.LEFT_CENTER]
-            ) {
-                // Place at left-center
-                return {
-                    anchorIndex: currentAnchorIndex,
-                    relPosition: new Point(
-                        -anchorDisplay.width / 2 - annotationCard.display.width - xOffset + anchorOffsetX,
-                        -annotationCard.display.height / 2 + anchorOffsetY
-                    ),
-                    zoomLevel: this._zoomLevel,
-                    placement: AnnotationPlacement.LEFT_CENTER,
-                    custom: false
-                };
-            }
-
-            if (
-                includeTopCenter
-                && !baseConflicts[AnnotationPlacement.TOP_CENTER]
-            ) {
-                // Place at top-center
-                return {
-                    anchorIndex: currentAnchorIndex,
-                    relPosition: new Point(
-                        -annotationCard.display.width / 2 + anchorDisplay.width / 2 + anchorOffsetX,
-                        -anchorDisplay.height / 2 - annotationCard.display.height - yOffset + anchorOffsetY
-                    ),
-                    zoomLevel: this._zoomLevel,
-                    placement: AnnotationPlacement.TOP_CENTER,
-                    custom: false
-                };
-            }
-
-            if (
-                includeBottomCenter
-                && !baseConflicts[AnnotationPlacement.BOTTOM_CENTER]
-            ) {
-                // Place at bottom-center
-                return {
-                    anchorIndex: currentAnchorIndex,
-                    relPosition: new Point(
-                        -annotationCard.display.width / 2 + anchorDisplay.width / 2 + anchorOffsetX,
-                        anchorDisplay.height / 2 + yOffset + anchorOffsetY
-                    ),
-                    zoomLevel: this._zoomLevel,
-                    placement: AnnotationPlacement.BOTTOM_CENTER,
-                    custom: false
-                };
-            }
-
-            if (
-                includeTopLeft
-                && !baseConflicts[AnnotationPlacement.TOP_LEFT]
-            ) {
-                // Place in top-left
-                return {
-                    anchorIndex: currentAnchorIndex,
-                    relPosition: new Point(
-                        -anchorDisplay.width / 2 - annotationCard.display.width - xOffset + anchorOffsetX,
-                        -anchorDisplay.height / 2 - annotationCard.display.height - yOffset + anchorOffsetY
-                    ),
-                    zoomLevel: this._zoomLevel,
-                    placement: AnnotationPlacement.TOP_LEFT,
-                    custom: false
-                };
-            }
-
-            if (
-                includeTopRight
-                && !baseConflicts[AnnotationPlacement.TOP_RIGHT]
-            ) {
-                // Place in top-right
-                return {
-                    anchorIndex: currentAnchorIndex,
-                    relPosition: new Point(
-                        anchorDisplay.width / 2 + xOffset + anchorOffsetX,
-                        -anchorDisplay.height / 2 - annotationCard.display.height - yOffset + anchorOffsetY
-                    ),
-                    zoomLevel: this._zoomLevel,
-                    placement: AnnotationPlacement.TOP_RIGHT,
-                    custom: false
-                };
-            }
-
-            if (
-                includeBottomLeft
-                && !baseConflicts[AnnotationPlacement.BOTTOM_LEFT]
-            ) {
-                // Place in bottom-left
-                return {
-                    anchorIndex: currentAnchorIndex,
-                    relPosition: new Point(
-                        -anchorDisplay.width / 2 - annotationCard.display.width - xOffset + anchorOffsetX,
-                        anchorDisplay.height / 2 + yOffset + anchorOffsetY
-                    ),
-                    zoomLevel: this._zoomLevel,
-                    placement: AnnotationPlacement.BOTTOM_LEFT,
-                    custom: false
-                };
-            }
-
-            if (
-                includeBottomRight
-                && !baseConflicts[AnnotationPlacement.BOTTOM_RIGHT]
-            ) {
-                // Place in bottom-right
-                return {
-                    anchorIndex: currentAnchorIndex,
-                    relPosition: new Point(
-                        anchorDisplay.width / 2 + xOffset + anchorOffsetX,
-                        anchorDisplay.height / 2 + yOffset + anchorOffsetY
-                    ),
-                    zoomLevel: this._zoomLevel,
-                    placement: AnnotationPlacement.BOTTOM_RIGHT,
-                    custom: false
-                };
-            }
-
-            // Shifted
-
-            const rightCenterConflict = baseConflicts[AnnotationPlacement.RIGHT_CENTER];
-            const rightCenterCorrection = rightCenterConflict?.correction;
-            if (
-                includeRightCenter
-                && rightCenterConflict
-                && rightCenterConflict?.resolvable
-                && rightCenterCorrection
-            ) {
-                // Place in shifted right-center
-
-                return {
-                    anchorIndex: currentAnchorIndex,
-                    relPosition: new Point(
-                        anchorDisplay.width / 2 + xOffset + anchorOffsetX
-                        + rightCenterCorrection.x,
-                        -annotationCard.display.height / 2 + anchorOffsetY
-                        + rightCenterCorrection.y
-                    ),
-                    zoomLevel: this._zoomLevel,
-                    placement: AnnotationPlacement.RIGHT_CENTER,
-                    custom: false
-                };
-            }
-
-            const leftCenterConflict = baseConflicts[AnnotationPlacement.LEFT_CENTER];
-            const leftCenterCorrection = leftCenterConflict?.correction;
-            if (
-                includeLeftCenter
-                && leftCenterConflict
-                && leftCenterConflict?.resolvable
-                && leftCenterCorrection
-            ) {
-                // Place in shifted left-center
-                return {
-                    anchorIndex: currentAnchorIndex,
-                    relPosition: new Point(
-                        -anchorDisplay.width / 2 - annotationCard.display.width - xOffset + anchorOffsetX
-                        + leftCenterCorrection.x,
-                        -annotationCard.display.height / 2 + anchorOffsetY
-                        + leftCenterCorrection.y
-                    ),
-                    zoomLevel: this._zoomLevel,
-                    placement: AnnotationPlacement.LEFT_CENTER,
-                    custom: false
-                };
-            }
-
-            const topCenterConflict = baseConflicts[AnnotationPlacement.TOP_CENTER];
-            const topCenterCorrection = topCenterConflict?.correction;
-            if (
-                includeTopCenter
-                && topCenterConflict
-                && topCenterConflict?.resolvable
-                && topCenterCorrection
-            ) {
-                // Place in shifted top-center
-                return {
-                    anchorIndex: currentAnchorIndex,
-                    relPosition: new Point(
-                        -annotationCard.display.width / 2 + anchorDisplay.width / 2 + anchorOffsetX
-                        + topCenterCorrection.x,
-                        -anchorDisplay.height / 2 - annotationCard.display.height - yOffset + anchorOffsetY
-                        + topCenterCorrection.y
-                    ),
-                    zoomLevel: this._zoomLevel,
-                    placement: AnnotationPlacement.TOP_CENTER,
-                    custom: false
-                };
-            }
-
-            const bottomCenterConflict = baseConflicts[AnnotationPlacement.BOTTOM_CENTER];
-            const bottomCenterCorrection = topCenterConflict?.correction;
-            if (
-                includeBottomCenter
-                && bottomCenterConflict
-                && bottomCenterConflict?.resolvable
-                && bottomCenterCorrection
-            ) {
-                // Place in shifted bottom-center
-                return {
-                    anchorIndex: currentAnchorIndex,
-                    relPosition: new Point(
-                        -annotationCard.display.width / 2 + anchorDisplay.width / 2 + anchorOffsetX
-                        + bottomCenterCorrection.x,
-                        anchorDisplay.height / 2 + yOffset + anchorOffsetY
-                        + bottomCenterCorrection.y
-                    ),
-                    zoomLevel: this._zoomLevel,
-                    placement: AnnotationPlacement.BOTTOM_CENTER,
-                    custom: false
-                };
-            }
-
-            const topLeftConflict = baseConflicts[AnnotationPlacement.TOP_LEFT];
-            const topLeftCorrection = topCenterConflict?.correction;
-            if (
-                includeTopLeft
-                && topLeftConflict
-                && topLeftConflict?.resolvable
-                && topLeftCorrection
-            ) {
-                // Place in shifted top-left
-                return {
-                    anchorIndex: currentAnchorIndex,
-                    relPosition: new Point(
-                        -anchorDisplay.width / 2 - annotationCard.display.width - xOffset
-                        + anchorOffsetX + topLeftCorrection.x,
-                        -anchorDisplay.height / 2 - annotationCard.display.height - yOffset
-                        + anchorOffsetY + topLeftCorrection.y
-                    ),
-                    zoomLevel: this._zoomLevel,
-                    placement: AnnotationPlacement.TOP_LEFT,
-                    custom: false
-                };
-            }
-
-            const topRightConflict = baseConflicts[AnnotationPlacement.TOP_RIGHT];
-            const topRightCorrection = topCenterConflict?.correction;
-            if (
-                includeTopRight
-                && topRightConflict
-                && topRightConflict?.resolvable
-                && topRightCorrection
-            ) {
-                // Place in shifted top-right
-                return {
-                    anchorIndex: currentAnchorIndex,
-                    relPosition: new Point(
-                        anchorDisplay.width / 2 + xOffset + anchorOffsetX
-                        + topRightCorrection.x,
-                        -anchorDisplay.height / 2 - annotationCard.display.height - yOffset + anchorOffsetY
-                        + topRightCorrection.y
-                    ),
-                    zoomLevel: this._zoomLevel,
-                    placement: AnnotationPlacement.TOP_RIGHT,
-                    custom: false
-                };
-            }
-
-            const bottomLeftConflict = baseConflicts[AnnotationPlacement.BOTTOM_LEFT];
-            const bottomLeftCorrection = topCenterConflict?.correction;
-            if (
-                includeBottomLeft
-                && bottomLeftConflict
-                && bottomLeftConflict?.resolvable
-                && bottomLeftCorrection
-            ) {
-                // Place in shifted bottom-left
-                return {
-                    anchorIndex: currentAnchorIndex,
-                    relPosition: new Point(
-                        -anchorDisplay.width / 2 - annotationCard.display.width - xOffset + anchorOffsetX
-                        + bottomLeftCorrection.x,
-                        anchorDisplay.height / 2 + yOffset + anchorOffsetY
-                        + bottomLeftCorrection.y
-                    ),
-                    zoomLevel: this._zoomLevel,
-                    placement: AnnotationPlacement.BOTTOM_LEFT,
-                    custom: false
-                };
-            }
-
-            const bottomRightConflict = baseConflicts[AnnotationPlacement.BOTTOM_RIGHT];
-            const bottomRightCorrection = topCenterConflict?.correction;
-            if (
-                includeBottomRight
-                && bottomRightConflict
-                && bottomRightConflict?.resolvable
-                && bottomRightCorrection
-            ) {
-                // Place in shifted bottom-right
-                return {
-                    anchorIndex: currentAnchorIndex,
-                    relPosition: new Point(
-                        anchorDisplay.width / 2 + xOffset + anchorOffsetX
-                        + bottomRightCorrection.x,
-                        anchorDisplay.height / 2 + yOffset + anchorOffsetY
-                        + bottomRightCorrection.y
-                    ),
-                    zoomLevel: this._zoomLevel,
-                    placement: AnnotationPlacement.BOTTOM_RIGHT,
-                    custom: false
-                };
-            }
-
-            return null;
-        };
-
-        /**
-         * Helper function that checks whether annotations/layers exist at a proposed position
-         *
-         * @param position proposed relative position (to anchor) of annotation computed from
-         * the annotation's top-left corner
-         * @return absolute bounds of existing annotion (if one exists) or null (if position is vacant)
-         */
-        const checkIfCardAtPosition = (position: AnnotationPosition | null): AnnotationPositionConflict | null => {
-            if (
-                position
-                && position.relPosition
-                && position.placement
-            ) {
-                const cardArray = this._zoomLevel > Pose2D.ANNOTATION_LAYER_THRESHOLD
-                    ? this._layers : this._annotations;
-
-                for (let i = 0; i < cardArray.length; i++) {
-                    // Get annotation object
-                    const card = cardArray[i];
-                    // Annotation might have multiple positions for each range associated with it
-                    for (let j = 0; j < card.positions.length; j++) {
-                        const display = card.displays[j];
-                        const cardRelPosition = card.positions[j].relPosition;
-                        const cardAnchorPoint = new Point(
-                            this._bases[card.positions[j].anchorIndex].x + this._offX,
-                            this._bases[card.positions[j].anchorIndex].y + this._offY
-                        );
-                        const cardAbsolutePosition = new Point(
-                            cardRelPosition.x + cardAnchorPoint.x,
-                            cardRelPosition.y + cardAnchorPoint.y
-                        );
-
-                        const absolutePosition = new Point(
-                            position.relPosition.x + anchorPoint.x,
-                            position.relPosition.y + anchorPoint.y
-                        );
-
-                        // There are four cases where overlap can occur
-                        if (display && ((
-                            // Existing annotation behind possible position
-                            // Existing annotation below possible position
-                            (
-                                cardAbsolutePosition.x >= absolutePosition.x
-                                        && cardAbsolutePosition.x < absolutePosition.x + annotationCard.display.width
-                            )
-                                    && (
-                                        cardAbsolutePosition.y >= absolutePosition.y
-                                        && cardAbsolutePosition.y < absolutePosition.y + annotationCard.display.height
-                                    )
-                        )
-                            || (
-                                // Existing annotation behind possible position
-                                // Existing annotation below possible position
-                                (
-                                    absolutePosition.x >= cardAbsolutePosition.x
-                                    && absolutePosition.x < cardAbsolutePosition.x + display.width
-                                )
-                                && (
-                                    cardAbsolutePosition.y >= absolutePosition.y
-                                    && cardAbsolutePosition.y < absolutePosition.y + annotationCard.display.height
-                                )
-                            )
-                            || (
-                                // Existing annotation after possible position
-                                // Existing annotation above possible annotation
-                                (
-                                    absolutePosition.x >= cardAbsolutePosition.x
-                                    && absolutePosition.x < cardAbsolutePosition.x + display.width
-                                )
-                                && (
-                                    absolutePosition.y >= cardAbsolutePosition.y
-                                    && absolutePosition.y < cardAbsolutePosition.y + display.height
-                                )
-                            )
-                            || (
-                                // Existing annotation after possible position
-                                // Existing annotation above possible annotation
-                                (
-                                    cardAbsolutePosition.x >= absolutePosition.x
-                                    && cardAbsolutePosition.x < absolutePosition.x + annotationCard.display.width
-                                )
-                                && (
-                                    absolutePosition.y >= cardAbsolutePosition.y
-                                    && absolutePosition.y < cardAbsolutePosition.y + display.height
-                                )
-                            )
-                        )) {
-                            // We want absolute position so we add back anchor position
-                            const positionConflict: AnnotationPositionConflict = {
-                                bounds: new Rectangle(
-                                    cardAbsolutePosition.x,
-                                    cardAbsolutePosition.y,
-                                    display.width,
-                                    display.height
-                                ),
-                                placement: position.placement
-                            };
-
-                            if (DEBUG_ANNOTATION_PLACEMENT) {
-                                const debugRect = new Graphics().lineStyle(1, ANNOTATION_CONFLICT_COLOR).drawRect(
-                                    positionConflict.bounds.x,
-                                    positionConflict.bounds.y,
-                                    positionConflict.bounds.width,
-                                    positionConflict.bounds.height
-                                );
-                                if (numSearchAttempts >= DEBUG_FROM_SEARCH_ATTEMPT) {
-                                    this._baseLayer.addChild(debugRect);
-                                }
-                            }
-
-                            return positionConflict;
-                        }
-                    }
-                }
-            }
-
-            return null;
-        };
-
-        // Find places that are occupied by bases
-        const baseConflicts = findBaseConflicts();
-
-        // Find possible position factoring occupied places
-        let proposedPosition: AnnotationPosition | null = findProposedPosition(
-            baseConflicts,
-            true,
-            true,
-            true,
-            includeCenters,
-            includeCenters,
-            true,
-            true,
-            true
-        );
-
-        // Makes sure there are no annotations at proposed position
-        // Will return bounds if one exists
-        let annotationPositionConflict = checkIfCardAtPosition(proposedPosition);
-
-        // Handles case if annotation exists at bounds
-        // Marks region as occupied and searches next available
-        // region about anchor point
-        let testTopLeft = true;
-        let testTopCenter = true;
-        let testTopRight = true;
-        let testBottomLeft = true;
-        let testBottomCenter = true;
-        let testBottomRight = true;
-        // Accumlate all annotation overlap bounds to
-        // use as anchors for recursive search
-        const positionConflicts: AnnotationPositionConflict[] = [];
-        while (annotationPositionConflict && proposedPosition) {
-            // Store to overlap bound
-            positionConflicts.push(annotationPositionConflict);
-
-            // Update vacancy loss due to annotation occupancy
-            switch (annotationPositionConflict.placement) {
-                case AnnotationPlacement.TOP_LEFT:
-                    testTopLeft = false;
-                    break;
-                case AnnotationPlacement.TOP_CENTER:
-                    testTopCenter = false;
-                    break;
-                case AnnotationPlacement.TOP_RIGHT:
-                    testTopRight = false;
-                    break;
-                case AnnotationPlacement.BOTTOM_LEFT:
-                    testBottomLeft = false;
-                    break;
-                case AnnotationPlacement.BOTTOM_CENTER:
-                    testBottomCenter = false;
-                    break;
-                case AnnotationPlacement.BOTTOM_RIGHT:
-                    testBottomRight = false;
-                    break;
-                default:
-                    break;
-            }
-
-            // Find possible position factoring updated occupied places
-            proposedPosition = findProposedPosition(
-                baseConflicts,
-                testTopLeft,
-                testTopCenter,
-                testTopRight,
-                false,
-                false,
-                testBottomLeft,
-                testBottomCenter,
-                testBottomRight
-            );
-
-            // Makes sure there are no annotations at new proposed position
-            annotationPositionConflict = checkIfCardAtPosition(proposedPosition);
-        }
-
-        if (proposedPosition) {
-            // We have an available position
-            return proposedPosition.relPosition;
-        } else if (positionConflicts.length > 0 && numSearchAttempts < Pose2D.ANNOTATION_PLACEMENT_ITERATION_TIMEOUT) {
-            // If we still don't have a proposed position
-            // Recursively search for one using each conflict annotation
-            // as an anchor point
-            for (const positionConflict of positionConflicts) {
-                // Compute offset based on overlap placement
-                const conflictOffsetX = positionConflict.bounds.x - anchorPoint.x + positionConflict.bounds.width / 2;
-                const conflictOffsetY = positionConflict.bounds.y - anchorPoint.y + positionConflict.bounds.height / 2;
-
-                const point = this.computeAnnotationPositionPoint(
-                    originalAnchorIndex,
-                    currentAnchorIndex,
-                    anchorPoint,
-                    annotationCard.display,
-                    annotationCard,
-                    numSearchAttempts + 1, // Increment recursive depth
-                    conflictOffsetX,
-                    conflictOffsetY,
-                    numSearchAttempts === 0 || !includeCenters
-                );
-
-                if (point) {
-                    return point;
-                }
-            }
-        } else if (
-            numSearchAttempts < Pose2D.ANNOTATION_PLACEMENT_ITERATION_TIMEOUT
-            && currentAnchorIndex > 1
-            && currentAnchorIndex < this._bases.length - 1
-        ) {
-            // We'll change the anchor index in the hopes of finding available space
-            // We move in the direction with the most bases
-            const increaseAnchor = this._bases.length - originalAnchorIndex > originalAnchorIndex;
-            const newAnchorIndex = increaseAnchor ? currentAnchorIndex + 1 : currentAnchorIndex - 1;
-            const newAnchorPoint = new Point(
-                this._bases[newAnchorIndex].x + this._offX,
-                this._bases[newAnchorIndex].y + this._offY
-            );
-
-            const point = this.computeAnnotationPositionPoint(
-                originalAnchorIndex,
-                newAnchorIndex,
-                newAnchorPoint,
-                annotationCard.display,
-                annotationCard,
-                numSearchAttempts + 1, // Increment iterative steps,
-                0,
-                0
-            );
-
-            if (point) {
-                return point;
-            }
-        }
-
-        return null;
     }
 
     private checkPairs(): void {
@@ -6020,7 +4079,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _showBaseRope: boolean = false;
     private _showPseudoknots: boolean = false;
     private _simpleGraphicsMods: boolean = false;
-    private _annotationModeActive: boolean = false;
 
     // customNumbering
     private _customNumbering: (number | null)[] | undefined = undefined;
@@ -6039,18 +4097,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _showNucleotideRange: boolean = false;
 
     // Annotations
-    private _annotations: AnnotationDisplayObject[] = [];
-    private _layers: AnnotationDisplayObject[] = [];
-    private _annotationGraph: AnnotationGraph;
-    private _annotationSpaceAvailability: boolean[][] = [];
-    private annotationCanvas: Graphics;
-    private _annotationRanges: AnnotationRange[] = [];
-    private _editingAnnotation: boolean = false;
+    public annotationManager: AnnotationManager;
+    private _annotationCanvas: Graphics;
     private _annotationHighlightBox: HighlightBox;
-    private _puzzleAnnotationsEditable: boolean = false;
-    private _resetAnnotationPositions: boolean = false;
-    private _ignoreCustomAnnotationPositions: boolean = false;
-    public movingAnnotation: boolean = false;
+    private _annotationSpaceAvailability: boolean[][] = [];
+    private _annotationRanges: AnnotationRange[] = [];
+    private _selectingAnnotationRange: boolean = false;
 
     /*
      * NEW HIGHLIGHT.
@@ -6061,11 +4113,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _allNewHighlights: RNAHighlightState[] = [];
 
     private static readonly P: Point = new Point();
-
-    private static readonly ANNOTATION_UNHIGHLIGHTED_OPACITY = 0.5;
-    private static readonly DEFAULT_ANNOTATION_SHIFT = 15;
-    private static readonly ANNOTATION_PLACEMENT_ITERATION_TIMEOUT = 20;
-    private static readonly ANNOTATION_LAYER_THRESHOLD = 1;
 }
 
 export interface Oligo {

@@ -1,37 +1,42 @@
 import {ContainerObject, Dragger, GameObjectRef} from 'flashbang';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {UnitSignal, Value} from 'signals';
-import Eterna from 'eterna/Eterna';
 import {Point} from 'pixi.js';
+import {
+    AnnotationData,
+    AnnotationCategory,
+    AnnotationHierarchyType
+} from 'eterna/AnnotationManager';
 import {FontWeight} from '../../flashbang/util/TextBuilder';
 import TextBalloon from './TextBalloon';
 import GameButton from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';
-import {
-    AnnotationData, AnnotationCategory, AnnotationItemType
-} from './AnnotationItem';
 
-export default class AnnotationCard extends ContainerObject {
+export default class AnnotationView extends ContainerObject {
     public readonly onEditButtonPressed = new UnitSignal();
     public readonly isMoving: Value<boolean> = new Value<boolean>(false);
     public readonly onMovedAnnotation: Value<Point | null> = new Value<Point | null>(null);
 
     constructor(
-        type: AnnotationItemType,
+        type: AnnotationHierarchyType,
         item: AnnotationData,
-        puzzleAnnotationsEditable: boolean,
+        activeCategory: AnnotationCategory,
         textColor: number
     ) {
         super();
 
         this._type = type;
         this._item = item;
-        this._puzzleAnnotationsEditable = puzzleAnnotationsEditable;
+        this._activeCategory = activeCategory;
         this._textColor = textColor;
     }
 
     protected added(): void {
         super.added();
+
+        if (!this._item.visible) {
+            return;
+        }
 
         this._panel = new GamePanel({
             type: GamePanelType.NORMAL,
@@ -80,20 +85,16 @@ export default class AnnotationCard extends ContainerObject {
             undefined,
             this._textColor,
             FontWeight.BOLD,
-            AnnotationCard.MAX_WIDTH
+            AnnotationView.MAX_WIDTH
         );
         this.addObject(this._card, this.container);
         this.display.cursor = 'pointer';
 
         if (
             this._item.selected
-            && Eterna.playerID === this._item.playerID
-            && (
-                this._item.category !== AnnotationCategory.PUZZLE
-                || this._puzzleAnnotationsEditable
-            )
+            && this._item.category === this._activeCategory
             && this._item.category !== AnnotationCategory.STRUCTURE
-            && this._type === AnnotationItemType.ANNOTATION
+            && this._type === AnnotationHierarchyType.ANNOTATION
         ) {
             this._editButton = new GameButton()
                 .allStates(Bitmaps.ImgPencil)
@@ -248,9 +249,9 @@ export default class AnnotationCard extends ContainerObject {
         return this.display.height;
     }
 
-    private _type: AnnotationItemType;
+    private _type: AnnotationHierarchyType;
     private _item: AnnotationData;
-    private _puzzleAnnotationsEditable: boolean;
+    private _activeCategory: AnnotationCategory;
     private _textColor: number;
     private _card: TextBalloon;
     private _editButton: GameButton;

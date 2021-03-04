@@ -13,12 +13,13 @@ import {BoostersData} from 'eterna/puzzle/Puzzle';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import BitmapManager from 'eterna/resources/BitmapManager';
+import AnnotationManager from 'eterna/AnnotationManager';
 import NucleotidePalette from './NucleotidePalette';
 import GameButton from './GameButton';
 import ToggleBar from './ToggleBar';
 import EternaMenu, {EternaMenuStyle} from './EternaMenu';
 import ScrollContainer from './ScrollContainer';
-import AnnotationLayersPanel from './AnnotationLayersPanel';
+import AnnotationPanel from './AnnotationPanel';
 
 export enum ToolbarType {
     PUZZLE,
@@ -84,8 +85,8 @@ export default class Toolbar extends ContainerObject {
 
     // Annotations
     public annotationModeButton: GameButton;
-    public annotationLayersButton: GameButton;
-    public annotationsLayerPanel: AnnotationLayersPanel;
+    public annotationPanelButton: GameButton;
+    public annotationPanel: AnnotationPanel;
 
     public freezeButton: GameButton;
 
@@ -129,12 +130,14 @@ export default class Toolbar extends ContainerObject {
             states = 1,
             boosters,
             showGlue = false,
-            showAdvancedMenus = true
+            showAdvancedMenus = true,
+            annotationManager
         }: {
             states?: number;
             boosters?: BoostersData;
             showGlue?: boolean;
             showAdvancedMenus?: boolean;
+            annotationManager?: AnnotationManager;
         }
     ) {
         super();
@@ -143,6 +146,7 @@ export default class Toolbar extends ContainerObject {
         this._showGlue = showGlue;
         this._showAdvancedMenus = showAdvancedMenus;
         this._boostersData = boosters ?? null;
+        this._annotationManager = annotationManager;
     }
 
     public onResized() {
@@ -676,23 +680,25 @@ export default class Toolbar extends ContainerObject {
             this.magicGlueButton.toggled.value = true;
         }));
 
-        this.annotationModeButton = new ToolbarButton()
-            .up(Bitmaps.ImgAnnotationMode)
-            .over(Bitmaps.ImgAnnotationModeOver)
-            .down(Bitmaps.ImgAnnotationModeSelected)
-            .selected(Bitmaps.ImgAnnotationModeSelected)
-            .tooltip('Annotation Mode');
-        this.addObject(this.annotationModeButton, this.lowerToolbarLayout);
+        if (this._annotationManager) {
+            this.annotationModeButton = new ToolbarButton()
+                .up(Bitmaps.ImgAnnotationMode)
+                .over(Bitmaps.ImgAnnotationModeOver)
+                .down(Bitmaps.ImgAnnotationModeSelected)
+                .selected(Bitmaps.ImgAnnotationModeSelected)
+                .tooltip('Annotation Mode');
+            this.addObject(this.annotationModeButton, this.lowerToolbarLayout);
 
-        this.annotationLayersButton = new ToolbarButton()
-            .up(Bitmaps.ImgAnnotationLayer)
-            .over(Bitmaps.ImgAnnotationLayerOver)
-            .down(Bitmaps.ImgAnnotationLayerSelected)
-            .selected(Bitmaps.ImgAnnotationLayerSelected)
-            .tooltip('Annotations Panel');
-        this.annotationsLayerPanel = new AnnotationLayersPanel(this._type, this.annotationLayersButton);
-        this.addObject(this.annotationsLayerPanel, this.mode?.container);
-        this.addObject(this.annotationLayersButton, this.lowerToolbarLayout);
+            this.annotationPanelButton = new ToolbarButton()
+                .up(Bitmaps.ImgAnnotationLayer)
+                .over(Bitmaps.ImgAnnotationLayerOver)
+                .down(Bitmaps.ImgAnnotationLayerSelected)
+                .selected(Bitmaps.ImgAnnotationLayerSelected)
+                .tooltip('Annotations Panel');
+            this.annotationPanel = new AnnotationPanel(this.annotationPanelButton, this._annotationManager);
+            this.addObject(this.annotationPanel, this.mode?.container);
+            this.addObject(this.annotationPanelButton, this.lowerToolbarLayout);
+        }
 
         if (this._type === ToolbarType.PUZZLEMAKER) {
             this.submitButton.tooltip('Publish your puzzle!');
@@ -928,7 +934,7 @@ export default class Toolbar extends ContainerObject {
         this.redoButton.enabled = !disable;
 
         this.annotationModeButton.enabled = !disable;
-        this.annotationLayersButton.enabled = !disable;
+        this.annotationPanelButton.enabled = !disable;
 
         this.freezeButton.enabled = !disable;
 
@@ -969,10 +975,6 @@ export default class Toolbar extends ContainerObject {
         }
     }
 
-    public get annotationLayersPanel(): AnnotationLayersPanel {
-        return this.annotationsLayerPanel;
-    }
-
     public get type(): ToolbarType {
         return this._type;
     }
@@ -988,4 +990,6 @@ export default class Toolbar extends ContainerObject {
 
     private _uncollapsedContentLoc: Point;
     private _autoCollapseRegs: RegistrationGroup | null;
+
+    private _annotationManager: AnnotationManager | undefined;
 }

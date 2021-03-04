@@ -1,7 +1,7 @@
 import {Assert} from 'flashbang';
 import {RNABase} from 'eterna/EPars';
 import Plot, {PlotType} from 'eterna/Plot';
-import {AnnotationGraph} from 'eterna/ui/AnnotationItem';
+import {AnnotationDataBundle} from 'eterna/AnnotationManager';
 import Pose2D, {Oligo} from './pose2D/Pose2D';
 import Folder from './folding/Folder';
 import Utility from './util/Utility';
@@ -42,7 +42,7 @@ export interface TargetConditions {
     'custom-layout'?: ([number, number] | [null, null])[];
     'custom-reference'?: string;
     'custom-numbering'?: string;
-    annotations?: AnnotationGraph;
+    annotations?: AnnotationDataBundle;
     oligo_concentration?: string | number; // the strings have to be convertible
     oligo_bind?: boolean;
     oligo_sequence?: string;

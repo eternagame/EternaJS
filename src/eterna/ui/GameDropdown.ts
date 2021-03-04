@@ -195,37 +195,20 @@ export default class GameDropdown extends ContainerObject {
         let yWalker = 0;
         let maxWidth = this._box.width;
         for (const option of this.options) {
-            let text: TextBalloon;
             const balloonColor = option === this.selectedOption.value ? 0x4471A2 : this._boxColor;
-            if (this._width) {
-                text = new TextBalloon(
-                    option,
-                    balloonColor,
-                    1,
-                    0,
-                    0,
-                    this._width,
-                    GameDropdown._POPUP_ITEM_HEIGHT,
-                    0,
-                    this._checkboxes
-                        ? GameDropdown._POPUP_CHECKBOX_HEIGHT + 2 * GameDropdown._POPUP_CHECKBOX_PADDING
-                        : 0
-                );
-            } else {
-                text = new TextBalloon(
-                    option,
-                    balloonColor,
-                    0.07,
-                    0,
-                    0,
-                    null,
-                    null,
-                    0,
-                    this._checkboxes
-                        ? GameDropdown._POPUP_CHECKBOX_HEIGHT + 2 * GameDropdown._POPUP_CHECKBOX_PADDING
-                        : 0
-                );
-            }
+            const text = new TextBalloon(
+                option,
+                balloonColor,
+                this._width ? 1 : 0.07,
+                0,
+                0,
+                this._width,
+                this._width ? GameDropdown._POPUP_ITEM_HEIGHT : null,
+                0,
+                this._checkboxes
+                    ? GameDropdown._POPUP_CHECKBOX_HEIGHT + 2 * GameDropdown._POPUP_CHECKBOX_PADDING
+                    : 0
+            );
             text.setText(option, this._fontSize, 0xC0DCE7);
             this._popup.addObject(text, contentLayout);
 

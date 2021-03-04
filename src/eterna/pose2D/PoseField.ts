@@ -168,14 +168,14 @@ export default class PoseField extends ContainerObject implements KeyboardListen
             }
         } else if (this._interactionCache.size === 1) {
             if (!this._zoomGestureStarted) {
-                if (this.pose.movingAnnotation) {
+                if (this.pose.annotationManager.isMovingAnnotation) {
                     return;
                 }
 
                 // simple drag
-                if (this._pose.annotations.length > 0) {
+                if (this._pose.annotationManager.allAnnotations.length > 0) {
                     this._erasedAnnotations = true;
-                    this._pose.eraseAnnotations(true);
+                    this._pose.annotationManager.eraseAnnotations(true);
                 }
 
                 ROPWait.notifyMoveCamera();
@@ -209,8 +209,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         }
 
         if (this._erasedAnnotations) {
-            this._pose.eraseAnnotations();
-            this._pose.drawAnnotations();
+            this._pose.annotationManager.refreshAnnotations(this.pose);
             this._erasedAnnotations = false;
         }
     }
