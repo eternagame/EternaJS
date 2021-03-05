@@ -72,7 +72,6 @@ import AnnotationManager, {
     AnnotationRange,
     AnnotationHierarchyType
 } from 'eterna/AnnotationManager';
-import {v4 as uuidv4} from 'uuid';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
@@ -1873,7 +1872,7 @@ export default class PoseEditMode extends GameMode {
 
         if (this._puzzle.nodeID === PuzzleID.TheophyllineRibozymeSwitch) {
             const annotation: AnnotationData = {
-                id: uuidv4(),
+                id: 5000549,
                 type: AnnotationHierarchyType.ANNOTATION,
                 category: AnnotationCategory.PUZZLE,
                 timestamp: (new Date()).getTime(),
@@ -1883,7 +1882,6 @@ export default class PoseEditMode extends GameMode {
                     start: 28,
                     end: 28
                 }],
-                visible: true,
                 positions: [],
                 children: []
             };
