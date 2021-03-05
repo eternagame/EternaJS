@@ -1,6 +1,5 @@
 import {Graphics, Point} from 'pixi.js';
 import {
-    ContainerObject,
     LateUpdatable,
     Assert,
     RepeatingTask,
@@ -9,6 +8,7 @@ import {
     AlphaTask,
     Vector2
 } from 'flashbang';
+import GraphicsObject from 'flashbang/objects/GraphicsObject';
 import {Value} from 'signals';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Pose2D from './Pose2D';
@@ -26,7 +26,7 @@ export enum HighlightType {
 }
 
 /** A class for highlighting groups of bases in a Pose2D */
-export default class HighlightBox extends ContainerObject implements LateUpdatable {
+export default class HighlightBox extends GraphicsObject implements LateUpdatable {
     public readonly hovered = new Value<boolean>(false);
     constructor(pose: Pose2D, type: HighlightType) {
         super();
@@ -37,7 +37,7 @@ export default class HighlightBox extends ContainerObject implements LateUpdatab
 
     protected added(): void {
         super.added();
-        this.container.addChild(this._graphics);
+        this.display.addChild(this._graphics);
 
         this.pointerOver.connect(() => {
             this.hovered.value = true;

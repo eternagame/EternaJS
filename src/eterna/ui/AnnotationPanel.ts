@@ -241,7 +241,7 @@ export default class AnnotationPanel extends ContainerObject {
      * @param items a graph of panel items
      * @param arr array to place panel items into
      */
-    private static collectAnnotationPanelItems = (items: AnnotationPanelItem[], arr: AnnotationPanelItem[]) => {
+    private static collectAnnotationPanelItems(items: AnnotationPanelItem[], arr: AnnotationPanelItem[]): void {
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
 
@@ -252,7 +252,7 @@ export default class AnnotationPanel extends ContainerObject {
                 arr.push(item);
             }
         }
-    };
+    }
 
     /**
      * Rerenders the upper toolbar of the panel. The 'new layer' button

@@ -127,8 +127,14 @@ export default class DragDropper extends ContainerObject {
                     this._tempItem = item;
                 }
 
-                // The last condition ensures the source and target are from the same parent
-                if (!this.mode || !this.mode.container || source._item.index[0] !== this._item.index[0]) return;
+                // The third last condition ensures we don't drop on same item
+                // The last two conditions ensure the source and target are from the same parent
+                if (
+                    !this.mode
+                    || !this.mode.container
+                    || source._item.index[0] !== this._item.index[0]
+                    || source._item.index.length < this._item.index.length
+                ) return;
                 const globalBoxBounds = DisplayUtil.getBoundsRelative(this._displayObject, this.mode.container);
 
                 // Update isOver value: i.e. if drag source is above drop target

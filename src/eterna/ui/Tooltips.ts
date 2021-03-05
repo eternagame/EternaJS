@@ -18,6 +18,7 @@ import {
 } from 'flashbang';
 import {PaletteTarget} from 'eterna/ui/NucleotidePalette';
 import Fonts from 'eterna/util/Fonts';
+import GraphicsObject from 'flashbang/objects/GraphicsObject';
 
 /** A tooltip can be a string, styled text, or a function that creates a DisplayObject */
 export type Tooltip = (() => DisplayObject) | string | StyledTextBuilder;
@@ -49,7 +50,10 @@ export default class Tooltips extends GameObject {
         super.removed();
     }
 
-    public showTooltip(key: Button | PaletteTarget | ContainerObject, loc: Point, tooltip: Tooltip): void {
+    public showTooltip(
+        key: Button | PaletteTarget | ContainerObject | GraphicsObject,
+        loc: Point, tooltip: Tooltip
+    ): void {
         if (this._curTooltipKey === key) {
             return;
         }
@@ -79,7 +83,7 @@ export default class Tooltips extends GameObject {
 
     public showTooltipFor(
         target: DisplayObject,
-        key: Button | PaletteTarget | ContainerObject,
+        key: Button | PaletteTarget | ContainerObject | GraphicsObject,
         tooltip: Tooltip
     ): void {
         if (this._curTooltipKey === key) {
@@ -92,7 +96,7 @@ export default class Tooltips extends GameObject {
         this.showTooltip(key, p, tooltip);
     }
 
-    public removeTooltip(key: Button | PaletteTarget | ContainerObject): void {
+    public removeTooltip(key: Button | PaletteTarget | ContainerObject | GraphicsObject): void {
         if (this._curTooltipKey === key) {
             this.removeCurTooltip();
         }
@@ -107,7 +111,7 @@ export default class Tooltips extends GameObject {
         }
     }
 
-    public addTooltip(ele: Button | ContainerObject, tooltip: Tooltip): Registration {
+    public addTooltip(ele: Button | ContainerObject | GraphicsObject, tooltip: Tooltip): Registration {
         const show = (): void => {
             if ((ele instanceof Button && ele.enabled) || !(ele instanceof Button)) {
                 this.showTooltipFor(ele.display, ele, tooltip);
@@ -153,7 +157,7 @@ export default class Tooltips extends GameObject {
 
     private readonly _layer: Container;
 
-    private _curTooltipKey: Button | PaletteTarget | ContainerObject | null;
+    private _curTooltipKey: Button | PaletteTarget | ContainerObject | GraphicsObject | null;
     private _curTooltip: DisplayObject | null;
     private _curTooltipFader: GameObjectRef = GameObjectRef.NULL;
 
