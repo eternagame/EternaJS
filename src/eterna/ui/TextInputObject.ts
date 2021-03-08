@@ -22,6 +22,7 @@ interface TextInputObjectProps {
     placeholder?: string;
     bgColor?: number;
     borderColor?: number;
+    domParent?: string | HTMLElement;
     characterLimit?: number;
 }
 
@@ -35,7 +36,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
 
     constructor(props: TextInputObjectProps) {
         super(
-            Eterna.OVERLAY_DIV_ID, (props.rows ?? 1) === 1
+            props.domParent ?? Eterna.OVERLAY_DIV_ID, (props.rows ?? 1) === 1
                 ? TextInputObject.createTextInput(
                     props.height ?? 40, props.placeholder,
                     props.characterLimit,
@@ -122,8 +123,12 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
                 setTimeout(() => {
                     this.destroyFakeTextInput();
                     this._obj.style.visibility = 'visible';
+                    // On Chrome, it seems there's a bug (?) that causes the input to zoom into focus
+                    // based on its actual position and not its transformed position, or... something
+                    // At any rate without this when a partially offscreen textbox is shown the entire
+                    // page moves.
                     if (this._obj instanceof HTMLInputElement || this._obj instanceof HTMLTextAreaElement) {
-                        this._obj.focus();
+                        this._obj.focus({preventScroll: true});
                     } else {
                         let input: HTMLInputElement | HTMLTextAreaElement | undefined;
                         for (const child of this._obj.children) {
@@ -134,7 +139,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
                             }
                         }
                         if (input) {
-                            input.focus();
+                            input.focus({preventScroll: true});
                         }
                     }
                 });
