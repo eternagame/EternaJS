@@ -132,6 +132,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
             this._dragStart = new Point(x, y);
             this._dragPoseStart = new Point(this._pose.xOffset, this._pose.yOffset);
         }
+
         e.stopPropagation();
     }
 
@@ -167,7 +168,16 @@ export default class PoseField extends ContainerObject implements KeyboardListen
             }
         } else if (this._interactionCache.size === 1) {
             if (!this._zoomGestureStarted) {
+                if (this.pose.annotationManager.isMovingAnnotation) {
+                    return;
+                }
+
                 // simple drag
+                if (this._pose.annotationManager.allAnnotations.length > 0) {
+                    this._erasedAnnotations = true;
+                    this._pose.annotationManager.eraseAnnotations(true);
+                }
+
                 ROPWait.notifyMoveCamera();
                 const [finger] = Array.from(this._interactionCache.values());
                 const deltaX = finger.x - this._dragStart.x;
@@ -196,6 +206,11 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
         if (this._zoomGestureStarted) {
             this._zoomGestureStarted = this._interactionCache.size > 0;
+        }
+
+        if (this._erasedAnnotations) {
+            this._pose.annotationManager.refreshAnnotations(this.pose);
+            this._erasedAnnotations = false;
         }
     }
 
@@ -292,6 +307,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     private _dragStart = new Point();
     private _zoomDirection = 0;
     private _zoomGestureStarted = false;
+    private _erasedAnnotations = false;
 
     private static readonly P: Point = new Point();
 }

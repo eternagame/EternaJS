@@ -38,7 +38,7 @@ import Folder from './folding/Folder';
 import RSignals from './rscript/RSignals';
 import Fonts from './util/Fonts';
 
-enum PuzzleID {
+export enum PuzzleID {
     FunAndEasy = 4350940,
     Tulip2 = 467887,
     TryptophanASameState = 8787266,

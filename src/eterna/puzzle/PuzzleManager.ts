@@ -390,6 +390,7 @@ export default class PuzzleManager {
         log.info(`Loading puzzle [nid=${puznid}, scriptid=${scriptid}...]`);
         const json = await Eterna.client.getPuzzle(puznid, scriptid);
         const data = json['data'];
+
         if (data['hairpins']) {
             SolutionManager.instance.addHairpins(data['hairpins']);
         }

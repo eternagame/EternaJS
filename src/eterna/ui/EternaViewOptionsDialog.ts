@@ -50,7 +50,6 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
         if (this._optionsMode === EternaViewOptionsMode.LAB) {
             bind(Eterna.settings.useContinuousColors, 'Use continuous colors for the exp. data (advanced)');
             bind(Eterna.settings.useExtendedColors, 'Use extended 4-color scale for the exp. data (advanced)');
-            bind(Eterna.settings.displayAuxInfo, 'Display auxiliary information about RNAs');
         }
 
         const NUM_VOLUME_BUTTONS = 5;
@@ -100,7 +99,13 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
 
         this._viewLayout.layout();
 
-        this._panel = new GamePanel(GamePanelType.NORMAL, 1, 0x21508C, 1, 0x4A90E2);
+        this._panel = new GamePanel({
+            type: GamePanelType.NORMAL,
+            alpha: 1,
+            color: 0x21508C,
+            borderAlpha: 1,
+            borderColor: 0x4A90E2
+        });
         this._panel.title = 'Settings';
         this.addObject(this._panel, this.container);
 
