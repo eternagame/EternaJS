@@ -2,9 +2,9 @@ import MultiStyleText from 'pixi-multistyle-text';
 import {Point, Text} from 'pixi.js';
 import {StyledTextBuilder, DisplayUtil, ContainerObject} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
-import BaseGamePanel from './BaseGamePanel';
 import GameButton from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';
+import {FontWeight} from '../../flashbang/util/TextBuilder';
 
 export default class TextBalloon extends ContainerObject {
     constructor(
@@ -12,11 +12,36 @@ export default class TextBalloon extends ContainerObject {
         balloonColor: number = 0xFFFFFF,
         balloonAlpha: number = 0.07,
         borderColor: number = 0,
-        borderAlpha: number = 0
+        borderAlpha: number = 0,
+        width: number | null = null,
+        height: number | null = null,
+        borderRadius: number | undefined = undefined,
+        textOffset: number = 0,
+        textColor: number = TextBalloon.DEFAULT_FONT_COLOR,
+        textWeight: string = FontWeight.REGULAR,
+        maxWidth: number | null = null
     ) {
         super();
 
-        this._panel = new GamePanel(GamePanelType.NORMAL, balloonAlpha, balloonColor, borderAlpha, borderColor);
+        this._textOffset = textOffset;
+        this._panel = new GamePanel({
+            type: GamePanelType.NORMAL,
+            alpha: balloonAlpha,
+            color: balloonColor,
+            borderAlpha,
+            borderColor,
+            borderRadius
+        });
+        if (width && height) {
+            this._width = width;
+            this._height = height;
+            this._panel.setSize(width, height);
+        }
+
+        if (maxWidth) {
+            this._maxWidth = maxWidth;
+        }
+
         this.addObject(this._panel, this.container);
 
         this._button = new GameButton().label('Next', 12);
@@ -24,7 +49,7 @@ export default class TextBalloon extends ContainerObject {
         this._button.display.visible = false;
 
         if (text != null && text.length > 0) {
-            this.setText(text);
+            this.setText(text, TextBalloon.DEFAULT_FONT_SIZE, textColor, textWeight);
         }
     }
 
@@ -66,12 +91,24 @@ export default class TextBalloon extends ContainerObject {
         }
     }
 
-    public setText(text: string, fontsize: number = 15, fontColor: number = 0xC0DCE7): void {
+    public setText(
+        text: string,
+        fontsize: number = 15,
+        fontColor: number = TextBalloon.DEFAULT_FONT_COLOR,
+        fontWeight: string = FontWeight.REGULAR
+    ): void {
         this.styledText = new StyledTextBuilder({
             fontFamily: Fonts.STDFONT,
             fontSize: fontsize,
-            fill: fontColor
+            fill: fontColor,
+            fontWeight,
+            wordWrap: !!this._maxWidth,
+            wordWrapWidth: this._maxWidth
         }).append(text);
+    }
+
+    public setBalloonColor(color: number = 0xFFFFFF): void {
+        this._panel.color = color;
     }
 
     public showButton(show: boolean): GameButton {
@@ -107,8 +144,14 @@ export default class TextBalloon extends ContainerObject {
             return;
         }
 
-        const {width} = this;
-        const {height} = this;
+        let {width} = this;
+        let {height} = this;
+        if (this._width) {
+            width = this._width;
+        }
+        if (this._height) {
+            height = this._height;
+        }
         this._panel.setSize(width, height);
 
         const wholeWidth: number = width - 2 * TextBalloon.W_MARGIN;
@@ -116,7 +159,10 @@ export default class TextBalloon extends ContainerObject {
 
         if (!this._centered) {
             if (this._text != null) {
-                this._text.position = new Point(TextBalloon.W_MARGIN, TextBalloon.H_MARGIN + titleSpace);
+                this._text.position = new Point(
+                    TextBalloon.W_MARGIN + this._textOffset,
+                    TextBalloon.H_MARGIN + titleSpace
+                );
             }
 
             if (this._button.display.visible) {
@@ -147,11 +193,19 @@ export default class TextBalloon extends ContainerObject {
 
     protected _button: GameButton;
 
-    protected _panel: BaseGamePanel;
+    private _panel: GamePanel;
     protected _text: MultiStyleText;
     protected _centered: boolean = false;
     protected _hasTitle: boolean = false;
 
+    private _width: number | undefined;
+    private _height: number | undefined;
+    private _maxWidth: number | undefined = undefined;
+
+    private _textOffset: number = 0;
+
     protected static readonly W_MARGIN = 10;
     protected static readonly H_MARGIN = 10;
+    public static readonly DEFAULT_FONT_SIZE = 15;
+    public static readonly DEFAULT_FONT_COLOR = 0xC0DCE7;
 }
