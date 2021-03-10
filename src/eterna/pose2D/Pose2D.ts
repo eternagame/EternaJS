@@ -37,10 +37,8 @@ import PaintCursor from './PaintCursor';
 import PoseField from './PoseField';
 import PoseUtil from './PoseUtil';
 import PuzzleEditOp from './PuzzleEditOp';
-import RNAAnchorObject from './RNAAnchorObject';
 import RNALayout, {RNATreeNode} from './RNALayout';
 import ScoreDisplayNode, {ScoreDisplayNodeType} from './ScoreDisplayNode';
-import ExplosionFactorPanel from './ExplosionFactorPanel';
 import triangulate from './triangulate';
 import Tooltips from '../ui/Tooltips';
 
@@ -67,8 +65,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public static readonly OLIGO_MODE_EXT3P: number = 2;
     public static readonly OLIGO_MODE_EXT5P: number = 3;
 
-    private static readonly SCORES_POSITION_Y = 128;
-
     constructor(poseField: PoseField, editable: boolean) {
         super();
         this._poseField = poseField;
@@ -89,20 +85,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         this.container.addChild(this._baseLayer);
 
-        this._primaryScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
-        this._primaryScoreEnergyDisplay.position = new Point(17, Pose2D.SCORES_POSITION_Y);
-        this.container.addChild(this._primaryScoreEnergyDisplay);
-
-        this._deltaScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
-        this._deltaScoreEnergyDisplay.position = new Point(17 + 119, Pose2D.SCORES_POSITION_Y);
-        this._deltaScoreEnergyDisplay.visible = false;
-        this.container.addChild(this._deltaScoreEnergyDisplay);
-
-        this._secondaryScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
-        this._secondaryScoreEnergyDisplay.position = new Point(17 + 119 * 2, Pose2D.SCORES_POSITION_Y);
-        this._secondaryScoreEnergyDisplay.visible = false;
-        this.container.addChild(this._secondaryScoreEnergyDisplay);
-
         this._moleculeLayer = new Container();
         this.container.addChild(this._moleculeLayer);
         this._moleculeLayer.visible = false;
@@ -113,16 +95,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._paintCursor = new PaintCursor();
         this._paintCursor.display.visible = false;
         this.addObject(this._paintCursor, this.container);
-
-        this._explosionFactorPanel = new ExplosionFactorPanel();
-        this._explosionFactorPanel.display.position = new Point(17, Pose2D.SCORES_POSITION_Y + 82);
-        this._explosionFactorPanel.display.visible = false;
-        this._explosionFactorPanel.factorUpdated.connect((factor: number) => {
-            this._explosionFactor = factor;
-            this.computeLayout(true);
-            this._redraw = true;
-        });
-        this.addObject(this._explosionFactorPanel, this.container);
 
         this._explosionRays = [];
         for (let ii = 0; ii < 10; ii++) {
@@ -196,29 +168,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.container.hitArea = new Rectangle(0, 0, width, height);
     }
 
+    public set redraw(setting: boolean) {
+        this._redraw = setting;
+    }
+
     public get baseLayer(): Container {
         return this._baseLayer;
-    }
-
-    public get primaryScoreDisplay(): EnergyScoreDisplay {
-        return this._primaryScoreEnergyDisplay;
-    }
-
-    public get secondaryScoreDisplay(): EnergyScoreDisplay {
-        return this._secondaryScoreEnergyDisplay;
-    }
-
-    public addAnchoredObject(obj: RNAAnchorObject): void {
-        this._anchoredObjects.push(obj);
-    }
-
-    public removeAnchoredObject(obj: RNAAnchorObject): void {
-        for (let ii = 0; ii < this._anchoredObjects.length; ++ii) {
-            if (obj === this._anchoredObjects[ii]) {
-                this._anchoredObjects.splice(ii, 1);
-                break;
-            }
-        }
     }
 
     public get isAnimating(): boolean {
@@ -2444,17 +2399,15 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     private makeHighlightState() {
-        let hlState: RNAHighlightState | undefined;
-        if (this._allNewHighlights.length > 0) {
-            hlState = new RNAHighlightState();
-            hlState.nuc = [];
-            hlState.isOn = true;
-            for (const existingHighlight of this._allNewHighlights) {
-                if (existingHighlight.nuc !== null) {
-                    hlState.nuc = hlState.nuc.concat(existingHighlight.nuc);
-                }
-            }
+        if (this._allNewHighlights.length === 0) {
+            return undefined;
         }
+
+        const hlState = new RNAHighlightState();
+        hlState.nuc = Array.prototype.concat(
+            this._allNewHighlights.map((h) => h.nuc).filter((n): n is number[] => n !== null)
+        );
+        hlState.isOn = true;
         return hlState;
     }
 
@@ -2502,12 +2455,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
         Assert.assertIsDefined(this.mode);
         const currentTime: number = this.mode.time;
-        for (const anchor of this._anchoredObjects) {
-            if (anchor.isLive) {
-                const p: Point = this.getBaseLoc(anchor.base);
-                anchor.object.display.position = new Point(p.x + anchor.offset.x, p.y + anchor.offset.y);
-            }
-        }
 
         const fullSeq: Sequence = this.fullSequence;
         let center: Point;
@@ -2787,17 +2734,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._baseFromY = null;
 
             this.updateScoreNodeGui();
-
-            if (this.checkOverlap()) {
-                // If overlaps have been introduced, make sure the explosion factor input is shown
-                this._explosionFactorPanel.display.visible = true;
-            } else if (this._explosionFactorPanel.display.visible === true) {
-                // If all overlaps have been removed, remove the explosion
-                this._explosionFactor = 1;
-                this._explosionFactorPanel.display.visible = false;
-                this.computeLayout(true);
-                this._redraw = true;
-            }
         }
     }
 
@@ -2822,31 +2758,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._lettermode;
     }
 
-    public get showTotalEnergy(): boolean {
-        return this._showTotalEnergy;
-    }
-
-    public set showTotalEnergy(show: boolean) {
-        this._showTotalEnergy = show;
-        this._primaryScoreEnergyDisplay.visible = (show && this._scoreFolder != null);
-        this._secondaryScoreEnergyDisplay.visible = (
-            show && this._scoreFolder != null && this._secondaryScoreEnergyDisplay.hasText
-        );
-        this._deltaScoreEnergyDisplay.visible = show && this._scoreFolder != null;
-    }
-
-    public get showExplosionFactor(): boolean {
-        return this._explosionFactorPanel.display.visible;
-    }
-
-    public set showExplosionFactor(show: boolean) {
-        this._explosionFactorPanel.display.visible = show;
-    }
-
     public set scoreFolder(folder: Folder | null) {
         if (this._scoreFolder !== folder) {
             this._scoreFolder = folder;
-            this.showTotalEnergy = this._showTotalEnergy;
+            // this.showTotalEnergy = this._showTotalEnergy;
             this.generateScoreNodes();
         }
     }
@@ -3065,6 +2980,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
+    public fastLayout(): void {
+        this.computeLayout(true);
+    }
+
     private computeLayout(fast: boolean = false): void {
         const fullSeq: Sequence = this.fullSequence;
 
@@ -3093,7 +3012,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
         const rnaDrawer: RNALayout = new RNALayout(
             Pose2D.ZOOM_SPACINGS[this._zoomLevel],
-            Pose2D.ZOOM_SPACINGS[this._zoomLevel] * this._explosionFactor,
+            Pose2D.ZOOM_SPACINGS[this._zoomLevel] * this._poseField.explosionFactor,
             exceptionIndices
         );
 
@@ -3520,7 +3439,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         for (let ii = 0; ii < this._pairs.length; ii++) {
             const pi = this._pairs.pairingPartner(ii);
             if (this._pairs.isPaired(ii) && this.isPairSatisfied(ii, pi)) {
-                const pairStr: number = Pose2D.getPairStrength(
+                const pairStr: number = PoseUtil.getPairStrength(
                     fullSeq.nt(ii), fullSeq.nt(pi)
                 );
 
@@ -3723,39 +3642,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
             } else {
                 scoreScore = `${(totalScore / 100).toString()} kcal`;
             }
-            this.updateEnergyDisplaySizeLocation(factor);
 
-            this._primaryScoreEnergyDisplay.setEnergyText(scoreLabel, scoreScore);
-            this._secondaryScoreEnergyDisplay.setEnergyText(nodeLabel, nodeScore);
-            this._secondaryScoreEnergyDisplay.visible = (this._showTotalEnergy && nodeFound);
-
-            // This is because the undo stack isn't populated yet when this is run on puzzle boot/changing folders,
-            // which is needed for the delta - TODO: Handle this in a less hacky way
-            const attemptSetDelta = () => {
-                try {
-                    this._deltaScoreEnergyDisplay.setEnergyText(
-                        'Natural/Target Delta',
-                        `${Math.round(this._getEnergyDelta()) / 100} kcal`
-                    );
-                    this._deltaScoreEnergyDisplay.visible = (this._showTotalEnergy && this._scoreFolder != null);
-                } catch (e) {
-                    this._deltaScoreEnergyDisplay.visible = false;
-                    setTimeout(attemptSetDelta, 1000);
-                }
-            };
-            setTimeout(attemptSetDelta, 50);
+            this._poseField.updateEnergyGui(
+                factor, scoreLabel, scoreScore, nodeLabel, nodeScore, nodeFound, this._getEnergyDelta
+            );
         }
-    }
-
-    private updateEnergyDisplaySizeLocation(factor: number): void {
-        this._primaryScoreEnergyDisplay.position = new Point(17, Pose2D.SCORES_POSITION_Y);
-        this._primaryScoreEnergyDisplay.setSize(111 + factor * 59, 40);
-
-        this._deltaScoreEnergyDisplay.position = new Point(17 + 119 + factor * 59, Pose2D.SCORES_POSITION_Y);
-        this._deltaScoreEnergyDisplay.setSize(111, 40);
-
-        this._secondaryScoreEnergyDisplay.position = new Point(17 + 119 * 2 + factor * 59, Pose2D.SCORES_POSITION_Y);
-        this._secondaryScoreEnergyDisplay.setSize(111, 40);
     }
 
     private clearScoreTexts(): void {
@@ -3889,27 +3780,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     private static createDefaultLocks(sequenceLength: number): boolean[] {
-        const locks: boolean[] = new Array<boolean>(sequenceLength);
-        for (let ii = 0; ii < sequenceLength; ++ii) {
-            locks[ii] = false;
-        }
-        return locks;
-    }
-
-    private static getPairStrength(s1: number, s2: number): number {
-        if (Pose2D.isPair(s1, s2, RNABase.ADENINE, RNABase.URACIL)) {
-            return 2;
-        } else if (Pose2D.isPair(s1, s2, RNABase.GUANINE, RNABase.URACIL)) {
-            return 1;
-        } else if (Pose2D.isPair(s1, s2, RNABase.GUANINE, RNABase.CYTOSINE)) {
-            return 3;
-        } else {
-            return -1;
-        }
-    }
-
-    private static isPair(s1: number, s2: number, type1: number, type2: number): boolean {
-        return (s1 === type1 && s2 === type2) || (s1 === type2 && s2 === type1);
+        return new Array<boolean>(sequenceLength).fill(false);
     }
 
     private readonly _baseLayer: Container = new Container();
@@ -4058,16 +3929,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _lastScoreNodeIndex: number = -1;
     private _scoreNodeHighlight: Graphics;
 
-    // New Score Display panels
-    private _primaryScoreEnergyDisplay: EnergyScoreDisplay;
-    private _secondaryScoreEnergyDisplay: EnergyScoreDisplay;
-    private _deltaScoreEnergyDisplay: EnergyScoreDisplay;
-    private _showTotalEnergy: boolean = true;
-
-    // Explosion Factor (RNALayout pairSpace multiplier)
-    private _explosionFactor: number = 1;
-    private _explosionFactorPanel: ExplosionFactorPanel;
-
     // For tracking a base
     private _cursorIndex: number | null = 0;
     private _cursorBox: Graphics | null = null;
@@ -4090,7 +3951,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _expContinuous: boolean = false;
     private _expExtendedScale: boolean = false;
 
-    private _anchoredObjects: RNAAnchorObject[] = [];
     private _highlightEnergyText: boolean = false;
     private _energyHighlights: SceneObject[] = [];
 

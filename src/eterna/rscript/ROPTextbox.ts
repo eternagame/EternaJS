@@ -102,7 +102,7 @@ export default class ROPTextbox extends RScriptOp {
                 }
 
                 textBox.display.position = new Point(p.x + offset.x, p.y + offset.y);
-                this._env.pose.addAnchoredObject(new RNAAnchorObject(textBox, this._targetIndex, offset));
+                this._env.poseField.addAnchoredObject(new RNAAnchorObject(textBox, this._targetIndex, offset));
             } else if (this._mode === ROPTextboxMode.TEXTBOX_DEFAULT) {
                 this._env.setTextboxVisible(this._id, true);
             }

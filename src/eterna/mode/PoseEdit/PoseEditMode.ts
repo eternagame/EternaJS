@@ -531,8 +531,8 @@ export default class PoseEditMode extends GameMode {
     }
 
     public setShowTotalEnergy(show: boolean): void {
-        for (const pose of this._poses) {
-            pose.showTotalEnergy = show;
+        for (const poseField of this._poseFields) {
+            poseField.showTotalEnergy = show;
         }
     }
 
@@ -694,28 +694,30 @@ export default class PoseEditMode extends GameMode {
             const poseState = this._isPipMode || poseIdx !== 0 ? poseIdx : this._curTargetIndex;
             if (!highlightInfos) continue;
             for (const highlightInfo of highlightInfos) {
-                if (highlightInfo && (highlightInfo.stateIndex == null || poseState === highlightInfo.stateIndex)) {
-                    const currBlock = this.getCurrentUndoBlock(poseState);
-                    const naturalMap = currBlock.reorderedOligosIndexMap(currBlock.oligoOrder);
-                    const ranges = (this._poseState === PoseState.NATIVE && naturalMap != null)
-                        ? highlightInfo.ranges.map((index: number) => {
-                            Assert.assertIsDefined(naturalMap);
-                            return naturalMap.indexOf(index);
-                        }) : highlightInfo.ranges;
+                if (highlightInfo.stateIndex !== undefined && poseState !== highlightInfo.stateIndex) {
+                    continue;
+                }
 
-                    switch (highlightInfo.color) {
-                        case HighlightType.RESTRICTED:
-                            pose.highlightRestrictedSequence(ranges);
-                            break;
-                        case HighlightType.UNSTABLE:
-                            pose.highlightUnstableSequence(ranges);
-                            break;
-                        case HighlightType.USER_DEFINED:
-                            pose.highlightUserDefinedSequence(ranges);
-                            break;
-                        default:
-                            log.error(`Invalid highlight type: ${highlightInfo.color}`);
-                    }
+                const currBlock = this.getCurrentUndoBlock(poseState);
+                const naturalMap = currBlock.reorderedOligosIndexMap(currBlock.oligoOrder);
+                const ranges = (this._poseState === PoseState.NATIVE && naturalMap !== undefined)
+                    ? highlightInfo.ranges.map((index: number) => {
+                        Assert.assertIsDefined(naturalMap);
+                        return naturalMap.indexOf(index);
+                    }) : highlightInfo.ranges;
+
+                switch (highlightInfo.color) {
+                    case HighlightType.RESTRICTED:
+                        pose.highlightRestrictedSequence(ranges);
+                        break;
+                    case HighlightType.UNSTABLE:
+                        pose.highlightUnstableSequence(ranges);
+                        break;
+                    case HighlightType.USER_DEFINED:
+                        pose.highlightUserDefinedSequence(ranges);
+                        break;
+                    default:
+                        log.error(`Invalid highlight type: ${highlightInfo.color}`);
                 }
             }
         }
@@ -908,26 +910,26 @@ export default class PoseEditMode extends GameMode {
             this._targetOligo.push(undefined);
             this._oligoMode.push(undefined);
             this._oligoName.push(undefined);
-            if (targetConditions[ii] !== undefined) {
-                const tc = targetConditions[ii] as TargetConditions;
-                if (tc['oligo_sequence']) {
-                    this._targetOligo[ii] = Sequence.fromSequenceString(tc['oligo_sequence'] as string).baseArray;
-                    this._oligoMode[ii] = tc['fold_mode'] == null
-                        ? Pose2D.OLIGO_MODE_DIMER
-                        : Number(tc['fold_mode']);
-                    this._oligoName[ii] = tc['oligo_name'];
-                }
-                if (tc['oligos']) {
-                    // Map from OligoDef to Oligo, basically requires turning
-                    // a sequence string into a baseArray.
-                    this._targetOligos[ii] = tc['oligos'].map(
-                        (odef) => ({
-                            sequence: Sequence.fromSequenceString(odef.sequence).baseArray,
-                            malus: odef.malus,
-                            name: odef.name
-                        })
-                    );
-                }
+            if (targetConditions[ii] === undefined) continue;
+
+            const tc = targetConditions[ii] as TargetConditions;
+            if (tc['oligo_sequence']) {
+                this._targetOligo[ii] = Sequence.fromSequenceString(tc['oligo_sequence'] as string).baseArray;
+                this._oligoMode[ii] = tc['fold_mode'] === undefined
+                    ? Pose2D.OLIGO_MODE_DIMER
+                    : Number(tc['fold_mode']);
+                this._oligoName[ii] = tc['oligo_name'];
+            }
+            if (tc['oligos']) {
+                // Map from OligoDef to Oligo, basically requires turning
+                // a sequence string into a baseArray.
+                this._targetOligos[ii] = tc['oligos'].map(
+                    (odef) => ({
+                        sequence: Sequence.fromSequenceString(odef.sequence).baseArray,
+                        malus: odef.malus,
+                        name: odef.name
+                    })
+                );
             }
         }
 
@@ -1710,9 +1712,9 @@ export default class PoseEditMode extends GameMode {
         this._hintBoxRef.destroyObject();
 
         const explosionFactorVisible: boolean[] = [];
-        for (const pose of this._poses) {
-            explosionFactorVisible.push(pose.showExplosionFactor);
-            pose.showExplosionFactor = false;
+        for (const poseField of this._poseFields) {
+            explosionFactorVisible.push(poseField.showExplosionFactor);
+            poseField.showExplosionFactor = false;
         }
 
         const tempBG = DisplayUtil.fillStageRect(0x061A34);
@@ -1734,8 +1736,8 @@ export default class PoseEditMode extends GameMode {
             disp.visible = wasVisible;
         }
 
-        for (let ii = 0; ii < this._poses.length; ++ii) {
-            this._poses[ii].showExplosionFactor = explosionFactorVisible[ii];
+        for (let ii = 0; ii < this._poseFields.length; ++ii) {
+            this._poseFields[ii].showExplosionFactor = explosionFactorVisible[ii];
         }
 
         if (showingHint) {
@@ -1784,27 +1786,29 @@ export default class PoseEditMode extends GameMode {
     private getForcedHighlights(targetIndex: number): number[] {
         const elems: number[] = [];
 
-        if (this._targetConditions && this._targetConditions[targetIndex] !== undefined) {
-            const tc = this._targetConditions[targetIndex] as TargetConditions;
-            const maxLen: number = this._poses[targetIndex].sequence.length;
-            for (let ii = 0; ii < this._poses.length; ii++) {
-                if (ii === targetIndex || tc['force_struct'] == null) {
-                    continue;
-                }
+        if (this._targetConditions[targetIndex] === undefined) {
+            return elems;
+        }
 
-                let curr = 1;
-                const forced: number[] = EPars.parenthesisToForcedArray(tc['force_struct']);
-                let jj;
-                for (jj = 0; jj < maxLen && jj < forced.length; jj++) {
-                    const _stat: number = (forced[jj] === EPars.FORCE_IGNORE ? 1 : 0);
-                    if ((curr ^ _stat) !== 0) {
-                        elems.push(jj - _stat);
-                        curr = _stat;
-                    }
+        const tc = this._targetConditions[targetIndex] as TargetConditions;
+        const maxLen: number = this._poses[targetIndex].sequence.length;
+        for (let ii = 0; ii < this._poses.length; ii++) {
+            if (ii === targetIndex || tc['force_struct'] == null) {
+                continue;
+            }
+
+            let curr = 1;
+            const forced: number[] = EPars.parenthesisToForcedArray(tc['force_struct']);
+            let jj;
+            for (jj = 0; jj < maxLen && jj < forced.length; jj++) {
+                const _stat: number = (forced[jj] === EPars.FORCE_IGNORE ? 1 : 0);
+                if ((curr ^ _stat) !== 0) {
+                    elems.push(jj - _stat);
+                    curr = _stat;
                 }
-                if ((elems.length % 2) === 1) {
-                    elems.push(jj - 1);
-                }
+            }
+            if ((elems.length % 2) === 1) {
+                elems.push(jj - 1);
             }
         }
 
@@ -2215,22 +2219,24 @@ export default class PoseEditMode extends GameMode {
                 for (const pose of this._poses) {
                     pose.setZoomLevel(0, true, true);
                     const p = pose.startExplosion();
-                    if (fxComplete == null) {
-                        fxComplete = p.then(() => {
-                            bubbles.decay();
-                            bubbles.addObject(new SerialTask(
-                                new AlphaTask(0, 5, Easing.easeIn),
-                                new SelfDestructTask()
-                            ));
+                    if (fxComplete != null) continue;
 
-                            for (const poseToClear of this._poses) {
-                                poseToClear.showTotalEnergy = false;
-                                poseToClear.clearExplosion();
-                            }
+                    fxComplete = p.then(() => {
+                        bubbles.decay();
+                        bubbles.addObject(new SerialTask(
+                            new AlphaTask(0, 5, Easing.easeIn),
+                            new SelfDestructTask()
+                        ));
 
-                            this._constraintsLayer.visible = false;
-                        });
-                    }
+                        for (const poseFieldToClear of this._poseFields) {
+                            poseFieldToClear.showTotalEnergy = false;
+                        }
+                        for (const poseExplosion of this._poses) {
+                            poseExplosion.clearExplosion();
+                        }
+
+                        this._constraintsLayer.visible = false;
+                    });
                 }
             }
         }
@@ -2295,14 +2301,11 @@ export default class PoseEditMode extends GameMode {
                 this.setAncestorId(data['solution-id']);
             }
 
-            if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
-                if (this._puzzle.useBarcode) {
-                    const hairpin: string | null = EPars.getBarcodeHairpin(seqString());
-                    if (hairpin != null) {
-                        SolutionManager.instance.addHairpins([hairpin]);
-                        this.checkConstraints();
-                    }
-                }
+            if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
+                && this._puzzle.useBarcode
+                && EPars.getBarcodeHairpin(seqString()) !== null) {
+                SolutionManager.instance.addHairpins([EPars.getBarcodeHairpin(seqString()) as string]);
+                this.checkConstraints();
             }
         }
     }
@@ -2315,8 +2318,8 @@ export default class PoseEditMode extends GameMode {
         this._constraintsLayer.visible = false;
         this._exitButton.display.visible = false;
         this._helpBar.display.visible = false;
-        for (const pose of this._poses) {
-            pose.showTotalEnergy = false;
+        for (const poseField of this._poseFields) {
+            poseField.showTotalEnergy = false;
         }
         Eterna.chat.pushHideChat();
 
@@ -2345,26 +2348,25 @@ export default class PoseEditMode extends GameMode {
         if (submitSolutionRspData) missionClearedPanel.createRankScroll(submitSolutionRspData);
 
         const keepPlaying = () => {
-            if (missionClearedPanel != null) {
-                Eterna.chat.popHideChat();
+            if (missionClearedPanel === null) return;
+            Eterna.chat.popHideChat();
 
-                missionClearedPanel.destroySelf();
-                missionClearedPanel = null;
+            missionClearedPanel.destroySelf();
+            missionClearedPanel = null;
 
-                // Restore UI
-                this._constraintsLayer.visible = true;
-                this.disableTools(false);
+            // Restore UI
+            this._constraintsLayer.visible = true;
+            this.disableTools(false);
 
-                for (const pose of this._poses) {
-                    pose.showTotalEnergy = true;
-                }
-
-                this._exitButton.display.alpha = 0;
-                this._exitButton.display.visible = true;
-                this._exitButton.addObject(new AlphaTask(1, 0.3));
-
-                this._helpBar.display.visible = true;
+            for (const poseField of this._poseFields) {
+                poseField.showTotalEnergy = true;
             }
+
+            this._exitButton.display.alpha = 0;
+            this._exitButton.display.visible = true;
+            this._exitButton.addObject(new AlphaTask(1, 0.3));
+
+            this._helpBar.display.visible = true;
         };
 
         if (hasNextPuzzle) {
@@ -2581,11 +2583,6 @@ export default class PoseEditMode extends GameMode {
         if (this._puzzle.puzzleType === PuzzleType.BASIC) {
             return false;
         }
-
-        // if (this.root.loaderInfo.parameters.autoload
-        //     && Number(this.root.loaderInfo.parameters.autoload) === 0) {
-        //     return false;
-        // }
 
         const beginningSequence: Sequence = this._puzzle.getBeginningSequence();
         const locks: boolean[] = this._puzzle.puzzleLocks;
@@ -3031,88 +3028,92 @@ export default class PoseEditMode extends GameMode {
         const lastShiftedIndex: number = this._poses[targetIndex].lastShiftedIndex;
         const lastShiftedCommand: number = this._poses[targetIndex].lastShiftedCommand;
         for (let ii = 0; ii < this._poses.length; ii++) {
-            if (lastShiftedIndex > 0 && lastShiftedCommand >= 0) {
-                if (ii !== targetIndex) {
-                    this._poses[ii].baseShiftWithCommand(lastShiftedCommand, lastShiftedIndex);
+            if (lastShiftedIndex <= 0 || lastShiftedCommand < 0) {
+                this._poses[ii].sequence = this._poses[targetIndex].sequence;
+                this._poses[ii].puzzleLocks = this._poses[targetIndex].puzzleLocks;
+                continue;
+            }
+
+            if (ii !== targetIndex) {
+                this._poses[ii].baseShiftWithCommand(lastShiftedCommand, lastShiftedIndex);
+            }
+
+            const results: [string, PuzzleEditOp, number[]?] | null = this._poses[ii].parseCommandWithPairs(
+                lastShiftedCommand, lastShiftedIndex, this._targetPairs[ii]
+            );
+            if (results != null) {
+                const parenthesis: string = results[0];
+                this._targetPairs[ii] = SecStruct.fromParens(parenthesis);
+            }
+
+            // Adjust indices for all constraints in TargetConditions
+            const tc = this._targetConditions[ii] as TargetConditions;
+            const antiStructureConstraints = tc['anti_structure_constraints'];
+            if (antiStructureConstraints !== undefined) {
+                if (lastShiftedCommand === RNAPaint.ADD_BASE) {
+                    const antiStructureConstraint: boolean = antiStructureConstraints[lastShiftedIndex];
+                    antiStructureConstraints.splice(lastShiftedIndex, 0, antiStructureConstraint);
+                } else if (lastShiftedCommand === RNAPaint.DELETE) {
+                    antiStructureConstraints.splice(lastShiftedIndex, 1);
                 }
+            }
 
-                const results: [string, PuzzleEditOp, number[]?] | null = this._poses[ii].parseCommandWithPairs(
-                    lastShiftedCommand, lastShiftedIndex, this._targetPairs[ii]
-                );
-                if (results != null) {
-                    const parenthesis: string = results[0];
-                    this._targetPairs[ii] = SecStruct.fromParens(parenthesis);
-                }
+            const structureConstraints = tc['structure_constraints'];
+            if (structureConstraints !== undefined) {
+                const constraintVal: boolean = structureConstraints[lastShiftedIndex];
+                let newConstraints: boolean[];
 
-                // Adjust indices for all constraints in TargetConditions
-                const tc = this._targetConditions[ii] as TargetConditions;
-                const antiStructureConstraints = tc['anti_structure_constraints'];
-                if (antiStructureConstraints !== undefined) {
-                    if (lastShiftedCommand === RNAPaint.ADD_BASE) {
-                        const antiStructureConstraint: boolean = antiStructureConstraints[lastShiftedIndex];
-                        antiStructureConstraints.splice(lastShiftedIndex, 0, antiStructureConstraint);
-                    } else if (lastShiftedCommand === RNAPaint.DELETE) {
-                        antiStructureConstraints.splice(lastShiftedIndex, 1);
-                    }
-                }
-
-                const structureConstraints = tc['structure_constraints'];
-                if (structureConstraints !== undefined) {
-                    const constraintVal: boolean = structureConstraints[lastShiftedIndex];
-                    let newConstraints: boolean[];
-
-                    if (lastShiftedCommand === RNAPaint.ADD_BASE) {
-                        newConstraints = structureConstraints.slice(0, lastShiftedIndex);
-                        newConstraints.push(constraintVal);
-                        newConstraints = newConstraints.concat(
-                            structureConstraints.slice(lastShiftedIndex, structureConstraints.length)
-                        );
-                    } else {
-                        newConstraints = structureConstraints.slice(0, lastShiftedIndex);
-                        newConstraints = newConstraints.concat(
-                            structureConstraints.slice(lastShiftedIndex + 1, structureConstraints.length)
-                        );
-                    }
-                    tc['structure_constraints'] = newConstraints;
-                }
-
-                const antiSecstruct: string | undefined = tc['anti_secstruct'];
-                if (antiSecstruct != null) {
-                    const antiPairs: SecStruct = SecStruct.fromParens(antiSecstruct);
-                    const antiResult: [string, PuzzleEditOp, number[]?] | null = this._poses[ii].parseCommandWithPairs(
-                        lastShiftedCommand, lastShiftedIndex, antiPairs
+                if (lastShiftedCommand === RNAPaint.ADD_BASE) {
+                    newConstraints = structureConstraints.slice(0, lastShiftedIndex);
+                    newConstraints.push(constraintVal);
+                    newConstraints = newConstraints.concat(
+                        structureConstraints.slice(lastShiftedIndex, structureConstraints.length)
                     );
-                    if (antiResult) tc['anti_secstruct'] = antiResult[0];
+                } else {
+                    newConstraints = structureConstraints.slice(0, lastShiftedIndex);
+                    newConstraints = newConstraints.concat(
+                        structureConstraints.slice(lastShiftedIndex + 1, structureConstraints.length)
+                    );
                 }
+                tc['structure_constraints'] = newConstraints;
+            }
 
-                if (tc['type'] === 'aptamer') {
-                    const bindingSite: number[] = (tc['site'] as number[]).slice(0);
-                    const bindingPairs: number[] = [];
-                    if (lastShiftedCommand === RNAPaint.ADD_BASE) {
-                        for (let ss = 0; ss < bindingSite.length; ss++) {
-                            if (bindingSite[ss] >= lastShiftedIndex) {
-                                bindingSite[ss]++;
-                            }
-                        }
+            const antiSecstruct: string | undefined = tc['anti_secstruct'];
+            if (antiSecstruct != null) {
+                const antiPairs: SecStruct = SecStruct.fromParens(antiSecstruct);
+                const antiResult: [string, PuzzleEditOp, number[]?] | null = this._poses[ii].parseCommandWithPairs(
+                    lastShiftedCommand, lastShiftedIndex, antiPairs
+                );
+                if (antiResult) tc['anti_secstruct'] = antiResult[0];
+            }
 
-                        for (let jj = 0; jj < bindingSite.length; jj++) {
-                            bindingPairs.push(this._targetPairs[ii].pairingPartner(bindingSite[jj]));
-                        }
-                    } else {
-                        for (let ss = 0; ss < bindingSite.length; ss++) {
-                            if (bindingSite[ss] >= lastShiftedIndex) {
-                                bindingSite[ss]--;
-                            }
-                        }
-
-                        for (let jj = 0; jj < bindingSite.length; jj++) {
-                            bindingPairs.push(this._targetPairs[ii].pairingPartner(bindingSite[jj]));
+            if (tc['type'] === 'aptamer') {
+                const bindingSite: number[] = (tc['site'] as number[]).slice(0);
+                const bindingPairs: number[] = [];
+                if (lastShiftedCommand === RNAPaint.ADD_BASE) {
+                    for (let ss = 0; ss < bindingSite.length; ss++) {
+                        if (bindingSite[ss] >= lastShiftedIndex) {
+                            bindingSite[ss]++;
                         }
                     }
 
-                    tc['site'] = bindingSite;
-                    tc['binding_pairs'] = bindingPairs;
+                    for (let jj = 0; jj < bindingSite.length; jj++) {
+                        bindingPairs.push(this._targetPairs[ii].pairingPartner(bindingSite[jj]));
+                    }
+                } else {
+                    for (let ss = 0; ss < bindingSite.length; ss++) {
+                        if (bindingSite[ss] >= lastShiftedIndex) {
+                            bindingSite[ss]--;
+                        }
+                    }
+
+                    for (let jj = 0; jj < bindingSite.length; jj++) {
+                        bindingPairs.push(this._targetPairs[ii].pairingPartner(bindingSite[jj]));
+                    }
                 }
+
+                tc['site'] = bindingSite;
+                tc['binding_pairs'] = bindingPairs;
             }
 
             this._poses[ii].sequence = this._poses[targetIndex].sequence;
@@ -3567,7 +3568,6 @@ export default class PoseEditMode extends GameMode {
     private _asynchText: Text;
     private _foldTotalTime: number;
     // / Undo stack
-    private _seqStacks: UndoBlock[][];
     private _stackLevel: number;
     private _stackSize: number;
     private _alreadyCleared: boolean = false;
@@ -3578,6 +3578,8 @@ export default class PoseEditMode extends GameMode {
     private _moves: Move[][] = [];
     protected _curTargetIndex: number = 0;
     private _poseState: PoseState = PoseState.NATIVE;
+
+    private _seqStacks: UndoBlock[][];
     protected _targetPairs: SecStruct[] = [];
     protected _targetConditions: (TargetConditions | undefined)[] = [];
     private _targetOligo: (RNABase[] | undefined)[] = [];
