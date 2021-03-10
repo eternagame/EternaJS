@@ -203,5 +203,6 @@ export default class MultiPagePanel extends ContainerObject {
 
         this._prevButton.display.visible = this._currentPage > 0;
         this._nextButton.display.visible = this._currentPage < this.pageCount - 1;
+        this.doLayout();
     }
 }

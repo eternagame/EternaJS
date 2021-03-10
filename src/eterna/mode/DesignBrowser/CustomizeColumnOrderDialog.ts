@@ -34,7 +34,14 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
     protected added(): void {
         super.added();
 
-        this._bg = new GamePanel(GamePanelType.NORMAL, 1.0, 0x043468, 1, 0x4A90E2);
+        this._bg = new GamePanel({
+            type: GamePanelType.NORMAL,
+            alpha: 1.0,
+            color: 0x043468,
+            borderAlpha: 1,
+            borderColor: 0x4A90E2
+        });
+
         this._bg.title = 'CONFIGURE COLUMNS';
         this.addObject(this._bg, this.container);
 

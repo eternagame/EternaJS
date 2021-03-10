@@ -1,4 +1,5 @@
 import {FontLoader, TextBuilder} from 'flashbang';
+import {FontWeight} from 'flashbang/util/TextBuilder';
 import log from 'loglevel';
 
 export default class Fonts {
@@ -15,12 +16,20 @@ export default class Fonts {
             .catch((e) => log.error('Error loading fonts: ', e));
     }
 
-    public static monospace(text: string = '', fontSize: number = 12): TextBuilder {
-        return new TextBuilder(text).font(this.MONOSPACE).fontSize(fontSize);
+    public static monospace(
+        text: string = '',
+        fontSize: number = 12,
+        weight: FontWeight = FontWeight.REGULAR
+    ): TextBuilder {
+        return new TextBuilder(text).font(this.MONOSPACE).fontSize(fontSize).fontWeight(weight);
     }
 
-    public static std(text: string = '', fontSize: number = 12): TextBuilder {
-        return new TextBuilder(text).font(this.STDFONT).fontSize(fontSize);
+    public static std(
+        text: string = '',
+        fontSize: number = 12,
+        weight: FontWeight = FontWeight.REGULAR
+    ): TextBuilder {
+        return new TextBuilder(text).font(this.STDFONT).fontSize(fontSize).fontWeight(weight);
     }
 
     // The fonts we specifically load that we want to wait on

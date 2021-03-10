@@ -77,7 +77,7 @@ export default class DisplayUtil {
 
     /** Transforms a point from one DisplayObject's coordinate space to another's. */
     public static transformPoint(
-        p: IPoint, from: DisplayObject, to: DisplayObject, out: IPoint | undefined = undefined
+        p: IPoint, from: DisplayObject, to: DisplayObject, out: Point | undefined = undefined
     ): IPoint {
         return to.toLocal(from.toGlobal(p, DisplayUtil.P), undefined, out);
     }
@@ -381,12 +381,14 @@ export default class DisplayUtil {
     private static findCommonParent(object1: DisplayObject, object2: DisplayObject): DisplayObject {
         let currentObject: DisplayObject = object1;
 
+        // Walks up tree from object1 to root node
         while (currentObject) {
             DisplayUtil.sAncestors.push(currentObject);
             currentObject = currentObject.parent;
         }
 
         currentObject = object2;
+        // Walks up tree from object2 to root node less encounters common parent
         while (currentObject && DisplayUtil.sAncestors.indexOf(currentObject) === -1) {
             currentObject = currentObject.parent;
         }

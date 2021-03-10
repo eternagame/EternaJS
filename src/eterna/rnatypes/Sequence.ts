@@ -339,6 +339,10 @@ export default class Sequence {
         ).join('');
     }
 
+    public toString(): string {
+        return this.sequenceString();
+    }
+
     public get length(): number {
         return this._baseArray.length;
     }

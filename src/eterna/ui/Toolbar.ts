@@ -13,11 +13,13 @@ import {BoostersData} from 'eterna/puzzle/Puzzle';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import BitmapManager from 'eterna/resources/BitmapManager';
+import AnnotationManager from 'eterna/AnnotationManager';
 import NucleotidePalette from './NucleotidePalette';
 import GameButton from './GameButton';
 import ToggleBar from './ToggleBar';
 import EternaMenu, {EternaMenuStyle} from './EternaMenu';
 import ScrollContainer from './ScrollContainer';
+import AnnotationPanel from './AnnotationPanel';
 
 export enum ToolbarType {
     PUZZLE,
@@ -81,6 +83,11 @@ export default class Toolbar extends ContainerObject {
     public nucleotideFindButton: GameButton;
     public nucleotideRangeButton: GameButton;
 
+    // Annotations
+    public annotationModeButton: GameButton;
+    public annotationPanelButton: GameButton;
+    public annotationPanel: AnnotationPanel;
+
     public freezeButton: GameButton;
 
     public boostersMenu: GameButton;
@@ -121,19 +128,25 @@ export default class Toolbar extends ContainerObject {
         type: ToolbarType,
         {
             states = 1,
+            boosters,
             showGlue = false,
-            boosters
+            showAdvancedMenus = true,
+            annotationManager
         }: {
             states?: number;
-            showGlue?: boolean;
             boosters?: BoostersData;
+            showGlue?: boolean;
+            showAdvancedMenus?: boolean;
+            annotationManager?: AnnotationManager;
         }
     ) {
         super();
         this._type = type;
         this._states = states;
         this._showGlue = showGlue;
+        this._showAdvancedMenus = showAdvancedMenus;
         this._boostersData = boosters ?? null;
+        this._annotationManager = annotationManager;
     }
 
     public onResized() {
@@ -373,7 +386,7 @@ export default class Toolbar extends ContainerObject {
 
         this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters).disabled(undefined);
 
-        if (this._boostersData != null && this._boostersData.actions != null) {
+        if (this._boostersData != null && this._boostersData.actions != null && this._showAdvancedMenus) {
             const boosterMenuIdx = this.actionMenu.addMenuButton(this.boostersMenu);
             for (let ii = 0; ii < this._boostersData.actions.length; ii++) {
                 const data = this._boostersData.actions[ii];
@@ -386,17 +399,12 @@ export default class Toolbar extends ContainerObject {
             }
         }
 
-        const alterMenuIdx = this.actionMenu.addMenuButton(
-            new GameButton().allStates(Bitmaps.CustomLayout).disabled(undefined)
-        );
-
         this.moveButton = new GameButton()
             .allStates(Bitmaps.CustomLayout)
             .disabled(undefined)
             .label('Move', 14)
             .scaleBitmapToLabel()
             .tooltip('Move a nucleotide or stem by ctrl-shift-click');
-        this.actionMenu.addSubMenuButton(alterMenuIdx, this.moveButton);
 
         this.rotateStemButton = new GameButton()
             .allStates(Bitmaps.CustomLayout)
@@ -404,7 +412,6 @@ export default class Toolbar extends ContainerObject {
             .label('Rotate stem', 14)
             .scaleBitmapToLabel()
             .tooltip('Rotate stem clockwise 1/4 turn by ctrl-shift-click');
-        this.actionMenu.addSubMenuButton(alterMenuIdx, this.rotateStemButton);
 
         this.flipStemButton = new GameButton()
             .allStates(Bitmaps.CustomLayout)
@@ -412,7 +419,6 @@ export default class Toolbar extends ContainerObject {
             .label('Flip stem', 14)
             .scaleBitmapToLabel()
             .tooltip('Flip stem by ctrl-shift-click');
-        this.actionMenu.addSubMenuButton(alterMenuIdx, this.flipStemButton);
 
         this.snapToGridButton = new GameButton()
             .allStates(Bitmaps.CustomLayout)
@@ -420,7 +426,6 @@ export default class Toolbar extends ContainerObject {
             .label('Snap to grid', 14)
             .scaleBitmapToLabel()
             .tooltip('Snap current layout to a grid');
-        this.actionMenu.addSubMenuButton(alterMenuIdx, this.snapToGridButton);
 
         this.downloadHKWSButton = new GameButton()
             .allStates(Bitmaps.CustomLayout)
@@ -428,7 +433,6 @@ export default class Toolbar extends ContainerObject {
             .label('Download HKWS format', 14)
             .scaleBitmapToLabel()
             .tooltip('Download a draw_rna input file for the current layout');
-        this.actionMenu.addSubMenuButton(alterMenuIdx, this.downloadHKWSButton);
 
         this.downloadSVGButton = new GameButton()
             .allStates(Bitmaps.CustomLayout)
@@ -436,7 +440,19 @@ export default class Toolbar extends ContainerObject {
             .label('Download SVG format', 14)
             .scaleBitmapToLabel()
             .tooltip('Download an SVG of the current RNA layout');
-        this.actionMenu.addSubMenuButton(alterMenuIdx, this.downloadSVGButton);
+
+        if (this._showAdvancedMenus) {
+            const alterMenuIdx = this.actionMenu.addMenuButton(
+                new GameButton().allStates(Bitmaps.CustomLayout).disabled(undefined)
+            );
+
+            this.actionMenu.addSubMenuButton(alterMenuIdx, this.moveButton);
+            this.actionMenu.addSubMenuButton(alterMenuIdx, this.rotateStemButton);
+            this.actionMenu.addSubMenuButton(alterMenuIdx, this.flipStemButton);
+            this.actionMenu.addSubMenuButton(alterMenuIdx, this.snapToGridButton);
+            this.actionMenu.addSubMenuButton(alterMenuIdx, this.downloadHKWSButton);
+            this.actionMenu.addSubMenuButton(alterMenuIdx, this.downloadSVGButton);
+        }
 
         if (this._type === ToolbarType.LAB) {
             this.submitButton.tooltip('Publish your solution!');
@@ -664,9 +680,29 @@ export default class Toolbar extends ContainerObject {
             this.magicGlueButton.toggled.value = true;
         }));
 
+        if (this._annotationManager) {
+            this.annotationModeButton = new ToolbarButton()
+                .up(Bitmaps.ImgAnnotationMode)
+                .over(Bitmaps.ImgAnnotationModeOver)
+                .down(Bitmaps.ImgAnnotationModeSelected)
+                .selected(Bitmaps.ImgAnnotationModeSelected)
+                .tooltip('Annotation Mode');
+            this.addObject(this.annotationModeButton, this.lowerToolbarLayout);
+
+            this.annotationPanelButton = new ToolbarButton()
+                .up(Bitmaps.ImgAnnotationLayer)
+                .over(Bitmaps.ImgAnnotationLayerOver)
+                .down(Bitmaps.ImgAnnotationLayerSelected)
+                .selected(Bitmaps.ImgAnnotationLayerSelected)
+                .tooltip('Annotations Panel');
+            this.annotationPanel = new AnnotationPanel(this.annotationPanelButton, this._annotationManager);
+            this.addObject(this.annotationPanel, this.mode?.container);
+            this.addObject(this.annotationPanelButton, this.lowerToolbarLayout);
+        }
+
         if (this._type === ToolbarType.PUZZLEMAKER) {
             this.submitButton.tooltip('Publish your puzzle!');
-
+            this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
             this.addObject(this.submitButton, this.lowerToolbarLayout);
         }
 
@@ -897,6 +933,9 @@ export default class Toolbar extends ContainerObject {
         this.undoButton.enabled = !disable;
         this.redoButton.enabled = !disable;
 
+        this.annotationModeButton.enabled = !disable;
+        this.annotationPanelButton.enabled = !disable;
+
         this.freezeButton.enabled = !disable;
 
         this.boostersMenu.enabled = !disable;
@@ -936,9 +975,14 @@ export default class Toolbar extends ContainerObject {
         }
     }
 
+    public get type(): ToolbarType {
+        return this._type;
+    }
+
     private readonly _type: ToolbarType;
     private readonly _states: number;
     private readonly _showGlue: boolean;
+    private readonly _showAdvancedMenus: boolean;
     private readonly _boostersData: BoostersData | null;
 
     private _invisibleBackground: Graphics;
@@ -946,4 +990,6 @@ export default class Toolbar extends ContainerObject {
 
     private _uncollapsedContentLoc: Point;
     private _autoCollapseRegs: RegistrationGroup | null;
+
+    private _annotationManager: AnnotationManager | undefined;
 }

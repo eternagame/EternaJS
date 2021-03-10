@@ -10,7 +10,12 @@ export default class ContextMenu extends ContainerObject {
     constructor() {
         super();
 
-        this._panel = new GamePanel(GamePanelType.NORMAL, 1.0, 0x152843, 1.0, 0xffffff);
+        this._panel = new GamePanel({
+            type: GamePanelType.NORMAL,
+            alpha: 1.0,
+            color: 0x152843,
+            dropShadow: true
+        });
         this.addObject(this._panel, this.container, 0);
 
         this._buttonLayout = new VLayoutContainer(5, HAlign.LEFT);

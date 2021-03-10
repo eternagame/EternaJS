@@ -10,7 +10,7 @@ import EnergyScoreDisplay from './EnergyScoreDisplay';
 import ExplosionFactorPanel from './ExplosionFactorPanel';
 import RNAAnchorObject from './RNAAnchorObject';
 
-type InteractionEvent = PIXI.interaction.InteractionEvent;
+type InteractionEvent = PIXI.InteractionEvent;
 
 /** Wraps a Pose2D and handles resizing, masking, and input events */
 export default class PoseField extends ContainerObject implements KeyboardListener, MouseWheelListener {
@@ -33,20 +33,20 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this.addObject(this._pose, this.container);
 
         this.pointerDown.filter(InputUtil.IsLeftMouse).connect(
-            (e: PIXI.interaction.InteractionEvent) => this.onPointerDown(e)
+            (e: PIXI.InteractionEvent) => this.onPointerDown(e)
         );
         this.pointerUp.filter(InputUtil.IsLeftMouse).connect(
-            (e: PIXI.interaction.InteractionEvent) => this.onPointerUp(e)
+            (e: PIXI.InteractionEvent) => this.onPointerUp(e)
         );
         this.pointerMove.connect(
-            (e: PIXI.interaction.InteractionEvent) => this.onPointerMove(e)
+            (e: PIXI.InteractionEvent) => this.onPointerMove(e)
         );
         this.container.on('pointercancel',
-            (e: PIXI.interaction.InteractionEvent) => this.onPointerUp(e));
+            (e: PIXI.InteractionEvent) => this.onPointerUp(e));
         this.container.on('pointerout',
-            (e: PIXI.interaction.InteractionEvent) => this.onPointerUp(e));
+            (e: PIXI.InteractionEvent) => this.onPointerUp(e));
         this.container.on('pointerupoutside',
-            (e: PIXI.interaction.InteractionEvent) => this.onPointerUp(e));
+            (e: PIXI.InteractionEvent) => this.onPointerUp(e));
 
         Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.keyboardInput.pushListener(this));
@@ -197,6 +197,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
             this._dragStart = new Point(x, y);
             this._dragPoseStart = new Point(this._pose.xOffset, this._pose.yOffset);
         }
+
         e.stopPropagation();
     }
 
@@ -232,7 +233,16 @@ export default class PoseField extends ContainerObject implements KeyboardListen
             }
         } else if (this._interactionCache.size === 1) {
             if (!this._zoomGestureStarted) {
+                if (this.pose.annotationManager.isMovingAnnotation) {
+                    return;
+                }
+
                 // simple drag
+                if (this._pose.annotationManager.allAnnotations.length > 0) {
+                    this._erasedAnnotations = true;
+                    this._pose.annotationManager.eraseAnnotations(true);
+                }
+
                 ROPWait.notifyMoveCamera();
                 const [finger] = Array.from(this._interactionCache.values());
                 const deltaX = finger.x - this._dragStart.x;
@@ -329,6 +339,11 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
         if (this._zoomGestureStarted) {
             this._zoomGestureStarted = this._interactionCache.size > 0;
+        }
+
+        if (this._erasedAnnotations) {
+            this._pose.annotationManager.refreshAnnotations(this.pose);
+            this._erasedAnnotations = false;
         }
     }
 
@@ -436,6 +451,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     private _dragStart = new Point();
     private _zoomDirection = 0;
     private _zoomGestureStarted = false;
+    private _erasedAnnotations = false;
 
     private static readonly P: Point = new Point();
 

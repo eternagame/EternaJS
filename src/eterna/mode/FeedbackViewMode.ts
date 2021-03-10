@@ -1,6 +1,6 @@
 import * as log from 'loglevel';
 import {
-    DisplayObject, Point, Text, Sprite
+    DisplayObject, Point, Sprite
 } from 'pixi.js';
 import Constants from 'eterna/Constants';
 import Eterna from 'eterna/Eterna';
@@ -56,14 +56,6 @@ export default class FeedbackViewMode extends GameMode {
         const background = new Background();
         this.addObject(background, this.bgLayer);
 
-        // this._puzzleTitle = Fonts.std(this._puzzle.getName(false), 14).color(0xffffff).bold().build();
-        // this._puzzleTitle.position = new Point(33, 8);
-        // this.uiLayer.addChild(this._puzzleTitle);
-
-        this._title = Fonts.std('', 12).color(0xffffff).bold().build();
-        this._title.position = new Point(33, 30);
-        this.uiLayer.addChild(this._title);
-
         this._homeButton = new GameButton()
             .up(Bitmaps.ImgHome)
             .over(Bitmaps.ImgHome)
@@ -73,22 +65,21 @@ export default class FeedbackViewMode extends GameMode {
             if (Eterna.MOBILE_APP) {
                 window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
             } else {
-                window.location.href = EternaURL.createURL({page: 'lab_bench'});
+                window.location.href = EternaURL.createURL({page: 'home'});
             }
         });
         this.addObject(this._homeButton, this.uiLayer);
 
         const homeArrow = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgHomeArrow));
         homeArrow.position = new Point(45, 14);
-        Assert.assertIsDefined(this.container);
-        this.container.addChild(homeArrow);
+        this.uiLayer.addChild(homeArrow);
 
-        const puzzleTitle = UITheme.makeTitle(this._puzzle.getName(true), 0xffffff);
+        const puzzleTitle = UITheme.makeTitle(this._puzzle.getName(!Eterna.MOBILE_APP), 0xffffff);
         puzzleTitle.hideWhenModeInactive();
         this.addObject(puzzleTitle, this.uiLayer);
         DisplayUtil.positionRelative(
             puzzleTitle.display, HAlign.LEFT, VAlign.CENTER,
-            homeArrow, HAlign.RIGHT, VAlign.CENTER, 53, 13
+            homeArrow, HAlign.RIGHT, VAlign.CENTER, 8, 8
         );
 
         this._toolbar = new Toolbar(ToolbarType.FEEDBACK, {states: this._puzzle.getSecstructs().length});
@@ -251,7 +242,7 @@ export default class FeedbackViewMode extends GameMode {
         // we are not changing the solution.
         this._info.clicked.connect(() => {
             if (this._solutionView) {
-                this._solutionView.showSolution(this._solution);
+                this._solutionView.container.visible = !this._solutionView.container.visible;
                 this.onResized();
             }
         });
@@ -259,12 +250,12 @@ export default class FeedbackViewMode extends GameMode {
 
         this.setPoseFields(poseFields);
 
-        this._dropdown = new GameDropdown(
-            14,
-            this._solution.expFeedback?.conditions ?? ['SHAPE'],
-            'SHAPE',
-            0
-        );
+        this._dropdown = new GameDropdown({
+            fontSize: 14,
+            options: this._solution.expFeedback?.conditions ?? ['SHAPE'],
+            defaultOption: 'SHAPE',
+            borderWidth: 0
+        });
 
         this._dropdown.disabled = false;
         this._dropdown.selectedOption.connect(() => this.showExperimentalColors());
@@ -696,7 +687,7 @@ export default class FeedbackViewMode extends GameMode {
 
     private loadDesignBrowser(): void {
         this.pushUILock();
-        Eterna.app.switchToDesignBrowser(this._puzzle.nodeID)
+        Eterna.app.switchToDesignBrowser(this._puzzle.nodeID, this._solution, false)
             .then(() => this.popUILock())
             .catch((e) => {
                 log.error(e);
@@ -721,7 +712,6 @@ export default class FeedbackViewMode extends GameMode {
     private _currentIndex: number;
 
     private _foldMode: PoseFoldMode;
-    private _title: Text;
     private _feedback: Feedback | null;
     private _sequence: Sequence;
     private _secstructs: SecStruct[] = [];

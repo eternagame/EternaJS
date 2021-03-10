@@ -7,10 +7,11 @@ import Eterna from 'eterna/Eterna';
 export default class ScrollContainer extends ContainerObject {
     public readonly content = new Container();
 
-    constructor(width: number, height: number) {
+    constructor(width: number, height: number, radius: number = 0) {
         super();
         this._width = width;
         this._height = height;
+        this._radius = radius;
     }
 
     protected added() {
@@ -24,6 +25,9 @@ export default class ScrollContainer extends ContainerObject {
         Assert.assertIsDefined(overlayEl);
         this._htmlWrapper = document.createElement('div');
         this._htmlWrapper.style.position = 'absolute';
+        // Turn off pointer events for the wrapper, but keep them on for children
+        // (handled via) our stylesheet
+        this._htmlWrapper.classList.add('scroll-container-wrapper');
         overlayEl.appendChild(this._htmlWrapper);
 
         this.doLayout();
@@ -82,7 +86,11 @@ export default class ScrollContainer extends ContainerObject {
         const prevScrollX = this.scrollX;
         const prevScrollY = this.scrollY;
 
-        this._contentMask.clear().beginFill(0x00ff00).drawRect(0, 0, this._width, this._height).endFill();
+        this._contentMask
+            .clear()
+            .beginFill(0x00ff00)
+            .drawRoundedRect(0, 0, this._width, this._height, this._radius)
+            .endFill();
 
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
@@ -114,4 +122,5 @@ export default class ScrollContainer extends ContainerObject {
 
     private _width: number;
     private _height: number;
+    private _radius: number;
 }

@@ -13,7 +13,7 @@ export enum EternaMenuStyle {
 
 export default class EternaMenu extends GamePanel implements Enableable {
     constructor(menuStyle: EternaMenuStyle = EternaMenuStyle.DEFAULT, inToolbar = false) {
-        super();
+        super({});
         this._style = menuStyle;
         this.inToolbar = inToolbar;
     }
@@ -71,7 +71,7 @@ export default class EternaMenu extends GamePanel implements Enableable {
         }
 
         // Clicking a submenu item hides the panel
-        itemButton.pointerTap.connect(() => {
+        itemButton.clicked.connect(() => {
             menu.panel.display.visible = false;
             if (this._activeCapture) {
                 menu.panel.removeObject(this._activeCapture);
@@ -92,7 +92,7 @@ export default class EternaMenu extends GamePanel implements Enableable {
         menu.itemButtons.splice(pos, 0, itemButton);
 
         // Clicking a submenu item hides the panel
-        itemButton.pointerTap.connect(() => {
+        itemButton.clicked.connect(() => {
             menu.panel.display.visible = false;
             if (this._activeCapture) {
                 menu.panel.removeObject(this._activeCapture);
@@ -153,9 +153,13 @@ export default class EternaMenu extends GamePanel implements Enableable {
         this.addObject(menuButton, this.container);
         this._menus.push(menu);
 
-        menu.panel = new GamePanel(GamePanelType.NORMAL, 0.85);
+        menu.panel = new GamePanel({
+            type: GamePanelType.NORMAL,
+            alpha: 0.85,
+            dropShadow: true
+        });
         if (this._style === EternaMenuStyle.PULLUP) {
-            menu.panel.setup(GamePanelType.NORMAL, 1.0, 0x152843, 1.0, 0xC0DCE7);
+            menu.panel.setup(GamePanelType.NORMAL, 1.0, 0x152843, 0, 0, 7.5);
         }
         menu.panel.display.visible = false;
         menuButton.addObject(menu.panel, this.mode?.container);
@@ -216,7 +220,7 @@ export default class EternaMenu extends GamePanel implements Enableable {
             }));
         });
 
-        menuButton.pointerTap.connect(() => {
+        menuButton.clicked.connect(() => {
             if (!this._enabled) return;
             if (menu.panel.display.visible) return;
 

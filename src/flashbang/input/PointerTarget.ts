@@ -1,7 +1,7 @@
 import {DisplayObject} from 'pixi.js';
 import {SignalView} from 'signals';
 
-type InteractionEvent = PIXI.interaction.InteractionEvent;
+type InteractionEvent = PIXI.InteractionEvent;
 
 /** Exposes signals for an interactive object */
 export default interface PointerTarget {

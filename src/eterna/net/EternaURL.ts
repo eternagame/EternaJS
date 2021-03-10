@@ -33,55 +33,55 @@ export default class EternaURL {
             params = {page: 'me'};
         }
 
+        let url = '/web/';
+
         if (params['page'] === 'player') {
-            return `/web/player/${params['uid']}/`;
-        } else if (params['page'] === 'lab_bench') {
-            return '/web/';
+            url = `/web/player/${params['uid']}/`;
+        } else if (params['page'] === 'home') {
+            url = '/web/';
         } else if (params['page'] === 'me') {
-            return '/web/';
+            url = '/web/';
         } else if (params['page'] === 'roadmap') {
-            return '/web/roadmap/';
+            url = '/web/roadmap/';
         } else if (params['page'] === 'about') {
-            return '/web/about/';
+            url = '/web/about/';
         } else if (params['page'] === 'tutorials') {
-            return '/web/tutorials/';
+            url = '/web/tutorials/';
         } else if (params['page'] === 'challenges') {
-            return '/web/challenges/';
+            url = '/web/challenges/';
         } else if (params['page'] === 'playerpuzzles') {
-            return '/web/playerpuzzles/';
+            url = '/web/playerpuzzles/';
         } else if (params['page'] === 'currentlabs') {
-            return '/web/labs/';
+            url = '/web/labs/';
         } else if (params['page'] === 'proposedlabs') {
-            return '/web/labs/proposed/';
+            url = '/web/labs/proposed/';
         } else if (params['page'] === 'waitinglabs') {
-            return '/web/labs/waiting/';
+            url = '/web/labs/waiting/';
         } else if (params['page'] === 'pastlabs') {
-            return '/web/labs/past/';
+            url = '/web/labs/past/';
         } else if (params['page'] === 'strategymarket') {
-            return '/web/strategymarket/';
+            url = '/web/strategymarket/';
         } else if (params['page'] === 'scripts') {
-            return '/web/script/';
+            url = '/web/script/';
         } else if (params['page'] === 'manual') {
-            return '/web/lab/manual/';
+            url = '/web/lab/manual/';
         } else if (params['page'] === 'newslist') {
-            return '/web/news/';
+            url = '/web/news/';
         } else if (params['page'] === 'players') {
-            return '/web/players/';
+            url = '/web/players/';
         } else if (params['page'] === 'register') {
-            return '/web/register/';
+            url = '/web/register/';
         } else if (params['page'] === 'puzzle') {
-            return `/web/puzzle/${params['nid']}/`;
+            url = `/web/puzzle/${params['nid']}/`;
         } else if (params['page'] === 'strategy_guides') {
-            return '/web/strategy_guides/';
+            url = '/web/strategy_guides/';
         } else if (params['page'] === 'blog') {
-            return '/web/blog/';
+            url = '/web/blog/';
         } else if (params['page'] === 'lab_browser') {
-            return `/web/browse/${params['nid']}/`;
+            url = `/web/browse/${params['nid']}/`;
         } else if (params['page'] === 'browse_solution' || params['page'] === 'browse_player') {
-            const url = `/game/browse/${params['puznid']}/?`;
-            delete params['page'];
-            delete params['puznid'];
-            return url + new URLSearchParams({
+            url = `/game/browse/${params['puznid']}/?`;
+            url += new URLSearchParams({
                 filter1: params.filter1 as string,
                 /* eslint-disable @typescript-eslint/camelcase */
                 filter1_arg1: String(params.filter1_arg1) as string,
@@ -89,13 +89,13 @@ export default class EternaURL {
                 /* eslint-enable @typescript-eslint/camelcase */
             });
         } else if (params['page'] === 'script') {
-            return '/web/script/';
+            url = '/web/script/';
         } else if (params['page'] === 'group') {
-            return '/web/group/';
+            url = '/web/group/';
         } else if (params['page'] === 'conduct') {
-            return '/web/conduct/';
+            url = '/web/conduct/';
         }
 
-        return '/web/';
+        return Eterna.SERVER_URL + url;
     }
 }

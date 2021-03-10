@@ -334,6 +334,22 @@ export default class Bitmaps {
     public static readonly BranchinessIcon: string = require('assets/branchy.png');
     public static readonly Folder: string = require('assets/folder.png');
     public static readonly CustomLayout: string = require('assets/UI/custom-layout-small.png');
+    // Annotations
+    public static readonly ImgAnnotationMode: string = require('assets/UI/annotation-mode-btn.png');
+    public static readonly ImgAnnotationModeOver: string = require('assets/UI/annotation-mode-btn-over.png');
+    public static readonly ImgAnnotationModeSelected: string = require('assets/UI/annotation-mode-btn-selected.png');
+    public static readonly ImgAnnotationLayer: string = require('assets/UI/annotation-layers-btn.png');
+    public static readonly ImgAnnotationLayerOver: string = require('assets/UI/annotation-layers-btn-over.png');
+    public static readonly ImgAnnotationLayerSelected: string = require('assets/UI/annotation-layers-btn-selected.png');
+    public static readonly ImgFolder: string = require('assets/UI/folder.png');
+    public static readonly ImgTrash: string = require('assets/UI/trash.png');
+    public static readonly ImgEye: string = require('assets/UI/eye.png');
+    public static readonly ImgChevronDown: string = require('assets/UI/chevron-down.png');
+    public static readonly ImgChevronRight: string = require('assets/UI/chevron-right.png');
+    public static readonly ImgPencil: string = require('assets/UI/pencil.png');
+    public static readonly ImgPointerHand: string = require('assets/UI/pointer-hand.png');
+    public static readonly ImgAnnotationCheckmark: string = require('assets/UI/annotation-checkmark.png');
+    public static readonly ImgAnnotationCross: string = require('assets/UI/annotation-cross.png');
 
     public static get all(): string[] {
         if (Bitmaps.ALL_URLS == null) {

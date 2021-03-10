@@ -26,7 +26,14 @@ export default class ErrorDialogMode extends AppMode {
         const bg = new Graphics();
         this.container.addChild(bg);
 
-        const panel = new GamePanel(GamePanelType.NORMAL, 1.0, 0x152843, 0.27, 0xC0DCE7);
+        const panel = new GamePanel({
+            type: GamePanelType.NORMAL,
+            alpha: 1.0,
+            color: 0x152843,
+            borderAlpha: 0.27,
+            borderColor: 0xC0DCE7
+        });
+
         panel.title = 'Fatal Error!';
         this.addObject(panel, this.container);
 

@@ -19,23 +19,31 @@ import {SortOrder} from './SortOptions';
 import SequenceStringListView from './SequenceStringListView';
 import {DesignBrowserDataType, DesignCategory, DBVote} from './DesignBrowserMode';
 
+interface DataColProps {
+    dataType: DesignBrowserDataType;
+    category: DesignCategory;
+    dataWidth: number;
+    fonttype: string;
+    fontSize: number;
+    sortable: boolean;
+    domParent: string | HTMLElement;
+}
 export default class DataCol extends ContainerObject {
     public readonly sortOrderChanged = new Signal<SortOrder>();
     public readonly filtersChanged = new UnitSignal();
     public readonly voteChanged = new Signal<number>();
     public readonly category: DesignCategory;
 
-    constructor(dataType: DesignBrowserDataType, category: DesignCategory,
-        dataWidth: number, fonttype: string,
-        fontSize: number, sortable: boolean) {
+    constructor(props: DataColProps) {
         super();
 
-        this.category = category;
-        this._dataType = dataType;
-        this._dataWidth = dataWidth;
-        this._fontType = fonttype;
-        this._fontSize = fontSize;
-        this._sortable = sortable;
+        this.category = props.category;
+        this._dataType = props.dataType;
+        this._dataWidth = props.dataWidth;
+        this._fontType = props.fonttype;
+        this._fontSize = props.fontSize;
+        this._sortable = props.sortable;
+        this._domParent = props.domParent;
     }
 
     public get sortOrder(): SortOrder {
@@ -118,7 +126,8 @@ export default class DataCol extends ContainerObject {
             this._filterField1 = new TextInputObject({
                 fontSize: TEXT_INPUT_SIZE,
                 width: this._dataWidth - 22,
-                placeholder: 'Search'
+                placeholder: 'Search',
+                domParent: this._domParent
             });
             this._filterField1.tabIndex = -1; // prevent tab-selection
             this._filterField1.display.position = new Point(11, theme.headerHeight + theme.filterPadding);
@@ -129,7 +138,8 @@ export default class DataCol extends ContainerObject {
             this._filterField1 = new TextInputObject({
                 fontSize: TEXT_INPUT_SIZE,
                 width: 40,
-                placeholder: 'min'
+                placeholder: 'min',
+                domParent: this._domParent
             });
             this._filterField1.tabIndex = -1; // prevent tab-selection
             this._filterField1.display.position = new Point(11, theme.headerHeight + theme.filterPadding);
@@ -140,7 +150,8 @@ export default class DataCol extends ContainerObject {
             this._filterField2 = new TextInputObject({
                 fontSize: TEXT_INPUT_SIZE,
                 width: 40,
-                placeholder: 'max'
+                placeholder: 'max',
+                domParent: this._domParent
             });
             this._filterField2.tabIndex = -1; // prevent tab-selection
             this._filterField2.display.position = new Point(11 + 40 + 12, theme.headerHeight + theme.filterPadding);
@@ -175,7 +186,7 @@ export default class DataCol extends ContainerObject {
         this._pairsArray = pairs.slice(0);
     }
 
-    public getMouseIndex(e: PIXI.interaction.InteractionEvent): [number, number] {
+    public getMouseIndex(e: PIXI.InteractionEvent): [number, number] {
         const {designBrowser: theme} = UITheme;
         const dataStart = theme.headerHeight + theme.filterHeight + theme.dataPadding / 2;
 
@@ -547,6 +558,7 @@ export default class DataCol extends ContainerObject {
     private readonly _fontSize: number;
     private readonly _sortable: boolean;
     private readonly _dataType: DesignBrowserDataType;
+    private readonly _domParent: string | HTMLElement;
 
     private _graphics: Graphics;
 

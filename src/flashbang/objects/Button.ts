@@ -29,6 +29,9 @@ export default abstract class Button extends ContainerObject implements Enableab
     protected added(): void {
         super.added();
 
+        // Use pointer cursor
+        this.container.cursor = 'pointer';
+
         this.showState(this._state);
 
         this.regs.add(this.pointerOver.connect(() => {

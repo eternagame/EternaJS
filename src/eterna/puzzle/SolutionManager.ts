@@ -3,6 +3,7 @@ import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import Feedback, {BrentTheoData} from 'eterna/Feedback';
 import Sequence from 'eterna/rnatypes/Sequence';
+import {AnnotationDataBundle} from 'eterna/AnnotationManager';
 import Solution from './Solution';
 
 interface SolutionSpec {
@@ -28,6 +29,7 @@ interface SolutionSpec {
     'SHAPE-min': string;
     'has-fold-data': number | null;
     'fold-data': string;
+    'annotations': AnnotationDataBundle;
 }
 
 interface ShapeData {
@@ -63,13 +65,8 @@ export default class SolutionManager {
     public getSolutionsForPuzzle(puzzleID: number): Promise<Solution[]> {
         log.info(`Loading solutions for puzzle ${puzzleID}...`);
         return Eterna.client.getSolutions(puzzleID).then((json) => {
-            const solutionsData = json['data']['solutions'];
-            this._solutions = [];
-
-            for (const solution of solutionsData) {
-                this._solutions.push(SolutionManager.processData(solution));
-            }
-
+            const solutionsData = json['data']['solutions'] as SolutionSpec[];
+            this._solutions = solutionsData.map((solution) => SolutionManager.processData(solution));
             return this._solutions;
         });
     }
@@ -254,6 +251,10 @@ export default class SolutionManager {
 
         if (obj['fold-data'] != null) {
             newsol.foldData = JSON.parse(obj['fold-data']);
+        }
+
+        if (obj['annotations'] != null) {
+            newsol.annotations = obj['annotations'] as AnnotationDataBundle;
         }
 
         return newsol;

@@ -13,7 +13,7 @@ import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import ROPWait from 'eterna/rscript/ROPWait';
 import Tooltips from './Tooltips';
 
-type InteractionEvent = PIXI.interaction.InteractionEvent;
+type InteractionEvent = PIXI.InteractionEvent;
 
 export enum PaletteTargetType {
     A = 0, U, G, C, AU, UG, GC

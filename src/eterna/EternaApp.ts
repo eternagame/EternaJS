@@ -38,7 +38,7 @@ import Folder from './folding/Folder';
 import RSignals from './rscript/RSignals';
 import Fonts from './util/Fonts';
 
-enum PuzzleID {
+export enum PuzzleID {
     FunAndEasy = 4350940,
     Tulip2 = 467887,
     TryptophanASameState = 8787266,
@@ -314,7 +314,10 @@ export default class EternaApp extends FlashbangApp {
         ) as DesignBrowserMode;
         if (existingBrowser != null && existingBrowser.puzzleID === puzzleID) {
             this.modeStack.setModeIndex(existingBrowser, -1);
-            if (sortOnSolution && solution) {
+            if (solution) {
+                existingBrowser.showSolutionDetailsDialog(solution);
+            }
+            if (solution && sortOnSolution) {
                 existingBrowser.sortOnSolution(solution);
             }
             return Promise.resolve();
@@ -324,7 +327,7 @@ export default class EternaApp extends FlashbangApp {
                     if (existingBrowser != null) {
                         this.modeStack.removeMode(existingBrowser);
                     }
-                    this.modeStack.pushMode(new DesignBrowserMode(puzzle, false, null, solution));
+                    this.modeStack.pushMode(new DesignBrowserMode(puzzle, false, null, solution, sortOnSolution));
                 });
         }
     }
