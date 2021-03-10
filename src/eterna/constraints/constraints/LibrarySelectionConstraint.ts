@@ -21,7 +21,7 @@ export default class LibrarySelectionConstraint extends Constraint<LibrarySelect
 
     public evaluate(constraintContext: ConstraintContext): LibrarySelectionConstraintStatus {
         // TODO: Multistate?
-        const numNtSelected = constraintContext.pose?.markedNumbers().length ?? 0;
+        const numNtSelected = constraintContext.pose?.designStructNumbers().length ?? 0;
 
         return {
             satisfied: numNtSelected === this.numNtSelected,
