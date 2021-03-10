@@ -1265,12 +1265,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
      * Return all the sequence positions (in customNumbering if available) where
      * the designStruct is set.
      */
-    public designStructNumbers(): number[] {
+    public markedNumbers(): number[] {
         const sequencePositions: number[] = [];
         if (this._customNumbering !== undefined) {
             Assert.assertIsDefined(this._customNumbering);
-            for (let jj = 0; jj < this._designStruct.length; ++jj) {
-                if (this._designStruct[jj]) {
+            for (let jj = 0; jj < this._bases.length; ++jj) {
+                if (this._bases[jj].isMarked()) {
                     if (this._customNumbering[jj] != null) {
                         const seqpos = this._customNumbering[jj] as number;
                         sequencePositions.push(seqpos);
@@ -1278,8 +1278,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 }
             }
         } else {
-            for (let jj = 0; jj < this._designStruct.length; ++jj) {
-                if (this._designStruct[jj]) {
+            for (let jj = 0; jj < this._bases.length; ++jj) {
+                if (this._bases[jj].isMarked()) {
                     sequencePositions.push(jj);
                 }
             }

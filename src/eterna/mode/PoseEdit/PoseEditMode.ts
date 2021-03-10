@@ -2011,7 +2011,7 @@ export default class PoseEditMode extends GameMode {
             }
 
             // Record designStruct numbers, used for library puzzles.
-            postData['library_nt'] = this._poses[0].designStructNumbers();
+            postData['library_nt'] = this._poses[0].markedNumbers();
         }
 
         return postData;
