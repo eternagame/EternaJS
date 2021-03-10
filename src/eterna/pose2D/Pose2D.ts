@@ -1270,6 +1270,32 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return elems;
     }
 
+    /**
+     * Return all the sequence positions (in customNumbering if available) where
+     * the designStruct is set.
+     */
+    public designStructNumbers(): number[] {
+        const sequencePositions: number[] = [];
+        if (this._customNumbering !== undefined) {
+            Assert.assertIsDefined(this._customNumbering);
+            for (let jj = 0; jj < this._designStruct.length; ++jj) {
+                if (this._designStruct[jj]) {
+                    if (this._customNumbering[jj] != null) {
+                        const seqpos = this._customNumbering[jj] as number;
+                        sequencePositions.push(seqpos);
+                    }
+                }
+            }
+        } else {
+            for (let jj = 0; jj < this._designStruct.length; ++jj) {
+                if (this._designStruct[jj]) {
+                    sequencePositions.push(jj);
+                }
+            }
+        }
+        return sequencePositions;
+    }
+
     public shift3Prime(): void {
         const q: number[] | null = this._shiftHighlightBox.getQueue();
         if (q == null) {

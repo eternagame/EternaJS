@@ -19,9 +19,9 @@ interface VoteDataWrapper {
     votes: VoteData[];
 }
 
-type Params =Record<
+type Params = Record<
 string,
-string | number | boolean | PuzzleJSON | RankScrollData | AnnotationDataBundle | null | undefined
+string | number | number[] | boolean | PuzzleJSON | RankScrollData | AnnotationDataBundle | null | undefined
 >;
 
 export default class GameClient {
