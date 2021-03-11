@@ -137,7 +137,7 @@ export type SubmitSolutionData = {
     'solution-id'?: number;
     'pointsrank-before'?: RankScrollData | null;
     'pointsrank-after'?: RankScrollData | null;
-    'library_nt'?: number[];
+    'selected-nts'?: number[];
     'annotations'?: AnnotationDataBundle;
 };
 
@@ -668,6 +668,7 @@ export default class PoseEditMode extends GameMode {
                 const sequence = solution.sequence;
                 for (const pose of this._poses) {
                     pose.pasteSequence(sequence);
+                    console.error('solution.libraryNT,', solution.libraryNT);
                     if (pose.customNumbering) {
                         // in custom numbering
                         for (const num of solution.libraryNT) {
@@ -740,6 +741,7 @@ export default class PoseEditMode extends GameMode {
         const poseFields: PoseField[] = [];
 
         const targetSecstructs: string[] = this._puzzle.getSecstructs();
+        console.error('targetSecstructs', targetSecstructs);
         const targetConditions = this._puzzle.targetConditions;
 
         // TSC: this crashes, and doesn't seem to accomplish anything
@@ -972,6 +974,8 @@ export default class PoseEditMode extends GameMode {
 
         // now that we have made the folder check, we can set _targetPairs. Used to do this
         // above but because NuPACK can handle pseudoknots, we shouldn't
+        console.error('targetConditions,', this._targetConditions);
+        console.error('targetConditions,', targetSecstructs);
         for (let ii = 0; ii < targetSecstructs.length; ii++) {
             if (this._targetConditions && this._targetConditions[0]
                     && this._targetConditions[0]['type'] === 'pseudoknot') {
@@ -1030,6 +1034,21 @@ export default class PoseEditMode extends GameMode {
             // AMW: I'm keeping the function around in case we want to call it
             // in some other context, but we don't need it anymore.
             // this.updateSolutionNameText(this._curSolution);
+            for (const pose of this._poses) {
+                console.error('solution.libraryNT,', this._params.initSolution.libraryNT);
+                if (pose.customNumbering) {
+                    // in custom numbering
+                    for (const num of this._params.initSolution.libraryNT) {
+                        // We don't have to handle not-found because this customNumbering must have it -- after all
+                        // how did this solution get generated?
+                        pose.markDesignStructTrue(pose.customNumbering.indexOf(num));
+                    }
+                } else {
+                    for (const num of this._params.initSolution.libraryNT) {
+                        pose.markDesignStructTrue(num);
+                    }
+                }
+            }
             if (this._solutionView) {
                 this.removeObject(this._solutionView);
             }
@@ -2203,7 +2222,7 @@ export default class PoseEditMode extends GameMode {
             }
 
             // Record designStruct numbers, used for library puzzles.
-            postData['library_nt'] = this._poses[0].designStructNumbers();
+            postData['selected-nts'] = this._poses[0].designStructNumbers();
         }
 
         return postData;

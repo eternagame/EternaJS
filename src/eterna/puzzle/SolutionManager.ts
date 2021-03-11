@@ -30,6 +30,7 @@ interface SolutionSpec {
     'has-fold-data': number | null;
     'fold-data': string;
     'annotations': AnnotationDataBundle;
+    'selected-nts': number[];
 }
 
 interface ShapeData {

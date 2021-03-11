@@ -1180,8 +1180,8 @@ export default class DesignBrowserMode extends GameMode {
         DesignCategory.FREE_ENERGY,
         DesignCategory.SYNTHESIZED,
         DesignCategory.SYNTHESIS_SCORE,
-        DesignCategory.SEQUENCE,
-        DesignCategory.LIBRARY_NT
+        DesignCategory.LIBRARY_NT,
+        DesignCategory.SEQUENCE
     ];
 
     private _initialSolution?: Solution;
