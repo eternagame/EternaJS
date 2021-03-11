@@ -193,7 +193,7 @@ test(`EternaFold:get_dot_plot`, () => {
                 Sequence.fromSequenceString(SEQ),
                 SecStruct.fromParens(STRUCT),
                 37
-            )).toBeDeepCloseTo(expectedResult[0], 5);
+            )?.data).toBeDeepCloseTo(expectedResult[0], 5);
         }))
         .resolves.toBeUndefined();
 });

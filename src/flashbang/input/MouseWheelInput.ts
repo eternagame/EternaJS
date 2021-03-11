@@ -1,6 +1,7 @@
 import {Registration} from 'signals';
 import LinkedList from 'flashbang/util/LinkedList';
-import {Assert} from 'flashbang';
+import {Assert, DisplayUtil, AppMode} from 'flashbang';
+import {Container} from 'pixi.js';
 
 export interface MouseWheelListener {
     /**
@@ -8,6 +9,8 @@ export interface MouseWheelListener {
      * should stop.
      */
     onMouseWheelEvent(e: WheelEvent): boolean;
+    display: Container;
+    mode: AppMode | null;
 }
 
 export default class MouseWheelInput {
@@ -19,15 +22,35 @@ export default class MouseWheelInput {
     public handleMouseWheelEvent(e: WheelEvent): boolean {
         let handled = false;
         try {
+            let smallestCandidateListenerWidth = Infinity;
+            let smallestCandidateListener: MouseWheelListener | null = null;
             for (
                 let elt = this._listeners ? this._listeners.beginIteration() : null;
                 elt != null;
                 elt = elt.next
             ) {
-                handled = elt.data !== null && elt.data.onMouseWheelEvent(e);
-                if (handled) {
-                    break;
+                if (
+                    elt.data !== null
+                    && elt.data.mode != null
+                    && elt.data.mode.container != null
+                ) {
+                    const globalBoxBounds = DisplayUtil.getBoundsRelative(elt.data.display, elt.data.mode.container);
+                    if (
+                        e.x >= globalBoxBounds.x
+                        && e.x <= globalBoxBounds.x + globalBoxBounds.width
+                        && e.y >= globalBoxBounds.y
+                        && e.y <= globalBoxBounds.y + globalBoxBounds.height
+                        && globalBoxBounds.width < smallestCandidateListenerWidth
+                    ) {
+                        smallestCandidateListenerWidth = globalBoxBounds.width;
+                        smallestCandidateListener = elt.data;
+                    }
                 }
+            }
+
+            if (smallestCandidateListener) {
+                smallestCandidateListener.onMouseWheelEvent(e);
+                handled = true;
             }
         } finally {
             if (this._listeners) this._listeners.endIteration();

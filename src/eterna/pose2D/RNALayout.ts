@@ -7,6 +7,7 @@ import Eterna from 'eterna/Eterna';
 import {Assert} from 'flashbang';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
+import log from 'loglevel';
 
 enum RotationDirection {
     CCW = -1, // counterclockwise
@@ -272,9 +273,9 @@ export default class RNALayout {
         const nnfe: number[] = [];
 
         if (this._targetPairs !== null
-                && (this._targetPairs.getParenthesis().includes('{')
+            && (this._targetPairs.getParenthesis().includes('{')
                 || this._targetPairs.getParenthesis().includes('['))
-                && folder.name === NuPACK.NAME) {
+            && folder.name === NuPACK.NAME) {
             folder.scoreStructures(seq, this._origPairs, true, EPars.DEFAULT_TEMPERATURE, nnfe);
         } else {
             folder.scoreStructures(seq, this._origPairs, false, EPars.DEFAULT_TEMPERATURE, nnfe);
@@ -1052,7 +1053,7 @@ export default class RNALayout {
             return scaleFactor;
         }
         if (this._targetPairs === null) {
-            console.error('this._targetPairs is null');
+            log.error('this._targetPairs is null');
             return scaleFactor;
         }
         for (let ii = 0; ii < this._targetPairs.length - 1; ii++) {

@@ -25,6 +25,7 @@ import Utility from 'eterna/util/Utility';
 import Folder from 'eterna/folding/Folder';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
+import AnnotationManager, {AnnotationRange} from 'eterna/AnnotationManager';
 import Base from './Base';
 import BaseDrawFlags from './BaseDrawFlags';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
@@ -36,21 +37,16 @@ import PaintCursor from './PaintCursor';
 import PoseField from './PoseField';
 import PoseUtil from './PoseUtil';
 import PuzzleEditOp from './PuzzleEditOp';
-import RNAAnchorObject from './RNAAnchorObject';
 import RNALayout, {RNATreeNode} from './RNALayout';
 import ScoreDisplayNode, {ScoreDisplayNodeType} from './ScoreDisplayNode';
-import ExplosionFactorPanel from './ExplosionFactorPanel';
 import triangulate from './triangulate';
+import Tooltips from '../ui/Tooltips';
 
 type InteractionEvent = PIXI.InteractionEvent;
 
 interface Mut {
     pos: number;
     base: string;
-}
-
-interface AuxInfo {
-    cleavingSite?: number;
 }
 
 export enum Layout {
@@ -68,8 +64,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public static readonly OLIGO_MODE_DIMER: number = 1;
     public static readonly OLIGO_MODE_EXT3P: number = 2;
     public static readonly OLIGO_MODE_EXT5P: number = 3;
-
-    private static readonly SCORES_POSITION_Y = 128;
 
     constructor(poseField: PoseField, editable: boolean) {
         super();
@@ -91,20 +85,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         this.container.addChild(this._baseLayer);
 
-        this._primaryScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
-        this._primaryScoreEnergyDisplay.position = new Point(17, Pose2D.SCORES_POSITION_Y);
-        this.container.addChild(this._primaryScoreEnergyDisplay);
-
-        this._deltaScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
-        this._deltaScoreEnergyDisplay.position = new Point(17 + 119, Pose2D.SCORES_POSITION_Y);
-        this._deltaScoreEnergyDisplay.visible = false;
-        this.container.addChild(this._deltaScoreEnergyDisplay);
-
-        this._secondaryScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
-        this._secondaryScoreEnergyDisplay.position = new Point(17 + 119 * 2, Pose2D.SCORES_POSITION_Y);
-        this._secondaryScoreEnergyDisplay.visible = false;
-        this.container.addChild(this._secondaryScoreEnergyDisplay);
-
         this._moleculeLayer = new Container();
         this.container.addChild(this._moleculeLayer);
         this._moleculeLayer.visible = false;
@@ -115,16 +95,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._paintCursor = new PaintCursor();
         this._paintCursor.display.visible = false;
         this.addObject(this._paintCursor, this.container);
-
-        this._explosionFactorPanel = new ExplosionFactorPanel();
-        this._explosionFactorPanel.display.position = new Point(17, Pose2D.SCORES_POSITION_Y + 82);
-        this._explosionFactorPanel.display.visible = false;
-        this._explosionFactorPanel.factorUpdated.connect((factor: number) => {
-            this._explosionFactor = factor;
-            this.computeLayout(true);
-            this._redraw = true;
-        });
-        this.addObject(this._explosionFactorPanel, this.container);
 
         this._explosionRays = [];
         for (let ii = 0; ii < 10; ii++) {
@@ -151,17 +121,19 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._shiftHighlightBox = new HighlightBox(this, HighlightType.SHIFT);
         this.addObject(this._shiftHighlightBox, this.container);
 
+        this._annotationHighlightBox = new HighlightBox(this, HighlightType.ANNOTATION);
+        this._annotationHighlightBox.display.cursor = 'pointer';
+        this.addObject(this._annotationHighlightBox, this.container);
+        if (Tooltips.instance != null) {
+            this.regs.add(Tooltips.instance.addTooltip(this._annotationHighlightBox, 'Create Annotation'));
+        }
+
         if (!this._editable) {
             this._currentColor = -1;
         }
 
-        this._auxInfoCanvas = new Graphics();
-        this._auxInfoCanvas.visible = false;
-        this.container.addChild(this._auxInfoCanvas);
-
-        this._auxTextballoon = new TextBalloon('', 0x0, 0.9);
-        this._auxTextballoon.display.visible = false;
-        this.addObject(this._auxTextballoon, this._auxInfoCanvas);
+        this._annotationCanvas = new Graphics();
+        this.container.addChild(this.annotationCanvas);
 
         this._strandLabel = new TextBalloon('', 0x0, 0.8);
         this._strandLabel.display.visible = false;
@@ -185,7 +157,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.regs.add(
             Eterna.settings.highlightRestricted.connectNotify((value) => { this.highlightRestricted = value; })
         );
-        this.regs.add(Eterna.settings.displayAuxInfo.connectNotify((value) => { this.displayAuxInfo = value; }));
         this.regs.add(Eterna.settings.simpleGraphics.connectNotify((value) => { this.useSimpleGraphics = value; }));
         this.regs.add(Eterna.settings.usePuzzlerLayout.connect(() => this.computeLayout()));
     }
@@ -197,25 +168,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.container.hitArea = new Rectangle(0, 0, width, height);
     }
 
-    public get primaryScoreDisplay(): EnergyScoreDisplay {
-        return this._primaryScoreEnergyDisplay;
+    public set redraw(setting: boolean) {
+        this._redraw = setting;
     }
 
-    public get secondaryScoreDisplay(): EnergyScoreDisplay {
-        return this._secondaryScoreEnergyDisplay;
-    }
-
-    public addAnchoredObject(obj: RNAAnchorObject): void {
-        this._anchoredObjects.push(obj);
-    }
-
-    public removeAnchoredObject(obj: RNAAnchorObject): void {
-        for (let ii = 0; ii < this._anchoredObjects.length; ++ii) {
-            if (obj === this._anchoredObjects[ii]) {
-                this._anchoredObjects.splice(ii, 1);
-                break;
-            }
-        }
+    public get baseLayer(): Container {
+        return this._baseLayer;
     }
 
     public get isAnimating(): boolean {
@@ -269,6 +227,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     return;
                 }
             }
+
+            if (this.annotationManager.allAnnotations.length > 0) {
+                this.updateAnnotationSpaceAvailability();
+            }
+            this.annotationManager.refreshAnnotations(this, true);
 
             this._startOffsetX = this._offX;
             this._startOffsetY = this._offY;
@@ -360,6 +323,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.updateMolecule();
             this.generateScoreNodes();
             this.callPoseEditCallback();
+            this.annotationManager.refreshAnnotations(this, false);
             return;
         }
 
@@ -406,6 +370,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.updateMolecule();
             this.generateScoreNodes();
             this.callPoseEditCallback();
+            this.annotationManager.refreshAnnotations(this);
         }
 
         this._mutatedSequence = null;
@@ -461,6 +426,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.updateMolecule();
             this.generateScoreNodes();
             this.callPoseEditCallback();
+            this.updateAnnotationSpaceAvailability();
+            this.annotationManager.refreshAnnotations(this, true);
         }
     }
 
@@ -855,6 +822,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
         const shiftDown: boolean = Flashbang.app.isShiftKeyDown;
         const ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
 
+        if (this.annotationManager.isMovingAnnotation) {
+            return;
+        }
+
         // ctrl + shift: drag base around; ctrl: base mark; shift: shift highlight
         if (closestIndex >= 0) {
             this._mouseDownAltKey = altDown;
@@ -876,11 +847,15 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 });
                 return;
             }
-            if ((ctrlDown || this.currentColor === RNAPaint.BASE_MARK) && closestIndex < this.fullSequenceLength) {
+            if (
+                (ctrlDown || this.currentColor === RNAPaint.BASE_MARK)
+                && closestIndex < this.fullSequenceLength
+                && !this.annotationManager.annotationModeActive
+            ) {
                 this.toggleBaseMark(closestIndex);
                 return;
             }
-            if (shiftDown) {
+            if (shiftDown && !this.annotationManager.annotationModeActive) {
                 if (closestIndex < this.sequenceLength) {
                     this._shiftStart = closestIndex;
                     this._shiftEnd = closestIndex;
@@ -892,6 +867,33 @@ export default class Pose2D extends ContainerObject implements Updatable {
                         this._shiftEnd = -1;
                         if (reg) reg.close();
                     });
+                }
+                e.stopPropagation();
+                return;
+            } else if (this.annotationManager.annotationModeActive) {
+                if (closestIndex < this.sequenceLength) {
+                    const clickedHighlight = this._annotationRanges.some((range) => (
+                        closestIndex >= range.start && closestIndex <= range.end)
+                        || (closestIndex <= range.start && closestIndex >= range.end));
+
+                    if (!clickedHighlight) {
+                        this._selectingAnnotationRange = true;
+
+                        this._annotationRanges.push({
+                            start: closestIndex,
+                            end: closestIndex
+                        });
+
+                        this.updateAnnotationRangeHighlight();
+
+                        let reg: Registration | null = null;
+                        reg = this.pointerUp.connect(() => {
+                            this._selectingAnnotationRange = false;
+                            if (reg) reg.close();
+                        });
+                    } else {
+                        this.annotationManager.createAnnotation(this._annotationRanges);
+                    }
                 }
                 e.stopPropagation();
                 return;
@@ -916,10 +918,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
 
             e.stopPropagation();
-        } else if (shiftDown) {
+        } else if (shiftDown && !this.annotationManager.annotationModeActive) {
             this._shiftStart = -1;
             this._shiftEnd = -1;
             this.updateShiftHighlight();
+        } else if (this.annotationManager.annotationModeActive) {
+            this._annotationRanges = [];
+            this._selectingAnnotationRange = false;
+            this.updateAnnotationRangeHighlight();
         }
     }
 
@@ -1054,8 +1060,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (closestIndex >= 0 && this._currentColor >= 0) {
             this.onBaseMouseMove(closestIndex);
             // document.getElementById(Eterna.PIXI_CONTAINER_ID).style.cursor = 'none';
-            this._paintCursor.display.visible = true;
-            this._paintCursor.setShape(this._currentColor);
+
+            if (!this.annotationManager.annotationModeActive) {
+                this._paintCursor.display.visible = true;
+                this._paintCursor.setShape(this._currentColor);
+            }
 
             const strandName: string | null = this.getStrandName(closestIndex);
             if (strandName != null) {
@@ -1519,6 +1528,22 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._shiftHighlightBox.clear();
     }
 
+    public clearAnnotationRanges(): void {
+        this._annotationRanges = [];
+
+        this.clearAnnotationHighlight();
+    }
+
+    public clearAnnotationHighlight(): void {
+        this._annotationHighlightBox.clear();
+
+        if (this.annotationManager.annotationModeActive) {
+            for (const base of this._bases) {
+                base.container.alpha = AnnotationManager.ANNOTATION_UNHIGHLIGHTED_OPACITY;
+            }
+        }
+    }
+
     public praiseStack(stackStart: number, stackEnd: number): void {
         this._praiseQueue.push(stackStart);
         this._praiseQueue.push(stackEnd);
@@ -1643,20 +1668,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (ii >= 0 && ii < this.fullSequenceLength) {
                 this._bases[ii].startSparking();
             }
-        }
-    }
-
-    public set displayAuxInfo(display: boolean) {
-        this._displayAuxInfo = display;
-        this._auxInfoCanvas.visible = display;
-    }
-
-    public set auxInfo(auxInfo: AuxInfo | null) {
-        this._auxInfo = auxInfo;
-
-        if (this._auxInfo != null && this._auxInfo[Pose2D.CLEAVING_SITE] != null) {
-            this._auxTextballoon.display.visible = true;
-            this._auxTextballoon.setText('Ribozyme cleaving site');
         }
     }
 
@@ -2236,6 +2247,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.checkPairs();
         this.updateMolecule();
         this.generateScoreNodes();
+        this.updateAnnotationSpaceAvailability();
+        this.annotationManager.refreshAnnotations(this, true);
     }
 
     public get sequence(): Sequence {
@@ -2267,11 +2280,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
         //     }
         // }
 
-        // / Recompute sequence layout
+        // Recompute sequence layout
         this.computeLayout(false);
         this.checkPairs();
         this.updateMolecule();
         this.generateScoreNodes();
+        this.updateAnnotationSpaceAvailability();
+        this.annotationManager.refreshAnnotations(this, true);
     }
 
     public get secstruct(): SecStruct {
@@ -2384,17 +2399,15 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     private makeHighlightState() {
-        let hlState: RNAHighlightState | undefined;
-        if (this._allNewHighlights.length > 0) {
-            hlState = new RNAHighlightState();
-            hlState.nuc = [];
-            hlState.isOn = true;
-            for (const existingHighlight of this._allNewHighlights) {
-                if (existingHighlight.nuc !== null) {
-                    hlState.nuc = hlState.nuc.concat(existingHighlight.nuc);
-                }
-            }
+        if (this._allNewHighlights.length === 0) {
+            return undefined;
         }
+
+        const hlState = new RNAHighlightState();
+        hlState.nuc = Array.prototype.concat(
+            this._allNewHighlights.map((h) => h.nuc).filter((n): n is number[] => n !== null)
+        );
+        hlState.isOn = true;
         return hlState;
     }
 
@@ -2432,10 +2445,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this._zoomLevel, this._offX, this._offY, currentTime, drawFlags, numberBitmap, hlState
             );
         }
-
-        if (this._displayAuxInfo) {
-            this.renderAuxInfo();
-        }
     }
 
     /* override */
@@ -2446,12 +2455,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
         Assert.assertIsDefined(this.mode);
         const currentTime: number = this.mode.time;
-        for (const anchor of this._anchoredObjects) {
-            if (anchor.isLive) {
-                const p: Point = this.getBaseLoc(anchor.base);
-                anchor.object.display.position = new Point(p.x + anchor.offset.x, p.y + anchor.offset.y);
-            }
-        }
 
         const fullSeq: Sequence = this.fullSequence;
         let center: Point;
@@ -2476,6 +2479,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (prog >= 1) {
                 prog = 1;
                 this._offsetTranslating = false;
+
+                this.updateAnnotationSpaceAvailability();
+                this.annotationManager.refreshAnnotations(this, true);
             }
 
             if (this._offsetTranslating) {
@@ -2495,7 +2501,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        // / Update score node
+        // Update score node
         this.updateScoreNodeVisualization(this._offX !== this._prevOffsetX || this._offY !== this._prevOffsetY);
 
         // / Bitblt rendering
@@ -2728,17 +2734,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._baseFromY = null;
 
             this.updateScoreNodeGui();
-
-            if (this.checkOverlap()) {
-                // If overlaps have been introduced, make sure the explosion factor input is shown
-                this._explosionFactorPanel.display.visible = true;
-            } else if (this._explosionFactorPanel.display.visible === true) {
-                // If all overlaps have been removed, remove the explosion
-                this._explosionFactor = 1;
-                this._explosionFactorPanel.display.visible = false;
-                this.computeLayout(true);
-                this._redraw = true;
-            }
         }
     }
 
@@ -2763,31 +2758,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._lettermode;
     }
 
-    public get showTotalEnergy(): boolean {
-        return this._showTotalEnergy;
-    }
-
-    public set showTotalEnergy(show: boolean) {
-        this._showTotalEnergy = show;
-        this._primaryScoreEnergyDisplay.visible = (show && this._scoreFolder != null);
-        this._secondaryScoreEnergyDisplay.visible = (
-            show && this._scoreFolder != null && this._secondaryScoreEnergyDisplay.hasText
-        );
-        this._deltaScoreEnergyDisplay.visible = show && this._scoreFolder != null;
-    }
-
-    public get showExplosionFactor(): boolean {
-        return this._explosionFactorPanel.display.visible;
-    }
-
-    public set showExplosionFactor(show: boolean) {
-        this._explosionFactorPanel.display.visible = show;
-    }
-
     public set scoreFolder(folder: Folder | null) {
         if (this._scoreFolder !== folder) {
             this._scoreFolder = folder;
-            this.showTotalEnergy = this._showTotalEnergy;
+            // this.showTotalEnergy = this._showTotalEnergy;
             this.generateScoreNodes();
         }
     }
@@ -3006,6 +2980,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
+    public fastLayout(): void {
+        this.computeLayout(true);
+    }
+
     private computeLayout(fast: boolean = false): void {
         const fullSeq: Sequence = this.fullSequence;
 
@@ -3034,7 +3012,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
         const rnaDrawer: RNALayout = new RNALayout(
             Pose2D.ZOOM_SPACINGS[this._zoomLevel],
-            Pose2D.ZOOM_SPACINGS[this._zoomLevel] * this._explosionFactor,
+            Pose2D.ZOOM_SPACINGS[this._zoomLevel] * this._poseField.explosionFactor,
             exceptionIndices
         );
 
@@ -3201,6 +3179,15 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (!this._coloring && this._shiftStart >= 0 && seqnum < this.sequenceLength) {
             this._shiftEnd = seqnum;
             this.updateShiftHighlight();
+        } else if (
+            !this._coloring
+            && this.annotationManager.annotationModeActive
+            && this._annotationRanges.length > 0
+            && this._selectingAnnotationRange
+            && seqnum < this.sequenceLength
+        ) {
+            this._annotationRanges[this._annotationRanges.length - 1].end = seqnum;
+            this.updateAnnotationRangeHighlight();
         }
 
         if (!this._coloring || (seqnum === this._lastColoredIndex)) {
@@ -3312,6 +3299,98 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
+    public setAnnotationRangeHighlight(ranges: AnnotationRange[]): void {
+        this._annotationHighlightBox.clear();
+        for (const range of ranges) {
+            this._annotationHighlightBox.setHighlight([range.start, range.end]);
+        }
+    }
+
+    public updateAnnotationRangeHighlight(): void {
+        this._annotationHighlightBox.clear();
+
+        if (this.annotationManager.annotationModeActive) {
+            for (let i = 0; i < this._bases.length; i++) {
+                this._bases[i].container.alpha = AnnotationManager.ANNOTATION_UNHIGHLIGHTED_OPACITY;
+            }
+        }
+
+        for (const range of this._annotationRanges) {
+            const highlightExtents: number[] = range.end < range.start
+                ? [range.end, range.start]
+                : [range.start, range.end];
+            this._annotationHighlightBox.setHighlight(highlightExtents);
+
+            for (let i = highlightExtents[0]; i <= highlightExtents[1]; i++) {
+                this._bases[i].container.alpha = 1;
+            }
+        }
+    }
+
+    public get annotationSpaceAvailability(): boolean[][] {
+        return this._annotationSpaceAvailability;
+    }
+
+    public get annotationCanvas(): Graphics {
+        return this._annotationCanvas;
+    }
+
+    public setBasesOpacity(opacity: number): void {
+        for (const base of this._bases) {
+            base.container.alpha = opacity;
+        }
+    }
+
+    public setAnnotationCanvasOpacity(opacity: number): void {
+        this.annotationCanvas.alpha = opacity;
+    }
+
+    public triggerRedraw(): void {
+        this._redraw = true;
+    }
+
+    public clearAnnotationCanvas(): void {
+        if (this.annotationCanvas.children.length > 0) {
+            // Remove from any remaining artifacts from canvas
+            this.annotationCanvas.removeChildren();
+            this.annotationCanvas.clear();
+        }
+    }
+
+    public updateAnnotationSpaceAvailability(): void {
+        // Set annotation space availability to true
+        this._annotationSpaceAvailability = Array(Math.ceil(this._baseLayer.height)).fill(0).map(
+            () => Array(Math.ceil(this._baseLayer.width)).fill(true)
+        );
+
+        const baseLayerBounds = DisplayUtil.getBoundsRelative(this._baseLayer, this.container);
+
+        // Populate with bases
+        for (let i = 0; i < this._bases.length; i++) {
+            const base = this._bases[i];
+            const baseBounds = DisplayUtil.getBoundsRelative(base.display, this._baseLayer);
+            const baseRowStart = Math.max(0, Math.floor(baseBounds.y - baseLayerBounds.y));
+            const baseRowEnd = Math.min(
+                Math.ceil(this._baseLayer.height),
+                Math.ceil(baseBounds.y - baseLayerBounds.y + baseBounds.height)
+            );
+            const baseColStart = Math.max(0, Math.floor(baseBounds.x - baseLayerBounds.x));
+            const baseColEnd = Math.min(
+                Math.ceil(this._baseLayer.width),
+                Math.ceil(baseBounds.x - baseLayerBounds.x + baseBounds.width)
+            );
+
+            for (let row = baseRowStart; row < baseRowEnd; row++) {
+                const replaceCount = baseColEnd - baseColStart;
+                this._annotationSpaceAvailability[row].splice(
+                    baseColStart,
+                    replaceCount,
+                    ...Array(replaceCount).fill(false)
+                );
+            }
+        }
+    }
+
     private static drawEnergyHighlight(hilite: Graphics, energy: Sprite): Graphics {
         // Draw highlight around the energy reading.
         // Give it a bit of padding so the highlight isn't so tight.
@@ -3354,42 +3433,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._energyHighlights = [];
     }
 
-    private renderAuxInfo(): void {
-        this._auxInfoCanvas.clear();
-
-        if (!this._displayAuxInfo || this._auxInfo == null || this._auxInfo[Pose2D.CLEAVING_SITE] === undefined) {
-            return;
-        }
-
-        const cleavingSite: number = this._auxInfo[Pose2D.CLEAVING_SITE] as number;
-        if (cleavingSite >= this._bases.length - 1) return;
-
-        const bX: number = this._bases[cleavingSite].x + this._offX;
-        const bY: number = this._bases[cleavingSite].y + this._offY;
-
-        const bNextX: number = this._bases[cleavingSite + 1].x + this._offX;
-        const bNextY: number = this._bases[cleavingSite + 1].y + this._offY;
-
-        const cX: number = (bX + bNextX) / 2.0;
-        const cY: number = (bY + bNextY) / 2.0;
-
-        const goX: number = bNextY - bY;
-        const goY: number = -(bNextX - bX);
-
-        this._auxInfoCanvas.lineStyle(3, 0xFF0000, 0.9);
-        this._auxInfoCanvas.moveTo(cX + goX / 2.0, cY + goY / 2.0);
-        this._auxInfoCanvas.lineTo(cX - goX / 2.0, cY - goY / 2.0);
-
-        this._auxTextballoon.display.position = new Point(cX + goX / 2.0, cY + goY / 2.0);
-    }
-
     private checkPairs(): void {
         const fullSeq = this.fullSequence;
 
         for (let ii = 0; ii < this._pairs.length; ii++) {
             const pi = this._pairs.pairingPartner(ii);
             if (this._pairs.isPaired(ii) && this.isPairSatisfied(ii, pi)) {
-                const pairStr: number = Pose2D.getPairStrength(
+                const pairStr: number = PoseUtil.getPairStrength(
                     fullSeq.nt(ii), fullSeq.nt(pi)
                 );
 
@@ -3592,39 +3642,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
             } else {
                 scoreScore = `${(totalScore / 100).toString()} kcal`;
             }
-            this.updateEnergyDisplaySizeLocation(factor);
 
-            this._primaryScoreEnergyDisplay.setEnergyText(scoreLabel, scoreScore);
-            this._secondaryScoreEnergyDisplay.setEnergyText(nodeLabel, nodeScore);
-            this._secondaryScoreEnergyDisplay.visible = (this._showTotalEnergy && nodeFound);
-
-            // This is because the undo stack isn't populated yet when this is run on puzzle boot/changing folders,
-            // which is needed for the delta - TODO: Handle this in a less hacky way
-            const attemptSetDelta = () => {
-                try {
-                    this._deltaScoreEnergyDisplay.setEnergyText(
-                        'Natural/Target Delta',
-                        `${Math.round(this._getEnergyDelta()) / 100} kcal`
-                    );
-                    this._deltaScoreEnergyDisplay.visible = (this._showTotalEnergy && this._scoreFolder != null);
-                } catch (e) {
-                    this._deltaScoreEnergyDisplay.visible = false;
-                    setTimeout(attemptSetDelta, 1000);
-                }
-            };
-            setTimeout(attemptSetDelta, 50);
+            this._poseField.updateEnergyGui(
+                factor, scoreLabel, scoreScore, nodeLabel, nodeScore, nodeFound, this._getEnergyDelta
+            );
         }
-    }
-
-    private updateEnergyDisplaySizeLocation(factor: number): void {
-        this._primaryScoreEnergyDisplay.position = new Point(17, Pose2D.SCORES_POSITION_Y);
-        this._primaryScoreEnergyDisplay.setSize(111 + factor * 59, 40);
-
-        this._deltaScoreEnergyDisplay.position = new Point(17 + 119 + factor * 59, Pose2D.SCORES_POSITION_Y);
-        this._deltaScoreEnergyDisplay.setSize(111, 40);
-
-        this._secondaryScoreEnergyDisplay.position = new Point(17 + 119 * 2 + factor * 59, Pose2D.SCORES_POSITION_Y);
-        this._secondaryScoreEnergyDisplay.setSize(111, 40);
     }
 
     private clearScoreTexts(): void {
@@ -3758,27 +3780,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     private static createDefaultLocks(sequenceLength: number): boolean[] {
-        const locks: boolean[] = new Array<boolean>(sequenceLength);
-        for (let ii = 0; ii < sequenceLength; ++ii) {
-            locks[ii] = false;
-        }
-        return locks;
-    }
-
-    private static getPairStrength(s1: number, s2: number): number {
-        if (Pose2D.isPair(s1, s2, RNABase.ADENINE, RNABase.URACIL)) {
-            return 2;
-        } else if (Pose2D.isPair(s1, s2, RNABase.GUANINE, RNABase.URACIL)) {
-            return 1;
-        } else if (Pose2D.isPair(s1, s2, RNABase.GUANINE, RNABase.CYTOSINE)) {
-            return 3;
-        } else {
-            return -1;
-        }
-    }
-
-    private static isPair(s1: number, s2: number, type1: number, type2: number): boolean {
-        return (s1 === type1 && s2 === type2) || (s1 === type2 && s2 === type1);
+        return new Array<boolean>(sequenceLength).fill(false);
     }
 
     private readonly _baseLayer: Container = new Container();
@@ -3927,16 +3929,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _lastScoreNodeIndex: number = -1;
     private _scoreNodeHighlight: Graphics;
 
-    // New Score Display panels
-    private _primaryScoreEnergyDisplay: EnergyScoreDisplay;
-    private _secondaryScoreEnergyDisplay: EnergyScoreDisplay;
-    private _deltaScoreEnergyDisplay: EnergyScoreDisplay;
-    private _showTotalEnergy: boolean = true;
-
-    // Explosion Factor (RNALayout pairSpace multiplier)
-    private _explosionFactor: number = 1;
-    private _explosionFactorPanel: ExplosionFactorPanel;
-
     // For tracking a base
     private _cursorIndex: number | null = 0;
     private _cursorBox: Graphics | null = null;
@@ -3958,16 +3950,19 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _expHi: number = 0;
     private _expContinuous: boolean = false;
     private _expExtendedScale: boolean = false;
-    private _displayAuxInfo: boolean;
-    private _auxInfo: AuxInfo | null;
-    private _auxInfoCanvas: Graphics;
-    private _auxTextballoon: TextBalloon;
 
-    private _anchoredObjects: RNAAnchorObject[] = [];
     private _highlightEnergyText: boolean = false;
     private _energyHighlights: SceneObject[] = [];
 
-    private _showNucleotideRange = false;
+    private _showNucleotideRange: boolean = false;
+
+    // Annotations
+    public annotationManager: AnnotationManager;
+    private _annotationCanvas: Graphics;
+    private _annotationHighlightBox: HighlightBox;
+    private _annotationSpaceAvailability: boolean[][] = [];
+    private _annotationRanges: AnnotationRange[] = [];
+    private _selectingAnnotationRange: boolean = false;
 
     /*
      * NEW HIGHLIGHT.
@@ -3976,8 +3971,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
      *  - Highlight Nucleotides: Brighten glow around the nucleotide.
      */
     private _allNewHighlights: RNAHighlightState[] = [];
-
-    private static readonly CLEAVING_SITE = 'cleavingSite';
 
     private static readonly P: Point = new Point();
 }

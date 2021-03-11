@@ -8,7 +8,11 @@ import SubmitPoseDetails from './SubmitPoseDetails';
 export default class SubmitPoseDialog extends Dialog<SubmitPoseDetails> {
     constructor(initialState: SubmitPoseDetails = {
         title: '',
-        comment: ''
+        comment: '',
+        annotations: {
+            puzzle: [],
+            solution: []
+        }
     }) {
         super();
         this._initialState = initialState;
@@ -36,7 +40,11 @@ export default class SubmitPoseDialog extends Dialog<SubmitPoseDetails> {
             const dict = inputPanel.getFieldValues();
             const details = {
                 title: dict.get(TITLE),
-                comment: dict.get(COMMENT)
+                comment: dict.get(COMMENT),
+                annotations: {
+                    puzzle: [],
+                    solution: []
+                }
             };
             this.saveInputs.emit(details);
             this.close(null);
@@ -45,7 +53,11 @@ export default class SubmitPoseDialog extends Dialog<SubmitPoseDetails> {
             const dict = inputPanel.getFieldValues();
             const details = {
                 title: dict.get(TITLE),
-                comment: dict.get(COMMENT)
+                comment: dict.get(COMMENT),
+                annotations: {
+                    puzzle: [],
+                    solution: []
+                }
             };
             this.saveInputs.emit(details);
             this.close(details);
