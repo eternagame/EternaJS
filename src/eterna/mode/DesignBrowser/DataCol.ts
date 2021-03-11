@@ -137,7 +137,7 @@ export default class DataCol extends ContainerObject {
         } else {
             this._filterField1 = new TextInputObject({
                 fontSize: TEXT_INPUT_SIZE,
-                width: 40,
+                width: 46,
                 placeholder: 'min',
                 domParent: this._domParent
             });
@@ -149,7 +149,7 @@ export default class DataCol extends ContainerObject {
 
             this._filterField2 = new TextInputObject({
                 fontSize: TEXT_INPUT_SIZE,
-                width: 40,
+                width: 46,
                 placeholder: 'max',
                 domParent: this._domParent
             });

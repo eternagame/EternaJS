@@ -130,8 +130,8 @@ export default class DesignBrowserMode extends GameMode {
         this.addObject(this._hSlider, this._content);
 
         this._scrollContainer = new ScrollContainer(1, 1);
-        this._scrollContainer.display.position = new Point(17, 85);
-        this.addObject(this._scrollContainer, this.container);
+        this._scrollContainer.display.position = new Point(7, 5);
+        this.addObject(this._scrollContainer, this._content);
 
         this._dataColParent = new ContainerObject();
         this._scrollContainer.addObject(this._dataColParent, this._scrollContainer.content);
@@ -263,7 +263,7 @@ export default class DesignBrowserMode extends GameMode {
         homeButton.display.position = new Point(18, 10);
         homeButton.clicked.connect(() => {
             if (Eterna.MOBILE_APP) {
-                window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
+                if (window.frameElement) window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
             } else {
                 window.location.href = EternaURL.createURL({page: 'home'});
             }
