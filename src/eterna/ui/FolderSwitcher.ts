@@ -15,12 +15,13 @@ export default class FolderSwitcher extends ContainerObject {
 
         this._canUseFolder = canUseFolder;
 
-        this._dropdown = new GameDropdown(
-            14,
-            FolderManager.instance.getFolders(this._canUseFolder),
-            defaultFolder?.name || FolderManager.instance.getFolders(this._canUseFolder)[0],
-            0
-        );
+        this._dropdown = new GameDropdown({
+            fontSize: 14,
+            options: FolderManager.instance.getFolders(this._canUseFolder),
+            defaultOption: defaultFolder?.name || FolderManager.instance.getFolders(this._canUseFolder)[0],
+            borderWidth: 0,
+            dropShadow: true
+        });
 
         if (!allowChange) {
             this._dropdown.disabled = true;

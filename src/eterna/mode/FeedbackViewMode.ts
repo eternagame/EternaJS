@@ -250,12 +250,12 @@ export default class FeedbackViewMode extends GameMode {
 
         this.setPoseFields(poseFields);
 
-        this._dropdown = new GameDropdown(
-            14,
-            this._solution.expFeedback?.conditions ?? ['SHAPE'],
-            'SHAPE',
-            0
-        );
+        this._dropdown = new GameDropdown({
+            fontSize: 14,
+            options: this._solution.expFeedback?.conditions ?? ['SHAPE'],
+            defaultOption: 'SHAPE',
+            borderWidth: 0
+        });
 
         this._dropdown.disabled = false;
         this._dropdown.selectedOption.connect(() => this.showExperimentalColors());

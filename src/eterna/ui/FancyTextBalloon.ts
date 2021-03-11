@@ -7,6 +7,7 @@ import RScriptArrow from 'eterna/rscript/RScriptArrow';
 import TextBalloon from './TextBalloon';
 import GameButton from './GameButton';
 import FancyGamePanel from './FancyGamePanel';
+import BaseGamePanel from './BaseGamePanel';
 
 export default class FancyTextBalloon extends TextBalloon implements Updatable {
     constructor(
@@ -25,13 +26,13 @@ export default class FancyTextBalloon extends TextBalloon implements Updatable {
 
     protected added(): void {
         // We do not call TextBalloon.added()
-        this._panel.destroySelf();
+        this._fancyPanel.destroySelf();
         this._button.destroySelf();
 
-        this._panel = this._showOutline
+        this._fancyPanel = this._showOutline
             ? new FancyGamePanel(2, this._balloonAlpha, this._balloonColor, this._outlineColor, this._outlineAlpha)
             : new FancyGamePanel(0, this._balloonAlpha, this._balloonColor);
-        this.addObject(this._panel, this.container, 0);
+        this.addObject(this._fancyPanel, this.container, 0);
 
         this._button = new GameButton()
             .up(Bitmaps.NovaNext)
@@ -68,7 +69,7 @@ export default class FancyTextBalloon extends TextBalloon implements Updatable {
 
     /* override */
     public set title(title: string) {
-        this._panel.title = title;
+        this._fancyPanel.title = title;
         this._hasTitle = title != null;
     }
 
@@ -78,7 +79,7 @@ export default class FancyTextBalloon extends TextBalloon implements Updatable {
 
     /* override */
     protected updateView(): void {
-        this._panel.setSize(this.width, this.height);
+        this._fancyPanel.setSize(this.width, this.height);
 
         const innerWidth = this.width - 2 * TextBalloon.W_MARGIN;
         const outerWidth = this.width;
@@ -88,19 +89,19 @@ export default class FancyTextBalloon extends TextBalloon implements Updatable {
                 this._text.position = new Point(TextBalloon.W_MARGIN, TextBalloon.H_MARGIN);
             }
 
-            this._panel.display.position = new Point(0, 0);
+            this._fancyPanel.display.position = new Point(0, 0);
         } else {
             if (this._text != null) {
                 this._text.position = new Point(-innerWidth / 2, TextBalloon.H_MARGIN);
             }
 
-            this._panel.display.position = new Point(-outerWidth * 0.5, 0);
+            this._fancyPanel.display.position = new Point(-outerWidth * 0.5, 0);
         }
 
         if (this._button.display.visible) {
             DisplayUtil.positionRelative(
                 this._button.display, HAlign.RIGHT, VAlign.BOTTOM,
-                this._panel.container, HAlign.RIGHT, VAlign.BOTTOM,
+                this._fancyPanel.container, HAlign.RIGHT, VAlign.BOTTOM,
                 -TextBalloon.W_MARGIN, -TextBalloon.H_MARGIN
             );
         }
@@ -150,4 +151,5 @@ export default class FancyTextBalloon extends TextBalloon implements Updatable {
     private _hasFixedWidth: boolean = false;
     private _fixedWidth: number;
     private _childrenArrows: RScriptArrow[] = [];
+    private _fancyPanel: BaseGamePanel;
 }

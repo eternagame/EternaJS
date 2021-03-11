@@ -233,7 +233,10 @@ export default class RankScroll extends ContainerObject {
             }
         }
 
-        const bg = new GamePanel(0, 0.9, 0x152843);
+        const bg = new GamePanel({
+            alpha: 0.9,
+            color: 0x152843
+        });
         bg.setSize(310, 88);
         bg.display.position = new Point(-10, -10);
         this.addObject(bg, this.container);

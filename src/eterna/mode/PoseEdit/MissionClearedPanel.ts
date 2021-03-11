@@ -110,7 +110,11 @@ export default class MissionClearedPanel extends ContainerObject {
         this._rankScrollContainer.visible = false;
         this._infoContainer.addChild(this._rankScrollContainer);
 
-        this._rankScrollHeading = new GamePanel(GamePanelType.NORMAL, 1.0, 0x2D4159);
+        this._rankScrollHeading = new GamePanel({
+            type: GamePanelType.NORMAL,
+            alpha: 1.0,
+            color: 0x2D4159
+        });
         this.addObject(this._rankScrollHeading, this._rankScrollContainer);
 
         this._tfPlayer = Fonts.std('PLAYER', 14).bold().color(0xffffff).build();
