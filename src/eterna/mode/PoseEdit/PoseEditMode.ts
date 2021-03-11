@@ -668,6 +668,18 @@ export default class PoseEditMode extends GameMode {
                 const sequence = solution.sequence;
                 for (const pose of this._poses) {
                     pose.pasteSequence(sequence);
+                    if (pose.customNumbering) {
+                        // in custom numbering
+                        for (const num of solution.libraryNT) {
+                            // We don't have to handle not-found because this customNumbering must have it -- after all
+                            // how did this solution get generated?
+                            pose.markDesignStructTrue(pose.customNumbering.indexOf(num));
+                        }
+                    } else {
+                        for (const num of solution.libraryNT) {
+                            pose.markDesignStructTrue(num);
+                        }
+                    }
                 }
             }
             this.clearMoveTracking(solution.sequence.sequenceString());
@@ -2060,7 +2072,8 @@ export default class PoseEditMode extends GameMode {
             this.submitSolution({
                 title: 'Cleared Solution',
                 comment: 'No comment',
-                annotations: this._poses[0].annotationManager.annotationBundle
+                annotations: this._poses[0].annotationManager.annotationBundle,
+                libraryNT: this._poses[0].designStructNumbers()
             }, solToSubmit);
         } else {
             const NOT_SATISFIED_PROMPT = 'Puzzle constraints are not satisfied.\n'

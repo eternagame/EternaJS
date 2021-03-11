@@ -64,6 +64,14 @@ export default class Solution {
         this._sequence = sequence;
     }
 
+    public get libraryNT(): number[] {
+        return this._libraryNT;
+    }
+
+    public set libraryNT(libraryNT: number[]) {
+        this._libraryNT = libraryNT;
+    }
+
     public get expFeedback(): Feedback | null {
         return this._expFeedback;
     }
@@ -234,4 +242,5 @@ export default class Solution {
     private _hasFoldData: boolean = false;
     private _foldData: FoldData[] | null = null;
     private _annotations: AnnotationDataBundle | undefined = undefined;
+    private _libraryNT: number[] = [];
 }

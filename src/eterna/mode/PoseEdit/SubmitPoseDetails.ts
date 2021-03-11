@@ -4,4 +4,5 @@ export default interface SubmitPoseDetails {
     title: string | undefined;
     comment: string | undefined;
     annotations: AnnotationDataBundle;
+    libraryNT: number[];
 }

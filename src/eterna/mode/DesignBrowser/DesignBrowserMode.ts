@@ -64,6 +64,7 @@ export enum DesignCategory {
     SYNTHESIZED = 'Synthesized',
     SYNTHESIS_SCORE = 'Synthesis score',
     SEQUENCE = 'Sequence',
+    LIBRARY_NT = 'Library nucleotides',
 }
 
 function AllCategories(): DesignCategory[] {
@@ -950,6 +951,14 @@ export default class DesignBrowserMode extends GameMode {
                             sortable: true
                         });
                         break;
+                    case DesignCategory.LIBRARY_NT:
+                        column = new DataCol({
+                            ...baseParams,
+                            dataType: DesignBrowserDataType.STRING,
+                            dataWidth: 170,
+                            sortable: true
+                        });
+                        break;
                     default:
                         column = new DataCol({
                             ...baseParams,
@@ -1007,6 +1016,12 @@ export default class DesignBrowserMode extends GameMode {
                         dataCol.setWidth(singleLineRawData.sequence.length * 14
                             + UITheme.designBrowser.dataPadding * 5);
                         dataCol.drawGridText();
+                    }
+                } else if (category === DesignCategory.LIBRARY_NT) {
+                    dataArray.push(singleLineRawData.libraryNT.join(','));
+                    if (ii === 0) {
+                        dataCol.setWidth(singleLineRawData.libraryNT.length * 42 // two digits and comma?
+                            + UITheme.designBrowser.dataPadding * 5);
                     }
                 } else if (category === DesignCategory.DESCRIPTION) {
                     const des = singleLineRawData.getProperty('Description') as string;
@@ -1165,7 +1180,8 @@ export default class DesignBrowserMode extends GameMode {
         DesignCategory.FREE_ENERGY,
         DesignCategory.SYNTHESIZED,
         DesignCategory.SYNTHESIS_SCORE,
-        DesignCategory.SEQUENCE
+        DesignCategory.SEQUENCE,
+        DesignCategory.LIBRARY_NT
     ];
 
     private _initialSolution?: Solution;

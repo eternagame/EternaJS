@@ -1253,6 +1253,16 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 || this.fullSequence.hasCut(segments[1], segments[2])));
     }
 
+    public markDesignStructTrue(seqnum: number): void {
+        if (this._designStruct.length !== this.fullSequenceLength) {
+            this._designStruct = new Array(this.fullSequenceLength);
+        }
+
+        this._designStruct[seqnum] = true;
+        ROPWait.notifyBlueMark(seqnum, this._designStruct[seqnum]);
+        this.updateDesignHighlight();
+    }
+
     public get designSegments(): number[] {
         const elems: number[] = [];
         let curr = 0;
