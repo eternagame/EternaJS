@@ -130,7 +130,7 @@ export default class DesignBrowserMode extends GameMode {
         this.addObject(this._hSlider, this._content);
 
         this._scrollContainer = new ScrollContainer(1, 1);
-        this._scrollContainer.display.position = new Point(7, 5);
+        this._scrollContainer.display.position = new Point(7, 0);
         this.addObject(this._scrollContainer, this._content);
 
         this._dataColParent = new ContainerObject();
