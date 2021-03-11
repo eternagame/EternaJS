@@ -39,6 +39,7 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import EternaURL from 'eterna/net/EternaURL';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
+import ContextMenu from 'eterna/ui/ContextMenu';
 import AnnotationView from 'eterna/ui/AnnotationView';
 import AnnotationManager, {
     AnnotationData,
@@ -143,7 +144,7 @@ export default class PuzzleEditMode extends GameMode {
         this._homeButton.display.position = new Point(18, 10);
         this._homeButton.clicked.connect(() => {
             if (Eterna.MOBILE_APP) {
-                window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
+                if (window.frameElement) window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
             } else {
                 window.location.href = EternaURL.createURL({page: 'home'});
             }
@@ -205,10 +206,7 @@ export default class PuzzleEditMode extends GameMode {
             });
         });
 
-        this._toolbar.viewOptionsButton.clicked.connect(() => {
-            const dialog: EternaViewOptionsDialog = new EternaViewOptionsDialog(EternaViewOptionsMode.PUZZLEMAKER);
-            this.showDialog(dialog);
-        });
+        this._toolbar.viewOptionsButton.clicked.connect(() => this.showViewOptionsDialog());
 
         this._toolbar.resetButton.clicked.connect(() => this.promptForReset());
         this._toolbar.submitButton.clicked.connect(() => this.onSubmitPuzzle());
@@ -602,6 +600,27 @@ export default class PuzzleEditMode extends GameMode {
                 );
             }
         }
+    }
+
+    /* override */
+    protected createContextMenu(): ContextMenu | null {
+        if (this.isDialogOrNotifShowing || this.hasUILock) {
+            return null;
+        }
+
+        const menu = new ContextMenu();
+
+        menu.addItem('Preferences').clicked.connect(() => this.showViewOptionsDialog());
+        menu.addItem('Reset').clicked.connect(() => this.promptForReset());
+        menu.addItem('Copy Sequence').clicked.connect(() => this.showCopySequenceDialog());
+        menu.addItem('Paste Sequence').clicked.connect(() => this.showPasteSequenceDialog());
+
+        return menu;
+    }
+
+    protected showViewOptionsDialog() {
+        const dialog: EternaViewOptionsDialog = new EternaViewOptionsDialog(EternaViewOptionsMode.PUZZLEMAKER);
+        this.showDialog(dialog);
     }
 
     protected createScreenshot(): ArrayBuffer {

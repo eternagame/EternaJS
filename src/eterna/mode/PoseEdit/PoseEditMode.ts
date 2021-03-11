@@ -22,7 +22,6 @@ import {
     GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
-import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
 import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
 import FolderManager from 'eterna/folding/FolderManager';
 import Folder, {MultiFoldResult, CacheKey} from 'eterna/folding/Folder';
@@ -72,7 +71,6 @@ import AnnotationManager, {
     AnnotationRange,
     AnnotationHierarchyType
 } from 'eterna/AnnotationManager';
-import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -315,7 +313,7 @@ export default class PoseEditMode extends GameMode {
         this._homeButton.display.position = new Point(18, 10);
         this._homeButton.clicked.connect(() => {
             if (Eterna.MOBILE_APP) {
-                window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
+                if (window.frameElement) window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
             } else {
                 window.location.href = EternaURL.createURL({page: 'home'});
             }
@@ -460,29 +458,11 @@ export default class PoseEditMode extends GameMode {
         return this._constraintsLayer;
     }
 
-    private showPasteSequenceDialog(): void {
-        const customNumbering = this._poses[0].customNumbering;
-        this.showDialog(new PasteSequenceDialog(customNumbering)).closed.then((sequence) => {
-            if (sequence !== null) {
-                for (const pose of this._poses) {
-                    pose.pasteSequence(sequence);
-                }
-            }
-        });
-    }
-
     private showViewOptionsDialog(): void {
         const mode = this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
             ? EternaViewOptionsMode.LAB
             : EternaViewOptionsMode.PUZZLE;
         this.showDialog(new EternaViewOptionsDialog(mode));
-    }
-
-    private showCopySequenceDialog(): void {
-        Assert.assertIsDefined(this.modeStack);
-        let sequenceString = this._poses[0].sequence.sequenceString();
-        if (this._poses[0].customNumbering != null) sequenceString += ` ${Utility.arrayToRangeString(this._poses[0].customNumbering)}`;
-        this.modeStack.pushMode(new CopyTextDialogMode(sequenceString, 'Current Sequence'));
     }
 
     public set puzzleDefaultMode(defaultMode: PoseState) {
@@ -961,7 +941,7 @@ export default class PoseEditMode extends GameMode {
         // above but because NuPACK can handle pseudoknots, we shouldn't
         for (let ii = 0; ii < targetSecstructs.length; ii++) {
             if (this._targetConditions && this._targetConditions[0]
-                    && this._targetConditions[0]['type'] === 'pseudoknot') {
+                && this._targetConditions[0]['type'] === 'pseudoknot') {
                 this._targetPairs.push(SecStruct.fromParens(targetSecstructs[ii], true));
                 this._poseFields[ii].pose.pseudoknotted = true;
             } else {
@@ -1188,12 +1168,12 @@ export default class PoseEditMode extends GameMode {
         this._scriptInterface.addCallback('get_sequence_string', (): string => this.getPose(0).getSequenceString());
 
         this._scriptInterface.addCallback('get_custom_numbering_to_index',
-            (): {[customNumber: number]: number} | undefined => {
+            (): { [customNumber: number]: number } | undefined => {
                 const customNumbering = this.getPose(0).customNumbering;
                 if (customNumbering === undefined) return undefined;
 
                 // At Omei's request, create maps both ways
-                const numberingToIdx: {[customNumber: number]: number} = {};
+                const numberingToIdx: { [customNumber: number]: number } = {};
                 for (let ii = 0; ii < customNumbering.length; ++ii) {
                     const cn: number | null = customNumbering[ii];
                     if (cn !== null) {
@@ -1204,12 +1184,12 @@ export default class PoseEditMode extends GameMode {
             });
 
         this._scriptInterface.addCallback('get_index_to_custom_numbering',
-            (): {[serialIndex: number]: number | null} | undefined => {
+            (): { [serialIndex: number]: number | null } | undefined => {
                 const customNumbering = this.getPose(0).customNumbering;
                 if (customNumbering === undefined) return undefined;
 
                 // At Omei's request, create maps both ways
-                const idxToNumbering: {[serialIndex: number]: number | null} = {};
+                const idxToNumbering: { [serialIndex: number]: number | null } = {};
                 for (let ii = 0; ii < customNumbering.length; ++ii) {
                     idxToNumbering[ii] = customNumbering[ii];
                 }
@@ -1302,7 +1282,7 @@ export default class PoseEditMode extends GameMode {
                 }
                 const seqArr: Sequence = Sequence.fromSequenceString(seq);
                 if (this._targetConditions && this._targetConditions[0]
-                        && this._targetConditions[0]['type'] === 'pseudoknot') {
+                    && this._targetConditions[0]['type'] === 'pseudoknot') {
                     const folded: SecStruct | null = this._folder.foldSequence(seqArr, null, constraint, true);
                     Assert.assertIsDefined(folded);
                     return folded.getParenthesis(null, true);
@@ -1335,7 +1315,7 @@ export default class PoseEditMode extends GameMode {
             const seqArr: Sequence = Sequence.fromSequenceString(seq);
             const structArr: SecStruct = SecStruct.fromParens(secstruct);
             const freeEnergy = (this._targetConditions && this._targetConditions[0]
-                    && this._targetConditions[0]['type'] === 'pseudoknot')
+                && this._targetConditions[0]['type'] === 'pseudoknot')
                 ? this._folder.scoreStructures(seqArr, structArr, true)
                 : this._folder.scoreStructures(seqArr, structArr);
             return 0.01 * freeEnergy;
@@ -2264,7 +2244,7 @@ export default class PoseEditMode extends GameMode {
             const submissionResponse = allResults[0];
 
             // show achievements, if we were awarded any
-            const cheevs: {[name: string]: AchievementData} = submissionResponse['new_achievements'];
+            const cheevs: { [name: string]: AchievementData } = submissionResponse['new_achievements'];
             if (cheevs != null) {
                 await this._achievements.awardAchievements(cheevs);
             }
@@ -2399,7 +2379,9 @@ export default class PoseEditMode extends GameMode {
             missionClearedPanel.nextButton.clicked.connect(() => {
                 keepPlaying();
                 if (Eterna.MOBILE_APP) {
-                    window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
+                    if (window.frameElement) {
+                        window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
+                    }
                 } else {
                     window.open(EternaURL.getFeedURL(), '_self');
                 }
@@ -2923,7 +2905,7 @@ export default class PoseEditMode extends GameMode {
             if (!pairsxx.isPaired(jj)) {
                 numUnpaired++;
             } else if (pairsxx.pairingPartner(jj) < segments[2]
-                    || pairsxx.pairingPartner(jj) > segments[3]) {
+                || pairsxx.pairingPartner(jj) > segments[3]) {
                 numWrong++;
             }
         }
@@ -2935,7 +2917,7 @@ export default class PoseEditMode extends GameMode {
             if (!pairsxx.isPaired(jj)) {
                 numUnpaired++;
             } else if (pairsxx.pairingPartner(jj) < segments[0]
-                    || pairsxx.pairingPartner(jj) > segments[1]) {
+                || pairsxx.pairingPartner(jj) > segments[1]) {
                 numWrong++;
             }
         }
@@ -3214,7 +3196,7 @@ export default class PoseEditMode extends GameMode {
         const seq: Sequence = this._poses[ii].sequence;
 
         const pseudoknots = (this._targetConditions && this._targetConditions[ii] !== undefined
-                && (this._targetConditions[ii] as TargetConditions)['type'] === 'pseudoknot');
+            && (this._targetConditions[ii] as TargetConditions)['type'] === 'pseudoknot');
 
         if (!this._folder) {
             throw new Error('Cannot progress through poseEditByTargetFoldTarget with a null Folder!');
@@ -3233,7 +3215,7 @@ export default class PoseEditMode extends GameMode {
         let oligosPaired = 0;
         const forceStruct = tc ? tc['force_struct'] : undefined;
         if (tc === undefined
-                || (tc && tc['type'] === 'single')) {
+            || (tc && tc['type'] === 'single')) {
             bestPairs = this._folder.foldSequence(this._puzzle.transformSequence(seq, ii), null, forceStruct);
         } else if (tc['type'] === 'pseudoknot') {
             bestPairs = this._folder.foldSequence(this._puzzle.transformSequence(seq, ii), null, forceStruct, true);
