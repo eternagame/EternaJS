@@ -31,7 +31,7 @@ interface SolutionSpec {
     'has-fold-data': number | null;
     'fold-data': string;
     'annotations': AnnotationDataBundle;
-    'selected-nts': number[];
+    'selected-nts': string;
 }
 
 interface ShapeData {
@@ -257,6 +257,10 @@ export default class SolutionManager {
 
         if (obj['annotations'] != null) {
             newsol.annotations = obj['annotations'] as AnnotationDataBundle;
+        }
+
+        if (obj['selected-nts'] != null) {
+            newsol.libraryNT = obj['selected-nts'].split(',').map((n) => +n);
         }
 
         return newsol;
