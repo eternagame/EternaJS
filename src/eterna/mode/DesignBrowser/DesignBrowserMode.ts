@@ -152,14 +152,14 @@ export default class DesignBrowserMode extends GameMode {
         this._selectionBox.position = new Point(7, 0);
         this._selectionBox.visible = false;
         selectionBoxParent.addChild(this._selectionBox);
-        this._scrollContainer.content.addChild(selectionBoxParent);
+        this._content.addChild(selectionBoxParent);
 
         const clickedSelectionBoxParent = new Container();
         this._clickedSelectionBox = new SelectionBox(0x2F44D1);
         this._clickedSelectionBox.position = new Point(7, 0);
         this._clickedSelectionBox.visible = false;
         clickedSelectionBoxParent.addChild(this._clickedSelectionBox);
-        this._scrollContainer.content.addChild(clickedSelectionBoxParent);
+        this._content.addChild(clickedSelectionBoxParent);
 
         this._dataColParent.pointerMove.connect((e) => this.onMouseMove(e));
         this._dataColParent.pointerTap.connect((e) => this.onMouseUp(e));
