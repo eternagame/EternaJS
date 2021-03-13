@@ -62,9 +62,9 @@ export enum DesignCategory {
     MELTING_POINT = 'Melting Point',
     FREE_ENERGY = 'Free Energy',
     SYNTHESIZED = 'Synthesized',
-    SYNTHESIS_SCORE = 'Synthesis score',
+    SYNTHESIS_SCORE = 'Synthesis Score',
     SEQUENCE = 'Sequence',
-    LIBRARY_NT = 'Library nucleotides',
+    LIBRARY_NT = 'Library Nucleotides',
 }
 
 function AllCategories(): DesignCategory[] {
@@ -561,7 +561,7 @@ export default class DesignBrowserMode extends GameMode {
         };
 
         // string | number => definitely a number
-        const myVotes = Number(solution.getProperty('My Votes'));
+        const myVotes = Number(solution.getProperty(DesignCategory.MY_VOTES));
         Eterna.client.toggleSolutionVote(solution.nodeID, this._puzzle.nodeID, myVotes)
             .then((data) => {
                 this._voteProcessor.processData(data['votes']);
@@ -802,8 +802,8 @@ export default class DesignBrowserMode extends GameMode {
     }
 
     private setScrollHorizontal(progress: number): void {
-        this._dataColParent.display.x = (this._wholeRowWidth > this.contentWidth)
-            ? (this.contentWidth - this._wholeRowWidth) * progress
+        this._scrollContainer.scrollX = (this._wholeRowWidth > this.contentWidth)
+            ? (this._wholeRowWidth - this.contentWidth) * progress
             : 0;
     }
 
@@ -931,7 +931,7 @@ export default class DesignBrowserMode extends GameMode {
                         column = new DataCol({
                             ...baseParams,
                             dataType: DesignBrowserDataType.STRING,
-                            dataWidth: 100,
+                            dataWidth: 120,
                             sortable: true
                         });
                         break;
@@ -947,7 +947,7 @@ export default class DesignBrowserMode extends GameMode {
                         column = new DataCol({
                             ...baseParams,
                             dataType: DesignBrowserDataType.NUMBER,
-                            dataWidth: 170,
+                            dataWidth: 140,
                             sortable: true
                         });
                         break;
@@ -1013,25 +1013,33 @@ export default class DesignBrowserMode extends GameMode {
                 if (category === DesignCategory.SEQUENCE) {
                     dataArray.push(singleLineRawData.sequence.sequenceString());
                     if (ii === 0) {
-                        dataCol.setWidth(singleLineRawData.sequence.length * 14
-                            + UITheme.designBrowser.dataPadding * 5);
+                        dataCol.setWidth(
+                            singleLineRawData.sequence.length * 14
+                            + UITheme.designBrowser.dataPadding * 5
+                        );
                         dataCol.drawGridText();
                     }
                 } else if (category === DesignCategory.LIBRARY_NT) {
                     dataArray.push(singleLineRawData.libraryNT.join(','));
                     if (ii === 0) {
-                        dataCol.setWidth(singleLineRawData.libraryNT.length * 42 // two digits and comma?
-                            + UITheme.designBrowser.dataPadding * 5);
+                        dataCol.setWidth(
+                            Math.max(
+                                170,
+                                // two digits and comma?
+                                Math.max(...solutions.map((sol) => sol.libraryNT.length)) * 42
+                                    + UITheme.designBrowser.dataPadding * 5
+                            )
+                        );
                     }
                 } else if (category === DesignCategory.DESCRIPTION) {
-                    const des = singleLineRawData.getProperty('Description') as string;
+                    const des = singleLineRawData.getProperty(DesignCategory.DESCRIPTION) as string;
                     if (des.length < 45) {
                         dataArray.push(des);
                     } else {
                         dataArray.push(`${des.substr(0, 40)}...`);
                     }
                 } else if (category === DesignCategory.TITLE) {
-                    const des = singleLineRawData.getProperty('Title') as string;
+                    const des = singleLineRawData.getProperty(DesignCategory.TITLE) as string;
                     if (des.length < 30) {
                         dataArray.push(des);
                     } else {
@@ -1039,7 +1047,7 @@ export default class DesignBrowserMode extends GameMode {
                     }
                 } else if (category === DesignCategory.VOTE) {
                     const canVote = !this._novote && singleLineRawData.canVote(puz.round);
-                    const voted = singleLineRawData.getProperty('My Votes') > 0;
+                    const voted = singleLineRawData.getProperty(DesignCategory.MY_VOTES) > 0;
                     dataArray.push({canVote, voted, solutionIndex: ii});
                 } else {
                     const rawdata: string | number = singleLineRawData.getProperty(category) as string | number;
@@ -1074,8 +1082,10 @@ export default class DesignBrowserMode extends GameMode {
         for (let ii = 0; ii < this._dataCols.length; ii++) {
             const col: DataCol = this._dataCols[ii];
             if (animate) {
-                col.replaceNamedObject('AnimateLocation',
-                    new LocationTask(this._wholeRowWidth, 0, 0.5, Easing.easeOut));
+                col.replaceNamedObject(
+                    'AnimateLocation',
+                    new LocationTask(this._wholeRowWidth, 0, 0.5, Easing.easeOut)
+                );
             } else {
                 col.display.position = new Point(this._wholeRowWidth, 0);
             }
@@ -1088,6 +1098,10 @@ export default class DesignBrowserMode extends GameMode {
                 col.setBgColor(0xffffff, 0.05);
             }
         }
+
+        // Somewhere along the line when we moved to a scrollcontainer this got out of sync. How?
+        // I'll leave that exercise to the reader. For now, this seems to work.
+        this._wholeRowWidth += 14;
     }
 
     private refreshMarkingBoxes(): void {
