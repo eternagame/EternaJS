@@ -687,7 +687,6 @@ export default class Toolbar extends ContainerObject {
                 .down(Bitmaps.ImgAnnotationModeSelected)
                 .selected(Bitmaps.ImgAnnotationModeSelected)
                 .tooltip('Annotation Mode');
-            this.addObject(this.annotationModeButton, this.lowerToolbarLayout);
 
             this.annotationPanelButton = new ToolbarButton()
                 .up(Bitmaps.ImgAnnotationLayer)
@@ -696,8 +695,12 @@ export default class Toolbar extends ContainerObject {
                 .selected(Bitmaps.ImgAnnotationLayerSelected)
                 .tooltip('Annotations Panel');
             this.annotationPanel = new AnnotationPanel(this.annotationPanelButton, this._annotationManager);
-            this.addObject(this.annotationPanel, this.mode?.container);
-            this.addObject(this.annotationPanelButton, this.lowerToolbarLayout);
+
+            if (this._showAdvancedMenus) {
+                this.addObject(this.annotationPanel, this.mode?.container);
+                this.addObject(this.annotationModeButton, this.lowerToolbarLayout);
+                this.addObject(this.annotationPanelButton, this.lowerToolbarLayout);
+            }
         }
 
         if (this._type === ToolbarType.PUZZLEMAKER) {
