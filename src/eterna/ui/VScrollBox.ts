@@ -103,6 +103,7 @@ export default class VScrollBox extends ContainerObject implements MouseWheelLis
 
     public doLayout() {
         this._scrollContainer.doLayout();
+        this.updateScrollThumb();
 
         this._dragSurface.display.clear();
         this._dragSurface.display.beginFill(0x00FF00);
