@@ -26,7 +26,6 @@ export default class FancyTextBalloon extends TextBalloon implements Updatable {
 
     protected added(): void {
         // We do not call TextBalloon.added()
-        this._fancyPanel.destroySelf();
         this._button.destroySelf();
 
         this._fancyPanel = this._showOutline

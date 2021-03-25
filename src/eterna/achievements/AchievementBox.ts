@@ -1,10 +1,8 @@
-import * as log from 'loglevel';
 import {
     Point, Sprite, Graphics
 } from 'pixi.js';
 import {
     ContainerObject,
-    TextureUtil,
     SerialTask,
     DelayTask,
     ParallelTask,
@@ -27,6 +25,7 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import MultiStyleText from 'pixi-multistyle-text';
 import * as confetti from 'canvas-confetti';
 import Eterna from 'eterna/Eterna';
+import HTMLImageObject from 'eterna/ui/HTMLImageObject';
 
 export default class AchievementBox extends ContainerObject {
     public closed = new UnitSignal();
@@ -98,7 +97,16 @@ export default class AchievementBox extends ContainerObject {
         this.addObject(closeButton, this.container);
 
         // Icon
-        const imageSprite = new Sprite();
+        const imgObj = new HTMLImageObject(AchievementBox.getAbsUrl(this._imageURL));
+        imgObj.display.position = new Point(
+            (theme.size.x - theme.iconSize) / 2,
+            theme.headerHeight + theme.spacing
+        );
+        imgObj.width = theme.iconSize;
+        this.addObject(imgObj, this.container);
+        // We should really be handling this as a sprite, but for some reason we're having issues getting
+        // it to load properly on mobile with release builds. We need to debug this.
+        /* const imageSprite = new Sprite();
         TextureUtil.loadURL(AchievementBox.getAbsUrl(this._imageURL))
             .then((tex) => {
                 if (this.isLiveObject) {
@@ -115,7 +123,7 @@ export default class AchievementBox extends ContainerObject {
             (theme.size.x - theme.iconSize) / 2,
             theme.headerHeight + theme.spacing
         );
-        this.container.addChild(imageSprite);
+        this.container.addChild(imageSprite); */
 
         const checkmark = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgAchievementsCheckmark));
 
@@ -134,7 +142,7 @@ export default class AchievementBox extends ContainerObject {
                 (theme.size.x - this._descriptionTxt.width) / 2,
                 theme.spacing * 2 + checkmark.width
             ),
-            imageSprite.position.y + theme.iconSize + theme.spacing
+            imgObj.display.position.y + theme.iconSize + theme.spacing
         );
         this.container.addChild(this._descriptionTxt);
 
