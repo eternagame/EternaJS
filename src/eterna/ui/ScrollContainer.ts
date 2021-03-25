@@ -144,6 +144,13 @@ export default class ScrollContainer extends ContainerObject {
      * where events are fired on elements that cannot be seen with clip-path:
      * https://bugs.webkit.org/show_bug.cgi?id=152548
      *
+     * An example of where this can be seen is when you solve a puzzle like 6502949 which has
+     * an image in its mission complete screen. If your window is short enough, the image will be
+     * masked by the clip-path, but if it's position is still over the next button, you would not
+     * be able to click the next button because the click would just land on the image which is
+     * over the canvas. Similarly if a link is masked but positioned over the next button, clicking
+     * the next button would click the link.
+     *
      * @param e Pointer event being handled
      */
     private handlePossiblyMaskedEvent(e: MouseEvent | PointerEvent): void {
