@@ -40,7 +40,7 @@ export default class TextureUtil {
         if (base.valid) return tex;
         return new Promise<Texture>((resolve, reject) => {
             base.once('loaded', () => resolve(tex));
-            base.once('error', () => reject(new Error('texture failed to load [url=temptemptemp]')));
+            base.once('error', (e: string | Error) => reject(new Error(`Texture failed to load: ${e}`)));
         });
     }
 
