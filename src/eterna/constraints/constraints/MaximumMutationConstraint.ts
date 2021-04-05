@@ -1,7 +1,7 @@
 import {
     Sprite, Texture, Container, Point
 } from 'pixi.js';
-import {TextureUtil} from 'flashbang';
+import {StyledTextBuilder, TextureUtil} from 'flashbang';
 import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -36,7 +36,7 @@ export default class MaximumMutationConstraint extends Constraint<MaxMutationCon
     }
 
     public getConstraintBoxConfig(status: MaxMutationConstraintStatus): ConstraintBoxConfig {
-        const statText = ConstraintBox.createTextStyle()
+        const statText = new StyledTextBuilder()
             .append(status.mutations.toString(), {fill: (status.satisfied ? 0x00aa00 : 0xaa0000)})
             .append(`/${this.maxMutations}`);
 

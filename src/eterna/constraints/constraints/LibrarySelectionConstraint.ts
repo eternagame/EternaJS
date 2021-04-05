@@ -1,9 +1,9 @@
 import BitmapManager from 'eterna/resources/BitmapManager';
 import {
-    Texture, Container, Sprite, Point
+    Texture, Sprite, Point, Container
 } from 'pixi.js';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import {TextureUtil} from 'flashbang';
+import {StyledTextBuilder, TextureUtil} from 'flashbang';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 
@@ -21,7 +21,7 @@ export default class LibrarySelectionConstraint extends Constraint<LibrarySelect
 
     public evaluate(constraintContext: ConstraintContext): LibrarySelectionConstraintStatus {
         // TODO: Multistate?
-        const numNtSelected = constraintContext.pose?.designStructNumbers().length ?? 0;
+        const numNtSelected = (constraintContext.undoBlocks[0].librarySelections ?? []).length;
 
         return {
             satisfied: numNtSelected === this.numNtSelected,
@@ -46,11 +46,15 @@ export default class LibrarySelectionConstraint extends Constraint<LibrarySelect
             tooltip.popStyle();
         }
 
+        const statText = new StyledTextBuilder()
+            .append(status.currentLibrarySelection.toString(), {fill: (status.satisfied ? 0x00aa00 : 0xaa0000)})
+            .append(`/${this.numNtSelected}`);
+
         return {
             satisfied: status.satisfied,
             tooltip,
-            clarificationText: `EXACTLY ${this.numNtSelected} SELECTED`,
-            statText: `${status.currentLibrarySelection}`,
+            clarificationText: `RANDOMIZE ${this.numNtSelected} BASES`,
+            statText,
             showOutline: true,
             drawBG: true,
             icon: LibrarySelectionConstraint._icon
@@ -60,11 +64,11 @@ export default class LibrarySelectionConstraint extends Constraint<LibrarySelect
     private static get _icon(): Texture {
         const icon = new Container();
 
-        const base1 = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgHelp));
-        base1.width = 24;
-        base1.height = 24;
-        base1.position = new Point(50, 50);
-        icon.addChild(base1);
+        const sprite = new Sprite(BitmapManager.getBitmap(Bitmaps.RandomIcon));
+        sprite.width = 24;
+        sprite.height = 24;
+        sprite.position = new Point(50, 50);
+        icon.addChild(sprite);
 
         return TextureUtil.renderToTexture(icon);
     }

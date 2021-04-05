@@ -30,6 +30,7 @@ export interface FoldData {
     target_oligo_order_?: number[];
     puzzle_locks_?: boolean[];
     forced_struct_: number[];
+    library_selections_?: number[];
     target_conditions_?: TargetConditions;
 }
 
@@ -145,7 +146,8 @@ export default class UndoBlock {
             target_oligo_order_: this._targetOligoOrder,
             puzzle_locks_: this._puzzleLocks,
             forced_struct_: this._forcedStruct,
-            target_conditions_: this._targetConditions
+            target_conditions_: this._targetConditions,
+            library_selections_: this._librarySelections
         };
         /* eslint-enable @typescript-eslint/camelcase */
     }
@@ -185,6 +187,7 @@ export default class UndoBlock {
             this._targetOligoOrder = json.target_oligo_order_;
             this._puzzleLocks = json.puzzle_locks_;
             this._forcedStruct = json.forced_struct_;
+            this._librarySelections = json.library_selections_;
             this._targetConditions = json.target_conditions_
                 ? json.target_conditions_
                 : undefined;
@@ -333,6 +336,14 @@ export default class UndoBlock {
 
     public set forcedStruct(forced: number[]) {
         this._forcedStruct = forced;
+    }
+
+    public get librarySelections() {
+        return this._librarySelections;
+    }
+
+    public set librarySelections(selections: number[] | undefined) {
+        this._librarySelections = selections;
     }
 
     public get targetConditions(): TargetConditions | undefined {
@@ -703,6 +714,7 @@ export default class UndoBlock {
     private _puzzleLocks: boolean[] | undefined = [];
     private _forcedStruct: number[] = [];
     private _targetConditions: TargetConditions | undefined = undefined;
+    private _librarySelections: number[] | undefined = undefined;
 
     private _dotPlotData: DotPlot | null;
     private _meltPlotPairScores: number[];

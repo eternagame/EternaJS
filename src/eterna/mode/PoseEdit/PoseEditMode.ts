@@ -71,6 +71,7 @@ import AnnotationManager, {
     AnnotationRange,
     AnnotationHierarchyType
 } from 'eterna/AnnotationManager';
+import LibrarySelectionConstraint from 'eterna/constraints/constraints/LibrarySelectionConstraint';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -170,6 +171,7 @@ export default class PoseEditMode extends GameMode {
                 ?.some((condition) => condition?.structure_constrained_bases),
             boosters: this._puzzle.boosters ? this._puzzle.boosters : undefined,
             showAdvancedMenus: this._puzzle.puzzleType !== PuzzleType.PROGRESSION,
+            showLibrarySelect: this._puzzle.constraints?.some((con) => con instanceof LibrarySelectionConstraint),
             annotationManager: this._annotationManager
         });
         this.addObject(this._toolbar, this.uiLayer);
@@ -231,6 +233,10 @@ export default class PoseEditMode extends GameMode {
 
         this._toolbar.baseMarkerButton.clicked.connect(() => {
             this.setPosesColor(RNAPaint.BASE_MARK);
+        });
+
+        this._toolbar.librarySelectionButton.clicked.connect(() => {
+            this.setPosesColor(RNAPaint.LIBRARY_SELECT);
         });
 
         this._toolbar.magicGlueButton.clicked.connect(() => {
@@ -648,19 +654,7 @@ export default class PoseEditMode extends GameMode {
                 const sequence = solution.sequence;
                 for (const pose of this._poses) {
                     pose.pasteSequence(sequence);
-                    console.error('solution.libraryNT,', solution.libraryNT);
-                    if (pose.customNumbering) {
-                        // in custom numbering
-                        for (const num of solution.libraryNT) {
-                            // We don't have to handle not-found because this customNumbering must have it -- after all
-                            // how did this solution get generated?
-                            pose.markDesignStructTrue(pose.customNumbering.indexOf(num));
-                        }
-                    } else {
-                        for (const num of solution.libraryNT) {
-                            pose.markDesignStructTrue(num);
-                        }
-                    }
+                    pose.librarySelections = solution.libraryNT;
                 }
             }
             this.clearMoveTracking(solution.sequence.sequenceString());
@@ -721,7 +715,6 @@ export default class PoseEditMode extends GameMode {
         const poseFields: PoseField[] = [];
 
         const targetSecstructs: string[] = this._puzzle.getSecstructs();
-        console.error('targetSecstructs', targetSecstructs);
         const targetConditions = this._puzzle.targetConditions;
 
         // TSC: this crashes, and doesn't seem to accomplish anything
@@ -954,8 +947,6 @@ export default class PoseEditMode extends GameMode {
 
         // now that we have made the folder check, we can set _targetPairs. Used to do this
         // above but because NuPACK can handle pseudoknots, we shouldn't
-        console.error('targetConditions,', this._targetConditions);
-        console.error('targetConditions,', targetSecstructs);
         for (let ii = 0; ii < targetSecstructs.length; ii++) {
             if (this._targetConditions && this._targetConditions[0]
                 && this._targetConditions[0]['type'] === 'pseudoknot') {
@@ -1007,6 +998,7 @@ export default class PoseEditMode extends GameMode {
         // Initialize sequence and/or solution as relevant
         let initialSequence: Sequence | null = null;
         let annotationGraph: AnnotationDataBundle | undefined;
+        let librarySelections: number[] = [];
         if (this._params.initSolution != null) {
             initialSequence = this._params.initSolution.sequence;
             annotationGraph = this._params.initSolution.annotations;
@@ -1014,21 +1006,7 @@ export default class PoseEditMode extends GameMode {
             // AMW: I'm keeping the function around in case we want to call it
             // in some other context, but we don't need it anymore.
             // this.updateSolutionNameText(this._curSolution);
-            for (const pose of this._poses) {
-                console.error('solution.libraryNT,', this._params.initSolution.libraryNT);
-                if (pose.customNumbering) {
-                    // in custom numbering
-                    for (const num of this._params.initSolution.libraryNT) {
-                        // We don't have to handle not-found because this customNumbering must have it -- after all
-                        // how did this solution get generated?
-                        pose.markDesignStructTrue(pose.customNumbering.indexOf(num));
-                    }
-                } else {
-                    for (const num of this._params.initSolution.libraryNT) {
-                        pose.markDesignStructTrue(num);
-                    }
-                }
-            }
+            librarySelections = this._params.initSolution.libraryNT;
             if (this._solutionView) {
                 this.removeObject(this._solutionView);
             }
@@ -1131,6 +1109,7 @@ export default class PoseEditMode extends GameMode {
 
             this._poses[ii].puzzleLocks = this._puzzle.puzzleLocks;
             this._poses[ii].shiftLimit = this._puzzle.shiftLimit;
+            this._poses[ii].librarySelections = librarySelections;
 
             if (
                 this._annotationManager.allAnnotations.length === 0
@@ -2072,7 +2051,7 @@ export default class PoseEditMode extends GameMode {
                 title: 'Cleared Solution',
                 comment: 'No comment',
                 annotations: this._poses[0].annotationManager.annotationBundle,
-                libraryNT: this._poses[0].designStructNumbers()
+                libraryNT: this._poses[0].librarySelections ?? []
             }, solToSubmit);
         } else {
             const NOT_SATISFIED_PROMPT = 'Puzzle constraints are not satisfied.\n'
@@ -2202,7 +2181,7 @@ export default class PoseEditMode extends GameMode {
             }
 
             // Record designStruct numbers, used for library puzzles.
-            postData['selected-nts'] = this._poses[0].designStructNumbers();
+            postData['selected-nts'] = this._poses[0].librarySelections;
         }
 
         return postData;
@@ -2746,8 +2725,7 @@ export default class PoseEditMode extends GameMode {
         return this._constraintBar.updateConstraints({
             undoBlocks: this._seqStacks[this._stackLevel],
             targetConditions: this._targetConditions,
-            puzzle: this._puzzle,
-            pose: this._poses[0] // temporary? library constraints depend on pose highlights
+            puzzle: this._puzzle
         });
     }
 
@@ -3050,6 +3028,7 @@ export default class PoseEditMode extends GameMode {
             if (lastShiftedIndex <= 0 || lastShiftedCommand < 0) {
                 this._poses[ii].sequence = this._poses[targetIndex].sequence;
                 this._poses[ii].puzzleLocks = this._poses[targetIndex].puzzleLocks;
+                this._poses[ii].librarySelections = this._poses[targetIndex].librarySelections;
                 continue;
             }
 
@@ -3137,6 +3116,7 @@ export default class PoseEditMode extends GameMode {
 
             this._poses[ii].sequence = this._poses[targetIndex].sequence;
             this._poses[ii].puzzleLocks = this._poses[targetIndex].puzzleLocks;
+            this._poses[ii].librarySelections = this._poses[targetIndex].librarySelections;
         }
     }
 
@@ -3366,6 +3346,7 @@ export default class PoseEditMode extends GameMode {
         undoBlock.puzzleLocks = this._poses[ii].puzzleLocks;
         undoBlock.targetConditions = this._targetConditions[ii];
         undoBlock.setBasics(37, pseudoknots);
+        undoBlock.librarySelections = this._poses[ii].librarySelections;
         this._seqStacks[this._stackLevel][ii] = undoBlock;
     }
 
@@ -3477,6 +3458,7 @@ export default class PoseEditMode extends GameMode {
     private setPosesWithUndoBlock(ii: number, undoBlock: UndoBlock): void {
         this._poses[ii].sequence = this._puzzle.transformSequence(undoBlock.sequence, ii);
         this._poses[ii].puzzleLocks = undoBlock.puzzleLocks;
+        this._poses[ii].librarySelections = undoBlock.librarySelections;
     }
 
     private moveUndoStack(): void {

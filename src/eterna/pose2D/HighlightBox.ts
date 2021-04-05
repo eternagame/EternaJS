@@ -23,6 +23,7 @@ export enum HighlightType {
     SHIFT = 6,
     USER_DEFINED = 7,
     ANNOTATION = 8,
+    LIBRARY_SELECT = 9
 }
 
 /** A class for highlighting groups of bases in a Pose2D */
@@ -186,6 +187,9 @@ export default class HighlightBox extends GraphicsObject implements LateUpdatabl
                 break;
             case HighlightType.ANNOTATION:
                 color = HighlightBox.ANNOTATION_COLOR;
+                break;
+            case HighlightType.LIBRARY_SELECT:
+                color = 0x622ac9;
                 break;
             default:
                 Assert.unreachable(type);

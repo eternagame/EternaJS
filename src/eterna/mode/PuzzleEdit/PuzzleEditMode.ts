@@ -1009,8 +1009,7 @@ export default class PuzzleEditMode extends GameMode {
             }
 
             this._constraintBar.updateConstraints({
-                undoBlocks: this._seqStack[this._stackLevel],
-                pose: this._poses[ii]
+                undoBlocks: this._seqStack[this._stackLevel]
             });
         }
 

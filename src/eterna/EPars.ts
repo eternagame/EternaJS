@@ -36,7 +36,8 @@ export enum RNAPaint {
     SHIFT = 17,
     // public static readonly const RNABase_ADD_ANNOTATION:int = 18; //Variable for adding an annotation by lullujune
     MAGIC_GLUE = 20,
-    BASE_MARK = 21
+    BASE_MARK = 21,
+    LIBRARY_SELECT = 22
 }
 
 export default class EPars {
