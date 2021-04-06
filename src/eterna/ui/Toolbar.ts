@@ -671,7 +671,7 @@ export default class Toolbar extends ContainerObject {
             .up(Bitmaps.RandomBtn)
             .over(Bitmaps.RandomBtnOver)
             .down(Bitmaps.RandomBtn)
-            .tooltip('Mark bases (hold ctrl)');
+            .tooltip('Select bases to randomize');
 
         if (this._showLibrarySelect) {
             this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
