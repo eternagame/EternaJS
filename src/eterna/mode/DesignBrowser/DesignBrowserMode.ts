@@ -1021,16 +1021,6 @@ export default class DesignBrowserMode extends GameMode {
                     }
                 } else if (category === DesignCategory.LIBRARY_NT) {
                     dataArray.push(singleLineRawData.libraryNT.join(','));
-                    if (ii === 0) {
-                        dataCol.setWidth(
-                            Math.max(
-                                170,
-                                // two digits and comma?
-                                Math.max(...solutions.map((sol) => sol.libraryNT.length)) * 42
-                                    + UITheme.designBrowser.dataPadding * 5
-                            )
-                        );
-                    }
                 } else if (category === DesignCategory.DESCRIPTION) {
                     const des = singleLineRawData.getProperty(DesignCategory.DESCRIPTION) as string;
                     if (des.length < 45) {
@@ -1062,6 +1052,13 @@ export default class DesignBrowserMode extends GameMode {
 
             // Setting and Displaying all raw data for each column
             dataCol.setDataAndDisplay(dataArray);
+
+            // This has to get set after the content is updated since we rely on the text width
+            if (category === DesignCategory.LIBRARY_NT) {
+                dataCol.setWidth(
+                    Math.max(170, dataCol.textWidth + UITheme.designBrowser.dataPadding * 10)
+                );
+            }
         }
 
         this.refreshMarkingBoxes();

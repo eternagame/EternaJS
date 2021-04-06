@@ -305,6 +305,10 @@ export default class DataCol extends ContainerObject {
         return this._dataWidth;
     }
 
+    public get textWidth(): number {
+        return this._dataDisplay.width;
+    }
+
     public set showExp(value: boolean) {
         this._showExp = value;
         this.updateView();
