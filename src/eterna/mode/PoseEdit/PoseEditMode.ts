@@ -71,6 +71,7 @@ import AnnotationManager, {
     AnnotationRange,
     AnnotationHierarchyType
 } from 'eterna/AnnotationManager';
+import LibrarySelectionConstraint from 'eterna/constraints/constraints/LibrarySelectionConstraint';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -135,6 +136,7 @@ export type SubmitSolutionData = {
     'solution-id'?: number;
     'pointsrank-before'?: RankScrollData | null;
     'pointsrank-after'?: RankScrollData | null;
+    'selected-nts'?: number[];
     'annotations'?: AnnotationDataBundle;
 };
 
@@ -169,6 +171,7 @@ export default class PoseEditMode extends GameMode {
                 ?.some((condition) => condition?.structure_constrained_bases),
             boosters: this._puzzle.boosters ? this._puzzle.boosters : undefined,
             showAdvancedMenus: this._puzzle.puzzleType !== PuzzleType.PROGRESSION,
+            showLibrarySelect: this._puzzle.constraints?.some((con) => con instanceof LibrarySelectionConstraint),
             annotationManager: this._annotationManager
         });
         this.addObject(this._toolbar, this.uiLayer);
@@ -230,6 +233,10 @@ export default class PoseEditMode extends GameMode {
 
         this._toolbar.baseMarkerButton.clicked.connect(() => {
             this.setPosesColor(RNAPaint.BASE_MARK);
+        });
+
+        this._toolbar.librarySelectionButton.clicked.connect(() => {
+            this.setPosesColor(RNAPaint.LIBRARY_SELECT);
         });
 
         this._toolbar.magicGlueButton.clicked.connect(() => {
@@ -647,6 +654,7 @@ export default class PoseEditMode extends GameMode {
                 const sequence = solution.sequence;
                 for (const pose of this._poses) {
                     pose.pasteSequence(sequence);
+                    pose.librarySelections = solution.libraryNT;
                 }
             }
             this.clearMoveTracking(solution.sequence.sequenceString());
@@ -990,6 +998,7 @@ export default class PoseEditMode extends GameMode {
         // Initialize sequence and/or solution as relevant
         let initialSequence: Sequence | null = null;
         let annotationGraph: AnnotationDataBundle | undefined;
+        let librarySelections: number[] = [];
         if (this._params.initSolution != null) {
             initialSequence = this._params.initSolution.sequence;
             annotationGraph = this._params.initSolution.annotations;
@@ -997,6 +1006,7 @@ export default class PoseEditMode extends GameMode {
             // AMW: I'm keeping the function around in case we want to call it
             // in some other context, but we don't need it anymore.
             // this.updateSolutionNameText(this._curSolution);
+            librarySelections = this._params.initSolution.libraryNT;
             if (this._solutionView) {
                 this.removeObject(this._solutionView);
             }
@@ -1099,6 +1109,7 @@ export default class PoseEditMode extends GameMode {
 
             this._poses[ii].puzzleLocks = this._puzzle.puzzleLocks;
             this._poses[ii].shiftLimit = this._puzzle.shiftLimit;
+            this._poses[ii].librarySelections = librarySelections;
 
             if (
                 this._annotationManager.allAnnotations.length === 0
@@ -2039,7 +2050,8 @@ export default class PoseEditMode extends GameMode {
             this.submitSolution({
                 title: 'Cleared Solution',
                 comment: 'No comment',
-                annotations: this._poses[0].annotationManager.annotationBundle
+                annotations: this._poses[0].annotationManager.annotationBundle,
+                libraryNT: this._poses[0].librarySelections ?? []
             }, solToSubmit);
         } else {
             const NOT_SATISFIED_PROMPT = 'Puzzle constraints are not satisfied.\n'
@@ -2167,6 +2179,9 @@ export default class PoseEditMode extends GameMode {
                 }
                 postData['fold-data'] = JSON.stringify(fd);
             }
+
+            // Record designStruct numbers, used for library puzzles.
+            postData['selected-nts'] = this._poses[0].librarySelections;
         }
 
         return postData;
@@ -3013,6 +3028,7 @@ export default class PoseEditMode extends GameMode {
             if (lastShiftedIndex <= 0 || lastShiftedCommand < 0) {
                 this._poses[ii].sequence = this._poses[targetIndex].sequence;
                 this._poses[ii].puzzleLocks = this._poses[targetIndex].puzzleLocks;
+                this._poses[ii].librarySelections = this._poses[targetIndex].librarySelections;
                 continue;
             }
 
@@ -3100,6 +3116,7 @@ export default class PoseEditMode extends GameMode {
 
             this._poses[ii].sequence = this._poses[targetIndex].sequence;
             this._poses[ii].puzzleLocks = this._poses[targetIndex].puzzleLocks;
+            this._poses[ii].librarySelections = this._poses[targetIndex].librarySelections;
         }
     }
 
@@ -3329,6 +3346,7 @@ export default class PoseEditMode extends GameMode {
         undoBlock.puzzleLocks = this._poses[ii].puzzleLocks;
         undoBlock.targetConditions = this._targetConditions[ii];
         undoBlock.setBasics(37, pseudoknots);
+        undoBlock.librarySelections = this._poses[ii].librarySelections;
         this._seqStacks[this._stackLevel][ii] = undoBlock;
     }
 
@@ -3440,6 +3458,7 @@ export default class PoseEditMode extends GameMode {
     private setPosesWithUndoBlock(ii: number, undoBlock: UndoBlock): void {
         this._poses[ii].sequence = this._puzzle.transformSequence(undoBlock.sequence, ii);
         this._poses[ii].puzzleLocks = undoBlock.puzzleLocks;
+        this._poses[ii].librarySelections = undoBlock.librarySelections;
     }
 
     private moveUndoStack(): void {

@@ -121,6 +121,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._shiftHighlightBox = new HighlightBox(this, HighlightType.SHIFT);
         this.addObject(this._shiftHighlightBox, this.container);
 
+        this._libraryHighlightBox = new HighlightBox(this, HighlightType.LIBRARY_SELECT);
+        this.addObject(this._libraryHighlightBox, this.container);
+
         this._annotationHighlightBox = new HighlightBox(this, HighlightType.ANNOTATION);
         this._annotationHighlightBox.display.cursor = 'pointer';
         this.addObject(this._annotationHighlightBox, this.container);
@@ -318,12 +321,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         let needUpdate = false;
 
-        if (this._customLayoutChanged) {
+        if (this._customLayoutChanged || this._librarySelectionsChanged) {
             this.checkPairs();
             this.updateMolecule();
             this.generateScoreNodes();
             this.callPoseEditCallback();
             this.annotationManager.refreshAnnotations(this, false);
+            this._librarySelectionsChanged = false;
             return;
         }
 
@@ -870,7 +874,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 }
                 e.stopPropagation();
                 return;
-            } else if (this.annotationManager.annotationModeActive) {
+            }
+            if (this.annotationManager.annotationModeActive) {
                 if (closestIndex < this.sequenceLength) {
                     const clickedHighlight = this._annotationRanges.some((range) => (
                         closestIndex >= range.start && closestIndex <= range.end)
@@ -1236,6 +1241,55 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public clearDesignStruct(): void {
         this._designStruct.fill(false);
         this.updateDesignHighlight();
+    }
+
+    private updateLibraryHighlights() {
+        this._libraryHighlightBox.clear();
+        const elems = this._librarySelections.map((selected, idx) => (selected ? idx : null))
+            .filter((idx): idx is number => idx != null)
+            .map((idx) => [idx, idx])
+            .flat();
+        this._libraryHighlightBox.setHighlight(elems);
+    }
+
+    private toggleLibrarySelection(seqnum: number) {
+        // Don't allow bases to be selected if they don't "actually exist" (eg, in the PTC
+        // puzzles where we have a subset of a larger solution that isn't contiguous and we added
+        // "padding" bases
+        if (this.customNumbering && !this.customNumbering[seqnum]) return;
+
+        // This might break on multistrand puzzles, but I'm also not sure what would be
+        // required there - if for some reason we ever need that, some testing and thought is needed
+        if (this._librarySelections.length === 0) {
+            this._librarySelections = new Array(this._sequence.length);
+        }
+
+        this._librarySelections[seqnum] = !this._librarySelections[seqnum];
+        this.updateLibraryHighlights();
+    }
+
+    public get librarySelections(): number[] | undefined {
+        const sels = this._librarySelections.map((selected, idx) => (selected ? idx : null))
+            .filter((idx): idx is number => idx != null);
+
+        if (this.customNumbering) {
+            return sels.map((idx) => this.customNumbering && this.customNumbering[idx])
+                .filter((idx): idx is number => idx !== null);
+        } else {
+            return sels.map((idx) => idx + 1);
+        }
+    }
+
+    public set librarySelections(selections: number[] | undefined) {
+        this._librarySelections = new Array(this._sequence.length);
+        if (!selections) return;
+
+        for (const idx of selections) {
+            const customNumbering = this.customNumbering;
+            if (customNumbering) this._librarySelections[customNumbering.indexOf(idx)] = true;
+            else this._librarySelections[idx - 1] = true;
+        }
+        this.updateLibraryHighlights();
     }
 
     public toggleDesignStruct(seqnum: number): boolean {
@@ -3171,6 +3225,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
             } else if (this._dynPaintColors.indexOf(this._currentColor) >= 0) {
                 const index: number = this._dynPaintColors.indexOf(this._currentColor);
                 this._dynPaintTools[index].onPaint(this, seqnum);
+            } else if (this._currentColor === RNAPaint.LIBRARY_SELECT && seqnum < this.sequenceLength) {
+                this.toggleLibrarySelection(seqnum);
+                this._librarySelectionsChanged = true;
             }
         }
     }
@@ -3277,6 +3334,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
             } else if (this._dynPaintColors.indexOf(this._currentColor) >= 0) {
                 const index: number = this._dynPaintColors.indexOf(this._currentColor);
                 this._dynPaintTools[index].onPainting(this, seqnum);
+            } else if (this._currentColor === RNAPaint.LIBRARY_SELECT && seqnum <= this.sequenceLength) {
+                this.toggleLibrarySelection(seqnum);
+                this._librarySelectionsChanged = true;
             }
         }
         this._lastColoredIndex = seqnum;
@@ -3811,6 +3871,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _customLayout: Array<[number, number] | [null, null]> | undefined = undefined;
     private _customLayoutChanged: boolean = false;
     private _pseudoknotted: boolean = false;
+    private _librarySelections: boolean[] = [];
+    private _librarySelectionsChanged: boolean = false;
 
     // Oligos
     private _oligo: number[] | null = null;
@@ -3916,6 +3978,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _shiftHighlightBox: HighlightBox;
     private _shiftStart: number = -1;
     private _shiftEnd: number = -1;
+    private _libraryHighlightBox: HighlightBox;
 
     // For praising stacks
     private _praiseQueue: number[] = [];

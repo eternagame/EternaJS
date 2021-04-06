@@ -3,6 +3,7 @@ import Feedback from 'eterna/Feedback';
 import {FoldData} from 'eterna/UndoBlock';
 import Sequence from 'eterna/rnatypes/Sequence';
 import {AnnotationDataBundle} from 'eterna/AnnotationManager';
+import {DesignCategory} from 'eterna/mode/DesignBrowser/DesignBrowserMode';
 
 export default class Solution {
     constructor(nid: number, puzzleNID: number) {
@@ -64,6 +65,14 @@ export default class Solution {
         this._sequence = sequence;
     }
 
+    public get libraryNT(): number[] {
+        return this._libraryNT;
+    }
+
+    public set libraryNT(libraryNT: number[]) {
+        this._libraryNT = libraryNT;
+    }
+
     public get expFeedback(): Feedback | null {
         return this._expFeedback;
     }
@@ -106,8 +115,8 @@ export default class Solution {
 
     public canVote(round: number) {
         return !this.synthetized
-            && this.getProperty('Synthesized') === 'n'
-            && this.getProperty('Round') === round;
+            && this.getProperty(DesignCategory.SYNTHESIZED) === 'n'
+            && this.getProperty(DesignCategory.ROUND) === round;
     }
 
     public setNumPairs(gc: number, gu: number, ua: number): void {
@@ -159,44 +168,44 @@ export default class Solution {
     }
 
     // AMW TODO what why
-    public getProperty(keyword: string): Sequence | string | number {
-        if (keyword === 'Title') {
+    public getProperty(keyword: DesignCategory): Sequence | string | number {
+        if (keyword === DesignCategory.TITLE) {
             return this._title;
-        } else if (keyword === 'GU Pairs') {
+        } else if (keyword === DesignCategory.GU_PAIRS) {
             return this._numGUs;
-        } else if (keyword === 'GC Pairs') {
+        } else if (keyword === DesignCategory.GC_PAIRS) {
             return this._numGCs;
-        } else if (keyword === 'UA Pairs') {
+        } else if (keyword === DesignCategory.UA_PAIRS) {
             return this._numUAs;
-        } else if (keyword === 'Melting Point') {
+        } else if (keyword === DesignCategory.MELTING_POINT) {
             return this._meltingPoint;
-        } else if (keyword === 'Designer') {
+        } else if (keyword === DesignCategory.DESIGNER) {
             return this._playerName;
-        } else if (keyword === 'Sequence') {
+        } else if (keyword === DesignCategory.SEQUENCE) {
             return this._sequence;
-        } else if (keyword === 'Free Energy') {
+        } else if (keyword === DesignCategory.FREE_ENERGY) {
             return this._freeEnergy;
-        } else if (keyword === 'Description') {
+        } else if (keyword === DesignCategory.DESCRIPTION) {
             return this._shortDesc;
-        } else if (keyword === 'Round') {
+        } else if (keyword === DesignCategory.ROUND) {
             return this._round;
-        } else if (keyword === 'Votes') {
+        } else if (keyword === DesignCategory.VOTES) {
             if (this._synthesizedRound) {
                 return -1;
             }
             return this._numVotes;
-        } else if (keyword === 'My Votes') {
+        } else if (keyword === DesignCategory.MY_VOTES) {
             if (this._synthesizedRound) {
                 return -1;
             }
             return this._numMyVotes;
-        } else if (keyword === 'Synthesized') {
+        } else if (keyword === DesignCategory.SYNTHESIZED) {
             if (this._synthesizedRound > 0) {
                 return 'y';
             } else {
                 return 'n';
             }
-        } else if (keyword === 'Synthesis score') {
+        } else if (keyword === DesignCategory.SYNTHESIS_SCORE) {
             if (this._expFeedback != null && this._expFeedback.getShapeData() != null) {
                 return this._synthesisScore;
             } else if (this._expFeedback != null && this._expFeedback.isFailed() !== 0) {
@@ -234,4 +243,5 @@ export default class Solution {
     private _hasFoldData: boolean = false;
     private _foldData: FoldData[] | null = null;
     private _annotations: AnnotationDataBundle | undefined = undefined;
+    private _libraryNT: number[] = [];
 }

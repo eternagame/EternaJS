@@ -263,13 +263,13 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             this._icon.texture = Texture.EMPTY;
             if (config.icon instanceof Texture) {
                 this._icon.texture = config.icon;
-                this._icon.position = new Point((111 - this._icon.width) * 0.5, 2);
+                this._icon.position = new Point((111 - this._icon.width) * 0.5, 5);
             } else if (config.icon instanceof Graphics) {
                 this._icon.addChild(config.icon);
             } else {
                 TextureUtil.fromBase64PNG(config.icon).then((tex) => {
                     this._icon.texture = tex;
-                    this._icon.position = new Point((111 - this._icon.width) * 0.5, 2);
+                    this._icon.position = new Point((111 - this._icon.width) * 0.5, 5);
                 });
             }
         }

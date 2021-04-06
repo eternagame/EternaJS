@@ -1,7 +1,6 @@
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {RNABase} from 'eterna/EPars';
-import {Assert} from 'flashbang';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
@@ -83,9 +82,7 @@ function detectLoops(targetPairs: SecStruct, loops: Loop[]) {
         } else if (loopStack.length > 0) {
             if (i === loopStack[loopStack.length - 1].pairs[0][1]) {
                 // Found last pair that needs to be encountered - loop finished.
-                const loop: Loop | undefined = loopStack.pop();
-                // This should never happen, given that we check loopStack.length > 0
-                Assert.assertIsDefined(loop);
+                const loop: Loop = loopStack.pop() as Loop;
                 loops.push(loop.clone());
                 examiningLoops = false;
             }

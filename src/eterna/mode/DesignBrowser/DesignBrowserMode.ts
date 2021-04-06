@@ -62,8 +62,9 @@ export enum DesignCategory {
     MELTING_POINT = 'Melting Point',
     FREE_ENERGY = 'Free Energy',
     SYNTHESIZED = 'Synthesized',
-    SYNTHESIS_SCORE = 'Synthesis score',
+    SYNTHESIS_SCORE = 'Synthesis Score',
     SEQUENCE = 'Sequence',
+    LIBRARY_NT = 'Library Nucleotides',
 }
 
 function AllCategories(): DesignCategory[] {
@@ -129,8 +130,8 @@ export default class DesignBrowserMode extends GameMode {
         this.addObject(this._hSlider, this._content);
 
         this._scrollContainer = new ScrollContainer(1, 1);
-        this._scrollContainer.display.position = new Point(17, 85);
-        this.addObject(this._scrollContainer, this.container);
+        this._scrollContainer.display.position = new Point(7, 0);
+        this.addObject(this._scrollContainer, this._content);
 
         this._dataColParent = new ContainerObject();
         this._scrollContainer.addObject(this._dataColParent, this._scrollContainer.content);
@@ -151,14 +152,14 @@ export default class DesignBrowserMode extends GameMode {
         this._selectionBox.position = new Point(7, 0);
         this._selectionBox.visible = false;
         selectionBoxParent.addChild(this._selectionBox);
-        this._scrollContainer.content.addChild(selectionBoxParent);
+        this._content.addChild(selectionBoxParent);
 
         const clickedSelectionBoxParent = new Container();
         this._clickedSelectionBox = new SelectionBox(0x2F44D1);
         this._clickedSelectionBox.position = new Point(7, 0);
         this._clickedSelectionBox.visible = false;
         clickedSelectionBoxParent.addChild(this._clickedSelectionBox);
-        this._scrollContainer.content.addChild(clickedSelectionBoxParent);
+        this._content.addChild(clickedSelectionBoxParent);
 
         this._dataColParent.pointerMove.connect((e) => this.onMouseMove(e));
         this._dataColParent.pointerTap.connect((e) => this.onMouseUp(e));
@@ -262,7 +263,7 @@ export default class DesignBrowserMode extends GameMode {
         homeButton.display.position = new Point(18, 10);
         homeButton.clicked.connect(() => {
             if (Eterna.MOBILE_APP) {
-                window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
+                if (window.frameElement) window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
             } else {
                 window.location.href = EternaURL.createURL({page: 'home'});
             }
@@ -560,7 +561,7 @@ export default class DesignBrowserMode extends GameMode {
         };
 
         // string | number => definitely a number
-        const myVotes = Number(solution.getProperty('My Votes'));
+        const myVotes = Number(solution.getProperty(DesignCategory.MY_VOTES));
         Eterna.client.toggleSolutionVote(solution.nodeID, this._puzzle.nodeID, myVotes)
             .then((data) => {
                 this._voteProcessor.processData(data['votes']);
@@ -801,8 +802,8 @@ export default class DesignBrowserMode extends GameMode {
     }
 
     private setScrollHorizontal(progress: number): void {
-        this._dataColParent.display.x = (this._wholeRowWidth > this.contentWidth)
-            ? (this.contentWidth - this._wholeRowWidth) * progress
+        this._scrollContainer.scrollX = (this._wholeRowWidth > this.contentWidth)
+            ? (this._wholeRowWidth - this.contentWidth) * progress
             : 0;
     }
 
@@ -930,7 +931,7 @@ export default class DesignBrowserMode extends GameMode {
                         column = new DataCol({
                             ...baseParams,
                             dataType: DesignBrowserDataType.STRING,
-                            dataWidth: 100,
+                            dataWidth: 120,
                             sortable: true
                         });
                         break;
@@ -946,6 +947,14 @@ export default class DesignBrowserMode extends GameMode {
                         column = new DataCol({
                             ...baseParams,
                             dataType: DesignBrowserDataType.NUMBER,
+                            dataWidth: 140,
+                            sortable: true
+                        });
+                        break;
+                    case DesignCategory.LIBRARY_NT:
+                        column = new DataCol({
+                            ...baseParams,
+                            dataType: DesignBrowserDataType.STRING,
                             dataWidth: 170,
                             sortable: true
                         });
@@ -1004,19 +1013,23 @@ export default class DesignBrowserMode extends GameMode {
                 if (category === DesignCategory.SEQUENCE) {
                     dataArray.push(singleLineRawData.sequence.sequenceString());
                     if (ii === 0) {
-                        dataCol.setWidth(singleLineRawData.sequence.length * 14
-                            + UITheme.designBrowser.dataPadding * 5);
+                        dataCol.setWidth(
+                            singleLineRawData.sequence.length * 14
+                            + UITheme.designBrowser.dataPadding * 5
+                        );
                         dataCol.drawGridText();
                     }
+                } else if (category === DesignCategory.LIBRARY_NT) {
+                    dataArray.push(singleLineRawData.libraryNT.join(','));
                 } else if (category === DesignCategory.DESCRIPTION) {
-                    const des = singleLineRawData.getProperty('Description') as string;
+                    const des = singleLineRawData.getProperty(DesignCategory.DESCRIPTION) as string;
                     if (des.length < 45) {
                         dataArray.push(des);
                     } else {
                         dataArray.push(`${des.substr(0, 40)}...`);
                     }
                 } else if (category === DesignCategory.TITLE) {
-                    const des = singleLineRawData.getProperty('Title') as string;
+                    const des = singleLineRawData.getProperty(DesignCategory.TITLE) as string;
                     if (des.length < 30) {
                         dataArray.push(des);
                     } else {
@@ -1024,7 +1037,7 @@ export default class DesignBrowserMode extends GameMode {
                     }
                 } else if (category === DesignCategory.VOTE) {
                     const canVote = !this._novote && singleLineRawData.canVote(puz.round);
-                    const voted = singleLineRawData.getProperty('My Votes') > 0;
+                    const voted = singleLineRawData.getProperty(DesignCategory.MY_VOTES) > 0;
                     dataArray.push({canVote, voted, solutionIndex: ii});
                 } else {
                     const rawdata: string | number = singleLineRawData.getProperty(category) as string | number;
@@ -1039,6 +1052,13 @@ export default class DesignBrowserMode extends GameMode {
 
             // Setting and Displaying all raw data for each column
             dataCol.setDataAndDisplay(dataArray);
+
+            // This has to get set after the content is updated since we rely on the text width
+            if (category === DesignCategory.LIBRARY_NT) {
+                dataCol.setWidth(
+                    Math.max(170, dataCol.textWidth + UITheme.designBrowser.dataPadding * 10)
+                );
+            }
         }
 
         this.refreshMarkingBoxes();
@@ -1059,8 +1079,10 @@ export default class DesignBrowserMode extends GameMode {
         for (let ii = 0; ii < this._dataCols.length; ii++) {
             const col: DataCol = this._dataCols[ii];
             if (animate) {
-                col.replaceNamedObject('AnimateLocation',
-                    new LocationTask(this._wholeRowWidth, 0, 0.5, Easing.easeOut));
+                col.replaceNamedObject(
+                    'AnimateLocation',
+                    new LocationTask(this._wholeRowWidth, 0, 0.5, Easing.easeOut)
+                );
             } else {
                 col.display.position = new Point(this._wholeRowWidth, 0);
             }
@@ -1073,6 +1095,10 @@ export default class DesignBrowserMode extends GameMode {
                 col.setBgColor(0xffffff, 0.05);
             }
         }
+
+        // Somewhere along the line when we moved to a scrollcontainer this got out of sync. How?
+        // I'll leave that exercise to the reader. For now, this seems to work.
+        this._wholeRowWidth += 14;
     }
 
     private refreshMarkingBoxes(): void {
@@ -1165,6 +1191,7 @@ export default class DesignBrowserMode extends GameMode {
         DesignCategory.FREE_ENERGY,
         DesignCategory.SYNTHESIZED,
         DesignCategory.SYNTHESIS_SCORE,
+        DesignCategory.LIBRARY_NT,
         DesignCategory.SEQUENCE
     ];
 

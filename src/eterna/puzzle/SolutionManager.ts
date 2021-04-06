@@ -4,6 +4,7 @@ import Eterna from 'eterna/Eterna';
 import Feedback, {BrentTheoData} from 'eterna/Feedback';
 import Sequence from 'eterna/rnatypes/Sequence';
 import {AnnotationDataBundle} from 'eterna/AnnotationManager';
+import {DesignCategory} from 'eterna/mode/DesignBrowser/DesignBrowserMode';
 import Solution from './Solution';
 
 interface SolutionSpec {
@@ -30,6 +31,7 @@ interface SolutionSpec {
     'has-fold-data': number | null;
     'fold-data': string;
     'annotations': AnnotationDataBundle;
+    'selected-nts': string;
 }
 
 interface ShapeData {
@@ -112,7 +114,7 @@ export default class SolutionManager {
     public getMyCurrentSolutionTitles(round: number): string[] {
         const titles: string[] = [];
         for (const solution of this._solutions) {
-            if (solution.getProperty('Round') === round && solution.playerID === Eterna.playerID) {
+            if (solution.getProperty(DesignCategory.ROUND) === round && solution.playerID === Eterna.playerID) {
                 titles.push(solution.title);
             }
         }
@@ -255,6 +257,10 @@ export default class SolutionManager {
 
         if (obj['annotations'] != null) {
             newsol.annotations = obj['annotations'] as AnnotationDataBundle;
+        }
+
+        if (obj['selected-nts'] != null) {
+            newsol.libraryNT = obj['selected-nts'].split(',').map((n) => +n);
         }
 
         return newsol;

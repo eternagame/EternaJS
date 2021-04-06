@@ -42,7 +42,7 @@ import ButtonWithIcon from './ButtonWithIcon';
 import LabComments, {CommentsData} from './LabComments';
 import FeedbackViewMode from '../FeedbackViewMode';
 import PoseEditMode from '../PoseEdit/PoseEditMode';
-import DesignBrowserMode from './DesignBrowserMode';
+import DesignBrowserMode, {DesignCategory} from './DesignBrowserMode';
 
 interface ViewSolutionOverlayProps {
     solution: Solution;
@@ -304,7 +304,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
             // VOTE (disallowed is solution is synthesized or old)
             this._voteButton = new ButtonWithIcon({text: {text: ''}, icon: Bitmaps.ImgVote});
             this._voteButton.clicked.connect(() => this.voteClicked.emit());
-            this.setVoteStatus(this._props.solution.getProperty('My Votes') > 0);
+            this.setVoteStatus(this._props.solution.getProperty(DesignCategory.MY_VOTES) > 0);
             this._content.addObject(this._voteButton, this._contentLayout);
         }
 
@@ -378,9 +378,9 @@ export default class ViewSolutionOverlay extends ContainerObject {
 
         // DELETE (only allowed if the puzzle belongs to us and has no votes)
         if (
-            this._props.solution.getProperty('Round') === this._props.puzzle.round
+            this._props.solution.getProperty(DesignCategory.ROUND) === this._props.puzzle.round
             && this._props.solution.playerID === Eterna.playerID
-            && this._props.solution.getProperty('Votes') === 0
+            && this._props.solution.getProperty(DesignCategory.VOTES) === 0
         ) {
             const deleteButton = new ThumbnailAndTextButton({
                 thumbnail: new Graphics()
@@ -603,19 +603,19 @@ export default class ViewSolutionOverlay extends ContainerObject {
             if (solution.expFeedback.isFailed() === 0) {
                 text += '<bold>[SYNTHESIZED!]</bold>\n'
                     + '<orange>This design was synthesized with score </orange>'
-                    + `<bold>${solution.getProperty('Synthesis score')} / 100</bold>\n`;
+                    + `<bold>${solution.getProperty(DesignCategory.SYNTHESIS_SCORE)} / 100</bold>\n`;
             } else {
                 const failureIdx = Feedback.EXPCODES.indexOf(solution.expFeedback.isFailed());
                 text += `${Feedback.EXPDISPLAYS_LONG[failureIdx]
                 } Score : <bold>${Feedback.EXPSCORES[failureIdx]} / 100</bold>\n`;
             }
-        } else if (solution.getProperty('Synthesized') === 'y') {
+        } else if (solution.getProperty(DesignCategory.SYNTHESIZED) === 'y') {
             text += '<bold>[WAITING]</bold>\n'
                     + '<orange>This design is being synthesized and waiting for results. </orange>\n';
-        } else if (solution.getProperty('Round') < puzzle.round) {
+        } else if (solution.getProperty(DesignCategory.ROUND) < puzzle.round) {
             text += '<bold>[OLD]</bold>\n'
                     + '<orange>This design was submitted in round </orange>'
-                    + `<bold>${solution.getProperty('Round')}.</bold>`
+                    + `<bold>${solution.getProperty(DesignCategory.ROUND)}.</bold>`
                     + "<orange> You can't vote on designs from previous rounds."
                     + 'But you can use or resubmit this design by clicking on </orange>'
                     + '<bold>"Modify".</bold>\n';

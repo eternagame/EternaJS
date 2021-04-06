@@ -334,6 +334,9 @@ export default class Bitmaps {
     public static readonly BranchinessIcon: string = require('assets/branchy.png');
     public static readonly Folder: string = require('assets/folder.png');
     public static readonly CustomLayout: string = require('assets/UI/custom-layout-small.png');
+    public static readonly RandomIcon: string = require('assets/random.png');
+    public static readonly RandomBtn: string = require('assets/UI/random-btn.png');
+    public static readonly RandomBtnOver: string = require('assets/UI/random-btn-over.png');
     // Annotations
     public static readonly ImgAnnotationMode: string = require('assets/UI/annotation-mode-btn.png');
     public static readonly ImgAnnotationModeOver: string = require('assets/UI/annotation-mode-btn-over.png');

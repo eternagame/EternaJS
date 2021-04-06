@@ -38,7 +38,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
         super(
             props.domParent ?? Eterna.OVERLAY_DIV_ID, (props.rows ?? 1) === 1
                 ? TextInputObject.createTextInput(
-                    props.height ?? 40, props.placeholder,
+                    props.height ?? 30, props.placeholder,
                     props.characterLimit,
                     DOMObject.colorToString(props.bgColor ?? UITheme.textInput.colors.background)
                 )
@@ -59,7 +59,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
         this._textColor = UITheme.textInput.colors.text;
         this._borderRadius = 5;
         this.width = props.width ?? 100;
-        this.height = props.height ?? 40;
+        this.height = props.height ?? 30;
 
         if (this._characterLimit) {
             let input: HTMLInputElement | HTMLTextAreaElement | undefined;

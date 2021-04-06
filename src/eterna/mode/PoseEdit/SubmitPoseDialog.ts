@@ -12,7 +12,8 @@ export default class SubmitPoseDialog extends Dialog<SubmitPoseDetails> {
         annotations: {
             puzzle: [],
             solution: []
-        }
+        },
+        libraryNT: []
     }) {
         super();
         this._initialState = initialState;
@@ -44,7 +45,8 @@ export default class SubmitPoseDialog extends Dialog<SubmitPoseDetails> {
                 annotations: {
                     puzzle: [],
                     solution: []
-                }
+                },
+                libraryNT: []
             };
             this.saveInputs.emit(details);
             this.close(null);
@@ -57,7 +59,8 @@ export default class SubmitPoseDialog extends Dialog<SubmitPoseDetails> {
                 annotations: {
                     puzzle: [],
                     solution: []
-                }
+                },
+                libraryNT: []
             };
             this.saveInputs.emit(details);
             this.close(details);

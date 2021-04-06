@@ -93,6 +93,7 @@ export default class Toolbar extends ContainerObject {
     public boostersMenu: GameButton;
 
     public baseMarkerButton: GameButton;
+    public librarySelectionButton: GameButton;
     public magicGlueButton: GameButton;
     public moveButton: GameButton;
     public rotateStemButton: GameButton;
@@ -131,12 +132,14 @@ export default class Toolbar extends ContainerObject {
             boosters,
             showGlue = false,
             showAdvancedMenus = true,
+            showLibrarySelect = false,
             annotationManager
         }: {
             states?: number;
             boosters?: BoostersData;
             showGlue?: boolean;
             showAdvancedMenus?: boolean;
+            showLibrarySelect?: boolean;
             annotationManager?: AnnotationManager;
         }
     ) {
@@ -145,6 +148,7 @@ export default class Toolbar extends ContainerObject {
         this._states = states;
         this._showGlue = showGlue;
         this._showAdvancedMenus = showAdvancedMenus;
+        this._showLibrarySelect = showLibrarySelect;
         this._boostersData = boosters ?? null;
         this._annotationManager = annotationManager;
     }
@@ -663,6 +667,22 @@ export default class Toolbar extends ContainerObject {
             this.baseMarkerButton.toggled.value = true;
         }));
 
+        this.librarySelectionButton = new ToolbarButton()
+            .up(Bitmaps.RandomBtn)
+            .over(Bitmaps.RandomBtnOver)
+            .down(Bitmaps.RandomBtn)
+            .tooltip('Select bases to randomize');
+
+        if (this._showLibrarySelect) {
+            this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
+            this.addObject(this.librarySelectionButton, this.lowerToolbarLayout);
+
+            this.regs.add(this.librarySelectionButton.clicked.connect(() => {
+                this._deselectAllPaintTools();
+                this.librarySelectionButton.toggled.value = true;
+            }));
+        }
+
         this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
         this.magicGlueButton = new ToolbarButton()
             .up(Bitmaps.ImgMagicGlue)
@@ -972,6 +992,7 @@ export default class Toolbar extends ContainerObject {
         this.moleculeButton.toggled.value = false;
         this.magicGlueButton.toggled.value = false;
         this.baseMarkerButton.toggled.value = false;
+        this.librarySelectionButton.toggled.value = false;
 
         for (const button of this.dynPaintTools) {
             button.toggled.value = false;
@@ -986,6 +1007,7 @@ export default class Toolbar extends ContainerObject {
     private readonly _states: number;
     private readonly _showGlue: boolean;
     private readonly _showAdvancedMenus: boolean;
+    private readonly _showLibrarySelect: boolean;
     private readonly _boostersData: BoostersData | null;
 
     private _invisibleBackground: Graphics;
