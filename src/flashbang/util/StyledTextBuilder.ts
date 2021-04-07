@@ -40,7 +40,16 @@ export default class StyledTextBuilder {
         if (this._styles[name] != null) {
             log.warn(`Redefining existing style '${name}'`);
         }
-        this._styles[name] = style;
+        // If we were passed a PIXI.TextStyle and pass that on to MultiStyleText, MultiStyleText
+        // will copy the private values of the TextStyle rather than the public getters,
+        // since the getters are not enumerable. This means that if we then override any values
+        // with a different style, it won't properly override the underscore-prefixed property
+        // since when the styles are merged, both will be present and apparently the
+        // underscore-prefixed one is preferred... which frankly I don't understad looking at the
+        // source for MultiStyleText, but here we are.
+        this._styles[name] = Object.fromEntries(
+            Object.entries(style).map(([key, value]) => [key.replace(/^_/, ''), value])
+        );
         return this;
     }
 
