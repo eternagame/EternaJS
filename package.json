@@ -83,6 +83,7 @@
     "pixi-multistyle-text": "github:eternagame/pixi-multistyle-text#45a514d8b6234a2a0292f12c8cddebf1b1270a48",
     "pixi-sound": "^3.0.5",
     "pixi.js": "^5.3.3",
+    "rxjs": "^6.6.7",
     "store": "^2.0.12",
     "upng-js": "^2.1.0",
     "uuid": "^8.3.2",
