@@ -214,6 +214,7 @@ export default class VScrollBox extends ContainerObject implements MouseWheelLis
             const currY = event instanceof InteractionEvent ? event.data.global.y : event.y;
             const dragRange = currY - this._dragStartPoint;
             this.scrollLocation = this._dragStartScroll - dragRange;
+            this.updateScrollThumb();
         }
     }
 

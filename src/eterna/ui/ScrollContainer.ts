@@ -27,6 +27,18 @@ for (const event of events) {
     }, true);
 }
 
+// Same deal but for touch events
+const touchEvents = ['touchstart', 'touchcancel', 'touchend', 'touchmove'] as const;
+
+let earlyTouchHandlers: ((e: TouchEvent) => void)[] = [];
+
+for (const event of touchEvents) {
+    // eslint-disable-next-line no-loop-func
+    window.addEventListener(event, (e) => {
+        earlyTouchHandlers.forEach((handler) => handler(e));
+    }, true);
+}
+
 export default class ScrollContainer extends ContainerObject {
     public readonly content = new Container();
 
@@ -36,6 +48,7 @@ export default class ScrollContainer extends ContainerObject {
         this._height = height;
         this._radius = radius;
         this._boundHME = this.handlePossiblyMaskedEvent.bind(this);
+        this._boundHTE = this.handleTouchEvent.bind(this);
     }
 
     protected added() {
@@ -57,6 +70,11 @@ export default class ScrollContainer extends ContainerObject {
         this.doLayout();
 
         earlyHandlers.push(this._boundHME);
+        earlyTouchHandlers.push(this._boundHTE);
+        Assert.assertIsDefined(Flashbang.app.pixi);
+        // Technically this is readonly, but the weak typing in Pixi doesn't catch this,
+        // and we have to disable this to force Pixi to only use pointer events - see handleTouchEvent
+        Flashbang.app.pixi.renderer.plugins.interaction.supportsTouchEvents = false;
     }
 
     protected dispose(): void {
@@ -64,6 +82,12 @@ export default class ScrollContainer extends ContainerObject {
         Assert.assertIsDefined(overlayEl);
         overlayEl.removeChild(this._htmlWrapper);
         earlyHandlers = earlyHandlers.filter((handler) => handler !== this._boundHME);
+        earlyTouchHandlers = earlyTouchHandlers.filter((handler) => handler !== this._boundHTE);
+        // Just to be clean about it
+        if (earlyTouchHandlers.length === 0) {
+            Assert.assertIsDefined(Flashbang.app.pixi);
+            Flashbang.app.pixi.renderer.plugins.interaction.supportsTouchEvents = true;
+        }
 
         super.dispose();
     }
@@ -193,6 +217,23 @@ export default class ScrollContainer extends ContainerObject {
     }
 
     /**
+     * Similar to handlePossiblyMaskedEvent. However, touch events do not have a position, only a
+     * target element, so we can't filter it like we do there. Luckily touch events aren't
+     * *actually* required for PIXI to function properly (they really should be just used as
+     * fallbacks when PointerEvents aren't available, and we expect them to be available anyways),
+     * so we can just make sure these events never get to Pixi so that it doesn't erroniously
+     * handle these events
+     *
+     * @param e Touch event to be handled
+     */
+    private handleTouchEvent(e: TouchEvent): void {
+        if (e.target === Flashbang.app.view) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }
+
+    /**
      * HTML wrapper element used to mask HTML children - all HTML content added to this
      * scroll container should be added as a child of this element
      */
@@ -203,6 +244,7 @@ export default class ScrollContainer extends ContainerObject {
     private readonly _contentMask = new Graphics();
     private _htmlWrapper: HTMLDivElement;
 
+    private _boundHTE: (e: TouchEvent) => void;
     private _boundHME: (e: MouseEvent | PointerEvent) => void;
     private lastEventWasMasked = false;
 
