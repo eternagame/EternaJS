@@ -86,7 +86,7 @@ export default class ScrollContainer extends ContainerObject {
         // Just to be clean about it
         if (earlyTouchHandlers.length === 0) {
             Assert.assertIsDefined(Flashbang.app.pixi);
-            Flashbang.app.pixi.renderer.plugins.interaction.supportsTouchEvents = false;
+            Flashbang.app.pixi.renderer.plugins.interaction.supportsTouchEvents = true;
         }
 
         super.dispose();
