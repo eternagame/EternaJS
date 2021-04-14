@@ -2458,10 +2458,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         const hlState = new RNAHighlightState();
-        hlState.nuc = Array.prototype.concat(
-            this._allNewHighlights.map((h) => h.nuc).filter((n): n is number[] => n !== null)
-        );
+        hlState.nuc = this._allNewHighlights
+            .map((h) => h.nuc)
+            .filter((n): n is number[] => n !== null)
+            .flat();
         hlState.isOn = true;
+
         return hlState;
     }
 
