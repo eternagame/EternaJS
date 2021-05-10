@@ -1,94 +1,75 @@
 
 
-# Eternajs
+# EternaJS
+Eterna's gamified RNA design interface
 
-This project was generated using [Nx](https://nx.dev).
+Interested in development? Join the discusson on the Eterna Discord!
 
-<p style="text-align: center;"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="450"></p>
+[![Eterna Discord](https://discord.com/api/guilds/702618517589065758/widget.png?style=banner2)](https://discord.gg/KYeTwux)
 
-🔎 **Powerful, Extensible Dev Tools**
+## Setup
+* Install `npm` (via `nodejs`): 
+    - https://nodejs.org/en/download/
+* Run `npm install` in the root directory of this repository
 
-## Adding capabilities to your workspace
+## Using NX
+This project is structured as an [Nx](https://nx.dev) monorepo to manage its components. Here are some
+common actions you might want to take
 
-Nx supports many plugins which add capabilities for developing different types of applications and different tools.
-
-These capabilities include generating applications, libraries, etc as well as the devtools to test, and build projects as well.
-
-Below are our core plugins:
-
-- [React](https://reactjs.org)
-  - `npm install --save-dev @nrwl/react`
-- Web (no framework frontends)
-  - `npm install --save-dev @nrwl/web`
-- [Angular](https://angular.io)
-  - `npm install --save-dev @nrwl/angular`
-- [Nest](https://nestjs.com)
-  - `npm install --save-dev @nrwl/nest`
-- [Express](https://expressjs.com)
-  - `npm install --save-dev @nrwl/express`
-- [Node](https://nodejs.org)
-  - `npm install --save-dev @nrwl/node`
-
-There are also many [community plugins](https://nx.dev/nx-community) you could add.
-
-## Generate an application
-
-Run `nx g @nrwl/react:app my-app` to generate an application.
-
-> You can use any of the plugins above to generate applications as well.
+### Generate an application
+Run `npx nx g <app template> my-app` to generate an application.
 
 When using Nx, you can create multiple applications and libraries in the same workspace.
 
-## Generate a library
+### Generate a library
+Run `npx nx g <lib template> my-lib` to generate a library.
 
-Run `nx g @nrwl/react:lib my-lib` to generate a library.
+Libraries are shareable across libraries and applications. They can be imported from `@eternagame/mylib`.
 
-> You can also use any of the plugins above to generate libraries as well.
+### Development server
+Run `npx nx serve my-app` for a dev server. Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
 
-Libraries are shareable across libraries and applications. They can be imported from `@eternajs/mylib`.
+### Code scaffolding
+Run `npx nx g <component template> my-component --project=my-app` to generate a new component.
 
-## Development server
+### Build
+Run `npx nx build my-app` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
 
-Run `nx serve my-app` for a dev server. Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
+### Running unit tests
+Run `npx nx test my-app` to execute the unit tests via [Jest](https://jestjs.io).
 
-## Code scaffolding
+Run `npx nx affected:test` to execute the unit tests affected by a change.
 
-Run `nx g @nrwl/react:component my-component --project=my-app` to generate a new component.
+### Running end-to-end tests
+Run `npx nx e2e my-app` to execute the end-to-end tests via [Cypress](https://www.cypress.io).
 
-## Build
+Run `npx nx affected:e2e` to execute the end-to-end tests affected by a change.
 
-Run `nx build my-app` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+### Understand your workspace
+Run `npx nx dep-graph` to see a diagram of the dependencies of your projects.
 
-## Running unit tests
-
-Run `nx test my-app` to execute the unit tests via [Jest](https://jestjs.io).
-
-Run `nx affected:test` to execute the unit tests affected by a change.
-
-## Running end-to-end tests
-
-Run `ng e2e my-app` to execute the end-to-end tests via [Cypress](https://www.cypress.io).
-
-Run `nx affected:e2e` to execute the end-to-end tests affected by a change.
-
-## Understand your workspace
-
-Run `nx dep-graph` to see a diagram of the dependencies of your projects.
-
-## Further help
-
+### Further help
 Visit the [Nx Documentation](https://nx.dev) to learn more.
 
+## Setting up new test puzzles
+ * Create your puzzle using the puzzlemaker GUI by clicking the "Create Puzzle" button at `http://eternadev.org/web/playerpuzzles/`
+   (or loading up the puzzlemaker in your local copy of EternaJS)
 
+ * For functionality not available via the puzzlemaker, a puzzle can be directly set up via Drupal on the `eternadev` server through http://eternadev.org/node/add/puzzle and edited with `http://eternadev.org/node/<id>/edit`. Your login will need to have been granted Drupal admin access. We are working on a way to define and load puzzles locally, but until that time if you need a custom puzzle set up, let us know.
 
-## ☁ Nx Cloud
+ * After you publish, you should be able to see the puzzle on the same player puzzles page, and figure out its ID by clicking on the puzzle.
 
-### Computation Memoization in the Cloud
+## Contributing
+For introductory material to this codebase and the technologies it is built with, check out https://github.com/eternagame/development-bootcamp. If you're looking for somewhere to start contributing, check out our [issues labelled good first issue](https://github.com/eternagame/EternaJS/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22).
 
-<p style="text-align: center;"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-cloud-card.png"></p>
+ * Fork the repository
 
-Nx Cloud pairs with Nx in order to enable you to build and test code more rapidly, by up to 10 times. Even teams that are new to Nx can connect to Nx Cloud and start saving time instantly.
+ * Make your changes in a separate git branch. In command line, use a command like `git checkout -b myawesomefeature`. 
+ 
+ * VS Code is a superb IDE for developing EternaJS, available for Mac/Windows/Linux. (Even Rhiju, a hardcore Emacs user, has converted.)
 
-Teams using Nx gain the advantage of building full-stack applications with their preferred framework alongside Nx’s advanced code generation and project dependency graph, plus a unified experience for both frontend and backend developers.
+ * When you're ready to merge into master for deployment, create a pull request at `https://github.com/Eternagame/EternaJS/pulls`. We will then perform a code review.
+ 
+Please note that for some reason or another, we may not approve of adding a feature you may have written. To avoid doing work we may reject later please [open an issue](https://github.com/eternagame/eternajs/issues) and we will triage it and/or initiate discussion about the feature. That said, feel free to work on changes for your own experimentation. Eternascript boosters are also a great way to add in extra tools you want to see added, without needing us to consider whether or not that feature makes sense as a first-class citizen, or the specifics of how it needs to be implemented for a consistent user experience.
 
-Visit [Nx Cloud](https://nx.app/) to learn more.
+We also recommend joining our [Discord](https://discord.gg/KYeTwux) to chat with other developers.
