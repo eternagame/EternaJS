@@ -1,5 +1,5 @@
 import * as log from 'loglevel';
-import {Container, Point} from 'pixi.js';
+import {Container, Point, ParticleContainer} from 'pixi.js';
 import Eterna from 'eterna/Eterna';
 import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
 import SecStruct from 'eterna/rnatypes/SecStruct';
@@ -24,14 +24,14 @@ import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
 import CopyTextDialogMode from './CopyTextDialogMode';
 
 export default abstract class GameMode extends AppMode {
-    public readonly bgLayer = new Container();
-    public readonly poseLayer = new Container();
-    public readonly uiLayer = new Container();
-    public readonly dialogLayer = new Container();
-    public readonly notifLayer = new Container();
-    public readonly tooltipLayer = new Container();
-    public readonly achievementsLayer = new Container();
-    public readonly contextMenuLayer = new Container();
+    public readonly bgLayer = new ParticleContainer();
+    public readonly poseLayer = new ParticleContainer();
+    public readonly uiLayer = new ParticleContainer();
+    public readonly dialogLayer = new ParticleContainer();
+    public readonly notifLayer = new ParticleContainer();
+    public readonly tooltipLayer = new ParticleContainer();
+    public readonly achievementsLayer = new ParticleContainer();
+    public readonly contextMenuLayer = new ParticleContainer();
 
     /** Controls whether certain folding operations are run synchronously or queued up */
     public forceSync: boolean = false;

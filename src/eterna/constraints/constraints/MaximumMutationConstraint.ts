@@ -1,5 +1,5 @@
 import {
-    Sprite, Texture, Container, Point
+    Sprite, Texture, ParticleContainer, Point
 } from 'pixi.js';
 import {StyledTextBuilder, TextureUtil} from 'flashbang';
 import EPars from 'eterna/EPars';
@@ -61,7 +61,7 @@ export default class MaximumMutationConstraint extends Constraint<MaxMutationCon
     }
 
     private static get _icon(): Texture {
-        const icon = new Container();
+        const icon = new ParticleContainer();
 
         const base1 = new Sprite(BitmapManager.getBitmap(Bitmaps.BaseAMid));
         base1.position = new Point(28, 8);

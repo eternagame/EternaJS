@@ -3,7 +3,7 @@ import {
     SerialTask, DelayTask, AlphaTask, TextureUtil, LocationTask, Easing, ParallelTask, ScaleTask, VisibleTask, Flashbang
 } from 'flashbang';
 import {
-    Graphics, Sprite, Text, Point, Texture, Container
+    Graphics, Sprite, Text, Point, Texture, ParticleContainer
 } from 'pixi.js';
 import MultiStyleText from 'pixi-multistyle-text';
 import Fonts from 'eterna/util/Fonts';
@@ -143,7 +143,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this.container.addChild(this._fglow);
     }
 
-    public setContent(config: ConstraintBoxConfig, toolTipContainer?: Container): void {
+    public setContent(config: ConstraintBoxConfig, toolTipContainer?: ParticleContainer): void {
         this._check.visible = config.satisfied && !this._forMissionScreen;
 
         // If clarificationText is a string we're fine; if it's a StyledTextBuilder
@@ -347,7 +347,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         }
     }
 
-    private setMouseOverObject(obj: SceneObject, container?: Container): void {
+    private setMouseOverObject(obj: SceneObject, container?: ParticleContainer): void {
         const FADE_IN_DELAY = 1.0;
 
         if (this._mouseOverObject != null) {

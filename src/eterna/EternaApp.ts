@@ -166,8 +166,8 @@ export default class EternaApp extends FlashbangApp {
                 </a>
             `;
             errorEl.innerHTML = errorText;
-
             const eternaContainer = document.getElementById(this._params.containerID);
+
             Assert.assertIsDefined(eternaContainer);
             eternaContainer.appendChild(errorEl);
         } else {

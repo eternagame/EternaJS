@@ -38,7 +38,7 @@ export default class MultiPagePanel extends ContainerObject {
 
     private _background: Graphics;
     private _pagesContainer: VScrollBox;
-    private _titleText: PIXI.Text;
+    private _titleText: PIXI.BitmapText;
     private _prevButton: GameButton;
     private _nextButton: GameButton;
     private _panelHeight = 0;

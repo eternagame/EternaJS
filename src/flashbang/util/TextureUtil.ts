@@ -1,5 +1,5 @@
 import {
-    BaseRenderTexture, BaseTexture, Container, DisplayObject, Rectangle, RenderTexture, Texture
+    BaseRenderTexture, BaseTexture, ParticleContainer, DisplayObject, Rectangle, RenderTexture, Texture
 } from 'pixi.js';
 import Flashbang from 'flashbang/core/Flashbang';
 import Assert from './Assert';
@@ -64,7 +64,7 @@ export default class TextureUtil {
     public static renderToTexture(disp: DisplayObject): Texture {
         Assert.isTrue(disp.parent == null, 'TODO');
 
-        const wrap: Container = new Container();
+        const wrap: ParticleContainer = new ParticleContainer();
         wrap.addChild(disp);
 
         wrap.getLocalBounds(TextureUtil.R);

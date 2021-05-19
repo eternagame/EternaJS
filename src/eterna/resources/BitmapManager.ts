@@ -8,6 +8,7 @@ import Bitmaps from './Bitmaps';
 export default class BitmapManager {
     public static getBitmap(url: string): Texture {
         return Texture.from(url);
+        //  new Sprite(texture);
     }
 
     public static getNumberBitmap(ii: number, color: number = 0xffffff): Texture {

@@ -1,6 +1,6 @@
 import {UndoBlockParam} from 'eterna/UndoBlock';
 import {
-    Container, Sprite, Point, Texture
+    Container, Sprite, Point, Texture, ParticleContainer
 } from 'pixi.js';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -52,7 +52,7 @@ export default class MinimumStackLengthConstraint extends Constraint<MinStackCon
     }
 
     private static get _icon(): Texture {
-        const icon = new Container();
+        const icon = new ParticleContainer();
         const tex = BitmapManager.getBitmap(Bitmaps.BaseWMidPattern);
 
         const base1 = new Sprite(tex);

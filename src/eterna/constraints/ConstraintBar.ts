@@ -2,7 +2,7 @@ import {
     ContainerObject, Flashbang, ParallelTask, LocationTask, Easing, AlphaTask
 } from 'flashbang';
 import {
-    Point, Graphics, Container, Sprite
+    Point, Graphics, ParticleContainer, Sprite
 } from 'pixi.js';
 import {Value} from 'signals';
 import Eterna from 'eterna/Eterna';
@@ -51,9 +51,9 @@ export default class ConstraintBar extends ContainerObject {
     private _collapsed = false;
     private _background: GraphicsObject;
     private _mask: Graphics;
-    private _constraintsRoot: Container;
-    private _constraintsLayer: Container;
-    private _constraintsTooltips: Container;
+    private _constraintsRoot: ParticleContainer;
+    private _constraintsLayer: ParticleContainer;
+    private _constraintsTooltips: ParticleContainer;
     private _totalWidth = 0;
     private _selectedConstraint: ConstraintWrapper | null = null;
     private _selectionArrow: Sprite;
@@ -127,9 +127,9 @@ export default class ConstraintBar extends ContainerObject {
         }
 
         // Constraint boxes
-        const constraintsContainer = new Container(); // contains the constraints and the selection arrow
-        this._constraintsLayer = new Container();
-        this._constraintsRoot = new Container();
+        const constraintsContainer = new ParticleContainer(); // contains the constraints and the selection arrow
+        this._constraintsLayer = new ParticleContainer();
+        this._constraintsRoot = new ParticleContainer();
         this._constraintsRoot.position.y = config.startPos.y;
         constraintsContainer.addChild(this._constraintsLayer);
         this._constraintsRoot.addChild(constraintsContainer);
@@ -139,7 +139,7 @@ export default class ConstraintBar extends ContainerObject {
             constraintsContainer.addChild(this._selectionArrow);
         }
 
-        this._constraintsTooltips = new Container();
+        this._constraintsTooltips = new ParticleContainer();
         this._constraintsTooltips.position.y = this._constraintsLayer.position.y;
         this._constraintsRoot.addChild(this._constraintsTooltips);
 

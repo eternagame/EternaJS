@@ -1,7 +1,7 @@
 import Eterna from 'eterna/Eterna';
 import {RegistrationGroup, UnitSignal, Value} from 'signals';
 import {
-    Point, Container, Rectangle, Graphics
+    Point, Container, ParticleContainer, Rectangle, Graphics
 } from 'pixi.js';
 import {ToolbarType} from 'eterna/ui/Toolbar';
 import {DisplayUtil} from 'flashbang';
@@ -1125,7 +1125,7 @@ export default class AnnotationManager {
         originalAnchorIndex: number,
         currentAnchorIndex: number,
         anchorPoint: Point,
-        anchorDisplay: Container,
+        anchorDisplay: ParticleContainer,
         annotationView: AnnotationView,
         numSearchAttempts: number,
         anchorOffsetX: number = 0,
@@ -1364,7 +1364,7 @@ export default class AnnotationManager {
     private findProposedPosition(
         pose: Pose2D,
         currentAnchorIndex: number,
-        anchorDisplay: Container,
+        anchorDisplay: ParticleContainer,
         annotationView: AnnotationView,
         anchorOffsetX: number = 0,
         anchorOffsetY: number = 0,
@@ -1822,7 +1822,7 @@ export default class AnnotationManager {
     private findBaseConflicts(
         pose: Pose2D,
         anchorPoint: Point,
-        anchorDisplay: Container,
+        anchorDisplay: ParticleContainer,
         annotationView: AnnotationView,
         numSearchAttempts: number,
         anchorOffsetX: number = 0,

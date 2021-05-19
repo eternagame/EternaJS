@@ -32,7 +32,7 @@ export default class MissionIntroPanel extends ContainerObject {
     private _goalsBG: Sprite;
     private _thumbnail: Sprite;
     private _constraints: MissionIntroConstraints;
-    private _titleLabel: PIXI.Text;
+    private _titleLabel: PIXI.BitmapText;
     private _descriptionLabel: MultiStyleText;
     private _thumbnailButtons?: GameButton[];
     private _size = new Point();
