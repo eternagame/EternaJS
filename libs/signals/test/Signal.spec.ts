@@ -20,7 +20,6 @@ interface PriorityTestCounter {
 
 class PriorityTestSlot<T> {
     public order: number;
-
     public counter: PriorityTestCounter;
 
     constructor(counter: PriorityTestCounter) {
@@ -29,7 +28,7 @@ class PriorityTestSlot<T> {
     }
 
     public onEmit(_event: T | null = null): void {
-        this.order += this.counter.val;
+        this.order = ++this.counter.val;
     }
 }
 
