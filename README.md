@@ -12,44 +12,52 @@ Interested in development? Join the discusson on the Eterna Discord!
   - https://nodejs.org/en/download/
 - Run `npm install` in the root directory of this repository
 
-## Using NX
+## Common commands
 
 This project is structured as an [Nx](https://nx.dev) monorepo to manage its components. Here are some
 common actions you might want to take
 
-### Generate a package
-
-To generate a new library, run `npx nx workspace-generator lib <package-name>`.
-To generate a new application, run `npx nx workspace-generator app <package-name>`.
-
-There are two types of packages - libraries and applications. Applications can be loaded directly by
-a browser via an html entry point once built. No other pacakge imports an application. Libraries are
-shareable across libraries and applications.
-
 ### Development server
 
-Run `npx nx serve <app-name>` to run a dev server for a given app.
+Run `npm start <app-name>` to run a dev server for a given app.
 
-> Ex: `npx nx serve my-app`
+> Ex: `npm start my-app`
 
 Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
 
 ### Build
 
-Run `npx nx build <app-name>` to build an app. The build artifacts will be stored in the `dist/`
+Run `npm run build <package-name>` to build an app. The build artifacts will be stored in the `dist/`
 directory. Use the `--prod` flag for a production build.
+
+### Running linting and formatting
+
+Run `npm run lint <package-name>` to run linting for a package via [ESLint](https://eslint.org/).
+
+Run `npm run affected:lint` to lint files in packages affected by a change.
+
+Run `npm run format` to format files via [Prettier](https://prettier.io/)
 
 ### Running unit tests
 
-Run `npx nx test <package-name>` to execute the unit tests for a package via [Jest](https://jestjs.io).
+Run `npm test <package-name>` to execute the unit tests for a package via [Jest](https://jestjs.io).
 
-Run `npx nx affected:test` to execute the unit tests affected by a change.
+Run `npm run affected:test` to execute the unit tests affected by a change.
 
 ### Running end-to-end tests
 
-Run `npx nx e2e <package-name>` to execute the end-to-end tests via [Cypress](https://www.cypress.io).
+Run `npm run e2e <package-name>` to execute the end-to-end tests via [Cypress](https://www.cypress.io).
 
-Run `npx nx affected:e2e` to execute the end-to-end tests affected by a change.
+Run `npm run affected:e2e` to execute the end-to-end tests affected by a change.
+
+### Generate a package
+
+To generate a new library, run `npm run workspace-generator lib <package-name>`.
+To generate a new application, run `npm run workspace-generator app <package-name>`.
+
+There are two types of packages - libraries and applications. Applications can be loaded directly by
+a browser via an html entry point once built. No other pacakge imports an application. Libraries are
+shareable across libraries and applications.
 
 ## Setting up new test puzzles
 
