@@ -19,12 +19,11 @@ common actions you might want to take
 
 ### Generate a package
 
-To generate a new package, run `npx nx g <template-name> <package-name>`.
+To generate a new library, run `npx nx workspace-generator lib <package-name>`.
 
 There are two types of packages - libraries and applications. Applications can be loaded directly by
 a browser via an html entry point once built. No other pacakge imports an application. Libraries are
-shareable across libraries and applications. We typically use the `@nrwl/workspace:lib` template
-for libraries, and `@nrwl/web:app` for applications.
+shareable across libraries and applications.
 
 ### Development server
 
