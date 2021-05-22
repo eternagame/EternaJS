@@ -7,7 +7,10 @@ import Connection from './Connection';
  * exposing a public interface for emitting events. This can be used by entities which wish to
  * expose a signal-like interface for listening, without allowing external callers to emit signals.
  */
-export default abstract class AbstractSignal<T> extends Reactor<T, T, undefined> implements SignalView<T> {
+export default abstract class AbstractSignal<T>
+    extends Reactor<T, T, undefined>
+    implements SignalView<T>
+{
     public abstract map<U>(func: (value: T) => U): SignalView<U>;
 
     public abstract filter(pred: (value: T) => boolean): SignalView<T>;

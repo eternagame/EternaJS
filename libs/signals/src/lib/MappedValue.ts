@@ -9,7 +9,10 @@ import Connection from './Connection';
  * connection from the underlying value.
  */
 export default abstract class MappedValue<T> extends AbstractValue<T> {
-    public static create<T, U>(source: ValueView<T>, map: (value: T) => U): ValueView<U> {
+    public static create<T, U>(
+        source: ValueView<T>,
+        map: (value: T) => U
+    ): ValueView<U> {
         return new MappedValueImpl(source, map);
     }
 

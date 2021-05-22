@@ -1,4 +1,4 @@
-import Reactor, {RListener} from './Reactor';
+import Reactor, { RListener } from './Reactor';
 
 import Connection from './Connection';
 
@@ -9,7 +9,10 @@ export default class Cons<T1, T2, T3> implements Connection {
     /** The next connection in our chain. */
     public next: Cons<T1, T2, T3> | null;
 
-    constructor(owner: Reactor<T1, T2, T3> | null, listener: RListener<T1, T2, T3> | null) {
+    constructor(
+        owner: Reactor<T1, T2, T3> | null,
+        listener: RListener<T1, T2, T3> | null
+    ) {
         this._owner = owner;
         this._listener = listener;
     }
@@ -40,7 +43,9 @@ export default class Cons<T1, T2, T3> implements Connection {
 
     public atPriority(priority: number): Connection {
         if (this._owner == null) {
-            throw new Error('Cannot change priority of disconnected connection.');
+            throw new Error(
+                'Cannot change priority of disconnected connection.'
+            );
         }
         this._owner._removeCons(this);
         this.next = null;
@@ -50,7 +55,10 @@ export default class Cons<T1, T2, T3> implements Connection {
     }
 
     /* internal */
-    public static _insert<T1, T2, T3>(head: Cons<T1, T2, T3> | null, cons: Cons<T1, T2, T3>): Cons<T1, T2, T3> {
+    public static _insert<T1, T2, T3>(
+        head: Cons<T1, T2, T3> | null,
+        cons: Cons<T1, T2, T3>
+    ): Cons<T1, T2, T3> {
         if (head == null) {
             return cons;
         } else if (cons._priority > head._priority) {
@@ -63,7 +71,10 @@ export default class Cons<T1, T2, T3> implements Connection {
     }
 
     /* internal */
-    public static _remove<T1, T2, T3>(head: Cons<T1, T2, T3> | null, cons: Cons<T1, T2, T3>): Cons<T1, T2, T3> | null {
+    public static _remove<T1, T2, T3>(
+        head: Cons<T1, T2, T3> | null,
+        cons: Cons<T1, T2, T3>
+    ): Cons<T1, T2, T3> | null {
         if (head == null) {
             return head;
         } else if (head === cons) {

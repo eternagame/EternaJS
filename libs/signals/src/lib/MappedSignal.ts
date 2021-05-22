@@ -61,7 +61,9 @@ class MappedSignalImpl<TMapped, TSource> extends MappedSignal<TMapped> {
     }
 
     /* override */ protected connectToSource(): Connection {
-        return this._source.connect((value): void => { this.notifyEmit(this._f(value)); });
+        return this._source.connect((value): void => {
+            this.notifyEmit(this._f(value));
+        });
     }
 
     protected _source: SignalView<TSource>;

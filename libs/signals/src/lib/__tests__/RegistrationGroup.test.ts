@@ -1,8 +1,8 @@
-import RegistrationGroup from "../RegistrationGroup";
-import UnitSignal from "../UnitSignal";
-import Counter from "./Counter";
+import RegistrationGroup from '../RegistrationGroup';
+import UnitSignal from '../UnitSignal';
+import Counter from './Counter';
 
-test("registrationGroup", () => {
+test('registrationGroup', () => {
     const group: RegistrationGroup = new RegistrationGroup();
     const sig: UnitSignal = new UnitSignal();
     const counter: Counter = new Counter();
@@ -11,5 +11,5 @@ test("registrationGroup", () => {
     group.close();
     sig.emit();
 
-    counter.assertTriggered(1, "RegistrationGroup close all connections");
+    counter.assertTriggered(1, 'RegistrationGroup close all connections');
 });

@@ -18,8 +18,7 @@ export default class Registrations {
 }
 
 class NullRegistration implements Registration {
-    public close(): void {
-    }
+    public close(): void {}
 }
 
 class FunctionRegistration implements Registration {

@@ -1,7 +1,7 @@
-import {Connection, Signal, SignalView, UnitSignal} from "signals";
-import Counter from "./Counter";
+import { Connection, Signal, SignalView, UnitSignal } from 'signals';
+import Counter from './Counter';
 
-test("signalToSlot", () => {
+test('signalToSlot', () => {
     const signal: Signal<number> = new Signal();
     const slot: AccSlot = new AccSlot();
     signal.connect((value) => slot.onEmit(value));
@@ -11,7 +11,7 @@ test("signalToSlot", () => {
     expect(slot.events).toEqual([1, 2, 3]);
 });
 
-test("oneShotSlot", () => {
+test('oneShotSlot', () => {
     const signal: Signal<number> = new Signal();
     const slot: AccSlot = new AccSlot();
     signal.connect((value) => slot.onEmit(value)).once();
@@ -21,8 +21,8 @@ test("oneShotSlot", () => {
     expect(slot.events).toEqual([1]);
 });
 
-test("slotPriority", () => {
-    const counter: any = {val: 0};
+test('slotPriority', () => {
+    const counter: any = { val: 0 };
     const slot1: PriorityTestSlot = new PriorityTestSlot(counter);
     const slot2: PriorityTestSlot = new PriorityTestSlot(counter);
     const slot3: PriorityTestSlot = new PriorityTestSlot(counter);
@@ -40,13 +40,15 @@ test("slotPriority", () => {
     expect(slot4.order).toEqual(1);
 });
 
-test("addDuringDispatch", () => {
+test('addDuringDispatch', () => {
     const signal: Signal<number> = new Signal();
     const toAdd: AccSlot = new AccSlot();
 
-    signal.connect(() => {
-        signal.connect((value) => toAdd.onEmit(value));
-    }).once();
+    signal
+        .connect(() => {
+            signal.connect((value) => toAdd.onEmit(value));
+        })
+        .once();
 
     // this will connect our new signal but not dispatch to it
     signal.emit(5);
@@ -57,11 +59,11 @@ test("addDuringDispatch", () => {
     expect(toAdd.events).toEqual([42]);
 });
 
-test("removeDuringDispatch", () => {
+test('removeDuringDispatch', () => {
     const signal: Signal<number> = new Signal();
     const toRemove: AccSlot = new AccSlot();
     const rconn: Connection = signal.connect((value) => {
-        toRemove.onEmit(value)
+        toRemove.onEmit(value);
     });
 
     // dispatch one event and make sure it's received
@@ -69,9 +71,11 @@ test("removeDuringDispatch", () => {
     expect(toRemove.events).toEqual([5]);
 
     // now add our removing signal, and dispatch again
-    signal.connect(() => {
-        rconn.close();
-    }).atPriority(1); // ensure that we're before toRemove
+    signal
+        .connect(() => {
+            rconn.close();
+        })
+        .atPriority(1); // ensure that we're before toRemove
     signal.emit(42);
 
     // toRemove will have been removed during this dispatch, so it should not have received
@@ -79,7 +83,7 @@ test("removeDuringDispatch", () => {
     expect(toRemove.events).toEqual([5]);
 });
 
-test("addAndRemoveDuringDispatch", () => {
+test('addAndRemoveDuringDispatch', () => {
     const signal: Signal<number> = new Signal();
     const toAdd: AccSlot = new AccSlot();
     const toRemove: AccSlot = new AccSlot();
@@ -105,7 +109,7 @@ test("addAndRemoveDuringDispatch", () => {
     expect(toRemove.events).toEqual([5, 42]);
 });
 
-test("unitSlot", () => {
+test('unitSlot', () => {
     const signal: Signal<number> = new Signal();
     let fired: boolean = false;
     signal.connect(() => {
@@ -115,36 +119,38 @@ test("unitSlot", () => {
     expect(fired).toBe(true);
 });
 
-test("singleFailure", () => {
+test('singleFailure', () => {
     expect(() => {
         const signal: UnitSignal = new UnitSignal();
         signal.connect(() => {
-            throw new Error("Bang!");
+            throw new Error('Bang!');
         });
         signal.emit();
     }).toThrowError();
 });
 
-test("multiFailure", () => {
+test('multiFailure', () => {
     expect(() => {
         const signal: UnitSignal = new UnitSignal();
         signal.connect(() => {
-            throw new Error("Bing!");
+            throw new Error('Bing!');
         });
         signal.connect(() => {
-            throw new Error("Bang!");
+            throw new Error('Bang!');
         });
         signal.emit();
     }).toThrowError();
 });
 
-test("mappedSignal", () => {
+test('mappedSignal', () => {
     const signal: Signal<number> = new Signal();
-    const mapped: SignalView<string> = signal.map((value) => "" + value);
+    const mapped: SignalView<string> = signal.map((value) => '' + value);
 
     const counter: Counter = new Counter();
     const c1: Connection = mapped.connect((value) => counter.onEmit(value));
-    const c2: Connection = mapped.connect((value) => expect(value).toEqual("15"));
+    const c2: Connection = mapped.connect((value) =>
+        expect(value).toEqual('15')
+    );
 
     signal.emit(15);
     counter.assertTriggered(1);
@@ -174,6 +180,6 @@ class PriorityTestSlot {
     }
 
     public onEmit(_event: any = null): void {
-        this.order = ++(this.counter.val);
+        this.order = ++this.counter.val;
     }
 }

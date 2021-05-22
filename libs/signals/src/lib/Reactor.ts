@@ -21,10 +21,16 @@ export default abstract class Reactor<T1, T2, T3> {
 
     protected removeConnection(listener: RListener<T1, T2, T3>): void {
         if (this.isDispatching) {
-            this._pendingRuns = Reactor.insert(this._pendingRuns, new Runs((): void => {
-                this._listeners = Cons._removeAll(this._listeners, listener);
-                this.connectionRemoved();
-            }));
+            this._pendingRuns = Reactor.insert(
+                this._pendingRuns,
+                new Runs((): void => {
+                    this._listeners = Cons._removeAll(
+                        this._listeners,
+                        listener
+                    );
+                    this.connectionRemoved();
+                })
+            );
         } else {
             this._listeners = Cons._removeAll(this._listeners, listener);
             this.connectionRemoved();
@@ -47,7 +53,11 @@ export default abstract class Reactor<T1, T2, T3> {
 
         let error: Error | null = null;
         try {
-            for (let cons: Cons<T1, T2, T3> | null = lners; cons != null; cons = cons.next) {
+            for (
+                let cons: Cons<T1, T2, T3> | null = lners;
+                cons != null;
+                cons = cons.next
+            ) {
                 // cons.listener will be null if Cons was closed after iteration started
                 if (cons && cons.listener != null) {
                     try {
@@ -69,7 +79,11 @@ export default abstract class Reactor<T1, T2, T3> {
             this._listeners = lners;
 
             // now remove listeners any queued for removing and add any queued for adding
-            for (; this._pendingRuns != null; this._pendingRuns = this._pendingRuns.next) {
+            for (
+                ;
+                this._pendingRuns != null;
+                this._pendingRuns = this._pendingRuns.next
+            ) {
                 this._pendingRuns.action();
             }
         }
@@ -103,10 +117,13 @@ export default abstract class Reactor<T1, T2, T3> {
     /* internal */
     public _addCons(cons: Cons<T1, T2, T3>): Cons<T1, T2, T3> {
         if (this.isDispatching) {
-            this._pendingRuns = Reactor.insert(this._pendingRuns, new Runs(() => {
-                this._listeners = Cons._insert(this._listeners, cons);
-                this.connectionAdded();
-            }));
+            this._pendingRuns = Reactor.insert(
+                this._pendingRuns,
+                new Runs(() => {
+                    this._listeners = Cons._insert(this._listeners, cons);
+                    this.connectionAdded();
+                })
+            );
         } else {
             this._listeners = Cons._insert(this._listeners, cons);
             this.connectionAdded();
@@ -117,10 +134,13 @@ export default abstract class Reactor<T1, T2, T3> {
     /* internal */
     public _removeCons(cons: Cons<T1, T2, T3>): void {
         if (this.isDispatching) {
-            this._pendingRuns = Reactor.insert(this._pendingRuns, new Runs(() => {
-                this._listeners = Cons._remove(this._listeners, cons);
-                this.connectionRemoved();
-            }));
+            this._pendingRuns = Reactor.insert(
+                this._pendingRuns,
+                new Runs(() => {
+                    this._listeners = Cons._remove(this._listeners, cons);
+                    this.connectionRemoved();
+                })
+            );
         } else {
             this._listeners = Cons._remove(this._listeners, cons);
             this.connectionRemoved();
