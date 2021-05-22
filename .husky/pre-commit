@@ -1,0 +1,7 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+nx affected --target=lint --uncommitted
+nx format:write --uncommitted
+nx affected --target=typecheck --uncommitted
+nx affected --target=test --uncommitted
