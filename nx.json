@@ -4,7 +4,8 @@
       "dependencies": "*",
       "devDependencies": "*"
     },
-    ".eslintrc.json": "*"
+    ".eslintrc.json": "*",
+    ".husky/**/*": "*"
   },
   "affected": {
     "defaultBase": "v2"
