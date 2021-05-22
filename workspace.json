@@ -1,6 +1,28 @@
 {
   "version": 2,
-  "projects": {},
+  "projects": {
+    "signals": {
+      "root": "libs/signals",
+      "sourceRoot": "libs/signals/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": ["libs/signals/**/*.ts"]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/signals"],
+          "options": {
+            "jestConfig": "libs/signals/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      }
+    }
+  },
   "cli": {
     "defaultCollection": "@nrwl/workspace"
   }

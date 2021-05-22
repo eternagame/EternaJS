@@ -5,7 +5,9 @@
     "baseUrl": ".",
     "moduleResolution": "node",
     "lib": ["esnext", "dom"],
-    "paths": {},
+    "paths": {
+      "@eternagame/signals": ["libs/signals/src/index.ts"]
+    },
     "target": "es2015",
     "module": "esnext",
     "sourceMap": true,
