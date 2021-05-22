@@ -1,9 +1,41 @@
-import { Connection, Signal, SignalView, UnitSignal } from '@eternagame/signals';
+import {
+    Connection,
+    Signal,
+    SignalView,
+    UnitSignal,
+} from '@eternagame/signals';
 import Counter from './Counter';
+
+class AccSlot<T> {
+    public events: T[] = [];
+
+    public onEmit(event: T): void {
+        this.events.push(event);
+    }
+}
+
+interface PriorityTestCounter {
+    val: number;
+}
+
+class PriorityTestSlot<T> {
+    public order: number;
+
+    public counter: PriorityTestCounter;
+
+    constructor(counter: PriorityTestCounter) {
+        this.counter = counter;
+        this.order = counter.val;
+    }
+
+    public onEmit(_event: T | null = null): void {
+        this.order += this.counter.val;
+    }
+}
 
 test('signalToSlot', () => {
     const signal: Signal<number> = new Signal();
-    const slot: AccSlot = new AccSlot();
+    const slot: AccSlot<number> = new AccSlot();
     signal.connect((value) => slot.onEmit(value));
     signal.emit(1);
     signal.emit(2);
@@ -13,7 +45,7 @@ test('signalToSlot', () => {
 
 test('oneShotSlot', () => {
     const signal: Signal<number> = new Signal();
-    const slot: AccSlot = new AccSlot();
+    const slot: AccSlot<number> = new AccSlot();
     signal.connect((value) => slot.onEmit(value)).once();
     signal.emit(1); // slot should be removed after this emit
     signal.emit(2);
@@ -23,10 +55,10 @@ test('oneShotSlot', () => {
 
 test('slotPriority', () => {
     const counter: PriorityTestCounter = { val: 0 };
-    const slot1: PriorityTestSlot = new PriorityTestSlot(counter);
-    const slot2: PriorityTestSlot = new PriorityTestSlot(counter);
-    const slot3: PriorityTestSlot = new PriorityTestSlot(counter);
-    const slot4: PriorityTestSlot = new PriorityTestSlot(counter);
+    const slot1: PriorityTestSlot<number> = new PriorityTestSlot(counter);
+    const slot2: PriorityTestSlot<number> = new PriorityTestSlot(counter);
+    const slot3: PriorityTestSlot<number> = new PriorityTestSlot(counter);
+    const slot4: PriorityTestSlot<number> = new PriorityTestSlot(counter);
 
     const signal: UnitSignal = new UnitSignal();
     signal.connect(() => slot3.onEmit()).atPriority(3);
@@ -42,7 +74,7 @@ test('slotPriority', () => {
 
 test('addDuringDispatch', () => {
     const signal: Signal<number> = new Signal();
-    const toAdd: AccSlot = new AccSlot();
+    const toAdd: AccSlot<number> = new AccSlot();
 
     signal
         .connect(() => {
@@ -61,7 +93,7 @@ test('addDuringDispatch', () => {
 
 test('removeDuringDispatch', () => {
     const signal: Signal<number> = new Signal();
-    const toRemove: AccSlot = new AccSlot();
+    const toRemove: AccSlot<number> = new AccSlot();
     const rconn: Connection = signal.connect((value) => {
         toRemove.onEmit(value);
     });
@@ -85,8 +117,8 @@ test('removeDuringDispatch', () => {
 
 test('addAndRemoveDuringDispatch', () => {
     const signal: Signal<number> = new Signal();
-    const toAdd: AccSlot = new AccSlot();
-    const toRemove: AccSlot = new AccSlot();
+    const toAdd: AccSlot<number> = new AccSlot();
+    const toRemove: AccSlot<number> = new AccSlot();
     const rconn: Connection = signal.connect((value) => toRemove.onEmit(value));
 
     // dispatch one event and make sure it's received by toRemove
@@ -111,7 +143,7 @@ test('addAndRemoveDuringDispatch', () => {
 
 test('unitSlot', () => {
     const signal: Signal<number> = new Signal();
-    let fired: boolean = false;
+    let fired = false;
     signal.connect(() => {
         fired = true;
     });
@@ -144,9 +176,9 @@ test('multiFailure', () => {
 
 test('mappedSignal', () => {
     const signal: Signal<number> = new Signal();
-    const mapped: SignalView<string> = signal.map((value) => '' + value);
+    const mapped: SignalView<string> = signal.map((value) => `${value}`);
 
-    const counter: Counter = new Counter();
+    const counter: Counter<string> = new Counter();
     const c1: Connection = mapped.connect((value) => counter.onEmit(value));
     const c2: Connection = mapped.connect((value) =>
         expect(value).toEqual('15')
@@ -162,29 +194,3 @@ test('mappedSignal', () => {
     c2.close();
     expect(signal.hasConnections).toBeFalsy();
 });
-
-class AccSlot {
-    public events: any[] = [];
-
-    public onEmit(event: any): void {
-        this.events.push(event);
-    }
-}
-
-interface PriorityTestCounter {
-    val: number;
-}
-
-class PriorityTestSlot {
-    public order: number;
-    public counter: PriorityTestCounter;
-
-    constructor(counter: PriorityTestCounter) {
-        this.counter = counter;
-        this.order = counter.val;
-    }
-
-    public onEmit(_event: any = null): void {
-        this.order = ++this.counter.val;
-    }
-}

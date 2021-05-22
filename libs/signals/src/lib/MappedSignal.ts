@@ -1,6 +1,7 @@
 import AbstractSignal from './AbstractSignal';
 import SignalView from './SignalView';
 import Connection from './Connection';
+// eslint-disable-next-line import/no-cycle
 import FilteredSignal from './FilteredSignal';
 
 /**

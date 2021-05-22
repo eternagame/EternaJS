@@ -10,7 +10,7 @@ import ValueView from './ValueView';
  * (so that they may send them over the network, for example).
  */
 export default abstract class AbstractValue<T>
-    extends Reactor<T, T, undefined>
+    extends Reactor<[T, T]>
     implements ValueView<T>
 {
     public abstract get value(): T;
@@ -22,22 +22,20 @@ export default abstract class AbstractValue<T>
 
     public abstract map<U>(func: (value: T) => U): ValueView<U>;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public connect(listener: (value: any, ovalue: any) => void): Connection {
+    public connect(listener: (value: T, oldValue: T) => void): Connection {
         return this.addConnection(listener);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public connectNotify(
-        listener: (value: any, ovalue: any) => void
+        listener: (value: T, oldValue: T) => void
     ): Connection {
         // connect before calling emit; if the listener changes the value in the body of onEmit, it
         // will expect to be notified of that change; however if onEmit throws a runtime exception,
         // we need to take care of disconnecting the listener because the returned connection
         // instance will never reach the caller
-        const cons: Cons<T, T, undefined> = this.addConnection(listener);
+        const cons: Cons<[T, T]> = this.addConnection(listener);
         try {
-            cons.listener(this.value);
+            cons.listener(this.value, this.value);
         } catch (e) {
             cons.close();
             throw e;
@@ -45,8 +43,7 @@ export default abstract class AbstractValue<T>
         return cons;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public disconnect(listener: (value: any, ovalue: any) => void): void {
+    public disconnect(listener: (value: T, oldValue: T) => void): void {
         this.removeConnection(listener);
     }
 
@@ -62,13 +59,13 @@ export default abstract class AbstractValue<T>
      * Updates the value contained in this instance and notifies registered listeners.
      * @return the previously contained value.
      */
-    protected updateAndNotify(value: T, force: boolean = true): T {
+    protected updateAndNotify(value: T, force = true): T {
         this.checkMutate();
-        const ovalue: T = this.updateLocal(value);
-        if (force || !this.valuesAreEqual(value, ovalue)) {
-            this.emitChange(value, ovalue);
+        const oldValue: T = this.updateLocal(value);
+        if (force || !this.valuesAreEqual(value, oldValue)) {
+            this.emitChange(value, oldValue);
         }
-        return ovalue;
+        return oldValue;
     }
 
     /**

@@ -4,10 +4,10 @@ import Counter from './Counter';
 
 test('simpleListener', () => {
     const value: Value<number> = new Value(42);
-    let fired: boolean = false;
-    value.connect((nvalue: number, ovalue: number) => {
-        expect(ovalue).toEqual(42);
-        expect(nvalue).toEqual(15);
+    let fired = false;
+    value.connect((newValue: number, oldValue: number) => {
+        expect(oldValue).toEqual(42);
+        expect(newValue).toEqual(15);
         fired = true;
     });
 
@@ -18,9 +18,9 @@ test('simpleListener', () => {
 
 test('valueAsSignal', () => {
     const value: Value<number> = new Value(42);
-    let fired: boolean = false;
-    value.connect((value: number) => {
-        expect(value).toEqual(15);
+    let fired = false;
+    value.connect((newValue: number) => {
+        expect(newValue).toEqual(15);
         fired = true;
     });
     value.value = 15;
@@ -29,8 +29,8 @@ test('valueAsSignal', () => {
 
 test('valueAsOnceSignal', () => {
     const value: Value<number> = new Value(42);
-    const counter: Counter = new Counter();
-    value.connect((value) => counter.onEmit(value)).once();
+    const counter: Counter<number> = new Counter();
+    value.connect((newValue) => counter.onEmit(newValue)).once();
     value.value = 15;
     value.value = 42;
     counter.assertTriggered(1);
@@ -38,12 +38,16 @@ test('valueAsOnceSignal', () => {
 
 test('mappedValue', () => {
     const value: Value<number> = new Value(42);
-    const mapped: ValueView<string> = value.map((value) => value.toString());
+    const mapped: ValueView<string> = value.map((newValue) =>
+        newValue.toString()
+    );
 
-    const counter: Counter = new Counter();
-    const c1: Connection = mapped.connect((value) => counter.onEmit(value));
-    const c2: Connection = mapped.connect((value) =>
-        expect(value).toEqual('15')
+    const counter: Counter<string> = new Counter();
+    const c1: Connection = mapped.connect((newValue) =>
+        counter.onEmit(newValue)
+    );
+    const c2: Connection = mapped.connect((newValue) =>
+        expect(newValue).toEqual('15')
     );
 
     value.value = 15;
@@ -61,9 +65,9 @@ test('mappedValue', () => {
 
 test('connectNotify', () => {
     const value: Value<number> = new Value(42);
-    let fired: boolean = false;
-    value.connectNotify((val: number) => {
-        expect(val).toEqual(42);
+    let fired = false;
+    value.connectNotify((newValue: number) => {
+        expect(newValue).toEqual(42);
         fired = true;
     });
     expect(fired).toBeTruthy();
@@ -72,7 +76,7 @@ test('connectNotify', () => {
 test('disconnect', () => {
     const value: Value<number> = new Value(42);
     let expectedValue: number = value.value;
-    let fired: number = 0;
+    let fired = 0;
 
     const listener = (newValue: number) => {
         expect(newValue).toEqual(expectedValue);
@@ -81,7 +85,8 @@ test('disconnect', () => {
     };
 
     const conn: Connection = value.connectNotify(listener);
-    value.value = expectedValue = 12;
+    expectedValue = 12;
+    value.value = expectedValue;
     assert.strictEqual(fired, 1, 'Disconnecting in listenNotify disconnects');
     conn.close(); // Ensure no error when calling close while already closed
 
@@ -90,12 +95,15 @@ test('disconnect', () => {
     value.connect(listener);
     value.connect(() => dummy.onEmit(value));
     value.connect(listener);
-    value.value = expectedValue = 13;
-    value.value = expectedValue = 14;
+    expectedValue = 13;
+    value.value = expectedValue;
+    expectedValue = 14;
+    value.value = expectedValue;
     assert.strictEqual(fired, 3, 'Disconnecting in listen disconnects');
 
     value.connect(listener).close();
-    value.value = expectedValue = 15;
+    expectedValue = 15;
+    value.value = expectedValue;
     assert.strictEqual(
         fired,
         3,
@@ -105,8 +113,8 @@ test('disconnect', () => {
 
 test('slot', () => {
     const value: Value<number> = new Value(42);
-    let expectedValue: number = value.value;
-    let fired: number = 0;
+    let expectedValue = value.value;
+    let fired = 0;
     const listener = (newValue: number) => {
         expect(newValue).toEqual(expectedValue);
         fired += 1;
@@ -114,10 +122,12 @@ test('slot', () => {
     };
 
     value.connect(listener);
-    value.value = expectedValue = 12;
+    expectedValue = 12;
+    value.value = expectedValue;
     assert.strictEqual(1, fired, 'Calling disconnect with a slot disconnects');
 
     value.connect(listener).close();
-    value.value = expectedValue = 14;
+    expectedValue = 14;
+    value.value = expectedValue;
     assert.strictEqual(1, fired);
 });
