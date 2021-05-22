@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { Connection, Value, ValueView } from 'signals';
+import { Connection, Value, ValueView } from '@eternagame/signals';
 import Counter from './Counter';
 
 test('simpleListener', () => {

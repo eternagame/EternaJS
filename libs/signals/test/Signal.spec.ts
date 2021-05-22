@@ -1,4 +1,4 @@
-import { Connection, Signal, SignalView, UnitSignal } from 'signals';
+import { Connection, Signal, SignalView, UnitSignal } from '@eternagame/signals';
 import Counter from './Counter';
 
 test('signalToSlot', () => {
@@ -22,7 +22,7 @@ test('oneShotSlot', () => {
 });
 
 test('slotPriority', () => {
-    const counter: any = { val: 0 };
+    const counter: PriorityTestCounter = { val: 0 };
     const slot1: PriorityTestSlot = new PriorityTestSlot(counter);
     const slot2: PriorityTestSlot = new PriorityTestSlot(counter);
     const slot3: PriorityTestSlot = new PriorityTestSlot(counter);
@@ -171,12 +171,17 @@ class AccSlot {
     }
 }
 
+interface PriorityTestCounter {
+    val: number;
+}
+
 class PriorityTestSlot {
     public order: number;
-    public counter: any;
+    public counter: PriorityTestCounter;
 
-    constructor(counter: any) {
+    constructor(counter: PriorityTestCounter) {
         this.counter = counter;
+        this.order = counter.val;
     }
 
     public onEmit(_event: any = null): void {

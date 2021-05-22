@@ -58,16 +58,13 @@ export default abstract class Reactor<T1, T2, T3> {
                 cons != null;
                 cons = cons.next
             ) {
-                // cons.listener will be null if Cons was closed after iteration started
-                if (cons && cons.listener != null) {
-                    try {
-                        cons.listener(a1, a2, a3);
-                    } catch (e) {
-                        error = e;
-                    }
-                    if (cons.oneShot()) {
-                        cons.close();
-                    }
+                try {
+                    cons.listener(a1, a2, a3);
+                } catch (e) {
+                    error = e;
+                }
+                if (cons.oneShot()) {
+                    cons.close();
                 }
             }
 
@@ -151,7 +148,7 @@ export default abstract class Reactor<T1, T2, T3> {
         return this._listeners === this.DISPATCHING;
     }
 
-    protected static insert(head: Runs, action: Runs): Runs {
+    protected static insert(head: Runs | null, action: Runs): Runs {
         if (head == null) {
             return action;
         } else {
@@ -160,18 +157,18 @@ export default abstract class Reactor<T1, T2, T3> {
         }
     }
 
-    protected _listeners: Cons<T1, T2, T3> | null;
-    protected _pendingRuns: Runs;
+    protected _listeners: Cons<T1, T2, T3> | null = null;
+    protected _pendingRuns: Runs | null = null;
 
     // AMW: this shouldn't be static. then it can't match up with template
     // params...
     // TODO: if this breaks things, maybe that's a sign that we need this... to
     // be nullable or something.
-    protected DISPATCHING: Cons<T1, T2, T3> = new Cons<T1, T2, T3>(null, null);
+    protected DISPATCHING: Cons<T1, T2, T3> = new Cons<T1, T2, T3>(null, () => {});
 }
 
 class Runs {
-    public next: Runs;
+    public next: Runs | null = null;
     public action: () => void;
 
     constructor(action: () => void) {

@@ -1,4 +1,3 @@
-import Assert from 'flashbang/util/Assert';
 import Connection from './Connection';
 import Cons from './Cons';
 import Reactor from './Reactor';
@@ -38,7 +37,6 @@ export default abstract class AbstractValue<T>
         // instance will never reach the caller
         const cons: Cons<T, T, undefined> = this.addConnection(listener);
         try {
-            Assert.assertIsDefined(cons.listener);
             cons.listener(this.value);
         } catch (e) {
             cons.close();

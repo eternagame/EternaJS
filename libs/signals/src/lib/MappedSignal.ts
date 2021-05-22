@@ -50,7 +50,7 @@ export default abstract class MappedSignal<T> extends AbstractSignal<T> {
         }
     }
 
-    protected _conn: Connection | null;
+    protected _conn: Connection | null = null;
 }
 
 class MappedSignalImpl<TMapped, TSource> extends MappedSignal<TMapped> {

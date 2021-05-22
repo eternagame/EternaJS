@@ -1,5 +1,4 @@
-import RegistrationGroup from '../RegistrationGroup';
-import UnitSignal from '../UnitSignal';
+import {RegistrationGroup, UnitSignal} from "@eternagame/signals";
 import Counter from './Counter';
 
 test('registrationGroup', () => {

@@ -7,11 +7,11 @@ import Connection from './Connection';
  */
 export default class Cons<T1, T2, T3> implements Connection {
     /** The next connection in our chain. */
-    public next: Cons<T1, T2, T3> | null;
+    public next: Cons<T1, T2, T3> | null = null;
 
     constructor(
         owner: Reactor<T1, T2, T3> | null,
-        listener: RListener<T1, T2, T3> | null
+        listener: RListener<T1, T2, T3>
     ) {
         this._owner = owner;
         this._listener = listener;
@@ -23,7 +23,7 @@ export default class Cons<T1, T2, T3> implements Connection {
     }
 
     /** Returns the listener for this cons cell. */
-    public get listener(): RListener<T1, T2, T3> | null {
+    public get listener(): RListener<T1, T2, T3> {
         return this._listener;
     }
 
@@ -32,7 +32,9 @@ export default class Cons<T1, T2, T3> implements Connection {
         if (this._owner != null) {
             this._owner._removeCons(this);
             this._owner = null;
-            this._listener = null;
+            // Release references to the function to release any resources since we don't
+            // need them any more. Future calls to listener should noop
+            this._listener = () => {};
         }
     }
 
@@ -101,7 +103,7 @@ export default class Cons<T1, T2, T3> implements Connection {
     }
 
     private _owner: Reactor<T1, T2, T3> | null;
-    private _listener: RListener<T1, T2, T3> | null;
-    private _oneShot: boolean;
+    private _listener: RListener<T1, T2, T3>;
+    private _oneShot: boolean = false;
     private _priority: number = 0;
 }
