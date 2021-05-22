@@ -16,40 +16,33 @@ Interested in development? Join the discusson on the Eterna Discord!
 This project is structured as an [Nx](https://nx.dev) monorepo to manage its components. Here are some
 common actions you might want to take
 
-### Generate an application
-Run `npx nx g <app template> my-app` to generate an application.
+### Generate a package
+To generate a new package, run `npx nx g <template-name> <package-name>`.
 
-When using Nx, you can create multiple applications and libraries in the same workspace.
-
-### Generate a library
-Run `npx nx g <lib template> my-lib` to generate a library.
-
-Libraries are shareable across libraries and applications. They can be imported from `@eternagame/mylib`.
+There are two types of packages - libraries and applications. Applications can be loaded directly by
+a browser via an html entry point once built. No other pacakge imports an application. Libraries are
+shareable across libraries and applications. We typically use the `@nrwl/workspace:lib` template
+for libraries, and `@nrwl/web:app` for applications.
 
 ### Development server
-Run `npx nx serve my-app` for a dev server. Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
+Run `npx nx serve <app-name>` to run a dev server for a given app.
+> Ex: `npx nx serve my-app`
 
-### Code scaffolding
-Run `npx nx g <component template> my-component --project=my-app` to generate a new component.
+Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
 
 ### Build
-Run `npx nx build my-app` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+Run `npx nx build <app-name>` to build an app. The build artifacts will be stored in the `dist/`
+directory. Use the `--prod` flag for a production build.
 
 ### Running unit tests
-Run `npx nx test my-app` to execute the unit tests via [Jest](https://jestjs.io).
+Run `npx nx test <package-name>` to execute the unit tests for a package via [Jest](https://jestjs.io).
 
 Run `npx nx affected:test` to execute the unit tests affected by a change.
 
 ### Running end-to-end tests
-Run `npx nx e2e my-app` to execute the end-to-end tests via [Cypress](https://www.cypress.io).
+Run `npx nx e2e <package-name>` to execute the end-to-end tests via [Cypress](https://www.cypress.io).
 
 Run `npx nx affected:e2e` to execute the end-to-end tests affected by a change.
-
-### Understand your workspace
-Run `npx nx dep-graph` to see a diagram of the dependencies of your projects.
-
-### Further help
-Visit the [Nx Documentation](https://nx.dev) to learn more.
 
 ## Setting up new test puzzles
  * Create your puzzle using the puzzlemaker GUI by clicking the "Create Puzzle" button at `http://eternadev.org/web/playerpuzzles/`
