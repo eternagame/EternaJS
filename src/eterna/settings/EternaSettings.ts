@@ -17,7 +17,6 @@ export default class EternaSettings extends Settings {
     public readonly pipEnabled: Setting<boolean>;
     public readonly simpleGraphics: Setting<boolean>;
     public readonly usePuzzlerLayout: Setting<boolean>;
-    public readonly annotationModeActive: Setting<boolean>;
 
     public readonly soundMute: Setting<boolean>;
     public readonly soundVolume: Setting<number>;
@@ -45,7 +44,6 @@ export default class EternaSettings extends Settings {
         this.pipEnabled = this.setting<boolean>('pipEnabled', false);
         this.simpleGraphics = this.setting<boolean>('simpleGraphics', false);
         this.usePuzzlerLayout = this.setting<boolean>('usePuzzlerLayout', false);
-        this.annotationModeActive = this.setting<boolean>('annotationModeActive', false);
         this.designBrowserColumnNames = this.setting('designBrowserColumnNames-3', null);
         this.designBrowserSelectedSolutionIDs = this.setting('designBrowserSelectedSolutionIDs', null);
 

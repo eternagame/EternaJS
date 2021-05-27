@@ -74,10 +74,11 @@ export default class Puzzle {
         return seq;
     }
 
-    constructor(nid: number, name: string, puzzleType: PuzzleType) {
+    constructor(nid: number, name: string, puzzleType: PuzzleType, puzzleAuthor: string) {
         this._nid = nid;
         this._name = name;
         this._puzzleType = puzzleType;
+        this._puzzleAuthor = puzzleAuthor;
 
         if (puzzleType === PuzzleType.EXPERIMENTAL) {
             this._folder = FolderManager.instance.lastUsedFolder;
@@ -135,6 +136,10 @@ export default class Puzzle {
 
     public get puzzleType(): PuzzleType {
         return this._puzzleType;
+    }
+
+    public get puzzleAuthor(): string {
+        return this._puzzleAuthor;
     }
 
     public get missionText(): string {
@@ -553,6 +558,7 @@ export default class Puzzle {
     private readonly _nid: number;
     private readonly _name: string;
     private readonly _puzzleType: PuzzleType;
+    private readonly _puzzleAuthor: string;
     private _secstructs: string[] = [];
     private _missionText: string = Puzzle.DEFAULT_MISSION_TEXT;
     private _puzzleLocks: boolean[];
