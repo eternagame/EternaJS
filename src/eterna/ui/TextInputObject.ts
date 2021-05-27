@@ -55,7 +55,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
         this._fontFamily = Fonts.STDFONT;
         this._fontWeight = FontWeight.REGULAR;
         this._bgColor = props.bgColor ?? UITheme.textInput.colors.background;
-        this._borderColor = props.borderColor ?? UITheme.textInput.colors.border;
+        this._borderColor = props.borderColor ?? null;
         this._textColor = UITheme.textInput.colors.text;
         this._borderRadius = 5;
         this.width = props.width ?? 100;
@@ -142,7 +142,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
                             input.focus({preventScroll: true});
                         }
                     }
-                });
+                }, 0);
             }
         });
 
@@ -190,7 +190,9 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
                 input.style.fontWeight = this._fontWeight;
                 input.style.color = DOMObject.colorToString(this._textColor);
                 input.style.backgroundColor = DOMObject.colorToString(this._bgColor);
-                input.style.borderColor = DOMObject.colorToString(this._borderColor);
+                if (this._borderColor) {
+                    input.style.borderColor = DOMObject.colorToString(this._borderColor);
+                }
                 input.style.borderRadius = this._borderRadius.toString();
             }
         } else if (this._obj instanceof HTMLInputElement || this._obj instanceof HTMLTextAreaElement) {
@@ -199,7 +201,9 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
             this._obj.style.fontWeight = this._fontWeight;
             this._obj.style.color = DOMObject.colorToString(this._textColor);
             this._obj.style.backgroundColor = DOMObject.colorToString(this._bgColor);
-            this._obj.style.borderColor = DOMObject.colorToString(this._borderColor);
+            if (this._borderColor) {
+                this._obj.style.borderColor = DOMObject.colorToString(this._borderColor);
+            }
             this._obj.style.borderRadius = this._borderRadius.toString();
         }
 
@@ -552,9 +556,11 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
 
         this._fakeTextInput = new Sprite();
 
-        const bg = new Graphics()
-            .lineStyle(1, this._borderColor)
-            .beginFill(this._bgColor)
+        const bg = new Graphics();
+        if (this._borderColor) {
+            bg.lineStyle(1, this._borderColor);
+        }
+        bg.beginFill(this._bgColor)
             .drawRoundedRect(0, 0, this.width, this.height, this._borderRadius)
             .endFill();
         this._fakeTextInput.addChild(bg);
@@ -613,7 +619,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
             text.position = new Point(
                 parseFloat(window.getComputedStyle(this._obj, null).getPropertyValue('padding-left')),
                 this._rows === 1
-                    ? (this.height - this._fontSize) / 2
+                    ? (this.height - text.height) / 2
                     : parseFloat(window.getComputedStyle(this._obj, null).getPropertyValue('padding-left'))
             );
         }
@@ -750,7 +756,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
     private _rows: number;
     private _textColor: number;
     private _bgColor: number;
-    private _borderColor: number;
+    private _borderColor: number | null;
     private _borderRadius: number;
     private _characterLimit: number | null;
     private _hasFocus: boolean;

@@ -53,7 +53,6 @@ import HelpBar from 'eterna/ui/HelpBar';
 import HelpScreen from 'eterna/ui/help/HelpScreen';
 import NucleotideFinder from 'eterna/ui/NucleotideFinder';
 import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
-import AnnotationDialog from 'eterna/ui/AnnotationDialog';
 import {HighlightInfo} from 'eterna/constraints/Constraint';
 import {AchievementData} from 'eterna/achievements/AchievementManager';
 import {RankScrollData} from 'eterna/rank/RankScroll';
@@ -172,7 +171,8 @@ export default class PoseEditMode extends GameMode {
             boosters: this._puzzle.boosters ? this._puzzle.boosters : undefined,
             showAdvancedMenus: this._puzzle.puzzleType !== PuzzleType.PROGRESSION,
             showLibrarySelect: this._puzzle.constraints?.some((con) => con instanceof LibrarySelectionConstraint),
-            annotationManager: this._annotationManager
+            annotationManager: this._annotationManager,
+            puzzle: this._puzzle
         });
         this.addObject(this._toolbar, this.uiLayer);
 
@@ -455,6 +455,14 @@ export default class PoseEditMode extends GameMode {
         this._dockedSpecBox.setSize(Flashbang.stageWidth - this._solDialogOffset, Flashbang.stageHeight - 340);
         const s: number = this._dockedSpecBox.plotSize;
         this._dockedSpecBox.setSize(s + 55, s * 2 + 51);
+
+        for (const pose of this._poses) {
+            this._annotationManager.refreshAnnotations(pose, true);
+        }
+
+        if (this._toolbar.annotationPanel.isVisible) {
+            this._toolbar.annotationPanel.updatePanelPosition();
+        }
     }
 
     public get toolbar(): Toolbar {
@@ -770,116 +778,111 @@ export default class PoseEditMode extends GameMode {
             bindMousedownEvent(pose, ii);
             poseFields.push(poseField);
             pose.annotationManager = this._annotationManager;
-            this._annotationManager.onAdjustBasesOpacity.connect((opacity: number) => {
-                pose.setBasesOpacity(opacity);
-            });
-            this._annotationManager.onAdjustAnnotationCanvasOpacity.connect((opacity: number) => {
-                pose.setAnnotationCanvasOpacity(opacity);
-            });
-            this._annotationManager.onTriggerRedraw.connect(() => pose.triggerRedraw());
-            this._annotationManager.onTriggerSave.connect(() => this.saveData());
-            this._annotationManager.onClearHighlights.connect(() => pose.clearAnnotationHighlight());
-            this._annotationManager.onClearAnnotationCanvas.connect(() => {
-                pose.clearAnnotationCanvas();
-            });
-            this._annotationManager.onSetHighlights.connect((ranges: AnnotationRange[] | null) => {
-                if (ranges) {
-                    pose.setAnnotationRangeHighlight(ranges);
-                }
-            });
-            this._annotationManager.onRecomputeSpaceAvailability.connect(() => {
-                // We don't check for annotations.length > 0 because
-                // we only want to account for scenario where to go
-                // from non-zero to zero annotation
-                if (pose.annotationSpaceAvailability.length === 0) {
-                    pose.updateAnnotationSpaceAvailability();
-                }
-            });
-            this._annotationManager.onAddAnnotationView.connect((view: AnnotationView) => {
-                this.addObject(view, pose.annotationCanvas);
-            });
-
-            this._annotationManager.onCreateAnnotation.connect((args: AnnotationArguments) => {
-                this._annotationDialog = new AnnotationDialog(
-                    false,
-                    pose.fullSequenceLength,
-                    args.ranges,
-                    this._annotationManager.activeLayers
-                );
-                this.showDialog(
-                    this._annotationDialog
-                ).closed.then((annotation: AnnotationData | null) => {
-                    if (annotation) {
-                        this._annotationManager.addAnnotation(annotation, AnnotationCategory.SOLUTION);
+            if (ii === 0) {
+                // We only need one annotation manager to act on annotation logic
+                this._annotationManager.onAdjustBasesOpacity.connect((opacity: number) => {
+                    pose.setBasesOpacity(opacity);
+                });
+                this._annotationManager.onAdjustAnnotationCanvasOpacity.connect((opacity: number) => {
+                    pose.setAnnotationCanvasOpacity(opacity);
+                });
+                this._annotationManager.onTriggerRedraw.connect(() => pose.triggerRedraw());
+                this._annotationManager.onTriggerSave.connect(() => this.saveData());
+                this._annotationManager.onClearHighlights.connect(() => pose.clearAnnotationHighlight());
+                this._annotationManager.onClearAnnotationCanvas.connect(() => {
+                    pose.clearAnnotationCanvas();
+                });
+                this._annotationManager.onSetHighlights.connect((ranges: AnnotationRange[] | null) => {
+                    if (ranges) {
+                        pose.setAnnotationRangeHighlight(ranges);
                     }
+                });
+                this._annotationManager.onRecomputeSpaceAvailability.connect(() => {
+                    // We don't check for annotations.length > 0 because
+                    // we only want to account for scenario where to go
+                    // from non-zero to zero annotation
+                    if (pose.annotationSpaceAvailability.length === 0) {
+                        pose.updateAnnotationSpaceAvailability();
+                    }
+                });
+                this._annotationManager.onAddAnnotationView.connect((view: AnnotationView) => {
+                    if (!view.isLiveObject) {
+                        this.addObject(view, pose.annotationCanvas);
+                    }
+                });
 
-                    // Clear annotation dialog reference
-                    this._annotationDialog = null;
+                this._annotationManager.onCreateAnnotation.connect((args: AnnotationArguments) => {
+                    this._annotationManager.showAnnotationDialog(
+                        false,
+                        args.ranges,
+                        false,
+                        this,
+                        pose,
+                        this.uiLayer,
+                        () => {
+                            if (this._poses.length > 0) {
+                                this.saveData();
+                            }
+                        },
+                        args.panelPos
+                    );
+                });
 
-                    // Remove annotation highlighting
-                    pose.clearAnnotationRanges();
+                this._annotationManager.onToggleItemSelection.connect((annotation: AnnotationData | null) => {
+                    if (annotation) {
+                        this._toolbar.annotationPanel.toggleAnnotationPanelItemSelection(annotation);
+                    }
+                });
+                const editAnnotation = (annotation: AnnotationData | null) => {
+                    if (annotation && annotation.ranges) {
+                        this._annotationManager.showAnnotationDialog(
+                            true,
+                            annotation.ranges,
+                            true,
+                            this,
+                            pose,
+                            this.uiLayer,
+                            () => {
+                                if (this._poses.length > 0) {
+                                    this.saveData();
+                                }
+                            },
+                            undefined,
+                            annotation
+                        );
+                    }
+                };
+                this._annotationManager.onEditAnnotation.connect(editAnnotation);
+                this._annotationManager.onTriggerPanelUpdate.connect(() => {
+                    this._toolbar.annotationPanel.updatePanel();
+
+                    if (this._annotationManager.dialogIsVisible) {
+                        this._annotationManager.updateDialogLayers();
+                    }
 
                     if (this._poses.length > 0) {
                         this.saveData();
                     }
                 });
-            });
+                this._annotationManager.onTriggerPoseUpdate.connect(() => {
+                    this._annotationManager.updateAnnotationViews(pose);
 
-            this._annotationManager.onToggleItemSelection.connect((annotation: AnnotationData) => {
-                this._toolbar.annotationPanel.toggleAnnotationPanelItemSelection(annotation);
-            });
-            const editAnnotation = (annotation: AnnotationData | null) => {
-                if (annotation && annotation.ranges) {
-                    this._annotationDialog = new AnnotationDialog(
-                        true,
-                        pose.fullSequenceLength,
-                        annotation.ranges,
-                        this._annotationManager.activeLayers,
-                        annotation
-                    );
-                    this.showDialog(
-                        this._annotationDialog
-                    ).closed.then((editedAnnotation: AnnotationData | null) => {
-                        if (editedAnnotation) {
-                            editedAnnotation.selected = false;
-                            this._annotationManager.editAnnotation(editedAnnotation);
-                        } else {
-                            // We interpret null argument as delete intent when editing
-                            this._annotationManager.deleteAnnotation(annotation);
-                        }
+                    if (this._annotationManager.dialogIsVisible) {
+                        this._annotationManager.updateDialogLayers();
+                    }
 
-                        // Clear annotation dialog reference
-                        this._annotationDialog = null;
+                    if (this._poses.length > 0) {
+                        this.saveData();
+                    }
+                });
 
-                        if (this._poses.length > 0) {
-                            this.saveData();
-                        }
-                    });
-                }
-            };
-            this._annotationManager.onEditAnnotation.connect(editAnnotation);
-            this._annotationManager.onTriggerPanelUpdate.connect(() => {
-                this._toolbar.annotationPanel.updatePanel();
-
-                if (this._annotationDialog) {
-                    this._annotationDialog.setLayers(this._annotationManager.activeLayers);
-                }
-
-                if (this._poses.length > 0) {
-                    this.saveData();
-                }
-            });
-            this._annotationManager.onTriggerPoseUpdate.connect(() => {
-                this._annotationManager.updateAnnotationViews(pose);
-
-                if (this._annotationDialog) {
-                    this._annotationDialog.setLayers(this._annotationManager.activeLayers);
-                }
-
-                if (this._poses.length > 0) {
-                    this.saveData();
-                }
-            });
+                this._annotationManager.onUploadAnnotations.connect((bundle: AnnotationDataBundle) => {
+                    if (bundle) {
+                        this._annotationManager.setPuzzleAnnotations(bundle.puzzle);
+                        this._annotationManager.setSolutionAnnotations(bundle.solution);
+                    }
+                });
+            }
         }
 
         this.setPoseFields(poseFields);
@@ -1657,7 +1660,7 @@ export default class PoseEditMode extends GameMode {
             return null;
         }
 
-        const menu = new ContextMenu();
+        const menu = new ContextMenu({horizontal: false});
 
         menu.addItem('Preferences').clicked.connect(() => this.showViewOptionsDialog());
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
@@ -2050,7 +2053,7 @@ export default class PoseEditMode extends GameMode {
             this.submitSolution({
                 title: 'Cleared Solution',
                 comment: 'No comment',
-                annotations: this._poses[0].annotationManager.annotationBundle,
+                annotations: this._poses[0].annotationManager.annotationDataBundle,
                 libraryNT: this._poses[0].librarySelections ?? []
             }, solToSubmit);
         } else {
@@ -2108,7 +2111,7 @@ export default class PoseEditMode extends GameMode {
                 // / Always submit the sequence in the first state
                 this.updateCurrentBlockWithDotAndMeltingPlot(0);
                 const solToSubmit: UndoBlock = this.getCurrentUndoBlock(0);
-                submitDetails.annotations = this._poses[0].annotationManager.annotationBundle;
+                submitDetails.annotations = this._poses[0].annotationManager.annotationDataBundle;
                 this.submitSolution(submitDetails, solToSubmit);
             }
         });
@@ -2539,7 +2542,7 @@ export default class PoseEditMode extends GameMode {
         for (let ii = 0; ii < this._poses.length; ++ii) {
             objs.push(JSON.stringify({
                 undoBlock: this._seqStacks[this._stackLevel][ii].toJSON(),
-                annotations: this._poses[ii].annotationManager.annotationBundle
+                annotations: this._poses[ii].annotationManager.annotationDataBundle
             }));
         }
 
@@ -2562,7 +2565,7 @@ export default class PoseEditMode extends GameMode {
                 sequence: pose.sequence.sequenceString(),
                 structure: this._puzzle.getSecstruct(i),
                 startingFolder: this._folder.name,
-                annotations: this._annotationManager.annotationBundle
+                annotations: this._annotationManager.annotationDataBundle
             };
             if (tc !== undefined && Puzzle.isAptamerType(tc['type'])) {
                 puzzledef.site = tc['site'];
@@ -3624,7 +3627,6 @@ export default class PoseEditMode extends GameMode {
     private _solutionView?: ViewSolutionOverlay;
 
     // Annotations
-    private _annotationDialog: AnnotationDialog | null = null;
     private _annotationManager: AnnotationManager;
 
     private static readonly FOLDING_LOCK = 'Folding';

@@ -399,13 +399,12 @@ export default class AnnotationPanelItem extends ContainerObject {
 
                     if (this.isEditingTitle.value) {
                         this._itemNameInput.display.visible = true;
+                        this._itemSaveEditButton.display.visible = true;
+                        this._itemCancelEditButton.display.visible = true;
                         this._itemTextButton.display.visible = false;
 
                         // Add text to input
                         this._itemNameInput.text = this._title;
-                    } else {
-                        this._itemNameInput.display.visible = false;
-                        this._itemTextButton.display.visible = true;
                     }
                 });
             } else {
@@ -435,52 +434,18 @@ export default class AnnotationPanelItem extends ContainerObject {
             // Create input
             this._itemNameInput = new TextInputObject({
                 fontSize: AnnotationPanelItem.INPUT_FONT_SIZE,
-                width: this._itemWidth - 2 * AnnotationPanelItem.INPUT_MARGIN,
+                width: this._itemWidth - AnnotationPanelItem.INPUT_MARGIN
+                    - 2 * AnnotationPanelItem.ITEM_EDIT_BUTTON_WIDTH,
                 height: length - 2 * AnnotationPanelItem.INPUT_MARGIN,
                 rows: 1,
                 placeholder: this._title,
                 characterLimit: AnnotationDialog.ANNOTATION_TEXT_CHARACTER_LIMIT
             }).font(Fonts.STDFONT);
             this._itemNameInput.keyPressed.connect((key) => {
-                if (key === 'Enter' || key === 'Escape') {
-                    this.isEditingTitle.value = !this.isEditingTitle.value;
-                    this.itemNameInput.display.visible = false;
-                    if (this.itemTextButton) {
-                        // When we escape this this.itemTextButton is undefined for some unknown reason
-                        this.itemTextButton.display.visible = true;
-                    }
-
-                    const newTitle = this.itemNameInput.text;
-                    if (key === 'Enter' && newTitle.length > 0 && newTitle !== this._title) {
-                        this._title = newTitle;
-                        const editedPreparedLabelText = this.prepareLabelText(this._title, this._itemWidth);
-                        const text = editedPreparedLabelText.object;
-                        const truncText = editedPreparedLabelText.string;
-                        const textBuilder = new TextBuilder(truncText)
-                            .font(Fonts.STDFONT)
-                            .fontSize(AnnotationPanelItem.FONT_SIZE)
-                            .fontWeight(FontWeight.REGULAR)
-                            .color(0xFFFFFF)
-                            .hAlignLeft();
-                        const background = new Graphics()
-                            .drawRect(
-                                0,
-                                0,
-                                text.width,
-                                text.height
-                            );
-                        this.itemTextButton
-                            .customStyleBox(background)
-                            .label(textBuilder)
-                            .tooltip(this._title);
-                        this.itemNameInput.placeholderText(this._title);
-
-                        // Update in state
-                        this._updateTitle(this._indexPath, this._title);
-                    }
-
-                    // only clear once complete
-                    this.itemNameInput.text = '';
+                if (key === 'Enter') {
+                    this.saveEdit();
+                } else if (key === 'Escape') {
+                    this.cancelEdit();
                 }
             });
 
@@ -489,6 +454,60 @@ export default class AnnotationPanelItem extends ContainerObject {
             this._itemNameInput.display.visible = false;
 
             this.addObject(this._itemNameInput, textContainer);
+
+            // Set up save edit button
+            this._itemSaveEditButtonBackground = new Graphics()
+                .beginFill(this.isSelected.value
+                    ? AnnotationPanelItem.ITEM_BACKGROUND_SELECTED
+                    : AnnotationPanelItem.ITEM_BACKGROUND_RESTING).drawRect(
+                    0,
+                    0,
+                    AnnotationPanelItem.ITEM_EDIT_BUTTON_WIDTH,
+                    length
+                )
+                .endFill();
+            this._checkmarkSprite = Sprite.from(Bitmaps.ImgAnnotationCheckmark);
+            this._checkmarkSprite.width = AnnotationPanelItem.ITEM_EDIT_BUTTON_WIDTH;
+            this._checkmarkSprite.height = AnnotationPanelItem.ITEM_EDIT_BUTTON_WIDTH;
+            this._checkmarkSprite.alpha = 1;
+            this._itemSaveEditButtonBackground.addChild(this._checkmarkSprite);
+            this._itemSaveEditButton = new GameButton()
+                .customStyleBox(this._itemSaveEditButtonBackground)
+                .tooltip('Save');
+            this._itemSaveEditButton.display.cursor = 'pointer';
+            this._itemSaveEditButton.clicked.connect(() => this.saveEdit());
+            this._itemSaveEditButton.display.visible = false;
+            this._itemSaveEditButton.display.x = this._itemNameInput.display.x
+                + this._itemNameInput.width;
+            this._itemSaveEditButton.display.y = (length - AnnotationPanelItem.ITEM_EDIT_BUTTON_WIDTH) / 2;
+            this.addObject(this._itemSaveEditButton, textContainer);
+
+            // Set up cancel edit button
+            this._itemCancelEditButtonBackground = new Graphics()
+                .beginFill(this.isSelected.value
+                    ? AnnotationPanelItem.ITEM_BACKGROUND_SELECTED
+                    : AnnotationPanelItem.ITEM_BACKGROUND_RESTING).drawRect(
+                    0,
+                    0,
+                    AnnotationPanelItem.ITEM_EDIT_BUTTON_WIDTH,
+                    length
+                )
+                .endFill();
+            this._crossSprite = Sprite.from(Bitmaps.ImgAnnotationCross);
+            this._crossSprite.width = AnnotationPanelItem.ITEM_EDIT_BUTTON_WIDTH;
+            this._crossSprite.height = AnnotationPanelItem.ITEM_EDIT_BUTTON_WIDTH;
+            this._crossSprite.alpha = 1;
+            this._itemCancelEditButtonBackground.addChild(this._crossSprite);
+            this._itemCancelEditButton = new GameButton()
+                .customStyleBox(this._itemCancelEditButtonBackground)
+                .tooltip('Cancel');
+            this._itemCancelEditButton.display.cursor = 'pointer';
+            this._itemCancelEditButton.clicked.connect(() => this.cancelEdit());
+            this._itemCancelEditButton.display.visible = false;
+            this._itemCancelEditButton.display.x = this._itemNameInput.display.x
+                + this._itemNameInput.width + this._itemSaveEditButton.display.width;
+            this._itemCancelEditButton.display.y = (length - AnnotationPanelItem.ITEM_EDIT_BUTTON_WIDTH) / 2;
+            this.addObject(this._itemCancelEditButton, textContainer);
         }
 
         this._itemContainer.addChild(textContainer);
@@ -681,6 +700,22 @@ export default class AnnotationPanelItem extends ContainerObject {
             this._itemButtonBackground.width,
             this._itemButtonBackground.height
         );
+        if (this._itemSaveEditButtonBackground) {
+            this.redraw(
+                this._itemSaveEditButtonBackground,
+                AnnotationPanelItem.ITEM_BACKGROUND_SELECTED,
+                this._itemSaveEditButtonBackground.width,
+                this._itemSaveEditButtonBackground.height
+            );
+        }
+        if (this._itemCancelEditButtonBackground) {
+            this.redraw(
+                this._itemCancelEditButtonBackground,
+                AnnotationPanelItem.ITEM_BACKGROUND_SELECTED,
+                this._itemSaveEditButtonBackground.width,
+                this._itemSaveEditButtonBackground.height
+            );
+        }
     }
 
     public deselect() {
@@ -710,6 +745,22 @@ export default class AnnotationPanelItem extends ContainerObject {
             this._itemButtonBackground.width,
             this._itemButtonBackground.height
         );
+        if (this._itemSaveEditButtonBackground) {
+            this.redraw(
+                this._itemSaveEditButtonBackground,
+                AnnotationPanelItem.ITEM_BACKGROUND_RESTING,
+                this._itemSaveEditButtonBackground.width,
+                this._itemSaveEditButtonBackground.height
+            );
+        }
+        if (this._itemCancelEditButtonBackground) {
+            this.redraw(
+                this._itemCancelEditButtonBackground,
+                AnnotationPanelItem.ITEM_BACKGROUND_RESTING,
+                this._itemCancelEditButtonBackground.width,
+                this._itemCancelEditButtonBackground.height
+            );
+        }
     }
 
     public setTitle(title: string): void {
@@ -827,6 +878,65 @@ export default class AnnotationPanelItem extends ContainerObject {
         }
     }
 
+    private saveEdit() {
+        this.isEditingTitle.value = !this.isEditingTitle.value;
+        this._itemNameInput.display.visible = false;
+        this._itemSaveEditButton.display.visible = false;
+        this._itemCancelEditButton.display.visible = false;
+        this._itemTextButton.display.visible = true;
+        if (this.itemTextButton) {
+            // When we escape this this.itemTextButton is undefined for some unknown reason
+            this.itemTextButton.display.visible = true;
+        }
+
+        const newTitle = this.itemNameInput.text;
+        if (newTitle.length > 0 && newTitle !== this._title) {
+            this._title = newTitle;
+            const editedPreparedLabelText = this.prepareLabelText(this._title, this._itemWidth);
+            const text = editedPreparedLabelText.object;
+            const truncText = editedPreparedLabelText.string;
+            const textBuilder = new TextBuilder(truncText)
+                .font(Fonts.STDFONT)
+                .fontSize(AnnotationPanelItem.FONT_SIZE)
+                .fontWeight(FontWeight.REGULAR)
+                .color(0xFFFFFF)
+                .hAlignLeft();
+            const background = new Graphics()
+                .drawRect(
+                    0,
+                    0,
+                    text.width,
+                    text.height
+                );
+            this.itemTextButton
+                .customStyleBox(background)
+                .label(textBuilder)
+                .tooltip(this._title);
+            this.itemNameInput.placeholderText(this._title);
+
+            // Update in state
+            this._updateTitle(this._indexPath, this._title);
+        }
+
+        // only clear once complete
+        this.itemNameInput.text = '';
+    }
+
+    private cancelEdit() {
+        this.isEditingTitle.value = !this.isEditingTitle.value;
+        this.itemNameInput.display.visible = false;
+        this._itemSaveEditButton.display.visible = false;
+        this._itemCancelEditButton.display.visible = false;
+        this._itemTextButton.display.visible = true;
+        if (this.itemTextButton) {
+            // When we escape this this.itemTextButton is undefined for some unknown reason
+            this.itemTextButton.display.visible = true;
+        }
+
+        // only clear once complete
+        this.itemNameInput.text = '';
+    }
+
     public get id() {
         return this._id;
     }
@@ -888,6 +998,14 @@ export default class AnnotationPanelItem extends ContainerObject {
         return this._itemNameInput;
     }
 
+    public get itemSaveEditButton() {
+        return this._itemSaveEditButton;
+    }
+
+    public get itemCancelEditButton() {
+        return this._itemCancelEditButton;
+    }
+
     private _id: string | number;
     private _indexPath: number[];
     private _title: string;
@@ -911,6 +1029,12 @@ export default class AnnotationPanelItem extends ContainerObject {
     private _itemButtonBackground: Graphics;
     private _itemTextButton: GameButton;
     private _itemNameInput: TextInputObject;
+    private _itemSaveEditButtonBackground: Graphics;
+    private _checkmarkSprite: Sprite;
+    private _itemSaveEditButton: GameButton;
+    private _itemCancelEditButtonBackground: Graphics;
+    private _crossSprite: Sprite;
+    private _itemCancelEditButton: GameButton;
     private _modelChildren: AnnotationPanelItem[];
     private _numAnnotationChildren: number | null = null;
     private _itemWidth: number;
@@ -939,6 +1063,7 @@ export default class AnnotationPanelItem extends ContainerObject {
     private static readonly VISIBILITY_BUTTON_BACKGROUND_COLOR = 0x1D375C;
     private static readonly ITEM_BACKGROUND_RESTING = 0x152843;
     private static readonly ITEM_BACKGROUND_SELECTED = 0x254573;
+    private static readonly ITEM_EDIT_BUTTON_WIDTH = 30;
     private static readonly ITEM_HOVER_COLOR = 0x2F94D1;
     public static readonly STRUCTURE_RIBBON_COLOR = 0xD73832;
     public static readonly PUZZLE_RIBBON_COLOR = 0x2F94D1;

@@ -26,6 +26,8 @@ import Folder from 'eterna/folding/Folder';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 import AnnotationManager, {AnnotationRange} from 'eterna/AnnotationManager';
+import ContextMenu from 'eterna/ui/ContextMenu';
+import Bitmaps from 'eterna/resources/Bitmaps';
 import Base from './Base';
 import BaseDrawFlags from './BaseDrawFlags';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
@@ -40,7 +42,6 @@ import PuzzleEditOp from './PuzzleEditOp';
 import RNALayout, {RNATreeNode} from './RNALayout';
 import ScoreDisplayNode, {ScoreDisplayNodeType} from './ScoreDisplayNode';
 import triangulate from './triangulate';
-import Tooltips from '../ui/Tooltips';
 
 type InteractionEvent = PIXI.InteractionEvent;
 
@@ -127,9 +128,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._annotationHighlightBox = new HighlightBox(this, HighlightType.ANNOTATION);
         this._annotationHighlightBox.display.cursor = 'pointer';
         this.addObject(this._annotationHighlightBox, this.container);
-        if (Tooltips.instance != null) {
-            this.regs.add(Tooltips.instance.addTooltip(this._annotationHighlightBox, 'Create Annotation'));
-        }
 
         if (!this._editable) {
             this._currentColor = -1;
@@ -138,12 +136,44 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._annotationCanvas = new Graphics();
         this.container.addChild(this.annotationCanvas);
 
+        this._annotationContextMenu = new ContextMenu({horizontal: true});
+        this._annotationContextMenu.addItem(
+            'Create',
+            Bitmaps.ImgAnnotationCheckmark,
+            'Create Annotation',
+            0x54B54E
+        ).clicked.connect(() => {
+            this.annotationManager.createAnnotation(
+                this._annotationRanges,
+                new Point(
+                    this._annotationContextMenu.display.x,
+                    this._annotationContextMenu.display.y
+                )
+            );
+            this.hideAnnotationContextMenu();
+        });
+        this._annotationContextMenu.addItem(
+            'Cancel',
+            Bitmaps.ImgAnnotationCross,
+            'Cancel Annotation'
+        ).clicked.connect(() => {
+            this.clearAnnotationRanges();
+            this.hideAnnotationContextMenu();
+        });
+        this.hideAnnotationContextMenu();
+        this.addObject(this._annotationContextMenu, this.container);
+
         this._strandLabel = new TextBalloon('', 0x0, 0.8);
         this._strandLabel.display.visible = false;
         this.addObject(this._strandLabel, this.container);
 
         this.pointerMove.connect((p) => this.onMouseMoved(p.data.global));
-        this.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => this.callStartMousedownCallback(e));
+        this.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => {
+            this.callStartMousedownCallback(e);
+
+            // deselect all annotations
+            this.annotationManager.deselectAll();
+        });
         this.pointerOut.connect(() => this.onMouseOut());
 
         // handle view settings
@@ -162,6 +192,21 @@ export default class Pose2D extends ContainerObject implements Updatable {
         );
         this.regs.add(Eterna.settings.simpleGraphics.connectNotify((value) => { this.useSimpleGraphics = value; }));
         this.regs.add(Eterna.settings.usePuzzlerLayout.connect(() => this.computeLayout()));
+        this.regs.add(Eterna.settings.annotationModeActive.connectNotify((value) => {
+            if (!value) {
+                this.clearAnnotationRanges();
+                this.hideAnnotationContextMenu();
+                const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
+                if (doc) {
+                    doc.style.cursor = 'default';
+                }
+            } else {
+                const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
+                if (doc) {
+                    doc.style.cursor = 'grab';
+                }
+            }
+        }));
     }
 
     public setSize(width: number, height: number): void {
@@ -876,29 +921,80 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 return;
             }
             if (this.annotationManager.annotationModeActive) {
+                this.hideAnnotationContextMenu();
+
                 if (closestIndex < this.sequenceLength) {
-                    const clickedHighlight = this._annotationRanges.some((range) => (
+                    const rangeIndex = this._annotationRanges.findIndex((range) => (
                         closestIndex >= range.start && closestIndex <= range.end)
                         || (closestIndex <= range.start && closestIndex >= range.end));
 
-                    if (!clickedHighlight) {
+                    if (rangeIndex === -1) {
+                        // Start annotation selection
                         this._selectingAnnotationRange = true;
 
                         this._annotationRanges.push({
                             start: closestIndex,
                             end: closestIndex
                         });
-
-                        this.updateAnnotationRangeHighlight();
-
-                        let reg: Registration | null = null;
-                        reg = this.pointerUp.connect(() => {
-                            this._selectingAnnotationRange = false;
-                            if (reg) reg.close();
-                        });
                     } else {
-                        this.annotationManager.createAnnotation(this._annotationRanges);
+                        // Deselect clicked base
+
+                        // Get range that was clicked
+                        const range = {...this._annotationRanges[rangeIndex]};
+
+                        // Remove existing range
+                        this._annotationRanges.splice(rangeIndex, 1);
+
+                        // Split range
+                        if (range.start <= range.end && closestIndex > range.start) {
+                            const leftRange = {
+                                start: range.start,
+                                end: closestIndex - 1
+                            };
+                            this._annotationRanges.push(leftRange);
+                        } else if (range.start >= range.end && closestIndex < range.start) {
+                            const leftRange = {
+                                start: closestIndex + 1,
+                                end: range.start
+                            };
+                            this._annotationRanges.push(leftRange);
+                        } else {
+                            // Do nothing
+                        }
+
+                        if (range.start <= range.end && closestIndex < range.end) {
+                            const rightRange = {
+                                start: closestIndex + 1,
+                                end: range.end
+                            };
+                            this._annotationRanges.push(rightRange);
+                        } else if (range.start >= range.end && closestIndex > range.end) {
+                            const rightRange = {
+                                start: range.end,
+                                end: closestIndex - 1
+                            };
+                            this._annotationRanges.push(rightRange);
+                        } else {
+                            // Do nothing
+                        }
                     }
+
+                    let reg: Registration | null = null;
+                    reg = this.pointerUp.connect(() => {
+                        this._selectingAnnotationRange = false;
+                        // Merge ranges
+                        if (!this.annotationManager.dialogIsVisible) {
+                            this.updateAnnotationContextMenu(
+                                this._annotationRanges[this._annotationRanges.length - 1].end
+                            );
+                        }
+                        this.mergeAnnotationRanges();
+                        this.updateAnnotationRangeHighlight();
+                        if (this.annotationManager.dialogIsVisible) {
+                            this.annotationManager.updateDialogRanges(this._annotationRanges);
+                        }
+                        if (reg) reg.close();
+                    });
                 }
                 e.stopPropagation();
                 return;
@@ -927,11 +1023,15 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._shiftStart = -1;
             this._shiftEnd = -1;
             this.updateShiftHighlight();
-        } else if (this.annotationManager.annotationModeActive) {
-            this._annotationRanges = [];
-            this._selectingAnnotationRange = false;
-            this.updateAnnotationRangeHighlight();
         }
+        // else if (this.annotationManager.annotationModeActive) {
+        //     // Clicked ether/cytoplasm space while in annotation mode
+        //     // Deselect any selected base ranges
+        //     this._annotationRanges = [];
+        //     this.hideAnnotationContextMenu();
+        //     this._selectingAnnotationRange = false;
+        //     this.updateAnnotationRangeHighlight();
+        // }
     }
 
     public toggleBaseMark(baseIndex: number): void {
@@ -1136,6 +1236,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public setOffset(offX: number, offY: number): void {
+        if (this._annotationContextMenu.display.visible) {
+            this._annotationContextMenu.display.x -= (this.xOffset - offX);
+            this._annotationContextMenu.display.y -= (this.yOffset - offY);
+        }
         this._offX = offX;
         this._offY = offY;
         this._redraw = true;
@@ -1582,6 +1686,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._shiftHighlightBox.clear();
     }
 
+    public setAnnotationRanges(ranges: AnnotationRange[]): void {
+        this._annotationRanges = ranges;
+        this.updateAnnotationRangeHighlight();
+    }
+
     public clearAnnotationRanges(): void {
         this._annotationRanges = [];
 
@@ -1591,11 +1700,27 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public clearAnnotationHighlight(): void {
         this._annotationHighlightBox.clear();
 
-        if (this.annotationManager.annotationModeActive) {
+        if (
+            this.annotationManager
+            && this.annotationManager.annotationModeActive
+        ) {
             for (const base of this._bases) {
                 base.container.alpha = AnnotationManager.ANNOTATION_UNHIGHLIGHTED_OPACITY;
             }
         }
+    }
+
+    private updateAnnotationContextMenu(baseIndex: number): void {
+        const CONTEXT_MENU_OFFSET = 10;
+        const basePosition = this.getBaseLoc(baseIndex);
+        this._annotationContextMenu.display.x = basePosition.x + CONTEXT_MENU_OFFSET;
+        this._annotationContextMenu.display.y = basePosition.y - CONTEXT_MENU_OFFSET;
+
+        this._annotationContextMenu.display.visible = true;
+    }
+
+    private hideAnnotationContextMenu(): void {
+        this._annotationContextMenu.display.visible = false;
     }
 
     public praiseStack(stackStart: number, stackEnd: number): void {
@@ -3361,6 +3486,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
+    /**
+     * Used to temporarily set annotation range highlights when a player mouses over an annotation
+     *
+     * @param ranges ranges of bases to highlight
+     */
     public setAnnotationRangeHighlight(ranges: AnnotationRange[]): void {
         this._annotationHighlightBox.clear();
         for (const range of ranges) {
@@ -3368,6 +3498,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
+    /**
+     * Used to update annotation range highlights when creating an annotation
+     */
     public updateAnnotationRangeHighlight(): void {
         this._annotationHighlightBox.clear();
 
@@ -3386,6 +3519,50 @@ export default class Pose2D extends ContainerObject implements Updatable {
             for (let i = highlightExtents[0]; i <= highlightExtents[1]; i++) {
                 this._bases[i].container.alpha = 1;
             }
+        }
+    }
+
+    public mergeAnnotationRanges(): void {
+        if (this._annotationRanges.length > 1) {
+            // Sort ranges in increasing order
+            let sortedRanges = [...this._annotationRanges];
+            sortedRanges = sortedRanges.map((range: AnnotationRange) => ({
+                start: Math.min(range.start, range.end),
+                end: Math.max(range.start, range.end)
+            }));
+            sortedRanges.sort((a: AnnotationRange, b: AnnotationRange) => a.start - b.start);
+
+            const updatedRanges: AnnotationRange[] = [];
+            let focusedRangeIndex = 0;
+            let comparatorRangeIndexDiff = 1;
+
+            while (focusedRangeIndex + comparatorRangeIndexDiff < sortedRanges.length) {
+                if (sortedRanges[focusedRangeIndex + comparatorRangeIndexDiff].start
+                    - sortedRanges[focusedRangeIndex + comparatorRangeIndexDiff - 1].end <= 1
+                ) {
+                    if (focusedRangeIndex + comparatorRangeIndexDiff + 1 === sortedRanges.length) {
+                        updatedRanges.push({
+                            start: sortedRanges[focusedRangeIndex].start,
+                            end: sortedRanges[focusedRangeIndex + comparatorRangeIndexDiff].end
+                        });
+                    }
+
+                    comparatorRangeIndexDiff += 1;
+                } else {
+                    updatedRanges.push({
+                        start: sortedRanges[focusedRangeIndex].start,
+                        end: sortedRanges[focusedRangeIndex + comparatorRangeIndexDiff - 1].end
+                    });
+
+                    if (focusedRangeIndex + comparatorRangeIndexDiff + 1 === sortedRanges.length) {
+                        updatedRanges.push(sortedRanges[focusedRangeIndex + comparatorRangeIndexDiff]);
+                    }
+
+                    focusedRangeIndex += comparatorRangeIndexDiff;
+                    comparatorRangeIndexDiff = 1;
+                }
+            }
+            this._annotationRanges = updatedRanges;
         }
     }
 
@@ -4025,6 +4202,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public annotationManager: AnnotationManager;
     private _annotationCanvas: Graphics;
     private _annotationHighlightBox: HighlightBox;
+    private _annotationContextMenu: ContextMenu;
     private _annotationSpaceAvailability: boolean[][] = [];
     private _annotationRanges: AnnotationRange[] = [];
     private _selectingAnnotationRange: boolean = false;

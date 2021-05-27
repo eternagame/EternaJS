@@ -1,6 +1,12 @@
 import {Graphics} from 'pixi.js';
 import {
-    ContainerObject, KeyboardListener, MouseWheelListener, DisplayObjectPointerTarget, InputUtil, Flashbang, Assert
+    ContainerObject,
+    KeyboardListener,
+    MouseWheelListener,
+    DisplayObjectPointerTarget,
+    InputUtil,
+    Flashbang,
+    Assert
 } from 'flashbang';
 
 /** Dialogs that expose a "confirmed" promise will reject with this error if the dialog is canceled */
@@ -11,45 +17,48 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
     /** A Promise that will resolve when the dialog is closed. */
     public readonly closed: Promise<T | null>;
 
-    constructor() {
+    constructor(modal: boolean = true) {
         super();
+        this._modal = modal;
         this.closed = new Promise((resolve) => { this._resolvePromise = resolve; });
     }
 
     protected added() {
         super.added();
 
-        const bg = new Graphics();
-        this.container.addChild(bg);
+        if (this._modal) {
+            const bg = new Graphics();
+            this.container.addChild(bg);
 
-        // Eat mouse events - make sure any objects created within the dialog should set
-        // interactive to true and stop propogation if the event shouldn't be passed through to the bg
-        const bgTarget = new DisplayObjectPointerTarget(bg);
+            // Eat mouse events - make sure any objects created within the dialog should set
+            // interactive to true and stop propogation if the event shouldn't be passed through to the bg
+            const bgTarget = new DisplayObjectPointerTarget(bg);
 
-        bgTarget.pointerDown.connect((e) => {
-            if (InputUtil.IsLeftMouse(e)) {
-                this.onBGClicked();
-            }
-            e.stopPropagation();
-        });
-        bgTarget.pointerUp.connect((e) => e.stopPropagation());
-        bgTarget.pointerMove.connect((e) => e.stopPropagation());
+            bgTarget.pointerDown.connect((e) => {
+                if (InputUtil.IsLeftMouse(e)) {
+                    this.onBGClicked();
+                }
+                e.stopPropagation();
+            });
+            bgTarget.pointerUp.connect((e) => e.stopPropagation());
+            bgTarget.pointerMove.connect((e) => e.stopPropagation());
 
-        Assert.assertIsDefined(this.mode);
-        this.regs.add(this.mode.keyboardInput.pushListener(this));
-        this.regs.add(this.mode.mouseWheelInput.pushListener(this));
+            Assert.assertIsDefined(this.mode);
+            this.regs.add(this.mode.keyboardInput.pushListener(this));
+            this.regs.add(this.mode.mouseWheelInput.pushListener(this));
 
-        const updateBG = () => {
-            Assert.assertIsDefined(Flashbang.stageWidth);
-            Assert.assertIsDefined(Flashbang.stageHeight);
-            bg.clear()
-                .beginFill(0x0)
-                .drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
-                .endFill();
-            bg.alpha = this.bgAlpha;
-        };
-        updateBG();
-        this.regs.add(this.mode.resized.connect(updateBG));
+            const updateBG = () => {
+                Assert.assertIsDefined(Flashbang.stageWidth);
+                Assert.assertIsDefined(Flashbang.stageHeight);
+                bg.clear()
+                    .beginFill(0x0)
+                    .drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
+                    .endFill();
+                bg.alpha = this.bgAlpha;
+            };
+            updateBG();
+            this.regs.add(this.mode.resized.connect(updateBG));
+        }
     }
 
     /**
@@ -91,4 +100,5 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
 
     protected _resolvePromise: (value: T | null) => void;
     protected _isClosed: boolean;
+    protected _modal: boolean;
 }

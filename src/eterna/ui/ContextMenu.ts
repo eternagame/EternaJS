@@ -1,25 +1,44 @@
 import {UnitSignal} from 'signals';
-import {ContainerObject, VLayoutContainer, HAlign} from 'flashbang';
+import {
+    Graphics
+} from 'pixi.js';
+import {
+    ContainerObject,
+    VLayoutContainer,
+    HLayoutContainer,
+    HAlign,
+    VAlign
+} from 'flashbang';
 import GameButton from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';
+
+interface ContextMenuObjectProps {
+    horizontal: boolean;
+}
 
 export default class ContextMenu extends ContainerObject {
     /** Emitted when the user interacts with the menu. */
     public readonly menuItemSelected = new UnitSignal();
 
-    constructor() {
+    constructor(props: ContextMenuObjectProps) {
         super();
 
         this._panel = new GamePanel({
             type: GamePanelType.NORMAL,
             alpha: 1.0,
-            color: 0x152843,
+            color: ContextMenu.PANEL_BACKGROUND_COLOR,
             dropShadow: true
         });
         this.addObject(this._panel, this.container, 0);
 
-        this._buttonLayout = new VLayoutContainer(5, HAlign.LEFT);
+        if (props.horizontal) {
+            this._buttonLayout = new HLayoutContainer(5, VAlign.CENTER);
+        } else {
+            this._buttonLayout = new VLayoutContainer(5, HAlign.LEFT);
+        }
         this._panel.container.addChild(this._buttonLayout);
+
+        this._horizontal = props.horizontal || false;
     }
 
     protected added(): void {
@@ -27,8 +46,39 @@ export default class ContextMenu extends ContainerObject {
         this.doLayout();
     }
 
-    public addItem(item: string): GameButton {
-        const button = new GameButton().label(item, 14);
+    public addItem(
+        text: string,
+        icon: string | undefined = undefined,
+        tooltipText: string | undefined = undefined,
+        fillColor: number | undefined = undefined
+    ): GameButton {
+        const button = new GameButton();
+
+        if (text) {
+            button.label(text, 14);
+        }
+
+        if (icon) {
+            button.allStates(icon);
+        }
+
+        if (tooltipText) {
+            button.tooltip(tooltipText);
+        }
+
+        if (fillColor) {
+            const buttonGraphic = new Graphics()
+                .beginFill(fillColor)
+                .drawRoundedRect(
+                    0,
+                    0,
+                    ContextMenu.BUTTON_WIDTH,
+                    ContextMenu.BUTTON_HEIGHT,
+                    ContextMenu.BUTTON_CORNER_RADIUS
+                ).endFill();
+            button.customStyleBox(buttonGraphic);
+        }
+
         this.addObject(button, this._buttonLayout);
         this._buttons.push(button);
 
@@ -45,33 +95,40 @@ export default class ContextMenu extends ContainerObject {
     }
 
     private doLayout(): void {
-        let maxButtonWidth = 0;
-        for (const button of this._buttons) {
-            button.fixedLabelWidth(0);
-            maxButtonWidth = Math.max(button.container.width, maxButtonWidth);
+        if (!this._horizontal) {
+            let maxButtonWidth = 0;
+            for (const button of this._buttons) {
+                button.fixedLabelWidth(0);
+                maxButtonWidth = Math.max(button.container.width, maxButtonWidth);
+            }
+
+            const MIN_LABEL_WIDTH = 200;
+            const labelWidth = Math.max(maxButtonWidth, MIN_LABEL_WIDTH);
+
+            for (const button of this._buttons) {
+                button.fixedLabelWidth(labelWidth);
+            }
         }
-
-        const MIN_LABEL_WIDTH = 200;
-        const labelWidth = Math.max(maxButtonWidth, MIN_LABEL_WIDTH);
-
-        for (const button of this._buttons) {
-            button.fixedLabelWidth(labelWidth);
-        }
-
-        const MARGIN = 10;
 
         this._buttonLayout.layout(true);
-        this._buttonLayout.x = MARGIN;
-        this._buttonLayout.y = MARGIN;
+        this._buttonLayout.x = ContextMenu.PANEL_MARGIN;
+        this._buttonLayout.y = ContextMenu.PANEL_MARGIN;
 
         this._panel.setSize(
-            this._buttonLayout.width + (MARGIN * 2),
-            this._buttonLayout.height + (MARGIN * 2)
+            this._buttonLayout.width + (ContextMenu.PANEL_MARGIN * 2),
+            this._buttonLayout.height + (ContextMenu.PANEL_MARGIN * 2)
         );
     }
 
     private readonly _panel: GamePanel;
-    private readonly _buttonLayout: VLayoutContainer;
+    private readonly _buttonLayout: VLayoutContainer | HLayoutContainer;
 
+    private _horizontal: boolean;
     private _buttons: GameButton[] = [];
+
+    private static readonly PANEL_MARGIN: number = 5;
+    private static readonly PANEL_BACKGROUND_COLOR: number = 0x152843;
+    private static readonly BUTTON_WIDTH: number = 110;
+    private static readonly BUTTON_HEIGHT: number = 30;
+    private static readonly BUTTON_CORNER_RADIUS: number = 5;
 }
