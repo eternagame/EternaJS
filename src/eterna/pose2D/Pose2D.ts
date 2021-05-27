@@ -1009,14 +1009,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._shiftEnd = -1;
             this.updateShiftHighlight();
         }
-        // else if (this.annotationManager.annotationModeActive) {
-        //     // Clicked ether/cytoplasm space while in annotation mode
-        //     // Deselect any selected base ranges
-        //     this._annotationRanges = [];
-        //     this.hideAnnotationContextMenu();
-        //     this._selectingAnnotationRange = false;
-        //     this.updateAnnotationRangeHighlight();
-        // }
     }
 
     public toggleBaseMark(baseIndex: number): void {
