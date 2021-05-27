@@ -831,20 +831,20 @@ export default class PoseEditMode extends GameMode {
                 });
 
                 this._annotationManager.onCreateAnnotation.connect((args: AnnotationArguments) => {
-                    this._annotationManager.showAnnotationDialog(
-                        false,
-                        args.ranges,
-                        false,
-                        this,
+                    this._annotationManager.showAnnotationDialog({
+                        edit: false,
+                        ranges: args.ranges,
+                        modal: false,
+                        gameMode: this,
                         pose,
-                        this.uiLayer,
-                        () => {
+                        gameLayer: this.uiLayer,
+                        closeCallback: () => {
                             if (this._poses.length > 0) {
                                 this.saveData();
                             }
                         },
-                        args.panelPos
-                    );
+                        panelPos: args.panelPos
+                    });
                 });
 
                 this._annotationManager.onToggleItemSelection.connect((annotation: AnnotationData | null) => {
@@ -854,21 +854,20 @@ export default class PoseEditMode extends GameMode {
                 });
                 const editAnnotation = (annotation: AnnotationData | null) => {
                     if (annotation && annotation.ranges) {
-                        this._annotationManager.showAnnotationDialog(
-                            true,
-                            annotation.ranges,
-                            true,
-                            this,
+                        this._annotationManager.showAnnotationDialog({
+                            edit: true,
+                            ranges: annotation.ranges,
+                            modal: true,
+                            gameMode: this,
                             pose,
-                            this.uiLayer,
-                            () => {
+                            gameLayer: this.uiLayer,
+                            closeCallback: () => {
                                 if (this._poses.length > 0) {
                                     this.saveData();
                                 }
                             },
-                            undefined,
                             annotation
-                        );
+                        });
                     }
                 };
                 this._annotationManager.onEditAnnotation.connect(editAnnotation);

@@ -129,10 +129,6 @@ export default class AnnotationView extends ContainerObject {
             this._item.selected
             && this._item.category === this._activeCategory
             && this._item.category !== AnnotationCategory.STRUCTURE
-            && !(
-                this._type === AnnotationHierarchyType.ANNOTATION
-                && this._item.layerId
-            )
         ) {
             let panelWidth = this._card.width;
             const panelHeight = this._card.height;

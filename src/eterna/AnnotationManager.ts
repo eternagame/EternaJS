@@ -176,6 +176,22 @@ export interface AnnotationPositionConflict {
     placement: AnnotationPlacement;
 }
 
+/**
+ * A data structure to represent the arguments required to
+ * invoke an annotation dialog
+ */
+export interface AnnotationDialogArguments {
+    edit: boolean;
+    ranges: AnnotationRange[];
+    modal: boolean;
+    gameMode: GameMode;
+    pose: Pose2D;
+    gameLayer: Container;
+    closeCallback: () => void;
+    panelPos?: Point;
+    annotation?: AnnotationData;
+}
+
 export default class AnnotationManager {
     // Signals annotation mode active state
     public readonly annotationMode: Value<boolean> = new Value<boolean>(false);
@@ -662,65 +678,55 @@ export default class AnnotationManager {
         this.onTriggerPoseUpdate.emit();
     }
 
-    public showAnnotationDialog(
-        edit: boolean,
-        ranges: AnnotationRange[],
-        modal: boolean,
-        gameMode: GameMode,
-        pose: Pose2D,
-        gameLayer: Container,
-        closeCallback: () => void,
-        panelPos?: Point,
-        annotation?: AnnotationData
-    ) {
+    public showAnnotationDialog(args: AnnotationDialogArguments) {
         this._annotationDialog = new AnnotationDialog(
-            edit,
-            modal,
-            pose.fullSequenceLength,
-            ranges,
+            args.edit,
+            args.modal,
+            args.pose.fullSequenceLength,
+            args.ranges,
             this.activeLayers,
-            annotation
+            args.annotation
         );
         this._annotationDialog.onUpdateRanges.connect((rngs: AnnotationRange[] | null) => {
             if (rngs) {
-                pose.setAnnotationRanges(rngs);
+                args.pose.setAnnotationRanges(rngs);
             }
         });
 
         this.dialogIsVisible = true;
 
-        if (modal) {
-            gameMode.showDialog(
+        if (args.modal) {
+            args.gameMode.showDialog(
                 this._annotationDialog
             ).closed.then((editedAnnotation: AnnotationData | null) => {
                 if (editedAnnotation) {
                     editedAnnotation.selected = false;
                     this.editAnnotation(editedAnnotation);
-                } else if (annotation) {
+                } else if (args.annotation) {
                     // We interpret null argument as delete intent when editing
-                    this.deleteAnnotation(annotation);
+                    this.deleteAnnotation(args.annotation);
                 }
 
                 // Clear annotation dialog reference
                 this._annotationDialog = null;
 
-                closeCallback();
+                args.closeCallback();
 
                 this.dialogIsVisible = false;
             });
         } else {
-            gameMode.addObject(this._annotationDialog, gameLayer);
-            if (panelPos) {
+            args.gameMode.addObject(this._annotationDialog, args.gameLayer);
+            if (args.panelPos) {
                 Assert.assertIsDefined(Flashbang.stageWidth);
                 Assert.assertIsDefined(Flashbang.stageHeight);
-                this._annotationDialog.display.x = panelPos.x
+                this._annotationDialog.display.x = args.panelPos.x
                     + this._annotationDialog.display.width < Flashbang.stageWidth
-                    ? panelPos.x
-                    : panelPos.x - this._annotationDialog.display.width;
-                this._annotationDialog.display.y = panelPos.y
+                    ? args.panelPos.x
+                    : args.panelPos.x - this._annotationDialog.display.width;
+                this._annotationDialog.display.y = args.panelPos.y
                     + this._annotationDialog.display.height < Flashbang.stageWidth
-                    ? panelPos.y
-                    : panelPos.y - this._annotationDialog.display.height;
+                    ? args.panelPos.y
+                    : args.panelPos.y - this._annotationDialog.display.height;
             }
             this._annotationDialog.closed.then((annot: AnnotationData | null) => {
                 if (annot) {
@@ -736,9 +742,9 @@ export default class AnnotationManager {
                 this._annotationDialog = null;
 
                 // // Remove annotation highlighting
-                pose.clearAnnotationRanges();
+                args.pose.clearAnnotationRanges();
 
-                closeCallback();
+                args.closeCallback();
 
                 this.dialogIsVisible = false;
             });
