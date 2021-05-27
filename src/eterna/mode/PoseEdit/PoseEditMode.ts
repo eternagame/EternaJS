@@ -269,8 +269,8 @@ export default class PoseEditMode extends GameMode {
             this.downloadSVG();
         });
 
-        this._toolbar.annotationModeButton.toggled.connect((active) => {
-            Eterna.settings.annotationModeActive.value = active;
+        this._toolbar.annotationModeButton.toggled.connect((active: boolean) => {
+            this._annotationManager.setAnnotationMode(active);
         });
 
         this._toolbar.annotationPanelButton.toggled.connect((visible) => {
@@ -768,6 +768,22 @@ export default class PoseEditMode extends GameMode {
             });
         };
 
+        const onAnnotationModeChange = (pose: Pose2D, active: boolean) => {
+            if (!active) {
+                pose.clearAnnotationRanges();
+                pose.hideAnnotationContextMenu();
+                const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
+                if (doc) {
+                    doc.style.cursor = 'default';
+                }
+            } else {
+                const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
+                if (doc) {
+                    doc.style.cursor = 'grab';
+                }
+            }
+        };
+
         for (let ii = 0; ii < targetConditions.length; ii++) {
             const poseField: PoseField = new PoseField(true);
             this.addObject(poseField, this.poseLayer);
@@ -780,6 +796,9 @@ export default class PoseEditMode extends GameMode {
             pose.annotationManager = this._annotationManager;
             if (ii === 0) {
                 // We only need one annotation manager to act on annotation logic
+                this._annotationManager.annotationMode.connect((active: boolean) => {
+                    onAnnotationModeChange(pose, active);
+                });
                 this._annotationManager.onAdjustBasesOpacity.connect((opacity: number) => {
                     pose.setBasesOpacity(opacity);
                 });

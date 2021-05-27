@@ -192,21 +192,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         );
         this.regs.add(Eterna.settings.simpleGraphics.connectNotify((value) => { this.useSimpleGraphics = value; }));
         this.regs.add(Eterna.settings.usePuzzlerLayout.connect(() => this.computeLayout()));
-        this.regs.add(Eterna.settings.annotationModeActive.connectNotify((value) => {
-            if (!value) {
-                this.clearAnnotationRanges();
-                this.hideAnnotationContextMenu();
-                const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
-                if (doc) {
-                    doc.style.cursor = 'default';
-                }
-            } else {
-                const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
-                if (doc) {
-                    doc.style.cursor = 'grab';
-                }
-            }
-        }));
     }
 
     public setSize(width: number, height: number): void {
@@ -899,12 +884,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (
                 (ctrlDown || this.currentColor === RNAPaint.BASE_MARK)
                 && closestIndex < this.fullSequenceLength
-                && !this.annotationManager.annotationModeActive
+                && !this.annotationManager.getAnnotationMode()
             ) {
                 this.toggleBaseMark(closestIndex);
                 return;
             }
-            if (shiftDown && !this.annotationManager.annotationModeActive) {
+            if (shiftDown && !this.annotationManager.getAnnotationMode()) {
                 if (closestIndex < this.sequenceLength) {
                     this._shiftStart = closestIndex;
                     this._shiftEnd = closestIndex;
@@ -920,7 +905,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 e.stopPropagation();
                 return;
             }
-            if (this.annotationManager.annotationModeActive) {
+            if (this.annotationManager.getAnnotationMode()) {
                 this.hideAnnotationContextMenu();
 
                 if (closestIndex < this.sequenceLength) {
@@ -1019,7 +1004,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
 
             e.stopPropagation();
-        } else if (shiftDown && !this.annotationManager.annotationModeActive) {
+        } else if (shiftDown && !this.annotationManager.getAnnotationMode()) {
             this._shiftStart = -1;
             this._shiftEnd = -1;
             this.updateShiftHighlight();
@@ -1166,7 +1151,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.onBaseMouseMove(closestIndex);
             // document.getElementById(Eterna.PIXI_CONTAINER_ID).style.cursor = 'none';
 
-            if (!this.annotationManager.annotationModeActive) {
+            if (!this.annotationManager.getAnnotationMode()) {
                 this._paintCursor.display.visible = true;
                 this._paintCursor.setShape(this._currentColor);
             }
@@ -1708,7 +1693,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         if (
             this.annotationManager
-            && this.annotationManager.annotationModeActive
+            && this.annotationManager.getAnnotationMode()
         ) {
             for (const base of this._bases) {
                 base.container.alpha = AnnotationManager.ANNOTATION_UNHIGHLIGHTED_OPACITY;
@@ -1725,7 +1710,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._annotationContextMenu.display.visible = true;
     }
 
-    private hideAnnotationContextMenu(): void {
+    public hideAnnotationContextMenu(): void {
         this._annotationContextMenu.display.visible = false;
     }
 
@@ -3371,7 +3356,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.updateShiftHighlight();
         } else if (
             !this._coloring
-            && this.annotationManager.annotationModeActive
+            && this.annotationManager.getAnnotationMode()
             && this._annotationRanges.length > 0
             && this._selectingAnnotationRange
             && seqnum < this.sequenceLength
@@ -3510,7 +3495,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public updateAnnotationRangeHighlight(): void {
         this._annotationHighlightBox.clear();
 
-        if (this.annotationManager.annotationModeActive) {
+        if (this.annotationManager.getAnnotationMode()) {
             for (let i = 0; i < this._bases.length; i++) {
                 this._bases[i].container.alpha = AnnotationManager.ANNOTATION_UNHIGHLIGHTED_OPACITY;
             }

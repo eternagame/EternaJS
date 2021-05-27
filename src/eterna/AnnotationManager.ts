@@ -177,6 +177,8 @@ export interface AnnotationPositionConflict {
 }
 
 export default class AnnotationManager {
+    // Signals annotation mode active state
+    public readonly annotationMode: Value<boolean> = new Value<boolean>(false);
     // Signals the process to create a new annotation with the necessary initial data
     public readonly onCreateAnnotation: Value<AnnotationArguments> = new Value<AnnotationArguments>({
         ranges: [],
@@ -216,9 +218,6 @@ export default class AnnotationManager {
 
     constructor(toolbarType: ToolbarType) {
         this._toolbarType = toolbarType;
-        this.regs.add(Eterna.settings.annotationModeActive.connectNotify((value) => {
-            this.annotationModeActive = value;
-        }));
     }
 
     /**
@@ -579,7 +578,7 @@ export default class AnnotationManager {
         }
 
         // Make canvas translucent if we have annotation mode active
-        if (this._annotationModeActive) {
+        if (this.getAnnotationMode()) {
             this.onAdjustAnnotationCanvasOpacity.value = AnnotationManager.ANNOTATION_UNHIGHLIGHTED_OPACITY;
         } else {
             this.onAdjustAnnotationCanvasOpacity.value = 1;
@@ -766,8 +765,8 @@ export default class AnnotationManager {
      * Sets the desired annotation mode state. When active
      * users are able to create new annotations
      */
-    public set annotationModeActive(active: boolean) {
-        this._annotationModeActive = active;
+    public setAnnotationMode(active: boolean): void {
+        this.annotationMode.value = active;
         if (!active) {
             this.onClearHighlights.emit();
 
@@ -788,8 +787,8 @@ export default class AnnotationManager {
     /**
      * Accesses the current annotation mode value
      */
-    public get annotationModeActive(): boolean {
-        return this._annotationModeActive;
+    public getAnnotationMode(): boolean {
+        return this.annotationMode.value;
     }
 
     /**
@@ -1072,7 +1071,7 @@ export default class AnnotationManager {
             view.pointerOver.connect(() => {
                 // we only set highlight if annotation mode off so we don't
                 // disturb any selections that might be taking place
-                if (!this.annotationModeActive) {
+                if (!this.getAnnotationMode()) {
                     // highlight associated range
                     if (item.type === AnnotationHierarchyType.ANNOTATION) {
                         const annotation = item.data as AnnotationData;
@@ -1096,7 +1095,7 @@ export default class AnnotationManager {
             view.pointerOut.connect(() => {
                 // remove associated range only if annotation mode off so we don't
                 // disturb any selections that might be taking place
-                if (!item.data.selected && !this.annotationModeActive) {
+                if (!item.data.selected && !this.getAnnotationMode()) {
                     this.onClearHighlights.emit();
                 }
             });
@@ -2647,7 +2646,6 @@ export default class AnnotationManager {
     private _regs: RegistrationGroup | null;
     private _annotationDialog: AnnotationDialog | null = null;
     private _selectedAnnotation: AnnotationPanelItem | AnnotationData | null;
-    private _annotationModeActive: boolean = false;
     private _dialogIsVisible: boolean = false;
     private _resetAnnotationPositions: boolean = false;
     private _ignoreCustomAnnotationPositions: boolean = false;

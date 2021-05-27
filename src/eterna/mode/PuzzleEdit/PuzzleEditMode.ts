@@ -245,8 +245,8 @@ export default class PuzzleEditMode extends GameMode {
             this._scriptInterface.addCallback('get_shift_limit', () => this.shiftLimitString);
         }
 
-        this._toolbar.annotationModeButton.toggled.connect((active) => {
-            Eterna.settings.annotationModeActive.value = active;
+        this._toolbar.annotationModeButton.toggled.connect((active: boolean) => {
+            this._annotationManager.setAnnotationMode(active);
         });
 
         this._toolbar.annotationPanelButton.toggled.connect((visible) => {
@@ -283,6 +283,22 @@ export default class PuzzleEditMode extends GameMode {
         // We don't appropriately handle these, so for now just force them off
         Eterna.settings.showRope.value = false;
         Eterna.settings.usePuzzlerLayout.value = false;
+
+        const onAnnotationModeChange = (pose: Pose2D, active: boolean) => {
+            if (!active) {
+                pose.clearAnnotationRanges();
+                pose.hideAnnotationContextMenu();
+                const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
+                if (doc) {
+                    doc.style.cursor = 'default';
+                }
+            } else {
+                const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
+                if (doc) {
+                    doc.style.cursor = 'grab';
+                }
+            }
+        };
 
         const initialPoseData = this._initialPoseData;
         for (let ii = 0; ii < this._numTargets; ii++) {
@@ -326,6 +342,10 @@ export default class PuzzleEditMode extends GameMode {
             }
             poseFields.push(poseField);
 
+            // We only need one annotation manager to act on annotation logic
+            this._annotationManager.annotationMode.connect((active: boolean) => {
+                onAnnotationModeChange(pose, active);
+            });
             this._annotationManager.onAdjustBasesOpacity.connect((opacity: number) => {
                 pose.setBasesOpacity(opacity);
             });

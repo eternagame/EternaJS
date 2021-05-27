@@ -247,36 +247,36 @@ export default class Toolbar extends ContainerObject {
 
             this.regs.add(this.addbaseButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
-                if (Eterna.settings.annotationModeActive.value) {
-                    Eterna.settings.annotationModeActive.value = false;
+                if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
+                    this._annotationManager.setAnnotationMode(false);
                 }
                 this.addbaseButton.toggled.value = true;
             }));
             this.regs.add(this.addpairButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
-                if (Eterna.settings.annotationModeActive.value) {
-                    Eterna.settings.annotationModeActive.value = false;
+                if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
+                    this._annotationManager.setAnnotationMode(false);
                 }
                 this.addpairButton.toggled.value = true;
             }));
             this.regs.add(this.deleteButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
-                if (Eterna.settings.annotationModeActive.value) {
-                    Eterna.settings.annotationModeActive.value = false;
+                if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
+                    this._annotationManager.setAnnotationMode(false);
                 }
                 this.deleteButton.toggled.value = true;
             }));
             this.regs.add(this.lockButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
-                if (Eterna.settings.annotationModeActive.value) {
-                    Eterna.settings.annotationModeActive.value = false;
+                if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
+                    this._annotationManager.setAnnotationMode(false);
                 }
                 this.lockButton.toggled.value = true;
             }));
             this.regs.add(this.moleculeButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
-                if (Eterna.settings.annotationModeActive.value) {
-                    Eterna.settings.annotationModeActive.value = false;
+                if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
+                    this._annotationManager.setAnnotationMode(false);
                 }
                 this.moleculeButton.toggled.value = true;
             }));
@@ -579,8 +579,8 @@ export default class Toolbar extends ContainerObject {
 
         this.regs.add(this.palette.targetClicked.connect(() => {
             this._deselectAllPaintTools();
-            if (Eterna.settings.annotationModeActive.value) {
-                Eterna.settings.annotationModeActive.value = false;
+            if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
+                this._annotationManager.setAnnotationMode(false);
             }
         }));
 
@@ -604,8 +604,8 @@ export default class Toolbar extends ContainerObject {
 
             this.regs.add(this.pairSwapButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
-                if (Eterna.settings.annotationModeActive.value) {
-                    Eterna.settings.annotationModeActive.value = false;
+                if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
+                    this._annotationManager.setAnnotationMode(false);
                 }
                 this.pairSwapButton.toggled.value = true;
             }));
@@ -622,8 +622,8 @@ export default class Toolbar extends ContainerObject {
                         this.regs.add(button.clicked.connect(() => {
                             mode.setPosesColor(booster.toolColor);
                             this._deselectAllPaintTools();
-                            if (Eterna.settings.annotationModeActive.value) {
-                                Eterna.settings.annotationModeActive.value = false;
+                            if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
+                                this._annotationManager.setAnnotationMode(false);
                             }
                         }));
                         this.dynPaintTools.push(button);
@@ -691,8 +691,8 @@ export default class Toolbar extends ContainerObject {
 
         this.regs.add(this.baseMarkerButton.clicked.connect(() => {
             this._deselectAllPaintTools();
-            if (Eterna.settings.annotationModeActive.value) {
-                Eterna.settings.annotationModeActive.value = false;
+            if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
+                this._annotationManager.setAnnotationMode(false);
             }
             this.baseMarkerButton.toggled.value = true;
         }));
@@ -709,8 +709,8 @@ export default class Toolbar extends ContainerObject {
 
             this.regs.add(this.librarySelectionButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
-                if (Eterna.settings.annotationModeActive.value) {
-                    Eterna.settings.annotationModeActive.value = false;
+                if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
+                    this._annotationManager.setAnnotationMode(false);
                 }
                 this.librarySelectionButton.toggled.value = true;
             }));
@@ -730,8 +730,8 @@ export default class Toolbar extends ContainerObject {
 
         this.regs.add(this.magicGlueButton.clicked.connect(() => {
             this._deselectAllPaintTools();
-            if (Eterna.settings.annotationModeActive.value) {
-                Eterna.settings.annotationModeActive.value = false;
+            if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
+                this._annotationManager.setAnnotationMode(false);
             }
             this.magicGlueButton.toggled.value = true;
         }));
@@ -811,14 +811,16 @@ export default class Toolbar extends ContainerObject {
         }));
         this._setupToolbarDrag();
 
-        this.regs.add(Eterna.settings.annotationModeActive.connectNotify((value) => {
-            if (
-                (value && !this.annotationModeButton.isSelected)
-                || (!value && this.annotationModeButton.isSelected)
-            ) {
-                this.annotationModeButton.toggle();
-            }
-        }));
+        if (this._annotationManager) {
+            this.regs.add(this._annotationManager.annotationMode.connectNotify((value) => {
+                if (
+                    (value && !this.annotationModeButton.isSelected)
+                    || (!value && this.annotationModeButton.isSelected)
+                ) {
+                    this.annotationModeButton.toggle();
+                }
+            }));
+        }
     }
 
     private makeArrowButton(direction: 'left' | 'right'): GameButton {
