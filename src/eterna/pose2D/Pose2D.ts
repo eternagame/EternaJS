@@ -1239,6 +1239,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (this._annotationContextMenu.display.visible) {
             this._annotationContextMenu.display.x -= (this.xOffset - offX);
             this._annotationContextMenu.display.y -= (this.yOffset - offY);
+        } else if (
+            this.annotationManager.dialogIsVisible
+            && this.annotationManager.annotationDialog
+        ) {
+            this.annotationManager.annotationDialog.display.x -= (this.xOffset - offX);
+            this.annotationManager.annotationDialog.display.y -= (this.yOffset - offY);
         }
         this._offX = offX;
         this._offY = offY;

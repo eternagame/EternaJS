@@ -807,6 +807,13 @@ export default class AnnotationManager {
     }
 
     /**
+     * Accesses the current annotation dialog
+     */
+    public get annotationDialog(): AnnotationDialog | null {
+        return this._annotationDialog;
+    }
+
+    /**
      * Accesses all layers (struction, puzzle, solution)
      */
     public get allLayers() {
