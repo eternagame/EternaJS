@@ -232,7 +232,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         permalink.clicked.connect(
             () => {
                 Assert.assertIsDefined(this.modeStack);
-                const solutionURL = Eterna.SERVER_URL + EternaURL.createURL({
+                const solutionURL = EternaURL.createURL({
                     page: 'browse_solution',
                     puznid: this._props.puzzle.nodeID,
                     filter1: 'Id',
@@ -259,7 +259,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         playerDesigns.clicked.connect(
             () => {
                 Assert.assertIsDefined(this.modeStack);
-                const playerURL = Eterna.SERVER_URL + EternaURL.createURL({
+                const playerURL = EternaURL.createURL({
                     page: 'browse_player',
                     puznid: this._props.puzzle.nodeID,
                     filter1: 'Designer',
