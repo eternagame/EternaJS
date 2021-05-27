@@ -706,6 +706,7 @@ export default class AnnotationPanel extends ContainerObject {
         if (annotationData) {
             if (layerPath.length === 1) {
                 // Not in layer
+                annotationData.layerId = undefined;
                 categoryData.push(annotationData);
             } else if (layerPath.length === 2) {
                 // In layer
@@ -786,6 +787,7 @@ export default class AnnotationPanel extends ContainerObject {
         // move to new position
         if (firstAnnotationData) {
             if (secondAnnotationPath.length === 2) {
+                firstAnnotationData.layerId = undefined;
                 // Annotation not in layer
                 categoryData.splice(secondAnnotationPath[1], 0, firstAnnotationData);
             } else if (secondAnnotationPath.length === 3) {
