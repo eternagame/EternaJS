@@ -476,10 +476,10 @@ export default class AnnotationManager {
      * @param type category of annotation being created
      * @returns array of annotation display objects
      */
-    private generateAnnotationDisplayObjects = (
+    private generateAnnotationDisplayObjects(
         items: AnnotationData[],
         type: AnnotationHierarchyType
-    ): AnnotationDisplayObject[] => {
+    ): AnnotationDisplayObject[] {
         const displayObjects: AnnotationDisplayObject[] = [];
         for (const item of items) {
             if (item.positions) {
@@ -519,7 +519,7 @@ export default class AnnotationManager {
         }
 
         return displayObjects;
-    };
+    }
 
     /**
      * Rerenders all annotation views in a given puzzle pose
