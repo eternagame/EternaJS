@@ -636,6 +636,12 @@ export default class AnnotationPanel extends ContainerObject {
      * @param layerPath an index path to target layer
      */
     private updateAnnotationLayer(annotation: Item, layerPath: number[]) {
+        // unselect any selected annotation
+        const selectedAnnotation = this._annotationManager.selectedAnnotation as AnnotationData;
+        if (selectedAnnotation) {
+            this.setAnnotationPanelItemSelection(selectedAnnotation, false);
+        }
+
         // IMPORTANT:
         // If a user drops an annotation onto
         // another annotation in a layer three drop events occur in this order:
@@ -725,6 +731,12 @@ export default class AnnotationPanel extends ContainerObject {
      * @param secondAnnotationPath an index path to target annotation
      */
     private updateAnnotationPosition(firstAnnotation: Item, secondAnnotationPath: number[]) {
+        // unselect any selected annotation
+        const selectedAnnotation = this._annotationManager.selectedAnnotation as AnnotationData;
+        if (selectedAnnotation) {
+            this.setAnnotationPanelItemSelection(selectedAnnotation, false);
+        }
+
         // remove from current layer
         let firstAnnotationData: AnnotationData | null = null;
         const [category, categoryData] = this.getCategoryData(secondAnnotationPath[0]);
