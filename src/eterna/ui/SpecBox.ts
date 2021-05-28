@@ -1,7 +1,7 @@
 import * as log from 'loglevel';
 import MultiStyleText from 'pixi-multistyle-text';
 import {
-    Graphics, Point, Sprite, Text
+    Container, Graphics, Point, Sprite, Text
 } from 'pixi.js';
 import {UnitSignal} from 'signals';
 import EPars from 'eterna/EPars';
@@ -252,7 +252,7 @@ export default class SpecBox extends ContainerObject {
             this._dotplot.replotWithBase(this._dotplotOriginX, this._dotplotOriginY);
 
             if (this._dotPlotSprite.mask != null) {
-                if (this._dotPlotSprite.mask instanceof PIXI.Container) {
+                if (this._dotPlotSprite.mask instanceof Container) {
                     // Can't do this for a PIXI.MaskData
                     this._dotPlotSprite.mask.destroy();
                 }
