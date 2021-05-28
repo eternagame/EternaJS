@@ -83,10 +83,10 @@ export default class EternaURL {
             url = `/game/browse/${params['puznid']}/?`;
             url += new URLSearchParams({
                 filter1: params.filter1 as string,
-                /* eslint-disable @typescript-eslint/camelcase */
+                /* eslint-disable @typescript-eslint/naming-convention */
                 filter1_arg1: String(params.filter1_arg1) as string,
                 filter1_arg2: String(params.filter1_arg2) as string
-                /* eslint-enable @typescript-eslint/camelcase */
+                /* eslint-enable camelcase */
             });
         } else if (params['page'] === 'script') {
             url = '/web/script/';

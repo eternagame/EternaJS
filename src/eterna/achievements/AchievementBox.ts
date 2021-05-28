@@ -213,7 +213,7 @@ export default class AchievementBox extends ContainerObject {
                     origin: {y: 0.7}
                 };
 
-                function fire(particleRatio: number, opts: object) {
+                function fire(particleRatio: number, opts: Record<string, unknown>) {
                     // sadly, @types/canvas-confetti doesn't export the confetti method properly!
                     // eslint-disable-next-line
                     (confetti as any).default(Object.assign({}, defaults, opts, {

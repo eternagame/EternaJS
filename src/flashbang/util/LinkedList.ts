@@ -116,6 +116,8 @@ export default class LinkedList<T> {
     private _iterating: Cons<T> | null;
     private _pendingRuns: Runs | null;
 
+    // Not sure why this rule is triggering. TODO: Investigate
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
     private readonly ITERATING: Cons<T> = new Cons<T>(null, null);
 }
 

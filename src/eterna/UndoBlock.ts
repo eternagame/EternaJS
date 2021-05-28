@@ -131,7 +131,7 @@ export default class UndoBlock {
         // TODO: Updating this requires changing all content in the DB AND
         // migrating all autosave content on boot for however long we want to allow
         // players to migrate their autosaves
-        /* eslint-disable @typescript-eslint/camelcase */
+        /* eslint-disable @typescript-eslint/naming-convention */
         return {
             folderName_: this._folderName,
             sequence_: this._sequence.baseArray,
@@ -149,7 +149,7 @@ export default class UndoBlock {
             target_conditions_: this._targetConditions,
             library_selections_: this._librarySelections
         };
-        /* eslint-enable @typescript-eslint/camelcase */
+        /* eslint-enable camelcase */
     }
 
     public fromJSON(json: FoldData): void {

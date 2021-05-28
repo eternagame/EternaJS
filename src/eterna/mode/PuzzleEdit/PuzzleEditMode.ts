@@ -881,7 +881,7 @@ export default class PuzzleEditMode extends GameMode {
             midimgdata: midImageString,
             bigimgdata: bigImageString,
             lock: lockString,
-            // eslint-disable-next-line @typescript-eslint/camelcase
+            // eslint-disable-next-line camelcase
             begin_sequence: beginningSequence,
             objectives: JSON.stringify(objectives)
         };

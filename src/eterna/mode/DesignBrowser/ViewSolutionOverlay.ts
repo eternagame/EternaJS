@@ -237,10 +237,10 @@ export default class ViewSolutionOverlay extends ContainerObject {
                     puznid: this._props.puzzle.nodeID,
                     filter1: 'Id',
                     // TODO: Update website so that these can be camelcase
-                    /* eslint-disable @typescript-eslint/camelcase */
+                    /* eslint-disable @typescript-eslint/naming-convention */
                     filter1_arg1: this._props.solution.nodeID,
                     filter1_arg2: this._props.solution.nodeID
-                    /* eslint-enable @typescript-eslint/camelcase */
+                    /* eslint-enable camelcase */
                 });
                 this.modeStack.pushMode(new CopyTextDialogMode(solutionURL, 'Solution URL'));
             }
@@ -264,9 +264,9 @@ export default class ViewSolutionOverlay extends ContainerObject {
                     puznid: this._props.puzzle.nodeID,
                     filter1: 'Designer',
                     // TODO: Update website so that these can be camelcase
-                    /* eslint-disable @typescript-eslint/camelcase */
+                    /* eslint-disable @typescript-eslint/naming-convention */
                     filter1_arg1: this._props.solution.playerName
-                    /* eslint-enable @typescript-eslint/camelcase */
+                    /* eslint-enable camelcase */
                 });
                 this.modeStack.pushMode(new CopyTextDialogMode(playerURL, 'Player URL'));
             }

@@ -94,7 +94,7 @@ export default class PointerCapture extends GameObject {
         // - If it isn't, processing should only stop if stopPropagation was called - PIXI's pointer
         //   event processing atomatically handles that for us.
 
-        /* eslint-disable @typescript-eslint/ban-ts-ignore */
+        /* eslint-disable @typescript-eslint/ban-ts-comment */
 
         // @ts-ignore Not null
         e.target = null;
@@ -121,11 +121,9 @@ export default class PointerCapture extends GameObject {
                 break;
         }
 
-        // FIXME: This changed to public in Pixi 5.3, remove me once we upgrade
-        // @ts-ignore Protected
         if (func != null) interaction.processInteractive(e, interaction.lastObjectRendered, func, true);
 
-        /* eslint-enable @typescript-eslint/ban-ts-ignore */
+        /* eslint-enable @typescript-eslint/ban-ts-comment */
 
         this._surface.display.interactive = true;
     }
