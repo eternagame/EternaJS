@@ -10,7 +10,7 @@ import Assert from './Assert';
 export default class DisplayUtil {
     public static renderToPNG(target: DisplayObject): ArrayBuffer {
         Assert.assertIsDefined(Flashbang.app.pixi);
-        const pixels = Flashbang.app.pixi.renderer.extract.pixels(target);
+        const pixels = Flashbang.app.pixi.renderer.plugins.extract.pixels(target);
         // Floor our target width/height - UPNG.encode doesn't handle fractional sizes
         return UPNG.encode(
             [pixels.buffer],
@@ -241,8 +241,8 @@ export default class DisplayUtil {
         if (out == null) {
             out = new Rectangle();
         }
-        out.left = left;
-        out.top = top;
+        out.x = left;
+        out.y = top;
         out.width = right - left;
         out.height = bottom - top;
         return out;

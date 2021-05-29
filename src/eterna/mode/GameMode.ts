@@ -227,7 +227,7 @@ export default abstract class GameMode extends AppMode {
             const numFields: number = this._poseFields.length;
             for (let ii = 0; ii < numFields; ii++) {
                 const poseField = this._poseFields[ii];
-                poseField.display.position = new Point((this.posesWidth / numFields) * ii, 0);
+                poseField.display.position.set((this.posesWidth / numFields) * ii, 0);
                 poseField.setSize(this.posesWidth / numFields, Flashbang.stageHeight, true);
                 poseField.display.visible = true;
             }
@@ -235,7 +235,7 @@ export default abstract class GameMode extends AppMode {
             for (let ii = 0; ii < this._poseFields.length; ii++) {
                 const poseField = this._poseFields[ii];
                 if (ii === 0) {
-                    poseField.display.position = new Point(0, 0);
+                    poseField.display.position.set(0, 0);
                     poseField.setSize(this.posesWidth, Flashbang.stageHeight, false);
                     poseField.display.visible = true;
                 } else {
@@ -497,7 +497,7 @@ class ContextMenuDialog extends Dialog<void> {
         super.added();
         this.addObject(this._menu, this.container);
 
-        this._menu.display.position = this._menuLoc;
+        this._menu.display.position.copyFrom(this._menuLoc);
         this._menu.menuItemSelected.connect(() => this.close());
     }
 

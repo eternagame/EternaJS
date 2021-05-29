@@ -15,12 +15,13 @@
     "allowSyntheticDefaultImports": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    "skipLibCheck": true,
     "baseUrl": "./src",
     "paths": {
       "engines-bin/*": [
         "../node_modules/eternajs-folding-engines/engines/*",
         "eterna/folding/engines/*"
-      ]
+      ],
     }
   },
   "include": [

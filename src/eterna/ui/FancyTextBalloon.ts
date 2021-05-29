@@ -1,4 +1,3 @@
-import {Point} from 'pixi.js';
 import {
     Updatable, DisplayUtil, HAlign, VAlign, Vector2
 } from 'flashbang';
@@ -85,16 +84,16 @@ export default class FancyTextBalloon extends TextBalloon implements Updatable {
 
         if (!this._centered) {
             if (this._text != null) {
-                this._text.position = new Point(TextBalloon.W_MARGIN, TextBalloon.H_MARGIN);
+                this._text.position.set(TextBalloon.W_MARGIN, TextBalloon.H_MARGIN);
             }
 
-            this._fancyPanel.display.position = new Point(0, 0);
+            this._fancyPanel.display.position.set(0, 0);
         } else {
             if (this._text != null) {
-                this._text.position = new Point(-innerWidth / 2, TextBalloon.H_MARGIN);
+                this._text.position.set(-innerWidth / 2, TextBalloon.H_MARGIN);
             }
 
-            this._fancyPanel.display.position = new Point(-outerWidth * 0.5, 0);
+            this._fancyPanel.display.position.set(-outerWidth * 0.5, 0);
         }
 
         if (this._button.display.visible) {

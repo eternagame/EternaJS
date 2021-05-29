@@ -76,7 +76,7 @@ export default class TextureUtil {
         }));
 
         Assert.assertIsDefined(Flashbang.pixi);
-        Flashbang.pixi.renderer.render(wrap, tex, true);
+        Flashbang.pixi.renderer.render(wrap, {renderTexture: tex, clear: true});
         return tex;
     }
 

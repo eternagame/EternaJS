@@ -4,7 +4,7 @@ import {
 import Fonts from 'eterna/util/Fonts';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {
-    Graphics, Point
+    Graphics, Point, Text
 } from 'pixi.js';
 import Assert from 'flashbang/util/Assert';
 import {FontWeight} from 'flashbang/util/TextBuilder';
@@ -38,7 +38,7 @@ export default class MultiPagePanel extends ContainerObject {
 
     private _background: Graphics;
     private _pagesContainer: VScrollBox;
-    private _titleText: PIXI.Text;
+    private _titleText: Text;
     private _prevButton: GameButton;
     private _nextButton: GameButton;
     private _panelHeight = 0;
@@ -126,7 +126,7 @@ export default class MultiPagePanel extends ContainerObject {
 
         const {theme} = MultiPagePanel;
 
-        this._pagesContainer.container.position = new Point(
+        this._pagesContainer.container.position.set(
             UITheme.panel.padding,
             UITheme.panel.padding + theme.title.height
         );
@@ -170,14 +170,14 @@ export default class MultiPagePanel extends ContainerObject {
         this._background.endFill();
 
         this._titleText.text = this.title;
-        this._titleText.position = new Point(theme.title.padding, theme.title.padding);
+        this._titleText.position.set(theme.title.padding, theme.title.padding);
 
-        this._prevButton.display.position = new Point(
+        this._prevButton.display.position.set(
             UITheme.panel.padding,
             this._panelHeight - theme.buttonSize.y - UITheme.panel.padding
         );
 
-        this._nextButton.display.position = new Point(
+        this._nextButton.display.position.set(
             this._prevButton.display.x + UITheme.panel.padding + theme.buttonSize.x,
             this._prevButton.display.y
         );

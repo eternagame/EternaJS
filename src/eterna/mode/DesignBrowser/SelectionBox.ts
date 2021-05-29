@@ -20,6 +20,6 @@ export default class SelectionBox extends Graphics {
     }
 
     protected readonly _color: number;
-    private _width: number = 0;
-    private _height: number = 0;
+    protected _width: number = 0;
+    protected _height: number = 0;
 }

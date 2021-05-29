@@ -1,5 +1,5 @@
 import MultiStyleText from 'pixi-multistyle-text';
-import {Container, Graphics, Point} from 'pixi.js';
+import {Container, Graphics} from 'pixi.js';
 import {VLayoutContainer, HAlign} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import {FontWeight} from 'flashbang/util/TextBuilder';
@@ -55,7 +55,7 @@ export default class EnergyScoreDisplay extends Container {
         textLayout.addChild(this._energyText);
 
         textLayout.layout();
-        textLayout.position = new Point(5, 4);
+        textLayout.position.set(5, 4);
         this.addChild(textLayout);
 
         this.setEnergyText('', '');
@@ -91,6 +91,6 @@ export default class EnergyScoreDisplay extends Container {
     private readonly _energyText: MultiStyleText;
     private readonly _bg: Graphics;
 
-    private _width: number;
-    private _height: number;
+    protected _width: number;
+    protected _height: number;
 }

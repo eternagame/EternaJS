@@ -34,6 +34,6 @@ export default class GridLines extends Graphics {
     private readonly _color: number;
     private readonly _intervalSpacing: number;
 
-    private _width: number = 0;
-    private _height: number = 0;
+    protected _width: number = 0;
+    protected _height: number = 0;
 }

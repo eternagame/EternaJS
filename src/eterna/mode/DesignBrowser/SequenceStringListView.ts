@@ -183,7 +183,7 @@ export default class SequenceStringListView extends Container {
 
     private _content: Container | null;
 
-    private _height: number;
+    protected _height: number;
 
     private static readonly NUM_DATA_PER_LETTER = 18;
     private static readonly A_INDEX = 0;

@@ -2,7 +2,7 @@ import {ContainerObject, StyledTextBuilder} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import TextUtil from 'eterna/util/TextUtil';
 import {UnitSignal} from 'signals';
-import {Point, TextMetrics} from 'pixi.js';
+import {TextMetrics} from 'pixi.js';
 import {FontWeight} from 'flashbang/util/TextBuilder';
 import GameButton from '../GameButton';
 
@@ -53,7 +53,7 @@ export default class HelpPage extends ContainerObject {
         const contentElem = contentBuilder
             .appendHTMLStyledText(TextUtil.processTags(content))
             .build();
-        contentElem.position = new Point(0, titleMetrics.height + theme.padding);
+        contentElem.position.set(0, titleMetrics.height + theme.padding);
 
         const back = new GameButton().label(
             Fonts.std()
@@ -67,7 +67,7 @@ export default class HelpPage extends ContainerObject {
         this.regs.add(back.clicked.connect(() => {
             this._onBack.emit();
         }));
-        back.container.position = new Point(0, this._height - theme.padding);
+        back.container.position.set(0, this._height - theme.padding);
 
         this.container.addChild(titleElem);
         this.container.addChild(contentElem);

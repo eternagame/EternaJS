@@ -1,4 +1,4 @@
-import {Point, Sprite, Texture} from 'pixi.js';
+import {Sprite, Texture} from 'pixi.js';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import EternaTextureUtil from 'eterna/util/EternaTextureUtil';
@@ -43,7 +43,7 @@ export default class BaseGlow extends Sprite {
             : BaseGlow._textures[zoomLevel][progInd];
 
         this.texture = bodyTex;
-        this.position = new Point(x - bodyTex.width / 2, y - bodyTex.height / 2);
+        this.position.set(x - bodyTex.width / 2, y - bodyTex.height / 2);
     }
 
     public static initTextures(): void {

@@ -1,5 +1,5 @@
 import {
-    Point, Graphics, Container, TextMetrics
+    Graphics, Container, TextMetrics
 } from 'pixi.js';
 import TextUtil from 'eterna/util/TextUtil';
 import Fonts from 'eterna/util/Fonts';
@@ -50,7 +50,7 @@ export default class HelpToolTips {
                             rect.beginFill(color);
                             rect.drawRect(0, 0, elemW, elemH);
                             rect.endFill();
-                            rect.position = new Point(x, y);
+                            rect.position.set(x, y);
                             return rect;
                         };
 
@@ -58,7 +58,7 @@ export default class HelpToolTips {
                             const builder = Fonts.std(text).color(0);
                             const metrics = TextMetrics.measureText(text, builder.style);
                             const textElem = builder.build();
-                            textElem.position = new Point(
+                            textElem.position.set(
                                 (elemW - metrics.width) / 2,
                                 (elemH - metrics.height) / 2
                             );

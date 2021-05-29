@@ -1,4 +1,3 @@
-import {Point} from 'pixi.js';
 import {ContainerObject, Updatable} from 'flashbang';
 import PlayerRank from './PlayerRank';
 import RankRowLayout from './RankRowLayout';
@@ -21,7 +20,7 @@ export default class RankBoard extends ContainerObject implements Updatable {
         for (let ii = 0; ii < numRows + 1; ii++) {
             const row: RankRowLayout = new RankRowLayout(ii + startingRank, rankData[ii], offsetBtwRankCoin, 15, 100);
             row.container.height = RankBoard.ROW_HEIGHT;
-            row.display.position = new Point(0, RankBoard.ROW_HEIGHT * ii);
+            row.display.position.set(0, RankBoard.ROW_HEIGHT * ii);
             this.addObject(row, this.container);
             this._rows.push(row);
         }

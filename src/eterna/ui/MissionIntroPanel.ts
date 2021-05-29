@@ -2,7 +2,7 @@ import {
     ContainerObject, StyledTextBuilder, DisplayUtil, Flashbang
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
-import {Sprite, Point} from 'pixi.js';
+import {Sprite, Point, Text} from 'pixi.js';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import ConstraintBox from 'eterna/constraints/ConstraintBox';
 import MultiStyleText from 'pixi-multistyle-text';
@@ -32,7 +32,7 @@ export default class MissionIntroPanel extends ContainerObject {
     private _goalsBG: Sprite;
     private _thumbnail: Sprite;
     private _constraints: MissionIntroConstraints;
-    private _titleLabel: PIXI.Text;
+    private _titleLabel: Text;
     private _descriptionLabel: MultiStyleText;
     private _thumbnailButtons?: GameButton[];
     private _size = new Point();
@@ -114,14 +114,14 @@ export default class MissionIntroPanel extends ContainerObject {
                 + theme.spacing;
             DisplayUtil.center(this._thumbnail, this._goalsBG);
 
-            this._constraints.container.position = new Point(
+            this._constraints.container.position.set(
                 this._goalsBG.width,
                 this._goalsBG.y + 20
             );
 
             if (this._thumbnailButtons) {
                 this._thumbnailButtons.forEach((button, index) => {
-                    button.display.position = new Point(
+                    button.display.position.set(
                         index * (button.container.width + theme.spacing),
                         this._goalsBG.position.y + this._goalsBG.height + theme.spacing
                     );
@@ -134,7 +134,7 @@ export default class MissionIntroPanel extends ContainerObject {
 
             const {headerHeight} = UITheme.missionIntro;
             Assert.assertIsDefined(Flashbang.stageHeight);
-            this.container.position = new Point(
+            this.container.position.set(
                 Math.max(Flashbang.stageWidth - width, 0) / 2,
                 headerHeight + Math.max(Flashbang.stageHeight - headerHeight - height, 0) / 2
             );

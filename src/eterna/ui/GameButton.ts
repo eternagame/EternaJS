@@ -1,5 +1,5 @@
 import {
-    Container, DisplayObject, Graphics, Point, Rectangle, Sprite, Text, Texture
+    Container, DisplayObject, Graphics, Rectangle, Sprite, Text, Texture
 } from 'pixi.js';
 import {Registration, Registrations, Value} from 'signals';
 import {
@@ -216,7 +216,7 @@ export default class GameButton extends Button implements KeyboardListener {
         if (label != null) {
             if (this._scaleIconToLabel && icon != null) {
                 const scale: number = (1.5 * label.height) / this._content.height;
-                icon.scale = new Point(scale, scale);
+                icon.scale.set(scale, scale);
             }
 
             this._content.addChild(label);
@@ -226,7 +226,7 @@ export default class GameButton extends Button implements KeyboardListener {
                     this._customStyleBox, HAlign.CENTER, VAlign.CENTER
                 );
             } else if (icon == null) {
-                label.position = new Point(GameButton.WMARGIN, GameButton.HMARGIN);
+                label.position.set(GameButton.WMARGIN, GameButton.HMARGIN);
             } else {
                 DisplayUtil.positionRelative(
                     label, HAlign.LEFT, VAlign.CENTER,

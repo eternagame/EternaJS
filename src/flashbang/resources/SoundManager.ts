@@ -1,5 +1,5 @@
 import * as log from 'loglevel';
-import sound from 'pixi-sound';
+import {sound, Sound as PixiSound, PlayOptions} from '@pixi/sound';
 import Flashbang from 'flashbang/core/Flashbang';
 
 export default class SoundManager {
@@ -52,10 +52,10 @@ export default class SoundManager {
  */
 class Sound {
     constructor(url: string) {
-        this._sound = sound.Sound.from({url, preload: true, loaded: () => this.onLoaded()});
+        this._sound = PixiSound.from({url, preload: true, loaded: () => this.onLoaded()});
     }
 
-    public play(options: sound.PlayOptions) {
+    public play(options: PlayOptions) {
         if (this._sound.isLoaded) {
             this._sound.play(options);
         } else {
@@ -71,6 +71,6 @@ class Sound {
         this._pendingPlayOptions = null;
     }
 
-    private readonly _sound: sound.Sound;
-    private _pendingPlayOptions: sound.PlayOptions | null;
+    private readonly _sound: PixiSound;
+    private _pendingPlayOptions: PlayOptions | null;
 }

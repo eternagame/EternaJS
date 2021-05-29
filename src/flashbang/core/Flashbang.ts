@@ -1,9 +1,8 @@
 import Assert from 'flashbang/util/Assert';
 import {SoundManager} from 'flashbang';
+import {Application, InteractionManager, Point} from 'pixi.js';
 import FlashbangApp from './FlashbangApp';
 import AppMode from './AppMode';
-
-type InteractionManager = PIXI.InteractionManager;
 
 export default class Flashbang {
     public static get app(): FlashbangApp {
@@ -14,7 +13,7 @@ export default class Flashbang {
         return Flashbang._app.modeStack.topMode;
     }
 
-    public static get pixi(): PIXI.Application | null {
+    public static get pixi(): Application | null {
         return Flashbang._app.pixi;
     }
 
@@ -27,7 +26,7 @@ export default class Flashbang {
     }
 
     /** Global mouse location */
-    public static get globalMouse(): PIXI.Point | null {
+    public static get globalMouse(): Point | null {
         return this._interaction ? this._interaction.mouse.global : null;
     }
 

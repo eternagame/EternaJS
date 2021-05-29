@@ -1,7 +1,7 @@
 import {ContainerObject} from 'flashbang';
 import ConstraintBox from 'eterna/constraints/ConstraintBox';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import {Point, Sprite} from 'pixi.js';
+import {Sprite} from 'pixi.js';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import GameButton from './GameButton';
 import UITheme from './UITheme';
@@ -44,7 +44,7 @@ export default class MissionIntroConstraints extends ContainerObject {
             .up(Bitmaps.ImgArrowLeft)
             .over(Bitmaps.ImgArrowLeft)
             .down(Bitmaps.ImgArrowLeft);
-        this._leftButton.display.position = new Point(0, 10);
+        this._leftButton.display.position.set(0, 10);
         this._leftButton.clicked.connect(() => this.pageScroll(-1));
         this.addObject(this._leftButton, this.container);
 
@@ -52,7 +52,7 @@ export default class MissionIntroConstraints extends ContainerObject {
             .up(Bitmaps.ImgArrowRight)
             .over(Bitmaps.ImgArrowRight)
             .down(Bitmaps.ImgArrowRight);
-        this._rightButton.display.position = new Point(0, 10);
+        this._rightButton.display.position.set(0, 10);
         this._rightButton.clicked.connect(() => this.pageScroll(1));
         this.addObject(this._rightButton, this.container);
 

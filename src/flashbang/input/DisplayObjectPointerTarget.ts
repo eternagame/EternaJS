@@ -1,9 +1,7 @@
-import {DisplayObject} from 'pixi.js';
+import {DisplayObject, InteractionEvent} from 'pixi.js';
 import {SignalView} from 'signals';
 import EventSignal from 'flashbang/util/EventSignal';
 import PointerTarget from './PointerTarget';
-
-type InteractionEvent = PIXI.InteractionEvent;
 
 export default class DisplayObjectPointerTarget implements PointerTarget {
     public readonly target: DisplayObject;

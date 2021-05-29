@@ -17,7 +17,7 @@ export default class VibrateTask extends DisplayObjectTask {
             this._target.position.y = this._startLoc.y + (Math.random() * 2 - 1) * 4;
         } else {
             // Complete
-            this._target.position = this._startLoc;
+            this._target.position.copyFrom(this._startLoc);
         }
     }
 

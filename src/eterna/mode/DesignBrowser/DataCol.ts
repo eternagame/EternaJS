@@ -1,5 +1,5 @@
 import {
-    Container, Graphics, Point, Text, Sprite
+    Container, Graphics, Text, Sprite, InteractionEvent
 } from 'pixi.js';
 import {Signal, UnitSignal} from 'signals';
 import {
@@ -72,18 +72,18 @@ export default class DataCol extends ContainerObject {
             // this._dataDisplay.setText("A\nA");
             // let metr: TextLineMetrics = this._dataDisplay.GetTextBox().getLineMetrics(0);
             // this._lineHeight = metr.height + metr.leading / 2;
-            this._dataDisplay.position = new Point(11, dataStart);
+            this._dataDisplay.position.set(11, dataStart);
             this.container.addChild(this._dataDisplay);
         }
 
         this._sequencesView = new SequenceStringListView(
             this._fontType, this._fontSize, true, this._fontSize, this._lineHeight
         );
-        this._sequencesView.position = new Point(0, dataStart);
+        this._sequencesView.position.set(0, dataStart);
         this.container.addChild(this._sequencesView);
 
         this._label = new GameButton().label(this.category, 14, false);
-        this._label.display.position = new Point(11, 7);
+        this._label.display.position.set(11, 7);
         this.addObject(this._label, this.container);
 
         this._labelArrow = new Graphics();
@@ -118,7 +118,7 @@ export default class DataCol extends ContainerObject {
                 })
             );
             this.addObject(voteButton, this.container);
-            voteButton.display.position = new Point(
+            voteButton.display.position.set(
                 (this.width / 2) - (voteButton.display.width / 2),
                 theme.headerHeight + (theme.filterHeight / 2) - (voteButton.display.height / 2)
             );
@@ -130,7 +130,7 @@ export default class DataCol extends ContainerObject {
                 domParent: this._domParent
             });
             this._filterField1.tabIndex = -1; // prevent tab-selection
-            this._filterField1.display.position = new Point(11, theme.headerHeight + theme.filterPadding);
+            this._filterField1.display.position.set(11, theme.headerHeight + theme.filterPadding);
             this.addObject(this._filterField1, this.container);
 
             this.regs.add(this._filterField1.valueChanged.connect(() => this.filtersChanged.emit()));
@@ -142,7 +142,7 @@ export default class DataCol extends ContainerObject {
                 domParent: this._domParent
             });
             this._filterField1.tabIndex = -1; // prevent tab-selection
-            this._filterField1.display.position = new Point(11, theme.headerHeight + theme.filterPadding);
+            this._filterField1.display.position.set(11, theme.headerHeight + theme.filterPadding);
             this.addObject(this._filterField1, this.container);
 
             this.regs.add(this._filterField1.valueChanged.connect(() => this.filtersChanged.emit()));
@@ -154,7 +154,7 @@ export default class DataCol extends ContainerObject {
                 domParent: this._domParent
             });
             this._filterField2.tabIndex = -1; // prevent tab-selection
-            this._filterField2.display.position = new Point(11 + 40 + 12, theme.headerHeight + theme.filterPadding);
+            this._filterField2.display.position.set(11 + 40 + 12, theme.headerHeight + theme.filterPadding);
             this.addObject(this._filterField2, this.container);
 
             this.regs.add(this._filterField2.valueChanged.connect(() => this.filtersChanged.emit()));
@@ -186,7 +186,7 @@ export default class DataCol extends ContainerObject {
         this._pairsArray = pairs.slice(0);
     }
 
-    public getMouseIndex(e: PIXI.InteractionEvent): [number, number] {
+    public getMouseIndex(e: InteractionEvent): [number, number] {
         const {designBrowser: theme} = UITheme;
         const dataStart = theme.headerHeight + theme.filterHeight + theme.dataPadding / 2;
 
@@ -296,7 +296,7 @@ export default class DataCol extends ContainerObject {
             // Gets width of text (length * fontSize = length * 10), and uses it to center the text over the gridline
             const centerOffset = gridstring.length * 2.5;
             const x = xIncrement + offset - centerOffset;
-            gridtext.position = new Point(x, 73);
+            gridtext.position.set(x, 73);
             this._gridNumbers.addChild(gridtext);
         }
     }
@@ -384,7 +384,7 @@ export default class DataCol extends ContainerObject {
                 this._votesContainer.destroySelf();
             }
             this._votesContainer = new SceneObject(new VLayoutContainer(theme.rowHeight - dummySprite.height));
-            this._votesContainer.display.position = new Point(
+            this._votesContainer.display.position.set(
                 (this._dataWidth - dummySprite.width) / 2,
                 dataStart
             );
@@ -521,7 +521,7 @@ export default class DataCol extends ContainerObject {
 
             const {designBrowser: theme} = UITheme;
             const dataStart = theme.headerHeight + theme.filterHeight + theme.dataPadding;
-            this._sequencesView.position = new Point(this._dataDisplay.width + theme.dataPadding, dataStart);
+            this._sequencesView.position.set(this._dataDisplay.width + theme.dataPadding, dataStart);
         } else {
             this._sequencesView.setSequences(null, null, null);
         }

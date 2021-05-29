@@ -1,4 +1,4 @@
-import {Graphics, Point} from 'pixi.js';
+import {Graphics} from 'pixi.js';
 import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
 import {
     VLayoutContainer, HAlign, ErrorUtil, Flashbang, AppMode, Assert
@@ -61,7 +61,7 @@ export default class ErrorDialogMode extends AppMode {
         const H_MARGIN = 10;
 
         panel.setSize(panelLayout.width + (W_MARGIN * 2), panel.titleHeight + panelLayout.height + (H_MARGIN * 2));
-        panelLayout.position = new Point(W_MARGIN, H_MARGIN + panel.titleHeight);
+        panelLayout.position.set(W_MARGIN, H_MARGIN + panel.titleHeight);
 
         const updateView = () => {
             Assert.assertIsDefined(Flashbang.stageWidth);

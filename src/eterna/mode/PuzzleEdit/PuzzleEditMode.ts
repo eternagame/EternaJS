@@ -1,4 +1,4 @@
-import {DisplayObject, Point} from 'pixi.js';
+import {DisplayObject, InteractionEvent} from 'pixi.js';
 import EPars, {RNAPaint, RNABase} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import UndoBlock, {UndoBlockParam, TargetConditions} from 'eterna/UndoBlock';
@@ -50,8 +50,6 @@ import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
 import StructureInput from './StructureInput';
-
-type InteractionEvent = PIXI.InteractionEvent;
 
 export interface PuzzleEditPoseData {
     sequence: string;
@@ -132,14 +130,14 @@ export default class PuzzleEditMode extends GameMode {
             this.clearUndoStack();
             this.poseEditByTarget(0);
         });
-        this._folderSwitcher.display.position = new Point(17, 175);
+        this._folderSwitcher.display.position.set(17, 175);
         this.addObject(this._folderSwitcher, this.uiLayer);
 
         this._homeButton = new GameButton()
             .up(Bitmaps.ImgHome)
             .over(Bitmaps.ImgHome)
             .down(Bitmaps.ImgHome);
-        this._homeButton.display.position = new Point(18, 10);
+        this._homeButton.display.position.set(18, 10);
         this._homeButton.clicked.connect(() => {
             if (Eterna.MOBILE_APP) {
                 if (window.frameElement) window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
@@ -598,12 +596,12 @@ export default class PuzzleEditMode extends GameMode {
             const structureInput = this._structureInputs[ii];
             const poseField = this._poseFields[ii];
             if (!this._embedded) {
-                structureInput.display.position = new Point(
+                structureInput.display.position.set(
                     (poseField.width - structureInput.width) * 0.5,
                     toolbarBounds.y - structureInput.height - 7
                 );
             } else {
-                structureInput.display.position = new Point(
+                structureInput.display.position.set(
                     (poseField.width - structureInput.width) * 0.5,
                     toolbarBounds.y - structureInput.height - 7
                 );

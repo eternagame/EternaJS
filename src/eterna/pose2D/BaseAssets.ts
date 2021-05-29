@@ -8,6 +8,7 @@ import Sounds from 'eterna/resources/Sounds';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import EternaTextureUtil from 'eterna/util/EternaTextureUtil';
+import {ColorMatrixFilter} from '@pixi/filter-color-matrix';
 import BaseTextures from './BaseTextures';
 import BaseDrawFlags from './BaseDrawFlags';
 import Base from './Base';
@@ -280,7 +281,7 @@ export default class BaseAssets {
         return TextureUtil.renderToTexture(scratch);
     }
 
-    public static createSatelliteBitmaps(colorTransform: PIXI.filters.ColorMatrixFilter): Texture[] {
+    public static createSatelliteBitmaps(colorTransform: ColorMatrixFilter): Texture[] {
         const baseImage: Texture = BitmapManager.getBitmap(Bitmaps.Satellite);
         const sprite = new Sprite(baseImage);
         sprite.filters = [colorTransform];

@@ -1,8 +1,6 @@
-import {Container, DisplayObject} from 'pixi.js';
+import {Container, DisplayObject, InteractionEvent} from 'pixi.js';
 import {Assert, Flashbang, GameObject} from 'flashbang';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
-
-type InteractionEvent = PIXI.InteractionEvent;
 
 /**
  * Begins capturing pointer input. All pointer events not related to the passed Container will be
@@ -32,7 +30,8 @@ export default class PointerCapture extends GameObject {
     }
 
     protected added() {
-        Assert.assertIsDefined(this.mode?.container);
+        Assert.assertIsDefined(this.mode);
+        Assert.assertIsDefined(this.mode.container);
         this.regs.add(this.mode.resized.connect(() => this.onModeResized()));
         this.onModeResized();
 

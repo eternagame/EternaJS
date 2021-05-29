@@ -1,6 +1,6 @@
 import BitmapManager from 'eterna/resources/BitmapManager';
 import {
-    Texture, Sprite, Point, Container
+    Texture, Sprite, Container
 } from 'pixi.js';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {StyledTextBuilder, TextureUtil} from 'flashbang';
@@ -67,7 +67,7 @@ export default class LibrarySelectionConstraint extends Constraint<LibrarySelect
         const sprite = new Sprite(BitmapManager.getBitmap(Bitmaps.RandomIcon));
         sprite.width = 24;
         sprite.height = 24;
-        sprite.position = new Point(50, 50);
+        sprite.position.set(50, 50);
         icon.addChild(sprite);
 
         return TextureUtil.renderToTexture(icon);

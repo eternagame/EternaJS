@@ -1,14 +1,13 @@
 import {
-    Graphics, Point, Sprite, Text, Texture
+    Graphics, Sprite, Text, Texture
 } from 'pixi.js';
+import {ColorMatrixFilter} from '@pixi/filter-color-matrix';
 import {
     ContainerObject, MathUtil, TextureUtil, ColorUtil, Updatable
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
-
-type ColorMatrixFilter = PIXI.filters.ColorMatrixFilter;
 
 export default class Band extends ContainerObject implements Updatable {
     constructor(farDist: number, closeDist: number, strength: number) {
@@ -28,7 +27,7 @@ export default class Band extends ContainerObject implements Updatable {
         this.container.addChild(this._st1);
 
         const scoreText: Text = Fonts.std('', 10).bold().build();
-        scoreText.position = new Point(2, 19);
+        scoreText.position.set(2, 19);
         this.container.addChild(scoreText);
 
         this.strength = strength;
@@ -73,7 +72,7 @@ export default class Band extends ContainerObject implements Updatable {
             disp.beginFill(0).drawRect(0, 0, 20, 20).endFill();
 
             const sat = new Sprite(satTex);
-            sat.pivot = new Point(10, 10);
+            sat.pivot.set(10, 10);
             sat.rotation = MathUtil.deg2Rad * -rotation;
             if (colorTransform != null) {
                 sat.filters = [colorTransform];

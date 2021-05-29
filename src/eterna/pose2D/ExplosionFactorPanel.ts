@@ -1,4 +1,4 @@
-import {Point, Text} from 'pixi.js';
+import {Text} from 'pixi.js';
 import {Signal} from 'signals';
 import {KeyCode} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
@@ -21,7 +21,7 @@ export default class ExplosionFactorPanel extends GamePanel {
         let heightWalker: number = ExplosionFactorPanel.HMARGIN;
 
         const label: Text = Fonts.std('Explosion Factor', 14).color(0xC0DCE7).hAlignCenter().build();
-        label.position = new Point(ExplosionFactorPanel.WMARGIN, heightWalker);
+        label.position.set(ExplosionFactorPanel.WMARGIN, heightWalker);
         this.container.addChild(label);
 
         heightWalker += label.height + 10;
@@ -34,7 +34,7 @@ export default class ExplosionFactorPanel extends GamePanel {
             rows: 1
         }).font(Fonts.STDFONT);
         input.text = '1';
-        input.display.position = new Point(widthWalker, heightWalker);
+        input.display.position.set(widthWalker, heightWalker);
         this.addObject(input, this.container);
         input.valueChanged.connect((val) => {
             const factor = parseFloat(val);
@@ -46,7 +46,7 @@ export default class ExplosionFactorPanel extends GamePanel {
         widthWalker += /* input.width */ 50 + 5;
 
         const decreaseButton: GameButton = new GameButton().label('-', 16);
-        decreaseButton.display.position = new Point(widthWalker, heightWalker);
+        decreaseButton.display.position.set(widthWalker, heightWalker);
         this.addObject(decreaseButton, this.container);
         decreaseButton.clicked.connect(() => {
             const factor = Math.max(0, Math.round((parseFloat(input.text) - 0.25) * 1000) / 1000);
@@ -59,7 +59,7 @@ export default class ExplosionFactorPanel extends GamePanel {
         widthWalker += /* decreaseButton.container.width */20 + 5;
 
         const increaseButton: GameButton = new GameButton().label('+', 16);
-        increaseButton.display.position = new Point(widthWalker, heightWalker);
+        increaseButton.display.position.set(widthWalker, heightWalker);
         this.addObject(increaseButton, this.container);
         increaseButton.clicked.connect(() => {
             const factor = Math.max(0, Math.round((parseFloat(input.text) + 0.25) * 1000) / 1000);

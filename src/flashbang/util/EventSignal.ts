@@ -1,13 +1,11 @@
+import {InteractionEvent, utils as PixiUtils} from 'pixi.js';
 import {
     AbstractSignal, FilteredSignal, MappedSignal, SignalView
 } from 'signals';
 
-type InteractionEvent = PIXI.InteractionEvent;
-type EventEmitter = PIXI.utils.EventEmitter;
-
 /** Redispatches a pixi InteractionEvent as a Signal */
 export default class EventSignal extends AbstractSignal<InteractionEvent> implements SignalView<InteractionEvent> {
-    constructor(target: EventEmitter, eventType: string | symbol) {
+    constructor(target: PixiUtils.EventEmitter, eventType: string | symbol) {
         super();
         this._target = target;
         this._eventType = eventType;
@@ -55,7 +53,7 @@ export default class EventSignal extends AbstractSignal<InteractionEvent> implem
         }
     }
 
-    protected _target: EventEmitter;
+    protected _target: PixiUtils.EventEmitter;
     protected _eventType: string | symbol;
     protected _connected: boolean;
 

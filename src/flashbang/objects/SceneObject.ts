@@ -1,10 +1,8 @@
-import {DisplayObject} from 'pixi.js';
+import {DisplayObject, InteractionEvent} from 'pixi.js';
 import {SignalView} from 'signals';
 import GameObject from 'flashbang/core/GameObject';
 import PointerTarget from 'flashbang/input/PointerTarget';
 import DisplayObjectPointerTarget from 'flashbang/input/DisplayObjectPointerTarget';
-
-type InteractionEvent = PIXI.InteractionEvent;
 
 /** A convenience class that manages a DisplayObject directly. */
 export default class SceneObject<T extends DisplayObject = DisplayObject> extends GameObject implements PointerTarget {

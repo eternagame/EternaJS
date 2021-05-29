@@ -148,7 +148,7 @@ export default class StyledTextBuilder {
         // Parse <b>
         const BOLD_OPEN = /<b>/i;
         const BOLD_CLOSE = /<\/b>/i;
-        text = parseHTMLStyle(text, BOLD_OPEN, BOLD_CLOSE, () => ['__bold', {fontStyle: 'bold'}]);
+        text = parseHTMLStyle(text, BOLD_OPEN, BOLD_CLOSE, () => ['__bold', {fontWeight: 'bold'}]);
 
         return this.append(text);
     }

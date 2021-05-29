@@ -76,13 +76,13 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
         this._noText = Fonts.std('NO', 16).bold().color(0xffffff).letterSpacing(-0.5)
             .build();
-        this._noText.position = new Point(35, 0);
+        this._noText.position.set(35, 0);
         this._noText.visible = false;
         this.container.addChild(this._noText);
 
         this._stateText = Fonts.std('', 18).bold().color(0xffffff).letterSpacing(-0.5)
             .build();
-        this._stateText.position = new Point(3, 45);
+        this._stateText.position.set(3, 45);
         this._stateText.visible = false;
         this.container.addChild(this._stateText);
 
@@ -95,7 +95,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                 align: 'center'
             }
         });
-        this._reqClarifyText.position = new Point(50, 30);
+        this._reqClarifyText.position.set(50, 30);
         this._reqClarifyText.visible = false;
         this.container.addChild(this._reqClarifyText);
 
@@ -107,12 +107,12 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                 letterSpacing: -0.5
             }
         });
-        this._reqStatText.position = new Point(50, 50);
+        this._reqStatText.position.set(50, 50);
         this._reqStatText.visible = false;
         this.container.addChild(this._reqStatText);
 
         this._smallThumbnail = new Sprite();
-        this._smallThumbnail.position = new Point(6, 6);
+        this._smallThumbnail.position.set(6, 6);
         this.container.addChild(this._smallThumbnail);
 
         this._flag = new Graphics();
@@ -120,7 +120,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._flag.beginFill(0xBEDCE7, 1.0);
         this._flag.drawRect(0, 0, 5, 5);
         this._flag.endFill();
-        this._flag.position = new Point(4, 4);
+        this._flag.position.set(4, 4);
         this.container.addChild(this._flag);
         this._flag.visible = false;
 
@@ -130,7 +130,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         }
 
         this._check = new Sprite(BitmapManager.getBitmap(Bitmaps.NovaGreenCheck));
-        this._check.position = new Point(80, 50);
+        this._check.position.set(80, 50);
         this._check.visible = false;
         this.container.addChild(this._check);
 
@@ -232,9 +232,9 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             }
 
             this.initOpaqueBackdrop(this._bg.texture.width, this._bg.texture.height);
-            this._check.position = new Point(55, 50);
-            this._noText.position = new Point(35, 1);
-            this._stateText.position = new Point(3, 45);
+            this._check.position.set(55, 50);
+            this._noText.position.set(35, 1);
+            this._stateText.position.set(3, 45);
         }
 
         if (this._forMissionScreen) {
@@ -242,7 +242,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             tooltipText.apply(this._sideText);
             // Make the icon look centered with respect to the text
             const deltaWidth = Math.max(0, this._sideText.width - this._opaqueBackdrop.width);
-            this._sideText.position = new Point(-deltaWidth / 2, this._opaqueBackdrop.height + 10);
+            this._sideText.position.set(-deltaWidth / 2, this._opaqueBackdrop.height + 10);
         }
 
         if (config.stateNumber && !this._forMissionScreen && this._states > 1) {
@@ -263,13 +263,13 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             this._icon.texture = Texture.EMPTY;
             if (config.icon instanceof Texture) {
                 this._icon.texture = config.icon;
-                this._icon.position = new Point((111 - this._icon.width) * 0.5, 5);
+                this._icon.position.set((111 - this._icon.width) * 0.5, 5);
             } else if (config.icon instanceof Graphics) {
                 this._icon.addChild(config.icon);
             } else {
                 TextureUtil.fromBase64PNG(config.icon).then((tex) => {
                     this._icon.texture = tex;
-                    this._icon.position = new Point((111 - this._icon.width) * 0.5, 5);
+                    this._icon.position.set((111 - this._icon.width) * 0.5, 5);
                 });
             }
         }
@@ -412,7 +412,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             );
         } else {
             this.removeNamedObjects(ConstraintBox.LOCATION_ANIM);
-            this.display.position = p;
+            this.display.position.copyFrom(p);
         }
     }
 
@@ -441,7 +441,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._fglow.scale.y = 1;
         this._fglow.alpha = 0;
         this._fglow.visible = true;
-        this._fglow.position = new Point(0, 0);
+        this._fglow.position.set(0, 0);
         this.replaceNamedObject(ConstraintBox.FGLOW_ANIM, new ParallelTask(
             new LocationTask(0, -lineWidth, 1.6, Easing.easeIn, this._fglow),
             new ScaleTask(1.0, 1.0 + (2 * (lineWidth + 1)) / this.display.width, 1.6, Easing.easeIn, this._fglow),
@@ -458,7 +458,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._backlight.endFill();
         this._backlight.alpha = 0;
         this._backlight.visible = true;
-        this._backlight.position = new Point(0, 0);
+        this._backlight.position.set(0, 0);
         this.replaceNamedObject(ConstraintBox.BACKLIGHT_ANIM, new SerialTask(
             new AlphaTask(1, 0.8, Easing.easeInOut, this._backlight),
             new AlphaTask(0, 0.8, Easing.easeInOut, this._backlight),
@@ -473,7 +473,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._backlight.endFill();
         this._backlight.alpha = 0;
         this._backlight.visible = true;
-        this._backlight.position = new Point(0, 0);
+        this._backlight.position.set(0, 0);
 
         this.replaceNamedObject(ConstraintBox.BACKLIGHT_ANIM, new SerialTask(
             new AlphaTask(1, 0.15, Easing.easeInOut, this._backlight),

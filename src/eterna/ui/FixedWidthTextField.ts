@@ -42,7 +42,7 @@ export default class FixedWidthTextField extends Container {
         }
     }
 
-    private readonly _width: number;
+    protected readonly _width: number;
     private readonly _tf: Text;
     private readonly _halign: HAlign;
 

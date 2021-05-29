@@ -1,7 +1,7 @@
 import * as log from 'loglevel';
 import MultiStyleText from 'pixi-multistyle-text';
 import {
-    Container, Graphics, Point, Sprite, Text
+    Container, Graphics, InteractionEvent, Point, Sprite, Text
 } from 'pixi.js';
 import {UnitSignal} from 'signals';
 import EPars from 'eterna/EPars';
@@ -17,8 +17,6 @@ import GameButton from './GameButton';
 import GamePanel from './GamePanel';
 import HTMLTextObject from './HTMLTextObject';
 import TextBalloon from './TextBalloon';
-
-type InteractionEvent = PIXI.InteractionEvent;
 
 export default class SpecBox extends ContainerObject {
     /** Emitted when a docked SpecBox's maximize button is clicked */
@@ -151,7 +149,7 @@ export default class SpecBox extends ContainerObject {
                 fontSize: 14,
                 fill: 0xffffff
             }).addStyle('bold', {
-                fontStyle: 'bold'
+                fontWeight: 'bold'
             });
             EPars.addLetterStyles(statString);
 
@@ -272,31 +270,31 @@ export default class SpecBox extends ContainerObject {
         this._panel.setSize(this._width, this._height);
 
         if (this._docked) {
-            this._dotPlotSprite.position = new Point(20, 15);
-            this._meltPlotSprite.position = new Point(20, (this._height * 0.5) + 8);
-            this._maximizeButton.display.position = new Point(this._width - 22, 5);
+            this._dotPlotSprite.position.set(20, 15);
+            this._meltPlotSprite.position.set(20, (this._height * 0.5) + 8);
+            this._maximizeButton.display.position.set(this._width - 22, 5);
         } else {
             this._panel.title = 'RNA Spec';
 
-            this._v0.position = new Point(40 - this._v0.width - 3, 70);
+            this._v0.position.set(40 - this._v0.width - 3, 70);
 
             this._vnMelt.position.x = (this._width * 0.5) + 25 - this._vnMelt.width - 3;
             this._vnMelt.position.y = 70;
 
-            this._dotPlotSprite.position = new Point(40, 70);
-            this._meltPlotSprite.position = new Point((this._width * 0.5) + 20, 70);
+            this._dotPlotSprite.position.set(40, 70);
+            this._meltPlotSprite.position.set((this._width * 0.5) + 20, 70);
 
             this._stattext.visible = true;
-            this._stattext.position = new Point(20, this._height - 100);
+            this._stattext.position.set(20, this._height - 100);
             // this._stattext.size= new Point(200, 200);
 
             this._helpText.display.visible = true;
-            this._helpText.display.position = new Point(20, this._height - 35);
-            this._dotplottext.position = new Point(30, 40);
-            this._meltplottext.position = new Point((this._width * 0.5) + 10, 50);
+            this._helpText.display.position.set(20, this._height - 35);
+            this._dotplottext.position.set(30, 40);
+            this._meltplottext.position.set((this._width * 0.5) + 10, 50);
 
-            this._zoomInButton.display.position = new Point(40, this._height - 125);
-            this._zoomOutButton.display.position = new Point(70, this._height - 130);
+            this._zoomInButton.display.position.set(40, this._height - 125);
+            this._zoomOutButton.display.position.set(70, this._height - 130);
         }
 
         // Redraw our dotplot
@@ -432,12 +430,12 @@ export default class SpecBox extends ContainerObject {
         const h0XStart: number = h0DefaultX + refX;
         const h0YStart: number = h0DefaultY;
 
-        this._h0.position = new Point(h0XStart, h0YStart);
+        this._h0.position.set(h0XStart, h0YStart);
         this._h0.visible = !(h0XStart < h0DefaultX);
 
         for (let ii = 0; ii < this._hvec.length; ++ii) {
             const pos = this.calculateCoordPosition(this._h0, ii, SpecBox.HORIZONTAL);
-            this._hvec[ii].position = pos;
+            this._hvec[ii].position.copyFrom(pos);
             this._hvec[ii].visible = !(pos.x >= plotSize + h0DefaultX - this._hvec[ii].width || pos.x < h0DefaultX);
         }
 
@@ -447,14 +445,14 @@ export default class SpecBox extends ContainerObject {
         const v0XStart: number = v0DefaultX;
         const v0YStart: number = v0DefaultY + refY;
 
-        this._v0.position = new Point(v0XStart, v0YStart);
+        this._v0.position.set(v0XStart, v0YStart);
 
         this._v0.visible = !(v0YStart < v0DefaultY);
 
         for (let ii = 0; ii < this._vvec.length; ++ii) {
             const pos = this.calculateCoordPosition(this._v0, ii, SpecBox.VERTICAL);
             pos.set(pos.x - this._vvec[ii].width, pos.y);
-            this._vvec[ii].position = pos;
+            this._vvec[ii].position.copyFrom(pos);
             this._vvec[ii].visible = !((pos.y >= plotSize + v0DefaultY - this._vvec[ii].height || pos.y < v0DefaultY));
         }
     }

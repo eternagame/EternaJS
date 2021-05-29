@@ -1,4 +1,4 @@
-import {Graphics, Point} from 'pixi.js';
+import {Graphics, InteractionEvent, Point} from 'pixi.js';
 import {
     ContainerObject, KeyboardListener, MouseWheelListener, InputUtil, Flashbang,
     KeyboardEventType, KeyCode, Assert
@@ -9,8 +9,6 @@ import Pose2D from './Pose2D';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
 import ExplosionFactorPanel from './ExplosionFactorPanel';
 import RNAAnchorObject from './RNAAnchorObject';
-
-type InteractionEvent = PIXI.InteractionEvent;
 
 /** Wraps a Pose2D and handles resizing, masking, and input events */
 export default class PoseField extends ContainerObject implements KeyboardListener, MouseWheelListener {
@@ -33,41 +31,41 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this.addObject(this._pose, this.container);
 
         this.pointerDown.filter(InputUtil.IsLeftMouse).connect(
-            (e: PIXI.InteractionEvent) => this.onPointerDown(e)
+            (e: InteractionEvent) => this.onPointerDown(e)
         );
         this.pointerUp.filter(InputUtil.IsLeftMouse).connect(
-            (e: PIXI.InteractionEvent) => this.onPointerUp(e)
+            (e: InteractionEvent) => this.onPointerUp(e)
         );
         this.pointerMove.connect(
-            (e: PIXI.InteractionEvent) => this.onPointerMove(e)
+            (e: InteractionEvent) => this.onPointerMove(e)
         );
         this.container.on('pointercancel',
-            (e: PIXI.InteractionEvent) => this.onPointerUp(e));
+            (e: InteractionEvent) => this.onPointerUp(e));
         this.container.on('pointerout',
-            (e: PIXI.InteractionEvent) => this.onPointerUp(e));
+            (e: InteractionEvent) => this.onPointerUp(e));
         this.container.on('pointerupoutside',
-            (e: PIXI.InteractionEvent) => this.onPointerUp(e));
+            (e: InteractionEvent) => this.onPointerUp(e));
 
         Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.keyboardInput.pushListener(this));
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));
 
         this._primaryScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
-        this._primaryScoreEnergyDisplay.position = new Point(17, PoseField.SCORES_POSITION_Y);
+        this._primaryScoreEnergyDisplay.position.set(17, PoseField.SCORES_POSITION_Y);
         this.container.addChild(this._primaryScoreEnergyDisplay);
 
         this._deltaScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
-        this._deltaScoreEnergyDisplay.position = new Point(17 + 119, PoseField.SCORES_POSITION_Y);
+        this._deltaScoreEnergyDisplay.position.set(17 + 119, PoseField.SCORES_POSITION_Y);
         this._deltaScoreEnergyDisplay.visible = false;
         this.container.addChild(this._deltaScoreEnergyDisplay);
 
         this._secondaryScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
-        this._secondaryScoreEnergyDisplay.position = new Point(17 + 119 * 2, PoseField.SCORES_POSITION_Y);
+        this._secondaryScoreEnergyDisplay.position.set(17 + 119 * 2, PoseField.SCORES_POSITION_Y);
         this._secondaryScoreEnergyDisplay.visible = false;
         this.container.addChild(this._secondaryScoreEnergyDisplay);
 
         this._explosionFactorPanel = new ExplosionFactorPanel();
-        this._explosionFactorPanel.display.position = new Point(17, PoseField.SCORES_POSITION_Y + 82);
+        this._explosionFactorPanel.display.position.set(17, PoseField.SCORES_POSITION_Y + 82);
         this._explosionFactorPanel.display.visible = false;
         this._explosionFactorPanel.factorUpdated.connect((factor: number) => {
             this._explosionFactor = factor;
@@ -87,7 +85,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         for (const anchor of this._anchoredObjects) {
             if (anchor.isLive) {
                 const p: Point = this.pose.getBaseLoc(anchor.base);
-                anchor.object.display.position = new Point(p.x + anchor.offset.x, p.y + anchor.offset.y);
+                anchor.object.display.position.set(p.x + anchor.offset.x, p.y + anchor.offset.y);
             }
         }
     }
@@ -373,13 +371,13 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     }
 
     private updateEnergyDisplaySizeLocation(factor: number): void {
-        this._primaryScoreEnergyDisplay.position = new Point(17, PoseField.SCORES_POSITION_Y);
+        this._primaryScoreEnergyDisplay.position.set(17, PoseField.SCORES_POSITION_Y);
         this._primaryScoreEnergyDisplay.setSize(111 + factor * 59, 40);
 
-        this._deltaScoreEnergyDisplay.position = new Point(17 + 119 + factor * 59, PoseField.SCORES_POSITION_Y);
+        this._deltaScoreEnergyDisplay.position.set(17 + 119 + factor * 59, PoseField.SCORES_POSITION_Y);
         this._deltaScoreEnergyDisplay.setSize(111, 40);
 
-        this._secondaryScoreEnergyDisplay.position = new Point(17 + 119 * 2 + factor * 59, PoseField.SCORES_POSITION_Y);
+        this._secondaryScoreEnergyDisplay.position.set(17 + 119 * 2 + factor * 59, PoseField.SCORES_POSITION_Y);
         this._secondaryScoreEnergyDisplay.setSize(111, 40);
     }
 

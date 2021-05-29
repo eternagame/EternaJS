@@ -58,7 +58,7 @@ export default class HintsPanel extends ContainerObject {
             const {theme} = HintsPanel;
             Assert.assertIsDefined(Flashbang.stageWidth);
             Assert.assertIsDefined(Flashbang.stageHeight);
-            this.container.position = new Point(
+            this.container.position.set(
                 Flashbang.stageWidth * theme.relativePos.x,
                 (Flashbang.stageHeight - this.container.height) * theme.relativePos.y
             );

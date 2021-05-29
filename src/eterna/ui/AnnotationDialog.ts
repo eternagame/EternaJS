@@ -272,7 +272,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
                 borderColor: AnnotationDialog.UPPER_TOOLBAR_DIVIDER_COLOR,
                 color: 0x021E46,
                 textColor: 0xF39C12,
-                textWeight: 'bold',
+                textWeight: FontWeight.BOLD,
                 width: AnnotationDialog.FIELD_WIDTH,
                 height: AnnotationDialog.DROPDOWN_HEIGHT,
                 dropShadow: true,

@@ -1,5 +1,5 @@
 import {
-    Container, Point, Text, Graphics
+    Container, Text, Graphics
 } from 'pixi.js';
 import {Signal} from 'signals';
 import Dialog from 'eterna/ui/Dialog';
@@ -140,23 +140,23 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
         Arrays.addAt(this._columnUIs, ui, idx);
 
         ui.categoryText = Fonts.std(category, 14).bold().color(0xffffff).build();
-        ui.categoryText.position = new Point(10, 0);
+        ui.categoryText.position.set(10, 0);
         ui.categoryText.alpha = this.isDisabled(category) ? 0.3 : 1;
         ui.container.addChild(ui.categoryText);
 
         ui.moveUpButton = new GameButton().allStates(Bitmaps.GoUpImg);
         ui.moveUpButton.clicked.connect(() => this.moveColumn(category, -1));
-        ui.moveUpButton.display.position = new Point(280, 5);
+        ui.moveUpButton.display.position.set(280, 5);
         this.addObject(ui.moveUpButton, ui.container);
 
         ui.moveDownButton = new GameButton().allStates(Bitmaps.GoDownImg);
         ui.moveDownButton.clicked.connect(() => this.moveColumn(category, 1));
-        ui.moveDownButton.display.position = new Point(300, 5);
+        ui.moveDownButton.display.position.set(300, 5);
         this.addObject(ui.moveDownButton, ui.container);
 
         ui.removeButton = new GameButton().allStates(Bitmaps.ImgRemove);
         ui.removeButton.clicked.connect(() => this.removeColumn(category));
-        ui.removeButton.display.position = new Point(320, 5);
+        ui.removeButton.display.position.set(320, 5);
         this.addObject(ui.removeButton, ui.container);
 
         // Separator line

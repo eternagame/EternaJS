@@ -1,4 +1,4 @@
-import {Point, Text} from 'pixi.js';
+import {Text} from 'pixi.js';
 import {Signal, UnitSignal} from 'signals';
 import Fonts from 'eterna/util/Fonts';
 import GameButton from './GameButton';
@@ -76,11 +76,11 @@ export default class TextInputPanel extends GamePanel {
         const height = heightWalker + 20 + TextInputPanel.H_MARGIN;
         this.setSize(width, height);
 
-        this._okButton.display.position = new Point(
+        this._okButton.display.position.set(
             (width * 0.5) - 30 - this._okButton.container.width,
             heightWalker
         );
-        this._cancelButton.display.position = new Point((width * 0.5) + 30, heightWalker);
+        this._cancelButton.display.position.set((width * 0.5) + 30, heightWalker);
     }
 
     public addField(name: string, width: number, multiline: boolean = false): TextInputObject {

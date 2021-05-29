@@ -1,4 +1,6 @@
-import {Graphics, Point, Text} from 'pixi.js';
+import {
+    Graphics, InteractionEvent, Point, Text
+} from 'pixi.js';
 import {Signal} from 'signals';
 import {
     ContainerObject, KeyboardListener, Enableable, LocationTask, Easing, KeyboardEventType, KeyCode, Flashbang, Assert
@@ -7,8 +9,6 @@ import Fonts from 'eterna/util/Fonts';
 import Sounds from 'eterna/resources/Sounds';
 import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import ROPWait from 'eterna/rscript/ROPWait';
-
-type InteractionEvent = PIXI.InteractionEvent;
 
 export default class ToggleBar extends ContainerObject implements KeyboardListener, Enableable {
     /** Emitted when our state changes */
@@ -59,7 +59,7 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
 
         for (let ii = 0; ii < this._numStates; ii++) {
             this._labels[ii] = Fonts.std(`${ii + 1}`, 12).color(ToggleBar.COLOR_TEXT).build();
-            this._labels[ii].position = new Point((ii * ToggleBar.BUTTON_SIZE) + 9, 5);
+            this._labels[ii].position.set((ii * ToggleBar.BUTTON_SIZE) + 9, 5);
             this.container.addChild(this._labels[ii]);
         }
 
@@ -163,7 +163,7 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
             this._hoverHilite.visible = false;
         } else {
             this._hoverHilite.visible = true;
-            this._hoverHilite.position = new Point(this._hoveredState * ToggleBar.BUTTON_SIZE, 0);
+            this._hoverHilite.position.set(this._hoveredState * ToggleBar.BUTTON_SIZE, 0);
             this._labels[this._hoveredState].style.fill = ToggleBar.COLOR_HIGH;
         }
     }

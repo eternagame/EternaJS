@@ -1,4 +1,3 @@
-import {Point} from 'pixi.js';
 import {
     Enableable, PointerCapture, DisplayUtil, HAlign, VAlign, Flashbang, Assert
 } from 'flashbang';
@@ -268,7 +267,7 @@ export default class EternaMenu extends GamePanel implements Enableable {
                     continue;
                 }
 
-                button.display.position = new Point(7, heightWalker);
+                button.display.position.set(7, heightWalker);
                 heightWalker += DisplayUtil.height(button.display) + 7;
                 widthWalker = Math.max(widthWalker, DisplayUtil.width(button.display) + 14);
             }
@@ -284,7 +283,7 @@ export default class EternaMenu extends GamePanel implements Enableable {
             const buttonWidth: number = menu.menuButton.container.width;
             const buttonHeight: number = menu.menuButton.container.height;
 
-            menu.menuButton.display.position = new Point(widthOffset, 0);
+            menu.menuButton.display.position.set(widthOffset, 0);
             widthOffset += buttonWidth + space;
             this._menuHeight = Math.max(this._menuHeight, buttonHeight);
         }

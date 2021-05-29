@@ -1,6 +1,6 @@
 import BitmapManager from 'eterna/resources/BitmapManager';
 import {
-    Texture, Container, Sprite, Point
+    Texture, Container, Sprite
 } from 'pixi.js';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {TextureUtil} from 'flashbang';
@@ -67,7 +67,7 @@ export default class BranchinessConstraint extends Constraint<BranchinessConstra
         const base1 = new Sprite(BitmapManager.getBitmap(Bitmaps.BranchinessIcon));
         base1.width = 24;
         base1.height = 24;
-        base1.position = new Point(50, 50);
+        base1.position.set(50, 50);
         icon.addChild(base1);
 
         return TextureUtil.renderToTexture(icon);

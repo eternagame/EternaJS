@@ -1,6 +1,5 @@
 import {
     Graphics,
-    Point,
     Sprite
 } from 'pixi.js';
 import {Signal} from 'signals';
@@ -608,7 +607,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
             }
 
             if (input) {
-                text.position = new Point(
+                text.position.set(
                     parseFloat(window.getComputedStyle(input, null).getPropertyValue('padding-left')),
                     this._rows === 1
                         ? (this.height - this._fontSize) / 2
@@ -616,7 +615,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
                 );
             }
         } else if (this._obj instanceof HTMLInputElement || this._obj instanceof HTMLTextAreaElement) {
-            text.position = new Point(
+            text.position.set(
                 parseFloat(window.getComputedStyle(this._obj, null).getPropertyValue('padding-left')),
                 this._rows === 1
                     ? (this.height - text.height) / 2

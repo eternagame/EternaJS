@@ -1,4 +1,4 @@
-import {Container, Point} from 'pixi.js';
+import {Container} from 'pixi.js';
 import SelectionBox from './SelectionBox';
 
 export default class MarkerBoxView extends Container {
@@ -36,7 +36,7 @@ export default class MarkerBoxView extends Container {
 
         const box = new SelectionBox(this._color);
         box.setSize(this._width, this._markerHeight);
-        box.position = new Point(0, index * this._markerHeight);
+        box.position.set(0, index * this._markerHeight);
         this.addChild(box);
 
         this._markers.push(box);
@@ -76,7 +76,7 @@ export default class MarkerBoxView extends Container {
                 const yPos = (this._indices[ii] - firstVisIdx) * this._markerHeight;
                 if (yPos + this._markerHeight < this._height) {
                     box.visible = true;
-                    box.position = new Point(0, yPos);
+                    box.position.set(0, yPos);
                     box.setSize(this._width, this._markerHeight);
                 }
             }
@@ -86,8 +86,8 @@ export default class MarkerBoxView extends Container {
     private readonly _color: number;
     private readonly _markerHeight: number;
 
-    private _width: number = 0;
-    private _height: number = 0;
+    protected _width: number = 0;
+    protected _height: number = 0;
 
     private _markers: SelectionBox[];
     private _indices: number[];

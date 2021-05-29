@@ -123,6 +123,8 @@ export default class FlashbangApp {
         this._isUpdating = true;
 
         try {
+            // This seems to aways be set. TODO: Investigate
+            Assert.assertIsDefined(settings.TARGET_FPMS);
             // convert PIXI's weird ticker delta into elapsed seconds
             const dt = tickerDelta / (settings.TARGET_FPMS * 1000);
 
