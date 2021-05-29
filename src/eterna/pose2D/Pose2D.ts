@@ -3420,9 +3420,15 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public updateAnnotationSpaceAvailability(): void {
+        // These are SUPER expensive getters which basically have to touch all the objects in
+        // the container. There's no reason the width and height change while running this function,
+        // so let's only compute them once.
+        const baseLayerheight = this._baseLayer.height;
+        const baseLayerWidth = this._baseLayer.width;
+
         // Set annotation space availability to true
-        this._annotationSpaceAvailability = Array(Math.ceil(this._baseLayer.height)).fill(0).map(
-            () => Array(Math.ceil(this._baseLayer.width)).fill(true)
+        this._annotationSpaceAvailability = Array(Math.ceil(baseLayerheight)).fill(0).map(
+            () => Array(Math.ceil(baseLayerWidth)).fill(true)
         );
 
         const baseLayerBounds = DisplayUtil.getBoundsRelative(this._baseLayer, this.container);
@@ -3433,12 +3439,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
             const baseBounds = DisplayUtil.getBoundsRelative(base.display, this._baseLayer);
             const baseRowStart = Math.max(0, Math.floor(baseBounds.y - baseLayerBounds.y));
             const baseRowEnd = Math.min(
-                Math.ceil(this._baseLayer.height),
+                Math.ceil(baseLayerheight),
                 Math.ceil(baseBounds.y - baseLayerBounds.y + baseBounds.height)
             );
             const baseColStart = Math.max(0, Math.floor(baseBounds.x - baseLayerBounds.x));
             const baseColEnd = Math.min(
-                Math.ceil(this._baseLayer.width),
+                Math.ceil(baseLayerWidth),
                 Math.ceil(baseBounds.x - baseLayerBounds.x + baseBounds.width)
             );
 
