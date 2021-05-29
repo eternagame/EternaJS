@@ -63,6 +63,7 @@ export default class FeedbackViewMode extends GameMode {
         this._homeButton.display.position = new Point(18, 10);
         this._homeButton.clicked.connect(() => {
             if (Eterna.MOBILE_APP) {
+                Assert.assertIsDefined(window.frameElement);
                 window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
             } else {
                 window.location.href = EternaURL.createURL({page: 'home'});

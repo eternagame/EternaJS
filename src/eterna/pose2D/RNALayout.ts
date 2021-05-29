@@ -634,7 +634,7 @@ export default class RNALayout {
                     let customGoX: number = customCrossY;
                     let customGoY: number = -customCrossX;
                     const customCoordNext = this._customLayout[child.indexA + 1];
-                    let childCustomRotationDirection: RotationDirection = 0;
+                    let childCustomRotationDirection: RotationDirection | 0 = 0;
                     let childCustomDotProd = 0;
                     if (
                         customCoordNext[0] !== null
@@ -794,7 +794,9 @@ export default class RNALayout {
                 const puzzlerGoNextX: number = puzzlerCoordNext[0] - puzzlerCoord[0];
                 const puzzlerGoNextY: number = puzzlerCoordNext[1] - puzzlerCoord[1];
                 const childPuzzlerDotProd = puzzlerGoNextX * puzzlerGoX + puzzlerGoNextY * puzzlerGoY;
-                let childPuzzlerLayoutRotationDirection: RotationDirection = Math.sign(childPuzzlerDotProd);
+                // TS really doesn't like picking up on the | 0 in a regular type annotation
+                // for some reason -  maybe a bug with our current version? Change it back if possible
+                let childPuzzlerLayoutRotationDirection = Math.sign(childPuzzlerDotProd) as RotationDirection | 0;
                 if (puzzlerCoordNext[0] === null) {
                     childPuzzlerLayoutRotationDirection = anchorPuzzlerRotationDirection;
                 } else if (childPuzzlerLayoutRotationDirection === 0
