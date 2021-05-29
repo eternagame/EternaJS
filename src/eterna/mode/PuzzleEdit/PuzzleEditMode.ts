@@ -33,7 +33,6 @@ import ShapeConstraint from 'eterna/constraints/constraints/ShapeConstraint';
 import ContraFold from 'eterna/folding/Contrafold';
 import {SaveStoreItem} from 'flashbang/settings/SaveGameManager';
 import FolderSwitcher from 'eterna/ui/FolderSwitcher';
-import AnnotationDialog from 'eterna/ui/AnnotationDialog';
 import GameButton from 'eterna/ui/GameButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import EternaURL from 'eterna/net/EternaURL';
@@ -43,7 +42,6 @@ import ContextMenu from 'eterna/ui/ContextMenu';
 import AnnotationView from 'eterna/ui/AnnotationView';
 import AnnotationManager, {
     AnnotationData,
-    AnnotationCategory,
     AnnotationArguments,
     AnnotationDataBundle,
     AnnotationRange
@@ -247,8 +245,8 @@ export default class PuzzleEditMode extends GameMode {
             this._scriptInterface.addCallback('get_shift_limit', () => this.shiftLimitString);
         }
 
-        this._toolbar.annotationModeButton.toggled.connect((active) => {
-            Eterna.settings.annotationModeActive.value = active;
+        this._toolbar.annotationModeButton.toggled.connect((active: boolean) => {
+            this._annotationManager.setAnnotationMode(active);
         });
 
         this._toolbar.annotationPanelButton.toggled.connect((visible) => {
@@ -285,6 +283,22 @@ export default class PuzzleEditMode extends GameMode {
         // We don't appropriately handle these, so for now just force them off
         Eterna.settings.showRope.value = false;
         Eterna.settings.usePuzzlerLayout.value = false;
+
+        const onAnnotationModeChange = (pose: Pose2D, active: boolean) => {
+            if (!active) {
+                pose.clearAnnotationRanges();
+                pose.hideAnnotationContextMenu();
+                const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
+                if (doc) {
+                    doc.style.cursor = 'default';
+                }
+            } else {
+                const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
+                if (doc) {
+                    doc.style.cursor = 'grab';
+                }
+            }
+        };
 
         const initialPoseData = this._initialPoseData;
         for (let ii = 0; ii < this._numTargets; ii++) {
@@ -328,6 +342,10 @@ export default class PuzzleEditMode extends GameMode {
             }
             poseFields.push(poseField);
 
+            // We only need one annotation manager to act on annotation logic
+            this._annotationManager.annotationMode.connect((active: boolean) => {
+                onAnnotationModeChange(pose, active);
+            });
             this._annotationManager.onAdjustBasesOpacity.connect((opacity: number) => {
                 pose.setBasesOpacity(opacity);
             });
@@ -354,63 +372,47 @@ export default class PuzzleEditMode extends GameMode {
                 }
             });
             this._annotationManager.onAddAnnotationView.connect((view: AnnotationView) => {
-                this.addObject(view, pose.annotationCanvas);
+                if (!view.isLiveObject) {
+                    this.addObject(view, pose.annotationCanvas);
+                }
             });
 
             this._annotationManager.onCreateAnnotation.connect((args: AnnotationArguments) => {
-                this._annotationDialog = new AnnotationDialog(
-                    false,
-                    pose.fullSequenceLength,
-                    args.ranges,
-                    this._annotationManager.activeLayers
-                );
-                this.showDialog(
-                    this._annotationDialog
-                ).closed.then((annotation: AnnotationData | null) => {
-                    if (annotation) {
-                        this._annotationManager.addAnnotation(annotation, AnnotationCategory.PUZZLE);
-                    }
-
-                    // Clear annotation dialog reference
-                    this._annotationDialog = null;
-
-                    // Remove annotation highlighting
-                    pose.clearAnnotationRanges();
-
-                    if (this._poses.length > 0) {
-                        this.saveData();
-                    }
-                });
-            });
-            this._annotationManager.onToggleItemSelection.connect((annotation: AnnotationData) => {
-                this._toolbar.annotationPanel.toggleAnnotationPanelItemSelection(annotation);
-            });
-            const editAnnotation = (annotation: AnnotationData | null) => {
-                if (annotation && annotation.ranges) {
-                    this._annotationDialog = new AnnotationDialog(
-                        true,
-                        pose.fullSequenceLength,
-                        annotation.ranges,
-                        this._annotationManager.activeLayers,
-                        annotation
-                    );
-                    this.showDialog(
-                        this._annotationDialog
-                    ).closed.then((editedAnnotation: AnnotationData | null) => {
-                        if (editedAnnotation) {
-                            editedAnnotation.selected = false;
-                            this._annotationManager.editAnnotation(editedAnnotation);
-                        } else {
-                            // We interpret null argument as delete intent when editing
-                            this._annotationManager.deleteAnnotation(annotation);
-                        }
-
-                        // Clear annotation dialog reference
-                        this._annotationDialog = null;
-
+                this._annotationManager.showAnnotationDialog({
+                    edit: false,
+                    ranges: args.ranges,
+                    modal: false,
+                    gameMode: this,
+                    pose,
+                    gameLayer: this.uiLayer,
+                    closeCallback: () => {
                         if (this._poses.length > 0) {
                             this.saveData();
                         }
+                    },
+                    panelPos: args.panelPos
+                });
+            });
+            this._annotationManager.onToggleItemSelection.connect((annotation: AnnotationData | null) => {
+                if (annotation) {
+                    this._toolbar.annotationPanel.toggleAnnotationPanelItemSelection(annotation);
+                }
+            });
+            const editAnnotation = (annotation: AnnotationData | null) => {
+                if (annotation && annotation.ranges) {
+                    this._annotationManager.showAnnotationDialog({
+                        edit: true,
+                        ranges: annotation.ranges,
+                        modal: true,
+                        gameMode: this,
+                        pose,
+                        gameLayer: this.uiLayer,
+                        closeCallback: () => {
+                            if (this._poses.length > 0) {
+                                this.saveData();
+                            }
+                        },
+                        annotation
                     });
                 }
             };
@@ -418,8 +420,8 @@ export default class PuzzleEditMode extends GameMode {
             this._annotationManager.onTriggerPanelUpdate.connect(() => {
                 this._toolbar.annotationPanel.updatePanel();
 
-                if (this._annotationDialog) {
-                    this._annotationDialog.setLayers(this._annotationManager.activeLayers);
+                if (this._annotationManager.dialogIsVisible) {
+                    this._annotationManager.updateDialogLayers();
                 }
 
                 if (this._poses.length > 0) {
@@ -429,12 +431,19 @@ export default class PuzzleEditMode extends GameMode {
             this._annotationManager.onTriggerPoseUpdate.connect(() => {
                 this._annotationManager.updateAnnotationViews(pose);
 
-                if (this._annotationDialog) {
-                    this._annotationDialog.setLayers(this._annotationManager.activeLayers);
+                if (this._annotationManager.dialogIsVisible) {
+                    this._annotationManager.updateDialogLayers();
                 }
 
                 if (this._poses.length > 0) {
                     this.saveData();
+                }
+            });
+
+            this._annotationManager.onUploadAnnotations.connect((bundle: AnnotationDataBundle) => {
+                if (bundle) {
+                    this._annotationManager.setPuzzleAnnotations(bundle.puzzle);
+                    this._annotationManager.setSolutionAnnotations(bundle.solution);
                 }
             });
 
@@ -528,7 +537,7 @@ export default class PuzzleEditMode extends GameMode {
             objs.push(JSON.stringify({
                 sequence: pose.sequence.sequenceString(),
                 structure: pose.molecularStructure.getParenthesis(null, true),
-                annotations: this._annotationManager.annotationBundle
+                annotations: this._annotationManager.annotationDataBundle
             }));
         }
 
@@ -600,6 +609,14 @@ export default class PuzzleEditMode extends GameMode {
                 );
             }
         }
+
+        for (const pose of this._poses) {
+            this._annotationManager.refreshAnnotations(pose, true);
+        }
+
+        if (this._toolbar.annotationPanel.isVisible) {
+            this._toolbar.annotationPanel.updatePanelPosition();
+        }
     }
 
     /* override */
@@ -608,7 +625,7 @@ export default class PuzzleEditMode extends GameMode {
             return null;
         }
 
-        const menu = new ContextMenu();
+        const menu = new ContextMenu({horizontal: false});
 
         menu.addItem('Preferences').clicked.connect(() => this.showViewOptionsDialog());
         menu.addItem('Reset').clicked.connect(() => this.promptForReset());
@@ -846,7 +863,7 @@ export default class PuzzleEditMode extends GameMode {
                     type: pseudoknots ? 'pseudoknot' : 'single',
                     secstruct: this._structureInputs[ii].structureString,
                     'custom-layout': this._poses[ii].customLayout,
-                    annotations: this._poses[ii].annotationManager.annotationBundle
+                    annotations: this._poses[ii].annotationManager.annotationDataBundle
                 };
             }
 
@@ -1236,6 +1253,5 @@ export default class PuzzleEditMode extends GameMode {
     private _constraintBar: ConstraintBar;
 
     // Annotations
-    private _annotationDialog: AnnotationDialog | null = null;
     private _annotationManager: AnnotationManager;
 }

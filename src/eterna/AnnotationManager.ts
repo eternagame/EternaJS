@@ -4,11 +4,14 @@ import {
     Point, Container, Rectangle, Graphics
 } from 'pixi.js';
 import {ToolbarType} from 'eterna/ui/Toolbar';
-import {DisplayUtil} from 'flashbang';
+import {DisplayUtil, Assert, Flashbang} from 'flashbang';
 import {v4 as uuidv4} from 'uuid';
-import AnnotationPanelItem from './ui/AnnotationPanelItem';
-import AnnotationView from './ui/AnnotationView';
-import Pose2D from './pose2D/Pose2D';
+import AnnotationPanelItem from 'eterna/ui/AnnotationPanelItem';
+import AnnotationView from 'eterna/ui/AnnotationView';
+import AnnotationDialog from 'eterna/ui/AnnotationDialog';
+import {HTMLInputEvent} from 'eterna/ui/FileInputObject';
+import Pose2D from 'eterna/pose2D/Pose2D';
+import GameMode from 'eterna/mode/GameMode';
 
 // DEBUG SETTINGS FOR ANNOTATION PLACEMENT:
 // In order to visualize placement conflicts, you can toggle these variables
@@ -85,6 +88,7 @@ export interface AnnotationRange {
  */
 export interface AnnotationArguments {
     ranges: AnnotationRange[];
+    panelPos: Point;
 }
 
 /**
@@ -172,20 +176,33 @@ export interface AnnotationPositionConflict {
     placement: AnnotationPlacement;
 }
 
+/**
+ * A data structure to represent the arguments required to
+ * invoke an annotation dialog
+ */
+export interface AnnotationDialogArguments {
+    edit: boolean;
+    ranges: AnnotationRange[];
+    modal: boolean;
+    gameMode: GameMode;
+    pose: Pose2D;
+    gameLayer: Container;
+    closeCallback: () => void;
+    panelPos?: Point;
+    annotation?: AnnotationData;
+}
+
 export default class AnnotationManager {
+    // Signals annotation mode active state
+    public readonly annotationMode: Value<boolean> = new Value<boolean>(false);
     // Signals the process to create a new annotation with the necessary initial data
-    public readonly onCreateAnnotation: Value<AnnotationArguments> = new Value<AnnotationArguments>({ranges: []});
-    // Signals that an annotation has been selected
-    public readonly onToggleItemSelection: Value<AnnotationData> = new Value<AnnotationData>({
-        id: '',
-        category: AnnotationCategory.PUZZLE,
-        type: AnnotationHierarchyType.ANNOTATION,
-        playerID: Eterna.playerID,
-        title: '',
-        positions: [],
-        children: []
+    public readonly onCreateAnnotation: Value<AnnotationArguments> = new Value<AnnotationArguments>({
+        ranges: [],
+        panelPos: new Point(0, 0)
     });
 
+    // Signals that an annotation has been selected
+    public readonly onToggleItemSelection: Value<AnnotationData | null> = new Value<AnnotationData | null>(null);
     // Signals that an annotation should be edited (reveal AnnotationDialog)
     public readonly onEditAnnotation: Value<AnnotationData | null> = new Value<AnnotationData | null>(null);
     // Signals to clear highlights placed on bases upon annotation selection or hover
@@ -210,12 +227,13 @@ export default class AnnotationManager {
     public readonly onTriggerPanelUpdate = new UnitSignal();
     // Signals to upate the puzzle pose/s
     public readonly onTriggerPoseUpdate = new UnitSignal();
+    // Signals to import annotation bundle
+    public readonly onUploadAnnotations: Value<AnnotationDataBundle | null> = new Value<
+    AnnotationDataBundle | null
+    >(null);
 
     constructor(toolbarType: ToolbarType) {
         this._toolbarType = toolbarType;
-        this.regs.add(Eterna.settings.annotationModeActive.connectNotify((value) => {
-            this.annotationModeActive = value;
-        }));
     }
 
     /**
@@ -223,10 +241,11 @@ export default class AnnotationManager {
      *
      * @param ranges the set of ranges associated with the new annotation
      */
-    public createAnnotation(ranges: AnnotationRange[]) {
+    public createAnnotation(ranges: AnnotationRange[], panelPos: Point) {
         // Inform listener to expose annotation dialog
         this.onCreateAnnotation.value = {
-            ranges
+            ranges,
+            panelPos
         };
     }
 
@@ -321,6 +340,74 @@ export default class AnnotationManager {
     }
 
     /**
+     * Deselects all annotations
+     */
+    public deselectAll(): void {
+        this.allAnnotations.forEach((annotation) => {
+            if (annotation.selected) {
+                this.onToggleItemSelection.value = annotation as AnnotationData;
+                this.onToggleItemSelection.value = null;
+            }
+        });
+
+        this.allLayers.forEach((layer) => {
+            if (layer.selected) {
+                this.onToggleItemSelection.value = layer as AnnotationData;
+                this.onToggleItemSelection.value = null;
+            }
+        });
+    }
+
+    /**
+     * Downloads the annotation bundle to the player's disk
+     */
+    public downloadAnnotations() {
+        const currentDate = new Date();
+        const exportName = `eterna-puzzle-annotation-graph-${
+            currentDate.getUTCFullYear()
+        }-${
+            currentDate.getMonth()
+        }-${
+            currentDate.getDay()
+        }-${
+            currentDate.getUTCHours()
+        }${
+            currentDate.getUTCMinutes()
+        }${
+            currentDate.getUTCSeconds()
+        }`;
+
+        const dataStr = `data:text/json;charset=utf-8,${
+            encodeURIComponent(JSON.stringify(this.annotationDataBundle, undefined, 2))}`;
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute('href', dataStr);
+        downloadAnchorNode.setAttribute('download', `${exportName}.json`);
+        document.body.appendChild(downloadAnchorNode); // required for firefox
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    }
+
+    /**
+     * Uploads a valid annotation bundle JSON from a player's disk into the current puzzle
+     */
+    public uploadAnnotations(e: HTMLInputEvent) {
+        if (e.target.files && e.target.files.length > 0) {
+            const receivedText = (progE: ProgressEvent<FileReader>) => {
+                const lines = progE.target?.result as string;
+                const annotationDataBundle = JSON.parse(lines) as AnnotationDataBundle;
+                if (annotationDataBundle) {
+                    this.onUploadAnnotations.value = annotationDataBundle;
+                    this.onUploadAnnotations.value = null;
+                }
+            };
+            const json = e.target.files[0];
+            const fileReader = new FileReader();
+            fileReader.onload = receivedText;
+            fileReader.readAsText(json);
+        }
+    }
+
+    /**
      * Modifies the selection state of an annotation
      *
      * @param annotation total data of annotation of interest
@@ -331,6 +418,15 @@ export default class AnnotationManager {
         if (parentNode && index != null) {
             parentNode[index].selected = isSelected;
 
+            if (isSelected) {
+                this._selectedAnnotation = annotation;
+            } else if (
+                this._selectedAnnotation
+                && this._selectedAnnotation.id === annotation.id
+                && !isSelected
+            ) {
+                this._selectedAnnotation = null;
+            }
             this.onTriggerPoseUpdate.emit();
         }
     }
@@ -366,6 +462,82 @@ export default class AnnotationManager {
     }
 
     /**
+     * Recomputes the display objects of all annotations and layers
+     *
+     * @param pose puzzle pose of interest
+     */
+    public updateAnnotationViews(pose: Pose2D): void {
+        this.onClearHighlights.emit();
+
+        const updatedLayers = this.generateAnnotationDisplayObjects(
+            this.allLayers,
+            AnnotationHierarchyType.LAYER
+        );
+        const updatedAnnotations = this.generateAnnotationDisplayObjects(
+            this.allAnnotations,
+            AnnotationHierarchyType.ANNOTATION
+        );
+        this._annotations = updatedAnnotations;
+        this._layers = updatedLayers;
+
+        this.onRecomputeSpaceAvailability.emit();
+        this.refreshAnnotations(pose, true);
+    }
+
+    /**
+     * Helper function used to define an array of display objects for annotations
+     * given an array of AnnotationData
+     *
+     * @param items annotations or annotation layers
+     * @param type category of annotation being created
+     * @returns array of annotation display objects
+     */
+    private generateAnnotationDisplayObjects(
+        items: AnnotationData[],
+        type: AnnotationHierarchyType
+    ): AnnotationDisplayObject[] {
+        const displayObjects: AnnotationDisplayObject[] = [];
+        for (const item of items) {
+            if (item.positions) {
+                // Keep existing positions in case we have custom positioning
+                displayObjects.push({
+                    data: item,
+                    type,
+                    positions: item.positions,
+                    views: []
+                });
+            } else {
+                displayObjects.push({
+                    data: item,
+                    type,
+                    positions: [],
+                    views: []
+                });
+            }
+
+            if (item.selected && item.visible && item.ranges) {
+                // Single Annotation
+                this.onSetHighlights.value = item.ranges;
+                this.onSetHighlights.value = null;
+            } else if (item.selected && item.visible && item.children.length > 0) {
+                // Layer (multiple annotations)
+                const ranges: AnnotationRange[] = [];
+                item.children.forEach((child: AnnotationData) => {
+                    if (child.ranges) {
+                        ranges.push(...child.ranges);
+                    }
+                });
+                if (ranges.length > 0) {
+                    this.onSetHighlights.value = ranges;
+                    this.onSetHighlights.value = null;
+                }
+            }
+        }
+
+        return displayObjects;
+    }
+
+    /**
      * Rerenders all annotation views in a given puzzle pose
      *
      * @param pose puzzle pose of interest
@@ -375,74 +547,6 @@ export default class AnnotationManager {
     public refreshAnnotations(pose: Pose2D, reset: boolean = false, ignoreCustom: boolean = false) {
         this.eraseAnnotations(reset, ignoreCustom);
         this.drawAnnotations(pose);
-    }
-
-    /**
-     * Recomputes the display objects of all annotations and layers
-     *
-     * @param pose puzzle pose of interest
-     */
-    public updateAnnotationViews(pose: Pose2D): void {
-        this.onClearHighlights.emit();
-
-        const generateDisplayObjects = (
-            items: AnnotationData[],
-            type: AnnotationHierarchyType
-        ): AnnotationDisplayObject[] => {
-            const displayObjects: AnnotationDisplayObject[] = [];
-            for (const item of items) {
-                if (item.positions) {
-                    // Keep existing positions in case we have custom positioning
-                    displayObjects.push({
-                        data: item,
-                        type,
-                        positions: item.positions,
-                        views: []
-                    });
-                } else {
-                    displayObjects.push({
-                        data: item,
-                        type,
-                        positions: [],
-                        views: []
-                    });
-                }
-
-                if (item.selected && item.visible && item.ranges) {
-                    // Single Annotation
-                    this.onSetHighlights.value = item.ranges;
-                    this.onSetHighlights.value = null;
-                } else if (item.selected && item.visible && item.children.length > 0) {
-                    // Layer (multiple annotations)
-                    const ranges: AnnotationRange[] = [];
-                    item.children.forEach((child: AnnotationData) => {
-                        if (child.ranges) {
-                            ranges.push(...child.ranges);
-                        }
-                    });
-                    if (ranges.length > 0) {
-                        this.onSetHighlights.value = ranges;
-                        this.onSetHighlights.value = null;
-                    }
-                }
-            }
-
-            return displayObjects;
-        };
-
-        const updatedLayers = generateDisplayObjects(
-            this.allLayers,
-            AnnotationHierarchyType.LAYER
-        );
-        const updatedAnnotations = generateDisplayObjects(
-            this.allAnnotations,
-            AnnotationHierarchyType.ANNOTATION
-        );
-        this._annotations = updatedAnnotations;
-        this._layers = updatedLayers;
-
-        this.onRecomputeSpaceAvailability.emit();
-        this.refreshAnnotations(pose, true);
     }
 
     /**
@@ -475,6 +579,13 @@ export default class AnnotationManager {
             for (let i = 0; i < this._layers.length; i++) {
                 this.placeAnnotationInPose(pose, this._layers[i], i);
             }
+
+            // visualize annotations not in layers
+            for (let i = 0; i < this._annotations.length; i++) {
+                if (!this._annotations[i].data.layerId) {
+                    this.placeAnnotationInPose(pose, this._annotations[i], i);
+                }
+            }
         } else {
             // visualize annotations
             for (let i = 0; i < this._annotations.length; i++) {
@@ -483,7 +594,7 @@ export default class AnnotationManager {
         }
 
         // Make canvas translucent if we have annotation mode active
-        if (this._annotationModeActive) {
+        if (this.getAnnotationMode()) {
             this.onAdjustAnnotationCanvasOpacity.value = AnnotationManager.ANNOTATION_UNHIGHLIGHTED_OPACITY;
         } else {
             this.onAdjustAnnotationCanvasOpacity.value = 1;
@@ -567,12 +678,101 @@ export default class AnnotationManager {
         this.onTriggerPoseUpdate.emit();
     }
 
+    public showAnnotationDialog(args: AnnotationDialogArguments) {
+        this._annotationDialog = new AnnotationDialog(
+            args.edit,
+            args.modal,
+            args.pose.fullSequenceLength,
+            args.ranges,
+            this.activeLayers,
+            args.annotation
+        );
+        this._annotationDialog.onUpdateRanges.connect((rngs: AnnotationRange[] | null) => {
+            if (rngs) {
+                args.pose.setAnnotationRanges(rngs);
+            }
+        });
+
+        this.dialogIsVisible = true;
+
+        if (args.modal) {
+            args.gameMode.showDialog(
+                this._annotationDialog
+            ).closed.then((editedAnnotation: AnnotationData | null) => {
+                if (editedAnnotation) {
+                    editedAnnotation.selected = false;
+                    this.editAnnotation(editedAnnotation);
+                } else if (args.annotation) {
+                    // We interpret null argument as delete intent when editing
+                    this.deleteAnnotation(args.annotation);
+                }
+
+                // Clear annotation dialog reference
+                this._annotationDialog = null;
+
+                args.closeCallback();
+
+                this.dialogIsVisible = false;
+            });
+        } else {
+            args.gameMode.addObject(this._annotationDialog, args.gameLayer);
+            if (args.panelPos) {
+                Assert.assertIsDefined(Flashbang.stageWidth);
+                Assert.assertIsDefined(Flashbang.stageHeight);
+                this._annotationDialog.display.x = args.panelPos.x
+                    + this._annotationDialog.display.width < Flashbang.stageWidth
+                    ? args.panelPos.x
+                    : args.panelPos.x - this._annotationDialog.display.width;
+                this._annotationDialog.display.y = args.panelPos.y
+                    + this._annotationDialog.display.height < Flashbang.stageWidth
+                    ? args.panelPos.y
+                    : args.panelPos.y - this._annotationDialog.display.height;
+            }
+            this._annotationDialog.closed.then((annot: AnnotationData | null) => {
+                if (annot) {
+                    this.addAnnotation(annot, AnnotationCategory.SOLUTION);
+                }
+
+                // Destroy object
+                if (this._annotationDialog) {
+                    this._annotationDialog.destroySelf();
+                }
+
+                // Clear annotation dialog reference
+                this._annotationDialog = null;
+
+                // // Remove annotation highlighting
+                args.pose.clearAnnotationRanges();
+
+                args.closeCallback();
+
+                this.dialogIsVisible = false;
+            });
+        }
+    }
+
+    public updateDialogLayers(): boolean {
+        if (this.dialogIsVisible && this._annotationDialog) {
+            this._annotationDialog.setLayers(this.activeLayers);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public updateDialogRanges(ranges: AnnotationRange[]) {
+        if (this.dialogIsVisible && this._annotationDialog) {
+            this._annotationDialog.setRanges(ranges);
+        }
+    }
+
     /**
      * Sets the desired annotation mode state. When active
      * users are able to create new annotations
      */
-    public set annotationModeActive(active: boolean) {
-        this._annotationModeActive = active;
+    public setAnnotationMode(active: boolean): void {
+        this.annotationMode.value = active;
         if (!active) {
             this.onClearHighlights.emit();
 
@@ -593,8 +793,29 @@ export default class AnnotationManager {
     /**
      * Accesses the current annotation mode value
      */
-    public get annotationModeActive(): boolean {
-        return this._annotationModeActive;
+    public getAnnotationMode(): boolean {
+        return this.annotationMode.value;
+    }
+
+    /**
+     * Sets the annotation dialog visibility
+     */
+    public set dialogIsVisible(visible: boolean) {
+        this._dialogIsVisible = visible;
+    }
+
+    /**
+     * Accesses the current annotation dialog visibility
+     */
+    public get dialogIsVisible(): boolean {
+        return this._dialogIsVisible;
+    }
+
+    /**
+     * Accesses the current annotation dialog
+     */
+    public get annotationDialog(): AnnotationDialog | null {
+        return this._annotationDialog;
     }
 
     /**
@@ -648,9 +869,16 @@ export default class AnnotationManager {
     }
 
     /**
+     * Accesses selected annotation
+     */
+    public get selectedAnnotation() {
+        return this._selectedAnnotation;
+    }
+
+    /**
      * Accesses all annotations in a single bundled object
      */
-    public get annotationBundle() {
+    public get annotationDataBundle() {
         const prepareNode = (node: AnnotationData): AnnotationData => {
             const cleansedNode = {...node};
             // These are runtime properties
@@ -822,7 +1050,7 @@ export default class AnnotationManager {
      *
      * @param item display object to be made into a view
      */
-    private getAnnotationView(item: AnnotationDisplayObject): AnnotationView {
+    private getAnnotationView(pose: Pose2D, positionIndex: number, item: AnnotationDisplayObject): AnnotationView {
         let textColor;
         switch (item.data.category) {
             case AnnotationCategory.STRUCTURE:
@@ -837,7 +1065,9 @@ export default class AnnotationManager {
         }
 
         const view = new AnnotationView(
+            pose,
             item.type,
+            positionIndex,
             item.data,
             this.activeCategory,
             textColor
@@ -845,34 +1075,41 @@ export default class AnnotationManager {
 
         if (item.data.visible) {
             view.pointerOver.connect(() => {
-                // highlight associated range
-                if (item.type === AnnotationHierarchyType.ANNOTATION) {
-                    const annotation = item.data as AnnotationData;
-                    if (annotation.ranges) {
-                        this.onSetHighlights.value = annotation.ranges;
+                // we only set highlight if annotation mode off so we don't
+                // disturb any selections that might be taking place
+                if (!this.getAnnotationMode()) {
+                    // highlight associated range
+                    if (item.type === AnnotationHierarchyType.ANNOTATION) {
+                        const annotation = item.data as AnnotationData;
+                        if (annotation.ranges) {
+                            this.onSetHighlights.value = annotation.ranges;
+                            this.onSetHighlights.value = null;
+                        }
+                    } else if (item.type === AnnotationHierarchyType.LAYER) {
+                        const layer = item.data as AnnotationData;
+                        let ranges: AnnotationRange[] = [];
+                        for (const annotation of layer.children) {
+                            if (annotation.ranges) {
+                                ranges = ranges.concat(annotation.ranges);
+                            }
+                        }
+                        this.onSetHighlights.value = ranges;
                         this.onSetHighlights.value = null;
                     }
-                } else if (item.type === AnnotationHierarchyType.LAYER) {
-                    const layer = item.data as AnnotationData;
-                    let ranges: AnnotationRange[] = [];
-                    for (const annotation of layer.children) {
-                        if (annotation.ranges) {
-                            ranges = ranges.concat(annotation.ranges);
-                        }
-                    }
-                    this.onSetHighlights.value = ranges;
-                    this.onSetHighlights.value = null;
                 }
             });
             view.pointerOut.connect(() => {
-                // remove associated range
-                if (!item.data.selected) {
+                // remove associated range only if annotation mode off so we don't
+                // disturb any selections that might be taking place
+                if (!item.data.selected && !this.getAnnotationMode()) {
                     this.onClearHighlights.emit();
                 }
             });
 
-            view.pointerDown.connect(() => {
+            view.pointerDown.connect((e) => {
+                e.stopPropagation();
                 this.onToggleItemSelection.value = item.data as AnnotationData;
+                this.onToggleItemSelection.value = null;
             });
             view.isMoving.connect((moving: boolean) => {
                 this.isMovingAnnotation = moving;
@@ -882,9 +1119,19 @@ export default class AnnotationManager {
                 // We don't need to apply access control logic here
                 // This is handled in AnnotationView
                 view.onEditButtonPressed.connect(() => {
-                    this.setAnnotationSelection(item.data, false);
                     this.onEditAnnotation.value = item.data as AnnotationData;
                     this.onEditAnnotation.value = null;
+                });
+                view.onReleasePositionButtonPressed.connect(() => {
+                    // Release position
+                    const releasedPosition: AnnotationPosition = {
+                        ...item.data.positions[positionIndex],
+                        custom: false
+                    };
+
+                    this.setAnnotationPositions(item.data, positionIndex, releasedPosition);
+                    this.refreshAnnotations(pose, true);
+                    this.onTriggerSave.emit();
                 });
             }
         }
@@ -908,7 +1155,7 @@ export default class AnnotationManager {
         ) {
             for (let i = 0; i < item.positions.length; i++) {
                 const position = item.positions[i];
-                const view = this.getAnnotationView(item);
+                const view = this.getAnnotationView(pose, i, item);
                 if (item.type === AnnotationHierarchyType.ANNOTATION) {
                     view.onMovedAnnotation.connect((point: Point) => {
                         const anchorIndex = this._annotations[itemIndex].positions[i].anchorIndex;
@@ -986,7 +1233,7 @@ export default class AnnotationManager {
         for (let i = 0; i < ranges.length; i++) {
             const range = ranges[i];
             const prevPosition = item.positions.length > i ? item.positions[i] : null;
-            const view = this.getAnnotationView(item);
+            const view = this.getAnnotationView(pose, i, item);
             if (item.type === AnnotationHierarchyType.ANNOTATION) {
                 view.onMovedAnnotation.connect((point: Point) => {
                     const anchorIndex = this._annotations[itemIndex].positions[i].anchorIndex;
@@ -1023,7 +1270,8 @@ export default class AnnotationManager {
                 anchorIndex = prevPosition.anchorIndex;
                 const base = pose.getBase(anchorIndex);
                 const zoomScaling = 1
-                + 2 * ((prevPosition.zoomLevel - pose.zoomLevel) / Pose2D.ZOOM_SPACINGS.length);
+                + ((prevPosition.zoomLevel - pose.zoomLevel) / (Pose2D.ZOOM_SPACINGS.length - 1));
+
                 const anchorPoint = new Point(
                     base.x + pose.xOffset,
                     base.y + pose.yOffset
@@ -2402,7 +2650,9 @@ export default class AnnotationManager {
 
     private _toolbarType: ToolbarType;
     private _regs: RegistrationGroup | null;
-    private _annotationModeActive: boolean = false;
+    private _annotationDialog: AnnotationDialog | null = null;
+    private _selectedAnnotation: AnnotationPanelItem | AnnotationData | null;
+    private _dialogIsVisible: boolean = false;
     private _resetAnnotationPositions: boolean = false;
     private _ignoreCustomAnnotationPositions: boolean = false;
     public isMovingAnnotation: boolean = false;
@@ -2410,6 +2660,6 @@ export default class AnnotationManager {
     public static readonly ANNOTATION_UNHIGHLIGHTED_OPACITY = 0.5;
     public static readonly DEFAULT_ANNOTATION_SHIFT = 15;
     public static readonly ANNOTATION_PLACEMENT_ITERATION_TIMEOUT = 20;
-    public static readonly ANNOTATION_LAYER_THRESHOLD = 1;
+    public static readonly ANNOTATION_LAYER_THRESHOLD = 2;
     public static readonly CONFLICT_RESOLUTION_OFFSET = 5;
 }

@@ -1,4 +1,5 @@
 import {Graphics, Text} from 'pixi.js';
+import {Value} from 'signals';
 import {
     VLayoutContainer,
     HAlign,
@@ -28,15 +29,20 @@ import VScrollBox from './VScrollBox';
 import GameDropdown from './GameDropdown';
 
 export default class AnnotationDialog extends Dialog<AnnotationData> {
+    // Signals to update selected ranges
+    public readonly onUpdateRanges: Value<AnnotationRange[] | null> = new Value<AnnotationRange[] | null>(null);
+
     constructor(
         edit: boolean,
+        title: boolean,
         sequenceLength: number,
         initialRanges: AnnotationRange[],
         initialLayers: AnnotationData[],
         initialAnnotation: AnnotationData | null = null
     ) {
-        super();
+        super(edit);
         this._edit = edit;
+        this._hasTitle = title;
         this._sequenceLength = sequenceLength;
         this._initialRanges = initialRanges.sort((firstRange, secondRange) => firstRange.start - secondRange.start);
         this._layers = initialLayers;
@@ -51,21 +57,28 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
         this._panel = new GamePanel({
             type: GamePanelType.NORMAL,
             alpha: 1,
-            color: 0x21508C,
-            borderAlpha: 1,
-            borderColor: 0x4A90E2,
+            color: AnnotationDialog.PANEL_COLOR,
+            borderAlpha: this._modal ? 1 : 0,
+            borderColor: AnnotationDialog.UPPER_TOOLBAR_DIVIDER_COLOR,
             dropShadow: true
         });
-        this._panel.title = this._edit ? 'Edit Annotation' : 'New Annotation';
+        if (this._hasTitle) {
+            this._panel.title = this._edit ? 'Edit Annotation' : 'New Annotation';
+        }
         this.addObject(this._panel, this.container);
 
-        // Generate Dialog Close Button
-        const closeButton = new GameButton()
-            .allStates(Bitmaps.ImgAchievementsClose);
-        this.addObject(closeButton, this.container);
-        closeButton.clicked.connect(() => {
-            this.close(this._initialAnnotation || null);
-        });
+        let closeButton: GameButton | null = null;
+        if (this._modal) {
+            // Generate Dialog Close Button
+            closeButton = new GameButton()
+                .allStates(Bitmaps.ImgAchievementsClose);
+            this.addObject(closeButton, this.container);
+            closeButton.display.width = AnnotationDialog.CLOSE_BUTTON_LENGTH;
+            closeButton.display.height = AnnotationDialog.CLOSE_BUTTON_LENGTH;
+            closeButton.clicked.connect(() => {
+                this.close(this._initialAnnotation || null);
+            });
+        }
 
         // Generate Dialog Body
         // const settingsLayout: VLayoutContainer = new VLayoutContainer(15, HAlign.LEFT);
@@ -112,6 +125,10 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
         this._basesField.input.valueChanged.connect(() => {
             const isValid = this.isValidAnnotation();
             this._saveButton.enabled = isValid;
+            if (this.isValidRanges()) {
+                this.onUpdateRanges.value = AnnotationDialog.stringToAnnotationRange(this._basesField.input.text);
+                this.onUpdateRanges.value = null;
+            }
         });
         this._basesField.input.keyPressed.connect((key) => {
             if (key === 'Enter') {
@@ -136,8 +153,10 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
         this._actionButtonLayout = new HLayoutContainer(buttonPadding, VAlign.CENTER);
         // 1) Cancel Button
         const cancelButtonGraphic = new Graphics()
-            .lineStyle(AnnotationDialog.ACTION_BUTTON_BORDER_WIDTH, 0xffffff)
-            .beginFill(0x21508C)
+            .lineStyle(
+                AnnotationDialog.ACTION_BUTTON_BORDER_WIDTH,
+                AnnotationDialog.UPPER_TOOLBAR_DIVIDER_COLOR
+            ).beginFill(AnnotationDialog.PANEL_COLOR)
             .drawRoundedRect(
                 0,
                 0,
@@ -155,7 +174,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
         this.addObject(cancelButton, this._actionButtonLayout);
         // 2) Save Button
         const saveButtonGraphic = new Graphics()
-            .beginFill(0x54B54E)
+            .beginFill(AnnotationDialog.ACTION_BUTTON_SUCCESS_COLOR)
             .drawRoundedRect(
                 0,
                 0,
@@ -196,15 +215,17 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
 
         // Generate Dialog Divider
         this._divider = new Graphics()
-            .lineStyle(AnnotationDialog.ACTION_BUTTON_BORDER_WIDTH, 0x4A90E2)
-            .moveTo(0, 0)
+            .lineStyle(
+                AnnotationDialog.ACTION_BUTTON_BORDER_WIDTH,
+                AnnotationDialog.UPPER_TOOLBAR_DIVIDER_COLOR
+            ).moveTo(0, 0)
             .lineTo(AnnotationDialog.FIELD_WIDTH + 2 * AnnotationDialog.W_MARGIN, 0);
 
         // Generate Delete Annotation Button
         if (this._edit) {
             this._deleteButtonLayout = new HLayoutContainer(0, VAlign.CENTER);
             const deleteButtonGraphic = new Graphics()
-                .beginFill(0x21508C)
+                .beginFill(AnnotationDialog.PANEL_COLOR)
                 .drawRect(
                     0,
                     0,
@@ -248,8 +269,8 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
                 options: this._layers.map((layer: AnnotationData) => layer.title),
                 defaultOption: initialLayer?.title || 'Select a Layer',
                 borderWidth: 0,
-                borderColor: 0xC0DCE7,
-                color: 0x043468,
+                borderColor: AnnotationDialog.UPPER_TOOLBAR_DIVIDER_COLOR,
+                color: 0x021E46,
                 textColor: 0xF39C12,
                 textWeight: 'bold',
                 width: AnnotationDialog.FIELD_WIDTH,
@@ -261,7 +282,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
                 'Annotation Layer',
                 AnnotationDialog.FONT_SIZE,
                 FontWeight.BOLD
-            ).color(0xC0DCE7).build();
+            ).color(AnnotationDialog.LABEL_COLOR).build();
             let accHeight = 0;
             if (this._fields.length > 0) {
                 for (const field of this._fields) {
@@ -323,11 +344,13 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
 
             this._panel.setSize(panelWidth, panelHeight);
 
-            DisplayUtil.positionRelativeToStage(
-                this._panel.display,
-                HAlign.CENTER, VAlign.CENTER,
-                HAlign.CENTER, VAlign.CENTER
-            );
+            if (this._modal) {
+                DisplayUtil.positionRelativeToStage(
+                    this._panel.display,
+                    HAlign.CENTER, VAlign.CENTER,
+                    HAlign.CENTER, VAlign.CENTER
+                );
+            }
 
             DisplayUtil.positionRelative(
                 this._divider, HAlign.CENTER, VAlign.TOP,
@@ -345,11 +368,13 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
                 0, this._panel.titleHeight + AnnotationDialog.H_MARGIN
             );
 
-            DisplayUtil.positionRelative(
-                closeButton.display, HAlign.RIGHT, VAlign.TOP,
-                this._panel.display, HAlign.RIGHT, VAlign.TOP,
-                -10, 11
-            );
+            if (closeButton) {
+                DisplayUtil.positionRelative(
+                    closeButton.display, HAlign.RIGHT, VAlign.TOP,
+                    this._panel.display, HAlign.RIGHT, VAlign.TOP,
+                    -10, (this._panel.titleHeight - AnnotationDialog.CLOSE_BUTTON_LENGTH) / 2
+                );
+            }
         };
 
         updateLocation();
@@ -370,13 +395,17 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
             fontSize: AnnotationDialog.FIELD_FONT_SIZE,
             width,
             height,
+            bgColor: 0x021E46,
             rows: multiline ? 3 : 1,
             placeholder,
             characterLimit
         }).font(Fonts.STDFONT);
 
         // Generate label text object
-        const label: Text = Fonts.std(name, AnnotationDialog.FONT_SIZE, FontWeight.BOLD).color(0xC0DCE7).build();
+        const label: Text = Fonts
+            .std(name, AnnotationDialog.FONT_SIZE, FontWeight.BOLD)
+            .color(AnnotationDialog.LABEL_COLOR)
+            .build();
 
         // Compute height occupied by prior input fields
         let accHeight = 0;
@@ -410,8 +439,27 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
         this._layers = layers;
     }
 
+    public setRanges(ranges: AnnotationRange[]): void {
+        const baseRanges = AnnotationDialog.annotationRangeToString(ranges);
+        // set ranges string
+        this._basesField.input.text = baseRanges;
+    }
+
     public isValidAnnotation(): boolean {
         // Title
+        if (!this.isValidText()) {
+            return false;
+        }
+
+        // Base Range(s)
+        if (!this.isValidRanges()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public isValidText(): boolean {
         const titleText = this._titleField.input.text;
         if (
             titleText.length === 0
@@ -420,7 +468,10 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
             return false;
         }
 
-        // Base Range(s)
+        return true;
+    }
+
+    public isValidRanges(): boolean {
         const rangeText = this._basesField.input.text;
         if (rangeText.length === 0) {
             return false;
@@ -438,7 +489,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
             // Numbers must not be larger than the sequence length
             for (const numText of rangeNumbers) {
                 const num = parseInt(numText, 10);
-                if (num < 0 || num > this._sequenceLength) {
+                if (num <= 0 || num > this._sequenceLength) {
                     return false;
                 }
             }
@@ -489,7 +540,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
             ranges.push({
                 // We remove one because backend is zero-indexed
                 start: parseInt(extents[0], 10) - 1,
-                // We remve one because backend is zero-indexed
+                // We remove one because backend is zero-indexed
                 end: parseInt(extents[1], 10) - 1
             });
         }
@@ -536,6 +587,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
     }
 
     private _edit: boolean = false;
+    private _hasTitle: boolean = false;
     private _sequenceLength: number;
     private _initialAnnotation: AnnotationData | null = null;
     private _initialRanges: AnnotationRange[] | null = null;
@@ -552,25 +604,30 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
     private _basesField: InputField;
     private _saveButton: GameButton;
 
-    private static readonly W_MARGIN = 35;
-    private static readonly H_MARGIN = 20;
+    private static readonly W_MARGIN = 10;
+    private static readonly H_MARGIN = 5;
     private static readonly FONT_SIZE = 12;
-    private static readonly FIELD_WIDTH = 305;
-    private static readonly FIELD_HEIGHT = 45;
-    private static readonly FIELD_MARGIN = 20;
-    private static readonly FIELD_FONT_SIZE = 16;
-    private static readonly LABEL_PADDING = 10;
-    private static readonly ACTION_BUTTON_LAYOUT_MARGIN = 45;
-    private static readonly ACTION_BUTTON_WIDTH = 120;
-    private static readonly ACTION_BUTTON_HEIGHT = 45;
+    private static readonly FIELD_WIDTH = 200;
+    private static readonly FIELD_HEIGHT = 30;
+    private static readonly FIELD_MARGIN = 5;
+    private static readonly FIELD_FONT_SIZE = 12;
+    private static readonly LABEL_PADDING = 5;
+    private static readonly ACTION_BUTTON_LAYOUT_MARGIN = 20;
+    private static readonly ACTION_BUTTON_WIDTH = 80;
+    private static readonly ACTION_BUTTON_HEIGHT = AnnotationDialog.FIELD_HEIGHT;
     private static readonly ACTION_BUTTON_CORNER_RADIUS = 5;
     private static readonly ACTION_BUTTON_BORDER_WIDTH = 1;
-    private static readonly ACTION_BUTTON_FONT_SIZE = 18;
-    private static readonly DELETE_BUTTON_LAYOUT_MARGIN = 20;
+    private static readonly ACTION_BUTTON_FONT_SIZE = 12;
+    private static readonly ACTION_BUTTON_SUCCESS_COLOR = 0x54B54E;
+    private static readonly DELETE_BUTTON_LAYOUT_MARGIN = AnnotationDialog.H_MARGIN;
     private static readonly DELETE_BUTTON_WIDTH = 120;
-    private static readonly DELETE_BUTTON_HEIGHT = 20;
-    private static readonly DELETE_BUTTON_FONT_SIZE = 14;
-    private static readonly DROPDOWN_HEIGHT = 35;
+    private static readonly DELETE_BUTTON_HEIGHT = AnnotationDialog.ACTION_BUTTON_HEIGHT - 10;
+    private static readonly DELETE_BUTTON_FONT_SIZE = 12;
+    private static readonly DROPDOWN_HEIGHT = AnnotationDialog.ACTION_BUTTON_HEIGHT;
     public static readonly ANNOTATION_TEXT_CHARACTER_LIMIT = 50;
     public static readonly RANGE_REGEX: RegExp = /(\d+\s*-\s*\d+)(,\s*\d+\s*-\s*\d+)*/g;
+    private static readonly PANEL_COLOR = 0x152843;
+    private static readonly UPPER_TOOLBAR_DIVIDER_COLOR = 0x112238;
+    private static readonly LABEL_COLOR = 0xC0DCE7;
+    private static readonly CLOSE_BUTTON_LENGTH = 10;
 }

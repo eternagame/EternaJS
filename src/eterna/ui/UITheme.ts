@@ -45,6 +45,14 @@ export default class UITheme {
         }
     };
 
+    public static fileInput = {
+        colors: {
+            background: 0x021E46,
+            border: 0x2F94D1,
+            text: 0xFFFFFF
+        }
+    };
+
     public static makeTitle(title: string, color: number) {
         return new HTMLTextObject(title, undefined, undefined, true)
             .font(Fonts.STDFONT)

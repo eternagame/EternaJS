@@ -47,6 +47,7 @@ export interface PuzzleJSON {
     title: string;
     type: PuzzleType; // AMW: worried this is actually stored as a string
     body: string;
+    username: string;
     locks?: string;
     objective?: string;
     beginseq?: string;
@@ -80,7 +81,7 @@ export default class PuzzleManager {
     }
 
     public async parsePuzzle(json: PuzzleJSON): Promise<Puzzle> {
-        const newpuz: Puzzle = new Puzzle(Number(json['id']), json['title'], json['type']);
+        const newpuz: Puzzle = new Puzzle(Number(json['id']), json['title'], json['type'], json['username']);
 
         if (json['body']) {
             // Convention: mission texts are encapsulated by

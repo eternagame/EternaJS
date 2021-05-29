@@ -14,7 +14,8 @@ import {
     GameObjectRef,
     Button,
     Assert,
-    ContainerObject
+    ContainerObject,
+    DisplayObjectPointerTarget
 } from 'flashbang';
 import {PaletteTarget} from 'eterna/ui/NucleotidePalette';
 import Fonts from 'eterna/util/Fonts';
@@ -51,7 +52,7 @@ export default class Tooltips extends GameObject {
     }
 
     public showTooltip(
-        key: Button | PaletteTarget | ContainerObject | GraphicsObject,
+        key: Button | PaletteTarget | ContainerObject | GraphicsObject | DisplayObjectPointerTarget,
         loc: Point, tooltip: Tooltip
     ): void {
         if (this._curTooltipKey === key) {
@@ -83,7 +84,7 @@ export default class Tooltips extends GameObject {
 
     public showTooltipFor(
         target: DisplayObject,
-        key: Button | PaletteTarget | ContainerObject | GraphicsObject,
+        key: Button | PaletteTarget | ContainerObject | GraphicsObject | DisplayObjectPointerTarget,
         tooltip: Tooltip
     ): void {
         if (this._curTooltipKey === key) {
@@ -96,7 +97,9 @@ export default class Tooltips extends GameObject {
         this.showTooltip(key, p, tooltip);
     }
 
-    public removeTooltip(key: Button | PaletteTarget | ContainerObject | GraphicsObject): void {
+    public removeTooltip(
+        key: Button | PaletteTarget | ContainerObject | GraphicsObject | DisplayObjectPointerTarget
+    ): void {
         if (this._curTooltipKey === key) {
             this.removeCurTooltip();
         }
@@ -111,10 +114,17 @@ export default class Tooltips extends GameObject {
         }
     }
 
-    public addTooltip(ele: Button | ContainerObject | GraphicsObject, tooltip: Tooltip): Registration {
+    public addTooltip(
+        ele: Button | ContainerObject | GraphicsObject | DisplayObjectPointerTarget,
+        tooltip: Tooltip
+    ): Registration {
         const show = (): void => {
             if ((ele instanceof Button && ele.enabled) || !(ele instanceof Button)) {
-                this.showTooltipFor(ele.display, ele, tooltip);
+                if (ele instanceof DisplayObjectPointerTarget) {
+                    this.showTooltipFor(ele.target, ele, tooltip);
+                } else {
+                    this.showTooltipFor(ele.display, ele, tooltip);
+                }
             }
         };
 
@@ -131,7 +141,9 @@ export default class Tooltips extends GameObject {
         regs.add(ele.pointerOver.connect(show));
         regs.add(ele.pointerOut.connect(hide));
 
-        regs.add(ele.destroyed.connect(hide));
+        if (!(ele instanceof DisplayObjectPointerTarget)) {
+            regs.add(ele.destroyed.connect(hide));
+        }
 
         return regs;
     }
@@ -157,7 +169,13 @@ export default class Tooltips extends GameObject {
 
     private readonly _layer: Container;
 
-    private _curTooltipKey: Button | PaletteTarget | ContainerObject | GraphicsObject | null;
+    private _curTooltipKey: Button |
+    PaletteTarget |
+    ContainerObject |
+    GraphicsObject |
+    DisplayObjectPointerTarget |
+    null;
+
     private _curTooltip: DisplayObject | null;
     private _curTooltipFader: GameObjectRef = GameObjectRef.NULL;
 
