@@ -11,7 +11,8 @@
     "build:prod": "node multiplatform/mkdirp dist/prod && webpack --config webpack.prod.js",
     "postbuild:dev": "node multiplatform/cpr ./website/frontend ./dist/dev/frontend && coffee -o ./dist/dev/frontend/jscripts -c ./website/frontend/coffee",
     "test": "jest --verbose",
-    "lint": "eslint src --ext .ts"
+    "lint": "eslint src --ext .ts",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -50,10 +51,10 @@
     "eslint-plugin-import": "^2.23.3",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.3.1",
-    "husky": "^3.1.0",
+    "husky": "^6.0.0",
     "jest": "^27.0.1",
     "jest-canvas-mock": "^2.3.1",
-    "lint-staged": "^9.5.0",
+    "lint-staged": "^11.0.0",
     "source-map-loader": "^3.0.0",
     "style-loader": "^2.0.0",
     "ts-jest": "^27.0.1",
@@ -91,14 +92,8 @@
   "lint-staged": {
     "*.ts": [
       "npm run lint -- --fix",
-      "npm run test -- --findRelatedTests",
-      "git add"
+      "npm run test -- --findRelatedTests"
     ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged && npm run typecheck"
-    }
   },
   "optionalDependencies": {
     "eternajs-folding-engines": "github:eternagame/eternajs-folding-engines#06199966f2bf2b0e3756986751a4e53f36a3cef6"
