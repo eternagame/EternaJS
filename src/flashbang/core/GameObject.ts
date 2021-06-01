@@ -225,7 +225,7 @@ export default class GameObject extends GameObjectBase {
         if (this.display != null) {
             if (this.display instanceof Container) {
                 try {
-                    (this.display as Container).destroy({children: true});
+                    this.display.destroy({children: true});
                 } catch (e) {
                     log.warn('GameObject.display.destroy blew up', e);
                 }

@@ -80,11 +80,15 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
             });
         }
 
+        // Primary dialog contents
+        const inputContainer = new VScrollBox(0, 0);
+        this.addObject(inputContainer, this.container);
+
         // Generate Dialog Body
-        // const settingsLayout: VLayoutContainer = new VLayoutContainer(15, HAlign.LEFT);
-        // this._viewLayout.addChild(settingsLayout);
         this._textInputLayout = new VLayoutContainer(0, HAlign.CENTER);
         this._textInputLayout.sortableChildren = true;
+        inputContainer.content.addChild(this._textInputLayout);
+
         // Add Text Field
         this._titleField = this.getInputField(
             'Text',
@@ -108,7 +112,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
             this._titleField.input.text = this._initialAnnotation.title;
         }
         this._textInputLayout.addChild(this._titleField.label);
-        this.addObject(this._titleField.input, this._textInputLayout);
+        inputContainer.addObject(this._titleField.input, this._textInputLayout);
 
         // Add Bases Field
         this._basesField = this.getInputField(
@@ -136,7 +140,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
             }
         });
         this._textInputLayout.addChild(this._basesField.label);
-        this.addObject(this._basesField.input, this._textInputLayout);
+        inputContainer.addObject(this._basesField.input, this._textInputLayout);
         this._titleField.input.setFocus();
 
         // Generate Dialog Action Buttons
@@ -151,6 +155,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
                 + AnnotationDialog.FONT_SIZE;
         }
         this._actionButtonLayout = new HLayoutContainer(buttonPadding, VAlign.CENTER);
+        inputContainer.content.addChild(this._actionButtonLayout);
         // 1) Cancel Button
         const cancelButtonGraphic = new Graphics()
             .lineStyle(
@@ -171,7 +176,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
         cancelButton.clicked.connect(() => {
             this.close(this._initialAnnotation || null);
         });
-        this.addObject(cancelButton, this._actionButtonLayout);
+        inputContainer.addObject(cancelButton, this._actionButtonLayout);
         // 2) Save Button
         const saveButtonGraphic = new Graphics()
             .beginFill(AnnotationDialog.ACTION_BUTTON_SUCCESS_COLOR)
@@ -207,7 +212,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
 
             this.close(annotation);
         });
-        this.addObject(this._saveButton, this._actionButtonLayout);
+        inputContainer.addObject(this._saveButton, this._actionButtonLayout);
         this._actionButtonLayout.y = this._textInputLayout.height
             + dropdownSectionHeight
             + AnnotationDialog.ACTION_BUTTON_LAYOUT_MARGIN;
@@ -224,6 +229,8 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
         // Generate Delete Annotation Button
         if (this._edit) {
             this._deleteButtonLayout = new HLayoutContainer(0, VAlign.CENTER);
+            inputContainer.content.addChild(this._deleteButtonLayout);
+
             const deleteButtonGraphic = new Graphics()
                 .beginFill(AnnotationDialog.PANEL_COLOR)
                 .drawRect(
@@ -238,7 +245,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
             deleteButton.clicked.connect(() => {
                 this.close(null); // Returning null will be interpreted as delete
             });
-            this.addObject(deleteButton, this._deleteButtonLayout);
+            inputContainer.addObject(deleteButton, this._deleteButtonLayout);
             this._deleteButtonLayout.x = (AnnotationDialog.FIELD_WIDTH - AnnotationDialog.DELETE_BUTTON_WIDTH) / 2;
             this._deleteButtonLayout.y = this._textInputLayout.height
                 + dropdownSectionHeight
@@ -248,14 +255,6 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
             this._deleteButtonLayout.layout();
         }
 
-        // Place layouts in input container
-        const inputContainer = new VScrollBox(0, 0);
-        this.addObject(inputContainer, this.container);
-        inputContainer.content.addChild(this._textInputLayout);
-        inputContainer.content.addChild(this._actionButtonLayout);
-        if (this._deleteButtonLayout !== null) {
-            inputContainer.content.addChild(this._deleteButtonLayout);
-        }
         this.container.addChild(this._divider);
 
         if (this._layers.length > 0) {
@@ -311,7 +310,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
             });
 
             this._textInputLayout.addChild(dropDownLabel);
-            this.addObject(this._dropdown, this._textInputLayout);
+            inputContainer.addObject(this._dropdown, this._textInputLayout);
         }
 
         const updateLocation = () => {
