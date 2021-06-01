@@ -462,7 +462,7 @@ export default class EternaApp extends FlashbangApp {
             width: this._params.width,
             height: this._params.height,
             backgroundColor: 0x0,
-            transparent: true,
+            backgroundAlpha: 0,
             antialias: true,
             autoDensity: true,
             resolution: devicePixelRatio
