@@ -154,7 +154,7 @@ export default class UndoBlock {
         return map;
     }
 
-    private isSeializedBooleanMap<K>(arr: [boolean, K[][]][] | K[][]): arr is [boolean, K[][]][] {
+    private isSerializedBooleanMap<K>(arr: [boolean, K[][]][] | K[][]): arr is [boolean, K[][]][] {
         const entry: [boolean, K[][]] | K[] = arr[0];
 
         // The first check is to ensure we can check the second element (guarding against a [K])
@@ -195,7 +195,7 @@ export default class UndoBlock {
 
             // Legacy -- this wasn't always a map. So check typeof and put nonmaps
             // into the pseudoknots false field.
-            if (!this.isSeializedBooleanMap(json.pairs_array_)) {
+            if (!this.isSerializedBooleanMap(json.pairs_array_)) {
                 this._pairsArray = new Map<boolean, SecStruct[]>();
                 this._pairsArray.set(false, json.pairs_array_.map((v) => (v ? new SecStruct(v) : v)));
             } else {
@@ -210,7 +210,7 @@ export default class UndoBlock {
                     this._pairsArray.set(true, g.map((v) => (v ? new SecStruct(v) : v)));
                 }
             }
-            if (!this.isSeializedBooleanMap(json.params_array_)) {
+            if (!this.isSerializedBooleanMap(json.params_array_)) {
                 this._paramsArray = new Map<boolean, Param[][]>();
                 this._paramsArray.set(false, json.params_array_);
             } else {
