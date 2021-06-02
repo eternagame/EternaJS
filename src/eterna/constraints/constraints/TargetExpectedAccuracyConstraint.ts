@@ -2,7 +2,7 @@ import {UndoBlockParam} from 'eterna/UndoBlock';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import {TextureUtil} from 'flashbang';
 import {
-    Container, Texture, Sprite, Point
+    Container, Texture, Sprite
 } from 'pixi.js';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
@@ -82,7 +82,7 @@ export default class TargetExpectedAccuracyConstraint extends Constraint<TargetE
         const base1 = new Sprite(BitmapManager.getBitmap(Bitmaps.CleanDotPlotIcon));
         base1.width = 24;
         base1.height = 24;
-        base1.position = new Point(50, 50);
+        base1.position.set(50, 50);
         icon.addChild(base1);
 
         return TextureUtil.renderToTexture(icon);

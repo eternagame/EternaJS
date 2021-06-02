@@ -1,5 +1,5 @@
 import {
-    Graphics, Point, Sprite
+    Graphics, Sprite
 } from 'pixi.js';
 import Eterna from 'eterna/Eterna';
 import {
@@ -58,9 +58,10 @@ export default class MissionIntroMode extends AppMode {
             .up(Bitmaps.ImgHome)
             .over(Bitmaps.ImgHome)
             .down(Bitmaps.ImgHome);
-        homeButton.display.position = new Point(18, 10);
+        homeButton.display.position.set(18, 10);
         homeButton.clicked.connect(() => {
             if (Eterna.MOBILE_APP) {
+                Assert.assertIsDefined(window.frameElement);
                 window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
             } else {
                 window.location.href = EternaURL.createURL({page: 'home'});
@@ -69,7 +70,7 @@ export default class MissionIntroMode extends AppMode {
         this.addObject(homeButton, this.container);
 
         const homeArrow = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgHomeArrow));
-        homeArrow.position = new Point(45, 14);
+        homeArrow.position.set(45, 14);
         this.container.addChild(homeArrow);
 
         Assert.assertIsDefined(Flashbang.stageWidth);
@@ -81,7 +82,7 @@ export default class MissionIntroMode extends AppMode {
             .selectable(false)
             .maxWidth(Flashbang.stageWidth);
         this.addObject(nameLabel, this.container);
-        nameLabel.display.position = new Point(57, 8);
+        nameLabel.display.position.set(57, 8);
 
         const missionIntroPanel = new MissionIntroPanel({
             description: this._puzzleDescription,
@@ -112,7 +113,7 @@ export default class MissionIntroMode extends AppMode {
             );
             background.endFill();
 
-            playButton.display.position = new Point(
+            playButton.display.position.set(
                 Math.min(
                     Flashbang.stageWidth - playButton.container.width - 27,
                     missionIntroPanel.container.x

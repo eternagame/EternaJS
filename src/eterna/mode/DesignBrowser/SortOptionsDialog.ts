@@ -1,5 +1,5 @@
 import {
-    Container, Graphics, Point, Text
+    Container, Graphics, Text
 } from 'pixi.js';
 import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
 import Dialog from 'eterna/ui/Dialog';
@@ -115,28 +115,28 @@ export default class SortOptionsDialog extends Dialog<void> {
         Arrays.addAt(this._criteriaUI, ui, idx);
 
         ui.categoryText = Fonts.std(category, 14).bold().color(0xffffff).build();
-        ui.categoryText.position = new Point(10, 0);
+        ui.categoryText.position.set(10, 0);
         ui.container.addChild(ui.categoryText);
 
         ui.sortOrderButton = new GameButton()
             .label(sortOrder === SortOrder.INCREASING ? 'increasing' : 'decreasing', 14, false);
         ui.sortOrderButton.clicked.connect(() => this.toggleSort(category));
-        ui.sortOrderButton.display.position = new Point(180, 0);
+        ui.sortOrderButton.display.position.set(180, 0);
         this.addObject(ui.sortOrderButton, ui.container);
 
         ui.moveUpButton = new GameButton().allStates(Bitmaps.GoUpImg);
         ui.moveUpButton.clicked.connect(() => this.moveCriteria(category, -1));
-        ui.moveUpButton.display.position = new Point(280, 5);
+        ui.moveUpButton.display.position.set(280, 5);
         this.addObject(ui.moveUpButton, ui.container);
 
         ui.moveDownButton = new GameButton().allStates(Bitmaps.GoDownImg);
         ui.moveDownButton.clicked.connect(() => this.moveCriteria(category, 1));
-        ui.moveDownButton.display.position = new Point(300, 5);
+        ui.moveDownButton.display.position.set(300, 5);
         this.addObject(ui.moveDownButton, ui.container);
 
         ui.removeButton = new GameButton().allStates(Bitmaps.ImgRemove);
         ui.removeButton.clicked.connect(() => this.removeCriteria(category));
-        ui.removeButton.display.position = new Point(320, 5);
+        ui.removeButton.display.position.set(320, 5);
         this.addObject(ui.removeButton, ui.container);
 
         // Separator line

@@ -1,4 +1,4 @@
-import {Point, Text} from 'pixi.js';
+import {Text} from 'pixi.js';
 import {ContainerObject, TextUtil} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import PlayerRank from './PlayerRank';
@@ -14,11 +14,11 @@ export default class RankRowLayout extends ContainerObject {
         this.container.addChild(this._tfName);
 
         this._tfRank = Fonts.std('', fontSize).color(textColor).build();
-        this._tfRank.position = new Point(130, 0);
+        this._tfRank.position.set(130, 0);
         this.container.addChild(this._tfRank);
 
         this._tfScore = Fonts.std('', fontSize).color(textColor).build();
-        this._tfScore.position = new Point(130 + rankScoreOffset, 0);
+        this._tfScore.position.set(130 + rankScoreOffset, 0);
         this.container.addChild(this._tfScore);
 
         this.setPlayerName(data.name, maxNameWidth);

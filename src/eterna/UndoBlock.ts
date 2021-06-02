@@ -19,8 +19,8 @@ import {TargetType} from './puzzle/Puzzle';
 export interface FoldData {
     folderName_: string;
     sequence_: number[];
-    pairs_array_: Map<boolean, number[][]>;
-    params_array_: Map<boolean, Param[][]>;
+    pairs_array_: [boolean, number[][]][] | number[][];
+    params_array_: [boolean, Param[][]][] | Param[][];
     stable_: boolean;
     target_oligo_?: number[];
     target_oligos_?: Oligo[];
@@ -127,16 +127,52 @@ export default class UndoBlock {
         return m;
     }
 
+    /**
+     * Converts a map to a format that is able to be stringified.
+     * The format used is the one defined in https://github.com/DavidBruant/Map-Set.prototype.toJSON,
+     * as that is the one that was previously present in core-js, so that we maintain backwards compatbibility
+     * with old saves
+     *
+     * @param map Map to be serialized
+     * @returns Map suitable for stringification
+     */
+    private mapToJSON<K, V>(map: Map<K, V>): [K, V][] {
+        return [...map.entries()];
+    }
+
+    /**
+     * Converts a map to a format that is able to be stringified.
+     * The format used is the one defined in https://github.com/DavidBruant/Map-Set.prototype.toJSON,
+     * as that is the one that was previously present in core-js, so that we maintain backwards compatbibility
+     * with old saves
+     *
+     * @param map Map to be serialized
+     * @returns Map suitable for stringification
+     */
+    private mapFromJSON<K, V>(json: [K, V][]): Map<K, V> {
+        const map = new Map<K, V>(json);
+        return map;
+    }
+
+    private isSerializedBooleanMap<K>(arr: [boolean, K[][]][] | K[][]): arr is [boolean, K[][]][] {
+        const entry: [boolean, K[][]] | K[] = arr[0];
+
+        // The first check is to ensure we can check the second element (guarding against a [K])
+        // The second check is verifying that the first entry could actually be our boolean key
+        // The third check is verifying that we don't have a [boolean, boolean]
+        return entry.length === 2 && typeof entry[0] === 'boolean' && Array.isArray(entry[1]);
+    }
+
     public toJSON(): FoldData {
         // TODO: Updating this requires changing all content in the DB AND
         // migrating all autosave content on boot for however long we want to allow
         // players to migrate their autosaves
-        /* eslint-disable @typescript-eslint/camelcase */
+        /* eslint-disable @typescript-eslint/naming-convention */
         return {
             folderName_: this._folderName,
             sequence_: this._sequence.baseArray,
-            pairs_array_: this.pairsOfPairs(this._pairsArray),
-            params_array_: this._paramsArray,
+            pairs_array_: this.mapToJSON(this.pairsOfPairs(this._pairsArray)),
+            params_array_: this.mapToJSON(this._paramsArray),
             stable_: this._stable,
             target_oligo_: this._targetOligo,
             target_oligos_: this._targetOligos,
@@ -149,34 +185,36 @@ export default class UndoBlock {
             target_conditions_: this._targetConditions,
             library_selections_: this._librarySelections
         };
-        /* eslint-enable @typescript-eslint/camelcase */
+        /* eslint-enable camelcase */
     }
 
     public fromJSON(json: FoldData): void {
         try {
             this._folderName = json.folderName_;
-            this._sequence.baseArray = json.sequence_;// JSONUtil.require(json, 'sequence_');
+            this._sequence.baseArray = json.sequence_;
+
             // Legacy -- this wasn't always a map. So check typeof and put nonmaps
             // into the pseudoknots false field.
-            if (Array.isArray(json.pairs_array_)) {
+            if (!this.isSerializedBooleanMap(json.pairs_array_)) {
                 this._pairsArray = new Map<boolean, SecStruct[]>();
-                this._pairsArray.set(false, json.pairs_array_);
+                this._pairsArray.set(false, json.pairs_array_.map((v) => (v ? new SecStruct(v) : v)));
             } else {
                 this._pairsArray = new Map<boolean, SecStruct[]>();
-                const f = json.pairs_array_.get(false);
+                const pairsArray = this.mapFromJSON<boolean, number[][]>(json.pairs_array_);
+                const f = pairsArray.get(false);
                 if (f) {
-                    this._pairsArray.set(false, f.map((v) => new SecStruct(v)));
+                    this._pairsArray.set(false, f.map((v) => (v ? new SecStruct(v) : v)));
                 }
-                const g = json.pairs_array_.get(true);
+                const g = pairsArray.get(true);
                 if (g) {
-                    this._pairsArray.set(true, g.map((v) => new SecStruct(v)));
+                    this._pairsArray.set(true, g.map((v) => (v ? new SecStruct(v) : v)));
                 }
             }
-            if (Array.isArray(json.params_array_)) {
+            if (!this.isSerializedBooleanMap(json.params_array_)) {
                 this._paramsArray = new Map<boolean, Param[][]>();
                 this._paramsArray.set(false, json.params_array_);
             } else {
-                this._paramsArray = json.params_array_;
+                this._paramsArray = this.mapFromJSON(json.params_array_);
             }
             this._stable = json.stable_;
             this._targetOligo = json.target_oligo_;

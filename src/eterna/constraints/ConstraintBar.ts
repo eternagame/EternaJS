@@ -2,7 +2,7 @@ import {
     ContainerObject, Flashbang, ParallelTask, LocationTask, Easing, AlphaTask
 } from 'flashbang';
 import {
-    Point, Graphics, Container, Sprite
+    Point, Graphics, Container, Sprite, InteractionEvent
 } from 'pixi.js';
 import {Value} from 'signals';
 import Eterna from 'eterna/Eterna';
@@ -16,8 +16,6 @@ import GraphicsObject from 'flashbang/objects/GraphicsObject';
 import ShapeConstraint, {AntiShapeConstraint} from './constraints/ShapeConstraint';
 import ConstraintBox from './ConstraintBox';
 import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from './Constraint';
-
-type InteractionEvent = PIXI.InteractionEvent;
 
 interface ConstraintWrapper {
     constraint: Constraint<BaseConstraintStatus>;
@@ -228,7 +226,7 @@ export default class ConstraintBar extends ContainerObject {
             this._mask.endFill();
 
             this._drawerTip.visible = true;
-            this._drawerTip.position = new Point(drawerWidth, backgroundY);
+            this._drawerTip.position.set(drawerWidth, backgroundY);
             this._drawerTip.height = backgroundHeight;
 
             // Selection arrow
@@ -237,7 +235,7 @@ export default class ConstraintBar extends ContainerObject {
                 if (!this._selectedConstraint) {
                     this._selectedConstraint = positioning.positions[0].constraint;
                 }
-                this._selectionArrow.position = new Point(
+                this._selectionArrow.position.set(
                     (() => {
                         const info = positioning.positions.find((p) => p.constraint === this._selectedConstraint);
                         // AMW TODO: What is the correct behavior here?

@@ -1,4 +1,3 @@
-import {Point} from 'pixi.js';
 import {
     VLayoutContainer, HAlign, HLayoutContainer, AlphaTask, Flashbang, Assert
 } from 'flashbang';
@@ -77,7 +76,7 @@ export default class ConfirmDialog extends Dialog<boolean> {
 
         panelLayout.layout();
         panel.setSize(panelLayout.width + (W_MARGIN * 2), panel.titleHeight + panelLayout.height + (H_MARGIN * 2));
-        panelLayout.position = new Point(W_MARGIN, H_MARGIN + panel.titleHeight);
+        panelLayout.position.set(W_MARGIN, H_MARGIN + panel.titleHeight);
 
         panel.display.alpha = 0;
         panel.addObject(new AlphaTask(1, 0.3));
@@ -85,7 +84,7 @@ export default class ConfirmDialog extends Dialog<boolean> {
         const updateLocation = () => {
             Assert.assertIsDefined(Flashbang.stageWidth);
             Assert.assertIsDefined(Flashbang.stageHeight);
-            panel.display.position = new Point(
+            panel.display.position.set(
                 (Flashbang.stageWidth - panel.width) * 0.5,
                 (Flashbang.stageHeight - panel.height) * 0.5
             );

@@ -158,7 +158,7 @@ export default class Toolbar extends ContainerObject {
 
     public onResized() {
         Assert.assertIsDefined(Flashbang.stageWidth);
-        this.stateToggle.container.position = new Point(
+        this.stateToggle.container.position.set(
             Flashbang.stageWidth / 2 - this.container.position.x,
             -this.container.position.y + 8
         );
@@ -980,7 +980,7 @@ export default class Toolbar extends ContainerObject {
             }
 
             this.removeNamedObjects(COLLAPSE_ANIM);
-            this._content.position = this._uncollapsedContentLoc;
+            this._content.position.copyFrom(this._uncollapsedContentLoc);
             this.display.interactive = false;
         }
     }

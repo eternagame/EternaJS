@@ -80,7 +80,7 @@ export default class AchievementBox extends ContainerObject {
 
         // Title
         const title = Fonts.std('NEW ACHIEVEMENT', 20).bold().color(0xFFFFFF).build();
-        title.position = new Point(
+        title.position.set(
             (theme.size.x - title.width) / 2,
             (theme.headerHeight - title.height) / 2
         );
@@ -89,7 +89,7 @@ export default class AchievementBox extends ContainerObject {
         // Close button
         const closeIcon = BitmapManager.getBitmap(Bitmaps.ImgAchievementsClose);
         const closeButton = new GameButton().allStates(closeIcon);
-        closeButton.container.position = new Point(
+        closeButton.container.position.set(
             theme.size.x - theme.spacing - closeIcon.width,
             (theme.headerHeight - closeIcon.height) / 2
         );
@@ -98,7 +98,7 @@ export default class AchievementBox extends ContainerObject {
 
         // Icon
         const imgObj = new HTMLImageObject(AchievementBox.getAbsUrl(this._imageURL));
-        imgObj.display.position = new Point(
+        imgObj.display.position.set(
             (theme.size.x - theme.iconSize) / 2,
             theme.headerHeight + theme.spacing
         );
@@ -119,7 +119,7 @@ export default class AchievementBox extends ContainerObject {
             .catch((err) => {
                 log.warn(`Failed to load Achievement image [url=${this._imageURL}, err=${err}]`);
             });
-        imageSprite.position = new Point(
+        imageSprite.position.set(
             (theme.size.x - theme.iconSize) / 2,
             theme.headerHeight + theme.spacing
         );
@@ -137,7 +137,7 @@ export default class AchievementBox extends ContainerObject {
         })
             .appendHTMLStyledText(this._description)
             .build();
-        this._descriptionTxt.position = new Point(
+        this._descriptionTxt.position.set(
             Math.max(
                 (theme.size.x - this._descriptionTxt.width) / 2,
                 theme.spacing * 2 + checkmark.width
@@ -147,7 +147,7 @@ export default class AchievementBox extends ContainerObject {
         this.container.addChild(this._descriptionTxt);
 
         // Checkmark
-        checkmark.position = new Point(
+        checkmark.position.set(
             this._descriptionTxt.position.x - theme.spacing - checkmark.width,
             this._descriptionTxt.position.y
         );
@@ -156,7 +156,7 @@ export default class AchievementBox extends ContainerObject {
         const updateLayout = () => {
             Assert.assertIsDefined(Flashbang.stageHeight);
             Assert.assertIsDefined(Flashbang.stageWidth);
-            this.container.position = new Point(
+            this.container.position.set(
                 (Flashbang.stageWidth - theme.size.x) / 2,
                 (Flashbang.stageHeight - theme.size.y) / 2
             );
@@ -174,7 +174,7 @@ export default class AchievementBox extends ContainerObject {
         const {theme} = AchievementBox;
 
         this.container.alpha = 0;
-        this.container.scale = new Point(3, 3);
+        this.container.scale.set(3, 3);
         this.container.x = (Flashbang.stageWidth - (theme.size.x * this.container.scale.x)) / 2;
         this.container.y = (Flashbang.stageHeight - (theme.size.y * this.container.scale.y)) / 2;
         this._descriptionTxt.alpha = 0;
@@ -213,7 +213,7 @@ export default class AchievementBox extends ContainerObject {
                     origin: {y: 0.7}
                 };
 
-                function fire(particleRatio: number, opts: object) {
+                function fire(particleRatio: number, opts: Record<string, unknown>) {
                     // sadly, @types/canvas-confetti doesn't export the confetti method properly!
                     // eslint-disable-next-line
                     (confetti as any).default(Object.assign({}, defaults, opts, {

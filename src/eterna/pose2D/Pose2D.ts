@@ -1,6 +1,6 @@
 import * as log from 'loglevel';
 import {
-    Container, Graphics, Point, Sprite, Texture, Rectangle
+    Container, Graphics, Point, Sprite, Texture, Rectangle, InteractionEvent
 } from 'pixi.js';
 import {Registration} from 'signals';
 import EPars, {RNABase, RNAPaint} from 'eterna/EPars';
@@ -42,8 +42,6 @@ import PuzzleEditOp from './PuzzleEditOp';
 import RNALayout, {RNATreeNode} from './RNALayout';
 import ScoreDisplayNode, {ScoreDisplayNodeType} from './ScoreDisplayNode';
 import triangulate from './triangulate';
-
-type InteractionEvent = PIXI.InteractionEvent;
 
 interface Mut {
     pos: number;
@@ -1152,12 +1150,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (strandName != null) {
                 this._strandLabel.setText(strandName);
                 if (mouseX + 16 + this._strandLabel.width > this._width) {
-                    this._strandLabel.display.position = new Point(
+                    this._strandLabel.display.position.set(
                         mouseX - 16 - this._strandLabel.width,
                         mouseY + 16
                     );
                 } else {
-                    this._strandLabel.display.position = new Point(mouseX + 16, mouseY + 16);
+                    this._strandLabel.display.position.set(mouseX + 16, mouseY + 16);
                 }
                 this._strandLabel.display.visible = true;
             }
@@ -1770,7 +1768,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         const praiseText = stackLen > 1 ? 'Great Pairings!' : 'Great Pairing!';
         const praiseObj = new SceneObject(Fonts.std(praiseText, 20).bold().color(0xffffff).build());
-        praiseObj.display.position = new Point(xPos - DisplayUtil.width(praiseObj.display) * 0.5, yPos);
+        praiseObj.display.position.set(xPos - DisplayUtil.width(praiseObj.display) * 0.5, yPos);
         this.addObject(praiseObj, this.container);
 
         praiseObj.display.alpha = 0;
@@ -2840,7 +2838,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                         ray.fadeIn();
                     }
 
-                    ray.display.position = this.getBaseLoc(ii);
+                    ray.display.position.copyFrom(this.getBaseLoc(ii));
                 }
             } else {
                 const diff: number = (fullSeq.length - this._explosionRays.length) / this._explosionRays.length;
@@ -2860,7 +2858,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                             ray.fadeIn();
                         }
 
-                        ray.display.position = this.getBaseLoc(ii);
+                        ray.display.position.copyFrom(this.getBaseLoc(ii));
                         rayWalker++;
                         diffWalker += diff;
                     } else {
@@ -3580,9 +3578,15 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public updateAnnotationSpaceAvailability(): void {
+        // These are SUPER expensive getters which basically have to touch all the objects in
+        // the container. There's no reason the width and height change while running this function,
+        // so let's only compute them once.
+        const baseLayerheight = this._baseLayer.height;
+        const baseLayerWidth = this._baseLayer.width;
+
         // Set annotation space availability to true
-        this._annotationSpaceAvailability = Array(Math.ceil(this._baseLayer.height)).fill(0).map(
-            () => Array(Math.ceil(this._baseLayer.width)).fill(true)
+        this._annotationSpaceAvailability = Array(Math.ceil(baseLayerheight)).fill(0).map(
+            () => Array(Math.ceil(baseLayerWidth)).fill(true)
         );
 
         const baseLayerBounds = DisplayUtil.getBoundsRelative(this._baseLayer, this.container);
@@ -3593,12 +3597,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
             const baseBounds = DisplayUtil.getBoundsRelative(base.display, this._baseLayer);
             const baseRowStart = Math.max(0, Math.floor(baseBounds.y - baseLayerBounds.y));
             const baseRowEnd = Math.min(
-                Math.ceil(this._baseLayer.height),
+                Math.ceil(baseLayerheight),
                 Math.ceil(baseBounds.y - baseLayerBounds.y + baseBounds.height)
             );
             const baseColStart = Math.max(0, Math.floor(baseBounds.x - baseLayerBounds.x));
             const baseColEnd = Math.min(
-                Math.ceil(this._baseLayer.width),
+                Math.ceil(baseLayerWidth),
                 Math.ceil(baseBounds.x - baseLayerBounds.x + baseBounds.width)
             );
 
@@ -3747,7 +3751,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             xAvg -= this._scoreTexts[ii].width / 2;
             yAvg -= this._scoreTexts[ii].height / 2;
 
-            this._scoreTexts[ii].position = new Point(xAvg, yAvg);
+            this._scoreTexts[ii].position.set(xAvg, yAvg);
             this._scoreTexts[ii].visible = (this._zoomLevel < 4);
             this.updateEnergyHighlight(this._scoreTexts[ii], ii, this._scoreTexts[ii].visible);
         }

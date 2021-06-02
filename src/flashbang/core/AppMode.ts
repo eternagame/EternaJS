@@ -66,7 +66,7 @@ export default class AppMode {
     }
 
     /** The PIXI Container that all this mode's DisplayObjects should live within */
-    public get container(): PIXI.Container | null {
+    public get container(): Container | null {
         return this._container;
     }
 

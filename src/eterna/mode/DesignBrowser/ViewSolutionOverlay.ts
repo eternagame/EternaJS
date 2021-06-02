@@ -1,5 +1,5 @@
 import {
-    Container, Graphics, Point, Sprite, Text
+    Container, Graphics, Sprite, Text
 } from 'pixi.js';
 import {UnitSignal} from 'signals';
 import SecStruct from 'eterna/rnatypes/SecStruct';
@@ -107,7 +107,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
             this.container.visible = false;
             this._parentMode.onResized(); // public unlike updateLayout
         });
-        closeButton.container.position = new Point(
+        closeButton.container.position.set(
             theme.width - theme.margin.right - closeButtonIcon.width,
             theme.margin.top
         );
@@ -171,7 +171,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
 
         // Header
         this._header = new VLayoutContainer(10, HAlign.LEFT);
-        this._header.position = new Point(theme.margin.left, theme.margin.top);
+        this._header.position.set(theme.margin.left, theme.margin.top);
         this._content.display.addChild(this._header);
 
         if (!(this._parentMode instanceof DesignBrowserMode)) {
@@ -237,10 +237,10 @@ export default class ViewSolutionOverlay extends ContainerObject {
                     puznid: this._props.puzzle.nodeID,
                     filter1: 'Id',
                     // TODO: Update website so that these can be camelcase
-                    /* eslint-disable @typescript-eslint/camelcase */
+                    /* eslint-disable @typescript-eslint/naming-convention */
                     filter1_arg1: this._props.solution.nodeID,
                     filter1_arg2: this._props.solution.nodeID
-                    /* eslint-enable @typescript-eslint/camelcase */
+                    /* eslint-enable camelcase */
                 });
                 this.modeStack.pushMode(new CopyTextDialogMode(solutionURL, 'Solution URL'));
             }
@@ -264,9 +264,9 @@ export default class ViewSolutionOverlay extends ContainerObject {
                     puznid: this._props.puzzle.nodeID,
                     filter1: 'Designer',
                     // TODO: Update website so that these can be camelcase
-                    /* eslint-disable @typescript-eslint/camelcase */
+                    /* eslint-disable @typescript-eslint/naming-convention */
                     filter1_arg1: this._props.solution.playerName
-                    /* eslint-enable @typescript-eslint/camelcase */
+                    /* eslint-enable camelcase */
                 });
                 this.modeStack.pushMode(new CopyTextDialogMode(playerURL, 'Player URL'));
             }
@@ -321,7 +321,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
             3, PoseThumbnailType.BASE_COLORED,
             0, null, false, 0, customLayout
         );
-        playThumbnail.scale = new Point(0.8, 0.8);
+        playThumbnail.scale.set(0.8, 0.8);
         if (!(this._parentMode instanceof PoseEditMode)) {
             const playButton = new ThumbnailAndTextButton({
                 thumbnail: playThumbnail,
@@ -353,7 +353,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
                 expdata.getShapeThreshold(),
                 customLayout
             );
-            resultThumbnail.scale = new Point(0.8, 0.8);
+            resultThumbnail.scale.set(0.8, 0.8);
 
             if (!(this._parentMode instanceof FeedbackViewMode)) {
                 const seeResultButton = new ThumbnailAndTextButton({
@@ -509,17 +509,17 @@ export default class ViewSolutionOverlay extends ContainerObject {
         Assert.assertIsDefined(Flashbang.stageHeight);
 
         const {theme} = ViewSolutionOverlay;
-        this.container.position = new Point(Flashbang.stageWidth - theme.width, 0);
+        this.container.position.set(Flashbang.stageWidth - theme.width, 0);
 
         this._panelBG.display.clear();
         this._panelBG.display.beginFill(0x101010);
         this._panelBG.display.drawRect(0, 0, theme.width, Flashbang.stageHeight);
         this._header.layout(true);
         this._footer.layout(true);
-        this._footer.position = new Point(theme.margin.left, Flashbang.stageHeight - this._footer.height);
+        this._footer.position.set(theme.margin.left, Flashbang.stageHeight - this._footer.height);
 
         this._contentLayout.layout(true);
-        this._scrollViewContainer.position = new Point(
+        this._scrollViewContainer.position.set(
             theme.margin.left,
             this._header.position.y + this._header.height + theme.margin.top
         );
@@ -630,7 +630,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
                 wordWrap: true,
                 wordWrapWidth: theme.width - 40
             },
-            bold: {fontStyle: 'bold'},
+            bold: {fontWeight: 'bold'},
             orange: {fill: 0xffcc00}
         });
     }

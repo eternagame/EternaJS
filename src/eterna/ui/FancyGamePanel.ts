@@ -1,4 +1,4 @@
-import {Graphics, Point, Text} from 'pixi.js';
+import {Graphics, Text} from 'pixi.js';
 import Fonts from 'eterna/util/Fonts';
 import BaseGamePanel from './BaseGamePanel';
 
@@ -69,7 +69,7 @@ export default class FancyGamePanel extends BaseGamePanel {
                 this._background.endFill();
 
                 this._titleText = Fonts.std(this._title, 13).bold().color(0x061F3A).build();
-                this._titleText.position = new Point(5, -20);
+                this._titleText.position.set(5, -20);
                 this.container.addChild(this._titleText);
             } else {
                 // Draw the border by just drawing another round rectangle behind the original

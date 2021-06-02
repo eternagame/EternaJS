@@ -3,9 +3,8 @@
 
 const path = require('path');
 const webpack = require('webpack');
-const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ManifestPlugin = require('webpack-manifest-plugin');
+const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 
 const packageJson = require('./package.json');
 const vendorDependencies = Object.keys(packageJson['dependencies']);
@@ -41,13 +40,14 @@ module.exports = {
     devtool: "inline-source-map",
     
     entry: {
-        main: ['babel-polyfill', "./src/eterna/index.ts"],
+        main: ['core-js/stable', 'regenerator-runtime/runtime', "./src/eterna/index.ts"],
         vendor: vendorDependencies
     },
 
     output: {
         filename: '[name].[chunkhash].js',
-        chunkFilename: 'bundles/[chunkhash].js'
+        chunkFilename: 'bundles/[chunkhash].js',
+        assetModuleFilename: 'assets/[name].[hash].[ext]'
     },
 
     resolve: {
@@ -59,6 +59,14 @@ module.exports = {
             flashbang: path.resolve(__dirname, 'src/flashbang'),
             eterna: path.resolve(__dirname, 'src/eterna'),
             'engines-bin': getEngineLocation()
+        },
+        fallback: {
+            // Our emscripten modules have code intended for non-web environments which import
+            // node libraries, which webpack tries to import even though they're not available in
+            // the web environment. More info: https://stackoverflow.com/a/59488387/5557208
+            fs: false,
+            crypto: false,
+            path: false
         }
     },
     
@@ -75,12 +83,7 @@ module.exports = {
             },
             {
                 test: /\.(png|jpg|gif|mp3|ttf)$/,
-                use: [
-                    {
-                        loader: 'file-loader',
-                        options: {name: 'assets/[name].[hash].[ext]'},
-                    }
-                ]
+                type: 'asset/resource',
             },
             {
                 test: /\.css$/,
@@ -97,30 +100,37 @@ module.exports = {
         // "react": "React",
         // "react-dom": "ReactDOM"
     },
-    
-    // 5/15/18 - Cargo-culting this line in to fix 'Module not found: Error: Can't resolve 'fs''
-    // https://github.com/webpack-contrib/css-loader/issues/447
-    node: {
-        fs: "empty"
+
+    cache: {
+        // Cache to disk to make future builds faster
+        // (especially due to the folding engines, which are large)
+        type: 'filesystem',
+        buildDependencies: {
+            config: [
+                __filename,
+                path.join(__dirname, 'package-lock.json'),
+                path.join(__dirname, '.env'),
+                path.join(__dirname, '.env.local'),
+                path.join(__dirname, 'tsconfig.json'),
+                path.join(__dirname, '.babelrc'),
+            ]
+        }
+    },
+
+    optimization: {
+        splitChunks: {
+            chunks: 'all',
+        },      
     },
     
-    plugins: [
-        // Caching plugin for faster builds
-        // https://github.com/mzgoddard/hard-source-webpack-plugin
-        new HardSourceWebpackPlugin({
-            environmentHash: {
-                root: process.cwd(),
-                directories: [],
-                files: ['package-lock.json', 'yarn.lock', '.env', '.env.local']
-            }
-        }),
-        
+    plugins: [        
         new webpack.EnvironmentPlugin(Object.keys(process.env)),
         
         // Generate an index.html that includes our webpack bundles
         new HtmlWebpackPlugin({
             template: 'src/index.html.tmpl',
             inject: false,
+            scriptLoading: 'blocking',
             process: {
                 env: {
                     ...process.env
@@ -130,7 +140,7 @@ module.exports = {
 
         // Generate a manifest.json file containing our entry point file names:
         // https://github.com/danethurber/webpack-manifest-plugin#hooks-options
-        new ManifestPlugin({
+        new WebpackManifestPlugin({
             filter: (item) => item.isInitial
         }),
     ]

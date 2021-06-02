@@ -1,6 +1,6 @@
 import * as log from 'loglevel';
 import {
-    Container, DisplayObject, Point, Sprite, Text, Rectangle
+    Container, DisplayObject, Point, Sprite, Text, Rectangle, InteractionEvent
 } from 'pixi.js';
 import EPars, {RNABase, RNAPaint} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
@@ -79,8 +79,6 @@ import MissionIntroMode from './MissionIntroMode';
 import MissionClearedPanel from './MissionClearedPanel';
 import ViewSolutionOverlay from '../DesignBrowser/ViewSolutionOverlay';
 import {PuzzleEditPoseData} from '../PuzzleEdit/PuzzleEditMode';
-
-type InteractionEvent = PIXI.InteractionEvent;
 
 export interface PoseEditParams {
     isReset?: boolean;
@@ -283,7 +281,7 @@ export default class PoseEditMode extends GameMode {
 
         // Add our docked SpecBox at the bottom of uiLayer
         this._dockedSpecBox = new SpecBox(true);
-        this._dockedSpecBox.display.position = new Point(15, 190);
+        this._dockedSpecBox.display.position.set(15, 190);
         this._dockedSpecBox.setSize(155, 251);
         this._dockedSpecBox.display.visible = false;
         this.addObject(this._dockedSpecBox, this.uiLayer, 0);
@@ -303,7 +301,7 @@ export default class PoseEditMode extends GameMode {
         this.addObject(this._uiHighlight, this.uiLayer);
 
         this._exitButton = new GameButton().allStates(Bitmaps.ImgNextInside);
-        this._exitButton.display.scale = new Point(0.3, 0.3);
+        this._exitButton.display.scale.set(0.3, 0.3);
         this._exitButton.display.visible = false;
 
         Assert.assertIsDefined(this.regs);
@@ -317,7 +315,7 @@ export default class PoseEditMode extends GameMode {
             .up(Bitmaps.ImgHome)
             .over(Bitmaps.ImgHome)
             .down(Bitmaps.ImgHome);
-        this._homeButton.display.position = new Point(18, 10);
+        this._homeButton.display.position.set(18, 10);
         this._homeButton.clicked.connect(() => {
             if (Eterna.MOBILE_APP) {
                 if (window.frameElement) window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
@@ -328,13 +326,13 @@ export default class PoseEditMode extends GameMode {
         this.addObject(this._homeButton, this.uiLayer);
 
         const homeArrow = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgHomeArrow));
-        homeArrow.position = new Point(45, 14);
+        homeArrow.position.set(45, 14);
         Assert.assertIsDefined(this.container);
         this.container.addChild(homeArrow);
 
         // Async text shows above our UI lock, and right below all dialogs
         this._asynchText = Fonts.std('folding...', 12).bold().color(0xffffff).build();
-        this._asynchText.position = new Point(16, 200);
+        this._asynchText.position.set(16, 200);
         this.dialogLayer.addChild(this._asynchText);
         this.hideAsyncText();
 
@@ -444,11 +442,11 @@ export default class PoseEditMode extends GameMode {
 
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
-        this._exitButton.display.position = new Point(
+        this._exitButton.display.position.set(
             Flashbang.stageWidth - 85 - this._solDialogOffset,
             Flashbang.stageHeight - 120
         );
-        this._undockSpecBoxButton.display.position = new Point(Flashbang.stageWidth - 22 - this._solDialogOffset, 5);
+        this._undockSpecBoxButton.display.position.set(Flashbang.stageWidth - 22 - this._solDialogOffset, 5);
 
         this._constraintBar.layout();
 
@@ -948,7 +946,7 @@ export default class PoseEditMode extends GameMode {
         const puzzleTitle = UITheme.makeTitle(this._puzzle.getName(!Eterna.MOBILE_APP), 0xC0DCE7);
         puzzleTitle.hideWhenModeInactive();
         this.addObject(puzzleTitle, this.uiLayer);
-        puzzleTitle.display.position = new Point(57, 8);
+        puzzleTitle.display.position.set(57, 8);
 
         this._solutionNameText = Fonts.std('', 14).bold().color(0xc0c0c0).build();
         this.uiLayer.addChild(this._solutionNameText);
@@ -984,7 +982,7 @@ export default class PoseEditMode extends GameMode {
             initialFolder,
             this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
         );
-        this._folderSwitcher.display.position = new Point(17, 175);
+        this._folderSwitcher.display.position.set(17, 175);
         this.addObject(this._folderSwitcher, this.uiLayer);
 
         this._folderSwitcher.selectedFolder.connectNotify((folder) => {

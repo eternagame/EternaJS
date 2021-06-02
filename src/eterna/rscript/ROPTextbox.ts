@@ -85,7 +85,7 @@ export default class ROPTextbox extends RScriptOp {
             if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
                 Assert.assertIsDefined(Flashbang.stageWidth);
                 Assert.assertIsDefined(Flashbang.stageHeight);
-                textBox.display.position = new Point(
+                textBox.display.position.set(
                     Flashbang.stageWidth * this._xPos + this._xRel,
                     Flashbang.stageHeight * this._yPos + this._yRel
                 );
@@ -101,7 +101,7 @@ export default class ROPTextbox extends RScriptOp {
                     offset.y = this._yOffset;
                 }
 
-                textBox.display.position = new Point(p.x + offset.x, p.y + offset.y);
+                textBox.display.position.set(p.x + offset.x, p.y + offset.y);
                 this._env.poseField.addAnchoredObject(new RNAAnchorObject(textBox, this._targetIndex, offset));
             } else if (this._mode === ROPTextboxMode.TEXTBOX_DEFAULT) {
                 this._env.setTextboxVisible(this._id, true);
@@ -135,14 +135,14 @@ export default class ROPTextbox extends RScriptOp {
             if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
                 Assert.assertIsDefined(Flashbang.stageHeight);
                 Assert.assertIsDefined(Flashbang.stageWidth);
-                newArrow.display.position = new Point(
+                newArrow.display.position.set(
                     Flashbang.stageWidth * this._xPos + this._xRel,
                     Flashbang.stageHeight * this._yPos + this._yRel
                 );
             } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
-                newArrow.display.position = this._env.pose.getBaseLoc(this._targetIndex);
+                newArrow.display.position.copyFrom(this._env.pose.getBaseLoc(this._targetIndex));
             } else if (this._mode === ROPTextboxMode.ARROW_ENERGY) {
-                newArrow.display.position = this._env.pose.getEnergyScorePos(this._targetIndex);
+                newArrow.display.position.copyFrom(this._env.pose.getEnergyScorePos(this._targetIndex));
             }
 
             // Determine where we want to draw the tip of the arrow
@@ -206,14 +206,14 @@ export default class ROPTextbox extends RScriptOp {
             if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
                 const offset = calcOffset();
                 const p = this._env.pose.getBaseLoc(this._targetIndex);
-                newArrow.display.position = new Point(p.x + offset.x, p.y + offset.y);
+                newArrow.display.position.set(p.x + offset.x, p.y + offset.y);
                 log.debug('TODO: set_anchor_nucleotide?');
                 // TSC - I'm not sure if this is ever called or what it should do
                 // newArrow.set_anchor_nucleotide(this._env.GetRNA(), this._nuc_idx, offset.x, offset.y);
             } else if (this._mode === ROPTextboxMode.ARROW_ENERGY) {
                 const offset = calcOffset();
                 const p = this._env.pose.getEnergyScorePos(this._targetIndex);
-                newArrow.display.position = new Point(
+                newArrow.display.position.set(
                     p.x + offset.x + ROPTextbox.DEFAULT_ENERGY_ARROW_OFFSET.x,
                     p.y + offset.y + ROPTextbox.DEFAULT_ENERGY_ARROW_OFFSET.y
                 );

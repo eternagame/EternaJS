@@ -3,7 +3,7 @@ export default class Deferred<T> {
     public readonly promise: Promise<T>;
 
     constructor() {
-        this.promise = new Promise((resolve, reject) => {
+        this.promise = new Promise<T>((resolve, reject) => {
             this._resolve = resolve;
             this._reject = reject;
         });
@@ -14,7 +14,7 @@ export default class Deferred<T> {
         return this._resolve == null;
     }
 
-    public resolve(value?: PromiseLike<T> | T): void {
+    public resolve(value: PromiseLike<T> | T): void {
         if (this.isSealed) {
             throw new Error("Can't resolve sealed promise");
         }
@@ -36,6 +36,6 @@ export default class Deferred<T> {
         fn(reason);
     }
 
-    private _resolve: (value?: PromiseLike<T> | T) => void;
+    private _resolve: (value: PromiseLike<T> | T) => void;
     private _reject: (reason?: Error) => void;
 }

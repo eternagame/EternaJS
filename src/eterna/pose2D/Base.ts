@@ -1,7 +1,8 @@
 import * as log from 'loglevel';
 import {
-    Point, Sprite, Texture, Graphics, filters
+    Point, Sprite, Texture, Graphics
 } from 'pixi.js';
+import {ColorMatrixFilter} from '@pixi/filter-color-matrix';
 import {ContainerObject, LateUpdatable, Flashbang} from 'flashbang';
 import Constants from 'eterna/Constants';
 import {RNABase, RNAPaint} from 'eterna/EPars';
@@ -9,8 +10,6 @@ import ROPWait from 'eterna/rscript/ROPWait';
 import BaseAssets from './BaseAssets';
 import BaseDrawFlags from './BaseDrawFlags';
 import {RNAHighlightState} from './Pose2D';
-
-type ColorMatrixFilter = PIXI.filters.ColorMatrixFilter;
 
 export default class Base extends ContainerObject implements LateUpdatable {
     public static NUM_ZOOM_LEVELS = 2;
@@ -559,12 +558,12 @@ export default class Base extends ContainerObject implements LateUpdatable {
 
         const flyingDist = (zoomLevel < Base.NUM_ZOOM_LEVELS) ? 100 : 70;
 
-        this._spark1.position = new Point(
+        this._spark1.position.set(
             offX + this._sparkDir.x * flyingDist * animProgress,
             offY + this._sparkDir.y * flyingDist * animProgress
         );
 
-        this._spark2.position = new Point(
+        this._spark2.position.set(
             offX - this._sparkDir.x * flyingDist * animProgress,
             offY - this._sparkDir.y * flyingDist * animProgress
         );
@@ -588,13 +587,12 @@ export default class Base extends ContainerObject implements LateUpdatable {
     }
 
     private static multiplyAlphaFilter(multiplier: number): ColorMatrixFilter {
-        const filter = new filters.ColorMatrixFilter();
+        const filter = new ColorMatrixFilter();
         filter.matrix = [
             1, 0, 0, 0, 0,
             0, 1, 0, 0, 0,
             0, 0, 1, 0, 0,
-            0, 0, 0, multiplier, 0,
-            0, 0, 0, 0, 1
+            0, 0, 0, multiplier, 0
         ];
         return filter;
     }

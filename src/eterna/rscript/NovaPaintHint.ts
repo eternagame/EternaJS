@@ -24,7 +24,7 @@ export default class NovaPaintHint extends ContainerObject implements Updatable 
     public initialize(): void {
         this._active = true;
         this._totalDistance = 0.0;
-        this.display.position = this._startPoint;
+        this.display.position.copyFrom(this._startPoint);
     }
 
     public setAnchorNucleotide(rna: Pose2D, base: number): void {
@@ -90,7 +90,7 @@ export default class NovaPaintHint extends ContainerObject implements Updatable 
         this._lastTimeTick = currentTime;
 
         dir.length = this._totalDistance;
-        this.display.position = new Point(startPos.x + dir.x, startPos.y + dir.y);
+        this.display.position.set(startPos.x + dir.x, startPos.y + dir.y);
     }
 
     private readonly _startPoint: Point;

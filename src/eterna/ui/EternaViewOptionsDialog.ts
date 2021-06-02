@@ -1,4 +1,4 @@
-import {Point, Graphics} from 'pixi.js';
+import {Graphics} from 'pixi.js';
 import {
     VLayoutContainer, HAlign, Setting, HLayoutContainer, VAlign, DisplayUtil, Flashbang, Assert
 } from 'flashbang';
@@ -58,7 +58,7 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
         settingsLayout.addChild(soundButtonLayout);
 
         this._muteButton = new GameButton().allStates(Bitmaps.AudioNormal);
-        this._muteButton.display.scale = new Point(0.7, 0.7);
+        this._muteButton.display.scale.set(0.7, 0.7);
         // Don't play the default button sound when the button is clicked -
         // we want to update the volume first, and *then* play the sound.
         this._muteButton.downSound = null;
@@ -71,7 +71,7 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
 
         for (let ii = 0; ii < NUM_VOLUME_BUTTONS; ++ii) {
             const volumeButton = new GameButton().allStates(Bitmaps.Audio_Vol_On);
-            volumeButton.display.scale = new Point(0.3, 0.3);
+            volumeButton.display.scale.set(0.3, 0.3);
             volumeButton.downSound = null;
             volumeButton.clicked.connect(() => {
                 this.setVolume(false, (ii + 1) / NUM_VOLUME_BUTTONS);

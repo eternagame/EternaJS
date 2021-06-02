@@ -1,7 +1,7 @@
 import {
     ContainerObject, Flashbang, DisplayUtil, HAlign, VAlign, AppMode, Assert
 } from 'flashbang';
-import {Point, Graphics} from 'pixi.js';
+import {Graphics} from 'pixi.js';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {isMobile} from 'is-mobile';
 import MultiPagePanel from '../MultiPagePanel';
@@ -194,16 +194,16 @@ export default class HelpScreen extends AppMode {
 
         if (this._shortCuts) {
             width += theme.column.width;
-            this._shortCuts.container.position = new Point(
+            this._shortCuts.container.position.set(
                 Flashbang.stageWidth * 0.5 - width / 2,
                 Flashbang.stageHeight * 0.5 - theme.column.height / 2
             );
-            this._sections.container.position = new Point(
+            this._sections.container.position.set(
                 this._shortCuts.container.position.x + theme.column.width + theme.column.margin,
                 this._shortCuts.container.position.y
             );
         } else {
-            this._sections.container.position = new Point(
+            this._sections.container.position.set(
                 Flashbang.stageWidth * 0.5 - width / 2,
                 Flashbang.stageHeight * 0.5 - theme.column.height / 2
             );

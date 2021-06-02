@@ -1,7 +1,7 @@
 import * as log from 'loglevel';
 import MultiStyleText from 'pixi-multistyle-text';
 import {
-    Container, Point, Sprite, Text
+    Container, InteractionEvent, Sprite, Text
 } from 'pixi.js';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Eterna from 'eterna/Eterna';
@@ -103,7 +103,7 @@ export default class DesignBrowserMode extends GameMode {
     protected setup(): void {
         super.setup();
 
-        this._content.position = new Point(10, 86);
+        this._content.position.set(10, 86);
         this.uiLayer.addChild(this._content);
 
         this._votesText = new MultiStyleText('You have...', {
@@ -113,10 +113,10 @@ export default class DesignBrowserMode extends GameMode {
                 fill: 0xffffff
             },
             bold: {
-                fontStyle: FontWeight.BOLD
+                fontWeight: FontWeight.BOLD
             }
         });
-        this._votesText.position = new Point(20, 52);
+        this._votesText.position.set(20, 52);
         this.uiLayer.addChild(this._votesText);
 
         this._vSlider = new SliderBar(true);
@@ -130,7 +130,7 @@ export default class DesignBrowserMode extends GameMode {
         this.addObject(this._hSlider, this._content);
 
         this._scrollContainer = new ScrollContainer(1, 1);
-        this._scrollContainer.display.position = new Point(7, 0);
+        this._scrollContainer.display.position.set(7, 0);
         this.addObject(this._scrollContainer, this._content);
 
         this._dataColParent = new ContainerObject();
@@ -140,23 +140,23 @@ export default class DesignBrowserMode extends GameMode {
         this._firstVisSolutionIdx = 0;
         this._gridLines = new GridLines(1, 0x2f93d1, 5 * theme.rowHeight);
         const dataStart = theme.headerHeight + theme.filterHeight + theme.dataPadding;
-        this._gridLines.position = new Point(10, dataStart);
+        this._gridLines.position.set(10, dataStart);
         this._content.addChild(this._gridLines);
 
         this._markerBoxes = new MarkerBoxView(0xFF0000, theme.rowHeight);
-        this._markerBoxes.position = new Point(7, theme.headerHeight + theme.filterHeight + 1);
+        this._markerBoxes.position.set(7, theme.headerHeight + theme.filterHeight + 1);
         this._content.addChild(this._markerBoxes);
 
         const selectionBoxParent = new Container();
         this._selectionBox = new SelectionBox(0x2F94D1);
-        this._selectionBox.position = new Point(7, 0);
+        this._selectionBox.position.set(7, 0);
         this._selectionBox.visible = false;
         selectionBoxParent.addChild(this._selectionBox);
         this._content.addChild(selectionBoxParent);
 
         const clickedSelectionBoxParent = new Container();
         this._clickedSelectionBox = new SelectionBox(0x2F44D1);
-        this._clickedSelectionBox.position = new Point(7, 0);
+        this._clickedSelectionBox.position.set(7, 0);
         this._clickedSelectionBox.visible = false;
         clickedSelectionBoxParent.addChild(this._clickedSelectionBox);
         this._content.addChild(clickedSelectionBoxParent);
@@ -260,7 +260,7 @@ export default class DesignBrowserMode extends GameMode {
             .up(Bitmaps.ImgHome)
             .over(Bitmaps.ImgHome)
             .down(Bitmaps.ImgHome);
-        homeButton.display.position = new Point(18, 10);
+        homeButton.display.position.set(18, 10);
         homeButton.clicked.connect(() => {
             if (Eterna.MOBILE_APP) {
                 if (window.frameElement) window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
@@ -271,7 +271,7 @@ export default class DesignBrowserMode extends GameMode {
         this.addObject(homeButton, this.uiLayer);
 
         const homeArrow = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgHomeArrow));
-        homeArrow.position = new Point(45, 14);
+        homeArrow.position.set(45, 14);
         this.uiLayer.addChild(homeArrow);
 
         const puzzleTitle = UITheme.makeTitle(this._puzzle.getName(!Eterna.MOBILE_APP), 0xffffff);
@@ -343,14 +343,14 @@ export default class DesignBrowserMode extends GameMode {
     }
 
     private updateLayout(): void {
-        this._hSlider.display.position = new Point(30, this.contentHeight + 3);
+        this._hSlider.display.position.set(30, this.contentHeight + 3);
         this._hSlider.setSize(this.contentWidth - 60, 0);
         // If we don't do this, we can be in a situation where the horizontal position
         // of the content won't be synced with the scrollbar, due to showing/hiding
         // the solution sidebar
         this._hSlider.setProgress(this._hSlider.getProgress());
 
-        this._vSlider.display.position = new Point(this.contentWidth + 5, 50);
+        this._vSlider.display.position.set(this.contentWidth + 5, 50);
         this._vSlider.setSize(0, this.contentHeight - 70);
 
         this._gridLines.setSize(
@@ -595,7 +595,7 @@ export default class DesignBrowserMode extends GameMode {
             });
     }
 
-    private onMouseUp(e: PIXI.InteractionEvent): void {
+    private onMouseUp(e: InteractionEvent): void {
         if (Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown) {
             this.mark(e);
             return;
@@ -660,7 +660,7 @@ export default class DesignBrowserMode extends GameMode {
         this.updateLayout();
     }
 
-    private onMouseMove(e: PIXI.InteractionEvent): void {
+    private onMouseMove(e: InteractionEvent): void {
         this._selectionBox.visible = false;
         Assert.assertIsDefined(Flashbang.globalMouse);
 
@@ -691,7 +691,7 @@ export default class DesignBrowserMode extends GameMode {
         this._clickedSelectionBox.visible = idxOffset > 0;
     }
 
-    private mark(e: PIXI.InteractionEvent): void {
+    private mark(e: InteractionEvent): void {
         if (this._dataCols == null) {
             this._markerBoxes.visible = false;
             return;
@@ -1084,7 +1084,7 @@ export default class DesignBrowserMode extends GameMode {
                     new LocationTask(this._wholeRowWidth, 0, 0.5, Easing.easeOut)
                 );
             } else {
-                col.display.position = new Point(this._wholeRowWidth, 0);
+                col.display.position.set(this._wholeRowWidth, 0);
             }
 
             this._wholeRowWidth += col.width;

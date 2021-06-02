@@ -222,8 +222,8 @@ export default class Plot extends Container {
     private _upperBounds: number[] | null;
     private _labelFields: Text[] | null;
 
-    private _width: number = 100;
-    private _height: number = 100;
+    protected _width: number = 100;
+    protected _height: number = 100;
 
     private static readonly W_MARGIN = 0;
     private static readonly H_MARGIN = 20;

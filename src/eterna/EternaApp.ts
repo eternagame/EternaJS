@@ -444,7 +444,7 @@ export default class EternaApp extends FlashbangApp {
     protected onUncaughtError(err: ErrorEvent): void {
         const errstring = ErrorUtil.getErrString(err);
         if (errstring.startsWith("Error: Failed to set the 'buffer' property on 'AudioBufferSourceNode'")) {
-            log.debug('pixi-sound is misbehaving again');
+            log.debug('@pixi/sound is misbehaving again');
         } else {
             Eterna.onFatalError(err);
         }
@@ -462,7 +462,7 @@ export default class EternaApp extends FlashbangApp {
             width: this._params.width,
             height: this._params.height,
             backgroundColor: 0x0,
-            transparent: true,
+            backgroundAlpha: 0,
             antialias: true,
             autoDensity: true,
             resolution: devicePixelRatio

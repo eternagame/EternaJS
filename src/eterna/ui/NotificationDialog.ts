@@ -1,4 +1,3 @@
-import {Point} from 'pixi.js';
 import {HLayoutContainer, Flashbang, Assert} from 'flashbang';
 import Dialog from './Dialog';
 import GameButton from './GameButton';
@@ -39,7 +38,7 @@ export default class NotificationDialog extends Dialog<void> {
         }
 
         buttonLayout.layout();
-        buttonLayout.position = new Point(
+        buttonLayout.position.set(
             (box.width - buttonLayout.width) * 0.5,
             (box.height - buttonLayout.height - 10)
         );
@@ -49,7 +48,7 @@ export default class NotificationDialog extends Dialog<void> {
         const updateLocation = () => {
             Assert.assertIsDefined(Flashbang.stageWidth);
             Assert.assertIsDefined(Flashbang.stageHeight);
-            box.display.position = new Point(
+            box.display.position.set(
                 (Flashbang.stageWidth - box.width) * 0.5,
                 (Flashbang.stageHeight - box.height) * 0.5
             );

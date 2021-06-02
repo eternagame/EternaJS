@@ -1,5 +1,5 @@
 import {
-    Graphics, Point, Text
+    Graphics, Text
 } from 'pixi.js';
 import {DropShadowFilter} from '@pixi/filter-drop-shadow';
 import Fonts from 'eterna/util/Fonts';
@@ -139,7 +139,7 @@ export default class GamePanel extends BaseGamePanel {
                 }
 
                 this._titleText.text = this._title.toUpperCase();
-                this._titleText.position = new Point(
+                this._titleText.position.set(
                     (this._width - this._titleText.width) * 0.5,
                     (this.titleHeight - this._titleText.height) * 0.5
                 );

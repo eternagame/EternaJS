@@ -1,6 +1,6 @@
 import {UndoBlockParam} from 'eterna/UndoBlock';
 import {
-    Container, Sprite, Point, Texture
+    Container, Sprite, Texture
 } from 'pixi.js';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -56,27 +56,27 @@ export default class MinimumStackLengthConstraint extends Constraint<MinStackCon
         const tex = BitmapManager.getBitmap(Bitmaps.BaseWMidPattern);
 
         const base1 = new Sprite(tex);
-        base1.position = new Point(8, 1);
+        base1.position.set(8, 1);
         icon.addChild(base1);
 
         const base2 = new Sprite(tex);
-        base2.position = new Point(33, 1);
+        base2.position.set(33, 1);
         icon.addChild(base2);
 
         const base3 = new Sprite(tex);
-        base3.position = new Point(8, 15);
+        base3.position.set(8, 15);
         icon.addChild(base3);
 
         const base4 = new Sprite(tex);
-        base4.position = new Point(33, 15);
+        base4.position.set(33, 15);
         icon.addChild(base4);
 
         const bond1 = new Band(3, 3, 1);
-        bond1.display.position = new Point(22, 3);
+        bond1.display.position.set(22, 3);
         icon.addChild(bond1.container);
 
         const bond2 = new Band(3, 3, 1);
-        bond2.display.position = new Point(22, 17);
+        bond2.display.position.set(22, 17);
         icon.addChild(bond2.container);
 
         return TextureUtil.renderToTexture(icon);

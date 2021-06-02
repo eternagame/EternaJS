@@ -1,10 +1,9 @@
 import {ContainerObject, Assert} from 'flashbang';
 import {
-    Graphics, Point, Rectangle, TextMetrics
+    Container,
+    Graphics, InteractionEvent, Point, Rectangle, TextMetrics
 } from 'pixi.js';
 import Fonts from 'eterna/util/Fonts';
-
-type InteractionEvent = PIXI.InteractionEvent;
 
 // AMW we have to be content to accept our positioner may
 // in fact return null (if we want to use getbounds() for
@@ -18,7 +17,7 @@ interface HelpToolTipProps {
     positioner: ToolTipPositioner;
     side?: HelpToolTipSide;
     tailLength?: number;
-    content?: PIXI.Container;
+    content?: Container;
 }
 
 export default class HelpToolTip extends ContainerObject {
@@ -92,7 +91,7 @@ export default class HelpToolTip extends ContainerObject {
         background.on('click', (e: InteractionEvent) => e.stopPropagation());
         background.beginFill(theme.colors.background, 1);
         background.drawRoundedRect(backgroundX, backgroundY, width, height, theme.borderRadius);
-        textElem.position = new Point(
+        textElem.position.set(
             backgroundX + (width - textMetrics.width) / 2,
             backgroundY + theme.padding
         );
@@ -117,7 +116,7 @@ export default class HelpToolTip extends ContainerObject {
         this.container.addChild(background);
 
         if (props.content) {
-            props.content.position = new Point(
+            props.content.position.set(
                 backgroundX + (width - props.content.width) / 2,
                 backgroundY + textMetrics.height + theme.padding * 2
             );

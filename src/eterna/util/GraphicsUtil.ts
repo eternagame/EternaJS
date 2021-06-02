@@ -1,4 +1,4 @@
-import {Graphics, Point} from 'pixi.js';
+import {Graphics} from 'pixi.js';
 import {Vector2} from 'flashbang';
 
 export default class GraphicsUtil {
@@ -44,7 +44,7 @@ export default class GraphicsUtil {
         graphics.drawRect(rStart.x, rStart.y, baseLength, rectHeight);
         graphics.endFill();
 
-        graphics.lineStyle(undefined, undefined);
+        graphics.lineStyle(0);
         graphics.beginFill(fillColor, 1);
         graphics.drawRect(rStart.x - 5, rStart.y + 1, 20, rectHeight - 1);
         graphics.endFill();
@@ -63,7 +63,7 @@ export default class GraphicsUtil {
             .lineTo(-7, 0)
             .lineTo(0, -5)
             .lineTo(0, 5);
-        g.scale = new Point(scale, scale);
+        g.scale.set(scale, scale);
         return g;
     }
 
@@ -78,7 +78,7 @@ export default class GraphicsUtil {
             .lineTo(7, 0)
             .lineTo(0, -5)
             .lineTo(0, 5);
-        g.scale = new Point(scale, scale);
+        g.scale.set(scale, scale);
         return g;
     }
 }

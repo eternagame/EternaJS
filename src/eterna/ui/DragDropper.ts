@@ -24,7 +24,7 @@ export interface Item {
     type: string;
     globalX?: number;
     globalY?: number;
-    payload?: object | string;
+    payload?: Record<string, unknown> | string;
 }
 
 interface DragDropperProps {

@@ -1,4 +1,3 @@
-import {Point} from 'pixi.js';
 import Dialog from 'eterna/ui/Dialog';
 import Fonts from 'eterna/util/Fonts';
 import {
@@ -21,7 +20,7 @@ export default class SubmittingDialog extends Dialog<void> {
         const updateLocation = () => {
             Assert.assertIsDefined(Flashbang.stageHeight);
             Assert.assertIsDefined(Flashbang.stageWidth);
-            text.position = new Point(
+            text.position.set(
                 (Flashbang.stageWidth - text.width) * 0.5,
                 (Flashbang.stageHeight - text.height) * 0.5
             );

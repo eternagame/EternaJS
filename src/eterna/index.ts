@@ -9,6 +9,7 @@ declare global {
     interface Window {
         EternaApp: typeof EternaApp;
         app: EternaApp; // this syntax is used in index.html.tmpl, at least...
+        PIXI?: typeof PIXI;
     }
 }
 

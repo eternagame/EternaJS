@@ -1,6 +1,5 @@
 import {
     Graphics,
-    Point,
     Sprite
 } from 'pixi.js';
 import {Signal, Registration} from 'signals';
@@ -295,7 +294,7 @@ export default class FileInputObject extends DOMObject<HTMLInputElement | HTMLDi
                     + icon.width
                     : parseFloat(window.getComputedStyle(this._obj, null).getPropertyValue('padding-left'));
                 const y = (this.height - labelText.height) / 2;
-                labelText.position = new Point(x, y);
+                labelText.position.set(x, y);
             }
             this._fakeFileInput.addChild(labelText);
         }

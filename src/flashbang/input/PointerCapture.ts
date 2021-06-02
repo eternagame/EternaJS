@@ -1,8 +1,6 @@
-import {Container, DisplayObject} from 'pixi.js';
+import {Container, DisplayObject, InteractionEvent} from 'pixi.js';
 import {Assert, Flashbang, GameObject} from 'flashbang';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
-
-type InteractionEvent = PIXI.InteractionEvent;
 
 /**
  * Begins capturing pointer input. All pointer events not related to the passed Container will be
@@ -32,7 +30,8 @@ export default class PointerCapture extends GameObject {
     }
 
     protected added() {
-        Assert.assertIsDefined(this.mode?.container);
+        Assert.assertIsDefined(this.mode);
+        Assert.assertIsDefined(this.mode.container);
         this.regs.add(this.mode.resized.connect(() => this.onModeResized()));
         this.onModeResized();
 
@@ -94,7 +93,7 @@ export default class PointerCapture extends GameObject {
         // - If it isn't, processing should only stop if stopPropagation was called - PIXI's pointer
         //   event processing atomatically handles that for us.
 
-        /* eslint-disable @typescript-eslint/ban-ts-ignore */
+        /* eslint-disable @typescript-eslint/ban-ts-comment */
 
         // @ts-ignore Not null
         e.target = null;
@@ -121,11 +120,9 @@ export default class PointerCapture extends GameObject {
                 break;
         }
 
-        // FIXME: This changed to public in Pixi 5.3, remove me once we upgrade
-        // @ts-ignore Protected
         if (func != null) interaction.processInteractive(e, interaction.lastObjectRendered, func, true);
 
-        /* eslint-enable @typescript-eslint/ban-ts-ignore */
+        /* eslint-enable @typescript-eslint/ban-ts-comment */
 
         this._surface.display.interactive = true;
     }

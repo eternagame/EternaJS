@@ -1188,7 +1188,7 @@ export default class AnnotationManager {
                     base.x + pose.xOffset,
                     base.y + pose.yOffset
                 );
-                view.display.position = new Point(
+                view.display.position.set(
                     position.relPosition.x + anchorPoint.x,
                     position.relPosition.y + anchorPoint.y
                 );
@@ -1322,7 +1322,7 @@ export default class AnnotationManager {
             // Handle position
             if (relPosition && absolutePosition) {
                 // Set position
-                view.display.position = absolutePosition;
+                view.display.position.copyFrom(absolutePosition);
                 // Save display
                 item.views.push(view);
 

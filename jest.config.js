@@ -52,11 +52,12 @@ module.exports = {
     "globals": {
       "ts-jest": {
         "babelConfig": false,
-        "tsConfig": "./tsconfig.jest.json"
+        "tsconfig": "./tsconfig.jest.json"
       }
     },
     "setupFiles": [
       "jest-canvas-mock",
       "dotenv/config"
-    ]
+    ],
+    "testEnvironment": "jsdom"
 }

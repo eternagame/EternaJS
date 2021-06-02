@@ -1,4 +1,3 @@
-import {Point} from 'pixi.js';
 import UndoBlock from 'eterna/UndoBlock';
 import {
     KeyCode, Flashbang, DisplayUtil, HAlign, VAlign, Assert
@@ -48,7 +47,7 @@ export default class SpecBoxDialog extends Dialog<boolean> {
             specBox.display.position.x = (Flashbang.stageWidth - specBox.width) * 0.5;
             specBox.display.position.y = (Flashbang.stageHeight - specBox.height) * 0.5;
 
-            cancelButton.display.position = new Point(
+            cancelButton.display.position.set(
                 specBox.width - cancelButton.container.width - 20,
                 specBox.height - cancelButton.container.height - 20
             );

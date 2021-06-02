@@ -1,5 +1,5 @@
 import {
-    Graphics, Point, Sprite
+    Graphics, Sprite
 } from 'pixi.js';
 import {
     ContainerObject, LocationTask, Easing, SerialTask, VisibleTask, DelayTask,
@@ -238,7 +238,7 @@ export default class RankScroll extends ContainerObject {
             color: 0x152843
         });
         bg.setSize(310, 88);
-        bg.display.position = new Point(-10, -10);
+        bg.display.position.set(-10, -10);
         this.addObject(bg, this.container);
 
         // Set up rankboard according to above infos
@@ -248,7 +248,7 @@ export default class RankScroll extends ContainerObject {
         maskTop.drawRect(0, 0, RankBoard.ROW_WIDTH, sizeIndicator * RankBoard.ROW_HEIGHT);
         this.container.addChild(maskTop);
         this._rankBoardTop.display.mask = maskTop;
-        this._rankBoardTop.display.position = new Point(
+        this._rankBoardTop.display.position.set(
             0, -((rankDataTop.length - sizeIndicator) * RankBoard.ROW_HEIGHT)
         );
         this._rankBoardTop.registerStartingPos();
@@ -265,7 +265,7 @@ export default class RankScroll extends ContainerObject {
         this.container.addChild(maskBottom);
         this._rankBoardBottom.display.mask = maskBottom;
 
-        this._rankBoardBottom.display.position = new Point(0,
+        this._rankBoardBottom.display.position.set(0,
             (sizeIndicator * RankBoard.ROW_HEIGHT) + RankBoard.PLAYER_ROW_HEIGHT
             - (this._moveOffset * RankBoard.ROW_HEIGHT));
         this._rankBoardBottom.registerStartingPos();
@@ -273,17 +273,17 @@ export default class RankScroll extends ContainerObject {
 
         // Set current player's row as center position
         this._playerRow = new RankRowLayout(startRank, this._playerRank, maxWidth, 20, 100, 0xEBA800);
-        this._playerRow.display.position = new Point(0, sizeIndicator * RankBoard.ROW_HEIGHT + 4);
+        this._playerRow.display.position.set(0, sizeIndicator * RankBoard.ROW_HEIGHT + 4);
         this.addObject(this._playerRow, this.container);
 
         this._tfRankOffset = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgRankBubble));
         const rankText = Fonts.std(`+${this._rankOffset}`, 20).color(0).bold().build();
-        rankText.position = new Point(
+        rankText.position.set(
             (this._tfRankOffset.width - rankText.width) / 2,
             (this._tfRankOffset.height - rankText.height) / 2
         );
         this._tfRankOffset.addChild(rankText);
-        this._tfRankOffset.position = new Point(
+        this._tfRankOffset.position.set(
             -this._tfRankOffset.width - 2, sizeIndicator * RankBoard.ROW_HEIGHT - 12
         );
         this._tfRankOffset.visible = true;

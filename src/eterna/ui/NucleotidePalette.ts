@@ -1,4 +1,5 @@
 import {
+    InteractionEvent,
     Point, Rectangle, Sprite, Text, Texture
 } from 'pixi.js';
 import {Signal} from 'signals';
@@ -12,8 +13,6 @@ import Fonts from 'eterna/util/Fonts';
 import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import ROPWait from 'eterna/rscript/ROPWait';
 import Tooltips from './Tooltips';
-
-type InteractionEvent = PIXI.InteractionEvent;
 
 export enum PaletteTargetType {
     A = 0, U, G, C, AU, UG, GC
@@ -243,15 +242,15 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
     public setPairCounts(au: number, ug: number, gc: number): void {
         if (this._targets[PaletteTargetType.AU].enabled) {
             this._numAU.text = au.toString();
-            this._numAU.position = new Point(51 - 4 - 0.50 * this._numAU.width, 1);
+            this._numAU.position.set(51 - 4 - 0.50 * this._numAU.width, 1);
         }
         if (this._targets[PaletteTargetType.UG].enabled) {
             this._numUG.text = ug.toString();
-            this._numUG.position = new Point(100 - 4 - 0.50 * this._numUG.width, 1);
+            this._numUG.position.set(100 - 4 - 0.50 * this._numUG.width, 1);
         }
         if (this._targets[PaletteTargetType.GC].enabled) {
             this._numGC.text = gc.toString();
-            this._numGC.position = new Point(149 - 4 - 0.50 * this._numGC.width, 1);
+            this._numGC.position.set(149 - 4 - 0.50 * this._numGC.width, 1);
         }
     }
 
@@ -264,7 +263,7 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
             this.clearSelection();
         } else {
             this._selection.texture = isPair ? this._selectPairData : this._selectBaseData;
-            this._selection.position = new Point(selectedBox.x, selectedBox.y);
+            this._selection.position.set(selectedBox.x, selectedBox.y);
             this._selection.visible = true;
         }
     }

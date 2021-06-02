@@ -17,6 +17,7 @@ import {
 import Fonts from 'eterna/util/Fonts';
 import {Value} from 'signals';
 import {DropShadowFilter} from '@pixi/filter-drop-shadow';
+import {FontWeight} from 'flashbang/util/TextBuilder';
 import GamePanel, {GamePanelType} from './GamePanel';
 import TextBalloon from './TextBalloon';
 import GameCheckbox from './GameCheckbox';
@@ -30,7 +31,7 @@ interface GameDropdownProps {
     borderColor?: number;
     color?: number;
     textColor?: number;
-    textWeight?: string;
+    textWeight?: FontWeight;
     width?: number;
     height?: number;
     dropShadow?: boolean;
@@ -54,7 +55,7 @@ export default class GameDropdown extends ContainerObject {
         this._borderColor = props.borderColor || 0xC0DCE7;
         this._boxColor = props.color || 0x324B73;
         this._textColor = props.textColor || 0xD0DCE7;
-        this._textWeight = props.textWeight || 'normal';
+        this._textWeight = props.textWeight || FontWeight.MEDIUM;
         this._dropShadow = props.dropShadow || false;
         this._checkboxes = props.checkboxes || false;
 
@@ -382,7 +383,7 @@ export default class GameDropdown extends ContainerObject {
     private _borderWidth: number;
     private _borderColor: number;
     private _textColor: number;
-    private _textWeight: string;
+    private _textWeight: FontWeight;
     private _disabled: boolean = false;
     private _boxColor: number;
     private _dropShadow: boolean;

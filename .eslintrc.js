@@ -21,6 +21,8 @@ module.exports = {
         // Prefer typescript-eslint version
         'semi': 'off',
         '@typescript-eslint/semi': 'error',
+        'no-shadow': 'off',
+        '@typescript-eslint/no-shadow': 'error',
 
         // Handled by typescript
         'no-dupe-class-members': 'off',
@@ -34,7 +36,8 @@ module.exports = {
         'max-classes-per-file': 'off',
         '@typescript-eslint/no-empty-function': 'off',
         'no-fallthrough': ['error', { "commentPattern": "break[\\s\\w]*omitted" }],
-        '@typescript-eslint/no-use-before-define': ['error', {'classes': false}],
+        'no-use-before-define': 'off',
+        '@typescript-eslint/no-use-before-define': ['error', {'classes': false, 'typedefs': false, 'ignoreTypeReferences': true}],
         // NOTE: Some are public but marked `/* internal */`, awaiting https://github.com/Microsoft/TypeScript/issues/5228
         '@typescript-eslint/explicit-member-accessibility': ['warn', {
           'overrides': {'constructors': 'no-public'}
@@ -94,10 +97,13 @@ module.exports = {
       // Outparams are used in some places to reduce allocations, however it'd be nice to have in general...
       // Should probably reconfigure with ignorePropertyModificationsFor
       'no-param-reassign': 'off',
-
+      // It would be good to turn this on, but we'll leave that for v2
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
 
       // this became a problem recently because a default changed
-      'import/extensions': ['error', 'never']
+      'import/extensions': ['error', 'never'],
+      // typescript-eslint changed some stuff, again we'll reenable in v2
+      'camelcase': 'off'
     }
   };
   

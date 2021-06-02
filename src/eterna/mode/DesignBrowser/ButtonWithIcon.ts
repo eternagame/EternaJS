@@ -1,6 +1,6 @@
 import GameButton from 'eterna/ui/GameButton';
 import {
-    Graphics, Sprite, Container, Point
+    Graphics, Sprite, Container
 } from 'pixi.js';
 import Fonts from 'eterna/util/Fonts';
 import {HLayoutContainer, VAlign} from 'flashbang';
@@ -49,7 +49,7 @@ export default class ButtonWithIcon extends GameButton {
         const iconPosition = props.iconPosition ?? 'left';
         layout.addChildAt(icon, iconPosition === 'left' ? 0 : 1);
         layout.layout(true);
-        layout.position = new Point(theme.margin.horizontal, theme.margin.vertical);
+        layout.position.set(theme.margin.horizontal, theme.margin.vertical);
 
         this._view.removeChildren();
 

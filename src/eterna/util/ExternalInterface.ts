@@ -2,16 +2,21 @@ import * as log from 'loglevel';
 import {Registration, UnitSignal} from 'signals';
 import {Deferred, Assert} from 'flashbang';
 
+// We have to deal with callbacks weakly. Ideally there'd be a mechanism to make this a bit
+// more explicit using `unknown`, but I couldn't immediately figure out a way to do it
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyFunction = (...args: any[]) => any;
+
 /**
  * A collection of externally registered callbacks.
  * GameModes can build an ExternalInterfaceCtx, push it to ExternalInterface when they are active,
  * and pop when they become inactive or destroyed, ensuring that stale callbacks won't linger.
  */
 export class ExternalInterfaceCtx {
-    public readonly callbacks = new Map<string, Function>();
+    public readonly callbacks = new Map<string, AnyFunction>();
     public readonly changed = new UnitSignal();
 
-    public addCallback(name: string, callback: Function): void {
+    public addCallback(name: string, callback: AnyFunction): void {
         this.callbacks.set(name, callback);
         this.changed.emit();
     }
@@ -177,7 +182,7 @@ export default class ExternalInterface {
     public static call(name: string, ...args: any[]): any {
         try {
             const [thisVal, f] = getDeepProperty(window as any, name);
-            return (f as Function).apply(thisVal, args);
+            return (f as AnyFunction).apply(thisVal, args);
         } catch (e) {
             log.error(`ExternalInterface: error calling '${name}': ${e}`);
             return undefined;

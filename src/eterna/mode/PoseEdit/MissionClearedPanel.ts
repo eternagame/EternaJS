@@ -1,5 +1,5 @@
 import {
-    Container, Graphics, Point, Text
+    Container, Graphics, Text
 } from 'pixi.js';
 import {
     ContainerObject, VLayoutContainer, HAlign, DOMObject, AlphaTask,
@@ -63,7 +63,7 @@ export default class MissionClearedPanel extends ContainerObject {
         const panelWidth = MissionClearedPanel.calcWidth();
 
         this._contentLayout = new VLayoutContainer(10, HAlign.CENTER);
-        this._contentLayout.position = new Point(theme.margin.left, theme.margin.top);
+        this._contentLayout.position.set(theme.margin.left, theme.margin.top);
         this.container.addChild(this._contentLayout);
 
         const title = Fonts.std('MISSION ACCOMPLISHED!', 20).bold().color(0xFFCC00).build();
@@ -118,15 +118,15 @@ export default class MissionClearedPanel extends ContainerObject {
         this.addObject(this._rankScrollHeading, this._rankScrollContainer);
 
         this._tfPlayer = Fonts.std('PLAYER', 14).bold().color(0xffffff).build();
-        this._tfPlayer.position = new Point(10, 2);
+        this._tfPlayer.position.set(10, 2);
         this._rankScrollHeading.container.addChild(this._tfPlayer);
 
         const tfRank: Text = Fonts.std('RANK', 14).bold().color(0xffffff).build();
-        tfRank.position = new Point(10 + 130, 2);
+        tfRank.position.set(10 + 130, 2);
         this._rankScrollHeading.container.addChild(tfRank);
 
         const tfCoin: Text = Fonts.std('POINTS', 14).bold().color(0xffffff).build();
-        tfCoin.position = new Point(10 + 130 + 85, 2);
+        tfCoin.position.set(10 + 130 + 85, 2);
         this._rankScrollHeading.container.addChild(tfCoin);
 
         this.closeButton = new GameButton()
@@ -198,11 +198,11 @@ export default class MissionClearedPanel extends ContainerObject {
 
         if (this._rankScroll != null) {
             this._rankScrollHeading.setSize(310, this._tfPlayer.height + 6);
-            this._rankScrollHeading.display.position = new Point(0, 0);
-            this._rankScroll.display.position = new Point(10, 12 + this._tfPlayer.height);
+            this._rankScrollHeading.display.position.set(0, 0);
+            this._rankScroll.display.position.set(10, 12 + this._tfPlayer.height);
 
             const rankScale = Math.min(1, panelWidth / (400 + 80));
-            this._rankScrollContainer.scale = new Point(rankScale, rankScale);
+            this._rankScrollContainer.scale.set(rankScale, rankScale);
         }
 
         const {theme} = MissionClearedPanel;
@@ -215,7 +215,7 @@ export default class MissionClearedPanel extends ContainerObject {
         this._infoContainer.layout(true);
 
         Assert.assertIsDefined(Flashbang.stageHeight);
-        this.nextButton.display.position = new Point(
+        this.nextButton.display.position.set(
             (panelWidth - this.nextButton.container.width) * 0.5,
             Flashbang.stageHeight - 20 - this.nextButton.container.height
         );

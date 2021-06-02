@@ -1,15 +1,9 @@
-import {Text, TextStyle} from 'pixi.js';
-
-// AMW right now we kind of need to be able to gradually build up a TextStyle
-// in this way. At least, refactoring that system should be separate from our
-// version port. PIXI v5+ no longer exports TextStyleOptions; rather, TextStyle
-// has a ctor that takes an anonymous struct of args that follows that pattern.
-// So here, I'll define my own.
+import {ITextStyle, Text, TextStyle} from 'pixi.js';
 
 // Using the terms used by Google Fonts
 export enum FontWeight {
     THIN = '100',
-    ExTRALIGHT = '200',
+    EXTRALIGHT = '200',
     LIGHT = '300',
     REGULAR = '400',
     MEDIUM = '500',
@@ -17,38 +11,6 @@ export enum FontWeight {
     BOLD = '700',
     EXTRABOLD = '800',
     BLACK = '900'
-}
-
-class TextStyleOptions {
-    public align?: string;
-    public breakWords?: boolean;
-    public dropShadow?: boolean;
-    public dropShadowAlpha?: number;
-    public dropShadowAngle?: number;
-    public dropShadowBlur?: number;
-    public dropShadowColor?: string | number;
-    public dropShadowDistance?: number;
-    public fill?: string | string[] | number | number[] | CanvasGradient | CanvasPattern;
-    public fillGradientType?: number;
-    public fillGradientStops?: number[];
-    public fontFamily?: string | string[];
-    public fontSize?: number | string;
-    public fontStyle?: string;
-    public fontVariant?: string;
-    public fontWeight?: string;
-    public leading?: number;
-    public letterSpacing?: number;
-    public lineHeight?: number;
-    public lineJoin?: string;
-    public miterLimit?: number;
-    public padding?: number;
-    public stroke?: string | number;
-    public strokeThickness?: number;
-    public trim?: boolean;
-    public textBaseline?: string;
-    public whiteSpace?: string;
-    public wordWrap?: boolean;
-    public wordWrapWidth?: number;
 }
 
 export default class TextBuilder {
@@ -179,7 +141,7 @@ export default class TextBuilder {
         return this;
     }
 
-    private _style: TextStyleOptions = {};
+    private _style: Partial<ITextStyle> = {};
     private _text: string;
     private _scale = 1;
 }

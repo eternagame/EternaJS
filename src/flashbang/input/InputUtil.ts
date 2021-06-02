@@ -1,4 +1,4 @@
-type InteractionEvent = PIXI.InteractionEvent;
+import {InteractionEvent} from 'pixi.js';
 
 export default class InputUtil {
     public static IsLeftMouse = (e: InteractionEvent): boolean => {

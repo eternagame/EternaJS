@@ -1,5 +1,4 @@
 import MultiStyleText from 'pixi-multistyle-text';
-import {Point, Text} from 'pixi.js';
 import {StyledTextBuilder, DisplayUtil, ContainerObject} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import GameButton from './GameButton';
@@ -18,7 +17,7 @@ export default class TextBalloon extends ContainerObject {
         borderRadius: number | undefined = undefined,
         textOffset: number = 0,
         textColor: number = TextBalloon.DEFAULT_FONT_COLOR,
-        textWeight: string = FontWeight.REGULAR,
+        textWeight: FontWeight = FontWeight.REGULAR,
         maxWidth: number | null = null
     ) {
         super();
@@ -63,7 +62,7 @@ export default class TextBalloon extends ContainerObject {
         this.updateView();
     }
 
-    public get text(): Text {
+    public get text(): MultiStyleText {
         return this._text;
     }
 
@@ -95,7 +94,7 @@ export default class TextBalloon extends ContainerObject {
         text: string,
         fontsize: number = 15,
         fontColor: number = TextBalloon.DEFAULT_FONT_COLOR,
-        fontWeight: string = FontWeight.REGULAR
+        fontWeight: FontWeight = FontWeight.REGULAR
     ): void {
         this.styledText = new StyledTextBuilder({
             fontFamily: Fonts.STDFONT,
@@ -159,33 +158,33 @@ export default class TextBalloon extends ContainerObject {
 
         if (!this._centered) {
             if (this._text != null) {
-                this._text.position = new Point(
+                this._text.position.set(
                     TextBalloon.W_MARGIN + this._textOffset,
                     TextBalloon.H_MARGIN + titleSpace
                 );
             }
 
             if (this._button.display.visible) {
-                this._button.display.position = new Point(
+                this._button.display.position.set(
                     TextBalloon.W_MARGIN + this._text.width + TextBalloon.W_MARGIN,
                     TextBalloon.H_MARGIN + titleSpace + this._text.height - DisplayUtil.height(this._button.display)
                 );
             }
 
-            this._panel.display.position = new Point(0, 0);
+            this._panel.display.position.set(0, 0);
         } else {
             if (this._text != null) {
-                this._text.position = new Point(-wholeWidth / 2, TextBalloon.H_MARGIN + titleSpace);
+                this._text.position.set(-wholeWidth / 2, TextBalloon.H_MARGIN + titleSpace);
             }
 
             if (this._button.display.visible) {
-                this._button.display.position = new Point(
+                this._button.display.position.set(
                     -wholeWidth / 2 + this._text.width + TextBalloon.W_MARGIN,
                     TextBalloon.H_MARGIN + titleSpace + this._text.height - DisplayUtil.height(this._button.display)
                 );
             }
 
-            this._panel.display.position = new Point(-wholeWidth / 2, 0);
+            this._panel.display.position.set(-wholeWidth / 2, 0);
         }
     }
 

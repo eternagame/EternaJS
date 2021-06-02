@@ -1,6 +1,6 @@
 import * as log from 'loglevel';
 import {
-    DisplayObject, Point, Sprite
+    DisplayObject, Sprite
 } from 'pixi.js';
 import Constants from 'eterna/Constants';
 import Eterna from 'eterna/Eterna';
@@ -60,9 +60,10 @@ export default class FeedbackViewMode extends GameMode {
             .up(Bitmaps.ImgHome)
             .over(Bitmaps.ImgHome)
             .down(Bitmaps.ImgHome);
-        this._homeButton.display.position = new Point(18, 10);
+        this._homeButton.display.position.set(18, 10);
         this._homeButton.clicked.connect(() => {
             if (Eterna.MOBILE_APP) {
+                Assert.assertIsDefined(window.frameElement);
                 window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
             } else {
                 window.location.href = EternaURL.createURL({page: 'home'});
@@ -71,7 +72,7 @@ export default class FeedbackViewMode extends GameMode {
         this.addObject(this._homeButton, this.uiLayer);
 
         const homeArrow = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgHomeArrow));
-        homeArrow.position = new Point(45, 14);
+        homeArrow.position.set(45, 14);
         this.uiLayer.addChild(homeArrow);
 
         const puzzleTitle = UITheme.makeTitle(this._puzzle.getName(!Eterna.MOBILE_APP), 0xffffff);
@@ -269,7 +270,7 @@ export default class FeedbackViewMode extends GameMode {
         );
 
         this.addObject(this._dropdown, this.uiLayer);
-        this._dropdown.display.position = new Point(18, 50);
+        this._dropdown.display.position.set(18, 50);
 
         const seeShape: boolean = (this._feedback !== null && this._feedback.getShapeData() != null);
         if (seeShape) {
