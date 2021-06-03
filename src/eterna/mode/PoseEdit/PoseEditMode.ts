@@ -792,8 +792,9 @@ export default class PoseEditMode extends GameMode {
             bindMousedownEvent(pose, ii);
             poseFields.push(poseField);
             pose.annotationManager = this._annotationManager;
+
+            // We only need one annotation manager to act on annotation logic
             if (ii === 0) {
-                // We only need one annotation manager to act on annotation logic
                 this._annotationManager.annotationMode.connect((active: boolean) => {
                     onAnnotationModeChange(pose, active);
                 });
@@ -869,17 +870,21 @@ export default class PoseEditMode extends GameMode {
                     }
                 };
                 this._annotationManager.onEditAnnotation.connect(editAnnotation);
-                this._annotationManager.onTriggerPanelUpdate.connect(() => {
-                    this._toolbar.annotationPanel.updatePanel();
+                // On progression puzzles, the panel is not added to the toolbar, so we need to
+                // avoid updating the panel
+                if (this._puzzle.puzzleType !== PuzzleType.PROGRESSION) {
+                    this._annotationManager.onTriggerPanelUpdate.connect(() => {
+                        this._toolbar.annotationPanel.updatePanel();
 
-                    if (this._annotationManager.dialogIsVisible) {
-                        this._annotationManager.updateDialogLayers();
-                    }
+                        if (this._annotationManager.dialogIsVisible) {
+                            this._annotationManager.updateDialogLayers();
+                        }
 
-                    if (this._poses.length > 0) {
-                        this.saveData();
-                    }
-                });
+                        if (this._poses.length > 0) {
+                            this.saveData();
+                        }
+                    });
+                }
                 this._annotationManager.onTriggerPoseUpdate.connect(() => {
                     this._annotationManager.updateAnnotationViews(pose);
 
