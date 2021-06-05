@@ -1546,7 +1546,8 @@ export default class PoseEditMode extends GameMode {
         const solution = this._params.solutions[nextSolutionIdx];
         Assert.notNull(solution);
         this.showSolution(solution);
-        if (this._solutionView && this._solutionView.container.visible) {
+        if (this._solutionView) {
+            const visible = this._solutionView.container.visible;
             this.removeObject(this._solutionView);
             this._solutionView = new ViewSolutionOverlay({
                 solution,
@@ -1556,6 +1557,7 @@ export default class PoseEditMode extends GameMode {
                 onNext: () => this.showNextSolution(1),
                 parentMode: (() => this)()
             });
+            this._solutionView.container.visible = visible;
             this.addObject(this._solutionView, this.dialogLayer);
             this._solutionView.seeResultClicked.connect(() => {
                 this.switchToFeedbackViewForSolution(this._curSolution);
