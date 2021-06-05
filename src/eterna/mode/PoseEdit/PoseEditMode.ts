@@ -1024,7 +1024,7 @@ export default class PoseEditMode extends GameMode {
         let annotationGraph: AnnotationDataBundle | undefined;
         let librarySelections: number[] = [];
         if (this._params.initSolution != null) {
-            initialSequence = this._params.initSolution.sequence;
+            initialSequence = this._params.initSolution.sequence.slice(0);
             annotationGraph = this._params.initSolution.annotations;
             this._curSolution = this._params.initSolution;
             // AMW: I'm keeping the function around in case we want to call it
