@@ -30,6 +30,7 @@ import SolutionManager from 'eterna/puzzle/SolutionManager';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 import UITheme from 'eterna/ui/UITheme';
+import AnnotationManager from 'eterna/AnnotationManager';
 import GameMode from './GameMode';
 import ViewSolutionOverlay from './DesignBrowser/ViewSolutionOverlay';
 
@@ -155,6 +156,9 @@ export default class FeedbackViewMode extends GameMode {
                     throw new Error("Critical error: can't create a Vienna folder instance by name");
                 }
                 poseField.pose.scoreFolder = vienna;
+                // We don't support annotations here right now, but the pose calls some methods
+                // on it
+                poseField.pose.annotationManager = new AnnotationManager(ToolbarType.FEEDBACK);
                 poseField.pose.sequence = this._sequence;
                 poseField.pose.secstruct = this._secstructs[ii];
                 poseFields.push(poseField);
