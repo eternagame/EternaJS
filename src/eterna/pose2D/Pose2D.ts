@@ -296,19 +296,16 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public computeDefaultZoomLevel(): number {
-        const n: number = this.fullSequenceLength;
-        const xarray: number[] = new Array(n);
-        const yarray: number[] = new Array(n);
-
         const rnaCoords: RNALayout = new RNALayout(Pose2D.ZOOM_SPACINGS[0], Pose2D.ZOOM_SPACINGS[0]);
         rnaCoords.setupTree(this._pairs, this._targetPairs);
         rnaCoords.drawTree(this._customLayout);
-        rnaCoords.getCoords(xarray, yarray);
+        const {
+            xbounds,
+            ybounds
+        } = rnaCoords.getCoords(this.fullSequenceLength);
 
-        const xmin: number = Math.min(...xarray);// xarray[0];
-        const xmax: number = Math.max(...xarray);
-        const ymin: number = Math.min(...yarray);
-        const ymax: number = Math.max(...yarray);
+        const [xmin, xmax] = xbounds;
+        const [ymin, ymax] = ybounds;
         const xdiff: number = xmax - xmin;
         const ydiff: number = ymax - ymin;
         const xscale: number = xdiff / this._width;
@@ -565,9 +562,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         // rnaCoords.setupTree(this._pairs.filterForPseudoknots(), this._targetPairs.filterForPseudoknots());
         rnaCoords.setupTree(this._pairs, this._targetPairs);
         rnaCoords.drawTree(this._customLayout);
-        const xarray: number[] = new Array(this._bases.length);
-        const yarray: number[] = new Array(this._bases.length);
-        rnaCoords.getCoords(xarray, yarray);
+        const {xarray, yarray} = rnaCoords.getCoords(this._bases.length);
 
         const localCustomLayout: ([number, number] | [null, null])[] = [];
         for (let ii = 0; ii < this._bases.length; ++ii) {
@@ -734,9 +729,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         );
         rnaCoords.setupTree(this._pairs, this._targetPairs);
         rnaCoords.drawTree(this._customLayout);
-        const xarray: number[] = new Array(this._bases.length);
-        const yarray: number[] = new Array(this._bases.length);
-        rnaCoords.getCoords(xarray, yarray);
+        const {xarray, yarray} = rnaCoords.getCoords(this._bases.length);
 
         const localCustomLayout: ([number, number] | [null, null])[] = [];
         for (let ii = 0; ii < this._bases.length; ++ii) {
@@ -808,9 +801,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         );
         rnaCoords.setupTree(this._pairs, this._targetPairs);
         rnaCoords.drawTree(this._customLayout);
-        const xarray: number[] = new Array(this._bases.length);
-        const yarray: number[] = new Array(this._bases.length);
-        rnaCoords.getCoords(xarray, yarray);
+        const {xarray, yarray} = rnaCoords.getCoords(this._bases.length);
 
         const localCustomLayout: ([number, number] | [null, null])[] = [];
         for (let ii = 0; ii < this._bases.length; ++ii) {
@@ -1057,9 +1048,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             );
             rnaCoords.setupTree(this._pairs, this._targetPairs);
             rnaCoords.drawTree(this._customLayout);
-            const xarray: number[] = new Array(this._bases.length);
-            const yarray: number[] = new Array(this._bases.length);
-            rnaCoords.getCoords(xarray, yarray);
+            const {xarray, yarray} = rnaCoords.getCoords(this._bases.length);
             // The simplest thing to do is to use the x/y coords as the new customLayout.
             // This minimizes the calculations you have to do later.
             const localCustomLayout: ([number, number] | [null, null])[] = [];
@@ -2513,9 +2502,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         rnaDrawer.setupTree(this._pairs, this._targetPairs);
         rnaDrawer.drawTree(this._customLayout);
 
-        const xarray: number[] = new Array(this._bases.length);
-        const yarray: number[] = new Array(this._bases.length);
-        rnaDrawer.getCoords(xarray, yarray);
+        const {xarray, yarray} = rnaDrawer.getCoords(this._bases.length);
         for (let ii = 0; ii < this._bases.length; ii++) {
             const ax: number = xarray[ii];
             const ay: number = yarray[ii];
@@ -3158,9 +3145,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         let xMid = 0;
         let yMid = 0;
 
-        let xarray: number[] = new Array(n);
-        let yarray: number[] = new Array(n);
-
         let exceptionIndices: number[] | undefined;
         if (fullSeq.findCut() >= 0) {
             exceptionIndices = [];
@@ -3180,7 +3164,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         rnaDrawer.setupTree(this._pairs, this._targetPairs);
         rnaDrawer.drawTree(this._customLayout);
-        rnaDrawer.getCoords(xarray, yarray);
+        const rnaCoords = rnaDrawer.getCoords(n);
+        let {xarray, yarray} = rnaCoords;
+        const {xbounds, ybounds} = rnaCoords;
         this._pseudoknotPairs = rnaDrawer.pseudoknotPairs;
 
         this._baseRotationDirectionSign = new Array(n);
@@ -3192,11 +3178,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
             yarray = tmp;
         }
 
-        const xmin: number = Math.min(...xarray);
-        const xmax: number = Math.max(...xarray);
-        const ymin: number = Math.min(...yarray);
-        const ymax: number = Math.max(...yarray);
-
+        const [xmin, xmax] = xbounds;
+        const [ymin, ymax] = ybounds;
         xMid = (xmax + xmin) / 2.0;
         yMid = (ymax + ymin) / 2.0;
 
