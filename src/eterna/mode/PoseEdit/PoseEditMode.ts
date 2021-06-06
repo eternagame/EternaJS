@@ -2431,7 +2431,7 @@ export default class PoseEditMode extends GameMode {
     private switchToFeedbackViewForSolution(solution: Solution): void {
         this.pushUILock();
 
-        Eterna.app.switchToFeedbackView(this._puzzle, solution)
+        Eterna.app.switchToFeedbackView(this._puzzle, solution, this._params.solutions)
             .then(() => this.popUILock())
             .catch((e) => {
                 log.error(e);
