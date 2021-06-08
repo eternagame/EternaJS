@@ -25,7 +25,8 @@ export default class PseudoknotLines extends GameObject implements LateUpdatable
     }
 
     public lateUpdate(_dt: number): void {
-        for (let i = 0; i < this._pose.fullSequence.length; i++) {
+        const fullSeq = this._pose.fullSequence;
+        for (let i = 0; i < fullSeq.length; i++) {
             if (this._pose.getBase(i).isAnimating) {
                 this.redraw(false);
                 return;
