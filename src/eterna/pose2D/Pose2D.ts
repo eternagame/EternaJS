@@ -2621,13 +2621,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         const fullSeq: Sequence = this.fullSequence;
         let center: Point;
 
-        // Hide bases that aren't part of our current sequence
-        if (!this._showNucleotideRange) {
-            for (let ii = 0; ii < this._bases.length; ++ii) {
-                this._bases[ii].display.visible = this.isNucleotidePartOfSequence(ii);
-            }
-        }
-
         const basesMoved = this._baseToX && this._baseToY && this._baseFromX && this._baseFromY;
         if (basesMoved) {
             // Update base locations
@@ -2904,7 +2897,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         let n = 0;
         for (let ii = 0; ii < this._pairs.length; ii++) {
             if (this._pairs.pairingPartner(ii) > ii
-                    && (!satisfied || this.isPairSatisfied(ii, this._pairs.pairingPartner(ii)))) {
+            && (!satisfied || this.isPairSatisfied(ii, this._pairs.pairingPartner(ii)))) {
                 n++;
             }
         }
@@ -3127,11 +3120,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (start < 1 || end > this._bases.length || start >= end) {
             // eslint-disable-next-line
             console.warn(`Invalid nucleotide range [${start}, ${end}]`);
-            return;
-        }
-
-        this._showNucleotideRange = Boolean(range);
-        if (!range) {
             return;
         }
 
@@ -4182,8 +4170,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     private _highlightEnergyText: boolean = false;
     private _energyHighlights: SceneObject[] = [];
-
-    private _showNucleotideRange: boolean = false;
 
     // Annotations
     public annotationManager: AnnotationManager;
