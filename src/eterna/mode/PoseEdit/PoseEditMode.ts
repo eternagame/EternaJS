@@ -1540,6 +1540,18 @@ export default class PoseEditMode extends GameMode {
             } else if (this._stackLevel <= 1 && key === KeyCode.KeyU && this._params.solutions != null) {
                 this.showNextSolution(-1);
                 handled = true;
+            } else if (key === KeyCode.BracketLeft) {
+                const factor = Math.max(0, Math.round((this._poseFields[0].explosionFactor - 0.25) * 1000) / 1000);
+                for (const pf of this._poseFields) {
+                    pf.explosionFactor = factor;
+                }
+                handled = true;
+            } else if (key === KeyCode.BracketRight) {
+                const factor = Math.max(0, Math.round((this._poseFields[0].explosionFactor + 0.25) * 1000) / 1000);
+                for (const pf of this._poseFields) {
+                    pf.explosionFactor = factor;
+                }
+                handled = true;
             }
         }
 
