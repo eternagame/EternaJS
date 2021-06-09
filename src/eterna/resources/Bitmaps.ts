@@ -337,6 +337,7 @@ export default class Bitmaps {
     public static readonly RandomIcon: string = require('assets/random.png');
     public static readonly RandomBtn: string = require('assets/UI/random-btn.png');
     public static readonly RandomBtnOver: string = require('assets/UI/random-btn-over.png');
+    public static readonly ImgFlare: string = require('assets/flare-g-big-gray.png');
     // Annotations
     public static readonly ImgAnnotationMode: string = require('assets/UI/annotation-mode-btn.png');
     public static readonly ImgAnnotationModeOver: string = require('assets/UI/annotation-mode-btn-over.png');

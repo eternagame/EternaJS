@@ -82,6 +82,7 @@ export default class Toolbar extends ContainerObject {
     public pasteButton: GameButton;
     public nucleotideFindButton: GameButton;
     public nucleotideRangeButton: GameButton;
+    public explosionFactorButton: GameButton;
 
     // Annotations
     public annotationModeButton: GameButton;
@@ -405,6 +406,15 @@ export default class Toolbar extends ContainerObject {
             .hotkey(KeyCode.KeyV);
 
         this.actionMenu.addSubMenuButton(0, this.nucleotideRangeButton);
+
+        this.explosionFactorButton = new GameButton()
+            .allStates(Bitmaps.ImgFlare)
+            .disabled()
+            .label('Explosion Factor', 14)
+            .scaleBitmapToLabel()
+            .tooltip('Set explosion factor ([, ])');
+
+        this.actionMenu.addSubMenuButton(0, this.explosionFactorButton);
 
         this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters).disabled(undefined);
 

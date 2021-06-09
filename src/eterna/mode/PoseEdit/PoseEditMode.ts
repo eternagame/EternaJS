@@ -71,6 +71,7 @@ import AnnotationManager, {
     AnnotationHierarchyType
 } from 'eterna/AnnotationManager';
 import LibrarySelectionConstraint from 'eterna/constraints/constraints/LibrarySelectionConstraint';
+import ExplosionFactorDialog from 'eterna/ui/ExplosionFactorDialog';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -228,6 +229,7 @@ export default class PoseEditMode extends GameMode {
 
         this._toolbar.nucleotideFindButton.clicked.connect(() => this.findNucleotide());
         this._toolbar.nucleotideRangeButton.clicked.connect(() => this.showNucleotideRange());
+        this._toolbar.explosionFactorButton.clicked.connect(() => this.changeExplosionFactor());
 
         this._toolbar.baseMarkerButton.clicked.connect(() => {
             this.setPosesColor(RNAPaint.BASE_MARK);
@@ -418,6 +420,14 @@ export default class PoseEditMode extends GameMode {
                 this._poses.forEach((p) => p.showNucleotideRange(this._nucleotideRangeToShow));
             } else {
                 this._poses[this._curTargetIndex].showNucleotideRange(this._nucleotideRangeToShow);
+            }
+        });
+    }
+
+    private changeExplosionFactor(): void {
+        this.showDialog(new ExplosionFactorDialog(this._poseFields[0].explosionFactor)).closed.then((result) => {
+            if (result != null) {
+                this._poseFields.forEach((pf) => { pf.explosionFactor = result; });
             }
         });
     }
@@ -1726,12 +1736,6 @@ export default class PoseEditMode extends GameMode {
         const showingHint = this._hintBoxRef.isLive;
         this._hintBoxRef.destroyObject();
 
-        const explosionFactorVisible: boolean[] = [];
-        for (const poseField of this._poseFields) {
-            explosionFactorVisible.push(poseField.showExplosionFactor);
-            poseField.showExplosionFactor = false;
-        }
-
         const tempBG = DisplayUtil.fillStageRect(0x061A34);
         this.container.addChildAt(tempBG, 0);
 
@@ -1749,10 +1753,6 @@ export default class PoseEditMode extends GameMode {
 
         for (const [disp, wasVisible] of visibleState.entries()) {
             disp.visible = wasVisible;
-        }
-
-        for (let ii = 0; ii < this._poseFields.length; ++ii) {
-            this._poseFields[ii].showExplosionFactor = explosionFactorVisible[ii];
         }
 
         if (showingHint) {
