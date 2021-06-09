@@ -697,7 +697,10 @@ export default class Toolbar extends ContainerObject {
             .over(Bitmaps.ImgBaseMarkerOver)
             .down(Bitmaps.ImgBaseMarker)
             .tooltip('Mark bases (hold ctrl)');
-        this.addObject(this.baseMarkerButton, this.lowerToolbarLayout);
+
+        if (this.type !== ToolbarType.FEEDBACK) {
+            this.addObject(this.baseMarkerButton, this.lowerToolbarLayout);
+        }
 
         this.regs.add(this.baseMarkerButton.clicked.connect(() => {
             this._deselectAllPaintTools();

@@ -30,8 +30,11 @@ import SolutionManager from 'eterna/puzzle/SolutionManager';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 import UITheme from 'eterna/ui/UITheme';
-import GameMode from './GameMode';
+import ExplosionFactorDialog from 'eterna/ui/ExplosionFactorDialog';
+import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
+import NucleotideFinder from 'eterna/ui/NucleotideFinder';
 import ViewSolutionOverlay from './DesignBrowser/ViewSolutionOverlay';
+import GameMode from './GameMode';
 
 enum PoseFoldMode {
     ESTIMATE = 'ESTIMATE',
@@ -109,6 +112,10 @@ export default class FeedbackViewMode extends GameMode {
         this._toolbar.pipButton.clicked.connect(() => this.togglePip());
         this._toolbar.estimateButton.clicked.connect(() => this.setToEstimateMode());
         this._toolbar.targetButton.clicked.connect(() => this.setToTargetMode());
+
+        this._toolbar.nucleotideFindButton.clicked.connect(() => this.findNucleotide());
+        this._toolbar.nucleotideRangeButton.clicked.connect(() => this.showNucleotideRange());
+        this._toolbar.explosionFactorButton.clicked.connect(() => this.changeExplosionFactor());
 
         this._feedback = this._solution.expFeedback;
         this._targetConditions = this._puzzle.targetConditions;
@@ -489,6 +496,63 @@ export default class FeedbackViewMode extends GameMode {
         return pngData;
     }
 
+    private findNucleotide(): void {
+        this.showDialog(new NucleotideFinder()).closed.then((result) => {
+            if (result != null) {
+                if (this._isPipMode) {
+                    this._poses.forEach((p) => p.focusNucleotide(result.nucleotideIndex));
+                } else {
+                    this._poses[this._curTargetIndex].focusNucleotide(result.nucleotideIndex);
+                }
+            }
+        });
+    }
+
+    private showNucleotideRange(): void {
+        const initialRange = this._nucleotideRangeToShow
+            ?? (() => {
+                if (this._isPipMode) {
+                    return [
+                        1,
+                        Math.min(...this._poses.map((p) => p.fullSequenceLength))
+                    ];
+                } else {
+                    return [1, this._poses[this._curTargetIndex].fullSequenceLength];
+                }
+            })() as [number, number];
+
+        this.showDialog(
+            new NucleotideRangeSelector({
+                initialRange,
+                isPartialRange: Boolean(this._nucleotideRangeToShow)
+            })
+        ).closed.then((result) => {
+            if (result === null) {
+                return;
+            }
+
+            if (result.clearRange) {
+                this._nucleotideRangeToShow = null;
+            } else {
+                this._nucleotideRangeToShow = [result.startIndex, result.endIndex];
+            }
+
+            if (this._isPipMode) {
+                this._poses.forEach((p) => p.showNucleotideRange(this._nucleotideRangeToShow));
+            } else {
+                this._poses[this._curTargetIndex].showNucleotideRange(this._nucleotideRangeToShow);
+            }
+        });
+    }
+
+    private changeExplosionFactor(): void {
+        this.showDialog(new ExplosionFactorDialog(this._poseFields[0].explosionFactor)).closed.then((result) => {
+            if (result != null) {
+                this._poseFields.forEach((pf) => { pf.explosionFactor = result; });
+            }
+        });
+    }
+
     private setToTargetMode(): void {
         this._foldMode = PoseFoldMode.TARGET;
         this._toolbar.targetButton.hotkey();
@@ -711,6 +775,8 @@ export default class FeedbackViewMode extends GameMode {
 
     private _undoBlocks: UndoBlock[] = [];
     private _currentIndex: number;
+
+    private _nucleotideRangeToShow: [number, number] | null = null;
 
     private _foldMode: PoseFoldMode;
     private _feedback: Feedback | null;
