@@ -209,6 +209,14 @@ export default class PuzzleEditMode extends GameMode {
 
         this._toolbar.palette.targetClicked.connect((type) => this.onPaletteTargetSelected(type));
 
+        this._toolbar.nucleotideFindButton.clicked.connect(() => this.findNucleotide());
+        this._toolbar.nucleotideRangeButton.clicked.connect(() => this.showNucleotideRange());
+        this._toolbar.explosionFactorButton.clicked.connect(() => this.changeExplosionFactor());
+
+        this._toolbar.baseMarkerButton.clicked.connect(() => {
+            this.onEditButtonClicked(RNAPaint.BASE_MARK);
+        });
+
         this._toolbar.moveButton.clicked.connect(() => {
             this.setPosesLayoutTool(Layout.MOVE);
         });
@@ -522,6 +530,18 @@ export default class PuzzleEditMode extends GameMode {
             } else if (ctrl && key === KeyCode.KeyH) {
                 this.downloadHKWS();
                 handled = true;
+            } else if (key === KeyCode.BracketLeft) {
+                const factor = Math.max(0, Math.round((this._poseFields[0].explosionFactor - 0.25) * 1000) / 1000);
+                for (const pf of this._poseFields) {
+                    pf.explosionFactor = factor;
+                }
+                handled = true;
+            } else if (key === KeyCode.BracketRight) {
+                const factor = Math.max(0, Math.round((this._poseFields[0].explosionFactor + 0.25) * 1000) / 1000);
+                for (const pf of this._poseFields) {
+                    pf.explosionFactor = factor;
+                }
+                handled = true;
             }
         }
 
@@ -659,13 +679,9 @@ export default class PuzzleEditMode extends GameMode {
 
         const energyVisible: boolean[] = [];
         const trackedCursorIdx: (number | null)[] = [];
-        const explosionFactorVisible: boolean[] = [];
         for (const poseField of this._poseFields) {
             energyVisible.push(poseField.showTotalEnergy);
             poseField.showTotalEnergy = false;
-
-            explosionFactorVisible.push(poseField.showExplosionFactor);
-            poseField.showExplosionFactor = false;
         }
         for (const pose of this._poses) {
             trackedCursorIdx.push(pose.trackedCursorIdx);
@@ -693,7 +709,6 @@ export default class PuzzleEditMode extends GameMode {
 
         for (let ii = 0; ii < this._poseFields.length; ++ii) {
             this._poseFields[ii].showTotalEnergy = energyVisible[ii];
-            this._poseFields[ii].showExplosionFactor = explosionFactorVisible[ii];
         }
         for (let ii = 0; ii < this._poses.length; ++ii) {
             this._poses[ii].trackCursor(trackedCursorIdx[ii]);

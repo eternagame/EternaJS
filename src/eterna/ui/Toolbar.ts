@@ -82,6 +82,7 @@ export default class Toolbar extends ContainerObject {
     public pasteButton: GameButton;
     public nucleotideFindButton: GameButton;
     public nucleotideRangeButton: GameButton;
+    public explosionFactorButton: GameButton;
 
     // Annotations
     public annotationModeButton: GameButton;
@@ -406,6 +407,15 @@ export default class Toolbar extends ContainerObject {
 
         this.actionMenu.addSubMenuButton(0, this.nucleotideRangeButton);
 
+        this.explosionFactorButton = new GameButton()
+            .allStates(Bitmaps.ImgFlare)
+            .disabled()
+            .label('Explosion Factor', 14)
+            .scaleBitmapToLabel()
+            .tooltip('Set explosion factor ([, ])');
+
+        this.actionMenu.addSubMenuButton(0, this.explosionFactorButton);
+
         this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters).disabled(undefined);
 
         if (this._boostersData != null && this._boostersData.actions != null && this._showAdvancedMenus) {
@@ -687,7 +697,10 @@ export default class Toolbar extends ContainerObject {
             .over(Bitmaps.ImgBaseMarkerOver)
             .down(Bitmaps.ImgBaseMarker)
             .tooltip('Mark bases (hold ctrl)');
-        this.addObject(this.baseMarkerButton, this.lowerToolbarLayout);
+
+        if (this.type !== ToolbarType.FEEDBACK) {
+            this.addObject(this.baseMarkerButton, this.lowerToolbarLayout);
+        }
 
         this.regs.add(this.baseMarkerButton.clicked.connect(() => {
             this._deselectAllPaintTools();

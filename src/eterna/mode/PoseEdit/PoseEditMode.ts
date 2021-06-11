@@ -51,8 +51,6 @@ import Utility from 'eterna/util/Utility';
 import HintsPanel from 'eterna/ui/HintsPanel';
 import HelpBar from 'eterna/ui/HelpBar';
 import HelpScreen from 'eterna/ui/help/HelpScreen';
-import NucleotideFinder from 'eterna/ui/NucleotideFinder';
-import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
 import {HighlightInfo} from 'eterna/constraints/Constraint';
 import {AchievementData} from 'eterna/achievements/AchievementManager';
 import {RankScrollData} from 'eterna/rank/RankScroll';
@@ -228,6 +226,7 @@ export default class PoseEditMode extends GameMode {
 
         this._toolbar.nucleotideFindButton.clicked.connect(() => this.findNucleotide());
         this._toolbar.nucleotideRangeButton.clicked.connect(() => this.showNucleotideRange());
+        this._toolbar.explosionFactorButton.clicked.connect(() => this.changeExplosionFactor());
 
         this._toolbar.baseMarkerButton.clicked.connect(() => {
             this.setPosesColor(RNAPaint.BASE_MARK);
@@ -371,55 +370,6 @@ export default class PoseEditMode extends GameMode {
     protected get posesWidth(): number {
         Assert.assertIsDefined(Flashbang.stageWidth);
         return Flashbang.stageWidth - this._solDialogOffset;
-    }
-
-    private findNucleotide(): void {
-        this.showDialog(new NucleotideFinder()).closed.then((result) => {
-            if (result != null) {
-                if (this._isPipMode) {
-                    this._poses.forEach((p) => p.focusNucleotide(result.nucleotideIndex));
-                } else {
-                    this._poses[this._curTargetIndex].focusNucleotide(result.nucleotideIndex);
-                }
-            }
-        });
-    }
-
-    private showNucleotideRange(): void {
-        const initialRange = this._nucleotideRangeToShow
-            ?? (() => {
-                if (this._isPipMode) {
-                    return [
-                        1,
-                        Math.min(...this._poses.map((p) => p.fullSequenceLength))
-                    ];
-                } else {
-                    return [1, this._poses[this._curTargetIndex].fullSequenceLength];
-                }
-            })() as [number, number];
-
-        this.showDialog(
-            new NucleotideRangeSelector({
-                initialRange,
-                isPartialRange: Boolean(this._nucleotideRangeToShow)
-            })
-        ).closed.then((result) => {
-            if (result === null) {
-                return;
-            }
-
-            if (result.clearRange) {
-                this._nucleotideRangeToShow = null;
-            } else {
-                this._nucleotideRangeToShow = [result.startIndex, result.endIndex];
-            }
-
-            if (this._isPipMode) {
-                this._poses.forEach((p) => p.showNucleotideRange(this._nucleotideRangeToShow));
-            } else {
-                this._poses[this._curTargetIndex].showNucleotideRange(this._nucleotideRangeToShow);
-            }
-        });
     }
 
     private updateUILayout(): void {
@@ -1524,6 +1474,18 @@ export default class PoseEditMode extends GameMode {
             } else if (ctrl && key === KeyCode.KeyH) {
                 this.downloadHKWS();
                 handled = true;
+            } else if (key === KeyCode.BracketLeft) {
+                const factor = Math.max(0, Math.round((this._poseFields[0].explosionFactor - 0.25) * 1000) / 1000);
+                for (const pf of this._poseFields) {
+                    pf.explosionFactor = factor;
+                }
+                handled = true;
+            } else if (key === KeyCode.BracketRight) {
+                const factor = Math.max(0, Math.round((this._poseFields[0].explosionFactor + 0.25) * 1000) / 1000);
+                for (const pf of this._poseFields) {
+                    pf.explosionFactor = factor;
+                }
+                handled = true;
             }
         }
 
@@ -1722,12 +1684,6 @@ export default class PoseEditMode extends GameMode {
         const showingHint = this._hintBoxRef.isLive;
         this._hintBoxRef.destroyObject();
 
-        const explosionFactorVisible: boolean[] = [];
-        for (const poseField of this._poseFields) {
-            explosionFactorVisible.push(poseField.showExplosionFactor);
-            poseField.showExplosionFactor = false;
-        }
-
         const tempBG = DisplayUtil.fillStageRect(0x061A34);
         this.container.addChildAt(tempBG, 0);
 
@@ -1745,10 +1701,6 @@ export default class PoseEditMode extends GameMode {
 
         for (const [disp, wasVisible] of visibleState.entries()) {
             disp.visible = wasVisible;
-        }
-
-        for (let ii = 0; ii < this._poseFields.length; ++ii) {
-            this._poseFields[ii].showExplosionFactor = explosionFactorVisible[ii];
         }
 
         if (showingHint) {
@@ -3644,8 +3596,6 @@ export default class PoseEditMode extends GameMode {
 
     // Will be non-null after we submit our solution to the server
     private _submitSolutionRspData: SubmitSolutionData | null;
-
-    private _nucleotideRangeToShow: [number, number] | null = null;
 
     private _solutionView?: ViewSolutionOverlay;
 

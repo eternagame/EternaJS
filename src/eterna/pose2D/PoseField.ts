@@ -7,7 +7,6 @@ import ROPWait from 'eterna/rscript/ROPWait';
 import debounce from 'lodash.debounce';
 import Pose2D from './Pose2D';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
-import ExplosionFactorPanel from './ExplosionFactorPanel';
 import RNAAnchorObject from './RNAAnchorObject';
 
 /** Wraps a Pose2D and handles resizing, masking, and input events */
@@ -63,16 +62,6 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this._secondaryScoreEnergyDisplay.position.set(17 + 119 * 2, PoseField.SCORES_POSITION_Y);
         this._secondaryScoreEnergyDisplay.visible = false;
         this.container.addChild(this._secondaryScoreEnergyDisplay);
-
-        this._explosionFactorPanel = new ExplosionFactorPanel();
-        this._explosionFactorPanel.display.position.set(17, PoseField.SCORES_POSITION_Y + 82);
-        this._explosionFactorPanel.display.visible = false;
-        this._explosionFactorPanel.factorUpdated.connect((factor: number) => {
-            this._explosionFactor = factor;
-            this.pose.fastLayout();
-            this.pose.redraw = true;
-        });
-        this.addObject(this._explosionFactorPanel, this.container);
     }
 
     /* override */
@@ -178,6 +167,16 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this._pose.setZoomLevel(prevZoom + 1);
     }
 
+    public set explosionFactor(val: number) {
+        this._explosionFactor = val;
+        this.pose.fastLayout();
+        this.pose.redraw = true;
+    }
+
+    public get explosionFactor(): number {
+        return this._explosionFactor;
+    }
+
     public get pose(): Pose2D {
         return this._pose;
     }
@@ -248,17 +247,6 @@ export default class PoseField extends ContainerObject implements KeyboardListen
                 this._pose.setOffset(this._dragPoseStart.x + deltaX, this._dragPoseStart.y + deltaY);
             }
         }
-
-        if (this._pose.checkOverlap()) {
-            // If overlaps have been introduced, make sure the explosion factor input is shown
-            this._explosionFactorPanel.display.visible = true;
-        } else if (this._explosionFactorPanel.display.visible === true) {
-            // If all overlaps have been removed, remove the explosion
-            this._explosionFactor = 1;
-            this._explosionFactorPanel.display.visible = false;
-            this.pose.fastLayout();
-            this.pose.redraw = true;
-        }
     }
 
     public updateEnergyGui(
@@ -304,18 +292,6 @@ export default class PoseField extends ContainerObject implements KeyboardListen
             show && this.pose.scoreFolder != null && this._secondaryScoreEnergyDisplay.hasText
         );
         this._deltaScoreEnergyDisplay.visible = show && this.pose.scoreFolder != null;
-    }
-
-    public get showExplosionFactor(): boolean {
-        return this._explosionFactorPanel.display.visible;
-    }
-
-    public set showExplosionFactor(show: boolean) {
-        this._explosionFactorPanel.display.visible = show;
-    }
-
-    public get explosionFactor(): number {
-        return this._explosionFactor;
     }
 
     private onPointerUp(e: InteractionEvent): void {
@@ -461,7 +437,6 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
     // Explosion Factor (RNALayout pairSpace multiplier)
     private _explosionFactor: number = 1;
-    private _explosionFactorPanel: ExplosionFactorPanel;
 
     private _anchoredObjects: RNAAnchorObject[] = [];
 }

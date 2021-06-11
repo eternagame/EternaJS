@@ -30,8 +30,8 @@ import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 import UITheme from 'eterna/ui/UITheme';
 import AnnotationManager from 'eterna/AnnotationManager';
-import GameMode from './GameMode';
 import ViewSolutionOverlay from './DesignBrowser/ViewSolutionOverlay';
+import GameMode from './GameMode';
 
 enum PoseFoldMode {
     ESTIMATE = 'ESTIMATE',
@@ -110,6 +110,10 @@ export default class FeedbackViewMode extends GameMode {
         this._toolbar.estimateButton.clicked.connect(() => this.setToEstimateMode());
         this._toolbar.targetButton.clicked.connect(() => this.setToTargetMode());
 
+        this._toolbar.nucleotideFindButton.clicked.connect(() => this.findNucleotide());
+        this._toolbar.nucleotideRangeButton.clicked.connect(() => this.showNucleotideRange());
+        this._toolbar.explosionFactorButton.clicked.connect(() => this.changeExplosionFactor());
+      
         this._targetConditions = this._puzzle.targetConditions;
 
         this._foldMode = PoseFoldMode.TARGET;
@@ -320,6 +324,18 @@ export default class FeedbackViewMode extends GameMode {
                 handled = true;
             } else if (!ctrl && key === KeyCode.KeyS) {
                 this.showSpec();
+                handled = true;
+            } else if (key === KeyCode.BracketLeft) {
+                const factor = Math.max(0, Math.round((this._poseFields[0].explosionFactor - 0.25) * 1000) / 1000);
+                for (const pf of this._poseFields) {
+                    pf.explosionFactor = factor;
+                }
+                handled = true;
+            } else if (key === KeyCode.BracketRight) {
+                const factor = Math.max(0, Math.round((this._poseFields[0].explosionFactor + 0.25) * 1000) / 1000);
+                for (const pf of this._poseFields) {
+                    pf.explosionFactor = factor;
+                }
                 handled = true;
             }
         }
