@@ -21,6 +21,9 @@ import Folder from 'eterna/folding/Folder';
 import Dialog from 'eterna/ui/Dialog';
 import Utility from 'eterna/util/Utility';
 import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
+import NucleotideFinder from 'eterna/ui/NucleotideFinder';
+import ExplosionFactorDialog from 'eterna/ui/ExplosionFactorDialog';
+import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
 import CopyTextDialogMode from './CopyTextDialogMode';
 
 export default abstract class GameMode extends AppMode {
@@ -454,6 +457,63 @@ export default abstract class GameMode extends AppMode {
         });
     }
 
+    protected findNucleotide(): void {
+        this.showDialog(new NucleotideFinder()).closed.then((result) => {
+            if (result != null) {
+                if (this._isPipMode) {
+                    this._poses.forEach((p) => p.focusNucleotide(result.nucleotideIndex));
+                } else {
+                    this._poses[this._curTargetIndex].focusNucleotide(result.nucleotideIndex);
+                }
+            }
+        });
+    }
+
+    protected showNucleotideRange(): void {
+        const initialRange = this._nucleotideRangeToShow
+            ?? (() => {
+                if (this._isPipMode) {
+                    return [
+                        1,
+                        Math.min(...this._poses.map((p) => p.fullSequenceLength))
+                    ];
+                } else {
+                    return [1, this._poses[this._curTargetIndex].fullSequenceLength];
+                }
+            })() as [number, number];
+
+        this.showDialog(
+            new NucleotideRangeSelector({
+                initialRange,
+                isPartialRange: Boolean(this._nucleotideRangeToShow)
+            })
+        ).closed.then((result) => {
+            if (result === null) {
+                return;
+            }
+
+            if (result.clearRange) {
+                this._nucleotideRangeToShow = null;
+            } else {
+                this._nucleotideRangeToShow = [result.startIndex, result.endIndex];
+            }
+
+            if (this._isPipMode) {
+                this._poses.forEach((p) => p.showNucleotideRange(this._nucleotideRangeToShow));
+            } else {
+                this._poses[this._curTargetIndex].showNucleotideRange(this._nucleotideRangeToShow);
+            }
+        });
+    }
+
+    protected changeExplosionFactor(): void {
+        this.showDialog(new ExplosionFactorDialog(this._poseFields[0].explosionFactor)).closed.then((result) => {
+            if (result != null) {
+                this._poseFields.forEach((pf) => { pf.explosionFactor = result; });
+            }
+        });
+    }
+
     protected _achievements: AchievementManager;
 
     protected _dialogRef: GameObjectRef = GameObjectRef.NULL;
@@ -466,6 +526,8 @@ export default abstract class GameMode extends AppMode {
     protected _poseFields: PoseField[] = [];
     protected _poses: Pose2D[] = []; // TODO: remove me!
     protected _isPipMode: boolean = false;
+
+    protected _nucleotideRangeToShow: [number, number] | null = null;
 
     // Things that might or might not be set in children so that getEnergyDelta can get set in setPoseFields
     protected get _folder(): Folder | null {

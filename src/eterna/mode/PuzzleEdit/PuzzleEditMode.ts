@@ -46,9 +46,6 @@ import AnnotationManager, {
     AnnotationDataBundle,
     AnnotationRange
 } from 'eterna/AnnotationManager';
-import NucleotideFinder from 'eterna/ui/NucleotideFinder';
-import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
-import ExplosionFactorDialog from 'eterna/ui/ExplosionFactorDialog';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
@@ -740,63 +737,6 @@ export default class PuzzleEditMode extends GameMode {
         });
     }
 
-    private findNucleotide(): void {
-        this.showDialog(new NucleotideFinder()).closed.then((result) => {
-            if (result != null) {
-                if (this._isPipMode) {
-                    this._poses.forEach((p) => p.focusNucleotide(result.nucleotideIndex));
-                } else {
-                    this._poses[this._curTargetIndex].focusNucleotide(result.nucleotideIndex);
-                }
-            }
-        });
-    }
-
-    private showNucleotideRange(): void {
-        const initialRange = this._nucleotideRangeToShow
-            ?? (() => {
-                if (this._isPipMode) {
-                    return [
-                        1,
-                        Math.min(...this._poses.map((p) => p.fullSequenceLength))
-                    ];
-                } else {
-                    return [1, this._poses[this._curTargetIndex].fullSequenceLength];
-                }
-            })() as [number, number];
-
-        this.showDialog(
-            new NucleotideRangeSelector({
-                initialRange,
-                isPartialRange: Boolean(this._nucleotideRangeToShow)
-            })
-        ).closed.then((result) => {
-            if (result === null) {
-                return;
-            }
-
-            if (result.clearRange) {
-                this._nucleotideRangeToShow = null;
-            } else {
-                this._nucleotideRangeToShow = [result.startIndex, result.endIndex];
-            }
-
-            if (this._isPipMode) {
-                this._poses.forEach((p) => p.showNucleotideRange(this._nucleotideRangeToShow));
-            } else {
-                this._poses[this._curTargetIndex].showNucleotideRange(this._nucleotideRangeToShow);
-            }
-        });
-    }
-
-    private changeExplosionFactor(): void {
-        this.showDialog(new ExplosionFactorDialog(this._poseFields[0].explosionFactor)).closed.then((result) => {
-            if (result != null) {
-                this._poseFields.forEach((pf) => { pf.explosionFactor = result; });
-            }
-        });
-    }
-
     private onSubmitPuzzle(): void {
         const firstSecstruct: string = this._structureInputs[0].structureString;
 
@@ -1324,8 +1264,6 @@ export default class PuzzleEditMode extends GameMode {
     private _folderSwitcher: FolderSwitcher;
     private _homeButton: GameButton;
     private _constraintBar: ConstraintBar;
-
-    private _nucleotideRangeToShow: [number, number] | null = null;
 
     // Annotations
     private _annotationManager: AnnotationManager;
