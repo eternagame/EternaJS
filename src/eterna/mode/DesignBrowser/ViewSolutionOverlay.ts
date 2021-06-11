@@ -468,7 +468,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
             frame: null
         });
         this.regs.add(previous.clicked.connect(() => this._props.onPrevious()));
-        previous.hotkey(KeyCode.KeyD);
+        previous.hotkey(KeyCode.KeyU);
         this._content.addObject(previous, footerLinks);
 
         // Next
@@ -484,7 +484,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         });
         this.regs.add(next.clicked.connect(() => this._props.onNext()));
         next.container.position.x = theme.width - theme.margin.right - theme.margin.left - next.container.width;
-        next.hotkey(KeyCode.KeyU);
+        next.hotkey(KeyCode.KeyD);
         this._content.addObject(next, footerLinks);
 
         this._footer.addVSpacer(20);

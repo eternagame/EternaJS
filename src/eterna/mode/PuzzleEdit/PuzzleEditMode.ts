@@ -335,16 +335,18 @@ export default class PuzzleEditMode extends GameMode {
             pose.molecularBindingBonus = -4.86;
             pose.sequence = Sequence.fromSequenceString(defaultSequence);
 
-            if (initialPoseData != null
+            if (
+                initialPoseData != null
                 && initialPoseData[ii] != null
-                && initialPoseData[ii]['sequence'] != null
-                && initialPoseData[ii]['structure'] != null
-                && initialPoseData[ii]['bindingPairs'] !== undefined) {
-                pose.setMolecularBinding(
-                    initialPoseData[ii]['site'],
-                    initialPoseData[ii]['bindingPairs'],
-                    initialPoseData[ii]['bonus'] as number / 100.0
-                );
+                && initialPoseData[ii]['site'] !== undefined
+                && initialPoseData[ii]['bonus'] !== undefined
+            ) {
+                pose.molecularBindingBonus = initialPoseData[ii]['bonus'] as number / 100.0;
+                const bindingSite = new Array(initialPoseData[ii]['sequence'].length).fill(false);
+                for (const base of initialPoseData[ii]['site'] as number[]) {
+                    bindingSite[base] = true;
+                }
+                pose.molecularBindingSite = bindingSite;
             }
             poseFields.push(poseField);
 

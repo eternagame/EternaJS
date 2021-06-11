@@ -52,12 +52,8 @@ export default class AchievementBox extends ContainerObject {
         this._description = text;
     }
 
-    private static getAbsUrl(relUrl: string) {
-        if (Eterna.MOBILE_APP) {
-            return Eterna.SERVER_URL + relUrl;
-        } else {
-            return relUrl;
-        }
+    private static getAbsUrl(uri: string) {
+        return /^http/i.exec(uri) ? uri : `${Eterna.SERVER_URL}${uri}`;
     }
 
     protected added(): void {
