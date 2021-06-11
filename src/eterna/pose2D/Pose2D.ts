@@ -1530,8 +1530,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public get satisfied(): boolean {
+        const fullSeq = this.fullSequence;
         for (let ii = 0; ii < this._pairs.length; ii++) {
-            if (this._pairs.pairingPartner(ii) > ii && !this.isPairSatisfied(ii, this._pairs.pairingPartner(ii))) {
+            if (this._pairs.pairingPartner(ii) > ii
+                && !this.isPairSatisfied(fullSeq, ii, this._pairs.pairingPartner(ii))) {
                 return false;
             }
         }
@@ -2342,7 +2344,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return seq;
     }
 
-    public isPairSatisfied(a: number, b: number): boolean {
+    public isPairSatisfied(fullSequence: Sequence, a: number, b: number): boolean {
         // AMW TODO why swap? do we assume asymmetrical pairs
         if (b < a) {
             const temp: number = a;
@@ -2354,7 +2356,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             return false;
         }
 
-        return (EPars.pairType(this.fullSequence.nt(a), this.fullSequence.nt(b)) !== 0);
+        return (EPars.pairType(fullSequence.nt(a), fullSequence.nt(b)) !== 0);
     }
 
     public get sequenceLength(): number {
@@ -2611,7 +2613,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         // Hide bases that aren't part of our current sequence
         if (!this._showNucleotideRange) {
             for (let ii = 0; ii < this._bases.length; ++ii) {
-                this._bases[ii].display.visible = this.isNucleotidePartOfSequence(ii);
+                this._bases[ii].display.visible = this.isNucleotidePartOfSequence(fullSeq, ii);
             }
         }
 
@@ -2865,7 +2867,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public setAnimationProgress(progress: number) {
         if (this._baseToX && this._baseToY && this._baseFromX && this._baseFromY) {
-            for (let ii = 0; ii < this.fullSequence.length; ii++) {
+            const fullSeq = this.fullSequence;
+            for (let ii = 0; ii < fullSeq.length; ii++) {
                 const vx: number = this._baseToX[ii] - this._baseFromX[ii];
                 const vy: number = this._baseToY[ii] - this._baseFromY[ii];
 
@@ -2889,9 +2892,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public numPairs(satisfied: boolean): number {
         // AMW TODO: this is very similar to SecStruct::numPairs, but with satisfied.
         let n = 0;
+        const fullSeq = this.fullSequence;
         for (let ii = 0; ii < this._pairs.length; ii++) {
             if (this._pairs.pairingPartner(ii) > ii
-                    && (!satisfied || this.isPairSatisfied(ii, this._pairs.pairingPartner(ii)))) {
+                    && (!satisfied || this.isPairSatisfied(fullSeq, ii, this._pairs.pairingPartner(ii)))) {
                 n++;
             }
         }
@@ -3122,10 +3126,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
             return;
         }
 
+        const fullSeq: Sequence = this.fullSequence;
         for (let i = 0; i < this._bases.length; ++i) {
             this._bases[i].container.visible = i >= (start - 1)
                 && i < end
-                && this.isNucleotidePartOfSequence(i);
+                && this.isNucleotidePartOfSequence(fullSeq, i);
         }
     }
 
@@ -3647,7 +3652,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         for (let ii = 0; ii < this._pairs.length; ii++) {
             const pi = this._pairs.pairingPartner(ii);
-            if (this._pairs.isPaired(ii) && this.isPairSatisfied(ii, pi)) {
+            if (this._pairs.isPaired(ii) && this.isPairSatisfied(fullSeq, ii, pi)) {
                 const pairStr: number = PoseUtil.getPairStrength(
                     fullSeq.nt(ii), fullSeq.nt(pi)
                 );
@@ -3984,8 +3989,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return base;
     }
 
-    private isNucleotidePartOfSequence(index: number) {
-        return index < this.fullSequence.length && this._bases[index].type !== RNABase.CUT;
+    private isNucleotidePartOfSequence(fullSequence: Sequence, index: number) {
+        return index < fullSequence.length && this._bases[index].type !== RNABase.CUT;
     }
 
     private static createDefaultLocks(sequenceLength: number): boolean[] {
