@@ -17,90 +17,127 @@ export default class ExplosionFactorDialog extends Dialog<number> {
     protected added() {
         super.added();
 
-        const panel = new GamePanel({
+        this._panel = new GamePanel({
             alpha: 1.0,
             color: 0x152843,
             borderAlpha: 0.27,
             borderColor: 0xC0DCE7
         });
 
-        this.addObject(panel, this.container);
-        panel.title = 'Explosion Factor';
+        this.addObject(this._panel, this.container);
+        this._panel.title = 'Explosion Factor';
 
-        const panelLayout = new VLayoutContainer(0, HAlign.CENTER);
-        panel.container.addChild(panelLayout);
+        this._panelLayout = new VLayoutContainer(10, HAlign.CENTER);
+        this._panel.container.addChild(this._panelLayout);
 
-        const inputLayout = new HLayoutContainer(0, VAlign.CENTER);
-        panelLayout.addChild(inputLayout);
+        const errorText = Fonts.std()
+            .fontSize(14)
+            .color(0xEE0000)
+            .build();
+        errorText.visible = false;
+        this._panelLayout.addChild(errorText);
 
-        // Create now since the decrease button needs to reference it, but wait to add it
-        // until after the button so that it shows up in the middle
+        const inputLayout = new HLayoutContainer(10, VAlign.CENTER);
+        this._panelLayout.addChild(inputLayout);
+
+        const decreaseButton: GameButton = new GameButton().label('-', 16);
+        this._panel.addObject(decreaseButton, inputLayout);
+        decreaseButton.hotkey(KeyCode.BracketLeft);
+        decreaseButton.tooltip('Decrease space between paired bases ([)');
+
         const input: TextInputObject = new TextInputObject({
             fontSize: 14,
             width: 45,
             rows: 1
         }).font(Fonts.STDFONT);
         input.text = this._initialFactor.toString();
+        this._panel.addObject(input, inputLayout);
 
-        const decreaseButton: GameButton = new GameButton().label('-', 16);
-        panel.addObject(decreaseButton, inputLayout);
+        const increaseButton: GameButton = new GameButton().label('+', 16);
+        this._panel.addObject(increaseButton, inputLayout);
+        increaseButton.hotkey(KeyCode.BracketRight);
+        increaseButton.tooltip('Increase space between paired bases (])');
+
         decreaseButton.clicked.connect(() => {
             const factor = Math.max(0, Math.round((parseFloat(input.text) - 0.25) * 1000) / 1000);
             input.text = (Number.isNaN(factor) ? 1 : factor).toString();
         });
-        decreaseButton.hotkey(KeyCode.BracketLeft);
-        decreaseButton.tooltip('Decrease space between paired bases ([)');
 
-        inputLayout.addHSpacer(10);
-
-        panel.addObject(input, inputLayout);
-
-        inputLayout.addHSpacer(10);
-
-        const increaseButton: GameButton = new GameButton().label('+', 16);
-        panel.addObject(increaseButton, inputLayout);
         increaseButton.clicked.connect(() => {
             const factor = Math.max(0, Math.round((parseFloat(input.text) + 0.25) * 1000) / 1000);
             input.text = (Number.isNaN(factor) ? 1 : factor).toString();
         });
-        increaseButton.hotkey(KeyCode.BracketRight);
-        increaseButton.tooltip('Increase space between paired bases (])');
 
         const buttonLayout = new HLayoutContainer(12);
-        panelLayout.addVSpacer(10);
-        panelLayout.addChild(buttonLayout);
+        this._panelLayout.addChild(buttonLayout);
 
         const yesButton: GameButton = new GameButton().label('Ok', 16);
-        panel.addObject(yesButton, buttonLayout);
+        this._panel.addObject(yesButton, buttonLayout);
         yesButton.clicked.connect(() => {
             const factor = parseFloat(input.text);
-            // TODO: Display error message instead of failing silently?
-            if (Number.isNaN(factor)) this.close(null);
-            if (factor < 0) this.close(null);
             this.close(factor);
         });
 
+        input.valueChanged.connect((val) => {
+            const factor = parseFloat(val);
+            const prevText = errorText.text;
+            const wasVisible = errorText.visible;
+
+            if (val === '') {
+                // Don't annoy the user with an error message if they're just deleting the contents
+                // to type something else in, but don't let them submit an empty form either.
+                errorText.visible = false;
+                yesButton.enabled = false;
+            } else if (Number.isNaN(factor)) {
+                errorText.text = 'Please enter a valid number';
+                errorText.visible = true;
+                yesButton.enabled = false;
+            } else if (factor < 0) {
+                errorText.text = 'Explosion factor must not be negative';
+                errorText.visible = true;
+                yesButton.enabled = false;
+            } else {
+                errorText.visible = false;
+                yesButton.enabled = true;
+            }
+
+            if (errorText.visible !== wasVisible || prevText !== errorText.text) {
+                this.layout();
+            }
+        });
+
         const noButton: GameButton = new GameButton().label('Cancel', 16);
-        panel.addObject(noButton, buttonLayout);
+        this._panel.addObject(noButton, buttonLayout);
         noButton.clicked.connect(() => this.close(null));
 
-        panelLayout.layout();
-        panel.setSize(
-            panelLayout.width + (ExplosionFactorDialog.W_MARGIN * 2),
-            panel.titleHeight + panelLayout.height + (ExplosionFactorDialog.H_MARGIN * 2)
-        );
-        panelLayout.position.set(ExplosionFactorDialog.W_MARGIN, ExplosionFactorDialog.H_MARGIN + panel.titleHeight);
+        this.layout();
 
-        const updateLocation = () => {
-            Assert.assertIsDefined(Flashbang.stageWidth);
-            Assert.assertIsDefined(Flashbang.stageHeight);
-            panel.display.position.x = (Flashbang.stageWidth - panel.width) * 0.5;
-            panel.display.position.y = (Flashbang.stageHeight - panel.height) * 0.5;
-        };
-        updateLocation();
         Assert.assertIsDefined(this.mode);
-        this.regs.add(this.mode.resized.connect(updateLocation));
+        this.regs.add(this.mode.resized.connect(this.updateLocation));
     }
+
+    private layout(): void {
+        this._panelLayout.layout(true);
+        this._panel.setSize(
+            this._panelLayout.width + (ExplosionFactorDialog.W_MARGIN * 2),
+            this._panel.titleHeight + this._panelLayout.height + (ExplosionFactorDialog.H_MARGIN * 2)
+        );
+        this._panelLayout.position.set(
+            ExplosionFactorDialog.W_MARGIN,
+            ExplosionFactorDialog.H_MARGIN + this._panel.titleHeight
+        );
+        this.updateLocation();
+    }
+
+    private updateLocation(): void {
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(Flashbang.stageHeight);
+        this._panel.display.position.x = (Flashbang.stageWidth - this._panel.width) * 0.5;
+        this._panel.display.position.y = (Flashbang.stageHeight - this._panel.height) * 0.5;
+    }
+
+    private _panel: GamePanel;
+    private _panelLayout: VLayoutContainer;
 
     private _initialFactor: number;
 
