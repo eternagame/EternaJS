@@ -2582,9 +2582,14 @@ export default class PoseEditMode extends GameMode {
         const poseData: SaveStoreItem = [0, this._poses[0].sequence.baseArray];
         for (const [i, pose] of this._poses.entries()) {
             const tc = this._targetConditions[i];
+            const ublk = this.getCurrentUndoBlock(i);
+            const pseudoknots = tc !== undefined && tc.type === 'pseudoknot';
+
             const puzzledef: PuzzleEditPoseData = {
                 sequence: pose.sequence.sequenceString(),
-                structure: this._puzzle.getSecstruct(i),
+                structure: (
+                    this._poseState === PoseState.TARGET ? ublk.targetPairs : ublk.getPairs(37, pseudoknots)
+                ).getParenthesis(),
                 startingFolder: this._folder.name,
                 annotations: this._annotationManager.annotationDataBundle
             };
@@ -2593,6 +2598,7 @@ export default class PoseEditMode extends GameMode {
                 puzzledef.bindingPairs = tc['binding_pairs'];
                 puzzledef.bonus = tc['bonus'];
             }
+
             poseData.push(JSON.stringify(puzzledef));
         }
 
