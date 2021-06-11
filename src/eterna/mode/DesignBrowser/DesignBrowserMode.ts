@@ -433,7 +433,7 @@ export default class DesignBrowserMode extends GameMode {
     private switchToFeedbackViewForSolution(solution: Solution): void {
         this.pushUILock();
 
-        Eterna.app.switchToFeedbackView(this._puzzle, solution, this._filteredSolutions)
+        Eterna.app.switchToFeedbackView(this._puzzle, solution, this._filteredSolutions.slice())
             .then(() => this.popUILock())
             .catch((e) => {
                 log.error(e);
