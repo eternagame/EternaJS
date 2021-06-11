@@ -1024,7 +1024,7 @@ export default class PoseEditMode extends GameMode {
         let annotationGraph: AnnotationDataBundle | undefined;
         let librarySelections: number[] = [];
         if (this._params.initSolution != null) {
-            initialSequence = this._params.initSolution.sequence;
+            initialSequence = this._params.initSolution.sequence.slice(0);
             annotationGraph = this._params.initSolution.annotations;
             this._curSolution = this._params.initSolution;
             // AMW: I'm keeping the function around in case we want to call it
@@ -1524,12 +1524,6 @@ export default class PoseEditMode extends GameMode {
             } else if (ctrl && key === KeyCode.KeyH) {
                 this.downloadHKWS();
                 handled = true;
-            } else if (this._stackLevel <= 1 && key === KeyCode.KeyD && this._params.solutions != null) {
-                this.showNextSolution(1);
-                handled = true;
-            } else if (this._stackLevel <= 1 && key === KeyCode.KeyU && this._params.solutions != null) {
-                this.showNextSolution(-1);
-                handled = true;
             }
         }
 
@@ -1552,7 +1546,8 @@ export default class PoseEditMode extends GameMode {
         const solution = this._params.solutions[nextSolutionIdx];
         Assert.notNull(solution);
         this.showSolution(solution);
-        if (this._solutionView && this._solutionView.container.visible) {
+        if (this._solutionView) {
+            const visible = this._solutionView.container.visible;
             this.removeObject(this._solutionView);
             this._solutionView = new ViewSolutionOverlay({
                 solution,
@@ -1562,6 +1557,7 @@ export default class PoseEditMode extends GameMode {
                 onNext: () => this.showNextSolution(1),
                 parentMode: (() => this)()
             });
+            this._solutionView.container.visible = visible;
             this.addObject(this._solutionView, this.dialogLayer);
             this._solutionView.seeResultClicked.connect(() => {
                 this.switchToFeedbackViewForSolution(this._curSolution);
