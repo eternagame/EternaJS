@@ -177,24 +177,35 @@ export default class RNALayout {
      * Provides actual coordinates for the layout whose structure is encoded
      * by this object.
      *
-     * @param xarray x-coordinates (output param)
-     * @param yarray y-coordinates (output param)
      */
-    public getCoords(xarray: number[], yarray: number[]): void {
+    public getCoords(length: number) {
+        const xarray: number[] = new Array(length);
+        const yarray: number[] = new Array(length);
+        const xbounds = [Number.MAX_VALUE, Number.MIN_VALUE];
+        const ybounds = [Number.MAX_VALUE, Number.MIN_VALUE];
+
         // FIXME add documentation. And its confusing that xarray,yarray are changeable by function ('outparams').
 
         // If there is a root node in the layout, use the recursive function
         // starting from root. The first two nt can be in a vertical line.
         // After that, start making a circle.
         if (this._root != null) {
-            this.getCoordsRecursive(this._root, xarray, yarray);
+            this.getCoordsRecursive(this._root, xarray, yarray, xbounds, ybounds);
         } else if (xarray.length <= 4) {
             // there is no structure (no pairs)
             // really short, just place them in a vertical line
             for (let ii = 0; ii < xarray.length; ii++) {
                 xarray[ii] = 0;
-                yarray[ii] = ii * this._primarySpace;
+
+                const y = ii * this._primarySpace;
+                yarray[ii] = y;
+
+                ybounds[0] = Math.min(ybounds[0], y);
+                ybounds[1] = Math.max(ybounds[1], y);
             }
+
+            xbounds[0] = 0;
+            xbounds[1] = 0;
         } else {
             // if longer, make the sequence form a circle instead
             // FIXME: there's a bit of code duplication here, somewhat inelegant...
@@ -224,14 +235,25 @@ export default class RNALayout {
                 }
 
                 const radAngle: number = (lengthWalker / circleLength) * 2 * Math.PI - Math.PI / 2.0;
-                xarray[ii] = (
-                    _rootX + Math.cos(radAngle) * crossX * circleRadius + Math.sin(radAngle) * goX * circleRadius
-                );
-                yarray[ii] = (
-                    _rootY + Math.cos(radAngle) * crossY * circleRadius + Math.sin(radAngle) * goY * circleRadius
-                );
+
+                const x = _rootX + Math.cos(radAngle) * crossX * circleRadius + Math.sin(radAngle) * goX * circleRadius;
+                const y = _rootY + Math.cos(radAngle) * crossY * circleRadius + Math.sin(radAngle) * goY * circleRadius;
+                xarray[ii] = x;
+                yarray[ii] = y;
+
+                xbounds[0] = Math.min(xbounds[0], x);
+                xbounds[1] = Math.max(xbounds[1], x);
+                ybounds[0] = Math.min(ybounds[0], y);
+                ybounds[1] = Math.max(ybounds[1], y);
             }
         }
+
+        return {
+            xarray,
+            yarray,
+            xbounds,
+            ybounds
+        };
     }
 
     /**
@@ -318,23 +340,44 @@ export default class RNALayout {
         rootnode.children.push(newnode);
     }
 
-    private getCoordsRecursive(rootnode: RNATreeNode, xarray: number[], yarray: number[]): void {
+    private getCoordsRecursive(
+        rootnode: RNATreeNode,
+        xarray: number[],
+        yarray: number[],
+        xbounds: number[],
+        ybounds: number[]
+    ): void {
         if (rootnode.isPair) {
             const crossX: number = -rootnode.goY * rootnode.rotationDirection;
             const crossY: number = rootnode.goX * rootnode.rotationDirection;
 
-            xarray[rootnode.indexA] = rootnode.x + (crossX * this._pairSpace) / 2.0;
-            xarray[rootnode.indexB] = rootnode.x - (crossX * this._pairSpace) / 2.0;
+            const x1 = rootnode.x + (crossX * this._pairSpace) / 2.0;
+            const x2 = rootnode.x - (crossX * this._pairSpace) / 2.0;
+            xarray[rootnode.indexA] = x1;
+            xarray[rootnode.indexB] = x2;
 
-            yarray[rootnode.indexA] = rootnode.y + (crossY * this._pairSpace) / 2.0;
-            yarray[rootnode.indexB] = rootnode.y - (crossY * this._pairSpace) / 2.0;
+            const y1 = rootnode.y + (crossY * this._pairSpace) / 2.0;
+            const y2 = rootnode.y - (crossY * this._pairSpace) / 2.0;
+            yarray[rootnode.indexA] = y1;
+            yarray[rootnode.indexB] = y2;
+
+            xbounds[0] = Math.min(xbounds[0], x1, x2);
+            xbounds[1] = Math.max(xbounds[1], x1, x2);
+            ybounds[0] = Math.min(ybounds[0], y1, y2);
+            ybounds[1] = Math.max(ybounds[1], y1, y2);
         } else if (rootnode.indexA >= 0) {
-            xarray[rootnode.indexA] = rootnode.x;
-            yarray[rootnode.indexA] = rootnode.y;
+            const [x, y] = [rootnode.x, rootnode.y];
+            xarray[rootnode.indexA] = x;
+            yarray[rootnode.indexA] = y;
+
+            xbounds[0] = Math.min(xbounds[0], x);
+            xbounds[1] = Math.max(xbounds[1], x);
+            ybounds[0] = Math.min(ybounds[0], y);
+            ybounds[1] = Math.max(ybounds[1], y);
         }
 
         for (const child of rootnode.children) {
-            this.getCoordsRecursive(child, xarray, yarray);
+            this.getCoordsRecursive(child, xarray, yarray, xbounds, ybounds);
         }
     }
 

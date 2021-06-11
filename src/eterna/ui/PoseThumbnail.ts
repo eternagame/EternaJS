@@ -146,18 +146,18 @@ export default class PoseThumbnail {
             return bd;
         }
 
-        const xarray: number[] = new Array(n);
-        const yarray: number[] = new Array(n);
-
         const rnaDrawer: RNALayout = new RNALayout(45, 45);
         rnaDrawer.setupTree(pairs);
         rnaDrawer.drawTree(customLayout);
-        rnaDrawer.getCoords(xarray, yarray);
+        const {
+            xarray,
+            yarray,
+            xbounds,
+            ybounds
+        } = rnaDrawer.getCoords(n);
 
-        const xmin: number = Math.min(...xarray);
-        const xmax: number = Math.max(...xarray);
-        const ymin: number = Math.min(...yarray);
-        const ymax: number = Math.max(...yarray);
+        const [xmin, xmax] = xbounds;
+        const [ymin, ymax] = ybounds;
 
         const xdiff: number = xmax - xmin;
         const xscale = xdiff > Constants.EPSILON ? (w) / xdiff : 1;
