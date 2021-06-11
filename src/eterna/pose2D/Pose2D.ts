@@ -1114,7 +1114,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         let closestDist = -1;
         let closestIndex = -1;
-        for (let ii = 0; ii < this.fullSequenceLength; ii++) {
+        const fullSeqLen = this.fullSequenceLength;
+        for (let ii = 0; ii < fullSeqLen; ii++) {
             const mouseDist: number = this._bases[ii].isClicked(
                 mouseX - this._offX, mouseY - this._offY, this._zoomLevel, this._coloring
             );
@@ -1279,7 +1280,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         const temp: number[] = [];
-        for (let ii = 0; ii < this.fullSequenceLength; ii++) {
+        const fullSeqLen = this.fullSequenceLength;
+        for (let ii = 0; ii < fullSeqLen; ii++) {
             temp.push(EPars.FORCE_IGNORE);
         }
 
@@ -1384,7 +1386,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public get designSegments(): number[] {
         const elems: number[] = [];
         let curr = 0;
-        for (let jj = 0; jj < this.fullSequenceLength; jj++) {
+        const fullSeqLen = this.fullSequenceLength;
+        for (let jj = 0; jj < fullSeqLen; jj++) {
             const stat: number = this._designStruct[jj] ? 1 : 0;
             if ((curr ^ stat) !== 0) {
                 elems.push(jj - curr);
@@ -1815,8 +1818,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     private onPraiseSeq(seqStart: number, seqEnd: number): void {
+        const fullSeqLen = this.fullSequenceLength;
         for (let ii: number = seqStart; ii <= seqEnd; ii++) {
-            if (ii >= 0 && ii < this.fullSequenceLength) {
+            if (ii >= 0 && ii < fullSeqLen) {
                 this._bases[ii].startSparking();
             }
         }
@@ -1938,7 +1942,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         let closestIndex = -1;
 
         if (this._startMousedownCallback != null) {
-            for (let ii = 0; ii < this.fullSequenceLength; ii++) {
+            const fullSeqLen = this.fullSequenceLength;
+            for (let ii = 0; ii < fullSeqLen; ii++) {
                 const mouseDist: number = this._bases[ii].isClicked(
                     mouseX - this._offX, mouseY - this._offY, this._zoomLevel, false
                 );
@@ -2221,7 +2226,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         // blue highlights ("magic glue")
         const newDesign: boolean[] = [];
-        for (let ii = 0; ii < this.fullSequenceLength; ii++) {
+        const fullSeqLen = this.fullSequenceLength;
+        for (let ii = 0; ii < fullSeqLen; ii++) {
             newDesign[idxMap[ii]] = this._designStruct[ii];
         }
         this._designStruct = newDesign;
@@ -3765,7 +3771,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 mouseP = mouseP.copyFrom(this.display.toLocal(Flashbang.globalMouse, undefined, Pose2D.MOUSE_LOC));
                 const baseXys: Point[] = [];
 
-                for (let ii = 0; ii < this.fullSequenceLength; ii++) {
+                const fullSeqLen = this.fullSequenceLength;
+                for (let ii = 0; ii < fullSeqLen; ii++) {
                     baseXys.push(this.getBaseLoc(ii));
                 }
                 for (let ii = 0; ii < this._scoreNodes.length; ii++) {
