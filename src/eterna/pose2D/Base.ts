@@ -117,10 +117,6 @@ export default class Base extends ContainerObject implements LateUpdatable {
         return this._baseType;
     }
 
-    public get markerColors(): number[] {
-        return [...this._markerColors];
-    }
-
     public set forced(forced: boolean) {
         this._isForced = forced;
     }
@@ -236,25 +232,66 @@ export default class Base extends ContainerObject implements LateUpdatable {
         return -1;
     }
 
-    public mark(colors: number[]) {
-        const angle = (Math.PI * 2) / colors.length;
+    public mark(colors: number[], layer: string) {
+        if (colors.length === 0) {
+            this.unmarkLayer(layer);
+            return;
+        }
+
+        this._markerColors.set(layer, colors);
+        this.redrawMark();
+    }
+
+    public unmarkLayer(layer: string) {
+        this._markerColors.delete(layer);
+        this.redrawMark();
+    }
+
+    public unmarkAllLayers() {
+        this._markerColors.clear();
+        this.redrawMark();
+    }
+
+    public setMarkerLayer(layer: string) {
+        this._currentMarkerLayer = layer;
+        this.redrawMark();
+    }
+
+    private redrawMark() {
         this._markers.clear();
+        const colors = this._markerColors.get(this._currentMarkerLayer);
+        if (!colors) return;
+
+        const angle = (Math.PI * 2) / colors.length;
         colors.forEach((color, colorIndex) => {
             this._markers.lineStyle(1, color);
             this._markers.arc(0, 0, 1 / Base.MARKER_THICKNESS,
                 colorIndex * angle, (colorIndex + 1) * angle);
         });
         this._markers.visible = true;
-
-        this._markerColors = colors;
     }
 
-    public unmark() {
-        this.mark([]);
+    public isCurrentLayerMarked(): boolean {
+        return !!this.isLayerMarked(this._currentMarkerLayer);
     }
 
-    public isMarked() {
-        return this._markerColors.length > 0;
+    public isLayerMarked(layer: string): boolean {
+        return this._markerColors.has(layer);
+    }
+
+    public isAnyLayerMarked(): boolean {
+        for (const val of this._markerColors.values()) {
+            if (val) return true;
+        }
+        return false;
+    }
+
+    public get markerData(): Map<string, number[]> {
+        const ret = new Map<string, number[]>();
+        this._markerColors.forEach((colors, layer) => {
+            ret.set(layer, colors.slice());
+        });
+        return ret;
     }
 
     public setDrawParams(
@@ -638,11 +675,15 @@ export default class Base extends ContainerObject implements LateUpdatable {
     private _baseType: number = -1;
     // The index of the base in the base array.
     private _baseIdx: number = -1;
+
     private _goX: number = 0;
     private _goY: number = 0;
     private _outX: number = 0;
     private _outY: number = 0;
-    private _markerColors: number[] = [];
+
+    private _currentMarkerLayer: string = '';
+    private _markerColors: Map<string, number[]> = new Map();
+
     private _needsRedraw: boolean = false;
     private _lastCenterX: number;
     private _lastCenterY: number;
@@ -664,6 +705,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
     private _isForced: boolean;
     private _isDontcare: boolean;
     private _forceUnpaired: boolean;
+
     private _sparking: boolean = false;
     private _sparkStartTime: number = -1;
     private _sparkDir: Point;

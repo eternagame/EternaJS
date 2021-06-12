@@ -54,6 +54,9 @@ export enum Layout {
     FLIP_STEM
 }
 
+export const PLAYER_MARKER_LAYER = 'Player';
+export const SCRIPT_MARKER_LAYER = 'Script';
+
 export type PoseMouseDownCallback = (e: InteractionEvent, closestDist: number, closestIndex: number) => void;
 
 export default class Pose2D extends ContainerObject implements Updatable {
@@ -1000,29 +1003,34 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
+    public setMarkerLayer(layer: string) {
+        this._currentMarkerLayer = layer;
+        for (const base of this._bases) {
+            base.setMarkerLayer(layer);
+        }
+    }
+
     public toggleBaseMark(baseIndex: number): void {
-        if (!this.isTrackedIndex(baseIndex)) {
-            this.addBaseMark(baseIndex);
+        if (!this.isTrackedLayer(baseIndex, PLAYER_MARKER_LAYER)) {
+            this.addBaseMark(baseIndex, PLAYER_MARKER_LAYER);
         } else {
-            this.removeBaseMark(baseIndex);
+            this.removeBaseMark(baseIndex, PLAYER_MARKER_LAYER);
         }
     }
 
-    public addBaseMark(baseIndex: number, colors: number | number[] = 0x000000): void {
-        if (!this.isTrackedIndex(baseIndex)) {
-            if (typeof (colors) === 'number') colors = [colors];
-            ROPWait.notifyBlackMark(baseIndex, true);
-            this._bases[baseIndex].mark(colors);
-        }
+    public addBaseMark(baseIndex: number, layer: string, colors: number | number[] = 0x000000): void {
+        if (typeof (colors) === 'number') colors = [colors];
+        ROPWait.notifyBlackMark(baseIndex, true);
+        this._bases[baseIndex].mark(colors, layer);
     }
 
-    public removeBaseMark(baseIndex: number): void {
-        this._bases[baseIndex].unmark();
+    public removeBaseMark(baseIndex: number, layer: string): void {
+        this._bases[baseIndex].unmarkLayer(layer);
         ROPWait.notifyBlackMark(baseIndex, false);
     }
 
-    public isTrackedIndex(index: number): boolean {
-        return this._bases[index].isMarked();
+    private isTrackedLayer(index: number, layer: string) {
+        return this._bases[index].isLayerMarked(layer);
     }
 
     public onMouseMoved(point: Point, startIdx?: number): void {
@@ -1165,24 +1173,26 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public deleteBaseWithIndexPairs(index: number, pairs: SecStruct): [string, PuzzleEditOp, RNABase[]?] {
-        if (this.isTrackedIndex(index)) {
-            this.toggleBaseMark(index);
-        }
-
         return PoseUtil.deleteNopairWithIndex(index, pairs);
     }
 
-    public clearTracking(): void {
+    public clearLayerTracking(layer: string): void {
         for (const base of this._bases) {
-            base.unmark();
+            base.unmarkLayer(layer);
         }
     }
 
-    public get trackedIndices(): { baseIndex: number; colors: number[] }[] {
-        const result = [] as { baseIndex: number; colors: number[] }[];
+    public clearTrackingAllLayers(): void {
+        for (const base of this._bases) {
+            base.unmarkAllLayers();
+        }
+    }
+
+    public get trackedIndices(): number[] {
+        const result: number[] = [];
         this._bases.forEach((base, baseIndex) => {
-            if (base.isMarked()) {
-                result.push({baseIndex, colors: base.markerColors});
+            if (base.isCurrentLayerMarked()) {
+                result.push(baseIndex);
             }
         });
         return result;
@@ -2217,11 +2227,16 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._prevOligosOrder = undefined;
 
         // base marks
-        const indices = this.trackedIndices;
-        this.clearTracking();
-        for (const index of indices) {
-            index.baseIndex = idxMap[index.baseIndex];
-            this.addBaseMark(index.baseIndex, index.colors);
+        const baseMarkerData = this._bases.map((base, baseIdx) => ({
+            markerData: base.markerData,
+            baseIdx
+        }));
+        this.clearTrackingAllLayers();
+        for (const baseInfo of baseMarkerData) {
+            const newIdx = idxMap[baseInfo.baseIdx];
+            baseInfo.markerData.forEach((colors, layer) => {
+                this.addBaseMark(newIdx, layer, colors);
+            });
         }
 
         // blue highlights ("magic glue")
@@ -2384,12 +2399,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
             for (let ii = 0; ii < diff; ii++) {
                 this.createBase();
                 this._locks.push(false);
-            }
-        } else if (this._sequence.length < this._bases.length) {
-            for (let ii: number = this._sequence.length; ii < this._bases.length; ii++) {
-                if (this.isTrackedIndex(ii)) {
-                    this.removeBaseMark(ii);
-                }
             }
         }
 
@@ -3213,10 +3222,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     private deleteBaseWithIndex(index: number): [string, PuzzleEditOp, RNABase[]?] {
-        if (this.isTrackedIndex(index)) {
-            this.toggleBaseMark(index);
-        }
-
         if (!this._pairs.isPaired(index) || this.isLocked(this._pairs.pairingPartner(index))) {
             return PoseUtil.deleteNopairWithIndex(index, this._pairs);
         } else {
@@ -3991,6 +3996,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     private createBase(): Base {
         const base: Base = new Base(RNABase.GUANINE);
+        base.setMarkerLayer(this._currentMarkerLayer);
         this.addObject(base, this._baseLayer);
         this._bases.push(base);
         return base;
@@ -4153,9 +4159,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _lastScoreNodeIndex: number = -1;
     private _scoreNodeHighlight: Graphics;
 
-    // For tracking a base
+    // Base rings
     private _cursorIndex: number | null = 0;
     private _cursorBox: Graphics | null = null;
+    private _currentMarkerLayer: string = PLAYER_MARKER_LAYER;
+
+    // Adding/removing bases
     private _lastShiftedIndex: number = -1;
     private _lastShiftedCommand: number = -1;
 

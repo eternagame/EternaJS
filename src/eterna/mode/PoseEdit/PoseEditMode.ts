@@ -27,7 +27,9 @@ import FolderManager from 'eterna/folding/FolderManager';
 import Folder, {MultiFoldResult, CacheKey} from 'eterna/folding/Folder';
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
 import PoseField from 'eterna/pose2D/PoseField';
-import Pose2D, {Oligo, Layout} from 'eterna/pose2D/Pose2D';
+import Pose2D, {
+    Oligo, Layout, PLAYER_MARKER_LAYER, SCRIPT_MARKER_LAYER
+} from 'eterna/pose2D/Pose2D';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import ConstraintBar from 'eterna/constraints/ConstraintBar';
@@ -69,6 +71,7 @@ import AnnotationManager, {
     AnnotationHierarchyType
 } from 'eterna/AnnotationManager';
 import LibrarySelectionConstraint from 'eterna/constraints/constraints/LibrarySelectionConstraint';
+import GameDropdown from 'eterna/ui/GameDropdown';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -667,6 +670,39 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
+    private addMarkerLayer(layer: string) {
+        if (this._markerSwitcher && this._markerSwitcher.options.includes(layer)) {
+            // It's already there, don't bother recreating the dropdown
+            return;
+        }
+
+        if (this._markerSwitcher) {
+            this.removeObject(this._markerSwitcher);
+        }
+
+        const newOptions = this._markerSwitcher
+            ? [...this._markerSwitcher.options, layer]
+            : [PLAYER_MARKER_LAYER, layer];
+
+        this._markerSwitcher = new GameDropdown({
+            fontSize: 14,
+            options: newOptions,
+            defaultOption: layer,
+            borderWidth: 0,
+            dropShadow: true
+        });
+        this._markerSwitcher.display.position.set(17, 200);
+        this.addObject(this._markerSwitcher, this.uiLayer);
+
+        this.regs?.add(this._markerSwitcher.selectedOption.connectNotify((val) => this.setMarkerLayer(val)));
+    }
+
+    private setMarkerLayer(layer: string) {
+        for (const pose of this._poses) {
+            pose.setMarkerLayer(layer);
+        }
+    }
+
     private setPuzzle(): void {
         const poseFields: PoseField[] = [];
 
@@ -1251,8 +1287,7 @@ export default class PoseEditMode extends GameMode {
             }
         });
 
-        this._scriptInterface.addCallback('get_tracked_indices',
-            (): number[] => this.getPose(0).trackedIndices.map((mark) => mark.baseIndex));
+        this._scriptInterface.addCallback('get_tracked_indices', (): number[] => this.getPose(0).trackedIndices);
         this._scriptInterface.addCallback('get_barcode_indices', (): number[] | null => this._puzzle.barcodeIndices);
         this._scriptInterface.addCallback('is_barcode_available',
             (seq: string): boolean => SolutionManager.instance.checkRedundancyByHairpin(seq));
@@ -1389,7 +1424,11 @@ export default class PoseEditMode extends GameMode {
         });
 
         this._scriptInterface.addCallback('set_tracked_indices',
-            (marks: (number | { baseIndex: number; colors?: number | number[] })[], colors?: number[]): void => {
+            (
+                marks: (number | { baseIndex: number; colors?: number | number[] })[],
+                colors?: number[],
+                layerName?: string
+            ): void => {
                 let standardizedMarks: { baseIndex: number; colors?: number | number[] }[] | null = null;
 
                 if (colors) {
@@ -1425,11 +1464,14 @@ export default class PoseEditMode extends GameMode {
                     return;
                 }
 
+                const layer = layerName ?? SCRIPT_MARKER_LAYER;
+                this.addMarkerLayer(layer);
+
                 for (let ii = 0; ii < this.numPoseFields; ii++) {
                     const pose: Pose2D = this.getPose(ii);
-                    pose.clearTracking();
+                    pose.clearLayerTracking(layer);
                     for (const mark of standardizedMarks) {
-                        pose.addBaseMark(mark.baseIndex, mark.colors);
+                        pose.addBaseMark(mark.baseIndex, layer, mark.colors);
                     }
                 }
             });
@@ -3568,6 +3610,8 @@ export default class PoseEditMode extends GameMode {
     private _targetOligosOrder: (number[] | undefined)[] = [];
 
     private _folderSwitcher: FolderSwitcher;
+    private _markerSwitcher: GameDropdown | null;
+
     private _isFrozen: boolean = false;
     private _targetName: Text;
 
