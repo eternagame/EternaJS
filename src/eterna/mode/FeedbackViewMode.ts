@@ -113,7 +113,7 @@ export default class FeedbackViewMode extends GameMode {
         this._toolbar.nucleotideFindButton.clicked.connect(() => this.findNucleotide());
         this._toolbar.nucleotideRangeButton.clicked.connect(() => this.showNucleotideRange());
         this._toolbar.explosionFactorButton.clicked.connect(() => this.changeExplosionFactor());
-      
+
         this._targetConditions = this._puzzle.targetConditions;
 
         this._foldMode = PoseFoldMode.TARGET;

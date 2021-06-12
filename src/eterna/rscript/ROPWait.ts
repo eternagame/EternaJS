@@ -159,15 +159,6 @@ export default class ROPWait extends RScriptOp {
             ).toUpperCase();
 
             return !((t1 === this._color1 && t2 === this._color2) || (t2 === this._color1 && t1 === this._color2));
-        } else if (this._waitType === ROPWaitType.NUCLEOTIDECHANGE && !this._conditionClear) {
-            for (let ii = this._startIdx; ii <= this._endIdx; ++ii) {
-                if (RScriptEnv.convertNucleotideIntToString(
-                    this._env.pose.getBase(ii).type
-                ).toUpperCase() !== this._expectedColor) {
-                    return true;
-                }
-            }
-            return false;
         } else if (this._waitType === ROPWaitType.TIME && !this._conditionClear) {
             const now: number = new Date().getTime();
             if (now < this._startTime + this._delay) {
@@ -187,15 +178,20 @@ export default class ROPWait extends RScriptOp {
             this._allNucleotidesCompleted = [];
         }
 
-        if (this._expectedColor && color !== this._expectedColor && color !== '') {
-            return false;
+        if (this._expectedColor && color !== this._expectedColor) {
+            let pos: number = this._allNucleotidesCompleted.indexOf(i);
+            while (pos !== -1) {
+                this._allNucleotidesCompleted.splice(pos, 1);
+                pos = this._allNucleotidesCompleted.indexOf(i);
+            }
+        } else {
+            this._allNucleotidesCompleted.push(i);
         }
 
         if (this._waitType === ROPWaitType.MUTATION) {
             return (this._elements.indexOf(i) !== -1);
         }
 
-        this._allNucleotidesCompleted.push(i);
         for (let x: number = this._startIdx; x <= this._endIdx; ++x) {
             if (this._allNucleotidesCompleted.indexOf(x) === -1) {
                 return false;
