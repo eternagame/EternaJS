@@ -174,20 +174,6 @@ export default class ROPWait extends RScriptOp {
                 return true;
             }
             this.clearCondition();
-        } else if (this._waitType === ROPWaitType.BLACKMARK && !this._conditionClear) {
-            for (let ii = this._startIdx; ii <= this._endIdx; ++ii) {
-                if (!this._env.pose.isTrackedIndex(ii)) {
-                    return true;
-                }
-            }
-            this.clearCondition();
-        } else if (this._waitType === ROPWaitType.BLUEMARK && !this._conditionClear) {
-            for (let ii = this._startIdx; ii <= this._endIdx; ++ii) {
-                if (!this._env.pose.isDesignStructureHighlighted(ii)) {
-                    return true;
-                }
-            }
-            this.clearCondition();
         }
         return !this._conditionClear;
     }
