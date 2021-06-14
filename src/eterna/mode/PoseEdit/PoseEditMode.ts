@@ -167,6 +167,7 @@ export default class PoseEditMode extends GameMode {
             boosters: this._puzzle.boosters ? this._puzzle.boosters : undefined,
             showAdvancedMenus: this._puzzle.puzzleType !== PuzzleType.PROGRESSION,
             showLibrarySelect: this._puzzle.constraints?.some((con) => con instanceof LibrarySelectionConstraint),
+            showCodonCycler: this._puzzle.targetConditions[0]?.codons !== undefined,
             annotationManager: this._annotationManager,
             puzzle: this._puzzle
         });
@@ -232,12 +233,16 @@ export default class PoseEditMode extends GameMode {
             this.setPosesColor(RNAPaint.BASE_MARK);
         });
 
-        this._toolbar.librarySelectionButton.clicked.connect(() => {
-            this.setPosesColor(RNAPaint.LIBRARY_SELECT);
-        });
-
         this._toolbar.magicGlueButton.clicked.connect(() => {
             this.setPosesColor(RNAPaint.MAGIC_GLUE);
+        });
+
+        this._toolbar.codonCyclerButton.clicked.connect(() => {
+            this.setPosesColor(RNAPaint.CODON_CYCLER);
+        });
+
+        this._toolbar.librarySelectionButton.clicked.connect(() => {
+            this.setPosesColor(RNAPaint.LIBRARY_SELECT);
         });
 
         this._toolbar.moveButton.clicked.connect(() => {

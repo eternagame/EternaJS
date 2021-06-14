@@ -40,6 +40,7 @@ export interface TargetConditions {
     secstruct: string;
     sequence?: string;
     IUPAC?: string;
+    codons?: string;
     'custom-layout'?: ([number, number] | [null, null])[];
     'custom-reference'?: string;
     'custom-numbering'?: string;

@@ -72,6 +72,7 @@ export default class Toolbar extends ContainerObject {
     // Pose Editing
     public palette: NucleotidePalette;
     public pairSwapButton: GameButton;
+    public codonCyclerButton: GameButton;
 
     public naturalButton: GameButton;
 
@@ -134,6 +135,7 @@ export default class Toolbar extends ContainerObject {
             showGlue = false,
             showAdvancedMenus = true,
             showLibrarySelect = false,
+            showCodonCycler = false,
             annotationManager,
             puzzle
         }: {
@@ -141,6 +143,7 @@ export default class Toolbar extends ContainerObject {
             boosters?: BoostersData;
             showGlue?: boolean;
             showAdvancedMenus?: boolean;
+            showCodonCycler?: boolean;
             showLibrarySelect?: boolean;
             annotationManager?: AnnotationManager;
             puzzle?: Puzzle;
@@ -151,6 +154,7 @@ export default class Toolbar extends ContainerObject {
         this._states = states;
         this._showGlue = showGlue;
         this._showAdvancedMenus = showAdvancedMenus;
+        this._showCodonCycler = showCodonCycler;
         this._showLibrarySelect = showLibrarySelect;
         this._boostersData = boosters ?? null;
         this._annotationManager = annotationManager;
@@ -599,8 +603,15 @@ export default class Toolbar extends ContainerObject {
             .over(Bitmaps.ImgSwapOver)
             .down(Bitmaps.ImgSwapOver)
             .hotkey(KeyCode.Digit5)
-            .tooltip('Swap paired bases.')
+            .tooltip('Swap paired bases (5).')
             .rscriptID(RScriptUIElementID.SWAP);
+
+        this.codonCyclerButton = new ToolbarButton()
+            .up(Bitmaps.CodonBtn)
+            .over(Bitmaps.CodonBtnOver)
+            .down(Bitmaps.CodonBtnOver)
+            .hotkey(KeyCode.KeyC)
+            .tooltip('Cycle codon (C).');
 
         if (this._type !== ToolbarType.FEEDBACK) {
             this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
@@ -619,6 +630,19 @@ export default class Toolbar extends ContainerObject {
                 }
                 this.pairSwapButton.toggled.value = true;
             }));
+
+            if (this._showCodonCycler) {
+                this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
+                this.addObject(this.codonCyclerButton, this.lowerToolbarLayout);
+
+                this.regs.add(this.codonCyclerButton.clicked.connect(() => {
+                    this._deselectAllPaintTools();
+                    if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
+                        this._annotationManager.setAnnotationMode(false);
+                    }
+                    this.codonCyclerButton.toggled.value = true;
+                }));
+            }
 
             if (this._boostersData != null && this._boostersData.paint_tools != null) {
                 const mode: PoseEditMode = this.mode as PoseEditMode;
@@ -1013,12 +1037,16 @@ export default class Toolbar extends ContainerObject {
 
         this.palette.enabled = !disable;
         this.pairSwapButton.enabled = !disable;
+        this.codonCyclerButton.enabled = !disable;
 
         this.naturalButton.enabled = !disable;
 
         this.undoButton.enabled = !disable;
         this.redoButton.enabled = !disable;
 
+        this.librarySelectionButton.enabled = !disable;
+        this.baseMarkerButton.enabled = !disable;
+        this.magicGlueButton.enabled = !disable;
         this.annotationModeButton.enabled = !disable;
         this.annotationPanelButton.enabled = !disable;
 
@@ -1056,6 +1084,7 @@ export default class Toolbar extends ContainerObject {
         this.magicGlueButton.toggled.value = false;
         this.baseMarkerButton.toggled.value = false;
         this.librarySelectionButton.toggled.value = false;
+        this.codonCyclerButton.toggled.value = false;
 
         for (const button of this.dynPaintTools) {
             button.toggled.value = false;
@@ -1070,6 +1099,7 @@ export default class Toolbar extends ContainerObject {
     private readonly _states: number;
     private readonly _showGlue: boolean;
     private readonly _showAdvancedMenus: boolean;
+    private readonly _showCodonCycler: boolean;
     private readonly _showLibrarySelect: boolean;
     private readonly _boostersData: BoostersData | null;
 
