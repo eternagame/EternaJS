@@ -1426,7 +1426,7 @@ export default class PoseEditMode extends GameMode {
         this._scriptInterface.addCallback('set_tracked_indices',
             (
                 marks: (number | { baseIndex: number; colors?: number | number[] })[],
-                layerName?: string
+                options?: {layerName?: string}
             ): void => {
                 const standardizedMarks = marks.map(
                     (mark) => (typeof (mark) === 'number' ? {baseIndex: mark as number} : mark)
@@ -1440,7 +1440,7 @@ export default class PoseEditMode extends GameMode {
                     return;
                 }
 
-                const layer = layerName ?? SCRIPT_MARKER_LAYER;
+                const layer = options?.layerName ?? SCRIPT_MARKER_LAYER;
                 this.addMarkerLayer(layer);
 
                 for (let ii = 0; ii < this.numPoseFields; ii++) {
