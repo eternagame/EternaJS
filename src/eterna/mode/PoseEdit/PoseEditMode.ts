@@ -1426,35 +1426,11 @@ export default class PoseEditMode extends GameMode {
         this._scriptInterface.addCallback('set_tracked_indices',
             (
                 marks: (number | { baseIndex: number; colors?: number | number[] })[],
-                colors?: number[],
                 layerName?: string
             ): void => {
-                let standardizedMarks: { baseIndex: number; colors?: number | number[] }[] | null = null;
-
-                if (colors) {
-                    log.warn(
-                        'Sending a colors argument to set_tracked_indices is deprecated, and will soon not be supported'
-                    );
-                    if (colors.length !== marks.length) {
-                        log.error(
-                            'Marks array is not the same length as color array for set_tracked_indices',
-                            ' - leaving as black'
-                        );
-                    } else if (marks.some((mark) => typeof (mark) !== 'number')) {
-                        log.error(
-                            'Marks array should consist of numbers when the colors argument is present - aborting'
-                        );
-                        return;
-                    } else {
-                        standardizedMarks = colors.map((color, i) => ({baseIndex: marks[i] as number, colors: color}));
-                    }
-                }
-
-                if (!standardizedMarks) {
-                    standardizedMarks = marks.map(
-                        (mark) => (typeof (mark) === 'number' ? {baseIndex: mark as number} : mark)
-                    );
-                }
+                const standardizedMarks = marks.map(
+                    (mark) => (typeof (mark) === 'number' ? {baseIndex: mark as number} : mark)
+                );
 
                 if (standardizedMarks.some((mark) => typeof (mark.baseIndex) !== 'number')) {
                     log.error(
