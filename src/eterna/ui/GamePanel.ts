@@ -26,7 +26,7 @@ export default class GamePanel extends BaseGamePanel {
 
         const type = props.type || GamePanelType.NORMAL;
         const alpha = props.alpha !== undefined ? props.alpha : 0.07;
-        const color = props.color || 0xffffff;
+        const color = props.color ?? 0xffffff;
         const borderAlpha = props.borderAlpha !== undefined ? props.borderAlpha : 0.0;
         const borderColor = props.borderColor !== undefined ? props.borderColor : 0;
         const dropShadow = props.dropShadow || false;
