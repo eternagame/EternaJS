@@ -717,7 +717,7 @@ export default class Toolbar extends ContainerObject {
             .tooltip('Select bases to randomize');
 
         if (this._showLibrarySelect) {
-            this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
+            this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
             this.addObject(this.librarySelectionButton, this.lowerToolbarLayout);
 
             this.regs.add(this.librarySelectionButton.clicked.connect(() => {
@@ -729,16 +729,14 @@ export default class Toolbar extends ContainerObject {
             }));
         }
 
-        this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
         this.magicGlueButton = new ToolbarButton()
             .up(Bitmaps.ImgMagicGlue)
             .over(Bitmaps.ImgMagicGlueOver)
             .down(Bitmaps.ImgMagicGlue)
             .tooltip('Magic glue - change target structure in purple areas (hold alt)');
         if (this._showGlue) {
-            this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
-            this.addObject(this.magicGlueButton, this.lowerToolbarLayout);
             this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
+            this.addObject(this.magicGlueButton, this.lowerToolbarLayout);
         }
 
         this.regs.add(this.magicGlueButton.clicked.connect(() => {
@@ -770,6 +768,7 @@ export default class Toolbar extends ContainerObject {
             );
 
             if (this._showAdvancedMenus) {
+                this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
                 this.addObject(this.annotationPanel, this.mode?.container);
                 this.addObject(this.annotationModeButton, this.lowerToolbarLayout);
                 this.addObject(this.annotationPanelButton, this.lowerToolbarLayout);
