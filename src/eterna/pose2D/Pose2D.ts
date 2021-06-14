@@ -54,7 +54,7 @@ export enum Layout {
     FLIP_STEM
 }
 
-export const PLAYER_MARKER_LAYER = 'Player';
+export const PLAYER_MARKER_LAYER = 'Markers';
 export const SCRIPT_MARKER_LAYER = 'Script';
 
 export type PoseMouseDownCallback = (e: InteractionEvent, closestDist: number, closestIndex: number) => void;
