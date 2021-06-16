@@ -28,7 +28,7 @@ import Folder, {MultiFoldResult, CacheKey} from 'eterna/folding/Folder';
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
 import PoseField from 'eterna/pose2D/PoseField';
 import Pose2D, {
-    Oligo, Layout, PLAYER_MARKER_LAYER, SCRIPT_MARKER_LAYER
+    Oligo, Layout, SCRIPT_MARKER_LAYER
 } from 'eterna/pose2D/Pose2D';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
 import BitmapManager from 'eterna/resources/BitmapManager';
@@ -57,6 +57,7 @@ import {HighlightInfo} from 'eterna/constraints/Constraint';
 import {AchievementData} from 'eterna/achievements/AchievementManager';
 import {RankScrollData} from 'eterna/rank/RankScroll';
 import FolderSwitcher from 'eterna/ui/FolderSwitcher';
+import MarkerSwitcher from 'eterna/ui/MarkerSwitcher';
 import DotPlot from 'eterna/rnatypes/DotPlot';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
@@ -71,7 +72,6 @@ import AnnotationManager, {
     AnnotationHierarchyType
 } from 'eterna/AnnotationManager';
 import LibrarySelectionConstraint from 'eterna/constraints/constraints/LibrarySelectionConstraint';
-import GameDropdown from 'eterna/ui/GameDropdown';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -670,31 +670,9 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    private addMarkerLayer(layer: string) {
-        if (this._markerSwitcher && this._markerSwitcher.options.includes(layer)) {
-            // It's already there, don't bother recreating the dropdown
-            return;
-        }
-
-        if (this._markerSwitcher) {
-            this.removeObject(this._markerSwitcher);
-        }
-
-        const newOptions = this._markerSwitcher
-            ? [...this._markerSwitcher.options, layer]
-            : [PLAYER_MARKER_LAYER, layer];
-
-        this._markerSwitcher = new GameDropdown({
-            fontSize: 14,
-            options: newOptions,
-            defaultOption: layer,
-            borderWidth: 0,
-            dropShadow: true
-        });
-        this._markerSwitcher.display.position.set(17, 200);
-        this.addObject(this._markerSwitcher, this.uiLayer);
-
-        this.regs?.add(this._markerSwitcher.selectedOption.connectNotify((val) => this.setMarkerLayer(val)));
+    private addMarkerLayer(layer: string, resetSelectedLayer?: boolean) {
+        this._markerSwitcher.addMarkerLayer(layer, resetSelectedLayer);
+        this._markerSwitcher.display.visible = true;
     }
 
     private setMarkerLayer(layer: string) {
@@ -989,6 +967,12 @@ export default class PoseEditMode extends GameMode {
 
             this.onChangeFolder();
         });
+
+        this._markerSwitcher = new MarkerSwitcher();
+        this._markerSwitcher.display.position.set(17, 200);
+        this.addObject(this._markerSwitcher, this.uiLayer);
+        this.regs?.add(this._markerSwitcher.selectedLayer.connectNotify((val) => this.setMarkerLayer(val)));
+        this._markerSwitcher.display.visible = false;
 
         this._constraintsLayer = new Container();
         this.uiLayer.addChild(this._constraintsLayer);
@@ -3586,7 +3570,7 @@ export default class PoseEditMode extends GameMode {
     private _targetOligosOrder: (number[] | undefined)[] = [];
 
     private _folderSwitcher: FolderSwitcher;
-    private _markerSwitcher: GameDropdown | null;
+    private _markerSwitcher: MarkerSwitcher;
 
     private _isFrozen: boolean = false;
     private _targetName: Text;
