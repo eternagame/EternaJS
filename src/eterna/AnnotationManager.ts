@@ -730,7 +730,7 @@ export default class AnnotationManager {
             }
             this._annotationDialog.closed.then((annot: AnnotationData | null) => {
                 if (annot) {
-                    this.addAnnotation(annot, AnnotationCategory.SOLUTION);
+                    this.addAnnotation(annot, this.activeCategory);
                 }
 
                 // Destroy object
