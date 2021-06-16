@@ -678,7 +678,7 @@ export default class PoseEditMode extends GameMode {
         //     before_reset = this._puzzle.transform_sequence(this.get_current_undo_block(0).get_sequence(), 0);
         // }
 
-        const bindAddbaseCB = (pose: Pose2D, kk: number) => {
+        const bindAddBaseCB = (pose: Pose2D, kk: number) => {
             pose.addBaseCallback = ((parenthesis: string | null, op: PuzzleEditOp | null, index: number) => {
                 Assert.assertIsDefined(parenthesis);
                 Assert.assertIsDefined(op);
@@ -735,7 +735,7 @@ export default class PoseEditMode extends GameMode {
             const poseField: PoseField = new PoseField(true);
             this.addObject(poseField, this.poseLayer);
             const pose: Pose2D = poseField.pose;
-            bindAddbaseCB(pose, ii);
+            bindAddBaseCB(pose, ii);
             bindPoseEdit(pose, ii);
             bindTrackMoves(pose, ii);
             bindMousedownEvent(pose, ii);

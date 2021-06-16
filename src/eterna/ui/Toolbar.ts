@@ -109,8 +109,8 @@ export default class Toolbar extends ContainerObject {
     public get position() { return new Point(this._content.x, this._content.y); }
 
     // Puzzle Maker
-    public addbaseButton: GameButton;
-    public addpairButton: GameButton;
+    public addBaseButton: GameButton;
+    public addPairButton: GameButton;
     public deleteButton: GameButton;
     public lockButton: GameButton;
     public moleculeButton: GameButton;
@@ -201,14 +201,14 @@ export default class Toolbar extends ContainerObject {
             this._content.addChild(upperToolbarLayout);
         }
 
-        this.addbaseButton = new ToolbarButton()
+        this.addBaseButton = new ToolbarButton()
             .up(Bitmaps.ImgAddBase)
             .over(Bitmaps.ImgAddBaseOver)
             .down(Bitmaps.ImgAddBaseSelect)
             .hotkey(KeyCode.Digit6)
             .tooltip('Add a single base.');
 
-        this.addpairButton = new ToolbarButton()
+        this.addPairButton = new ToolbarButton()
             .up(Bitmaps.ImgAddPair)
             .over(Bitmaps.ImgAddPairOver)
             .down(Bitmaps.ImgAddPairSelect)
@@ -237,25 +237,25 @@ export default class Toolbar extends ContainerObject {
             .tooltip('Create or remove a molecular binding site.');
 
         if (this._type === ToolbarType.PUZZLEMAKER || this._type === ToolbarType.PUZZLEMAKER_EMBEDDED) {
-            this.addObject(this.addbaseButton, upperToolbarLayout);
-            this.addObject(this.addpairButton, upperToolbarLayout);
+            this.addObject(this.addBaseButton, upperToolbarLayout);
+            this.addObject(this.addPairButton, upperToolbarLayout);
             this.addObject(this.deleteButton, upperToolbarLayout);
             this.addObject(this.lockButton, upperToolbarLayout);
             this.addObject(this.moleculeButton, upperToolbarLayout);
 
-            this.regs.add(this.addbaseButton.clicked.connect(() => {
+            this.regs.add(this.addBaseButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
                 if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
                     this._annotationManager.setAnnotationMode(false);
                 }
-                this.addbaseButton.toggled.value = true;
+                this.addBaseButton.toggled.value = true;
             }));
-            this.regs.add(this.addpairButton.clicked.connect(() => {
+            this.regs.add(this.addPairButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
                 if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
                     this._annotationManager.setAnnotationMode(false);
                 }
-                this.addpairButton.toggled.value = true;
+                this.addPairButton.toggled.value = true;
             }));
             this.regs.add(this.deleteButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
@@ -1023,8 +1023,8 @@ export default class Toolbar extends ContainerObject {
 
         this.boostersMenu.enabled = !disable;
 
-        this.addbaseButton.enabled = !disable;
-        this.addpairButton.enabled = !disable;
+        this.addBaseButton.enabled = !disable;
+        this.addPairButton.enabled = !disable;
         this.deleteButton.enabled = !disable;
         this.lockButton.enabled = !disable;
         this.moleculeButton.enabled = !disable;
@@ -1045,8 +1045,8 @@ export default class Toolbar extends ContainerObject {
     private _deselectAllPaintTools(): void {
         this.palette.clearSelection();
         this.pairSwapButton.toggled.value = false;
-        this.addbaseButton.toggled.value = false;
-        this.addpairButton.toggled.value = false;
+        this.addBaseButton.toggled.value = false;
+        this.addPairButton.toggled.value = false;
         this.deleteButton.toggled.value = false;
         this.lockButton.toggled.value = false;
         this.moleculeButton.toggled.value = false;

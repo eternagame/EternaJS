@@ -155,8 +155,8 @@ export default class PuzzleEditMode extends GameMode {
         });
         this.addObject(this._toolbar, this.uiLayer);
 
-        this._toolbar.addbaseButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.ADD_BASE));
-        this._toolbar.addpairButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.ADD_PAIR));
+        this._toolbar.addBaseButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.ADD_BASE));
+        this._toolbar.addPairButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.ADD_PAIR));
         this._toolbar.deleteButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.DELETE));
         this._toolbar.lockButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.LOCK));
         this._toolbar.moleculeButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.BINDING_SITE));
