@@ -9,7 +9,7 @@ import {
     ContainerObject, Flashbang, VLayoutContainer, HLayoutContainer,
     KeyCode, VAlign, HAlign, DisplayUtil, LocationTask, Easing, Assert
 } from 'flashbang';
-import Puzzle, {BoostersData} from 'eterna/puzzle/Puzzle';
+import {BoostersData} from 'eterna/puzzle/Puzzle';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import BitmapManager from 'eterna/resources/BitmapManager';
@@ -134,8 +134,7 @@ export default class Toolbar extends ContainerObject {
             showGlue = false,
             showAdvancedMenus = true,
             showLibrarySelect = false,
-            annotationManager,
-            puzzle
+            annotationManager
         }: {
             states?: number;
             boosters?: BoostersData;
@@ -143,7 +142,6 @@ export default class Toolbar extends ContainerObject {
             showAdvancedMenus?: boolean;
             showLibrarySelect?: boolean;
             annotationManager?: AnnotationManager;
-            puzzle?: Puzzle;
         }
     ) {
         super();
@@ -154,7 +152,6 @@ export default class Toolbar extends ContainerObject {
         this._showLibrarySelect = showLibrarySelect;
         this._boostersData = boosters ?? null;
         this._annotationManager = annotationManager;
-        this._puzzle = puzzle;
     }
 
     public onResized() {
@@ -765,8 +762,7 @@ export default class Toolbar extends ContainerObject {
                 .tooltip('Annotations Panel');
             this.annotationPanel = new AnnotationPanel(
                 this.annotationPanelButton,
-                this._annotationManager,
-                this._puzzle
+                this._annotationManager
             );
 
             if (this._showAdvancedMenus) {
@@ -1081,5 +1077,4 @@ export default class Toolbar extends ContainerObject {
     private _autoCollapseRegs: RegistrationGroup | null;
 
     private _annotationManager: AnnotationManager | undefined;
-    private _puzzle: Puzzle | undefined;
 }

@@ -167,8 +167,7 @@ export default class PoseEditMode extends GameMode {
             boosters: this._puzzle.boosters ? this._puzzle.boosters : undefined,
             showAdvancedMenus: this._puzzle.puzzleType !== PuzzleType.PROGRESSION,
             showLibrarySelect: this._puzzle.constraints?.some((con) => con instanceof LibrarySelectionConstraint),
-            annotationManager: this._annotationManager,
-            puzzle: this._puzzle
+            annotationManager: this._annotationManager
         });
         this.addObject(this._toolbar, this.uiLayer);
 

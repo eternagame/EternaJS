@@ -15,7 +15,6 @@ import AnnotationManager, {
     AnnotationCategory
 } from 'eterna/AnnotationManager';
 import AnnotationPanelItem from 'eterna/ui/AnnotationPanelItem';
-import Puzzle from 'eterna/puzzle/Puzzle';
 import Eterna from 'eterna/Eterna';
 import Flashbang from 'flashbang/core/Flashbang';
 import FileInputObject, {HTMLInputEvent} from './FileInputObject';
@@ -25,12 +24,11 @@ import VScrollBox from './VScrollBox';
 import {Item} from './DragDropper';
 
 export default class AnnotationPanel extends ContainerObject {
-    constructor(button: GameButton, manager: AnnotationManager, puzzle: Puzzle | undefined) {
+    constructor(button: GameButton, manager: AnnotationManager) {
         super();
 
         this._button = button;
         this._annotationManager = manager;
-        this._puzzle = puzzle;
 
         this._panel = new GamePanel({
             type: GamePanelType.NORMAL,
@@ -295,58 +293,51 @@ export default class AnnotationPanel extends ContainerObject {
         // Otherwise buttons toolbar buttons will be offset by a single button's width
         let offset = -31;
         if (
-            (
-                this._annotationManager.activeCategory === AnnotationCategory.PUZZLE
-                && this._puzzle?.puzzleAuthor === Eterna.playerName
-            ) || this._overridePuzzleAuthorExportPriviledges
+            this._annotationManager.getPuzzleAnnotations().length > 0
+            || this._annotationManager.getSolutionAnnotations().length > 0
+            || this._annotationManager.getStructureAnnotations().length > 0
         ) {
-            if (
-                this._annotationManager.getPuzzleAnnotations().length > 0
-                || this._annotationManager.getSolutionAnnotations().length > 0
-                || this._annotationManager.getStructureAnnotations().length > 0
-            ) {
-                this._downloadButton = new GameButton()
-                    .allStates(Bitmaps.ImgDownload)
-                    .tooltip('Download Annotations');
-                this._downloadButton.pointerDown.connect(() => {
-                    this._annotationManager.downloadAnnotations();
-                    // There is an odd bug where pointerUp does not trigger
-                    // on Button sometimes.
-                    // As a result, pointerTap is not always called, resulting
-                    // in incosistent clicked.connect() emissions.
-                    //
-                    // We fix this by connecting to pointerDown and playing button
-                    // sound here.
-                    Flashbang.sound.playSound(GameButton.DEFAULT_DOWN_SOUND);
-                });
-                this._panel.addObject(this._downloadButton, this._upperToolbar);
-                if (!initial) {
-                    offset += this._downloadButton.display.width;
-                }
-            }
-
-            this._uploadButton = new FileInputObject({
-                id: 'annotation-upload-file-input',
-                width: 30,
-                height: 30,
-                acceptedFiletypes: '.json',
-                labelIcon: Bitmaps.ImgUpload
-            }).tooltip('Upload Annotations');
-            this._uploadButton.fileSelected.connect((e: HTMLInputEvent) => {
-                this._annotationManager.uploadAnnotations(e);
+            this._downloadButton = new GameButton()
+                .allStates(Bitmaps.ImgDownload)
+                .tooltip('Download Annotations');
+            this._downloadButton.pointerDown.connect(() => {
+                this._annotationManager.downloadAnnotations();
                 // There is an odd bug where pointerUp does not trigger
                 // on Button sometimes.
                 // As a result, pointerTap is not always called, resulting
-                // in incosistent clicked.connect() emissions.
+                // in inconsistent clicked.connect() emissions.
                 //
                 // We fix this by connecting to pointerDown and playing button
                 // sound here.
                 Flashbang.sound.playSound(GameButton.DEFAULT_DOWN_SOUND);
             });
-            this._panel.addObject(this._uploadButton, this._upperToolbar);
+            this._panel.addObject(this._downloadButton, this._upperToolbar);
             if (!initial) {
-                offset += this._uploadButton.display.width;
+                offset += this._downloadButton.display.width;
             }
+        }
+
+        this._uploadButton = new FileInputObject({
+            id: 'annotation-upload-file-input',
+            width: 30,
+            height: 30,
+            acceptedFiletypes: '.json',
+            labelIcon: Bitmaps.ImgUpload
+        }).tooltip('Upload Annotations');
+        this._uploadButton.fileSelected.connect((e: HTMLInputEvent) => {
+            this._annotationManager.uploadAnnotations(e);
+            // There is an odd bug where pointerUp does not trigger
+            // on Button sometimes.
+            // As a result, pointerTap is not always called, resulting
+            // in inconsistent clicked.connect() emissions.
+            //
+            // We fix this by connecting to pointerDown and playing button
+            // sound here.
+            Flashbang.sound.playSound(GameButton.DEFAULT_DOWN_SOUND);
+        });
+        this._panel.addObject(this._uploadButton, this._upperToolbar);
+        if (!initial) {
+            offset += this._uploadButton.display.width;
         }
 
         this._newLayerButton = new GameButton()
@@ -357,7 +348,7 @@ export default class AnnotationPanel extends ContainerObject {
             // There is an odd bug where pointerUp does not trigger
             // on Button sometimes.
             // As a result, pointerTap is not always called, resulting
-            // in incosistent clicked.connect() emissions.
+            // in inconsistent clicked.connect() emissions.
             //
             // We fix this by connecting to pointerDown and playing button
             // sound here.
@@ -377,7 +368,7 @@ export default class AnnotationPanel extends ContainerObject {
                 // There is an odd bug where pointerUp does not trigger
                 // on Button sometimes.
                 // As a result, pointerTap is not always called, resulting
-                // in incosistent clicked.connect() emissions.
+                // in inconsistent clicked.connect() emissions.
                 //
                 // We fix this by connecting to pointerDown and playing button
                 // sound here.
@@ -398,7 +389,7 @@ export default class AnnotationPanel extends ContainerObject {
                 // There is an odd bug where pointerUp does not trigger
                 // on Button sometimes.
                 // As a result, pointerTap is not always called, resulting
-                // in incosistent clicked.connect() emissions.
+                // in inconsistent clicked.connect() emissions.
                 //
                 // We fix this by connecting to pointerDown and playing button
                 // sound here.
@@ -887,26 +878,11 @@ export default class AnnotationPanel extends ContainerObject {
         return this._isVisible;
     }
 
-    /**
-     * When set to true, any player regardless of whether they authored the puzzle will
-     * be able to export annotations
-     */
-    public set overridePuzzleAuthorExportPriviledges(override: boolean) {
-        this._overridePuzzleAuthorExportPriviledges = override;
-
-        this.updatePanelPosition();
-
-        // Repaint layers
-        this.updatePanel();
-    }
-
     private _panel: GamePanel;
     private _scrollView: VScrollBox;
     private _items: AnnotationPanelItem[] = [];
     private _contentLayout: VLayoutContainer;
     private _annotationManager: AnnotationManager;
-    private _puzzle: Puzzle | undefined = undefined;
-    private _overridePuzzleAuthorExportPriviledges: boolean = false;
 
     // A reference to the button that reveals/hides it in the toolbar
     private _button: GameButton;
