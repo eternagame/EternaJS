@@ -210,12 +210,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this.setAnnotationCanvasOpacity(1);
             }
         }));
-        this.regs.add(this._annotationManager.onSetHighlights.connect((ranges: AnnotationRange[] | null) => {
+        this.regs.add(this._annotationManager.highlights.connect((ranges: AnnotationRange[] | null) => {
             if (ranges) {
                 this.setAnnotationRangeHighlight(ranges);
             }
         }));
-        this.regs.add(this._annotationManager.onClearHighlights.connect(() => this.clearAnnotationHighlight()));
         this.regs.add(this._annotationManager.onClearAnnotationCanvas.connect(() => {
             this.clearAnnotationCanvas();
         }));
@@ -1701,12 +1700,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public clearAnnotationRanges(): void {
         this._annotationRanges = [];
-
-        this.clearAnnotationHighlight();
-    }
-
-    public clearAnnotationHighlight(): void {
-        this._annotationHighlightBox.clear();
+        this._annotationManager.highlights.value = [];
 
         if (
             this._annotationManager

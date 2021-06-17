@@ -205,10 +205,8 @@ export default class AnnotationManager {
     public readonly onToggleItemSelection: Value<AnnotationData | null> = new Value<AnnotationData | null>(null);
     // Signals that an annotation should be edited (reveal AnnotationDialog)
     public readonly onEditAnnotation: Value<AnnotationData | null> = new Value<AnnotationData | null>(null);
-    // Signals to clear highlights placed on bases upon annotation selection or hover
-    public readonly onClearHighlights = new UnitSignal();
     // Signals to set highlights placed on bases upon annotation selection or hover
-    public readonly onSetHighlights: Value<AnnotationRange[] | null> = new Value<AnnotationRange[] | null>(null);
+    public readonly highlights: Value<AnnotationRange[]> = new Value<AnnotationRange[]>([]);
     // Signals to recompute annotation space availability in the puzzle
     public readonly onUpdateAnnotationViews = new UnitSignal();
     // Signals to save annotations
@@ -450,7 +448,7 @@ export default class AnnotationManager {
      * Recomputes the display objects of all annotations and layers
      */
     public updateAnnotationViews(): void {
-        this.onClearHighlights.emit();
+        this.highlights.value = [];
 
         const updatedLayers = this.generateAnnotationDisplayObjects(
             this.allLayers,
@@ -507,8 +505,7 @@ export default class AnnotationManager {
 
             if (item.selected && item.visible && item.ranges) {
                 // Single Annotation
-                this.onSetHighlights.value = item.ranges;
-                this.onSetHighlights.value = null;
+                this.highlights.value = item.ranges;
             } else if (item.selected && item.visible && item.children.length > 0) {
                 // Layer (multiple annotations)
                 const ranges: AnnotationRange[] = [];
@@ -518,8 +515,7 @@ export default class AnnotationManager {
                     }
                 });
                 if (ranges.length > 0) {
-                    this.onSetHighlights.value = ranges;
-                    this.onSetHighlights.value = null;
+                    this.highlights.value = ranges;
                 }
             }
         }
@@ -754,7 +750,7 @@ export default class AnnotationManager {
         this.annotationMode.value = active;
 
         if (!active) {
-            this.onClearHighlights.emit();
+            this.highlights.value = [];
 
             const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
             if (doc) {
@@ -1048,8 +1044,7 @@ export default class AnnotationManager {
                     if (item.type === AnnotationHierarchyType.ANNOTATION) {
                         const annotation = item.data as AnnotationData;
                         if (annotation.ranges) {
-                            this.onSetHighlights.value = annotation.ranges;
-                            this.onSetHighlights.value = null;
+                            this.highlights.value = annotation.ranges;
                         }
                     } else if (item.type === AnnotationHierarchyType.LAYER) {
                         const layer = item.data as AnnotationData;
@@ -1059,8 +1054,7 @@ export default class AnnotationManager {
                                 ranges = ranges.concat(annotation.ranges);
                             }
                         }
-                        this.onSetHighlights.value = ranges;
-                        this.onSetHighlights.value = null;
+                        this.highlights.value = ranges;
                     }
                 }
             });
@@ -1068,7 +1062,7 @@ export default class AnnotationManager {
                 // remove associated range only if annotation mode off so we don't
                 // disturb any selections that might be taking place
                 if (!item.data.selected && !this.getAnnotationMode()) {
-                    this.onClearHighlights.emit();
+                    this.highlights.value = [];
                 }
             });
 
