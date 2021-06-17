@@ -293,18 +293,15 @@ export default class PuzzleEditMode extends GameMode {
             let defaultStructure = '.....((((((((....)))))))).....';
             let defaultPairs: SecStruct = SecStruct.fromParens(defaultStructure);
             let defaultSequence = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
-            let defaultAnnotations: AnnotationDataBundle | null = null;
 
             if (initialPoseData != null
                 && initialPoseData[ii] != null
                 && initialPoseData[ii]['sequence'] != null
                 && initialPoseData[ii]['structure'] != null
                 && initialPoseData[ii]['structure'] !== ''
-                && initialPoseData[ii]['annotations'] != null
             ) {
                 defaultStructure = initialPoseData[ii]['structure'];
                 defaultSequence = initialPoseData[ii]['sequence'];
-                defaultAnnotations = initialPoseData[ii]['annotations'];
                 defaultPairs = SecStruct.fromParens(defaultStructure);
             }
 
@@ -379,11 +376,6 @@ export default class PuzzleEditMode extends GameMode {
 
             structureInput.structureString = defaultStructure;
             this._structureInputs.push(structureInput);
-
-            if (defaultAnnotations) {
-                this._annotationManager.setPuzzleAnnotations(defaultAnnotations.puzzle);
-                this._annotationManager.setSolutionAnnotations(defaultAnnotations.solution);
-            }
         }
 
         this._constraintBar = new ConstraintBar(Utility.range(this._numTargets).map(
@@ -393,12 +385,20 @@ export default class PuzzleEditMode extends GameMode {
         this._constraintBar.layout();
 
         this.setPoseFields(poseFields);
+
         // Must do this AFTER pose initialization
         if (initialPoseData != null
             && initialPoseData[0] != null
             && initialPoseData[0]['startingFolder'] != null) {
             this._folderSwitcher.changeFolder(initialPoseData[0].startingFolder);
         }
+
+        if (initialPoseData[0]['annotations']) {
+            const defaultAnnotations = initialPoseData[0]['annotations'];
+            this._annotationManager.setPuzzleAnnotations(defaultAnnotations.puzzle);
+            this._annotationManager.setSolutionAnnotations(defaultAnnotations.solution);
+        }
+
         this.poseEditByTarget(0);
 
         const setCB = (kk: number): void => {
