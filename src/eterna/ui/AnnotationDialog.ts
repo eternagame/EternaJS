@@ -624,7 +624,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
     private static readonly DELETE_BUTTON_FONT_SIZE = 12;
     private static readonly DROPDOWN_HEIGHT = AnnotationDialog.ACTION_BUTTON_HEIGHT;
     public static readonly ANNOTATION_TEXT_CHARACTER_LIMIT = 50;
-    public static readonly RANGE_REGEX: RegExp = /(\d+\s*-\s*\d+)(,\s*\d+\s*-\s*\d+)*/g;
+    public static readonly RANGE_REGEX: RegExp = /^(\d+\s*-\s*\d+)(,\s*\d+\s*-\s*\d+)*$/;
     private static readonly PANEL_COLOR = 0x152843;
     private static readonly UPPER_TOOLBAR_DIVIDER_COLOR = 0x112238;
     private static readonly LABEL_COLOR = 0xC0DCE7;
