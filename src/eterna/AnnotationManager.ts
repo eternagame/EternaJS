@@ -377,8 +377,8 @@ export default class AnnotationManager {
             currentDate.getUTCSeconds()
         }`;
 
-        const dataStr = `data:text/json;charset=utf-8,${
-            encodeURIComponent(JSON.stringify(this.annotationDataBundle, undefined, 2))}`;
+        const bundleJSON = JSON.stringify(this.createAnnotationBundle(), undefined, 2);
+        const dataStr = `data:text/json;charset=utf-8,${encodeURIComponent(bundleJSON)}`;
         const downloadAnchorNode = document.createElement('a');
         downloadAnchorNode.setAttribute('href', dataStr);
         downloadAnchorNode.setAttribute('download', `${exportName}.json`);
@@ -875,10 +875,7 @@ export default class AnnotationManager {
         return this._selectedAnnotation;
     }
 
-    /**
-     * Accesses all annotations in a single bundled object
-     */
-    public get annotationDataBundle() {
+    private bundleAnnotations(graph: AnnotationData[]) {
         const prepareNode = (node: AnnotationData): AnnotationData => {
             const cleansedNode = {...node};
             // These are runtime properties
@@ -902,24 +899,25 @@ export default class AnnotationManager {
             };
         };
 
-        const annotationGraph: AnnotationDataBundle = {
-            puzzle: [],
-            solution: []
-        };
-        const puzzleGraph: AnnotationData[] = [];
-        for (const child of this._puzzleAnnotations) {
-            const path = prepareNode(child);
-            puzzleGraph.push(path);
-        }
-        annotationGraph.puzzle = puzzleGraph;
-        const solutionGraph: AnnotationData[] = [];
-        for (const child of this._solutionAnnotations) {
-            const path = prepareNode(child);
-            solutionGraph.push(path);
-        }
-        annotationGraph.solution = solutionGraph;
+        return graph.map(prepareNode);
+    }
 
-        return annotationGraph;
+    public createAnnotationBundle(): AnnotationDataBundle {
+        return {
+            puzzle: this.categoryAnnotationData(AnnotationCategory.PUZZLE),
+            solution: this.categoryAnnotationData(AnnotationCategory.SOLUTION)
+        };
+    }
+
+    public categoryAnnotationData(category: AnnotationCategory.PUZZLE | AnnotationCategory.SOLUTION) {
+        switch (category) {
+            case AnnotationCategory.PUZZLE:
+                return this.bundleAnnotations(this._puzzleAnnotations);
+            case AnnotationCategory.SOLUTION:
+                return this.bundleAnnotations(this._solutionAnnotations);
+            default:
+                return Assert.unreachable(category);
+        }
     }
 
     /**

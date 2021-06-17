@@ -44,7 +44,8 @@ import AnnotationManager, {
     AnnotationData,
     AnnotationArguments,
     AnnotationDataBundle,
-    AnnotationRange
+    AnnotationRange,
+    AnnotationCategory
 } from 'eterna/AnnotationManager';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
@@ -559,7 +560,7 @@ export default class PuzzleEditMode extends GameMode {
             objs.push(JSON.stringify({
                 sequence: pose.sequence.sequenceString(),
                 structure: pose.molecularStructure.getParenthesis(null, true),
-                annotations: this._annotationManager.annotationDataBundle
+                annotations: this._annotationManager.createAnnotationBundle()
             }));
         }
 
@@ -875,7 +876,7 @@ export default class PuzzleEditMode extends GameMode {
                     type: pseudoknots ? 'pseudoknot' : 'single',
                     secstruct: this._structureInputs[ii].structureString,
                     'custom-layout': this._poses[ii].customLayout,
-                    annotations: this._poses[ii].annotationManager.annotationDataBundle
+                    annotations: this._poses[ii].annotationManager.categoryAnnotationData(AnnotationCategory.PUZZLE)
                 };
             }
 

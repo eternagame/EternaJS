@@ -110,6 +110,8 @@ export interface Move {
 
 // AMW TODO: we need the "all optional" impl for piece by piece buildup.
 // Should be converted to an "all required" type for subsequent processing.
+// JAR TODO: This seems to conflate the request data with the response data.
+// Should be converted to two separate structures (in addition to the above)
 export type SubmitSolutionData = {
     'next-puzzle'?: PuzzleJSON | number | null;
     'recommend-puzzle'?: boolean;
@@ -132,7 +134,7 @@ export type SubmitSolutionData = {
     'pointsrank-before'?: RankScrollData | null;
     'pointsrank-after'?: RankScrollData | null;
     'selected-nts'?: number[];
-    'annotations'?: AnnotationDataBundle;
+    'annotations'?: string;
 };
 
 export default class PoseEditMode extends GameMode {
@@ -615,6 +617,9 @@ export default class PoseEditMode extends GameMode {
             this.clearMoveTracking(solution.sequence.sequenceString());
             this.setAncestorId(solution.nodeID);
 
+            const annotations = solution.annotations;
+            this._annotationManager.setSolutionAnnotations(annotations ?? []);
+
             // AMW: I'm keeping the function around in case we want to call it
             // in some other context, but we don't need it anymore.
             // this.updateSolutionNameText(solution);
@@ -970,11 +975,13 @@ export default class PoseEditMode extends GameMode {
 
         // Initialize sequence and/or solution as relevant
         let initialSequence: Sequence | null = null;
-        let annotationGraph: AnnotationDataBundle | undefined;
         let librarySelections: number[] = [];
         if (this._params.initSolution != null) {
             initialSequence = this._params.initSolution.sequence.slice(0);
-            annotationGraph = this._params.initSolution.annotations;
+            const annotations = this._params.initSolution.annotations;
+            if (annotations) {
+                this._annotationManager.setSolutionAnnotations(annotations);
+            }
             this._curSolution = this._params.initSolution;
             // AMW: I'm keeping the function around in case we want to call it
             // in some other context, but we don't need it anymore.
@@ -1034,8 +1041,10 @@ export default class PoseEditMode extends GameMode {
                 const tc = this._targetConditions[ii] as TargetConditions;
                 this._poses[ii].structConstraints = tc['structure_constraints'];
 
-                // Get annotation graph
-                annotationGraph = tc['annotations'];
+                const annotations = tc['annotations'];
+                if (annotations) {
+                    this._annotationManager.setPuzzleAnnotations(annotations);
+                }
 
                 this._poses[ii].customLayout = tc['custom-layout'];
                 const customLayout = this._poses[ii].customLayout;
@@ -1083,15 +1092,6 @@ export default class PoseEditMode extends GameMode {
             this._poses[ii].puzzleLocks = this._puzzle.puzzleLocks;
             this._poses[ii].shiftLimit = this._puzzle.shiftLimit;
             this._poses[ii].librarySelections = librarySelections;
-
-            if (
-                this._annotationManager.allAnnotations.length === 0
-                && this._annotationManager.allLayers.length === 0
-                && annotationGraph
-            ) {
-                this._annotationManager.setPuzzleAnnotations(annotationGraph.puzzle);
-                this._annotationManager.setSolutionAnnotations(annotationGraph.solution);
-            }
         }
 
         this.clearUndoStack();
@@ -2021,7 +2021,7 @@ export default class PoseEditMode extends GameMode {
             this.submitSolution({
                 title: 'Cleared Solution',
                 comment: 'No comment',
-                annotations: this._poses[0].annotationManager.annotationDataBundle,
+                annotations: this._poses[0].annotationManager.categoryAnnotationData(AnnotationCategory.SOLUTION),
                 libraryNT: this._poses[0].librarySelections ?? []
             }, solToSubmit);
         } else {
@@ -2079,7 +2079,9 @@ export default class PoseEditMode extends GameMode {
                 // / Always submit the sequence in the first state
                 this.updateCurrentBlockWithDotAndMeltingPlot(0);
                 const solToSubmit: UndoBlock = this.getCurrentUndoBlock(0);
-                submitDetails.annotations = this._poses[0].annotationManager.annotationDataBundle;
+                submitDetails.annotations = this._poses[0].annotationManager.categoryAnnotationData(
+                    AnnotationCategory.SOLUTION
+                );
                 this.submitSolution(submitDetails, solToSubmit);
             }
         });
@@ -2137,7 +2139,7 @@ export default class PoseEditMode extends GameMode {
         postData['ua'] = undoBlock.getParam(UndoBlockParam.AU) as number;
         postData['body'] = details.comment;
         if (details.annotations) {
-            postData['annotations'] = details.annotations;
+            postData['annotations'] = JSON.stringify(details.annotations);
         }
 
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
@@ -2510,7 +2512,7 @@ export default class PoseEditMode extends GameMode {
         for (let ii = 0; ii < this._poses.length; ++ii) {
             objs.push(JSON.stringify({
                 undoBlock: this._seqStacks[this._stackLevel][ii].toJSON(),
-                annotations: this._poses[ii].annotationManager.annotationDataBundle
+                annotations: this._poses[ii].annotationManager.createAnnotationBundle()
             }));
         }
 
@@ -2538,7 +2540,7 @@ export default class PoseEditMode extends GameMode {
                     this._poseState === PoseState.TARGET ? ublk.targetPairs : ublk.getPairs(37, pseudoknots)
                 ).getParenthesis(),
                 startingFolder: this._folder.name,
-                annotations: this._annotationManager.annotationDataBundle
+                annotations: this._annotationManager.createAnnotationBundle()
             };
             if (tc !== undefined && Puzzle.isAptamerType(tc['type'])) {
                 puzzledef.site = tc['site'];
@@ -2637,7 +2639,8 @@ export default class PoseEditMode extends GameMode {
 
             const annotations: AnnotationDataBundle | null = savedAnnotations[ii];
             if (annotations) {
-                this._annotationManager.setPuzzleAnnotations(annotations.puzzle);
+                // Don't load puzzle annotations, as we want to use the up-to-date ones from
+                // the current puzzle definition in case they changed
                 this._annotationManager.setSolutionAnnotations(annotations.solution);
             }
         }
