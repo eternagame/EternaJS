@@ -187,7 +187,6 @@ export interface AnnotationDialogArguments {
     gameMode: GameMode;
     pose: Pose2D;
     gameLayer: Container;
-    closeCallback: () => void;
     panelPos?: Point;
     annotation?: AnnotationData;
 }
@@ -685,8 +684,6 @@ export default class AnnotationManager {
                 // Clear annotation dialog reference
                 this._annotationDialog = null;
 
-                args.closeCallback();
-
                 this.dialogIsVisible = false;
             });
         } else {
@@ -718,8 +715,6 @@ export default class AnnotationManager {
 
                 // // Remove annotation highlighting
                 args.pose.clearAnnotationRanges();
-
-                args.closeCallback();
 
                 this.dialogIsVisible = false;
             });

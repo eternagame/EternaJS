@@ -338,11 +338,6 @@ export default class PuzzleEditMode extends GameMode {
                         gameMode: this,
                         pose,
                         gameLayer: this.uiLayer,
-                        closeCallback: () => {
-                            if (this._poses.length > 0) {
-                                this.saveData();
-                            }
-                        },
                         panelPos: args.panelPos
                     });
                 });
@@ -355,11 +350,6 @@ export default class PuzzleEditMode extends GameMode {
                             gameMode: this,
                             pose,
                             gameLayer: this.uiLayer,
-                            closeCallback: () => {
-                                if (this._poses.length > 0) {
-                                    this.saveData();
-                                }
-                            },
                             annotation
                         });
                     }
