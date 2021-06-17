@@ -62,11 +62,12 @@ import UITheme from 'eterna/ui/UITheme';
 import AnnotationManager, {
     AnnotationData,
     AnnotationCategory,
-    AnnotationArguments,
     AnnotationDataBundle,
-    AnnotationHierarchyType
+    AnnotationHierarchyType,
+    AnnotationRange
 } from 'eterna/AnnotationManager';
 import LibrarySelectionConstraint from 'eterna/constraints/constraints/LibrarySelectionConstraint';
+import AnnotationDialog from 'eterna/ui/AnnotationDialog';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -162,6 +163,32 @@ export default class PoseEditMode extends GameMode {
 
         this._annotationManager = new AnnotationManager(toolbarType);
         this._annotationManager.annotationDataUpdated.connect(() => this.saveData());
+        this._annotationManager.onEditAnnotation.connect((annotation: AnnotationData | null) => {
+            if (annotation && annotation.ranges) {
+                const dialog = new AnnotationDialog({
+                    edit: true,
+                    title: true,
+                    sequenceLength: this._poses[0].fullSequenceLength,
+                    initialRanges: annotation.ranges,
+                    initialLayers: this._annotationManager.activeLayers,
+                    initialAnnotation: annotation
+                });
+                dialog.onUpdateRanges.connect((ranges: AnnotationRange[] | null) => {
+                    if (ranges) {
+                        this._poses.forEach((pose) => pose.setAnnotationRanges(ranges));
+                    }
+                });
+                this.showDialog(dialog).closed.then((editedAnnotation: AnnotationData | null) => {
+                    if (editedAnnotation) {
+                        editedAnnotation.selected = false;
+                        this._annotationManager.editAnnotation(editedAnnotation);
+                    } else if (annotation) {
+                        // We interpret null argument as delete intent when editing
+                        this._annotationManager.deleteAnnotation(annotation);
+                    }
+                });
+            }
+        });
 
         this._toolbar = new Toolbar(toolbarType, {
             states: this._puzzle.getSecstructs().length,
@@ -726,35 +753,6 @@ export default class PoseEditMode extends GameMode {
             bindTrackMoves(pose, ii);
             bindMousedownEvent(pose, ii);
             poseFields.push(poseField);
-
-            // We only need one annotation manager to act on annotation logic
-            if (ii === 0) {
-                this._annotationManager.onCreateAnnotation.connect((args: AnnotationArguments) => {
-                    this._annotationManager.showAnnotationDialog({
-                        edit: false,
-                        ranges: args.ranges,
-                        modal: false,
-                        gameMode: this,
-                        pose,
-                        gameLayer: this.uiLayer,
-                        panelPos: args.panelPos
-                    });
-                });
-
-                this._annotationManager.onEditAnnotation.connect((annotation: AnnotationData | null) => {
-                    if (annotation && annotation.ranges) {
-                        this._annotationManager.showAnnotationDialog({
-                            edit: true,
-                            ranges: annotation.ranges,
-                            modal: true,
-                            gameMode: this,
-                            pose,
-                            gameLayer: this.uiLayer,
-                            annotation
-                        });
-                    }
-                });
-            }
         }
 
         this.setPoseFields(poseFields);

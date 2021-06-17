@@ -41,10 +41,11 @@ import Sequence from 'eterna/rnatypes/Sequence';
 import ContextMenu from 'eterna/ui/ContextMenu';
 import AnnotationManager, {
     AnnotationData,
-    AnnotationArguments,
     AnnotationDataBundle,
-    AnnotationCategory
+    AnnotationCategory,
+    AnnotationRange
 } from 'eterna/AnnotationManager';
+import AnnotationDialog from 'eterna/ui/AnnotationDialog';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
@@ -150,6 +151,32 @@ export default class PuzzleEditMode extends GameMode {
 
         this._annotationManager = new AnnotationManager(toolbarType);
         this._annotationManager.annotationDataUpdated.connect(() => this.saveData());
+        this._annotationManager.onEditAnnotation.connect((annotation: AnnotationData | null) => {
+            if (annotation && annotation.ranges) {
+                const dialog = new AnnotationDialog({
+                    edit: true,
+                    title: true,
+                    sequenceLength: this._poses[0].fullSequenceLength,
+                    initialRanges: annotation.ranges,
+                    initialLayers: this._annotationManager.activeLayers,
+                    initialAnnotation: annotation
+                });
+                dialog.onUpdateRanges.connect((ranges: AnnotationRange[] | null) => {
+                    if (ranges) {
+                        this._poses.forEach((pose) => pose.setAnnotationRanges(ranges));
+                    }
+                });
+                this.showDialog(dialog).closed.then((editedAnnotation: AnnotationData | null) => {
+                    if (editedAnnotation) {
+                        editedAnnotation.selected = false;
+                        this._annotationManager.editAnnotation(editedAnnotation);
+                    } else if (annotation) {
+                        // We interpret null argument as delete intent when editing
+                        this._annotationManager.deleteAnnotation(annotation);
+                    }
+                });
+            }
+        });
 
         this._toolbar = new Toolbar(toolbarType, {
             states: this._numTargets,
@@ -327,34 +354,6 @@ export default class PuzzleEditMode extends GameMode {
                 pose.molecularBindingSite = bindingSite;
             }
             poseFields.push(poseField);
-
-            // We only need one annotation manager to act on annotation logic
-            if (ii === 0) {
-                this._annotationManager.onCreateAnnotation.connect((args: AnnotationArguments) => {
-                    this._annotationManager.showAnnotationDialog({
-                        edit: false,
-                        ranges: args.ranges,
-                        modal: false,
-                        gameMode: this,
-                        pose,
-                        gameLayer: this.uiLayer,
-                        panelPos: args.panelPos
-                    });
-                });
-                this._annotationManager.onEditAnnotation.connect((annotation: AnnotationData | null) => {
-                    if (annotation && annotation.ranges) {
-                        this._annotationManager.showAnnotationDialog({
-                            edit: true,
-                            ranges: annotation.ranges,
-                            modal: true,
-                            gameMode: this,
-                            pose,
-                            gameLayer: this.uiLayer,
-                            annotation
-                        });
-                    }
-                });
-            }
 
             const structureInput = new StructureInput(pose);
             poseField.addObject(structureInput, poseField.container);

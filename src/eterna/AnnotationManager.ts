@@ -4,11 +4,10 @@ import {
     Point, Container, Rectangle, Graphics
 } from 'pixi.js';
 import {ToolbarType} from 'eterna/ui/Toolbar';
-import {DisplayUtil, Assert, Flashbang} from 'flashbang';
+import {DisplayUtil, Assert} from 'flashbang';
 import {v4 as uuidv4} from 'uuid';
 import AnnotationPanelItem from 'eterna/ui/AnnotationPanelItem';
 import AnnotationView from 'eterna/ui/AnnotationView';
-import AnnotationDialog from 'eterna/ui/AnnotationDialog';
 import {HTMLInputEvent} from 'eterna/ui/FileInputObject';
 import Pose2D from 'eterna/pose2D/Pose2D';
 import GameMode from 'eterna/mode/GameMode';
@@ -646,76 +645,6 @@ export default class AnnotationManager {
         this.propagateDataUpdates();
     }
 
-    public showAnnotationDialog(args: AnnotationDialogArguments) {
-        this._annotationDialog = new AnnotationDialog(
-            args.edit,
-            args.modal,
-            args.pose.fullSequenceLength,
-            args.ranges,
-            this.activeLayers,
-            args.annotation
-        );
-        this._annotationDialog.onUpdateRanges.connect((rngs: AnnotationRange[] | null) => {
-            if (rngs) {
-                args.pose.setAnnotationRanges(rngs);
-            }
-        });
-
-        this.dialogIsVisible = true;
-
-        if (args.modal) {
-            args.gameMode.showDialog(
-                this._annotationDialog
-            ).closed.then((editedAnnotation: AnnotationData | null) => {
-                if (editedAnnotation) {
-                    editedAnnotation.selected = false;
-                    this.editAnnotation(editedAnnotation);
-                } else if (args.annotation) {
-                    // We interpret null argument as delete intent when editing
-                    this.deleteAnnotation(args.annotation);
-                }
-
-                // Clear annotation dialog reference
-                this._annotationDialog = null;
-
-                this.dialogIsVisible = false;
-            });
-        } else {
-            args.gameMode.addObject(this._annotationDialog, args.gameLayer);
-            if (args.panelPos) {
-                Assert.assertIsDefined(Flashbang.stageWidth);
-                Assert.assertIsDefined(Flashbang.stageHeight);
-                this._annotationDialog.display.x = args.panelPos.x
-                    + this._annotationDialog.display.width < Flashbang.stageWidth
-                    ? args.panelPos.x
-                    : args.panelPos.x - this._annotationDialog.display.width;
-                this._annotationDialog.display.y = args.panelPos.y
-                    + this._annotationDialog.display.height < Flashbang.stageWidth
-                    ? args.panelPos.y
-                    : args.panelPos.y - this._annotationDialog.display.height;
-            }
-            this._annotationDialog.closed.then((annot: AnnotationData | null) => {
-                if (annot) {
-                    this.addAnnotation(annot, this.activeCategory);
-                }
-
-                // Clear annotation dialog reference
-                this._annotationDialog = null;
-
-                // // Remove annotation highlighting
-                args.pose.clearAnnotationRanges();
-
-                this.dialogIsVisible = false;
-            });
-        }
-    }
-
-    public updateDialogRanges(ranges: AnnotationRange[]) {
-        if (this.dialogIsVisible && this._annotationDialog) {
-            this._annotationDialog.setRanges(ranges);
-        }
-    }
-
     /**
      * Sets the desired annotation mode state. When active
      * users are able to create new annotations
@@ -743,27 +672,6 @@ export default class AnnotationManager {
      */
     public getAnnotationMode(): boolean {
         return this.annotationMode.value;
-    }
-
-    /**
-     * Sets the annotation dialog visibility
-     */
-    public set dialogIsVisible(visible: boolean) {
-        this._dialogIsVisible = visible;
-    }
-
-    /**
-     * Accesses the current annotation dialog visibility
-     */
-    public get dialogIsVisible(): boolean {
-        return this._dialogIsVisible;
-    }
-
-    /**
-     * Accesses the current annotation dialog
-     */
-    public get annotationDialog(): AnnotationDialog | null {
-        return this._annotationDialog;
     }
 
     /**
@@ -2583,9 +2491,8 @@ export default class AnnotationManager {
     private _layers: AnnotationDisplayObject[] = [];
 
     private _toolbarType: ToolbarType;
-    private _annotationDialog: AnnotationDialog | null = null;
+
     private _selectedAnnotation: AnnotationPanelItem | AnnotationData | null;
-    private _dialogIsVisible: boolean = false;
     private _resetAnnotationPositions: boolean = false;
     private _ignoreCustomAnnotationPositions: boolean = false;
     public isMovingAnnotation: boolean = false;

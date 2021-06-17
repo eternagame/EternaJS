@@ -25,10 +25,11 @@ import Utility from 'eterna/util/Utility';
 import Folder from 'eterna/folding/Folder';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
-import AnnotationManager, {AnnotationRange} from 'eterna/AnnotationManager';
+import AnnotationManager, {AnnotationData, AnnotationRange} from 'eterna/AnnotationManager';
 import ContextMenu from 'eterna/ui/ContextMenu';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import AnnotationView from 'eterna/ui/AnnotationView';
+import AnnotationDialog from 'eterna/ui/AnnotationDialog';
 import Base from './Base';
 import BaseDrawFlags from './BaseDrawFlags';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
@@ -149,13 +150,39 @@ export default class Pose2D extends ContainerObject implements Updatable {
             'Create Annotation',
             0x54B54E
         ).clicked.connect(() => {
-            this._annotationManager.createAnnotation(
-                this._annotationRanges,
-                new Point(
-                    this._annotationContextMenu.display.x,
-                    this._annotationContextMenu.display.y
-                )
-            );
+            this._annotationDialog = new AnnotationDialog({
+                edit: false,
+                title: false,
+                sequenceLength: this.fullSequenceLength,
+                initialRanges: this._annotationRanges,
+                initialLayers: this._annotationManager.activeLayers
+            });
+
+            this._annotationDialog.onUpdateRanges.connect((ranges: AnnotationRange[] | null) => {
+                if (ranges) this.setAnnotationRanges(ranges);
+            });
+
+            this._annotationDialog.closed.then((annotation: AnnotationData | null) => {
+                if (annotation) {
+                    this._annotationManager.addAnnotation(annotation, this._annotationManager.activeCategory);
+                }
+
+                this._annotationDialog = null;
+
+                this.clearAnnotationRanges();
+            });
+
+            const menuX = this._annotationContextMenu.display.x;
+            const menuY = this._annotationContextMenu.display.y;
+            Assert.assertIsDefined(Flashbang.stageWidth);
+            Assert.assertIsDefined(Flashbang.stageHeight);
+            this._annotationDialog.display.x = menuX + this._annotationDialog.display.width < Flashbang.stageWidth
+                ? menuX : menuX - this._annotationDialog.display.width;
+            this._annotationDialog.display.y = menuY + this._annotationDialog.display.height < Flashbang.stageWidth
+                ? menuY : menuY - this._annotationDialog.display.height;
+
+            this.addObject(this._annotationDialog, this.container);
+
             this.hideAnnotationContextMenu();
         });
         this._annotationContextMenu.addItem(
@@ -985,20 +1012,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     let reg: Registration | null = null;
                     reg = this.pointerUp.connect(() => {
                         this._selectingAnnotationRange = false;
-                        // Merge ranges (as long as we still *have* ranges)
-                        if (
-                            !this._annotationManager.dialogIsVisible
-                            && this._annotationRanges[this._annotationRanges.length - 1]
-                        ) {
+                        if (!this._annotationDialog && this._annotationRanges[this._annotationRanges.length - 1]) {
                             this.updateAnnotationContextMenu(
                                 this._annotationRanges[this._annotationRanges.length - 1].end
                             );
                         }
                         this.mergeAnnotationRanges();
                         this.updateAnnotationRangeHighlight();
-                        if (this._annotationManager.dialogIsVisible) {
-                            this._annotationManager.updateDialogRanges(this._annotationRanges);
-                        }
+                        this._annotationDialog?.setRanges(this._annotationRanges);
                         if (reg) reg.close();
                     });
                 }
@@ -1236,12 +1257,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (this._annotationContextMenu.display.visible) {
             this._annotationContextMenu.display.x -= (this.xOffset - offX);
             this._annotationContextMenu.display.y -= (this.yOffset - offY);
-        } else if (
-            this._annotationManager.dialogIsVisible
-            && this._annotationManager.annotationDialog
-        ) {
-            this._annotationManager.annotationDialog.display.x -= (this.xOffset - offX);
-            this._annotationManager.annotationDialog.display.y -= (this.yOffset - offY);
+        } else if (this._annotationDialog) {
+            this._annotationDialog.display.x -= (this.xOffset - offX);
+            this._annotationDialog.display.y -= (this.yOffset - offY);
         }
         this._offX = offX;
         this._offY = offY;
@@ -4229,6 +4247,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _annotationCanvas: Graphics;
     private _annotationHighlightBox: HighlightBox;
     private _annotationContextMenu: ContextMenu;
+    private _annotationDialog: AnnotationDialog | null = null;
     private _annotationSpaceAvailability: boolean[][] = [];
     private _annotationRanges: AnnotationRange[] = [];
     private _selectingAnnotationRange: boolean = false;

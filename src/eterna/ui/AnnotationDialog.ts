@@ -28,26 +28,30 @@ import GamePanel, {GamePanelType} from './GamePanel';
 import VScrollBox from './VScrollBox';
 import GameDropdown from './GameDropdown';
 
+interface AnnotationDialogParams {
+    edit: boolean;
+    title: boolean;
+    sequenceLength: number;
+    initialRanges: AnnotationRange[];
+    initialLayers: AnnotationData[];
+    initialAnnotation?: AnnotationData;
+}
+
 export default class AnnotationDialog extends Dialog<AnnotationData> {
     // Signals to update selected ranges
     public readonly onUpdateRanges: Value<AnnotationRange[] | null> = new Value<AnnotationRange[] | null>(null);
 
-    constructor(
-        edit: boolean,
-        title: boolean,
-        sequenceLength: number,
-        initialRanges: AnnotationRange[],
-        initialLayers: AnnotationData[],
-        initialAnnotation: AnnotationData | null = null
-    ) {
-        super(edit);
-        this._edit = edit;
-        this._hasTitle = title;
-        this._sequenceLength = sequenceLength;
-        this._initialRanges = initialRanges.sort((firstRange, secondRange) => firstRange.start - secondRange.start);
-        this._layers = initialLayers;
-        if (initialAnnotation) {
-            this._initialAnnotation = initialAnnotation;
+    constructor(params: AnnotationDialogParams) {
+        super(params.edit);
+        this._edit = params.edit;
+        this._hasTitle = params.title;
+        this._sequenceLength = params.sequenceLength;
+        this._initialRanges = params.initialRanges.sort(
+            (firstRange, secondRange) => firstRange.start - secondRange.start
+        );
+        this._layers = params.initialLayers;
+        if (params.initialAnnotation) {
+            this._initialAnnotation = params.initialAnnotation;
         }
     }
 
