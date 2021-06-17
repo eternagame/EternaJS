@@ -407,9 +407,6 @@ export default class AnnotationManager {
                 this._selectedAnnotation = null;
             }
             this.updateAnnotationViews();
-            if (this.dialogIsVisible) {
-                this.updateDialogLayers();
-            }
         }
     }
 
@@ -464,9 +461,6 @@ export default class AnnotationManager {
     }
 
     private propagateDataUpdates(): void {
-        if (this.dialogIsVisible) {
-            this.updateDialogLayers();
-        }
         this.updateAnnotationViews();
         this.annotationDataUpdated.emit();
     }
@@ -705,11 +699,6 @@ export default class AnnotationManager {
                     this.addAnnotation(annot, this.activeCategory);
                 }
 
-                // Destroy object
-                if (this._annotationDialog) {
-                    this._annotationDialog.destroySelf();
-                }
-
                 // Clear annotation dialog reference
                 this._annotationDialog = null;
 
@@ -719,16 +708,6 @@ export default class AnnotationManager {
                 this.dialogIsVisible = false;
             });
         }
-    }
-
-    public updateDialogLayers(): boolean {
-        if (this.dialogIsVisible && this._annotationDialog) {
-            this._annotationDialog.setLayers(this.activeLayers);
-
-            return true;
-        }
-
-        return false;
     }
 
     public updateDialogRanges(ranges: AnnotationRange[]) {

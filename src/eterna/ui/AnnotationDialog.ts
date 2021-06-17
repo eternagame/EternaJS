@@ -434,10 +434,6 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
         return inputField;
     }
 
-    public setLayers(layers: AnnotationData[]): void {
-        this._layers = layers;
-    }
-
     public setRanges(ranges: AnnotationRange[]): void {
         const baseRanges = AnnotationDialog.annotationRangeToString(ranges);
         // set ranges string
