@@ -245,37 +245,22 @@ export default class Toolbar extends ContainerObject {
 
             this.regs.add(this.addBaseButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
-                if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
-                    this._annotationManager.setAnnotationMode(false);
-                }
                 this.addBaseButton.toggled.value = true;
             }));
             this.regs.add(this.addPairButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
-                if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
-                    this._annotationManager.setAnnotationMode(false);
-                }
                 this.addPairButton.toggled.value = true;
             }));
             this.regs.add(this.deleteButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
-                if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
-                    this._annotationManager.setAnnotationMode(false);
-                }
                 this.deleteButton.toggled.value = true;
             }));
             this.regs.add(this.lockButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
-                if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
-                    this._annotationManager.setAnnotationMode(false);
-                }
                 this.lockButton.toggled.value = true;
             }));
             this.regs.add(this.moleculeButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
-                if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
-                    this._annotationManager.setAnnotationMode(false);
-                }
                 this.moleculeButton.toggled.value = true;
             }));
         }
@@ -586,9 +571,6 @@ export default class Toolbar extends ContainerObject {
 
         this.regs.add(this.palette.targetClicked.connect(() => {
             this._deselectAllPaintTools();
-            if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
-                this._annotationManager.setAnnotationMode(false);
-            }
         }));
 
         this.pairSwapButton = new ToolbarButton()
@@ -611,9 +593,6 @@ export default class Toolbar extends ContainerObject {
 
             this.regs.add(this.pairSwapButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
-                if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
-                    this._annotationManager.setAnnotationMode(false);
-                }
                 this.pairSwapButton.toggled.value = true;
             }));
 
@@ -629,9 +608,6 @@ export default class Toolbar extends ContainerObject {
                         this.regs.add(button.clicked.connect(() => {
                             mode.setPosesColor(booster.toolColor);
                             this._deselectAllPaintTools();
-                            if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
-                                this._annotationManager.setAnnotationMode(false);
-                            }
                         }));
                         this.dynPaintTools.push(button);
                         this.addObject(button, boosterPaintToolsLayout);
@@ -701,9 +677,6 @@ export default class Toolbar extends ContainerObject {
 
         this.regs.add(this.baseMarkerButton.clicked.connect(() => {
             this._deselectAllPaintTools();
-            if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
-                this._annotationManager.setAnnotationMode(false);
-            }
             this.baseMarkerButton.toggled.value = true;
         }));
 
@@ -719,9 +692,6 @@ export default class Toolbar extends ContainerObject {
 
             this.regs.add(this.librarySelectionButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
-                if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
-                    this._annotationManager.setAnnotationMode(false);
-                }
                 this.librarySelectionButton.toggled.value = true;
             }));
         }
@@ -740,9 +710,6 @@ export default class Toolbar extends ContainerObject {
 
         this.regs.add(this.magicGlueButton.clicked.connect(() => {
             this._deselectAllPaintTools();
-            if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
-                this._annotationManager.setAnnotationMode(false);
-            }
             this.magicGlueButton.toggled.value = true;
         }));
 
@@ -1056,6 +1023,10 @@ export default class Toolbar extends ContainerObject {
 
         for (const button of this.dynPaintTools) {
             button.toggled.value = false;
+        }
+
+        if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
+            this._annotationManager.setAnnotationMode(false);
         }
     }
 
