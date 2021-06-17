@@ -54,6 +54,12 @@ export enum Layout {
     FLIP_STEM
 }
 
+enum FrameUpdateState {
+    IDLE,
+    THIS_FRAME,
+    NEXT_FRAME
+}
+
 export type PoseMouseDownCallback = (e: InteractionEvent, closestDist: number, closestIndex: number) => void;
 
 export default class Pose2D extends ContainerObject implements Updatable {
@@ -197,6 +203,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._height = height;
 
         this.container.hitArea = new Rectangle(0, 0, width, height);
+        this.redrawAnnotations();
     }
 
     public set redraw(setting: boolean) {
@@ -258,11 +265,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     return;
                 }
             }
-
-            if (this.annotationManager.allAnnotations.length > 0) {
-                this.updateAnnotationSpaceAvailability();
-            }
-            this.annotationManager.refreshAnnotations(this, true);
 
             this._startOffsetX = this._offX;
             this._startOffsetY = this._offY;
@@ -351,7 +353,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.updateMolecule();
             this.generateScoreNodes();
             this.callPoseEditCallback();
-            this.annotationManager.refreshAnnotations(this, false);
+            this.redrawAnnotations();
             this._librarySelectionsChanged = false;
             return;
         }
@@ -399,7 +401,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.updateMolecule();
             this.generateScoreNodes();
             this.callPoseEditCallback();
-            this.annotationManager.refreshAnnotations(this);
         }
 
         this._mutatedSequence = null;
@@ -455,8 +456,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.updateMolecule();
             this.generateScoreNodes();
             this.callPoseEditCallback();
-            this.updateAnnotationSpaceAvailability();
-            this.annotationManager.refreshAnnotations(this, true);
         }
     }
 
@@ -956,8 +955,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     let reg: Registration | null = null;
                     reg = this.pointerUp.connect(() => {
                         this._selectingAnnotationRange = false;
-                        // Merge ranges
-                        if (!this.annotationManager.dialogIsVisible) {
+                        // Merge ranges (as long as we still *have* ranges)
+                        if (
+                            !this.annotationManager.dialogIsVisible
+                            && this._annotationRanges[this._annotationRanges.length - 1]
+                        ) {
                             this.updateAnnotationContextMenu(
                                 this._annotationRanges[this._annotationRanges.length - 1].end
                             );
@@ -2404,8 +2406,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.checkPairs();
         this.updateMolecule();
         this.generateScoreNodes();
-        this.updateAnnotationSpaceAvailability();
-        this.annotationManager.refreshAnnotations(this, true);
     }
 
     public get sequence(): Sequence {
@@ -2442,8 +2442,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.checkPairs();
         this.updateMolecule();
         this.generateScoreNodes();
-        this.updateAnnotationSpaceAvailability();
-        this.annotationManager.refreshAnnotations(this, true);
     }
 
     public get secstruct(): SecStruct {
@@ -2637,8 +2635,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 prog = 1;
                 this._offsetTranslating = false;
 
-                this.updateAnnotationSpaceAvailability();
-                this.annotationManager.refreshAnnotations(this, true);
+                this.redrawAnnotations();
+            } else {
+                // Don't show annotations while animating. If we recomputed it each frame it would
+                // be laggy, if we don't the annotation locations may be in visually bizarre locations
+                this.annotationManager.eraseAnnotations();
             }
 
             if (this._offsetTranslating) {
@@ -2869,6 +2870,23 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         this._prevOffsetX = this._offX;
         this._prevOffsetY = this._offY;
+    }
+
+    public lateUpdate(_dt: number): void {
+        // For some reason, if we attempt to recompute position rotations before things are
+        // redrawn to the screen, it incorectly determines where the bases actually are.
+        // Maybe DisplayObject#getLocalBounds only updates after a draw? Dunno.
+        if (this._redrawAnnotations === FrameUpdateState.NEXT_FRAME) {
+            this._redrawAnnotations = FrameUpdateState.THIS_FRAME;
+        } else if (this._redrawAnnotations === FrameUpdateState.THIS_FRAME) {
+            if (this.annotationManager.allAnnotations.length > 0) {
+                if (!this._redrawAnnotationUseCache || this.annotationSpaceAvailability.length !== 0) {
+                    this.updateAnnotationSpaceAvailability();
+                }
+                this.annotationManager.refreshAnnotations(this, true);
+            }
+            this._redrawAnnotations = FrameUpdateState.IDLE;
+        }
     }
 
     public setAnimationProgress(progress: number) {
@@ -3571,7 +3589,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public updateAnnotationSpaceAvailability(): void {
+    private updateAnnotationSpaceAvailability(): void {
         // These are SUPER expensive getters which basically have to touch all the objects in
         // the container. There's no reason the width and height change while running this function,
         // so let's only compute them once.
@@ -3609,6 +3627,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 );
             }
         }
+    }
+
+    public redrawAnnotations(useCachedSpaceAvailability = false) {
+        this._redrawAnnotations = FrameUpdateState.NEXT_FRAME;
+        this._redrawAnnotationUseCache = useCachedSpaceAvailability;
     }
 
     private static drawEnergyHighlight(hilite: Graphics, energy: Sprite): Graphics {
@@ -4188,6 +4211,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _annotationSpaceAvailability: boolean[][] = [];
     private _annotationRanges: AnnotationRange[] = [];
     private _selectingAnnotationRange: boolean = false;
+    private _redrawAnnotations: FrameUpdateState = FrameUpdateState.IDLE;
+    private _redrawAnnotationUseCache: boolean = false;
 
     /*
      * NEW HIGHLIGHT.

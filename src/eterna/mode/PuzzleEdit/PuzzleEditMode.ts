@@ -373,13 +373,8 @@ export default class PuzzleEditMode extends GameMode {
                         pose.setAnnotationRangeHighlight(ranges);
                     }
                 });
-                this._annotationManager.onRecomputeSpaceAvailability.connect(() => {
-                    // We don't check for annotations.length > 0 because
-                    // we only want to account for scenario where to go
-                    // from non-zero to zero annotation
-                    if (pose.annotationSpaceAvailability.length === 0) {
-                        pose.updateAnnotationSpaceAvailability();
-                    }
+                this._annotationManager.onUpdateAnnotationViews.connect(() => {
+                    pose.redrawAnnotations(true);
                 });
                 this._annotationManager.onAddAnnotationView.connect((view: AnnotationView) => {
                     if (!view.isLiveObject) {
@@ -439,7 +434,7 @@ export default class PuzzleEditMode extends GameMode {
                     }
                 });
                 this._annotationManager.onTriggerPoseUpdate.connect(() => {
-                    this._annotationManager.updateAnnotationViews(pose);
+                    this._annotationManager.updateAnnotationViews();
 
                     if (this._annotationManager.dialogIsVisible) {
                         this._annotationManager.updateDialogLayers();
@@ -937,7 +932,6 @@ export default class PuzzleEditMode extends GameMode {
 
         this._paused = false;
         this.updateScore();
-        this._annotationManager.eraseAnnotations(true, true);
     }
 
     private setToTargetMode(): void {
@@ -953,7 +947,6 @@ export default class PuzzleEditMode extends GameMode {
         this._paused = true;
 
         this.updateScore();
-        this._annotationManager.eraseAnnotations(true);
     }
 
     private clearUndoStack(): void {

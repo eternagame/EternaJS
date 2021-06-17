@@ -210,7 +210,7 @@ export default class AnnotationManager {
     // Signals to set highlights placed on bases upon annotation selection or hover
     public readonly onSetHighlights: Value<AnnotationRange[] | null> = new Value<AnnotationRange[] | null>(null);
     // Signals to recompute annotation space availability in the puzzle
-    public readonly onRecomputeSpaceAvailability = new UnitSignal();
+    public readonly onUpdateAnnotationViews = new UnitSignal();
     // Signals to redraw puzzle
     public readonly onTriggerRedraw = new UnitSignal();
     // Signals to save annotations
@@ -463,10 +463,8 @@ export default class AnnotationManager {
 
     /**
      * Recomputes the display objects of all annotations and layers
-     *
-     * @param pose puzzle pose of interest
      */
-    public updateAnnotationViews(pose: Pose2D): void {
+    public updateAnnotationViews(): void {
         this.onClearHighlights.emit();
 
         const updatedLayers = this.generateAnnotationDisplayObjects(
@@ -480,8 +478,7 @@ export default class AnnotationManager {
         this._annotations = updatedAnnotations;
         this._layers = updatedLayers;
 
-        this.onRecomputeSpaceAvailability.emit();
-        this.refreshAnnotations(pose, true);
+        this.onUpdateAnnotationViews.emit();
     }
 
     /**
@@ -558,7 +555,7 @@ export default class AnnotationManager {
     public eraseAnnotations(reset: boolean = false, ignoreCustom: boolean = false): void {
         // Clear prior annotation displays
         this._annotations.forEach((annotation) => {
-            annotation.views.forEach((view) => view.destroySelf);
+            annotation.views.forEach((view) => view.destroySelf());
             annotation.views = [];
         });
 
