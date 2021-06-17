@@ -1,5 +1,5 @@
 import Eterna from 'eterna/Eterna';
-import {RegistrationGroup, UnitSignal, Value} from 'signals';
+import {UnitSignal, Value} from 'signals';
 import {
     Point, Container, Rectangle, Graphics
 } from 'pixi.js';
@@ -211,26 +211,12 @@ export default class AnnotationManager {
     public readonly onSetHighlights: Value<AnnotationRange[] | null> = new Value<AnnotationRange[] | null>(null);
     // Signals to recompute annotation space availability in the puzzle
     public readonly onUpdateAnnotationViews = new UnitSignal();
-    // Signals to redraw puzzle
-    public readonly onTriggerRedraw = new UnitSignal();
     // Signals to save annotations
-    public readonly onTriggerSave = new UnitSignal();
-    // Signals to adjust the opacity of the bases in the puzzle to a desired number
-    public readonly onAdjustBasesOpacity: Value<number> = new Value<number>(1);
-    // Signals to adjust the opacity of the annotations in the puzzle to a desired number
-    public readonly onAdjustAnnotationCanvasOpacity: Value<number> = new Value<number>(1);
+    public readonly annotationDataUpdated = new UnitSignal();
     // Signals to clear the annotation views in the puzzle
     public readonly onClearAnnotationCanvas = new UnitSignal();
     // Signals to place a new annotation view in the puzzle
     public readonly onAddAnnotationView: Value<AnnotationView | null> = new Value<AnnotationView | null>(null);
-    // Signals to update the Annotation Panel
-    public readonly onTriggerPanelUpdate = new UnitSignal();
-    // Signals to upate the puzzle pose/s
-    public readonly onTriggerPoseUpdate = new UnitSignal();
-    // Signals to import annotation bundle
-    public readonly onUploadAnnotations: Value<AnnotationDataBundle | null> = new Value<
-    AnnotationDataBundle | null
-    >(null);
 
     constructor(toolbarType: ToolbarType) {
         this._toolbarType = toolbarType;
@@ -269,8 +255,7 @@ export default class AnnotationManager {
             this.insertNewAnnotation(annotation, this._solutionAnnotations);
         }
 
-        this.onTriggerPanelUpdate.emit();
-        this.onTriggerPoseUpdate.emit();
+        this.propagateDataUpdates();
     }
 
     /**
@@ -303,8 +288,7 @@ export default class AnnotationManager {
             this._solutionAnnotations.splice(layerIndex, 0, newLayer);
         }
 
-        this.onTriggerPanelUpdate.emit();
-        this.onTriggerPoseUpdate.emit();
+        this.propagateDataUpdates();
     }
 
     /**
@@ -319,8 +303,7 @@ export default class AnnotationManager {
                 ...annotation
             };
 
-            this.onTriggerPanelUpdate.emit();
-            this.onTriggerPoseUpdate.emit();
+            this.propagateDataUpdates();
         }
     }
 
@@ -334,8 +317,7 @@ export default class AnnotationManager {
         if (parentNode && index != null) {
             parentNode.splice(index, 1);
 
-            this.onTriggerPanelUpdate.emit();
-            this.onTriggerPoseUpdate.emit();
+            this.propagateDataUpdates();
         }
     }
 
@@ -396,8 +378,8 @@ export default class AnnotationManager {
                 const lines = progE.target?.result as string;
                 const annotationDataBundle = JSON.parse(lines) as AnnotationDataBundle;
                 if (annotationDataBundle) {
-                    this.onUploadAnnotations.value = annotationDataBundle;
-                    this.onUploadAnnotations.value = null;
+                    this.setPuzzleAnnotations(annotationDataBundle.puzzle);
+                    this.setSolutionAnnotations(annotationDataBundle.solution);
                 }
             };
             const json = e.target.files[0];
@@ -427,7 +409,10 @@ export default class AnnotationManager {
             ) {
                 this._selectedAnnotation = null;
             }
-            this.onTriggerPoseUpdate.emit();
+            this.updateAnnotationViews();
+            if (this.dialogIsVisible) {
+                this.updateDialogLayers();
+            }
         }
     }
 
@@ -442,7 +427,7 @@ export default class AnnotationManager {
         if (parentNode && index != null) {
             parentNode[index].visible = isVisible;
 
-            this.onTriggerPoseUpdate.emit();
+            this.updateAnnotationViews();
         }
     }
 
@@ -479,6 +464,14 @@ export default class AnnotationManager {
         this._layers = updatedLayers;
 
         this.onUpdateAnnotationViews.emit();
+    }
+
+    private propagateDataUpdates(): void {
+        if (this.dialogIsVisible) {
+            this.updateDialogLayers();
+        }
+        this.updateAnnotationViews();
+        this.annotationDataUpdated.emit();
     }
 
     /**
@@ -590,13 +583,6 @@ export default class AnnotationManager {
             }
         }
 
-        // Make canvas translucent if we have annotation mode active
-        if (this.getAnnotationMode()) {
-            this.onAdjustAnnotationCanvasOpacity.value = AnnotationManager.ANNOTATION_UNHIGHLIGHTED_OPACITY;
-        } else {
-            this.onAdjustAnnotationCanvasOpacity.value = 1;
-        }
-
         this._resetAnnotationPositions = false;
     }
 
@@ -619,8 +605,7 @@ export default class AnnotationManager {
         );
         this._puzzleAnnotations = preparedAnnotations;
         this._resetAnnotationPositions = true;
-        this.onTriggerPanelUpdate.emit();
-        this.onTriggerPoseUpdate.emit();
+        this.propagateDataUpdates();
     }
 
     /**
@@ -637,8 +622,7 @@ export default class AnnotationManager {
      */
     public updatePuzzleAnnotations(annotations: AnnotationData[]) {
         this._puzzleAnnotations = annotations;
-        this.onTriggerPanelUpdate.emit();
-        this.onTriggerPoseUpdate.emit();
+        this.propagateDataUpdates();
     }
 
     /**
@@ -653,8 +637,7 @@ export default class AnnotationManager {
         );
         this._solutionAnnotations = preparedAnnotations;
         this._resetAnnotationPositions = true;
-        this.onTriggerPanelUpdate.emit();
-        this.onTriggerPoseUpdate.emit();
+        this.propagateDataUpdates();
     }
 
     /**
@@ -671,8 +654,7 @@ export default class AnnotationManager {
      */
     public updateSolutionAnnotations(annotations: AnnotationData[]) {
         this._solutionAnnotations = annotations;
-        this.onTriggerPanelUpdate.emit();
-        this.onTriggerPoseUpdate.emit();
+        this.propagateDataUpdates();
     }
 
     public showAnnotationDialog(args: AnnotationDialogArguments) {
@@ -770,20 +752,19 @@ export default class AnnotationManager {
      */
     public setAnnotationMode(active: boolean): void {
         this.annotationMode.value = active;
+
         if (!active) {
             this.onClearHighlights.emit();
 
-            // Change base opacity
-            this.onAdjustBasesOpacity.value = 1;
-
-            // Make annotation canvas opaque
-            this.onAdjustAnnotationCanvasOpacity.value = 1;
+            const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
+            if (doc) {
+                doc.style.cursor = 'default';
+            }
         } else {
-            // Change base opacity
-            this.onAdjustBasesOpacity.value = AnnotationManager.ANNOTATION_UNHIGHLIGHTED_OPACITY;
-
-            // Make annotation canvas opaque
-            this.onAdjustAnnotationCanvasOpacity.value = AnnotationManager.ANNOTATION_UNHIGHLIGHTED_OPACITY;
+            const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
+            if (doc) {
+                doc.style.cursor = 'grab';
+            }
         }
     }
 
@@ -915,16 +896,6 @@ export default class AnnotationManager {
             default:
                 return Assert.unreachable(category);
         }
-    }
-
-    /**
-     * Creates registration group for managing signals
-     */
-    public get regs(): RegistrationGroup {
-        if (this._regs == null) {
-            this._regs = new RegistrationGroup();
-        }
-        return this._regs;
     }
 
     /**
@@ -1126,7 +1097,7 @@ export default class AnnotationManager {
 
                     this.setAnnotationPositions(item.data, positionIndex, releasedPosition);
                     this.refreshAnnotations(pose, true);
-                    this.onTriggerSave.emit();
+                    this.annotationDataUpdated.emit();
                 });
             }
         }
@@ -1171,7 +1142,7 @@ export default class AnnotationManager {
                         };
 
                         this.setAnnotationPositions(item.data, i, movedPosition);
-                        this.onTriggerSave.emit();
+                        this.annotationDataUpdated.emit();
                     });
                 }
                 item.views.push(view);
@@ -1248,10 +1219,10 @@ export default class AnnotationManager {
                     };
 
                     this.setAnnotationPositions(item.data, i, movedPosition);
-                    this.onTriggerSave.emit();
+                    this.annotationDataUpdated.emit();
                 });
             }
-            // We need to prematruely add this to the display object graph
+            // We need to prematurely add this to the display object graph
             // so that we can read it's dimensions/position
             this.onAddAnnotationView.value = view;
 
@@ -2644,7 +2615,6 @@ export default class AnnotationManager {
     private _layers: AnnotationDisplayObject[] = [];
 
     private _toolbarType: ToolbarType;
-    private _regs: RegistrationGroup | null;
     private _annotationDialog: AnnotationDialog | null = null;
     private _selectedAnnotation: AnnotationPanelItem | AnnotationData | null;
     private _dialogIsVisible: boolean = false;

@@ -13,7 +13,7 @@ import {BoostersData} from 'eterna/puzzle/Puzzle';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import BitmapManager from 'eterna/resources/BitmapManager';
-import AnnotationManager from 'eterna/AnnotationManager';
+import AnnotationManager, {AnnotationData} from 'eterna/AnnotationManager';
 import NucleotidePalette from './NucleotidePalette';
 import GameButton from './GameButton';
 import ToggleBar from './ToggleBar';
@@ -732,6 +732,30 @@ export default class Toolbar extends ContainerObject {
                 this._annotationManager
             );
 
+            this.regs.add(this.annotationModeButton.toggled.connect((active: boolean) => {
+                Assert.assertIsDefined(this._annotationManager);
+                this._annotationManager.setAnnotationMode(active);
+            }));
+
+            this.regs.add(this._annotationManager.annotationMode.connectNotify((value) => {
+                if (
+                    (value && !this.annotationModeButton.isSelected)
+                    || (!value && this.annotationModeButton.isSelected)
+                ) {
+                    this.annotationModeButton.toggle();
+                }
+            }));
+
+            this.regs.add(this._annotationManager.onToggleItemSelection.connect((annotation: AnnotationData | null) => {
+                if (annotation) {
+                    this.annotationPanel.toggleAnnotationPanelItemSelection(annotation);
+                }
+            }));
+
+            this.regs.add(this._annotationManager.annotationDataUpdated.connect(() => {
+                this.annotationPanel.updatePanel();
+            }));
+
             if (this._showAdvancedMenus) {
                 this.addObject(this.annotationPanel, this.mode?.container);
                 this.addObject(this.annotationModeButton, this.lowerToolbarLayout);
@@ -786,17 +810,6 @@ export default class Toolbar extends ContainerObject {
             this.setToolbarAutohide(value);
         }));
         this._setupToolbarDrag();
-
-        if (this._annotationManager) {
-            this.regs.add(this._annotationManager.annotationMode.connectNotify((value) => {
-                if (
-                    (value && !this.annotationModeButton.isSelected)
-                    || (!value && this.annotationModeButton.isSelected)
-                ) {
-                    this.annotationModeButton.toggle();
-                }
-            }));
-        }
     }
 
     private makeArrowButton(direction: 'left' | 'right'): GameButton {
