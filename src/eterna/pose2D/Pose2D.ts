@@ -248,11 +248,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.regs.add(this._annotationManager.onUpdateAnnotationViews.connect(() => {
             this.redrawAnnotations(true);
         }));
-        this.regs.add(this._annotationManager.onAddAnnotationView.connect((view: AnnotationView) => {
-            if (!view.isLiveObject) {
-                this.addObject(view, this._annotationCanvas);
-            }
-        }));
     }
 
     public setSize(width: number, height: number): void {
@@ -3620,12 +3615,34 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._redraw = true;
     }
 
-    public clearAnnotationCanvas(): void {
-        if (this._annotationCanvas.children.length > 0) {
-            // Remove from any remaining artifacts from canvas
-            this._annotationCanvas.removeChildren();
-            this._annotationCanvas.clear();
+    public addAnnotationView(view: AnnotationView) {
+        if (!view.isLiveObject) {
+            this.addObject(view, this._annotationCanvas);
         }
+
+        this._annotationViews.push(view);
+    }
+
+    public getAnnotationViewDims(id: string | number, positionIndex: number) {
+        const desiredView = this._annotationViews.find(
+            (view) => view.annotationID === id && view.positionIndex === positionIndex
+        );
+
+        if (desiredView) {
+            return {
+                width: desiredView.width,
+                height: desiredView.height
+            };
+        }
+
+        return null;
+    }
+
+    public clearAnnotationCanvas(): void {
+        for (const view of this._annotationViews) {
+            this.removeObject(view);
+        }
+        this._annotationViews = [];
     }
 
     private updateAnnotationSpaceAvailability(): void {
@@ -4245,6 +4262,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     // Annotations
     private _annotationManager: AnnotationManager;
     private _annotationCanvas: Graphics;
+    private _annotationViews: AnnotationView[] = [];
     private _annotationHighlightBox: HighlightBox;
     private _annotationContextMenu: ContextMenu;
     private _annotationDialog: AnnotationDialog | null = null;

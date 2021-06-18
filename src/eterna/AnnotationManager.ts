@@ -201,8 +201,6 @@ export default class AnnotationManager {
     public readonly annotationDataUpdated = new UnitSignal();
     // Signals to clear the annotation views in the puzzle
     public readonly onClearAnnotationCanvas = new UnitSignal();
-    // Signals to place a new annotation view in the puzzle
-    public readonly onAddAnnotationView: Value<AnnotationView | null> = new Value<AnnotationView | null>(null);
 
     constructor(toolbarType: ToolbarType) {
         this._toolbarType = toolbarType;
@@ -489,10 +487,6 @@ export default class AnnotationManager {
      * @param ignoreCustom whether to override the custom
      */
     public eraseAnnotations(reset: boolean = false, ignoreCustom: boolean = false): void {
-        // Clear prior annotation displays
-        this._annotationViews.forEach((view) => view.destroySelf());
-        this._annotationViews = [];
-
         this._resetAnnotationPositions = reset;
         this._ignoreCustomAnnotationPositions = ignoreCustom;
 
@@ -967,8 +961,7 @@ export default class AnnotationManager {
                         this.annotationDataUpdated.emit();
                     });
                 }
-                this._annotationViews.push(view);
-                this.onAddAnnotationView.value = view;
+                pose.addAnnotationView(view);
 
                 const anchorIndex = position.anchorIndex;
                 const base = pose.getBase(anchorIndex);
@@ -1044,9 +1037,9 @@ export default class AnnotationManager {
                     this.annotationDataUpdated.emit();
                 });
             }
-            // We need to prematurely add this to the display object graph
+            // We need to prematurely (ie, before we have a final position) add this to the display object graph
             // so that we can read it's dimensions/position
-            this.onAddAnnotationView.value = view;
+            pose.addAnnotationView(view);
 
             let absolutePosition: Point | null = null;
             let relPosition: Point | null = null;
@@ -1111,8 +1104,7 @@ export default class AnnotationManager {
             if (relPosition && absolutePosition) {
                 // Set position
                 view.display.position.copyFrom(absolutePosition);
-                // Save display
-                this._annotationViews.push(view);
+                // pose.addAnnotationView(view, false, true);
 
                 // Cache position
                 this.setAnnotationPositions(item, i, {
@@ -1723,9 +1715,16 @@ export default class AnnotationManager {
                 const card = cardArray[i];
                 // Annotation might have multiple positions for each range associated with it
                 for (let j = 0; j < card.positions.length; j++) {
-                    const display = this._annotationViews.find(
-                        (view) => view.annotationID === card.id && view.positionIndex === j
-                    );
+                    // We had to add the annotation to the pose already even though we don't have a final
+                    // position (so that we could get its size), so make sure we don't take it into account
+                    if (
+                        card.id === annotationView.annotationID
+                        && j === annotationView.positionIndex
+                    ) {
+                        continue;
+                    }
+
+                    const display = pose.getAnnotationViewDims(card.id, j);
                     const cardRelPosition = card.positions[j].relPosition;
                     const base = pose.getBase(card.positions[j].anchorIndex);
                     const cardAnchorPoint = new Point(
@@ -2427,8 +2426,6 @@ export default class AnnotationManager {
             children
         };
     };
-
-    private _annotationViews: AnnotationView[] = [];
 
     // Stores the master data for all categories of annotations
     private _structureAnnotations: AnnotationData[] = [];
