@@ -15,7 +15,6 @@ import {
 import Bitmaps from 'eterna/resources/Bitmaps';
 import Fonts from 'eterna/util/Fonts';
 import TextBuilder, {FontWeight} from 'flashbang/util/TextBuilder';
-import Eterna from 'eterna/Eterna';
 import {
     AnnotationData,
     AnnotationHierarchyType,
@@ -113,7 +112,7 @@ export default class AnnotationPanelItem extends ContainerObject {
                     playerID: child.playerID,
                     ranges: child.ranges,
                     layerId: child.layerId,
-                    titleEditable: this._titleEditable && child.playerID === Eterna.playerID,
+                    titleEditable: this._titleEditable,
                     updateTitle: this._updateTitle,
                     updateAnnotationLayer: this._updateAnnotationLayer,
                     updateAnnotationPosition: this._updateAnnotationPosition

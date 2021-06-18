@@ -364,7 +364,7 @@ export default class AnnotationPanel extends ContainerObject {
             offset += this._newLayerButton.display.width;
         }
 
-        if (withEdit && this._selectedItem?.playerID === Eterna.playerID) {
+        if (withEdit) {
             this._editButton = new GameButton()
                 .allStates(Bitmaps.ImgPencil)
                 .tooltip('Edit');
@@ -385,7 +385,7 @@ export default class AnnotationPanel extends ContainerObject {
             }
         }
 
-        if (withDelete && this._selectedItem?.playerID === Eterna.playerID) {
+        if (withDelete) {
             this._deleteButton = new GameButton()
                 .allStates(Bitmaps.ImgTrash)
                 .tooltip('Delete');
