@@ -137,7 +137,6 @@ export interface AnnotationDataBundle {
  */
 export interface AnnotationDisplayObject {
     data: AnnotationData;
-    positions: AnnotationPosition[];
     views: AnnotationView[];
 }
 
@@ -472,13 +471,11 @@ export default class AnnotationManager {
                 // Keep existing positions in case we have custom positioning
                 displayObjects.push({
                     data: item,
-                    positions: item.positions,
                     views: []
                 });
             } else {
                 displayObjects.push({
                     data: item,
-                    positions: [],
                     views: []
                 });
             }
@@ -979,16 +976,16 @@ export default class AnnotationManager {
         // If annotation positions have been computed already
         // use cached value
         if (
-            item.positions.length > 0
+            item.data.positions.length > 0
             && !this._resetAnnotationPositions
             && !this._ignoreCustomAnnotationPositions
         ) {
-            for (let i = 0; i < item.positions.length; i++) {
-                const position = item.positions[i];
+            for (let i = 0; i < item.data.positions.length; i++) {
+                const position = item.data.positions[i];
                 const view = this.getAnnotationView(pose, i, item);
                 if (item.data.type === AnnotationHierarchyType.ANNOTATION) {
                     view.onMovedAnnotation.connect((point: Point) => {
-                        const anchorIndex = this._annotations[itemIndex].positions[i].anchorIndex;
+                        const anchorIndex = this._annotations[itemIndex].data.positions[i].anchorIndex;
                         const base = pose.getBase(anchorIndex);
                         const anchorPoint = new Point(
                             base.x + pose.xOffset,
@@ -1062,11 +1059,11 @@ export default class AnnotationManager {
         // label duplicates.
         for (let i = 0; i < ranges.length; i++) {
             const range = ranges[i];
-            const prevPosition = item.positions.length > i ? item.positions[i] : null;
+            const prevPosition = item.data.positions.length > i ? item.data.positions[i] : null;
             const view = this.getAnnotationView(pose, i, item);
             if (item.data.type === AnnotationHierarchyType.ANNOTATION) {
                 view.onMovedAnnotation.connect((point: Point) => {
-                    const anchorIndex = this._annotations[itemIndex].positions[i].anchorIndex;
+                    const anchorIndex = this._annotations[itemIndex].data.positions[i].anchorIndex;
                     const base = pose.getBase(anchorIndex);
                     const anchorPoint = new Point(
                         base.x + pose.xOffset,
@@ -1074,7 +1071,7 @@ export default class AnnotationManager {
                     );
                     // Compute relative position
                     const movedPosition: AnnotationPosition = {
-                        ...this._annotations[itemIndex].positions[i],
+                        ...this._annotations[itemIndex].data.positions[i],
                         relPosition: new Point(
                             point.x - anchorPoint.x,
                             point.y - anchorPoint.y
@@ -1764,10 +1761,10 @@ export default class AnnotationManager {
                 // Get annotation object
                 const card = cardArray[i];
                 // Annotation might have multiple positions for each range associated with it
-                for (let j = 0; j < card.positions.length; j++) {
+                for (let j = 0; j < card.data.positions.length; j++) {
                     const display = card.views[j];
-                    const cardRelPosition = card.positions[j].relPosition;
-                    const base = pose.getBase(card.positions[j].anchorIndex);
+                    const cardRelPosition = card.data.positions[j].relPosition;
+                    const base = pose.getBase(card.data.positions[j].anchorIndex);
                     const cardAnchorPoint = new Point(
                         base.x + pose.xOffset,
                         base.y + pose.yOffset
