@@ -133,13 +133,6 @@ export interface AnnotationDataBundle {
 }
 
 /**
- * Manages annotation placement at runtime (not for storage purposes)
- */
-export interface AnnotationDisplayObject {
-    data: AnnotationData;
-}
-
-/**
  * Represents a position conflict between a base and
  * an annotation and whether it can be resolved
  * (with the appropriate correction)
@@ -440,12 +433,14 @@ export default class AnnotationManager {
      * Recomputes the display objects of all annotations and layers
      */
     public updateAnnotationViews(): void {
+        // TODO: Is this necessary?
         this.highlights.value = [];
+        this.rehighlightSelectedItems(this.allLayers);
+        this.rehighlightSelectedItems(this.allAnnotations);
 
-        const updatedLayers = this.generateAnnotationDisplayObjects(this.allLayers);
-        const updatedAnnotations = this.generateAnnotationDisplayObjects(this.allAnnotations);
-        this._annotations = updatedAnnotations;
-        this._layers = updatedLayers;
+        // TODO: Is there a cleaner way to cache, or do we really need to at all?
+        this._annotations = this.allAnnotations;
+        this._layers = this.allLayers;
 
         this.onUpdateAnnotationViews.emit();
     }
@@ -463,20 +458,8 @@ export default class AnnotationManager {
      * @param type category of annotation being created
      * @returns array of annotation display objects
      */
-    private generateAnnotationDisplayObjects(items: AnnotationData[]): AnnotationDisplayObject[] {
-        const displayObjects: AnnotationDisplayObject[] = [];
+    private rehighlightSelectedItems(items: AnnotationData[]) {
         for (const item of items) {
-            if (item.positions) {
-                // Keep existing positions in case we have custom positioning
-                displayObjects.push({
-                    data: item
-                });
-            } else {
-                displayObjects.push({
-                    data: item
-                });
-            }
-
             if (item.selected && item.visible && item.ranges) {
                 // Single Annotation
                 this.highlights.value = item.ranges;
@@ -493,8 +476,6 @@ export default class AnnotationManager {
                 }
             }
         }
-
-        return displayObjects;
     }
 
     /**
@@ -540,7 +521,7 @@ export default class AnnotationManager {
 
             // visualize annotations not in layers
             for (let i = 0; i < this._annotations.length; i++) {
-                if (!this._annotations[i].data.layerId) {
+                if (!this._annotations[i].layerId) {
                     this.placeAnnotationInPose(pose, this._annotations[i], i);
                 }
             }
@@ -874,9 +855,9 @@ export default class AnnotationManager {
      *
      * @param item display object to be made into a view
      */
-    private getAnnotationView(pose: Pose2D, positionIndex: number, item: AnnotationDisplayObject): AnnotationView {
+    private getAnnotationView(pose: Pose2D, positionIndex: number, item: AnnotationData): AnnotationView {
         let textColor;
-        switch (item.data.category) {
+        switch (item.category) {
             case AnnotationCategory.STRUCTURE:
                 textColor = AnnotationPanelItem.STRUCTURE_RIBBON_COLOR;
                 break;
@@ -890,26 +871,26 @@ export default class AnnotationManager {
 
         const view = new AnnotationView(
             pose,
-            item.data.type,
+            item.type,
             positionIndex,
-            item.data,
+            item,
             this.activeCategory,
             textColor
         );
 
-        if (item.data.visible) {
+        if (item.visible) {
             view.pointerOver.connect(() => {
                 // we only set highlight if annotation mode off so we don't
                 // disturb any selections that might be taking place
                 if (!this.getAnnotationMode()) {
                     // highlight associated range
-                    if (item.data.type === AnnotationHierarchyType.ANNOTATION) {
-                        const annotation = item.data as AnnotationData;
+                    if (item.type === AnnotationHierarchyType.ANNOTATION) {
+                        const annotation = item;
                         if (annotation.ranges) {
                             this.highlights.value = annotation.ranges;
                         }
-                    } else if (item.data.type === AnnotationHierarchyType.LAYER) {
-                        const layer = item.data as AnnotationData;
+                    } else if (item.type === AnnotationHierarchyType.LAYER) {
+                        const layer = item;
                         let ranges: AnnotationRange[] = [];
                         for (const annotation of layer.children) {
                             if (annotation.ranges) {
@@ -923,35 +904,35 @@ export default class AnnotationManager {
             view.pointerOut.connect(() => {
                 // remove associated range only if annotation mode off so we don't
                 // disturb any selections that might be taking place
-                if (!item.data.selected && !this.getAnnotationMode()) {
+                if (!item.selected && !this.getAnnotationMode()) {
                     this.highlights.value = [];
                 }
             });
 
             view.pointerDown.connect((e) => {
                 e.stopPropagation();
-                this.onToggleItemSelection.value = item.data as AnnotationData;
+                this.onToggleItemSelection.value = item;
                 this.onToggleItemSelection.value = null;
             });
             view.isMoving.connect((moving: boolean) => {
                 this.isMovingAnnotation = moving;
             });
 
-            if (item.data.type === AnnotationHierarchyType.ANNOTATION) {
+            if (item.type === AnnotationHierarchyType.ANNOTATION) {
                 // We don't need to apply access control logic here
                 // This is handled in AnnotationView
                 view.onEditButtonPressed.connect(() => {
-                    this.onEditAnnotation.value = item.data as AnnotationData;
+                    this.onEditAnnotation.value = item;
                     this.onEditAnnotation.value = null;
                 });
                 view.onReleasePositionButtonPressed.connect(() => {
                     // Release position
                     const releasedPosition: AnnotationPosition = {
-                        ...item.data.positions[positionIndex],
+                        ...item.positions[positionIndex],
                         custom: false
                     };
 
-                    this.setAnnotationPositions(item.data, positionIndex, releasedPosition);
+                    this.setAnnotationPositions(item, positionIndex, releasedPosition);
                     this.refreshAnnotations(pose, true);
                     this.annotationDataUpdated.emit();
                 });
@@ -967,20 +948,20 @@ export default class AnnotationManager {
      * @param item display object data with positioning and annotation metadata
      * @param itemIndex index of item within parent array
      */
-    private placeAnnotationInPose(pose: Pose2D, item: AnnotationDisplayObject, itemIndex: number): void {
+    private placeAnnotationInPose(pose: Pose2D, item: AnnotationData, itemIndex: number): void {
         // If annotation positions have been computed already
         // use cached value
         if (
-            item.data.positions.length > 0
+            item.positions.length > 0
             && !this._resetAnnotationPositions
             && !this._ignoreCustomAnnotationPositions
         ) {
-            for (let i = 0; i < item.data.positions.length; i++) {
-                const position = item.data.positions[i];
+            for (let i = 0; i < item.positions.length; i++) {
+                const position = item.positions[i];
                 const view = this.getAnnotationView(pose, i, item);
-                if (item.data.type === AnnotationHierarchyType.ANNOTATION) {
+                if (item.type === AnnotationHierarchyType.ANNOTATION) {
                     view.onMovedAnnotation.connect((point: Point) => {
-                        const anchorIndex = this._annotations[itemIndex].data.positions[i].anchorIndex;
+                        const anchorIndex = this._annotations[itemIndex].positions[i].anchorIndex;
                         const base = pose.getBase(anchorIndex);
                         const anchorPoint = new Point(
                             base.x + pose.xOffset,
@@ -997,7 +978,7 @@ export default class AnnotationManager {
                             custom: true
                         };
 
-                        this.setAnnotationPositions(item.data, i, movedPosition);
+                        this.setAnnotationPositions(item, i, movedPosition);
                         this.annotationDataUpdated.emit();
                     });
                 }
@@ -1020,14 +1001,14 @@ export default class AnnotationManager {
         }
 
         let ranges: AnnotationRange[] = [];
-        if (item.data.type === AnnotationHierarchyType.LAYER) {
+        if (item.type === AnnotationHierarchyType.LAYER) {
             // We only want one layer label for each item, so we pick the first range we find
             //
             // An improvement that could be made is to find the
             // "center of mass" of all the ranges in a layer
             // and place the layer label at an appropriate base closest to
             // the center of mass point
-            const layerData = item.data as AnnotationData;
+            const layerData = item;
 
             if (layerData.children) {
                 for (const annotation of layerData.children) {
@@ -1038,7 +1019,7 @@ export default class AnnotationManager {
                 }
             }
         } else {
-            const annotationData = item.data as AnnotationData;
+            const annotationData = item;
             if (annotationData.ranges) {
                 ranges = annotationData.ranges;
             }
@@ -1054,11 +1035,11 @@ export default class AnnotationManager {
         // label duplicates.
         for (let i = 0; i < ranges.length; i++) {
             const range = ranges[i];
-            const prevPosition = item.data.positions.length > i ? item.data.positions[i] : null;
+            const prevPosition = item.positions.length > i ? item.positions[i] : null;
             const view = this.getAnnotationView(pose, i, item);
-            if (item.data.type === AnnotationHierarchyType.ANNOTATION) {
+            if (item.type === AnnotationHierarchyType.ANNOTATION) {
                 view.onMovedAnnotation.connect((point: Point) => {
-                    const anchorIndex = this._annotations[itemIndex].data.positions[i].anchorIndex;
+                    const anchorIndex = this._annotations[itemIndex].positions[i].anchorIndex;
                     const base = pose.getBase(anchorIndex);
                     const anchorPoint = new Point(
                         base.x + pose.xOffset,
@@ -1066,7 +1047,7 @@ export default class AnnotationManager {
                     );
                     // Compute relative position
                     const movedPosition: AnnotationPosition = {
-                        ...this._annotations[itemIndex].data.positions[i],
+                        ...this._annotations[itemIndex].positions[i],
                         relPosition: new Point(
                             point.x - anchorPoint.x,
                             point.y - anchorPoint.y
@@ -1074,7 +1055,7 @@ export default class AnnotationManager {
                         custom: true
                     };
 
-                    this.setAnnotationPositions(item.data, i, movedPosition);
+                    this.setAnnotationPositions(item, i, movedPosition);
                     this.annotationDataUpdated.emit();
                 });
             }
@@ -1149,7 +1130,7 @@ export default class AnnotationManager {
                 this._annotationViews.push(view);
 
                 // Cache position
-                this.setAnnotationPositions(item.data, i, {
+                this.setAnnotationPositions(item, i, {
                     anchorIndex,
                     relPosition,
                     zoomLevel,
@@ -1756,12 +1737,12 @@ export default class AnnotationManager {
                 // Get annotation object
                 const card = cardArray[i];
                 // Annotation might have multiple positions for each range associated with it
-                for (let j = 0; j < card.data.positions.length; j++) {
+                for (let j = 0; j < card.positions.length; j++) {
                     const display = this._annotationViews.find(
-                        (view) => view.annotationID === card.data.id && view.positionIndex === j
+                        (view) => view.annotationID === card.id && view.positionIndex === j
                     );
-                    const cardRelPosition = card.data.positions[j].relPosition;
-                    const base = pose.getBase(card.data.positions[j].anchorIndex);
+                    const cardRelPosition = card.positions[j].relPosition;
+                    const base = pose.getBase(card.positions[j].anchorIndex);
                     const cardAnchorPoint = new Point(
                         base.x + pose.xOffset,
                         base.y + pose.yOffset
@@ -2471,8 +2452,8 @@ export default class AnnotationManager {
 
     // Holds the runtime objects for all annotations and layers
     // in the puzzle
-    private _annotations: AnnotationDisplayObject[] = [];
-    private _layers: AnnotationDisplayObject[] = [];
+    private _annotations: AnnotationData[] = [];
+    private _layers: AnnotationData[] = [];
 
     private _toolbarType: ToolbarType;
 
