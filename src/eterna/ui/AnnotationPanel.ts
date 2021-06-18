@@ -181,12 +181,17 @@ export default class AnnotationPanel extends ContainerObject {
             this.addCategory(this._solutionCategory);
         }
 
+        const selectedItem = this._annotationManager.selectedItem.value;
+        if (selectedItem) {
+            this.setAnnotationPanelItemSelection(selectedItem, true);
+        }
+
         this.doLayout();
         this._scrollView.doLayout();
         this._scrollView.updateScrollThumb();
 
-        const withEdit = false;
-        const withDelete = false;
+        const withEdit = this._editButton && this._editButton.isLiveObject;
+        const withDelete = this._deleteButton && this._deleteButton.isLiveObject;
         this.updateUpperToolbar(withDelete, withEdit);
     }
 
