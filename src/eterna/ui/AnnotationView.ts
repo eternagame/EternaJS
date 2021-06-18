@@ -337,6 +337,14 @@ export default class AnnotationView extends ContainerObject {
         return this.display.height;
     }
 
+    public get annotationID() {
+        return this._item.id;
+    }
+
+    public get positionIndex() {
+        return this._positionIndex;
+    }
+
     private _pose: Pose2D;
     private _type: AnnotationHierarchyType;
     private _positionIndex: number;

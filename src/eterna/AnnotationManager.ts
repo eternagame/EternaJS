@@ -137,7 +137,6 @@ export interface AnnotationDataBundle {
  */
 export interface AnnotationDisplayObject {
     data: AnnotationData;
-    views: AnnotationView[];
 }
 
 /**
@@ -470,13 +469,11 @@ export default class AnnotationManager {
             if (item.positions) {
                 // Keep existing positions in case we have custom positioning
                 displayObjects.push({
-                    data: item,
-                    views: []
+                    data: item
                 });
             } else {
                 displayObjects.push({
-                    data: item,
-                    views: []
+                    data: item
                 });
             }
 
@@ -520,10 +517,8 @@ export default class AnnotationManager {
      */
     public eraseAnnotations(reset: boolean = false, ignoreCustom: boolean = false): void {
         // Clear prior annotation displays
-        this._annotations.forEach((annotation) => {
-            annotation.views.forEach((view) => view.destroySelf());
-            annotation.views = [];
-        });
+        this._annotationViews.forEach((view) => view.destroySelf());
+        this._annotationViews = [];
 
         this._resetAnnotationPositions = reset;
         this._ignoreCustomAnnotationPositions = ignoreCustom;
@@ -1006,7 +1001,7 @@ export default class AnnotationManager {
                         this.annotationDataUpdated.emit();
                     });
                 }
-                item.views.push(view);
+                this._annotationViews.push(view);
                 this.onAddAnnotationView.value = view;
 
                 const anchorIndex = position.anchorIndex;
@@ -1151,7 +1146,7 @@ export default class AnnotationManager {
                 // Set position
                 view.display.position.copyFrom(absolutePosition);
                 // Save display
-                item.views.push(view);
+                this._annotationViews.push(view);
 
                 // Cache position
                 this.setAnnotationPositions(item.data, i, {
@@ -1762,7 +1757,9 @@ export default class AnnotationManager {
                 const card = cardArray[i];
                 // Annotation might have multiple positions for each range associated with it
                 for (let j = 0; j < card.data.positions.length; j++) {
-                    const display = card.views[j];
+                    const display = this._annotationViews.find(
+                        (view) => view.annotationID === card.data.id && view.positionIndex === j
+                    );
                     const cardRelPosition = card.data.positions[j].relPosition;
                     const base = pose.getBase(card.data.positions[j].anchorIndex);
                     const cardAnchorPoint = new Point(
@@ -2464,6 +2461,8 @@ export default class AnnotationManager {
             children
         };
     };
+
+    private _annotationViews: AnnotationView[] = [];
 
     // Stores the master data for all categories of annotations
     private _structureAnnotations: AnnotationData[] = [];
