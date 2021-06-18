@@ -189,15 +189,15 @@ export default class AnnotationManager {
         panelPos: new Point(0, 0)
     });
 
-    // Signals that an annotation has been selected
-    public readonly onToggleItemSelection: Value<AnnotationData | null> = new Value<AnnotationData | null>(null);
+    // Currently selected annotation
+    public readonly selectedItem = new Value<AnnotationData | null>(null);
     // Signals that an annotation should be edited (reveal AnnotationDialog)
     public readonly onEditAnnotation: Value<AnnotationData | null> = new Value<AnnotationData | null>(null);
-    // Signals to set highlights placed on bases upon annotation selection or hover
+    // Currently highlighted bases from annotation selection or hover
     public readonly highlights: Value<AnnotationRange[]> = new Value<AnnotationRange[]>([]);
     // Signals to recompute annotation space availability in the puzzle
     public readonly onUpdateAnnotationViews = new UnitSignal();
-    // Signals to save annotations
+    // Signals to save annotations, redraw, etc
     public readonly annotationDataUpdated = new UnitSignal();
     // Signals to clear the annotation views in the puzzle
     public readonly onClearAnnotationCanvas = new UnitSignal();
@@ -311,19 +311,7 @@ export default class AnnotationManager {
      * Deselects all annotations
      */
     public deselectAll(): void {
-        this.allAnnotations.forEach((annotation) => {
-            if (annotation.selected) {
-                this.onToggleItemSelection.value = annotation as AnnotationData;
-                this.onToggleItemSelection.value = null;
-            }
-        });
-
-        this.allLayers.forEach((layer) => {
-            if (layer.selected) {
-                this.onToggleItemSelection.value = layer as AnnotationData;
-                this.onToggleItemSelection.value = null;
-            }
-        });
+        this.selectedItem.value = null;
     }
 
     /**
@@ -381,19 +369,19 @@ export default class AnnotationManager {
      * @param annotation total data of annotation of interest
      * @param isSelected desired selection value
      */
-    public setAnnotationSelection(annotation: AnnotationPanelItem | AnnotationData, isSelected: boolean): void {
+    public setAnnotationSelection(annotation: AnnotationPanelItem, isSelected: boolean): void {
         const [parentNode, index] = this.getRelevantParentNode(annotation);
         if (parentNode && index != null) {
             parentNode[index].selected = isSelected;
 
             if (isSelected) {
-                this._selectedAnnotation = annotation;
+                this.selectedItem.value = parentNode[index];
             } else if (
-                this._selectedAnnotation
-                && this._selectedAnnotation.id === annotation.id
+                this.selectedItem.value
+                && this.selectedItem.value.id === annotation.id
                 && !isSelected
             ) {
-                this._selectedAnnotation = null;
+                this.selectedItem.value = null;
             }
             this.updateAnnotationViews();
         }
@@ -685,13 +673,6 @@ export default class AnnotationManager {
         return annotations;
     }
 
-    /**
-     * Accesses selected annotation
-     */
-    public get selectedAnnotation() {
-        return this._selectedAnnotation;
-    }
-
     private bundleAnnotations(graph: AnnotationData[]) {
         const prepareNode = (node: AnnotationData): AnnotationData => {
             const cleansedNode = {...node};
@@ -911,8 +892,7 @@ export default class AnnotationManager {
 
             view.pointerDown.connect((e) => {
                 e.stopPropagation();
-                this.onToggleItemSelection.value = item;
-                this.onToggleItemSelection.value = null;
+                this.selectedItem.value = item;
             });
             view.isMoving.connect((moving: boolean) => {
                 this.isMovingAnnotation = moving;
@@ -2457,7 +2437,6 @@ export default class AnnotationManager {
 
     private _toolbarType: ToolbarType;
 
-    private _selectedAnnotation: AnnotationPanelItem | AnnotationData | null;
     private _resetAnnotationPositions: boolean = false;
     private _ignoreCustomAnnotationPositions: boolean = false;
     public isMovingAnnotation: boolean = false;

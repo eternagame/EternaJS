@@ -556,15 +556,6 @@ export default class AnnotationPanel extends ContainerObject {
     }
 
     /**
-     * Finds and toggles the selection state in of a given item (annotion or layer)
-     *
-     * @param item data of item of interest
-     */
-    public toggleAnnotationPanelItemSelection(item: AnnotationData): void {
-        this.setAnnotationPanelItemSelection(item, !item.selected);
-    }
-
-    /**
      * Finds and sets the selection state in of a given item (annotion or layer)
      *
      * @param item data of item of interest
@@ -628,7 +619,7 @@ export default class AnnotationPanel extends ContainerObject {
      */
     private updateAnnotationLayer(annotation: Item, layerPath: number[]) {
         // unselect any selected annotation
-        const selectedAnnotation = this._annotationManager.selectedAnnotation as AnnotationData;
+        const selectedAnnotation = this._annotationManager.selectedItem.value;
         if (selectedAnnotation) {
             this.setAnnotationPanelItemSelection(selectedAnnotation, false);
         }
@@ -724,7 +715,7 @@ export default class AnnotationPanel extends ContainerObject {
      */
     private updateAnnotationPosition(firstAnnotation: Item, secondAnnotationPath: number[]) {
         // unselect any selected annotation
-        const selectedAnnotation = this._annotationManager.selectedAnnotation as AnnotationData;
+        const selectedAnnotation = this._annotationManager.selectedItem.value;
         if (selectedAnnotation) {
             this.setAnnotationPanelItemSelection(selectedAnnotation, false);
         }
@@ -862,7 +853,7 @@ export default class AnnotationPanel extends ContainerObject {
             // Repaint layers
             this.updatePanel();
 
-            const selectedAnnotation = this._annotationManager.selectedAnnotation as AnnotationData;
+            const selectedAnnotation = this._annotationManager.selectedItem.value;
             if (selectedAnnotation) {
                 this.setAnnotationPanelItemSelection(selectedAnnotation, true);
             }

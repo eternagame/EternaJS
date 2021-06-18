@@ -746,11 +746,16 @@ export default class Toolbar extends ContainerObject {
                 }
             }));
 
-            this.regs.add(this._annotationManager.onToggleItemSelection.connect((annotation: AnnotationData | null) => {
-                if (annotation) {
-                    this.annotationPanel.toggleAnnotationPanelItemSelection(annotation);
+            this.regs.add(this._annotationManager.selectedItem.connect(
+                (newAnnotation: AnnotationData | null, oldAnnotation: AnnotationData | null) => {
+                    if (newAnnotation) {
+                        this.annotationPanel.setAnnotationPanelItemSelection(newAnnotation, true);
+                    }
+                    if (oldAnnotation) {
+                        this.annotationPanel.setAnnotationPanelItemSelection(oldAnnotation, false);
+                    }
                 }
-            }));
+            ));
 
             this.regs.add(this._annotationManager.annotationDataUpdated.connect(() => {
                 this.annotationPanel.updatePanel();
