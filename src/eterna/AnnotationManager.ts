@@ -168,7 +168,7 @@ export interface AnnotationBaseConflicts {
 }
 
 /**
- * Represents a positon conflict betwwen two annotations
+ * Represents a position conflict between two annotations
  */
 export interface AnnotationPositionConflict {
     bounds: Rectangle;
@@ -516,7 +516,7 @@ export default class AnnotationManager {
     }
 
     /**
-     * Rerenders all annotation views in a given puzzle pose
+     * Re-renders all annotation views in a given puzzle pose
      *
      * @param pose puzzle pose of interest
      * @param reset whether to recalculate the positions of all annotations
@@ -675,7 +675,7 @@ export default class AnnotationManager {
     }
 
     /**
-     * Accesses all layers (struction, puzzle, solution)
+     * Accesses all layers (structure, puzzle, solution)
      */
     public get allLayers() {
         const annotationItems = this.getAllAnnotationItems();
@@ -708,7 +708,7 @@ export default class AnnotationManager {
     }
 
     /**
-     * Accesses all annotation (struction, puzzle, solution)
+     * Accesses all annotation (structure, puzzle, solution)
      */
     public get allAnnotations() {
         const annotationItems = this.getAllAnnotationItems();
@@ -1178,14 +1178,14 @@ export default class AnnotationManager {
             } else {
                 // We should ideally always receive a position
                 //
-                // In cases we dont, remove annotation card from view
+                // In cases we don't, remove annotation card from view
                 view.destroySelf();
             }
         }
     }
 
     /**
-     * Searches for spot in available space around annnotation range
+     * Searches for spot in available space around annotation range
      * to place annotation card
      *
      * Runs a recursive/iterative search on each place defined about the co-ordinate
@@ -1279,7 +1279,7 @@ export default class AnnotationManager {
         let testBottomLeft = true;
         let testBottomCenter = true;
         let testBottomRight = true;
-        // Accumlate all conflicts to
+        // Accumulate all conflicts to
         // use as anchors for recursive search
         const positionConflicts: AnnotationPositionConflict[] = [];
         while (annotationPositionConflict && proposedPosition) {
@@ -1443,13 +1443,13 @@ export default class AnnotationManager {
      * @param baseConflicts an object with the conflict (or lack thereof) at each placement region
      * @param includeTopLeft whether to include top-left as suitable region
      * @param includeTopCenter whether to include top-center as suitable region
-     * @param includeTopRight whether to include top-rightas suitable region
+     * @param includeTopRight whether to include top-right as suitable region
      * @param includeLeftCenter whether to include left-center as suitable region
      * @param includeRightCenter whether to include right-center as suitable region
      * @param includeBottomLeft whether to include bottom-left as suitable region
      * @param includeBottomCenter whether to include bottom-center as suitable region
      * @param includeBottomRight whether to include bottom-right as suitable region
-     * @return relative position of existing annotion (if one exists) or null (if position is vacant)
+     * @return relative position of existing annotation (if one exists) or null (if position is vacant)
      */
     private findProposedPosition(
         pose: Pose2D,
@@ -1755,7 +1755,7 @@ export default class AnnotationManager {
      * @param numSearchAttempts the number of new search attempts undergone
      * @param position proposed relative position (to anchor) of annotation computed from
      * the annotation's top-left corner
-     * @return absolute bounds of existing annotion (if one exists) or null (if position is vacant)
+     * @return absolute bounds of existing annotation (if one exists) or null (if position is vacant)
      */
     private findCardConflict(
         pose: Pose2D,
@@ -1944,7 +1944,7 @@ export default class AnnotationManager {
         // - Bottom Row = Bottom Left and Bottom Right
         // - Center Column = Top and Bottom
         // - Left Column = Top Left, Bottom Left, Left Center
-        // - Right Column = Top Rigth, Bottom right, Right Center
+        // - Right Column = Top Right, Bottom right, Right Center
         const startCenterRow = anchorBaseY - annotationView.height / 2;
         const stopCenterRow = anchorBaseY + annotationView.height / 2;
         const startCenterColumn = anchorBaseX - annotationView.width / 2 + anchorDisplay.width / 2;
