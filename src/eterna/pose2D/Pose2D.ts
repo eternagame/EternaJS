@@ -205,7 +205,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.callStartMousedownCallback(e);
 
             // deselect all annotations
-            this._annotationManager.deselectAll();
+            this._annotationManager.deselectSelected();
         });
         this.pointerOut.connect(() => this.onMouseOut());
 

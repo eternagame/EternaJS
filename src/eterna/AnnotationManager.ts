@@ -308,13 +308,6 @@ export default class AnnotationManager {
     }
 
     /**
-     * Deselects all annotations
-     */
-    public deselectAll(): void {
-        this.selectedItem.value = null;
-    }
-
-    /**
      * Downloads the annotation bundle to the player's disk
      */
     public downloadAnnotations() {
@@ -363,13 +356,24 @@ export default class AnnotationManager {
         }
     }
 
+    public deselectSelected(): void {
+        if (this.selectedItem.value) {
+            const [parentNode, index] = this.getRelevantParentNode(this.selectedItem.value);
+            if (parentNode && index != null) {
+                parentNode[index].selected = false;
+                this.updateAnnotationViews();
+            }
+            this.selectedItem.value = null;
+        }
+    }
+
     /**
      * Modifies the selection state of an annotation
      *
      * @param annotation total data of annotation of interest
      * @param isSelected desired selection value
      */
-    public setAnnotationSelection(annotation: AnnotationPanelItem, isSelected: boolean): void {
+    public setAnnotationSelection(annotation: AnnotationPanelItem | AnnotationData, isSelected: boolean): void {
         const [parentNode, index] = this.getRelevantParentNode(annotation);
         if (parentNode && index != null) {
             parentNode[index].selected = isSelected;
@@ -892,7 +896,8 @@ export default class AnnotationManager {
 
             view.pointerDown.connect((e) => {
                 e.stopPropagation();
-                this.selectedItem.value = item;
+                this.deselectSelected();
+                this.setAnnotationSelection(item, true);
             });
             view.isMoving.connect((moving: boolean) => {
                 this.isMovingAnnotation = moving;
