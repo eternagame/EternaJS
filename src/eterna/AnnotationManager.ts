@@ -199,8 +199,6 @@ export default class AnnotationManager {
     public readonly onUpdateAnnotationViews = new UnitSignal();
     // Signals to save annotations, redraw, etc
     public readonly annotationDataUpdated = new UnitSignal();
-    // Signals to clear the annotation views in the puzzle
-    public readonly onClearAnnotationCanvas = new UnitSignal();
 
     constructor(toolbarType: ToolbarType) {
         this._toolbarType = toolbarType;
@@ -469,56 +467,35 @@ export default class AnnotationManager {
     }
 
     /**
-     * Re-renders all annotation views in a given puzzle pose
-     *
-     * @param pose puzzle pose of interest
-     * @param reset whether to recalculate the positions of all annotations
-     * @param ignoreCustom whether to override the custom
-     */
-    public refreshAnnotations(pose: Pose2D, reset: boolean = false, ignoreCustom: boolean = false) {
-        this.eraseAnnotations(reset, ignoreCustom);
-        this.drawAnnotations(pose);
-    }
-
-    /**
-     * Discards all annotation views
-     *
-     * @param reset whether to recalculate the positions of all annotations
-     * @param ignoreCustom whether to override the custom
-     */
-    public eraseAnnotations(reset: boolean = false, ignoreCustom: boolean = false): void {
-        this._resetAnnotationPositions = reset;
-        this._ignoreCustomAnnotationPositions = ignoreCustom;
-
-        this.onClearAnnotationCanvas.emit();
-    }
-
-    /**
      * Draws all annotation views in a given puzzle pose
      *
      * @param pose puzzle pose of interest
+     * @param reset whether to recalculate the positions of all annotations
+     * @param ignoreCustom whether to override the custom
      */
-    public drawAnnotations(pose: Pose2D): void {
-        if (pose.zoomLevel > AnnotationManager.ANNOTATION_LAYER_THRESHOLD) {
+    public drawAnnotations(params: {
+        pose: Pose2D;
+        reset: boolean;
+        ignoreCustom: boolean;
+    }): void {
+        if (params.pose.zoomLevel > AnnotationManager.ANNOTATION_LAYER_THRESHOLD) {
             // visualize layers
             for (let i = 0; i < this._layers.length; i++) {
-                this.placeAnnotationInPose(pose, this._layers[i], i);
+                this.placeAnnotationInPose({...params, item: this._layers[i], itemIndex: i});
             }
 
             // visualize annotations not in layers
             for (let i = 0; i < this._annotations.length; i++) {
                 if (!this._annotations[i].layerId) {
-                    this.placeAnnotationInPose(pose, this._annotations[i], i);
+                    this.placeAnnotationInPose({...params, item: this._annotations[i], itemIndex: i});
                 }
             }
         } else {
             // visualize annotations
             for (let i = 0; i < this._annotations.length; i++) {
-                this.placeAnnotationInPose(pose, this._annotations[i], i);
+                this.placeAnnotationInPose({...params, item: this._annotations[i], itemIndex: i});
             }
         }
-
-        this._resetAnnotationPositions = false;
     }
 
     /**
@@ -539,7 +516,6 @@ export default class AnnotationManager {
             (annotation: AnnotationData) => AnnotationManager.prepareAnnotationNode(annotation)
         );
         this._puzzleAnnotations = preparedAnnotations;
-        this._resetAnnotationPositions = true;
         this.propagateDataUpdates();
     }
 
@@ -571,7 +547,6 @@ export default class AnnotationManager {
             (annotation: AnnotationData) => AnnotationManager.prepareAnnotationNode(annotation)
         );
         this._solutionAnnotations = preparedAnnotations;
-        this._resetAnnotationPositions = true;
         this.propagateDataUpdates();
     }
 
@@ -912,8 +887,7 @@ export default class AnnotationManager {
                     };
 
                     this.setAnnotationPositions(item, positionIndex, releasedPosition);
-                    this.refreshAnnotations(pose, true);
-                    this.annotationDataUpdated.emit();
+                    this.propagateDataUpdates();
                 });
             }
         }
@@ -927,24 +901,30 @@ export default class AnnotationManager {
      * @param item display object data with positioning and annotation metadata
      * @param itemIndex index of item within parent array
      */
-    private placeAnnotationInPose(pose: Pose2D, item: AnnotationData, itemIndex: number): void {
+    private placeAnnotationInPose(params: {
+        pose: Pose2D;
+        item: AnnotationData;
+        itemIndex: number;
+        reset: boolean;
+        ignoreCustom: boolean;
+    }): void {
         // If annotation positions have been computed already
         // use cached value
         if (
-            item.positions.length > 0
-            && !this._resetAnnotationPositions
-            && !this._ignoreCustomAnnotationPositions
+            params.item.positions.length > 0
+            && !params.reset
+            && !params.ignoreCustom
         ) {
-            for (let i = 0; i < item.positions.length; i++) {
-                const position = item.positions[i];
-                const view = this.getAnnotationView(pose, i, item);
-                if (item.type === AnnotationHierarchyType.ANNOTATION) {
+            for (let i = 0; i < params.item.positions.length; i++) {
+                const position = params.item.positions[i];
+                const view = this.getAnnotationView(params.pose, i, params.item);
+                if (params.item.type === AnnotationHierarchyType.ANNOTATION) {
                     view.onMovedAnnotation.connect((point: Point) => {
-                        const anchorIndex = this._annotations[itemIndex].positions[i].anchorIndex;
-                        const base = pose.getBase(anchorIndex);
+                        const anchorIndex = this._annotations[params.itemIndex].positions[i].anchorIndex;
+                        const base = params.pose.getBase(anchorIndex);
                         const anchorPoint = new Point(
-                            base.x + pose.xOffset,
-                            base.y + pose.yOffset
+                            base.x + params.pose.xOffset,
+                            base.y + params.pose.yOffset
                         );
 
                         // Compute relative position
@@ -957,17 +937,17 @@ export default class AnnotationManager {
                             custom: true
                         };
 
-                        this.setAnnotationPositions(item, i, movedPosition);
+                        this.setAnnotationPositions(params.item, i, movedPosition);
                         this.annotationDataUpdated.emit();
                     });
                 }
-                pose.addAnnotationView(view);
+                params.pose.addAnnotationView(view);
 
                 const anchorIndex = position.anchorIndex;
-                const base = pose.getBase(anchorIndex);
+                const base = params.pose.getBase(anchorIndex);
                 const anchorPoint = new Point(
-                    base.x + pose.xOffset,
-                    base.y + pose.yOffset
+                    base.x + params.pose.xOffset,
+                    base.y + params.pose.yOffset
                 );
                 view.display.position.set(
                     position.relPosition.x + anchorPoint.x,
@@ -979,14 +959,14 @@ export default class AnnotationManager {
         }
 
         let ranges: AnnotationRange[] = [];
-        if (item.type === AnnotationHierarchyType.LAYER) {
+        if (params.item.type === AnnotationHierarchyType.LAYER) {
             // We only want one layer label for each item, so we pick the first range we find
             //
             // An improvement that could be made is to find the
             // "center of mass" of all the ranges in a layer
             // and place the layer label at an appropriate base closest to
             // the center of mass point
-            const layerData = item;
+            const layerData = params.item;
 
             if (layerData.children) {
                 for (const annotation of layerData.children) {
@@ -997,7 +977,7 @@ export default class AnnotationManager {
                 }
             }
         } else {
-            const annotationData = item;
+            const annotationData = params.item;
             if (annotationData.ranges) {
                 ranges = annotationData.ranges;
             }
@@ -1013,19 +993,19 @@ export default class AnnotationManager {
         // label duplicates.
         for (let i = 0; i < ranges.length; i++) {
             const range = ranges[i];
-            const prevPosition = item.positions.length > i ? item.positions[i] : null;
-            const view = this.getAnnotationView(pose, i, item);
-            if (item.type === AnnotationHierarchyType.ANNOTATION) {
+            const prevPosition = params.item.positions.length > i ? params.item.positions[i] : null;
+            const view = this.getAnnotationView(params.pose, i, params.item);
+            if (params.item.type === AnnotationHierarchyType.ANNOTATION) {
                 view.onMovedAnnotation.connect((point: Point) => {
-                    const anchorIndex = this._annotations[itemIndex].positions[i].anchorIndex;
-                    const base = pose.getBase(anchorIndex);
+                    const anchorIndex = this._annotations[params.itemIndex].positions[i].anchorIndex;
+                    const base = params.pose.getBase(anchorIndex);
                     const anchorPoint = new Point(
-                        base.x + pose.xOffset,
-                        base.y + pose.yOffset
+                        base.x + params.pose.xOffset,
+                        base.y + params.pose.yOffset
                     );
                     // Compute relative position
                     const movedPosition: AnnotationPosition = {
-                        ...this._annotations[itemIndex].positions[i],
+                        ...this._annotations[params.itemIndex].positions[i],
                         relPosition: new Point(
                             point.x - anchorPoint.x,
                             point.y - anchorPoint.y
@@ -1033,29 +1013,29 @@ export default class AnnotationManager {
                         custom: true
                     };
 
-                    this.setAnnotationPositions(item, i, movedPosition);
+                    this.setAnnotationPositions(params.item, i, movedPosition);
                     this.annotationDataUpdated.emit();
                 });
             }
             // We need to prematurely (ie, before we have a final position) add this to the display object graph
             // so that we can read it's dimensions/position
-            pose.addAnnotationView(view);
+            params.pose.addAnnotationView(view);
 
             let absolutePosition: Point | null = null;
             let relPosition: Point | null = null;
             let anchorIndex: number | null = null;
             let customPosition = false;
-            let zoomLevel: number = pose.zoomLevel;
-            if (prevPosition?.custom && !this._ignoreCustomAnnotationPositions) {
+            let zoomLevel: number = params.pose.zoomLevel;
+            if (prevPosition?.custom && !params.ignoreCustom) {
                 relPosition = prevPosition.relPosition;
                 anchorIndex = prevPosition.anchorIndex;
-                const base = pose.getBase(anchorIndex);
+                const base = params.pose.getBase(anchorIndex);
                 const zoomScaling = 1
-                + ((prevPosition.zoomLevel - pose.zoomLevel) / (Pose2D.ZOOM_SPACINGS.length - 1));
+                + ((prevPosition.zoomLevel - params.pose.zoomLevel) / (Pose2D.ZOOM_SPACINGS.length - 1));
 
                 const anchorPoint = new Point(
-                    base.x + pose.xOffset,
-                    base.y + pose.yOffset
+                    base.x + params.pose.xOffset,
+                    base.y + params.pose.yOffset
                 );
                 absolutePosition = new Point(
                     relPosition.x * zoomScaling + anchorPoint.x,
@@ -1073,17 +1053,17 @@ export default class AnnotationManager {
                 }
 
                 // Make sure anchor sits within sequence length
-                if (anchorIndex >= pose.sequenceLength - 1) continue;
-                const base = pose.getBase(anchorIndex);
+                if (anchorIndex >= params.pose.sequenceLength - 1) continue;
+                const base = params.pose.getBase(anchorIndex);
                 const anchorPoint = new Point(
-                    base.x + pose.xOffset,
-                    base.y + pose.yOffset
+                    base.x + params.pose.xOffset,
+                    base.y + params.pose.yOffset
                 );
 
                 // Run a search to find best place to locate
                 // annotation within available space
                 relPosition = this.computeAnnotationPositionPoint(
-                    pose,
+                    params.pose,
                     anchorIndex,
                     anchorIndex,
                     anchorPoint,
@@ -1104,10 +1084,10 @@ export default class AnnotationManager {
             if (relPosition && absolutePosition) {
                 // Set position
                 view.display.position.copyFrom(absolutePosition);
-                // pose.addAnnotationView(view, false, true);
+                // params.pose.addAnnotationView(view, false, true);
 
                 // Cache position
-                this.setAnnotationPositions(item, i, {
+                this.setAnnotationPositions(params.item, i, {
                     anchorIndex,
                     relPosition,
                     zoomLevel,
@@ -2439,8 +2419,6 @@ export default class AnnotationManager {
 
     private _toolbarType: ToolbarType;
 
-    private _resetAnnotationPositions: boolean = false;
-    private _ignoreCustomAnnotationPositions: boolean = false;
     public isMovingAnnotation: boolean = false;
 
     public static readonly ANNOTATION_UNHIGHLIGHTED_OPACITY = 0.5;

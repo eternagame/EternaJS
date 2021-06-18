@@ -242,9 +242,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this.setAnnotationRangeHighlight(ranges);
             }
         }));
-        this.regs.add(this._annotationManager.onClearAnnotationCanvas.connect(() => {
-            this.clearAnnotationCanvas();
-        }));
         this.regs.add(this._annotationManager.onUpdateAnnotationViews.connect(() => {
             this.redrawAnnotations(true);
         }));
@@ -2677,7 +2674,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             } else {
                 // Don't show annotations while animating. If we recomputed it each frame it would
                 // be laggy, if we don't the annotation locations may be in visually bizarre locations
-                this._annotationManager.eraseAnnotations();
+                this.clearAnnotationCanvas();
             }
 
             if (this._offsetTranslating) {
@@ -2921,7 +2918,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 if (!this._redrawAnnotationUseCache || this.annotationSpaceAvailability.length !== 0) {
                     this.updateAnnotationSpaceAvailability();
                 }
-                this._annotationManager.refreshAnnotations(this, true);
+                this.clearAnnotationCanvas();
+                this._annotationManager.drawAnnotations({
+                    pose: this,
+                    reset: true,
+                    ignoreCustom: false
+                });
             }
             this._redrawAnnotations = FrameUpdateState.IDLE;
         }
@@ -3615,6 +3617,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._redraw = true;
     }
 
+    public redrawAnnotations(useCachedSpaceAvailability = false) {
+        this._redrawAnnotations = FrameUpdateState.NEXT_FRAME;
+        this._redrawAnnotationUseCache = useCachedSpaceAvailability;
+    }
+
     public addAnnotationView(view: AnnotationView) {
         if (!view.isLiveObject) {
             this.addObject(view, this._annotationCanvas);
@@ -3683,11 +3690,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 );
             }
         }
-    }
-
-    public redrawAnnotations(useCachedSpaceAvailability = false) {
-        this._redrawAnnotations = FrameUpdateState.NEXT_FRAME;
-        this._redrawAnnotationUseCache = useCachedSpaceAvailability;
     }
 
     private static drawEnergyHighlight(hilite: Graphics, energy: Sprite): Graphics {

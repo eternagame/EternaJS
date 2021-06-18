@@ -430,7 +430,7 @@ export default class PoseEditMode extends GameMode {
         this._dockedSpecBox.setSize(s + 55, s * 2 + 51);
 
         for (const pose of this._poses) {
-            this._annotationManager.refreshAnnotations(pose, true);
+            pose.redrawAnnotations();
         }
 
         if (this._toolbar.annotationPanel.isVisible) {

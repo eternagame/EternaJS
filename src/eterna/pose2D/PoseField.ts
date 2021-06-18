@@ -239,7 +239,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
                 // simple drag
                 if (this._annotationManager.allAnnotations.length > 0) {
                     this._erasedAnnotations = true;
-                    this._annotationManager.eraseAnnotations(true);
+                    this.pose.clearAnnotationCanvas();
                 }
 
                 ROPWait.notifyMoveCamera();
@@ -318,7 +318,11 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         }
 
         if (this._erasedAnnotations) {
-            this._annotationManager.refreshAnnotations(this.pose);
+            this._annotationManager.drawAnnotations({
+                pose: this.pose,
+                reset: false,
+                ignoreCustom: false
+            });
             this._erasedAnnotations = false;
         }
     }

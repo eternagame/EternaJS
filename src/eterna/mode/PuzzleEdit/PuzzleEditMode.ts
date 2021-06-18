@@ -534,7 +534,7 @@ export default class PuzzleEditMode extends GameMode {
         }
 
         for (const pose of this._poses) {
-            this._annotationManager.refreshAnnotations(pose, true);
+            pose.redrawAnnotations();
         }
 
         if (this._toolbar.annotationPanel.isVisible) {
