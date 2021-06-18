@@ -163,8 +163,8 @@ export default class PoseEditMode extends GameMode {
 
         this._annotationManager = new AnnotationManager(toolbarType);
         this._annotationManager.annotationDataUpdated.connect(() => this.saveData());
-        this._annotationManager.onEditAnnotation.connect((annotation: AnnotationData | null) => {
-            if (annotation && annotation.ranges) {
+        this._annotationManager.annotationEditRequested.connect((annotation: AnnotationData) => {
+            if (annotation.ranges) {
                 const dialog = new AnnotationDialog({
                     edit: true,
                     title: true,

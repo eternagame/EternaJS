@@ -1,5 +1,5 @@
 import Eterna from 'eterna/Eterna';
-import {UnitSignal, Value} from 'signals';
+import {Signal, UnitSignal, Value} from 'signals';
 import {
     Point, Container, Rectangle, Graphics
 } from 'pixi.js';
@@ -192,9 +192,9 @@ export default class AnnotationManager {
     // Currently selected annotation
     public readonly selectedItem = new Value<AnnotationData | null>(null);
     // Signals that an annotation should be edited (reveal AnnotationDialog)
-    public readonly onEditAnnotation: Value<AnnotationData | null> = new Value<AnnotationData | null>(null);
+    public readonly annotationEditRequested = new Signal<AnnotationData>();
     // Currently highlighted bases from annotation selection or hover
-    public readonly highlights: Value<AnnotationRange[]> = new Value<AnnotationRange[]>([]);
+    public readonly highlights = new Value<AnnotationRange[]>([]);
     // Signals to recompute annotation space availability in the puzzle
     public readonly onUpdateAnnotationViews = new UnitSignal();
     // Signals to save annotations, redraw, etc
@@ -876,8 +876,7 @@ export default class AnnotationManager {
                 // We don't need to apply access control logic here
                 // This is handled in AnnotationView
                 view.onEditButtonPressed.connect(() => {
-                    this.onEditAnnotation.value = item;
-                    this.onEditAnnotation.value = null;
+                    this.annotationEditRequested.emit(item);
                 });
                 view.onReleasePositionButtonPressed.connect(() => {
                     // Release position

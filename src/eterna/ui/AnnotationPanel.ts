@@ -429,13 +429,13 @@ export default class AnnotationPanel extends ContainerObject {
                 if (this._selectedPath.length === 2) {
                     // Annotation not in layer or is layer
                     const annotation = categoryData[this._selectedPath[1]];
-                    this._annotationManager.onEditAnnotation.value = annotation;
+                    this._annotationManager.annotationEditRequested.emit(annotation);
                 } else if (this._selectedPath.length === 3) {
                     // Annotation in layer
                     const layerChildren = categoryData[this._selectedPath[1]].children;
                     if (layerChildren) {
                         const annotation = layerChildren[this._selectedPath[2]];
-                        this._annotationManager.onEditAnnotation.value = annotation;
+                        this._annotationManager.annotationEditRequested.emit(annotation);
                     }
                 }
 
