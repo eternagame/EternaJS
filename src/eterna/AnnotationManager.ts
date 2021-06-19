@@ -32,8 +32,7 @@ const POSSIBLE_PLACEMENT_AVAILABILITY_COLOR = 0x00FF00;
 export enum AnnotationCategory {
     STRUCTURE = 'Structure',
     PUZZLE = 'Puzzle',
-    SOLUTION = 'Solution',
-    UNDEFINED = 'Undefined'
+    SOLUTION = 'Solution'
 }
 
 /**
@@ -105,6 +104,7 @@ export interface AnnotationData {
     children: AnnotationData[];
     visible?: boolean;
     selected?: boolean;
+    expanded?: boolean;
     positions: AnnotationPosition[];
 }
 
@@ -185,8 +185,6 @@ export default class AnnotationManager {
     public readonly annotationModeActive: Value<boolean> = new Value<boolean>(false);
     // Signals that an annotation should be edited (reveal AnnotationDialog)
     public readonly annotationEditRequested = new Signal<AnnotationData>();
-    // Currently selected annotation
-    public readonly selectedItem = new Value<AnnotationData | null>(null);
     // Currently highlighted bases from annotation selection or hover
     public readonly highlights = new Value<AnnotationRange[]>([]);
     // Signals to redraw annotation visualizations
@@ -334,13 +332,13 @@ export default class AnnotationManager {
     }
 
     public deselectSelected(): void {
-        if (this.selectedItem.value) {
-            const [parentNode, index] = this.getRelevantParentNode(this.selectedItem.value);
+        if (this._selectedItem) {
+            const [parentNode, index] = this.getRelevantParentNode(this._selectedItem);
             if (parentNode && index != null) {
                 parentNode[index].selected = false;
                 this.updateAnnotationViews();
             }
-            this.selectedItem.value = null;
+            this._selectedItem = null;
         }
     }
 
@@ -353,17 +351,18 @@ export default class AnnotationManager {
     public setAnnotationSelection(annotation: AnnotationPanelItem | AnnotationData, isSelected: boolean): void {
         const [parentNode, index] = this.getRelevantParentNode(annotation);
         if (parentNode && index != null) {
-            parentNode[index].selected = isSelected;
-
             if (isSelected) {
-                this.selectedItem.value = parentNode[index];
+                this.deselectSelected();
+                this._selectedItem = parentNode[index];
             } else if (
-                this.selectedItem.value
-                && this.selectedItem.value.id === annotation.id
+                this._selectedItem
+                && this._selectedItem.id === annotation.id
                 && !isSelected
             ) {
-                this.selectedItem.value = null;
+                this._selectedItem = null;
             }
+
+            parentNode[index].selected = isSelected;
             this.updateAnnotationViews();
         }
     }
@@ -380,7 +379,49 @@ export default class AnnotationManager {
             parentNode[index].visible = isVisible;
 
             this.updateAnnotationViews();
+        } else if (annotation.type === AnnotationHierarchyType.CATEGORY) {
+            switch (annotation.category) {
+                case AnnotationCategory.PUZZLE:
+                    this._puzzleAnnotationsVisible = isVisible;
+                    break;
+                case AnnotationCategory.SOLUTION:
+                    this._solutionAnnotationsVisible = isVisible;
+                    break;
+                case AnnotationCategory.STRUCTURE:
+                    this._structureAnnotationsVisible = isVisible;
+                    break;
+                default:
+                    Assert.unreachable(annotation.category);
+            }
+            this.updateAnnotationViews();
         }
+    }
+
+    /**
+     * Modifies the expansion state of an annotation
+     *
+     * @param annotation total data of annotation of interest
+     * @param isExpanded desired expansion value
+     */
+    public setAnnotationExpansion(annotation: AnnotationPanelItem, isExpanded: boolean): void {
+        const [parentNode, index] = this.getRelevantParentNode(annotation);
+        if (parentNode && index != null) {
+            parentNode[index].expanded = isExpanded;
+
+            this.updateAnnotationViews();
+        }
+    }
+
+    public get puzzleAnnotationsVisible() {
+        return this._puzzleAnnotationsVisible;
+    }
+
+    public get solutionAnnotationsVisible() {
+        return this._solutionAnnotationsVisible;
+    }
+
+    public get structureAnnotationsVisible() {
+        return this._structureAnnotationsVisible;
     }
 
     /**
@@ -447,6 +488,32 @@ export default class AnnotationManager {
         }
     }
 
+    private isAnnotationVisible(data: AnnotationData) {
+        if (!data.visible) return false;
+
+        if (
+            data.category === AnnotationCategory.PUZZLE
+            && !this._puzzleAnnotationsVisible
+        ) return false;
+
+        if (
+            data.category === AnnotationCategory.SOLUTION
+            && !this._solutionAnnotationsVisible
+        ) return false;
+
+        if (
+            data.category === AnnotationCategory.STRUCTURE
+            && !this._structureAnnotationsVisible
+        ) return false;
+
+        if (data.layerId) {
+            const parentLayer = this._layers.find((layer) => layer.id === data.layerId);
+            if (!parentLayer?.visible) return false;
+        }
+
+        return true;
+    }
+
     /**
      * Draws all annotation views in a given puzzle pose
      *
@@ -461,20 +528,24 @@ export default class AnnotationManager {
     }): void {
         if (params.pose.zoomLevel > AnnotationManager.ANNOTATION_LAYER_THRESHOLD) {
             // visualize layers
-            for (let i = 0; i < this._layers.length; i++) {
-                this.placeAnnotationInPose({...params, item: this._layers[i], itemIndex: i});
+            for (const [idx, layer] of this._layers.entries()) {
+                if (this.isAnnotationVisible(layer)) {
+                    this.placeAnnotationInPose({...params, item: layer, itemIndex: idx});
+                }
             }
 
             // visualize annotations not in layers
-            for (let i = 0; i < this._annotations.length; i++) {
-                if (!this._annotations[i].layerId) {
-                    this.placeAnnotationInPose({...params, item: this._annotations[i], itemIndex: i});
+            for (const [idx, annotation] of this._annotations.entries()) {
+                if (!annotation.layerId && this.isAnnotationVisible(annotation)) {
+                    this.placeAnnotationInPose({...params, item: annotation, itemIndex: idx});
                 }
             }
         } else {
             // visualize annotations
-            for (let i = 0; i < this._annotations.length; i++) {
-                this.placeAnnotationInPose({...params, item: this._annotations[i], itemIndex: i});
+            for (const [idx, annotation] of this._annotations.entries()) {
+                if (this.isAnnotationVisible(annotation)) {
+                    this.placeAnnotationInPose({...params, item: annotation, itemIndex: idx});
+                }
             }
         }
     }
@@ -2382,6 +2453,12 @@ export default class AnnotationManager {
     private _structureAnnotations: AnnotationData[] = [];
     private _puzzleAnnotations: AnnotationData[] = [];
     private _solutionAnnotations: AnnotationData[] = [];
+
+    private _structureAnnotationsVisible: boolean = true;
+    private _puzzleAnnotationsVisible: boolean = true;
+    private _solutionAnnotationsVisible: boolean = true;
+
+    private _selectedItem: AnnotationData | null = null;
 
     // Holds the runtime objects for all annotations and layers
     // in the puzzle

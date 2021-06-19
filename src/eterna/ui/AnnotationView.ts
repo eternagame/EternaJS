@@ -42,10 +42,6 @@ export default class AnnotationView extends ContainerObject {
     protected added(): void {
         super.added();
 
-        if (!this._item.visible) {
-            return;
-        }
-
         this._panel = new GamePanel({
             type: GamePanelType.NORMAL,
             color: 0xFFFFFF,

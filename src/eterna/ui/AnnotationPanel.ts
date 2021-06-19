@@ -5,7 +5,8 @@ import {
     DisplayUtil,
     VAlign,
     HAlign,
-    HLayoutContainer
+    HLayoutContainer,
+    Assert
 } from 'flashbang';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {v4 as uuidv4} from 'uuid';
@@ -134,16 +135,20 @@ export default class AnnotationPanel extends ContainerObject {
             || (this._annotationManager.activeCategory === AnnotationCategory.SOLUTION && puzzleAnnotations.length > 0)
         ) {
             this._puzzleCategory = new AnnotationPanelItem({
-                id: uuidv4(),
-                playerID: Eterna.playerID,
+                data: {
+                    id: uuidv4(),
+                    type: AnnotationHierarchyType.CATEGORY,
+                    category: AnnotationCategory.PUZZLE,
+                    playerID: Eterna.playerID,
+                    title: 'Puzzle',
+                    children: puzzleAnnotations,
+                    visible: this._annotationManager.puzzleAnnotationsVisible,
+                    expanded: this._puzzleCategoryExpanded
+                },
                 indexPath: [1],
                 width: AnnotationPanel.PANEL_WIDTH,
                 dividerThickness: AnnotationPanel.DIVIDER_THICKNESS,
-                type: AnnotationHierarchyType.CATEGORY,
-                title: 'Puzzle',
-                category: AnnotationCategory.PUZZLE,
                 titleEditable: this._annotationManager.activeCategory === AnnotationCategory.PUZZLE,
-                children: puzzleAnnotations,
                 updateTitle: (itemPath: number[], text: string) => {
                     this.updateTitle(itemPath, text);
                 },
@@ -158,16 +163,20 @@ export default class AnnotationPanel extends ContainerObject {
         }
         if (this._annotationManager.activeCategory === AnnotationCategory.SOLUTION) {
             this._solutionCategory = new AnnotationPanelItem({
-                id: uuidv4(),
-                playerID: Eterna.playerID,
+                data: {
+                    id: uuidv4(),
+                    type: AnnotationHierarchyType.CATEGORY,
+                    category: AnnotationCategory.SOLUTION,
+                    playerID: Eterna.playerID,
+                    title: 'Solution',
+                    children: this._annotationManager.getSolutionAnnotations(),
+                    visible: this._annotationManager.solutionAnnotationsVisible,
+                    expanded: this._solutionCategoryExpanded
+                },
                 indexPath: [2],
                 width: AnnotationPanel.PANEL_WIDTH,
                 dividerThickness: AnnotationPanel.DIVIDER_THICKNESS,
-                type: AnnotationHierarchyType.CATEGORY,
-                title: 'Solution',
-                category: AnnotationCategory.SOLUTION,
                 titleEditable: this._annotationManager.activeCategory === AnnotationCategory.SOLUTION,
-                children: this._annotationManager.getSolutionAnnotations(),
                 updateTitle: (itemPath: number[], text: string) => {
                     this.updateTitle(itemPath, text);
                 },
@@ -179,11 +188,6 @@ export default class AnnotationPanel extends ContainerObject {
                 }
             });
             this.addCategory(this._solutionCategory);
-        }
-
-        const selectedItem = this._annotationManager.selectedItem.value;
-        if (selectedItem) {
-            this.setAnnotationPanelItemSelection(selectedItem, true);
         }
 
         // Get 1D array of annotations in annotation tree
@@ -501,11 +505,6 @@ export default class AnnotationPanel extends ContainerObject {
 
             for (let j = 0; j < items.length; j++) {
                 const connectorAnnotation = items[j];
-                if (i !== j) {
-                    connectedAnnotation.isSelected.disconnect(AnnotationPanel.deselectItem(items, j));
-                    connectedAnnotation.isSelected.connect(AnnotationPanel.deselectItem(items, j));
-                }
-
                 if (
                     connectedAnnotation.dropTarget
                     && connectorAnnotation.dragSource
@@ -556,39 +555,27 @@ export default class AnnotationPanel extends ContainerObject {
                 // Inform layer panel observers of update
                 this._annotationManager.setAnnotationVisibility(panelItem, isVisible);
             });
+            panelItem.isExpanded.connect((isExpanded: boolean) => {
+                if (panelItem.type === AnnotationHierarchyType.CATEGORY) {
+                    switch (panelItem.category) {
+                        case AnnotationCategory.PUZZLE:
+                            this._puzzleCategoryExpanded = !this._puzzleCategoryExpanded;
+                            break;
+                        case AnnotationCategory.SOLUTION:
+                            this._solutionCategoryExpanded = !this._solutionCategoryExpanded;
+                            break;
+                        case AnnotationCategory.STRUCTURE:
+                            this._structureCategoryExpanded = !this._structureCategoryExpanded;
+                            break;
+                        default:
+                            Assert.unreachable(panelItem.category);
+                    }
+                    this.updatePanel();
+                } else {
+                    this._annotationManager.setAnnotationExpansion(panelItem, isExpanded);
+                }
+            });
         }
-    }
-
-    /**
-     * Finds and sets the selection state in of a given item (annotion or layer)
-     *
-     * @param item data of item of interest
-     */
-    public setAnnotationPanelItemSelection(item: AnnotationData, isSelected: boolean): void {
-        const annotationItems: AnnotationPanelItem[] = [];
-        AnnotationPanel.collectAnnotationPanelItems(this._items, annotationItems);
-
-        for (const val of annotationItems) {
-            if (val.id === item.id && isSelected) {
-                val.select();
-            } else if (val.id === item.id && !isSelected) {
-                val.deselect();
-            }
-        }
-    }
-
-    /**
-     * Returns a function that deselects a particular item once invoked
-     *
-     * @param items array of panel items
-     * @param index index of panel item of interest
-     */
-    public static deselectItem(items: AnnotationPanelItem[], index: number): (value: boolean, ovalue: boolean) => void {
-        return (selected: boolean): void => {
-            if (selected) {
-                items[index].deselect();
-            }
-        };
     }
 
     /**
@@ -622,12 +609,6 @@ export default class AnnotationPanel extends ContainerObject {
      * @param layerPath an index path to target layer
      */
     private updateAnnotationLayer(annotation: Item, layerPath: number[]) {
-        // unselect any selected annotation
-        const selectedAnnotation = this._annotationManager.selectedItem.value;
-        if (selectedAnnotation) {
-            this.setAnnotationPanelItemSelection(selectedAnnotation, false);
-        }
-
         // IMPORTANT:
         // If a user drops an annotation onto
         // another annotation in a layer three drop events occur in this order:
@@ -718,12 +699,6 @@ export default class AnnotationPanel extends ContainerObject {
      * @param secondAnnotationPath an index path to target annotation
      */
     private updateAnnotationPosition(firstAnnotation: Item, secondAnnotationPath: number[]) {
-        // unselect any selected annotation
-        const selectedAnnotation = this._annotationManager.selectedItem.value;
-        if (selectedAnnotation) {
-            this.setAnnotationPanelItemSelection(selectedAnnotation, false);
-        }
-
         // remove from current layer
         let firstAnnotationData: AnnotationData | null = null;
         const [category, categoryData] = this.getCategoryData(secondAnnotationPath[0]);
@@ -856,11 +831,6 @@ export default class AnnotationPanel extends ContainerObject {
 
             // Repaint layers
             this.updatePanel();
-
-            const selectedAnnotation = this._annotationManager.selectedItem.value;
-            if (selectedAnnotation) {
-                this.setAnnotationPanelItemSelection(selectedAnnotation, true);
-            }
         } else if (!visible && this._isVisible) {
             // Hide Panel
             this._panel.display.visible = false;
@@ -895,6 +865,10 @@ export default class AnnotationPanel extends ContainerObject {
     private _structureCategory: AnnotationPanelItem;
     private _puzzleCategory: AnnotationPanelItem;
     private _solutionCategory: AnnotationPanelItem;
+
+    private _puzzleCategoryExpanded: boolean = true;
+    private _solutionCategoryExpanded: boolean = true;
+    private _structureCategoryExpanded: boolean = true;
 
     private static readonly PANEL_WIDTH = 240;
     private static readonly PANEL_HEIGHT = 250;

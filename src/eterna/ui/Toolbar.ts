@@ -13,7 +13,7 @@ import {BoostersData} from 'eterna/puzzle/Puzzle';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import BitmapManager from 'eterna/resources/BitmapManager';
-import AnnotationManager, {AnnotationData} from 'eterna/AnnotationManager';
+import AnnotationManager from 'eterna/AnnotationManager';
 import NucleotidePalette from './NucleotidePalette';
 import GameButton from './GameButton';
 import ToggleBar from './ToggleBar';
@@ -745,17 +745,6 @@ export default class Toolbar extends ContainerObject {
                 Assert.assertIsDefined(this._annotationManager);
                 this._annotationManager.setAnnotationMode(true);
             }));
-
-            this.regs.add(this._annotationManager.selectedItem.connect(
-                (newAnnotation: AnnotationData | null, oldAnnotation: AnnotationData | null) => {
-                    if (newAnnotation) {
-                        this.annotationPanel.setAnnotationPanelItemSelection(newAnnotation, true);
-                    }
-                    if (oldAnnotation) {
-                        this.annotationPanel.setAnnotationPanelItemSelection(oldAnnotation, false);
-                    }
-                }
-            ));
 
             this.regs.add(this._annotationManager.viewAnnotationDataUpdated.connect(() => {
                 this.annotationPanel.updatePanel();

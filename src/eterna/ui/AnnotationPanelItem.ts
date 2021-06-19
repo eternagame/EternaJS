@@ -18,8 +18,7 @@ import TextBuilder, {FontWeight} from 'flashbang/util/TextBuilder';
 import {
     AnnotationData,
     AnnotationHierarchyType,
-    AnnotationCategory,
-    AnnotationRange
+    AnnotationCategory
 } from 'eterna/AnnotationManager';
 import GameButton from './GameButton';
 import DragDropper, {DragDropType, Item} from './DragDropper';
@@ -32,19 +31,10 @@ interface TruncatedLabelText {
 }
 
 interface AnnotationPanelItemProps {
-    id: string | number;
+    data: Omit<AnnotationData, 'positions'>;
     indexPath: number[];
     width: number;
     dividerThickness: number;
-    type: AnnotationHierarchyType;
-    title: string;
-    category: AnnotationCategory;
-    children: AnnotationData[];
-    timestamp?: number;
-    playerID: number;
-    ranges?: AnnotationRange[];
-    layerId?: string | number;
-    body?: string;
     titleEditable: boolean;
     updateTitle: (itemPath: number[], text: string) => void;
     updateAnnotationLayer: (annotation: Item, layerPath: number[]) => void;
@@ -57,42 +47,29 @@ export default class AnnotationPanelItem extends ContainerObject {
     public readonly isExpanded: Value<boolean> = new Value<boolean>(true);
     public readonly isEditingTitle: Value<boolean> = new Value<boolean>(false);
     public readonly onUpdatePanel = new UnitSignal();
+
     constructor(props: AnnotationPanelItemProps) {
         super();
-        this._id = props.id;
+        this._data = props.data;
         this._indexPath = props.indexPath;
-        this._title = props.title;
         this._width = props.width;
         this._dividerThickness = props.dividerThickness;
-        this._type = props.type;
-        this._category = props.category;
         this._titleEditable = props.titleEditable;
-        if (props.timestamp) {
-            this._timestamp = props.timestamp;
-        }
-        if (props.playerID) {
-            this._playerID = props.playerID;
-        }
-        if (props.ranges) {
-            this._ranges = props.ranges;
-        }
-        if (props.layerId) {
-            this._layerId = props.layerId;
-        }
-        if (props.body) {
-            this._body = props.body;
-        }
+
+        this.isVisible.value = props.data.visible ?? true;
+        this.isSelected.value = props.data.selected ?? false;
+        this.isExpanded.value = props.data.expanded ?? true;
 
         this._updateTitle = props.updateTitle;
         this._updateAnnotationLayer = props.updateAnnotationLayer;
         this._updateAnnotationPosition = props.updateAnnotationPosition;
 
-        if (props.children.length > 0) {
+        if (props.data.children.length > 0) {
             // Lay out annotation item children
             let numAnnotationChildren = 0;
             const modelChildren: AnnotationPanelItem[] = [];
-            for (let i = 0; i < props.children.length; i++) {
-                const child = props.children[i];
+            for (let i = 0; i < props.data.children.length; i++) {
+                const child = props.data.children[i];
                 if (child.type === AnnotationHierarchyType.LAYER) {
                     numAnnotationChildren += child.children?.length || 0;
                 } else if (child.type === AnnotationHierarchyType.ANNOTATION) {
@@ -100,50 +77,14 @@ export default class AnnotationPanelItem extends ContainerObject {
                 }
 
                 const item = new AnnotationPanelItem({
-                    id: child.id,
+                    data: child,
                     indexPath: [...this._indexPath, i],
                     width: this._width,
                     dividerThickness: this._dividerThickness,
-                    title: child.title,
-                    type: child.type,
-                    category: this._category,
-                    children: child.children,
-                    timestamp: child.timestamp,
-                    playerID: child.playerID,
-                    ranges: child.ranges,
-                    layerId: child.layerId,
                     titleEditable: this._titleEditable,
                     updateTitle: this._updateTitle,
                     updateAnnotationLayer: this._updateAnnotationLayer,
                     updateAnnotationPosition: this._updateAnnotationPosition
-                });
-
-                item.isExpanded.connect(() => {
-                    // Removes children:
-                    // 1) annotation item
-                    // 2) child layers (if item is a category header)
-                    // 3) child annotations (if item is a layer)
-                    this._itemStack.removeChildren();
-
-                    // Add back annotation item
-                    this._itemStack.addChild(this._itemContainer);
-
-                    // Adds back children:
-                    // 1) child layers (if item is a category header)
-                    // 2) child annotations (if item is a layer)
-                    for (const itemChild of this._modelChildren) {
-                        this._itemStack.addChild(itemChild.container);
-                    }
-
-                    // Updates vertical layout of annotation item + children
-                    this._itemStack.layout();
-
-                    // Notify that annotation layer panel that needs to be updated
-                    this.onUpdatePanel.emit();
-                });
-
-                this.isVisible.connect((visible) => {
-                    item.isVisible.value = visible;
                 });
 
                 modelChildren.push(item);
@@ -161,7 +102,7 @@ export default class AnnotationPanelItem extends ContainerObject {
     protected added(): void {
         super.added();
         let length: number;
-        switch (this._type) {
+        switch (this._data.type) {
             case AnnotationHierarchyType.CATEGORY:
                 length = AnnotationPanelItem.CATEGORY_HEIGHT;
                 break;
@@ -175,25 +116,29 @@ export default class AnnotationPanelItem extends ContainerObject {
 
         let usedWidth = 0; // tracks how much horizontal space is being filled as we build out item container
         if (
-            this._type === AnnotationHierarchyType.LAYER
-            || (this._type === AnnotationHierarchyType.ANNOTATION && this._layerId === undefined)
+            this._data.type === AnnotationHierarchyType.LAYER
+            || (this._data.type === AnnotationHierarchyType.ANNOTATION && this._data.layerId === undefined)
         ) {
             // Layers or layerless annotations have a single indent
             const width = AnnotationPanelItem.LAYER_HEIGHT;
             this._itemIndent = new Graphics()
-                .beginFill(AnnotationPanelItem.ITEM_BACKGROUND_RESTING)
+                .beginFill(
+                    this.isSelected.value
+                        ? AnnotationPanelItem.ITEM_BACKGROUND_SELECTED
+                        : AnnotationPanelItem.ITEM_BACKGROUND_RESTING
+                )
                 .drawRect(
                     0,
                     0,
                     width,
-                    this._type === AnnotationHierarchyType.LAYER
+                    this._data.type === AnnotationHierarchyType.LAYER
                         ? AnnotationPanelItem.LAYER_HEIGHT
                         : AnnotationPanelItem.ANNOTATION_HEIGHT
                 )
                 .endFill();
             usedWidth += width;
             this._itemContainer.addChild(this._itemIndent);
-        } else if (this._type === AnnotationHierarchyType.ANNOTATION && this._layerId) {
+        } else if (this._data.type === AnnotationHierarchyType.ANNOTATION && this._data.layerId) {
             // Annotations in a layer have a double indent
             const width = 2 * AnnotationPanelItem.LAYER_HEIGHT;
             this._itemIndent = new Graphics()
@@ -226,31 +171,30 @@ export default class AnnotationPanelItem extends ContainerObject {
         this._visibilityButtonBackground.addChild(this._visibilityEyeSprite);
         this._visibilityButton = new GameButton()
             .customStyleBox(this._visibilityButtonBackground)
-            .tooltip(`Hide ${this._type.toString()}`);
+            .tooltip(`Hide ${this._data.type.toString()}`);
         this._visibilityButton.display.cursor = 'pointer';
         this._visibilityButton.clicked.connect(() => {
             this.isVisible.value = !this.isVisible.value;
-
-            if (this.isVisible.value) {
-                // Change tooltip text
-                this._visibilityButton.tooltip(`Hide ${this._type.toString()}`);
-                // Show visibility eye
-                this._visibilityEyeSprite.alpha = 1;
-            } else {
-                // Change tooltip text
-                this._visibilityButton.tooltip(`Show ${this._type.toString()}`);
-                // Hide visibility eye
-                this._visibilityEyeSprite.alpha = 0;
-            }
         });
+        if (this.isVisible.value) {
+            // Change tooltip text
+            this._visibilityButton.tooltip(`Hide ${this._data.type.toString()}`);
+            // Show visibility eye
+            this._visibilityEyeSprite.alpha = 1;
+        } else {
+            // Change tooltip text
+            this._visibilityButton.tooltip(`Show ${this._data.type.toString()}`);
+            // Hide visibility eye
+            this._visibilityEyeSprite.alpha = 0;
+        }
         this.addObject(this._visibilityButton, this._itemContainer);
 
         // Set up item ribbon
         let ribbonColor: number;
-        if (this._category === AnnotationCategory.STRUCTURE) {
+        if (this._data.category === AnnotationCategory.STRUCTURE) {
             // RNA Annotation or Layer
             ribbonColor = AnnotationPanelItem.STRUCTURE_RIBBON_COLOR;
-        } else if (this._category === AnnotationCategory.PUZZLE) {
+        } else if (this._data.category === AnnotationCategory.PUZZLE) {
             // PLAYER Annotation or Layer
             ribbonColor = AnnotationPanelItem.PUZZLE_RIBBON_COLOR;
         } else {
@@ -270,8 +214,15 @@ export default class AnnotationPanelItem extends ContainerObject {
 
         // Set up accordion chevron if necessary
         if (
-            (this._type === AnnotationHierarchyType.CATEGORY && this._modelChildren && this._modelChildren.length > 0)
-            || (this._type === AnnotationHierarchyType.LAYER && this._modelChildren && this._modelChildren.length > 0)
+            (
+                this._data.type === AnnotationHierarchyType.CATEGORY
+                && this._modelChildren
+                && this._modelChildren.length > 0
+            ) || (
+                this._data.type === AnnotationHierarchyType.LAYER
+                && this._modelChildren
+                && this._modelChildren.length > 0
+            )
         ) {
             const accordionChevronContainer = new Container();
             this._chevronRight = Sprite.from(Bitmaps.ImgChevronRight);
@@ -279,7 +230,11 @@ export default class AnnotationPanelItem extends ContainerObject {
             this._chevronDown.alpha = 0;
             const aspectRatio = this._chevronRight.width / this._chevronRight.height;
             this._accordionChevron = new Graphics()
-                .beginFill(AnnotationPanelItem.ITEM_BACKGROUND_RESTING)
+                .beginFill(
+                    this.isSelected.value
+                        ? AnnotationPanelItem.ITEM_BACKGROUND_SELECTED
+                        : AnnotationPanelItem.ITEM_BACKGROUND_RESTING
+                )
                 .drawRect(
                     0,
                     0,
@@ -291,38 +246,15 @@ export default class AnnotationPanelItem extends ContainerObject {
             this._chevronButton = new GameButton()
                 .customStyleBox(this._accordionChevron);
             this._chevronButton.clicked.connect(() => {
-                const isExpanded = !this.isExpanded.value;
-                if (isExpanded) {
-                    this._chevronRight.alpha = 0;
-                    this._chevronDown.alpha = 1;
-
-                    // add item children
-                    for (const child of this._modelChildren) {
-                        this._itemStack.addChild(child.container);
-                    }
-
-                    // Updates vertical layout of annotation item + children
-                    this._itemStack.layout();
-                } else {
-                    this._chevronRight.alpha = 1;
-                    this._chevronDown.alpha = 0;
-
-                    // We want to keep the header but remove the children, hence starting
-                    // at index 1
-                    this._itemStack.removeChildren(1, this._itemStack.children.length);
-
-                    // Updates vertical layout of annotation item + children
-                    this._itemStack.layout();
-                }
-
-                this.isExpanded.value = isExpanded;
-
-                if (this._type === AnnotationHierarchyType.CATEGORY) {
-                    // Notify that annotation layer panel that needs to be updated
-                    // if we expand or close category accordion
-                    this.onUpdatePanel.emit();
-                }
+                this.isExpanded.value = !this.isExpanded.value;
             });
+            if (this.isExpanded.value) {
+                this._chevronRight.alpha = 0;
+                this._chevronDown.alpha = 1;
+            } else {
+                this._chevronRight.alpha = 1;
+                this._chevronDown.alpha = 0;
+            }
             this.addObject(this._chevronButton, accordionChevronContainer);
             this._chevronRight.width = length * aspectRatio;
             this._chevronRight.height = length;
@@ -338,7 +270,11 @@ export default class AnnotationPanelItem extends ContainerObject {
         const textContainer = new Container();
         this._itemWidth = this._width - length - AnnotationPanelItem.RIBBON_WIDTH - usedWidth;
         this._itemButtonBackground = new Graphics()
-            .beginFill(AnnotationPanelItem.ITEM_BACKGROUND_RESTING)
+            .beginFill(
+                this.isSelected.value
+                    ? AnnotationPanelItem.ITEM_BACKGROUND_SELECTED
+                    : AnnotationPanelItem.ITEM_BACKGROUND_RESTING
+            )
             .drawRect(
                 0,
                 0,
@@ -350,29 +286,25 @@ export default class AnnotationPanelItem extends ContainerObject {
             .customStyleBox(this._itemButtonBackground);
         this._itemButton.display.cursor = 'default';
         this._itemButton.clicked.connect(() => {
-            if (!this.isSelected.value) {
-                this.select();
-            } else {
-                this.deselect();
-            }
+            this.isSelected.value = !this.isSelected.value;
         });
         this.addObject(this._itemButton, textContainer);
 
         // Retrieve label that fits within remaining item container
-        const preparedLabelText = this.prepareLabelText(this._title, this._itemWidth);
+        const preparedLabelText = this.prepareLabelText(this._data.title, this._itemWidth);
         const labelText = preparedLabelText.object;
         const truncatedText = preparedLabelText.string;
 
-        if (this._type === AnnotationHierarchyType.CATEGORY) {
+        if (this._data.type === AnnotationHierarchyType.CATEGORY) {
             // Create uneditable label
             labelText.y = (length - labelText.height) / 2;
             if (!this._modelChildren || this._modelChildren.length === 0) {
                 labelText.x = AnnotationPanelItem.ITEM_BUTTON_MARGIN_LEFT;
             }
             textContainer.addChild(labelText);
-            this._itemButton.tooltip(this._title);
+            this._itemButton.tooltip(this._data.title);
         } else {
-            // Create editabled label (click to reveal input)
+            // Create editable label (click to reveal input)
             const itemTextButtonTextBuilder = new TextBuilder(truncatedText)
                 .font(Fonts.STDFONT)
                 .fontSize(AnnotationPanelItem.FONT_SIZE)
@@ -389,7 +321,7 @@ export default class AnnotationPanelItem extends ContainerObject {
             this._itemTextButton = new GameButton()
                 .customStyleBox(labelTextBackground)
                 .label(itemTextButtonTextBuilder)
-                .tooltip(this._title);
+                .tooltip(this._data.title);
 
             if (this._titleEditable) {
                 // Edit title
@@ -403,25 +335,21 @@ export default class AnnotationPanelItem extends ContainerObject {
                         this._itemTextButton.display.visible = false;
 
                         // Add text to input
-                        this._itemNameInput.text = this._title;
+                        this._itemNameInput.text = this._data.title;
                     }
                 });
             } else {
                 // Select item
                 this._itemTextButton.clicked.connect(() => {
-                    if (!this.isSelected.value) {
-                        this.select();
-                    } else {
-                        this.deselect();
-                    }
+                    this.isSelected.value = !this.isSelected.value;
                 });
             }
 
             this._itemTextButton.display.y = (length - labelText.height) / 2;
             if (
-                this._type === AnnotationHierarchyType.ANNOTATION
+                this._data.type === AnnotationHierarchyType.ANNOTATION
                 || (
-                    this._type === AnnotationHierarchyType.LAYER
+                    this._data.type === AnnotationHierarchyType.LAYER
                     && (!this._modelChildren || this._modelChildren.length === 0)
                 )
             ) {
@@ -437,7 +365,7 @@ export default class AnnotationPanelItem extends ContainerObject {
                     - 2 * AnnotationPanelItem.ITEM_EDIT_BUTTON_WIDTH,
                 height: length - 2 * AnnotationPanelItem.INPUT_MARGIN,
                 rows: 1,
-                placeholder: this._title,
+                placeholder: this._data.title,
                 characterLimit: AnnotationDialog.ANNOTATION_TEXT_CHARACTER_LIMIT
             }).font(Fonts.STDFONT);
             this._itemNameInput.keyPressed.connect((key) => {
@@ -456,9 +384,12 @@ export default class AnnotationPanelItem extends ContainerObject {
 
             // Set up save edit button
             this._itemSaveEditButtonBackground = new Graphics()
-                .beginFill(this.isSelected.value
-                    ? AnnotationPanelItem.ITEM_BACKGROUND_SELECTED
-                    : AnnotationPanelItem.ITEM_BACKGROUND_RESTING).drawRect(
+                .beginFill(
+                    this.isSelected.value
+                        ? AnnotationPanelItem.ITEM_BACKGROUND_SELECTED
+                        : AnnotationPanelItem.ITEM_BACKGROUND_RESTING
+                )
+                .drawRect(
                     0,
                     0,
                     AnnotationPanelItem.ITEM_EDIT_BUTTON_WIDTH,
@@ -483,9 +414,12 @@ export default class AnnotationPanelItem extends ContainerObject {
 
             // Set up cancel edit button
             this._itemCancelEditButtonBackground = new Graphics()
-                .beginFill(this.isSelected.value
-                    ? AnnotationPanelItem.ITEM_BACKGROUND_SELECTED
-                    : AnnotationPanelItem.ITEM_BACKGROUND_RESTING).drawRect(
+                .beginFill(
+                    this.isSelected.value
+                        ? AnnotationPanelItem.ITEM_BACKGROUND_SELECTED
+                        : AnnotationPanelItem.ITEM_BACKGROUND_RESTING
+                )
+                .drawRect(
                     0,
                     0,
                     AnnotationPanelItem.ITEM_EDIT_BUTTON_WIDTH,
@@ -529,16 +463,16 @@ export default class AnnotationPanelItem extends ContainerObject {
         this.container.addChild(divider);
 
         // Attach drag sources and drop targets
-        switch (this._type) {
+        switch (this._data.type) {
             case AnnotationHierarchyType.CATEGORY:
                 this._dropTarget = new DragDropper({
                     dropType: DragDropType.TARGET,
                     itemDisplayObject: this.display,
                     pointerTarget: this._itemButton.container,
                     item: {
-                        id: this._id,
+                        id: this._data.id,
                         index: this._indexPath,
-                        type: this._type.toString()
+                        type: this._data.type.toString()
                     },
                     acceptItemType: AnnotationHierarchyType.ANNOTATION.toString(),
                     onDrop: (item: Item): void => this.handleDrop(item),
@@ -552,9 +486,9 @@ export default class AnnotationPanelItem extends ContainerObject {
                     itemDisplayObject: this.display,
                     pointerTarget: this._itemButton.container,
                     item: {
-                        id: this._id,
+                        id: this._data.id,
                         index: this._indexPath,
-                        type: this._type.toString()
+                        type: this._data.type.toString()
                     },
                     draggingBorderColor: AnnotationPanelItem.ITEM_HOVER_COLOR,
                     canDrop: (): boolean => true
@@ -564,9 +498,9 @@ export default class AnnotationPanelItem extends ContainerObject {
                     itemDisplayObject: this.display,
                     pointerTarget: this._itemButton.container,
                     item: {
-                        id: this._id,
+                        id: this._data.id,
                         index: this._indexPath,
-                        type: this._type.toString()
+                        type: this._data.type.toString()
                     },
                     acceptItemType: AnnotationHierarchyType.ANNOTATION.toString(),
                     onDrop: (item: Item): void => this.handleDrop(item),
@@ -581,9 +515,9 @@ export default class AnnotationPanelItem extends ContainerObject {
                     itemDisplayObject: this.display,
                     pointerTarget: this._itemButton.container,
                     item: {
-                        id: this._id,
+                        id: this._data.id,
                         index: this._indexPath,
-                        type: this._type.toString()
+                        type: this._data.type.toString()
                     },
                     draggingBorderColor: AnnotationPanelItem.ITEM_HOVER_COLOR,
                     canDrop: (): boolean => true
@@ -593,9 +527,9 @@ export default class AnnotationPanelItem extends ContainerObject {
                     itemDisplayObject: this.display,
                     pointerTarget: this._itemButton.container,
                     item: {
-                        id: this._id,
+                        id: this._data.id,
                         index: this._indexPath,
-                        type: this._type.toString()
+                        type: this._data.type.toString()
                     },
                     acceptItemType: AnnotationHierarchyType.ANNOTATION.toString(),
                     onDrop: (item: Item): void => this.handleDrop(item),
@@ -613,7 +547,7 @@ export default class AnnotationPanelItem extends ContainerObject {
         }
 
         // Add any children to item stack
-        if (this._modelChildren && this._modelChildren.length > 0) {
+        if (this._modelChildren && this._modelChildren.length > 0 && this.isExpanded.value) {
             this.isExpanded.value = true;
             this._chevronRight.alpha = 0;
             this._chevronDown.alpha = 1;
@@ -672,99 +606,9 @@ export default class AnnotationPanelItem extends ContainerObject {
         };
     }
 
-    public select() {
-        if (!this.isSelected.value) {
-            this.isSelected.value = true;
-        }
-
-        if (this._itemIndent) {
-            this.redraw(
-                this._itemIndent,
-                AnnotationPanelItem.ITEM_BACKGROUND_SELECTED,
-                this._itemIndent.width,
-                this._itemIndent.height
-            );
-        }
-        if (this._accordionChevron) {
-            this.redraw(
-                this._accordionChevron,
-                AnnotationPanelItem.ITEM_BACKGROUND_SELECTED,
-                this._accordionChevron.width,
-                this._accordionChevron.height
-            );
-        }
-        this.redraw(
-            this._itemButtonBackground,
-            AnnotationPanelItem.ITEM_BACKGROUND_SELECTED,
-            this._itemButtonBackground.width,
-            this._itemButtonBackground.height
-        );
-        if (this._itemSaveEditButtonBackground) {
-            this.redraw(
-                this._itemSaveEditButtonBackground,
-                AnnotationPanelItem.ITEM_BACKGROUND_SELECTED,
-                this._itemSaveEditButtonBackground.width,
-                this._itemSaveEditButtonBackground.height
-            );
-        }
-        if (this._itemCancelEditButtonBackground) {
-            this.redraw(
-                this._itemCancelEditButtonBackground,
-                AnnotationPanelItem.ITEM_BACKGROUND_SELECTED,
-                this._itemSaveEditButtonBackground.width,
-                this._itemSaveEditButtonBackground.height
-            );
-        }
-    }
-
-    public deselect() {
-        if (this.isSelected.value) {
-            this.isSelected.value = false;
-        }
-
-        if (this._itemIndent) {
-            this.redraw(
-                this._itemIndent,
-                AnnotationPanelItem.ITEM_BACKGROUND_RESTING,
-                this._itemIndent.width,
-                this._itemIndent.height
-            );
-        }
-        if (this._accordionChevron) {
-            this.redraw(
-                this._accordionChevron,
-                AnnotationPanelItem.ITEM_BACKGROUND_RESTING,
-                this._accordionChevron.width,
-                this._accordionChevron.height
-            );
-        }
-        this.redraw(
-            this._itemButtonBackground,
-            AnnotationPanelItem.ITEM_BACKGROUND_RESTING,
-            this._itemButtonBackground.width,
-            this._itemButtonBackground.height
-        );
-        if (this._itemSaveEditButtonBackground) {
-            this.redraw(
-                this._itemSaveEditButtonBackground,
-                AnnotationPanelItem.ITEM_BACKGROUND_RESTING,
-                this._itemSaveEditButtonBackground.width,
-                this._itemSaveEditButtonBackground.height
-            );
-        }
-        if (this._itemCancelEditButtonBackground) {
-            this.redraw(
-                this._itemCancelEditButtonBackground,
-                AnnotationPanelItem.ITEM_BACKGROUND_RESTING,
-                this._itemCancelEditButtonBackground.width,
-                this._itemCancelEditButtonBackground.height
-            );
-        }
-    }
-
     public setTitle(title: string): void {
-        this._title = title;
-        const preparedLabelText = this.prepareLabelText(this._title, this._itemWidth);
+        this._data.title = title;
+        const preparedLabelText = this.prepareLabelText(this._data.title, this._itemWidth);
         const text = preparedLabelText.object;
         const truncText = preparedLabelText.string;
         const textBuilder = new TextBuilder(truncText)
@@ -783,15 +627,11 @@ export default class AnnotationPanelItem extends ContainerObject {
         this.itemTextButton
             .customStyleBox(background)
             .label(textBuilder)
-            .tooltip(this._title);
-        this.itemNameInput.placeholderText(this._title);
+            .tooltip(this._data.title);
+        this.itemNameInput.placeholderText(this._data.title);
 
         // Update in state
-        this._updateTitle(this._indexPath, this._title);
-    }
-
-    public setRanges(ranges: AnnotationRange[]): void {
-        this._ranges = ranges;
+        this._updateTitle(this._indexPath, this._data.title);
     }
 
     public observeDragSource(source: DragDropper) {
@@ -868,11 +708,11 @@ export default class AnnotationPanelItem extends ContainerObject {
     }
 
     private handleDrop(item: Item) {
-        if (this._type === AnnotationHierarchyType.CATEGORY) {
+        if (this._data.type === AnnotationHierarchyType.CATEGORY) {
             this._updateAnnotationLayer(item, this._indexPath);
-        } else if (this._type === AnnotationHierarchyType.LAYER) {
+        } else if (this._data.type === AnnotationHierarchyType.LAYER) {
             this._updateAnnotationLayer(item, this._indexPath);
-        } else if (this._type === AnnotationHierarchyType.ANNOTATION) {
+        } else if (this._data.type === AnnotationHierarchyType.ANNOTATION) {
             this._updateAnnotationPosition(item, this._indexPath);
         }
     }
@@ -889,9 +729,9 @@ export default class AnnotationPanelItem extends ContainerObject {
         }
 
         const newTitle = this.itemNameInput.text;
-        if (newTitle.length > 0 && newTitle !== this._title) {
-            this._title = newTitle;
-            const editedPreparedLabelText = this.prepareLabelText(this._title, this._itemWidth);
+        if (newTitle.length > 0 && newTitle !== this._data.title) {
+            this._data.title = newTitle;
+            const editedPreparedLabelText = this.prepareLabelText(this._data.title, this._itemWidth);
             const text = editedPreparedLabelText.object;
             const truncText = editedPreparedLabelText.string;
             const textBuilder = new TextBuilder(truncText)
@@ -910,11 +750,11 @@ export default class AnnotationPanelItem extends ContainerObject {
             this.itemTextButton
                 .customStyleBox(background)
                 .label(textBuilder)
-                .tooltip(this._title);
-            this.itemNameInput.placeholderText(this._title);
+                .tooltip(this._data.title);
+            this.itemNameInput.placeholderText(this._data.title);
 
             // Update in state
-            this._updateTitle(this._indexPath, this._title);
+            this._updateTitle(this._indexPath, this._data.title);
         }
 
         // only clear once complete
@@ -937,11 +777,11 @@ export default class AnnotationPanelItem extends ContainerObject {
     }
 
     public get id() {
-        return this._id;
+        return this._data.id;
     }
 
     public get category() {
-        return this._category;
+        return this._data.category;
     }
 
     public get modelChildren() {
@@ -949,31 +789,27 @@ export default class AnnotationPanelItem extends ContainerObject {
     }
 
     public get title() {
-        return this._title;
+        return this._data.title;
     }
 
     public get type() {
-        return this._type;
+        return this._data.type;
     }
 
     public get timestamp() {
-        return this._timestamp;
+        return this._data.timestamp;
     }
 
     public get playerID() {
-        return this._playerID;
+        return this._data.playerID;
     }
 
     public get ranges() {
-        return this._ranges;
-    }
-
-    public get body() {
-        return this._body;
+        return this._data.ranges;
     }
 
     public get layerId() {
-        return this._layerId;
+        return this._data.layerId;
     }
 
     public get dragSource() {
@@ -1005,13 +841,10 @@ export default class AnnotationPanelItem extends ContainerObject {
         return this._itemCancelEditButton;
     }
 
-    private _id: string | number;
+    private _data: Omit<AnnotationData, 'positions'>;
     private _indexPath: number[];
-    private _title: string;
     private _width: number;
     private _dividerThickness: number;
-    private _type: AnnotationHierarchyType;
-    private _category: AnnotationCategory;
     private _titleEditable: boolean;
     private _itemStack: VLayoutContainer;
     private _itemContainer: HLayoutContainer;
@@ -1043,13 +876,6 @@ export default class AnnotationPanelItem extends ContainerObject {
     private _updateTitle: (itemPath: number[], text: string) => void;
     private _updateAnnotationLayer: (annotation: Item, layerPath: number[]) => void;
     private _updateAnnotationPosition: (firstAnnotation: Item, secondAnnotationPath: number[]) => void;
-
-    // Annotation
-    private _timestamp: number;
-    private _playerID: number;
-    private _ranges: AnnotationRange[];
-    private _layerId: string | number;
-    private _body: string;
 
     private static readonly CATEGORY_HEIGHT = 40;
     private static readonly LAYER_HEIGHT = 40;
