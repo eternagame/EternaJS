@@ -757,7 +757,7 @@ export default class Toolbar extends ContainerObject {
                 }
             ));
 
-            this.regs.add(this._annotationManager.annotationDataUpdated.connect(() => {
+            this.regs.add(this._annotationManager.viewAnnotationDataUpdated.connect(() => {
                 this.annotationPanel.updatePanel();
             }));
 

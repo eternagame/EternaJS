@@ -150,7 +150,7 @@ export default class PuzzleEditMode extends GameMode {
         const toolbarType = this._embedded ? ToolbarType.PUZZLEMAKER_EMBEDDED : ToolbarType.PUZZLEMAKER;
 
         this._annotationManager = new AnnotationManager(toolbarType);
-        this._annotationManager.annotationDataUpdated.connect(() => this.saveData());
+        this._annotationManager.persistentAnnotationDataUpdated.connect(() => this.saveData());
         this._annotationManager.annotationEditRequested.connect((annotation: AnnotationData) => {
             if (annotation.ranges) {
                 const dialog = new AnnotationDialog({

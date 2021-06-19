@@ -162,7 +162,7 @@ export default class PoseEditMode extends GameMode {
         const toolbarType = this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL ? ToolbarType.LAB : ToolbarType.PUZZLE;
 
         this._annotationManager = new AnnotationManager(toolbarType);
-        this._annotationManager.annotationDataUpdated.connect(() => this.saveData());
+        this._annotationManager.persistentAnnotationDataUpdated.connect(() => this.saveData());
         this._annotationManager.annotationEditRequested.connect((annotation: AnnotationData) => {
             if (annotation.ranges) {
                 const dialog = new AnnotationDialog({

@@ -189,16 +189,16 @@ export default class AnnotationManager {
         panelPos: new Point(0, 0)
     });
 
-    // Currently selected annotation
-    public readonly selectedItem = new Value<AnnotationData | null>(null);
     // Signals that an annotation should be edited (reveal AnnotationDialog)
     public readonly annotationEditRequested = new Signal<AnnotationData>();
+    // Currently selected annotation
+    public readonly selectedItem = new Value<AnnotationData | null>(null);
     // Currently highlighted bases from annotation selection or hover
     public readonly highlights = new Value<AnnotationRange[]>([]);
-    // Signals to recompute annotation space availability in the puzzle
-    public readonly onUpdateAnnotationViews = new UnitSignal();
-    // Signals to save annotations, redraw, etc
-    public readonly annotationDataUpdated = new UnitSignal();
+    // Signals to redraw annotation visualizations
+    public readonly viewAnnotationDataUpdated = new UnitSignal();
+    // Signals to save annotations
+    public readonly persistentAnnotationDataUpdated = new UnitSignal();
 
     constructor(toolbarType: ToolbarType) {
         this._toolbarType = toolbarType;
@@ -371,7 +371,7 @@ export default class AnnotationManager {
      */
     public setAnnotationSelection(annotation: AnnotationPanelItem | AnnotationData, isSelected: boolean): void {
         const [parentNode, index] = this.getRelevantParentNode(annotation);
-        if (parentNode && index != null) {
+        if (parentNode && index != null && (!isSelected || this.selectedItem.value !== parentNode[index])) {
             parentNode[index].selected = isSelected;
 
             if (isSelected) {
@@ -430,12 +430,12 @@ export default class AnnotationManager {
         this._annotations = this.allAnnotations;
         this._layers = this.allLayers;
 
-        this.onUpdateAnnotationViews.emit();
+        this.viewAnnotationDataUpdated.emit();
     }
 
     private propagateDataUpdates(): void {
         this.updateAnnotationViews();
-        this.annotationDataUpdated.emit();
+        this.persistentAnnotationDataUpdated.emit();
     }
 
     /**
@@ -937,7 +937,7 @@ export default class AnnotationManager {
                         };
 
                         this.setAnnotationPositions(params.item, i, movedPosition);
-                        this.annotationDataUpdated.emit();
+                        this.persistentAnnotationDataUpdated.emit();
                     });
                 }
                 params.pose.addAnnotationView(view);
@@ -1013,7 +1013,7 @@ export default class AnnotationManager {
                     };
 
                     this.setAnnotationPositions(params.item, i, movedPosition);
-                    this.annotationDataUpdated.emit();
+                    this.persistentAnnotationDataUpdated.emit();
                 });
             }
             // We need to prematurely (ie, before we have a final position) add this to the display object graph
@@ -1083,7 +1083,6 @@ export default class AnnotationManager {
             if (relPosition && absolutePosition) {
                 // Set position
                 view.display.position.copyFrom(absolutePosition);
-                // params.pose.addAnnotationView(view, false, true);
 
                 // Cache position
                 this.setAnnotationPositions(params.item, i, {

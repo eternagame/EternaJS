@@ -242,7 +242,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this.setAnnotationRangeHighlight(ranges);
             }
         }));
-        this.regs.add(this._annotationManager.onUpdateAnnotationViews.connect(() => {
+        this.regs.add(this._annotationManager.viewAnnotationDataUpdated.connect(() => {
             this.redrawAnnotations(true);
         }));
     }
