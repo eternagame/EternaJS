@@ -732,18 +732,18 @@ export default class Toolbar extends ContainerObject {
                 this._annotationManager
             );
 
-            this.regs.add(this.annotationModeButton.toggled.connect((active: boolean) => {
-                Assert.assertIsDefined(this._annotationManager);
-                this._annotationManager.setAnnotationMode(active);
-            }));
+            if (this._showAdvancedMenus) {
+                this.addObject(this.annotationPanel, this.mode?.container);
+                this.addObject(this.annotationModeButton, this.lowerToolbarLayout);
+                this.addObject(this.annotationPanelButton, this.lowerToolbarLayout);
+            }
 
-            this.regs.add(this._annotationManager.annotationModeActive.connectNotify((value) => {
-                if (
-                    (value && !this.annotationModeButton.isSelected)
-                    || (!value && this.annotationModeButton.isSelected)
-                ) {
-                    this.annotationModeButton.toggle();
-                }
+            this.regs.add(this.annotationModeButton.clicked.connect(() => {
+                this._deselectAllPaintTools();
+                this.annotationModeButton.toggled.value = true;
+
+                Assert.assertIsDefined(this._annotationManager);
+                this._annotationManager.setAnnotationMode(true);
             }));
 
             this.regs.add(this._annotationManager.selectedItem.connect(
@@ -760,12 +760,6 @@ export default class Toolbar extends ContainerObject {
             this.regs.add(this._annotationManager.viewAnnotationDataUpdated.connect(() => {
                 this.annotationPanel.updatePanel();
             }));
-
-            if (this._showAdvancedMenus) {
-                this.addObject(this.annotationPanel, this.mode?.container);
-                this.addObject(this.annotationModeButton, this.lowerToolbarLayout);
-                this.addObject(this.annotationPanelButton, this.lowerToolbarLayout);
-            }
         }
 
         if (this._type === ToolbarType.PUZZLEMAKER) {
@@ -1043,7 +1037,8 @@ export default class Toolbar extends ContainerObject {
             button.toggled.value = false;
         }
 
-        if (this._annotationManager && this._annotationManager.annotationModeActive.value) {
+        this.annotationModeButton.toggled.value = false;
+        if (this._annotationManager) {
             this._annotationManager.setAnnotationMode(false);
         }
     }
