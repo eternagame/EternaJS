@@ -186,6 +186,14 @@ export default class AnnotationPanel extends ContainerObject {
             this.setAnnotationPanelItemSelection(selectedItem, true);
         }
 
+        // Get 1D array of annotations in annotation tree
+        const annotationModels: AnnotationPanelItem[] = [];
+        AnnotationPanel.collectAnnotationPanelItems(this._items, annotationModels);
+        // Register annotation models to observe drag events
+        this.registerDragObservers(annotationModels);
+        // Register panel to respond to annotation selection events
+        this.registerAnnotationObservers(annotationModels);
+
         this.doLayout();
         this._scrollView.doLayout();
         this._scrollView.updateScrollThumb();
@@ -211,13 +219,6 @@ export default class AnnotationPanel extends ContainerObject {
         });
         // Add to list of items
         this._items.push(item);
-        // Get 1D array of annotations in annotation tree
-        const annotationModels: AnnotationPanelItem[] = [];
-        AnnotationPanel.collectAnnotationPanelItems(this._items, annotationModels);
-        // Register annotation models to observe drag events
-        this.registerDragObservers(annotationModels);
-        // Register panel to respond to annotation selection events
-        this.registerAnnotationObservers(annotationModels);
 
         this.doLayout();
     }

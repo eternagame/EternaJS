@@ -352,7 +352,7 @@ export default class AnnotationManager {
      */
     public setAnnotationSelection(annotation: AnnotationPanelItem | AnnotationData, isSelected: boolean): void {
         const [parentNode, index] = this.getRelevantParentNode(annotation);
-        if (parentNode && index != null && (!isSelected || this.selectedItem.value !== parentNode[index])) {
+        if (parentNode && index != null) {
             parentNode[index].selected = isSelected;
 
             if (isSelected) {
