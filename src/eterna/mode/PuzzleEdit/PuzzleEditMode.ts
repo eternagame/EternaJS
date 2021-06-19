@@ -159,6 +159,7 @@ export default class PuzzleEditMode extends GameMode {
                     sequenceLength: this._poses[0].fullSequenceLength,
                     initialRanges: annotation.ranges,
                     initialLayers: this._annotationManager.activeLayers,
+                    activeCategory: this._annotationManager.activeCategory,
                     initialAnnotation: annotation
                 });
                 dialog.onUpdateRanges.connect((ranges: AnnotationRange[] | null) => {

@@ -155,7 +155,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 title: false,
                 sequenceLength: this.fullSequenceLength,
                 initialRanges: this._annotationRanges,
-                initialLayers: this._annotationManager.activeLayers
+                initialLayers: this._annotationManager.activeLayers,
+                activeCategory: this._annotationManager.activeCategory
             });
 
             this._annotationDialog.onUpdateRanges.connect((ranges: AnnotationRange[] | null) => {
