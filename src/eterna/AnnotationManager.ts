@@ -183,12 +183,6 @@ export interface AnnotationDialogArguments {
 export default class AnnotationManager {
     // Signals annotation mode active state
     public readonly annotationMode: Value<boolean> = new Value<boolean>(false);
-    // Signals the process to create a new annotation with the necessary initial data
-    public readonly onCreateAnnotation: Value<AnnotationArguments> = new Value<AnnotationArguments>({
-        ranges: [],
-        panelPos: new Point(0, 0)
-    });
-
     // Signals that an annotation should be edited (reveal AnnotationDialog)
     public readonly annotationEditRequested = new Signal<AnnotationData>();
     // Currently selected annotation
@@ -202,19 +196,6 @@ export default class AnnotationManager {
 
     constructor(toolbarType: ToolbarType) {
         this._toolbarType = toolbarType;
-    }
-
-    /**
-     * Initiates the annotation creation process
-     *
-     * @param ranges the set of ranges associated with the new annotation
-     */
-    public createAnnotation(ranges: AnnotationRange[], panelPos: Point) {
-        // Inform listener to expose annotation dialog
-        this.onCreateAnnotation.value = {
-            ranges,
-            panelPos
-        };
     }
 
     /**
