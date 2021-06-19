@@ -531,11 +531,9 @@ export default class AnnotationPanel extends ContainerObject {
                     this._selectedDisplay = panelItem.display;
 
                     // Show delete + edit button
-                    const withEdit = panelItem.category === this._annotationManager.activeCategory
-                        && panelItem.category !== AnnotationCategory.STRUCTURE
+                    const withEdit = panelItem.category !== AnnotationCategory.STRUCTURE
                         && panelItem.type === AnnotationHierarchyType.ANNOTATION;
-                    const withDelete = panelItem.category === this._annotationManager.activeCategory
-                    && panelItem.category !== AnnotationCategory.STRUCTURE;
+                    const withDelete = panelItem.category !== AnnotationCategory.STRUCTURE;
                     this.updateUpperToolbar(withDelete, withEdit);
                 } else if (
                     this._selectedPath

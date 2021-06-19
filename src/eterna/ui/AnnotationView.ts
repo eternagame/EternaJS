@@ -28,7 +28,6 @@ export default class AnnotationView extends ContainerObject {
         type: AnnotationHierarchyType,
         positionIndex: number,
         item: AnnotationData,
-        activeCategory: AnnotationCategory,
         textColor: number
     ) {
         super();
@@ -37,7 +36,6 @@ export default class AnnotationView extends ContainerObject {
         this._type = type;
         this._positionIndex = positionIndex;
         this._item = item;
-        this._activeCategory = activeCategory;
         this._textColor = textColor;
     }
 
@@ -126,7 +124,6 @@ export default class AnnotationView extends ContainerObject {
 
         if (
             this._item.selected
-            && this._item.category === this._activeCategory
             && this._item.category !== AnnotationCategory.STRUCTURE
         ) {
             let panelWidth = this._card.width;
@@ -342,7 +339,6 @@ export default class AnnotationView extends ContainerObject {
     private _type: AnnotationHierarchyType;
     private _positionIndex: number;
     private _item: AnnotationData;
-    private _activeCategory: AnnotationCategory;
     private _textColor: number;
     private _card: TextBalloon;
     private _editButton: GameButton;

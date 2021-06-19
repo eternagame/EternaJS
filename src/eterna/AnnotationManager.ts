@@ -802,7 +802,6 @@ export default class AnnotationManager {
             item.type,
             positionIndex,
             item,
-            this.activeCategory,
             textColor
         );
 
