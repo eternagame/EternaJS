@@ -737,7 +737,7 @@ export default class Toolbar extends ContainerObject {
                 this._annotationManager.setAnnotationMode(active);
             }));
 
-            this.regs.add(this._annotationManager.annotationMode.connectNotify((value) => {
+            this.regs.add(this._annotationManager.annotationModeActive.connectNotify((value) => {
                 if (
                     (value && !this.annotationModeButton.isSelected)
                     || (!value && this.annotationModeButton.isSelected)
@@ -1043,7 +1043,7 @@ export default class Toolbar extends ContainerObject {
             button.toggled.value = false;
         }
 
-        if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
+        if (this._annotationManager && this._annotationManager.annotationModeActive.value) {
             this._annotationManager.setAnnotationMode(false);
         }
     }

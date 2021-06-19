@@ -182,7 +182,7 @@ export interface AnnotationDialogArguments {
 
 export default class AnnotationManager {
     // Signals annotation mode active state
-    public readonly annotationMode: Value<boolean> = new Value<boolean>(false);
+    public readonly annotationModeActive: Value<boolean> = new Value<boolean>(false);
     // Signals that an annotation should be edited (reveal AnnotationDialog)
     public readonly annotationEditRequested = new Signal<AnnotationData>();
     // Currently selected annotation
@@ -553,7 +553,7 @@ export default class AnnotationManager {
      * users are able to create new annotations
      */
     public setAnnotationMode(active: boolean): void {
-        this.annotationMode.value = active;
+        this.annotationModeActive.value = active;
 
         if (!active) {
             this.highlights.value = [];
@@ -568,13 +568,6 @@ export default class AnnotationManager {
                 doc.style.cursor = 'grab';
             }
         }
-    }
-
-    /**
-     * Accesses the current annotation mode value
-     */
-    public getAnnotationMode(): boolean {
-        return this.annotationMode.value;
     }
 
     /**
@@ -817,7 +810,7 @@ export default class AnnotationManager {
             view.pointerOver.connect(() => {
                 // we only set highlight if annotation mode off so we don't
                 // disturb any selections that might be taking place
-                if (!this.getAnnotationMode()) {
+                if (!this.annotationModeActive.value) {
                     // highlight associated range
                     if (item.type === AnnotationHierarchyType.ANNOTATION) {
                         const annotation = item;
@@ -839,7 +832,7 @@ export default class AnnotationManager {
             view.pointerOut.connect(() => {
                 // remove associated range only if annotation mode off so we don't
                 // disturb any selections that might be taking place
-                if (!item.selected && !this.getAnnotationMode()) {
+                if (!item.selected && !this.annotationModeActive.value) {
                     this.highlights.value = [];
                 }
             });

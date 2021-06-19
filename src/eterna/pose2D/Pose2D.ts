@@ -226,7 +226,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.regs.add(Eterna.settings.simpleGraphics.connectNotify((value) => { this.useSimpleGraphics = value; }));
         this.regs.add(Eterna.settings.usePuzzlerLayout.connect(() => this.computeLayout()));
 
-        this.regs.add(this._annotationManager.annotationMode.connect((active: boolean) => {
+        this.regs.add(this._annotationManager.annotationModeActive.connect((active: boolean) => {
             if (active) {
                 this.setBasesOpacity(AnnotationManager.ANNOTATION_UNHIGHLIGHTED_OPACITY);
                 this.setAnnotationCanvasOpacity(AnnotationManager.ANNOTATION_UNHIGHLIGHTED_OPACITY);
@@ -921,12 +921,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (
                 (ctrlDown || this.currentColor === RNAPaint.BASE_MARK)
                 && closestIndex < this.fullSequenceLength
-                && !this._annotationManager.getAnnotationMode()
+                && !this._annotationManager.annotationModeActive.value
             ) {
                 this.toggleBaseMark(closestIndex);
                 return;
             }
-            if (shiftDown && !this._annotationManager.getAnnotationMode()) {
+            if (shiftDown && !this._annotationManager.annotationModeActive.value) {
                 if (closestIndex < this.sequenceLength) {
                     this._shiftStart = closestIndex;
                     this._shiftEnd = closestIndex;
@@ -942,7 +942,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 e.stopPropagation();
                 return;
             }
-            if (this._annotationManager.getAnnotationMode()) {
+            if (this._annotationManager.annotationModeActive.value) {
                 this.hideAnnotationContextMenu();
 
                 if (closestIndex < this.sequenceLength) {
@@ -1038,7 +1038,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
 
             e.stopPropagation();
-        } else if (shiftDown && !this._annotationManager.getAnnotationMode()) {
+        } else if (shiftDown && !this._annotationManager.annotationModeActive.value) {
             this._shiftStart = -1;
             this._shiftEnd = -1;
             this.updateShiftHighlight();
@@ -1176,7 +1176,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.onBaseMouseMove(closestIndex);
             // document.getElementById(Eterna.PIXI_CONTAINER_ID).style.cursor = 'none';
 
-            if (!this._annotationManager.getAnnotationMode()) {
+            if (!this._annotationManager.annotationModeActive.value) {
                 this._paintCursor.display.visible = true;
                 this._paintCursor.setShape(this._currentColor);
             }
@@ -1714,7 +1714,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         if (
             this._annotationManager
-            && this._annotationManager.getAnnotationMode()
+            && this._annotationManager.annotationModeActive.value
         ) {
             for (const base of this._bases) {
                 base.container.alpha = AnnotationManager.ANNOTATION_UNHIGHLIGHTED_OPACITY;
@@ -3398,7 +3398,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.updateShiftHighlight();
         } else if (
             !this._coloring
-            && this._annotationManager.getAnnotationMode()
+            && this._annotationManager.annotationModeActive.value
             && this._annotationRanges.length > 0
             && this._selectingAnnotationRange
             && seqnum < this.sequenceLength
@@ -3537,7 +3537,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public updateAnnotationRangeHighlight(): void {
         this._annotationHighlightBox.clear();
 
-        if (this._annotationManager.getAnnotationMode()) {
+        if (this._annotationManager.annotationModeActive.value) {
             for (let i = 0; i < this._bases.length; i++) {
                 this._bases[i].container.alpha = AnnotationManager.ANNOTATION_UNHIGHLIGHTED_OPACITY;
             }
