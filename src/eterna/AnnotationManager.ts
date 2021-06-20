@@ -943,6 +943,8 @@ export default class AnnotationManager {
      * @param pose puzzle pose of interest
      * @param item display object data with positioning and annotation metadata
      * @param itemIndex index of item within parent array
+     * @param reset whether to recalculate the positions of all annotations
+     * @param ignoreCustom whether to override the custom
      */
     private placeAnnotationInPose(params: {
         pose: Pose2D;
