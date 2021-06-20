@@ -27,7 +27,9 @@ import FolderManager from 'eterna/folding/FolderManager';
 import Folder, {MultiFoldResult, CacheKey} from 'eterna/folding/Folder';
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
 import PoseField from 'eterna/pose2D/PoseField';
-import Pose2D, {Oligo, Layout} from 'eterna/pose2D/Pose2D';
+import Pose2D, {
+    Oligo, Layout, SCRIPT_MARKER_LAYER
+} from 'eterna/pose2D/Pose2D';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import ConstraintBar from 'eterna/constraints/ConstraintBar';
@@ -55,6 +57,7 @@ import {HighlightInfo} from 'eterna/constraints/Constraint';
 import {AchievementData} from 'eterna/achievements/AchievementManager';
 import {RankScrollData} from 'eterna/rank/RankScroll';
 import FolderSwitcher from 'eterna/ui/FolderSwitcher';
+import MarkerSwitcher from 'eterna/ui/MarkerSwitcher';
 import DotPlot from 'eterna/rnatypes/DotPlot';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
@@ -692,6 +695,17 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
+    private addMarkerLayer(layer: string, resetSelectedLayer?: boolean) {
+        this._markerSwitcher.addMarkerLayer(layer, resetSelectedLayer);
+        this._markerSwitcher.display.visible = true;
+    }
+
+    private setMarkerLayer(layer: string) {
+        for (const pose of this._poses) {
+            pose.setMarkerLayer(layer);
+        }
+    }
+
     private setPuzzle(): void {
         const poseFields: PoseField[] = [];
 
@@ -849,6 +863,12 @@ export default class PoseEditMode extends GameMode {
 
             this.onChangeFolder();
         });
+
+        this._markerSwitcher = new MarkerSwitcher();
+        this._markerSwitcher.display.position.set(17, 200);
+        this.addObject(this._markerSwitcher, this.uiLayer);
+        this.regs?.add(this._markerSwitcher.selectedLayer.connectNotify((val) => this.setMarkerLayer(val)));
+        this._markerSwitcher.display.visible = false;
 
         this._constraintsLayer = new Container();
         this.uiLayer.addChild(this._constraintsLayer);
@@ -1142,8 +1162,7 @@ export default class PoseEditMode extends GameMode {
             }
         });
 
-        this._scriptInterface.addCallback('get_tracked_indices',
-            (): number[] => this.getPose(0).trackedIndices.map((mark) => mark.baseIndex));
+        this._scriptInterface.addCallback('get_tracked_indices', (): number[] => this.getPose(0).trackedIndices);
         this._scriptInterface.addCallback('get_barcode_indices', (): number[] | null => this._puzzle.barcodeIndices);
         this._scriptInterface.addCallback('is_barcode_available',
             (seq: string): boolean => SolutionManager.instance.checkRedundancyByHairpin(seq));
@@ -1280,33 +1299,13 @@ export default class PoseEditMode extends GameMode {
         });
 
         this._scriptInterface.addCallback('set_tracked_indices',
-            (marks: (number | { baseIndex: number; colors?: number | number[] })[], colors?: number[]): void => {
-                let standardizedMarks: { baseIndex: number; colors?: number | number[] }[] | null = null;
-
-                if (colors) {
-                    log.warn(
-                        'Sending a colors argument to set_tracked_indices is deprecated, and will soon not be supported'
-                    );
-                    if (colors.length !== marks.length) {
-                        log.error(
-                            'Marks array is not the same length as color array for set_tracked_indices',
-                            ' - leaving as black'
-                        );
-                    } else if (marks.some((mark) => typeof (mark) !== 'number')) {
-                        log.error(
-                            'Marks array should consist of numbers when the colors argument is present - aborting'
-                        );
-                        return;
-                    } else {
-                        standardizedMarks = colors.map((color, i) => ({baseIndex: marks[i] as number, colors: color}));
-                    }
-                }
-
-                if (!standardizedMarks) {
-                    standardizedMarks = marks.map(
-                        (mark) => (typeof (mark) === 'number' ? {baseIndex: mark as number} : mark)
-                    );
-                }
+            (
+                marks: (number | { baseIndex: number; colors?: number | number[] })[],
+                options?: {layerName?: string}
+            ): void => {
+                const standardizedMarks = marks.map(
+                    (mark) => (typeof (mark) === 'number' ? {baseIndex: mark as number} : mark)
+                );
 
                 if (standardizedMarks.some((mark) => typeof (mark.baseIndex) !== 'number')) {
                     log.error(
@@ -1316,11 +1315,14 @@ export default class PoseEditMode extends GameMode {
                     return;
                 }
 
+                const layer = options?.layerName ?? SCRIPT_MARKER_LAYER;
+                this.addMarkerLayer(layer);
+
                 for (let ii = 0; ii < this.numPoseFields; ii++) {
                     const pose: Pose2D = this.getPose(ii);
-                    pose.clearTracking();
+                    pose.clearLayerTracking(layer);
                     for (const mark of standardizedMarks) {
-                        pose.addBaseMark(mark.baseIndex, mark.colors);
+                        pose.addBaseMark(mark.baseIndex, layer, mark.colors);
                     }
                 }
             });
@@ -3460,6 +3462,8 @@ export default class PoseEditMode extends GameMode {
     private _targetOligosOrder: (number[] | undefined)[] = [];
 
     private _folderSwitcher: FolderSwitcher;
+    private _markerSwitcher: MarkerSwitcher;
+
     private _isFrozen: boolean = false;
     private _targetName: Text;
 
