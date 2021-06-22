@@ -2410,7 +2410,7 @@ export default class AnnotationManager {
      * @param items a graph of annotations
      * @param arr array to place annotations into
      */
-    private static collectAnnotationItems = (items: AnnotationData[], arr: AnnotationData[]) => {
+    private static collectAnnotationItems(items: AnnotationData[], arr: AnnotationData[]) {
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
 
@@ -2421,14 +2421,14 @@ export default class AnnotationManager {
                 arr.push(item);
             }
         }
-    };
+    }
 
     /**
      * Cleans up annotation data in order for it to include runtime variables
      *
      * @param node annotation of interest
      */
-    private static prepareAnnotationNode = (node: AnnotationData): AnnotationData => {
+    private static prepareAnnotationNode(node: AnnotationData): AnnotationData {
         const processedNode = {...node};
         // These are runtime properties
         processedNode.visible = true;
@@ -2449,7 +2449,7 @@ export default class AnnotationManager {
             ...processedNode,
             children
         };
-    };
+    }
 
     // Stores the master data for all categories of annotations
     private _structureAnnotations: AnnotationData[] = [];
