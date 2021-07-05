@@ -29,7 +29,6 @@
         "airbnb-typescript/base",
         "prettier"
       ],
-      "plugins": ["@typescript-eslint"],
       "rules": {
         // default-case doesn"t understand the idea of exhaustivity (because it doesn"t understand types),
         // but switch-exhaustiveness-check does
