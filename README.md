@@ -59,6 +59,13 @@ There are two types of packages - libraries and applications. Applications can b
 a browser via an html entry point once built. No other pacakge imports an application. Libraries are
 shareable across libraries and applications.
 
+### Updating dependencies
+
+When updating Nx plugins (or dependencies that are managed by Nx plugins), the plugins may have changes
+to configurations or other changes that should be made when updating. The process of updating packages
+and making changes is automated, and can be done via `npm run update`. Never update these packages
+"manually" (without using this command). Remove the migrations.json file before committing changes.
+
 ## Setting up new test puzzles
 
 - Create your puzzle using the puzzlemaker GUI by clicking the "Create Puzzle" button at `http://eternadev.org/web/playerpuzzles/`
