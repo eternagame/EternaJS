@@ -6,6 +6,7 @@
     "ecmaVersion": 2020
   },
   "overrides": [
+    // Javascript base
     {
       "files": ["*.js", "*.jsx"],
       "extends": ["airbnb-base", "prettier"],
@@ -19,6 +20,7 @@
         ]
       }
     },
+    // TS base
     {
       "files": ["*.ts", "*.tsx"],
       "extends": [
@@ -53,6 +55,7 @@
         ]
       }
     },
+    // JS + TS overrides
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
       "rules": {
@@ -96,6 +99,7 @@
         "max-classes-per-file": "off"
       }
     },
+    // Test file overrides
     {
       "files": [
         "**/__tests__/*.{j,t}s?(x)",
