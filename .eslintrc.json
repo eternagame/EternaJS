@@ -30,24 +30,25 @@
         "prettier"
       ],
       "rules": {
-        // default-case doesn"t understand the idea of exhaustivity (because it doesn"t understand types),
+        // default-case doesn't understand the idea of exhaustivity (because it doesn't understand types),
         // but switch-exhaustiveness-check does
         "default-case": "off",
         "@typescript-eslint/switch-exhaustiveness-check": "error",
         // This is generally covered by typescript - and it will run into issues with switch exhaustivity too
         "consistent-return": "off",
-        // We"ll let typescript noUnusedLocals/noUnusedParams handle this
+        // We'll let typescript noUnusedLocals/noUnusedParams handle this
         "@typescript-eslint/no-unused-vars": "off",
         // This gets very noisy when you have a bunch of attributes
-        // Specified separately for js
+        // Note: Specified separately for js
         "@typescript-eslint/lines-between-class-members": [
           "error",
           "always",
           { "exceptAfterSingleLine": true }
         ],
-        // This rule frequently throws up false positives with subclasses https://github.com/typescript-eslint/typescript-eslint/issues/52
+        // While technically it can be a static method if you don't use `this`, stylistically
+        // we prefer using static methods when it actually needs to be used without an instance
         "class-methods-use-this": "off",
-        // It"s nice to put the primary class up front in a file
+        // It's nice to put the primary class up front in a file
         "@typescript-eslint/no-use-before-define": [
           "error",
           { "classes": false }
@@ -89,9 +90,9 @@
             "message": "`with` is disallowed in strict mode because it makes code impossible to predict and optimize."
           }
         ],
-        // We use this extensively to be clear about private members
+        // We use this to be clear about private members
         "no-underscore-dangle": "off",
-        // It requires being a bit careful, but these allow for a bit cleaner arithmatic
+        // It requires being a bit careful, but these allow for a bit cleaner arithmetic
         "no-bitwise": "off",
         "no-plusplus": "off",
         // We might want to do this with small utility classes
@@ -124,7 +125,7 @@
           }
         ],
         // We may want to add some lightweight classes used for mocking, for example
-        // (plus the point of this rule doesn"t really apply for tests in general)
+        // (plus the point of this rule doesn't really apply for tests in general)
         "max-classes-per-file": "off"
       }
     }
