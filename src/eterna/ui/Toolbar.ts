@@ -739,11 +739,12 @@ export default class Toolbar extends ContainerObject {
             }
 
             this.regs.add(this.annotationModeButton.clicked.connect(() => {
+                const buttonValue: boolean = this.annotationModeButton.toggled.value;
                 this._deselectAllPaintTools();
-                this.annotationModeButton.toggled.value = true;
+                this.annotationModeButton.toggled.value = buttonValue;
 
                 Assert.assertIsDefined(this._annotationManager);
-                this._annotationManager.setAnnotationMode(true);
+                this._annotationManager.setAnnotationMode(this.annotationModeButton.toggled.value);
             }));
 
             this.regs.add(this._annotationManager.viewAnnotationDataUpdated.connect(() => {
