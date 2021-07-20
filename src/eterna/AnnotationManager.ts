@@ -202,17 +202,25 @@ export default class AnnotationManager {
      * @param annotation the total annotation data
      * @param type the category of annotation being created
      */
-    public addAnnotation(annotation: AnnotationData, category: AnnotationCategory) {
+    public addAnnotation(annotation: AnnotationData) {
         if (annotation.type !== AnnotationHierarchyType.ANNOTATION) {
             return;
         }
 
         // Replace undefined category with active one
-        annotation.category = this.activeCategory;
+        if (!annotation.category) {
+            annotation.category = this.activeCategory;
+        }
 
-        if (category === AnnotationCategory.PUZZLE) {
+        if (
+            annotation.category === AnnotationCategory.PUZZLE
+            || this.activeCategory === AnnotationCategory.PUZZLE
+        ) {
             this.insertNewAnnotation(annotation, this._puzzleAnnotations);
-        } else if (category === AnnotationCategory.SOLUTION) {
+        } else if (
+            annotation.category === AnnotationCategory.SOLUTION
+            || this.activeCategory === AnnotationCategory.SOLUTION
+        ) {
             this.insertNewAnnotation(annotation, this._solutionAnnotations);
         }
 

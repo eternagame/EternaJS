@@ -1748,7 +1748,7 @@ export default class PoseEditMode extends GameMode {
             if (targetIndex === 1) {
                 this._annotationManager.deleteAnnotation(annotation);
             } else {
-                this._annotationManager.addAnnotation(annotation, AnnotationCategory.PUZZLE);
+                this._annotationManager.addAnnotation(annotation);
             }
         }
     }

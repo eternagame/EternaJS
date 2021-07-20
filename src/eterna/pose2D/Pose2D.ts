@@ -167,7 +167,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
             this._annotationDialog.closed.then((annotation: AnnotationData | null) => {
                 if (annotation) {
-                    this._annotationManager.addAnnotation(annotation, this._annotationManager.activeCategory);
+                    this._annotationManager.addAnnotation(annotation);
                 }
 
                 this._annotationDialog = null;
