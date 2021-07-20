@@ -12,6 +12,7 @@ import {
     HLayoutContainer,
     VLayoutContainer
 } from 'flashbang';
+import Flashbang from 'flashbang/core/Flashbang';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import Fonts from 'eterna/util/Fonts';
 import TextBuilder, {FontWeight} from 'flashbang/util/TextBuilder';
@@ -39,6 +40,7 @@ interface AnnotationPanelItemProps {
     updateTitle: (itemPath: number[], text: string) => void;
     updateAnnotationLayer: (annotation: Item, layerPath: number[]) => void;
     updateAnnotationPosition: (firstAnnotation: Item, secondAnnotationPath: number[]) => void;
+    createNewLayer: (category: AnnotationCategory) => void;
 }
 
 export default class AnnotationPanelItem extends ContainerObject {
@@ -63,6 +65,7 @@ export default class AnnotationPanelItem extends ContainerObject {
         this._updateTitle = props.updateTitle;
         this._updateAnnotationLayer = props.updateAnnotationLayer;
         this._updateAnnotationPosition = props.updateAnnotationPosition;
+        this._createNewLayer = props.createNewLayer;
 
         if (props.data.children.length > 0) {
             // Lay out annotation item children
@@ -84,7 +87,8 @@ export default class AnnotationPanelItem extends ContainerObject {
                     titleEditable: this._titleEditable,
                     updateTitle: this._updateTitle,
                     updateAnnotationLayer: this._updateAnnotationLayer,
-                    updateAnnotationPosition: this._updateAnnotationPosition
+                    updateAnnotationPosition: this._updateAnnotationPosition,
+                    createNewLayer: this._createNewLayer
                 });
 
                 modelChildren.push(item);
@@ -441,6 +445,27 @@ export default class AnnotationPanelItem extends ContainerObject {
                 + this._itemNameInput.width + this._itemSaveEditButton.display.width;
             this._itemCancelEditButton.display.y = (length - AnnotationPanelItem.ITEM_EDIT_BUTTON_WIDTH) / 2;
             this.addObject(this._itemCancelEditButton, textContainer);
+        }
+
+        if (this._data.type === AnnotationHierarchyType.CATEGORY) {
+            this._createLayerButton = new GameButton()
+                .allStates(Bitmaps.ImgFolder)
+                .tooltip('Add layer');
+            this._createLayerButton.pointerDown.connect(() => {
+                this._createNewLayer(this._data.category);
+                // There is an odd bug where pointerUp does not trigger
+                // on Button sometimes.
+                // As a result, pointerTap is not always called, resulting
+                // in inconsistent clicked.connect() emissions.
+                //
+                // We fix this by connecting to pointerDown and playing button
+                // sound here.
+                Flashbang.sound.playSound(GameButton.DEFAULT_DOWN_SOUND);
+            });
+            this.addObject(this._createLayerButton, textContainer);
+            this._createLayerButton.display.x = this._itemWidth
+                - this._createLayerButton.display.width - AnnotationPanelItem.CREATE_LAYER_MARGIN_RIGHT;
+            this._createLayerButton.display.y = (length - this._createLayerButton.display.height) / 2;
         }
 
         this._itemContainer.addChild(textContainer);
@@ -862,6 +887,7 @@ export default class AnnotationPanelItem extends ContainerObject {
     private _itemTextButton: GameButton;
     private _itemNameInput: TextInputObject;
     private _itemSaveEditButtonBackground: Graphics;
+    private _createLayerButton: GameButton;
     private _checkmarkSprite: Sprite;
     private _itemSaveEditButton: GameButton;
     private _itemCancelEditButtonBackground: Graphics;
@@ -876,6 +902,7 @@ export default class AnnotationPanelItem extends ContainerObject {
     private _updateTitle: (itemPath: number[], text: string) => void;
     private _updateAnnotationLayer: (annotation: Item, layerPath: number[]) => void;
     private _updateAnnotationPosition: (firstAnnotation: Item, secondAnnotationPath: number[]) => void;
+    private _createNewLayer: (category: AnnotationCategory) => void;
 
     private static readonly CATEGORY_HEIGHT = 40;
     private static readonly LAYER_HEIGHT = 40;
@@ -885,6 +912,7 @@ export default class AnnotationPanelItem extends ContainerObject {
     private static readonly INPUT_MARGIN = 5;
     private static readonly FONT_SIZE = 14;
     private static readonly ITEM_BUTTON_MARGIN_LEFT = 10;
+    private static readonly CREATE_LAYER_MARGIN_RIGHT = 10;
     private static readonly VISIBILITY_BUTTON_BACKGROUND_COLOR = 0x1D375C;
     private static readonly ITEM_BACKGROUND_RESTING = 0x152843;
     private static readonly ITEM_BACKGROUND_SELECTED = 0x254573;

@@ -224,17 +224,17 @@ export default class AnnotationManager {
             this.insertNewAnnotation(annotation, this._solutionAnnotations);
         }
 
-        this.propagateDataUpdates();
+        this?.propagateDataUpdates();
     }
 
     /**
      * Inserts a new empty layer into the active category
      */
-    public createNewLayer() {
+    public createNewLayer(category: AnnotationCategory) {
         const newLayer: AnnotationData = {
             id: uuidv4(),
             type: AnnotationHierarchyType.LAYER,
-            category: this.activeCategory,
+            category,
             title: 'Untitled Layer',
             timestamp: (new Date()).getTime(),
             children: [],
@@ -244,7 +244,7 @@ export default class AnnotationManager {
             positions: []
         };
 
-        if (this.activeCategory === AnnotationCategory.PUZZLE) {
+        if (category === AnnotationCategory.PUZZLE) {
             // Place new layer in puzzle category
             const layerIndex = this.getLowestLayerIndex(this._puzzleAnnotations);
             this._puzzleAnnotations.splice(layerIndex, 0, newLayer);

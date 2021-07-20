@@ -157,6 +157,9 @@ export default class AnnotationPanel extends ContainerObject {
                 },
                 updateAnnotationPosition: (firstAnnotation: Item, secondAnnotationPath: number[]) => {
                     this.updateAnnotationPosition(firstAnnotation, secondAnnotationPath);
+                },
+                createNewLayer: (category: AnnotationCategory) => {
+                    this._annotationManager.createNewLayer(category);
                 }
             });
             this.addCategory(this._puzzleCategory);
@@ -185,6 +188,9 @@ export default class AnnotationPanel extends ContainerObject {
                 },
                 updateAnnotationPosition: (firstAnnotation: Item, secondAnnotationPath: number[]) => {
                     this.updateAnnotationPosition(firstAnnotation, secondAnnotationPath);
+                },
+                createNewLayer: (category: AnnotationCategory) => {
+                    this._annotationManager.createNewLayer(category);
                 }
             });
             this.addCategory(this._solutionCategory);
@@ -283,9 +289,6 @@ export default class AnnotationPanel extends ContainerObject {
      * @param withEdit whether to include the edit button
      */
     private updateUpperToolbar(withDelete: boolean, withEdit: boolean, initial: boolean = false) {
-        if (this._newLayerButton) {
-            this._newLayerButton.destroySelf();
-        }
         if (this._deleteButton) {
             this._deleteButton.destroySelf();
         }
@@ -348,25 +351,6 @@ export default class AnnotationPanel extends ContainerObject {
         this._panel.addObject(this._uploadButton, this._upperToolbar);
         if (!initial) {
             offset += this._uploadButton.display.width;
-        }
-
-        this._newLayerButton = new GameButton()
-            .allStates(Bitmaps.ImgFolder)
-            .tooltip('Add layer');
-        this._newLayerButton.pointerDown.connect(() => {
-            this._annotationManager.createNewLayer();
-            // There is an odd bug where pointerUp does not trigger
-            // on Button sometimes.
-            // As a result, pointerTap is not always called, resulting
-            // in inconsistent clicked.connect() emissions.
-            //
-            // We fix this by connecting to pointerDown and playing button
-            // sound here.
-            Flashbang.sound.playSound(GameButton.DEFAULT_DOWN_SOUND);
-        });
-        this._panel.addObject(this._newLayerButton, this._upperToolbar);
-        if (!initial) {
-            offset += this._newLayerButton.display.width;
         }
 
         if (withEdit) {
@@ -855,7 +839,6 @@ export default class AnnotationPanel extends ContainerObject {
     private _upperToolbar: HLayoutContainer;
     private _uploadButton: FileInputObject;
     private _downloadButton: GameButton;
-    private _newLayerButton: GameButton;
     private _deleteButton: GameButton;
     private _editButton: GameButton;
     private _selectedPath: number[] | null;
