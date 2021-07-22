@@ -456,10 +456,6 @@ export default class AnnotationManager {
         this.rehighlightSelectedItems(this.allLayers);
         this.rehighlightSelectedItems(this.allAnnotations);
 
-        // TODO: Is there a cleaner way to cache, or do we really need to at all?
-        this._annotations = this.allAnnotations;
-        this._layers = this.allLayers;
-
         this.viewAnnotationDataUpdated.emit();
     }
 
@@ -515,7 +511,7 @@ export default class AnnotationManager {
         ) return false;
 
         if (data.layerId) {
-            const parentLayer = this._layers.find((layer) => layer.id === data.layerId);
+            const parentLayer = this.allLayers.find((layer) => layer.id === data.layerId);
             if (!parentLayer?.visible) return false;
         }
 
@@ -536,21 +532,21 @@ export default class AnnotationManager {
     }): void {
         if (params.pose.zoomLevel > AnnotationManager.ANNOTATION_LAYER_THRESHOLD) {
             // visualize layers
-            for (const [idx, layer] of this._layers.entries()) {
+            for (const [idx, layer] of this.allLayers.entries()) {
                 if (this.isAnnotationVisible(layer)) {
                     this.placeAnnotationInPose({...params, item: layer, itemIndex: idx});
                 }
             }
 
             // visualize annotations not in layers
-            for (const [idx, annotation] of this._annotations.entries()) {
+            for (const [idx, annotation] of this.allAnnotations.entries()) {
                 if (!annotation.layerId && this.isAnnotationVisible(annotation)) {
                     this.placeAnnotationInPose({...params, item: annotation, itemIndex: idx});
                 }
             }
         } else {
             // visualize annotations
-            for (const [idx, annotation] of this._annotations.entries()) {
+            for (const [idx, annotation] of this.allAnnotations.entries()) {
                 if (this.isAnnotationVisible(annotation)) {
                     this.placeAnnotationInPose({...params, item: annotation, itemIndex: idx});
                 }
@@ -961,7 +957,7 @@ export default class AnnotationManager {
                 const view = this.getAnnotationView(params.pose, i, params.item);
                 if (params.item.type === AnnotationHierarchyType.ANNOTATION) {
                     view.onMovedAnnotation.connect((point: Point) => {
-                        const anchorIndex = this._annotations[params.itemIndex].positions[i].anchorIndex;
+                        const anchorIndex = this.allAnnotations[params.itemIndex].positions[i].anchorIndex;
                         const base = params.pose.getBase(anchorIndex);
                         const anchorPoint = new Point(
                             base.x + params.pose.xOffset,
@@ -1038,7 +1034,7 @@ export default class AnnotationManager {
             const view = this.getAnnotationView(params.pose, i, params.item);
             if (params.item.type === AnnotationHierarchyType.ANNOTATION) {
                 view.onMovedAnnotation.connect((point: Point) => {
-                    const anchorIndex = this._annotations[params.itemIndex].positions[i].anchorIndex;
+                    const anchorIndex = this.allAnnotations[params.itemIndex].positions[i].anchorIndex;
                     const base = params.pose.getBase(anchorIndex);
                     const anchorPoint = new Point(
                         base.x + params.pose.xOffset,
@@ -1046,7 +1042,7 @@ export default class AnnotationManager {
                     );
                     // Compute relative position
                     const movedPosition: AnnotationPosition = {
-                        ...this._annotations[params.itemIndex].positions[i],
+                        ...this.allAnnotations[params.itemIndex].positions[i],
                         relPosition: new Point(
                             point.x - anchorPoint.x,
                             point.y - anchorPoint.y
@@ -1728,7 +1724,7 @@ export default class AnnotationManager {
             && position.placement
         ) {
             const cardArray = pose.zoomLevel > AnnotationManager.ANNOTATION_LAYER_THRESHOLD
-                ? this._layers : this._annotations;
+                ? this.allLayers : this.allAnnotations;
 
             for (let i = 0; i < cardArray.length; i++) {
                 // Get annotation object
@@ -2456,11 +2452,6 @@ export default class AnnotationManager {
     private _solutionAnnotationsVisible: boolean = true;
 
     private _selectedItem: AnnotationData | null = null;
-
-    // Holds the runtime objects for all annotations and layers
-    // in the puzzle
-    private _annotations: AnnotationData[] = [];
-    private _layers: AnnotationData[] = [];
 
     private _toolbarType: ToolbarType;
 

@@ -249,7 +249,9 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
 
         this._categoryDropdown.selectedOption.connect(() => {
             // Reset layer selection
-            this._layerDropdown.selectedOption.value = '';
+            if (this._layerDropdown) {
+                this._layerDropdown.selectedOption.value = '';
+            }
 
             // Rerender dialog
             this.renderDialog(false);
