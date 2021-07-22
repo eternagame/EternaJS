@@ -653,14 +653,9 @@ export default class AnnotationManager {
      * Accesses all layers (structure, puzzle, solution)
      */
     public get allLayers() {
-        const annotationItems = this.getAllAnnotationItems();
-        const layers: AnnotationData[] = annotationItems.reduce(
-            (allLayers: AnnotationData[], item: AnnotationData) => {
-                if (item.type === AnnotationHierarchyType.LAYER) {
-                    allLayers.push(item);
-                }
-                return allLayers;
-            }, []
+        const annotationItems = this.getAnnotationItems(true, true);
+        const layers: AnnotationData[] = annotationItems.filter(
+            (item: AnnotationData) => item.type === AnnotationHierarchyType.LAYER
         );
         return layers;
     }
@@ -670,14 +665,12 @@ export default class AnnotationManager {
      * currently modifiable category
      */
     public get activeLayers() {
-        const annotationItems = this.getAllAnnotationItems();
-        const layers: AnnotationData[] = annotationItems.reduce(
-            (allLayers: AnnotationData[], item: AnnotationData) => {
-                if (item.type === AnnotationHierarchyType.LAYER) {
-                    allLayers.push(item);
-                }
-                return allLayers;
-            }, []
+        const annotationItems = this.getAnnotationItems(
+            this.activeCategory === AnnotationCategory.PUZZLE,
+            this.activeCategory === AnnotationCategory.SOLUTION
+        );
+        const layers: AnnotationData[] = annotationItems.filter(
+            (item: AnnotationData) => item.type === AnnotationHierarchyType.LAYER
         );
         return layers;
     }
@@ -686,14 +679,9 @@ export default class AnnotationManager {
      * Accesses all annotation (structure, puzzle, solution)
      */
     public get allAnnotations() {
-        const annotationItems = this.getAllAnnotationItems();
-        const annotations: AnnotationData[] = annotationItems.reduce(
-            (allAnnotations: AnnotationData[], item: AnnotationData) => {
-                if (item.type === AnnotationHierarchyType.ANNOTATION) {
-                    allAnnotations.push(item);
-                }
-                return allAnnotations;
-            }, []
+        const annotationItems = this.getAnnotationItems(true, true);
+        const annotations: AnnotationData[] = annotationItems.filter(
+            (item: AnnotationData) => item.type === AnnotationHierarchyType.ANNOTATION
         );
 
         return annotations;
@@ -2389,21 +2377,20 @@ export default class AnnotationManager {
     /**
      * Get all annotations in active category
      */
-    private getAllAnnotationItems(): AnnotationData[] {
+    public getAnnotationItems(puzzle: boolean, solution: boolean): AnnotationData[] {
         const annotationItems: AnnotationData[] = [];
-        if (this.activeCategory === AnnotationCategory.PUZZLE) {
+        if (puzzle) {
             // Puzzle Annotations
             AnnotationManager.collectAnnotationItems(
                 [...this._puzzleAnnotations],
                 annotationItems
             );
-        } else {
-            // Solution Annotations
+        }
+
+        // Solution Annotations
+        if (solution) {
             AnnotationManager.collectAnnotationItems(
-                [
-                    ...this._puzzleAnnotations,
-                    ...this._solutionAnnotations
-                ],
+                [...this._solutionAnnotations],
                 annotationItems
             );
         }
