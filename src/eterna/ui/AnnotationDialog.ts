@@ -1,4 +1,4 @@
-import {Graphics, Text} from 'pixi.js';
+import {DisplayObject, Graphics, Text} from 'pixi.js';
 import {Value} from 'signals';
 import {
     VLayoutContainer,
@@ -59,6 +59,23 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
 
     protected added(): void {
         super.added();
+        this.renderDialog(true);
+    }
+
+    public renderDialog(focusTitle: boolean): void {
+        const prevTitle = this._titleField?.input.text || '';
+        const prevBases = this._basesField?.input.text || '';
+
+        // Clear old objects
+        this.removeAllObjects();
+        this.container.children.forEach((child: DisplayObject) => {
+            child.destroy();
+        });
+
+        if (this._modal) {
+            this.setupModalBackground();
+        }
+
         // Generate Dialog Heading
         this._panel = new GamePanel({
             type: GamePanelType.NORMAL,
@@ -82,16 +99,17 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
             closeButton.display.width = AnnotationDialog.CLOSE_BUTTON_LENGTH;
             closeButton.display.height = AnnotationDialog.CLOSE_BUTTON_LENGTH;
             closeButton.clicked.connect(() => {
+                this._isClosing = true;
                 this.close(this._initialAnnotation || null);
             });
         }
 
-        const scrollBox = new VScrollBox(0, 0);
-        this.addObject(scrollBox, this.container);
+        this._scrollBox = new VScrollBox(0, 0);
+        this.addObject(this._scrollBox, this.container);
 
         // Primary dialog contents
         const bodyLayout = new VLayoutContainer(AnnotationDialog.H_MARGIN, HAlign.CENTER);
-        scrollBox.content.addChild(bodyLayout);
+        this._scrollBox.content.addChild(bodyLayout);
 
         // Input fields
         this._inputLayout = new VLayoutContainer(AnnotationDialog.LABEL_PADDING, HAlign.LEFT);
@@ -107,6 +125,9 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
             false,
             AnnotationDialog.ANNOTATION_TEXT_CHARACTER_LIMIT
         );
+        if (prevTitle) {
+            this._titleField.input.text = prevTitle;
+        }
         this._titleField.input.valueChanged.connect(() => {
             const isValid = this.isValidAnnotation();
             this._saveButton.enabled = isValid;
@@ -121,7 +142,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
             this._titleField.input.text = this._initialAnnotation.title;
         }
         this._inputLayout.addChild(this._titleField.label);
-        scrollBox.addObject(this._titleField.input, this._inputLayout);
+        this._scrollBox.addObject(this._titleField.input, this._inputLayout);
 
         // Add Bases Field
         this._basesField = this.getInputField(
@@ -130,7 +151,9 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
             AnnotationDialog.FIELD_WIDTH,
             AnnotationDialog.FIELD_HEIGHT
         );
-        if (this._initialRanges !== null) {
+        if (prevBases) {
+            this._basesField.input.text = prevBases;
+        } else if (this._initialRanges !== null) {
             const baseRanges = AnnotationDialog.annotationRangeToString(this._initialRanges);
             // set ranges string
             this._basesField.input.text = baseRanges;
@@ -149,19 +172,33 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
             }
         });
         this._inputLayout.addChild(this._basesField.label);
-        scrollBox.addObject(this._basesField.input, this._inputLayout);
-        this._titleField.input.setFocus();
+        this._scrollBox.addObject(this._basesField.input, this._inputLayout);
 
-        if (this._layers.length > 0) {
-            const initialLayer = this._layers.find(
+        if (focusTitle) {
+            this._titleField.input.setFocus();
+        }
+
+        const categoryLayers = this._layers.filter((layer: AnnotationData) => (
+            this._categoryDropdown && layer.category === this._categoryDropdown.selectedOption.value)
+                || (
+                    !this._categoryDropdown && (
+                        layer.category === this._initialAnnotation?.category
+                    || this._activeCategory
+                    )
+                ));
+
+        if (categoryLayers.length > 0) {
+            const initialLayer = categoryLayers.find(
                 (layer: AnnotationData) => layer.id === this._initialAnnotation?.layerId
             );
 
             // Add Annotation Layer Dropdown
+            const defaultLayerOption = this._layerDropdown?.selectedOption.value
+                || initialLayer?.title || 'Select a Layer';
             this._layerDropdown = new GameDropdown({
                 fontSize: 14,
-                options: this._layers.map((layer: AnnotationData) => layer.title),
-                defaultOption: initialLayer?.title || 'Select a Layer',
+                options: categoryLayers.map((layer: AnnotationData) => layer.title),
+                defaultOption: defaultLayerOption,
                 borderWidth: 0,
                 borderColor: AnnotationDialog.UPPER_TOOLBAR_DIVIDER_COLOR,
                 color: 0x021E46,
@@ -172,6 +209,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
                 dropShadow: true,
                 checkboxes: true
             });
+
             const layerDropDownLabel: Text = Fonts.std(
                 'Annotation Layer',
                 AnnotationDialog.FONT_SIZE,
@@ -180,7 +218,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
 
             // Handle dropdown selection event
             this._layerDropdown.selectedOption.connect((value) => {
-                for (const layer of this._layers) {
+                for (const layer of categoryLayers) {
                     if (layer.title === value) {
                         this._selectedLayer = layer;
                     }
@@ -188,14 +226,16 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
             });
 
             this._inputLayout.addChild(layerDropDownLabel);
-            scrollBox.addObject(this._layerDropdown, this._inputLayout);
+            this._scrollBox.addObject(this._layerDropdown, this._inputLayout);
         }
 
         // Add Annotation Category Dropdown
+        const defaultCategoryOption = this._categoryDropdown?.selectedOption.value
+            || this._initialAnnotation?.category || this._activeCategory;
         this._categoryDropdown = new GameDropdown({
             fontSize: 14,
             options: [AnnotationCategory.PUZZLE, AnnotationCategory.SOLUTION],
-            defaultOption: this._initialAnnotation?.category || this._activeCategory,
+            defaultOption: defaultCategoryOption,
             borderWidth: 0,
             borderColor: AnnotationDialog.UPPER_TOOLBAR_DIVIDER_COLOR,
             color: 0x021E46,
@@ -206,6 +246,14 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
             dropShadow: true,
             checkboxes: true
         });
+
+        this._categoryDropdown.selectedOption.connect(() => {
+            // Reset layer selection
+            this._layerDropdown.selectedOption.value = '';
+
+            // Rerender dialog
+            this.renderDialog(false);
+        });
         const categoryDropDownLabel: Text = Fonts.std(
             'Annotation Type',
             AnnotationDialog.FONT_SIZE,
@@ -213,7 +261,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
         ).color(AnnotationDialog.LABEL_COLOR).build();
 
         this._inputLayout.addChild(categoryDropDownLabel);
-        scrollBox.addObject(this._categoryDropdown, this._inputLayout);
+        this._scrollBox.addObject(this._categoryDropdown, this._inputLayout);
 
         // Generate Dialog Divider
         this._divider = new Graphics()
@@ -248,9 +296,10 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
             .customStyleBox(cancelButtonGraphic)
             .label('Cancel', AnnotationDialog.ACTION_BUTTON_FONT_SIZE);
         cancelButton.clicked.connect(() => {
+            this._isClosing = true;
             this.close(this._initialAnnotation || null);
         });
-        scrollBox.addObject(cancelButton, this._actionButtonLayout);
+        this._scrollBox.addObject(cancelButton, this._actionButtonLayout);
         // 2) Save Button
         const saveButtonGraphic = new Graphics()
             .beginFill(AnnotationDialog.ACTION_BUTTON_SUCCESS_COLOR)
@@ -264,7 +313,8 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
         this._saveButton = new GameButton()
             .customStyleBox(saveButtonGraphic)
             .label('Save', AnnotationDialog.ACTION_BUTTON_FONT_SIZE);
-        this._saveButton.enabled = false; // Start save button as false
+        const isValid = this.isValidAnnotation();
+        this._saveButton.enabled = isValid;
         this._saveButton.clicked.connect(() => {
             const annotation: AnnotationData = {
                 ...this._initialAnnotation,
@@ -284,9 +334,10 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
                 annotation['layerId'] = this._selectedLayer.id;
             }
 
+            this._isClosing = true;
             this.close(annotation);
         });
-        scrollBox.addObject(this._saveButton, this._actionButtonLayout);
+        this._scrollBox.addObject(this._saveButton, this._actionButtonLayout);
 
         // Generate Delete Annotation Button
         if (this._edit) {
@@ -303,55 +354,62 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
                 .label('Delete Annotation', AnnotationDialog.DELETE_BUTTON_FONT_SIZE);
             deleteButton.clicked.connect(() => {
                 // Returning null will be interpreted as delete
+                this._isClosing = true;
                 this.close(null);
             });
-            scrollBox.addObject(deleteButton, bodyLayout);
+            this._scrollBox.addObject(deleteButton, bodyLayout);
         }
 
-        const updateLocation = () => {
-            bodyLayout.layout();
-
-            Assert.assertIsDefined(Flashbang.stageHeight);
-            const maxHeight = Flashbang.stageHeight * 0.8;
-            const panelExtraHeight = 2 * AnnotationDialog.H_MARGIN + (this._hasTitle ? this._panel.titleHeight : 0);
-            const idealHeight = bodyLayout.height + panelExtraHeight;
-            const panelHeight = Math.min(idealHeight, maxHeight);
-            const panelWidth = AnnotationDialog.FIELD_WIDTH + 2 * AnnotationDialog.W_MARGIN;
-
-            scrollBox.setSize(panelWidth, panelHeight - panelExtraHeight);
-            scrollBox.doLayout();
-
-            this._panel.setSize(panelWidth, panelHeight);
-
-            if (this._modal) {
-                DisplayUtil.positionRelativeToStage(
-                    this._panel.display,
-                    HAlign.CENTER, VAlign.CENTER,
-                    HAlign.CENTER, VAlign.CENTER
-                );
-            }
-
-            DisplayUtil.positionRelative(
-                scrollBox.display, HAlign.CENTER, VAlign.TOP,
-                this._panel.display, HAlign.CENTER, VAlign.TOP,
-                0, this._panel.titleHeight + AnnotationDialog.H_MARGIN
-            );
-
-            if (closeButton) {
-                DisplayUtil.positionRelative(
-                    closeButton.display, HAlign.RIGHT, VAlign.TOP,
-                    this._panel.display, HAlign.RIGHT, VAlign.TOP,
-                    -10, (this._panel.titleHeight - AnnotationDialog.CLOSE_BUTTON_LENGTH) / 2
-                );
-            }
-        };
-
-        updateLocation();
+        this.updateDialogLocation(bodyLayout, closeButton);
         Assert.assertIsDefined(this._mode);
-        this.regs.add(this._mode.resized.connect(updateLocation));
+        this.regs.add(this._mode.resized.connect(() => {
+            this.updateDialogLocation(bodyLayout, closeButton);
+        }));
+    }
+
+    public updateDialogLocation(
+        bodyLayout: VLayoutContainer,
+        closeButton: GameButton | null
+    ): void {
+        bodyLayout.layout();
+
+        Assert.assertIsDefined(Flashbang.stageHeight);
+        const maxHeight = Flashbang.stageHeight * 0.8;
+        const panelExtraHeight = 2 * AnnotationDialog.H_MARGIN + (this._hasTitle ? this._panel.titleHeight : 0);
+        const idealHeight = bodyLayout.height + panelExtraHeight;
+        const panelHeight = Math.min(idealHeight, maxHeight);
+        const panelWidth = AnnotationDialog.FIELD_WIDTH + 2 * AnnotationDialog.W_MARGIN;
+
+        this._scrollBox.setSize(panelWidth, panelHeight - panelExtraHeight);
+        this._scrollBox.doLayout();
+
+        this._panel.setSize(panelWidth, panelHeight);
+
+        if (this._modal) {
+            DisplayUtil.positionRelativeToStage(
+                this._panel.display,
+                HAlign.CENTER, VAlign.CENTER,
+                HAlign.CENTER, VAlign.CENTER
+            );
+        }
+
+        DisplayUtil.positionRelative(
+            this._scrollBox.display, HAlign.CENTER, VAlign.TOP,
+            this._panel.display, HAlign.CENTER, VAlign.TOP,
+            0, this._panel.titleHeight + AnnotationDialog.H_MARGIN
+        );
+
+        if (closeButton) {
+            DisplayUtil.positionRelative(
+                closeButton.display, HAlign.RIGHT, VAlign.TOP,
+                this._panel.display, HAlign.RIGHT, VAlign.TOP,
+                -10, (this._panel.titleHeight - AnnotationDialog.CLOSE_BUTTON_LENGTH) / 2
+            );
+        }
     }
 
     protected onBGClicked(): void {
+        this._isClosing = true;
         this.close(this._initialAnnotation || null);
     }
 
@@ -536,8 +594,20 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
         return expandedRanges;
     }
 
+    public get layers() {
+        return this._layers;
+    }
+
+    public set layers(data: AnnotationData[]) {
+        this._layers = data;
+        if (!this._isClosing) {
+            this.renderDialog(false);
+        }
+    }
+
     private _edit: boolean = false;
     private _hasTitle: boolean = false;
+    private _isClosing: boolean = false;
     private _sequenceLength: number;
     private _initialAnnotation: AnnotationData | null = null;
     private _initialRanges: AnnotationRange[] | null = null;
@@ -545,6 +615,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
     private _layers: AnnotationData[] = [];
     private _selectedLayer: AnnotationData | null = null;
     private _panel: GamePanel;
+    private _scrollBox: VScrollBox;
     private _inputLayout: VLayoutContainer;
     private _actionButtonLayout: HLayoutContainer;
     private _layerDropdown: GameDropdown;

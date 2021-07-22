@@ -148,7 +148,7 @@ export default class AnnotationPanel extends ContainerObject {
                 indexPath: [1],
                 width: AnnotationPanel.PANEL_WIDTH,
                 dividerThickness: AnnotationPanel.DIVIDER_THICKNESS,
-                titleEditable: this._annotationManager.activeCategory === AnnotationCategory.PUZZLE,
+                titleEditable: true,
                 updateTitle: (itemPath: number[], text: string) => {
                     this.updateTitle(itemPath, text);
                 },
@@ -179,7 +179,7 @@ export default class AnnotationPanel extends ContainerObject {
                 indexPath: [2],
                 width: AnnotationPanel.PANEL_WIDTH,
                 dividerThickness: AnnotationPanel.DIVIDER_THICKNESS,
-                titleEditable: this._annotationManager.activeCategory === AnnotationCategory.SOLUTION,
+                titleEditable: true,
                 updateTitle: (itemPath: number[], text: string) => {
                     this.updateTitle(itemPath, text);
                 },

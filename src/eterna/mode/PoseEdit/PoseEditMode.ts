@@ -173,7 +173,7 @@ export default class PoseEditMode extends GameMode {
                     title: true,
                     sequenceLength: this._poses[0].fullSequenceLength,
                     initialRanges: annotation.ranges,
-                    initialLayers: this._annotationManager.activeLayers,
+                    initialLayers: this._annotationManager.allLayers,
                     activeCategory: this._annotationManager.activeCategory,
                     initialAnnotation: annotation
                 });
@@ -181,6 +181,9 @@ export default class PoseEditMode extends GameMode {
                     if (ranges) {
                         this._poses.forEach((pose) => pose.setAnnotationRanges(ranges));
                     }
+                });
+                this._annotationManager.persistentAnnotationDataUpdated.connect(() => {
+                    dialog.layers = this._annotationManager.allLayers;
                 });
                 this.showDialog(dialog).closed.then((editedAnnotation: AnnotationData | null) => {
                     if (editedAnnotation) {

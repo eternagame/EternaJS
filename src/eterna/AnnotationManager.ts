@@ -224,7 +224,7 @@ export default class AnnotationManager {
             this.insertNewAnnotation(annotation, this._solutionAnnotations);
         }
 
-        this?.propagateDataUpdates();
+        this.propagateDataUpdates();
     }
 
     /**

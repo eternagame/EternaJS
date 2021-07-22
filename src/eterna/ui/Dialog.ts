@@ -27,38 +27,42 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
         super.added();
 
         if (this._modal) {
-            const bg = new Graphics();
-            this.container.addChild(bg);
-
-            // Eat mouse events - make sure any objects created within the dialog should set
-            // interactive to true and stop propogation if the event shouldn't be passed through to the bg
-            const bgTarget = new DisplayObjectPointerTarget(bg);
-
-            bgTarget.pointerDown.connect((e) => {
-                if (InputUtil.IsLeftMouse(e)) {
-                    this.onBGClicked();
-                }
-                e.stopPropagation();
-            });
-            bgTarget.pointerUp.connect((e) => e.stopPropagation());
-            bgTarget.pointerMove.connect((e) => e.stopPropagation());
-
-            Assert.assertIsDefined(this.mode);
-            this.regs.add(this.mode.keyboardInput.pushListener(this));
-            this.regs.add(this.mode.mouseWheelInput.pushListener(this));
-
-            const updateBG = () => {
-                Assert.assertIsDefined(Flashbang.stageWidth);
-                Assert.assertIsDefined(Flashbang.stageHeight);
-                bg.clear()
-                    .beginFill(0x0)
-                    .drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
-                    .endFill();
-                bg.alpha = this.bgAlpha;
-            };
-            updateBG();
-            this.regs.add(this.mode.resized.connect(updateBG));
+            this.setupModalBackground();
         }
+    }
+
+    protected setupModalBackground(): void {
+        const bg = new Graphics();
+        this.container.addChild(bg);
+
+        // Eat mouse events - make sure any objects created within the dialog should set
+        // interactive to true and stop propogation if the event shouldn't be passed through to the bg
+        const bgTarget = new DisplayObjectPointerTarget(bg);
+
+        bgTarget.pointerDown.connect((e) => {
+            if (InputUtil.IsLeftMouse(e)) {
+                this.onBGClicked();
+            }
+            e.stopPropagation();
+        });
+        bgTarget.pointerUp.connect((e) => e.stopPropagation());
+        bgTarget.pointerMove.connect((e) => e.stopPropagation());
+
+        Assert.assertIsDefined(this.mode);
+        this.regs.add(this.mode.keyboardInput.pushListener(this));
+        this.regs.add(this.mode.mouseWheelInput.pushListener(this));
+
+        const updateBG = () => {
+            Assert.assertIsDefined(Flashbang.stageWidth);
+            Assert.assertIsDefined(Flashbang.stageHeight);
+            bg.clear()
+                .beginFill(0x0)
+                .drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
+                .endFill();
+            bg.alpha = this.bgAlpha;
+        };
+        updateBG();
+        this.regs.add(this.mode.resized.connect(updateBG));
     }
 
     /**
