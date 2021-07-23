@@ -1307,8 +1307,10 @@ export default class AnnotationManager {
             // as an anchor point
             for (const positionConflict of positionConflicts) {
                 // Compute offset based on overlap placement
-                const conflictOffsetX = positionConflict.bounds.x - anchorPoint.x + positionConflict.bounds.width / 2;
-                const conflictOffsetY = positionConflict.bounds.y - anchorPoint.y + positionConflict.bounds.height / 2;
+                const conflictOffsetX = positionConflict.bounds.x
+                    - anchorPoint.x + anchorDisplay.width + positionConflict.bounds.width / 2;
+                const conflictOffsetY = positionConflict.bounds.y
+                    - anchorPoint.y + anchorDisplay.height + positionConflict.bounds.height / 2;
 
                 const point = this.computeAnnotationPositionPoint(
                     pose,
@@ -1759,8 +1761,8 @@ export default class AnnotationManager {
 
                     // There are four cases where overlap can occur
                     if (display && ((
-                        // Existing annotation behind possible position
-                        // Existing annotation below possible position
+                        // Proposed annotation behind existing one
+                        // Proposed annotation above existing one
                         (
                             cardAbsolutePosition.x >= absolutePosition.x
                                     && cardAbsolutePosition.x < absolutePosition.x + annotationView.width
@@ -1771,8 +1773,8 @@ export default class AnnotationManager {
                                 )
                     )
                         || (
-                            // Existing annotation behind possible position
-                            // Existing annotation below possible position
+                            // Existing annotation behind proposed one
+                            // Proposed annotation above existing one
                             (
                                 absolutePosition.x >= cardAbsolutePosition.x
                                 && absolutePosition.x < cardAbsolutePosition.x + display.width
@@ -1783,8 +1785,8 @@ export default class AnnotationManager {
                             )
                         )
                         || (
-                            // Existing annotation after possible position
-                            // Existing annotation above possible annotation
+                            // Existing annotation behind proposed one
+                            // Existing annotation above proposed one
                             (
                                 absolutePosition.x >= cardAbsolutePosition.x
                                 && absolutePosition.x < cardAbsolutePosition.x + display.width
@@ -1795,8 +1797,8 @@ export default class AnnotationManager {
                             )
                         )
                         || (
-                            // Existing annotation after possible position
-                            // Existing annotation above possible annotation
+                            // Proposed annotation behind existing one
+                            // Existing annotation above proposed one
                             (
                                 cardAbsolutePosition.x >= absolutePosition.x
                                 && cardAbsolutePosition.x < absolutePosition.x + annotationView.width
@@ -2459,7 +2461,7 @@ export default class AnnotationManager {
 
     public static readonly ANNOTATION_UNHIGHLIGHTED_OPACITY = 0.5;
     public static readonly DEFAULT_ANNOTATION_SHIFT = 15;
-    public static readonly ANNOTATION_PLACEMENT_ITERATION_TIMEOUT = 20;
+    public static readonly ANNOTATION_PLACEMENT_ITERATION_TIMEOUT = 5;
     public static readonly ANNOTATION_LAYER_THRESHOLD = 2;
     public static readonly CONFLICT_RESOLUTION_OFFSET = 5;
 }
