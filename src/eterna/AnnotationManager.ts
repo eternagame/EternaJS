@@ -347,6 +347,7 @@ export default class AnnotationManager {
                 this.updateAnnotationViews();
             }
             this._selectedItem = null;
+            this.highlights.value = [];
         }
     }
 
@@ -362,15 +363,34 @@ export default class AnnotationManager {
             if (isSelected) {
                 this.deselectSelected();
                 this._selectedItem = parentNode[index];
+
+                // Set Highlights
+                if (this._selectedItem.ranges) {
+                    // Single Annotation
+                    this.highlights.value = this._selectedItem.ranges;
+                } else if (this._selectedItem.children.length > 0) {
+                    // Layer (multiple annotations)
+                    const ranges: AnnotationRange[] = [];
+                    this._selectedItem.children.forEach((child: AnnotationData) => {
+                        if (child.ranges) {
+                            ranges.push(...child.ranges);
+                        }
+                    });
+                    if (ranges.length > 0) {
+                        this.highlights.value = ranges;
+                    }
+                }
             } else if (
                 this._selectedItem
                 && this._selectedItem.id === annotation.id
                 && !isSelected
             ) {
-                this._selectedItem = null;
+                this.deselectSelected();
             }
 
+            // Set selected state
             parentNode[index].selected = isSelected;
+
             this.updateAnnotationViews();
         }
     }
@@ -451,45 +471,12 @@ export default class AnnotationManager {
      * Recomputes the display objects of all annotations and layers
      */
     public updateAnnotationViews(): void {
-        // TODO: Is this necessary?
-        this.highlights.value = [];
-        this.rehighlightSelectedItems(this.allLayers);
-        this.rehighlightSelectedItems(this.allAnnotations);
-
         this.viewAnnotationDataUpdated.emit();
     }
 
     private propagateDataUpdates(): void {
         this.updateAnnotationViews();
         this.persistentAnnotationDataUpdated.emit();
-    }
-
-    /**
-     * Helper function used to define an array of display objects for annotations
-     * given an array of AnnotationData
-     *
-     * @param items annotations or annotation layers
-     * @param type category of annotation being created
-     * @returns array of annotation display objects
-     */
-    private rehighlightSelectedItems(items: AnnotationData[]) {
-        for (const item of items) {
-            if (item.selected && item.visible && item.ranges) {
-                // Single Annotation
-                this.highlights.value = item.ranges;
-            } else if (item.selected && item.visible && item.children.length > 0) {
-                // Layer (multiple annotations)
-                const ranges: AnnotationRange[] = [];
-                item.children.forEach((child: AnnotationData) => {
-                    if (child.ranges) {
-                        ranges.push(...child.ranges);
-                    }
-                });
-                if (ranges.length > 0) {
-                    this.highlights.value = ranges;
-                }
-            }
-        }
     }
 
     private isAnnotationVisible(data: AnnotationData) {
@@ -901,7 +888,6 @@ export default class AnnotationManager {
 
             view.pointerDown.connect((e) => {
                 e.stopPropagation();
-                this.deselectSelected();
                 this.setAnnotationSelection(item, true);
             });
             view.isMoving.connect((moving: boolean) => {
