@@ -261,7 +261,44 @@ export default class AnnotationManager {
      */
     public editAnnotation(annotation: AnnotationData): void {
         const [parentNode, index] = this.getRelevantParentNode(annotation);
-        if (parentNode && index != null) {
+
+        if (annotation.layerId && !parentNode && !index) {
+            // We moved annotation into a new layer when making edits
+
+            let categoryData: AnnotationData[];
+            if (annotation.category === AnnotationCategory.PUZZLE) {
+                // Puzzle Annotations
+                categoryData = this._puzzleAnnotations;
+            } else {
+                // Solution Annotations
+                categoryData = this._solutionAnnotations;
+            }
+
+            // Remove from original location
+            let currentIndex = -1;
+            for (let i = 0; i < categoryData.length; i++) {
+                if (categoryData[i].id === annotation.id) {
+                    currentIndex = i;
+                }
+            }
+            categoryData.splice(currentIndex, 1);
+
+            // Add to layer children
+            const layerIndex = categoryData.findIndex((layer: AnnotationData) => layer.id === annotation.layerId);
+            const layerData = categoryData[layerIndex];
+            if (layerData.children) {
+                const layerChildren = layerData.children;
+                layerChildren.push({
+                    ...annotation
+                });
+            } else {
+                layerData['children'] = [{
+                    ...annotation
+                }];
+            }
+
+            this.propagateDataUpdates();
+        } else if (parentNode && index != null) {
             parentNode[index] = {
                 ...annotation
             };
