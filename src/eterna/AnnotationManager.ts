@@ -937,7 +937,7 @@ export default class AnnotationManager {
                 const view = this.getAnnotationView(params.pose, i, params.item);
                 if (params.item.type === AnnotationHierarchyType.ANNOTATION) {
                     view.onMovedAnnotation.connect((point: Point) => {
-                        const anchorIndex = this.allAnnotations[params.itemIndex].positions[i].anchorIndex;
+                        const anchorIndex = params.item.positions[i].anchorIndex;
                         const base = params.pose.getBase(anchorIndex);
                         const anchorPoint = new Point(
                             base.x + params.pose.xOffset,
@@ -1014,7 +1014,7 @@ export default class AnnotationManager {
             const view = this.getAnnotationView(params.pose, i, params.item);
             if (params.item.type === AnnotationHierarchyType.ANNOTATION) {
                 view.onMovedAnnotation.connect((point: Point) => {
-                    const anchorIndex = this.allAnnotations[params.itemIndex].positions[i].anchorIndex;
+                    const anchorIndex = params.item.positions[i].anchorIndex;
                     const base = params.pose.getBase(anchorIndex);
                     const anchorPoint = new Point(
                         base.x + params.pose.xOffset,
@@ -1022,7 +1022,7 @@ export default class AnnotationManager {
                     );
                     // Compute relative position
                     const movedPosition: AnnotationPosition = {
-                        ...this.allAnnotations[params.itemIndex].positions[i],
+                        ...params.item.positions[i],
                         relPosition: new Point(
                             point.x - anchorPoint.x,
                             point.y - anchorPoint.y
