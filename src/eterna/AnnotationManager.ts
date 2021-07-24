@@ -638,21 +638,6 @@ export default class AnnotationManager {
     }
 
     /**
-     * Accesses all active layers where active is the category
-     * currently modifiable category
-     */
-    public get activeLayers() {
-        const annotationItems = this.getAnnotationItems(
-            this.activeCategory === AnnotationCategory.PUZZLE,
-            this.activeCategory === AnnotationCategory.SOLUTION
-        );
-        const layers: AnnotationData[] = annotationItems.filter(
-            (item: AnnotationData) => item.type === AnnotationHierarchyType.LAYER
-        );
-        return layers;
-    }
-
-    /**
      * Accesses all annotation (structure, puzzle, solution)
      */
     public get allAnnotations() {
