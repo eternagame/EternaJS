@@ -212,15 +212,9 @@ export default class AnnotationManager {
             annotation.category = this.activeCategory;
         }
 
-        if (
-            annotation.category === AnnotationCategory.PUZZLE
-            || this.activeCategory === AnnotationCategory.PUZZLE
-        ) {
+        if (annotation.category === AnnotationCategory.PUZZLE) {
             this.insertNewAnnotation(annotation, this._puzzleAnnotations);
-        } else if (
-            annotation.category === AnnotationCategory.SOLUTION
-            || this.activeCategory === AnnotationCategory.SOLUTION
-        ) {
+        } else if (annotation.category === AnnotationCategory.SOLUTION) {
             this.insertNewAnnotation(annotation, this._solutionAnnotations);
         }
 
