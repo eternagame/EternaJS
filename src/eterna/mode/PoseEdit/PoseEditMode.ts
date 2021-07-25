@@ -2496,9 +2496,16 @@ export default class PoseEditMode extends GameMode {
             if (saveStoreItem[ii + 2] != null) {
                 const undoBlock: UndoBlock = new UndoBlock(new Sequence([]), '');
                 try {
-                    const pose: FoldData = JSON.parse(saveStoreItem[ii + 2] as string).undoBlock;
-                    savedAnnotations[ii] = JSON.parse(saveStoreItem[ii + 2] as string).annotations;
-                    undoBlock.fromJSON(pose);
+                    const saveData = JSON.parse(saveStoreItem[ii + 2] as string);
+                    if (saveData.undoBlock) {
+                        const pose: FoldData = saveData.undoBlock;
+                        savedAnnotations[ii] = saveData.annotations;
+                        undoBlock.fromJSON(pose);
+                    } else {
+                        // Old format before annotations were introduced
+                        const pose: FoldData = saveData;
+                        undoBlock.fromJSON(pose);
+                    }
                 } catch (e) {
                     log.error('Error loading saved puzzle data', e);
                     return false;
