@@ -178,6 +178,42 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
             this._titleField.input.setFocus();
         }
 
+        // Add Annotation Category Dropdown
+        const defaultCategoryOption = this._categoryDropdown?.selectedOption.value
+            || this._initialAnnotation?.category || this._activeCategory;
+        this._categoryDropdown = new GameDropdown({
+            fontSize: 14,
+            options: [AnnotationCategory.PUZZLE, AnnotationCategory.SOLUTION],
+            defaultOption: defaultCategoryOption,
+            borderWidth: 0,
+            borderColor: AnnotationDialog.UPPER_TOOLBAR_DIVIDER_COLOR,
+            color: 0x021E46,
+            textColor: 0xF39C12,
+            textWeight: FontWeight.BOLD,
+            width: AnnotationDialog.FIELD_WIDTH,
+            height: AnnotationDialog.DROPDOWN_HEIGHT,
+            dropShadow: true,
+            checkboxes: true
+        });
+
+        this._categoryDropdown.selectedOption.connect(() => {
+            // Reset layer selection
+            if (this._layerDropdown) {
+                this._layerDropdown.selectedOption.value = '';
+            }
+
+            // Rerender dialog
+            this.renderDialog(false);
+        });
+        const categoryDropDownLabel: Text = Fonts.std(
+            'Annotation Type',
+            AnnotationDialog.FONT_SIZE,
+            FontWeight.BOLD
+        ).color(AnnotationDialog.LABEL_COLOR).build();
+
+        this._inputLayout.addChild(categoryDropDownLabel);
+        this._scrollBox.addObject(this._categoryDropdown, this._inputLayout);
+
         const categoryLayers = this._layers.filter((layer: AnnotationData) => (
             this._categoryDropdown && layer.category === this._categoryDropdown.selectedOption.value)
                 || (
@@ -228,42 +264,6 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
             this._inputLayout.addChild(layerDropDownLabel);
             this._scrollBox.addObject(this._layerDropdown, this._inputLayout);
         }
-
-        // Add Annotation Category Dropdown
-        const defaultCategoryOption = this._categoryDropdown?.selectedOption.value
-            || this._initialAnnotation?.category || this._activeCategory;
-        this._categoryDropdown = new GameDropdown({
-            fontSize: 14,
-            options: [AnnotationCategory.PUZZLE, AnnotationCategory.SOLUTION],
-            defaultOption: defaultCategoryOption,
-            borderWidth: 0,
-            borderColor: AnnotationDialog.UPPER_TOOLBAR_DIVIDER_COLOR,
-            color: 0x021E46,
-            textColor: 0xF39C12,
-            textWeight: FontWeight.BOLD,
-            width: AnnotationDialog.FIELD_WIDTH,
-            height: AnnotationDialog.DROPDOWN_HEIGHT,
-            dropShadow: true,
-            checkboxes: true
-        });
-
-        this._categoryDropdown.selectedOption.connect(() => {
-            // Reset layer selection
-            if (this._layerDropdown) {
-                this._layerDropdown.selectedOption.value = '';
-            }
-
-            // Rerender dialog
-            this.renderDialog(false);
-        });
-        const categoryDropDownLabel: Text = Fonts.std(
-            'Annotation Type',
-            AnnotationDialog.FONT_SIZE,
-            FontWeight.BOLD
-        ).color(AnnotationDialog.LABEL_COLOR).build();
-
-        this._inputLayout.addChild(categoryDropDownLabel);
-        this._scrollBox.addObject(this._categoryDropdown, this._inputLayout);
 
         // Generate Dialog Divider
         this._divider = new Graphics()
