@@ -130,71 +130,65 @@ export default class AnnotationPanel extends ContainerObject {
         // });
         // this.addCategory(this._rnaCategory);
         const puzzleAnnotations = this._annotationManager.getPuzzleAnnotations();
-        if (
-            this._annotationManager.activeCategory === AnnotationCategory.PUZZLE
-            || (this._annotationManager.activeCategory === AnnotationCategory.SOLUTION && puzzleAnnotations.length > 0)
-        ) {
-            this._puzzleCategory = new AnnotationPanelItem({
-                data: {
-                    id: uuidv4(),
-                    type: AnnotationHierarchyType.CATEGORY,
-                    category: AnnotationCategory.PUZZLE,
-                    playerID: Eterna.playerID,
-                    title: 'Puzzle',
-                    children: puzzleAnnotations,
-                    visible: this._annotationManager.puzzleAnnotationsVisible,
-                    expanded: this._puzzleCategoryExpanded
-                },
-                indexPath: [1],
-                width: AnnotationPanel.PANEL_WIDTH,
-                dividerThickness: AnnotationPanel.DIVIDER_THICKNESS,
-                titleEditable: true,
-                updateTitle: (itemPath: number[], text: string) => {
-                    this.updateTitle(itemPath, text);
-                },
-                updateAnnotationLayer: (annotation: Item, layerPath: number[]) => {
-                    this.updateAnnotationLayer(annotation, layerPath);
-                },
-                updateAnnotationPosition: (firstAnnotation: Item, secondAnnotationPath: number[]) => {
-                    this.updateAnnotationPosition(firstAnnotation, secondAnnotationPath);
-                },
-                createNewLayer: (category: AnnotationCategory) => {
-                    this._annotationManager.createNewLayer(category);
-                }
-            });
-            this.addCategory(this._puzzleCategory);
-        }
-        if (this._annotationManager.activeCategory === AnnotationCategory.SOLUTION) {
-            this._solutionCategory = new AnnotationPanelItem({
-                data: {
-                    id: uuidv4(),
-                    type: AnnotationHierarchyType.CATEGORY,
-                    category: AnnotationCategory.SOLUTION,
-                    playerID: Eterna.playerID,
-                    title: 'Solution',
-                    children: this._annotationManager.getSolutionAnnotations(),
-                    visible: this._annotationManager.solutionAnnotationsVisible,
-                    expanded: this._solutionCategoryExpanded
-                },
-                indexPath: [2],
-                width: AnnotationPanel.PANEL_WIDTH,
-                dividerThickness: AnnotationPanel.DIVIDER_THICKNESS,
-                titleEditable: true,
-                updateTitle: (itemPath: number[], text: string) => {
-                    this.updateTitle(itemPath, text);
-                },
-                updateAnnotationLayer: (annotation: Item, layerPath: number[]) => {
-                    this.updateAnnotationLayer(annotation, layerPath);
-                },
-                updateAnnotationPosition: (firstAnnotation: Item, secondAnnotationPath: number[]) => {
-                    this.updateAnnotationPosition(firstAnnotation, secondAnnotationPath);
-                },
-                createNewLayer: (category: AnnotationCategory) => {
-                    this._annotationManager.createNewLayer(category);
-                }
-            });
-            this.addCategory(this._solutionCategory);
-        }
+        this._puzzleCategory = new AnnotationPanelItem({
+            data: {
+                id: uuidv4(),
+                type: AnnotationHierarchyType.CATEGORY,
+                category: AnnotationCategory.PUZZLE,
+                playerID: Eterna.playerID,
+                title: 'Puzzle',
+                children: puzzleAnnotations,
+                visible: this._annotationManager.puzzleAnnotationsVisible,
+                expanded: this._puzzleCategoryExpanded
+            },
+            indexPath: [1],
+            width: AnnotationPanel.PANEL_WIDTH,
+            dividerThickness: AnnotationPanel.DIVIDER_THICKNESS,
+            titleEditable: true,
+            updateTitle: (itemPath: number[], text: string) => {
+                this.updateTitle(itemPath, text);
+            },
+            updateAnnotationLayer: (annotation: Item, layerPath: number[]) => {
+                this.updateAnnotationLayer(annotation, layerPath);
+            },
+            updateAnnotationPosition: (firstAnnotation: Item, secondAnnotationPath: number[]) => {
+                this.updateAnnotationPosition(firstAnnotation, secondAnnotationPath);
+            },
+            createNewLayer: (category: AnnotationCategory) => {
+                this._annotationManager.createNewLayer(category);
+            }
+        });
+        this.addCategory(this._puzzleCategory);
+
+        this._solutionCategory = new AnnotationPanelItem({
+            data: {
+                id: uuidv4(),
+                type: AnnotationHierarchyType.CATEGORY,
+                category: AnnotationCategory.SOLUTION,
+                playerID: Eterna.playerID,
+                title: 'Solution',
+                children: this._annotationManager.getSolutionAnnotations(),
+                visible: this._annotationManager.solutionAnnotationsVisible,
+                expanded: this._solutionCategoryExpanded
+            },
+            indexPath: [2],
+            width: AnnotationPanel.PANEL_WIDTH,
+            dividerThickness: AnnotationPanel.DIVIDER_THICKNESS,
+            titleEditable: true,
+            updateTitle: (itemPath: number[], text: string) => {
+                this.updateTitle(itemPath, text);
+            },
+            updateAnnotationLayer: (annotation: Item, layerPath: number[]) => {
+                this.updateAnnotationLayer(annotation, layerPath);
+            },
+            updateAnnotationPosition: (firstAnnotation: Item, secondAnnotationPath: number[]) => {
+                this.updateAnnotationPosition(firstAnnotation, secondAnnotationPath);
+            },
+            createNewLayer: (category: AnnotationCategory) => {
+                this._annotationManager.createNewLayer(category);
+            }
+        });
+        this.addCategory(this._solutionCategory);
 
         // Get 1D array of annotations in annotation tree
         const annotationModels: AnnotationPanelItem[] = [];
