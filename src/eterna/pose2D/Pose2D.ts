@@ -2927,11 +2927,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (this._redrawAnnotations === FrameUpdateState.NEXT_FRAME) {
             this._redrawAnnotations = FrameUpdateState.THIS_FRAME;
         } else if (this._redrawAnnotations === FrameUpdateState.THIS_FRAME) {
+            // If we just went from 1 annotation to 0, we still need to make sure we clear it.
+            this.clearAnnotationCanvas();
             if (this._annotationManager.allAnnotations.length > 0) {
                 if (!this._redrawAnnotationUseCache || this.annotationSpaceAvailability.length !== 0) {
                     this.updateAnnotationSpaceAvailability();
                 }
-                this.clearAnnotationCanvas();
                 this._annotationManager.drawAnnotations({
                     pose: this,
                     reset: true,
