@@ -1310,9 +1310,9 @@ export default class AnnotationManager {
             for (const positionConflict of positionConflicts) {
                 // Compute offset based on overlap placement
                 const conflictOffsetX = positionConflict.bounds.x
-                    - anchorPoint.x + anchorDisplay.width + positionConflict.bounds.width / 2;
+                    - anchorPoint.x + anchorDisplay.width / 2 + positionConflict.bounds.width / 2;
                 const conflictOffsetY = positionConflict.bounds.y
-                    - anchorPoint.y + anchorDisplay.height + positionConflict.bounds.height / 2;
+                    - anchorPoint.y + anchorDisplay.height / 2 + positionConflict.bounds.height / 2;
 
                 const point = this.computeAnnotationPositionPoint(
                     pose,
