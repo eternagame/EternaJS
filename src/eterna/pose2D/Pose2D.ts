@@ -25,9 +25,11 @@ import Utility from 'eterna/util/Utility';
 import Folder from 'eterna/folding/Folder';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
-import AnnotationManager, {AnnotationRange} from 'eterna/AnnotationManager';
+import AnnotationManager, {AnnotationData, AnnotationRange} from 'eterna/AnnotationManager';
 import ContextMenu from 'eterna/ui/ContextMenu';
 import Bitmaps from 'eterna/resources/Bitmaps';
+import AnnotationView from 'eterna/ui/AnnotationView';
+import AnnotationDialog from 'eterna/ui/AnnotationDialog';
 import Base from './Base';
 import BaseDrawFlags from './BaseDrawFlags';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
@@ -54,6 +56,11 @@ export enum Layout {
     FLIP_STEM
 }
 
+enum FrameUpdateState {
+    IDLE,
+    THIS_FRAME,
+    NEXT_FRAME
+}
 export const PLAYER_MARKER_LAYER = 'Markers';
 export const SCRIPT_MARKER_LAYER = 'Script';
 
@@ -67,10 +74,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public static readonly OLIGO_MODE_EXT3P: number = 2;
     public static readonly OLIGO_MODE_EXT5P: number = 3;
 
-    constructor(poseField: PoseField, editable: boolean) {
+    constructor(poseField: PoseField, editable: boolean, annotationManager: AnnotationManager) {
         super();
         this._poseField = poseField;
         this._editable = editable;
+        this._annotationManager = annotationManager;
     }
 
     protected added() {
@@ -135,7 +143,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         this._annotationCanvas = new Graphics();
-        this.container.addChild(this.annotationCanvas);
+        this.container.addChild(this._annotationCanvas);
 
         this._annotationContextMenu = new ContextMenu({horizontal: true});
         this._annotationContextMenu.addItem(
@@ -144,13 +152,44 @@ export default class Pose2D extends ContainerObject implements Updatable {
             'Create Annotation',
             0x54B54E
         ).clicked.connect(() => {
-            this.annotationManager.createAnnotation(
-                this._annotationRanges,
-                new Point(
-                    this._annotationContextMenu.display.x,
-                    this._annotationContextMenu.display.y
-                )
-            );
+            this._annotationDialog = new AnnotationDialog({
+                edit: false,
+                title: false,
+                sequenceLength: this.fullSequenceLength,
+                initialRanges: this._annotationRanges,
+                initialLayers: this._annotationManager.allLayers,
+                activeCategory: this._annotationManager.activeCategory
+            });
+            this._annotationManager.persistentAnnotationDataUpdated.connect(() => {
+                if (this._annotationDialog) {
+                    this._annotationDialog.layers = this._annotationManager.allLayers;
+                }
+            });
+            this._annotationDialog.onUpdateRanges.connect((ranges: AnnotationRange[] | null) => {
+                if (ranges) this.setAnnotationRanges(ranges);
+            });
+
+            this._annotationDialog.closed.then((annotation: AnnotationData | null) => {
+                this._annotationDialog = null;
+
+                if (annotation) {
+                    this._annotationManager.addAnnotation(annotation);
+                }
+
+                this.clearAnnotationRanges();
+            });
+
+            const menuX = this._annotationContextMenu.display.x;
+            const menuY = this._annotationContextMenu.display.y;
+            Assert.assertIsDefined(Flashbang.stageWidth);
+            Assert.assertIsDefined(Flashbang.stageHeight);
+            this._annotationDialog.display.x = menuX + this._annotationDialog.display.width < Flashbang.stageWidth
+                ? menuX : menuX - this._annotationDialog.display.width;
+            this._annotationDialog.display.y = menuY + this._annotationDialog.display.height < Flashbang.stageWidth
+                ? menuY : menuY - this._annotationDialog.display.height;
+
+            this.addObject(this._annotationDialog, this.container);
+
             this.hideAnnotationContextMenu();
         });
         this._annotationContextMenu.addItem(
@@ -173,7 +212,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.callStartMousedownCallback(e);
 
             // deselect all annotations
-            this.annotationManager.deselectAll();
+            this._annotationManager.deselectSelected();
         });
         this.pointerOut.connect(() => this.onMouseOut());
 
@@ -193,6 +232,26 @@ export default class Pose2D extends ContainerObject implements Updatable {
         );
         this.regs.add(Eterna.settings.simpleGraphics.connectNotify((value) => { this.useSimpleGraphics = value; }));
         this.regs.add(Eterna.settings.usePuzzlerLayout.connect(() => this.computeLayout()));
+
+        this.regs.add(this._annotationManager.annotationModeActive.connect((active: boolean) => {
+            if (active) {
+                this.setBasesOpacity(AnnotationManager.ANNOTATION_UNHIGHLIGHTED_OPACITY);
+                this.setAnnotationCanvasOpacity(AnnotationManager.ANNOTATION_UNHIGHLIGHTED_OPACITY);
+            } else {
+                this.clearAnnotationRanges();
+                this.hideAnnotationContextMenu();
+                this.setBasesOpacity(1);
+                this.setAnnotationCanvasOpacity(1);
+            }
+        }));
+        this.regs.add(this._annotationManager.highlights.connect((ranges: AnnotationRange[] | null) => {
+            if (ranges) {
+                this.setAnnotationRangeHighlight(ranges);
+            }
+        }));
+        this.regs.add(this._annotationManager.viewAnnotationDataUpdated.connect(() => {
+            this.redrawAnnotations(true);
+        }));
     }
 
     public setSize(width: number, height: number): void {
@@ -200,6 +259,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._height = height;
 
         this.container.hitArea = new Rectangle(0, 0, width, height);
+        this.redrawAnnotations();
     }
 
     public set redraw(setting: boolean) {
@@ -261,11 +321,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     return;
                 }
             }
-
-            if (this.annotationManager.allAnnotations.length > 0) {
-                this.updateAnnotationSpaceAvailability();
-            }
-            this.annotationManager.refreshAnnotations(this, true);
 
             this._startOffsetX = this._offX;
             this._startOffsetY = this._offY;
@@ -354,7 +409,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.updateMolecule();
             this.generateScoreNodes();
             this.callPoseEditCallback();
-            this.annotationManager.refreshAnnotations(this, false);
+            this.redrawAnnotations();
             this._librarySelectionsChanged = false;
             return;
         }
@@ -402,7 +457,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.updateMolecule();
             this.generateScoreNodes();
             this.callPoseEditCallback();
-            this.annotationManager.refreshAnnotations(this);
         }
 
         this._mutatedSequence = null;
@@ -458,8 +512,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.updateMolecule();
             this.generateScoreNodes();
             this.callPoseEditCallback();
-            this.updateAnnotationSpaceAvailability();
-            this.annotationManager.refreshAnnotations(this, true);
         }
     }
 
@@ -848,7 +900,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         const shiftDown: boolean = Flashbang.app.isShiftKeyDown;
         const ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
 
-        if (this.annotationManager.isMovingAnnotation) {
+        if (this._annotationManager.isMovingAnnotation) {
             return;
         }
 
@@ -876,12 +928,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (
                 (ctrlDown || this.currentColor === RNAPaint.BASE_MARK)
                 && closestIndex < this.fullSequenceLength
-                && !this.annotationManager.getAnnotationMode()
+                && !this._annotationManager.annotationModeActive.value
             ) {
                 this.toggleBaseMark(closestIndex);
                 return;
             }
-            if (shiftDown && !this.annotationManager.getAnnotationMode()) {
+            if (shiftDown && !this._annotationManager.annotationModeActive.value) {
                 if (closestIndex < this.sequenceLength) {
                     this._shiftStart = closestIndex;
                     this._shiftEnd = closestIndex;
@@ -897,7 +949,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 e.stopPropagation();
                 return;
             }
-            if (this.annotationManager.getAnnotationMode()) {
+            if (this._annotationManager.annotationModeActive.value) {
                 this.hideAnnotationContextMenu();
 
                 if (closestIndex < this.sequenceLength) {
@@ -959,17 +1011,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     let reg: Registration | null = null;
                     reg = this.pointerUp.connect(() => {
                         this._selectingAnnotationRange = false;
-                        // Merge ranges
-                        if (!this.annotationManager.dialogIsVisible) {
+                        if (!this._annotationDialog && this._annotationRanges[this._annotationRanges.length - 1]) {
                             this.updateAnnotationContextMenu(
                                 this._annotationRanges[this._annotationRanges.length - 1].end
                             );
                         }
                         this.mergeAnnotationRanges();
                         this.updateAnnotationRangeHighlight();
-                        if (this.annotationManager.dialogIsVisible) {
-                            this.annotationManager.updateDialogRanges(this._annotationRanges);
-                        }
+                        this._annotationDialog?.setRanges(this._annotationRanges);
                         if (reg) reg.close();
                     });
                 }
@@ -996,7 +1045,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
 
             e.stopPropagation();
-        } else if (shiftDown && !this.annotationManager.getAnnotationMode()) {
+        } else if (shiftDown && !this._annotationManager.annotationModeActive.value) {
             this._shiftStart = -1;
             this._shiftEnd = -1;
             this.updateShiftHighlight();
@@ -1139,7 +1188,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.onBaseMouseMove(closestIndex);
             // document.getElementById(Eterna.PIXI_CONTAINER_ID).style.cursor = 'none';
 
-            if (!this.annotationManager.getAnnotationMode()) {
+            if (!this._annotationManager.annotationModeActive.value) {
                 this._paintCursor.display.visible = true;
                 this._paintCursor.setShape(this._currentColor);
             }
@@ -1214,12 +1263,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (this._annotationContextMenu.display.visible) {
             this._annotationContextMenu.display.x -= (this.xOffset - offX);
             this._annotationContextMenu.display.y -= (this.yOffset - offY);
-        } else if (
-            this.annotationManager.dialogIsVisible
-            && this.annotationManager.annotationDialog
-        ) {
-            this.annotationManager.annotationDialog.display.x -= (this.xOffset - offX);
-            this.annotationManager.annotationDialog.display.y -= (this.yOffset - offY);
+        } else if (this._annotationDialog) {
+            this._annotationDialog.display.x -= (this.xOffset - offX);
+            this._annotationDialog.display.y -= (this.yOffset - offY);
         }
         this._offX = offX;
         this._offY = offY;
@@ -1678,16 +1724,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public clearAnnotationRanges(): void {
         this._annotationRanges = [];
-
-        this.clearAnnotationHighlight();
-    }
-
-    public clearAnnotationHighlight(): void {
-        this._annotationHighlightBox.clear();
+        this._annotationManager.highlights.value = [];
 
         if (
-            this.annotationManager
-            && this.annotationManager.getAnnotationMode()
+            this._annotationManager
+            && this._annotationManager.annotationModeActive.value
         ) {
             for (const base of this._bases) {
                 base.container.alpha = AnnotationManager.ANNOTATION_UNHIGHLIGHTED_OPACITY;
@@ -2413,8 +2454,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.checkPairs();
         this.updateMolecule();
         this.generateScoreNodes();
-        this.updateAnnotationSpaceAvailability();
-        this.annotationManager.refreshAnnotations(this, true);
     }
 
     public get sequence(): Sequence {
@@ -2451,8 +2490,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.checkPairs();
         this.updateMolecule();
         this.generateScoreNodes();
-        this.updateAnnotationSpaceAvailability();
-        this.annotationManager.refreshAnnotations(this, true);
     }
 
     public get secstruct(): SecStruct {
@@ -2646,8 +2683,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 prog = 1;
                 this._offsetTranslating = false;
 
-                this.updateAnnotationSpaceAvailability();
-                this.annotationManager.refreshAnnotations(this, true);
+                this.redrawAnnotations();
+            } else {
+                // Don't show annotations while animating. If we recomputed it each frame it would
+                // be laggy, if we don't the annotation locations may be in visually bizarre locations
+                this.clearAnnotationCanvas();
             }
 
             if (this._offsetTranslating) {
@@ -2880,6 +2920,29 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         this._prevOffsetX = this._offX;
         this._prevOffsetY = this._offY;
+    }
+
+    public lateUpdate(_dt: number): void {
+        // For some reason, if we attempt to recompute position rotations before things are
+        // redrawn to the screen, it incorrectly determines where the bases actually are.
+        // Maybe DisplayObject#getLocalBounds only updates after a draw? Dunno.
+        if (this._redrawAnnotations === FrameUpdateState.NEXT_FRAME) {
+            this._redrawAnnotations = FrameUpdateState.THIS_FRAME;
+        } else if (this._redrawAnnotations === FrameUpdateState.THIS_FRAME) {
+            // If we just went from 1 annotation to 0, we still need to make sure we clear it.
+            this.clearAnnotationCanvas();
+            if (this._annotationManager.allAnnotations.length > 0) {
+                if (!this._redrawAnnotationUseCache || this.annotationSpaceAvailability.length === 0) {
+                    this.updateAnnotationSpaceAvailability();
+                }
+                this._annotationManager.drawAnnotations({
+                    pose: this,
+                    reset: true,
+                    ignoreCustom: false
+                });
+            }
+            this._redrawAnnotations = FrameUpdateState.IDLE;
+        }
     }
 
     public setAnimationProgress(progress: number) {
@@ -3347,7 +3410,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.updateShiftHighlight();
         } else if (
             !this._coloring
-            && this.annotationManager.getAnnotationMode()
+            && this._annotationManager.annotationModeActive.value
             && this._annotationRanges.length > 0
             && this._selectingAnnotationRange
             && seqnum < this.sequenceLength
@@ -3486,7 +3549,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public updateAnnotationRangeHighlight(): void {
         this._annotationHighlightBox.clear();
 
-        if (this.annotationManager.getAnnotationMode()) {
+        if (this._annotationManager.annotationModeActive.value) {
             for (let i = 0; i < this._bases.length; i++) {
                 this._bases[i].container.alpha = AnnotationManager.ANNOTATION_UNHIGHLIGHTED_OPACITY;
             }
@@ -3552,10 +3615,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._annotationSpaceAvailability;
     }
 
-    public get annotationCanvas(): Graphics {
-        return this._annotationCanvas;
-    }
-
     public setBasesOpacity(opacity: number): void {
         for (const base of this._bases) {
             base.container.alpha = opacity;
@@ -3563,22 +3622,49 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public setAnnotationCanvasOpacity(opacity: number): void {
-        this.annotationCanvas.alpha = opacity;
+        this._annotationCanvas.alpha = opacity;
     }
 
     public triggerRedraw(): void {
         this._redraw = true;
     }
 
-    public clearAnnotationCanvas(): void {
-        if (this.annotationCanvas.children.length > 0) {
-            // Remove from any remaining artifacts from canvas
-            this.annotationCanvas.removeChildren();
-            this.annotationCanvas.clear();
-        }
+    public redrawAnnotations(useCachedSpaceAvailability = false) {
+        this._redrawAnnotations = FrameUpdateState.NEXT_FRAME;
+        this._redrawAnnotationUseCache = useCachedSpaceAvailability;
     }
 
-    public updateAnnotationSpaceAvailability(): void {
+    public addAnnotationView(view: AnnotationView) {
+        if (!view.isLiveObject) {
+            this.addObject(view, this._annotationCanvas);
+        }
+
+        this._annotationViews.push(view);
+    }
+
+    public getAnnotationViewDims(id: string | number, positionIndex: number) {
+        const desiredView = this._annotationViews.find(
+            (view) => view.annotationID === id && view.positionIndex === positionIndex
+        );
+
+        if (desiredView) {
+            return {
+                width: desiredView.width,
+                height: desiredView.height
+            };
+        }
+
+        return null;
+    }
+
+    public clearAnnotationCanvas(): void {
+        for (const view of this._annotationViews) {
+            this.removeObject(view);
+        }
+        this._annotationViews = [];
+    }
+
+    private updateAnnotationSpaceAvailability(): void {
         // These are SUPER expensive getters which basically have to touch all the objects in
         // the container. There's no reason the width and height change while running this function,
         // so let's only compute them once.
@@ -4192,13 +4278,17 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _showNucleotideRange: boolean = false;
 
     // Annotations
-    public annotationManager: AnnotationManager;
+    private _annotationManager: AnnotationManager;
     private _annotationCanvas: Graphics;
+    private _annotationViews: AnnotationView[] = [];
     private _annotationHighlightBox: HighlightBox;
     private _annotationContextMenu: ContextMenu;
+    private _annotationDialog: AnnotationDialog | null = null;
     private _annotationSpaceAvailability: boolean[][] = [];
     private _annotationRanges: AnnotationRange[] = [];
     private _selectingAnnotationRange: boolean = false;
+    private _redrawAnnotations: FrameUpdateState = FrameUpdateState.IDLE;
+    private _redrawAnnotationUseCache: boolean = false;
 
     /*
      * NEW HIGHLIGHT.

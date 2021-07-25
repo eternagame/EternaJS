@@ -1,8 +1,8 @@
-import {AnnotationDataBundle} from 'eterna/AnnotationManager';
+import {AnnotationData} from 'eterna/AnnotationManager';
 
 export default interface SubmitPoseDetails {
     title: string | undefined;
     comment: string | undefined;
-    annotations: AnnotationDataBundle;
+    annotations: AnnotationData[];
     libraryNT: number[];
 }

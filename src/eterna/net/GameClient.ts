@@ -4,7 +4,7 @@ import {FoldData} from 'eterna/UndoBlock';
 import {VoteData} from 'eterna/mode/DesignBrowser/VoteProcessor';
 import {RankScrollData} from 'eterna/rank/RankScroll';
 import {PuzzleJSON} from 'eterna/puzzle/PuzzleManager';
-import {AnnotationDataBundle} from 'eterna/AnnotationManager';
+import {AnnotationData} from 'eterna/AnnotationManager';
 
 // we MUST do this, because we use a dom method that gives us
 // any. long term AMW TODO build interfaces for each get/post
@@ -21,7 +21,7 @@ interface VoteDataWrapper {
 
 type Params = Record<
 string,
-string | number | number[] | boolean | PuzzleJSON | RankScrollData | AnnotationDataBundle | null | undefined>;
+string | number | number[] | boolean | PuzzleJSON | RankScrollData | AnnotationData[] | null | undefined>;
 
 export default class GameClient {
     public readonly baseURL: string;

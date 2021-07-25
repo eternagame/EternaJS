@@ -62,16 +62,15 @@ import DotPlot from 'eterna/rnatypes/DotPlot';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 import UITheme from 'eterna/ui/UITheme';
-import AnnotationView from 'eterna/ui/AnnotationView';
 import AnnotationManager, {
     AnnotationData,
     AnnotationCategory,
-    AnnotationArguments,
     AnnotationDataBundle,
-    AnnotationRange,
-    AnnotationHierarchyType
+    AnnotationHierarchyType,
+    AnnotationRange
 } from 'eterna/AnnotationManager';
 import LibrarySelectionConstraint from 'eterna/constraints/constraints/LibrarySelectionConstraint';
+import AnnotationDialog from 'eterna/ui/AnnotationDialog';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -113,6 +112,8 @@ export interface Move {
 
 // AMW TODO: we need the "all optional" impl for piece by piece buildup.
 // Should be converted to an "all required" type for subsequent processing.
+// JAR TODO: This seems to conflate the request data with the response data.
+// Should be converted to two separate structures (in addition to the above)
 export type SubmitSolutionData = {
     'next-puzzle'?: PuzzleJSON | number | null;
     'recommend-puzzle'?: boolean;
@@ -135,7 +136,7 @@ export type SubmitSolutionData = {
     'pointsrank-before'?: RankScrollData | null;
     'pointsrank-after'?: RankScrollData | null;
     'selected-nts'?: number[];
-    'annotations'?: AnnotationDataBundle;
+    'annotations'?: string;
 };
 
 export default class PoseEditMode extends GameMode {
@@ -162,7 +163,40 @@ export default class PoseEditMode extends GameMode {
         this.addObject(this._background, this.bgLayer);
 
         const toolbarType = this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL ? ToolbarType.LAB : ToolbarType.PUZZLE;
+
         this._annotationManager = new AnnotationManager(toolbarType);
+        this._annotationManager.persistentAnnotationDataUpdated.connect(() => this.saveData());
+        this._annotationManager.annotationEditRequested.connect((annotation: AnnotationData) => {
+            if (annotation.ranges) {
+                const dialog = new AnnotationDialog({
+                    edit: true,
+                    title: true,
+                    sequenceLength: this._poses[0].fullSequenceLength,
+                    initialRanges: annotation.ranges,
+                    initialLayers: this._annotationManager.allLayers,
+                    activeCategory: this._annotationManager.activeCategory,
+                    initialAnnotation: annotation
+                });
+                dialog.onUpdateRanges.connect((ranges: AnnotationRange[] | null) => {
+                    if (ranges) {
+                        this._poses.forEach((pose) => pose.setAnnotationRanges(ranges));
+                    }
+                });
+                this._annotationManager.persistentAnnotationDataUpdated.connect(() => {
+                    dialog.layers = this._annotationManager.allLayers;
+                });
+                this.showDialog(dialog).closed.then((editedAnnotation: AnnotationData | null) => {
+                    if (editedAnnotation) {
+                        editedAnnotation.selected = false;
+                        this._annotationManager.editAnnotation(editedAnnotation);
+                    } else if (annotation) {
+                        // We interpret null argument as delete intent when editing
+                        this._annotationManager.deleteAnnotation(annotation);
+                    }
+                });
+            }
+        });
+
         this._toolbar = new Toolbar(toolbarType, {
             states: this._puzzle.getSecstructs().length,
             showGlue: this._puzzle.targetConditions
@@ -170,8 +204,7 @@ export default class PoseEditMode extends GameMode {
             boosters: this._puzzle.boosters ? this._puzzle.boosters : undefined,
             showAdvancedMenus: this._puzzle.puzzleType !== PuzzleType.PROGRESSION,
             showLibrarySelect: this._puzzle.constraints?.some((con) => con instanceof LibrarySelectionConstraint),
-            annotationManager: this._annotationManager,
-            puzzle: this._puzzle
+            annotationManager: this._annotationManager
         });
         this.addObject(this._toolbar, this.uiLayer);
 
@@ -267,10 +300,6 @@ export default class PoseEditMode extends GameMode {
 
         this._toolbar.downloadSVGButton.clicked.connect(() => {
             this.downloadSVG();
-        });
-
-        this._toolbar.annotationModeButton.toggled.connect((active: boolean) => {
-            this._annotationManager.setAnnotationMode(active);
         });
 
         this._toolbar.annotationPanelButton.toggled.connect((visible) => {
@@ -406,10 +435,6 @@ export default class PoseEditMode extends GameMode {
         this._dockedSpecBox.setSize(Flashbang.stageWidth - this._solDialogOffset, Flashbang.stageHeight - 340);
         const s: number = this._dockedSpecBox.plotSize;
         this._dockedSpecBox.setSize(s + 55, s * 2 + 51);
-
-        for (const pose of this._poses) {
-            this._annotationManager.refreshAnnotations(pose, true);
-        }
 
         if (this._toolbar.annotationPanel.isVisible) {
             this._toolbar.annotationPanel.updatePanelPosition();
@@ -619,6 +644,9 @@ export default class PoseEditMode extends GameMode {
             this.clearMoveTracking(solution.sequence.sequenceString());
             this.setAncestorId(solution.nodeID);
 
+            const annotations = solution.annotations;
+            this._annotationManager.setSolutionAnnotations(annotations ?? []);
+
             // AMW: I'm keeping the function around in case we want to call it
             // in some other context, but we don't need it anymore.
             // this.updateSolutionNameText(solution);
@@ -693,7 +721,7 @@ export default class PoseEditMode extends GameMode {
         //     before_reset = this._puzzle.transform_sequence(this.get_current_undo_block(0).get_sequence(), 0);
         // }
 
-        const bindAddbaseCB = (pose: Pose2D, kk: number) => {
+        const bindAddBaseCB = (pose: Pose2D, kk: number) => {
             pose.addBaseCallback = ((parenthesis: string | null, op: PuzzleEditOp | null, index: number) => {
                 Assert.assertIsDefined(parenthesis);
                 Assert.assertIsDefined(op);
@@ -730,144 +758,15 @@ export default class PoseEditMode extends GameMode {
             });
         };
 
-        const onAnnotationModeChange = (pose: Pose2D, active: boolean) => {
-            if (!active) {
-                pose.clearAnnotationRanges();
-                pose.hideAnnotationContextMenu();
-                const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
-                if (doc) {
-                    doc.style.cursor = 'default';
-                }
-            } else {
-                const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
-                if (doc) {
-                    doc.style.cursor = 'grab';
-                }
-            }
-        };
-
         for (let ii = 0; ii < targetConditions.length; ii++) {
-            const poseField: PoseField = new PoseField(true);
+            const poseField: PoseField = new PoseField(true, this._annotationManager);
             this.addObject(poseField, this.poseLayer);
             const pose: Pose2D = poseField.pose;
-            bindAddbaseCB(pose, ii);
+            bindAddBaseCB(pose, ii);
             bindPoseEdit(pose, ii);
             bindTrackMoves(pose, ii);
             bindMousedownEvent(pose, ii);
             poseFields.push(poseField);
-            pose.annotationManager = this._annotationManager;
-
-            // We only need one annotation manager to act on annotation logic
-            if (ii === 0) {
-                this._annotationManager.annotationMode.connect((active: boolean) => {
-                    onAnnotationModeChange(pose, active);
-                });
-                this._annotationManager.onAdjustBasesOpacity.connect((opacity: number) => {
-                    pose.setBasesOpacity(opacity);
-                });
-                this._annotationManager.onAdjustAnnotationCanvasOpacity.connect((opacity: number) => {
-                    pose.setAnnotationCanvasOpacity(opacity);
-                });
-                this._annotationManager.onTriggerRedraw.connect(() => pose.triggerRedraw());
-                this._annotationManager.onTriggerSave.connect(() => this.saveData());
-                this._annotationManager.onClearHighlights.connect(() => pose.clearAnnotationHighlight());
-                this._annotationManager.onClearAnnotationCanvas.connect(() => {
-                    pose.clearAnnotationCanvas();
-                });
-                this._annotationManager.onSetHighlights.connect((ranges: AnnotationRange[] | null) => {
-                    if (ranges) {
-                        pose.setAnnotationRangeHighlight(ranges);
-                    }
-                });
-                this._annotationManager.onRecomputeSpaceAvailability.connect(() => {
-                    // We don't check for annotations.length > 0 because
-                    // we only want to account for scenario where to go
-                    // from non-zero to zero annotation
-                    if (pose.annotationSpaceAvailability.length === 0) {
-                        pose.updateAnnotationSpaceAvailability();
-                    }
-                });
-                this._annotationManager.onAddAnnotationView.connect((view: AnnotationView) => {
-                    if (!view.isLiveObject) {
-                        this.addObject(view, pose.annotationCanvas);
-                    }
-                });
-
-                this._annotationManager.onCreateAnnotation.connect((args: AnnotationArguments) => {
-                    this._annotationManager.showAnnotationDialog({
-                        edit: false,
-                        ranges: args.ranges,
-                        modal: false,
-                        gameMode: this,
-                        pose,
-                        gameLayer: this.uiLayer,
-                        closeCallback: () => {
-                            if (this._poses.length > 0) {
-                                this.saveData();
-                            }
-                        },
-                        panelPos: args.panelPos
-                    });
-                });
-
-                this._annotationManager.onToggleItemSelection.connect((annotation: AnnotationData | null) => {
-                    if (annotation) {
-                        this._toolbar.annotationPanel.toggleAnnotationPanelItemSelection(annotation);
-                    }
-                });
-                const editAnnotation = (annotation: AnnotationData | null) => {
-                    if (annotation && annotation.ranges) {
-                        this._annotationManager.showAnnotationDialog({
-                            edit: true,
-                            ranges: annotation.ranges,
-                            modal: true,
-                            gameMode: this,
-                            pose,
-                            gameLayer: this.uiLayer,
-                            closeCallback: () => {
-                                if (this._poses.length > 0) {
-                                    this.saveData();
-                                }
-                            },
-                            annotation
-                        });
-                    }
-                };
-                this._annotationManager.onEditAnnotation.connect(editAnnotation);
-                // On progression puzzles, the panel is not added to the toolbar, so we need to
-                // avoid updating the panel
-                if (this._puzzle.puzzleType !== PuzzleType.PROGRESSION) {
-                    this._annotationManager.onTriggerPanelUpdate.connect(() => {
-                        this._toolbar.annotationPanel.updatePanel();
-
-                        if (this._annotationManager.dialogIsVisible) {
-                            this._annotationManager.updateDialogLayers();
-                        }
-
-                        if (this._poses.length > 0) {
-                            this.saveData();
-                        }
-                    });
-                }
-                this._annotationManager.onTriggerPoseUpdate.connect(() => {
-                    this._annotationManager.updateAnnotationViews(pose);
-
-                    if (this._annotationManager.dialogIsVisible) {
-                        this._annotationManager.updateDialogLayers();
-                    }
-
-                    if (this._poses.length > 0) {
-                        this.saveData();
-                    }
-                });
-
-                this._annotationManager.onUploadAnnotations.connect((bundle: AnnotationDataBundle) => {
-                    if (bundle) {
-                        this._annotationManager.setPuzzleAnnotations(bundle.puzzle);
-                        this._annotationManager.setSolutionAnnotations(bundle.solution);
-                    }
-                });
-            }
         }
 
         this.setPoseFields(poseFields);
@@ -991,11 +890,13 @@ export default class PoseEditMode extends GameMode {
 
         // Initialize sequence and/or solution as relevant
         let initialSequence: Sequence | null = null;
-        let annotationGraph: AnnotationDataBundle | undefined;
         let librarySelections: number[] = [];
         if (this._params.initSolution != null) {
             initialSequence = this._params.initSolution.sequence.slice(0);
-            annotationGraph = this._params.initSolution.annotations;
+            const annotations = this._params.initSolution.annotations;
+            if (annotations) {
+                this._annotationManager.setSolutionAnnotations(annotations);
+            }
             this._curSolution = this._params.initSolution;
             // AMW: I'm keeping the function around in case we want to call it
             // in some other context, but we don't need it anymore.
@@ -1055,8 +956,10 @@ export default class PoseEditMode extends GameMode {
                 const tc = this._targetConditions[ii] as TargetConditions;
                 this._poses[ii].structConstraints = tc['structure_constraints'];
 
-                // Get annotation graph
-                annotationGraph = tc['annotations'];
+                const annotations = tc['annotations'];
+                if (annotations) {
+                    this._annotationManager.setPuzzleAnnotations(annotations);
+                }
 
                 this._poses[ii].customLayout = tc['custom-layout'];
                 const customLayout = this._poses[ii].customLayout;
@@ -1104,15 +1007,6 @@ export default class PoseEditMode extends GameMode {
             this._poses[ii].puzzleLocks = this._puzzle.puzzleLocks;
             this._poses[ii].shiftLimit = this._puzzle.shiftLimit;
             this._poses[ii].librarySelections = librarySelections;
-
-            if (
-                this._annotationManager.allAnnotations.length === 0
-                && this._annotationManager.allLayers.length === 0
-                && annotationGraph
-            ) {
-                this._annotationManager.setPuzzleAnnotations(annotationGraph.puzzle);
-                this._annotationManager.setSolutionAnnotations(annotationGraph.solution);
-            }
         }
 
         this.clearUndoStack();
@@ -1857,7 +1751,7 @@ export default class PoseEditMode extends GameMode {
             if (targetIndex === 1) {
                 this._annotationManager.deleteAnnotation(annotation);
             } else {
-                this._annotationManager.addAnnotation(annotation, AnnotationCategory.PUZZLE);
+                this._annotationManager.addAnnotation(annotation);
             }
         }
     }
@@ -1885,7 +1779,6 @@ export default class PoseEditMode extends GameMode {
         this.savePosesMarkersContexts();
         this._paused = false;
         this.updateScore();
-        this._annotationManager.eraseAnnotations(true, true);
         this.transformPosesMarkers();
     }
 
@@ -1928,7 +1821,6 @@ export default class PoseEditMode extends GameMode {
 
         this._paused = true;
         this.updateScore();
-        this._annotationManager.eraseAnnotations(true);
         this.transformPosesMarkers();
     }
 
@@ -2024,7 +1916,7 @@ export default class PoseEditMode extends GameMode {
             this.submitSolution({
                 title: 'Cleared Solution',
                 comment: 'No comment',
-                annotations: this._poses[0].annotationManager.annotationDataBundle,
+                annotations: this._annotationManager.categoryAnnotationData(AnnotationCategory.SOLUTION),
                 libraryNT: this._poses[0].librarySelections ?? []
             }, solToSubmit);
         } else {
@@ -2082,7 +1974,9 @@ export default class PoseEditMode extends GameMode {
                 // / Always submit the sequence in the first state
                 this.updateCurrentBlockWithDotAndMeltingPlot(0);
                 const solToSubmit: UndoBlock = this.getCurrentUndoBlock(0);
-                submitDetails.annotations = this._poses[0].annotationManager.annotationDataBundle;
+                submitDetails.annotations = this._annotationManager.categoryAnnotationData(
+                    AnnotationCategory.SOLUTION
+                );
                 this.submitSolution(submitDetails, solToSubmit);
             }
         });
@@ -2140,7 +2034,7 @@ export default class PoseEditMode extends GameMode {
         postData['ua'] = undoBlock.getParam(UndoBlockParam.AU) as number;
         postData['body'] = details.comment;
         if (details.annotations) {
-            postData['annotations'] = details.annotations;
+            postData['annotations'] = JSON.stringify(details.annotations);
         }
 
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
@@ -2513,7 +2407,7 @@ export default class PoseEditMode extends GameMode {
         for (let ii = 0; ii < this._poses.length; ++ii) {
             objs.push(JSON.stringify({
                 undoBlock: this._seqStacks[this._stackLevel][ii].toJSON(),
-                annotations: this._poses[ii].annotationManager.annotationDataBundle
+                annotations: this._annotationManager.createAnnotationBundle()
             }));
         }
 
@@ -2541,7 +2435,7 @@ export default class PoseEditMode extends GameMode {
                     this._poseState === PoseState.TARGET ? ublk.targetPairs : ublk.getPairs(37, pseudoknots)
                 ).getParenthesis(),
                 startingFolder: this._folder.name,
-                annotations: this._annotationManager.annotationDataBundle
+                annotations: this._annotationManager.createAnnotationBundle()
             };
             if (tc !== undefined && Puzzle.isAptamerType(tc['type'])) {
                 puzzledef.site = tc['site'];
@@ -2640,7 +2534,8 @@ export default class PoseEditMode extends GameMode {
 
             const annotations: AnnotationDataBundle | null = savedAnnotations[ii];
             if (annotations) {
-                this._annotationManager.setPuzzleAnnotations(annotations.puzzle);
+                // Don't load puzzle annotations, as we want to use the up-to-date ones from
+                // the current puzzle definition in case they changed
                 this._annotationManager.setSolutionAnnotations(annotations.solution);
             }
         }
