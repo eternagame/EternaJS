@@ -2682,7 +2682,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         // AMW TODO: this means that PuzzleEditMode can get a baserope showing
         // if the custom layout tools are used.
-        this._baseRope.enabled = this._showBaseRope || (this._customLayout != null);
+        this._baseRope.enabled = this._showBaseRope
+            || this._customLayout != null
+            || Eterna.settings.usePuzzlerLayout.value;
         this._pseudoknotLines.enabled = this._pseudoknotPairs
             && this._pseudoknotPairs.nonempty();
 
