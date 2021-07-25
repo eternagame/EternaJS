@@ -71,7 +71,7 @@
     "canvas-confetti": "^1.4.0",
     "core-js": "^3.13.1",
     "dompurify": "^2.2.9",
-    "eterna-chat-wrapper": "https://github.com/eternagame/eterna-chat-wrapper/archive/6169c8f45f1252b9a3a46c54cf80853736766516.tar.gz",
+    "eterna-chat-wrapper": "https://github.com/eternagame/eterna-chat-wrapper/archive/dd47b03753aeae81c3a8450933b274216515d1bc.tar.gz",
     "is-mobile": "^3.0.0",
     "js-polyfills": "^0.1.43",
     "libtess": "^1.2.2",
