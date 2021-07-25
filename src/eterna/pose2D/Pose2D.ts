@@ -2999,6 +2999,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
+    public get scoreFolder(): Folder | null {
+        return this._scoreFolder;
+    }
+
     public baseShiftWithCommand(command: number, index: number): void {
         const cmd: [string, PuzzleEditOp, number[]?] | null = this.parseCommand(command, index);
         if (cmd != null) {
