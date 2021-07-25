@@ -2922,7 +2922,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public lateUpdate(_dt: number): void {
         // For some reason, if we attempt to recompute position rotations before things are
-        // redrawn to the screen, it incorectly determines where the bases actually are.
+        // redrawn to the screen, it incorrectly determines where the bases actually are.
         // Maybe DisplayObject#getLocalBounds only updates after a draw? Dunno.
         if (this._redrawAnnotations === FrameUpdateState.NEXT_FRAME) {
             this._redrawAnnotations = FrameUpdateState.THIS_FRAME;
@@ -2930,7 +2930,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             // If we just went from 1 annotation to 0, we still need to make sure we clear it.
             this.clearAnnotationCanvas();
             if (this._annotationManager.allAnnotations.length > 0) {
-                if (!this._redrawAnnotationUseCache || this.annotationSpaceAvailability.length !== 0) {
+                if (!this._redrawAnnotationUseCache || this.annotationSpaceAvailability.length === 0) {
                     this.updateAnnotationSpaceAvailability();
                 }
                 this._annotationManager.drawAnnotations({
