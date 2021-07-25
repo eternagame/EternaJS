@@ -576,7 +576,7 @@ export default class Toolbar extends ContainerObject {
         this.pairSwapButton = new ToolbarButton()
             .up(Bitmaps.ImgSwap)
             .over(Bitmaps.ImgSwapOver)
-            .down(Bitmaps.ImgSwapOver)
+            .down(Bitmaps.ImgSwap)
             .hotkey(KeyCode.Digit5)
             .tooltip('Swap paired bases.')
             .rscriptID(RScriptUIElementID.SWAP);
@@ -717,8 +717,7 @@ export default class Toolbar extends ContainerObject {
             this.annotationModeButton = new ToolbarButton()
                 .up(Bitmaps.ImgAnnotationMode)
                 .over(Bitmaps.ImgAnnotationModeOver)
-                .down(Bitmaps.ImgAnnotationModeSelected)
-                .selected(Bitmaps.ImgAnnotationModeSelected)
+                .down(Bitmaps.ImgAnnotationMode)
                 .tooltip('Annotation Mode');
 
             this.annotationPanelButton = new ToolbarButton()
