@@ -317,6 +317,7 @@ export default class AnnotationManager {
         if (parentNode && index != null) {
             parentNode.splice(index, 1);
 
+            this.deselectSelected();
             this.propagateDataUpdates();
         }
     }
