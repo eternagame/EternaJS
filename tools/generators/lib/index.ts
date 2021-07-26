@@ -8,7 +8,10 @@ import {
 import { libraryGenerator } from '@nrwl/workspace/generators';
 
 export default async function (host: Tree, schema: any) {
-    await libraryGenerator(host, { name: schema.name });
+    await libraryGenerator(host, {
+        name: schema.name,
+        setParserOptionsProject: true,
+    });
 
     const projectConfig = readProjectConfiguration(host, schema.name);
 

@@ -8,7 +8,10 @@ import {
 import { applicationGenerator } from '@nrwl/web';
 
 export default async function (host: Tree, schema: any) {
-    await applicationGenerator(host, { name: schema.name });
+    await applicationGenerator(host, {
+        name: schema.name,
+        setParserOptionsProject: true,
+    });
 
     const projectConfig = readProjectConfiguration(host, schema.name);
     const e2eConfig = readProjectConfiguration(host, `${schema.name}-e2e`);
