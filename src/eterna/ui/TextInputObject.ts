@@ -652,7 +652,6 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
         element.rows = rows;
         element.title = '';
         element.style.resize = 'none';
-        element.style.overflow = 'scroll';
         return element;
     }
 
