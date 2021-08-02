@@ -58,7 +58,11 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
         this._textColor = UITheme.textInput.colors.text;
         this._borderRadius = 5;
         this.width = props.width ?? 100;
-        this.height = props.height ?? 30;
+
+        // Don't force a default height when using a text area, as the number of rows will determine that
+        if (!props.rows || props.rows === 1 || props.height) {
+            this.height = props.height ?? 30;
+        }
 
         if (this._characterLimit) {
             let input: HTMLInputElement | HTMLTextAreaElement | undefined;
