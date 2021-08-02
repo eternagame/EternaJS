@@ -380,13 +380,19 @@ export default class PuzzleEditMode extends GameMode {
         this.setPoseFields(poseFields);
 
         // Must do this AFTER pose initialization
-        if (initialPoseData != null
+        if (
+            initialPoseData != null
             && initialPoseData[0] != null
-            && initialPoseData[0]['startingFolder'] != null) {
+            && initialPoseData[0]['startingFolder'] != null
+        ) {
             this._folderSwitcher.changeFolder(initialPoseData[0].startingFolder);
         }
 
-        if (initialPoseData[0]['annotations']) {
+        if (
+            initialPoseData != null
+            && initialPoseData[0] != null
+            && initialPoseData[0]['annotations']
+        ) {
             const defaultAnnotations = initialPoseData[0]['annotations'];
             this._annotationManager.setPuzzleAnnotations(defaultAnnotations.puzzle);
             this._annotationManager.setSolutionAnnotations(defaultAnnotations.solution);
