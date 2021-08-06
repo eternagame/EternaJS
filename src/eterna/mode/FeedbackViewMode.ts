@@ -83,7 +83,7 @@ export default class FeedbackViewMode extends GameMode {
             homeArrow, HAlign.RIGHT, VAlign.CENTER, 8, 8
         );
 
-        this._toolbar = new Toolbar(ToolbarType.FEEDBACK, {states: this._puzzle.getSecstructs().length});
+        this._toolbar = new Toolbar(ToolbarType.FEEDBACK, {states: this._puzzle.getSecstructs().length}, {});
         this.addObject(this._toolbar, this.uiLayer);
 
         Assert.assertIsDefined(this._toolbar.zoomOutButton);
@@ -102,7 +102,7 @@ export default class FeedbackViewMode extends GameMode {
 
         this._toolbar.screenshotButton.clicked.connect(() => this.postScreenshot(this.createScreenshot()));
         this._toolbar.viewSolutionsButton.clicked.connect(() => this.loadDesignBrowser());
-        this._toolbar.viewOptionsButton.clicked.connect(() => this.showViewOptionsDialog());
+        this._toolbar.settingsButton.clicked.connect(() => this.showViewOptionsDialog());
         this._toolbar.letterColorButton.clicked.connect(() => this.showBaseColors());
         this._toolbar.expColorButton.clicked.connect(() => this.showExperimentalColors());
         this._toolbar.specButton.clicked.connect(() => this.showSpec());

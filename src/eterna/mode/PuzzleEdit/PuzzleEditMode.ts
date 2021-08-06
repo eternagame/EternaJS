@@ -152,6 +152,12 @@ export default class PuzzleEditMode extends GameMode {
         this._toolbar = new Toolbar(toolbarType, {
             states: this._numTargets,
             annotationManager: this._annotationManager
+        }, {
+            handleRedoButtonClick: () => this.moveUndoStackForward(),
+            handleUndoButtonClick: () => this.moveUndoStackBackward(),
+            handleSettingsButtonClick: () => this.showViewOptionsDialog(),
+            handleScreenshotButtonClick: () => this.postScreenshot(this.createScreenshot()),
+            handlePaletteButtonClick: (targetType: PaletteTargetType) => this.onPaletteTargetSelected(targetType)
         });
         this.addObject(this._toolbar, this.uiLayer);
 
@@ -202,7 +208,7 @@ export default class PuzzleEditMode extends GameMode {
             });
         });
 
-        this._toolbar.viewOptionsButton.clicked.connect(() => this.showViewOptionsDialog());
+        this._toolbar.settingsButton.clicked.connect(() => this.showViewOptionsDialog());
 
         this._toolbar.resetButton.clicked.connect(() => this.promptForReset());
         this._toolbar.submitButton.clicked.connect(() => this.onSubmitPuzzle());

@@ -172,6 +172,12 @@ export default class PoseEditMode extends GameMode {
             showLibrarySelect: this._puzzle.constraints?.some((con) => con instanceof LibrarySelectionConstraint),
             annotationManager: this._annotationManager,
             puzzle: this._puzzle
+        }, {
+            handleRedoButtonClick: () => this.moveUndoStackForward(),
+            handleUndoButtonClick: () => this.moveUndoStackBackward(),
+            handleSettingsButtonClick: () => this.showViewOptionsDialog(),
+            handleScreenshotButtonClick: () => this.postScreenshot(this.createScreenshot()),
+            handlePaletteButtonClick: (targetType: PaletteTargetType) => this.onPaletteTargetSelected(targetType)
         });
         this.addObject(this._toolbar, this.uiLayer);
 
@@ -216,7 +222,7 @@ export default class PoseEditMode extends GameMode {
         this._toolbar.specButton.clicked.connect(() => this.showSpec());
         this._toolbar.copyButton.clicked.connect(() => this.showCopySequenceDialog());
         this._toolbar.pasteButton.clicked.connect(() => this.showPasteSequenceDialog());
-        this._toolbar.viewOptionsButton.clicked.connect(() => this.showViewOptionsDialog());
+        this._toolbar.settingsButton.clicked.connect(() => this.showViewOptionsDialog());
         this._toolbar.screenshotButton.clicked.connect(() => this.postScreenshot(this.createScreenshot()));
 
         this._toolbar.pipButton.clicked.connect(() => this.togglePip());
@@ -569,7 +575,7 @@ export default class PoseEditMode extends GameMode {
                     ? [() => getBounds(this.toolbar.submitButton), 0]
                     : undefined,
 
-                menu: [() => getBounds(this.toolbar.actionMenu), 0],
+                menu: [() => getBounds(this.toolbar.settingsButton), 0],
 
                 palette: this.toolbar.palette.container.visible
                     ? [() => getBounds(this.toolbar.palette), 0]

@@ -183,9 +183,9 @@ export default class AnnotationPanel extends ContainerObject {
             this.addCategory(this._solutionCategory);
         }
 
-        this.doLayout();
-        this._scrollView.doLayout();
-        this._scrollView.updateScrollThumb();
+        // this.doLayout();
+        // this._scrollView.doLayout();
+        // this._scrollView.updateScrollThumb();
 
         const withEdit = false;
         const withDelete = false;

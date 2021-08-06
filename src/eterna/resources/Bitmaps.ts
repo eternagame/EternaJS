@@ -19,6 +19,7 @@ export default class Bitmaps {
     public static readonly NovaBarcodeMissionReq: string = require('assets/NOVA/Mission/barcode-req-mission.png');
     public static readonly NovaBarcodeReq: string = require('assets/NOVA/Constraints/barcode-requirement-carrier.png');
     public static readonly ImgSelectBase: string = require('assets/NOVA/Palette/base-selected.png');
+    public static readonly ImgExpandArrow: string = require('assets/NOVA/Palette/expand_arrow.png');
     public static readonly ImgBindingBaseGlow: string = require('assets/Aptamer/base_outer-1.png');
     public static readonly BaseAf: string = require('assets/RNABase/BaseAf.png');
     public static readonly BaseAfLock: string = require('assets/RNABase/BaseAfLock.png');
@@ -141,6 +142,7 @@ export default class Bitmaps {
     public static readonly ImgMaximize: string = require('assets/MaximizeButton.png');
     public static readonly ImgMenuBorder: string = require('assets/menu-border.png');
     public static readonly NovaMenu: string = require('assets/NOVA/menu_button.png');
+    public static readonly NovaMenuOutlined: string = require('assets/NOVA/menu_outlined_2.png');
     public static readonly ImgMenuDot: string = require('assets/menudot.png');
     public static readonly BaseWMidOutline: string = require('assets/RNABase/mid_outline.png');
     public static readonly ImgZoomOutHit: string = require('assets/NOVA/Zoom/minus-hit.png');
@@ -286,6 +288,7 @@ export default class Bitmaps {
     public static readonly ImgUndoHit: string = require('assets/NOVA/Undo/undo-hit.png');
     public static readonly ImgUndoOver: string = require('assets/NOVA/Undo/undo-over.png');
     public static readonly ImgUndo: string = require('assets/NOVA/Undo/undo.png');
+    public static readonly ImgUndoMiddle: string = require('assets/NOVA/Undo/undo-middle.png');
     public static readonly ImgUpArrow: string = require('assets/up_arrow.png');
     public static readonly Audio_Vol_Off: string = require('assets/volume_off.png');
     public static readonly Audio_Vol_On: string = require('assets/volume_on.png');
