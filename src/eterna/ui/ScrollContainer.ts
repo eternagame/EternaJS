@@ -1,4 +1,4 @@
-import {Container, Graphics} from 'pixi.js';
+import { Container, Graphics } from 'pixi.js';
 import {
     MathUtil, ContainerObject, Assert, Flashbang
 } from 'flashbang';
@@ -197,8 +197,10 @@ export default class ScrollContainer extends ContainerObject {
             // Find the next element "under" this element that isn't in our scroll container,
             // to re-fire the event on.
             const candidateEls = document.elementsFromPoint(e.clientX, e.clientY);
-            const newTarget = candidateEls.find((el) => !this._htmlWrapper.contains(el));
-            if (!newTarget) return;
+            let newTarget = candidateEls.find((el) => !this._htmlWrapper.contains(el));
+            if (!newTarget) {
+                return;
+            }
 
             // If we transition from an unmasked portion of an overlay element to the masked portion,
             // we won't trigger the pointerover event because the browser thinks we're still on

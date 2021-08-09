@@ -1,27 +1,27 @@
-import {DisplayObject, InteractionEvent} from 'pixi.js';
-import EPars, {RNAPaint, RNABase} from 'eterna/EPars';
+import { DisplayObject, InteractionEvent } from 'pixi.js';
+import EPars, { RNAPaint, RNABase } from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
-import UndoBlock, {UndoBlockParam, TargetConditions} from 'eterna/UndoBlock';
+import UndoBlock, { UndoBlockParam, TargetConditions } from 'eterna/UndoBlock';
 import Background from 'eterna/vfx/Background';
 import Molecule from 'eterna/pose2D/Molecule';
 import BaseGlow from 'eterna/vfx/BaseGlow';
-import Toolbar, {ToolbarType} from 'eterna/ui/Toolbar';
+import Toolbar, { ToolbarType } from 'eterna/ui/Toolbar';
 import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
-import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
+import EternaViewOptionsDialog, { EternaViewOptionsMode } from 'eterna/ui/EternaViewOptionsDialog';
 import PoseField from 'eterna/pose2D/PoseField';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
-import Pose2D, {Layout} from 'eterna/pose2D/Pose2D';
-import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
+import Pose2D, { Layout } from 'eterna/pose2D/Pose2D';
+import { PaletteTargetType, GetPaletteTargetBaseType } from 'eterna/ui/NucleotidePalette';
 import Folder from 'eterna/folding/Folder';
-import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
+import PoseThumbnail, { PoseThumbnailType } from 'eterna/ui/PoseThumbnail';
 import {
     Base64, DisplayUtil, HAlign, VAlign, KeyCode, Assert, KeyboardEventType
 } from 'flashbang';
-import {DialogCanceledError} from 'eterna/ui/Dialog';
+import { DialogCanceledError } from 'eterna/ui/Dialog';
 import Vienna2 from 'eterna/folding/Vienna2';
 import NuPACK from 'eterna/folding/NuPACK';
 import AsyncProcessDialog from 'eterna/ui/AsyncProcessDialog';
-import {ExternalInterfaceCtx} from 'eterna/util/ExternalInterface';
+import { ExternalInterfaceCtx } from 'eterna/util/ExternalInterface';
 import Fonts from 'eterna/util/Fonts';
 import LinearFoldV from 'eterna/folding/LinearFoldV';
 import LinearFoldC from 'eterna/folding/LinearFoldC';
@@ -31,7 +31,7 @@ import ConstraintBar from 'eterna/constraints/ConstraintBar';
 import Utility from 'eterna/util/Utility';
 import ShapeConstraint from 'eterna/constraints/constraints/ShapeConstraint';
 import ContraFold from 'eterna/folding/Contrafold';
-import {SaveStoreItem} from 'flashbang/settings/SaveGameManager';
+import { SaveStoreItem } from 'flashbang/settings/SaveGameManager';
 import FolderSwitcher from 'eterna/ui/FolderSwitcher';
 import GameButton from 'eterna/ui/GameButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -48,7 +48,7 @@ import AnnotationManager, {
 } from 'eterna/AnnotationManager';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
-import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
+import SubmitPuzzleDialog, { SubmitPuzzleDetails } from './SubmitPuzzleDialog';
 import StructureInput from './StructureInput';
 
 export interface PuzzleEditPoseData {
@@ -140,9 +140,9 @@ export default class PuzzleEditMode extends GameMode {
         this._homeButton.display.position.set(18, 10);
         this._homeButton.clicked.connect(() => {
             if (Eterna.MOBILE_APP) {
-                if (window.frameElement) window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
+                if (window.frameElement) window.frameElement.dispatchEvent(new CustomEvent('navigate', { detail: '/' }));
             } else {
-                window.location.href = EternaURL.createURL({page: 'home'});
+                window.location.href = EternaURL.createURL({ page: 'home' });
             }
         });
         this.addObject(this._homeButton, this.uiLayer);
@@ -328,7 +328,7 @@ export default class PuzzleEditMode extends GameMode {
 
             const poseField: PoseField = new PoseField(true);
             this.addObject(poseField, this.poseLayer);
-            const {pose} = poseField;
+            const { pose } = poseField;
             pose.annotationManager = this._annotationManager;
             pose.scoreFolder = this._folder;
             pose.molecularStructure = defaultPairs;
@@ -645,7 +645,7 @@ export default class PuzzleEditMode extends GameMode {
             return null;
         }
 
-        const menu = new ContextMenu({horizontal: false});
+        const menu = new ContextMenu({ horizontal: false });
 
         menu.addItem('Preferences').clicked.connect(() => this.showViewOptionsDialog());
         menu.addItem('Reset').clicked.connect(() => this.promptForReset());
@@ -700,8 +700,8 @@ export default class PuzzleEditMode extends GameMode {
 
         const pngData = DisplayUtil.renderToPNG(this.container);
 
-        tempBG.destroy({children: true});
-        infoText.destroy({children: true});
+        tempBG.destroy({ children: true });
+        infoText.destroy({ children: true });
 
         for (const [disp, wasVisible] of visibleState.entries()) {
             disp.visible = wasVisible;
@@ -723,7 +723,7 @@ export default class PuzzleEditMode extends GameMode {
         this.showConfirmDialog(PROMPT).closed.then((confirmed) => {
             if (confirmed) {
                 for (const pose of this._poses) {
-                    const {sequence} = pose;
+                    const { sequence } = pose;
                     for (let ii = 0; ii < sequence.length; ii++) {
                         if (!pose.isLocked(ii)) {
                             sequence.setNt(ii, RNABase.ADENINE);
@@ -1024,7 +1024,7 @@ export default class PuzzleEditMode extends GameMode {
             const undoblock: UndoBlock = this.getCurrentUndoBlock(ii);
             const targetPairs = this.getCurrentTargetPairs(ii);
             const bestPairs = undoblock.getPairs(EPars.DEFAULT_TEMPERATURE);
-            const {sequence} = this._poses[ii];
+            const { sequence } = this._poses[ii];
             if (sequence.length !== targetPairs.length) {
                 throw new Error("sequence and design pairs lengths don't match");
             }

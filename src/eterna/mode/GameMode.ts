@@ -1,14 +1,14 @@
 import * as log from 'loglevel';
-import {Container, Point} from 'pixi.js';
+import { Container, Point } from 'pixi.js';
 import Eterna from 'eterna/Eterna';
-import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
+import UndoBlock, { TargetConditions } from 'eterna/UndoBlock';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import {
     AppMode, SceneObject, Flashbang, GameObjectRef, Assert
 } from 'flashbang';
 import AchievementManager from 'eterna/achievements/AchievementManager';
 import Tooltips from 'eterna/ui/Tooltips';
-import ExternalInterface, {ExternalInterfaceCtx} from 'eterna/util/ExternalInterface';
+import ExternalInterface, { ExternalInterfaceCtx } from 'eterna/util/ExternalInterface';
 import Pose2D from 'eterna/pose2D/Pose2D';
 import ConfirmDialog from 'eterna/ui/ConfirmDialog';
 import NotificationDialog from 'eterna/ui/NotificationDialog';
@@ -315,7 +315,7 @@ export default abstract class GameMode extends AppMode {
     }
 
     protected static createHomeButton(): URLButton {
-        const button = new URLButton('Go to Home', EternaURL.createURL({page: 'home'}));
+        const button = new URLButton('Go to Home', EternaURL.createURL({ page: 'home' }));
         button.selectable(false);
         return button;
     }
@@ -439,6 +439,11 @@ export default abstract class GameMode extends AppMode {
         }
     }
 
+    getSequence(): string {
+        let sequenceString = this._poses[0].sequence.sequenceString();
+        if (this._poses[0].customNumbering != null) sequenceString += ` ${Utility.arrayToRangeString(this._poses[0].customNumbering)}`;
+        return sequenceString;
+    }
     protected showCopySequenceDialog(): void {
         Assert.assertIsDefined(this.modeStack);
         let sequenceString = this._poses[0].sequence.sequenceString();

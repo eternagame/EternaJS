@@ -2,9 +2,9 @@ import * as log from 'loglevel';
 import {
     Container, DisplayObject, Point, Sprite, Text, Rectangle, InteractionEvent
 } from 'pixi.js';
-import EPars, {RNABase, RNAPaint} from 'eterna/EPars';
+import EPars, { RNABase, RNAPaint } from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
-import {PuzzleID} from 'eterna/EternaApp';
+import { PuzzleID } from 'eterna/EternaApp';
 import UndoBlock, {
     UndoBlockParam, FoldData, TargetConditions, OligoDef
 } from 'eterna/UndoBlock';
@@ -13,7 +13,7 @@ import Puzzle, {
     PuzzleType, PoseState, BoostersData, TargetType
 } from 'eterna/puzzle/Puzzle';
 import Background from 'eterna/vfx/Background';
-import Toolbar, {ToolbarType} from 'eterna/ui/Toolbar';
+import Toolbar, { ToolbarType } from 'eterna/ui/Toolbar';
 import SpecBox from 'eterna/ui/SpecBox';
 import GameButton from 'eterna/ui/GameButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -22,10 +22,10 @@ import {
     GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
-import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
+import EternaViewOptionsDialog, { EternaViewOptionsMode } from 'eterna/ui/EternaViewOptionsDialog';
 import FolderManager from 'eterna/folding/FolderManager';
-import Folder, {MultiFoldResult, CacheKey} from 'eterna/folding/Folder';
-import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
+import Folder, { MultiFoldResult, CacheKey } from 'eterna/folding/Folder';
+import { PaletteTargetType, GetPaletteTargetBaseType } from 'eterna/ui/NucleotidePalette';
 import PoseField from 'eterna/pose2D/PoseField';
 import Pose2D, {
     Oligo, Layout, SCRIPT_MARKER_LAYER
@@ -38,24 +38,24 @@ import int from 'eterna/util/int';
 import PoseOp from 'eterna/pose2D/PoseOp';
 import RNAScript from 'eterna/rscript/RNAScript';
 import SolutionManager from 'eterna/puzzle/SolutionManager';
-import {ExternalInterfaceCtx} from 'eterna/util/ExternalInterface';
+import { ExternalInterfaceCtx } from 'eterna/util/ExternalInterface';
 import ContextMenu from 'eterna/ui/ContextMenu';
-import {SaveStoreItem} from 'flashbang/settings/SaveGameManager';
+import { SaveStoreItem } from 'flashbang/settings/SaveGameManager';
 import SpecBoxDialog from 'eterna/ui/SpecBoxDialog';
 import BubbleSweep from 'eterna/vfx/BubbleSweep';
 import Sounds from 'eterna/resources/Sounds';
 import EternaURL from 'eterna/net/EternaURL';
-import PuzzleManager, {PuzzleJSON} from 'eterna/puzzle/PuzzleManager';
+import PuzzleManager, { PuzzleJSON } from 'eterna/puzzle/PuzzleManager';
 import FoldUtil from 'eterna/folding/FoldUtil';
-import ShapeConstraint, {AntiShapeConstraint} from 'eterna/constraints/constraints/ShapeConstraint';
-import {HighlightType} from 'eterna/pose2D/HighlightBox';
+import ShapeConstraint, { AntiShapeConstraint } from 'eterna/constraints/constraints/ShapeConstraint';
+import { HighlightType } from 'eterna/pose2D/HighlightBox';
 import Utility from 'eterna/util/Utility';
 import HintsPanel from 'eterna/ui/HintsPanel';
 import HelpBar from 'eterna/ui/HelpBar';
 import HelpScreen from 'eterna/ui/help/HelpScreen';
-import {HighlightInfo} from 'eterna/constraints/Constraint';
-import {AchievementData} from 'eterna/achievements/AchievementManager';
-import {RankScrollData} from 'eterna/rank/RankScroll';
+import { HighlightInfo } from 'eterna/constraints/Constraint';
+import { AchievementData } from 'eterna/achievements/AchievementManager';
+import { RankScrollData } from 'eterna/rank/RankScroll';
 import FolderSwitcher from 'eterna/ui/FolderSwitcher';
 import MarkerSwitcher from 'eterna/ui/MarkerSwitcher';
 import DotPlot from 'eterna/rnatypes/DotPlot';
@@ -79,7 +79,9 @@ import SubmitPoseDetails from './SubmitPoseDetails';
 import MissionIntroMode from './MissionIntroMode';
 import MissionClearedPanel from './MissionClearedPanel';
 import ViewSolutionOverlay from '../DesignBrowser/ViewSolutionOverlay';
-import {PuzzleEditPoseData} from '../PuzzleEdit/PuzzleEditMode';
+import { PuzzleEditPoseData } from '../PuzzleEdit/PuzzleEditMode';
+import Mol3DView from './Mol3DView';
+
 
 export interface PoseEditParams {
     isReset?: boolean;
@@ -139,6 +141,7 @@ export type SubmitSolutionData = {
 };
 
 export default class PoseEditMode extends GameMode {
+    mol3DView: Mol3DView;
     constructor(puzzle: Puzzle, params: PoseEditParams, autosaveData: SaveStoreItem | null = null) {
         super();
         this._puzzle = puzzle;
@@ -148,6 +151,11 @@ export default class PoseEditMode extends GameMode {
         if (this._params.rscript != null) {
             puzzle.rscript = this._params.rscript;
         }
+
+        console.log('here', puzzle)
+
+        this.mol3DView = new Mol3DView(this);
+        this.mol3DView.showScreen(false);
     }
 
     public get puzzleID(): number { return this._puzzle.nodeID; }
@@ -180,6 +188,7 @@ export default class PoseEditMode extends GameMode {
                 ? () => this.onHintClicked()
                 : undefined,
             onHelpClicked: () => this.onHelpClicked(),
+            onThreeClicked: () => this.onThreeClicked(), //kkk
             onChatClicked: () => {
                 Eterna.settings.showChat.value = !Eterna.settings.showChat.value;
             },
@@ -320,9 +329,9 @@ export default class PoseEditMode extends GameMode {
         this._homeButton.display.position.set(18, 10);
         this._homeButton.clicked.connect(() => {
             if (Eterna.MOBILE_APP) {
-                if (window.frameElement) window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
+                if (window.frameElement) window.frameElement.dispatchEvent(new CustomEvent('navigate', { detail: '/' }));
             } else {
-                window.location.href = EternaURL.createURL({page: 'home'});
+                window.location.href = EternaURL.createURL({ page: 'home' });
             }
         });
         this.addObject(this._homeButton, this.uiLayer);
@@ -586,6 +595,10 @@ export default class PoseEditMode extends GameMode {
         }));
     }
 
+    //kkk
+    private onThreeClicked(): void {
+        this.mol3DView.showScreen(!this.mol3DView.getVisibleState());
+    }
     private showSolution(solution: Solution): void {
         this.clearUndoStack();
         this.pushUILock();
@@ -681,6 +694,18 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
+    public mouseHovered(index: number, color: number) {
+        this.mol3DView.mouseHovered(index, color);
+    }
+    //kkk
+    public checkCustomEvent(_closestDist: number, closestIndex: number) {
+        // console.log(this._poseFields.length);
+        for (let ii = 0; ii < this._poseFields.length; ++ii) {
+            const poseField: PoseField = this._poseFields[ii];
+            const poseToNotify: Pose2D = poseField.pose;
+            poseToNotify.onPoseKKKMouseDown(closestIndex);
+        }
+    }
     private setPuzzle(): void {
         const poseFields: PoseField[] = [];
 
@@ -750,9 +775,12 @@ export default class PoseEditMode extends GameMode {
             const poseField: PoseField = new PoseField(true);
             this.addObject(poseField, this.poseLayer);
             const pose: Pose2D = poseField.pose;
+            pose.setPoseEditMode(this); //kkk
             bindAddbaseCB(pose, ii);
             bindPoseEdit(pose, ii);
             bindTrackMoves(pose, ii);
+            //kkk
+            // console.log(ii);
             bindMousedownEvent(pose, ii);
             poseFields.push(poseField);
             pose.annotationManager = this._annotationManager;
@@ -1361,7 +1389,7 @@ export default class PoseEditMode extends GameMode {
                     return null;
                 }
                 return `${folded.slice(0, len).getParenthesis()
-                }&${folded.slice(len).getParenthesis()}`;
+                    }&${folded.slice(len).getParenthesis()}`;
             });
 
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
@@ -1410,10 +1438,10 @@ export default class PoseEditMode extends GameMode {
         this._scriptInterface.addCallback('set_tracked_indices',
             (
                 marks: (number | { baseIndex: number; colors?: number | number[] })[],
-                options?: {layerName?: string}
+                options?: { layerName?: string }
             ): void => {
                 const standardizedMarks = marks.map(
-                    (mark) => (typeof (mark) === 'number' ? {baseIndex: mark as number} : mark)
+                    (mark) => (typeof (mark) === 'number' ? { baseIndex: mark as number } : mark)
                 );
 
                 if (standardizedMarks.some((mark) => typeof (mark.baseIndex) !== 'number')) {
@@ -1641,7 +1669,7 @@ export default class PoseEditMode extends GameMode {
             return null;
         }
 
-        const menu = new ContextMenu({horizontal: false});
+        const menu = new ContextMenu({ horizontal: false });
 
         menu.addItem('Preferences').clicked.connect(() => this.showViewOptionsDialog());
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
@@ -1698,8 +1726,8 @@ export default class PoseEditMode extends GameMode {
 
         const pngData = DisplayUtil.renderToPNG(this.container);
 
-        tempBG.destroy({children: true});
-        infoText.destroy({children: true});
+        tempBG.destroy({ children: true });
+        infoText.destroy({ children: true });
 
         for (const [disp, wasVisible] of visibleState.entries()) {
             disp.visible = wasVisible;
@@ -1723,7 +1751,7 @@ export default class PoseEditMode extends GameMode {
             if (confirmed) {
                 this.resetAutosaveData();
                 Assert.assertIsDefined(this.modeStack);
-                this.modeStack.changeMode(new PoseEditMode(this._puzzle, {isReset: true}));
+                this.modeStack.changeMode(new PoseEditMode(this._puzzle, { isReset: true }));
             }
         });
     }
@@ -2369,7 +2397,7 @@ export default class PoseEditMode extends GameMode {
                 keepPlaying();
                 if (Eterna.MOBILE_APP) {
                     if (window.frameElement) {
-                        window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
+                        window.frameElement.dispatchEvent(new CustomEvent('navigate', { detail: '/' }));
                     }
                 } else {
                     window.open(EternaURL.getFeedURL(), '_self');
@@ -2659,7 +2687,7 @@ export default class PoseEditMode extends GameMode {
         const muts: Move[] = [];
         for (let ii = 0; ii < after.length; ii++) {
             if (after.nt(ii) !== before.nt(ii)) {
-                muts.push({pos: ii + 1, base: EPars.nucleotideToString(after.nt(ii))});
+                muts.push({ pos: ii + 1, base: EPars.nucleotideToString(after.nt(ii)) });
             }
         }
         if (muts.length === 0) return;
@@ -2669,7 +2697,7 @@ export default class PoseEditMode extends GameMode {
 
     private moveHistoryAddSequence(changeType: string, seq: string): void {
         const muts: Move[] = [];
-        muts.push({type: changeType, sequence: seq});
+        muts.push({ type: changeType, sequence: seq });
         this._moveCount++;
         this._moves.push(muts.slice());
     }
@@ -3154,6 +3182,8 @@ export default class PoseEditMode extends GameMode {
         } else {
             execfoldCB(null);
         }
+        //kkk
+        this.mol3DView.updateSequence(this.getSequence());
     }
 
     private poseEditByTargetDoFold(targetIndex: number): void {
@@ -3452,6 +3482,8 @@ export default class PoseEditMode extends GameMode {
             this._targetOligos[ii] = this._seqStacks[this._stackLevel][ii].targetOligos;
             this._targetOligosOrder[ii] = this._seqStacks[this._stackLevel][ii].targetOligoOrder;
         }
+        //kkk
+        this.mol3DView.updateSequence(this.getSequence());
     }
 
     private moveUndoStackForward(): void {

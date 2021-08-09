@@ -1,4 +1,4 @@
-import {Graphics, InteractionEvent, Point} from 'pixi.js';
+import { Graphics, InteractionEvent, Point } from 'pixi.js';
 import {
     ContainerObject, KeyboardListener, MouseWheelListener, InputUtil, Flashbang,
     KeyboardEventType, KeyCode, Assert
@@ -15,6 +15,8 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
     private static readonly SCORES_POSITION_Y = 128;
 
+    private isOver3DCanvas: boolean;
+
     constructor(edit: boolean) {
         super();
         this._pose = new Pose2D(this, edit);
@@ -22,6 +24,19 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         // _clickTargetDisp is an invisible rectangle with our exact size, so that we can always receive mouse events
         this._clickTargetDisp = new Graphics();
         this.container.addChild(this._clickTargetDisp);
+
+        //kkk
+        this.isOver3DCanvas = false;
+        window.addEventListener('pointermove', e => {
+            var x = e.clientX, y = e.clientY;
+            var elementMouseIsOver = <HTMLElement>document.elementFromPoint(x, y);
+            // console.log(elementMouseIsOver.id)
+            if (elementMouseIsOver && elementMouseIsOver.id.includes('viewport')) {
+                this.isOver3DCanvas = true;
+            } else {
+                this.isOver3DCanvas = false;
+            }
+        })
     }
 
     protected added(): void {
@@ -122,7 +137,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
         // If we're in PIP mode, we mask our view
         if (this._mask != null) {
-            this._mask.destroy({children: true});
+            this._mask.destroy({ children: true });
             this._mask = null;
         }
         this.container.mask = null;
@@ -187,7 +202,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         }
 
         const pointerId = e.data.identifier;
-        const {x, y} = e.data.global;
+        const { x, y } = e.data.global;
         this._interactionCache.set(pointerId, new Point(x, y));
 
         if (this._interactionCache.size === 1) {
@@ -201,7 +216,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     private onPointerMove(e: InteractionEvent) {
         this._interactionCache.forEach((_point, pointerId) => {
             if (pointerId === e.data.identifier) {
-                const {x, y} = e.data.global;
+                const { x, y } = e.data.global;
                 this._interactionCache.set(pointerId, new Point(x, y));
             }
         });
@@ -327,20 +342,23 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         if (!this.display.visible || !this.containsPoint(mouse.x, mouse.y)) {
             return false;
         }
-        if (e.deltaY < 0) {
-            if (e.deltaY < -2 && e.deltaY < this._lastDeltaY) this._debounceZoomIn();
-            this._lastDeltaY = e.deltaY;
-            setTimeout(() => {
-                this._lastDeltaY = 0;
-            }, 200);
-            return true;
-        } else if (e.deltaY > 0) {
-            if (e.deltaY > 2 && e.deltaY > this._lastDeltaY) this._debounceZoomOut();
-            this._lastDeltaY = e.deltaY;
-            setTimeout(() => {
-                this._lastDeltaY = 0;
-            }, 200);
-            return true;
+        //kkk
+        if (!this.isOver3DCanvas) {
+            if (e.deltaY < 0) {
+                if (e.deltaY < -2 && e.deltaY < this._lastDeltaY) this._debounceZoomIn();
+                this._lastDeltaY = e.deltaY;
+                setTimeout(() => {
+                    this._lastDeltaY = 0;
+                }, 200);
+                return true;
+            } else if (e.deltaY > 0) {
+                if (e.deltaY > 2 && e.deltaY > this._lastDeltaY) this._debounceZoomOut();
+                this._lastDeltaY = e.deltaY;
+                setTimeout(() => {
+                    this._lastDeltaY = 0;
+                }, 200);
+                return true;
+            }
         }
 
         return false;

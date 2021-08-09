@@ -170,7 +170,7 @@ export default class VScrollBox extends ContainerObject implements MouseWheelLis
             );
         } else if (
             (this._scrollContainer.content.height <= 0
-            || this._scrollContainer.content.height <= this._height)
+                || this._scrollContainer.content.height <= this._height)
             && this._scrollThumb
         ) {
             // remove scroll thumb if no longer can scroll

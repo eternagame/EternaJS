@@ -2,8 +2,8 @@ import * as log from 'loglevel';
 import {
     Container, Graphics, Point, Sprite, Texture, Rectangle, InteractionEvent
 } from 'pixi.js';
-import {Registration} from 'signals';
-import EPars, {RNABase, RNAPaint} from 'eterna/EPars';
+import { Registration } from 'signals';
+import EPars, { RNABase, RNAPaint } from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import ExpPainter from 'eterna/ExpPainter';
 import {
@@ -11,7 +11,7 @@ import {
     ParallelTask, AlphaTask, LocationTask, DelayTask, SelfDestructTask, Vector2, Arrays,
     RepeatingTask, Updatable, Assert
 } from 'flashbang';
-import {Move} from 'eterna/mode/PoseEdit/PoseEditMode';
+import PoseEditMode, { Move } from 'eterna/mode/PoseEdit/PoseEditMode';
 import LightRay from 'eterna/vfx/LightRay';
 import TextBalloon from 'eterna/ui/TextBalloon';
 import ROPWait from 'eterna/rscript/ROPWait';
@@ -25,13 +25,13 @@ import Utility from 'eterna/util/Utility';
 import Folder from 'eterna/folding/Folder';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
-import AnnotationManager, {AnnotationRange} from 'eterna/AnnotationManager';
+import AnnotationManager, { AnnotationRange } from 'eterna/AnnotationManager';
 import ContextMenu from 'eterna/ui/ContextMenu';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import Base from './Base';
 import BaseDrawFlags from './BaseDrawFlags';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
-import HighlightBox, {HighlightType} from './HighlightBox';
+import HighlightBox, { HighlightType } from './HighlightBox';
 import BaseRope from './BaseRope';
 import PseudoknotLines from './PseudoknotLines';
 import Molecule from './Molecule';
@@ -39,8 +39,8 @@ import PaintCursor from './PaintCursor';
 import PoseField from './PoseField';
 import PoseUtil from './PoseUtil';
 import PuzzleEditOp from './PuzzleEditOp';
-import RNALayout, {RNATreeNode} from './RNALayout';
-import ScoreDisplayNode, {ScoreDisplayNodeType} from './ScoreDisplayNode';
+import RNALayout, { RNATreeNode } from './RNALayout';
+import ScoreDisplayNode, { ScoreDisplayNodeType } from './ScoreDisplayNode';
 import triangulate from './triangulate';
 
 interface Mut {
@@ -71,8 +71,37 @@ export default class Pose2D extends ContainerObject implements Updatable {
         super();
         this._poseField = poseField;
         this._editable = editable;
+
+        window.addEventListener('kkk', e => {
+            var ce = <CustomEvent>e;
+            const mouseX: number = ce.detail.clientX;
+            const mouseY: number = ce.detail.clientY;
+
+            let closestDist = -1;
+            let closestIndex = -1;
+
+            if (this.posEditMode) {
+                const fullSeqLen = this.fullSequenceLength;
+                for (let ii = 0; ii < fullSeqLen; ii++) {
+                    const mouseDist: number = this._bases[ii].isClicked(
+                        mouseX - this._offX, mouseY - this._offY, this._zoomLevel, false
+                    );
+                    if (mouseDist >= 0) {
+                        if (closestIndex < 0 || mouseDist < closestDist) {
+                            closestIndex = ii;
+                            closestDist = mouseDist;
+                        }
+                    }
+                }
+                this.posEditMode.checkCustomEvent(closestDist, closestIndex);
+            }
+        });
     }
 
+    protected posEditMode: PoseEditMode;
+    public setPoseEditMode(posEdit: PoseEditMode) {
+        this.posEditMode = posEdit;
+    }
     protected added() {
         super.added();
 
@@ -137,7 +166,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._annotationCanvas = new Graphics();
         this.container.addChild(this.annotationCanvas);
 
-        this._annotationContextMenu = new ContextMenu({horizontal: true});
+        this._annotationContextMenu = new ContextMenu({ horizontal: true });
         this._annotationContextMenu.addItem(
             'Create',
             Bitmaps.ImgAnnotationCheckmark,
@@ -385,7 +414,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (this._sequence.nt(ii) !== this._mutatedSequence.nt(ii + offset)) {
                 numMut++;
                 this._sequence.setNt(ii, this._mutatedSequence.nt(ii + offset));
-                muts.push({pos: ii + 1, base: EPars.nucleotideToString(this._sequence.nt(ii))});
+                muts.push({ pos: ii + 1, base: EPars.nucleotideToString(this._sequence.nt(ii)) });
                 needUpdate = true;
             }
         }
@@ -445,7 +474,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (this._sequence.nt(ii) !== sequence.nt(ii) && !this.isLocked(offset + ii)) {
                 numMut++;
                 this._sequence.setNt(ii, sequence.nt(ii));
-                muts.push({pos: ii + 1, base: EPars.nucleotideToString(this._sequence.nt(ii))});
+                muts.push({ pos: ii + 1, base: EPars.nucleotideToString(this._sequence.nt(ii)) });
                 this._bases[offset + ii].setType(sequence.nt(ii));
                 needUpdate = true;
             }
@@ -565,7 +594,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         // rnaCoords.setupTree(this._pairs.filterForPseudoknots(), this._targetPairs.filterForPseudoknots());
         rnaCoords.setupTree(this._pairs, this._targetPairs);
         rnaCoords.drawTree(this._customLayout);
-        const {xarray, yarray} = rnaCoords.getCoords(this._bases.length);
+        const { xarray, yarray } = rnaCoords.getCoords(this._bases.length);
 
         const localCustomLayout: ([number, number] | [null, null])[] = [];
         for (let ii = 0; ii < this._bases.length; ++ii) {
@@ -732,7 +761,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         );
         rnaCoords.setupTree(this._pairs, this._targetPairs);
         rnaCoords.drawTree(this._customLayout);
-        const {xarray, yarray} = rnaCoords.getCoords(this._bases.length);
+        const { xarray, yarray } = rnaCoords.getCoords(this._bases.length);
 
         const localCustomLayout: ([number, number] | [null, null])[] = [];
         for (let ii = 0; ii < this._bases.length; ++ii) {
@@ -804,7 +833,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         );
         rnaCoords.setupTree(this._pairs, this._targetPairs);
         rnaCoords.drawTree(this._customLayout);
-        const {xarray, yarray} = rnaCoords.getCoords(this._bases.length);
+        const { xarray, yarray } = rnaCoords.getCoords(this._bases.length);
 
         const localCustomLayout: ([number, number] | [null, null])[] = [];
         for (let ii = 0; ii < this._bases.length; ++ii) {
@@ -841,6 +870,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._baseRope.redraw(true);
         this._pseudoknotLines.redraw(true);
         this._customLayoutChanged = true;
+    }
+
+    public onPoseKKKMouseDown(closestIndex: number): void {
+        if (closestIndex >= 0) {
+            this._lastShiftedCommand = -1;
+            this.onBaseMouseDown(closestIndex, false);
+        }
     }
 
     public onPoseMouseDown(e: InteractionEvent, closestIndex: number): void {
@@ -894,7 +930,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                         if (reg) reg.close();
                     });
                 }
-                e.stopPropagation();
+                e?.stopPropagation();
                 return;
             }
             if (this.annotationManager.getAnnotationMode()) {
@@ -917,7 +953,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                         // Deselect clicked base
 
                         // Get range that was clicked
-                        const range = {...this._annotationRanges[rangeIndex]};
+                        const range = { ...this._annotationRanges[rangeIndex] };
 
                         // Remove existing range
                         this._annotationRanges.splice(rangeIndex, 1);
@@ -973,7 +1009,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                         if (reg) reg.close();
                     });
                 }
-                e.stopPropagation();
+                e?.stopPropagation();
                 return;
             }
             this._lastShiftedCommand = -1;
@@ -995,7 +1031,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this.callAddBaseCallback(cmd[0], cmd[1], closestIndex);
             }
 
-            e.stopPropagation();
+            e?.stopPropagation();
         } else if (shiftDown && !this.annotationManager.getAnnotationMode()) {
             this._shiftStart = -1;
             this._shiftEnd = -1;
@@ -1056,7 +1092,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             );
             rnaCoords.setupTree(this._pairs, this._targetPairs);
             rnaCoords.drawTree(this._customLayout);
-            const {xarray, yarray} = rnaCoords.getCoords(this._bases.length);
+            const { xarray, yarray } = rnaCoords.getCoords(this._bases.length);
             // The simplest thing to do is to use the x/y coords as the new customLayout.
             // This minimizes the calculations you have to do later.
             const localCustomLayout: ([number, number] | [null, null])[] = [];
@@ -1136,6 +1172,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         if (closestIndex >= 0 && this._currentColor >= 0) {
+            // console.log('kkk', closestIndex); //kkkk
+            //kkk
+            this.posEditMode.mouseHovered(closestIndex + 1, this._currentColor);
             this.onBaseMouseMove(closestIndex);
             // document.getElementById(Eterna.PIXI_CONTAINER_ID).style.cursor = 'none';
 
@@ -1159,6 +1198,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         } else {
             this._lastColoredIndex = -1;
+            this.posEditMode.mouseHovered(-1, 0, 0);
         }
 
         if (!this._coloring) {
@@ -1951,6 +1991,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         let closestDist = -1;
         let closestIndex = -1;
 
+        // console.log(mouseX, mouseY, this._offX, this._offY);
+
         if (this._startMousedownCallback != null) {
             const fullSeqLen = this.fullSequenceLength;
             for (let ii = 0; ii < fullSeqLen; ii++) {
@@ -2033,14 +2075,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
         bindingSites: number[] | undefined, bindingPairs: number[] | undefined, bindingBonus: number | undefined
     ): void {
         if (this._molecule != null) {
-            this._molecule.destroy({children: true});
+            this._molecule.destroy({ children: true });
             this._molecule = null;
         }
 
         if (this._molecularBindingBases != null) {
             for (const glow of this._molecularBindingBases) {
                 if (glow != null) {
-                    glow.destroy({children: true});
+                    glow.destroy({ children: true });
                 }
             }
             this._molecularBindingBases = null;
@@ -2519,7 +2561,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         rnaDrawer.setupTree(this._pairs, this._targetPairs);
         rnaDrawer.drawTree(this._customLayout);
 
-        const {xarray, yarray} = rnaDrawer.getCoords(this._bases.length);
+        const { xarray, yarray } = rnaDrawer.getCoords(this._bases.length);
         for (let ii = 0; ii < this._bases.length; ii++) {
             const ax: number = xarray[ii];
             const ay: number = yarray[ii];
@@ -2553,7 +2595,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 Pose2D.COLOR_CURSOR);
             this._cursorBox.drawCircle(0, 0, Base.MARKER_RADIUS[this.zoomLevel]);
         } else if (this._cursorBox != null) {
-            this._cursorBox.destroy({children: true});
+            this._cursorBox.destroy({ children: true });
             this._cursorBox = null;
         }
     }
@@ -2910,7 +2952,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         const fullSeq = this.fullSequence;
         for (let ii = 0; ii < this._pairs.length; ii++) {
             if (this._pairs.pairingPartner(ii) > ii
-                    && (!satisfied || this.isPairSatisfied(fullSeq, ii, this._pairs.pairingPartner(ii)))) {
+                && (!satisfied || this.isPairSatisfied(fullSeq, ii, this._pairs.pairingPartner(ii)))) {
                 n++;
             }
         }
@@ -3185,8 +3227,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         rnaDrawer.setupTree(this._pairs, this._targetPairs);
         rnaDrawer.drawTree(this._customLayout);
         const rnaCoords = rnaDrawer.getCoords(n);
-        let {xarray, yarray} = rnaCoords;
-        const {xbounds, ybounds} = rnaCoords;
+        let { xarray, yarray } = rnaCoords;
+        const { xbounds, ybounds } = rnaCoords;
         this._pseudoknotPairs = rnaDrawer.pseudoknotPairs;
 
         this._baseRotationDirectionSign = new Array(n);
@@ -3878,7 +3920,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private clearScoreTexts(): void {
         if (this._scoreTexts != null) {
             for (const scoreText of this._scoreTexts) {
-                scoreText.destroy({children: true});
+                scoreText.destroy({ children: true });
             }
             this._scoreTexts = null;
         }
@@ -4029,7 +4071,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _bindingSite: boolean[] | null;
     private _molecularBindingBases: BaseGlow[] | null = null;
     private _molecularBindingPairs: number[] = [];
-    private _molecule: Molecule | null= null;
+    private _molecule: Molecule | null = null;
     private _moleculeIsBound: boolean = false;
     private _moleculeIsBoundReal: boolean = false;
     private _molecularBindingBonus: number | undefined = 0;

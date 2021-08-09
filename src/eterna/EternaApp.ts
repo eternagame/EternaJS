@@ -48,7 +48,7 @@ export enum PuzzleID {
     TheophyllineRibozymeSwitch = 2390140, // aux info
     MicrofluidicChip = 6502997, // level 4/7 - MissionCleared info
     AandBRO = 6892307, // Oligos
-    Tutorial1 = 6502927, // rscript
+    Tutorial1 = 9218290,//6502927, // rscript
     Tutorial4 = 6502944,
     Tutorial6 = 6502945,
     Tutorial8 = 6502947,

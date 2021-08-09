@@ -1,6 +1,6 @@
-import {ContainerObject, KeyCode} from 'flashbang';
+import { ContainerObject, KeyCode } from 'flashbang';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
+import { RScriptUIElementID } from 'eterna/rscript/RScriptUIElement';
 import GameButton from './GameButton';
 
 interface HelpBarProps {
@@ -8,6 +8,7 @@ interface HelpBarProps {
     onHelpClicked: () => void;
     onChatClicked: () => void;
     onInfoClicked?: () => void;
+    onThreeClicked?: () => void; //kkk
 }
 
 export default class HelpBar extends ContainerObject {
@@ -18,7 +19,16 @@ export default class HelpBar extends ContainerObject {
     constructor(props: HelpBarProps) {
         super();
 
-        const {theme} = HelpBar;
+        const { theme } = HelpBar;
+
+        //kkk
+        const threeButton = new GameButton()
+            .up(Bitmaps.ImgThreeScreen)
+            .over(Bitmaps.ImgThreeScreen)
+            .down(Bitmaps.ImgThreeScreen)
+            .tooltip('3D Screen');
+        this.addObject(threeButton, this.container);
+        this.regs.add(threeButton.clicked.connect(props.onThreeClicked));
 
         const chat = new GameButton()
             .up(Bitmaps.ImgChat)
