@@ -592,7 +592,21 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
             textColor = this.text.length === 0 ? 0x777777 : this._textColor;
         }
 
-        const text = new TextBuilder(displayText)
+        // If we try to render text that's too long (say, the sequence for the ribosome 23s sequence in
+        // the sequence copy dialog), it can wind up causing Pixi to attempt to work with a context that
+        // is larger than the maximum supported size in standard WebGL implementations. In particular,
+        // this will crash in Firefox.
+        //
+        // Since we'd be masking out the majority of this text anyways, it's safe to just clip it somewhere around
+        // the end of the mask. The font size may not directly correlate to number of pixels, so the * 2 is just
+        // to ensure we're cutting it off with plenty of room to spare - I can't immediately imagine a situation
+        // where it would be insufficient, and our input width should always be small enough that it will never
+        // be too large as to not prevent the WebGL size issue.
+        //
+        // See for example https://stackoverflow.com/a/12644047/5557208
+        const limitedText = displayText.substring(0, (this.width / this._fontSize) * 2);
+
+        const text = new TextBuilder(limitedText)
             .font(this._fontFamily)
             .fontWeight(this._fontWeight)
             .fontSize(this._fontSize)
