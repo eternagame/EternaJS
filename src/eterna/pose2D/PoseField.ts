@@ -26,11 +26,11 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this.container.addChild(this._clickTargetDisp);
 
         //kkk
+        // make mouse wheel events of 2D and 3D views independent 
         this.isOver3DCanvas = false;
         window.addEventListener('pointermove', e => {
             var x = e.clientX, y = e.clientY;
             var elementMouseIsOver = <HTMLElement>document.elementFromPoint(x, y);
-            // console.log(elementMouseIsOver.id)
             if (elementMouseIsOver && elementMouseIsOver.id.includes('viewport')) {
                 this.isOver3DCanvas = true;
             } else {
@@ -343,6 +343,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
             return false;
         }
         //kkk
+        // ignore mouse wheel event from 3D view
         if (!this.isOver3DCanvas) {
             if (e.deltaY < 0) {
                 if (e.deltaY < -2 && e.deltaY < this._lastDeltaY) this._debounceZoomIn();

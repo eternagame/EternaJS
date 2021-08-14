@@ -1,7 +1,5 @@
 import { Container, Graphics } from 'pixi.js';
-import {
-    MathUtil, ContainerObject, Assert, Flashbang
-} from 'flashbang';
+import { MathUtil, ContainerObject, Assert, Flashbang } from 'flashbang';
 import Eterna from 'eterna/Eterna';
 
 const events = [

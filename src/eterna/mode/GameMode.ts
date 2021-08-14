@@ -440,7 +440,7 @@ export default abstract class GameMode extends AppMode {
     }
 
     getSequence(): string {
-        let sequenceString = this._poses[0].sequence.sequenceString();
+        let sequenceString: string = this._poses[0].sequence.sequenceString();
         if (this._poses[0].customNumbering != null) sequenceString += ` ${Utility.arrayToRangeString(this._poses[0].customNumbering)}`;
         return sequenceString;
     }

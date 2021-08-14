@@ -1,7 +1,7 @@
 // import * as NGL from '../../../../../ngl/build/js/ngl.dev.js';
-import * as NGL from './ngl.dev.js';
+import * as NGL from 'ngl';
 import PoseEditMode from './PoseEditMode';
-
+// import PaintCursor from '../../pose2D/PaintCursor';
 import { RNABase } from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 
@@ -20,7 +20,7 @@ export default class Mol3DView {
 
     myColorScheme = NGL.ColormakerRegistry.addScheme(function (this: any) {
 
-        this.atomColor = function (atom:NGL.AtomProxy) {
+        this.atomColor = function (atom: any) {
             // console.log('atom = ', atom);
             // console.log(atom)
             var colorArray = [0x3183c0, 0xaa1c20, 0xffff00, 0x1b7b3d];
@@ -32,6 +32,9 @@ export default class Mol3DView {
                 }
             });
 
+            // if (atom.resno == Mol3DView.scope.hoverdInfo.index) {
+            //     alphaColor = 0x80000000;
+            // }
             switch (atomResname) {
                 case 'U':
                     color = colorArray[0];
@@ -46,26 +49,26 @@ export default class Mol3DView {
                     color = colorArray[3];
                     break;
             }
-            if (atom.resno == Mol3DView.scope.hoverdInfo.index) {
-                // color += 0x7F000000 + Mol3DView.scope.hoverdInfo.color;
-                switch (Mol3DView.scope.hoverdInfo.color) {
-                    case RNABase.ADENINE:
-                        color = colorArray[2];
-                        break;
-                    case RNABase.URACIL:
-                        color = colorArray[0];
-                        break;
-                    case RNABase.GUANINE:
-                        color = colorArray[1];
-                        break;
-                    case RNABase.CYTOSINE:
-                        color = colorArray[3];
-                        break;
-                    default:
-                        color = colorArray[0];
-                        break;
-                }
-            }
+            // if (atom.resno == Mol3DView.scope.hoverdInfo.index) {
+            //     // color += 0x7F000000 + Mol3DView.scope.hoverdInfo.color;
+            //     switch (Mol3DView.scope.hoverdInfo.color) {
+            //         case RNABase.ADENINE:
+            //             color = colorArray[2];
+            //             break;
+            //         case RNABase.URACIL:
+            //             color = colorArray[0];
+            //             break;
+            //         case RNABase.GUANINE:
+            //             color = colorArray[1];
+            //             break;
+            //         case RNABase.CYTOSINE:
+            //             color = colorArray[3];
+            //             break;
+            //         default:
+            //             color = colorArray[0];
+            //             break;
+            //     }
+            // }
 
             return color;
         }
@@ -98,12 +101,30 @@ export default class Mol3DView {
     mouseHovered(index: number, color: number) {
         this.hoverdInfo.index = index;
         this.hoverdInfo.color = color;
+        var colorArray = [0x3183c0, 0xaa1c20, 0xffff00, 0x1b7b3d];
+        var color1: number = 0xFFFFFF;
+        switch (color) {
+            case RNABase.ADENINE:
+                color1 = colorArray[2];
+                break;
+            case RNABase.URACIL:
+                color1 = colorArray[0];
+                break;
+            case RNABase.GUANINE:
+                color1 = colorArray[1];
+                break;
+            case RNABase.CYTOSINE:
+                color1 = colorArray[3];
+                break;
+            default:
+                color1 = colorArray[0];
+                break;
+        }
+        Mol3DView.scope.component?.viewer.selectEBaseObject(this.hoverdInfo.index - 1);
         Mol3DView.scope.component?.updateRepresentations({ color: this.myColorScheme });
     }
 
     updateSequence(seq: string) {
-        // var baseCheckBox = <HTMLInputElement>document.getElementById('base');
-        // if (!baseCheckBox.checked) throw ('aaa');
         for (var i = 0; i < seq.length; i++) {
             this.colorChangeMap.set(i + 1, seq[i]);
         }
@@ -111,6 +132,12 @@ export default class Mol3DView {
         // console.log(seq);
     }
 
+    selectBase(index: number) {
+        this.component?.viewer.selectEBaseObject(index);
+    }
+    deselectBase() {
+        this.component?.viewer.deselectEBaseObject();
+    }
     private createContainer(): HTMLDivElement {
         const controlDiv = <HTMLDivElement>document.createElement('div');
         controlDiv.style.position = 'absolute';
@@ -121,25 +148,24 @@ export default class Mol3DView {
         controlDiv.style.alignItems = 'flex-end';
 
         controlDiv.innerHTML = `
-            <div>
-            Backbone:&nbsp&nbsp<select id="backboneSelect">
-                <option value="backbone" selected>backbone</option>
-                <option value="cartoon">cartoon</option>
-                <option value="tube">tube</option>
-            </select>&nbsp&nbsp<input type="checkbox" unchecked id="backbone" style="width: 30px"></input>
-            </div>
         <div>
-        Base:&nbsp&nbsp<input type="checkbox" checked id="base" style="width: 30px" />
+        eBase:&nbsp&nbsp<input type="checkbox" checked id="base" style="width: 30px" />
         </div>
         <div>
-        Type:&nbsp&nbsp<select id="typeSelect">
-                <option value="eball+stick:1" selected>eball+stick-1</option>
-                <option value="eball+stick:0" >eball+stick-2</option>
+        eBall+Stick:&nbsp&nbsp<select id="typeSelect">
+                <option value="eball+stick:1" selected>Type 1</option>
+                <option value="eball+stick:0" >Type 2</option>
                 <!-- <option value="spacefill">spacefill</option> -->
                 <!-- <option value="surface">surface</option> -->
             </select>&nbsp&nbsp<input type="checkbox" checked id="ballstick" style="width: 30px" />
         </div>
         <div>
+        Back bone:&nbsp&nbsp<select id="backboneSelect">
+            <option value="backbone" selected>Default</option>
+            <option value="cartoon">Cartoon</option>
+            <option value="tube">Tube</option>
+        </select>&nbsp&nbsp<input type="checkbox" unchecked id="backbone" style="width: 30px"></input>
+        </div>
       `;
 
         document.body.appendChild(controlDiv);
@@ -197,7 +223,7 @@ export default class Mol3DView {
         var backboneCheckBox = <HTMLInputElement>document.getElementById('backbone');
         if (backboneCheckBox) {
             backboneCheckBox.addEventListener('change', () => {
-                console.log('backbone', backboneCheckBox.checked);
+                // console.log('backbone', backboneCheckBox.checked);
                 if (Mol3DView.scope.component) {
                     if (backboneCheckBox.checked) {
                         var backboneSelect: HTMLSelectElement = <HTMLSelectElement>document.getElementById('backboneSelect');
@@ -215,7 +241,7 @@ export default class Mol3DView {
         var baseCheckBox = <HTMLInputElement>document.getElementById('base');
         if (baseCheckBox) {
             baseCheckBox.addEventListener('change', () => {
-                console.log('base', baseCheckBox.checked)
+                // console.log('base', baseCheckBox.checked)
                 if (Mol3DView.scope.component) {
                     if (baseCheckBox.checked) {
                         Mol3DView.scope.baseElement = Mol3DView.scope.component.addRepresentation("ebase", { vScale: 0.5, color: Mol3DView.scope.myColorScheme })
@@ -258,7 +284,7 @@ export default class Mol3DView {
     create3D() {
         const filePath = require('assets/data/3J9Z_chain_LB_5S_rRNA.cif');
 
-        this.stage.loadFile(filePath, null).then((com: NGL.Component) => {
+        this.stage.loadFile(filePath).then((com: void | NGL.Component) => {
 
             const canvas = <HTMLDivElement>this.stage.viewer.container.childNodes[0].childNodes[0];//<HTMLDivElement>scope.container.children[0];
             canvas.style.removeProperty("background-color");

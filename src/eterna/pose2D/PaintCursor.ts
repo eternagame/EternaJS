@@ -109,8 +109,8 @@ export default class PaintCursor extends GameObject implements Updatable {
     }
 
     private readonly _graphics: Graphics;
-    private _color: number;
-    private _outColor: number;
+    _color: number;
+    _outColor: number;
 
     static readonly YELLOW = 0xFFFF00;
     static readonly BLUE = 0x0000FF;

@@ -188,7 +188,7 @@ export default class PoseEditMode extends GameMode {
                 ? () => this.onHintClicked()
                 : undefined,
             onHelpClicked: () => this.onHelpClicked(),
-            onThreeClicked: () => this.onThreeClicked(), //kkk
+            onThreeClicked: () => this.onThreeClicked(), //kkk add 3DModel View button
             onChatClicked: () => {
                 Eterna.settings.showChat.value = !Eterna.settings.showChat.value;
             },
@@ -596,6 +596,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     //kkk
+    // process 3DViewButton click event
     private onThreeClicked(): void {
         this.mol3DView.showScreen(!this.mol3DView.getVisibleState());
     }
@@ -694,10 +695,14 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
+    //kkk
+    //Extend the mouse hover of 2DPos canvas to 3D canvas
     public mouseHovered(index: number, color: number) {
         this.mol3DView.mouseHovered(index, color);
     }
+
     //kkk
+    //Transfer the mouse down evwnt of 3D canvas to 2D canvas so that implement mouse event transparency.
     public checkCustomEvent(_closestDist: number, closestIndex: number) {
         // console.log(this._poseFields.length);
         for (let ii = 0; ii < this._poseFields.length; ++ii) {
@@ -775,12 +780,10 @@ export default class PoseEditMode extends GameMode {
             const poseField: PoseField = new PoseField(true);
             this.addObject(poseField, this.poseLayer);
             const pose: Pose2D = poseField.pose;
-            pose.setPoseEditMode(this); //kkk
+            pose.setPoseEditMode(this); //kkk // make call channel between Pos2D and PoseEditMode
             bindAddbaseCB(pose, ii);
             bindPoseEdit(pose, ii);
             bindTrackMoves(pose, ii);
-            //kkk
-            // console.log(ii);
             bindMousedownEvent(pose, ii);
             poseFields.push(poseField);
             pose.annotationManager = this._annotationManager;
@@ -3482,7 +3485,7 @@ export default class PoseEditMode extends GameMode {
             this._targetOligos[ii] = this._seqStacks[this._stackLevel][ii].targetOligos;
             this._targetOligosOrder[ii] = this._seqStacks[this._stackLevel][ii].targetOligoOrder;
         }
-        //kkk
+        //kkk // update the base colors of 3D Model
         this.mol3DView.updateSequence(this.getSequence());
     }
 

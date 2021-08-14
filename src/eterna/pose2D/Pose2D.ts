@@ -72,6 +72,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._poseField = poseField;
         this._editable = editable;
 
+        //kkk 
+        // transfer 3D Canvas mouse down event to 2D Canvas
         window.addEventListener('kkk', e => {
             var ce = <CustomEvent>e;
             const mouseX: number = ce.detail.clientX;
@@ -95,6 +97,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 }
                 this.posEditMode.checkCustomEvent(closestDist, closestIndex);
             }
+        });
+        //kkk 
+        // transfer 3D mouse move picking result to 2D Canvas and highlight corresponding base.
+        window.addEventListener('picking', e => {
+            var ce = <CustomEvent>e;
+            const closestIndex: number = ce.detail.resno;
+            this.on3DPickingMouseMoved(closestIndex - 1);
         });
     }
 
@@ -1172,11 +1181,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         if (closestIndex >= 0 && this._currentColor >= 0) {
-            // console.log('kkk', closestIndex); //kkkk
-            //kkk
-            this.posEditMode.mouseHovered(closestIndex + 1, this._currentColor);
+            //kkk 
+            // transfer mouse hover result to 3DView 
+            this.posEditMode?.mouseHovered(closestIndex + 1, this._currentColor);
+
             this.onBaseMouseMove(closestIndex);
-            // document.getElementById(Eterna.PIXI_CONTAINER_ID).style.cursor = 'none';
 
             if (!this.annotationManager.getAnnotationMode()) {
                 this._paintCursor.display.visible = true;
@@ -1198,7 +1207,50 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         } else {
             this._lastColoredIndex = -1;
-            this.posEditMode.mouseHovered(-1, 0, 0);
+            //kkk
+            // transfer mouse hover result to 3DView 
+            this.posEditMode?.mouseHovered(-1, 0);
+        }
+
+        if (!this._coloring) {
+            this.updateScoreNodeGui();
+        }
+    }
+
+    //kkk
+    // transfer the mouse picking result of 3DView to 2D canvas 
+    public on3DPickingMouseMoved(closestIndex: number): void {
+        if (!this._coloring) {
+            this.clearMouse();
+        }
+        const mouseX = this._bases[closestIndex].x + this._offX;
+        const mouseY = this._bases[closestIndex].y + this._offY;
+
+        this._paintCursor.display.x = mouseX;
+        this._paintCursor.display.y = mouseY;
+
+        if (closestIndex >= 0 && this._currentColor >= 0) {
+            this.onBaseMouseMove(closestIndex);
+
+            if (!this.annotationManager.getAnnotationMode()) {
+                this._paintCursor.display.visible = true;
+                this._paintCursor.setShape(this._currentColor);
+                this._paintCursor._outColor = PaintCursor.WHITE;
+            }
+
+            const strandName: string | null = this.getStrandName(closestIndex);
+            if (strandName != null) {
+                this._strandLabel.setText(strandName);
+                if (mouseX + 16 + this._strandLabel.width > this._width) {
+                    this._strandLabel.display.position.set(
+                        mouseX - 16 - this._strandLabel.width,
+                        mouseY + 16
+                    );
+                } else {
+                    this._strandLabel.display.position.set(mouseX + 16, mouseY + 16);
+                }
+                this._strandLabel.display.visible = true;
+            }
         }
 
         if (!this._coloring) {
