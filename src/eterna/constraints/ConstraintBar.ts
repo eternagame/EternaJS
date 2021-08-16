@@ -365,8 +365,6 @@ export default class ConstraintBar extends ContainerObject {
     }
 
     private collapse() {
-        // eslint-disable-next-line no-debugger
-        debugger;
         Assert.assertIsDefined(this._selectedConstraint);
         this._collapsed = true;
         const {config} = ConstraintBar;
@@ -416,8 +414,6 @@ export default class ConstraintBar extends ContainerObject {
     }
 
     private expand() {
-        // eslint-disable-next-line no-debugger
-        debugger;
         Assert.assertIsDefined(this._selectedConstraint);
 
         this._collapsed = false;
