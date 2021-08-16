@@ -3698,12 +3698,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
             );
 
             for (let row = baseRowStart; row < baseRowEnd; row++) {
-                const replaceCount = baseColEnd - baseColStart;
-                this._annotationSpaceAvailability[row].splice(
-                    baseColStart,
-                    replaceCount,
-                    ...Array(replaceCount).fill(false)
-                );
+                for (let col = baseColStart; col < baseColEnd; col++) {
+                    this._annotationSpaceAvailability[row][col] = false;
+                }
             }
         }
     }
