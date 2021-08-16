@@ -549,25 +549,37 @@ export default class AnnotationManager {
         reset: boolean;
         ignoreCustom: boolean;
     }): void {
+        // Get base layer bounds relative to Pose2D container
+        // This is done here rather than in findBaseConflicts where it's actually used
+        // because it is quite expensive for large puzzles, and would wind up getting run
+        // quite a number of times otherwise
+        const baseLayerBounds = DisplayUtil.getBoundsRelative(params.pose.baseLayer, params.pose.container);
+
         if (params.pose.zoomLevel > AnnotationManager.ANNOTATION_LAYER_THRESHOLD) {
             // visualize layers
             for (const [idx, layer] of this.allLayers.entries()) {
                 if (this.isAnnotationVisible(layer)) {
-                    this.placeAnnotationInPose({...params, item: layer, itemIndex: idx});
+                    this.placeAnnotationInPose({
+                        ...params, item: layer, itemIndex: idx, baseLayerBounds
+                    });
                 }
             }
 
             // visualize annotations not in layers
             for (const [idx, annotation] of this.allAnnotations.entries()) {
                 if (!annotation.layerId && this.isAnnotationVisible(annotation)) {
-                    this.placeAnnotationInPose({...params, item: annotation, itemIndex: idx});
+                    this.placeAnnotationInPose({
+                        ...params, item: annotation, itemIndex: idx, baseLayerBounds
+                    });
                 }
             }
         } else {
             // visualize annotations
             for (const [idx, annotation] of this.allAnnotations.entries()) {
                 if (this.isAnnotationVisible(annotation)) {
-                    this.placeAnnotationInPose({...params, item: annotation, itemIndex: idx});
+                    this.placeAnnotationInPose({
+                        ...params, item: annotation, itemIndex: idx, baseLayerBounds
+                    });
                 }
             }
         }
@@ -947,6 +959,7 @@ export default class AnnotationManager {
         itemIndex: number;
         reset: boolean;
         ignoreCustom: boolean;
+        baseLayerBounds: Rectangle;
     }): void {
         // If annotation positions have been computed already
         // use cached value
@@ -1109,7 +1122,11 @@ export default class AnnotationManager {
                     anchorPoint,
                     base.display,
                     view,
-                    0
+                    0,
+                    undefined,
+                    undefined,
+                    undefined,
+                    params.baseLayerBounds
                 );
 
                 if (relPosition) {
@@ -1181,7 +1198,8 @@ export default class AnnotationManager {
         numSearchAttempts: number,
         anchorOffsetX: number = 0,
         anchorOffsetY: number = 0,
-        includeCenters: boolean = true
+        includeCenters: boolean = true,
+        baseLayerBounds: Rectangle
     ): Point | null {
         // x and y offsets that create space between annotations
         const annotationOffsetX: number = AnnotationManager.DEFAULT_ANNOTATION_SHIFT;
@@ -1197,7 +1215,8 @@ export default class AnnotationManager {
             anchorOffsetX,
             anchorOffsetY,
             annotationOffsetX,
-            annotationOffsetY
+            annotationOffsetY,
+            baseLayerBounds
         );
 
         // Find possible position factoring occupied places
@@ -1329,7 +1348,8 @@ export default class AnnotationManager {
                     numSearchAttempts + 1, // Increment recursive depth
                     conflictOffsetX,
                     conflictOffsetY,
-                    numSearchAttempts === 0 || !includeCenters
+                    numSearchAttempts === 0 || !includeCenters,
+                    baseLayerBounds
                 );
 
                 if (point) {
@@ -1361,7 +1381,8 @@ export default class AnnotationManager {
                 numSearchAttempts + 1, // Increment iterative steps,
                 0,
                 0,
-                true
+                true,
+                baseLayerBounds
             );
 
             if (point) {
@@ -1890,7 +1911,8 @@ export default class AnnotationManager {
         anchorOffsetX: number = 0,
         anchorOffsetY: number = 0,
         annotationOffsetX: number,
-        annotationOffsetY: number
+        annotationOffsetY: number,
+        baseLayerBounds: Rectangle
     ): AnnotationBaseConflicts {
         let topLeftConflict: AnnotationBaseConflict | null = null;
         let topCenterConflict: AnnotationBaseConflict | null = null;
@@ -1900,9 +1922,6 @@ export default class AnnotationManager {
         let bottomLeftConflict: AnnotationBaseConflict | null = null;
         let bottomCenterConflict: AnnotationBaseConflict | null = null;
         let bottomRightConflict: AnnotationBaseConflict | null = null;
-
-        // Get base layer bounds relative to Pose2D container
-        const baseLayerBounds = DisplayUtil.getBoundsRelative(pose.baseLayer, pose.container);
 
         // Determine anchor co-ordinates relative to base layer
         // we subtract (width / 2) from X to compute value relative to left edge versus midpoint
