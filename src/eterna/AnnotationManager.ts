@@ -1135,8 +1135,12 @@ export default class AnnotationManager {
             } else {
                 // We should ideally always receive a position
                 //
-                // In cases we don't, remove annotation card from view
-                view.destroySelf();
+                // In cases we don't, remove annotation card from view.
+                //
+                // TODO: In the future, we should revisit computeAnnotationPositionPoint to always
+                // return *something*, as just not showing the annotation is behavior that does not
+                // seem user friendly.
+                params.pose.removeAnnotationView(view);
             }
         }
     }

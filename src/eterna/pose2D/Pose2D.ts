@@ -3646,6 +3646,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._annotationViews.push(view);
     }
 
+    public removeAnnotationView(view: AnnotationView) {
+        this._annotationViews = this._annotationViews.filter((v: AnnotationView) => v !== view);
+        this.removeObject(view);
+    }
+
     public getAnnotationViewDims(id: string | number, positionIndex: number) {
         const desiredView = this._annotationViews.find(
             (view) => view.annotationID === id && view.positionIndex === positionIndex
