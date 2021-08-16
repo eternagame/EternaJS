@@ -1,4 +1,4 @@
-import {Container, Graphics} from 'pixi.js';
+import {Container, Graphics, Rectangle} from 'pixi.js';
 import {
     MathUtil, ContainerObject, Assert, Flashbang
 } from 'flashbang';
@@ -7,16 +7,16 @@ import Eterna from 'eterna/Eterna';
 const events = [
     'pointercancel', 'pointerdown', 'pointerenter', 'pointerleave', 'pointermove',
     'pointerout', 'pointerover', 'pointerup', 'mousedown', 'mouseenter', 'mouseleave',
-    'mousemove', 'mouseout', 'mouseover', 'mouseup', 'mousedown', 'mouseup'
+    'mousemove', 'mouseout', 'mouseover', 'mouseup', 'mousedown', 'mouseup', 'click'
 ] as const;
 
 let earlyHandlers: ((e: MouseEvent | PointerEvent) => void)[] = [];
 
 // Why are you doing this, you might ask? First off, see ScrollContainer#handlePossiblyMaskedEvent
 // Ok, got that? Lets continue. For some mouse events, Pixi registers listeners on the window with capturing
-// enebled, which means that it gets notified of events dispatched on children before event listeners
+// enabled, which means that it gets notified of events dispatched on children before event listeners
 // on the children themselves do. This is the only way for us to make sure we can catch an event
-// and prevent it from propogating before Pixi has a chance to say "well, that event was fired on
+// and prevent it from propagating before Pixi has a chance to say "well, that event was fired on
 // something that wasn't the Pixi canvas, so that must mean our canvas has lost focus" (and as such,
 // refusing to do things like fire a pointertap because it threw away references to tracked pointers,
 // thinking we started a tap and canceled it by releasing our mouse outside the canvas).
@@ -149,7 +149,7 @@ export default class ScrollContainer extends ContainerObject {
         this._htmlWrapper.style.height = `${Flashbang.stageHeight}px`;
         const {
             x, y, width, height
-        } = this.display.getBounds();
+        } = this.getBounds();
         this._htmlWrapper.style.clipPath = `polygon(
             ${x}px ${y}px,
             ${x + width}px ${y}px,
@@ -180,7 +180,7 @@ export default class ScrollContainer extends ContainerObject {
     private handlePossiblyMaskedEvent(e: MouseEvent | PointerEvent): void {
         const {
             x, y, width, height
-        } = this.display.getBounds();
+        } = this.getBounds();
 
         const isMaskedElement = this._htmlWrapper.contains(e.target as HTMLDivElement);
 
@@ -239,6 +239,11 @@ export default class ScrollContainer extends ContainerObject {
      */
     public get htmlWrapper(): HTMLDivElement {
         return this._htmlWrapper;
+    }
+
+    private getBounds(): Rectangle {
+        const {x, y} = this.display.getGlobalPosition();
+        return new Rectangle(x, y, this._width, this._height);
     }
 
     private readonly _contentMask = new Graphics();

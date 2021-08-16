@@ -1,6 +1,6 @@
 {
   "name": "eternajs",
-  "version": "1.11.0-rc3",
+  "version": "1.11.7",
   "license": "SEE LICENSE IN LICENSE",
   "description": "Eterna game/RNA design interface",
   "scripts": {
@@ -71,7 +71,7 @@
     "canvas-confetti": "^1.4.0",
     "core-js": "^3.13.1",
     "dompurify": "^2.2.9",
-    "eterna-chat-wrapper": "github:eternagame/eterna-chat-wrapper#6169c8f45f1252b9a3a46c54cf80853736766516",
+    "eterna-chat-wrapper": "https://github.com/eternagame/eterna-chat-wrapper/archive/dd47b03753aeae81c3a8450933b274216515d1bc.tar.gz",
     "is-mobile": "^3.0.0",
     "js-polyfills": "^0.1.43",
     "libtess": "^1.2.2",
@@ -81,7 +81,7 @@
     "marked": "^2.0.7",
     "pchip": "^1.0.2",
     "pixi-filters": "^4.1.1",
-    "pixi-multistyle-text": "github:eternagame/pixi-multistyle-text#1f2283b1d4a1bb262b57783e1bf2f81802a17809",
+    "pixi-multistyle-text": "https://github.com/eternagame/pixi-multistyle-text/archive/1f2283b1d4a1bb262b57783e1bf2f81802a17809.tar.gz",
     "pixi.js": "^6.0.4",
     "regenerator-runtime": "^0.13.7",
     "store": "^2.0.12",

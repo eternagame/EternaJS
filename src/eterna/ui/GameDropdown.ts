@@ -3,9 +3,6 @@ import {
     DisplayUtil,
     HAlign,
     VAlign,
-    DisplayObjectPointerTarget,
-    InputUtil,
-    Flashbang,
     VLayoutContainer
 } from 'flashbang';
 import {
@@ -128,34 +125,6 @@ export default class GameDropdown extends ContainerObject {
     }
 
     private _setupPopup() {
-        const bg = new Graphics();
-        if (this.mode?.container) this.mode.container.addChild(bg);
-
-        // Eat mouse events (except pointerMove, the other buttons need it for pointerOut to fire)
-        const bgTarget = new DisplayObjectPointerTarget(bg);
-
-        bgTarget.pointerDown.connect((e) => {
-            if (InputUtil.IsLeftMouse(e)) {
-                this._hidePopup();
-            }
-            e.stopPropagation();
-        });
-        bgTarget.pointerUp.connect((e) => e.stopPropagation());
-        // bgTarget.pointerMove.connect((e) => e.stopPropagation());
-
-        const updateBG = () => {
-            bg.clear()
-                .beginFill(0x0, 0)
-                .drawRoundedRect(
-                    -GameDropdown._HORIZONTAL_PADDING,
-                    0,
-                    Flashbang.stageWidth || 0,
-                    Flashbang.stageHeight || 0, GameDropdown._BORDER_RADIUS
-                ).endFill();
-        };
-        updateBG();
-        if (this.mode) this.regs.add(this.mode.resized.connect(updateBG));
-
         if (!this.mode || !this.mode.container) return;
         this._popup = new ContainerObject();
         this.addObject(this._popup, this.mode.container);
@@ -234,16 +203,18 @@ export default class GameDropdown extends ContainerObject {
                 this.selectedOption.value = option;
                 // Reset all option colors
                 for (const optionItem of this._optionItems) {
-                    optionItem.textBalloon.setBalloonColor(this._boxColor);
-                    if (optionItem.checkbox) {
+                    if (optionItem.textBalloon.display.parent) optionItem.textBalloon.setBalloonColor(this._boxColor);
+                    if (optionItem.checkbox && optionItem.checkbox.display.parent) {
                         optionItem.checkbox.toggled.value = false;
                     }
                 }
                 // Set selected color
-                text.setBalloonColor(0x4471A2);
+                if (text.display.parent) {
+                    text.setBalloonColor(0x4471A2);
+                }
 
                 // Check checkbox
-                if (this._checkboxes && checkbox) {
+                if (this._checkboxes && checkbox && checkbox.display.parent) {
                     checkbox.toggled.value = true;
                 }
                 this._hidePopup();

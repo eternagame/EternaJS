@@ -9,7 +9,7 @@ import {
     ContainerObject, Flashbang, VLayoutContainer, HLayoutContainer,
     KeyCode, VAlign, HAlign, DisplayUtil, LocationTask, Easing, Assert, ParallelTask, AlphaTask
 } from 'flashbang';
-import Puzzle, {BoostersData} from 'eterna/puzzle/Puzzle';
+import {BoostersData} from 'eterna/puzzle/Puzzle';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import BitmapManager from 'eterna/resources/BitmapManager';
@@ -160,8 +160,8 @@ export default class Toolbar extends ContainerObject {
     public get position() { return new Point(this._content.x, this._content.y); }
 
     // Puzzle Maker
-    public addbaseButton: GameButton;
-    public addpairButton: GameButton;
+    public addBaseButton: GameButton;
+    public addPairButton: GameButton;
     public deleteButton: GameButton;
     public lockButton: GameButton;
     public moleculeButton: GameButton;
@@ -194,9 +194,7 @@ export default class Toolbar extends ContainerObject {
             showGlue = false,
             showAdvancedMenus = true,
             showLibrarySelect = false,
-            annotationManager,
-            puzzle,
-            isExpanded = false
+            annotationManager
         }: {
             states?: number;
             boosters?: BoostersData;
@@ -204,8 +202,6 @@ export default class Toolbar extends ContainerObject {
             showAdvancedMenus?: boolean;
             showLibrarySelect?: boolean;
             annotationManager?: AnnotationManager;
-            puzzle?: Puzzle;
-            isExpanded?: boolean;
         }
     ) {
         super();
@@ -216,8 +212,6 @@ export default class Toolbar extends ContainerObject {
         this._showLibrarySelect = showLibrarySelect;
         this._boostersData = boosters ?? null;
         this._annotationManager = annotationManager;
-        this._puzzle = puzzle;
-        this._isExpanded = isExpanded;
     }
 
     public onResized() {
@@ -267,14 +261,14 @@ export default class Toolbar extends ContainerObject {
             this._content.addChild(upperToolbarLayout);
         }
 
-        this.addbaseButton = new ToolbarButton()
+        this.addBaseButton = new ToolbarButton()
             .up(Bitmaps.ImgAddBase)
             .over(Bitmaps.ImgAddBaseOver)
             .down(Bitmaps.ImgAddBaseSelect)
             .hotkey(KeyCode.Digit6)
             .tooltip('Add a single base.');
 
-        this.addpairButton = new ToolbarButton()
+        this.addPairButton = new ToolbarButton()
             .up(Bitmaps.ImgAddPair)
             .over(Bitmaps.ImgAddPairOver)
             .down(Bitmaps.ImgAddPairSelect)
@@ -303,45 +297,30 @@ export default class Toolbar extends ContainerObject {
             .tooltip('Create or remove a molecular binding site.');
 
         if (this._type === ToolbarType.PUZZLEMAKER || this._type === ToolbarType.PUZZLEMAKER_EMBEDDED) {
-            this.addObject(this.addbaseButton, upperToolbarLayout);
-            this.addObject(this.addpairButton, upperToolbarLayout);
+            this.addObject(this.addBaseButton, upperToolbarLayout);
+            this.addObject(this.addPairButton, upperToolbarLayout);
             this.addObject(this.deleteButton, upperToolbarLayout);
             this.addObject(this.lockButton, upperToolbarLayout);
             this.addObject(this.moleculeButton, upperToolbarLayout);
 
-            this.regs.add(this.addbaseButton.clicked.connect(() => {
+            this.regs.add(this.addBaseButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
-                if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
-                    this._annotationManager.setAnnotationMode(false);
-                }
-                this.addbaseButton.toggled.value = true;
+                this.addBaseButton.toggled.value = true;
             }));
-            this.regs.add(this.addpairButton.clicked.connect(() => {
+            this.regs.add(this.addPairButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
-                if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
-                    this._annotationManager.setAnnotationMode(false);
-                }
-                this.addpairButton.toggled.value = true;
+                this.addPairButton.toggled.value = true;
             }));
             this.regs.add(this.deleteButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
-                if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
-                    this._annotationManager.setAnnotationMode(false);
-                }
                 this.deleteButton.toggled.value = true;
             }));
             this.regs.add(this.lockButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
-                if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
-                    this._annotationManager.setAnnotationMode(false);
-                }
                 this.lockButton.toggled.value = true;
             }));
             this.regs.add(this.moleculeButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
-                if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
-                    this._annotationManager.setAnnotationMode(false);
-                }
                 this.moleculeButton.toggled.value = true;
             }));
         }
@@ -764,15 +743,12 @@ export default class Toolbar extends ContainerObject {
 
         this.regs.add(this.palette.targetClicked.connect(() => {
             this._deselectAllPaintTools();
-            if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
-                this._annotationManager.setAnnotationMode(false);
-            }
         }));
 
         this.pairSwapButton = new ToolbarButton()
             .up(Bitmaps.ImgSwap)
             .over(Bitmaps.ImgSwapOver)
-            .down(Bitmaps.ImgSwapOver)
+            .down(Bitmaps.ImgSwap)
             .hotkey(KeyCode.Digit5)
             .tooltip('Swap paired bases.')
             .rscriptID(RScriptUIElementID.SWAP);
@@ -823,9 +799,6 @@ export default class Toolbar extends ContainerObject {
 
             this.regs.add(this.pairSwapButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
-                if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
-                    this._annotationManager.setAnnotationMode(false);
-                }
                 this.pairSwapButton.toggled.value = true;
             }));
 
@@ -841,9 +814,6 @@ export default class Toolbar extends ContainerObject {
                         this.regs.add(button.clicked.connect(() => {
                             mode.setPosesColor(booster.toolColor);
                             this._deselectAllPaintTools();
-                            if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
-                                this._annotationManager.setAnnotationMode(false);
-                            }
                         }));
                         this.dynPaintTools.push(button);
                         this.addObject(button, boosterPaintToolsLayout);
@@ -914,9 +884,6 @@ export default class Toolbar extends ContainerObject {
 
         this.regs.add(this.baseMarkerButton.clicked.connect(() => {
             this._deselectAllPaintTools();
-            if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
-                this._annotationManager.setAnnotationMode(false);
-            }
             this.baseMarkerButton.toggled.value = true;
         }));
 
@@ -933,9 +900,6 @@ export default class Toolbar extends ContainerObject {
 
             this.regs.add(this.librarySelectionButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
-                if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
-                    this._annotationManager.setAnnotationMode(false);
-                }
                 this.librarySelectionButton.toggled.value = true;
             }));
         }
@@ -955,9 +919,6 @@ export default class Toolbar extends ContainerObject {
 
         this.regs.add(this.magicGlueButton.clicked.connect(() => {
             this._deselectAllPaintTools();
-            if (this._annotationManager && this._annotationManager.getAnnotationMode()) {
-                this._annotationManager.setAnnotationMode(false);
-            }
             this.magicGlueButton.toggled.value = true;
         }));
 
@@ -965,8 +926,7 @@ export default class Toolbar extends ContainerObject {
             this.annotationModeButton = new ToolbarButton()
                 .up(Bitmaps.ImgAnnotationMode)
                 .over(Bitmaps.ImgAnnotationModeOver)
-                .down(Bitmaps.ImgAnnotationModeSelected)
-                .selected(Bitmaps.ImgAnnotationModeSelected)
+                .down(Bitmaps.ImgAnnotationMode)
                 .tooltip('Annotation Mode');
 
             this.annotationPanelButton = new ToolbarButton()
@@ -977,14 +937,25 @@ export default class Toolbar extends ContainerObject {
                 .tooltip('Annotations Panel');
             this.annotationPanel = new AnnotationPanel(
                 this.annotationPanelButton,
-                this._annotationManager,
-                this._puzzle
+                this._annotationManager
             );
 
             if (this._showAdvancedMenus) {
-                // this.addObject(this.annotationPanel, this.mode?.container);
-                // this.addObject(this.annotationModeButton, this.lowerToolbarLayout);
-                // this.addObject(this.annotationPanelButton, this.lowerToolbarLayout);
+                this.addObject(this.annotationPanel, this.mode?.container);
+                this.addObject(this.annotationModeButton, this.lowerToolbarLayout);
+                this.addObject(this.annotationPanelButton, this.lowerToolbarLayout);
+
+                this.regs.add(this.annotationModeButton.clicked.connect(() => {
+                    this._deselectAllPaintTools();
+                    this.annotationModeButton.toggled.value = true;
+
+                    Assert.assertIsDefined(this._annotationManager);
+                    this._annotationManager.setAnnotationMode(true);
+                }));
+
+                this.regs.add(this._annotationManager.viewAnnotationDataUpdated.connect(() => {
+                    this.annotationPanel.updatePanel();
+                }));
             }
         }
 
@@ -1036,17 +1007,6 @@ export default class Toolbar extends ContainerObject {
             this.setToolbarAutohide(value);
         }));
         this._setupToolbarDrag();
-
-        if (this._annotationManager) {
-            this.regs.add(this._annotationManager.annotationMode.connectNotify((value) => {
-                if (
-                    (value && !this.annotationModeButton.isSelected)
-                    || (!value && this.annotationModeButton.isSelected)
-                ) {
-                    this.annotationModeButton.toggle();
-                }
-            }));
-        }
     }
 
     private onDragStart(e: InteractionEvent): void {
@@ -1102,7 +1062,6 @@ export default class Toolbar extends ContainerObject {
     }
 
     private collapse() {
-        console.log('collapsing...');
         Assert.assertIsDefined(this.backgroundContainer);
         this._isExpanded = false;
         // this.middle.visible = false;
@@ -1130,7 +1089,6 @@ export default class Toolbar extends ContainerObject {
     }
 
     private expand() {
-        console.log('expanding...');
         Assert.assertIsDefined(this.backgroundContainer);
 
         this._isExpanded = true;
@@ -1358,8 +1316,8 @@ export default class Toolbar extends ContainerObject {
 
         this.boostersMenu.enabled = !disable;
 
-        this.addbaseButton.enabled = !disable;
-        this.addpairButton.enabled = !disable;
+        this.addBaseButton.enabled = !disable;
+        this.addPairButton.enabled = !disable;
         this.deleteButton.enabled = !disable;
         this.lockButton.enabled = !disable;
         this.moleculeButton.enabled = !disable;
@@ -1380,8 +1338,8 @@ export default class Toolbar extends ContainerObject {
     private _deselectAllPaintTools(): void {
         this.palette.clearSelection();
         this.pairSwapButton.toggled.value = false;
-        this.addbaseButton.toggled.value = false;
-        this.addpairButton.toggled.value = false;
+        this.addBaseButton.toggled.value = false;
+        this.addPairButton.toggled.value = false;
         this.deleteButton.toggled.value = false;
         this.lockButton.toggled.value = false;
         this.moleculeButton.toggled.value = false;
@@ -1391,6 +1349,11 @@ export default class Toolbar extends ContainerObject {
 
         for (const button of this.dynPaintTools) {
             button.toggled.value = false;
+        }
+
+        this.annotationModeButton.toggled.value = false;
+        if (this._annotationManager) {
+            this._annotationManager.setAnnotationMode(false);
         }
     }
 
@@ -1421,5 +1384,4 @@ export default class Toolbar extends ContainerObject {
     private _startPoint: Point | null;
 
     private _annotationManager: AnnotationManager | undefined;
-    private _puzzle: Puzzle | undefined;
 }
