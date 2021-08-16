@@ -172,12 +172,6 @@ export default class PoseEditMode extends GameMode {
             showLibrarySelect: this._puzzle.constraints?.some((con) => con instanceof LibrarySelectionConstraint),
             annotationManager: this._annotationManager,
             puzzle: this._puzzle
-        }, {
-            handleRedoButtonClick: () => this.moveUndoStackForward(),
-            handleUndoButtonClick: () => this.moveUndoStackBackward(),
-            handleSettingsButtonClick: () => this.showViewOptionsDialog(),
-            handleScreenshotButtonClick: () => this.postScreenshot(this.createScreenshot()),
-            handlePaletteButtonClick: (targetType: PaletteTargetType) => this.onPaletteTargetSelected(targetType)
         });
         this.addObject(this._toolbar, this.uiLayer);
 

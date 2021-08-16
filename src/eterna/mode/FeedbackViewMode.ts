@@ -83,7 +83,7 @@ export default class FeedbackViewMode extends GameMode {
             homeArrow, HAlign.RIGHT, VAlign.CENTER, 8, 8
         );
 
-        this._toolbar = new Toolbar(ToolbarType.FEEDBACK, {states: this._puzzle.getSecstructs().length}, {});
+        this._toolbar = new Toolbar(ToolbarType.FEEDBACK, {states: this._puzzle.getSecstructs().length});
         this.addObject(this._toolbar, this.uiLayer);
 
         Assert.assertIsDefined(this._toolbar.zoomOutButton);
