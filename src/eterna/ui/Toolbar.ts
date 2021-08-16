@@ -941,9 +941,9 @@ export default class Toolbar extends ContainerObject {
             );
 
             if (this._showAdvancedMenus) {
-                this.addObject(this.annotationPanel, this.mode?.container);
-                this.addObject(this.annotationModeButton, this.lowerToolbarLayout);
-                this.addObject(this.annotationPanelButton, this.lowerToolbarLayout);
+                // this.addObject(this.annotationPanel, this.mode?.container);
+                // this.addObject(this.annotationModeButton, this.lowerToolbarLayout);
+                // this.addObject(this.annotationPanelButton, this.lowerToolbarLayout);
 
                 this.regs.add(this.annotationModeButton.clicked.connect(() => {
                     this._deselectAllPaintTools();
