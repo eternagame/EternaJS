@@ -3487,6 +3487,7 @@ export default class PoseEditMode extends GameMode {
         }
         //kkk // update the base colors of 3D Model
         this.mol3DView.updateSequence(this.getSequence());
+        this.mol3DView.stage.viewer.selectEBaseObject2(-1);
     }
 
     private moveUndoStackForward(): void {

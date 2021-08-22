@@ -13,12 +13,13 @@ interface EternaURLParams {
 export default class EternaURL {
     public static readonly BARCODE_HELP: string = '/web/lab/manual/#barcode';
     public static readonly STRATEGY_GUIDE: string =
-    'http://getsatisfaction.com/eternagame/topics/the_strategy_guide_to_solve_eterna_puzzles';
+        'http://getsatisfaction.com/eternagame/topics/the_strategy_guide_to_solve_eterna_puzzles';
 
     public static getFeedURL(): string {
+        console.log('Player ID = ', Eterna.playerID);
         return Eterna.playerID === 0
-            ? EternaURL.createURL({page: 'register'})
-            : EternaURL.createURL({page: 'me'});
+            ? EternaURL.createURL({ page: 'register' })
+            : EternaURL.createURL({ page: 'me' });
     }
 
     /**
@@ -30,7 +31,7 @@ export default class EternaURL {
      */
     public static createURL(params: EternaURLParams | null): string {
         if (params == null) {
-            params = {page: 'me'};
+            params = { page: 'me' };
         }
 
         let url = '/web/';

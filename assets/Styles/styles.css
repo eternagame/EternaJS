@@ -24,6 +24,10 @@ body {
     z-index: 0;
 }
 
+.ngl-view {
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+}
 .ingame-chat {
     width: 230px;
     height: 340px;

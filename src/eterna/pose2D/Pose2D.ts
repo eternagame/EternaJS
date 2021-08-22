@@ -368,6 +368,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public set currentColor(col: RNAPaint) {
         this._currentColor = col;
+        //kkk
+        this.posEditMode.mol3DView.stage.viewer.setBaseColor(this.posEditMode.mol3DView.getBaseColor(col));
     }
 
     public get currentColor(): RNAPaint {
@@ -1056,6 +1058,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public toggleBaseMark(baseIndex: number): void {
+        this.posEditMode?.mol3DView.stage.viewer.markEBaseObject(baseIndex);
         if (!this.isTrackedLayer(baseIndex, PLAYER_MARKER_LAYER)) {
             this.addBaseMark(baseIndex, PLAYER_MARKER_LAYER);
         } else {
@@ -3327,6 +3330,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._lastColoredIndex = seqnum;
 
         if (togglelock || !this.isEditable(seqnum)) return;
+
+        //kkk
+        this.posEditMode?.mol3DView.stage.viewer.selectEBaseObject2(seqnum);
 
         this._coloring = true;
         this._mutatedSequence = this.fullSequence.slice(0);
