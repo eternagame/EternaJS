@@ -20,6 +20,7 @@ export default class Bitmaps {
     public static readonly NovaBarcodeReq: string = require('assets/NOVA/Constraints/barcode-requirement-carrier.png');
     public static readonly ImgSelectBase: string = require('assets/NOVA/Palette/base-selected.png');
     public static readonly ImgExpandArrow: string = require('assets/NOVA/Palette/expand_arrow.png');
+    public static readonly ImgCollapseArrow: string = require('assets/NOVA/Palette/collapse_arrow.png');
     public static readonly ImgBindingBaseGlow: string = require('assets/Aptamer/base_outer-1.png');
     public static readonly BaseAf: string = require('assets/RNABase/BaseAf.png');
     public static readonly BaseAfLock: string = require('assets/RNABase/BaseAfLock.png');

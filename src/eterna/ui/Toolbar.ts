@@ -1,5 +1,5 @@
 import {
-    Graphics, Point, Sprite, Container, InteractionEvent, DisplayObject
+    Graphics, Point, Sprite, Container, InteractionEvent, DisplayObject, Text
 } from 'pixi.js';
 import {RegistrationGroup} from 'signals';
 import Eterna from 'eterna/Eterna';
@@ -7,13 +7,15 @@ import Booster from 'eterna/mode/PoseEdit/Booster';
 import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
 import {
     ContainerObject, Flashbang, VLayoutContainer, HLayoutContainer,
-    KeyCode, VAlign, HAlign, DisplayUtil, LocationTask, Easing, Assert, ParallelTask, AlphaTask
+    KeyCode, VAlign, HAlign, DisplayUtil, LocationTask, Easing, Assert, ParallelTask, VisibleTask
 } from 'flashbang';
 import {BoostersData} from 'eterna/puzzle/Puzzle';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import AnnotationManager from 'eterna/AnnotationManager';
+import Fonts from 'eterna/util/Fonts';
+import {FontWeight} from 'flashbang/util/TextBuilder';
 import NucleotidePalette from './NucleotidePalette';
 import GameButton from './GameButton';
 import ToggleBar from './ToggleBar';
@@ -76,13 +78,36 @@ export class ButtonsGroup extends ContainerObject {
         });
     }
 
-    public addButton(newButton: DisplayObject, start: boolean = false): void {
-        if (start) {
-            this._content.addChildAt(newButton, 0);
+    public changeMode(value: boolean): void {
+        const {BUTTON_WIDTH} = ButtonsGroup;
+        if (value) {
+            this._background
+                .lineStyle(1, 0x3397DB, 1)
+                .drawRoundedRect(0, 0, this._content.children.length * BUTTON_WIDTH, 51, 7)
+                .endFill();
         } else {
-            this._content.addChild(newButton);
+            this._background
+                .clear()
+                .beginFill(0x043468, 1)
+                .drawRoundedRect(0, 0, (this._content.children.length * BUTTON_WIDTH), 51, 7)
+                .endFill();
         }
-        this._background.width = this._content.children.length * 55;
+        this._background.width = this._content.children.length * BUTTON_WIDTH;
+    }
+
+    public addButton(newButton: DisplayObject): void {
+        const {BUTTON_WIDTH} = ButtonsGroup;
+        this._content.addChildAt(newButton, 0);
+        this._background.width = this._content.children.length * BUTTON_WIDTH;
+        this._content.layout(true);
+    }
+
+    public removeButton(button: DisplayObject): void {
+        const {BUTTON_WIDTH} = ButtonsGroup;
+        const childrenIndex = this._content.children.findIndex((el) => el === button);
+        if (childrenIndex < 0) return;
+        this._content.removeChildAt(childrenIndex);
+        this._background.width = this._content.children.length * BUTTON_WIDTH;
         this._content.layout(true);
     }
 
@@ -153,6 +178,7 @@ export default class Toolbar extends ContainerObject {
     public dynActionTools: GameButton[] = [];
 
     public expandButton: GameButton;
+    public collapseButton: GameButton;
 
     public activeButtons: GameButton[] = [];
     public availableButtons: GameButton[] = [];
@@ -185,6 +211,7 @@ export default class Toolbar extends ContainerObject {
     public middle: Container;
     public backgroundContainer: Container;
     public backgroundContainerBackgroundContainer: Graphics;
+    public text: Text;
 
     constructor(
         type: ToolbarType,
@@ -330,10 +357,10 @@ export default class Toolbar extends ContainerObject {
         this.backgroundContainer = new Container();
 
         this.backgroundContainerBackgroundContainer = new Graphics()
-            .beginFill(0x043468, 1)
+            .beginFill(0x21508C, 1)
             .drawRoundedRect(0, 0, 666, 223, 7)
             .endFill();
-        this.backgroundContainerBackgroundContainer.alpha = 0;
+        this.backgroundContainerBackgroundContainer.visible = false;
 
         this.lowerToolbarContainer = new VLayoutContainer();
         this.backgroundContainer.addChild(this.backgroundContainerBackgroundContainer);
@@ -342,19 +369,24 @@ export default class Toolbar extends ContainerObject {
         this.top = new HLayoutContainer();
         this.middle = new Container();
         const background = new Graphics()
-            .lineStyle(1, 0xFFFFFF, 1)
-            .beginFill(0x043468, 1)
-            .drawRoundedRect(0, 0, 600, 51, 55)
-            .endFill()
             .beginFill(0x043468)
             .drawRoundedRect(0, 0, 600, 51, 7)
             .endFill();
         this.middle.addChild(background);
         this.middle.visible = false;
-        this.middle.alpha = 0;
         this.lowerToolbarContainer.addChild(this.top);
         this.lowerToolbarContainer.addVSpacer(14);
         this.lowerToolbarContainer.addChild(this.middle);
+        // eslint-disable-next-line max-len
+        this.text = new Text('Drag an icon to the right or left above to replace the existing tool, or tap an icon to use it.', {
+            fontSize: 12,
+            fontFamily: Fonts.STDFONT,
+            fill: 0xABC9D8,
+            fontWeight: FontWeight.MEDIUM
+        });
+        this.text.visible = false;
+        this.lowerToolbarContainer.addVSpacer(14);
+        this.lowerToolbarContainer.addChild(this.text);
         this.scrollContainerContainer = new HLayoutContainer(0, VAlign.BOTTOM);
         Assert.assertIsDefined(Flashbang.stageHeight);
         this.scrollContainer = new ScrollContainer(Flashbang.stageWidth, Flashbang.stageHeight);
@@ -413,29 +445,27 @@ export default class Toolbar extends ContainerObject {
         this.expandButton = new GameButton()
             .allStates(Bitmaps.ImgExpandArrow);
         this.addObject(this.expandButton, this._expandButtonContainer);
+        this.collapseButton = new GameButton()
+            .allStates(Bitmaps.ImgCollapseArrow);
+        this.collapseButton.container.visible = false;
+        this.addObject(this.collapseButton, this.lowerToolbarContainer);
+
+        DisplayUtil.positionRelative(
+            this.collapseButton.container, HAlign.CENTER, VAlign.BOTTOM,
+            this.backgroundContainer, HAlign.CENTER, VAlign.BOTTOM,
+            7, -10
+        );
 
         this.regs.add(this.expandButton.clicked.connect(() => {
-            if (this._isExpanded) {
-                this.collapse();
-            } else {
-                this.expand();
-            }
+            if (this._isExpanded) return;
+            this.expand();
             this.updateLayout();
         }));
-
-        // this.actionMenu = new EternaMenu(EternaMenuStyle.PULLUP, true);
-        // this.addObject(this.actionMenu, this.lowerToolbarLayout);
-
-        // this.actionMenu.addMenuButton(new GameButton().allStates(Bitmaps.NovaMenu).disabled(undefined));
-
-        // this.screenshotButton = new GameButton()
-        //     .allStates(Bitmaps.ImgScreenshot)
-        //     .disabled(undefined)
-        //     .label('Screenshot', 14)
-        //     .scaleBitmapToLabel()
-        //     .tooltip('Screenshot');
-        // this.availableButtons.push(this.screenshotButton);
-        // this.actionMenu.addSubMenuButton(0, this.screenshotButton);
+        this.regs.add(this.collapseButton.clicked.connect(() => {
+            if (!this._isExpanded) return;
+            this.collapse();
+            this.updateLayout();
+        }));
 
         this.viewOptionsButton = new GameButton()
             .allStates(Bitmaps.ImgSettings)
@@ -444,106 +474,74 @@ export default class Toolbar extends ContainerObject {
             .scaleBitmapToLabel()
             .tooltip('Game options');
 
-        // this.settingsButton = new ToolbarButton()
-        //     .allStates(Bitmaps.ImgSettings)
-        //     .tooltip('Game options');
-        // this.actionMenu.addSubMenuButton(0, this.viewOptionsButton);
-
-        this.viewSolutionsButton = new GameButton()
+        this.viewSolutionsButton = new ToolbarButton()
             .allStates(Bitmaps.ImgFile)
             .disabled(undefined)
-            .label('Designs', 14)
-            .scaleBitmapToLabel()
             .tooltip('View all submitted designs for this puzzle.');
 
         if (this._type === ToolbarType.LAB || this._type === ToolbarType.FEEDBACK) {
             this.availableButtons.push(this.viewSolutionsButton);
-            // this.addObject(this.viewSolutionsButton, this.middle);
-            // this.actionMenu.addSubMenuButton(0, this.viewSolutionsButton);
+            this.addObject(this.viewSolutionsButton, this.middle);
         }
 
-        this.specButton = new GameButton()
+        this.specButton = new ToolbarButton()
             .allStates(Bitmaps.ImgSpec)
-            .disabled(undefined)
-            .label('Specs', 14)
-            .scaleBitmapToLabel()
             .tooltip("View RNA's melting point, dotplot and other specs")
             .hotkey(KeyCode.KeyS);
 
         if (this._type !== ToolbarType.PUZZLEMAKER && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED) {
             this.availableButtons.push(this.specButton);
-            // this.addObject(this.specButton, this.middle);
-            // this.actionMenu.addSubMenuButton(0, this.specButton);
+            this.addObject(this.specButton, this.middle);
         }
 
         const resetTooltip = this._type === ToolbarType.PUZZLEMAKER || this._type === ToolbarType.PUZZLEMAKER_EMBEDDED
             ? 'Reset all bases to A' : 'Reset and try this puzzle again.';
 
-        this.resetButton = new GameButton()
+        this.resetButton = new ToolbarButton()
             .allStates(Bitmaps.ImgReset)
-            .disabled(undefined)
-            .label('Reset', 14)
-            .scaleBitmapToLabel()
             .tooltip(resetTooltip)
             .rscriptID(RScriptUIElementID.RESET);
 
-        this.copyButton = new GameButton()
+        this.copyButton = new ToolbarButton()
             .allStates(Bitmaps.ImgCopy)
-            .disabled(undefined)
-            .label('Copy', 14)
-            .scaleBitmapToLabel()
             .tooltip('Copy the current sequence');
 
-        this.pasteButton = new GameButton()
+        this.pasteButton = new ToolbarButton()
             .allStates(Bitmaps.ImgPaste)
-            .disabled(undefined)
-            .label('Paste', 14)
-            .scaleBitmapToLabel()
             .tooltip('Type in a sequence');
 
         if (this._type !== ToolbarType.FEEDBACK) {
-            // this.addObject(this.resetButton, this.middle);
-            // this.addObject(this.copyButton, this.middle);
-            // this.addObject(this.pasteButton, this.middle);
+            this.addObject(this.resetButton, this.middle);
+            this.addObject(this.copyButton, this.middle);
+            this.addObject(this.pasteButton, this.middle);
             this.availableButtons.push(this.resetButton);
             this.availableButtons.push(this.copyButton);
             this.availableButtons.push(this.pasteButton);
-            // this.actionMenu.addSubMenuButton(0, this.resetButton);
-            // this.actionMenu.addSubMenuButton(0, this.copyButton);
-            // this.actionMenu.addSubMenuButton(0, this.pasteButton);
         }
 
-        this.nucleotideFindButton = new GameButton()
+        this.nucleotideFindButton = new ToolbarButton()
             .allStates(Bitmaps.ImgFind)
             .disabled()
-            .label('Jump to Nucleotide', 14)
-            .scaleBitmapToLabel()
             .tooltip('Type a nucleotide index to put it in the center of the screen (j)')
             .hotkey(KeyCode.KeyJ);
 
+        this.addObject(this.nucleotideFindButton, this.middle);
         this.availableButtons.push(this.nucleotideFindButton);
-        // this.actionMenu.addSubMenuButton(0, this.nucleotideFindButton);
 
-        this.nucleotideRangeButton = new GameButton()
+        this.nucleotideRangeButton = new ToolbarButton()
             .allStates(Bitmaps.NovaPuzzleImg)
-            .disabled()
-            .label('View Nucleotide Range', 14)
-            .scaleBitmapToLabel()
             .tooltip('Enter a nucleotide range to view (v)')
             .hotkey(KeyCode.KeyV);
 
         this.availableButtons.push(this.nucleotideRangeButton);
-        // this.actionMenu.addSubMenuButton(0, this.nucleotideRangeButton);
 
-        this.explosionFactorButton = new GameButton()
+        this.explosionFactorButton = new ToolbarButton()
             .allStates(Bitmaps.ImgFlare)
             .disabled()
-            .label('Explosion Factor', 14)
-            .scaleBitmapToLabel()
             .tooltip('Set explosion factor ([, ])');
 
+        // this.addObject(this.explosionFactorButton, this.middle);
         this.availableButtons.push(this.explosionFactorButton);
-        // this.actionMenu.addSubMenuButton(0, this.explosionFactorButton);
 
         this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters).disabled(undefined);
 
@@ -560,81 +558,59 @@ export default class Toolbar extends ContainerObject {
         //     }
         // }
 
-        this.moveButton = new GameButton()
+        this.moveButton = new ToolbarButton()
             .allStates(Bitmaps.CustomLayout)
             .disabled(undefined)
-            .label('Move', 14)
-            .scaleBitmapToLabel()
             .tooltip('Move a nucleotide or stem by ctrl-shift-click');
 
-        this.rotateStemButton = new GameButton()
+        this.rotateStemButton = new ToolbarButton()
             .allStates(Bitmaps.CustomLayout)
             .disabled(undefined)
-            .label('Rotate stem', 14)
-            .scaleBitmapToLabel()
             .tooltip('Rotate stem clockwise 1/4 turn by ctrl-shift-click');
 
-        this.flipStemButton = new GameButton()
+        this.flipStemButton = new ToolbarButton()
             .allStates(Bitmaps.CustomLayout)
             .disabled(undefined)
-            .label('Flip stem', 14)
-            .scaleBitmapToLabel()
             .tooltip('Flip stem by ctrl-shift-click');
 
-        this.snapToGridButton = new GameButton()
+        this.snapToGridButton = new ToolbarButton()
             .allStates(Bitmaps.CustomLayout)
             .disabled(undefined)
-            .label('Snap to grid', 14)
-            .scaleBitmapToLabel()
             .tooltip('Snap current layout to a grid');
 
-        this.downloadHKWSButton = new GameButton()
+        this.downloadHKWSButton = new ToolbarButton()
             .allStates(Bitmaps.CustomLayout)
             .disabled(undefined)
-            .label('Download HKWS format', 14)
-            .scaleBitmapToLabel()
             .tooltip('Download a draw_rna input file for the current layout');
 
-        this.downloadSVGButton = new GameButton()
+        this.downloadSVGButton = new ToolbarButton()
             .allStates(Bitmaps.CustomLayout)
             .disabled(undefined)
-            .label('Download SVG format', 14)
-            .scaleBitmapToLabel()
             .tooltip('Download an SVG of the current RNA layout');
 
-        // if (this._showAdvancedMenus) {
-        //     const alterMenuIdx = this.actionMenu.addMenuButton(
-        //         new GameButton().allStates(Bitmaps.CustomLayout).disabled(undefined)
-        //     );
-
-        //     this.actionMenu.addSubMenuButton(alterMenuIdx, this.moveButton);
-        //     this.actionMenu.addSubMenuButton(alterMenuIdx, this.rotateStemButton);
-        //     this.actionMenu.addSubMenuButton(alterMenuIdx, this.flipStemButton);
-        //     this.actionMenu.addSubMenuButton(alterMenuIdx, this.snapToGridButton);
-        //     this.actionMenu.addSubMenuButton(alterMenuIdx, this.downloadHKWSButton);
-        //     this.actionMenu.addSubMenuButton(alterMenuIdx, this.downloadSVGButton);
-        // }
+        if (this._showAdvancedMenus) {
+            // this.addObject(this.moveButton, this.middle);
+            // this.addObject(this.rotateStemButton, this.middle);
+            // this.addObject(this.flipStemButton, this.middle);
+            // this.addObject(this.snapToGridButton, this.middle);
+            // this.addObject(this.downloadHKWSButton, this.middle);
+            // this.addObject(this.downloadSVGButton, this.middle);
+        }
 
         if (this._type === ToolbarType.LAB) {
             this.submitButton.tooltip('Publish your solution!');
-            this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
-            this.addObject(this.submitButton, this.lowerToolbarLayout);
+            this.addObject(this.submitButton, this.middle);
         }
 
-        this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
-
         this.freezeButton = new ToolbarButton()
-            .up(Bitmaps.ImgFreeze)
-            .over(Bitmaps.ImgFreezeOver)
-            .down(Bitmaps.ImgFreezeSelected)
+            .allStates(Bitmaps.ImgFreeze)
             .tooltip('Frozen mode. Suspends/resumes folding engine calculations.')
             .hotkey(KeyCode.KeyF)
             .rscriptID(RScriptUIElementID.FREEZE);
 
         if (this._type === ToolbarType.LAB || this._type === ToolbarType.PUZZLE) {
             this.availableButtons.push(this.freezeButton);
-            // this.addObject(this.freezeButton, this.lowerToolbarLayout);
-            // this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
+            this.addObject(this.freezeButton, this.middle);
             this.freezeButton.display.visible = Eterna.settings.freezeButtonAlwaysVisible.value;
             this.regs.add(Eterna.settings.freezeButtonAlwaysVisible.connect((visible) => {
                 this.freezeButton.display.visible = visible;
@@ -642,10 +618,8 @@ export default class Toolbar extends ContainerObject {
             }));
         }
 
-        this.pipButton = new GameButton()
-            .up(Bitmaps.ImgPip)
-            .over(Bitmaps.ImgPipOver)
-            .down(Bitmaps.ImgPipHit)
+        this.pipButton = new ToolbarButton()
+            .allStates(Bitmaps.ImgPip)
             .tooltip('Set PiP mode')
             .hotkey(KeyCode.KeyP)
             .rscriptID(RScriptUIElementID.PIP);
@@ -655,60 +629,34 @@ export default class Toolbar extends ContainerObject {
             && this._type !== ToolbarType.PUZZLEMAKER && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED
         ) {
             this.availableButtons.push(this.pipButton);
-            // this.addObject(this.pipButton, this.lowerToolbarLayout);
-            // this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
+            this.addObject(this.pipButton, this.middle);
         }
 
         this.naturalButton = new ToolbarButton()
-            .up(Bitmaps.ImgNative)
-            .over(Bitmaps.ImgNativeOver)
-            .down(Bitmaps.ImgNativeSelected)
-            .selected(Bitmaps.ImgNativeSelected)
+            .allStates(Bitmaps.ImgNative)
             .tooltip('Natural Mode. RNA folds into the most stable shape.')
             .rscriptID(RScriptUIElementID.TOGGLENATURAL);
 
-        this.naturalButton.container.interactive = true;
-        this.naturalButton.container.buttonMode = true;
-
-        // this.naturalButton.pointerDown.connect((e: InteractionEvent) => {
-        //     console.log(e);
-        // });
-
-        // this.naturalButton.pointerDown.connect((e: InteractionEvent) => this.onPointerDown(e));
-        // this.naturalButton.pointerUp.connect((e: InteractionEvent) => this.onPointerUp(e));
-        // this.naturalButton.pointerMove.connect((e: InteractionEvent) => {
-        //     console.log(e);
-        // });
-
         this.estimateButton = new ToolbarButton()
-            .up(Bitmaps.ImgEstimate)
-            .over(Bitmaps.ImgEstimateOver)
-            .down(Bitmaps.ImgEstimateSelected)
-            .selected(Bitmaps.ImgEstimateSelected)
+            .allStates(Bitmaps.ImgEstimate)
             .tooltip('Estimate Mode. The game approximates how the RNA actually folded in a test tube.');
 
         this.targetButton = new ToolbarButton()
-            .up(Bitmaps.ImgTarget)
-            .over(Bitmaps.ImgTargetOver)
-            .down(Bitmaps.ImgTargetSelected)
-            .selected(Bitmaps.ImgTargetSelected)
+            .allStates(Bitmaps.ImgTarget)
             .tooltip('Target Mode. RNA freezes into the desired shape.')
             .rscriptID(RScriptUIElementID.TOGGLETARGET);
 
         if (this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED) {
             if (this._type !== ToolbarType.FEEDBACK) {
                 this.availableButtons.push(this.naturalButton);
-                this.addNamedObject('naturalButton', this.naturalButton, this.middle);
-                // this.addObject(this.naturalButton, this.lowerToolbarLayout);
+                this.addObject(this.naturalButton, this.middle);
             } else {
                 this.availableButtons.push(this.estimateButton);
                 this.addObject(this.estimateButton, this.middle);
-                // this.addObject(this.estimateButton, this.lowerToolbarLayout);
             }
 
             this.availableButtons.push(this.targetButton);
             this.addObject(this.targetButton, this.middle);
-            // this.addObject(this.targetButton, this.lowerToolbarLayout);
         }
 
         this.letterColorButton = new ToolbarButton()
@@ -726,17 +674,13 @@ export default class Toolbar extends ContainerObject {
             .tooltip('Color sequences based on experimental data.');
 
         if (this._type === ToolbarType.FEEDBACK) {
-            // this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
-
             this.letterColorButton.toggled.value = false;
             this.availableButtons.push(this.letterColorButton);
             this.addObject(this.letterColorButton, this.middle);
-            // this.addObject(this.letterColorButton, this.lowerToolbarLayout);
 
             this.expColorButton.toggled.value = true;
             this.availableButtons.push(this.expColorButton);
             this.addObject(this.expColorButton, this.middle);
-            // this.addObject(this.expColorButton, this.lowerToolbarLayout);
         }
 
         this.palette = new NucleotidePalette();
@@ -746,10 +690,7 @@ export default class Toolbar extends ContainerObject {
         }));
 
         this.pairSwapButton = new ToolbarButton()
-            .up(Bitmaps.ImgSwap)
-            .over(Bitmaps.ImgSwapOver)
-            .down(Bitmaps.ImgSwap)
-            .hotkey(KeyCode.Digit5)
+            .allStates(Bitmaps.ImgSwap)
             .tooltip('Swap paired bases.')
             .rscriptID(RScriptUIElementID.SWAP);
 
@@ -764,23 +705,17 @@ export default class Toolbar extends ContainerObject {
             .tooltip('Game options');
         this.undoButton = new GameButton()
             .allStates(Bitmaps.ImgUndo)
-            // .over(Bitmaps.ImgUndoOver)
-            // .down(Bitmaps.ImgUndoHit)
             .tooltip('Undo')
             .hotkey(KeyCode.KeyZ)
             .rscriptID(RScriptUIElementID.UNDO);
 
         this.redoButton = new GameButton()
             .allStates(Bitmaps.ImgRedo)
-            // .over(Bitmaps.ImgRedoOver)
-            // .down(Bitmaps.ImgRedoHit)
             .tooltip('Redo')
             .hotkey(KeyCode.KeyY)
             .rscriptID(RScriptUIElementID.REDO);
 
         if (this._type !== ToolbarType.FEEDBACK) {
-            // this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
-
             this.leftButtonsGroup = new ButtonsGroup([this.settingsButton, this.screenshotButton]);
             this.rightButtonsGroup = new ButtonsGroup([this.undoButton, this.redoButton]);
             this.addObject(this.leftButtonsGroup, this.top);
@@ -790,12 +725,8 @@ export default class Toolbar extends ContainerObject {
             this.addObject(this.rightButtonsGroup, this.top);
             this.palette.changeDefaultMode();
 
-            // this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
-
             this.availableButtons.push(this.pairSwapButton);
             this.addObject(this.pairSwapButton, this.middle);
-            // this.middle.addChild(this.pairSwapButton.display);
-            // this.addObject(this.pairSwapButton, this.lowerToolbarLayout);
 
             this.regs.add(this.pairSwapButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
@@ -805,7 +736,6 @@ export default class Toolbar extends ContainerObject {
             if (this._boostersData != null && this._boostersData.paint_tools != null) {
                 const mode: PoseEditMode = this.mode as PoseEditMode;
                 const boosterPaintToolsLayout = new HLayoutContainer();
-                this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
                 this.lowerToolbarLayout.addChild(boosterPaintToolsLayout);
                 for (const data of this._boostersData.paint_tools) {
                     Booster.create(mode, data).then((booster) => {
@@ -823,8 +753,6 @@ export default class Toolbar extends ContainerObject {
             }
         }
 
-        // this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
-
         if (!Eterna.MOBILE_APP) {
             this.zoomInButton = new GameButton()
                 .up(Bitmaps.ImgZoomIn)
@@ -834,7 +762,7 @@ export default class Toolbar extends ContainerObject {
                 .tooltip('Zoom in')
                 .hotkey(KeyCode.Equal)
                 .rscriptID(RScriptUIElementID.ZOOMIN);
-            // this.addObject(this.zoomInButton, this.lowerToolbarLayout);
+            this.addObject(this.zoomInButton, this.middle);
 
             this.zoomOutButton = new GameButton()
                 .up(Bitmaps.ImgZoomOut)
@@ -844,42 +772,16 @@ export default class Toolbar extends ContainerObject {
                 .tooltip('Zoom out')
                 .hotkey(KeyCode.Minus)
                 .rscriptID(RScriptUIElementID.ZOOMOUT);
-            // this.addObject(this.zoomOutButton, this.lowerToolbarLayout);
-
-            // this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
+            this.addObject(this.zoomOutButton, this.middle);
         }
 
-        // this.undoButton = new GameButton()
-        //     .up(Bitmaps.ImgUndo)
-        //     .over(Bitmaps.ImgUndoOver)
-        //     .down(Bitmaps.ImgUndoHit)
-        //     .tooltip('Undo')
-        //     .hotkey(KeyCode.KeyZ)
-        //     .rscriptID(RScriptUIElementID.UNDO);
-
-        // this.redoButton = new GameButton()
-        //     .up(Bitmaps.ImgRedo)
-        //     .over(Bitmaps.ImgRedoOver)
-        //     .down(Bitmaps.ImgRedoHit)
-        //     .tooltip('Redo')
-        //     .hotkey(KeyCode.KeyY)
-        //     .rscriptID(RScriptUIElementID.REDO);
-
-        if (this._type !== ToolbarType.FEEDBACK) {
-            // this.addObject(this.undoButton, this.lowerToolbarLayout);
-            // this.addObject(this.redoButton, this.lowerToolbarLayout);
-        }
-
-        // this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
         this.baseMarkerButton = new ToolbarButton()
-            .up(Bitmaps.ImgBaseMarker)
-            .over(Bitmaps.ImgBaseMarkerOver)
-            .down(Bitmaps.ImgBaseMarker)
+            .allStates(Bitmaps.ImgBaseMarker)
             .tooltip('Mark bases (hold ctrl)');
 
         if (this.type !== ToolbarType.FEEDBACK) {
             this.availableButtons.push(this.baseMarkerButton);
-            // this.addObject(this.baseMarkerButton, this.lowerToolbarLayout);
+            this.addObject(this.baseMarkerButton, this.middle);
         }
 
         this.regs.add(this.baseMarkerButton.clicked.connect(() => {
@@ -894,9 +796,8 @@ export default class Toolbar extends ContainerObject {
             .tooltip('Select bases to randomize');
 
         if (this._showLibrarySelect) {
-            // this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
             this.availableButtons.push(this.librarySelectionButton);
-            // this.addObject(this.librarySelectionButton, this.lowerToolbarLayout);
+            this.addObject(this.librarySelectionButton, this.middle);
 
             this.regs.add(this.librarySelectionButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
@@ -904,17 +805,14 @@ export default class Toolbar extends ContainerObject {
             }));
         }
 
-        // this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
         this.magicGlueButton = new ToolbarButton()
             .up(Bitmaps.ImgMagicGlue)
             .over(Bitmaps.ImgMagicGlueOver)
             .down(Bitmaps.ImgMagicGlue)
             .tooltip('Magic glue - change target structure in purple areas (hold alt)');
         if (this._showGlue) {
-            // this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
-            // this.addObject(this.magicGlueButton, this.lowerToolbarLayout);
+            this.addObject(this.magicGlueButton, this.middle);
             this.availableButtons.push(this.magicGlueButton);
-            // this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
         }
 
         this.regs.add(this.magicGlueButton.clicked.connect(() => {
@@ -961,9 +859,8 @@ export default class Toolbar extends ContainerObject {
 
         if (this._type === ToolbarType.PUZZLEMAKER) {
             this.submitButton.tooltip('Publish your puzzle!');
-            // this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
             this.availableButtons.push(this.submitButton);
-            // this.addObject(this.submitButton, this.lowerToolbarLayout);
+            this.addObject(this.submitButton, this.middle);
         }
 
         this.rightArrow = this.makeArrowButton('right');
@@ -1009,62 +906,124 @@ export default class Toolbar extends ContainerObject {
         this._setupToolbarDrag();
     }
 
+    private _updateAvailableButtonsContainer(): void {
+        let offset = 0;
+        for (const child of this.middle.children) {
+            if (!child.buttonMode || !child.visible) continue;
+            const bounds = child.getLocalBounds();
+            child.x = offset;
+            child.y = 0;
+            offset += bounds.width;
+        }
+    }
+
     private onDragStart(e: InteractionEvent): void {
+        e.stopPropagation();
         if (!e.target.buttonMode) return;
+        if (this._isDragging || !this._isExpanded) return;
+        if (DisplayUtil.hitTest(this.leftButtonsGroup.container, e.data.global)) {
+            this._startPointContainer = this.leftButtonsGroup._content;
+        }
+        if (DisplayUtil.hitTest(this.rightButtonsGroup.container, e.data.global)) {
+            this._startPointContainer = this.rightButtonsGroup._content;
+        }
+        if (DisplayUtil.hitTest(this.middle, e.data.global)) {
+            this._startPointContainer = this.middle;
+        }
+
+        if (!this._startPointContainer) return;
+        if (this._startPointContainer.children.length <= 1) return;
+
         this._isDragging = true;
+        this._startPoint = new Point(e.target.position.x, e.target.position.y);
         this._draggingElement = e.target;
-        this._startPoint = e.data.global;
+        this._draggingElement.zIndex = 999;
     }
 
     private onDragEnd(e: InteractionEvent): void {
+        e.stopPropagation();
         this._isDragging = false;
+        if (!this._draggingElement || !this._isExpanded || !this._startPoint || !this._startPointContainer) return;
+        if (
+            this._startPoint?.x === e.data.global.x
+            && this._startPoint?.y === e.data.global.y
+        ) return;
         const leftButtonsBounds = this.leftButtonsGroup.container.getBounds();
         const rightButtonsBounds = this.rightButtonsGroup.container.getBounds();
-
-        if (!this._draggingElement) return;
+        const availableButtonsBounds = this.middle.getBounds();
 
         if (
             !leftButtonsBounds.contains(e.data.global.x, e.data.global.y)
-            && !rightButtonsBounds.contains(e.data.global.x, e.data.global.y)) {
-            this._draggingElement.position.set(this._startPoint?.x, this._startPoint?.y);
+            && !rightButtonsBounds.contains(e.data.global.x, e.data.global.y)
+            && !availableButtonsBounds.contains(e.data.global.x, e.data.global.y)
+        ) {
+            this._draggingElement.position.copyFrom(this._startPoint);
+            this._draggingElement = null;
             this._startPoint = null;
             return;
         }
 
         if (leftButtonsBounds.contains(e.data.global.x, e.data.global.y)) {
-            if (this.leftButtonsGroup._content.children.length >= 3) return;
-            const childrenIndex = this.middle.children.findIndex((el) => el === this._draggingElement);
-            this.middle.children.splice(childrenIndex, 1);
-            if (this._draggingElement) {
-                this.leftButtonsGroup.addButton(this._draggingElement);
-                this.leftButtonsGroup.forceLayout();
+            if (this.leftButtonsGroup._content.children.length >= 3) {
+                this._draggingElement.position.copyFrom(this._startPoint);
+                this._draggingElement = null;
+                this._startPoint = null;
+                this._startPointContainer = null;
+                this.updateLayout();
+                return;
             }
+            const childIndex = this._startPointContainer.children.findIndex((el) => el === this._draggingElement);
+            this._startPointContainer.children.splice(childIndex, 1);
+            this.leftButtonsGroup.addButton(this._draggingElement);
+            this.leftButtonsGroup.forceLayout();
+        } else if (rightButtonsBounds.contains(e.data.global.x, e.data.global.y)) {
+            if (this.rightButtonsGroup._content.children.length >= 3) {
+                this._draggingElement.position.copyFrom(this._startPoint);
+                this._draggingElement = null;
+                this._startPoint = null;
+                this._startPointContainer = null;
+                this.updateLayout();
+                return;
+            }
+            const childIndex = this._startPointContainer.children.findIndex((el) => el === this._draggingElement);
+            this._startPointContainer.children.splice(childIndex, 1);
+            this.rightButtonsGroup.addButton(this._draggingElement);
+            this.rightButtonsGroup.forceLayout();
+        } else if (availableButtonsBounds.contains(e.data.global.x, e.data.global.y)) {
+            if (this._startPointContainer === this.leftButtonsGroup._content) {
+                this.leftButtonsGroup.removeButton(this._draggingElement);
+            }
+            if (this._startPointContainer === this.rightButtonsGroup._content) {
+                this.rightButtonsGroup.removeButton(this._draggingElement);
+            }
+            this.middle.addChild(this._draggingElement);
+            this._updateAvailableButtonsContainer();
+            this.updateLayout();
         }
 
-        if (rightButtonsBounds.contains(e.data.global.x, e.data.global.y)) {
-            if (this.rightButtonsGroup._content.children.length >= 3) return;
-            const childrenIndex = this.middle.children.findIndex((el) => el === this._draggingElement);
-            this.middle.children.splice(childrenIndex, 1);
-            if (this._draggingElement) {
-                this.rightButtonsGroup.addButton(this._draggingElement, true);
-                this.rightButtonsGroup.forceLayout();
-            }
-        }
-        this.lowerToolbarContainer.layout(true);
-        this.lowerToolbarLayout.layout(true);
+        this._updateAvailableButtonsContainer();
+        this._draggingElement = null;
+        this._startPoint = null;
+        this.updateLayout();
     }
 
     private onDragMove(e: InteractionEvent): void {
-        // e.stopPropagation();
+        e.stopPropagation();
+        if (!this._draggingElement || !this._isExpanded) return;
         if (this._isDragging) {
-            this._draggingElement.position.set(e.data.global.x - 200, e.data.global.y - 620);
+            const pos = e.data.getLocalPosition(this.middle);
+            const buttonBounds = this._draggingElement.getLocalBounds();
+            this._draggingElement.position.set(
+                pos.x - Math.floor(buttonBounds.width / 2),
+                pos.y - Math.floor(buttonBounds.height / 2)
+            );
         }
     }
 
     private collapse() {
-        Assert.assertIsDefined(this.backgroundContainer);
         this._isExpanded = false;
-        // this.middle.visible = false;
+        this.collapseButton.container.visible = false;
+        this.expandButton.container.visible = true;
 
         this.removeNamedObjects('test');
         this.addNamedObject(
@@ -1072,49 +1031,52 @@ export default class Toolbar extends ContainerObject {
             new ParallelTask(
                 new LocationTask(
                     0,
-                    150,
-                    0.5, Easing.easeOut, this.backgroundContainer
+                    0,
+                    3, Easing.easeOut, this.lowerToolbarLayout
                 ),
-                new AlphaTask(0, 0.5, Easing.easeOut, this.middle),
-                new AlphaTask(0, 0.5, Easing.easeOut, this.backgroundContainerBackgroundContainer)
+                // new AlphaTask(0, 3, Easing.easeOut, this.middle),
+                new VisibleTask(false, this.middle),
+                // new AlphaTask(0, 3, Easing.easeOut, this.text),
+                new VisibleTask(false, this.text),
+                // new AlphaTask(0, 3, Easing.easeOut, this.backgroundContainerBackgroundContainer),
+                new VisibleTask(false, this.backgroundContainerBackgroundContainer)
             )
-            // new LocationTask(
-            //     this.lowerToolbarContainer.x,
-            //     this.lowerToolbarContainer.y + 100,
-            //     0.5, Easing.easeOut, this.lowerToolbarContainer
-            // )
         );
-        this.middle.visible = false;
+        this.leftButtonsGroup.changeMode(false);
+        this.rightButtonsGroup.changeMode(false);
         this.updateLayout();
     }
 
     private expand() {
-        Assert.assertIsDefined(this.backgroundContainer);
-
         this._isExpanded = true;
-        this.middle.visible = true;
+        this.collapseButton.container.visible = true;
+        this.expandButton.container.visible = false;
+        DisplayUtil.positionRelative(
+            this.collapseButton.container, HAlign.CENTER, VAlign.BOTTOM,
+            this.backgroundContainer, HAlign.CENTER, VAlign.BOTTOM,
+            7, -10
+        );
         this.removeNamedObjects('test');
         this.addNamedObject(
             'test',
             new ParallelTask(
                 new LocationTask(
                     0,
-                    // 50,
                     0,
-                    0.5, Easing.easeOut, this.backgroundContainer
+                    3, Easing.easeOut, this.lowerToolbarLayout
                 ),
-                new AlphaTask(1, 0.5, Easing.easeOut, this.middle),
-                new AlphaTask(1, 0.5, Easing.easeOut, this.backgroundContainerBackgroundContainer)
+                // new AlphaTask(1, 3, Easing.easeOut, this.middle),
+                new VisibleTask(true, this.middle),
+                // new AlphaTask(1, 3, Easing.easeOut, this.text),
+                new VisibleTask(true, this.text),
+                // new AlphaTask(1, 3, Easing.easeOut, this.backgroundContainerBackgroundContainer),
+                new VisibleTask(true, this.backgroundContainerBackgroundContainer)
             )
         );
 
-        let offset = 0;
-        for (const child of this.middle.children) {
-            if (child.constructor.name !== 'Container') continue;
-            const bounds = DisplayUtil.getBoundsRelative(child, this.middle);
-            child.x = offset;
-            offset += bounds.width;
-        }
+        this.leftButtonsGroup.changeMode(true);
+        this.rightButtonsGroup.changeMode(true);
+        this._updateAvailableButtonsContainer();
         this.updateLayout();
     }
 
@@ -1197,14 +1159,20 @@ export default class Toolbar extends ContainerObject {
 
         DisplayUtil.positionRelative(
             this._content, HAlign.CENTER, VAlign.BOTTOM,
-            this._invisibleBackground, HAlign.CENTER, VAlign.BOTTOM
-            // -25, 0
+            this._invisibleBackground, HAlign.CENTER, VAlign.BOTTOM,
+            -25, 0
         );
 
         DisplayUtil.positionRelative(
             this.lowerToolbarContainer, HAlign.CENTER, VAlign.TOP,
             this.backgroundContainer, HAlign.CENTER, VAlign.TOP,
             0, 20
+        );
+
+        DisplayUtil.positionRelative(
+            this.collapseButton.container, HAlign.CENTER, VAlign.BOTTOM,
+            this.backgroundContainer, HAlign.CENTER, VAlign.BOTTOM,
+            7, -10
         );
     }
 
@@ -1379,9 +1347,10 @@ export default class Toolbar extends ContainerObject {
     private _isExpanded: boolean;
     private _isDragging: boolean;
 
-    private _draggingElement: DisplayObject;
+    private _draggingElement: DisplayObject | null;
 
     private _startPoint: Point | null;
+    private _startPointContainer: Container | null;
 
     private _annotationManager: AnnotationManager | undefined;
 }
