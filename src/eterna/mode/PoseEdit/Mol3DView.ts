@@ -17,9 +17,9 @@ export default class Mol3DView {
     colorChangeMap = new Map();
     hoverdInfo = { index: -1, color: 0, outColor: 0 };
     container0: HTMLDivElement;
-    width: number = 800;
-    height: number = 600;
-    top: number = 100;
+    width: number = 230;
+    height: number = 340;
+    top: number = 404;
     right: number = 10;
     minSize: number = 100;
     margin: number = 10;
@@ -263,10 +263,10 @@ export default class Mol3DView {
         if (blurCheckBox) {
             blurCheckBox.addEventListener('change', () => {
                 if (blurCheckBox.checked) {
-                    this.container0.classList.add("ngl-view");
+                    this.container0.classList.add("ngl-view-blur");
                 }
                 else {
-                    this.container0.classList.remove("ngl-view");
+                    this.container0.classList.remove("ngl-view-blur");
                 }
             })
         }
@@ -274,10 +274,11 @@ export default class Mol3DView {
 
         this.container0 = <HTMLDivElement>document.createElement('div');
         this.container0.style.backgroundColor = "rgba(2,35,71,0.6)";//"transparent";//"rgb(2,35,71)";
-        this.container0.classList.add("ngl-view");
+        // this.container0.classList.add("ngl-view");
+        this.container0.classList.add("ngl-view-blur");
 
-        this.container0.style.border = '1px solid #c0c0c0'
-        this.container0.style.borderRadius = '8px'
+        this.container0.style.border = '1px solid rgba(47, 148, 209, 0.9)'
+        this.container0.style.borderRadius = '5px'
         this.container0.style.position = 'absolute';
         this.container0.style.right = this.right + 'px';
         this.container0.style.top = this.top + 'px';

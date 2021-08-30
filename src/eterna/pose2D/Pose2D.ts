@@ -3331,9 +3331,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         if (togglelock || !this.isEditable(seqnum)) return;
 
-        //kkk
-        this.posEditMode?.mol3DView.stage.viewer.selectEBaseObject2(seqnum);
-
         this._coloring = true;
         this._mutatedSequence = this.fullSequence.slice(0);
 
@@ -3380,6 +3377,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         } else if (!this.isLocked(seqnum)) {
             if (this._currentColor >= 1 && this._currentColor <= 4) {
+                //kkk
+                var curColor = this._mutatedSequence.nt(seqnum)
+                this.posEditMode?.mol3DView.stage.viewer.selectEBaseObject2(seqnum, curColor != this._currentColor);
+
                 this._mutatedSequence.setNt(seqnum, this._currentColor);
                 ROPWait.notifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
                 this._bases[seqnum].setType(this._currentColor, true);
