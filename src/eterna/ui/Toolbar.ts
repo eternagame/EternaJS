@@ -839,9 +839,9 @@ export default class Toolbar extends ContainerObject {
             );
 
             if (this._showAdvancedMenus) {
-                // this.addObject(this.annotationPanel, this.mode?.container);
-                // this.addObject(this.annotationModeButton, this.lowerToolbarLayout);
-                // this.addObject(this.annotationPanelButton, this.lowerToolbarLayout);
+                this.addObject(this.annotationPanel, this.mode?.container);
+                this.addObject(this.annotationModeButton, this.lowerToolbarLayout);
+                this.addObject(this.annotationPanelButton, this.lowerToolbarLayout);
 
                 this.regs.add(this.annotationModeButton.clicked.connect(() => {
                     this._deselectAllPaintTools();
@@ -921,6 +921,12 @@ export default class Toolbar extends ContainerObject {
         e.stopPropagation();
         if (!e.target.buttonMode) return;
         if (this._isDragging || !this._isExpanded) return;
+        if (
+            this.settingsButton.container === e.target
+            || this.screenshotButton.container === e.target
+            || this.redoButton.container === e.target
+            || this.undoButton.container === e.target
+        ) return;
         if (DisplayUtil.hitTest(this.leftButtonsGroup.container, e.data.global)) {
             this._startPointContainer = this.leftButtonsGroup._content;
         }
@@ -951,6 +957,10 @@ export default class Toolbar extends ContainerObject {
         const leftButtonsBounds = this.leftButtonsGroup.container.getBounds();
         const rightButtonsBounds = this.rightButtonsGroup.container.getBounds();
         const availableButtonsBounds = this.middle.getBounds();
+        // for some reason the height of the container changes when button is dragging
+        leftButtonsBounds.height = 55;
+        rightButtonsBounds.height = 55;
+        availableButtonsBounds.height = 55;
 
         if (
             !leftButtonsBounds.contains(e.data.global.x, e.data.global.y)
@@ -958,6 +968,7 @@ export default class Toolbar extends ContainerObject {
             && !availableButtonsBounds.contains(e.data.global.x, e.data.global.y)
         ) {
             this._draggingElement.position.copyFrom(this._startPoint);
+            this._draggingElement.interactive = true;
             this._draggingElement = null;
             this._startPoint = null;
             return;
@@ -966,6 +977,7 @@ export default class Toolbar extends ContainerObject {
         if (leftButtonsBounds.contains(e.data.global.x, e.data.global.y)) {
             if (this.leftButtonsGroup._content.children.length >= 3) {
                 this._draggingElement.position.copyFrom(this._startPoint);
+                this._draggingElement.interactive = true;
                 this._draggingElement = null;
                 this._startPoint = null;
                 this._startPointContainer = null;
@@ -979,6 +991,7 @@ export default class Toolbar extends ContainerObject {
         } else if (rightButtonsBounds.contains(e.data.global.x, e.data.global.y)) {
             if (this.rightButtonsGroup._content.children.length >= 3) {
                 this._draggingElement.position.copyFrom(this._startPoint);
+                this._draggingElement.interactive = true;
                 this._draggingElement = null;
                 this._startPoint = null;
                 this._startPointContainer = null;
@@ -990,6 +1003,15 @@ export default class Toolbar extends ContainerObject {
             this.rightButtonsGroup.addButton(this._draggingElement);
             this.rightButtonsGroup.forceLayout();
         } else if (availableButtonsBounds.contains(e.data.global.x, e.data.global.y)) {
+            if (this._startPointContainer === this.middle) {
+                this._draggingElement.position.copyFrom(this._startPoint);
+                this._draggingElement.interactive = true;
+                this._draggingElement = null;
+                this._startPoint = null;
+                this._startPointContainer = null;
+                this.updateLayout();
+                return;
+            }
             if (this._startPointContainer === this.leftButtonsGroup._content) {
                 this.leftButtonsGroup.removeButton(this._draggingElement);
             }
@@ -1002,6 +1024,7 @@ export default class Toolbar extends ContainerObject {
         }
 
         this._updateAvailableButtonsContainer();
+        this._draggingElement.interactive = true;
         this._draggingElement = null;
         this._startPoint = null;
         this.updateLayout();
@@ -1010,8 +1033,9 @@ export default class Toolbar extends ContainerObject {
     private onDragMove(e: InteractionEvent): void {
         e.stopPropagation();
         if (!this._draggingElement || !this._isExpanded) return;
+        this._draggingElement.interactive = false;
         if (this._isDragging) {
-            const pos = e.data.getLocalPosition(this.middle);
+            const pos = e.data.getLocalPosition(this._draggingElement.parent);
             const buttonBounds = this._draggingElement.getLocalBounds();
             this._draggingElement.position.set(
                 pos.x - Math.floor(buttonBounds.width / 2),
