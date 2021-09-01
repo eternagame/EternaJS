@@ -242,6 +242,7 @@ export default class Bitmaps {
     public static readonly ImgScreenshotHit: string = require('assets/NOVA/Camera/screenshot-hit.png');
     public static readonly ImgScreenshotOver: string = require('assets/NOVA/Camera/screenshot-over.png');
     public static readonly ImgScreenshot: string = require('assets/NOVA/Camera/screenshot.png');
+    public static readonly FutureFeature: string = require('assets/NOVA/Camera/future_feature.png');
     public static readonly ImgSettingsHit: string = require('assets/NOVA/Options/settings-over-hit.png');
     public static readonly ImgSettingsOver: string = require('assets/NOVA/Options/settings-over.png');
     public static readonly ImgSettings: string = require('assets/NOVA/Options/settings.png');
@@ -343,6 +344,8 @@ export default class Bitmaps {
     public static readonly RandomBtnOver: string = require('assets/UI/random-btn-over.png');
     public static readonly ImgFlare: string = require('assets/flare-g-big-gray.png');
     public static readonly ImgRing: string = require('assets/icon-ring.png');
+    public static readonly PrevArrow: string = require('assets/NOVA/prev_arrow.png');
+    public static readonly NextArrow: string = require('assets/NOVA/next_arrow.png');
     // Annotations
     public static readonly ImgAnnotationMode: string = require('assets/UI/annotation-mode-btn.png');
     public static readonly ImgAnnotationModeOver: string = require('assets/UI/annotation-mode-btn-over.png');

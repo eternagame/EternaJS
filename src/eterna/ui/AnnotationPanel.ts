@@ -198,9 +198,9 @@ export default class AnnotationPanel extends ContainerObject {
         // Register panel to respond to annotation selection events
         this.registerAnnotationObservers(annotationModels);
 
-        this.doLayout();
-        this._scrollView.doLayout();
-        this._scrollView.updateScrollThumb();
+        // this.doLayout();
+        // this._scrollView.doLayout();
+        // this._scrollView.updateScrollThumb();
 
         const withEdit = this._editButton && this._editButton.isLiveObject;
         const withDelete = this._deleteButton && this._deleteButton.isLiveObject;

@@ -1,5 +1,5 @@
 import {
-    Graphics, Point, Sprite, Container, InteractionEvent, DisplayObject, Text
+    Graphics, Point, Sprite, Container, InteractionEvent, DisplayObject, Text, Rectangle
 } from 'pixi.js';
 import {RegistrationGroup} from 'signals';
 import Eterna from 'eterna/Eterna';
@@ -132,6 +132,7 @@ export default class Toolbar extends ContainerObject {
     public specButton: GameButton;
 
     public settingsButton: GameButton;
+    public futureFeatureButton: GameButton;
 
     public lowerToolbarLayout: HLayoutContainer;
     public scrollContainer: ScrollContainer;
@@ -181,7 +182,6 @@ export default class Toolbar extends ContainerObject {
     public collapseButton: GameButton;
 
     public activeButtons: GameButton[] = [];
-    public availableButtons: GameButton[] = [];
 
     public get position() { return new Point(this._content.x, this._content.y); }
 
@@ -208,7 +208,8 @@ export default class Toolbar extends ContainerObject {
 
     public lowerToolbarContainer: VLayoutContainer;
     public top: HLayoutContainer;
-    public middle: Container;
+    public middle: HLayoutContainer;
+    public middleBg: Graphics;
     public backgroundContainer: Container;
     public backgroundContainerBackgroundContainer: Graphics;
     public text: Text;
@@ -239,6 +240,8 @@ export default class Toolbar extends ContainerObject {
         this._showLibrarySelect = showLibrarySelect;
         this._boostersData = boosters ?? null;
         this._annotationManager = annotationManager;
+        this._scrollStep = 55;
+        this._scrollOffset = 0;
     }
 
     public onResized() {
@@ -366,16 +369,28 @@ export default class Toolbar extends ContainerObject {
         this.backgroundContainer.addChild(this.backgroundContainerBackgroundContainer);
         this.backgroundContainer.addChild(this.lowerToolbarContainer);
         this.lowerToolbarLayout.addChild(this.backgroundContainer);
+
         this.top = new HLayoutContainer();
-        this.middle = new Container();
-        const background = new Graphics()
+        this.middle = new HLayoutContainer();
+        this.middleBg = new Graphics()
             .beginFill(0x043468)
-            .drawRoundedRect(0, 0, 600, 51, 7)
+            .drawRoundedRect(0, 0, 605, 51, 7)
             .endFill();
-        this.middle.addChild(background);
         this.middle.visible = false;
         this.lowerToolbarContainer.addChild(this.top);
         this.lowerToolbarContainer.addVSpacer(14);
+
+        const prevButton = new ToolbarButton()
+            .allStates(Bitmaps.PrevArrow);
+        const nextButton = new ToolbarButton()
+            .allStates(Bitmaps.NextArrow);
+
+        this.addObject(prevButton, this.middle);
+
+        this._scrollContainer = new ScrollContainer(605, 52, 7);
+        this._scrollContainer.content.addChild(this.middleBg);
+        this.addObject(this._scrollContainer, this.middle);
+        this.addObject(nextButton, this.middle);
         this.lowerToolbarContainer.addChild(this.middle);
         // eslint-disable-next-line max-len
         this.text = new Text('Drag an icon to the right or left above to replace the existing tool, or tap an icon to use it.', {
@@ -392,6 +407,21 @@ export default class Toolbar extends ContainerObject {
         this.scrollContainer = new ScrollContainer(Flashbang.stageWidth, Flashbang.stageHeight);
         this._content.addChild(this.scrollContainerContainer);
         this.scrollContainer.container.addChild(this.lowerToolbarLayout);
+
+        this.regs.add(prevButton.clicked.connect(() => {
+            if (this._scrollOffset <= 0) return;
+            this._scrollOffset -= this._scrollOffset < this._scrollStep ? this._scrollOffset : this._scrollStep;
+            this._scrollContainer.setScroll(this._scrollOffset, 0);
+        }));
+
+        this.regs.add(nextButton.clicked.connect(() => {
+            const contentWidth = this._scrollContainer.content.children.length * this._scrollStep;
+            if (contentWidth < this._scrollContainer.content.width) return;
+            if (this._scrollOffset >= this._scrollContainer.maxScrollX) return;
+            const diff = this._scrollContainer.maxScrollX - this._scrollOffset;
+            this._scrollOffset += diff < this._scrollStep ? diff : this._scrollStep;
+            this._scrollContainer.setScroll(this._scrollOffset, 0);
+        }));
 
         DisplayUtil.positionRelative(
             this.lowerToolbarContainer, HAlign.CENTER, VAlign.TOP,
@@ -480,8 +510,7 @@ export default class Toolbar extends ContainerObject {
             .tooltip('View all submitted designs for this puzzle.');
 
         if (this._type === ToolbarType.LAB || this._type === ToolbarType.FEEDBACK) {
-            this.availableButtons.push(this.viewSolutionsButton);
-            this.addObject(this.viewSolutionsButton, this.middle);
+            this._scrollContainer.addObject(this.viewSolutionsButton, this._scrollContainer.content);
         }
 
         this.specButton = new ToolbarButton()
@@ -490,8 +519,7 @@ export default class Toolbar extends ContainerObject {
             .hotkey(KeyCode.KeyS);
 
         if (this._type !== ToolbarType.PUZZLEMAKER && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED) {
-            this.availableButtons.push(this.specButton);
-            this.addObject(this.specButton, this.middle);
+            this._scrollContainer.addObject(this.specButton, this._scrollContainer.content);
         }
 
         const resetTooltip = this._type === ToolbarType.PUZZLEMAKER || this._type === ToolbarType.PUZZLEMAKER_EMBEDDED
@@ -511,12 +539,9 @@ export default class Toolbar extends ContainerObject {
             .tooltip('Type in a sequence');
 
         if (this._type !== ToolbarType.FEEDBACK) {
-            this.addObject(this.resetButton, this.middle);
-            this.addObject(this.copyButton, this.middle);
-            this.addObject(this.pasteButton, this.middle);
-            this.availableButtons.push(this.resetButton);
-            this.availableButtons.push(this.copyButton);
-            this.availableButtons.push(this.pasteButton);
+            this._scrollContainer.addObject(this.resetButton, this._scrollContainer.content);
+            this._scrollContainer.addObject(this.copyButton, this._scrollContainer.content);
+            this._scrollContainer.addObject(this.pasteButton, this._scrollContainer.content);
         }
 
         this.nucleotideFindButton = new ToolbarButton()
@@ -525,23 +550,19 @@ export default class Toolbar extends ContainerObject {
             .tooltip('Type a nucleotide index to put it in the center of the screen (j)')
             .hotkey(KeyCode.KeyJ);
 
-        this.addObject(this.nucleotideFindButton, this.middle);
-        this.availableButtons.push(this.nucleotideFindButton);
+        this._scrollContainer.addObject(this.nucleotideFindButton, this._scrollContainer.content);
 
         this.nucleotideRangeButton = new ToolbarButton()
             .allStates(Bitmaps.NovaPuzzleImg)
             .tooltip('Enter a nucleotide range to view (v)')
             .hotkey(KeyCode.KeyV);
 
-        this.availableButtons.push(this.nucleotideRangeButton);
-
         this.explosionFactorButton = new ToolbarButton()
             .allStates(Bitmaps.ImgFlare)
             .disabled()
             .tooltip('Set explosion factor ([, ])');
 
-        // this.addObject(this.explosionFactorButton, this.middle);
-        this.availableButtons.push(this.explosionFactorButton);
+        // this._scrollContainer.addObject(this.explosionFactorButton, this._scrollContainer.content);
 
         this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters).disabled(undefined);
 
@@ -599,7 +620,7 @@ export default class Toolbar extends ContainerObject {
 
         if (this._type === ToolbarType.LAB) {
             this.submitButton.tooltip('Publish your solution!');
-            this.addObject(this.submitButton, this.middle);
+            this._scrollContainer.addObject(this.submitButton, this._scrollContainer.content);
         }
 
         this.freezeButton = new ToolbarButton()
@@ -609,8 +630,7 @@ export default class Toolbar extends ContainerObject {
             .rscriptID(RScriptUIElementID.FREEZE);
 
         if (this._type === ToolbarType.LAB || this._type === ToolbarType.PUZZLE) {
-            this.availableButtons.push(this.freezeButton);
-            this.addObject(this.freezeButton, this.middle);
+            this._scrollContainer.addObject(this.freezeButton, this._scrollContainer.content);
             this.freezeButton.display.visible = Eterna.settings.freezeButtonAlwaysVisible.value;
             this.regs.add(Eterna.settings.freezeButtonAlwaysVisible.connect((visible) => {
                 this.freezeButton.display.visible = visible;
@@ -628,8 +648,7 @@ export default class Toolbar extends ContainerObject {
             this._states > 1
             && this._type !== ToolbarType.PUZZLEMAKER && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED
         ) {
-            this.availableButtons.push(this.pipButton);
-            this.addObject(this.pipButton, this.middle);
+            this._scrollContainer.addObject(this.pipButton, this._scrollContainer.content);
         }
 
         this.naturalButton = new ToolbarButton()
@@ -648,15 +667,12 @@ export default class Toolbar extends ContainerObject {
 
         if (this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED) {
             if (this._type !== ToolbarType.FEEDBACK) {
-                this.availableButtons.push(this.naturalButton);
-                this.addObject(this.naturalButton, this.middle);
+                this._scrollContainer.addObject(this.naturalButton, this._scrollContainer.content);
             } else {
-                this.availableButtons.push(this.estimateButton);
-                this.addObject(this.estimateButton, this.middle);
+                this._scrollContainer.addObject(this.estimateButton, this._scrollContainer.content);
             }
 
-            this.availableButtons.push(this.targetButton);
-            this.addObject(this.targetButton, this.middle);
+            this._scrollContainer.addObject(this.targetButton, this._scrollContainer.content);
         }
 
         this.letterColorButton = new ToolbarButton()
@@ -675,12 +691,10 @@ export default class Toolbar extends ContainerObject {
 
         if (this._type === ToolbarType.FEEDBACK) {
             this.letterColorButton.toggled.value = false;
-            this.availableButtons.push(this.letterColorButton);
-            this.addObject(this.letterColorButton, this.middle);
+            this._scrollContainer.addObject(this.letterColorButton, this._scrollContainer.content);
 
             this.expColorButton.toggled.value = true;
-            this.availableButtons.push(this.expColorButton);
-            this.addObject(this.expColorButton, this.middle);
+            this._scrollContainer.addObject(this.expColorButton, this._scrollContainer.content);
         }
 
         this.palette = new NucleotidePalette();
@@ -699,7 +713,13 @@ export default class Toolbar extends ContainerObject {
             .tooltip('Screenshot')
             .disabled(undefined);
 
-        this.availableButtons.push(this.screenshotButton);
+        this.futureFeatureButton = new ToolbarButton()
+            .allStates(Bitmaps.FutureFeature)
+            .tooltip('Something')
+            .disabled(undefined);
+
+        this._scrollContainer.addObject(this.screenshotButton, this._scrollContainer.content);
+
         this.settingsButton = new ToolbarButton()
             .allStates(Bitmaps.ImgSettings)
             .tooltip('Game options');
@@ -716,7 +736,7 @@ export default class Toolbar extends ContainerObject {
             .rscriptID(RScriptUIElementID.REDO);
 
         if (this._type !== ToolbarType.FEEDBACK) {
-            this.leftButtonsGroup = new ButtonsGroup([this.settingsButton, this.screenshotButton]);
+            this.leftButtonsGroup = new ButtonsGroup([this.settingsButton, this.futureFeatureButton]);
             this.rightButtonsGroup = new ButtonsGroup([this.undoButton, this.redoButton]);
             this.addObject(this.leftButtonsGroup, this.top);
             this.top.addHSpacer(SPACE_WIDE);
@@ -725,8 +745,7 @@ export default class Toolbar extends ContainerObject {
             this.addObject(this.rightButtonsGroup, this.top);
             this.palette.changeDefaultMode();
 
-            this.availableButtons.push(this.pairSwapButton);
-            this.addObject(this.pairSwapButton, this.middle);
+            this._scrollContainer.addObject(this.pairSwapButton, this._scrollContainer.content);
 
             this.regs.add(this.pairSwapButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
@@ -762,7 +781,7 @@ export default class Toolbar extends ContainerObject {
                 .tooltip('Zoom in')
                 .hotkey(KeyCode.Equal)
                 .rscriptID(RScriptUIElementID.ZOOMIN);
-            this.addObject(this.zoomInButton, this.middle);
+            this._scrollContainer.addObject(this.zoomInButton, this._scrollContainer.content);
 
             this.zoomOutButton = new GameButton()
                 .up(Bitmaps.ImgZoomOut)
@@ -772,7 +791,7 @@ export default class Toolbar extends ContainerObject {
                 .tooltip('Zoom out')
                 .hotkey(KeyCode.Minus)
                 .rscriptID(RScriptUIElementID.ZOOMOUT);
-            this.addObject(this.zoomOutButton, this.middle);
+            this._scrollContainer.addObject(this.zoomOutButton, this._scrollContainer.content);
         }
 
         this.baseMarkerButton = new ToolbarButton()
@@ -780,8 +799,7 @@ export default class Toolbar extends ContainerObject {
             .tooltip('Mark bases (hold ctrl)');
 
         if (this.type !== ToolbarType.FEEDBACK) {
-            this.availableButtons.push(this.baseMarkerButton);
-            this.addObject(this.baseMarkerButton, this.middle);
+            this._scrollContainer.addObject(this.baseMarkerButton, this._scrollContainer.content);
         }
 
         this.regs.add(this.baseMarkerButton.clicked.connect(() => {
@@ -796,8 +814,7 @@ export default class Toolbar extends ContainerObject {
             .tooltip('Select bases to randomize');
 
         if (this._showLibrarySelect) {
-            this.availableButtons.push(this.librarySelectionButton);
-            this.addObject(this.librarySelectionButton, this.middle);
+            this._scrollContainer.addObject(this.librarySelectionButton, this._scrollContainer.content);
 
             this.regs.add(this.librarySelectionButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
@@ -811,8 +828,7 @@ export default class Toolbar extends ContainerObject {
             .down(Bitmaps.ImgMagicGlue)
             .tooltip('Magic glue - change target structure in purple areas (hold alt)');
         if (this._showGlue) {
-            this.addObject(this.magicGlueButton, this.middle);
-            this.availableButtons.push(this.magicGlueButton);
+            this._scrollContainer.addObject(this.magicGlueButton, this._scrollContainer.content);
         }
 
         this.regs.add(this.magicGlueButton.clicked.connect(() => {
@@ -839,9 +855,9 @@ export default class Toolbar extends ContainerObject {
             );
 
             if (this._showAdvancedMenus) {
-                this.addObject(this.annotationPanel, this.mode?.container);
-                this.addObject(this.annotationModeButton, this.lowerToolbarLayout);
-                this.addObject(this.annotationPanelButton, this.lowerToolbarLayout);
+                // this.addObject(this.annotationPanel, this.mode?.container);
+                // this.addObject(this.annotationModeButton, this.lowerToolbarLayout);
+                // this.addObject(this.annotationPanelButton, this.lowerToolbarLayout);
 
                 this.regs.add(this.annotationModeButton.clicked.connect(() => {
                     this._deselectAllPaintTools();
@@ -859,8 +875,7 @@ export default class Toolbar extends ContainerObject {
 
         if (this._type === ToolbarType.PUZZLEMAKER) {
             this.submitButton.tooltip('Publish your puzzle!');
-            this.availableButtons.push(this.submitButton);
-            this.addObject(this.submitButton, this.middle);
+            this._scrollContainer.addObject(this.submitButton, this._scrollContainer.content);
         }
 
         this.rightArrow = this.makeArrowButton('right');
@@ -908,7 +923,7 @@ export default class Toolbar extends ContainerObject {
 
     private _updateAvailableButtonsContainer(): void {
         let offset = 0;
-        for (const child of this.middle.children) {
+        for (const child of this._scrollContainer.content.children) {
             if (!child.buttonMode || !child.visible) continue;
             const bounds = child.getLocalBounds();
             child.x = offset;
@@ -917,13 +932,22 @@ export default class Toolbar extends ContainerObject {
         }
     }
 
+    private resetDragState(): void {
+        if (!this._draggingElement || !this._startPoint) return;
+        this._draggingElement.position.copyFrom(this._startPoint);
+        this._draggingElement.interactive = true;
+        this._draggingElement = null;
+        this._startPoint = null;
+        this._startPointContainer = null;
+    }
+
     private onDragStart(e: InteractionEvent): void {
         e.stopPropagation();
         if (!e.target.buttonMode) return;
         if (this._isDragging || !this._isExpanded) return;
         if (
             this.settingsButton.container === e.target
-            || this.screenshotButton.container === e.target
+            || this.futureFeatureButton.container === e.target
             || this.redoButton.container === e.target
             || this.undoButton.container === e.target
         ) return;
@@ -933,8 +957,8 @@ export default class Toolbar extends ContainerObject {
         if (DisplayUtil.hitTest(this.rightButtonsGroup.container, e.data.global)) {
             this._startPointContainer = this.rightButtonsGroup._content;
         }
-        if (DisplayUtil.hitTest(this.middle, e.data.global)) {
-            this._startPointContainer = this.middle;
+        if (DisplayUtil.hitTest(this._scrollContainer.content, e.data.global)) {
+            this._startPointContainer = this._scrollContainer.content;
         }
 
         if (!this._startPointContainer) return;
@@ -954,13 +978,37 @@ export default class Toolbar extends ContainerObject {
             this._startPoint?.x === e.data.global.x
             && this._startPoint?.y === e.data.global.y
         ) return;
-        const leftButtonsBounds = this.leftButtonsGroup.container.getBounds();
-        const rightButtonsBounds = this.rightButtonsGroup.container.getBounds();
-        const availableButtonsBounds = this.middle.getBounds();
+
+        const leftButtonsRect = this.leftButtonsGroup.container.getBounds();
+        const rightButtonsRect = this.rightButtonsGroup.container.getBounds();
+        const availableButtonsRect = this._scrollContainer.content.getBounds();
+
+        const leftButtonsBounds = new Rectangle(
+            leftButtonsRect.x,
+            leftButtonsRect.y,
+            leftButtonsRect.width,
+            leftButtonsRect.height
+        );
+        const rightButtonsBounds = new Rectangle(
+            rightButtonsRect.x,
+            rightButtonsRect.y,
+            rightButtonsRect.width,
+            rightButtonsRect.height
+        );
+        const availableButtonsBounds = new Rectangle(
+            availableButtonsRect.x,
+            availableButtonsRect.y,
+            availableButtonsRect.width,
+            availableButtonsRect.height
+        );
         // for some reason the height of the container changes when button is dragging
-        leftButtonsBounds.height = 55;
-        rightButtonsBounds.height = 55;
-        availableButtonsBounds.height = 55;
+        leftButtonsBounds.height = 52;
+        rightButtonsBounds.height = 52;
+        availableButtonsBounds.height = 52;
+
+        leftButtonsBounds.width = this.leftButtonsGroup._content.children.length * 55;
+        rightButtonsBounds.width = this.rightButtonsGroup._content.children.length * 55;
+        availableButtonsBounds.width = this._scrollContainer.content.children.length * 55;
 
         if (
             !leftButtonsBounds.contains(e.data.global.x, e.data.global.y)
@@ -976,39 +1024,36 @@ export default class Toolbar extends ContainerObject {
 
         if (leftButtonsBounds.contains(e.data.global.x, e.data.global.y)) {
             if (this.leftButtonsGroup._content.children.length >= 3) {
-                this._draggingElement.position.copyFrom(this._startPoint);
-                this._draggingElement.interactive = true;
-                this._draggingElement = null;
-                this._startPoint = null;
-                this._startPointContainer = null;
+                this.resetDragState();
                 this.updateLayout();
                 return;
             }
             const childIndex = this._startPointContainer.children.findIndex((el) => el === this._draggingElement);
-            this._startPointContainer.children.splice(childIndex, 1);
+            if (this._startPointContainer === this.rightButtonsGroup._content) {
+                this.rightButtonsGroup.removeButton(this._draggingElement);
+            } else {
+                this._startPointContainer.children.splice(childIndex, 1);
+            }
             this.leftButtonsGroup.addButton(this._draggingElement);
             this.leftButtonsGroup.forceLayout();
         } else if (rightButtonsBounds.contains(e.data.global.x, e.data.global.y)) {
             if (this.rightButtonsGroup._content.children.length >= 3) {
-                this._draggingElement.position.copyFrom(this._startPoint);
-                this._draggingElement.interactive = true;
-                this._draggingElement = null;
-                this._startPoint = null;
-                this._startPointContainer = null;
+                this.resetDragState();
                 this.updateLayout();
                 return;
             }
             const childIndex = this._startPointContainer.children.findIndex((el) => el === this._draggingElement);
-            this._startPointContainer.children.splice(childIndex, 1);
+            if (this._startPointContainer === this.leftButtonsGroup._content) {
+                this.leftButtonsGroup.removeButton(this._draggingElement);
+                this.leftButtonsGroup.forceLayout();
+            } else {
+                this._startPointContainer.children.splice(childIndex, 1);
+            }
             this.rightButtonsGroup.addButton(this._draggingElement);
             this.rightButtonsGroup.forceLayout();
         } else if (availableButtonsBounds.contains(e.data.global.x, e.data.global.y)) {
-            if (this._startPointContainer === this.middle) {
-                this._draggingElement.position.copyFrom(this._startPoint);
-                this._draggingElement.interactive = true;
-                this._draggingElement = null;
-                this._startPoint = null;
-                this._startPointContainer = null;
+            if (this._startPointContainer === this._scrollContainer.content) {
+                this.resetDragState();
                 this.updateLayout();
                 return;
             }
@@ -1018,7 +1063,7 @@ export default class Toolbar extends ContainerObject {
             if (this._startPointContainer === this.rightButtonsGroup._content) {
                 this.rightButtonsGroup.removeButton(this._draggingElement);
             }
-            this.middle.addChild(this._draggingElement);
+            this._scrollContainer.content.addChild(this._draggingElement);
             this._updateAvailableButtonsContainer();
             this.updateLayout();
         }
@@ -1174,6 +1219,7 @@ export default class Toolbar extends ContainerObject {
 
         // lowerToolbarLayout isn't a child of another LayoutContainer (since we have the ScrollContainer)
         // so we'll need to play some games to make sure both are updated when their sizes change
+        this._scrollContainer.doLayout();
         this._content.layout(true);
         this.lowerToolbarLayout.layout(true);
         this.lowerToolbarContainer.layout(true);
@@ -1363,6 +1409,8 @@ export default class Toolbar extends ContainerObject {
     private _invisibleBackground: Graphics;
     private _content: VLayoutContainer;
 
+    private _scrollContainer: ScrollContainer;
+
     private _expandButtonContainer: HLayoutContainer;
 
     private _uncollapsedContentLoc: Point;
@@ -1370,6 +1418,9 @@ export default class Toolbar extends ContainerObject {
 
     private _isExpanded: boolean;
     private _isDragging: boolean;
+
+    private _scrollStep: number;
+    private _scrollOffset: number;
 
     private _draggingElement: DisplayObject | null;
 
