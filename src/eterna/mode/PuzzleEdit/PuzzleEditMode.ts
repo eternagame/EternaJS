@@ -7,7 +7,7 @@ import Molecule from 'eterna/pose2D/Molecule';
 import BaseGlow from 'eterna/vfx/BaseGlow';
 import Toolbar, {ToolbarType} from 'eterna/ui/Toolbar';
 import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
-import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
+import EternaSettingsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaSettingsDialog';
 import PoseField from 'eterna/pose2D/PoseField';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
 import Pose2D, {Layout} from 'eterna/pose2D/Pose2D';
@@ -235,7 +235,7 @@ export default class PuzzleEditMode extends GameMode {
             });
         });
 
-        this._toolbar.settingsButton.clicked.connect(() => this.showViewOptionsDialog());
+        this._toolbar.settingsButton.clicked.connect(() => this.showSettingsDialog());
 
         this._toolbar.resetButton.clicked.connect(() => this.promptForReset());
         this._toolbar.submitButton.clicked.connect(() => this.onSubmitPuzzle());
@@ -556,7 +556,7 @@ export default class PuzzleEditMode extends GameMode {
 
         const menu = new ContextMenu({horizontal: false});
 
-        menu.addItem('Preferences').clicked.connect(() => this.showViewOptionsDialog());
+        menu.addItem('Preferences').clicked.connect(() => this.showSettingsDialog());
         menu.addItem('Reset').clicked.connect(() => this.promptForReset());
         menu.addItem('Copy Sequence').clicked.connect(() => this.showCopySequenceDialog());
         menu.addItem('Paste Sequence').clicked.connect(() => this.showPasteSequenceDialog());
@@ -564,8 +564,8 @@ export default class PuzzleEditMode extends GameMode {
         return menu;
     }
 
-    protected showViewOptionsDialog() {
-        const dialog: EternaViewOptionsDialog = new EternaViewOptionsDialog(EternaViewOptionsMode.PUZZLEMAKER);
+    protected showSettingsDialog() {
+        const dialog: EternaSettingsDialog = new EternaSettingsDialog(EternaViewOptionsMode.PUZZLEMAKER);
         this.showDialog(dialog);
     }
 

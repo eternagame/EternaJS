@@ -17,7 +17,7 @@ import Vienna from 'eterna/folding/Vienna';
 import {
     VAlign, HAlign, DisplayUtil, KeyboardEventType, KeyCode, Assert
 } from 'flashbang';
-import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
+import EternaSettingsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaSettingsDialog';
 import SpecBoxDialog from 'eterna/ui/SpecBoxDialog';
 import Folder from 'eterna/folding/Folder';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -102,7 +102,7 @@ export default class FeedbackViewMode extends GameMode {
 
         this._toolbar.screenshotButton.clicked.connect(() => this.postScreenshot(this.createScreenshot()));
         this._toolbar.viewSolutionsButton.clicked.connect(() => this.loadDesignBrowser());
-        this._toolbar.settingsButton.clicked.connect(() => this.showViewOptionsDialog());
+        this._toolbar.settingsButton.clicked.connect(() => this.showSettingsDialog());
         this._toolbar.letterColorButton.clicked.connect(() => this.showBaseColors());
         this._toolbar.expColorButton.clicked.connect(() => this.showExperimentalColors());
         this._toolbar.specButton.clicked.connect(() => this.showSpec());
@@ -304,8 +304,8 @@ export default class FeedbackViewMode extends GameMode {
         );
     }
 
-    private showViewOptionsDialog(): void {
-        this.showDialog(new EternaViewOptionsDialog(EternaViewOptionsMode.LAB));
+    private showSettingsDialog(): void {
+        this.showDialog(new EternaSettingsDialog(EternaViewOptionsMode.LAB));
     }
 
     public onKeyboardEvent(e: KeyboardEvent): void {

@@ -22,7 +22,7 @@ import {
     GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
-import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
+import EternaSettingsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaSettingsDialog';
 import FolderManager from 'eterna/folding/FolderManager';
 import Folder, {MultiFoldResult, CacheKey} from 'eterna/folding/Folder';
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
@@ -249,7 +249,7 @@ export default class PoseEditMode extends GameMode {
         this._toolbar.specButton.clicked.connect(() => this.showSpec());
         this._toolbar.copyButton.clicked.connect(() => this.showCopySequenceDialog());
         this._toolbar.pasteButton.clicked.connect(() => this.showPasteSequenceDialog());
-        this._toolbar.settingsButton.clicked.connect(() => this.showViewOptionsDialog());
+        this._toolbar.settingsButton.clicked.connect(() => this.showSettingsDialog());
         this._toolbar.screenshotButton.clicked.connect(() => this.postScreenshot(this.createScreenshot()));
 
         this._toolbar.pipButton.clicked.connect(() => this.togglePip());
@@ -449,11 +449,11 @@ export default class PoseEditMode extends GameMode {
         return this._constraintsLayer;
     }
 
-    private showViewOptionsDialog(): void {
+    private showSettingsDialog(): void {
         const mode = this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
             ? EternaViewOptionsMode.LAB
             : EternaViewOptionsMode.PUZZLE;
-        this.showDialog(new EternaViewOptionsDialog(mode));
+        this.showDialog(new EternaSettingsDialog(mode));
     }
 
     public set puzzleDefaultMode(defaultMode: PoseState) {
@@ -1537,7 +1537,7 @@ export default class PoseEditMode extends GameMode {
 
         const menu = new ContextMenu({horizontal: false});
 
-        menu.addItem('Preferences').clicked.connect(() => this.showViewOptionsDialog());
+        menu.addItem('Preferences').clicked.connect(() => this.showSettingsDialog());
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
             menu.addItem('Design Browser').clicked.connect(() => this.openDesignBrowserForOurPuzzle());
             menu.addItem('Submit').clicked.connect(() => this.submitCurrentPose());

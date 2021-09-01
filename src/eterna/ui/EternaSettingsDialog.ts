@@ -14,7 +14,7 @@ export enum EternaViewOptionsMode {
     PUZZLE = 0, PUZZLEMAKER, LAB
 }
 
-export default class EternaViewOptionsDialog extends Dialog<void> {
+export default class EternaSettingsDialog extends Dialog<void> {
     constructor(mode: EternaViewOptionsMode) {
         super();
         this._optionsMode = mode;
@@ -28,7 +28,7 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
         const settingsLayout: VLayoutContainer = new VLayoutContainer(15, HAlign.LEFT);
 
         const bind = (setting: Setting<boolean>, name: string) => {
-            this.addObject(EternaViewOptionsDialog.createCheckbox(name, setting), settingsLayout);
+            this.addObject(EternaSettingsDialog.createCheckbox(name, setting), settingsLayout);
         };
 
         bind(Eterna.settings.showNumbers, `Show nucleotide numbers${showShortcuts ? ' (N)' : ''}`);
