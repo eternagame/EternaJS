@@ -374,23 +374,23 @@ export default class Toolbar extends ContainerObject {
         this.middle = new HLayoutContainer();
         this.middleBg = new Graphics()
             .beginFill(0x043468)
-            .drawRoundedRect(0, 0, 605, 51, 7)
+            .drawRoundedRect(0, 0, 605, 52, 7)
             .endFill();
         this.middle.visible = false;
         this.lowerToolbarContainer.addChild(this.top);
         this.lowerToolbarContainer.addVSpacer(14);
 
-        const prevButton = new ToolbarButton()
+        this._scrollPrevButton = new ToolbarButton()
             .allStates(Bitmaps.PrevArrow);
-        const nextButton = new ToolbarButton()
+        this._scrollNextButton = new ToolbarButton()
             .allStates(Bitmaps.NextArrow);
 
-        this.addObject(prevButton, this.middle);
+        this.addObject(this._scrollPrevButton, this.middle);
 
         this._scrollContainer = new ScrollContainer(605, 52, 7);
         this._scrollContainer.content.addChild(this.middleBg);
         this.addObject(this._scrollContainer, this.middle);
-        this.addObject(nextButton, this.middle);
+        this.addObject(this._scrollNextButton, this.middle);
         this.lowerToolbarContainer.addChild(this.middle);
         // eslint-disable-next-line max-len
         this.text = new Text('Drag an icon to the right or left above to replace the existing tool, or tap an icon to use it.', {
@@ -408,19 +408,31 @@ export default class Toolbar extends ContainerObject {
         this._content.addChild(this.scrollContainerContainer);
         this.scrollContainer.container.addChild(this.lowerToolbarLayout);
 
-        this.regs.add(prevButton.clicked.connect(() => {
+        this.regs.add(this._scrollPrevButton.clicked.connect(() => {
             if (this._scrollOffset <= 0) return;
             this._scrollOffset -= this._scrollOffset < this._scrollStep ? this._scrollOffset : this._scrollStep;
             this._scrollContainer.setScroll(this._scrollOffset, 0);
+            const cntr = this._scrollContainer.content.children.reduce((acc, el) => {
+                if (!el.buttonMode || !el.visible) return acc;
+                return acc + 1;
+            }, 0);
+            const newWidth = cntr * this._scrollStep;
+            this.middleBg.width = newWidth < 605 ? 605 : newWidth;
         }));
 
-        this.regs.add(nextButton.clicked.connect(() => {
+        this.regs.add(this._scrollNextButton.clicked.connect(() => {
             const contentWidth = this._scrollContainer.content.children.length * this._scrollStep;
             if (contentWidth < this._scrollContainer.content.width) return;
             if (this._scrollOffset >= this._scrollContainer.maxScrollX) return;
             const diff = this._scrollContainer.maxScrollX - this._scrollOffset;
             this._scrollOffset += diff < this._scrollStep ? diff : this._scrollStep;
             this._scrollContainer.setScroll(this._scrollOffset, 0);
+            const cntr = this._scrollContainer.content.children.reduce((acc, el) => {
+                if (!el.buttonMode || !el.visible) return acc;
+                return acc + 1;
+            }, 0);
+            const newWidth = cntr * this._scrollStep;
+            this.middleBg.width = newWidth < 605 ? 605 : newWidth;
         }));
 
         DisplayUtil.positionRelative(
@@ -579,34 +591,46 @@ export default class Toolbar extends ContainerObject {
         //     }
         // }
 
-        this.moveButton = new ToolbarButton()
+        this.moveButton = new GameButton()
             .allStates(Bitmaps.CustomLayout)
             .disabled(undefined)
+            .label('Move', 14)
+            .scaleBitmapToLabel()
             .tooltip('Move a nucleotide or stem by ctrl-shift-click');
 
-        this.rotateStemButton = new ToolbarButton()
+        this.rotateStemButton = new GameButton()
             .allStates(Bitmaps.CustomLayout)
             .disabled(undefined)
+            .label('Rotate stem', 14)
+            .scaleBitmapToLabel()
             .tooltip('Rotate stem clockwise 1/4 turn by ctrl-shift-click');
 
-        this.flipStemButton = new ToolbarButton()
+        this.flipStemButton = new GameButton()
             .allStates(Bitmaps.CustomLayout)
             .disabled(undefined)
+            .label('Flip stem', 14)
+            .scaleBitmapToLabel()
             .tooltip('Flip stem by ctrl-shift-click');
 
-        this.snapToGridButton = new ToolbarButton()
+        this.snapToGridButton = new GameButton()
             .allStates(Bitmaps.CustomLayout)
             .disabled(undefined)
+            .label('Snap to grid', 14)
+            .scaleBitmapToLabel()
             .tooltip('Snap current layout to a grid');
 
-        this.downloadHKWSButton = new ToolbarButton()
+        this.downloadHKWSButton = new GameButton()
             .allStates(Bitmaps.CustomLayout)
             .disabled(undefined)
+            .label('Download HKWS format', 14)
+            .scaleBitmapToLabel()
             .tooltip('Download a draw_rna input file for the current layout');
 
-        this.downloadSVGButton = new ToolbarButton()
+        this.downloadSVGButton = new GameButton()
             .allStates(Bitmaps.CustomLayout)
             .disabled(undefined)
+            .label('Download SVG format', 14)
+            .scaleBitmapToLabel()
             .tooltip('Download an SVG of the current RNA layout');
 
         if (this._showAdvancedMenus) {
@@ -943,6 +967,7 @@ export default class Toolbar extends ContainerObject {
 
     private onDragStart(e: InteractionEvent): void {
         e.stopPropagation();
+        if (e.target === this._scrollNextButton.container || e.target === this._scrollPrevButton.container) return;
         if (!e.target.buttonMode) return;
         if (this._isDragging || !this._isExpanded) return;
         if (
@@ -1426,6 +1451,9 @@ export default class Toolbar extends ContainerObject {
 
     private _startPoint: Point | null;
     private _startPointContainer: Container | null;
+
+    private _scrollNextButton: GameButton;
+    private _scrollPrevButton: GameButton;
 
     private _annotationManager: AnnotationManager | undefined;
 }
