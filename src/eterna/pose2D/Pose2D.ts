@@ -72,8 +72,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._poseField = poseField;
         this._editable = editable;
 
-        //kkk 
-        // transfer 3D Canvas mouse down event to 2D Canvas
+        //kkk // transfer mouse down event from 3D Canvas to 2D Canvas
         window.addEventListener('kkk', e => {
             var ce = <CustomEvent>e;
             const mouseX: number = ce.detail.clientX;
@@ -98,8 +97,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this.posEditMode.checkCustomEvent(closestDist, closestIndex);
             }
         });
-        //kkk 
-        // transfer 3D mouse move picking result to 2D Canvas and highlight corresponding base.
+        //kkk // transfer 3D mouse move picking result to 2D Canvas and highlight corresponding base.
         window.addEventListener('picking', e => {
             var ce = <CustomEvent>e;
             const closestIndex: number = ce.detail.resno;
@@ -368,7 +366,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public set currentColor(col: RNAPaint) {
         this._currentColor = col;
-        //kkk
+        //kkk //syncronize the color change by 2D with 3D
         this.posEditMode.mol3DView.stage.viewer.setBaseColor(this.posEditMode.mol3DView.getBaseColor(col));
     }
 
@@ -1184,8 +1182,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         if (closestIndex >= 0 && this._currentColor >= 0) {
-            //kkk 
-            // transfer mouse hover result to 3DView 
+            //kkk //transfer mouse hover result from 2D to 3DView 
             this.posEditMode?.mouseHovered(closestIndex + 1, this._currentColor);
 
             this.onBaseMouseMove(closestIndex);
@@ -1210,8 +1207,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         } else {
             this._lastColoredIndex = -1;
-            //kkk
-            // transfer mouse hover result to 3DView 
+            //kkk // transfer mouse hover result from 2D to 3DView 
             this.posEditMode?.mouseHovered(-1, 0);
         }
 
@@ -1220,8 +1216,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    //kkk
-    // transfer the mouse picking result of 3DView to 2D canvas 
+    //kkk // transfer the mouse picking result from 3DView to 2D canvas 
     public on3DPickingMouseMoved(closestIndex: number): void {
         if (!this._coloring) {
             this.clearMouse();

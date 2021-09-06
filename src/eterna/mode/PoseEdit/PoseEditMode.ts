@@ -154,7 +154,7 @@ export default class PoseEditMode extends GameMode {
 
         console.log('here', puzzle)
 
-        this.mol3DView = new Mol3DView(this);
+        this.mol3DView = new Mol3DView(this, puzzle);
         this.mol3DView.showScreen(false);
     }
 
@@ -191,6 +191,21 @@ export default class PoseEditMode extends GameMode {
             onThreeClicked: () => this.onThreeClicked(), //kkk add 3DModel View button
             onChatClicked: () => {
                 Eterna.settings.showChat.value = !Eterna.settings.showChat.value;
+
+                //kkk //set chat window position according to 3DView
+                if (Eterna.settings.showChat.value) {
+                    var molPos = this.mol3DView.get3DContainerPosition();
+                    var chatPos = Eterna.chat.getPosition();
+                    if (chatPos != null) {
+                        if (molPos.right > chatPos.right + chatPos.width) {
+                            Eterna.chat.setPosition(60);
+                        }
+                        else
+                            Eterna.chat.setPosition(molPos.top + molPos.height + 4);
+                    }
+                    else
+                        Eterna.chat.setPosition(molPos.top + molPos.height + 4);
+                }
             },
             onInfoClicked: this._params.initSolution ? () => {
                 if (this._solutionView) {
@@ -595,8 +610,7 @@ export default class PoseEditMode extends GameMode {
         }));
     }
 
-    //kkk
-    // process 3DViewButton click event
+    //kkk // process 3DViewButton click event
     private onThreeClicked(): void {
         this.mol3DView.showScreen(!this.mol3DView.getVisibleState());
     }
@@ -695,16 +709,13 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    //kkk
-    //Extend the mouse hover of 2DPos canvas to 3D canvas
+    //kkk //transfer the mouse hover from 2D to 3D 
     public mouseHovered(index: number, color: number) {
         this.mol3DView.mouseHovered(index, color);
     }
 
-    //kkk
-    //Transfer the mouse down evwnt of 3D canvas to 2D canvas so that implement mouse event transparency.
+    //kkk //Transfer the mouse down evwnt from 3D to 2D so that implement mouse event transparency.
     public checkCustomEvent(_closestDist: number, closestIndex: number) {
-        // console.log(this._poseFields.length);
         for (let ii = 0; ii < this._poseFields.length; ++ii) {
             const poseField: PoseField = this._poseFields[ii];
             const poseToNotify: Pose2D = poseField.pose;
@@ -2367,6 +2378,7 @@ export default class PoseEditMode extends GameMode {
             this._exitButton.addObject(new AlphaTask(1, 0.3));
 
             this._helpBar.display.visible = true;
+            console.log('xxxxxxxxxxxxx');
         };
 
         if (hasNextPuzzle) {
@@ -2512,7 +2524,8 @@ export default class PoseEditMode extends GameMode {
             missionText,
             this._targetPairs,
             introConstraintBoxes,
-            customLayout
+            customLayout,
+            this.mol3DView
         ));
     }
 
@@ -3185,7 +3198,7 @@ export default class PoseEditMode extends GameMode {
         } else {
             execfoldCB(null);
         }
-        //kkk
+        //kkk //make the change of sequence of bases from 2D to be synchronize in 3D 
         this.mol3DView.updateSequence(this.getSequence());
     }
 
@@ -3455,6 +3468,7 @@ export default class PoseEditMode extends GameMode {
 
                 Eterna.client.updateSolutionFoldData(sol.nodeID, fd).then((datastring: string) => {
                     log.debug(datastring);
+                    console.log(datastring);
                 });
             }
         }

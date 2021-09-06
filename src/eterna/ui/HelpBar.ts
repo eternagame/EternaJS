@@ -21,8 +21,7 @@ export default class HelpBar extends ContainerObject {
 
         const { theme } = HelpBar;
 
-        //kkk
-        //set 3DView button
+        //kkk //set 3DView button
         const threeButton = new GameButton()
             .up(Bitmaps.ImgThreeScreen)
             .over(Bitmaps.ImgThreeScreenOver)

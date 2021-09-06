@@ -15,11 +15,13 @@ import BitmapManager from 'eterna/resources/BitmapManager';
 import MissionIntroPanel from 'eterna/ui/MissionIntroPanel';
 import UITheme from 'eterna/ui/UITheme';
 import SecStruct from 'eterna/rnatypes/SecStruct';
+import Mol3DView from './Mol3DView';
 
 export default class MissionIntroMode extends AppMode {
+    private readonly _mol3DView: PoseEditMode; //kkk
     constructor(
         puzzleName: string, puzzleDescription: string, puzzleThumbnails: SecStruct[], constraintBoxes: ConstraintBox[],
-        customLayout: Array<[number, number] | [null, null]> | null = null
+        customLayout: Array<[number, number] | [null, null]> | null = null, mol3DView: Mol3DView
     ) {
         super();
         this._puzzleName = puzzleName;
@@ -27,6 +29,7 @@ export default class MissionIntroMode extends AppMode {
         this._puzzleThumbnails = puzzleThumbnails;
         this._constraintBoxes = constraintBoxes;
         this._customLayout = customLayout;
+        this._mol3DView = mol3DView;
     }
 
     protected setup(): void {
@@ -62,9 +65,9 @@ export default class MissionIntroMode extends AppMode {
         homeButton.clicked.connect(() => {
             if (Eterna.MOBILE_APP) {
                 Assert.assertIsDefined(window.frameElement);
-                window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
+                window.frameElement.dispatchEvent(new CustomEvent('navigate', { detail: '/' }));
             } else {
-                window.location.href = EternaURL.createURL({page: 'home'});
+                window.location.href = EternaURL.createURL({ page: 'home' });
             }
         });
         this.addObject(homeButton, this.container);
@@ -93,7 +96,7 @@ export default class MissionIntroMode extends AppMode {
         this.addObject(missionIntroPanel, this.container);
 
         const updateLayout = () => {
-            const {headerHeight} = UITheme.missionIntro;
+            const { headerHeight } = UITheme.missionIntro;
 
             Assert.assertIsDefined(Flashbang.stageWidth);
             Assert.assertIsDefined(Flashbang.stageHeight);
@@ -117,8 +120,8 @@ export default class MissionIntroMode extends AppMode {
                 Math.min(
                     Flashbang.stageWidth - playButton.container.width - 27,
                     missionIntroPanel.container.x
-                        + missionIntroPanel.size.x
-                        - (this._constraintBoxes.length > 0 ? playButton.container.width : 0)
+                    + missionIntroPanel.size.x
+                    - (this._constraintBoxes.length > 0 ? playButton.container.width : 0)
                 ),
                 Math.min(
                     Flashbang.stageHeight - 27 - playButton.container.height,
@@ -145,6 +148,8 @@ export default class MissionIntroMode extends AppMode {
             this._closed = true;
             Assert.assertIsDefined(this.modeStack);
             this.modeStack.popMode();
+            //kkk
+            this._mol3DView.showScreen(true);
         }
     }
 

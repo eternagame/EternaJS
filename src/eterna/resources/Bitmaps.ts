@@ -117,8 +117,7 @@ export default class Bitmaps {
     public static readonly ImgHelpOver: string = require('assets/UI/help-btn-hover.png');
     public static readonly ImgHelpHit: string = require('assets/UI/help-btn-active.png');
     public static readonly ImgHelp: string = require('assets/UI/help-btn.png');
-    //kkk
-    //3DView buttons
+    //kkk //3DView buttons
     public static readonly ImgThreeScreen: string = require('assets/UI/three-obj.png');
     public static readonly ImgThreeScreenOver: string = require('assets/UI/three-obj-hover.png');
     public static readonly ImgThreeScreenHint: string = require('assets/UI/three-obj-hint.png');
