@@ -326,35 +326,6 @@ export default class Toolbar extends ContainerObject {
             .hotkey(KeyCode.Digit0)
             .tooltip('Create or remove a molecular binding site.');
 
-        if (this._type === ToolbarType.PUZZLEMAKER || this._type === ToolbarType.PUZZLEMAKER_EMBEDDED) {
-            this.addObject(this.addBaseButton, upperToolbarLayout);
-            this.addObject(this.addPairButton, upperToolbarLayout);
-            this.addObject(this.deleteButton, upperToolbarLayout);
-            this.addObject(this.lockButton, upperToolbarLayout);
-            this.addObject(this.moleculeButton, upperToolbarLayout);
-
-            this.regs.add(this.addBaseButton.clicked.connect(() => {
-                this._deselectAllPaintTools();
-                this.addBaseButton.toggled.value = true;
-            }));
-            this.regs.add(this.addPairButton.clicked.connect(() => {
-                this._deselectAllPaintTools();
-                this.addPairButton.toggled.value = true;
-            }));
-            this.regs.add(this.deleteButton.clicked.connect(() => {
-                this._deselectAllPaintTools();
-                this.deleteButton.toggled.value = true;
-            }));
-            this.regs.add(this.lockButton.clicked.connect(() => {
-                this._deselectAllPaintTools();
-                this.lockButton.toggled.value = true;
-            }));
-            this.regs.add(this.moleculeButton.clicked.connect(() => {
-                this._deselectAllPaintTools();
-                this.moleculeButton.toggled.value = true;
-            }));
-        }
-
         // LOWER TOOLBAR (palette, zoom, settings, etc)
         this.lowerToolbarLayout = new HLayoutContainer(0, VAlign.BOTTOM);
         this.backgroundContainer = new Container();
@@ -442,7 +413,6 @@ export default class Toolbar extends ContainerObject {
         );
 
         this._isDragging = false;
-
         this.backgroundContainer.interactive = true;
 
         this.backgroundContainer.on('pointerup', (e: InteractionEvent) => {
@@ -460,6 +430,35 @@ export default class Toolbar extends ContainerObject {
         this.backgroundContainer.on('pointerdown', (e: InteractionEvent) => {
             this.onDragStart(e);
         });
+
+        if (this._type === ToolbarType.PUZZLEMAKER || this._type === ToolbarType.PUZZLEMAKER_EMBEDDED) {
+            this._scrollContainer.addObject(this.addBaseButton, this._scrollContainer.content);
+            this._scrollContainer.addObject(this.addPairButton, this._scrollContainer.content);
+            this._scrollContainer.addObject(this.deleteButton, this._scrollContainer.content);
+            this._scrollContainer.addObject(this.lockButton, this._scrollContainer.content);
+            this._scrollContainer.addObject(this.moleculeButton, this._scrollContainer.content);
+
+            this.regs.add(this.addBaseButton.clicked.connect(() => {
+                this._deselectAllPaintTools();
+                this.addBaseButton.toggled.value = true;
+            }));
+            this.regs.add(this.addPairButton.clicked.connect(() => {
+                this._deselectAllPaintTools();
+                this.addPairButton.toggled.value = true;
+            }));
+            this.regs.add(this.deleteButton.clicked.connect(() => {
+                this._deselectAllPaintTools();
+                this.deleteButton.toggled.value = true;
+            }));
+            this.regs.add(this.lockButton.clicked.connect(() => {
+                this._deselectAllPaintTools();
+                this.lockButton.toggled.value = true;
+            }));
+            this.regs.add(this.moleculeButton.clicked.connect(() => {
+                this._deselectAllPaintTools();
+                this.moleculeButton.toggled.value = true;
+            }));
+        }
 
         /*
         The lower toolbar structure is a HLayoutContainer wrapped in ScrollContainer wrapped in another HLayoutContainer
