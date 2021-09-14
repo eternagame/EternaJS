@@ -292,37 +292,27 @@ export default class Toolbar extends ContainerObject {
         }
 
         this.addBaseButton = new ToolbarButton()
-            .up(Bitmaps.ImgAddBase)
-            .over(Bitmaps.ImgAddBaseOver)
-            .down(Bitmaps.ImgAddBaseSelect)
+            .allStates(Bitmaps.ImgAddBase)
             .hotkey(KeyCode.Digit6)
             .tooltip('Add a single base.');
 
         this.addPairButton = new ToolbarButton()
-            .up(Bitmaps.ImgAddPair)
-            .over(Bitmaps.ImgAddPairOver)
-            .down(Bitmaps.ImgAddPairSelect)
+            .allStates(Bitmaps.ImgAddPair)
             .hotkey(KeyCode.Digit7)
             .tooltip('Add a pair.');
 
         this.deleteButton = new ToolbarButton()
-            .up(Bitmaps.ImgErase)
-            .over(Bitmaps.ImgEraseOver)
-            .down(Bitmaps.ImgEraseSelect)
+            .allStates(Bitmaps.ImgErase)
             .hotkey(KeyCode.Digit8)
             .tooltip('Delete a base or a pair.');
 
         this.lockButton = new ToolbarButton()
-            .up(Bitmaps.ImgLock)
-            .over(Bitmaps.ImgLockOver)
-            .down(Bitmaps.ImgLockSelect)
+            .allStates(Bitmaps.ImgLock)
             .hotkey(KeyCode.Digit9)
             .tooltip('Lock or unlock a base.');
 
         this.moleculeButton = new ToolbarButton()
-            .up(Bitmaps.ImgMolecule)
-            .over(Bitmaps.ImgMoleculeOver)
-            .down(Bitmaps.ImgMoleculeSelect)
+            .allStates(Bitmaps.ImgMolecule)
             .hotkey(KeyCode.Digit0)
             .tooltip('Create or remove a molecular binding site.');
 
