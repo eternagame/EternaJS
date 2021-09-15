@@ -188,18 +188,23 @@ export default class PoseEditMode extends GameMode {
                 ? () => this.onHintClicked()
                 : undefined,
             onHelpClicked: () => this.onHelpClicked(),
-            onThreeClicked: () => this.onThreeClicked(), //kkk add 3DModel View button
+            // onThreeClicked: () => this.onThreeClicked(), //kkk add 3DModel View button
             onChatClicked: () => {
                 Eterna.settings.showChat.value = !Eterna.settings.showChat.value;
 
                 //kkk //set chat window position according to 3DView
+                var H0 = 80;
                 if (Eterna.settings.showChat.value) {
                     var molPos = this.mol3DView.get3DContainerPosition();
                     var chatPos = Eterna.chat.getPosition();
                     if (chatPos != null) {
                         if (molPos.right > chatPos.right + chatPos.width) {
-                            Eterna.chat.setPosition(60);
+                            Eterna.chat.setPosition(H0);
                         }
+                        else if (molPos.top > chatPos.height + H0)
+                            Eterna.chat.setPosition(H0);
+                        else if (document.body.clientHeight - (molPos.top + molPos.height) < chatPos.height)
+                            Eterna.chat.setPosition(H0);
                         else
                             Eterna.chat.setPosition(molPos.top + molPos.height + 4);
                     }
@@ -611,9 +616,10 @@ export default class PoseEditMode extends GameMode {
     }
 
     //kkk // process 3DViewButton click event
-    private onThreeClicked(): void {
-        this.mol3DView.showScreen(!this.mol3DView.getVisibleState());
-    }
+    // private onThreeClicked(): void {
+    //     this.mol3DView.showScreen(!this.mol3DView.getVisibleState());
+    // }
+
     private showSolution(solution: Solution): void {
         this.clearUndoStack();
         this.pushUILock();

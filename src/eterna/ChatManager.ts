@@ -70,6 +70,7 @@ export default class ChatManager {
             return;
         }
         this._chatbox.style.top = top + 'px';
+        this._chatbox.style.zIndex = '99999999';
     }
     public getPosition(): any {
         if (this._chatbox == null) {

@@ -16,7 +16,7 @@ export default class Mol3DView {
     backboneElement: NGL.RepresentationElement | null;
     baseElement: NGL.RepresentationElement | null;
     ballstickElement: NGL.RepresentationElement | null;
-    static scope: Mol3DView;
+    public static scope: Mol3DView;
     poseEditMode: PoseEditMode;
     private readonly puzzle: Puzzle;
     colorChangeMap = new Map();
@@ -63,6 +63,7 @@ export default class Mol3DView {
 
         this.mol3DUI = new Mol3DUI(this);
         this.stage = new NGL.Stage("viewport");
+
         this.component = null;
 
         window.addEventListener("resize", () => {
@@ -106,7 +107,7 @@ export default class Mol3DView {
         this.hoverdInfo.index = index;
         this.hoverdInfo.color = color;
         var color1: number = this.getBaseColor(color);
-        Mol3DView.scope.component?.viewer.selectEBaseObject(this.hoverdInfo.index - 1, color1);
+        Mol3DView.scope.component?.viewer.selectEBaseObject(this.hoverdInfo.index - 1, false, color1);
     }
 
     updateSequence(seq: string) {
@@ -120,6 +121,7 @@ export default class Mol3DView {
     public get3DContainerPosition() {
         return this.mol3DUI.get3DContainerPosition();
     }
+
     changeBackbone(cmd: string, selectedValue: string | null, option: any | null) {
         if (cmd.includes("change")) {
             if (this.backboneElement) {
