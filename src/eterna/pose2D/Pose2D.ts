@@ -1056,7 +1056,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public toggleBaseMark(baseIndex: number): void {
-        this.posEditMode?.mol3DView.stage.viewer.markEBaseObject(baseIndex);
+        //kkk toggle basemark in 3D
+        this.posEditMode?.mol3DView?.stage?.viewer.markEBaseObject(baseIndex);
         if (!this.isTrackedLayer(baseIndex, PLAYER_MARKER_LAYER)) {
             this.addBaseMark(baseIndex, PLAYER_MARKER_LAYER);
         } else {
@@ -2796,6 +2797,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
+        //kkk
+        if(this._redraw) {
+            this.posEditMode.mol3DView.showAnnotations(this.showNumbering);
+        }
+
         this._redraw = false;
 
         this._moleculeLayer.visible = false;
@@ -3372,13 +3378,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         } else if (!this.isLocked(seqnum)) {
             if (this._currentColor >= 1 && this._currentColor <= 4) {
-                //kkk
-                var curColor = this._mutatedSequence.nt(seqnum)
-                this.posEditMode?.mol3DView.stage.viewer.selectEBaseObject2(seqnum, curColor != this._currentColor);
-
                 this._mutatedSequence.setNt(seqnum, this._currentColor);
                 ROPWait.notifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
                 this._bases[seqnum].setType(this._currentColor, true);
+                //kkk
+                var curColor = this._mutatedSequence.nt(seqnum)
+                this.posEditMode?.mol3DView.stage.viewer.selectEBaseObject2(seqnum, curColor != this._currentColor);
             } else if (this._currentColor === RNAPaint.PAIR && this._pairs.isPaired(seqnum)) {
                 const pi = this._pairs.pairingPartner(seqnum);
                 if (this.isLocked(pi)) {

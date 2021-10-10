@@ -7,6 +7,7 @@ import Assert from 'flashbang/util/Assert';
 import Flashbang from './Flashbang';
 import ModeStack from './ModeStack';
 import Updatable from './Updatable';
+import Mol3DView from 'eterna/mode/PoseEdit/Mol3DView';
 
 // Adds KeyboardEvent.code support to Edge
 import 'js-polyfills/keyboard';
@@ -174,6 +175,10 @@ export default class FlashbangApp {
     }
 
     protected onMouseWheelEvent(e: WheelEvent): void {
+        //kkk
+        if(Mol3DView.scope !== undefined && Mol3DView.scope.isOver3DCanvas) {
+            Mol3DView.scope.stage.viewer.getWebGLCanvas().dispatchEvent(new WheelEvent(e.type, e));
+        }
         const {topMode} = this._modeStack;
         if (topMode != null) {
             topMode.onMouseWheelEvent(e);

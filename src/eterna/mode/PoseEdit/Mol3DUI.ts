@@ -9,6 +9,7 @@ export class Mol3DUI {
     private lb: HTMLDivElement;
     private tb: HTMLDivElement;
     private cb: HTMLImageElement;
+
     private mol3DView: Mol3DView;
 
     public static BOTTOM_H: number = 70;
@@ -43,7 +44,7 @@ export class Mol3DUI {
         }
 
         this.container = <HTMLDivElement>document.createElement('div');
-        this.container.style.backgroundColor = "rgba(2,35,71,0.6)";//"transparent";//"rgb(2,35,71)";
+        this.container.style.backgroundColor = "rgba(2,35,71,0.6)";
         this.container.style.border = '1px solid rgba(47, 148, 209, 0.9)'
         this.container.style.borderRadius = '5px'
         this.container.style.position = 'absolute';
@@ -73,124 +74,6 @@ export class Mol3DUI {
         if (this.container.style.display.includes('none')) return false;
         else return true;
     }
-
-    // createControlDiv() {
-    //     const controlDiv = <HTMLDivElement>document.createElement('div');
-    //     controlDiv.style.position = 'absolute';
-    //     controlDiv.style.right = '0px';
-    //     controlDiv.style.top = '24px';
-    //     controlDiv.style.display = 'flex';
-    //     controlDiv.style.flexDirection = 'column';
-    //     controlDiv.style.alignItems = 'flex-end';
-    //     controlDiv.style.display = 'none';
-
-    //     controlDiv.innerHTML = `
-    //     <div>
-    //     eBase:&nbsp&nbsp<input type="checkbox" checked id="base" style="width: 30px" />
-    //     </div>
-    //     <div>
-    //     eBall+Stick:&nbsp&nbsp<select id="typeSelect">
-    //             <option value="eball+stick:1" selected>Type 1</option>
-    //             <option value="eball+stick:0" >Type 2</option>
-    //             <!-- <option value="spacefill">spacefill</option> -->
-    //             <!-- <option value="surface">surface</option> -->
-    //         </select>&nbsp&nbsp<input type="checkbox" unchecked id="ballstick" style="width: 30px" />
-    //     </div>
-    //     <div>
-    //     Back bone:&nbsp&nbsp<select id="backboneSelect">
-    //         <option value="backbone" selected>Default</option>
-    //         <option value="cartoon">Cartoon</option>
-    //         <option value="tube">Tube</option>
-    //     </select>&nbsp&nbsp<input type="checkbox" checked id="backbone" style="width: 30px"></input>
-    //     </div>
-    //     <div>
-    //     Blur:&nbsp&nbsp<input type="checkbox" unchecked id="blur" style="width: 30px" />
-    //     </div>
-    //   `;
-
-    //     document.body.appendChild(controlDiv);
-
-    //     var backboneSelect: HTMLSelectElement = <HTMLSelectElement>document.getElementById('backboneSelect');
-    //     if (backboneSelect) {
-    //         backboneSelect.addEventListener('change', () => {
-    //             let selectedOption = backboneSelect.options[backboneSelect.selectedIndex];
-    //             const selectedValue = selectedOption.value;
-    //             this.mol3DView.changeBackbone('change', selectedValue, { color: 0xFF8000 });
-    //         })
-    //     }
-    //     var typeSelect: HTMLSelectElement = <HTMLSelectElement>document.getElementById('typeSelect');
-    //     if (typeSelect) {
-    //         typeSelect.addEventListener('change', () => {
-    //             let selectedOption = typeSelect.options[typeSelect.selectedIndex];
-    //             let valArray = selectedOption.value.split(':');
-    //             const selectedValue = valArray[0];
-    //             let extSugar = true;
-    //             if (valArray.length > 1) {
-    //                 extSugar = (parseInt(valArray[1]) > 0);
-    //             }
-    //             this.mol3DView.changeBallstick('change', selectedValue, { extSugar: extSugar });
-    //         })
-    //     }
-    //     var ballstickCheckBox = <HTMLInputElement>document.getElementById('ballstick');
-    //     if (ballstickCheckBox) {
-    //         ballstickCheckBox.addEventListener('change', () => {
-    //             if (ballstickCheckBox.checked) {
-    //                 var typeSelect: HTMLSelectElement = <HTMLSelectElement>document.getElementById('typeSelect');
-    //                 let selectedOption = typeSelect.options[typeSelect.selectedIndex];
-    //                 let valArray = selectedOption.value.split(':');
-    //                 const selectedValue = valArray[0];
-    //                 let extSugar = true;
-    //                 if (valArray.length > 1) {
-    //                     extSugar = (parseInt(valArray[1]) > 0);
-    //                 }
-    //                 this.mol3DView.changeBallstick('create', selectedValue, { extSugar: extSugar });
-    //             }
-    //             else if (this.mol3DView.ballstickElement) {
-    //                 this.mol3DView.changeBallstick('remove', null, null);
-    //             }
-    //         })
-    //     }
-
-    //     var backboneCheckBox = <HTMLInputElement>document.getElementById('backbone');
-    //     if (backboneCheckBox) {
-    //         backboneCheckBox.addEventListener('change', () => {
-    //             if (backboneCheckBox.checked) {
-    //                 var backboneSelect: HTMLSelectElement = <HTMLSelectElement>document.getElementById('backboneSelect');
-    //                 let selectedOption = backboneSelect.options[backboneSelect.selectedIndex];
-    //                 const selectedValue = selectedOption.value;
-    //                 this.mol3DView.changeBackbone('create', selectedValue, { color: 0xFF8000 });
-    //             }
-    //             else if (this.mol3DView.backboneElement) {
-    //                 this.mol3DView.changeBackbone('remove', null, null);
-    //             }
-    //         })
-    //     }
-    //     var baseCheckBox = <HTMLInputElement>document.getElementById('base');
-    //     if (baseCheckBox) {
-    //         baseCheckBox.addEventListener('change', () => {
-    //             if (baseCheckBox.checked) {
-    //                 this.mol3DView.changeBase('create');
-    //             }
-    //             else if (this.mol3DView.baseElement) {
-    //                 this.mol3DView.changeBase('remove');
-    //             }
-    //         })
-    //     }
-    //     var blurCheckBox = <HTMLInputElement>document.getElementById('blur');
-    //     if (blurCheckBox) {
-    //         blurCheckBox.addEventListener('change', () => {
-    //             if (blurCheckBox.checked) {
-    //                 this.container.classList.add("ngl-view-blur");
-    //             }
-    //             else {
-    //                 this.container.classList.remove("ngl-view-blur");
-    //             }
-    //         })
-    //     }
-
-    //     this.container.appendChild(controlDiv);
-    //     this.controlDiv = controlDiv;
-    // }
 
     showScreen(bShow: boolean) {
         if (bShow) {
@@ -233,8 +116,8 @@ export class Mol3DUI {
         _3DContainer.style.position = 'relative';
         _3DContainer.style.left = '0px';
         _3DContainer.style.top = '0px';
-        _3DContainer.style.width = '100%';
-        _3DContainer.style.height = '100%';
+        _3DContainer.style.width = '0px';//'100%';
+        _3DContainer.style.height = '0px';//'100%';
         return _3DContainer;
     }
 
@@ -525,22 +408,6 @@ export class Mol3DUI {
         this.contentContainer.style.display = 'block';
         this.mol3DView.component?.stage.handleResize();
     }
-
-    // miniScreen() {
-    //     var W = 320;
-    //     var H = 240;
-    //     if (this.isMobile) {
-    //         this.container.style.right = (document.body.clientWidth - (this.margin + W)) + 'px';
-    //         this.container.style.width = W + 'px';
-    //     }
-    //     else {
-    //         this.container.style.right = this.margin + 'px';
-    //         this.container.style.width = W + 'px';
-    //     }
-    //     this.container.style.height = H + 'px';
-    //     this.container.style.top = (document.body.clientHeight - Mol3DUI.BOTTOM_H - this.margin - H) + 'px';
-    //     this.mol3DView.component?.stage.handleResize();
-    // }
 
     setResizeHandlers() {
         var scope = this;

@@ -1,14 +1,20 @@
-// import * as NGL from '../../../../../ngl/build/js/ngl.dev.js';
 import * as NGL from 'ngl';
 import PoseEditMode from './PoseEditMode';
-// import PaintCursor from '../../pose2D/PaintCursor';
 import { RNABase } from 'eterna/EPars';
 import Puzzle from 'eterna/puzzle/Puzzle';
 import SecStruct from 'eterna/rnatypes/SecStruct';
-// import Eterna from 'eterna/Eterna';
-// import xxx from '../../../../assets/data/'
 import { DectectDevice } from './DetectDevice';
+import Representation from 'ngl/dist/declarations/representation/representation';
 import { Mol3DUI } from './Mol3DUI';
+import ThreeView from 'eterna/ui/ThreeView';
+import { Point } from '@pixi/math';
+
+export interface PixiRenderCallback {
+    (imgData: HTMLCanvasElement, width: number, height: number): void;
+}
+interface PixiCifCheckerCallback {
+    (component: NGL.Structure | null): void;
+}
 
 export default class Mol3DView {
     stage: NGL.Stage;
@@ -21,13 +27,16 @@ export default class Mol3DView {
     private readonly puzzle: Puzzle;
     colorChangeMap = new Map();
     hoverdInfo = { index: -1, color: 0, outColor: 0 };
+    bShow: boolean = true;
+    bShowAnnotations: boolean = true;
+    isOver3DCanvas: boolean = false; //kkk
+    metaState: boolean = false;
     mol3DUI: Mol3DUI;
+    threeView: ThreeView; //
 
     myColorScheme = NGL.ColormakerRegistry.addScheme(function (this: any) {
 
         this.atomColor = function (atom: any) {
-            // console.log('atom = ', atom);
-            // console.log(atom)
             var colorArray = [0x3183c0, 0xaa1c20, 0xffff00, 0x1b7b3d];
             var color = 0;
             var atomResname = atom.resname;
@@ -56,30 +65,41 @@ export default class Mol3DView {
         }
     }, 'myColorScheme')
 
-    constructor(poseEditMode: PoseEditMode, _puzzle: Puzzle) {
+    constructor(filePath: string | File | Blob, container: HTMLElement, threeView: ThreeView, callback: PixiRenderCallback, poseEditMode: PoseEditMode, _puzzle: Puzzle) {
         Mol3DView.scope = this;
         this.poseEditMode = poseEditMode;
         this.puzzle = _puzzle;
+        this.threeView = threeView;
 
-        this.mol3DUI = new Mol3DUI(this);
-        this.stage = new NGL.Stage("viewport");
+        // this.mol3DUI = new Mol3DUI(this);
+        this.stage = new NGL.Stage(container, {}, callback);
 
         this.component = null;
+        this.metaState = false;
 
-        window.addEventListener("resize", () => {
-            this.stage.handleResize();
-        }, false);
+        // window.addEventListener("resize", () => {
+        //     this.stage.handleResize();
+        // }, false);
 
-        DectectDevice()
+        DectectDevice();
+        threeView.mol3DView = this;
 
-        this.create3D();
+        this.create3D(filePath);
+    }
+
+    public PtInCanvas(x: number, y: number): boolean {
+        return this.threeView.PtInCanvas(x, y)
+    }
+    public getPosition(): Point {
+        return new Point(this.threeView.left, this.threeView.top + this.threeView.iconSize);
     }
 
     showScreen(bShow: boolean) {
-        this.mol3DUI.showScreen(bShow);
+        this.bShow = bShow;
+        this.stage.viewer.requestRender();
     }
     getVisibleState(): boolean {
-        return this.mol3DUI.getVisibleState();
+        return this.bShow;
     }
     getBaseColor(color: number): number {
         let colorArray = [0x3183c0, 0xaa1c20, 0xffff00, 0x1b7b3d];
@@ -110,16 +130,18 @@ export default class Mol3DView {
         Mol3DView.scope.component?.viewer.selectEBaseObject(this.hoverdInfo.index - 1, false, color1);
     }
 
-    updateSequence(seq: string) {
-        for (var i = 0; i < seq.length; i++) {
-            this.colorChangeMap.set(i + 1, seq[i]);
+    //kkk
+    updateSequence(seq: string[]) {
+        for (var i = 0; i < seq[0].length; i++) {
+            this.colorChangeMap.set(i + 1, seq[0][i]);
         }
-        this.component?.viewer.setEthernaSequence(seq);
+        var numBase = 1;
+        if (seq.length > 1) {
+            numBase = parseInt(seq[1].split('-')[0]);
+        }
+        this.component?.viewer.setEthernaSequence(seq[0], numBase);
         this.component?.updateRepresentations({ color: this.myColorScheme });
-    }
-
-    public get3DContainerPosition() {
-        return this.mol3DUI.get3DContainerPosition();
+        this.stage.viewer.requestRender();
     }
 
     changeBackbone(cmd: string, selectedValue: string | null, option: any | null) {
@@ -161,31 +183,60 @@ export default class Mol3DView {
             this.baseElement = this.component?.addRepresentation("ebase", { vScale: 0.5, color: this.myColorScheme })
         }
     }
-    create3D() {
-        const filePath = require('assets/data/test.cif');
-        // const filePath = require('assets/data/4ybb_16S.cif')
+    create3D(filePath: string | File | Blob) {
+        this.stage.removeAllComponents();
+        this.component = null;
+
         const secstructs: string[] = this.puzzle.getSecstructs();
         var pairs = SecStruct.fromParens(secstructs[0]).pairs;
-        // console.log(pairs)
 
+        this.stage.defaultFileParams = { firstModelOnly: true };
         this.stage.loadFile(filePath, { etherna_pairs: pairs }).then((component: void | NGL.Component) => {
-
-            const canvas = <HTMLDivElement>this.stage.viewer.container.childNodes[0].childNodes[0];
-            canvas.style.removeProperty("background-color");
-            canvas.id = 'viewport_canvas';
-            canvas.style.width = '100%';
-            canvas.style.height = '100%';
-
-            canvas.addEventListener("click", (event: MouseEvent) => event.preventDefault())
-
             if (component) {
                 this.component = component;
+                this.updateSequence(this.poseEditMode.getSequence().split(' '));
+                this.component.viewer.setHBondColor([0xFFFFFF, 0x8F9DC0, 0x546986]);
                 this.baseElement = this.component.addRepresentation("ebase", { vScale: 0.5, color: Mol3DView.scope.myColorScheme });
+                if (this.baseElement) {
+                    var baseRepr: Representation = this.baseElement.repr;
+                    if (baseRepr) {
+                        var numBase = 1;
+                        var seq = this.poseEditMode.getSequence().split(' ');
+                        if (seq.length > 1) {
+                            numBase = parseInt(seq[1].split('-')[0]);
+                        }
+                        var annotations = baseRepr.getAnnotations();
+                        var i = 0;
+                        annotations.forEach((a: any) => {
+                            var num = numBase + a.num;
+                            if (i == 0 || i == annotations.length - 1 || (num % 5) == 0) {
+                                let vector = new NGL.Vector3(a.x, a.y, a.z);
+                                component.addAnnotation(vector, num + '', {});
+                            }
+                            i++;
+                        })
+                    }
+                }
                 // this.ballstickElement = this.component.addRepresentation("eball+stick", { extSugar: true })
                 this.backboneElement = this.component.addRepresentation("backbone", { color: 0xFF8000 })
                 this.component.autoView()
             }
         })
+    }
+    showAnnotations(bShow: boolean) {
+        this.bShowAnnotations = bShow;
+        if (!bShow) this.poseEditMode.hideAnnotations();
+        this.stage.viewer.requestRender();
+    }
+    static checkModelFile(path: string | File | Blob) {
+        let promise: Promise<any>
+        var result = 0;
+        function ModelCallback(obj: NGL.Structure): void {
+            result = obj.chainStore.residueCount[0];
+        }
+        var callback: PixiCifCheckerCallback = <PixiCifCheckerCallback>ModelCallback;
+        promise = NGL.Stage.checkModelFile(path, callback);
+        return promise.then(() => { return result })
     }
 }
 

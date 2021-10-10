@@ -1,4 +1,4 @@
-import { Graphics, InteractionEvent, Point } from 'pixi.js';
+import { Graphics, Sprite, InteractionEvent, Point, BaseTexture, Texture, FORMATS, SCALE_MODES } from 'pixi.js';
 import {
     ContainerObject, KeyboardListener, MouseWheelListener, InputUtil, Flashbang,
     KeyboardEventType, KeyCode, Assert
@@ -8,14 +8,13 @@ import debounce from 'lodash.debounce';
 import Pose2D from './Pose2D';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
 import RNAAnchorObject from './RNAAnchorObject';
+import Mol3DView from 'eterna/mode/PoseEdit/Mol3DView';
 
 /** Wraps a Pose2D and handles resizing, masking, and input events */
 export default class PoseField extends ContainerObject implements KeyboardListener, MouseWheelListener {
     private static readonly zoomThreshold = 5;
 
     private static readonly SCORES_POSITION_Y = 128;
-
-    private isOver3DCanvas: boolean;
 
     constructor(edit: boolean) {
         super();
@@ -24,18 +23,6 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         // _clickTargetDisp is an invisible rectangle with our exact size, so that we can always receive mouse events
         this._clickTargetDisp = new Graphics();
         this.container.addChild(this._clickTargetDisp);
-
-        //kkk //make mouse wheel events of 2D and 3D views independent 
-        this.isOver3DCanvas = false;
-        window.addEventListener('pointermove', e => {
-            var x = e.clientX, y = e.clientY;
-            var elementMouseIsOver = <HTMLElement>document.elementFromPoint(x, y);
-            if (elementMouseIsOver && elementMouseIsOver.id.includes('viewport')) {
-                this.isOver3DCanvas = true;
-            } else {
-                this.isOver3DCanvas = false;
-            }
-        })
     }
 
     protected added(): void {
@@ -199,6 +186,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         if (Flashbang.app.isControlKeyDown) {
             return;
         }
+        if (Mol3DView.scope && Mol3DView.scope.isOver3DCanvas) return; //kkk
 
         const pointerId = e.data.identifier;
         const { x, y } = e.data.global;
@@ -213,6 +201,8 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     }
 
     private onPointerMove(e: InteractionEvent) {
+        if (this._interactionCache.size == 0 && Mol3DView.scope && Mol3DView.scope.isOver3DCanvas) return; //kkk
+
         this._interactionCache.forEach((_point, pointerId) => {
             if (pointerId === e.data.identifier) {
                 const { x, y } = e.data.global;
@@ -342,22 +332,22 @@ export default class PoseField extends ContainerObject implements KeyboardListen
             return false;
         }
         //kkk // ignore mouse wheel event from 3D view
-        if (!this.isOver3DCanvas) {
-            if (e.deltaY < 0) {
-                if (e.deltaY < -2 && e.deltaY < this._lastDeltaY) this._debounceZoomIn();
-                this._lastDeltaY = e.deltaY;
-                setTimeout(() => {
-                    this._lastDeltaY = 0;
-                }, 200);
-                return true;
-            } else if (e.deltaY > 0) {
-                if (e.deltaY > 2 && e.deltaY > this._lastDeltaY) this._debounceZoomOut();
-                this._lastDeltaY = e.deltaY;
-                setTimeout(() => {
-                    this._lastDeltaY = 0;
-                }, 200);
-                return true;
-            }
+        if (Mol3DView.scope !== undefined && Mol3DView.scope.isOver3DCanvas) return false;
+
+        if (e.deltaY < 0) {
+            if (e.deltaY < -2 && e.deltaY < this._lastDeltaY) this._debounceZoomIn();
+            this._lastDeltaY = e.deltaY;
+            setTimeout(() => {
+                this._lastDeltaY = 0;
+            }, 200);
+            return true;
+        } else if (e.deltaY > 0) {
+            if (e.deltaY > 2 && e.deltaY > this._lastDeltaY) this._debounceZoomOut();
+            this._lastDeltaY = e.deltaY;
+            setTimeout(() => {
+                this._lastDeltaY = 0;
+            }, 200);
+            return true;
         }
 
         return false;

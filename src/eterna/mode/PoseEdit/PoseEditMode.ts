@@ -1,7 +1,9 @@
 import * as log from 'loglevel';
 import {
-    Container, DisplayObject, Point, Sprite, Text, Rectangle, InteractionEvent
+    Container, DisplayObject, Point, Sprite, Text, Rectangle, InteractionEvent, BaseTexture, Texture, Graphics
 } from 'pixi.js';
+// import { Graphics, Sprite, InteractionEvent, Point, BaseTexture, Texture, FORMATS, SCALE_MODES } from 'pixi.js';
+
 import EPars, { RNABase, RNAPaint } from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import { PuzzleID } from 'eterna/EternaApp';
@@ -80,7 +82,9 @@ import MissionIntroMode from './MissionIntroMode';
 import MissionClearedPanel from './MissionClearedPanel';
 import ViewSolutionOverlay from '../DesignBrowser/ViewSolutionOverlay';
 import { PuzzleEditPoseData } from '../PuzzleEdit/PuzzleEditMode';
-import Mol3DView from './Mol3DView';
+import Mol3DView, { PixiRenderCallback } from './Mol3DView';
+
+import ThreeView from 'eterna/ui/ThreeView';
 
 
 export interface PoseEditParams {
@@ -142,6 +146,13 @@ export type SubmitSolutionData = {
 
 export default class PoseEditMode extends GameMode {
     mol3DView: Mol3DView;
+    _3DSprite: Sprite; //kkk
+    _3DSpriteCanvas: HTMLCanvasElement;
+    _3DSpriteContext: CanvasRenderingContext2D | null; //kkk
+    THREE_TEXTURE: BaseTexture;
+    _3DTextArray: Text[];
+    // _3DFrame: Graphics;
+
     constructor(puzzle: Puzzle, params: PoseEditParams, autosaveData: SaveStoreItem | null = null) {
         super();
         this._puzzle = puzzle;
@@ -152,10 +163,7 @@ export default class PoseEditMode extends GameMode {
             puzzle.rscript = this._params.rscript;
         }
 
-        console.log('here', puzzle)
-
-        this.mol3DView = new Mol3DView(this, puzzle);
-        this.mol3DView.showScreen(false);
+        console.log('here', puzzle, this.poseLayer)
     }
 
     public get puzzleID(): number { return this._puzzle.nodeID; }
@@ -179,7 +187,7 @@ export default class PoseEditMode extends GameMode {
             showAdvancedMenus: this._puzzle.puzzleType !== PuzzleType.PROGRESSION,
             showLibrarySelect: this._puzzle.constraints?.some((con) => con instanceof LibrarySelectionConstraint),
             annotationManager: this._annotationManager,
-            puzzle: this._puzzle
+            puzzle: this._puzzle,
         });
         this.addObject(this._toolbar, this.uiLayer);
 
@@ -191,26 +199,6 @@ export default class PoseEditMode extends GameMode {
             // onThreeClicked: () => this.onThreeClicked(), //kkk add 3DModel View button
             onChatClicked: () => {
                 Eterna.settings.showChat.value = !Eterna.settings.showChat.value;
-
-                //kkk //set chat window position according to 3DView
-                var H0 = 80;
-                if (Eterna.settings.showChat.value) {
-                    var molPos = this.mol3DView.get3DContainerPosition();
-                    var chatPos = Eterna.chat.getPosition();
-                    if (chatPos != null) {
-                        if (molPos.right > chatPos.right + chatPos.width) {
-                            Eterna.chat.setPosition(H0);
-                        }
-                        else if (molPos.top > chatPos.height + H0)
-                            Eterna.chat.setPosition(H0);
-                        else if (document.body.clientHeight - (molPos.top + molPos.height) < chatPos.height)
-                            Eterna.chat.setPosition(H0);
-                        else
-                            Eterna.chat.setPosition(molPos.top + molPos.height + 4);
-                    }
-                    else
-                        Eterna.chat.setPosition(molPos.top + molPos.height + 4);
-                }
             },
             onInfoClicked: this._params.initSolution ? () => {
                 if (this._solutionView) {
@@ -417,6 +405,9 @@ export default class PoseEditMode extends GameMode {
             HAlign.RIGHT, VAlign.TOP, 0 - this._solDialogOffset, 0
         );
 
+        //kkk
+        this._3DView.onResized();
+
         DisplayUtil.positionRelativeToStage(
             this._solutionNameText, HAlign.CENTER, VAlign.TOP,
             HAlign.CENTER, VAlign.TOP, 0, 8
@@ -615,11 +606,6 @@ export default class PoseEditMode extends GameMode {
         }));
     }
 
-    //kkk // process 3DViewButton click event
-    // private onThreeClicked(): void {
-    //     this.mol3DView.showScreen(!this.mol3DView.getVisibleState());
-    // }
-
     private showSolution(solution: Solution): void {
         this.clearUndoStack();
         this.pushUILock();
@@ -728,6 +714,79 @@ export default class PoseEditMode extends GameMode {
             poseToNotify.onPoseKKKMouseDown(closestIndex);
         }
     }
+
+    //kkk
+    add3DSprite(filePath: string | File | Blob) {
+        var threeView = this._3DView;
+        if (this.mol3DView) {
+            this.mol3DView.stage?.dispose();
+            this._3DTextArray.forEach((t) => {
+                this.poseLayer.removeChild(t);
+            })
+            this._3DTextArray = new Array(0);
+        }
+        if (threeView.threeContainer) {
+            this._3DTextArray = new Array(0);
+            var scope = this;
+            function NGLCallback(canvas: HTMLCanvasElement, width: number, height: number): void {
+                if (scope._3DSpriteContext) {
+                    scope._3DSpriteContext.fillStyle = 'rgba(2,35,71,0.6)'
+                    scope._3DSpriteContext.clearRect(0, 0, scope._3DSpriteCanvas.width, scope._3DSpriteCanvas.height);
+                    if (width > 0 && height > 0) {
+                        var dpr = window.devicePixelRatio;
+                        scope._3DSpriteContext.fillRect(threeView.left, threeView.top + threeView.iconSize, threeView.width, threeView.height - threeView.iconSize)
+                        scope._3DSpriteContext.drawImage(canvas, 0, 0, width * dpr, height * dpr, threeView.left, threeView.top + threeView.iconSize, threeView.width, threeView.height - threeView.iconSize);
+                    }
+                    scope.THREE_TEXTURE.update();
+                }
+                var i = 0;
+                var uninit: boolean = (scope._3DTextArray.length == 0);
+                scope.mol3DView.component?.eachAnnotation((a) => {
+                    var text;
+                    var x: number;
+                    var y: number;
+                    if (uninit) {
+                        text = new Text(a.getContent(), { fontFamily: 'Arial', fontSize: 12, fill: 0xffffff, align: 'center' });
+                        text.width
+                        if (scope.mol3DView.bShowAnnotations && scope.mol3DView.getVisibleState()) {
+                            x = a.getCanvasPosition().x;
+                            y = threeView.iconSize + height - a.getCanvasPosition().y;
+                            if (threeView.PtInCanvas(x, y) && x + text.width < threeView.width) {
+                                text.x = threeView.left + x;
+                                text.y = threeView.top + y;
+                            }
+                            else text.x = -10000;
+                        }
+                        scope._3DTextArray.push(text);
+                        scope.poseLayer.addChild(text);
+                    }
+                    else {
+                        if (scope.mol3DView.bShowAnnotations && scope.mol3DView.getVisibleState()) {
+                            text = scope._3DTextArray[i];
+                            x = a.getCanvasPosition().x;
+                            y = threeView.iconSize + height - a.getCanvasPosition().y;
+                            if (threeView.PtInCanvas(x, y) && x + text.width < threeView.width) {
+                                text.x = threeView.left + x;
+                                text.y = threeView.top + y;
+                            }
+                            else text.x = -10000;
+                            i++;
+                        }
+                    }
+                })
+            }
+            var callback: PixiRenderCallback = NGLCallback;
+            this.mol3DView = new Mol3DView(filePath, threeView.threeContainer, threeView, callback, this, this._puzzle);
+            threeView.onResized();
+        }
+    }
+    //kkk
+    hideAnnotations() {
+        this._3DTextArray.forEach((text) => {
+            text.x = -10000;
+        });
+    }
+
     private setPuzzle(): void {
         const poseFields: PoseField[] = [];
 
@@ -956,6 +1015,22 @@ export default class PoseEditMode extends GameMode {
                 );
             }
         }
+
+        //kkk
+        this._3DView = new ThreeView();
+        this.addObject(this._3DView, this.uiLayer);
+
+        this._3DTextArray = new Array(0);
+        this._3DSpriteCanvas = document.createElement('canvas');
+        this._3DSpriteCanvas.width = screen.width;
+        this._3DSpriteCanvas.height = screen.height;
+        this._3DSpriteContext = this._3DSpriteCanvas.getContext('2d');
+        this.THREE_TEXTURE = BaseTexture.from(this._3DSpriteCanvas);
+        this._3DSprite = new Sprite(new Texture(this.THREE_TEXTURE));
+        this.poseLayer.addChild(this._3DSprite);
+
+        const filePath = require('assets/data/test.cif');
+        this.add3DSprite(filePath);
 
         this._exitButton.display.visible = false;
         this.addObject(this._exitButton, this.uiLayer);
@@ -1683,10 +1758,34 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
+    zoomInNGLView() {
+        this.mol3DView.stage.viewerControls.zoom(0.1)
+    }
+    zoomOutNGLView() {
+        this.mol3DView.stage.viewerControls.zoom(-0.1)
+    }
+    setNGLMovState() {
+        this.mol3DView.metaState = true;
+    }
+    setNGLRotateState() {
+        this.mol3DView.metaState = false;
+    }
     /* override */
     protected createContextMenu(): ContextMenu | null {
         if (this.isDialogOrNotifShowing || this.hasUILock) {
             return null;
+        }
+
+        //kkk add 3D Menu
+        if (this.mol3DView && this.mol3DView.isOver3DCanvas) {
+            const menu = new ContextMenu({ horizontal: false });
+            var moveIcon = this.mol3DView.metaState ? Bitmaps.Img3DMoveCheckIcon : Bitmaps.Img3DMoveIcon;
+            var rotateIcon = this.mol3DView.metaState ? Bitmaps.Img3DRotateIcon : Bitmaps.Img3DRotateCheckIcon;
+            menu.addItem('Pan', moveIcon).clicked.connect(() => this.setNGLMovState());
+            menu.addItem('Rotate', rotateIcon).clicked.connect(() => this.setNGLRotateState());
+            menu.addItem('Zoom in', Bitmaps.Img3DZoominIcon).clicked.connect(() => this.zoomInNGLView());
+            menu.addItem('Zoom out', Bitmaps.Img3DZoomoutIcon).clicked.connect(() => this.zoomOutNGLView());
+            return menu;
         }
 
         const menu = new ContextMenu({ horizontal: false });
@@ -2384,7 +2483,6 @@ export default class PoseEditMode extends GameMode {
             this._exitButton.addObject(new AlphaTask(1, 0.3));
 
             this._helpBar.display.visible = true;
-            console.log('xxxxxxxxxxxxx');
         };
 
         if (hasNextPuzzle) {
@@ -3151,6 +3249,8 @@ export default class PoseEditMode extends GameMode {
     }
 
     private poseEditByTarget(targetIndex: number): void {
+        // this.mol3DView.updateSequence(this.getSequence().split(' '));
+
         this.savePosesMarkersContexts();
 
         // Reorder oligos and reorganize structure constraints as needed
@@ -3204,8 +3304,7 @@ export default class PoseEditMode extends GameMode {
         } else {
             execfoldCB(null);
         }
-        //kkk //make the change of sequence of bases from 2D to be synchronize in 3D 
-        this.mol3DView.updateSequence(this.getSequence());
+        // this.mol3DView.updateSequence(this.getSequence().split(' '));
     }
 
     private poseEditByTargetDoFold(targetIndex: number): void {
@@ -3474,7 +3573,6 @@ export default class PoseEditMode extends GameMode {
 
                 Eterna.client.updateSolutionFoldData(sol.nodeID, fd).then((datastring: string) => {
                     log.debug(datastring);
-                    console.log(datastring);
                 });
             }
         }
@@ -3505,8 +3603,8 @@ export default class PoseEditMode extends GameMode {
             this._targetOligos[ii] = this._seqStacks[this._stackLevel][ii].targetOligos;
             this._targetOligosOrder[ii] = this._seqStacks[this._stackLevel][ii].targetOligoOrder;
         }
-        //kkk // update the base colors of 3D Model
-        this.mol3DView.updateSequence(this.getSequence());
+        //kkk undo sequence change in 3D
+        this.mol3DView.updateSequence(this.getSequence().split(' '));
         this.mol3DView.stage.viewer.selectEBaseObject2(-1);
     }
 
@@ -3594,6 +3692,7 @@ export default class PoseEditMode extends GameMode {
 
     private _toolbar: Toolbar;
     private _helpBar: HelpBar;
+    private _3DView: ThreeView; //
 
     protected get _folder(): Folder {
         return this._folderSwitcher.selectedFolder.value;

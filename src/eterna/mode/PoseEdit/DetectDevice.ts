@@ -34,6 +34,5 @@ export const DectectDevice = () => {
 
     // true if Android, iPhone, iPad
     // false if desktop browser
-    console.log('device status', isMobile())
     return isMobile();
 }

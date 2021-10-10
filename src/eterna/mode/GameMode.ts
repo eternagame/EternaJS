@@ -25,10 +25,12 @@ import NucleotideFinder from 'eterna/ui/NucleotideFinder';
 import ExplosionFactorDialog from 'eterna/ui/ExplosionFactorDialog';
 import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
 import CopyTextDialogMode from './CopyTextDialogMode';
+import Mol3DView from './PoseEdit/Mol3DView';
+import MyContainer from './PuzzleEdit/MyContainer';
 
 export default abstract class GameMode extends AppMode {
     public readonly bgLayer = new Container();
-    public readonly poseLayer = new Container();
+    public readonly poseLayer = new MyContainer();//new Container();
     public readonly uiLayer = new Container();
     public readonly dialogLayer = new Container();
     public readonly notifLayer = new Container();
@@ -285,6 +287,22 @@ export default abstract class GameMode extends AppMode {
                 this._contextMenuDialogRef.destroyObject();
                 handled = true;
             } else {
+                // if(Mol3DView.scope !== undefined) {
+                //     //kkk
+                //     // var pos = Mol3DView.scope.getPosition();
+                //     // var event = e as PointerEvent;
+                //     // if(Mol3DView.scope.stage.viewer.isPointInBoundBox(event.offsetX, event.offsetY, false)) return;
+                //     if(Mol3DView.scope.isOver3DCanvas) {
+                //         const menu = Mol3DView.scope.createContextMenu();
+                //         if (menu != null) {
+                //             this._contextMenuDialogRef = this.addObject(
+                //                 new ContextMenuDialog(menu, Flashbang.globalMouse),
+                //                 this.contextMenuLayer
+                //             );
+                //         }
+                //         handled = true;
+                //     }
+                // }
                 const menu = this.createContextMenu();
                 if (menu != null) {
                     this._contextMenuDialogRef = this.addObject(
@@ -348,6 +366,7 @@ export default abstract class GameMode extends AppMode {
 
     protected downloadSVG(): void {
         for (let ii = 0; ii < this._poses.length; ++ii) {
+
             if (this._poses[ii].customLayout === undefined) continue;
             const cl = this._poses[ii].customLayout;
             // width and height: xmax-xmin+20

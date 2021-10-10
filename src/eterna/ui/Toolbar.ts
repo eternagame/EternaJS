@@ -1,7 +1,7 @@
 import {
     Graphics, Point, Sprite, Container
 } from 'pixi.js';
-import {RegistrationGroup} from 'signals';
+import { RegistrationGroup } from 'signals';
 import Eterna from 'eterna/Eterna';
 import Booster from 'eterna/mode/PoseEdit/Booster';
 import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
@@ -9,17 +9,20 @@ import {
     ContainerObject, Flashbang, VLayoutContainer, HLayoutContainer,
     KeyCode, VAlign, HAlign, DisplayUtil, LocationTask, Easing, Assert
 } from 'flashbang';
-import Puzzle, {BoostersData} from 'eterna/puzzle/Puzzle';
+import Puzzle, { BoostersData } from 'eterna/puzzle/Puzzle';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
+import { RScriptUIElementID } from 'eterna/rscript/RScriptUIElement';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import AnnotationManager from 'eterna/AnnotationManager';
 import NucleotidePalette from './NucleotidePalette';
 import GameButton from './GameButton';
 import ToggleBar from './ToggleBar';
-import EternaMenu, {EternaMenuStyle} from './EternaMenu';
+import EternaMenu, { EternaMenuStyle } from './EternaMenu';
 import ScrollContainer from './ScrollContainer';
 import AnnotationPanel from './AnnotationPanel';
+import fileDialog from 'file-dialog';
+import Mol3DView from 'eterna/mode/PoseEdit/Mol3DView';
+import { boolean } from 'nglx/dist/declarations/utils';
 
 export enum ToolbarType {
     PUZZLE,
@@ -92,6 +95,8 @@ export default class Toolbar extends ContainerObject {
     public freezeButton: GameButton;
 
     public boostersMenu: GameButton;
+
+    public validate3DButton: GameButton; //kkk
 
     public baseMarkerButton: GameButton;
     public librarySelectionButton: GameButton;
@@ -781,6 +786,18 @@ export default class Toolbar extends ContainerObject {
             this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
             this.addObject(this.submitButton, this.lowerToolbarLayout);
         }
+        //kkk
+        this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
+        this.validate3DButton = new ToolbarButton()
+            .up(Bitmaps.ImgFileOpen)
+            .over(Bitmaps.ImgFileOpenHover)
+            .down(Bitmaps.ImgFileOpen)
+            .tooltip('Validate 3D Models');
+
+        if (this.type !== ToolbarType.FEEDBACK) {
+            this.addObject(this.validate3DButton, this.lowerToolbarLayout);
+        }
+
 
         this.rightArrow = this.makeArrowButton('right');
         this.addObject(this.rightArrow, this.scrollContainerContainer);
@@ -834,6 +851,42 @@ export default class Toolbar extends ContainerObject {
                 }
             }));
         }
+
+        //kkk
+        this.regs.add(this.validate3DButton.clicked.connect(() => {
+            fileDialog({ accept: ['.cif'] }).then(file => {
+                // const data = new FormData()
+                // data.append('file', file[0])
+                // data.append('cifName', file[0].name)
+                var mode: PoseEditMode = this.mode as PoseEditMode;
+                var sequence = mode.getSequence().split(' ')[0];
+                Mol3DView.checkModelFile(file[0], mode.getSequence().split(' ')[0]).then((resCount:number)=>{
+                    // console.log(resCount, sequence.length, sequence);
+                    if(resCount == sequence.length)
+                        mode?.add3DSprite(file[0]);
+                    else {
+                        const PROMPT = 'Error!\nYour selected file is mismatched with the puzzle.';
+                        mode?.showConfirmDialog(PROMPT);
+                    }
+                });
+
+                // var reader = new FileReader();
+                // // reader.readAsDataURL(file[0]); // this is reading as data url
+                // reader.readAsText(file[0]); // this is reading as data url
+
+                // // here we tell the reader what to do when it's done reading...
+                // reader.onload = readerEvent => {
+                //     var content = readerEvent.target?.result;
+                //     // console.log(content);
+                //     // Post to server
+                //     fetch('/upload3DModel', {
+                //         method: 'POST',
+                //         body: content
+                //     })
+                // }
+
+            })
+        }));
     }
 
     private makeArrowButton(direction: 'left' | 'right'): GameButton {
@@ -870,7 +923,7 @@ export default class Toolbar extends ContainerObject {
         let startingX: number;
         let startingScroll: number;
         this.regs.add(this.pointerDown.connect((e) => {
-            const {x, y} = e.data.global;
+            const { x, y } = e.data.global;
             if (this.lowerToolbarLayout.getBounds().contains(x, y)) {
                 mouseDown = true;
                 startingX = x;
@@ -887,7 +940,7 @@ export default class Toolbar extends ContainerObject {
         }));
 
         this.regs.add(this.pointerMove.connect((e) => {
-            const {x, y} = e.data.global;
+            const { x, y } = e.data.global;
             if (e.data.buttons === 1 && mouseDown && this.lowerToolbarLayout.getBounds().contains(x, y)) {
                 const offset = x - startingX;
                 if (Math.abs(offset) > 15) {
