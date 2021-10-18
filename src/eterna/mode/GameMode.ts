@@ -25,12 +25,12 @@ import NucleotideFinder from 'eterna/ui/NucleotideFinder';
 import ExplosionFactorDialog from 'eterna/ui/ExplosionFactorDialog';
 import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
 import CopyTextDialogMode from './CopyTextDialogMode';
-import Mol3DView from './PoseEdit/Mol3DView';
-import MyContainer from './PuzzleEdit/MyContainer';
+import ThreeView from './ThreeView';
+import Mol3DGate, { PixiRenderCallback } from './Mol3DGate';
 
 export default abstract class GameMode extends AppMode {
     public readonly bgLayer = new Container();
-    public readonly poseLayer = new MyContainer();//new Container();
+    public readonly poseLayer = new Container();
     public readonly uiLayer = new Container();
     public readonly dialogLayer = new Container();
     public readonly notifLayer = new Container();
@@ -40,7 +40,41 @@ export default abstract class GameMode extends AppMode {
 
     /** Controls whether certain folding operations are run synchronously or queued up */
     public forceSync: boolean = false;
+    
+    //kkk members for 3D
+    _3DView: ThreeView; 
+    _3DFilePath: string | File | Blob = '';
+    mol3DGate: Mol3DGate;
 
+    //kkk transfer the mouse hover from 2D to 3D 
+    public mouseHovered(index: number, color: number) {
+        this.mol3DGate?.mouseHovered(index, color);
+    }
+    //kkk create 3D ContextMenu
+    create3DMenu():ContextMenu {
+        return this._3DView.create3DMenu();
+    }
+    //kkk make 3d view on game scene with cif file 
+    add3DSprite(filePath: string | File | Blob, _secStruct:string) {
+        this._3DFilePath = filePath;
+        if(!this._3DView) {
+            this._3DView = new ThreeView();
+            this.addObject(this._3DView, this.poseLayer);
+        }
+        var threeView = this._3DView;
+        this.mol3DGate?.stage?.dispose();
+        threeView.removeAnnotations();
+        if(threeView.pixiContainer) {
+            threeView.nglTextArray = new Array(0);
+            function NGLCallback(canvas:HTMLCanvasElement, width:number, height:number):void {
+                threeView.updateNGLTexture(canvas, width, height);
+           }
+            var callback:PixiRenderCallback = NGLCallback;
+            this.mol3DGate = new Mol3DGate(filePath, threeView.pixiContainer, threeView, callback, this, _secStruct);
+            // threeView.setToNormal();
+            threeView.onResized();
+        }
+    }
     protected setup(): void {
         super.setup();
         Assert.assertIsDefined(this.container);
@@ -281,32 +315,20 @@ export default abstract class GameMode extends AppMode {
 
     public onContextMenuEvent(e: Event): void {
         Assert.assertIsDefined(Flashbang.globalMouse);
+        var pos = Flashbang.globalMouse;
+        var ee = <PointerEvent> e;
+        if(ee.clientX !== undefined && ee.clientY !== undefined)
+            pos = new Point(ee.clientX, ee.clientY);
         let handled = false;
         if (((e.target as HTMLElement).parentNode as HTMLElement).id === Eterna.PIXI_CONTAINER_ID) {
             if (this._contextMenuDialogRef.isLive) {
                 this._contextMenuDialogRef.destroyObject();
                 handled = true;
             } else {
-                // if(Mol3DView.scope !== undefined) {
-                //     //kkk
-                //     // var pos = Mol3DView.scope.getPosition();
-                //     // var event = e as PointerEvent;
-                //     // if(Mol3DView.scope.stage.viewer.isPointInBoundBox(event.offsetX, event.offsetY, false)) return;
-                //     if(Mol3DView.scope.isOver3DCanvas) {
-                //         const menu = Mol3DView.scope.createContextMenu();
-                //         if (menu != null) {
-                //             this._contextMenuDialogRef = this.addObject(
-                //                 new ContextMenuDialog(menu, Flashbang.globalMouse),
-                //                 this.contextMenuLayer
-                //             );
-                //         }
-                //         handled = true;
-                //     }
-                // }
                 const menu = this.createContextMenu();
                 if (menu != null) {
                     this._contextMenuDialogRef = this.addObject(
-                        new ContextMenuDialog(menu, Flashbang.globalMouse),
+                        new ContextMenuDialog(menu, pos/*Flashbang.globalMouse*/),
                         this.contextMenuLayer
                     );
                     handled = true;

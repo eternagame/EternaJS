@@ -1,4 +1,4 @@
-
+//kkk VToolBar.ts --- side tool bar for 3d View
 import {Sprite} from 'pixi.js';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import {

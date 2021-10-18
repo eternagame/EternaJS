@@ -48,8 +48,10 @@ export enum PuzzleID {
     TheophyllineRibozymeSwitch = 2390140, // aux info
     MicrofluidicChip = 6502997, // level 4/7 - MissionCleared info
     AandBRO = 6892307, // Oligos
-    Tutorial1 = 9218290, //9837790,// //6502927, // rscript // 10907948,//
-    // Tutorial1 = 10907948,//
+    Tutorial1 = 9218290, //E.Coli Ribisome 55 rRNA, test.cif  
+    // Tutorial1 = 9837790, // COVID-19 Frameshifting ..., 6xrz.cif
+    // Tutorial1 = 6502927,
+    // Tutorial1 = 10907948,
     Tutorial4 = 6502944,
     Tutorial6 = 6502945,
     Tutorial8 = 6502947,
@@ -134,16 +136,6 @@ export default class EternaApp extends FlashbangApp {
         const pixiContainer: HTMLElement = document.createElement('div');
         pixiContainer.id = Eterna.PIXI_CONTAINER_ID;
         eternaContainer.appendChild(pixiContainer);
-
-        //kkk
-        // var tmpContainer: HTMLDivElement = document.createElement('div');
-        // tmpContainer.id = 'mycontainer';
-        // tmpContainer.style.position = 'absolute'
-        // tmpContainer.style.left = '0px'
-        // tmpContainer.style.top = '0px'
-        // tmpContainer.style.width = screen.width + 'px'
-        // tmpContainer.style.height = screen.height + 'px';
-        // pixiContainer.appendChild(tmpContainer);
 
         const overlay: HTMLElement = document.createElement('div');
         overlay.id = Eterna.OVERLAY_DIV_ID;

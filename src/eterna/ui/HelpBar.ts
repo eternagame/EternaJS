@@ -8,7 +8,6 @@ interface HelpBarProps {
     onHelpClicked: () => void;
     onChatClicked: () => void;
     onInfoClicked?: () => void;
-    // onThreeClicked?: () => void; //kkk //set 3DView button interface
 }
 
 export default class HelpBar extends ContainerObject {
@@ -20,15 +19,6 @@ export default class HelpBar extends ContainerObject {
         super();
 
         const { theme } = HelpBar;
-
-        //kkk //set 3DView button
-        // const threeButton = new GameButton()
-        //     .up(Bitmaps.ImgThreeScreen)
-        //     .over(Bitmaps.ImgThreeScreenOver)
-        //     .down(Bitmaps.ImgThreeScreenHint)
-        //     .tooltip('3D Screen');
-        // this.addObject(threeButton, this.container);
-        // this.regs.add(threeButton.clicked.connect(props.onThreeClicked));
 
         const chat = new GameButton()
             .up(Bitmaps.ImgChat)

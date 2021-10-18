@@ -64,13 +64,13 @@ export default class ChatManager {
         }
     }
 
-    //kkk
+    //kkk get/set chat window position
     public setPosition(top: number) {
         if (this._chatbox == null) {
             return;
         }
         this._chatbox.style.top = top + 'px';
-        this._chatbox.style.zIndex = '99999999';
+        this._chatbox.style.zIndex = '1';
     }
     public getPosition(): any {
         if (this._chatbox == null) {

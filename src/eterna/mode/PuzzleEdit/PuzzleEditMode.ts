@@ -329,6 +329,7 @@ export default class PuzzleEditMode extends GameMode {
             const poseField: PoseField = new PoseField(true);
             this.addObject(poseField, this.poseLayer);
             const { pose } = poseField;
+            pose.setEditMode(this); //kkk make channel between Pos2D and PuzzleEditMode
             pose.annotationManager = this._annotationManager;
             pose.scoreFolder = this._folder;
             pose.molecularStructure = defaultPairs;
@@ -613,6 +614,9 @@ export default class PuzzleEditMode extends GameMode {
             HAlign.CENTER, VAlign.BOTTOM, 20, -20
         );
 
+        //kkk call onResize of 3d view 
+        this._3DView?.onResized();
+
         const toolbarBounds = this._toolbar.display.getBounds();
         for (let ii = 0; ii < this._numTargets; ++ii) {
             const structureInput = this._structureInputs[ii];
@@ -643,6 +647,11 @@ export default class PuzzleEditMode extends GameMode {
     protected createContextMenu(): ContextMenu | null {
         if (this.isDialogOrNotifShowing || this.hasUILock) {
             return null;
+        }
+
+        //kkk add 3D Menu
+        if(this.mol3DGate && this.mol3DGate.isOver3DCanvas) {
+            return this.create3DMenu();
         }
 
         const menu = new ContextMenu({ horizontal: false });
@@ -997,6 +1006,9 @@ export default class PuzzleEditMode extends GameMode {
         }
 
         this.updateScore();
+        //kkk undo sequence change in 3D
+        this.mol3DGate?.updateSequence(this.getSequence().split(' '));
+        this.mol3DGate?.stage?.viewer.selectEBaseObject2(-1);
     }
 
     private moveUndoStackBackward(): void {
@@ -1015,6 +1027,10 @@ export default class PuzzleEditMode extends GameMode {
                 .getParenthesis(undefined, true);
         }
         this.updateScore();
+        
+        //kkk undo sequence change in 3D
+        this.mol3DGate?.updateSequence(this.getSequence().split(' '));
+        this.mol3DGate?.stage?.viewer.selectEBaseObject2(-1);
     }
 
     private updateScore(): void {
@@ -1220,6 +1236,9 @@ export default class PuzzleEditMode extends GameMode {
             currentCustomLayouts.push(customLayout || null);
             currentTargetPairs.push(targetPairs);
         }
+        //kkk update 3D baseSequence
+        // this.mol3DGate?.updateSequence(this.getSequence().split(' '));
+
         if (noChange && this._stackLevel >= 0) {
             return;
         }

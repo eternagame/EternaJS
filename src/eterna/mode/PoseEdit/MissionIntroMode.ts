@@ -15,13 +15,11 @@ import BitmapManager from 'eterna/resources/BitmapManager';
 import MissionIntroPanel from 'eterna/ui/MissionIntroPanel';
 import UITheme from 'eterna/ui/UITheme';
 import SecStruct from 'eterna/rnatypes/SecStruct';
-import Mol3DView from './Mol3DView';
 
 export default class MissionIntroMode extends AppMode {
-    private readonly _mol3DView: PoseEditMode; //kkk
     constructor(
         puzzleName: string, puzzleDescription: string, puzzleThumbnails: SecStruct[], constraintBoxes: ConstraintBox[],
-        customLayout: Array<[number, number] | [null, null]> | null = null, mol3DView: Mol3DView
+        customLayout: Array<[number, number] | [null, null]> | null = null
     ) {
         super();
         this._puzzleName = puzzleName;
@@ -29,7 +27,6 @@ export default class MissionIntroMode extends AppMode {
         this._puzzleThumbnails = puzzleThumbnails;
         this._constraintBoxes = constraintBoxes;
         this._customLayout = customLayout;
-        this._mol3DView = mol3DView;
     }
 
     protected setup(): void {
@@ -148,8 +145,6 @@ export default class MissionIntroMode extends AppMode {
             this._closed = true;
             Assert.assertIsDefined(this.modeStack);
             this.modeStack.popMode();
-            //kkk
-            this._mol3DView.showScreen(true);
         }
     }
 

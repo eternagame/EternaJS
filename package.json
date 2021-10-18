@@ -90,7 +90,7 @@
     "lodash.debounce": "^4.0.8",
     "loglevel": "^1.7.1",
     "marked": "^2.0.7",
-    "ngl": "https://github.com/eternagame/ngl/archive/0436c6407464b474380e83ec9440696e153f98ba.tar.gz",
+    "ngl": "https://github.com/eternagame/ngl/archive/cfee3cab842e27feca24d36f223f1bdb1c8109c9.tar.gz",
     "pchip": "^1.0.2",
     "pixi-filters": "^4.1.1",
     "pixi-multistyle-text": "github:eternagame/pixi-multistyle-text#1f2283b1d4a1bb262b57783e1bf2f81802a17809",

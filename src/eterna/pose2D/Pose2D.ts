@@ -11,7 +11,7 @@ import {
     ParallelTask, AlphaTask, LocationTask, DelayTask, SelfDestructTask, Vector2, Arrays,
     RepeatingTask, Updatable, Assert
 } from 'flashbang';
-import PoseEditMode, { Move } from 'eterna/mode/PoseEdit/PoseEditMode';
+import { Move } from 'eterna/mode/PoseEdit/PoseEditMode';
 import LightRay from 'eterna/vfx/LightRay';
 import TextBalloon from 'eterna/ui/TextBalloon';
 import ROPWait from 'eterna/rscript/ROPWait';
@@ -42,6 +42,7 @@ import PuzzleEditOp from './PuzzleEditOp';
 import RNALayout, { RNATreeNode } from './RNALayout';
 import ScoreDisplayNode, { ScoreDisplayNodeType } from './ScoreDisplayNode';
 import triangulate from './triangulate';
+import Mol3DGate from 'eterna/mode/Mol3DGate';
 
 interface Mut {
     pos: number;
@@ -72,42 +73,24 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._poseField = poseField;
         this._editable = editable;
 
-        //kkk // transfer mouse down event from 3D Canvas to 2D Canvas
-        window.addEventListener('kkk', e => {
-            var ce = <CustomEvent>e;
-            const mouseX: number = ce.detail.clientX;
-            const mouseY: number = ce.detail.clientY;
-
-            let closestDist = -1;
-            let closestIndex = -1;
-
-            if (this.posEditMode) {
-                const fullSeqLen = this.fullSequenceLength;
-                for (let ii = 0; ii < fullSeqLen; ii++) {
-                    const mouseDist: number = this._bases[ii].isClicked(
-                        mouseX - this._offX, mouseY - this._offY, this._zoomLevel, false
-                    );
-                    if (mouseDist >= 0) {
-                        if (closestIndex < 0 || mouseDist < closestDist) {
-                            closestIndex = ii;
-                            closestDist = mouseDist;
-                        }
-                    }
-                }
-                this.posEditMode.checkCustomEvent(closestDist, closestIndex);
-            }
-        });
-        //kkk // transfer 3D mouse move picking result to 2D Canvas and highlight corresponding base.
+        //kkk transfer 3D mouse move picking result to 2D Canvas and highlight/click corresponding base.
         window.addEventListener('picking', e => {
             var ce = <CustomEvent>e;
             const closestIndex: number = ce.detail.resno;
-            this.on3DPickingMouseMoved(closestIndex - 1);
+            if(ce.detail.action === 'hover' && !Mol3DGate.inUpdating) {
+                this.on3DPickingMouseMoved(closestIndex - 1);
+            }
+            else if(ce.detail.action === 'clicked') {
+                if(Mol3DGate.scope && Mol3DGate.scope.threeView.metaState == 2) {
+                    this.simulateMousedownCallback(closestIndex - 1);
+                }
+            }
         });
     }
 
-    protected posEditMode: PoseEditMode;
-    public setPoseEditMode(posEdit: PoseEditMode) {
-        this.posEditMode = posEdit;
+    protected pEditMode: GameMode;
+    public setEditMode(editMode: GameMode) {
+        this.pEditMode = editMode;
     }
     protected added() {
         super.added();
@@ -366,8 +349,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public set currentColor(col: RNAPaint) {
         this._currentColor = col;
-        //kkk //syncronize the color change by 2D with 3D
-        this.posEditMode.mol3DView.stage.viewer.setBaseColor(this.posEditMode.mol3DView.getBaseColor(col));
+        //kkk syncronize the color change by 2D with 3D
+        this.pEditMode?.mol3DGate?.stage?.viewer.setBaseColor(this.pEditMode.mol3DGate.getBaseColor(col));
     }
 
     public get currentColor(): RNAPaint {
@@ -394,10 +377,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.callPoseEditCallback();
             this.annotationManager.refreshAnnotations(this, false);
             this._librarySelectionsChanged = false;
+            Mol3DGate.inUpdating = false; //kkk
             return;
         }
 
         if (this._mutatedSequence == null) {
+            Mol3DGate.inUpdating = false; //kkk
             return;
         }
 
@@ -442,6 +427,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.callPoseEditCallback();
             this.annotationManager.refreshAnnotations(this);
         }
+        Mol3DGate.inUpdating = false; //kkk
 
         this._mutatedSequence = null;
         this._lockUpdated = false;
@@ -567,7 +553,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public onPoseMouseDownPropagate(e: InteractionEvent, closestIndex: number): void {
+    public onPoseMouseDownPropagate(e: InteractionEvent|null, closestIndex: number): void {
         const altDown: boolean = Flashbang.app.isAltKeyDown;
         const ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
         const ctrlDownOrBaseMarking = ctrlDown || this.currentColor === RNAPaint.BASE_MARK;
@@ -881,13 +867,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._customLayoutChanged = true;
     }
 
-    public onPoseKKKMouseDown(closestIndex: number): void {
-        if (closestIndex >= 0) {
-            this._lastShiftedCommand = -1;
-            this.onBaseMouseDown(closestIndex, false);
-        }
-    }
-
     public onPoseMouseDown(e: InteractionEvent, closestIndex: number): void {
         const altDown: boolean = Flashbang.app.isAltKeyDown;
         const shiftDown: boolean = Flashbang.app.isShiftKeyDown;
@@ -1057,7 +1036,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public toggleBaseMark(baseIndex: number): void {
         //kkk toggle basemark in 3D
-        this.posEditMode?.mol3DView?.stage?.viewer.markEBaseObject(baseIndex);
+        this.pEditMode?.mol3DGate?.stage?.viewer.markEBaseObject(baseIndex);
+
         if (!this.isTrackedLayer(baseIndex, PLAYER_MARKER_LAYER)) {
             this.addBaseMark(baseIndex, PLAYER_MARKER_LAYER);
         } else {
@@ -1183,8 +1163,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         if (closestIndex >= 0 && this._currentColor >= 0) {
-            //kkk //transfer mouse hover result from 2D to 3DView 
-            this.posEditMode?.mouseHovered(closestIndex + 1, this._currentColor);
+            //kkk transfer mouse hover result from 2D to 3DView 
+            this.pEditMode?.mouseHovered(closestIndex + 1, this._currentColor);
 
             this.onBaseMouseMove(closestIndex);
 
@@ -1208,8 +1188,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         } else {
             this._lastColoredIndex = -1;
-            //kkk // transfer mouse hover result from 2D to 3DView 
-            this.posEditMode?.mouseHovered(-1, 0);
+            //kkk transfer mouse hover result from 2D to 3DView 
+            this.pEditMode?.mouseHovered(-1, 0);
         }
 
         if (!this._coloring) {
@@ -1217,7 +1197,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    //kkk // transfer the mouse picking result from 3DView to 2D canvas 
+    //kkk transfer the mouse picking result from 3DView to 2D canvas 
     public on3DPickingMouseMoved(closestIndex: number): void {
         if (!this._coloring) {
             this.clearMouse();
@@ -2005,6 +1985,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public callPoseEditCallback(): void {
         if (this._poseEditCallback != null) {
             this._poseEditCallback();
+            //kkk update 3D baseSequence
+            this.pEditMode.mol3DGate?.updateSequence(this.pEditMode.getSequence().split(' '));
         }
     }
 
@@ -2032,6 +2014,17 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public set startMousedownCallback(cb: PoseMouseDownCallback) {
         this._startMousedownCallback = cb;
+    }
+
+    //kkk transfer picking result result from 3D to 2D so that enable edit puzzle on 3D
+    public simulateMousedownCallback(closestIndex:number): void {
+        if (this._startMousedownCallback != null && closestIndex>=0) {
+            Mol3DGate.inUpdating = true;
+            var e: InteractionEvent = new InteractionEvent();
+            this._startMousedownCallback(e, 0, closestIndex);
+        }
+        // deselect all annotations
+        this.annotationManager.deselectAll();
     }
 
     public callStartMousedownCallback(e: InteractionEvent): void {
@@ -2797,9 +2790,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        //kkk
+        //kkk synchronize showNumbering of 2D with 3D
         if(this._redraw) {
-            this.posEditMode.mol3DView.showAnnotations(this.showNumbering);
+            this.pEditMode?.mol3DGate?.showAnnotations(this.showNumbering);
         }
 
         this._redraw = false;
@@ -3381,9 +3374,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this._mutatedSequence.setNt(seqnum, this._currentColor);
                 ROPWait.notifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
                 this._bases[seqnum].setType(this._currentColor, true);
-                //kkk
+                //kkk synchronize base over color with 3D
                 var curColor = this._mutatedSequence.nt(seqnum)
-                this.posEditMode?.mol3DView.stage.viewer.selectEBaseObject2(seqnum, curColor != this._currentColor);
+                this.pEditMode?.mol3DGate?.stage.viewer.selectEBaseObject2(seqnum, curColor != this._currentColor);
             } else if (this._currentColor === RNAPaint.PAIR && this._pairs.isPaired(seqnum)) {
                 const pi = this._pairs.pairingPartner(seqnum);
                 if (this.isLocked(pi)) {

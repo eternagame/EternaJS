@@ -1,4 +1,4 @@
-import { Graphics, Sprite, InteractionEvent, Point, BaseTexture, Texture, FORMATS, SCALE_MODES } from 'pixi.js';
+import { Graphics, InteractionEvent, Point } from 'pixi.js';
 import {
     ContainerObject, KeyboardListener, MouseWheelListener, InputUtil, Flashbang,
     KeyboardEventType, KeyCode, Assert
@@ -8,7 +8,7 @@ import debounce from 'lodash.debounce';
 import Pose2D from './Pose2D';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
 import RNAAnchorObject from './RNAAnchorObject';
-import Mol3DView from 'eterna/mode/PoseEdit/Mol3DView';
+import Mol3DGate from 'eterna/mode/Mol3DGate';
 
 /** Wraps a Pose2D and handles resizing, masking, and input events */
 export default class PoseField extends ContainerObject implements KeyboardListener, MouseWheelListener {
@@ -186,7 +186,8 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         if (Flashbang.app.isControlKeyDown) {
             return;
         }
-        if (Mol3DView.scope && Mol3DView.scope.isOver3DCanvas) return; //kkk
+        //kkk ignore mouse event on 3d view
+        if (Mol3DGate.scope && Mol3DGate.scope.isOver3DCanvas) return; 
 
         const pointerId = e.data.identifier;
         const { x, y } = e.data.global;
@@ -201,7 +202,8 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     }
 
     private onPointerMove(e: InteractionEvent) {
-        if (this._interactionCache.size == 0 && Mol3DView.scope && Mol3DView.scope.isOver3DCanvas) return; //kkk
+        //kkk ignore mouse event on 3d view
+        if (this._interactionCache.size == 0 && Mol3DGate.scope && Mol3DGate.scope.isOver3DCanvas) return; 
 
         this._interactionCache.forEach((_point, pointerId) => {
             if (pointerId === e.data.identifier) {
@@ -331,8 +333,8 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         if (!this.display.visible || !this.containsPoint(mouse.x, mouse.y)) {
             return false;
         }
-        //kkk // ignore mouse wheel event from 3D view
-        if (Mol3DView.scope !== undefined && Mol3DView.scope.isOver3DCanvas) return false;
+        //kkk ignore WheelEvent on 3D view
+        if (Mol3DGate.scope && Mol3DGate.scope.isOver3DCanvas) return false;
 
         if (e.deltaY < 0) {
             if (e.deltaY < -2 && e.deltaY < this._lastDeltaY) this._debounceZoomIn();

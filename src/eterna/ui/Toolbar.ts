@@ -21,8 +21,10 @@ import EternaMenu, { EternaMenuStyle } from './EternaMenu';
 import ScrollContainer from './ScrollContainer';
 import AnnotationPanel from './AnnotationPanel';
 import fileDialog from 'file-dialog';
-import Mol3DView from 'eterna/mode/PoseEdit/Mol3DView';
-import { boolean } from 'nglx/dist/declarations/utils';
+import Mol3DGate from 'eterna/mode/Mol3DGate';
+import ErrorDialog from './ErrorDialog';
+import GameMode from 'eterna/mode/GameMode';
+import PuzzleEditMode from 'eterna/mode/PuzzleEdit/PuzzleEditMode';
 
 export enum ToolbarType {
     PUZZLE,
@@ -96,7 +98,7 @@ export default class Toolbar extends ContainerObject {
 
     public boostersMenu: GameButton;
 
-    public validate3DButton: GameButton; //kkk
+    public validate3DButton: GameButton; //kkk declare 3d validation button
 
     public baseMarkerButton: GameButton;
     public librarySelectionButton: GameButton;
@@ -786,17 +788,33 @@ export default class Toolbar extends ContainerObject {
             this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
             this.addObject(this.submitButton, this.lowerToolbarLayout);
         }
-        //kkk
-        this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
-        this.validate3DButton = new ToolbarButton()
-            .up(Bitmaps.ImgFileOpen)
-            .over(Bitmaps.ImgFileOpenHover)
-            .down(Bitmaps.ImgFileOpen)
-            .tooltip('Validate 3D Models');
 
-        if (this.type !== ToolbarType.FEEDBACK) {
+        //kkk add 3d validation button
+        if (this._type === ToolbarType.PUZZLEMAKER) {
+            this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
+            this.validate3DButton = new ToolbarButton()
+                .up(Bitmaps.ImgFileOpen)
+                .over(Bitmaps.ImgFileOpenHover)
+                .down(Bitmaps.ImgFileOpen)
+                .tooltip('Validate 3D Models');
+
             this.addObject(this.validate3DButton, this.lowerToolbarLayout);
+            this.regs.add(this.validate3DButton.clicked.connect(() => {
+                fileDialog({ accept: ['.cif'] }).then(file => {
+                    var mode: PuzzleEditMode = this.mode as PuzzleEditMode;
+                    var sequence = mode.getSequence().split(' ')[0];
+                    Mol3DGate.checkModelFile(file[0], mode.getSequence().split(' ')[0]).then((resCount:number)=>{
+                        if(mode && resCount == sequence.length)
+                            mode.add3DSprite(file[0], mode.structure);
+                        else {
+                            const PROMPT = 'Your selected file is mismatched with the puzzle.';
+                            mode?.showDialog(new ErrorDialog(PROMPT));
+                        }
+                    });
+                })
+            }));
         }
+        
 
 
         this.rightArrow = this.makeArrowButton('right');
@@ -851,42 +869,6 @@ export default class Toolbar extends ContainerObject {
                 }
             }));
         }
-
-        //kkk
-        this.regs.add(this.validate3DButton.clicked.connect(() => {
-            fileDialog({ accept: ['.cif'] }).then(file => {
-                // const data = new FormData()
-                // data.append('file', file[0])
-                // data.append('cifName', file[0].name)
-                var mode: PoseEditMode = this.mode as PoseEditMode;
-                var sequence = mode.getSequence().split(' ')[0];
-                Mol3DView.checkModelFile(file[0], mode.getSequence().split(' ')[0]).then((resCount:number)=>{
-                    // console.log(resCount, sequence.length, sequence);
-                    if(resCount == sequence.length)
-                        mode?.add3DSprite(file[0]);
-                    else {
-                        const PROMPT = 'Error!\nYour selected file is mismatched with the puzzle.';
-                        mode?.showConfirmDialog(PROMPT);
-                    }
-                });
-
-                // var reader = new FileReader();
-                // // reader.readAsDataURL(file[0]); // this is reading as data url
-                // reader.readAsText(file[0]); // this is reading as data url
-
-                // // here we tell the reader what to do when it's done reading...
-                // reader.onload = readerEvent => {
-                //     var content = readerEvent.target?.result;
-                //     // console.log(content);
-                //     // Post to server
-                //     fetch('/upload3DModel', {
-                //         method: 'POST',
-                //         body: content
-                //     })
-                // }
-
-            })
-        }));
     }
 
     private makeArrowButton(direction: 'left' | 'right'): GameButton {
