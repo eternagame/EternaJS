@@ -959,12 +959,6 @@ export default class Toolbar extends ContainerObject {
         if (e.target === this._scrollNextButton.container || e.target === this._scrollPrevButton.container) return;
         if (!e.target.buttonMode) return;
         if (this._isDragging || !this._isExpanded) return;
-        if (
-            this.settingsButton.container === e.target
-            || this.futureFeatureButton.container === e.target
-            || this.redoButton.container === e.target
-            || this.undoButton.container === e.target
-        ) return;
         if (DisplayUtil.hitTest(this.leftButtonsGroup.container, e.data.global)) {
             this._startPointContainer = this.leftButtonsGroup._content;
         }
