@@ -143,26 +143,16 @@ class @Library
     data = Script.get_script_sync(id).data
     script = data['script'][0]
     code = ""
-
     if secure? and secure is true
-      user_id = data['current_uid']
-      status = "Access Denied:"
-      if !(user_id?)
-        status += " Must be logged in to execute scripts!"
-        alert(status)
-        return code
-      if user_id != script['uid']
-        status += " We can only execute scripts you have authored..."
-        status += " try making a copy!"
-        alert(status)
-        return code
-
+      if !ScriptInterface.maybe_show_security_prompt(script)
+        return ""
     # for multiple input implementation
     if script['input']
       inputs = JSON.parse(script['input'])
-      for i in [0..(inputs.length - 1)]
-        input = inputs[i]
-        code += "var "+input['value']+"=arguments["+i+"];"
+      if inputs.length > 0
+        for i in [0..(inputs.length - 1)]
+          input = inputs[i]
+          code += "var "+input['value']+"=arguments["+i+"];"
     code = "function _"+id+"(){Lib = new Library();"+code+script['source']+"};_"+id
     return code
 

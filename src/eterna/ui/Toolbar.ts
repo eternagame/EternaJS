@@ -516,7 +516,8 @@ export default class Toolbar extends ContainerObject {
 
         this.specButton = new ToolbarButton()
             .allStates(Bitmaps.ImgSpec)
-            .tooltip("View RNA's melting point, dotplot and other specs")
+            .disabled(undefined)
+            .tooltip("View RNA's melting point, dotplot and other specs (S)")
             .hotkey(KeyCode.KeyS);
 
         if (this._type !== ToolbarType.PUZZLEMAKER && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED) {
@@ -548,14 +549,15 @@ export default class Toolbar extends ContainerObject {
         this.nucleotideFindButton = new ToolbarButton()
             .allStates(Bitmaps.ImgFind)
             .disabled()
-            .tooltip('Type a nucleotide index to put it in the center of the screen (j)')
+            .tooltip('Type a nucleotide index to put it in the center of the screen (J)')
             .hotkey(KeyCode.KeyJ);
 
         this._scrollContainer.addObject(this.nucleotideFindButton, this._scrollContainer.content);
 
         this.nucleotideRangeButton = new ToolbarButton()
             .allStates(Bitmaps.NovaPuzzleImg)
-            .tooltip('Enter a nucleotide range to view (v)')
+            .disabled()
+            .tooltip('Enter a nucleotide range to view (V)')
             .hotkey(KeyCode.KeyV);
 
         this.explosionFactorButton = new ToolbarButton()
@@ -585,21 +587,21 @@ export default class Toolbar extends ContainerObject {
             .disabled(undefined)
             .label('Move', 14)
             .scaleBitmapToLabel()
-            .tooltip('Move a nucleotide or stem by ctrl-shift-click');
+            .tooltip('Move a nucleotide or stem by Ctrl-Shift-Click');
 
         this.rotateStemButton = new GameButton()
             .allStates(Bitmaps.CustomLayout)
             .disabled(undefined)
             .label('Rotate stem', 14)
             .scaleBitmapToLabel()
-            .tooltip('Rotate stem clockwise 1/4 turn by ctrl-shift-click');
+            .tooltip('Rotate stem clockwise 1/4 turn by Ctrl-Shift-Click');
 
         this.flipStemButton = new GameButton()
             .allStates(Bitmaps.CustomLayout)
             .disabled(undefined)
             .label('Flip stem', 14)
             .scaleBitmapToLabel()
-            .tooltip('Flip stem by ctrl-shift-click');
+            .tooltip('Flip stem by Ctrl-Shift-Click');
 
         this.snapToGridButton = new GameButton()
             .allStates(Bitmaps.CustomLayout)
@@ -638,7 +640,7 @@ export default class Toolbar extends ContainerObject {
 
         this.freezeButton = new ToolbarButton()
             .allStates(Bitmaps.ImgFreeze)
-            .tooltip('Frozen mode. Suspends/resumes folding engine calculations.')
+            .tooltip('Frozen mode. Suspends/resumes folding engine calculations. (F)')
             .hotkey(KeyCode.KeyF)
             .rscriptID(RScriptUIElementID.FREEZE);
 
@@ -653,7 +655,7 @@ export default class Toolbar extends ContainerObject {
 
         this.pipButton = new ToolbarButton()
             .allStates(Bitmaps.ImgPip)
-            .tooltip('Set PiP mode')
+            .tooltip('Set PiP mode (P)')
             .hotkey(KeyCode.KeyP)
             .rscriptID(RScriptUIElementID.PIP);
 
@@ -666,7 +668,7 @@ export default class Toolbar extends ContainerObject {
 
         this.naturalButton = new ToolbarButton()
             .allStates(Bitmaps.ImgNative)
-            .tooltip('Natural Mode. RNA folds into the most stable shape.')
+            .tooltip('Natural Mode. RNA folds into the most stable shape. (Space)')
             .rscriptID(RScriptUIElementID.TOGGLENATURAL);
 
         this.estimateButton = new ToolbarButton()
@@ -675,7 +677,7 @@ export default class Toolbar extends ContainerObject {
 
         this.targetButton = new ToolbarButton()
             .allStates(Bitmaps.ImgTarget)
-            .tooltip('Target Mode. RNA freezes into the desired shape.')
+            .tooltip('Target Mode. RNA freezes into the desired shape. (Space)')
             .rscriptID(RScriptUIElementID.TOGGLETARGET);
 
         if (this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED) {
@@ -718,7 +720,7 @@ export default class Toolbar extends ContainerObject {
 
         this.pairSwapButton = new ToolbarButton()
             .allStates(Bitmaps.ImgSwap)
-            .tooltip('Swap paired bases.')
+            .tooltip('Swap paired bases. (5)')
             .rscriptID(RScriptUIElementID.SWAP);
 
         this.screenshotButton = new ToolbarButton()
@@ -791,7 +793,7 @@ export default class Toolbar extends ContainerObject {
                 .over(Bitmaps.ImgZoomInOver)
                 .down(Bitmaps.ImgZoomInHit)
                 .disabled(Bitmaps.ImgZoomInDisable)
-                .tooltip('Zoom in')
+                .tooltip('Zoom in (=)')
                 .hotkey(KeyCode.Equal)
                 .rscriptID(RScriptUIElementID.ZOOMIN);
             this._scrollContainer.addObject(this.zoomInButton, this._scrollContainer.content);
@@ -801,7 +803,7 @@ export default class Toolbar extends ContainerObject {
                 .over(Bitmaps.ImgZoomOutOver)
                 .down(Bitmaps.ImgZoomOutHit)
                 .disabled(Bitmaps.ImgZoomOutDisable)
-                .tooltip('Zoom out')
+                .tooltip('Zoom out (-)')
                 .hotkey(KeyCode.Minus)
                 .rscriptID(RScriptUIElementID.ZOOMOUT);
             this._scrollContainer.addObject(this.zoomOutButton, this._scrollContainer.content);
@@ -839,7 +841,7 @@ export default class Toolbar extends ContainerObject {
             .up(Bitmaps.ImgMagicGlue)
             .over(Bitmaps.ImgMagicGlueOver)
             .down(Bitmaps.ImgMagicGlue)
-            .tooltip('Magic glue - change target structure in purple areas (hold alt)');
+            .tooltip('Magic glue - change target structure in purple areas (Hold Alt)');
         if (this._showGlue) {
             this._scrollContainer.addObject(this.magicGlueButton, this._scrollContainer.content);
         }

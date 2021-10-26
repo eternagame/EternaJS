@@ -151,11 +151,23 @@
     )
 
   evaluate_script_with_nid : (nid, params, callback, _sync) ->
-    Script.get_script(nid, (data)=>
+    finish_evaluating_script = (result) => 
+      if maingame = document.getElementById("maingame")
+        if maingame['end_'+nid]
+          maingame['end_'+nid](result)
+        else if maingame['end']
+          maingame.end(result)
+      if callback
+        callback(result)
+
+    Script.get_script(nid, (data) =>
       if data['script'].length == 0
-        alert "please check nid"
+        finish_evaluating_script({ cause: "Script not found; Please check nid", result: false, eval_time: 0 })
         return
       script = data['script'][0]
+      if !ScriptInterface.maybe_show_security_prompt(script)
+        finish_evaluating_script({ cause: "Didn't agree to run script", result: false, eval_time: 0 })
+        return
       input_array = JSON.parse(script['input'])
       if input_array.length > 0 and params?
         for ii in [0..input_array.length-1]
@@ -174,14 +186,7 @@
       if @Pervasives?
         @Pervasives.ignore()
       result = @evaluate(coded_input + source)
-      if maingame = document.getElementById("maingame")
-        if maingame['end_'+nid]
-          maingame['end_'+nid](result)
-        else if maingame['end']
-          maingame.end(result)
-
-      if callback
-        callback(result)
+      finish_evaluating_script(result)
     , if (_sync?) then _sync else false)
 
   evaluate_puzzle_solving : (script, secstruct, timeout) ->
@@ -289,6 +294,29 @@
         break
     code += source
     return code  
+
+  # Returns if the user agreed to run the script or if it is trusted
+  maybe_show_security_prompt : (script) -> 
+    if script['agreed_to_run'] == "0" && script['is_trusted'] == "0"
+      answer = null
+      id = script['nid']
+      if script['is_favorite'] == "1"
+        answer = prompt('The script has been updated since you last ran it!\n' +
+              'Go to this link to review it, and then click OK to unlock it again, or Cancel if you aren\'t sure.\n\n' +
+              '"' + script['title'] + '" by ' + script['author']['name'],
+              'https://eternagame.org/web/script/' + id)
+        if answer != null
+          Script.reaffirm_favorite(id, () => {})
+          script["agreed_to_run"] = 1 # Hack to make sure it updates it in the cache
+      else
+          answer = prompt('Scripts you run can do anything you can do on Eterna, such as posting puzzles, solutions, and comments (but NOT editing your account).\n\n' +
+                        'Only run this script if you trust it. Go to the attached link to review it, then click OK to run the script or Cancel if you aren\'t sure.\n' +
+                        '(This message will stop appearing for this script if you favorite it)\n\n' +
+                        '"' + script['title'] + '" by ' + script['author']['name'],
+                        'https://eternagame.org/web/script/' + id + '/')
+
+      return answer != null
+    return true
 }                      
 
 class @LibLoader
