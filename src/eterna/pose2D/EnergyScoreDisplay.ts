@@ -1,6 +1,6 @@
 import MultiStyleText from 'pixi-multistyle-text';
-import {Container, Graphics} from 'pixi.js';
-import {VLayoutContainer, HAlign} from 'flashbang';
+import {Container} from 'pixi.js';
+import {HLayoutContainer, VAlign} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import {FontWeight} from 'flashbang/util/TextBuilder';
 
@@ -23,16 +23,12 @@ export default class EnergyScoreDisplay extends Container {
         this._width = width;
         this._height = height;
 
-        this._bg = new Graphics();
-        this.addChild(this._bg);
-        this.updateBG();
-
-        const textLayout: VLayoutContainer = new VLayoutContainer(2, HAlign.LEFT);
+        const textLayout: HLayoutContainer = new HLayoutContainer(2, VAlign.CENTER);
 
         this._labelText = new MultiStyleText('Total', {
             default: {
                 fontFamily: Fonts.STDFONT,
-                fontSize: 11,
+                fontSize: 10,
                 fill: 0xffffff
             },
             grey: {fill: 0x777777},
@@ -45,7 +41,7 @@ export default class EnergyScoreDisplay extends Container {
             default: {
                 fontFamily: Fonts.STDFONT,
                 fontWeight: FontWeight.SEMIBOLD,
-                fontSize: 13,
+                fontSize: 10,
                 fill: 0xffffff
             },
             grey: {fill: 0x777777},
@@ -53,6 +49,8 @@ export default class EnergyScoreDisplay extends Container {
             red: {fill: 0xFF4747}
         });
         textLayout.addChild(this._energyText);
+
+        this._energyText.position.set(this._labelText.position.x + this._labelText.width + 5, 0);
 
         textLayout.layout();
         textLayout.position.set(5, 4);
@@ -69,27 +67,18 @@ export default class EnergyScoreDisplay extends Container {
     public setEnergyText(label: string, energy: string): void {
         this._labelText.text = label;
         this._energyText.text = energy;
+        this._energyText.position.set(this._labelText.position.x + this._labelText.width + 5, 0);
     }
 
     public setSize(width: number, height: number): void {
         if (width !== this._width || height !== this._height) {
             this._width = width;
             this._height = height;
-            this.updateBG();
         }
-    }
-
-    private updateBG(): void {
-        this._bg.clear();
-        this._bg.beginFill(0x33465F);
-        this._bg.drawRoundedRect(0, 0, this._width, this._height, 10);
-        this._bg.endFill();
-        this._bg.alpha = 0.5;
     }
 
     private readonly _labelText: MultiStyleText;
     private readonly _energyText: MultiStyleText;
-    private readonly _bg: Graphics;
 
     protected _width: number;
     protected _height: number;

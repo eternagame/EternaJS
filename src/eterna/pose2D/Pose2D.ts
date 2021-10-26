@@ -3963,6 +3963,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 scoreScore = `${(totalScore / 100).toString()} kcal`;
             }
 
+            scoreLabel = EnergyScoreDisplay.grey(scoreLabel);
+            scoreScore = EnergyScoreDisplay.grey(scoreScore);
             this._poseField.updateEnergyGui(
                 factor, scoreLabel, scoreScore, nodeLabel, nodeScore, nodeFound, this._getEnergyDelta
             );

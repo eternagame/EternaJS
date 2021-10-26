@@ -56,7 +56,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this.container.addChild(this._primaryScoreEnergyDisplay);
 
         this._deltaScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
-        this._deltaScoreEnergyDisplay.position.set(17 + 119, PoseField.SCORES_POSITION_Y);
+        this._deltaScoreEnergyDisplay.position.set(17 + 90, PoseField.SCORES_POSITION_Y);
         this._deltaScoreEnergyDisplay.visible = false;
         this.container.addChild(this._deltaScoreEnergyDisplay);
 
@@ -356,7 +356,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this._primaryScoreEnergyDisplay.position.set(17, PoseField.SCORES_POSITION_Y);
         this._primaryScoreEnergyDisplay.setSize(111 + factor * 59, 40);
 
-        this._deltaScoreEnergyDisplay.position.set(17 + 119 + factor * 59, PoseField.SCORES_POSITION_Y);
+        this._deltaScoreEnergyDisplay.position.set(17 + 90 + factor * 59, PoseField.SCORES_POSITION_Y);
         this._deltaScoreEnergyDisplay.setSize(111, 40);
 
         this._secondaryScoreEnergyDisplay.position.set(17 + 119 * 2 + factor * 59, PoseField.SCORES_POSITION_Y);
