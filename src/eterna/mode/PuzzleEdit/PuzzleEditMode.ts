@@ -50,6 +50,7 @@ import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, { SubmitPuzzleDetails } from './SubmitPuzzleDialog';
 import StructureInput from './StructureInput';
+import Mol3DGate from '../Mol3DGate';
 
 export interface PuzzleEditPoseData {
     sequence: string;
@@ -74,6 +75,7 @@ type SubmitPuzzleParams = {
     lock: string;
     begin_sequence: string;
     objectives: string;
+    three_structure_file: File;
 };
 
 export default class PuzzleEditMode extends GameMode {
@@ -651,7 +653,7 @@ export default class PuzzleEditMode extends GameMode {
 
         //kkk add 3D Menu
         if(this.mol3DGate && this.mol3DGate.isOver3DCanvas) {
-            return this.create3DMenu();
+            return null;//this.create3DMenu();
         }
 
         const menu = new ContextMenu({ horizontal: false });
@@ -919,8 +921,17 @@ export default class PuzzleEditMode extends GameMode {
             lock: lockString,
             // eslint-disable-next-line camelcase
             begin_sequence: beginningSequence,
-            objectives: JSON.stringify(objectives)
+            objectives: JSON.stringify(objectives),
+            three_structure_file : new File(['testing'], 'structure_upload_test.cif'),
         };
+        //kkk
+        if(Mol3DGate.scope?._3DFilePath instanceof File) {
+            var blob = Mol3DGate.scope._3DFilePath.slice();
+            postParams.three_structure_file = new File([blob], 'structure_upload_test.cif');
+        }
+        else {
+            postParams.three_structure_file = new File([''], 'structure_upload_test.cif');
+        }
 
         const submitText = this.showDialog(new AsyncProcessDialog('Submitting...')).ref;
         Eterna.client.submitPuzzle(postParams)

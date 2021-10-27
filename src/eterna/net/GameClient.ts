@@ -21,7 +21,7 @@ interface VoteDataWrapper {
 
 type Params = Record<
 string,
-string | number | number[] | boolean | PuzzleJSON | RankScrollData | AnnotationDataBundle | null | undefined>;
+string | number | number[] | boolean | PuzzleJSON | RankScrollData | AnnotationDataBundle | File | null | undefined>;
 
 export default class GameClient {
     public readonly baseURL: string;
@@ -241,12 +241,15 @@ export default class GameClient {
     private post(urlString: string, params?: Params): Promise<Response> {
         const url: URL = this.makeURL(urlString);
 
-        const postParams = new URLSearchParams();
+        // const postParams = new URLSearchParams();
+        const postParams = new FormData();
         if (params) {
             // POST requests pass params in the body
             Object.keys(params).forEach((key) => {
                 if (typeof params[key] === 'string') {
                     postParams.append(key, params[key] as string);
+                } else if (params[key] instanceof Blob) {
+                    postParams.append(key, params[key] as Blob);
                 } else {
                     postParams.append(key, String(params[key]));
                 }
@@ -255,8 +258,9 @@ export default class GameClient {
 
         return fetch(url.toString(), {
             method: 'POST',
-            body: postParams.toString(),
-            headers: new Headers({'Content-Type': 'application/x-www-form-urlencoded'}),
+            // body: postParams.toString(),
+            body: postParams, 
+            // headers: new Headers({'Content-Type': 'application/x-www-form-urlencoded'}),
             credentials: 'include'
         }).then((rsp) => {
             if (!rsp.ok) {

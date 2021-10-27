@@ -4,7 +4,7 @@ import {InteractionEvent, Point, Rectangle, Sprite, Graphics, Text, Texture, Con
 import BitmapManager from 'eterna/resources/BitmapManager';
 import {
     ContainerObject, Flashbang, VLayoutContainer, 
-    HAlign, Assert, HLayoutContainer, VAlign, DisplayUtil, SpriteObject
+    HAlign, Assert, HLayoutContainer, VAlign, DisplayUtil, SpriteObject, GameObjectRef
 } from 'flashbang';
 import GameButton from '../ui/GameButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -13,6 +13,7 @@ import Eterna from 'eterna/Eterna';
 import Mol3DGate from 'eterna/mode/Mol3DGate';
 import TextBalloon from 'eterna/ui/TextBalloon';
 import ContextMenu from 'eterna/ui/ContextMenu';
+import { ContextMenuDialog } from './GameMode';
 
 const events = [
     'pointercancel', 'pointerdown', 'pointerenter', 'pointerleave', 'pointermove',
@@ -177,6 +178,7 @@ export default class ThreeView extends ContainerObject {
     metaState: number = 0;
 
     mainContainer: Container;
+    mainMask: Graphics;
 
     nglContainer: Container;
     nglSprite: Sprite; 
@@ -184,12 +186,15 @@ export default class ThreeView extends ContainerObject {
     nglSpriteContext: CanvasRenderingContext2D | null; 
     nglTexture: BaseTexture;
     nglTextArray: Text[];
+    nglMask: Graphics;
 
     frameContainer: MyContainer;
     frameBaseTexture:BaseRenderTexture;
     frameTexture:RenderTexture;
     frameSprite: Sprite;
     tooltip: TextBalloon;
+    
+    _contextMenuDialogRef: GameObjectRef = GameObjectRef.NULL;
 
     constructor() {
         super();
@@ -263,10 +268,10 @@ export default class ThreeView extends ContainerObject {
         this.nglGate?.stage.viewerControls.zoom(-0.1)
     }
     setNGLMovState() {
-        this.metaState = 1;
+        this.metaState = 0;
     }
     setNGLRotateState() {
-        this.metaState = 0;
+        this.metaState = 1;
     }
     setNGLEditState() {
         this.metaState = 2;
@@ -290,23 +295,34 @@ export default class ThreeView extends ContainerObject {
         }
     }
     create3DMenu():ContextMenu {
+        var moveContainer = new Container();
+        moveContainer.addChild(Sprite.from(Bitmaps.Img3DMoveIcon));
+        var moveArrow = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgToolbarArrow));
+        moveArrow.position.x = (moveContainer.width - moveArrow.width) / 2;
+        moveArrow.visible = this.metaState === 0;
+        moveContainer.addChild(moveArrow);
+
+        var rotateContainer = new Container();
+        rotateContainer.addChild(Sprite.from(Bitmaps.Img3DRotateIcon));
+        var rotateArrow = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgToolbarArrow));
+        rotateArrow.position.x = (rotateContainer.width - rotateArrow.width) / 2;
+        rotateArrow.visible = this.metaState === 1;
+        rotateContainer.addChild(rotateArrow);
+        
         const menu = new ContextMenu({ horizontal: false });  
-        var moveIcon = (this.metaState === 1)?Bitmaps.Img3DMoveCheckIcon:Bitmaps.Img3DMoveIcon;
-        var rotateIcon = (this.metaState === 0)?Bitmaps.Img3DRotateCheckIcon:Bitmaps.Img3DRotateIcon;
-        var editIcon = (this.metaState === 2)?Bitmaps.ImgPencilCheck:Bitmaps.ImgPencil;
-        menu.addItem('Rotate', rotateIcon).clicked.connect(() => this.setNGLRotateState());
-        menu.addItem('Pan', moveIcon).clicked.connect(() => this.setNGLMovState());
-        menu.addItem('Edit', editIcon).clicked.connect(() => this.setNGLEditState());
-        menu.addItem('Zoom in', Bitmaps.Img3DZoominIcon).clicked.connect(() => this.zoomInNGLView());
-        menu.addItem('Zoom out', Bitmaps.Img3DZoomoutIcon).clicked.connect(() => this.zoomOutNGLView());
-        var annoMenuTitle = 'Show'
-        if(this.nglGate.bShowAnnotations) annoMenuTitle = 'Hide'
-        menu.addItem(annoMenuTitle, Bitmaps.ImgAnnotation).clicked.connect(() => {
-            this.nglGate.showAnnotations(!this.nglGate.bShowAnnotations);
-        });
-        if(this.nglGate._3DFilePath instanceof File) {
-            menu.addItem('Upload CIF', Bitmaps.ImgUpload).clicked.connect(() => this.uploadCIF());
-        }
+        menu.addItem('Pan', moveContainer).clicked.connect(() => this.setNGLMovState());
+        menu.addItem('Rotate', rotateContainer).clicked.connect(() => this.setNGLRotateState());
+        // menu.addItem('Edit', editIcon).clicked.connect(() => this.setNGLEditState());
+        // menu.addItem('Zoom in', Bitmaps.Img3DZoominIcon).clicked.connect(() => this.zoomInNGLView());
+        // menu.addItem('Zoom out', Bitmaps.Img3DZoomoutIcon).clicked.connect(() => this.zoomOutNGLView());
+        // var annoMenuTitle = 'Show'
+        // if(this.nglGate.bShowAnnotations) annoMenuTitle = 'Hide'
+        // menu.addItem(annoMenuTitle, Bitmaps.ImgAnnotation).clicked.connect(() => {
+        //     this.nglGate.showAnnotations(!this.nglGate.bShowAnnotations);
+        // });
+        // if(this.nglGate._3DFilePath instanceof File) {
+        //     menu.addItem('Upload CIF', Bitmaps.ImgUpload).clicked.connect(() => this.uploadCIF());
+        // }
         return menu;
     }
     removeAnnotations() {
@@ -357,18 +373,18 @@ export default class ThreeView extends ContainerObject {
             case 'pointercancel':
                 scope.pressed = false;
                 break;
-            case 'pointerover':
-                const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
-                if (doc) {
-                    doc.style.cursor = 'move';
-                }
-                break;
-            case 'pointerout':
-                const doc1 = document.getElementById(Eterna.PIXI_CONTAINER_ID);
-                if (doc1) {
-                    doc1.style.cursor = 'default';
-                }
-                break;
+            // case 'pointerover':
+            //     const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
+            //     if (doc) {
+            //         doc.style.cursor = 'move';
+            //     }
+            //     break;
+            // case 'pointerout':
+            //     const doc1 = document.getElementById(Eterna.PIXI_CONTAINER_ID);
+            //     if (doc1) {
+            //         doc1.style.cursor = 'default';
+            //     }
+            //     break;
             default:
                 break;
         }
@@ -557,6 +573,12 @@ export default class ThreeView extends ContainerObject {
         this.frameSprite = new Sprite(this.frameTexture);
         this.frameContainer.addChild(this.frameSprite);
 
+        this.nglMask = new Graphics()
+        this.nglMask.beginFill(0x000000)
+        this.nglMask.drawRect(0, 0, this.width, this.height-this.iconSize)
+        this.nglMask.endFill()
+        this.nglContainer.addChild(this.nglMask);
+
         this.nglTextArray = new Array(0);
         this.nglSpriteCanvas = document.createElement('canvas');
         this.nglSpriteCanvas.width =  screen.width;
@@ -564,6 +586,7 @@ export default class ThreeView extends ContainerObject {
         this.nglSpriteContext = this.nglSpriteCanvas.getContext('2d');
         this.nglTexture = BaseTexture.from(this.nglSpriteCanvas); 
         this.nglSprite = new Sprite(new Texture(this.nglTexture));
+        this.nglSprite.mask = this.nglMask;
         this.nglContainer.addChild(this.nglSprite);
 
         this.frameContainer.addChild(this.lbSprite.display);
@@ -576,8 +599,15 @@ export default class ThreeView extends ContainerObject {
         this.mainContainer.addChild(this.frameContainer)
         this.mainContainer.addChild(this.nglContainer)
 
+        this.mainMask = new Graphics()
+        this.mainMask.beginFill(0x000000)
+        this.mainMask.drawRect(0, 0, this.width, this.height-this.iconSize)
+        this.mainMask.endFill()
+        this.mainContainer.addChild(this.mainMask);
+
         this.tooltip = new TextBalloon('', 0x0, 1);
         this.tooltip.display.visible = false;
+        this.tooltip.display.mask = this.mainMask;
         this.addObject(this.tooltip, this.mainContainer);
 
         this.contentLay.addChild(this.mainContainer)
@@ -634,46 +664,38 @@ export default class ThreeView extends ContainerObject {
             var y:number;
             x = a.getCanvasPosition().x;
             y = height - a.getCanvasPosition().y;
-            var ok:boolean = (x>=0 && x<width && y>=0 && y<height);
             if(uninit) {
                 text = new Text(a.getContent(),{fontFamily : 'Arial', fontSize: 12, fill : 0xffffff, align : 'center'});
                 text.x = x;
                 text.y = y;
                 text.visible = false
-                if(this.nglGate.bShowAnnotations) {
-                    if(ok && x+text.width<this.width  && y+text.height<height) {
-                        text.visible = true;
-                    }
-                }
+                if(this.nglGate.bShowAnnotations) text.visible = true;
                 this.nglTextArray.push(text);
+                text.mask = this.nglMask;
                 this.nglContainer.addChild(text);
             }
             else {
-                if(this.nglGate.bShowAnnotations) {
-                    text = this.nglTextArray[i];
-                    text.x = x;
-                    text.y = y;
-                    text.visible = false
-                    if(ok && x+text.width<this.width  && y+text.height<height) {
-                        text.visible = true;
-                    }
-                    i++;
-                }
+                text = this.nglTextArray[i];
+                text.x = x;
+                text.y = y;
+                text.visible = false;
+                if(this.nglGate.bShowAnnotations) text.visible = true;
+                i++;
             }
         })
     }
     updateNGLTexture(canvas:HTMLCanvasElement, width:number, height:number) {
         if(this.nglSpriteContext) {
-            this.nglSpriteContext.fillStyle = 'rgba(2,35,71,0.6)'
             this.nglSpriteContext.clearRect(0,0,this.nglSpriteCanvas.width,this.nglSpriteCanvas.height);
             if(width>0 && height>0) {
                 var dpr = window.devicePixelRatio;
-                this.nglSpriteContext.fillRect(0, 0, this.width, this.height-this.iconSize)
-                this.nglSpriteContext.drawImage(canvas, 0, 0, width*dpr, height*dpr, 0, 0, this.width, this.height-this.iconSize); 
+                this.nglSpriteContext.fillStyle = 'rgba(2,35,71,0.6)'
+                this.nglSpriteContext.fillRect(0, 0, width, height)
+                this.nglSpriteContext.drawImage(canvas, 0, 0, width*dpr, height*dpr, 0, 0, width, height); 
             }
             this.nglTexture.update();
         }
-        this.updateAnnotations(this.frameContainer.width, this.frameContainer.height);
+        this.updateAnnotations(width, height);
     }
     hideAnnotations() {
         this.nglTextArray.forEach((text)=>{
@@ -681,15 +703,30 @@ export default class ThreeView extends ContainerObject {
         });
     }
     onMenuClick() {
-        var init:PointerEventInit = {
-            cancelable: true,
-            bubbles: true,
-            clientX: this.left + this.menuButton.display.x,
-            clientY: this.top + this.iconSize,
+        // var init:PointerEventInit = {
+        //     cancelable: true,
+        //     bubbles: true,
+        //     clientX: this.left + this.menuButton.display.x,
+        //     clientY: this.top + this.iconSize,
+        // }
+        // var event = new PointerEvent('contextmenu', init);
+        // this.isOver3DCanvas = true;
+        // document.getElementById(Eterna.PIXI_CONTAINER_ID)?.children[0]?.dispatchEvent(event);
+
+        var pos = new Point(this.menuButton.display.x, 0);
+        let handled = false;
+        if (this._contextMenuDialogRef.isLive) {
+            this._contextMenuDialogRef.destroyObject();
+            handled = true;
+        } else {
+            const menu = this.create3DMenu();
+            if (menu != null) {
+                this._contextMenuDialogRef = this.addObject(
+                    new ContextMenuDialog(menu, pos), this.mainContainer
+                );
+                handled = true;
+            }
         }
-        var event = new PointerEvent('contextmenu', init);
-        this.isOver3DCanvas = true;
-        document.getElementById(Eterna.PIXI_CONTAINER_ID)?.children[0]?.dispatchEvent(event);
     }
     setToNormal() {
         this.maxButton.up(Bitmaps.Img3DMax)
@@ -818,7 +855,17 @@ export default class ThreeView extends ContainerObject {
         }
         
         this.frame.clear();
-        this.frame.lineStyle(1, 0x2F94D1).drawRect(0,0,this.width,this.height);
+        this.frame.lineStyle(1, 0x2F94D1).drawRect(0,0,this.width,this.height);        
+        
+        this.nglMask.clear();
+        this.nglMask.beginFill(0x000000)
+        this.nglMask.drawRect(0, 0, this.width, this.height-this.iconSize)
+        this.nglMask.endFill()
+
+        this.mainMask.clear();
+        this.mainMask.beginFill(0x000000)
+        this.mainMask.drawRect(0, 0, this.width, this.height-this.iconSize)
+        this.mainMask.endFill()
 
         this.contentLay.layout(true);
         this.titleLay.layout(true);

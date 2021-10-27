@@ -81,7 +81,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this.on3DPickingMouseMoved(closestIndex - 1);
             }
             else if(ce.detail.action === 'clicked') {
-                if(Mol3DGate.scope && Mol3DGate.scope.threeView.metaState == 2) {
+                if(Mol3DGate.scope/* && Mol3DGate.scope.threeView.metaState == 2*/) {
                     this.simulateMousedownCallback(closestIndex - 1);
                 }
             }

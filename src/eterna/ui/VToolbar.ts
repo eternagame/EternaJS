@@ -7,22 +7,7 @@ import {
 } from 'flashbang';
 import GameButton from './GameButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
-
-class ToolbarButton extends GameButton {
-    protected added() {
-        super.added();
-        this._arrow = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgToolbarArrow));
-        this._arrow.position.x = (this.container.width - this._arrow.width) / 2;
-        this._arrow.visible = false;
-        this.container.addChild(this._arrow);
-
-        this.toggled.connectNotify((toggled) => {
-            this._arrow.visible = toggled;
-        });
-    }
-
-    private _arrow: Sprite;
-}
+import { ToolbarButton } from './Toolbar';
 
 export default class VToolBar extends ContainerObject {
     side3DToolbarLayout: VLayoutContainer;

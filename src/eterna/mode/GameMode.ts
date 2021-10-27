@@ -594,7 +594,7 @@ export default abstract class GameMode extends AppMode {
     protected _targetConditions: (TargetConditions | undefined)[] = [];
 }
 
-class ContextMenuDialog extends Dialog<void> {
+export class ContextMenuDialog extends Dialog<void> {
     constructor(menu: ContextMenu, menuLoc: Point) {
         super();
         this._menu = menu;

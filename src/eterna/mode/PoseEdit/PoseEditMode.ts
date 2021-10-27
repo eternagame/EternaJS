@@ -1675,7 +1675,7 @@ export default class PoseEditMode extends GameMode {
 
         //kkk add 3D Menu
         if(this.mol3DGate && this.mol3DGate.isOver3DCanvas) {
-            return this.create3DMenu();
+            return null;//this.create3DMenu();
         }
 
         const menu = new ContextMenu({ horizontal: false });

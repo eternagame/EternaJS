@@ -1,6 +1,8 @@
 import {UnitSignal} from 'signals';
 import {
-    Graphics
+    DisplayObject,
+    Graphics,
+    Texture
 } from 'pixi.js';
 import {
     ContainerObject,
@@ -48,7 +50,7 @@ export default class ContextMenu extends ContainerObject {
 
     public addItem(
         text: string,
-        icon: string | undefined = undefined,
+        icon: DisplayObject | Texture | string | undefined = undefined, //kkk
         tooltipText: string | undefined = undefined,
         fillColor: number | undefined = undefined
     ): GameButton {

@@ -189,7 +189,11 @@ export default class FlashbangApp {
     protected onContextMenuEvent(e: Event): void {
         const {topMode} = this._modeStack;
         if (topMode != null) {
-            topMode.onContextMenuEvent(e);
+            if(Mol3DGate.scope?.isOver3DCanvas) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            else topMode.onContextMenuEvent(e);
         }
     }
 
