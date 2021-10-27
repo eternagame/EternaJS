@@ -74,18 +74,18 @@ export default class Puzzle {
         return seq;
     }
 
-    //kkk get 3d_structure path from server
+    // kkk get 3d_structure path from server
     public getThreePath() {
         return this._threePath;
     }
 
-    constructor(nid: number, name: string, puzzleType: PuzzleType, puzzleAuthor: string, threePath:string|undefined|null = undefined) {
+    constructor(nid: number, name: string, puzzleType: PuzzleType,
+        puzzleAuthor: string, threePath:string|undefined|null = undefined) {
         this._nid = nid;
         this._name = name;
         this._puzzleType = puzzleType;
         this._puzzleAuthor = puzzleAuthor;
-        if(threePath) this._threePath = threePath;
-        // console.log(this._threePath);
+        if (threePath) this._threePath = threePath;
 
         if (puzzleType === PuzzleType.EXPERIMENTAL) {
             this._folder = FolderManager.instance.lastUsedFolder;

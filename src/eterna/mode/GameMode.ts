@@ -1,14 +1,14 @@
 import * as log from 'loglevel';
-import { Container, Point } from 'pixi.js';
+import {Container, Point} from 'pixi.js';
 import Eterna from 'eterna/Eterna';
-import UndoBlock, { TargetConditions } from 'eterna/UndoBlock';
+import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import {
     AppMode, SceneObject, Flashbang, GameObjectRef, Assert
 } from 'flashbang';
 import AchievementManager from 'eterna/achievements/AchievementManager';
 import Tooltips from 'eterna/ui/Tooltips';
-import ExternalInterface, { ExternalInterfaceCtx } from 'eterna/util/ExternalInterface';
+import ExternalInterface, {ExternalInterfaceCtx} from 'eterna/util/ExternalInterface';
 import Pose2D from 'eterna/pose2D/Pose2D';
 import ConfirmDialog from 'eterna/ui/ConfirmDialog';
 import NotificationDialog from 'eterna/ui/NotificationDialog';
@@ -26,7 +26,7 @@ import ExplosionFactorDialog from 'eterna/ui/ExplosionFactorDialog';
 import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
 import CopyTextDialogMode from './CopyTextDialogMode';
 import ThreeView from './ThreeView';
-import Mol3DGate, { PixiRenderCallback } from './Mol3DGate';
+import Mol3DGate, {PixiRenderCallback} from './Mol3DGate';
 
 export default abstract class GameMode extends AppMode {
     public readonly bgLayer = new Container();
@@ -40,41 +40,44 @@ export default abstract class GameMode extends AppMode {
 
     /** Controls whether certain folding operations are run synchronously or queued up */
     public forceSync: boolean = false;
-    
-    //kkk members for 3D
-    _3DView: ThreeView; 
+
+    // kkk members for 3D
+    _3DView: ThreeView;
     _3DFilePath: string | File | Blob = '';
     mol3DGate: Mol3DGate;
 
-    //kkk transfer the mouse hover from 2D to 3D 
+    // kkk transfer the mouse hover from 2D to 3D
     public mouseHovered(index: number, color: number) {
         this.mol3DGate?.mouseHovered(index, color);
     }
-    //kkk create 3D ContextMenu
+
+    // kkk create 3D ContextMenu
     create3DMenu():ContextMenu {
         return this._3DView.create3DMenu();
     }
-    //kkk make 3d view on game scene with cif file 
+
+    // kkk make 3d view on game scene with cif file
     add3DSprite(filePath: string | File | Blob, _secStruct:string) {
         this._3DFilePath = filePath;
-        if(!this._3DView) {
+        if (!this._3DView) {
             this._3DView = new ThreeView();
             this.addObject(this._3DView, this.poseLayer);
         }
-        var threeView = this._3DView;
+        const threeView = this._3DView;
+        function NGLCallback(canvas:HTMLCanvasElement, width:number, height:number):void {
+            threeView.updateNGLTexture(canvas, width, height);
+        }
         this.mol3DGate?.stage?.dispose();
         threeView.removeAnnotations();
-        if(threeView.pixiContainer) {
+        if (threeView.pixiContainer) {
             threeView.nglTextArray = new Array(0);
-            function NGLCallback(canvas:HTMLCanvasElement, width:number, height:number):void {
-                threeView.updateNGLTexture(canvas, width, height);
-           }
-            var callback:PixiRenderCallback = NGLCallback;
+            const callback:PixiRenderCallback = NGLCallback;
             this.mol3DGate = new Mol3DGate(filePath, threeView.pixiContainer, threeView, callback, this, _secStruct);
             // threeView.setToNormal();
             threeView.onResized();
         }
     }
+
     protected setup(): void {
         super.setup();
         Assert.assertIsDefined(this.container);
@@ -315,10 +318,9 @@ export default abstract class GameMode extends AppMode {
 
     public onContextMenuEvent(e: Event): void {
         Assert.assertIsDefined(Flashbang.globalMouse);
-        var pos = Flashbang.globalMouse;
-        var ee = <PointerEvent> e;
-        if(ee.clientX !== undefined && ee.clientY !== undefined)
-            pos = new Point(ee.clientX, ee.clientY);
+        let pos = Flashbang.globalMouse;
+        const ee = <PointerEvent> e;
+        if (ee.clientX !== undefined && ee.clientY !== undefined) pos = new Point(ee.clientX, ee.clientY);
         let handled = false;
         if (((e.target as HTMLElement).parentNode as HTMLElement).id === Eterna.PIXI_CONTAINER_ID) {
             if (this._contextMenuDialogRef.isLive) {
@@ -328,7 +330,7 @@ export default abstract class GameMode extends AppMode {
                 const menu = this.createContextMenu();
                 if (menu != null) {
                     this._contextMenuDialogRef = this.addObject(
-                        new ContextMenuDialog(menu, pos/*Flashbang.globalMouse*/),
+                        new ContextMenuDialog(menu, pos/* Flashbang.globalMouse */),
                         this.contextMenuLayer
                     );
                     handled = true;
@@ -355,7 +357,7 @@ export default abstract class GameMode extends AppMode {
     }
 
     protected static createHomeButton(): URLButton {
-        const button = new URLButton('Go to Home', EternaURL.createURL({ page: 'home' }));
+        const button = new URLButton('Go to Home', EternaURL.createURL({page: 'home'}));
         button.selectable(false);
         return button;
     }
@@ -388,7 +390,6 @@ export default abstract class GameMode extends AppMode {
 
     protected downloadSVG(): void {
         for (let ii = 0; ii < this._poses.length; ++ii) {
-
             if (this._poses[ii].customLayout === undefined) continue;
             const cl = this._poses[ii].customLayout;
             // width and height: xmax-xmin+20
@@ -485,6 +486,7 @@ export default abstract class GameMode extends AppMode {
         if (this._poses[0].customNumbering != null) sequenceString += ` ${Utility.arrayToRangeString(this._poses[0].customNumbering)}`;
         return sequenceString;
     }
+
     protected showCopySequenceDialog(): void {
         Assert.assertIsDefined(this.modeStack);
         let sequenceString = this._poses[0].sequence.sequenceString();

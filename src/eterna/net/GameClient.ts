@@ -259,7 +259,7 @@ export default class GameClient {
         return fetch(url.toString(), {
             method: 'POST',
             // body: postParams.toString(),
-            body: postParams, 
+            body: postParams,
             // headers: new Headers({'Content-Type': 'application/x-www-form-urlencoded'}),
             credentials: 'include'
         }).then((rsp) => {

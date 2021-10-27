@@ -1,14 +1,14 @@
-import { Graphics, InteractionEvent, Point } from 'pixi.js';
+import {Graphics, InteractionEvent, Point} from 'pixi.js';
 import {
     ContainerObject, KeyboardListener, MouseWheelListener, InputUtil, Flashbang,
     KeyboardEventType, KeyCode, Assert
 } from 'flashbang';
 import ROPWait from 'eterna/rscript/ROPWait';
 import debounce from 'lodash.debounce';
+import Mol3DGate from 'eterna/mode/Mol3DGate';
 import Pose2D from './Pose2D';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
 import RNAAnchorObject from './RNAAnchorObject';
-import Mol3DGate from 'eterna/mode/Mol3DGate';
 
 /** Wraps a Pose2D and handles resizing, masking, and input events */
 export default class PoseField extends ContainerObject implements KeyboardListener, MouseWheelListener {
@@ -123,7 +123,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
         // If we're in PIP mode, we mask our view
         if (this._mask != null) {
-            this._mask.destroy({ children: true });
+            this._mask.destroy({children: true});
             this._mask = null;
         }
         this.container.mask = null;
@@ -186,11 +186,11 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         if (Flashbang.app.isControlKeyDown) {
             return;
         }
-        //kkk ignore mouse event on 3d view
-        if (Mol3DGate.scope && Mol3DGate.scope.isOver3DCanvas) return; 
+        // kkk ignore mouse event on 3d view
+        if (Mol3DGate.scope && Mol3DGate.scope.isOver3DCanvas) return;
 
         const pointerId = e.data.identifier;
-        const { x, y } = e.data.global;
+        const {x, y} = e.data.global;
         this._interactionCache.set(pointerId, new Point(x, y));
 
         if (this._interactionCache.size === 1) {
@@ -202,12 +202,12 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     }
 
     private onPointerMove(e: InteractionEvent) {
-        //kkk ignore mouse event on 3d view
-        if (this._interactionCache.size == 0 && Mol3DGate.scope && Mol3DGate.scope.isOver3DCanvas) return; 
+        // kkk ignore mouse event on 3d view
+        if (this._interactionCache.size === 0 && Mol3DGate.scope && Mol3DGate.scope.isOver3DCanvas) { return; }
 
         this._interactionCache.forEach((_point, pointerId) => {
             if (pointerId === e.data.identifier) {
-                const { x, y } = e.data.global;
+                const {x, y} = e.data.global;
                 this._interactionCache.set(pointerId, new Point(x, y));
             }
         });
@@ -333,7 +333,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         if (!this.display.visible || !this.containsPoint(mouse.x, mouse.y)) {
             return false;
         }
-        //kkk ignore WheelEvent on 3D view
+        // kkk ignore WheelEvent on 3D view
         if (Mol3DGate.scope && Mol3DGate.scope.isOver3DCanvas) return false;
 
         if (e.deltaY < 0) {

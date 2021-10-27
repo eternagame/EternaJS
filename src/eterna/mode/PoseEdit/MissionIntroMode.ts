@@ -62,9 +62,9 @@ export default class MissionIntroMode extends AppMode {
         homeButton.clicked.connect(() => {
             if (Eterna.MOBILE_APP) {
                 Assert.assertIsDefined(window.frameElement);
-                window.frameElement.dispatchEvent(new CustomEvent('navigate', { detail: '/' }));
+                window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
             } else {
-                window.location.href = EternaURL.createURL({ page: 'home' });
+                window.location.href = EternaURL.createURL({page: 'home'});
             }
         });
         this.addObject(homeButton, this.container);
@@ -93,7 +93,7 @@ export default class MissionIntroMode extends AppMode {
         this.addObject(missionIntroPanel, this.container);
 
         const updateLayout = () => {
-            const { headerHeight } = UITheme.missionIntro;
+            const {headerHeight} = UITheme.missionIntro;
 
             Assert.assertIsDefined(Flashbang.stageWidth);
             Assert.assertIsDefined(Flashbang.stageHeight);

@@ -1,20 +1,20 @@
 import 'assets/Styles/styles.css'; // css-loader will pick up on this and embed our stylesheet
-import { settings, Application, utils } from 'pixi.js';
+import {settings, Application, utils} from 'pixi.js';
 import * as log from 'loglevel';
 import {
     FlashbangApp, SaveGameManager, TextureUtil, ErrorUtil, Flashbang, Assert
 } from 'flashbang';
 import ChatManager from 'eterna/ChatManager';
 import Eterna from 'eterna/Eterna';
-import { SaveStoreItem } from 'flashbang/settings/SaveGameManager';
-import DesignBrowserMode, { DesignBrowserFilter } from './mode/DesignBrowser/DesignBrowserMode';
-import ExternalInterface, { ExternalInterfaceCtx } from './util/ExternalInterface';
+import {SaveStoreItem} from 'flashbang/settings/SaveGameManager';
+import DesignBrowserMode, {DesignBrowserFilter} from './mode/DesignBrowser/DesignBrowserMode';
+import ExternalInterface, {ExternalInterfaceCtx} from './util/ExternalInterface';
 import EternaSettings from './settings/EternaSettings';
 import GameClient from './net/GameClient';
 import Bitmaps from './resources/Bitmaps';
 import TestMode from './debug/TestMode';
 import Puzzle from './puzzle/Puzzle';
-import PoseEditMode, { PoseEditParams } from './mode/PoseEdit/PoseEditMode';
+import PoseEditMode, {PoseEditParams} from './mode/PoseEdit/PoseEditMode';
 import PuzzleEditMode from './mode/PuzzleEdit/PuzzleEditMode';
 import FeedbackViewMode from './mode/FeedbackViewMode';
 import Solution from './puzzle/Solution';
@@ -48,14 +48,14 @@ export enum PuzzleID {
     TheophyllineRibozymeSwitch = 2390140, // aux info
     MicrofluidicChip = 6502997, // level 4/7 - MissionCleared info
     AandBRO = 6892307, // Oligos
-    Tutorial1 = 9218290, //E.Coli Ribisome 55 rRNA, test.cif  
+    Tutorial1 = 9218290, // E.Coli Ribisome 55 rRNA, test.cif
     // Tutorial1 = 9837790, // COVID-19 Frameshifting ..., 6xrz.cif
     // Tutorial1 = 6502927,
     // Tutorial1 = 10907948,
     Tutorial4 = 6502944,
     Tutorial6 = 6502945,
     Tutorial8 = 6502947,
-    LiquidRobotics10of11 = 6503036, // Script constraints 
+    LiquidRobotics10of11 = 6503036, // Script constraints
     EternaCon2018 = 8952159,
     SameStateTryptophanB = 7656242, // Booster paint tool
     TemporalAnomaly = 7796345, // Really big!
@@ -288,7 +288,7 @@ export default class EternaApp extends FlashbangApp {
         return this.loadSolution(puzzleID, solutionID)
             .then(([puzzle, solution, solutions]) => {
                 if (loadInPoseEdit) {
-                    this._modeStack.unwindToMode(new PoseEditMode(puzzle, { initSolution: solution }));
+                    this._modeStack.unwindToMode(new PoseEditMode(puzzle, {initSolution: solution}));
                 } else {
                     this._modeStack.unwindToMode(new FeedbackViewMode(solution, puzzle, solutions));
                 }
@@ -561,12 +561,12 @@ export default class EternaApp extends FlashbangApp {
 
     private initScriptInterface(): void {
         this._scriptInterface.addCallback('test_tutorial', (puzzleID: number, rscript: string): void => {
-            this.loadPoseEdit(puzzleID, { rscript, isReset: true })
+            this.loadPoseEdit(puzzleID, {rscript, isReset: true})
                 .catch((e) => Eterna.onFatalError(e));
         });
 
         this._scriptInterface.addCallback('load_puzzle', (puzzleID: number, doneCallback: string): void => {
-            this.loadPoseEdit(puzzleID, { isReset: true })
+            this.loadPoseEdit(puzzleID, {isReset: true})
                 .then(() => {
                     ExternalInterface.call(doneCallback);
                 })

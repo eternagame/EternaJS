@@ -1,5 +1,5 @@
-import { Container, DisplayObject, InteractionEvent } from 'pixi.js';
-import { Assert, Flashbang, GameObject } from 'flashbang';
+import {Container, DisplayObject, InteractionEvent} from 'pixi.js';
+import {Assert, Flashbang, GameObject} from 'flashbang';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
 
 /**

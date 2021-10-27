@@ -1,4 +1,4 @@
-import { Graphics, Point } from 'pixi.js';
+import {Graphics, Point} from 'pixi.js';
 import {
     LateUpdatable,
     Assert,
@@ -9,7 +9,7 @@ import {
     Vector2
 } from 'flashbang';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
-import { Value } from 'signals';
+import {Value} from 'signals';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Pose2D from './Pose2D';
 

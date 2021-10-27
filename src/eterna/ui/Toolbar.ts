@@ -1,7 +1,7 @@
 import {
     Graphics, Point, Sprite, Container
 } from 'pixi.js';
-import { RegistrationGroup } from 'signals';
+import {RegistrationGroup} from 'signals';
 import Eterna from 'eterna/Eterna';
 import Booster from 'eterna/mode/PoseEdit/Booster';
 import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
@@ -9,22 +9,22 @@ import {
     ContainerObject, Flashbang, VLayoutContainer, HLayoutContainer,
     KeyCode, VAlign, HAlign, DisplayUtil, LocationTask, Easing, Assert
 } from 'flashbang';
-import Puzzle, { BoostersData } from 'eterna/puzzle/Puzzle';
+import Puzzle, {BoostersData} from 'eterna/puzzle/Puzzle';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import { RScriptUIElementID } from 'eterna/rscript/RScriptUIElement';
+import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import AnnotationManager from 'eterna/AnnotationManager';
+import fileDialog from 'file-dialog';
+import Mol3DGate from 'eterna/mode/Mol3DGate';
+import GameMode from 'eterna/mode/GameMode';
+import PuzzleEditMode from 'eterna/mode/PuzzleEdit/PuzzleEditMode';
 import NucleotidePalette from './NucleotidePalette';
 import GameButton from './GameButton';
 import ToggleBar from './ToggleBar';
-import EternaMenu, { EternaMenuStyle } from './EternaMenu';
+import EternaMenu, {EternaMenuStyle} from './EternaMenu';
 import ScrollContainer from './ScrollContainer';
 import AnnotationPanel from './AnnotationPanel';
-import fileDialog from 'file-dialog';
-import Mol3DGate from 'eterna/mode/Mol3DGate';
 import ErrorDialog from './ErrorDialog';
-import GameMode from 'eterna/mode/GameMode';
-import PuzzleEditMode from 'eterna/mode/PuzzleEdit/PuzzleEditMode';
 
 export enum ToolbarType {
     PUZZLE,
@@ -98,7 +98,7 @@ export default class Toolbar extends ContainerObject {
 
     public boostersMenu: GameButton;
 
-    public validate3DButton: GameButton; //kkk declare 3d validation button
+    public validate3DButton: GameButton; // kkk declare 3d validation button
 
     public baseMarkerButton: GameButton;
     public librarySelectionButton: GameButton;
@@ -789,7 +789,7 @@ export default class Toolbar extends ContainerObject {
             this.addObject(this.submitButton, this.lowerToolbarLayout);
         }
 
-        //kkk add 3d validation button
+        // kkk add 3d validation button
         if (this._type === ToolbarType.PUZZLEMAKER) {
             this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
             this.validate3DButton = new ToolbarButton()
@@ -800,22 +800,19 @@ export default class Toolbar extends ContainerObject {
 
             this.addObject(this.validate3DButton, this.lowerToolbarLayout);
             this.regs.add(this.validate3DButton.clicked.connect(() => {
-                fileDialog({ accept: ['.cif'] }).then(file => {
-                    var mode: PuzzleEditMode = this.mode as PuzzleEditMode;
-                    var sequence = mode.getSequence().split(' ')[0];
-                    Mol3DGate.checkModelFile(file[0], mode.getSequence().split(' ')[0]).then((resCount:number)=>{
-                        if(mode && resCount == sequence.length)
-                            mode.add3DSprite(file[0], mode.structure);
+                fileDialog({accept: ['.cif']}).then((file) => {
+                    const mode: PuzzleEditMode = this.mode as PuzzleEditMode;
+                    const sequence = mode.getSequence().split(' ')[0];
+                    Mol3DGate.checkModelFile(file[0], mode.getSequence().split(' ')[0]).then((resCount:number) => {
+                        if (mode && resCount === sequence.length) mode.add3DSprite(file[0], mode.structure);
                         else {
                             const PROMPT = 'Your selected file is mismatched with the puzzle.';
                             mode?.showDialog(new ErrorDialog(PROMPT));
                         }
                     });
-                })
+                });
             }));
         }
-        
-
 
         this.rightArrow = this.makeArrowButton('right');
         this.addObject(this.rightArrow, this.scrollContainerContainer);
@@ -905,7 +902,7 @@ export default class Toolbar extends ContainerObject {
         let startingX: number;
         let startingScroll: number;
         this.regs.add(this.pointerDown.connect((e) => {
-            const { x, y } = e.data.global;
+            const {x, y} = e.data.global;
             if (this.lowerToolbarLayout.getBounds().contains(x, y)) {
                 mouseDown = true;
                 startingX = x;
@@ -922,7 +919,7 @@ export default class Toolbar extends ContainerObject {
         }));
 
         this.regs.add(this.pointerMove.connect((e) => {
-            const { x, y } = e.data.global;
+            const {x, y} = e.data.global;
             if (e.data.buttons === 1 && mouseDown && this.lowerToolbarLayout.getBounds().contains(x, y)) {
                 const offset = x - startingX;
                 if (Math.abs(offset) > 15) {

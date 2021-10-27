@@ -50,7 +50,7 @@ export default class ContextMenu extends ContainerObject {
 
     public addItem(
         text: string,
-        icon: DisplayObject | Texture | string | undefined = undefined, //kkk
+        icon: DisplayObject | Texture | string | undefined = undefined, // kkk
         tooltipText: string | undefined = undefined,
         fillColor: number | undefined = undefined
     ): GameButton {

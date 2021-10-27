@@ -1,6 +1,6 @@
-import { Graphics, DisplayObject } from 'pixi.js';
-import { GameObject, Flashbang, Updatable } from 'flashbang';
-import { RNABase, RNAPaint } from 'eterna/EPars';
+import {Graphics, DisplayObject} from 'pixi.js';
+import {GameObject, Flashbang, Updatable} from 'flashbang';
+import {RNABase, RNAPaint} from 'eterna/EPars';
 
 export default class PaintCursor extends GameObject implements Updatable {
     constructor() {
@@ -22,6 +22,7 @@ export default class PaintCursor extends GameObject implements Updatable {
     public getColor(): number {
         return this._color;
     }
+
     public getOutColor(): number {
         return this._outColor;
     }

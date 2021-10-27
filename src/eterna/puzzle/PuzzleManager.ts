@@ -82,8 +82,8 @@ export default class PuzzleManager {
     }
 
     public async parsePuzzle(json: PuzzleJSON): Promise<Puzzle> {
-        console.log(json);
-        const newpuz: Puzzle = new Puzzle(Number(json['id']), json['title'], json['type'], json['username'], json['3d_structure']);
+        const newpuz: Puzzle = new Puzzle(Number(json['id']),
+            json['title'], json['type'], json['username'], json['3d_structure']);
 
         if (json['body']) {
             // Convention: mission texts are encapsulated by

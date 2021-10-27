@@ -4,10 +4,10 @@ import {RegistrationGroup, Value} from 'signals';
 import KeyboardEventType from 'flashbang/input/KeyboardEventType';
 import KeyCode from 'flashbang/input/KeyCode';
 import Assert from 'flashbang/util/Assert';
+import Mol3DGate from 'eterna/mode/Mol3DGate';
 import Flashbang from './Flashbang';
 import ModeStack from './ModeStack';
 import Updatable from './Updatable';
-import Mol3DGate from 'eterna/mode/Mol3DGate';
 
 // Adds KeyboardEvent.code support to Edge
 import 'js-polyfills/keyboard';
@@ -176,8 +176,8 @@ export default class FlashbangApp {
     }
 
     protected onMouseWheelEvent(e: WheelEvent): void {
-        //kkk dispatch WheelEvent to NGL
-        if(Mol3DGate.scope && Mol3DGate.scope.isOver3DCanvas) {
+        // kkk dispatch WheelEvent to NGL
+        if (Mol3DGate.scope && Mol3DGate.scope.isOver3DCanvas) {
             Mol3DGate.scope.stage.viewer.getWebGLCanvas().dispatchEvent(new WheelEvent(e.type, e));
         }
         const {topMode} = this._modeStack;
@@ -189,11 +189,10 @@ export default class FlashbangApp {
     protected onContextMenuEvent(e: Event): void {
         const {topMode} = this._modeStack;
         if (topMode != null) {
-            if(Mol3DGate.scope?.isOver3DCanvas) {
+            if (Mol3DGate.scope?.isOver3DCanvas) {
                 e.preventDefault();
                 e.stopPropagation();
-            }
-            else topMode.onContextMenuEvent(e);
+            } else topMode.onContextMenuEvent(e);
         }
     }
 

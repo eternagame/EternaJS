@@ -2,8 +2,8 @@ import * as log from 'loglevel';
 import {
     Container, Graphics, Point, Sprite, Texture, Rectangle, InteractionEvent
 } from 'pixi.js';
-import { Registration } from 'signals';
-import EPars, { RNABase, RNAPaint } from 'eterna/EPars';
+import {Registration} from 'signals';
+import EPars, {RNABase, RNAPaint} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import ExpPainter from 'eterna/ExpPainter';
 import {
@@ -11,7 +11,7 @@ import {
     ParallelTask, AlphaTask, LocationTask, DelayTask, SelfDestructTask, Vector2, Arrays,
     RepeatingTask, Updatable, Assert
 } from 'flashbang';
-import { Move } from 'eterna/mode/PoseEdit/PoseEditMode';
+import {Move} from 'eterna/mode/PoseEdit/PoseEditMode';
 import LightRay from 'eterna/vfx/LightRay';
 import TextBalloon from 'eterna/ui/TextBalloon';
 import ROPWait from 'eterna/rscript/ROPWait';
@@ -25,13 +25,14 @@ import Utility from 'eterna/util/Utility';
 import Folder from 'eterna/folding/Folder';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
-import AnnotationManager, { AnnotationRange } from 'eterna/AnnotationManager';
+import AnnotationManager, {AnnotationRange} from 'eterna/AnnotationManager';
 import ContextMenu from 'eterna/ui/ContextMenu';
 import Bitmaps from 'eterna/resources/Bitmaps';
+import Mol3DGate from 'eterna/mode/Mol3DGate';
 import Base from './Base';
 import BaseDrawFlags from './BaseDrawFlags';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
-import HighlightBox, { HighlightType } from './HighlightBox';
+import HighlightBox, {HighlightType} from './HighlightBox';
 import BaseRope from './BaseRope';
 import PseudoknotLines from './PseudoknotLines';
 import Molecule from './Molecule';
@@ -39,10 +40,9 @@ import PaintCursor from './PaintCursor';
 import PoseField from './PoseField';
 import PoseUtil from './PoseUtil';
 import PuzzleEditOp from './PuzzleEditOp';
-import RNALayout, { RNATreeNode } from './RNALayout';
-import ScoreDisplayNode, { ScoreDisplayNodeType } from './ScoreDisplayNode';
+import RNALayout, {RNATreeNode} from './RNALayout';
+import ScoreDisplayNode, {ScoreDisplayNodeType} from './ScoreDisplayNode';
 import triangulate from './triangulate';
-import Mol3DGate from 'eterna/mode/Mol3DGate';
 
 interface Mut {
     pos: number;
@@ -73,15 +73,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._poseField = poseField;
         this._editable = editable;
 
-        //kkk transfer 3D mouse move picking result to 2D Canvas and highlight/click corresponding base.
-        window.addEventListener('picking', e => {
-            var ce = <CustomEvent>e;
+        // kkk transfer 3D mouse move picking result to 2D Canvas and highlight/click corresponding base.
+        window.addEventListener('picking', (e) => {
+            const ce = <CustomEvent>e;
             const closestIndex: number = ce.detail.resno;
-            if(ce.detail.action === 'hover' && !Mol3DGate.inUpdating) {
+            if (ce.detail.action === 'hover' && !Mol3DGate.inUpdating) {
                 this.on3DPickingMouseMoved(closestIndex - 1);
-            }
-            else if(ce.detail.action === 'clicked') {
-                if(Mol3DGate.scope/* && Mol3DGate.scope.threeView.metaState == 2*/) {
+            } else if (ce.detail.action === 'clicked') {
+                if (Mol3DGate.scope/* && Mol3DGate.scope.threeView.metaState == 2 */) {
                     this.simulateMousedownCallback(closestIndex - 1);
                 }
             }
@@ -92,6 +91,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public setEditMode(editMode: GameMode) {
         this.pEditMode = editMode;
     }
+
     protected added() {
         super.added();
 
@@ -156,7 +156,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._annotationCanvas = new Graphics();
         this.container.addChild(this.annotationCanvas);
 
-        this._annotationContextMenu = new ContextMenu({ horizontal: true });
+        this._annotationContextMenu = new ContextMenu({horizontal: true});
         this._annotationContextMenu.addItem(
             'Create',
             Bitmaps.ImgAnnotationCheckmark,
@@ -349,7 +349,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public set currentColor(col: RNAPaint) {
         this._currentColor = col;
-        //kkk syncronize the color change by 2D with 3D
+        // kkk syncronize the color change by 2D with 3D
         this.pEditMode?.mol3DGate?.stage?.viewer.setBaseColor(this.pEditMode.mol3DGate.getBaseColor(col));
     }
 
@@ -377,12 +377,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.callPoseEditCallback();
             this.annotationManager.refreshAnnotations(this, false);
             this._librarySelectionsChanged = false;
-            Mol3DGate.inUpdating = false; //kkk
+            Mol3DGate.inUpdating = false; // kkk
             return;
         }
 
         if (this._mutatedSequence == null) {
-            Mol3DGate.inUpdating = false; //kkk
+            Mol3DGate.inUpdating = false; // kkk
             return;
         }
 
@@ -408,7 +408,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (this._sequence.nt(ii) !== this._mutatedSequence.nt(ii + offset)) {
                 numMut++;
                 this._sequence.setNt(ii, this._mutatedSequence.nt(ii + offset));
-                muts.push({ pos: ii + 1, base: EPars.nucleotideToString(this._sequence.nt(ii)) });
+                muts.push({pos: ii + 1, base: EPars.nucleotideToString(this._sequence.nt(ii))});
                 needUpdate = true;
             }
         }
@@ -427,7 +427,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.callPoseEditCallback();
             this.annotationManager.refreshAnnotations(this);
         }
-        Mol3DGate.inUpdating = false; //kkk
+        Mol3DGate.inUpdating = false; // kkk
 
         this._mutatedSequence = null;
         this._lockUpdated = false;
@@ -469,7 +469,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (this._sequence.nt(ii) !== sequence.nt(ii) && !this.isLocked(offset + ii)) {
                 numMut++;
                 this._sequence.setNt(ii, sequence.nt(ii));
-                muts.push({ pos: ii + 1, base: EPars.nucleotideToString(this._sequence.nt(ii)) });
+                muts.push({pos: ii + 1, base: EPars.nucleotideToString(this._sequence.nt(ii))});
                 this._bases[offset + ii].setType(sequence.nt(ii));
                 needUpdate = true;
             }
@@ -589,7 +589,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         // rnaCoords.setupTree(this._pairs.filterForPseudoknots(), this._targetPairs.filterForPseudoknots());
         rnaCoords.setupTree(this._pairs, this._targetPairs);
         rnaCoords.drawTree(this._customLayout);
-        const { xarray, yarray } = rnaCoords.getCoords(this._bases.length);
+        const {xarray, yarray} = rnaCoords.getCoords(this._bases.length);
 
         const localCustomLayout: ([number, number] | [null, null])[] = [];
         for (let ii = 0; ii < this._bases.length; ++ii) {
@@ -756,7 +756,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         );
         rnaCoords.setupTree(this._pairs, this._targetPairs);
         rnaCoords.drawTree(this._customLayout);
-        const { xarray, yarray } = rnaCoords.getCoords(this._bases.length);
+        const {xarray, yarray} = rnaCoords.getCoords(this._bases.length);
 
         const localCustomLayout: ([number, number] | [null, null])[] = [];
         for (let ii = 0; ii < this._bases.length; ++ii) {
@@ -828,7 +828,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         );
         rnaCoords.setupTree(this._pairs, this._targetPairs);
         rnaCoords.drawTree(this._customLayout);
-        const { xarray, yarray } = rnaCoords.getCoords(this._bases.length);
+        const {xarray, yarray} = rnaCoords.getCoords(this._bases.length);
 
         const localCustomLayout: ([number, number] | [null, null])[] = [];
         for (let ii = 0; ii < this._bases.length; ++ii) {
@@ -941,7 +941,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                         // Deselect clicked base
 
                         // Get range that was clicked
-                        const range = { ...this._annotationRanges[rangeIndex] };
+                        const range = {...this._annotationRanges[rangeIndex]};
 
                         // Remove existing range
                         this._annotationRanges.splice(rangeIndex, 1);
@@ -1035,7 +1035,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public toggleBaseMark(baseIndex: number): void {
-        //kkk toggle basemark in 3D
+        // kkk toggle basemark in 3D
         this.pEditMode?.mol3DGate?.stage?.viewer.markEBaseObject(baseIndex);
 
         if (!this.isTrackedLayer(baseIndex, PLAYER_MARKER_LAYER)) {
@@ -1083,7 +1083,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             );
             rnaCoords.setupTree(this._pairs, this._targetPairs);
             rnaCoords.drawTree(this._customLayout);
-            const { xarray, yarray } = rnaCoords.getCoords(this._bases.length);
+            const {xarray, yarray} = rnaCoords.getCoords(this._bases.length);
             // The simplest thing to do is to use the x/y coords as the new customLayout.
             // This minimizes the calculations you have to do later.
             const localCustomLayout: ([number, number] | [null, null])[] = [];
@@ -1163,7 +1163,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         if (closestIndex >= 0 && this._currentColor >= 0) {
-            //kkk transfer mouse hover result from 2D to 3DView 
+            // kkk transfer mouse hover result from 2D to 3DView
             this.pEditMode?.mouseHovered(closestIndex + 1, this._currentColor);
 
             this.onBaseMouseMove(closestIndex);
@@ -1188,7 +1188,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         } else {
             this._lastColoredIndex = -1;
-            //kkk transfer mouse hover result from 2D to 3DView 
+            // kkk transfer mouse hover result from 2D to 3DView
             this.pEditMode?.mouseHovered(-1, 0);
         }
 
@@ -1197,7 +1197,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    //kkk transfer the mouse picking result from 3DView to 2D canvas 
+    // kkk transfer the mouse picking result from 3DView to 2D canvas
     public on3DPickingMouseMoved(closestIndex: number): void {
         if (!this._coloring) {
             this.clearMouse();
@@ -1985,7 +1985,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public callPoseEditCallback(): void {
         if (this._poseEditCallback != null) {
             this._poseEditCallback();
-            //kkk update 3D baseSequence
+            // kkk update 3D baseSequence
             this.pEditMode.mol3DGate?.updateSequence(this.pEditMode.getSequence().split(' '));
         }
     }
@@ -2016,11 +2016,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._startMousedownCallback = cb;
     }
 
-    //kkk transfer picking result result from 3D to 2D so that enable edit puzzle on 3D
+    // kkk transfer picking result result from 3D to 2D so that enable edit puzzle on 3D
     public simulateMousedownCallback(closestIndex:number): void {
-        if (this._startMousedownCallback != null && closestIndex>=0) {
+        if (this._startMousedownCallback != null && closestIndex >= 0) {
             Mol3DGate.inUpdating = true;
-            var e: InteractionEvent = new InteractionEvent();
+            const e: InteractionEvent = new InteractionEvent();
             this._startMousedownCallback(e, 0, closestIndex);
         }
         // deselect all annotations
@@ -2034,8 +2034,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         let closestDist = -1;
         let closestIndex = -1;
-
-        // console.log(mouseX, mouseY, this._offX, this._offY);
 
         if (this._startMousedownCallback != null) {
             const fullSeqLen = this.fullSequenceLength;
@@ -2119,14 +2117,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
         bindingSites: number[] | undefined, bindingPairs: number[] | undefined, bindingBonus: number | undefined
     ): void {
         if (this._molecule != null) {
-            this._molecule.destroy({ children: true });
+            this._molecule.destroy({children: true});
             this._molecule = null;
         }
 
         if (this._molecularBindingBases != null) {
             for (const glow of this._molecularBindingBases) {
                 if (glow != null) {
-                    glow.destroy({ children: true });
+                    glow.destroy({children: true});
                 }
             }
             this._molecularBindingBases = null;
@@ -2605,7 +2603,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         rnaDrawer.setupTree(this._pairs, this._targetPairs);
         rnaDrawer.drawTree(this._customLayout);
 
-        const { xarray, yarray } = rnaDrawer.getCoords(this._bases.length);
+        const {xarray, yarray} = rnaDrawer.getCoords(this._bases.length);
         for (let ii = 0; ii < this._bases.length; ii++) {
             const ax: number = xarray[ii];
             const ay: number = yarray[ii];
@@ -2639,7 +2637,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 Pose2D.COLOR_CURSOR);
             this._cursorBox.drawCircle(0, 0, Base.MARKER_RADIUS[this.zoomLevel]);
         } else if (this._cursorBox != null) {
-            this._cursorBox.destroy({ children: true });
+            this._cursorBox.destroy({children: true});
             this._cursorBox = null;
         }
     }
@@ -2790,8 +2788,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        //kkk synchronize showNumbering of 2D with 3D
-        if(this._redraw) {
+        // kkk synchronize showNumbering of 2D with 3D
+        if (this._redraw) {
             this.pEditMode?.mol3DGate?.showAnnotations(this.showNumbering);
         }
 
@@ -3276,8 +3274,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         rnaDrawer.setupTree(this._pairs, this._targetPairs);
         rnaDrawer.drawTree(this._customLayout);
         const rnaCoords = rnaDrawer.getCoords(n);
-        let { xarray, yarray } = rnaCoords;
-        const { xbounds, ybounds } = rnaCoords;
+        let {xarray, yarray} = rnaCoords;
+        const {xbounds, ybounds} = rnaCoords;
         this._pseudoknotPairs = rnaDrawer.pseudoknotPairs;
 
         this._baseRotationDirectionSign = new Array(n);
@@ -3374,9 +3372,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this._mutatedSequence.setNt(seqnum, this._currentColor);
                 ROPWait.notifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
                 this._bases[seqnum].setType(this._currentColor, true);
-                //kkk synchronize base over color with 3D
-                var curColor = this._mutatedSequence.nt(seqnum)
-                this.pEditMode?.mol3DGate?.stage.viewer.selectEBaseObject2(seqnum, curColor != this._currentColor);
+                // kkk synchronize base over color with 3D
+                const curColor = this._mutatedSequence.nt(seqnum);
+                this.pEditMode?.mol3DGate?.stage.viewer.selectEBaseObject2(seqnum, curColor !== this._currentColor);
             } else if (this._currentColor === RNAPaint.PAIR && this._pairs.isPaired(seqnum)) {
                 const pi = this._pairs.pairingPartner(seqnum);
                 if (this.isLocked(pi)) {
@@ -3972,7 +3970,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private clearScoreTexts(): void {
         if (this._scoreTexts != null) {
             for (const scoreText of this._scoreTexts) {
-                scoreText.destroy({ children: true });
+                scoreText.destroy({children: true});
             }
             this._scoreTexts = null;
         }

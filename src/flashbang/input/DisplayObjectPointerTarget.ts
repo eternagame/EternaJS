@@ -1,5 +1,5 @@
-import { DisplayObject, InteractionEvent } from 'pixi.js';
-import { SignalView } from 'signals';
+import {DisplayObject, InteractionEvent} from 'pixi.js';
+import {SignalView} from 'signals';
 import EventSignal from 'flashbang/util/EventSignal';
 import PointerTarget from './PointerTarget';
 

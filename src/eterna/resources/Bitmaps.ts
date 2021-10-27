@@ -327,19 +327,19 @@ export default class Bitmaps {
     public static readonly Img3DSettingIcon: string = require('assets/UI/setting-ngl.png');
     public static readonly Img3DSettingHoverIcon: string = require('assets/UI/setting-ngl-hover.png');
 
-    public static readonly Img3DLeft: string = require("assets/UI/canvas_left.png")
-    public static readonly Img3DLeftHover: string = require("assets/UI/canvas_left_hover.png")
-    public static readonly Img3DRight: string = require("assets/UI/canvas_right.png")
-    public static readonly Img3DRightHover: string = require("assets/UI/canvas_right_hover.png")
-    public static readonly Img3DTitle: string = require("assets/UI/canvas_title.png")
-    public static readonly Img3DMax: string = require("assets/UI/max.png")
-    public static readonly Img3DMaxHover: string = require("assets/UI/max_hover.png")
-    public static readonly Img3DMaxRestore: string = require("assets/UI/origin.png")
-    public static readonly Img3DMaxRestoreHover: string = require("assets/UI/origin_hover.png")
-    public static readonly Img3DMin: string = require("assets/UI/canvas_dropdown.png")
-    public static readonly Img3DMinHover: string = require("assets/UI/canvas_dropdown_hover.png")
-    public static readonly Img3DMinRestore: string = require("assets/UI/canvas_dropdown_closed.png")
-    public static readonly Img3DMinRestoreHover: string = require("assets/UI/canvas_dropdown_closed_hover.png")
+    public static readonly Img3DLeft: string = require('assets/UI/canvas_left.png');
+    public static readonly Img3DLeftHover: string = require('assets/UI/canvas_left_hover.png');
+    public static readonly Img3DRight: string = require('assets/UI/canvas_right.png');
+    public static readonly Img3DRightHover: string = require('assets/UI/canvas_right_hover.png');
+    public static readonly Img3DTitle: string = require('assets/UI/canvas_title.png');
+    public static readonly Img3DMax: string = require('assets/UI/max.png');
+    public static readonly Img3DMaxHover: string = require('assets/UI/max_hover.png');
+    public static readonly Img3DMaxRestore: string = require('assets/UI/origin.png');
+    public static readonly Img3DMaxRestoreHover: string = require('assets/UI/origin_hover.png');
+    public static readonly Img3DMin: string = require('assets/UI/canvas_dropdown.png');
+    public static readonly Img3DMinHover: string = require('assets/UI/canvas_dropdown_hover.png');
+    public static readonly Img3DMinRestore: string = require('assets/UI/canvas_dropdown_closed.png');
+    public static readonly Img3DMinRestoreHover: string = require('assets/UI/canvas_dropdown_closed_hover.png');
 
     public static readonly ImgBaseMarker: string = require('assets/UI/base-marker-btn.png');
     public static readonly ImgBaseMarkerOver: string = require('assets/UI/base-marker-btn-over.png');

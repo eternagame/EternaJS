@@ -1,5 +1,7 @@
-import { Container, Graphics } from 'pixi.js';
-import { MathUtil, ContainerObject, Assert, Flashbang } from 'flashbang';
+import {Container, Graphics} from 'pixi.js';
+import {
+    MathUtil, ContainerObject, Assert, Flashbang
+} from 'flashbang';
 import Eterna from 'eterna/Eterna';
 
 const events = [
@@ -195,7 +197,7 @@ export default class ScrollContainer extends ContainerObject {
             // Find the next element "under" this element that isn't in our scroll container,
             // to re-fire the event on.
             const candidateEls = document.elementsFromPoint(e.clientX, e.clientY);
-            let newTarget = candidateEls.find((el) => !this._htmlWrapper.contains(el));
+            const newTarget = candidateEls.find((el) => !this._htmlWrapper.contains(el));
             if (!newTarget) {
                 return;
             }

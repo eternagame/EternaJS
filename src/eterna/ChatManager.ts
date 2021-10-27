@@ -1,8 +1,14 @@
 import * as log from 'loglevel';
-import { Chat } from 'eterna-chat-wrapper';
+import {Chat} from 'eterna-chat-wrapper';
 import EternaSettings from './settings/EternaSettings';
 import Eterna from './Eterna';
 
+interface ChatPosition {
+    top: number,
+    right: number,
+    width: number,
+    height: number
+}
 export default class ChatManager {
     constructor(chatboxID: string, settings: EternaSettings) {
         this._chatbox = document.getElementById(chatboxID);
@@ -16,7 +22,7 @@ export default class ChatManager {
     /** Posts a message to the chat */
     public postText(text: string): void {
         if (this._chat) {
-            this._chat.postMessage({ type: 'chat-message', content: text }, '*');
+            this._chat.postMessage({type: 'chat-message', content: text}, '*');
         }
     }
 
@@ -54,7 +60,7 @@ export default class ChatManager {
                     }
                 });
             } else {
-                this._chat.postMessage({ type: 'chat-scroll' }, '*');
+                this._chat.postMessage({type: 'chat-scroll'}, '*');
                 this._chat.show();
             }
         } else if (this._chat) {
@@ -64,20 +70,26 @@ export default class ChatManager {
         }
     }
 
-    //kkk get/set chat window position
+    // kkk get/set chat window position
     public setPosition(top: number) {
         if (this._chatbox == null) {
             return;
         }
-        this._chatbox.style.top = top + 'px';
+        this._chatbox.style.top = `${top}px`;
         this._chatbox.style.zIndex = '1';
     }
-    public getPosition(): any {
+
+    public getPosition(): null | ChatPosition {
         if (this._chatbox == null) {
             return null;
         }
-        var style = getComputedStyle(this._chatbox);
-        return { top: parseInt(style.top), right: parseInt(style.right), width: parseInt(style.width), height: parseInt(style.height) };
+        const style = getComputedStyle(this._chatbox);
+        return {
+            top: parseInt(style.top, 10),
+            right: parseInt(style.right, 10),
+            width: parseInt(style.width, 10),
+            height: parseInt(style.height, 10)
+        } as ChatPosition;
     }
 
     private readonly _chatbox: HTMLElement | null;

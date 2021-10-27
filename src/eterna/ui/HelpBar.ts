@@ -1,6 +1,6 @@
-import { ContainerObject, KeyCode } from 'flashbang';
+import {ContainerObject, KeyCode} from 'flashbang';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import { RScriptUIElementID } from 'eterna/rscript/RScriptUIElement';
+import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import GameButton from './GameButton';
 
 interface HelpBarProps {
@@ -18,7 +18,7 @@ export default class HelpBar extends ContainerObject {
     constructor(props: HelpBarProps) {
         super();
 
-        const { theme } = HelpBar;
+        const {theme} = HelpBar;
 
         const chat = new GameButton()
             .up(Bitmaps.ImgChat)

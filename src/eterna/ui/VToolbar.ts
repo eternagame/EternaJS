@@ -1,13 +1,11 @@
-//kkk VToolBar.ts --- side tool bar for 3d View
-import {Sprite} from 'pixi.js';
-import BitmapManager from 'eterna/resources/BitmapManager';
+// kkk VToolBar.ts --- side tool bar for 3d View
 import {
-    ContainerObject, Flashbang, VLayoutContainer, 
+    ContainerObject, Flashbang, VLayoutContainer,
     HAlign, Assert
 } from 'flashbang';
-import GameButton from './GameButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import { ToolbarButton } from './Toolbar';
+import GameButton from './GameButton';
+import {ToolbarButton} from './Toolbar';
 
 export default class VToolBar extends ContainerObject {
     side3DToolbarLayout: VLayoutContainer;
@@ -16,14 +14,12 @@ export default class VToolBar extends ContainerObject {
     zoomout3D: GameButton;
     move3D: GameButton;
     rotate3D: GameButton;
-    
-    constructor() {
-        super();
-    }
+
     protected added(): void {
         super.added();
         this.create3DButtons();
     }
+
     create3DButtons() {
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
@@ -35,7 +31,7 @@ export default class VToolBar extends ContainerObject {
         const SPACE_WIDE = Math.min((Flashbang.stageWidth / APPROX_ITEM_COUNT) - APPROX_ITEM_WIDTH, 13);
         const SPACE_NARROW = SPACE_WIDE * 0.28;
 
-        this.side3DToolbarLayout = new VLayoutContainer(SPACE_NARROW, HAlign.CENTER)
+        this.side3DToolbarLayout = new VLayoutContainer(SPACE_NARROW, HAlign.CENTER);
         this.move3D = new ToolbarButton()
             .up(Bitmaps.Img3DMove)
             .over(Bitmaps.Img3DMove)
@@ -74,11 +70,12 @@ export default class VToolBar extends ContainerObject {
         this.container.addChild(this.side3DToolbarLayout);
         this.updateLayout();
     }
+
     public onResized() {
         this.updateLayout();
     }
+
     private updateLayout(): void {
         this.side3DToolbarLayout.layout(true);
     }
-
 }

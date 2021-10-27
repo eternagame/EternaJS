@@ -5,19 +5,19 @@ import {
 import Constants from 'eterna/Constants';
 import Eterna from 'eterna/Eterna';
 import Feedback from 'eterna/Feedback';
-import UndoBlock, { TargetConditions } from 'eterna/UndoBlock';
+import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
 import Solution from 'eterna/puzzle/Solution';
 import Puzzle from 'eterna/puzzle/Puzzle';
 import Background from 'eterna/vfx/Background';
 import Fonts from 'eterna/util/Fonts';
-import Toolbar, { ToolbarType } from 'eterna/ui/Toolbar';
+import Toolbar, {ToolbarType} from 'eterna/ui/Toolbar';
 import PoseField from 'eterna/pose2D/PoseField';
 import FolderManager from 'eterna/folding/FolderManager';
 import Vienna from 'eterna/folding/Vienna';
 import {
     VAlign, HAlign, DisplayUtil, KeyboardEventType, KeyCode, Assert
 } from 'flashbang';
-import EternaViewOptionsDialog, { EternaViewOptionsMode } from 'eterna/ui/EternaViewOptionsDialog';
+import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
 import SpecBoxDialog from 'eterna/ui/SpecBoxDialog';
 import Folder from 'eterna/folding/Folder';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -25,7 +25,7 @@ import GameButton from 'eterna/ui/GameButton';
 import EternaURL from 'eterna/net/EternaURL';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import GameDropdown from 'eterna/ui/GameDropdown';
-import { MappedValue, ValueView } from 'signals';
+import {MappedValue, ValueView} from 'signals';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 import UITheme from 'eterna/ui/UITheme';
@@ -64,9 +64,9 @@ export default class FeedbackViewMode extends GameMode {
         this._homeButton.clicked.connect(() => {
             if (Eterna.MOBILE_APP) {
                 Assert.assertIsDefined(window.frameElement);
-                window.frameElement.dispatchEvent(new CustomEvent('navigate', { detail: '/' }));
+                window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
             } else {
-                window.location.href = EternaURL.createURL({ page: 'home' });
+                window.location.href = EternaURL.createURL({page: 'home'});
             }
         });
         this.addObject(this._homeButton, this.uiLayer);
@@ -83,7 +83,7 @@ export default class FeedbackViewMode extends GameMode {
             homeArrow, HAlign.RIGHT, VAlign.CENTER, 8, 8
         );
 
-        this._toolbar = new Toolbar(ToolbarType.FEEDBACK, { states: this._puzzle.getSecstructs().length });
+        this._toolbar = new Toolbar(ToolbarType.FEEDBACK, {states: this._puzzle.getSecstructs().length});
         this.addObject(this._toolbar, this.uiLayer);
 
         Assert.assertIsDefined(this._toolbar.zoomOutButton);
@@ -251,7 +251,7 @@ export default class FeedbackViewMode extends GameMode {
             // AH: This loads the cached solutions if they're available (they should be)
             // and falls back to the current solution if they're not
             await Eterna.app.switchToPoseEdit(
-                this._puzzle, false, { initSolution: solution, solutions: [...this._solutions || solution] }
+                this._puzzle, false, {initSolution: solution, solutions: [...this._solutions || solution]}
             );
         } catch (e) {
             log.error(e);
@@ -435,8 +435,8 @@ export default class FeedbackViewMode extends GameMode {
 
         const pngData = DisplayUtil.renderToPNG(this.container);
 
-        tempBG.destroy({ children: true });
-        infoText.destroy({ children: true });
+        tempBG.destroy({children: true});
+        infoText.destroy({children: true});
 
         for (const [disp, wasVisible] of visibleState.entries()) {
             disp.visible = wasVisible;
@@ -583,7 +583,7 @@ export default class FeedbackViewMode extends GameMode {
         const shapeThreshold: number = this._feedback.getShapeThreshold(index);
         const shapeData: number[] = this._feedback.getShapeData(index);
         const startIndex: number = this._feedback.getShapeStartIndex(index);
-        const { puzzleLocks } = this._puzzle;
+        const {puzzleLocks} = this._puzzle;
         const shapeMax: number = this._feedback.getShapeMax(index);
         const shapeMin: number = this._feedback.getShapeMin(index);
 

@@ -11,10 +11,10 @@ import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import EPars from 'eterna/EPars';
 import TextBalloon from 'eterna/ui/TextBalloon';
-import { RegistrationGroup } from 'signals';
+import {RegistrationGroup} from 'signals';
 import Sounds from 'eterna/resources/Sounds';
 import UITheme from 'eterna/ui/UITheme';
-import { FontWeight } from 'flashbang/util/TextBuilder';
+import {FontWeight} from 'flashbang/util/TextBuilder';
 
 export interface ConstraintBoxConfig {
     // Toggle checkmark, green vs red outline
@@ -207,7 +207,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             ? config.tooltip : ConstraintBox.createTextStyle().append(config.tooltip);
 
         if (!config.satisfied && !this._forMissionScreen) {
-            tooltipText = tooltipText.clone().append('\n').append('Unsatisfied', { fill: 0xff0000 });
+            tooltipText = tooltipText.clone().append('\n').append('Unsatisfied', {fill: 0xff0000});
         }
 
         const balloon = new TextBalloon('', 0x0, 0.8);
