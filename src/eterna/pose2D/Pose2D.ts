@@ -1,6 +1,6 @@
 import * as log from 'loglevel';
 import {
-    Container, Graphics, Point, Sprite, Texture, Rectangle, InteractionEvent
+    Container, Graphics, Point, Sprite, Texture, Rectangle, InteractionEvent, InteractionData
 } from 'pixi.js';
 import {Registration} from 'signals';
 import EPars, {RNABase, RNAPaint} from 'eterna/EPars';
@@ -59,6 +59,7 @@ export const PLAYER_MARKER_LAYER = 'Markers';
 export const SCRIPT_MARKER_LAYER = 'Script';
 
 export type PoseMouseDownCallback = (e: InteractionEvent, closestDist: number, closestIndex: number) => void;
+export type PosePickCallback = (closestIndex: number) => void;
 
 export default class Pose2D extends ContainerObject implements Updatable {
     public static readonly COLOR_CURSOR: number = 0xFFC0CB;
@@ -77,7 +78,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         window.addEventListener('picking', (e) => {
             const ce = <CustomEvent>e;
             const closestIndex: number = ce.detail.resno;
-            if (ce.detail.action === 'hover' && !Mol3DGate.inUpdating) {
+            if (ce.detail.action === 'hover') {
                 this.on3DPickingMouseMoved(closestIndex - 1);
             } else if (ce.detail.action === 'clicked') {
                 if (Mol3DGate.scope/* && Mol3DGate.scope.threeView.metaState == 2 */) {
@@ -377,12 +378,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.callPoseEditCallback();
             this.annotationManager.refreshAnnotations(this, false);
             this._librarySelectionsChanged = false;
-            Mol3DGate.inUpdating = false; // kkk
             return;
         }
 
         if (this._mutatedSequence == null) {
-            Mol3DGate.inUpdating = false; // kkk
             return;
         }
 
@@ -427,7 +426,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.callPoseEditCallback();
             this.annotationManager.refreshAnnotations(this);
         }
-        Mol3DGate.inUpdating = false; // kkk
 
         this._mutatedSequence = null;
         this._lockUpdated = false;
@@ -563,6 +561,18 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 return;
             }
             this.onPoseMouseDown(e, closestIndex);
+        }
+    }
+    public onVirtualPoseMouseDownPropagate(closestIndex: number): void {
+        const altDown: boolean = Flashbang.app.isAltKeyDown;
+        const ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
+        const ctrlDownOrBaseMarking = ctrlDown || this.currentColor === RNAPaint.BASE_MARK;
+
+        if ((this._coloring && !altDown) || ctrlDownOrBaseMarking) {
+            if (ctrlDownOrBaseMarking && closestIndex >= this.sequence.length) {
+                return;
+            }
+            this.onVirtualPoseMouseDown(closestIndex);
         }
     }
 
@@ -1025,6 +1035,42 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._shiftEnd = -1;
             this.updateShiftHighlight();
         }
+    }
+
+    public onVirtualPoseMouseDown(closestIndex: number): void {
+        const altDown: boolean = Flashbang.app.isAltKeyDown;
+        const shiftDown: boolean = Flashbang.app.isShiftKeyDown;
+        const ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
+
+        if (this.annotationManager.isMovingAnnotation) {
+            return;
+        }
+
+        // ctrl + shift: drag base around; ctrl: base mark; shift: shift highlight
+        if (closestIndex >= 0) {
+            this._mouseDownAltKey = altDown;
+            if (
+                (ctrlDown || this.currentColor === RNAPaint.BASE_MARK)
+                && closestIndex < this.fullSequenceLength
+                && !this.annotationManager.getAnnotationMode()
+            ) {
+                this.toggleBaseMark(closestIndex);
+                return;
+            }
+            this._lastShiftedCommand = -1;
+            this._lastShiftedIndex = -1;
+            const cmd: [string, PuzzleEditOp, number[]?] | null = this.parseCommand(this._currentColor, closestIndex);
+            if (cmd == null) {
+                this.onBaseMouseDown(closestIndex, ctrlDown);
+                this.onMouseUp()
+            } else {
+                this._lastShiftedCommand = this._currentColor;
+                this._lastShiftedIndex = closestIndex;
+
+                this.callAddBaseCallback(cmd[0], cmd[1], closestIndex);
+            }
+
+        } 
     }
 
     public setMarkerLayer(layer: string) {
@@ -2015,13 +2061,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public set startMousedownCallback(cb: PoseMouseDownCallback) {
         this._startMousedownCallback = cb;
     }
+    public set startPickCallback(cb: PosePickCallback) {
+        this._startPickCallback = cb;
+    }
 
     // kkk transfer picking result result from 3D to 2D so that enable edit puzzle on 3D
     public simulateMousedownCallback(closestIndex:number): void {
-        if (this._startMousedownCallback != null && closestIndex >= 0) {
-            Mol3DGate.inUpdating = true;
-            const e: InteractionEvent = new InteractionEvent();
-            this._startMousedownCallback(e, 0, closestIndex);
+        if (this._startPickCallback != null && closestIndex >= 0) {
+            this._startPickCallback(closestIndex);
         }
         // deselect all annotations
         this.annotationManager.deselectAll();
@@ -4181,6 +4228,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _trackMovesCallback: ((count: number, moves: Move[]) => void) | null = null;
     private _addBaseCallback: (parenthesis: string | null, op: PuzzleEditOp | null, index: number) => void;
     private _startMousedownCallback: PoseMouseDownCallback;
+    private _startPickCallback: PosePickCallback;
     private _mouseDownAltKey: boolean = false;
 
     // Pointer to function that needs to be called in a GameMode to have access to appropriate state

@@ -52,7 +52,6 @@ interface PixiCifCheckerCallback {
 }
 
 export default class Mol3DGate {
-    static inUpdating: boolean = false;
     stage: NGL.Stage;
     component: NGL.Component | null;
     backboneElement: NGL.RepresentationElement | null;

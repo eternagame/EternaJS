@@ -741,6 +741,17 @@ export default class PoseEditMode extends GameMode {
                     }
                 }
             });
+            pose.startPickCallback = (closestIndex: number):void =>{
+                for (let ii = 0; ii < poseFields.length; ++ii) {
+                    const poseField: PoseField = poseFields[ii];
+                    const poseToNotify = poseField.pose;
+                    if (ii === index) {
+                        poseToNotify.onVirtualPoseMouseDown(closestIndex);
+                    } else {
+                        poseToNotify.onVirtualPoseMouseDownPropagate(closestIndex);
+                    }
+                }
+            }
         };
 
         const onAnnotationModeChange = (pose: Pose2D, active: boolean) => {
