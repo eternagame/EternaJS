@@ -161,7 +161,6 @@ export default class Bitmaps {
     public static readonly AudioNormal: string = require('assets/mute-icon1.png');
     public static readonly AudioMute: string = require('assets/mute-icon2.png');
     public static readonly ImgNativeOver: string = require('assets/NOVA/Target/nature-over.png');
-    public static readonly ImgNativeSelected: string = require('assets/NOVA/Target/nature-selected.png');
     public static readonly ImgNative: string = require('assets/NOVA/Target/nature.png');
     public static readonly LBaseU: string = require('assets/RNABase/new_big_blue.png');
     public static readonly BaseWPattern: string = require('assets/RNABase/new_big_gray.png');
@@ -264,7 +263,6 @@ export default class Bitmaps {
     public static readonly ImgSwapSelect: string = require('assets/NOVA/Palette/Swap/swap-selected.png');
     public static readonly ImgSwap: string = require('assets/NOVA/Palette/Swap/swap.png');
     public static readonly ImgTargetOver: string = require('assets/NOVA/Target/target-over.png');
-    public static readonly ImgTargetSelected: string = require('assets/NOVA/Target/target-selected.png');
     public static readonly ImgTarget: string = require('assets/NOVA/Target/target.png');
     public static readonly TemperatureImg: string = require('assets/temperature.png');
     public static readonly BaseC: string = require('assets/RNABase/thinner_green.png');
@@ -366,6 +364,7 @@ export default class Bitmaps {
     public static readonly ImgUpload: string = require('assets/UI/upload.png');
     public static readonly ImgAnnotation: string = require('assets/UI/annotation.png');
     public static readonly ImgUnlock: string = require('assets/UI/unlock.png');
+    public static readonly RectImg: string = require('assets/rect.png');
 
     public static get all(): string[] {
         if (Bitmaps.ALL_URLS == null) {

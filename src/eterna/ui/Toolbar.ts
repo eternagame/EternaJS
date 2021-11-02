@@ -21,6 +21,7 @@ import GameButton from './GameButton';
 import ToggleBar from './ToggleBar';
 import ScrollContainer from './ScrollContainer';
 import AnnotationPanel from './AnnotationPanel';
+import EternaMenu, {EternaMenuStyle} from './EternaMenu';
 
 export enum ToolbarType {
     PUZZLE,
@@ -122,6 +123,7 @@ export default class Toolbar extends ContainerObject {
     public zoomOutButton?: GameButton;
     public pipButton: GameButton;
     public stateToggle: ToggleBar;
+    public actionMenu: EternaMenu;
 
     public targetButton: GameButton;
 
@@ -246,10 +248,6 @@ export default class Toolbar extends ContainerObject {
 
     public onResized() {
         Assert.assertIsDefined(Flashbang.stageWidth);
-        this.stateToggle.container.position.set(
-            Flashbang.stageWidth / 2 - this.container.position.x,
-            -this.container.position.y + 8
-        );
         this.updateLayout();
     }
 
@@ -456,20 +454,12 @@ export default class Toolbar extends ContainerObject {
         The actual toolbar content is in the innermost HLayoutContainer
         */
 
-        if (
-            this._states > 1
-            && this._type !== ToolbarType.PUZZLEMAKER
-            && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED
-        ) {
-            // We create the stateToggle even if we don't add it to the mode,
-            // as scripts may rely on its existence
-            this.addObject(this.stateToggle, this.container);
-        }
-
         this.leftArrow = this.makeArrowButton('left');
 
         this.addObject(this.leftArrow, this.scrollContainerContainer);
         this.addObject(this.scrollContainer, this.scrollContainerContainer);
+
+        this.actionMenu = new EternaMenu(EternaMenuStyle.PULLUP, true);
 
         this._expandButtonContainer = new HLayoutContainer(0, VAlign.CENTER);
         this._content.addChild(this._expandButtonContainer);
@@ -666,8 +656,11 @@ export default class Toolbar extends ContainerObject {
             this._scrollContainer.addObject(this.pipButton, this._scrollContainer.content);
         }
 
-        this.naturalButton = new ToolbarButton()
-            .allStates(Bitmaps.ImgNative)
+        this.naturalButton = new GameButton()
+            .up(Bitmaps.ImgNative)
+            .over(Bitmaps.ImgNativeOver)
+            .down(Bitmaps.ImgNativeOver)
+            .selected(Bitmaps.ImgNativeOver)
             .tooltip('Natural Mode. RNA folds into the most stable shape. (Space)')
             .rscriptID(RScriptUIElementID.TOGGLENATURAL);
 
@@ -675,19 +668,22 @@ export default class Toolbar extends ContainerObject {
             .allStates(Bitmaps.ImgEstimate)
             .tooltip('Estimate Mode. The game approximates how the RNA actually folded in a test tube.');
 
-        this.targetButton = new ToolbarButton()
-            .allStates(Bitmaps.ImgTarget)
+        this.targetButton = new GameButton()
+            .up(Bitmaps.ImgTarget)
+            .over(Bitmaps.ImgTargetOver)
+            .down(Bitmaps.ImgTargetOver)
+            .selected(Bitmaps.ImgTargetOver)
             .tooltip('Target Mode. RNA freezes into the desired shape. (Space)')
             .rscriptID(RScriptUIElementID.TOGGLETARGET);
 
         if (this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED) {
             if (this._type !== ToolbarType.FEEDBACK) {
-                this._scrollContainer.addObject(this.naturalButton, this._scrollContainer.content);
-            } else {
                 this._scrollContainer.addObject(this.estimateButton, this._scrollContainer.content);
+            } else {
+                this._scrollContainer.addObject(this.naturalButton, this._scrollContainer.content);
             }
 
-            this._scrollContainer.addObject(this.targetButton, this._scrollContainer.content);
+            // this._scrollContainer.addObject(this.targetButton, this._scrollContainer.content);
         }
 
         this.letterColorButton = new ToolbarButton()
@@ -870,9 +866,9 @@ export default class Toolbar extends ContainerObject {
             );
 
             if (this._showAdvancedMenus) {
-                // this.addObject(this.annotationPanel, this.mode?.container);
-                // this.addObject(this.annotationModeButton, this.lowerToolbarLayout);
-                // this.addObject(this.annotationPanelButton, this.lowerToolbarLayout);
+                this.addObject(this.annotationPanel, this.mode?.container);
+                this.addObject(this.annotationModeButton, this.lowerToolbarLayout);
+                this.addObject(this.annotationPanelButton, this.lowerToolbarLayout);
 
                 this.regs.add(this.annotationModeButton.clicked.connect(() => {
                     this._deselectAllPaintTools();

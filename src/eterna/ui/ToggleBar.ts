@@ -1,14 +1,24 @@
 import {
-    Graphics, InteractionEvent, Point, Text
+    InteractionEvent, Point, Text, Sprite
 } from 'pixi.js';
 import {Signal} from 'signals';
 import {
-    ContainerObject, KeyboardListener, Enableable, LocationTask, Easing, KeyboardEventType, KeyCode, Flashbang, Assert
+    ContainerObject,
+    KeyboardListener,
+    Enableable,
+    KeyboardEventType,
+    KeyCode,
+    Flashbang,
+    Assert,
+    HLayoutContainer,
+    VAlign
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import Sounds from 'eterna/resources/Sounds';
 import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import ROPWait from 'eterna/rscript/ROPWait';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import GameButton from './GameButton';
 
 export default class ToggleBar extends ContainerObject implements KeyboardListener, Enableable {
     /** Emitted when our state changes */
@@ -19,55 +29,36 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
 
         this._numStates = numStates;
 
-        this._bg = new Graphics();
-        this.container.addChild(this._bg);
+        const container = new HLayoutContainer(0, VAlign.CENTER);
 
-        this._bg.clear();
-        this._bg.beginFill(ToggleBar.COLOR_DARK, 0.6);
-        this._bg.lineStyle(2, ToggleBar.COLOR_LIGHT, 0.85);
-        this._bg.drawRoundedRect(
-            0, 0,
-            ToggleBar.BUTTON_SIZE * this._numStates, ToggleBar.BUTTON_SIZE,
-            ToggleBar.ROUND_RECT_RADIUS
-        );
-        this._bg.endFill();
+        const background = Sprite.from(Bitmaps.RectImg);
 
-        this._hoverHilite = new Graphics();
-        this.container.addChild(this._hoverHilite);
+        const prevButton = new GameButton()
+            .allStates(Bitmaps.PrevArrow);
+        prevButton.display.position.set(-18, -9);
 
-        this._hoverHilite.clear();
-        this._hoverHilite.beginFill(ToggleBar.COLOR_MEDIUM, 0.45);
-        this._hoverHilite.drawRoundedRect(
-            0, 0,
-            ToggleBar.BUTTON_SIZE, ToggleBar.BUTTON_SIZE,
-            ToggleBar.ROUND_RECT_RADIUS
-        );
-        this._hoverHilite.endFill();
-        this._hoverHilite.visible = false;
+        const nextButton = new GameButton()
+            .allStates(Bitmaps.NextArrow);
+        nextButton.display.position.set(28, -9);
 
-        this._selectedHilite = new Graphics();
-        this.container.addChild(this._selectedHilite);
+        prevButton.clicked.connect(() => this.prevState());
+        nextButton.clicked.connect(() => this.nextState());
 
-        this._selectedHilite.clear();
-        this._selectedHilite.beginFill(ToggleBar.COLOR_LIGHT, 0.85);
-        this._selectedHilite.drawRoundedRect(
-            0, 0,
-            ToggleBar.BUTTON_SIZE, ToggleBar.BUTTON_SIZE,
-            ToggleBar.ROUND_RECT_RADIUS
-        );
-        this._selectedHilite.endFill();
-
-        for (let ii = 0; ii < this._numStates; ii++) {
-            this._labels[ii] = Fonts.std(`${ii + 1}`, 12).color(ToggleBar.COLOR_TEXT).build();
-            this._labels[ii].position.set((ii * ToggleBar.BUTTON_SIZE) + 9, 5);
-            this.container.addChild(this._labels[ii]);
-        }
+        this._text = Fonts.std(`${this._selectedState + 1}/${this._numStates}`, 13).color(ToggleBar.COLOR_TEXT).build();
+        this._text.position.set(8, 10);
 
         this.state = 0;
 
+        this.addObject(prevButton, container);
+        this.addObject(nextButton, container);
+
+        this.container.addChild(background);
+        this.container.addChild(container);
+
+        this.container.addChild(this._text);
+
         this.pointerOver.connect(() => this.onMouseOver());
         this.pointerOut.connect(() => this.onMouseOut());
-        this.pointerTap.connect((event) => this.onMouseClick(event));
         this.pointerMove.connect((event) => this.onMouseMove(event));
     }
 
@@ -79,19 +70,8 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
 
     public set state(newState: number) {
         if (newState !== this._selectedState) {
-            if ((this._selectedState >= 0) && (this._selectedState < this._numStates)) {
-                this._labels[this._selectedState].style.fill = ToggleBar.COLOR_TEXT;
-            }
-
             this._selectedState = newState;
-            this.replaceNamedObject(
-                'BGSelectedAnim',
-                new LocationTask(
-                    this._selectedState * ToggleBar.BUTTON_SIZE, 0,
-                    0.5, Easing.easeInOut, this._selectedHilite
-                )
-            );
-            this._labels[this._selectedState].style.fill = ToggleBar.COLOR_HIGH;
+            this._text.text = `${newState + 1}/${this._numStates}`;
 
             Flashbang.sound.playSound(Sounds.SoundSwitch);
             this.stateChanged.emit(newState);
@@ -121,13 +101,17 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
         this._enabled = value;
     }
 
-    private onMouseClick(e: InteractionEvent): void {
-        const state: number = this.getStateUnderMouse(e);
-        if ((state === this._selectedState) || (state < 0) || (state >= this._numStates)) {
-            return;
-        }
+    private prevState(): void {
+        const prevState = this._selectedState - 1;
+        if (prevState < 0) return;
+        this.state = prevState;
+        ROPWait.notifyClickUI(RScriptUIElementID.SWITCH);
+    }
 
-        this.state = state;
+    private nextState(): void {
+        const nextState = this._selectedState + 1;
+        if (nextState + 1 > this._numStates) return;
+        this.state = nextState;
         ROPWait.notifyClickUI(RScriptUIElementID.SWITCH);
     }
 
@@ -137,10 +121,6 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
 
     private onMouseOut(): void {
         this._mouseOver = false;
-        this._hoverHilite.visible = false;
-        if ((this._hoveredState >= 0) && (this._hoveredState !== this._selectedState)) {
-            this._labels[this._hoveredState].style.fill = ToggleBar.COLOR_TEXT;
-        }
         this._hoveredState = -1;
     }
 
@@ -154,18 +134,7 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
             return;
         }
 
-        if (this._hoveredState >= 0 && this._hoveredState !== this._selectedState) {
-            this._labels[this._hoveredState].style.fill = ToggleBar.COLOR_TEXT;
-        }
-
         this._hoveredState = state;
-        if (this._hoveredState === this._selectedState) {
-            this._hoverHilite.visible = false;
-        } else {
-            this._hoverHilite.visible = true;
-            this._hoverHilite.position.set(this._hoveredState * ToggleBar.BUTTON_SIZE, 0);
-            this._labels[this._hoveredState].style.fill = ToggleBar.COLOR_HIGH;
-        }
     }
 
     private getStateUnderMouse(e: InteractionEvent): number {
@@ -173,25 +142,16 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
         return Math.floor(ToggleBar.P.x / ToggleBar.BUTTON_SIZE);
     }
 
-    private readonly _bg: Graphics;
-    private readonly _hoverHilite: Graphics;
-    private readonly _selectedHilite: Graphics;
-
     private readonly _numStates: number;
 
     private _enabled: boolean = true;
     private _selectedState: number = -1;
     private _hoveredState: number = -1;
     private _mouseOver: boolean = false;
-    private _labels: Text[] = [];
+    private _text: Text;
 
     private static readonly BUTTON_SIZE = 25;
-    private static readonly ROUND_RECT_RADIUS = 10;
-    private static readonly COLOR_DARK = 0x1C304C;
-    private static readonly COLOR_MEDIUM = 0x3E566A;
-    private static readonly COLOR_LIGHT = 0x88A1B1;
-    private static readonly COLOR_TEXT = 0xBEDCE7;
-    private static readonly COLOR_HIGH = 0xFFFFFF;
+    private static readonly COLOR_TEXT = 0x043468;
 
     private static readonly P: Point = new Point();
 }

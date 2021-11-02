@@ -310,6 +310,12 @@ export default class PoseEditMode extends GameMode {
             }
         });
 
+        this.addObject(this._toolbar.naturalButton, this.uiLayer);
+        this.addObject(this._toolbar.targetButton, this.uiLayer);
+        if (this._puzzle.getSecstructs().length > 1) {
+            this.addObject(this._toolbar.stateToggle, this.uiLayer);
+        }
+
         // Add our docked SpecBox at the bottom of uiLayer
         this._dockedSpecBox = new SpecBox(true);
         this._dockedSpecBox.display.position.set(15, 190);
@@ -421,6 +427,31 @@ export default class PoseEditMode extends GameMode {
             this._solutionNameText, HAlign.CENTER, VAlign.TOP,
             HAlign.CENTER, VAlign.TOP, 0, 8
         );
+
+        DisplayUtil.positionRelativeToStage(
+            this._toolbar.naturalButton.display, HAlign.LEFT, VAlign.TOP,
+            HAlign.LEFT, VAlign.TOP, 10, (
+                this._folderSwitcher.display.position.y
+                + this._folderSwitcher.display.height + 20
+            )
+        );
+        DisplayUtil.positionRelativeToStage(
+            this._toolbar.targetButton.display, HAlign.LEFT, VAlign.TOP,
+            HAlign.LEFT, VAlign.TOP, 60, (
+                this._folderSwitcher.display.position.y
+                + this._folderSwitcher.display.height + 20
+            )
+        );
+
+        DisplayUtil.positionRelativeToStage(
+            this._toolbar.stateToggle.display, HAlign.LEFT, VAlign.TOP,
+            HAlign.LEFT, VAlign.TOP, 10, (
+                this._toolbar.targetButton.display.y
+                + this._toolbar.targetButton.display.height + 10
+            )
+        );
+
+        // this._toolbar.setToggleBarPosition(0, 0);
 
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);

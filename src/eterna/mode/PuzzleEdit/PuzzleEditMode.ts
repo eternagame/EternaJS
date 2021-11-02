@@ -292,6 +292,9 @@ export default class PuzzleEditMode extends GameMode {
             }
         });
 
+        this.addObject(this._toolbar.naturalButton, this.uiLayer);
+        this.addObject(this._toolbar.targetButton, this.uiLayer);
+
         this.clearUndoStack();
 
         const poseFields: PoseField[] = [];
@@ -524,6 +527,21 @@ export default class PuzzleEditMode extends GameMode {
         DisplayUtil.positionRelativeToStage(
             this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
             HAlign.CENTER, VAlign.BOTTOM, 20, -20
+        );
+
+        DisplayUtil.positionRelativeToStage(
+            this._toolbar.naturalButton.display, HAlign.LEFT, VAlign.TOP,
+            HAlign.LEFT, VAlign.TOP, 10, (
+                this._folderSwitcher.display.position.y
+                + this._folderSwitcher.display.height + 20
+            )
+        );
+        DisplayUtil.positionRelativeToStage(
+            this._toolbar.targetButton.display, HAlign.LEFT, VAlign.TOP,
+            HAlign.LEFT, VAlign.TOP, 60, (
+                this._folderSwitcher.display.position.y
+                + this._folderSwitcher.display.height + 20
+            )
         );
 
         const toolbarBounds = this._toolbar.display.getBounds();
