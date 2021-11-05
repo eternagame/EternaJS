@@ -100,7 +100,12 @@ export class ButtonsGroup extends ContainerObject {
         const {BUTTON_WIDTH} = ButtonsGroup;
         this._content.addChildAt(newButton, 0);
         this._background.width = this._content.children.length * BUTTON_WIDTH;
-        this._content.layout(true);
+    }
+
+    public addButtonAt(newButton: DisplayObject, position: number): void {
+        const {BUTTON_WIDTH} = ButtonsGroup;
+        this._content.addChildAt(newButton, position);
+        this._background.width = this._content.children.length * BUTTON_WIDTH;
     }
 
     public removeButton(button: DisplayObject): void {
@@ -110,6 +115,10 @@ export class ButtonsGroup extends ContainerObject {
         this._content.removeChildAt(childrenIndex);
         this._background.width = this._content.children.length * BUTTON_WIDTH;
         this._content.layout(true);
+    }
+
+    public removeButtonAt(index: number): Container {
+        return this._content.removeChildAt(index);
     }
 
     public forceLayout(): void {
@@ -976,6 +985,41 @@ export default class Toolbar extends ContainerObject {
         this._draggingElement.zIndex = 999;
     }
 
+    private _getUnderButtonIndex(buttonSize: number, pos: number): number {
+        return Math.floor(pos / buttonSize);
+    }
+
+    private _updateActiveButtonsGroup(
+        currentButtonGroup: ButtonsGroup,
+        currentButtonBounds: Rectangle,
+        startPointContainer: Container,
+        draggingElement: DisplayObject,
+        anotherButtonGroup: ButtonsGroup,
+        lastKnownPoint: Point
+    ): void {
+        if (currentButtonGroup._content.children.length < 3) {
+            const childIndex = startPointContainer.children.findIndex((el) => el === draggingElement);
+            if (startPointContainer === anotherButtonGroup._content) {
+                anotherButtonGroup.removeButton(draggingElement);
+            } else {
+                startPointContainer.children.splice(childIndex, 1);
+            }
+            currentButtonGroup.addButton(draggingElement);
+            currentButtonGroup.forceLayout();
+        } else {
+            const minX = currentButtonBounds.x;
+            const cursorX = lastKnownPoint.x;
+            const pos = cursorX - minX;
+            const underButtonIndex = this._getUnderButtonIndex(55, pos);
+            const replacedButton = currentButtonGroup.removeButtonAt(underButtonIndex);
+            const btnIndex = startPointContainer.children.findIndex((el) => el === draggingElement);
+            startPointContainer.children.splice(btnIndex, 1);
+            currentButtonGroup.addButtonAt(draggingElement, underButtonIndex);
+            this._scrollContainer.content.addChildAt(replacedButton, btnIndex);
+            currentButtonGroup.forceLayout();
+        }
+    }
+
     private onDragEnd(e: InteractionEvent): void {
         e.stopPropagation();
         this._isDragging = false;
@@ -1029,34 +1073,33 @@ export default class Toolbar extends ContainerObject {
         }
 
         if (leftButtonsBounds.contains(e.data.global.x, e.data.global.y)) {
-            if (this.leftButtonsGroup._content.children.length >= 3) {
+            if (this.leftButtonsGroup._content === this._startPointContainer) {
                 this.resetDragState();
                 this.updateLayout();
                 return;
             }
-            const childIndex = this._startPointContainer.children.findIndex((el) => el === this._draggingElement);
-            if (this._startPointContainer === this.rightButtonsGroup._content) {
-                this.rightButtonsGroup.removeButton(this._draggingElement);
-            } else {
-                this._startPointContainer.children.splice(childIndex, 1);
-            }
-            this.leftButtonsGroup.addButton(this._draggingElement);
-            this.leftButtonsGroup.forceLayout();
+            this._updateActiveButtonsGroup(
+                this.leftButtonsGroup,
+                leftButtonsBounds,
+                this._startPointContainer,
+                this._draggingElement,
+                this.rightButtonsGroup,
+                e.data.global
+            );
         } else if (rightButtonsBounds.contains(e.data.global.x, e.data.global.y)) {
-            if (this.rightButtonsGroup._content.children.length >= 3) {
+            if (this.rightButtonsGroup._content === this._startPointContainer) {
                 this.resetDragState();
                 this.updateLayout();
                 return;
             }
-            const childIndex = this._startPointContainer.children.findIndex((el) => el === this._draggingElement);
-            if (this._startPointContainer === this.leftButtonsGroup._content) {
-                this.leftButtonsGroup.removeButton(this._draggingElement);
-                this.leftButtonsGroup.forceLayout();
-            } else {
-                this._startPointContainer.children.splice(childIndex, 1);
-            }
-            this.rightButtonsGroup.addButton(this._draggingElement);
-            this.rightButtonsGroup.forceLayout();
+            this._updateActiveButtonsGroup(
+                this.rightButtonsGroup,
+                rightButtonsBounds,
+                this._startPointContainer,
+                this._draggingElement,
+                this.leftButtonsGroup,
+                e.data.global
+            );
         } else if (availableButtonsBounds.contains(e.data.global.x, e.data.global.y)) {
             if (this._startPointContainer === this._scrollContainer.content) {
                 this.resetDragState();
