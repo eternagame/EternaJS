@@ -1,10 +1,11 @@
 // kkk Mol3DGate.ts --- manage 3d part of EternaGame
 
 import * as NGL from 'ngl';
-import { RNABase } from 'eterna/EPars';
+import {RNABase} from 'eterna/EPars';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import ThreeView from './ThreeView';
 import GameMode from './GameMode';
+import Bitmaps from 'eterna/resources/Bitmaps';
 
 /*
 test pattern
@@ -45,7 +46,7 @@ const DectectDevice = () => {
 };
 
 export interface PixiRenderCallback {
-    (imgData: HTMLCanvasElement, width: number, height: number): void;
+    (imgData: HTMLCanvasElement, width:number, height:number): void;
 }
 interface PixiCifCheckerCallback {
     (component: NGL.Structure | null): void;
@@ -61,7 +62,7 @@ export default class Mol3DGate {
     poseMode: GameMode;
     private readonly secStruct: string;
     colorChangeMap = new Map();
-    hoverdInfo = { index: -1, color: 0, outColor: 0 };
+    hoverdInfo = {index: -1, color: 0, outColor: 0};
     bShowAnnotations: boolean = true;
     threeView: ThreeView;
     _3DFilePath: string | File | Blob = '';
@@ -96,15 +97,15 @@ export default class Mol3DGate {
         };
     }, 'myColorScheme');
 
-    constructor(filePath: string | File | Blob, container: HTMLElement,
-        threeView: ThreeView, callback: PixiRenderCallback, poseMode: GameMode, _secStruct: string) {
+    constructor(filePath: string | File | Blob, container:HTMLElement,
+        threeView: ThreeView, callback:PixiRenderCallback, poseMode: GameMode, _secStruct: string) {
         Mol3DGate.scope = this;
         this._3DFilePath = filePath;
         this.poseMode = poseMode;
         this.secStruct = _secStruct;
         this.threeView = threeView;
 
-        this.stage = new NGL.Stage(container, { mousePreset: 'eterna' }, callback);
+        this.stage = new NGL.Stage(container, {mousePreset: 'eterna'}, callback);
 
         this.component = null;
 
@@ -157,7 +158,7 @@ export default class Mol3DGate {
             numBase = parseInt(seq[1].split('-')[0], 10);
         }
         this.component?.viewer.setEthernaSequence(seq[0], numBase);
-        this.component?.updateRepresentations({ color: this.myColorScheme });
+        this.component?.updateRepresentations({color: this.myColorScheme});
         this.stage.viewer.requestRender();
     }
 
@@ -194,7 +195,7 @@ export default class Mol3DGate {
             if (this.baseElement) this.component?.removeRepresentation(this.baseElement);
             this.baseElement = null;
         } else if (cmd.includes('create')) {
-            this.baseElement = this.component?.addRepresentation('ebase', { vScale: 0.5, color: this.myColorScheme });
+            this.baseElement = this.component?.addRepresentation('ebase', {vScale: 0.5, color: this.myColorScheme});
         }
     }
 
@@ -204,14 +205,14 @@ export default class Mol3DGate {
 
         const pairs = SecStruct.fromParens(this.secStruct).pairs;
 
-        this.stage.defaultFileParams = { firstModelOnly: true };
-        this.stage.loadFile(filePath, { etherna_pairs: pairs }).then((component: void | NGL.Component) => {
+        this.stage.defaultFileParams = {firstModelOnly: true};
+        this.stage.loadFile(filePath, {etherna_pairs: pairs}).then((component: void | NGL.Component) => {
             if (component) {
                 this.component = component;
                 this.updateSequence(this.poseMode.getSequence().split(' '));
                 this.component.viewer.setHBondColor([0xFFFFFF, 0x8F9DC0, 0x546986, 0xFFFFFF]);
                 this.baseElement = this.component.addRepresentation('ebase',
-                    { vScale: 0.5, color: Mol3DGate.scope.myColorScheme });
+                    {vScale: 0.5, color: Mol3DGate.scope.myColorScheme});
                 if (this.baseElement) {
                     const baseRepr = this.baseElement.repr;
                     if (baseRepr) {
@@ -222,7 +223,7 @@ export default class Mol3DGate {
                         }
                         const annotations = baseRepr.getAnnotations();
                         let i = 0;
-                        annotations.forEach((a: any) => {
+                        annotations.forEach((a:any) => {
                             const num = numBase + a.num;
                             if (i === 0 || i === annotations.length - 1 || (num % 5) === 0) {
                                 const vector = new NGL.Vector3(a.x, a.y, a.z);
@@ -233,13 +234,14 @@ export default class Mol3DGate {
                     }
                 }
                 // this.ballstickElement = this.component.addRepresentation("eball+stick", { extSugar: true })
-                this.backboneElement = this.component.addRepresentation('backbone', { color: 0xFF8000 });
+                this.backboneElement = this.component.addRepresentation('backbone', {color: 0xFF8000});
                 this.component.autoView();
+                this.stage.viewer.spark.setURL(Bitmaps.BonusSymbol);
             }
         });
     }
 
-    showAnnotations(bShow: boolean) {
+    showAnnotations(bShow:boolean) {
         this.bShowAnnotations = bShow;
         if (!bShow) this.threeView.hideAnnotations();
         else this.stage.viewer.requestRender();
@@ -247,10 +249,10 @@ export default class Mol3DGate {
 
     static checkModelFile(path: string | File | Blob, seq: string) {
         let result = 0;
-        function ModelCallback(obj: NGL.Structure): void {
+        function ModelCallback(obj: NGL.Structure):void {
             result = obj.chainStore.residueCount[0];
         }
-        const callback: PixiCifCheckerCallback = <PixiCifCheckerCallback>ModelCallback;
+        const callback: PixiCifCheckerCallback = <PixiCifCheckerCallback> ModelCallback;
         const promise = NGL.Stage.checkModelFile(path, callback);
         return promise.then(() => result);
     }

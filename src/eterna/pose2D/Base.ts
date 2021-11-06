@@ -10,6 +10,7 @@ import ROPWait from 'eterna/rscript/ROPWait';
 import BaseAssets from './BaseAssets';
 import BaseDrawFlags from './BaseDrawFlags';
 import {RNAHighlightState} from './Pose2D';
+import Mol3DGate from 'eterna/mode/Mol3DGate';
 
 export default class Base extends ContainerObject implements LateUpdatable {
     public static NUM_ZOOM_LEVELS = 2;
@@ -48,6 +49,12 @@ export default class Base extends ContainerObject implements LateUpdatable {
         this._sparkStartTime = -1;
         const randAngle: number = Math.random() * Math.PI * 2;
         this._sparkDir = new Point(Math.cos(randAngle), Math.sin(randAngle));
+
+        //kkk set NGL sparking 
+        if (Mol3DGate.scope) {
+            Mol3DGate.scope.stage?.viewer?.addSpark(this._baseIdx+1);
+            console.log('startSparking = ', this._baseIdx+1);
+        }
     }
 
     public setGoDir(goX: number, goY: number): void {

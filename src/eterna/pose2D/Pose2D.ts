@@ -1849,6 +1849,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
+        //kkk set NGL sparking 
+        if (Mol3DGate.scope) {
+            Mol3DGate.scope.stage?.viewer?.beginSpark();
+        }
         for (let ii: number = stackStart; ii <= stackEnd; ii++) {
             const aa: number = ii;
             const bb: number = this._pairs.pairingPartner(ii);
@@ -1880,6 +1884,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
             xPos += p2.x;
             yPos += p2.y;
+        }
+        //kkk set NGL sparking 
+        if (Mol3DGate.scope) {
+            Mol3DGate.scope.stage?.viewer?.endSpark(20);
         }
 
         const stackLen: number = (stackEnd - stackStart) + 1;
@@ -1946,10 +1954,18 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     private onPraiseSeq(seqStart: number, seqEnd: number): void {
         const fullSeqLen = this.fullSequenceLength;
+        //kkk set NGL sparking 
+        if (Mol3DGate.scope) {
+            Mol3DGate.scope.stage?.viewer?.beginSpark();
+        }
         for (let ii: number = seqStart; ii <= seqEnd; ii++) {
             if (ii >= 0 && ii < fullSeqLen) {
                 this._bases[ii].startSparking();
             }
+        }
+        //kkk set NGL sparking 
+        if (Mol3DGate.scope) {
+            Mol3DGate.scope.stage?.viewer?.endSpark(20);
         }
     }
 
