@@ -5,9 +5,9 @@ import {StyledTextBuilder, TextureUtil} from 'flashbang';
 import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
+import Utility from 'eterna/util/Utility';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
-import Utility from 'eterna/util/Utility';
 
 interface MaxNonLibraryMutationConstraintStatus extends BaseConstraintStatus {
     mutations: number;
@@ -26,7 +26,7 @@ export default class MaximumNonLibraryMutationConstraint extends Constraint<MaxN
         if (!context.puzzle) {
             throw new Error('Non-library mutation constraint requires beginning sequence, which is unavailable');
         }
-        
+
         // luxaritas: we are skipping the librarySelections region. but presumably
         // librarySelections is not in sequence numbering -- it is either sequence
         // numbering plus one or it is post customNumbering mapping.
@@ -39,7 +39,6 @@ export default class MaximumNonLibraryMutationConstraint extends Constraint<MaxN
             ) as (number | null)[];
 
             unmappedLibrarySelections = ls.map((ii) => cn?.indexOf(ii));
-
         } else {
             unmappedLibrarySelections = ls.map((ii) => ii - 1);
         }

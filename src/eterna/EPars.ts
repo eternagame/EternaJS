@@ -295,7 +295,7 @@ export default class EPars {
         return str;
     }
 
-    public static sequenceDiff(seq1: Sequence, seq2: Sequence, skipRegion: number[]): number {
+    public static sequenceDiff(seq1: Sequence, seq2: Sequence, skipRegion: number[] = []): number {
         let diff = 0;
         for (let ii = 0; ii < seq1.length; ii++) {
             if (skipRegion.includes(ii)) continue;
