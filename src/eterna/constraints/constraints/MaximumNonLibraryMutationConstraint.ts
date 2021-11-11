@@ -27,20 +27,14 @@ export default class MaximumNonLibraryMutationConstraint extends Constraint<MaxN
             throw new Error('Non-library mutation constraint requires beginning sequence, which is unavailable');
         }
 
-        // luxaritas: we are skipping the librarySelections region. but presumably
-        // librarySelections is not in sequence numbering -- it is either sequence
-        // numbering plus one or it is post customNumbering mapping.
-        // you may want to check this part
         let unmappedLibrarySelections: number[] = [];
-        const ls = context.undoBlocks[0].librarySelections ?? [];
-        if (context.undoBlocks[0].targetConditions?.['custom-numbering']) {
-            const cn = Utility.numberingJSONToArray(
-                context.undoBlocks[0].targetConditions['custom-numbering'] as string
-            ) as (number | null)[];
-
-            unmappedLibrarySelections = ls.map((ii) => cn?.indexOf(ii));
+        const librarySelections = context.undoBlocks[0].librarySelections ?? [];
+        const customNumberingStr = context.undoBlocks[0].targetConditions?.['custom-numbering'];
+        if (customNumberingStr) {
+            const customNumbering = Utility.numberingJSONToArray(customNumberingStr);
+            unmappedLibrarySelections = librarySelections.map((ii) => customNumbering.indexOf(ii));
         } else {
-            unmappedLibrarySelections = ls.map((ii) => ii - 1);
+            unmappedLibrarySelections = librarySelections.map((ii) => ii - 1);
         }
 
         const mutations: number = EPars.sequenceDiff(
