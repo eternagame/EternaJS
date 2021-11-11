@@ -2685,45 +2685,44 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
-        for (let ii = 0; ii < this._poses.length; ii++) {
-            const jj: number = (ii === 0 && !this._isPipMode)
+        for (let poseIdx = 0; poseIdx < this._poses.length; poseIdx++) {
+            const stateIdx: number = (poseIdx === 0 && !this._isPipMode)
                 ? this._curTargetIndex
-                : ii;
+                : poseIdx;
 
-            if (this._targetConditions == null || this._targetConditions[jj] === undefined
-                || (this._targetConditions[jj] as TargetConditions)['type'] === undefined) {
+            if (this._targetConditions == null || this._targetConditions[stateIdx] === undefined
+                || (this._targetConditions[stateIdx] as TargetConditions)['type'] === undefined) {
                 continue;
             }
 
-            const tc = this._targetConditions[ii] as TargetConditions;
-            const tcjj = this._targetConditions[jj] as TargetConditions;
+            const tc = this._targetConditions[stateIdx] as TargetConditions;
             if (Puzzle.isAptamerType(tc['type'])) {
-                this._poses[ii].setMolecularBinding(
+                this._poses[poseIdx].setMolecularBinding(
                     tc['site'],
                     tc['binding_pairs'],
                     tc['bonus'] as number / 100.0
                 );
             } else {
-                this._poses[ii].setMolecularBinding(undefined, undefined, 0);
+                this._poses[poseIdx].setMolecularBinding(undefined, undefined, 0);
             }
-            if (Puzzle.isOligoType(tcjj['type'])) {
-                this._poses[ii].oligoMalus = tcjj['malus'] as number;
-                const nnfe = this.getCurrentUndoBlock(jj).getParam(
+            if (Puzzle.isOligoType(tc['type'])) {
+                this._poses[poseIdx].oligoMalus = tc['malus'] as number;
+                const nnfe = this.getCurrentUndoBlock(stateIdx).getParam(
                     UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE, pseudoknots
                 ) as number[];
                 if (nnfe != null && nnfe[0] === -2) {
-                    this._poses[ii].oligoPaired = true;
-                    this._poses[ii].duplexCost = nnfe[1] * 0.01;
+                    this._poses[poseIdx].oligoPaired = true;
+                    this._poses[poseIdx].duplexCost = nnfe[1] * 0.01;
                 } else {
-                    this._poses[ii].oligoPaired = false;
+                    this._poses[poseIdx].oligoPaired = false;
                 }
             }
-            if (tcjj['type'] === 'multistrand') {
-                const nnfe = this.getCurrentUndoBlock(jj).getParam(
+            if (tc['type'] === 'multistrand') {
+                const nnfe = this.getCurrentUndoBlock(stateIdx).getParam(
                     UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE, pseudoknots
                 ) as number[];
                 if (nnfe != null && nnfe[0] === -2) {
-                    this._poses[ii].duplexCost = nnfe[1] * 0.01;
+                    this._poses[poseIdx].duplexCost = nnfe[1] * 0.01;
                 }
             }
         }
