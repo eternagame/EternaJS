@@ -310,6 +310,8 @@ export default class Utility {
      *
      * @returns array of numbers
     */
+    public static numberingJSONToArray(numberingJSON: string): (number | null)[]
+    public static numberingJSONToArray(numberingJSON?: string): (number | null)[] | undefined
     public static numberingJSONToArray(numberingJSON?: string): (number | null)[] | undefined {
         if (numberingJSON === undefined) return undefined;
         else { // if (typeof numberingJSON === 'string') {
