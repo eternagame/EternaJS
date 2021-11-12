@@ -2932,7 +2932,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             // If we just went from 1 annotation to 0, we still need to make sure we clear it.
             this.clearAnnotationCanvas();
             if (this._annotationManager.allAnnotations.length > 0) {
-                if (!this._redrawAnnotationUseCache || this.annotationSpaceAvailability.length === 0) {
+                if (!this._redrawAnnotationUseCache || this.annotationSpaceAvailability.size === 0) {
                     this.updateAnnotationSpaceAvailability();
                 }
                 this._annotationManager.drawAnnotations({
@@ -3615,7 +3615,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public get annotationSpaceAvailability(): boolean[][] {
+    public get annotationSpaceAvailability(): Map<string, boolean> {
         return this._annotationSpaceAvailability;
     }
 
@@ -3677,13 +3677,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
         // These are SUPER expensive getters which basically have to touch all the objects in
         // the container. There's no reason the width and height change while running this function,
         // so let's only compute them once.
-        const baseLayerheight = this._baseLayer.height;
-        const baseLayerWidth = this._baseLayer.width;
+        const baseLayerHeight = Math.ceil(this._baseLayer.height);
+        const baseLayerWidth = Math.ceil(this._baseLayer.width);
 
-        // Set annotation space availability to true
-        this._annotationSpaceAvailability = Array(Math.ceil(baseLayerheight)).fill(0).map(
-            () => Array(Math.ceil(baseLayerWidth)).fill(true)
-        );
+        this._annotationSpaceAvailability = new Map();
 
         const baseLayerBounds = DisplayUtil.getBoundsRelative(this._baseLayer, this.container);
 
@@ -3693,18 +3690,18 @@ export default class Pose2D extends ContainerObject implements Updatable {
             const baseBounds = DisplayUtil.getBoundsRelative(base.display, this._baseLayer);
             const baseRowStart = Math.max(0, Math.floor(baseBounds.y - baseLayerBounds.y));
             const baseRowEnd = Math.min(
-                Math.ceil(baseLayerheight),
+                baseLayerHeight,
                 Math.ceil(baseBounds.y - baseLayerBounds.y + baseBounds.height)
             );
             const baseColStart = Math.max(0, Math.floor(baseBounds.x - baseLayerBounds.x));
             const baseColEnd = Math.min(
-                Math.ceil(baseLayerWidth),
+                baseLayerWidth,
                 Math.ceil(baseBounds.x - baseLayerBounds.x + baseBounds.width)
             );
 
             for (let row = baseRowStart; row < baseRowEnd; row++) {
                 for (let col = baseColStart; col < baseColEnd; col++) {
-                    this._annotationSpaceAvailability[row][col] = false;
+                    this._annotationSpaceAvailability.set(`${row}-${col}`, true);
                 }
             }
         }
@@ -4290,7 +4287,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _annotationHighlightBox: HighlightBox;
     private _annotationContextMenu: ContextMenu;
     private _annotationDialog: AnnotationDialog | null = null;
-    private _annotationSpaceAvailability: boolean[][] = [];
+    private _annotationSpaceAvailability: Map<string, boolean> = new Map();
     private _annotationRanges: AnnotationRange[] = [];
     private _selectingAnnotationRange: boolean = false;
     private _redrawAnnotations: FrameUpdateState = FrameUpdateState.IDLE;
