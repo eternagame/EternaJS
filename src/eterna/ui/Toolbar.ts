@@ -79,6 +79,12 @@ export class ButtonsGroup extends ContainerObject {
         });
     }
 
+    public toggleInteractive(value: boolean): void {
+        this._content.children.forEach((button) => {
+            button.interactive = value;
+        });
+    }
+
     public changeMode(value: boolean): void {
         const {BUTTON_WIDTH} = ButtonsGroup;
         if (value) {
@@ -119,6 +125,10 @@ export class ButtonsGroup extends ContainerObject {
 
     public removeButtonAt(index: number): Container {
         return this._content.removeChildAt(index);
+    }
+
+    public getButtonIndex(button: DisplayObject): number {
+        return this._content.children.findIndex((el) => el === button);
     }
 
     public forceLayout(): void {
@@ -961,6 +971,14 @@ export default class Toolbar extends ContainerObject {
         this._startPointContainer = null;
     }
 
+    private _toggleButtonsInteractive(value: boolean): void {
+        this.leftButtonsGroup.toggleInteractive(value);
+        this.rightButtonsGroup.toggleInteractive(value);
+        this._scrollContainer.content.children.forEach((button) => {
+            button.interactive = value;
+        });
+    }
+
     private onDragStart(e: InteractionEvent): void {
         e.stopPropagation();
         if (e.target === this._scrollNextButton.container || e.target === this._scrollPrevButton.container) return;
@@ -1011,12 +1029,21 @@ export default class Toolbar extends ContainerObject {
             const cursorX = lastKnownPoint.x;
             const pos = cursorX - minX;
             const underButtonIndex = this._getUnderButtonIndex(55, pos);
-            const replacedButton = currentButtonGroup.removeButtonAt(underButtonIndex);
-            const btnIndex = startPointContainer.children.findIndex((el) => el === draggingElement);
-            startPointContainer.children.splice(btnIndex, 1);
-            currentButtonGroup.addButtonAt(draggingElement, underButtonIndex);
-            this._scrollContainer.content.addChildAt(replacedButton, btnIndex);
+
+            if (startPointContainer === anotherButtonGroup._content) {
+                const replacedButton = currentButtonGroup.removeButtonAt(underButtonIndex);
+                anotherButtonGroup.removeButton(draggingElement);
+                anotherButtonGroup.addButton(replacedButton);
+                currentButtonGroup.addButtonAt(draggingElement, underButtonIndex);
+            } else {
+                const replacedButton = currentButtonGroup.removeButtonAt(underButtonIndex);
+                const btnIndex = startPointContainer.children.findIndex((el) => el === draggingElement);
+                startPointContainer.children.splice(btnIndex, 1);
+                currentButtonGroup.addButtonAt(draggingElement, underButtonIndex);
+                this._scrollContainer.content.addChildAt(replacedButton, btnIndex);
+            }
             currentButtonGroup.forceLayout();
+            anotherButtonGroup.forceLayout();
         }
     }
 
@@ -1027,7 +1054,10 @@ export default class Toolbar extends ContainerObject {
         if (
             this._startPoint?.x === e.data.global.x
             && this._startPoint?.y === e.data.global.y
-        ) return;
+        ) {
+            this._toggleButtonsInteractive(true);
+            return;
+        }
 
         const leftButtonsRect = this.leftButtonsGroup.container.getBounds();
         const rightButtonsRect = this.rightButtonsGroup.container.getBounds();
@@ -1065,6 +1095,7 @@ export default class Toolbar extends ContainerObject {
             && !rightButtonsBounds.contains(e.data.global.x, e.data.global.y)
             && !availableButtonsBounds.contains(e.data.global.x, e.data.global.y)
         ) {
+            this._toggleButtonsInteractive(true);
             this._draggingElement.position.copyFrom(this._startPoint);
             this._draggingElement.interactive = true;
             this._draggingElement = null;
@@ -1076,6 +1107,7 @@ export default class Toolbar extends ContainerObject {
             if (this.leftButtonsGroup._content === this._startPointContainer) {
                 this.resetDragState();
                 this.updateLayout();
+                this._toggleButtonsInteractive(true);
                 return;
             }
             this._updateActiveButtonsGroup(
@@ -1086,10 +1118,12 @@ export default class Toolbar extends ContainerObject {
                 this.rightButtonsGroup,
                 e.data.global
             );
+            this._toggleButtonsInteractive(true);
         } else if (rightButtonsBounds.contains(e.data.global.x, e.data.global.y)) {
             if (this.rightButtonsGroup._content === this._startPointContainer) {
                 this.resetDragState();
                 this.updateLayout();
+                this._toggleButtonsInteractive(true);
                 return;
             }
             this._updateActiveButtonsGroup(
@@ -1100,10 +1134,12 @@ export default class Toolbar extends ContainerObject {
                 this.leftButtonsGroup,
                 e.data.global
             );
+            this._toggleButtonsInteractive(true);
         } else if (availableButtonsBounds.contains(e.data.global.x, e.data.global.y)) {
             if (this._startPointContainer === this._scrollContainer.content) {
                 this.resetDragState();
                 this.updateLayout();
+                this._toggleButtonsInteractive(true);
                 return;
             }
             if (this._startPointContainer === this.leftButtonsGroup._content) {
@@ -1118,7 +1154,9 @@ export default class Toolbar extends ContainerObject {
         }
 
         this._updateAvailableButtonsContainer();
-        this._draggingElement.interactive = true;
+        this._toggleButtonsInteractive(true);
+        this._isDisabled = false;
+        // this._draggingElement.interactive = true;
         this._draggingElement = null;
         this._startPoint = null;
         this.updateLayout();
@@ -1127,6 +1165,10 @@ export default class Toolbar extends ContainerObject {
     private onDragMove(e: InteractionEvent): void {
         e.stopPropagation();
         if (!this._draggingElement || !this._isExpanded) return;
+        if (!this._isDisabled) {
+            this._toggleButtonsInteractive(false);
+            this._isDisabled = true;
+        }
         this._draggingElement.interactive = false;
         if (this._isDragging) {
             const pos = e.data.getLocalPosition(this._draggingElement.parent);
@@ -1467,6 +1509,7 @@ export default class Toolbar extends ContainerObject {
 
     private _isExpanded: boolean;
     private _isDragging: boolean;
+    private _isDisabled: boolean;
 
     private _scrollStep: number;
     private _scrollOffset: number;

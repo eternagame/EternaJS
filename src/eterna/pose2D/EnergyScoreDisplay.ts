@@ -1,6 +1,6 @@
 import MultiStyleText from 'pixi-multistyle-text';
 import {Container} from 'pixi.js';
-import {HLayoutContainer, VAlign} from 'flashbang';
+import {VLayoutContainer, HAlign} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import {FontWeight} from 'flashbang/util/TextBuilder';
 
@@ -23,12 +23,12 @@ export default class EnergyScoreDisplay extends Container {
         this._width = width;
         this._height = height;
 
-        const textLayout: HLayoutContainer = new HLayoutContainer(2, VAlign.CENTER);
+        const textLayout: VLayoutContainer = new VLayoutContainer(2, HAlign.LEFT);
 
         this._labelText = new MultiStyleText('Total', {
             default: {
                 fontFamily: Fonts.STDFONT,
-                fontSize: 10,
+                fontSize: 11,
                 fill: 0xffffff
             },
             grey: {fill: 0x777777},
@@ -41,7 +41,7 @@ export default class EnergyScoreDisplay extends Container {
             default: {
                 fontFamily: Fonts.STDFONT,
                 fontWeight: FontWeight.SEMIBOLD,
-                fontSize: 10,
+                fontSize: 13,
                 fill: 0xffffff
             },
             grey: {fill: 0x777777},
@@ -49,8 +49,6 @@ export default class EnergyScoreDisplay extends Container {
             red: {fill: 0xFF4747}
         });
         textLayout.addChild(this._energyText);
-
-        this._energyText.position.set(this._labelText.position.x + this._labelText.width + 5, 0);
 
         textLayout.layout();
         textLayout.position.set(5, 4);
@@ -67,7 +65,6 @@ export default class EnergyScoreDisplay extends Container {
     public setEnergyText(label: string, energy: string): void {
         this._labelText.text = label;
         this._energyText.text = energy;
-        this._energyText.position.set(this._labelText.position.x + this._labelText.width + 5, 0);
     }
 
     public setSize(width: number, height: number): void {
