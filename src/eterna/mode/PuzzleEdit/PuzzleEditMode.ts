@@ -286,7 +286,7 @@ export default class PuzzleEditMode extends GameMode {
                     }
                 }
             };
-            pose.startPickCallback = (closestIndex: number):void =>{
+            pose.startPickCallback = (closestIndex: number):void => {
                 for (let ii = 0; ii < this._numTargets; ++ii) {
                     const poseField: PoseField = poseFields[ii];
                     const poseToNotify = poseField.pose;
@@ -296,7 +296,7 @@ export default class PuzzleEditMode extends GameMode {
                         poseToNotify.onVirtualPoseMouseDownPropagate(closestIndex);
                     }
                 }
-            }
+            };
         };
 
         // We don't appropriately handle these, so for now just force them off

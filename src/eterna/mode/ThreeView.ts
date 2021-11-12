@@ -18,41 +18,38 @@ import ContextMenu from 'eterna/ui/ContextMenu';
 import GameButton from '../ui/GameButton';
 import {ContextMenuDialog} from './GameMode';
 
-const events = [
-    'pointercancel', 'pointerdown', 'pointerenter', 'pointerleave', 'pointermove',
+const events = ['pointercancel', 'pointerdown', 'pointerenter', 'pointerleave', 'pointermove',
     'pointerout', 'pointerover', 'pointerup', 'mousedown', 'mouseenter', 'mouseleave',
-    'mousemove', 'mouseout', 'mouseover', 'mouseup', 'mousedown', 'mouseup'
-] as const;
+    'mousemove', 'mouseout', 'mouseover', 'mouseup', 'mousedown', 'mouseup'] as const;
+
 const earlyHandlers: ((e: MouseEvent | PointerEvent) => void)[] = [];
+
 for (const event of events) {
     window.addEventListener(event, (e) => {
         earlyHandlers.forEach((handler) => handler(e));
     }, true);
 }
+
 const touchEvents = ['touchstart', 'touchcancel', 'touchend', 'touchmove'] as const;
 const earlyTouchHandlers: ((e: TouchEvent) => void)[] = [];
+
 for (const event of touchEvents) {
     window.addEventListener(event, (e) => {
         earlyTouchHandlers.forEach((handler) => handler(e));
     }, true);
 }
 class MyContainer extends Container {
-    touchDown: Point;
-    touchPosition: Point;
-    touchDownTime: number;
-    touchTime: number;
-    pressed: boolean = false;
-    threeView:ThreeView;
     constructor(view:ThreeView) {
         super();
         this.threeView = view;
         this._boundHandleMouseEvent = this.handlePossiblyMaskedEvent.bind(this);
         this._boundHandleTouchEvent = this.handleTouchEvent.bind(this);
+        
         earlyHandlers.push(this._boundHandleMouseEvent);
         earlyTouchHandlers.push(this._boundHandleTouchEvent);
     }
 
-    private handlePossiblyMaskedEvent(e: MouseEvent | PointerEvent): void {
+    public handlePossiblyMaskedEvent(e: MouseEvent | PointerEvent): void {
         if (e instanceof MouseEvent) {
             const pos = this.threeView.getPosition();
             const init:MouseEventInit = {
@@ -88,7 +85,7 @@ class MyContainer extends Container {
         }
     }
 
-    private handleTouchEvent(e: TouchEvent): void {
+    public handleTouchEvent(e: TouchEvent): void {
         const pos = this.threeView.getPosition();
         if (e.touches.length > 0) {
             const touchObjArray = [];
@@ -138,8 +135,11 @@ class MyContainer extends Container {
         }
     }
 
-    private _boundHandleTouchEvent: (e: TouchEvent) => void;
-    private _boundHandleMouseEvent: (e: MouseEvent | PointerEvent) => void;
+    protected _boundHandleTouchEvent: (e: TouchEvent) => void;
+    protected _boundHandleMouseEvent: (e: MouseEvent | PointerEvent) => void;
+
+    protected pressed: boolean = false;
+    protected threeView:ThreeView;
 }
 
 const MaxState = 2;
@@ -154,27 +154,27 @@ interface ViewStatus {
     h: number;
 }
 export default class ThreeView extends ContainerObject {
-    nglGate: Mol3DGate;
-    pixiContainer: HTMLDivElement;
-    contentLay: VLayoutContainer;
-    titleLay: HLayoutContainer;
-    menuButton: GameButton;
-    maxButton: GameButton;
-    minButton: GameButton;
-    rbSprite: SpriteObject;
-    lbSprite: SpriteObject;
-    sprite1: SpriteObject;
-    sprite2: SpriteObject;
-    frame: Graphics;
-    titleText:Text;
-    gap: number = 4;
-    iconSize: number = 20;
-    pressed: boolean = false;
-    framePressed = false;
-    dragLeftPressed: boolean = false;
-    dragRightPressed: boolean = false;
-    curViewState: number = NormalState;
-    isOver3DCanvas: boolean = false;
+    public nglGate: Mol3DGate;
+    public pixiContainer: HTMLDivElement;
+    private contentLay: VLayoutContainer;
+    private titleLay: HLayoutContainer;
+    protected menuButton: GameButton;
+    private maxButton: GameButton;
+    private minButton: GameButton;
+    private rbSprite: SpriteObject;
+    private lbSprite: SpriteObject;
+    private sprite1: SpriteObject;
+    private sprite2: SpriteObject;
+    private frame: Graphics;
+    private titleText:Text;
+    private gap: number = 4;
+    private iconSize: number = 20;
+    private pressed: boolean = false;
+    private dragLeftPressed: boolean = false;
+    private dragRightPressed: boolean = false;
+    private curViewState: number = NormalState;
+    public isOver3DCanvas: boolean = false;
+
     public left: number = 100;
     public top: number = 100;
     public width: number = 460;
@@ -185,30 +185,31 @@ export default class ThreeView extends ContainerObject {
     public dragRightPrevPt: Point = new Point();
     public canvasRect: Rectangle;
     public static scope: ThreeView;
-    normalState: ViewStatus = {
+
+    private normalState: ViewStatus = {
         x: this.left, y: this.top, w: this.width, h: this.height
     };
 
-    metaState: number = 0;
+    public metaState: number = 0;
 
-    mainContainer: Container;
-    mainMask: Graphics;
+    private mainContainer: Container;
+    private mainMask: Graphics;
 
-    nglContainer: Container;
-    nglSprite: Sprite;
-    nglSpriteCanvas: HTMLCanvasElement;
-    nglSpriteContext: CanvasRenderingContext2D | null;
-    nglTexture: BaseTexture;
-    nglTextArray: Text[];
-    nglMask: Graphics;
+    private nglContainer: Container;
+    private nglSprite: Sprite;
+    private nglSpriteCanvas: HTMLCanvasElement;
+    private nglSpriteContext: CanvasRenderingContext2D | null;
+    private nglTexture: BaseTexture;
+    public nglTextArray: Text[];
+    private nglMask: Graphics;
 
-    frameContainer: MyContainer;
-    frameBaseTexture:BaseRenderTexture;
-    frameTexture:RenderTexture;
-    frameSprite: Sprite;
-    tooltip: TextBalloon;
+    private frameContainer: MyContainer;
+    private frameBaseTexture:BaseRenderTexture;
+    private frameTexture:RenderTexture;
+    private frameSprite: Sprite;
+    private tooltip: TextBalloon;
 
-    _contextMenuDialogRef: GameObjectRef = GameObjectRef.NULL;
+    protected _contextMenuDialogRef: GameObjectRef = GameObjectRef.NULL;
 
     constructor() {
         super();
@@ -276,27 +277,27 @@ export default class ThreeView extends ContainerObject {
         return pt;
     }
 
-    zoomInNGLView() {
+    protected zoomInNGLView() {
         this.nglGate?.stage.viewerControls.zoom(0.1);
     }
 
-    zoomOutNGLView() {
+    protected zoomOutNGLView() {
         this.nglGate?.stage.viewerControls.zoom(-0.1);
     }
 
-    setNGLMovState() {
+    protected setNGLMovState() {
         this.metaState = 0;
     }
 
-    setNGLRotateState() {
+    protected setNGLRotateState() {
         this.metaState = 1;
     }
 
-    setNGLEditState() {
+    protected setNGLEditState() {
         this.metaState = 2;
     }
 
-    create3DMenu():ContextMenu {
+    public create3DMenu():ContextMenu {
         const moveContainer = new Container();
         moveContainer.addChild(Sprite.from(Bitmaps.Img3DMoveIcon));
         const moveArrow = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgToolbarArrow));
@@ -317,18 +318,18 @@ export default class ThreeView extends ContainerObject {
         return menu;
     }
 
-    removeAnnotations() {
+    public removeAnnotations() {
         this.nglTextArray.forEach((t) => {
             this.nglContainer.removeChild(t);
         });
         this.nglTextArray = new Array(0);
     }
 
-    hideTooltip() {
+    public hideTooltip() {
         if (this.tooltip) this.tooltip.display.visible = false;
     }
 
-    dragHandleEvent(e:InteractionEvent) {
+    protected dragHandleEvent(e:InteractionEvent) {
         const scope = ThreeView.scope;
         switch (e.type) {
             case 'pointerdown':
@@ -384,7 +385,7 @@ export default class ThreeView extends ContainerObject {
         }
     }
 
-    leftHandleEvent(e:InteractionEvent) {
+    protected leftHandleEvent(e:InteractionEvent) {
         this.lbSprite.display.interactive = false;
         switch (e.type) {
             case 'pointerdown':
@@ -443,7 +444,7 @@ export default class ThreeView extends ContainerObject {
         this.lbSprite.display.interactive = true;
     }
 
-    rightHandleEvent(e:InteractionEvent) {
+    protected rightHandleEvent(e:InteractionEvent) {
         this.rbSprite.display.interactive = false;
         switch (e.type) {
             case 'pointerdown':
@@ -656,7 +657,7 @@ export default class ThreeView extends ContainerObject {
         this.onResized();
     }
 
-    updateAnnotations(width:number, height:number) {
+    protected updateAnnotations(width:number, height:number) {
         let i = 0;
         const uninit:boolean = (this.nglTextArray.length === 0);
         this.nglGate.component?.eachAnnotation((a) => {
@@ -685,7 +686,7 @@ export default class ThreeView extends ContainerObject {
         });
     }
 
-    updateNGLTexture(canvas:HTMLCanvasElement, width:number, height:number) {
+    public updateNGLTexture(canvas:HTMLCanvasElement, width:number, height:number) {
         if (this.nglSpriteContext) {
             this.nglSpriteContext.clearRect(0, 0, this.nglSpriteCanvas.width, this.nglSpriteCanvas.height);
             if (width > 0 && height > 0) {
@@ -699,13 +700,13 @@ export default class ThreeView extends ContainerObject {
         this.updateAnnotations(width, height);
     }
 
-    hideAnnotations() {
+    public hideAnnotations() {
         this.nglTextArray.forEach((text) => {
             text.visible = false;
         });
     }
 
-    onMenuClick() {
+    public onMenuClick() {
         // var init:PointerEventInit = {
         //     cancelable: true,
         //     bubbles: true,
@@ -717,22 +718,21 @@ export default class ThreeView extends ContainerObject {
         // document.getElementById(Eterna.PIXI_CONTAINER_ID)?.children[0]?.dispatchEvent(event);
 
         const pos = new Point(this.menuButton.display.x, 0);
-        let handled = false;
+
         if (this._contextMenuDialogRef.isLive) {
             this._contextMenuDialogRef.destroyObject();
-            handled = true;
         } else {
             const menu = this.create3DMenu();
             if (menu != null) {
                 this._contextMenuDialogRef = this.addObject(
-                    new ContextMenuDialog(menu, pos), this.mainContainer
+                    new ContextMenuDialog(menu, pos),
+                    this.mainContainer
                 );
-                handled = true;
             }
         }
     }
 
-    setToNormal() {
+    protected setToNormal() {
         this.maxButton.up(Bitmaps.Img3DMax)
             .over(Bitmaps.Img3DMaxHover)
             .down(Bitmaps.Img3DMax).tooltip('Maximize');
@@ -782,7 +782,7 @@ export default class ThreeView extends ContainerObject {
         this.onResized();
     }
 
-    onMaxButton() {
+    protected onMaxButton() {
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
         if (this.curViewState === MaxState || this.curViewState === MinState) {
@@ -793,7 +793,7 @@ export default class ThreeView extends ContainerObject {
         this.onResized();
     }
 
-    onMinButton() {
+    protected onMinButton() {
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
         if (this.curViewState === MinState || this.curViewState === MaxState) {
@@ -818,7 +818,7 @@ export default class ThreeView extends ContainerObject {
         this.moveWindow();
     }
 
-    moveWindow() {
+    protected moveWindow() {
         this.nglGate?.stage?.viewer.setPosition(this.left, this.top + this.iconSize);
         DisplayUtil.positionRelativeToStage(
             this.display, HAlign.LEFT, VAlign.TOP,
@@ -826,7 +826,7 @@ export default class ThreeView extends ContainerObject {
         );
     }
 
-    updateLayout(): void {
+    protected updateLayout(): void {
         this.lbSprite.display.width = this.iconSize;
         this.lbSprite.display.height = this.iconSize;
         this.rbSprite.display.width = this.iconSize;
@@ -886,7 +886,7 @@ export default class ThreeView extends ContainerObject {
         this.nglGate?.stage?.handleResize(w, h);
     }
 
-    PtInCanvas(x:number, y: number): boolean {
+    public PtInCanvas(x:number, y: number): boolean {
         if (x >= this.lbSprite.display.x
             && x <= this.lbSprite.display.x + this.lbSprite.display.width
             && y >= this.lbSprite.display.y

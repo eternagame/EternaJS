@@ -8,19 +8,19 @@ import GameButton from './GameButton';
 import {ToolbarButton} from './Toolbar';
 
 export default class VToolBar extends ContainerObject {
-    side3DToolbarLayout: VLayoutContainer;
-    show3D: GameButton;
-    zoomin3D: GameButton;
-    zoomout3D: GameButton;
-    move3D: GameButton;
-    rotate3D: GameButton;
+    protected side3DToolbarLayout: VLayoutContainer;
+    protected show3D: GameButton;
+    protected zoomin3D: GameButton;
+    protected zoomout3D: GameButton;
+    protected move3D: GameButton;
+    protected rotate3D: GameButton;
 
     protected added(): void {
         super.added();
         this.create3DButtons();
     }
 
-    create3DButtons() {
+    protected create3DButtons() {
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
         const APPROX_ITEM_COUNT = 13;

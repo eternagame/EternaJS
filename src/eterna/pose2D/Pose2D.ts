@@ -1,6 +1,6 @@
 import * as log from 'loglevel';
 import {
-    Container, Graphics, Point, Sprite, Texture, Rectangle, InteractionEvent, InteractionData
+    Container, Graphics, Point, Sprite, Texture, Rectangle, InteractionEvent
 } from 'pixi.js';
 import {Registration} from 'signals';
 import EPars, {RNABase, RNAPaint} from 'eterna/EPars';
@@ -563,6 +563,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.onPoseMouseDown(e, closestIndex);
         }
     }
+
     public onVirtualPoseMouseDownPropagate(closestIndex: number): void {
         const altDown: boolean = Flashbang.app.isAltKeyDown;
         const ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
@@ -1062,15 +1063,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
             const cmd: [string, PuzzleEditOp, number[]?] | null = this.parseCommand(this._currentColor, closestIndex);
             if (cmd == null) {
                 this.onBaseMouseDown(closestIndex, ctrlDown);
-                this.onMouseUp()
+                this.onMouseUp();
             } else {
                 this._lastShiftedCommand = this._currentColor;
                 this._lastShiftedIndex = closestIndex;
 
                 this.callAddBaseCallback(cmd[0], cmd[1], closestIndex);
             }
-
-        } 
+        }
     }
 
     public setMarkerLayer(layer: string) {
@@ -1849,7 +1849,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        //kkk set NGL sparking 
+        // kkk set NGL sparking
         if (Mol3DGate.scope) {
             Mol3DGate.scope.stage?.viewer?.beginSpark();
         }
@@ -1885,7 +1885,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             xPos += p2.x;
             yPos += p2.y;
         }
-        //kkk set NGL sparking 
+        // kkk set NGL sparking
         if (Mol3DGate.scope) {
             Mol3DGate.scope.stage?.viewer?.endSpark(20);
         }
@@ -1954,7 +1954,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     private onPraiseSeq(seqStart: number, seqEnd: number): void {
         const fullSeqLen = this.fullSequenceLength;
-        //kkk set NGL sparking 
+        // kkk set NGL sparking
         if (Mol3DGate.scope) {
             Mol3DGate.scope.stage?.viewer?.beginSpark();
         }
@@ -1963,7 +1963,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this._bases[ii].startSparking();
             }
         }
-        //kkk set NGL sparking 
+        // kkk set NGL sparking
         if (Mol3DGate.scope) {
             Mol3DGate.scope.stage?.viewer?.endSpark(20);
         }
@@ -2077,6 +2077,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public set startMousedownCallback(cb: PoseMouseDownCallback) {
         this._startMousedownCallback = cb;
     }
+
     public set startPickCallback(cb: PosePickCallback) {
         this._startPickCallback = cb;
     }

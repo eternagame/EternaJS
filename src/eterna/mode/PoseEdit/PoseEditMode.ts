@@ -82,8 +82,7 @@ import MissionIntroMode from './MissionIntroMode';
 import MissionClearedPanel from './MissionClearedPanel';
 import ViewSolutionOverlay from '../DesignBrowser/ViewSolutionOverlay';
 import {PuzzleEditPoseData} from '../PuzzleEdit/PuzzleEditMode';
-import Mol3DGate, {PixiRenderCallback} from '../Mol3DGate';
-import ThreeView from '../ThreeView';
+import Mol3DGate from '../Mol3DGate';
 
 export interface PoseEditParams {
     isReset?: boolean;
@@ -741,7 +740,7 @@ export default class PoseEditMode extends GameMode {
                     }
                 }
             });
-            pose.startPickCallback = (closestIndex: number):void =>{
+            pose.startPickCallback = (closestIndex: number):void => {
                 for (let ii = 0; ii < poseFields.length; ++ii) {
                     const poseField: PoseField = poseFields[ii];
                     const poseToNotify = poseField.pose;
@@ -751,7 +750,7 @@ export default class PoseEditMode extends GameMode {
                         poseToNotify.onVirtualPoseMouseDownPropagate(closestIndex);
                     }
                 }
-            }
+            };
         };
 
         const onAnnotationModeChange = (pose: Pose2D, active: boolean) => {

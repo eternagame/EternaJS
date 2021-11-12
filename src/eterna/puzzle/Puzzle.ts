@@ -562,7 +562,7 @@ export default class Puzzle {
         this._alreadySolved = alreadySolved;
     }
 
-    _threePath: string | undefined | null = undefined;
+    private _threePath: string | undefined | null = undefined;
     private readonly _nid: number;
     private readonly _name: string;
     private readonly _puzzleType: PuzzleType;

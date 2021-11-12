@@ -9,16 +9,16 @@ export default class MyCanvasResource extends Resource {
         this._canvas = canvas;
     }
 
-    get canvas() {
+    public get canvas() {
         return this._canvas;
     }
 
-    set canvas(c) {
+    public set canvas(c) {
         this._canvas = c;
         this.resize(this._canvas.width, this._canvas.height);
     }
 
-    upload(renderer: Renderer, baseTexture: BaseTexture, glTexture: GLTexture): boolean {
+    public upload(renderer: Renderer, baseTexture: BaseTexture, glTexture: GLTexture): boolean {
         const {width} = this; // default size or from baseTexture?
         const {height} = this; // your choice.
 

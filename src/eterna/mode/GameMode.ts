@@ -24,9 +24,10 @@ import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
 import NucleotideFinder from 'eterna/ui/NucleotideFinder';
 import ExplosionFactorDialog from 'eterna/ui/ExplosionFactorDialog';
 import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
+import * as NGL from 'ngl';
 import CopyTextDialogMode from './CopyTextDialogMode';
 import ThreeView from './ThreeView';
-import Mol3DGate, {PixiRenderCallback} from './Mol3DGate';
+import Mol3DGate from './Mol3DGate';
 
 export default abstract class GameMode extends AppMode {
     public readonly bgLayer = new Container();
@@ -42,9 +43,9 @@ export default abstract class GameMode extends AppMode {
     public forceSync: boolean = false;
 
     // kkk members for 3D
-    _3DView: ThreeView;
-    _3DFilePath: string | File | Blob = '';
-    mol3DGate: Mol3DGate;
+    public _3DView: ThreeView;
+    public _3DFilePath: string | File | Blob = '';
+    public mol3DGate: Mol3DGate;
 
     // kkk transfer the mouse hover from 2D to 3D
     public mouseHovered(index: number, color: number) {
@@ -52,12 +53,12 @@ export default abstract class GameMode extends AppMode {
     }
 
     // kkk create 3D ContextMenu
-    create3DMenu():ContextMenu {
+    public create3DMenu():ContextMenu {
         return this._3DView.create3DMenu();
     }
 
     // kkk make 3d view on game scene with cif file
-    add3DSprite(filePath: string | File | Blob, _secStruct:string) {
+    public add3DSprite(filePath: string | File | Blob, _secStruct:string) {
         this._3DFilePath = filePath;
         if (!this._3DView) {
             this._3DView = new ThreeView();
@@ -71,7 +72,7 @@ export default abstract class GameMode extends AppMode {
         threeView.removeAnnotations();
         if (threeView.pixiContainer) {
             threeView.nglTextArray = new Array(0);
-            const callback:PixiRenderCallback = NGLCallback;
+            const callback:NGL.PixiRenderCallback = NGLCallback;
             this.mol3DGate = new Mol3DGate(filePath, threeView.pixiContainer, threeView, callback, this, _secStruct);
             // threeView.setToNormal();
             threeView.onResized();
@@ -481,7 +482,7 @@ export default abstract class GameMode extends AppMode {
         }
     }
 
-    getSequence(): string {
+    public getSequence(): string {
         let sequenceString: string = this._poses[0].sequence.sequenceString();
         if (this._poses[0].customNumbering != null) sequenceString += ` ${Utility.arrayToRangeString(this._poses[0].customNumbering)}`;
         return sequenceString;

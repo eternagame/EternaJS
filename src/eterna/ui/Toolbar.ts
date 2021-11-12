@@ -16,7 +16,6 @@ import BitmapManager from 'eterna/resources/BitmapManager';
 import AnnotationManager from 'eterna/AnnotationManager';
 import fileDialog from 'file-dialog';
 import Mol3DGate from 'eterna/mode/Mol3DGate';
-import GameMode from 'eterna/mode/GameMode';
 import PuzzleEditMode from 'eterna/mode/PuzzleEdit/PuzzleEditMode';
 import NucleotidePalette from './NucleotidePalette';
 import GameButton from './GameButton';
