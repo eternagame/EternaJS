@@ -2191,22 +2191,19 @@ export default class AnnotationManager {
         stopCol: number
     ): AnnotationBaseConflict | null {
         let conflict: AnnotationBaseConflict | null = null;
-        for (let row = Math.floor(
-            Math.min(Math.max(0, startRow), pose.annotationSpaceAvailability.length)
-        );
-            row < Math.ceil(
-                Math.min(Math.max(0, stopRow), pose.annotationSpaceAvailability.length)
-            );
-            row++) {
-            for (let col = Math.floor(
-                Math.min(Math.max(0, startCol), pose.annotationSpaceAvailability[0].length)
-            );
-                col < Math.ceil(
-                    Math.min(Math.max(0, stopCol), pose.annotationSpaceAvailability[0].length)
-                );
-                col++) {
+
+        for (
+            let row = Math.floor(Math.max(0, startRow));
+            row < Math.ceil(Math.max(0, stopRow));
+            row++
+        ) {
+            for (
+                let col = Math.floor(Math.max(0, startCol));
+                col < Math.ceil(Math.max(0, stopCol));
+                col++
+            ) {
                 // build out conflict bounds
-                if (!pose.annotationSpaceAvailability[row][col] && !conflict) {
+                if (pose.annotationSpaceAvailability.get(`${row}-${col}`) && !conflict) {
                     conflict = {
                         bounds: new Rectangle(
                             col,
@@ -2216,7 +2213,7 @@ export default class AnnotationManager {
                         ),
                         resolvable: false
                     };
-                } else if (!pose.annotationSpaceAvailability[row][col] && conflict) {
+                } else if (pose.annotationSpaceAvailability.get(`${row}-${col}`) && conflict) {
                     conflict.bounds = new Rectangle(
                         conflict.bounds.x,
                         conflict.bounds.y,
@@ -2363,35 +2360,19 @@ export default class AnnotationManager {
         stopCol: number,
         shiftPoint: Point
     ): boolean {
-        for (let row = Math.floor(
-            Math.min(
-                Math.max(0, startRow + shiftPoint.y),
-                pose.annotationSpaceAvailability.length
-            )
-        );
-            row < Math.ceil(
-                Math.min(
-                    Math.max(0, stopRow + shiftPoint.y),
-                    pose.annotationSpaceAvailability.length
-                )
-            );
-            row++) {
-            const startPixel = Math.floor(
-                Math.min(
-                    Math.max(0, startCol + shiftPoint.x),
-                    pose.annotationSpaceAvailability[0].length
-                )
-            );
-            const stopPixel = Math.ceil(
-                Math.min(
-                    Math.max(0, stopCol + shiftPoint.x),
-                    pose.annotationSpaceAvailability[0].length
-                )
-            );
-            const pixels = pose.annotationSpaceAvailability[row].slice(startPixel, stopPixel);
-            const occupiedPixelIndex = pixels.findIndex((pixel: boolean) => !pixel);
-            if (occupiedPixelIndex !== -1) {
-                return false;
+        for (
+            let row = Math.floor(Math.max(0, startRow + shiftPoint.y));
+            row < Math.ceil(Math.max(0, stopRow + shiftPoint.y));
+            row++
+        ) {
+            for (
+                let col = Math.floor(Math.max(0, startCol + shiftPoint.x));
+                col < Math.ceil(Math.max(0, stopCol + shiftPoint.x));
+                col++
+            ) {
+                if (pose.annotationSpaceAvailability.get(`${row}-${col}`)) {
+                    return false;
+                }
             }
         }
 
