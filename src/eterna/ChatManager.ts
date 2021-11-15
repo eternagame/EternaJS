@@ -3,12 +3,6 @@ import {Chat} from 'eterna-chat-wrapper';
 import EternaSettings from './settings/EternaSettings';
 import Eterna from './Eterna';
 
-interface ChatPosition {
-    top: number,
-    right: number,
-    width: number,
-    height: number
-}
 export default class ChatManager {
     constructor(chatboxID: string, settings: EternaSettings) {
         this._chatbox = document.getElementById(chatboxID);
@@ -68,28 +62,6 @@ export default class ChatManager {
         } else {
             this._chatbox.classList.add('hidden');
         }
-    }
-
-    // kkk get/set chat window position
-    public setPosition(top: number) {
-        if (this._chatbox == null) {
-            return;
-        }
-        this._chatbox.style.top = `${top}px`;
-        this._chatbox.style.zIndex = '1';
-    }
-
-    public getPosition(): null | ChatPosition {
-        if (this._chatbox == null) {
-            return null;
-        }
-        const style = getComputedStyle(this._chatbox);
-        return {
-            top: parseInt(style.top, 10),
-            right: parseInt(style.right, 10),
-            width: parseInt(style.width, 10),
-            height: parseInt(style.height, 10)
-        } as ChatPosition;
     }
 
     private readonly _chatbox: HTMLElement | null;

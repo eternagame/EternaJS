@@ -272,6 +272,7 @@ export default class PuzzleEditMode extends GameMode {
 
         const poseEditSetter = (index: number, poseToSet: Pose2D): void => {
             poseToSet.poseEditCallback = () => this.poseEditByTarget(index);
+            poseToSet.poseUpdateCallback = this.posUpdateCallback;
         };
 
         const bindMousedownEvent = (pose: Pose2D, index: number): void => {
@@ -339,10 +340,9 @@ export default class PuzzleEditMode extends GameMode {
                 defaultPairs = SecStruct.fromParens(defaultStructure);
             }
 
-            const poseField: PoseField = new PoseField(true);
+            const poseField: PoseField = new PoseField(this, true);
             this.addObject(poseField, this.poseLayer);
             const {pose} = poseField;
-            pose.setEditMode(this); // kkk make channel between Pos2D and PuzzleEditMode
             pose.annotationManager = this._annotationManager;
             pose.scoreFolder = this._folder;
             pose.molecularStructure = defaultPairs;
@@ -627,8 +627,8 @@ export default class PuzzleEditMode extends GameMode {
             HAlign.CENTER, VAlign.BOTTOM, 20, -20
         );
 
-        // kkk call onResize of 3d view
-        this._3DView?.onResized();
+        // call onResize of 3d view
+        GameMode._3DView?.onResized();
 
         const toolbarBounds = this._toolbar.display.getBounds();
         for (let ii = 0; ii < this._numTargets; ++ii) {
@@ -662,9 +662,9 @@ export default class PuzzleEditMode extends GameMode {
             return null;
         }
 
-        // kkk add 3D Menu
-        if (this.mol3DGate && this.mol3DGate.isOver3DCanvas) {
-            return null;// this.create3DMenu();
+        // add 3D Menu
+        if (GameMode._3DView?.isOver3DCanvas) {
+            return null;
         }
 
         const menu = new ContextMenu({horizontal: false});
@@ -757,6 +757,7 @@ export default class PuzzleEditMode extends GameMode {
                     pose.molecularBindingSite = null;
                 }
                 this.poseEditByTarget(0);
+                GameMode.mol3DGate?.updateSequence(this.getSequence().split(' '));
             }
         });
     }
@@ -935,7 +936,7 @@ export default class PuzzleEditMode extends GameMode {
             objectives: JSON.stringify(objectives),
             three_structure_file: new File(['testing'], 'structure_upload_test.cif')
         };
-        // kkk
+
         if (Mol3DGate.scope?._3DFilePath instanceof File) {
             const blob = Mol3DGate.scope._3DFilePath.slice();
             postParams.three_structure_file = new File([blob], 'structure_upload_test.cif');
@@ -1027,9 +1028,13 @@ export default class PuzzleEditMode extends GameMode {
         }
 
         this.updateScore();
-        // kkk undo sequence change in 3D
-        this.mol3DGate?.updateSequence(this.getSequence().split(' '));
-        this.mol3DGate?.stage?.viewer.selectEBaseObject2(-1);
+        // undo sequence change in 3D
+        GameMode.mol3DGate?.updateSequence(this.getSequence().split(' '));
+        const diff = this.getStackDiffernce(this._seqStack[this._stackLevel - 1][0].sequence,
+            this._seqStack[this._stackLevel][0].sequence);
+        diff.forEach((n) => {
+            GameMode.mol3DGate?.viewerEx?.selectEBaseObject(n);
+        });
     }
 
     private moveUndoStackBackward(): void {
@@ -1049,9 +1054,13 @@ export default class PuzzleEditMode extends GameMode {
         }
         this.updateScore();
 
-        // kkk undo sequence change in 3D
-        this.mol3DGate?.updateSequence(this.getSequence().split(' '));
-        this.mol3DGate?.stage?.viewer.selectEBaseObject2(-1);
+        // undo sequence change in 3D
+        GameMode.mol3DGate?.updateSequence(this.getSequence().split(' '));
+        const diff = this.getStackDiffernce(this._seqStack[this._stackLevel + 1][0].sequence,
+            this._seqStack[this._stackLevel][0].sequence);
+        diff.forEach((n) => {
+            GameMode.mol3DGate?.viewerEx?.selectEBaseObject(n);
+        });
     }
 
     private updateScore(): void {
@@ -1257,8 +1266,6 @@ export default class PuzzleEditMode extends GameMode {
             currentCustomLayouts.push(customLayout || null);
             currentTargetPairs.push(targetPairs);
         }
-        // kkk update 3D baseSequence
-        // this.mol3DGate?.updateSequence(this.getSequence().split(' '));
 
         if (noChange && this._stackLevel >= 0) {
             return;

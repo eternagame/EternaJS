@@ -23,12 +23,16 @@ import Utility from 'eterna/util/Utility';
 import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
 import NucleotideFinder from 'eterna/ui/NucleotideFinder';
 import ExplosionFactorDialog from 'eterna/ui/ExplosionFactorDialog';
+import {PixiRenderCallback} from 'ngl';
 import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
-import * as NGL from 'ngl';
+import Sequence from 'eterna/rnatypes/Sequence';
 import CopyTextDialogMode from './CopyTextDialogMode';
 import ThreeView from './ThreeView';
 import Mol3DGate from './Mol3DGate';
 
+function NGLCallback(canvas:HTMLCanvasElement, width:number, height:number):void {
+    GameMode._3DView?.updateNGLTexture(canvas, width, height);
+}
 export default abstract class GameMode extends AppMode {
     public readonly bgLayer = new Container();
     public readonly poseLayer = new Container();
@@ -42,41 +46,76 @@ export default abstract class GameMode extends AppMode {
     /** Controls whether certain folding operations are run synchronously or queued up */
     public forceSync: boolean = false;
 
-    // kkk members for 3D
-    public _3DView: ThreeView;
+    // members for 3D
+    public static _3DView: ThreeView | undefined = undefined;
     public _3DFilePath: string | File | Blob = '';
-    public mol3DGate: Mol3DGate;
+    public static mol3DGate: Mol3DGate | undefined = undefined;
+    public static _scope: GameMode;
 
-    // kkk transfer the mouse hover from 2D to 3D
+    constructor() {
+        super();
+        GameMode._scope = this;
+        window.addEventListener('wheel', this.MouseWheelEvent);
+        window.addEventListener('picking', this.handle3DPicking);
+    }
+
+    protected handle3DPicking(e:Event) {
+        const scope = GameMode._scope;
+        const ce = <CustomEvent>e;
+        const closestIndex: number = ce.detail.resno;
+        if (ce.detail.action === 'hover') {
+            scope._poses.forEach((pose) => {
+                pose.on3DPickingMouseMoved(closestIndex - 1);
+            });
+        } else if (ce.detail.action === 'clicked') {
+            scope._poses.forEach((pose) => {
+                pose.simulateMousedownCallback(closestIndex - 1);
+            });
+        }
+    }
+
+    protected MouseWheelEvent(e: WheelEvent): void {
+        if (GameMode._3DView?.isOver3DCanvas) {
+            GameMode.mol3DGate?.viewerEx.getWebGLCanvas().dispatchEvent(new WheelEvent(e.type, e));
+        }
+    }
+
+    // transfer the mouse hover from 2D to 3D
     public mouseHovered(index: number, color: number) {
-        this.mol3DGate?.mouseHovered(index, color);
+        GameMode.mol3DGate?.mouse2DHovered(index, color);
     }
 
-    // kkk create 3D ContextMenu
-    public create3DMenu():ContextMenu {
-        return this._3DView.create3DMenu();
-    }
-
-    // kkk make 3d view on game scene with cif file
+    // make 3d view on game scene with cif file
     public add3DSprite(filePath: string | File | Blob, _secStruct:string) {
+        GameMode.mol3DGate?.dispose();
+        GameMode.mol3DGate = undefined;
+        GameMode._3DView = undefined;
+
         this._3DFilePath = filePath;
-        if (!this._3DView) {
-            this._3DView = new ThreeView();
-            this.addObject(this._3DView, this.poseLayer);
+        GameMode._3DView = new ThreeView(this);
+        if (!GameMode._3DView.pixiContainer) return;
+
+        this.addObject(GameMode._3DView, this.poseLayer);
+        GameMode._3DView.removeAnnotations();
+
+        const callback:PixiRenderCallback = NGLCallback;
+        GameMode.mol3DGate = new Mol3DGate(filePath, GameMode._3DView.pixiContainer,
+            callback, this, _secStruct);
+        GameMode._3DView.onResized();
+    }
+
+    public getStackDiffernce(before:Sequence, after:Sequence): number[] {
+        const differnce:number[] = [];
+        for (let i = 0; i < before.length; i++) {
+            if (before.nt(i) !== after.nt(i)) {
+                differnce.push(i);
+            }
         }
-        const threeView = this._3DView;
-        function NGLCallback(canvas:HTMLCanvasElement, width:number, height:number):void {
-            threeView.updateNGLTexture(canvas, width, height);
-        }
-        this.mol3DGate?.stage?.dispose();
-        threeView.removeAnnotations();
-        if (threeView.pixiContainer) {
-            threeView.nglTextArray = new Array(0);
-            const callback:NGL.PixiRenderCallback = NGLCallback;
-            this.mol3DGate = new Mol3DGate(filePath, threeView.pixiContainer, threeView, callback, this, _secStruct);
-            // threeView.setToNormal();
-            threeView.onResized();
-        }
+        return differnce;
+    }
+
+    public posUpdateCallback(resno: number, oldBase:number, base: number) {
+        GameMode.mol3DGate?.viewerEx?.selectEBaseObject(resno, oldBase !== base, 3000);
     }
 
     protected setup(): void {
@@ -319,6 +358,13 @@ export default abstract class GameMode extends AppMode {
 
     public onContextMenuEvent(e: Event): void {
         Assert.assertIsDefined(Flashbang.globalMouse);
+
+        if (GameMode._3DView?.isOver3DCanvas) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+        }
+
         let pos = Flashbang.globalMouse;
         const ee = <PointerEvent> e;
         if (ee.clientX !== undefined && ee.clientY !== undefined) pos = new Point(ee.clientX, ee.clientY);
@@ -565,10 +611,10 @@ export default abstract class GameMode extends AppMode {
 
     protected _achievements: AchievementManager;
 
-    protected _dialogRef: GameObjectRef = GameObjectRef.NULL;
+    public _dialogRef: GameObjectRef = GameObjectRef.NULL;
     protected _uiLockRef: GameObjectRef = GameObjectRef.NULL;
     protected _notifRef: GameObjectRef = GameObjectRef.NULL;
-    protected _contextMenuDialogRef: GameObjectRef = GameObjectRef.NULL;
+    public _contextMenuDialogRef: GameObjectRef = GameObjectRef.NULL;
 
     private _modeScriptInterface: ExternalInterfaceCtx;
 

@@ -177,7 +177,7 @@ export default class FeedbackViewMode extends GameMode {
 
         const poseFields: PoseField[] = [];
         for (let ii = 0; ii < secstructs.length; ii++) {
-            const poseField: PoseField = new PoseField(false);
+            const poseField: PoseField = new PoseField(this, false);
             this.addObject(poseField, this.poseLayer);
 
             const vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);

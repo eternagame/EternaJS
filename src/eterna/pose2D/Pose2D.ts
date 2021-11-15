@@ -69,28 +69,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public static readonly OLIGO_MODE_EXT3P: number = 2;
     public static readonly OLIGO_MODE_EXT5P: number = 3;
 
+    public static scope: Pose2D;
+
     constructor(poseField: PoseField, editable: boolean) {
         super();
+        Pose2D.scope = this;
         this._poseField = poseField;
         this._editable = editable;
-
-        // kkk transfer 3D mouse move picking result to 2D Canvas and highlight/click corresponding base.
-        window.addEventListener('picking', (e) => {
-            const ce = <CustomEvent>e;
-            const closestIndex: number = ce.detail.resno;
-            if (ce.detail.action === 'hover') {
-                this.on3DPickingMouseMoved(closestIndex - 1);
-            } else if (ce.detail.action === 'clicked') {
-                if (Mol3DGate.scope/* && Mol3DGate.scope.threeView.metaState == 2 */) {
-                    this.simulateMousedownCallback(closestIndex - 1);
-                }
-            }
-        });
-    }
-
-    protected pEditMode: GameMode;
-    public setEditMode(editMode: GameMode) {
-        this.pEditMode = editMode;
     }
 
     protected added() {
@@ -350,8 +335,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public set currentColor(col: RNAPaint) {
         this._currentColor = col;
-        // kkk syncronize the color change by 2D with 3D
-        this.pEditMode?.mol3DGate?.stage?.viewer.setBaseColor(this.pEditMode.mol3DGate.getBaseColor(col));
+        // syncronize the color change by 2D with 3D
+        if (GameMode.mol3DGate) {
+            GameMode.mol3DGate.viewerEx?.setBaseColor(
+                GameMode.mol3DGate.getBaseColor(col)
+            );
+        }
     }
 
     public get currentColor(): RNAPaint {
@@ -878,7 +867,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._customLayoutChanged = true;
     }
 
-    public onPoseMouseDown(e: InteractionEvent, closestIndex: number): void {
+    public onPoseMouseDown(e: InteractionEvent | null, closestIndex: number): void {
         const altDown: boolean = Flashbang.app.isAltKeyDown;
         const shiftDown: boolean = Flashbang.app.isShiftKeyDown;
         const ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
@@ -1040,7 +1029,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public onVirtualPoseMouseDown(closestIndex: number): void {
         const altDown: boolean = Flashbang.app.isAltKeyDown;
-        const shiftDown: boolean = Flashbang.app.isShiftKeyDown;
         const ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
 
         if (this.annotationManager.isMovingAnnotation) {
@@ -1081,8 +1069,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public toggleBaseMark(baseIndex: number): void {
-        // kkk toggle basemark in 3D
-        this.pEditMode?.mol3DGate?.stage?.viewer.markEBaseObject(baseIndex);
+        GameMode.mol3DGate?.viewerEx.markEBaseObject(baseIndex);
 
         if (!this.isTrackedLayer(baseIndex, PLAYER_MARKER_LAYER)) {
             this.addBaseMark(baseIndex, PLAYER_MARKER_LAYER);
@@ -1209,8 +1196,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         if (closestIndex >= 0 && this._currentColor >= 0) {
-            // kkk transfer mouse hover result from 2D to 3DView
-            this.pEditMode?.mouseHovered(closestIndex + 1, this._currentColor);
+            this._poseField.gameMode.mouseHovered(closestIndex + 1, this._currentColor);
 
             this.onBaseMouseMove(closestIndex);
 
@@ -1234,8 +1220,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         } else {
             this._lastColoredIndex = -1;
-            // kkk transfer mouse hover result from 2D to 3DView
-            this.pEditMode?.mouseHovered(-1, 0);
+            this._poseField.gameMode.mouseHovered(-1, 0);
         }
 
         if (!this._coloring) {
@@ -1243,7 +1228,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    // kkk transfer the mouse picking result from 3DView to 2D canvas
     public on3DPickingMouseMoved(closestIndex: number): void {
         if (!this._coloring) {
             this.clearMouse();
@@ -1849,10 +1833,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        // kkk set NGL sparking
-        if (Mol3DGate.scope) {
-            Mol3DGate.scope.stage?.viewer?.beginSpark();
-        }
+        Mol3DGate.scope?.viewerEx?.beginSpark();
+
         for (let ii: number = stackStart; ii <= stackEnd; ii++) {
             const aa: number = ii;
             const bb: number = this._pairs.pairingPartner(ii);
@@ -1885,10 +1867,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
             xPos += p2.x;
             yPos += p2.y;
         }
-        // kkk set NGL sparking
-        if (Mol3DGate.scope) {
-            Mol3DGate.scope.stage?.viewer?.endSpark(20);
-        }
+
+        Mol3DGate.scope?.viewerEx?.endSpark(20);
 
         const stackLen: number = (stackEnd - stackStart) + 1;
 
@@ -1954,19 +1934,16 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     private onPraiseSeq(seqStart: number, seqEnd: number): void {
         const fullSeqLen = this.fullSequenceLength;
-        // kkk set NGL sparking
-        if (Mol3DGate.scope) {
-            Mol3DGate.scope.stage?.viewer?.beginSpark();
-        }
+
+        Mol3DGate.scope?.viewerEx?.beginSpark();
+
         for (let ii: number = seqStart; ii <= seqEnd; ii++) {
             if (ii >= 0 && ii < fullSeqLen) {
                 this._bases[ii].startSparking();
             }
         }
-        // kkk set NGL sparking
-        if (Mol3DGate.scope) {
-            Mol3DGate.scope.stage?.viewer?.endSpark(20);
-        }
+
+        Mol3DGate.scope?.viewerEx?.endSpark(20);
     }
 
     public startExplosion(): Promise<void> {
@@ -2040,6 +2017,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.callExplosionCompleteCallback();
     }
 
+    public set poseUpdateCallback(cb: (resno:number, oldBase:number, base:number) => void) {
+        this._poseUpdateSequenceCallback = cb;
+    }
+
     public set poseEditCallback(cb: () => void) {
         this._poseEditCallback = cb;
     }
@@ -2047,8 +2028,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public callPoseEditCallback(): void {
         if (this._poseEditCallback != null) {
             this._poseEditCallback();
-            // kkk update 3D baseSequence
-            this.pEditMode.mol3DGate?.updateSequence(this.pEditMode.getSequence().split(' '));
+
+            GameMode.mol3DGate?.updateSequence(
+                this._poseField.gameMode.getSequence().split(' ')
+            );
         }
     }
 
@@ -2082,7 +2065,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._startPickCallback = cb;
     }
 
-    // kkk transfer picking result result from 3D to 2D so that enable edit puzzle on 3D
     public simulateMousedownCallback(closestIndex:number): void {
         if (this._startPickCallback != null && closestIndex >= 0) {
             this._startPickCallback(closestIndex);
@@ -2852,9 +2834,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        // kkk synchronize showNumbering of 2D with 3D
         if (this._redraw) {
-            this.pEditMode?.mol3DGate?.showAnnotations(this.showNumbering);
+            GameMode.mol3DGate?.showAnnotations(this.showNumbering);
         }
 
         this._redraw = false;
@@ -3433,12 +3414,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         } else if (!this.isLocked(seqnum)) {
             if (this._currentColor >= 1 && this._currentColor <= 4) {
-                this._mutatedSequence.setNt(seqnum, this._currentColor);
+                this._mutatedSequence.setNt(seqnum, this._currentColor, this._poseUpdateSequenceCallback);
                 ROPWait.notifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
                 this._bases[seqnum].setType(this._currentColor, true);
-                // kkk synchronize base over color with 3D
-                const curColor = this._mutatedSequence.nt(seqnum);
-                this.pEditMode?.mol3DGate?.stage.viewer.selectEBaseObject2(seqnum, curColor !== this._currentColor);
             } else if (this._currentColor === RNAPaint.PAIR && this._pairs.isPaired(seqnum)) {
                 const pi = this._pairs.pairingPartner(seqnum);
                 if (this.isLocked(pi)) {
@@ -3447,8 +3425,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
                 const clickBase: RNABase = this._mutatedSequence.nt(seqnum);
 
-                this._mutatedSequence.setNt(seqnum, this._mutatedSequence.nt(pi));
-                this._mutatedSequence.setNt(pi, clickBase);
+                this._mutatedSequence.setNt(seqnum, this._mutatedSequence.nt(pi), this._poseUpdateSequenceCallback);
+                this._mutatedSequence.setNt(pi, clickBase, this._poseUpdateSequenceCallback);
 
                 this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
                 this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
@@ -3458,8 +3436,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     return;
                 }
 
-                this._mutatedSequence.setNt(seqnum, RNABase.ADENINE);
-                this._mutatedSequence.setNt(pi, RNABase.URACIL);
+                this._mutatedSequence.setNt(seqnum, RNABase.ADENINE, this._poseUpdateSequenceCallback);
+                this._mutatedSequence.setNt(pi, RNABase.URACIL, this._poseUpdateSequenceCallback);
 
                 this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
                 this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
@@ -3469,8 +3447,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     return;
                 }
 
-                this._mutatedSequence.setNt(seqnum, RNABase.GUANINE);
-                this._mutatedSequence.setNt(pi, RNABase.CYTOSINE);
+                this._mutatedSequence.setNt(seqnum, RNABase.GUANINE, this._poseUpdateSequenceCallback);
+                this._mutatedSequence.setNt(pi, RNABase.CYTOSINE, this._poseUpdateSequenceCallback);
 
                 this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
                 this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
@@ -3480,8 +3458,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     return;
                 }
 
-                this._mutatedSequence.setNt(seqnum, RNABase.URACIL);
-                this._mutatedSequence.setNt(pi, RNABase.GUANINE);
+                this._mutatedSequence.setNt(seqnum, RNABase.URACIL, this._poseUpdateSequenceCallback);
+                this._mutatedSequence.setNt(pi, RNABase.GUANINE, this._poseUpdateSequenceCallback);
 
                 this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
                 this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
@@ -4167,7 +4145,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     private readonly _baseLayer: Container = new Container();
-    private readonly _poseField: PoseField;
+    public readonly _poseField: PoseField;
 
     private _width: number = 0;
     private _height: number = 0;
@@ -4241,6 +4219,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _editableIndices: number[] | null = null;
 
     // Pointer to callback function to be called after change in pose
+    private _poseUpdateSequenceCallback: ((resno:number, oldBase:number, base:number) => void) | null = null;
     private _poseEditCallback: (() => void) | null = null;
     private _trackMovesCallback: ((count: number, moves: Move[]) => void) | null = null;
     private _addBaseCallback: (parenthesis: string | null, op: PuzzleEditOp | null, index: number) => void;

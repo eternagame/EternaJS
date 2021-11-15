@@ -1,58 +1,107 @@
-// kkk ThreeView.ts --- Provide 3d view in pixi mode
+// ThreeView.ts --- Provide 3d view in pixi mode
 
 import {
-    InteractionEvent, Point, Rectangle, Sprite, Graphics, Text, Texture,
-    Container, RenderTexture, BaseRenderTexture, SCALE_MODES, BaseTexture
+    InteractionEvent,
+    Point,
+    Rectangle,
+    Sprite,
+    Graphics,
+    Text,
+    Texture,
+    Container,
+    RenderTexture,
+    BaseRenderTexture,
+    SCALE_MODES,
+    BaseTexture
 } from 'pixi.js';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import {
-    ContainerObject, Flashbang, VLayoutContainer,
-    HAlign, Assert, HLayoutContainer, VAlign, DisplayUtil, SpriteObject, GameObjectRef
+    ContainerObject,
+    Flashbang,
+    VLayoutContainer,
+    HAlign,
+    Assert,
+    HLayoutContainer,
+    VAlign,
+    DisplayUtil,
+    SpriteObject,
+    GameObjectRef
 } from 'flashbang';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import Fonts from 'eterna/util/Fonts';
 import Eterna from 'eterna/Eterna';
-import Mol3DGate from 'eterna/mode/Mol3DGate';
 import TextBalloon from 'eterna/ui/TextBalloon';
 import ContextMenu from 'eterna/ui/ContextMenu';
 import GameButton from '../ui/GameButton';
-import {ContextMenuDialog} from './GameMode';
+import GameMode, {ContextMenuDialog} from './GameMode';
 
-const events = ['pointercancel', 'pointerdown', 'pointerenter', 'pointerleave', 'pointermove',
-    'pointerout', 'pointerover', 'pointerup', 'mousedown', 'mouseenter', 'mouseleave',
-    'mousemove', 'mouseout', 'mouseover', 'mouseup', 'mousedown', 'mouseup'] as const;
+const events = [
+    'pointercancel',
+    'pointerdown',
+    'pointerenter',
+    'pointerleave',
+    'pointermove',
+    'pointerout',
+    'pointerover',
+    'pointerup',
+    'mousedown',
+    'mouseenter',
+    'mouseleave',
+    'mousemove',
+    'mouseout',
+    'mouseover',
+    'mouseup',
+    'mousedown',
+    'mouseup'
+] as const;
 
 const earlyHandlers: ((e: MouseEvent | PointerEvent) => void)[] = [];
 
 for (const event of events) {
-    window.addEventListener(event, (e) => {
-        earlyHandlers.forEach((handler) => handler(e));
-    }, true);
+    window.addEventListener(
+        event,
+        (e) => {
+            earlyHandlers.forEach((handler) => handler(e));
+        },
+        true
+    );
 }
 
-const touchEvents = ['touchstart', 'touchcancel', 'touchend', 'touchmove'] as const;
+const touchEvents = [
+    'touchstart',
+    'touchcancel',
+    'touchend',
+    'touchmove'
+] as const;
 const earlyTouchHandlers: ((e: TouchEvent) => void)[] = [];
 
 for (const event of touchEvents) {
-    window.addEventListener(event, (e) => {
-        earlyTouchHandlers.forEach((handler) => handler(e));
-    }, true);
+    window.addEventListener(
+        event,
+        (e) => {
+            earlyTouchHandlers.forEach((handler) => handler(e));
+        },
+        true
+    );
 }
 class MyContainer extends Container {
-    constructor(view:ThreeView) {
+    constructor() {
         super();
-        this.threeView = view;
         this._boundHandleMouseEvent = this.handlePossiblyMaskedEvent.bind(this);
         this._boundHandleTouchEvent = this.handleTouchEvent.bind(this);
-        
+
         earlyHandlers.push(this._boundHandleMouseEvent);
         earlyTouchHandlers.push(this._boundHandleTouchEvent);
     }
 
     public handlePossiblyMaskedEvent(e: MouseEvent | PointerEvent): void {
+        if (!GameMode._3DView || !GameMode.mol3DGate) return;
+        if (GameMode._3DView._contextMenuDialogRef.isLive) return;
+        if (GameMode._3DView.gameMode._contextMenuDialogRef.isLive) return;
+        if (GameMode._3DView.gameMode._dialogRef.isLive) return;
         if (e instanceof MouseEvent) {
-            const pos = this.threeView.getPosition();
-            const init:MouseEventInit = {
+            const pos = GameMode._3DView.getPosition();
+            const init: MouseEventInit = {
                 cancelable: true,
                 bubbles: true,
                 altKey: e.altKey,
@@ -68,46 +117,58 @@ class MyContainer extends Container {
                 screenX: e.screenX,
                 screenY: e.screenY
             };
-            if (this.threeView.metaState === 1) {
+            if (GameMode._3DView.metaState === 1) {
                 init.ctrlKey = true;
             }
-            const myEvent = new MouseEvent(e.type, init);// new MouseEvent(e.type, e);
-            this.threeView.isOver3DCanvas = this.threeView.PtInCanvas(e.clientX - pos.x, e.clientY - pos.y);
-            if (this.threeView.isOver3DCanvas || this.pressed) {
+            const myEvent = new MouseEvent(e.type, init); // new MouseEvent(e.type, e);
+            GameMode._3DView.isOver3DCanvas = GameMode._3DView.PtInCanvas(
+                e.clientX - pos.x,
+                e.clientY - pos.y
+            );
+            if (GameMode._3DView.isOver3DCanvas || this.pressed) {
                 if (e.type === 'mousedown') this.pressed = true;
-                this.threeView.nglGate.stage.viewer.getWebGLCanvas().dispatchEvent(myEvent);
+                const viewer = GameMode.mol3DGate.viewerEx;
+                viewer?.getWebGLCanvas().dispatchEvent(myEvent);
             }
             if (e.type === 'mouseup') this.pressed = false;
             if (this.pressed) e.stopPropagation();
-            if (!this.threeView.isOver3DCanvas) {
-                this.threeView.hideTooltip();
+            if (!GameMode._3DView.isOver3DCanvas) {
+                GameMode._3DView.hideTooltip();
             }
         }
     }
 
     public handleTouchEvent(e: TouchEvent): void {
-        const pos = this.threeView.getPosition();
+        if (!GameMode._3DView || !GameMode.mol3DGate) return;
+        if (GameMode._3DView._contextMenuDialogRef.isLive) return;
+        if (GameMode._3DView.gameMode._contextMenuDialogRef.isLive) return;
+        if (GameMode._3DView.gameMode._dialogRef.isLive) return;
+        const viewerEx = GameMode.mol3DGate.viewerEx;
+        if (!viewerEx) return;
+        const pos = GameMode._3DView.getPosition();
         if (e.touches.length > 0) {
             const touchObjArray = [];
             const x = e.touches[0].clientX - pos.x;
             const y = e.touches[0].clientY - pos.y;
             for (let i = 0; i < e.touches.length; i++) {
-                touchObjArray.push(new Touch({
-                    identifier: Date.now(),
-                    target: this.threeView.nglGate.stage.viewer.getWebGLCanvas(),
-                    clientX: e.touches[i].clientX - pos.x,
-                    clientY: e.touches[i].clientY - pos.y,
-                    screenX: e.touches[i].screenX,
-                    screenY: e.touches[i].screenY,
-                    pageX: e.touches[i].pageX - pos.x,
-                    pageY: e.touches[i].pageY - pos.y,
-                    radiusX: e.touches[i].radiusX,
-                    radiusY: e.touches[i].radiusY,
-                    rotationAngle: e.touches[i].rotationAngle,
-                    force: e.touches[i].force
-                }));
+                touchObjArray.push(
+                    new Touch({
+                        identifier: Date.now(),
+                        target: viewerEx.getWebGLCanvas(),
+                        clientX: e.touches[i].clientX - pos.x,
+                        clientY: e.touches[i].clientY - pos.y,
+                        screenX: e.touches[i].screenX,
+                        screenY: e.touches[i].screenY,
+                        pageX: e.touches[i].pageX - pos.x,
+                        pageY: e.touches[i].pageY - pos.y,
+                        radiusX: e.touches[i].radiusX,
+                        radiusY: e.touches[i].radiusY,
+                        rotationAngle: e.touches[i].rotationAngle,
+                        force: e.touches[i].force
+                    })
+                );
             }
-            const init:TouchEventInit = {
+            const init: TouchEventInit = {
                 cancelable: true,
                 bubbles: true,
                 touches: touchObjArray,
@@ -116,30 +177,38 @@ class MyContainer extends Container {
                 shiftKey: e.shiftKey,
                 ctrlKey: e.ctrlKey
             };
-            if (this.threeView.metaState === 1) {
+            if (GameMode._3DView.metaState === 1) {
                 init.ctrlKey = true;
             }
             const touchEvent = new TouchEvent(e.type, init);
-            this.threeView.isOver3DCanvas = this.threeView.PtInCanvas(x, y);
-            if (this.threeView.isOver3DCanvas || this.pressed) {
+            GameMode._3DView.isOver3DCanvas = GameMode._3DView.PtInCanvas(x, y);
+            if (GameMode._3DView.isOver3DCanvas || this.pressed) {
                 if (e.type === 'touchstart') this.pressed = true;
-                this.threeView.nglGate.stage.viewer.getWebGLCanvas().dispatchEvent(touchEvent);
+                viewerEx.getWebGLCanvas().dispatchEvent(touchEvent);
             }
-            if (!this.threeView.isOver3DCanvas) {
+            if (!GameMode._3DView.isOver3DCanvas) {
                 if (e.type === 'touchstart') this.pressed = false;
             }
             if (this.pressed) e.stopPropagation();
-            if (!this.threeView.isOver3DCanvas) {
-                this.threeView.hideTooltip();
+            if (!GameMode._3DView.isOver3DCanvas) {
+                GameMode._3DView.hideTooltip();
             }
         }
+    }
+
+    public dispose() {
+        earlyHandlers.forEach(() => {
+            earlyHandlers.pop();
+        });
+        earlyTouchHandlers.forEach(() => {
+            earlyTouchHandlers.pop();
+        });
     }
 
     protected _boundHandleTouchEvent: (e: TouchEvent) => void;
     protected _boundHandleMouseEvent: (e: MouseEvent | PointerEvent) => void;
 
     protected pressed: boolean = false;
-    protected threeView:ThreeView;
 }
 
 const MaxState = 2;
@@ -154,7 +223,6 @@ interface ViewStatus {
     h: number;
 }
 export default class ThreeView extends ContainerObject {
-    public nglGate: Mol3DGate;
     public pixiContainer: HTMLDivElement;
     private contentLay: VLayoutContainer;
     private titleLay: HLayoutContainer;
@@ -166,7 +234,7 @@ export default class ThreeView extends ContainerObject {
     private sprite1: SpriteObject;
     private sprite2: SpriteObject;
     private frame: Graphics;
-    private titleText:Text;
+    private titleText: Text;
     private gap: number = 4;
     private iconSize: number = 20;
     private pressed: boolean = false;
@@ -187,7 +255,10 @@ export default class ThreeView extends ContainerObject {
     public static scope: ThreeView;
 
     private normalState: ViewStatus = {
-        x: this.left, y: this.top, w: this.width, h: this.height
+        x: this.left,
+        y: this.top,
+        w: this.width,
+        h: this.height
     };
 
     public metaState: number = 0;
@@ -204,18 +275,20 @@ export default class ThreeView extends ContainerObject {
     private nglMask: Graphics;
 
     private frameContainer: MyContainer;
-    private frameBaseTexture:BaseRenderTexture;
-    private frameTexture:RenderTexture;
+    private frameBaseTexture: BaseRenderTexture;
+    private frameTexture: RenderTexture;
     private frameSprite: Sprite;
     private tooltip: TextBalloon;
+    public gameMode: GameMode;
 
-    protected _contextMenuDialogRef: GameObjectRef = GameObjectRef.NULL;
+    public _contextMenuDialogRef: GameObjectRef = GameObjectRef.NULL;
 
-    constructor() {
+    constructor(gamemode: GameMode) {
         super();
         ThreeView.scope = this;
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
+        this.gameMode = gamemode;
         this.metaState = 0;
         this.width = 460;
         this.height = 300;
@@ -223,66 +296,71 @@ export default class ThreeView extends ContainerObject {
         this.left = Flashbang.stageWidth - this.width - this.rightMargin;
         this.top = 100;
         this.saveNormalState();
-        this.pixiContainer = <HTMLDivElement> document.getElementById(Eterna.PIXI_CONTAINER_ID);
-        window.addEventListener('resize', () => {
-            Assert.assertIsDefined(Flashbang.stageWidth);
-            Assert.assertIsDefined(Flashbang.stageHeight);
-            this.maxButton.up(Bitmaps.Img3DMax)
-                .over(Bitmaps.Img3DMaxHover)
-                .down(Bitmaps.Img3DMax).tooltip('Maximize');
-            this.minButton.up(Bitmaps.Img3DMin)
-                .over(Bitmaps.Img3DMinHover)
-                .down(Bitmaps.Img3DMin).tooltip('Minimize');
-            this.left = this.normalState.x;
-            this.top = this.normalState.y;
-            this.width = this.normalState.w;
-            this.height = this.normalState.h;
-            const oldWidth = this.left + this.width + this.rightMargin;
-            const dw = Flashbang.stageWidth - oldWidth;
-            let dwL = 0; let
-                dwR = 0;
-            if ((this.left + this.rightMargin) !== 0) {
-                dwL = (dw * this.left) / (this.left + this.rightMargin);
-                dwR = dw - dwL;
-            }
-            if (this.left + dwL < 0) {
-                this.left = 0;
-                this.rightMargin = Flashbang.stageWidth - this.width;
-            } else {
-                this.left += dwL;
-                this.rightMargin += dwR;
-            }
-            this.curViewState = NormalState;
-            this.saveNormalState();
-            this.onResized();
-        }, false);
+        this.pixiContainer = <HTMLDivElement>(
+            document.getElementById(Eterna.PIXI_CONTAINER_ID)
+        );
 
-        window.addEventListener('tooltip', (e) => {
-            const ce = <CustomEvent>e;
-            const x: number = ce.detail.x;
-            const y: number = ce.detail.y;
-            const label: string = ce.detail.label;
-            if (label.length === 0) this.hideTooltip();
-            else {
-                this.tooltip.setText(label);
-                this.tooltip.display.position.set(10 + x, y);
-                this.tooltip.display.visible = true;
-            }
-        });
+        window.addEventListener('resize', this.onResize, false);
+        window.addEventListener('tooltip', this.onTooltip);
     }
 
-    public getPosition():Point {
+    public onTooltip(e: Event) {
+        const ce = <CustomEvent>e;
+        const x: number = ce.detail.x;
+        const y: number = ce.detail.y;
+        const label: string = ce.detail.label;
+        const scope = ThreeView.scope;
+        if (label.length === 0) scope.hideTooltip();
+        else {
+            scope.tooltip.setText(label);
+            scope.tooltip.display.position.set(10 + x, y);
+            scope.tooltip.display.visible = true;
+        }
+    }
+
+    public onResize() {
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(Flashbang.stageHeight);
+
+        const scope = ThreeView.scope;
+        scope.maxButton
+            .up(Bitmaps.Img3DMax)
+            .over(Bitmaps.Img3DMaxHover)
+            .down(Bitmaps.Img3DMax)
+            .tooltip('Maximize');
+        scope.minButton
+            .up(Bitmaps.Img3DMin)
+            .over(Bitmaps.Img3DMinHover)
+            .down(Bitmaps.Img3DMin)
+            .tooltip('Minimize');
+        scope.left = scope.normalState.x;
+        scope.top = scope.normalState.y;
+        scope.width = scope.normalState.w;
+        scope.height = scope.normalState.h;
+        const oldWidth = scope.left + scope.width + scope.rightMargin;
+        const dw = Flashbang.stageWidth - oldWidth;
+        let dwL = 0;
+        let dwR = 0;
+        if (scope.left + scope.rightMargin !== 0) {
+            dwL = (dw * scope.left) / (scope.left + scope.rightMargin);
+            dwR = dw - dwL;
+        }
+        if (scope.left + dwL < 0) {
+            scope.left = 0;
+            scope.rightMargin = Flashbang.stageWidth - scope.width;
+        } else {
+            scope.left += dwL;
+            scope.rightMargin += dwR;
+        }
+        scope.curViewState = NormalState;
+        scope.saveNormalState();
+        scope.onResized();
+    }
+
+    public getPosition(): Point {
         const pt = new Point();
         this.frameContainer.getGlobalPosition(pt);
         return pt;
-    }
-
-    protected zoomInNGLView() {
-        this.nglGate?.stage.viewerControls.zoom(0.1);
-    }
-
-    protected zoomOutNGLView() {
-        this.nglGate?.stage.viewerControls.zoom(-0.1);
     }
 
     protected setNGLMovState() {
@@ -297,17 +375,21 @@ export default class ThreeView extends ContainerObject {
         this.metaState = 2;
     }
 
-    public create3DMenu():ContextMenu {
+    public createMenu(): ContextMenu {
         const moveContainer = new Container();
         moveContainer.addChild(Sprite.from(Bitmaps.Img3DMoveIcon));
-        const moveArrow = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgToolbarArrow));
+        const moveArrow = new Sprite(
+            BitmapManager.getBitmap(Bitmaps.ImgToolbarArrow)
+        );
         moveArrow.position.x = (moveContainer.width - moveArrow.width) / 2;
         moveArrow.visible = this.metaState === 0;
         moveContainer.addChild(moveArrow);
 
         const rotateContainer = new Container();
         rotateContainer.addChild(Sprite.from(Bitmaps.Img3DRotateIcon));
-        const rotateArrow = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgToolbarArrow));
+        const rotateArrow = new Sprite(
+            BitmapManager.getBitmap(Bitmaps.ImgToolbarArrow)
+        );
         rotateArrow.position.x = (rotateContainer.width - rotateArrow.width) / 2;
         rotateArrow.visible = this.metaState === 1;
         rotateContainer.addChild(rotateArrow);
@@ -329,7 +411,7 @@ export default class ThreeView extends ContainerObject {
         if (this.tooltip) this.tooltip.display.visible = false;
     }
 
-    protected dragHandleEvent(e:InteractionEvent) {
+    protected dragHandleEvent(e: InteractionEvent) {
         const scope = ThreeView.scope;
         switch (e.type) {
             case 'pointerdown':
@@ -351,7 +433,12 @@ export default class ThreeView extends ContainerObject {
                     const right = left + scope.width;
                     const bottom = top + scope.height;
 
-                    if (left > 0 && top > 0 && right < Flashbang.stageWidth && bottom < Flashbang.stageHeight) {
+                    if (
+                        left > 0
+                        && top > 0
+                        && right < Flashbang.stageWidth
+                        && bottom < Flashbang.stageHeight
+                    ) {
                         scope.left = left;
                         scope.top = top;
                         scope.prevPt.x = curPt.x;
@@ -368,24 +455,12 @@ export default class ThreeView extends ContainerObject {
             case 'pointercancel':
                 scope.pressed = false;
                 break;
-            // case 'pointerover':
-            //     const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
-            //     if (doc) {
-            //         doc.style.cursor = 'move';
-            //     }
-            //     break;
-            // case 'pointerout':
-            //     const doc1 = document.getElementById(Eterna.PIXI_CONTAINER_ID);
-            //     if (doc1) {
-            //         doc1.style.cursor = 'default';
-            //     }
-            //     break;
             default:
                 break;
         }
     }
 
-    protected leftHandleEvent(e:InteractionEvent) {
+    protected leftHandleEvent(e: InteractionEvent) {
         this.lbSprite.display.interactive = false;
         switch (e.type) {
             case 'pointerdown':
@@ -405,9 +480,17 @@ export default class ThreeView extends ContainerObject {
                     const width = this.width - dx;
                     const height = this.height + dy;
                     const bottom = this.top + height;
-                    const minW = this.iconSize * 3 + this.titleText.width + 100 + this.gap * 5;
+                    const minW = this.iconSize * 3
+                        + this.titleText.width
+                        + 100
+                        + this.gap * 5;
 
-                    if (left > 0 && width >= minW && height >= minH && bottom < Flashbang.stageHeight) {
+                    if (
+                        left > 0
+                        && width >= minW
+                        && height >= minH
+                        && bottom < Flashbang.stageHeight
+                    ) {
                         this.left = left;
                         this.height = height;
                         this.width = width;
@@ -426,17 +509,25 @@ export default class ThreeView extends ContainerObject {
             case 'pointercancel':
                 this.dragLeftPressed = false;
                 break;
-            case 'pointerover': {
-                const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
-                if (doc) {
-                    doc.style.cursor = 'sw-resize';
-                } }
+            case 'pointerover':
+                {
+                    const doc = document.getElementById(
+                        Eterna.PIXI_CONTAINER_ID
+                    );
+                    if (doc) {
+                        doc.style.cursor = 'sw-resize';
+                    }
+                }
                 break;
-            case 'pointerout': {
-                const doc1 = document.getElementById(Eterna.PIXI_CONTAINER_ID);
-                if (doc1) {
-                    doc1.style.cursor = 'default';
-                } }
+            case 'pointerout':
+                {
+                    const doc1 = document.getElementById(
+                        Eterna.PIXI_CONTAINER_ID
+                    );
+                    if (doc1) {
+                        doc1.style.cursor = 'default';
+                    }
+                }
                 break;
             default:
                 break;
@@ -444,7 +535,7 @@ export default class ThreeView extends ContainerObject {
         this.lbSprite.display.interactive = true;
     }
 
-    protected rightHandleEvent(e:InteractionEvent) {
+    protected rightHandleEvent(e: InteractionEvent) {
         this.rbSprite.display.interactive = false;
         switch (e.type) {
             case 'pointerdown':
@@ -456,7 +547,10 @@ export default class ThreeView extends ContainerObject {
                 Assert.assertIsDefined(Flashbang.stageWidth);
                 Assert.assertIsDefined(Flashbang.stageHeight);
                 if (this.dragRightPressed && e.data.pressure === 0) this.dragRightPressed = false;
-                if (this.dragRightPressed && this.curViewState === NormalState) {
+                if (
+                    this.dragRightPressed
+                    && this.curViewState === NormalState
+                ) {
                     const dx = e.data.global.x - this.dragRightPrevPt.x;
                     const dy = e.data.global.y - this.dragRightPrevPt.y;
 
@@ -464,10 +558,17 @@ export default class ThreeView extends ContainerObject {
                     const right = this.left + width;
                     const height = this.height + dy;
                     const bottom = this.top + height;
-                    const minW = this.iconSize * 3 + this.titleText.width + 100 + this.gap * 5;
+                    const minW = this.iconSize * 3
+                        + this.titleText.width
+                        + 100
+                        + this.gap * 5;
 
-                    if (width >= minW && height >= minH
-                        && right < Flashbang.stageWidth && bottom < Flashbang.stageHeight) {
+                    if (
+                        width >= minW
+                        && height >= minH
+                        && right < Flashbang.stageWidth
+                        && bottom < Flashbang.stageHeight
+                    ) {
                         this.width = width;
                         this.height = height;
                         this.dragRightPrevPt.x = e.data.global.x;
@@ -484,17 +585,25 @@ export default class ThreeView extends ContainerObject {
             case 'pointercancel':
                 this.dragRightPressed = false;
                 break;
-            case 'pointerover': {
-                const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
-                if (doc) {
-                    doc.style.cursor = 'nw-resize';
-                } }
+            case 'pointerover':
+                {
+                    const doc = document.getElementById(
+                        Eterna.PIXI_CONTAINER_ID
+                    );
+                    if (doc) {
+                        doc.style.cursor = 'nw-resize';
+                    }
+                }
                 break;
-            case 'pointerout': {
-                const doc1 = document.getElementById(Eterna.PIXI_CONTAINER_ID);
-                if (doc1) {
-                    doc1.style.cursor = 'default';
-                } }
+            case 'pointerout':
+                {
+                    const doc1 = document.getElementById(
+                        Eterna.PIXI_CONTAINER_ID
+                    );
+                    if (doc1) {
+                        doc1.style.cursor = 'default';
+                    }
+                }
                 break;
             default:
                 break;
@@ -507,11 +616,15 @@ export default class ThreeView extends ContainerObject {
 
         this.frame = new Graphics();
 
-        this.lbSprite = new SpriteObject(new Sprite(BitmapManager.getBitmap(Bitmaps.Img3DLeft)));
+        this.lbSprite = new SpriteObject(
+            new Sprite(BitmapManager.getBitmap(Bitmaps.Img3DLeft))
+        );
         this.lbSprite.display.width = this.iconSize;
         this.lbSprite.display.height = this.iconSize;
 
-        this.rbSprite = new SpriteObject(new Sprite(BitmapManager.getBitmap(Bitmaps.Img3DRight)));
+        this.rbSprite = new SpriteObject(
+            new Sprite(BitmapManager.getBitmap(Bitmaps.Img3DRight))
+        );
         this.rbSprite.display.width = this.iconSize;
         this.rbSprite.display.height = this.iconSize;
 
@@ -539,7 +652,9 @@ export default class ThreeView extends ContainerObject {
         this.addObject(this.menuButton, this.titleLay);
         this.titleLay.addHSpacer(this.gap);
 
-        this.sprite1 = new SpriteObject(new Sprite(BitmapManager.getBitmap(Bitmaps.Img3DTitle)));
+        this.sprite1 = new SpriteObject(
+            new Sprite(BitmapManager.getBitmap(Bitmaps.Img3DTitle))
+        );
         this.addObject(this.sprite1, this.titleLay);
         this.titleLay.addHSpacer(this.gap);
 
@@ -548,7 +663,9 @@ export default class ThreeView extends ContainerObject {
         this.titleLay.addChild(this.titleText);
         this.titleLay.addHSpacer(this.gap);
 
-        this.sprite2 = new SpriteObject(new Sprite(BitmapManager.getBitmap(Bitmaps.Img3DTitle)));
+        this.sprite2 = new SpriteObject(
+            new Sprite(BitmapManager.getBitmap(Bitmaps.Img3DTitle))
+        );
         this.addObject(this.sprite2, this.titleLay);
         this.titleLay.addHSpacer(this.gap);
 
@@ -565,10 +682,13 @@ export default class ThreeView extends ContainerObject {
 
         this.mainContainer = new Container();
         this.nglContainer = new Container();
-        this.frameContainer = new MyContainer(this);
+        this.frameContainer = new MyContainer();
 
         this.frameBaseTexture = new BaseRenderTexture({
-            width: this.width, height: this.height - this.iconSize, scaleMode: SCALE_MODES.LINEAR, resolution: 1
+            width: this.width,
+            height: this.height - this.iconSize,
+            scaleMode: SCALE_MODES.LINEAR,
+            resolution: 1
         });
         this.frameTexture = new RenderTexture(this.frameBaseTexture);
         this.frameSprite = new Sprite(this.frameTexture);
@@ -615,19 +735,43 @@ export default class ThreeView extends ContainerObject {
         this.container.addChild(this.contentLay);
         this.container.addChild(this.frame);
 
-        this.regs.add(this.sprite1.pointerDown.connect((e) => this.dragHandleEvent(e)));
-        this.regs.add(this.sprite1.pointerUp.connect((e) => this.dragHandleEvent(e)));
-        this.regs.add(this.sprite1.pointerMove.connect((e) => this.dragHandleEvent(e)));
-        this.regs.add(this.sprite1.pointerOver.connect((e) => this.dragHandleEvent(e)));
-        this.regs.add(this.sprite1.pointerOut.connect((e) => this.dragHandleEvent(e)));
-        this.regs.add(this.sprite1.pointerCancel.connect((e) => this.dragHandleEvent(e)));
+        this.regs.add(
+            this.sprite1.pointerDown.connect((e) => this.dragHandleEvent(e))
+        );
+        this.regs.add(
+            this.sprite1.pointerUp.connect((e) => this.dragHandleEvent(e))
+        );
+        this.regs.add(
+            this.sprite1.pointerMove.connect((e) => this.dragHandleEvent(e))
+        );
+        this.regs.add(
+            this.sprite1.pointerOver.connect((e) => this.dragHandleEvent(e))
+        );
+        this.regs.add(
+            this.sprite1.pointerOut.connect((e) => this.dragHandleEvent(e))
+        );
+        this.regs.add(
+            this.sprite1.pointerCancel.connect((e) => this.dragHandleEvent(e))
+        );
 
-        this.regs.add(this.sprite2.pointerDown.connect((e) => this.dragHandleEvent(e)));
-        this.regs.add(this.sprite2.pointerUp.connect((e) => this.dragHandleEvent(e)));
-        this.regs.add(this.sprite2.pointerMove.connect((e) => this.dragHandleEvent(e)));
-        this.regs.add(this.sprite2.pointerOver.connect((e) => this.dragHandleEvent(e)));
-        this.regs.add(this.sprite2.pointerOut.connect((e) => this.dragHandleEvent(e)));
-        this.regs.add(this.sprite2.pointerCancel.connect((e) => this.dragHandleEvent(e)));
+        this.regs.add(
+            this.sprite2.pointerDown.connect((e) => this.dragHandleEvent(e))
+        );
+        this.regs.add(
+            this.sprite2.pointerUp.connect((e) => this.dragHandleEvent(e))
+        );
+        this.regs.add(
+            this.sprite2.pointerMove.connect((e) => this.dragHandleEvent(e))
+        );
+        this.regs.add(
+            this.sprite2.pointerOver.connect((e) => this.dragHandleEvent(e))
+        );
+        this.regs.add(
+            this.sprite2.pointerOut.connect((e) => this.dragHandleEvent(e))
+        );
+        this.regs.add(
+            this.sprite2.pointerCancel.connect((e) => this.dragHandleEvent(e))
+        );
 
         this.titleText.on('pointerdown', this.dragHandleEvent);
         this.titleText.on('pointerup', this.dragHandleEvent);
@@ -636,19 +780,43 @@ export default class ThreeView extends ContainerObject {
         this.titleText.on('pointerout', this.dragHandleEvent);
         this.titleText.on('pointercancel', this.dragHandleEvent);
 
-        this.regs.add(this.lbSprite.pointerDown.connect((e) => this.leftHandleEvent(e)));
-        this.regs.add(this.lbSprite.pointerUp.connect((e) => this.leftHandleEvent(e)));
-        this.regs.add(this.lbSprite.pointerMove.connect((e) => this.leftHandleEvent(e)));
-        this.regs.add(this.lbSprite.pointerOver.connect((e) => this.leftHandleEvent(e)));
-        this.regs.add(this.lbSprite.pointerOut.connect((e) => this.leftHandleEvent(e)));
-        this.regs.add(this.lbSprite.pointerCancel.connect((e) => this.leftHandleEvent(e)));
+        this.regs.add(
+            this.lbSprite.pointerDown.connect((e) => this.leftHandleEvent(e))
+        );
+        this.regs.add(
+            this.lbSprite.pointerUp.connect((e) => this.leftHandleEvent(e))
+        );
+        this.regs.add(
+            this.lbSprite.pointerMove.connect((e) => this.leftHandleEvent(e))
+        );
+        this.regs.add(
+            this.lbSprite.pointerOver.connect((e) => this.leftHandleEvent(e))
+        );
+        this.regs.add(
+            this.lbSprite.pointerOut.connect((e) => this.leftHandleEvent(e))
+        );
+        this.regs.add(
+            this.lbSprite.pointerCancel.connect((e) => this.leftHandleEvent(e))
+        );
 
-        this.regs.add(this.rbSprite.pointerDown.connect((e) => this.rightHandleEvent(e)));
-        this.regs.add(this.rbSprite.pointerUp.connect((e) => this.rightHandleEvent(e)));
-        this.regs.add(this.rbSprite.pointerMove.connect((e) => this.rightHandleEvent(e)));
-        this.regs.add(this.rbSprite.pointerOver.connect((e) => this.rightHandleEvent(e)));
-        this.regs.add(this.rbSprite.pointerOut.connect((e) => this.rightHandleEvent(e)));
-        this.regs.add(this.rbSprite.pointerCancel.connect((e) => this.rightHandleEvent(e)));
+        this.regs.add(
+            this.rbSprite.pointerDown.connect((e) => this.rightHandleEvent(e))
+        );
+        this.regs.add(
+            this.rbSprite.pointerUp.connect((e) => this.rightHandleEvent(e))
+        );
+        this.regs.add(
+            this.rbSprite.pointerMove.connect((e) => this.rightHandleEvent(e))
+        );
+        this.regs.add(
+            this.rbSprite.pointerOver.connect((e) => this.rightHandleEvent(e))
+        );
+        this.regs.add(
+            this.rbSprite.pointerOut.connect((e) => this.rightHandleEvent(e))
+        );
+        this.regs.add(
+            this.rbSprite.pointerCancel.connect((e) => this.rightHandleEvent(e))
+        );
 
         this.maxButton.clicked.connect(() => this.onMaxButton());
         this.minButton.clicked.connect(() => this.onMinButton());
@@ -657,21 +825,24 @@ export default class ThreeView extends ContainerObject {
         this.onResized();
     }
 
-    protected updateAnnotations(width:number, height:number) {
+    protected updateAnnotations(height: number) {
         let i = 0;
-        const uninit:boolean = (this.nglTextArray.length === 0);
-        this.nglGate.component?.eachAnnotation((a) => {
+        const uninit: boolean = this.nglTextArray.length === 0;
+        GameMode.mol3DGate?.component?.eachAnnotationEx((a) => {
             let text;
             const x = a.getCanvasPosition().x;
             const y = height - a.getCanvasPosition().y;
             if (uninit) {
                 text = new Text(a.getContent(), {
-                    fontFamily: 'Arial', fontSize: 12, fill: 0xffffff, align: 'center'
+                    fontFamily: 'Arial',
+                    fontSize: 12,
+                    fill: 0xffffff,
+                    align: 'center'
                 });
                 text.x = x;
                 text.y = y;
                 text.visible = false;
-                if (this.nglGate.bShowAnnotations) text.visible = true;
+                if (GameMode.mol3DGate?.bShowAnnotations) text.visible = true;
                 this.nglTextArray.push(text);
                 text.mask = this.nglMask;
                 this.nglContainer.addChild(text);
@@ -680,24 +851,43 @@ export default class ThreeView extends ContainerObject {
                 text.x = x;
                 text.y = y;
                 text.visible = false;
-                if (this.nglGate.bShowAnnotations) text.visible = true;
+                if (GameMode.mol3DGate?.bShowAnnotations) text.visible = true;
                 i++;
             }
         });
     }
 
-    public updateNGLTexture(canvas:HTMLCanvasElement, width:number, height:number) {
+    public updateNGLTexture(
+        canvas: HTMLCanvasElement,
+        width: number,
+        height: number
+    ) {
         if (this.nglSpriteContext) {
-            this.nglSpriteContext.clearRect(0, 0, this.nglSpriteCanvas.width, this.nglSpriteCanvas.height);
+            this.nglSpriteContext.clearRect(
+                0,
+                0,
+                this.nglSpriteCanvas.width,
+                this.nglSpriteCanvas.height
+            );
             if (width > 0 && height > 0) {
                 const dpr = window.devicePixelRatio;
                 this.nglSpriteContext.fillStyle = 'rgba(2,35,71,0.6)';
                 this.nglSpriteContext.fillRect(0, 0, width, height);
-                this.nglSpriteContext.drawImage(canvas, 0, 0, width * dpr, height * dpr, 0, 0, width, height);
+                this.nglSpriteContext.drawImage(
+                    canvas,
+                    0,
+                    0,
+                    width * dpr,
+                    height * dpr,
+                    0,
+                    0,
+                    width,
+                    height
+                );
             }
             this.nglTexture.update();
         }
-        this.updateAnnotations(width, height);
+        this.updateAnnotations(height);
     }
 
     public hideAnnotations() {
@@ -707,25 +897,15 @@ export default class ThreeView extends ContainerObject {
     }
 
     public onMenuClick() {
-        // var init:PointerEventInit = {
-        //     cancelable: true,
-        //     bubbles: true,
-        //     clientX: this.left + this.menuButton.display.x,
-        //     clientY: this.top + this.iconSize,
-        // }
-        // var event = new PointerEvent('contextmenu', init);
-        // this.isOver3DCanvas = true;
-        // document.getElementById(Eterna.PIXI_CONTAINER_ID)?.children[0]?.dispatchEvent(event);
-
         const pos = new Point(this.menuButton.display.x, 0);
-
         if (this._contextMenuDialogRef.isLive) {
             this._contextMenuDialogRef.destroyObject();
         } else {
-            const menu = this.create3DMenu();
+            const menu = this.createMenu();
             if (menu != null) {
+                const menuDlg = new ContextMenuDialog(menu, pos);
                 this._contextMenuDialogRef = this.addObject(
-                    new ContextMenuDialog(menu, pos),
+                    menuDlg,
                     this.mainContainer
                 );
             }
@@ -733,12 +913,16 @@ export default class ThreeView extends ContainerObject {
     }
 
     protected setToNormal() {
-        this.maxButton.up(Bitmaps.Img3DMax)
+        this.maxButton
+            .up(Bitmaps.Img3DMax)
             .over(Bitmaps.Img3DMaxHover)
-            .down(Bitmaps.Img3DMax).tooltip('Maximize');
-        this.minButton.up(Bitmaps.Img3DMin)
+            .down(Bitmaps.Img3DMax)
+            .tooltip('Maximize');
+        this.minButton
+            .up(Bitmaps.Img3DMin)
             .over(Bitmaps.Img3DMinHover)
-            .down(Bitmaps.Img3DMin).tooltip('Minimize');
+            .down(Bitmaps.Img3DMin)
+            .tooltip('Minimize');
         this.left = this.normalState.x;
         this.top = this.normalState.y;
         this.width = this.normalState.w;
@@ -750,12 +934,16 @@ export default class ThreeView extends ContainerObject {
     private setToMax() {
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
-        this.maxButton.up(Bitmaps.Img3DMaxRestore)
+        this.maxButton
+            .up(Bitmaps.Img3DMaxRestore)
             .over(Bitmaps.Img3DMaxRestoreHover)
-            .down(Bitmaps.Img3DMaxRestore).tooltip('Restore');
-        this.minButton.up(Bitmaps.Img3DMinRestore)
+            .down(Bitmaps.Img3DMaxRestore)
+            .tooltip('Restore');
+        this.minButton
+            .up(Bitmaps.Img3DMinRestore)
             .over(Bitmaps.Img3DMinRestoreHover)
-            .down(Bitmaps.Img3DMinRestore).tooltip('Restore');
+            .down(Bitmaps.Img3DMinRestore)
+            .tooltip('Restore');
         this.top = 100;
         this.left = 100;
         this.width = Flashbang.stageWidth - 100 * 2;
@@ -767,12 +955,16 @@ export default class ThreeView extends ContainerObject {
     private setToMin() {
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
-        this.minButton.up(Bitmaps.Img3DMinRestore)
+        this.minButton
+            .up(Bitmaps.Img3DMinRestore)
             .over(Bitmaps.Img3DMinRestoreHover)
-            .down(Bitmaps.Img3DMinRestore).tooltip('Restore');
-        this.maxButton.up(Bitmaps.Img3DMaxRestore)
+            .down(Bitmaps.Img3DMinRestore)
+            .tooltip('Restore');
+        this.maxButton
+            .up(Bitmaps.Img3DMaxRestore)
             .over(Bitmaps.Img3DMaxRestoreHover)
-            .down(Bitmaps.Img3DMaxRestore).tooltip('Restore');
+            .down(Bitmaps.Img3DMaxRestore)
+            .tooltip('Restore');
         this.width = Math.min(460, this.width);
         this.rightMargin = (Flashbang.stageWidth - this.width) / 2;
         this.left = Flashbang.stageWidth - this.width - this.rightMargin;
@@ -819,10 +1011,14 @@ export default class ThreeView extends ContainerObject {
     }
 
     protected moveWindow() {
-        this.nglGate?.stage?.viewer.setPosition(this.left, this.top + this.iconSize);
         DisplayUtil.positionRelativeToStage(
-            this.display, HAlign.LEFT, VAlign.TOP,
-            HAlign.LEFT, VAlign.TOP, this.left, this.top
+            this.display,
+            HAlign.LEFT,
+            VAlign.TOP,
+            HAlign.LEFT,
+            VAlign.TOP,
+            this.left,
+            this.top
         );
     }
 
@@ -839,9 +1035,11 @@ export default class ThreeView extends ContainerObject {
         this.menuButton.display.width = this.iconSize;
         this.menuButton.display.height = this.iconSize;
 
-        this.sprite1.display.width = this.width / 2 - (this.iconSize * 2 + this.titleText.width / 2 + this.gap * 3);
+        this.sprite1.display.width = this.width / 2
+            - (this.iconSize * 2 + this.titleText.width / 2 + this.gap * 3);
         this.sprite1.display.height = this.iconSize;
-        this.sprite2.display.width = this.width / 2 - (this.iconSize + this.titleText.width / 2 + this.gap * 2);
+        this.sprite2.display.width = this.width / 2
+            - (this.iconSize + this.titleText.width / 2 + this.gap * 2);
         this.sprite2.display.height = this.iconSize;
 
         this.titleLay.height = this.iconSize;
@@ -864,7 +1062,9 @@ export default class ThreeView extends ContainerObject {
         }
 
         this.frame.clear();
-        this.frame.lineStyle(1, 0x2F94D1).drawRect(0, 0, this.width, this.height);
+        this.frame
+            .lineStyle(1, 0x2f94d1)
+            .drawRect(0, 0, this.width, this.height);
 
         this.nglMask.clear();
         this.nglMask.beginFill(0x000000);
@@ -882,23 +1082,35 @@ export default class ThreeView extends ContainerObject {
 
         const w = Math.max(2, this.width);
         const h = Math.max(2, this.height - this.iconSize);
-        this.nglGate?.stage?.viewer.setPosition(this.left, this.top + this.iconSize);
-        this.nglGate?.stage?.handleResize(w, h);
+        GameMode.mol3DGate?.stageEx?.handleResize(w, h);
     }
 
-    public PtInCanvas(x:number, y: number): boolean {
-        if (x >= this.lbSprite.display.x
+    public PtInCanvas(x: number, y: number): boolean {
+        if (
+            x >= this.lbSprite.display.x
             && x <= this.lbSprite.display.x + this.lbSprite.display.width
             && y >= this.lbSprite.display.y
-            && y <= this.lbSprite.display.y + this.lbSprite.display.height) {
+            && y <= this.lbSprite.display.y + this.lbSprite.display.height
+        ) {
             return false;
         }
-        if (x >= this.rbSprite.display.x
+        if (
+            x >= this.rbSprite.display.x
             && x <= this.rbSprite.display.x + this.rbSprite.display.width
             && y >= this.rbSprite.display.y
-            && y <= this.rbSprite.display.y + this.rbSprite.display.height) {
+            && y <= this.rbSprite.display.y + this.rbSprite.display.height
+        ) {
             return false;
         }
-        return (x >= 0 && x < this.frameContainer.width && y > 0 && y < this.frameContainer.height);
+        return (
+            x >= 0
+            && x < this.frameContainer.width
+            && y > 0
+            && y < this.frameContainer.height
+        );
+    }
+
+    public dispose() {
+        this.frameContainer.dispose();
     }
 }

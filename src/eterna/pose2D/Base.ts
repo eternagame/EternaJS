@@ -50,9 +50,9 @@ export default class Base extends ContainerObject implements LateUpdatable {
         const randAngle: number = Math.random() * Math.PI * 2;
         this._sparkDir = new Point(Math.cos(randAngle), Math.sin(randAngle));
 
-        // kkk set NGL sparking
+        // set NGL sparking
         if (Mol3DGate.scope) {
-            Mol3DGate.scope.stage?.viewer?.addSpark(this._baseIdx + 1);
+            Mol3DGate.scope?.viewerEx?.addSpark(this._baseIdx + 1);
             // console.log('startSparking = ', this._baseIdx + 1);
         }
     }

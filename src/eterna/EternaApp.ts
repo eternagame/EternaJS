@@ -49,9 +49,6 @@ export enum PuzzleID {
     MicrofluidicChip = 6502997, // level 4/7 - MissionCleared info
     AandBRO = 6892307, // Oligos
     Tutorial1 = 9218290, // E.Coli Ribisome 55 rRNA, test.cif
-    // Tutorial1 = 9837790, // COVID-19 Frameshifting ..., 6xrz.cif
-    // Tutorial1 = 6502927,
-    // Tutorial1 = 10907948,
     Tutorial4 = 6502944,
     Tutorial6 = 6502945,
     Tutorial8 = 6502947,

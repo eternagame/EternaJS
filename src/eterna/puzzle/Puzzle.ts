@@ -74,7 +74,6 @@ export default class Puzzle {
         return seq;
     }
 
-    // kkk get 3d_structure path from server
     public getThreePath() {
         return this._threePath;
     }

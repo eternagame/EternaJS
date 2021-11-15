@@ -1,6 +1,10 @@
 import EPars, {RNABase} from 'eterna/EPars';
 import SecStruct from './SecStruct';
 
+export interface UpdateSequenceCallback {
+    (resno:number, oldColr:number, color:number): void;
+}
+
 export default class Sequence {
     constructor(baseArray: RNABase[]) {
         this._baseArray = baseArray;
@@ -329,8 +333,13 @@ export default class Sequence {
      * @param ii The position
      * @param rb The new identity
      */
-    public setNt(ii: number, rb: RNABase) {
+    public setNt(ii: number, rb: RNABase, cb:UpdateSequenceCallback | null = null) {
+        const oldBase = this.nt(ii);
         this._baseArray[ii] = rb;
+
+        if (cb) {
+            cb(ii, oldBase, rb);
+        }
     }
 
     public sequenceString(allowCut: boolean = true, allowUnknown: boolean = true): string {

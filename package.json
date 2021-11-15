@@ -11,7 +11,7 @@
     "build:prod": "node multiplatform/mkdirp dist/prod && webpack --config webpack.prod.js",
     "postbuild:dev": "node multiplatform/cpr ./website/frontend ./dist/dev/frontend && coffee -o ./dist/dev/frontend/jscripts -c ./website/frontend/coffee",
     "test": "jest --verbose",
-    "lint": "eslint src --ext .ts",
+    "lint": "eslint src --ext .ts --fix",
     "prepare": "husky install"
   },
   "repository": {
@@ -90,7 +90,7 @@
     "lodash.debounce": "^4.0.8",
     "loglevel": "^1.7.1",
     "marked": "^2.0.7",
-    "ngl": "https://github.com/eternagame/ngl/archive/e99e576dbff92292df322f530a54f4f2dbe35d56.tar.gz",
+    "ngl": "https://github.com/eternagame/ngl/archive/8f51aa3ac119d34e76111c641a2648778927331c.tar.gz",
     "pchip": "^1.0.2",
     "pixi-filters": "^4.1.1",
     "pixi-multistyle-text": "github:eternagame/pixi-multistyle-text#1f2283b1d4a1bb262b57783e1bf2f81802a17809",

@@ -1,4 +1,3 @@
-// kkk ErrorDialog.ts --- ErrorDialog
 import {
     VLayoutContainer, HAlign, HLayoutContainer, AlphaTask, Flashbang, Assert
 } from 'flashbang';

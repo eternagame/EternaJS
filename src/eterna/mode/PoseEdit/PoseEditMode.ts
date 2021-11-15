@@ -185,12 +185,6 @@ export default class PoseEditMode extends GameMode {
             onHelpClicked: () => this.onHelpClicked(),
             onChatClicked: () => {
                 Eterna.settings.showChat.value = !Eterna.settings.showChat.value;
-
-                // kkk set chat window position according to 3DView
-                // var H0 = 80;
-                // if (Eterna.settings.showChat.value) {
-                //     Eterna.chat.setPosition(H0);
-                // }
             },
             onInfoClicked: this._params.initSolution ? () => {
                 if (this._solutionView) {
@@ -397,8 +391,8 @@ export default class PoseEditMode extends GameMode {
             HAlign.RIGHT, VAlign.TOP, 0 - this._solDialogOffset, 0
         );
 
-        // kkk call onResize of 3d view
-        this._3DView?.onResized();
+        // call onResize of 3d view
+        GameMode._3DView?.onResized();
 
         DisplayUtil.positionRelativeToStage(
             this._solutionNameText, HAlign.CENTER, VAlign.TOP,
@@ -718,6 +712,7 @@ export default class PoseEditMode extends GameMode {
             pose.poseEditCallback = (() => {
                 this.poseEditByTarget(index);
             });
+            pose.poseUpdateCallback = this.posUpdateCallback;
         };
         const bindTrackMoves = (pose: Pose2D, _index: number) => {
             pose.trackMovesCallback = ((count: number, moves: Move[]) => {
@@ -770,10 +765,9 @@ export default class PoseEditMode extends GameMode {
         };
 
         for (let ii = 0; ii < targetConditions.length; ii++) {
-            const poseField: PoseField = new PoseField(true);
+            const poseField: PoseField = new PoseField(this, true);
             this.addObject(poseField, this.poseLayer);
             const pose: Pose2D = poseField.pose;
-            pose.setEditMode(this); // kkk make channel between Pos2D and PoseEditMode
             bindAddbaseCB(pose, ii);
             bindPoseEdit(pose, ii);
             bindTrackMoves(pose, ii);
@@ -1174,12 +1168,12 @@ export default class PoseEditMode extends GameMode {
         // RScript can set our initial poseState
         this._poseState = this._puzzle.defaultMode;
 
-        // kkk add 3DWindow
+        // add 3DWindow
         const threePath = this._puzzle.getThreePath();
         if (threePath) {
             const url = new URL(threePath, Eterna.SERVER_URL);
             const sequence = this.getSequence().split(' ')[0];
-            Mol3DGate.checkModelFile(url.href, sequence).then((resCount:number) => {
+            Mol3DGate.checkModelFile(url.href).then((resCount:number) => {
                 if (resCount === sequence.length) {
                     this.add3DSprite(url.href, this._puzzle.getSecstructs()[0]);
                 } else {
@@ -1680,9 +1674,9 @@ export default class PoseEditMode extends GameMode {
             return null;
         }
 
-        // kkk add 3D Menu
-        if (this.mol3DGate && this.mol3DGate.isOver3DCanvas) {
-            return null;// this.create3DMenu();
+        // discard menu in 3D window
+        if (GameMode._3DView?.isOver3DCanvas) {
+            return null;
         }
 
         const menu = new ContextMenu({horizontal: false});
@@ -3198,8 +3192,6 @@ export default class PoseEditMode extends GameMode {
         } else {
             execfoldCB(null);
         }
-        // kkk update 3D baseSequence
-        // this.mol3DGate?.updateSequence(this.getSequence().split(' '));
     }
 
     private poseEditByTargetDoFold(targetIndex: number): void {
@@ -3517,9 +3509,12 @@ export default class PoseEditMode extends GameMode {
         this.updateScore();
         this.transformPosesMarkers();
 
-        // kkk undo sequence change in 3D
-        this.mol3DGate?.updateSequence(this.getSequence().split(' '));
-        this.mol3DGate?.stage?.viewer.selectEBaseObject2(-1);
+        // undo sequence change in 3D
+        GameMode.mol3DGate?.updateSequence(this.getSequence().split(' '));
+        const diff = this.getStackDiffernce(before, after);
+        diff.forEach((n) => {
+            GameMode.mol3DGate?.viewerEx?.selectEBaseObject(n);
+        });
     }
 
     private moveUndoStackBackward(): void {
@@ -3539,9 +3534,12 @@ export default class PoseEditMode extends GameMode {
         this.updateScore();
         this.transformPosesMarkers();
 
-        // kkk undo sequence change in 3D
-        this.mol3DGate?.updateSequence(this.getSequence().split(' '));
-        this.mol3DGate?.stage?.viewer.selectEBaseObject2(-1);
+        // undo sequence change in 3D
+        GameMode.mol3DGate?.updateSequence(this.getSequence().split(' '));
+        const diff = this.getStackDiffernce(before, after);
+        diff.forEach((n) => {
+            GameMode.mol3DGate?.viewerEx?.selectEBaseObject(n);
+        });
     }
 
     private moveUndoStackToLastStable(): void {

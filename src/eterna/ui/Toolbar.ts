@@ -17,6 +17,7 @@ import AnnotationManager from 'eterna/AnnotationManager';
 import fileDialog from 'file-dialog';
 import Mol3DGate from 'eterna/mode/Mol3DGate';
 import PuzzleEditMode from 'eterna/mode/PuzzleEdit/PuzzleEditMode';
+import GameMode from 'eterna/mode/GameMode';
 import NucleotidePalette from './NucleotidePalette';
 import GameButton from './GameButton';
 import ToggleBar from './ToggleBar';
@@ -97,7 +98,7 @@ export default class Toolbar extends ContainerObject {
 
     public boostersMenu: GameButton;
 
-    public validate3DButton: GameButton; // kkk declare 3d validation button
+    public validate3DButton: GameButton;
 
     public baseMarkerButton: GameButton;
     public librarySelectionButton: GameButton;
@@ -788,7 +789,6 @@ export default class Toolbar extends ContainerObject {
             this.addObject(this.submitButton, this.lowerToolbarLayout);
         }
 
-        // kkk add 3d validation button
         if (this._type === ToolbarType.PUZZLEMAKER) {
             this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
             this.validate3DButton = new ToolbarButton()
@@ -799,12 +799,14 @@ export default class Toolbar extends ContainerObject {
 
             this.addObject(this.validate3DButton, this.lowerToolbarLayout);
             this.regs.add(this.validate3DButton.clicked.connect(() => {
-                fileDialog({accept: ['.cif']}).then((file) => {
+                fileDialog({accept: ['.cif', '.pdb']}).then((file) => {
                     const mode: PuzzleEditMode = this.mode as PuzzleEditMode;
                     const sequence = mode.getSequence().split(' ')[0];
-                    Mol3DGate.checkModelFile(file[0], mode.getSequence().split(' ')[0]).then((resCount:number) => {
-                        if (mode && resCount === sequence.length) mode.add3DSprite(file[0], mode.structure);
-                        else {
+                    Mol3DGate.checkModelFile(file[0]).then((resCount:number) => {
+                        if (mode && resCount === sequence.length) {
+                            if (GameMode._3DView) mode.removeObject(GameMode._3DView);
+                            mode.add3DSprite(file[0], mode.structure);
+                        } else {
                             const PROMPT = 'Your selected file is mismatched with the puzzle.';
                             mode?.showDialog(new ErrorDialog(PROMPT));
                         }
