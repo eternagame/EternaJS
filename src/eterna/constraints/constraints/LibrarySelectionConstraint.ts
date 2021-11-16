@@ -43,10 +43,10 @@ export default class LibrarySelectionConstraint extends Constraint<LibrarySelect
         const requiredNum = this.numNtSelected === -1 ? 'any' : `${this.numNtSelected}`;
 
         if (requiredNum === 'any') {
-            tooltip.append('You must select SOME number of nt for library randomization.', 'altText');
+            tooltip.append('You must select SOME number of bases for library randomization.', 'altText');
         } else {
             tooltip.append('You must select for library randomization exactly', 'altText')
-                .append(` ${requiredNum} nt.`);
+                .append(` ${requiredNum} bases.`);
         }
 
         if (forMissionScreen) {
@@ -60,7 +60,7 @@ export default class LibrarySelectionConstraint extends Constraint<LibrarySelect
         return {
             satisfied: status.satisfied,
             tooltip,
-            clarificationText: `RANDOMIZE ${requiredNum.toUpperCase()} BASES`,
+            clarificationText: 'RANDOMIZE BASES',
             statText,
             showOutline: true,
             drawBG: true,

@@ -65,7 +65,7 @@ export default class MaximumNonLibraryMutationConstraint extends Constraint<MaxN
             icon: MaximumNonLibraryMutationConstraint._icon,
             showOutline: true,
             statText,
-            clarificationText: `AT MOST${this.maxMutations.toString().length > 2 ? ' \n' : ' '}${this.maxMutations} NON-LIBRARY CHANGES`
+            clarificationText: 'NON-RANDOMIZED\nCHANGES'
         };
     }
 
