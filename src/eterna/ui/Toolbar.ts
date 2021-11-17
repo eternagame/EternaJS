@@ -79,6 +79,12 @@ export class ButtonsGroup extends ContainerObject {
         });
     }
 
+    public resizeContainer(): void {
+        const {BUTTON_WIDTH} = ButtonsGroup;
+        this._background.width = this._content.children.length * BUTTON_WIDTH;
+        this._content.layout(true);
+    }
+
     public toggleInteractive(value: boolean): void {
         this._content.children.forEach((button) => {
             button.interactive = value;
@@ -493,7 +499,7 @@ export default class Toolbar extends ContainerObject {
         DisplayUtil.positionRelative(
             this.collapseButton.container, HAlign.CENTER, VAlign.BOTTOM,
             this.backgroundContainer, HAlign.CENTER, VAlign.BOTTOM,
-            7, -10
+            0, -10
         );
 
         this.regs.add(this.expandButton.clicked.connect(() => {
@@ -963,7 +969,9 @@ export default class Toolbar extends ContainerObject {
     }
 
     private resetDragState(): void {
-        if (!this._draggingElement || !this._startPoint) return;
+        Assert.assertIsDefined(this._draggingElement);
+        Assert.assertIsDefined(this._startPoint);
+
         this._draggingElement.position.copyFrom(this._startPoint);
         this._draggingElement.interactive = true;
         this._draggingElement = null;
@@ -998,13 +1006,23 @@ export default class Toolbar extends ContainerObject {
         if (this._startPointContainer.children.length <= 1) return;
 
         this._isDragging = true;
-        this._startPoint = new Point(e.target.position.x, e.target.position.y);
         this._draggingElement = e.target;
-        this._draggingElement.zIndex = 999;
+        this._startPoint = new Point(e.target.position.x, e.target.position.y);
+        this._startPointGlobal = new Point(e.data.global.x, e.data.global.y);
+        const btnIndex = this._startPointContainer.children.findIndex((el) => el === this._draggingElement);
+        if (btnIndex >= 0) {
+            this._draggingElementIndex = btnIndex;
+        }
     }
 
     private _getUnderButtonIndex(buttonSize: number, pos: number): number {
         return Math.floor(pos / buttonSize);
+    }
+
+    private _getPointsDifference(p1: Point, p2: Point): Point {
+        const x = Math.abs(p1.x - p2.x);
+        const y = Math.abs(p1.y - p2.y);
+        return new Point(x, y);
     }
 
     private _updateActiveButtonsGroup(
@@ -1015,15 +1033,10 @@ export default class Toolbar extends ContainerObject {
         anotherButtonGroup: ButtonsGroup,
         lastKnownPoint: Point
     ): void {
+        Assert.assertIsDefined(this._draggingElement);
         if (currentButtonGroup._content.children.length < 3) {
-            const childIndex = startPointContainer.children.findIndex((el) => el === draggingElement);
-            if (startPointContainer === anotherButtonGroup._content) {
-                anotherButtonGroup.removeButton(draggingElement);
-            } else {
-                startPointContainer.children.splice(childIndex, 1);
-            }
+            this.container.removeChild(this._draggingElement);
             currentButtonGroup.addButton(draggingElement);
-            currentButtonGroup.forceLayout();
         } else {
             const minX = currentButtonBounds.x;
             const cursorX = lastKnownPoint.x;
@@ -1032,24 +1045,24 @@ export default class Toolbar extends ContainerObject {
 
             if (startPointContainer === anotherButtonGroup._content) {
                 const replacedButton = currentButtonGroup.removeButtonAt(underButtonIndex);
-                anotherButtonGroup.removeButton(draggingElement);
+                this.container.removeChild(this._draggingElement);
                 anotherButtonGroup.addButton(replacedButton);
                 currentButtonGroup.addButtonAt(draggingElement, underButtonIndex);
             } else {
                 const replacedButton = currentButtonGroup.removeButtonAt(underButtonIndex);
-                const btnIndex = startPointContainer.children.findIndex((el) => el === draggingElement);
-                startPointContainer.children.splice(btnIndex, 1);
+                this.container.removeChild(this._draggingElement);
                 currentButtonGroup.addButtonAt(draggingElement, underButtonIndex);
-                this._scrollContainer.content.addChildAt(replacedButton, btnIndex);
+                this._scrollContainer.content.addChildAt(replacedButton, this._draggingElementIndex);
             }
-            currentButtonGroup.forceLayout();
-            anotherButtonGroup.forceLayout();
         }
+        currentButtonGroup.resizeContainer();
+        anotherButtonGroup.resizeContainer();
     }
 
     private onDragEnd(e: InteractionEvent): void {
         e.stopPropagation();
         this._isDragging = false;
+        this._canDrag = false;
         if (!this._draggingElement || !this._isExpanded || !this._startPoint || !this._startPointContainer) return;
         if (
             this._startPoint?.x === e.data.global.x
@@ -1095,16 +1108,17 @@ export default class Toolbar extends ContainerObject {
             && !rightButtonsBounds.contains(e.data.global.x, e.data.global.y)
             && !availableButtonsBounds.contains(e.data.global.x, e.data.global.y)
         ) {
+            this.container.removeChild(this._draggingElement);
+            this._startPointContainer.addChild(this._draggingElement);
             this._toggleButtonsInteractive(true);
-            this._draggingElement.position.copyFrom(this._startPoint);
-            this._draggingElement.interactive = true;
-            this._draggingElement = null;
-            this._startPoint = null;
+            this.resetDragState();
             return;
         }
 
         if (leftButtonsBounds.contains(e.data.global.x, e.data.global.y)) {
             if (this.leftButtonsGroup._content === this._startPointContainer) {
+                this.container.removeChild(this._draggingElement);
+                this.leftButtonsGroup.addButtonAt(this._draggingElement, this._draggingElementIndex);
                 this.resetDragState();
                 this.updateLayout();
                 this._toggleButtonsInteractive(true);
@@ -1121,6 +1135,8 @@ export default class Toolbar extends ContainerObject {
             this._toggleButtonsInteractive(true);
         } else if (rightButtonsBounds.contains(e.data.global.x, e.data.global.y)) {
             if (this.rightButtonsGroup._content === this._startPointContainer) {
+                this.container.removeChild(this._draggingElement);
+                this.rightButtonsGroup.addButtonAt(this._draggingElement, this._draggingElementIndex);
                 this.resetDragState();
                 this.updateLayout();
                 this._toggleButtonsInteractive(true);
@@ -1137,19 +1153,22 @@ export default class Toolbar extends ContainerObject {
             this._toggleButtonsInteractive(true);
         } else if (availableButtonsBounds.contains(e.data.global.x, e.data.global.y)) {
             if (this._startPointContainer === this._scrollContainer.content) {
+                this.container.removeChild(this._draggingElement);
+                this._scrollContainer.content.addChild(this._draggingElement);
                 this.resetDragState();
                 this.updateLayout();
                 this._toggleButtonsInteractive(true);
                 return;
             }
-            if (this._startPointContainer === this.leftButtonsGroup._content) {
-                this.leftButtonsGroup.removeButton(this._draggingElement);
-            }
-            if (this._startPointContainer === this.rightButtonsGroup._content) {
-                this.rightButtonsGroup.removeButton(this._draggingElement);
-            }
+            this.container.removeChild(this._draggingElement);
             this._scrollContainer.content.addChild(this._draggingElement);
             this._updateAvailableButtonsContainer();
+            if (this._startPointContainer === this.leftButtonsGroup._content) {
+                this.leftButtonsGroup.resizeContainer();
+            }
+            if (this._startPointContainer === this.rightButtonsGroup._content) {
+                this.rightButtonsGroup.resizeContainer();
+            }
             this.updateLayout();
         }
 
@@ -1165,12 +1184,26 @@ export default class Toolbar extends ContainerObject {
     private onDragMove(e: InteractionEvent): void {
         e.stopPropagation();
         if (!this._draggingElement || !this._isExpanded) return;
+
+        Assert.assertIsDefined(this._startPointContainer);
+        Assert.assertIsDefined(this._startPointGlobal);
+
         if (!this._isDisabled) {
             this._toggleButtonsInteractive(false);
             this._isDisabled = true;
         }
+
+        const minPointDiff = 5;
+        if (!this._canDrag) {
+            const diff = this._getPointsDifference(e.data.global, this._startPointGlobal);
+            if (diff.x < minPointDiff && diff.y < minPointDiff) return;
+
+            this._startPointContainer.removeChild(this._draggingElement);
+            this.container.addChild(this._draggingElement);
+            this._canDrag = true;
+        }
         this._draggingElement.interactive = false;
-        if (this._isDragging) {
+        if (this._isDragging && this._canDrag) {
             const pos = e.data.getLocalPosition(this._draggingElement.parent);
             const buttonBounds = this._draggingElement.getLocalBounds();
             this._draggingElement.position.set(
@@ -1214,7 +1247,7 @@ export default class Toolbar extends ContainerObject {
         DisplayUtil.positionRelative(
             this.collapseButton.container, HAlign.CENTER, VAlign.BOTTOM,
             this.backgroundContainer, HAlign.CENTER, VAlign.BOTTOM,
-            7, -10
+            0, -10
         );
         this.removeNamedObjects('test');
         this.addNamedObject(
@@ -1320,20 +1353,19 @@ export default class Toolbar extends ContainerObject {
 
         DisplayUtil.positionRelative(
             this._content, HAlign.CENTER, VAlign.BOTTOM,
-            this._invisibleBackground, HAlign.CENTER, VAlign.BOTTOM,
-            -25, 0
-        );
-
-        DisplayUtil.positionRelative(
-            this.lowerToolbarContainer, HAlign.CENTER, VAlign.TOP,
-            this.backgroundContainer, HAlign.CENTER, VAlign.TOP,
-            0, 20
+            this._invisibleBackground, HAlign.CENTER, VAlign.BOTTOM
         );
 
         DisplayUtil.positionRelative(
             this.collapseButton.container, HAlign.CENTER, VAlign.BOTTOM,
             this.backgroundContainer, HAlign.CENTER, VAlign.BOTTOM,
-            7, -10
+            0, -10
+        );
+
+        DisplayUtil.positionRelative(
+            this.expandButton.container, HAlign.CENTER, VAlign.BOTTOM,
+            this._expandButtonContainer, HAlign.CENTER, VAlign.BOTTOM,
+            0, -10
         );
     }
 
@@ -1509,14 +1541,17 @@ export default class Toolbar extends ContainerObject {
 
     private _isExpanded: boolean;
     private _isDragging: boolean;
+    private _canDrag: boolean;
     private _isDisabled: boolean;
 
     private _scrollStep: number;
     private _scrollOffset: number;
 
     private _draggingElement: DisplayObject | null;
+    private _draggingElementIndex: number = 0;
 
     private _startPoint: Point | null;
+    private _startPointGlobal: Point | null;
     private _startPointContainer: Container | null;
 
     private _scrollNextButton: GameButton;
