@@ -23,6 +23,7 @@ import Booster from 'eterna/mode/PoseEdit/Booster';
 import GameMode from 'eterna/mode/GameMode';
 import Utility from 'eterna/util/Utility';
 import Folder from 'eterna/folding/Folder';
+import {Oligo, OligoMode} from 'eterna/rnatypes/Oligo';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 import AnnotationManager, {AnnotationData, AnnotationRange} from 'eterna/AnnotationManager';
@@ -69,10 +70,6 @@ export type PoseMouseDownCallback = (e: InteractionEvent, closestDist: number, c
 export default class Pose2D extends ContainerObject implements Updatable {
     public static readonly COLOR_CURSOR: number = 0xFFC0CB;
     public static readonly ZOOM_SPACINGS: number[] = [45, 30, 20, 14, 7];
-
-    public static readonly OLIGO_MODE_DIMER: number = 1;
-    public static readonly OLIGO_MODE_EXT3P: number = 2;
-    public static readonly OLIGO_MODE_EXT5P: number = 3;
 
     constructor(poseField: PoseField, editable: boolean, annotationManager: AnnotationManager) {
         super();
@@ -432,7 +429,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         const offset: number = (
             this._oligo != null
-            && this._oligoMode === Pose2D.OLIGO_MODE_EXT5P
+            && this._oligoMode === OligoMode.EXT5P
         ) ? this._oligo.length : 0;
         let numMut = 0;
         const muts: Mut[] = [];
@@ -469,7 +466,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         Assert.assertIsDefined(this._mutatedSequence);
         const n: number = Math.min(this._mutatedSequence.length, seqArr.length);
         const offset: number = (
-            this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_EXT5P
+            this._oligo != null && this._oligoMode === OligoMode.EXT5P
         ) ? this._oligo.length : 0;
 
         for (let ii = 0; ii < n; ii++) {
@@ -491,7 +488,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         const n: number = Math.min(sequence.length, this._sequence.length);
         let needUpdate = false;
         const offset: number = (
-            this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_EXT5P
+            this._oligo != null && this._oligoMode === OligoMode.EXT5P
         ) ? this._oligo.length : 0;
 
         for (let ii = 0; ii < n; ii++) {
@@ -1302,7 +1299,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public isLocked(seqnum: number): boolean {
-        if (this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_EXT5P) {
+        if (this._oligo != null && this._oligoMode === OligoMode.EXT5P) {
             seqnum -= this._oligo.length;
         }
 
@@ -2292,7 +2289,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public setOligo(
         oligo: number[] | undefined,
-        mode: number | string | null = Pose2D.OLIGO_MODE_DIMER,
+        mode: number | string | null = OligoMode.DIMER,
         oName: string | null = null
     ): void {
         if (oligo == null) {
@@ -2336,26 +2333,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public get fullSequence(): Sequence {
-        if (this._oligo == null && this._oligos === undefined) {
-            return this._sequence.slice(0);
-        }
-        let seq: RNABase[] = this._sequence.baseArray.slice();
-        if (this._oligos === undefined || this._oligosOrder === undefined) {
-            Assert.assertIsDefined(this._oligo);
-            if (this._oligoMode === Pose2D.OLIGO_MODE_EXT5P) {
-                seq = this._oligo.concat(seq);
-            } else {
-                if (this._oligoMode === Pose2D.OLIGO_MODE_DIMER) seq.push(RNABase.CUT);
-                seq = seq.concat(this._oligo);
-            }
-            return new Sequence(seq);
-        }
-        // _oligos != null, we have a multistrand target
-        for (let ii = 0; ii < this._oligos.length; ii++) {
-            seq.push(RNABase.CUT);
-            seq = seq.concat(this._oligos[this._oligosOrder[ii]].sequence);
-        }
-        return new Sequence(seq);
+        return EPars.constructFullSequence(
+            this._sequence,
+            this._oligo ? this._oligo : undefined,
+            this._oligos,
+            this._oligosOrder,
+            this._oligoMode
+        );
     }
 
     public get fullSequenceLength(): number {
@@ -2365,7 +2349,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
         if (this._oligos == null && this._oligo !== null) {
             len += this._oligo.length;
-            if (this._oligoMode === Pose2D.OLIGO_MODE_DIMER) len++;
+            if (this._oligoMode === OligoMode.DIMER) len++;
             return len;
         }
         Assert.assertIsDefined(this._oligos);
@@ -3903,7 +3887,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             let scoreScore = '';
             let factor = 0;
             if ((this._molecularBindingBases != null)
-                || (this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_DIMER)
+                || (this._oligo != null && this._oligoMode === OligoMode.DIMER)
                 || (this._oligos != null)) {
                 const labelElems: string[] = [];
                 const scoreElems: string[] = [];
@@ -3920,7 +3904,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                         scoreElems.push(EnergyScoreDisplay.grey(' (0 kcal)'));
                     }
                 }
-                if (this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_DIMER) {
+                if (this._oligo != null && this._oligoMode === OligoMode.DIMER) {
                     factor++;
                     const malus: number = this._duplexCost + Math.round(this._oligoMalus);
                     if (this._oligoPaired) {
@@ -4134,7 +4118,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     // Oligos
     private _oligo: number[] | null = null;
-    private _oligoMode: number = Pose2D.OLIGO_MODE_DIMER;
+    private _oligoMode: number = OligoMode.DIMER;
     private _oligoName: string | null = null;
     private _duplexCost: number = 4.1; // total for all strands
     private _oligoMalus: number = 0; // concentration related penalty
@@ -4302,12 +4286,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _allNewHighlights: RNAHighlightState[] = [];
 
     private static readonly P: Point = new Point();
-}
-
-export interface Oligo {
-    malus: number;
-    name?: string;
-    sequence: number[];
 }
 
 export class RNAHighlightState {

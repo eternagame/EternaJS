@@ -4,7 +4,6 @@ import FolderManager from 'eterna/folding/FolderManager';
 import Vienna from 'eterna/folding/Vienna';
 import Folder from 'eterna/folding/Folder';
 import EternaURL from 'eterna/net/EternaURL';
-import Pose2D from 'eterna/pose2D/Pose2D';
 import Constraint, {BaseConstraintStatus} from 'eterna/constraints/Constraint';
 import ShapeConstraint from 'eterna/constraints/constraints/ShapeConstraint';
 import {TargetConditions, OligoDef} from 'eterna/UndoBlock';
@@ -12,6 +11,7 @@ import {BoosterData} from 'eterna/mode/PoseEdit/Booster';
 import Utility from 'eterna/util/Utility';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
+import {OligoMode} from 'eterna/rnatypes/Oligo';
 
 export interface BoostersData {
     mission?: Mission;
@@ -263,7 +263,7 @@ export default class Puzzle {
                 Puzzle.isOligoType(tcType)
                 && Object.hasOwnProperty.call(this._targetConditions[ii], 'fold_mode') === false
             ) {
-                this._targetConditions[ii]['fold_mode'] = Pose2D.OLIGO_MODE_DIMER.toString();
+                this._targetConditions[ii]['fold_mode'] = OligoMode.DIMER.toString();
             }
 
             if (Puzzle.isOligoType(tcType) && this._targetConditions[ii]['oligo_sequence'] != null) {

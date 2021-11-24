@@ -24,6 +24,8 @@ import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
 import NucleotideFinder from 'eterna/ui/NucleotideFinder';
 import ExplosionFactorDialog from 'eterna/ui/ExplosionFactorDialog';
 import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
+import Sequence from 'eterna/rnatypes/Sequence';
+import EPars from 'eterna/EPars';
 import CopyTextDialogMode from './CopyTextDialogMode';
 
 export default abstract class GameMode extends AppMode {
@@ -188,12 +190,15 @@ export default abstract class GameMode extends AppMode {
                     const pseudoknots: boolean = this._targetConditions != null
                         && this._targetConditions[0] != null
                         && this._targetConditions[0]['type'] === 'pseudoknot';
-                    const score = (pairs: SecStruct) => {
+                    const score = (sequence: Sequence, pairs: SecStruct) => {
                         Assert.assertIsDefined(this._folder);
                         return this._folder.scoreStructures(
-                            newField.pose.fullSequence, pairs, pseudoknots
+                            sequence, pairs, pseudoknots
                         );
                     };
+
+                    const ublk = this.getCurrentUndoBlock(poseidx);
+                    Assert.assertIsDefined(ublk, 'getEnergyDelta is being called where UndoBlocks are unavailable!');
 
                     const targetPairs: SecStruct | undefined = this._targetPairs
                         ? this._targetPairs[poseidx] : this.getCurrentTargetPairs(poseidx);
@@ -201,11 +206,23 @@ export default abstract class GameMode extends AppMode {
                         targetPairs,
                         "This poses's targetPairs are undefined; energy delta cannot be computed!"
                     );
-                    const ublk = this.getCurrentUndoBlock(poseidx);
-                    Assert.assertIsDefined(ublk, 'getEnergyDelta is being called where UndoBlocks are unavailable!');
                     const nativePairs: SecStruct = ublk.getPairs(37, pseudoknots);
-                    return score(targetPairs.getSatisfiedPairs(newField.pose.fullSequence))
-                        - score(nativePairs);
+                    const targetSeq = EPars.constructFullSequence(
+                        newField.pose.sequence,
+                        ublk.targetOligo,
+                        ublk.targetOligos,
+                        ublk.targetOligoOrder,
+                        ublk.oligoMode
+                    );
+                    const nativeSeq = EPars.constructFullSequence(
+                        newField.pose.sequence,
+                        ublk.targetOligo,
+                        ublk.targetOligos,
+                        ublk.oligoOrder,
+                        ublk.oligoMode
+                    );
+
+                    return score(targetSeq, targetPairs.getSatisfiedPairs(targetSeq)) - score(nativeSeq, nativePairs);
                 }
                 return -1;
             };
