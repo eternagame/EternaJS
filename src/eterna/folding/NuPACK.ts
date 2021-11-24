@@ -3,7 +3,7 @@ import {RNABase} from 'eterna/EPars';
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import PoseOp from 'eterna/pose2D/PoseOp';
 import int from 'eterna/util/int';
-import {Oligo} from 'eterna/pose2D/Pose2D';
+import {Oligo} from 'eterna/rnatypes/Oligo';
 import DotPlot from 'eterna/rnatypes/DotPlot';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';

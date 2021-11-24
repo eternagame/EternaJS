@@ -2,13 +2,13 @@ import {Assert} from 'flashbang';
 import {RNABase} from 'eterna/EPars';
 import Plot, {PlotType} from 'eterna/Plot';
 import {AnnotationData} from 'eterna/AnnotationManager';
-import Pose2D, {Oligo} from './pose2D/Pose2D';
 import Folder from './folding/Folder';
 import Utility from './util/Utility';
 import Vienna from './folding/Vienna';
 import Vienna2 from './folding/Vienna2';
 import FolderManager from './folding/FolderManager';
 import DotPlot from './rnatypes/DotPlot';
+import {Oligo, OligoMode} from './rnatypes/Oligo';
 import SecStruct from './rnatypes/SecStruct';
 import Sequence from './rnatypes/Sequence';
 import {TargetType} from './puzzle/Puzzle';
@@ -309,7 +309,7 @@ export default class UndoBlock {
     public get oligoMode(): number {
         const tc: TargetConditions | undefined = this.targetConditions;
         if (tc === undefined) return 0;
-        return tc['fold_mode'] === undefined ? Pose2D.OLIGO_MODE_DIMER : Number(tc['fold_mode']);
+        return tc['fold_mode'] === undefined ? OligoMode.DIMER : Number(tc['fold_mode']);
     }
 
     public get oligoName(): string | undefined {
@@ -456,8 +456,8 @@ export default class UndoBlock {
 
         let fullSeq: RNABase[] = seq.baseArray.slice();
         if (this._targetOligo) {
-            if (this.oligoMode === Pose2D.OLIGO_MODE_DIMER) fullSeq.push(RNABase.CUT);
-            if (this.oligoMode === Pose2D.OLIGO_MODE_EXT5P) {
+            if (this.oligoMode === OligoMode.DIMER) fullSeq.push(RNABase.CUT);
+            if (this.oligoMode === OligoMode.EXT5P) {
                 fullSeq = this._targetOligo.concat(fullSeq);
             } else {
                 fullSeq = fullSeq.concat(this._targetOligo);
@@ -709,7 +709,7 @@ export default class UndoBlock {
     }
 
     /**
-     * Return map of current base indices to adjusted base indices when oligos are rearranged
+     * Return map of adjusted base indices to original base indices when oligos are rearranged
      * according to otherorder
      * @param otherOrder An array of indexes, where the index refers to the new index
      * the oligo at the given position in the old array should be placed at.
