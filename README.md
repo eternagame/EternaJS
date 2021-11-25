@@ -14,10 +14,10 @@ The project uses NPM for dependency management, webpack for packaging, and babel
     - https://nodejs.org/en/download/
 * `$ npm install` in root directory
 * Install and build the energy models via the instructions in [lib/README.md](lib/README.md). These are not included due to licensing restrictions.
-* if you want to modify any values in `.env`:
-    - Create a file named `.env.local` and add any values from `.env` that you want to override
-    - You may want to use your actual username and password for `DEBUG_PLAYER_ID` and `DEBUG_PLAYER_PASSWORD`, instead of using EternaJS unauthenticated (ie, as a guest user).
-    - If you will be performing actions which cause data to be uploaded to our servers that could create inconsistencies, spam, or other potential problems, please leave `APP_SERVER_URL` as `http://eternadev.org`. If your changes are purely cosmetic, you may benefit from using `https://eternagame.org` instead.
+* If you want to modify any values in `.env`:
+    - Create a file named `.env.local` and add any values from `.env` that you want to override.
+    - You may want to use your actual username and password for `DEBUG_PLAYER_ID` and `DEBUG_PLAYER_PASSWORD`, instead of using EternaJS unauthenticated (i.e., as a guest user).
+    - If you will be performing actions which cause data to be uploaded to our servers that could create inconsistencies, spam, or other potential problems, please leave `APP_SERVER_URL` as `https://eternadev.org`. If your changes are purely cosmetic, you may benefit from using `https://eternagame.org` instead.
     - If you are using eternadev, please note that this is using a clone of our production database. We wipe and re-clone it occasionally, but some times the time span we do this in may be longer or shorter. Depending on when we last cloned the DB and when you made your account, YOU MAY NOT YET HAVE AN ACCOUNT. Feel free to create one at http://eternadev.org. Additionally, make sure to back up anything you have on eternadev that you want to keep around.
 
 ## Running tests
