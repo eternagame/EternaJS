@@ -25,7 +25,7 @@ export default class LibrarySelectionConstraint extends Constraint<LibrarySelect
         const numNtSelected = (constraintContext.undoBlocks[0].librarySelections ?? []).length;
 
         return {
-            satisfied: numNtSelected === this.numNtSelected || (this.numNtSelected === -1 && numNtSelected > 0),
+            satisfied: numNtSelected <== this.numNtSelected || (this.numNtSelected === -1 && numNtSelected > 0),
             currentLibrarySelection: numNtSelected
         };
     }
@@ -45,7 +45,7 @@ export default class LibrarySelectionConstraint extends Constraint<LibrarySelect
         if (requiredNum === 'any') {
             tooltip.append('You must select SOME number of bases for library randomization.', 'altText');
         } else {
-            tooltip.append('You must select for library randomization exactly', 'altText')
+            tooltip.append('You must select for library randomization at most', 'altText')
                 .append(` ${requiredNum} bases.`);
         }
 
