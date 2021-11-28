@@ -1926,7 +1926,8 @@ export default class PoseEditMode extends GameMode {
                 + 'synthesized properly';
 
             if (!this.checkConstraints()) {
-                if (this._puzzle.isSoftConstraint || Eterna.DEV_MODE) {
+                // If we pass constraints when taking into account soft constraints, just prompt
+                if (this.checkConstraints(this._puzzle.isSoftConstraint || Eterna.DEV_MODE)) {
                     this.showConfirmDialog(NOT_SATISFIED_PROMPT).closed
                         .then((confirmed) => {
                             if (confirmed) {
@@ -2604,12 +2605,12 @@ export default class PoseEditMode extends GameMode {
         this.ropPresets();
     }
 
-    private checkConstraints(): boolean {
+    private checkConstraints(soft: boolean = false): boolean {
         return this._constraintBar.updateConstraints({
             undoBlocks: this._seqStacks[this._stackLevel],
             targetConditions: this._targetConditions,
             puzzle: this._puzzle
-        });
+        }, soft);
     }
 
     private updateScore(): void {

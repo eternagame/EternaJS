@@ -15,6 +15,7 @@ interface MaxNonLibraryMutationConstraintStatus extends BaseConstraintStatus {
 
 export default class MaximumNonLibraryMutationConstraint extends Constraint<MaxNonLibraryMutationConstraintStatus> {
     public static readonly NAME = 'NONLIBRARYMUTATION';
+    public readonly hard = true;
     public readonly maxMutations: number;
 
     constructor(maxMutations: number) {
