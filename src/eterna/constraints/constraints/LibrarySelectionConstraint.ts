@@ -14,6 +14,7 @@ interface LibrarySelectionConstraintStatus extends BaseConstraintStatus {
 export default class LibrarySelectionConstraint extends Constraint<LibrarySelectionConstraintStatus> {
     // when numNtSelected is set to -1, it means any nonzero number will satisfy
     public readonly numNtSelected: number;
+    public readonly hard = true;
 
     constructor(numNtSelected: number) {
         super();
@@ -25,7 +26,7 @@ export default class LibrarySelectionConstraint extends Constraint<LibrarySelect
         const numNtSelected = (constraintContext.undoBlocks[0].librarySelections ?? []).length;
 
         return {
-            satisfied: numNtSelected <== this.numNtSelected || (this.numNtSelected === -1 && numNtSelected > 0),
+            satisfied: numNtSelected <= this.numNtSelected || (this.numNtSelected === -1 && numNtSelected > 0),
             currentLibrarySelection: numNtSelected
         };
     }
