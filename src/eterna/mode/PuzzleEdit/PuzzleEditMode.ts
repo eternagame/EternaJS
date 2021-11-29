@@ -75,7 +75,7 @@ type SubmitPuzzleParams = {
     lock: string;
     begin_sequence: string;
     objectives: string;
-    three_structure_file: File;
+    'files[3d_structure]': File;
 };
 
 export default class PuzzleEditMode extends GameMode {
@@ -934,14 +934,14 @@ export default class PuzzleEditMode extends GameMode {
             // eslint-disable-next-line camelcase
             begin_sequence: beginningSequence,
             objectives: JSON.stringify(objectives),
-            three_structure_file: new File(['testing'], 'structure_upload_test.cif')
+            'files[3d_structure]': new File(['testing'], 'structure_upload_test.cif')
         };
 
         if (Mol3DGate.scope?._3DFilePath instanceof File) {
             const blob = Mol3DGate.scope._3DFilePath.slice();
-            postParams.three_structure_file = new File([blob], 'structure_upload_test.cif');
+            postParams['files[3d_structure]'] = new File([blob], 'structure_upload_test.cif');
         } else {
-            postParams.three_structure_file = new File([''], 'structure_upload_test.cif');
+            postParams['files[3d_structure]'] = new File([''], 'structure_upload_test.cif');
         }
 
         const submitText = this.showDialog(new AsyncProcessDialog('Submitting...')).ref;
