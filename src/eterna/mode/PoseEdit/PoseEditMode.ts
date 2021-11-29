@@ -2252,7 +2252,7 @@ export default class PoseEditMode extends GameMode {
                     const oldURL = window.location.toString();
                     const newURL = Eterna.DEV_MODE
                         ? oldURL.replace(/puzzle=\d+?$/, `puzzle=${nextPuzzle.nodeID}`)
-                        : oldURL.replace(/\d+\/?$/, nextPuzzle.nodeID.toString());
+                        : oldURL.replace(/\d+(\/?)$/, `${nextPuzzle.nodeID.toString()}$1`);
                     // eslint-disable-next-line no-restricted-globals
                     if (!Eterna.MOBILE_APP) history.pushState(null, '', newURL);
                 } catch (err) {
