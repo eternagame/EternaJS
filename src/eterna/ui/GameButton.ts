@@ -11,9 +11,19 @@ import Fonts from 'eterna/util/Fonts';
 import Sounds from 'eterna/resources/Sounds';
 import Tooltips from './Tooltips';
 
+export enum ButtonCategory {
+    SOLVE = 'SOLVE',
+    CREATE = 'CREATE',
+    VIEW = 'VIEW',
+    ANNOTATE = 'ANNOTATE',
+    IMPORT_EXPORT = 'IMPORT/EXPORT',
+    CUSTOM_LAYOUT = 'CUSTOM LAYOUT',
+}
+
 export default class GameButton extends Button implements KeyboardListener {
     public readonly toggled: Value<boolean> = new Value<boolean>(false);
     public static readonly DEFAULT_DOWN_SOUND: string = Sounds.SoundButtonClick;
+    public category: ButtonCategory | null = null;
 
     constructor() {
         super();
@@ -61,6 +71,11 @@ export default class GameButton extends Button implements KeyboardListener {
 
     public selected(display: DisplayObject | Texture | string): GameButton {
         this._selectedState = GameButton.getDisplayObject(display);
+        return this;
+    }
+
+    public setCategory(category: ButtonCategory): GameButton {
+        this.category = category;
         return this;
     }
 
