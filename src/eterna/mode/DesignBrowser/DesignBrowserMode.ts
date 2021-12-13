@@ -527,7 +527,7 @@ export default class DesignBrowserMode extends GameMode {
                 // Update corresponding icon in Vote column
                 const voteColumn = this._dataCols.find((c) => c.category === DesignCategory.VOTE);
                 if (voteColumn) {
-                    const solutionIndex = this._allSolutions.indexOf(solution);
+                    const solutionIndex = this._filteredSolutions.indexOf(solution);
                     if (solutionIndex >= 0) {
                         voteColumn.setVoteStatus(solutionIndex, newVoteStatus);
                     }
@@ -832,7 +832,7 @@ export default class DesignBrowserMode extends GameMode {
                             sortable: false
                         });
                         column.voteChanged.connect((solutionIndex) => {
-                            const solution = this._allSolutions[solutionIndex];
+                            const solution = this._filteredSolutions[solutionIndex];
                             Assert.assertIsDefined(solution);
                             if (solution) {
                                 this.vote(solution);
