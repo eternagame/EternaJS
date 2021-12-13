@@ -1,10 +1,10 @@
 import * as log from 'loglevel';
-import {Container, Point} from 'pixi.js';
+import {Container, Point, Text} from 'pixi.js';
 import Eterna from 'eterna/Eterna';
 import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import {
-    AppMode, SceneObject, Flashbang, GameObjectRef, Assert
+    AppMode, SceneObject, Flashbang, GameObjectRef, Assert, AlphaTask, RepeatingTask, SerialTask
 } from 'flashbang';
 import AchievementManager from 'eterna/achievements/AchievementManager';
 import Tooltips from 'eterna/ui/Tooltips';
@@ -26,6 +26,7 @@ import ExplosionFactorDialog from 'eterna/ui/ExplosionFactorDialog';
 import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
 import Sequence from 'eterna/rnatypes/Sequence';
 import EPars from 'eterna/EPars';
+import Fonts from 'eterna/util/Fonts';
 import CopyTextDialogMode from './CopyTextDialogMode';
 
 export default abstract class GameMode extends AppMode {
@@ -98,6 +99,15 @@ export default abstract class GameMode extends AppMode {
 
     public closeCurDialog(): void {
         this._dialogRef.destroyObject();
+    }
+
+    protected static createStatusText(text: string): SceneObject<Text> {
+        const statusText = new SceneObject<Text>(Fonts.std(text, 22).color(0xffffff).bold().build());
+        statusText.addObject(new RepeatingTask(() => new SerialTask(
+            new AlphaTask(0, 0.3),
+            new AlphaTask(1, 0.3)
+        )));
+        return statusText;
     }
 
     /**

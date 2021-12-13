@@ -78,6 +78,8 @@ import MissionIntroMode from './MissionIntroMode';
 import MissionClearedPanel from './MissionClearedPanel';
 import ViewSolutionOverlay from '../DesignBrowser/ViewSolutionOverlay';
 import {PuzzleEditPoseData} from '../PuzzleEdit/PuzzleEditMode';
+import {DesignCategory} from '../DesignBrowser/DesignBrowserMode';
+import VoteProcessor from '../DesignBrowser/VoteProcessor';
 
 export interface PoseEditParams {
     isReset?: boolean;
@@ -645,11 +647,6 @@ export default class PoseEditMode extends GameMode {
 
             const annotations = solution.annotations;
             this._annotationManager.setSolutionAnnotations(annotations ?? []);
-
-            // AMW: I'm keeping the function around in case we want to call it
-            // in some other context, but we don't need it anymore.
-            // this.updateSolutionNameText(solution);
-            this._curSolution = solution;
         };
 
         if (this._puzzle.hasTargetType('multistrand')) {
@@ -893,33 +890,19 @@ export default class PoseEditMode extends GameMode {
         let initialSequence: Sequence | null = null;
         let librarySelections: number[] = [];
         if (this._params.initSolution != null) {
+            Assert.assertIsDefined(
+                this._params.solutions,
+                'Initial solution provided, but no solution list is available'
+            );
             initialSequence = this._params.initSolution.sequence.slice(0);
             const annotations = this._params.initSolution.annotations;
             if (annotations) {
                 this._annotationManager.setSolutionAnnotations(annotations);
             }
-            this._curSolution = this._params.initSolution;
-            // AMW: I'm keeping the function around in case we want to call it
-            // in some other context, but we don't need it anymore.
-            // this.updateSolutionNameText(this._curSolution);
+
             librarySelections = this._params.initSolution.libraryNT;
-            if (this._solutionView) {
-                this.removeObject(this._solutionView);
-            }
-            this._solutionView = new ViewSolutionOverlay({
-                solution: this._params.initSolution,
-                puzzle: this._puzzle,
-                voteDisabled: false,
-                onPrevious: () => this.showNextSolution(-1),
-                onNext: () => this.showNextSolution(1),
-                parentMode: (() => this)()
-            });
-            this.addObject(this._solutionView, this.dialogLayer);
-            this._solutionView.seeResultClicked.connect(() => {
-                this.switchToFeedbackViewForSolution(this._curSolution);
-            });
-            this._solutionView.sortClicked.connect(() => this.switchToBrowser(this._curSolution, true));
-            this._solutionView.returnClicked.connect(() => this.switchToBrowser(this._curSolution));
+            this._curSolutionIdx = this._params.solutions.indexOf(this._params.initSolution);
+            this.showSolutionDetailsDialog(this._params.initSolution, true);
         } else if (this._params.initSequence != null) {
             initialSequence = Sequence.fromSequenceString(this._params.initSequence);
         }
@@ -1062,6 +1045,70 @@ export default class PoseEditMode extends GameMode {
         } finally {
             this.popUILock();
         }
+    }
+
+    private vote(solution: Solution): void {
+        this.pushUILock();
+
+        const statusText = PoseEditMode.createStatusText('Submitting...');
+        this.addObject(statusText, this.notifLayer);
+        DisplayUtil.positionRelativeToStage(statusText.display,
+            HAlign.CENTER, VAlign.CENTER,
+            HAlign.CENTER, VAlign.CENTER);
+
+        const cleanup = () => {
+            this.popUILock();
+            statusText.destroySelf();
+            this.closeCurDialog();
+        };
+
+        // string | number => definitely a number
+        const myVotes = Number(solution.getProperty(DesignCategory.MY_VOTES));
+        Eterna.client.toggleSolutionVote(solution.nodeID, this._puzzle.nodeID, myVotes)
+            .then((data) => {
+                VoteProcessor.processDataGlobal(data['votes']);
+                const cheevs: {[name: string]: AchievementData} = data['new_achievements'];
+                if (cheevs != null) {
+                    this._achievements.awardAchievements(cheevs).then(() => { /* ignore result */ });
+                }
+                cleanup();
+
+                const newVoteStatus = (1 - myVotes) > 0;
+
+                // Toggle vote button
+                if (this._solutionView) {
+                    this._solutionView.setVoteStatus(newVoteStatus);
+                }
+            })
+            .catch((err) => {
+                this.showNotification(`Vote failed: ${err}`);
+                cleanup();
+            });
+    }
+
+    private unpublish(solution: Solution): void {
+        this.pushUILock();
+
+        const statusText = PoseEditMode.createStatusText('Deleting...');
+        this.addObject(statusText, this.notifLayer);
+        DisplayUtil.positionRelativeToStage(statusText.display,
+            HAlign.CENTER, VAlign.CENTER,
+            HAlign.CENTER, VAlign.CENTER);
+
+        const cleanup = () => {
+            this.popUILock();
+            statusText.destroySelf();
+            this.closeCurDialog();
+        };
+
+        Eterna.client.deleteSolution(solution.nodeID)
+            .then(() => SolutionManager.instance.getSolutionsForPuzzle(this._puzzle.nodeID))
+            .then(() => this.reloadCurrentSolution())
+            .then(cleanup)
+            .catch((err) => {
+                this.showNotification(`Delete failed: ${err}`);
+                cleanup();
+            });
     }
 
     private buildScriptInterface(): void {
@@ -1391,39 +1438,63 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
+    private reloadCurrentSolution(): void {
+        if (this._params.solutions == null || this._params.solutions.length === 0) {
+            // If we've deleted our current solution and there's none to replace it,
+            // close the dialog
+            if (this._solutionView) this.removeObject(this._solutionView);
+            return;
+        }
+
+        // get sol at current index again, wrapped around.
+        const newCurrentIdx = this._curSolutionIdx >= this._params.solutions.length
+            ? 0
+            : this._curSolutionIdx;
+
+        const newSolution = this._params.solutions[newCurrentIdx];
+        this.showSolution(newSolution);
+        this.showSolutionDetailsDialog(newSolution);
+    }
+
     private showNextSolution(indexOffset: number): void {
         if (this._params.solutions == null || this._params.solutions.length === 0) {
             return;
         }
 
-        const curSolutionIdx = this._params.solutions.indexOf(this._curSolution);
-        let nextSolutionIdx = (curSolutionIdx >= 0 ? curSolutionIdx + indexOffset : 0) % this._params.solutions.length;
+        let nextSolutionIdx = (
+            this._curSolutionIdx >= 0 ? this._curSolutionIdx + indexOffset : 0
+        ) % this._params.solutions.length;
         if (nextSolutionIdx < 0) {
             nextSolutionIdx = this._params.solutions.length + nextSolutionIdx;
         }
 
         const solution = this._params.solutions[nextSolutionIdx];
-        Assert.notNull(solution);
         this.showSolution(solution);
-        if (this._solutionView) {
-            const visible = this._solutionView.container.visible;
-            this.removeObject(this._solutionView);
-            this._solutionView = new ViewSolutionOverlay({
-                solution,
-                puzzle: this._puzzle,
-                voteDisabled: false,
-                onPrevious: () => this.showNextSolution(-1),
-                onNext: () => this.showNextSolution(1),
-                parentMode: (() => this)()
-            });
-            this._solutionView.container.visible = visible;
-            this.addObject(this._solutionView, this.dialogLayer);
-            this._solutionView.seeResultClicked.connect(() => {
-                this.switchToFeedbackViewForSolution(this._curSolution);
-            });
-            this._solutionView.sortClicked.connect(() => this.switchToBrowser(this._curSolution, true));
-            this._solutionView.returnClicked.connect(() => this.switchToBrowser(this._curSolution));
-        }
+        this.showSolutionDetailsDialog(solution);
+        this._curSolutionIdx = nextSolutionIdx;
+    }
+
+    public showSolutionDetailsDialog(solution: Solution, forceShow: boolean = false): void {
+        const visible = this._solutionView?.container.visible ?? false;
+        if (this._solutionView) this.removeObject(this._solutionView);
+        this._solutionView = new ViewSolutionOverlay({
+            solution,
+            puzzle: this._puzzle,
+            voteDisabled: false,
+            onPrevious: () => this.showNextSolution(-1),
+            onNext: () => this.showNextSolution(1),
+            parentMode: (() => this)()
+        });
+        this._solutionView.container.visible = visible || forceShow;
+        this.addObject(this._solutionView, this.dialogLayer);
+
+        this._solutionView.seeResultClicked.connect(() => {
+            this.switchToFeedbackViewForSolution(solution);
+        });
+        this._solutionView.sortClicked.connect(() => this.switchToBrowser(solution, true));
+        this._solutionView.returnClicked.connect(() => this.switchToBrowser(solution));
+        this._solutionView.voteClicked.connect(() => this.vote(solution));
+        this._solutionView.deleteClicked.connect(() => this.unpublish(solution));
     }
 
     /* override */
@@ -1556,7 +1627,7 @@ export default class PoseEditMode extends GameMode {
     private openDesignBrowserForOurPuzzle(): void {
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
             this.pushUILock();
-            Eterna.app.switchToDesignBrowser(this._puzzle, this._curSolution, false)
+            Eterna.app.switchToDesignBrowser(this._puzzle, this._params.solutions?.[this._curSolutionIdx], false)
                 .then(() => this.popUILock())
                 .catch((e) => {
                     log.error(e);
@@ -3492,7 +3563,7 @@ export default class PoseEditMode extends GameMode {
     private _ropPresets: (() => void)[] = [];
 
     private _isPlaying: boolean = false;
-    private _curSolution: Solution;
+    private _curSolutionIdx: number;
     private _solutionNameText: Text;
 
     // Tutorial Script Extra Functionality
