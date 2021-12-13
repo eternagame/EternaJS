@@ -9,7 +9,7 @@ export default class InputUtil {
         }
     };
 
-    public static scrollAmount(e: MouseWheelEvent, lineHeight: number, pageHeight: number): number {
+    public static scrollAmount(e: WheelEvent, lineHeight: number, pageHeight: number): number {
         switch (e.deltaMode) {
             case WheelEvent.DOM_DELTA_PIXEL:
                 return e.deltaY;

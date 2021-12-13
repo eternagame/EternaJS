@@ -97,7 +97,7 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
         return true;
     }
 
-    public onMouseWheelEvent(_e: MouseWheelEvent): boolean {
+    public onMouseWheelEvent(_e: WheelEvent): boolean {
         // By default, dialogs eat all mousewheel input
         return true;
     }
