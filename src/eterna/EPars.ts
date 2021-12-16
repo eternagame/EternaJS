@@ -424,7 +424,7 @@ export default class EPars {
             return baseSequence.slice(0);
         }
         let seq: RNABase[] = baseSequence.baseArray.slice();
-        if (oligos === undefined || oligosOrder === undefined) {
+        if (oligos === undefined) {
             Assert.assertIsDefined(oligo);
             if (oligoMode === OligoMode.EXT5P) {
                 seq = oligo.concat(seq);
@@ -437,7 +437,10 @@ export default class EPars {
         // _oligos != null, we have a multistrand target
         for (let ii = 0; ii < oligos.length; ii++) {
             seq.push(RNABase.CUT);
-            seq = seq.concat(oligos[oligosOrder[ii]].sequence);
+            // Note: oligosOrder could be undefined - from what I can tell, this happen if there's
+            // only one oligo or if no custom target order has been defined. In this case, it is
+            // assumed that the order should be the order they were originally defined in
+            seq = seq.concat(oligos[oligosOrder?.[ii] ?? ii].sequence);
         }
         return new Sequence(seq);
     }
