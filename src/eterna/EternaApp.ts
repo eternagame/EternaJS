@@ -48,7 +48,7 @@ export enum PuzzleID {
     TheophyllineRibozymeSwitch = 2390140, // aux info
     MicrofluidicChip = 6502997, // level 4/7 - MissionCleared info
     AandBRO = 6892307, // Oligos
-    Tutorial1 = 9218290, // E.Coli Ribisome 55 rRNA, test.cif
+    Tutorial1 = 6502927, // rscript
     Tutorial4 = 6502944,
     Tutorial6 = 6502945,
     Tutorial8 = 6502947,
@@ -58,7 +58,8 @@ export enum PuzzleID {
     TemporalAnomaly = 7796345, // Really big!
     Switch2pt5leftRight = 8984178, // molecule
     JieuxAppetit2 = 8980331, // unbound molecule
-    PTCCustomLayout = 9386237 // customLayout
+    PTCCustomLayout = 9386237, // customLayout
+    Ribo5s3D = 9218290, // E.Coli Ribisome 5s rRNA, test.cif (eternadev)
 }
 
 interface SolutionAndPuzzleID {
