@@ -12,8 +12,10 @@ import {
     MouseActions,
     DivAnnotation,
     Vector3,
-    ModelCheckCallback,
-    Structure
+    Structure,
+    getFileInfo,
+    ParserRegistry,
+    autoLoad
 } from 'ngl';
 import {RNABase} from 'eterna/EPars';
 import SecStruct from 'eterna/rnatypes/SecStruct';
@@ -229,14 +231,17 @@ export default class Mol3DGate {
         else this.viewerEx.requestRender();
     }
 
-    public static checkModelFile(path: string | File | Blob) {
-        let result = 0;
-        function ModelCallback(obj: Structure): void {
-            result = obj.chainStore.residueCount[0];
+    public static async checkModelFile(path: string | File | Blob) {
+        const ext = getFileInfo(path).ext;
+
+        if (ParserRegistry.isTrajectory(ext)) {
+            throw new Error(`loadFile: ext '${ext}' is a trajectory and must be loaded into a structure component`);
         }
-        const callback: ModelCheckCallback = <ModelCheckCallback>ModelCallback;
-        const promise = StageEx.checkModelFile(path, callback);
-        return promise.then(() => result);
+
+        const object = await autoLoad(path);
+
+        if (object instanceof Structure) return object.chainStore.residueCount[0];
+        else return 0;
     }
 
     public dispose() {
