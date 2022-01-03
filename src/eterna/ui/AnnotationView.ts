@@ -11,7 +11,6 @@ import AnnotationManager, {
     AnnotationCategory,
     AnnotationHierarchyType
 } from 'eterna/AnnotationManager';
-import Eterna from 'eterna/Eterna';
 import {FontWeight} from '../../flashbang/util/TextBuilder';
 import TextBalloon from './TextBalloon';
 import GameButton from './GameButton';
@@ -29,7 +28,6 @@ export default class AnnotationView extends ContainerObject {
         type: AnnotationHierarchyType,
         positionIndex: number,
         item: AnnotationData,
-        activeCategory: AnnotationCategory,
         textColor: number
     ) {
         super();
@@ -38,16 +36,11 @@ export default class AnnotationView extends ContainerObject {
         this._type = type;
         this._positionIndex = positionIndex;
         this._item = item;
-        this._activeCategory = activeCategory;
         this._textColor = textColor;
     }
 
     protected added(): void {
         super.added();
-
-        if (!this._item.visible) {
-            return;
-        }
 
         this._panel = new GamePanel({
             type: GamePanelType.NORMAL,
@@ -127,62 +120,57 @@ export default class AnnotationView extends ContainerObject {
 
         if (
             this._item.selected
-            && this._item.category === this._activeCategory
             && this._item.category !== AnnotationCategory.STRUCTURE
         ) {
             let panelWidth = this._card.width;
             const panelHeight = this._card.height;
             if (this._type === AnnotationHierarchyType.ANNOTATION) {
-                if (this._item.playerID === Eterna.playerID) {
-                    this._editButton = new GameButton()
-                        .allStates(Bitmaps.ImgPencil)
-                        .tooltip('Edit');
-                    this._editButton.pointerDown.connect((e) => {
-                        this.onEditButtonPressed.emit();
-                        e.stopPropagation();
-                    });
-                    this.addObject(this._editButton, this.container);
-                    panelWidth += this._editButton.display.width;
-                }
+                this._editButton = new GameButton()
+                    .allStates(Bitmaps.ImgPencil)
+                    .tooltip('Edit');
+                this._editButton.pointerDown.connect((e) => {
+                    this.onEditButtonPressed.emit();
+                    e.stopPropagation();
+                });
+                this.addObject(this._editButton, this.container);
+                panelWidth += this._editButton.display.width;
 
-                if (this._item.playerID === Eterna.playerID) {
-                    this._moveButton = new GameButton()
-                        .allStates(Bitmaps.ImgPointerHand)
-                        .tooltip('Move');
-                    this._moveButton.pointerDown.connect((e) => {
-                        this.isMoving.value = true;
-                        this._panel.color = 0x2F94D1;
-                        this._panel.alpha = 1;
-                        this._editButton.display.visible = false;
-                        this._editButton.enabled = false;
-                        this._card.setText(
-                            this._item.title,
-                            TextBalloon.DEFAULT_FONT_SIZE,
-                            0xFFFFFF,
-                            FontWeight.BOLD
-                        );
-                        this.display.cursor = 'grab';
+                this._moveButton = new GameButton()
+                    .allStates(Bitmaps.ImgPointerHand)
+                    .tooltip('Move');
+                this._moveButton.pointerDown.connect((e) => {
+                    this.isMoving.value = true;
+                    this._panel.color = 0x2F94D1;
+                    this._panel.alpha = 1;
+                    this._editButton.display.visible = false;
+                    this._editButton.enabled = false;
+                    this._card.setText(
+                        this._item.title,
+                        TextBalloon.DEFAULT_FONT_SIZE,
+                        0xFFFFFF,
+                        FontWeight.BOLD
+                    );
+                    this.display.cursor = 'grab';
 
-                        // Hide Move Button
-                        this._moveButton.display.visible = false;
-                        this._moveButton.enabled = false;
+                    // Hide Move Button
+                    this._moveButton.display.visible = false;
+                    this._moveButton.enabled = false;
 
-                        // Show Save Button
-                        this._saveButton.display.visible = true;
-                        this._saveButton.enabled = true;
+                    // Show Save Button
+                    this._saveButton.display.visible = true;
+                    this._saveButton.enabled = true;
 
-                        // Show Cancel Button
-                        this._cancelMoveButton.display.visible = true;
-                        this._cancelMoveButton.enabled = true;
+                    // Show Cancel Button
+                    this._cancelMoveButton.display.visible = true;
+                    this._cancelMoveButton.enabled = true;
 
-                        e.stopPropagation();
-                    });
+                    e.stopPropagation();
+                });
 
-                    this._moveButton.display.visible = !this._item.positions[this._positionIndex].custom;
-                    this._moveButton.enabled = !this._item.positions[this._positionIndex].custom;
-                    this.addObject(this._moveButton, this.container);
-                    panelWidth += this._moveButton.display.width;
-                }
+                this._moveButton.display.visible = !this._item.positions[this._positionIndex].custom;
+                this._moveButton.enabled = !this._item.positions[this._positionIndex].custom;
+                this.addObject(this._moveButton, this.container);
+                panelWidth += this._moveButton.display.width;
 
                 this._releaseButton = new GameButton()
                     .allStates(Bitmaps.ImgUnlock)
@@ -292,21 +280,19 @@ export default class AnnotationView extends ContainerObject {
                 this.addObject(this._cancelMoveButton, this.container);
 
                 this._panel.setSize(panelWidth, panelHeight);
-                if (this._item.playerID === Eterna.playerID) {
-                    this._editButton.display.x = this._card.width;
-                    this._editButton.display.y = (this._panel.height - this._editButton.display.height) / 2;
-                }
-                if (this._item.playerID === Eterna.playerID) {
-                    this._moveButton.display.x = this._card.width + this._editButton.display.width;
-                    this._moveButton.display.y = (this._panel.height - this._moveButton.display.height) / 2;
-                }
-                this._releaseButton.display.x = this._card.width;
-                if (this._item.playerID === Eterna.playerID) {
-                    this._releaseButton.display.x += this._editButton.display.width;
-                }
+
+                this._editButton.display.x = this._card.width;
+                this._editButton.display.y = (this._panel.height - this._editButton.display.height) / 2;
+
+                this._moveButton.display.x = this._card.width + this._editButton.display.width;
+                this._moveButton.display.y = (this._panel.height - this._moveButton.display.height) / 2;
+
+                this._releaseButton.display.x = this._card.width + this._editButton.display.width;
                 this._releaseButton.display.y = (this._panel.height - this._releaseButton.display.height) / 2;
+
                 this._saveButton.display.x = this._card.width;
                 this._saveButton.display.y = (this._panel.height - this._saveButton.display.height) / 2;
+
                 this._cancelMoveButton.display.x = this._card.width + this._saveButton.display.width;
                 this._cancelMoveButton.display.y = (this._panel.height - this._cancelMoveButton.display.height) / 2;
             } else {
@@ -337,11 +323,18 @@ export default class AnnotationView extends ContainerObject {
         return this.display.height;
     }
 
+    public get annotationID() {
+        return this._item.id;
+    }
+
+    public get positionIndex() {
+        return this._positionIndex;
+    }
+
     private _pose: Pose2D;
     private _type: AnnotationHierarchyType;
     private _positionIndex: number;
     private _item: AnnotationData;
-    private _activeCategory: AnnotationCategory;
     private _textColor: number;
     private _card: TextBalloon;
     private _editButton: GameButton;

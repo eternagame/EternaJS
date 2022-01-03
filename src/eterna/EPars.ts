@@ -1,6 +1,7 @@
 import Utility from 'eterna/util/Utility';
-import {StyledTextBuilder} from 'flashbang';
+import {Assert, StyledTextBuilder} from 'flashbang';
 import Arrays from 'flashbang/util/Arrays';
+import {Oligo, OligoMode} from './rnatypes/Oligo';
 import SecStruct from './rnatypes/SecStruct';
 import Sequence from './rnatypes/Sequence';
 
@@ -295,9 +296,10 @@ export default class EPars {
         return str;
     }
 
-    public static sequenceDiff(seq1: Sequence, seq2: Sequence): number {
+    public static sequenceDiff(seq1: Sequence, seq2: Sequence, skipRegion: number[] = []): number {
         let diff = 0;
         for (let ii = 0; ii < seq1.length; ii++) {
+            if (skipRegion.includes(ii)) continue;
             if (seq1.nt(ii) !== seq2.nt(ii)) {
                 diff++;
             }
@@ -409,6 +411,38 @@ export default class EPars {
 
     public static pairType(a: number, b: number): number {
         return EPars.PAIR_TYPE_MAT[a * 8 + b];
+    }
+
+    public static constructFullSequence(
+        baseSequence: Sequence,
+        oligo: number[] | undefined,
+        oligos: Oligo[] | undefined,
+        oligosOrder: number[] | undefined,
+        oligoMode: number | undefined
+    ) {
+        if (oligo == null && oligos === undefined) {
+            return baseSequence.slice(0);
+        }
+        let seq: RNABase[] = baseSequence.baseArray.slice();
+        if (oligos === undefined) {
+            Assert.assertIsDefined(oligo);
+            if (oligoMode === OligoMode.EXT5P) {
+                seq = oligo.concat(seq);
+            } else {
+                if (oligoMode === OligoMode.DIMER) seq.push(RNABase.CUT);
+                seq = seq.concat(oligo);
+            }
+            return new Sequence(seq);
+        }
+        // _oligos != null, we have a multistrand target
+        for (let ii = 0; ii < oligos.length; ii++) {
+            seq.push(RNABase.CUT);
+            // Note: oligosOrder could be undefined - from what I can tell, this happen if there's
+            // only one oligo or if no custom target order has been defined. In this case, it is
+            // assumed that the order should be the order they were originally defined in
+            seq = seq.concat(oligos[oligosOrder?.[ii] ?? ii].sequence);
+        }
+        return new Sequence(seq);
     }
 
     private static readonly PAIR_TYPE_MAT: number[] = [

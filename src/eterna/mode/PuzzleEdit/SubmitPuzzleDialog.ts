@@ -140,7 +140,7 @@ export default class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
             const numGU: number = this._puzzleState.getParam(UndoBlockParam.GU, EPars.DEFAULT_TEMPERATURE) as number;
             const numGC: number = this._puzzleState.getParam(UndoBlockParam.GC, EPars.DEFAULT_TEMPERATURE) as number;
 
-            if (details.minGU) {
+            if (details.minGU !== undefined) {
                 const maxGU = (numAU + numGU + numGC) / 3;
                 if (details.minGU < 0 || details.minGU > numGU || details.minGU > maxGU) {
                     return `${'Number of G-U pairs should be either blank or '
@@ -149,12 +149,12 @@ export default class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
                 }
             }
 
-            if (details.maxGC && details.maxGC < numGC) {
+            if (details.maxGC !== undefined && details.maxGC < numGC) {
                 return `${'Number of G-C pairs should be either blank or '
                     + 'at least '}${numGC} (number GCs in your current solution)`;
             }
 
-            if (details.minAU && (details.minAU < 0 || details.minAU > numAU)) {
+            if (details.minAU !== undefined && (details.minAU < 0 || details.minAU > numAU)) {
                 return `${'Number of A-U pairs should be either blank or '
                     + 'an integer between 0 and '}${numAU} (number of AUs in your current solution)`;
             }

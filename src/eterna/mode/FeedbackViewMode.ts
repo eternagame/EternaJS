@@ -176,8 +176,10 @@ export default class FeedbackViewMode extends GameMode {
         this.addObject(this._info, this.uiLayer);
 
         const poseFields: PoseField[] = [];
+        // We don't support annotations here right now, but the pose calls some methods on it
+        const annotationManager = new AnnotationManager(ToolbarType.FEEDBACK);
         for (let ii = 0; ii < secstructs.length; ii++) {
-            const poseField: PoseField = new PoseField(this, false);
+            const poseField: PoseField = new PoseField(this, false, annotationManager);
             this.addObject(poseField, this.poseLayer);
 
             const vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
@@ -185,9 +187,6 @@ export default class FeedbackViewMode extends GameMode {
                 throw new Error("Critical error: can't create a Vienna folder instance by name");
             }
             poseField.pose.scoreFolder = vienna;
-            // We don't support annotations here right now, but the pose calls some methods
-            // on it
-            poseField.pose.annotationManager = new AnnotationManager(ToolbarType.FEEDBACK);
             poseFields.push(poseField);
         }
         this.setPoseFields(poseFields);

@@ -13,13 +13,11 @@ export default class VoteProcessor {
         this._maxVotes = maxVotes;
     }
 
-    public processData(data: VoteData[]): void {
+    public static processDataGlobal(data: VoteData[]): number {
         const solutionIDs: number[] = [];
         const voteCounts: number[] = [];
         const myVoteCounts: number[] = [];
         let totalMyVotes = 0;
-
-        this._votesLeft = 0;
 
         for (let ii = data.length - 1; ii >= 0; ii--) {
             const obj: VoteData = data[ii];
@@ -55,6 +53,12 @@ export default class VoteProcessor {
             }
         }
 
+        return totalMyVotes;
+    }
+
+    public processData(data: VoteData[]): void {
+        this._votesLeft = 0;
+        const totalMyVotes = VoteProcessor.processDataGlobal(data);
         this._votesLeft = this._maxVotes - totalMyVotes;
     }
 

@@ -6,6 +6,7 @@ import {
 import ROPWait from 'eterna/rscript/ROPWait';
 import debounce from 'lodash.debounce';
 import GameMode from 'eterna/mode/GameMode';
+import AnnotationManager from 'eterna/AnnotationManager';
 import Pose2D from './Pose2D';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
 import RNAAnchorObject from './RNAAnchorObject';
@@ -18,10 +19,11 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
     public readonly gameMode: GameMode;
 
-    constructor(gameMode: GameMode, edit: boolean) {
+    constructor(gameMode: GameMode, edit: boolean, annotationManager: AnnotationManager) {
         super();
         this.gameMode = gameMode;
-        this._pose = new Pose2D(this, edit);
+        this._pose = new Pose2D(this, edit, annotationManager);
+        this._annotationManager = annotationManager;
 
         // _clickTargetDisp is an invisible rectangle with our exact size, so that we can always receive mouse events
         this._clickTargetDisp = new Graphics();
@@ -240,14 +242,14 @@ export default class PoseField extends ContainerObject implements KeyboardListen
             }
         } else if (this._interactionCache.size === 1) {
             if (!this._zoomGestureStarted) {
-                if (this.pose.annotationManager.isMovingAnnotation) {
+                if (this._annotationManager.isMovingAnnotation) {
                     return;
                 }
 
                 // simple drag
-                if (this._pose.annotationManager.allAnnotations.length > 0) {
+                if (this._annotationManager.allAnnotations.length > 0) {
                     this._erasedAnnotations = true;
-                    this._pose.annotationManager.eraseAnnotations(true);
+                    this.pose.clearAnnotationCanvas();
                 }
 
                 ROPWait.notifyMoveCamera();
@@ -326,7 +328,11 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         }
 
         if (this._erasedAnnotations) {
-            this._pose.annotationManager.refreshAnnotations(this.pose);
+            this._annotationManager.drawAnnotations({
+                pose: this.pose,
+                reset: false,
+                ignoreCustom: false
+            });
             this._erasedAnnotations = false;
         }
     }
@@ -452,4 +458,6 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     private _explosionFactor: number = 1;
 
     private _anchoredObjects: RNAAnchorObject[] = [];
+
+    private _annotationManager: AnnotationManager;
 }

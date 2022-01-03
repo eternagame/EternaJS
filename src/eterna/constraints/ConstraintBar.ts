@@ -295,7 +295,7 @@ export default class ConstraintBar extends ContainerObject {
         }
     }
 
-    public updateConstraints(context: ConstraintContext): boolean {
+    public updateConstraints(context: ConstraintContext, soft: boolean = false): boolean {
         let satisfied = true;
 
         for (const constraint of this._constraints) {
@@ -311,7 +311,13 @@ export default class ConstraintBar extends ContainerObject {
             );
             constraint.highlightCache = status.satisfied
                 ? null : constraint.constraint.getHighlight(status, context);
-            satisfied = satisfied && status.satisfied;
+
+            // Hack to allow certain constraints to be required to be met even if the SOFT
+            // constraint would otherwise mean no constraint is required. Really we should allow
+            // individual constraints to be enabled/disabled in the puzzle definition rather than it
+            // being all or nothing
+            const isSoft = soft && !constraint.constraint.hard;
+            satisfied = satisfied && (status.satisfied || isSoft);
         }
 
         this.updateHighlights();

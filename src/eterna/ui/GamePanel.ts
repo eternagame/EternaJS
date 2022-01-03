@@ -115,7 +115,7 @@ export default class GamePanel extends BaseGamePanel {
     }
 
     protected updateView(): void {
-        this._background.clear();
+        this._background?.clear();
 
         if (this._width <= 0 || this._height <= 0) {
             return;

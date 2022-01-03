@@ -1,10 +1,10 @@
 import * as log from 'loglevel';
-import {Container, Point} from 'pixi.js';
+import {Container, Point, Text} from 'pixi.js';
 import Eterna from 'eterna/Eterna';
 import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import {
-    AppMode, SceneObject, Flashbang, GameObjectRef, Assert
+    AppMode, SceneObject, Flashbang, GameObjectRef, Assert, AlphaTask, RepeatingTask, SerialTask
 } from 'flashbang';
 import AchievementManager from 'eterna/achievements/AchievementManager';
 import Tooltips from 'eterna/ui/Tooltips';
@@ -26,6 +26,8 @@ import ExplosionFactorDialog from 'eterna/ui/ExplosionFactorDialog';
 import {PixiRenderCallback} from 'ngl';
 import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
 import Sequence from 'eterna/rnatypes/Sequence';
+import EPars from 'eterna/EPars';
+import Fonts from 'eterna/util/Fonts';
 import CopyTextDialogMode from './CopyTextDialogMode';
 import ThreeView from './ThreeView';
 import Mol3DGate from './Mol3DGate';
@@ -177,6 +179,15 @@ export default abstract class GameMode extends AppMode {
         this._dialogRef.destroyObject();
     }
 
+    protected static createStatusText(text: string): SceneObject<Text> {
+        const statusText = new SceneObject<Text>(Fonts.std(text, 22).color(0xffffff).bold().build());
+        statusText.addObject(new RepeatingTask(() => new SerialTask(
+            new AlphaTask(0, 0.3),
+            new AlphaTask(1, 0.3)
+        )));
+        return statusText;
+    }
+
     /**
      *
      * Show a notification. Removes any existing notification. Dialogs will be hidden while the notification exists.
@@ -267,12 +278,15 @@ export default abstract class GameMode extends AppMode {
                     const pseudoknots: boolean = this._targetConditions != null
                         && this._targetConditions[0] != null
                         && this._targetConditions[0]['type'] === 'pseudoknot';
-                    const score = (pairs: SecStruct) => {
+                    const score = (sequence: Sequence, pairs: SecStruct) => {
                         Assert.assertIsDefined(this._folder);
                         return this._folder.scoreStructures(
-                            newField.pose.fullSequence, pairs, pseudoknots
+                            sequence, pairs, pseudoknots
                         );
                     };
+
+                    const ublk = this.getCurrentUndoBlock(poseidx);
+                    Assert.assertIsDefined(ublk, 'getEnergyDelta is being called where UndoBlocks are unavailable!');
 
                     const targetPairs: SecStruct | undefined = this._targetPairs
                         ? this._targetPairs[poseidx] : this.getCurrentTargetPairs(poseidx);
@@ -280,11 +294,23 @@ export default abstract class GameMode extends AppMode {
                         targetPairs,
                         "This poses's targetPairs are undefined; energy delta cannot be computed!"
                     );
-                    const ublk = this.getCurrentUndoBlock(poseidx);
-                    Assert.assertIsDefined(ublk, 'getEnergyDelta is being called where UndoBlocks are unavailable!');
                     const nativePairs: SecStruct = ublk.getPairs(37, pseudoknots);
-                    return score(targetPairs.getSatisfiedPairs(newField.pose.fullSequence))
-                        - score(nativePairs);
+                    const targetSeq = EPars.constructFullSequence(
+                        newField.pose.sequence,
+                        ublk.targetOligo,
+                        ublk.targetOligos,
+                        ublk.targetOligoOrder,
+                        ublk.oligoMode
+                    );
+                    const nativeSeq = EPars.constructFullSequence(
+                        newField.pose.sequence,
+                        ublk.targetOligo,
+                        ublk.targetOligos,
+                        ublk.oligoOrder,
+                        ublk.oligoMode
+                    );
+
+                    return score(targetSeq, targetPairs.getSatisfiedPairs(targetSeq)) - score(nativeSeq, nativePairs);
                 }
                 return -1;
             };

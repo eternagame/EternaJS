@@ -18,6 +18,9 @@
         type: method,
         url : url,
         data : parameter_string,
+        xhrFields: {
+          withCredentials: true
+        },
         success: (data) ->
           if success_cb?
             success_cb(Utils.json_to_object(data))
@@ -39,6 +42,9 @@
         url : url,
         headers: { 
           Accept : "application/json"
+        },
+        xhrFields: {
+          withCredentials: true
         },
         success: (data) ->
           if success_cb?
@@ -77,6 +83,7 @@
       parameter_string = Utils.generate_parameter_string(parameters,true)
       url += "?" + parameter_string
 
+      xhr.withCredentials = true
       xhr.request({
         url: url,
         headers: { 
@@ -110,6 +117,9 @@
       type: method,
       data :parameter_string,
       dataType:"json"
+      xhrFields: {
+        withCredentials: true
+      },
     })    
     if data['responseText']?
       data = JSON.parse data['responseText']

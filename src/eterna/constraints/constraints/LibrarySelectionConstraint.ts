@@ -12,7 +12,9 @@ interface LibrarySelectionConstraintStatus extends BaseConstraintStatus {
 }
 
 export default class LibrarySelectionConstraint extends Constraint<LibrarySelectionConstraintStatus> {
+    // when numNtSelected is set to -1, it means any nonzero number will satisfy
     public readonly numNtSelected: number;
+    public readonly hard = true;
 
     constructor(numNtSelected: number) {
         super();
@@ -24,7 +26,7 @@ export default class LibrarySelectionConstraint extends Constraint<LibrarySelect
         const numNtSelected = (constraintContext.undoBlocks[0].librarySelections ?? []).length;
 
         return {
-            satisfied: numNtSelected === this.numNtSelected,
+            satisfied: numNtSelected <= this.numNtSelected || (this.numNtSelected === -1 && numNtSelected > 0),
             currentLibrarySelection: numNtSelected
         };
     }
@@ -39,8 +41,14 @@ export default class LibrarySelectionConstraint extends Constraint<LibrarySelect
             tooltip.pushStyle('altTextMain');
         }
 
-        tooltip.append('You must select for library randomization exactly', 'altText')
-            .append(` ${this.numNtSelected} nt.`);
+        const requiredNum = this.numNtSelected === -1 ? 'any' : `${this.numNtSelected}`;
+
+        if (requiredNum === 'any') {
+            tooltip.append('You must select SOME number of bases for library randomization.', 'altText');
+        } else {
+            tooltip.append('You must select for library randomization at most', 'altText')
+                .append(` ${requiredNum} bases.`);
+        }
 
         if (forMissionScreen) {
             tooltip.popStyle();
@@ -48,12 +56,12 @@ export default class LibrarySelectionConstraint extends Constraint<LibrarySelect
 
         const statText = new StyledTextBuilder()
             .append(status.currentLibrarySelection.toString(), {fill: (status.satisfied ? 0x00aa00 : 0xaa0000)})
-            .append(`/${this.numNtSelected}`);
+            .append(`/${requiredNum}`);
 
         return {
             satisfied: status.satisfied,
             tooltip,
-            clarificationText: `RANDOMIZE ${this.numNtSelected} BASES`,
+            clarificationText: 'RANDOMIZE BASES',
             statText,
             showOutline: true,
             drawBG: true,

@@ -35,7 +35,7 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
 
         if (targetMap != null) {
             const targetAlignedConstraints: boolean[] = [];
-            for (const [rawIndex, targetIndex] of targetMap.entries()) {
+            for (const [targetIndex, rawIndex] of targetMap.entries()) {
                 targetAlignedConstraints[targetIndex] = constraints[Number(rawIndex)];
             }
             return targetAlignedConstraints;
@@ -59,23 +59,23 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
         // }
         const naturalPairs = ublk.getPairs(37, pseudoknots);
 
-        // rawIndex => targetAlignedIndex
+        // targetAlignedIndex => rawIndex
         const targetMap = ublk.reorderedOligosIndexMap(ublk.targetOligoOrder);
         if (targetMap != null) {
-            // rawIndex => naturalAlignedIndex
+            // naturalAlignedIndex => rawIndex
             const naturalMap = ublk.reorderedOligosIndexMap(ublk.oligoOrder);
             if (naturalMap !== undefined) {
                 const targetAlignedNaturalPairs: SecStruct = new SecStruct();
-                for (const [rawIndex, targetIndex] of targetMap.entries()) {
-                    const naturalIndex = naturalMap[rawIndex];
+                for (const [targetIndex, rawIndex] of targetMap.entries()) {
+                    const naturalIndex = naturalMap.indexOf(rawIndex);
                     // If unpaired, it's unpaired, otherwise we need to get the index of the paired base
                     // according to target mode
                     if (!naturalPairs.isPaired(naturalIndex)) {
                         targetAlignedNaturalPairs.setUnpaired(targetIndex);
                     } else {
                         const naturalPairedIndex = naturalPairs.pairingPartner(naturalIndex);
-                        const rawPairedIndex = naturalMap.indexOf(naturalPairedIndex);
-                        targetAlignedNaturalPairs.setPairingPartner(targetIndex, targetMap[rawPairedIndex]);
+                        const rawPairedIndex = naturalMap[naturalPairedIndex];
+                        targetAlignedNaturalPairs.setPairingPartner(targetIndex, targetMap.indexOf(rawPairedIndex));
                     }
                 }
 
@@ -102,8 +102,8 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
         };
     }
 
-    public getHighlight(status: ShapeConstraintStatus): HighlightInfo {
-        const unstable: number[] = [];
+    public getHighlight(status: ShapeConstraintStatus, context: ConstraintContext): HighlightInfo {
+        let unstable: number[] = [];
         if (status.wrongPairs) {
             let curr = 0;
             let jj: number;
@@ -117,6 +117,16 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
             if ((unstable.length % 2) === 1) {
                 unstable.push(jj - 1);
             }
+        }
+
+        // If we have oligos, we need to transform our highlights from being in "target mode" numbering
+        // (ie, based on the target mode oligo order) to the "raw" ordering (ie, based on the puzzle
+        // definition ordering). We handle converting this to the correct numbering space depending
+        // on whether we're in target or natural mode in PoseEditMode
+        const undoBlock = context.undoBlocks[this.stateIndex];
+        const targetMap = undoBlock.reorderedOligosIndexMap(undoBlock.targetOligoOrder);
+        if (targetMap) {
+            unstable = unstable.map((idx) => targetMap[idx]);
         }
 
         return {

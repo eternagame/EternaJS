@@ -9,10 +9,7 @@ export default class SubmitPoseDialog extends Dialog<SubmitPoseDetails> {
     constructor(initialState: SubmitPoseDetails = {
         title: '',
         comment: '',
-        annotations: {
-            puzzle: [],
-            solution: []
-        },
+        annotations: [],
         libraryNT: []
     }) {
         super();
@@ -42,10 +39,7 @@ export default class SubmitPoseDialog extends Dialog<SubmitPoseDetails> {
             const details = {
                 title: dict.get(TITLE),
                 comment: dict.get(COMMENT),
-                annotations: {
-                    puzzle: [],
-                    solution: []
-                },
+                annotations: [],
                 libraryNT: []
             };
             this.saveInputs.emit(details);
@@ -56,10 +50,7 @@ export default class SubmitPoseDialog extends Dialog<SubmitPoseDetails> {
             const details = {
                 title: dict.get(TITLE),
                 comment: dict.get(COMMENT),
-                annotations: {
-                    puzzle: [],
-                    solution: []
-                },
+                annotations: [],
                 libraryNT: []
             };
             this.saveInputs.emit(details);
