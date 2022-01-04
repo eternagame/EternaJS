@@ -84,7 +84,10 @@ for (const event of touchEvents) {
         true
     );
 }
-class MyContainer extends Container {
+
+// For more info on what's going on here, see ScrollContainer. The idea is the same: we have events
+// being handled by Pixi that we really want to propagate to a different DOM element instead.
+class FrameContainer extends Container {
     constructor() {
         super();
         this._boundHandleMouseEvent = this.handlePossiblyMaskedEvent.bind(this);
@@ -274,7 +277,7 @@ export default class ThreeView extends ContainerObject {
     public nglTextArray: Text[];
     private nglMask: Graphics;
 
-    private frameContainer: MyContainer;
+    private frameContainer: FrameContainer;
     private frameBaseTexture: BaseRenderTexture;
     private frameTexture: RenderTexture;
     private frameSprite: Sprite;
@@ -682,7 +685,7 @@ export default class ThreeView extends ContainerObject {
 
         this.mainContainer = new Container();
         this.nglContainer = new Container();
-        this.frameContainer = new MyContainer();
+        this.frameContainer = new FrameContainer();
 
         this.frameBaseTexture = new BaseRenderTexture({
             width: this.width,
