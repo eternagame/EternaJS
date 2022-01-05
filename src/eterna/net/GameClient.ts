@@ -241,7 +241,6 @@ export default class GameClient {
     private post(urlString: string, params?: Params): Promise<Response> {
         const url: URL = this.makeURL(urlString);
 
-        // const postParams = new URLSearchParams();
         const postParams = new FormData();
         if (params) {
             // POST requests pass params in the body
@@ -258,9 +257,7 @@ export default class GameClient {
 
         return fetch(url.toString(), {
             method: 'POST',
-            // body: postParams.toString(),
             body: postParams,
-            // headers: new Headers({'Content-Type': 'application/x-www-form-urlencoded'}),
             credentials: 'include'
         }).then((rsp) => {
             if (!rsp.ok) {
@@ -270,27 +267,6 @@ export default class GameClient {
         }).catch((err) => {
             throw new Error(`${url.toString()}: ${err}`);
         });
-
-        // Passing params in a FormData is more correct, I think,
-        // but the server might choke with this approach?
-
-        // let form = new FormData();
-        // if (params) {
-        //     // POST requests pass params via FormData, in the body
-        //     Object.keys(params).forEach(key => form.append(key, params[key]));
-        // }
-        //
-        // return fetch(url.toString(), {
-        //     method: "POST",
-        //     body: form,
-        // }).then((rsp) => {
-        //     if (!rsp.ok) {
-        //         throw new Error("HTTP status code: " + rsp.status);
-        //     }
-        //     return rsp;
-        // }).catch((err) => {
-        //     throw new Error(url.toString() + ": " + err);
-        // });
     }
 
     private makeURL(urlString: string): URL {

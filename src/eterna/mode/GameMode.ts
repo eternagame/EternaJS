@@ -50,7 +50,6 @@ export default abstract class GameMode extends AppMode {
 
     // members for 3D
     public static _3DView: ThreeView | undefined = undefined;
-    public _3DFilePath: string | File | Blob = '';
     public static mol3DGate: Mol3DGate | undefined = undefined;
     public static _scope: GameMode;
 
@@ -93,7 +92,6 @@ export default abstract class GameMode extends AppMode {
         GameMode.mol3DGate = undefined;
         GameMode._3DView = undefined;
 
-        this._3DFilePath = filePath;
         GameMode._3DView = new ThreeView(this);
         if (!GameMode._3DView.pixiContainer) return;
 

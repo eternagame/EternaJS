@@ -146,18 +146,6 @@ export default class Mol3DGate {
         this.viewerEx.requestRender();
     }
 
-    public changeBase(cmd: string) {
-        if (cmd.includes('remove')) {
-            if (this.baseElement) this.component?.removeRepresentation(this.baseElement);
-            this.baseElement = null;
-        } else if (cmd.includes('create')) {
-            this.baseElement = this.component?.addRepresentation('ebase', {
-                vScale: 0.5,
-                color: this.myColorScheme
-            });
-        }
-    }
-
     public create3D(filePath: string | File | Blob) {
         this.stageEx.removeAllComponents();
         this.component = null;
