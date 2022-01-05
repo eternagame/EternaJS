@@ -30,7 +30,6 @@ export default class Mol3DGate {
     protected poseMode: GameMode;
     private readonly secStruct: string;
     protected colorChangeMap = new Map();
-    protected hoverdInfo = {index: -1, color: 0, outColor: 0};
     public bShowAnnotations: boolean = true;
     public _3DFilePath: string | File | Blob = '';
 
@@ -130,14 +129,8 @@ export default class Mol3DGate {
     }
 
     public mouse2DHovered(index: number, color: number) {
-        this.hoverdInfo.index = index;
-        this.hoverdInfo.color = color;
         const color1: number = this.getBaseColor(color);
-        this.viewerEx?.hoverEBaseObject(
-            this.hoverdInfo.index - 1,
-            false,
-            color1
-        );
+        this.viewerEx?.hoverEBaseObject(index - 1, false, color1);
     }
 
     public updateSequence(seq: string[]) {
