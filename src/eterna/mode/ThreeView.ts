@@ -132,6 +132,7 @@ class FrameContainer extends Container {
                 if (e.type === 'mousedown') this.pressed = true;
                 const viewer = GameMode.mol3DGate.viewerEx;
                 viewer?.getWebGLCanvas().dispatchEvent(myEvent);
+                e.stopPropagation();
             }
             if (e.type === 'mouseup') this.pressed = false;
             if (this.pressed) e.stopPropagation();
@@ -188,6 +189,7 @@ class FrameContainer extends Container {
             if (GameMode._3DView.isOver3DCanvas || this.pressed) {
                 if (e.type === 'touchstart') this.pressed = true;
                 viewerEx.getWebGLCanvas().dispatchEvent(touchEvent);
+                e.stopPropagation();
             }
             if (!GameMode._3DView.isOver3DCanvas) {
                 if (e.type === 'touchstart') this.pressed = false;
