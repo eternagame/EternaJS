@@ -10,8 +10,6 @@ import {
     AtomProxy,
     ColormakerRegistry,
     MouseActions,
-    DivAnnotation,
-    Vector3,
     Structure,
     getFileInfo,
     ParserRegistry,
@@ -187,34 +185,6 @@ export default class Mol3DGate {
                         'ebase',
                         {vScale: 0.5, color: Mol3DGate.scope.myColorScheme}
                     );
-                    if (this.baseElement) {
-                        const baseRepr = this.baseElement.repr;
-                        if (baseRepr) {
-                            let numBase = 1;
-                            const seq = this.poseMode.getSequence().split(' ');
-                            if (seq.length > 1) {
-                                numBase = parseInt(seq[1].split('-')[0], 10);
-                            }
-                            const annotations = baseRepr.getAnnotations();
-                            let i = 0;
-                            annotations.forEach((a: DivAnnotation) => {
-                                const num = numBase + a.num;
-                                if (
-                                    i === 0
-                                    || i === annotations.length - 1
-                                    || num % 5 === 0
-                                ) {
-                                    const vector = new Vector3(a.x, a.y, a.z);
-                                    component.addAnnotationEx(
-                                        vector,
-                                        `${num}`,
-                                        {}
-                                    );
-                                }
-                                i++;
-                            });
-                        }
-                    }
                     this.backboneElement = this.component.addRepresentation(
                         'backbone',
                         {color: 0xff8000}

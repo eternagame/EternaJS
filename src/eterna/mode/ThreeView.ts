@@ -828,38 +828,6 @@ export default class ThreeView extends ContainerObject {
         this.onResized();
     }
 
-    protected updateAnnotations(height: number) {
-        let i = 0;
-        const uninit: boolean = this.nglTextArray.length === 0;
-        GameMode.mol3DGate?.component?.eachAnnotationEx((a) => {
-            let text;
-            const x = a.getCanvasPosition().x;
-            const y = height - a.getCanvasPosition().y;
-            if (uninit) {
-                text = new Text(a.getContent(), {
-                    fontFamily: 'Arial',
-                    fontSize: 12,
-                    fill: 0xffffff,
-                    align: 'center'
-                });
-                text.x = x;
-                text.y = y;
-                text.visible = false;
-                if (GameMode.mol3DGate?.bShowAnnotations) text.visible = true;
-                this.nglTextArray.push(text);
-                text.mask = this.nglMask;
-                this.nglContainer.addChild(text);
-            } else {
-                text = this.nglTextArray[i];
-                text.x = x;
-                text.y = y;
-                text.visible = false;
-                if (GameMode.mol3DGate?.bShowAnnotations) text.visible = true;
-                i++;
-            }
-        });
-    }
-
     public updateNGLTexture(
         canvas: HTMLCanvasElement,
         width: number,
@@ -890,7 +858,6 @@ export default class ThreeView extends ContainerObject {
             }
             this.nglTexture.update();
         }
-        this.updateAnnotations(height);
     }
 
     public hideAnnotations() {
