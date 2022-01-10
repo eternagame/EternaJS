@@ -157,6 +157,7 @@ export default class PuzzleEditMode extends GameMode {
                     edit: true,
                     title: true,
                     sequenceLength: this._poses[0].fullSequenceLength,
+                    customNumbering: this._poses[0].customNumbering,
                     initialRanges: annotation.ranges,
                     initialLayers: this._annotationManager.allLayers,
                     activeCategory: this._annotationManager.activeCategory,
