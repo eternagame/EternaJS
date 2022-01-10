@@ -970,6 +970,12 @@ export default class AnnotationManager {
         ) {
             for (let i = 0; i < params.item.positions.length; i++) {
                 const position = params.item.positions[i];
+                // When computing positions, we were not able to find a position for this range,
+                // and instead decided that we should just not show this annotation rather than
+                // crashing. We will follow the same advice here, with the same understanding as
+                // later on in this function that we should revisit computeAnnotationPositionPoint
+                // to always return something rather than just not display the annotation.
+                if (!position) continue;
                 const view = this.getAnnotationView(params.pose, i, params.item);
                 if (params.item.type === AnnotationHierarchyType.ANNOTATION) {
                     view.onMovedAnnotation.connect((point: Point) => {
@@ -1769,6 +1775,10 @@ export default class AnnotationManager {
                     ) {
                         continue;
                     }
+                    // When computing positions, we were not able to find a position for this range,
+                    // and instead decided that we should just not show this annotation rather than
+                    // crashing. See placeAnnotationInPose
+                    if (!position) continue;
 
                     const display = pose.getAnnotationViewDims(card.id, j);
                     const cardRelPosition = card.positions[j].relPosition;
