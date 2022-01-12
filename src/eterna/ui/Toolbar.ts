@@ -775,9 +775,9 @@ export default class Toolbar extends ContainerObject {
             this.regs.add(this.validate3DButton.clicked.connect(() => {
                 fileDialog({accept: ['.cif', '.pdb']}).then((file) => {
                     const mode: PuzzleEditMode = this.mode as PuzzleEditMode;
-                    const sequence = mode.getSequence().split(' ')[0];
+                    const sequence = mode.getSequence();
                     Mol3DGate.checkModelFile(file[0]).then((resCount:number) => {
-                        if (mode && resCount === sequence.length) {
+                        if (mode && resCount === sequence[0].length) {
                             if (GameMode._3DView) mode.removeObject(GameMode._3DView);
                             mode.add3DSprite(file[0], mode.structure);
                         } else {

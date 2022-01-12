@@ -133,15 +133,11 @@ export default class Mol3DGate {
         this.viewerEx?.hoverEBaseObject(index - 1, false, color1);
     }
 
-    public updateSequence(seq: string[]) {
+    public updateSequence(seq: [string, (number|null) [] | undefined]) {
         for (let i = 0; i < seq[0].length; i++) {
             this.colorChangeMap.set(i + 1, seq[0][i]);
         }
-        let numBase = 1;
-        if (seq.length > 1) {
-            numBase = parseInt(seq[1].split('-')[0], 10);
-        }
-        this.viewerEx.setEthernaSequence(seq[0], numBase);
+        this.viewerEx.setEthernaSequence(seq[0], seq[1]);
         this.component?.updateRepresentations({color: this.myColorScheme});
         this.viewerEx.requestRender();
     }
@@ -158,7 +154,7 @@ export default class Mol3DGate {
             .then((component: void | Component) => {
                 if (component) {
                     this.component = component;
-                    this.updateSequence(this.poseMode.getSequence().split(' '));
+                    this.updateSequence(this.poseMode.getSequence());
                     this.viewerEx.setHBondColor([
                         0xffffff, 0x8f9dc0, 0x546986, 0xffffff
                     ]);

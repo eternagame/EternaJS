@@ -552,10 +552,9 @@ export default abstract class GameMode extends AppMode {
         }
     }
 
-    public getSequence(): string {
-        let sequenceString: string = this._poses[0].sequence.sequenceString();
-        if (this._poses[0].customNumbering != null) sequenceString += ` ${Utility.arrayToRangeString(this._poses[0].customNumbering)}`;
-        return sequenceString;
+    public getSequence(): [string, (number|null) [] | undefined] {
+        const sequenceString: string = this._poses[0].sequence.sequenceString();
+        return [sequenceString, this._poses[0].customNumbering];
     }
 
     protected showCopySequenceDialog(): void {

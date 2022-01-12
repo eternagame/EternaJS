@@ -666,7 +666,7 @@ export default class PuzzleEditMode extends GameMode {
                     pose.molecularBindingSite = null;
                 }
                 this.poseEditByTarget(0);
-                GameMode.mol3DGate?.updateSequence(this.getSequence().split(' '));
+                GameMode.mol3DGate?.updateSequence(this.getSequence());
             }
         });
     }
@@ -936,7 +936,7 @@ export default class PuzzleEditMode extends GameMode {
 
         this.updateScore();
         // undo sequence change in 3D
-        GameMode.mol3DGate?.updateSequence(this.getSequence().split(' '));
+        GameMode.mol3DGate?.updateSequence(this.getSequence());
         const diff = this.getStackDiffernce(this._seqStack[this._stackLevel - 1][0].sequence,
             this._seqStack[this._stackLevel][0].sequence);
         diff.forEach((n) => {
@@ -962,7 +962,7 @@ export default class PuzzleEditMode extends GameMode {
         this.updateScore();
 
         // undo sequence change in 3D
-        GameMode.mol3DGate?.updateSequence(this.getSequence().split(' '));
+        GameMode.mol3DGate?.updateSequence(this.getSequence());
         const diff = this.getStackDiffernce(this._seqStack[this._stackLevel + 1][0].sequence,
             this._seqStack[this._stackLevel][0].sequence);
         diff.forEach((n) => {

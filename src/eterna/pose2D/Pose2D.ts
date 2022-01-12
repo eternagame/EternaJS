@@ -2068,7 +2068,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._poseEditCallback();
 
             GameMode.mol3DGate?.updateSequence(
-                this._poseField.gameMode.getSequence().split(' ')
+                this._poseField.gameMode.getSequence()
             );
         }
     }

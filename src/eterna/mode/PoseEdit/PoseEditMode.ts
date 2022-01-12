@@ -1050,9 +1050,9 @@ export default class PoseEditMode extends GameMode {
         const threePath = this._puzzle.getThreePath();
         if (threePath) {
             const url = new URL(threePath, Eterna.SERVER_URL);
-            const sequence = this.getSequence().split(' ')[0];
+            const sequence = this.getSequence();
             Mol3DGate.checkModelFile(url.href).then((resCount:number) => {
-                if (resCount === sequence.length) {
+                if (resCount === sequence[0].length) {
                     this.add3DSprite(url.href, this._puzzle.getSecstructs()[0]);
                 } else {
                     const PROMPT = '3D Structure is mismatched with the puzzle.';
@@ -3484,7 +3484,7 @@ export default class PoseEditMode extends GameMode {
         this.transformPosesMarkers();
 
         // undo sequence change in 3D
-        GameMode.mol3DGate?.updateSequence(this.getSequence().split(' '));
+        GameMode.mol3DGate?.updateSequence(this.getSequence());
         const diff = this.getStackDiffernce(before, after);
         diff.forEach((n) => {
             GameMode.mol3DGate?.viewerEx?.selectEBaseObject(n);
@@ -3509,7 +3509,7 @@ export default class PoseEditMode extends GameMode {
         this.transformPosesMarkers();
 
         // undo sequence change in 3D
-        GameMode.mol3DGate?.updateSequence(this.getSequence().split(' '));
+        GameMode.mol3DGate?.updateSequence(this.getSequence());
         const diff = this.getStackDiffernce(before, after);
         diff.forEach((n) => {
             GameMode.mol3DGate?.viewerEx?.selectEBaseObject(n);
