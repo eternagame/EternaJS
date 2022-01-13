@@ -30,7 +30,6 @@ export default class Mol3DGate {
     protected poseMode: GameMode;
     private readonly secStruct: string;
     protected colorChangeMap = new Map();
-    public bShowAnnotations: boolean = true;
     public _3DFilePath: string | File | Blob = '';
 
     protected myColorScheme: string;
@@ -170,12 +169,6 @@ export default class Mol3DGate {
                     this.viewerEx.spark.setURL(Bitmaps.BonusSymbol);
                 }
             });
-    }
-
-    public showAnnotations(bShow: boolean) {
-        this.bShowAnnotations = bShow;
-        if (!bShow) GameMode._3DView?.hideAnnotations();
-        else this.viewerEx.requestRender();
     }
 
     public static async checkModelFile(path: string | File | Blob) {

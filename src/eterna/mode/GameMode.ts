@@ -83,7 +83,6 @@ export default abstract class GameMode extends AppMode {
         if (!GameMode._3DView.pixiContainer) return;
 
         this.addObject(GameMode._3DView, this.poseLayer);
-        GameMode._3DView.removeAnnotations();
 
         const callback:PixiRenderCallback = NGLCallback;
         GameMode.mol3DGate = new Mol3DGate(filePath, GameMode._3DView.pixiContainer,

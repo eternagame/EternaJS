@@ -2855,10 +2855,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        if (this._redraw) {
-            GameMode.mol3DGate?.showAnnotations(this.showNumbering);
-        }
-
         this._redraw = false;
 
         this._moleculeLayer.visible = false;

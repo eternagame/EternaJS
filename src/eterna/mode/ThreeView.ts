@@ -277,7 +277,6 @@ export default class ThreeView extends ContainerObject implements MouseWheelList
     private nglSpriteCanvas: HTMLCanvasElement;
     private nglSpriteContext: CanvasRenderingContext2D | null;
     private nglTexture: BaseTexture;
-    public nglTextArray: Text[];
     private nglMask: Graphics;
 
     private frameContainer: FrameContainer;
@@ -413,13 +412,6 @@ export default class ThreeView extends ContainerObject implements MouseWheelList
         menu.addItem('Pan', moveContainer).clicked.connect(() => this.setNGLMovState());
         menu.addItem('Rotate', rotateContainer).clicked.connect(() => this.setNGLRotateState());
         return menu;
-    }
-
-    public removeAnnotations() {
-        this.nglTextArray.forEach((t) => {
-            this.nglContainer.removeChild(t);
-        });
-        this.nglTextArray = new Array(0);
     }
 
     public hideTooltip() {
@@ -715,7 +707,6 @@ export default class ThreeView extends ContainerObject implements MouseWheelList
         this.nglMask.endFill();
         this.nglContainer.addChild(this.nglMask);
 
-        this.nglTextArray = new Array(0);
         this.nglSpriteCanvas = document.createElement('canvas');
         this.nglSpriteCanvas.width = window.screen.width;
         this.nglSpriteCanvas.height = window.screen.height;
@@ -873,12 +864,6 @@ export default class ThreeView extends ContainerObject implements MouseWheelList
             }
             this.nglTexture.update();
         }
-    }
-
-    public hideAnnotations() {
-        this.nglTextArray.forEach((text) => {
-            text.visible = false;
-        });
     }
 
     public onMenuClick() {
