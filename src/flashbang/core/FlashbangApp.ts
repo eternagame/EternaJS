@@ -43,7 +43,6 @@ export default class FlashbangApp {
         window.addEventListener(KeyboardEventType.KEY_UP, (e) => this.onKeyboardEvent(e));
         window.addEventListener('wheel', (e) => this.onMouseWheelEvent(e));
         window.addEventListener('contextmenu', (e) => this.onContextMenuEvent(e));
-        window.addEventListener('oncontextmenu', (e) => this.onContextMenuEvent(e));
         window.addEventListener('focus', () => { this.isActive.value = true; });
         window.addEventListener('blur', () => { this.isActive.value = false; });
 
