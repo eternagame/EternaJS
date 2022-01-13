@@ -333,7 +333,6 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         if (!this.display.visible || !this.containsPoint(mouse.x, mouse.y)) {
             return false;
         }
-
         if (e.deltaY < 0) {
             if (e.deltaY < -2 && e.deltaY < this._lastDeltaY) this._debounceZoomIn();
             this._lastDeltaY = e.deltaY;
