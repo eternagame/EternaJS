@@ -73,11 +73,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public static readonly COLOR_CURSOR: number = 0xFFC0CB;
     public static readonly ZOOM_SPACINGS: number[] = [45, 30, 20, 14, 7];
 
-    public static scope: Pose2D;
-
     constructor(poseField: PoseField, editable: boolean, annotationManager: AnnotationManager) {
         super();
-        Pose2D.scope = this;
         this._poseField = poseField;
         this._editable = editable;
         this._annotationManager = annotationManager;
@@ -1242,7 +1239,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         if (closestIndex >= 0 && this._currentColor >= 0) {
-            this._poseField.gameMode.mouseHovered(closestIndex + 1, this._currentColor);
+            GameMode.mol3DGate?.mouse2DHovered(closestIndex + 1, this._currentColor);
 
             this.onBaseMouseMove(closestIndex);
 
@@ -1266,7 +1263,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         } else {
             this._lastColoredIndex = -1;
-            this._poseField.gameMode.mouseHovered(-1, 0);
+            GameMode.mol3DGate?.mouse2DHovered(-1, 0);
         }
 
         if (!this._coloring) {
@@ -2067,9 +2064,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (this._poseEditCallback != null) {
             this._poseEditCallback();
 
-            GameMode.mol3DGate?.updateSequence(
-                this._poseField.gameMode.getSequence()
-            );
+            GameMode.mol3DGate?.updateSequence([this.sequence.sequenceString(), this.customNumbering]);
         }
     }
 

@@ -775,7 +775,7 @@ export default class PoseEditMode extends GameMode {
         };
 
         for (let ii = 0; ii < targetConditions.length; ii++) {
-            const poseField: PoseField = new PoseField(this, true, this._annotationManager);
+            const poseField: PoseField = new PoseField(true, this._annotationManager);
             this.addObject(poseField, this.poseLayer);
             const pose: Pose2D = poseField.pose;
             bindAddBaseCB(pose, ii);

@@ -179,7 +179,7 @@ export default class FeedbackViewMode extends GameMode {
         // We don't support annotations here right now, but the pose calls some methods on it
         const annotationManager = new AnnotationManager(ToolbarType.FEEDBACK);
         for (let ii = 0; ii < secstructs.length; ii++) {
-            const poseField: PoseField = new PoseField(this, false, annotationManager);
+            const poseField: PoseField = new PoseField(false, annotationManager);
             this.addObject(poseField, this.poseLayer);
 
             const vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);

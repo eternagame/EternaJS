@@ -5,7 +5,6 @@ import {
 } from 'flashbang';
 import ROPWait from 'eterna/rscript/ROPWait';
 import debounce from 'lodash.debounce';
-import GameMode from 'eterna/mode/GameMode';
 import AnnotationManager from 'eterna/AnnotationManager';
 import Pose2D from './Pose2D';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
@@ -17,11 +16,8 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
     private static readonly SCORES_POSITION_Y = 128;
 
-    public readonly gameMode: GameMode;
-
-    constructor(gameMode: GameMode, edit: boolean, annotationManager: AnnotationManager) {
+    constructor(edit: boolean, annotationManager: AnnotationManager) {
         super();
-        this.gameMode = gameMode;
         this._pose = new Pose2D(this, edit, annotationManager);
         this._annotationManager = annotationManager;
 

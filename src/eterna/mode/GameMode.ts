@@ -51,32 +51,26 @@ export default abstract class GameMode extends AppMode {
     // members for 3D
     public static _3DView: ThreeView | undefined = undefined;
     public static mol3DGate: Mol3DGate | undefined = undefined;
-    public static _scope: GameMode;
 
     constructor() {
         super();
-        GameMode._scope = this;
-        window.addEventListener('picking', this.handle3DPicking);
+        const handler = (e: Event) => this.handle3DPicking(e);
+        window.addEventListener('picking', handler);
+        this.regs?.add({close: () => window.removeEventListener('picking', handler)});
     }
 
     protected handle3DPicking(e:Event) {
-        const scope = GameMode._scope;
         const ce = <CustomEvent>e;
         const closestIndex: number = ce.detail.resno;
         if (ce.detail.action === 'hover') {
-            scope._poses.forEach((pose) => {
+            this._poses.forEach((pose) => {
                 pose.on3DPickingMouseMoved(closestIndex - 1);
             });
         } else if (ce.detail.action === 'clicked') {
-            scope._poses.forEach((pose) => {
+            this._poses.forEach((pose) => {
                 pose.simulateMousedownCallback(closestIndex - 1);
             });
         }
-    }
-
-    // transfer the mouse hover from 2D to 3D
-    public mouseHovered(index: number, color: number) {
-        GameMode.mol3DGate?.mouse2DHovered(index, color);
     }
 
     // make 3d view on game scene with cif file

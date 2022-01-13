@@ -350,7 +350,7 @@ export default class PuzzleEditMode extends GameMode {
                 defaultPairs = SecStruct.fromParens(defaultStructure);
             }
 
-            const poseField: PoseField = new PoseField(this, true, this._annotationManager);
+            const poseField: PoseField = new PoseField(true, this._annotationManager);
             this.addObject(poseField, this.poseLayer);
             const {pose} = poseField;
             pose.scoreFolder = this._folder;
