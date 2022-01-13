@@ -192,8 +192,6 @@ export default class PoseField extends ContainerObject implements KeyboardListen
             return;
         }
 
-        if (GameMode._3DView?.isOver3DCanvas) return;
-
         const pointerId = e.data.identifier;
         const {x, y} = e.data.global;
         this._interactionCache.set(pointerId, new Point(x, y));
@@ -207,10 +205,6 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     }
 
     private onPointerMove(e: InteractionEvent) {
-        if (this._interactionCache.size === 0 && GameMode._3DView?.isOver3DCanvas) {
-            return;
-        }
-
         this._interactionCache.forEach((_point, pointerId) => {
             if (pointerId === e.data.identifier) {
                 const {x, y} = e.data.global;
@@ -343,8 +337,6 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         if (!this.display.visible || !this.containsPoint(mouse.x, mouse.y)) {
             return false;
         }
-
-        if (GameMode._3DView?.isOver3DCanvas) { return false; }
 
         if (e.deltaY < 0) {
             if (e.deltaY < -2 && e.deltaY < this._lastDeltaY) this._debounceZoomIn();

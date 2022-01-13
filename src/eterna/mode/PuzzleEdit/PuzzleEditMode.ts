@@ -571,11 +571,6 @@ export default class PuzzleEditMode extends GameMode {
             return null;
         }
 
-        // add 3D Menu
-        if (GameMode._3DView?.isOver3DCanvas) {
-            return null;
-        }
-
         const menu = new ContextMenu({horizontal: false});
 
         menu.addItem('Preferences').clicked.connect(() => this.showViewOptionsDialog());

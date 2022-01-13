@@ -1640,11 +1640,6 @@ export default class PoseEditMode extends GameMode {
             return null;
         }
 
-        // discard menu in 3D window
-        if (GameMode._3DView?.isOver3DCanvas) {
-            return null;
-        }
-
         const menu = new ContextMenu({horizontal: false});
 
         menu.addItem('Preferences').clicked.connect(() => this.showViewOptionsDialog());

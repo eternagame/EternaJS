@@ -25,7 +25,8 @@ import {
     VAlign,
     DisplayUtil,
     SpriteObject,
-    GameObjectRef
+    GameObjectRef,
+    MouseWheelListener
 } from 'flashbang';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import Fonts from 'eterna/util/Fonts';
@@ -102,6 +103,7 @@ class FrameContainer extends Container {
         if (GameMode._3DView._contextMenuDialogRef.isLive) return;
         if (GameMode._3DView.gameMode._contextMenuDialogRef.isLive) return;
         if (GameMode._3DView.gameMode._dialogRef.isLive) return;
+        if (GameMode._3DView.isOver3DCanvas) e.stopImmediatePropagation();
         if (e instanceof MouseEvent) {
             const pos = GameMode._3DView.getPosition();
             const init: MouseEventInit = {
@@ -132,7 +134,6 @@ class FrameContainer extends Container {
                 if (e.type === 'mousedown') this.pressed = true;
                 const viewer = GameMode.mol3DGate.viewerEx;
                 viewer?.getWebGLCanvas().dispatchEvent(myEvent);
-                e.stopPropagation();
             }
             if (e.type === 'mouseup') this.pressed = false;
             if (this.pressed) e.stopPropagation();
@@ -147,6 +148,7 @@ class FrameContainer extends Container {
         if (GameMode._3DView._contextMenuDialogRef.isLive) return;
         if (GameMode._3DView.gameMode._contextMenuDialogRef.isLive) return;
         if (GameMode._3DView.gameMode._dialogRef.isLive) return;
+        if (GameMode._3DView.isOver3DCanvas) e.stopImmediatePropagation();
         const viewerEx = GameMode.mol3DGate.viewerEx;
         if (!viewerEx) return;
         const pos = GameMode._3DView.getPosition();
@@ -189,7 +191,6 @@ class FrameContainer extends Container {
             if (GameMode._3DView.isOver3DCanvas || this.pressed) {
                 if (e.type === 'touchstart') this.pressed = true;
                 viewerEx.getWebGLCanvas().dispatchEvent(touchEvent);
-                e.stopPropagation();
             }
             if (!GameMode._3DView.isOver3DCanvas) {
                 if (e.type === 'touchstart') this.pressed = false;
@@ -227,7 +228,7 @@ interface ViewStatus {
     w: number;
     h: number;
 }
-export default class ThreeView extends ContainerObject {
+export default class ThreeView extends ContainerObject implements MouseWheelListener {
     public pixiContainer: HTMLDivElement;
     private contentLay: VLayoutContainer;
     private titleLay: HLayoutContainer;
@@ -307,6 +308,15 @@ export default class ThreeView extends ContainerObject {
 
         window.addEventListener('resize', this.onResize, false);
         window.addEventListener('tooltip', this.onTooltip);
+    }
+
+    public onMouseWheelEvent(e: WheelEvent): boolean {
+        if (this.isOver3DCanvas) {
+            GameMode.mol3DGate?.viewerEx.getWebGLCanvas().dispatchEvent(new WheelEvent(e.type, e));
+            return true;
+        }
+
+        return false;
     }
 
     public onTooltip(e: Event) {
@@ -826,6 +836,9 @@ export default class ThreeView extends ContainerObject {
         this.maxButton.clicked.connect(() => this.onMaxButton());
         this.minButton.clicked.connect(() => this.onMinButton());
         this.menuButton.clicked.connect(() => this.onMenuClick());
+
+        Assert.assertIsDefined(this.mode);
+        this.regs.add(this.mode.mouseWheelInput.pushListener(this));
 
         this.onResized();
     }

@@ -56,7 +56,6 @@ export default abstract class GameMode extends AppMode {
     constructor() {
         super();
         GameMode._scope = this;
-        window.addEventListener('wheel', this.MouseWheelEvent);
         window.addEventListener('picking', this.handle3DPicking);
     }
 
@@ -72,12 +71,6 @@ export default abstract class GameMode extends AppMode {
             scope._poses.forEach((pose) => {
                 pose.simulateMousedownCallback(closestIndex - 1);
             });
-        }
-    }
-
-    protected MouseWheelEvent(e: WheelEvent): void {
-        if (GameMode._3DView?.isOver3DCanvas) {
-            GameMode.mol3DGate?.viewerEx.getWebGLCanvas().dispatchEvent(new WheelEvent(e.type, e));
         }
     }
 
@@ -382,12 +375,6 @@ export default abstract class GameMode extends AppMode {
 
     public onContextMenuEvent(e: Event): void {
         Assert.assertIsDefined(Flashbang.globalMouse);
-
-        if (GameMode._3DView?.isOver3DCanvas) {
-            e.preventDefault();
-            e.stopPropagation();
-            return;
-        }
 
         let pos = Flashbang.globalMouse;
         const ee = <PointerEvent> e;
