@@ -34,7 +34,7 @@ export enum ToolbarType {
     FEEDBACK
 }
 
-export class ToolbarButton extends GameButton {
+class ToolbarButton extends GameButton {
     protected added() {
         super.added();
         this._arrow = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgToolbarArrow));
