@@ -145,7 +145,7 @@ export default class VScrollBox extends ContainerObject implements MouseWheelLis
             this._scrollThumb.display.visible = true;
         } else if (
             (this._scrollContainer.content.height <= 0
-                || this._scrollContainer.content.height <= this._height)
+            || this._scrollContainer.content.height <= this._height)
             && this._scrollThumb
         ) {
             this._scrollThumb.display.visible = false;

@@ -198,9 +198,7 @@ export default class ScrollContainer extends ContainerObject {
             // to re-fire the event on.
             const candidateEls = document.elementsFromPoint(e.clientX, e.clientY);
             const newTarget = candidateEls.find((el) => !this._htmlWrapper.contains(el));
-            if (!newTarget) {
-                return;
-            }
+            if (!newTarget) return;
 
             // If we transition from an unmasked portion of an overlay element to the masked portion,
             // we won't trigger the pointerover event because the browser thinks we're still on

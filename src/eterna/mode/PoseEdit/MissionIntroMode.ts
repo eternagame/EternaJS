@@ -117,8 +117,8 @@ export default class MissionIntroMode extends AppMode {
                 Math.min(
                     Flashbang.stageWidth - playButton.container.width - 27,
                     missionIntroPanel.container.x
-                    + missionIntroPanel.size.x
-                    - (this._constraintBoxes.length > 0 ? playButton.container.width : 0)
+                        + missionIntroPanel.size.x
+                        - (this._constraintBoxes.length > 0 ? playButton.container.width : 0)
                 ),
                 Math.min(
                     Flashbang.stageHeight - 27 - playButton.container.height,
