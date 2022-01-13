@@ -74,17 +74,11 @@ export default class Puzzle {
         return seq;
     }
 
-    public getThreePath() {
-        return this._threePath;
-    }
-
-    constructor(nid: number, name: string, puzzleType: PuzzleType,
-        puzzleAuthor: string, threePath:string|undefined|null = undefined) {
+    constructor(nid: number, name: string, puzzleType: PuzzleType, puzzleAuthor: string) {
         this._nid = nid;
         this._name = name;
         this._puzzleType = puzzleType;
         this._puzzleAuthor = puzzleAuthor;
-        if (threePath) this._threePath = threePath;
 
         if (puzzleType === PuzzleType.EXPERIMENTAL) {
             this._folder = FolderManager.instance.lastUsedFolder;
@@ -561,7 +555,15 @@ export default class Puzzle {
         this._alreadySolved = alreadySolved;
     }
 
-    private _threePath: string | undefined | null = undefined;
+    public get threePath(): string | null {
+        return this._threePath;
+    }
+
+    public set threePath(path: string | null) {
+        this._threePath = path;
+    }
+
+    private _threePath: string | null = null;
     private readonly _nid: number;
     private readonly _name: string;
     private readonly _puzzleType: PuzzleType;

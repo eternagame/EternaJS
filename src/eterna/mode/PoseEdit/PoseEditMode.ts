@@ -1047,7 +1047,7 @@ export default class PoseEditMode extends GameMode {
         this._poseState = this._puzzle.defaultMode;
 
         // add 3DWindow
-        const threePath = this._puzzle.getThreePath();
+        const threePath = this._puzzle.threePath;
         if (threePath) {
             const url = new URL(threePath, Eterna.SERVER_URL);
             const sequence = this.getSequence();

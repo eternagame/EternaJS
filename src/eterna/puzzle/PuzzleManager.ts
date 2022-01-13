@@ -83,8 +83,7 @@ export default class PuzzleManager {
     }
 
     public async parsePuzzle(json: PuzzleJSON): Promise<Puzzle> {
-        const newpuz: Puzzle = new Puzzle(Number(json['id']),
-            json['title'], json['type'], json['username'], json['3d_structure']);
+        const newpuz: Puzzle = new Puzzle(Number(json['id']), json['title'], json['type'], json['username']);
 
         if (json['body']) {
             // Convention: mission texts are encapsulated by
@@ -180,6 +179,10 @@ export default class PuzzleManager {
 
         if (json['max-votes']) {
             newpuz.maxVotes = Number(json['max-votes']);
+        }
+
+        if (json['3d_structure']) {
+            newpuz.threePath = json['3d_structure'];
         }
 
         if (newpuz.nodeID === 877668) {
