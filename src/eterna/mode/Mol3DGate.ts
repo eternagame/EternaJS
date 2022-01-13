@@ -146,7 +146,7 @@ export default class Mol3DGate {
         this.stageEx.removeAllComponents();
         this.component = null;
 
-        const pairs = SecStruct.fromParens(this.secStruct).pairs;
+        const pairs = SecStruct.fromParens(this.secStruct, true).pairs;
 
         this.stageEx.defaultFileParams = {firstModelOnly: true};
         this.stageEx
