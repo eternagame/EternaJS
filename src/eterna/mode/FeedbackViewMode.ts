@@ -30,6 +30,7 @@ import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 import UITheme from 'eterna/ui/UITheme';
 import AnnotationManager from 'eterna/AnnotationManager';
+import EternaSettingsDialog from 'eterna/ui/EternaSettingsDialog';
 import ViewSolutionOverlay from './DesignBrowser/ViewSolutionOverlay';
 import GameMode from './GameMode';
 
@@ -83,8 +84,14 @@ export default class FeedbackViewMode extends GameMode {
             homeArrow, HAlign.RIGHT, VAlign.CENTER, 8, 8
         );
 
-        this._toolbar = new Toolbar(ToolbarType.FEEDBACK, {states: this._puzzle.getSecstructs().length});
+        this._toolbar = new Toolbar(ToolbarType.FEEDBACK, {states: this._puzzle.getSecstructs().length}, {
+            pairSwapButtonHandler: () => console.log('pairSwapButtonHandler'),
+            baseMarkerButtonHandler: () => console.log('baseMarkerButtonHandler'),
+            settingsButtonHandler: () => this.showSettingsDialog()
+        });
         this.addObject(this._toolbar, this.uiLayer);
+        this.addObject(this._toolbar.estimateButton, this.uiLayer);
+        this.addObject(this._toolbar.targetButton, this.uiLayer);
 
         Assert.assertIsDefined(this._toolbar.zoomOutButton);
         this._toolbar.zoomOutButton.clicked.connect(() => {
@@ -102,7 +109,6 @@ export default class FeedbackViewMode extends GameMode {
 
         this._toolbar.screenshotButton.clicked.connect(() => this.postScreenshot(this.createScreenshot()));
         this._toolbar.viewSolutionsButton.clicked.connect(() => this.loadDesignBrowser());
-        this._toolbar.viewOptionsButton.clicked.connect(() => this.showViewOptionsDialog());
         this._toolbar.letterColorButton.clicked.connect(() => this.showBaseColors());
         this._toolbar.expColorButton.clicked.connect(() => this.showExperimentalColors());
         this._toolbar.specButton.clicked.connect(() => this.showSpec());
@@ -306,6 +312,10 @@ export default class FeedbackViewMode extends GameMode {
 
     private showViewOptionsDialog(): void {
         this.showDialog(new EternaViewOptionsDialog(EternaViewOptionsMode.LAB));
+    }
+
+    private showSettingsDialog(): void {
+        this.showDialog(new EternaSettingsDialog(EternaViewOptionsMode.LAB));
     }
 
     public onKeyboardEvent(e: KeyboardEvent): void {

@@ -46,6 +46,7 @@ import AnnotationManager, {
     AnnotationRange
 } from 'eterna/AnnotationManager';
 import AnnotationDialog from 'eterna/ui/AnnotationDialog';
+import EternaSettingsDialog from 'eterna/ui/EternaSettingsDialog';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
@@ -130,7 +131,6 @@ export default class PuzzleEditMode extends GameMode {
             this.clearUndoStack();
             this.poseEditByTarget(0);
         });
-        this._folderSwitcher.display.position.set(17, 175);
         this.addObject(this._folderSwitcher, this.uiLayer);
 
         this._homeButton = new GameButton()
@@ -185,8 +185,15 @@ export default class PuzzleEditMode extends GameMode {
         this._toolbar = new Toolbar(toolbarType, {
             states: this._numTargets,
             annotationManager: this._annotationManager
+        },
+        {
+            pairSwapButtonHandler: () => this.onEditButtonClicked(RNAPaint.PAIR),
+            baseMarkerButtonHandler: () => this.onEditButtonClicked(RNAPaint.BASE_MARK),
+            settingsButtonHandler: () => this.showSettingsDialog()
         });
         this.addObject(this._toolbar, this.uiLayer);
+        this.addObject(this._toolbar.naturalButton, this.uiLayer);
+        this.addObject(this._toolbar.targetButton, this.uiLayer);
 
         this._toolbar.addBaseButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.ADD_BASE));
         this._toolbar.addPairButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.ADD_PAIR));
@@ -234,8 +241,6 @@ export default class PuzzleEditMode extends GameMode {
                 }
             });
         });
-
-        this._toolbar.viewOptionsButton.clicked.connect(() => this.showViewOptionsDialog());
 
         this._toolbar.resetButton.clicked.connect(() => this.promptForReset());
         this._toolbar.submitButton.clicked.connect(() => this.onSubmitPuzzle());
@@ -526,6 +531,20 @@ export default class PuzzleEditMode extends GameMode {
             HAlign.CENTER, VAlign.BOTTOM, 20, -20
         );
 
+        let w = 17;
+        const h = 175;
+        DisplayUtil.positionRelativeToStage(
+            this._toolbar.naturalButton.display, HAlign.LEFT, VAlign.TOP,
+            HAlign.LEFT, VAlign.TOP, w, h
+        );
+        w += this._toolbar.naturalButton.display.width;
+        DisplayUtil.positionRelativeToStage(
+            this._toolbar.targetButton.display, HAlign.LEFT, VAlign.TOP,
+            HAlign.LEFT, VAlign.TOP, w, h
+        );
+
+        this._folderSwitcher.display.position.set(17, h + this._toolbar.targetButton.display.height + 20);
+
         const toolbarBounds = this._toolbar.display.getBounds();
         for (let ii = 0; ii < this._numTargets; ++ii) {
             const structureInput = this._structureInputs[ii];
@@ -566,6 +585,11 @@ export default class PuzzleEditMode extends GameMode {
 
     protected showViewOptionsDialog() {
         const dialog: EternaViewOptionsDialog = new EternaViewOptionsDialog(EternaViewOptionsMode.PUZZLEMAKER);
+        this.showDialog(dialog);
+    }
+
+    protected showSettingsDialog() {
+        const dialog: EternaSettingsDialog = new EternaSettingsDialog(EternaViewOptionsMode.PUZZLEMAKER);
         this.showDialog(dialog);
     }
 

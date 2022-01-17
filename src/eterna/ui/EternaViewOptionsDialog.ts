@@ -153,7 +153,7 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
     }
 
     protected onBGClicked(): void {
-        this.close(null);
+        // this.close(null);
     }
 
     protected get bgAlpha(): number {

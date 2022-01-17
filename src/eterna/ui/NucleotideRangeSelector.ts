@@ -124,4 +124,9 @@ export default class NucleotideRangeSelector extends Dialog<NucleotideRangeSelec
         Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(updateLocation));
     }
+
+    protected onBGClicked(): void {
+        // Is there a good reason not to enable this?
+        // this.close(null);
+    }
 }

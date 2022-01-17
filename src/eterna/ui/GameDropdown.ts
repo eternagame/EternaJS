@@ -9,11 +9,11 @@ import {
     Graphics,
     Point,
     Text,
-    Container
+    Container,
+    Rectangle
 } from 'pixi.js';
 import Fonts from 'eterna/util/Fonts';
 import {Value} from 'signals';
-import {DropShadowFilter} from '@pixi/filter-drop-shadow';
 import {FontWeight} from 'flashbang/util/TextBuilder';
 import GamePanel, {GamePanelType} from './GamePanel';
 import TextBalloon from './TextBalloon';
@@ -53,7 +53,7 @@ export default class GameDropdown extends ContainerObject {
         this._boxColor = props.color || 0x324B73;
         this._textColor = props.textColor || 0xD0DCE7;
         this._textWeight = props.textWeight || FontWeight.MEDIUM;
-        this._dropShadow = props.dropShadow || false;
+        this._dropShadow = true;// props.dropShadow || false;
         this._checkboxes = props.checkboxes || false;
 
         if (props.width) {
@@ -133,11 +133,12 @@ export default class GameDropdown extends ContainerObject {
         const dropShadowPanel = new GamePanel({
             type: GamePanelType.NORMAL,
             alpha: 1,
-            color: this._boxColor
+            color: this._boxColor,
+            dropShadow: true// this._dropShadow,
         });
-        if (this._dropShadow) {
-            dropShadowPanel.display.filters = [new DropShadowFilter()];
-        }
+        // if (this._dropShadow) {
+        //     dropShadowPanel.display.filters = [new DropShadowFilter()];
+        // }
         this._popup.addObject(dropShadowPanel, scrollViewContainer);
         this._scrollView = new VScrollBox(
             this._box.width,
@@ -162,6 +163,19 @@ export default class GameDropdown extends ContainerObject {
             0, GameDropdown._POPUP_VERTICAL_OFFSET
         );
 
+        document.addEventListener('pointerdown', (e:PointerEvent) => {
+            if (this._popupVisible) {
+                const pt = this._popup.display.toGlobal(new Point());
+                const rect = this._popup.display.getLocalBounds(new Rectangle());
+                const mousePt = new Point(e.clientX, e.clientY);
+                rect.x += pt.x;
+                rect.y += pt.y;
+                if (!rect.contains(mousePt.x, mousePt.y)) {
+                    this._hidePopup();
+                }
+            }
+        });
+
         let yWalker = 0;
         let maxWidth = this._box.width;
         for (const option of this.options) {
@@ -169,7 +183,7 @@ export default class GameDropdown extends ContainerObject {
             const text = new TextBalloon(
                 option,
                 balloonColor,
-                this._width ? 1 : 0.07,
+                0, // this._width ? 1 : 0.07,
                 0,
                 0,
                 this._width,
@@ -180,6 +194,12 @@ export default class GameDropdown extends ContainerObject {
                     : 0
             );
             text.setText(option, this._fontSize, 0xC0DCE7);
+            const txtBack = new Graphics();
+            txtBack.clear();
+            txtBack.beginFill(this._boxColor, 1);
+            txtBack.drawRect(0, 0, this._width ? this._width : 500, GameDropdown._POPUP_ITEM_HEIGHT);
+            txtBack.endFill();
+            text.display.addChildAt(txtBack, 0);
             this._popup.addObject(text, contentLayout);
 
             let checkbox: GameCheckbox | null;
@@ -226,12 +246,20 @@ export default class GameDropdown extends ContainerObject {
                 if (text.text.text !== this.selectedOption.value) {
                     text.setBalloonColor(0x053E7A);
                 }
+                txtBack.clear();
+                txtBack.beginFill(this._boxColor + 0x202020, 1);
+                txtBack.drawRect(0, 0, this._width ? this._width : 500, GameDropdown._POPUP_ITEM_HEIGHT);
+                txtBack.endFill();
             });
             text.pointerOut.connect(() => {
                 text.setText(option, this._fontSize, 0xC0DCE7);
                 if (text.text.text !== this.selectedOption.value) {
                     text.setBalloonColor(this._boxColor);
                 }
+                txtBack.clear();
+                txtBack.beginFill(this._boxColor, 1);
+                txtBack.drawRect(0, 0, this._width ? this._width : 500, GameDropdown._POPUP_ITEM_HEIGHT);
+                txtBack.endFill();
             });
             text.pointerUp.connect(() => {
                 text.setText(option, this._fontSize, 0xC0DCE7);
@@ -373,7 +401,7 @@ export default class GameDropdown extends ContainerObject {
     private static readonly _BORDER_RADIUS: number = 4;
     private static readonly _ARROW_SIDE_SIZE = 10;
     private static readonly _POPUP_VERTICAL_OFFSET = 5;
-    private static readonly _POPUP_VERTICAL_HEIGHT = 100;
+    private static readonly _POPUP_VERTICAL_HEIGHT = 120;
     private static readonly _POPUP_ITEM_HEIGHT = 40;
     private static readonly _POPUP_CHECKBOX_HEIGHT = 18;
     private static readonly _POPUP_CHECKBOX_PADDING = 5;

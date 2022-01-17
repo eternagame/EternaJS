@@ -56,4 +56,9 @@ export default class NucleotideFinder extends Dialog<NucleotideFinderResult> {
         updateLocation();
         this.regs.add(this.mode.resized.connect(updateLocation));
     }
+
+    protected onBGClicked(): void {
+        // Is there a good reason not to enable this?
+        // this.close(null);
+    }
 }

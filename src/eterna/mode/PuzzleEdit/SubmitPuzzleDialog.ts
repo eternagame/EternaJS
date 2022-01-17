@@ -128,6 +128,11 @@ export default class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
         this.regs.add(this.mode.resized.connect(updateLocation));
     }
 
+    protected onBGClicked(): void {
+        // Is there a good reason not to enable this?
+        // this.close(null);
+    }
+
     private validate(details: SubmitPuzzleDetails): string | null {
         if (!details.title || details.title.length === 0) {
             return 'You must enter a title for your puzzle';

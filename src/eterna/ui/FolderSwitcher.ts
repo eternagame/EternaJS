@@ -20,6 +20,9 @@ export default class FolderSwitcher extends ContainerObject {
             options: FolderManager.instance.getFolders(this._canUseFolder),
             defaultOption: defaultFolder?.name || FolderManager.instance.getFolders(this._canUseFolder)[0],
             borderWidth: 0,
+            height: 32,
+            color: 0x043468,
+            textColor: 0xFFFFFF,
             dropShadow: true
         });
 
@@ -41,8 +44,11 @@ export default class FolderSwitcher extends ContainerObject {
     }
 
     protected added() {
-        this.display.addChild(new Sprite(BitmapManager.getBitmap(Bitmaps.Folder)));
-        this._dropdown.display.position.x = 26;
+        const icon = new Sprite(BitmapManager.getBitmap(Bitmaps.Folder));
+        icon.height = 32;
+        icon.scale.x = icon.scale.y;
+        this.display.addChild(icon);
+        this._dropdown.display.position.x = icon.width + 4;
         this.addObject(this._dropdown, this.display);
     }
 

@@ -45,8 +45,12 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
             }
             e.stopPropagation();
         });
-        bgTarget.pointerUp.connect((e) => e.stopPropagation());
-        bgTarget.pointerMove.connect((e) => e.stopPropagation());
+        bgTarget.pointerUp.connect((e) => {
+            e.stopPropagation();
+        });
+        bgTarget.pointerMove.connect((e) => {
+            e.stopPropagation();
+        });
 
         Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.keyboardInput.pushListener(this));

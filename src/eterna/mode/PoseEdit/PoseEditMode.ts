@@ -70,6 +70,7 @@ import AnnotationManager, {
 } from 'eterna/AnnotationManager';
 import LibrarySelectionConstraint from 'eterna/constraints/constraints/LibrarySelectionConstraint';
 import AnnotationDialog from 'eterna/ui/AnnotationDialog';
+import EternaSettingsDialog from 'eterna/ui/EternaSettingsDialog';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -206,8 +207,15 @@ export default class PoseEditMode extends GameMode {
             showAdvancedMenus: this._puzzle.puzzleType !== PuzzleType.PROGRESSION,
             showLibrarySelect: this._puzzle.constraints?.some((con) => con instanceof LibrarySelectionConstraint),
             annotationManager: this._annotationManager
+        }, {
+            pairSwapButtonHandler: this.onSwapClicked.bind(this),
+            baseMarkerButtonHandler: () => this.setPosesColor(RNAPaint.BASE_MARK),
+            settingsButtonHandler: () => this.showSettingsDialog()
         });
         this.addObject(this._toolbar, this.uiLayer);
+        this.addObject(this._toolbar.naturalButton, this.uiLayer);
+        this.addObject(this._toolbar.targetButton, this.uiLayer);
+        this.addObject(this._toolbar.stateToggle, this.uiLayer);
 
         this._helpBar = new HelpBar({
             onHintClicked: this._puzzle.hint
@@ -245,12 +253,13 @@ export default class PoseEditMode extends GameMode {
         this._toolbar.submitButton.clicked.connect(() => this.submitCurrentPose());
         this._toolbar.viewSolutionsButton.clicked.connect(() => this.openDesignBrowserForOurPuzzle());
         this._toolbar.resetButton.clicked.connect(() => this.showResetPrompt());
+
         this._toolbar.naturalButton.clicked.connect(() => this.togglePoseState());
         this._toolbar.targetButton.clicked.connect(() => this.togglePoseState());
+
         this._toolbar.specButton.clicked.connect(() => this.showSpec());
         this._toolbar.copyButton.clicked.connect(() => this.showCopySequenceDialog());
         this._toolbar.pasteButton.clicked.connect(() => this.showPasteSequenceDialog());
-        this._toolbar.viewOptionsButton.clicked.connect(() => this.showViewOptionsDialog());
         this._toolbar.screenshotButton.clicked.connect(() => this.postScreenshot(this.createScreenshot()));
 
         this._toolbar.pipButton.clicked.connect(() => this.togglePip());
@@ -423,6 +432,26 @@ export default class PoseEditMode extends GameMode {
             HAlign.CENTER, VAlign.TOP, 0, 8
         );
 
+        let w = 17;
+        const h = 175;
+        DisplayUtil.positionRelativeToStage(
+            this._toolbar.naturalButton.display, HAlign.LEFT, VAlign.TOP,
+            HAlign.LEFT, VAlign.TOP, w, h
+        );
+        w += this._toolbar.naturalButton.display.width;
+        DisplayUtil.positionRelativeToStage(
+            this._toolbar.targetButton.display, HAlign.LEFT, VAlign.TOP,
+            HAlign.LEFT, VAlign.TOP, w, h
+        );
+        w += this._toolbar.targetButton.display.width + 20;
+        DisplayUtil.positionRelativeToStage(
+            this._toolbar.stateToggle.display, HAlign.LEFT, VAlign.TOP,
+            HAlign.LEFT, VAlign.TOP, w,
+            h + (this._toolbar.targetButton.display.height - this._toolbar.stateToggle.display.height) / 2
+        );
+
+        this._folderSwitcher.display.position.set(17, h + this._toolbar.targetButton.display.height + 20);
+
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
         this._exitButton.display.position.set(
@@ -455,6 +484,13 @@ export default class PoseEditMode extends GameMode {
             ? EternaViewOptionsMode.LAB
             : EternaViewOptionsMode.PUZZLE;
         this.showDialog(new EternaViewOptionsDialog(mode));
+    }
+
+    private showSettingsDialog(): void {
+        const mode = this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
+            ? EternaViewOptionsMode.LAB
+            : EternaViewOptionsMode.PUZZLE;
+        this.showDialog(new EternaSettingsDialog(mode));
     }
 
     public set puzzleDefaultMode(defaultMode: PoseState) {
@@ -848,7 +884,6 @@ export default class PoseEditMode extends GameMode {
             initialFolder,
             this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
         );
-        this._folderSwitcher.display.position.set(17, 175);
         this.addObject(this._folderSwitcher, this.uiLayer);
 
         this._folderSwitcher.selectedFolder.connectNotify((folder) => {
@@ -1845,6 +1880,7 @@ export default class PoseEditMode extends GameMode {
 
         this._toolbar.targetButton.toggled.value = false;
         this._toolbar.naturalButton.toggled.value = true;
+
         this._toolbar.targetButton.hotkey(KeyCode.Space);
         this._toolbar.naturalButton.hotkey();
 
@@ -1859,6 +1895,7 @@ export default class PoseEditMode extends GameMode {
 
         this._toolbar.targetButton.toggled.value = true;
         this._toolbar.naturalButton.toggled.value = false;
+
         this._toolbar.naturalButton.hotkey(KeyCode.Space);
         this._toolbar.targetButton.hotkey();
 

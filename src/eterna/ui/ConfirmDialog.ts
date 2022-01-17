@@ -95,6 +95,11 @@ export default class ConfirmDialog extends Dialog<boolean> {
         this.regs.add(this._mode.resized.connect(updateLocation));
     }
 
+    protected onBGClicked(): void {
+        // Is there a good reason not to enable this?
+        // this.close(null);
+    }
+
     private readonly _prompt: string;
     private readonly _useHTML: boolean;
 }

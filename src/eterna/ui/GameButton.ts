@@ -11,14 +11,27 @@ import Fonts from 'eterna/util/Fonts';
 import Sounds from 'eterna/resources/Sounds';
 import Tooltips from './Tooltips';
 
+export enum ButtonCategory {
+    INFO = 'INFO',
+    SOLVE = 'SOLVE',
+    CREATE = 'CREATE',
+    VIEW = 'VIEW',
+    ANNOTATE = 'ANNOTATE',
+    IMPORT_EXPORT = 'IMPORT/EXPORT',
+    CUSTOM_LAYOUT = 'CUSTOM LAYOUT',
+}
 export default class GameButton extends Button implements KeyboardListener {
     public readonly toggled: Value<boolean> = new Value<boolean>(false);
     public static readonly DEFAULT_DOWN_SOUND: string = Sounds.SoundButtonClick;
+    public name: string | null = null;
+    public category: ButtonCategory | null = null;
+    private size: number = 0;
+    public age: number = 0;
 
     constructor() {
         super();
 
-        this.downSound = GameButton.DEFAULT_DOWN_SOUND;
+        this.downSound = null;// GameButton.DEFAULT_DOWN_SOUND;
 
         this._content = new Container();
         this.container.addChild(this._content);
@@ -61,6 +74,16 @@ export default class GameButton extends Button implements KeyboardListener {
 
     public selected(display: DisplayObject | Texture | string): GameButton {
         this._selectedState = GameButton.getDisplayObject(display);
+        return this;
+    }
+
+    public setCategory(category: ButtonCategory): GameButton {
+        this.category = category;
+        return this;
+    }
+
+    public setName(name: string): GameButton {
+        this.name = name;
         return this;
     }
 
@@ -113,6 +136,12 @@ export default class GameButton extends Button implements KeyboardListener {
 
     public scaleBitmapToLabel(): GameButton {
         this._scaleIconToLabel = true;
+        this.needsRedraw();
+        return this;
+    }
+
+    public scaleTo(size:number): GameButton {
+        this.size = size;
         this.needsRedraw();
         return this;
     }
@@ -245,6 +274,9 @@ export default class GameButton extends Button implements KeyboardListener {
                     .endFill();
                 this._content.addChildAt(hitbox, 0);
             }
+        } else if (this.size > 0 && icon != null) {
+            const scale: number = this.size / this._content.height;
+            icon.scale.set(scale, scale);
         }
     }
 

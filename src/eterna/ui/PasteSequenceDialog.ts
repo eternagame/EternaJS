@@ -66,5 +66,10 @@ export default class PasteSequenceDialog extends Dialog<Sequence> {
         this.close(s as Sequence);
     }
 
+    protected onBGClicked(): void {
+        // Is there a good reason not to enable this?
+        // this.close(null);
+    }
+
     private readonly _customNumbering: (number | null)[] | undefined;
 }

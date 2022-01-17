@@ -69,6 +69,11 @@ export default class SubmitPoseDialog extends Dialog<SubmitPoseDetails> {
         this.regs.add(this.mode.resized.connect(updateLocation));
     }
 
+    protected onBGClicked(): void {
+        // Is there a good reason not to enable this?
+        // this.close(null);
+    }
+
     private readonly _initialState: SubmitPoseDetails;
     public saveInputs: Signal<SubmitPoseDetails> = new Signal();
 }

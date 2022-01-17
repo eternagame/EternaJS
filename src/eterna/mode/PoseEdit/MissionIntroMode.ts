@@ -40,6 +40,7 @@ export default class MissionIntroMode extends AppMode {
         new DisplayObjectPointerTarget(background)
             .pointerDown.filter(InputUtil.IsLeftMouse)
             .connect(() => this.play());
+        background.interactive = false; // kkk
 
         const playButtonBg = new Graphics()
             .beginFill(0x54B54E)

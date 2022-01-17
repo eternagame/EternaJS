@@ -35,6 +35,11 @@ export default class UILockDialog extends Dialog<void> {
         }
     }
 
+    protected onBGClicked(): void {
+        // Is there a good reason not to enable this?
+        // this.close(null);
+    }
+
     protected get bgAlpha(): number {
         return 0.2;
     }

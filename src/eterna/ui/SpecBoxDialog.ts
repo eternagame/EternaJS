@@ -65,6 +65,11 @@ export default class SpecBoxDialog extends Dialog<boolean> {
         this.regs.add(this.mode.resized.connect(updateBounds));
     }
 
+    protected onBGClicked(): void {
+        // Is there a good reason not to enable this?
+        // this.close(null);
+    }
+
     private readonly _datablock: UndoBlock;
     private readonly _showMinimizeButton: boolean;
 }
