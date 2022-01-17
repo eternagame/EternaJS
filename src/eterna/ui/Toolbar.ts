@@ -7,7 +7,7 @@ import Booster from 'eterna/mode/PoseEdit/Booster';
 import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
 import {
     ContainerObject, Flashbang, VLayoutContainer, HLayoutContainer,
-    KeyCode, VAlign, HAlign, DisplayUtil, LocationTask, Easing, Assert, ParallelTask, VisibleTask, AlphaTask
+    KeyCode, VAlign, HAlign, DisplayUtil, LocationTask, Easing, Assert, ParallelTask, VisibleTask
 } from 'flashbang';
 import {BoostersData} from 'eterna/puzzle/Puzzle';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -1655,10 +1655,6 @@ export default class Toolbar extends ContainerObject {
         }
     }
 
-    private _getButtonCategory(target: DisplayObject): ButtonCategory | null {
-        return Array.from(this._tabs.values()).flat().find((button) => button.display === target)?.category ?? null;
-    }
-
     private _getButtonName(target: DisplayObject): string | null {
         return Array.from(this._tabs.values()).flat().find((button) => button.display === target)?.name ?? null;
     }
@@ -1728,12 +1724,10 @@ export default class Toolbar extends ContainerObject {
                 Assert.isTrue(anotherButtonGroup._content === startPointContainer);
                 let name = null;
                 let button:GameButton | null = null;
-                let category:ButtonCategory | null = null;
                 this.topButtons.forEach((bt, key) => {
                     if (bt.display === draggingElement) {
                         name = key;
                         button = bt;
-                        category = bt.category;
                     }
                 });
                 if (name && button) {
@@ -1779,10 +1773,6 @@ export default class Toolbar extends ContainerObject {
                         }
                     }
                 }
-                // if (this._currentTab.category === this._getButtonCategory(replacedButton)) {
-                //     // this._scrollContainer.content.addChildAt(replacedButton, this._draggingElementIndex);
-                //     this._scrollContainer.content.addChild(replacedButton);
-                // }
             }
         }
         endButtonGroup.resizeContainer();
@@ -2142,11 +2132,8 @@ export default class Toolbar extends ContainerObject {
                     0,
                     3, Easing.easeOut, this.lowerToolbarLayout
                 ),
-                // new AlphaTask(0, 3, Easing.easeOut, this.middle),
                 new VisibleTask(false, this.middleLayout),
-                // new AlphaTask(0, 3, Easing.easeOut, this.text),
                 new VisibleTask(false, this.text),
-                // new AlphaTask(0, 3, Easing.easeOut, this.backgroundContainerBackgroundContainer),
                 new VisibleTask(false, this.backgroundContainerBackground)
             )
         );
@@ -2174,11 +2161,8 @@ export default class Toolbar extends ContainerObject {
                     0,
                     3, Easing.easeOut, this.lowerToolbarLayout
                 ),
-                // new AlphaTask(1, 3, Easing.easeOut, this.middle),
                 new VisibleTask(true, this.middleLayout),
-                // new AlphaTask(1, 3, Easing.easeOut, this.text),
                 new VisibleTask(true, this.text),
-                // new AlphaTask(1, 3, Easing.easeOut, this.backgroundContainerBackgroundContainer),
                 new VisibleTask(true, this.backgroundContainerBackground)
             )
         );

@@ -17,7 +17,7 @@ import Vienna from 'eterna/folding/Vienna';
 import {
     VAlign, HAlign, DisplayUtil, KeyboardEventType, KeyCode, Assert
 } from 'flashbang';
-import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
+import {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
 import SpecBoxDialog from 'eterna/ui/SpecBoxDialog';
 import Folder from 'eterna/folding/Folder';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -308,10 +308,6 @@ export default class FeedbackViewMode extends GameMode {
             this._info.display, HAlign.RIGHT, VAlign.TOP,
             HAlign.RIGHT, VAlign.TOP, 0 - this._solDialogOffset, 0
         );
-    }
-
-    private showViewOptionsDialog(): void {
-        this.showDialog(new EternaViewOptionsDialog(EternaViewOptionsMode.LAB));
     }
 
     private showSettingsDialog(): void {
