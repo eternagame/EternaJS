@@ -13,7 +13,7 @@ import GameButton from 'eterna/ui/GameButton';
 import Fonts from 'eterna/util/Fonts';
 import ContextMenu from 'eterna/ui/ContextMenu';
 import TextBalloon from 'eterna/ui/TextBalloon';
-import {ContextMenuDialog} from 'eterna/mode/GameMode';
+import ContextMenuDialog from 'eterna/ui/ContextMenuDialog';
 import WindowBounds from './WindowBounds';
 import PointerEventPropagator from './PointerEventPropagator';
 

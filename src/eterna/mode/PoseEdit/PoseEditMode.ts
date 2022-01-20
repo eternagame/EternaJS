@@ -2,7 +2,6 @@ import * as log from 'loglevel';
 import {
     Container, DisplayObject, Point, Sprite, Text, Rectangle, InteractionEvent
 } from 'pixi.js';
-
 import EPars, {RNABase, RNAPaint} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import {PuzzleID} from 'eterna/EternaApp';

@@ -1,10 +1,6 @@
 import EPars, {RNABase} from 'eterna/EPars';
 import SecStruct from './SecStruct';
 
-export interface UpdateSequenceCallback {
-    (resno:number, oldColr:number, color:number): void;
-}
-
 export default class Sequence {
     constructor(baseArray: RNABase[]) {
         this._baseArray = baseArray;

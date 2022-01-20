@@ -1,5 +1,5 @@
 import * as log from 'loglevel';
-import {Container, Point, Text} from 'pixi.js';
+import {Container, Text} from 'pixi.js';
 import Eterna from 'eterna/Eterna';
 import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
 import SecStruct from 'eterna/rnatypes/SecStruct';
@@ -19,7 +19,7 @@ import ContextMenu from 'eterna/ui/ContextMenu';
 import URLButton from 'eterna/ui/URLButton';
 import EternaURL from 'eterna/net/EternaURL';
 import Folder from 'eterna/folding/Folder';
-import Dialog from 'eterna/ui/Dialog';
+import ContextMenuDialog from 'eterna/ui/ContextMenuDialog';
 import Utility from 'eterna/util/Utility';
 import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
 import NucleotideFinder from 'eterna/ui/NucleotideFinder';
@@ -335,9 +335,6 @@ export default abstract class GameMode extends AppMode {
     public onContextMenuEvent(e: Event): void {
         Assert.assertIsDefined(Flashbang.globalMouse);
 
-        let pos = Flashbang.globalMouse;
-        const ee = <PointerEvent> e;
-        if (ee.clientX !== undefined && ee.clientY !== undefined) pos = new Point(ee.clientX, ee.clientY);
         let handled = false;
         if (((e.target as HTMLElement).parentNode as HTMLElement).id === Eterna.PIXI_CONTAINER_ID) {
             if (this._contextMenuDialogRef.isLive) {
@@ -347,7 +344,7 @@ export default abstract class GameMode extends AppMode {
                 const menu = this.createContextMenu();
                 if (menu != null) {
                     this._contextMenuDialogRef = this.addObject(
-                        new ContextMenuDialog(menu, pos/* Flashbang.globalMouse */),
+                        new ContextMenuDialog(menu, Flashbang.globalMouse),
                         this.contextMenuLayer
                     );
                     handled = true;
@@ -498,11 +495,6 @@ export default abstract class GameMode extends AppMode {
         }
     }
 
-    public getSequence(): [string, (number|null) [] | undefined] {
-        const sequenceString: string = this._poses[0].sequence.sequenceString();
-        return [sequenceString, this._poses[0].customNumbering];
-    }
-
     protected showCopySequenceDialog(): void {
         Assert.assertIsDefined(this.modeStack);
         let sequenceString = this._poses[0].sequence.sequenceString();
@@ -580,10 +572,10 @@ export default abstract class GameMode extends AppMode {
 
     protected _achievements: AchievementManager;
 
-    public _dialogRef: GameObjectRef = GameObjectRef.NULL;
+    protected _dialogRef: GameObjectRef = GameObjectRef.NULL;
     protected _uiLockRef: GameObjectRef = GameObjectRef.NULL;
     protected _notifRef: GameObjectRef = GameObjectRef.NULL;
-    public _contextMenuDialogRef: GameObjectRef = GameObjectRef.NULL;
+    protected _contextMenuDialogRef: GameObjectRef = GameObjectRef.NULL;
 
     private _modeScriptInterface: ExternalInterfaceCtx;
 
@@ -611,31 +603,4 @@ export default abstract class GameMode extends AppMode {
     protected _targetPairs: SecStruct[];
 
     protected _targetConditions: (TargetConditions | undefined)[] = [];
-}
-
-export class ContextMenuDialog extends Dialog<void> {
-    constructor(menu: ContextMenu, menuLoc: Point) {
-        super();
-        this._menu = menu;
-        this._menuLoc = menuLoc;
-    }
-
-    protected added(): void {
-        super.added();
-        this.addObject(this._menu, this.container);
-
-        this._menu.display.position.copyFrom(this._menuLoc);
-        this._menu.menuItemSelected.connect(() => this.close());
-    }
-
-    protected onBGClicked(): void {
-        this.close();
-    }
-
-    protected get bgAlpha(): number {
-        return 0;
-    }
-
-    private readonly _menu: ContextMenu;
-    private readonly _menuLoc: Point;
 }

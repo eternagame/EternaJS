@@ -387,14 +387,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public set currentColor(col: RNAPaint) {
         this._currentColor = col;
-        // syncronize the color change by 2D with 3D
-        /*
-        if (GameMode.mol3DGate) {
-            GameMode.mol3DGate.viewerEx?.setBaseColor(
-                GameMode.mol3DGate.getBaseColor(col)
-            );
-        }
-        */
     }
 
     public get currentColor(): RNAPaint {
@@ -591,7 +583,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public onPoseMouseDownPropagate(e: InteractionEvent|null, closestIndex: number): void {
+    public onPoseMouseDownPropagate(e: InteractionEvent, closestIndex: number): void {
         const altDown: boolean = Flashbang.app.isAltKeyDown;
         const ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
         const ctrlDownOrBaseMarking = ctrlDown || this.currentColor === RNAPaint.BASE_MARK;
@@ -918,7 +910,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._customLayoutChanged = true;
     }
 
-    public onPoseMouseDown(e: InteractionEvent | null, closestIndex: number): void {
+    public onPoseMouseDown(e: InteractionEvent, closestIndex: number): void {
         const altDown: boolean = Flashbang.app.isAltKeyDown;
         const shiftDown: boolean = Flashbang.app.isShiftKeyDown;
         const ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
@@ -969,7 +961,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                         if (reg) reg.close();
                     });
                 }
-                e?.stopPropagation();
+                e.stopPropagation();
                 return;
             }
             if (this._annotationManager.annotationModeActive.value) {
@@ -1045,7 +1037,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                         if (reg) reg.close();
                     });
                 }
-                e?.stopPropagation();
+                e.stopPropagation();
                 return;
             }
             this._lastShiftedCommand = -1;
@@ -1067,7 +1059,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this.callAddBaseCallback(cmd[0], cmd[1], closestIndex);
             }
 
-            e?.stopPropagation();
+            e.stopPropagation();
         } else if (shiftDown && !this._annotationManager.annotationModeActive.value) {
             this._shiftStart = -1;
             this._shiftEnd = -1;
@@ -1292,7 +1284,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (!this._annotationManager.annotationModeActive.value) {
                 this._paintCursor.display.visible = true;
                 this._paintCursor.setShape(this._currentColor);
-                this._paintCursor._outColor = PaintCursor.WHITE;
             }
 
             const strandName: string | null = this.getStrandName(closestIndex);
@@ -4213,7 +4204,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     private readonly _baseLayer: Container = new Container();
-    public readonly _poseField: PoseField;
+    private readonly _poseField: PoseField;
 
     private _width: number = 0;
     private _height: number = 0;

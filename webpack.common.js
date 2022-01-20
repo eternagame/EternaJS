@@ -82,7 +82,7 @@ module.exports = {
                 }
             },
             {
-                test: /\.(png|jpg|gif|mp3|ttf|cif)$/,
+                test: /\.(png|jpg|gif|mp3|ttf)$/,
                 type: 'asset/resource',
             },
             {

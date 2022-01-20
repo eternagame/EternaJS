@@ -19,15 +19,7 @@ export default class PaintCursor extends GameObject implements Updatable {
         this._color = col;
     }
 
-    public getColor(): number {
-        return this._color;
-    }
-
-    public getOutColor(): number {
-        return this._outColor;
-    }
-
-    public setShape(shape: number): void {
+    public setShape(shape: number, whiteOutside: boolean = false): void {
         switch (shape) {
             case RNABase.ADENINE:
                 this._color = PaintCursor.YELLOW;
@@ -75,6 +67,8 @@ export default class PaintCursor extends GameObject implements Updatable {
                 this._color = PaintCursor.WHITE;
                 this._outColor = PaintCursor.NULL;
         }
+
+        if (whiteOutside) this._outColor = PaintCursor.WHITE;
     }
 
     /* override */
@@ -110,15 +104,15 @@ export default class PaintCursor extends GameObject implements Updatable {
     }
 
     private readonly _graphics: Graphics;
-    public _color: number;
-    public _outColor: number;
+    private _color: number;
+    private _outColor: number;
 
-    public static readonly YELLOW = 0xFFFF00;
-    public static readonly BLUE = 0x0000FF;
-    public static readonly RED = 0xFF0000;
-    public static readonly GREEN = 0x00FF00;
-    public static readonly WHITE = 0xFFFFFF;
-    public static readonly CYAN = 0x7EFFFF;
-    public static readonly GREY = 0xC0C0C0;
-    public static readonly NULL = 0x0;
+    private static readonly YELLOW = 0xFFFF00;
+    private static readonly BLUE = 0x0000FF;
+    private static readonly RED = 0xFF0000;
+    private static readonly GREEN = 0x00FF00;
+    private static readonly WHITE = 0xFFFFFF;
+    private static readonly CYAN = 0x7EFFFF;
+    private static readonly GREY = 0xC0C0C0;
+    private static readonly NULL = 0x0;
 }
