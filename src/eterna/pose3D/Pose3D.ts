@@ -73,8 +73,10 @@ export default class Pose3D extends ContainerObject {
     }
 
     public dispose() {
+        this._stage.removeAllComponents();
         this._stage.dispose();
         this._nglDiv.remove();
+        super.dispose();
     }
 
     private initControls() {

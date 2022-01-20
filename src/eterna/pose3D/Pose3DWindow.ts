@@ -141,6 +141,9 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
 
         this._nglSprite = new SpriteObject(Sprite.from(this._nglStage.viewer.renderer.domElement));
         this._nglStage.viewer.signals.rendered.add(() => {
+            // We've removed the 3D view, but NGL hasn't been fully destroyed yet
+            if (!this._nglSprite.display.texture) return;
+
             this._nglSprite.display.texture.update();
             this._nglSprite.display.width = this._currentBounds.width;
             this._nglSprite.display.height = this._currentBounds.height - this.ICON_SIZE;
