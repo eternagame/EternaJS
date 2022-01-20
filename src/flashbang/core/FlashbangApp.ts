@@ -46,6 +46,12 @@ export default class FlashbangApp {
         window.addEventListener('focus', () => { this.isActive.value = true; });
         window.addEventListener('blur', () => { this.isActive.value = false; });
 
+        // Due to legacy implementation, by default Pixi raises pointermove events on DisplayObjects
+        // even when the mouse is not actually over them. This behavior isn't really desirable, so
+        // we'll change it. Eventually it will be the default.
+        // See https://pixijs.download/release/docs/PIXI.InteractionManager.html#moveWhenInside
+        this._pixi.renderer.plugins.interaction.moveWhenInside = true;
+
         this.isActive.connect((value) => this.onIsActiveChanged(value));
     }
 

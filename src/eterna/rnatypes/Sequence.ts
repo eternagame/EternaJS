@@ -333,13 +333,8 @@ export default class Sequence {
      * @param ii The position
      * @param rb The new identity
      */
-    public setNt(ii: number, rb: RNABase, cb:UpdateSequenceCallback | null = null) {
-        const oldBase = this.nt(ii);
+    public setNt(ii: number, rb: RNABase) {
         this._baseArray[ii] = rb;
-
-        if (cb) {
-            cb(ii, oldBase, rb);
-        }
     }
 
     public sequenceString(allowCut: boolean = true, allowUnknown: boolean = true): string {

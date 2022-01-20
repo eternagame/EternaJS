@@ -10,6 +10,7 @@ import AchievementManager from 'eterna/achievements/AchievementManager';
 import Tooltips from 'eterna/ui/Tooltips';
 import ExternalInterface, {ExternalInterfaceCtx} from 'eterna/util/ExternalInterface';
 import Pose2D from 'eterna/pose2D/Pose2D';
+import Pose3D from 'eterna/pose3D/Pose3D';
 import ConfirmDialog from 'eterna/ui/ConfirmDialog';
 import NotificationDialog from 'eterna/ui/NotificationDialog';
 import UILockDialog from 'eterna/ui/UILockDialog';
@@ -23,18 +24,12 @@ import Utility from 'eterna/util/Utility';
 import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
 import NucleotideFinder from 'eterna/ui/NucleotideFinder';
 import ExplosionFactorDialog from 'eterna/ui/ExplosionFactorDialog';
-import {PixiRenderCallback} from 'ngl';
 import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
 import Sequence from 'eterna/rnatypes/Sequence';
 import EPars from 'eterna/EPars';
 import Fonts from 'eterna/util/Fonts';
 import CopyTextDialogMode from './CopyTextDialogMode';
-import ThreeView from './ThreeView';
-import Mol3DGate from './Mol3DGate';
 
-function NGLCallback(canvas:HTMLCanvasElement, width:number, height:number):void {
-    GameMode._3DView?.updateNGLTexture(canvas, width, height);
-}
 export default abstract class GameMode extends AppMode {
     public readonly bgLayer = new Container();
     public readonly poseLayer = new Container();
@@ -47,62 +42,6 @@ export default abstract class GameMode extends AppMode {
 
     /** Controls whether certain folding operations are run synchronously or queued up */
     public forceSync: boolean = false;
-
-    // members for 3D
-    public static _3DView: ThreeView | undefined = undefined;
-    public static mol3DGate: Mol3DGate | undefined = undefined;
-
-    constructor() {
-        super();
-        const handler = (e: Event) => this.handle3DPicking(e);
-        window.addEventListener('picking', handler);
-        this.regs?.add({close: () => window.removeEventListener('picking', handler)});
-    }
-
-    protected handle3DPicking(e:Event) {
-        const ce = <CustomEvent>e;
-        const closestIndex: number = ce.detail.resno;
-        if (ce.detail.action === 'hover') {
-            this._poses.forEach((pose) => {
-                pose.on3DPickingMouseMoved(closestIndex - 1);
-            });
-        } else if (ce.detail.action === 'clicked') {
-            this._poses.forEach((pose) => {
-                pose.simulateMousedownCallback(closestIndex - 1);
-            });
-        }
-    }
-
-    // make 3d view on game scene with cif file
-    public add3DSprite(filePath: string | File | Blob, _secStruct:string) {
-        GameMode.mol3DGate?.dispose();
-        GameMode.mol3DGate = undefined;
-        GameMode._3DView = undefined;
-
-        GameMode._3DView = new ThreeView(this);
-        if (!GameMode._3DView.pixiContainer) return;
-
-        this.addObject(GameMode._3DView, this.poseLayer);
-
-        const callback:PixiRenderCallback = NGLCallback;
-        GameMode.mol3DGate = new Mol3DGate(filePath, GameMode._3DView.pixiContainer,
-            callback, this, _secStruct);
-        GameMode._3DView.onResized();
-    }
-
-    public getStackDiffernce(before:Sequence, after:Sequence): number[] {
-        const differnce:number[] = [];
-        for (let i = 0; i < before.length; i++) {
-            if (before.nt(i) !== after.nt(i)) {
-                differnce.push(i);
-            }
-        }
-        return differnce;
-    }
-
-    public posUpdateCallback(resno: number, oldBase:number, base: number) {
-        GameMode.mol3DGate?.viewerEx?.selectEBaseObject(resno, oldBase !== base, 3000);
-    }
 
     protected setup(): void {
         super.setup();
@@ -343,6 +282,33 @@ export default abstract class GameMode extends AppMode {
     }
 
     protected onSetPip(_pipMode: boolean): void {
+    }
+
+    protected addPose3D(structureFile: string | File | Blob) {
+        const ublk = this.getCurrentUndoBlock(0);
+        Assert.assertIsDefined(ublk, "Can't create 3D view - undo state not available");
+        if (this._pose3D) this.removeObject(this._pose3D);
+        this._pose3D = new Pose3D(structureFile, ublk.sequence, ublk.targetPairs, this._poses[0].customNumbering);
+        this.addObject(this._pose3D, this.dialogLayer);
+        this.regs?.add(this._pose3D.baseHovered.connect((closestIndex) => {
+            this._poses.forEach((pose) => {
+                pose.on3DPickingMouseMoved(closestIndex - 1);
+            });
+        }));
+        this.regs?.add(this._pose3D.baseClicked.connect((closestIndex) => {
+            this._poses.forEach((pose) => {
+                pose.simulateMousedownCallback(closestIndex - 1);
+            });
+        }));
+        this.regs?.add(this._poses[0].baseHovered.connect(
+            (val: {index: number; color: number}) => this._pose3D?.hover3D(val.index, val.color)
+        ));
+        this.regs?.add(this._poses[0].baseMarked.connect(
+            (val: number) => this._pose3D?.mark3D(val)
+        ));
+        this.regs?.add(this._poses[0].basesSparked.connect(
+            (val: number[]) => this._pose3D?.spark3D(val)
+        ));
     }
 
     protected postScreenshot(screenshot: ArrayBuffer): void {
@@ -624,6 +590,7 @@ export default abstract class GameMode extends AppMode {
     protected _poseFields: PoseField[] = [];
     protected _poses: Pose2D[] = []; // TODO: remove me!
     protected _isPipMode: boolean = false;
+    protected _pose3D: Pose3D | null = null;
 
     protected _nucleotideRangeToShow: [number, number] | null = null;
 

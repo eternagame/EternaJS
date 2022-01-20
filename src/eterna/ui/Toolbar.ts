@@ -1,7 +1,7 @@
 import {
     Graphics, Point, Sprite, Container
 } from 'pixi.js';
-import {RegistrationGroup} from 'signals';
+import {RegistrationGroup, Signal} from 'signals';
 import Eterna from 'eterna/Eterna';
 import Booster from 'eterna/mode/PoseEdit/Booster';
 import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
@@ -14,17 +14,12 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import AnnotationManager from 'eterna/AnnotationManager';
-import fileDialog from 'file-dialog';
-import Mol3DGate from 'eterna/mode/Mol3DGate';
-import PuzzleEditMode from 'eterna/mode/PuzzleEdit/PuzzleEditMode';
-import GameMode from 'eterna/mode/GameMode';
 import NucleotidePalette from './NucleotidePalette';
 import GameButton from './GameButton';
 import ToggleBar from './ToggleBar';
 import EternaMenu, {EternaMenuStyle} from './EternaMenu';
 import ScrollContainer from './ScrollContainer';
 import AnnotationPanel from './AnnotationPanel';
-import ErrorDialog from './ErrorDialog';
 
 export enum ToolbarType {
     PUZZLE,
@@ -98,7 +93,8 @@ export default class Toolbar extends ContainerObject {
 
     public boostersMenu: GameButton;
 
-    public validate3DButton: GameButton;
+    public upload3DButton: GameButton;
+    public selected3DFile: Signal<FileList | null>;
 
     public baseMarkerButton: GameButton;
     public librarySelectionButton: GameButton;
@@ -765,28 +761,13 @@ export default class Toolbar extends ContainerObject {
 
         if (this._type === ToolbarType.PUZZLEMAKER) {
             this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
-            this.validate3DButton = new ToolbarButton()
+            this.upload3DButton = new ToolbarButton()
                 .up(Bitmaps.ImgFileOpen)
                 .over(Bitmaps.ImgFileOpenHover)
                 .down(Bitmaps.ImgFileOpen)
                 .tooltip('Validate 3D Models');
 
-            this.addObject(this.validate3DButton, this.lowerToolbarLayout);
-            this.regs.add(this.validate3DButton.clicked.connect(() => {
-                fileDialog({accept: ['.cif', '.pdb']}).then((file) => {
-                    const mode: PuzzleEditMode = this.mode as PuzzleEditMode;
-                    const sequence = mode.getSequence();
-                    Mol3DGate.checkModelFile(file[0]).then((resCount:number) => {
-                        if (mode && resCount === sequence[0].length) {
-                            if (GameMode._3DView) mode.removeObject(GameMode._3DView);
-                            mode.add3DSprite(file[0], mode.structure);
-                        } else {
-                            const PROMPT = 'Your selected file is mismatched with the puzzle.';
-                            mode?.showDialog(new ErrorDialog(PROMPT));
-                        }
-                    });
-                });
-            }));
+            this.addObject(this.upload3DButton, this.lowerToolbarLayout);
         }
 
         this.rightArrow = this.makeArrowButton('right');

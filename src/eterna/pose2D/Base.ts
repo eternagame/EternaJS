@@ -7,7 +7,6 @@ import {ContainerObject, LateUpdatable, Flashbang} from 'flashbang';
 import Constants from 'eterna/Constants';
 import {RNABase, RNAPaint} from 'eterna/EPars';
 import ROPWait from 'eterna/rscript/ROPWait';
-import Mol3DGate from 'eterna/mode/Mol3DGate';
 import BaseAssets from './BaseAssets';
 import BaseDrawFlags from './BaseDrawFlags';
 import {RNAHighlightState} from './Pose2D';
@@ -49,12 +48,6 @@ export default class Base extends ContainerObject implements LateUpdatable {
         this._sparkStartTime = -1;
         const randAngle: number = Math.random() * Math.PI * 2;
         this._sparkDir = new Point(Math.cos(randAngle), Math.sin(randAngle));
-
-        // set NGL sparking
-        if (Mol3DGate.scope) {
-            Mol3DGate.scope?.viewerEx?.addSpark(this._baseIdx + 1);
-            // console.log('startSparking = ', this._baseIdx + 1);
-        }
     }
 
     public setGoDir(goX: number, goY: number): void {

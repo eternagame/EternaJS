@@ -1,4 +1,4 @@
-import {Container, DisplayObject, InteractionEvent} from 'pixi.js';
+import {DisplayObject, InteractionEvent} from 'pixi.js';
 import {Assert, Flashbang, GameObject} from 'flashbang';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
 
@@ -12,16 +12,16 @@ import GraphicsObject from 'flashbang/objects/GraphicsObject';
  * and ends when it is removed via GameObject#removeObject
  *
  * Be aware that with the current implementation, we do intercept non-pointer events, but they
- * will never be propogated (though you should most likely be using pointer events anyways to
+ * will never be propagated (though you should most likely be using pointer events anyways to
  * make sure it works on touchscreens, mice, etc!). However, non-pointer events will still be fired
- * on the original objects if stopPropogation is not called.
+ * on the original objects if stopPropagation is not called.
  *
  * Note that all events captured are actually events registered on a surface added to the very top
  * of the current mode - they do NOT represent an event fired on an arbitrary Container outside
  * the bounds of the passed Container. This is the only way we can intercept events from PIXI.
  */
 export default class PointerCapture extends GameObject {
-    constructor(root: Container, onEvent: (e: InteractionEvent) => void) {
+    constructor(root: DisplayObject, onEvent: (e: InteractionEvent) => void) {
         super();
         this._root = root;
         this._onEvent = onEvent;
@@ -39,9 +39,9 @@ export default class PointerCapture extends GameObject {
 
         // We're not listening to over, out, or upOutside since a) those would refer to our surface,
         // which isn't really meaningful, plus they're not providing the opportunity to prevent
-        // any events on lower objects - eg if you stop propogation on a pointerup, PIXI won't then
+        // any events on lower objects - eg if you stop propagation on a pointerup, PIXI won't then
         // continue to test children objects for a pointerUpOutside or pointerTap (pointerTap is
-        // still provided here for the convinience of wanting to know when the surface is tapped)
+        // still provided here for the convenience of wanting to know when the surface is tapped)
         this.regs.add(this._surface.pointerDown.connect((e) => this.handleEvent(e)));
         this.regs.add(this._surface.pointerMove.connect((e) => this.handleEvent(e)));
         this.regs.add(this._surface.pointerUp.connect((e) => this.handleEvent(e)));
@@ -91,7 +91,7 @@ export default class PointerCapture extends GameObject {
         // - If it is, we need to rerun the processing so that the appropriate events are fired on
         //   the right child of the root object.
         // - If it isn't, processing should only stop if stopPropagation was called - PIXI's pointer
-        //   event processing atomatically handles that for us.
+        //   event processing automatically handles that for us.
 
         /* eslint-disable @typescript-eslint/ban-ts-comment */
 
@@ -106,7 +106,7 @@ export default class PointerCapture extends GameObject {
                 break;
             case 'pointermove':
                 // @ts-ignore Private
-                func = interaction.processPointerDown;
+                func = interaction.processPointerMove;
                 break;
             case 'pointerup':
                 // @ts-ignore Private
@@ -127,7 +127,7 @@ export default class PointerCapture extends GameObject {
         this._surface.display.interactive = true;
     }
 
-    private _root: Container;
+    private _root: DisplayObject;
     private _surface: GraphicsObject;
     private _onEvent: ((e: InteractionEvent) => void);
 }

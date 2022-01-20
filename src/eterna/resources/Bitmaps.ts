@@ -323,6 +323,7 @@ export default class Bitmaps {
     public static readonly Img3DRotateCheckIcon: string = require('assets/UI/rotate-3d-check-icon.png');
     public static readonly Img3DZoominIcon: string = require('assets/UI/zoomin-3d-icon.png');
     public static readonly Img3DZoomoutIcon: string = require('assets/UI/zoomout-3d-icon.png');
+    public static readonly ImgMingZoomIn: string = require('assets/MingUI/ui_zoomin.png');
 
     public static readonly Img3DSettingIcon: string = require('assets/UI/setting-ngl.png');
     public static readonly Img3DSettingHoverIcon: string = require('assets/UI/setting-ngl-hover.png');

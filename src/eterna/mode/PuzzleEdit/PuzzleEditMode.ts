@@ -46,11 +46,13 @@ import AnnotationManager, {
     AnnotationRange
 } from 'eterna/AnnotationManager';
 import AnnotationDialog from 'eterna/ui/AnnotationDialog';
+import FileInputObject, {HTMLInputEvent} from 'eterna/ui/FileInputObject';
+import Pose3D from 'eterna/pose3D/Pose3D';
+import ErrorDialog from 'eterna/ui/ErrorDialog';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
 import StructureInput from './StructureInput';
-import Mol3DGate from '../Mol3DGate';
 
 export interface PuzzleEditPoseData {
     sequence: string;
@@ -75,7 +77,7 @@ type SubmitPuzzleParams = {
     lock: string;
     begin_sequence: string;
     objectives: string;
-    'files[3d_structure]': File;
+    'files[3d_structure]'?: File;
 };
 
 export default class PuzzleEditMode extends GameMode {
@@ -278,6 +280,28 @@ export default class PuzzleEditMode extends GameMode {
             this.downloadSVG();
         });
 
+        this._toolbar.upload3DButton.clicked.connect(() => {
+            const uploadButton = new FileInputObject({
+                id: '3d-upload-file-input',
+                width: 30,
+                height: 30,
+                acceptedFiletypes: '.cif,.pdb'
+            });
+            this.addObject(uploadButton);
+            uploadButton.activateDialog();
+            this.regs?.add(uploadButton.fileSelected.connect((e: HTMLInputEvent) => {
+                const files = e.target.files;
+                if (files && files[0]) {
+                    Pose3D.checkModelFile(files[0], this.getCurrentUndoBlock(0).sequence.length).then(() => {
+                        this.addPose3D(files[0]);
+                    }).catch((err) => {
+                        this.showDialog(new ErrorDialog(err));
+                    });
+                }
+                this.removeObject(uploadButton);
+            }));
+        });
+
         if (this._embedded) {
             this._scriptInterface.addCallback('get_secstruct', () => this.structure);
             this._scriptInterface.addCallback('get_sequence', () => this.sequence);
@@ -301,7 +325,6 @@ export default class PuzzleEditMode extends GameMode {
 
         const poseEditSetter = (index: number, poseToSet: Pose2D): void => {
             poseToSet.poseEditCallback = () => this.poseEditByTarget(index);
-            poseToSet.poseUpdateCallback = this.posUpdateCallback;
         };
 
         const bindMousedownEvent = (pose: Pose2D, index: number): void => {
@@ -540,9 +563,6 @@ export default class PuzzleEditMode extends GameMode {
             HAlign.CENTER, VAlign.BOTTOM, 20, -20
         );
 
-        // call onResize of 3d view
-        GameMode._3DView?.onResized();
-
         const toolbarBounds = this._toolbar.display.getBounds();
         for (let ii = 0; ii < this._numTargets; ++ii) {
             const structureInput = this._structureInputs[ii];
@@ -661,7 +681,6 @@ export default class PuzzleEditMode extends GameMode {
                     pose.molecularBindingSite = null;
                 }
                 this.poseEditByTarget(0);
-                GameMode.mol3DGate?.updateSequence(this.getSequence());
             }
         });
     }
@@ -837,15 +856,12 @@ export default class PuzzleEditMode extends GameMode {
             lock: lockString,
             // eslint-disable-next-line camelcase
             begin_sequence: beginningSequence,
-            objectives: JSON.stringify(objectives),
-            'files[3d_structure]': new File(['testing'], 'structure_upload_test.cif')
+            objectives: JSON.stringify(objectives)
         };
 
-        if (Mol3DGate.scope?._3DFilePath instanceof File) {
-            const blob = Mol3DGate.scope._3DFilePath.slice();
-            postParams['files[3d_structure]'] = new File([blob], 'structure_upload_test.cif');
-        } else {
-            postParams['files[3d_structure]'] = new File([''], 'structure_upload_test.cif');
+        if (this._pose3D?.structureFile instanceof File) {
+            const blob = this._pose3D?.structureFile.slice();
+            postParams['files[3d_structure]'] = new File([blob], this._pose3D?.structureFile.name);
         }
 
         const submitText = this.showDialog(new AsyncProcessDialog('Submitting...')).ref;
@@ -930,13 +946,6 @@ export default class PuzzleEditMode extends GameMode {
         }
 
         this.updateScore();
-        // undo sequence change in 3D
-        GameMode.mol3DGate?.updateSequence(this.getSequence());
-        const diff = this.getStackDiffernce(this._seqStack[this._stackLevel - 1][0].sequence,
-            this._seqStack[this._stackLevel][0].sequence);
-        diff.forEach((n) => {
-            GameMode.mol3DGate?.viewerEx?.selectEBaseObject(n);
-        });
     }
 
     private moveUndoStackBackward(): void {
@@ -955,14 +964,6 @@ export default class PuzzleEditMode extends GameMode {
                 .getParenthesis(undefined, true);
         }
         this.updateScore();
-
-        // undo sequence change in 3D
-        GameMode.mol3DGate?.updateSequence(this.getSequence());
-        const diff = this.getStackDiffernce(this._seqStack[this._stackLevel + 1][0].sequence,
-            this._seqStack[this._stackLevel][0].sequence);
-        diff.forEach((n) => {
-            GameMode.mol3DGate?.viewerEx?.selectEBaseObject(n);
-        });
     }
 
     private updateScore(): void {
@@ -987,6 +988,8 @@ export default class PuzzleEditMode extends GameMode {
                 undoBlocks: this._seqStack[this._stackLevel]
             });
         }
+
+        if (this._pose3D) this._pose3D.sequence.value = this.getCurrentUndoBlock(0).sequence;
 
         const undoblock: UndoBlock = this.getCurrentUndoBlock(this._poses.length - 1);
         const numAU: number = undoblock.getParam(UndoBlockParam.AU) as number;

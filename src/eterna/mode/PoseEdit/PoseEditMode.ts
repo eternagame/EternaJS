@@ -29,6 +29,7 @@ import Folder, {MultiFoldResult, CacheKey} from 'eterna/folding/Folder';
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
 import PoseField from 'eterna/pose2D/PoseField';
 import Pose2D, {Layout, SCRIPT_MARKER_LAYER} from 'eterna/pose2D/Pose2D';
+import Pose3D from 'eterna/pose3D/Pose3D';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import ConstraintBar from 'eterna/constraints/ConstraintBar';
@@ -80,7 +81,6 @@ import MissionIntroMode from './MissionIntroMode';
 import MissionClearedPanel from './MissionClearedPanel';
 import ViewSolutionOverlay from '../DesignBrowser/ViewSolutionOverlay';
 import {PuzzleEditPoseData} from '../PuzzleEdit/PuzzleEditMode';
-import Mol3DGate from '../Mol3DGate';
 import {DesignCategory} from '../DesignBrowser/DesignBrowserMode';
 import VoteProcessor from '../DesignBrowser/VoteProcessor';
 
@@ -421,9 +421,6 @@ export default class PoseEditMode extends GameMode {
             HAlign.RIGHT, VAlign.TOP, 0 - this._solDialogOffset, 0
         );
 
-        // call onResize of 3d view
-        GameMode._3DView?.onResized();
-
         DisplayUtil.positionRelativeToStage(
             this._solutionNameText, HAlign.CENTER, VAlign.TOP,
             HAlign.CENTER, VAlign.TOP, 0, 8
@@ -738,7 +735,6 @@ export default class PoseEditMode extends GameMode {
             pose.poseEditCallback = (() => {
                 this.poseEditByTarget(index);
             });
-            pose.poseUpdateCallback = this.posUpdateCallback;
         };
         const bindTrackMoves = (pose: Pose2D, _index: number) => {
             pose.trackMovesCallback = ((count: number, moves: Move[]) => {
@@ -1050,14 +1046,10 @@ export default class PoseEditMode extends GameMode {
         const threePath = this._puzzle.threePath;
         if (threePath) {
             const url = new URL(threePath, Eterna.SERVER_URL);
-            const sequence = this.getSequence();
-            Mol3DGate.checkModelFile(url.href).then((resCount:number) => {
-                if (resCount === sequence[0].length) {
-                    this.add3DSprite(url.href, this._puzzle.getSecstructs()[0]);
-                } else {
-                    const PROMPT = '3D Structure is mismatched with the puzzle.';
-                    this.showDialog(new ErrorDialog(PROMPT));
-                }
+            Pose3D.checkModelFile(url.href, this._puzzle.getSecstruct(0).length).then(() => {
+                this.addPose3D(url.href);
+            }).catch((err) => {
+                this.showDialog(new ErrorDialog(err));
             });
         }
     }
@@ -2833,6 +2825,8 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
+        if (this._pose3D) this._pose3D.sequence.value = this.getCurrentUndoBlock().sequence;
+
         const numAU: number = undoBlock.getParam(UndoBlockParam.AU, 37, pseudoknots) as number;
         const numGU: number = undoBlock.getParam(UndoBlockParam.GU, 37, pseudoknots) as number;
         const numGC: number = undoBlock.getParam(UndoBlockParam.GC, 37, pseudoknots) as number;
@@ -3477,13 +3471,6 @@ export default class PoseEditMode extends GameMode {
 
         this.updateScore();
         this.transformPosesMarkers();
-
-        // undo sequence change in 3D
-        GameMode.mol3DGate?.updateSequence(this.getSequence());
-        const diff = this.getStackDiffernce(before, after);
-        diff.forEach((n) => {
-            GameMode.mol3DGate?.viewerEx?.selectEBaseObject(n);
-        });
     }
 
     private moveUndoStackBackward(): void {
@@ -3502,13 +3489,6 @@ export default class PoseEditMode extends GameMode {
 
         this.updateScore();
         this.transformPosesMarkers();
-
-        // undo sequence change in 3D
-        GameMode.mol3DGate?.updateSequence(this.getSequence());
-        const diff = this.getStackDiffernce(before, after);
-        diff.forEach((n) => {
-            GameMode.mol3DGate?.viewerEx?.selectEBaseObject(n);
-        });
     }
 
     private moveUndoStackToLastStable(): void {
