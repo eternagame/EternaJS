@@ -2,23 +2,30 @@ import {
     autoLoad,
     Component,
     getFileInfo,
-    MouseActions, ParserRegistry, PickingProxy, StageEx, Structure, ViewerEx
+    MouseActions, ParserRegistry, PickingProxy, StageEx, Structure, Vector2
 } from 'ngl';
+import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer';
+import {OutlinePass} from 'three/examples/jsm/postprocessing/OutlinePass';
+import {ShaderPass} from 'three/examples/jsm/postprocessing/ShaderPass';
+import {FXAAShader} from 'three/examples/jsm/shaders/FXAAShader';
 import {Assert, ContainerObject} from 'flashbang';
 import {Signal, Value} from 'signals';
 import Eterna from 'eterna/Eterna';
-import {RNABase} from 'eterna/EPars';
-import Bitmaps from 'eterna/resources/Bitmaps';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 import NGLPickingUtils from './NGLPickingUtils';
-import createColorScheme, {getBaseColor} from './NGLColorScheme';
+import createColorScheme, {getBaseColor} from './EternaColorScheme';
 import Pose3DWindow, {NGLDragState} from './Pose3DWindow';
+import NGLRenderPass from './NGLRenderPass';
+import createEternaRepresentation from './EternaRepresentation';
+import BaseHighlightGroup from './BaseHighlightGroup';
+import SparkGroup from './SparkGroup';
 
 export default class Pose3D extends ContainerObject {
     public readonly baseClicked: Signal<number> = new Signal();
     public readonly baseHovered: Signal<number> = new Signal();
     public readonly sequence: Value<Sequence>;
+    public readonly secstruct: Value<SecStruct>;
     public readonly structureFile: string | File | Blob;
 
     constructor(
@@ -30,7 +37,7 @@ export default class Pose3D extends ContainerObject {
     ) {
         super();
         this.structureFile = structureFile;
-        this._secStruct = secstruct;
+        this.secstruct = new Value(secstruct);
         this.sequence = new Value(sequence);
         this._customNumbering = customNumbering;
 
@@ -50,6 +57,7 @@ export default class Pose3D extends ContainerObject {
         // create a wrapper div for it instead of just passing the dom parent directly.
         this._nglDiv = document.createElement('div');
         this._nglDiv.style.pointerEvents = 'none';
+        this._nglDiv.style.visibility = 'hidden';
         // For some reason this is necessary for the pointer events to actually stop firing on the div
         // (which we need to ensure, otherwise our div will be over part of the canvas and the canvas)
         // won't receive the pointer events
@@ -57,11 +65,21 @@ export default class Pose3D extends ContainerObject {
         this._domParent.appendChild(this._nglDiv);
 
         // Initialize NGL
-        this._stage = new StageEx(this._nglDiv);
+        this._stage = new StageEx(this._nglDiv, {
+            lightColor: 0xffffff,
+            ambientColor: 0xffffff
+        });
 
         // Initialize UI
         this._window = new Pose3DWindow(this._stage);
         this.addObject(this._window, this.container);
+
+        // Customize initial viewer parameters
+        this._stage.viewer.setFog(0x222222);
+        this._stage.viewer.cameraDistance = 800;
+
+        // Custom effects
+        this.initEffects();
 
         // Set our custom control scheme
         this.initControls();
@@ -109,25 +127,74 @@ export default class Pose3D extends ContainerObject {
         );
     }
 
+    private initEffects() {
+        const composer = new EffectComposer(this._stage.viewer.renderer);
+
+        const nglRender = this._stage.viewer.render.bind(this._stage.viewer);
+        const renderPass = new NGLRenderPass(nglRender);
+        composer.addPass(renderPass);
+
+        const changedBaseOutlinePass = new OutlinePass(
+            new Vector2(this._window.nglWidth, this._window.nglHeight),
+            this._stage.viewer.scene,
+            this._stage.viewer.camera
+        );
+        changedBaseOutlinePass.edgeStrength = 5;
+        changedBaseOutlinePass.edgeGlow = 0.5;
+        changedBaseOutlinePass.edgeThickness = 2;
+        composer.addPass(changedBaseOutlinePass);
+
+        const effectFXAA = new ShaderPass(FXAAShader);
+        composer.addPass(effectFXAA);
+
+        this._baseHighlights = new BaseHighlightGroup(this._stage, changedBaseOutlinePass);
+        this._baseHighlights.name = 'baseHighlightGroup';
+        this._stage.viewer.rotationGroup.add(this._baseHighlights);
+
+        this._sparkGroup = new SparkGroup(this._stage);
+        this._sparkGroup.name = 'sparkGroup';
+        this._stage.viewer.rotationGroup.add(this._sparkGroup);
+
+        this._stage.viewer.render = (picking) => {
+            // When render is called with picking, that makes NGL render to a renderTarget used for
+            // hit testing, rather than actually rendering to the screen. We don't want to apply our
+            // extra effects in that scenario, so just call nglRender directly.
+            if (picking) {
+                // We also don't want to render the base highlights while picking, or else NGL will
+                // think that because the highlight is the first thing behind the cursor, that we're
+                // hovering over that and not the base
+                this._baseHighlights.visible = false;
+                nglRender(true);
+                this._baseHighlights.visible = true;
+            } else {
+                composer.render();
+                this._window.updateNGLTexture();
+            }
+        };
+
+        this.regs.add(this._window.resized.connect(() => {
+            composer.setSize(this._window.nglWidth, this._window.nglHeight);
+            effectFXAA.uniforms['resolution'].value.set(1 / this._window.nglWidth, 1 / this._window.nglHeight);
+        }));
+
+        this._stage.viewer.requestRender();
+    }
+
     private loadStructure() {
         this._stage.removeAllComponents();
         this._component = null;
 
-        const pairs = this._secStruct.pairs;
-
         this._stage.defaultFileParams = {firstModelOnly: true};
         this._stage
-            .loadFile(this.structureFile, {}, pairs)
+            .loadFile(this.structureFile)
             .then((component: void | Component) => {
                 if (component) {
                     this._component = component;
                     this._colorScheme = createColorScheme(this.sequence);
-                    this._component.addRepresentation('ebase', {vScale: 0.5, color: this._colorScheme});
+                    const representationID = createEternaRepresentation(this.sequence, this.secstruct);
+                    this._component.addRepresentation(representationID, {vScale: 0.5, color: this._colorScheme});
                     this._component.addRepresentation('backbone', {color: 0xff8000});
                     this._component.autoView();
-                    const viewer = this._stage.viewer as ViewerEx;
-                    viewer.spark.setURL(Bitmaps.BonusSymbol);
-                    viewer.setHBondColor([0xffffff, 0x8f9dc0, 0x546986, 0xffffff]);
                 }
             });
     }
@@ -142,62 +209,65 @@ export default class Pose3D extends ContainerObject {
     }
 
     private tooltipPick(pickingProxy: PickingProxy) {
-        const viewer = this._stage.viewer as ViewerEx;
-
         // We'll draw the tooltip ourselves, so hide the NGL one
         this._stage.tooltip.style.display = 'none';
 
         const sp = this._stage.getParameters();
         if (sp.tooltip && pickingProxy) {
             const mp = pickingProxy.mouse.position;
-            const label = NGLPickingUtils.getLabel(pickingProxy, this._customNumbering);
+            const label = NGLPickingUtils.getLabel(pickingProxy, this.sequence.value, this._customNumbering);
 
             if (label === '') {
                 this._window.tooltip.display.visible = false;
             } else {
                 this._window.tooltip.setText(label);
-                this._window.tooltip.display.position.set(10 + mp.x, mp.y);
+                // This doesn't take into account the Pixi view not being at the origin. Should it?
+                // I think there's other areas in the code dealing with HTML elements where we
+                // similarly rely on the Pixi view being at the origin...
+                const globalPos = this._window.display.getGlobalPosition();
+                this._window.tooltip.display.position.set(10 + mp.x - globalPos.x, mp.y - globalPos.y);
                 this._window.tooltip.display.visible = true;
             }
 
-            const clickedBase = NGLPickingUtils.checkForBase(pickingProxy);
-            if (clickedBase !== null) {
-                viewer.hoverEBaseObject(clickedBase - 1, true, 0xFFFF00);
-                this.baseHovered.emit(clickedBase);
+            const hoveredBase = NGLPickingUtils.checkForBase(pickingProxy);
+            if (hoveredBase !== null) {
+                this.hover3D(hoveredBase);
+                this.baseHovered.emit(hoveredBase);
             } else {
-                viewer.hoverEBaseObject(-1);
+                this.hover3D(-1);
             }
         } else {
             this._window.tooltip.display.visible = false;
-            viewer.hoverEBaseObject(-1);
+            this.hover3D(-1);
         }
     }
 
     private update3DSequence(oldSeq: Sequence, newSeq: Sequence) {
         for (let i = 0; i < oldSeq.length; i++) {
             if (oldSeq.nt(i) !== newSeq.nt(i)) {
-                (this._stage.viewer as ViewerEx).selectEBaseObject(i);
+                this._baseHighlights.addChanged(i);
             }
         }
+        this._baseHighlights.updateHoverColor((baseIndex) => getBaseColor(this.sequence.value.nt(baseIndex)));
         this._component?.updateRepresentations({color: this._colorScheme});
         this._stage.viewer.requestRender();
     }
 
-    public hover3D(index: number, base: RNABase) {
-        const color: number = getBaseColor(base);
-        (this._stage.viewer as ViewerEx).hoverEBaseObject(index - 1, false, color);
+    public hover3D(index: number) {
+        if (index !== -1) {
+            const color: number = getBaseColor(this.sequence.value.nt(index));
+            this._baseHighlights.switchHover(index, color);
+        } else {
+            this._baseHighlights.clearHover();
+        }
     }
 
     public mark3D(index: number) {
-        (this._stage.viewer as ViewerEx).markEBaseObject(index);
+        this._baseHighlights.toggleMark(index);
     }
 
     public spark3D(indices: number[]) {
-        (this._stage.viewer as ViewerEx).beginSpark();
-        for (const index of indices) {
-            (this._stage.viewer as ViewerEx).addSpark(index + 1);
-        }
-        (this._stage.viewer as ViewerEx).endSpark(20);
+        this._sparkGroup.spark(indices);
     }
 
     /**
@@ -224,13 +294,14 @@ export default class Pose3D extends ContainerObject {
     }
 
     private _customNumbering: (number | null)[] | undefined;
-    private _secStruct: SecStruct;
     private _domParent: HTMLElement;
 
     private _nglDiv: HTMLElement;
     private _stage: StageEx;
     private _component: Component | null;
     private _colorScheme: string;
+    private _baseHighlights: BaseHighlightGroup;
+    private _sparkGroup: SparkGroup;
 
     private _window: Pose3DWindow;
 }

@@ -184,6 +184,19 @@ export default class EternaApp extends FlashbangApp {
         Eterna.client = new GameClient(Eterna.SERVER_URL);
         Eterna.gameDiv = document.getElementById(this._params.containerID);
 
+        // Without this, we stop the pointer events from propagating to NGL in Pose3D/PointerEventPropagator,
+        // but the original mouse events will still get fired, so NGL will get confused since it tracks some
+        // events that happen outside its canvas, and these will be targeted to the Pixi canvas.
+        if (window.PointerEvent) {
+            this.view.addEventListener('mousedown', (e) => e.stopImmediatePropagation());
+            this.view.addEventListener('mouseenter', (e) => e.stopImmediatePropagation());
+            this.view.addEventListener('mouseleave', (e) => e.stopImmediatePropagation());
+            this.view.addEventListener('mousemove', (e) => e.stopImmediatePropagation());
+            this.view.addEventListener('mouseout', (e) => e.stopImmediatePropagation());
+            this.view.addEventListener('mouseover', (e) => e.stopImmediatePropagation());
+            this.view.addEventListener('mouseup', (e) => e.stopImmediatePropagation());
+        }
+
         Assert.assertIsDefined(this._regs);
 
         this._regs.add(Eterna.settings.soundMute.connectNotify((mute) => {

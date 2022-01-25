@@ -73,7 +73,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public static readonly ZOOM_SPACINGS: number[] = [45, 30, 20, 14, 7];
 
     public readonly baseMarked = new Signal<number>();
-    public readonly baseHovered = new Signal<{index: number; color: number;}>();
+    public readonly baseHovered = new Signal<number>();
     public readonly basesSparked = new Signal<number[]>();
 
     constructor(poseField: PoseField, editable: boolean, annotationManager: AnnotationManager) {
@@ -1236,7 +1236,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         if (closestIndex >= 0 && this._currentColor >= 0) {
-            this.baseHovered.emit({index: closestIndex + 1, color: this._currentColor});
+            this.baseHovered.emit(closestIndex);
 
             this.onBaseMouseMove(closestIndex);
 
@@ -1260,7 +1260,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         } else {
             this._lastColoredIndex = -1;
-            this.baseHovered.emit({index: -1, color: 0});
+            this.baseHovered.emit(-1);
         }
 
         if (!this._coloring) {

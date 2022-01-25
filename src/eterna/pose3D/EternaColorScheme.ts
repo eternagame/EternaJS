@@ -27,11 +27,11 @@ export function getBaseColor(base: RNABase) {
 }
 
 export default function createColorScheme(sequence: Value<Sequence>) {
-    class NGLColorScheme extends Colormaker {
+    class EternaColorScheme extends Colormaker {
         public atomColor(atom: AtomProxy): number {
-            return getBaseColor(sequence.value.nt(atom.resno - 1));
+            return getBaseColor(sequence.value.nt(atom.residueIndex));
         }
     }
 
-    return ColormakerRegistry._addUserScheme(NGLColorScheme);
+    return ColormakerRegistry._addUserScheme(EternaColorScheme);
 }

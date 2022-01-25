@@ -180,6 +180,8 @@ export default class FlashbangApp {
     }
 
     protected onMouseWheelEvent(e: WheelEvent): void {
+        if (e.target !== this.view) return;
+
         const {topMode} = this._modeStack;
         if (topMode != null) {
             topMode.onMouseWheelEvent(e);
@@ -187,6 +189,8 @@ export default class FlashbangApp {
     }
 
     protected onContextMenuEvent(e: Event): void {
+        if (e.target !== this.view) return;
+
         const {topMode} = this._modeStack;
         if (topMode != null) {
             topMode.onContextMenuEvent(e);

@@ -6,6 +6,7 @@ import {
     Assert, ContainerObject, DisplayUtil, Dragger, Flashbang, GameObjectRef, HAlign, HLayoutContainer,
     MathUtil, MouseWheelListener, SceneObject, SpriteObject, VAlign, VLayoutContainer
 } from 'flashbang';
+import {UnitSignal} from 'signals';
 import Eterna from 'eterna/Eterna';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import BitmapManager from 'eterna/resources/BitmapManager';
@@ -33,6 +34,7 @@ export enum NGLDragState {
 export default class Pose3DWindow extends ContainerObject implements MouseWheelListener {
     public nglDragState: NGLDragState = NGLDragState.PAN;
     public tooltip: TextBalloon;
+    public resized = new UnitSignal();
 
     constructor(stage: Stage) {
         super();
@@ -71,7 +73,7 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
         this.layout();
 
         Assert.assertIsDefined(this.mode);
-        this.regs.add(this.mode.resized.connect(() => this.resized()));
+        this.regs.add(this.mode.resized.connect(() => this.modeResized()));
 
         Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));
@@ -140,14 +142,6 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
         const nglContainer = new Container();
 
         this._nglSprite = new SpriteObject(Sprite.from(this._nglStage.viewer.renderer.domElement));
-        this._nglStage.viewer.signals.rendered.add(() => {
-            // We've removed the 3D view, but NGL hasn't been fully destroyed yet
-            if (!this._nglSprite.display.texture) return;
-
-            this._nglSprite.display.texture.update();
-            this._nglSprite.display.width = this._currentBounds.width;
-            this._nglSprite.display.height = this._currentBounds.height - this.ICON_SIZE;
-        });
         this.addObject(this._nglSprite, nglContainer);
 
         const eventPropagator = new PointerEventPropagator(this._nglSprite, this._nglStage.viewer.renderer.domElement);
@@ -182,6 +176,15 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
         }));
 
         return nglContainer;
+    }
+
+    public updateNGLTexture() {
+        // We've removed the 3D view, but NGL hasn't been fully destroyed yet
+        if (!this._nglSprite.display.texture) return;
+
+        this._nglSprite.display.texture.update();
+        this._nglSprite.display.width = this.nglWidth;
+        this._nglSprite.display.height = this.nglHeight;
     }
 
     public onMouseWheelEvent(e: WheelEvent): boolean {
@@ -378,7 +381,7 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
         this.layout();
     }
 
-    private resized() {
+    private modeResized() {
         Assert.assertIsDefined(Flashbang.stageWidth);
         // Don't make the window so small that our toolbar doesn't fit, but if that means
         // our window becomes smaller than the screen width, when we're bigger again don't be super
@@ -409,9 +412,10 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
         // No need to re-render if we're not visible
         if (this._nglSprite.display.visible) {
             this._nglStage.setSize(
-                `${this._currentBounds.width}px`,
-                `${this._currentBounds.height - this.ICON_SIZE}px`
+                `${this.nglWidth}px`,
+                `${this.nglHeight}px`
             );
+            this.resized.emit();
         }
 
         // Title bar drag handles should fill remaining space
@@ -421,10 +425,7 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
             - (this.ICON_SIZE + this._titleText.display.width / 2 + this.GAP * 2);
 
         // Resize handles go on the bottom left and right corners
-        const relativeNglBounds = new Rectangle(
-            0, 0,
-            this._currentBounds.width, this._currentBounds.height - this.ICON_SIZE
-        );
+        const relativeNglBounds = new Rectangle(0, 0, this.nglWidth, this.nglHeight);
         DisplayUtil.positionRelativeToBounds(
             this._dragHandleLeft.display, HAlign.LEFT, VAlign.BOTTOM,
             relativeNglBounds, HAlign.LEFT, VAlign.BOTTOM
@@ -445,10 +446,22 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
 
         this.display.x = this._currentBounds.x;
         this.display.y = this._currentBounds.y;
+
+        // Position the canvas so that when we fire events, NGL can interpret the positions correctly
+        this._nglStage.viewer.wrapper.style.left = `${this._currentBounds.x}px`;
+        this._nglStage.viewer.wrapper.style.top = `${this._currentBounds.y + this.ICON_SIZE}px`;
     }
 
     private get minWidth(): number {
         return this.ICON_SIZE * 3 + this._titleText.display.width + 50 + this.GAP * 5;
+    }
+
+    public get nglWidth() {
+        return this._currentBounds.width;
+    }
+
+    public get nglHeight() {
+        return this._currentBounds.height - this.ICON_SIZE;
     }
 
     private _nglStage: Stage;

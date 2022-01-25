@@ -1,4 +1,3 @@
-import * as log from 'loglevel';
 import {InteractionEvent} from 'pixi.js';
 import {GameObject, PointerCapture, SceneObject} from 'flashbang';
 
@@ -45,6 +44,7 @@ export default class PointerEventPropagator extends GameObject {
 
     private handleEvent(e: InteractionEvent) {
         e.stopPropagation();
+        e.data.originalEvent.stopImmediatePropagation();
 
         if (e.type === 'pointerdown') {
             this.initPointerCapture();
@@ -65,9 +65,9 @@ export default class PointerEventPropagator extends GameObject {
 
             const originalTouch = e.data.originalEvent instanceof TouchEvent
                 ? this.getTouchById(e.data.originalEvent, e.data.identifier) : e.data.originalEvent;
-            // This shouldn't be possible, but while it probably shouldn't cause issues, at least
-            // make a note of it in the console in case my assumption bites us later and we need to debug it
-            if (!originalTouch) log.warn('Forwarding touch event where the original touch could not be found');
+            // This shouldn't be possible, amd would likely cause issues since the position would be
+            // set to 0, 0 or something like that
+            if (!originalTouch) throw new Error('Forwarding touch event where the original touch could not be found');
 
             const touch = new Touch({
                 identifier: e.data.identifier,
@@ -77,12 +77,12 @@ export default class PointerEventPropagator extends GameObject {
                 // becomes important, we can use a PointerCapture and record interactions elsewhere,
                 // and change this if the initial start of the touch came from elsewhere
                 target: this._domElement,
-                clientX: e.data.getLocalPosition(this._target.display).x,
-                clientY: e.data.getLocalPosition(this._target.display).y,
-                screenX: originalTouch?.screenX,
-                screenY: originalTouch?.screenY,
-                pageX: originalTouch?.pageX,
-                pageY: originalTouch?.pageY,
+                clientX: originalTouch.clientX,
+                clientY: originalTouch.clientY,
+                screenX: originalTouch.screenX,
+                screenY: originalTouch.screenY,
+                pageX: originalTouch.pageX,
+                pageY: originalTouch.pageY,
                 radiusX: e.data.width,
                 radiusY: e.data.height,
                 rotationAngle: e.data.rotationAngle,
@@ -137,8 +137,8 @@ export default class PointerEventPropagator extends GameObject {
                 shiftKey: e.data.originalEvent.shiftKey,
                 button: e.data.button,
                 buttons: e.data.buttons,
-                clientX: e.data.getLocalPosition(this._target.display).x,
-                clientY: e.data.getLocalPosition(this._target.display).y,
+                clientX: e.data.originalEvent.clientX,
+                clientY: e.data.originalEvent.clientY,
                 movementX: e.data.originalEvent.movementX,
                 movementY: e.data.originalEvent.movementY,
                 screenX: e.data.originalEvent.screenX,

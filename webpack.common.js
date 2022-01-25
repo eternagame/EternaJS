@@ -58,7 +58,11 @@ module.exports = {
             signals: path.resolve(__dirname, 'src/signals'),
             flashbang: path.resolve(__dirname, 'src/flashbang'),
             eterna: path.resolve(__dirname, 'src/eterna'),
-            'engines-bin': getEngineLocation()
+            'engines-bin': getEngineLocation(),
+            // Because our signals conflicts with the ngl-imported signals, we need to use
+            // the version of ngl that bundles its externalized dependencies. In the future we
+            // should probably make aliases for our codebase scoped, like @eternagame/signals
+            'ngl': path.resolve(__dirname, 'node_modules/ngl/dist/ngl.js')
         },
         fallback: {
             // Our emscripten modules have code intended for non-web environments which import
