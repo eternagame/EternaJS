@@ -237,6 +237,11 @@ export default class Pose3D extends ContainerObject {
                     this._component.addRepresentation(representationID, {vScale: 0.5, color: this._colorScheme});
                     this._component.addRepresentation('backbone', {color: 0xff8000});
                     this._component.autoView();
+                    // This forces NGL's debug bounding box mesh to be updated and its bounding sphere
+                    // computed. Without doing this, rotateDrag won't actually rotate around the center
+                    // of the model. Is there a better way to do this that isn't taking advantage of debug
+                    // helpers?
+                    this._stage.viewer.updateHelper();
                 }
             });
     }
