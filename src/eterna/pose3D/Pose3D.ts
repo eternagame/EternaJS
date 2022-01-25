@@ -1,9 +1,11 @@
 import {
     autoLoad,
+    Box3,
     Component,
     getFileInfo,
-    MouseActions, ParserRegistry, PickingProxy, StageEx, Structure, Vector2
+    MouseActions, ParserRegistry, PickingProxy, Stage, Structure, Vector2, Vector3
 } from 'ngl';
+import {Matrix4} from 'three';
 import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer';
 import {OutlinePass} from 'three/examples/jsm/postprocessing/OutlinePass';
 import {ShaderPass} from 'three/examples/jsm/postprocessing/ShaderPass';
@@ -65,7 +67,7 @@ export default class Pose3D extends ContainerObject {
         this._domParent.appendChild(this._nglDiv);
 
         // Initialize NGL
-        this._stage = new StageEx(this._nglDiv, {
+        this._stage = new Stage(this._nglDiv, {
             lightColor: 0xffffff,
             ambientColor: 0xffffff
         });
@@ -75,8 +77,7 @@ export default class Pose3D extends ContainerObject {
         this.addObject(this._window, this.container);
 
         // Customize initial viewer parameters
-        this._stage.viewer.setFog(0x222222);
-        this._stage.viewer.cameraDistance = 800;
+        this._stage.viewer.setFog(0x222222, undefined, 100000000);
 
         // Custom effects
         this.initEffects();
@@ -106,7 +107,7 @@ export default class Pose3D extends ContainerObject {
                     MouseActions.panDrag(stage, dx, dy);
                     break;
                 case NGLDragState.ROTATE:
-                    MouseActions.rotateDrag(stage, dx, dy);
+                    this.rotateDrag(dx, dy);
                     break;
                 case NGLDragState.ZOOM:
                     MouseActions.zoomDrag(stage, dx, dy);
@@ -114,17 +115,58 @@ export default class Pose3D extends ContainerObject {
                 default: Assert.unreachable(this._window.nglDragState);
             }
         });
-        this._stage.mouseControls.add('drag-alt-left', MouseActions.panDrag);
-        this._stage.mouseControls.add('drag-ctrl-left', MouseActions.rotateDrag);
-        this._stage.mouseControls.add('drag-shift-left', MouseActions.zoomDrag);
+        this._stage.mouseControls.add('drag-shift-left', MouseActions.panDrag);
+        this._stage.mouseControls.add(
+            'drag-ctrl-left',
+            (_stage: Stage, dx: number, dy: number) => this.rotateDrag(dx, dy)
+        );
         this._stage.mouseControls.add(
             'clickPick-left',
-            (_stage: StageEx, pickingProxy: PickingProxy) => this.paintPick(pickingProxy)
+            (_stage: Stage, pickingProxy: PickingProxy) => this.paintPick(pickingProxy)
         );
         this._stage.mouseControls.add(
             'hoverPick',
-            (_stage: StageEx, pickingProxy: PickingProxy) => this.tooltipPick(pickingProxy)
+            (_stage: Stage, pickingProxy: PickingProxy) => this.tooltipPick(pickingProxy)
         );
+    }
+
+    /**
+     * Custom orbit control
+     *
+     * NGL's rotation controls either rotate either:
+     * 1) Around the origin after the position is offset, which is liable to be confusing for many users,
+     *    since you could do something like offset to the right, rotate to the back, and then you're left
+     *    wondering "why is it so far away and how do I actually rotate the model"
+     * 2) Rotate the component itself, which doesn't work for us since we place things like base highlights
+     *    in the scene as a child of the translation group, not the component, so they'd wind up being in
+     *    the wrong position
+     *
+     * This function instead adds a rotation to the translation group, rotating around its center
+     *
+     * @param x Mouse x offset
+     * @param y Mouse y offset
+     */
+    private rotateDrag(x: number, y: number) {
+        const dx = this._stage.trackballControls.rotateSpeed * -x * 0.01;
+        const dy = this._stage.trackballControls.rotateSpeed * -y * 0.01;
+
+        const box = new Box3().setFromObject(this._stage.viewer.translationGroup);
+        const center = box.getCenter(new Vector3());
+
+        const transform = new Matrix4();
+        transform
+            // Translate to center
+            .premultiply(new Matrix4().makeTranslation(-center.x, -center.y, -center.z))
+            // Rotate on X axis
+            .premultiply(new Matrix4().makeRotationX(-dy))
+            // Rotate on Y axis
+            .premultiply(new Matrix4().makeRotationY(dx))
+            // Translate back to original position
+            .premultiply(new Matrix4().makeTranslation(center.x, center.y, center.z));
+
+        this._stage.viewer.translationGroup.applyMatrix4(transform);
+
+        this._stage.viewer.requestRender();
     }
 
     private initEffects() {
@@ -149,11 +191,11 @@ export default class Pose3D extends ContainerObject {
 
         this._baseHighlights = new BaseHighlightGroup(this._stage, changedBaseOutlinePass);
         this._baseHighlights.name = 'baseHighlightGroup';
-        this._stage.viewer.rotationGroup.add(this._baseHighlights);
+        this._stage.viewer.translationGroup.add(this._baseHighlights);
 
         this._sparkGroup = new SparkGroup(this._stage);
         this._sparkGroup.name = 'sparkGroup';
-        this._stage.viewer.rotationGroup.add(this._sparkGroup);
+        this._stage.viewer.translationGroup.add(this._sparkGroup);
 
         this._stage.viewer.render = (picking) => {
             // When render is called with picking, that makes NGL render to a renderTarget used for
@@ -297,7 +339,7 @@ export default class Pose3D extends ContainerObject {
     private _domParent: HTMLElement;
 
     private _nglDiv: HTMLElement;
-    private _stage: StageEx;
+    private _stage: Stage;
     private _component: Component | null;
     private _colorScheme: string;
     private _baseHighlights: BaseHighlightGroup;
