@@ -1,4 +1,5 @@
-import {AtomProxy, Colormaker, ColormakerRegistry} from 'ngl';
+import {Colormaker, ColormakerRegistry} from 'ngl';
+import type AtomProxy from 'ngl/dist/declarations/proxy/atom-proxy';
 import {Value} from 'signals';
 import {RNABase} from 'eterna/EPars';
 import Sequence from 'eterna/rnatypes/Sequence';

@@ -1,5 +1,5 @@
 import {
-    AtomProxy, ConeBuffer,
+    ConeBuffer,
     RepresentationRegistry,
     Structure, StructureRepresentation, StructureRepresentationParameters, Viewer, WidelineBuffer
 } from 'ngl';
@@ -155,13 +155,9 @@ class EternaRepresentationImpl extends StructureRepresentation {
                     id2 = rawBondData.picking.bondStore.atomIndex1[n1];
                 } else id2 = id + 1;
 
-                const ap1 = new AtomProxy(bondData.picking.structure);
-                ap1.index = id;
-                const ap2 = new AtomProxy(bondData.picking.structure);
-                ap2.index = id2;
-                const dx = ap2.x - ap1.x;
-                const dy = ap2.y - ap1.y;
-                const dz = ap2.z - ap1.z;
+                const dx = bondData.picking.structure.atomStore.x[id2] - bondData.picking.structure.atomStore.x[id];
+                const dy = bondData.picking.structure.atomStore.y[id2] - bondData.picking.structure.atomStore.y[id];
+                const dz = bondData.picking.structure.atomStore.z[id2] - bondData.picking.structure.atomStore.z[id];
                 x1 = y * dz - z * dy;
                 y1 = z * dx - x * dz;
                 z1 = x * dy - y * dx;
