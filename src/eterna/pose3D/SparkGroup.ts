@@ -55,39 +55,43 @@ export default class SparkGroup extends Group {
 
             const forwardSprite = new Sprite(this.MAT);
             forwardSprite.position.set(avgPos.x, avgPos.y, avgPos.z);
+            forwardSprite.scale.set(5, 5, 1);
             group.add(forwardSprite);
             angles.set(forwardSprite, forwardDirection);
 
             const reverseSprite = new Sprite(this.MAT);
             reverseSprite.position.set(avgPos.x, avgPos.y, avgPos.z);
+            reverseSprite.scale.set(5, 5, 1);
             group.add(reverseSprite);
             angles.set(reverseSprite, forwardDirection.clone().negate());
         }
 
-        for (const sprite of group.children) {
-            sprite.scale.set(sparkDistance, sparkDistance, 1.0);
-        }
-
-        const expiration = 300;
-        let updates = 0;
+        const expiration = 1000;
+        let startTime = 0;
         let handle: number;
         const update: TimerHandler = () => {
-            if (updates > expiration) {
+            // Since everything runs on the main thread, in large puzzles everything may be frozen
+            // a bit before the graphics actually update and we start animating. Waiting to set the
+            // start time until now ensures the animation actually plays instead of just expiring
+            // before we even start.
+            if (startTime === 0) startTime = (new Date()).getTime();
+
+            const timeDiff = new Date().getTime() - startTime;
+            if (timeDiff > expiration) {
                 this.remove(group);
                 clearInterval(handle);
             }
 
-            const opacity = 1.0 - updates / expiration;
+            const opacity = 1.0 - timeDiff / expiration;
             for (const sprite of group.children as Sprite[]) {
                 if (sprite.visible) {
-                    const delta = (((sparkDistance / 24) * (expiration - updates)) / expiration);
+                    const delta = (((sparkDistance / 24) * (expiration - timeDiff)) / expiration);
                     const direction = angles.get(sprite);
                     if (direction) sprite.translateOnAxis(direction, delta);
                     sprite.material.opacity = opacity;
                 }
             }
 
-            updates++;
             this._stage.viewer.requestRender();
         };
         handle = setInterval(update, 1);
