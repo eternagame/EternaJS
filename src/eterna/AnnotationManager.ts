@@ -322,6 +322,25 @@ export default class AnnotationManager {
         }
     }
 
+    private validateAnnotationBases(length: number) {
+        const annotationValid = (annot: AnnotationData) => (
+            annot.ranges
+                ? annot.ranges.every((range) => range.start < length && range.end < length)
+                : true
+        );
+
+        // This will prevent crashes eg in puzzlemaker if you remove bases where the start/end base
+        // refers to a base that no longer exists (which would cause the layout code to try and get
+        // the position of an undefined base). Running this on every layout update is not great,
+        // and the UX of "just outright delete any annotation where some part of its selection
+        // no longer exists" is not great, so we should probably come up with a better option in
+        // the future when we have better state management. However, this will at least prevent
+        // crashes for now.
+        this._structureAnnotations = this._structureAnnotations.filter(annotationValid);
+        this._puzzleAnnotations = this._puzzleAnnotations.filter(annotationValid);
+        this._solutionAnnotations = this._solutionAnnotations.filter(annotationValid);
+    }
+
     /**
      * Downloads the annotation bundle to the player's disk
      */
@@ -549,6 +568,8 @@ export default class AnnotationManager {
         reset: boolean;
         ignoreCustom: boolean;
     }): void {
+        this.validateAnnotationBases(params.pose.fullSequenceLength);
+
         // Get base layer bounds relative to Pose2D container
         // This is done here rather than in findBaseConflicts where it's actually used
         // because it is quite expensive for large puzzles, and would wind up getting run

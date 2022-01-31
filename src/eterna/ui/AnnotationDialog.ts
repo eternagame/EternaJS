@@ -579,7 +579,6 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
 
             const parseExtent = (extent: string): number => {
                 // We remove one because backend is zero-indexed
-                if (extent.startsWith('r')) return parseInt(extent.replace('r', ''), 10) - 1;
                 if (this._customNumbering) return this._customNumbering.indexOf(parseInt(extent, 10));
                 return parseInt(extent, 10) - 1;
             };
