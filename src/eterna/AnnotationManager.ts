@@ -1133,7 +1133,7 @@ export default class AnnotationManager {
                 }
 
                 // Make sure anchor sits within sequence length
-                if (anchorIndex >= params.pose.sequenceLength - 1) continue;
+                if (anchorIndex > params.pose.sequenceLength - 1) continue;
                 const base = params.pose.getBase(anchorIndex);
                 const anchorPoint = new Point(
                     base.x + params.pose.xOffset,
