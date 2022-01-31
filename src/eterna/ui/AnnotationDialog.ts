@@ -453,8 +453,12 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
         if (!this.isLiveObject) return;
 
         const baseRanges = this.annotationRangeToString(ranges);
+
         // set ranges string
         this._basesField.input.text = baseRanges;
+
+        const isValid = this.isValidAnnotation();
+        this._saveButton.enabled = isValid;
     }
 
     public isValidAnnotation(): boolean {
@@ -499,12 +503,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
             return false;
         } else {
             for (const numText of rangeNumbers) {
-                if (numText.startsWith('r')) {
-                    const num = parseInt(numText.replace('r', ''), 10);
-                    if (num <= 0 || num > this._sequenceLength) {
-                        return false;
-                    }
-                } else if (this._customNumbering) {
+                if (this._customNumbering) {
                     const num = this._customNumbering.indexOf(parseInt(numText, 10));
                     if (num < 0 || num > this._sequenceLength - 1) {
                         return false;
@@ -546,9 +545,10 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
                 const customIndex = this._customNumbering[index];
                 // For bases without indexes in the custom numbering system, such as the bases
                 // in the PTC puzzles where an area of the full ribosome is "capped off" with a
-                // faux hairpin, we allow them to still be indexed and used by an annotation by
-                // prefixing the index with "r" (for "raw").
-                if (customIndex == null) return `r${index + 1}`;
+                // faux hairpin, we have no number for them. We prevent selecting these bases
+                // in the UI, but in case something slips through somehow, leaving it as an empty
+                // string will just look "wrong" and fail to validate preventing the user from saving it
+                if (customIndex == null) return '';
                 return customIndex.toString();
             } else {
                 return `${index + 1}`;
