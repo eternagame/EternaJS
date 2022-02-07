@@ -416,6 +416,7 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
                 `${this.nglHeight}px`
             );
             this.resized.emit();
+            this._nglStage.viewer.render(false);
         }
 
         // Title bar drag handles should fill remaining space
