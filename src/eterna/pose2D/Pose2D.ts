@@ -385,11 +385,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public set currentColor(col: RNAPaint) {
+    public set currentColor(col: RNAPaint | RNABase) {
         this._currentColor = col;
     }
 
-    public get currentColor(): RNAPaint {
+    public get currentColor(): RNAPaint | RNABase {
         return this._currentColor;
     }
 
@@ -552,7 +552,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._strandLabel.display.visible = false;
     }
 
-    public parseCommand(command: RNAPaint, closestIndex: number): [string, PuzzleEditOp, RNABase[]?] | null {
+    public parseCommand(command: RNAPaint | RNABase, closestIndex: number): [string, PuzzleEditOp, RNABase[]?] | null {
         switch (command) {
             case RNAPaint.ADD_BASE:
                 return PoseUtil.addBaseWithIndex(closestIndex, this._pairs);
@@ -3450,7 +3450,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this._designStructUpdated = true;
             }
         } else if (!this.isLocked(seqnum)) {
-            if (this._currentColor >= 1 && this._currentColor <= 4) {
+            if (
+                this._currentColor === RNABase.ADENINE || this._currentColor === RNABase.URACIL
+                || this._currentColor === RNABase.GUANINE || this._currentColor === RNABase.CYTOSINE
+            ) {
                 this._mutatedSequence.setNt(seqnum, this._currentColor);
                 ROPWait.notifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
                 this._bases[seqnum].setType(this._currentColor, true);
@@ -3547,7 +3550,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (this._mutatedSequence === null) {
                 throw new Error('The clicked base is not locked, but the mutated sequence is null: critical error!');
             }
-            if (this._currentColor >= 1 && this._currentColor <= 4) {
+            if (
+                this._currentColor === RNABase.ADENINE || this._currentColor === RNABase.URACIL
+                || this._currentColor === RNABase.GUANINE || this._currentColor === RNABase.CYTOSINE
+            ) {
                 this._mutatedSequence.setNt(seqnum, this._currentColor);
                 ROPWait.notifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
                 this._bases[seqnum].setType(this._currentColor, true);
@@ -4255,7 +4261,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _energyTextLayer: Container;
 
     private _coloring: boolean = false;
-    private _currentColor: number = RNABase.URACIL;
+    private _currentColor: RNABase | RNAPaint = RNABase.URACIL;
     private _lastColoredIndex: number;
     private _lockUpdated: boolean;
     private _bindingSiteUpdated: boolean;

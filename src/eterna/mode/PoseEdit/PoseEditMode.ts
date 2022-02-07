@@ -519,7 +519,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     public onPaletteTargetSelected(type: PaletteTargetType): void {
-        const baseType: number = GetPaletteTargetBaseType(type);
+        const baseType = GetPaletteTargetBaseType(type);
         this.setPosesColor(baseType);
     }
 
@@ -2384,7 +2384,8 @@ export default class PoseEditMode extends GameMode {
             });
     }
 
-    public setPosesColor(paintColor: RNAPaint): void {
+    public setPosesColor(paintColor: RNABase | RNAPaint): void {
+        if (this._pose3D) this._pose3D.currentColor = paintColor;
         for (const pose of this._poses) {
             pose.currentColor = paintColor;
         }

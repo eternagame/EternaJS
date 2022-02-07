@@ -1,7 +1,7 @@
 import {Colormaker, ColormakerRegistry} from 'ngl';
 import type AtomProxy from 'ngl/dist/declarations/proxy/atom-proxy';
 import {Value} from 'signals';
-import {RNABase} from 'eterna/EPars';
+import {RNABase, RNAPaint} from 'eterna/EPars';
 import Sequence from 'eterna/rnatypes/Sequence';
 
 enum BaseColor {
@@ -12,7 +12,7 @@ enum BaseColor {
     DEFAULT = 0xFFFFFF
 }
 
-export function getBaseColor(base: RNABase) {
+export function getBaseColor(base: RNABase | RNAPaint) {
     switch (base) {
         case RNABase.URACIL:
             return BaseColor.URACIL;

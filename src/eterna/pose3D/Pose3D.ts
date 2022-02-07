@@ -13,6 +13,7 @@ import {FXAAShader} from 'three/examples/jsm/shaders/FXAAShader';
 import {Assert, ContainerObject} from 'flashbang';
 import {Signal, Value} from 'signals';
 import Eterna from 'eterna/Eterna';
+import {RNABase, RNAPaint} from 'eterna/EPars';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 import NGLPickingUtils from './NGLPickingUtils';
@@ -29,6 +30,7 @@ export default class Pose3D extends ContainerObject {
     public readonly sequence: Value<Sequence>;
     public readonly secstruct: Value<SecStruct>;
     public readonly structureFile: string | File | Blob;
+    public currentColor: RNABase | RNAPaint = RNABase.ADENINE;
 
     constructor(
         structureFile: string | File | Blob,
@@ -302,7 +304,7 @@ export default class Pose3D extends ContainerObject {
 
     public hover3D(index: number) {
         if (index !== -1) {
-            const color: number = getBaseColor(this.sequence.value.nt(index));
+            const color: number = getBaseColor(this.currentColor);
             this._baseHighlights.switchHover(index, color);
         } else {
             this._baseHighlights.clearHover();
