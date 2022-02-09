@@ -19,7 +19,7 @@ export default class PaintCursor extends GameObject implements Updatable {
         this._color = col;
     }
 
-    public setShape(shape: number): void {
+    public setShape(shape: number, whiteOutside: boolean = false): void {
         switch (shape) {
             case RNABase.ADENINE:
                 this._color = PaintCursor.YELLOW;
@@ -67,6 +67,8 @@ export default class PaintCursor extends GameObject implements Updatable {
                 this._color = PaintCursor.WHITE;
                 this._outColor = PaintCursor.NULL;
         }
+
+        if (whiteOutside) this._outColor = PaintCursor.WHITE;
     }
 
     /* override */

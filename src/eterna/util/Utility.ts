@@ -1,6 +1,6 @@
 import {Point} from 'pixi.js';
 import DOMPurify from 'dompurify';
-import Marked from 'marked';
+import {marked} from 'marked';
 import {Assert} from 'flashbang';
 
 // Allow iframes to YouTube
@@ -43,7 +43,7 @@ export default class Utility {
             opts.ALLOWED_TAGS = [];
         }
 
-        return DOMPurify.sanitize(markup ? Marked(str) : str, opts) as string;
+        return DOMPurify.sanitize(markup ? marked(str) : str, opts) as string;
     }
 
     /**

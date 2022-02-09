@@ -1,7 +1,7 @@
 import {
     Graphics, Point, Sprite, Container
 } from 'pixi.js';
-import {RegistrationGroup} from 'signals';
+import {RegistrationGroup, Signal} from 'signals';
 import Eterna from 'eterna/Eterna';
 import Booster from 'eterna/mode/PoseEdit/Booster';
 import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
@@ -92,6 +92,9 @@ export default class Toolbar extends ContainerObject {
     public freezeButton: GameButton;
 
     public boostersMenu: GameButton;
+
+    public upload3DButton: GameButton;
+    public selected3DFile: Signal<FileList | null>;
 
     public baseMarkerButton: GameButton;
     public librarySelectionButton: GameButton;
@@ -263,6 +266,14 @@ export default class Toolbar extends ContainerObject {
                 this._deselectAllPaintTools();
                 this.moleculeButton.toggled.value = true;
             }));
+
+            this.upload3DButton = new ToolbarButton()
+                .up(Bitmaps.Img3DFileOpen)
+                .over(Bitmaps.Img3DFileOpenHover)
+                .down(Bitmaps.Img3DFileOpen)
+                .tooltip('Load 3D Model');
+
+            this.addObject(this.upload3DButton, upperToolbarLayout);
         }
 
         // LOWER TOOLBAR (palette, zoom, settings, etc)

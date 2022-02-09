@@ -117,6 +117,9 @@ export default class Bitmaps {
     public static readonly ImgHelpOver: string = require('assets/UI/help-btn-hover.png');
     public static readonly ImgHelpHit: string = require('assets/UI/help-btn-active.png');
     public static readonly ImgHelp: string = require('assets/UI/help-btn.png');
+    public static readonly ImgThreeScreen: string = require('assets/UI/three-obj.png');
+    public static readonly ImgThreeScreenOver: string = require('assets/UI/three-obj-hover.png');
+    public static readonly ImgThreeScreenHint: string = require('assets/UI/three-obj-hint.png');
     public static readonly ImgHelpClose: string = require('assets/UI/help-btn-close.png');
     public static readonly ImgHelpCloseOver: string = require('assets/UI/help-btn-close-hover.png');
     public static readonly ImgChat: string = require('assets/UI/chat-btn.png');
@@ -304,6 +307,41 @@ export default class Bitmaps {
     public static readonly ImgAchievementsCheckmark: string = require('assets/Achievements/checkmark.png');
     public static readonly ImgConstraintArrowUp: string = require('assets/UI/constraint-arrow-up.png');
     public static readonly ImgConstraintDrawerTip: string = require('assets/UI/constraint-drawer-tip.png');
+
+    public static readonly Img3DFileOpen: string = require('assets/UI/3d-btn.png');
+    public static readonly Img3DFileOpenHover: string = require('assets/UI/3d-btn-over.png');
+    public static readonly Img3DShow: string = require('assets/UI/show-3d.png');
+    public static readonly Img3DHide: string = require('assets/UI/hide-3d.png');
+    public static readonly Img3DZoomin: string = require('assets/UI/zoomin-3d.png');
+    public static readonly Img3DZoomout: string = require('assets/UI/zoomout-3d.png');
+    public static readonly Img3DMove: string = require('assets/UI/move-3d.png');
+    public static readonly Img3DRotate: string = require('assets/UI/rotate-3d.png');
+
+    public static readonly Img3DMoveIcon: string = require('assets/UI/move-3d-icon.png');
+    public static readonly Img3DRotateIcon: string = require('assets/UI/rotate-3d-icon.png');
+    public static readonly Img3DMoveCheckIcon: string = require('assets/UI/move-3d-check-icon.png');
+    public static readonly Img3DRotateCheckIcon: string = require('assets/UI/rotate-3d-check-icon.png');
+    public static readonly Img3DZoominIcon: string = require('assets/UI/zoomin-3d-icon.png');
+    public static readonly Img3DZoomoutIcon: string = require('assets/UI/zoomout-3d-icon.png');
+    public static readonly ImgMingZoomIn: string = require('assets/MingUI/ui_zoomin.png');
+
+    public static readonly Img3DSettingIcon: string = require('assets/UI/setting-ngl.png');
+    public static readonly Img3DSettingHoverIcon: string = require('assets/UI/setting-ngl-hover.png');
+
+    public static readonly Img3DLeft: string = require('assets/UI/canvas_left.png');
+    public static readonly Img3DLeftHover: string = require('assets/UI/canvas_left_hover.png');
+    public static readonly Img3DRight: string = require('assets/UI/canvas_right.png');
+    public static readonly Img3DRightHover: string = require('assets/UI/canvas_right_hover.png');
+    public static readonly Img3DTitle: string = require('assets/UI/canvas_title.png');
+    public static readonly Img3DMax: string = require('assets/UI/max.png');
+    public static readonly Img3DMaxHover: string = require('assets/UI/max_hover.png');
+    public static readonly Img3DMaxRestore: string = require('assets/UI/origin.png');
+    public static readonly Img3DMaxRestoreHover: string = require('assets/UI/origin_hover.png');
+    public static readonly Img3DMin: string = require('assets/UI/canvas_dropdown.png');
+    public static readonly Img3DMinHover: string = require('assets/UI/canvas_dropdown_hover.png');
+    public static readonly Img3DMinRestore: string = require('assets/UI/canvas_dropdown_closed.png');
+    public static readonly Img3DMinRestoreHover: string = require('assets/UI/canvas_dropdown_closed_hover.png');
+
     public static readonly ImgBaseMarker: string = require('assets/UI/base-marker-btn.png');
     public static readonly ImgBaseMarkerOver: string = require('assets/UI/base-marker-btn-over.png');
     public static readonly ImgMagicGlueOver: string = require('assets/UI/magic-glue-btn-over.png');
@@ -352,6 +390,7 @@ export default class Bitmaps {
     public static readonly ImgChevronDown: string = require('assets/UI/chevron-down.png');
     public static readonly ImgChevronRight: string = require('assets/UI/chevron-right.png');
     public static readonly ImgPencil: string = require('assets/UI/pencil.png');
+    public static readonly ImgPencilCheck: string = require('assets/UI/pencil-check.png');
     public static readonly ImgPointerHand: string = require('assets/UI/pointer-hand.png');
     public static readonly ImgAnnotationCheckmark: string = require('assets/UI/annotation-checkmark.png');
     public static readonly ImgAnnotationCross: string = require('assets/UI/annotation-cross.png');

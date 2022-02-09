@@ -2,7 +2,7 @@ import * as log from 'loglevel';
 import {
     Container, Graphics, Point, Sprite, Texture, Rectangle, InteractionEvent
 } from 'pixi.js';
-import {Registration} from 'signals';
+import {Registration, Signal} from 'signals';
 import EPars, {RNABase, RNAPaint} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import ExpPainter from 'eterna/ExpPainter';
@@ -66,10 +66,15 @@ export const PLAYER_MARKER_LAYER = 'Markers';
 export const SCRIPT_MARKER_LAYER = 'Script';
 
 export type PoseMouseDownCallback = (e: InteractionEvent, closestDist: number, closestIndex: number) => void;
+export type PosePickCallback = (closestIndex: number) => void;
 
 export default class Pose2D extends ContainerObject implements Updatable {
     public static readonly COLOR_CURSOR: number = 0xFFC0CB;
     public static readonly ZOOM_SPACINGS: number[] = [45, 30, 20, 14, 7];
+
+    public readonly baseMarked = new Signal<number>();
+    public readonly baseHovered = new Signal<number>();
+    public readonly basesSparked = new Signal<number[]>();
 
     constructor(poseField: PoseField, editable: boolean, annotationManager: AnnotationManager) {
         super();
@@ -381,11 +386,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public set currentColor(col: RNAPaint) {
+    public set currentColor(col: RNAPaint | RNABase) {
         this._currentColor = col;
     }
 
-    public get currentColor(): RNAPaint {
+    public get currentColor(): RNAPaint | RNABase {
         return this._currentColor;
     }
 
@@ -548,7 +553,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._strandLabel.display.visible = false;
     }
 
-    public parseCommand(command: RNAPaint, closestIndex: number): [string, PuzzleEditOp, RNABase[]?] | null {
+    public parseCommand(command: RNAPaint | RNABase, closestIndex: number): [string, PuzzleEditOp, RNABase[]?] | null {
         switch (command) {
             case RNAPaint.ADD_BASE:
                 return PoseUtil.addBaseWithIndex(closestIndex, this._pairs);
@@ -589,6 +594,19 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 return;
             }
             this.onPoseMouseDown(e, closestIndex);
+        }
+    }
+
+    public onVirtualPoseMouseDownPropagate(closestIndex: number): void {
+        const altDown: boolean = Flashbang.app.isAltKeyDown;
+        const ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
+        const ctrlDownOrBaseMarking = ctrlDown || this.currentColor === RNAPaint.BASE_MARK;
+
+        if ((this._coloring && !altDown) || ctrlDownOrBaseMarking) {
+            if (ctrlDownOrBaseMarking && closestIndex >= this.sequence.length) {
+                return;
+            }
+            this.onVirtualPoseMouseDown(closestIndex);
         }
     }
 
@@ -1050,6 +1068,40 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
+    public onVirtualPoseMouseDown(closestIndex: number): void {
+        const altDown: boolean = Flashbang.app.isAltKeyDown;
+        const ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
+
+        if (this._annotationManager.isMovingAnnotation) {
+            return;
+        }
+
+        // ctrl + shift: drag base around; ctrl: base mark; shift: shift highlight
+        if (closestIndex >= 0) {
+            this._mouseDownAltKey = altDown;
+            if (
+                (ctrlDown || this.currentColor === RNAPaint.BASE_MARK)
+                && closestIndex < this.fullSequenceLength
+                && !this._annotationManager.annotationModeActive.value
+            ) {
+                this.toggleBaseMark(closestIndex);
+                return;
+            }
+            this._lastShiftedCommand = -1;
+            this._lastShiftedIndex = -1;
+            const cmd: [string, PuzzleEditOp, number[]?] | null = this.parseCommand(this._currentColor, closestIndex);
+            if (cmd == null) {
+                this.onBaseMouseDown(closestIndex, ctrlDown);
+                this.onMouseUp();
+            } else {
+                this._lastShiftedCommand = this._currentColor;
+                this._lastShiftedIndex = closestIndex;
+
+                this.callAddBaseCallback(cmd[0], cmd[1], closestIndex);
+            }
+        }
+    }
+
     public setMarkerLayer(layer: string) {
         this._currentMarkerLayer = layer;
         for (const base of this._bases) {
@@ -1058,6 +1110,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public toggleBaseMark(baseIndex: number): void {
+        this.baseMarked.emit(baseIndex);
+
         if (!this.isTrackedLayer(baseIndex, PLAYER_MARKER_LAYER)) {
             this.addBaseMark(baseIndex, PLAYER_MARKER_LAYER);
         } else {
@@ -1183,8 +1237,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         if (closestIndex >= 0 && this._currentColor >= 0) {
+            this.baseHovered.emit(closestIndex);
+
             this.onBaseMouseMove(closestIndex);
-            // document.getElementById(Eterna.PIXI_CONTAINER_ID).style.cursor = 'none';
 
             if (!this._annotationManager.annotationModeActive.value) {
                 this._paintCursor.display.visible = true;
@@ -1206,6 +1261,45 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         } else {
             this._lastColoredIndex = -1;
+            this.baseHovered.emit(-1);
+        }
+
+        if (!this._coloring) {
+            this.updateScoreNodeGui();
+        }
+    }
+
+    public on3DPickingMouseMoved(closestIndex: number): void {
+        if (!this._coloring) {
+            this.clearMouse();
+        }
+        const mouseX = this._bases[closestIndex].x + this._offX;
+        const mouseY = this._bases[closestIndex].y + this._offY;
+
+        this._paintCursor.display.x = mouseX;
+        this._paintCursor.display.y = mouseY;
+
+        if (closestIndex >= 0 && this._currentColor >= 0) {
+            this.onBaseMouseMove(closestIndex);
+
+            if (!this._annotationManager.annotationModeActive.value) {
+                this._paintCursor.display.visible = true;
+                this._paintCursor.setShape(this._currentColor);
+            }
+
+            const strandName: string | null = this.getStrandName(closestIndex);
+            if (strandName != null) {
+                this._strandLabel.setText(strandName);
+                if (mouseX + 16 + this._strandLabel.width > this._width) {
+                    this._strandLabel.display.position.set(
+                        mouseX - 16 - this._strandLabel.width,
+                        mouseY + 16
+                    );
+                } else {
+                    this._strandLabel.display.position.set(mouseX + 16, mouseY + 16);
+                }
+                this._strandLabel.display.visible = true;
+            }
         }
 
         if (!this._coloring) {
@@ -1771,6 +1865,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
+        const sparked: number[] = [];
+
         for (let ii: number = stackStart; ii <= stackEnd; ii++) {
             const aa: number = ii;
             const bb: number = this._pairs.pairingPartner(ii);
@@ -1794,6 +1890,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
             this._bases[ii].startSparking();
             this._bases[this._pairs.pairingPartner(ii)].startSparking();
+            sparked.push(ii);
+            sparked.push(this._pairs.pairingPartner(ii));
             const p: Point = this.getBaseLoc(ii);
             const p2: Point = this.getBaseLoc(this._pairs.pairingPartner(ii));
 
@@ -1803,6 +1901,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
             xPos += p2.x;
             yPos += p2.y;
         }
+
+        this.basesSparked.emit(sparked);
 
         const stackLen: number = (stackEnd - stackStart) + 1;
 
@@ -1868,11 +1968,17 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     private onPraiseSeq(seqStart: number, seqEnd: number): void {
         const fullSeqLen = this.fullSequenceLength;
+
+        const sparked: number[] = [];
+
         for (let ii: number = seqStart; ii <= seqEnd; ii++) {
             if (ii >= 0 && ii < fullSeqLen) {
                 this._bases[ii].startSparking();
+                sparked.push(ii);
             }
         }
+
+        this.basesSparked.emit(sparked);
     }
 
     public startExplosion(): Promise<void> {
@@ -1980,6 +2086,18 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public set startMousedownCallback(cb: PoseMouseDownCallback) {
         this._startMousedownCallback = cb;
+    }
+
+    public set startPickCallback(cb: PosePickCallback) {
+        this._startPickCallback = cb;
+    }
+
+    public simulateMousedownCallback(closestIndex:number): void {
+        if (this._startPickCallback != null && closestIndex >= 0) {
+            this._startPickCallback(closestIndex);
+        }
+        // deselect all annotations
+        this._annotationManager.deselectSelected();
     }
 
     public callStartMousedownCallback(e: InteractionEvent): void {
@@ -2960,7 +3078,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         const fullSeq = this.fullSequence;
         for (let ii = 0; ii < this._pairs.length; ii++) {
             if (this._pairs.pairingPartner(ii) > ii
-                    && (!satisfied || this.isPairSatisfied(fullSeq, ii, this._pairs.pairingPartner(ii)))) {
+                && (!satisfied || this.isPairSatisfied(fullSeq, ii, this._pairs.pairingPartner(ii)))) {
                 n++;
             }
         }
@@ -3333,7 +3451,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this._designStructUpdated = true;
             }
         } else if (!this.isLocked(seqnum)) {
-            if (this._currentColor >= 1 && this._currentColor <= 4) {
+            if (
+                this._currentColor === RNABase.ADENINE || this._currentColor === RNABase.URACIL
+                || this._currentColor === RNABase.GUANINE || this._currentColor === RNABase.CYTOSINE
+            ) {
                 this._mutatedSequence.setNt(seqnum, this._currentColor);
                 ROPWait.notifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
                 this._bases[seqnum].setType(this._currentColor, true);
@@ -3430,7 +3551,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (this._mutatedSequence === null) {
                 throw new Error('The clicked base is not locked, but the mutated sequence is null: critical error!');
             }
-            if (this._currentColor >= 1 && this._currentColor <= 4) {
+            if (
+                this._currentColor === RNABase.ADENINE || this._currentColor === RNABase.URACIL
+                || this._currentColor === RNABase.GUANINE || this._currentColor === RNABase.CYTOSINE
+            ) {
                 this._mutatedSequence.setNt(seqnum, this._currentColor);
                 ROPWait.notifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
                 this._bases[seqnum].setType(this._currentColor, true);
@@ -4101,7 +4225,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _bindingSite: boolean[] | null;
     private _molecularBindingBases: BaseGlow[] | null = null;
     private _molecularBindingPairs: number[] = [];
-    private _molecule: Molecule | null= null;
+    private _molecule: Molecule | null = null;
     private _moleculeIsBound: boolean = false;
     private _moleculeIsBoundReal: boolean = false;
     private _molecularBindingBonus: number | undefined = 0;
@@ -4134,7 +4258,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _energyTextLayer: Container;
 
     private _coloring: boolean = false;
-    private _currentColor: number = RNABase.URACIL;
+    private _currentColor: RNABase | RNAPaint = RNABase.URACIL;
     private _lastColoredIndex: number;
     private _lockUpdated: boolean;
     private _bindingSiteUpdated: boolean;
@@ -4161,6 +4285,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _trackMovesCallback: ((count: number, moves: Move[]) => void) | null = null;
     private _addBaseCallback: (parenthesis: string | null, op: PuzzleEditOp | null, index: number) => void;
     private _startMousedownCallback: PoseMouseDownCallback;
+    private _startPickCallback: PosePickCallback;
     private _mouseDownAltKey: boolean = false;
 
     // Pointer to function that needs to be called in a GameMode to have access to appropriate state
