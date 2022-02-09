@@ -317,10 +317,16 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._zoomLevel;
     }
 
+    /**
+     * @param animate should the zoom happen in an animation over time, instead of instantaniously
+     * @param center should the camera move to the center of the screen
+     */
     public setZoomLevel(zoomLevel: number, animate: boolean = true, center: boolean = false): void {
-        if ((this._zoomLevel !== zoomLevel || center) && animate) {
-            if (this._zoomLevel === zoomLevel && center) {
-                if (Math.abs(this._width / 2 - this._offX) + Math.abs(this._height / 2 - this._offY) < 50) {
+        const needsToZoom = this._zoomLevel !== zoomLevel;
+        if ((needsToZoom || center) && animate) {
+            if (!needsToZoom && center) {
+                const distanceFromCenter = Math.hypot(this._width / 2 - this._offX, this._height / 2 - this._offY);
+                if (distanceFromCenter < 50) {
                     return;
                 }
             }
@@ -349,7 +355,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._zoomLevel = zoomLevel;
             this.computeLayout(true);
             this._redraw = true;
-        } else if (this._zoomLevel !== zoomLevel) {
+        } else if (needsToZoom) {
             this._zoomLevel = zoomLevel;
             this.computeLayout(true);
             this._redraw = true;
