@@ -46,6 +46,9 @@ import AnnotationManager, {
     AnnotationRange
 } from 'eterna/AnnotationManager';
 import AnnotationDialog from 'eterna/ui/AnnotationDialog';
+import FileInputObject, {HTMLInputEvent} from 'eterna/ui/FileInputObject';
+import Pose3D from 'eterna/pose3D/Pose3D';
+import ErrorDialog from 'eterna/ui/ErrorDialog';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
@@ -74,6 +77,7 @@ type SubmitPuzzleParams = {
     lock: string;
     begin_sequence: string;
     objectives: string;
+    'files[3d_structure]'?: File;
 };
 
 export default class PuzzleEditMode extends GameMode {
@@ -277,6 +281,28 @@ export default class PuzzleEditMode extends GameMode {
             this.downloadSVG();
         });
 
+        this._toolbar.upload3DButton.clicked.connect(() => {
+            const uploadButton = new FileInputObject({
+                id: '3d-upload-file-input',
+                width: 30,
+                height: 30,
+                acceptedFiletypes: '.cif,.pdb'
+            });
+            this.addObject(uploadButton);
+            uploadButton.activateDialog();
+            this.regs?.add(uploadButton.fileSelected.connect((e: HTMLInputEvent) => {
+                const files = e.target.files;
+                if (files && files[0]) {
+                    Pose3D.checkModelFile(files[0], this.getCurrentUndoBlock(0).sequence.length).then(() => {
+                        this.addPose3D(files[0]);
+                    }).catch((err) => {
+                        this.showDialog(new ErrorDialog(err));
+                    });
+                }
+                this.removeObject(uploadButton);
+            }));
+        });
+
         if (this._embedded) {
             this._scriptInterface.addCallback('get_secstruct', () => this.structure);
             this._scriptInterface.addCallback('get_sequence', () => this.sequence);
@@ -311,6 +337,17 @@ export default class PuzzleEditMode extends GameMode {
                         poseToNotify.onPoseMouseDown(e, closestIndex);
                     } else {
                         poseToNotify.onPoseMouseDownPropagate(e, closestIndex);
+                    }
+                }
+            };
+            pose.startPickCallback = (closestIndex: number):void => {
+                for (let ii = 0; ii < this._numTargets; ++ii) {
+                    const poseField: PoseField = poseFields[ii];
+                    const poseToNotify = poseField.pose;
+                    if (ii === index) {
+                        poseToNotify.onVirtualPoseMouseDown(closestIndex);
+                    } else {
+                        poseToNotify.onVirtualPoseMouseDownPropagate(closestIndex);
                     }
                 }
             };
@@ -823,6 +860,11 @@ export default class PuzzleEditMode extends GameMode {
             objectives: JSON.stringify(objectives)
         };
 
+        if (this._pose3D?.structureFile instanceof File) {
+            const blob = this._pose3D?.structureFile.slice();
+            postParams['files[3d_structure]'] = new File([blob], this._pose3D?.structureFile.name);
+        }
+
         const submitText = this.showDialog(new AsyncProcessDialog('Submitting...')).ref;
         Eterna.client.submitPuzzle(postParams)
             .then(() => {
@@ -947,6 +989,8 @@ export default class PuzzleEditMode extends GameMode {
                 undoBlocks: this._seqStack[this._stackLevel]
             });
         }
+
+        if (this._pose3D) this._pose3D.sequence.value = this.getCurrentUndoBlock(0).sequence;
 
         const undoblock: UndoBlock = this.getCurrentUndoBlock(this._poses.length - 1);
         const numAU: number = undoblock.getParam(UndoBlockParam.AU) as number;
@@ -1128,6 +1172,7 @@ export default class PuzzleEditMode extends GameMode {
             currentCustomLayouts.push(customLayout || null);
             currentTargetPairs.push(targetPairs);
         }
+
         if (noChange && this._stackLevel >= 0) {
             return;
         }

@@ -67,6 +67,7 @@ export interface PuzzleJSON {
     hint?: string;
     'max-votes'?: string;
     constraints?: string; // AMW TODO: string formatting restrictions
+    '3d_structure'?: string; //
 }
 
 interface ObjectiveString {
@@ -178,6 +179,10 @@ export default class PuzzleManager {
 
         if (json['max-votes']) {
             newpuz.maxVotes = Number(json['max-votes']);
+        }
+
+        if (json['3d_structure']) {
+            newpuz.threePath = json['3d_structure'];
         }
 
         if (newpuz.nodeID === 877668) {

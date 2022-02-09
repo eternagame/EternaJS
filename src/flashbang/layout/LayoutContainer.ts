@@ -13,9 +13,9 @@ export default abstract class LayoutContainer extends Container {
     }
 
     /* override */
-    public addChild<T extends DisplayObject>(children_0: T, ...children: DisplayObject[]): T {
+    public addChild<T extends DisplayObject[]>(...children: T): T[0] {
         this._needsLayout = true;
-        return super.addChild(children_0, ...children);
+        return super.addChild(...children);
     }
 
     // AMW TODO: Painfully, because pixi type definitions require specific
