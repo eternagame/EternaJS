@@ -13,6 +13,7 @@ module.exports = merge(common, {
         port: 63343,
         static: {
             directory: path.resolve(__dirname + "/dist/dev"),
-        }
+        },
+        hot: false
     },
 });
