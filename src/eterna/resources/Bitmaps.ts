@@ -308,8 +308,8 @@ export default class Bitmaps {
     public static readonly ImgConstraintArrowUp: string = require('assets/UI/constraint-arrow-up.png');
     public static readonly ImgConstraintDrawerTip: string = require('assets/UI/constraint-drawer-tip.png');
 
-    public static readonly ImgFileOpen: string = require('assets/UI/file-open.png');
-    public static readonly ImgFileOpenHover: string = require('assets/UI/file-open-hover.png');
+    public static readonly Img3DFileOpen: string = require('assets/UI/3d-btn.png');
+    public static readonly Img3DFileOpenHover: string = require('assets/UI/3d-btn-over.png');
     public static readonly Img3DShow: string = require('assets/UI/show-3d.png');
     public static readonly Img3DHide: string = require('assets/UI/hide-3d.png');
     public static readonly Img3DZoomin: string = require('assets/UI/zoomin-3d.png');

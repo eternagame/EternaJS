@@ -266,6 +266,14 @@ export default class Toolbar extends ContainerObject {
                 this._deselectAllPaintTools();
                 this.moleculeButton.toggled.value = true;
             }));
+
+            this.upload3DButton = new ToolbarButton()
+                .up(Bitmaps.Img3DFileOpen)
+                .over(Bitmaps.Img3DFileOpenHover)
+                .down(Bitmaps.Img3DFileOpen)
+                .tooltip('Load 3D Model');
+
+            this.addObject(this.upload3DButton, upperToolbarLayout);
         }
 
         // LOWER TOOLBAR (palette, zoom, settings, etc)
@@ -757,17 +765,6 @@ export default class Toolbar extends ContainerObject {
             this.submitButton.tooltip('Publish your puzzle!');
             this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
             this.addObject(this.submitButton, this.lowerToolbarLayout);
-        }
-
-        if (this._type === ToolbarType.PUZZLEMAKER) {
-            this.lowerToolbarLayout.addHSpacer(SPACE_WIDE);
-            this.upload3DButton = new ToolbarButton()
-                .up(Bitmaps.ImgFileOpen)
-                .over(Bitmaps.ImgFileOpenHover)
-                .down(Bitmaps.ImgFileOpen)
-                .tooltip('Validate 3D Models');
-
-            this.addObject(this.upload3DButton, this.lowerToolbarLayout);
         }
 
         this.rightArrow = this.makeArrowButton('right');
