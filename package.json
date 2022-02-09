@@ -86,7 +86,7 @@
     "pixi.js": "^6.0.4",
     "regenerator-runtime": "^0.13.7",
     "store": "^2.0.12",
-    "three": "^0.118.0",
+    "three": "^0.125.0",
     "upng-js": "^2.1.0",
     "uuid": "^8.3.2",
     "webfontloader": "^1.6.28"
