@@ -257,6 +257,32 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }));
     }
 
+    public get mousePosition() {
+        return Pose2D.P;
+    }
+
+    public worldToScreenPosition(
+        worldPosition: Point,
+        offset: Point | null = null,
+        zoomLevel: number | null = null
+    ): Point {
+        zoomLevel ??= this.zoomLevel;
+        offset ??= new Point(this._offX, this._offY);
+        const spacing = Pose2D.ZOOM_SPACINGS[zoomLevel];
+        return new Point(offset.x + worldPosition.x * spacing, offset.y + worldPosition.y * spacing);
+    }
+
+    public screenToWorldPosition(
+        screenPosition: Point,
+        offset: Point | null = null,
+        zoomLevel: number | null = null
+    ): Point {
+        zoomLevel ??= this.zoomLevel;
+        offset ??= new Point(this._offX, this._offY);
+        const spacing = Pose2D.ZOOM_SPACINGS[zoomLevel];
+        return new Point((screenPosition.x - offset.x) / spacing, (screenPosition.y - offset.y) / spacing);
+    }
+
     public setSize(width: number, height: number): void {
         this._width = width;
         this._height = height;
@@ -334,20 +360,37 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._startOffsetX = this._offX;
             this._startOffsetY = this._offY;
 
-            let scaler = 1;
-            if (zoomLevel > this._zoomLevel) {
-                scaler = Pose2D.ZOOM_SPACINGS[zoomLevel] / Pose2D.ZOOM_SPACINGS[this._zoomLevel];
-            }
-
-            if (!this._offsetTranslating && !center) {
-                this._endOffsetX = scaler * (this._offX - this._width / 2) + this._width / 2;
-                this._endOffsetY = scaler * (this._offY - this._height / 2) + this._height / 2;
-            } else if (this._offsetTranslating) {
-                this._endOffsetX = scaler * (this._endOffsetX - this._width / 2) + this._width / 2;
-                this._endOffsetY = scaler * (this._endOffsetY - this._height / 2) + this._height / 2;
-            } else {
+            if (center) {
                 this._endOffsetX = this._width / 2;
                 this._endOffsetY = this._height / 2;
+            } else {
+                /** The offset after the current animation finishes */
+                let effectiveOffset: Point;
+                if (this._offsetTranslating) {
+                    // TODO: should this be different? I need to respect if the mosue moved
+                    // also what if the user presses the button?
+                    // also what if the user drags in the middle of the zoom?
+                    effectiveOffset = new Point(this._endOffsetX, this._endOffsetY);
+                } else {
+                    effectiveOffset = new Point(this._offX, this._offY);
+                }
+
+                const oldMouseScreenPosition = this.mousePosition;
+                const mouseWorldPosition = this.screenToWorldPosition(
+                    oldMouseScreenPosition,
+                    effectiveOffset,
+                    this.zoomLevel
+                );
+                const newMouseScreenPosition = this.worldToScreenPosition(
+                    mouseWorldPosition,
+                    effectiveOffset,
+                    zoomLevel
+                );
+
+                // The mouse should stay at the same point in space before and after zooming,
+                // so move the offset to cancel the mouse movement.
+                this._endOffsetX = effectiveOffset.x + oldMouseScreenPosition.x - newMouseScreenPosition.x;
+                this._endOffsetY = effectiveOffset.y + oldMouseScreenPosition.y - newMouseScreenPosition.y;
             }
 
             this._offsetTranslating = true;
@@ -2790,6 +2833,15 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
             if (prog >= 1) {
                 prog = 1;
+            }
+
+            if (this._offsetTranslating) {
+                this._redraw = true;
+                this._offX = prog * this._endOffsetX + (1 - prog) * this._startOffsetX;
+                this._offY = prog * this._endOffsetY + (1 - prog) * this._startOffsetY;
+            }
+
+            if (prog >= 1) {
                 this._offsetTranslating = false;
 
                 this.redrawAnnotations();
@@ -2797,12 +2849,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 // Don't show annotations while animating. If we recomputed it each frame it would
                 // be laggy, if we don't the annotation locations may be in visually bizarre locations
                 this.clearAnnotationCanvas();
-            }
-
-            if (this._offsetTranslating) {
-                this._redraw = true;
-                this._offX = prog * this._endOffsetX + (1 - prog) * this._startOffsetX;
-                this._offY = prog * this._endOffsetY + (1 - prog) * this._startOffsetY;
             }
 
             this.setAnimationProgress(prog);
@@ -3061,8 +3107,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 const vx: number = this._baseToX[ii] - this._baseFromX[ii];
                 const vy: number = this._baseToY[ii] - this._baseFromY[ii];
 
-                const currentX: number = this._baseFromX[ii] + ((vx + (vx * progress)) / 2) * progress;
-                const currentY: number = this._baseFromY[ii] + ((vy + (vy * progress)) / 2) * progress;
+                const currentX = this._baseFromX[ii] + vx * progress;
+                const currentY = this._baseFromY[ii] + vy * progress;
 
                 this._bases[ii].setXY(currentX, currentY);
             }
@@ -4310,6 +4356,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _offY: number = 0;
     private _prevOffsetX: number = 0;
     private _prevOffsetY: number = 0;
+    /** Are we currently animating a movement */
     private _offsetTranslating: boolean;
     private _startOffsetX: number;
     private _startOffsetY: number;
