@@ -357,12 +357,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
         const needsToZoom = this._zoomLevel !== zoomLevel;
         if ((needsToZoom || center) && animate) {
             if (!needsToZoom && center) {
-                // TODO Guy: hypot is expensive and I don't even need the sqrt
-                const distanceFromCenter = Math.hypot(
-                    this._width / 2 - this._offset.x,
-                    this._height / 2 - this._offset.y
-                );
-                if (distanceFromCenter < 50) {
+                const squaredDistanceFromCenter = (this._width / 2 - this._offset.x) ** 2
+                    + (this._height / 2 - this._offset.y) ** 2;
+                if (squaredDistanceFromCenter < 50 ** 2) {
                     return;
                 }
             }
@@ -376,7 +373,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 // also what if the user presses the button?
                 // also what if the user drags in the middle of the zoom?
                 /** The offset after the current animation finishes */
-                const effectiveOffset = this._offsetTranslating ? this._endOffset : this._offset;
+                const effectiveOffset = this._animatingZoom ? this._endOffset : this._offset;
 
                 const oldMouseScreenPosition = this.mousePosition;
                 const mouseWorldPosition = this.screenToWorldPosition(
@@ -398,7 +395,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 );
             }
 
-            this._offsetTranslating = true;
+            this._animatingZoom = true;
 
             this._zoomLevel = zoomLevel;
             this.computeLayout(true);
@@ -2839,16 +2836,16 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 prog = 1;
             }
 
-            if (this._offsetTranslating) {
+            if (this._animatingZoom) {
                 this._redraw = true;
-                this._offset = new Point(
+                this.setOffset(
                     prog * this._endOffset.x + (1 - prog) * this._startOffset.x,
                     prog * this._endOffset.y + (1 - prog) * this._startOffset.y
                 );
             }
 
             if (prog >= 1) {
-                this._offsetTranslating = false;
+                this._animatingZoom = false;
 
                 this.redrawAnnotations();
             } else {
@@ -2869,7 +2866,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         // Update score node
-        // TODO Guy: test
         this.updateScoreNodeVisualization(!this._offset.equals(this._prevOffset));
 
         // / Bitblt rendering
@@ -3005,7 +3001,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         // / Praise stacks when RNA is not moving
-        if (!this._offsetTranslating && this._baseToX == null) {
+        if (!this._animatingZoom && this._baseToX == null) {
             if (this._praiseQueue.length > 0) {
                 for (let ii = 0; ii < this._praiseQueue.length; ii += 2) {
                     this.onPraiseStack(
@@ -3023,14 +3019,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        if (this._isExploding && !this._offsetTranslating && this._baseToX == null) {
+        if (this._isExploding && !this._animatingZoom && this._baseToX == null) {
             if (this._explosionStartTime < 0) {
                 this._explosionStartTime = currentTime;
                 this._origOffset = this._offset.clone();
             }
 
-            // TODO Guy: Should we call setOffset here?
-            this._offset = new Point(
+            this.setOffset(
                 this._origOffset.x + (Math.random() * 2 - 1) * 5,
                 this._origOffset.y + (Math.random() * 2 - 1) * 5
             );
@@ -4362,8 +4357,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     // Pose position offset
     private _offset: Point = new Point(0, 0);
     private _prevOffset: Point = new Point(0, 0);
-    /** Are we currently animating a movement */
-    private _offsetTranslating: boolean;
+    private _animatingZoom: boolean;
     private _startOffset: Point;
     private _endOffset: Point;
 
