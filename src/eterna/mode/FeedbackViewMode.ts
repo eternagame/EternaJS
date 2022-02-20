@@ -85,8 +85,12 @@ export default class FeedbackViewMode extends GameMode {
         );
 
         this._toolbar = new Toolbar(ToolbarType.FEEDBACK, {states: this._puzzle.getSecstructs().length}, {
-            pairSwapButtonHandler: () => console.log('pairSwapButtonHandler'),
-            baseMarkerButtonHandler: () => console.log('baseMarkerButtonHandler'),
+            pairSwapButtonHandler: () => {
+                // console.log('pairSwapButtonHandler');
+            },
+            baseMarkerButtonHandler: () => {
+                // console.log('baseMarkerButtonHandler');
+            },
             settingsButtonHandler: () => this.showSettingsDialog()
         });
         this.addObject(this._toolbar, this.uiLayer);
@@ -309,6 +313,10 @@ export default class FeedbackViewMode extends GameMode {
             HAlign.RIGHT, VAlign.TOP, 0 - this._solDialogOffset, 0
         );
     }
+
+    // private showViewOptionsDialog(): void {
+    //     this.showDialog(new EternaViewOptionsDialog(EternaViewOptionsMode.LAB));
+    // }
 
     private showSettingsDialog(): void {
         this.showDialog(new EternaSettingsDialog(EternaViewOptionsMode.LAB));

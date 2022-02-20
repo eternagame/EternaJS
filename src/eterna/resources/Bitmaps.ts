@@ -402,6 +402,11 @@ export default class Bitmaps {
     public static readonly ImgUnlock: string = require('assets/UI/unlock.png');
     public static readonly RectImg: string = require('assets/rect.png');
 
+    public static readonly ImgClose: string = require('assets/UI/close-btn.png');
+    public static readonly ImgCloseOver: string = require('assets/UI/close-btn-hover.png');
+    public static readonly ImgNormalSize: string = require('assets/UI/normal-size.png');
+    public static readonly ImgNormalSizeOver: string = require('assets/UI/normal-size-hover.png');
+
     public static get all(): string[] {
         if (Bitmaps.ALL_URLS == null) {
             Bitmaps.ALL_URLS = [];

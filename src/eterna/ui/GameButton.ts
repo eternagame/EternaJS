@@ -31,7 +31,7 @@ export default class GameButton extends Button implements KeyboardListener {
     constructor() {
         super();
 
-        this.downSound = null;// GameButton.DEFAULT_DOWN_SOUND;
+        this.downSound = GameButton.DEFAULT_DOWN_SOUND;
 
         this._content = new Container();
         this.container.addChild(this._content);
@@ -84,6 +84,7 @@ export default class GameButton extends Button implements KeyboardListener {
 
     public setName(name: string): GameButton {
         this.name = name;
+        this.display.name = name;
         return this;
     }
 
@@ -301,6 +302,14 @@ export default class GameButton extends Button implements KeyboardListener {
         if (this._tooltip != null && this._tooltip !== '' && Tooltips.instance != null) {
             this._tooltipReg = this.regs.add(Tooltips.instance.addTooltip(this, this._tooltip));
         }
+    }
+
+    public activateTooltip() {
+
+    }
+
+    public deactivateTooltip() {
+
     }
 
     private needsRedraw() {

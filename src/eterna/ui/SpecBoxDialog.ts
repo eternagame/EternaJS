@@ -2,18 +2,21 @@ import UndoBlock from 'eterna/UndoBlock';
 import {
     KeyCode, Flashbang, DisplayUtil, HAlign, VAlign, Assert
 } from 'flashbang';
-import Dialog from './Dialog';
+import FloatDialog from './FloatDialog';
 import GameButton from './GameButton';
-import SpecBox from './SpecBox';
+import MySpecBox from './MySpecBox';
 
 /**
  * Displays a SpecBox in a modal dialog.
  * If the "Minimize Window" button is clicked, the dialog will be closed with "true". The owning mode
  * should display a docked SpecBox.
  */
-export default class SpecBoxDialog extends Dialog<boolean> {
+export default class SpecBoxDialog extends FloatDialog<boolean> {
+    private specBox: MySpecBox;
+    private cancelButton: GameButton;
+    private minimizeButton: GameButton;
     constructor(datablock: UndoBlock, showMinimizeButton: boolean = true) {
-        super();
+        super('RNA Spec');
         this._datablock = datablock;
         this._showMinimizeButton = showMinimizeButton;
     }
@@ -21,53 +24,51 @@ export default class SpecBoxDialog extends Dialog<boolean> {
     protected added(): void {
         super.added();
 
-        const specBox = new SpecBox();
-        this.addObject(specBox, this.container);
+        this.specBox = new MySpecBox();
+        this.addObject(this.specBox, this.contentVLay);
 
-        specBox.setSpec(this._datablock);
+        this.specBox.setSpec(this._datablock);
 
-        const cancelButton = new GameButton().label('Ok', 14).hotkey(KeyCode.KeyS);
-        specBox.addObject(cancelButton, specBox.container);
-        cancelButton.clicked.connect(() => this.close(false));
+        this.cancelButton = new GameButton().label('Ok', 14).hotkey(KeyCode.KeyS);
+        this.specBox.addObject(this.cancelButton, this.specBox.container);
+        this.cancelButton.clicked.connect(() => this.close(false));
 
-        let minimizeButton: GameButton;
         if (this._showMinimizeButton) {
-            minimizeButton = new GameButton()
+            this.minimizeButton = new GameButton()
                 .label('Minimize Window', 14)
                 .tooltip('Minimize')
                 .hotkey(KeyCode.KeyM);
-            specBox.addObject(minimizeButton, specBox.container);
-            minimizeButton.clicked.connect(() => this.close(true));
+            this.specBox.addObject(this.minimizeButton, this.specBox.container);
+            this.minimizeButton.clicked.connect(() => this.close(true));
         }
 
-        const updateBounds = () => {
-            Assert.assertIsDefined(Flashbang.stageWidth);
-            Assert.assertIsDefined(Flashbang.stageHeight);
-            specBox.setSize(Flashbang.stageWidth * 0.7, Flashbang.stageHeight * 0.7);
-            specBox.display.position.x = (Flashbang.stageWidth - specBox.width) * 0.5;
-            specBox.display.position.y = (Flashbang.stageHeight - specBox.height) * 0.5;
-
-            cancelButton.display.position.set(
-                specBox.width - cancelButton.container.width - 20,
-                specBox.height - cancelButton.container.height - 20
-            );
-
-            if (minimizeButton != null && minimizeButton !== undefined) {
-                DisplayUtil.positionRelative(
-                    minimizeButton.display, HAlign.RIGHT, VAlign.CENTER,
-                    cancelButton.display, HAlign.LEFT, VAlign.CENTER,
-                    -20, 0
-                );
-            }
-        };
-        updateBounds();
-        Assert.assertIsDefined(this.mode);
-        this.regs.add(this.mode.resized.connect(updateBounds));
+        this.updateLocation2();
     }
 
-    protected onBGClicked(): void {
-        // Is there a good reason not to enable this?
-        // this.close(null);
+    public updateLocation2() {
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(Flashbang.stageHeight);
+        this.specBox.setSize(Flashbang.stageWidth * 0.7, Flashbang.stageHeight * 0.7);
+        this.specBox.display.position.x = (Flashbang.stageWidth - this.specBox.width) * 0.5;
+        this.specBox.display.position.y = (Flashbang.stageHeight - this.specBox.height) * 0.5;
+
+        this.cancelButton.display.position.set(
+            this.specBox.width - this.cancelButton.container.width - 20,
+            this.specBox.height - this.cancelButton.container.height - 20
+        );
+
+        if (this.minimizeButton != null && this.minimizeButton !== undefined) {
+            DisplayUtil.positionRelative(
+                this.minimizeButton.display, HAlign.RIGHT, VAlign.CENTER,
+                this.cancelButton.display, HAlign.LEFT, VAlign.CENTER,
+                -20, 0
+            );
+        }
+        super.updateFloatLocation();
+    }
+
+    public resize(w: number, h: number): void {
+        super.resize(w, h);
     }
 
     private readonly _datablock: UndoBlock;

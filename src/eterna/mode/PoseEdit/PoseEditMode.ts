@@ -22,7 +22,7 @@ import {
     GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
-import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
+import {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
 import FolderManager from 'eterna/folding/FolderManager';
 import Folder, {MultiFoldResult, CacheKey} from 'eterna/folding/Folder';
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
@@ -71,6 +71,7 @@ import AnnotationManager, {
 import LibrarySelectionConstraint from 'eterna/constraints/constraints/LibrarySelectionConstraint';
 import AnnotationDialog from 'eterna/ui/AnnotationDialog';
 import EternaSettingsDialog from 'eterna/ui/EternaSettingsDialog';
+import {ToolTipPositioner} from 'eterna/ui/help/HelpToolTip';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -417,7 +418,7 @@ export default class PoseEditMode extends GameMode {
     private updateUILayout(): void {
         DisplayUtil.positionRelativeToStage(
             this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
-            HAlign.CENTER, VAlign.BOTTOM, 20, -20
+            HAlign.CENTER, VAlign.BOTTOM, 0, 0 // 20, -20
         );
 
         this._toolbar.onResized();
@@ -483,7 +484,8 @@ export default class PoseEditMode extends GameMode {
         const mode = this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
             ? EternaViewOptionsMode.LAB
             : EternaViewOptionsMode.PUZZLE;
-        this.showDialog(new EternaViewOptionsDialog(mode));
+        // this.showDialog(new EternaViewOptionsDialog(mode));
+        this.showDialog(new EternaSettingsDialog(mode));
     }
 
     private showSettingsDialog(): void {
@@ -589,8 +591,27 @@ export default class PoseEditMode extends GameMode {
         const switchStateButton = Boolean(this.toolbar.stateToggle.container.parent)
             && this.toolbar.stateToggle.display.visible;
         Assert.assertIsDefined(this.modeStack);
+
+        const helpers:ToolTipPositioner[] = [];
+        const topBtArray:GameButton[] = [];
+        this.toolbar.topButtons.forEach((val) => {
+            topBtArray.push(val);
+        });
+        topBtArray.sort((b1, b2) => {
+            const r1 = getBounds(b1);
+            const r2 = getBounds(b2);
+            if (r1.x < r2.x) return -1;
+            else return 1;
+        });
+        for (let i = 0; i < topBtArray.length; i++) {
+            const bt = topBtArray[i];
+            const rect = getBounds(bt);
+            helpers.push([() => rect, 0, bt.name as string]);
+        }
         this.modeStack.pushMode(new HelpScreen({
             toolTips: {
+                topbarHelpers: helpers,
+
                 hints: this._puzzle.hint
                     ? [
                         () => new Rectangle(
@@ -599,20 +620,13 @@ export default class PoseEditMode extends GameMode {
                             this._helpBar.container.width,
                             this._helpBar.container.height
                         ),
-                        0
+                        0, 'Hint'
                     ]
                     : undefined,
 
                 modeSwitch: this.toolbar.naturalButton.display.visible
-                    ? [() => getBounds(this.toolbar.naturalButton), this.toolbar.naturalButton.container.width / 2]
-                    : undefined,
-
-                swapPairs: this.toolbar.pairSwapButton.display.visible
-                    ? [() => getBounds(this.toolbar.pairSwapButton), 0]
-                    : undefined,
-
-                pip: this.toolbar.pipButton.container.parent
-                    ? [() => getBounds(this.toolbar.pipButton), 0]
+                    ? [() => getBounds(this.toolbar.naturalButton),
+                        this.toolbar.naturalButton.container.width / 2, 'Mode switch']
                     : undefined,
 
                 switchState: switchStateButton
@@ -623,26 +637,12 @@ export default class PoseEditMode extends GameMode {
                             this.toolbar.stateToggle.container.width,
                             this.toolbar.stateToggle.container.height
                         ),
-                        0
+                        0, 'Switch state'
                     ]
                     : undefined,
 
-                submit: this.toolbar.submitButton.container.parent
-                    ? [() => getBounds(this.toolbar.submitButton), 0]
-                    : undefined,
-
-                menu: [() => getBounds(this.toolbar.actionMenu), 0],
-
                 palette: this.toolbar.palette.container.visible
-                    ? [() => getBounds(this.toolbar.palette), 0]
-                    : undefined,
-
-                zoom: this.toolbar.zoomInButton !== undefined && this.toolbar.zoomInButton.container.visible
-                    ? [() => getBounds(this.toolbar.zoomInButton), this.toolbar.zoomInButton.container.width / 2]
-                    : undefined,
-
-                undo: this.toolbar.undoButton.display.visible
-                    ? [() => getBounds(this.toolbar.undoButton), this.toolbar.undoButton.container.width / 2]
+                    ? [() => getBounds(this.toolbar.palette), 0, 'Pallete']
                     : undefined
             }
         }));

@@ -53,6 +53,7 @@ export default class GameDropdown extends ContainerObject {
         this._boxColor = props.color || 0x324B73;
         this._textColor = props.textColor || 0xD0DCE7;
         this._textWeight = props.textWeight || FontWeight.MEDIUM;
+        // this._dropShadow = true;// props.dropShadow || false;
         this._checkboxes = props.checkboxes || false;
 
         if (props.width) {
@@ -133,9 +134,11 @@ export default class GameDropdown extends ContainerObject {
             type: GamePanelType.NORMAL,
             alpha: 1,
             color: this._boxColor,
-            dropShadow: true
+            dropShadow: true// this._dropShadow,
         });
-
+        // if (this._dropShadow) {
+        //     dropShadowPanel.display.filters = [new DropShadowFilter()];
+        // }
         this._popup.addObject(dropShadowPanel, scrollViewContainer);
         this._scrollView = new VScrollBox(
             this._box.width,
@@ -382,6 +385,7 @@ export default class GameDropdown extends ContainerObject {
     private _textWeight: FontWeight;
     private _disabled: boolean = false;
     private _boxColor: number;
+    // private _dropShadow: boolean;
     private _checkboxes: boolean;
 
     private _box: Graphics;

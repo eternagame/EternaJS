@@ -128,7 +128,9 @@ export default class Tooltips extends GameObject {
             }
         };
 
-        const hide = (): void => this.removeTooltip(ele);
+        const hide = (): void => {
+            this.removeTooltip(ele);
+        };
 
         const regs = new RegistrationGroup();
 

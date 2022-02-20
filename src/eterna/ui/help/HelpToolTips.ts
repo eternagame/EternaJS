@@ -6,39 +6,24 @@ import Fonts from 'eterna/util/Fonts';
 import HelpToolTip, {ToolTipPositioner} from './HelpToolTip';
 
 export interface HelpToolTipsProps {
-    menu: ToolTipPositioner;
+    topbarHelpers: ToolTipPositioner[];
     palette?: ToolTipPositioner;
-    zoom?: ToolTipPositioner;
-    undo?: ToolTipPositioner;
     hints?: ToolTipPositioner;
-    swapPairs?: ToolTipPositioner;
     switchState?: ToolTipPositioner;
     modeSwitch?: ToolTipPositioner;
-    pip?: ToolTipPositioner;
-    submit?: ToolTipPositioner;
 }
-
 export default class HelpToolTips {
     public static create(props: HelpToolTipsProps) {
         const tailLength = 57;
-        return [
-            new HelpToolTip({text: 'MENU', tailLength, positioner: props.menu}),
-
-            props.submit
-                ? new HelpToolTip({text: 'SUBMIT', positioner: props.submit})
-                : null,
-
+        const toolTips:(HelpToolTip|null)[] = [];
+        const fixedToolTips = [
             props.modeSwitch
-                ? new HelpToolTip({text: 'NATURAL/TARGET MODE', positioner: props.modeSwitch})
-                : null,
-
-            props.pip
-                ? new HelpToolTip({text: 'PiP MODE', tailLength, positioner: props.pip})
+                ? new HelpToolTip({text: 'Natural/Target Mode', positioner: props.modeSwitch})
                 : null,
 
             props.palette
                 ? new HelpToolTip({
-                    text: 'BASE PALETTE',
+                    text: 'Base Palette',
                     tailLength,
                     positioner: props.palette,
                     content: (() => {
@@ -86,26 +71,27 @@ export default class HelpToolTips {
                 })
                 : null,
 
-            props.swapPairs
-                ? new HelpToolTip({text: 'SWAP PAIR', positioner: props.swapPairs})
-                : null,
-
-            props.zoom
-                ? new HelpToolTip({text: 'ZOOM IN/OUT', tailLength, positioner: props.zoom})
-                : null,
-
-            props.undo
-                ? new HelpToolTip({text: 'UNDO/REDO', positioner: props.undo})
-                : null,
-
             props.hints
-                ? new HelpToolTip({text: 'HINTS ON/OFF', side: 'bottom', positioner: props.hints})
+                ? new HelpToolTip({text: 'Hints On/Off', side: 'bottom', positioner: props.hints})
                 : null,
 
             props.switchState
-                ? new HelpToolTip({text: 'SWITCH STATE', side: 'bottom', positioner: props.switchState})
+                ? new HelpToolTip({text: 'Switch state', side: 'bottom', positioner: props.switchState})
                 : null
 
-        ].filter((toolTip): toolTip is HelpToolTip => toolTip != null);
+        ];
+        fixedToolTips.forEach((tip) => {
+            toolTips.push(tip);
+        });
+        let k = 0;
+        let h = 2 * HelpToolTip.theme.vPadding;
+        h += HelpToolTip.theme.fontSize;
+        h += 4;
+        props.topbarHelpers.forEach((p) => {
+            const [, , name] = p;
+            toolTips.push(new HelpToolTip({text: name, tailLength: h * (k % 2), positioner: p}));
+            k++;
+        });
+        return toolTips.filter((toolTip): toolTip is HelpToolTip => toolTip != null);
     }
 }

@@ -1,12 +1,12 @@
-import {Flashbang, KeyCode, Assert} from 'flashbang';
-import TextInputPanel from './TextInputPanel';
-import Dialog from './Dialog';
+import {KeyCode} from 'flashbang';
+import FloatDialog from './FloatDialog';
+import MyTextInputPanel from './MyTextInputPanel';
 
 interface NucleotideFinderResult {
     nucleotideIndex: number;
 }
 
-export default class NucleotideFinder extends Dialog<NucleotideFinderResult> {
+export default class NucleotideFinder extends FloatDialog<NucleotideFinderResult> {
     private static readonly props = {
         title: 'Jump to Nucleotide',
         fieldName: 'Nucleotide Index'
@@ -16,14 +16,17 @@ export default class NucleotideFinder extends Dialog<NucleotideFinderResult> {
         width: 80
     };
 
+    constructor() {
+        super(NucleotideFinder.props.title);
+    }
+
     protected added() {
         super.added();
         const {props, theme} = NucleotideFinder;
 
-        const inputPanel = new TextInputPanel();
-        inputPanel.title = props.title;
+        const inputPanel = new MyTextInputPanel();
         const field = inputPanel.addField(props.fieldName, theme.width);
-        this.addObject(inputPanel, this.container);
+        this.addObject(inputPanel, this.contentVLay);
 
         field.setFocus();
         field.keyPressed.connect((key) => {
@@ -45,20 +48,6 @@ export default class NucleotideFinder extends Dialog<NucleotideFinderResult> {
             }
         });
 
-        Assert.assertIsDefined(this.mode);
-
-        const updateLocation = () => {
-            Assert.assertIsDefined(Flashbang.stageWidth);
-            Assert.assertIsDefined(Flashbang.stageHeight);
-            inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.width) * 0.5;
-            inputPanel.display.position.y = (Flashbang.stageHeight - inputPanel.height) * 0.5;
-        };
-        updateLocation();
-        this.regs.add(this.mode.resized.connect(updateLocation));
-    }
-
-    protected onBGClicked(): void {
-        // Is there a good reason not to enable this?
-        // this.close(null);
+        this.updateFloatLocation();
     }
 }

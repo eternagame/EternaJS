@@ -1,18 +1,18 @@
-import {Flashbang, KeyCode, Assert} from 'flashbang';
-import Dialog from 'eterna/ui/Dialog';
-import TextInputPanel from 'eterna/ui/TextInputPanel';
+import {KeyCode} from 'flashbang';
 import {Signal} from 'signals';
+import FloatDialog from 'eterna/ui/FloatDialog';
+import MyTextInputPanel from 'eterna/ui/MyTextInputPanel';
 import SubmitPoseDetails from './SubmitPoseDetails';
 
 /** Prompts the player for a title and comment */
-export default class SubmitPoseDialog extends Dialog<SubmitPoseDetails> {
+export default class SubmitPoseDialog extends FloatDialog<SubmitPoseDetails> {
     constructor(initialState: SubmitPoseDetails = {
         title: '',
         comment: '',
         annotations: [],
         libraryNT: []
     }) {
-        super();
+        super('Submit your design');
         this._initialState = initialState;
     }
 
@@ -22,13 +22,12 @@ export default class SubmitPoseDialog extends Dialog<SubmitPoseDetails> {
         const TITLE = 'Title';
         const COMMENT = 'Comment';
 
-        const inputPanel = new TextInputPanel();
-        inputPanel.title = 'Submit your design';
+        const inputPanel = new MyTextInputPanel();
         const title = inputPanel.addField(TITLE, 200);
         const comment = inputPanel.addField(COMMENT, 200, true);
         if (this._initialState.title) title.text = this._initialState.title;
         if (this._initialState.comment) comment.text = this._initialState.comment;
-        this.addObject(inputPanel, this.container);
+        this.addObject(inputPanel, this.contentVLay);
 
         title.setFocus();
 
@@ -57,21 +56,7 @@ export default class SubmitPoseDialog extends Dialog<SubmitPoseDetails> {
             this.close(details);
         });
 
-        const updateLocation = () => {
-            Assert.assertIsDefined(Flashbang.stageHeight);
-            Assert.assertIsDefined(Flashbang.stageWidth);
-            inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.width) * 0.5;
-            inputPanel.display.position.y = (Flashbang.stageHeight - inputPanel.height) * 0.5;
-        };
-        updateLocation();
-
-        Assert.assertIsDefined(this.mode);
-        this.regs.add(this.mode.resized.connect(updateLocation));
-    }
-
-    protected onBGClicked(): void {
-        // Is there a good reason not to enable this?
-        // this.close(null);
+        this.updateFloatLocation();
     }
 
     private readonly _initialState: SubmitPoseDetails;

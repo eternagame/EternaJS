@@ -4,19 +4,18 @@ import {
 } from 'flashbang';
 import Eterna from 'eterna/Eterna';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import Dialog from './Dialog';
 import GameButton from './GameButton';
 import GameCheckbox from './GameCheckbox';
-import GamePanel, {GamePanelType} from './GamePanel';
 import VScrollBox from './VScrollBox';
+import FloatDialog from './FloatDialog';
 
 export enum EternaViewOptionsMode {
     PUZZLE = 0, PUZZLEMAKER, LAB
 }
 
-export default class EternaSettingsDialog extends Dialog<void> {
+export default class EternaSettingsDialog extends FloatDialog<void> {
     constructor(mode: EternaViewOptionsMode) {
-        super();
+        super('Settings');
         this._optionsMode = mode;
     }
 
@@ -99,65 +98,27 @@ export default class EternaSettingsDialog extends Dialog<void> {
 
         this._viewLayout.layout();
 
-        this._panel = new GamePanel({
-            type: GamePanelType.NORMAL,
-            alpha: 1,
-            color: 0x21508C,
-            borderAlpha: 1,
-            borderColor: 0x4A90E2
-        });
-        this._panel.title = 'Settings';
-        this.addObject(this._panel, this.container);
+        this.scrollBox = new VScrollBox(0, 0);
+        this.addObject(this.scrollBox, this.contentVLay);
+        this.scrollBox.content.addChild(this._viewLayout);
 
-        const scrollBox = new VScrollBox(0, 0);
-        this.addObject(scrollBox, this.container);
-        scrollBox.content.addChild(this._viewLayout);
-
-        const closeButton = new GameButton()
-            .allStates(Bitmaps.ImgAchievementsClose);
-        this.addObject(closeButton, this.container);
-        closeButton.clicked.connect(() => this.close(null));
-
-        const updateLocation = () => {
-            Assert.assertIsDefined(Flashbang.stageHeight);
-            const idealHeight = this._viewLayout.height + 40 + this._panel.titleHeight;
-            const maxHeight = Flashbang.stageHeight * 0.8;
-            const panelHeight = Math.min(idealHeight, maxHeight);
-
-            scrollBox.setSize(this._viewLayout.width, panelHeight - 40 - this._panel.titleHeight);
-            scrollBox.doLayout();
-
-            this._panel.setSize(this._viewLayout.width + 40, panelHeight);
-
-            DisplayUtil.positionRelativeToStage(
-                this._panel.display,
-                HAlign.CENTER, VAlign.CENTER,
-                HAlign.CENTER, VAlign.CENTER
-            );
-
-            DisplayUtil.positionRelative(
-                scrollBox.display, HAlign.CENTER, VAlign.TOP,
-                this._panel.display, HAlign.CENTER, VAlign.TOP, 0, this._panel.titleHeight + 10
-            );
-
-            DisplayUtil.positionRelative(
-                closeButton.display, HAlign.RIGHT, VAlign.TOP,
-                this._panel.display, HAlign.RIGHT, VAlign.TOP,
-                -10, 11
-            );
-        };
-
-        updateLocation();
-        Assert.assertIsDefined(this._mode);
-        this.regs.add(this._mode.resized.connect(updateLocation));
+        this.updateLocation2();
     }
 
-    protected onBGClicked(): void {
-        // this.close(null);
-    }
+    public updateLocation2() {
+        Assert.assertIsDefined(Flashbang.stageHeight);
+        const idealHeight = this._viewLayout.height + 40 + this.titleArea.height;
+        const maxHeight = Flashbang.stageHeight * 0.8;
+        const panelHeight = Math.min(idealHeight, maxHeight);
 
-    protected get bgAlpha(): number {
-        return 0.3;
+        this.scrollBox.setSize(this._viewLayout.width, panelHeight - 40 - this.titleArea.height);
+        this.scrollBox.doLayout();
+
+        DisplayUtil.positionRelative(
+            this.scrollBox.display, HAlign.CENTER, VAlign.TOP,
+            this.titleArea, HAlign.CENTER, VAlign.TOP, 0, this.titleArea.height + 10
+        );
+        super.updateFloatLocation();
     }
 
     private setVolume(mute: boolean, volume: number): void {
@@ -182,9 +143,9 @@ export default class EternaSettingsDialog extends Dialog<void> {
         return checkbox;
     }
 
-    private _panel: GamePanel;
     private _viewLayout: VLayoutContainer;
     private readonly _optionsMode: EternaViewOptionsMode;
     private _muteButton: GameButton;
     private _volumeButtons: GameButton[] = [];
+    private scrollBox: VScrollBox;
 }

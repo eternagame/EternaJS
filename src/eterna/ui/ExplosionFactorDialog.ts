@@ -1,15 +1,15 @@
 import {
-    Assert, Flashbang, HAlign, HLayoutContainer, KeyCode, VAlign, VLayoutContainer
+    HAlign, HLayoutContainer, KeyCode, VAlign, VLayoutContainer
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import TextInputObject from 'eterna/ui/TextInputObject';
 import GameButton from 'eterna/ui/GameButton';
 import GamePanel from 'eterna/ui/GamePanel';
-import Dialog from './Dialog';
+import FloatDialog from './FloatDialog';
 
-export default class ExplosionFactorDialog extends Dialog<number> {
+export default class ExplosionFactorDialog extends FloatDialog<number> {
     constructor(initialFactor?: number) {
-        super();
+        super('Explosion Factor');
 
         this._initialFactor = initialFactor ?? 1;
     }
@@ -24,8 +24,7 @@ export default class ExplosionFactorDialog extends Dialog<number> {
             borderColor: 0xC0DCE7
         });
 
-        this.addObject(this._panel, this.container);
-        this._panel.title = 'Explosion Factor';
+        this.addObject(this._panel, this.contentVLay);
 
         this._panelLayout = new VLayoutContainer(10, HAlign.CENTER);
         this._panel.container.addChild(this._panelLayout);
@@ -111,9 +110,6 @@ export default class ExplosionFactorDialog extends Dialog<number> {
         noButton.clicked.connect(() => this.close(null));
 
         this.layout();
-
-        Assert.assertIsDefined(this.mode);
-        this.regs.add(this.mode.resized.connect(this.updateLocation));
     }
 
     private layout(): void {
@@ -126,14 +122,7 @@ export default class ExplosionFactorDialog extends Dialog<number> {
             ExplosionFactorDialog.W_MARGIN,
             ExplosionFactorDialog.H_MARGIN + this._panel.titleHeight
         );
-        this.updateLocation();
-    }
-
-    private updateLocation(): void {
-        Assert.assertIsDefined(Flashbang.stageWidth);
-        Assert.assertIsDefined(Flashbang.stageHeight);
-        this._panel.display.position.x = (Flashbang.stageWidth - this._panel.width) * 0.5;
-        this._panel.display.position.y = (Flashbang.stageHeight - this._panel.height) * 0.5;
+        this.updateFloatLocation();
     }
 
     private _panel: GamePanel;

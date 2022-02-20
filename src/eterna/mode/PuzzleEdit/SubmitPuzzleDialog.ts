@@ -1,10 +1,10 @@
-import {KeyCode, Flashbang, Assert} from 'flashbang';
+import {KeyCode} from 'flashbang';
 import EPars from 'eterna/EPars';
 import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
-import Dialog, {DialogCanceledError} from 'eterna/ui/Dialog';
-import TextInputPanel from 'eterna/ui/TextInputPanel';
 import TextInputObject from 'eterna/ui/TextInputObject';
 import {Signal} from 'signals';
+import FloatDialog, {FloatDialogCanceledError} from 'eterna/ui/FloatDialog';
+import MyTextInputPanel from 'eterna/ui/MyTextInputPanel';
 import GameMode from '../GameMode';
 
 function GetNumber(dict: Map<string, string>, name: string): number | undefined {
@@ -24,9 +24,9 @@ export interface SubmitPuzzleDetails {
     minAU?: number;
 }
 
-export default class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
+export default class SubmitPuzzleDialog extends FloatDialog<SubmitPuzzleDetails> {
     constructor(numPoses: number, puzzleState: UndoBlock, initialState: SubmitPuzzleDetails = {}) {
-        super();
+        super('Publish your puzzle');
         this._numPoses = numPoses;
         this._puzzleState = puzzleState;
         this._initialState = initialState;
@@ -42,7 +42,7 @@ export default class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
                 if (value != null) {
                     resolve(value);
                 } else {
-                    reject(new DialogCanceledError());
+                    reject(new FloatDialogCanceledError());
                 }
             });
         });
@@ -59,8 +59,7 @@ export default class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
 
         const FIELD_WIDTH = 200;
 
-        const inputPanel = new TextInputPanel();
-        inputPanel.title = 'Publish your puzzle';
+        const inputPanel = new MyTextInputPanel();
 
         const inputFields: { [key: string]: TextInputObject} = {};
 
@@ -79,7 +78,7 @@ export default class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
             if (state[input]) inputFields[input].text = state[input] as string;
         });
 
-        this.addObject(inputPanel, this.container);
+        this.addObject(inputPanel, this.contentVLay);
 
         title.setFocus();
 
@@ -117,20 +116,7 @@ export default class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
             }
         });
 
-        const updateLocation = () => {
-            Assert.assertIsDefined(Flashbang.stageWidth);
-            Assert.assertIsDefined(Flashbang.stageHeight);
-            inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.width) * 0.5;
-            inputPanel.display.position.y = (Flashbang.stageHeight - inputPanel.height) * 0.5;
-        };
-        updateLocation();
-        Assert.assertIsDefined(this.mode);
-        this.regs.add(this.mode.resized.connect(updateLocation));
-    }
-
-    protected onBGClicked(): void {
-        // Is there a good reason not to enable this?
-        // this.close(null);
+        this.updateFloatLocation();
     }
 
     private validate(details: SubmitPuzzleDetails): string | null {

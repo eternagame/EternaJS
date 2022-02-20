@@ -47,7 +47,7 @@ import AnnotationManager, {
 } from 'eterna/AnnotationManager';
 import AnnotationDialog from 'eterna/ui/AnnotationDialog';
 import EternaSettingsDialog from 'eterna/ui/EternaSettingsDialog';
-import CopyTextDialogMode from '../CopyTextDialogMode';
+import CopyTextDialog from 'eterna/ui/CopyTextDialog';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
 import StructureInput from './StructureInput';
@@ -224,11 +224,12 @@ export default class PuzzleEditMode extends GameMode {
         });
 
         this._toolbar.copyButton.clicked.connect(() => {
-            Assert.assertIsDefined(this.modeStack);
-            this.modeStack.pushMode(new CopyTextDialogMode(
-                this._poses[0].sequence.sequenceString(),
-                'Current Sequence'
-            ));
+            // Assert.assertIsDefined(this.modeStack);
+            // this.modeStack.pushMode(new CopyTextDialogMode(
+            //     this._poses[0].sequence.sequenceString(),
+            //     'Current Sequence'
+            // ));
+            this.showDialog(new CopyTextDialog(this._poses[0].sequence.sequenceString(), 'Current Sequence'));
         });
 
         this._toolbar.pasteButton.clicked.connect(() => {

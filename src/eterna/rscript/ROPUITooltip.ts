@@ -26,7 +26,7 @@ export default class ROPUITooltip extends RScriptOp {
                     text: this._text,
                     tailLength: this._tailLength,
                     side: this._side as HelpToolTipSide,
-                    positioner: [getBounds, 0]
+                    positioner: [getBounds, 0, '']
                 });
                 const updatePosition = () => tooltip.updatePosition();
 

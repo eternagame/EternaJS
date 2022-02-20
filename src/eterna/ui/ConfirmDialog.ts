@@ -1,15 +1,15 @@
 import {
-    VLayoutContainer, HAlign, HLayoutContainer, AlphaTask, Flashbang, Assert
+    VLayoutContainer, HAlign, HLayoutContainer, AlphaTask
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
-import Dialog, {DialogCanceledError} from './Dialog';
 import GameButton from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';
 import HTMLTextObject from './HTMLTextObject';
+import FloatDialog, {FloatDialogCanceledError} from './FloatDialog';
 
-export default class ConfirmDialog extends Dialog<boolean> {
+export default class ConfirmDialog extends FloatDialog<boolean> {
     constructor(prompt: string, promptIsHTML: boolean = false) {
-        super();
+        super('Are you sure?');
         this._prompt = prompt;
         this._useHTML = promptIsHTML;
     }
@@ -24,7 +24,7 @@ export default class ConfirmDialog extends Dialog<boolean> {
                 if (value) {
                     resolve();
                 } else {
-                    reject(new DialogCanceledError());
+                    reject(new FloatDialogCanceledError());
                 }
             });
         });
@@ -40,8 +40,7 @@ export default class ConfirmDialog extends Dialog<boolean> {
             borderAlpha: 0.27,
             borderColor: 0xC0DCE7
         });
-        panel.title = 'Are you sure?';
-        this.addObject(panel, this.container);
+        this.addObject(panel, this.contentVLay);
 
         const panelLayout = new VLayoutContainer(0, HAlign.CENTER);
         panel.container.addChild(panelLayout);
@@ -81,23 +80,7 @@ export default class ConfirmDialog extends Dialog<boolean> {
         panel.display.alpha = 0;
         panel.addObject(new AlphaTask(1, 0.3));
 
-        const updateLocation = () => {
-            Assert.assertIsDefined(Flashbang.stageWidth);
-            Assert.assertIsDefined(Flashbang.stageHeight);
-            panel.display.position.set(
-                (Flashbang.stageWidth - panel.width) * 0.5,
-                (Flashbang.stageHeight - panel.height) * 0.5
-            );
-        };
-
-        updateLocation();
-        Assert.assertIsDefined(this._mode);
-        this.regs.add(this._mode.resized.connect(updateLocation));
-    }
-
-    protected onBGClicked(): void {
-        // Is there a good reason not to enable this?
-        // this.close(null);
+        this.updateFloatLocation();
     }
 
     private readonly _prompt: string;

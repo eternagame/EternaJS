@@ -1,8 +1,8 @@
-import {Flashbang, KeyCode, Assert} from 'flashbang';
+import {KeyCode} from 'flashbang';
 import {UnitSignal} from 'signals';
-import TextInputPanel from './TextInputPanel';
-import Dialog from './Dialog';
 import GameButton from './GameButton';
+import FloatDialog from './FloatDialog';
+import MyTextInputPanel from './MyTextInputPanel';
 
 interface NucleotideRangeSelectorProps {
     initialRange: [number, number];
@@ -15,7 +15,7 @@ interface NucleotideRangeSelectorResult {
     clearRange: boolean;
 }
 
-class NucleotideRangeSelectorInput extends TextInputPanel {
+class NucleotideRangeSelectorInput extends MyTextInputPanel {
     public onClear = new UnitSignal();
     private _clearButton: GameButton;
 
@@ -49,7 +49,7 @@ class NucleotideRangeSelectorInput extends TextInputPanel {
     }
 }
 
-export default class NucleotideRangeSelector extends Dialog<NucleotideRangeSelectorResult> {
+export default class NucleotideRangeSelector extends FloatDialog<NucleotideRangeSelectorResult> {
     private static readonly config = {
         title: 'Select Nucleotide Range to View',
         startFieldName: 'Start Index',
@@ -64,7 +64,7 @@ export default class NucleotideRangeSelector extends Dialog<NucleotideRangeSelec
     private _props: NucleotideRangeSelectorProps;
 
     constructor(props: NucleotideRangeSelectorProps) {
-        super();
+        super(NucleotideRangeSelector.config.title);
         this._props = props;
     }
 
@@ -74,8 +74,7 @@ export default class NucleotideRangeSelector extends Dialog<NucleotideRangeSelec
 
         const inputPanel = this._props.isPartialRange
             ? new NucleotideRangeSelectorInput()
-            : new TextInputPanel();
-        inputPanel.title = config.title;
+            : new MyTextInputPanel();
 
         const startField = inputPanel.addField(config.startFieldName, theme.width);
         const endField = inputPanel.addField(config.endFieldName, theme.width);
@@ -83,7 +82,7 @@ export default class NucleotideRangeSelector extends Dialog<NucleotideRangeSelec
         startField.text = `${start}`;
         endField.text = `${end}`;
 
-        this.addObject(inputPanel, this.container);
+        this.addObject(inputPanel, this.contentVLay);
 
         startField.setFocus();
         inputPanel.setHotkeys(KeyCode.Enter, undefined, KeyCode.Escape);
@@ -114,19 +113,6 @@ export default class NucleotideRangeSelector extends Dialog<NucleotideRangeSelec
             });
         }
 
-        const updateLocation = () => {
-            Assert.assertIsDefined(Flashbang.stageWidth);
-            Assert.assertIsDefined(Flashbang.stageHeight);
-            inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.width) * 0.5;
-            inputPanel.display.position.y = (Flashbang.stageHeight - inputPanel.height) * 0.5;
-        };
-        updateLocation();
-        Assert.assertIsDefined(this.mode);
-        this.regs.add(this.mode.resized.connect(updateLocation));
-    }
-
-    protected onBGClicked(): void {
-        // Is there a good reason not to enable this?
-        // this.close(null);
+        this.updateFloatLocation();
     }
 }

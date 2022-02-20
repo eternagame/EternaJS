@@ -27,7 +27,7 @@ import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
 import Sequence from 'eterna/rnatypes/Sequence';
 import EPars from 'eterna/EPars';
 import Fonts from 'eterna/util/Fonts';
-import CopyTextDialogMode from './CopyTextDialogMode';
+import CopyTextDialog from 'eterna/ui/CopyTextDialog';
 
 export default abstract class GameMode extends AppMode {
     public readonly bgLayer = new Container();
@@ -470,7 +470,8 @@ export default abstract class GameMode extends AppMode {
         Assert.assertIsDefined(this.modeStack);
         let sequenceString = this._poses[0].sequence.sequenceString();
         if (this._poses[0].customNumbering != null) sequenceString += ` ${Utility.arrayToRangeString(this._poses[0].customNumbering)}`;
-        this.modeStack.pushMode(new CopyTextDialogMode(sequenceString, 'Current Sequence'));
+        // this.modeStack.pushMode(new CopyTextDialogMode(sequenceString, 'Current Sequence'));
+        this.showDialog(new CopyTextDialog(sequenceString, 'Current Sequence'));
     }
 
     protected showPasteSequenceDialog(): void {

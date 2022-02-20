@@ -35,7 +35,7 @@ import SliderBar from 'eterna/ui/SliderBar';
 import {FontWeight} from 'flashbang/util/TextBuilder';
 import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
-import CopyTextDialogMode from '../CopyTextDialogMode';
+import CopyTextDialog from 'eterna/ui/CopyTextDialog';
 import ThumbnailAndTextButton from './ThumbnailAndTextButton';
 import GameMode from '../GameMode';
 import ButtonWithIcon from './ButtonWithIcon';
@@ -242,7 +242,8 @@ export default class ViewSolutionOverlay extends ContainerObject {
                     filter1_arg2: this._props.solution.nodeID
                     /* eslint-enable camelcase */
                 });
-                this.modeStack.pushMode(new CopyTextDialogMode(solutionURL, 'Solution URL'));
+                // this.modeStack.pushMode(new CopyTextDialogMode(solutionURL, 'Solution URL'));
+                (this.mode as GameMode).showDialog(new CopyTextDialog(solutionURL, 'Solution URL'));
             }
         );
         this._content.addObject(permalink, headerLinks);
@@ -268,7 +269,8 @@ export default class ViewSolutionOverlay extends ContainerObject {
                     filter1_arg1: this._props.solution.playerName
                     /* eslint-enable camelcase */
                 });
-                this.modeStack.pushMode(new CopyTextDialogMode(playerURL, 'Player URL'));
+                // this.modeStack.pushMode(new CopyTextDialogMode(playerURL, 'Player URL'));
+                (this.mode as GameMode).showDialog(new CopyTextDialog(playerURL, 'Player URL'));
             }
         );
 

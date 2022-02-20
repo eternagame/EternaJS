@@ -1,18 +1,18 @@
-import {KeyCode, Flashbang, Assert} from 'flashbang';
+import {KeyCode, Assert} from 'flashbang';
 import GameMode from 'eterna/mode/GameMode';
 import EPars from 'eterna/EPars';
 import Sequence from 'eterna/rnatypes/Sequence';
-import Dialog from './Dialog';
-import TextInputPanel from './TextInputPanel';
+import MyTextInputPanel from './MyTextInputPanel';
+import FloatDialog from './FloatDialog';
 
 /**
  * Prompts the user to paste a sequence.
  * If OK is pressed, the dialog will be closed with array of numbers (ADENOSINE,...)
  *  corresponding to sequence string.
  */
-export default class PasteSequenceDialog extends Dialog<Sequence> {
+export default class PasteSequenceDialog extends FloatDialog<Sequence> {
     constructor(customNumbering?: (number | null)[] | undefined) {
-        super();
+        super('Write down a sequence');
         this._customNumbering = customNumbering;
     }
 
@@ -21,10 +21,9 @@ export default class PasteSequenceDialog extends Dialog<Sequence> {
 
         const SEQUENCE = 'Sequence';
 
-        const inputPanel = new TextInputPanel();
+        const inputPanel = new MyTextInputPanel();
         const sequenceField = inputPanel.addField(SEQUENCE, 200);
-        inputPanel.title = 'Write down a sequence';
-        this.addObject(inputPanel, this.container);
+        this.addObject(inputPanel, this.contentVLay);
 
         sequenceField.setFocus(true);
 
@@ -33,16 +32,7 @@ export default class PasteSequenceDialog extends Dialog<Sequence> {
         inputPanel.cancelClicked.connect(() => this.close(null));
         inputPanel.okClicked.connect((values) => this.onSequenceEntered(values.get(SEQUENCE)));
 
-        const updateLocation = () => {
-            Assert.assertIsDefined(Flashbang.stageHeight);
-            Assert.assertIsDefined(Flashbang.stageWidth);
-            inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.width) * 0.5;
-            inputPanel.display.position.y = (Flashbang.stageHeight - inputPanel.height) * 0.5;
-        };
-        updateLocation();
-
-        Assert.assertIsDefined(this.mode);
-        this.regs.add(this.mode.resized.connect(updateLocation));
+        this.updateFloatLocation();
     }
 
     private onSequenceEntered(sequence: string | undefined): void {
@@ -64,11 +54,6 @@ export default class PasteSequenceDialog extends Dialog<Sequence> {
             return;
         }
         this.close(s as Sequence);
-    }
-
-    protected onBGClicked(): void {
-        // Is there a good reason not to enable this?
-        // this.close(null);
     }
 
     private readonly _customNumbering: (number | null)[] | undefined;

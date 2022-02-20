@@ -1,6 +1,7 @@
 import {Settings, Setting} from 'flashbang';
 import Eterna from 'eterna/Eterna';
 import {DesignCategory} from 'eterna/mode/DesignBrowser/DesignBrowserMode';
+import {TopBarSetting} from 'eterna/ui/Toolbar';
 
 export default class EternaSettings extends Settings {
     public readonly showChat: Setting<boolean>;
@@ -24,6 +25,8 @@ export default class EternaSettings extends Settings {
     public readonly designBrowserColumnNames: Setting<DesignCategory[]> | Setting<null>;
     public readonly designBrowserSelectedSolutionIDs: Setting<number[]> | Setting<null>;
 
+    public readonly topToolbarSettings: Setting<TopBarSetting[]> | Setting<null>;
+
     public readonly saveGamesTransfered: Setting<boolean>;
 
     constructor() {
@@ -46,6 +49,8 @@ export default class EternaSettings extends Settings {
         this.usePuzzlerLayout = this.setting<boolean>('usePuzzlerLayout', false);
         this.designBrowserColumnNames = this.setting('designBrowserColumnNames-3', null);
         this.designBrowserSelectedSolutionIDs = this.setting('designBrowserSelectedSolutionIDs', null);
+
+        this.topToolbarSettings = this.setting('topToolbarSettings', null);
 
         // Denotes whether savegames have been transfered from localstorage/storeJS/EternaSettings to
         // indexedDB/localforage/SaveGameManager - eventually this might be able to be dropped,
