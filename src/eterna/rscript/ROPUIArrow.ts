@@ -9,7 +9,7 @@ export default class ROPUIArrow extends RScriptOp {
         length: 55,
         colors: {
             outline: 0x000000,
-            fill: 0xFFFF00
+            fill: 0xffff00
         }
     };
 

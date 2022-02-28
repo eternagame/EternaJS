@@ -1,17 +1,38 @@
 import {
-    Graphics, Point, Sprite, Container, InteractionEvent, DisplayObject, Text, Rectangle
+    Graphics,
+    Point,
+    Sprite,
+    Container,
+    InteractionEvent,
+    DisplayObject,
+    Text,
+    Rectangle
 } from 'pixi.js';
 import {RegistrationGroup} from 'signals';
 import Eterna from 'eterna/Eterna';
 import Booster from 'eterna/mode/PoseEdit/Booster';
 import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
 import {
-    ContainerObject, Flashbang, VLayoutContainer, HLayoutContainer,
-    KeyCode, VAlign, HAlign, DisplayUtil, LocationTask, Easing, Assert, ParallelTask, VisibleTask
+    ContainerObject,
+    Flashbang,
+    VLayoutContainer,
+    HLayoutContainer,
+    KeyCode,
+    VAlign,
+    HAlign,
+    DisplayUtil,
+    LocationTask,
+    Easing,
+    Assert,
+    ParallelTask,
+    VisibleTask
 } from 'flashbang';
 import {BoostersData} from 'eterna/puzzle/Puzzle';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
+import {
+    RScriptUIElement,
+    RScriptUIElementID
+} from 'eterna/rscript/RScriptUIElement';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import AnnotationManager from 'eterna/AnnotationManager';
 import Fonts from 'eterna/util/Fonts';
@@ -21,7 +42,6 @@ import GameButton, {ButtonCategory} from './GameButton';
 import ToggleBar from './ToggleBar';
 import ScrollContainer from './ScrollContainer';
 import AnnotationPanel from './AnnotationPanel';
-import EternaMenu, {EternaMenuStyle} from './EternaMenu';
 import TextBalloon from './TextBalloon';
 
 export enum ToolbarType {
@@ -29,12 +49,12 @@ export enum ToolbarType {
     PUZZLEMAKER,
     PUZZLEMAKER_EMBEDDED,
     LAB,
-    FEEDBACK
+    FEEDBACK,
 }
 
 const MIDDLE_BACKCOLOR = 0x043468;
-const LINE_COLOR = 0x3397DB;
-const EDIT_BACKCOLOR = 0x21508C;
+const LINE_COLOR = 0x3397db;
+const EDIT_BACKCOLOR = 0x21508c;
 
 const TOP_HSPACE = 4;
 const EMPTY_SIZE = 1;
@@ -50,7 +70,9 @@ const tabGap = 2;
 class ToolbarButton extends GameButton {
     protected added() {
         super.added();
-        this._arrow = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgToolbarArrow));
+        this._arrow = new Sprite(
+            BitmapManager.getBitmap(Bitmaps.ImgToolbarArrow)
+        );
         this._arrow.position.x = (this.container.width - this._arrow.width) / 2;
         this._arrow.visible = false;
         this.container.addChild(this._arrow);
@@ -97,17 +119,23 @@ export class ButtonsGroup extends ContainerObject {
         this._content = new HLayoutContainer();
         this._background = new Graphics()
             .beginFill(MIDDLE_BACKCOLOR, 1)
-            .drawRoundedRect(0, 0, (Math.max(this._buttons.length, EMPTY_SIZE) * BUTTON_WIDTH), APPROX_ITEM_HEIGHT, 7)
+            .drawRoundedRect(
+                0,
+                0,
+                Math.max(this._buttons.length, EMPTY_SIZE) * BUTTON_WIDTH,
+                APPROX_ITEM_HEIGHT,
+                7
+            )
             .endFill();
 
         this.container.addChild(this._background);
         this.container.addChild(this._content);
         this._highlight = new Graphics()
-            .beginFill(0xC0C0C0, 0.4)
+            .beginFill(0xc0c0c0, 0.4)
             .drawRoundedRect(0, 0, BUTTON_WIDTH, APPROX_ITEM_HEIGHT, 7)
             .endFill();
         this._cursor = new Graphics()
-            .beginFill(0xC0C0C0)
+            .beginFill(0xc0c0c0)
             .drawRect(0, 2, 2, APPROX_ITEM_HEIGHT - 4)
             .endFill();
         this.container.addChild(this._highlight);
@@ -144,11 +172,20 @@ export class ButtonsGroup extends ContainerObject {
                 .clear()
                 .lineStyle(1, LINE_COLOR, 1)
                 .beginFill(MIDDLE_BACKCOLOR, 1)
-                .drawRoundedRect(-1, -1, Math.max(this._content.children.length, EMPTY_SIZE) * BUTTON_WIDTH + 2,
-                    APPROX_ITEM_HEIGHT + 2, 7)
+                .drawRoundedRect(
+                    -1,
+                    -1,
+                    Math.max(this._content.children.length, EMPTY_SIZE)
+                        * BUTTON_WIDTH
+                        + 2,
+                    APPROX_ITEM_HEIGHT + 2,
+                    7
+                )
                 .endFill();
 
-            this._background.width = Math.max(this._content.children.length, EMPTY_SIZE) * BUTTON_WIDTH + 2;
+            this._background.width = Math.max(this._content.children.length, EMPTY_SIZE)
+                    * BUTTON_WIDTH
+                + 2;
         } else {
             this._highlight.visible = false;
             this._cursor.visible = false;
@@ -157,11 +194,18 @@ export class ButtonsGroup extends ContainerObject {
             this._background
                 .clear()
                 .beginFill(MIDDLE_BACKCOLOR, 1)
-                .drawRoundedRect(0, 0, Math.max(this._content.children.length, EMPTY_SIZE) * BUTTON_WIDTH,
-                    APPROX_ITEM_HEIGHT, 7)
+                .drawRoundedRect(
+                    0,
+                    0,
+                    Math.max(this._content.children.length, EMPTY_SIZE)
+                        * BUTTON_WIDTH,
+                    APPROX_ITEM_HEIGHT,
+                    7
+                )
                 .endFill();
 
-            this._background.width = Math.max(this._content.children.length, EMPTY_SIZE) * BUTTON_WIDTH;
+            this._background.width = Math.max(this._content.children.length, EMPTY_SIZE)
+                * BUTTON_WIDTH;
         }
     }
 
@@ -175,16 +219,18 @@ export class ButtonsGroup extends ContainerObject {
         this._background.width = Math.max(this._content.children.length, EMPTY_SIZE) * BUTTON_WIDTH;
     }
 
-    public swapButton(bt1: DisplayObject, bt2:DisplayObject) {
+    public swapButton(bt1: DisplayObject, bt2: DisplayObject) {
         this._content.swapChildren(bt1, bt2);
     }
 
-    public getButtonAt(id:number):DisplayObject {
+    public getButtonAt(id: number): DisplayObject {
         return this._content.getChildAt(id);
     }
 
     public removeButton(button: DisplayObject): void {
-        const childrenIndex = this._content.children.findIndex((el) => el === button);
+        const childrenIndex = this._content.children.findIndex(
+            (el) => el === button
+        );
         if (childrenIndex < 0) return;
         this._content.removeChildAt(childrenIndex);
         this._background.width = Math.max(this._content.children.length, EMPTY_SIZE) * BUTTON_WIDTH;
@@ -212,7 +258,6 @@ export default class Toolbar extends ContainerObject {
     public zoomOutButton: GameButton;
     public pipButton: GameButton;
     public stateToggle: ToggleBar;
-    public actionMenu: EternaMenu;
 
     public targetButton: GameButton;
     public naturalButton: GameButton;
@@ -272,7 +317,9 @@ export default class Toolbar extends ContainerObject {
 
     public activeButtons: GameButton[] = [];
 
-    public get position() { return new Point(this.vContent.x, this.vContent.y); }
+    public get position() {
+        return new Point(this.vContent.x, this.vContent.y);
+    }
 
     // Puzzle Maker
     public addBaseButton: GameButton;
@@ -309,12 +356,12 @@ export default class Toolbar extends ContainerObject {
     public textScrollContainer: ScrollContainer;
     public text: Text;
     private handlers: {
-        pairSwapButtonHandler: VoidHandler,
-        baseMarkerButtonHandler: VoidHandler,
-        settingsButtonHandler: VoidHandler
+        pairSwapButtonHandler: VoidHandler;
+        baseMarkerButtonHandler: VoidHandler;
+        settingsButtonHandler: VoidHandler;
     };
 
-    private visiblities:Map<DisplayObject, boolean> = new Map();
+    private visiblities: Map<DisplayObject, boolean> = new Map();
 
     constructor(
         type: ToolbarType,
@@ -334,9 +381,9 @@ export default class Toolbar extends ContainerObject {
             annotationManager?: AnnotationManager;
         },
         handlers: {
-            pairSwapButtonHandler: VoidHandler
-            baseMarkerButtonHandler: VoidHandler
-            settingsButtonHandler: VoidHandler
+            pairSwapButtonHandler: VoidHandler;
+            baseMarkerButtonHandler: VoidHandler;
+            settingsButtonHandler: VoidHandler;
         }
     ) {
         super();
@@ -377,11 +424,17 @@ export default class Toolbar extends ContainerObject {
     }
 
     // eslint-disable-next-line max-len
-    private _createTab(title: ButtonCategory): {container: Container, enable: () => void, disable: () => void, category: ButtonCategory, tabWidth: number} {
+    private _createTab(title: ButtonCategory): {
+        container: Container;
+        enable: () => void;
+        disable: () => void;
+        category: ButtonCategory;
+        tabWidth: number;
+    } {
         const tabText = new Text(title, {
             fontSize: 10,
             fontFamily: Fonts.STDFONT,
-            fill: 0xFFFFFF,
+            fill: 0xffffff,
             fontWeight: FontWeight.REGULAR
         });
         const tabWidth = Math.max(tabText.width + 20, TAB_WIDTH);
@@ -396,14 +449,15 @@ export default class Toolbar extends ContainerObject {
 
         tabContainer.addChild(tabBg);
         tabContainer.addChild(tabText);
-        const textX = (tabWidth / 2) - (tabText.width / 2);
+        const textX = tabWidth / 2 - tabText.width / 2;
         const textY = (TAB_HEIGHT - tabText.height) / 2;
         tabText.position.set(textX, textY);
         tabContainer.interactive = true;
         tabContainer.buttonMode = true;
         const enable = (): void => {
             this._currentTab?.disable();
-            tabBg.clear()
+            tabBg
+                .clear()
                 .beginFill(MIDDLE_BACKCOLOR)
                 .drawRect(0, 4, tabWidth, TAB_HEIGHT - 4)
                 .drawRoundedRect(0, 0, tabWidth, 10, 8)
@@ -411,7 +465,8 @@ export default class Toolbar extends ContainerObject {
         };
 
         const disable = (): void => {
-            tabBg.clear()
+            tabBg
+                .clear()
                 .beginFill(0x0c2040)
                 .drawRect(0, 4, tabWidth, TAB_HEIGHT - 4)
                 .drawRoundedRect(0, 0, tabWidth, 10, 8)
@@ -419,7 +474,8 @@ export default class Toolbar extends ContainerObject {
         };
         tabContainer.on('click', () => {
             this._currentTab.disable();
-            tabBg.clear()
+            tabBg
+                .clear()
                 .beginFill(MIDDLE_BACKCOLOR)
                 .drawRect(0, 4, tabWidth, TAB_HEIGHT - 4)
                 .drawRoundedRect(0, 0, tabWidth, 10, 8)
@@ -435,7 +491,8 @@ export default class Toolbar extends ContainerObject {
         });
         tabContainer.on('tap', () => {
             this._currentTab.disable();
-            tabBg.clear()
+            tabBg
+                .clear()
                 .beginFill(MIDDLE_BACKCOLOR)
                 .drawRect(0, 4, tabWidth, TAB_HEIGHT - 4)
                 .drawRoundedRect(0, 0, tabWidth, 10, 8)
@@ -470,7 +527,10 @@ export default class Toolbar extends ContainerObject {
             [ButtonCategory.CUSTOM_LAYOUT, []]
         ]);
 
-        this.tabsScrollContainer = new ScrollContainer(MIDDLE_WIDTH, TAB_HEIGHT);
+        this.tabsScrollContainer = new ScrollContainer(
+            MIDDLE_WIDTH,
+            TAB_HEIGHT
+        );
         this.tabsBg = new Graphics()
             .beginFill(MIDDLE_BACKCOLOR)
             .drawRect(0, 0, MIDDLE_WIDTH, TAB_HEIGHT)
@@ -508,39 +568,68 @@ export default class Toolbar extends ContainerObject {
 
         this._currentTab = tab1;
 
-        this.tabsScrollContainer.addObject(new ContainerObject(tab0.container), this.tabsScrollContainer.content);
-        this.tabsScrollContainer.addObject(new ContainerObject(tab1.container), this.tabsScrollContainer.content);
-        this.tabsScrollContainer.addObject(new ContainerObject(tab2.container), this.tabsScrollContainer.content);
-        this.tabsScrollContainer.addObject(new ContainerObject(tab3.container), this.tabsScrollContainer.content);
-        this.tabsScrollContainer.addObject(new ContainerObject(tab4.container), this.tabsScrollContainer.content);
-        this.tabsScrollContainer.addObject(new ContainerObject(tab5.container), this.tabsScrollContainer.content);
-        this.tabsScrollContainer.addObject(new ContainerObject(tab6.container), this.tabsScrollContainer.content);
+        this.tabsScrollContainer.addObject(
+            new ContainerObject(tab0.container),
+            this.tabsScrollContainer.content
+        );
+        this.tabsScrollContainer.addObject(
+            new ContainerObject(tab1.container),
+            this.tabsScrollContainer.content
+        );
+        this.tabsScrollContainer.addObject(
+            new ContainerObject(tab2.container),
+            this.tabsScrollContainer.content
+        );
+        this.tabsScrollContainer.addObject(
+            new ContainerObject(tab3.container),
+            this.tabsScrollContainer.content
+        );
+        this.tabsScrollContainer.addObject(
+            new ContainerObject(tab4.container),
+            this.tabsScrollContainer.content
+        );
+        this.tabsScrollContainer.addObject(
+            new ContainerObject(tab5.container),
+            this.tabsScrollContainer.content
+        );
+        this.tabsScrollContainer.addObject(
+            new ContainerObject(tab6.container),
+            this.tabsScrollContainer.content
+        );
         let offset = 0;
         for (const child of this.tabsScrollContainer.content.children) {
             if (!child.visible) continue;
             const bounds = child.getLocalBounds();
             child.x = offset;
             child.y = 0;
-            offset += (bounds.width + tabGap);
+            offset += bounds.width + tabGap;
         }
         this.tabsScrollContainer.doLayout();
         this.tabsScrollContainer.content.interactive = true;
         let downed = false;
         let downX = 0;
-        this.tabsScrollContainer.content.on('pointerdown', (e:InteractionEvent) => {
-            downed = true;
-            downX = e.data.global.x;
-        });
-        this.tabsScrollContainer.content.on('pointermove', (e:InteractionEvent) => {
-            if (downed) {
-                const dx = downX - e.data.global.x;
-                const dW = totalWidth - this.tabsScrollContainer.scrollX - MIDDLE_WIDTH;
-                if (totalWidth > MIDDLE_WIDTH && dW - dx > 0) {
-                    this.tabsScrollContainer.scrollX += dx;
-                }
+        this.tabsScrollContainer.content.on(
+            'pointerdown',
+            (e: InteractionEvent) => {
+                downed = true;
                 downX = e.data.global.x;
             }
-        });
+        );
+        this.tabsScrollContainer.content.on(
+            'pointermove',
+            (e: InteractionEvent) => {
+                if (downed) {
+                    const dx = downX - e.data.global.x;
+                    const dW = totalWidth
+                        - this.tabsScrollContainer.scrollX
+                        - MIDDLE_WIDTH;
+                    if (totalWidth > MIDDLE_WIDTH && dW - dx > 0) {
+                        this.tabsScrollContainer.scrollX += dx;
+                    }
+                    downX = e.data.global.x;
+                }
+            }
+        );
         this.tabsScrollContainer.content.on('pointerup', () => {
             downed = false;
         });
@@ -562,7 +651,7 @@ export default class Toolbar extends ContainerObject {
             const bounds = child.getLocalBounds();
             child.x = offset;
             child.y = 0;
-            offset += (bounds.width + tabGap);
+            offset += bounds.width + tabGap;
         }
         this.tabsScrollContainer.doLayout();
     }
@@ -574,12 +663,14 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.INFO)
             .setName('Submit');
         this.gameButtons.set('Submit', this.submitButton);
-        this.bottomButtons.set('Submit',
+        this.bottomButtons.set(
+            'Submit',
             new GameButton()
                 .allStates(Bitmaps.ImgSubmit)
                 // .tooltip('Submit')
                 .setCategory(ButtonCategory.INFO)
-                .setName('Submit'));
+                .setName('Submit')
+        );
 
         this.viewSolutionsButton = new ToolbarButton()
             .allStates(Bitmaps.NovaSolver)
@@ -588,13 +679,15 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.INFO)
             .setName('Solutions');
         this.gameButtons.set('Solutions', this.viewSolutionsButton);
-        this.bottomButtons.set('Solutions',
+        this.bottomButtons.set(
+            'Solutions',
             new ToolbarButton()
                 .allStates(Bitmaps.NovaSolver)
                 .disabled(undefined)
                 // .tooltip('View all submitted designs for this puzzle.')
                 .setCategory(ButtonCategory.INFO)
-                .setName('Solutions'));
+                .setName('Solutions')
+        );
 
         this.specButton = new ToolbarButton()
             .allStates(Bitmaps.ImgSpec)
@@ -604,13 +697,15 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.INFO)
             .setName('Spec');
         this.gameButtons.set('Spec', this.specButton);
-        this.bottomButtons.set('Spec',
+        this.bottomButtons.set(
+            'Spec',
             new ToolbarButton()
                 .allStates(Bitmaps.ImgSpec)
                 .disabled(undefined)
                 // .tooltip("View RNA's melting point, dotplot and other specs (S)")
                 .setCategory(ButtonCategory.INFO)
-                .setName('Spec'));
+                .setName('Spec')
+        );
 
         this.settingsButton = new ToolbarButton()
             .allStates(Bitmaps.ImgSettings)
@@ -618,20 +713,30 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.INFO)
             .setName('Settings');
         this.gameButtons.set('Settings', this.settingsButton);
-        this.bottomButtons.set('Settings',
+        this.bottomButtons.set(
+            'Settings',
             new ToolbarButton()
                 .allStates(Bitmaps.ImgSettings)
                 // .tooltip('Game options')
                 .setCategory(ButtonCategory.INFO)
-                .setName('Settings'));
-        this.settingsButton.clicked.connect(this.handlers.settingsButtonHandler);
+                .setName('Settings')
+        );
+        this.settingsButton.clicked.connect(
+            this.handlers.settingsButtonHandler
+        );
     }
 
     private makeInfoLayout() {
-        if (this._type === ToolbarType.LAB || this._type === ToolbarType.FEEDBACK) {
+        if (
+            this._type === ToolbarType.LAB
+            || this._type === ToolbarType.FEEDBACK
+        ) {
             this.pushButtonToCategory(this.viewSolutionsButton);
         }
-        if (this._type !== ToolbarType.PUZZLEMAKER && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED) {
+        if (
+            this._type !== ToolbarType.PUZZLEMAKER
+            && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED
+        ) {
             this.pushButtonToCategory(this.specButton);
         }
 
@@ -656,12 +761,14 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.CREATE)
             .setName('Add base');
         this.gameButtons.set('Add base', this.addBaseButton);
-        this.bottomButtons.set('Add base',
+        this.bottomButtons.set(
+            'Add base',
             new GameButton()
                 .allStates(Bitmaps.ImgAddBase)
                 // .tooltip('Add a single base.')
                 .setCategory(ButtonCategory.CREATE)
-                .setName('Add base'));
+                .setName('Add base')
+        );
 
         this.addPairButton = new ToolbarButton()
             .allStates(Bitmaps.ImgAddPair)
@@ -670,12 +777,14 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.CREATE)
             .setName('Add pair');
         this.gameButtons.set('Add pair', this.addPairButton);
-        this.bottomButtons.set('Add pair',
+        this.bottomButtons.set(
+            'Add pair',
             new ToolbarButton()
                 .allStates(Bitmaps.ImgAddPair)
                 // .tooltip('Add a pair.')
                 .setCategory(ButtonCategory.CREATE)
-                .setName('Add pair'));
+                .setName('Add pair')
+        );
 
         this.deleteButton = new ToolbarButton()
             .allStates(Bitmaps.ImgErase)
@@ -684,12 +793,14 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.CREATE)
             .setName('Delete');
         this.gameButtons.set('Delete', this.deleteButton);
-        this.bottomButtons.set('Delete',
+        this.bottomButtons.set(
+            'Delete',
             new ToolbarButton()
                 .allStates(Bitmaps.ImgErase)
                 // .tooltip('Delete a base or a pair.')
                 .setCategory(ButtonCategory.CREATE)
-                .setName('Delete'));
+                .setName('Delete')
+        );
 
         this.lockButton = new ToolbarButton()
             .allStates(Bitmaps.ImgLock)
@@ -698,12 +809,14 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.CREATE)
             .setName('Lock');
         this.gameButtons.set('Lock', this.lockButton);
-        this.bottomButtons.set('Lock',
+        this.bottomButtons.set(
+            'Lock',
             new ToolbarButton()
                 .allStates(Bitmaps.ImgLock)
                 // .tooltip('Lock or unlock a base.')
                 .setCategory(ButtonCategory.CREATE)
-                .setName('Lock'));
+                .setName('Lock')
+        );
 
         this.moleculeButton = new ToolbarButton()
             .allStates(Bitmaps.ImgMolecule)
@@ -712,12 +825,14 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.CREATE)
             .setName('Molecule');
         this.gameButtons.set('Molecule', this.moleculeButton);
-        this.bottomButtons.set('Molecule',
+        this.bottomButtons.set(
+            'Molecule',
             new ToolbarButton()
                 .allStates(Bitmaps.ImgMolecule)
                 // .tooltip('Create or remove a molecular binding site.')
                 .setCategory(ButtonCategory.CREATE)
-                .setName('Molecule'));
+                .setName('Molecule')
+        );
 
         this.validate3DButton = new ToolbarButton()
             .allStates(Bitmaps.ImgFileOpen)
@@ -725,42 +840,57 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.CREATE)
             .setName('Open 3D');
         this.gameButtons.set('Open 3D', this.validate3DButton);
-        this.bottomButtons.set('Open 3D',
+        this.bottomButtons.set(
+            'Open 3D',
             new ToolbarButton()
                 .allStates(Bitmaps.ImgFileOpen)
                 // .tooltip('Validate 3D Models')
                 .setCategory(ButtonCategory.CREATE)
-                .setName('Open 3D'));
+                .setName('Open 3D')
+        );
 
-        this.regs.add(this.addBaseButton.clicked.connect(() => {
-            this._deselectAllPaintTools();
-            this.addBaseButton.toggled.value = true;
-            this.getMirrorButton(this.addBaseButton).toggled.value = true;
-        }));
-        this.regs.add(this.addPairButton.clicked.connect(() => {
-            this._deselectAllPaintTools();
-            this.addPairButton.toggled.value = true;
-            this.getMirrorButton(this.addPairButton).toggled.value = true;
-        }));
-        this.regs.add(this.deleteButton.clicked.connect(() => {
-            this._deselectAllPaintTools();
-            this.deleteButton.toggled.value = true;
-            this.getMirrorButton(this.deleteButton).toggled.value = true;
-        }));
-        this.regs.add(this.lockButton.clicked.connect(() => {
-            this._deselectAllPaintTools();
-            this.lockButton.toggled.value = true;
-            this.getMirrorButton(this.lockButton).toggled.value = true;
-        }));
-        this.regs.add(this.moleculeButton.clicked.connect(() => {
-            this._deselectAllPaintTools();
-            this.moleculeButton.toggled.value = true;
-            this.getMirrorButton(this.moleculeButton).toggled.value = true;
-        }));
+        this.regs.add(
+            this.addBaseButton.clicked.connect(() => {
+                this._deselectAllPaintTools();
+                this.addBaseButton.toggled.value = true;
+                this.getMirrorButton(this.addBaseButton).toggled.value = true;
+            })
+        );
+        this.regs.add(
+            this.addPairButton.clicked.connect(() => {
+                this._deselectAllPaintTools();
+                this.addPairButton.toggled.value = true;
+                this.getMirrorButton(this.addPairButton).toggled.value = true;
+            })
+        );
+        this.regs.add(
+            this.deleteButton.clicked.connect(() => {
+                this._deselectAllPaintTools();
+                this.deleteButton.toggled.value = true;
+                this.getMirrorButton(this.deleteButton).toggled.value = true;
+            })
+        );
+        this.regs.add(
+            this.lockButton.clicked.connect(() => {
+                this._deselectAllPaintTools();
+                this.lockButton.toggled.value = true;
+                this.getMirrorButton(this.lockButton).toggled.value = true;
+            })
+        );
+        this.regs.add(
+            this.moleculeButton.clicked.connect(() => {
+                this._deselectAllPaintTools();
+                this.moleculeButton.toggled.value = true;
+                this.getMirrorButton(this.moleculeButton).toggled.value = true;
+            })
+        );
     }
 
     private makeCreateLayout() {
-        if (this._type === ToolbarType.PUZZLEMAKER || this._type === ToolbarType.PUZZLEMAKER_EMBEDDED) {
+        if (
+            this._type === ToolbarType.PUZZLEMAKER
+            || this._type === ToolbarType.PUZZLEMAKER_EMBEDDED
+        ) {
             this.pushButtonToCategory(this.addBaseButton);
             this.pushButtonToCategory(this.addPairButton);
             this.pushButtonToCategory(this.deleteButton);
@@ -778,12 +908,14 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.SOLVE)
             .setName('Reset');
         this.gameButtons.set('Reset', this.resetButton);
-        this.bottomButtons.set('Reset',
+        this.bottomButtons.set(
+            'Reset',
             new ToolbarButton()
                 .allStates(Bitmaps.ImgReset)
                 // .tooltip(resetTooltip)
                 .setCategory(ButtonCategory.SOLVE)
-                .setName('Reset'));
+                .setName('Reset')
+        );
 
         this.boostersMenu = new GameButton()
             .allStates(Bitmaps.NovaBoosters)
@@ -791,12 +923,14 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.SOLVE)
             .setName('Boosters');
         this.gameButtons.set('Boosters', this.boostersMenu);
-        this.bottomButtons.set('Boosters',
+        this.bottomButtons.set(
+            'Boosters',
             new ToolbarButton()
                 .allStates(Bitmaps.NovaBoosters)
                 .disabled(undefined)
                 .setCategory(ButtonCategory.SOLVE)
-                .setName('Boosters'));
+                .setName('Boosters')
+        );
 
         this.freezeButton = new ToolbarButton()
             .allStates(Bitmaps.ImgFreeze)
@@ -806,12 +940,14 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.SOLVE)
             .setName('Freeze');
         this.gameButtons.set('Freeze', this.freezeButton);
-        this.bottomButtons.set('Freeze',
+        this.bottomButtons.set(
+            'Freeze',
             new ToolbarButton()
                 .allStates(Bitmaps.ImgFreeze)
                 // .tooltip('Frozen mode. Suspends/resumes folding engine calculations. (F)')
                 .setCategory(ButtonCategory.SOLVE)
-                .setName('Freeze'));
+                .setName('Freeze')
+        );
 
         this.baseShiftButton = new ToolbarButton()
             .allStates(Bitmaps.ImgSwap)
@@ -819,12 +955,14 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.SOLVE)
             .setName('Shift base');
         this.gameButtons.set('Shift base', this.baseShiftButton);
-        this.bottomButtons.set('Shift base',
+        this.bottomButtons.set(
+            'Shift base',
             new ToolbarButton()
                 .allStates(Bitmaps.ImgSwap)
                 // .tooltip('Base shift')
                 .setCategory(ButtonCategory.SOLVE)
-                .setName('Shift base'));
+                .setName('Shift base')
+        );
 
         this.pairSwapButton = new ToolbarButton()
             .allStates(Bitmaps.ImgSwap)
@@ -833,13 +971,17 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.SOLVE)
             .setName('Swap pair');
         this.gameButtons.set('Swap pair', this.pairSwapButton);
-        this.pairSwapButton.clicked.connect(this.handlers.pairSwapButtonHandler);
-        this.bottomButtons.set('Swap pair',
+        this.pairSwapButton.clicked.connect(
+            this.handlers.pairSwapButtonHandler
+        );
+        this.bottomButtons.set(
+            'Swap pair',
             new ToolbarButton()
                 .allStates(Bitmaps.ImgSwap)
                 // .tooltip('Swap paired bases. (5)')
                 .setCategory(ButtonCategory.SOLVE)
-                .setName('Swap pair'));
+                .setName('Swap pair')
+        );
 
         this.undoButton = new GameButton()
             .allStates(Bitmaps.ImgUndo)
@@ -849,12 +991,14 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.SOLVE)
             .setName('Undo');
         this.gameButtons.set('Undo', this.undoButton);
-        this.bottomButtons.set('Undo',
+        this.bottomButtons.set(
+            'Undo',
             new GameButton()
                 .allStates(Bitmaps.ImgUndo)
                 // .tooltip('Undo')
                 .setCategory(ButtonCategory.SOLVE)
-                .setName('Undo'));
+                .setName('Undo')
+        );
 
         this.redoButton = new GameButton()
             .allStates(Bitmaps.ImgRedo)
@@ -864,12 +1008,14 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.SOLVE)
             .setName('Redo');
         this.gameButtons.set('Redo', this.redoButton);
-        this.bottomButtons.set('Redo',
+        this.bottomButtons.set(
+            'Redo',
             new GameButton()
                 .allStates(Bitmaps.ImgRedo)
                 // .tooltip('Redo')
                 .setCategory(ButtonCategory.SOLVE)
-                .setName('Redo'));
+                .setName('Redo')
+        );
 
         this.librarySelectionButton = new ToolbarButton()
             .up(Bitmaps.RandomBtn)
@@ -879,14 +1025,16 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.SOLVE)
             .setName('Select lib');
         this.gameButtons.set('Select lib', this.librarySelectionButton);
-        this.bottomButtons.set('Select lib',
+        this.bottomButtons.set(
+            'Select lib',
             new ToolbarButton()
                 .up(Bitmaps.RandomBtn)
                 .over(Bitmaps.RandomBtnOver)
                 .down(Bitmaps.RandomBtn)
                 // .tooltip('Select bases to randomize')
                 .setCategory(ButtonCategory.SOLVE)
-                .setName('Select lib'));
+                .setName('Select lib')
+        );
 
         this.magicGlueButton = new ToolbarButton()
             .allStates(Bitmaps.ImgMagicGlue)
@@ -895,43 +1043,56 @@ export default class Toolbar extends ContainerObject {
             .setName('Magic glue');
         this.gameButtons.set('Magic glue', this.magicGlueButton);
         this.magicGlueButton.display.interactive = true;
-        this.bottomButtons.set('Magic glue',
+        this.bottomButtons.set(
+            'Magic glue',
             new ToolbarButton()
                 .allStates(Bitmaps.ImgMagicGlue)
                 // .tooltip('Magic glue - change target structure in purple areas (Hold Alt)')
                 .setCategory(ButtonCategory.SOLVE)
-                .setName('Magic glue'));
+                .setName('Magic glue')
+        );
     }
 
     private makeSolveLayout() {
-        if (this._type === ToolbarType.LAB || this._type === ToolbarType.PUZZLE) {
+        if (
+            this._type === ToolbarType.LAB
+            || this._type === ToolbarType.PUZZLE
+        ) {
             this.pushButtonToCategory(this.freezeButton);
             this.freezeButton.display.visible = Eterna.settings.freezeButtonAlwaysVisible.value;
-            this.regs.add(Eterna.settings.freezeButtonAlwaysVisible.connect((visible) => {
-                this.freezeButton.display.visible = visible;
-                this.updateLayout();
-            }));
+            this.regs.add(
+                Eterna.settings.freezeButtonAlwaysVisible.connect((visible) => {
+                    this.freezeButton.display.visible = visible;
+                    this.updateLayout();
+                })
+            );
         }
 
         this.pushButtonToCategory(this.pairSwapButton);
         this.pushButtonToCategory(this.baseShiftButton);
 
-        this.regs.add(this.pairSwapButton.clicked.connect(() => {
-            this._deselectAllPaintTools();
-            this.pairSwapButton.toggled.value = true;
-            this.getMirrorButton(this.pairSwapButton).toggled.value = true;
-        }));
+        this.regs.add(
+            this.pairSwapButton.clicked.connect(() => {
+                this._deselectAllPaintTools();
+                this.pairSwapButton.toggled.value = true;
+                this.getMirrorButton(this.pairSwapButton).toggled.value = true;
+            })
+        );
 
         this.pushButtonToCategory(this.undoButton);
         this.pushButtonToCategory(this.redoButton);
 
         if (this._showLibrarySelect) {
             this.pushButtonToCategory(this.librarySelectionButton);
-            this.regs.add(this.librarySelectionButton.clicked.connect(() => {
-                this._deselectAllPaintTools();
-                this.librarySelectionButton.toggled.value = true;
-                this.getMirrorButton(this.librarySelectionButton).toggled.value = true;
-            }));
+            this.regs.add(
+                this.librarySelectionButton.clicked.connect(() => {
+                    this._deselectAllPaintTools();
+                    this.librarySelectionButton.toggled.value = true;
+                    this.getMirrorButton(
+                        this.librarySelectionButton
+                    ).toggled.value = true;
+                })
+            );
         }
         if (this._type !== ToolbarType.FEEDBACK) {
             this.pushButtonToCategory(this.resetButton);
@@ -939,11 +1100,13 @@ export default class Toolbar extends ContainerObject {
 
         if (this._showGlue) {
             this.pushButtonToCategory(this.magicGlueButton);
-            this.regs.add(this.magicGlueButton.clicked.connect(() => {
-                this._deselectAllPaintTools();
-                this.magicGlueButton.toggled.value = true;
-                this.getMirrorButton(this.magicGlueButton).toggled.value = true;
-            }));
+            this.regs.add(
+                this.magicGlueButton.clicked.connect(() => {
+                    this._deselectAllPaintTools();
+                    this.magicGlueButton.toggled.value = true;
+                    this.getMirrorButton(this.magicGlueButton).toggled.value = true;
+                })
+            );
         }
     }
 
@@ -954,12 +1117,14 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.IMPORT_EXPORT)
             .setName('Copy');
         this.gameButtons.set('Copy', this.copyButton);
-        this.bottomButtons.set('Copy',
+        this.bottomButtons.set(
+            'Copy',
             new GameButton()
                 .allStates(Bitmaps.ImgCopy)
                 // .tooltip('Copy the current sequence')
                 .setCategory(ButtonCategory.IMPORT_EXPORT)
-                .setName('Copy'));
+                .setName('Copy')
+        );
 
         this.pasteButton = new GameButton()
             .allStates(Bitmaps.ImgPaste)
@@ -967,12 +1132,14 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.IMPORT_EXPORT)
             .setName('Paste');
         this.gameButtons.set('Paste', this.pasteButton);
-        this.bottomButtons.set('Paste',
+        this.bottomButtons.set(
+            'Paste',
             new GameButton()
                 .allStates(Bitmaps.ImgPaste)
                 // .tooltip('Type in a sequence')
                 .setCategory(ButtonCategory.IMPORT_EXPORT)
-                .setName('Paste'));
+                .setName('Paste')
+        );
 
         this.downloadHKWSButton = new GameButton()
             .allStates(Bitmaps.CustomLayout)
@@ -980,12 +1147,14 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.IMPORT_EXPORT)
             .setName('Download HKWS');
         this.gameButtons.set('Download HKWS', this.downloadHKWSButton);
-        this.bottomButtons.set('Download HKWS',
+        this.bottomButtons.set(
+            'Download HKWS',
             new GameButton()
                 .allStates(Bitmaps.CustomLayout)
                 // .tooltip('Download a draw_rna input file for the current layout')
                 .setCategory(ButtonCategory.IMPORT_EXPORT)
-                .setName('Download HKWS'));
+                .setName('Download HKWS')
+        );
         this.downloadHKWSButton.display.buttonMode = true;
         this.downloadHKWSButton.display.interactive = true;
 
@@ -995,12 +1164,14 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.IMPORT_EXPORT)
             .setName('Download SVG');
         this.gameButtons.set('Download SVG', this.downloadSVGButton);
-        this.bottomButtons.set('Download SVG',
+        this.bottomButtons.set(
+            'Download SVG',
             new GameButton()
                 .allStates(Bitmaps.CustomLayout)
                 // .tooltip('Download an SVG of the current RNA layout')
                 .setCategory(ButtonCategory.IMPORT_EXPORT)
-                .setName('Download SVG'));
+                .setName('Download SVG')
+        );
         // this.downloadSVGButton.display.buttonMode = true;
         // this.downloadSVGButton.display.interactive = true;
 
@@ -1011,13 +1182,15 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.IMPORT_EXPORT)
             .setName('Screenshot');
         this.gameButtons.set('Screenshot', this.screenshotButton);
-        this.bottomButtons.set('Screenshot',
+        this.bottomButtons.set(
+            'Screenshot',
             new ToolbarButton()
                 .allStates(Bitmaps.ImgScreenshot)
                 // .tooltip('Screenshot')
                 .disabled(undefined)
                 .setCategory(ButtonCategory.IMPORT_EXPORT)
-                .setName('Screenshot'));
+                .setName('Screenshot')
+        );
     }
 
     private makeInoutLayout() {
@@ -1041,13 +1214,15 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.VIEW)
             .setName('Find');
         this.gameButtons.set('Find', this.nucleotideFindButton);
-        this.bottomButtons.set('Find',
+        this.bottomButtons.set(
+            'Find',
             new ToolbarButton()
                 .allStates(Bitmaps.ImgFind)
                 .disabled()
                 // .tooltip('Type a nucleotide index to put it in the center of the screen (J)')
                 .setCategory(ButtonCategory.VIEW)
-                .setName('Find'));
+                .setName('Find')
+        );
 
         this.nucleotideRangeButton = new ToolbarButton()
             .allStates(Bitmaps.NovaBigPuzzleImg)
@@ -1057,13 +1232,15 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.VIEW)
             .setName('Range');
         this.gameButtons.set('Range', this.nucleotideRangeButton);
-        this.bottomButtons.set('Range',
+        this.bottomButtons.set(
+            'Range',
             new ToolbarButton()
                 .allStates(Bitmaps.NovaBigPuzzleImg)
                 .disabled()
                 // .tooltip('Enter a nucleotide range to view (V)')
                 .setCategory(ButtonCategory.VIEW)
-                .setName('Range'));
+                .setName('Range')
+        );
 
         this.explosionFactorButton = new ToolbarButton()
             .allStates(Bitmaps.ImgFlareSmall)
@@ -1072,13 +1249,15 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.VIEW)
             .setName('Explosion factor');
         this.gameButtons.set('Explosion factor', this.explosionFactorButton);
-        this.bottomButtons.set('Explosion factor',
+        this.bottomButtons.set(
+            'Explosion factor',
             new ToolbarButton()
                 .allStates(Bitmaps.ImgFlareSmall)
                 .disabled()
                 // .tooltip('Set explosion factor ([, ])')
                 .setCategory(ButtonCategory.VIEW)
-                .setName('Explosion factor'));
+                .setName('Explosion factor')
+        );
 
         this.pipButton = new ToolbarButton()
             .allStates(Bitmaps.ImgPip)
@@ -1088,12 +1267,14 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.VIEW)
             .setName('PiP');
         this.gameButtons.set('PiP', this.pipButton);
-        this.bottomButtons.set('PiP',
+        this.bottomButtons.set(
+            'PiP',
             new ToolbarButton()
                 .allStates(Bitmaps.ImgPip)
                 // .tooltip('Set PiP mode (P)')
                 .setCategory(ButtonCategory.VIEW)
-                .setName('PiP'));
+                .setName('PiP')
+        );
 
         this.zoomInButton = new GameButton()
             .allStates(Bitmaps.ImgZoomIn)
@@ -1104,13 +1285,15 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.VIEW)
             .setName('Zoom in');
         this.gameButtons.set('Zoom in', this.zoomInButton);
-        this.bottomButtons.set('Zoom in',
+        this.bottomButtons.set(
+            'Zoom in',
             new GameButton()
                 .allStates(Bitmaps.ImgZoomIn)
                 .disabled(Bitmaps.ImgZoomInDisable)
                 // .tooltip('Zoom in (=)')
                 .setCategory(ButtonCategory.VIEW)
-                .setName('Zoom in'));
+                .setName('Zoom in')
+        );
 
         this.zoomOutButton = new GameButton()
             .allStates(Bitmaps.ImgZoomOut)
@@ -1121,13 +1304,15 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.VIEW)
             .setName('Zoom out');
         this.gameButtons.set('Zoom out', this.zoomOutButton);
-        this.bottomButtons.set('Zoom out',
+        this.bottomButtons.set(
+            'Zoom out',
             new GameButton()
                 .allStates(Bitmaps.ImgZoomOut)
                 .disabled(Bitmaps.ImgZoomOutDisable)
                 // .tooltip('Zoom out (-)')
                 .setCategory(ButtonCategory.VIEW)
-                .setName('Zoom out'));
+                .setName('Zoom out')
+        );
     }
 
     private makeViewLayout() {
@@ -1135,8 +1320,10 @@ export default class Toolbar extends ContainerObject {
         this.pushButtonToCategory(this.nucleotideRangeButton);
         this.pushButtonToCategory(this.explosionFactorButton);
 
-        if (this._states > 1
-            && this._type !== ToolbarType.PUZZLEMAKER && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED
+        if (
+            this._states > 1
+            && this._type !== ToolbarType.PUZZLEMAKER
+            && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED
         ) {
             this.pushButtonToCategory(this.pipButton);
         }
@@ -1154,12 +1341,14 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.CUSTOM_LAYOUT)
             .setName('Move');
         this.gameButtons.set('Move', this.moveButton);
-        this.bottomButtons.set('Move',
+        this.bottomButtons.set(
+            'Move',
             new GameButton()
                 .allStates(Bitmaps.CustomLayout)
                 // .tooltip('Move a nucleotide or stem by Ctrl-Shift-Click')
                 .setCategory(ButtonCategory.CUSTOM_LAYOUT)
-                .setName('Move'));
+                .setName('Move')
+        );
         this.moveButton.display.buttonMode = true;
         this.moveButton.display.interactive = true;
 
@@ -1169,12 +1358,14 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.CUSTOM_LAYOUT)
             .setName('Rotate stem');
         this.gameButtons.set('Rotate stem', this.rotateStemButton);
-        this.bottomButtons.set('Rotate stem',
+        this.bottomButtons.set(
+            'Rotate stem',
             new GameButton()
                 .allStates(Bitmaps.CustomLayout)
                 // .tooltip('Rotate stem clockwise 1/4 turn by Ctrl-Shift-Click')
                 .setCategory(ButtonCategory.CUSTOM_LAYOUT)
-                .setName('Rotate stem'));
+                .setName('Rotate stem')
+        );
         this.rotateStemButton.display.buttonMode = true;
         this.rotateStemButton.display.interactive = true;
 
@@ -1184,12 +1375,14 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.CUSTOM_LAYOUT)
             .setName('Flip stem');
         this.gameButtons.set('Flip stem', this.flipStemButton);
-        this.bottomButtons.set('Flip stem',
+        this.bottomButtons.set(
+            'Flip stem',
             new GameButton()
                 .allStates(Bitmaps.CustomLayout)
                 // .tooltip('Flip stem by Ctrl-Shift-Click')
                 .setCategory(ButtonCategory.CUSTOM_LAYOUT)
-                .setName('Flip stem'));
+                .setName('Flip stem')
+        );
         this.flipStemButton.display.buttonMode = true;
         this.flipStemButton.display.interactive = true;
 
@@ -1199,12 +1392,14 @@ export default class Toolbar extends ContainerObject {
             .setCategory(ButtonCategory.CUSTOM_LAYOUT)
             .setName('Snap to grid');
         this.gameButtons.set('Snap to grid', this.snapToGridButton);
-        this.bottomButtons.set('Snap to grid',
+        this.bottomButtons.set(
+            'Snap to grid',
             new GameButton()
                 .allStates(Bitmaps.CustomLayout)
                 // .tooltip('Snap current layout to a grid')
                 .setCategory(ButtonCategory.CUSTOM_LAYOUT)
-                .setName('Snap to grid'));
+                .setName('Snap to grid')
+        );
         this.snapToGridButton.display.buttonMode = true;
         this.snapToGridButton.display.interactive = true;
     }
@@ -1226,12 +1421,14 @@ export default class Toolbar extends ContainerObject {
             .setName('Base marker');
         this.gameButtons.set('Base marker', this.baseMarkerButton);
         this.baseMarkerButton.display.interactive = true;
-        this.bottomButtons.set('Base marker',
+        this.bottomButtons.set(
+            'Base marker',
             new ToolbarButton()
                 .allStates(Bitmaps.ImgBaseMarker)
                 // .tooltip('Mark bases (hold ctrl)')
                 .setCategory(ButtonCategory.ANNOTATE)
-                .setName('Base marker'));
+                .setName('Base marker')
+        );
 
         this.annotationModeButton = new ToolbarButton()
             .allStates(Bitmaps.ImgAnnotationMode)
@@ -1240,12 +1437,14 @@ export default class Toolbar extends ContainerObject {
             .setName('Annotation mode');
         this.gameButtons.set('Annotation mode', this.annotationModeButton);
         this.annotationModeButton.display.interactive = true;
-        this.bottomButtons.set('Annotation mode',
+        this.bottomButtons.set(
+            'Annotation mode',
             new ToolbarButton()
                 .allStates(Bitmaps.ImgAnnotationMode)
                 // .tooltip('Annotation Mode')
                 .setCategory(ButtonCategory.ANNOTATE)
-                .setName('Annotation mode'));
+                .setName('Annotation mode')
+        );
 
         this.annotationPanelButton = new ToolbarButton()
             .allStates(Bitmaps.ImgAnnotationLayer)
@@ -1255,25 +1454,31 @@ export default class Toolbar extends ContainerObject {
             .setName('Annotation panel');
         this.gameButtons.set('Annotation panel', this.annotationPanelButton);
         this.annotationPanelButton.display.interactive = true;
-        this.bottomButtons.set('Annotation panel',
+        this.bottomButtons.set(
+            'Annotation panel',
             new ToolbarButton()
                 .allStates(Bitmaps.ImgAnnotationLayer)
                 .selected(Bitmaps.ImgAnnotationLayerSelected)
                 // .tooltip('Annotations Panel')
                 .setCategory(ButtonCategory.ANNOTATE)
-                .setName('Annotation panel'));
+                .setName('Annotation panel')
+        );
     }
 
     private makeAnnotateLayout() {
         if (this.type !== ToolbarType.FEEDBACK) {
             this.pushButtonToCategory(this.baseMarkerButton);
-            this.baseMarkerButton.clicked.connect(this.handlers.baseMarkerButtonHandler);
+            this.baseMarkerButton.clicked.connect(
+                this.handlers.baseMarkerButtonHandler
+            );
         }
-        this.regs.add(this.baseMarkerButton.clicked.connect(() => {
-            this._deselectAllPaintTools();
-            this.baseMarkerButton.toggled.value = true;
-            this.getMirrorButton(this.baseMarkerButton).toggled.value = true;
-        }));
+        this.regs.add(
+            this.baseMarkerButton.clicked.connect(() => {
+                this._deselectAllPaintTools();
+                this.baseMarkerButton.toggled.value = true;
+                this.getMirrorButton(this.baseMarkerButton).toggled.value = true;
+            })
+        );
 
         if (this._annotationManager) {
             this.annotationPanel = new AnnotationPanel(
@@ -1287,18 +1492,26 @@ export default class Toolbar extends ContainerObject {
                 this.pushButtonToCategory(this.annotationModeButton);
                 this.pushButtonToCategory(this.annotationPanelButton);
 
-                this.regs.add(this.annotationModeButton.clicked.connect(() => {
-                    this._deselectAllPaintTools();
-                    this.annotationModeButton.toggled.value = true;
-                    this.getMirrorButton(this.annotationModeButton).toggled.value = true;
+                this.regs.add(
+                    this.annotationModeButton.clicked.connect(() => {
+                        this._deselectAllPaintTools();
+                        this.annotationModeButton.toggled.value = true;
+                        this.getMirrorButton(
+                            this.annotationModeButton
+                        ).toggled.value = true;
 
-                    Assert.assertIsDefined(this._annotationManager);
-                    // this._annotationManager.setAnnotationMode(true);
-                }));
+                        Assert.assertIsDefined(this._annotationManager);
+                        // this._annotationManager.setAnnotationMode(true);
+                    })
+                );
 
-                this.regs.add(this._annotationManager.viewAnnotationDataUpdated.connect(() => {
-                    // this.annotationPanel.updatePanel();
-                }));
+                this.regs.add(
+                    this._annotationManager.viewAnnotationDataUpdated.connect(
+                        () => {
+                            // this.annotationPanel.updatePanel();
+                        }
+                    )
+                );
             }
         }
     }
@@ -1338,14 +1551,16 @@ export default class Toolbar extends ContainerObject {
             // .tooltip('Color sequences based on base colors as in the game.')
             .setName('Letter color');
         this.gameButtons.set('Letter color', this.letterColorButton);
-        this.bottomButtons.set('Letter color',
+        this.bottomButtons.set(
+            'Letter color',
             new ToolbarButton()
                 .up(Bitmaps.ImgColoring)
                 .over(Bitmaps.ImgColoringOver)
                 .down(Bitmaps.ImgColoringSelected)
                 .selected(Bitmaps.ImgColoringSelected)
                 // .tooltip('Color sequences based on base colors as in the game.')
-                .setName('Letter color'));
+                .setName('Letter color')
+        );
 
         this.expColorButton = new ToolbarButton()
             .up(Bitmaps.ImgFlask)
@@ -1355,34 +1570,45 @@ export default class Toolbar extends ContainerObject {
             // .tooltip('Color sequences based on experimental data.')
             .setName('Exp color');
         this.gameButtons.set('Exp color', this.expColorButton);
-        this.bottomButtons.set('Exp color',
+        this.bottomButtons.set(
+            'Exp color',
             new ToolbarButton()
                 .up(Bitmaps.ImgFlask)
                 .over(Bitmaps.ImgFlaskOver)
                 .down(Bitmaps.ImgFlaskSelected)
                 .selected(Bitmaps.ImgFlaskSelected)
                 // .tooltip('Color sequences based on experimental data.')
-                .setName('Exp color'));
+                .setName('Exp color')
+        );
 
         if (this._type === ToolbarType.FEEDBACK) {
             this.letterColorButton.toggled.value = false;
             this.getMirrorButton(this.letterColorButton).toggled.value = false;
-            this.addObject(this.letterColorButton, this.middleScrollContainer.content);
+            this.addObject(
+                this.letterColorButton,
+                this.middleScrollContainer.content
+            );
 
             this.expColorButton.toggled.value = true;
             this.getMirrorButton(this.expColorButton).toggled.value = false;
-            this.addObject(this.expColorButton, this.middleScrollContainer.content);
+            this.addObject(
+                this.expColorButton,
+                this.middleScrollContainer.content
+            );
         }
     }
 
     private initializeTopButtons() {
-        const leftBts:GameButton[] = [];
-        const rightBts:GameButton[] = [];
+        const leftBts: GameButton[] = [];
+        const rightBts: GameButton[] = [];
 
-        const leftButtonNames:string[] = [];
-        const rightButtonNames:string[] = [];
+        const leftButtonNames: string[] = [];
+        const rightButtonNames: string[] = [];
 
-        if (this._type === ToolbarType.PUZZLEMAKER || this._type === ToolbarType.PUZZLEMAKER_EMBEDDED) {
+        if (
+            this._type === ToolbarType.PUZZLEMAKER
+            || this._type === ToolbarType.PUZZLEMAKER_EMBEDDED
+        ) {
             // add
         } else if (this._type === ToolbarType.LAB) {
             leftBts.push(this.getMirrorButton(this.viewSolutionsButton));
@@ -1422,7 +1648,7 @@ export default class Toolbar extends ContainerObject {
         });
         this.rightButtonsGroup = new ButtonsGroup(rightBts);
 
-        const topToolbarSettings:TopBarSetting[] = [];
+        const topToolbarSettings: TopBarSetting[] = [];
         if (Eterna.settings.topToolbarSettings.value !== null) {
             Eterna.settings.topToolbarSettings.value.forEach((v) => {
                 topToolbarSettings.push(v);
@@ -1437,15 +1663,15 @@ export default class Toolbar extends ContainerObject {
     }
 
     private saveTopButtons() {
-        const leftButtonNames:string[] = [];
-        const rightButtonNames:string[] = [];
+        const leftButtonNames: string[] = [];
+        const rightButtonNames: string[] = [];
         this.leftButtonsGroup._content.children.forEach((e) => {
             leftButtonNames.push(e.name);
         });
         this.rightButtonsGroup._content.children.forEach((e) => {
             rightButtonNames.push(e.name);
         });
-        const topToolbarSettings:TopBarSetting[] = [];
+        const topToolbarSettings: TopBarSetting[] = [];
         if (Eterna.settings.topToolbarSettings.value !== null) {
             Eterna.settings.topToolbarSettings.value.forEach((v) => {
                 if (v.type !== this._type) topToolbarSettings.push(v);
@@ -1464,9 +1690,11 @@ export default class Toolbar extends ContainerObject {
 
         this.palette = new NucleotidePalette();
 
-        this.regs.add(this.palette.targetClicked.connect(() => {
-            this._deselectAllPaintTools();
-        }));
+        this.regs.add(
+            this.palette.targetClicked.connect(() => {
+                this._deselectAllPaintTools();
+            })
+        );
 
         this.futureFeatureButton = new ToolbarButton()
             .allStates(Bitmaps.FutureFeature)
@@ -1480,15 +1708,23 @@ export default class Toolbar extends ContainerObject {
                 this.initializeTopButtons();
             } else {
                 try {
-                    const leftBts:GameButton[] = [];
-                    const rightBts:GameButton[] = [];
+                    const leftBts: GameButton[] = [];
+                    const rightBts: GameButton[] = [];
                     topToolbarSettings.forEach((s) => {
                         if (s.type === this._type) {
                             s.left.forEach((name) => {
-                                leftBts.push(this.getMirrorButton(this.gameButtons.get(name) as GameButton));
+                                leftBts.push(
+                                    this.getMirrorButton(
+                                        this.gameButtons.get(name) as GameButton
+                                    )
+                                );
                             });
                             s.right.forEach((name) => {
-                                rightBts.push(this.getMirrorButton(this.gameButtons.get(name) as GameButton));
+                                rightBts.push(
+                                    this.getMirrorButton(
+                                        this.gameButtons.get(name) as GameButton
+                                    )
+                                );
                             });
                             leftBts.forEach((b) => {
                                 if (b.name) {
@@ -1516,42 +1752,69 @@ export default class Toolbar extends ContainerObject {
                 }
             }
 
-            this.addObject(this.leftButtonsGroup, this.topScrollContainer.content);
+            this.addObject(
+                this.leftButtonsGroup,
+                this.topScrollContainer.content
+            );
 
             this.addObject(this.palette, this.topScrollContainer.content);
             this.palette.changeDefaultMode();
 
-            this.addObject(this.rightButtonsGroup, this.topScrollContainer.content);
+            this.addObject(
+                this.rightButtonsGroup,
+                this.topScrollContainer.content
+            );
 
             this.leftButtonsGroup._content.interactive = true;
-            this.leftButtonsGroup._content.on('pointerup', (e: InteractionEvent) => {
-                this.onDragEnd(e);
-            });
-            this.leftButtonsGroup._content.on('pointerupoutside', (e: InteractionEvent) => {
-                this.onDragEnd(e);
-            });
+            this.leftButtonsGroup._content.on(
+                'pointerup',
+                (e: InteractionEvent) => {
+                    this.onDragEnd(e);
+                }
+            );
+            this.leftButtonsGroup._content.on(
+                'pointerupoutside',
+                (e: InteractionEvent) => {
+                    this.onDragEnd(e);
+                }
+            );
             this.leftButtonsGroup._content.on('pointermove', (e) => {
                 this.onDragMove(e);
             });
-            this.leftButtonsGroup._content.on('pointerdown', (e: InteractionEvent) => {
-                this.onDragStart(e);
-            });
+            this.leftButtonsGroup._content.on(
+                'pointerdown',
+                (e: InteractionEvent) => {
+                    this.onDragStart(e);
+                }
+            );
 
             this.rightButtonsGroup._content.interactive = true;
-            this.rightButtonsGroup._content.on('pointerup', (e: InteractionEvent) => {
-                this.onDragEnd(e);
-            });
-            this.rightButtonsGroup._content.on('pointerupoutside', (e: InteractionEvent) => {
-                this.onDragEnd(e);
-            });
+            this.rightButtonsGroup._content.on(
+                'pointerup',
+                (e: InteractionEvent) => {
+                    this.onDragEnd(e);
+                }
+            );
+            this.rightButtonsGroup._content.on(
+                'pointerupoutside',
+                (e: InteractionEvent) => {
+                    this.onDragEnd(e);
+                }
+            );
             this.rightButtonsGroup._content.on('pointermove', (e) => {
                 this.onDragMove(e);
             });
-            this.rightButtonsGroup._content.on('pointerdown', (e: InteractionEvent) => {
-                this.onDragStart(e);
-            });
+            this.rightButtonsGroup._content.on(
+                'pointerdown',
+                (e: InteractionEvent) => {
+                    this.onDragStart(e);
+                }
+            );
 
-            if (this._boostersData != null && this._boostersData.paint_tools != null) {
+            if (
+                this._boostersData != null
+                && this._boostersData.paint_tools != null
+            ) {
                 const mode: PoseEditMode = this.mode as PoseEditMode;
                 const boosterPaintToolsLayout = new HLayoutContainer();
                 this.lowerHLayout.addChild(boosterPaintToolsLayout);
@@ -1559,10 +1822,12 @@ export default class Toolbar extends ContainerObject {
                     Booster.create(mode, data).then((booster) => {
                         booster.onLoad();
                         const button: GameButton = booster.createButton();
-                        this.regs.add(button.clicked.connect(() => {
-                            mode.setPosesColor(booster.toolColor);
-                            this._deselectAllPaintTools();
-                        }));
+                        this.regs.add(
+                            button.clicked.connect(() => {
+                                mode.setPosesColor(booster.toolColor);
+                                this._deselectAllPaintTools();
+                            })
+                        );
                         this.dynPaintTools.push(button);
                         this.addObject(button, boosterPaintToolsLayout);
                         this.updateLayout();
@@ -1577,7 +1842,9 @@ export default class Toolbar extends ContainerObject {
         Assert.assertIsDefined(Flashbang.stageHeight);
 
         TOOLBAR_WIDTH = Flashbang.stageWidth * 0.8;
-        MIDDLE_WIDTH = TOOLBAR_WIDTH - this._scrollPrevButton.display.width - this._scrollNextButton.display.width;
+        MIDDLE_WIDTH = TOOLBAR_WIDTH
+            - this._scrollPrevButton.display.width
+            - this._scrollNextButton.display.width;
 
         this.background
             .clear()
@@ -1617,7 +1884,11 @@ export default class Toolbar extends ContainerObject {
 
     private updateTopContainer() {
         let palWidth = this.palette.display.width;
-        if (this._type === ToolbarType.FEEDBACK) palWidth = 0;
+        if (this._type === ToolbarType.FEEDBACK) {
+            palWidth = 0;
+        } else {
+            this.palette.display.visible = true;
+        }
 
         const topSpace = MIDDLE_WIDTH - palWidth - 2 * TOP_HSPACE;
         let buttonCount = Math.floor(topSpace / BUTTON_WIDTH);
@@ -1626,11 +1897,14 @@ export default class Toolbar extends ContainerObject {
         this.rightButtonsGroup._capability = Math.floor(buttonCount / 2);
         this.leftButtonsGroup._capability = buttonCount - this.rightButtonsGroup._capability;
 
-        while (this.leftButtonsGroup._content.children.length > this.leftButtonsGroup._capability) {
+        while (
+            this.leftButtonsGroup._content.children.length
+            > this.leftButtonsGroup._capability
+        ) {
             const element = this.leftButtonsGroup._content.children[0];
             let name = null;
-            let button:GameButton | null = null;
-            let category:ButtonCategory | null = null;
+            let button: GameButton | null = null;
+            let category: ButtonCategory | null = null;
             this.topButtons.forEach((bt, key) => {
                 if (bt.display === element) {
                     name = key;
@@ -1647,11 +1921,14 @@ export default class Toolbar extends ContainerObject {
                 this.leftButtonsGroup.resizeContainer();
             }
         }
-        while (this.rightButtonsGroup._content.children.length > this.rightButtonsGroup._capability) {
+        while (
+            this.rightButtonsGroup._content.children.length
+            > this.rightButtonsGroup._capability
+        ) {
             const element = this.rightButtonsGroup._content.children[0];
             let name = null;
-            let button:GameButton | null = null;
-            let category:ButtonCategory | null = null;
+            let button: GameButton | null = null;
+            let category: ButtonCategory | null = null;
             this.topButtons.forEach((bt, key) => {
                 if (bt.display === element) {
                     name = key;
@@ -1720,7 +1997,10 @@ export default class Toolbar extends ContainerObject {
         Assert.assertIsDefined(Flashbang.stageHeight);
         // Update the scroll container size, accounting for buttons
         const buttonOffset = this.leftArrow.display.width + this.rightArrow.display.width;
-        this.scrollContainer.setSize(Flashbang.stageWidth - buttonOffset, Flashbang.stageHeight);
+        this.scrollContainer.setSize(
+            Flashbang.stageWidth - buttonOffset,
+            Flashbang.stageHeight
+        );
 
         // lowerToolbarLayout isn't a child of another LayoutContainer (since we have the ScrollContainer)
         // so we'll need to play some games to make sure both are updated when their sizes change
@@ -1740,26 +2020,45 @@ export default class Toolbar extends ContainerObject {
         this.updateTopContainer();
 
         DisplayUtil.positionRelative(
-            this.vContent, HAlign.CENTER, VAlign.BOTTOM,
-            this.invisibleBackground, HAlign.CENTER, VAlign.BOTTOM
+            this.vContent,
+            HAlign.CENTER,
+            VAlign.BOTTOM,
+            this.invisibleBackground,
+            HAlign.CENTER,
+            VAlign.BOTTOM
         );
 
         DisplayUtil.positionRelative(
-            this.collapseButton.container, HAlign.CENTER, VAlign.BOTTOM,
-            this.backgroundContainer, HAlign.CENTER, VAlign.BOTTOM,
-            0, -10
+            this.collapseButton.container,
+            HAlign.CENTER,
+            VAlign.BOTTOM,
+            this.backgroundContainer,
+            HAlign.CENTER,
+            VAlign.BOTTOM,
+            0,
+            -10
         );
 
         DisplayUtil.positionRelative(
-            this.expandButton.container, HAlign.CENTER, VAlign.BOTTOM,
-            this._expandButtonContainer, HAlign.CENTER, VAlign.BOTTOM,
-            0, -10
+            this.expandButton.container,
+            HAlign.CENTER,
+            VAlign.BOTTOM,
+            this._expandButtonContainer,
+            HAlign.CENTER,
+            VAlign.BOTTOM,
+            0,
+            -10
         );
 
         DisplayUtil.positionRelative(
-            this.tabsHContainer, HAlign.LEFT, VAlign.TOP,
-            this.middleScrollContainer.content, HAlign.LEFT, VAlign.TOP,
-            0, -20
+            this.tabsHContainer,
+            HAlign.LEFT,
+            VAlign.TOP,
+            this.middleScrollContainer.content,
+            HAlign.LEFT,
+            VAlign.TOP,
+            0,
+            -20
         );
     }
 
@@ -1767,8 +2066,11 @@ export default class Toolbar extends ContainerObject {
         // For some reason there's a 2px margin on either side of our UI elements baked in... because.
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
-        const APPROX_ITEM_WIDTH = APPROX_ITEM_HEIGHT + (2 * 2);
-        const SPACE_WIDE = Math.min((Flashbang.stageWidth / APPROX_ITEM_COUNT) - APPROX_ITEM_WIDTH, 13);
+        const APPROX_ITEM_WIDTH = APPROX_ITEM_HEIGHT + 2 * 2;
+        const SPACE_WIDE = Math.min(
+            Flashbang.stageWidth / APPROX_ITEM_COUNT - APPROX_ITEM_WIDTH,
+            13
+        );
         const SPACE_NARROW = SPACE_WIDE * 0.28;
 
         this.invisibleBackground = new Graphics();
@@ -1785,7 +2087,10 @@ export default class Toolbar extends ContainerObject {
         // UPPER TOOLBAR (structure editing tools)
         // kkk
         const upperToolbarLayout = new HLayoutContainer(SPACE_NARROW);
-        if (this._type === ToolbarType.PUZZLEMAKER || this._type === ToolbarType.PUZZLEMAKER_EMBEDDED) {
+        if (
+            this._type === ToolbarType.PUZZLEMAKER
+            || this._type === ToolbarType.PUZZLEMAKER_EMBEDDED
+        ) {
             this.vContent.addChild(upperToolbarLayout);
         }
 
@@ -1808,7 +2113,9 @@ export default class Toolbar extends ContainerObject {
             .setName('scrollNextButton');
 
         TOOLBAR_WIDTH = Flashbang.stageWidth * 0.8;
-        MIDDLE_WIDTH = TOOLBAR_WIDTH - this._scrollPrevButton.display.width - this._scrollNextButton.display.width;
+        MIDDLE_WIDTH = TOOLBAR_WIDTH
+            - this._scrollPrevButton.display.width
+            - this._scrollNextButton.display.width;
 
         this.background = new Graphics()
             .beginFill(EDIT_BACKCOLOR, 1)
@@ -1827,7 +2134,10 @@ export default class Toolbar extends ContainerObject {
             .beginFill(MIDDLE_BACKCOLOR, 0)
             .drawRect(0, 0, MIDDLE_WIDTH, BUTTON_WIDTH + 2)
             .endFill();
-        this.topScrollContainer = new ScrollContainer(MIDDLE_WIDTH, BUTTON_WIDTH + 3);
+        this.topScrollContainer = new ScrollContainer(
+            MIDDLE_WIDTH,
+            BUTTON_WIDTH + 3
+        );
         this.topScrollContainer.content.addChild(this.topBg);
 
         this.addObject(this._scrollTopPrevButton, this.topHLayout);
@@ -1846,27 +2156,41 @@ export default class Toolbar extends ContainerObject {
         // this.middleHLayout.position.set(this.middleHLayout.position.x, this.middleHLayout.position.y + 30);
 
         DisplayUtil.positionRelative(
-            this.tabsHContainer, HAlign.CENTER, VAlign.TOP,
-            this.middleHLayout, HAlign.CENTER, VAlign.TOP,
-            0, -TAB_HEIGHT
+            this.tabsHContainer,
+            HAlign.CENTER,
+            VAlign.TOP,
+            this.middleHLayout,
+            HAlign.CENTER,
+            VAlign.TOP,
+            0,
+            -TAB_HEIGHT
         );
 
         this.addObject(this._scrollPrevButton, this.middleHLayout);
 
-        this.middleScrollContainer = new ScrollContainer(MIDDLE_WIDTH, BUTTON_WIDTH);
+        this.middleScrollContainer = new ScrollContainer(
+            MIDDLE_WIDTH,
+            BUTTON_WIDTH
+        );
         this.middleScrollContainer.content.addChild(this.middleBg);
         this.addObject(this.middleScrollContainer, this.middleHLayout);
         this.addObject(this._scrollNextButton, this.middleHLayout);
         this.lowerVContainer.addChild(this.middleHLayout);
         // eslint-disable-next-line max-len
-        this.text = new Text('Drag an icon to the right or left above to replace the existing tool, or tap an icon to use it.', {
-            fontSize: 12,
-            fontFamily: Fonts.STDFONT,
-            fill: 0xABC9D8,
-            fontWeight: FontWeight.MEDIUM
-        });
+        this.text = new Text(
+            'Drag an icon to the right or left above to replace the existing tool, or tap an icon to use it.',
+            {
+                fontSize: 12,
+                fontFamily: Fonts.STDFONT,
+                fill: 0xabc9d8,
+                fontWeight: FontWeight.MEDIUM
+            }
+        );
         this.textHLayout = new HLayoutContainer();
-        this.textScrollContainer = new ScrollContainer(MIDDLE_WIDTH, this.text.height);
+        this.textScrollContainer = new ScrollContainer(
+            MIDDLE_WIDTH,
+            this.text.height
+        );
         this.textScrollContainer.content.addChild(this.text);
         this.textHLayout.visible = false;
         this.addObject(this.textScrollContainer, this.textHLayout);
@@ -1876,76 +2200,119 @@ export default class Toolbar extends ContainerObject {
         this.scrollContainerContainer = new HLayoutContainer(0, VAlign.BOTTOM);
         this.vContent.addChild(this.scrollContainerContainer);
 
-        this.scrollContainer = new ScrollContainer(Flashbang.stageWidth, Flashbang.stageHeight);
+        this.scrollContainer = new ScrollContainer(
+            Flashbang.stageWidth,
+            Flashbang.stageHeight
+        );
         this.scrollContainer.container.addChild(this.lowerHLayout);
 
         DisplayUtil.positionRelative(
-            this.lowerVContainer, HAlign.CENTER, VAlign.TOP,
-            this.backgroundContainer, HAlign.CENTER, VAlign.TOP,
-            0, 20
+            this.lowerVContainer,
+            HAlign.CENTER,
+            VAlign.TOP,
+            this.backgroundContainer,
+            HAlign.CENTER,
+            VAlign.TOP,
+            0,
+            20
         );
 
-        this.regs.add(this._scrollPrevButton.clicked.connect(() => {
-            if (this._scrollOffset <= 0) return;
-            this._scrollOffset -= this._scrollOffset < this._scrollStep ? this._scrollOffset : this._scrollStep;
-            this.middleScrollContainer.setScroll(this._scrollOffset, 0);
-            const cntr = this.middleScrollContainer.content.children.reduce((acc, el) => {
-                if (!el.buttonMode || !el.visible) return acc;
-                return acc + 1;
-            }, 0);
-            const newWidth = cntr * this._scrollStep;
-            this.middleBg.width = newWidth < MIDDLE_WIDTH ? MIDDLE_WIDTH : newWidth;
-        }));
+        this.regs.add(
+            this._scrollPrevButton.clicked.connect(() => {
+                if (this._scrollOffset <= 0) return;
+                this._scrollOffset
+                    -= this._scrollOffset < this._scrollStep
+                        ? this._scrollOffset
+                        : this._scrollStep;
+                this.middleScrollContainer.setScroll(this._scrollOffset, 0);
+                const cntr = this.middleScrollContainer.content.children.reduce(
+                    (acc, el) => {
+                        if (!el.buttonMode || !el.visible) return acc;
+                        return acc + 1;
+                    },
+                    0
+                );
+                const newWidth = cntr * this._scrollStep;
+                this.middleBg.width = newWidth < MIDDLE_WIDTH ? MIDDLE_WIDTH : newWidth;
+            })
+        );
 
-        this.regs.add(this._scrollNextButton.clicked.connect(() => {
-            const contentWidth = this.middleScrollContainer.content.children.length * this._scrollStep;
-            if (contentWidth < this.middleScrollContainer.content.width) return;
-            if (this._scrollOffset >= this.middleScrollContainer.maxScrollX) return;
-            const diff = this.middleScrollContainer.maxScrollX - this._scrollOffset;
-            this._scrollOffset += diff < this._scrollStep ? diff : this._scrollStep;
-            this.middleScrollContainer.setScroll(this._scrollOffset, 0);
-            const cntr = this.middleScrollContainer.content.children.reduce((acc, el) => {
-                if (!el.buttonMode || !el.visible) return acc;
-                return acc + 1;
-            }, 0);
-            const newWidth = cntr * this._scrollStep;
-            this.middleBg.width = newWidth < MIDDLE_WIDTH ? MIDDLE_WIDTH : newWidth;
-        }));
+        this.regs.add(
+            this._scrollNextButton.clicked.connect(() => {
+                const contentWidth = this.middleScrollContainer.content.children.length
+                    * this._scrollStep;
+                if (contentWidth < this.middleScrollContainer.content.width) return;
+                if (this._scrollOffset >= this.middleScrollContainer.maxScrollX) return;
+                const diff = this.middleScrollContainer.maxScrollX - this._scrollOffset;
+                this._scrollOffset
+                    += diff < this._scrollStep ? diff : this._scrollStep;
+                this.middleScrollContainer.setScroll(this._scrollOffset, 0);
+                const cntr = this.middleScrollContainer.content.children.reduce(
+                    (acc, el) => {
+                        if (!el.buttonMode || !el.visible) return acc;
+                        return acc + 1;
+                    },
+                    0
+                );
+                const newWidth = cntr * this._scrollStep;
+                this.middleBg.width = newWidth < MIDDLE_WIDTH ? MIDDLE_WIDTH : newWidth;
+            })
+        );
 
-        this.regs.add(this._scrollTopPrevButton.clicked.connect(() => {
-            const width = this.topScrollContainer.content.width;
-            const dW = width - MIDDLE_WIDTH;
-            if (dW > 0 && this.topScrollContainer.scrollX > 0) {
-                this.topScrollContainer.scrollX -= Math.min(BUTTON_WIDTH, this.topScrollContainer.scrollX);
-            }
-        }));
+        this.regs.add(
+            this._scrollTopPrevButton.clicked.connect(() => {
+                const width = this.topScrollContainer.content.width;
+                const dW = width - MIDDLE_WIDTH;
+                if (dW > 0 && this.topScrollContainer.scrollX > 0) {
+                    this.topScrollContainer.scrollX -= Math.min(
+                        BUTTON_WIDTH,
+                        this.topScrollContainer.scrollX
+                    );
+                }
+            })
+        );
 
-        this.regs.add(this._scrollTopNextButton.clicked.connect(() => {
-            const width = this.topScrollContainer.content.width;
-            const dW = width - MIDDLE_WIDTH;
-            if (dW > 0) {
-                const dx = width - this.topScrollContainer.scrollX - MIDDLE_WIDTH;
-                if (dx > 0) this.topScrollContainer.scrollX += Math.min(BUTTON_WIDTH, dx);
-            }
-        }));
+        this.regs.add(
+            this._scrollTopNextButton.clicked.connect(() => {
+                const width = this.topScrollContainer.content.width;
+                const dW = width - MIDDLE_WIDTH;
+                if (dW > 0) {
+                    const dx = width - this.topScrollContainer.scrollX - MIDDLE_WIDTH;
+                    if (dx > 0) {
+                        this.topScrollContainer.scrollX += Math.min(
+                            BUTTON_WIDTH,
+                            dx
+                        );
+                    }
+                }
+            })
+        );
 
         this.textScrollContainer.content.interactive = true;
         let downed = false;
         let downX = 0;
-        this.textScrollContainer.content.on('pointerdown', (e:InteractionEvent) => {
-            downed = true;
-            downX = e.data.global.x;
-        });
-        this.textScrollContainer.content.on('pointermove', (e:InteractionEvent) => {
-            if (downed) {
-                const dx = downX - e.data.global.x;
-                const dW = this.text.width - this.textScrollContainer.scrollX - MIDDLE_WIDTH;
-                if (this.text.width > MIDDLE_WIDTH && dW - dx > 0) {
-                    this.textScrollContainer.scrollX += dx;
-                }
+        this.textScrollContainer.content.on(
+            'pointerdown',
+            (e: InteractionEvent) => {
+                downed = true;
                 downX = e.data.global.x;
             }
-        });
+        );
+        this.textScrollContainer.content.on(
+            'pointermove',
+            (e: InteractionEvent) => {
+                if (downed) {
+                    const dx = downX - e.data.global.x;
+                    const dW = this.text.width
+                        - this.textScrollContainer.scrollX
+                        - MIDDLE_WIDTH;
+                    if (this.text.width > MIDDLE_WIDTH && dW - dx > 0) {
+                        this.textScrollContainer.scrollX += dx;
+                    }
+                    downX = e.data.global.x;
+                }
+            }
+        );
         this.textScrollContainer.content.on('pointerup', () => {
             downed = false;
         });
@@ -1988,21 +2355,51 @@ export default class Toolbar extends ContainerObject {
         this.addObject(this.collapseButton, this.lowerVContainer);
 
         DisplayUtil.positionRelative(
-            this.collapseButton.container, HAlign.CENTER, VAlign.BOTTOM,
-            this.backgroundContainer, HAlign.CENTER, VAlign.BOTTOM,
-            0, -10
+            this.collapseButton.container,
+            HAlign.CENTER,
+            VAlign.BOTTOM,
+            this.backgroundContainer,
+            HAlign.CENTER,
+            VAlign.BOTTOM,
+            0,
+            -10
         );
 
-        this.regs.add(this.expandButton.clicked.connect(() => {
-            if (this._isExpanded) return;
-            this.expand();
-            this.updateLayout();
-        }));
-        this.regs.add(this.collapseButton.clicked.connect(() => {
-            if (!this._isExpanded) return;
-            this.collapse();
-            this.updateLayout();
-        }));
+        this.regs.add(
+            this.expandButton.clicked.connect(() => {
+                if (this._isExpanded) return;
+                this.expand();
+                this.updateLayout();
+            })
+        );
+        this.regs.add(
+            this.collapseButton.clicked.connect(() => {
+                if (!this._isExpanded) return;
+                this.collapse();
+                this.updateLayout();
+            })
+        );
+    }
+
+    public getScriptUIElement(bt: GameButton): RScriptUIElement {
+        if (this._isExpanded) {
+            const button = this.getMirrorTopButton(bt);
+            if (button && button.display.visible) return button;
+            else {
+                const category = bt.category as ButtonCategory;
+                if (category === this._currentTab.category) {
+                    return bt;
+                } else {
+                    return this._currentTab.container;
+                }
+            }
+        } else {
+            const button = this.getMirrorTopButton(bt);
+            if (button && button.display.visible) return button;
+            else {
+                return this.expandButton;
+            }
+        }
     }
 
     protected added(): void {
@@ -2026,9 +2423,6 @@ export default class Toolbar extends ContainerObject {
         this.addObject(this.leftArrow, this.scrollContainerContainer);
 
         this.addObject(this.scrollContainer, this.scrollContainerContainer);
-
-        this.actionMenu = new EternaMenu(EternaMenuStyle.PULLUP, true);
-        this.addObject(this.actionMenu, this.lowerHLayout);
 
         this.makeExpandControl();
 
@@ -2061,36 +2455,55 @@ export default class Toolbar extends ContainerObject {
             if (interval) clearInterval(interval);
         };
         const scrollRight = () => {
-            this.scrollContainer.setScroll(this.scrollContainer.scrollX + 10, this.scrollContainer.scrollY);
+            this.scrollContainer.setScroll(
+                this.scrollContainer.scrollX + 10,
+                this.scrollContainer.scrollY
+            );
             this.updateArrowVisibility();
         };
         const scrollLeft = () => {
-            this.scrollContainer.setScroll(this.scrollContainer.scrollX - 10, this.scrollContainer.scrollY);
+            this.scrollContainer.setScroll(
+                this.scrollContainer.scrollX - 10,
+                this.scrollContainer.scrollY
+            );
             this.updateArrowVisibility();
         };
-        this.regs.add(this.rightArrow.pointerDown.connect(() => {
-            endScroll();
-            interval = setInterval(scrollRight, 100);
-        }));
+        this.regs.add(
+            this.rightArrow.pointerDown.connect(() => {
+                endScroll();
+                interval = setInterval(scrollRight, 100);
+            })
+        );
         this.regs.add(this.rightArrow.pointerUp.connect(() => endScroll()));
-        this.regs.add(this.leftArrow.pointerDown.connect(() => {
-            endScroll();
-            interval = setInterval(scrollLeft, 100);
-        }));
+        this.regs.add(
+            this.leftArrow.pointerDown.connect(() => {
+                endScroll();
+                interval = setInterval(scrollLeft, 100);
+            })
+        );
         this.regs.add(this.leftArrow.pointerUp.connect(() => endScroll()));
-        this.regs.add(this.rightArrow.pointerTap.connect(() => {
-            endScroll();
-            scrollRight();
-        }));
-        this.regs.add(this.leftArrow.pointerTap.connect(() => {
-            endScroll();
-            scrollLeft();
-        }));
+        this.regs.add(
+            this.rightArrow.pointerTap.connect(() => {
+                endScroll();
+                scrollRight();
+            })
+        );
+        this.regs.add(
+            this.leftArrow.pointerTap.connect(() => {
+                endScroll();
+                scrollLeft();
+            })
+        );
 
-        this._uncollapsedContentLoc = new Point(this.vContent.position.x, this.vContent.position.y);
-        this.regs.add(Eterna.settings.autohideToolbar.connectNotify((value) => {
-            this.setToolbarAutohide(value);
-        }));
+        this._uncollapsedContentLoc = new Point(
+            this.vContent.position.x,
+            this.vContent.position.y
+        );
+        this.regs.add(
+            Eterna.settings.autohideToolbar.connectNotify((value) => {
+                this.setToolbarAutohide(value);
+            })
+        );
         this._setupToolbarDrag();
 
         this.lowerVContainer.addChild(this.tabsHContainer);
@@ -2146,9 +2559,11 @@ export default class Toolbar extends ContainerObject {
             this.addObject(button, this.middleScrollContainer.content);
             const mirrorButton = this.getMirrorButton(button);
             this.addObject(mirrorButton, this.middleScrollContainer.content);
-            this.regs.add(mirrorButton.clicked.connect(() => {
-                button.clicked.emit();
-            }));
+            this.regs.add(
+                mirrorButton.clicked.connect(() => {
+                    button.clicked.emit();
+                })
+            );
             buttons.push(button);
         }
     }
@@ -2162,13 +2577,22 @@ export default class Toolbar extends ContainerObject {
     // }
 
     private _getButtonName(target: DisplayObject): string | null {
-        return Array.from(this._tabs.values()).flat().find((button) => button.display === target)?.name ?? null;
+        return (
+            Array.from(this._tabs.values())
+                .flat()
+                .find((button) => button.display === target)?.name ?? null
+        );
     }
 
-    private _getUnderButtonInfo(buttonGroup: ButtonsGroup, buttonSize: number, pos: number):
-    {insertPos:boolean, pos:number} {
+    private _getUnderButtonInfo(
+        buttonGroup: ButtonsGroup,
+        buttonSize: number,
+        pos: number
+    ): { insertPos: boolean; pos: number } {
         const count = buttonGroup._content.children.length;
-        if (count === 0 || pos < 0) { return {insertPos: true, pos: 0}; }
+        if (count === 0 || pos < 0) {
+            return {insertPos: true, pos: 0};
+        }
         const n = pos / buttonSize;
         if (n < 0) {
             return {insertPos: true, pos: 0};
@@ -2180,7 +2604,9 @@ export default class Toolbar extends ContainerObject {
                 return {insertPos: true, pos: Math.floor(n + 1)};
             } else if (p > 2 * m) {
                 return {insertPos: true, pos: Math.floor(n)};
-            } else { return {insertPos: false, pos: Math.floor(n)}; }
+            } else {
+                return {insertPos: false, pos: Math.floor(n)};
+            }
         } else {
             return {insertPos: true, pos: count};
         }
@@ -2192,7 +2618,10 @@ export default class Toolbar extends ContainerObject {
         return new Point(x, y);
     }
 
-    private getDragName(draggingElement: DisplayObject, buttonMap: Map<string, GameButton>) {
+    private getDragName(
+        draggingElement: DisplayObject,
+        buttonMap: Map<string, GameButton>
+    ) {
         let name = null;
         buttonMap.forEach((bt, key) => {
             if (bt.display === draggingElement) name = key;
@@ -2213,12 +2642,19 @@ export default class Toolbar extends ContainerObject {
         const minX = endButtonBounds.x;
         const cursorX = endPoint.x;
         const pos = cursorX - minX;
-        const underButtonInfo = this._getUnderButtonInfo(endButtonGroup, BUTTON_WIDTH, pos);
+        const underButtonInfo = this._getUnderButtonInfo(
+            endButtonGroup,
+            BUTTON_WIDTH,
+            pos
+        );
         const count = endButtonGroup._content.children.length;
         if (count < endButtonGroup._capability && underButtonInfo.insertPos) {
             this.container.removeChild(draggingElement);
             if (startPointContainer === this.middleScrollContainer.content) {
-                const name = this.getDragName(draggingElement, this.bottomButtons);
+                const name = this.getDragName(
+                    draggingElement,
+                    this.bottomButtons
+                );
                 if (name) {
                     const bt = this.bottomButtons.get(name);
                     if (bt) {
@@ -2228,9 +2664,11 @@ export default class Toolbar extends ContainerObject {
                     startPointContainer.removeChild(draggingElement);
                 }
             } else {
-                Assert.isTrue(anotherButtonGroup._content === startPointContainer);
+                Assert.isTrue(
+                    anotherButtonGroup._content === startPointContainer
+                );
                 let name = null;
-                let button:GameButton | null = null;
+                let button: GameButton | null = null;
                 // let category:ButtonCategory | null = null;
                 this.topButtons.forEach((bt, key) => {
                     if (bt.display === draggingElement) {
@@ -2247,12 +2685,19 @@ export default class Toolbar extends ContainerObject {
         } else if (underButtonInfo.insertPos) {
             return false;
         } else if (startPointContainer === anotherButtonGroup._content) {
-            const replacedButton = endButtonGroup.removeButtonAt(underButtonInfo.pos);
+            const replacedButton = endButtonGroup.removeButtonAt(
+                underButtonInfo.pos
+            );
             this.container.removeChild(draggingElement);
-            anotherButtonGroup.addButtonAt(replacedButton, this._draggingElementIndex);
+            anotherButtonGroup.addButtonAt(
+                replacedButton,
+                this._draggingElementIndex
+            );
             endButtonGroup.addButtonAt(draggingElement, underButtonInfo.pos);
         } else {
-            const replacedButton = endButtonGroup.removeButtonAt(underButtonInfo.pos);
+            const replacedButton = endButtonGroup.removeButtonAt(
+                underButtonInfo.pos
+            );
             this.container.removeChild(draggingElement);
 
             endButtonGroup.addButtonAt(draggingElement, underButtonInfo.pos);
@@ -2268,7 +2713,10 @@ export default class Toolbar extends ContainerObject {
                 replacedButton.visible = false;
                 replacedButton.interactive = true;
 
-                const replaceName = this.getDragName(replacedButton, topButtons);
+                const replaceName = this.getDragName(
+                    replacedButton,
+                    topButtons
+                );
                 if (replaceName) {
                     const replaceBt = topButtons.get(replaceName);
                     if (replaceBt) {
@@ -2286,29 +2734,47 @@ export default class Toolbar extends ContainerObject {
         return true;
     }
 
+    public get isExpanded(): boolean {
+        return this._isExpanded;
+    }
+
     private onDragStart(e: InteractionEvent): void {
         e.stopPropagation();
 
         this._draggingElement = null;
 
-        if (e.target === this._scrollNextButton.container || e.target === this._scrollPrevButton.container) return;
+        if (
+            e.target === this._scrollNextButton.container
+            || e.target === this._scrollPrevButton.container
+        ) return;
         if (!e.target.buttonMode) return;
         if (this._isDragging || !this._isExpanded) return;
 
-        if (DisplayUtil.hitTest(this.leftButtonsGroup.container, e.data.global)) {
+        if (
+            DisplayUtil.hitTest(this.leftButtonsGroup.container, e.data.global)
+        ) {
             this._startPointContainer = this.leftButtonsGroup._content;
         }
-        if (DisplayUtil.hitTest(this.rightButtonsGroup.container, e.data.global)) {
+        if (
+            DisplayUtil.hitTest(this.rightButtonsGroup.container, e.data.global)
+        ) {
             this._startPointContainer = this.rightButtonsGroup._content;
         }
-        if (DisplayUtil.hitTest(this.middleScrollContainer.content, e.data.global)) {
+        if (
+            DisplayUtil.hitTest(
+                this.middleScrollContainer.content,
+                e.data.global
+            )
+        ) {
             this._startPointContainer = this.middleScrollContainer.content;
         }
 
         if (!this._startPointContainer) return;
         if (this._startPointContainer.children.length <= 1) return;
 
-        const btnIndex = this._startPointContainer.children.findIndex((el) => el === e.target);
+        const btnIndex = this._startPointContainer.children.findIndex(
+            (el) => el === e.target
+        );
 
         if (this.leftButtonsGroup._content === this._startPointContainer) {
             if (btnIndex >= 0) {
@@ -2328,7 +2794,9 @@ export default class Toolbar extends ContainerObject {
                     } else return;
                 } else return;
             }
-        } else if (this.rightButtonsGroup._content === this._startPointContainer) {
+        } else if (
+            this.rightButtonsGroup._content === this._startPointContainer
+        ) {
             if (btnIndex >= 0) {
                 this._draggingElementIndex = btnIndex;
                 let name = null;
@@ -2346,7 +2814,9 @@ export default class Toolbar extends ContainerObject {
                     } else return;
                 } else return;
             }
-        } else if (this.middleScrollContainer.content === this._startPointContainer) {
+        } else if (
+            this.middleScrollContainer.content === this._startPointContainer
+        ) {
             if (btnIndex >= 0) {
                 this._draggingElementIndex = btnIndex;
                 const name = this._getButtonName(e.target);
@@ -2356,7 +2826,9 @@ export default class Toolbar extends ContainerObject {
                         this._draggingElement = foundButton.display;
                         this._draggingElement.visible = true;
                         // this._draggingElement.interactive = false;
-                        this.middleScrollContainer.content.addChild(this._draggingElement);
+                        this.middleScrollContainer.content.addChild(
+                            this._draggingElement
+                        );
                         this._draggingElement.position.copyFrom(e.target); // kkk
                         this.middleScrollContainer.doLayout();
                     } else return;
@@ -2382,7 +2854,12 @@ export default class Toolbar extends ContainerObject {
         this.rightButtonsGroup._cursor.visible = false;
 
         this._isDragging = false;
-        if (!this._draggingElement || !this._isExpanded || !this._startPoint || !this._startPointContainer) {
+        if (
+            !this._draggingElement
+            || !this._isExpanded
+            || !this._startPoint
+            || !this._startPointContainer
+        ) {
             this._canDrag = false;
             this._toggleButtonsInteractive(true);
             this._isDisabled = false;
@@ -2395,10 +2872,16 @@ export default class Toolbar extends ContainerObject {
             && this._startPoint?.y === e.data.global.y
         ) {
             if (this._canDrag) {
-                if (this._startPointContainer === this.middleScrollContainer.content) {
+                if (
+                    this._startPointContainer
+                    === this.middleScrollContainer.content
+                ) {
                     this._draggingElement.visible = false;
                 }
-                this._startPointContainer.addChildAt(this._draggingElement, this._draggingElementIndex);
+                this._startPointContainer.addChildAt(
+                    this._draggingElement,
+                    this._draggingElementIndex
+                );
             }
             this._canDrag = false;
             this._toggleButtonsInteractive(true);
@@ -2440,10 +2923,15 @@ export default class Toolbar extends ContainerObject {
             && !availableButtonsBounds.contains(e.data.global.x, e.data.global.y)
         ) {
             this.container.removeChild(this._draggingElement);
-            if (this._startPointContainer === this.middleScrollContainer.content) {
+            if (
+                this._startPointContainer === this.middleScrollContainer.content
+            ) {
                 this._draggingElement.visible = false;
             }
-            this._startPointContainer.addChildAt(this._draggingElement, this._draggingElementIndex);
+            this._startPointContainer.addChildAt(
+                this._draggingElement,
+                this._draggingElementIndex
+            );
             this._toggleButtonsInteractive(true);
             this._isDisabled = false;
             this.resetDragState();
@@ -2453,7 +2941,10 @@ export default class Toolbar extends ContainerObject {
         if (leftButtonsBounds.contains(e.data.global.x, e.data.global.y)) {
             if (this.leftButtonsGroup._content === this._startPointContainer) {
                 this.container.removeChild(this._draggingElement);
-                this.leftButtonsGroup._content.addChildAt(this._draggingElement, this._draggingElementIndex);
+                this.leftButtonsGroup._content.addChildAt(
+                    this._draggingElement,
+                    this._draggingElementIndex
+                );
                 this.leftButtonsGroup.resizeContainer();
 
                 this.resetDragState();
@@ -2473,10 +2964,16 @@ export default class Toolbar extends ContainerObject {
             );
             if (!result) {
                 this.container.removeChild(this._draggingElement);
-                if (this._startPointContainer === this.middleScrollContainer.content) {
+                if (
+                    this._startPointContainer
+                    === this.middleScrollContainer.content
+                ) {
                     this._draggingElement.visible = false;
                 }
-                this._startPointContainer.addChildAt(this._draggingElement, this._draggingElementIndex);
+                this._startPointContainer.addChildAt(
+                    this._draggingElement,
+                    this._draggingElementIndex
+                );
                 this._toggleButtonsInteractive(true);
                 this._isDisabled = false;
                 this.resetDragState();
@@ -2487,10 +2984,15 @@ export default class Toolbar extends ContainerObject {
             }
             this._toggleButtonsInteractive(true);
             this._isDisabled = false;
-        } else if (rightButtonsBounds.contains(e.data.global.x, e.data.global.y)) {
+        } else if (
+            rightButtonsBounds.contains(e.data.global.x, e.data.global.y)
+        ) {
             if (this.rightButtonsGroup._content === this._startPointContainer) {
                 this.container.removeChild(this._draggingElement);
-                this.rightButtonsGroup._content.addChildAt(this._draggingElement, this._draggingElementIndex);
+                this.rightButtonsGroup._content.addChildAt(
+                    this._draggingElement,
+                    this._draggingElementIndex
+                );
                 this.rightButtonsGroup.resizeContainer();
 
                 this.resetDragState();
@@ -2511,10 +3013,16 @@ export default class Toolbar extends ContainerObject {
             );
             if (!result) {
                 this.container.removeChild(this._draggingElement);
-                if (this._startPointContainer === this.middleScrollContainer.content) {
+                if (
+                    this._startPointContainer
+                    === this.middleScrollContainer.content
+                ) {
                     this._draggingElement.visible = false;
                 }
-                this._startPointContainer.addChildAt(this._draggingElement, this._draggingElementIndex);
+                this._startPointContainer.addChildAt(
+                    this._draggingElement,
+                    this._draggingElementIndex
+                );
                 this._toggleButtonsInteractive(true);
                 this._isDisabled = false;
                 this.resetDragState();
@@ -2522,8 +3030,12 @@ export default class Toolbar extends ContainerObject {
             }
             this._toggleButtonsInteractive(true);
             this._isDisabled = false;
-        } else if (availableButtonsBounds.contains(e.data.global.x, e.data.global.y)) {
-            if (this._startPointContainer === this.middleScrollContainer.content) {
+        } else if (
+            availableButtonsBounds.contains(e.data.global.x, e.data.global.y)
+        ) {
+            if (
+                this._startPointContainer === this.middleScrollContainer.content
+            ) {
                 this.container.removeChild(this._draggingElement);
                 this._draggingElement.visible = false;
                 // this._scrollContainer.content.addChild(this._draggingElement);
@@ -2538,8 +3050,8 @@ export default class Toolbar extends ContainerObject {
             this._draggingElement.visible = false;
             if (this._startPointContainer === this.rightButtonsGroup._content) {
                 let name = null;
-                let button:GameButton | null = null;
-                let category:ButtonCategory | null = null;
+                let button: GameButton | null = null;
+                let category: ButtonCategory | null = null;
                 this.topButtons.forEach((bt, key) => {
                     if (bt.display === this._draggingElement) {
                         name = key;
@@ -2551,7 +3063,9 @@ export default class Toolbar extends ContainerObject {
                     this.topButtons.delete(name);
                     this.bottomButtons.set(name, button);
                     this.rightButtonsGroup.removeButton(button);
-                    this.middleScrollContainer.content.addChild(this._draggingElement);
+                    this.middleScrollContainer.content.addChild(
+                        this._draggingElement
+                    );
 
                     this._renderButtonsWithNewCategory(category);
                     this._tabArray.forEach((tab) => {
@@ -2562,10 +3076,12 @@ export default class Toolbar extends ContainerObject {
                         }
                     });
                 }
-            } else if (this._startPointContainer === this.leftButtonsGroup._content) {
+            } else if (
+                this._startPointContainer === this.leftButtonsGroup._content
+            ) {
                 let name = null;
-                let button:GameButton | null = null;
-                let category:ButtonCategory | null = null;
+                let button: GameButton | null = null;
+                let category: ButtonCategory | null = null;
                 this.topButtons.forEach((bt, key) => {
                     if (bt.display === this._draggingElement) {
                         name = key;
@@ -2577,7 +3093,9 @@ export default class Toolbar extends ContainerObject {
                     this.topButtons.delete(name);
                     this.bottomButtons.set(name, button);
                     this.leftButtonsGroup.removeButton(button);
-                    this.middleScrollContainer.content.addChild(this._draggingElement);
+                    this.middleScrollContainer.content.addChild(
+                        this._draggingElement
+                    );
 
                     this._renderButtonsWithNewCategory(category);
                     this._tabArray.forEach((tab) => {
@@ -2618,7 +3136,7 @@ export default class Toolbar extends ContainerObject {
         this.saveTopButtons();
     }
 
-    private checkDragElement(x:number, y:number) {
+    private checkDragElement(x: number, y: number) {
         Assert.assertIsDefined(this._startPointContainer);
         const leftButtonsRect = this.leftButtonsGroup.container.getBounds();
         const rightButtonsRect = this.rightButtonsGroup.container.getBounds();
@@ -2666,19 +3184,38 @@ export default class Toolbar extends ContainerObject {
             const minX = endButtonBounds.x;
             const cursorX = x;
             const pos = cursorX - minX;
-            const underButtonInfo = this._getUnderButtonInfo(endButtonGroup, BUTTON_WIDTH, pos);
+            const underButtonInfo = this._getUnderButtonInfo(
+                endButtonGroup,
+                BUTTON_WIDTH,
+                pos
+            );
             endButtonGroup._cursor.position.x = underButtonInfo.pos * BUTTON_WIDTH;
             endButtonGroup._highlight.position.x = underButtonInfo.pos * BUTTON_WIDTH;
 
-            if (count < endButtonGroup._capability && underButtonInfo.insertPos) {
+            if (
+                count < endButtonGroup._capability
+                && underButtonInfo.insertPos
+            ) {
                 endButtonGroup._cursor.visible = true;
-                endButtonGroup.topTooltip.setText('Insert', 15, TextBalloon.DEFAULT_FONT_COLOR);
+                endButtonGroup.topTooltip.setText(
+                    'Insert',
+                    15,
+                    TextBalloon.DEFAULT_FONT_COLOR
+                );
             } else if (underButtonInfo.insertPos) {
                 endButtonGroup._cursor.visible = true;
-                endButtonGroup.topTooltip.setText('Only replacement is allowed', 15, 0xFF0000);
+                endButtonGroup.topTooltip.setText(
+                    'Only replacement is allowed',
+                    15,
+                    0xff0000
+                );
             } else {
                 endButtonGroup._highlight.visible = true;
-                endButtonGroup.topTooltip.setText('Replace', 15, TextBalloon.DEFAULT_FONT_COLOR);
+                endButtonGroup.topTooltip.setText(
+                    'Replace',
+                    15,
+                    TextBalloon.DEFAULT_FONT_COLOR
+                );
             }
             endButtonGroup.topTooltip.display.position.set(x - 10, y - 60);
             endButtonGroup.topTooltip.display.visible = true;
@@ -2699,7 +3236,10 @@ export default class Toolbar extends ContainerObject {
 
         const minPointDiff = 5;
         if (!this._canDrag) {
-            const diff = this._getPointsDifference(e.data.global, this._startPointGlobal);
+            const diff = this._getPointsDifference(
+                e.data.global,
+                this._startPointGlobal
+            );
             if (diff.x < minPointDiff && diff.y < minPointDiff) return;
 
             this._startPointContainer.removeChild(this._draggingElement); // kkk
@@ -2727,6 +3267,22 @@ export default class Toolbar extends ContainerObject {
         return new GameButton();
     }
 
+    public getMirrorTopButton(bt: GameButton): GameButton | undefined {
+        if (bt.name) {
+            const b = this.topButtons.get(bt.name);
+            if (b) return b;
+        }
+        return undefined;
+    }
+
+    public getMirrorBottomButton(bt: GameButton): GameButton | undefined {
+        if (bt.name) {
+            const b = this.bottomButtons.get(bt.name);
+            if (b) return b;
+        }
+        return undefined;
+    }
+
     private collapse() {
         this._isExpanded = false;
         this.collapseButton.container.visible = false;
@@ -2737,11 +3293,7 @@ export default class Toolbar extends ContainerObject {
         this.addNamedObject(
             'test',
             new ParallelTask(
-                new LocationTask(
-                    0,
-                    0,
-                    3, Easing.easeOut, this.lowerHLayout
-                ),
+                new LocationTask(0, 0, 3, Easing.easeOut, this.lowerHLayout),
                 // new AlphaTask(0, 3, Easing.easeOut, this.middle),
                 new VisibleTask(false, this.middleHLayout),
                 // new AlphaTask(0, 3, Easing.easeOut, this.text),
@@ -2761,19 +3313,20 @@ export default class Toolbar extends ContainerObject {
         this.expandButton.container.visible = false;
         this.tabsHContainer.visible = true;
         DisplayUtil.positionRelative(
-            this.collapseButton.container, HAlign.CENTER, VAlign.BOTTOM,
-            this.backgroundContainer, HAlign.CENTER, VAlign.BOTTOM,
-            0, -10
+            this.collapseButton.container,
+            HAlign.CENTER,
+            VAlign.BOTTOM,
+            this.backgroundContainer,
+            HAlign.CENTER,
+            VAlign.BOTTOM,
+            0,
+            -10
         );
         this.removeNamedObjects('test');
         this.addNamedObject(
             'test',
             new ParallelTask(
-                new LocationTask(
-                    0,
-                    0,
-                    3, Easing.easeOut, this.lowerHLayout
-                ),
+                new LocationTask(0, 0, 3, Easing.easeOut, this.lowerHLayout),
                 // new AlphaTask(1, 3, Easing.easeOut, this.middle),
                 new VisibleTask(true, this.middleHLayout),
                 // new AlphaTask(1, 3, Easing.easeOut, this.text),
@@ -2793,9 +3346,13 @@ export default class Toolbar extends ContainerObject {
         // Height of the rest of the toolbar elements
         const HEIGHT = APPROX_ITEM_HEIGHT;
 
-        const arrowImg = new Sprite(BitmapManager.getBitmap(
-            direction === 'left' ? Bitmaps.ImgArrowLeft : Bitmaps.ImgArrowRight
-        ));
+        const arrowImg = new Sprite(
+            BitmapManager.getBitmap(
+                direction === 'left'
+                    ? Bitmaps.ImgArrowLeft
+                    : Bitmaps.ImgArrowRight
+            )
+        );
         // GameButton resets location/scale/etc, so we have to wrap it in a container and then
         // create an invisible object to force the height to be what we want, then position
         // our thing in the center. Ugh.
@@ -2808,47 +3365,65 @@ export default class Toolbar extends ContainerObject {
         arrowContainer.addChild(arrowImg);
         arrowContainer.addChild(arrowFrame);
         DisplayUtil.positionRelative(
-            arrowImg, HAlign.LEFT, VAlign.CENTER,
-            arrowFrame, HAlign.LEFT, VAlign.CENTER
+            arrowImg,
+            HAlign.LEFT,
+            VAlign.CENTER,
+            arrowFrame,
+            HAlign.LEFT,
+            VAlign.CENTER
         );
 
-        return new GameButton()
-            .allStates(arrowContainer)
-            .disabled(undefined)
-            // .tooltip(`Scroll ${direction}`)
-            .setName('arrowButton');
+        return (
+            new GameButton()
+                .allStates(arrowContainer)
+                .disabled(undefined)
+                // .tooltip(`Scroll ${direction}`)
+                .setName('arrowButton')
+        );
     }
 
     private _setupToolbarDrag() {
         let mouseDown = false;
         let startingX: number;
         let startingScroll: number;
-        this.regs.add(this.pointerDown.connect((e) => {
-            const {x, y} = e.data.global;
-            if (this.lowerHLayout.getBounds().contains(x, y)) {
-                mouseDown = true;
-                startingX = x;
-                startingScroll = this.scrollContainer.scrollX;
-            }
-        }));
-
-        this.regs.add(this.pointerUp.connect((_e) => {
-            mouseDown = false;
-        }));
-
-        this.regs.add(this.scrollContainer.pointerUpOutside.connect(() => {
-            mouseDown = false;
-        }));
-
-        this.regs.add(this.pointerMove.connect((e) => {
-            const {x, y} = e.data.global;
-            if (e.data.buttons === 1 && mouseDown && this.lowerHLayout.getBounds().contains(x, y)) {
-                const offset = x - startingX;
-                if (Math.abs(offset) > 15) {
-                    this.scrollContainer.scrollX = startingScroll - offset;
+        this.regs.add(
+            this.pointerDown.connect((e) => {
+                const {x, y} = e.data.global;
+                if (this.lowerHLayout.getBounds().contains(x, y)) {
+                    mouseDown = true;
+                    startingX = x;
+                    startingScroll = this.scrollContainer.scrollX;
                 }
-            }
-        }));
+            })
+        );
+
+        this.regs.add(
+            this.pointerUp.connect((_e) => {
+                mouseDown = false;
+            })
+        );
+
+        this.regs.add(
+            this.scrollContainer.pointerUpOutside.connect(() => {
+                mouseDown = false;
+            })
+        );
+
+        this.regs.add(
+            this.pointerMove.connect((e) => {
+                const {x, y} = e.data.global;
+                if (
+                    e.data.buttons === 1
+                    && mouseDown
+                    && this.lowerHLayout.getBounds().contains(x, y)
+                ) {
+                    const offset = x - startingX;
+                    if (Math.abs(offset) > 15) {
+                        this.scrollContainer.scrollX = startingScroll - offset;
+                    }
+                }
+            })
+        );
     }
 
     private updateArrowVisibility() {
@@ -2865,7 +3440,9 @@ export default class Toolbar extends ContainerObject {
                 this.leftArrow.display.alpha = 0;
             }
 
-            if (this.scrollContainer.scrollX < this.scrollContainer.maxScrollX) {
+            if (
+                this.scrollContainer.scrollX < this.scrollContainer.maxScrollX
+            ) {
                 this.rightArrow.display.alpha = 1;
             } else {
                 this.rightArrow.display.alpha = 0;
@@ -2892,7 +3469,9 @@ export default class Toolbar extends ContainerObject {
                         new LocationTask(
                             this._uncollapsedContentLoc.x,
                             this._uncollapsedContentLoc.y,
-                            0.25, Easing.easeOut, this.vContent
+                            0.25,
+                            Easing.easeOut,
+                            this.vContent
                         )
                     );
                 }
@@ -2907,7 +3486,9 @@ export default class Toolbar extends ContainerObject {
                         new LocationTask(
                             this._uncollapsedContentLoc.x,
                             this._uncollapsedContentLoc.y + 72,
-                            0.25, Easing.easeOut, this.vContent
+                            0.25,
+                            Easing.easeOut,
+                            this.vContent
                         )
                     );
                 }
@@ -2941,8 +3522,6 @@ export default class Toolbar extends ContainerObject {
         this.stateToggle.enabled = !disable;
 
         this.targetButton.enabled = !disable;
-
-        this.actionMenu.enabled = !disable;
 
         this.palette.enabled = !disable;
         this.pairSwapButton.enabled = !disable;
@@ -3032,19 +3611,19 @@ export default class Toolbar extends ContainerObject {
     private tabsScrollContainer: ScrollContainer;
     private tabsHContainer: HLayoutContainer;
     private _currentTab: {
-        container: Container,
-        enable: () => void,
-        disable: () => void,
-        category: ButtonCategory,
-        tabWidth: number
+        container: Container;
+        enable: () => void;
+        disable: () => void;
+        category: ButtonCategory;
+        tabWidth: number;
     };
 
     private _tabArray: {
-        container: Container,
-        enable: () => void,
-        disable: () => void,
-        category: ButtonCategory,
-        tabWidth:number
+        container: Container;
+        enable: () => void;
+        disable: () => void;
+        category: ButtonCategory;
+        tabWidth: number;
     }[];
 
     private gameButtons: Map<string, GameButton> = new Map();

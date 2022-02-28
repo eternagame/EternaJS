@@ -641,7 +641,7 @@ export default class PoseEditMode extends GameMode {
                     ]
                     : undefined,
 
-                palette: this.toolbar.palette.container.visible
+                palette: this.toolbar.palette.display.visible
                     ? [() => getBounds(this.toolbar.palette), 0, 'Pallete']
                     : undefined
             }
