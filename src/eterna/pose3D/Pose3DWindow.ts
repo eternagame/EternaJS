@@ -3,20 +3,18 @@ import {
 } from 'pixi.js';
 import {Stage} from 'ngl';
 import {
-    Assert, ContainerObject, DisplayUtil, Dragger, Flashbang, GameObjectRef, HAlign, HLayoutContainer,
+    Assert, ContainerObject, DisplayUtil, Dragger, Flashbang, HAlign, HLayoutContainer,
     MathUtil, MouseWheelListener, SceneObject, SpriteObject, VAlign, VLayoutContainer
 } from 'flashbang';
-import {UnitSignal} from 'signals';
+import {MappedValue, UnitSignal, ValueView} from 'signals';
 import Eterna from 'eterna/Eterna';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import BitmapManager from 'eterna/resources/BitmapManager';
 import GameButton from 'eterna/ui/GameButton';
 import Fonts from 'eterna/util/Fonts';
-import ContextMenu from 'eterna/ui/ContextMenu';
 import TextBalloon from 'eterna/ui/TextBalloon';
-import ContextMenuDialog from 'eterna/ui/ContextMenuDialog';
 import WindowBounds from './WindowBounds';
 import PointerEventPropagator from './PointerEventPropagator';
+import Pose3DDropdown from './Pose3DDropdwon';
 
 enum WindowState {
     MINIMIZED_FROM_NORMAL,
@@ -32,7 +30,7 @@ export enum NGLDragState {
 }
 
 export default class Pose3DWindow extends ContainerObject implements MouseWheelListener {
-    public nglDragState: NGLDragState = NGLDragState.PAN;
+    public nglDragState: NGLDragState = NGLDragState.ROTATE;
     public tooltip: TextBalloon;
     public resized = new UnitSignal();
 
@@ -79,6 +77,16 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));
     }
 
+    private onDropDown() {
+        if (this._dataOption.value === 'Pan') {
+            this.nglDragState = NGLDragState.PAN;
+        } else if (this._dataOption.value === 'Rotate') {
+            this.nglDragState = NGLDragState.ROTATE;
+        } else if (this._dataOption.value === 'Zoom') {
+            this.nglDragState = NGLDragState.ZOOM;
+        }
+    }
+
     private createTitleBar(): HLayoutContainer {
         const titleLayout = new HLayoutContainer(0, VAlign.CENTER);
 
@@ -94,16 +102,29 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
         titleLayout.addHSpacer(this.GAP);
         this.regs.add(this._maxRestoreButton.clicked.connect(() => this.maxOrRestore()));
 
-        this._settingsButton = new GameButton()
-            .up(Bitmaps.Img3DSettingIcon)
-            .over(Bitmaps.Img3DSettingHoverIcon)
-            .down(Bitmaps.Img3DSettingIcon)
-            .tooltip('Menu');
-        this.addObject(this._settingsButton, titleLayout);
-        titleLayout.addHSpacer(this.GAP);
-        this._settingsButton.display.width = this.ICON_SIZE;
-        this._settingsButton.display.height = this.ICON_SIZE;
-        this.regs.add(this._settingsButton.clicked.connect(() => this.onSettingsClick()));
+        this._dropdown = new Pose3DDropdown({
+            fontSize: 12,
+            options: [
+                {txt: 'Rotate', icon: Bitmaps.Img3DRotateIcon},
+                {txt: 'Pan', icon: Bitmaps.Img3DMoveIcon},
+                {txt: 'Zoom', icon: Bitmaps.ImgMingZoomIn}
+            ],
+            defaultOption: 'Rotate',
+            borderWidth: 0,
+            height: this.ICON_SIZE,
+            color: 0x043468,
+            textColor: 0xFFFFFF,
+            dropShadow: true
+        });
+        this._dropdown.display.position.x = this.ICON_SIZE + this.GAP;
+        this._dropdown.display.position.y = 1;
+        this.addObject(this._dropdown, this.display);
+        this._dataOption = MappedValue.create(
+            this._dropdown.selectedOption,
+            (name) => name
+        );
+        this._dropdown.selectedOption.connect(() => this.onDropDown());
+        titleLayout.addHSpacer(this._dropdown.width + this.GAP);
 
         this._titleDraggerLeft = new SpriteObject(Sprite.from(Bitmaps.Img3DTitle));
         this.addObject(this._titleDraggerLeft, titleLayout);
@@ -190,58 +211,6 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
     public onMouseWheelEvent(e: WheelEvent): boolean {
         this._nglStage.viewer.renderer.domElement.dispatchEvent(new WheelEvent(e.type, e));
         return true;
-    }
-
-    private onSettingsClick() {
-        const pos = new Point(this._settingsButton.display.x, 0);
-        if (this._settingsContextMenuDialogRef.isLive) {
-            this._settingsContextMenuDialogRef.destroyObject();
-        } else {
-            const moveContainer = new Container();
-            moveContainer.addChild(Sprite.from(Bitmaps.Img3DMoveIcon));
-            const moveArrow = new Sprite(
-                BitmapManager.getBitmap(Bitmaps.ImgToolbarArrow)
-            );
-            moveArrow.position.x = (moveContainer.width - moveArrow.width) / 2;
-            moveArrow.visible = this.nglDragState === NGLDragState.PAN;
-            moveContainer.addChild(moveArrow);
-
-            const rotateContainer = new Container();
-            rotateContainer.addChild(Sprite.from(Bitmaps.Img3DRotateIcon));
-            const rotateArrow = new Sprite(
-                BitmapManager.getBitmap(Bitmaps.ImgToolbarArrow)
-            );
-            rotateArrow.position.x = (rotateContainer.width - rotateArrow.width) / 2;
-            rotateArrow.visible = this.nglDragState === NGLDragState.ROTATE;
-            rotateContainer.addChild(rotateArrow);
-
-            const zoomContainer = new Container();
-            zoomContainer.addChild(Sprite.from(Bitmaps.ImgMingZoomIn));
-            const zoomArrow = new Sprite(
-                BitmapManager.getBitmap(Bitmaps.ImgToolbarArrow)
-            );
-            zoomArrow.position.x = (zoomContainer.width - zoomArrow.width) / 2;
-            zoomArrow.visible = this.nglDragState === NGLDragState.ZOOM;
-            zoomContainer.addChild(zoomArrow);
-
-            const menu = new ContextMenu({horizontal: false});
-            menu.addItem('Pan', moveContainer).clicked.connect(() => {
-                this.nglDragState = NGLDragState.PAN;
-            });
-            menu.addItem('Rotate', rotateContainer).clicked.connect(() => {
-                this.nglDragState = NGLDragState.ROTATE;
-            });
-            menu.addItem('Zoom', zoomContainer).clicked.connect(() => {
-                this.nglDragState = NGLDragState.ZOOM;
-            });
-            if (menu != null) {
-                const menuDlg = new ContextMenuDialog(menu, pos);
-                this._settingsContextMenuDialogRef = this.addObject(
-                    menuDlg,
-                    this.container
-                );
-            }
-        }
     }
 
     private handleMove(e: InteractionEvent) {
@@ -421,7 +390,7 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
 
         // Title bar drag handles should fill remaining space
         this._titleDraggerLeft.display.width = this._currentBounds.width / 2
-            - (this.ICON_SIZE * 2 + this._titleText.display.width / 2 + this.GAP * 3);
+            - (this.ICON_SIZE + (this._dropdown.width + 4) + this._titleText.display.width / 2 + this.GAP * 3);
         this._titleDraggerRight.display.width = this._currentBounds.width / 2
             - (this.ICON_SIZE + this._titleText.display.width / 2 + this.GAP * 2);
 
@@ -474,8 +443,8 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
     private _mainLayout: VLayoutContainer;
     private _frame: Graphics;
     private _maxRestoreButton: GameButton;
-    private _settingsButton: GameButton;
-    private _settingsContextMenuDialogRef: GameObjectRef = GameObjectRef.NULL;
+    private _dropdown: Pose3DDropdown;
+    private _dataOption: ValueView<string>;
     private _titleDraggerLeft: SpriteObject;
     private _titleText: SceneObject<Text>;
     private _titleDraggerRight: SpriteObject;
