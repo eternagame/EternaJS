@@ -187,6 +187,11 @@ export default class MultiPagePanel extends ContainerObject {
         if (this._sizeChanged) {
             this._pagesContainer.doLayout();
             this._sizeChanged = false;
+            // DOM elements are weird. We need to wait a frame for the mask to actually
+            // kick in and the DOM to properly rerender in order for the height to not read as zero,
+            // which causes the scroll bar not to appear initially. There's probably a less hacky
+            // way to do this (and maybe even some other underlying cause)...
+            setTimeout(() => this._pagesContainer.updateScrollThumb(), 20);
         }
     }
 

@@ -105,6 +105,7 @@ export default class VScrollBox extends ContainerObject implements MouseWheelLis
         this._width = width;
         this._height = height;
         this._scrollContainer.setSize(width, height);
+        this.updateScrollThumb();
     }
 
     public doLayout() {
