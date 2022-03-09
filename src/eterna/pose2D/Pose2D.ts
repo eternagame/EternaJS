@@ -257,10 +257,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }));
     }
 
-    public get mousePosition() {
-        return Pose2D.P;
-    }
-
     public worldToScreenPosition(
         worldPosition: Point,
         offset: Point | null = null,
@@ -375,7 +371,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 /** The offset after the current animation finishes */
                 const effectiveOffset = this._animatingZoom ? this._endOffset : this._offset;
 
-                const oldMouseScreenPosition = this.mousePosition;
+                const oldMouseScreenPosition = Pose2D.P;
                 const mouseWorldPosition = this.screenToWorldPosition(
                     oldMouseScreenPosition,
                     effectiveOffset,
