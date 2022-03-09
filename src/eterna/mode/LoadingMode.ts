@@ -1,6 +1,7 @@
 import {Text} from 'pixi.js';
 import {
-    AppMode, ContainerObject, SerialTask, DelayTask, RepeatingTask, ObjectTask, ScaleTask, Easing, Flashbang, Assert
+    AppMode, ContainerObject, SerialTask, DelayTask, RepeatingTask, ObjectTask, ScaleTask, Easing,
+    Flashbang, Assert, VLayoutContainer, DisplayUtil, HAlign, VAlign
 } from 'flashbang';
 import Background from 'eterna/vfx/Background';
 import Fonts from 'eterna/util/Fonts';
@@ -26,8 +27,7 @@ export default class LoadingMode extends AppMode {
             this._text = value;
             if (this._textField != null) {
                 this._textField.text = value;
-                this._textField.x = -this._textField.width * 0.5;
-                this._textField.y = -this._textField.height * 0.5;
+                this.layout();
             }
         }
     }
@@ -38,20 +38,20 @@ export default class LoadingMode extends AppMode {
         this.addObject(new Background(0), this._container);
 
         this._textField = Fonts.std(this._text, 24).color(0xffffff).build();
-        this._textField.x = -this._textField.width * 0.5;
-        this._textField.y = -this._textField.height * 0.5;
 
-        this._extraBlurbTextField = Fonts.std(this.extraBlurbText, 36).bold().color(0xffffff).hAlignCenter()
+        this._extraBlurbTextField = Fonts.std(this.extraBlurbText, 36)
+            .bold()
+            .color(0xffffff)
+            .hAlignCenter()
             .build();
-        this._extraBlurbTextField.x = -this._extraBlurbTextField.width * 0.5;
-        this._extraBlurbTextField.y = -this._textField.height - this._extraBlurbTextField.height;
 
-        const container = new ContainerObject();
-        container.container.addChild(this._textField);
-        container.container.addChild(this._extraBlurbTextField);
-        this.addObject(container, this.container);
+        this._layoutContainer = new VLayoutContainer();
+        const containerObject = new ContainerObject(this._layoutContainer);
+        this._layoutContainer.addChild(this._extraBlurbTextField);
+        this._layoutContainer.addChild(this._textField);
+        this.addObject(containerObject, this.container);
 
-        container.addObject(new SerialTask(
+        containerObject.addObject(new SerialTask(
             new DelayTask(0.5),
             new RepeatingTask((): ObjectTask => new SerialTask(
                 new ScaleTask(0.95, 0.95, 1, Easing.easeInOut),
@@ -59,14 +59,23 @@ export default class LoadingMode extends AppMode {
             ))
         ));
 
-        const updateLoc = () => {
-            Assert.assertIsDefined(Flashbang.stageWidth);
-            Assert.assertIsDefined(Flashbang.stageHeight);
-            container.display.x = Flashbang.stageWidth * 0.5;
-            container.display.y = Flashbang.stageHeight * 0.5;
-        };
-        updateLoc();
-        this.resized.connect(updateLoc);
+        this.layout();
+        this.resized.connect(() => this.layout());
+    }
+
+    private layout() {
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(Flashbang.stageHeight);
+        this._extraBlurbTextField.style.wordWrap = true;
+        this._extraBlurbTextField.style.wordWrapWidth = Flashbang.stageWidth - 20;
+        this._layoutContainer.layout(true);
+        this._layoutContainer.pivot.x = 0.5 * this._layoutContainer.width;
+        this._layoutContainer.pivot.y = 0.5 * this._layoutContainer.height;
+        DisplayUtil.positionRelativeToStage(
+            this._layoutContainer,
+            HAlign.CENTER, VAlign.CENTER,
+            HAlign.CENTER, VAlign.CENTER
+        );
     }
 
     private getExtraBlurb(): string {
@@ -98,6 +107,6 @@ export default class LoadingMode extends AppMode {
 
     private _text: string;
     private _textField: Text;
-
     private _extraBlurbTextField: Text;
+    private _layoutContainer: VLayoutContainer;
 }
