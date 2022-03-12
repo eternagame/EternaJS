@@ -1,23 +1,22 @@
 import {DisplayObject, Rectangle} from 'pixi.js';
-import {GameObject, DisplayUtil} from 'flashbang';
+import {GameObject} from 'flashbang';
 
-export type RScriptUIElement = GameObject | DisplayObject | Rectangle;
+export type RSScriptRectangle = {
+    rect: Rectangle;
+    proxy?: boolean;
+};
+export type RScriptUIElement = GameObject | DisplayObject | RSScriptRectangle;
 
 export function GetRScriptUIElementBounds(element: RScriptUIElement | null): Rectangle | null {
     if (element instanceof GameObject) {
         return element.display != null
-            ? new Rectangle(
-                element.display.worldTransform.tx,
-                element.display.worldTransform.ty,
-                DisplayUtil.width(element.display),
-                DisplayUtil.height(element.display)
-            )
-            : new Rectangle();
+            ? element.display.getBounds()
+            : null;
     } else if (element instanceof DisplayObject) {
-        return new Rectangle(element.x, element.y, DisplayUtil.width(element), DisplayUtil.height(element));
-    } else {
-        return element;
-    }
+        return element.getBounds();
+    } else if (element !== null) {
+        return element.rect;
+    } else return null;
 }
 
 export enum RScriptUIElementID {

@@ -189,7 +189,8 @@ export default class PuzzleEditMode extends GameMode {
         {
             pairSwapButtonHandler: () => this.onEditButtonClicked(RNAPaint.PAIR),
             baseMarkerButtonHandler: () => this.onEditButtonClicked(RNAPaint.BASE_MARK),
-            settingsButtonHandler: () => this.showSettingsDialog()
+            settingsButtonHandler: () => this.showSettingsDialog(),
+            updateScriptViews: () => { this._resized.emit(); }
         });
         this.addObject(this._toolbar, this.uiLayer);
         this.addObject(this._toolbar.naturalButton, this.uiLayer);

@@ -359,6 +359,7 @@ export default class Toolbar extends ContainerObject {
         pairSwapButtonHandler: VoidHandler;
         baseMarkerButtonHandler: VoidHandler;
         settingsButtonHandler: VoidHandler;
+        updateScriptViews: VoidHandler;
     };
 
     private visiblities: Map<DisplayObject, boolean> = new Map();
@@ -384,6 +385,7 @@ export default class Toolbar extends ContainerObject {
             pairSwapButtonHandler: VoidHandler;
             baseMarkerButtonHandler: VoidHandler;
             settingsButtonHandler: VoidHandler;
+            updateScriptViews: VoidHandler;
         }
     ) {
         super();
@@ -913,6 +915,7 @@ export default class Toolbar extends ContainerObject {
             new ToolbarButton()
                 .allStates(Bitmaps.ImgReset)
                 // .tooltip(resetTooltip)
+                .rscriptID(RScriptUIElementID.RESET)
                 .setCategory(ButtonCategory.SOLVE)
                 .setName('Reset')
         );
@@ -945,6 +948,7 @@ export default class Toolbar extends ContainerObject {
             new ToolbarButton()
                 .allStates(Bitmaps.ImgFreeze)
                 // .tooltip('Frozen mode. Suspends/resumes folding engine calculations. (F)')
+                .rscriptID(RScriptUIElementID.FREEZE)
                 .setCategory(ButtonCategory.SOLVE)
                 .setName('Freeze')
         );
@@ -979,6 +983,7 @@ export default class Toolbar extends ContainerObject {
             new ToolbarButton()
                 .allStates(Bitmaps.ImgSwap)
                 // .tooltip('Swap paired bases. (5)')
+                .rscriptID(RScriptUIElementID.SWAP)
                 .setCategory(ButtonCategory.SOLVE)
                 .setName('Swap pair')
         );
@@ -1841,7 +1846,7 @@ export default class Toolbar extends ContainerObject {
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
 
-        TOOLBAR_WIDTH = Flashbang.stageWidth * 0.8;
+        TOOLBAR_WIDTH = Math.min(980, Flashbang.stageWidth * 0.8);
         MIDDLE_WIDTH = TOOLBAR_WIDTH
             - this._scrollPrevButton.display.width
             - this._scrollNextButton.display.width;
@@ -2060,6 +2065,8 @@ export default class Toolbar extends ContainerObject {
             0,
             -20
         );
+
+        this.handlers.updateScriptViews();
     }
 
     private makeLayout() {
@@ -2112,7 +2119,7 @@ export default class Toolbar extends ContainerObject {
             .allStates(Bitmaps.NextArrow)
             .setName('scrollNextButton');
 
-        TOOLBAR_WIDTH = Flashbang.stageWidth * 0.8;
+        TOOLBAR_WIDTH = Math.min(980, Flashbang.stageWidth * 0.8);
         MIDDLE_WIDTH = TOOLBAR_WIDTH
             - this._scrollPrevButton.display.width
             - this._scrollNextButton.display.width;
@@ -2381,23 +2388,47 @@ export default class Toolbar extends ContainerObject {
         );
     }
 
-    public getScriptUIElement(bt: GameButton): RScriptUIElement {
+    private switchTab(category:ButtonCategory) {
+        if (category !== this._currentTab.category) {
+            this._renderButtonsWithNewCategory(category);
+            this._tabArray.forEach((tab) => {
+                if (tab.category === category) {
+                    this._currentTab.disable();
+                    this._currentTab = tab;
+                    this._currentTab.enable();
+                }
+            });
+        }
+    }
+
+    public getScriptUIElement(bt: GameButton, scriptID: RScriptUIElementID): RScriptUIElement {
         if (this._isExpanded) {
             const button = this.getMirrorTopButton(bt);
-            if (button && button.display.visible) return button;
-            else {
+            if (button && button.display.visible) {
+                button.rscriptID(scriptID);
+                return button;
+            } else {
                 const category = bt.category as ButtonCategory;
+                this.switchTab(category);
                 if (category === this._currentTab.category) {
+                    bt.rscriptID(scriptID);
                     return bt;
                 } else {
-                    return this._currentTab.container;
+                    return {
+                        rect: this._currentTab.container.getBounds(),
+                        proxy: true
+                    };
                 }
             }
         } else {
             const button = this.getMirrorTopButton(bt);
             if (button && button.display.visible) return button;
             else {
-                return this.expandButton;
+                this.expandButton.rscriptID(scriptID);
+                return {
+                    rect: this.expandButton.display.getBounds(),
+                    proxy: true
+                };
             }
         }
     }
@@ -2567,14 +2598,6 @@ export default class Toolbar extends ContainerObject {
             buttons.push(button);
         }
     }
-
-    // private _getButtonCategory(target: DisplayObject): ButtonCategory | null {
-    //     return Array.from(this._tabs.values()).flat().find((button) => button.display === target)?.category ?? null;
-    // }
-
-    // private _getButton(target: DisplayObject): GameButton | undefined {
-    //     return Array.from(this._tabs.values()).flat().find((button) => button.display === target);
-    // }
 
     private _getButtonName(target: DisplayObject): string | null {
         return (
@@ -3067,14 +3090,7 @@ export default class Toolbar extends ContainerObject {
                         this._draggingElement
                     );
 
-                    this._renderButtonsWithNewCategory(category);
-                    this._tabArray.forEach((tab) => {
-                        if (tab.category === category) {
-                            this._currentTab.disable();
-                            this._currentTab = tab;
-                            this._currentTab.enable();
-                        }
-                    });
+                    this.switchTab(category);
                 }
             } else if (
                 this._startPointContainer === this.leftButtonsGroup._content
@@ -3097,14 +3113,7 @@ export default class Toolbar extends ContainerObject {
                         this._draggingElement
                     );
 
-                    this._renderButtonsWithNewCategory(category);
-                    this._tabArray.forEach((tab) => {
-                        if (tab.category === category) {
-                            this._currentTab.disable();
-                            this._currentTab = tab;
-                            this._currentTab.enable();
-                        }
-                    });
+                    this.switchTab(category);
                 }
             }
 

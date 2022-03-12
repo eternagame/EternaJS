@@ -27,11 +27,59 @@ export default class RNAScript {
         // Convert string into instructions by splitting at semicolons.
         // If we ever make "Blocks" (i.e for IF conditionals), we'll need to make this a little
         // more complex
+        let i:number;
+        let k: number;
         const instructions: string[] = strData.split(';');
+        for (i = 0; i < instructions.length; i++) {
+            let instruction = instructions[i];
+            instruction = instruction.replace(/^\s*/, '');
+            instruction = instruction.replace(/\s*$/, '');
+            instructions[i] = instruction;
+        }
+
+        const newInstructions: string[] = [];
+        const showUIInstructions: string[] = [];
+        let bShowUI = false;
+        for (i = 0; i < instructions.length; i++) {
+            const instruction = instructions[i];
+            const instRegex = /(#PRE-)?(\w+)\s*(.*)/gi;
+            const regResult = instRegex.exec(instruction);
+            if (regResult) {
+                if (regResult[2] === 'ShowUIHighlight') {
+                    showUIInstructions.push(instruction);
+                    newInstructions.push(instruction);
+                    bShowUI = true;
+                } else if (regResult[2] === 'ShowUIArrow') {
+                    showUIInstructions.push(instruction);
+                    newInstructions.push(instruction);
+                    bShowUI = true;
+                } else if (regResult[2] === 'ShowUITooltip') {
+                    showUIInstructions.push(instruction);
+                    newInstructions.push(instruction);
+                    bShowUI = true;
+                } else {
+                    if (bShowUI) {
+                        const cmds = this._env.checkShowUI(showUIInstructions);
+                        for (k = 0; k < cmds.length; k++) {
+                            newInstructions.push(cmds[k]);
+                        }
+                    }
+                    bShowUI = false;
+                    newInstructions.push(instruction);
+                }
+            }
+        }
+        if (bShowUI) {
+            const cmds = this._env.checkShowUI(showUIInstructions);
+            for (k = 0; k < cmds.length; k++) {
+                newInstructions.push(cmds[k]);
+            }
+        }
+        bShowUI = false;
 
         // For each instruction, make it into an RScriptOp (OP).
         // Give it to the OpTree to handle placing it where it should go.
-        for (const instruction of instructions) {
+        for (const instruction of newInstructions) {
             this._ops.addNode(this.createOpFromInstruction(instruction));
         }
         this._ops.finishCreation();

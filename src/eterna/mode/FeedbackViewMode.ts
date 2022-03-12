@@ -91,7 +91,8 @@ export default class FeedbackViewMode extends GameMode {
             baseMarkerButtonHandler: () => {
                 // console.log('baseMarkerButtonHandler');
             },
-            settingsButtonHandler: () => this.showSettingsDialog()
+            settingsButtonHandler: () => this.showSettingsDialog(),
+            updateScriptViews: () => { this._resized.emit(); }
         });
         this.addObject(this._toolbar, this.uiLayer);
         this.addObject(this._toolbar.estimateButton, this.uiLayer);

@@ -211,7 +211,8 @@ export default class PoseEditMode extends GameMode {
         }, {
             pairSwapButtonHandler: this.onSwapClicked.bind(this),
             baseMarkerButtonHandler: () => this.setPosesColor(RNAPaint.BASE_MARK),
-            settingsButtonHandler: () => this.showSettingsDialog()
+            settingsButtonHandler: () => this.showSettingsDialog(),
+            updateScriptViews: () => { this._resized.emit(); }
         });
         this.addObject(this._toolbar, this.uiLayer);
         this.addObject(this._toolbar.naturalButton, this.uiLayer);
