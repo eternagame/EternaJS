@@ -32,7 +32,6 @@ interface AnnotationDialogParams {
     edit: boolean;
     title: boolean;
     sequenceLength: number;
-    customNumbering: (number | null)[] | undefined;
     initialRanges: AnnotationRange[];
     initialLayers: AnnotationData[];
     activeCategory: AnnotationCategory;
@@ -48,7 +47,6 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
         this._edit = params.edit;
         this._hasTitle = params.title;
         this._sequenceLength = params.sequenceLength;
-        this._customNumbering = params.customNumbering;
         this._initialRanges = params.initialRanges.sort(
             (firstRange, secondRange) => firstRange.start - secondRange.start
         );
@@ -156,7 +154,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
         if (prevBases) {
             this._basesField.input.text = prevBases;
         } else if (this._initialRanges !== null) {
-            const baseRanges = this.annotationRangeToString(this._initialRanges);
+            const baseRanges = AnnotationDialog.annotationRangeToString(this._initialRanges);
             // set ranges string
             this._basesField.input.text = baseRanges;
         }
@@ -164,7 +162,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
             const isValid = this.isValidAnnotation();
             this._saveButton.enabled = isValid;
             if (this.isValidRanges()) {
-                this.onUpdateRanges.value = this.stringToAnnotationRange(this._basesField.input.text);
+                this.onUpdateRanges.value = AnnotationDialog.stringToAnnotationRange(this._basesField.input.text);
                 this.onUpdateRanges.value = null;
             }
         });
@@ -327,7 +325,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
                 category: this._categoryDropdown.selectedOption.value as AnnotationCategory,
                 timestamp: (new Date()).getTime(),
                 title: this._titleField.input.text,
-                ranges: this.stringToAnnotationRange(this._basesField.input.text),
+                ranges: AnnotationDialog.stringToAnnotationRange(this._basesField.input.text),
                 playerID: Eterna.playerID,
                 positions: [],
                 children: []
@@ -452,13 +450,9 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
     public setRanges(ranges: AnnotationRange[]): void {
         if (!this.isLiveObject) return;
 
-        const baseRanges = this.annotationRangeToString(ranges);
-
+        const baseRanges = AnnotationDialog.annotationRangeToString(ranges);
         // set ranges string
         this._basesField.input.text = baseRanges;
-
-        const isValid = this.isValidAnnotation();
-        this._saveButton.enabled = isValid;
     }
 
     public isValidAnnotation(): boolean {
@@ -502,17 +496,11 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
             // Meaning there should be an even count
             return false;
         } else {
+            // Numbers must not be larger than the sequence length
             for (const numText of rangeNumbers) {
-                if (this._customNumbering) {
-                    const num = this._customNumbering.indexOf(parseInt(numText, 10));
-                    if (num < 0 || num > this._sequenceLength - 1) {
-                        return false;
-                    }
-                } else {
-                    const num = parseInt(numText, 10);
-                    if (num <= 0 || num > this._sequenceLength) {
-                        return false;
-                    }
+                const num = parseInt(numText, 10);
+                if (num <= 0 || num > this._sequenceLength) {
+                    return false;
                 }
             }
         }
@@ -524,7 +512,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
         }
 
         const cleansedRangeText = cleansedRangeTexts as string[];
-        const expandedRanges = this.expandRanges(cleansedRangeText[0]);
+        const expandedRanges = AnnotationDialog.expandRanges(cleansedRangeText[0]);
         const annotationBaseIndices = expandedRanges.reduce((a, b) => a.concat(b), []);
         if (AnnotationDialog.hasDuplicates(annotationBaseIndices).length > 0) {
             // There should be no duplication of indices
@@ -536,32 +524,15 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
         return true;
     }
 
-    private annotationRangeToString(ranges: AnnotationRange[]): string {
+    public static annotationRangeToString(ranges: AnnotationRange[]): string {
         let baseRanges = '';
-
-        const rawIndexToUINumbering = (index: number): string => {
-            // We add one because frontend numbers bases from 1
-            if (this._customNumbering) {
-                const customIndex = this._customNumbering[index];
-                // For bases without indexes in the custom numbering system, such as the bases
-                // in the PTC puzzles where an area of the full ribosome is "capped off" with a
-                // faux hairpin, we have no number for them. We prevent selecting these bases
-                // in the UI, but in case something slips through somehow, leaving it as an empty
-                // string will just look "wrong" and fail to validate preventing the user from saving it
-                if (customIndex == null) return '';
-                return customIndex.toString();
-            } else {
-                return `${index + 1}`;
-            }
-        };
-
         for (const range of ranges) {
-            const start = rawIndexToUINumbering(range.start);
-            const end = rawIndexToUINumbering(range.end);
             if (range.start <= range.end) {
-                baseRanges += `${start}-${end}, `;
+                // We add one because frontend numbers bases from 1
+                baseRanges += `${range.start + 1}-${range.end + 1}, `;
             } else {
-                baseRanges += `${end}-${start}, `;
+                // We add one because frontend numbers bases from 1
+                baseRanges += `${range.end + 1}-${range.start + 1}, `;
             }
         }
         // remove last comma
@@ -570,22 +541,17 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
         return baseRanges;
     }
 
-    private stringToAnnotationRange(str: string): AnnotationRange[] {
+    private static stringToAnnotationRange(str: string): AnnotationRange[] {
         const ranges: AnnotationRange[] = [];
         const rangeTexts = str.split(',');
         for (const s of rangeTexts) {
             s.replace(' ', '');
             const extents = s.split('-');
-
-            const parseExtent = (extent: string): number => {
-                // We remove one because backend is zero-indexed
-                if (this._customNumbering) return this._customNumbering.indexOf(parseInt(extent, 10));
-                return parseInt(extent, 10) - 1;
-            };
-
             ranges.push({
-                start: parseExtent(extents[0]),
-                end: parseExtent(extents[1])
+                // We remove one because backend is zero-indexed
+                start: parseInt(extents[0], 10) - 1,
+                // We remove one because backend is zero-indexed
+                end: parseInt(extents[1], 10) - 1
             });
         }
 
@@ -593,7 +559,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
     }
 
     private static extractRangeIndices(str: string): RegExpMatchArray | null {
-        return str.match(/r?\d+/g);
+        return str.match(/\d+/g);
     }
 
     private static hasDuplicates(arr: (string|number)[]): (string|number)[] {
@@ -615,8 +581,8 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
         return results;
     }
 
-    private expandRanges(range: string): number[][] {
-        const annotationRanges = this.stringToAnnotationRange(range);
+    private static expandRanges(range: string): number[][] {
+        const annotationRanges = AnnotationDialog.stringToAnnotationRange(range);
 
         const expandedRanges: number[][] = [];
         for (const annotationRange of annotationRanges) {
@@ -645,7 +611,6 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
     private _hasTitle: boolean = false;
     private _isClosing: boolean = false;
     private _sequenceLength: number;
-    private _customNumbering: (number | null)[] | undefined;
     private _initialAnnotation: AnnotationData | null = null;
     private _initialRanges: AnnotationRange[] | null = null;
     private _activeCategory: AnnotationCategory;
@@ -681,7 +646,7 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
     private static readonly DELETE_BUTTON_FONT_SIZE = 12;
     private static readonly DROPDOWN_HEIGHT = AnnotationDialog.ACTION_BUTTON_HEIGHT;
     public static readonly ANNOTATION_TEXT_CHARACTER_LIMIT = 50;
-    public static readonly RANGE_REGEX: RegExp = /^(r?\d+\s*-\s*r?\d+)(,\s*r?\d+\s*-\s*r?\d+)*$/;
+    public static readonly RANGE_REGEX: RegExp = /^(\d+\s*-\s*\d+)(,\s*\d+\s*-\s*\d+)*$/;
     private static readonly PANEL_COLOR = 0x152843;
     private static readonly UPPER_TOOLBAR_DIVIDER_COLOR = 0x112238;
     private static readonly LABEL_COLOR = 0xC0DCE7;

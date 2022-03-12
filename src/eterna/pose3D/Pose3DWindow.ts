@@ -12,9 +12,9 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import GameButton from 'eterna/ui/GameButton';
 import Fonts from 'eterna/util/Fonts';
 import TextBalloon from 'eterna/ui/TextBalloon';
+import GameDropdown from 'eterna/ui/GameDropdown';
 import WindowBounds from './WindowBounds';
 import PointerEventPropagator from './PointerEventPropagator';
-import Pose3DDropdown from './Pose3DDropdwon';
 
 enum WindowState {
     MINIMIZED_FROM_NORMAL,
@@ -102,14 +102,15 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
         titleLayout.addHSpacer(this.GAP);
         this.regs.add(this._maxRestoreButton.clicked.connect(() => this.maxOrRestore()));
 
-        this._dropdown = new Pose3DDropdown({
+        this._dropdown = new GameDropdown({
             fontSize: 12,
-            options: [
+            options: ['Rotate', 'Pan', 'Zoom'],
+            defaultOption: 'Rotate',
+            icons: [
                 {txt: 'Rotate', icon: Bitmaps.Img3DRotateIcon},
                 {txt: 'Pan', icon: Bitmaps.Img3DMoveIcon},
                 {txt: 'Zoom', icon: Bitmaps.ImgMingZoomIn}
             ],
-            defaultOption: 'Rotate',
             borderWidth: 0,
             height: this.ICON_SIZE,
             color: 0x043468,
@@ -443,7 +444,7 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
     private _mainLayout: VLayoutContainer;
     private _frame: Graphics;
     private _maxRestoreButton: GameButton;
-    private _dropdown: Pose3DDropdown;
+    private _dropdown: GameDropdown;
     private _dataOption: ValueView<string>;
     private _titleDraggerLeft: SpriteObject;
     private _titleText: SceneObject<Text>;

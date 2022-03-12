@@ -167,16 +167,8 @@ export default class AnnotationView extends ContainerObject {
                     e.stopPropagation();
                 });
 
-                // HACK: The position may not be available if AnnotationManager#computeAnnotationPositionPoint
-                // couldn't find a location to put the annotation. Presumably this means it's not custom
-                // positioned.
-                if (this._item.positions[this._positionIndex]) {
-                    this._moveButton.display.visible = !this._item.positions[this._positionIndex].custom;
-                    this._moveButton.enabled = !this._item.positions[this._positionIndex].custom;
-                } else {
-                    this._moveButton.display.visible = true;
-                    this._moveButton.enabled = true;
-                }
+                this._moveButton.display.visible = !this._item.positions[this._positionIndex].custom;
+                this._moveButton.enabled = !this._item.positions[this._positionIndex].custom;
                 this.addObject(this._moveButton, this.container);
                 panelWidth += this._moveButton.display.width;
 
@@ -196,16 +188,8 @@ export default class AnnotationView extends ContainerObject {
 
                     this.onReleasePositionButtonPressed.emit();
                 });
-                // HACK: The position may not be available if AnnotationManager#computeAnnotationPositionPoint
-                // couldn't find a location to put the annotation. Presumably this means it's not custom
-                // positioned.
-                if (this._item.positions[this._positionIndex]) {
-                    this._releaseButton.display.visible = this._item.positions[this._positionIndex].custom;
-                    this._releaseButton.enabled = this._item.positions[this._positionIndex].custom;
-                } else {
-                    this._releaseButton.display.visible = false;
-                    this._releaseButton.enabled = false;
-                }
+                this._releaseButton.display.visible = this._item.positions[this._positionIndex].custom;
+                this._releaseButton.enabled = this._item.positions[this._positionIndex].custom;
                 this.addObject(this._releaseButton, this.container);
 
                 this._saveButton = new GameButton()

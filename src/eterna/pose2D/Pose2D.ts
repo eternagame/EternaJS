@@ -158,7 +158,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 edit: false,
                 title: false,
                 sequenceLength: this.fullSequenceLength,
-                customNumbering: this.customNumbering,
                 initialRanges: this._annotationRanges,
                 initialLayers: this._annotationManager.allLayers,
                 activeCategory: this._annotationManager.activeCategory
@@ -3649,7 +3648,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
      *
      * @param ranges ranges of bases to highlight
      */
-    private setAnnotationRangeHighlight(ranges: AnnotationRange[]): void {
+    public setAnnotationRangeHighlight(ranges: AnnotationRange[]): void {
         this._annotationHighlightBox.clear();
         for (const range of ranges) {
             this._annotationHighlightBox.setHighlight([range.start, range.end]);
@@ -3659,7 +3658,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     /**
      * Used to update annotation range highlights when creating an annotation
      */
-    private updateAnnotationRangeHighlight(): void {
+    public updateAnnotationRangeHighlight(): void {
         this._annotationHighlightBox.clear();
 
         if (this._annotationManager.annotationModeActive.value) {
@@ -3680,7 +3679,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    private mergeAnnotationRanges(): void {
+    public mergeAnnotationRanges(): void {
         if (this._annotationRanges.length > 1) {
             // Sort ranges in increasing order
             let sortedRanges = [...this._annotationRanges];
@@ -3728,17 +3727,21 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._annotationSpaceAvailability;
     }
 
-    private setBasesOpacity(opacity: number): void {
+    public setBasesOpacity(opacity: number): void {
         for (const base of this._bases) {
             base.container.alpha = opacity;
         }
     }
 
-    private setAnnotationCanvasOpacity(opacity: number): void {
+    public setAnnotationCanvasOpacity(opacity: number): void {
         this._annotationCanvas.alpha = opacity;
     }
 
-    private redrawAnnotations(useCachedSpaceAvailability = false) {
+    public triggerRedraw(): void {
+        this._redraw = true;
+    }
+
+    public redrawAnnotations(useCachedSpaceAvailability = false) {
         this._redrawAnnotations = FrameUpdateState.NEXT_FRAME;
         this._redrawAnnotationUseCache = useCachedSpaceAvailability;
     }
