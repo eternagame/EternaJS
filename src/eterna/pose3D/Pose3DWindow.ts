@@ -422,6 +422,8 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
         // Position the canvas so that when we fire events, NGL can interpret the positions correctly
         this._nglStage.viewer.wrapper.style.left = `${this._currentBounds.x}px`;
         this._nglStage.viewer.wrapper.style.top = `${this._currentBounds.y + this.ICON_SIZE}px`;
+
+        this._dropdown.repositionPopup();
     }
 
     private get minWidth(): number {

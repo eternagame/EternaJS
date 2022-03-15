@@ -298,6 +298,16 @@ export default class GameDropdown extends ContainerObject {
         this._scrollView.updateScrollThumb();
     }
 
+    public repositionPopup() {
+        if (!this.mode || !this.mode.container) return;
+        const globalBoxBounds = DisplayUtil.getBoundsRelative(this._box, this.mode.container);
+        DisplayUtil.positionRelativeToBounds(
+            this._popup.container, HAlign.LEFT, VAlign.TOP,
+            globalBoxBounds, HAlign.LEFT, VAlign.BOTTOM,
+            0, GameDropdown._POPUP_VERTICAL_OFFSET
+        );
+    }
+
     private _showPopup(): void {
         this._popupVisible = true;
         this._popup.display.visible = true;
