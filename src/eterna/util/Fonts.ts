@@ -34,6 +34,15 @@ export default class Fonts {
 
     // The fonts we specifically load that we want to wait on
     private static readonly LOCAL_FONT_FAMILIES: string[] = [
-        Fonts.STDFONT
+        `${Fonts.STDFONT}:n3`,
+        `${Fonts.STDFONT}:n4`,
+        `${Fonts.STDFONT}:n6`,
+        `${Fonts.STDFONT}:n7`,
+        `${Fonts.STDFONT}:n8`,
+        `${Fonts.STDFONT}:i3`,
+        `${Fonts.STDFONT}:i4`,
+        `${Fonts.STDFONT}:i6`,
+        `${Fonts.STDFONT}:i7`,
+        `${Fonts.STDFONT}:i8`
     ];
 }
