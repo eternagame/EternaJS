@@ -130,11 +130,12 @@ export default class PointerCapture extends GameObject {
         // the InteractionManager uses static variables to handle the current active event. Regardless,
         // this is an ugly hack and we should move to Pixi's new interaction system which can avoid most of the
         // hacks in this function
-        e.stopPropagationHint = true;
         const newEvent = new InteractionEvent();
         interaction.configureInteractionEventForDOMEvent(newEvent, e.data.originalEvent, e.data);
 
         if (func != null) interaction.processInteractive(newEvent, interaction.lastObjectRendered, func, true);
+
+        e.stopPropagationHint = true;
 
         /* eslint-enable @typescript-eslint/ban-ts-comment */
 
