@@ -120,7 +120,22 @@ export default class PointerCapture extends GameObject {
                 break;
         }
 
-        if (func != null) interaction.processInteractive(e, interaction.lastObjectRendered, func, true);
+        // Pixi's legacy interaction manager is a bit batty. We need to immediately stop dispatching events
+        // so that a pointermove on our surface doesn't cause Pixi to dispatch a pointerout event on
+        // the root element of our pointer capture (since the mouse has moved from the root element to
+        // the surface since we toggled it off and on again). However, we can't just run processInteractive
+        // with the surface off, let it fire its events, then stop the dispatches on the event because
+        // we do want _actual_ pointerout events to still be fired, and they wind up getting fired after
+        // the processInteractive finishes (next frame, I guess?). This is in part due to the fact
+        // the InteractionManager uses static variables to handle the current active event. Regardless,
+        // this is an ugly hack and we should move to Pixi's new interaction system which can avoid most of the
+        // hacks in this function
+        const newEvent = new InteractionEvent();
+        interaction.configureInteractionEventForDOMEvent(newEvent, e.data.originalEvent, e.data);
+
+        if (func != null) interaction.processInteractive(newEvent, interaction.lastObjectRendered, func, true);
+
+        e.stopPropagationHint = true;
 
         /* eslint-enable @typescript-eslint/ban-ts-comment */
 
