@@ -123,6 +123,10 @@ export default class Pose3D extends ContainerObject {
             (_stage: Stage, dx: number, dy: number) => this.rotateDrag(dx, dy)
         );
         this._stage.mouseControls.add(
+            'drag-meta-left',
+            (_stage: Stage, dx: number, dy: number) => this.rotateDrag(dx, dy)
+        );
+        this._stage.mouseControls.add(
             'clickPick-left',
             (_stage: Stage, pickingProxy: PickingProxy) => this.paintPick(pickingProxy)
         );
