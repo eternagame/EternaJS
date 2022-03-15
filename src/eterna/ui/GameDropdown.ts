@@ -322,10 +322,6 @@ export default class GameDropdown extends ContainerObject {
         this._activeCapture = new PointerCapture(this._popup.display, (e) => {
             if (e.type === 'pointertap') {
                 this._hidePopup();
-                if (this._activeCapture) {
-                    this._popup.removeObject(this._activeCapture);
-                    this._activeCapture = null;
-                }
             }
             e.stopPropagation();
         });
@@ -335,6 +331,10 @@ export default class GameDropdown extends ContainerObject {
     private _hidePopup(): void {
         this._popupVisible = false;
         this._popup.display.visible = false;
+        if (this._activeCapture) {
+            this._popup.removeObject(this._activeCapture);
+            this._activeCapture = null;
+        }
     }
 
     private _drawBox(_hover: boolean) {
