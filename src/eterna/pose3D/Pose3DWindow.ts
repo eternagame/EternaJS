@@ -390,10 +390,11 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
         }
 
         // Title bar drag handles should fill remaining space
-        this._titleDraggerLeft.display.width = this._currentBounds.width / 2
-            - (this.ICON_SIZE + (this._dropdown.width + 4) + this._titleText.display.width / 2 + this.GAP * 3);
-        this._titleDraggerRight.display.width = this._currentBounds.width / 2
-            - (this.ICON_SIZE + this._titleText.display.width / 2 + this.GAP * 2);
+        const remainingWidth = this._currentBounds.width - (
+            this.ICON_SIZE * 2 + this.GAP * 6 + this._titleText.display.width + this._dropdown.width
+        );
+        this._titleDraggerLeft.display.width = remainingWidth / 2;
+        this._titleDraggerRight.display.width = remainingWidth / 2;
 
         // Resize handles go on the bottom left and right corners
         const relativeNglBounds = new Rectangle(0, 0, this.nglWidth, this.nglHeight);
@@ -424,7 +425,7 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
     }
 
     private get minWidth(): number {
-        return this.ICON_SIZE * 3 + this._titleText.display.width + 50 + this.GAP * 5;
+        return this.ICON_SIZE * 2 + this._dropdown.width + this._titleText.display.width + this.GAP * 6;
     }
 
     public get nglWidth() {
