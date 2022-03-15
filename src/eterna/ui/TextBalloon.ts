@@ -188,6 +188,12 @@ export default class TextBalloon extends ContainerObject {
         }
     }
 
+    public setSize(width: number, height: number) {
+        this._width = width;
+        this._height = height;
+        this.updateView();
+    }
+
     protected _initialText: StyledTextBuilder;
 
     protected _button: GameButton;
