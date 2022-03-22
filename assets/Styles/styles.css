@@ -11,6 +11,13 @@ body {
     background-image: radial-gradient(ellipse, rgb(2, 38, 76) 0%, rgb(3, 27, 60) 70%);
 }
 
+#maingame canvas {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 #eterna-overlay {
     position: absolute;
     left: 0px;
