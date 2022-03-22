@@ -37,9 +37,9 @@ class ToolbarButton extends GameButton {
         this._arrow.visible = false;
         this.container.addChild(this._arrow);
 
-        this.toggled.connectNotify((toggled) => {
+        this.regs.add(this.toggled.connectNotify((toggled) => {
             this._arrow.visible = toggled;
-        });
+        }));
     }
 
     private _arrow: Sprite;
@@ -282,7 +282,7 @@ export default class Toolbar extends ContainerObject {
         Assert.assertIsDefined(Flashbang.stageHeight);
         this.scrollContainer = new ScrollContainer(Flashbang.stageWidth, Flashbang.stageHeight);
         this._content.addChild(this.scrollContainerContainer);
-        this.scrollContainer.container.addChild(this.lowerToolbarLayout);
+        this.scrollContainer.content.addChild(this.lowerToolbarLayout);
 
         /*
         The lower toolbar structure is a HLayoutContainer wrapped in ScrollContainer wrapped in another HLayoutContainer
@@ -853,6 +853,7 @@ export default class Toolbar extends ContainerObject {
         }));
 
         this.regs.add(this.pointerUp.connect((_e) => {
+            this.disableTools(false);
             mouseDown = false;
         }));
 
@@ -865,7 +866,9 @@ export default class Toolbar extends ContainerObject {
             if (e.data.buttons === 1 && mouseDown && this.lowerToolbarLayout.getBounds().contains(x, y)) {
                 const offset = x - startingX;
                 if (Math.abs(offset) > 15) {
+                    this.disableTools(true);
                     this.scrollContainer.scrollX = startingScroll - offset;
+                    this.updateArrowVisibility();
                 }
             }
         }));
@@ -993,6 +996,8 @@ export default class Toolbar extends ContainerObject {
 
         this.undoButton.enabled = !disable;
         this.redoButton.enabled = !disable;
+
+        this.baseMarkerButton.enabled = !disable;
 
         this.annotationModeButton.enabled = !disable;
         this.annotationPanelButton.enabled = !disable;
