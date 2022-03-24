@@ -130,8 +130,13 @@ export default class PointerCapture extends GameObject {
         // the InteractionManager uses static variables to handle the current active event. Regardless,
         // this is an ugly hack and we should move to Pixi's new interaction system which can avoid most of the
         // hacks in this function
-        const newEvent = new InteractionEvent();
-        interaction.configureInteractionEventForDOMEvent(newEvent, e.data.originalEvent, e.data);
+        // EDIT: ...well, only if it's a pointermove. Because otherwise a pointertap will fall through past
+        // the PointerCapture when it shouldn't
+        let newEvent = e;
+        if (e.type === 'pointermove') {
+            newEvent = new InteractionEvent();
+            interaction.configureInteractionEventForDOMEvent(newEvent, e.data.originalEvent, e.data);
+        }
 
         if (func != null) interaction.processInteractive(newEvent, interaction.lastObjectRendered, func, true);
 
