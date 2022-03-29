@@ -497,6 +497,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._oligo != null && this._oligoMode === OligoMode.EXT5P
         ) ? this._oligo.length : 0;
 
+        // Without this, there is some weird behavior where pasting a sequence across multiple
+        // poses fails to update sequences on all poses. There may be a better fix for that.
+        this._sequence = this._sequence.slice(0);
+
         for (let ii = 0; ii < n; ii++) {
             if (sequence.nt(ii) === RNABase.UNDEFINED) continue;
             if (this._sequence.nt(ii) !== sequence.nt(ii) && !this.isLocked(offset + ii)) {
