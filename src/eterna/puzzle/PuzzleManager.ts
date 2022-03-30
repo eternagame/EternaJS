@@ -229,7 +229,12 @@ export default class PuzzleManager {
         const constraints: Constraint<BaseConstraintStatus>[] = [];
         if (json['constraints'] && json['constraints'].length > 0) {
             const constraintDefs: string[] = json['constraints'].split(',');
-            if (constraintDefs.length % 2 === 1) {
+            if (constraintDefs.length % 2 === 1 && (
+                // For backwards compatibility, if the last constraint doesn't need a parameter,
+                // don't require it to have one
+                constraintDefs[constraintDefs.length - 1] !== 'SOFT'
+                && constraintDefs[constraintDefs.length - 1] !== SynthesisConstraint.NAME
+            )) {
                 throw new Error('Invalid constraint definition - uneven number of constraints and parameters');
             }
 
