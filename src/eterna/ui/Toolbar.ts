@@ -999,8 +999,8 @@ export default class Toolbar extends ContainerObject {
 
         this.baseMarkerButton.enabled = !disable;
 
-        this.annotationModeButton.enabled = !disable;
-        this.annotationPanelButton.enabled = !disable;
+        if (this.annotationModeButton) this.annotationModeButton.enabled = !disable;
+        if (this.annotationPanelButton) this.annotationPanelButton.enabled = !disable;
 
         this.freezeButton.enabled = !disable;
 
