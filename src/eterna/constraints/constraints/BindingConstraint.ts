@@ -137,13 +137,13 @@ export class MultistrandBindingsConstraint extends BindingsConstraint<Multistran
         }
 
         const stateCondition = context.targetConditions[this.stateIndex];
-        Assert.assertIsDefined(stateCondition, 'Target condition not available for BINDINGS constraint');
+        Assert.assertIsDefined(stateCondition, `Target condition not available for BINDINGS constraint for state ${this.stateIndex}`);
 
         const oligos: OligoDef[] | undefined = stateCondition['oligos'];
-        Assert.assertIsDefined(oligos, 'OligoDefinition not available for BINDINGS constraint');
+        Assert.assertIsDefined(oligos, `OligoDefinition not available for BINDINGS constraint for state ${this.stateIndex}`);
 
         const oligoOrder = undoBlock.oligoOrder;
-        Assert.assertIsDefined(oligoOrder, 'Undo block does not specify oligos for BINDINGS constraint');
+        Assert.assertIsDefined(oligoOrder, `Undo block does not specify oligos for BINDINGS constraint for state ${this.stateIndex}`);
 
         // Unbound oligos are always at the end of the natural mode oligo order, so to know if it's bound according to
         // target mode ordering, check if its index in natural mode is less than the number bound
