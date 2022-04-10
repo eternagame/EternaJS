@@ -331,7 +331,7 @@ export default class GameDropdown extends ContainerObject {
     private _hidePopup(): void {
         this._popupVisible = false;
         this._popup.display.visible = false;
-        if (this._activeCapture) {
+        if (this._activeCapture && this.isLiveObject) {
             this._popup.removeObject(this._activeCapture);
             this._activeCapture = null;
         }
