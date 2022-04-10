@@ -161,7 +161,7 @@ export default class Toolbar extends ContainerObject {
         Assert.assertIsDefined(Flashbang.stageWidth);
         this.stateToggle.container.position.set(
             Flashbang.stageWidth / 2 - this.container.position.x,
-            -this.container.position.y + 8
+            -this.container.position.y + 30
         );
         this.updateLayout();
     }
