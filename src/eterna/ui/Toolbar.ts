@@ -159,6 +159,11 @@ export default class Toolbar extends ContainerObject {
 
     public onResized() {
         Assert.assertIsDefined(Flashbang.stageWidth);
+        this._invisibleBackground
+            .beginFill(0xff0000)
+            .drawRect(0, 0, Flashbang.stageWidth, 120)
+            .endFill();
+
         this.stateToggle.container.position.set(
             Flashbang.stageWidth / 2 - this.container.position.x,
             -this.container.position.y + 30
@@ -184,13 +189,11 @@ export default class Toolbar extends ContainerObject {
             .over(Bitmaps.ImgSubmitOver)
             .down(Bitmaps.ImgSubmitHit);
 
+        // This ensures that even as we move the toolbar up and down to autohide, positioning the entire
+        // toolbar relative to the bottom of the screen will work (otherwise, the bottom of the toolbar
+        // will be inferred to be wherever the bottom of the visible toolbar content is)
         this._invisibleBackground = new Graphics();
-        Assert.assertIsDefined(Flashbang.stageWidth);
-        this._invisibleBackground
-            .beginFill(0xff0000, 0)
-            .drawRect(0, 0, Flashbang.stageWidth, 100)
-            .endFill();
-        this._invisibleBackground.y = -this._invisibleBackground.height;
+        this._invisibleBackground.alpha = 0;
         this.container.addChild(this._invisibleBackground);
 
         this._content = new VLayoutContainer(SPACE_NARROW);
@@ -803,7 +806,6 @@ export default class Toolbar extends ContainerObject {
 
         this.onResized();
 
-        this._uncollapsedContentLoc = new Point(this._content.position.x, this._content.position.y);
         this.regs.add(Eterna.settings.autohideToolbar.connectNotify((value) => {
             this.setToolbarAutohide(value);
         }));
@@ -877,6 +879,10 @@ export default class Toolbar extends ContainerObject {
     private updateLayout(): void {
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
+
+        // Center the toolbar
+        this._content.x = (Flashbang.stageWidth - this._content.width) / 2;
+
         // Update the scroll container size, accounting for buttons
         const buttonOffset = this.leftArrow.display.width + this.rightArrow.display.width;
         this.scrollContainer.setSize(Flashbang.stageWidth - buttonOffset, Flashbang.stageHeight);
@@ -888,12 +894,6 @@ export default class Toolbar extends ContainerObject {
         this._content.layout(true);
 
         this.updateArrowVisibility();
-
-        DisplayUtil.positionRelative(
-            this._content, HAlign.CENTER, VAlign.BOTTOM,
-            this._invisibleBackground, HAlign.CENTER, VAlign.BOTTOM,
-            -25, 0
-        );
     }
 
     private updateArrowVisibility() {
@@ -923,9 +923,10 @@ export default class Toolbar extends ContainerObject {
 
     private setToolbarAutohide(enabled: boolean): void {
         const COLLAPSE_ANIM = 'CollapseAnim';
+
         if (enabled) {
             this.display.interactive = true;
-
+            this._invisibleBackground.interactive = true;
             let collapsed = false;
 
             const uncollapse = () => {
@@ -935,8 +936,8 @@ export default class Toolbar extends ContainerObject {
                     this.addNamedObject(
                         COLLAPSE_ANIM,
                         new LocationTask(
-                            this._uncollapsedContentLoc.x,
-                            this._uncollapsedContentLoc.y,
+                            null,
+                            0,
                             0.25, Easing.easeOut, this._content
                         )
                     );
@@ -950,8 +951,8 @@ export default class Toolbar extends ContainerObject {
                     this.addNamedObject(
                         COLLAPSE_ANIM,
                         new LocationTask(
-                            this._uncollapsedContentLoc.x,
-                            this._uncollapsedContentLoc.y + 72,
+                            null,
+                            64,
                             0.25, Easing.easeOut, this._content
                         )
                     );
@@ -959,19 +960,24 @@ export default class Toolbar extends ContainerObject {
             };
 
             this._autoCollapseRegs = new RegistrationGroup();
+            this._autoCollapseRegs.add(this.pointerTap.connect(() => {
+                if (collapsed) uncollapse(); else collapse();
+            }));
             this._autoCollapseRegs.add(this.pointerOver.connect(uncollapse));
             this._autoCollapseRegs.add(this.pointerOut.connect(collapse));
 
             collapse();
         } else {
+            this.display.interactive = false;
+            this._invisibleBackground.interactive = false;
+
             if (this._autoCollapseRegs != null) {
                 this._autoCollapseRegs.close();
                 this._autoCollapseRegs = null;
             }
 
             this.removeNamedObjects(COLLAPSE_ANIM);
-            this._content.position.copyFrom(this._uncollapsedContentLoc);
-            this.display.interactive = false;
+            this._content.y = 0;
         }
     }
 
@@ -1061,7 +1067,6 @@ export default class Toolbar extends ContainerObject {
     private _invisibleBackground: Graphics;
     private _content: VLayoutContainer;
 
-    private _uncollapsedContentLoc: Point;
     private _autoCollapseRegs: RegistrationGroup | null;
 
     private _annotationManager: AnnotationManager | undefined;

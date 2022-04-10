@@ -5,7 +5,7 @@ import DisplayObjectTask from './DisplayObjectTask';
 
 export default class LocationTask extends DisplayObjectTask {
     constructor(
-        x: number, y: number, time: number = 0, easingFn: EasingFunc | null = null,
+        x: number | null, y: number | null, time: number = 0, easingFn: EasingFunc | null = null,
         target: DisplayObject | null = null
     ) {
         super(time, easingFn, target);
@@ -20,12 +20,12 @@ export default class LocationTask extends DisplayObjectTask {
             this._fromX = this._target.x;
             this._fromY = this._target.y;
         }
-        this._target.x = this.interpolate(this._fromX, this._toX);
-        this._target.y = this.interpolate(this._fromY, this._toY);
+        if (this._toX !== null) this._target.x = this.interpolate(this._fromX, this._toX);
+        if (this._toY !== null) this._target.y = this.interpolate(this._fromY, this._toY);
     }
 
-    private readonly _toX: number;
-    private readonly _toY: number;
+    private readonly _toX: number | null;
+    private readonly _toY: number | null;
     private _fromX?: number = undefined;
     private _fromY?: number = undefined;
 }

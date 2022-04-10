@@ -410,8 +410,8 @@ export default class PoseEditMode extends GameMode {
 
     private updateUILayout(): void {
         DisplayUtil.positionRelativeToStage(
-            this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
-            HAlign.CENTER, VAlign.BOTTOM, 20, -20
+            this._toolbar.display, HAlign.LEFT, VAlign.BOTTOM,
+            HAlign.LEFT, VAlign.BOTTOM, 0, 50
         );
 
         this._toolbar.onResized();
