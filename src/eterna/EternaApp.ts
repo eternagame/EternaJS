@@ -477,10 +477,7 @@ export default class EternaApp extends FlashbangApp {
             height: this._params.height,
             backgroundColor: 0x0,
             backgroundAlpha: 0,
-            // There's an MSAA bug on Webkit in iOS 15.4 which causes significant graphical bugs
-            // XREF https://github.com/pixijs/pixijs/issues/8183
-            // XREF https://github.com/eternagame/EternaJS/issues/634
-            antialias: !window.navigator.userAgent.match(/iPhone OS 15_4/),
+            antialias: true,
             autoDensity: true,
             resolution: devicePixelRatio
         });
@@ -588,6 +585,10 @@ export default class EternaApp extends FlashbangApp {
         });
 
         ExternalInterface.pushContext(this._scriptInterface);
+    }
+
+    public getParams(): ProcessedEternaAppParams {
+        return this._params;
     }
 
     private readonly _params: ProcessedEternaAppParams;

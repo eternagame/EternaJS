@@ -606,6 +606,7 @@ export default class DesignBrowserMode extends GameMode {
 
     private onMouseMove(e: InteractionEvent): void {
         this._selectionBox.visible = false;
+        Assert.assertIsDefined(Flashbang.globalMouse);
 
         if (this._dataCols == null || this._dialogRef.isLive || this._filteredSolutions == null) {
             return;

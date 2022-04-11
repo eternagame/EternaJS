@@ -1,7 +1,6 @@
 import {
-    Enableable, PointerCapture, DisplayUtil, HAlign, VAlign, Assert
+    Enableable, PointerCapture, DisplayUtil, HAlign, VAlign, Flashbang, Assert
 } from 'flashbang';
-import {InteractionEvent} from 'pixi.js';
 import {RegistrationGroup} from 'signals';
 import GameButton from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';
@@ -203,15 +202,17 @@ export default class EternaMenu extends GamePanel implements Enableable {
 
             const regs = new RegistrationGroup();
 
-            regs.add(menu.panel.pointerOut.connect((e: InteractionEvent) => {
-                if (!DisplayUtil.hitTest(menuButton.display, e.data.global)) {
+            regs.add(menu.panel.pointerOut.connect(() => {
+                Assert.assertIsDefined(Flashbang.globalMouse);
+                if (!DisplayUtil.hitTest(menuButton.display, Flashbang.globalMouse)) {
                     menu.panel.display.visible = false;
                     regs.close();
                 }
             }));
 
-            regs.add(menuButton.pointerOut.connect((e: InteractionEvent) => {
-                if (!DisplayUtil.hitTest(menu.panel.display, e.data.global)) {
+            regs.add(menuButton.pointerOut.connect(() => {
+                Assert.assertIsDefined(Flashbang.globalMouse);
+                if (!DisplayUtil.hitTest(menu.panel.display, Flashbang.globalMouse)) {
                     menu.panel.display.visible = false;
                     regs.close();
                 }

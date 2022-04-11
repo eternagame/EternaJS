@@ -246,7 +246,7 @@ export default class ConstraintBar extends ContainerObject {
                 );
             }
 
-            // Clamp scroll position within bounds if necessary
+            // Clamp scroll position whithin bounds if necessary
             this.scrollConstraints(0);
         }
     }
@@ -371,8 +371,6 @@ export default class ConstraintBar extends ContainerObject {
     }
 
     private collapse() {
-        this._background.display.interactive = false;
-
         Assert.assertIsDefined(this._selectedConstraint);
         this._collapsed = true;
         const {config} = ConstraintBar;
@@ -422,8 +420,6 @@ export default class ConstraintBar extends ContainerObject {
     }
 
     private expand() {
-        this._background.display.interactive = true;
-
         Assert.assertIsDefined(this._selectedConstraint);
 
         this._collapsed = false;
