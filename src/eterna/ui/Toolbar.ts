@@ -159,10 +159,6 @@ export default class Toolbar extends ContainerObject {
 
     public onResized() {
         Assert.assertIsDefined(Flashbang.stageWidth);
-        this._invisibleBackground
-            .beginFill(0xff0000)
-            .drawRect(0, 0, Flashbang.stageWidth, 120)
-            .endFill();
 
         this.stateToggle.container.position.set(
             Flashbang.stageWidth / 2 - this.container.position.x,
@@ -196,7 +192,7 @@ export default class Toolbar extends ContainerObject {
         this._invisibleBackground.alpha = 0;
         this.container.addChild(this._invisibleBackground);
 
-        this._content = new VLayoutContainer(SPACE_NARROW);
+        this._content = new VLayoutContainer(7);
         this.container.addChild(this._content);
 
         this.stateToggle = new ToggleBar(this._states);
@@ -880,9 +876,6 @@ export default class Toolbar extends ContainerObject {
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
 
-        // Center the toolbar
-        this._content.x = (Flashbang.stageWidth - this._content.width) / 2;
-
         // Update the scroll container size, accounting for buttons
         const buttonOffset = this.leftArrow.display.width + this.rightArrow.display.width;
         this.scrollContainer.setSize(Flashbang.stageWidth - buttonOffset, Flashbang.stageHeight);
@@ -892,18 +885,28 @@ export default class Toolbar extends ContainerObject {
         this._content.layout(true);
         this.lowerToolbarLayout.layout(true);
         this._content.layout(true);
-
         this.updateArrowVisibility();
+        // Plus we have to re-layout again so that if our arrow visibility just changed to true, that
+        // the arrow gets positioned properly :/
+        this._content.layout(true);
+
+        // Center the toolbar
+        this._content.x = (Flashbang.stageWidth - this._content.width) / 2;
+
+        this._invisibleBackground
+            .beginFill(0xff0000)
+            .drawRect(0, 0, Flashbang.stageWidth, this._content.height + 70)
+            .endFill();
     }
 
     private updateArrowVisibility() {
-        this.rightArrow.display.visible = true;
-        this.leftArrow.display.visible = true;
-
         // maxScrollX being greater than 0 indicates that scrolling is possible and some content is covered up
         // Alpha is used here since we don't want to shift the scrollcontainer around the screen
         // when the arrows get shown/hidden - reserve some space for them!
         if (this.scrollContainer.maxScrollX > 0) {
+            this.rightArrow.display.visible = true;
+            this.leftArrow.display.visible = true;
+
             if (this.scrollContainer.scrollX > 0) {
                 this.leftArrow.display.alpha = 1;
             } else {
