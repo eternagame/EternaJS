@@ -81,9 +81,12 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
         Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));
 
-        this.regs.add(Eterna.chat.chatShowSignal.connect((param: {show:boolean,
-            bound:
-            {x:number, y:number, width:number, height:number}}) => {
+        this.regs.add(Eterna.chat.chatShowSignal.connect((param: {show:boolean, bound:{
+            x:number,
+            y:number,
+            width: number,
+            height: number
+        }}) => {
             Assert.assertIsDefined(Flashbang.stageWidth);
             Assert.assertIsDefined(Flashbang.stageHeight);
             this._chatShow = param.show;
@@ -432,10 +435,17 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
 
         // Title bar drag handles should fill remaining space
         const remainingWidth = this._currentBounds.width - (
-            this.ICON_SIZE * 2 + this.GAP * 6 + this._titleText.display.width + this._dropdown.width
+            this.ICON_SIZE * 2 + this.GAP * 5 + this._titleText.display.width + this._dropdown.width
         );
-        this._titleDraggerLeft.display.width = remainingWidth / 2;
-        this._titleDraggerRight.display.width = remainingWidth / 2;
+        const lW = this.GAP * 3 + this.ICON_SIZE + this._dropdown.width;
+        const tX = this._currentBounds.width / 2 - this._titleText.display.width / 2;
+        if (tX >= lW) {
+            this._titleDraggerLeft.display.width = tX - lW;// remainingWidth / 2;
+            this._titleDraggerRight.display.width = tX - (this.GAP * 2 + this.ICON_SIZE);// remainingWidth / 2;
+        } else {
+            this._titleDraggerLeft.display.width = remainingWidth / 2;
+            this._titleDraggerRight.display.width = remainingWidth / 2;
+        }
 
         // Resize handles go on the bottom left and right corners
         const relativeNglBounds = new Rectangle(0, 0, this.nglWidth, this.nglHeight);
@@ -468,7 +478,7 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
     }
 
     private get minWidth(): number {
-        return this.ICON_SIZE * 2 + this._dropdown.width + this._titleText.display.width + this.GAP * 6;
+        return this.ICON_SIZE * 2 + this._dropdown.width + this._titleText.display.width + this.GAP * 5;
     }
 
     public get nglWidth() {
