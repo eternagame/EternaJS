@@ -902,7 +902,7 @@ export default class PoseEditMode extends GameMode {
         });
 
         this._markerSwitcher = new MarkerSwitcher();
-        this._markerSwitcher.display.position.set(17, 200);
+        this._markerSwitcher.display.position.set(17, 294);
         this.addObject(this._markerSwitcher, this.uiLayer);
         this.regs?.add(this._markerSwitcher.selectedLayer.connectNotify((val) => this.setMarkerLayer(val)));
         this._markerSwitcher.display.visible = false;

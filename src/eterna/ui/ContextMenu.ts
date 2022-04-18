@@ -1,6 +1,6 @@
 import {UnitSignal} from 'signals';
 import {
-    Graphics
+    Graphics, Texture
 } from 'pixi.js';
 import {
     ContainerObject,
@@ -48,7 +48,7 @@ export default class ContextMenu extends ContainerObject {
 
     public addItem(
         text: string,
-        icon: string | undefined = undefined,
+        icon: string | Texture | undefined = undefined,
         tooltipText: string | undefined = undefined,
         fillColor: number | undefined = undefined
     ): GameButton {
@@ -118,6 +118,10 @@ export default class ContextMenu extends ContainerObject {
             this._buttonLayout.width + (ContextMenu.PANEL_MARGIN * 2),
             this._buttonLayout.height + (ContextMenu.PANEL_MARGIN * 2)
         );
+    }
+
+    public calcLayout() {
+        this.doLayout();
     }
 
     private readonly _panel: GamePanel;

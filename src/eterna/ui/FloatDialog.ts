@@ -1,5 +1,5 @@
 import {
-    Container, Graphics, Point, Sprite, InteractionEvent
+    Container, Graphics, Point, Sprite, InteractionEvent, Text
 } from 'pixi.js';
 import {
     ContainerObject,
@@ -9,7 +9,7 @@ import {
     Flashbang,
     Assert,
     VLayoutContainer, HLayoutContainer,
-    VAlign, HAlign, SpriteObject
+    VAlign, HAlign, SpriteObject, SceneObject
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -20,7 +20,7 @@ import SliderBar from './SliderBar';
 import ScrollContainer from './ScrollContainer';
 
 const frameColor = 0x2f94d1;
-const titleBackColor = 0x43586F;
+const titleBackColor = 0x043468;
 const backColor = 0x152843;
 const THUMB_WIDTH = 11;
 const THUMB_MARGIN = 26;
@@ -34,6 +34,10 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
     public readonly closed: Promise<T | null>;
     private title: string;
     public titleArea: Container;
+    private _titleDraggerLeft: SpriteObject;
+    private _titleText: SceneObject<Text>;
+    private _titleDraggerRight: SpriteObject;
+    private readonly GAP: number = 4;
     private closeButton: GameButton;
     private normalButton: GameButton;
     private frameContainer: Container;
@@ -44,7 +48,7 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
     private scrollContainer: ScrollContainer;
     private vSlider: SliderBar;
     private hSlider: SliderBar;
-    private closeIconSize: number = 35;
+    private closeIconSize: number = 24;
     private titleBackground: Graphics;
     private background: Graphics;
     private frameMask: Graphics;
@@ -114,31 +118,43 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
             .beginFill(titleBackColor)
             .drawRect(0, 0, 10, this.closeIconSize)
             .endFill();
-        const text = Fonts.std(this.title.toUpperCase(), 16).bold().color(0xffffff).build();
-        text.position.x = 10;
-        text.position.y = (this.closeIconSize - text.height) / 2;
         this.titleArea.addChild(this.titleBackground);
-        this.titleArea.addChild(text);
+
+        this._titleDraggerLeft = new SpriteObject(Sprite.from(Bitmaps.Img3DTitle));
+        this._titleDraggerLeft.display.height = this.closeIconSize;
+        this.addObject(this._titleDraggerLeft, this.titleArea);
+        this._titleDraggerLeft.display.position.x = this.closeIconSize + this.GAP;
+
+        this._titleText = new SceneObject<Text>(Fonts.std(this.title.toUpperCase(), 16).color(0xffffff).build());
+        this.addObject(this._titleText, this.titleArea);
+        this._titleText.display.position.y = (this.closeIconSize - this._titleText.display.height) / 2;
+
+        this._titleDraggerRight = new SpriteObject(Sprite.from(Bitmaps.Img3DTitle));
+        this._titleDraggerRight.display.height = this.closeIconSize;
+        this.addObject(this._titleDraggerRight, this.titleArea);
+
         this.titleArea.interactive = true;
         this.titleArea.height = this.closeIconSize;
 
         this.closeButton = new GameButton()
-            .up(Bitmaps.ImgClose)
-            .over(Bitmaps.ImgCloseOver)
-            .down(Bitmaps.ImgClose)
+            .up(Bitmaps.Img3DMin)
+            .over(Bitmaps.Img3DMinHover)
+            .down(Bitmaps.Img3DMin)
             .tooltip('Close');
         this.addObject(this.closeButton, this.titleArea);
-        this.closeButton.display.width = this.closeIconSize;
-        this.closeButton.display.height = this.closeIconSize;
+        this.closeButton.display.width = this.closeIconSize - 4;
+        this.closeButton.display.height = this.closeIconSize - 4;
+        this.closeButton.display.position.y = 2;
 
         this.normalButton = new GameButton()
-            .up(Bitmaps.ImgNormalSize)
-            .over(Bitmaps.ImgNormalSizeOver)
-            .down(Bitmaps.ImgNormalSize)
+            .up(Bitmaps.Img3DMaxRestore)
+            .over(Bitmaps.Img3DMaxRestoreHover)
+            .down(Bitmaps.Img3DMaxRestore)
             .tooltip('Normal size');
         this.addObject(this.normalButton, this.titleArea);
-        this.normalButton.display.width = this.closeIconSize;
-        this.normalButton.display.height = this.closeIconSize;
+        this.normalButton.display.width = this.closeIconSize - 4;
+        this.normalButton.display.height = this.closeIconSize - 4;
+        this.normalButton.display.position.y = 2;
 
         this.closeButton.clicked.connect(() => {
             this.close(null);
@@ -367,8 +383,8 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
             .endFill();
 
         this.frame.clear()
-            .lineStyle(1, frameColor)
-            .drawRect(0, 0, w - 1, h);
+            .lineStyle(2, frameColor)
+            .drawRect(0, 0, w, h);
 
         this.lbSprite.display.x = 0;
         this.lbSprite.display.y = 0 + h - this.iconSize;
@@ -392,8 +408,36 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         this.hSlider.display.visible = (contentW > containerW);
 
         this.titleBackground.width = w;
+        this.layoutTitleArea(w);
+    }
+
+    private layoutTitleArea(w: number) {
         this.closeButton.display.position.x = w - this.closeIconSize;
-        this.normalButton.display.position.x = w - 2 * this.closeIconSize - 2;
+        this.normalButton.display.position.x = 2;
+        if (w > this._titleText.display.width + this.closeIconSize * 2 + this.GAP * 4) {
+            const leftW = w / 2 - (this.closeIconSize + this._titleText.display.width / 2 + this.GAP * 2);
+            this._titleDraggerLeft.display.width = leftW;
+            this._titleDraggerLeft.display.height = this.closeIconSize;
+            this._titleDraggerLeft.display.position.x = this.closeIconSize + this.GAP;
+
+            const textX = this._titleDraggerLeft.display.position.x + this._titleDraggerLeft.display.width + this.GAP;
+            this._titleText.display.position.x = textX;
+
+            const rightW = w / 2 - (this.closeIconSize + this._titleText.display.width / 2 + this.GAP * 2);
+            this._titleDraggerRight.display.width = rightW;
+            this._titleDraggerRight.display.height = this.closeIconSize;
+            this._titleDraggerRight.display.position.x = w / 2 + this._titleText.display.width / 2 + this.GAP;
+        } else {
+            this._titleDraggerLeft.display.width = 0;
+            this._titleDraggerLeft.display.height = this.closeIconSize;
+            this._titleDraggerLeft.display.position.x = this.closeIconSize;
+
+            this._titleText.display.position.x = this.closeIconSize + this.GAP;
+
+            this._titleDraggerRight.display.width = 0;
+            this._titleDraggerRight.display.height = this.closeIconSize;
+            this._titleDraggerRight.display.position.x = w - this.closeIconSize;
+        }
     }
 
     private normalize() {
@@ -416,8 +460,8 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
             .endFill();
 
         this.frame.clear()
-            .lineStyle(1, frameColor)
-            .drawRect(0, 0, w - 1, h);
+            .lineStyle(2, frameColor)
+            .drawRect(0, 0, w, h);
 
         this.lbSprite.display.x = 0;
         this.lbSprite.display.y = 0 + h - this.iconSize;
@@ -425,8 +469,7 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         this.rbSprite.display.y = this.lbSprite.display.y;
 
         this.titleBackground.width = w;
-        this.closeButton.display.position.x = w - this.closeIconSize;
-        this.normalButton.display.position.x = w - 2 * this.closeIconSize - 2;
+        this.layoutTitleArea(w);
     }
 
     public updateFloatLocation() {
@@ -453,8 +496,8 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
             .endFill();
 
         this.frame.clear()
-            .lineStyle(1, frameColor)
-            .drawRect(0, 0, w - 1, h);
+            .lineStyle(2, frameColor)
+            .drawRect(0, 0, w, h);
 
         this.lbSprite.display.x = 0;
         this.lbSprite.display.y = 0 + h - this.iconSize;
@@ -462,8 +505,7 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         this.rbSprite.display.y = this.lbSprite.display.y;
 
         this.titleBackground.width = w;
-        this.closeButton.display.position.x = w - this.closeIconSize;
-        this.normalButton.display.position.x = w - 2 * this.closeIconSize - 2;
+        this.layoutTitleArea(w);
 
         this.scrollContainer.setSize(this.contentLay.width, this.contentLay.height);
         this.scrollContainer.doLayout();

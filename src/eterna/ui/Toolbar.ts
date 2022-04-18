@@ -25,7 +25,8 @@ import {
     Easing,
     Assert,
     ParallelTask,
-    VisibleTask
+    VisibleTask,
+    GameObjectRef
 } from 'flashbang';
 import {BoostersData} from 'eterna/puzzle/Puzzle';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -43,6 +44,7 @@ import ToggleBar from './ToggleBar';
 import ScrollContainer from './ScrollContainer';
 import AnnotationPanel from './AnnotationPanel';
 import TextBalloon from './TextBalloon';
+import BoosterDialog from './BoosterDialog';
 
 export enum ToolbarType {
     PUZZLE,
@@ -265,6 +267,7 @@ export default class Toolbar extends ContainerObject {
     public screenshotButton: GameButton;
 
     public specButton: GameButton;
+    public _contextMenuDialogRef: GameObjectRef = GameObjectRef.NULL;
 
     public settingsButton: GameButton;
     public futureFeatureButton: GameButton;
@@ -342,6 +345,7 @@ export default class Toolbar extends ContainerObject {
 
     public leftButtonsGroup: ButtonsGroup;
     public rightButtonsGroup: ButtonsGroup;
+    public boosterButtonsGroup: ButtonsGroup;
 
     public lowerVContainer: VLayoutContainer;
     public topHLayout: HLayoutContainer;
@@ -370,7 +374,6 @@ export default class Toolbar extends ContainerObject {
             states = 1,
             boosters,
             showGlue = false,
-            showAdvancedMenus = true,
             showLibrarySelect = false,
             annotationManager
         }: {
@@ -392,7 +395,6 @@ export default class Toolbar extends ContainerObject {
         this._type = type;
         this._states = states;
         this._showGlue = showGlue;
-        this._showAdvancedMenus = showAdvancedMenus;
         this._showLibrarySelect = showLibrarySelect;
         this._boostersData = boosters ?? null;
         this._annotationManager = annotationManager;
@@ -660,7 +662,7 @@ export default class Toolbar extends ContainerObject {
 
     private makeInfoButtons() {
         this.submitButton = new GameButton()
-            .allStates(Bitmaps.ImgSubmit)
+            .allStates(Bitmaps.smallImgSubmit)
             // .tooltip('Submit')
             .setCategory(ButtonCategory.INFO)
             .setName('Submit');
@@ -668,14 +670,14 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Submit',
             new GameButton()
-                .allStates(Bitmaps.ImgSubmit)
+                .allStates(Bitmaps.smallImgSubmit)
                 // .tooltip('Submit')
                 .setCategory(ButtonCategory.INFO)
                 .setName('Submit')
         );
 
         this.viewSolutionsButton = new ToolbarButton()
-            .allStates(Bitmaps.NovaSolver)
+            .allStates(Bitmaps.smallImgViewSolutions)
             .disabled(undefined)
             .tooltip('View all submitted designs for this puzzle.')
             .setCategory(ButtonCategory.INFO)
@@ -684,7 +686,7 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Solutions',
             new ToolbarButton()
-                .allStates(Bitmaps.NovaSolver)
+                .allStates(Bitmaps.smallImgViewSolutions)
                 .disabled(undefined)
                 // .tooltip('View all submitted designs for this puzzle.')
                 .setCategory(ButtonCategory.INFO)
@@ -692,7 +694,7 @@ export default class Toolbar extends ContainerObject {
         );
 
         this.specButton = new ToolbarButton()
-            .allStates(Bitmaps.ImgSpec)
+            .allStates(Bitmaps.smallImgSpec)
             .disabled(undefined)
             // .tooltip("View RNA's melting point, dotplot and other specs (S)")
             .hotkey(KeyCode.KeyS)
@@ -702,7 +704,7 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Spec',
             new ToolbarButton()
-                .allStates(Bitmaps.ImgSpec)
+                .allStates(Bitmaps.smallImgSpec)
                 .disabled(undefined)
                 // .tooltip("View RNA's melting point, dotplot and other specs (S)")
                 .setCategory(ButtonCategory.INFO)
@@ -710,7 +712,7 @@ export default class Toolbar extends ContainerObject {
         );
 
         this.settingsButton = new ToolbarButton()
-            .allStates(Bitmaps.ImgSettings)
+            .allStates(Bitmaps.smallImgSettings)
             // .tooltip('Game options')
             .setCategory(ButtonCategory.INFO)
             .setName('Settings');
@@ -718,7 +720,7 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Settings',
             new ToolbarButton()
-                .allStates(Bitmaps.ImgSettings)
+                .allStates(Bitmaps.smallImgSettings)
                 // .tooltip('Game options')
                 .setCategory(ButtonCategory.INFO)
                 .setName('Settings')
@@ -757,7 +759,7 @@ export default class Toolbar extends ContainerObject {
 
     private makeCreateButtons() {
         this.addBaseButton = new ToolbarButton()
-            .allStates(Bitmaps.ImgAddBase)
+            .allStates(Bitmaps.smallImgAddBase)
             .hotkey(KeyCode.Digit6)
             // .tooltip('Add a single base.')
             .setCategory(ButtonCategory.CREATE)
@@ -766,14 +768,14 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Add base',
             new GameButton()
-                .allStates(Bitmaps.ImgAddBase)
+                .allStates(Bitmaps.smallImgAddBase)
                 // .tooltip('Add a single base.')
                 .setCategory(ButtonCategory.CREATE)
                 .setName('Add base')
         );
 
         this.addPairButton = new ToolbarButton()
-            .allStates(Bitmaps.ImgAddPair)
+            .allStates(Bitmaps.smallImgAddPair)
             .hotkey(KeyCode.Digit7)
             // .tooltip('Add a pair.')
             .setCategory(ButtonCategory.CREATE)
@@ -782,14 +784,14 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Add pair',
             new ToolbarButton()
-                .allStates(Bitmaps.ImgAddPair)
+                .allStates(Bitmaps.smallImgAddPair)
                 // .tooltip('Add a pair.')
                 .setCategory(ButtonCategory.CREATE)
                 .setName('Add pair')
         );
 
         this.deleteButton = new ToolbarButton()
-            .allStates(Bitmaps.ImgErase)
+            .allStates(Bitmaps.smallImgDelete)
             .hotkey(KeyCode.Digit8)
             // .tooltip('Delete a base or a pair.')
             .setCategory(ButtonCategory.CREATE)
@@ -798,14 +800,14 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Delete',
             new ToolbarButton()
-                .allStates(Bitmaps.ImgErase)
+                .allStates(Bitmaps.smallImgDelete)
                 // .tooltip('Delete a base or a pair.')
                 .setCategory(ButtonCategory.CREATE)
                 .setName('Delete')
         );
 
         this.lockButton = new ToolbarButton()
-            .allStates(Bitmaps.ImgLock)
+            .allStates(Bitmaps.smallImgLock)
             .hotkey(KeyCode.Digit9)
             // .tooltip('Lock or unlock a base.')
             .setCategory(ButtonCategory.CREATE)
@@ -814,14 +816,14 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Lock',
             new ToolbarButton()
-                .allStates(Bitmaps.ImgLock)
+                .allStates(Bitmaps.smallImgLock)
                 // .tooltip('Lock or unlock a base.')
                 .setCategory(ButtonCategory.CREATE)
                 .setName('Lock')
         );
 
         this.moleculeButton = new ToolbarButton()
-            .allStates(Bitmaps.ImgMolecule)
+            .allStates(Bitmaps.smallImgMolecule)
             .hotkey(KeyCode.Digit0)
             // .tooltip('Create or remove a molecular binding site.')
             .setCategory(ButtonCategory.CREATE)
@@ -830,14 +832,14 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Molecule',
             new ToolbarButton()
-                .allStates(Bitmaps.ImgMolecule)
+                .allStates(Bitmaps.smallImgMolecule)
                 // .tooltip('Create or remove a molecular binding site.')
                 .setCategory(ButtonCategory.CREATE)
                 .setName('Molecule')
         );
 
         this.validate3DButton = new ToolbarButton()
-            .allStates(Bitmaps.ImgFileOpen)
+            .allStates(Bitmaps.smallImgValidate3D)
             // .tooltip('Validate 3D Models')
             .setCategory(ButtonCategory.CREATE)
             .setName('Open 3D');
@@ -845,7 +847,7 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Open 3D',
             new ToolbarButton()
-                .allStates(Bitmaps.ImgFileOpen)
+                .allStates(Bitmaps.smallImgValidate3D)
                 // .tooltip('Validate 3D Models')
                 .setCategory(ButtonCategory.CREATE)
                 .setName('Open 3D')
@@ -904,7 +906,7 @@ export default class Toolbar extends ContainerObject {
 
     private makeSolveButtons() {
         this.resetButton = new ToolbarButton()
-            .allStates(Bitmaps.ImgReset)
+            .allStates(Bitmaps.smallImgReset)
             // .tooltip(resetTooltip)
             .rscriptID(RScriptUIElementID.RESET)
             .setCategory(ButtonCategory.SOLVE)
@@ -913,30 +915,15 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Reset',
             new ToolbarButton()
-                .allStates(Bitmaps.ImgReset)
+                .allStates(Bitmaps.smallImgReset)
                 // .tooltip(resetTooltip)
                 .rscriptID(RScriptUIElementID.RESET)
                 .setCategory(ButtonCategory.SOLVE)
                 .setName('Reset')
         );
 
-        this.boostersMenu = new GameButton()
-            .allStates(Bitmaps.NovaBoosters)
-            .disabled(undefined)
-            .setCategory(ButtonCategory.SOLVE)
-            .setName('Boosters');
-        this.gameButtons.set('Boosters', this.boostersMenu);
-        this.bottomButtons.set(
-            'Boosters',
-            new ToolbarButton()
-                .allStates(Bitmaps.NovaBoosters)
-                .disabled(undefined)
-                .setCategory(ButtonCategory.SOLVE)
-                .setName('Boosters')
-        );
-
         this.freezeButton = new ToolbarButton()
-            .allStates(Bitmaps.ImgFreeze)
+            .allStates(Bitmaps.smallImgFreeze)
             // .tooltip('Frozen mode. Suspends/resumes folding engine calculations. (F)')
             .hotkey(KeyCode.KeyF)
             .rscriptID(RScriptUIElementID.FREEZE)
@@ -946,7 +933,7 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Freeze',
             new ToolbarButton()
-                .allStates(Bitmaps.ImgFreeze)
+                .allStates(Bitmaps.smallImgFreeze)
                 // .tooltip('Frozen mode. Suspends/resumes folding engine calculations. (F)')
                 .rscriptID(RScriptUIElementID.FREEZE)
                 .setCategory(ButtonCategory.SOLVE)
@@ -954,7 +941,7 @@ export default class Toolbar extends ContainerObject {
         );
 
         this.baseShiftButton = new ToolbarButton()
-            .allStates(Bitmaps.ImgSwap)
+            .allStates(Bitmaps.smallImgBaseShift)
             // .tooltip('Base shift')
             .setCategory(ButtonCategory.SOLVE)
             .setName('Shift base');
@@ -962,14 +949,14 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Shift base',
             new ToolbarButton()
-                .allStates(Bitmaps.ImgSwap)
+                .allStates(Bitmaps.smallImgBaseShift)
                 // .tooltip('Base shift')
                 .setCategory(ButtonCategory.SOLVE)
                 .setName('Shift base')
         );
 
         this.pairSwapButton = new ToolbarButton()
-            .allStates(Bitmaps.ImgSwap)
+            .allStates(Bitmaps.smallImgPairSwap)
             // .tooltip('Swap paired bases. (5)')
             .rscriptID(RScriptUIElementID.SWAP)
             .setCategory(ButtonCategory.SOLVE)
@@ -981,7 +968,7 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Swap pair',
             new ToolbarButton()
-                .allStates(Bitmaps.ImgSwap)
+                .allStates(Bitmaps.smallImgPairSwap)
                 // .tooltip('Swap paired bases. (5)')
                 .rscriptID(RScriptUIElementID.SWAP)
                 .setCategory(ButtonCategory.SOLVE)
@@ -989,7 +976,7 @@ export default class Toolbar extends ContainerObject {
         );
 
         this.undoButton = new GameButton()
-            .allStates(Bitmaps.ImgUndo)
+            .allStates(Bitmaps.smallImgUndo)
             // .tooltip('Undo')
             .hotkey(KeyCode.KeyZ)
             .rscriptID(RScriptUIElementID.UNDO)
@@ -999,14 +986,14 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Undo',
             new GameButton()
-                .allStates(Bitmaps.ImgUndo)
+                .allStates(Bitmaps.smallImgUndo)
                 // .tooltip('Undo')
                 .setCategory(ButtonCategory.SOLVE)
                 .setName('Undo')
         );
 
         this.redoButton = new GameButton()
-            .allStates(Bitmaps.ImgRedo)
+            .allStates(Bitmaps.smallImgRedo)
             // .tooltip('Redo')
             .hotkey(KeyCode.KeyY)
             .rscriptID(RScriptUIElementID.REDO)
@@ -1016,16 +1003,14 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Redo',
             new GameButton()
-                .allStates(Bitmaps.ImgRedo)
+                .allStates(Bitmaps.smallImgRedo)
                 // .tooltip('Redo')
                 .setCategory(ButtonCategory.SOLVE)
                 .setName('Redo')
         );
 
         this.librarySelectionButton = new ToolbarButton()
-            .up(Bitmaps.RandomBtn)
-            .over(Bitmaps.RandomBtnOver)
-            .down(Bitmaps.RandomBtn)
+            .allStates(Bitmaps.smallImgLibrarySelection)
             // .tooltip('Select bases to randomize')
             .setCategory(ButtonCategory.SOLVE)
             .setName('Select lib');
@@ -1033,16 +1018,14 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Select lib',
             new ToolbarButton()
-                .up(Bitmaps.RandomBtn)
-                .over(Bitmaps.RandomBtnOver)
-                .down(Bitmaps.RandomBtn)
+                .allStates(Bitmaps.smallImgLibrarySelection)
                 // .tooltip('Select bases to randomize')
                 .setCategory(ButtonCategory.SOLVE)
                 .setName('Select lib')
         );
 
         this.magicGlueButton = new ToolbarButton()
-            .allStates(Bitmaps.ImgMagicGlue)
+            .allStates(Bitmaps.smallImgMagicGlue)
             // .tooltip('Magic glue - change target structure in purple areas (Hold Alt)')
             .setCategory(ButtonCategory.SOLVE)
             .setName('Magic glue');
@@ -1051,7 +1034,7 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Magic glue',
             new ToolbarButton()
-                .allStates(Bitmaps.ImgMagicGlue)
+                .allStates(Bitmaps.smallImgMagicGlue)
                 // .tooltip('Magic glue - change target structure in purple areas (Hold Alt)')
                 .setCategory(ButtonCategory.SOLVE)
                 .setName('Magic glue')
@@ -1117,7 +1100,7 @@ export default class Toolbar extends ContainerObject {
 
     private makeInoutButtons() {
         this.copyButton = new GameButton()
-            .allStates(Bitmaps.ImgCopy)
+            .allStates(Bitmaps.smallImgCopy)
             // .tooltip('Copy the current sequence')
             .setCategory(ButtonCategory.IMPORT_EXPORT)
             .setName('Copy');
@@ -1125,14 +1108,14 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Copy',
             new GameButton()
-                .allStates(Bitmaps.ImgCopy)
+                .allStates(Bitmaps.smallImgCopy)
                 // .tooltip('Copy the current sequence')
                 .setCategory(ButtonCategory.IMPORT_EXPORT)
                 .setName('Copy')
         );
 
         this.pasteButton = new GameButton()
-            .allStates(Bitmaps.ImgPaste)
+            .allStates(Bitmaps.smallImgPaste)
             // .tooltip('Type in a sequence')
             .setCategory(ButtonCategory.IMPORT_EXPORT)
             .setName('Paste');
@@ -1140,14 +1123,14 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Paste',
             new GameButton()
-                .allStates(Bitmaps.ImgPaste)
+                .allStates(Bitmaps.smallImgPaste)
                 // .tooltip('Type in a sequence')
                 .setCategory(ButtonCategory.IMPORT_EXPORT)
                 .setName('Paste')
         );
 
         this.downloadHKWSButton = new GameButton()
-            .allStates(Bitmaps.CustomLayout)
+            .allStates(Bitmaps.smallImgDownloadHKWS)
             // .tooltip('Download a draw_rna input file for the current layout')
             .setCategory(ButtonCategory.IMPORT_EXPORT)
             .setName('Download HKWS');
@@ -1155,7 +1138,7 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Download HKWS',
             new GameButton()
-                .allStates(Bitmaps.CustomLayout)
+                .allStates(Bitmaps.smallImgDownloadHKWS)
                 // .tooltip('Download a draw_rna input file for the current layout')
                 .setCategory(ButtonCategory.IMPORT_EXPORT)
                 .setName('Download HKWS')
@@ -1164,7 +1147,7 @@ export default class Toolbar extends ContainerObject {
         this.downloadHKWSButton.display.interactive = true;
 
         this.downloadSVGButton = new GameButton()
-            .allStates(Bitmaps.CustomLayout)
+            .allStates(Bitmaps.smallImgDownloadSVG)
             // .tooltip('Download an SVG of the current RNA layout')
             .setCategory(ButtonCategory.IMPORT_EXPORT)
             .setName('Download SVG');
@@ -1172,7 +1155,7 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Download SVG',
             new GameButton()
-                .allStates(Bitmaps.CustomLayout)
+                .allStates(Bitmaps.smallImgDownloadSVG)
                 // .tooltip('Download an SVG of the current RNA layout')
                 .setCategory(ButtonCategory.IMPORT_EXPORT)
                 .setName('Download SVG')
@@ -1181,7 +1164,7 @@ export default class Toolbar extends ContainerObject {
         // this.downloadSVGButton.display.interactive = true;
 
         this.screenshotButton = new ToolbarButton()
-            .allStates(Bitmaps.ImgScreenshot)
+            .allStates(Bitmaps.smallImgScreenshot)
             // .tooltip('Screenshot')
             .disabled(undefined)
             .setCategory(ButtonCategory.IMPORT_EXPORT)
@@ -1190,7 +1173,7 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Screenshot',
             new ToolbarButton()
-                .allStates(Bitmaps.ImgScreenshot)
+                .allStates(Bitmaps.smallImgScreenshot)
                 // .tooltip('Screenshot')
                 .disabled(undefined)
                 .setCategory(ButtonCategory.IMPORT_EXPORT)
@@ -1203,16 +1186,14 @@ export default class Toolbar extends ContainerObject {
             this.pushButtonToCategory(this.copyButton);
             this.pushButtonToCategory(this.pasteButton);
         }
-        if (this._showAdvancedMenus) {
-            this.pushButtonToCategory(this.downloadHKWSButton);
-            this.pushButtonToCategory(this.downloadSVGButton);
-        }
+        this.pushButtonToCategory(this.downloadHKWSButton);
+        this.pushButtonToCategory(this.downloadSVGButton);
         this.pushButtonToCategory(this.screenshotButton);
     }
 
     private makeViewButtons() {
         this.nucleotideFindButton = new ToolbarButton()
-            .allStates(Bitmaps.ImgFind)
+            .allStates(Bitmaps.smallImgNucleotideFind)
             .disabled()
             // .tooltip('Type a nucleotide index to put it in the center of the screen (J)')
             .hotkey(KeyCode.KeyJ)
@@ -1222,7 +1203,7 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Find',
             new ToolbarButton()
-                .allStates(Bitmaps.ImgFind)
+                .allStates(Bitmaps.smallImgNucleotideFind)
                 .disabled()
                 // .tooltip('Type a nucleotide index to put it in the center of the screen (J)')
                 .setCategory(ButtonCategory.VIEW)
@@ -1230,7 +1211,7 @@ export default class Toolbar extends ContainerObject {
         );
 
         this.nucleotideRangeButton = new ToolbarButton()
-            .allStates(Bitmaps.NovaBigPuzzleImg)
+            .allStates(Bitmaps.smallImgNucleotideRange)
             .disabled()
             // .tooltip('Enter a nucleotide range to view (V)')
             .hotkey(KeyCode.KeyV)
@@ -1240,7 +1221,7 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Range',
             new ToolbarButton()
-                .allStates(Bitmaps.NovaBigPuzzleImg)
+                .allStates(Bitmaps.smallImgNucleotideRange)
                 .disabled()
                 // .tooltip('Enter a nucleotide range to view (V)')
                 .setCategory(ButtonCategory.VIEW)
@@ -1248,7 +1229,7 @@ export default class Toolbar extends ContainerObject {
         );
 
         this.explosionFactorButton = new ToolbarButton()
-            .allStates(Bitmaps.ImgFlareSmall)
+            .allStates(Bitmaps.smallImgExplosionFactor)
             .disabled()
             // .tooltip('Set explosion factor ([, ])')
             .setCategory(ButtonCategory.VIEW)
@@ -1257,7 +1238,7 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Explosion factor',
             new ToolbarButton()
-                .allStates(Bitmaps.ImgFlareSmall)
+                .allStates(Bitmaps.smallImgExplosionFactor)
                 .disabled()
                 // .tooltip('Set explosion factor ([, ])')
                 .setCategory(ButtonCategory.VIEW)
@@ -1265,7 +1246,7 @@ export default class Toolbar extends ContainerObject {
         );
 
         this.pipButton = new ToolbarButton()
-            .allStates(Bitmaps.ImgPip)
+            .allStates(Bitmaps.smallImgPip)
             // .tooltip('Set PiP mode (P)')
             .hotkey(KeyCode.KeyP)
             .rscriptID(RScriptUIElementID.PIP)
@@ -1275,14 +1256,14 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'PiP',
             new ToolbarButton()
-                .allStates(Bitmaps.ImgPip)
+                .allStates(Bitmaps.smallImgPip)
                 // .tooltip('Set PiP mode (P)')
                 .setCategory(ButtonCategory.VIEW)
                 .setName('PiP')
         );
 
         this.zoomInButton = new GameButton()
-            .allStates(Bitmaps.ImgZoomIn)
+            .allStates(Bitmaps.smallImgZoomIn)
             .disabled(Bitmaps.ImgZoomInDisable)
             // .tooltip('Zoom in (=)')
             .hotkey(KeyCode.Equal)
@@ -1293,7 +1274,7 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Zoom in',
             new GameButton()
-                .allStates(Bitmaps.ImgZoomIn)
+                .allStates(Bitmaps.smallImgZoomIn)
                 .disabled(Bitmaps.ImgZoomInDisable)
                 // .tooltip('Zoom in (=)')
                 .setCategory(ButtonCategory.VIEW)
@@ -1301,7 +1282,7 @@ export default class Toolbar extends ContainerObject {
         );
 
         this.zoomOutButton = new GameButton()
-            .allStates(Bitmaps.ImgZoomOut)
+            .allStates(Bitmaps.smallImgZoomOut)
             .disabled(Bitmaps.ImgZoomOutDisable)
             // .tooltip('Zoom out (-)')
             .hotkey(KeyCode.Minus)
@@ -1312,7 +1293,7 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Zoom out',
             new GameButton()
-                .allStates(Bitmaps.ImgZoomOut)
+                .allStates(Bitmaps.smallImgZoomOut)
                 .disabled(Bitmaps.ImgZoomOutDisable)
                 // .tooltip('Zoom out (-)')
                 .setCategory(ButtonCategory.VIEW)
@@ -1341,7 +1322,7 @@ export default class Toolbar extends ContainerObject {
 
     private makeCustomButtons() {
         this.moveButton = new GameButton()
-            .allStates(Bitmaps.CustomLayout)
+            .allStates(Bitmaps.smallImgMove)
             // .tooltip('Move a nucleotide or stem by Ctrl-Shift-Click')
             .setCategory(ButtonCategory.CUSTOM_LAYOUT)
             .setName('Move');
@@ -1349,7 +1330,7 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Move',
             new GameButton()
-                .allStates(Bitmaps.CustomLayout)
+                .allStates(Bitmaps.smallImgMove)
                 // .tooltip('Move a nucleotide or stem by Ctrl-Shift-Click')
                 .setCategory(ButtonCategory.CUSTOM_LAYOUT)
                 .setName('Move')
@@ -1358,7 +1339,7 @@ export default class Toolbar extends ContainerObject {
         this.moveButton.display.interactive = true;
 
         this.rotateStemButton = new GameButton()
-            .allStates(Bitmaps.CustomLayout)
+            .allStates(Bitmaps.smallImgRotateStem)
             // .tooltip('Rotate stem clockwise 1/4 turn by Ctrl-Shift-Click')
             .setCategory(ButtonCategory.CUSTOM_LAYOUT)
             .setName('Rotate stem');
@@ -1366,7 +1347,7 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Rotate stem',
             new GameButton()
-                .allStates(Bitmaps.CustomLayout)
+                .allStates(Bitmaps.smallImgRotateStem)
                 // .tooltip('Rotate stem clockwise 1/4 turn by Ctrl-Shift-Click')
                 .setCategory(ButtonCategory.CUSTOM_LAYOUT)
                 .setName('Rotate stem')
@@ -1375,7 +1356,7 @@ export default class Toolbar extends ContainerObject {
         this.rotateStemButton.display.interactive = true;
 
         this.flipStemButton = new GameButton()
-            .allStates(Bitmaps.CustomLayout)
+            .allStates(Bitmaps.smallImgFlipStem)
             // .tooltip('Flip stem by Ctrl-Shift-Click')
             .setCategory(ButtonCategory.CUSTOM_LAYOUT)
             .setName('Flip stem');
@@ -1383,7 +1364,7 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Flip stem',
             new GameButton()
-                .allStates(Bitmaps.CustomLayout)
+                .allStates(Bitmaps.smallImgFlipStem)
                 // .tooltip('Flip stem by Ctrl-Shift-Click')
                 .setCategory(ButtonCategory.CUSTOM_LAYOUT)
                 .setName('Flip stem')
@@ -1392,7 +1373,7 @@ export default class Toolbar extends ContainerObject {
         this.flipStemButton.display.interactive = true;
 
         this.snapToGridButton = new GameButton()
-            .allStates(Bitmaps.CustomLayout)
+            .allStates(Bitmaps.smallImgSnapToGrid)
             // .tooltip('Snap current layout to a grid')
             .setCategory(ButtonCategory.CUSTOM_LAYOUT)
             .setName('Snap to grid');
@@ -1400,7 +1381,7 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Snap to grid',
             new GameButton()
-                .allStates(Bitmaps.CustomLayout)
+                .allStates(Bitmaps.smallImgSnapToGrid)
                 // .tooltip('Snap current layout to a grid')
                 .setCategory(ButtonCategory.CUSTOM_LAYOUT)
                 .setName('Snap to grid')
@@ -1410,17 +1391,15 @@ export default class Toolbar extends ContainerObject {
     }
 
     private makeCustomLayout() {
-        if (this._showAdvancedMenus) {
-            this.pushButtonToCategory(this.moveButton);
-            this.pushButtonToCategory(this.rotateStemButton);
-            this.pushButtonToCategory(this.flipStemButton);
-            this.pushButtonToCategory(this.snapToGridButton);
-        }
+        this.pushButtonToCategory(this.moveButton);
+        this.pushButtonToCategory(this.rotateStemButton);
+        this.pushButtonToCategory(this.flipStemButton);
+        this.pushButtonToCategory(this.snapToGridButton);
     }
 
     private makeAnnotateButtons() {
         this.baseMarkerButton = new ToolbarButton()
-            .allStates(Bitmaps.ImgBaseMarker)
+            .allStates(Bitmaps.smallImgBaseMarker)
             // .tooltip('Mark bases (hold ctrl)')
             .setCategory(ButtonCategory.ANNOTATE)
             .setName('Base marker');
@@ -1429,14 +1408,14 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Base marker',
             new ToolbarButton()
-                .allStates(Bitmaps.ImgBaseMarker)
+                .allStates(Bitmaps.smallImgBaseMarker)
                 // .tooltip('Mark bases (hold ctrl)')
                 .setCategory(ButtonCategory.ANNOTATE)
                 .setName('Base marker')
         );
 
         this.annotationModeButton = new ToolbarButton()
-            .allStates(Bitmaps.ImgAnnotationMode)
+            .allStates(Bitmaps.smallImgAnnotationMode)
             // .tooltip('Annotation Mode')
             .setCategory(ButtonCategory.ANNOTATE)
             .setName('Annotation mode');
@@ -1445,15 +1424,15 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Annotation mode',
             new ToolbarButton()
-                .allStates(Bitmaps.ImgAnnotationMode)
+                .allStates(Bitmaps.smallImgAnnotationMode)
                 // .tooltip('Annotation Mode')
                 .setCategory(ButtonCategory.ANNOTATE)
                 .setName('Annotation mode')
         );
 
         this.annotationPanelButton = new ToolbarButton()
-            .allStates(Bitmaps.ImgAnnotationLayer)
-            .selected(Bitmaps.ImgAnnotationLayerSelected)
+            .allStates(Bitmaps.smallImgAnnotationPanel)
+            .selected(Bitmaps.smallImgAnnotationPanel)
             // .tooltip('Annotations Panel')
             .setCategory(ButtonCategory.ANNOTATE)
             .setName('Annotation panel');
@@ -1462,8 +1441,8 @@ export default class Toolbar extends ContainerObject {
         this.bottomButtons.set(
             'Annotation panel',
             new ToolbarButton()
-                .allStates(Bitmaps.ImgAnnotationLayer)
-                .selected(Bitmaps.ImgAnnotationLayerSelected)
+                .allStates(Bitmaps.smallImgAnnotationPanel)
+                .selected(Bitmaps.smallImgAnnotationPanel)
                 // .tooltip('Annotations Panel')
                 .setCategory(ButtonCategory.ANNOTATE)
                 .setName('Annotation panel')
@@ -1490,58 +1469,53 @@ export default class Toolbar extends ContainerObject {
                 this.annotationPanelButton,
                 this._annotationManager
             );
+            this.addObject(this.annotationPanel, this.mode?.container);
 
-            if (this._showAdvancedMenus) {
-                this.addObject(this.annotationPanel, this.mode?.container);
+            this.pushButtonToCategory(this.annotationModeButton);
+            this.pushButtonToCategory(this.annotationPanelButton);
 
-                this.pushButtonToCategory(this.annotationModeButton);
-                this.pushButtonToCategory(this.annotationPanelButton);
+            this.regs.add(
+                this.annotationModeButton.clicked.connect(() => {
+                    this._deselectAllPaintTools();
+                    this.annotationModeButton.toggled.value = true;
+                    this.getMirrorButton(
+                        this.annotationModeButton
+                    ).toggled.value = true;
 
-                this.regs.add(
-                    this.annotationModeButton.clicked.connect(() => {
-                        this._deselectAllPaintTools();
-                        this.annotationModeButton.toggled.value = true;
-                        this.getMirrorButton(
-                            this.annotationModeButton
-                        ).toggled.value = true;
+                    Assert.assertIsDefined(this._annotationManager);
+                    // this._annotationManager.setAnnotationMode(true);
+                })
+            );
 
-                        Assert.assertIsDefined(this._annotationManager);
-                        // this._annotationManager.setAnnotationMode(true);
-                    })
-                );
-
-                this.regs.add(
-                    this._annotationManager.viewAnnotationDataUpdated.connect(
-                        () => {
-                            // this.annotationPanel.updatePanel();
-                        }
-                    )
-                );
-            }
+            this.regs.add(
+                this._annotationManager.viewAnnotationDataUpdated.connect(
+                    () => {
+                        // this.annotationPanel.updatePanel();
+                    }
+                )
+            );
         }
     }
 
     private makeTargetButtons() {
         this.naturalButton = new ToolbarButton()
-            .allStates(Bitmaps.ImgNative)
-            .selected(Bitmaps.ImgNativeOver)
+            .allStates(Bitmaps.smallImgNatural)
+            .selected(Bitmaps.smallImgNatural)
             // .tooltip('Natural Mode. RNA folds into the most stable shape.')
             .rscriptID(RScriptUIElementID.TOGGLENATURAL)
             .setName('naturalButton');
 
         this.estimateButton = new ToolbarButton()
-            .up(Bitmaps.ImgEstimate)
-            .over(Bitmaps.ImgEstimateOver)
-            .down(Bitmaps.ImgEstimateSelected)
-            .selected(Bitmaps.ImgEstimateSelected)
+            .allStates(Bitmaps.smallImgEstimate)
+            .selected(Bitmaps.smallImgEstimate)
             // .tooltip(
             //     'Estimate Mode. The game approximates how the RNA actually folded in a test tube.'
             // )
             .setName('estimateButton');
 
         this.targetButton = new ToolbarButton()
-            .allStates(Bitmaps.ImgTarget)
-            .selected(Bitmaps.ImgTargetOver)
+            .allStates(Bitmaps.smallImgTarget)
+            .selected(Bitmaps.smallImgTarget)
             // .tooltip('Target Mode. RNA freezes into the desired shape.')
             .rscriptID(RScriptUIElementID.TOGGLETARGET)
             .setName('targetButton');
@@ -1549,39 +1523,31 @@ export default class Toolbar extends ContainerObject {
 
     private makeFeedbackLayout() {
         this.letterColorButton = new ToolbarButton()
-            .up(Bitmaps.ImgColoring)
-            .over(Bitmaps.ImgColoringOver)
-            .down(Bitmaps.ImgColoringSelected)
-            .selected(Bitmaps.ImgColoringSelected)
+            .allStates(Bitmaps.smallImgLetterColor)
+            .selected(Bitmaps.smallImgLetterColor)
             // .tooltip('Color sequences based on base colors as in the game.')
             .setName('Letter color');
         this.gameButtons.set('Letter color', this.letterColorButton);
         this.bottomButtons.set(
             'Letter color',
             new ToolbarButton()
-                .up(Bitmaps.ImgColoring)
-                .over(Bitmaps.ImgColoringOver)
-                .down(Bitmaps.ImgColoringSelected)
-                .selected(Bitmaps.ImgColoringSelected)
+                .allStates(Bitmaps.smallImgLetterColor)
+                .selected(Bitmaps.smallImgLetterColor)
                 // .tooltip('Color sequences based on base colors as in the game.')
                 .setName('Letter color')
         );
 
         this.expColorButton = new ToolbarButton()
-            .up(Bitmaps.ImgFlask)
-            .over(Bitmaps.ImgFlaskOver)
-            .down(Bitmaps.ImgFlaskSelected)
-            .selected(Bitmaps.ImgFlaskSelected)
+            .allStates(Bitmaps.smallImgExpColor)
+            .selected(Bitmaps.smallImgExpColor)
             // .tooltip('Color sequences based on experimental data.')
             .setName('Exp color');
         this.gameButtons.set('Exp color', this.expColorButton);
         this.bottomButtons.set(
             'Exp color',
             new ToolbarButton()
-                .up(Bitmaps.ImgFlask)
-                .over(Bitmaps.ImgFlaskOver)
-                .down(Bitmaps.ImgFlaskSelected)
-                .selected(Bitmaps.ImgFlaskSelected)
+                .allStates(Bitmaps.smallImgExpColor)
+                .selected(Bitmaps.smallImgExpColor)
                 // .tooltip('Color sequences based on experimental data.')
                 .setName('Exp color')
         );
@@ -1762,6 +1728,64 @@ export default class Toolbar extends ContainerObject {
                 this.topScrollContainer.content
             );
 
+            const boosterBts: GameButton[] = [];
+            if (this._boostersData != null) {
+                this.boostersMenu = new ToolbarButton()
+                    .allStates(Bitmaps.smallImgBoosters)
+                    .setCategory(ButtonCategory.SOLVE)
+                    .setName('BoosterMenu')
+                    .disabled(undefined);
+                this.bottomButtons.set(
+                    'BoosterMenu',
+                    new ToolbarButton()
+                        .allStates(Bitmaps.smallImgBoosters)
+                    // .tooltip('Game options')
+                        .setCategory(ButtonCategory.SOLVE)
+                        .setName('BoosterMenu')
+                );
+
+                this.gameButtons.set('BoosterMenu', this.boostersMenu);
+                boosterBts.push(this.getMirrorButton(this.boostersMenu));
+                this.boostersMenu.display.interactive = true;
+                this.pushButtonToCategory(this.boostersMenu);
+
+                this.boostersMenu.clicked.connect(() => {
+                    if (this._boostersData != null && this._boostersData.actions != null) {
+                        const mode = this.mode as PoseEditMode;
+                        mode.showDialog(new BoosterDialog(this._boostersData));
+                    }
+                });
+
+                if (this._boostersData.paint_tools != null) {
+                    const mode: PoseEditMode = this.mode as PoseEditMode;
+                    for (const data of this._boostersData.paint_tools) {
+                        Booster.create(mode, data).then((booster) => {
+                            booster.onLoad();
+                            const button: GameButton = booster.createButton();
+                            button.setName(`BoosterPainting-${button.label}`)
+                                .setCategory(ButtonCategory.SOLVE);
+                            this.regs.add(
+                                button.clicked.connect(() => {
+                                    mode.setPosesColor(booster.toolColor);
+                                    this._deselectAllPaintTools();
+                                })
+                            );
+                            this.dynPaintTools.push(button);
+                            button.display.interactive = true;
+                            this.pushButtonToCategory(button);
+                        });
+                    }
+                }
+            }
+            this.boosterButtonsGroup = new ButtonsGroup(boosterBts);
+            if (this.boosterButtonsGroup.buttons.length > 0) {
+                this.addObject(
+                    this.boosterButtonsGroup,
+                    this.topScrollContainer.content
+                );
+                this.boosterButtonsGroup._content.interactive = true;
+            }
+
             this.addObject(this.palette, this.topScrollContainer.content);
             this.palette.changeDefaultMode();
 
@@ -1815,30 +1839,6 @@ export default class Toolbar extends ContainerObject {
                     this.onDragStart(e);
                 }
             );
-
-            if (
-                this._boostersData != null
-                && this._boostersData.paint_tools != null
-            ) {
-                const mode: PoseEditMode = this.mode as PoseEditMode;
-                const boosterPaintToolsLayout = new HLayoutContainer();
-                this.lowerHLayout.addChild(boosterPaintToolsLayout);
-                for (const data of this._boostersData.paint_tools) {
-                    Booster.create(mode, data).then((booster) => {
-                        booster.onLoad();
-                        const button: GameButton = booster.createButton();
-                        this.regs.add(
-                            button.clicked.connect(() => {
-                                mode.setPosesColor(booster.toolColor);
-                                this._deselectAllPaintTools();
-                            })
-                        );
-                        this.dynPaintTools.push(button);
-                        this.addObject(button, boosterPaintToolsLayout);
-                        this.updateLayout();
-                    });
-                }
-            }
         }
     }
 
@@ -1953,7 +1953,10 @@ export default class Toolbar extends ContainerObject {
 
         const leftWidth = this.leftButtonsGroup.display.width;
         const rightWidth = this.rightButtonsGroup.display.width;
-        const topWidth = leftWidth + TOP_HSPACE + palWidth + TOP_HSPACE + rightWidth;
+        const boosterWidth = this.boosterButtonsGroup.buttons.length > 0 ? this.boosterButtonsGroup.display.width : 0;
+
+        const topWidth = leftWidth + TOP_HSPACE + palWidth + TOP_HSPACE
+        + (boosterWidth > 0 ? (boosterWidth + TOP_HSPACE) : 0) + rightWidth;
 
         if (topWidth > MIDDLE_WIDTH) {
             this._scrollTopPrevButton.display.visible = true;
@@ -1963,6 +1966,13 @@ export default class Toolbar extends ContainerObject {
             this.leftButtonsGroup.display.position.x = x;
             this.leftButtonsGroup.display.position.y = 1;
             x += leftWidth + TOP_HSPACE;
+
+            if (boosterWidth > 0) {
+                this.boosterButtonsGroup.display.position.x = x;
+                this.boosterButtonsGroup.display.position.y = 1;
+                x += boosterWidth + TOP_HSPACE;
+            }
+
             if (this._type !== ToolbarType.FEEDBACK) {
                 this.palette.display.position.x = x;
                 this.palette.display.position.y = 1;
@@ -1985,6 +1995,13 @@ export default class Toolbar extends ContainerObject {
             this.leftButtonsGroup.display.position.x = x;
             this.leftButtonsGroup.display.position.y = 1;
             x += leftWidth + TOP_HSPACE;
+
+            if (boosterWidth > 0) {
+                this.boosterButtonsGroup.display.position.x = x;
+                this.boosterButtonsGroup.display.position.y = 1;
+                x += boosterWidth + TOP_HSPACE;
+            }
+
             if (this._type !== ToolbarType.FEEDBACK) {
                 this.palette.display.position.x = x;
                 this.palette.display.position.y = 1;
@@ -2843,7 +2860,7 @@ export default class Toolbar extends ContainerObject {
             if (btnIndex >= 0) {
                 this._draggingElementIndex = btnIndex;
                 const name = this._getButtonName(e.target);
-                if (name) {
+                if (name && !name.includes('Booster')) {
                     const foundButton = this.bottomButtons.get(name);
                     if (foundButton) {
                         this._draggingElement = foundButton.display;
@@ -3607,7 +3624,6 @@ export default class Toolbar extends ContainerObject {
     private readonly _type: ToolbarType;
     private readonly _states: number;
     private readonly _showGlue: boolean;
-    private readonly _showAdvancedMenus: boolean;
     private readonly _showLibrarySelect: boolean;
     private readonly _boostersData: BoostersData | null;
 

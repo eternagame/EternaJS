@@ -10,7 +10,9 @@ export default class MarkerSwitcher extends ContainerObject {
     public readonly selectedLayer: ValueView<string> = new Value(PLAYER_MARKER_LAYER);
 
     protected added() {
-        this.display.addChild(new Sprite(BitmapManager.getBitmap(Bitmaps.ImgRing)));
+        const icon = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgRing));
+        this.display.addChild(icon);
+        icon.position.set(0, (32 - icon.height) / 2);
         this.addDropdown([PLAYER_MARKER_LAYER], PLAYER_MARKER_LAYER);
     }
 
@@ -23,10 +25,13 @@ export default class MarkerSwitcher extends ContainerObject {
             fontSize: 14,
             options,
             defaultOption: selectedOption,
+            color: 0x043468,
+            textColor: 0xFFFFFF,
+            height: 32,
             borderWidth: 0,
             dropShadow: true
         });
-        this._dropdown.display.position.x = 26;
+        this._dropdown.display.position.x = 32;
         this.addObject(this._dropdown, this.container);
         this.regs?.add(this._dropdown.selectedOption.connectNotify((val) => { this.selectedLayer.value = val; }));
     }

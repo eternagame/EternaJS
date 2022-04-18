@@ -44,11 +44,10 @@ export default class FolderSwitcher extends ContainerObject {
     }
 
     protected added() {
-        const icon = new Sprite(BitmapManager.getBitmap(Bitmaps.Folder));
-        icon.height = 32;
-        icon.scale.x = icon.scale.y;
+        const icon = new Sprite(BitmapManager.getBitmap(Bitmaps.smallImgFoldingEngine));
         this.display.addChild(icon);
-        this._dropdown.display.position.x = icon.width + 4;
+        icon.position.set(0, (32 - icon.height) / 2);
+        this._dropdown.display.position.x = 32;
         this.addObject(this._dropdown, this.display);
     }
 

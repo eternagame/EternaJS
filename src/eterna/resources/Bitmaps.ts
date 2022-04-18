@@ -407,6 +407,52 @@ export default class Bitmaps {
     public static readonly ImgNormalSize: string = require('assets/UI/normal-size.png');
     public static readonly ImgNormalSizeOver: string = require('assets/UI/normal-size-hover.png');
 
+    public static readonly smallImgAddBase: string = require('assets/SmallUI/addBase.png');
+    public static readonly smallImgAddPair: string = require('assets/SmallUI/addPair.png');
+    public static readonly smallImgAnnotationMode: string = require('assets/SmallUI/annotationMode.png');
+    public static readonly smallImgAnnotationPanel: string = require('assets/SmallUI/annotationPanel.png');
+    public static readonly smallImgBaseMarker: string = require('assets/SmallUI/baseMarker.png');
+    public static readonly smallImgBaseShift: string = require('assets/SmallUI/baseShift.png');
+    public static readonly smallImgBoosters: string = require('assets/SmallUI/boosters.png');
+    public static readonly smallImgCopy: string = require('assets/SmallUI/copy.png');
+    public static readonly smallImgDelete: string = require('assets/SmallUI/delete.png');
+    public static readonly smallImgDownloadHKWS: string = require('assets/SmallUI/downloadHKWS.png');
+    public static readonly smallImgDownloadSVG: string = require('assets/SmallUI/downloadSVG.png');
+    public static readonly smallImgEstimate: string = require('assets/SmallUI/estimate.png');
+    public static readonly smallImgExpColor: string = require('assets/SmallUI/expColor.png');
+    public static readonly smallImgExplosionFactor: string = require('assets/SmallUI/explosionFactor.png');
+    public static readonly smallImgFlipStem: string = require('assets/SmallUI/flipStem.png');
+    public static readonly smallImgFoldingEngine: string = require('assets/SmallUI/foldingEngine.png');
+    public static readonly smallImgFreeze: string = require('assets/SmallUI/freeze.png');
+    public static readonly smallImgLetterColor: string = require('assets/SmallUI/letterColor.png');
+    public static readonly smallImgLibrarySelection: string = require('assets/SmallUI/librarySelection.png');
+    public static readonly smallImgLock: string = require('assets/SmallUI/lock.png');
+    public static readonly smallImgMagicGlue: string = require('assets/SmallUI/magicGlue.png');
+    public static readonly smallImgMolecule: string = require('assets/SmallUI/molecule.png');
+    public static readonly smallImgMove: string = require('assets/SmallUI/move.png');
+    public static readonly smallImgNatural: string = require('assets/SmallUI/natural.png');
+    public static readonly smallImgNucleotideFind: string = require('assets/SmallUI/nucleotideFind.png');
+    public static readonly smallImgNucleotideRange: string = require('assets/SmallUI/nucleotideRange.png');
+    public static readonly smallImgPairSwap: string = require('assets/SmallUI/pairSwap.png');
+    public static readonly smallImgPaste: string = require('assets/SmallUI/paste.png');
+    public static readonly smallImgPip: string = require('assets/SmallUI/pip.png');
+    public static readonly smallImgPuzzleInfo: string = require('assets/SmallUI/puzzleInfo.png');
+    public static readonly smallImgRedo: string = require('assets/SmallUI/redo.png');
+    public static readonly smallImgReset: string = require('assets/SmallUI/reset.png');
+    public static readonly smallImgRotateStem: string = require('assets/SmallUI/rotateStem.png');
+    public static readonly smallImgScreenshot: string = require('assets/SmallUI/screenshot.png');
+    public static readonly smallImgScriptUI: string = require('assets/SmallUI/scriptUI.png');
+    public static readonly smallImgSettings: string = require('assets/SmallUI/settings.png');
+    public static readonly smallImgSnapToGrid: string = require('assets/SmallUI/snapToGrid.png');
+    public static readonly smallImgSpec: string = require('assets/SmallUI/spec.png');
+    public static readonly smallImgSubmit: string = require('assets/SmallUI/submit.png');
+    public static readonly smallImgTarget: string = require('assets/SmallUI/target.png');
+    public static readonly smallImgUndo: string = require('assets/SmallUI/undo.png');
+    public static readonly smallImgValidate3D: string = require('assets/SmallUI/validate3D.png');
+    public static readonly smallImgViewSolutions: string = require('assets/SmallUI/viewSolutions.png');
+    public static readonly smallImgZoomIn: string = require('assets/SmallUI/zoomIn.png');
+    public static readonly smallImgZoomOut: string = require('assets/SmallUI/zoomOut.png');
+
     public static get all(): string[] {
         if (Bitmaps.ALL_URLS == null) {
             Bitmaps.ALL_URLS = [];
