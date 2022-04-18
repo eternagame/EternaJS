@@ -560,9 +560,11 @@ export default class PuzzleEditMode extends GameMode {
 
     private updateUILayout(): void {
         DisplayUtil.positionRelativeToStage(
-            this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
-            HAlign.CENTER, VAlign.BOTTOM, 20, -20
+            this._toolbar.display, HAlign.LEFT, VAlign.BOTTOM,
+            HAlign.LEFT, VAlign.BOTTOM, 0, 50
         );
+
+        this._toolbar.onResized();
 
         const toolbarBounds = this._toolbar.display.getBounds();
         for (let ii = 0; ii < this._numTargets; ++ii) {
