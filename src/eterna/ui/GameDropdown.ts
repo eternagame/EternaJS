@@ -218,7 +218,7 @@ export default class GameDropdown extends ContainerObject {
                 const icon = new Sprite(this.iconMap.get(option));
                 icon.width = GameDropdown._ICON_SIZE;
                 icon.height = GameDropdown._ICON_SIZE;
-                icon.x = 0;
+                icon.x = GameDropdown._HORIZONTAL_PADDING / 2;
                 icon.y = (text.display.height - GameDropdown._ICON_SIZE) / 2;
                 this.addObject(new ContainerObject(icon), text.display);
                 this._optionItems.push({icon, textBalloon: text});
@@ -331,7 +331,7 @@ export default class GameDropdown extends ContainerObject {
     private _hidePopup(): void {
         this._popupVisible = false;
         this._popup.display.visible = false;
-        if (this._activeCapture) {
+        if (this._activeCapture && this.isLiveObject) {
             this._popup.removeObject(this._activeCapture);
             this._activeCapture = null;
         }
@@ -355,7 +355,7 @@ export default class GameDropdown extends ContainerObject {
         } else {
             width = TEXT_WIDTH + ARROW_WIDTH + GameDropdown._HORIZONTAL_PADDING;
         }
-        width += GameDropdown._ICON_SIZE;
+        if (this.iconMap.size > 0) width += GameDropdown._ICON_SIZE;
 
         let height = 0;
         if (this._height && this._height !== 0) {
@@ -437,14 +437,14 @@ export default class GameDropdown extends ContainerObject {
 
     private _optionItems: OptionItem[] = [];
 
-    private static _HORIZONTAL_PADDING: number = 4;
-    private static _VERTICAL_PADDING: number = 3;
-    private static _BORDER_RADIUS: number = 4;
-    private static _ARROW_SIDE_SIZE = 10;
-    private static _POPUP_VERTICAL_OFFSET = 5;
-    private static _POPUP_VERTICAL_HEIGHT = 120;
-    private static _POPUP_ITEM_HEIGHT = 30;
-    private static _ICON_SIZE = 20;
-    private static _POPUP_CHECKBOX_HEIGHT = 18;
-    private static _POPUP_CHECKBOX_PADDING = 5;
+    private static readonly _HORIZONTAL_PADDING: number = 10;
+    private static readonly _VERTICAL_PADDING: number = 3;
+    private static readonly _BORDER_RADIUS: number = 4;
+    private static readonly _ARROW_SIDE_SIZE = 10;
+    private static readonly _POPUP_VERTICAL_OFFSET = 5;
+    private static readonly _POPUP_VERTICAL_HEIGHT = 120;
+    private static readonly _POPUP_ITEM_HEIGHT = 30;
+    private static readonly _ICON_SIZE = 20;
+    private static readonly _POPUP_CHECKBOX_HEIGHT = 18;
+    private static readonly _POPUP_CHECKBOX_PADDING = 5;
 }

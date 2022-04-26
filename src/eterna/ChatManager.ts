@@ -98,13 +98,12 @@ export default class ChatManager {
         };
     }
 
-    public readonly chatShowSignal: Signal<{show:boolean,
-        bound: {
-            x:number,
-            y:number,
-            width:number,
-            height:number
-        }}> = new Signal();
+    public readonly chatShowSignal: Signal<{show:boolean, bound:{
+        x:number,
+        y:number,
+        width: number,
+        height: number
+    }}> = new Signal();
 
     private readonly _chatbox: HTMLElement | null;
     private readonly _settings: EternaSettings;

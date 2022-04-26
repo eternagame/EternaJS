@@ -159,9 +159,10 @@ export default class Toolbar extends ContainerObject {
 
     public onResized() {
         Assert.assertIsDefined(Flashbang.stageWidth);
+
         this.stateToggle.container.position.set(
             Flashbang.stageWidth / 2 - this.container.position.x,
-            -this.container.position.y + 8
+            -this.container.position.y + 30
         );
         this.updateLayout();
     }
@@ -184,16 +185,14 @@ export default class Toolbar extends ContainerObject {
             .over(Bitmaps.ImgSubmitOver)
             .down(Bitmaps.ImgSubmitHit);
 
+        // This ensures that even as we move the toolbar up and down to autohide, positioning the entire
+        // toolbar relative to the bottom of the screen will work (otherwise, the bottom of the toolbar
+        // will be inferred to be wherever the bottom of the visible toolbar content is)
         this._invisibleBackground = new Graphics();
-        Assert.assertIsDefined(Flashbang.stageWidth);
-        this._invisibleBackground
-            .beginFill(0xff0000, 0)
-            .drawRect(0, 0, Flashbang.stageWidth, 100)
-            .endFill();
-        this._invisibleBackground.y = -this._invisibleBackground.height;
+        this._invisibleBackground.alpha = 0;
         this.container.addChild(this._invisibleBackground);
 
-        this._content = new VLayoutContainer(SPACE_NARROW);
+        this._content = new VLayoutContainer(7);
         this.container.addChild(this._content);
 
         this.stateToggle = new ToggleBar(this._states);
@@ -803,7 +802,6 @@ export default class Toolbar extends ContainerObject {
 
         this.onResized();
 
-        this._uncollapsedContentLoc = new Point(this._content.position.x, this._content.position.y);
         this.regs.add(Eterna.settings.autohideToolbar.connectNotify((value) => {
             this.setToolbarAutohide(value);
         }));
@@ -877,6 +875,7 @@ export default class Toolbar extends ContainerObject {
     private updateLayout(): void {
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
+
         // Update the scroll container size, accounting for buttons
         const buttonOffset = this.leftArrow.display.width + this.rightArrow.display.width;
         this.scrollContainer.setSize(Flashbang.stageWidth - buttonOffset, Flashbang.stageHeight);
@@ -886,24 +885,28 @@ export default class Toolbar extends ContainerObject {
         this._content.layout(true);
         this.lowerToolbarLayout.layout(true);
         this._content.layout(true);
-
         this.updateArrowVisibility();
+        // Plus we have to re-layout again so that if our arrow visibility just changed to true, that
+        // the arrow gets positioned properly :/
+        this._content.layout(true);
 
-        DisplayUtil.positionRelative(
-            this._content, HAlign.CENTER, VAlign.BOTTOM,
-            this._invisibleBackground, HAlign.CENTER, VAlign.BOTTOM,
-            -25, 0
-        );
+        // Center the toolbar
+        this._content.x = (Flashbang.stageWidth - this._content.width) / 2;
+
+        this._invisibleBackground
+            .beginFill(0xff0000)
+            .drawRect(0, 0, Flashbang.stageWidth, this._content.height + 70)
+            .endFill();
     }
 
     private updateArrowVisibility() {
-        this.rightArrow.display.visible = true;
-        this.leftArrow.display.visible = true;
-
         // maxScrollX being greater than 0 indicates that scrolling is possible and some content is covered up
         // Alpha is used here since we don't want to shift the scrollcontainer around the screen
         // when the arrows get shown/hidden - reserve some space for them!
         if (this.scrollContainer.maxScrollX > 0) {
+            this.rightArrow.display.visible = true;
+            this.leftArrow.display.visible = true;
+
             if (this.scrollContainer.scrollX > 0) {
                 this.leftArrow.display.alpha = 1;
             } else {
@@ -923,9 +926,10 @@ export default class Toolbar extends ContainerObject {
 
     private setToolbarAutohide(enabled: boolean): void {
         const COLLAPSE_ANIM = 'CollapseAnim';
+
         if (enabled) {
             this.display.interactive = true;
-
+            this._invisibleBackground.interactive = true;
             let collapsed = false;
 
             const uncollapse = () => {
@@ -935,8 +939,8 @@ export default class Toolbar extends ContainerObject {
                     this.addNamedObject(
                         COLLAPSE_ANIM,
                         new LocationTask(
-                            this._uncollapsedContentLoc.x,
-                            this._uncollapsedContentLoc.y,
+                            null,
+                            0,
                             0.25, Easing.easeOut, this._content
                         )
                     );
@@ -950,8 +954,8 @@ export default class Toolbar extends ContainerObject {
                     this.addNamedObject(
                         COLLAPSE_ANIM,
                         new LocationTask(
-                            this._uncollapsedContentLoc.x,
-                            this._uncollapsedContentLoc.y + 72,
+                            null,
+                            64,
                             0.25, Easing.easeOut, this._content
                         )
                     );
@@ -959,19 +963,24 @@ export default class Toolbar extends ContainerObject {
             };
 
             this._autoCollapseRegs = new RegistrationGroup();
+            this._autoCollapseRegs.add(this.pointerTap.connect(() => {
+                if (collapsed) uncollapse(); else collapse();
+            }));
             this._autoCollapseRegs.add(this.pointerOver.connect(uncollapse));
             this._autoCollapseRegs.add(this.pointerOut.connect(collapse));
 
             collapse();
         } else {
+            this.display.interactive = false;
+            this._invisibleBackground.interactive = false;
+
             if (this._autoCollapseRegs != null) {
                 this._autoCollapseRegs.close();
                 this._autoCollapseRegs = null;
             }
 
             this.removeNamedObjects(COLLAPSE_ANIM);
-            this._content.position.copyFrom(this._uncollapsedContentLoc);
-            this.display.interactive = false;
+            this._content.y = 0;
         }
     }
 
@@ -1061,7 +1070,6 @@ export default class Toolbar extends ContainerObject {
     private _invisibleBackground: Graphics;
     private _content: VLayoutContainer;
 
-    private _uncollapsedContentLoc: Point;
     private _autoCollapseRegs: RegistrationGroup | null;
 
     private _annotationManager: AnnotationManager | undefined;
