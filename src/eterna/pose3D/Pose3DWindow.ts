@@ -81,7 +81,7 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
         Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));
 
-        this.regs.add(Eterna.chat.chatShowSignal.connect((param: {show:boolean, bound:{
+        this.regs.add(Eterna.chat.chatVisibilityChanged.connect((param: {show:boolean, bound:{
             x:number,
             y:number,
             width: number,
@@ -109,17 +109,17 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
         const x11 = this._currentBounds.x + this._currentBounds.width;
         const y10 = this._currentBounds.y;
         const y11 = this._currentBounds.y + this._currentBounds.height;
-        let crossX = (x00 > x10 && x00 < x11);
-        crossX ||= (x01 > x10 && x01 < x11);
-        crossX ||= (x10 > x00 && x10 < x01);
-        crossX ||= (x11 > x00 && x11 < x01);
-        let crossY = (y00 > y10 && y00 < y11);
-        crossY ||= (y01 > y10 && y01 < y11);
-        crossY ||= (y10 > y00 && y10 < y01);
-        crossY ||= (y11 > y00 && y11 < y01);
+        let isHorizontalIntersected = (x00 > x10 && x00 < x11);
+        isHorizontalIntersected ||= (x01 > x10 && x01 < x11);
+        isHorizontalIntersected ||= (x10 > x00 && x10 < x01);
+        isHorizontalIntersected ||= (x11 > x00 && x11 < x01);
+        let isVerticalIntersected = (y00 > y10 && y00 < y11);
+        isVerticalIntersected ||= (y01 > y10 && y01 < y11);
+        isVerticalIntersected ||= (y10 > y00 && y10 < y01);
+        isVerticalIntersected ||= (y11 > y00 && y11 < y01);
 
         if (this._chatShow) {
-            if (crossX && crossY) {
+            if (isHorizontalIntersected && isVerticalIntersected) {
                 this._currentBounds.x = chatBound.x - this._currentBounds.width - this.GAP;
                 if (this._currentBounds.x < 0) {
                     this._currentBounds.width = chatBound.x - this.GAP - this.MARGIN;
@@ -449,11 +449,11 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
         const remainingWidth = this._currentBounds.width - (
             this.ICON_SIZE * 2 + this.GAP * 5 + this._titleText.display.width + this._dropdown.width
         );
-        const lW = this.GAP * 3 + this.ICON_SIZE + this._dropdown.width;
-        const tX = this._currentBounds.width / 2 - this._titleText.display.width / 2;
-        if (tX >= lW) {
-            this._titleDraggerLeft.display.width = tX - lW;
-            this._titleDraggerRight.display.width = tX - (this.GAP * 2 + this.ICON_SIZE);
+        const startPosX = this.GAP * 3 + this.ICON_SIZE + this._dropdown.width;
+        const textPosX = this._currentBounds.width / 2 - this._titleText.display.width / 2;
+        if (textPosX >= startPosX) {
+            this._titleDraggerLeft.display.width = textPosX - startPosX;
+            this._titleDraggerRight.display.width = textPosX - (this.GAP * 2 + this.ICON_SIZE);
         } else {
             this._titleDraggerLeft.display.width = remainingWidth / 2;
             this._titleDraggerRight.display.width = remainingWidth / 2;

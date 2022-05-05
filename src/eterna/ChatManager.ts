@@ -64,10 +64,10 @@ export default class ChatManager {
             this._chatbox.classList.add('hidden');
         }
 
-        this.chatShowSignal.emit({show, bound: this._chatbox.getBoundingClientRect()});
+        this.chatVisibilityChanged.emit({show, bound: this._chatbox.getBoundingClientRect()});
     }
 
-    public readonly chatShowSignal: Signal<{show:boolean, bound:{
+    public readonly chatVisibilityChanged: Signal<{show:boolean, bound:{
         x:number,
         y:number,
         width: number,
