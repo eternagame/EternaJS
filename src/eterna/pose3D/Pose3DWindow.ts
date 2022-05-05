@@ -100,15 +100,32 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
 
+        const chatBound = this._chatBound;
+        const x00 = chatBound.x;
+        const x01 = chatBound.x + chatBound.width;
+        const y00 = chatBound.y;
+        const y01 = chatBound.y + chatBound.height;
+        const x10 = this._currentBounds.x;
+        const x11 = this._currentBounds.x + this._currentBounds.width;
+        const y10 = this._currentBounds.y;
+        const y11 = this._currentBounds.y + this._currentBounds.height;
+        let crossX = (x00 > x10 && x00 < x11);
+        crossX ||= (x01 > x10 && x01 < x11);
+        crossX ||= (x10 > x00 && x10 < x01);
+        crossX ||= (x11 > x00 && x11 < x01);
+        let crossY = (y00 > y10 && y00 < y11);
+        crossY ||= (y01 > y10 && y01 < y11);
+        crossY ||= (y10 > y00 && y10 < y01);
+        crossY ||= (y11 > y00 && y11 < y01);
+
         if (this._chatShow) {
-            const chatBound = this._chatBound;
-            this._currentBounds.x = chatBound.x - this._currentBounds.width - this.GAP;
-            if (this._currentBounds.x < 0) {
-                this._currentBounds.width = chatBound.x - this.GAP - this.MARGIN;
-                this._currentBounds.x = this.MARGIN;
+            if (crossX && crossY) {
+                this._currentBounds.x = chatBound.x - this._currentBounds.width - this.GAP;
+                if (this._currentBounds.x < 0) {
+                    this._currentBounds.width = chatBound.x - this.GAP - this.MARGIN;
+                    this._currentBounds.x = this.MARGIN;
+                }
             }
-        } else {
-            this._currentBounds.x = Flashbang.stageWidth - this._currentBounds.width - this.MARGIN;
         }
     }
 
