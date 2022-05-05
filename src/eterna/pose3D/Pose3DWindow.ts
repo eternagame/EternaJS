@@ -107,11 +107,6 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
                 this._currentBounds.width = chatBound.x - this.GAP - this.MARGIN;
                 this._currentBounds.x = this.MARGIN;
             }
-            if (this._currentBounds.height + chatBound.y < Flashbang.stageHeight - this.BOTTOM_MARGIN) {
-                if (chatBound.y >= this.TOP_MARGIN) {
-                    this._currentBounds.y = chatBound.y;
-                }
-            }
         } else {
             this._currentBounds.x = Flashbang.stageWidth - this._currentBounds.width - this.MARGIN;
         }
@@ -440,8 +435,8 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
         const lW = this.GAP * 3 + this.ICON_SIZE + this._dropdown.width;
         const tX = this._currentBounds.width / 2 - this._titleText.display.width / 2;
         if (tX >= lW) {
-            this._titleDraggerLeft.display.width = tX - lW;// remainingWidth / 2;
-            this._titleDraggerRight.display.width = tX - (this.GAP * 2 + this.ICON_SIZE);// remainingWidth / 2;
+            this._titleDraggerLeft.display.width = tX - lW;
+            this._titleDraggerRight.display.width = tX - (this.GAP * 2 + this.ICON_SIZE);
         } else {
             this._titleDraggerLeft.display.width = remainingWidth / 2;
             this._titleDraggerRight.display.width = remainingWidth / 2;

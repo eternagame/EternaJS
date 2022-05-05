@@ -64,38 +64,7 @@ export default class ChatManager {
             this._chatbox.classList.add('hidden');
         }
 
-        this.chatShowSignal.emit({show, bound: this.getChatboxBounds(show)});
-    }
-
-    private getChatboxBounds(show: boolean): {
-        x:number,
-        y:number,
-        width: number,
-        height: number
-    } {
-        if (!show || !this._chatbox) {
-            return {
-                x: 0, y: 0, width: 0, height: 0
-            };
-        }
-
-        const getOffset = (el: HTMLElement | null) => {
-            let x = 0;
-            let y = 0;
-            while (el && !Number.isNaN(el.offsetLeft) && !Number.isNaN(el.offsetTop)) {
-                x += el.offsetLeft - el.scrollLeft;
-                y += el.offsetTop - el.scrollTop;
-                el = el.offsetParent as (HTMLElement | null);
-            }
-            return {top: y, left: x};
-        };
-        const offset = getOffset(this._chatbox);
-        return {
-            x: offset.left,
-            y: offset.top,
-            width: this._chatbox.clientWidth,
-            height: this._chatbox.clientHeight
-        };
+        this.chatShowSignal.emit({show, bound: this._chatbox.getBoundingClientRect()});
     }
 
     public readonly chatShowSignal: Signal<{show:boolean, bound:{
