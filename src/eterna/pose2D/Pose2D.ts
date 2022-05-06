@@ -344,12 +344,52 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public get zoomLevel(): number {
         return this._zoomLevel;
     }
+    
+    public focusOnScreenPoint(screenPoint: Point) {
+        // Guy TODO: Should I use .set/.copyFrom or `=`?
+        this._startOffset = this._offset.clone();
+        this._endOffset = screenPoint.clone();
+    }
+
+    private zoomOntoMouse(newZoomLevel: number){
+        // Guy TODO: should this be different? I need to respect if the mosue moved
+        // also what if the user presses the button?
+        // also what if the user drags in the middle of the zoom?
+        /** The offset after the current animation finishes */
+        const effectiveOffset = this._animatingZoom ? this._endOffset : this._offset;
+
+        const oldMouseScreenPosition = Pose2D.P;
+        const mouseWorldPosition = this.screenToWorldPosition(
+            oldMouseScreenPosition,
+            effectiveOffset,
+            this.zoomLevel
+        );
+        const newMouseScreenPosition = this.worldToScreenPosition(
+            mouseWorldPosition,
+            effectiveOffset,
+            newZoomLevel
+        );
+
+        // The mouse should stay at the same point in space before and after zooming,
+        // so move the offset to cancel the mouse movement.
+        this.focusOnScreenPoint(new Point(
+            effectiveOffset.x + oldMouseScreenPosition.x - newMouseScreenPosition.x,
+            effectiveOffset.y + oldMouseScreenPosition.y - newMouseScreenPosition.y
+        ));
+    }
 
     /**
      * @param animate should the zoom happen in an animation over time, instead of instantaniously
      * @param center should the camera move to the center of the screen
      */
     public setZoomLevel(zoomLevel: number, animate: boolean = true, center: boolean = false): void {
+        console.trace();
+        // I need to extract the inner logic to make sure I can use it in any way I want:
+        // * Just set the zoom level and the target offset (don't calculate the mouse at all)
+        //  * potential: Just set the zoom level, and zoom according to any arbitrary focus?
+        // * Zoom in / out on the mouse
+        // * Zoom in / out on an arbitrary point
+        // * Zoom in / out on the center of the RNA
         const needsToZoom = this._zoomLevel !== zoomLevel;
         if ((needsToZoom || center) && animate) {
             if (!needsToZoom && center) {
@@ -360,47 +400,23 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 }
             }
 
-            this._startOffset = this._offset.clone();
-
             if (center) {
-                this._endOffset = new Point(this._width / 2, this._height / 2);
+                this.focusOnScreenPoint(new Point(this._width / 2, this._height / 2));
             } else {
-                // TODO: should this be different? I need to respect if the mosue moved
-                // also what if the user presses the button?
-                // also what if the user drags in the middle of the zoom?
-                /** The offset after the current animation finishes */
-                const effectiveOffset = this._animatingZoom ? this._endOffset : this._offset;
-
-                const oldMouseScreenPosition = Pose2D.P;
-                const mouseWorldPosition = this.screenToWorldPosition(
-                    oldMouseScreenPosition,
-                    effectiveOffset,
-                    this.zoomLevel
-                );
-                const newMouseScreenPosition = this.worldToScreenPosition(
-                    mouseWorldPosition,
-                    effectiveOffset,
-                    zoomLevel
-                );
-
-                // The mouse should stay at the same point in space before and after zooming,
-                // so move the offset to cancel the mouse movement.
-                this._endOffset = new Point(
-                    effectiveOffset.x + oldMouseScreenPosition.x - newMouseScreenPosition.x,
-                    effectiveOffset.y + oldMouseScreenPosition.y - newMouseScreenPosition.y
-                );
+                this.zoomOntoMouse(zoomLevel);
             }
 
             this._animatingZoom = true;
 
-            this._zoomLevel = zoomLevel;
-            this.computeLayout(true);
-            this._redraw = true;
-        } else if (needsToZoom) {
-            this._zoomLevel = zoomLevel;
-            this.computeLayout(true);
-            this._redraw = true;
         }
+        // Guy TODO: make sure that I didn't break anything here
+        // I think that I made it still happen if all 3 values are false? might just wrap everything in an if or add a return at the start
+        // Guy TODO: Where should _zoomLevel = zoomLevel sit?
+        this._zoomLevel = zoomLevel;
+        // Guy TODO: What do these 2 lines do? is it just because I changed the zoomLevel, or also because I changed the offset?
+        // If it's because I change the offset, can I put that in setOffset?
+        this.computeLayout(true);
+        this._redraw = true;
     }
 
     public computeDefaultZoomLevel(): number {
