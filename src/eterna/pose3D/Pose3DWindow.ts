@@ -40,11 +40,16 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
         const width = 460;
+        let height = 300;
+        const x = Flashbang.stageWidth - width - this.MARGIN;
+        let y = 100;
+        if (y + height > Flashbang.stageHeight - this.BOTTOM_MARGIN) {
+            y = this.TOP_MARGIN;
+            height = Flashbang.stageHeight - this.BOTTOM_MARGIN - y;
+        }
         this._currentBounds = new WindowBounds(
-            (Flashbang.stageWidth / 2) - (width / 2),
-            100,
-            width,
-            300
+            x, y,
+            width, height
         );
     }
 
@@ -75,6 +80,53 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
 
         Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));
+
+        this.regs.add(Eterna.chat.chatVisibilityChanged.connect((param: {show:boolean, bound:{
+            x:number,
+            y:number,
+            width: number,
+            height: number
+        }}) => {
+            Assert.assertIsDefined(Flashbang.stageWidth);
+            Assert.assertIsDefined(Flashbang.stageHeight);
+            this._chatShow = param.show;
+            this._chatBound = param.bound;
+            this.alignToChatWindow();
+            this.layout();
+        }));
+    }
+
+    private alignToChatWindow() {
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(Flashbang.stageHeight);
+
+        const chatBound = this._chatBound;
+        const x00 = chatBound.x;
+        const x01 = chatBound.x + chatBound.width;
+        const y00 = chatBound.y;
+        const y01 = chatBound.y + chatBound.height;
+        const x10 = this._currentBounds.x;
+        const x11 = this._currentBounds.x + this._currentBounds.width;
+        const y10 = this._currentBounds.y;
+        const y11 = this._currentBounds.y + this._currentBounds.height;
+        let isHorizontalIntersected = (x00 > x10 && x00 < x11);
+        isHorizontalIntersected ||= (x01 > x10 && x01 < x11);
+        isHorizontalIntersected ||= (x10 > x00 && x10 < x01);
+        isHorizontalIntersected ||= (x11 > x00 && x11 < x01);
+        let isVerticalIntersected = (y00 > y10 && y00 < y11);
+        isVerticalIntersected ||= (y01 > y10 && y01 < y11);
+        isVerticalIntersected ||= (y10 > y00 && y10 < y01);
+        isVerticalIntersected ||= (y11 > y00 && y11 < y01);
+
+        if (this._chatShow) {
+            if (isHorizontalIntersected && isVerticalIntersected) {
+                this._currentBounds.x = chatBound.x - this._currentBounds.width - this.GAP;
+                if (this._currentBounds.x < 0) {
+                    this._currentBounds.width = chatBound.x - this.GAP - this.MARGIN;
+                    this._currentBounds.x = this.MARGIN;
+                }
+            }
+        }
     }
 
     private onDropDown() {
@@ -264,6 +316,8 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
 
     private restore() {
         this._currentBounds = this._normalBounds;
+        this.alignToChatWindow();
+
         this._windowState = WindowState.NORMAL;
         this._minRestoreButton
             .up(Bitmaps.Img3DMin)
@@ -281,12 +335,15 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
         if (this._windowState === WindowState.NORMAL) this._normalBounds = this._currentBounds;
+
+        const width = Flashbang.stageWidth - this.MARGIN * 2;
+        const height = Flashbang.stageHeight - this.TOP_MARGIN - this.BOTTOM_MARGIN;
         this._currentBounds = new WindowBounds(
-            100,
-            100,
-            Flashbang.stageWidth - 100 * 2,
-            Flashbang.stageHeight - 100 - 80
+            this.MARGIN, this.TOP_MARGIN,
+            width, height
         );
+        this.alignToChatWindow();
+
         this._windowState = WindowState.MAXIMIZED;
 
         this._minRestoreButton
@@ -302,8 +359,6 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
     }
 
     private minimize() {
-        Assert.assertIsDefined(Flashbang.stageWidth);
-        Assert.assertIsDefined(Flashbang.stageHeight);
         if (this._windowState === WindowState.MAXIMIZED) {
             this._windowState = WindowState.MINIMIZED_FROM_MAX;
         } else {
@@ -324,11 +379,12 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
 
         const width = Math.min(460, this._normalBounds.width);
         this._currentBounds = new WindowBounds(
-            (Flashbang.stageWidth / 2) - (width / 2),
-            10,
+            this.MARGIN,
+            this.TOP_MARGIN,
             width,
             this.ICON_SIZE
         );
+        this.alignToChatWindow();
     }
 
     private maxOrRestore() {
@@ -391,10 +447,17 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
 
         // Title bar drag handles should fill remaining space
         const remainingWidth = this._currentBounds.width - (
-            this.ICON_SIZE * 2 + this.GAP * 6 + this._titleText.display.width + this._dropdown.width
+            this.ICON_SIZE * 2 + this.GAP * 5 + this._titleText.display.width + this._dropdown.width
         );
-        this._titleDraggerLeft.display.width = remainingWidth / 2;
-        this._titleDraggerRight.display.width = remainingWidth / 2;
+        const startPosX = this.GAP * 3 + this.ICON_SIZE + this._dropdown.width;
+        const textPosX = this._currentBounds.width / 2 - this._titleText.display.width / 2;
+        if (textPosX >= startPosX) {
+            this._titleDraggerLeft.display.width = textPosX - startPosX;
+            this._titleDraggerRight.display.width = textPosX - (this.GAP * 2 + this.ICON_SIZE);
+        } else {
+            this._titleDraggerLeft.display.width = remainingWidth / 2;
+            this._titleDraggerRight.display.width = remainingWidth / 2;
+        }
 
         // Resize handles go on the bottom left and right corners
         const relativeNglBounds = new Rectangle(0, 0, this.nglWidth, this.nglHeight);
@@ -427,7 +490,7 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
     }
 
     private get minWidth(): number {
-        return this.ICON_SIZE * 2 + this._dropdown.width + this._titleText.display.width + this.GAP * 6;
+        return this.ICON_SIZE * 2 + this._dropdown.width + this._titleText.display.width + this.GAP * 5;
     }
 
     public get nglWidth() {
@@ -457,7 +520,13 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
     private _nglMask: Graphics;
     private _dragHandleLeft: SpriteObject;
     private _dragHandleRight: SpriteObject;
+    private _chatShow: boolean = true;
+    private _chatBound: {x: number, y: number, width: number, height: number};
 
     private readonly ICON_SIZE = 20;
     private readonly GAP = 4;
+
+    private readonly MARGIN = 10;
+    private readonly TOP_MARGIN = 46;
+    private readonly BOTTOM_MARGIN = 80;
 }
