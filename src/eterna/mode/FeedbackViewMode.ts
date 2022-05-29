@@ -299,11 +299,6 @@ export default class FeedbackViewMode extends GameMode {
     }
 
     private updateUILayout(): void {
-        DisplayUtil.positionRelativeToStage(
-            this._toolbar.display, HAlign.LEFT, VAlign.BOTTOM,
-            HAlign.LEFT, VAlign.BOTTOM, 0, 50
-        );
-
         this._toolbar.onResized();
 
         // DisplayUtil.positionRelativeToStage(

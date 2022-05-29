@@ -566,11 +566,6 @@ export default class PuzzleEditMode extends GameMode {
     }
 
     private updateUILayout(): void {
-        DisplayUtil.positionRelativeToStage(
-            this._toolbar.display, HAlign.LEFT, VAlign.BOTTOM,
-            HAlign.LEFT, VAlign.BOTTOM, 0, 50
-        );
-
         let w = 17;
         const h = 175;
         DisplayUtil.positionRelativeToStage(

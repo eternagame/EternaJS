@@ -2086,6 +2086,16 @@ export default class Toolbar extends ContainerObject {
             .beginFill(0xff0000)
             .drawRect(0, 0, Flashbang.stageWidth, this.vContent.height + 70)
             .endFill();
+
+        DisplayUtil.positionRelativeToStage(
+            this.vContent,
+            HAlign.CENTER,
+            VAlign.BOTTOM,
+            HAlign.CENTER,
+            VAlign.BOTTOM,
+            0,
+            this._isExpanded ? 0 : -10
+        );
     }
 
     private makeLayout() {
@@ -3486,13 +3496,14 @@ export default class Toolbar extends ContainerObject {
 
             const uncollapse = () => {
                 if (collapsed) {
+                    Assert.assertIsDefined(Flashbang.stageHeight);
                     collapsed = false;
                     this.removeNamedObjects(COLLAPSE_ANIM);
                     this.addNamedObject(
                         COLLAPSE_ANIM,
                         new LocationTask(
                             null,
-                            0,
+                            Flashbang.stageHeight - this.vContent.height - (this._isExpanded ? 0 : 10),
                             0.25,
                             Easing.easeOut,
                             this.vContent
@@ -3503,13 +3514,14 @@ export default class Toolbar extends ContainerObject {
 
             const collapse = () => {
                 if (!collapsed) {
+                    Assert.assertIsDefined(Flashbang.stageHeight);
                     collapsed = true;
                     this.removeNamedObjects(COLLAPSE_ANIM);
                     this.addNamedObject(
                         COLLAPSE_ANIM,
                         new LocationTask(
                             null,
-                            64,
+                            Flashbang.stageHeight - 10,
                             0.25,
                             Easing.easeOut,
                             this.vContent
@@ -3527,6 +3539,7 @@ export default class Toolbar extends ContainerObject {
 
             collapse();
         } else {
+            Assert.assertIsDefined(Flashbang.stageHeight);
             this.display.interactive = false;
             this._invisibleBackground.interactive = false;
 
@@ -3536,7 +3549,7 @@ export default class Toolbar extends ContainerObject {
             }
 
             this.removeNamedObjects(COLLAPSE_ANIM);
-            this.vContent.y = 0;
+            this.vContent.y = Flashbang.stageHeight - this.vContent.height - (this._isExpanded ? 0 : 10);
         }
     }
 
