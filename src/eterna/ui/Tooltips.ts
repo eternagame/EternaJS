@@ -1,6 +1,5 @@
-import {TextStyleExtended} from 'pixi-multistyle-text';
 import {
-    Container, DisplayObject, Graphics, Point, Rectangle, Text
+    Container, DisplayObject, Graphics, ITextStyle, Point, Rectangle, Text
 } from 'pixi.js';
 import {Registration, RegistrationGroup} from 'signals';
 import {
@@ -26,7 +25,7 @@ export type Tooltip = (() => DisplayObject) | string | StyledTextBuilder;
 
 export default class Tooltips extends GameObject {
     /** Default text style for tooltips */
-    public static readonly DEFAULT_STYLE: TextStyleExtended = {
+    public static readonly DEFAULT_STYLE: Partial<ITextStyle> = {
         fontFamily: Fonts.STDFONT,
         fontSize: 15,
         fill: 0xC0DCE7

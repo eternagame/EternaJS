@@ -52,7 +52,7 @@
 
 <script>
     Application.GET_URI = "<%= htmlWebpackPlugin.options.process.env.APP_SERVER_URL %>/get/";
-    Application.POST_URI = "<%= htmlWebpackPlugin.options.process.env.APP_SERVER_URL %>/get/";
+    Application.POST_URI = "<%= htmlWebpackPlugin.options.process.env.APP_SERVER_URL %>/post/";
 
     const params = new URLSearchParams(window.location.search);
     const numberParam = (name) => params.has(name) ? Number(params.get(name)) : undefined;

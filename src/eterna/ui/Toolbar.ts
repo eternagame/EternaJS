@@ -8,7 +8,7 @@ import {
     Text,
     Rectangle
 } from 'pixi.js';
-import {RegistrationGroup} from 'signals';
+import {RegistrationGroup, Signal} from 'signals';
 import Eterna from 'eterna/Eterna';
 import Booster from 'eterna/mode/PoseEdit/Booster';
 import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
@@ -79,9 +79,9 @@ class ToolbarButton extends GameButton {
         this._arrow.visible = false;
         this.container.addChild(this._arrow);
 
-        this.toggled.connectNotify((toggled) => {
+        this.regs.add(this.toggled.connectNotify((toggled) => {
             this._arrow.visible = toggled;
-        });
+        }));
     }
 
     private _arrow: Sprite;
@@ -300,6 +300,9 @@ export default class Toolbar extends ContainerObject {
 
     public freezeButton: GameButton;
     public boostersMenu: GameButton;
+
+    public upload3DButton: GameButton;
+    public selected3DFile: Signal<FileList | null>;
 
     public baseMarkerButton: GameButton;
 
@@ -2041,14 +2044,8 @@ export default class Toolbar extends ContainerObject {
         this.updateArrowVisibility();
         this.updateTopContainer();
 
-        DisplayUtil.positionRelative(
-            this.vContent,
-            HAlign.CENTER,
-            VAlign.BOTTOM,
-            this.invisibleBackground,
-            HAlign.CENTER,
-            VAlign.BOTTOM
-        );
+        // Center the toolbar
+        this.vContent.x = (Flashbang.stageWidth - this.vContent.width) / 2;
 
         DisplayUtil.positionRelative(
             this.collapseButton.container,
@@ -2084,6 +2081,11 @@ export default class Toolbar extends ContainerObject {
         );
 
         this.handlers.updateScriptViews();
+
+        this._invisibleBackground
+            .beginFill(0xff0000)
+            .drawRect(0, 0, Flashbang.stageWidth, this.vContent.height + 70)
+            .endFill();
     }
 
     private makeLayout() {
@@ -2097,15 +2099,11 @@ export default class Toolbar extends ContainerObject {
         );
         const SPACE_NARROW = SPACE_WIDE * 0.28;
 
-        this.invisibleBackground = new Graphics();
-        this.invisibleBackground
-            .beginFill(0xff0000, 0)
-            .drawRect(0, 0, Flashbang.stageWidth, 100)
-            .endFill();
-        this.invisibleBackground.y = -this.invisibleBackground.height;
-        this.container.addChild(this.invisibleBackground);
+        this._invisibleBackground = new Graphics();
+        this._invisibleBackground.alpha = 0;
+        this.container.addChild(this._invisibleBackground);
 
-        this.vContent = new VLayoutContainer(SPACE_NARROW);
+        this.vContent = new VLayoutContainer(7);
         this.container.addChild(this.vContent);
 
         // UPPER TOOLBAR (structure editing tools)
@@ -2228,7 +2226,7 @@ export default class Toolbar extends ContainerObject {
             Flashbang.stageWidth,
             Flashbang.stageHeight
         );
-        this.scrollContainer.container.addChild(this.lowerHLayout);
+        this.scrollContainer.content.addChild(this.lowerHLayout);
 
         DisplayUtil.positionRelative(
             this.lowerVContainer,
@@ -2543,10 +2541,6 @@ export default class Toolbar extends ContainerObject {
             })
         );
 
-        this._uncollapsedContentLoc = new Point(
-            this.vContent.position.x,
-            this.vContent.position.y
-        );
         this.regs.add(
             Eterna.settings.autohideToolbar.connectNotify((value) => {
                 this.setToolbarAutohide(value);
@@ -3425,6 +3419,7 @@ export default class Toolbar extends ContainerObject {
 
         this.regs.add(
             this.pointerUp.connect((_e) => {
+                this.disableTools(false);
                 mouseDown = false;
             })
         );
@@ -3445,7 +3440,9 @@ export default class Toolbar extends ContainerObject {
                 ) {
                     const offset = x - startingX;
                     if (Math.abs(offset) > 15) {
+                        this.disableTools(true);
                         this.scrollContainer.scrollX = startingScroll - offset;
+                        this.updateArrowVisibility();
                     }
                 }
             })
@@ -3453,13 +3450,13 @@ export default class Toolbar extends ContainerObject {
     }
 
     private updateArrowVisibility() {
-        this.rightArrow.display.visible = true;
-        this.leftArrow.display.visible = true;
-
         // maxScrollX being greater than 0 indicates that scrolling is possible and some content is covered up
         // Alpha is used here since we don't want to shift the scrollcontainer around the screen
         // when the arrows get shown/hidden - reserve some space for them!
         if (this.scrollContainer.maxScrollX > 0) {
+            this.rightArrow.display.visible = true;
+            this.leftArrow.display.visible = true;
+
             if (this.scrollContainer.scrollX > 0) {
                 this.leftArrow.display.alpha = 1;
             } else {
@@ -3481,9 +3478,10 @@ export default class Toolbar extends ContainerObject {
 
     private setToolbarAutohide(enabled: boolean): void {
         const COLLAPSE_ANIM = 'CollapseAnim';
+
         if (enabled) {
             this.display.interactive = true;
-
+            this._invisibleBackground.interactive = true;
             let collapsed = false;
 
             const uncollapse = () => {
@@ -3493,8 +3491,8 @@ export default class Toolbar extends ContainerObject {
                     this.addNamedObject(
                         COLLAPSE_ANIM,
                         new LocationTask(
-                            this._uncollapsedContentLoc.x,
-                            this._uncollapsedContentLoc.y,
+                            null,
+                            0,
                             0.25,
                             Easing.easeOut,
                             this.vContent
@@ -3510,8 +3508,8 @@ export default class Toolbar extends ContainerObject {
                     this.addNamedObject(
                         COLLAPSE_ANIM,
                         new LocationTask(
-                            this._uncollapsedContentLoc.x,
-                            this._uncollapsedContentLoc.y + 72,
+                            null,
+                            64,
                             0.25,
                             Easing.easeOut,
                             this.vContent
@@ -3521,19 +3519,24 @@ export default class Toolbar extends ContainerObject {
             };
 
             this._autoCollapseRegs = new RegistrationGroup();
+            this._autoCollapseRegs.add(this.pointerTap.connect(() => {
+                if (collapsed) uncollapse(); else collapse();
+            }));
             this._autoCollapseRegs.add(this.pointerOver.connect(uncollapse));
             this._autoCollapseRegs.add(this.pointerOut.connect(collapse));
 
             collapse();
         } else {
+            this.display.interactive = false;
+            this._invisibleBackground.interactive = false;
+
             if (this._autoCollapseRegs != null) {
                 this._autoCollapseRegs.close();
                 this._autoCollapseRegs = null;
             }
 
             this.removeNamedObjects(COLLAPSE_ANIM);
-            this.vContent.position.copyFrom(this._uncollapsedContentLoc);
-            this.display.interactive = false;
+            this.vContent.y = 0;
         }
     }
 
@@ -3557,12 +3560,14 @@ export default class Toolbar extends ContainerObject {
         this.undoButton.enabled = !disable;
         this.redoButton.enabled = !disable;
 
-        this.annotationModeButton.enabled = !disable;
-        this.annotationPanelButton.enabled = !disable;
+        this.baseMarkerButton.enabled = !disable;
+
+        if (this.annotationModeButton) this.annotationModeButton.enabled = !disable;
+        if (this.annotationPanelButton) this.annotationPanelButton.enabled = !disable;
 
         this.freezeButton.enabled = !disable;
 
-        this.boostersMenu.enabled = !disable;
+        if (this.boostersMenu) this.boostersMenu.enabled = !disable;
 
         this.addBaseButton.enabled = !disable;
         this.addPairButton.enabled = !disable;
@@ -3627,7 +3632,7 @@ export default class Toolbar extends ContainerObject {
     private readonly _showLibrarySelect: boolean;
     private readonly _boostersData: BoostersData | null;
 
-    private invisibleBackground: Graphics;
+    private _invisibleBackground: Graphics;
     private vContent: VLayoutContainer;
 
     public middleScrollContainer: ScrollContainer;
@@ -3657,7 +3662,6 @@ export default class Toolbar extends ContainerObject {
 
     private _expandButtonContainer: HLayoutContainer;
 
-    private _uncollapsedContentLoc: Point;
     private _autoCollapseRegs: RegistrationGroup | null;
 
     private _isExpanded: boolean;

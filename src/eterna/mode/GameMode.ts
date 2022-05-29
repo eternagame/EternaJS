@@ -1,5 +1,5 @@
 import * as log from 'loglevel';
-import {Container, Point, Text} from 'pixi.js';
+import {Container, Text} from 'pixi.js';
 import Eterna from 'eterna/Eterna';
 import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
 import SecStruct from 'eterna/rnatypes/SecStruct';
@@ -10,6 +10,7 @@ import AchievementManager from 'eterna/achievements/AchievementManager';
 import Tooltips from 'eterna/ui/Tooltips';
 import ExternalInterface, {ExternalInterfaceCtx} from 'eterna/util/ExternalInterface';
 import Pose2D from 'eterna/pose2D/Pose2D';
+import Pose3D from 'eterna/pose3D/Pose3D';
 import ConfirmDialog from 'eterna/ui/ConfirmDialog';
 import NotificationDialog from 'eterna/ui/NotificationDialog';
 import UILockDialog from 'eterna/ui/UILockDialog';
@@ -18,7 +19,7 @@ import ContextMenu from 'eterna/ui/ContextMenu';
 import URLButton from 'eterna/ui/URLButton';
 import EternaURL from 'eterna/net/EternaURL';
 import Folder from 'eterna/folding/Folder';
-import Dialog from 'eterna/ui/Dialog';
+import ContextMenuDialog from 'eterna/ui/ContextMenuDialog';
 import Utility from 'eterna/util/Utility';
 import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
 import NucleotideFinder from 'eterna/ui/NucleotideFinder';
@@ -283,6 +284,33 @@ export default abstract class GameMode extends AppMode {
     protected onSetPip(_pipMode: boolean): void {
     }
 
+    protected addPose3D(structureFile: string | File | Blob) {
+        const ublk = this.getCurrentUndoBlock(0);
+        Assert.assertIsDefined(ublk, "Can't create 3D view - undo state not available");
+        if (this._pose3D) this.removeObject(this._pose3D);
+        this._pose3D = new Pose3D(structureFile, ublk.sequence, ublk.targetPairs, this._poses[0].customNumbering);
+        this.addObject(this._pose3D, this.dialogLayer);
+        this.regs?.add(this._pose3D.baseHovered.connect((closestIndex) => {
+            this._poses.forEach((pose) => {
+                pose.on3DPickingMouseMoved(closestIndex);
+            });
+        }));
+        this.regs?.add(this._pose3D.baseClicked.connect((closestIndex) => {
+            this._poses.forEach((pose) => {
+                pose.simulateMousedownCallback(closestIndex);
+            });
+        }));
+        this.regs?.add(this._poses[0].baseHovered.connect(
+            (val: number) => this._pose3D?.hover3D(val)
+        ));
+        this.regs?.add(this._poses[0].baseMarked.connect(
+            (val: number) => this._pose3D?.mark3D(val)
+        ));
+        this.regs?.add(this._poses[0].basesSparked.connect(
+            (val: number[]) => this._pose3D?.spark3D(val)
+        ));
+    }
+
     protected postScreenshot(screenshot: ArrayBuffer): void {
         this.pushUILock('Screenshot');
 
@@ -306,6 +334,7 @@ export default abstract class GameMode extends AppMode {
 
     public onContextMenuEvent(e: Event): void {
         Assert.assertIsDefined(Flashbang.globalMouse);
+
         let handled = false;
         if (((e.target as HTMLElement).parentNode as HTMLElement).id === Eterna.PIXI_CONTAINER_ID) {
             if (this._contextMenuDialogRef.isLive) {
@@ -554,6 +583,7 @@ export default abstract class GameMode extends AppMode {
     protected _poseFields: PoseField[] = [];
     protected _poses: Pose2D[] = []; // TODO: remove me!
     protected _isPipMode: boolean = false;
+    protected _pose3D: Pose3D | null = null;
 
     protected _nucleotideRangeToShow: [number, number] | null = null;
 
@@ -574,31 +604,4 @@ export default abstract class GameMode extends AppMode {
     protected _targetPairs: SecStruct[];
 
     protected _targetConditions: (TargetConditions | undefined)[] = [];
-}
-
-class ContextMenuDialog extends Dialog<void> {
-    constructor(menu: ContextMenu, menuLoc: Point) {
-        super();
-        this._menu = menu;
-        this._menuLoc = menuLoc;
-    }
-
-    protected added(): void {
-        super.added();
-        this.addObject(this._menu, this.container);
-
-        this._menu.display.position.copyFrom(this._menuLoc);
-        this._menu.menuItemSelected.connect(() => this.close());
-    }
-
-    protected onBGClicked(): void {
-        this.close();
-    }
-
-    protected get bgAlpha(): number {
-        return 0;
-    }
-
-    private readonly _menu: ContextMenu;
-    private readonly _menuLoc: Point;
 }

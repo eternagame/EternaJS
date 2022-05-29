@@ -108,33 +108,37 @@ export default class FileInputObject extends DOMObject<HTMLInputElement | HTMLDi
 
         // When our fakeFileInput is clicked, show, focus and click our real fileInput
         this._pointerTarget.pointerDown.connect(() => {
-            if (this._fakeFileInput != null) {
-                // On Chrome, it seems there's a bug (?) that causes the input to zoom into focus
-                // based on its actual position and not its transformed position, or... something
-                // At any rate without this when a partially offscreen file input is shown the entire
-                // page moves.
-                if (this._obj instanceof HTMLInputElement) {
-                    this._obj.focus({preventScroll: true});
-                    this._obj.click();
-                } else {
-                    let input: HTMLInputElement | undefined;
-                    for (const child of this._obj.children) {
-                        if (child instanceof HTMLInputElement) {
-                            input = child as HTMLInputElement;
-                        }
-                    }
-                    if (input) {
-                        input.focus({preventScroll: true});
-                        input.click();
-                    }
-                }
-            }
+            this.activateDialog();
         });
 
         this._dummyDisp.interactive = false;
 
         this.createFakeFileInput();
         this.setupTooltip();
+    }
+
+    public activateDialog() {
+        if (this._fakeFileInput != null) {
+            // On Chrome, it seems there's a bug (?) that causes the input to zoom into focus
+            // based on its actual position and not its transformed position, or... something
+            // At any rate without this when a partially offscreen file input is shown the entire
+            // page moves.
+            if (this._obj instanceof HTMLInputElement) {
+                this._obj.focus({preventScroll: true});
+                this._obj.click();
+            } else {
+                let input: HTMLInputElement | undefined;
+                for (const child of this._obj.children) {
+                    if (child instanceof HTMLInputElement) {
+                        input = child as HTMLInputElement;
+                    }
+                }
+                if (input) {
+                    input.focus({preventScroll: true});
+                    input.click();
+                }
+            }
+        }
     }
 
     protected updateElementProperties(): void {

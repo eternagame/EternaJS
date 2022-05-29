@@ -55,7 +55,7 @@ export default class DisplayObjectPointerTarget implements PointerTarget {
 
     public get pointerCancel(): SignalView<InteractionEvent> {
         if (this._pointerCancel == null) {
-            this._pointerCancel = new EventSignal(this.target, 'pointerupcancel');
+            this._pointerCancel = new EventSignal(this.target, 'pointercancel');
         }
         return this._pointerCancel;
     }

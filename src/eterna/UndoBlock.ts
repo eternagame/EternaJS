@@ -122,7 +122,7 @@ export default class UndoBlock {
         // can be nicely serialized.
         const m = new Map<boolean, number[][]>();
         pa.forEach((v: SecStruct[], k: boolean) => {
-            m.set(k, v.map((it) => it.pairs));
+            m.set(k, v.map((it) => (it ? it.pairs : it)));
         });
         return m;
     }
@@ -154,13 +154,15 @@ export default class UndoBlock {
         return map;
     }
 
-    private isSerializedBooleanMap<K>(arr: [boolean, K[][]][] | K[][]): arr is [boolean, K[][]][] {
-        const entry: [boolean, K[][]] | K[] = arr[0];
+    private isSerializedBooleanMap<K>(arr: [boolean, (K[] | null)[]][] | (K[] | null)[]): arr is [boolean, K[][]][] {
+        const entry = arr[0];
 
-        // The first check is to ensure we can check the second element (guarding against a [K])
-        // The second check is verifying that the first entry could actually be our boolean key
-        // The third check is verifying that we don't have a [boolean, boolean]
-        return entry.length === 2 && typeof entry[0] === 'boolean' && Array.isArray(entry[1]);
+        // The first check is to guard against a (K[] | null)[] where the first entry is null
+        //   (in the case of a [boolean, (K[] | null)[]][] it would never be null)
+        // The second check is to ensure we can check the second element (guarding against a [K])
+        // The third check is verifying that the first entry could actually be our boolean key
+        // The fourth check is verifying that we don't have a [boolean, boolean]
+        return entry !== null && entry.length === 2 && typeof entry[0] === 'boolean' && Array.isArray(entry[1]);
     }
 
     public toJSON(): FoldData {
@@ -226,9 +228,16 @@ export default class UndoBlock {
             this._puzzleLocks = json.puzzle_locks_;
             this._forcedStruct = json.forced_struct_;
             this._librarySelections = json.library_selections_;
-            this._targetConditions = json.target_conditions_
-                ? json.target_conditions_
-                : undefined;
+            if (json.target_conditions_) {
+                if (typeof json.target_conditions_ === 'string') {
+                    // When returned from the server, it may be double-encoded
+                    this._targetConditions = JSON.parse(json.target_conditions_);
+                } else {
+                    this._targetConditions = json.target_conditions_;
+                }
+            } else {
+                this._targetConditions = undefined;
+            }
         } catch (e) {
             throw new Error(`Error parsing UndoBlock JSON: ${e}`);
         }

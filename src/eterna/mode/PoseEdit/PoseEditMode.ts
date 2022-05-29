@@ -28,6 +28,7 @@ import Folder, {MultiFoldResult, CacheKey} from 'eterna/folding/Folder';
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
 import PoseField from 'eterna/pose2D/PoseField';
 import Pose2D, {Layout, SCRIPT_MARKER_LAYER} from 'eterna/pose2D/Pose2D';
+import Pose3D from 'eterna/pose3D/Pose3D';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import ConstraintBar from 'eterna/constraints/ConstraintBar';
@@ -69,6 +70,7 @@ import AnnotationManager, {
     AnnotationRange
 } from 'eterna/AnnotationManager';
 import LibrarySelectionConstraint from 'eterna/constraints/constraints/LibrarySelectionConstraint';
+import ErrorDialog from 'eterna/ui/ErrorDialog';
 import AnnotationDialog from 'eterna/ui/AnnotationDialog';
 import EternaSettingsDialog from 'eterna/ui/EternaSettingsDialog';
 import {ToolTipPositioner} from 'eterna/ui/help/HelpToolTip';
@@ -175,6 +177,7 @@ export default class PoseEditMode extends GameMode {
                     edit: true,
                     title: true,
                     sequenceLength: this._poses[0].fullSequenceLength,
+                    customNumbering: this._poses[0].customNumbering,
                     initialRanges: annotation.ranges,
                     initialLayers: this._annotationManager.allLayers,
                     activeCategory: this._annotationManager.activeCategory,
@@ -418,8 +421,8 @@ export default class PoseEditMode extends GameMode {
 
     private updateUILayout(): void {
         DisplayUtil.positionRelativeToStage(
-            this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
-            HAlign.CENTER, VAlign.BOTTOM, 0, 0 // 20, -20
+            this._toolbar.display, HAlign.LEFT, VAlign.BOTTOM,
+            HAlign.LEFT, VAlign.BOTTOM, 0, 50
         );
 
         this._toolbar.onResized();
@@ -556,7 +559,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     public onPaletteTargetSelected(type: PaletteTargetType): void {
-        const baseType: number = GetPaletteTargetBaseType(type);
+        const baseType = GetPaletteTargetBaseType(type);
         this.setPosesColor(baseType);
     }
 
@@ -791,6 +794,17 @@ export default class PoseEditMode extends GameMode {
                     }
                 }
             });
+            pose.startPickCallback = (closestIndex: number):void => {
+                for (let ii = 0; ii < poseFields.length; ++ii) {
+                    const poseField: PoseField = poseFields[ii];
+                    const poseToNotify = poseField.pose;
+                    if (ii === index) {
+                        poseToNotify.onVirtualPoseMouseDown(closestIndex);
+                    } else {
+                        poseToNotify.onVirtualPoseMouseDownPropagate(closestIndex);
+                    }
+                }
+            };
         };
 
         for (let ii = 0; ii < targetConditions.length; ii++) {
@@ -1063,6 +1077,17 @@ export default class PoseEditMode extends GameMode {
 
         // RScript can set our initial poseState
         this._poseState = this._puzzle.defaultMode;
+
+        // add 3DWindow
+        const threePath = this._puzzle.threePath;
+        if (threePath) {
+            const url = new URL(threePath, Eterna.SERVER_URL);
+            Pose3D.checkModelFile(url.href, this._puzzle.getSecstruct(0).length).then(() => {
+                this.addPose3D(url.href);
+            }).catch((err) => {
+                this.showDialog(new ErrorDialog(err));
+            });
+        }
     }
 
     private async switchToBrowser(solution: Solution, sortOnSolution: boolean = false): Promise<void> {
@@ -1388,7 +1413,7 @@ export default class PoseEditMode extends GameMode {
         this._scriptInterface.addCallback('set_tracked_indices',
             (
                 marks: (number | { baseIndex: number; colors?: number | number[] })[],
-                options?: {layerName?: string}
+                options?: { layerName?: string }
             ): void => {
                 const standardizedMarks = marks.map(
                     (mark) => (typeof (mark) === 'number' ? {baseIndex: mark as number} : mark)
@@ -2398,7 +2423,8 @@ export default class PoseEditMode extends GameMode {
             });
     }
 
-    public setPosesColor(paintColor: RNAPaint): void {
+    public setPosesColor(paintColor: RNABase | RNAPaint): void {
+        if (this._pose3D) this._pose3D.currentColor = paintColor;
         for (const pose of this._poses) {
             pose.currentColor = paintColor;
         }
@@ -2837,6 +2863,8 @@ export default class PoseEditMode extends GameMode {
                 }
             }
         }
+
+        if (this._pose3D) this._pose3D.sequence.value = this.getCurrentUndoBlock().sequence;
 
         const numAU: number = undoBlock.getParam(UndoBlockParam.AU, 37, pseudoknots) as number;
         const numGU: number = undoBlock.getParam(UndoBlockParam.GU, 37, pseudoknots) as number;

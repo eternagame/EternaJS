@@ -24,7 +24,7 @@ export default class HelpScreen extends AppMode {
         column: {
             width: 228,
             height: 356,
-            maxItems: 12,
+            maxItems: 14,
             margin: 10
         },
         page: {

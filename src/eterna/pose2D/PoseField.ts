@@ -1,7 +1,7 @@
 import {Graphics, InteractionEvent, Point} from 'pixi.js';
 import {
     ContainerObject, KeyboardListener, MouseWheelListener, InputUtil, Flashbang,
-    KeyboardEventType, KeyCode, Assert
+    KeyboardEventType, KeyCode, Assert, PointerCapture
 } from 'flashbang';
 import ROPWait from 'eterna/rscript/ROPWait';
 import debounce from 'lodash.debounce';
@@ -40,12 +40,9 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this.pointerMove.connect(
             (e: InteractionEvent) => this.onPointerMove(e)
         );
-        this.container.on('pointercancel',
-            (e: InteractionEvent) => this.onPointerUp(e));
-        this.container.on('pointerout',
-            (e: InteractionEvent) => this.onPointerUp(e));
-        this.container.on('pointerupoutside',
-            (e: InteractionEvent) => this.onPointerUp(e));
+        this.pointerUpOutside.connect(
+            (e: InteractionEvent) => this.onPointerUp(e)
+        );
 
         Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.keyboardInput.pushListener(this));
@@ -188,6 +185,16 @@ export default class PoseField extends ContainerObject implements KeyboardListen
             return;
         }
 
+        // If we start dragging, continue the drag even if we go over other objects,
+        // don't fire the mouseup on them if we release over them, etc.
+        if (!this._activePointerCapture) {
+            this._activePointerCapture = new PointerCapture(this.display, (captured) => {
+                captured.stopPropagation();
+                this.display.emit(captured.type, captured);
+            });
+            this.addObject(this._activePointerCapture);
+        }
+
         const pointerId = e.data.identifier;
         const {x, y} = e.data.global;
         this._interactionCache.set(pointerId, new Point(x, y));
@@ -325,6 +332,11 @@ export default class PoseField extends ContainerObject implements KeyboardListen
             });
             this._erasedAnnotations = false;
         }
+
+        if (this._activePointerCapture && this._interactionCache.size === 0) {
+            this.removeObject(this._activePointerCapture);
+            this._activePointerCapture = null;
+        }
     }
 
     public onMouseWheelEvent(e: WheelEvent): boolean {
@@ -425,6 +437,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     private _height: number = 0;
     private _mask: Graphics | null;
 
+    private _activePointerCapture: PointerCapture | null = null;
     private _interactionCache = new Map<number, Point>();
     private _previousDragDiff = -1;
     private _dragPoseStart = new Point();

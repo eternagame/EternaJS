@@ -67,6 +67,7 @@ export interface PuzzleJSON {
     hint?: string;
     'max-votes'?: string;
     constraints?: string; // AMW TODO: string formatting restrictions
+    '3d_structure'?: string; //
 }
 
 interface ObjectiveString {
@@ -180,6 +181,10 @@ export default class PuzzleManager {
             newpuz.maxVotes = Number(json['max-votes']);
         }
 
+        if (json['3d_structure']) {
+            newpuz.threePath = json['3d_structure'];
+        }
+
         if (newpuz.nodeID === 877668) {
             newpuz.objective = JSON.parse(PuzzleManager.OBJECTIVE_877668);
         } else if (newpuz.nodeID === 885046) {
@@ -224,7 +229,12 @@ export default class PuzzleManager {
         const constraints: Constraint<BaseConstraintStatus>[] = [];
         if (json['constraints'] && json['constraints'].length > 0) {
             const constraintDefs: string[] = json['constraints'].split(',');
-            if (constraintDefs.length % 2 === 1) {
+            if (constraintDefs.length % 2 === 1 && (
+                // For backwards compatibility, if the last constraint doesn't need a parameter,
+                // don't require it to have one
+                constraintDefs[constraintDefs.length - 1] !== 'SOFT'
+                && constraintDefs[constraintDefs.length - 1] !== SynthesisConstraint.NAME
+            )) {
                 throw new Error('Invalid constraint definition - uneven number of constraints and parameters');
             }
 

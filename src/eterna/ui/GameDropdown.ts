@@ -2,6 +2,7 @@ import {
     ContainerObject,
     DisplayUtil,
     HAlign,
+    PointerCapture,
     VAlign,
     VLayoutContainer
 } from 'flashbang';
@@ -10,20 +11,23 @@ import {
     Point,
     Text,
     Container,
-    Rectangle
+    Rectangle,
+    Sprite,
+    Texture
 } from 'pixi.js';
 import Fonts from 'eterna/util/Fonts';
 import {Value} from 'signals';
 import {FontWeight} from 'flashbang/util/TextBuilder';
+import GameCheckbox from 'eterna/ui/GameCheckbox';
 import GamePanel, {GamePanelType} from './GamePanel';
 import TextBalloon from './TextBalloon';
-import GameCheckbox from './GameCheckbox';
 import VScrollBox from './VScrollBox';
 
 interface GameDropdownProps {
     fontSize: number;
     options: string[];
     defaultOption: string;
+    icons?: {txt:string, icon:string}[];
     borderWidth: number;
     borderColor?: number;
     color?: number;
@@ -38,11 +42,13 @@ interface GameDropdownProps {
 interface OptionItem {
     textBalloon: TextBalloon;
     checkbox?: GameCheckbox;
+    icon?: Sprite;
 }
 
 export default class GameDropdown extends ContainerObject {
     public readonly selectedOption: Value<string>;
     public readonly options: string[];
+    private iconMap: Map<string, Texture> = new Map();
 
     constructor(props: GameDropdownProps) {
         super();
@@ -63,7 +69,12 @@ export default class GameDropdown extends ContainerObject {
             this._height = props.height;
         }
 
-        this.selectedOption = new Value(props.defaultOption || 'Select One...');
+        this.selectedOption = new Value(props.defaultOption);
+        if (props.icons) {
+            props.icons.forEach((v) => {
+                this.iconMap.set(v.txt, Texture.from(v.icon));
+            });
+        }
     }
 
     protected added(): void {
@@ -98,16 +109,33 @@ export default class GameDropdown extends ContainerObject {
             fill: this._textColor,
             fontWeight: this._textWeight
         });
+
+        if (this.iconMap.size > 0) {
+            this._selectedIcon = new Sprite();
+            this._selectedIcon.width = GameDropdown._ICON_SIZE;
+            this._selectedIcon.height = GameDropdown._ICON_SIZE;
+            this.container.addChild(this._selectedIcon);
+        }
         this.container.addChild(this._selectedText);
+
+        if (this._selectedIcon) {
+            DisplayUtil.positionRelative(
+                this._selectedIcon, HAlign.LEFT, VAlign.CENTER,
+                this._box, HAlign.LEFT, VAlign.CENTER,
+                this._borderWidth
+            );
+        }
         DisplayUtil.positionRelative(
             this._selectedText, HAlign.LEFT, VAlign.CENTER,
             this._box, HAlign.LEFT, VAlign.CENTER,
-            this._borderWidth + GameDropdown._HORIZONTAL_PADDING
+            this._borderWidth + GameDropdown._HORIZONTAL_PADDING + (this._selectedIcon ? GameDropdown._ICON_SIZE : 0)
         );
 
         this.regs.add(
             this.selectedOption.connectNotify((selected) => {
                 this._selectedText.text = selected;
+                const t = this.iconMap.get(selected);
+                if (t && this._selectedIcon) this._selectedIcon.texture = t;
             })
         );
 
@@ -178,8 +206,10 @@ export default class GameDropdown extends ContainerObject {
 
         let yWalker = 0;
         let maxWidth = this._box.width;
+        const texts: TextBalloon[] = [];
         for (const option of this.options) {
             const balloonColor = option === this.selectedOption.value ? 0x4471A2 : this._boxColor;
+            const iconSize = this._selectedIcon ? GameDropdown._ICON_SIZE : 0;
             const text = new TextBalloon(
                 option,
                 balloonColor,
@@ -190,8 +220,8 @@ export default class GameDropdown extends ContainerObject {
                 this._width ? GameDropdown._POPUP_ITEM_HEIGHT : null,
                 0,
                 this._checkboxes
-                    ? GameDropdown._POPUP_CHECKBOX_HEIGHT + 2 * GameDropdown._POPUP_CHECKBOX_PADDING
-                    : 0
+                    ? GameDropdown._POPUP_CHECKBOX_HEIGHT + 2 * GameDropdown._POPUP_CHECKBOX_PADDING + iconSize
+                    : iconSize
             );
             text.setText(option, this._fontSize, 0xC0DCE7);
             const txtBack = new Graphics();
@@ -201,9 +231,18 @@ export default class GameDropdown extends ContainerObject {
             txtBack.endFill();
             text.display.addChildAt(txtBack, 0);
             this._popup.addObject(text, contentLayout);
+            texts.push(text);
 
             let checkbox: GameCheckbox | null;
-            if (this._checkboxes) {
+            if (this.iconMap.size > 0) {
+                const icon = new Sprite(this.iconMap.get(option));
+                icon.width = GameDropdown._ICON_SIZE;
+                icon.height = GameDropdown._ICON_SIZE;
+                icon.x = GameDropdown._HORIZONTAL_PADDING / 2;
+                icon.y = (text.display.height - GameDropdown._ICON_SIZE) / 2;
+                this.addObject(new ContainerObject(icon), text.display);
+                this._optionItems.push({icon, textBalloon: text});
+            } else if (this._checkboxes) {
                 checkbox = new GameCheckbox(GameDropdown._POPUP_CHECKBOX_HEIGHT, '', true);
                 checkbox.enabled = false;
                 checkbox.toggled.value = option === this.selectedOption.value;
@@ -214,16 +253,18 @@ export default class GameDropdown extends ContainerObject {
                 // Save to option item array
                 this._optionItems.push({textBalloon: text, checkbox});
             } else {
-                // Save to option item array
                 this._optionItems.push({textBalloon: text});
             }
+
             text.display.y = yWalker;
             yWalker += text.display.height;
             text.pointerTap.connect(() => {
                 this.selectedOption.value = option;
                 // Reset all option colors
                 for (const optionItem of this._optionItems) {
-                    if (optionItem.textBalloon.display.parent) optionItem.textBalloon.setBalloonColor(this._boxColor);
+                    if (optionItem.textBalloon.display.parent) {
+                        optionItem.textBalloon.setBalloonColor(this._boxColor);
+                    }
                     if (optionItem.checkbox && optionItem.checkbox.display.parent) {
                         optionItem.checkbox.toggled.value = false;
                     }
@@ -272,6 +313,9 @@ export default class GameDropdown extends ContainerObject {
             });
             maxWidth = Math.max(text.display.width + GameDropdown._HORIZONTAL_PADDING, maxWidth);
         }
+        for (const text of texts) {
+            text.setSize(maxWidth, text.height);
+        }
         popupPanel.setSize(this._box.width, yWalker);
         let popupPanelHeight = GameDropdown._POPUP_VERTICAL_HEIGHT;
         if (GameDropdown._POPUP_VERTICAL_HEIGHT / this.options.length > GameDropdown._POPUP_ITEM_HEIGHT) {
@@ -280,6 +324,16 @@ export default class GameDropdown extends ContainerObject {
         }
         dropShadowPanel.setSize(this._box.width, popupPanelHeight);
         this._scrollView.updateScrollThumb();
+    }
+
+    public repositionPopup() {
+        if (!this.mode || !this.mode.container) return;
+        const globalBoxBounds = DisplayUtil.getBoundsRelative(this._box, this.mode.container);
+        DisplayUtil.positionRelativeToBounds(
+            this._popup.container, HAlign.LEFT, VAlign.TOP,
+            globalBoxBounds, HAlign.LEFT, VAlign.BOTTOM,
+            0, GameDropdown._POPUP_VERTICAL_OFFSET
+        );
     }
 
     private _showPopup(): void {
@@ -292,11 +346,23 @@ export default class GameDropdown extends ContainerObject {
             globalBoxBounds, HAlign.LEFT, VAlign.BOTTOM,
             0, GameDropdown._POPUP_VERTICAL_OFFSET
         );
+
+        this._activeCapture = new PointerCapture(this._popup.display, (e) => {
+            if (e.type === 'pointertap') {
+                this._hidePopup();
+            }
+            e.stopPropagation();
+        });
+        this._popup.addObject(this._activeCapture);
     }
 
     private _hidePopup(): void {
         this._popupVisible = false;
         this._popup.display.visible = false;
+        if (this._activeCapture && this.isLiveObject) {
+            this._popup.removeObject(this._activeCapture);
+            this._activeCapture = null;
+        }
     }
 
     private _drawBox(_hover: boolean) {
@@ -317,6 +383,7 @@ export default class GameDropdown extends ContainerObject {
         } else {
             width = TEXT_WIDTH + ARROW_WIDTH + GameDropdown._HORIZONTAL_PADDING;
         }
+        if (this.iconMap.size > 0) width += GameDropdown._ICON_SIZE;
 
         let height = 0;
         if (this._height && this._height !== 0) {
@@ -391,8 +458,10 @@ export default class GameDropdown extends ContainerObject {
     private _box: Graphics;
     private _arrow: Graphics = new Graphics();
     private _selectedText: Text;
+    private _selectedIcon?: Sprite;
     private _popup: ContainerObject;
     private _scrollView: VScrollBox;
+    private _activeCapture: PointerCapture | null;
 
     private _optionItems: OptionItem[] = [];
 
@@ -402,7 +471,8 @@ export default class GameDropdown extends ContainerObject {
     private static readonly _ARROW_SIDE_SIZE = 10;
     private static readonly _POPUP_VERTICAL_OFFSET = 5;
     private static readonly _POPUP_VERTICAL_HEIGHT = 120;
-    private static readonly _POPUP_ITEM_HEIGHT = 40;
+    private static readonly _POPUP_ITEM_HEIGHT = 30;
+    private static readonly _ICON_SIZE = 20;
     private static readonly _POPUP_CHECKBOX_HEIGHT = 18;
     private static readonly _POPUP_CHECKBOX_PADDING = 5;
 }

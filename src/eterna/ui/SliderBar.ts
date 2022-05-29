@@ -1,7 +1,7 @@
-import {Graphics, Point} from 'pixi.js';
+import {Graphics, InteractionEvent, Point} from 'pixi.js';
 import {Signal} from 'signals';
 import {
-    ContainerObject, DisplayObjectPointerTarget, Dragger, Flashbang, GameObjectRef, Assert
+    ContainerObject, DisplayObjectPointerTarget, Dragger, GameObjectRef
 } from 'flashbang';
 
 export default class SliderBar extends ContainerObject {
@@ -34,7 +34,7 @@ export default class SliderBar extends ContainerObject {
         const linePointerTarget = new DisplayObjectPointerTarget(this._sliderLine);
 
         barPointerTarget.pointerDown.connect(() => this.onMouseDown());
-        linePointerTarget.pointerDown.connect(() => this.onSliderLineClicked());
+        linePointerTarget.pointerDown.connect((e) => this.onSliderLineClicked(e));
 
         this.onSizeChanged();
     }
@@ -130,20 +130,17 @@ export default class SliderBar extends ContainerObject {
         });
     }
 
-    private onSliderLineClicked(): void {
-        Assert.assertIsDefined(Flashbang.globalMouse);
-        const mouse = this.container.toLocal(Flashbang.globalMouse);
-
+    private onSliderLineClicked(e: InteractionEvent): void {
         if (this._vertical) {
             if (this._height > 0) {
-                this._currentVal = mouse.y / this._height;
+                this._currentVal = e.data.getLocalPosition(this.container).y / this._height;
             } else {
                 this._currentVal = 1;
             }
             this._barRect.y = this._currentVal * (this._height - 10) + 10;
         } else {
             if (this._width > 0) {
-                this._currentVal = mouse.x / this._width;
+                this._currentVal = e.data.getLocalPosition(this.container).x / this._width;
             } else {
                 this._currentVal = 1;
             }

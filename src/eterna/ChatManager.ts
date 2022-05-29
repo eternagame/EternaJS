@@ -1,5 +1,6 @@
 import * as log from 'loglevel';
 import {Chat} from 'eterna-chat-wrapper';
+import {Signal} from 'signals';
 import EternaSettings from './settings/EternaSettings';
 import Eterna from './Eterna';
 
@@ -62,7 +63,16 @@ export default class ChatManager {
         } else {
             this._chatbox.classList.add('hidden');
         }
+
+        this.chatVisibilityChanged.emit({show, bound: this._chatbox.getBoundingClientRect()});
     }
+
+    public readonly chatVisibilityChanged: Signal<{show:boolean, bound:{
+        x:number,
+        y:number,
+        width: number,
+        height: number
+    }}> = new Signal();
 
     private readonly _chatbox: HTMLElement | null;
     private readonly _settings: EternaSettings;

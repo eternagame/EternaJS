@@ -555,6 +555,15 @@ export default class Puzzle {
         this._alreadySolved = alreadySolved;
     }
 
+    public get threePath(): string | null {
+        return this._threePath;
+    }
+
+    public set threePath(path: string | null) {
+        this._threePath = path;
+    }
+
+    private _threePath: string | null = null;
     private readonly _nid: number;
     private readonly _name: string;
     private readonly _puzzleType: PuzzleType;

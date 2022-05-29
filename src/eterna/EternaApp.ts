@@ -58,7 +58,8 @@ export enum PuzzleID {
     TemporalAnomaly = 7796345, // Really big!
     Switch2pt5leftRight = 8984178, // molecule
     JieuxAppetit2 = 8980331, // unbound molecule
-    PTCCustomLayout = 9386237 // customLayout
+    PTCCustomLayout = 9386237, // customLayout
+    Ribo5s3D = 9218290, // E.Coli Ribisome 5s rRNA, test.cif (eternadev)
 }
 
 interface SolutionAndPuzzleID {
@@ -182,6 +183,19 @@ export default class EternaApp extends FlashbangApp {
         Eterna.settings = new EternaSettings();
         Eterna.client = new GameClient(Eterna.SERVER_URL);
         Eterna.gameDiv = document.getElementById(this._params.containerID);
+
+        // Without this, we stop the pointer events from propagating to NGL in Pose3D/PointerEventPropagator,
+        // but the original mouse events will still get fired, so NGL will get confused since it tracks some
+        // events that happen outside its canvas, and these will be targeted to the Pixi canvas.
+        if (window.PointerEvent) {
+            this.view.addEventListener('mousedown', (e) => e.stopImmediatePropagation());
+            this.view.addEventListener('mouseenter', (e) => e.stopImmediatePropagation());
+            this.view.addEventListener('mouseleave', (e) => e.stopImmediatePropagation());
+            this.view.addEventListener('mousemove', (e) => e.stopImmediatePropagation());
+            this.view.addEventListener('mouseout', (e) => e.stopImmediatePropagation());
+            this.view.addEventListener('mouseover', (e) => e.stopImmediatePropagation());
+            this.view.addEventListener('mouseup', (e) => e.stopImmediatePropagation());
+        }
 
         Assert.assertIsDefined(this._regs);
 
@@ -463,7 +477,10 @@ export default class EternaApp extends FlashbangApp {
             height: this._params.height,
             backgroundColor: 0x0,
             backgroundAlpha: 0,
-            antialias: true,
+            // There's an MSAA bug on Webkit in iOS 15.4 which causes significant graphical bugs
+            // XREF https://github.com/pixijs/pixijs/issues/8183
+            // XREF https://github.com/eternagame/EternaJS/issues/634
+            antialias: !window.navigator.userAgent.match(/iPhone OS 15_4/),
             autoDensity: true,
             resolution: devicePixelRatio
         });

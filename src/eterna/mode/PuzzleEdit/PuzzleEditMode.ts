@@ -48,6 +48,9 @@ import AnnotationManager, {
 import AnnotationDialog from 'eterna/ui/AnnotationDialog';
 import EternaSettingsDialog from 'eterna/ui/EternaSettingsDialog';
 import CopyTextDialog from 'eterna/ui/CopyTextDialog';
+import FileInputObject, {HTMLInputEvent} from 'eterna/ui/FileInputObject';
+import Pose3D from 'eterna/pose3D/Pose3D';
+import ErrorDialog from 'eterna/ui/ErrorDialog';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
 import StructureInput from './StructureInput';
@@ -75,6 +78,7 @@ type SubmitPuzzleParams = {
     lock: string;
     begin_sequence: string;
     objectives: string;
+    'files[3d_structure]'?: File;
 };
 
 export default class PuzzleEditMode extends GameMode {
@@ -157,6 +161,7 @@ export default class PuzzleEditMode extends GameMode {
                     edit: true,
                     title: true,
                     sequenceLength: this._poses[0].fullSequenceLength,
+                    customNumbering: this._poses[0].customNumbering,
                     initialRanges: annotation.ranges,
                     initialLayers: this._annotationManager.allLayers,
                     activeCategory: this._annotationManager.activeCategory,
@@ -283,6 +288,28 @@ export default class PuzzleEditMode extends GameMode {
             this.downloadSVG();
         });
 
+        this._toolbar.upload3DButton.clicked.connect(() => {
+            const uploadButton = new FileInputObject({
+                id: '3d-upload-file-input',
+                width: 30,
+                height: 30,
+                acceptedFiletypes: '.cif,.pdb'
+            });
+            this.addObject(uploadButton);
+            uploadButton.activateDialog();
+            this.regs?.add(uploadButton.fileSelected.connect((e: HTMLInputEvent) => {
+                const files = e.target.files;
+                if (files && files[0]) {
+                    Pose3D.checkModelFile(files[0], this.getCurrentUndoBlock(0).sequence.length).then(() => {
+                        this.addPose3D(files[0]);
+                    }).catch((err) => {
+                        this.showDialog(new ErrorDialog(err));
+                    });
+                }
+                this.removeObject(uploadButton);
+            }));
+        });
+
         if (this._embedded) {
             this._scriptInterface.addCallback('get_secstruct', () => this.structure);
             this._scriptInterface.addCallback('get_sequence', () => this.sequence);
@@ -317,6 +344,17 @@ export default class PuzzleEditMode extends GameMode {
                         poseToNotify.onPoseMouseDown(e, closestIndex);
                     } else {
                         poseToNotify.onPoseMouseDownPropagate(e, closestIndex);
+                    }
+                }
+            };
+            pose.startPickCallback = (closestIndex: number):void => {
+                for (let ii = 0; ii < this._numTargets; ++ii) {
+                    const poseField: PoseField = poseFields[ii];
+                    const poseToNotify = poseField.pose;
+                    if (ii === index) {
+                        poseToNotify.onVirtualPoseMouseDown(closestIndex);
+                    } else {
+                        poseToNotify.onVirtualPoseMouseDownPropagate(closestIndex);
                     }
                 }
             };
@@ -529,8 +567,8 @@ export default class PuzzleEditMode extends GameMode {
 
     private updateUILayout(): void {
         DisplayUtil.positionRelativeToStage(
-            this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
-            HAlign.CENTER, VAlign.BOTTOM, 20, -20
+            this._toolbar.display, HAlign.LEFT, VAlign.BOTTOM,
+            HAlign.LEFT, VAlign.BOTTOM, 0, 50
         );
 
         let w = 17;
@@ -546,6 +584,7 @@ export default class PuzzleEditMode extends GameMode {
         );
 
         this._folderSwitcher.display.position.set(17, h + this._toolbar.targetButton.display.height + 20);
+        this._toolbar.onResized();
 
         const toolbarBounds = this._toolbar.display.getBounds();
         for (let ii = 0; ii < this._numTargets; ++ii) {
@@ -848,6 +887,11 @@ export default class PuzzleEditMode extends GameMode {
             objectives: JSON.stringify(objectives)
         };
 
+        if (this._pose3D?.structureFile instanceof File) {
+            const blob = this._pose3D?.structureFile.slice();
+            postParams['files[3d_structure]'] = new File([blob], this._pose3D?.structureFile.name);
+        }
+
         const submitText = this.showDialog(new AsyncProcessDialog('Submitting...')).ref;
         Eterna.client.submitPuzzle(postParams)
             .then(() => {
@@ -972,6 +1016,8 @@ export default class PuzzleEditMode extends GameMode {
                 undoBlocks: this._seqStack[this._stackLevel]
             });
         }
+
+        if (this._pose3D) this._pose3D.sequence.value = this.getCurrentUndoBlock(0).sequence;
 
         const undoblock: UndoBlock = this.getCurrentUndoBlock(this._poses.length - 1);
         const numAU: number = undoblock.getParam(UndoBlockParam.AU) as number;
@@ -1153,6 +1199,7 @@ export default class PuzzleEditMode extends GameMode {
             currentCustomLayouts.push(customLayout || null);
             currentTargetPairs.push(targetPairs);
         }
+
         if (noChange && this._stackLevel >= 0) {
             return;
         }
