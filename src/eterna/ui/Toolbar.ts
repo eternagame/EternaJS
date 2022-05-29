@@ -2084,18 +2084,30 @@ export default class Toolbar extends ContainerObject {
 
         this._invisibleBackground
             .beginFill(0xff0000)
-            .drawRect(0, 0, Flashbang.stageWidth, this.vContent.height + 70)
+            .drawRect(0, Flashbang.stageHeight - 30, Flashbang.stageWidth, 30)
             .endFill();
 
-        DisplayUtil.positionRelativeToStage(
-            this.vContent,
-            HAlign.CENTER,
-            VAlign.BOTTOM,
-            HAlign.CENTER,
-            VAlign.BOTTOM,
-            0,
-            this._isExpanded ? 0 : -10
-        );
+        if (!this._isAutoCollapsed) {
+            DisplayUtil.positionRelativeToStage(
+                this.vContent,
+                HAlign.CENTER,
+                VAlign.BOTTOM,
+                HAlign.CENTER,
+                VAlign.BOTTOM,
+                0,
+                this._isExpanded ? 0 : -10
+            );
+        } else {
+            DisplayUtil.positionRelativeToStage(
+                this.vContent,
+                HAlign.CENTER,
+                VAlign.TOP,
+                HAlign.CENTER,
+                VAlign.BOTTOM,
+                0,
+                -10
+            );
+        }
     }
 
     private makeLayout() {
@@ -3492,12 +3504,12 @@ export default class Toolbar extends ContainerObject {
         if (enabled) {
             this.display.interactive = true;
             this._invisibleBackground.interactive = true;
-            let collapsed = false;
+            this._isAutoCollapsed = false;
 
             const uncollapse = () => {
-                if (collapsed) {
+                if (this._isAutoCollapsed) {
                     Assert.assertIsDefined(Flashbang.stageHeight);
-                    collapsed = false;
+                    this._isAutoCollapsed = false;
                     this.removeNamedObjects(COLLAPSE_ANIM);
                     this.addNamedObject(
                         COLLAPSE_ANIM,
@@ -3513,9 +3525,9 @@ export default class Toolbar extends ContainerObject {
             };
 
             const collapse = () => {
-                if (!collapsed) {
+                if (!this._isAutoCollapsed) {
                     Assert.assertIsDefined(Flashbang.stageHeight);
-                    collapsed = true;
+                    this._isAutoCollapsed = true;
                     this.removeNamedObjects(COLLAPSE_ANIM);
                     this.addNamedObject(
                         COLLAPSE_ANIM,
@@ -3532,7 +3544,7 @@ export default class Toolbar extends ContainerObject {
 
             this._autoCollapseRegs = new RegistrationGroup();
             this._autoCollapseRegs.add(this.pointerTap.connect(() => {
-                if (collapsed) uncollapse(); else collapse();
+                if (this._isAutoCollapsed) uncollapse(); else collapse();
             }));
             this._autoCollapseRegs.add(this.pointerOver.connect(uncollapse));
             this._autoCollapseRegs.add(this.pointerOut.connect(collapse));
@@ -3678,6 +3690,7 @@ export default class Toolbar extends ContainerObject {
     private _autoCollapseRegs: RegistrationGroup | null;
 
     private _isExpanded: boolean;
+    private _isAutoCollapsed: boolean;
     private _isDragging: boolean;
     private _canDrag: boolean;
     private _isDisabled: boolean = false;
