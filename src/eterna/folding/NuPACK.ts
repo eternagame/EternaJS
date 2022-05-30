@@ -9,7 +9,9 @@ import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import * as NupackLib from './engines/NupackLib';
-import {DotPlotResult, FullEvalResult, FullFoldResult} from './engines/NupackLib';
+import {
+    DotPlotResult, FullEvalResult, FullFoldResult, FullAdvancedResult
+} from './engines/NupackLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
 import Folder, {MultiFoldResult, CacheKey, FullEvalCache} from './Folder';
 import FoldUtil from './FoldUtil';
@@ -83,6 +85,37 @@ export default class NuPACK extends Folder {
     /* override */
     public get name(): string {
         return NuPACK.NAME;
+    }
+
+    /* override */
+    public getSuboptEnsemble(seq: Sequence, temp: number, kcal_delta: number,
+        pseudoknotted: boolean = false): string[][] {
+        let result: FullAdvancedResult | null = null;
+        result = this._lib
+            .FullEnsembleNoBindingSite(
+                seq.sequenceString(), temp,
+                kcal_delta, pseudoknotted
+            );
+        if (!result) {
+            throw new Error('NuPACK returned a null result');
+        }
+        const suboptdata: string[][] = new Array<Array<string>>();
+        const subopt_structures_array = EmscriptenUtil.stdVectorToArray(result.subopt_structures);
+        const subopt_energyError_array = EmscriptenUtil.stdVectorToArray(result.subopt_energyError);
+        const subopt_freeEnergy_array = EmscriptenUtil.stdVectorToArray(result.subopt_freeEnergy);
+
+        suboptdata.push(subopt_structures_array);
+        suboptdata.push(subopt_energyError_array);
+        suboptdata.push(subopt_freeEnergy_array);
+
+        // let ensmeble_structures: string[] = [];
+        //
+        // for (int index = 0; index  < ArraySuboptdata.length; index ++) {
+        // let struct = SecStruct.fromParens(ArraySuboptdata[index].toString());
+        // ensmeble_structures.push(struct);
+        // }
+
+        return suboptdata;
     }
 
     /* override */

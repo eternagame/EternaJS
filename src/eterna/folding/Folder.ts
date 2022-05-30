@@ -86,6 +86,12 @@ export default abstract class Folder {
         return false;
     }
 
+    public getSuboptEnsemble(
+        _seq: Sequence, _temp: number, _kcal_delta_range_mfe_subopt: number, _pseudoknotted: boolean = false
+    ): string[][] {
+        return new Array<Array<string>>();
+    }
+
     public getDotPlot(
         _seq: Sequence, _secstruct: SecStruct, _temp: number = 37, _pseudoknots: boolean = false
     ): DotPlot | null {

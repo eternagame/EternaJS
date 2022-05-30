@@ -42,6 +42,32 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldV]) {
             .resolves.toBeUndefined();
     });
 
+    test('Nupack_Subopt_structures', () => {    
+   	 expect.assertions(1);
+    	 return expect(CreateFolder(NuPACK)
+           .then((folder) => {
+            if (folder === null) {
+                expect(true).toBeTruthy();
+                return;
+            }
+
+            const structures = folder.getSuboptEnsemble(
+                Sequence.fromSequenceString("auauauagaaaauauaua"),
+                37, 1, false);
+	    
+	        //let num = structures.length;
+	        console.log(structures); 
+            //console.log(structures[0]); 			 
+                
+            //expect(structures).toBeDefined();
+            //expect(structures[0])
+                //.toEqual(".((((((.....))))))");
+        }))
+        .resolves.toBeUndefined(); // (we're returning a promise)
+
+    });
+
+
     test(`${folderType.NAME}:emptyStructure`, () => {
         expect.assertions(2);
         return expect(CreateFolder(folderType)

@@ -1313,6 +1313,24 @@ export default class PoseEditMode extends GameMode {
                 return pp.data;
             });
 
+        this._scriptInterface.addCallback('subopt',
+            (seq: string, temp: number, kcal_delta: number,
+                pseudoknotted: boolean): string[][] | null => {
+                if (this._folder === null) {
+                    return null;
+                }
+                const seqArr: Sequence = Sequence.fromSequenceString(seq);
+                let folded: string[][] = new Array<Array<string>>();
+                folded = this._folder.getSuboptEnsemble(
+                    seqArr, temp, kcal_delta, pseudoknotted
+                );
+                if (folded === null) {
+                    return null;
+                }
+
+                return folded;
+            });
+
         this._scriptInterface.addCallback('cofold',
             (seq: string, oligo: string, malus: number = 0.0, constraint: string | null = null): string | null => {
                 if (this._folder === null) {
