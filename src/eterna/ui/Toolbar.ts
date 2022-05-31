@@ -3448,6 +3448,7 @@ export default class Toolbar extends ContainerObject {
 
         this.regs.add(
             this.scrollContainer.pointerUpOutside.connect(() => {
+                this.disableTools(false);
                 mouseDown = false;
             })
         );
