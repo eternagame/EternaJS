@@ -18,6 +18,7 @@ export default class Bitmaps {
     public static readonly Backbone: string = require('assets/RNABase/backbone_new.png');
     public static readonly NovaBarcodeMissionReq: string = require('assets/NOVA/Mission/barcode-req-mission.png');
     public static readonly NovaBarcodeReq: string = require('assets/NOVA/Constraints/barcode-requirement-carrier.png');
+    public static readonly PseudoknotReqIcon: string = require('assets/NOVA/Constraints/constraint-pseudoknot.png');
     public static readonly ImgSelectBase: string = require('assets/NOVA/Palette/base-selected.png');
     public static readonly ImgBindingBaseGlow: string = require('assets/Aptamer/base_outer-1.png');
     public static readonly BaseAf: string = require('assets/RNABase/BaseAf.png');
