@@ -7,11 +7,12 @@
 
 struct FullAdvancedResult {
     double ensembleDefect;
-    std::vector<std::string> subopt_structures;
-    std::vector<std::string> subopt_energyError;
-    std::vector<std::string> subopt_freeEnergy;
+    std::vector<std::string> suboptStructures;
+    std::vector<double> suboptEnergyError;
+    std::vector<double> suboptFreeEnergy;
 };
 
-FullAdvancedResult* FullEnsembleNoBindingSite (const std::string& seqString, int temperature, float kcal_delta_range_mfe_subopt, bool const pseudoknotted);
+FullAdvancedResult* FullEnsembleNoBindingSite (const std::string& seqString, int temperature, float kcalDeltaRange, bool const pseudoknotted);
+FullAdvancedResult* FullEnsembleWithOligos (const std::string& seqString, int temperature, float kcalDeltaRange,  bool const pseudoknotted);
 
 #endif //NUPACK_FULLENSEMBLE_H

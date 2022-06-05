@@ -1313,23 +1313,41 @@ export default class PoseEditMode extends GameMode {
                 return pp.data;
             });
 
-        this._scriptInterface.addCallback('subopt',
-            (seq: string, temp: number, kcal_delta: number,
-                pseudoknotted: boolean): string[][] | null => {
+        //I want players to be able to play aroudn with temp for folding
+        this._scriptInterface.addCallback('suboptSingleSequence',
+            (seq: string, kcal_delta: number, pseudoknotted: boolean, 
+                        temp: number = 37): string[][] | null => {
                 if (this._folder === null) {
                     return null;
                 }
+                //now get subopt stuff
                 const seqArr: Sequence = Sequence.fromSequenceString(seq);
-                let folded: string[][] = new Array<Array<string>>();
-                folded = this._folder.getSuboptEnsemble(
-                    seqArr, temp, kcal_delta, pseudoknotted
-                );
-                if (folded === null) {
-                    return null;
-                }
-
-                return folded;
+                return this._folder.getSuboptEnsemble(seqArr, 
+                                    kcal_delta, pseudoknotted, temp);
+                
             });
+
+        //I want players to be able to play aroudn with temp for folding
+        this._scriptInterface.addCallback('suboptOligos',
+        (seq: string, oligoStrings: string[], kcal_delta: number, pseudoknotted: boolean, 
+                    temp: number = 37): string[][] | null => {
+            if (this._folder === null) {
+                return null;
+            }
+            //make teh sequence string from the oligos
+            let newSequence: string = seq;
+            for (let oligoIndex=0; oligoIndex < oligoStrings.length; oligoIndex++) {
+                let oligoSequence: string = oligoStrings[oligoIndex];               
+                newSequence = newSequence + "&" + oligoSequence;
+                          
+            }
+
+            //now get subopt stuff
+            const seqArr: Sequence = Sequence.fromSequenceString(newSequence);      
+            return this._folder.getSuboptEnsembleWithOligos(seqArr, 
+                            kcal_delta, pseudoknotted, temp);
+            
+        });
 
         this._scriptInterface.addCallback('cofold',
             (seq: string, oligo: string, malus: number = 0.0, constraint: string | null = null): string | null => {

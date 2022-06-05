@@ -13,7 +13,7 @@ import {
     DotPlotResult, FullEvalResult, FullFoldResult, FullAdvancedResult
 } from './engines/NupackLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
-import Folder, {MultiFoldResult, CacheKey, FullEvalCache} from './Folder';
+import Folder, {MultiFoldResult, CacheKey, FullEvalCache, SuboptEnsembleResult} from './Folder';
 import FoldUtil from './FoldUtil';
 
 export default class NuPACK extends Folder {
@@ -87,35 +87,123 @@ export default class NuPACK extends Folder {
         return NuPACK.NAME;
     }
 
+
     /* override */
-    public getSuboptEnsemble(seq: Sequence, temp: number, kcal_delta: number,
-        pseudoknotted: boolean = false): string[][] {
+    public getSuboptEnsembleWithOligos(seq: Sequence, oligoStrings: string[], kcal_delta: number, 
+        pseudoknotted: boolean = false, temp: number  = 37
+        ): SuboptEnsembleResult {
+        const key = {
+            primitive: 'subopt',
+            seq: seq.baseArray,
+            kcal_delta,
+            pseudoknotted, 
+            temp
+        };
+
+        let suboptdataCache: SuboptEnsembleResult = this.getCache(key) as SuboptEnsembleResult;
+        if (suboptdataCache != null) {
+            // trace("getSuboptEnsemble cache hit");
+            return suboptdataCache;
+        }        
+
+    
+        //initialize empty result cache
+        suboptdataCache = {
+            ensembleDefect: 0,
+            suboptStructures: [],
+            suboptEnergyError: [],
+            suboptFreeEnergy:[]
+        };
+
+        let newSequence: string = seq.sequenceString();
+        for (let oligoIndex=0; oligoIndex < oligoStrings.length; oligoIndex++) {
+            let oligoSequence: string = oligoStrings[oligoIndex];               
+            newSequence = newSequence + "&" + oligoSequence;                      
+        }
+
+        //now get subopt stuff
+        const seqArr: Sequence = Sequence.fromSequenceString(newSequence);   
+
+        //run nupack code
+        //pass a new sequence strucure as teh strucuture based on the concatinated oligo string
         let result: FullAdvancedResult | null = null;
-        result = this._lib
-            .FullEnsembleNoBindingSite(
-                seq.sequenceString(), temp,
-                kcal_delta, pseudoknotted
+        result = this._lib.FullEnsembleWithOligos(
+            seqArr.sequenceString(), temp, 
+            kcal_delta, pseudoknotted 
             );
+            
         if (!result) {
             throw new Error('NuPACK returned a null result');
         }
-        const suboptdata: string[][] = new Array<Array<string>>();
-        const subopt_structures_array = EmscriptenUtil.stdVectorToArray(result.subopt_structures);
-        const subopt_energyError_array = EmscriptenUtil.stdVectorToArray(result.subopt_energyError);
-        const subopt_freeEnergy_array = EmscriptenUtil.stdVectorToArray(result.subopt_freeEnergy);
+        
+        //prepare teh results for return and storage in cache
+        const subopt_structures: string[] = EmscriptenUtil.stdVectorToArray(result.suboptStructures);
+        suboptdataCache.suboptStructures = subopt_structures;
+        
+        const subopt_structures_energyErrors: number[] = EmscriptenUtil.stdVectorToArray(result.suboptEnergyError);
+        suboptdataCache.suboptEnergyError = subopt_structures_energyErrors;
+        
+        const subopt_structures_freeEnergy: number[] = EmscriptenUtil.stdVectorToArray(result.suboptFreeEnergy);
+        suboptdataCache.suboptFreeEnergy = subopt_structures_freeEnergy;
+            
 
-        suboptdata.push(subopt_structures_array);
-        suboptdata.push(subopt_energyError_array);
-        suboptdata.push(subopt_freeEnergy_array);
+        this.putCache(key, suboptdataCache);
+        return suboptdataCache;
+    }
 
-        // let ensmeble_structures: string[] = [];
-        //
-        // for (int index = 0; index  < ArraySuboptdata.length; index ++) {
-        // let struct = SecStruct.fromParens(ArraySuboptdata[index].toString());
-        // ensmeble_structures.push(struct);
-        // }
 
-        return suboptdata;
+    /* override */
+    public getSuboptEnsembleNoBindingSite(seq: Sequence, kcal_delta: number, 
+        pseudoknotted: boolean = false, temp: number  = 37
+        ): SuboptEnsembleResult {
+        const key = {
+            primitive: 'subopt',
+            seq: seq.baseArray,
+            kcal_delta,
+            pseudoknotted,            
+            //bindingSite,
+            //bonus,                
+            temp
+        };
+
+        let suboptdataCache: SuboptEnsembleResult = this.getCache(key) as SuboptEnsembleResult;
+        if (suboptdataCache != null) {
+            // trace("getSuboptEnsemble cache hit");
+            return suboptdataCache;
+        }         
+            
+        //initialize empty result cache
+        suboptdataCache = {
+            ensembleDefect: 0,
+            suboptStructures: [],
+            suboptEnergyError: [],
+            suboptFreeEnergy:[]
+        };
+
+        let result: FullAdvancedResult | null = null;
+        result = this._lib.FullEnsembleNoBindingSite(
+            seq.sequenceString(), temp, 
+            kcal_delta, pseudoknotted 
+            );
+            
+        if (!result) {
+            throw new Error('NuPACK returned a null result');
+        }
+
+        
+        //prepare teh results for return and storage in cache
+        const subopt_structures: string[] = EmscriptenUtil.stdVectorToArray(result.suboptStructures);
+        suboptdataCache.suboptStructures = subopt_structures;
+
+        const subopt_structures_energyErrors: number[] = EmscriptenUtil.stdVectorToArray(result.suboptEnergyError);
+        suboptdataCache.suboptEnergyError = subopt_structures_energyErrors;
+        
+        const subopt_structures_freeEnergy: number[] = EmscriptenUtil.stdVectorToArray(result.suboptFreeEnergy);
+        suboptdataCache.suboptFreeEnergy = subopt_structures_freeEnergy;
+               
+
+        this.putCache(key, suboptdataCache);
+        return suboptdataCache;
     }
 
     /* override */
@@ -476,6 +564,10 @@ export default class NuPACK extends Folder {
             order.push(ii);
         }
 
+        //this code appears to do do peform multiple runs where it 
+        //incrementally adds a oligo to the cofold if needed and scores it.
+        //it finds best fit and then uses that. I needed to figure out what was happeing
+        //here for subopt stuff and wanted to commment -Jennifer Pearl
         let more: boolean;
         do {
             for (let ii = numOligo; ii >= 0; ii--) {

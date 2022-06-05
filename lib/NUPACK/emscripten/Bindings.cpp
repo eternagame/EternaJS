@@ -64,11 +64,13 @@ EMSCRIPTEN_BINDINGS(EmscriptenBridge) {
 
     class_<FullAdvancedResult>("FullAdvancedResult")
         .property("ensembleDefect", &FullAdvancedResult::ensembleDefect)
-        .property("subopt_structures", &FullAdvancedResult::subopt_structures)
-        .property("subopt_energyError", &FullAdvancedResult::subopt_energyError)
-        .property("subopt_freeEnergy", &FullAdvancedResult::subopt_freeEnergy);
+        .property("suboptStructures", &FullAdvancedResult::suboptStructures)
+        .property("suboptEnergyError", &FullAdvancedResult::suboptEnergyError)
+        .property("suboptFreeEnergy", &FullAdvancedResult::suboptFreeEnergy);
 
     function("FullEnsembleNoBindingSite", &FullEnsembleNoBindingSite, allow_raw_pointers());
+    function("FullEnsembleWithOligos", &FullEnsembleWithOligos, allow_raw_pointers());
+
 
 }
 

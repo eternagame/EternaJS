@@ -4,8 +4,8 @@ import DotPlot from 'eterna/rnatypes/DotPlot';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 
-export type CacheItem = SecStruct | number[] | FullEvalCache | MultiFoldResult | undefined;
-export type CacheKey = Record<string, string | number | number[] | boolean | Oligo[] | null>;
+export type CacheItem = SecStruct | number[] | FullEvalCache | MultiFoldResult | SuboptEnsembleResult | undefined;
+export type CacheKey = Record<string, string | string[] | number | number[] | boolean | Oligo[] | null>;
 
 export interface MultiFoldResult {
     pairs: SecStruct;
@@ -17,6 +17,14 @@ export interface FullEvalCache {
     nodes: number[];
     energy: number;
 }
+
+export interface SuboptEnsembleResult {
+    ensembleDefect: number;
+    suboptStructures: string[];
+    suboptEnergyError: number[];
+    suboptFreeEnergy: number[];
+}
+
 
 export default abstract class Folder {
     public abstract get name (): string;
@@ -86,10 +94,16 @@ export default abstract class Folder {
         return false;
     }
 
-    public getSuboptEnsemble(
-        _seq: Sequence, _temp: number, _kcal_delta_range_mfe_subopt: number, _pseudoknotted: boolean = false
-    ): string[][] {
-        return new Array<Array<string>>();
+    public getSuboptEnsembleNoBindingSite(
+        _seq: Sequence, _kcalDeltaRange: number, _pseudoknotted: boolean = false, _temp: number = 37
+    ): SuboptEnsembleResult {
+        return  {ensembleDefect: 0, suboptStructures: [], suboptEnergyError: [], suboptFreeEnergy:[]};
+    }
+
+    public getSuboptEnsembleWithOligos(
+        _seq: Sequence, _oligos: string[], _kcalDeltaRange: number, _pseudoknotted: boolean = false, _temp: number = 37
+    ): SuboptEnsembleResult {
+        return  {ensembleDefect: 0, suboptStructures: [], suboptEnergyError: [], suboptFreeEnergy:[]};
     }
 
     public getDotPlot(
