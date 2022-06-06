@@ -27,7 +27,6 @@ import {
     ParallelTask,
     VisibleTask,
     GameObjectRef,
-    AlphaTask,
     SerialTask
 } from 'flashbang';
 import {BoostersData} from 'eterna/puzzle/Puzzle';
@@ -47,7 +46,7 @@ import ScrollContainer from './ScrollContainer';
 import AnnotationPanel from './AnnotationPanel';
 import TextBalloon from './TextBalloon';
 import BoosterDialog from './BoosterDialog';
-import ToolbarButton, {ButtonCategory, BUTTON_HEIGHT, BUTTON_WIDTH} from './ToolbarButton';
+import ToolbarButton, {ButtonCategory, BUTTON_WIDTH} from './ToolbarButton';
 
 export enum ToolbarType {
     PUZZLE,
@@ -1714,8 +1713,8 @@ export default class Toolbar extends ContainerObject {
                         Booster.create(mode, data).then((booster) => {
                             booster.onLoad();
                             const button: ToolbarButton = booster.createButton();
-                            button.setName(`BoosterPainting-${button.label}`)
-                                .setCategory(ButtonCategory.SOLVE);
+                            button.setCategory(ButtonCategory.SOLVE)
+                                .setName(`BoosterPainting-${button.label}`);
                             this.regs.add(
                                 button.clicked.connect(() => {
                                     mode.setPosesColor(booster.toolColor);
@@ -2257,10 +2256,10 @@ export default class Toolbar extends ContainerObject {
                 downX = e.data.global.x;
             }
         });
-        this.textScrollContainer.pointerUp.connect((e) => {
+        this.textScrollContainer.pointerUp.connect(() => {
             downed = false;
         });
-        this.textScrollContainer.pointerUpOutside.connect((e) => {
+        this.textScrollContainer.pointerUpOutside.connect(() => {
             downed = false;
         });
 

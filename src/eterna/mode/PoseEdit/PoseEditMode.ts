@@ -22,7 +22,7 @@ import {
     GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
-import {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
+import EternaSettingsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaSettingsDialog';
 import FolderManager from 'eterna/folding/FolderManager';
 import Folder, {MultiFoldResult, CacheKey} from 'eterna/folding/Folder';
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
@@ -72,7 +72,6 @@ import AnnotationManager, {
 import LibrarySelectionConstraint from 'eterna/constraints/constraints/LibrarySelectionConstraint';
 import ErrorDialog from 'eterna/ui/ErrorDialog';
 import AnnotationDialog from 'eterna/ui/AnnotationDialog';
-import EternaSettingsDialog from 'eterna/ui/EternaSettingsDialog';
 import {ToolTipPositioner} from 'eterna/ui/help/HelpToolTip';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';

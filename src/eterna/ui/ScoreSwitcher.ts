@@ -41,7 +41,7 @@ export default class ScoreSwitcher extends ContainerObject {
     }
 
     protected added() {
-        this.display.addChild(new Sprite(BitmapManager.getBitmap(Bitmaps.smallImgFoldingEngine)));
+        this.display.addChild(new Sprite(BitmapManager.getBitmap(Bitmaps.ImgFoldingEngine)));
         this._dropdown.display.position.x = 26;
         this.addObject(this._dropdown, this.display);
     }

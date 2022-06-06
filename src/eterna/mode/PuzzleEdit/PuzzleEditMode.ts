@@ -7,7 +7,7 @@ import Molecule from 'eterna/pose2D/Molecule';
 import BaseGlow from 'eterna/vfx/BaseGlow';
 import Toolbar, {ToolbarType} from 'eterna/ui/Toolbar';
 import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
-import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
+import EternaSettingsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaSettingsDialog';
 import PoseField from 'eterna/pose2D/PoseField';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
 import Pose2D, {Layout} from 'eterna/pose2D/Pose2D';
@@ -46,7 +46,6 @@ import AnnotationManager, {
     AnnotationRange
 } from 'eterna/AnnotationManager';
 import AnnotationDialog from 'eterna/ui/AnnotationDialog';
-import EternaSettingsDialog from 'eterna/ui/EternaSettingsDialog';
 import CopyTextDialog from 'eterna/ui/CopyTextDialog';
 import FileInputObject, {HTMLInputEvent} from 'eterna/ui/FileInputObject';
 import Pose3D from 'eterna/pose3D/Pose3D';

@@ -5,11 +5,10 @@ import {
     ContainerObject,
     KeyboardListener,
     MouseWheelListener,
-    DisplayObjectPointerTarget,
     Flashbang,
     Assert,
     VLayoutContainer, HLayoutContainer,
-    VAlign, HAlign, SpriteObject, SceneObject, Dragger, MathUtil
+    VAlign, HAlign, SpriteObject, SceneObject, Dragger
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -244,16 +243,16 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         this.dragLeftPrevPt.x = e.data.global.x;
         this.dragLeftPrevPt.y = e.data.global.y;
         this.regs.add(dragger.dragged.connect((p: Point) => {
-            const dx = e.data.global.x - this.dragLeftPrevPt.x;
-            const dy = e.data.global.y - this.dragLeftPrevPt.y;
+            const dx = p.x - this.dragLeftPrevPt.x;
+            const dy = p.y - this.dragLeftPrevPt.y;
 
             const w = this.frameMask.width - dx;
             const h = this.frameMask.height + dy;
             if (w > 100 && h > 100) {
                 this.frameContainer.position.x += dx;
                 this.resize(w, h);
-                this.dragLeftPrevPt.x = e.data.global.x;
-                this.dragLeftPrevPt.y = e.data.global.y;
+                this.dragLeftPrevPt.x = p.x;
+                this.dragLeftPrevPt.y = p.y;
             }
         }));
     }

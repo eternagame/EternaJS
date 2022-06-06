@@ -17,7 +17,7 @@ import Vienna from 'eterna/folding/Vienna';
 import {
     VAlign, HAlign, DisplayUtil, KeyboardEventType, KeyCode, Assert
 } from 'flashbang';
-import {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
+import EternaSettingsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaSettingsDialog';
 import SpecBoxDialog from 'eterna/ui/SpecBoxDialog';
 import Folder from 'eterna/folding/Folder';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -30,7 +30,6 @@ import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 import UITheme from 'eterna/ui/UITheme';
 import AnnotationManager from 'eterna/AnnotationManager';
-import EternaSettingsDialog from 'eterna/ui/EternaSettingsDialog';
 import ViewSolutionOverlay from './DesignBrowser/ViewSolutionOverlay';
 import GameMode from './GameMode';
 
