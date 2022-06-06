@@ -5,7 +5,7 @@ import GameButton from './GameButton';
 import GamePanel from './GamePanel';
 import TextInputObject from './TextInputObject';
 
-export default class MyTextInputPanel extends GamePanel {
+export default class FlexibleTextInputPanel extends GamePanel {
     public readonly cancelClicked: UnitSignal = new UnitSignal();
     public readonly okClicked: Signal<Map<string, string>> = new Signal();
 
@@ -43,31 +43,31 @@ export default class MyTextInputPanel extends GamePanel {
         let heightWalker = 0;
 
         if (this._fields.length > 0) {
-            heightWalker = MyTextInputPanel.H_MARGIN;
+            heightWalker = FlexibleTextInputPanel.H_MARGIN;
 
             for (const field of this._fields) {
                 heightWalker += 4;
 
-                field.input.display.x = fieldStart + (MyTextInputPanel.W_MARGIN * 2);
+                field.input.display.x = fieldStart + (FlexibleTextInputPanel.W_MARGIN * 2);
                 field.input.display.y = heightWalker;
 
-                field.label.x = MyTextInputPanel.W_MARGIN;
+                field.label.x = FlexibleTextInputPanel.W_MARGIN;
                 field.label.y = heightWalker;
 
                 heightWalker += field.input.height;
             }
 
-            heightWalker += MyTextInputPanel.H_MARGIN;
+            heightWalker += FlexibleTextInputPanel.H_MARGIN;
         }
 
         const tmpwidth = 0;
         const width = (
-            fieldStart + maxWidth + MyTextInputPanel.W_MARGIN > tmpwidth
-                ? MyTextInputPanel.W_MARGIN + fieldStart + MyTextInputPanel.W_MARGIN
-                + maxWidth + MyTextInputPanel.W_MARGIN
-                : MyTextInputPanel.W_MARGIN + tmpwidth + MyTextInputPanel.W_MARGIN
+            fieldStart + maxWidth + FlexibleTextInputPanel.W_MARGIN > tmpwidth
+                ? FlexibleTextInputPanel.W_MARGIN + fieldStart + FlexibleTextInputPanel.W_MARGIN
+                + maxWidth + FlexibleTextInputPanel.W_MARGIN
+                : FlexibleTextInputPanel.W_MARGIN + tmpwidth + FlexibleTextInputPanel.W_MARGIN
         );
-        const height = heightWalker + this._okButton.display.height + MyTextInputPanel.H_MARGIN;
+        const height = heightWalker + this._okButton.display.height + FlexibleTextInputPanel.H_MARGIN;
         this.setSize(width, height);
 
         this._okButton.display.position.set(

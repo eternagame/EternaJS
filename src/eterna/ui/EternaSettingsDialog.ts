@@ -102,10 +102,10 @@ export default class EternaSettingsDialog extends FloatDialog<void> {
         this.addObject(this.scrollBox, this.contentVLay);
         this.scrollBox.content.addChild(this._viewLayout);
 
-        this.updateLocation2();
+        this.updateFinalFloatLocation();
     }
 
-    public updateLocation2() {
+    public updateFinalFloatLocation() {
         Assert.assertIsDefined(Flashbang.stageHeight);
         const idealHeight = this._viewLayout.height + 40 + this.titleArea.height;
         const maxHeight = Flashbang.stageHeight * 0.8;

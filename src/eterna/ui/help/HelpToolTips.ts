@@ -83,14 +83,13 @@ export default class HelpToolTips {
         fixedToolTips.forEach((tip) => {
             toolTips.push(tip);
         });
-        let k = 0;
-        let h = 2 * HelpToolTip.theme.vPadding;
-        h += HelpToolTip.theme.fontSize;
-        h += 4;
-        props.topbarHelpers.forEach((p) => {
+
+        let tailBodyHeight = 2 * HelpToolTip.theme.vPadding;
+        tailBodyHeight += HelpToolTip.theme.fontSize;
+        tailBodyHeight += 4;
+        props.topbarHelpers.forEach((p, k) => {
             const [, , name] = p;
-            toolTips.push(new HelpToolTip({text: name, tailLength: h * (k % 2), positioner: p}));
-            k++;
+            toolTips.push(new HelpToolTip({text: name, tailLength: tailBodyHeight * (k % 2), positioner: p}));
         });
         return toolTips.filter((toolTip): toolTip is HelpToolTip => toolTip != null);
     }

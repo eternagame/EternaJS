@@ -4,7 +4,7 @@ import {
 } from 'flashbang';
 import FloatDialog from './FloatDialog';
 import GameButton from './GameButton';
-import MySpecBox from './MySpecBox';
+import FloatSpecBox from './FloatSpecBox';
 
 /**
  * Displays a SpecBox in a modal dialog.
@@ -12,7 +12,7 @@ import MySpecBox from './MySpecBox';
  * should display a docked SpecBox.
  */
 export default class SpecBoxDialog extends FloatDialog<boolean> {
-    private specBox: MySpecBox;
+    private specBox: FloatSpecBox;
     private cancelButton: GameButton;
     private minimizeButton: GameButton;
     constructor(datablock: UndoBlock, showMinimizeButton: boolean = true) {
@@ -24,7 +24,7 @@ export default class SpecBoxDialog extends FloatDialog<boolean> {
     protected added(): void {
         super.added();
 
-        this.specBox = new MySpecBox();
+        this.specBox = new FloatSpecBox();
         this.addObject(this.specBox, this.contentVLay);
 
         this.specBox.setSpec(this._datablock);
@@ -42,10 +42,10 @@ export default class SpecBoxDialog extends FloatDialog<boolean> {
             this.minimizeButton.clicked.connect(() => this.close(true));
         }
 
-        this.updateLocation2();
+        this.updateFinalFloatLocation();
     }
 
-    public updateLocation2() {
+    public updateFinalFloatLocation() {
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
         this.specBox.setSize(Flashbang.stageWidth * 0.7, Flashbang.stageHeight * 0.7);

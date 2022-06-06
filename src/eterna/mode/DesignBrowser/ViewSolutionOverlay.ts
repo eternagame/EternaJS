@@ -35,7 +35,6 @@ import SliderBar from 'eterna/ui/SliderBar';
 import {FontWeight} from 'flashbang/util/TextBuilder';
 import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
-import CopyTextDialog from 'eterna/ui/CopyTextDialog';
 import ThumbnailAndTextButton from './ThumbnailAndTextButton';
 import GameMode from '../GameMode';
 import ButtonWithIcon from './ButtonWithIcon';
@@ -43,6 +42,7 @@ import LabComments, {CommentsData} from './LabComments';
 import FeedbackViewMode from '../FeedbackViewMode';
 import PoseEditMode from '../PoseEdit/PoseEditMode';
 import DesignBrowserMode, {DesignCategory} from './DesignBrowserMode';
+import CopyTextDialogMode from '../CopyTextDialogMode';
 
 interface ViewSolutionOverlayProps {
     solution: Solution;
@@ -242,8 +242,8 @@ export default class ViewSolutionOverlay extends ContainerObject {
                     filter1_arg2: this._props.solution.nodeID
                     /* eslint-enable camelcase */
                 });
-                // this.modeStack.pushMode(new CopyTextDialogMode(solutionURL, 'Solution URL'));
-                (this.mode as GameMode).showDialog(new CopyTextDialog(solutionURL, 'Solution URL'));
+                this.modeStack.pushMode(new CopyTextDialogMode(solutionURL, 'Solution URL'));
+                // (this.mode as GameMode).showDialog(new CopyTextDialog(solutionURL, 'Solution URL'));
             }
         );
         this._content.addObject(permalink, headerLinks);
@@ -269,8 +269,8 @@ export default class ViewSolutionOverlay extends ContainerObject {
                     filter1_arg1: this._props.solution.playerName
                     /* eslint-enable camelcase */
                 });
-                // this.modeStack.pushMode(new CopyTextDialogMode(playerURL, 'Player URL'));
-                (this.mode as GameMode).showDialog(new CopyTextDialog(playerURL, 'Player URL'));
+                this.modeStack.pushMode(new CopyTextDialogMode(playerURL, 'Player URL'));
+                // (this.mode as GameMode).showDialog(new CopyTextDialog(playerURL, 'Player URL'));
             }
         );
 

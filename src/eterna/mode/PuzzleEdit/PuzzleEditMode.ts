@@ -230,11 +230,6 @@ export default class PuzzleEditMode extends GameMode {
         });
 
         this._toolbar.copyButton.clicked.connect(() => {
-            // Assert.assertIsDefined(this.modeStack);
-            // this.modeStack.pushMode(new CopyTextDialogMode(
-            //     this._poses[0].sequence.sequenceString(),
-            //     'Current Sequence'
-            // ));
             this.showDialog(new CopyTextDialog(this._poses[0].sequence.sequenceString(), 'Current Sequence'));
         });
 
@@ -611,17 +606,12 @@ export default class PuzzleEditMode extends GameMode {
 
         const menu = new ContextMenu({horizontal: false});
 
-        menu.addItem('Preferences').clicked.connect(() => this.showViewOptionsDialog());
+        menu.addItem('Preferences').clicked.connect(() => this.showSettingsDialog());
         menu.addItem('Reset').clicked.connect(() => this.promptForReset());
         menu.addItem('Copy Sequence').clicked.connect(() => this.showCopySequenceDialog());
         menu.addItem('Paste Sequence').clicked.connect(() => this.showPasteSequenceDialog());
 
         return menu;
-    }
-
-    protected showViewOptionsDialog() {
-        const dialog: EternaViewOptionsDialog = new EternaViewOptionsDialog(EternaViewOptionsMode.PUZZLEMAKER);
-        this.showDialog(dialog);
     }
 
     protected showSettingsDialog() {

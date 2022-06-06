@@ -1,6 +1,6 @@
 import {KeyCode} from 'flashbang';
 import FloatDialog from './FloatDialog';
-import MyTextInputPanel from './MyTextInputPanel';
+import FlexibleTextInputPanel from './FlexibleTextInputPanel';
 
 interface NucleotideFinderResult {
     nucleotideIndex: number;
@@ -24,7 +24,7 @@ export default class NucleotideFinder extends FloatDialog<NucleotideFinderResult
         super.added();
         const {props, theme} = NucleotideFinder;
 
-        const inputPanel = new MyTextInputPanel();
+        const inputPanel = new FlexibleTextInputPanel();
         const field = inputPanel.addField(props.fieldName, theme.width);
         this.addObject(inputPanel, this.contentVLay);
 

@@ -9,7 +9,7 @@ import {
     Flashbang,
     Assert,
     VLayoutContainer, HLayoutContainer,
-    VAlign, HAlign, SpriteObject, SceneObject
+    VAlign, HAlign, SpriteObject, SceneObject, Dragger, MathUtil
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -57,8 +57,6 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
     private iconSize: number = 20;
     private rbSprite: SpriteObject;
     private lbSprite: SpriteObject;
-    private dragLeftPressed: boolean = false;
-    private dragRightPressed: boolean = false;
     private dragLeftPrevPt: Point = new Point();
     private dragRightPrevPt: Point = new Point();
 
@@ -200,181 +198,84 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
 
         this.updateFloatLocation();
 
-        const titleTarget = new DisplayObjectPointerTarget(this.titleArea);
-        let mouseDown = false;
-        const prevPt = new Point();
-        titleTarget.pointerDown.connect((e) => {
-            mouseDown = true;
-            prevPt.x = e.data.global.x;
-            prevPt.y = e.data.global.y;
-            e.stopPropagation();
-        });
-        titleTarget.pointerUp.connect((e) => {
-            mouseDown = false;
-            e.stopPropagation();
-        });
-        titleTarget.pointerMove.connect((e) => {
-            if (mouseDown) {
-                const dx = e.data.global.x - prevPt.x;
-                const dy = e.data.global.y - prevPt.y;
-                this.moveWindow(dx, dy);
-                prevPt.x = e.data.global.x;
-                prevPt.y = e.data.global.y;
-            }
-            e.stopPropagation();
-        });
-        this.regs.add(
-            this.lbSprite.pointerDown.connect((e) => this.leftHandleEvent(e))
-        );
-        this.regs.add(
-            this.lbSprite.pointerUp.connect((e) => this.leftHandleEvent(e))
-        );
-        this.regs.add(
-            this.lbSprite.pointerMove.connect((e) => this.leftHandleEvent(e))
-        );
-        this.regs.add(
-            this.lbSprite.pointerOver.connect((e) => this.leftHandleEvent(e))
-        );
-        this.regs.add(
-            this.lbSprite.pointerOut.connect((e) => this.leftHandleEvent(e))
-        );
-        this.regs.add(
-            this.lbSprite.pointerCancel.connect((e) => this.leftHandleEvent(e))
-        );
+        this.regs.add(this._titleDraggerLeft.pointerDown.connect((e) => this.handleMove(e)));
+        this.regs.add(this._titleDraggerRight.pointerDown.connect((e) => this.handleMove(e)));
+        this.regs.add(this._titleText.pointerDown.connect((e) => this.handleMove(e)));
 
-        this.regs.add(
-            this.rbSprite.pointerDown.connect((e) => this.rightHandleEvent(e))
-        );
-        this.regs.add(
-            this.rbSprite.pointerUp.connect((e) => this.rightHandleEvent(e))
-        );
-        this.regs.add(
-            this.rbSprite.pointerMove.connect((e) => this.rightHandleEvent(e))
-        );
-        this.regs.add(
-            this.rbSprite.pointerOver.connect((e) => this.rightHandleEvent(e))
-        );
-        this.regs.add(
-            this.rbSprite.pointerOut.connect((e) => this.rightHandleEvent(e))
-        );
-        this.regs.add(
-            this.rbSprite.pointerCancel.connect((e) => this.rightHandleEvent(e))
-        );
+        this.regs.add(this.lbSprite.pointerDown.connect((e) => this.handleResizeLeft(e)));
+        this.regs.add(this.lbSprite.pointerOver.connect(() => {
+            const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
+            if (doc) doc.style.cursor = 'sw-resize';
+        }));
+        this.regs.add(this.lbSprite.pointerOut.connect(() => {
+            const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
+            if (doc) doc.style.cursor = '';
+        }));
+
+        this.regs.add(this.rbSprite.pointerDown.connect((e) => this.handleResizeRight(e)));
+        this.regs.add(this.rbSprite.pointerOver.connect(() => {
+            const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
+            if (doc) doc.style.cursor = 'nw-resize';
+        }));
+        this.regs.add(this.rbSprite.pointerOut.connect(() => {
+            const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
+            if (doc) doc.style.cursor = '';
+        }));
     }
 
-    protected leftHandleEvent(e: InteractionEvent) {
-        this.lbSprite.display.interactive = false;
-        switch (e.type) {
-            case 'pointerdown':
-                this.dragLeftPressed = true;
+    private handleMove(e: InteractionEvent) {
+        const dragger = new Dragger();
+        this.addObject(dragger);
+
+        const dragStartingPoint = e.data.global.clone();
+        const Y0 = this.frameContainer.position.y;
+        const X0 = this.frameContainer.position.x;
+
+        this.regs.add(dragger.dragged.connect((p: Point) => {
+            this.frameContainer.position.y = Y0 + (p.y - dragStartingPoint.y);
+            this.frameContainer.position.x = X0 + (p.x - dragStartingPoint.x);
+        }));
+    }
+
+    private handleResizeLeft(e: InteractionEvent) {
+        const dragger = new Dragger();
+        this.addObject(dragger);
+
+        this.dragLeftPrevPt.x = e.data.global.x;
+        this.dragLeftPrevPt.y = e.data.global.y;
+        this.regs.add(dragger.dragged.connect((p: Point) => {
+            const dx = e.data.global.x - this.dragLeftPrevPt.x;
+            const dy = e.data.global.y - this.dragLeftPrevPt.y;
+
+            const w = this.frameMask.width - dx;
+            const h = this.frameMask.height + dy;
+            if (w > 100 && h > 100) {
+                this.frameContainer.position.x += dx;
+                this.resize(w, h);
                 this.dragLeftPrevPt.x = e.data.global.x;
                 this.dragLeftPrevPt.y = e.data.global.y;
-                break;
-            case 'pointermove':
-                Assert.assertIsDefined(Flashbang.stageWidth);
-                Assert.assertIsDefined(Flashbang.stageHeight);
-                if (this.dragLeftPressed && e.data.pressure === 0) this.dragLeftPressed = false;
-                if (this.dragLeftPressed) {
-                    const dx = e.data.global.x - this.dragLeftPrevPt.x;
-                    const dy = e.data.global.y - this.dragLeftPrevPt.y;
-
-                    const w = this.frameMask.width - dx;
-                    const h = this.frameMask.height + dy;
-                    if (w > 100 && h > 100) {
-                        this.frameContainer.position.x += dx;
-                        this.resize(w, h);
-                        this.dragLeftPrevPt.x = e.data.global.x;
-                        this.dragLeftPrevPt.y = e.data.global.y;
-                    }
-                }
-                break;
-            case 'pointerup':
-                this.dragLeftPressed = false;
-                break;
-            case 'pointercancel':
-                this.dragLeftPressed = false;
-                break;
-            case 'pointerover':
-                {
-                    const doc = document.getElementById(
-                        Eterna.PIXI_CONTAINER_ID
-                    );
-                    if (doc) {
-                        doc.style.cursor = 'sw-resize';
-                    }
-                }
-                break;
-            case 'pointerout':
-                {
-                    const doc1 = document.getElementById(
-                        Eterna.PIXI_CONTAINER_ID
-                    );
-                    if (doc1) {
-                        doc1.style.cursor = 'default';
-                    }
-                }
-                break;
-            default:
-                break;
-        }
-        this.lbSprite.display.interactive = true;
+            }
+        }));
     }
 
-    protected rightHandleEvent(e: InteractionEvent) {
-        this.rbSprite.display.interactive = false;
-        switch (e.type) {
-            case 'pointerdown':
-                this.dragRightPressed = true;
+    private handleResizeRight(e: InteractionEvent) {
+        const dragger = new Dragger();
+        this.addObject(dragger);
+
+        this.dragRightPrevPt.x = e.data.global.x;
+        this.dragRightPrevPt.y = e.data.global.y;
+        this.regs.add(dragger.dragged.connect((p: Point) => {
+            const dx = p.x - this.dragRightPrevPt.x;
+            const dy = p.y - this.dragRightPrevPt.y;
+
+            const w = this.frameMask.width + dx;
+            const h = this.frameMask.height + dy;
+            if (w > 100 && h > 100) {
+                this.resize(w, h);
                 this.dragRightPrevPt.x = e.data.global.x;
                 this.dragRightPrevPt.y = e.data.global.y;
-                break;
-            case 'pointermove':
-                Assert.assertIsDefined(Flashbang.stageWidth);
-                Assert.assertIsDefined(Flashbang.stageHeight);
-                if (this.dragRightPressed && e.data.pressure === 0) this.dragRightPressed = false;
-                if (this.dragRightPressed) {
-                    const dx = e.data.global.x - this.dragRightPrevPt.x;
-                    const dy = e.data.global.y - this.dragRightPrevPt.y;
-
-                    const w = this.frameMask.width + dx;
-                    const h = this.frameMask.height + dy;
-                    if (w > 100 && h > 100) {
-                        this.resize(w, h);
-                        this.dragRightPrevPt.x = e.data.global.x;
-                        this.dragRightPrevPt.y = e.data.global.y;
-                    }
-                }
-                break;
-            case 'pointerup':
-                this.dragRightPressed = false;
-                break;
-            case 'pointercancel':
-                this.dragRightPressed = false;
-                break;
-            case 'pointerover':
-                {
-                    const doc = document.getElementById(
-                        Eterna.PIXI_CONTAINER_ID
-                    );
-                    if (doc) {
-                        doc.style.cursor = 'nw-resize';
-                    }
-                }
-                break;
-            case 'pointerout':
-                {
-                    const doc1 = document.getElementById(
-                        Eterna.PIXI_CONTAINER_ID
-                    );
-                    if (doc1) {
-                        doc1.style.cursor = 'default';
-                    }
-                }
-                break;
-            default:
-                break;
-        }
-        this.rbSprite.display.interactive = true;
+            }
+        }));
     }
 
     public resize(w: number, h: number) {
@@ -519,11 +420,6 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         this.hSlider.display.visible = false;
     }
 
-    private moveWindow(dx:number, dy: number) {
-        this.frameContainer.position.x += dx;
-        this.frameContainer.position.y += dy;
-    }
-
     protected setupModalBackground(): void {
         this.background = new Graphics();
         this.container.addChild(this.background);
@@ -546,7 +442,7 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
 
         this.background
             .clear()
-            .beginFill(0x0, 0)
+            .beginFill(0x0, 0.1)
             .drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
             .endFill();
     }

@@ -3,10 +3,10 @@ import {Texture} from 'pixi.js';
 import {TextureUtil, Flashbang} from 'flashbang';
 import EPars from 'eterna/EPars';
 import Pose2D from 'eterna/pose2D/Pose2D';
-import GameButton from 'eterna/ui/GameButton';
 import Sounds from 'eterna/resources/Sounds';
 import ExternalInterface, {ExternalInterfaceCtx} from 'eterna/util/ExternalInterface';
 import Sequence from 'eterna/rnatypes/Sequence';
+import ToolbarButton from 'eterna/ui/ToolbarButton';
 import GameMode from '../GameMode';
 
 export enum BoosterType {
@@ -94,11 +94,12 @@ export default class Booster {
         return this._toolColor;
     }
 
-    public createButton(fontsize: number = 22): GameButton {
+    public createButton(fontsize: number = 22): ToolbarButton {
         if (this._buttonStateTextures[0] === null) {
             throw new Error('Cannot call createButton before setting at least the first button state texture!');
         }
-        const button: GameButton = new GameButton().allStates(this._buttonStateTextures[0]);
+        const button: ToolbarButton = new ToolbarButton();
+        button.allStates(this._buttonStateTextures[0]);
         if (this._type === BoosterType.PAINTER) {
             if (this._buttonStateTextures[0] !== null) {
                 button.up(this._buttonStateTextures[0]);
@@ -202,7 +203,7 @@ export default class Booster {
     private readonly _label: string;
     private readonly _tooltip: string;
     private readonly _scriptID: string;
-    public readonly _buttonStateTextures: (Texture | null)[] = [null, null, null, null, null];
+    private readonly _buttonStateTextures: (Texture | null)[] = [null, null, null, null, null];
 
     private static _toolColorCounter: number = EPars.RNABase_DYNAMIC_FIRST;
 }

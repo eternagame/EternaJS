@@ -1,7 +1,7 @@
 import {KeyCode} from 'flashbang';
 import {Signal} from 'signals';
 import FloatDialog from 'eterna/ui/FloatDialog';
-import MyTextInputPanel from 'eterna/ui/MyTextInputPanel';
+import FlexibleTextInputPanel from 'eterna/ui/FlexibleTextInputPanel';
 import SubmitPoseDetails from './SubmitPoseDetails';
 
 /** Prompts the player for a title and comment */
@@ -22,7 +22,7 @@ export default class SubmitPoseDialog extends FloatDialog<SubmitPoseDetails> {
         const TITLE = 'Title';
         const COMMENT = 'Comment';
 
-        const inputPanel = new MyTextInputPanel();
+        const inputPanel = new FlexibleTextInputPanel();
         const title = inputPanel.addField(TITLE, 200);
         const comment = inputPanel.addField(COMMENT, 200, true);
         if (this._initialState.title) title.text = this._initialState.title;

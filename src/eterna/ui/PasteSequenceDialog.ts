@@ -2,7 +2,7 @@ import {KeyCode, Assert} from 'flashbang';
 import GameMode from 'eterna/mode/GameMode';
 import EPars from 'eterna/EPars';
 import Sequence from 'eterna/rnatypes/Sequence';
-import MyTextInputPanel from './MyTextInputPanel';
+import FlexibleTextInputPanel from './FlexibleTextInputPanel';
 import FloatDialog from './FloatDialog';
 
 /**
@@ -21,7 +21,7 @@ export default class PasteSequenceDialog extends FloatDialog<Sequence> {
 
         const SEQUENCE = 'Sequence';
 
-        const inputPanel = new MyTextInputPanel();
+        const inputPanel = new FlexibleTextInputPanel();
         const sequenceField = inputPanel.addField(SEQUENCE, 200);
         this.addObject(inputPanel, this.contentVLay);
 

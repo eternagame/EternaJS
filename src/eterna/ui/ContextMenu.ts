@@ -122,10 +122,6 @@ export default class ContextMenu extends ContainerObject {
         );
     }
 
-    public calcLayout() {
-        this.doLayout();
-    }
-
     private readonly _panel: GamePanel;
     private readonly _buttonLayout: VLayoutContainer | HLayoutContainer;
 

@@ -18,8 +18,7 @@ import GamePanel from './GamePanel';
 import HTMLTextObject from './HTMLTextObject';
 import TextBalloon from './TextBalloon';
 
-export default class MySpecBox extends ContainerObject {
-    /** Emitted when a docked MySpecBox's maximize button is clicked */
+export default class FloatSpecBox extends ContainerObject {
     public readonly shouldMaximize = new UnitSignal();
 
     constructor(docked: boolean = false) {
@@ -189,13 +188,15 @@ export default class MySpecBox extends ContainerObject {
         this._vvec = [];
 
         // initialize h1 ~ hn-1, v1 ~ vn-1
-        for (let ii = MySpecBox.OFFSET;
-            ii <= (this._datasize / MySpecBox.OFFSET) * MySpecBox.OFFSET; ii += MySpecBox.OFFSET) {
-            const hnew: Text = Fonts.std(String.fromCharCode(65 + (ii / MySpecBox.OFFSET)), 12).color(0xffffff).build();
+        for (let ii = FloatSpecBox.OFFSET;
+            ii <= (this._datasize / FloatSpecBox.OFFSET) * FloatSpecBox.OFFSET; ii += FloatSpecBox.OFFSET) {
+            const hnew: Text = Fonts.std(
+                String.fromCharCode(65 + (ii / FloatSpecBox.OFFSET)), 12
+            ).color(0xffffff).build();
             this._hvec.push(hnew);
             this.container.addChild(hnew);
 
-            const vnew: Text = Fonts.std(`${(ii / MySpecBox.OFFSET) * 10}`, 12).color(0xffffff).build();
+            const vnew: Text = Fonts.std(`${(ii / FloatSpecBox.OFFSET) * 10}`, 12).color(0xffffff).build();
             this._vvec.push(vnew);
             this.container.addChild(vnew);
         }
@@ -208,7 +209,7 @@ export default class MySpecBox extends ContainerObject {
     }
 
     public dotPlotZoomIn(): void {
-        this._dotplotScaleLevel += MySpecBox.DOTPLOT_SCALE_STEP;
+        this._dotplotScaleLevel += FloatSpecBox.DOTPLOT_SCALE_STEP;
         if (this._dotplotScaleLevel >= 5) {
             this._dotplotScaleLevel = 5;
         }
@@ -216,7 +217,7 @@ export default class MySpecBox extends ContainerObject {
     }
 
     public dotPlotZoomOut(): void {
-        this._dotplotScaleLevel -= MySpecBox.DOTPLOT_SCALE_STEP;
+        this._dotplotScaleLevel -= FloatSpecBox.DOTPLOT_SCALE_STEP;
         if (this._dotplotScaleLevel <= 1) {
             this._dotplotScaleLevel = 1;
         }
@@ -415,7 +416,7 @@ export default class MySpecBox extends ContainerObject {
         posFrom.copyFrom(from.position);
         const diffX: number = this.dotplotOffsetSize;
         const diffY: number = this.dotplotOffsetSize;
-        if (d === MySpecBox.HORIZONTAL) {
+        if (d === FloatSpecBox.HORIZONTAL) {
             return new Point(posFrom.x + diffX * (index + 1), posFrom.y);
         } else {
             return new Point(posFrom.x + from.width, posFrom.y + diffY * (index + 1));
@@ -424,8 +425,8 @@ export default class MySpecBox extends ContainerObject {
 
     private updateDotplotLabel(refX: number, refY: number): void {
         const {plotSize} = this;
-        const h0DefaultX: number = this._docked ? 20 : MySpecBox.H0_DEFAULT_X;
-        const h0DefaultY: number = this._docked ? 0 : MySpecBox.H0_DEFAULT_Y;
+        const h0DefaultX: number = this._docked ? 20 : FloatSpecBox.H0_DEFAULT_X;
+        const h0DefaultY: number = this._docked ? 0 : FloatSpecBox.H0_DEFAULT_Y;
 
         const h0XStart: number = h0DefaultX + refX;
         const h0YStart: number = h0DefaultY;
@@ -434,13 +435,13 @@ export default class MySpecBox extends ContainerObject {
         this._h0.visible = !(h0XStart < h0DefaultX);
 
         for (let ii = 0; ii < this._hvec.length; ++ii) {
-            const pos = this.calculateCoordPosition(this._h0, ii, MySpecBox.HORIZONTAL);
+            const pos = this.calculateCoordPosition(this._h0, ii, FloatSpecBox.HORIZONTAL);
             this._hvec[ii].position.copyFrom(pos);
             this._hvec[ii].visible = !(pos.x >= plotSize + h0DefaultX - this._hvec[ii].width || pos.x < h0DefaultX);
         }
 
-        const v0DefaultX: number = this._docked ? 10 : MySpecBox.V0_DEFAULT_X;
-        const v0DefaultY: number = this._docked ? 15 : MySpecBox.V0_DEFAULT_Y;
+        const v0DefaultX: number = this._docked ? 10 : FloatSpecBox.V0_DEFAULT_X;
+        const v0DefaultY: number = this._docked ? 15 : FloatSpecBox.V0_DEFAULT_Y;
 
         const v0XStart: number = v0DefaultX;
         const v0YStart: number = v0DefaultY + refY;
@@ -450,7 +451,7 @@ export default class MySpecBox extends ContainerObject {
         this._v0.visible = !(v0YStart < v0DefaultY);
 
         for (let ii = 0; ii < this._vvec.length; ++ii) {
-            const pos = this.calculateCoordPosition(this._v0, ii, MySpecBox.VERTICAL);
+            const pos = this.calculateCoordPosition(this._v0, ii, FloatSpecBox.VERTICAL);
             pos.set(pos.x - this._vvec[ii].width, pos.y);
             this._vvec[ii].position.copyFrom(pos);
             this._vvec[ii].visible = !((pos.y >= plotSize + v0DefaultY - this._vvec[ii].height || pos.y < v0DefaultY));

@@ -152,10 +152,6 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
         this.regs.add(this._mode.resized.connect(updateLocation));
     }
 
-    protected onBGClicked(): void {
-        this.close(null);
-    }
-
     protected get bgAlpha(): number {
         return 0.3;
     }

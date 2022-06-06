@@ -4,7 +4,7 @@ import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
 import TextInputObject from 'eterna/ui/TextInputObject';
 import {Signal} from 'signals';
 import FloatDialog, {FloatDialogCanceledError} from 'eterna/ui/FloatDialog';
-import MyTextInputPanel from 'eterna/ui/MyTextInputPanel';
+import FlexibleTextInputPanel from 'eterna/ui/FlexibleTextInputPanel';
 import GameMode from '../GameMode';
 
 function GetNumber(dict: Map<string, string>, name: string): number | undefined {
@@ -59,7 +59,7 @@ export default class SubmitPuzzleDialog extends FloatDialog<SubmitPuzzleDetails>
 
         const FIELD_WIDTH = 200;
 
-        const inputPanel = new MyTextInputPanel();
+        const inputPanel = new FlexibleTextInputPanel();
 
         const inputFields: { [key: string]: TextInputObject} = {};
 

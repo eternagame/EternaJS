@@ -11,22 +11,12 @@ import Fonts from 'eterna/util/Fonts';
 import Sounds from 'eterna/resources/Sounds';
 import Tooltips from './Tooltips';
 
-export enum ButtonCategory {
-    INFO = 'INFO',
-    SOLVE = 'SOLVE',
-    CREATE = 'CREATE',
-    VIEW = 'VIEW',
-    ANNOTATE = 'ANNOTATE',
-    IMPORT_EXPORT = 'IMPORT/EXPORT',
-    CUSTOM_LAYOUT = 'CUSTOM LAYOUT',
-}
 export default class GameButton extends Button implements KeyboardListener {
     public readonly toggled: Value<boolean> = new Value<boolean>(false);
     public static readonly DEFAULT_DOWN_SOUND: string = Sounds.SoundButtonClick;
-    public name: string | null = null;
-    public category: ButtonCategory | null = null;
-    private size: number = 0;
+    public size: number = 0;
     public age: number = 0;
+    public name: string | null = null;
 
     constructor() {
         super();
@@ -77,17 +67,6 @@ export default class GameButton extends Button implements KeyboardListener {
         return this;
     }
 
-    public setCategory(category: ButtonCategory): GameButton {
-        this.category = category;
-        return this;
-    }
-
-    public setName(name: string): GameButton {
-        this.name = name;
-        this.display.name = name;
-        return this;
-    }
-
     public rscriptID(value: RScriptUIElementID): GameButton {
         if (this._rscriptID !== value) {
             this._rscriptID = value;
@@ -107,6 +86,12 @@ export default class GameButton extends Button implements KeyboardListener {
 
     public customStyleBox(stylebox: Graphics): GameButton {
         this._customStyleBox = stylebox;
+        return this;
+    }
+
+    public setName(name: string): GameButton {
+        this.name = name;
+        this.display.name = name;
         return this;
     }
 
@@ -345,12 +330,17 @@ export default class GameButton extends Button implements KeyboardListener {
             return new Sprite(displayOrTex);
         } else if (typeof (displayOrTex) === 'string') {
             if (displayOrTex.includes('.svg')) {
-                const texture = Texture.from(displayOrTex);
-                return new Sprite(texture);
+                const texture = Texture.from(displayOrTex, {resourceOptions: {scale: 2}});
+                const sprite = new Sprite(texture);
+                return sprite;
             } else return Sprite.from(displayOrTex);
         } else {
             return null;
         }
+    }
+
+    public getContent() {
+        return this._content;
     }
 
     private readonly _content: Container;

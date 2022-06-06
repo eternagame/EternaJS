@@ -1,8 +1,6 @@
-import {
-    Flashbang, KeyCode, Assert
-} from 'flashbang';
+import {Flashbang, KeyCode, Assert} from 'flashbang';
 import FloatDialog from './FloatDialog';
-import MyTextInputPanel from './MyTextInputPanel';
+import FlexibleTextInputPanel from './FlexibleTextInputPanel';
 
 /** Show a dialog with text that the user can copy */
 export default class CopyTextDialog extends FloatDialog<string> {
@@ -14,7 +12,7 @@ export default class CopyTextDialog extends FloatDialog<string> {
     protected added() {
         super.added();
 
-        const inputPanel = new MyTextInputPanel(18);
+        const inputPanel = new FlexibleTextInputPanel(18);
         inputPanel.okButtonLabel = 'Copy';
 
         Assert.assertIsDefined(Flashbang.stageWidth);

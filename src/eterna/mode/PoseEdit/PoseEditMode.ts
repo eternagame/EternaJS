@@ -212,7 +212,7 @@ export default class PoseEditMode extends GameMode {
             showLibrarySelect: this._puzzle.constraints?.some((con) => con instanceof LibrarySelectionConstraint),
             annotationManager: this._annotationManager
         }, {
-            pairSwapButtonHandler: this.onSwapClicked.bind(this),
+            pairSwapButtonHandler: () => this.onSwapClicked(),
             baseMarkerButtonHandler: () => this.setPosesColor(RNAPaint.BASE_MARK),
             settingsButtonHandler: () => this.showSettingsDialog(),
             updateScriptViews: () => { this._resized.emit(); }
@@ -443,7 +443,7 @@ export default class PoseEditMode extends GameMode {
             this._toolbar.targetButton.display, HAlign.LEFT, VAlign.TOP,
             HAlign.LEFT, VAlign.TOP, w, h
         );
-        w += this._toolbar.targetButton.display.width + 20;
+        w += this._toolbar.targetButton.display.width;
         DisplayUtil.positionRelativeToStage(
             this._toolbar.stateToggle.display, HAlign.LEFT, VAlign.TOP,
             HAlign.LEFT, VAlign.TOP, w,
@@ -477,14 +477,6 @@ export default class PoseEditMode extends GameMode {
 
     public get constraintsLayer(): Container {
         return this._constraintsLayer;
-    }
-
-    private showViewOptionsDialog(): void {
-        const mode = this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
-            ? EternaViewOptionsMode.LAB
-            : EternaViewOptionsMode.PUZZLE;
-        // this.showDialog(new EternaViewOptionsDialog(mode));
-        this.showDialog(new EternaSettingsDialog(mode));
     }
 
     private showSettingsDialog(): void {
@@ -593,7 +585,7 @@ export default class PoseEditMode extends GameMode {
 
         const helpers:ToolTipPositioner[] = [];
         const topBtArray:GameButton[] = [];
-        this.toolbar.topButtons.forEach((val) => {
+        this.toolbar._topButtons.forEach((val) => {
             topBtArray.push(val);
         });
         topBtArray.sort((b1, b2) => {
@@ -1665,7 +1657,7 @@ export default class PoseEditMode extends GameMode {
 
         const menu = new ContextMenu({horizontal: false});
 
-        menu.addItem('Preferences').clicked.connect(() => this.showViewOptionsDialog());
+        menu.addItem('Preferences').clicked.connect(() => this.showSettingsDialog());
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
             menu.addItem('Design Browser').clicked.connect(() => this.openDesignBrowserForOurPuzzle());
             menu.addItem('Submit').clicked.connect(() => this.submitCurrentPose());

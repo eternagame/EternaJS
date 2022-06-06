@@ -1,11 +1,9 @@
-import {Sprite, Texture} from 'pixi.js';
 import {
-    VLayoutContainer, HAlign, VAlign, DisplayUtil, Flashbang, Assert, TextureUtil
+    VLayoutContainer, HAlign, VAlign, DisplayUtil, Flashbang, Assert
 } from 'flashbang';
 import {BoostersData} from 'eterna/puzzle/Puzzle';
 import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
 import Booster from 'eterna/mode/PoseEdit/Booster';
-import GameButton from './GameButton';
 import VScrollBox from './VScrollBox';
 import FloatDialog from './FloatDialog';
 
@@ -28,35 +26,22 @@ export default class BoosterDialog extends FloatDialog<BoostersData> {
         this.scrollBox.content.addChild(this._viewLayout);
 
         if (this._boostersData.actions !== undefined) {
-            const count = this._boostersData.actions.length;
-            for (let i = 0; i < count; i++) {
-                const data = this._boostersData.actions[i];
+            for (const data of this._boostersData.actions) {
                 Booster.create(this.mode as PoseEditMode, data).then((booster) => {
-                    const texture = booster._buttonStateTextures[0] as Texture;
-                    const sprite = new Sprite(texture);
-                    sprite.width = 24;
-                    sprite.height = 24;
-                    const button = new GameButton();
-                    if (data.label) {
-                        button.label(data.label, 14);
-                    }
-                    if (texture) {
-                        button.allStates(TextureUtil.renderToTexture(sprite));
-                    }
+                    const button = booster.createButton(14);
                     this.addObject(button, vLayout);
                     button.clicked.connect(() => { booster.onRun(); });
-
                     vLayout.layout();
                     this._viewLayout.layout();
-                    this.updateLocation2();
+                    this.updateFinalFloatLocation();
                 });
             }
         }
 
-        this.updateLocation2();
+        this.updateFinalFloatLocation();
     }
 
-    public updateLocation2() {
+    public updateFinalFloatLocation() {
         Assert.assertIsDefined(Flashbang.stageHeight);
         const idealHeight = this._viewLayout.height + 40 + this.titleArea.height;
         const maxHeight = Flashbang.stageHeight * 0.8;

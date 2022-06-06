@@ -2,7 +2,7 @@ import {KeyCode} from 'flashbang';
 import {UnitSignal} from 'signals';
 import GameButton from './GameButton';
 import FloatDialog from './FloatDialog';
-import MyTextInputPanel from './MyTextInputPanel';
+import FlexibleTextInputPanel from './FlexibleTextInputPanel';
 
 interface NucleotideRangeSelectorProps {
     initialRange: [number, number];
@@ -15,7 +15,7 @@ interface NucleotideRangeSelectorResult {
     clearRange: boolean;
 }
 
-class NucleotideRangeSelectorInput extends MyTextInputPanel {
+class NucleotideRangeSelectorInput extends FlexibleTextInputPanel {
     public onClear = new UnitSignal();
     private _clearButton: GameButton;
 
@@ -74,7 +74,7 @@ export default class NucleotideRangeSelector extends FloatDialog<NucleotideRange
 
         const inputPanel = this._props.isPartialRange
             ? new NucleotideRangeSelectorInput()
-            : new MyTextInputPanel();
+            : new FlexibleTextInputPanel();
 
         const startField = inputPanel.addField(config.startFieldName, theme.width);
         const endField = inputPanel.addField(config.endFieldName, theme.width);

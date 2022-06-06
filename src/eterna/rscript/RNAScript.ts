@@ -27,21 +27,16 @@ export default class RNAScript {
         // Convert string into instructions by splitting at semicolons.
         // If we ever make "Blocks" (i.e for IF conditionals), we'll need to make this a little
         // more complex
-        let i:number;
-        let k: number;
         const instructions: string[] = strData.split(';');
-        for (i = 0; i < instructions.length; i++) {
-            let instruction = instructions[i];
+        for (let instruction of instructions) {
             instruction = instruction.replace(/^\s*/, '');
             instruction = instruction.replace(/\s*$/, '');
-            instructions[i] = instruction;
         }
 
         const newInstructions: string[] = [];
         const showUIInstructions: string[] = [];
         let bShowUI = false;
-        for (i = 0; i < instructions.length; i++) {
-            const instruction = instructions[i];
+        for (const instruction of instructions) {
             const instRegex = /(#PRE-)?(\w+)\s*(.*)/gi;
             const regResult = instRegex.exec(instruction);
             if (regResult) {
@@ -60,8 +55,8 @@ export default class RNAScript {
                 } else {
                     if (bShowUI) {
                         const cmds = this._env.checkShowUI(showUIInstructions);
-                        for (k = 0; k < cmds.length; k++) {
-                            newInstructions.push(cmds[k]);
+                        for (const cmd of cmds) {
+                            newInstructions.push(cmd);
                         }
                     }
                     bShowUI = false;
@@ -71,8 +66,8 @@ export default class RNAScript {
         }
         if (bShowUI) {
             const cmds = this._env.checkShowUI(showUIInstructions);
-            for (k = 0; k < cmds.length; k++) {
-                newInstructions.push(cmds[k]);
+            for (const cmd of cmds) {
+                newInstructions.push(cmd);
             }
         }
         bShowUI = false;
