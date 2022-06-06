@@ -91,8 +91,9 @@ export default class MultiPagePanel extends ContainerObject {
             .up(Bitmaps.NovaPrev)
             .over(Bitmaps.NovaPrevOver)
             .down(Bitmaps.NovaPrevHit);
-
         this.addObject(this._prevButton, this.container);
+        this._prevButton.display.width = 60;
+        this._prevButton.display.height = 25;
         this.regs.add(this._prevButton.clicked.connect(() => {
             if (this._currentPage > 0) {
                 this.setCurrentPage(this._currentPage - 1);
@@ -104,6 +105,8 @@ export default class MultiPagePanel extends ContainerObject {
             .over(Bitmaps.NovaNextOver)
             .down(Bitmaps.NovaNextHit);
         this.addObject(this._nextButton, this.container);
+        this._nextButton.display.width = 60;
+        this._nextButton.display.height = 25;
         this.regs.add(this._nextButton.clicked.connect(() => {
             if (this._currentPage < this.pageCount - 1) {
                 this.setCurrentPage(this._currentPage + 1);
