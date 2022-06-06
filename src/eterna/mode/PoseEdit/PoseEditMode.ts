@@ -1315,22 +1315,24 @@ export default class PoseEditMode extends GameMode {
 
         //I want players to be able to play aroudn with temp for folding
         this._scriptInterface.addCallback('suboptSingleSequence',
-            (seq: string, kcal_delta: number, pseudoknotted: boolean, 
-                        temp: number = 37): string[][] | null => {
+            (seq: string, kcalDelta: number,  
+                pseudoknotted: boolean,temp: number = 37
+            ): string[][] | null => {
                 if (this._folder === null) {
                     return null;
                 }
                 //now get subopt stuff
                 const seqArr: Sequence = Sequence.fromSequenceString(seq);
                 return this._folder.getSuboptEnsemble(seqArr, 
-                                    kcal_delta, pseudoknotted, temp);
+                    kcalDelta, pseudoknotted, temp);
                 
             });
 
         //I want players to be able to play aroudn with temp for folding
         this._scriptInterface.addCallback('suboptOligos',
-        (seq: string, oligoStrings: string[], kcal_delta: number, pseudoknotted: boolean, 
-                    temp: number = 37): string[][] | null => {
+        (seq: string, oligoStrings: string[], kcalDelta: number,  
+            pseudoknotted: boolean,temp: number = 37
+        ): string[][] | null => {
             if (this._folder === null) {
                 return null;
             }
@@ -1345,7 +1347,7 @@ export default class PoseEditMode extends GameMode {
             //now get subopt stuff
             const seqArr: Sequence = Sequence.fromSequenceString(newSequence);      
             return this._folder.getSuboptEnsembleWithOligos(seqArr, 
-                            kcal_delta, pseudoknotted, temp);
+                kcalDelta, pseudoknotted, temp);
             
         });
 

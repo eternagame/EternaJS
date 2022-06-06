@@ -89,13 +89,13 @@ export default class NuPACK extends Folder {
 
 
     /* override */
-    public getSuboptEnsembleWithOligos(seq: Sequence, oligoStrings: string[], kcal_delta: number, 
+    public getSuboptEnsembleWithOligos(seq: Sequence, oligoStrings: string[], kcalDeltaRange: number, 
         pseudoknotted: boolean = false, temp: number  = 37
-        ): SuboptEnsembleResult {
+    ): SuboptEnsembleResult {
         const key = {
             primitive: 'subopt',
             seq: seq.baseArray,
-            kcal_delta,
+            kcalDeltaRange,
             pseudoknotted, 
             temp
         };
@@ -129,7 +129,7 @@ export default class NuPACK extends Folder {
         let result: FullAdvancedResult | null = null;
         result = this._lib.FullEnsembleWithOligos(
             seqArr.sequenceString(), temp, 
-            kcal_delta, pseudoknotted 
+            kcalDeltaRange, pseudoknotted 
             );
             
         if (!result) {
@@ -143,8 +143,8 @@ export default class NuPACK extends Folder {
         const subopt_structures_energyErrors: number[] = EmscriptenUtil.stdVectorToArray(result.suboptEnergyError);
         suboptdataCache.suboptEnergyError = subopt_structures_energyErrors;
         
-        const subopt_structures_freeEnergy: number[] = EmscriptenUtil.stdVectorToArray(result.suboptFreeEnergy);
-        suboptdataCache.suboptFreeEnergy = subopt_structures_freeEnergy;
+        const suboptStructuresFreeEnergy: number[] = EmscriptenUtil.stdVectorToArray(result.suboptFreeEnergy);
+        suboptdataCache.suboptFreeEnergy = suboptStructuresFreeEnergy;
             
 
         this.putCache(key, suboptdataCache);
@@ -153,13 +153,13 @@ export default class NuPACK extends Folder {
 
 
     /* override */
-    public getSuboptEnsembleNoBindingSite(seq: Sequence, kcal_delta: number, 
+    public getSuboptEnsembleNoBindingSite(seq: Sequence, kcalDeltaRange: number, 
         pseudoknotted: boolean = false, temp: number  = 37
-        ): SuboptEnsembleResult {
+    ): SuboptEnsembleResult {
         const key = {
             primitive: 'subopt',
             seq: seq.baseArray,
-            kcal_delta,
+            kcalDeltaRange,
             pseudoknotted,            
             //bindingSite,
             //bonus,                
@@ -183,7 +183,7 @@ export default class NuPACK extends Folder {
         let result: FullAdvancedResult | null = null;
         result = this._lib.FullEnsembleNoBindingSite(
             seq.sequenceString(), temp, 
-            kcal_delta, pseudoknotted 
+            kcalDeltaRange, pseudoknotted 
             );
             
         if (!result) {
@@ -198,8 +198,8 @@ export default class NuPACK extends Folder {
         const subopt_structures_energyErrors: number[] = EmscriptenUtil.stdVectorToArray(result.suboptEnergyError);
         suboptdataCache.suboptEnergyError = subopt_structures_energyErrors;
         
-        const subopt_structures_freeEnergy: number[] = EmscriptenUtil.stdVectorToArray(result.suboptFreeEnergy);
-        suboptdataCache.suboptFreeEnergy = subopt_structures_freeEnergy;
+        const suboptStructuresFreeEnergy: number[] = EmscriptenUtil.stdVectorToArray(result.suboptFreeEnergy);
+        suboptdataCache.suboptFreeEnergy = suboptStructuresFreeEnergy;
                
 
         this.putCache(key, suboptdataCache);
