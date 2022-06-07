@@ -25,7 +25,6 @@ export interface SuboptEnsembleResult {
     suboptFreeEnergy: number[];
 }
 
-
 export default abstract class Folder {
     public abstract get name (): string;
     public abstract get isFunctional (): boolean;
@@ -97,13 +96,17 @@ export default abstract class Folder {
     public getSuboptEnsembleNoBindingSite(
         _seq: Sequence, _kcalDeltaRange: number, _pseudoknotted: boolean = false, _temp: number = 37
     ): SuboptEnsembleResult {
-        return  {ensembleDefect: 0, suboptStructures: [], suboptEnergyError: [], suboptFreeEnergy:[]};
+        return {
+            ensembleDefect: 0, suboptStructures: [], suboptEnergyError: [], suboptFreeEnergy: []
+        };
     }
 
     public getSuboptEnsembleWithOligos(
         _seq: Sequence, _oligos: string[], _kcalDeltaRange: number, _pseudoknotted: boolean = false, _temp: number = 37
     ): SuboptEnsembleResult {
-        return  {ensembleDefect: 0, suboptStructures: [], suboptEnergyError: [], suboptFreeEnergy:[]};
+        return {
+            ensembleDefect: 0, suboptStructures: [], suboptEnergyError: [], suboptFreeEnergy: []
+        };
     }
 
     public getDotPlot(

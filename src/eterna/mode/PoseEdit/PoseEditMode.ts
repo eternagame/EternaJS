@@ -1313,8 +1313,7 @@ export default class PoseEditMode extends GameMode {
                 return pp.data;
             });
 
-        // I want players to be able to play aroudn with temp for folding
-        this._scriptInterface.addCallback('suboptSingleSequence',
+        this._scriptInterface.addCallback('subopt_single_sequence',
             (seq: string, kcalDelta: number,
                 pseudoknotted: boolean, temp: number = 37): SuboptEnsembleResult | null => {
                 if (this._folder === null) {
@@ -1326,14 +1325,13 @@ export default class PoseEditMode extends GameMode {
                     kcalDelta, pseudoknotted, temp);
             });
 
-        // I want players to be able to play aroudn with temp for folding
-        this._scriptInterface.addCallback('suboptOligos',
+        this._scriptInterface.addCallback('subopt_oligos',
             (seq: string, oligoStrings: string[], kcalDelta: number,
                 pseudoknotted: boolean, temp: number = 37): SuboptEnsembleResult | null => {
                 if (this._folder === null) {
                     return null;
                 }
-                // make teh sequence string from the oligos
+                // make the sequence string from the oligos
                 let newSequence: string = seq;
                 for (let oligoIndex = 0; oligoIndex < oligoStrings.length; oligoIndex++) {
                     const oligoSequence: string = oligoStrings[oligoIndex];
