@@ -24,7 +24,7 @@ import {
 import Fonts from 'eterna/util/Fonts';
 import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
 import FolderManager from 'eterna/folding/FolderManager';
-import Folder, {MultiFoldResult, CacheKey} from 'eterna/folding/Folder';
+import Folder, {MultiFoldResult, CacheKey, SuboptEnsembleResult} from 'eterna/folding/Folder';
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
 import PoseField from 'eterna/pose2D/PoseField';
 import Pose2D, {Layout, SCRIPT_MARKER_LAYER} from 'eterna/pose2D/Pose2D';
@@ -1313,43 +1313,38 @@ export default class PoseEditMode extends GameMode {
                 return pp.data;
             });
 
-        //I want players to be able to play aroudn with temp for folding
+        // I want players to be able to play aroudn with temp for folding
         this._scriptInterface.addCallback('suboptSingleSequence',
-            (seq: string, kcalDelta: number,  
-                pseudoknotted: boolean,temp: number = 37
-            ): string[][] | null => {
+            (seq: string, kcalDelta: number,
+                pseudoknotted: boolean, temp: number = 37): SuboptEnsembleResult | null => {
                 if (this._folder === null) {
                     return null;
                 }
-                //now get subopt stuff
+                // now get subopt stuff
                 const seqArr: Sequence = Sequence.fromSequenceString(seq);
-                return this._folder.getSuboptEnsemble(seqArr, 
+                return this._folder.getSuboptEnsembleNoBindingSite(seqArr,
                     kcalDelta, pseudoknotted, temp);
-                
             });
 
-        //I want players to be able to play aroudn with temp for folding
+        // I want players to be able to play aroudn with temp for folding
         this._scriptInterface.addCallback('suboptOligos',
-        (seq: string, oligoStrings: string[], kcalDelta: number,  
-            pseudoknotted: boolean,temp: number = 37
-        ): string[][] | null => {
-            if (this._folder === null) {
-                return null;
-            }
-            //make teh sequence string from the oligos
-            let newSequence: string = seq;
-            for (let oligoIndex=0; oligoIndex < oligoStrings.length; oligoIndex++) {
-                let oligoSequence: string = oligoStrings[oligoIndex];               
-                newSequence = newSequence + "&" + oligoSequence;
-                          
-            }
+            (seq: string, oligoStrings: string[], kcalDelta: number,
+                pseudoknotted: boolean, temp: number = 37): SuboptEnsembleResult | null => {
+                if (this._folder === null) {
+                    return null;
+                }
+                // make teh sequence string from the oligos
+                let newSequence: string = seq;
+                for (let oligoIndex = 0; oligoIndex < oligoStrings.length; oligoIndex++) {
+                    const oligoSequence: string = oligoStrings[oligoIndex];
+                    newSequence = `${newSequence}&${oligoSequence}`;
+                }
 
-            //now get subopt stuff
-            const seqArr: Sequence = Sequence.fromSequenceString(newSequence);      
-            return this._folder.getSuboptEnsembleWithOligos(seqArr, 
-                kcalDelta, pseudoknotted, temp);
-            
-        });
+                // now get subopt stuff
+                const seqArr: Sequence = Sequence.fromSequenceString(newSequence);
+                return this._folder.getSuboptEnsembleWithOligos(seqArr,
+                    oligoStrings, kcalDelta, pseudoknotted, temp);
+            });
 
         this._scriptInterface.addCallback('cofold',
             (seq: string, oligo: string, malus: number = 0.0, constraint: string | null = null): string | null => {

@@ -26,14 +26,11 @@ function CreateFolder(type: any): Promise<Folder | null> {
     return type.create();
 }
 
-test('NuPACK:suboptstructuresNoOligos', () => {    
-    expect.assertions(13);
+test('NuPACK:suboptstructuresNoOligos', () => {        
      return expect(CreateFolder(NuPACK)
-       .then((folder) => {
-        if (folder === null) {
-            expect(true).toBeTruthy();
-            return;
-        }
+     .then((folder) => {
+        if (folder === null) return;
+
         let sequence = Sequence.fromSequenceString("auauauagaaaauauaua")
         let temperature: number = 37;
         let isPsuedoknot:boolean = false;
@@ -80,14 +77,11 @@ test('NuPACK:suboptstructuresNoOligos', () => {
 
 });
 
-test('NuPACK:suboptstructuresWithOligos', () => {    
-    expect.assertions(7);
+test('NuPACK:suboptstructuresWithOligos', () => {        
      return expect(CreateFolder(NuPACK)
        .then((folder) => {
-        if (folder === null) {
-            expect(true).toBeTruthy();
-            return;
-        }
+        if (folder === null) return;
+        
         let sequence = Sequence.fromSequenceString("auauauagaaaauauaua")
         let oligos: string[] = ["acgcga", "auguau"];
         let temperature: number = 37;
