@@ -24,7 +24,7 @@ import {
 import Fonts from 'eterna/util/Fonts';
 import EternaSettingsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaSettingsDialog';
 import FolderManager from 'eterna/folding/FolderManager';
-import Folder, {MultiFoldResult, CacheKey} from 'eterna/folding/Folder';
+import Folder, {MultiFoldResult, CacheKey, SuboptEnsembleResult} from 'eterna/folding/Folder';
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
 import PoseField from 'eterna/pose2D/PoseField';
 import Pose2D, {Layout, SCRIPT_MARKER_LAYER} from 'eterna/pose2D/Pose2D';
@@ -1321,6 +1321,37 @@ export default class PoseEditMode extends GameMode {
                 const pp: DotPlot | null = this._folder.getDotPlot(seqArr, folded);
                 Assert.assertIsDefined(pp);
                 return pp.data;
+            });
+
+        this._scriptInterface.addCallback('subopt_single_sequence',
+            (seq: string, kcalDelta: number,
+                pseudoknotted: boolean, temp: number = 37): SuboptEnsembleResult | null => {
+                if (this._folder === null) {
+                    return null;
+                }
+                // now get subopt stuff
+                const seqArr: Sequence = Sequence.fromSequenceString(seq);
+                return this._folder.getSuboptEnsembleNoBindingSite(seqArr,
+                    kcalDelta, pseudoknotted, temp);
+            });
+
+        this._scriptInterface.addCallback('subopt_oligos',
+            (seq: string, oligoStrings: string[], kcalDelta: number,
+                pseudoknotted: boolean, temp: number = 37): SuboptEnsembleResult | null => {
+                if (this._folder === null) {
+                    return null;
+                }
+                // make the sequence string from the oligos
+                let newSequence: string = seq;
+                for (let oligoIndex = 0; oligoIndex < oligoStrings.length; oligoIndex++) {
+                    const oligoSequence: string = oligoStrings[oligoIndex];
+                    newSequence = `${newSequence}&${oligoSequence}`;
+                }
+
+                // now get subopt stuff
+                const seqArr: Sequence = Sequence.fromSequenceString(newSequence);
+                return this._folder.getSuboptEnsembleWithOligos(seqArr,
+                    oligoStrings, kcalDelta, pseudoknotted, temp);
             });
 
         this._scriptInterface.addCallback('cofold',
@@ -2943,9 +2974,11 @@ export default class PoseEditMode extends GameMode {
             this.flashConstraintForTarget(xx);
             this._poses[targetIndex].clearDesignStruct();
         } else if (numUnpaired === segments[1] - segments[0] + segments[3] - segments[2] + 2) {
+            const pseudoknots = (this._targetConditions && this._targetConditions[xx] !== undefined
+                && (this._targetConditions[xx] as TargetConditions)['type'] === 'pseudoknot');
             // breaking pairs is safe, but adding them may not always be
             if (
-                EPars.validateParenthesis(
+                pseudoknots || EPars.validateParenthesis(
                     pairsxx.getParenthesis().slice(segments[1] + 1, segments[2]),
                     false
                 ) == null
@@ -2963,10 +2996,8 @@ export default class PoseEditMode extends GameMode {
             }
 
             // if the above fails, and we have multi-oligos, there may be a permutation where it works
-            if (this._targetOligos[xx] === null) return;
-
             const targetOligo = this._targetOligos[xx];
-            Assert.assertIsDefined(targetOligo);
+            if (!targetOligo) return;
             if (targetOligo.length <= 1) return;
 
             const newOrder: number[] = targetOligo.map((_value, idx) => idx);
