@@ -38,6 +38,8 @@ export default class FancyTextBalloon extends TextBalloon implements Updatable {
             .down(Bitmaps.NovaNextHit);
         this.addObject(this._button, this.container);
         this._button.display.visible = false;
+        this._button.display.width = 60;
+        this._button.display.height = 25;
 
         if (this._initialText != null) {
             this.styledText = this._initialText;

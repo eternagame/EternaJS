@@ -14,7 +14,7 @@ export default class RNApuzzler extends LayoutEngine {
      * @description AMW TODO cannot annotate type of module/program; both are any.
      */
     public static create(): Promise<RNApuzzler> {
-        // eslint-disable-next-line import/no-extraneous-dependencies
+        // eslint-disable-next-line import/no-unresolved, import/no-extraneous-dependencies
         return import('engines-bin/rnapuzzler')
             .then((module) => EmscriptenUtil.loadProgram(module))
             .then((program) => new RNApuzzler(program));

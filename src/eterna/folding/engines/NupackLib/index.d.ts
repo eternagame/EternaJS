@@ -32,6 +32,8 @@ declare class NupackLib {
     FullFoldWithBindingSite(seqString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): NupackLib.FullFoldResult | null;
     CoFoldSequence(seqString: string): NupackLib.FullFoldResult | null;
     CoFoldSequenceWithBindingSite(seqString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): NupackLib.FullFoldResult | null;
+    FullEnsembleNoBindingSite(seqString: string, temperature: number, kcalDeltaRange: number, pseudoknotted: boolean):  NupackLib.FullAdvancedResult | null;
+    FullEnsembleWithOligos (seqString: string, temperature: number, kcalDeltaRange: number, pseudoknotted: boolean):  NupackLib.FullAdvancedResult | null;
 }
 
 /*~ If you want to expose types from your module as well, you can
@@ -56,6 +58,14 @@ declare namespace NupackLib {
         energy: number;
         plot: stdcpp.vector<number>;
 
+        delete (): void;
+    }
+
+    export interface FullAdvancedResult {
+        ensembleDefect: number;       
+        suboptStructures: stdcpp.vector<string>;
+        suboptEnergyError: stdcpp.vector<number>;
+        suboptFreeEnergy: stdcpp.vector<number>;
         delete (): void;
     }
 }

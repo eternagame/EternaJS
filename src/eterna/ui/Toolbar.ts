@@ -362,6 +362,7 @@ export default class Toolbar extends ContainerObject {
             states?: number;
             boosters?: BoostersData;
             showGlue?: boolean;
+            showFreeze?: boolean;
             showAdvancedMenus?: boolean;
             showLibrarySelect?: boolean;
             annotationManager?: AnnotationManager;

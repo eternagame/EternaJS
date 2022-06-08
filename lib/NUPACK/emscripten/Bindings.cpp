@@ -1,5 +1,6 @@
 #include "FullEval.h"
 #include "FullFold.h"
+#include "FullEnsemble.h"
 
 #include "src/thermo/utils/pfuncUtilsConstants.h"
 #include "src/thermo/utils/pfuncUtilsHeader.h"
@@ -35,6 +36,8 @@ using namespace emscripten;
 EMSCRIPTEN_BINDINGS(EmscriptenBridge) {
     register_vector<int>("VectorInt");
     register_vector<double>("VectorDouble");
+    register_vector<std::string>("VectorString");
+    
 
     class_<FullEvalResult>("FullEvalResult")
         .constructor()
@@ -58,6 +61,17 @@ EMSCRIPTEN_BINDINGS(EmscriptenBridge) {
         .property("plot", &DotPlotResult::plot);
 
     function("GetDotPlot", &GetDotPlot, allow_raw_pointers());
+
+    class_<FullAdvancedResult>("FullAdvancedResult")
+        .property("ensembleDefect", &FullAdvancedResult::ensembleDefect)
+        .property("suboptStructures", &FullAdvancedResult::suboptStructures)
+        .property("suboptEnergyError", &FullAdvancedResult::suboptEnergyError)
+        .property("suboptFreeEnergy", &FullAdvancedResult::suboptFreeEnergy);
+
+    function("FullEnsembleNoBindingSite", &FullEnsembleNoBindingSite, allow_raw_pointers());
+    function("FullEnsembleWithOligos", &FullEnsembleWithOligos, allow_raw_pointers());
+
+
 }
 
 #endif

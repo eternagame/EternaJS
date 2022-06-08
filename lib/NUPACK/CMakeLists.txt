@@ -42,6 +42,7 @@ add_executable(nupack
         emscripten/Bindings.cpp
         emscripten/FullEval.cpp
         emscripten/FullFold.cpp
+        emscripten/FullEnsemble.cpp
         ../emscripten_common/EmscriptenUtils.cpp)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
