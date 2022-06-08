@@ -2962,9 +2962,11 @@ export default class PoseEditMode extends GameMode {
             this.flashConstraintForTarget(xx);
             this._poses[targetIndex].clearDesignStruct();
         } else if (numUnpaired === segments[1] - segments[0] + segments[3] - segments[2] + 2) {
+            const pseudoknots = (this._targetConditions && this._targetConditions[xx] !== undefined
+                && (this._targetConditions[xx] as TargetConditions)['type'] === 'pseudoknot');
             // breaking pairs is safe, but adding them may not always be
             if (
-                EPars.validateParenthesis(
+                pseudoknots || EPars.validateParenthesis(
                     pairsxx.getParenthesis().slice(segments[1] + 1, segments[2]),
                     false
                 ) == null
@@ -2982,10 +2984,8 @@ export default class PoseEditMode extends GameMode {
             }
 
             // if the above fails, and we have multi-oligos, there may be a permutation where it works
-            if (this._targetOligos[xx] === null) return;
-
             const targetOligo = this._targetOligos[xx];
-            Assert.assertIsDefined(targetOligo);
+            if (!targetOligo) return;
             if (targetOligo.length <= 1) return;
 
             const newOrder: number[] = targetOligo.map((_value, idx) => idx);
