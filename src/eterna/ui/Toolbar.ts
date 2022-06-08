@@ -135,6 +135,7 @@ export default class Toolbar extends ContainerObject {
             states = 1,
             boosters,
             showGlue = false,
+            showFreeze = false,
             showAdvancedMenus = true,
             showLibrarySelect = false,
             annotationManager
@@ -142,6 +143,7 @@ export default class Toolbar extends ContainerObject {
             states?: number;
             boosters?: BoostersData;
             showGlue?: boolean;
+            showFreeze?: boolean;
             showAdvancedMenus?: boolean;
             showLibrarySelect?: boolean;
             annotationManager?: AnnotationManager;
@@ -151,6 +153,7 @@ export default class Toolbar extends ContainerObject {
         this._type = type;
         this._states = states;
         this._showGlue = showGlue;
+        this._showFreeze = showFreeze;
         this._showAdvancedMenus = showAdvancedMenus;
         this._showLibrarySelect = showLibrarySelect;
         this._boostersData = boosters ?? null;
@@ -497,9 +500,9 @@ export default class Toolbar extends ContainerObject {
         if (this._type === ToolbarType.LAB || this._type === ToolbarType.PUZZLE) {
             this.addObject(this.freezeButton, this.lowerToolbarLayout);
             this.lowerToolbarLayout.addHSpacer(SPACE_NARROW);
-            this.freezeButton.display.visible = Eterna.settings.freezeButtonAlwaysVisible.value;
+            this.freezeButton.display.visible = Eterna.settings.freezeButtonAlwaysVisible.value || this._showFreeze;
             this.regs.add(Eterna.settings.freezeButtonAlwaysVisible.connect((visible) => {
-                this.freezeButton.display.visible = visible;
+                this.freezeButton.display.visible = visible || this._showFreeze;
                 this.updateLayout();
             }));
         }
@@ -1063,6 +1066,7 @@ export default class Toolbar extends ContainerObject {
     private readonly _type: ToolbarType;
     private readonly _states: number;
     private readonly _showGlue: boolean;
+    private readonly _showFreeze: boolean;
     private readonly _showAdvancedMenus: boolean;
     private readonly _showLibrarySelect: boolean;
     private readonly _boostersData: BoostersData | null;

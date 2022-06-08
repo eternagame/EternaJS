@@ -205,6 +205,11 @@ export default class PoseEditMode extends GameMode {
             states: this._puzzle.getSecstructs().length,
             showGlue: this._puzzle.targetConditions
                 ?.some((condition) => condition?.structure_constrained_bases),
+            showFreeze: (this._puzzle.targetConditions && this._puzzle.targetConditions.some((tc) => (
+                tc?.type === 'pseudoknot'
+                    || tc?.type === 'multistrand'
+                    || (tc?.secstruct.length ?? 0 > 1000)
+            ))),
             boosters: this._puzzle.boosters ? this._puzzle.boosters : undefined,
             showAdvancedMenus: this._puzzle.puzzleType !== PuzzleType.PROGRESSION,
             showLibrarySelect: this._puzzle.constraints?.some((con) => con instanceof LibrarySelectionConstraint),
