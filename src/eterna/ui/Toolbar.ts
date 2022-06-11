@@ -27,6 +27,7 @@ import {
     ParallelTask,
     VisibleTask,
     GameObjectRef,
+    AlphaTask,
     SerialTask
 } from 'flashbang';
 import {BoostersData} from 'eterna/puzzle/Puzzle';
@@ -39,11 +40,12 @@ import BitmapManager from 'eterna/resources/BitmapManager';
 import AnnotationManager from 'eterna/AnnotationManager';
 import Fonts from 'eterna/util/Fonts';
 import {FontWeight} from 'flashbang/util/TextBuilder';
+import GameMode from 'eterna/mode/GameMode';
 import NucleotidePalette from './NucleotidePalette';
 import GameButton from './GameButton';
 import ToggleBar from './ToggleBar';
 import ScrollContainer from './ScrollContainer';
-import AnnotationPanel from './AnnotationPanel';
+import AnnotationPanelDialog from './AnnotationPanelDialog';
 import TextBalloon from './TextBalloon';
 import BoosterDialog from './BoosterDialog';
 import ToolbarButton, {ButtonCategory, BUTTON_WIDTH} from './ToolbarButton';
@@ -244,6 +246,7 @@ export default class Toolbar extends ContainerObject {
 
     public targetButton: ToolbarButton;
     public naturalButton: ToolbarButton;
+    public annotationPanelDlg: AnnotationPanelDialog;
 
     public screenshotButton: ToolbarButton;
 
@@ -276,7 +279,6 @@ export default class Toolbar extends ContainerObject {
     // Annotations
     public annotationModeButton: ToolbarButton;
     public annotationPanelButton: ToolbarButton;
-    public annotationPanel: AnnotationPanel;
 
     public freezeButton: ToolbarButton;
     public boostersMenuButton: ToolbarButton;
@@ -362,7 +364,6 @@ export default class Toolbar extends ContainerObject {
             states?: number;
             boosters?: BoostersData;
             showGlue?: boolean;
-            showFreeze?: boolean;
             showAdvancedMenus?: boolean;
             showLibrarySelect?: boolean;
             annotationManager?: AnnotationManager;
@@ -1390,7 +1391,7 @@ export default class Toolbar extends ContainerObject {
         this.annotationPanelButton.setCategory(ButtonCategory.ANNOTATE);
         this.annotationPanelButton.setName('Annotation panel');
         this.annotationPanelButton.allStates(Bitmaps.ImgAnnotationPanel);
-        this.annotationPanelButton.selected(Bitmaps.ImgAnnotationPanel);
+        // this.annotationPanelButton.selected(Bitmaps.ImgAnnotationPanel);
         this.annotationPanelButton.tooltip('Annotations Panel');
         this._gameButtons.set('Annotation panel', this.annotationPanelButton);
         this.annotationPanelButton.display.interactive = true;
@@ -1421,12 +1422,6 @@ export default class Toolbar extends ContainerObject {
         );
 
         if (this._annotationManager) {
-            this.annotationPanel = new AnnotationPanel(
-                this.annotationPanelButton,
-                this._annotationManager
-            );
-            this.addObject(this.annotationPanel, this.mode?.container);
-
             this.pushButtonToCategory(this.annotationModeButton);
             this.pushButtonToCategory(this.annotationPanelButton);
 
@@ -1444,9 +1439,18 @@ export default class Toolbar extends ContainerObject {
             );
 
             this.regs.add(
+                this.annotationPanelButton.clicked.connect(() => {
+                    Assert.assertIsDefined(this._annotationManager);
+                    const mode = this.mode as GameMode;
+                    this.annotationPanelDlg = new AnnotationPanelDialog(this._annotationManager);
+                    mode.showDialog(this.annotationPanelDlg);
+                })
+            );
+
+            this.regs.add(
                 this._annotationManager.viewAnnotationDataUpdated.connect(
                     () => {
-                        // this.annotationPanel.updatePanel();
+                        if (this.annotationPanelDlg) this.annotationPanelDlg.updateFinalFloatLocation();
                     }
                 )
             );
@@ -1454,14 +1458,14 @@ export default class Toolbar extends ContainerObject {
     }
 
     private makeTargetButtons() {
-        this.naturalButton = new ToolbarButton();
+        this.naturalButton = new ToolbarButton({color: MIDDLE_BACKCOLOR, alpha: 1});
         this.naturalButton.setName('naturalButton');
         this.naturalButton.allStates(Bitmaps.ImgNatural);
         this.naturalButton.selected(Bitmaps.ImgNatural);
         this.naturalButton.tooltip('Natural Mode. RNA folds into the most stable shape.');
         this.naturalButton.rscriptID(RScriptUIElementID.TOGGLENATURAL);
 
-        this.estimateButton = new ToolbarButton();
+        this.estimateButton = new ToolbarButton({color: MIDDLE_BACKCOLOR, alpha: 1});
         this.estimateButton.setName('estimateButton');
         this.estimateButton.allStates(Bitmaps.ImgEstimate);
         this.estimateButton.selected(Bitmaps.ImgEstimate);
@@ -1469,12 +1473,17 @@ export default class Toolbar extends ContainerObject {
             'Estimate Mode. The game approximates how the RNA actually folded in a test tube.'
         );
 
-        this.targetButton = new ToolbarButton();
+        this.targetButton = new ToolbarButton({color: MIDDLE_BACKCOLOR, alpha: 1});
         this.targetButton.setName('targetButton');
         this.targetButton.allStates(Bitmaps.ImgTarget);
         this.targetButton.selected(Bitmaps.ImgTarget);
         this.targetButton.tooltip('Target Mode. RNA freezes into the desired shape.');
         this.targetButton.rscriptID(RScriptUIElementID.TOGGLETARGET);
+
+        this.stateToggle = new ToggleBar(this._states);
+        if (this._states <= 1) {
+            this.stateToggle.display.visible = false;
+        }
     }
 
     private makeFeedbackLayout() {
@@ -1703,7 +1712,7 @@ export default class Toolbar extends ContainerObject {
 
                 this.boostersMenuButton.clicked.connect(() => {
                     if (this._boostersData != null && this._boostersData.actions != null) {
-                        const mode = this.mode as PoseEditMode;
+                        const mode = this.mode as GameMode;
                         mode.showDialog(new BoosterDialog(this._boostersData));
                     }
                 });
@@ -2257,10 +2266,10 @@ export default class Toolbar extends ContainerObject {
                 downX = e.data.global.x;
             }
         });
-        this.textScrollContainer.pointerUp.connect(() => {
+        this.textScrollContainer.pointerUp.connect((e) => {
             downed = false;
         });
-        this.textScrollContainer.pointerUpOutside.connect(() => {
+        this.textScrollContainer.pointerUpOutside.connect((e) => {
             downed = false;
         });
 
@@ -2374,7 +2383,6 @@ export default class Toolbar extends ContainerObject {
         this.makeInoutButtons();
         this.makeAnnotateButtons();
         this.makeCustomButtons();
-        this.makeTargetButtons();
 
         this.makeInfoLayout();
         this.makeSolveLayout();
@@ -2389,7 +2397,6 @@ export default class Toolbar extends ContainerObject {
         super.added();
 
         this.makeTabs();
-        this.stateToggle = new ToggleBar(this._states);
 
         this.makeLayout();
 
@@ -2401,6 +2408,7 @@ export default class Toolbar extends ContainerObject {
         this.makeExpandControl();
 
         this.makeCategory();
+        this.makeTargetButtons();
 
         this.makeFeedbackLayout();
 

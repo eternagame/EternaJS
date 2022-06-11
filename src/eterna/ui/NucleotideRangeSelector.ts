@@ -51,7 +51,7 @@ class NucleotideRangeSelectorInput extends FlexibleTextInputPanel {
 
 export default class NucleotideRangeSelector extends FloatDialog<NucleotideRangeSelectorResult> {
     private static readonly config = {
-        title: 'Select Nucleotide Range to View',
+        title: 'Select Nucleotide Range',
         startFieldName: 'Start Index',
         endFieldName: 'End Index'
     };

@@ -317,10 +317,6 @@ export default class Puzzle {
         return this._savedSequence;
     }
 
-    public set barcodeStart(start: number) {
-        this._barcodeStart = start;
-    }
-
     public get barcodeIndices(): number[] | null {
         if (!this._useBarcode) {
             return null;
@@ -328,11 +324,7 @@ export default class Puzzle {
 
         const barcodes: number[] = [];
         const secstruct: string = this.getSecstruct();
-        if (this._barcodeStart !== null) {
-            for (let ii = this._barcodeStart; ii < this._barcodeStart + 19; ii++) {
-                barcodes.push(ii);
-            }
-        } else if (this._useTails) {
+        if (this._useTails) {
             for (let ii = secstruct.length - 39; ii < secstruct.length - 20; ii++) {
                 barcodes.push(ii);
             }
@@ -585,7 +577,6 @@ export default class Puzzle {
     private _useTails: boolean = false;
     private _useShortTails: boolean = false;
     private _useBarcode: boolean = false;
-    private _barcodeStart: number | null = null;
     private _targetConditions: TargetConditions[] | null = null;
     private _constraints: Constraint<BaseConstraintStatus>[] | null = null;
     private _round: number = -1;

@@ -5,23 +5,24 @@ import {
     ContainerObject,
     KeyboardListener,
     MouseWheelListener,
+    DisplayObjectPointerTarget,
     Flashbang,
     Assert,
     VLayoutContainer, HLayoutContainer,
-    VAlign, HAlign, SpriteObject, SceneObject, Dragger
+    VAlign, HAlign, SpriteObject, SceneObject, Dragger, MathUtil
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Eterna from 'eterna/Eterna';
 import GameButton from './GameButton';
-import SliderBar from './SliderBar';
+import FloatSliderBar from './FloatSliderBar';
 import ScrollContainer from './ScrollContainer';
 
 const frameColor = 0x2f94d1;
 const titleBackColor = 0x043468;
 const backColor = 0x152843;
-const THUMB_WIDTH = 11;
+const THUMB_WIDTH = 18;
 const THUMB_MARGIN = 26;
 
 /** FloatDialogs that expose a "confirmed" promise will reject with this error if the dialog is canceled */
@@ -45,8 +46,8 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
     private contentLay: VLayoutContainer;
     // private _scrollView: VScrollBox;
     private scrollContainer: ScrollContainer;
-    private vSlider: SliderBar;
-    private hSlider: SliderBar;
+    private vSlider: FloatSliderBar;
+    private hSlider: FloatSliderBar;
     private closeIconSize: number = 24;
     private titleBackground: Graphics;
     private background: Graphics;
@@ -122,7 +123,7 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         this.addObject(this._titleDraggerLeft, this.titleArea);
         this._titleDraggerLeft.display.position.x = this.closeIconSize + this.GAP;
 
-        this._titleText = new SceneObject<Text>(Fonts.std(this.title.toUpperCase(), 16).color(0xffffff).build());
+        this._titleText = new SceneObject<Text>(Fonts.std(this.title, 14).color(0xffffff).build());
         this.addObject(this._titleText, this.titleArea);
         this._titleText.display.position.y = (this.closeIconSize - this._titleText.display.height) / 2;
 
@@ -147,11 +148,12 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
             .up(Bitmaps.Img3DMaxRestore)
             .over(Bitmaps.Img3DMaxRestoreHover)
             .down(Bitmaps.Img3DMaxRestore)
-            .tooltip('Normal size');
+            .tooltip('Normalize');
         this.addObject(this.normalButton, this.titleArea);
         this.normalButton.display.width = this.closeIconSize - 4;
         this.normalButton.display.height = this.closeIconSize - 4;
         this.normalButton.display.position.y = 2;
+        this.normalButton.enabled = false;
 
         this.closeButton.clicked.connect(() => {
             this.close(null);
@@ -177,12 +179,12 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         this.addObject(this.scrollContainer, this.frameContainer);
         this.scrollContainer.content.addChild(this.contentLay);
 
-        this.vSlider = new SliderBar(true);
+        this.vSlider = new FloatSliderBar(true);
         this.vSlider.setProgress(0);
         this.vSlider.scrollChanged.connect((scrollValue) => this.setScrollVertical(scrollValue));
         this.addObject(this.vSlider, this.frameContainer);
 
-        this.hSlider = new SliderBar(false);
+        this.hSlider = new FloatSliderBar(false);
         this.hSlider.setProgress(0);
         this.hSlider.scrollChanged.connect((scrollValue) => this.setScrollHorizontal(scrollValue));
         this.addObject(this.hSlider, this.frameContainer);
@@ -271,8 +273,8 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
             const h = this.frameMask.height + dy;
             if (w > 100 && h > 100) {
                 this.resize(w, h);
-                this.dragRightPrevPt.x = e.data.global.x;
-                this.dragRightPrevPt.y = e.data.global.y;
+                this.dragRightPrevPt.x = p.x;
+                this.dragRightPrevPt.y = p.y;
             }
         }));
     }
@@ -291,24 +293,32 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         this.rbSprite.display.x = 0 + w - this.iconSize;
         this.rbSprite.display.y = this.lbSprite.display.y;
 
-        this.scrollContainer.setSize(w - THUMB_WIDTH, h - THUMB_WIDTH - this.titleArea.height);
+        const containerW = w - THUMB_WIDTH;
+        const containerH = h - THUMB_WIDTH - this.titleArea.height;
+        this.scrollContainer.setSize(containerW, containerH);
         this.scrollContainer.doLayout();
 
         const contentW = this.contentLay.width;
-        const containerW = this.scrollContainer.container.width;
+        // const containerW = this.scrollContainer.container.width;
         const contentH = this.contentLay.height;
-        const containerH = this.scrollContainer.container.height;
+        // const containerH = this.scrollContainer.container.height;
 
-        this.vSlider.display.position.set(w - THUMB_WIDTH, THUMB_MARGIN + this.titleArea.height);
-        this.vSlider.setSize(0, h - THUMB_WIDTH - this.titleArea.height - THUMB_MARGIN * 2);
+        // this.vSlider.display.position.set(w - THUMB_WIDTH, THUMB_MARGIN + this.titleArea.height);
+        this.vSlider.display.position.set(w - THUMB_WIDTH, this.titleArea.height);
+        // this.vSlider.setSize(0, h - THUMB_WIDTH - this.titleArea.height - THUMB_MARGIN * 2);
+        this.vSlider.setSize(h - this.titleArea.height - this.iconSize, contentH, containerH);
         this.vSlider.display.visible = (contentH > containerH);
 
-        this.hSlider.display.position.set(THUMB_MARGIN, h - THUMB_WIDTH);
-        this.hSlider.setSize(w - THUMB_MARGIN * 2, 0);
+        // this.hSlider.display.position.set(THUMB_MARGIN, h - THUMB_WIDTH);
+        this.hSlider.display.position.set(this.iconSize, h - THUMB_WIDTH);
+        // this.hSlider.setSize(w - THUMB_MARGIN * 2, 0);
+        this.hSlider.setSize(w - 2 * this.iconSize, contentW, containerW);
         this.hSlider.display.visible = (contentW > containerW);
 
         this.titleBackground.width = w;
         this.layoutTitleArea(w);
+
+        this.normalButton.enabled = true;
     }
 
     private layoutTitleArea(w: number) {
@@ -347,12 +357,7 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         this.scrollContainer.setSize(this.contentLay.width, this.contentLay.height);
         this.scrollContainer.doLayout();
 
-        this.vSlider.display.position.set(this.contentLay.width, THUMB_MARGIN + this.closeIconSize);
-        this.vSlider.setSize(0, this.contentLay.height - THUMB_MARGIN * 2);
         this.vSlider.display.visible = false;
-
-        this.hSlider.display.position.set(THUMB_MARGIN, h - THUMB_WIDTH);
-        this.hSlider.setSize(w - THUMB_MARGIN * 2, 0);
         this.hSlider.display.visible = false;
 
         this.frameMask.clear().beginFill(0, 1)
@@ -370,6 +375,8 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
 
         this.titleBackground.width = w;
         this.layoutTitleArea(w);
+
+        this.normalButton.enabled = false;
     }
 
     public updateFloatLocation() {
@@ -410,12 +417,7 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         this.scrollContainer.setSize(this.contentLay.width, this.contentLay.height);
         this.scrollContainer.doLayout();
 
-        this.vSlider.display.position.set(this.contentLay.width, THUMB_MARGIN + this.closeIconSize);
-        this.vSlider.setSize(0, h - THUMB_MARGIN);
         this.vSlider.display.visible = false;
-
-        this.hSlider.display.position.set(THUMB_MARGIN, h - THUMB_WIDTH);
-        this.hSlider.setSize(w - THUMB_MARGIN * 2, 0);
         this.hSlider.display.visible = false;
     }
 
@@ -468,6 +470,14 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
     public onMouseWheelEvent(_e: WheelEvent): boolean {
         // By default, dialogs eat all mousewheel input
         return true;
+    }
+
+    public get ContentLay() {
+        return this.contentLay;
+    }
+
+    public get Container() {
+        return this.frameContainer;
     }
 
     protected _resolvePromise: (value: T | null) => void;

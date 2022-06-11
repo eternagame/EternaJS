@@ -24,7 +24,7 @@ import {
 import Fonts from 'eterna/util/Fonts';
 import EternaSettingsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaSettingsDialog';
 import FolderManager from 'eterna/folding/FolderManager';
-import Folder, {MultiFoldResult, CacheKey, SuboptEnsembleResult} from 'eterna/folding/Folder';
+import Folder, {MultiFoldResult, CacheKey} from 'eterna/folding/Folder';
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
 import PoseField from 'eterna/pose2D/PoseField';
 import Pose2D, {Layout, SCRIPT_MARKER_LAYER} from 'eterna/pose2D/Pose2D';
@@ -268,7 +268,9 @@ export default class PoseEditMode extends GameMode {
 
         this._toolbar.pipButton.clicked.connect(() => this.togglePip());
 
-        this._toolbar.stateToggle.stateChanged.connect((targetIdx) => this.changeTarget(targetIdx));
+        if (this._toolbar.stateToggle) {
+            this._toolbar.stateToggle.stateChanged.connect((targetIdx) => this.changeTarget(targetIdx));
+        }
 
         this._toolbar.freezeButton.clicked.connect(() => this.toggleFreeze());
         this._toolbar.palette.targetClicked.connect((targetType) => this.onPaletteTargetSelected(targetType));
@@ -314,14 +316,6 @@ export default class PoseEditMode extends GameMode {
 
         this._toolbar.downloadSVGButton.clicked.connect(() => {
             this.downloadSVG();
-        });
-
-        this._toolbar.annotationPanelButton.toggled.connect((visible) => {
-            if (visible) {
-                this._toolbar.annotationPanel.isVisible = true;
-            } else {
-                this._toolbar.annotationPanel.isVisible = false;
-            }
         });
 
         // Add our docked SpecBox at the bottom of uiLayer
@@ -442,12 +436,15 @@ export default class PoseEditMode extends GameMode {
             this._toolbar.targetButton.display, HAlign.LEFT, VAlign.TOP,
             HAlign.LEFT, VAlign.TOP, w, h
         );
-        w += this._toolbar.targetButton.display.width;
-        DisplayUtil.positionRelativeToStage(
-            this._toolbar.stateToggle.display, HAlign.LEFT, VAlign.TOP,
-            HAlign.LEFT, VAlign.TOP, w,
-            h + (this._toolbar.targetButton.display.height - this._toolbar.stateToggle.display.height) / 2
-        );
+
+        if (this._toolbar.stateToggle) {
+            w += this._toolbar.targetButton.display.width;
+            DisplayUtil.positionRelativeToStage(
+                this._toolbar.stateToggle.display, HAlign.LEFT, VAlign.TOP,
+                HAlign.LEFT, VAlign.TOP, w,
+                h + (this._toolbar.targetButton.display.height - this._toolbar.stateToggle.display.height) / 2
+            );
+        }
 
         this._folderSwitcher.display.position.set(17, h + this._toolbar.targetButton.display.height + 20);
 
@@ -464,10 +461,6 @@ export default class PoseEditMode extends GameMode {
         this._dockedSpecBox.setSize(Flashbang.stageWidth - this._solDialogOffset, Flashbang.stageHeight - 340);
         const s: number = this._dockedSpecBox.plotSize;
         this._dockedSpecBox.setSize(s + 55, s * 2 + 51);
-
-        if (this._toolbar.annotationPanel.isVisible) {
-            this._toolbar.annotationPanel.updatePanelPosition();
-        }
     }
 
     public get toolbar(): Toolbar {
@@ -621,13 +614,8 @@ export default class PoseEditMode extends GameMode {
 
                 switchState: switchStateButton
                     ? [
-                        () => new Rectangle(
-                            this.toolbar.stateToggle.container.x + this.toolbar.container.x,
-                            this.toolbar.stateToggle.container.y + this.toolbar.container.y,
-                            this.toolbar.stateToggle.container.width,
-                            this.toolbar.stateToggle.container.height
-                        ),
-                        0, 'Switch state'
+                        () => getBounds(this.toolbar.stateToggle),
+                        -18, 'Switch state'
                     ]
                     : undefined,
 
@@ -1333,37 +1321,6 @@ export default class PoseEditMode extends GameMode {
                 const pp: DotPlot | null = this._folder.getDotPlot(seqArr, folded);
                 Assert.assertIsDefined(pp);
                 return pp.data;
-            });
-
-        this._scriptInterface.addCallback('subopt_single_sequence',
-            (seq: string, kcalDelta: number,
-                pseudoknotted: boolean, temp: number = 37): SuboptEnsembleResult | null => {
-                if (this._folder === null) {
-                    return null;
-                }
-                // now get subopt stuff
-                const seqArr: Sequence = Sequence.fromSequenceString(seq);
-                return this._folder.getSuboptEnsembleNoBindingSite(seqArr,
-                    kcalDelta, pseudoknotted, temp);
-            });
-
-        this._scriptInterface.addCallback('subopt_oligos',
-            (seq: string, oligoStrings: string[], kcalDelta: number,
-                pseudoknotted: boolean, temp: number = 37): SuboptEnsembleResult | null => {
-                if (this._folder === null) {
-                    return null;
-                }
-                // make the sequence string from the oligos
-                let newSequence: string = seq;
-                for (let oligoIndex = 0; oligoIndex < oligoStrings.length; oligoIndex++) {
-                    const oligoSequence: string = oligoStrings[oligoIndex];
-                    newSequence = `${newSequence}&${oligoSequence}`;
-                }
-
-                // now get subopt stuff
-                const seqArr: Sequence = Sequence.fromSequenceString(newSequence);
-                return this._folder.getSuboptEnsembleWithOligos(seqArr,
-                    oligoStrings, kcalDelta, pseudoknotted, temp);
             });
 
         this._scriptInterface.addCallback('cofold',
@@ -2986,11 +2943,9 @@ export default class PoseEditMode extends GameMode {
             this.flashConstraintForTarget(xx);
             this._poses[targetIndex].clearDesignStruct();
         } else if (numUnpaired === segments[1] - segments[0] + segments[3] - segments[2] + 2) {
-            const pseudoknots = (this._targetConditions && this._targetConditions[xx] !== undefined
-                && (this._targetConditions[xx] as TargetConditions)['type'] === 'pseudoknot');
             // breaking pairs is safe, but adding them may not always be
             if (
-                pseudoknots || EPars.validateParenthesis(
+                EPars.validateParenthesis(
                     pairsxx.getParenthesis().slice(segments[1] + 1, segments[2]),
                     false
                 ) == null
@@ -3008,8 +2963,10 @@ export default class PoseEditMode extends GameMode {
             }
 
             // if the above fails, and we have multi-oligos, there may be a permutation where it works
+            if (this._targetOligos[xx] === null) return;
+
             const targetOligo = this._targetOligos[xx];
-            if (!targetOligo) return;
+            Assert.assertIsDefined(targetOligo);
             if (targetOligo.length <= 1) return;
 
             const newOrder: number[] = targetOligo.map((_value, idx) => idx);

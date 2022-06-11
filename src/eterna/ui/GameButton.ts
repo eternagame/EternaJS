@@ -27,6 +27,12 @@ export default class GameButton extends Button implements KeyboardListener {
         this.container.addChild(this._content);
     }
 
+    public setName(name: string): GameButton {
+        this.name = name;
+        this.display.name = name;
+        return this;
+    }
+
     protected added(): void {
         super.added();
 
@@ -86,12 +92,6 @@ export default class GameButton extends Button implements KeyboardListener {
 
     public customStyleBox(stylebox: Graphics): GameButton {
         this._customStyleBox = stylebox;
-        return this;
-    }
-
-    public setName(name: string): GameButton {
-        this.name = name;
-        this.display.name = name;
         return this;
     }
 

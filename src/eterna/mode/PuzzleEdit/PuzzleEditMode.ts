@@ -312,14 +312,6 @@ export default class PuzzleEditMode extends GameMode {
             this._scriptInterface.addCallback('get_shift_limit', () => this.shiftLimitString);
         }
 
-        this._toolbar.annotationPanelButton.toggled.connect((visible) => {
-            if (visible) {
-                this._toolbar.annotationPanel.isVisible = true;
-            } else {
-                this._toolbar.annotationPanel.isVisible = false;
-            }
-        });
-
         this.clearUndoStack();
 
         const poseFields: PoseField[] = [];
@@ -590,10 +582,6 @@ export default class PuzzleEditMode extends GameMode {
                     toolbarBounds.y - structureInput.height - 7
                 );
             }
-        }
-
-        if (this._toolbar.annotationPanel.isVisible) {
-            this._toolbar.annotationPanel.updatePanelPosition();
         }
     }
 

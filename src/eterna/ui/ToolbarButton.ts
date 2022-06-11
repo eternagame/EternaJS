@@ -21,11 +21,14 @@ export default class ToolbarButton extends GameButton {
     public category: ButtonCategory | null = null;
     private _arrow: Sprite;
 
-    constructor() {
+    constructor(bkColor = {color: 0, alpha: 0}) {
         super();
         const background = new Graphics()
             .beginFill(0, 0)
             .drawRect(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT)
+            .endFill()
+            .beginFill(bkColor.color, bkColor.alpha)
+            .drawRoundedRect(2, 2, BUTTON_WIDTH - 4, BUTTON_HEIGHT - 4, 3)
             .endFill();
         this.container.addChildAt(background, 0);
     }

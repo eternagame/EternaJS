@@ -55,16 +55,16 @@ export default class SliderBar extends ContainerObject {
         return this._height;
     }
 
-    public setProgress(prog: number): void {
+    public setProgress(progress: number): void {
         if (this._vertical) {
-            this._currentVal = prog;
+            this._currentVal = progress;
             this._barRect.y = this._currentVal * (this._height - 10) + 10;
         } else {
-            this._currentVal = prog;
+            this._currentVal = progress;
             this._barRect.x = this._currentVal * (this._width - 10) + 10;
         }
 
-        this.scrollChanged.emit(prog);
+        this.scrollChanged.emit(progress);
     }
 
     protected onSizeChanged(): void {

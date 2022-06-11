@@ -11,6 +11,7 @@ import {
     Point,
     Text,
     Container,
+    Rectangle,
     Sprite,
     Texture
 } from 'pixi.js';

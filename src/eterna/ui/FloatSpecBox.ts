@@ -190,9 +190,9 @@ export default class FloatSpecBox extends ContainerObject {
         // initialize h1 ~ hn-1, v1 ~ vn-1
         for (let ii = FloatSpecBox.OFFSET;
             ii <= (this._datasize / FloatSpecBox.OFFSET) * FloatSpecBox.OFFSET; ii += FloatSpecBox.OFFSET) {
-            const hnew: Text = Fonts.std(
-                String.fromCharCode(65 + (ii / FloatSpecBox.OFFSET)), 12
-            ).color(0xffffff).build();
+            const hnew: Text = Fonts.std(String.fromCharCode(65 + (ii / FloatSpecBox.OFFSET)), 12)
+                .color(0xffffff)
+                .build();
             this._hvec.push(hnew);
             this.container.addChild(hnew);
 
