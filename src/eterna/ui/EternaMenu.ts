@@ -39,7 +39,7 @@ export default class EternaMenu extends GamePanel implements Enableable {
                 window.open(url, '_self');
             });
         } else {
-            menuButton.label(label, 12);
+            menuButton.label(label, 14);
         }
 
         this.createMenu(menuButton);
