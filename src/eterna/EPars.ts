@@ -61,14 +61,6 @@ export default class EPars {
         RNABase.CYTOSINE, RNABase.ADENINE, RNABase.ADENINE, RNABase.CYTOSINE
     ];
 
-    public static getBarcodeHairpin(seq: string): string | null {
-        const hairpinMatch: RegExpExecArray | null = (/[AGUC]{7}UUCG([AGUC]{7})AAAAGAAACAACAACAACAAC$/i).exec(seq);
-        if (hairpinMatch == null) {
-            return null;
-        }
-        return hairpinMatch[1];
-    }
-
     public static getLetterColor(letter: string): number {
         if (letter === 'G') {
             return 0xFF3333;
