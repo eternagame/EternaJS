@@ -1,5 +1,4 @@
 import * as log from 'loglevel';
-import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import Feedback, {BrentTheoData} from 'eterna/Feedback';
 import Sequence from 'eterna/rnatypes/Sequence';
@@ -97,14 +96,9 @@ export default class SolutionManager {
         }
     }
 
-    public checkRedundancyByHairpin(seq: string): boolean {
-        const seqHairpin: string | null = EPars.getBarcodeHairpin(seq);
-        if (seqHairpin == null) {
-            return true;
-        }
-
+    public isHairpinUsed(hairpinToCheck: string): boolean {
         for (const hairpin of this._hairpins) {
-            if (hairpin === seqHairpin) {
+            if (hairpin === hairpinToCheck) {
                 return true;
             }
         }

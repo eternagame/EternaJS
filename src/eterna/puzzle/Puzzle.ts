@@ -326,22 +326,30 @@ export default class Puzzle {
             return null;
         }
 
-        const barcodes: number[] = [];
         const secstruct: string = this.getSecstruct();
-        if (this._barcodeStart !== null) {
-            for (let ii = this._barcodeStart; ii < this._barcodeStart + 19; ii++) {
-                barcodes.push(ii);
-            }
+
+        let barcodeStart: number;
+        if (this._barcodeStart) {
+            barcodeStart = this._barcodeStart;
         } else if (this._useTails) {
-            for (let ii = secstruct.length - 39; ii < secstruct.length - 20; ii++) {
-                barcodes.push(ii);
-            }
+            // Last 7 bases before the 20-base tail (which is actually always 21 bases
+            // apparently - all cloud labs have defined an extra locked A just before the tail)
+            barcodeStart = secstruct.length - 20 - 7 - 1;
         } else {
-            for (let ii = secstruct.length - 19; ii < secstruct.length; ii++) {
-                barcodes.push(ii);
-            }
+            // Last 7 bases
+            barcodeStart = secstruct.length - 7;
         }
-        return barcodes;
+
+        return Utility.range(barcodeStart, barcodeStart + 7);
+    }
+
+    public getBarcodeHairpin(seq: Sequence): Sequence {
+        const barcode = this.barcodeIndices;
+        if (!barcode) {
+            throw new Error('Can\'t determine barcode hairpin for a puzzle that doesn\'t use barcodes');
+        }
+
+        return seq.slice(barcode[0], barcode[barcode.length - 1] + 1);
     }
 
     public get isSoftConstraint(): boolean {

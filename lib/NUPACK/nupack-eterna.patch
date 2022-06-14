@@ -1,212 +1,6 @@
-diff -ur -X .gitignore nupack3.0.4_stock/src/thermo/utils/CalculateEnergy.c nupack3.0.4/src/thermo/utils/CalculateEnergy.c
---- nupack3.0.4_stock/src/thermo/utils/CalculateEnergy.c	2019-11-23 17:28:53.653157300 -0500
-+++ nupack3.0.4/src/thermo/utils/CalculateEnergy.c	2019-11-23 15:35:11.830525700 -0500
-@@ -13,6 +13,10 @@
- 
- #include "pfuncUtilsHeader.h" //contains functions and structures
- #include "DNAExternals.h"
-+
-+/* for AS3 */
-+extern void (*eos_cb)(int index, int fe);
-+
- //***********************************************************
- 
- DBL_TYPE naEnergy( char *prefix, int seq[]) {
-@@ -71,7 +75,6 @@
-                                           possibleSymmetry, nStrands))*kB*TEMP_K;
-   energy += (BIMOLECULAR + SALT_CORRECTION)*(nStrands-1);
- 
--
-   free( foldFile);
-   free( thefold.pairs);
-   free( thefold.pknots);
-@@ -149,6 +152,7 @@
-   energy += LOG_FUNC( (DBL_TYPE) checkSymmetry( thefold.pairs, seqlength, nicks, 
-                                            possibleSymmetry, nStrands))*kB*TEMP_K;
-   energy += (BIMOLECULAR + SALT_CORRECTION)*(nStrands-1);
-+  if (eos_cb && (nStrands > 1)) (*eos_cb)(-2, floor(.5 + (BIMOLECULAR + SALT_CORRECTION)*(nStrands-1)*100.));
-   
-   free( thefold.pairs);
-   free( thefold.pknots);
-@@ -168,14 +172,15 @@
-   
-   int pairsFromParens[ MAXSEQLENGTH];
-   
--  
-+
-   thefold->seqlength = seqlength;
-   thefold->seq = seq;
-   
-   pairsFromParens[0] = -5; 
--  if( parens != NULL) 
-+  if( parens != NULL) {
-     getStructureFromParens( parens, pairsFromParens,  
-                            thefold->seqlength);
-+  }
-   
-   thefold->pairs = 
-     (int*) calloc( thefold->seqlength+1, sizeof(int));
-@@ -195,14 +200,22 @@
-     thefold->pairs[init] = -1;
-     thefold->pknots[init] = -1;
-   }
--  
-+
-+#if 0  
-   for( init = 0; init <= thefold->seqlength - 1; init++) {
-     if( parens != NULL) 
-       thefold->pairs[init] = pairsFromParens[init];
-     else
-       thefold->pairs[init] = thepairs[init];
-   }
--  
-+#else
-+  // it seems that the version of LLVM included in Alchemy
-+  // attempts to optimize the loop above by combining it
-+  // with the one below. And although only safe optimizations
-+  // are allowed, the module messes up something...
-+  // Temporary solution: replace the loop
-+  memmove(thefold->pairs, (parens != NULL) ? pairsFromParens : thepairs, thefold->seqlength * sizeof(int));
-+#endif
-   
-   //the following pknot finding routine should be optimized
-   for( init = 0; init <= thefold->seqlength-1; init++) {
-@@ -220,7 +233,6 @@
-       
-     }
-   }
--  
- }
- 
- 
-diff -ur -X .gitignore nupack3.0.4_stock/src/thermo/utils/GetEnergy.c nupack3.0.4/src/thermo/utils/GetEnergy.c
---- nupack3.0.4_stock/src/thermo/utils/GetEnergy.c	2019-11-23 17:28:53.656141200 -0500
-+++ nupack3.0.4/src/thermo/utils/GetEnergy.c	2019-11-23 15:35:11.833542600 -0500
-@@ -14,6 +14,8 @@
- #include "pfuncUtilsHeader.h"
- #include "DNAExternals.h"
- 
-+/* for AS3 */
-+void (*eos_cb)(int index, int fe) = NULL;
- 
- /* ******************************** */
- DBL_TYPE GetEnergy( fold *thefold) {
-@@ -33,6 +35,8 @@
-   
-   int j;
-   DBL_TYPE bp_penalty;
-+  DBL_TYPE local_e = 0.0;
-+  DBL_TYPE contrib;
-   
-   j = stop; 
-   while( j >= start) {
-@@ -65,10 +69,12 @@
-         bp_penalty = AT_PENALTY;
-       }
-       //EnergyFb( d, j, thefold);
--      energy +=
--        EnergyFb( d, j, thefold) + 
-+      contrib = 
-         DangleEnergyWithPairs( j+1, stop, thefold) +
-         bp_penalty;
-+      energy +=
-+        EnergyFb( d, j, thefold) + contrib;
-+      local_e += contrib;
-       
-       j = d-1;
-       stop = j;
-@@ -79,8 +85,11 @@
-   }
-   
-   
--  energy += DangleEnergyWithPairs( start, stop, 
-+  contrib = DangleEnergyWithPairs( start, stop, 
-                                   thefold);
-+  energy += contrib;
-+  local_e += contrib;
-+  if (eos_cb) (*eos_cb)(-1, floor(.5 + local_e * 100.));
-   /*  
-   energy += DangleEnergy( start, stop, 
-   thefold->seq, thefold->seqlength);
-@@ -190,14 +199,17 @@
-   if( nNicks == 0) {
-     if( nPairs == 1) { //hairpin
-       energy = HairpinEnergy( start, firstStop, thefold->seq);			
-+      if (eos_cb) (*eos_cb)(start, floor(.5 + energy * 100.));
-       //return energy;
-     }
-     else if( nPairs == 2) { //interior loop
--      energy = InteriorEnergy( start, firstStop, pairs[2], pairs[3], thefold->seq)
--        + EnergyFb( pairs[2], pairs[3], thefold);
-+      DBL_TYPE il_en = InteriorEnergy( start, firstStop, pairs[2], pairs[3], thefold->seq);
-+      energy = il_en + EnergyFb( pairs[2], pairs[3], thefold);
-+      if (eos_cb) (*eos_cb)(start, floor(.5 + il_en * 100.));
-       //return energy;
-     }
-     else if( nPairs >= 3) { //multiloop
-+      DBL_TYPE sub_en = 0.0;
-       energy = ALPHA_1 + ALPHA_2 + ALPHA_3 * (pairs[1]-pairs[3]-1) + 
-         DangleEnergyWithPairs(pairs[3]+1, pairs[1]-1, thefold);
-       
-@@ -210,11 +222,14 @@
-       
-       for( i = 1; i < nPairs; i++) {
-         if( thefold->pknots[ pairs[2*i]] == -1) { //not a pseudoknot
-+          DBL_TYPE fb_en;
-           if( thefold->seq[ pairs[2*i]] != BASE_C && thefold->seq[ pairs[2*i+1]] != BASE_C) {
-             bp_penalty += AT_PENALTY;
-           }
-           
--          energy += EnergyFb( pairs[2*i], pairs[ 2*i+1], thefold) + ALPHA_2;
-+          fb_en = EnergyFb( pairs[2*i], pairs[ 2*i+1], thefold) + ALPHA_2;
-+          energy += fb_en;
-+          sub_en += fb_en;
-         }
-         else { //a pseudoknot
-           p1 = pairs[2*i];
-@@ -241,6 +256,7 @@
-           DangleEnergyWithPairs( pairs[ p2]+1, pairs[p1]-1, thefold);
-       }
-       energy += bp_penalty;
-+      if (eos_cb) (*eos_cb)(start, floor(.5 + (energy - sub_en) * 100.));
-     }
-     else {
-       printf("Error in calculation of EnergyFb! %d\n", nPairs);
-@@ -248,6 +264,7 @@
-     }
-   }
-   else if( nNicks == 1) { //nNicks
-+    DBL_TYPE sub_en = 0.0;
-     if( thefold->seq[ pairs[0]] != BASE_C && thefold->seq[ pairs[1]] != BASE_C) {
-       bp_penalty = AT_PENALTY;
-     }
-@@ -261,11 +278,14 @@
-       energy = DangleEnergyWithPairs(pairs[3]+1, pairs[1]-1, thefold);
-       
-       for( i = 1; i < nPairs; i++) {
-+        DBL_TYPE fb_en;
-         if( thefold->seq[ pairs[2*i]] != BASE_C && thefold->seq[ pairs[2*i+1]] != BASE_C) {
-           bp_penalty += AT_PENALTY;
-         }
-         
--        energy += EnergyFb( pairs[2*i], pairs[ 2*i+1], thefold);
-+        fb_en = EnergyFb( pairs[2*i], pairs[ 2*i+1], thefold);
-+        energy += fb_en;
-+        sub_en += fb_en;
-         
-         p1 = 2*i;
-         if( i != nPairs - 1) p2 = 2*i+3;
-@@ -277,6 +297,7 @@
-       //return energy;
-     }
-     
-+    if (eos_cb) (*eos_cb)(start, floor(.5 + (energy - sub_en) * 100.));
-   }
-   
-   //#ifdef SHOWFB
-diff -ur -X .gitignore nupack3.0.4_stock/src/thermo/utils/backtrack.c nupack3.0.4/src/thermo/utils/backtrack.c
---- nupack3.0.4_stock/src/thermo/utils/backtrack.c	2019-11-23 17:28:53.671101500 -0500
-+++ nupack3.0.4/src/thermo/utils/backtrack.c	2019-11-23 15:35:11.837506500 -0500
+diff -X .gitignore -ur nupack3.0.4_stock/src/thermo/utils/backtrack.c nupack3.0.4/src/thermo/utils/backtrack.c
+--- nupack3.0.4_stock/src/thermo/utils/backtrack.c	2014-03-15 18:04:18.000000000 -0400
++++ nupack3.0.4/src/thermo/utils/backtrack.c	2022-06-07 10:36:54.215341136 -0400
 @@ -79,7 +79,8 @@
    }
  
@@ -328,9 +122,90 @@ diff -ur -X .gitignore nupack3.0.4_stock/src/thermo/utils/backtrack.c nupack3.0.
          energy = InteriorEnergy( i,j,d,e,seq) + Fb[ pf_index(d,e,seqlength)];
          if( WithinEps( Fb[ pf_ij], energy, ENERGY_TOLERANCE, allowableError)) {
  
-diff -ur -X .gitignore nupack3.0.4_stock/src/thermo/utils/ene.c nupack3.0.4/src/thermo/utils/ene.c
---- nupack3.0.4_stock/src/thermo/utils/ene.c	2019-11-23 17:28:53.683068800 -0500
-+++ nupack3.0.4/src/thermo/utils/ene.c	2019-11-23 15:35:11.841789000 -0500
+diff -X .gitignore -ur nupack3.0.4_stock/src/thermo/utils/CalculateEnergy.c nupack3.0.4/src/thermo/utils/CalculateEnergy.c
+--- nupack3.0.4_stock/src/thermo/utils/CalculateEnergy.c	2014-03-15 18:04:18.000000000 -0400
++++ nupack3.0.4/src/thermo/utils/CalculateEnergy.c	2022-06-07 10:36:54.215341136 -0400
+@@ -13,6 +13,10 @@
+ 
+ #include "pfuncUtilsHeader.h" //contains functions and structures
+ #include "DNAExternals.h"
++
++/* for AS3 */
++extern void (*eos_cb)(int index, int fe);
++
+ //***********************************************************
+ 
+ DBL_TYPE naEnergy( char *prefix, int seq[]) {
+@@ -71,7 +75,6 @@
+                                           possibleSymmetry, nStrands))*kB*TEMP_K;
+   energy += (BIMOLECULAR + SALT_CORRECTION)*(nStrands-1);
+ 
+-
+   free( foldFile);
+   free( thefold.pairs);
+   free( thefold.pknots);
+@@ -149,6 +152,7 @@
+   energy += LOG_FUNC( (DBL_TYPE) checkSymmetry( thefold.pairs, seqlength, nicks, 
+                                            possibleSymmetry, nStrands))*kB*TEMP_K;
+   energy += (BIMOLECULAR + SALT_CORRECTION)*(nStrands-1);
++  if (eos_cb && (nStrands > 1)) (*eos_cb)(-2, floor(.5 + (BIMOLECULAR + SALT_CORRECTION)*(nStrands-1)*100.));
+   
+   free( thefold.pairs);
+   free( thefold.pknots);
+@@ -168,14 +172,15 @@
+   
+   int pairsFromParens[ MAXSEQLENGTH];
+   
+-  
++
+   thefold->seqlength = seqlength;
+   thefold->seq = seq;
+   
+   pairsFromParens[0] = -5; 
+-  if( parens != NULL) 
++  if( parens != NULL) {
+     getStructureFromParens( parens, pairsFromParens,  
+                            thefold->seqlength);
++  }
+   
+   thefold->pairs = 
+     (int*) calloc( thefold->seqlength+1, sizeof(int));
+@@ -195,14 +200,22 @@
+     thefold->pairs[init] = -1;
+     thefold->pknots[init] = -1;
+   }
+-  
++
++#if 0  
+   for( init = 0; init <= thefold->seqlength - 1; init++) {
+     if( parens != NULL) 
+       thefold->pairs[init] = pairsFromParens[init];
+     else
+       thefold->pairs[init] = thepairs[init];
+   }
+-  
++#else
++  // it seems that the version of LLVM included in Alchemy
++  // attempts to optimize the loop above by combining it
++  // with the one below. And although only safe optimizations
++  // are allowed, the module messes up something...
++  // Temporary solution: replace the loop
++  memmove(thefold->pairs, (parens != NULL) ? pairsFromParens : thepairs, thefold->seqlength * sizeof(int));
++#endif
+   
+   //the following pknot finding routine should be optimized
+   for( init = 0; init <= thefold->seqlength-1; init++) {
+@@ -220,7 +233,6 @@
+       
+     }
+   }
+-  
+ }
+ 
+ 
+diff -X .gitignore -ur nupack3.0.4_stock/src/thermo/utils/ene.c nupack3.0.4/src/thermo/utils/ene.c
+--- nupack3.0.4_stock/src/thermo/utils/ene.c	2014-03-15 18:04:18.000000000 -0400
++++ nupack3.0.4/src/thermo/utils/ene.c	2022-06-07 10:36:54.218674472 -0400
 @@ -71,10 +71,10 @@
  
    extern DBL_TYPE MMEnergiesIL[];
@@ -605,9 +480,134 @@ diff -ur -X .gitignore nupack3.0.4_stock/src/thermo/utils/ene.c nupack3.0.4/src/
    static DBL_TYPE *slCache[MAXSTRANDS], *edc, tc;
    static int CacheInd=-1, nCaches=0;
    static DBL_TYPE TCache[MAXSTRANDS];
-diff -ur -X .gitignore nupack3.0.4_stock/src/thermo/utils/init.c nupack3.0.4/src/thermo/utils/init.c
---- nupack3.0.4_stock/src/thermo/utils/init.c	2019-11-23 17:28:53.686061200 -0500
-+++ nupack3.0.4/src/thermo/utils/init.c	2019-11-23 15:35:11.844512400 -0500
+diff -X .gitignore -ur nupack3.0.4_stock/src/thermo/utils/GetEnergy.c nupack3.0.4/src/thermo/utils/GetEnergy.c
+--- nupack3.0.4_stock/src/thermo/utils/GetEnergy.c	2014-03-15 18:04:18.000000000 -0400
++++ nupack3.0.4/src/thermo/utils/GetEnergy.c	2022-06-07 10:36:54.215341136 -0400
+@@ -14,6 +14,8 @@
+ #include "pfuncUtilsHeader.h"
+ #include "DNAExternals.h"
+ 
++/* for AS3 */
++void (*eos_cb)(int index, int fe) = NULL;
+ 
+ /* ******************************** */
+ DBL_TYPE GetEnergy( fold *thefold) {
+@@ -33,6 +35,8 @@
+   
+   int j;
+   DBL_TYPE bp_penalty;
++  DBL_TYPE local_e = 0.0;
++  DBL_TYPE contrib;
+   
+   j = stop; 
+   while( j >= start) {
+@@ -65,10 +69,12 @@
+         bp_penalty = AT_PENALTY;
+       }
+       //EnergyFb( d, j, thefold);
+-      energy +=
+-        EnergyFb( d, j, thefold) + 
++      contrib = 
+         DangleEnergyWithPairs( j+1, stop, thefold) +
+         bp_penalty;
++      energy +=
++        EnergyFb( d, j, thefold) + contrib;
++      local_e += contrib;
+       
+       j = d-1;
+       stop = j;
+@@ -79,8 +85,11 @@
+   }
+   
+   
+-  energy += DangleEnergyWithPairs( start, stop, 
++  contrib = DangleEnergyWithPairs( start, stop, 
+                                   thefold);
++  energy += contrib;
++  local_e += contrib;
++  if (eos_cb) (*eos_cb)(-1, floor(.5 + local_e * 100.));
+   /*  
+   energy += DangleEnergy( start, stop, 
+   thefold->seq, thefold->seqlength);
+@@ -190,14 +199,17 @@
+   if( nNicks == 0) {
+     if( nPairs == 1) { //hairpin
+       energy = HairpinEnergy( start, firstStop, thefold->seq);			
++      if (eos_cb) (*eos_cb)(start, floor(.5 + energy * 100.));
+       //return energy;
+     }
+     else if( nPairs == 2) { //interior loop
+-      energy = InteriorEnergy( start, firstStop, pairs[2], pairs[3], thefold->seq)
+-        + EnergyFb( pairs[2], pairs[3], thefold);
++      DBL_TYPE il_en = InteriorEnergy( start, firstStop, pairs[2], pairs[3], thefold->seq);
++      energy = il_en + EnergyFb( pairs[2], pairs[3], thefold);
++      if (eos_cb) (*eos_cb)(start, floor(.5 + il_en * 100.));
+       //return energy;
+     }
+     else if( nPairs >= 3) { //multiloop
++      DBL_TYPE sub_en = 0.0;
+       energy = ALPHA_1 + ALPHA_2 + ALPHA_3 * (pairs[1]-pairs[3]-1) + 
+         DangleEnergyWithPairs(pairs[3]+1, pairs[1]-1, thefold);
+       
+@@ -210,11 +222,14 @@
+       
+       for( i = 1; i < nPairs; i++) {
+         if( thefold->pknots[ pairs[2*i]] == -1) { //not a pseudoknot
++          DBL_TYPE fb_en;
+           if( thefold->seq[ pairs[2*i]] != BASE_C && thefold->seq[ pairs[2*i+1]] != BASE_C) {
+             bp_penalty += AT_PENALTY;
+           }
+           
+-          energy += EnergyFb( pairs[2*i], pairs[ 2*i+1], thefold) + ALPHA_2;
++          fb_en = EnergyFb( pairs[2*i], pairs[ 2*i+1], thefold) + ALPHA_2;
++          energy += fb_en;
++          sub_en += fb_en;
+         }
+         else { //a pseudoknot
+           p1 = pairs[2*i];
+@@ -241,6 +256,7 @@
+           DangleEnergyWithPairs( pairs[ p2]+1, pairs[p1]-1, thefold);
+       }
+       energy += bp_penalty;
++      if (eos_cb) (*eos_cb)(start, floor(.5 + (energy - sub_en) * 100.));
+     }
+     else {
+       printf("Error in calculation of EnergyFb! %d\n", nPairs);
+@@ -248,6 +264,7 @@
+     }
+   }
+   else if( nNicks == 1) { //nNicks
++    DBL_TYPE sub_en = 0.0;
+     if( thefold->seq[ pairs[0]] != BASE_C && thefold->seq[ pairs[1]] != BASE_C) {
+       bp_penalty = AT_PENALTY;
+     }
+@@ -261,11 +278,14 @@
+       energy = DangleEnergyWithPairs(pairs[3]+1, pairs[1]-1, thefold);
+       
+       for( i = 1; i < nPairs; i++) {
++        DBL_TYPE fb_en;
+         if( thefold->seq[ pairs[2*i]] != BASE_C && thefold->seq[ pairs[2*i+1]] != BASE_C) {
+           bp_penalty += AT_PENALTY;
+         }
+         
+-        energy += EnergyFb( pairs[2*i], pairs[ 2*i+1], thefold);
++        fb_en = EnergyFb( pairs[2*i], pairs[ 2*i+1], thefold);
++        energy += fb_en;
++        sub_en += fb_en;
+         
+         p1 = 2*i;
+         if( i != nPairs - 1) p2 = 2*i+3;
+@@ -277,6 +297,7 @@
+       //return energy;
+     }
+     
++    if (eos_cb) (*eos_cb)(start, floor(.5 + (energy - sub_en) * 100.));
+   }
+   
+   //#ifdef SHOWFB
+diff -X .gitignore -ur nupack3.0.4_stock/src/thermo/utils/init.c nupack3.0.4/src/thermo/utils/init.c
+--- nupack3.0.4_stock/src/thermo/utils/init.c	2014-03-15 18:04:18.000000000 -0400
++++ nupack3.0.4/src/thermo/utils/init.c	2022-06-13 10:06:09.893592493 -0400
 @@ -418,16 +418,18 @@
    // Allocate and deallocate Fx matrices
    
@@ -669,26 +669,9 @@ diff -ur -X .gitignore nupack3.0.4_stock/src/thermo/utils/init.c nupack3.0.4/src
      
    }
  }
-@@ -1854,11 +1864,15 @@
-   
-   int i,j,k, nick;
-   int indexE;
-+
-+  int arraySize = seqlength*(seqlength+1)/2 + (seqlength+1);
-+  int* blk = (int*) malloc( arraySize*2*sizeof( int));
-   
-   for( i = 0; i <= seqlength-1; i++) {
-     for( j = i-1; j <= seqlength-1; j++) {
-       indexE = pf_index( i, j, seqlength);
--      etaN[ indexE] = (int *) malloc( 2*sizeof( int));
-+      //etaN[ indexE] = (int *) malloc( 2*sizeof( int));
-+      etaN[ indexE] = blk + 2*indexE;
-       etaN[ indexE][0] = 0;
-       etaN[ indexE][1] = -1;
-       
-diff -ur -X .gitignore nupack3.0.4_stock/src/thermo/utils/mfeUtils.c nupack3.0.4/src/thermo/utils/mfeUtils.c
---- nupack3.0.4_stock/src/thermo/utils/mfeUtils.c	2019-11-23 17:28:53.658135200 -0500
-+++ nupack3.0.4/src/thermo/utils/mfeUtils.c	2019-11-23 15:35:11.847511100 -0500
+diff -X .gitignore -ur nupack3.0.4_stock/src/thermo/utils/mfeUtils.c nupack3.0.4/src/thermo/utils/mfeUtils.c
+--- nupack3.0.4_stock/src/thermo/utils/mfeUtils.c	2014-03-15 18:04:18.000000000 -0400
++++ nupack3.0.4/src/thermo/utils/mfeUtils.c	2022-06-07 10:36:54.218674472 -0400
 @@ -29,6 +29,7 @@
  #include <stdlib.h>
  #include <math.h>
@@ -905,9 +888,9 @@ diff -ur -X .gitignore nupack3.0.4_stock/src/thermo/utils/mfeUtils.c nupack3.0.4
  
    return result;
  }
-diff -ur -X .gitignore nupack3.0.4_stock/src/thermo/utils/min.c nupack3.0.4/src/thermo/utils/min.c
---- nupack3.0.4_stock/src/thermo/utils/min.c	2019-11-23 17:28:53.659132800 -0500
-+++ nupack3.0.4/src/thermo/utils/min.c	2019-11-23 15:35:11.851468800 -0500
+diff -X .gitignore -ur nupack3.0.4_stock/src/thermo/utils/min.c nupack3.0.4/src/thermo/utils/min.c
+--- nupack3.0.4_stock/src/thermo/utils/min.c	2014-03-15 18:04:18.000000000 -0400
++++ nupack3.0.4/src/thermo/utils/min.c	2022-06-07 10:36:54.222007809 -0400
 @@ -24,7 +24,8 @@
    int nNicks = 0;
  	
@@ -1246,9 +1229,9 @@ diff -ur -X .gitignore nupack3.0.4_stock/src/thermo/utils/min.c nupack3.0.4/src/
  	    if( seq[d] != BASE_C && seq[e] != BASE_C) {
  	      bp_penalty = AT_PENALTY;
  	    }
-diff -ur -X .gitignore nupack3.0.4_stock/src/thermo/utils/nsStar.c nupack3.0.4/src/thermo/utils/nsStar.c
---- nupack3.0.4_stock/src/thermo/utils/nsStar.c	2019-11-23 17:28:53.661130000 -0500
-+++ nupack3.0.4/src/thermo/utils/nsStar.c	2019-11-23 15:35:11.854460500 -0500
+diff -X .gitignore -ur nupack3.0.4_stock/src/thermo/utils/nsStar.c nupack3.0.4/src/thermo/utils/nsStar.c
+--- nupack3.0.4_stock/src/thermo/utils/nsStar.c	2014-03-15 18:04:18.000000000 -0400
++++ nupack3.0.4/src/thermo/utils/nsStar.c	2022-06-07 10:36:54.222007809 -0400
 @@ -10,7 +10,7 @@
  
  #include <stdio.h>
@@ -1258,9 +1241,9 @@ diff -ur -X .gitignore nupack3.0.4_stock/src/thermo/utils/nsStar.c nupack3.0.4/s
  #include <math.h>
  #include <string.h>
  #include <ctype.h>
-diff -ur -X .gitignore nupack3.0.4_stock/src/thermo/utils/pairsPr.c nupack3.0.4/src/thermo/utils/pairsPr.c
---- nupack3.0.4_stock/src/thermo/utils/pairsPr.c	2019-11-23 17:28:53.664119900 -0500
-+++ nupack3.0.4/src/thermo/utils/pairsPr.c	2019-11-23 15:35:11.859448300 -0500
+diff -X .gitignore -ur nupack3.0.4_stock/src/thermo/utils/pairsPr.c nupack3.0.4/src/thermo/utils/pairsPr.c
+--- nupack3.0.4_stock/src/thermo/utils/pairsPr.c	2014-03-15 18:04:18.000000000 -0400
++++ nupack3.0.4/src/thermo/utils/pairsPr.c	2022-06-07 10:36:54.222007809 -0400
 @@ -64,7 +64,7 @@
  
    value = -b/a + 1.0;
@@ -1270,9 +1253,9 @@ diff -ur -X .gitignore nupack3.0.4_stock/src/thermo/utils/pairsPr.c nupack3.0.4/
  
  #ifdef DEBUG
    if( a < 0) printf("%Le %Le %f\n", (long double) a, (long double) b, precisionLost);
-diff -ur -X .gitignore nupack3.0.4_stock/src/thermo/utils/pfuncUtils.c nupack3.0.4/src/thermo/utils/pfuncUtils.c
---- nupack3.0.4_stock/src/thermo/utils/pfuncUtils.c	2019-11-23 17:28:53.675090100 -0500
-+++ nupack3.0.4/src/thermo/utils/pfuncUtils.c	2019-11-23 15:35:11.863463100 -0500
+diff -X .gitignore -ur nupack3.0.4_stock/src/thermo/utils/pfuncUtils.c nupack3.0.4/src/thermo/utils/pfuncUtils.c
+--- nupack3.0.4_stock/src/thermo/utils/pfuncUtils.c	2014-03-15 18:04:18.000000000 -0400
++++ nupack3.0.4/src/thermo/utils/pfuncUtils.c	2022-06-07 10:36:54.222007809 -0400
 @@ -9,7 +9,7 @@
  #include <stdio.h>
  #include <math.h>
@@ -1326,9 +1309,9 @@ diff -ur -X .gitignore nupack3.0.4_stock/src/thermo/utils/pfuncUtils.c nupack3.0
    int shift;
    
    if( b == BASE_A) { 
-diff -ur -X .gitignore nupack3.0.4_stock/src/thermo/utils/pfuncUtilsConstants.h nupack3.0.4/src/thermo/utils/pfuncUtilsConstants.h
---- nupack3.0.4_stock/src/thermo/utils/pfuncUtilsConstants.h	2019-11-23 17:28:53.667112300 -0500
-+++ nupack3.0.4/src/thermo/utils/pfuncUtilsConstants.h	2019-11-23 15:35:11.865431200 -0500
+diff -X .gitignore -ur nupack3.0.4_stock/src/thermo/utils/pfuncUtilsConstants.h nupack3.0.4/src/thermo/utils/pfuncUtilsConstants.h
+--- nupack3.0.4_stock/src/thermo/utils/pfuncUtilsConstants.h	2014-03-15 18:04:18.000000000 -0400
++++ nupack3.0.4/src/thermo/utils/pfuncUtilsConstants.h	2022-06-07 10:36:54.222007809 -0400
 @@ -34,7 +34,7 @@
  #endif
  
@@ -1351,9 +1334,9 @@ diff -ur -X .gitignore nupack3.0.4_stock/src/thermo/utils/pfuncUtilsConstants.h 
   
  //MATCH_PF will make the energy model used in energy calculations
  //match the one used in mfe and partition function calculations.
-diff -ur -X .gitignore nupack3.0.4_stock/src/thermo/utils/pfuncUtilsHeader.h nupack3.0.4/src/thermo/utils/pfuncUtilsHeader.h
---- nupack3.0.4_stock/src/thermo/utils/pfuncUtilsHeader.h	2019-11-23 17:28:53.678083900 -0500
-+++ nupack3.0.4/src/thermo/utils/pfuncUtilsHeader.h	2019-11-23 15:35:11.869239300 -0500
+diff -X .gitignore -ur nupack3.0.4_stock/src/thermo/utils/pfuncUtilsHeader.h nupack3.0.4/src/thermo/utils/pfuncUtilsHeader.h
+--- nupack3.0.4_stock/src/thermo/utils/pfuncUtilsHeader.h	2014-03-15 18:04:18.000000000 -0400
++++ nupack3.0.4/src/thermo/utils/pfuncUtilsHeader.h	2022-06-10 15:30:47.146376559 -0400
 @@ -22,7 +22,7 @@
  #include "pfuncUtilsConstants.h"
  #include "runtime_constants.h"

@@ -8,9 +8,10 @@ export default class BarcodeConstraint extends Constraint<BaseConstraintStatus> 
     public static readonly NAME = 'BARCODE';
 
     public evaluate(context: ConstraintContext): BaseConstraintStatus {
+        if (!context.puzzle) throw new Error('Barcode constraint is only available in puzzle solver');
         return {
-            satisfied: !SolutionManager.instance.checkRedundancyByHairpin(
-                context.undoBlocks[0].sequence.sequenceString()
+            satisfied: !SolutionManager.instance.isHairpinUsed(
+                context.puzzle.getBarcodeHairpin(context.undoBlocks[0].sequence).sequenceString()
             )
         };
     }

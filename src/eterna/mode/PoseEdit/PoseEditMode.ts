@@ -1251,7 +1251,9 @@ export default class PoseEditMode extends GameMode {
         this._scriptInterface.addCallback('get_tracked_indices', (): number[] => this.getPose(0).trackedIndices);
         this._scriptInterface.addCallback('get_barcode_indices', (): number[] | null => this._puzzle.barcodeIndices);
         this._scriptInterface.addCallback('is_barcode_available',
-            (seq: string): boolean => SolutionManager.instance.checkRedundancyByHairpin(seq));
+            (seq: string): boolean => SolutionManager.instance.isHairpinUsed(
+                this._puzzle.getBarcodeHairpin(Sequence.fromSequenceString(seq)).sequenceString()
+            ));
 
         this._scriptInterface.addCallback('current_folder',
             (): string | null => (this._folder ? this._folder.name : null));
@@ -2283,18 +2285,16 @@ export default class PoseEditMode extends GameMode {
             return;
         }
 
-        const seqString = this._puzzle.transformSequence(undoBlock.sequence, 0).sequenceString;
+        const seq = this._puzzle.transformSequence(undoBlock.sequence, 0);
 
         if (data['error'] !== undefined) {
             log.debug(`Got solution submission error: ${data['error']}`);
             if (data['error'].indexOf('barcode') >= 0) {
                 const dialog = this.showNotification(data['error'], 'More Information');
                 dialog.extraButton.clicked.connect(() => window.open(EternaURL.BARCODE_HELP, '_blank'));
-                const hairpin: string | null = EPars.getBarcodeHairpin(seqString());
-                if (hairpin != null) {
-                    SolutionManager.instance.addHairpins([hairpin]);
-                    this.checkConstraints();
-                }
+                const hairpin = this._puzzle.getBarcodeHairpin(seq);
+                SolutionManager.instance.addHairpins([hairpin.sequenceString()]);
+                this.checkConstraints();
             } else {
                 this.showNotification(data['error']);
             }
@@ -2305,10 +2305,9 @@ export default class PoseEditMode extends GameMode {
                 this.setAncestorId(data['solution-id']);
             }
 
-            if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
-                && this._puzzle.useBarcode
-                && EPars.getBarcodeHairpin(seqString()) !== null) {
-                SolutionManager.instance.addHairpins([EPars.getBarcodeHairpin(seqString()) as string]);
+            if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL && this._puzzle.useBarcode) {
+                const hairpin: Sequence | null = this._puzzle.getBarcodeHairpin(seq);
+                SolutionManager.instance.addHairpins([hairpin.sequenceString()]);
                 this.checkConstraints();
             }
         }
