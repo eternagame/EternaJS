@@ -17,6 +17,7 @@ export default class PoseUtil {
     }
 
     public static addBaseWithIndex(index: number, pairs: SecStruct): [string, PuzzleEditOp, RNABase[]?] {
+        const pseudoknots = pairs.onlyPseudoknots().nonempty();
         let mutatedPairs: number[];
         mutatedPairs = pairs.pairs.slice(0, index);
         mutatedPairs.push(-1);
@@ -27,7 +28,7 @@ export default class PoseUtil {
                 mutatedPairs[ii]++;
             }
         }
-        const parenthesis: string = new SecStruct(mutatedPairs).getParenthesis();
+        const parenthesis: string = new SecStruct(mutatedPairs).getParenthesis(null, pseudoknots);
         return [parenthesis, PuzzleEditOp.ADD_BASE, mutatedPairs];
     }
 
