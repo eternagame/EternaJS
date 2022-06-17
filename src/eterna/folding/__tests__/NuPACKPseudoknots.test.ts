@@ -1,4 +1,3 @@
-import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 import Folder from '../Folder';
 import NuPACK from '../NuPACK';
@@ -8,6 +7,8 @@ function CreateFolder(type: any): Promise<Folder | null> {
     return type.create();
 }
 
+// See https://github.com/eternagame/EternaJS/issues/654
+/*
 test(`NuPACK:PK_score_structures`, () => {
     // The engines output different results
 
@@ -111,6 +112,7 @@ test(`NuPACK:PK_score_structures`, () => {
         }))
         .resolves.toBeUndefined(); // (we're returning a promise)
 });
+*/
 
 test(`NuPACK:PK_foldSequence`, () => {
     // The engines output different results
@@ -164,6 +166,8 @@ test(`NuPACK:PK_fold1L2X`, () => {
         .resolves.toBeUndefined(); // (we're returning a promise)
 });
 
+// See https://github.com/eternagame/EternaJS/issues/654
+/*
 test(`NuPACK:PK_score1L2X`, () => {
     // The engines output different results
 
@@ -188,3 +192,4 @@ test(`NuPACK:PK_score1L2X`, () => {
         }))
         .resolves.toBeUndefined(); // (we're returning a promise)
 });
+*/

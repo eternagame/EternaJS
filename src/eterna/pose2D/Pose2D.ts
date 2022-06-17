@@ -3964,6 +3964,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private updateScoreNodeGui(): void {
         this._scoreNodeIndex = -1;
 
+        if (this._pseudoknotted) {
+            // See https://github.com/eternagame/EternaJS/issues/654
+            this._poseField.disableEnergyGui('Unavailable');
+            return;
+        }
+
         if (this._scoreNodes != null) {
             let totalScore = 0;
             let nodeFound = false;

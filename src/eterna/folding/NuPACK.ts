@@ -215,6 +215,9 @@ export default class NuPACK extends Folder {
         seq: Sequence, pairs: SecStruct,
         pseudoknots: boolean = false, temp: number = 37, outNodes: number[] | null = null
     ): number {
+        // See https://github.com/eternagame/EternaJS/issues/654
+        if (pseudoknots) return 0;
+
         const key: CacheKey = {
             primitive: 'score', seq: seq.baseArray, pairs: pairs.pairs, pseudoknots, temp
         };
