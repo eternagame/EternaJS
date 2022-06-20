@@ -25,7 +25,7 @@ export default class EternaSettings extends Settings {
     public readonly designBrowserColumnNames: Setting<DesignCategory[]> | Setting<null>;
     public readonly designBrowserSelectedSolutionIDs: Setting<number[]> | Setting<null>;
 
-    public readonly topToolbarSettings: Setting<TopBarSetting[]> | Setting<null>;
+    public readonly topToolbarSettings: Setting<TopBarSetting> | Setting<null>;
 
     public readonly saveGamesTransfered: Setting<boolean>;
 

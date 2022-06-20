@@ -14,7 +14,6 @@ import Puzzle, {
 } from 'eterna/puzzle/Puzzle';
 import Background from 'eterna/vfx/Background';
 import Toolbar, {ToolbarType} from 'eterna/ui/Toolbar';
-import SpecBox from 'eterna/ui/SpecBox';
 import GameButton from 'eterna/ui/GameButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {
@@ -73,6 +72,7 @@ import LibrarySelectionConstraint from 'eterna/constraints/constraints/LibrarySe
 import ErrorDialog from 'eterna/ui/ErrorDialog';
 import AnnotationDialog from 'eterna/ui/AnnotationDialog';
 import {ToolTipPositioner} from 'eterna/ui/help/HelpToolTip';
+import FloatSpecBox from 'eterna/ui/FloatSpecBox';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -160,6 +160,88 @@ export default class PoseEditMode extends GameMode {
 
     public get isOpaque(): boolean { return true; }
 
+    private setToolbarEventHandlers() {
+        this.toolbar.undoButton.clicked.connect(() => this.moveUndoStackBackward());
+        this.toolbar.redoButton.clicked.connect(() => this.moveUndoStackForward());
+        if (this.toolbar.zoomOutButton) {
+            this.toolbar.zoomOutButton.clicked.connect(() => {
+                for (const poseField of this._poseFields) {
+                    poseField.zoomOut();
+                }
+            });
+        }
+        if (this.toolbar.zoomInButton) {
+            this.toolbar.zoomInButton.clicked.connect(() => {
+                for (const poseField of this._poseFields) {
+                    poseField.zoomIn();
+                }
+            });
+        }
+        this.toolbar.submitButton.clicked.connect(() => this.submitCurrentPose());
+        this.toolbar.viewSolutionsButton.clicked.connect(() => this.openDesignBrowserForOurPuzzle());
+        this.toolbar.resetButton.clicked.connect(() => this.showResetPrompt());
+
+        this.toolbar.naturalButton.clicked.connect(() => this.togglePoseState());
+        this.toolbar.targetButton.clicked.connect(() => this.togglePoseState());
+
+        this.toolbar.specButton.clicked.connect(() => this.showSpec());
+        this.toolbar.copyButton.clicked.connect(() => this.showCopySequenceDialog());
+        this.toolbar.pasteButton.clicked.connect(() => this.showPasteSequenceDialog());
+        this.toolbar.screenshotButton.clicked.connect(() => this.postScreenshot(this.createScreenshot()));
+
+        this.toolbar.pipButton.clicked.connect(() => this.togglePip());
+
+        if (this.toolbar.stateToggle) {
+            this.toolbar.stateToggle.stateChanged.connect((targetIdx) => this.changeTarget(targetIdx));
+        }
+
+        this.toolbar.freezeButton.clicked.connect(() => this.toggleFreeze());
+        this.toolbar.palette.targetClicked.connect((targetType) => this.onPaletteTargetSelected(targetType));
+        this.toolbar.pairSwapButton.clicked.connect(() => this.onSwapClicked());
+
+        this.toolbar.nucleotideFindButton.clicked.connect(() => this.findNucleotide());
+        this.toolbar.nucleotideRangeButton.clicked.connect(() => this.showNucleotideRange());
+        this.toolbar.explosionFactorButton.clicked.connect(() => this.changeExplosionFactor());
+
+        this.toolbar.baseMarkerButton.clicked.connect(() => {
+            this.setPosesColor(RNAPaint.BASE_MARK);
+        });
+
+        this.toolbar.librarySelectionButton.clicked.connect(() => {
+            this.setPosesColor(RNAPaint.LIBRARY_SELECT);
+        });
+
+        this.toolbar.magicGlueButton.clicked.connect(() => {
+            this.setPosesColor(RNAPaint.MAGIC_GLUE);
+        });
+
+        this.toolbar.moveButton.clicked.connect(() => {
+            this.setPosesLayoutTool(Layout.MOVE);
+        });
+
+        this.toolbar.rotateStemButton.clicked.connect(() => {
+            this.setPosesLayoutTool(Layout.ROTATE_STEM);
+        });
+
+        this.toolbar.flipStemButton.clicked.connect(() => {
+            this.setPosesLayoutTool(Layout.FLIP_STEM);
+        });
+
+        this.toolbar.snapToGridButton.clicked.connect(() => {
+            for (const pose of this._poses) {
+                pose.snapToGrid();
+            }
+        });
+
+        this.toolbar.downloadHKWSButton.clicked.connect(() => {
+            this.downloadHKWS();
+        });
+
+        this.toolbar.downloadSVGButton.clicked.connect(() => {
+            this.downloadSVG();
+        });
+    }
+
     protected setup(): void {
         super.setup();
 
@@ -202,128 +284,12 @@ export default class PoseEditMode extends GameMode {
             }
         });
 
-        this._toolbar = new Toolbar(toolbarType, {
-            states: this._puzzle.getSecstructs().length,
-            showGlue: this._puzzle.targetConditions
-                ?.some((condition) => condition?.structure_constrained_bases),
-            boosters: this._puzzle.boosters ? this._puzzle.boosters : undefined,
-            showAdvancedMenus: this._puzzle.puzzleType !== PuzzleType.PROGRESSION,
-            showLibrarySelect: this._puzzle.constraints?.some((con) => con instanceof LibrarySelectionConstraint),
-            annotationManager: this._annotationManager
-        }, {
-            pairSwapButtonHandler: () => this.onSwapClicked(),
-            baseMarkerButtonHandler: () => this.setPosesColor(RNAPaint.BASE_MARK),
-            settingsButtonHandler: () => this.showSettingsDialog(),
-            updateScriptViews: () => { this._resized.emit(); }
-        });
-        this.addObject(this._toolbar, this.uiLayer);
-        this.addObject(this._toolbar.naturalButton, this.uiLayer);
-        this.addObject(this._toolbar.targetButton, this.uiLayer);
-        this.addObject(this._toolbar.stateToggle, this.uiLayer);
-
-        this._helpBar = new HelpBar({
-            onHintClicked: this._puzzle.hint
-                ? () => this.onHintClicked()
-                : undefined,
-            onHelpClicked: () => this.onHelpClicked(),
-            onChatClicked: () => {
-                Eterna.settings.showChat.value = !Eterna.settings.showChat.value;
-            },
-            onInfoClicked: this._params.initSolution ? () => {
-                if (this._solutionView) {
-                    this._solutionView.container.visible = !this._solutionView.container.visible;
-                    this.onResized();
-                }
-            } : undefined
-        });
-        this.addObject(this._helpBar, this.uiLayer);
-
-        this._toolbar.undoButton.clicked.connect(() => this.moveUndoStackBackward());
-        this._toolbar.redoButton.clicked.connect(() => this.moveUndoStackForward());
-        if (this._toolbar.zoomOutButton) {
-            this._toolbar.zoomOutButton.clicked.connect(() => {
-                for (const poseField of this._poseFields) {
-                    poseField.zoomOut();
-                }
-            });
-        }
-        if (this._toolbar.zoomInButton) {
-            this._toolbar.zoomInButton.clicked.connect(() => {
-                for (const poseField of this._poseFields) {
-                    poseField.zoomIn();
-                }
-            });
-        }
-        this._toolbar.submitButton.clicked.connect(() => this.submitCurrentPose());
-        this._toolbar.viewSolutionsButton.clicked.connect(() => this.openDesignBrowserForOurPuzzle());
-        this._toolbar.resetButton.clicked.connect(() => this.showResetPrompt());
-
-        this._toolbar.naturalButton.clicked.connect(() => this.togglePoseState());
-        this._toolbar.targetButton.clicked.connect(() => this.togglePoseState());
-
-        this._toolbar.specButton.clicked.connect(() => this.showSpec());
-        this._toolbar.copyButton.clicked.connect(() => this.showCopySequenceDialog());
-        this._toolbar.pasteButton.clicked.connect(() => this.showPasteSequenceDialog());
-        this._toolbar.screenshotButton.clicked.connect(() => this.postScreenshot(this.createScreenshot()));
-
-        this._toolbar.pipButton.clicked.connect(() => this.togglePip());
-
-        if (this._toolbar.stateToggle) {
-            this._toolbar.stateToggle.stateChanged.connect((targetIdx) => this.changeTarget(targetIdx));
-        }
-
-        this._toolbar.freezeButton.clicked.connect(() => this.toggleFreeze());
-        this._toolbar.palette.targetClicked.connect((targetType) => this.onPaletteTargetSelected(targetType));
-        this._toolbar.pairSwapButton.clicked.connect(() => this.onSwapClicked());
-
-        this._toolbar.nucleotideFindButton.clicked.connect(() => this.findNucleotide());
-        this._toolbar.nucleotideRangeButton.clicked.connect(() => this.showNucleotideRange());
-        this._toolbar.explosionFactorButton.clicked.connect(() => this.changeExplosionFactor());
-
-        this._toolbar.baseMarkerButton.clicked.connect(() => {
-            this.setPosesColor(RNAPaint.BASE_MARK);
-        });
-
-        this._toolbar.librarySelectionButton.clicked.connect(() => {
-            this.setPosesColor(RNAPaint.LIBRARY_SELECT);
-        });
-
-        this._toolbar.magicGlueButton.clicked.connect(() => {
-            this.setPosesColor(RNAPaint.MAGIC_GLUE);
-        });
-
-        this._toolbar.moveButton.clicked.connect(() => {
-            this.setPosesLayoutTool(Layout.MOVE);
-        });
-
-        this._toolbar.rotateStemButton.clicked.connect(() => {
-            this.setPosesLayoutTool(Layout.ROTATE_STEM);
-        });
-
-        this._toolbar.flipStemButton.clicked.connect(() => {
-            this.setPosesLayoutTool(Layout.FLIP_STEM);
-        });
-
-        this._toolbar.snapToGridButton.clicked.connect(() => {
-            for (const pose of this._poses) {
-                pose.snapToGrid();
-            }
-        });
-
-        this._toolbar.downloadHKWSButton.clicked.connect(() => {
-            this.downloadHKWS();
-        });
-
-        this._toolbar.downloadSVGButton.clicked.connect(() => {
-            this.downloadSVG();
-        });
-
         // Add our docked SpecBox at the bottom of uiLayer
-        this._dockedSpecBox = new SpecBox(true);
+        this._dockedSpecBox = new FloatSpecBox(true);
         this._dockedSpecBox.display.position.set(15, 190);
         this._dockedSpecBox.setSize(155, 251);
         this._dockedSpecBox.display.visible = false;
-        this.addObject(this._dockedSpecBox, this.uiLayer, 0);
+        this.addObject(this._dockedSpecBox, this.dialogLayer, 0);
         this._dockedSpecBox.shouldMaximize.connect(() => this.showSpec());
 
         this._undockSpecBoxButton = new GameButton()
@@ -412,9 +378,8 @@ export default class PoseEditMode extends GameMode {
         return Flashbang.stageWidth - this._solDialogOffset;
     }
 
-    private updateUILayout(): void {
-        this._toolbar.onResized();
-
+    public updateUILayout(bResize:boolean = true): void {
+        super.updateUILayout(bResize);
         DisplayUtil.positionRelativeToStage(
             this._helpBar.display, HAlign.RIGHT, VAlign.TOP,
             HAlign.RIGHT, VAlign.TOP, 0 - this._solDialogOffset, 0
@@ -428,25 +393,25 @@ export default class PoseEditMode extends GameMode {
         let w = 17;
         const h = 175;
         DisplayUtil.positionRelativeToStage(
-            this._toolbar.naturalButton.display, HAlign.LEFT, VAlign.TOP,
+            this.toolbar.naturalButton.display, HAlign.LEFT, VAlign.TOP,
             HAlign.LEFT, VAlign.TOP, w, h
         );
-        w += this._toolbar.naturalButton.display.width;
+        w += this.toolbar.naturalButton.display.width;
         DisplayUtil.positionRelativeToStage(
-            this._toolbar.targetButton.display, HAlign.LEFT, VAlign.TOP,
+            this.toolbar.targetButton.display, HAlign.LEFT, VAlign.TOP,
             HAlign.LEFT, VAlign.TOP, w, h
         );
 
-        if (this._toolbar.stateToggle) {
-            w += this._toolbar.targetButton.display.width;
+        if (this.toolbar.stateToggle) {
+            w += this.toolbar.targetButton.display.width;
             DisplayUtil.positionRelativeToStage(
-                this._toolbar.stateToggle.display, HAlign.LEFT, VAlign.TOP,
+                this.toolbar.stateToggle.display, HAlign.LEFT, VAlign.TOP,
                 HAlign.LEFT, VAlign.TOP, w,
-                h + (this._toolbar.targetButton.display.height - this._toolbar.stateToggle.display.height) / 2
+                h + (this.toolbar.targetButton.display.height - this.toolbar.stateToggle.display.height) / 2
             );
         }
 
-        this._folderSwitcher.display.position.set(17, h + this._toolbar.targetButton.display.height + 20);
+        this._folderSwitcher.display.position.set(17, h + this.toolbar.targetButton.display.height + 20);
 
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
@@ -461,10 +426,6 @@ export default class PoseEditMode extends GameMode {
         this._dockedSpecBox.setSize(Flashbang.stageWidth - this._solDialogOffset, Flashbang.stageHeight - 340);
         const s: number = this._dockedSpecBox.plotSize;
         this._dockedSpecBox.setSize(s + 55, s * 2 + 51);
-    }
-
-    public get toolbar(): Toolbar {
-        return this._toolbar;
     }
 
     public get constraintsLayer(): Container {
@@ -484,8 +445,8 @@ export default class PoseEditMode extends GameMode {
 
     public ropChangeTarget(targetIndex: number): void {
         this.changeTarget(targetIndex);
-        if (this._toolbar.stateToggle != null) {
-            this._toolbar.stateToggle.state = targetIndex;
+        if (this.toolbar.stateToggle != null) {
+            this.toolbar.stateToggle.state = targetIndex;
         }
     }
 
@@ -589,7 +550,9 @@ export default class PoseEditMode extends GameMode {
         for (let i = 0; i < topBtArray.length; i++) {
             const bt = topBtArray[i];
             const rect = getBounds(bt);
-            helpers.push([() => rect, 0, bt.name as string]);
+            const leftRect = getBounds(this.toolbar.topScrollContainer);
+            const inLeft = leftRect.left <= rect.left && leftRect.right >= rect.right;
+            if (inLeft) helpers.push([() => rect, 0, bt.name as string]);
         }
         this.modeStack.pushMode(new HelpScreen({
             toolTips: {
@@ -897,10 +860,46 @@ export default class PoseEditMode extends GameMode {
 
         this._constraintsLayer = new Container();
         this.uiLayer.addChild(this._constraintsLayer);
-
         this._constraintsLayer.visible = true;
 
-        this._toolbar.palette.clickTarget(PaletteTargetType.A);
+        const toolbarType = this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL ? ToolbarType.LAB : ToolbarType.PUZZLE;
+        this.toolbar = new Toolbar(toolbarType, {
+            states: this._puzzle.getSecstructs().length,
+            showGlue: this._puzzle.targetConditions
+                ?.some((condition) => condition?.structure_constrained_bases),
+            boosters: this._puzzle.boosters ? this._puzzle.boosters : undefined,
+            showAdvancedMenus: this._puzzle.puzzleType !== PuzzleType.PROGRESSION,
+            showLibrarySelect: this._puzzle.constraints?.some((con) => con instanceof LibrarySelectionConstraint),
+            annotationManager: this._annotationManager
+        }, {
+            pairSwapButtonHandler: () => this.onSwapClicked(),
+            baseMarkerButtonHandler: () => this.setPosesColor(RNAPaint.BASE_MARK),
+            settingsButtonHandler: () => this.showSettingsDialog()
+        });
+        this.addObject(this.toolbar.naturalButton, this.uiLayer);
+        this.addObject(this.toolbar.targetButton, this.uiLayer);
+        this.addObject(this.toolbar.stateToggle, this.uiLayer);
+        this.addObject(this.toolbar, this.uiLayer);
+
+        this._helpBar = new HelpBar({
+            onHintClicked: this._puzzle.hint
+                ? () => this.onHintClicked()
+                : undefined,
+            onHelpClicked: () => this.onHelpClicked(),
+            onChatClicked: () => {
+                Eterna.settings.showChat.value = !Eterna.settings.showChat.value;
+            },
+            onInfoClicked: this._params.initSolution ? () => {
+                if (this._solutionView) {
+                    this._solutionView.container.visible = !this._solutionView.container.visible;
+                    this.onResized();
+                }
+            } : undefined
+        });
+        this.addObject(this._helpBar, this.uiLayer);
+        this.setToolbarEventHandlers();
+
+        this.toolbar.palette.clickTarget(PaletteTargetType.A);
 
         // Set up the constraintBar
         this._constraintBar = new ConstraintBar(this._puzzle.constraints, this._puzzle.getSecstructs.length);
@@ -1631,8 +1630,8 @@ export default class PoseEditMode extends GameMode {
     protected onSetPip(pipMode: boolean): void {
         Eterna.settings.pipEnabled.value = pipMode;
 
-        if (pipMode) {
-            this._toolbar.stateToggle.display.visible = false;
+        if (pipMode || this.toolbar.stateToggle.state < 2) {
+            this.toolbar.stateToggle.display.visible = false;
             this._targetName.visible = false;
 
             this._constraintBar.highlightState(-1);
@@ -1658,7 +1657,7 @@ export default class PoseEditMode extends GameMode {
                 pose.setZoomLevel(minZoom);
             }
         } else {
-            this._toolbar.stateToggle.display.visible = true;
+            this.toolbar.stateToggle.display.visible = true;
             this._targetName.visible = true;
 
             this._constraintBar.highlightState(this._curTargetIndex);
@@ -1911,11 +1910,11 @@ export default class PoseEditMode extends GameMode {
     private setToNativeMode(): void {
         this._poseState = PoseState.NATIVE;
 
-        this._toolbar.targetButton.toggled.value = false;
-        this._toolbar.naturalButton.toggled.value = true;
+        this.toolbar.targetButton.toggled.value = false;
+        this.toolbar.naturalButton.toggled.value = true;
 
-        this._toolbar.targetButton.hotkey(KeyCode.Space);
-        this._toolbar.naturalButton.hotkey();
+        this.toolbar.targetButton.hotkey(KeyCode.Space);
+        this.toolbar.naturalButton.hotkey();
 
         this.savePosesMarkersContexts();
         this._paused = false;
@@ -1926,11 +1925,11 @@ export default class PoseEditMode extends GameMode {
     private setToTargetMode(): void {
         this._poseState = PoseState.TARGET;
 
-        this._toolbar.targetButton.toggled.value = true;
-        this._toolbar.naturalButton.toggled.value = false;
+        this.toolbar.targetButton.toggled.value = true;
+        this.toolbar.naturalButton.toggled.value = false;
 
-        this._toolbar.naturalButton.hotkey(KeyCode.Space);
-        this._toolbar.targetButton.hotkey();
+        this.toolbar.naturalButton.hotkey(KeyCode.Space);
+        this.toolbar.targetButton.hotkey();
 
         this.savePosesMarkersContexts();
 
@@ -1982,9 +1981,9 @@ export default class PoseEditMode extends GameMode {
         this._constraintsLayer.alpha = (this._isFrozen ? 0.25 : 1.0);
         this.setShowTotalEnergy(!this._isFrozen);
 
-        this._toolbar.undoButton.enabled = !this._isFrozen;
-        this._toolbar.redoButton.enabled = !this._isFrozen;
-        this._toolbar.freezeButton.toggled.value = this._isFrozen;
+        this.toolbar.undoButton.enabled = !this._isFrozen;
+        this.toolbar.redoButton.enabled = !this._isFrozen;
+        this.toolbar.freezeButton.toggled.value = this._isFrozen;
 
         if (!this._isFrozen) { // we just "thawed", update
             this.poseEditByTarget(this._curTargetIndex);
@@ -2441,7 +2440,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     private disableTools(disable: boolean): void {
-        this._toolbar.disableTools(disable);
+        this.toolbar.disableTools(disable);
         this._hintBoxRef.destroyObject();
 
         this._folderSwitcher.display.visible = !disable;
@@ -2873,14 +2872,14 @@ export default class PoseEditMode extends GameMode {
         const numAU: number = undoBlock.getParam(UndoBlockParam.AU, 37, pseudoknots) as number;
         const numGU: number = undoBlock.getParam(UndoBlockParam.GU, 37, pseudoknots) as number;
         const numGC: number = undoBlock.getParam(UndoBlockParam.GC, 37, pseudoknots) as number;
-        this._toolbar.palette.setPairCounts(numAU, numGU, numGC);
+        this.toolbar.palette.setPairCounts(numAU, numGU, numGC);
 
         if (!this._isFrozen) {
-            if (this._toolbar.undoButton.display.visible) {
-                this._toolbar.undoButton.enabled = !(this._stackLevel < 1);
+            if (this.toolbar.undoButton.display.visible) {
+                this.toolbar.undoButton.enabled = !(this._stackLevel < 1);
             }
-            if (this._toolbar.redoButton.display.visible) {
-                this._toolbar.redoButton.enabled = !(this._stackLevel + 1 > this._stackSize - 1);
+            if (this.toolbar.redoButton.display.visible) {
+                this.toolbar.redoButton.enabled = !(this._stackLevel + 1 > this._stackSize - 1);
             }
         }
 
@@ -3580,7 +3579,6 @@ export default class PoseEditMode extends GameMode {
 
     private _background: Background;
 
-    private _toolbar: Toolbar;
     private _helpBar: HelpBar;
 
     protected get _folder(): Folder {
@@ -3623,7 +3621,7 @@ export default class PoseEditMode extends GameMode {
 
     private _constraintBar: ConstraintBar;
 
-    private _dockedSpecBox: SpecBox;
+    private _dockedSpecBox: FloatSpecBox;
     private _exitButton: GameButton;
 
     private _uiHighlight: SpriteObject;

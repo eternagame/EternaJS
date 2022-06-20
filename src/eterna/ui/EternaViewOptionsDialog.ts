@@ -43,9 +43,6 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
             // this option can be re-added once that works.
             bind(Eterna.settings.autohideToolbar, 'Autohide toolbar');
         }
-        if (this._optionsMode !== EternaViewOptionsMode.PUZZLEMAKER) {
-            bind(Eterna.settings.freezeButtonAlwaysVisible, 'Freeze button always visible');
-        }
 
         if (this._optionsMode === EternaViewOptionsMode.LAB) {
             bind(Eterna.settings.useContinuousColors, 'Use continuous colors for the exp. data (advanced)');

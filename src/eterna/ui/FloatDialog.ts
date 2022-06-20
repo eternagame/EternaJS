@@ -5,11 +5,10 @@ import {
     ContainerObject,
     KeyboardListener,
     MouseWheelListener,
-    DisplayObjectPointerTarget,
     Flashbang,
     Assert,
     VLayoutContainer, HLayoutContainer,
-    VAlign, HAlign, SpriteObject, SceneObject, Dragger, MathUtil
+    VAlign, HAlign, SpriteObject, SceneObject, Dragger
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -23,7 +22,6 @@ const frameColor = 0x2f94d1;
 const titleBackColor = 0x043468;
 const backColor = 0x152843;
 const THUMB_WIDTH = 18;
-const THUMB_MARGIN = 26;
 
 /** FloatDialogs that expose a "confirmed" promise will reject with this error if the dialog is canceled */
 export class FloatDialogCanceledError extends Error {}
@@ -222,6 +220,15 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
             const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
             if (doc) doc.style.cursor = '';
         }));
+    }
+
+    private moveToCenter() {
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(Flashbang.stageHeight);
+        const w = this.contentLay.width + THUMB_WIDTH;
+        const h = this.contentLay.height + THUMB_WIDTH + this.closeIconSize;
+        this.frameContainer.position.x = (Flashbang.stageWidth - w) * 0.5;
+        this.frameContainer.position.y = (Flashbang.stageHeight - h) * 0.5;
     }
 
     private handleMove(e: InteractionEvent) {
@@ -435,6 +442,7 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
 
     protected onResize() {
         this.updateFrameBackground();
+        this.moveToCenter();
     }
 
     private updateFrameBackground() {
@@ -443,7 +451,7 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
 
         this.background
             .clear()
-            .beginFill(0x0, 0.1)
+            .beginFill(0x0, 0)
             .drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
             .endFill();
     }

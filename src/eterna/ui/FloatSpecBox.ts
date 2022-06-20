@@ -28,9 +28,8 @@ export default class FloatSpecBox extends ContainerObject {
 
     protected added(): void {
         this._panel = new GamePanel({});
-        if (!this._docked) {
-            this._panel.setup(0, 1.0, 0x152843, 0.27, 0xC0DCE7);
-        }
+        this._panel.setup(0, 1.0, 0x152843, 0.27, 0xC0DCE7);
+
         this.addObject(this._panel, this.container);
         this._dotplotOriginX = 0;
         this._dotplotOriginY = 0;

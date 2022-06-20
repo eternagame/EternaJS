@@ -1,5 +1,7 @@
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
+import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
+import {KeyCode} from 'flashbang';
 import {ButtonState} from 'flashbang/objects/Button';
 import {Graphics, Sprite} from 'pixi.js';
 import GameButton from './GameButton';
@@ -15,7 +17,21 @@ export enum ButtonCategory {
     ANNOTATE = 'ANNOTATE',
     IMPORT_EXPORT = 'IMPORT/EXPORT',
     CUSTOM_LAYOUT = 'CUSTOM LAYOUT',
+    NONE = 'None',
 }
+
+export type ToolbarParam = {
+    cat:ButtonCategory,
+    name: string,
+    allImg: string,
+    overImg?: string,
+    disableImg:string,
+    tooltip:string,
+    selectedImg?:string,
+    hotKey?:KeyCode,
+    rscriptID?:RScriptUIElementID,
+    color?:{color:number, alpha:number},
+};
 
 export default class ToolbarButton extends GameButton {
     public category: ButtonCategory | null = null;
@@ -31,6 +47,22 @@ export default class ToolbarButton extends GameButton {
             .drawRoundedRect(2, 2, BUTTON_WIDTH - 4, BUTTON_HEIGHT - 4, 3)
             .endFill();
         this.container.addChildAt(background, 0);
+    }
+
+    public static createButton(info: ToolbarParam) {
+        let button;
+        if (info.color) button = new ToolbarButton(info.color);
+        else button = new ToolbarButton();
+        button.setCategory(info.cat);
+        button.setName(info.name);
+        button.allStates(info.allImg);
+        if (info.overImg) button.over(info.overImg);
+        button.disabled(info.disableImg);
+        if (info.selectedImg) button.selected(info.selectedImg);
+        button.tooltip(info.tooltip);
+        if (info.hotKey) button.hotkey(info.hotKey);
+        if (info.rscriptID) button.rscriptID(info.rscriptID);
+        return button;
     }
 
     public setCategory(category: ButtonCategory): ToolbarButton {

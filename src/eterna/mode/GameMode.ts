@@ -29,6 +29,7 @@ import Sequence from 'eterna/rnatypes/Sequence';
 import EPars from 'eterna/EPars';
 import Fonts from 'eterna/util/Fonts';
 import CopyTextDialog from 'eterna/ui/CopyTextDialog';
+import Toolbar from 'eterna/ui/Toolbar';
 
 export default abstract class GameMode extends AppMode {
     public readonly bgLayer = new Container();
@@ -42,6 +43,7 @@ export default abstract class GameMode extends AppMode {
 
     /** Controls whether certain folding operations are run synchronously or queued up */
     public forceSync: boolean = false;
+    public toolbar: Toolbar;
 
     protected setup(): void {
         super.setup();
@@ -100,6 +102,10 @@ export default abstract class GameMode extends AppMode {
 
     public closeCurDialog(): void {
         this._dialogRef.destroyObject();
+    }
+
+    public updateUILayout(bResize:boolean = true) {
+        if (bResize) this.toolbar.resizeToolbar();
     }
 
     protected static createStatusText(text: string): SceneObject<Text> {
