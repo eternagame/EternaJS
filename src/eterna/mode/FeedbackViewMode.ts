@@ -350,7 +350,7 @@ export default class FeedbackViewMode extends GameMode {
 
     /* override */
     protected onSetPip(pipMode: boolean): void {
-        if (pipMode || this.toolbar.stateToggle.state < 2) {
+        if (pipMode || this.toolbar.stateToggle.numStates < 2) {
             if (this.toolbar.stateToggle != null) {
                 this.toolbar.stateToggle.display.visible = false;
             }

@@ -426,6 +426,8 @@ export default class PoseEditMode extends GameMode {
         this._dockedSpecBox.setSize(Flashbang.stageWidth - this._solDialogOffset, Flashbang.stageHeight - 340);
         const s: number = this._dockedSpecBox.plotSize;
         this._dockedSpecBox.setSize(s + 55, s * 2 + 51);
+
+        if (this.toolbar.stateToggle.numStates < 2) this.toolbar.stateToggle.display.visible = false;
     }
 
     public get constraintsLayer(): Container {
@@ -1630,7 +1632,7 @@ export default class PoseEditMode extends GameMode {
     protected onSetPip(pipMode: boolean): void {
         Eterna.settings.pipEnabled.value = pipMode;
 
-        if (pipMode || this.toolbar.stateToggle.state < 2) {
+        if (pipMode || this.toolbar.stateToggle.numStates < 2) {
             this.toolbar.stateToggle.display.visible = false;
             this._targetName.visible = false;
 

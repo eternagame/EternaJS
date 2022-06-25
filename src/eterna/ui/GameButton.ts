@@ -29,6 +29,7 @@ export default class GameButton extends Button implements KeyboardListener {
 
     public setName(name: string): GameButton {
         this.name = name;
+        this._name = name;
         this.display.name = name;
         return this;
     }
@@ -140,6 +141,10 @@ export default class GameButton extends Button implements KeyboardListener {
             }
         }
         return this;
+    }
+
+    public getToolTip() {
+        return this._tooltip;
     }
 
     public hotkey(keycode?: string, ctrl: boolean = false): GameButton {

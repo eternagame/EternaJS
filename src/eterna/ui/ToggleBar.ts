@@ -101,6 +101,10 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
         this._enabled = value;
     }
 
+    public get numStates() {
+        return this._numStates;
+    }
+
     private prevState(): void {
         const prevState = this._selectedState - 1;
         if (prevState < 0) return;

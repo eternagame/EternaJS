@@ -36,6 +36,13 @@ export type ToolbarParam = {
 export default class ToolbarButton extends GameButton {
     public category: ButtonCategory | null = null;
     private _arrow: Sprite;
+    private info: ToolbarParam = {
+        cat: ButtonCategory.NONE,
+        name: 'ToolbarButton',
+        allImg: Bitmaps.ImgNatural,
+        disableImg: Bitmaps.ImgGreyNatural,
+        tooltip: 'ToolbarButton'
+    };
 
     constructor(bkColor = {color: 0, alpha: 0}) {
         super();
@@ -62,7 +69,13 @@ export default class ToolbarButton extends GameButton {
         button.tooltip(info.tooltip);
         if (info.hotKey) button.hotkey(info.hotKey);
         if (info.rscriptID) button.rscriptID(info.rscriptID);
+        button.info = info;
         return button;
+    }
+
+    public clone():ToolbarButton {
+        this.info.tooltip = this.getToolTip();
+        return ToolbarButton.createButton(this.info);
     }
 
     public setCategory(category: ButtonCategory): ToolbarButton {

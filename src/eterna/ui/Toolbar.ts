@@ -26,7 +26,8 @@ import {
     Assert,
     GameObjectRef,
     SerialTask,
-    CallbackTask
+    CallbackTask,
+    Dragger
 } from 'flashbang';
 import {BoostersData} from 'eterna/puzzle/Puzzle';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -192,16 +193,11 @@ export class ButtonsGroup extends ContainerObject {
         }
     }
 
-    public addButton(newButton: DisplayObject): void {
-        this._content.addChildAt(newButton, 0);
+    public addButtonAt(newButton: ToolbarButton, position: number): void {
+        this.addObject(newButton, this._content, position);
         this._background.width = Math.max(this._content.children.length, EMPTY_SIZE) * BUTTON_WIDTH;
         this._content.layout(true);
-    }
-
-    public addButtonAt(newButton: DisplayObject, position: number): void {
-        this._content.addChildAt(newButton, position);
-        this._background.width = Math.max(this._content.children.length, EMPTY_SIZE) * BUTTON_WIDTH;
-        this._content.layout(true);
+        this._buttons.push(newButton);
     }
 
     public swapButton(bt1: DisplayObject, bt2: DisplayObject) {
@@ -209,24 +205,26 @@ export class ButtonsGroup extends ContainerObject {
         this._content.layout();
     }
 
-    public getButtonAt(id: number): DisplayObject {
+    public getButtonAt(id: number): DisplayObject | undefined {
+        if (this._content.children.length <= id) return undefined;
         return this._content.getChildAt(id);
     }
 
-    public removeButton(button: DisplayObject): void {
-        const childrenIndex = this._content.children.findIndex(
-            (el) => el === button
-        );
-        if (childrenIndex < 0) return;
-        this._content.removeChildAt(childrenIndex);
-        this._background.width = Math.max(this._content.children.length, EMPTY_SIZE) * BUTTON_WIDTH;
-        this._content.layout(true);
+    public getButtonByName(name: string) {
+        return this._buttons.find((bt) => bt.name === name);
     }
 
-    public removeButtonAt(index: number): Container {
-        const bt = this._content.removeChildAt(index);
+    public removeButton(button: ToolbarButton): void {
+        const buttons:ToolbarButton[] = [];
+        this._buttons.forEach((bt) => {
+            if (bt !== button) buttons.push(bt);
+        });
+        this._buttons = buttons;
+
+        this.removeObject(button);
+
+        this._background.width = Math.max(this._content.children.length, EMPTY_SIZE) * BUTTON_WIDTH;
         this._content.layout(true);
-        return bt;
     }
 
     public getButtonIndex(button: DisplayObject): number {
@@ -350,8 +348,6 @@ export default class Toolbar extends ContainerObject {
         settingsButtonHandler: VoidHandler;
     };
 
-    private visiblities: Map<DisplayObject, boolean> = new Map();
-
     constructor(
         type: ToolbarType,
         {
@@ -395,21 +391,16 @@ export default class Toolbar extends ContainerObject {
         mode.updateUILayout();
     }
 
-    private _renderButtonsWithNewCategory(category: ButtonCategory): void {
-        this.middleScrollContainer.content.removeChildren();
-        this.middleScrollContainer.content.addChild(this.middleBg);
-        this.visiblities.clear();
-        const newButtons = this._tabs.get(category);
-        newButtons?.forEach((button) => {
-            this.visiblities.set(button.display, button.display.visible);
-            this.middleScrollContainer.content.addChild(button.display);
+    private updateToolbarButtons(category: ButtonCategory) {
+        this.toolbarButtons.forEach((b) => {
+            if (b.category !== category) b.display.visible = false;
+            else b.display.visible = true;
         });
+    }
 
-        // this.middleScrollContainer.content.children.forEach((c) => {
-        //     const v = this.visiblities.get(c);
-        //     if (v) c.visible = v;
-        //     else if(c.buttonMode) c.visible = false;
-        // });
+    private _renderButtonsWithNewCategory(category: ButtonCategory): void {
+        this.updateToolbarButtons(category);
+        this.updateEnableOfMiddleButtons();
 
         this._updateAvailableButtonsContainer();
     }
@@ -630,6 +621,14 @@ export default class Toolbar extends ContainerObject {
             paramInfo.name,
             ToolbarButton.createButton(paramInfo)
         );
+
+        const invisibleButton = ToolbarButton.createButton(paramInfo);
+        invisibleButton.display.visible = false;
+        this._containerButtons.set(
+            paramInfo.name,
+            invisibleButton
+        );
+        this.addObject(invisibleButton, this.container);
         this.toolbarButtons.set(paramInfo.name, button);
         return button;
     }
@@ -928,9 +927,9 @@ export default class Toolbar extends ContainerObject {
                 this.librarySelectionButton.clicked.connect(() => {
                     this._deselectAllPaintTools();
                     this.librarySelectionButton.toggled.value = true;
-                    this.getMirrorButtons(this.librarySelectionButton).forEach((b) => {
-                        if (b) b.toggled.value = true;
-                    });
+                    this.getMirrorButtons(this.librarySelectionButton).forEach(
+                        (b) => { if (b) b.toggled.value = true; }
+                    );
                 })
             );
         }
@@ -976,8 +975,6 @@ export default class Toolbar extends ContainerObject {
             disableImg: Bitmaps.ImgGreyDownloadHKWS,
             tooltip: 'Download a draw_rna input file for the current layout'
         });
-        // this.downloadHKWSButton.display.buttonMode = true;
-        // this.downloadHKWSButton.display.interactive = true;
 
         this.downloadSVGButton = this.createToolbarButton({
             cat: ButtonCategory.IMPORT_EXPORT,
@@ -987,8 +984,6 @@ export default class Toolbar extends ContainerObject {
             disableImg: Bitmaps.ImgGreyDownloadSVG,
             tooltip: 'Download an SVG of the current RNA layout'
         });
-        // this.downloadSVGButton.display.buttonMode = true;
-        // this.downloadSVGButton.display.interactive = true;
 
         this.screenshotButton = this.createToolbarButton({
             cat: ButtonCategory.IMPORT_EXPORT,
@@ -1204,7 +1199,7 @@ export default class Toolbar extends ContainerObject {
                     this.getMirrorButtons(this.annotationModeButton).forEach((b) => { if (b) b.toggled.value = true; });
 
                     Assert.assertIsDefined(this._annotationManager);
-                    // this._annotationManager.setAnnotationMode(true);
+                    this._annotationManager.setAnnotationMode(true);
                 })
             );
 
@@ -1264,6 +1259,7 @@ export default class Toolbar extends ContainerObject {
         });
 
         this.stateToggle = new ToggleBar(this._states);
+        if (this.stateToggle.numStates < 2) this.stateToggle.display.visible = false;
     }
 
     private makeFeedbackLayout() {
@@ -1441,41 +1437,27 @@ export default class Toolbar extends ContainerObject {
             this.palette.changeDefaultMode();
             this.addObject(this.rightButtonsGroup, this.topScrollContainer.content);
             this.topScrollContainer.doLayout();
-
-            this.leftButtonsGroup._content.interactive = true;
-            this.leftButtonsGroup._content.on('pointerup',
-                (e: InteractionEvent) => {
-                    this.onDragEnd(e);
-                });
-            this.leftButtonsGroup._content.on('pointerupoutside',
-                (e: InteractionEvent) => {
-                    this.onDragEnd(e);
-                });
-            this.leftButtonsGroup._content.on('pointermove', (e) => {
-                this.onDragMove(e);
-            });
-            this.leftButtonsGroup._content.on('pointerdown',
-                (e: InteractionEvent) => {
-                    this.onDragStart(e);
-                });
-
-            this.rightButtonsGroup._content.interactive = true;
-            this.rightButtonsGroup._content.on('pointerup',
-                (e: InteractionEvent) => {
-                    this.onDragEnd(e);
-                });
-            this.rightButtonsGroup._content.on('pointerupoutside',
-                (e: InteractionEvent) => {
-                    this.onDragEnd(e);
-                });
-            this.rightButtonsGroup._content.on('pointermove', (e) => {
-                this.onDragMove(e);
-            });
-            this.rightButtonsGroup._content.on('pointerdown',
-                (e: InteractionEvent) => {
-                    this.onDragStart(e);
-                });
         }
+    }
+
+    private initDragger() {
+        this.leftButtonsGroup._content.interactive = true;
+        this.leftButtonsGroup._content.on('pointerdown', (e: InteractionEvent) => this.onDragStart(e));
+        this.leftButtonsGroup._content.on('pointermove', (e: InteractionEvent) => this.onDragMove(e));
+        this.leftButtonsGroup._content.on('pointerup', () => this.onDragEnd());
+        this.leftButtonsGroup._content.on('pointerupoutside', () => this.onDragEnd());
+
+        this.rightButtonsGroup._content.interactive = true;
+        this.rightButtonsGroup._content.on('pointerdown', (e: InteractionEvent) => this.onDragStart(e));
+        this.rightButtonsGroup._content.on('pointermove', (e: InteractionEvent) => this.onDragMove(e));
+        this.rightButtonsGroup._content.on('pointerup', () => this.onDragEnd());
+        this.rightButtonsGroup._content.on('pointerupoutside', () => this.onDragEnd());
+
+        this.middleHLayout.interactive = true;
+        this.middleHLayout.on('pointerdown', (e: InteractionEvent) => this.onDragStart(e));
+        this.middleHLayout.on('pointermove', (e: InteractionEvent) => this.onDragMove(e));
+        this.middleHLayout.on('pointerup', () => this.onDragEnd());
+        this.middleHLayout.on('pointerupoutside', () => this.onDragEnd());
     }
 
     private makeBoosterMenu() {
@@ -1564,6 +1546,17 @@ export default class Toolbar extends ContainerObject {
         this.updateLayout();
     }
 
+    private linkClickHandler(bt: ToolbarButton) {
+        this.regs.add(
+            bt.clicked.connect(() => {
+                if (bt.display.visible) {
+                    const toolbarButton = this.toolbarButtons.get(bt.name as string);
+                    if (toolbarButton) toolbarButton.clicked.emit();
+                }
+            })
+        );
+    }
+
     private updateTopContainer() {
         let palWidth = this.palette.display.width;
         if (this._type === ToolbarType.FEEDBACK) {
@@ -1595,11 +1588,12 @@ export default class Toolbar extends ContainerObject {
                 }
             });
             if (name && button && category) {
+                const bt = button as ToolbarButton;
                 this._topButtons.delete(name);
-                this._bottomButtons.set(name, button);
-                this.leftButtonsGroup.removeButton(button);
-                element.visible = false;
-                this.middleScrollContainer.content.addChild(element);
+                const newBt = bt.clone();
+                this.linkClickHandler(newBt);
+                this._bottomButtons.set(name, newBt);
+                this.leftButtonsGroup.removeButton(bt);
                 this.leftButtonsGroup.resizeContainer();
             }
         }
@@ -1619,11 +1613,12 @@ export default class Toolbar extends ContainerObject {
                 }
             });
             if (name && button && category) {
+                const bt = button as ToolbarButton;
                 this._topButtons.delete(name);
-                this._bottomButtons.set(name, button);
-                this.rightButtonsGroup.removeButton(button);
-                element.visible = false;
-                this.middleScrollContainer.content.addChild(element);
+                const newBt = bt.clone();
+                this.linkClickHandler(newBt);
+                this._bottomButtons.set(name, newBt);
+                this.rightButtonsGroup.removeButton(bt);
                 this.rightButtonsGroup.resizeContainer();
             }
         }
@@ -2021,25 +2016,6 @@ export default class Toolbar extends ContainerObject {
         this.textScrollContainer.pointerUpOutside.connect(() => {
             downed = false;
         });
-
-        this._isDragging = false;
-        this.middleHLayout.interactive = true;
-
-        this.middleHLayout.on('pointerup', (e: InteractionEvent) => {
-            this.onDragEnd(e);
-        });
-
-        this.middleHLayout.on('pointerupoutside', (e: InteractionEvent) => {
-            this.onDragEnd(e);
-        });
-
-        this.middleHLayout.on('pointermove', (e) => {
-            this.onDragMove(e);
-        });
-
-        this.middleHLayout.on('pointerdown', (e: InteractionEvent) => {
-            this.onDragStart(e);
-        });
     }
 
     private makeExpandControl() {
@@ -2080,6 +2056,8 @@ export default class Toolbar extends ContainerObject {
     }
 
     private switchTab(category:ButtonCategory) {
+        this.updateToolbarButtons(category);
+        this.updateEnableOfMiddleButtons();
         if (category !== this._currentTab.category) {
             this._renderButtonsWithNewCategory(category);
             this._tabArray.forEach((tab) => {
@@ -2230,7 +2208,8 @@ export default class Toolbar extends ContainerObject {
         this._currentTab.enable();
         this._renderButtonsWithNewCategory(this._currentTab.category);
 
-        this._toggleButtonsInteractive(true);
+        this.enableToolbarButtons(true);
+        this.initDragger();
 
         this.resizeToolbar();
     }
@@ -2251,21 +2230,15 @@ export default class Toolbar extends ContainerObject {
         }
     }
 
-    private resetDragState(recovery = true): void {
-        Assert.assertIsDefined(this._draggingElement);
-        Assert.assertIsDefined(this._startPoint);
-
-        if (recovery) {
-            this._draggingElement.display.position.copyFrom(this._startPoint);
-            this._draggingElement.display.interactive = true;
-        }
-
+    private resetDragState(): void {
+        this._canDrag = false;
+        this._canDrop = false;
         this._draggingElement = undefined;
-        this._startPoint = null;
+        this._startPointGlobal = null;
         this._startPointContainer = null;
     }
 
-    private _toggleButtonsInteractive(value: boolean): void {
+    private enableToolbarButtons(value: boolean): void {
         this.leftButtonsGroup.toggleInteractive(value);
         this.rightButtonsGroup.toggleInteractive(value);
         this.middleScrollContainer.content.children.forEach((button) => {
@@ -2277,8 +2250,8 @@ export default class Toolbar extends ContainerObject {
     private pushButtonToCategory(button: ToolbarButton): void {
         const category = button.category;
         if (category) {
-            const buttons = this._tabs.get(category);
-            if (!buttons) {
+            const buttonsOfTab = this._tabs.get(category);
+            if (!buttonsOfTab) {
                 throw new Error('unknown category provided');
             }
 
@@ -2293,7 +2266,7 @@ export default class Toolbar extends ContainerObject {
                 }
             });
 
-            buttons.push(button);
+            buttonsOfTab.push(button);
             this.addObject(button, this.middleScrollContainer.content);
         }
     }
@@ -2340,20 +2313,8 @@ export default class Toolbar extends ContainerObject {
         return new Point(x, y);
     }
 
-    private getDragName(
-        draggingElement: DisplayObject,
-        buttonMap: Map<string, GameButton>
-    ) {
-        let name = null;
-        buttonMap.forEach((bt, key) => {
-            if (bt.display === draggingElement) name = key;
-        });
-        return name;
-    }
-
     private _updateActiveButtonsGroup(
         endButtonGroup: ButtonsGroup,
-        topButtons: Map<string, ToolbarButton>,
         endButtonBounds: Rectangle,
         startPointContainer: Container,
         draggingElement: ToolbarButton,
@@ -2369,81 +2330,109 @@ export default class Toolbar extends ContainerObject {
             BUTTON_WIDTH,
             pos
         );
-        const count = endButtonGroup._content.children.length;
-        if (count < endButtonGroup._capability && underButtonInfo.insertPos) {
-            this.container.removeChild(draggingElement.display);
+
+        draggingElement.display.visible = false;
+        if (!underButtonInfo.insertPos) {
+            // from middle to top
             if (startPointContainer === this.middleScrollContainer.content) {
-                const name = this.getDragName(
-                    draggingElement.display,
-                    this._bottomButtons
-                );
+                const name = draggingElement.name;
                 if (name) {
-                    const bt = this._bottomButtons.get(name);
-                    if (bt) {
-                        this._bottomButtons.delete(name);
-                        topButtons.set(name, bt);
+                    const button = this._bottomButtons.get(name);
+                    const disp = endButtonGroup.getButtonAt(underButtonInfo.pos);
+                    if (button && disp) {
+                        const replaceButton = endButtonGroup.getButtonByName(disp.name);
+                        if (replaceButton) {
+                            this._bottomButtons.delete(name);
+                            endButtonGroup.removeButton(replaceButton);
+                            const newName = replaceButton.name as string;
+                            this._topButtons.delete(newName);
+                            const newBt = replaceButton.clone();
+                            this.linkClickHandler(newBt);
+                            this._bottomButtons.set(newName, newBt);
+                        }
+
+                        this._topButtons.set(name, button);
+                        endButtonGroup.addButtonAt(button, underButtonInfo.pos);
                     }
-                    startPointContainer.removeChild(draggingElement.display);
                 }
             } else {
+                // from another top to top
                 Assert.isTrue(
                     anotherButtonGroup._content === startPointContainer
                 );
                 let name = null;
                 let button: ToolbarButton | null = null;
-                // let category:ButtonCategory | null = null;
                 this._topButtons.forEach((bt, key) => {
-                    if (bt === draggingElement) {
+                    if (bt.name === draggingElement.name) {
                         name = key;
                         button = bt;
-                        // category = bt.category;
                     }
                 });
                 if (name && button) {
-                    anotherButtonGroup.removeButton(button);
+                    const bt = button as ToolbarButton;
+                    const index = anotherButtonGroup.getButtonIndex(bt.display);
+                    const replaceButton = endButtonGroup.getButtonByName(name);
+                    const disp = endButtonGroup.getButtonAt(underButtonInfo.pos);
+                    if (disp) {
+                        const bt2 = endButtonGroup.getButtonByName(disp.name);
+                        if (replaceButton && bt2) {
+                            anotherButtonGroup.removeButton(replaceButton);
+                            endButtonGroup.removeButton(bt2);
+
+                            const name2 = bt2.name as string;
+                            this._topButtons.delete(name);
+                            this._topButtons.delete(name2);
+
+                            const newBt = bt.clone();
+                            const newBt2 = bt2.clone();
+                            this.linkClickHandler(newBt);
+                            this.linkClickHandler(newBt2);
+
+                            endButtonGroup.addButtonAt(newBt, underButtonInfo.pos);
+                            this._topButtons.set(name, newBt);
+
+                            anotherButtonGroup.addButtonAt(newBt2, index);
+                            this._topButtons.set(name2, newBt2);
+                        }
+                    }
                 }
             }
-            endButtonGroup.addButtonAt(draggingElement.display, underButtonInfo.pos);
-        } else if (underButtonInfo.insertPos) {
-            return false;
-        } else if (startPointContainer === anotherButtonGroup._content) {
-            const replacedButton = endButtonGroup.removeButtonAt(
-                underButtonInfo.pos
-            );
-            this.container.removeChild(draggingElement.display);
-            anotherButtonGroup.addButtonAt(
-                replacedButton,
-                this._draggingElementIndex
-            );
-            endButtonGroup.addButtonAt(draggingElement.display, underButtonInfo.pos);
         } else {
-            const replacedButton = endButtonGroup.removeButtonAt(
-                underButtonInfo.pos
-            );
-            this.container.removeChild(draggingElement.display);
-
-            endButtonGroup.addButtonAt(draggingElement.display, underButtonInfo.pos);
-            const name = this.getDragName(draggingElement.display, this._bottomButtons);
-            if (name) {
-                const bt = this._bottomButtons.get(name);
-                if (bt) {
-                    topButtons.set(name, bt);
-                    this._bottomButtons.delete(name);
-                }
-                startPointContainer.removeChild(draggingElement.display);
-                startPointContainer.addChild(replacedButton);
-                replacedButton.visible = false;
-                replacedButton.interactive = true;
-
-                const replaceName = this.getDragName(
-                    replacedButton,
-                    topButtons
-                );
-                if (replaceName) {
-                    const replaceBt = topButtons.get(replaceName);
-                    if (replaceBt) {
-                        this._bottomButtons.set(replaceName, replaceBt);
-                        topButtons.delete(replaceName);
+            const count = endButtonGroup._content.children.length;
+            // when topButtonGroup has space
+            if (count < endButtonGroup._capability) {
+                // from middle to top
+                if (startPointContainer === this.middleScrollContainer.content) {
+                    const name = draggingElement.name;
+                    if (name) {
+                        const button = this._bottomButtons.get(name);
+                        this._bottomButtons.delete(name);
+                        if (button) {
+                            this._topButtons.set(name, button);
+                            endButtonGroup.addButtonAt(button, underButtonInfo.pos);
+                        }
+                    }
+                } else {
+                    // from another top to top
+                    Assert.isTrue(
+                        anotherButtonGroup._content === startPointContainer
+                    );
+                    let name = null;
+                    let button: ToolbarButton | null = null;
+                    this._topButtons.forEach((bt, key) => {
+                        if (bt.name === draggingElement.name) {
+                            name = key;
+                            button = bt;
+                        }
+                    });
+                    if (name && button) {
+                        const bt = button as ToolbarButton;
+                        this._topButtons.delete(name);
+                        anotherButtonGroup.removeButton(bt);
+                        const newBt = bt.clone();
+                        this.linkClickHandler(newBt);
+                        this._topButtons.set(name, newBt);
+                        endButtonGroup.addButtonAt(newBt, underButtonInfo.pos);
                     }
                 }
             }
@@ -2460,113 +2449,30 @@ export default class Toolbar extends ContainerObject {
         return this._isExpanded;
     }
 
-    private onDragStart(e: InteractionEvent): void {
-        e.stopPropagation();
+    private dragMove(p: Point): void {
+        this._movePointGlobal = p;
 
-        this._draggingElement = undefined;
+        if (!this._draggingElement || !this._isExpanded) return;
 
-        if (
-            e.target === this._scrollNextButton.container
-            || e.target === this._scrollPrevButton.container
-        ) return;
-        if (!e.target.buttonMode) return;
-        if (this._isDragging || !this._isExpanded) return;
+        Assert.assertIsDefined(this._startPointContainer);
+        Assert.assertIsDefined(this._startPointGlobal);
 
-        if (
-            DisplayUtil.hitTest(this.leftButtonsGroup.container, e.data.global)
-        ) {
-            this._startPointContainer = this.leftButtonsGroup._content;
+        this.enableToolbarButtons(false);
+
+        if (this._canDrag) {
+            this._draggingElement.display.visible = true;
+
+            const gPos = this._draggingElement.display.parent.getGlobalPosition();
+            const pos = new Point(p.x - gPos.x, p.y - gPos.y);
+            const buttonBounds = this._draggingElement.display.getLocalBounds();
+            const x = pos.x - Math.floor(buttonBounds.width / 2);
+            const y = pos.y - Math.floor(buttonBounds.height / 2);
+            this._draggingElement.display.position.set(x, y);
+            this._canDrop = this.checkDragElement(p.x, p.y, this._draggingIndex);
         }
-        if (
-            DisplayUtil.hitTest(this.rightButtonsGroup.container, e.data.global)
-        ) {
-            this._startPointContainer = this.rightButtonsGroup._content;
-        }
-        if (
-            DisplayUtil.hitTest(
-                this.middleScrollContainer.content,
-                e.data.global
-            )
-        ) {
-            this._startPointContainer = this.middleScrollContainer.content;
-        }
-
-        if (!this._startPointContainer) return;
-        if (this._startPointContainer.children.length <= 1) return;
-
-        const btnIndex = this._startPointContainer.children.findIndex(
-            (el) => el === e.target
-        );
-
-        if (this.leftButtonsGroup._content === this._startPointContainer) {
-            if (btnIndex >= 0) {
-                this._draggingElementIndex = btnIndex;
-                let name = null;
-                this._topButtons.forEach((bt, key) => {
-                    if (bt.display === e.target) {
-                        name = key;
-                    }
-                });
-                if (name) {
-                    const foundButton = this._topButtons.get(name);
-                    if (foundButton) {
-                        this._draggingElement = foundButton;
-                        this._draggingElement.display.visible = true;
-                        this._draggingElement.display.position.copyFrom(e.target);
-                    } else return;
-                } else return;
-            }
-        } else if (
-            this.rightButtonsGroup._content === this._startPointContainer
-        ) {
-            if (btnIndex >= 0) {
-                this._draggingElementIndex = btnIndex;
-                let name = null;
-                this._topButtons.forEach((bt, key) => {
-                    if (bt.display === e.target) {
-                        name = key;
-                    }
-                });
-                if (name) {
-                    const foundButton = this._topButtons.get(name);
-                    if (foundButton) {
-                        this._draggingElement = foundButton;
-                        this._draggingElement.display.visible = true;
-                        this._draggingElement.display.position.copyFrom(e.target);
-                    } else return;
-                } else return;
-            }
-        } else if (
-            this.middleScrollContainer.content === this._startPointContainer
-        ) {
-            if (btnIndex >= 0) {
-                this._draggingElementIndex = btnIndex;
-                const name = this._getButtonName(e.target);
-                if (name) {
-                    const foundButton = this._bottomButtons.get(name);
-                    if (foundButton) {
-                        this._draggingElement = foundButton;
-                        this._draggingElement.display.visible = true;
-                        // this._draggingElement.display.interactive = false;
-                        this.middleScrollContainer.content.addChild(
-                            this._draggingElement.display
-                        );
-                        this._draggingElement.display.position.copyFrom(e.target);
-                        this.middleScrollContainer.doLayout();
-                    } else return;
-                } else return;
-            }
-        }
-
-        this._isDragging = true;
-        this._canDrag = false;
-        this._startPoint = new Point(e.target.position.x, e.target.position.y);
-        this._startPointGlobal = new Point(e.data.global.x, e.data.global.y);
     }
 
-    private onDragEnd(e: InteractionEvent): void {
-        e.stopPropagation();
-
+    private hideTopbarTooltip() {
         this.leftButtonsGroup.topTooltip.display.visible = false;
         this.leftButtonsGroup._highlight.visible = false;
         this.leftButtonsGroup._cursor.visible = false;
@@ -2574,313 +2480,326 @@ export default class Toolbar extends ContainerObject {
         this.rightButtonsGroup.topTooltip.display.visible = false;
         this.rightButtonsGroup._highlight.visible = false;
         this.rightButtonsGroup._cursor.visible = false;
+    }
 
-        this._isDragging = false;
-        if (
-            !this._draggingElement
-            || !this._isExpanded
-            || !this._startPoint
-            || !this._startPointContainer
-        ) {
-            this._canDrag = false;
-            this._toggleButtonsInteractive(true);
-            this._isDisabled = false;
-            return;
+    private dragEnd(): void {
+        if (this._draggingElement) {
+            this._draggingElement.display.visible = false;
         }
-        Assert.assertIsDefined(this._startPointContainer);
-        Assert.assertIsDefined(this._startPointGlobal);
-        if (
-            this._startPoint?.x === e.data.global.x
-            && this._startPoint?.y === e.data.global.y
-        ) {
-            if (this._canDrag) {
-                if (
-                    this._startPointContainer
-                    === this.middleScrollContainer.content
-                ) {
-                    this._draggingElement.display.visible = false;
-                }
-                this._startPointContainer.addChildAt(
-                    this._draggingElement.display,
-                    this._draggingElementIndex
-                );
-            }
-            this._canDrag = false;
-            this._toggleButtonsInteractive(true);
-            this._isDisabled = false;
-            return;
-        }
-
-        this._canDrag = false;
-
-        const leftButtonsRect = this.leftButtonsGroup.container.getBounds();
-        const rightButtonsRect = this.rightButtonsGroup.container.getBounds();
-        const availableButtonsRect = this.middleScrollContainer.content.getBounds();
-
-        const leftButtonsBounds = new Rectangle(
-            leftButtonsRect.x,
-            leftButtonsRect.y,
-            leftButtonsRect.width,
-            leftButtonsRect.height
-        );
-        const rightButtonsBounds = new Rectangle(
-            rightButtonsRect.x,
-            rightButtonsRect.y,
-            rightButtonsRect.width,
-            rightButtonsRect.height
-        );
-        const availableButtonsBounds = new Rectangle(
-            availableButtonsRect.x,
-            availableButtonsRect.y,
-            availableButtonsRect.width,
-            availableButtonsRect.height
-        );
-        // for some reason the height of the container changes when button is dragging
-        availableButtonsBounds.height = APPROX_ITEM_HEIGHT;
-        availableButtonsBounds.width = MIDDLE_WIDTH;
+        this.hideTopbarTooltip();
+        this.enableToolbarButtons(true);
 
         if (
-            !leftButtonsBounds.contains(e.data.global.x, e.data.global.y)
-            && !rightButtonsBounds.contains(e.data.global.x, e.data.global.y)
-            && !availableButtonsBounds.contains(e.data.global.x, e.data.global.y)
+            !this._draggingElement || !this._isExpanded
+            || !this._startPointGlobal || !this._startPointContainer
+            || !this._canDrop
         ) {
-            this.container.removeChild(this._draggingElement.display);
-            if (
-                this._startPointContainer === this.middleScrollContainer.content
-            ) {
-                this._draggingElement.display.visible = false;
-            }
-            this._startPointContainer.addChildAt(
-                this._draggingElement.display,
-                this._draggingElementIndex
-            );
-            this._toggleButtonsInteractive(true);
-            this._isDisabled = false;
             this.resetDragState();
             return;
         }
 
-        if (leftButtonsBounds.contains(e.data.global.x, e.data.global.y)) {
+        Assert.assertIsDefined(this._startPointContainer);
+        Assert.assertIsDefined(this._startPointGlobal);
+
+        this._canDrop = false;
+        this._canDrag = false;
+
+        const drop_dx = Math.abs(this._startPointGlobal.x - this._movePointGlobal.x);
+        const drop_dy = Math.abs(this._startPointGlobal.y - this._movePointGlobal.y);
+        const dropDistance = Math.max(drop_dx, drop_dy);
+        if (dropDistance < 5) {
+            this.resetDragState();
+            return;
+        }
+
+        const leftButtonsBounds = this.leftButtonsGroup.container.getBounds();
+        const rightButtonsBounds = this.rightButtonsGroup.container.getBounds();
+        const middleButtonsBounds = this.middleScrollContainer.content.getBounds();
+
+        if (
+            !leftButtonsBounds.contains(this._movePointGlobal.x, this._movePointGlobal.y)
+            && !rightButtonsBounds.contains(this._movePointGlobal.x, this._movePointGlobal.y)
+            && !middleButtonsBounds.contains(this._movePointGlobal.x, this._movePointGlobal.y)
+        ) {
+            this.resetDragState();
+            return;
+        }
+
+        // to leftTop
+        if (leftButtonsBounds.contains(this._movePointGlobal.x, this._movePointGlobal.y)) {
+            // leftTop to self
             if (this.leftButtonsGroup._content === this._startPointContainer) {
                 Assert.assertIsDefined(this._draggingElement);
-                this.container.removeChild(this._draggingElement.display);
+                this._draggingElement.display.visible = false;
                 const minX = leftButtonsBounds.x;
-                const cursorX = e.data.global.x;
+                const cursorX = this._movePointGlobal.x;
                 const pos = cursorX - minX;
                 const underButtonInfo = this._getUnderButtonInfo(
                     this.leftButtonsGroup,
                     BUTTON_WIDTH,
                     pos
                 );
-                this.leftButtonsGroup._content.addChildAt(
-                    this._draggingElement.display,
-                    this._draggingElementIndex
-                );
-                this.leftButtonsGroup.swapButton(this._draggingElement.display,
-                    this.leftButtonsGroup.getButtonAt(underButtonInfo.pos));
+                const bt = this.leftButtonsGroup.getButtonByName(this._draggingElement.name as string) as ToolbarButton;
+                const disp = this.leftButtonsGroup.getButtonAt(underButtonInfo.pos);
+                if (disp) this.leftButtonsGroup.swapButton(bt.display, disp);
                 this.leftButtonsGroup.resizeContainer();
 
-                this.resetDragState(false);
+                this.resetDragState();
                 this.updateLayout();
-                this._toggleButtonsInteractive(true);
-                this._isDisabled = false;
-
                 return;
             }
+            // to leftTop
             const result = this._updateActiveButtonsGroup(
                 this.leftButtonsGroup,
-                this._topButtons,
                 leftButtonsBounds,
                 this._startPointContainer,
                 this._draggingElement,
                 this.rightButtonsGroup,
-                e.data.global
+                this._movePointGlobal
             );
             if (!result) {
-                this.container.removeChild(this._draggingElement.display);
-                if (
-                    this._startPointContainer
-                    === this.middleScrollContainer.content
-                ) {
-                    this._draggingElement.display.visible = false;
-                }
-                this._startPointContainer.addChildAt(
-                    this._draggingElement.display,
-                    this._draggingElementIndex
-                );
-                this._toggleButtonsInteractive(true);
-                this._isDisabled = false;
+                this._draggingElement.display.visible = false;
                 this.resetDragState();
-
                 this.saveTopButtons();
-
                 return;
             }
-            this._toggleButtonsInteractive(true);
-            this._isDisabled = false;
         } else if (
-            rightButtonsBounds.contains(e.data.global.x, e.data.global.y)
+            // to rightTop
+            rightButtonsBounds.contains(this._movePointGlobal.x, this._movePointGlobal.y)
         ) {
+            // rightTop to self
             if (this.rightButtonsGroup._content === this._startPointContainer) {
                 Assert.assertIsDefined(this._draggingElement);
-                this.container.removeChild(this._draggingElement.display);
                 const minX = rightButtonsBounds.x;
-                const cursorX = e.data.global.x;
+                const cursorX = this._movePointGlobal.x;
                 const pos = cursorX - minX;
                 const underButtonInfo = this._getUnderButtonInfo(
                     this.rightButtonsGroup,
                     BUTTON_WIDTH,
                     pos
                 );
-                this.rightButtonsGroup._content.addChildAt(
-                    this._draggingElement.display,
-                    this._draggingElementIndex
-                );
-                this.rightButtonsGroup.swapButton(this._draggingElement.display,
-                    this.rightButtonsGroup.getButtonAt(underButtonInfo.pos));
+                const bt = this.rightButtonsGroup.getButtonByName(this._draggingElement.name as string);
+                if (bt) {
+                    const disp = this.rightButtonsGroup.getButtonAt(underButtonInfo.pos);
+                    if (disp) this.rightButtonsGroup.swapButton(bt.display, disp);
+                }
                 this.rightButtonsGroup.resizeContainer();
 
-                this.resetDragState(false);
+                this.resetDragState();
                 this.updateLayout();
-                this._toggleButtonsInteractive(true);
-                this._isDisabled = false;
-
                 return;
             }
 
+            // to rightTop
             const result = this._updateActiveButtonsGroup(
                 this.rightButtonsGroup,
-                this._topButtons,
                 rightButtonsBounds,
                 this._startPointContainer,
                 this._draggingElement,
                 this.leftButtonsGroup,
-                e.data.global
+                this._movePointGlobal
             );
             if (!result) {
-                this.container.removeChild(this._draggingElement.display);
-                if (
-                    this._startPointContainer
-                    === this.middleScrollContainer.content
-                ) {
-                    this._draggingElement.display.visible = false;
-                }
-                this._startPointContainer.addChildAt(
-                    this._draggingElement.display,
-                    this._draggingElementIndex
-                );
-                this._toggleButtonsInteractive(true);
-                this._isDisabled = false;
+                this._draggingElement.display.visible = false;
                 this.resetDragState();
                 return;
             }
-            this._toggleButtonsInteractive(true);
-            this._isDisabled = false;
         } else if (
-            availableButtonsBounds.contains(e.data.global.x, e.data.global.y)
+            // to middle
+            middleButtonsBounds.contains(this._movePointGlobal.x, this._movePointGlobal.y)
         ) {
-            if (
-                this._startPointContainer === this.middleScrollContainer.content
-            ) {
-                this.container.removeChild(this._draggingElement.display);
-                this._draggingElement.display.visible = false;
-                // this._scrollContainer.content.addChild(this._draggingElement.display);
+            // middle to middle
+            if (this._startPointContainer === this.middleScrollContainer.content) {
                 this.resetDragState();
                 this.updateLayout();
-                this._toggleButtonsInteractive(true);
-                this._isDisabled = false;
                 return;
             }
 
-            this.container.removeChild(this._draggingElement.display);
-            this._draggingElement.display.visible = false;
+            // topRight to middle
             if (this._startPointContainer === this.rightButtonsGroup._content) {
                 let name = null;
                 let button: ToolbarButton | null = null;
                 let category: ButtonCategory | null = null;
                 this._topButtons.forEach((bt, key) => {
-                    if (bt === this._draggingElement) {
+                    if (this._draggingElement && bt.name === this._draggingElement.name) {
                         name = key;
                         button = bt;
                         category = bt.category;
                     }
                 });
                 if (name && button && category) {
+                    const bt = button as ToolbarButton;
                     this._topButtons.delete(name);
-                    this._bottomButtons.set(name, button);
-                    this.rightButtonsGroup.removeButton(button);
-                    this.middleScrollContainer.content.addChild(
-                        this._draggingElement.display
-                    );
+                    const newBt = bt.clone();
+                    this.linkClickHandler(newBt);
+                    this._bottomButtons.set(name, newBt);
+                    this.rightButtonsGroup.removeButton(bt);
 
                     this.switchTab(category);
                 }
-            } else if (
-                this._startPointContainer === this.leftButtonsGroup._content
-            ) {
+            } else if (this._startPointContainer === this.leftButtonsGroup._content) {
+                // topLeft to middle
                 let name = null;
                 let button: ToolbarButton | null = null;
                 let category: ButtonCategory | null = null;
                 this._topButtons.forEach((bt, key) => {
-                    if (bt === this._draggingElement) {
+                    if (this._draggingElement && bt.name === this._draggingElement.name) {
                         name = key;
                         button = bt;
                         category = bt.category;
                     }
                 });
                 if (name && button && category) {
+                    const bt = button as ToolbarButton;
                     this._topButtons.delete(name);
-                    this._bottomButtons.set(name, button);
-                    this.leftButtonsGroup.removeButton(button);
-                    this.middleScrollContainer.content.addChild(
-                        this._draggingElement.display
-                    );
-
+                    const newBt = bt.clone();
+                    this.linkClickHandler(newBt);
+                    this._bottomButtons.set(name, newBt);
+                    this.leftButtonsGroup.removeButton(bt);
                     this.switchTab(category);
                 }
             }
 
-            this._draggingElement.display.interactive = true;
             this._updateAvailableButtonsContainer();
-            if (this._startPointContainer === this.leftButtonsGroup._content) {
-                this.leftButtonsGroup.resizeContainer();
-            }
-            if (this._startPointContainer === this.rightButtonsGroup._content) {
-                this.rightButtonsGroup.resizeContainer();
-            }
+            this.leftButtonsGroup.resizeContainer();
+            this.rightButtonsGroup.resizeContainer();
+
             this.updateLayout();
         } else {
             // add code
         }
 
         this._updateAvailableButtonsContainer();
-        this._toggleButtonsInteractive(true);
-        this._isDisabled = false;
-        // this._draggingElement.display.interactive = true;
         this._draggingElement = undefined;
-        this._startPoint = null;
+        this._startPointGlobal = null;
         this.updateLayout();
 
         this.saveTopButtons();
     }
 
-    private checkDragElement(x: number, y: number) {
-        Assert.assertIsDefined(this._startPointContainer);
-        const leftButtonsRect = this.leftButtonsGroup.container.getBounds();
-        const rightButtonsRect = this.rightButtonsGroup.container.getBounds();
+    private onDragStart(e: InteractionEvent): void {
+        this.resetDragState();
 
-        const leftButtonsBounds = new Rectangle(
-            leftButtonsRect.x,
-            leftButtonsRect.y,
-            leftButtonsRect.width,
-            leftButtonsRect.height
+        if (!this._isExpanded) return;
+
+        const p = e.data.global;
+        if (
+            DisplayUtil.hitTest(this.leftButtonsGroup.container, p)
+        ) {
+            this._startPointContainer = this.leftButtonsGroup._content;
+        }
+        if (
+            DisplayUtil.hitTest(this.rightButtonsGroup.container, p)
+        ) {
+            this._startPointContainer = this.rightButtonsGroup._content;
+        }
+        if (
+            DisplayUtil.hitTest(this.middleScrollContainer.container, p)
+        ) {
+            this._startPointContainer = this.middleScrollContainer.content;
+        }
+
+        if (!this._startPointContainer) return;
+        const btnIndex = this._startPointContainer.children.findIndex(
+            (el) => el.getBounds().contains(p.x, p.y)
         );
-        const rightButtonsBounds = new Rectangle(
-            rightButtonsRect.x,
-            rightButtonsRect.y,
-            rightButtonsRect.width,
-            rightButtonsRect.height
-        );
+
+        if (this._startPointContainer.children.length <= 1) return;
+
+        if (this.leftButtonsGroup._content === this._startPointContainer) {
+            if (btnIndex >= 0) {
+                let name = null;
+                this._topButtons.forEach((bt, key) => {
+                    if (bt.display === e.target) {
+                        name = key;
+                    }
+                });
+                if (name) {
+                    const foundButton = this._containerButtons.get(name);
+                    if (foundButton) {
+                        this._draggingElement = foundButton;
+                        this._draggingIndex = btnIndex;
+                    }
+                }
+            }
+        } else if (
+            this.rightButtonsGroup._content === this._startPointContainer
+        ) {
+            if (btnIndex >= 0) {
+                let name = null;
+                this._topButtons.forEach((bt, key) => {
+                    if (bt.display === e.target) {
+                        name = key;
+                    }
+                });
+                if (name) {
+                    const foundButton = this._containerButtons.get(name);
+                    if (foundButton) {
+                        this._draggingElement = foundButton;
+                        this._draggingIndex = btnIndex;
+                    }
+                }
+            }
+        } else if (
+            this.middleScrollContainer.content === this._startPointContainer
+        ) {
+            if (btnIndex >= 0) {
+                const name = this._getButtonName(e.target);
+                if (name) {
+                    const toolbarButton = this.toolbarButtons.get(name);
+                    if (toolbarButton && toolbarButton.enabled) {
+                        const foundButton = this._containerButtons.get(name);
+                        if (foundButton) {
+                            this._draggingElement = foundButton;
+                            this._draggingIndex = btnIndex;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (this._draggingElement) {
+            this._startPointGlobal = new Point(e.data.global.x, e.data.global.y);
+        }
+    }
+
+    private onDragMove(e: InteractionEvent): void {
+        if (!this._draggingElement || !this._isExpanded) return;
+
+        Assert.assertIsDefined(this._startPointContainer);
+        Assert.assertIsDefined(this._startPointGlobal);
+
+        const minPointDiff = 5;
+        if (!this._canDrag) {
+            const diff = this._getPointsDifference(
+                e.data.global, this._startPointGlobal
+            );
+            if (diff.x < minPointDiff && diff.y < minPointDiff) return;
+            this._canDrag = true;
+        }
+
+        if (this._canDrag) {
+            const dragger = new Dragger();
+            this.addObject(dragger);
+            this.regs.add(dragger.dragged.connect((p: Point) => {
+                this.dragMove(p);
+            }));
+            this.regs.add(dragger.dragComplete.connect(() => {
+                this.dragEnd();
+            }));
+        }
+    }
+
+    private onDragEnd(): void {
+        this._canDrag = false;
+        this._canDrop = false;
+        this._draggingElement = undefined;
+    }
+
+    private checkDragElement(x: number, y: number, draggingIndex: number): boolean {
+        Assert.assertIsDefined(this._startPointContainer);
+        const leftButtonsBounds = this.leftButtonsGroup.container.getBounds();
+        const rightButtonsBounds = this.rightButtonsGroup.container.getBounds();
 
         this.leftButtonsGroup.topTooltip.display.visible = false;
         this.leftButtonsGroup._highlight.visible = false;
@@ -2922,75 +2841,50 @@ export default class Toolbar extends ContainerObject {
             endButtonGroup._highlight.position.x = underButtonInfo.pos * BUTTON_WIDTH;
 
             if (inPlace) {
-                endButtonGroup._highlight.visible = true;
-                endButtonGroup.topTooltip.setText(
-                    'Swap buttons',
-                    15,
-                    TextBalloon.DEFAULT_FONT_COLOR
-                );
-            } else if (
-                count < endButtonGroup._capability
-                    && underButtonInfo.insertPos
-            ) {
-                endButtonGroup._cursor.visible = true;
-                endButtonGroup.topTooltip.setText(
-                    'Insert',
-                    15,
-                    TextBalloon.DEFAULT_FONT_COLOR
-                );
-            } else if (underButtonInfo.insertPos) {
-                endButtonGroup._cursor.visible = true;
-                endButtonGroup.topTooltip.setText(
-                    'Only replacement is allowed',
-                    15,
-                    0xff0000
-                );
+                if (draggingIndex !== underButtonInfo.pos
+                    && underButtonInfo.pos < this._startPointContainer.children.length) {
+                    endButtonGroup._highlight.visible = true;
+                    endButtonGroup.topTooltip.setText(
+                        'Swap buttons',
+                        15,
+                        TextBalloon.DEFAULT_FONT_COLOR
+                    );
+                    endButtonGroup.topTooltip.display.position.set(x - 10, y - 60);
+                    endButtonGroup.topTooltip.display.visible = true;
+                    return true;
+                } else return false;
             } else {
-                endButtonGroup._highlight.visible = true;
-                endButtonGroup.topTooltip.setText(
-                    'Replace',
-                    15,
-                    TextBalloon.DEFAULT_FONT_COLOR
-                );
+                if (
+                    count < endButtonGroup._capability
+                    && underButtonInfo.insertPos
+                ) {
+                    endButtonGroup._cursor.visible = true;
+                    endButtonGroup.topTooltip.setText(
+                        'Insert',
+                        15,
+                        TextBalloon.DEFAULT_FONT_COLOR
+                    );
+                } else if (underButtonInfo.insertPos) {
+                    endButtonGroup._cursor.visible = true;
+                    endButtonGroup.topTooltip.setText(
+                        'Only replacement is allowed',
+                        15,
+                        0xff0000
+                    );
+                } else {
+                    endButtonGroup._highlight.visible = true;
+                    endButtonGroup.topTooltip.setText(
+                        'Replace',
+                        15,
+                        TextBalloon.DEFAULT_FONT_COLOR
+                    );
+                }
+                endButtonGroup.topTooltip.display.position.set(x - 10, y - 60);
+                endButtonGroup.topTooltip.display.visible = true;
             }
-            endButtonGroup.topTooltip.display.position.set(x - 10, y - 60);
-            endButtonGroup.topTooltip.display.visible = true;
+            return true;
         }
-    }
-
-    private onDragMove(e: InteractionEvent): void {
-        e.stopPropagation();
-        if (!this._draggingElement || !this._isExpanded) return;
-
-        Assert.assertIsDefined(this._startPointContainer);
-        Assert.assertIsDefined(this._startPointGlobal);
-
-        if (!this._isDisabled) {
-            this._toggleButtonsInteractive(false);
-            this._isDisabled = true;
-        }
-
-        const minPointDiff = 5;
-        if (!this._canDrag) {
-            const diff = this._getPointsDifference(
-                e.data.global,
-                this._startPointGlobal
-            );
-            if (diff.x < minPointDiff && diff.y < minPointDiff) return;
-
-            this._startPointContainer.removeChild(this._draggingElement.display);
-            this.container.addChild(this._draggingElement.display);
-            this._canDrag = true;
-        }
-        // this._draggingElement.display.interactive = false;
-        if (this._isDragging && this._canDrag) {
-            const pos = e.data.getLocalPosition(this._draggingElement.display.parent);
-            const buttonBounds = this._draggingElement.display.getLocalBounds();
-            const x = pos.x - Math.floor(buttonBounds.width / 2);
-            const y = pos.y - Math.floor(buttonBounds.height / 2);
-            this._draggingElement.display.position.set(x, y);
-            this.checkDragElement(e.data.global.x, e.data.global.y);
-        }
+        return true;
     }
 
     public getMirrorButtons(bt: ToolbarButton) {
@@ -3012,6 +2906,14 @@ export default class Toolbar extends ContainerObject {
     public getMirrorTopButton(bt: ToolbarButton): ToolbarButton | undefined {
         if (bt.name) {
             const b = this._topButtons.get(bt.name);
+            if (b) return b;
+        }
+        return undefined;
+    }
+
+    public getMirrorBottomButton(bt: ToolbarButton): ToolbarButton | undefined {
+        if (bt.name) {
+            const b = this._bottomButtons.get(bt.name);
             if (b) return b;
         }
         return undefined;
@@ -3351,6 +3253,7 @@ export default class Toolbar extends ContainerObject {
     private toolbarButtons: Map<string, ToolbarButton> = new Map();
     private _bottomButtons: Map<string, ToolbarButton> = new Map();
     public _topButtons: Map<string, ToolbarButton> = new Map();
+    public _containerButtons: Map<string, ToolbarButton> = new Map();
 
     private _expandButtonContainer: HLayoutContainer;
 
@@ -3358,19 +3261,18 @@ export default class Toolbar extends ContainerObject {
 
     private _isExpanded: boolean;
     private _isAutoCollapsed: boolean;
-    private _isDragging: boolean;
     private _canDrag: boolean;
-    private _isDisabled: boolean = false;
+    private _canDrop: boolean;
 
     private _scrollStep: number;
     private _scrollOffset: number;
 
     private _draggingElement: ToolbarButton | undefined;
-    private _draggingElementIndex: number = 0;
+    private _draggingIndex: number;
 
-    private _startPoint: Point | null;
     private _startPointGlobal: Point | null;
     private _startPointContainer: Container | null;
+    private _movePointGlobal: Point = new Point();
 
     private _scrollNextButton: GameButton;
     private _scrollPrevButton: GameButton;
