@@ -8,7 +8,9 @@ import {
     Easing,
     AlphaTask,
     ColorUtil,
-    Assert
+    Assert,
+    CallbackTask,
+    DelayTask
 } from 'flashbang';
 import {RNAHighlightState} from 'eterna/pose2D/Pose2D';
 import ConstraintBox from 'eterna/constraints/ConstraintBox';
@@ -128,12 +130,39 @@ export default class ROPHighlight extends RScriptOp {
                 4
             );
 
+            let oldX = newX;
+            let oldY = newY;
+
             const highlightObj = new SceneObject(highlight);
             highlightObj.addObject(
                 new RepeatingTask(
                     () => new SerialTask(
                         new AlphaTask(0.2, 0.75, Easing.easeInOut),
                         new AlphaTask(1.0, 0.75, Easing.easeInOut)
+                    )
+                )
+            );
+            highlightObj.addObject(
+                new RepeatingTask(
+                    () => new SerialTask(
+                        new DelayTask(0.01),
+                        new CallbackTask(() => {
+                            const _uiElementBounds = GetRScriptUIElementBounds(uiElement);
+                            Assert.assertIsDefined(_uiElementBounds);
+                            const _newX: number = (highlightParent === uiElement ? 0 : _uiElementBounds.x)
+                                - padding.x
+                                + offset.x;
+                            const _newY: number = (highlightParent === uiElement ? 0 : _uiElementBounds.y)
+                                - padding.y
+                                + offset.y;
+
+                            if (oldX !== _newX || oldY !== _newY) {
+                                highlight.position.x += (_newX - oldX);
+                                highlight.position.y += (_newY - oldY);
+                                oldX = _newX;
+                                oldY = _newY;
+                            }
+                        })
                     )
                 )
             );

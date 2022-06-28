@@ -417,14 +417,15 @@ export default class Toolbar extends ContainerObject {
             fontSize: 10,
             fontFamily: Fonts.STDFONT,
             fill: 0xffffff,
-            fontWeight: FontWeight.REGULAR
+            fontWeight: FontWeight.BOLD
         });
         const tabWidth = Math.max(tabText.width + 20, TAB_WIDTH);
 
+        const radius = TAB_HEIGHT * 0.4;
         const tabBg = new Graphics()
             .beginFill(0x0c2040)
-            .drawRect(0, 4, tabWidth, TAB_HEIGHT - 4)
-            .drawRoundedRect(0, 0, tabWidth, 10, 8)
+            .drawRect(0, radius, tabWidth, TAB_HEIGHT - radius)
+            .drawRoundedRect(0, 0, tabWidth, TAB_HEIGHT, radius)
             .endFill();
 
         const tabContainer = new Container();
@@ -441,8 +442,8 @@ export default class Toolbar extends ContainerObject {
             tabBg
                 .clear()
                 .beginFill(MIDDLE_BACKCOLOR)
-                .drawRect(0, 4, tabWidth, TAB_HEIGHT - 4)
-                .drawRoundedRect(0, 0, tabWidth, 10, 8)
+                .drawRect(0, radius, tabWidth, TAB_HEIGHT - radius)
+                .drawRoundedRect(0, 0, tabWidth, TAB_HEIGHT, radius)
                 .endFill();
         };
 
@@ -450,8 +451,8 @@ export default class Toolbar extends ContainerObject {
             tabBg
                 .clear()
                 .beginFill(0x0c2040)
-                .drawRect(0, 4, tabWidth, TAB_HEIGHT - 4)
-                .drawRoundedRect(0, 0, tabWidth, 10, 8)
+                .drawRect(0, radius, tabWidth, TAB_HEIGHT - radius)
+                .drawRoundedRect(0, 0, tabWidth, TAB_HEIGHT, radius)
                 .endFill();
         };
         new ContainerObject(tabContainer).pointerTap.connect(() => {
@@ -459,8 +460,8 @@ export default class Toolbar extends ContainerObject {
             tabBg
                 .clear()
                 .beginFill(MIDDLE_BACKCOLOR)
-                .drawRect(0, 4, tabWidth, TAB_HEIGHT - 4)
-                .drawRoundedRect(0, 0, tabWidth, 10, 8)
+                .drawRect(0, radius, tabWidth, TAB_HEIGHT - radius)
+                .drawRoundedRect(0, 0, tabWidth, TAB_HEIGHT, radius)
                 .endFill();
             this._renderButtonsWithNewCategory(title);
             this._currentTab = {
@@ -914,7 +915,9 @@ export default class Toolbar extends ContainerObject {
             this.pairSwapButton.clicked.connect(() => {
                 this._deselectAllPaintTools();
                 this.pairSwapButton.toggled.value = true;
-                this.getMirrorButtons(this.pairSwapButton).forEach((b) => { if (b) b.toggled.value = true; });
+                this.getMirrorButtons(this.pairSwapButton).forEach((b) => {
+                    if (b) b.toggled.value = true;
+                });
             })
         );
 
@@ -927,9 +930,9 @@ export default class Toolbar extends ContainerObject {
                 this.librarySelectionButton.clicked.connect(() => {
                     this._deselectAllPaintTools();
                     this.librarySelectionButton.toggled.value = true;
-                    this.getMirrorButtons(this.librarySelectionButton).forEach(
-                        (b) => { if (b) b.toggled.value = true; }
-                    );
+                    this.getMirrorButtons(this.librarySelectionButton).forEach((b) => {
+                        if (b) b.toggled.value = true;
+                    });
                 })
             );
         }
@@ -2578,11 +2581,10 @@ export default class Toolbar extends ContainerObject {
                     BUTTON_WIDTH,
                     pos
                 );
-                const bt = this.rightButtonsGroup.getButtonByName(this._draggingElement.name as string);
-                if (bt) {
-                    const disp = this.rightButtonsGroup.getButtonAt(underButtonInfo.pos);
-                    if (disp) this.rightButtonsGroup.swapButton(bt.display, disp);
-                }
+                const name = this._draggingElement.name as string;
+                const bt = this.rightButtonsGroup.getButtonByName(name) as ToolbarButton;
+                const disp = this.rightButtonsGroup.getButtonAt(underButtonInfo.pos);
+                if (disp) this.rightButtonsGroup.swapButton(bt.display, disp);
                 this.rightButtonsGroup.resizeContainer();
 
                 this.resetDragState();
