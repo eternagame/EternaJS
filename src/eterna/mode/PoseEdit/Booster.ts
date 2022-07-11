@@ -125,6 +125,18 @@ export default class Booster {
         return button;
     }
 
+    public get label() {
+        return this._label;
+    }
+
+    public get tooltip() {
+        return this._tooltip;
+    }
+
+    public get buttonStateTextures() {
+        return this._buttonStateTextures;
+    }
+
     public onLoad(): void {
         this.executeScript(null, 'ON_LOAD', -1);
     }

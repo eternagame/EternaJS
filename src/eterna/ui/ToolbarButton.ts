@@ -3,7 +3,7 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import {KeyCode} from 'flashbang';
 import {ButtonState} from 'flashbang/objects/Button';
-import {Graphics, Sprite} from 'pixi.js';
+import {Graphics, Sprite, Texture} from 'pixi.js';
 import GameButton from './GameButton';
 
 export const BUTTON_WIDTH = 55;
@@ -23,14 +23,16 @@ export enum ButtonCategory {
 export type ToolbarParam = {
     cat:ButtonCategory,
     name: string,
-    allImg: string,
-    overImg?: string,
-    disableImg:string,
+    allImg: string | Texture,
+    overImg?: string | Texture,
+    disableImg:string | Texture,
     tooltip:string,
-    selectedImg?:string,
+    selectedImg?:string | Texture,
     hotKey?:KeyCode,
     rscriptID?:RScriptUIElementID,
     color?:{color:number, alpha:number},
+    label?:string,
+    fontSize?:number
 };
 
 export default class ToolbarButton extends GameButton {
@@ -69,6 +71,12 @@ export default class ToolbarButton extends GameButton {
         button.tooltip(info.tooltip);
         if (info.hotKey) button.hotkey(info.hotKey);
         if (info.rscriptID) button.rscriptID(info.rscriptID);
+
+        if (info.label) {
+            button.label(info.label, info.fontSize ? info.fontSize : 14);
+            button.scaleBitmapToLabel();
+        }
+
         button.info = info;
         return button;
     }

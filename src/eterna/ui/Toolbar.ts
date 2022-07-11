@@ -1465,41 +1465,68 @@ export default class Toolbar extends ContainerObject {
 
     private makeBoosterMenu() {
         if (this._type !== ToolbarType.FEEDBACK && this._boostersData != null) {
-            this.boostersMenuButton = this.createToolbarButton({
-                cat: ButtonCategory.SOLVE,
-                name: 'BoosterMenu',
-                allImg: Bitmaps.ImgBoosters,
-                overImg: Bitmaps.ImgOverBoosters,
-                disableImg: Bitmaps.ImgGreyBoosters,
-                tooltip: 'BoosterMenu'
-            });
-            this.boostersMenuButton.display.interactive = true;
-            this.pushButtonToCategory(this.boostersMenuButton);
-
-            this.boostersMenuButton.clicked.connect(() => {
-                if (this._boostersData != null && this._boostersData.actions != null) {
-                    const mode = this.mode as GameMode;
-                    mode.showDialog(new BoosterDialog(this._boostersData));
-                }
-            });
+            if (this._boostersData.actions != null) {
+                this.boostersMenuButton = this.createToolbarButton({
+                    cat: ButtonCategory.SOLVE,
+                    name: 'BoosterMenu',
+                    allImg: Bitmaps.ImgBoosters,
+                    overImg: Bitmaps.ImgOverBoosters,
+                    disableImg: Bitmaps.ImgGreyBoosters,
+                    tooltip: 'BoosterMenu'
+                });
+                this.boostersMenuButton.clicked.connect(() => {
+                    if (this._boostersData != null && this._boostersData.actions != null) {
+                        const mode = this.mode as GameMode;
+                        mode.showDialog(new BoosterDialog(this._boostersData));
+                    }
+                });
+                this.boostersMenuButton.display.interactive = true;
+                this.pushButtonToCategory(this.boostersMenuButton);
+            }
 
             if (this._boostersData.paint_tools != null) {
                 const mode: PoseEditMode = this.mode as PoseEditMode;
                 for (const data of this._boostersData.paint_tools) {
                     Booster.create(mode, data).then((booster) => {
                         booster.onLoad();
-                        const button: ToolbarButton = booster.createButton();
-                        button.setCategory(ButtonCategory.SOLVE)
-                            .setName(`BoosterPainting-${button.label}`);
-                        this.regs.add(
-                            button.clicked.connect(() => {
-                                mode.setPosesColor(booster.toolColor);
-                                this._deselectAllPaintTools();
-                            })
-                        );
-                        this.dynPaintTools.push(button);
-                        button.display.interactive = true;
-                        this.pushButtonToCategory(button);
+
+                        if (booster.buttonStateTextures[0] === null) {
+                            throw new Error(
+                                'Cannot call createButton before setting at least the first button state texture!'
+                            );
+                        }
+
+                        const name = `BoosterPainting${booster.label
+                            ? (`-${booster.label}`) : ''}`;
+
+                        const boosterPaintButton = this.createToolbarButton({
+                            cat: ButtonCategory.SOLVE,
+                            name,
+                            allImg: booster.buttonStateTextures[0],
+                            overImg: booster.buttonStateTextures[1] ? booster.buttonStateTextures[1]
+                                : undefined,
+                            disableImg: booster.buttonStateTextures[4] ? booster.buttonStateTextures[4]
+                                : booster.buttonStateTextures[0],
+                            tooltip: booster.tooltip,
+                            label: booster.label,
+                            fontSize: 14
+                        });
+                        boosterPaintButton.clicked.connect(() => {
+                            mode.setPosesColor(booster.toolColor);
+
+                            this._deselectAllPaintTools();
+                            boosterPaintButton.toggled.value = true;
+                            this.getMirrorButtons(boosterPaintButton).forEach(
+                                (b) => {
+                                    if (b) b.toggled.value = true;
+                                }
+                            );
+                        });
+                        this.dynPaintTools.push(boosterPaintButton);
+                        boosterPaintButton.display.interactive = true;
+                        this.pushButtonToCategory(boosterPaintButton);
+
+                        this._renderButtonsWithNewCategory(this._currentTab.category);
                     });
                 }
             }
@@ -3205,6 +3232,7 @@ export default class Toolbar extends ContainerObject {
 
         for (const button of this.dynPaintTools) {
             button.toggled.value = false;
+            this.getMirrorButtons(button).forEach((b) => { if (b) b.toggled.value = false; });
         }
 
         this.annotationModeButton.toggled.value = false;
