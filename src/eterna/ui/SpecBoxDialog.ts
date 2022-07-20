@@ -69,6 +69,7 @@ export default class SpecBoxDialog extends FloatDialog<boolean> {
 
     public resize(w: number, h: number): void {
         super.resize(w, h);
+        this.specBox.setHelpTextSize(w);
     }
 
     private readonly _datablock: UndoBlock;

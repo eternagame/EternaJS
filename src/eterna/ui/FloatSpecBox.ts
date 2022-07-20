@@ -78,7 +78,7 @@ export default class FloatSpecBox extends ContainerObject {
 
             const url = EternaURL.createURL({page: 'manual'});
             const helpText = `<A HREF="${url}" target="_blank"><U><FONT COLOR="#FFFFFF"><B>What are these parameters?</B></FONT></U></A>`;
-            this._helpText = new HTMLTextObject(helpText, undefined, undefined, true)
+            this._helpText = new HTMLTextObject(helpText, 400, undefined, true)
                 .font(Fonts.STDFONT)
                 .fontSize(14)
                 .color(0xffffff);
@@ -288,7 +288,7 @@ export default class FloatSpecBox extends ContainerObject {
             // this._stattext.size= new Point(200, 200);
 
             this._helpText.display.visible = true;
-            this._helpText.display.position.set(20, 10);// this._height - 35);
+            this._helpText.display.position.set(0, 0);// this._height - 35);
 
             this._dotplottext.position.set(30, 40);
             this._meltplottext.position.set((this._width * 0.5) + 10, 50);
@@ -455,6 +455,11 @@ export default class FloatSpecBox extends ContainerObject {
             this._vvec[ii].position.copyFrom(pos);
             this._vvec[ii].visible = !((pos.y >= plotSize + v0DefaultY - this._vvec[ii].height || pos.y < v0DefaultY));
         }
+    }
+
+    public setHelpTextSize(width: number) {
+        const w = Math.max(0, width - 40);
+        this._helpText.width = w;
     }
 
     private readonly _docked: boolean;
