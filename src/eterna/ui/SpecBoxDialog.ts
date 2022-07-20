@@ -15,6 +15,9 @@ export default class SpecBoxDialog extends FloatDialog<boolean> {
     private specBox: FloatSpecBox;
     private cancelButton: GameButton;
     private minimizeButton: GameButton;
+    private maxSpecWidth: number = 100;
+    private maxSpecHeight: number = 100;
+
     constructor(datablock: UndoBlock, showMinimizeButton: boolean = true) {
         super('RNA Spec');
         this._datablock = datablock;
@@ -23,6 +26,13 @@ export default class SpecBoxDialog extends FloatDialog<boolean> {
 
     protected added(): void {
         super.added();
+
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(Flashbang.stageHeight);
+
+        const scale = 0.6;
+        this.maxSpecWidth = Flashbang.stageWidth * scale;
+        this.maxSpecHeight = Flashbang.stageHeight * scale;
 
         this.specBox = new FloatSpecBox();
         this.addObject(this.specBox, this.contentVLay);
@@ -46,11 +56,9 @@ export default class SpecBoxDialog extends FloatDialog<boolean> {
     }
 
     public updateFinalFloatLocation() {
-        Assert.assertIsDefined(Flashbang.stageWidth);
-        Assert.assertIsDefined(Flashbang.stageHeight);
-        this.specBox.setSize(Flashbang.stageWidth * 0.7, Flashbang.stageHeight * 0.7);
-        this.specBox.display.position.x = (Flashbang.stageWidth - this.specBox.width) * 0.5;
-        this.specBox.display.position.y = (Flashbang.stageHeight - this.specBox.height) * 0.5;
+        this.specBox.setSize(this.maxSpecWidth, this.maxSpecHeight);
+        this.specBox.display.position.x = 0;
+        this.specBox.display.position.y = 0;
 
         this.cancelButton.display.position.set(
             this.specBox.width - this.cancelButton.container.width - 20,
@@ -68,8 +76,8 @@ export default class SpecBoxDialog extends FloatDialog<boolean> {
     }
 
     public resize(w: number, h: number): void {
+        this.specBox.setSize(Math.min(w, this.maxSpecWidth), Math.min(h, this.maxSpecHeight));
         super.resize(w, h);
-        this.specBox.setHelpTextSize(w);
     }
 
     private readonly _datablock: UndoBlock;

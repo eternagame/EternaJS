@@ -15,8 +15,8 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import EternaURL from 'eterna/net/EternaURL';
 import GameButton from './GameButton';
 import GamePanel from './GamePanel';
-import HTMLTextObject from './HTMLTextObject';
 import TextBalloon from './TextBalloon';
+import SpecHTMLButton from './SpecHTMLButton';
 
 export default class FloatSpecBox extends ContainerObject {
     public readonly shouldMaximize = new UnitSignal();
@@ -77,12 +77,11 @@ export default class FloatSpecBox extends ContainerObject {
             this.container.addChild(this._stattext);
 
             const url = EternaURL.createURL({page: 'manual'});
-            const helpText = `<A HREF="${url}" target="_blank"><U><FONT COLOR="#FFFFFF"><B>What are these parameters?</B></FONT></U></A>`;
-            this._helpText = new HTMLTextObject(helpText, 400, undefined, true)
-                .font(Fonts.STDFONT)
-                .fontSize(14)
-                .color(0xffffff);
+            this._helpText = new SpecHTMLButton('What are these parameters?', 16, Fonts.STDFONT);
             this.addObject(this._helpText, this.container);
+            this._helpText.clicked.connect(() => {
+                window.open(url, '_blank');
+            });
 
             this._dotplottext = Fonts.std('Pairing probabilities plot', 12).color(0xffffff).build();
             this.container.addChild(this._dotplottext);
@@ -457,11 +456,6 @@ export default class FloatSpecBox extends ContainerObject {
         }
     }
 
-    public setHelpTextSize(width: number) {
-        const w = Math.max(0, width - 40);
-        this._helpText.width = w;
-    }
-
     private readonly _docked: boolean;
 
     private _panel: GamePanel;
@@ -477,7 +471,7 @@ export default class FloatSpecBox extends ContainerObject {
     private _v0Melt: Text;
     private _vnMelt: Text;
     private _stattext: MultiStyleText;
-    private _helpText: HTMLTextObject;
+    private _helpText: SpecHTMLButton;
     private _dotplottext: Text;
     private _meltplottext: Text;
 
