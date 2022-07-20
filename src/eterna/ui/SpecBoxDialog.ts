@@ -22,6 +22,8 @@ export default class SpecBoxDialog extends FloatDialog<boolean> {
         super('RNA Spec');
         this._datablock = datablock;
         this._showMinimizeButton = showMinimizeButton;
+        this.minWidth = 320;
+        this.minHeight = 560;
     }
 
     protected added(): void {
@@ -30,9 +32,12 @@ export default class SpecBoxDialog extends FloatDialog<boolean> {
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
 
-        const scale = 0.6;
-        this.maxSpecWidth = Flashbang.stageWidth * scale;
-        this.maxSpecHeight = Flashbang.stageHeight * scale;
+        let scale = 0.6;
+        if ((Flashbang.stageWidth - this.getThumbSize() - 50) * scale < this.minWidth) {
+            scale = Math.max(0.8, this.minWidth / (Flashbang.stageWidth - this.getThumbSize() - 50));
+        }
+        this.maxSpecWidth = Math.max(this.minWidth, (Flashbang.stageWidth - this.getThumbSize() - 50) * scale);
+        this.maxSpecHeight = Math.max(this.minHeight, (Flashbang.stageHeight - 120) * scale);
 
         this.specBox = new FloatSpecBox();
         this.addObject(this.specBox, this.contentVLay);
@@ -55,28 +60,46 @@ export default class SpecBoxDialog extends FloatDialog<boolean> {
         this.updateFinalFloatLocation();
     }
 
+    private updateButtons() {
+        // console.log(this.cancelButton.container.height)
+        // this.cancelButton.display.position.set(
+        //     this.specBox.width - this.cancelButton.container.width - 20,
+        //     this.specBox.height - this.cancelButton.container.height
+        // );
+        this.minimizeButton.display.position.set(
+            10,
+            this.specBox.height - this.minimizeButton.container.height
+        );
+
+        if (this.cancelButton != null && this.cancelButton !== undefined) {
+            DisplayUtil.positionRelative(
+                this.cancelButton.display, HAlign.LEFT, VAlign.CENTER,
+                this.minimizeButton.display, HAlign.RIGHT, VAlign.CENTER,
+                20, 0
+            );
+        }
+    }
+
     public updateFinalFloatLocation() {
         this.specBox.setSize(this.maxSpecWidth, this.maxSpecHeight);
         this.specBox.display.position.x = 0;
         this.specBox.display.position.y = 0;
 
-        this.cancelButton.display.position.set(
-            this.specBox.width - this.cancelButton.container.width - 20,
-            this.specBox.height - this.cancelButton.container.height - 20
-        );
+        this.updateButtons();
 
-        if (this.minimizeButton != null && this.minimizeButton !== undefined) {
-            DisplayUtil.positionRelative(
-                this.minimizeButton.display, HAlign.RIGHT, VAlign.CENTER,
-                this.cancelButton.display, HAlign.LEFT, VAlign.CENTER,
-                -20, 0
-            );
-        }
         super.updateFloatLocation();
     }
 
     public resize(w: number, h: number): void {
-        this.specBox.setSize(Math.min(w, this.maxSpecWidth), Math.min(h, this.maxSpecHeight));
+        const padding = this.getPadding();
+        this.specBox.setSize(
+            w - 20 - this.getThumbSize() - padding.left - padding.right,
+            h - this.getTitleHeight() - this.getThumbSize() - padding.top - padding.bottom
+        );
+        this.specBox.display.position.x = 0;
+        this.specBox.display.position.y = 0;
+        this.updateButtons();
+        this.updateFloatLocation(false);
         super.resize(w, h);
     }
 

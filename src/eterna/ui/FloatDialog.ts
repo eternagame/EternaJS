@@ -55,8 +55,11 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
     private iconSize: number = 20;
     private rbSprite: SpriteObject;
     private lbSprite: SpriteObject;
-    private dragLeftPrevPt: Point = new Point();
-    private dragRightPrevPt: Point = new Point();
+    private _minWidth = 100;
+    private _minHeight = 100;
+    private padding = {
+        left: 4, right: 4, top: 4, bottom: 4
+    };
 
     constructor(title:string = '') {
         super();
@@ -162,15 +165,15 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
 
         this.frameContainer.addChild(this.titleArea);
 
-        this.contentLay.addVSpacer(10);
+        this.contentLay.addVSpacer(this.padding.top);
         this.contentHLay = new HLayoutContainer(0, VAlign.CENTER);
-        this.contentHLay.addHSpacer(10);
+        this.contentHLay.addHSpacer(this.padding.left);
         this.contentVLay = new VLayoutContainer(0, HAlign.LEFT);
         this.contentHLay.addChild(this.contentVLay);
-        this.contentHLay.addHSpacer(10);
+        this.contentHLay.addHSpacer(this.padding.right);
 
         this.contentLay.addChild(this.contentHLay);
-        this.contentLay.addVSpacer(10);
+        this.contentLay.addVSpacer(this.padding.bottom);
 
         this.scrollContainer = new ScrollContainer(1, 1);
         this.scrollContainer.display.position.set(0, this.closeIconSize);
@@ -249,19 +252,24 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         const dragger = new Dragger();
         this.addObject(dragger);
 
-        this.dragLeftPrevPt.x = e.data.global.x;
-        this.dragLeftPrevPt.y = e.data.global.y;
-        this.regs.add(dragger.dragged.connect((p: Point) => {
-            const dx = p.x - this.dragLeftPrevPt.x;
-            const dy = p.y - this.dragLeftPrevPt.y;
+        const dragStartingPoint = e.data.global.clone();
+        const windowStartingPoint = this.frameContainer.position.clone();
+        const maskSize = {x: this.frameMask.width, y: this.frameMask.height};
 
-            const w = this.frameMask.width - dx;
-            const h = this.frameMask.height + dy;
-            if (w > 100 && h > 100) {
-                this.frameContainer.position.x += dx;
+        this.regs.add(dragger.dragged.connect((p: Point) => {
+            const dx = p.x - dragStartingPoint.x;
+            const dy = p.y - dragStartingPoint.y;
+
+            const w = maskSize.x - dx;
+            const h = maskSize.y + dy;
+            if (w > this._minWidth && h > this._minHeight) {
+                this.frameContainer.position.x = windowStartingPoint.x + dx;
                 this.resize(w, h);
-                this.dragLeftPrevPt.x = p.x;
-                this.dragLeftPrevPt.y = p.y;
+            } else if (w > this._minWidth) {
+                this.frameContainer.position.x = windowStartingPoint.x + dx;
+                this.resize(w, this._minHeight);
+            } else if (h > this._minHeight) {
+                this.resize(this._minWidth, h);
             }
         }));
     }
@@ -270,20 +278,38 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         const dragger = new Dragger();
         this.addObject(dragger);
 
-        this.dragRightPrevPt.x = e.data.global.x;
-        this.dragRightPrevPt.y = e.data.global.y;
+        const dragStartingPoint = e.data.global.clone();
+        const maskSize = {x: this.frameMask.width, y: this.frameMask.height};
         this.regs.add(dragger.dragged.connect((p: Point) => {
-            const dx = p.x - this.dragRightPrevPt.x;
-            const dy = p.y - this.dragRightPrevPt.y;
+            const dx = p.x - dragStartingPoint.x;
+            const dy = p.y - dragStartingPoint.y;
 
-            const w = this.frameMask.width + dx;
-            const h = this.frameMask.height + dy;
-            if (w > 100 && h > 100) {
+            const w = maskSize.x + dx;
+            const h = maskSize.y + dy;
+            if (w > this._minWidth && h > this._minHeight) {
                 this.resize(w, h);
-                this.dragRightPrevPt.x = p.x;
-                this.dragRightPrevPt.y = p.y;
+            } else if (w > this._minWidth) {
+                this.resize(w, this._minHeight);
+            } else if (h > this._minHeight) {
+                this.resize(this._minWidth, h);
             }
         }));
+    }
+
+    public set minWidth(w: number) {
+        this._minWidth = w;
+    }
+
+    public get minWidth() {
+        return this._minWidth;
+    }
+
+    public set minHeight(h: number) {
+        this._minHeight = h;
+    }
+
+    public get minHeight() {
+        return this._minHeight;
     }
 
     public resize(w: number, h: number) {
@@ -357,6 +383,18 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         }
     }
 
+    public getTitleHeight() {
+        return this.closeIconSize;
+    }
+
+    public getThumbSize() {
+        return THUMB_WIDTH;
+    }
+
+    public getPadding() {
+        return this.padding;
+    }
+
     private normalize() {
         const w = this.contentLay.width + THUMB_WIDTH;
         const h = this.contentLay.height + this.titleArea.height + THUMB_WIDTH;
@@ -386,7 +424,7 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         this.normalButton.enabled = false;
     }
 
-    public updateFloatLocation() {
+    public updateFloatLocation(bInit:boolean = true) {
         Assert.assertIsDefined(Flashbang.stageHeight);
         Assert.assertIsDefined(Flashbang.stageWidth);
         this.background
@@ -402,8 +440,10 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         const w = this.contentLay.width + THUMB_WIDTH;
         const h = this.contentLay.height + THUMB_WIDTH + this.closeIconSize;
 
-        this.frameContainer.position.x = (Flashbang.stageWidth - w) * 0.5;
-        this.frameContainer.position.y = (Flashbang.stageHeight - h) * 0.5;
+        if (bInit) {
+            this.frameContainer.position.x = (Flashbang.stageWidth - w) * 0.5;
+            this.frameContainer.position.y = (Flashbang.stageHeight - h) * 0.5;
+        }
 
         this.frameMask.clear().beginFill(0, 1)
             .drawRect(0, 0, w, h)

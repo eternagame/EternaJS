@@ -77,7 +77,7 @@ export default class FloatSpecBox extends ContainerObject {
             this.container.addChild(this._stattext);
 
             const url = EternaURL.createURL({page: 'manual'});
-            this._helpText = new SpecHTMLButton('What are these parameters?', 16, Fonts.STDFONT);
+            this._helpText = new SpecHTMLButton('What are these parameters?', 14, Fonts.STDFONT);
             this.addObject(this._helpText, this.container);
             this._helpText.clicked.connect(() => {
                 window.open(url, '_blank');
@@ -222,11 +222,34 @@ export default class FloatSpecBox extends ContainerObject {
         this.scaleDotPlot(this._dotplotScaleLevel);
     }
 
-    public get plotSize(): number {
-        const plotW: number = this._docked ? this._width - 55 : (this._width - 100) / 2.0;
-        const plotH: number = this._docked ? (this._height - 51) / 2.0 : this._height - 200;
+    public get plotSize() {
+        let plotW: number;
+        let plotH: number;
 
-        return Math.min(plotW, plotH);
+        if (this._docked) {
+            plotW = this._width - 55;
+            plotH = (this._height - 51) / 2.0;
+            return {size: Math.min(plotW, plotH), vAligned: true};
+        } else {
+            const left = 20;
+            const right = this._width - 20;
+            const w = right - left;
+            plotW = w - this._vnMelt.width - 10;
+
+            const top = this._h0.position.y + this._h0.height;
+            let bottom = this._height - this._stattext.height - 20;
+            bottom -= this._zoomOutButton.display.height;
+            plotH = bottom - top;
+
+            if (plotW < plotH - 34) {
+                plotH -= 34;
+                plotH /= 2;
+                return {size: Math.min(plotW, plotH), vAligned: true};
+            } else {
+                plotW /= 2;
+                return {size: Math.min(plotW, plotH), vAligned: false};
+            }
+        }
     }
 
     public scaleDotPlot(level: number = 1): void {
@@ -241,9 +264,9 @@ export default class FloatSpecBox extends ContainerObject {
             this._dotplotOriginY = 0;
         }
 
-        const {plotSize} = this;
-        const plotSizeLevel: number = plotSize * level;
-        if (this._dotplot != null && plotSize > 0 && plotSizeLevel > 0) {
+        const plotSize = this.plotSize.size;
+        const plotSizeLevel = plotSize * level;
+        if (this._dotplot != null && plotSize > 0) {
             this._dotplotOriginX += (-this._dotplotOriginX) / level;
             this._dotplotOriginY += (-this._dotplotOriginY) / level;
             this._dotplot.setSize(plotSizeLevel, plotSizeLevel);
@@ -279,27 +302,35 @@ export default class FloatSpecBox extends ContainerObject {
             this._vnMelt.position.x = (this._width * 0.5) + 25 - this._vnMelt.width - 3;
             this._vnMelt.position.y = 70;
 
-            this._dotPlotSprite.position.set(40, 70);
-            this._meltPlotSprite.position.set((this._width * 0.5) + 20, 70);
+            this._dotPlotSprite.position.set(20, 70);
+            const plotSizeStruct = this.plotSize;
+            if (plotSizeStruct.vAligned) {
+                this._meltPlotSprite.position.set(20, 70 + plotSizeStruct.size + 20);
+                this._meltplottext.position.set(20, 70 + plotSizeStruct.size + 2);
+            } else {
+                this._meltPlotSprite.position.set(20 + plotSizeStruct.size + this._vnMelt.width + 10, 70);
+                this._meltplottext.position.set(4 + plotSizeStruct.size + this._vnMelt.width, 50);
+            }
 
             this._stattext.visible = true;
-            this._stattext.position.set(20, this._height - 100);
+            this._stattext.position.set(10, this._height - this._stattext.height - 20);
             // this._stattext.size= new Point(200, 200);
 
             this._helpText.display.visible = true;
-            this._helpText.display.position.set(0, 0);// this._height - 35);
+            this._helpText.display.position.set(0, 0);
 
-            this._dotplottext.position.set(30, 40);
-            this._meltplottext.position.set((this._width * 0.5) + 10, 50);
+            this._dotplottext.position.set(20, 30);
 
-            this._zoomInButton.display.position.set(40, this._height - 125);
-            this._zoomOutButton.display.position.set(70, this._height - 130);
+            this._zoomInButton.display.position.set(10,
+                this._stattext.position.y - this._zoomInButton.display.height);
+            this._zoomOutButton.display.position.set(40,
+                this._stattext.position.y - this._zoomOutButton.display.height);
         }
 
         // Redraw our dotplot
         this.scaleDotPlot(this._dotplotScaleLevel);
 
-        const {plotSize} = this;
+        const plotSize = this.plotSize.size;
         if (this._meltplot != null && plotSize > 0) {
             this._meltplot.setSize(plotSize, plotSize);
             this._meltplot.replot();
@@ -368,7 +399,7 @@ export default class FloatSpecBox extends ContainerObject {
             const diffX: number = e.data.global.x - this._dragBeginX;
             const diffY: number = e.data.global.y - this._dragBeginY;
 
-            const {plotSize} = this;
+            const plotSize = this.plotSize.size;
             const plotSizeLevel: number = plotSize * this._dotplotScaleLevel;
 
             this._dotplotX = this._dotplotOriginX + diffX;
@@ -405,7 +436,7 @@ export default class FloatSpecBox extends ContainerObject {
     }
 
     private get dotplotOffsetSize(): number {
-        return (this.plotSize / (this._datasize / 10)) * this._dotplotScaleLevel;
+        return (this.plotSize.size / (this._datasize / 10)) * this._dotplotScaleLevel;
     }
 
     // calculate it's origin and axis by from and to
@@ -422,7 +453,7 @@ export default class FloatSpecBox extends ContainerObject {
     }
 
     private updateDotplotLabel(refX: number, refY: number): void {
-        const {plotSize} = this;
+        const plotSize = this.plotSize.size;
         const h0DefaultX: number = this._docked ? 20 : FloatSpecBox.H0_DEFAULT_X;
         const h0DefaultY: number = this._docked ? 0 : FloatSpecBox.H0_DEFAULT_Y;
 
@@ -493,15 +524,15 @@ export default class FloatSpecBox extends ContainerObject {
     private _dotplotOriginX: number = 0;
     private _dotplotOriginY: number = 0;
 
-    private _width: number = 0;
-    private _height: number = 0;
+    private _width: number = 200;
+    private _height: number = 200;
 
     private static readonly HORIZONTAL = 0;
     private static readonly VERTICAL = 1;
     private static readonly DOTPLOT_SCALE_STEP = 0.2;
-    private static readonly H0_DEFAULT_X = 42;
+    private static readonly H0_DEFAULT_X = 20;
     private static readonly H0_DEFAULT_Y = 55;
-    private static readonly V0_DEFAULT_X = 30;
+    private static readonly V0_DEFAULT_X = 10;
     private static readonly V0_DEFAULT_Y = 70;
     private static readonly OFFSET = 10; // coord offset
 }

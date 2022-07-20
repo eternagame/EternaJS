@@ -424,7 +424,7 @@ export default class PoseEditMode extends GameMode {
         this._constraintBar.layout();
 
         this._dockedSpecBox.setSize(Flashbang.stageWidth - this._solDialogOffset, Flashbang.stageHeight - 340);
-        const s: number = this._dockedSpecBox.plotSize;
+        const s: number = this._dockedSpecBox.plotSize.size;
         this._dockedSpecBox.setSize(s + 55, s * 2 + 51);
 
         if (this.toolbar.stateToggle.numStates < 2) this.toolbar.stateToggle.display.visible = false;
