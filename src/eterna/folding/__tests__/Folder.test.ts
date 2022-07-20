@@ -31,14 +31,14 @@ test('NuPACK:suboptstructuresNoOligos', () => {
      .then((folder) => {
         if (folder === null) return;
 
-        let sequence = Sequence.fromSequenceString("auauauagaaaauauaua")
+        let sequence = Sequence.fromSequenceString("GGGAACGACUCGAGUAGAGUCGAAAAGAUAUAGAAAGCGCGACUAUAUCAAUAAACGCGCAAAAUAAAUAAAUAAAGAUCAGUUUCGACUGAUCAAAAGAAACAACAACAACAAC")
         let temperature: number = 37;
-        let isPsuedoknot:boolean = false;
-        let kcalDelta: number = 1;
+        let isPsuedoknot:boolean = true;
+        let kcalDelta: number = 4;
 
         const suboptEnsembleObject: 
             SuboptEnsembleResult = folder.getSuboptEnsembleNoBindingSite (
-            sequence, kcalDelta, 
+            sequence, kcalDelta,
             isPsuedoknot, temperature
         );	   
         
@@ -47,30 +47,26 @@ test('NuPACK:suboptstructuresNoOligos', () => {
         let ensembleStructuresEnergyError: number[]= suboptEnsembleObject.suboptEnergyError;
         let ensembleStructuresFreeEnergy: number[] = suboptEnsembleObject.suboptFreeEnergy;
         
+	//console.log(ensembleStructures);
 
         expect(ensembleStructures).toBeDefined();
         expect(ensembleStructures[0])
-            .toEqual(".((((((.....))))))");
+            .toEqual(".....((((((.....))))))....(((((((...{{{{{.)))))))......}}}}}................(((((((....))))))).....................");
         expect(ensembleStructures[1])
-            .toEqual("((((((.....)))))).");
+            .toEqual(".....((((((.....))))))....(((((((...{{{{..))))))).......}}}}................(((((((....))))))).....................");
         expect(ensembleStructures[2])
-            .toEqual("..(((((.....))))).");
+            .toEqual("......(((((.....))))).....(((((((...{{{{{.)))))))......}}}}}................(((((((....))))))).....................");
 
         expect(ensembleStructuresEnergyError).toBeDefined();
-        expect(ensembleStructuresEnergyError[0])
-            .toEqual(0);
-        expect(ensembleStructuresEnergyError[1])
-            .toEqual(0.30000000000000027);
-        expect(ensembleStructuresEnergyError[2])
-            .toEqual(0.5000000000000002);
+     
 
         expect(ensembleStructuresFreeEnergy).toBeDefined();
         expect(ensembleStructuresFreeEnergy[0])
-            .toEqual(-2.5);
+            .toEqual(-34.6);
         expect(ensembleStructuresFreeEnergy[1])
-            .toEqual(-2.1999999999999997);
+            .toEqual(-33.3);
         expect(ensembleStructuresFreeEnergy[2])
-            .toEqual(-1.9999999999999998);
+            .toEqual(-33);
 
     }))
     .resolves.toBeUndefined(); // (we're returning a promise)
