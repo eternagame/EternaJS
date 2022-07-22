@@ -20,6 +20,9 @@ export interface FullEvalCache {
 
 export interface SuboptEnsembleResult {
     ensembleDefect: number;
+    ensembleDefectNormalized: number;
+    mfeDefect: number;
+    mfeDefectNormalized: number;
     suboptStructures: string[];
     suboptEnergyError: number[];
     suboptFreeEnergy: number[];
@@ -97,7 +100,13 @@ export default abstract class Folder {
         _seq: Sequence, _kcalDeltaRange: number, _pseudoknotted: boolean = false, _temp: number = 37
     ): SuboptEnsembleResult {
         return {
-            ensembleDefect: 0, suboptStructures: [], suboptEnergyError: [], suboptFreeEnergy: []
+            ensembleDefect: 0,
+            ensembleDefectNormalized: 0,
+            mfeDefect: 0,
+            mfeDefectNormalized: 0,
+            suboptStructures: [],
+            suboptEnergyError: [],
+            suboptFreeEnergy: []
         };
     }
 
@@ -105,7 +114,13 @@ export default abstract class Folder {
         _seq: Sequence, _oligos: string[], _kcalDeltaRange: number, _pseudoknotted: boolean = false, _temp: number = 37
     ): SuboptEnsembleResult {
         return {
-            ensembleDefect: 0, suboptStructures: [], suboptEnergyError: [], suboptFreeEnergy: []
+            ensembleDefect: 0,
+            ensembleDefectNormalized: 0,
+            mfeDefect: 0,
+            mfeDefectNormalized: 0,
+            suboptStructures: [],
+            suboptEnergyError: [],
+            suboptFreeEnergy: []
         };
     }
 

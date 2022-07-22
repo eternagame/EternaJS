@@ -47,6 +47,10 @@ test('NuPACK:suboptstructuresNoOligos', () => {
         let ensembleStructuresEnergyError: number[]= suboptEnsembleObject.suboptEnergyError;
         let ensembleStructuresFreeEnergy: number[] = suboptEnsembleObject.suboptFreeEnergy;
         
+        let ensembleDefect: number = suboptEnsembleObject.ensembleDefect;
+        let ensembleDefectNormalized: number = suboptEnsembleObject.ensembleDefectNormalized;
+        let mfeDefect: number = suboptEnsembleObject.mfeDefect;
+        let mfeDefectNormalized: number = suboptEnsembleObject.mfeDefectNormalized;
 	//console.log(ensembleStructures);
 
         expect(ensembleStructures).toBeDefined();
@@ -67,6 +71,22 @@ test('NuPACK:suboptstructuresNoOligos', () => {
             .toEqual(-28.199999999999996);
         expect(ensembleStructuresFreeEnergy[2])
             .toEqual(-27.599999999999998);
+                
+        expect(ensembleDefect).toBeDefined();
+        expect(ensembleDefect)
+        .toEqual(4.665742668072042);
+
+        expect(ensembleDefectNormalized).toBeDefined();
+        expect(ensembleDefectNormalized)
+        .toEqual(0.0405716753745395);
+
+        expect(mfeDefect).toBeDefined();
+        expect(mfeDefect)
+        .toEqual(0);
+
+        expect(mfeDefectNormalized).toBeDefined();
+        expect(mfeDefectNormalized)
+            .toEqual(0);
 
     }))
     .resolves.toBeUndefined(); // (we're returning a promise)
