@@ -24,7 +24,11 @@ export default class MinimumStackLengthConstraint extends Constraint<MinStackCon
 
     public evaluate(context: ConstraintContext): MinStackConstraintStatus {
         // TODO: Multistate?
-        const stackLen = context.undoBlocks[0].getParam(UndoBlockParam.STACK) as number;
+        const undoBlock = context.undoBlocks[0];
+        const pseudoknots = (undoBlock.targetConditions !== undefined
+            && undoBlock.targetConditions['type'] === 'pseudoknot');
+
+        const stackLen = undoBlock.getParam(UndoBlockParam.STACK, 37, pseudoknots) as number;
         return {
             satisfied: stackLen >= this.minLength,
             currentLength: stackLen

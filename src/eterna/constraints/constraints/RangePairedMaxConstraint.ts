@@ -40,26 +40,26 @@ export default class RangePairedMaxConstraint extends Constraint<RangePairedMaxC
     }
 
     public evaluate(constraintContext: ConstraintContext): RangePairedMaxConstraintStatus {
-        // TODO: Multistate? pseudoknots?
+        // TODO: Multistate?
+        const undoBlock = constraintContext.undoBlocks[0];
+
+        const pseudoknots = (undoBlock.targetConditions !== undefined
+            && undoBlock.targetConditions['type'] === 'pseudoknot');
 
         // If this gets called before any folding has happened it'll be
         // undefined. Instead of forcing more folding, try saying it's
         // zero.
         // AMW: no
-        if (constraintContext.undoBlocks[0].getParam(
-            UndoBlockParam.DOTPLOT,
-            37,
-            false
-        ) === undefined) {
-            constraintContext.undoBlocks[0].updateMeltingPointAndDotPlot(false);
+        if (undoBlock.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) === undefined) {
+            undoBlock.updateMeltingPointAndDotPlot(pseudoknots);
         }
 
         if (!this._evalIndices) {
             this._evalIndices = this.indices.map((ii) => {
-                if (constraintContext.undoBlocks[0].targetConditions
-                    && 'custom-numbering' in constraintContext.undoBlocks[0].targetConditions) {
+                if (undoBlock.targetConditions
+                    && 'custom-numbering' in undoBlock.targetConditions) {
                     const cn = Utility.numberingJSONToArray(
-                        constraintContext.undoBlocks[0].targetConditions['custom-numbering'] as string
+                        undoBlock.targetConditions['custom-numbering'] as string
                     ) as (number | null)[];
                     for (let jj = 0; jj < cn.length; ++jj) {
                         if (ii === cn[jj]) {
@@ -74,11 +74,7 @@ export default class RangePairedMaxConstraint extends Constraint<RangePairedMaxC
         }
 
         // For some reason the null-coalescing operator ?? is not supported here.
-        const dotplot = constraintContext.undoBlocks[0].getParam(
-            UndoBlockParam.DOTPLOT,
-            37,
-            false
-        ) as number[];
+        const dotplot = undoBlock.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) as number[];
 
         // Look through the dotplot and find any pairs involving the implicated
         // residues.
@@ -87,12 +83,10 @@ export default class RangePairedMaxConstraint extends Constraint<RangePairedMaxC
             probForResidues.set(idx, 0.0);
         }
 
-        const square: boolean = (constraintContext.undoBlocks[0].folderName === Vienna.NAME
-            || constraintContext.undoBlocks[0].folderName === Vienna2.NAME);
+        const square: boolean = (undoBlock.folderName === Vienna.NAME
+            || undoBlock.folderName === Vienna2.NAME);
 
-        const finalOffset = (
-            (constraintContext.undoBlocks[0].getPairs()?.numPairs() ?? 0) * 3
-        );
+        const finalOffset = (undoBlock.getPairs()?.numPairs() ?? 0) * 3;
 
         for (let ii = 0; ii < dotplot.length - finalOffset; ii += 3) {
             // if either index is a number-of-interest, add probability in.
