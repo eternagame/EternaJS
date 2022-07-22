@@ -4,6 +4,7 @@
 
 #include "FullEnsemble.h"
 #include "EmscriptenUtils.h"
+#include "Utils.h"
 
 #include "src/thermo/utils/pfuncUtilsConstants.h"
 #include "src/thermo/utils/pfuncUtilsHeader.h"
