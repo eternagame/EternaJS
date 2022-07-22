@@ -70,7 +70,7 @@ EMSCRIPTEN_BINDINGS(EmscriptenBridge) {
 
     function("FullEnsembleNoBindingSite", &FullEnsembleNoBindingSite, allow_raw_pointers());
     function("FullEnsembleWithOligos", &FullEnsembleWithOligos, allow_raw_pointers());
-    function("getDotParens_OldMethod", &getDotParens_OldMethod, allow_raw_pointers());
+    function("getDotParens", &getDotParens, allow_raw_pointers());
 
 
 }

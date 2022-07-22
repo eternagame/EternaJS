@@ -14,6 +14,6 @@ struct FullAdvancedResult {
 
 FullAdvancedResult* FullEnsembleNoBindingSite (const std::string& seqString, int temperature, float kcalDeltaRange, bool const pseudoknotted);
 FullAdvancedResult* FullEnsembleWithOligos (const std::string& seqString, int temperature, float kcalDeltaRange,  bool const pseudoknotted);
-std::string getDotParens_OldMethod(bool pseudoknotted, const int seqlength, oneDnaStruct *currentStruct);
+std::string getDotParens(bool pseudoknotted, const int seqlength, oneDnaStruct *currentStruct);
 
 #endif //NUPACK_FULLENSEMBLE_H

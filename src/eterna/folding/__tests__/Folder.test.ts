@@ -33,7 +33,7 @@ test('NuPACK:suboptstructuresNoOligos', () => {
 
         let sequence = Sequence.fromSequenceString("GGGAACGACUCGAGUAGAGUCGAAAAGAUAUAGAAAGCGCGACUAUAUCAAUAAACGCGCAAAAUAAAUAAAUAAAGAUCAGUUUCGACUGAUCAAAAGAAACAACAACAACAAC")
         let temperature: number = 37;
-        let isPsuedoknot:boolean = true;
+        let isPsuedoknot:boolean = false;
         let kcalDelta: number = 4;
 
         const suboptEnsembleObject: 
@@ -51,25 +51,72 @@ test('NuPACK:suboptstructuresNoOligos', () => {
 
         expect(ensembleStructures).toBeDefined();
         expect(ensembleStructures[0])
-            .toEqual(".....((((((.....))))))....(((((((...{{{{{.)))))))......}}}}}................(((((((....))))))).....................");
+            .toEqual(".....((((((.....))))))..............(((((..(((....)))..)))))................(((((((....))))))).....................");
         expect(ensembleStructures[1])
-            .toEqual(".....((((((.....))))))....(((((((...{{{{..))))))).......}}}}................(((((((....))))))).....................");
+            .toEqual(".....((((((.....))))))..............(((((..............)))))................(((((((....))))))).....................");
         expect(ensembleStructures[2])
-            .toEqual("......(((((.....))))).....(((((((...{{{{{.)))))))......}}}}}................(((((((....))))))).....................");
-
+            .toEqual(".....((((((.....))))))..............(((((..((......))..)))))................(((((((....))))))).....................");
+            
         expect(ensembleStructuresEnergyError).toBeDefined();
      
 
         expect(ensembleStructuresFreeEnergy).toBeDefined();
         expect(ensembleStructuresFreeEnergy[0])
-            .toEqual(-34.6);
+            .toEqual(-28.499999999999996);
         expect(ensembleStructuresFreeEnergy[1])
-            .toEqual(-33.3);
+            .toEqual(-28.199999999999996);
         expect(ensembleStructuresFreeEnergy[2])
-            .toEqual(-33);
+            .toEqual(-27.599999999999998);
 
     }))
     .resolves.toBeUndefined(); // (we're returning a promise)
+
+});
+
+test('NuPACK:suboptstructuresNoOligosPknot', () => {        
+    return expect(CreateFolder(NuPACK)
+    .then((folder) => {
+       if (folder === null) return;
+
+       let sequence = Sequence.fromSequenceString("GGGAACGACUCGAGUAGAGUCGAAAAGAUAUAGAAAGCGCGACUAUAUCAAUAAACGCGCAAAAUAAAUAAAUAAAGAUCAGUUUCGACUGAUCAAAAGAAACAACAACAACAAC")
+       let temperature: number = 37;
+       let isPsuedoknot:boolean = true;
+       let kcalDelta: number = 4;
+
+       const suboptEnsembleObject: 
+           SuboptEnsembleResult = folder.getSuboptEnsembleNoBindingSite (
+           sequence, kcalDelta,
+           isPsuedoknot, temperature
+       );	   
+       
+ 
+       let ensembleStructures: string[] = suboptEnsembleObject.suboptStructures;
+       let ensembleStructuresEnergyError: number[]= suboptEnsembleObject.suboptEnergyError;
+       let ensembleStructuresFreeEnergy: number[] = suboptEnsembleObject.suboptFreeEnergy;
+       
+   //console.log(ensembleStructures);
+
+       expect(ensembleStructures).toBeDefined();
+       expect(ensembleStructures[0])
+           .toEqual(".....((((((.....))))))....(((((((...{{{{{.)))))))......}}}}}................(((((((....))))))).....................");
+       expect(ensembleStructures[1])
+           .toEqual(".....((((((.....))))))....(((((((...{{{{..))))))).......}}}}................(((((((....))))))).....................");
+       expect(ensembleStructures[2])
+           .toEqual("......(((((.....))))).....(((((((...{{{{{.)))))))......}}}}}................(((((((....))))))).....................");
+           
+       expect(ensembleStructuresEnergyError).toBeDefined();
+    
+
+       expect(ensembleStructuresFreeEnergy).toBeDefined();
+       expect(ensembleStructuresFreeEnergy[0])
+           .toEqual(-34.6);
+       expect(ensembleStructuresFreeEnergy[1])
+           .toEqual(-33.3);
+       expect(ensembleStructuresFreeEnergy[2])
+           .toEqual(-33);
+
+   }))
+   .resolves.toBeUndefined(); // (we're returning a promise)
 
 });
 
