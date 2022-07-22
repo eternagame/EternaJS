@@ -40,6 +40,7 @@ add_executable(nupack
         nupack3.0.4/src/thermo/utils/sumexp_pk.c
         nupack3.0.4/src/shared/utils.c
         emscripten/Bindings.cpp
+        emscripten/Utils.cpp
         emscripten/FullEval.cpp
         emscripten/FullFold.cpp
         emscripten/FullEnsemble.cpp
