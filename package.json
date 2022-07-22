@@ -1,6 +1,6 @@
 {
   "name": "eternajs",
-  "version": "1.14.4",
+  "version": "1.14.5",
   "license": "SEE LICENSE IN LICENSE",
   "description": "Eterna game/RNA design interface",
   "scripts": {
@@ -98,6 +98,6 @@
     ]
   },
   "optionalDependencies": {
-    "eternajs-folding-engines": "github:eternagame/eternajs-folding-engines#fdc969eb5921b4d4295ac6ca13374bb9a3028369"
+    "eternajs-folding-engines": "github:eternagame/eternajs-folding-engines#92caa78cb80e4f60e73f585c51b3361b418b9226"
   }
 }
