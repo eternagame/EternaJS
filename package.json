@@ -10,7 +10,7 @@
     "build:dev": "node multiplatform/mkdirp dist/dev && webpack --config webpack.dev.js",
     "build:prod": "node multiplatform/mkdirp dist/prod && webpack --config webpack.prod.js",
     "postbuild:dev": "node multiplatform/cpr ./website/frontend ./dist/dev/frontend && coffee -o ./dist/dev/frontend/jscripts -c ./website/frontend/coffee",
-    "test": "jest --verbose --debug",
+    "test": "jest --verbose",
     "lint": "eslint src --ext .ts",
     "prepare": "husky install"
   },
@@ -98,6 +98,6 @@
     ]
   },
   "optionalDependencies": {
-    "eternajs-folding-engines": "github:eternagame/eternajs-folding-engines#df750853227d25fcc4e0a8273c82537d47d29829"
+    "eternajs-folding-engines": "github:eternagame/eternajs-folding-engines#fb8a67d822e424ff35feea1eeb7cb70e654c2fa7"
   }
 }

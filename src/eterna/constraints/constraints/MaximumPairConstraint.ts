@@ -38,10 +38,15 @@ abstract class MaximumPairConstraint extends Constraint<MaxPairConstraintStatus>
 
     public evaluate(context: ConstraintContext): MaxPairConstraintStatus {
         // TODO: Multistate?
+        const undoBlock = context.undoBlocks[0];
+
         // AMW: This is non-null by definition.
         const param = PAIR_PARAM_MAP.get(this.pairType);
         Assert.assertIsDefined(param);
-        const currentPairs: number = context.undoBlocks[0].getParam(param) as number;
+
+        const pseudoknots = (undoBlock.targetConditions !== undefined
+            && undoBlock.targetConditions['type'] === 'pseudoknot');
+        const currentPairs: number = undoBlock.getParam(param, 37, pseudoknots) as number;
         return {
             satisfied: (
                 currentPairs <= this.maxPairs
