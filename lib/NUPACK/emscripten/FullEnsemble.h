@@ -15,9 +15,17 @@ struct FullAdvancedResult {
     std::vector<double> suboptFreeEnergy;
 };
 
+struct Defect {
+
+    double ensembleDefect;
+    double ensembleDefectNormalized;
+    double mfeDefect;
+    double mfeDefectNormalized;
+};
+
 FullAdvancedResult* FullEnsembleNoBindingSite (const std::string& seqString, int temperature, float kcalDeltaRange, bool const pseudoknotted);
 FullAdvancedResult* FullEnsembleWithOligos (const std::string& seqString, int temperature, float kcalDeltaRange,  bool const pseudoknotted);
 std::string getDotParens(bool pseudoknotted, const int seqlength, oneDnaStruct *currentStruct);
-void getEnsembleDefect(char* seqChar, char* dotParensStructure, int temperature, bool pseudoknot, 
-                       bool multiFold, double *returnEnsembleDefect, bool mfeDefect);
+Defect getEnsembleDefect(char* seqChar, char* dotParensStructure, int temperature, bool pseudoknot, 
+                       bool multiFold, bool mfeDefect);
 #endif //NUPACK_FULLENSEMBLE_H

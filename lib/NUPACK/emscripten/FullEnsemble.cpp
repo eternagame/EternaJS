@@ -216,21 +216,20 @@ FullAdvancedResult* FullEnsembleNoBindingSite(const std::string& seqString, int 
     char* newSecondStruct = autoStructString.get();
 
     //get ensemble defect for mfe structure
-     double* ensembleDefectArray = new double[2];
-     double* mfeEnsembleDefectArray = new double[2];
+     Defect ensembleDefectStruct;
      double ensembleDefect = -2;
      double ensembleDefectNormalized = -3;
      double mfeDefect = -4;
      double mfeDefectNormalized = -5;
      bool getDefectMFE = false;
-    getEnsembleDefect(string, newSecondStruct, temperature, pseudoknotted, false, ensembleDefectArray, getDefectMFE);
-    ensembleDefect = ensembleDefectArray[0];
-    ensembleDefectNormalized = ensembleDefectArray[1];
+    ensembleDefectStruct = getEnsembleDefect(string, newSecondStruct, temperature, pseudoknotted, false, getDefectMFE);
+    ensembleDefect = ensembleDefectStruct.ensembleDefect;
+    ensembleDefectNormalized = ensembleDefectStruct.ensembleDefectNormalized;
     
     getDefectMFE=true;
-    getEnsembleDefect(string, newSecondStruct, temperature, pseudoknotted, false, mfeEnsembleDefectArray, getDefectMFE);
-    mfeDefect = mfeEnsembleDefectArray[0];
-    mfeDefectNormalized = mfeEnsembleDefectArray[1];
+    ensembleDefectStruct = getEnsembleDefect(string, newSecondStruct, temperature, pseudoknotted, false, getDefectMFE);
+    mfeDefect = ensembleDefectStruct.mfeDefect;
+    mfeDefectNormalized = ensembleDefectStruct.mfeDefectNormalized;
 
     result->ensembleDefect=ensembleDefect;
     result->ensembleDefectNormalized=ensembleDefectNormalized;
@@ -370,7 +369,9 @@ std::string getDotParens(bool pseudoknotted, const int seqlength, oneDnaStruct *
     }
 }
 
-void getEnsembleDefect(char* seqChar, char* dotParensStructure, int temperature, bool pseudoknot, bool multiFold, double *returnEnsembleDefect, bool mfeDefect)
+
+//this code was pulled directly from the basics defect code and implemented here with minimal changes as possible.
+Defect getEnsembleDefect(char* seqChar, char* dotParensStructure, int temperature, bool pseudoknot, bool multiFold, bool mfeDefect)
 {
   //set global constants needed for correct folding and ensemble reporting     
     
@@ -509,19 +510,27 @@ void getEnsembleDefect(char* seqChar, char* dotParensStructure, int temperature,
   double EnsembleDefect;
   double EnsembleDefectNormalized;
   
+  Defect defectResult = Defect();
   
   if (USE_MFE) {
     //Fraction of correct nucleotides vs. MFE
-    EnsembleDefect = (long double) nsStar;
-    EnsembleDefectNormalized = (long double) nsStar/seqlength;
+
+    defectResult.mfeDefect=(long double) nsStar;
+    defectResult.mfeDefectNormalized=(long double) nsStar/seqlength;
+    defectResult.ensembleDefect = NULL;
+    defectResult.ensembleDefectNormalized = NULL;
   }
   else {
     //Ensemble defect n(s,phi) and normalized ensemble defect n(s,phi)/N;
-    EnsembleDefect = (long double) nsStar;
-    EnsembleDefectNormalized = (long double) nsStar/seqlength;
-  }
-  returnEnsembleDefect[0]=EnsembleDefect;
-  returnEnsembleDefect[1]=EnsembleDefectNormalized;
-}
 
+    defectResult.mfeDefect=NULL;
+    defectResult.mfeDefectNormalized=NULL;
+    defectResult.ensembleDefect = (long double) nsStar;
+    defectResult.ensembleDefectNormalized = (long double) nsStar/seqlength;
+   
+  }
+  
+
+  return defectResult;
+}
 
