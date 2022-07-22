@@ -21,25 +21,25 @@ export default class TargetExpectedAccuracyConstraint extends Constraint<TargetE
     }
 
     public evaluate(constraintContext: ConstraintContext): TargetExpectedAccuracyConstraintStatus {
-        // TODO: Multistate? pseudoknots?
+        // TODO: Multistate?
+        const undoBlock = constraintContext.undoBlocks[0];
+
+        const pseudoknots = (undoBlock.targetConditions !== undefined
+            && undoBlock.targetConditions['type'] === 'pseudoknot');
 
         // If this gets called before any folding has happened it'll be
         // undefined. Instead of forcing more folding, try saying it's
         // zero.
         // AMW: no
-        if (constraintContext.undoBlocks[0].getParam(
-            UndoBlockParam.TARGET_EXPECTED_ACCURACY,
-            37,
-            false
-        ) === undefined) {
-            constraintContext.undoBlocks[0].updateMeltingPointAndDotPlot(false);
+        if (undoBlock.getParam(UndoBlockParam.TARGET_EXPECTED_ACCURACY, 37, pseudoknots) === undefined) {
+            undoBlock.updateMeltingPointAndDotPlot(false);
         }
 
         // For some reason the null-coalescing operator ?? is not supported here.
-        const expectedAccuracy = constraintContext.undoBlocks[0].getParam(
+        const expectedAccuracy = undoBlock.getParam(
             UndoBlockParam.TARGET_EXPECTED_ACCURACY,
             37,
-            false
+            pseudoknots
         ) as number | undefined || 0;
 
         return {
