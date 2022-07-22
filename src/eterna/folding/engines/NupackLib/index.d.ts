@@ -62,7 +62,10 @@ declare namespace NupackLib {
     }
 
     export interface FullAdvancedResult {
-        ensembleDefect: number;       
+        ensembleDefect: number;
+        ensembleDefectNormalized: number;
+        mfeDefect: number;
+        mfeDefectNormalized: number;   
         suboptStructures: stdcpp.vector<string>;
         suboptEnergyError: stdcpp.vector<number>;
         suboptFreeEnergy: stdcpp.vector<number>;
