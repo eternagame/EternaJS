@@ -85,7 +85,7 @@ std::string getDotParens(bool pseudoknotted, const int seqlength, oneDnaStruct *
                     auto const & stem = stems[ii];
                     
                     size_t pk_ctr = 0;
-                    std::string substring = dbn.substr(stem[0].first+1,stem[0].second);
+                    std::string substring = dbn.substr(stem[0].first+1,stem[0].second - stem[0].first);
                     substringy = substringy + substring + ", ";
                     //check to see how many delimiter types exist in between where stem is going to go
                     // ah -- it's actually how many delimiters are only half-present, I think.
