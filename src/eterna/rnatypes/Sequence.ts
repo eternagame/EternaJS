@@ -308,6 +308,13 @@ export default class Sequence {
         return this._baseArray.lastIndexOf(RNABase.CUT);
     }
 
+    /**
+     * The number of cuts in this sequence
+     */
+    public numCuts(): number {
+        return this._baseArray.filter((base) => base === RNABase.CUT).length;
+    }
+
     public get baseArray(): RNABase[] {
         return this._baseArray;
     }
