@@ -916,7 +916,7 @@ export default class RNALayout {
             // / Top root case
             if (parentnode == null) {
                 // / initial ml scoring
-                rootnode.score = RNALayout.lookupFe(nnfe, -1);
+                rootnode.score = RNALayout.lookupFe(nnfe, -1) + RNALayout.lookupFe(nnfe, -2);
             } else if (!parentnode.isPair) {
                 throw new Error('Parent node must be a pair');
             }
