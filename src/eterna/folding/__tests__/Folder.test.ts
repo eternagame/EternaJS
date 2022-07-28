@@ -46,7 +46,8 @@ test('NuPACK:suboptstructuresNoOligos', () => {
         let ensembleStructures: string[] = suboptEnsembleObject.suboptStructures;
         let ensembleStructuresEnergyError: number[]= suboptEnsembleObject.suboptEnergyError;
         let ensembleStructuresFreeEnergy: number[] = suboptEnsembleObject.suboptFreeEnergy;
-        
+       
+       
 	//console.log(ensembleStructures);
 
         expect(ensembleStructures).toBeDefined();
@@ -67,6 +68,8 @@ test('NuPACK:suboptstructuresNoOligos', () => {
             .toEqual(-28.199999999999996);
         expect(ensembleStructuresFreeEnergy[2])
             .toEqual(-27.599999999999998);
+                
+       
 
     }))
     .resolves.toBeUndefined(); // (we're returning a promise)

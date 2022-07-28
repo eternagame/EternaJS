@@ -10,11 +10,11 @@ import Sequence from 'eterna/rnatypes/Sequence';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import * as NupackLib from './engines/NupackLib';
 import {
-    DotPlotResult, FullEvalResult, FullFoldResult, FullAdvancedResult
+    DotPlotResult, FullEvalResult, FullFoldResult, FullAdvancedResult, FullDefectResult
 } from './engines/NupackLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
 import Folder, {
-    MultiFoldResult, CacheKey, FullEvalCache, SuboptEnsembleResult
+    MultiFoldResult, CacheKey, FullEvalCache, SuboptEnsembleResult, DefectResult
 } from './Folder';
 import FoldUtil from './FoldUtil';
 
@@ -108,7 +108,6 @@ export default class NuPACK extends Folder {
 
         // initialize empty result cache
         suboptdataCache = {
-            ensembleDefect: 0,
             suboptStructures: [],
             suboptEnergyError: [],
             suboptFreeEnergy: []
@@ -136,6 +135,8 @@ export default class NuPACK extends Folder {
         }
 
         // prepare teh results for return and storage in cache
+
+        // prepare teh results for return and storage in cache
         const suboptStructures: string[] = EmscriptenUtil.stdVectorToArray(result.suboptStructures);
         suboptdataCache.suboptStructures = suboptStructures;
 
@@ -147,6 +148,50 @@ export default class NuPACK extends Folder {
 
         this.putCache(key, suboptdataCache);
         return suboptdataCache;
+    }
+
+    /* override */
+    public getDefect(seq: Sequence, pairs: SecStruct, mode:number, pseudoknotted: boolean = false,
+        temp: number = 37): DefectResult {
+        const key = {
+            primitive: 'defect',
+            seq: seq.baseArray,
+            pairs: pairs.pairs,
+            pseudoknotted,
+            // bindingSite,
+            // bonus,
+            temp,
+            mode
+        };
+
+        let defectResultDataCache: DefectResult = this.getCache(key) as DefectResult;
+        if (defectResultDataCache != null) {
+            // trace("getSuboptEnsemble cache hit");
+            return defectResultDataCache;
+        }
+        let result: FullDefectResult | null = null;
+        result = this._lib.FullEnsembleDefect(seq.sequenceString(),
+            pairs.getParenthesis(), temp, pseudoknotted, mode);
+
+        if (!result) {
+            throw new Error('NuPACK returned a null result');
+        }
+
+        // initialize empty result cache
+        defectResultDataCache = {
+            ensembleDefect: -1,
+            ensembleDefectNormalized: -1,
+            mfeDefect: -1,
+            mfeDefectNormalized: -1
+        };
+
+        defectResultDataCache.ensembleDefect = result.ensembleDefect;
+        defectResultDataCache.ensembleDefectNormalized = result.ensembleDefectNormalized;
+        defectResultDataCache.mfeDefect = result.mfeDefect;
+        defectResultDataCache.mfeDefectNormalized = result.mfeDefectNormalized;
+
+        this.putCache(key, defectResultDataCache);
+        return defectResultDataCache;
     }
 
     /* override */
@@ -170,7 +215,6 @@ export default class NuPACK extends Folder {
 
         // initialize empty result cache
         suboptdataCache = {
-            ensembleDefect: 0,
             suboptStructures: [],
             suboptEnergyError: [],
             suboptFreeEnergy: []

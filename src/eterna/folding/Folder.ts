@@ -4,7 +4,8 @@ import DotPlot from 'eterna/rnatypes/DotPlot';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 
-export type CacheItem = SecStruct | number[] | FullEvalCache | MultiFoldResult | SuboptEnsembleResult | undefined;
+export type CacheItem = SecStruct | number[] | FullEvalCache | MultiFoldResult |
+SuboptEnsembleResult | DefectResult | undefined;
 export type CacheKey = Record<string, string | string[] | number | number[] | boolean | Oligo[] | null>;
 
 export interface MultiFoldResult {
@@ -19,10 +20,16 @@ export interface FullEvalCache {
 }
 
 export interface SuboptEnsembleResult {
-    ensembleDefect: number;
     suboptStructures: string[];
     suboptEnergyError: number[];
     suboptFreeEnergy: number[];
+}
+
+export interface DefectResult {
+    ensembleDefect: number;
+    ensembleDefectNormalized: number;
+    mfeDefect: number;
+    mfeDefectNormalized: number;
 }
 
 export default abstract class Folder {
@@ -97,7 +104,20 @@ export default abstract class Folder {
         _seq: Sequence, _kcalDeltaRange: number, _pseudoknotted: boolean = false, _temp: number = 37
     ): SuboptEnsembleResult {
         return {
-            ensembleDefect: 0, suboptStructures: [], suboptEnergyError: [], suboptFreeEnergy: []
+            suboptStructures: [],
+            suboptEnergyError: [],
+            suboptFreeEnergy: []
+        };
+    }
+
+    public getDefect(
+        _seq: Sequence, _pairs: SecStruct, _mode:number, _pseudoknotted: boolean = false, _temp: number = 37
+    ): DefectResult {
+        return {
+            ensembleDefect: -1,
+            ensembleDefectNormalized: -1,
+            mfeDefect: -1,
+            mfeDefectNormalized: -1
         };
     }
 
@@ -105,7 +125,10 @@ export default abstract class Folder {
         _seq: Sequence, _oligos: string[], _kcalDeltaRange: number, _pseudoknotted: boolean = false, _temp: number = 37
     ): SuboptEnsembleResult {
         return {
-            ensembleDefect: 0, suboptStructures: [], suboptEnergyError: [], suboptFreeEnergy: []
+
+            suboptStructures: [],
+            suboptEnergyError: [],
+            suboptFreeEnergy: []
         };
     }
 

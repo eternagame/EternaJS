@@ -34,6 +34,8 @@ declare class NupackLib {
     CoFoldSequenceWithBindingSite(seqString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): NupackLib.FullFoldResult | null;
     FullEnsembleNoBindingSite(seqString: string, temperature: number, kcalDeltaRange: number, pseudoknotted: boolean):  NupackLib.FullAdvancedResult | null;
     FullEnsembleWithOligos (seqString: string, temperature: number, kcalDeltaRange: number, pseudoknotted: boolean):  NupackLib.FullAdvancedResult | null;
+    FullEnsembleDefect(seqString: string, MfeStructure: string, temperature: number, pseudoknotted: boolean, mode: number): NupackLib.FullDefectResult | null;
+
 }
 
 /*~ If you want to expose types from your module as well, you can
@@ -62,10 +64,22 @@ declare namespace NupackLib {
     }
 
     export interface FullAdvancedResult {
-        ensembleDefect: number;       
+        ensembleDefect: number;
+        ensembleDefectNormalized: number;
+        mfeDefect: number;
+        mfeDefectNormalized: number;   
         suboptStructures: stdcpp.vector<string>;
         suboptEnergyError: stdcpp.vector<number>;
         suboptFreeEnergy: stdcpp.vector<number>;
         delete (): void;
     }
+
+    export interface FullDefectResult {
+        ensembleDefect: number;
+        ensembleDefectNormalized: number;
+        mfeDefect: number;
+        mfeDefectNormalized: number;   
+        delete (): void;
+    }
+
 }

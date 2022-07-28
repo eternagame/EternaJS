@@ -35,6 +35,7 @@ export default class PoseUtil {
     public static addPairWithIndex(index: number, pairs: SecStruct): [string, PuzzleEditOp, RNABase[]?] {
         // if index is paired
         // add another pair before index
+        const pseudoknots = pairs.onlyPseudoknots().nonempty();
         let pindex: number = pairs.pairingPartner(index);
         if (pairs.isPaired(index)) {
             if (index > pindex) {
@@ -58,7 +59,7 @@ export default class PoseUtil {
             mutatedPairs[index] = pindex + 2;
             mutatedPairs[pindex + 2] = index;
 
-            const parenthesis: string = new SecStruct(mutatedPairs).getParenthesis();
+            const parenthesis: string = new SecStruct(mutatedPairs).getParenthesis(null, pseudoknots);
             return [parenthesis, PuzzleEditOp.ADD_PAIR];
         } else {
             // add a cycle of length 3
@@ -75,12 +76,13 @@ export default class PoseUtil {
             mutatedPairs[index] = index + 4;
             mutatedPairs[index + 4] = index;
 
-            const parenthesis: string = new SecStruct(mutatedPairs).getParenthesis();
+            const parenthesis: string = new SecStruct(mutatedPairs).getParenthesis(null, pseudoknots);
             return [parenthesis, PuzzleEditOp.ADD_CYCLE];
         }
     }
 
     public static deleteNopairWithIndex(index: number, pairs: SecStruct): [string, PuzzleEditOp, RNABase[]?] {
+        const pseudoknots = pairs.onlyPseudoknots().nonempty();
         let mutatedPairs: number[];
         mutatedPairs = pairs.pairs.slice(0, index);
         mutatedPairs = mutatedPairs.concat(pairs.pairs.slice(index + 1, pairs.length));
@@ -90,11 +92,12 @@ export default class PoseUtil {
             }
         }
 
-        const parenthesis: string = new SecStruct(mutatedPairs).getParenthesis();
+        const parenthesis: string = new SecStruct(mutatedPairs).getParenthesis(null, pseudoknots);
         return [parenthesis, PuzzleEditOp.DELETE_BASE, mutatedPairs];
     }
 
     public static deletePairWithIndex(index: number, pairs: SecStruct): [string, PuzzleEditOp, RNABase[]?] {
+        const pseudoknots = pairs.onlyPseudoknots().nonempty();
         let pindex: number = pairs.pairingPartner(index);
         if (pindex < 0) {
             throw new Error("base doesn't have pair");
@@ -116,7 +119,7 @@ export default class PoseUtil {
             }
         }
 
-        const parenthesis: string = new SecStruct(mutatedPairs).getParenthesis();
+        const parenthesis: string = new SecStruct(mutatedPairs).getParenthesis(null, pseudoknots);
         return [parenthesis, PuzzleEditOp.DELETE_PAIR];
     }
 
