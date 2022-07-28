@@ -1,5 +1,5 @@
 //import Folder, {MultiFoldResult} from '../Folder';
-import Folder, {SuboptEnsembleResult} from '../Folder';
+import Folder, {DefectResult, SuboptEnsembleResult} from '../Folder';
 import NuPACK from '../NuPACK';
 //import Vienna from '../Vienna';
 //import Vienna2 from '../Vienna2';
@@ -7,7 +7,7 @@ import NuPACK from '../NuPACK';
 import './jest-matcher-deep-close-to';
 //import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
-//import SecStruct from 'eterna/rnatypes/SecStruct';
+import SecStruct from 'eterna/rnatypes/SecStruct';
 //import {Oligo} from 'eterna/rnatypes/Oligo';
 
 function CreateFolder(type: any): Promise<Folder | null> {
@@ -84,7 +84,7 @@ test('NuPACK:suboptstructuresNoOligos', () => {
 });
 
 
-
+*/
 test('NuPACK:defect', () => {        
     return expect(CreateFolder(NuPACK)
     .then((folder) => {
@@ -129,7 +129,7 @@ test('NuPACK:defect', () => {
    .resolves.toBeUndefined(); // (we're returning a promise)
   
   });
-*/
+
 
 test('NuPACK:suboptstructuresNoOligosPknot', () => {        
   return expect(CreateFolder(NuPACK)
