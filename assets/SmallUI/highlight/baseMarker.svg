@@ -1,1 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="16.359" height="16.359" viewBox="1025.485 542.57 16.359 16.359"><g data-name="Base Marker"><path d="M1028.961 551.45a5.453 5.453 0 1 1 0 .1" fill="#eff7fa" fill-rule="evenodd" data-name="Ellipse 121"/><path d="M1025.485 550.7a8.18 8.18 0 1 1 0 .1" stroke-linejoin="round" stroke-linecap="round" stroke-width="1.5" stroke="#eff7fa" fill="transparent" data-name="Ellipse 122"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="17.859" height="17.859" viewBox="0 0 17.859 17.859">
+  <g id="Base_Marker" data-name="Base Marker" transform="translate(0.75 0.75)">
+    <circle id="Ellipse_121" data-name="Ellipse 121" cx="5.453" cy="5.453" r="5.453" transform="translate(2.727 2.727)" fill="#eff7fa"/>
+    <circle id="Ellipse_122" data-name="Ellipse 122" cx="8.18" cy="8.18" r="8.18" fill="none" stroke="#eff7fa" stroke-width="1.5"/>
+  </g>
+</svg>

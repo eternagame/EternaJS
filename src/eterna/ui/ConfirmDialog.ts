@@ -38,7 +38,8 @@ export default class ConfirmDialog extends FloatDialog<boolean> {
             alpha: 1.0,
             color: 0x152843,
             borderAlpha: 0.27,
-            borderColor: 0xC0DCE7
+            borderColor: 0xC0DCE7,
+            borderThickness: 0
         });
         this.addObject(panel, this.contentVLay);
 

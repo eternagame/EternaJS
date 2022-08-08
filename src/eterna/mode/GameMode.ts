@@ -408,7 +408,19 @@ export default abstract class GameMode extends AppMode {
         return '#000000';
     }
 
+    private canDownload(): boolean {
+        for (let ii = 0; ii < this._poses.length; ++ii) {
+            const cl = this._poses[ii].customLayout;
+            if (cl) return true;
+        }
+        this.showDialog(new NotificationDialog('There is no layout to download'));
+        return false;
+    }
+
     protected downloadSVG(): void {
+        if (!this.canDownload()) {
+            return;
+        }
         for (let ii = 0; ii < this._poses.length; ++ii) {
             if (this._poses[ii].customLayout === undefined) continue;
             const cl = this._poses[ii].customLayout;
@@ -489,6 +501,9 @@ export default abstract class GameMode extends AppMode {
     }
 
     protected downloadHKWS(): void {
+        if (!this.canDownload()) {
+            return;
+        }
         for (let ii = 0; ii < this._poses.length; ++ii) {
             if (this._poses[ii].customLayout === undefined) continue;
             const cl = this._poses[ii].customLayout;

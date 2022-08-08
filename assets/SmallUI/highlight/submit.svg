@@ -1,1 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="24.404" height="24.403" viewBox="555 101 24.404 24.403"><g data-name="Publish"><path d="M555.137 121.485a3.418 3.418 0 1 1 0 1" fill="#eff7fa" fill-rule="evenodd" data-name="Ellipse 74"/><g data-name="Group 573"><path d="M570.868 125.403h-3.844A12.038 12.038 0 0 0 555 113.38v-3.843c8.75 0 15.868 7.117 15.868 15.867Z" fill="#eff7fa" fill-rule="evenodd" data-name="Path 1675"/></g><g data-name="Group 574"><path d="M579.404 125.39h-3.844a20.57 20.57 0 0 0-20.547-20.547V101c13.449 0 24.391 10.941 24.391 24.39Z" fill="#eff7fa" fill-rule="evenodd" data-name="Path 1676"/></g></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="24.404" height="24.403" viewBox="0 0 24.404 24.403">
+  <g id="Publish" transform="translate(0 0)">
+    <ellipse id="Ellipse_74" data-name="Ellipse 74" cx="3.418" cy="3.418" rx="3.418" ry="3.418" transform="translate(0.137 17.567)" fill="#eff7fa"/>
+    <g id="Group_573" data-name="Group 573" transform="translate(0 8.536)">
+      <path id="Path_1675" data-name="Path 1675" d="M-319.412,472.718h-3.844a12.038,12.038,0,0,0-12.024-12.024V456.85A15.885,15.885,0,0,1-319.412,472.718Z" transform="translate(335.28 -456.85)" fill="#eff7fa"/>
+    </g>
+    <g id="Group_574" data-name="Group 574" transform="translate(0.013 0)">
+      <path id="Path_1676" data-name="Path 1676" d="M-310.852,456.2H-314.7a20.571,20.571,0,0,0-20.547-20.547v-3.843A24.419,24.419,0,0,1-310.852,456.2Z" transform="translate(335.243 -431.805)" fill="#eff7fa"/>
+    </g>
+  </g>
+</svg>

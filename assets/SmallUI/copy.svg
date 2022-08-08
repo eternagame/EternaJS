@@ -1,1 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="18.898" height="23.483" viewBox="555 861.246 18.898 23.483"><g data-name="Copy"><path d="M571.433 879.18h2.465v-17.934h-15.48v2.348" stroke-linejoin="round" stroke-linecap="round" stroke-width="1.5" stroke="#bedce8" fill="transparent" data-name="Path 1785"/><path d="M555 865.554h15.84v19.175H555v-19.175" fill="#bedce8" fill-rule="evenodd" data-name="Rectangle 393"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="20.398" height="23.483" viewBox="0 0 20.398 23.483">
+  <g id="Copy" transform="translate(-1753 -606.982)">
+    <path id="Path_1785" data-name="Path 1785" d="M1762,610.444V608.1h15.479V626.03h-2.465" transform="translate(-4.832 -0.364)" fill="none" stroke="#bedce8" stroke-width="1.5"/>
+    <rect id="Rectangle_393" data-name="Rectangle 393" width="15.84" height="19.175" transform="translate(1753 611.29)" fill="#bedce8"/>
+  </g>
+</svg>

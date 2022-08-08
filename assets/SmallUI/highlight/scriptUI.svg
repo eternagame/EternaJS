@@ -1,1 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="21" height="19"><path d="M18 0H3a3 3 0 0 0-3 3v13a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3V3a3 3 0 0 0-3-3ZM9.653 14.575l-1.425-.469 3.249-9.883 1.425.469-3.249 9.883Zm-1.954-2.878-1.061 1.061-3.359-3.359L6.638 6.04l1.061 1.061L5.4 9.399l2.299 2.298Zm6.793 1.061-1.061-1.061 2.298-2.298-2.298-2.298 1.061-1.061 3.358 3.359-3.358 3.359Z" fill="#eff7fa" fill-rule="evenodd" data-name="Path 1841"/></svg>
+<svg id="Group_668" data-name="Group 668" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="21" height="19" viewBox="0 0 21 19">
+  <defs>
+    <clipPath id="clip-path">
+      <rect id="Rectangle_438" data-name="Rectangle 438" width="21" height="19" fill="none"/>
+    </clipPath>
+  </defs>
+  <g id="Group_669" data-name="Group 669" clip-path="url(#clip-path)">
+    <path id="Path_1841" data-name="Path 1841" d="M18,0H3A3,3,0,0,0,0,3V16a3,3,0,0,0,3,3H18a3,3,0,0,0,3-3V3a3,3,0,0,0-3-3M7.7,11.7,6.638,12.758,3.279,9.4,6.638,6.04,7.7,7.1,5.4,9.4Zm1.954,2.878-1.425-.469,3.249-9.883,1.425.469Zm4.839-1.817L13.431,11.7l2.3-2.3-2.3-2.3L14.492,6.04,17.85,9.4Z" fill="#eff7fa"/>
+  </g>
+</svg>

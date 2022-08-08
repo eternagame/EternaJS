@@ -487,6 +487,9 @@ export default class Bitmaps {
     public static readonly ImgOverZoomIn: string = require('assets/SmallUI/highlight/zoomIn.svg');
     public static readonly ImgOverZoomOut: string = require('assets/SmallUI/highlight/zoomOut.svg');
 
+    public static readonly ImgDlgClose: string = require('assets/UI/close.svg');
+    public static readonly ImgOverDlgClose: string = require('assets/UI/close-over.svg');
+
     public static get all(): string[] {
         if (Bitmaps.ALL_URLS == null) {
             Bitmaps.ALL_URLS = [];

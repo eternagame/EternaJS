@@ -136,9 +136,9 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         this.titleArea.height = this.closeIconSize;
 
         this.closeButton = new GameButton()
-            .up(Bitmaps.Img3DMin)
-            .over(Bitmaps.Img3DMinHover)
-            .down(Bitmaps.Img3DMin)
+            .up(Bitmaps.ImgDlgClose)
+            .over(Bitmaps.ImgOverDlgClose)
+            .down(Bitmaps.ImgDlgClose)
             .tooltip('Close');
         this.addObject(this.closeButton, this.titleArea);
         this.closeButton.display.width = this.closeIconSize - 4;

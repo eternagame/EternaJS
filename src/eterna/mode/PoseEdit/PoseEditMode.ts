@@ -552,7 +552,7 @@ export default class PoseEditMode extends GameMode {
         for (let i = 0; i < topBtArray.length; i++) {
             const bt = topBtArray[i];
             const rect = getBounds(bt);
-            const leftRect = getBounds(this.toolbar.topScrollContainer);
+            const leftRect = getBounds(this.toolbar.scrollContainer);
             const inLeft = leftRect.left <= rect.left && leftRect.right >= rect.right;
             if (inLeft) helpers.push([() => rect, 0, bt.name as string]);
         }

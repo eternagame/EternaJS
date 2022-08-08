@@ -44,7 +44,8 @@ export default class SpecBoxDialog extends FloatDialog<boolean> {
 
         this.specBox.setSpec(this._datablock);
 
-        this.cancelButton = new GameButton().label('Ok', 14).hotkey(KeyCode.KeyS);
+        this.cancelButton = new GameButton().label('OK', 14)
+            .tooltip('OK').hotkey(KeyCode.KeyS);
         this.specBox.addObject(this.cancelButton, this.specBox.container);
         this.cancelButton.clicked.connect(() => this.close(false));
 
@@ -61,13 +62,10 @@ export default class SpecBoxDialog extends FloatDialog<boolean> {
     }
 
     private updateButtons() {
-        // console.log(this.cancelButton.container.height)
-        // this.cancelButton.display.position.set(
-        //     this.specBox.width - this.cancelButton.container.width - 20,
-        //     this.specBox.height - this.cancelButton.container.height
-        // );
+        const cWidth = this.specBox.width;
+        const w = this.minimizeButton.display.width + 20 + this.cancelButton.display.width;
         this.minimizeButton.display.position.set(
-            10,
+            10 + (cWidth - w) / 2,
             this.specBox.height - this.minimizeButton.container.height
         );
 

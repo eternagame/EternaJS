@@ -1,1 +1,3 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="15.282" height="25.47" viewBox="560.955 541.524 15.282 25.47"><path d="m560.955 555.614 6.767-1.023-6.334 12.403 14.849-17.497-7.712 1.023 4.86-8.97-6.794-.026" fill="#6189a9" fill-rule="evenodd" data-name="Booster"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="15.282" height="25.47" viewBox="0 0 15.282 25.47">
+  <path id="Booster" d="M585.146,829l6.794.026L587.08,838l7.712-1.023-14.849,17.5,6.334-12.4-6.767,1.023" transform="translate(-579.51 -829)" fill="#6189a9"/>
+</svg>

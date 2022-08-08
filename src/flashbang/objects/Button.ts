@@ -137,7 +137,7 @@ export default abstract class Button extends ContainerObject implements Enableab
      * to the DOWN state. Subclasses can override to customize the behavior.
      */
     private playStateTransitionSound(_fromState: ButtonState, toState: ButtonState): void {
-        if (toState === ButtonState.DOWN && this.downSound != null) {
+        if (toState === ButtonState.DOWN && _fromState === ButtonState.OVER && this.downSound != null) {
             Flashbang.sound.playSound(this.downSound);
         }
     }

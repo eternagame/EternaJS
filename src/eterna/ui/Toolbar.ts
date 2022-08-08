@@ -66,9 +66,9 @@ const EMPTY_SIZE = 1;
 const APPROX_ITEM_HEIGHT = 52;
 const TAB_WIDTH = 60;
 const TAB_HEIGHT = 20;
-const TOOLBAR_WIDTH = 780;
-let MIDDLE_WIDTH = TOOLBAR_WIDTH - 30 * 2;
+const DEFAULT_TOOLBAR_WIDTH = 600;
 const tabGap = 2;
+const BACKGROUND_HEIGHT = 223;
 
 export interface TopBarSetting {
     type: number;
@@ -89,7 +89,7 @@ export class ButtonsGroup extends ContainerObject {
     constructor(buttons: ToolbarButton[]) {
         super();
         this._buttons = buttons;
-        this._capability = 3;
+        this._capability = 50;
     }
 
     public get buttons() {
@@ -238,11 +238,31 @@ export class ButtonsGroup extends ContainerObject {
 
 type VoidHandler = () => void;
 
+class TopSpacer extends Container {
+    private sprite: Sprite;
+    constructor(width: number, height: number) {
+        super();
+
+        // For some reasons, spacers have zero-width bounds
+        // unless they're wrapped in a Container
+        this.sprite = new Sprite();
+        this.sprite.width = width;
+        this.sprite.height = height;
+        this.addChild(this.sprite);
+    }
+
+    public setSize(width:number, height:number) {
+        this.sprite.width = width;
+        this.sprite.height = height;
+    }
+}
+
 export default class Toolbar extends ContainerObject {
     public zoomInButton: ToolbarButton;
     public zoomOutButton: ToolbarButton;
     public pipButton: ToolbarButton;
     public stateToggle: ToggleBar;
+    private toolBarEnabled = true;
 
     public targetButton: ToolbarButton;
     public naturalButton: ToolbarButton;
@@ -259,8 +279,8 @@ export default class Toolbar extends ContainerObject {
     public scrollContainer: ScrollContainer;
     public scrollContainerContainer: HLayoutContainer;
 
-    public leftArrow: ToolbarButton;
-    public rightArrow: ToolbarButton;
+    public leftArrow: GameButton;
+    public rightArrow: GameButton;
 
     // Pose Editing
     public palette: NucleotidePalette;
@@ -332,7 +352,7 @@ export default class Toolbar extends ContainerObject {
 
     public lowerVContainer: VLayoutContainer;
     public topHLayout: HLayoutContainer;
-    public topScrollContainer: ScrollContainer;
+    public topToolsContainer: HLayoutContainer;// ScrollContainer;
     public middleHLayout: HLayoutContainer;
     public topBg: Graphics;
     public middleBg: Graphics;
@@ -347,6 +367,9 @@ export default class Toolbar extends ContainerObject {
         baseMarkerButtonHandler: VoidHandler;
         settingsButtonHandler: VoidHandler;
     };
+
+    public topLeftSpacer: TopSpacer;
+    public topRightSpacer: TopSpacer;
 
     constructor(
         type: ToolbarType,
@@ -378,8 +401,6 @@ export default class Toolbar extends ContainerObject {
         this._showLibrarySelect = showLibrarySelect;
         this._boostersData = boosters ?? null;
         this._annotationManager = annotationManager;
-        this._scrollStep = BUTTON_WIDTH;
-        this._scrollOffset = 0;
         this.handlers = handlers;
 
         this.makeTargetButtons();
@@ -484,22 +505,22 @@ export default class Toolbar extends ContainerObject {
 
     private makeTabs() {
         this._tabs = new Map([
-            [ButtonCategory.INFO, []],
             [ButtonCategory.SOLVE, []],
-            [ButtonCategory.CREATE, []],
             [ButtonCategory.VIEW, []],
+            [ButtonCategory.CREATE, []],
+            [ButtonCategory.INFO, []],
             [ButtonCategory.ANNOTATE, []],
             [ButtonCategory.IMPORT_EXPORT, []],
             [ButtonCategory.CUSTOM_LAYOUT, []]
         ]);
 
         this._tabsScrollContainer = new ScrollContainer(
-            MIDDLE_WIDTH,
+            this.MIDDLE_WIDTH,
             TAB_HEIGHT
         );
         this.tabsBg = new Graphics()
             .beginFill(MIDDLE_BACKCOLOR)
-            .drawRect(0, 0, MIDDLE_WIDTH, TAB_HEIGHT)
+            .drawRect(0, 0, this.MIDDLE_WIDTH, TAB_HEIGHT)
             .endFill();
         this._tabsScrollContainer.content.addChild(this.tabsBg);
         this.tabsBg.visible = false;
@@ -510,13 +531,14 @@ export default class Toolbar extends ContainerObject {
         this._tabsHContainer.visible = false;
 
         this._tabArray = [];
-        const tab0 = this._createTab(ButtonCategory.INFO);
-        const tab1 = this._createTab(ButtonCategory.SOLVE);
-        const tab2 = this._createTab(ButtonCategory.CREATE);
-        const tab3 = this._createTab(ButtonCategory.VIEW);
+        const tab0 = this._createTab(ButtonCategory.SOLVE);
+        const tab1 = this._createTab(ButtonCategory.CREATE);
+        const tab2 = this._createTab(ButtonCategory.VIEW);
+        const tab3 = this._createTab(ButtonCategory.INFO);
         const tab4 = this._createTab(ButtonCategory.ANNOTATE);
         const tab5 = this._createTab(ButtonCategory.IMPORT_EXPORT);
         const tab6 = this._createTab(ButtonCategory.CUSTOM_LAYOUT);
+        this._currentTab = tab2;
 
         this._tabArray.push(tab0);
         this._tabArray.push(tab1);
@@ -531,8 +553,6 @@ export default class Toolbar extends ContainerObject {
             totalWidth += tab.tabWidth;
             totalWidth += tabGap;
         });
-
-        this._currentTab = tab1;
 
         this._tabsScrollContainer.addObject(
             new ContainerObject(tab0.container),
@@ -583,8 +603,8 @@ export default class Toolbar extends ContainerObject {
                 const dx = downX - e.data.global.x;
                 const dW = totalWidth
                         - this._tabsScrollContainer.scrollX
-                        - MIDDLE_WIDTH;
-                if (totalWidth > MIDDLE_WIDTH && dW - dx > 0) {
+                        - this.MIDDLE_WIDTH;
+                if (totalWidth > this.MIDDLE_WIDTH && dW - dx > 0) {
                     this._tabsScrollContainer.scrollX += dx;
                 }
                 downX = e.data.global.x;
@@ -1261,7 +1281,7 @@ export default class Toolbar extends ContainerObject {
             rscriptID: RScriptUIElementID.TOGGLETARGET
         });
 
-        this.stateToggle = new ToggleBar(this._states);
+        this.stateToggle = new ToggleBar(this._states).tooltip('Switch state');
         if (this.stateToggle.numStates < 2) this.stateToggle.display.visible = false;
     }
 
@@ -1303,12 +1323,9 @@ export default class Toolbar extends ContainerObject {
         }
     }
 
-    private initializeTopButtons() {
+    private initializeTopLeftButtons() {
         const leftBts: ToolbarButton[] = [];
-        const rightBts: ToolbarButton[] = [];
-
         const leftButtonNames: string[] = [];
-        const rightButtonNames: string[] = [];
 
         if (
             this._type === ToolbarType.PUZZLEMAKER
@@ -1335,6 +1352,12 @@ export default class Toolbar extends ContainerObject {
             }
         });
         this.leftButtonsGroup = new ButtonsGroup(leftBts);
+        return leftButtonNames;
+    }
+
+    private initializeTopRightButtons() {
+        const rightBts: ToolbarButton[] = [];
+        const rightButtonNames: string[] = [];
 
         if (this.pairSwapButton.display.visible) {
             rightBts.push(this.getMirrorButton(this.pairSwapButton) as ToolbarButton);
@@ -1352,6 +1375,12 @@ export default class Toolbar extends ContainerObject {
             }
         });
         this.rightButtonsGroup = new ButtonsGroup(rightBts);
+        return rightButtonNames;
+    }
+
+    private initializeTopButtons() {
+        const leftButtonNames = this.initializeTopLeftButtons();
+        const rightButtonNames = this.initializeTopRightButtons();
 
         Eterna.settings.topToolbarSettings.value = {
             type: this._type,
@@ -1397,18 +1426,34 @@ export default class Toolbar extends ContainerObject {
                     const rightBts: ToolbarButton[] = [];
                     if (topToolbarSettings.type === this._type) {
                         topToolbarSettings.left.forEach((name) => {
-                            leftBts.push(
-                                this.getMirrorButton(
-                                    this.toolbarButtons.get(name) as ToolbarButton
-                                ) as ToolbarButton
-                            );
+                            const mirrorButton = this.getMirrorButton(
+                                this.toolbarButtons.get(name) as ToolbarButton
+                            ) as ToolbarButton;
+                            if (name === 'PiP') {
+                                if (this._states > 1
+                                    && this._type !== ToolbarType.PUZZLEMAKER
+                                    && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED
+                                ) {
+                                    leftBts.push(mirrorButton);
+                                }
+                            } else {
+                                leftBts.push(mirrorButton);
+                            }
                         });
                         topToolbarSettings.right.forEach((name) => {
-                            rightBts.push(
-                                this.getMirrorButton(
-                                    this.toolbarButtons.get(name) as ToolbarButton
-                                ) as ToolbarButton
-                            );
+                            const mirrorButton = this.getMirrorButton(
+                                this.toolbarButtons.get(name) as ToolbarButton
+                            ) as ToolbarButton;
+                            if (name === 'PiP') {
+                                if (this._states > 1
+                                    && this._type !== ToolbarType.PUZZLEMAKER
+                                    && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED
+                                ) {
+                                    rightBts.push(mirrorButton);
+                                }
+                            } else {
+                                rightBts.push(mirrorButton);
+                            }
                         });
                         leftBts.forEach((b) => {
                             if (b.name) {
@@ -1417,7 +1462,8 @@ export default class Toolbar extends ContainerObject {
                                 this._topButtons.set(b.name, b);
                             }
                         });
-                        this.leftButtonsGroup = new ButtonsGroup(leftBts);
+                        if (leftBts.length > 0) this.leftButtonsGroup = new ButtonsGroup(leftBts);
+                        else this.initializeTopLeftButtons();
                         rightBts.forEach((b) => {
                             if (b.name) {
                                 b.display.visible = true;
@@ -1425,7 +1471,8 @@ export default class Toolbar extends ContainerObject {
                                 this._topButtons.set(b.name, b);
                             }
                         });
-                        this.rightButtonsGroup = new ButtonsGroup(rightBts);
+                        if (rightBts.length > 0) this.rightButtonsGroup = new ButtonsGroup(rightBts);
+                        else this.initializeTopRightButtons();
                     }
                 } catch {
                     this._topButtons.clear();
@@ -1435,11 +1482,12 @@ export default class Toolbar extends ContainerObject {
                 }
             }
 
-            this.addObject(this.leftButtonsGroup, this.topScrollContainer.content);
-            this.addObject(this.palette, this.topScrollContainer.content);
+            this.addObject(this.leftButtonsGroup, this.topToolsContainer);
+            this.topToolsContainer.addHSpacer(TOP_HSPACE);
+            this.addObject(this.palette, this.topToolsContainer);
             this.palette.changeDefaultMode();
-            this.addObject(this.rightButtonsGroup, this.topScrollContainer.content);
-            this.topScrollContainer.doLayout();
+            this.topToolsContainer.addHSpacer(TOP_HSPACE);
+            this.addObject(this.rightButtonsGroup, this.topToolsContainer);
         }
     }
 
@@ -1534,45 +1582,6 @@ export default class Toolbar extends ContainerObject {
     }
 
     public resizeToolbar() {
-        Assert.assertIsDefined(Flashbang.stageWidth);
-        Assert.assertIsDefined(Flashbang.stageHeight);
-
-        const WIDTH = Math.min(TOOLBAR_WIDTH, Flashbang.stageWidth * 0.8);
-        MIDDLE_WIDTH = WIDTH - (this._scrollPrevButton.display.width + this._scrollNextButton.display.width);
-
-        this.background
-            .clear()
-            .beginFill(EDIT_BACKCOLOR, 1)
-            .drawRect(0, 0, WIDTH, 223)
-            .drawRoundedRect(0, -5, WIDTH, 10, 7)
-            .endFill();
-
-        this.middleBg
-            .clear()
-            .beginFill(MIDDLE_BACKCOLOR)
-            .drawRect(0, 0, MIDDLE_WIDTH, 47)
-            .drawRoundedRect(0, 43, MIDDLE_WIDTH, 10, 7)
-            .endFill();
-
-        this.tabsBg = new Graphics()
-            .clear()
-            .beginFill(MIDDLE_BACKCOLOR)
-            .drawRect(0, 0, MIDDLE_WIDTH, TAB_HEIGHT)
-            .endFill();
-
-        this.topBg
-            .clear()
-            .beginFill(MIDDLE_BACKCOLOR, 0)
-            .drawRect(0, 0, MIDDLE_WIDTH, BUTTON_WIDTH + 2)
-            .endFill();
-
-        this.middleBg.width = MIDDLE_WIDTH;
-        this.tabsBg.width = MIDDLE_WIDTH;
-        this.middleScrollContainer.setSize(MIDDLE_WIDTH, BUTTON_WIDTH);
-        this._tabsScrollContainer.setSize(MIDDLE_WIDTH, TAB_HEIGHT);
-        this.topScrollContainer.setSize(MIDDLE_WIDTH, BUTTON_WIDTH + 3);
-        this.textScrollContainer.setSize(MIDDLE_WIDTH, this.text.height);
-
         this.updateLayout();
     }
 
@@ -1588,152 +1597,105 @@ export default class Toolbar extends ContainerObject {
     }
 
     private updateTopContainer() {
-        let palWidth = this.palette.display.width;
-        if (this._type === ToolbarType.FEEDBACK) {
-            palWidth = 0;
-        } else {
-            this.palette.display.visible = true;
-        }
-
-        const topSpace = TOOLBAR_WIDTH - palWidth - 2 * TOP_HSPACE;
-        let buttonCapability = Math.floor(topSpace / BUTTON_WIDTH);
-        if (buttonCapability < 6) buttonCapability = 6;
-
-        this.rightButtonsGroup._capability = Math.floor(buttonCapability / 2);
-        this.leftButtonsGroup._capability = buttonCapability - this.rightButtonsGroup._capability;
-
-        while (
-            this.leftButtonsGroup._content.children.length
-            > this.leftButtonsGroup._capability
-        ) {
-            const element = this.leftButtonsGroup._content.children[0];
-            let name = null;
-            let button: ToolbarButton | null = null;
-            let category: ButtonCategory | null = null;
-            this._topButtons.forEach((bt, key) => {
-                if (bt.display === element) {
-                    name = key;
-                    button = bt;
-                    category = bt.category;
-                }
-            });
-            if (name && button && category) {
-                const bt = button as ToolbarButton;
-                this._topButtons.delete(name);
-                const newBt = bt.clone();
-                this.linkClickHandler(newBt);
-                this._bottomButtons.set(name, newBt);
-                this.leftButtonsGroup.removeButton(bt);
-                this.leftButtonsGroup.resizeContainer();
-            }
-        }
-        while (
-            this.rightButtonsGroup._content.children.length
-            > this.rightButtonsGroup._capability
-        ) {
-            const element = this.rightButtonsGroup._content.children[0];
-            let name = null;
-            let button: ToolbarButton | null = null;
-            let category: ButtonCategory | null = null;
-            this._topButtons.forEach((bt, key) => {
-                if (bt.display === element) {
-                    name = key;
-                    button = bt;
-                    category = bt.category;
-                }
-            });
-            if (name && button && category) {
-                const bt = button as ToolbarButton;
-                this._topButtons.delete(name);
-                const newBt = bt.clone();
-                this.linkClickHandler(newBt);
-                this._bottomButtons.set(name, newBt);
-                this.rightButtonsGroup.removeButton(bt);
-                this.rightButtonsGroup.resizeContainer();
-            }
-        }
-
-        const leftWidth = this.leftButtonsGroup.display.width;
-        const rightWidth = this.rightButtonsGroup.display.width;
-
-        const topWidth = leftWidth + TOP_HSPACE + palWidth + TOP_HSPACE + rightWidth;
-
-        if (topWidth > MIDDLE_WIDTH) {
-            this._scrollTopPrevButton.display.visible = true;
-            this._scrollTopNextButton.display.visible = true;
-
-            let x = 0;
-            this.leftButtonsGroup.display.position.x = x;
-            this.leftButtonsGroup.display.position.y = 1;
-            x += leftWidth + TOP_HSPACE;
-
-            if (this._type !== ToolbarType.FEEDBACK) {
-                this.palette.display.position.x = x;
-                this.palette.display.position.y = 1;
-                x += palWidth + TOP_HSPACE;
-            }
-            this.rightButtonsGroup.display.position.x = x;
-            this.rightButtonsGroup.display.position.y = 1;
-
-            if (topWidth - this.topScrollContainer.scrollX < MIDDLE_WIDTH) {
-                this.topScrollContainer.scrollX = topWidth - MIDDLE_WIDTH;
-            } else if (this.topScrollContainer.scrollX < 0) {
-                this.topScrollContainer.scrollX = 0;
-            }
-        } else {
-            this._scrollTopPrevButton.display.visible = false;
-            this._scrollTopNextButton.display.visible = false;
-
-            const dx = (MIDDLE_WIDTH - topWidth) / 2;
-            let x = dx;
-            this.leftButtonsGroup.display.position.x = x;
-            this.leftButtonsGroup.display.position.y = 1;
-            x += leftWidth + TOP_HSPACE;
-
-            if (this._type !== ToolbarType.FEEDBACK) {
-                this.palette.display.position.x = x;
-                this.palette.display.position.y = 1;
-                x += palWidth + TOP_HSPACE;
-            }
-            this.rightButtonsGroup.display.position.x = x;
-            this.rightButtonsGroup.display.position.y = 1;
-
-            this.topScrollContainer.scrollX = 0;
-        }
+        this.topHLayout.position.x = 0;
     }
 
     private updateEnableOfMiddleButtons() {
         const leftButtonNames: string[] = [];
         const rightButtonNames: string[] = [];
 
-        this.leftButtonsGroup._content.children.forEach((e) => {
-            leftButtonNames.push(e.name);
+        this.leftButtonsGroup.buttons.forEach((e) => {
+            e.enabled = this.toolBarEnabled;
+            leftButtonNames.push(e.name as string);
         });
-        this.rightButtonsGroup._content.children.forEach((e) => {
-            rightButtonNames.push(e.name);
+        this.rightButtonsGroup.buttons.forEach((e) => {
+            e.enabled = this.toolBarEnabled;
+            rightButtonNames.push(e.name as string);
         });
 
         this.toolbarButtons.forEach((bt) => {
-            bt.enabled = true;
-            bt.display.interactive = true;
+            bt.enabled = this.toolBarEnabled;
+            bt.display.interactive = this.toolBarEnabled;
         });
-        leftButtonNames.forEach((name) => {
-            const button = this.toolbarButtons.get(name);
-            if (button) {
-                button.enabled = false;
-            }
-        });
-        rightButtonNames.forEach((name) => {
-            const button = this.toolbarButtons.get(name);
-            if (button) {
-                button.enabled = false;
-            }
-        });
+
+        // leftButtonNames.forEach((name) => {
+        //     const button = this.toolbarButtons.get(name);
+        //     if (button) {
+        //         button.enabled = false;
+        //     }
+        // });
+        // rightButtonNames.forEach((name) => {
+        //     const button = this.toolbarButtons.get(name);
+        //     if (button) {
+        //         button.enabled = false;
+        //     }
+        // });
     }
 
     private updateLayout(): void {
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
+
+        const topSpacerWidth = 4;
+        const paletteWidth = this.palette.display.width;
+        const leftWidth = this.leftButtonsGroup.display.width;
+        const rightWidth = this.rightButtonsGroup.display.width;
+        const maxTopWidth = Math.max(leftWidth, rightWidth) * 2
+            + TOP_HSPACE + paletteWidth + TOP_HSPACE + 2 * topSpacerWidth;
+        const arrowWidth = this.leftArrow.display.width + this.rightArrow.display.width;
+        const availableTopWidth = Flashbang.stageWidth - arrowWidth
+            - (TOP_HSPACE + paletteWidth + TOP_HSPACE + 2 * topSpacerWidth);
+        const availableTopCount = Math.floor(availableTopWidth / BUTTON_WIDTH);
+        this.leftButtonsGroup._capability = Math.floor(availableTopCount / 2);
+        this.rightButtonsGroup._capability = Math.floor(availableTopCount / 2);
+
+        this.WIDTH = Math.max(DEFAULT_TOOLBAR_WIDTH, maxTopWidth);
+        this.MIDDLE_WIDTH = DEFAULT_TOOLBAR_WIDTH - 28;
+        this.MIDDLE_MARGIN = (this.WIDTH - DEFAULT_TOOLBAR_WIDTH) / 2;
+
+        if (leftWidth < rightWidth) {
+            this.topLeftSpacer.width = topSpacerWidth + Math.abs(rightWidth - leftWidth);
+            this.topRightSpacer.width = topSpacerWidth;
+        } else if (leftWidth > rightWidth) {
+            this.topRightSpacer.width = topSpacerWidth + Math.abs(rightWidth - leftWidth);
+            this.topLeftSpacer.width = topSpacerWidth;
+        } else {
+            this.topLeftSpacer.width = topSpacerWidth;
+            this.topRightSpacer.width = topSpacerWidth;
+        }
+
+        this.background
+            .clear()
+            .beginFill(EDIT_BACKCOLOR, 1)
+            .drawRect(0, 0, this.WIDTH, BACKGROUND_HEIGHT)
+            .drawRoundedRect(0, -5, this.WIDTH, 10, 7)
+            .endFill();
+
+        this.middleBg
+            .clear()
+            .beginFill(MIDDLE_BACKCOLOR)
+            .drawRect(0, 0, this.MIDDLE_WIDTH, 47)
+            .drawRoundedRect(0, 43, this.MIDDLE_WIDTH, 10, 7)
+            .endFill();
+
+        this.tabsBg = new Graphics()
+            .clear()
+            .beginFill(MIDDLE_BACKCOLOR)
+            .drawRect(0, 0, this.MIDDLE_WIDTH, TAB_HEIGHT)
+            .endFill();
+
+        this.topBg
+            .clear()
+            .beginFill(MIDDLE_BACKCOLOR, 0)
+            .drawRect(0, 0, this.MIDDLE_WIDTH, BUTTON_WIDTH + 2)
+            .endFill();
+
+        this.middleBg.width = this.MIDDLE_WIDTH;
+        this.tabsBg.width = this.MIDDLE_WIDTH;
+        this.middleScrollContainer.setSize(this.MIDDLE_WIDTH, BUTTON_WIDTH);
+        this._tabsScrollContainer.setSize(this.MIDDLE_WIDTH, TAB_HEIGHT);
+        this.textScrollContainer.setSize(this.MIDDLE_WIDTH, this.text.height);
+
         // Update the scroll container size, accounting for buttons
         const buttonOffset = this.leftArrow.display.width + this.rightArrow.display.width;
         this.scrollContainer.setSize(
@@ -1741,16 +1703,16 @@ export default class Toolbar extends ContainerObject {
             Flashbang.stageHeight
         );
 
-        this.topScrollContainer.doLayout();
         this._tabsScrollContainer.doLayout();
         this.middleScrollContainer.doLayout();
         this.textScrollContainer.doLayout();
         this.lowerVContainer.layout(true);
         this.lowerHLayout.layout(true);
-        this._vContent.layout(true);
 
+        this.middleHLayout.position.x = this.MIDDLE_MARGIN;
         this.middleHLayout.position.y += 30;
         this.textScrollContainer.display.position.y += 30;
+        this.textHLayout.position.x = this.MIDDLE_MARGIN + 20;
 
         this.updateArrowVisibility();
         this.updateTopContainer();
@@ -1758,6 +1720,7 @@ export default class Toolbar extends ContainerObject {
 
         // Center the toolbar
         this._vContent.x = (Flashbang.stageWidth - this._vContent.width) / 2;
+        this._vContent.layout(true);
 
         DisplayUtil.positionRelative(
             this.collapseButton.container,
@@ -1835,25 +1798,14 @@ export default class Toolbar extends ContainerObject {
         this.lowerHLayout = new HLayoutContainer(0, VAlign.BOTTOM);
         this.backgroundContainer = new Container();
 
-        this._scrollPrevButton = new GameButton();
-        this._scrollPrevButton.allStates(Bitmaps.PrevArrow);
-
-        this._scrollNextButton = new GameButton();
-        this._scrollNextButton.allStates(Bitmaps.NextArrow);
-
-        this._scrollTopPrevButton = new GameButton();
-        this._scrollTopPrevButton.allStates(Bitmaps.PrevArrow);
-
-        this._scrollTopNextButton = new GameButton();
-        this._scrollTopNextButton.allStates(Bitmaps.NextArrow);
-
-        const WIDTH = Math.min(TOOLBAR_WIDTH, Flashbang.stageWidth * 0.8);
-        MIDDLE_WIDTH = WIDTH - (this._scrollPrevButton.display.width + this._scrollNextButton.display.width);
+        this.WIDTH = Math.max(DEFAULT_TOOLBAR_WIDTH, Flashbang.stageWidth * 0.8);
+        this.MIDDLE_WIDTH = DEFAULT_TOOLBAR_WIDTH - 28;
+        this.MIDDLE_MARGIN = (this.WIDTH - DEFAULT_TOOLBAR_WIDTH) / 2;
 
         this.background = new Graphics()
             .beginFill(EDIT_BACKCOLOR, 1)
-            .drawRect(0, 0, WIDTH, 223)
-            .drawRoundedRect(0, -5, WIDTH, 10, 7)
+            .drawRect(0, 0, this.WIDTH, BACKGROUND_HEIGHT)
+            .drawRoundedRect(0, -5, this.WIDTH, 10, 7)
             .endFill();
         this.background.visible = false;
 
@@ -1865,28 +1817,27 @@ export default class Toolbar extends ContainerObject {
         this.topHLayout = new HLayoutContainer();
         this.topBg = new Graphics()
             .beginFill(MIDDLE_BACKCOLOR, 0)
-            .drawRect(0, 0, MIDDLE_WIDTH, BUTTON_WIDTH + 2)
+            .drawRect(0, 0, this.MIDDLE_WIDTH, BUTTON_WIDTH + 2)
             .endFill();
-        this.topScrollContainer = new ScrollContainer(
-            MIDDLE_WIDTH,
-            BUTTON_WIDTH + 3
-        );
-        this.topScrollContainer.content.addChild(this.topBg);
+        this.topToolsContainer = new HLayoutContainer();
+        this.topLeftSpacer = new TopSpacer(10, 1);
+        this.topRightSpacer = new TopSpacer(10, 1);
 
-        this.addObject(this._scrollTopPrevButton, this.topHLayout);
-        this.addObject(this.topScrollContainer, this.topHLayout);
-        this.addObject(this._scrollTopNextButton, this.topHLayout);
+        this.topHLayout.addChild(this.topLeftSpacer);
+        this.topHLayout.addChild(this.topToolsContainer);
+        this.topHLayout.addChild(this.topRightSpacer);
 
         this.middleHLayout = new HLayoutContainer();
         this.middleBg = new Graphics()
             .beginFill(MIDDLE_BACKCOLOR)
-            .drawRect(0, 0, MIDDLE_WIDTH, 47)
-            .drawRoundedRect(0, 43, MIDDLE_WIDTH, 10, 7)
+            .drawRect(0, 0, this.MIDDLE_WIDTH, 47)
+            .drawRoundedRect(0, 43, this.MIDDLE_WIDTH, 10, 7)
             .endFill();
         this.middleHLayout.visible = false;
         this.lowerVContainer.addChild(this.topHLayout);
 
         // this.middleHLayout.position.set(this.middleHLayout.position.x, this.middleHLayout.position.y + 30);
+        this.middleHLayout.position.x = this.MIDDLE_MARGIN;
 
         DisplayUtil.positionRelative(
             this._tabsHContainer,
@@ -1899,15 +1850,14 @@ export default class Toolbar extends ContainerObject {
             -TAB_HEIGHT
         );
 
-        this.addObject(this._scrollPrevButton, this.middleHLayout);
-
         this.middleScrollContainer = new ScrollContainer(
-            MIDDLE_WIDTH,
+            this.MIDDLE_WIDTH,
             BUTTON_WIDTH
         );
         this.middleScrollContainer.content.addChild(this.middleBg);
+        this.middleHLayout.addHSpacer(14);
         this.addObject(this.middleScrollContainer, this.middleHLayout);
-        this.addObject(this._scrollNextButton, this.middleHLayout);
+        this.middleHLayout.addHSpacer(14);
         this.lowerVContainer.addChild(this.middleHLayout);
         // eslint-disable-next-line max-len
         this.text = new Text(
@@ -1921,7 +1871,7 @@ export default class Toolbar extends ContainerObject {
         );
         this.textHLayout = new HLayoutContainer();
         this.textScrollContainer = new ScrollContainer(
-            MIDDLE_WIDTH,
+            this.MIDDLE_WIDTH,
             this.text.height
         );
         this.textScrollContainer.content.addChild(this.text);
@@ -1950,77 +1900,6 @@ export default class Toolbar extends ContainerObject {
             20
         );
 
-        this.regs.add(
-            this._scrollPrevButton.clicked.connect(() => {
-                if (this._scrollOffset <= 0) return;
-                this._scrollOffset
-                    -= this._scrollOffset < this._scrollStep
-                        ? this._scrollOffset
-                        : this._scrollStep;
-                this.middleScrollContainer.setScroll(this._scrollOffset, 0);
-                const cntr = this.middleScrollContainer.content.children.reduce(
-                    (acc, el) => {
-                        if (!el.buttonMode || !el.visible) return acc;
-                        return acc + 1;
-                    },
-                    0
-                );
-                const newWidth = cntr * this._scrollStep;
-                this.middleBg.width = newWidth < MIDDLE_WIDTH ? MIDDLE_WIDTH : newWidth;
-            })
-        );
-
-        this.regs.add(
-            this._scrollNextButton.clicked.connect(() => {
-                const contentWidth = this.middleScrollContainer.content.children.length
-                    * this._scrollStep;
-                if (contentWidth < this.middleScrollContainer.content.width) return;
-                if (this._scrollOffset >= this.middleScrollContainer.maxScrollX) return;
-                const diff = this.middleScrollContainer.maxScrollX - this._scrollOffset;
-                this._scrollOffset
-                    += diff < this._scrollStep ? diff : this._scrollStep;
-                this.middleScrollContainer.setScroll(this._scrollOffset, 0);
-                const cntr = this.middleScrollContainer.content.children.reduce(
-                    (acc, el) => {
-                        if (!el.buttonMode || !el.visible) return acc;
-                        return acc + 1;
-                    },
-                    0
-                );
-                const newWidth = cntr * this._scrollStep;
-                this.middleBg.width = newWidth < MIDDLE_WIDTH ? MIDDLE_WIDTH : newWidth;
-            })
-        );
-
-        this.regs.add(
-            this._scrollTopPrevButton.clicked.connect(() => {
-                const width = this.topScrollContainer.content.width;
-                const dW = width - MIDDLE_WIDTH;
-                if (dW > 0 && this.topScrollContainer.scrollX > 0) {
-                    this.topScrollContainer.scrollX -= Math.min(
-                        BUTTON_WIDTH,
-                        this.topScrollContainer.scrollX
-                    );
-                }
-            })
-        );
-
-        this.regs.add(
-            this._scrollTopNextButton.clicked.connect(() => {
-                const width = this.topScrollContainer.content.width;
-                const dW = width - MIDDLE_WIDTH;
-                if (dW > 0) {
-                    const dx = width - this.topScrollContainer.scrollX - MIDDLE_WIDTH;
-                    if (dx > 0) {
-                        this.topScrollContainer.scrollX += Math.min(
-                            BUTTON_WIDTH,
-                            dx
-                        );
-                    }
-                }
-            })
-        );
-
         this.textScrollContainer.content.interactive = true;
         let downed = false;
         let downX = 0;
@@ -2033,8 +1912,8 @@ export default class Toolbar extends ContainerObject {
                 const dx = downX - e.data.global.x;
                 const dW = this.text.width
                     - this.textScrollContainer.scrollX
-                    - MIDDLE_WIDTH;
-                if (this.text.width > MIDDLE_WIDTH && dW - dx > 0) {
+                    - this.MIDDLE_WIDTH;
+                if (this.text.width > this.MIDDLE_WIDTH && dW - dx > 0) {
                     this.textScrollContainer.scrollX += dx;
                 }
                 downX = e.data.global.x;
@@ -2133,18 +2012,18 @@ export default class Toolbar extends ContainerObject {
     }
 
     private makeCategory() {
-        this.makeInfoButtons();
         this.makeSolveButtons();
         this.makeCreateButtons();
         this.makeViewButtons();
+        this.makeInfoButtons();
         this.makeInoutButtons();
         this.makeAnnotateButtons();
         this.makeCustomButtons();
 
-        this.makeInfoLayout();
         this.makeSolveLayout();
         this.makeCreateLayout();
         this.makeViewLayout();
+        this.makeInfoLayout();
         this.makeInoutLayout();
         this.makeAnnotateLayout();
         this.makeCustomLayout();
@@ -2159,19 +2038,17 @@ export default class Toolbar extends ContainerObject {
         this.makeLayout();
 
         this.leftArrow = this.makeArrowButton('left');
+        this.rightArrow = this.makeArrowButton('right');
+
         this.addObject(this.leftArrow, this.scrollContainerContainer);
 
         this.addObject(this.scrollContainer, this.scrollContainerContainer);
 
         this.makeExpandControl();
-
         this.makeCategory();
-
         this.makeFeedbackLayout();
-
         this.layoutTabs();
 
-        this.rightArrow = this.makeArrowButton('right');
         this.addObject(this.rightArrow, this.scrollContainerContainer);
 
         let interval: NodeJS.Timeout;
@@ -2428,7 +2305,7 @@ export default class Toolbar extends ContainerObject {
                 }
             }
         } else {
-            const count = endButtonGroup._content.children.length;
+            const count = endButtonGroup.buttons.length;
             // when topButtonGroup has space
             if (count < endButtonGroup._capability) {
                 // from middle to top
@@ -2856,7 +2733,7 @@ export default class Toolbar extends ContainerObject {
             endButtonBounds = rightButtonsBounds;
         }
         if (endButtonGroup && endButtonBounds) {
-            const count = endButtonGroup._content.children.length;
+            const count = endButtonGroup.buttons.length;
 
             const minX = endButtonBounds.x;
             const cursorX = x;
@@ -2963,7 +2840,6 @@ export default class Toolbar extends ContainerObject {
                     this._isExpanded = false;
                     this.collapseButton.container.visible = false;
                     this.expandButton.container.visible = true;
-                    // this._tabsHContainer.visible = false;
 
                     this.middleHLayout.visible = false;
                     this.textHLayout.visible = false;
@@ -3007,15 +2883,15 @@ export default class Toolbar extends ContainerObject {
         );
     }
 
-    private makeArrowButton(direction: 'left' | 'right'): ToolbarButton {
+    private makeArrowButton(direction: 'left' | 'right'): GameButton {
         // Height of the rest of the toolbar elements
         const HEIGHT = APPROX_ITEM_HEIGHT;
 
         const arrowImg = new Sprite(
             BitmapManager.getBitmap(
                 direction === 'left'
-                    ? Bitmaps.ImgArrowLeft
-                    : Bitmaps.ImgArrowRight
+                    ? Bitmaps.PrevArrow
+                    : Bitmaps.NextArrow
             )
         );
 
@@ -3036,7 +2912,7 @@ export default class Toolbar extends ContainerObject {
             VAlign.CENTER
         );
 
-        const bt = new ToolbarButton();
+        const bt = new GameButton();
         bt.setName('arrowButton');
         bt.allStates(arrowContainer);
         bt.tooltip(`Scroll ${direction}`);
@@ -3060,14 +2936,14 @@ export default class Toolbar extends ContainerObject {
 
         this.regs.add(
             this.pointerUp.connect((_e) => {
-                this.disableTools(false);
+                this._disableTools(false);
                 mouseDown = false;
             })
         );
 
         this.regs.add(
             this.scrollContainer.pointerUpOutside.connect(() => {
-                this.disableTools(false);
+                this._disableTools(false);
                 mouseDown = false;
             })
         );
@@ -3082,7 +2958,7 @@ export default class Toolbar extends ContainerObject {
                 ) {
                     const offset = x - startingX;
                     if (Math.abs(offset) > 15) {
-                        this.disableTools(true);
+                        this._disableTools(this.toolBarEnabled);
                         this.scrollContainer.scrollX = startingScroll - offset;
                         this.updateArrowVisibility();
                     }
@@ -3183,28 +3059,32 @@ export default class Toolbar extends ContainerObject {
     }
 
     public disableTools(disable: boolean): void {
+        this.toolBarEnabled = !disable;
+        this._disableTools(disable);
+    }
+
+    public _disableTools(disable: boolean): void {
         this.stateToggle.enabled = !disable;
         this.targetButton.enabled = !disable;
         this.palette.enabled = !disable;
         this.naturalButton.enabled = !disable;
         this.estimateButton.enabled = !disable;
 
-        if (disable) {
-            this.toolbarButtons.forEach((bt) => {
-                bt.enabled = false;
-                this.getMirrorButtons(bt).forEach((b) => {
-                    if (b) b.enabled = false;
-                });
+        this.leftButtonsGroup.buttons.forEach((e) => {
+            e.enabled = !disable;
+        });
+        this.rightButtonsGroup.buttons.forEach((e) => {
+            e.enabled = !disable;
+        });
+
+        this.toolbarButtons.forEach((bt) => {
+            bt.enabled = !disable;
+            this.getMirrorButtons(bt).forEach((b) => {
+                if (b) b.enabled = !disable;
             });
-        } else {
-            this.toolbarButtons.forEach((bt) => {
-                bt.enabled = true;
-                this.getMirrorButtons(bt).forEach((b) => {
-                    if (b) b.enabled = true;
-                });
-            });
-            this.updateEnableOfMiddleButtons();
-        }
+        });
+
+        this.updateEnableOfMiddleButtons();
     }
 
     private _deselectAllPaintTools(): void {
@@ -3280,6 +3160,10 @@ export default class Toolbar extends ContainerObject {
         return this._vContent.getBounds();
     }
 
+    private WIDTH: number = DEFAULT_TOOLBAR_WIDTH;
+    private MIDDLE_WIDTH = DEFAULT_TOOLBAR_WIDTH - 30 * 2;
+    private MIDDLE_MARGIN = 0;
+
     private toolbarButtons: Map<string, ToolbarButton> = new Map();
     private _bottomButtons: Map<string, ToolbarButton> = new Map();
     public _topButtons: Map<string, ToolbarButton> = new Map();
@@ -3294,21 +3178,12 @@ export default class Toolbar extends ContainerObject {
     private _canDrag: boolean;
     private _canDrop: boolean;
 
-    private _scrollStep: number;
-    private _scrollOffset: number;
-
     private _draggingElement: ToolbarButton | undefined;
     private _draggingIndex: number;
 
     private _startPointGlobal: Point | null;
     private _startPointContainer: Container | null;
     private _movePointGlobal: Point = new Point();
-
-    private _scrollNextButton: GameButton;
-    private _scrollPrevButton: GameButton;
-
-    private _scrollTopNextButton: GameButton;
-    private _scrollTopPrevButton: GameButton;
 
     private _annotationManager: AnnotationManager | undefined;
 }

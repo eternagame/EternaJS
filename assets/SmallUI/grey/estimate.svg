@@ -1,1 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="19.594" height="18.144" viewBox="1023 782.999 19.594 18.144"><g data-name="Group 648"><g data-name="Group 647" transform="translate(1023 783)" clip-path="url(&quot;#a&quot;)"><path d="M17.165.118h2.346a11.794 11.794 0 0 1 .011.39c.02 1.664-.336 2.888-.923 3.754a4.142 4.142 0 0 1-3.581 1.76 7.382 7.382 0 0 1-.512-.018c-1.378-.095-2.756-.592-5.157-1.705a60.659 60.659 0 0 1-.043-.021c-1.192-.583-2.22-1.132-3.18-1.44A4.794 4.794 0 0 0 4.66 2.58a1.958 1.958 0 0 0-1.845 1.052c-.295.532-.467 1.28-.5 2.272H.009c-.083-2.064.467-3.594 1.4-4.579A4.371 4.371 0 0 1 4.659 0a6.914 6.914 0 0 1 1.057.078C6.72.232 7.725.62 9.204 1.304a89.571 89.571 0 0 1 .967.456c1.984.935 3.427 1.637 4.869 1.642a4.456 4.456 0 0 0 .015 0c1.36 0 2.028-1.06 2.105-3.075a10.219 10.219 0 0 0 .005-.209ZM.051 11.587h19.543V8.965H.05v2.622Zm0 6.556h19.543v-2.621H.05v2.62Z" fill="#6189a9" fill-rule="evenodd" data-name="Path 1816"/></g></g><defs><clipPath id="a"><path d="M0 0h19.594v18.143H0V0" data-name="Rectangle 428"/></clipPath></defs></svg>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="19.594" height="18.143" viewBox="0 0 19.594 18.143">
+  <defs>
+    <clipPath id="clip-path">
+      <rect id="Rectangle_428" data-name="Rectangle 428" width="19.594" height="18.143" fill="#6189a9"/>
+    </clipPath>
+  </defs>
+  <g id="Group_648" data-name="Group 648" transform="translate(0 0)">
+    <g id="Group_647" data-name="Group 647" transform="translate(0 0)" clip-path="url(#clip-path)">
+      <path id="Path_1816" data-name="Path 1816" d="M.051,18.143H19.594V15.521H.051Zm0-6.556H19.594V8.965H.051ZM.008,5.9C-.149,2,1.963,0,4.659,0,6.3,0,7.551.509,10.171,1.76,12.163,2.7,13.608,3.4,15.055,3.4c1.406,0,2.073-1.133,2.11-3.284h2.346c.195,4.379-2.073,5.9-4.493,5.9-1.565,0-2.971-.472-5.669-1.723C7.512,3.4,6.067,2.58,4.659,2.58S2.391,3.557,2.315,5.9Z" transform="translate(0 0)" fill="#6189a9"/>
+    </g>
+  </g>
+</svg>

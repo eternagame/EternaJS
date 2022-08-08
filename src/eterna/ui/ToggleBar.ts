@@ -1,7 +1,7 @@
 import {
     InteractionEvent, Point, Text, Sprite
 } from 'pixi.js';
-import {Signal} from 'signals';
+import {Registration, Signal} from 'signals';
 import {
     ContainerObject,
     KeyboardListener,
@@ -19,10 +19,13 @@ import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import ROPWait from 'eterna/rscript/ROPWait';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import GameButton from './GameButton';
+import Tooltips from './Tooltips';
 
 export default class ToggleBar extends ContainerObject implements KeyboardListener, Enableable {
     /** Emitted when our state changes */
     public readonly stateChanged: Signal<number> = new Signal();
+    private _tooltip: string;
+    private _tooltipReg: Registration | null;
 
     constructor(numStates: number) {
         super();
@@ -66,6 +69,7 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
         super.added();
         Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.keyboardInput.pushListener(this));
+        this.setupTooltip();
     }
 
     public set state(newState: number) {
@@ -90,6 +94,31 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
         } else {
             return false;
         }
+    }
+
+    private setupTooltip(): void {
+        if (this._tooltipReg != null) {
+            this._tooltipReg.close();
+            this._tooltipReg = null;
+        }
+
+        if (this._tooltip != null && this._tooltip !== '' && Tooltips.instance != null) {
+            this._tooltipReg = this.regs.add(Tooltips.instance.addTooltip(this, this._tooltip));
+        }
+    }
+
+    public tooltip(text: string): ToggleBar {
+        if (this._tooltip !== text) {
+            this._tooltip = text;
+            if (this.isLiveObject) {
+                this.setupTooltip();
+            }
+        }
+        return this;
+    }
+
+    public getToolTip() {
+        return this._tooltip;
     }
 
     public get enabled(): boolean {

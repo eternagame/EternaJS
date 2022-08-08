@@ -1,1 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="28.736" height="11.326" viewBox="552.834 626.381 28.736 11.326"><g data-name="Group 636"><path d="M572.366 632.044a5.662 5.662 0 0 1-5.663 5.663 5.663 5.663 0 0 1-5.665-5.663 5.663 5.663 0 0 1 5.665-5.663 5.662 5.662 0 0 1 5.663 5.663Z" stroke-linejoin="round" stroke-linecap="round" stroke="#bedce8" fill="transparent" data-name="Path 1803"/><path d="M571.47 632.544a4.267 4.267 0 0 1-4.267 4.267 4.267 4.267 0 0 1-4.269-4.267 4.267 4.267 0 0 1 4.269-4.267 4.267 4.267 0 0 1 4.267 4.267Z" fill="#bedce8" fill-rule="evenodd" data-name="Path 1804"/><path d="m581.57 632.544-5.925-4.444v2.963h-2.962v2.962h2.962v2.962l5.925-4.443Z" fill="#bedce8" fill-rule="evenodd" data-name="Path 1805"/><path d="m552.834 632.544 5.925 4.443v-2.962h2.962v-2.962h-2.962V628.1l-5.925 4.444Z" fill="#bedce8" fill-rule="evenodd" data-name="Path 1806"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="28.736" height="12.326" viewBox="0 0 28.736 12.326">
+  <g id="Group_636" data-name="Group 636" transform="translate(-1060.834 -626.381)">
+    <path id="Path_1803" data-name="Path 1803" d="M11.328,5.663A5.664,5.664,0,1,1,5.665,0a5.662,5.662,0,0,1,5.663,5.663" transform="translate(1069.538 626.881)" fill="none" stroke="#bedce8" stroke-width="1"/>
+    <path id="Path_1804" data-name="Path 1804" d="M8.536,4.267A4.268,4.268,0,1,1,4.269,0,4.267,4.267,0,0,1,8.536,4.267" transform="translate(1070.934 628.277)" fill="#bedce8"/>
+    <path id="Path_1805" data-name="Path 1805" d="M694.6,347.3l-5.925-4.443v2.962H685.71v2.962h2.962v2.962Z" transform="translate(394.973 285.24)" fill="#bedce8"/>
+    <path id="Path_1806" data-name="Path 1806" d="M0,347.294l5.925,4.443v-2.962H8.887v-2.962H5.925V342.85Z" transform="translate(1060.834 285.25)" fill="#bedce8"/>
+  </g>
+</svg>
