@@ -797,7 +797,7 @@ export default class PoseEditMode extends GameMode {
         }
 
         this._exitButton.display.visible = false;
-        this.addObject(this._exitButton, this.uiLayer);
+        this.addObject(this._exitButton, this.dialogLayer);
 
         const puzzleTitle = UITheme.makeTitle(this._puzzle.getName(!Eterna.MOBILE_APP), 0xC0DCE7);
         puzzleTitle.hideWhenModeInactive();
