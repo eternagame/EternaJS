@@ -239,7 +239,7 @@ export class ButtonsGroup extends ContainerObject {
 type VoidHandler = () => void;
 
 class TopSpacer extends Container {
-    private sprite: Sprite;
+    sprite: Sprite;
     constructor(width: number, height: number) {
         super();
 
@@ -714,7 +714,8 @@ export default class Toolbar extends ContainerObject {
             this.submitButton.tooltip('Publish your solution!');
             this.getMirrorButtons(this.submitButton).forEach((b) => { if (b) b.tooltip('Publish your solution!'); });
             this.pushButtonToCategory(this.submitButton);
-        } else if (this._type === ToolbarType.PUZZLEMAKER) {
+        } else if (this._type === ToolbarType.PUZZLEMAKER
+            || this._type === ToolbarType.PUZZLEMAKER_EMBEDDED) {
             this.submitButton.tooltip('Publish your puzzle!');
             this.getMirrorButtons(this.submitButton).forEach((b) => { if (b) b.tooltip('Publish your puzzle!'); });
             this.pushButtonToCategory(this.submitButton);
@@ -1238,7 +1239,9 @@ export default class Toolbar extends ContainerObject {
             this.regs.add(
                 this._annotationManager.viewAnnotationDataUpdated.connect(
                     () => {
-                        if (this.annotationPanelDlg) this.annotationPanelDlg.updateFinalFloatLocation();
+                        if (this.annotationPanelDlg && this.annotationPanelDlg._ref.isLive) {
+                            this.annotationPanelDlg.updatePanel();
+                        }
                     }
                 )
             );
@@ -1331,15 +1334,23 @@ export default class Toolbar extends ContainerObject {
             this._type === ToolbarType.PUZZLEMAKER
             || this._type === ToolbarType.PUZZLEMAKER_EMBEDDED
         ) {
-            // add
+            leftBts.push(this.getMirrorButton(this.addBaseButton) as ToolbarButton);
+            leftBts.push(this.getMirrorButton(this.submitButton) as ToolbarButton);
+
+            leftButtonNames.push(this.addBaseButton.name as string);
+            leftButtonNames.push(this.submitButton.name as string);
         } else if (this._type === ToolbarType.LAB) {
             leftBts.push(this.getMirrorButton(this.viewSolutionsButton) as ToolbarButton);
             leftBts.push(this.getMirrorButton(this.submitButton) as ToolbarButton);
 
             leftButtonNames.push(this.viewSolutionsButton.name as string);
             leftButtonNames.push(this.submitButton.name as string);
-        } else if (this._type === ToolbarType.PUZZLE) {
-            // add code
+        } else {
+            leftBts.push(this.getMirrorButton(this.pairSwapButton) as ToolbarButton);
+            leftBts.push(this.getMirrorButton(this.baseShiftButton) as ToolbarButton);
+
+            leftButtonNames.push(this.pairSwapButton.name as string);
+            leftButtonNames.push(this.baseShiftButton.name as string);
         }
         leftBts.push(this.getMirrorButton(this.settingsButton) as ToolbarButton);
         leftButtonNames.push(this.settingsButton.name as string);
@@ -1378,15 +1389,42 @@ export default class Toolbar extends ContainerObject {
         return rightButtonNames;
     }
 
+    private saveTopbarSetting(topbarSetting: TopBarSetting) {
+        let saved = false;
+        const array = [];
+        for (const val of Eterna.settings.topToolbarSettings.value) {
+            array.push(val);
+        }
+        for (const val of array) {
+            if (val.type === topbarSetting.type) {
+                val.left = topbarSetting.left;
+                val.right = topbarSetting.right;
+                saved = true;
+            }
+        }
+        if (!saved) array.push(topbarSetting);
+
+        Eterna.settings.topToolbarSettings.value = array;
+    }
+
+    private readTopbarSetting(type: number) {
+        for (const val of Eterna.settings.topToolbarSettings.value) {
+            if (val.type === type) {
+                return val;
+            }
+        }
+        return null;
+    }
+
     private initializeTopButtons() {
         const leftButtonNames = this.initializeTopLeftButtons();
         const rightButtonNames = this.initializeTopRightButtons();
 
-        Eterna.settings.topToolbarSettings.value = {
+        this.saveTopbarSetting({
             type: this._type,
             left: leftButtonNames,
             right: rightButtonNames
-        };
+        });
     }
 
     private saveTopButtons() {
@@ -1398,11 +1436,11 @@ export default class Toolbar extends ContainerObject {
         this.rightButtonsGroup._content.children.forEach((e) => {
             rightButtonNames.push(e.name);
         });
-        Eterna.settings.topToolbarSettings.value = {
+        this.saveTopbarSetting({
             type: this._type,
             left: leftButtonNames,
             right: rightButtonNames
-        };
+        });
     }
 
     private makeTopLayout() {
@@ -1416,9 +1454,12 @@ export default class Toolbar extends ContainerObject {
             })
         );
 
-        if (this._type !== ToolbarType.FEEDBACK) {
-            const topToolbarSettings = Eterna.settings.topToolbarSettings.value;
-            if (topToolbarSettings === null) {
+        // if (this._type !== ToolbarType.FEEDBACK)
+        {
+            const topToolbarSettings = this.readTopbarSetting(this._type);
+            if (topToolbarSettings === null
+                || topToolbarSettings.left.length === 0
+                || topToolbarSettings.right.length === 0) {
                 this.initializeTopButtons();
             } else {
                 try {
@@ -3037,7 +3078,8 @@ export default class Toolbar extends ContainerObject {
 
             this._autoCollapseRegs = new RegistrationGroup();
             this._autoCollapseRegs.add(this.pointerTap.connect(() => {
-                if (this._isAutoCollapsed) uncollapse(); else collapse();
+                if (this._isAutoCollapsed) uncollapse();
+                else collapse();
             }));
             this._autoCollapseRegs.add(this.pointerOver.connect(uncollapse));
             this._autoCollapseRegs.add(this.pointerOut.connect(collapse));
@@ -3047,6 +3089,7 @@ export default class Toolbar extends ContainerObject {
             Assert.assertIsDefined(Flashbang.stageHeight);
             this.display.interactive = false;
             this._invisibleBackground.interactive = false;
+            this._isAutoCollapsed = false;
 
             if (this._autoCollapseRegs != null) {
                 this._autoCollapseRegs.close();

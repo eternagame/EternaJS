@@ -1986,6 +1986,9 @@ export default class PoseEditMode extends GameMode {
         this.toolbar.undoButton.enabled = !this._isFrozen;
         this.toolbar.redoButton.enabled = !this._isFrozen;
         this.toolbar.freezeButton.toggled.value = this._isFrozen;
+        this.toolbar.getMirrorButtons(this.toolbar.freezeButton).forEach((b) => {
+            if (b) b.toggled.value = this._isFrozen;
+        });
 
         if (!this._isFrozen) { // we just "thawed", update
             this.poseEditByTarget(this._curTargetIndex);
