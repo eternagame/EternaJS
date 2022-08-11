@@ -26,7 +26,7 @@ import FloatDialog from './FloatDialog';
 
 export default class AnnotationPanelDialog extends FloatDialog<void> {
     constructor(manager: AnnotationManager) {
-        super('Annotaions');
+        super('Annotations');
 
         this._annotationManager = manager;
     }

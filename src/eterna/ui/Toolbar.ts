@@ -1355,13 +1355,13 @@ export default class Toolbar extends ContainerObject {
         leftBts.push(this.getMirrorButton(this.settingsButton) as ToolbarButton);
         leftButtonNames.push(this.settingsButton.name as string);
 
-        leftBts.forEach((b) => {
+        for (const b of leftBts) {
             if (b.name) {
                 b.display.visible = true;
                 this._bottomButtons.delete(b.name);
                 this._topButtons.set(b.name, b);
             }
-        });
+        }
         this.leftButtonsGroup = new ButtonsGroup(leftBts);
         return leftButtonNames;
     }
@@ -1378,13 +1378,13 @@ export default class Toolbar extends ContainerObject {
         rightBts.push(this.getMirrorButton(this.redoButton) as ToolbarButton);
         rightButtonNames.push(this.undoButton.name as string);
         rightButtonNames.push(this.redoButton.name as string);
-        rightBts.forEach((b) => {
+        for (const b of rightBts) {
             if (b.name) {
                 b.display.visible = true;
                 this._bottomButtons.delete(b.name);
                 this._topButtons.set(b.name, b);
             }
-        });
+        }
         this.rightButtonsGroup = new ButtonsGroup(rightBts);
         return rightButtonNames;
     }
@@ -1447,7 +1447,7 @@ export default class Toolbar extends ContainerObject {
         Assert.assertIsDefined(Flashbang.stageWidth);
 
         this.palette = new NucleotidePalette();
-
+        this.palette.changeDefaultMode();
         this.regs.add(
             this.palette.targetClicked.connect(() => {
                 this._deselectAllPaintTools();
@@ -1462,62 +1462,65 @@ export default class Toolbar extends ContainerObject {
                 || topToolbarSettings.right.length === 0) {
                 this.initializeTopButtons();
             } else {
-                try {
-                    const leftBts: ToolbarButton[] = [];
-                    const rightBts: ToolbarButton[] = [];
-                    if (topToolbarSettings.type === this._type) {
-                        topToolbarSettings.left.forEach((name) => {
-                            const mirrorButton = this.getMirrorButton(
-                                this.toolbarButtons.get(name) as ToolbarButton
-                            ) as ToolbarButton;
-                            if (name === 'PiP') {
-                                if (this._states > 1
-                                    && this._type !== ToolbarType.PUZZLEMAKER
-                                    && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED
-                                ) {
-                                    leftBts.push(mirrorButton);
-                                }
-                            } else {
-                                leftBts.push(mirrorButton);
-                            }
-                        });
-                        topToolbarSettings.right.forEach((name) => {
-                            const mirrorButton = this.getMirrorButton(
-                                this.toolbarButtons.get(name) as ToolbarButton
-                            ) as ToolbarButton;
-                            if (name === 'PiP') {
-                                if (this._states > 1
-                                    && this._type !== ToolbarType.PUZZLEMAKER
-                                    && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED
-                                ) {
-                                    rightBts.push(mirrorButton);
-                                }
-                            } else {
-                                rightBts.push(mirrorButton);
-                            }
-                        });
-                        leftBts.forEach((b) => {
-                            if (b.name) {
-                                b.display.visible = true;
-                                this._bottomButtons.delete(b.name);
-                                this._topButtons.set(b.name, b);
-                            }
-                        });
-                        if (leftBts.length > 0) this.leftButtonsGroup = new ButtonsGroup(leftBts);
-                        else this.initializeTopLeftButtons();
-                        rightBts.forEach((b) => {
-                            if (b.name) {
-                                b.display.visible = true;
-                                this._bottomButtons.delete(b.name);
-                                this._topButtons.set(b.name, b);
-                            }
-                        });
-                        if (rightBts.length > 0) this.rightButtonsGroup = new ButtonsGroup(rightBts);
-                        else this.initializeTopRightButtons();
+                const leftBts: ToolbarButton[] = [];
+                const rightBts: ToolbarButton[] = [];
+                topToolbarSettings.left.forEach((name) => {
+                    const mirrorButton = this.getMirrorButton(
+                        this.toolbarButtons.get(name) as ToolbarButton
+                    ) as ToolbarButton;
+                    if (name === 'PiP') {
+                        if (this._states > 1
+                            && this._type !== ToolbarType.PUZZLEMAKER
+                            && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED
+                        ) {
+                            leftBts.push(mirrorButton);
+                        }
+                    } else {
+                        leftBts.push(mirrorButton);
                     }
-                } catch {
-                    this._topButtons.clear();
+                });
+                topToolbarSettings.right.forEach((name) => {
+                    const mirrorButton = this.getMirrorButton(
+                        this.toolbarButtons.get(name) as ToolbarButton
+                    ) as ToolbarButton;
+                    if (name === 'PiP') {
+                        if (this._states > 1
+                            && this._type !== ToolbarType.PUZZLEMAKER
+                            && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED
+                        ) {
+                            rightBts.push(mirrorButton);
+                        }
+                    } else {
+                        rightBts.push(mirrorButton);
+                    }
+                });
+
+                for (const b of leftBts) {
+                    if (b.name) {
+                        b.display.visible = true;
+                        this._bottomButtons.delete(b.name);
+                        this._topButtons.set(b.name, b);
+                    }
                 }
+                if (leftBts.length > 0) {
+                    this.leftButtonsGroup = new ButtonsGroup(leftBts);
+                } else {
+                    this.initializeTopLeftButtons();
+                }
+
+                for (const b of rightBts) {
+                    if (b.name) {
+                        b.display.visible = true;
+                        this._bottomButtons.delete(b.name);
+                        this._topButtons.set(b.name, b);
+                    }
+                }
+                if (rightBts.length > 0) {
+                    this.rightButtonsGroup = new ButtonsGroup(rightBts);
+                } else {
+                    this.initializeTopRightButtons();
+                }
+
                 if (this._topButtons.size === 0) {
                     this.initializeTopButtons();
                 }
@@ -1526,7 +1529,6 @@ export default class Toolbar extends ContainerObject {
             this.addObject(this.leftButtonsGroup, this.topToolsContainer);
             this.topToolsContainer.addHSpacer(TOP_HSPACE);
             this.addObject(this.palette, this.topToolsContainer);
-            this.palette.changeDefaultMode();
             this.topToolsContainer.addHSpacer(TOP_HSPACE);
             this.addObject(this.rightButtonsGroup, this.topToolsContainer);
         }
@@ -1677,15 +1679,22 @@ export default class Toolbar extends ContainerObject {
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
 
-        const topSpacerWidth = 4;
-        const paletteWidth = this.palette.display.width;
+        let topSpacerWidth = 4;
+        let paletteWidth = this.palette.display.width;
+        if (!this.palette.display.visible) {
+            topSpacerWidth += paletteWidth / 2;
+            paletteWidth = 0;
+        }
+
         const leftWidth = this.leftButtonsGroup.display.width;
         const rightWidth = this.rightButtonsGroup.display.width;
         const maxTopWidth = Math.max(leftWidth, rightWidth) * 2
             + TOP_HSPACE + paletteWidth + TOP_HSPACE + 2 * topSpacerWidth;
+
         const arrowWidth = this.leftArrow.display.width + this.rightArrow.display.width;
         const availableTopWidth = Flashbang.stageWidth - arrowWidth
             - (TOP_HSPACE + paletteWidth + TOP_HSPACE + 2 * topSpacerWidth);
+
         const availableTopCount = Math.floor(availableTopWidth / BUTTON_WIDTH);
         this.leftButtonsGroup._capability = Math.floor(availableTopCount / 2);
         this.rightButtonsGroup._capability = Math.floor(availableTopCount / 2);
@@ -1835,7 +1844,6 @@ export default class Toolbar extends ContainerObject {
         this._vContent = new VLayoutContainer(7);
         this.container.addChild(this._vContent);
 
-        // LOWER TOOLBAR (palette, zoom, settings, etc)
         this.lowerHLayout = new HLayoutContainer(0, VAlign.BOTTOM);
         this.backgroundContainer = new Container();
 
@@ -1850,7 +1858,7 @@ export default class Toolbar extends ContainerObject {
             .endFill();
         this.background.visible = false;
 
-        this.lowerVContainer = new VLayoutContainer();
+        this.lowerVContainer = new VLayoutContainer(0, HAlign.CENTER);
         this.backgroundContainer.addChild(this.background);
         this.backgroundContainer.addChild(this.lowerVContainer);
         this.lowerHLayout.addChild(this.backgroundContainer);
