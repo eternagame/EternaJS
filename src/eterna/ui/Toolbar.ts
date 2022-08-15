@@ -930,7 +930,8 @@ export default class Toolbar extends ContainerObject {
         }
 
         this.pushButtonToCategory(this.pairSwapButton);
-        this.pushButtonToCategory(this.baseShiftButton);
+        // todo
+        // this.pushButtonToCategory(this.baseShiftButton);
 
         this.regs.add(
             this.pairSwapButton.clicked.connect(() => {
@@ -1346,11 +1347,11 @@ export default class Toolbar extends ContainerObject {
             leftButtonNames.push(this.viewSolutionsButton.name as string);
             leftButtonNames.push(this.submitButton.name as string);
         } else {
-            leftBts.push(this.getMirrorButton(this.pairSwapButton) as ToolbarButton);
-            leftBts.push(this.getMirrorButton(this.baseShiftButton) as ToolbarButton);
+            leftBts.push(this.getMirrorButton(this.zoomInButton) as ToolbarButton);
+            leftBts.push(this.getMirrorButton(this.zoomOutButton) as ToolbarButton);
 
-            leftButtonNames.push(this.pairSwapButton.name as string);
-            leftButtonNames.push(this.baseShiftButton.name as string);
+            leftButtonNames.push(this.zoomInButton.name as string);
+            leftButtonNames.push(this.zoomOutButton.name as string);
         }
         leftBts.push(this.getMirrorButton(this.settingsButton) as ToolbarButton);
         leftButtonNames.push(this.settingsButton.name as string);

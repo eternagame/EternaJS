@@ -50,7 +50,7 @@ export default class EternaSettings extends Settings {
         this.designBrowserColumnNames = this.setting('designBrowserColumnNames-3', null);
         this.designBrowserSelectedSolutionIDs = this.setting('designBrowserSelectedSolutionIDs', null);
 
-        this.topToolbarSettings = this.setting<TopBarSetting[]>('topToolbarSettings-5', []);
+        this.topToolbarSettings = this.setting<TopBarSetting[]>('topToolbarSettings-6', []);
 
         // Denotes whether savegames have been transfered from localstorage/storeJS/EternaSettings to
         // indexedDB/localforage/SaveGameManager - eventually this might be able to be dropped,
