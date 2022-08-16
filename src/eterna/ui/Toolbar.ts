@@ -531,22 +531,22 @@ export default class Toolbar extends ContainerObject {
         this._tabsHContainer.visible = false;
 
         this._tabArray = [];
-        const tab0 = this._createTab(ButtonCategory.SOLVE);
-        const tab1 = this._createTab(ButtonCategory.CREATE);
-        const tab2 = this._createTab(ButtonCategory.VIEW);
-        const tab3 = this._createTab(ButtonCategory.INFO);
-        const tab4 = this._createTab(ButtonCategory.ANNOTATE);
-        const tab5 = this._createTab(ButtonCategory.IMPORT_EXPORT);
-        const tab6 = this._createTab(ButtonCategory.CUSTOM_LAYOUT);
-        this._currentTab = tab2;
+        const tabSolve = this._createTab(ButtonCategory.SOLVE);
+        const tabCreate = this._createTab(ButtonCategory.CREATE);
+        const tabView = this._createTab(ButtonCategory.VIEW);
+        const tabInfo = this._createTab(ButtonCategory.INFO);
+        const tabAnnotate = this._createTab(ButtonCategory.ANNOTATE);
+        const tabExport = this._createTab(ButtonCategory.IMPORT_EXPORT);
+        const tabLayout = this._createTab(ButtonCategory.CUSTOM_LAYOUT);
+        this._currentTab = tabSolve;
 
-        this._tabArray.push(tab0);
-        this._tabArray.push(tab1);
-        this._tabArray.push(tab2);
-        this._tabArray.push(tab3);
-        this._tabArray.push(tab4);
-        this._tabArray.push(tab5);
-        this._tabArray.push(tab6);
+        this._tabArray.push(tabSolve);
+        this._tabArray.push(tabCreate);
+        this._tabArray.push(tabView);
+        this._tabArray.push(tabInfo);
+        this._tabArray.push(tabAnnotate);
+        this._tabArray.push(tabExport);
+        this._tabArray.push(tabLayout);
 
         let totalWidth = 0;
         this._tabArray.forEach((tab) => {
@@ -555,31 +555,31 @@ export default class Toolbar extends ContainerObject {
         });
 
         this._tabsScrollContainer.addObject(
-            new ContainerObject(tab0.container),
+            new ContainerObject(tabSolve.container),
             this._tabsScrollContainer.content
         );
         this._tabsScrollContainer.addObject(
-            new ContainerObject(tab1.container),
+            new ContainerObject(tabCreate.container),
             this._tabsScrollContainer.content
         );
         this._tabsScrollContainer.addObject(
-            new ContainerObject(tab2.container),
+            new ContainerObject(tabView.container),
             this._tabsScrollContainer.content
         );
         this._tabsScrollContainer.addObject(
-            new ContainerObject(tab3.container),
+            new ContainerObject(tabInfo.container),
             this._tabsScrollContainer.content
         );
         this._tabsScrollContainer.addObject(
-            new ContainerObject(tab4.container),
+            new ContainerObject(tabAnnotate.container),
             this._tabsScrollContainer.content
         );
         this._tabsScrollContainer.addObject(
-            new ContainerObject(tab5.container),
+            new ContainerObject(tabExport.container),
             this._tabsScrollContainer.content
         );
         this._tabsScrollContainer.addObject(
-            new ContainerObject(tab6.container),
+            new ContainerObject(tabLayout.container),
             this._tabsScrollContainer.content
         );
         let offset = 0;
