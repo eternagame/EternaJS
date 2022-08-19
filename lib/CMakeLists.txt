@@ -22,7 +22,6 @@ if (EXISTS "RNApuzzler/RNApuzzler")
 	add_subdirectory(RNApuzzler)
 endif()
 
-
 if (EXISTS "EternaFold/EternaFold")
 	add_subdirectory(EternaFold)
 endif()

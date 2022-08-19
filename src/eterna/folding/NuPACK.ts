@@ -10,7 +10,7 @@ import Sequence from 'eterna/rnatypes/Sequence';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import * as NupackLib from './engines/NupackLib';
 import {
-    DotPlotResult, FullEvalResult, FullFoldResult, FullAdvancedResult, FullDefectResult
+    DotPlotResult, FullEvalResult, FullFoldResult, FullAdvancedResult, FullEnsembleDefectResult
 } from './engines/NupackLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
 import Folder, {
@@ -151,17 +151,13 @@ export default class NuPACK extends Folder {
     }
 
     /* override */
-    public getDefect(seq: Sequence, pairs: SecStruct, mode:number, pseudoknotted: boolean = false,
-        temp: number = 37): DefectResult {
+    public getDefect(seq: Sequence, pairs: SecStruct, temp: number = 37, pseudoknotted: boolean = false): DefectResult {
         const key = {
             primitive: 'defect',
             seq: seq.baseArray,
             pairs: pairs.pairs,
             pseudoknotted,
-            // bindingSite,
-            // bonus,
-            temp,
-            mode
+            temp
         };
 
         let defectResultDataCache: DefectResult = this.getCache(key) as DefectResult;
@@ -169,9 +165,9 @@ export default class NuPACK extends Folder {
             // trace("getSuboptEnsemble cache hit");
             return defectResultDataCache;
         }
-        let result: FullDefectResult | null = null;
-        result = this._lib.FullEnsembleDefect(seq.sequenceString(),
-            pairs.getParenthesis(), temp, pseudoknotted, mode);
+        let result: FullEnsembleDefectResult | null = null;
+        result = this._lib.GetEnsembleDefect(seq.sequenceString(),
+            pairs.getParenthesis(), temp, pseudoknotted);
 
         if (!result) {
             throw new Error('NuPACK returned a null result');
@@ -180,15 +176,12 @@ export default class NuPACK extends Folder {
         // initialize empty result cache
         defectResultDataCache = {
             ensembleDefect: -1,
-            ensembleDefectNormalized: -1,
-            mfeDefect: -1,
-            mfeDefectNormalized: -1
+            ensembleDefectNormalized: -1
+
         };
 
         defectResultDataCache.ensembleDefect = result.ensembleDefect;
         defectResultDataCache.ensembleDefectNormalized = result.ensembleDefectNormalized;
-        defectResultDataCache.mfeDefect = result.mfeDefect;
-        defectResultDataCache.mfeDefectNormalized = result.mfeDefectNormalized;
 
         this.putCache(key, defectResultDataCache);
         return defectResultDataCache;

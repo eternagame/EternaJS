@@ -70,17 +70,14 @@ EMSCRIPTEN_BINDINGS(EmscriptenBridge) {
 
     function("FullEnsembleNoBindingSite", &FullEnsembleNoBindingSite, allow_raw_pointers());
     function("FullEnsembleWithOligos", &FullEnsembleWithOligos, allow_raw_pointers());
-    function("getDotParens", &getDotParens, allow_raw_pointers());
-    function("getDotParensNew", &getDotParensNew, allow_raw_pointers());
+    function("GetEnsembleDefect", &GetEnsembleDefect, allow_raw_pointers());
    
-    class_<FullDefectResult>("FullDefectResult")  
-        .property("ensembleDefect", &FullDefectResult::ensembleDefect)
-        .property("ensembleDefectNormalized", &FullDefectResult::ensembleDefectNormalized)
-        .property("mfeDefect", &FullDefectResult::mfeDefect)
-        .property("mfeDefectNormalized", &FullDefectResult::mfeDefectNormalized);    
+    class_<FullEnsembleDefectResult>("FullEnsembleDefectResult")  
+        .property("ensembleDefect", &FullEnsembleDefectResult::ensembleDefect)
+        .property("ensembleDefectNormalized", &FullEnsembleDefectResult::ensembleDefectNormalized);
+           
     
     function("GetEnsembleDefect", &GetEnsembleDefect, allow_raw_pointers());
-    function("FullEnsembleDefect", &FullEnsembleDefect, allow_raw_pointers()); 
 }
 
 #endif

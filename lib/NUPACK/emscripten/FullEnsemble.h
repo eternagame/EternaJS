@@ -11,26 +11,13 @@ struct FullAdvancedResult {
     std::vector<double> suboptFreeEnergy;
 };
 
-struct FullDefectResult {
-    double ensembleDefect;
-    double ensembleDefectNormalized;
-    double mfeDefect;
-    double mfeDefectNormalized;
-};
-
-struct Defect {
-
-    double ensembleDefect;
-    double ensembleDefectNormalized;
-    double mfeDefect;
-    double mfeDefectNormalized;
-    
+struct FullEnsembleDefectResult {
+    double ensembleDefect;    
+    double ensembleDefectNormalized;    
 };
 
 FullAdvancedResult* FullEnsembleNoBindingSite (const std::string& seqString, int temperature, float kcalDeltaRange, bool const pseudoknotted);
 FullAdvancedResult* FullEnsembleWithOligos (const std::string& seqString, int temperature, float kcalDeltaRange,  bool const pseudoknotted);
-FullDefectResult* FullEnsembleDefect( const std::string& seqString, const std::string& MfeStructure, int temperature, 
-                                      bool const pseudoknotted, int const mode);
-Defect GetEnsembleDefect(char* seqChar, char* dotParensStructure, int temperature, bool pseudoknot, bool multiFold, bool doEDefect, bool doMfeDefect);
+FullEnsembleDefectResult* GetEnsembleDefect(const std::string& seqString, const std::string& MfeStructure, int temperature, bool pseudoknot);
 
 #endif //NUPACK_FULLENSEMBLE_H

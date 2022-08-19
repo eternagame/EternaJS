@@ -28,8 +28,6 @@ export interface SuboptEnsembleResult {
 export interface DefectResult {
     ensembleDefect: number;
     ensembleDefectNormalized: number;
-    mfeDefect: number;
-    mfeDefectNormalized: number;
 }
 
 export default abstract class Folder {
@@ -111,13 +109,11 @@ export default abstract class Folder {
     }
 
     public getDefect(
-        _seq: Sequence, _pairs: SecStruct, _mode:number, _pseudoknotted: boolean = false, _temp: number = 37
+        _seq: Sequence, _pairs: SecStruct, _temp: number = 37, _pseudoknotted: boolean = false
     ): DefectResult {
         return {
             ensembleDefect: -1,
-            ensembleDefectNormalized: -1,
-            mfeDefect: -1,
-            mfeDefectNormalized: -1
+            ensembleDefectNormalized: -1
         };
     }
 
