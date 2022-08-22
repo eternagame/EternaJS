@@ -2279,6 +2279,7 @@ export default class Toolbar extends ContainerObject {
         endPoint: Point
     ): boolean {
         Assert.assertIsDefined(draggingElement);
+
         const minX = endButtonBounds.x;
         const cursorX = endPoint.x;
         const pos = cursorX - minX;
@@ -2289,27 +2290,66 @@ export default class Toolbar extends ContainerObject {
         );
 
         draggingElement.display.visible = false;
+        // swap or replace
         if (!underButtonInfo.insertPos) {
             // from middle to top
             if (startPointContainer === this.middleScrollContainer.content) {
                 const name = draggingElement.name;
                 if (name) {
-                    const button = this._bottomButtons.get(name);
-                    const disp = endButtonGroup.getButtonAt(underButtonInfo.pos);
-                    if (button && disp) {
-                        const replaceButton = endButtonGroup.getButtonByName(disp.name);
-                        if (replaceButton) {
-                            this._bottomButtons.delete(name);
-                            endButtonGroup.removeButton(replaceButton);
-                            const newName = replaceButton.name as string;
-                            this._topButtons.delete(newName);
-                            const newBt = replaceButton.clone();
-                            this.linkClickHandler(newBt);
-                            this._bottomButtons.set(newName, newBt);
-                        }
+                    const dragName = draggingElement.name as string;
+                    const endBt = endButtonGroup.buttons.find((b) => b.name === dragName);
+                    const anotherBt = anotherButtonGroup.buttons.find((b) => b.name === dragName);
 
-                        this._topButtons.set(name, button);
-                        endButtonGroup.addButtonAt(button, underButtonInfo.pos);
+                    if (endBt) {
+                        const bt = endButtonGroup.getButtonByName(dragName as string) as ToolbarButton;
+                        const disp = endButtonGroup.getButtonAt(underButtonInfo.pos);
+                        if (disp) endButtonGroup.swapButton(bt.display, disp);
+                        endButtonGroup.resizeContainer();
+                    } else if (anotherBt) {
+                        const bt = anotherBt as ToolbarButton;
+                        const index = anotherButtonGroup.getButtonIndex(bt.display);
+                        const replaceButton = anotherButtonGroup.getButtonByName(dragName);
+                        const disp = endButtonGroup.getButtonAt(underButtonInfo.pos);
+                        if (disp) {
+                            const bt2 = endButtonGroup.getButtonByName(disp.name);
+                            if (replaceButton && bt2) {
+                                anotherButtonGroup.removeButton(replaceButton);
+                                endButtonGroup.removeButton(bt2);
+
+                                const name2 = bt2.name as string;
+                                this._topButtons.delete(dragName);
+                                this._topButtons.delete(name2);
+
+                                const newBt = bt.clone();
+                                const newBt2 = bt2.clone();
+                                this.linkClickHandler(newBt);
+                                this.linkClickHandler(newBt2);
+
+                                endButtonGroup.addButtonAt(newBt, underButtonInfo.pos);
+                                this._topButtons.set(dragName, newBt);
+
+                                anotherButtonGroup.addButtonAt(newBt2, index);
+                                this._topButtons.set(name2, newBt2);
+                            }
+                        }
+                    } else {
+                        const button = this._bottomButtons.get(name);
+                        const disp = endButtonGroup.getButtonAt(underButtonInfo.pos);
+                        if (button && disp) {
+                            const replaceButton = endButtonGroup.getButtonByName(disp.name);
+                            if (replaceButton) {
+                                this._bottomButtons.delete(name);
+                                endButtonGroup.removeButton(replaceButton);
+                                const newName = replaceButton.name as string;
+                                this._topButtons.delete(newName);
+                                const newBt = replaceButton.clone();
+                                this.linkClickHandler(newBt);
+                                this._bottomButtons.set(newName, newBt);
+                            }
+
+                            this._topButtons.set(name, button);
+                            endButtonGroup.addButtonAt(button, underButtonInfo.pos);
+                        }
                     }
                 }
             } else {
@@ -2328,7 +2368,7 @@ export default class Toolbar extends ContainerObject {
                 if (name && button) {
                     const bt = button as ToolbarButton;
                     const index = anotherButtonGroup.getButtonIndex(bt.display);
-                    const replaceButton = endButtonGroup.getButtonByName(name);
+                    const replaceButton = anotherButtonGroup.getButtonByName(name);
                     const disp = endButtonGroup.getButtonAt(underButtonInfo.pos);
                     if (disp) {
                         const bt2 = endButtonGroup.getButtonByName(disp.name);
@@ -2425,7 +2465,7 @@ export default class Toolbar extends ContainerObject {
             const x = pos.x - Math.floor(buttonBounds.width / 2);
             const y = pos.y - Math.floor(buttonBounds.height / 2);
             this._draggingElement.display.position.set(x, y);
-            this._canDrop = this.checkDragElement(p.x, p.y, this._draggingIndex);
+            this._canDrop = this.checkDragElement(p.x, p.y, this._draggingElement, this._draggingIndex);
         }
     }
 
@@ -2752,7 +2792,7 @@ export default class Toolbar extends ContainerObject {
         this._draggingElement = undefined;
     }
 
-    private checkDragElement(x: number, y: number, draggingIndex: number): boolean {
+    private checkDragElement(x: number, y: number, draggingElement: ToolbarButton, draggingIndex: number): boolean {
         Assert.assertIsDefined(this._startPointContainer);
         const leftButtonsBounds = this.leftButtonsGroup.container.getBounds();
         const rightButtonsBounds = this.rightButtonsGroup.container.getBounds();
@@ -2768,17 +2808,31 @@ export default class Toolbar extends ContainerObject {
         let endButtonGroup = null;
         let endButtonBounds = null;
 
+        const dragName = draggingElement.name;
+        const leftBt = this.leftButtonsGroup.buttons.find((b) => b.name === dragName);
+        const rightBt = this.rightButtonsGroup.buttons.find((b) => b.name === dragName);
+
         let inPlace = false;
+        let swapTop = false;
+        let swapTop2 = false;
         if (leftButtonsBounds.contains(x, y)) {
             if (this.leftButtonsGroup._content === this._startPointContainer) {
                 inPlace = true;
-            }
+            } else if (this.rightButtonsGroup._content === this._startPointContainer) {
+                swapTop = true;
+            } else if (leftBt) swapTop2 = true;
+            else if (rightBt) swapTop2 = true;
+
             endButtonGroup = this.leftButtonsGroup;
             endButtonBounds = leftButtonsBounds;
         } else if (rightButtonsBounds.contains(x, y)) {
             if (this.rightButtonsGroup._content === this._startPointContainer) {
                 inPlace = true;
-            }
+            } else if (this.leftButtonsGroup._content === this._startPointContainer) {
+                swapTop = true;
+            } else if (rightBt) swapTop2 = true;
+            else if (leftBt) swapTop2 = true;
+
             endButtonGroup = this.rightButtonsGroup;
             endButtonBounds = rightButtonsBounds;
         }
@@ -2808,37 +2862,63 @@ export default class Toolbar extends ContainerObject {
                     endButtonGroup.topTooltip.display.position.set(x - 10, y - 60);
                     endButtonGroup.topTooltip.display.visible = true;
                     return true;
-                } else return false;
-            } else {
-                if (
-                    count < endButtonGroup._capability
-                    && underButtonInfo.insertPos
-                ) {
-                    endButtonGroup._cursor.visible = true;
-                    endButtonGroup.topTooltip.setText(
-                        'Insert',
-                        15,
-                        TextBalloon.DEFAULT_FONT_COLOR
-                    );
-                } else if (underButtonInfo.insertPos) {
-                    endButtonGroup._cursor.visible = true;
-                    endButtonGroup.topTooltip.setText(
-                        'Only replacement is allowed',
-                        15,
-                        0xff0000
-                    );
-                } else {
-                    endButtonGroup._highlight.visible = true;
-                    endButtonGroup.topTooltip.setText(
-                        'Replace',
-                        15,
-                        TextBalloon.DEFAULT_FONT_COLOR
-                    );
-                }
+                } else { return false; }
+            } else if (swapTop && !underButtonInfo.insertPos) {
+                endButtonGroup._highlight.visible = true;
+                endButtonGroup.topTooltip.setText(
+                    'Swap buttons',
+                    15,
+                    TextBalloon.DEFAULT_FONT_COLOR
+                );
                 endButtonGroup.topTooltip.display.position.set(x - 10, y - 60);
                 endButtonGroup.topTooltip.display.visible = true;
+                return true;
+            } else if (swapTop2 && !underButtonInfo.insertPos) {
+                endButtonGroup._highlight.visible = true;
+                endButtonGroup.topTooltip.setText(
+                    'Swap buttons',
+                    15,
+                    TextBalloon.DEFAULT_FONT_COLOR
+                );
+                endButtonGroup.topTooltip.display.position.set(x - 10, y - 60);
+                endButtonGroup.topTooltip.display.visible = true;
+                return true;
+            } else if (swapTop2) {
+                return false;
+            } else if (
+                count < endButtonGroup._capability
+                    && underButtonInfo.insertPos
+            ) {
+                endButtonGroup._cursor.visible = true;
+                endButtonGroup.topTooltip.setText(
+                    'Insert',
+                    15,
+                    TextBalloon.DEFAULT_FONT_COLOR
+                );
+                endButtonGroup.topTooltip.display.position.set(x - 10, y - 60);
+                endButtonGroup.topTooltip.display.visible = true;
+                return true;
+            } else if (underButtonInfo.insertPos) {
+                endButtonGroup._cursor.visible = true;
+                endButtonGroup.topTooltip.setText(
+                    'Only replacement is allowed',
+                    15,
+                    0xff0000
+                );
+                endButtonGroup.topTooltip.display.position.set(x - 10, y - 60);
+                endButtonGroup.topTooltip.display.visible = true;
+                return false;
+            } else {
+                endButtonGroup._highlight.visible = true;
+                endButtonGroup.topTooltip.setText(
+                    'Replace',
+                    15,
+                    TextBalloon.DEFAULT_FONT_COLOR
+                );
+                endButtonGroup.topTooltip.display.position.set(x - 10, y - 60);
+                endButtonGroup.topTooltip.display.visible = true;
+                return true;
             }
-            return true;
         }
         return true;
     }
