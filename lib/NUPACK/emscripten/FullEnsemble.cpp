@@ -127,6 +127,14 @@ FullAdvancedResult* FullEnsembleWithOligos(const std::string& seqString, int tem
 
 FullAdvancedResult* FullEnsembleNoBindingSite(const std::string& seqString, int temperature, float kcalDeltaRange, bool const pseudoknotted = false) {
 
+
+    SequenceStructureInfo rna_info = SequenceStructureInfo();
+    std::string testStruct = ".....((((((.....))))))..............(((((..(((....)))..)))))................(((((((....))))))).....................";
+    getSequenceInfo(seqString, &rna_info);
+    getStructureInfo(testStruct, &rna_info);
+    SetGlobals(FALSE,FALSE,pseudoknotted,temperature, &rna_info);
+
+
     //this chuck of code sets up the variables used to represent adn configure the sequence for the C code to use
     auto autoSeqString = MakeCString(seqString);
     char* string = autoSeqString.get();
@@ -195,7 +203,11 @@ FullAdvancedResult* FullEnsembleNoBindingSite(const std::string& seqString, int 
         double energyError = currentStruct.error;
         double correctedEnergy = currentStruct.correctedEnergy;  
         
-
+        //std::string test(rna_info.sequenceNumber);
+        std::string test;
+        for (int j =0; j < rna_info.sequenceLength; j++) {
+               test = test + std::to_string(rna_info.sequenceNumber[j]); 
+        }
         //write out data
         result->suboptStructures.push_back(singlestructure);
         result->suboptEnergyError.push_back(energyError);
@@ -216,79 +228,34 @@ FullAdvancedResult* FullEnsembleNoBindingSite(const std::string& seqString, int 
 
 FullEnsembleDefectResult* GetEnsembleDefect(const std::string& seqString, const std::string& MfeStructure, int temperature, bool pseudoknot) {
   
-  FullEnsembleDefectResult* result = new FullEnsembleDefectResult();  
-  int complexity;
-  DBL_TYPE nsStar_ED;
-  int i;
-  int nNicks;
-  int seqlength;
-  int tmpLength;
-  int seqNum[MAXSEQLENGTH+1];
- 
-  //set the globals 
-  USE_MFE=0;
-  ONLY_ONE_MFE=0;   
-
-  if (pseudoknot == true) {
-      DO_PSEUDOKNOTS = 1;
-  } else {
-      DO_PSEUDOKNOTS = 0;
-  }
-
-  if ( !DO_PSEUDOKNOTS ) {
-      complexity = 3;
-  } else {
-      complexity = 5;
-  }
-   
-
-  //convert sequence from string to char*
-  auto autoSeqString = MakeCString(seqString);
-  char* seqChar = autoSeqString.get();
-  
-
-  //convert sequence from latin based characters "A,C,U,G" into numerical representation A=1, C=2, G=3. U=4 
-  seqlength = tmpLength = strlen(seqChar);
-  convertSeq(seqChar, seqNum, tmpLength);
-
-  // Get the number of strand breaks
-  nNicks = 0;
-  for (i = 0; i < tmpLength; i++) {
-      if (seqChar[i] == '+') {
-          nNicks++;
-      }
-  }
-  
-  // New sequence length removing the number of breaks or pluses from the total
-  seqlength -= nNicks;
-
-  //convert the string structure to a char array
-  auto autoMfeStructure = MakeCString(MfeStructure);
-  char* MfeStructureChar = autoMfeStructure.get();
-
-  //get the pairs from the struct
-  int thepairs[MAXSEQLENGTH+1];
-  getStructureFromParens(MfeStructureChar, thepairs, seqlength);  
+    FullEnsembleDefectResult* result = new FullEnsembleDefectResult(); 
     
-  // Allocate memory for storing pair probabilities
-  pairPr = (DBL_TYPE*) calloc( (seqlength+1)*(seqlength+1), sizeof(DBL_TYPE));
-  // Allocate memory for storing pair probabilities
-  pairPrPbg = (DBL_TYPE*) calloc( (seqlength+1)*(seqlength+1), sizeof(DBL_TYPE));
-  pairPrPb = (DBL_TYPE*) calloc( (seqlength+1)*(seqlength+1), sizeof(DBL_TYPE));
+    SequenceStructureInfo rna_info = SequenceStructureInfo();
+    getSequenceInfo(seqString, &rna_info);
+    getStructureInfo(MfeStructure, &rna_info);
+    SetGlobals(FALSE,FALSE,pseudoknot,temperature, &rna_info);
+
+    DBL_TYPE nsStar_ED;
+        
+    // Allocate memory for storing pair probabilities
+    pairPr = (DBL_TYPE*) calloc( (rna_info.sequenceLength+1)*(rna_info.sequenceLength+1), sizeof(DBL_TYPE));
+    // Allocate memory for storing pair probabilities
+    pairPrPbg = (DBL_TYPE*) calloc( (rna_info.sequenceLength+1)*(rna_info.sequenceLength+1), sizeof(DBL_TYPE));
+    pairPrPb = (DBL_TYPE*) calloc( (rna_info.sequenceLength+1)*(rna_info.sequenceLength+1), sizeof(DBL_TYPE));
 
 
-  nsStar_ED = nsStarPairsOrParensFull(seqlength, seqNum, thepairs, NULL,
-            complexity, RNA, 1 /*DANGLETYPE*/,
-            temperature, SODIUM_CONC,
-            MAGNESIUM_CONC, USE_LONG_HELIX_FOR_SALT_CORRECTION);
+    nsStar_ED = nsStarPairsOrParensFull(rna_info.sequenceLength, rna_info.sequenceNumber, rna_info.thePairs, NULL,
+                rna_info.complexity, RNA, 1 /*DANGLETYPE*/,
+                rna_info.temperature, SODIUM_CONC,
+                MAGNESIUM_CONC, USE_LONG_HELIX_FOR_SALT_CORRECTION);
 
-  
-  result->ensembleDefect = (long double) nsStar_ED;
-  result->ensembleDefectNormalized = (long double) nsStar_ED/seqlength;
+    
+    result->ensembleDefect = (long double) nsStar_ED;
+    result->ensembleDefectNormalized = (long double) nsStar_ED/rna_info.sequenceLength;
 
-  free(pairPrPbg);
-  free(pairPrPb);
+    free(pairPrPbg);
+    free(pairPrPb);
 
-  return result;
+    return result;
 }
 

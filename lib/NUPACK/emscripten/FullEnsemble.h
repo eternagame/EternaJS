@@ -13,7 +13,9 @@ struct FullAdvancedResult {
 
 struct FullEnsembleDefectResult {
     double ensembleDefect;    
-    double ensembleDefectNormalized;    
+    double ensembleDefectNormalized;
+    //std::string testString;
+    //std::vector<int> testvector;  
 };
 
 FullAdvancedResult* FullEnsembleNoBindingSite (const std::string& seqString, int temperature, float kcalDeltaRange, bool const pseudoknotted);

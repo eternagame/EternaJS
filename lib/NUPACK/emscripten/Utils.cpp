@@ -1,6 +1,11 @@
 #include <vector>
 #include "Utils.h"
 
+#include "src/thermo/utils/pfuncUtilsConstants.h"
+#include "src/thermo/utils/pfuncUtilsHeader.h"
+#include "src/shared/utilsHeader.h"
+#include "src/thermo/utils/DNAExternals.h"
+
 //this is the current implementation of generating the dot paren structure from the fold as of 7/20/22
 //this seams to be lacking compaired to nupacks PrintDNAStructure called by the basics apps
 //when displaying the structure
@@ -128,4 +133,113 @@ std::string getDotParens(bool pseudoknotted, const int seqlength, oneDnaStruct *
     {
        return singlestructure;
     }
+}
+
+void getSequenceInfo(const std::string& seqString, SequenceStructureInfo *info) {
+   
+    
+    int i;
+    int nNicks;
+    int seqlength;
+    int tmpLength;
+    int seqNum[MAXSEQLENGTH+1];
+
+
+    //first do sequence stuff
+    //convert sequence from string to char*
+    auto autoSeqString = MakeCString(seqString);
+    char* seqChar = autoSeqString.get();
+  
+
+    //convert sequence from latin based characters "A,C,U,G" into numerical representation A=1, C=2, G=3. U=4 
+    seqlength = tmpLength = strlen(seqChar);
+    convertSeq(seqChar, seqNum, tmpLength);
+
+    // Get the number of strand breaks
+    nNicks = 0;
+    for (i = 0; i < tmpLength; i++) {
+        if (seqChar[i] == '+') {
+            nNicks++;
+        }
+    }
+    
+    // New sequence length removing the number of breaks or pluses from the total
+    seqlength -= nNicks;
+
+    info->sequenceString=seqString;
+
+    info->sequenceNumber=new int[tmpLength];
+    
+    std::copy(seqNum, seqNum+tmpLength, info->sequenceNumber);
+    info->sequenceChar = new char[tmpLength];
+    
+    std::copy(seqChar, seqChar+tmpLength, info->sequenceChar);
+    info->sequenceLength=seqlength;
+    
+
+
+   
+}
+
+void getStructureInfo(const std::string& structString, SequenceStructureInfo *info) {
+    int seqlength;
+    seqlength = info->sequenceLength;
+     //now do structure stuff
+    //convert the string structure to a char array
+    auto autoStructure = MakeCString(structString);
+    char* structureChar = autoStructure.get();
+
+    //get the pairs from the struct
+    int thepairs[MAXSEQLENGTH+1];
+    getStructureFromParens(structureChar, thepairs, seqlength); 
+
+
+    info->structureString=structString;
+    
+    info->structChar = new char[seqlength];
+    std::copy(structureChar, structureChar+seqlength, info->structChar);
+
+    info->thePairs = new int[seqlength];
+    std::copy(thepairs, thepairs+seqlength, info->thePairs);
+    
+}
+
+void SetGlobals(bool useMFE, bool onlyOneMFE, bool doPseudoknot, int temperature, SequenceStructureInfo *info) {
+    
+     //set the globals 
+    if(useMFE==TRUE)
+    {
+        USE_MFE=1;
+    }
+    else
+    {
+        USE_MFE=0;
+    }
+
+    if(onlyOneMFE==TRUE)
+    {
+        ONLY_ONE_MFE=1;
+    }
+    else
+    {
+        ONLY_ONE_MFE=0;
+    }
+     
+
+    if (doPseudoknot == true) {
+        DO_PSEUDOKNOTS = 1;
+        info->isPknot=TRUE;
+    } else {
+        DO_PSEUDOKNOTS = 0;
+         info->isPknot=FALSE;
+    }
+
+    if ( !DO_PSEUDOKNOTS ) {
+        info->complexity = 3;
+    } else {
+        info->complexity = 5;
+    }
+
+    info->temperature=temperature;
+
 }
