@@ -167,18 +167,15 @@ void getSequenceInfo(const std::string& seqString, SequenceStructureInfo *info) 
     seqlength -= nNicks;
 
     info->sequenceString=seqString;
-
-    info->sequenceNumber=new int[tmpLength];
-    
-    std::copy(seqNum, seqNum+tmpLength, info->sequenceNumber);
-    info->sequenceChar = new char[tmpLength];
-    
-    std::copy(seqChar, seqChar+tmpLength, info->sequenceChar);
     info->sequenceLength=seqlength;
     
-
-
-   
+    info->sequenceNumber=new int[tmpLength];    
+    std::copy(seqNum, seqNum+tmpLength, info->sequenceNumber);
+    
+    info->sequenceChar = new char[tmpLength];    
+    std::copy(seqChar, seqChar+tmpLength, info->sequenceChar);
+    
+       
 }
 
 void getStructureInfo(const std::string& structString, SequenceStructureInfo *info) {
@@ -193,15 +190,13 @@ void getStructureInfo(const std::string& structString, SequenceStructureInfo *in
     int thepairs[MAXSEQLENGTH+1];
     getStructureFromParens(structureChar, thepairs, seqlength); 
 
-
     info->structureString=structString;
     
     info->structChar = new char[seqlength];
     std::copy(structureChar, structureChar+seqlength, info->structChar);
 
     info->thePairs = new int[seqlength];
-    std::copy(thepairs, thepairs+seqlength, info->thePairs);
-    
+    std::copy(thepairs, thepairs+seqlength, info->thePairs);    
 }
 
 void SetGlobals(bool useMFE, bool onlyOneMFE, bool doPseudoknot, int temperature, SequenceStructureInfo *info) {
