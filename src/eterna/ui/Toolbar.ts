@@ -1527,11 +1527,13 @@ export default class Toolbar extends ContainerObject {
                 }
             }
 
+            this.topToolsContainer.addHSpacer(TOP_HSPACE);
             this.addObject(this.leftButtonsGroup, this.topToolsContainer);
             this.topToolsContainer.addHSpacer(TOP_HSPACE);
             this.addObject(this.palette, this.topToolsContainer);
             this.topToolsContainer.addHSpacer(TOP_HSPACE);
             this.addObject(this.rightButtonsGroup, this.topToolsContainer);
+            this.topToolsContainer.addHSpacer(TOP_HSPACE);
         }
     }
 
@@ -1680,21 +1682,20 @@ export default class Toolbar extends ContainerObject {
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
 
-        let topSpacerWidth = 4;
+        const PAL_SPACE = 4;
         let paletteWidth = this.palette.display.width;
         if (!this.palette.display.visible) {
-            topSpacerWidth += paletteWidth / 2;
             paletteWidth = 0;
         }
 
         const leftWidth = this.leftButtonsGroup.display.width;
         const rightWidth = this.rightButtonsGroup.display.width;
         const maxTopWidth = Math.max(leftWidth, rightWidth) * 2
-            + TOP_HSPACE + paletteWidth + TOP_HSPACE + 2 * topSpacerWidth;
+            + TOP_HSPACE + paletteWidth + TOP_HSPACE + 2 * PAL_SPACE;
 
         const arrowWidth = this.leftArrow.display.width + this.rightArrow.display.width;
         const availableTopWidth = Flashbang.stageWidth - arrowWidth
-            - (TOP_HSPACE + paletteWidth + TOP_HSPACE + 2 * topSpacerWidth);
+            - (TOP_HSPACE + paletteWidth + TOP_HSPACE + 2 * PAL_SPACE);
 
         const availableTopCount = Math.floor(availableTopWidth / BUTTON_WIDTH);
         this.leftButtonsGroup._capability = Math.floor(availableTopCount / 2);
@@ -1704,15 +1705,16 @@ export default class Toolbar extends ContainerObject {
         this.MIDDLE_WIDTH = DEFAULT_TOOLBAR_WIDTH - 28;
         this.MIDDLE_MARGIN = (this.WIDTH - DEFAULT_TOOLBAR_WIDTH) / 2;
 
+        const margin = (this.WIDTH - maxTopWidth) / 2;
         if (leftWidth < rightWidth) {
-            this.topLeftSpacer.width = topSpacerWidth + Math.abs(rightWidth - leftWidth);
-            this.topRightSpacer.width = topSpacerWidth;
+            this.topLeftSpacer.width = margin + Math.abs(rightWidth - leftWidth);
+            this.topRightSpacer.width = margin;
         } else if (leftWidth > rightWidth) {
-            this.topRightSpacer.width = topSpacerWidth + Math.abs(rightWidth - leftWidth);
-            this.topLeftSpacer.width = topSpacerWidth;
+            this.topRightSpacer.width = margin + Math.abs(rightWidth - leftWidth);
+            this.topLeftSpacer.width = margin;
         } else {
-            this.topLeftSpacer.width = topSpacerWidth;
-            this.topRightSpacer.width = topSpacerWidth;
+            this.topLeftSpacer.width = margin;
+            this.topRightSpacer.width = margin;
         }
 
         this.background
@@ -2395,6 +2397,7 @@ export default class Toolbar extends ContainerObject {
                 }
             }
         } else {
+            // insert
             const count = endButtonGroup.buttons.length;
             // when topButtonGroup has space
             if (count < endButtonGroup._capability) {
