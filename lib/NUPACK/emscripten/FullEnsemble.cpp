@@ -21,63 +21,23 @@ extern int Multistranded;
 FullAdvancedResult* FullEnsembleWithOligos(const std::string& seqString, int temperature, float kcalDeltaRange, bool const pseudoknotted = false) {
 
     //this chuck of code sets up the variables used to represent adn configure the sequence for the C code to use
-    auto autoSeqString = MakeCString(seqString);
-    char* string = autoSeqString.get();
-    int seqNum[MAXSEQLENGTH+1];
-    
-
-
-    //runtime_constants.h defines NAD_INFINITY
-    //#define NAD_INFINITY 100000 //artificial value for positive infinity
-    //this is how teh dnastructure call looks for subopt.c which is waht iran when you ron normal nupack compiled code
-    //here are comments from pfuncutilheaders.h on hwat the attributes of dnastructures consist of
-    
-    //oneDnaStruct and dnaStructures are used for enumerating sequences
-       // typedef struct {
-       // int *theStruct; //describes what is paired to what
-       // DBL_TYPE error; //accumulated error (from the mfe) for a structure
-       // DBL_TYPE correctedEnergy; //actual energy of a structure
-       // int slength;
-       // //(accounting for symmetry).
-       //  } oneDnaStruct;
-       //
-       // typedef struct {
-       // oneDnaStruct *validStructs;
-       //int nStructs; //# of structures stored
-       //int nAlloc; //# of structures allocated
-       // int seqlength;
-       // DBL_TYPE minError; //minimum deviation from mfe for all seqs
-       //in validStructs
-       //
-       //} dnaStructures;
-    
-    //this struct will store
-    //all the structures within the given range
-    dnaStructures suboptStructs = {NULL, 0, 0, 0, NAD_INFINITY}; 
- 
-    //convert from how it comes from eterna to how nuapck needs it for joined oligos '+'
-    char* pc;
-    do {
-        pc = strchr(string, '&');
-        if (pc) (*pc) = '+';
-    } while(pc);
+    SequenceStructureInfo rna_info = SequenceStructureInfo();
+    setSequenceInfo(seqString, &rna_info);
   
-
-    int seqStringLength = strlen(string);    
-    convertSeq(string, seqNum, seqStringLength);
-  
-
     //first get the ensemble through subopt
-    if ( pseudoknotted ) {
-        mfeFullWithSym_SubOpt(seqNum, seqStringLength, &suboptStructs, 5, RNA, 1 /*DANGLETYPE*/, 
-                                temperature, TRUE, (DBL_TYPE) kcalDeltaRange, 
+    dnaStructures suboptStructs = {NULL, 0, 0, 0, NAD_INFINITY};   
+    if ( rna_info.isPknot==TRUE ) {
+        mfeFullWithSym_SubOpt(rna_info.sequenceNumber, rna_info.sequenceLength, &suboptStructs, 5, RNA, 1 /*DANGLETYPE*/, 
+                                rna_info.temperature, TRUE, (DBL_TYPE) kcalDeltaRange, 
                                 0, SODIUM_CONC, MAGNESIUM_CONC, USE_LONG_HELIX_FOR_SALT_CORRECTION);
     } else {
-        mfeFullWithSym_SubOpt(seqNum, seqStringLength, &suboptStructs, 3, RNA, 1 /*DANGLETYPE*/, 
-                                temperature, TRUE, (DBL_TYPE) kcalDeltaRange, 
+        mfeFullWithSym_SubOpt(rna_info.sequenceNumber, rna_info.sequenceLength, &suboptStructs, 3, RNA, 1 /*DANGLETYPE*/, 
+                                rna_info.temperature, TRUE, (DBL_TYPE) kcalDeltaRange, 
                                 0, SODIUM_CONC, MAGNESIUM_CONC, USE_LONG_HELIX_FOR_SALT_CORRECTION);
     }
 
+
+    //now process the results for return to TS
     //initialize the result to return
     FullAdvancedResult* result = new FullAdvancedResult();
     
@@ -98,9 +58,9 @@ FullAdvancedResult* FullEnsembleWithOligos(const std::string& seqString, int tem
             else singlestructure.push_back(')');
         }  
 
-        
+        char* pc;
         std::string constraints = singlestructure;
-        for (pc = string, i = 0, j = 0; (*pc); pc++, j++) {
+        for (pc = rna_info.sequenceChar, i = 0, j = 0; (*pc); pc++, j++) {
             auto value = ((*pc) == '+' ? '&' : constraints[i++]);
             if (j < singlestructure.length()) {
                 singlestructure[j] = value;
@@ -127,63 +87,24 @@ FullAdvancedResult* FullEnsembleWithOligos(const std::string& seqString, int tem
 
 FullAdvancedResult* FullEnsembleNoBindingSite(const std::string& seqString, int temperature, float kcalDeltaRange, bool const pseudoknotted = false) {
 
-
     SequenceStructureInfo rna_info = SequenceStructureInfo();
-    std::string testStruct = ".....((((((.....))))))..............(((((..(((....)))..)))))................(((((((....))))))).....................";
-    getSequenceInfo(seqString, &rna_info);
-    getStructureInfo(testStruct, &rna_info);
-    SetGlobals(FALSE,FALSE,pseudoknotted,temperature, &rna_info);
-
-
-    //this chuck of code sets up the variables used to represent adn configure the sequence for the C code to use
-    auto autoSeqString = MakeCString(seqString);
-    char* string = autoSeqString.get();
-    int seqNum[MAXSEQLENGTH+1];
-    int seqStringLength = strlen(string);
-    //runtime_constants.h defines NAD_INFINITY
-    //#define NAD_INFINITY 100000 //artificial value for positive infinity
-    //this is how teh dnastructure call looks for subopt.c which is waht iran when you ron normal nupack compiled code
-    //here are comments from pfuncutilheaders.h on hwat the attributes of dnastructures consist of
-    
-    //oneDnaStruct and dnaStructures are used for enumerating sequences
-       // typedef struct {
-       // int *theStruct; //describes what is paired to what
-       // DBL_TYPE error; //accumulated error (from the mfe) for a structure
-       // DBL_TYPE correctedEnergy; //actual energy of a structure
-       // int slength;
-       // //(accounting for symmetry).
-       //  } oneDnaStruct;
-       //
-       // typedef struct {
-       // oneDnaStruct *validStructs;
-       //int nStructs; //# of structures stored
-       //int nAlloc; //# of structures allocated
-       // int seqlength;
-       // DBL_TYPE minError; //minimum deviation from mfe for all seqs
-       //in validStructs
-       //
-       //} dnaStructures;
-    
-    //this struct will store
-    //all the structures within the given range
-    dnaStructures suboptStructs = {NULL, 0, 0, 0, NAD_INFINITY};     
-    convertSeq(string, seqNum, seqStringLength);
-
-
-
+    setSequenceInfo(seqString, &rna_info);   
+    setGlobals(NULL, NULL, pseudoknotted, temperature, &rna_info);      
+ 
     //first get the ensemble through subopt
-    if ( pseudoknotted ) {
-        mfeFullWithSym_SubOpt(seqNum, seqStringLength, &suboptStructs, 5, RNA, 1 /*DANGLETYPE*/, 
-                                temperature, TRUE, (DBL_TYPE) kcalDeltaRange, 
+    dnaStructures suboptStructs = {NULL, 0, 0, 0, NAD_INFINITY};
+    if ( rna_info.isPknot == TRUE ) {
+        mfeFullWithSym_SubOpt(rna_info.sequenceNumber, rna_info.sequenceLength, &suboptStructs, 5, RNA, 1 /*DANGLETYPE*/, 
+                                rna_info.temperature, TRUE, (DBL_TYPE) kcalDeltaRange, 
                                 0, SODIUM_CONC, MAGNESIUM_CONC, USE_LONG_HELIX_FOR_SALT_CORRECTION);
     } else {
-        mfeFullWithSym_SubOpt(seqNum, seqStringLength, &suboptStructs, 3, RNA, 1 /*DANGLETYPE*/, 
-                                temperature, TRUE, (DBL_TYPE) kcalDeltaRange, 
+        mfeFullWithSym_SubOpt(rna_info.sequenceNumber, rna_info.sequenceLength, &suboptStructs, 3, RNA, 1 /*DANGLETYPE*/, 
+                                rna_info.temperature, TRUE, (DBL_TYPE) kcalDeltaRange, 
                                 0, SODIUM_CONC, MAGNESIUM_CONC, USE_LONG_HELIX_FOR_SALT_CORRECTION);
     }
 
-    //initialize the result to return
-    
+    //now process the results for return to TS
+    //initialize the result to return    
     FullAdvancedResult* result = new FullAdvancedResult();
     
     std::string mfeStructure;
@@ -219,21 +140,15 @@ FullAdvancedResult* FullEnsembleNoBindingSite(const std::string& seqString, int 
     return result;
 }
 
-/*
-  mode is how to do the ED
-  1= do only ED
-  2 = do only MFE ED
-  3 = do both
-*/
 
 FullEnsembleDefectResult* GetEnsembleDefect(const std::string& seqString, const std::string& MfeStructure, int temperature, bool pseudoknot) {
   
     FullEnsembleDefectResult* result = new FullEnsembleDefectResult(); 
     
     SequenceStructureInfo rna_info = SequenceStructureInfo();
-    getSequenceInfo(seqString, &rna_info);
-    getStructureInfo(MfeStructure, &rna_info);
-    SetGlobals(FALSE,FALSE,pseudoknot,temperature, &rna_info);
+    setSequenceInfo(seqString, &rna_info);
+    setStructureInfo(MfeStructure, &rna_info);
+    setGlobals(FALSE,FALSE,pseudoknot,temperature, &rna_info);
 
     DBL_TYPE nsStar_ED;
         

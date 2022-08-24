@@ -25,6 +25,6 @@ struct SequenceStructureInfo {
 };
 
 std::string getDotParens(bool pseudoknotted, const int seqlength, oneDnaStruct *currentStruct);
-void getSequenceInfo(const std::string& seqString, SequenceStructureInfo *info);
-void getStructureInfo(const std::string& structString, SequenceStructureInfo *info);
-void SetGlobals(bool useMFE, bool onlyOneMFE, bool doPseudoknot, int temperature, SequenceStructureInfo *info);
+void setSequenceInfo(const std::string& seqString, SequenceStructureInfo *info);
+void setStructureInfo(const std::string& structString, SequenceStructureInfo *info);
+void setGlobals(bool useMFE, bool onlyOneMFE, bool doPseudoknot, int temperature, SequenceStructureInfo *info);

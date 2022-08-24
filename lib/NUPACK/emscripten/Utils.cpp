@@ -135,7 +135,7 @@ std::string getDotParens(bool pseudoknotted, const int seqlength, oneDnaStruct *
     }
 }
 
-void getSequenceInfo(const std::string& seqString, SequenceStructureInfo *info) {
+void setSequenceInfo(const std::string& seqString, SequenceStructureInfo *info) {
    
     
     int i;
@@ -143,14 +143,19 @@ void getSequenceInfo(const std::string& seqString, SequenceStructureInfo *info) 
     int seqlength;
     int tmpLength;
     int seqNum[MAXSEQLENGTH+1];
-
+    char* pc;
 
     //first do sequence stuff
     //convert sequence from string to char*
     auto autoSeqString = MakeCString(seqString);
     char* seqChar = autoSeqString.get();
   
-
+    //if multifold then change & to a + 
+        do {
+            pc = strchr(seqChar, '&');
+            if (pc) (*pc) = '+';
+        } while(pc);
+   
     //convert sequence from latin based characters "A,C,U,G" into numerical representation A=1, C=2, G=3. U=4 
     seqlength = tmpLength = strlen(seqChar);
     convertSeq(seqChar, seqNum, tmpLength);
@@ -168,7 +173,7 @@ void getSequenceInfo(const std::string& seqString, SequenceStructureInfo *info) 
 
     info->sequenceString=seqString;
     info->sequenceLength=seqlength;
-    
+
     info->sequenceNumber=new int[tmpLength];    
     std::copy(seqNum, seqNum+tmpLength, info->sequenceNumber);
     
@@ -178,55 +183,52 @@ void getSequenceInfo(const std::string& seqString, SequenceStructureInfo *info) 
        
 }
 
-void getStructureInfo(const std::string& structString, SequenceStructureInfo *info) {
-    int seqlength;
-    seqlength = info->sequenceLength;
-     //now do structure stuff
+void setStructureInfo(const std::string& structString, SequenceStructureInfo *info) {
+  
+       //now do structure stuff
     //convert the string structure to a char array
     auto autoStructure = MakeCString(structString);
     char* structureChar = autoStructure.get();
 
     //get the pairs from the struct
     int thepairs[MAXSEQLENGTH+1];
-    getStructureFromParens(structureChar, thepairs, seqlength); 
+    getStructureFromParens(structureChar, thepairs, info->sequenceLength); 
 
     info->structureString=structString;
     
-    info->structChar = new char[seqlength];
-    std::copy(structureChar, structureChar+seqlength, info->structChar);
+    info->structChar = new char[info->sequenceLength];
+    std::copy(structureChar, structureChar+info->sequenceLength, info->structChar);
 
-    info->thePairs = new int[seqlength];
-    std::copy(thepairs, thepairs+seqlength, info->thePairs);    
+    info->thePairs = new int[info->sequenceLength];
+    std::copy(thepairs, thepairs+info->sequenceLength, info->thePairs);    
 }
 
-void SetGlobals(bool useMFE, bool onlyOneMFE, bool doPseudoknot, int temperature, SequenceStructureInfo *info) {
+void setGlobals(const bool useMFE, bool onlyOneMFE, bool doPseudoknot, int temperature, SequenceStructureInfo *info) {
     
-     //set the globals 
-    if(useMFE==TRUE)
-    {
+     //set the globals
+   
+    if(useMFE==TRUE) {
         USE_MFE=1;
     }
-    else
-    {
+
+    else if (useMFE==FALSE) {
         USE_MFE=0;
     }
 
-    if(onlyOneMFE==TRUE)
-    {
+    if(onlyOneMFE==TRUE) {
         ONLY_ONE_MFE=1;
     }
-    else
-    {
+    else if (onlyOneMFE==FALSE) {
         ONLY_ONE_MFE=0;
     }
      
 
-    if (doPseudoknot == true) {
+    if (doPseudoknot == TRUE) {
         DO_PSEUDOKNOTS = 1;
         info->isPknot=TRUE;
-    } else {
+    } else if (doPseudoknot == FALSE) {
         DO_PSEUDOKNOTS = 0;
-         info->isPknot=FALSE;
+        info->isPknot=FALSE;
     }
 
     if ( !DO_PSEUDOKNOTS ) {
