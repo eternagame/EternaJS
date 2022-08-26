@@ -205,6 +205,26 @@ export class ButtonsGroup extends ContainerObject {
         this._content.layout();
     }
 
+    public insertButton(bt1: DisplayObject, newPos: number) {
+        const oldPos = this._content.getChildIndex(bt1);
+        let i;
+        if (oldPos > newPos) {
+            for (i = oldPos; i > newPos; i--) {
+                const b1 = this._content.getChildAt(i);
+                const b2 = this._content.getChildAt(i - 1);
+                this.swapButton(b1, b2);
+                this._content.layout(true);
+            }
+        } else if (oldPos < newPos) {
+            for (i = oldPos; i < newPos - 1; i++) {
+                const b1 = this._content.getChildAt(i);
+                const b2 = this._content.getChildAt(i + 1);
+                this.swapButton(b1, b2);
+                this._content.layout(true);
+            }
+        }
+    }
+
     public getButtonAt(id: number): DisplayObject | undefined {
         if (this._content.children.length <= id) return undefined;
         return this._content.getChildAt(id);
@@ -2242,27 +2262,27 @@ export default class Toolbar extends ContainerObject {
         buttonGroup: ButtonsGroup,
         buttonSize: number,
         pos: number
-    ): { insertPos: boolean; pos: number } {
+    ): { bInsertPos: boolean; pos: number } {
         const count = buttonGroup._content.children.length;
         if (count === 0 || pos < 0) {
-            return {insertPos: true, pos: 0};
+            return {bInsertPos: true, pos: 0};
         }
         const n = pos / buttonSize;
         if (n < 0) {
-            return {insertPos: true, pos: 0};
+            return {bInsertPos: true, pos: 0};
         } else if (n < count) {
             const m = n - Math.floor(n);
             const p = Math.ceil(n) - n;
 
             if (m > 2 * p) {
-                return {insertPos: true, pos: Math.floor(n + 1)};
+                return {bInsertPos: true, pos: Math.floor(n + 1)};
             } else if (p > 2 * m) {
-                return {insertPos: true, pos: Math.floor(n)};
+                return {bInsertPos: true, pos: Math.floor(n)};
             } else {
-                return {insertPos: false, pos: Math.floor(n)};
+                return {bInsertPos: false, pos: Math.floor(n)};
             }
         } else {
-            return {insertPos: true, pos: count};
+            return {bInsertPos: true, pos: count};
         }
     }
 
@@ -2293,7 +2313,7 @@ export default class Toolbar extends ContainerObject {
 
         draggingElement.display.visible = false;
         // swap or replace
-        if (!underButtonInfo.insertPos) {
+        if (!underButtonInfo.bInsertPos) {
             // from middle to top
             if (startPointContainer === this.middleScrollContainer.content) {
                 const name = draggingElement.name;
@@ -2405,11 +2425,35 @@ export default class Toolbar extends ContainerObject {
                 if (startPointContainer === this.middleScrollContainer.content) {
                     const name = draggingElement.name;
                     if (name) {
-                        const button = this._bottomButtons.get(name);
-                        this._bottomButtons.delete(name);
-                        if (button) {
-                            this._topButtons.set(name, button);
-                            endButtonGroup.addButtonAt(button, underButtonInfo.pos);
+                        const dragName = draggingElement.name as string;
+                        const endBt = endButtonGroup.buttons.find((b) => b.name === dragName);
+                        const anotherBt = anotherButtonGroup.buttons.find((b) => b.name === dragName);
+
+                        if (endBt) {
+                            const bt = endButtonGroup.getButtonByName(dragName as string) as ToolbarButton;
+                            endButtonGroup.insertButton(bt.display, underButtonInfo.pos);
+                            endButtonGroup.resizeContainer();
+                        } else if (anotherBt) {
+                            const bt = anotherBt as ToolbarButton;
+                            const replaceButton = anotherButtonGroup.getButtonByName(dragName);
+                            if (replaceButton) {
+                                anotherButtonGroup.removeButton(replaceButton);
+
+                                this._topButtons.delete(dragName);
+
+                                const newBt = bt.clone();
+                                this.linkClickHandler(newBt);
+
+                                endButtonGroup.addButtonAt(newBt, underButtonInfo.pos);
+                                this._topButtons.set(dragName, newBt);
+                            }
+                        } else {
+                            const button = this._bottomButtons.get(name);
+                            this._bottomButtons.delete(name);
+                            if (button) {
+                                this._topButtons.set(name, button);
+                                endButtonGroup.addButtonAt(button, underButtonInfo.pos);
+                            }
                         }
                     }
                 } else {
@@ -2541,11 +2585,16 @@ export default class Toolbar extends ContainerObject {
                 );
                 const bt = this.leftButtonsGroup.getButtonByName(this._draggingElement.name as string) as ToolbarButton;
                 const disp = this.leftButtonsGroup.getButtonAt(underButtonInfo.pos);
-                if (disp) this.leftButtonsGroup.swapButton(bt.display, disp);
+                if (!underButtonInfo.bInsertPos) {
+                    if (disp) this.leftButtonsGroup.swapButton(bt.display, disp);
+                } else {
+                    this.leftButtonsGroup.insertButton(bt.display, underButtonInfo.pos);
+                }
                 this.leftButtonsGroup.resizeContainer();
 
                 this.resetDragState();
                 this.updateLayout();
+                this.saveTopButtons();
                 return;
             }
             // to leftTop
@@ -2581,7 +2630,11 @@ export default class Toolbar extends ContainerObject {
                 const name = this._draggingElement.name as string;
                 const bt = this.rightButtonsGroup.getButtonByName(name) as ToolbarButton;
                 const disp = this.rightButtonsGroup.getButtonAt(underButtonInfo.pos);
-                if (disp) this.rightButtonsGroup.swapButton(bt.display, disp);
+                if (!underButtonInfo.bInsertPos) {
+                    if (disp) this.rightButtonsGroup.swapButton(bt.display, disp);
+                } else {
+                    this.rightButtonsGroup.insertButton(bt.display, underButtonInfo.pos);
+                }
                 this.rightButtonsGroup.resizeContainer();
 
                 this.resetDragState();
@@ -2839,6 +2892,7 @@ export default class Toolbar extends ContainerObject {
             endButtonGroup = this.rightButtonsGroup;
             endButtonBounds = rightButtonsBounds;
         }
+
         if (endButtonGroup && endButtonBounds) {
             const count = endButtonGroup.buttons.length;
 
@@ -2854,7 +2908,7 @@ export default class Toolbar extends ContainerObject {
             endButtonGroup._highlight.position.x = underButtonInfo.pos * BUTTON_WIDTH;
 
             if (inPlace) {
-                if (draggingIndex !== underButtonInfo.pos
+                if (!underButtonInfo.bInsertPos && draggingIndex !== underButtonInfo.pos
                     && underButtonInfo.pos < this._startPointContainer.children.length) {
                     endButtonGroup._highlight.visible = true;
                     endButtonGroup.topTooltip.setText(
@@ -2865,32 +2919,39 @@ export default class Toolbar extends ContainerObject {
                     endButtonGroup.topTooltip.display.position.set(x - 10, y - 60);
                     endButtonGroup.topTooltip.display.visible = true;
                     return true;
-                } else { return false; }
-            } else if (swapTop && !underButtonInfo.insertPos) {
+                } else if (draggingIndex !== underButtonInfo.pos && (draggingIndex + 1) !== underButtonInfo.pos
+                    && underButtonInfo.bInsertPos) {
+                    endButtonGroup._cursor.visible = true;
+                    endButtonGroup.topTooltip.setText(
+                        'Insert',
+                        15,
+                        TextBalloon.DEFAULT_FONT_COLOR
+                    );
+                    endButtonGroup.topTooltip.display.position.set(x - 10, y - 60);
+                    endButtonGroup.topTooltip.display.visible = true;
+                    return true;
+                }
+            } else if (swapTop || swapTop2) {
+                let tipText = 'Swap buttons';
+                if (!underButtonInfo.bInsertPos) {
+                    endButtonGroup._highlight.visible = true;
+                    tipText = 'Swap buttons';
+                } else {
+                    endButtonGroup._cursor.visible = true;
+                    tipText = 'Insert';
+                }
                 endButtonGroup._highlight.visible = true;
                 endButtonGroup.topTooltip.setText(
-                    'Swap buttons',
+                    tipText,
                     15,
                     TextBalloon.DEFAULT_FONT_COLOR
                 );
                 endButtonGroup.topTooltip.display.position.set(x - 10, y - 60);
                 endButtonGroup.topTooltip.display.visible = true;
                 return true;
-            } else if (swapTop2 && !underButtonInfo.insertPos) {
-                endButtonGroup._highlight.visible = true;
-                endButtonGroup.topTooltip.setText(
-                    'Swap buttons',
-                    15,
-                    TextBalloon.DEFAULT_FONT_COLOR
-                );
-                endButtonGroup.topTooltip.display.position.set(x - 10, y - 60);
-                endButtonGroup.topTooltip.display.visible = true;
-                return true;
-            } else if (swapTop2) {
-                return false;
             } else if (
                 count < endButtonGroup._capability
-                    && underButtonInfo.insertPos
+                    && underButtonInfo.bInsertPos
             ) {
                 endButtonGroup._cursor.visible = true;
                 endButtonGroup.topTooltip.setText(
@@ -2901,7 +2962,7 @@ export default class Toolbar extends ContainerObject {
                 endButtonGroup.topTooltip.display.position.set(x - 10, y - 60);
                 endButtonGroup.topTooltip.display.visible = true;
                 return true;
-            } else if (underButtonInfo.insertPos) {
+            } else if (underButtonInfo.bInsertPos) {
                 endButtonGroup._cursor.visible = true;
                 endButtonGroup.topTooltip.setText(
                     'Only replacement is allowed',
@@ -2923,7 +2984,7 @@ export default class Toolbar extends ContainerObject {
                 return true;
             }
         }
-        return true;
+        return false;
     }
 
     public getMirrorButtons(bt: ToolbarButton) {
