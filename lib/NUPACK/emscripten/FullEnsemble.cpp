@@ -25,13 +25,12 @@ FullAdvancedResult* FullEnsembleWithOligos(const std::string& seqString, int tem
     setSequenceInfo(seqString, &rna_info);
   
     //first get the ensemble through subopt
-    dnaStructures suboptStructs = {NULL, 0, 0, 0, NAD_INFINITY};   
     if ( rna_info.isPknot==TRUE ) {
-        mfeFullWithSym_SubOpt(rna_info.sequenceNumber, rna_info.sequenceLength, &suboptStructs, 5, RNA, 1 /*DANGLETYPE*/, 
+        mfeFullWithSym_SubOpt(rna_info.sequenceNumber, rna_info.sequenceLength, &rna_info.ensemebleStructs, 5, RNA, 1 /*DANGLETYPE*/, 
                                 rna_info.temperature, TRUE, (DBL_TYPE) kcalDeltaRange, 
                                 0, SODIUM_CONC, MAGNESIUM_CONC, USE_LONG_HELIX_FOR_SALT_CORRECTION);
     } else {
-        mfeFullWithSym_SubOpt(rna_info.sequenceNumber, rna_info.sequenceLength, &suboptStructs, 3, RNA, 1 /*DANGLETYPE*/, 
+        mfeFullWithSym_SubOpt(rna_info.sequenceNumber, rna_info.sequenceLength, &rna_info.ensemebleStructs, 3, RNA, 1 /*DANGLETYPE*/, 
                                 rna_info.temperature, TRUE, (DBL_TYPE) kcalDeltaRange, 
                                 0, SODIUM_CONC, MAGNESIUM_CONC, USE_LONG_HELIX_FOR_SALT_CORRECTION);
     }
@@ -43,12 +42,12 @@ FullAdvancedResult* FullEnsembleWithOligos(const std::string& seqString, int tem
     
     int i, j;
     //get dot bracket notation from data 
-    for (i = 0; i < suboptStructs.nStructs; i++ ) {
-        oneDnaStruct currentStruct = suboptStructs.validStructs[i];
+    for (i = 0; i < rna_info.ensemebleStructs.nStructs; i++ ) {
+        oneDnaStruct currentStruct = rna_info.ensemebleStructs.validStructs[i];
 
         //each structure reset this
         std::string singlestructure = "";             
-        for (j = 0; j < suboptStructs.seqlength; j++ ) {
+        for (j = 0; j < rna_info.ensemebleStructs.seqlength; j++ ) {
             if ( currentStruct.theStruct[j] > j ) {
                 singlestructure.push_back('(');
             }
@@ -80,7 +79,7 @@ FullAdvancedResult* FullEnsembleWithOligos(const std::string& seqString, int tem
         result->suboptFreeEnergy.push_back(correctedEnergy);
     }
 
-    clearDnaStructures(&suboptStructs);
+    clearDnaStructures(&rna_info.ensemebleStructs);
     return result;
 }
 
@@ -92,13 +91,12 @@ FullAdvancedResult* FullEnsembleNoBindingSite(const std::string& seqString, int 
     setGlobals(NULL, NULL, pseudoknotted, temperature, &rna_info);      
  
     //first get the ensemble through subopt
-    dnaStructures suboptStructs = {NULL, 0, 0, 0, NAD_INFINITY};
     if ( rna_info.isPknot == TRUE ) {
-        mfeFullWithSym_SubOpt(rna_info.sequenceNumber, rna_info.sequenceLength, &suboptStructs, 5, RNA, 1 /*DANGLETYPE*/, 
+        mfeFullWithSym_SubOpt(rna_info.sequenceNumber, rna_info.sequenceLength, &rna_info.ensemebleStructs, 5, RNA, 1 /*DANGLETYPE*/, 
                                 rna_info.temperature, TRUE, (DBL_TYPE) kcalDeltaRange, 
                                 0, SODIUM_CONC, MAGNESIUM_CONC, USE_LONG_HELIX_FOR_SALT_CORRECTION);
     } else {
-        mfeFullWithSym_SubOpt(rna_info.sequenceNumber, rna_info.sequenceLength, &suboptStructs, 3, RNA, 1 /*DANGLETYPE*/, 
+        mfeFullWithSym_SubOpt(rna_info.sequenceNumber, rna_info.sequenceLength, &rna_info.ensemebleStructs, 3, RNA, 1 /*DANGLETYPE*/, 
                                 rna_info.temperature, TRUE, (DBL_TYPE) kcalDeltaRange, 
                                 0, SODIUM_CONC, MAGNESIUM_CONC, USE_LONG_HELIX_FOR_SALT_CORRECTION);
     }
@@ -109,11 +107,11 @@ FullAdvancedResult* FullEnsembleNoBindingSite(const std::string& seqString, int 
     
     std::string mfeStructure;
     //get dot bracket notation from data 
-    for ( int i = 0; i < suboptStructs.nStructs; i++ ) {
-        oneDnaStruct currentStruct = suboptStructs.validStructs[i];
+    for ( int i = 0; i < rna_info.ensemebleStructs.nStructs; i++ ) {
+        rna_info.currentStruct = rna_info.ensemebleStructs.validStructs[i];
         
         //get the secondary strucutre in dot paren notation 
-        std::string singlestructure = getDotParens(pseudoknotted, suboptStructs.seqlength, &currentStruct);
+        std::string singlestructure = getDotParens(pseudoknotted, rna_info.ensemebleStructs.seqlength, &rna_info.currentStruct);
         if (i == 0)
         {
           //this is the first one so it is the mfe          
@@ -121,8 +119,8 @@ FullAdvancedResult* FullEnsembleNoBindingSite(const std::string& seqString, int 
         }
 
         //get energies
-        double energyError = currentStruct.error;
-        double correctedEnergy = currentStruct.correctedEnergy;  
+        double energyError = rna_info.currentStruct.error;
+        double correctedEnergy = rna_info.currentStruct.correctedEnergy;  
         
         //std::string test(rna_info.sequenceNumber);
         std::string test;
@@ -135,7 +133,7 @@ FullAdvancedResult* FullEnsembleNoBindingSite(const std::string& seqString, int 
         result->suboptFreeEnergy.push_back(correctedEnergy);
     }
 
-    clearDnaStructures(&suboptStructs);
+    clearDnaStructures(&rna_info.ensemebleStructs);
 
     return result;
 }

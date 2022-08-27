@@ -189,16 +189,14 @@ void setStructureInfo(const std::string& structString, SequenceStructureInfo *in
     //convert the string structure to a char array
     auto autoStructure = MakeCString(structString);
     char* structureChar = autoStructure.get();
-
+   
     //get the pairs from the struct
     int thepairs[MAXSEQLENGTH+1];
     getStructureFromParens(structureChar, thepairs, info->sequenceLength); 
 
-    info->structureString=structString;
-    
+    info->structureString=structString;    
     info->structChar = new char[info->sequenceLength];
     std::copy(structureChar, structureChar+info->sequenceLength, info->structChar);
-
     info->thePairs = new int[info->sequenceLength];
     std::copy(thepairs, thepairs+info->sequenceLength, info->thePairs);    
 }

@@ -15,7 +15,9 @@ struct SequenceStructureInfo {
     std::string structureString;
     char *structChar;
     int *thePairs;
-
+    dnaStructures ensemebleStructs={NULL, 0, 0, 0, NAD_INFINITY}; 
+    oneDnaStruct currentStruct;
+    
     //pknotStuff
     bool isPknot;
     int complexity; 
