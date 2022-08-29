@@ -2211,7 +2211,7 @@ export default class Toolbar extends ContainerObject {
 
     private resetDragState(): void {
         this._canDrag = false;
-        this._canDrop = false;
+        this._canHotbarDrop = false;
         this._draggingElement = undefined;
         this._startPointGlobal = null;
         this._startPointContainer = null;
@@ -2512,7 +2512,7 @@ export default class Toolbar extends ContainerObject {
             const x = pos.x - Math.floor(buttonBounds.width / 2);
             const y = pos.y - Math.floor(buttonBounds.height / 2);
             this._draggingElement.display.position.set(x, y);
-            this._canDrop = this.checkDragElement(p.x, p.y, this._draggingElement, this._draggingIndex);
+            this._canHotbarDrop = this.checkDragElement(p.x, p.y, this._draggingElement, this._draggingIndex);
         }
     }
 
@@ -2527,6 +2527,7 @@ export default class Toolbar extends ContainerObject {
     }
 
     private dragEnd(): void {
+        console.log('dragEnd');
         if (this._draggingElement) {
             this._draggingElement.display.visible = false;
         }
@@ -2536,7 +2537,6 @@ export default class Toolbar extends ContainerObject {
         if (
             !this._draggingElement || !this._isExpanded
             || !this._startPointGlobal || !this._startPointContainer
-            || !this._canDrop
         ) {
             this.resetDragState();
             return;
@@ -2544,9 +2544,6 @@ export default class Toolbar extends ContainerObject {
 
         Assert.assertIsDefined(this._startPointContainer);
         Assert.assertIsDefined(this._startPointGlobal);
-
-        this._canDrop = false;
-        this._canDrag = false;
 
         const drop_dx = Math.abs(this._startPointGlobal.x - this._movePointGlobal.x);
         const drop_dy = Math.abs(this._startPointGlobal.y - this._movePointGlobal.y);
@@ -2571,6 +2568,10 @@ export default class Toolbar extends ContainerObject {
 
         // to leftTop
         if (leftButtonsBounds.contains(this._movePointGlobal.x, this._movePointGlobal.y)) {
+            if (!this._canHotbarDrop) {
+                this.resetDragState();
+                return;
+            }
             // leftTop to self
             if (this.leftButtonsGroup._content === this._startPointContainer) {
                 Assert.assertIsDefined(this._draggingElement);
@@ -2616,6 +2617,10 @@ export default class Toolbar extends ContainerObject {
             // to rightTop
             rightButtonsBounds.contains(this._movePointGlobal.x, this._movePointGlobal.y)
         ) {
+            if (!this._canHotbarDrop) {
+                this.resetDragState();
+                return;
+            }
             // rightTop to self
             if (this.rightButtonsGroup._content === this._startPointContainer) {
                 Assert.assertIsDefined(this._draggingElement);
@@ -2701,6 +2706,7 @@ export default class Toolbar extends ContainerObject {
                         category = bt.category;
                     }
                 });
+                console.log(name, button);
                 if (name && button && category) {
                     const bt = button as ToolbarButton;
                     this._topButtons.delete(name);
@@ -2712,20 +2718,20 @@ export default class Toolbar extends ContainerObject {
                 }
             }
 
+            this.resetDragState();
             this._updateAvailableButtonsContainer();
             this.leftButtonsGroup.resizeContainer();
             this.rightButtonsGroup.resizeContainer();
-
             this.updateLayout();
+            this.saveTopButtons();
+            return;
         } else {
             // add code
         }
 
+        this.resetDragState();
         this._updateAvailableButtonsContainer();
-        this._draggingElement = undefined;
-        this._startPointGlobal = null;
         this.updateLayout();
-
         this.saveTopButtons();
     }
 
@@ -2844,7 +2850,7 @@ export default class Toolbar extends ContainerObject {
 
     private onDragEnd(): void {
         this._canDrag = false;
-        this._canDrop = false;
+        this._canHotbarDrop = false;
         this._draggingElement = undefined;
     }
 
@@ -3372,7 +3378,7 @@ export default class Toolbar extends ContainerObject {
     private _isExpanded: boolean;
     private _isAutoCollapsed: boolean;
     private _canDrag: boolean;
-    private _canDrop: boolean;
+    private _canHotbarDrop: boolean;
 
     private _draggingElement: ToolbarButton | undefined;
     private _draggingIndex: number;
