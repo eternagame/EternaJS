@@ -13,6 +13,7 @@ import FloatDialog from './FloatDialog';
 export default class PasteSequenceDialog extends FloatDialog<Sequence> {
     constructor(customNumbering?: (number | null)[] | undefined) {
         super('Write down a sequence');
+        this.setPadding(0);
         this._customNumbering = customNumbering;
     }
 

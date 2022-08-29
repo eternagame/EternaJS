@@ -6,7 +6,7 @@ import Pose2D from 'eterna/pose2D/Pose2D';
 import Sounds from 'eterna/resources/Sounds';
 import ExternalInterface, {ExternalInterfaceCtx} from 'eterna/util/ExternalInterface';
 import Sequence from 'eterna/rnatypes/Sequence';
-import ToolbarButton from 'eterna/ui/ToolbarButton';
+import GameButton from 'eterna/ui/GameButton';
 import GameMode from '../GameMode';
 
 export enum BoosterType {
@@ -94,11 +94,11 @@ export default class Booster {
         return this._toolColor;
     }
 
-    public createButton(fontsize: number = 22): ToolbarButton {
+    public createButton(fontsize: number = 22): GameButton {
         if (this._buttonStateTextures[0] === null) {
             throw new Error('Cannot call createButton before setting at least the first button state texture!');
         }
-        const button: ToolbarButton = new ToolbarButton();
+        const button: GameButton = new GameButton();
         button.allStates(this._buttonStateTextures[0]);
         if (this._type === BoosterType.PAINTER) {
             if (this._buttonStateTextures[0] !== null) {

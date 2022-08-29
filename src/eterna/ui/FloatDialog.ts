@@ -58,13 +58,20 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
     private _minWidth = 100;
     private _minHeight = 100;
     private padding = {
-        left: 4, right: 4, top: 4, bottom: 4
+        left: 12, right: 12, top: 12, bottom: 12
     };
 
     constructor(title:string = '') {
         super();
         this.title = title;
         this.closed = new Promise((resolve) => { this._resolvePromise = resolve; });
+    }
+
+    public setPadding(l: number, r?:number, t?:number, b?: number) {
+        this.padding.left = l;
+        this.padding.right = r || l;
+        this.padding.top = t || l;
+        this.padding.bottom = b || l;
     }
 
     private setScrollHorizontal(progress: number): void {
@@ -326,27 +333,33 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         this.rbSprite.display.x = 0 + w - this.iconSize;
         this.rbSprite.display.y = this.lbSprite.display.y;
 
-        const containerW = w - THUMB_WIDTH;
-        const containerH = h - THUMB_WIDTH - this.titleArea.height;
+        const contentW = this.contentLay.width;
+        const contentH = this.contentLay.height;
+
+        let showHScroll = false;
+        let showVScroll = false;
+        let containerW = w;
+        if (contentW > containerW) {
+            containerW -= THUMB_WIDTH;
+            showHScroll = true;
+        }
+        let containerH = h - this.titleArea.height;
+        if (contentH > containerH) {
+            containerH -= THUMB_WIDTH;
+            showVScroll = true;
+        }
         this.scrollContainer.setSize(containerW, containerH);
         this.scrollContainer.doLayout();
 
-        const contentW = this.contentLay.width;
-        // const containerW = this.scrollContainer.container.width;
-        const contentH = this.contentLay.height;
-        // const containerH = this.scrollContainer.container.height;
-
-        // this.vSlider.display.position.set(w - THUMB_WIDTH, THUMB_MARGIN + this.titleArea.height);
         this.vSlider.display.position.set(w - THUMB_WIDTH, this.titleArea.height);
-        // this.vSlider.setSize(0, h - THUMB_WIDTH - this.titleArea.height - THUMB_MARGIN * 2);
         this.vSlider.setSize(h - this.titleArea.height - this.iconSize, contentH, containerH);
-        this.vSlider.display.visible = (contentH > containerH);
+        this.vSlider.display.visible = showVScroll;
 
         // this.hSlider.display.position.set(THUMB_MARGIN, h - THUMB_WIDTH);
         this.hSlider.display.position.set(this.iconSize, h - THUMB_WIDTH);
         // this.hSlider.setSize(w - THUMB_MARGIN * 2, 0);
         this.hSlider.setSize(w - 2 * this.iconSize, contentW, containerW);
-        this.hSlider.display.visible = (contentW > containerW);
+        this.hSlider.display.visible = showHScroll;
 
         this.titleBackground.width = w;
         this.layoutTitleArea(w);
@@ -437,8 +450,8 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         this.contentHLay.layout(true);
         this.contentLay.layout(true);
 
-        const w = this.contentLay.width + THUMB_WIDTH;
-        const h = this.contentLay.height + THUMB_WIDTH + this.closeIconSize;
+        const w = this.contentLay.width;// + THUMB_WIDTH;
+        const h = this.contentLay.height + this.closeIconSize;// + THUMB_WIDTH ;
 
         if (bInit) {
             this.frameContainer.position.x = (Flashbang.stageWidth - w) * 0.5;

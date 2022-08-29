@@ -801,7 +801,7 @@ export default class Toolbar extends ContainerObject {
             allImg: Bitmaps.ImgValidate3D,
             overImg: Bitmaps.ImgOverValidate3D,
             disableImg: Bitmaps.ImgGreyValidate3D,
-            tooltip: 'Validate 3D Models'
+            tooltip: 'Upload 3D Model'
         });
 
         this.regs.add(
@@ -1009,7 +1009,7 @@ export default class Toolbar extends ContainerObject {
             allImg: Bitmaps.ImgPaste,
             overImg: Bitmaps.ImgOverPaste,
             disableImg: Bitmaps.ImgGreyPaste,
-            tooltip: 'Type in a sequence'
+            tooltip: 'Paste a sequence'
         });
 
         this.downloadHKWSButton = this.createToolbarButton({
@@ -1036,7 +1036,7 @@ export default class Toolbar extends ContainerObject {
             allImg: Bitmaps.ImgScreenshot,
             overImg: Bitmaps.ImgOverScreenshot,
             disableImg: Bitmaps.ImgGreyScreenshot,
-            tooltip: 'Screenshot'
+            tooltip: 'Take a screenshot'
         });
     }
 
@@ -1586,7 +1586,7 @@ export default class Toolbar extends ContainerObject {
                     allImg: Bitmaps.ImgBoosters,
                     overImg: Bitmaps.ImgOverBoosters,
                     disableImg: Bitmaps.ImgGreyBoosters,
-                    tooltip: 'BoosterMenu'
+                    tooltip: 'Boosters'
                 });
                 this.boostersMenuButton.clicked.connect(() => {
                     if (this._boostersData != null && this._boostersData.actions != null) {

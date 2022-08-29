@@ -10,6 +10,7 @@ import FloatDialog, {FloatDialogCanceledError} from './FloatDialog';
 export default class ConfirmDialog extends FloatDialog<boolean> {
     constructor(prompt: string, promptIsHTML: boolean = false) {
         super('Are you sure?');
+        this.setPadding(0);
         this._prompt = prompt;
         this._useHTML = promptIsHTML;
     }

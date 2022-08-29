@@ -10,6 +10,7 @@ import FloatDialog from './FloatDialog';
 export default class ExplosionFactorDialog extends FloatDialog<number> {
     constructor(initialFactor?: number) {
         super('Explosion Factor');
+        this.setPadding(0);
 
         this._initialFactor = initialFactor ?? 1;
     }

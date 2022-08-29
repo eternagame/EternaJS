@@ -10,6 +10,7 @@ import FloatDialog from './FloatDialog';
 export default class BoosterDialog extends FloatDialog<BoostersData> {
     constructor(boostersData: BoostersData) {
         super('Boosters');
+        this.setPadding(12, 12, 0, 0);
         this._boostersData = boostersData;
     }
 

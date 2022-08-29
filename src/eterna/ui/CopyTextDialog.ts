@@ -6,6 +6,7 @@ import FlexibleTextInputPanel from './FlexibleTextInputPanel';
 export default class CopyTextDialog extends FloatDialog<string> {
     constructor(text: string, dialogTitle?: string) {
         super(dialogTitle || '');
+        this.setPadding(0);
         this._text = text;
     }
 
