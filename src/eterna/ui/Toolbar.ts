@@ -2527,7 +2527,6 @@ export default class Toolbar extends ContainerObject {
     }
 
     private dragEnd(): void {
-        console.log('dragEnd');
         if (this._draggingElement) {
             this._draggingElement.display.visible = false;
         }
@@ -2706,7 +2705,6 @@ export default class Toolbar extends ContainerObject {
                         category = bt.category;
                     }
                 });
-                console.log(name, button);
                 if (name && button && category) {
                     const bt = button as ToolbarButton;
                     this._topButtons.delete(name);
