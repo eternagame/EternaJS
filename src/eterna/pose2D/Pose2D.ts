@@ -181,17 +181,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
                 this.clearAnnotationRanges();
             });
-
-            const menuX = this._annotationContextMenu.display.x;
-            const menuY = this._annotationContextMenu.display.y;
-            Assert.assertIsDefined(Flashbang.stageWidth);
-            Assert.assertIsDefined(Flashbang.stageHeight);
-            this._annotationDialog.display.x = menuX + this._annotationDialog.display.width < Flashbang.stageWidth
-                ? menuX : menuX - this._annotationDialog.display.width;
-            this._annotationDialog.display.y = menuY + this._annotationDialog.display.height < Flashbang.stageWidth
-                ? menuY : menuY - this._annotationDialog.display.height;
-
-            this.addObject(this._annotationDialog, this.container);
+            Assert.assertIsDefined(this.mode);
+            (this.mode as GameMode).showDialog(this._annotationDialog);
 
             this.hideAnnotationContextMenu();
         });
