@@ -294,9 +294,6 @@ export default abstract class GameMode extends AppMode {
         const ublk = this.getCurrentUndoBlock(0);
         Assert.assertIsDefined(ublk, "Can't create 3D view - undo state not available");
         if (this._pose3D) this.removeObject(this._pose3D);
-        else {
-            this.toolbar.createThreeButton();
-        }
         this._pose3D = new Pose3D(structureFile, ublk.sequence, ublk.targetPairs, this._poses[0].customNumbering);
         this.addObject(this._pose3D, this.dialogLayer);
         this.regs?.add(this._pose3D.baseHovered.connect((closestIndex) => {
