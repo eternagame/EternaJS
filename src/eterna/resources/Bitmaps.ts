@@ -394,6 +394,7 @@ export default class Bitmaps {
     public static readonly ImgViewSolutions: string = require('assets/SmallUI/viewSolutions.svg');
     public static readonly ImgZoomIn: string = require('assets/SmallUI/zoomIn.svg');
     public static readonly ImgZoomOut: string = require('assets/SmallUI/zoomOut.svg');
+    public static readonly ImgThreeWindow: string = require('assets/SmallUI/icon-3D-window.svg');
 
     public static readonly ImgGreyAddBase: string = require('assets/SmallUI/grey/addBase.svg');
     public static readonly ImgGreyAddPair: string = require('assets/SmallUI/grey/addPair.svg');
@@ -440,6 +441,7 @@ export default class Bitmaps {
     public static readonly ImgGreyViewSolutions: string = require('assets/SmallUI/grey/viewSolutions.svg');
     public static readonly ImgGreyZoomIn: string = require('assets/SmallUI/grey/zoomIn.svg');
     public static readonly ImgGreyZoomOut: string = require('assets/SmallUI/grey/zoomOut.svg');
+    public static readonly ImgGreyThreeWindow: string = require('assets/SmallUI/grey/icon-3D-window.svg');
 
     public static readonly ImgOverAddBase: string = require('assets/SmallUI/highlight/addBase.svg');
     public static readonly ImgOverAddPair: string = require('assets/SmallUI/highlight/addPair.svg');
@@ -486,6 +488,7 @@ export default class Bitmaps {
     public static readonly ImgOverViewSolutions: string = require('assets/SmallUI/highlight/viewSolutions.svg');
     public static readonly ImgOverZoomIn: string = require('assets/SmallUI/highlight/zoomIn.svg');
     public static readonly ImgOverZoomOut: string = require('assets/SmallUI/highlight/zoomOut.svg');
+    public static readonly ImgOverThreeWindow: string = require('assets/SmallUI/highlight/icon-3D-window.svg');
 
     public static readonly ImgDlgClose: string = require('assets/UI/close.svg');
     public static readonly ImgOverDlgClose: string = require('assets/UI/close-over.svg');

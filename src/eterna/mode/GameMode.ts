@@ -622,6 +622,10 @@ export default abstract class GameMode extends AppMode {
         return undefined;
     }
 
+    public getPos3D() {
+        return this._pose3D;
+    }
+
     protected _targetPairs: SecStruct[];
 
     protected _targetConditions: (TargetConditions | undefined)[] = [];

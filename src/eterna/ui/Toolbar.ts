@@ -280,6 +280,7 @@ class TopSpacer extends Container {
 export default class Toolbar extends ContainerObject {
     public zoomInButton: ToolbarButton;
     public zoomOutButton: ToolbarButton;
+    public threeButton: ToolbarButton;
     public pipButton: ToolbarButton;
     public stateToggle: ToggleBar;
     private toolBarEnabled = true;
@@ -1112,6 +1113,22 @@ export default class Toolbar extends ContainerObject {
             hotKey: KeyCode.Minus,
             rscriptID: RScriptUIElementID.ZOOMOUT
         });
+
+        this.threeButton = this.createToolbarButton({
+            cat: ButtonCategory.VIEW,
+            name: 'ThreeWindow',
+            allImg: Bitmaps.ImgThreeWindow,
+            overImg: Bitmaps.ImgOverThreeWindow,
+            disableImg: Bitmaps.ImgGreyThreeWindow,
+            tooltip: 'View 3D window'
+        });
+        this.threeButton.clicked.connect(() => {
+            const mode = this.mode as GameMode;
+            const pos3D = mode.getPos3D();
+            if (pos3D) {
+                pos3D.getWindow().display.visible = true;
+            }
+        });
     }
 
     private makeViewLayout() {
@@ -1131,6 +1148,7 @@ export default class Toolbar extends ContainerObject {
             this.pushButtonToCategory(this.zoomInButton);
             this.pushButtonToCategory(this.zoomOutButton);
         }
+        this.pushButtonToCategory(this.threeButton);
     }
 
     private makeCustomButtons() {

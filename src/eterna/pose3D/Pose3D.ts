@@ -346,6 +346,10 @@ export default class Pose3D extends ContainerObject {
         }
     }
 
+    public getWindow() {
+        return this._window;
+    }
+
     private _customNumbering: (number | null)[] | undefined;
     private _domParent: HTMLElement;
 

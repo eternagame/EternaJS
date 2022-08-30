@@ -195,15 +195,15 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
         this._titleDraggerRight.display.height = this.ICON_SIZE;
 
         // Minimize/restore to previous
-        this._minRestoreButton = new GameButton()
-            .up(Bitmaps.Img3DMin)
-            .over(Bitmaps.Img3DMinHover)
-            .down(Bitmaps.Img3DMin)
-            .tooltip('Minimize');
-        this.addObject(this._minRestoreButton, titleLayout);
-        this._minRestoreButton.display.width = this.ICON_SIZE;
-        this._minRestoreButton.display.height = this.ICON_SIZE;
-        this.regs.add(this._minRestoreButton.clicked.connect(() => this.minOrRestore()));
+        this._closeButton = new GameButton()
+            .up(Bitmaps.ImgDlgClose)
+            .over(Bitmaps.ImgOverDlgClose)
+            .down(Bitmaps.ImgDlgClose)
+            .tooltip('Close');
+        this.addObject(this._closeButton, titleLayout);
+        this._closeButton.display.width = this.ICON_SIZE;
+        this._closeButton.display.height = this.ICON_SIZE;
+        this.regs.add(this._closeButton.clicked.connect(() => this.close()));
 
         this.regs.add(this._titleDraggerLeft.pointerDown.connect((e) => this.handleMove(e)));
         this.regs.add(this._titleDraggerRight.pointerDown.connect((e) => this.handleMove(e)));
@@ -319,11 +319,6 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
         this.alignToChatWindow();
 
         this._windowState = WindowState.NORMAL;
-        this._minRestoreButton
-            .up(Bitmaps.Img3DMin)
-            .over(Bitmaps.Img3DMinHover)
-            .down(Bitmaps.Img3DMin)
-            .tooltip('Minimize');
         this._maxRestoreButton
             .up(Bitmaps.Img3DMax)
             .over(Bitmaps.Img3DMaxHover)
@@ -346,45 +341,11 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
 
         this._windowState = WindowState.MAXIMIZED;
 
-        this._minRestoreButton
-            .up(Bitmaps.Img3DMin)
-            .over(Bitmaps.Img3DMinHover)
-            .down(Bitmaps.Img3DMin)
-            .tooltip('Minimize');
         this._maxRestoreButton
             .up(Bitmaps.Img3DMaxRestore)
             .over(Bitmaps.Img3DMaxRestoreHover)
             .down(Bitmaps.Img3DMaxRestore)
             .tooltip('Restore');
-    }
-
-    private minimize() {
-        if (this._windowState === WindowState.MAXIMIZED) {
-            this._windowState = WindowState.MINIMIZED_FROM_MAX;
-        } else {
-            this._normalBounds = this._currentBounds;
-            this._windowState = WindowState.MINIMIZED_FROM_NORMAL;
-        }
-
-        this._minRestoreButton
-            .up(Bitmaps.Img3DMinRestore)
-            .over(Bitmaps.Img3DMinRestoreHover)
-            .down(Bitmaps.Img3DMinRestore)
-            .tooltip('Restore');
-        this._maxRestoreButton
-            .up(Bitmaps.Img3DMax)
-            .over(Bitmaps.Img3DMaxHover)
-            .down(Bitmaps.Img3DMax)
-            .tooltip('Restore');
-
-        const width = Math.min(460, this._normalBounds.width);
-        this._currentBounds = new WindowBounds(
-            this.MARGIN,
-            this.TOP_MARGIN,
-            width,
-            this.ICON_SIZE
-        );
-        this.alignToChatWindow();
     }
 
     private maxOrRestore() {
@@ -396,15 +357,8 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
         this.layout();
     }
 
-    private minOrRestore() {
-        if (this._windowState === WindowState.MINIMIZED_FROM_NORMAL) {
-            this.restore();
-        } else if (this._windowState === WindowState.MINIMIZED_FROM_MAX) {
-            this.maximize();
-        } else {
-            this.minimize();
-        }
-        this.layout();
+    private close() {
+        if (this.isLiveObject) this.display.visible = false;
     }
 
     private modeResized() {
@@ -515,7 +469,7 @@ export default class Pose3DWindow extends ContainerObject implements MouseWheelL
     private _titleDraggerLeft: SpriteObject;
     private _titleText: SceneObject<Text>;
     private _titleDraggerRight: SpriteObject;
-    private _minRestoreButton: GameButton;
+    private _closeButton: GameButton;
     private _nglSprite: SpriteObject;
     private _nglMask: Graphics;
     private _dragHandleLeft: SpriteObject;
