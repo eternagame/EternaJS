@@ -67,6 +67,10 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         this.closed = new Promise((resolve) => { this._resolvePromise = resolve; });
     }
 
+    public setTitle(title: string) {
+        this.title = title;
+    }
+
     public setPadding(l: number, r?:number, t?:number, b?: number) {
         this.padding.left = l;
         this.padding.right = r || l;
@@ -163,9 +167,7 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         this.normalButton.display.position.y = 2;
         this.normalButton.enabled = false;
 
-        this.closeButton.clicked.connect(() => {
-            this.close(null);
-        });
+        this.closeButton.clicked.connect(this._close.bind(this));
         this.normalButton.clicked.connect(() => {
             this.normalize();
         });
@@ -507,6 +509,10 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
             .beginFill(0x0, 0)
             .drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
             .endFill();
+    }
+
+    protected _close() {
+        this.close(null);
     }
 
     protected close(value: T | null) {

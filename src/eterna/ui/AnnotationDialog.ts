@@ -5,11 +5,9 @@ import {
     HAlign,
     HLayoutContainer,
     VAlign,
-    DisplayUtil,
     Flashbang,
     Assert
 } from 'flashbang';
-import Bitmaps from 'eterna/resources/Bitmaps';
 import Fonts from 'eterna/util/Fonts';
 import {FontWeight} from 'flashbang/util/TextBuilder';
 import {v4 as uuidv4} from 'uuid';
@@ -20,13 +18,12 @@ import {
     AnnotationHierarchyType,
     AnnotationCategory
 } from 'eterna/AnnotationManager';
-import Dialog from './Dialog';
 import GameButton from './GameButton';
 import TextInputObject from './TextInputObject';
 import {InputField} from './TextInputPanel';
-import GamePanel, {GamePanelType} from './GamePanel';
 import GameDropdown from './GameDropdown';
 import VScrollBox from './VScrollBox';
+import FloatDialog from './FloatDialog';
 
 interface AnnotationDialogParams {
     edit: boolean;
@@ -39,14 +36,14 @@ interface AnnotationDialogParams {
     initialAnnotation?: AnnotationData;
 }
 
-export default class AnnotationDialog extends Dialog<AnnotationData> {
+export default class AnnotationDialog extends FloatDialog<AnnotationData> {
     // Signals to update selected ranges
     public readonly onUpdateRanges: Value<AnnotationRange[] | null> = new Value<AnnotationRange[] | null>(null);
 
     constructor(params: AnnotationDialogParams) {
-        super(params.edit);
+        super('Edit Annotation');
         this._edit = params.edit;
-        this._hasTitle = params.title;
+        if (!this._edit) this.setTitle('New Annotation');
         this._sequenceLength = params.sequenceLength;
         this._customNumbering = params.customNumbering;
         this._initialRanges = params.initialRanges.sort(
@@ -62,52 +59,26 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
     protected added(): void {
         super.added();
         this.renderDialog(true);
+        this.updateFloatLocation();
+    }
+
+    protected _close() {
+        this._isClosing = true;
+        this.close(this._initialAnnotation || null);
     }
 
     public renderDialog(focusTitle: boolean): void {
         const prevTitle = this._titleField?.input.text || '';
         const prevBases = this._basesField?.input.text || '';
 
-        // Clear old objects
-        this.removeAllObjects();
-        this.container.children.forEach((child: DisplayObject) => {
+        this.contentVLay.children.forEach((child: DisplayObject) => {
             child.destroy();
         });
 
-        if (this._modal) {
-            this.setupModalBackground();
-        }
-
-        // Generate Dialog Heading
-        this._panel = new GamePanel({
-            type: GamePanelType.NORMAL,
-            alpha: 1,
-            color: AnnotationDialog.PANEL_COLOR,
-            borderAlpha: this._modal ? 1 : 0,
-            borderColor: AnnotationDialog.UPPER_TOOLBAR_DIVIDER_COLOR,
-            dropShadow: true
-        });
-        if (this._hasTitle) {
-            this._panel.title = this._edit ? 'Edit Annotation' : 'New Annotation';
-        }
-        this.addObject(this._panel, this.container);
-
-        let closeButton: GameButton | null = null;
-        if (this._modal) {
-            // Generate Dialog Close Button
-            closeButton = new GameButton()
-                .allStates(Bitmaps.ImgAchievementsClose);
-            this.addObject(closeButton, this.container);
-            closeButton.display.width = AnnotationDialog.CLOSE_BUTTON_LENGTH;
-            closeButton.display.height = AnnotationDialog.CLOSE_BUTTON_LENGTH;
-            closeButton.clicked.connect(() => {
-                this._isClosing = true;
-                this.close(this._initialAnnotation || null);
-            });
-        }
+        this.setupModalBackground();
 
         this._scrollBox = new VScrollBox(0, 0);
-        this.addObject(this._scrollBox, this.container);
+        this.addObject(this._scrollBox, this.contentVLay);
 
         // Primary dialog contents
         const bodyLayout = new VLayoutContainer(AnnotationDialog.H_MARGIN, HAlign.CENTER);
@@ -364,57 +335,24 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
             this._scrollBox.addObject(deleteButton, bodyLayout);
         }
 
-        this.updateDialogLocation(bodyLayout, closeButton);
+        this.updateDialogLocation(bodyLayout);
         Assert.assertIsDefined(this._mode);
         this.regs.add(this._mode.resized.connect(() => {
-            this.updateDialogLocation(bodyLayout, closeButton);
+            this.updateDialogLocation(bodyLayout);
         }));
     }
 
-    public updateDialogLocation(
-        bodyLayout: VLayoutContainer,
-        closeButton: GameButton | null
-    ): void {
+    public updateDialogLocation(bodyLayout: VLayoutContainer): void {
         bodyLayout.layout();
 
         Assert.assertIsDefined(Flashbang.stageHeight);
         const maxHeight = Flashbang.stageHeight * 0.8;
-        const panelExtraHeight = 2 * AnnotationDialog.H_MARGIN + (this._hasTitle ? this._panel.titleHeight : 0);
-        const idealHeight = bodyLayout.height + panelExtraHeight;
+        const idealHeight = bodyLayout.height;
         const panelHeight = Math.min(idealHeight, maxHeight);
         const panelWidth = AnnotationDialog.FIELD_WIDTH + 2 * AnnotationDialog.W_MARGIN;
 
-        this._scrollBox.setSize(panelWidth, panelHeight - panelExtraHeight);
+        this._scrollBox.setSize(panelWidth, panelHeight);
         this._scrollBox.doLayout();
-
-        this._panel.setSize(panelWidth, panelHeight);
-
-        if (this._modal) {
-            DisplayUtil.positionRelativeToStage(
-                this._panel.display,
-                HAlign.CENTER, VAlign.CENTER,
-                HAlign.CENTER, VAlign.CENTER
-            );
-        }
-
-        DisplayUtil.positionRelative(
-            this._scrollBox.display, HAlign.CENTER, VAlign.TOP,
-            this._panel.display, HAlign.CENTER, VAlign.TOP,
-            0, this._panel.titleHeight + AnnotationDialog.H_MARGIN
-        );
-
-        if (closeButton) {
-            DisplayUtil.positionRelative(
-                closeButton.display, HAlign.RIGHT, VAlign.TOP,
-                this._panel.display, HAlign.RIGHT, VAlign.TOP,
-                -10, (this._panel.titleHeight - AnnotationDialog.CLOSE_BUTTON_LENGTH) / 2
-            );
-        }
-    }
-
-    protected onBGClicked(): void {
-        this._isClosing = true;
-        this.close(this._initialAnnotation || null);
     }
 
     public getInputField(
@@ -642,7 +580,6 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
     }
 
     private _edit: boolean = false;
-    private _hasTitle: boolean = false;
     private _isClosing: boolean = false;
     private _sequenceLength: number;
     private _customNumbering: (number | null)[] | undefined;
@@ -651,7 +588,6 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
     private _activeCategory: AnnotationCategory;
     private _layers: AnnotationData[] = [];
     private _selectedLayer: AnnotationData | null = null;
-    private _panel: GamePanel;
     private _scrollBox: VScrollBox;
     private _inputLayout: VLayoutContainer;
     private _actionButtonLayout: HLayoutContainer;
@@ -685,5 +621,4 @@ export default class AnnotationDialog extends Dialog<AnnotationData> {
     private static readonly PANEL_COLOR = 0x152843;
     private static readonly UPPER_TOOLBAR_DIVIDER_COLOR = 0x112238;
     private static readonly LABEL_COLOR = 0xC0DCE7;
-    private static readonly CLOSE_BUTTON_LENGTH = 10;
 }
