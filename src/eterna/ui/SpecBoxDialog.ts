@@ -1,6 +1,6 @@
 import UndoBlock from 'eterna/UndoBlock';
 import {
-    KeyCode, Flashbang, DisplayUtil, HAlign, VAlign, Assert
+    KeyCode, Flashbang, Assert
 } from 'flashbang';
 import FloatDialog from './FloatDialog';
 import GameButton from './GameButton';
@@ -13,7 +13,6 @@ import FloatSpecBox from './FloatSpecBox';
  */
 export default class SpecBoxDialog extends FloatDialog<boolean> {
     private specBox: FloatSpecBox;
-    private cancelButton: GameButton;
     private minimizeButton: GameButton;
     private maxSpecWidth: number = 100;
     private maxSpecHeight: number = 100;
@@ -44,11 +43,6 @@ export default class SpecBoxDialog extends FloatDialog<boolean> {
 
         this.specBox.setSpec(this._datablock);
 
-        this.cancelButton = new GameButton().label('OK', 14)
-            .tooltip('OK').hotkey(KeyCode.KeyS);
-        this.specBox.addObject(this.cancelButton, this.specBox.container);
-        this.cancelButton.clicked.connect(() => this.close(false));
-
         if (this._showMinimizeButton) {
             this.minimizeButton = new GameButton()
                 .label('Minimize Window', 14)
@@ -63,19 +57,11 @@ export default class SpecBoxDialog extends FloatDialog<boolean> {
 
     private updateButtons() {
         const cWidth = this.specBox.width;
-        const w = this.minimizeButton.display.width + 20 + this.cancelButton.display.width;
+        const w = this.minimizeButton.display.width;
         this.minimizeButton.display.position.set(
             10 + (cWidth - w) / 2,
             this.specBox.height - this.minimizeButton.container.height
         );
-
-        if (this.cancelButton != null && this.cancelButton !== undefined) {
-            DisplayUtil.positionRelative(
-                this.cancelButton.display, HAlign.LEFT, VAlign.CENTER,
-                this.minimizeButton.display, HAlign.RIGHT, VAlign.CENTER,
-                20, 0
-            );
-        }
     }
 
     public updateFinalFloatLocation() {

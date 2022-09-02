@@ -30,6 +30,7 @@ import EPars from 'eterna/EPars';
 import Fonts from 'eterna/util/Fonts';
 import CopyTextDialog from 'eterna/ui/CopyTextDialog';
 import Toolbar from 'eterna/ui/Toolbar';
+import FloatDialog from 'eterna/ui/FloatDialog';
 
 export default abstract class GameMode extends AppMode {
     public readonly bgLayer = new Container();
@@ -91,9 +92,14 @@ export default abstract class GameMode extends AppMode {
 
     /** Show a dialog. Removes any existing dialog. */
     public showDialog<T extends SceneObject>(dialog: T): T {
-        if (this._dialogRef.isLive) {
+        const isFloatDlg = this._dialogRef._obj instanceof FloatDialog;
+        if (this._dialogRef.isLive && !isFloatDlg) {
             log.warn('Dialog already showing');
             this._dialogRef.destroyObject();
+        } else if (this._dialogRef.isLive && isFloatDlg) {
+            log.warn('Dialog already showing');
+            const modal = (this._dialogRef._obj as FloatDialog<boolean>).isModal();
+            if (modal) this._dialogRef.destroyObject();
         }
 
         this._dialogRef = this.addObject(dialog, this.dialogLayer);
@@ -101,7 +107,12 @@ export default abstract class GameMode extends AppMode {
     }
 
     public closeCurDialog(): void {
-        this._dialogRef.destroyObject();
+        const isFloatDlg = this._dialogRef._obj instanceof FloatDialog;
+        if (!isFloatDlg) this._dialogRef.destroyObject();
+        else {
+            const modal = (this._dialogRef._obj as FloatDialog<boolean>).isModal();
+            if (modal) this._dialogRef.destroyObject();
+        }
     }
 
     public updateUILayout(bResize:boolean = true) {

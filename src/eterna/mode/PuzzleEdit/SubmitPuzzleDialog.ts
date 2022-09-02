@@ -26,7 +26,7 @@ export interface SubmitPuzzleDetails {
 
 export default class SubmitPuzzleDialog extends FloatDialog<SubmitPuzzleDetails> {
     constructor(numPoses: number, puzzleState: UndoBlock, initialState: SubmitPuzzleDetails = {}) {
-        super('Publish your puzzle');
+        super('Publish your puzzle', true);
         this.setPadding(0);
         this._numPoses = numPoses;
         this._puzzleState = puzzleState;

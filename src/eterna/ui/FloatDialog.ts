@@ -8,7 +8,7 @@ import {
     Flashbang,
     Assert,
     VLayoutContainer, HLayoutContainer,
-    VAlign, HAlign, SpriteObject, SceneObject, Dragger
+    VAlign, HAlign, SpriteObject, SceneObject, Dragger, DisplayObjectPointerTarget, InputUtil
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -42,7 +42,6 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
     private contentHLay: HLayoutContainer;
     public contentVLay: VLayoutContainer;
     private contentLay: VLayoutContainer;
-    // private _scrollView: VScrollBox;
     private scrollContainer: ScrollContainer;
     private vSlider: FloatSliderBar;
     private hSlider: FloatSliderBar;
@@ -61,8 +60,11 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         left: 12, right: 12, top: 12, bottom: 12
     };
 
-    constructor(title:string = '') {
+    private modalMode = false;
+
+    constructor(title:string = '', modalMode?:boolean) {
         super();
+        if (modalMode !== undefined) this.modalMode = modalMode;
         this.title = title;
         this.closed = new Promise((resolve) => { this._resolvePromise = resolve; });
     }
@@ -90,6 +92,10 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         const containerH = this.scrollContainer.container.height;
         this.scrollContainer.scrollY = (contentH > containerH)
             ? (contentH - containerH) * progress : 0;
+    }
+
+    public isModal() {
+        return this.modalMode;
     }
 
     protected added() {
@@ -201,6 +207,10 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
 
         this.frameContainer.addChild(this.lbSprite.display);
         this.frameContainer.addChild(this.rbSprite.display);
+        if (this.modalMode) {
+            this.lbSprite.display.alpha = 0;
+            this.rbSprite.display.alpha = 0;
+        }
 
         this.frame = new Graphics();
         this.frameContainer.addChild(this.frame);
@@ -209,29 +219,31 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
 
         this.updateFloatLocation();
 
-        this.regs.add(this._titleDraggerLeft.pointerDown.connect((e) => this.handleMove(e)));
-        this.regs.add(this._titleDraggerRight.pointerDown.connect((e) => this.handleMove(e)));
-        this.regs.add(this._titleText.pointerDown.connect((e) => this.handleMove(e)));
+        if (!this.modalMode) {
+            this.regs.add(this._titleDraggerLeft.pointerDown.connect((e) => this.handleMove(e)));
+            this.regs.add(this._titleDraggerRight.pointerDown.connect((e) => this.handleMove(e)));
+            this.regs.add(this._titleText.pointerDown.connect((e) => this.handleMove(e)));
 
-        this.regs.add(this.lbSprite.pointerDown.connect((e) => this.handleResizeLeft(e)));
-        this.regs.add(this.lbSprite.pointerOver.connect(() => {
-            const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
-            if (doc) doc.style.cursor = 'sw-resize';
-        }));
-        this.regs.add(this.lbSprite.pointerOut.connect(() => {
-            const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
-            if (doc) doc.style.cursor = '';
-        }));
+            this.regs.add(this.lbSprite.pointerDown.connect((e) => this.handleResizeLeft(e)));
+            this.regs.add(this.lbSprite.pointerOver.connect(() => {
+                const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
+                if (doc) doc.style.cursor = 'sw-resize';
+            }));
+            this.regs.add(this.lbSprite.pointerOut.connect(() => {
+                const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
+                if (doc) doc.style.cursor = '';
+            }));
 
-        this.regs.add(this.rbSprite.pointerDown.connect((e) => this.handleResizeRight(e)));
-        this.regs.add(this.rbSprite.pointerOver.connect(() => {
-            const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
-            if (doc) doc.style.cursor = 'nw-resize';
-        }));
-        this.regs.add(this.rbSprite.pointerOut.connect(() => {
-            const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
-            if (doc) doc.style.cursor = '';
-        }));
+            this.regs.add(this.rbSprite.pointerDown.connect((e) => this.handleResizeRight(e)));
+            this.regs.add(this.rbSprite.pointerOver.connect(() => {
+                const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
+                if (doc) doc.style.cursor = 'nw-resize';
+            }));
+            this.regs.add(this.rbSprite.pointerOut.connect(() => {
+                const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
+                if (doc) doc.style.cursor = '';
+            }));
+        }
     }
 
     private moveToCenter() {
@@ -444,9 +456,11 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         Assert.assertIsDefined(Flashbang.stageWidth);
         this.background
             .clear()
-            .beginFill(0x0, 0)
+            .beginFill(0x0)
             .drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
             .endFill();
+        if (this.modalMode) this.background.alpha = 0.7;
+        else this.background.alpha = 0;
 
         this.contentVLay.layout(true);
         this.contentHLay.layout(true);
@@ -487,6 +501,22 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         this.background = new Graphics();
         this.container.addChild(this.background);
 
+        if (this.modalMode) {
+            const bgTarget = new DisplayObjectPointerTarget(this.background);
+            bgTarget.pointerDown.connect((e) => {
+                if (InputUtil.IsLeftMouse(e)) {
+                    this.close(null);
+                }
+                e.stopPropagation();
+            });
+            bgTarget.pointerUp.connect((e) => {
+                e.stopPropagation();
+            });
+            bgTarget.pointerMove.connect((e) => {
+                e.stopPropagation();
+            });
+        }
+
         Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.keyboardInput.pushListener(this));
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));
@@ -506,9 +536,11 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
 
         this.background
             .clear()
-            .beginFill(0x0, 0)
+            .beginFill(0x0)
             .drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
             .endFill();
+        if (this.modalMode) this.background.alpha = 0.7;
+        else this.background.alpha = 0;
     }
 
     protected _close() {
@@ -547,6 +579,10 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         return this.frameContainer;
     }
 
+    /**
+     * Called when the dim background behind the dialog is clicked.
+     * Subclasses can override to e.g. close the dialog.
+     */
     protected _resolvePromise: (value: T | null) => void;
     protected _isClosed: boolean;
 }

@@ -5,12 +5,13 @@ import Fonts from 'eterna/util/Fonts';
 import TextInputObject from 'eterna/ui/TextInputObject';
 import GameButton from 'eterna/ui/GameButton';
 import GamePanel from 'eterna/ui/GamePanel';
+import GameMode from 'eterna/mode/GameMode';
 import FloatDialog from './FloatDialog';
 
 export default class ExplosionFactorDialog extends FloatDialog<number> {
     constructor(initialFactor?: number) {
         super('Explosion Factor');
-        this.setPadding(0);
+        this.setPadding(12, 12, 0, 0);
 
         this._initialFactor = initialFactor ?? 1;
     }
@@ -20,9 +21,9 @@ export default class ExplosionFactorDialog extends FloatDialog<number> {
 
         this._panel = new GamePanel({
             alpha: 1.0,
-            color: 0x152843,
-            borderAlpha: 0.27,
-            borderColor: 0xC0DCE7
+            color: 0x152843
+            // borderAlpha: 0.27,
+            // borderColor: 0xC0DCE7
         });
 
         this.addObject(this._panel, this.contentVLay);
@@ -61,22 +62,17 @@ export default class ExplosionFactorDialog extends FloatDialog<number> {
         decreaseButton.clicked.connect(() => {
             const factor = Math.max(0, Math.round((parseFloat(input.text) - 0.25) * 1000) / 1000);
             input.text = (Number.isNaN(factor) ? 1 : factor).toString();
+            this.applyFactor(parseFloat(input.text));
         });
 
         increaseButton.clicked.connect(() => {
             const factor = Math.max(0, Math.round((parseFloat(input.text) + 0.25) * 1000) / 1000);
             input.text = (Number.isNaN(factor) ? 1 : factor).toString();
+            this.applyFactor(parseFloat(input.text));
         });
 
         const buttonLayout = new HLayoutContainer(12);
         this._panelLayout.addChild(buttonLayout);
-
-        const yesButton: GameButton = new GameButton().label('Ok', 16);
-        this._panel.addObject(yesButton, buttonLayout);
-        yesButton.clicked.connect(() => {
-            const factor = parseFloat(input.text);
-            this.close(factor);
-        });
 
         input.valueChanged.connect((val) => {
             const factor = parseFloat(val);
@@ -87,18 +83,15 @@ export default class ExplosionFactorDialog extends FloatDialog<number> {
                 // Don't annoy the user with an error message if they're just deleting the contents
                 // to type something else in, but don't let them submit an empty form either.
                 errorText.visible = false;
-                yesButton.enabled = false;
             } else if (Number.isNaN(factor)) {
                 errorText.text = 'Please enter a valid number';
                 errorText.visible = true;
-                yesButton.enabled = false;
             } else if (factor < 0) {
                 errorText.text = 'Explosion factor must not be negative';
                 errorText.visible = true;
-                yesButton.enabled = false;
             } else {
                 errorText.visible = false;
-                yesButton.enabled = true;
+                this.applyFactor(factor);
             }
 
             if (errorText.visible !== wasVisible || prevText !== errorText.text) {
@@ -111,6 +104,19 @@ export default class ExplosionFactorDialog extends FloatDialog<number> {
         noButton.clicked.connect(() => this.close(null));
 
         this.layout();
+    }
+
+    private applyFactor(factor: number) {
+        if (Number.isNaN(factor)) return;
+        if (factor < 0) return;
+
+        if (this.mode) {
+            const mode = this.mode as GameMode;
+            const count = mode.numPoseFields;
+            for (let i = 0; i < count; i++) {
+                mode.getPoseField(i).explosionFactor = factor;
+            }
+        }
     }
 
     private layout(): void {

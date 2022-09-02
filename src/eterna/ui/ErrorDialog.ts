@@ -1,14 +1,15 @@
 import {
-    VLayoutContainer, HAlign, HLayoutContainer, AlphaTask, Flashbang, Assert
+    VLayoutContainer, HAlign, HLayoutContainer, AlphaTask
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
-import Dialog, {DialogCanceledError} from './Dialog';
 import GameButton from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';
+import FloatDialog, {FloatDialogCanceledError} from './FloatDialog';
 
-export default class ErrorDialog extends Dialog<boolean> {
+export default class ErrorDialog extends FloatDialog<boolean> {
     constructor(prompt: string) {
-        super();
+        super('Error', true);
+        this.setPadding(0);
         this._prompt = prompt;
     }
 
@@ -22,7 +23,7 @@ export default class ErrorDialog extends Dialog<boolean> {
                 if (value) {
                     resolve();
                 } else {
-                    reject(new DialogCanceledError());
+                    reject(new FloatDialogCanceledError());
                 }
             });
         });
@@ -38,8 +39,7 @@ export default class ErrorDialog extends Dialog<boolean> {
             borderAlpha: 0.27,
             borderColor: 0xC0DCE7
         });
-        panel.title = 'Error';
-        this.addObject(panel, this.container);
+        this.addObject(panel, this.contentVLay);
 
         const panelLayout = new VLayoutContainer(0, HAlign.CENTER);
         panel.container.addChild(panelLayout);
@@ -65,18 +65,7 @@ export default class ErrorDialog extends Dialog<boolean> {
         panel.display.alpha = 0;
         panel.addObject(new AlphaTask(1, 0.3));
 
-        const updateLocation = () => {
-            Assert.assertIsDefined(Flashbang.stageWidth);
-            Assert.assertIsDefined(Flashbang.stageHeight);
-            panel.display.position.set(
-                (Flashbang.stageWidth - panel.width) * 0.5,
-                (Flashbang.stageHeight - panel.height) * 0.5
-            );
-        };
-
-        updateLocation();
-        Assert.assertIsDefined(this._mode);
-        this.regs.add(this._mode.resized.connect(updateLocation));
+        this.updateFloatLocation();
     }
 
     private readonly _prompt: string;

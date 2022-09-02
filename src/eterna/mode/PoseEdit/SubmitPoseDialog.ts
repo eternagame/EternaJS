@@ -12,7 +12,8 @@ export default class SubmitPoseDialog extends FloatDialog<SubmitPoseDetails> {
         annotations: [],
         libraryNT: []
     }) {
-        super('Submit your design');
+        super('Submit your design', true);
+        this.setPadding(0);
         this._initialState = initialState;
     }
 

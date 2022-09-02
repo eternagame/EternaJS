@@ -47,6 +47,7 @@ export default class NucleotideFinder extends FloatDialog<NucleotideFinderResult
                 this.close({nucleotideIndex});
             }
         });
+        inputPanel.okButtonLabel = ' Jump ';
 
         this.updateFloatLocation();
     }
