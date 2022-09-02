@@ -40,6 +40,7 @@ import AnnotationManager from 'eterna/AnnotationManager';
 import Fonts from 'eterna/util/Fonts';
 import {FontWeight} from 'flashbang/util/TextBuilder';
 import GameMode from 'eterna/mode/GameMode';
+import isMobile from 'is-mobile';
 import NucleotidePalette from './NucleotidePalette';
 import GameButton from './GameButton';
 import ToggleBar from './ToggleBar';
@@ -72,6 +73,7 @@ const BACKGROUND_HEIGHT = 223;
 
 export interface TopBarSetting {
     type: number;
+    newUserMode: boolean;
     left: string[];
     right: string[];
 }
@@ -1113,7 +1115,6 @@ export default class Toolbar extends ContainerObject {
             hotKey: KeyCode.Minus,
             rscriptID: RScriptUIElementID.ZOOMOUT
         });
-
         this.threeButton = this.createToolbarButton({
             cat: ButtonCategory.VIEW,
             name: 'ThreeWindow',
@@ -1368,31 +1369,53 @@ export default class Toolbar extends ContainerObject {
     private initializeTopLeftButtons() {
         const leftBts: ToolbarButton[] = [];
         const leftButtonNames: string[] = [];
+        const mobileMode = isMobile({tablet: true});
+
+        const buttons: ToolbarButton[] = [];
 
         if (
             this._type === ToolbarType.PUZZLEMAKER
             || this._type === ToolbarType.PUZZLEMAKER_EMBEDDED
         ) {
-            leftBts.push(this.getMirrorButton(this.addBaseButton) as ToolbarButton);
-            leftBts.push(this.getMirrorButton(this.submitButton) as ToolbarButton);
-
-            leftButtonNames.push(this.addBaseButton.name as string);
-            leftButtonNames.push(this.submitButton.name as string);
+            buttons.push(this.resetButton);
+            buttons.push(this.screenshotButton);
+            buttons.push(this.submitButton);
+            buttons.push(this.settingsButton);
         } else if (this._type === ToolbarType.LAB) {
-            leftBts.push(this.getMirrorButton(this.viewSolutionsButton) as ToolbarButton);
-            leftBts.push(this.getMirrorButton(this.submitButton) as ToolbarButton);
-
-            leftButtonNames.push(this.viewSolutionsButton.name as string);
-            leftButtonNames.push(this.submitButton.name as string);
+            if (mobileMode) {
+                buttons.push(this.viewSolutionsButton);
+                buttons.push(this.submitButton);
+                buttons.push(this.settingsButton);
+            } else {
+                buttons.push(this.resetButton);
+                buttons.push(this.screenshotButton);
+                if (this.boostersMenuButton) buttons.push(this.boostersMenuButton);
+                buttons.push(this.viewSolutionsButton);
+                buttons.push(this.submitButton);
+                buttons.push(this.settingsButton);
+            }
         } else {
-            leftBts.push(this.getMirrorButton(this.zoomInButton) as ToolbarButton);
-            leftBts.push(this.getMirrorButton(this.zoomOutButton) as ToolbarButton);
-
-            leftButtonNames.push(this.zoomInButton.name as string);
-            leftButtonNames.push(this.zoomOutButton.name as string);
+            let newUserMode = true;
+            if (this.boostersMenuButton) newUserMode = false;
+            if (newUserMode) {
+                buttons.push(this.resetButton);
+                buttons.push(this.screenshotButton);
+                buttons.push(this.settingsButton);
+            } else if (mobileMode) {
+                buttons.push(this.screenshotButton);
+                buttons.push(this.boostersMenuButton);
+                buttons.push(this.settingsButton);
+            } else {
+                buttons.push(this.resetButton);
+                buttons.push(this.screenshotButton);
+                buttons.push(this.boostersMenuButton);
+                buttons.push(this.settingsButton);
+            }
         }
-        leftBts.push(this.getMirrorButton(this.settingsButton) as ToolbarButton);
-        leftButtonNames.push(this.settingsButton.name as string);
+        buttons.forEach((b) => {
+            leftBts.push(this.getMirrorButton(b) as ToolbarButton);
+            leftButtonNames.push(b.name as string);
+        });
 
         for (const b of leftBts) {
             if (b.name) {
@@ -1417,6 +1440,12 @@ export default class Toolbar extends ContainerObject {
         rightBts.push(this.getMirrorButton(this.redoButton) as ToolbarButton);
         rightButtonNames.push(this.undoButton.name as string);
         rightButtonNames.push(this.redoButton.name as string);
+        if (!isMobile({tablet: true})
+            && this.type !== ToolbarType.PUZZLEMAKER
+            && this.type !== ToolbarType.PUZZLEMAKER_EMBEDDED) {
+            rightBts.push(this.getMirrorButton(this.magicGlueButton) as ToolbarButton);
+            rightButtonNames.push(this.magicGlueButton.name as string);
+        }
         for (const b of rightBts) {
             if (b.name) {
                 b.display.visible = true;
@@ -1431,6 +1460,7 @@ export default class Toolbar extends ContainerObject {
     private saveTopbarSetting(topbarSetting: TopBarSetting) {
         let saved = false;
         const array = [];
+
         for (const val of Eterna.settings.topToolbarSettings.value) {
             array.push(val);
         }
@@ -1458,9 +1488,12 @@ export default class Toolbar extends ContainerObject {
     private initializeTopButtons() {
         const leftButtonNames = this.initializeTopLeftButtons();
         const rightButtonNames = this.initializeTopRightButtons();
+        let newUserMode = true;
+        if (this.boostersMenuButton) newUserMode = false;
 
         this.saveTopbarSetting({
             type: this._type,
+            newUserMode,
             left: leftButtonNames,
             right: rightButtonNames
         });
@@ -1475,8 +1508,12 @@ export default class Toolbar extends ContainerObject {
         this.rightButtonsGroup._content.children.forEach((e) => {
             rightButtonNames.push(e.name);
         });
+
+        let newUserMode = true;
+        if (this.boostersMenuButton) newUserMode = false;
         this.saveTopbarSetting({
             type: this._type,
+            newUserMode,
             left: leftButtonNames,
             right: rightButtonNames
         });
