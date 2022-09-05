@@ -87,7 +87,11 @@ export default abstract class GameMode extends AppMode {
     }
 
     public showConfirmDialog(prompt: string, promptIsHTML: boolean = false): ConfirmDialog {
-        return this.showDialog(new ConfirmDialog(prompt, promptIsHTML));
+        return this.showDialog(new ConfirmDialog(prompt, promptIsHTML, true));
+    }
+
+    public showOverlayConfirmDialog(prompt: string, promptIsHTML: boolean = false): ConfirmDialog {
+        return this.showDialog(new ConfirmDialog(prompt, promptIsHTML, false));
     }
 
     /** Show a dialog. Removes any existing dialog. */
@@ -335,7 +339,7 @@ export default abstract class GameMode extends AppMode {
             .then((filename) => {
                 const url = new URL(filename, Eterna.SERVER_URL);
                 const prompt = `Do you want to post <u><a href="${url.href}" target="_blank">this</a></u> screenshot in chat?`;
-                this.showConfirmDialog(prompt, true).closed.then((confirmed) => {
+                this.showOverlayConfirmDialog(prompt, true).closed.then((confirmed) => {
                     if (confirmed) {
                         Eterna.chat.postText(url.href);
                     }

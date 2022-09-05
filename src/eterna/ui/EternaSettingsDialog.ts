@@ -15,7 +15,7 @@ export enum EternaViewOptionsMode {
 
 export default class EternaSettingsDialog extends FloatDialog<void> {
     constructor(mode: EternaViewOptionsMode) {
-        super('Settings');
+        super('Settings', true);
         this._optionsMode = mode;
     }
 

@@ -19,8 +19,6 @@ import FloatSliderBar from './FloatSliderBar';
 import ScrollContainer from './ScrollContainer';
 
 const frameColor = 0x2f94d1;
-const titleBackColor = 0x043468;
-const backColor = 0x152843;
 const THUMB_WIDTH = 18;
 
 /** FloatDialogs that expose a "confirmed" promise will reject with this error if the dialog is canceled */
@@ -32,9 +30,9 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
     public readonly closed: Promise<T | null>;
     private title: string;
     public titleArea: Container;
-    private _titleDraggerLeft: SpriteObject;
+    private _titleDragger: SpriteObject;
+    private _textBg: Graphics;
     private _titleText: SceneObject<Text>;
-    private _titleDraggerRight: SpriteObject;
     private readonly GAP: number = 4;
     private closeButton: GameButton;
     private normalButton: GameButton;
@@ -61,6 +59,8 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
     };
 
     private modalMode = false;
+    private titleBackColor = 0x043468;
+    private backColor = 0x152843;
 
     constructor(title:string = '', modalMode?:boolean) {
         super();
@@ -106,7 +106,7 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         this.frameContainer = new Container();
         this.frameMask = new Graphics();
         this.frameBackground = new Graphics();
-        this.frameBackground.beginFill(backColor, 1)
+        this.frameBackground.beginFill(this.backColor, 1)
             .drawRect(0, 0, 2048, 2048)
             .endFill();
 
@@ -131,23 +131,24 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         this.titleArea = new Container();
         this.titleBackground = new Graphics();
         this.titleBackground
-            .beginFill(titleBackColor)
+            .beginFill(this.titleBackColor)
             .drawRect(0, 0, 10, this.closeIconSize)
             .endFill();
         this.titleArea.addChild(this.titleBackground);
 
-        this._titleDraggerLeft = new SpriteObject(Sprite.from(Bitmaps.Img3DTitle));
-        this._titleDraggerLeft.display.height = this.closeIconSize;
-        this.addObject(this._titleDraggerLeft, this.titleArea);
-        this._titleDraggerLeft.display.position.x = this.closeIconSize + this.GAP;
+        this._titleDragger = new SpriteObject(Sprite.from(Bitmaps.Img3DTitle));
+        this._titleDragger.display.height = this.closeIconSize;
+        this.addObject(this._titleDragger, this.titleArea);
 
+        this._textBg = new Graphics();
+        this._textBg
+            .beginFill(this.titleBackColor)
+            .drawRect(0, 0, 10, this.closeIconSize)
+            .endFill();
+        this.titleArea.addChild(this._textBg);
         this._titleText = new SceneObject<Text>(Fonts.std(this.title, 14).color(0xffffff).build());
         this.addObject(this._titleText, this.titleArea);
         this._titleText.display.position.y = (this.closeIconSize - this._titleText.display.height) / 2;
-
-        this._titleDraggerRight = new SpriteObject(Sprite.from(Bitmaps.Img3DTitle));
-        this._titleDraggerRight.display.height = this.closeIconSize;
-        this.addObject(this._titleDraggerRight, this.titleArea);
 
         this.titleArea.interactive = true;
         this.titleArea.height = this.closeIconSize;
@@ -172,6 +173,7 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         this.normalButton.display.height = this.closeIconSize - 4;
         this.normalButton.display.position.y = 2;
         this.normalButton.enabled = false;
+        if (this.modalMode) this.normalButton.display.visible = false;
 
         this.closeButton.clicked.connect(this._close.bind(this));
         this.normalButton.clicked.connect(() => {
@@ -210,6 +212,7 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         if (this.modalMode) {
             this.lbSprite.display.alpha = 0;
             this.rbSprite.display.alpha = 0;
+            this._titleDragger.display.alpha = 0;
         }
 
         this.frame = new Graphics();
@@ -220,8 +223,7 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         this.updateFloatLocation();
 
         if (!this.modalMode) {
-            this.regs.add(this._titleDraggerLeft.pointerDown.connect((e) => this.handleMove(e)));
-            this.regs.add(this._titleDraggerRight.pointerDown.connect((e) => this.handleMove(e)));
+            this.regs.add(this._titleDragger.pointerDown.connect((e) => this.handleMove(e)));
             this.regs.add(this._titleText.pointerDown.connect((e) => this.handleMove(e)));
 
             this.regs.add(this.lbSprite.pointerDown.connect((e) => this.handleResizeLeft(e)));
@@ -384,29 +386,27 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
     private layoutTitleArea(w: number) {
         this.closeButton.display.position.x = w - this.closeIconSize;
         this.normalButton.display.position.x = 2;
-        if (w > this._titleText.display.width + this.closeIconSize * 2 + this.GAP * 4) {
-            const leftW = w / 2 - (this.closeIconSize + this._titleText.display.width / 2 + this.GAP * 2);
-            this._titleDraggerLeft.display.width = leftW;
-            this._titleDraggerLeft.display.height = this.closeIconSize;
-            this._titleDraggerLeft.display.position.x = this.closeIconSize + this.GAP;
+        let buttonWidth = this.closeIconSize * 2 + this.GAP * 2;
+        if (this.modalMode) buttonWidth = this.closeIconSize + this.GAP * 2;
+        if (w > this._titleText.display.width + buttonWidth) {
+            this._titleDragger.display.width = w - buttonWidth;
+            this._titleDragger.display.height = this.closeIconSize;
+            if (this.modalMode) this._titleDragger.display.position.x = this.GAP;
+            else this._titleDragger.display.position.x = this.closeIconSize + this.GAP;
 
-            const textX = this._titleDraggerLeft.display.position.x + this._titleDraggerLeft.display.width + this.GAP;
+            const textX = (w - this._titleText.display.width) / 2;
             this._titleText.display.position.x = textX;
 
-            const rightW = w / 2 - (this.closeIconSize + this._titleText.display.width / 2 + this.GAP * 2);
-            this._titleDraggerRight.display.width = rightW;
-            this._titleDraggerRight.display.height = this.closeIconSize;
-            this._titleDraggerRight.display.position.x = w / 2 + this._titleText.display.width / 2 + this.GAP;
+            this._textBg
+                .clear()
+                .beginFill(this.titleBackColor)
+                .drawRect(0, 0, this._titleText.display.width + 2 * this.GAP, this.closeIconSize)
+                .endFill();
+            this._textBg.position.x = textX - this.GAP;
         } else {
-            this._titleDraggerLeft.display.width = 0;
-            this._titleDraggerLeft.display.height = this.closeIconSize;
-            this._titleDraggerLeft.display.position.x = this.closeIconSize;
-
-            this._titleText.display.position.x = this.closeIconSize + this.GAP;
-
-            this._titleDraggerRight.display.width = 0;
-            this._titleDraggerRight.display.height = this.closeIconSize;
-            this._titleDraggerRight.display.position.x = w - this.closeIconSize;
+            this._titleDragger.display.width = 0;
+            this._titleDragger.display.height = this.closeIconSize;
+            this._titleDragger.display.position.x = this.closeIconSize;
         }
     }
 

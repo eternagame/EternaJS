@@ -8,8 +8,8 @@ import HTMLTextObject from './HTMLTextObject';
 import FloatDialog, {FloatDialogCanceledError} from './FloatDialog';
 
 export default class ConfirmDialog extends FloatDialog<boolean> {
-    constructor(prompt: string, promptIsHTML: boolean = false) {
-        super('Are you sure?', true);
+    constructor(prompt: string, promptIsHTML: boolean = false, bModal: boolean = true) {
+        super('Are you sure?', bModal);
         this.setPadding(0);
         this._prompt = prompt;
         this._useHTML = promptIsHTML;
