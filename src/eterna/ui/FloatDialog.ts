@@ -20,6 +20,7 @@ import ScrollContainer from './ScrollContainer';
 
 const frameColor = 0x2f94d1;
 const THUMB_WIDTH = 18;
+const roundRadius = 5;
 
 /** FloatDialogs that expose a "confirmed" promise will reject with this error if the dialog is canceled */
 export class FloatDialogCanceledError extends Error {}
@@ -337,12 +338,12 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
 
     public resize(w: number, h: number) {
         this.frameMask.clear().beginFill(0, 1)
-            .drawRect(0, 0, w, h)
+            .drawRoundedRect(0, 0, w, h, roundRadius)
             .endFill();
 
         this.frame.clear()
             .lineStyle(2, frameColor)
-            .drawRect(0, 0, w, h);
+            .drawRoundedRect(0, 0, w, h, roundRadius);
 
         this.lbSprite.display.x = 0;
         this.lbSprite.display.y = 0 + h - this.iconSize;
@@ -433,12 +434,12 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         this.hSlider.display.visible = false;
 
         this.frameMask.clear().beginFill(0, 1)
-            .drawRect(0, 0, w, h)
+            .drawRoundedRect(0, 0, w, h, roundRadius)
             .endFill();
 
         this.frame.clear()
             .lineStyle(2, frameColor)
-            .drawRect(0, 0, w, h);
+            .drawRoundedRect(0, 0, w, h, roundRadius);
 
         this.lbSprite.display.x = 0;
         this.lbSprite.display.y = 0 + h - this.iconSize;
@@ -475,12 +476,12 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         }
 
         this.frameMask.clear().beginFill(0, 1)
-            .drawRect(0, 0, w, h)
+            .drawRoundedRect(0, 0, w, h, roundRadius)
             .endFill();
 
         this.frame.clear()
             .lineStyle(2, frameColor)
-            .drawRect(0, 0, w, h);
+            .drawRoundedRect(0, 0, w, h, roundRadius);
 
         this.lbSprite.display.x = 0;
         this.lbSprite.display.y = 0 + h - this.iconSize;
