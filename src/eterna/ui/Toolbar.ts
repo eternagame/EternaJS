@@ -1554,7 +1554,7 @@ export default class Toolbar extends ContainerObject {
                         ) {
                             leftBts.push(mirrorButton);
                         }
-                    } else {
+                    } else if (name !== 'ThreeWindow') {
                         leftBts.push(mirrorButton);
                     }
                 });
@@ -1569,7 +1569,7 @@ export default class Toolbar extends ContainerObject {
                         ) {
                             rightBts.push(mirrorButton);
                         }
-                    } else {
+                    } else if (name !== 'ThreeWindow') {
                         rightBts.push(mirrorButton);
                     }
                 });
