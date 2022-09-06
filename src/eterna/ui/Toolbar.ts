@@ -1446,8 +1446,8 @@ export default class Toolbar extends ContainerObject {
         if (!isMobile({tablet: true})
             && this.type !== ToolbarType.PUZZLEMAKER
             && this.type !== ToolbarType.PUZZLEMAKER_EMBEDDED) {
-            rightBts.push(this.getMirrorButton(this.magicGlueButton) as ToolbarButton);
-            rightButtonNames.push(this.magicGlueButton.name as string);
+            rightBts.push(this.getMirrorButton(this.baseMarkerButton) as ToolbarButton);
+            rightButtonNames.push(this.baseMarkerButton.name as string);
         }
         for (const b of rightBts) {
             if (b.name) {
