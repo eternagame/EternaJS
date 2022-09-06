@@ -1132,6 +1132,10 @@ export default class Toolbar extends ContainerObject {
         });
     }
 
+    public add3DButton() {
+        this.pushButtonToCategory(this.threeButton);
+    }
+
     private makeViewLayout() {
         this.pushButtonToCategory(this.nucleotideFindButton);
         this.pushButtonToCategory(this.nucleotideRangeButton);
@@ -1149,7 +1153,6 @@ export default class Toolbar extends ContainerObject {
             this.pushButtonToCategory(this.zoomInButton);
             this.pushButtonToCategory(this.zoomOutButton);
         }
-        this.pushButtonToCategory(this.threeButton);
     }
 
     private makeCustomButtons() {

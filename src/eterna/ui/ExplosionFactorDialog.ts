@@ -5,12 +5,13 @@ import Fonts from 'eterna/util/Fonts';
 import TextInputObject from 'eterna/ui/TextInputObject';
 import GameButton from 'eterna/ui/GameButton';
 import GamePanel from 'eterna/ui/GamePanel';
-import GameMode from 'eterna/mode/GameMode';
 import FloatDialog from './FloatDialog';
 
 export default class ExplosionFactorDialog extends FloatDialog<number> {
-    constructor(initialFactor?: number) {
+    private okCallback: (arg0: number)=>void;
+    constructor(initialFactor: number, callback: (arg0: number)=>void) {
         super('Explosion Factor');
+        this.okCallback = callback;
         this.setPadding(12, 12, 0, 0);
 
         this._initialFactor = initialFactor ?? 1;
@@ -62,13 +63,13 @@ export default class ExplosionFactorDialog extends FloatDialog<number> {
         decreaseButton.clicked.connect(() => {
             const factor = Math.max(0, Math.round((parseFloat(input.text) - 0.25) * 1000) / 1000);
             input.text = (Number.isNaN(factor) ? 1 : factor).toString();
-            this.applyFactor(parseFloat(input.text));
+            this.okCallback(parseFloat(input.text));
         });
 
         increaseButton.clicked.connect(() => {
             const factor = Math.max(0, Math.round((parseFloat(input.text) + 0.25) * 1000) / 1000);
             input.text = (Number.isNaN(factor) ? 1 : factor).toString();
-            this.applyFactor(parseFloat(input.text));
+            this.okCallback(parseFloat(input.text));
         });
 
         const buttonLayout = new HLayoutContainer(12);
@@ -91,7 +92,7 @@ export default class ExplosionFactorDialog extends FloatDialog<number> {
                 errorText.visible = true;
             } else {
                 errorText.visible = false;
-                this.applyFactor(factor);
+                this.okCallback(factor);
             }
 
             if (errorText.visible !== wasVisible || prevText !== errorText.text) {
@@ -99,24 +100,11 @@ export default class ExplosionFactorDialog extends FloatDialog<number> {
             }
         });
 
-        const noButton: GameButton = new GameButton().label('Cancel', 16);
-        this._panel.addObject(noButton, buttonLayout);
-        noButton.clicked.connect(() => this.close(null));
+        // const noButton: GameButton = new GameButton().label('Cancel', 16);
+        // this._panel.addObject(noButton, buttonLayout);
+        // noButton.clicked.connect(() => this.close(null));
 
         this.layout();
-    }
-
-    private applyFactor(factor: number) {
-        if (Number.isNaN(factor)) return;
-        if (factor < 0) return;
-
-        if (this.mode) {
-            const mode = this.mode as GameMode;
-            const count = mode.numPoseFields;
-            for (let i = 0; i < count; i++) {
-                mode.getPoseField(i).explosionFactor = factor;
-            }
-        }
     }
 
     private layout(): void {

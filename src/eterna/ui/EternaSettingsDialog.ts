@@ -1,4 +1,3 @@
-import {Graphics} from 'pixi.js';
 import {
     VLayoutContainer, HAlign, Setting, HLayoutContainer, VAlign, DisplayUtil, Flashbang, Assert
 } from 'flashbang';
@@ -83,15 +82,15 @@ export default class EternaSettingsDialog extends FloatDialog<void> {
         this._viewLayout = new VLayoutContainer(22, HAlign.CENTER);
         this._viewLayout.addChild(settingsLayout);
 
-        const okButtonGraphic = new Graphics()
-            .beginFill(0x54B54E)
-            .drawRoundedRect(0, 0, 170, 40, 10)
-            .endFill();
-        const okButton = new GameButton()
-            .customStyleBox(okButtonGraphic)
-            .label('Done', 14);
-        this.addObject(okButton, this._viewLayout);
-        okButton.clicked.connect(() => this.close(null));
+        // const okButtonGraphic = new Graphics()
+        //     .beginFill(0x54B54E)
+        //     .drawRoundedRect(0, 0, 170, 40, 10)
+        //     .endFill();
+        // const okButton = new GameButton()
+        //     .customStyleBox(okButtonGraphic)
+        //     .label('Done', 14);
+        // this.addObject(okButton, this._viewLayout);
+        // okButton.clicked.connect(() => this.close(null));
 
         this._viewLayout.layout();
 

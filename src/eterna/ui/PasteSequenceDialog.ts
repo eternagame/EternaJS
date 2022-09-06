@@ -11,9 +11,11 @@ import FloatDialog from './FloatDialog';
  *  corresponding to sequence string.
  */
 export default class PasteSequenceDialog extends FloatDialog<Sequence> {
-    constructor(customNumbering?: (number | null)[] | undefined) {
+    private okCallback:(sequence:Sequence)=>void;
+    constructor(customNumbering: (number | null)[] | undefined, callback:(sequence:Sequence)=>void) {
         super('Write down a sequence');
         this.setPadding(0);
+        this.okCallback = callback;
         this._customNumbering = customNumbering;
     }
 
@@ -41,12 +43,15 @@ export default class PasteSequenceDialog extends FloatDialog<Sequence> {
         sequence = sequence.toUpperCase().replace(/T/g, 'U');
         // make paste entry robust to blanks, and allow index specification after sequence.
         const seq = sequence.split(' ')[0];
+        if (seq.length === 0) return;
+
         for (const char of seq) {
             if (char !== 'A' && char !== 'U' && char !== 'G' && char !== 'C') {
                 (this.mode as GameMode).showNotification('You can only use characters A, C, G, T, and U');
                 return;
             }
         }
+
         const s = EPars.indexedStringToSequence(sequence, this._customNumbering);
         if (s === undefined && seq.length > 0) {
             (this.mode as GameMode).showNotification(
@@ -54,7 +59,7 @@ export default class PasteSequenceDialog extends FloatDialog<Sequence> {
             );
             return;
         }
-        this.close(s as Sequence);
+        this.okCallback(s as Sequence);
     }
 
     private readonly _customNumbering: (number | null)[] | undefined;

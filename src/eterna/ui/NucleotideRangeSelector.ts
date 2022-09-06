@@ -63,8 +63,19 @@ export default class NucleotideRangeSelector extends FloatDialog<NucleotideRange
 
     private _props: NucleotideRangeSelectorProps;
 
-    constructor(props: NucleotideRangeSelectorProps) {
+    private okCallback: (result:{
+        startIndex: number,
+        endIndex: number,
+        clearRange: boolean
+    })=>void;
+
+    constructor(props: NucleotideRangeSelectorProps, callback: (result:{
+        startIndex: number,
+        endIndex: number,
+        clearRange: boolean
+    })=>void) {
         super(NucleotideRangeSelector.config.title);
+        this.okCallback = callback;
         this._props = props;
     }
 
@@ -95,17 +106,18 @@ export default class NucleotideRangeSelector extends FloatDialog<NucleotideRange
             if ([startIndex, endIndex].some(Number.isNaN)) {
                 this.close(null);
             } else {
-                this.close({
+                this.okCallback({
                     startIndex,
                     endIndex,
                     clearRange: false
                 });
             }
         });
+        inputPanel.okButtonLabel = ' Go ';
 
         if (inputPanel instanceof NucleotideRangeSelectorInput) {
             inputPanel.onClear.connect(() => {
-                this.close({
+                this.okCallback({
                     clearRange: true,
                     startIndex: -1,
                     endIndex: -1

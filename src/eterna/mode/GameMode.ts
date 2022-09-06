@@ -308,7 +308,9 @@ export default abstract class GameMode extends AppMode {
     protected addPose3D(structureFile: string | File | Blob) {
         const ublk = this.getCurrentUndoBlock(0);
         Assert.assertIsDefined(ublk, "Can't create 3D view - undo state not available");
-        if (this._pose3D) this.removeObject(this._pose3D);
+        if (this._pose3D) {
+            this.removeObject(this._pose3D);
+        }
         this._pose3D = new Pose3D(structureFile, ublk.sequence, ublk.targetPairs, this._poses[0].customNumbering);
         this.addObject(this._pose3D, this.dialogLayer);
         this.regs?.add(this._pose3D.baseHovered.connect((closestIndex) => {
@@ -330,6 +332,7 @@ export default abstract class GameMode extends AppMode {
         this.regs?.add(this._poses[0].basesSparked.connect(
             (val: number[]) => this._pose3D?.spark3D(val)
         ));
+        this.toolbar.add3DButton();
     }
 
     protected postScreenshot(screenshot: ArrayBuffer): void {
@@ -437,8 +440,8 @@ export default abstract class GameMode extends AppMode {
             return;
         }
         for (let ii = 0; ii < this._poses.length; ++ii) {
-            if (this._poses[ii].customLayout === undefined) continue;
             const cl = this._poses[ii].customLayout;
+            if (cl === undefined) continue;
             // width and height: xmax-xmin+20
             // each coord is x-xmin+10
             Assert.assertIsDefined(cl);
@@ -520,8 +523,8 @@ export default abstract class GameMode extends AppMode {
             return;
         }
         for (let ii = 0; ii < this._poses.length; ++ii) {
-            if (this._poses[ii].customLayout === undefined) continue;
             const cl = this._poses[ii].customLayout;
+            if (cl === undefined) continue;
             Assert.assertIsDefined(cl);
             let hkwsText = 'idx,x,y,seq,partner\n';
             for (let jj = 0; jj < this._poses[ii].sequence.length; ++jj) {
@@ -541,7 +544,12 @@ export default abstract class GameMode extends AppMode {
 
     protected showPasteSequenceDialog(): void {
         const customNumbering = this._poses[0].customNumbering;
-        this.showDialog(new PasteSequenceDialog(customNumbering)).closed.then((sequence) => {
+        const callback = (sequence:Sequence) => {
+            for (const pose of this._poses) {
+                pose.pasteSequence(sequence);
+            }
+        };
+        this.showDialog(new PasteSequenceDialog(customNumbering, callback)).closed.then((sequence) => {
             if (sequence !== null) {
                 for (const pose of this._poses) {
                     pose.pasteSequence(sequence);
@@ -551,7 +559,14 @@ export default abstract class GameMode extends AppMode {
     }
 
     protected findNucleotide(): void {
-        this.showDialog(new NucleotideFinder()).closed.then((result) => {
+        const callback = (nucleotideIndex:number) => {
+            if (this._isPipMode) {
+                this._poses.forEach((p) => p.focusNucleotide(nucleotideIndex));
+            } else {
+                this._poses[this._curTargetIndex].focusNucleotide(nucleotideIndex);
+            }
+        };
+        this.showDialog(new NucleotideFinder(callback.bind(this))).closed.then((result) => {
             if (result != null) {
                 if (this._isPipMode) {
                     this._poses.forEach((p) => p.focusNucleotide(result.nucleotideIndex));
@@ -575,11 +590,28 @@ export default abstract class GameMode extends AppMode {
                 }
             })() as [number, number];
 
+        const callback = (result:{
+            startIndex: number,
+            endIndex: number,
+            clearRange: boolean
+        }) => {
+            if (result.clearRange) {
+                this._nucleotideRangeToShow = null;
+            } else {
+                this._nucleotideRangeToShow = [result.startIndex, result.endIndex];
+            }
+
+            if (this._isPipMode) {
+                this._poses.forEach((p) => p.showNucleotideRange(this._nucleotideRangeToShow));
+            } else {
+                this._poses[this._curTargetIndex].showNucleotideRange(this._nucleotideRangeToShow);
+            }
+        };
         this.showDialog(
             new NucleotideRangeSelector({
                 initialRange,
                 isPartialRange: Boolean(this._nucleotideRangeToShow)
-            })
+            }, callback.bind(this))
         ).closed.then((result) => {
             if (result === null) {
                 return;
@@ -600,7 +632,11 @@ export default abstract class GameMode extends AppMode {
     }
 
     protected changeExplosionFactor(): void {
-        this.showDialog(new ExplosionFactorDialog(this._poseFields[0].explosionFactor)).closed.then((result) => {
+        const callback = (explosionFactor:number) => {
+            this._poseFields.forEach((pf) => { pf.explosionFactor = explosionFactor; });
+        };
+        this.showDialog(new ExplosionFactorDialog(this._poseFields[0].explosionFactor,
+            callback.bind(this))).closed.then((result) => {
             if (result != null) {
                 this._poseFields.forEach((pf) => { pf.explosionFactor = result; });
             }

@@ -16,8 +16,11 @@ export default class NucleotideFinder extends FloatDialog<NucleotideFinderResult
         width: 80
     };
 
-    constructor() {
+    private okCallback: (arg0: number)=>void;
+
+    constructor(callback: (arg0: number)=>void) {
         super(NucleotideFinder.props.title);
+        this.okCallback = callback;
     }
 
     protected added() {
@@ -44,7 +47,8 @@ export default class NucleotideFinder extends FloatDialog<NucleotideFinderResult
             if (Number.isNaN(nucleotideIndex)) {
                 this.close(null);
             } else {
-                this.close({nucleotideIndex});
+                // this.close({nucleotideIndex});
+                this.okCallback(nucleotideIndex);
             }
         });
         inputPanel.okButtonLabel = ' Jump ';

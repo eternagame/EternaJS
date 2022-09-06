@@ -6,7 +6,6 @@ import Background from 'eterna/vfx/Background';
 import Molecule from 'eterna/pose2D/Molecule';
 import BaseGlow from 'eterna/vfx/BaseGlow';
 import Toolbar, {ToolbarType} from 'eterna/ui/Toolbar';
-import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
 import EternaSettingsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaSettingsDialog';
 import PoseField from 'eterna/pose2D/PoseField';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
@@ -46,7 +45,6 @@ import AnnotationManager, {
     AnnotationRange
 } from 'eterna/AnnotationManager';
 import AnnotationDialog from 'eterna/ui/AnnotationDialog';
-import CopyTextDialog from 'eterna/ui/CopyTextDialog';
 import FileInputObject, {HTMLInputEvent} from 'eterna/ui/FileInputObject';
 import Pose3D from 'eterna/pose3D/Pose3D';
 import ErrorDialog from 'eterna/ui/ErrorDialog';
@@ -126,19 +124,8 @@ export default class PuzzleEditMode extends GameMode {
                 poseField.zoomIn();
             }
         });
-        this.toolbar.copyButton.clicked.connect(() => {
-            this.showDialog(new CopyTextDialog(this._poses[0].sequence.sequenceString(), 'Current Sequence'));
-        });
-        this.toolbar.pasteButton.clicked.connect(() => {
-            const customNumbering = this._poses[0].customNumbering;
-            this.showDialog(new PasteSequenceDialog(customNumbering)).closed.then((sequence) => {
-                if (sequence != null) {
-                    for (const pose of this._poses) {
-                        pose.pasteSequence(sequence);
-                    }
-                }
-            });
-        });
+        this.toolbar.copyButton.clicked.connect(() => this.showCopySequenceDialog());
+        this.toolbar.pasteButton.clicked.connect(() => this.showPasteSequenceDialog());
 
         this.toolbar.resetButton.clicked.connect(() => this.promptForReset());
         this.toolbar.submitButton.clicked.connect(() => this.onSubmitPuzzle());
