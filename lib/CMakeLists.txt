@@ -1,17 +1,31 @@
 cmake_minimum_required(VERSION 3.10)
 
-add_subdirectory(Vienna1)
-add_subdirectory(Vienna2)
-add_subdirectory(LinearFold)
-add_subdirectory(NUPACK)
-add_subdirectory(RNApuzzler)
+# Conditionally compile external libraries only if the source is present
 
-# Will only work if you can, in fact, clone EternaFold
+if (EXISTS "Vienna1/ViennaRNA-1.8.5")
+	add_subdirectory(Vienna1)
+endif()
+
+if (EXISTS "Vienna2/ViennaRNA-2.1.8")
+	add_subdirectory(Vienna2)
+endif()
+
+if (EXISTS "LinearFold/LinearFold")
+	add_subdirectory(LinearFold)
+endif()
+
+if (EXISTS "NUPACK/nupack3.0.4")
+	add_subdirectory(NUPACK)
+endif()
+
+if (EXISTS "RNApuzzler/RNApuzzler")
+	add_subdirectory(RNApuzzler)
+endif()
+
 if (EXISTS "EternaFold/EternaFold")
 	add_subdirectory(EternaFold)
 endif()
 
-# Will only work if the user has decided to download contrafold
 if (EXISTS "contrafold/contrafold")
 	add_subdirectory(contrafold)
 endif()

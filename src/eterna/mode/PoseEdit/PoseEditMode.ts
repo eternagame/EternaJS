@@ -2578,7 +2578,7 @@ export default class PoseEditMode extends GameMode {
                 sequence: pose.sequence.sequenceString(),
                 structure: (
                     this._poseState === PoseState.TARGET ? ublk.targetPairs : ublk.getPairs(37, pseudoknots)
-                ).getParenthesis(),
+                ).getParenthesis(null, pseudoknots),
                 startingFolder: this._folder.name,
                 annotations: this._annotationManager.createAnnotationBundle()
             };

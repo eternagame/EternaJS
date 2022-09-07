@@ -21,7 +21,12 @@ export default class BranchinessConstraint extends Constraint<BranchinessConstra
 
     public evaluate(constraintContext: ConstraintContext): BranchinessConstraintStatus {
         // TODO: Multistate?
-        const branchiness = constraintContext.undoBlocks[0].branchiness(constraintContext.undoBlocks[0].getPairs(37));
+        const undoBlock = constraintContext.undoBlocks[0];
+
+        const pseudoknots = (undoBlock.targetConditions !== undefined
+            && undoBlock.targetConditions['type'] === 'pseudoknot');
+
+        const branchiness = undoBlock.branchiness(undoBlock.getPairs(37, pseudoknots));
 
         return {
             satisfied: branchiness >= this.minBranchiness,

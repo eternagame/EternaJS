@@ -258,6 +258,12 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         }
     }
 
+    public disableEnergyGui(message: string) {
+        this._primaryScoreEnergyDisplay.setEnergyText('Total', message);
+        this._deltaScoreEnergyDisplay.setEnergyText('Natural/Target Delta', message);
+        this._secondaryScoreEnergyDisplay.visible = false;
+    }
+
     public updateEnergyGui(
         factor: number,
         scoreLabel: string,

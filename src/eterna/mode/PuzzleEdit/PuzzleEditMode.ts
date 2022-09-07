@@ -345,7 +345,7 @@ export default class PuzzleEditMode extends GameMode {
             ) {
                 defaultStructure = initialPoseData[ii]['structure'];
                 defaultSequence = initialPoseData[ii]['sequence'];
-                defaultPairs = SecStruct.fromParens(defaultStructure);
+                defaultPairs = SecStruct.fromParens(defaultStructure, true);
             }
 
             const poseField: PoseField = new PoseField(true, this._annotationManager);
