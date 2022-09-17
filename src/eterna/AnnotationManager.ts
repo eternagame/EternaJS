@@ -3,7 +3,7 @@ import {Signal, UnitSignal, Value} from 'signals';
 import {
     Point, Container, Rectangle, Graphics
 } from 'pixi.js';
-import {ToolbarType} from 'eterna/ui/Toolbar';
+import {ToolbarType} from 'eterna/ui/toolbar/Toolbar';
 import {DisplayUtil, Assert} from 'flashbang';
 import {v4 as uuidv4} from 'uuid';
 import AnnotationPanelItem from 'eterna/ui/AnnotationPanelItem';
@@ -999,7 +999,9 @@ export default class AnnotationManager {
                 if (!position) continue;
                 const view = this.getAnnotationView(params.pose, i, params.item);
                 if (params.item.type === AnnotationHierarchyType.ANNOTATION) {
-                    view.onMovedAnnotation.connect((point: Point) => {
+                    view.onMovedAnnotation.connect((point: Point | null) => {
+                        if (!point) return;
+
                         const anchorIndex = params.item.positions[i].anchorIndex;
                         const base = params.pose.getBase(anchorIndex);
                         const anchorPoint = new Point(
@@ -1076,7 +1078,9 @@ export default class AnnotationManager {
             const prevPosition = params.item.positions.length > i ? params.item.positions[i] : null;
             const view = this.getAnnotationView(params.pose, i, params.item);
             if (params.item.type === AnnotationHierarchyType.ANNOTATION) {
-                view.onMovedAnnotation.connect((point: Point) => {
+                view.onMovedAnnotation.connect((point: Point | null) => {
+                    if (!point) return;
+
                     const anchorIndex = params.item.positions[i].anchorIndex;
                     const base = params.pose.getBase(anchorIndex);
                     const anchorPoint = new Point(

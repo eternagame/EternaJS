@@ -1,15 +1,15 @@
-import Reactor, {RListener} from './Reactor';
+import Reactor, {RListener, RListenerArgs} from './Reactor';
 
 import Connection from './Connection';
 
 /**
  * Implements {@link Connection} and a linked-list style listener list for {@link Reactor}s.
  */
-export default class Cons<T1, T2, T3> implements Connection {
+export default class Cons<ListenerArgs extends RListenerArgs> implements Connection {
     /** The next connection in our chain. */
-    public next: Cons<T1, T2, T3> | null;
+    public next: Cons<ListenerArgs> | null;
 
-    constructor(owner: Reactor<T1, T2, T3> | null, listener: RListener<T1, T2, T3> | null) {
+    constructor(owner: Reactor<ListenerArgs> | null, listener: RListener<ListenerArgs> | null) {
         this._owner = owner;
         this._listener = listener;
     }
@@ -20,7 +20,7 @@ export default class Cons<T1, T2, T3> implements Connection {
     }
 
     /** Returns the listener for this cons cell. */
-    public get listener(): RListener<T1, T2, T3> | null {
+    public get listener(): RListener<ListenerArgs> | null {
         return this._listener;
     }
 
@@ -50,7 +50,10 @@ export default class Cons<T1, T2, T3> implements Connection {
     }
 
     /* internal */
-    public static _insert<T1, T2, T3>(head: Cons<T1, T2, T3> | null, cons: Cons<T1, T2, T3>): Cons<T1, T2, T3> {
+    public static _insert<ListenerArgs extends RListenerArgs>(
+        head: Cons<ListenerArgs> | null,
+        cons: Cons<ListenerArgs>
+    ): Cons<ListenerArgs> {
         if (head == null) {
             return cons;
         } else if (cons._priority > head._priority) {
@@ -63,7 +66,10 @@ export default class Cons<T1, T2, T3> implements Connection {
     }
 
     /* internal */
-    public static _remove<T1, T2, T3>(head: Cons<T1, T2, T3> | null, cons: Cons<T1, T2, T3>): Cons<T1, T2, T3> | null {
+    public static _remove<ListenerArgs extends RListenerArgs>(
+        head: Cons<ListenerArgs> | null,
+        cons: Cons<ListenerArgs>
+    ): Cons<ListenerArgs> | null {
         if (head == null) {
             return head;
         } else if (head === cons) {
@@ -75,10 +81,10 @@ export default class Cons<T1, T2, T3> implements Connection {
     }
 
     /* internal */
-    public static _removeAll<T1, T2, T3>(
-        head: Cons<T1, T2, T3> | null,
-        listener: RListener<T1, T2, T3>
-    ): Cons<T1, T2, T3> | null {
+    public static _removeAll<ListenerArgs extends RListenerArgs>(
+        head: Cons<ListenerArgs> | null,
+        listener: RListener<ListenerArgs>
+    ): Cons<ListenerArgs> | null {
         if (head == null) {
             return null;
         } else if (head.listener === listener) {
@@ -89,8 +95,8 @@ export default class Cons<T1, T2, T3> implements Connection {
         }
     }
 
-    private _owner: Reactor<T1, T2, T3> | null;
-    private _listener: RListener<T1, T2, T3> | null;
+    private _owner: Reactor<ListenerArgs> | null;
+    private _listener: RListener<ListenerArgs> | null;
     private _oneShot: boolean;
     private _priority: number = 0;
 }

@@ -21,7 +21,7 @@ import GraphicsObject from 'flashbang/objects/GraphicsObject';
  * the bounds of the passed Container. This is the only way we can intercept events from PIXI.
  */
 export default class PointerCapture extends GameObject {
-    constructor(root: DisplayObject, onEvent: (e: InteractionEvent) => void) {
+    constructor(root: DisplayObject | null, onEvent: (e: InteractionEvent) => void) {
         super();
         this._root = root;
         this._onEvent = onEvent;
@@ -66,17 +66,21 @@ export default class PointerCapture extends GameObject {
         this._surface.display.interactive = false;
 
         let hitObj: DisplayObject | null = interaction.hitTest(e.data.global);
-        let isRootEvent = false;
+        let interceptEvent = true;
 
-        while (hitObj != null) {
-            if (hitObj === this._root) {
-                isRootEvent = true;
-                break;
+        // If we pass a null root element, that means we always want to trigger the callback,
+        // so no need to hit test
+        if (this._root) {
+            while (hitObj != null) {
+                if (hitObj === this._root) {
+                    interceptEvent = false;
+                    break;
+                }
+                hitObj = hitObj.parent;
             }
-            hitObj = hitObj.parent;
         }
 
-        if (!isRootEvent) {
+        if (interceptEvent) {
             this._onEvent(e);
         }
 
@@ -147,7 +151,7 @@ export default class PointerCapture extends GameObject {
         this._surface.display.interactive = true;
     }
 
-    private _root: DisplayObject;
+    private _root: DisplayObject | null;
     private _surface: GraphicsObject;
     private _onEvent: ((e: InteractionEvent) => void);
 }

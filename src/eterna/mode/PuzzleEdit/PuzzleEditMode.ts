@@ -5,7 +5,7 @@ import UndoBlock, {UndoBlockParam, TargetConditions} from 'eterna/UndoBlock';
 import Background from 'eterna/vfx/Background';
 import Molecule from 'eterna/pose2D/Molecule';
 import BaseGlow from 'eterna/vfx/BaseGlow';
-import Toolbar, {ToolbarType} from 'eterna/ui/Toolbar';
+import Toolbar, {ToolbarType} from 'eterna/ui/toolbar/Toolbar';
 import EternaSettingsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaSettingsDialog';
 import PoseField from 'eterna/pose2D/PoseField';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
@@ -48,6 +48,8 @@ import AnnotationDialog from 'eterna/ui/AnnotationDialog';
 import FileInputObject, {HTMLInputEvent} from 'eterna/ui/FileInputObject';
 import Pose3D from 'eterna/pose3D/Pose3D';
 import ErrorDialog from 'eterna/ui/ErrorDialog';
+import ToolbarButton from 'eterna/ui/toolbar/ToolbarButton';
+import {naturalButtonProps, targetButtonProps} from 'eterna/ui/toolbar/ToolbarButtons';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
 import StructureInput from './StructureInput';
@@ -101,93 +103,6 @@ export default class PuzzleEditMode extends GameMode {
     }
 
     public get isOpaque(): boolean { return true; }
-
-    private setToolbarEventHandlers() {
-        this.toolbar.addBaseButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.ADD_BASE));
-        this.toolbar.addPairButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.ADD_PAIR));
-        this.toolbar.deleteButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.DELETE));
-        this.toolbar.lockButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.LOCK));
-        this.toolbar.moleculeButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.BINDING_SITE));
-        this.toolbar.pairSwapButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.PAIR));
-        this.toolbar.naturalButton.clicked.connect(() => this.setToNativeMode());
-        this.toolbar.targetButton.clicked.connect(() => this.setToTargetMode());
-        this.toolbar.undoButton.clicked.connect(() => this.moveUndoStackBackward());
-        this.toolbar.redoButton.clicked.connect(() => this.moveUndoStackForward());
-        this.toolbar.screenshotButton.clicked.connect(() => this.postScreenshot(this.createScreenshot()));
-        this.toolbar.zoomOutButton.clicked.connect(() => {
-            for (const poseField of this._poseFields) {
-                poseField.zoomOut();
-            }
-        });
-        this.toolbar.zoomInButton.clicked.connect(() => {
-            for (const poseField of this._poseFields) {
-                poseField.zoomIn();
-            }
-        });
-        this.toolbar.copyButton.clicked.connect(() => this.showCopySequenceDialog());
-        this.toolbar.pasteButton.clicked.connect(() => this.showPasteSequenceDialog());
-
-        this.toolbar.resetButton.clicked.connect(() => this.promptForReset());
-        this.toolbar.submitButton.clicked.connect(() => this.onSubmitPuzzle());
-
-        this.toolbar.palette.targetClicked.connect((type) => this.onPaletteTargetSelected(type));
-
-        this.toolbar.nucleotideFindButton.clicked.connect(() => this.findNucleotide());
-        this.toolbar.nucleotideRangeButton.clicked.connect(() => this.showNucleotideRange());
-        this.toolbar.explosionFactorButton.clicked.connect(() => this.changeExplosionFactor());
-
-        this.toolbar.baseMarkerButton.clicked.connect(() => {
-            this.onEditButtonClicked(RNAPaint.BASE_MARK);
-        });
-
-        this.toolbar.moveButton.clicked.connect(() => {
-            this.setPosesLayoutTool(Layout.MOVE);
-        });
-
-        this.toolbar.rotateStemButton.clicked.connect(() => {
-            this.setPosesLayoutTool(Layout.ROTATE_STEM);
-        });
-
-        this.toolbar.flipStemButton.clicked.connect(() => {
-            this.setPosesLayoutTool(Layout.FLIP_STEM);
-        });
-
-        this.toolbar.snapToGridButton.clicked.connect(() => {
-            for (const pose of this._poses) {
-                pose.snapToGrid();
-            }
-        });
-
-        this.toolbar.downloadHKWSButton.clicked.connect(() => {
-            this.downloadHKWS();
-        });
-
-        this.toolbar.downloadSVGButton.clicked.connect(() => {
-            this.downloadSVG();
-        });
-
-        this.toolbar.validate3DButton.clicked.connect(() => {
-            const uploadButton = new FileInputObject({
-                id: '3d-upload-file-input',
-                width: 30,
-                height: 30,
-                acceptedFiletypes: '.cif,.pdb'
-            });
-            this.addObject(uploadButton);
-            uploadButton.activateDialog();
-            this.regs?.add(uploadButton.fileSelected.connect((e: HTMLInputEvent) => {
-                const files = e.target.files;
-                if (files && files[0]) {
-                    Pose3D.checkModelFile(files[0], this.getCurrentUndoBlock(0).sequence.length).then(() => {
-                        this.addPose3D(files[0]);
-                    }).catch((err) => {
-                        this.showDialog(new ErrorDialog(err));
-                    });
-                }
-                this.removeObject(uploadButton);
-            }));
-        });
-    }
 
     protected setup(): void {
         super.setup();
@@ -271,18 +186,14 @@ export default class PuzzleEditMode extends GameMode {
             }
         });
 
-        this.toolbar = new Toolbar(toolbarType, {
-            states: this._numTargets,
+        this._toolbar = new Toolbar(toolbarType, {
             annotationManager: this._annotationManager
-        },
-        {
-            pairSwapButtonHandler: () => this.onEditButtonClicked(RNAPaint.PAIR),
-            baseMarkerButtonHandler: () => this.onEditButtonClicked(RNAPaint.BASE_MARK),
-            settingsButtonHandler: () => this.showSettingsDialog()
         });
-        this.addObject(this.toolbar.naturalButton, this.uiLayer);
-        this.addObject(this.toolbar.targetButton, this.uiLayer);
-        this.addObject(this.toolbar, this.uiLayer);
+        this._naturalButton = ToolbarButton.createButton(naturalButtonProps);
+        this._targetButton = ToolbarButton.createButton(targetButtonProps);
+        this.addObject(this._naturalButton, this.uiLayer);
+        this.addObject(this._targetButton, this.uiLayer);
+        this.addObject(this._toolbar, this.uiLayer);
         this.setToolbarEventHandlers();
 
         if (this._embedded) {
@@ -442,6 +353,100 @@ export default class PuzzleEditMode extends GameMode {
         this.updateUILayout();
     }
 
+    private setToolbarEventHandlers() {
+        Assert.assertIsDefined(this.regs);
+        this.regs.add(this._naturalButton.clicked.connect(() => this.setToNativeMode()));
+        this.regs.add(this._targetButton.clicked.connect(() => this.setToTargetMode()));
+
+        this.regs.add(this._toolbar.addBaseButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.ADD_BASE)));
+        this.regs.add(this._toolbar.addPairButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.ADD_PAIR)));
+        this.regs.add(this._toolbar.deleteButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.DELETE)));
+        this.regs.add(this._toolbar.lockButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.LOCK)));
+        this.regs.add(
+            this._toolbar.moleculeButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.BINDING_SITE))
+        );
+        this.regs.add(this._toolbar.pairSwapButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.PAIR)));
+        this.regs.add(this._toolbar.undoButton.clicked.connect(() => this.moveUndoStackBackward()));
+        this.regs.add(this._toolbar.redoButton.clicked.connect(() => this.moveUndoStackForward()));
+        this.regs.add(
+            this._toolbar.screenshotButton.clicked.connect(() => this.postScreenshot(this.createScreenshot()))
+        );
+        this.regs.add(this._toolbar.zoomOutButton.clicked.connect(() => {
+            for (const poseField of this._poseFields) {
+                poseField.zoomOut();
+            }
+        }));
+        this.regs.add(this._toolbar.zoomInButton.clicked.connect(() => {
+            for (const poseField of this._poseFields) {
+                poseField.zoomIn();
+            }
+        }));
+        this.regs.add(this._toolbar.copyButton.clicked.connect(() => this.showCopySequenceDialog()));
+        this.regs.add(this._toolbar.pasteButton.clicked.connect(() => this.showPasteSequenceDialog()));
+
+        this.regs.add(this._toolbar.resetButton.clicked.connect(() => this.promptForReset()));
+        this.regs.add(this._toolbar.submitButton.clicked.connect(() => this.onSubmitPuzzle()));
+
+        this.regs.add(this._toolbar.palette.targetClicked.connect((type) => this.onPaletteTargetSelected(type)));
+        this.regs.add(this._toolbar.pairSwapButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.PAIR)));
+        this.regs.add(
+            this._toolbar.baseMarkerButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.BASE_MARK))
+        );
+        this.regs.add(this._toolbar.settingsButton.clicked.connect(() => this.showSettingsDialog()));
+
+        this.regs.add(this._toolbar.nucleotideFindButton.clicked.connect(() => this.findNucleotide()));
+        this.regs.add(this._toolbar.nucleotideRangeButton.clicked.connect(() => this.showNucleotideRange()));
+        this.regs.add(this._toolbar.explosionFactorButton.clicked.connect(() => this.changeExplosionFactor()));
+
+        this.regs.add(this._toolbar.baseMarkerButton.clicked.connect(() => {
+            this.onEditButtonClicked(RNAPaint.BASE_MARK);
+        }));
+
+        this.regs.add(this._toolbar.moveButton.clicked.connect(() => {
+            this.setPosesLayoutTool(Layout.MOVE);
+        }));
+
+        this.regs.add(this._toolbar.rotateStemButton.clicked.connect(() => {
+            this.setPosesLayoutTool(Layout.ROTATE_STEM);
+        }));
+
+        this.regs.add(this._toolbar.flipStemButton.clicked.connect(() => {
+            this.setPosesLayoutTool(Layout.FLIP_STEM);
+        }));
+
+        this.regs.add(this._toolbar.snapToGridButton.clicked.connect(() => {
+            for (const pose of this._poses) {
+                pose.snapToGrid();
+            }
+        }));
+
+        this.regs.add(this._toolbar.downloadSVGButton.clicked.connect(() => {
+            this.downloadSVG();
+        }));
+
+        this.regs.add(this._toolbar.upload3DButton.clicked.connect(() => {
+            const uploadButton = new FileInputObject({
+                id: '3d-upload-file-input',
+                width: 30,
+                height: 30,
+                acceptedFiletypes: '.cif,.pdb'
+            });
+            this.addObject(uploadButton);
+            uploadButton.activateDialog();
+            this.regs?.add(uploadButton.fileSelected.connect((e: HTMLInputEvent) => {
+                const files = e.target.files;
+                if (files && files[0]) {
+                    Pose3D.checkModelFile(files[0], this.getCurrentUndoBlock(0).sequence.length).then(() => {
+                        this.addPose3D(files[0]);
+                    }).catch((err) => {
+                        this.showDialog(new ErrorDialog(err));
+                    });
+                }
+                this.removeObject(uploadButton);
+            }));
+        }));
+    }
+
     public onKeyboardEvent(e: KeyboardEvent): void {
         let handled: boolean = this.keyboardInput.handleKeyboardEvent(e);
 
@@ -451,9 +456,6 @@ export default class PuzzleEditMode extends GameMode {
 
             if (ctrl && key === KeyCode.KeyS) {
                 this.downloadSVG();
-                handled = true;
-            } else if (ctrl && key === KeyCode.KeyH) {
-                this.downloadHKWS();
                 handled = true;
             } else if (key === KeyCode.BracketLeft) {
                 const factor = Math.max(0, Math.round((this._poseFields[0].explosionFactor - 0.25) * 1000) / 1000);
@@ -532,24 +534,22 @@ export default class PuzzleEditMode extends GameMode {
         this.updateUILayout();
     }
 
-    public updateUILayout(bResize:boolean = true): void {
-        super.updateUILayout(bResize);
-
+    public updateUILayout(): void {
         let w = 17;
         const h = 175;
         DisplayUtil.positionRelativeToStage(
-            this.toolbar.naturalButton.display, HAlign.LEFT, VAlign.TOP,
+            this._naturalButton.display, HAlign.LEFT, VAlign.TOP,
             HAlign.LEFT, VAlign.TOP, w, h
         );
-        w += this.toolbar.naturalButton.display.width;
+        w += this._naturalButton.display.width;
         DisplayUtil.positionRelativeToStage(
-            this.toolbar.targetButton.display, HAlign.LEFT, VAlign.TOP,
+            this._targetButton.display, HAlign.LEFT, VAlign.TOP,
             HAlign.LEFT, VAlign.TOP, w, h
         );
 
-        this._folderSwitcher.display.position.set(17, h + this.toolbar.targetButton.display.height + 20);
+        this._folderSwitcher.display.position.set(17, h + this._targetButton.display.height + 20);
 
-        const toolbarBounds = this.toolbar.getBounds();
+        const toolbarBounds = this._toolbar.display.getBounds();
         for (let ii = 0; ii < this._numTargets; ++ii) {
             const structureInput = this._structureInputs[ii];
             const poseField = this._poseFields[ii];
@@ -859,22 +859,22 @@ export default class PuzzleEditMode extends GameMode {
     }
 
     private setToNativeMode(): void {
-        this.toolbar.targetButton.toggled.value = false;
-        this.toolbar.naturalButton.toggled.value = true;
+        this._targetButton.toggled.value = false;
+        this._naturalButton.toggled.value = true;
 
-        this.toolbar.targetButton.hotkey(KeyCode.Space);
-        this.toolbar.naturalButton.hotkey();
+        this._targetButton.hotkey(KeyCode.Space);
+        this._naturalButton.hotkey();
 
         this._paused = false;
         this.updateScore();
     }
 
     private setToTargetMode(): void {
-        this.toolbar.targetButton.toggled.value = true;
-        this.toolbar.naturalButton.toggled.value = false;
+        this._targetButton.toggled.value = true;
+        this._naturalButton.toggled.value = false;
 
-        this.toolbar.naturalButton.hotkey(KeyCode.Space);
-        this.toolbar.targetButton.hotkey();
+        this._naturalButton.hotkey(KeyCode.Space);
+        this._targetButton.hotkey();
 
         for (let ii = 0; ii < this._poses.length; ii++) {
             this._poses[ii].secstruct = SecStruct.fromParens(this._structureInputs[ii].structureString, true);
@@ -978,7 +978,7 @@ export default class PuzzleEditMode extends GameMode {
         const numGU: number = undoblock.getParam(UndoBlockParam.GU) as number;
         const numGC: number = undoblock.getParam(UndoBlockParam.GC) as number;
 
-        this.toolbar.palette.setPairCounts(numAU, numGU, numGC);
+        this._toolbar.palette.setPairCounts(numAU, numGU, numGC);
     }
 
     private onPaletteTargetSelected(type: PaletteTargetType): void {
@@ -1194,6 +1194,8 @@ export default class PuzzleEditMode extends GameMode {
     private _folderSwitcher: FolderSwitcher;
     private _homeButton: GameButton;
     private _constraintBar: ConstraintBar;
+    private _targetButton: ToolbarButton;
+    private _naturalButton: ToolbarButton;
 
     // Annotations
     private _annotationManager: AnnotationManager;

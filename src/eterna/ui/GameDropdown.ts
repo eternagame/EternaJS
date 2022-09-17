@@ -22,10 +22,10 @@ import GamePanel, {GamePanelType} from './GamePanel';
 import TextBalloon from './TextBalloon';
 import VScrollBox from './VScrollBox';
 
-interface GameDropdownProps {
+interface GameDropdownProps<Option> {
     fontSize: number;
-    options: string[];
-    defaultOption: string;
+    options: Option[];
+    defaultOption: Option;
     icons?: {txt:string, icon:string}[];
     borderWidth: number;
     borderColor?: number;
@@ -44,12 +44,12 @@ interface OptionItem {
     icon?: Sprite;
 }
 
-export default class GameDropdown extends ContainerObject {
-    public readonly selectedOption: Value<string>;
-    public readonly options: string[];
+export default class GameDropdown<Option extends string = string> extends ContainerObject {
+    public readonly selectedOption: Value<Option>;
+    public readonly options: Option[];
     private iconMap: Map<string, Texture> = new Map();
 
-    constructor(props: GameDropdownProps) {
+    constructor(props: GameDropdownProps<Option>) {
         super();
         this._fontSize = props.fontSize;
         this.options = props.options;

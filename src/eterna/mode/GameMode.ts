@@ -29,7 +29,7 @@ import Sequence from 'eterna/rnatypes/Sequence';
 import EPars from 'eterna/EPars';
 import Fonts from 'eterna/util/Fonts';
 import CopyTextDialog from 'eterna/ui/CopyTextDialog';
-import Toolbar from 'eterna/ui/Toolbar';
+import Toolbar from 'eterna/ui/toolbar/Toolbar';
 import FloatDialog from 'eterna/ui/FloatDialog';
 
 export default abstract class GameMode extends AppMode {
@@ -44,7 +44,6 @@ export default abstract class GameMode extends AppMode {
 
     /** Controls whether certain folding operations are run synchronously or queued up */
     public forceSync: boolean = false;
-    public toolbar: Toolbar;
 
     protected setup(): void {
         super.setup();
@@ -117,10 +116,6 @@ export default abstract class GameMode extends AppMode {
             const modal = (this._dialogRef._obj as FloatDialog<boolean>).isModal();
             if (modal) this._dialogRef.destroyObject();
         }
-    }
-
-    public updateUILayout(bResize:boolean = true) {
-        if (bResize) this.toolbar.resizeToolbar();
     }
 
     protected static createStatusText(text: string): SceneObject<Text> {
@@ -332,7 +327,10 @@ export default abstract class GameMode extends AppMode {
         this.regs?.add(this._poses[0].basesSparked.connect(
             (val: number[]) => this._pose3D?.spark3D(val)
         ));
-        this.toolbar.add3DButton();
+        this._toolbar.addView3DButton();
+        this.regs?.add(this._toolbar.view3DButton.clicked.connect(() => {
+            if (this._pose3D) this._pose3D.getWindow().display.visible = true;
+        }));
     }
 
     protected postScreenshot(screenshot: ArrayBuffer): void {
@@ -518,22 +516,6 @@ export default abstract class GameMode extends AppMode {
         }
     }
 
-    protected downloadHKWS(): void {
-        if (!this.canDownload()) {
-            return;
-        }
-        for (let ii = 0; ii < this._poses.length; ++ii) {
-            const cl = this._poses[ii].customLayout;
-            if (cl === undefined) continue;
-            Assert.assertIsDefined(cl);
-            let hkwsText = 'idx,x,y,seq,partner\n';
-            for (let jj = 0; jj < this._poses[ii].sequence.length; ++jj) {
-                hkwsText += `${jj},${cl[jj][0]},${cl[jj][1]},${this._poses[ii].sequence.sequenceString()[jj]},${this._poses[ii].secstruct.pairs[jj]}\n`;
-            }
-            this.download(`${ii}.hkws`, hkwsText);
-        }
-    }
-
     protected showCopySequenceDialog(): void {
         Assert.assertIsDefined(this.modeStack);
         let sequenceString = this._poses[0].sequence.sequenceString();
@@ -656,6 +638,7 @@ export default abstract class GameMode extends AppMode {
     protected _poses: Pose2D[] = []; // TODO: remove me!
     protected _isPipMode: boolean = false;
     protected _pose3D: Pose3D | null = null;
+    protected _toolbar: Toolbar;
 
     protected _nucleotideRangeToShow: [number, number] | null = null;
 
@@ -671,10 +654,6 @@ export default abstract class GameMode extends AppMode {
 
     protected getCurrentTargetPairs(_index: number): SecStruct | undefined {
         return undefined;
-    }
-
-    public getPos3D() {
-        return this._pose3D;
     }
 
     protected _targetPairs: SecStruct[];

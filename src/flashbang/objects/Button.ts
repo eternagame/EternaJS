@@ -1,9 +1,10 @@
-import {UnitSignal} from 'signals';
+import {Signal, UnitSignal} from 'signals';
 import SerialTask from 'flashbang/tasks/SerialTask';
 import CallbackTask from 'flashbang/tasks/CallbackTask';
 import DelayTask from 'flashbang/tasks/DelayTask';
 import InputUtil from 'flashbang/input/InputUtil';
 import Flashbang from 'flashbang/core/Flashbang';
+import {InteractionEvent} from 'pixi.js';
 import Enableable from './Enableable';
 import ContainerObject from './ContainerObject';
 
@@ -14,7 +15,7 @@ export enum ButtonState {
 /** A button base class. */
 export default abstract class Button extends ContainerObject implements Enableable {
     /** Fired when the button is clicked */
-    public readonly clicked: UnitSignal = new UnitSignal();
+    public readonly clicked: Signal<InteractionEvent | null> = new Signal();
 
     /** Fired when the button is down and the mouse is released outside the hitbounds */
     public readonly clickCanceled: UnitSignal = new UnitSignal();
@@ -54,8 +55,8 @@ export default abstract class Button extends ContainerObject implements Enableab
         this.regs.add(this.pointerUp.filter(InputUtil.IsLeftMouse).connect(() => {
             this.isPointerDown = false;
         }));
-        this.regs.add(this.pointerTap.filter(InputUtil.IsLeftMouse).connect(() => {
-            if (this.enabled) this.clicked.emit();
+        this.regs.add(this.pointerTap.filter(InputUtil.IsLeftMouse).connect((e) => {
+            if (this.enabled) this.clicked.emit(e);
         }));
     }
 
@@ -75,7 +76,7 @@ export default abstract class Button extends ContainerObject implements Enableab
      */
     public click(): void {
         if (this.enabled) {
-            this.clicked.emit();
+            this.clicked.emit(null);
 
             // We can be destroyed as the result of the clicked signal, so ensure we're still
             // live before proceeding
@@ -91,6 +92,12 @@ export default abstract class Button extends ContainerObject implements Enableab
                 ));
             }
         }
+    }
+
+    /** Cancel active over/down state, useful eg when dragging the button */
+    public cancelInteraction() {
+        this.isPointerOver = false;
+        this.isPointerDown = false;
     }
 
     /** Subclasses override this to display the appropriate state */

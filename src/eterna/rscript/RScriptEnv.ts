@@ -372,7 +372,7 @@ export default class RScriptEnv extends ContainerObject {
             case RScriptUIElementID.OBJECTIVE:
                 return this.ui.getConstraintBox(i);
             case RScriptUIElementID.SWITCH:
-                return this.ui.toolbar.stateToggle;
+                return this.ui.stateToggle;
             case RScriptUIElementID.TOTALENERGY:
             case RScriptUIElementID.PRIMARY_ENERGY:
                 return this.poseField.primaryScoreDisplay;
@@ -382,12 +382,12 @@ export default class RScriptEnv extends ContainerObject {
             case RScriptUIElementID.PALETTEALT:
                 return this.ui.toolbar.palette;
             case RScriptUIElementID.TOGGLENATURAL:
-                return this.ui.toolbar.naturalButton;
+                return this.ui.naturalButton;
             case RScriptUIElementID.TOGGLETARGET:
-                return this.ui.toolbar.targetButton;
+                return this.ui.targetButton;
             case RScriptUIElementID.TOGGLEBAR:
                 // NOTE: There is no longer a toggle bar...
-                return this.ui.toolbar.naturalButton;
+                return this.ui.naturalButton;
             case RScriptUIElementID.ZOOMIN:
                 return this.ui.toolbar.zoomInButton
                     ? this.ui.toolbar.getScriptUIElement(

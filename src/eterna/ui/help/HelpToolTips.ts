@@ -6,7 +6,7 @@ import Fonts from 'eterna/util/Fonts';
 import HelpToolTip, {ToolTipPositioner} from './HelpToolTip';
 
 export interface HelpToolTipsProps {
-    topbarHelpers: ToolTipPositioner[];
+    hotbarButtons: ToolTipPositioner[];
     palette?: ToolTipPositioner;
     hints?: ToolTipPositioner;
     switchState?: ToolTipPositioner;
@@ -87,7 +87,7 @@ export default class HelpToolTips {
         let tailBodyHeight = 2 * HelpToolTip.theme.vPadding;
         tailBodyHeight += HelpToolTip.theme.fontSize;
         tailBodyHeight += 4;
-        props.topbarHelpers.forEach((p, k) => {
+        props.hotbarButtons.forEach((p, k) => {
             const [, , name] = p;
             toolTips.push(new HelpToolTip({text: name, tailLength: tailBodyHeight * (k % 2), positioner: p}));
         });

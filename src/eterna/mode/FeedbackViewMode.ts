@@ -10,7 +10,7 @@ import Solution from 'eterna/puzzle/Solution';
 import Puzzle from 'eterna/puzzle/Puzzle';
 import Background from 'eterna/vfx/Background';
 import Fonts from 'eterna/util/Fonts';
-import Toolbar, {ToolbarType} from 'eterna/ui/Toolbar';
+import Toolbar, {ToolbarType} from 'eterna/ui/toolbar/Toolbar';
 import PoseField from 'eterna/pose2D/PoseField';
 import FolderManager from 'eterna/folding/FolderManager';
 import Vienna from 'eterna/folding/Vienna';
@@ -30,6 +30,11 @@ import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 import UITheme from 'eterna/ui/UITheme';
 import AnnotationManager from 'eterna/AnnotationManager';
+import ToolbarButton from 'eterna/ui/toolbar/ToolbarButton';
+import ToggleBar from 'eterna/ui/ToggleBar';
+import {
+    baseColorButtonProps, estimateButtonProps, expColorButtonProps, targetButtonProps
+} from 'eterna/ui/toolbar/ToolbarButtons';
 import ViewSolutionOverlay from './DesignBrowser/ViewSolutionOverlay';
 import GameMode from './GameMode';
 
@@ -83,43 +88,49 @@ export default class FeedbackViewMode extends GameMode {
             homeArrow, HAlign.RIGHT, VAlign.CENTER, 8, 8
         );
 
-        this.toolbar = new Toolbar(ToolbarType.FEEDBACK, {states: this._puzzle.getSecstructs().length}, {
-            pairSwapButtonHandler: () => {
-            },
-            baseMarkerButtonHandler: () => {
-            },
-            settingsButtonHandler: () => this.showSettingsDialog()
-        });
-        this.addObject(this.toolbar.estimateButton, this.uiLayer);
-        this.addObject(this.toolbar.targetButton, this.uiLayer);
-        this.addObject(this.toolbar, this.uiLayer);
+        const states = this._puzzle.getSecstructs().length;
+        this._toolbar = new Toolbar(ToolbarType.FEEDBACK, {showPip: states > 1});
+        this._estimateButton = ToolbarButton.createButton(estimateButtonProps);
+        this._targetButton = ToolbarButton.createButton(targetButtonProps);
+        this._baseColorButton = ToolbarButton.createButton(baseColorButtonProps);
+        this._expColorButton = ToolbarButton.createButton(expColorButtonProps);
+        this.addObject(this._estimateButton, this.uiLayer);
+        this.addObject(this._targetButton, this.uiLayer);
+        this.addObject(this._baseColorButton, this.uiLayer);
+        this.addObject(this._expColorButton, this.uiLayer);
+        this.addObject(this._toolbar, this.uiLayer);
+        if (states > 1) {
+            this._stateToggle = new ToggleBar(states);
+            this.addObject(this._stateToggle, this.uiLayer);
+        }
 
-        Assert.assertIsDefined(this.toolbar.zoomOutButton);
-        this.toolbar.zoomOutButton.clicked.connect(() => {
+        Assert.assertIsDefined(this._toolbar.zoomOutButton);
+        this._toolbar.zoomOutButton.clicked.connect(() => {
             for (const poseField of this._poseFields) {
                 poseField.zoomOut();
             }
         });
 
-        Assert.assertIsDefined(this.toolbar.zoomInButton);
-        this.toolbar.zoomInButton.clicked.connect(() => {
+        Assert.assertIsDefined(this._toolbar.zoomInButton);
+        this._toolbar.zoomInButton.clicked.connect(() => {
             for (const poseField of this._poseFields) {
                 poseField.zoomIn();
             }
         });
 
-        this.toolbar.screenshotButton.clicked.connect(() => this.postScreenshot(this.createScreenshot()));
-        this.toolbar.viewSolutionsButton.clicked.connect(() => this.loadDesignBrowser());
-        this.toolbar.letterColorButton.clicked.connect(() => this.showBaseColors());
-        this.toolbar.expColorButton.clicked.connect(() => this.showExperimentalColors());
-        this.toolbar.specButton.clicked.connect(() => this.showSpec());
-        this.toolbar.pipButton.clicked.connect(() => this.togglePip());
-        this.toolbar.estimateButton.clicked.connect(() => this.setToEstimateMode());
-        this.toolbar.targetButton.clicked.connect(() => this.setToTargetMode());
+        this._toolbar.settingsButton.clicked.connect(() => this.showSettingsDialog());
+        this._toolbar.screenshotButton.clicked.connect(() => this.postScreenshot(this.createScreenshot()));
+        this._toolbar.viewSolutionsButton.clicked.connect(() => this.loadDesignBrowser());
+        this._baseColorButton.clicked.connect(() => this.showBaseColors());
+        this._expColorButton.clicked.connect(() => this.showExperimentalColors());
+        this._toolbar.specButton.clicked.connect(() => this.showSpec());
+        this._toolbar.pipButton.clicked.connect(() => this.togglePip());
+        this._estimateButton.clicked.connect(() => this.setToEstimateMode());
+        this._targetButton.clicked.connect(() => this.setToTargetMode());
 
-        this.toolbar.nucleotideFindButton.clicked.connect(() => this.findNucleotide());
-        this.toolbar.nucleotideRangeButton.clicked.connect(() => this.showNucleotideRange());
-        this.toolbar.explosionFactorButton.clicked.connect(() => this.changeExplosionFactor());
+        this._toolbar.nucleotideFindButton.clicked.connect(() => this.findNucleotide());
+        this._toolbar.nucleotideRangeButton.clicked.connect(() => this.showNucleotideRange());
+        this._toolbar.explosionFactorButton.clicked.connect(() => this.changeExplosionFactor());
 
         this._targetConditions = this._puzzle.targetConditions;
 
@@ -294,13 +305,39 @@ export default class FeedbackViewMode extends GameMode {
             ? ViewSolutionOverlay.theme.width : 0;
     }
 
-    public updateUILayout(bResize:boolean = true): void {
-        super.updateUILayout(bResize);
+    public updateUILayout(): void {
+        let w = 17;
+        const h = 175;
+        DisplayUtil.positionRelativeToStage(
+            this._estimateButton.display, HAlign.LEFT, VAlign.TOP,
+            HAlign.LEFT, VAlign.TOP, w, h
+        );
+        w += this._estimateButton.display.width;
+        DisplayUtil.positionRelativeToStage(
+            this._targetButton.display, HAlign.LEFT, VAlign.TOP,
+            HAlign.LEFT, VAlign.TOP, w, h
+        );
+        w += this._targetButton.display.width;
+        // Add a bit of extra separation
+        w += 5;
+        DisplayUtil.positionRelativeToStage(
+            this._baseColorButton.display, HAlign.LEFT, VAlign.TOP,
+            HAlign.LEFT, VAlign.TOP, w, h
+        );
+        w += this._baseColorButton.display.width;
+        DisplayUtil.positionRelativeToStage(
+            this._expColorButton.display, HAlign.LEFT, VAlign.TOP,
+            HAlign.LEFT, VAlign.TOP, w, h
+        );
 
-        // DisplayUtil.positionRelativeToStage(
-        //     this._homeButton.display, HAlign.RIGHT, VAlign.TOP,
-        //     HAlign.RIGHT, VAlign.TOP, 0 - this._solDialogOffset, 5
-        // );
+        if (this._stateToggle) {
+            w += this._targetButton.display.width;
+            DisplayUtil.positionRelativeToStage(
+                this._stateToggle.display, HAlign.LEFT, VAlign.TOP,
+                HAlign.LEFT, VAlign.TOP, w,
+                h + (this._targetButton.display.height - this._stateToggle.display.height) / 2
+            );
+        }
 
         DisplayUtil.positionRelativeToStage(
             this._info.display, HAlign.RIGHT, VAlign.TOP,
@@ -350,9 +387,9 @@ export default class FeedbackViewMode extends GameMode {
 
     /* override */
     protected onSetPip(pipMode: boolean): void {
-        if (pipMode || this.toolbar.stateToggle.numStates < 2) {
-            if (this.toolbar.stateToggle != null) {
-                this.toolbar.stateToggle.display.visible = false;
+        if (pipMode || (this._stateToggle && this._stateToggle.numStates < 2)) {
+            if (this._stateToggle) {
+                this._stateToggle.display.visible = false;
             }
 
             if (this._foldMode === PoseFoldMode.ESTIMATE) {
@@ -393,8 +430,8 @@ export default class FeedbackViewMode extends GameMode {
                 this.showExperimentalColors();
             }
         } else {
-            if (this.toolbar.stateToggle != null) {
-                this.toolbar.stateToggle.display.visible = true;
+            if (this._stateToggle) {
+                this._stateToggle.display.visible = true;
             }
 
             this.changeTarget(this._currentIndex);
@@ -454,10 +491,10 @@ export default class FeedbackViewMode extends GameMode {
 
     private setToTargetMode(): void {
         this._foldMode = PoseFoldMode.TARGET;
-        this.toolbar.targetButton.hotkey();
-        this.toolbar.estimateButton.hotkey(KeyCode.Space);
-        this.toolbar.estimateButton.toggled.value = false;
-        this.toolbar.targetButton.toggled.value = true;
+        this._targetButton.hotkey();
+        this._estimateButton.hotkey(KeyCode.Space);
+        this._estimateButton.toggled.value = false;
+        this._targetButton.toggled.value = true;
         if (this._isPipMode) {
             for (let ii = 0; ii < this._secstructs.length; ii++) {
                 this._poseFields[ii].pose.secstruct = this._secstructs[ii];
@@ -469,10 +506,10 @@ export default class FeedbackViewMode extends GameMode {
 
     private setToEstimateMode(): void {
         this._foldMode = PoseFoldMode.ESTIMATE;
-        this.toolbar.estimateButton.hotkey();
-        this.toolbar.targetButton.hotkey(KeyCode.Space);
-        this.toolbar.estimateButton.toggled.value = true;
-        this.toolbar.targetButton.toggled.value = false;
+        this._estimateButton.hotkey();
+        this._targetButton.hotkey(KeyCode.Space);
+        this._estimateButton.toggled.value = true;
+        this._targetButton.toggled.value = false;
         if (this._isPipMode) {
             for (let ii = 0; ii < this._secstructs.length; ii++) {
                 if (this._shapePairs[ii] !== null) {
@@ -520,8 +557,8 @@ export default class FeedbackViewMode extends GameMode {
         Assert.assertIsDefined(this._feedback);
 
         this._isExpColor = true;
-        this.toolbar.letterColorButton.toggled.value = false;
-        this.toolbar.expColorButton.toggled.value = true;
+        this._baseColorButton.toggled.value = false;
+        this._expColorButton.toggled.value = true;
 
         if (this._dataOption.value === 'SHAPE') {
             if (this._isPipMode) {
@@ -566,8 +603,8 @@ export default class FeedbackViewMode extends GameMode {
 
     private showBaseColors(): void {
         this._isExpColor = false;
-        this.toolbar.letterColorButton.toggled.value = true;
-        this.toolbar.expColorButton.toggled.value = false;
+        this._baseColorButton.toggled.value = true;
+        this._expColorButton.toggled.value = false;
         for (let ii = 0; ii < this._poseFields.length; ii++) {
             this._poseFields[ii].pose.clearFeedback();
         }
@@ -683,7 +720,7 @@ export default class FeedbackViewMode extends GameMode {
         this.setSolution(solution);
         this.changeTarget(this._currentIndex);
 
-        if (this._feedback !== null && this.toolbar.expColorButton.toggled.value) {
+        if (this._feedback !== null && this._expColorButton.toggled.value) {
             this.showExperimentalColors();
         }
 
@@ -713,6 +750,11 @@ export default class FeedbackViewMode extends GameMode {
     private _solutions: Solution[];
 
     private _homeButton: GameButton;
+    private _targetButton: ToolbarButton;
+    private _estimateButton: ToolbarButton;
+    private _baseColorButton: ToolbarButton;
+    private _expColorButton: ToolbarButton;
+    private _stateToggle: ToggleBar | undefined;
 
     private _undoBlocks: UndoBlock[] = [];
     private _currentIndex: number;

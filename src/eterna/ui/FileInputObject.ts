@@ -38,7 +38,7 @@ export interface HTMLInputEvent extends Event {
  * When it loses focus, it creates a fake file input display placeholder, and hides the DOM element.
  */
 export default class FileInputObject extends DOMObject<HTMLInputElement | HTMLDivElement> {
-    public readonly fileSelected = new Signal<Event>();
+    public readonly fileSelected = new Signal<HTMLInputEvent>();
 
     constructor(props: FileInputObjectProps) {
         super(
@@ -97,7 +97,7 @@ export default class FileInputObject extends DOMObject<HTMLInputElement | HTMLDi
                     fileInputEvent.target.files
                     && fileInputEvent.target.files.length > 0
                 ) {
-                    this.fileSelected.emit(e);
+                    this.fileSelected.emit(fileInputEvent);
                 }
             };
         }

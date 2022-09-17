@@ -4,7 +4,8 @@ import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import {KeyCode} from 'flashbang';
 import {ButtonState} from 'flashbang/objects/Button';
 import {Graphics, Sprite, Texture} from 'pixi.js';
-import GameButton from './GameButton';
+import {Value} from 'signals';
+import GameButton from '../GameButton';
 
 export const BUTTON_WIDTH = 55;
 export const BUTTON_HEIGHT = 51;
@@ -22,8 +23,10 @@ export enum ButtonCategory {
 
 export type ToolbarParam = {
     cat:ButtonCategory,
-    name: string,
+    id: string,
+    displayName: string,
     allImg: string | Texture,
+    isPaintTool?: boolean;
     overImg?: string | Texture,
     disableImg:string | Texture,
     tooltip:string,
@@ -36,18 +39,23 @@ export type ToolbarParam = {
 };
 
 export default class ToolbarButton extends GameButton {
-    public category: ButtonCategory | null = null;
-    private _arrow: Sprite;
-    private info: ToolbarParam = {
-        cat: ButtonCategory.NONE,
-        name: 'ToolbarButton',
-        allImg: Bitmaps.ImgNatural,
-        disableImg: Bitmaps.ImgGreyNatural,
-        tooltip: 'ToolbarButton'
-    };
+    public readonly category: ButtonCategory;
+    public readonly id: string;
+    public readonly displayName: string;
+    public readonly isPaintTool: boolean;
 
-    constructor(bkColor = {color: 0, alpha: 0}) {
+    constructor(
+        id: string,
+        displayName: string,
+        category: ButtonCategory,
+        isPaintTool: boolean | undefined,
+        bkColor = {color: 0, alpha: 0}
+    ) {
         super();
+        this.id = id;
+        this.displayName = displayName;
+        this.category = category;
+        this.isPaintTool = isPaintTool === true;
         const background = new Graphics()
             .beginFill(0, 0)
             .drawRect(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT)
@@ -59,11 +67,18 @@ export default class ToolbarButton extends GameButton {
     }
 
     public static createButton(info: ToolbarParam) {
+        // But of a shame to bypass our chaining/builder pattern, but this makes it convenient
+        // to define the parameters in a different file and clone ourselves
         let button;
-        if (info.color) button = new ToolbarButton(info.color);
-        else button = new ToolbarButton();
-        button.setCategory(info.cat);
-        button.setName(info.name);
+        if (info.color) {
+            button = new ToolbarButton(
+                info.id,
+                info.displayName,
+                info.cat,
+                info.isPaintTool,
+                info.color
+            );
+        } else button = new ToolbarButton(info.id, info.displayName, info.cat, info.isPaintTool);
         button.allStates(info.allImg);
         if (info.overImg) button.over(info.overImg);
         button.disabled(info.disableImg);
@@ -77,18 +92,31 @@ export default class ToolbarButton extends GameButton {
             button.scaleBitmapToLabel();
         }
 
-        button.info = info;
+        button._info = info;
         return button;
     }
 
-    public clone():ToolbarButton {
-        this.info.tooltip = this.getToolTip();
-        return ToolbarButton.createButton(this.info);
-    }
-
-    public setCategory(category: ButtonCategory): ToolbarButton {
-        this.category = category;
-        return this;
+    public clone(): ToolbarButton {
+        this._info.tooltip = this.getToolTip();
+        const newButton = ToolbarButton.createButton(this._info);
+        // Primary event handlers are registered on the initial instantiation of the button
+        // exposed on the Toolbar class, so we need to forward events from the copy in the hotbar
+        // to the original button. We don't need to worry about duplicate click sounds or anything
+        // because that only happens on transition from state over to down, and we never entered
+        // the over state
+        this.regs.add(
+            newButton.clicked.connect(() => {
+                this.clicked.emit(null);
+            })
+        );
+        // Also when this button is programmatically toggled or disabled, ensure the copy is too
+        newButton.regs.add(this.toggled.connect((toggled) => {
+            newButton.toggled.value = toggled;
+        }));
+        newButton.regs.add(this._enabled.connect((enabled) => {
+            newButton.enabled = enabled;
+        }));
+        return newButton;
     }
 
     protected showState(state: ButtonState): void {
@@ -111,4 +139,18 @@ export default class ToolbarButton extends GameButton {
             this._arrow.visible = toggled;
         }));
     }
+
+    public set enabled(newVal: boolean) {
+        super.enabled = newVal;
+        this._enabled.value = newVal;
+    }
+
+    // Because we override set, we also have to override get
+    public get enabled(): boolean {
+        return super.enabled;
+    }
+
+    private _arrow: Sprite;
+    private _info: ToolbarParam;
+    private _enabled = new Value(false);
 }

@@ -16,7 +16,6 @@ export default class GameButton extends Button implements KeyboardListener {
     public static readonly DEFAULT_DOWN_SOUND: string = Sounds.SoundButtonClick;
     public size: number = 0;
     public age: number = 0;
-    public name: string | null = null;
 
     constructor() {
         super();
@@ -25,13 +24,6 @@ export default class GameButton extends Button implements KeyboardListener {
 
         this._content = new Container();
         this.container.addChild(this._content);
-    }
-
-    public setName(name: string): GameButton {
-        this.name = name;
-        this._name = name;
-        this.display.name = name;
-        return this;
     }
 
     protected added(): void {
