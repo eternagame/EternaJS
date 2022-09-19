@@ -331,11 +331,11 @@ export default class FeedbackViewMode extends GameMode {
         );
 
         if (this._stateToggle) {
-            w += this._targetButton.display.width;
+            w += this._expColorButton.display.width;
             DisplayUtil.positionRelativeToStage(
                 this._stateToggle.display, HAlign.LEFT, VAlign.TOP,
                 HAlign.LEFT, VAlign.TOP, w,
-                h + (this._targetButton.display.height - this._stateToggle.display.height) / 2
+                h + (this._expColorButton.display.height - this._stateToggle.display.height) / 2
             );
         }
 
