@@ -67,7 +67,7 @@ export default class ToolbarButton extends GameButton {
     }
 
     public static createButton(info: ToolbarParam) {
-        // But of a shame to bypass our chaining/builder pattern, but this makes it convenient
+        // Bit of a shame to bypass our chaining/builder pattern, but this makes it convenient
         // to define the parameters in a different file and clone ourselves
         let button;
         if (info.color) {
