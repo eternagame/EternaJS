@@ -97,7 +97,6 @@ export default class ToolbarButton extends GameButton {
     }
 
     public clone(): ToolbarButton {
-        this._info.tooltip = this.getToolTip();
         const newButton = ToolbarButton.createButton(this._info);
         // Primary event handlers are registered on the initial instantiation of the button
         // exposed on the Toolbar class, so we need to forward events from the copy in the hotbar
@@ -121,9 +120,7 @@ export default class ToolbarButton extends GameButton {
 
     protected showState(state: ButtonState): void {
         super.showState(state);
-        const content = this.getContent();
-        if (content.width < BUTTON_WIDTH) content.position.x = (BUTTON_WIDTH - content.width) / 2;
-        if (content.height < BUTTON_HEIGHT) content.position.y = (BUTTON_HEIGHT - content.height) / 2;
+        this.centerContent(BUTTON_WIDTH, BUTTON_HEIGHT);
     }
 
     protected added() {

@@ -135,10 +135,6 @@ export default class GameButton extends Button implements KeyboardListener {
         return this;
     }
 
-    public getToolTip() {
-        return this._tooltip;
-    }
-
     public hotkey(keycode?: string, ctrl: boolean = false): GameButton {
         if (keycode !== this._hotkey || ctrl !== this._hotkeyCtrl) {
             this._hotkey = keycode ?? null;
@@ -286,14 +282,6 @@ export default class GameButton extends Button implements KeyboardListener {
         }
     }
 
-    public activateTooltip() {
-
-    }
-
-    public deactivateTooltip() {
-
-    }
-
     private needsRedraw() {
         if (this.isLiveObject) {
             this.showState(this._state);
@@ -336,8 +324,9 @@ export default class GameButton extends Button implements KeyboardListener {
         }
     }
 
-    public getContent() {
-        return this._content;
+    protected centerContent(width: number, height: number) {
+        if (this._content.width < width) this._content.position.x = (width - this._content.width) / 2;
+        if (this._content.height < height) this._content.position.y = (height - this._content.height) / 2;
     }
 
     private readonly _content: Container;
