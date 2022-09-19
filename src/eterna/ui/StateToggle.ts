@@ -21,7 +21,7 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import GameButton from './GameButton';
 import Tooltips from './Tooltips';
 
-export default class ToggleBar extends ContainerObject implements KeyboardListener, Enableable {
+export default class StateToggle extends ContainerObject implements KeyboardListener, Enableable {
     /** Emitted when our state changes */
     public readonly stateChanged: Signal<number> = new Signal();
     private _tooltip: string;
@@ -47,7 +47,7 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
         prevButton.clicked.connect(() => this.prevState());
         nextButton.clicked.connect(() => this.nextState());
 
-        this._text = Fonts.std(`${this._selectedState + 1}/${this._numStates}`, 13).color(ToggleBar.COLOR_TEXT).build();
+        this._text = Fonts.std(`${this._selectedState + 1}/${this._numStates}`, 13).color(StateToggle.COLOR_TEXT).build();
         this._text.position.set(8, 10);
 
         this.state = 0;
@@ -107,7 +107,7 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
         }
     }
 
-    public tooltip(text: string): ToggleBar {
+    public tooltip(text: string): StateToggle {
         if (this._tooltip !== text) {
             this._tooltip = text;
             if (this.isLiveObject) {
@@ -171,8 +171,8 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
     }
 
     private getStateUnderMouse(e: InteractionEvent): number {
-        e.data.getLocalPosition(this.display, ToggleBar.P);
-        return Math.floor(ToggleBar.P.x / ToggleBar.BUTTON_SIZE);
+        e.data.getLocalPosition(this.display, StateToggle.P);
+        return Math.floor(StateToggle.P.x / StateToggle.BUTTON_SIZE);
     }
 
     private readonly _numStates: number;

@@ -24,7 +24,7 @@ import Fonts from 'eterna/util/Fonts';
 import EternaSettingsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaSettingsDialog';
 import FolderManager from 'eterna/folding/FolderManager';
 import Folder, {MultiFoldResult, CacheKey, SuboptEnsembleResult} from 'eterna/folding/Folder';
-import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
+import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/toolbar/NucleotidePalette';
 import PoseField from 'eterna/pose2D/PoseField';
 import Pose2D, {Layout, SCRIPT_MARKER_LAYER} from 'eterna/pose2D/Pose2D';
 import Pose3D from 'eterna/pose3D/Pose3D';
@@ -73,7 +73,7 @@ import ErrorDialog from 'eterna/ui/ErrorDialog';
 import AnnotationDialog from 'eterna/ui/AnnotationDialog';
 import FloatSpecBox from 'eterna/ui/FloatSpecBox';
 import ToolbarButton from 'eterna/ui/toolbar/ToolbarButton';
-import ToggleBar from 'eterna/ui/ToggleBar';
+import StateToggle from 'eterna/ui/StateToggle';
 import {naturalButtonProps, targetButtonProps} from 'eterna/ui/toolbar/ToolbarButtons';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
@@ -778,7 +778,7 @@ export default class PoseEditMode extends GameMode {
         this.addObject(this._naturalButton, this.uiLayer);
         this.addObject(this._targetButton, this.uiLayer);
         if (states > 1) {
-            this._stateToggle = new ToggleBar(states);
+            this._stateToggle = new StateToggle(states);
             this.addObject(this._stateToggle, this.uiLayer);
         }
         this.addObject(this._toolbar, this.uiLayer);
@@ -3565,7 +3565,7 @@ export default class PoseEditMode extends GameMode {
         return this._targetButton;
     }
 
-    public get stateToggle(): ToggleBar | null {
+    public get stateToggle(): StateToggle | null {
         return this._stateToggle ?? null;
     }
 
@@ -3615,7 +3615,7 @@ export default class PoseEditMode extends GameMode {
     private _markerSwitcher: MarkerSwitcher;
     private _naturalButton: ToolbarButton;
     private _targetButton: ToolbarButton;
-    private _stateToggle?: ToggleBar;
+    private _stateToggle?: StateToggle;
 
     private _isFrozen: boolean = false;
     private _targetName: Text;

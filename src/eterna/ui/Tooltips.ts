@@ -16,7 +16,7 @@ import {
     ContainerObject,
     DisplayObjectPointerTarget
 } from 'flashbang';
-import {PaletteTarget} from 'eterna/ui/NucleotidePalette';
+import {PaletteTarget} from 'eterna/ui/toolbar/NucleotidePalette';
 import Fonts from 'eterna/util/Fonts';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
 

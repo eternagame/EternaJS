@@ -31,7 +31,7 @@ import Sequence from 'eterna/rnatypes/Sequence';
 import UITheme from 'eterna/ui/UITheme';
 import AnnotationManager from 'eterna/AnnotationManager';
 import ToolbarButton from 'eterna/ui/toolbar/ToolbarButton';
-import ToggleBar from 'eterna/ui/ToggleBar';
+import StateToggle from 'eterna/ui/StateToggle';
 import {
     baseColorButtonProps, estimateButtonProps, expColorButtonProps, targetButtonProps
 } from 'eterna/ui/toolbar/ToolbarButtons';
@@ -100,7 +100,7 @@ export default class FeedbackViewMode extends GameMode {
         this.addObject(this._expColorButton, this.uiLayer);
         this.addObject(this._toolbar, this.uiLayer);
         if (states > 1) {
-            this._stateToggle = new ToggleBar(states);
+            this._stateToggle = new StateToggle(states);
             this.addObject(this._stateToggle, this.uiLayer);
         }
 
@@ -760,7 +760,7 @@ export default class FeedbackViewMode extends GameMode {
     private _estimateButton: ToolbarButton;
     private _baseColorButton: ToolbarButton;
     private _expColorButton: ToolbarButton;
-    private _stateToggle: ToggleBar | undefined;
+    private _stateToggle: StateToggle | undefined;
 
     private _undoBlocks: UndoBlock[] = [];
     private _currentIndex: number;

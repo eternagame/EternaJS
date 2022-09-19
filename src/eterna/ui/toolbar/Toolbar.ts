@@ -21,7 +21,7 @@ import AnnotationPanelDialog from '../AnnotationPanelDialog';
 import BoosterDialog from '../BoosterDialog';
 import GameButton from '../GameButton';
 import {ToolTipPositioner} from '../help/HelpToolTip';
-import NucleotidePalette from '../NucleotidePalette';
+import NucleotidePalette from './NucleotidePalette';
 import HotbarBay from './HotbarBay';
 import ToolbarButton, {
     ButtonCategory, ToolbarParam

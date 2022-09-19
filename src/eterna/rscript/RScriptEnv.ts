@@ -10,8 +10,8 @@ import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
 import Puzzle from 'eterna/puzzle/Puzzle';
 import TextBalloon from 'eterna/ui/TextBalloon';
 import Pose2D, {RNAHighlightState} from 'eterna/pose2D/Pose2D';
-import {PaletteTargetType} from 'eterna/ui/NucleotidePalette';
-import ToggleBar from 'eterna/ui/ToggleBar';
+import {PaletteTargetType} from 'eterna/ui/toolbar/NucleotidePalette';
+import StateToggle from 'eterna/ui/StateToggle';
 import PoseField from 'eterna/pose2D/PoseField';
 import {RScriptUIElement, RScriptUIElementID} from './RScriptUIElement';
 
@@ -218,7 +218,7 @@ export default class RScriptEnv extends ContainerObject {
             );
         } else if (elementID === RScriptUIElementID.SWITCH) {
             (
-                this.getUIElementFromID(elementID)[0] as ToggleBar
+                this.getUIElementFromID(elementID)[0] as StateToggle
             ).display.visible = visible;
         } else {
             if (visible && elementID === RScriptUIElementID.PALETTE) {

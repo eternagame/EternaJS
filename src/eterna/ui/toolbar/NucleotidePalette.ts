@@ -12,7 +12,7 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import Fonts from 'eterna/util/Fonts';
 import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import ROPWait from 'eterna/rscript/ROPWait';
-import Tooltips from './Tooltips';
+import Tooltips from '../Tooltips';
 
 export enum PaletteTargetType {
     A = 0, U, G, C, AU, UG, GC
