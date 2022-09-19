@@ -201,8 +201,8 @@ export default class Toolbar extends ContainerObject {
         this._leftBay = new HotbarBay('left', this.getInitialTools().left);
         this.addObject(this._leftBay, this._hotbarLayout);
         this.palette = new NucleotidePalette();
-        // TODO: Display the palette as disabled
-        if (this._type !== ToolbarType.FEEDBACK) this.addObject(this.palette, this._hotbarLayout);
+        this.palette.enabled = this._type !== ToolbarType.FEEDBACK;
+        this.addObject(this.palette, this._hotbarLayout);
         this._rightBay = new HotbarBay('right', this.getInitialTools().right);
         this.addObject(this._rightBay, this._hotbarLayout);
         // By default, the toolbar is collapsed, so the hotbar is right above the chevron
@@ -822,7 +822,11 @@ export default class Toolbar extends ContainerObject {
 
     public disableTools(disable: boolean) {
         this._toolShelf.disableTools(disable);
-        this.palette.enabled = !disable;
+        this.palette.enabled = !disable && this._type !== ToolbarType.FEEDBACK;
+        this._leftBay.display.alpha = disable ? 0.5 : 1;
+        this._rightBay.display.alpha = disable ? 0.5 : 1;
+        this._expandCollapseButton.enabled = !disable;
+        this._expandCollapseButton.display.alpha = disable ? 0.5 : 1;
     }
 
     public getScriptUIElement(button: ToolbarButton, scriptID: RScriptUIElementID) {

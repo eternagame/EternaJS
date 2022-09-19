@@ -5,7 +5,7 @@ import {
 import Constants from 'eterna/Constants';
 import Eterna from 'eterna/Eterna';
 import Feedback from 'eterna/Feedback';
-import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
+import UndoBlock, {TargetConditions, UndoBlockParam} from 'eterna/UndoBlock';
 import Solution from 'eterna/puzzle/Solution';
 import Puzzle from 'eterna/puzzle/Puzzle';
 import Background from 'eterna/vfx/Background';
@@ -551,6 +551,12 @@ export default class FeedbackViewMode extends GameMode {
         if (this._isExpColor) {
             this.showExperimentalColors();
         }
+
+        const undoBlock = this._undoBlocks[this._currentIndex];
+        const numAU: number = undoBlock.getParam(UndoBlockParam.AU, 37) as number;
+        const numGU: number = undoBlock.getParam(UndoBlockParam.GU, 37) as number;
+        const numGC: number = undoBlock.getParam(UndoBlockParam.GC, 37) as number;
+        this._toolbar.palette.setPairCounts(numAU, numGU, numGC);
     }
 
     private showExperimentalColors(): void {

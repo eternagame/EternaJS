@@ -176,7 +176,7 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
     }
 
     public set enabled(value: boolean) {
-        this.display.alpha = value ? 1 : 1.0;
+        this.display.alpha = value ? 1 : 0.5;
         this._enabled = value;
     }
 
