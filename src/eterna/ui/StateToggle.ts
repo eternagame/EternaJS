@@ -1,5 +1,5 @@
 import {
-    InteractionEvent, Point, Text, Sprite
+    Text, Sprite
 } from 'pixi.js';
 import {Registration, Signal} from 'signals';
 import {
@@ -59,10 +59,6 @@ export default class StateToggle extends ContainerObject implements KeyboardList
         this.container.addChild(container);
 
         this.container.addChild(this._text);
-
-        this.pointerOver.connect(() => this.onMouseOver());
-        this.pointerOut.connect(() => this.onMouseOut());
-        this.pointerMove.connect((event) => this.onMouseMove(event));
     }
 
     protected added(): void {
@@ -135,56 +131,22 @@ export default class StateToggle extends ContainerObject implements KeyboardList
     }
 
     private prevState(): void {
-        const prevState = this._selectedState - 1;
-        if (prevState < 0) return;
+        const prevState = (this._selectedState - 1 + this._numStates) % this._numStates;
         this.state = prevState;
         ROPWait.notifyClickUI(RScriptUIElementID.SWITCH);
     }
 
     private nextState(): void {
-        const nextState = this._selectedState + 1;
-        if (nextState + 1 > this._numStates) return;
+        const nextState = (this._selectedState + 1 + this._numStates) % this._numStates;
         this.state = nextState;
         ROPWait.notifyClickUI(RScriptUIElementID.SWITCH);
-    }
-
-    private onMouseOver(): void {
-        this._mouseOver = true;
-    }
-
-    private onMouseOut(): void {
-        this._mouseOver = false;
-        this._hoveredState = -1;
-    }
-
-    private onMouseMove(e: InteractionEvent): void {
-        if (!this._mouseOver) {
-            return;
-        }
-
-        const state: number = this.getStateUnderMouse(e);
-        if ((state === this._hoveredState) || (state < 0) || (state >= this._numStates)) {
-            return;
-        }
-
-        this._hoveredState = state;
-    }
-
-    private getStateUnderMouse(e: InteractionEvent): number {
-        e.data.getLocalPosition(this.display, StateToggle.P);
-        return Math.floor(StateToggle.P.x / StateToggle.BUTTON_SIZE);
     }
 
     private readonly _numStates: number;
 
     private _enabled: boolean = true;
     private _selectedState: number = -1;
-    private _hoveredState: number = -1;
-    private _mouseOver: boolean = false;
     private _text: Text;
 
-    private static readonly BUTTON_SIZE = 25;
     private static readonly COLOR_TEXT = 0x043468;
-
-    private static readonly P: Point = new Point();
 }
