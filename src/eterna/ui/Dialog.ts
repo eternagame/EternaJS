@@ -75,6 +75,8 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
      */
     protected onBGClicked(): void {
         // Is there a good reason not to enable this?
+        // FIXME: Yes, in fact! Dialogs are used for overlays like "submitting..." which should not be
+        // dismissible.
         this.close(null);
     }
 
