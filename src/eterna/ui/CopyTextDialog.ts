@@ -1,9 +1,9 @@
 import {Flashbang, KeyCode, Assert} from 'flashbang';
-import FloatDialog from './FloatDialog';
+import WindowDialog from './WindowDialog';
 import FlexibleTextInputPanel from './FlexibleTextInputPanel';
 
 /** Show a dialog with text that the user can copy */
-export default class CopyTextDialog extends FloatDialog<string> {
+export default class CopyTextDialog extends WindowDialog<string> {
     constructor(text: string, dialogTitle?: string) {
         super(dialogTitle || '', true);
         this.setPadding(0);

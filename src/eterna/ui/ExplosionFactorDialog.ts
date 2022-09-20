@@ -5,9 +5,9 @@ import Fonts from 'eterna/util/Fonts';
 import TextInputObject from 'eterna/ui/TextInputObject';
 import GameButton from 'eterna/ui/GameButton';
 import GamePanel from 'eterna/ui/GamePanel';
-import FloatDialog from './FloatDialog';
+import WindowDialog from './WindowDialog';
 
-export default class ExplosionFactorDialog extends FloatDialog<number> {
+export default class ExplosionFactorDialog extends WindowDialog<number> {
     private okCallback: (arg0: number)=>void;
     constructor(initialFactor: number, callback: (arg0: number)=>void) {
         super('Explosion Factor');

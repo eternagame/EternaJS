@@ -1,11 +1,11 @@
 import {KeyCode} from 'flashbang';
 import {Signal} from 'signals';
-import FloatDialog from 'eterna/ui/FloatDialog';
+import WindowDialog from 'eterna/ui/WindowDialog';
 import FlexibleTextInputPanel from 'eterna/ui/FlexibleTextInputPanel';
 import SubmitPoseDetails from './SubmitPoseDetails';
 
 /** Prompts the player for a title and comment */
-export default class SubmitPoseDialog extends FloatDialog<SubmitPoseDetails> {
+export default class SubmitPoseDialog extends WindowDialog<SubmitPoseDetails> {
     constructor(initialState: SubmitPoseDetails = {
         title: '',
         comment: '',

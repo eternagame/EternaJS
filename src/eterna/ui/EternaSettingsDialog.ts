@@ -6,13 +6,13 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import GameButton from './GameButton';
 import GameCheckbox from './GameCheckbox';
 import VScrollBox from './VScrollBox';
-import FloatDialog from './FloatDialog';
+import WindowDialog from './WindowDialog';
 
 export enum EternaViewOptionsMode {
     PUZZLE = 0, PUZZLEMAKER, LAB
 }
 
-export default class EternaSettingsDialog extends FloatDialog<void> {
+export default class EternaSettingsDialog extends WindowDialog<void> {
     constructor(mode: EternaViewOptionsMode) {
         super('Settings', true);
         this._optionsMode = mode;

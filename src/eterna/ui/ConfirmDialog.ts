@@ -5,10 +5,10 @@ import Fonts from 'eterna/util/Fonts';
 import GameButton from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';
 import HTMLTextObject from './HTMLTextObject';
-import FloatDialog from './FloatDialog';
+import WindowDialog from './WindowDialog';
 import {DialogCanceledError} from './Dialog';
 
-export default class ConfirmDialog extends FloatDialog<boolean> {
+export default class ConfirmDialog extends WindowDialog<boolean> {
     constructor(prompt: string, promptIsHTML: boolean = false, bModal: boolean = true) {
         super('Are you sure?', bModal);
         this.setPadding(0);

@@ -2,7 +2,7 @@ import UndoBlock from 'eterna/UndoBlock';
 import {
     KeyCode, Flashbang, Assert
 } from 'flashbang';
-import FloatDialog from './FloatDialog';
+import WindowDialog from './WindowDialog';
 import GameButton from './GameButton';
 import FloatSpecBox from './FloatSpecBox';
 
@@ -11,7 +11,7 @@ import FloatSpecBox from './FloatSpecBox';
  * If the "Minimize Window" button is clicked, the dialog will be closed with "true". The owning mode
  * should display a docked SpecBox.
  */
-export default class SpecBoxDialog extends FloatDialog<boolean> {
+export default class SpecBoxDialog extends WindowDialog<boolean> {
     private specBox: FloatSpecBox;
     private minimizeButton: GameButton;
     private maxSpecWidth: number = 100;

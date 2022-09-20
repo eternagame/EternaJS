@@ -22,9 +22,9 @@ import GameButton from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';
 import VScrollBox from './VScrollBox';
 import {Item} from './DragDropper';
-import FloatDialog from './FloatDialog';
+import WindowDialog from './WindowDialog';
 
-export default class AnnotationPanelDialog extends FloatDialog<void> {
+export default class AnnotationPanelDialog extends WindowDialog<void> {
     constructor(manager: AnnotationManager) {
         super('Annotations');
         this.setPadding(0);

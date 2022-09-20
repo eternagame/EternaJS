@@ -3,7 +3,7 @@ import EPars from 'eterna/EPars';
 import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
 import TextInputObject from 'eterna/ui/TextInputObject';
 import {Signal} from 'signals';
-import FloatDialog from 'eterna/ui/FloatDialog';
+import WindowDialog from 'eterna/ui/WindowDialog';
 import FlexibleTextInputPanel from 'eterna/ui/FlexibleTextInputPanel';
 import {DialogCanceledError} from 'eterna/ui/Dialog';
 import GameMode from '../GameMode';
@@ -25,7 +25,7 @@ export interface SubmitPuzzleDetails {
     minAU?: number;
 }
 
-export default class SubmitPuzzleDialog extends FloatDialog<SubmitPuzzleDetails> {
+export default class SubmitPuzzleDialog extends WindowDialog<SubmitPuzzleDetails> {
     constructor(numPoses: number, puzzleState: UndoBlock, initialState: SubmitPuzzleDetails = {}) {
         super('Publish your puzzle', true);
         this.setPadding(0);

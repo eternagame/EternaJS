@@ -21,7 +21,7 @@ const THUMB_WIDTH = 18;
 const roundRadius = 5;
 
 /** Convenience base class for dialog objects. */
-export default abstract class FloatDialog<T> extends Dialog<T> {
+export default abstract class WindowDialog<T> extends Dialog<T> {
     private title: string;
     public titleArea: Container;
     private _titleDragger: SpriteObject;

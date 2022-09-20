@@ -23,7 +23,7 @@ import TextInputObject from './TextInputObject';
 import {InputField} from './TextInputPanel';
 import GameDropdown from './GameDropdown';
 import VScrollBox from './VScrollBox';
-import FloatDialog from './FloatDialog';
+import WindowDialog from './WindowDialog';
 
 interface AnnotationDialogParams {
     edit: boolean;
@@ -36,7 +36,7 @@ interface AnnotationDialogParams {
     initialAnnotation?: AnnotationData;
 }
 
-export default class AnnotationDialog extends FloatDialog<AnnotationData> {
+export default class AnnotationDialog extends WindowDialog<AnnotationData> {
     // Signals to update selected ranges
     public readonly onUpdateRanges: Value<AnnotationRange[] | null> = new Value<AnnotationRange[] | null>(null);
 

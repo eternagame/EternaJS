@@ -3,14 +3,14 @@ import GameMode from 'eterna/mode/GameMode';
 import EPars from 'eterna/EPars';
 import Sequence from 'eterna/rnatypes/Sequence';
 import FlexibleTextInputPanel from './FlexibleTextInputPanel';
-import FloatDialog from './FloatDialog';
+import WindowDialog from './WindowDialog';
 
 /**
  * Prompts the user to paste a sequence.
  * If OK is pressed, the dialog will be closed with array of numbers (ADENOSINE,...)
  *  corresponding to sequence string.
  */
-export default class PasteSequenceDialog extends FloatDialog<Sequence> {
+export default class PasteSequenceDialog extends WindowDialog<Sequence> {
     private okCallback:(sequence:Sequence)=>void;
     constructor(customNumbering: (number | null)[] | undefined, callback:(sequence:Sequence)=>void) {
         super('Write down a sequence');

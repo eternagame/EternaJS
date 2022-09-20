@@ -1,12 +1,12 @@
 import {KeyCode} from 'flashbang';
-import FloatDialog from './FloatDialog';
+import WindowDialog from './WindowDialog';
 import FlexibleTextInputPanel from './FlexibleTextInputPanel';
 
 interface NucleotideFinderResult {
     nucleotideIndex: number;
 }
 
-export default class NucleotideFinder extends FloatDialog<NucleotideFinderResult> {
+export default class NucleotideFinder extends WindowDialog<NucleotideFinderResult> {
     private static readonly props = {
         title: 'Jump to Nucleotide',
         fieldName: 'Nucleotide Index'

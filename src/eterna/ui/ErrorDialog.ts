@@ -4,10 +4,10 @@ import {
 import Fonts from 'eterna/util/Fonts';
 import GameButton from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';
-import FloatDialog from './FloatDialog';
+import WindowDialog from './WindowDialog';
 import {DialogCanceledError} from './Dialog';
 
-export default class ErrorDialog extends FloatDialog<boolean> {
+export default class ErrorDialog extends WindowDialog<boolean> {
     constructor(prompt: string) {
         super('Error', true);
         this.setPadding(0);

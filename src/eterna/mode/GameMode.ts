@@ -30,7 +30,7 @@ import EPars from 'eterna/EPars';
 import Fonts from 'eterna/util/Fonts';
 import CopyTextDialog from 'eterna/ui/CopyTextDialog';
 import Toolbar from 'eterna/ui/toolbar/Toolbar';
-import FloatDialog from 'eterna/ui/FloatDialog';
+import WindowDialog from 'eterna/ui/WindowDialog';
 
 export default abstract class GameMode extends AppMode {
     public readonly bgLayer = new Container();
@@ -95,13 +95,13 @@ export default abstract class GameMode extends AppMode {
 
     /** Show a dialog. Removes any existing dialog. */
     public showDialog<T extends SceneObject>(dialog: T): T {
-        const isFloatDlg = this._dialogRef._obj instanceof FloatDialog;
+        const isFloatDlg = this._dialogRef._obj instanceof WindowDialog;
         if (this._dialogRef.isLive && !isFloatDlg) {
             log.warn('Dialog already showing');
             this._dialogRef.destroyObject();
         } else if (this._dialogRef.isLive && isFloatDlg) {
             log.warn('Dialog already showing');
-            const modal = (this._dialogRef._obj as FloatDialog<boolean>).isModal();
+            const modal = (this._dialogRef._obj as WindowDialog<boolean>).isModal();
             if (modal) this._dialogRef.destroyObject();
         }
 
@@ -110,10 +110,10 @@ export default abstract class GameMode extends AppMode {
     }
 
     public closeCurDialog(): void {
-        const isFloatDlg = this._dialogRef._obj instanceof FloatDialog;
+        const isFloatDlg = this._dialogRef._obj instanceof WindowDialog;
         if (!isFloatDlg) this._dialogRef.destroyObject();
         else {
-            const modal = (this._dialogRef._obj as FloatDialog<boolean>).isModal();
+            const modal = (this._dialogRef._obj as WindowDialog<boolean>).isModal();
             if (modal) this._dialogRef.destroyObject();
         }
     }

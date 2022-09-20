@@ -1,7 +1,7 @@
 import {KeyCode} from 'flashbang';
 import {UnitSignal} from 'signals';
 import GameButton from './GameButton';
-import FloatDialog from './FloatDialog';
+import WindowDialog from './WindowDialog';
 import FlexibleTextInputPanel from './FlexibleTextInputPanel';
 
 interface NucleotideRangeSelectorProps {
@@ -49,7 +49,7 @@ class NucleotideRangeSelectorInput extends FlexibleTextInputPanel {
     }
 }
 
-export default class NucleotideRangeSelector extends FloatDialog<NucleotideRangeSelectorResult> {
+export default class NucleotideRangeSelector extends WindowDialog<NucleotideRangeSelectorResult> {
     private static readonly config = {
         title: 'Select Nucleotide Range',
         startFieldName: 'Start Index',

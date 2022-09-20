@@ -5,9 +5,9 @@ import {BoostersData} from 'eterna/puzzle/Puzzle';
 import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
 import Booster from 'eterna/mode/PoseEdit/Booster';
 import VScrollBox from './VScrollBox';
-import FloatDialog from './FloatDialog';
+import WindowDialog from './WindowDialog';
 
-export default class BoosterDialog extends FloatDialog<BoostersData> {
+export default class BoosterDialog extends WindowDialog<BoostersData> {
     constructor(boostersData: BoostersData) {
         super('Boosters');
         this.setPadding(12, 12, 0, 0);
