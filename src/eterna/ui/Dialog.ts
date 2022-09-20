@@ -99,13 +99,15 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
     }
 
     public onKeyboardEvent(_e: KeyboardEvent): boolean {
-        // By default, dialogs eat all keyboard input
-        return true;
+        // When in modal mode, dialogs eat all keyboard input
+        if (this._modal) return true;
+        return false;
     }
 
     public onMouseWheelEvent(_e: WheelEvent): boolean {
-        // By default, dialogs eat all mousewheel input
-        return true;
+        // When in modal mode, dialogs eat all mousewheel input
+        if (this._modal) return true;
+        return false;
     }
 
     protected _resolvePromise: (value: T | null) => void;

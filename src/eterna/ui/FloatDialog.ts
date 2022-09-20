@@ -2,13 +2,10 @@ import {
     Container, Graphics, Point, Sprite, InteractionEvent, Text
 } from 'pixi.js';
 import {
-    ContainerObject,
-    KeyboardListener,
-    MouseWheelListener,
     Flashbang,
     Assert,
     VLayoutContainer, HLayoutContainer,
-    VAlign, HAlign, SpriteObject, SceneObject, Dragger, DisplayObjectPointerTarget, InputUtil
+    VAlign, HAlign, SpriteObject, SceneObject, Dragger
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -17,18 +14,14 @@ import Eterna from 'eterna/Eterna';
 import GameButton from './GameButton';
 import FloatSliderBar from './FloatSliderBar';
 import ScrollContainer from './ScrollContainer';
+import Dialog from './Dialog';
 
 const frameColor = 0x2f94d1;
 const THUMB_WIDTH = 18;
 const roundRadius = 5;
 
-/** FloatDialogs that expose a "confirmed" promise will reject with this error if the dialog is canceled */
-export class FloatDialogCanceledError extends Error {}
-
 /** Convenience base class for dialog objects. */
-export default abstract class FloatDialog<T> extends ContainerObject implements KeyboardListener, MouseWheelListener {
-    /** A Promise that will resolve when the dialog is closed. */
-    public readonly closed: Promise<T | null>;
+export default abstract class FloatDialog<T> extends Dialog<T> {
     private title: string;
     public titleArea: Container;
     private _titleDragger: SpriteObject;
@@ -46,7 +39,6 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
     private hSlider: FloatSliderBar;
     private closeIconSize: number = 24;
     private titleBackground: Graphics;
-    private background: Graphics;
     private frameMask: Graphics;
     private frame: Graphics;
     private frameBackground: Graphics;
@@ -59,15 +51,12 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         left: 12, right: 12, top: 12, bottom: 12
     };
 
-    private modalMode = false;
     private titleBackColor = 0x043468;
     private backColor = 0x152843;
 
-    constructor(title:string = '', modalMode?:boolean) {
-        super();
-        if (modalMode !== undefined) this.modalMode = modalMode;
+    constructor(title:string = '', modal: boolean = false) {
+        super(modal);
         this.title = title;
-        this.closed = new Promise((resolve) => { this._resolvePromise = resolve; });
     }
 
     public setTitle(title: string) {
@@ -96,13 +85,11 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
     }
 
     public isModal() {
-        return this.modalMode;
+        return this._modal;
     }
 
     protected added() {
         super.added();
-
-        this.setupModalBackground();
 
         this.frameContainer = new Container();
         this.frameMask = new Graphics();
@@ -174,7 +161,7 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         this.normalButton.display.height = this.closeIconSize - 4;
         this.normalButton.display.position.y = 2;
         this.normalButton.enabled = false;
-        if (this.modalMode) this.normalButton.display.visible = false;
+        if (this._modal) this.normalButton.display.visible = false;
 
         this.closeButton.clicked.connect(this._close.bind(this));
         this.normalButton.clicked.connect(() => {
@@ -210,7 +197,7 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
 
         this.frameContainer.addChild(this.lbSprite.display);
         this.frameContainer.addChild(this.rbSprite.display);
-        if (this.modalMode) {
+        if (this._modal) {
             this.lbSprite.display.alpha = 0;
             this.rbSprite.display.alpha = 0;
             this._titleDragger.display.alpha = 0;
@@ -223,7 +210,7 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
 
         this.updateFloatLocation();
 
-        if (!this.modalMode) {
+        if (!this._modal) {
             this.regs.add(this._titleDragger.pointerDown.connect((e) => this.handleMove(e)));
             this.regs.add(this._titleText.pointerDown.connect((e) => this.handleMove(e)));
 
@@ -247,6 +234,9 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
                 if (doc) doc.style.cursor = '';
             }));
         }
+
+        Assert.assertIsDefined(this.mode);
+        this.regs.add(this.mode.resized.connect(() => this.moveToCenter()));
     }
 
     private moveToCenter() {
@@ -388,11 +378,11 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         this.closeButton.display.position.x = w - this.closeIconSize;
         this.normalButton.display.position.x = 2;
         let buttonWidth = this.closeIconSize * 2 + this.GAP * 2;
-        if (this.modalMode) buttonWidth = this.closeIconSize + this.GAP * 2;
+        if (this._modal) buttonWidth = this.closeIconSize + this.GAP * 2;
         if (w > this._titleText.display.width + buttonWidth) {
             this._titleDragger.display.width = w - buttonWidth;
             this._titleDragger.display.height = this.closeIconSize;
-            if (this.modalMode) this._titleDragger.display.position.x = this.GAP;
+            if (this._modal) this._titleDragger.display.position.x = this.GAP;
             else this._titleDragger.display.position.x = this.closeIconSize + this.GAP;
 
             const textX = (w - this._titleText.display.width) / 2;
@@ -455,13 +445,6 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
     public updateFloatLocation(bInit:boolean = true) {
         Assert.assertIsDefined(Flashbang.stageHeight);
         Assert.assertIsDefined(Flashbang.stageWidth);
-        this.background
-            .clear()
-            .beginFill(0x0)
-            .drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
-            .endFill();
-        if (this.modalMode) this.background.alpha = 0.7;
-        else this.background.alpha = 0;
 
         this.contentVLay.layout(true);
         this.contentHLay.layout(true);
@@ -498,78 +481,8 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
         this.hSlider.display.visible = false;
     }
 
-    protected setupModalBackground(): void {
-        this.background = new Graphics();
-        this.container.addChild(this.background);
-
-        if (this.modalMode) {
-            const bgTarget = new DisplayObjectPointerTarget(this.background);
-            bgTarget.pointerDown.connect((e) => {
-                if (InputUtil.IsLeftMouse(e)) {
-                    this.close(null);
-                }
-                e.stopPropagation();
-            });
-            bgTarget.pointerUp.connect((e) => {
-                e.stopPropagation();
-            });
-            bgTarget.pointerMove.connect((e) => {
-                e.stopPropagation();
-            });
-        }
-
-        Assert.assertIsDefined(this.mode);
-        this.regs.add(this.mode.keyboardInput.pushListener(this));
-        this.regs.add(this.mode.mouseWheelInput.pushListener(this));
-
-        this.updateFrameBackground();
-        this.regs.add(this.mode.resized.connect(this.onResize.bind(this)));
-    }
-
-    protected onResize() {
-        this.updateFrameBackground();
-        this.moveToCenter();
-    }
-
-    private updateFrameBackground() {
-        Assert.assertIsDefined(Flashbang.stageWidth);
-        Assert.assertIsDefined(Flashbang.stageHeight);
-
-        this.background
-            .clear()
-            .beginFill(0x0)
-            .drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
-            .endFill();
-        if (this.modalMode) this.background.alpha = 0.7;
-        else this.background.alpha = 0;
-    }
-
     protected _close() {
         this.close(null);
-    }
-
-    protected close(value: T | null) {
-        if (this._isClosed) {
-            return;
-        }
-        this._isClosed = true;
-        this._resolvePromise(value);
-        this.destroySelf();
-    }
-
-    protected removed() {
-        this.close(null);
-        super.removed();
-    }
-
-    public onKeyboardEvent(_e: KeyboardEvent): boolean {
-        // By default, dialogs eat all keyboard input
-        return true;
-    }
-
-    public onMouseWheelEvent(_e: WheelEvent): boolean {
-        // By default, dialogs eat all mousewheel input
-        return true;
     }
 
     public get ContentLay() {
@@ -579,11 +492,4 @@ export default abstract class FloatDialog<T> extends ContainerObject implements 
     public get Container() {
         return this.frameContainer;
     }
-
-    /**
-     * Called when the dim background behind the dialog is clicked.
-     * Subclasses can override to e.g. close the dialog.
-     */
-    protected _resolvePromise: (value: T | null) => void;
-    protected _isClosed: boolean;
 }

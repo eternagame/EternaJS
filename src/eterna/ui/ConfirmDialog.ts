@@ -5,7 +5,8 @@ import Fonts from 'eterna/util/Fonts';
 import GameButton from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';
 import HTMLTextObject from './HTMLTextObject';
-import FloatDialog, {FloatDialogCanceledError} from './FloatDialog';
+import FloatDialog from './FloatDialog';
+import {DialogCanceledError} from './Dialog';
 
 export default class ConfirmDialog extends FloatDialog<boolean> {
     constructor(prompt: string, promptIsHTML: boolean = false, bModal: boolean = true) {
@@ -25,7 +26,7 @@ export default class ConfirmDialog extends FloatDialog<boolean> {
                 if (value) {
                     resolve();
                 } else {
-                    reject(new FloatDialogCanceledError());
+                    reject(new DialogCanceledError());
                 }
             });
         });

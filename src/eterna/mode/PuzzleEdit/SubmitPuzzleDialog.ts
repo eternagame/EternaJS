@@ -3,8 +3,9 @@ import EPars from 'eterna/EPars';
 import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
 import TextInputObject from 'eterna/ui/TextInputObject';
 import {Signal} from 'signals';
-import FloatDialog, {FloatDialogCanceledError} from 'eterna/ui/FloatDialog';
+import FloatDialog from 'eterna/ui/FloatDialog';
 import FlexibleTextInputPanel from 'eterna/ui/FlexibleTextInputPanel';
+import {DialogCanceledError} from 'eterna/ui/Dialog';
 import GameMode from '../GameMode';
 
 function GetNumber(dict: Map<string, string>, name: string): number | undefined {
@@ -43,7 +44,7 @@ export default class SubmitPuzzleDialog extends FloatDialog<SubmitPuzzleDetails>
                 if (value != null) {
                     resolve(value);
                 } else {
-                    reject(new FloatDialogCanceledError());
+                    reject(new DialogCanceledError());
                 }
             });
         });
