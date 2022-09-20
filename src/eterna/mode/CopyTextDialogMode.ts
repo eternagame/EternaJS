@@ -44,7 +44,6 @@ export default class CopyTextDialogMode extends AppMode {
 
         inputPanel.pointerDown.connect((e) => e.stopPropagation());
         const target = new DisplayObjectPointerTarget(bg);
-        bg.interactive = true;
         target.pointerDown.connect((e) => {
             if (InputUtil.IsLeftMouse(e)) {
                 this.close();
