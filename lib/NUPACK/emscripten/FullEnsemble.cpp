@@ -285,7 +285,8 @@ FullEnsembleDefectResult* GetEnsembleDefect(const std::string& seqString, const 
   
   result->ensembleDefect = (long double) nsStar_ED;
   result->ensembleDefectNormalized = (long double) nsStar_ED/seqlength;
-
+  
+  free(pairPr);
   free(pairPrPbg);
   free(pairPrPb);
 
