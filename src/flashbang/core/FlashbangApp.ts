@@ -24,7 +24,7 @@ export default class FlashbangApp {
     }
 
     public run(): void {
-        // window.addEventListener('error', (e: ErrorEvent) => this.onUncaughtError(e));
+        window.addEventListener('error', (e: ErrorEvent) => this.onUncaughtError(e));
 
         this._pixi = this.createPixi();
         Assert.assertIsDefined(this.pixiParent);
