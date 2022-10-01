@@ -46,10 +46,9 @@ import AnnotationManager, {
 } from 'eterna/AnnotationManager';
 import AnnotationDialog from 'eterna/ui/AnnotationDialog';
 import FileInputObject, {HTMLInputEvent} from 'eterna/ui/FileInputObject';
-import Pose3D from 'eterna/pose3D/Pose3D';
-import ErrorDialog from 'eterna/ui/ErrorDialog';
 import ToolbarButton from 'eterna/ui/toolbar/ToolbarButton';
 import {naturalButtonProps, targetButtonProps} from 'eterna/ui/toolbar/ToolbarButtons';
+import Pose3DDialog from 'eterna/pose3D/Pose3DDialog';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
 import StructureInput from './StructureInput';
@@ -436,10 +435,10 @@ export default class PuzzleEditMode extends GameMode {
             this.regs?.add(uploadButton.fileSelected.connect((e: HTMLInputEvent) => {
                 const files = e.target.files;
                 if (files && files[0]) {
-                    Pose3D.checkModelFile(files[0], this.getCurrentUndoBlock(0).sequence.length).then(() => {
+                    Pose3DDialog.checkModelFile(files[0], this.getCurrentUndoBlock(0).sequence.length).then(() => {
                         this.addPose3D(files[0]);
                     }).catch((err) => {
-                        this.showDialog(new ErrorDialog(err));
+                        this.showNotification(err);
                     });
                 }
                 this.removeObject(uploadButton);
@@ -585,7 +584,7 @@ export default class PuzzleEditMode extends GameMode {
 
     protected showSettingsDialog() {
         const dialog: EternaSettingsDialog = new EternaSettingsDialog(EternaViewOptionsMode.PUZZLEMAKER);
-        this.showDialog(dialog);
+        this.showDialog(dialog, 'SettingsDialog');
     }
 
     protected createScreenshot(): ArrayBuffer {
@@ -979,6 +978,8 @@ export default class PuzzleEditMode extends GameMode {
         const numGC: number = undoblock.getParam(UndoBlockParam.GC) as number;
 
         this._toolbar.palette.setPairCounts(numAU, numGU, numGC);
+
+        this.updateCopySequenceDialog();
     }
 
     private onPaletteTargetSelected(type: PaletteTargetType): void {

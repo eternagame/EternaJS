@@ -1,5 +1,5 @@
 import {
-    DisplayObject, Graphics, Matrix, Point, IPoint, Rectangle
+    DisplayObject, Graphics, Matrix, Point, IPoint, Rectangle, Container
 } from 'pixi.js';
 import * as UPNG from 'upng-js';
 import Flashbang from 'flashbang/core/Flashbang';
@@ -376,6 +376,47 @@ export default class DisplayUtil {
 
         disp.x = x;
         disp.y = y;
+    }
+
+    /**
+     * Tests whether object1 is displayed on top of object2
+     *
+     * @param object1
+     * @param object2
+     */
+    public static isOver(object1: DisplayObject, object2: DisplayObject): boolean {
+        let currentObject: DisplayObject = object1;
+
+        // Walks up tree from object1 to root node
+        while (currentObject) {
+            DisplayUtil.sAncestors.push(currentObject);
+            currentObject = currentObject.parent;
+        }
+
+        currentObject = object2;
+        let prevObject = currentObject;
+        // Walks up tree from object2 to root node less encounters common parent
+        while (currentObject && DisplayUtil.sAncestors.indexOf(currentObject) === -1) {
+            prevObject = currentObject;
+            currentObject = currentObject.parent;
+        }
+
+        const commonParentIndex = DisplayUtil.sAncestors.indexOf(currentObject);
+        const sPrevObject = DisplayUtil.sAncestors[commonParentIndex - 1];
+
+        DisplayUtil.sAncestors.length = 0;
+
+        if (currentObject) {
+            // object1 is object2's parent (children are drawn on top of parents)
+            if (commonParentIndex === 0) return false;
+            // sPrevObject --> the shared parent's child on object1's side
+            // prevObject --> the shared parent's child on object2's side
+            // Later in the children list --> drawn later --> on top
+            return (currentObject as Container).children.indexOf(prevObject)
+                < (currentObject as Container).children.indexOf(sPrevObject);
+        } else {
+            throw new Error('Object not connected to target');
+        }
     }
 
     private static findCommonParent(object1: DisplayObject, object2: DisplayObject): DisplayObject {

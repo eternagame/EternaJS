@@ -1,58 +1,73 @@
-import {KeyCode} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
+import {VLayoutContainer} from 'flashbang';
+import {Text} from 'pixi.js';
+import {Signal} from 'signals';
+import GameButton from './GameButton';
+import TextInputGrid from './TextInputGrid';
 import WindowDialog from './WindowDialog';
-import FlexibleTextInputPanel from './FlexibleTextInputPanel';
 
-interface NucleotideFinderResult {
-    nucleotideIndex: number;
-}
+export default class NucleotideFinder extends WindowDialog<void> {
+    public readonly jumpClicked: Signal<number> = new Signal();
 
-export default class NucleotideFinder extends WindowDialog<NucleotideFinderResult> {
-    private static readonly props = {
-        title: 'Jump to Nucleotide',
-        fieldName: 'Nucleotide Index'
-    };
-
-    private static readonly theme = {
-        width: 80
-    };
-
-    private okCallback: (arg0: number)=>void;
-
-    constructor(callback: (arg0: number)=>void) {
-        super(NucleotideFinder.props.title);
-        this.okCallback = callback;
+    constructor() {
+        super({title: 'Jump to Nucleotide'});
     }
 
     protected added() {
         super.added();
-        const {props, theme} = NucleotideFinder;
 
-        const inputPanel = new FlexibleTextInputPanel();
-        const field = inputPanel.addField(props.fieldName, theme.width);
-        this.addObject(inputPanel, this.contentVLay);
+        this._content = new VLayoutContainer(20);
+        this._window.content.addChild(this._content);
 
-        field.setFocus();
-        field.keyPressed.connect((key) => {
-            if (key === 'Enter') {
-                inputPanel.okClicked.emit(inputPanel.getFieldValues());
-            }
+        this._errorText = Fonts.std()
+            .fontSize(14)
+            .color(0xff7070)
+            .bold()
+            .build();
+        this._errorText.visible = false;
+        this._content.addChild(this._errorText);
+
+        const inputGrid = new TextInputGrid(undefined, this._window.contentHtmlWrapper);
+        const baseField = inputGrid.addField('Base Number', 60);
+        this.addObject(inputGrid, this._content);
+
+        baseField.setFocus(true);
+
+        const applyButton = new GameButton().label('Jump', 14);
+        this.addObject(applyButton, this._content);
+
+        applyButton.clicked.connect(() => this.onApply(baseField.text));
+        baseField.keyPressed.connect((key) => {
+            if (key === 'Enter') this.onApply(baseField.text);
         });
 
-        inputPanel.setHotkeys(KeyCode.Enter, undefined, KeyCode.Escape);
-
-        inputPanel.cancelClicked.connect(() => this.close(null));
-        inputPanel.okClicked.connect(() => {
-            const dict = inputPanel.getFieldValues();
-            const nucleotideIndex = parseInt(dict.get(props.fieldName) ?? '', 10);
-            if (Number.isNaN(nucleotideIndex)) {
-                this.close(null);
-            } else {
-                // this.close({nucleotideIndex});
-                this.okCallback(nucleotideIndex);
-            }
-        });
-        inputPanel.okButtonLabel = ' Jump ';
-
-        this.updateFloatLocation();
+        this._content.layout();
+        this._window.layout();
     }
+
+    private onApply(base: string) {
+        const baseNum = parseInt(base, 10);
+
+        const prevText = this._errorText.text;
+        const wasVisible = this._errorText.visible;
+
+        if (base === '') {
+            this._errorText.text = 'Please enter a base number';
+            this._errorText.visible = true;
+        } else if (Number.isNaN(baseNum)) {
+            this._errorText.text = 'Please enter a valid number';
+            this._errorText.visible = true;
+        } else {
+            this._errorText.visible = false;
+            this.jumpClicked.emit(baseNum);
+        }
+
+        if (this._errorText.visible !== wasVisible || prevText !== this._errorText.text) {
+            this._content.layout(true);
+            this._window.layout();
+        }
+    }
+
+    private _content: VLayoutContainer;
+    private _errorText: Text;
 }

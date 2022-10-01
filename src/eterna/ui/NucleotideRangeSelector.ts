@@ -1,130 +1,106 @@
-import {KeyCode} from 'flashbang';
-import {UnitSignal} from 'signals';
+import Fonts from 'eterna/util/Fonts';
+import {HLayoutContainer, VLayoutContainer} from 'flashbang';
+import {Text} from 'pixi.js';
+import {Signal} from 'signals';
 import GameButton from './GameButton';
+import TextInputGrid from './TextInputGrid';
 import WindowDialog from './WindowDialog';
-import FlexibleTextInputPanel from './FlexibleTextInputPanel';
 
-interface NucleotideRangeSelectorProps {
-    initialRange: [number, number];
-    isPartialRange: boolean;
-}
+export default class NucleotideRangeSelector extends WindowDialog<void> {
+    public readonly applyClicked: Signal<{
+        start: number,
+        end: number
+    }> = new Signal();
 
-interface NucleotideRangeSelectorResult {
-    startIndex: number;
-    endIndex: number;
-    clearRange: boolean;
-}
-
-class NucleotideRangeSelectorInput extends FlexibleTextInputPanel {
-    public onClear = new UnitSignal();
-    private _clearButton: GameButton;
-
-    constructor() {
-        super();
-        this._clearButton = new GameButton()
-            .label('Clear range', 14)
-            .tooltip('View all nucleotides');
-        this.addObject(this._clearButton, this.container);
-        this._clearButton.clicked.connect(() => this.onClear.emit());
+    constructor(fullRange: [number, number], initialRange: [number, number]) {
+        super({title: 'Set Visible Nucleotides'});
+        this._fullRange = fullRange;
+        this._initialRange = initialRange;
     }
 
     protected added() {
         super.added();
 
-        const spacing = 30;
-        const buttons = [this._okButton, this._clearButton, this._cancelButton];
+        this._content = new VLayoutContainer(20);
+        this._window.content.addChild(this._content);
 
-        const totalWidth = buttons.reduce(
-            (prev, cur) => prev + cur.container.width + spacing,
-            -spacing
-        );
-        buttons.forEach((b, index) => {
-            b.display.position.x = (this._width - totalWidth) / 2;
-            for (let i = index - 1; i >= 0; --i) {
-                b.display.position.x += buttons[i].container.width + spacing;
-            }
-        });
+        this._errorText = Fonts.std()
+            .fontSize(14)
+            .color(0xff7070)
+            .bold()
+            .build();
+        this._errorText.visible = false;
+        this._content.addChild(this._errorText);
 
-        this._clearButton.display.position.y = this._okButton.display.position.y;
-    }
-}
-
-export default class NucleotideRangeSelector extends WindowDialog<NucleotideRangeSelectorResult> {
-    private static readonly config = {
-        title: 'Select Nucleotide Range',
-        startFieldName: 'Start Index',
-        endFieldName: 'End Index'
-    };
-
-    private static readonly theme = {
-        width: 140,
-        panelSpacing: 10
-    };
-
-    private _props: NucleotideRangeSelectorProps;
-
-    private okCallback: (result:{
-        startIndex: number,
-        endIndex: number,
-        clearRange: boolean
-    })=>void;
-
-    constructor(props: NucleotideRangeSelectorProps, callback: (result:{
-        startIndex: number,
-        endIndex: number,
-        clearRange: boolean
-    })=>void) {
-        super(NucleotideRangeSelector.config.title);
-        this.okCallback = callback;
-        this._props = props;
-    }
-
-    protected added() {
-        super.added();
-        const {config, theme} = NucleotideRangeSelector;
-
-        const inputPanel = this._props.isPartialRange
-            ? new NucleotideRangeSelectorInput()
-            : new FlexibleTextInputPanel();
-
-        const startField = inputPanel.addField(config.startFieldName, theme.width);
-        const endField = inputPanel.addField(config.endFieldName, theme.width);
-        const [start, end] = this._props.initialRange;
-        startField.text = `${start}`;
-        endField.text = `${end}`;
-
-        this.addObject(inputPanel, this.contentVLay);
+        const inputGrid = new TextInputGrid(undefined, this._window.contentHtmlWrapper);
+        const startField = inputGrid.addField('First Visible Base', 60);
+        const endField = inputGrid.addField('Last Visible Base', 60);
+        this.addObject(inputGrid, this._content);
+        startField.text = `${this._initialRange[0]}`;
+        endField.text = `${this._initialRange[1]}`;
 
         startField.setFocus();
-        inputPanel.setHotkeys(KeyCode.Enter, undefined, KeyCode.Escape);
 
-        inputPanel.cancelClicked.connect(() => this.close(null));
-        inputPanel.okClicked.connect(() => {
-            const dict = inputPanel.getFieldValues();
-            const startIndex = parseInt(dict.get(config.startFieldName) ?? '', 10);
-            const endIndex = parseInt(dict.get(config.endFieldName) ?? '', 10);
-            if ([startIndex, endIndex].some(Number.isNaN)) {
-                this.close(null);
-            } else {
-                this.okCallback({
-                    startIndex,
-                    endIndex,
-                    clearRange: false
-                });
-            }
+        const buttonLayout = new HLayoutContainer(20);
+        this._content.addChild(buttonLayout);
+        const applyButton = new GameButton().label('Apply', 14);
+        this.addObject(applyButton, buttonLayout);
+        const resetButton = new GameButton().label('Reset', 14);
+        this.addObject(resetButton, buttonLayout);
+
+        applyButton.clicked.connect(() => this.onApply(startField.text, endField.text));
+        startField.keyPressed.connect((key) => {
+            if (key === 'Enter') this.onApply(startField.text, endField.text);
         });
-        inputPanel.okButtonLabel = ' Go ';
+        endField.keyPressed.connect((key) => {
+            if (key === 'Enter') this.onApply(startField.text, endField.text);
+        });
+        resetButton.clicked.connect(() => {
+            startField.text = `${this._fullRange[0]}`;
+            endField.text = `${this._fullRange[1]}`;
+            this.onApply(startField.text, endField.text);
+        });
 
-        if (inputPanel instanceof NucleotideRangeSelectorInput) {
-            inputPanel.onClear.connect(() => {
-                this.okCallback({
-                    clearRange: true,
-                    startIndex: -1,
-                    endIndex: -1
-                });
-            });
+        this._content.layout();
+        this._window.layout();
+    }
+
+    private onApply(start: string, end: string) {
+        const startNum = parseInt(start, 10);
+        const endNum = parseInt(end, 10);
+
+        const prevText = this._errorText.text;
+        const wasVisible = this._errorText.visible;
+
+        if (start === '' || end === '') {
+            this._errorText.text = 'Please provide both a start and end number';
+            this._errorText.visible = true;
+        } else if (Number.isNaN(startNum) || Number.isNaN(endNum)) {
+            this._errorText.text = 'Please enter a valid number';
+            this._errorText.visible = true;
+        } else if (startNum < this._fullRange[0]) {
+            this._errorText.text = `Start number must be greater than ${this._fullRange[0]}`;
+            this._errorText.visible = true;
+        } else if (endNum > this._fullRange[1]) {
+            this._errorText.text = `End number must be less than ${this._fullRange[1]}`;
+            this._errorText.visible = true;
+        } else if (startNum > endNum - 1) {
+            this._errorText.text = 'End number must be greater than start number';
+            this._errorText.visible = true;
+        } else {
+            this._errorText.visible = false;
+            this.applyClicked.emit({start: startNum, end: endNum});
         }
 
-        this.updateFloatLocation();
+        if (this._errorText.visible !== wasVisible || prevText !== this._errorText.text) {
+            this._content.layout(true);
+            this._window.layout();
+        }
     }
+
+    private _content: VLayoutContainer;
+    private _errorText: Text;
+
+    private _fullRange: [number, number];
+    private _initialRange: [number, number];
 }

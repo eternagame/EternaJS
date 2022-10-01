@@ -105,7 +105,7 @@ export default class ToolbarButton extends GameButton {
         // the over state
         this.regs.add(
             newButton.clicked.connect(() => {
-                this.clicked.emit(null);
+                this.clicked.emit();
             })
         );
         // Also when this button is programmatically toggled or disabled, ensure the copy is too

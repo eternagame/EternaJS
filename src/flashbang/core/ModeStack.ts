@@ -23,6 +23,7 @@ export default class ModeStack {
 
     constructor(parentSprite: Container) {
         Assert.assertIsDefined(this._container);
+        this._container.name = 'ModeStack';
         parentSprite.addChild(this._container);
     }
 

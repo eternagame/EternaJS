@@ -1,8 +1,10 @@
 import {
-    Graphics, Text
+    Graphics, InteractionEvent, Text
 } from 'pixi.js';
 import {DropShadowFilter} from '@pixi/filter-drop-shadow';
 import Fonts from 'eterna/util/Fonts';
+import {SignalView} from 'signals';
+import GraphicsObject from 'flashbang/objects/GraphicsObject';
 import BaseGamePanel from './BaseGamePanel';
 
 export enum GamePanelType {
@@ -25,25 +27,14 @@ export default class GamePanel extends BaseGamePanel {
         super();
 
         const type = props.type || GamePanelType.NORMAL;
-        const alpha = props.alpha !== undefined ? props.alpha : 0.07;
-        const color = props.color ?? 0xffffff;
+        const alpha = props.alpha !== undefined ? props.alpha : 1;
+        const color = props.color ?? 0x025191;
         const borderAlpha = props.borderAlpha !== undefined ? props.borderAlpha : 0.0;
-        const borderColor = props.borderColor !== undefined ? props.borderColor : 0;
-        const dropShadow = props.dropShadow || false;
+        const borderColor = props.borderColor !== undefined ? props.borderColor : 0x2892E9;
         const borderRadius = props.borderRadius !== undefined ? props.borderRadius : 5;
         const borderThickness = props.borderThickness !== undefined
             ? props.borderThickness : GamePanel.DEFAULT_BORDER_THICKNESS;
-
-        // Clicks should not pass through the panel
-        this.pointerDown.connect((e) => {
-            e.stopPropagation();
-        });
-
-        this._background = new Graphics();
-        if (dropShadow) {
-            this._background.filters = [new DropShadowFilter()];
-        }
-        this.container.addChild(this._background);
+        const dropShadow = props.dropShadow || false;
 
         this.setup(
             type,
@@ -52,7 +43,8 @@ export default class GamePanel extends BaseGamePanel {
             borderAlpha,
             borderColor,
             borderRadius,
-            borderThickness
+            borderThickness,
+            dropShadow
         );
     }
 
@@ -63,7 +55,8 @@ export default class GamePanel extends BaseGamePanel {
         borderAlpha: number,
         borderColor: number,
         borderRadius: number = 0,
-        borderThickness: number = 0
+        borderThickness: number = 0,
+        dropShadow: boolean = false
     ): void {
         this._type = type;
         this._alpha = alpha;
@@ -72,6 +65,25 @@ export default class GamePanel extends BaseGamePanel {
         this._borderColor = borderColor;
         this._borderRadius = borderRadius;
         this._borderThickness = borderThickness;
+        this._dropShadow = dropShadow;
+        this.updateView();
+    }
+
+    protected added() {
+        // Clicks should not pass through the panel
+        this.regs.add(this.pointerDown.connect((e) => {
+            e.stopPropagation();
+        }));
+
+        this._background = new Graphics();
+        if (this._dropShadow) {
+            this._background.filters = [new DropShadowFilter()];
+        }
+        this.container.addChild(this._background);
+
+        this._titleBackground = new GraphicsObject();
+        this.addObject(this._titleBackground, this.container);
+
         this.updateView();
     }
 
@@ -106,6 +118,10 @@ export default class GamePanel extends BaseGamePanel {
         return this._title == null ? 0 : 35;
     }
 
+    public get titleTextWidth(): number {
+        return this._titleText ? this._titleText.width : 0;
+    }
+
     public get width(): number {
         return this._width;
     }
@@ -114,8 +130,19 @@ export default class GamePanel extends BaseGamePanel {
         return this._height;
     }
 
+    public get borderRadius(): number {
+        return this._borderRadius;
+    }
+
+    public get titlePointerDown(): SignalView<InteractionEvent> {
+        return this._titleBackground.pointerDown;
+    }
+
     protected updateView(): void {
-        this._background?.clear();
+        if (!this.isLiveObject) return;
+
+        this._background.clear();
+        this._titleBackground.display.clear();
 
         if (this._width <= 0 || this._height <= 0) {
             return;
@@ -143,8 +170,8 @@ export default class GamePanel extends BaseGamePanel {
                     (this._width - this._titleText.width) * 0.5,
                     (this.titleHeight - this._titleText.height) * 0.5
                 );
-                this._background.beginFill(this._borderColor, this._borderAlpha);
-                this._background
+                this._titleBackground.display.beginFill(this._borderColor, this._alpha);
+                this._titleBackground.display
                     .moveTo(0, 35)
                     .lineTo(0, 5)
                     .arcTo(0, 0, 5, 0, 5)
@@ -156,7 +183,8 @@ export default class GamePanel extends BaseGamePanel {
         }
     }
 
-    protected readonly _background: Graphics;
+    protected _background: Graphics;
+    protected _titleBackground: GraphicsObject;
 
     protected _type: GamePanelType;
 
@@ -166,6 +194,7 @@ export default class GamePanel extends BaseGamePanel {
     protected _borderColor: number = 0;
     protected _borderRadius: number = 5;
     protected _borderThickness: number = 0;
+    protected _dropShadow: boolean = false;
     protected _title: string | null = null;
     protected _titleText: Text | null = null;
 

@@ -1,7 +1,8 @@
-import {KeyCode} from 'flashbang';
+import {HLayoutContainer, KeyCode, VLayoutContainer} from 'flashbang';
 import {Signal} from 'signals';
 import WindowDialog from 'eterna/ui/WindowDialog';
-import FlexibleTextInputPanel from 'eterna/ui/FlexibleTextInputPanel';
+import TextInputGrid from 'eterna/ui/TextInputGrid';
+import GameButton from 'eterna/ui/GameButton';
 import SubmitPoseDetails from './SubmitPoseDetails';
 
 /** Prompts the player for a title and comment */
@@ -12,44 +13,45 @@ export default class SubmitPoseDialog extends WindowDialog<SubmitPoseDetails> {
         annotations: [],
         libraryNT: []
     }) {
-        super('Submit your design', true);
-        this.setPadding(0);
+        super({title: 'Submit your design', modal: true});
         this._initialState = initialState;
     }
 
-    protected added(): void {
+    protected added() {
         super.added();
 
-        const TITLE = 'Title';
-        const COMMENT = 'Comment';
-
-        const inputPanel = new FlexibleTextInputPanel();
-        const title = inputPanel.addField(TITLE, 200);
-        const comment = inputPanel.addField(COMMENT, 200, true);
+        const content = new VLayoutContainer(20);
+        this._window.content.addChild(content);
+        const inputGrid = new TextInputGrid(undefined, this._window.contentHtmlWrapper);
+        const title = inputGrid.addField('Title', 200);
+        const comment = inputGrid.addField('Comment', 200, true);
         if (this._initialState.title) title.text = this._initialState.title;
         if (this._initialState.comment) comment.text = this._initialState.comment;
-        this.addObject(inputPanel, this.contentVLay);
+        this.addObject(inputGrid, content);
 
         title.setFocus();
 
-        inputPanel.setHotkeys(undefined, undefined, KeyCode.Escape, undefined);
+        const buttonLayout = new HLayoutContainer(20);
+        content.addChild(buttonLayout);
+        const okButton = new GameButton().label('Ok', 14);
+        this.addObject(okButton, buttonLayout);
+        const cancelButton = new GameButton().label('Cancel', 14).hotkey(KeyCode.Escape);
+        this.addObject(cancelButton, buttonLayout);
 
-        inputPanel.cancelClicked.connect(() => {
-            const dict = inputPanel.getFieldValues();
+        cancelButton.clicked.connect(() => {
             const details = {
-                title: dict.get(TITLE),
-                comment: dict.get(COMMENT),
+                title: title.text,
+                comment: comment.text,
                 annotations: [],
                 libraryNT: []
             };
             this.saveInputs.emit(details);
             this.close(null);
         });
-        inputPanel.okClicked.connect(() => {
-            const dict = inputPanel.getFieldValues();
+        okButton.clicked.connect(() => {
             const details = {
-                title: dict.get(TITLE),
-                comment: dict.get(COMMENT),
+                title: title.text,
+                comment: comment.text,
                 annotations: [],
                 libraryNT: []
             };
@@ -57,7 +59,8 @@ export default class SubmitPoseDialog extends WindowDialog<SubmitPoseDetails> {
             this.close(details);
         });
 
-        this.updateFloatLocation();
+        content.layout();
+        this._window.layout();
     }
 
     private readonly _initialState: SubmitPoseDetails;

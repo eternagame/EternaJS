@@ -1,79 +1,67 @@
-import {
-    HAlign, HLayoutContainer, KeyCode, VAlign, VLayoutContainer
-} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
-import TextInputObject from 'eterna/ui/TextInputObject';
-import GameButton from 'eterna/ui/GameButton';
-import GamePanel from 'eterna/ui/GamePanel';
+import {HLayoutContainer, KeyCode, VLayoutContainer} from 'flashbang';
+import {Value} from 'signals';
+import GameButton from './GameButton';
+import TextInputObject from './TextInputObject';
 import WindowDialog from './WindowDialog';
 
-export default class ExplosionFactorDialog extends WindowDialog<number> {
-    private okCallback: (arg0: number)=>void;
-    constructor(initialFactor: number, callback: (arg0: number)=>void) {
-        super('Explosion Factor');
-        this.okCallback = callback;
-        this.setPadding(12, 12, 0, 0);
+export default class ExplosionFactorDialog extends WindowDialog<void> {
+    public factor: Value<number>;
 
-        this._initialFactor = initialFactor ?? 1;
+    constructor(initialFactor: number) {
+        super({title: 'Explosion Factor'});
+        this.factor = new Value(initialFactor);
     }
 
     protected added() {
         super.added();
 
-        this._panel = new GamePanel({
-            alpha: 1.0,
-            color: 0x152843
-            // borderAlpha: 0.27,
-            // borderColor: 0xC0DCE7
-        });
-
-        this.addObject(this._panel, this.contentVLay);
-
-        this._panelLayout = new VLayoutContainer(10, HAlign.CENTER);
-        this._panel.container.addChild(this._panelLayout);
+        const content = new VLayoutContainer(20);
+        this._window.content.addChild(content);
 
         const errorText = Fonts.std()
             .fontSize(14)
-            .color(0xEE0000)
+            .color(0xff7070)
+            .bold()
             .build();
         errorText.visible = false;
-        this._panelLayout.addChild(errorText);
+        content.addChild(errorText);
 
-        const inputLayout = new HLayoutContainer(10, VAlign.CENTER);
-        this._panelLayout.addChild(inputLayout);
+        const inputLayout = new HLayoutContainer(10);
+        content.addChild(inputLayout);
 
-        const decreaseButton: GameButton = new GameButton().label('-', 16);
-        this._panel.addObject(decreaseButton, inputLayout);
+        const decreaseButton = new GameButton('secondary').label('-', 14);
+        this.addObject(decreaseButton, inputLayout);
         decreaseButton.hotkey(KeyCode.BracketLeft);
         decreaseButton.tooltip('Decrease space between paired bases ([)');
 
-        const input: TextInputObject = new TextInputObject({
+        const input = new TextInputObject({
             fontSize: 14,
             width: 45,
-            rows: 1
+            rows: 1,
+            domParent: this._window.contentHtmlWrapper
         }).font(Fonts.STDFONT);
-        input.text = this._initialFactor.toString();
-        this._panel.addObject(input, inputLayout);
+        input.text = this.factor.value.toString();
+        this.addObject(input, inputLayout);
 
-        const increaseButton: GameButton = new GameButton().label('+', 16);
-        this._panel.addObject(increaseButton, inputLayout);
+        const increaseButton: GameButton = new GameButton('secondary').label('+', 14);
+        this.addObject(increaseButton, inputLayout);
         increaseButton.hotkey(KeyCode.BracketRight);
         increaseButton.tooltip('Increase space between paired bases (])');
+
+        input.setFocus();
 
         decreaseButton.clicked.connect(() => {
             const factor = Math.max(0, Math.round((parseFloat(input.text) - 0.25) * 1000) / 1000);
             input.text = (Number.isNaN(factor) ? 1 : factor).toString();
-            this.okCallback(parseFloat(input.text));
+            this.factor.value = parseFloat(input.text);
         });
 
         increaseButton.clicked.connect(() => {
             const factor = Math.max(0, Math.round((parseFloat(input.text) + 0.25) * 1000) / 1000);
             input.text = (Number.isNaN(factor) ? 1 : factor).toString();
-            this.okCallback(parseFloat(input.text));
+            this.factor.value = parseFloat(input.text);
         });
-
-        const buttonLayout = new HLayoutContainer(12);
-        this._panelLayout.addChild(buttonLayout);
 
         input.valueChanged.connect((val) => {
             const factor = parseFloat(val);
@@ -92,39 +80,16 @@ export default class ExplosionFactorDialog extends WindowDialog<number> {
                 errorText.visible = true;
             } else {
                 errorText.visible = false;
-                this.okCallback(factor);
+                this.factor.value = factor;
             }
 
             if (errorText.visible !== wasVisible || prevText !== errorText.text) {
-                this.layout();
+                content.layout(true);
+                this._window.layout();
             }
         });
 
-        // const noButton: GameButton = new GameButton().label('Cancel', 16);
-        // this._panel.addObject(noButton, buttonLayout);
-        // noButton.clicked.connect(() => this.close(null));
-
-        this.layout();
+        content.layout(true);
+        this._window.layout();
     }
-
-    private layout(): void {
-        this._panelLayout.layout(true);
-        this._panel.setSize(
-            this._panelLayout.width + (ExplosionFactorDialog.W_MARGIN * 2),
-            this._panel.titleHeight + this._panelLayout.height + (ExplosionFactorDialog.H_MARGIN * 2)
-        );
-        this._panelLayout.position.set(
-            ExplosionFactorDialog.W_MARGIN,
-            ExplosionFactorDialog.H_MARGIN + this._panel.titleHeight
-        );
-        this.updateFloatLocation();
-    }
-
-    private _panel: GamePanel;
-    private _panelLayout: VLayoutContainer;
-
-    private _initialFactor: number;
-
-    private static readonly W_MARGIN: number = 40;
-    private static readonly H_MARGIN: number = 20;
 }

@@ -28,14 +28,14 @@ import Fonts from 'eterna/util/Fonts';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import EternaURL from 'eterna/net/EternaURL';
 import TextInputObject from 'eterna/ui/TextInputObject';
-import VScrollBox from 'eterna/ui/VScrollBox';
+import ScrollBox from 'eterna/ui/ScrollBox';
 import MultiStyleText from 'pixi-multistyle-text';
 import Feedback from 'eterna/Feedback';
 import SliderBar from 'eterna/ui/SliderBar';
 import {FontWeight} from 'flashbang/util/TextBuilder';
 import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
-import CopyTextDialogMode from '../CopyTextDialogMode';
+import CopyTextDialog from 'eterna/ui/CopyTextDialog';
 import ThumbnailAndTextButton from './ThumbnailAndTextButton';
 import GameMode from '../GameMode';
 import ButtonWithIcon from './ButtonWithIcon';
@@ -126,7 +126,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
 
         // update scroll
         const pxdelta: number = InputUtil.scrollAmount(e, 13, this._scrollView.height);
-        this._scrollView.scrollLocation += pxdelta;
+        this._scrollView.yScrollLocation += pxdelta;
 
         return true;
     }
@@ -242,7 +242,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
                     filter1_arg2: this._props.solution.nodeID
                     /* eslint-enable camelcase */
                 });
-                this.modeStack.pushMode(new CopyTextDialogMode(solutionURL, 'Solution URL'));
+                (this.mode as GameMode).showDialog(new CopyTextDialog(solutionURL, 'Solution URL', true));
             }
         );
         this._content.addObject(permalink, headerLinks);
@@ -268,7 +268,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
                     filter1_arg1: this._props.solution.playerName
                     /* eslint-enable camelcase */
                 });
-                this.modeStack.pushMode(new CopyTextDialogMode(playerURL, 'Player URL'));
+                (this.mode as GameMode).showDialog(new CopyTextDialog(playerURL, 'Player URL', true));
             }
         );
 
@@ -277,7 +277,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         // Scrollable content
         this._scrollViewContainer = new Container();
         this._content.display.addChild(this._scrollViewContainer);
-        this._scrollView = new VScrollBox(200, 200);
+        this._scrollView = new ScrollBox(200, 200);
         this._content.addObject(this._scrollView, this._scrollViewContainer);
         this._contentLayout = new VLayoutContainer(10, HAlign.LEFT);
         this._scrollView.content.addChild(this._contentLayout);
@@ -672,7 +672,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
 
     private _header: VLayoutContainer;
     private _scrollViewContainer: Container;
-    private _scrollView: VScrollBox;
+    private _scrollView: ScrollBox;
     private _contentLayout: VLayoutContainer;
     private _voteButton: ButtonWithIcon;
     private _footer: VLayoutContainer;

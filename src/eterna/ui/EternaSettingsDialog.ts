@@ -1,11 +1,10 @@
 import {
-    VLayoutContainer, HAlign, Setting, HLayoutContainer, VAlign, DisplayUtil, Flashbang, Assert
+    VLayoutContainer, HAlign, Setting, HLayoutContainer, Flashbang
 } from 'flashbang';
 import Eterna from 'eterna/Eterna';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import GameButton from './GameButton';
 import GameCheckbox from './GameCheckbox';
-import VScrollBox from './VScrollBox';
 import WindowDialog from './WindowDialog';
 
 export enum EternaViewOptionsMode {
@@ -14,7 +13,7 @@ export enum EternaViewOptionsMode {
 
 export default class EternaSettingsDialog extends WindowDialog<void> {
     constructor(mode: EternaViewOptionsMode) {
-        super('Settings', true);
+        super({title: 'Settings'});
         this._optionsMode = mode;
     }
 
@@ -31,11 +30,17 @@ export default class EternaSettingsDialog extends WindowDialog<void> {
 
         bind(Eterna.settings.showNumbers, `Show nucleotide numbers${showShortcuts ? ' (N)' : ''}`);
         bind(Eterna.settings.showLetters, 'Show nucleotide letters');
-        bind(Eterna.settings.displayFreeEnergies, `Display free energies for all structures${showShortcuts ? ' (G)' : ''}`);
+        bind(
+            Eterna.settings.displayFreeEnergies,
+            `Display free energies for all structures${showShortcuts ? ' (G)' : ''}`
+        );
         bind(Eterna.settings.highlightRestricted, 'Highlight restricted sequences');
         bind(Eterna.settings.showChat, 'In-game chat');
         bind(Eterna.settings.simpleGraphics, `Use simpler, less animated graphics${showShortcuts ? ' (,)' : ''}`);
-        bind(Eterna.settings.usePuzzlerLayout, `Use clash-free layout for big structures${showShortcuts ? ' (L)' : ''}`);
+        bind(
+            Eterna.settings.usePuzzlerLayout,
+            `Use clash-free layout for big structures${showShortcuts ? ' (L)' : ''}`
+        );
         if (!Eterna.MOBILE_APP) {
             // NOTE(johannes): At the time of writing, auto-hide toolbar does not work with a touchscreen,
             // this option can be re-added once that works.
@@ -79,42 +84,9 @@ export default class EternaSettingsDialog extends WindowDialog<void> {
         // This will update the sound buttons to their proper start states
         this.setVolume(Eterna.settings.soundMute.value, Eterna.settings.soundVolume.value);
 
-        this._viewLayout = new VLayoutContainer(22, HAlign.CENTER);
-        this._viewLayout.addChild(settingsLayout);
-
-        // const okButtonGraphic = new Graphics()
-        //     .beginFill(0x54B54E)
-        //     .drawRoundedRect(0, 0, 170, 40, 10)
-        //     .endFill();
-        // const okButton = new GameButton()
-        //     .customStyleBox(okButtonGraphic)
-        //     .label('Done', 14);
-        // this.addObject(okButton, this._viewLayout);
-        // okButton.clicked.connect(() => this.close(null));
-
-        this._viewLayout.layout();
-
-        this.scrollBox = new VScrollBox(0, 0);
-        this.addObject(this.scrollBox, this.contentVLay);
-        this.scrollBox.content.addChild(this._viewLayout);
-
-        this.updateFinalFloatLocation();
-    }
-
-    public updateFinalFloatLocation() {
-        Assert.assertIsDefined(Flashbang.stageHeight);
-        const idealHeight = this._viewLayout.height + 40 + this.titleArea.height;
-        const maxHeight = Flashbang.stageHeight * 0.8;
-        const panelHeight = Math.min(idealHeight, maxHeight);
-
-        this.scrollBox.setSize(this._viewLayout.width, panelHeight - 40 - this.titleArea.height);
-        this.scrollBox.doLayout();
-
-        DisplayUtil.positionRelative(
-            this.scrollBox.display, HAlign.CENTER, VAlign.TOP,
-            this.titleArea, HAlign.CENTER, VAlign.TOP, 0, this.titleArea.height + 10
-        );
-        super.updateFloatLocation();
+        this._window.content.addChild(settingsLayout);
+        settingsLayout.layout();
+        this._window.layout();
     }
 
     private setVolume(mute: boolean, volume: number): void {
@@ -139,9 +111,9 @@ export default class EternaSettingsDialog extends WindowDialog<void> {
         return checkbox;
     }
 
-    private _viewLayout: VLayoutContainer;
+    // private _viewLayout: VLayoutContainer;
     private readonly _optionsMode: EternaViewOptionsMode;
     private _muteButton: GameButton;
     private _volumeButtons: GameButton[] = [];
-    private scrollBox: VScrollBox;
+    // private scrollBox: VScrollBox;
 }

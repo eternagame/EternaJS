@@ -356,7 +356,7 @@ export default class RScriptEnv extends ContainerObject {
                     this.ui.toolbar.magicGlueButton, RScriptUIElementID.MAGICGLUE
                 );
             default:
-                return null;// throw new Error(`Invalid UI Element: ${type}`);
+                return null;
         }
     }
 
@@ -451,8 +451,12 @@ export default class RScriptEnv extends ContainerObject {
             case RScriptUIElementID.GCCOMPLETE:
             case RScriptUIElementID.CGCOMPLETE:
                 return {rect: this.ui.toolbar.palette.getTarget(PaletteTargetType.GC)};
+            case RScriptUIElementID.ACTION_MENU:
+                log.warn('ACTION_MENU rscript ui element no longer exists');
+                return null;
             default:
-                return null;// throw new Error(`Invalid UI Element: ${type}`);
+                log.warn(`Invalid UI Element: ${type}`);
+                return null;
         }
     }
 

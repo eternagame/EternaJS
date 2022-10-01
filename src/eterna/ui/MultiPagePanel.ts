@@ -11,7 +11,7 @@ import {FontWeight} from 'flashbang/util/TextBuilder';
 import GameButton from './GameButton';
 import UITheme from './UITheme';
 import HTMLTextObject from './HTMLTextObject';
-import VScrollBox from './VScrollBox';
+import ScrollBox from './ScrollBox';
 
 interface MultiPagePanelProps {
     title: string;
@@ -37,7 +37,7 @@ export default class MultiPagePanel extends ContainerObject {
     private _title: string;
 
     private _background: Graphics;
-    private _pagesContainer: VScrollBox;
+    private _pagesContainer: ScrollBox;
     private _titleText: Text;
     private _prevButton: GameButton;
     private _nextButton: GameButton;
@@ -68,7 +68,7 @@ export default class MultiPagePanel extends ContainerObject {
         this.container.addChild(this._background);
 
         // Content
-        this._pagesContainer = new VScrollBox(0, 0);
+        this._pagesContainer = new ScrollBox(0, 0);
         this.addObject(this._pagesContainer, this.container);
 
         this._props.pages.forEach((page) => {
@@ -194,7 +194,7 @@ export default class MultiPagePanel extends ContainerObject {
             // kick in and the DOM to properly rerender in order for the height to not read as zero,
             // which causes the scroll bar not to appear initially. There's probably a less hacky
             // way to do this (and maybe even some other underlying cause)...
-            setTimeout(() => this._pagesContainer.updateScrollThumb(), 20);
+            setTimeout(() => this._pagesContainer.updateScrollThumbs(), 20);
         }
     }
 

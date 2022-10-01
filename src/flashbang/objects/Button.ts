@@ -1,10 +1,9 @@
-import {Signal, UnitSignal} from 'signals';
+import {UnitSignal} from 'signals';
 import SerialTask from 'flashbang/tasks/SerialTask';
 import CallbackTask from 'flashbang/tasks/CallbackTask';
 import DelayTask from 'flashbang/tasks/DelayTask';
 import InputUtil from 'flashbang/input/InputUtil';
 import Flashbang from 'flashbang/core/Flashbang';
-import {InteractionEvent} from 'pixi.js';
 import Enableable from './Enableable';
 import ContainerObject from './ContainerObject';
 
@@ -15,7 +14,7 @@ export enum ButtonState {
 /** A button base class. */
 export default abstract class Button extends ContainerObject implements Enableable {
     /** Fired when the button is clicked */
-    public readonly clicked: Signal<InteractionEvent | null> = new Signal();
+    public readonly clicked: UnitSignal = new UnitSignal();
 
     /** Fired when the button is down and the mouse is released outside the hitbounds */
     public readonly clickCanceled: UnitSignal = new UnitSignal();
@@ -41,22 +40,28 @@ export default abstract class Button extends ContainerObject implements Enableab
         this.regs.add(this.pointerOut.connect(() => {
             this.isPointerOver = false;
         }));
+        this.regs.add(this.pointerUpOutside.connect(() => {
+            this.isPointerDown = false;
+        }));
         this.regs.add(this.pointerCancel.connect(() => {
             this.isPointerOver = false;
             this.isPointerDown = false;
         }));
-        this.regs.add(this.pointerDown.filter(InputUtil.IsLeftMouse).connect(() => {
+        this.regs.add(this.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => {
+            e.stopPropagation();
             if (this.enabled) {
                 this.isPointerDown = true;
             } else if (!this.enabled && this.disabledSound != null) {
                 this.playDisabledSound();
             }
         }));
-        this.regs.add(this.pointerUp.filter(InputUtil.IsLeftMouse).connect(() => {
+        this.regs.add(this.pointerUp.filter(InputUtil.IsLeftMouse).connect((e) => {
+            e.stopPropagation();
             this.isPointerDown = false;
         }));
         this.regs.add(this.pointerTap.filter(InputUtil.IsLeftMouse).connect((e) => {
-            if (this.enabled) this.clicked.emit(e);
+            e.stopPropagation();
+            if (this.enabled) this.clicked.emit();
         }));
     }
 
@@ -76,7 +81,7 @@ export default abstract class Button extends ContainerObject implements Enableab
      */
     public click(): void {
         if (this.enabled) {
-            this.clicked.emit(null);
+            this.clicked.emit();
 
             // We can be destroyed as the result of the clicked signal, so ensure we're still
             // live before proceeding

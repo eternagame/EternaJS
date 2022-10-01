@@ -27,7 +27,6 @@ import Folder, {MultiFoldResult, CacheKey, SuboptEnsembleResult} from 'eterna/fo
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/toolbar/NucleotidePalette';
 import PoseField from 'eterna/pose2D/PoseField';
 import Pose2D, {Layout, SCRIPT_MARKER_LAYER} from 'eterna/pose2D/Pose2D';
-import Pose3D from 'eterna/pose3D/Pose3D';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import ConstraintBar from 'eterna/constraints/ConstraintBar';
@@ -69,12 +68,11 @@ import AnnotationManager, {
     AnnotationRange
 } from 'eterna/AnnotationManager';
 import LibrarySelectionConstraint from 'eterna/constraints/constraints/LibrarySelectionConstraint';
-import ErrorDialog from 'eterna/ui/ErrorDialog';
 import AnnotationDialog from 'eterna/ui/AnnotationDialog';
-import FloatSpecBox from 'eterna/ui/FloatSpecBox';
 import ToolbarButton from 'eterna/ui/toolbar/ToolbarButton';
 import StateToggle from 'eterna/ui/StateToggle';
 import {naturalButtonProps, targetButtonProps} from 'eterna/ui/toolbar/ToolbarButtons';
+import Pose3DDialog from 'eterna/pose3D/Pose3DDialog';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -204,24 +202,6 @@ export default class PoseEditMode extends GameMode {
             }
         });
 
-        // Add our docked SpecBox at the bottom of uiLayer
-        this._dockedSpecBox = new FloatSpecBox(true);
-        this._dockedSpecBox.display.position.set(15, 190);
-        this._dockedSpecBox.setSize(155, 251);
-        this._dockedSpecBox.display.visible = false;
-        this.addObject(this._dockedSpecBox, this.dialogLayer, 0);
-        this._dockedSpecBox.shouldMaximize.connect(() => this.showSpec());
-
-        this._undockSpecBoxButton = new GameButton()
-            .allStates(Bitmaps.ImgMaximize)
-            .tooltip('Re-maximize')
-            .hotkey(KeyCode.KeyM);
-        this._undockSpecBoxButton.clicked.connect(() => {
-            this._dockedSpecBox.display.visible = false;
-            this.showSpec();
-        });
-        this._dockedSpecBox.addObject(this._undockSpecBoxButton, this._dockedSpecBox.container);
-
         this._uiHighlight = new SpriteObject();
         this.addObject(this._uiHighlight, this.uiLayer);
 
@@ -338,13 +318,8 @@ export default class PoseEditMode extends GameMode {
             Flashbang.stageWidth - 85 - this._solDialogOffset,
             Flashbang.stageHeight - 120
         );
-        this._undockSpecBoxButton.display.position.set(Flashbang.stageWidth - 22 - this._solDialogOffset, 5);
 
         this._constraintBar.layout();
-
-        this._dockedSpecBox.setSize(Flashbang.stageWidth - this._solDialogOffset, Flashbang.stageHeight - 340);
-        const s: number = this._dockedSpecBox.plotSize.size;
-        this._dockedSpecBox.setSize(s + 55, s * 2 + 51);
 
         if (this._stateToggle && this._stateToggle.numStates < 2) this._stateToggle.display.visible = false;
     }
@@ -357,7 +332,7 @@ export default class PoseEditMode extends GameMode {
         const mode = this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
             ? EternaViewOptionsMode.LAB
             : EternaViewOptionsMode.PUZZLE;
-        this.showDialog(new EternaSettingsDialog(mode));
+        this.showDialog(new EternaSettingsDialog(mode), 'SettingsDialog');
     }
 
     public set puzzleDefaultMode(defaultMode: PoseState) {
@@ -957,10 +932,10 @@ export default class PoseEditMode extends GameMode {
         const threePath = this._puzzle.threePath;
         if (threePath) {
             const url = new URL(threePath, Eterna.SERVER_URL);
-            Pose3D.checkModelFile(url.href, this._puzzle.getSecstruct(0).length).then(() => {
+            Pose3DDialog.checkModelFile(url.href, this._puzzle.getSecstruct(0).length).then(() => {
                 this.addPose3D(url.href);
             }).catch((err) => {
-                this.showDialog(new ErrorDialog(err));
+                this.showNotification(err);
             });
         }
     }
@@ -2000,26 +1975,20 @@ export default class PoseEditMode extends GameMode {
     }
 
     private showSpec(): void {
-        this._dockedSpecBox.display.visible = false;
-
         this.updateCurrentBlockWithDotAndMeltingPlot();
         const puzzleState = this.getCurrentUndoBlock();
-
-        const dialog = this.showDialog(new SpecBoxDialog(puzzleState));
-        dialog.closed.then((showDocked) => {
-            if (showDocked) {
-                this._dockedSpecBox.setSpec(puzzleState);
-                this._dockedSpecBox.display.visible = true;
-            }
-        });
+        const specBox = this.showDialog(new SpecBoxDialog(), 'SpecBox');
+        // Already live
+        if (!specBox) return;
+        this._specBox = specBox;
+        this._specBox.setSpec(puzzleState);
+        this._specBox.closed.then(() => { this._specBox = null; });
     }
 
-    private updateDockedSpecBox(): void {
-        if (this._dockedSpecBox.display.visible) {
-            this.updateCurrentBlockWithDotAndMeltingPlot();
-            const datablock: UndoBlock = this.getCurrentUndoBlock();
-            this._dockedSpecBox.setSpec(datablock);
-        }
+    private updateSpecBox(): void {
+        this.updateCurrentBlockWithDotAndMeltingPlot();
+        const datablock: UndoBlock = this.getCurrentUndoBlock();
+        this._specBox?.setSpec(datablock);
     }
 
     private updateCurrentBlockWithDotAndMeltingPlot(index: number = -1): void {
@@ -2045,8 +2014,8 @@ export default class PoseEditMode extends GameMode {
                 libraryNT: this._poses[0].librarySelections ?? []
             }, solToSubmit);
         } else {
-            const NOT_SATISFIED_PROMPT = 'Puzzle constraints are not satisfied.\n'
-                + 'You can still submit the sequence, but please note that there is a risk of not getting\n'
+            const NOT_SATISFIED_PROMPT = 'Puzzle constraints are not satisfied.\n\n'
+                + 'You can still submit the sequence, but please note that there is a risk of not getting '
                 + 'synthesized properly';
 
             if (!this.checkConstraints()) {
@@ -2872,8 +2841,9 @@ export default class PoseEditMode extends GameMode {
             this.getCurrentUndoBlock(ii).stable = constraintsSatisfied;
         }
 
-        // / Update spec thumbnail if it is open
-        this.updateDockedSpecBox();
+        // Update open dialogs
+        this.updateSpecBox();
+        this.updateCopySequenceDialog();
 
         if (constraintsSatisfied || (this._puzzle.alreadySolved && this._puzzle.rscript === '')) {
             if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL && !this._alreadyCleared) {
@@ -3624,18 +3594,19 @@ export default class PoseEditMode extends GameMode {
 
     private _constraintBar: ConstraintBar;
 
-    private _dockedSpecBox: FloatSpecBox;
     private _exitButton: GameButton;
 
     private _uiHighlight: SpriteObject;
 
     private _homeButton: GameButton;
-    private _undockSpecBoxButton: GameButton;
     private _ropPresets: (() => void)[] = [];
 
     private _isPlaying: boolean = false;
     private _curSolutionIdx: number;
     private _solutionNameText: Text;
+
+    // Dialogs
+    private _specBox: SpecBoxDialog | null = null;
 
     // Tutorial Script Extra Functionality
     private _showMissionScreen: boolean = true;

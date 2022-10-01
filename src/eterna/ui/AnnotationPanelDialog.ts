@@ -19,15 +19,17 @@ import Eterna from 'eterna/Eterna';
 import Flashbang from 'flashbang/core/Flashbang';
 import FileInputObject, {HTMLInputEvent} from './FileInputObject';
 import GameButton from './GameButton';
-import GamePanel, {GamePanelType} from './GamePanel';
-import VScrollBox from './VScrollBox';
+import ScrollBox from './ScrollBox';
 import {Item} from './DragDropper';
 import WindowDialog from './WindowDialog';
 
 export default class AnnotationPanelDialog extends WindowDialog<void> {
     constructor(manager: AnnotationManager) {
-        super('Annotations');
-        this.setPadding(0);
+        super({
+            title: 'Annotations',
+            horizontalContentMargin: 0,
+            verticalContentMargin: 0
+        });
 
         this._annotationManager = manager;
     }
@@ -35,84 +37,74 @@ export default class AnnotationPanelDialog extends WindowDialog<void> {
     protected added(): void {
         super.added();
 
-        this._panel = new GamePanel({
-            type: GamePanelType.NORMAL,
-            alpha: 1.0,
-            color: AnnotationPanelDialog.PANEL_COLOR,
-            dropShadow: true,
-            borderRadius: AnnotationPanelDialog.BORDER_RADIUS
-        });
-
-        this.addObject(this._panel, this.contentVLay);
-
         // Generate panel upper toolbar
         this._upperToolbar = new HLayoutContainer(0, VAlign.CENTER);
-        this._panel.container.addChild(this._upperToolbar);
+        this._window.content.addChild(this._upperToolbar);
 
         const withEdit = false;
         const withDelete = false;
-        this.updateUpperToolbar(withDelete, withEdit, true);
+        this.updateUpperToolbar(withDelete, withEdit);
 
         // Upper Toolbar Divider
-        const upperToolbarBottomDivider = new Graphics()
-            .beginFill(AnnotationPanelDialog.UPPER_TOOLBAR_DIVIDER_COLOR)
-            .drawRect(
-                0,
-                0,
-                AnnotationPanelDialog.PANEL_WIDTH,
-                AnnotationPanelDialog.DIVIDER_THICKNESS
-            )
-            .endFill();
-        upperToolbarBottomDivider.x = AnnotationPanelDialog.DROP_SHADOW_X_OFFSET;
-        upperToolbarBottomDivider.y = AnnotationPanelDialog.UPPER_TOOLBAR_HEIGHT;
-        this._panel.container.addChild(upperToolbarBottomDivider);
+        this._upperToolbarBottomDivider = new Graphics();
+        this._upperToolbarBottomDivider.x = 0;
+        this._upperToolbarBottomDivider.y = AnnotationPanelDialog.UPPER_TOOLBAR_HEIGHT;
+        this._window.content.addChild(this._upperToolbarBottomDivider);
 
-        this._scrollView = new VScrollBox(AnnotationPanelDialog.PANEL_WIDTH, AnnotationPanelDialog.PANEL_HEIGHT);
-        this.addObject(this._scrollView, this._panel.container);
+        this._scrollView = new ScrollBox(this._width, this._height);
+        this.addObject(this._scrollView, this._window.content);
 
         this._contentLayout = new VLayoutContainer(0, HAlign.CENTER);
         this._scrollView.content.addChild(this._contentLayout);
         this._scrollView.doLayout();
         DisplayUtil.positionRelative(
             this._scrollView.container, HAlign.LEFT, VAlign.TOP,
-            this._panel.container, HAlign.LEFT, VAlign.TOP,
-            AnnotationPanelDialog.DROP_SHADOW_X_OFFSET,
-            this._upperToolbar.height + AnnotationPanelDialog.DIVIDER_THICKNESS
+            this._window.content, HAlign.LEFT, VAlign.TOP,
+            0, this._upperToolbar.height + AnnotationPanelDialog.DIVIDER_THICKNESS
         );
 
         this.doLayout();
         this._scrollView.doLayout();
-        this._scrollView.updateScrollThumb();
+        this._scrollView.updateScrollThumbs();
 
         this.updatePanel();
+
+        this._window.contentSizeWillUpdate.connect(({width, height}) => {
+            this._width = width;
+            this._height = height;
+            this.updatePanel();
+        });
+        this._window.setTargetBounds({
+            width: Math.max(this._contentLayout.width, this._width),
+            height: Math.max(
+                this._contentLayout.height + this._upperToolbar.height + AnnotationPanelDialog.DIVIDER_THICKNESS,
+                this._height
+            ) + this._window.titleHeight
+        });
     }
 
-    public updateFinalFloatLocation() {
-        super.updateFloatLocation();
-
-        Assert.assertIsDefined(Flashbang.stageWidth);
-        Assert.assertIsDefined(Flashbang.stageHeight);
-
-        this.Container.position.x = 0;
-    } /**
+    /**
      * Rerenders the panel
      */
-
     public updatePanel() {
+        // FIXME: This was implemented such that everything is destroyed and recreated, rather than just redrawn,
+        // which is very expensive. When dragging or resizing the window with a handful of layers/annotations,
+        // it gets rather laggy.
+
         if (this._items.length > 0) {
             this._items = [];
         }
 
         if (this._structureCategory) {
-            this._structureCategory.display.destroy();
+            this._structureCategory.destroySelf();
         }
 
         if (this._puzzleCategory) {
-            this._puzzleCategory.display.destroy();
+            this._puzzleCategory.destroySelf();
         }
 
         if (this._solutionCategory) {
-            this._solutionCategory.display.destroy();
+            this._solutionCategory.destroySelf();
         }
 
         // this._structureCategory = new AnnotationPanelItem({
@@ -150,7 +142,7 @@ export default class AnnotationPanelDialog extends WindowDialog<void> {
                 expanded: this._puzzleCategoryExpanded
             },
             indexPath: [1],
-            width: AnnotationPanelDialog.PANEL_WIDTH,
+            width: this._width,
             dividerThickness: AnnotationPanelDialog.DIVIDER_THICKNESS,
             titleEditable: true,
             updateTitle: (itemPath: number[], text: string) => {
@@ -181,7 +173,7 @@ export default class AnnotationPanelDialog extends WindowDialog<void> {
                 expanded: this._solutionCategoryExpanded
             },
             indexPath: [2],
-            width: AnnotationPanelDialog.PANEL_WIDTH,
+            width: this._width,
             dividerThickness: AnnotationPanelDialog.DIVIDER_THICKNESS,
             titleEditable: true,
             updateTitle: (itemPath: number[], text: string) => {
@@ -208,15 +200,13 @@ export default class AnnotationPanelDialog extends WindowDialog<void> {
         // Register panel to respond to annotation selection events
         this.registerAnnotationObservers(annotationModels);
 
-        this.doLayout();
-        this._scrollView.doLayout();
-        this._scrollView.updateScrollThumb();
-
         const withEdit = this._editButton && this._editButton.isLiveObject;
         const withDelete = this._deleteButton && this._deleteButton.isLiveObject;
         this.updateUpperToolbar(withDelete, withEdit);
 
-        this.updateFinalFloatLocation();
+        this.doLayout();
+        this._scrollView.doLayout();
+        this._scrollView.updateScrollThumbs();
     }
 
     /**
@@ -231,7 +221,7 @@ export default class AnnotationPanelDialog extends WindowDialog<void> {
         item.onUpdatePanel.connect(() => {
             this.doLayout();
             this._scrollView.doLayout();
-            this._scrollView.updateScrollThumb();
+            this._scrollView.updateScrollThumbs();
         });
         // Add to list of items
         this._items.push(item);
@@ -247,14 +237,26 @@ export default class AnnotationPanelDialog extends WindowDialog<void> {
             this._contentLayout.layout(true);
         }
 
-        if (this._panel && this._scrollView) {
-            this._panel.setSize(
-                AnnotationPanelDialog.PANEL_WIDTH,
-                AnnotationPanelDialog.UPPER_TOOLBAR_HEIGHT
-                + this._scrollView.height
-                + AnnotationPanelDialog.DROP_SHADOW_Y_OFFSET
-            );
-        }
+        this._upperToolbarBottomDivider.clear()
+            .beginFill(AnnotationPanelItem.DIVIDER_COLOR)
+            .drawRect(
+                0,
+                0,
+                this._width,
+                AnnotationPanelDialog.DIVIDER_THICKNESS
+            )
+            .endFill();
+
+        this._scrollView.setSize(
+            this._width,
+            this._height - this._upperToolbar.height - AnnotationPanelDialog.DIVIDER_THICKNESS
+        );
+
+        DisplayUtil.positionRelative(
+            this._upperToolbar, HAlign.RIGHT, VAlign.BOTTOM,
+            this._upperToolbarBottomDivider, HAlign.RIGHT, VAlign.TOP,
+            0, 0
+        );
     }
 
     /**
@@ -284,7 +286,7 @@ export default class AnnotationPanelDialog extends WindowDialog<void> {
      * @param withDelete whether to include the delete button
      * @param withEdit whether to include the edit button
      */
-    private updateUpperToolbar(withDelete: boolean, withEdit: boolean, initial: boolean = false) {
+    private updateUpperToolbar(withDelete: boolean, withEdit: boolean) {
         if (this._deleteButton) {
             this._deleteButton.destroySelf();
         }
@@ -298,9 +300,6 @@ export default class AnnotationPanelDialog extends WindowDialog<void> {
             this._downloadButton.destroySelf();
         }
 
-        // Needs to be the negative of a single button's width
-        // Otherwise buttons toolbar buttons will be offset by a single button's width
-        let offset = -31;
         if (
             this._annotationManager.getPuzzleAnnotations().length > 0
             || this._annotationManager.getSolutionAnnotations().length > 0
@@ -320,10 +319,7 @@ export default class AnnotationPanelDialog extends WindowDialog<void> {
                 // sound here.
                 Flashbang.sound.playSound(GameButton.DEFAULT_DOWN_SOUND);
             });
-            this._panel.addObject(this._downloadButton, this._upperToolbar);
-            if (!initial) {
-                offset += this._downloadButton.display.width;
-            }
+            this.addObject(this._downloadButton, this._upperToolbar);
         }
 
         this._uploadButton = new FileInputObject({
@@ -344,10 +340,7 @@ export default class AnnotationPanelDialog extends WindowDialog<void> {
             // sound here.
             Flashbang.sound.playSound(GameButton.DEFAULT_DOWN_SOUND);
         });
-        this._panel.addObject(this._uploadButton, this._upperToolbar);
-        if (!initial) {
-            offset += this._uploadButton.display.width;
-        }
+        this.addObject(this._uploadButton, this._upperToolbar);
 
         if (withEdit) {
             this._editButton = new GameButton()
@@ -364,10 +357,7 @@ export default class AnnotationPanelDialog extends WindowDialog<void> {
                 // sound here.
                 Flashbang.sound.playSound(GameButton.DEFAULT_DOWN_SOUND);
             });
-            this._panel.addObject(this._editButton, this._upperToolbar);
-            if (!initial) {
-                offset += this._editButton.display.width;
-            }
+            this.addObject(this._editButton, this._upperToolbar);
         }
 
         if (withDelete) {
@@ -385,17 +375,8 @@ export default class AnnotationPanelDialog extends WindowDialog<void> {
                 // sound here.
                 Flashbang.sound.playSound(GameButton.DEFAULT_DOWN_SOUND);
             });
-            this._panel.addObject(this._deleteButton, this._upperToolbar);
-            if (!initial) {
-                offset += this._deleteButton.display.width;
-            }
+            this.addObject(this._deleteButton, this._upperToolbar);
         }
-
-        DisplayUtil.positionRelative(
-            this._upperToolbar, HAlign.RIGHT, VAlign.TOP,
-            this._panel.container, HAlign.RIGHT, VAlign.TOP,
-            -offset, 0
-        );
 
         this._upperToolbar.layout();
     }
@@ -799,14 +780,14 @@ export default class AnnotationPanelDialog extends WindowDialog<void> {
         }
     }
 
-    private _panel: GamePanel;
-    private _scrollView: VScrollBox;
+    private _scrollView: ScrollBox;
     private _items: AnnotationPanelItem[] = [];
     private _contentLayout: VLayoutContainer;
     private _annotationManager: AnnotationManager;
 
     // A reference to the button that reveals/hides it in the toolbar
     private _upperToolbar: HLayoutContainer;
+    private _upperToolbarBottomDivider: Graphics;
     private _uploadButton: FileInputObject;
     private _downloadButton: GameButton;
     private _deleteButton: GameButton;
@@ -823,14 +804,10 @@ export default class AnnotationPanelDialog extends WindowDialog<void> {
     private _solutionCategoryExpanded: boolean = true;
     private _structureCategoryExpanded: boolean = true;
 
-    private static readonly PANEL_WIDTH = 240;
-    private static readonly PANEL_HEIGHT = 250;
+    private _width: number = 240;
+    private _height: number = 250;
+
     private static readonly UPPER_TOOLBAR_HEIGHT = 30;
     private static readonly DIVIDER_THICKNESS = 2;
-    private static readonly BORDER_RADIUS = 7.5;
-    private static readonly DROP_SHADOW_X_OFFSET = -0.25;
-    private static readonly DROP_SHADOW_Y_OFFSET = 2;
     private static readonly LAYER_UPDATE_DELAY = 100;
-    private static readonly PANEL_COLOR = 0x152843;
-    private static readonly UPPER_TOOLBAR_DIVIDER_COLOR = 0x112238;
 }

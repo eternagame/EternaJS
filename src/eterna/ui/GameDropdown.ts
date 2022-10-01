@@ -20,7 +20,7 @@ import {FontWeight} from 'flashbang/util/TextBuilder';
 import GameCheckbox from 'eterna/ui/GameCheckbox';
 import GamePanel, {GamePanelType} from './GamePanel';
 import TextBalloon from './TextBalloon';
-import VScrollBox from './VScrollBox';
+import ScrollBox from './ScrollBox';
 
 interface GameDropdownProps<Option> {
     fontSize: number;
@@ -77,13 +77,6 @@ export default class GameDropdown<Option extends string = string> extends Contai
 
     protected added(): void {
         super.added();
-
-        // Use pointer cursor
-        if (this._disabled) {
-            this.container.cursor = 'not-allowed';
-        } else {
-            this.container.cursor = 'pointer';
-        }
 
         this._box = new Graphics();
         this.container.addChild(this._box);
@@ -164,7 +157,7 @@ export default class GameDropdown<Option extends string = string> extends Contai
         });
 
         this._popup.addObject(dropShadowPanel, scrollViewContainer);
-        this._scrollView = new VScrollBox(
+        this._scrollView = new ScrollBox(
             this._box.width,
             GameDropdown._POPUP_VERTICAL_HEIGHT,
             GameDropdown._BORDER_RADIUS
@@ -210,7 +203,7 @@ export default class GameDropdown<Option extends string = string> extends Contai
             const txtBack = new Graphics();
             txtBack.clear();
             txtBack.beginFill(this._boxColor, 1);
-            txtBack.drawRect(0, 0, this._width ? this._width : 500, GameDropdown._POPUP_ITEM_HEIGHT);
+            txtBack.drawRect(0, 0, text.display.width, text.display.height);
             txtBack.endFill();
             text.display.addChildAt(txtBack, 0);
             this._popup.addObject(text, contentLayout);
@@ -272,7 +265,7 @@ export default class GameDropdown<Option extends string = string> extends Contai
                 }
                 txtBack.clear();
                 txtBack.beginFill(this._boxColor + 0x202020, 1);
-                txtBack.drawRect(0, 0, this._width ? this._width : 500, GameDropdown._POPUP_ITEM_HEIGHT);
+                txtBack.drawRect(0, 0, text.display.width, text.display.height);
                 txtBack.endFill();
             });
             text.pointerOut.connect(() => {
@@ -282,7 +275,7 @@ export default class GameDropdown<Option extends string = string> extends Contai
                 }
                 txtBack.clear();
                 txtBack.beginFill(this._boxColor, 1);
-                txtBack.drawRect(0, 0, this._width ? this._width : 500, GameDropdown._POPUP_ITEM_HEIGHT);
+                txtBack.drawRect(0, 0, text.display.width, text.display.height);
                 txtBack.endFill();
             });
             text.pointerUp.connect(() => {
@@ -294,7 +287,10 @@ export default class GameDropdown<Option extends string = string> extends Contai
             text.pointerDown.connect(() => {
                 text.setText(option, this._fontSize, 0x333333);
             });
-            maxWidth = Math.max(text.display.width + GameDropdown._HORIZONTAL_PADDING, maxWidth);
+            maxWidth = Math.max(
+                this._width ? this._width : (text.display.width + GameDropdown._HORIZONTAL_PADDING),
+                maxWidth
+            );
         }
         for (const text of texts) {
             text.setSize(maxWidth, text.height);
@@ -306,7 +302,7 @@ export default class GameDropdown<Option extends string = string> extends Contai
             popupPanelHeight = this.options.length * GameDropdown._POPUP_ITEM_HEIGHT;
         }
         dropShadowPanel.setSize(this._box.width, popupPanelHeight);
-        this._scrollView.updateScrollThumb();
+        this._scrollView.updateScrollThumbs();
     }
 
     public repositionPopup() {
@@ -412,11 +408,6 @@ export default class GameDropdown<Option extends string = string> extends Contai
     public set disabled(disabled: boolean) {
         this._disabled = disabled;
         this._arrow.visible = !disabled;
-        if (disabled) {
-            this.container.cursor = 'not-allowed';
-        } else {
-            this.container.cursor = 'pointer';
-        }
     }
 
     public get disabled() {
@@ -442,7 +433,7 @@ export default class GameDropdown<Option extends string = string> extends Contai
     private _selectedText: Text;
     private _selectedIcon?: Sprite;
     private _popup: ContainerObject;
-    private _scrollView: VScrollBox;
+    private _scrollView: ScrollBox;
     private _activeCapture: PointerCapture | null;
 
     private _optionItems: OptionItem[] = [];

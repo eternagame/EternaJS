@@ -47,6 +47,15 @@ export default class PointerCapture extends GameObject {
         this.regs.add(this._surface.pointerUp.connect((e) => this.handleEvent(e)));
         this.regs.add(this._surface.pointerCancel.connect((e) => this.handleEvent(e)));
         this.regs.add(this._surface.pointerTap.connect((e) => this.handleEvent(e)));
+        // When we "re-enter" the surface after testing something below it, we don't want want it to
+        // continue processing pointerover/pointerout events, as they'll be looking at the wrong object.
+        // When we handle re-firing pointerMove, it should wind up causing the over/out events.
+        // TODO: Something still isn't right. While this prevents incorrect "out" events,
+        // It doesn't look like the "over" events are firing when falling through the capture.
+        // For now though, there's no situation where this presents a real issue
+        this.regs.add(this._surface.pointerOver.connect((e) => {
+            e.stopPropagation();
+        }));
     }
 
     public onModeResized() {
@@ -65,12 +74,12 @@ export default class PointerCapture extends GameObject {
 
         this._surface.display.interactive = false;
 
-        let hitObj: DisplayObject | null = interaction.hitTest(e.data.global);
         let interceptEvent = true;
 
         // If we pass a null root element, that means we always want to trigger the callback,
         // so no need to hit test
         if (this._root) {
+            let hitObj: DisplayObject | null = interaction.hitTest(e.data.global);
             while (hitObj != null) {
                 if (hitObj === this._root) {
                     interceptEvent = false;
@@ -84,65 +93,62 @@ export default class PointerCapture extends GameObject {
             this._onEvent(e);
         }
 
-        // Let event continue propagating to siblings
-        //
-        // Some very rough inspiration from https://github.com/pixijs/pixi.js/issues/2921#issuecomment-493801249
-        // Here be dragons, given that we're using internal portions of PIXI/turning off typechecking
-        // Hopefully https://github.com/pixijs/pixi.js/issues/6926 will be addressed so that we no longer
-        // need to do this.
-        //
-        // This should happen whether or not the event is related to the root object:
-        // - If it is, we need to rerun the processing so that the appropriate events are fired on
-        //   the right child of the root object.
-        // - If it isn't, processing should only stop if stopPropagation was called - PIXI's pointer
-        //   event processing automatically handles that for us.
+        if (!e.stopped) {
+            // Let event continue propagating to siblings
+            //
+            // Some very rough inspiration from https://github.com/pixijs/pixi.js/issues/2921#issuecomment-493801249
+            // Here be dragons, given that we're using internal portions of PIXI/turning off typechecking
+            // Hopefully https://github.com/pixijs/pixi.js/issues/6926 will be addressed so that we no longer
+            // need to do this.
+            //
+            // This should happen whether or not the event is related to the root object:
+            // - If it is, we need to rerun the processing so that the appropriate events are fired on
+            //   the right child of the root object.
+            // - If it isn't, processing should only stop if stopPropagation was called - PIXI's pointer
+            //   event processing automatically handles that for us.
 
-        /* eslint-disable @typescript-eslint/ban-ts-comment */
+            /* eslint-disable @typescript-eslint/ban-ts-comment */
 
-        // @ts-ignore Not null
-        e.target = null;
+            // @ts-ignore Not null
+            e.target = null;
 
-        let func;
-        switch (e.type) {
-            case 'pointerdown':
-                // @ts-ignore Private
-                func = interaction.processPointerDown;
-                break;
-            case 'pointermove':
-                // @ts-ignore Private
-                func = interaction.processPointerMove;
-                break;
-            case 'pointerup':
-                // @ts-ignore Private
-                func = interaction.processPointerUp;
-                break;
-            case 'pointercancel':
-                // @ts-ignore Private
-                func = interaction.processPointerCancel;
-                break;
-            default:
-                break;
-        }
+            let func;
+            switch (e.type) {
+                case 'pointerdown':
+                    // @ts-ignore Private
+                    func = interaction.processPointerDown;
+                    break;
+                case 'pointermove':
+                    // @ts-ignore Private
+                    func = interaction.processPointerMove;
+                    break;
+                case 'pointerup':
+                    // @ts-ignore Private
+                    func = interaction.processPointerUp;
+                    break;
+                case 'pointercancel':
+                    // @ts-ignore Private
+                    func = interaction.processPointerCancel;
+                    break;
+                default:
+                    break;
+            }
 
-        // Pixi's legacy interaction manager is a bit batty. We need to immediately stop dispatching events
-        // so that a pointermove on our surface doesn't cause Pixi to dispatch a pointerout event on
-        // the root element of our pointer capture (since the mouse has moved from the root element to
-        // the surface since we toggled it off and on again). However, we can't just run processInteractive
-        // with the surface off, let it fire its events, then stop the dispatches on the event because
-        // we do want _actual_ pointerout events to still be fired, and they wind up getting fired after
-        // the processInteractive finishes (next frame, I guess?). This is in part due to the fact
-        // the InteractionManager uses static variables to handle the current active event. Regardless,
-        // this is an ugly hack and we should move to Pixi's new interaction system which can avoid most of the
-        // hacks in this function
-        // EDIT: ...well, only if it's a pointermove. Because otherwise a pointertap will fall through past
-        // the PointerCapture when it shouldn't
-        let newEvent = e;
-        if (e.type === 'pointermove') {
-            newEvent = new InteractionEvent();
+            // Pixi's legacy interaction manager is a bit batty. We need to immediately stop dispatching events
+            // so that a pointermove on our surface doesn't cause Pixi to dispatch a pointerout event on
+            // the root element of our pointer capture (since the mouse has moved from the root element to
+            // the surface since we toggled it off and on again). However, we can't just run processInteractive
+            // with the surface off, let it fire its events, then stop the dispatches on the event because
+            // we do want _actual_ pointerout events to still be fired, and they wind up getting fired after
+            // the processInteractive finishes (next frame, I guess?). This is in part due to the fact
+            // the InteractionManager uses static variables to handle the current active event. Regardless,
+            // this is an ugly hack and we should move to Pixi's new interaction system which can avoid most of the
+            // hacks in this function
+            const newEvent = new InteractionEvent();
             interaction.configureInteractionEventForDOMEvent(newEvent, e.data.originalEvent, e.data);
-        }
 
-        if (func != null) interaction.processInteractive(newEvent, interaction.lastObjectRendered, func, true);
+            if (func != null) interaction.processInteractive(newEvent, interaction.lastObjectRendered, func, true);
+        }
 
         e.stopPropagationHint = true;
 

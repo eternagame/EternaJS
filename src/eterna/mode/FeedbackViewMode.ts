@@ -102,6 +102,7 @@ export default class FeedbackViewMode extends GameMode {
         if (states > 1) {
             this._stateToggle = new StateToggle(states);
             this.addObject(this._stateToggle, this.uiLayer);
+            this._stateToggle.stateChanged.connect((targetIdx) => this.changeTarget(targetIdx));
         }
 
         Assert.assertIsDefined(this._toolbar.zoomOutButton);
@@ -346,7 +347,7 @@ export default class FeedbackViewMode extends GameMode {
     }
 
     private showSettingsDialog(): void {
-        this.showDialog(new EternaSettingsDialog(EternaViewOptionsMode.LAB));
+        this.showDialog(new EternaSettingsDialog(EternaViewOptionsMode.LAB), 'SettingsDialog');
     }
 
     public onKeyboardEvent(e: KeyboardEvent): void {
@@ -361,9 +362,6 @@ export default class FeedbackViewMode extends GameMode {
                 handled = true;
             } else if (!ctrl && key === KeyCode.KeyG) {
                 Eterna.settings.displayFreeEnergies.value = !Eterna.settings.displayFreeEnergies.value;
-                handled = true;
-            } else if (!ctrl && key === KeyCode.KeyS) {
-                this.showSpec();
                 handled = true;
             } else if (key === KeyCode.BracketLeft) {
                 const factor = Math.max(0, Math.round((this._poseFields[0].explosionFactor - 0.25) * 1000) / 1000);
@@ -557,6 +555,13 @@ export default class FeedbackViewMode extends GameMode {
         const numGU: number = undoBlock.getParam(UndoBlockParam.GU, 37) as number;
         const numGC: number = undoBlock.getParam(UndoBlockParam.GC, 37) as number;
         this._toolbar.palette.setPairCounts(numAU, numGU, numGC);
+
+        if (this._specBox) {
+            undoBlock.updateMeltingPointAndDotPlot();
+            this._specBox?.setSpec(undoBlock);
+        }
+
+        this.updateCopySequenceDialog();
     }
 
     private showExperimentalColors(): void {
@@ -706,7 +711,9 @@ export default class FeedbackViewMode extends GameMode {
     private showSpec(): void {
         const puzzleState = this._undoBlocks[this._currentIndex];
         puzzleState.updateMeltingPointAndDotPlot();
-        this.showDialog(new SpecBoxDialog(puzzleState, false));
+        this._specBox = this.showDialog(new SpecBoxDialog());
+        this._specBox.setSpec(puzzleState);
+        this._specBox.closed.then(() => { this._specBox = null; });
     }
 
     private showNextSolution(indexOffset: number): void {
@@ -761,6 +768,8 @@ export default class FeedbackViewMode extends GameMode {
     private _baseColorButton: ToolbarButton;
     private _expColorButton: ToolbarButton;
     private _stateToggle: StateToggle | undefined;
+
+    private _specBox: SpecBoxDialog | null = null;
 
     private _undoBlocks: UndoBlock[] = [];
     private _currentIndex: number;

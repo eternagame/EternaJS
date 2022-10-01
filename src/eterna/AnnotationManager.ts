@@ -681,20 +681,6 @@ export default class AnnotationManager {
      */
     public setAnnotationMode(active: boolean): void {
         this.annotationModeActive.value = active;
-
-        if (!active) {
-            this.highlights.value = [];
-
-            const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
-            if (doc) {
-                doc.style.cursor = 'default';
-            }
-        } else {
-            const doc = document.getElementById(Eterna.PIXI_CONTAINER_ID);
-            if (doc) {
-                doc.style.cursor = 'grab';
-            }
-        }
     }
 
     /**

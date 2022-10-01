@@ -14,7 +14,6 @@ import {
 } from 'flashbang';
 import {RNAHighlightState} from 'eterna/pose2D/Pose2D';
 import ConstraintBox from 'eterna/constraints/ConstraintBox';
-import EternaMenu from 'eterna/ui/EternaMenu';
 import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
 import {
     RScriptUIElement,
@@ -223,7 +222,7 @@ export default class ROPHighlight extends RScriptOp {
     ): Point {
         const bounds = GetRScriptUIElementBounds(uiObj);
         Assert.assertIsDefined(bounds);
-        let size = new Point(
+        const size = new Point(
             bounds.width + 2 * padding.x,
             bounds.height + 2 * padding.y
         );
@@ -254,12 +253,6 @@ export default class ROPHighlight extends RScriptOp {
             case RScriptUIElementID.SWAP:
                 size.x -= 6;
                 break;
-            case RScriptUIElementID.ACTION_MENU:
-                size = new Point(
-                    (uiObj as EternaMenu).getWidth(false) + 2 * padding.x,
-                    (uiObj as EternaMenu).height + 2 * padding.y
-                );
-            // break omitted
             case RScriptUIElementID.ZOOMIN:
             case RScriptUIElementID.ZOOMOUT:
             case RScriptUIElementID.UNDO:
@@ -290,6 +283,9 @@ export default class ROPHighlight extends RScriptOp {
                 break;
             case RScriptUIElementID.TOGGLENATURAL:
             case RScriptUIElementID.TOGGLETARGET:
+                break;
+            case RScriptUIElementID.ACTION_MENU:
+                log.warn('ACTION_MENU rscript ui element no longer exists');
                 break;
             default:
                 log.warn(`UI element does not have size: ${key}`);
@@ -326,7 +322,6 @@ export default class ROPHighlight extends RScriptOp {
                     RScriptUIElementID.OBJECTIVE,
                     altParam
                 );
-            case RScriptUIElementID.ACTION_MENU:
             case RScriptUIElementID.SWAP:
             case RScriptUIElementID.TOGGLENATURAL:
             case RScriptUIElementID.TOGGLETARGET:
@@ -337,6 +332,9 @@ export default class ROPHighlight extends RScriptOp {
             case RScriptUIElementID.PIP:
             case RScriptUIElementID.SWITCH:
                 return this._env.getUIElement(key);
+            case RScriptUIElementID.ACTION_MENU:
+                log.warn('ACTION_MENU rscript ui element no longer exists');
+                break;
             default:
                 log.warn(`No reference exist for UI element ${key}`);
         }

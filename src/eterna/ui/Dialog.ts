@@ -17,16 +17,19 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
     /** A Promise that will resolve when the dialog is closed. */
     public readonly closed: Promise<T | null>;
 
+    /** Whether or not the user has to interact with the modal before further action can be taken */
+    public readonly modal: boolean;
+
     constructor(modal: boolean = true) {
         super();
-        this._modal = modal;
+        this.modal = modal;
         this.closed = new Promise((resolve) => { this._resolvePromise = resolve; });
     }
 
     protected added() {
         super.added();
 
-        if (this._modal) {
+        if (this.modal) {
             this.setupModalBackground();
         }
     }
@@ -73,12 +76,7 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
      * Called when the dim background behind the dialog is clicked.
      * Subclasses can override to e.g. close the dialog.
      */
-    protected onBGClicked(): void {
-        // Is there a good reason not to enable this?
-        // FIXME: Yes, in fact! Dialogs are used for overlays like "submitting..." which should not be
-        // dismissible.
-        this.close(null);
-    }
+    protected onBGClicked(): void {}
 
     protected close(value: T | null) {
         if (this._isClosed) {
@@ -100,17 +98,16 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
 
     public onKeyboardEvent(_e: KeyboardEvent): boolean {
         // When in modal mode, dialogs eat all keyboard input
-        if (this._modal) return true;
+        if (this.modal) return true;
         return false;
     }
 
     public onMouseWheelEvent(_e: WheelEvent): boolean {
         // When in modal mode, dialogs eat all mousewheel input
-        if (this._modal) return true;
+        if (this.modal) return true;
         return false;
     }
 
     protected _resolvePromise: (value: T | null) => void;
     protected _isClosed: boolean;
-    protected _modal: boolean;
 }

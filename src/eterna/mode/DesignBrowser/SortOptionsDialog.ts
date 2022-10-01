@@ -1,58 +1,50 @@
 import {
     Container, Graphics, Text
 } from 'pixi.js';
-import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
-import Dialog from 'eterna/ui/Dialog';
 import {
-    VLayoutContainer, HAlign, HLayoutContainer, Arrays, VAlign, DisplayUtil, Assert
+    VLayoutContainer, HAlign, HLayoutContainer, Arrays, VAlign
 } from 'flashbang';
 import GraphicsUtil from 'eterna/util/GraphicsUtil';
 import GameButton from 'eterna/ui/GameButton';
 import FixedWidthTextField from 'eterna/ui/FixedWidthTextField';
 import Fonts from 'eterna/util/Fonts';
 import Bitmaps from 'eterna/resources/Bitmaps';
+import WindowDialog from 'eterna/ui/WindowDialog';
 import SortOptions, {SortOrder} from './SortOptions';
 import {DesignCategory} from './DesignBrowserMode';
 import ButtonWithIcon from './ButtonWithIcon';
 
-export default class SortOptionsDialog extends Dialog<void> {
+export default class SortOptionsDialog extends WindowDialog<void> {
     public readonly options: SortOptions;
 
     constructor(options: SortOptions) {
-        super();
+        super({
+            title: 'Sort',
+            contentHAlign: HAlign.LEFT,
+            contentVAlign: VAlign.TOP
+        });
         this.options = options;
     }
 
     protected added(): void {
         super.added();
 
-        this._bg = new GamePanel({
-            type: GamePanelType.NORMAL,
-            alpha: 1.0,
-            color: 0x043468,
-            borderAlpha: 1,
-            borderColor: 0x4A90E2
-        });
-        this._bg.title = 'SORT';
-        this.addObject(this._bg, this.container);
-
-        this._panelContent = new VLayoutContainer(0, HAlign.CENTER);
-        this.container.addChild(this._panelContent);
+        this._content = new VLayoutContainer(0, HAlign.CENTER);
+        this._window.content.addChild(this._content);
 
         this._sortCriteriaLayout = new VLayoutContainer(4);
         const addCriterionLayout = new HLayoutContainer(2);
         addCriterionLayout.position.x = 20;
-        this._panelContent.addVSpacer(26);
-        this._panelContent.addChild(this._sortCriteriaLayout);
-        this._panelContent.addVSpacer(10);
+        this._content.addChild(this._sortCriteriaLayout);
+        this._content.addVSpacer(10);
 
         const criterionContainer = new Container();
         criterionContainer.addChild(new Graphics()
-            .beginFill(0x19508D)
+            .beginFill(0x043468)
             .drawRoundedRect(0, -6, 334, 33, 6)
             .endFill());
         criterionContainer.addChild(addCriterionLayout);
-        this._panelContent.addChild(criterionContainer);
+        this._content.addChild(criterionContainer);
 
         // ADD CRITERION LAYOUT
         this._prevCategoryButton = new GameButton().allStates(GraphicsUtil.drawLeftTriangle(2, 0x2F94D1));
@@ -87,16 +79,7 @@ export default class SortOptionsDialog extends Dialog<void> {
 
         addCriterionLayout.layout();
 
-        this._panelContent.addVSpacer(20);
-
-        const okButton = new GameButton()
-            .label('Save', 16)
-            .customStyleBox(new Graphics()
-                .beginFill(0x54B54E)
-                .drawRoundedRect(0, 0, 80, 36, 6)
-                .endFill());
-        okButton.clicked.connect(() => this.close());
-        this.addObject(okButton, this._panelContent);
+        this._content.addVSpacer(20);
 
         // EXISTING SORT CRITERIA
         this.options.sortCriteria.forEach(
@@ -105,8 +88,6 @@ export default class SortOptionsDialog extends Dialog<void> {
 
         this.validateCurCategoryIdx();
         this.layout();
-        Assert.assertIsDefined(this.mode);
-        this.regs.add(this.mode.resized.connect(() => this.repositionDialog()));
     }
 
     private addCriterionUI(category: DesignCategory, sortOrder: SortOrder, idx: number): void {
@@ -272,27 +253,11 @@ export default class SortOptionsDialog extends Dialog<void> {
             this._sortCriteriaLayout.addChild(ui.container);
         }
 
-        this._panelContent.layout(true);
-        this._bg.setSize(this._panelContent.width + 60, this._panelContent.height + 40);
-
-        this.repositionDialog();
+        this._content.layout(true);
+        this._window.layout();
     }
 
-    private repositionDialog(): void {
-        DisplayUtil.positionRelativeToStage(
-            this._bg.display, HAlign.CENTER, VAlign.TOP,
-            HAlign.CENTER, VAlign.TOP, 0, 145
-        );
-
-        DisplayUtil.positionRelative(
-            this._panelContent, HAlign.CENTER, VAlign.CENTER,
-            this._bg.display, HAlign.CENTER, VAlign.CENTER
-        );
-    }
-
-    private _bg: GamePanel;
-
-    private _panelContent: VLayoutContainer;
+    private _content: VLayoutContainer;
     private _sortCriteriaLayout: VLayoutContainer;
 
     private _curCategoryText: FixedWidthTextField;

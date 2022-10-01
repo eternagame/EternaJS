@@ -216,11 +216,7 @@ export default class Toolbar extends ContainerObject {
             this.changeActivePaintTool('palette');
         });
 
-        this._expandCollapseButton.clicked.connect((e) => {
-            // Ensure that the button click doesn't also register as a tap on the toolbar to toggle
-            // the autohide
-            if (e) e.stopPropagation();
-
+        this._expandCollapseButton.clicked.connect(() => {
             this._expanded = !this._expanded;
             this.toggleExpanded(this._expanded);
         });
@@ -534,7 +530,7 @@ export default class Toolbar extends ContainerObject {
             this.boostersMenuButton.clicked.connect(() => {
                 if (this._boostersData != null && this._boostersData.actions != null) {
                     const mode = this.mode as GameMode;
-                    mode.showDialog(new BoosterDialog(this._boostersData));
+                    mode.showDialog(new BoosterDialog(this._boostersData), 'BoosterDialog');
                 }
             });
         }
@@ -577,7 +573,7 @@ export default class Toolbar extends ContainerObject {
                     Assert.assertIsDefined(this._annotationManager);
                     const mode = this.mode as GameMode;
                     annotationPanelDialog = new AnnotationPanelDialog(this._annotationManager);
-                    mode.showDialog(annotationPanelDialog);
+                    mode.showDialog(annotationPanelDialog, 'AnnotationsPanel');
                 })
             );
             this.regs.add(
@@ -643,7 +639,7 @@ export default class Toolbar extends ContainerObject {
     public addView3DButton() {
         // A bit of a shame we can't use a constructor parameter like everything else, but in puzzlemaker
         // we have to wait to add this until a 3D model is actually loaded
-        this.setupButton(view3DButtonProps);
+        this.view3DButton = this.setupButton(view3DButtonProps);
     }
 
     private setupButton(props: ToolbarParam, enabled: boolean = true): ToolbarButton {

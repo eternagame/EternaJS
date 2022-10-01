@@ -1,18 +1,15 @@
-import {KeyCode} from 'flashbang';
+import {HLayoutContainer, KeyCode, VLayoutContainer} from 'flashbang';
 import EPars from 'eterna/EPars';
 import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
 import TextInputObject from 'eterna/ui/TextInputObject';
 import {Signal} from 'signals';
 import WindowDialog from 'eterna/ui/WindowDialog';
-import FlexibleTextInputPanel from 'eterna/ui/FlexibleTextInputPanel';
 import {DialogCanceledError} from 'eterna/ui/Dialog';
-import GameMode from '../GameMode';
+import Fonts from 'eterna/util/Fonts';
+import TextInputGrid from 'eterna/ui/TextInputGrid';
+import GameButton from 'eterna/ui/GameButton';
 
-function GetNumber(dict: Map<string, string>, name: string): number | undefined {
-    if (!dict.has(name)) {
-        return undefined;
-    }
-    const value = dict.get(name);
+function GetNumber(value: string | undefined): number | undefined {
     return value != null && value.length > 0 ? Number(value) : undefined;
 }
 
@@ -26,9 +23,10 @@ export interface SubmitPuzzleDetails {
 }
 
 export default class SubmitPuzzleDialog extends WindowDialog<SubmitPuzzleDetails> {
+    public saveInput: Signal<SubmitPuzzleDetails> = new Signal();
+
     constructor(numPoses: number, puzzleState: UndoBlock, initialState: SubmitPuzzleDetails = {}) {
-        super('Publish your puzzle', true);
-        this.setPadding(0);
+        super({title: 'Publish your puzzle', modal: true});
         this._numPoses = numPoses;
         this._puzzleState = puzzleState;
         this._initialState = initialState;
@@ -50,75 +48,84 @@ export default class SubmitPuzzleDialog extends WindowDialog<SubmitPuzzleDetails
         });
     }
 
-    protected added(): void {
+    protected added() {
         super.added();
 
-        const TITLE = 'Title';
-        const MIN_GU = 'Min G-U pairs required';
-        const MAX_GC = 'Max G-C pairs allowed';
-        const MIN_AU = 'Min A-U pairs required';
-        const DESCRIPTION = 'Description';
+        const content = new VLayoutContainer(20);
+        this._window.content.addChild(content);
 
-        const FIELD_WIDTH = 200;
+        const errorText = Fonts.std()
+            .fontSize(14)
+            .color(0xff7070)
+            .bold()
+            .build();
+        errorText.visible = false;
+        content.addChild(errorText);
 
-        const inputPanel = new FlexibleTextInputPanel();
-
-        const inputFields: { [key: string]: TextInputObject} = {};
-
-        const title = inputPanel.addField(TITLE, FIELD_WIDTH);
-        inputFields.title = title;
+        const inputFields: { [key in keyof SubmitPuzzleDetails]: TextInputObject} = {};
+        const inputGrid = new TextInputGrid(undefined, this._window.contentHtmlWrapper);
+        inputFields.title = inputGrid.addField('Title', 200);
         if (this._numPoses === 1) {
-            inputFields.minGU = inputPanel.addField(MIN_GU, FIELD_WIDTH);
-            inputFields.maxGC = inputPanel.addField(MAX_GC, FIELD_WIDTH);
-            inputFields.minAU = inputPanel.addField(MIN_AU, FIELD_WIDTH);
+            inputFields.minGU = inputGrid.addField('Min G-U pairs required', 60);
+            inputFields.maxGC = inputGrid.addField('Max G-C pairs allowed', 60);
+            inputFields.minAU = inputGrid.addField('Min A-U pairs required', 60);
         }
-        inputFields.description = inputPanel.addField(DESCRIPTION, FIELD_WIDTH, true);
+        inputFields.description = inputGrid.addField('Description', 200, true);
         // If the initial state for the field exists, set the text to that state
         Object.keys(inputFields).forEach((input) => {
             const state = this._initialState as { [key: string]: string | number};
             // The keys for the initial state and the text fields are the same
-            if (state[input]) inputFields[input].text = state[input] as string;
+            if (state[input] && input in inputFields) {
+                const field = inputFields[input as keyof typeof inputFields];
+                if (field) field.text = state[input] as string;
+            }
         });
+        this.addObject(inputGrid, content);
 
-        this.addObject(inputPanel, this.contentVLay);
+        inputFields.title.setFocus();
 
-        title.setFocus();
+        const buttonLayout = new HLayoutContainer(20);
+        content.addChild(buttonLayout);
+        const okButton = new GameButton().label('Ok', 14);
+        this.addObject(okButton, buttonLayout);
+        const cancelButton = new GameButton().label('Cancel', 14).hotkey(KeyCode.Escape);
+        this.addObject(cancelButton, buttonLayout);
 
-        inputPanel.setHotkeys(undefined, undefined, KeyCode.Escape, undefined);
-
-        inputPanel.cancelClicked.connect(() => {
-            const dict = inputPanel.getFieldValues();
+        cancelButton.clicked.connect(() => {
             const details = {
-                title: dict.get(TITLE),
-                description: dict.get(DESCRIPTION),
-                minGU: GetNumber(dict, MIN_GU),
-                maxGC: GetNumber(dict, MAX_GC),
-                minAU: GetNumber(dict, MIN_AU)
+                title: inputFields.title?.text,
+                description: inputFields.description?.text,
+                minGU: GetNumber(inputFields.minGU?.text),
+                maxGC: GetNumber(inputFields.maxGC?.text),
+                minAU: GetNumber(inputFields.minAU?.text)
             };
             this.saveInput.emit(details);
             this.close(null);
         });
-        inputPanel.okClicked.connect(() => {
-            const dict = inputPanel.getFieldValues();
+        okButton.clicked.connect(() => {
             const details = {
-                title: dict.get(TITLE),
-                description: dict.get(DESCRIPTION),
-                minGU: GetNumber(dict, MIN_GU),
-                maxGC: GetNumber(dict, MAX_GC),
-                minAU: GetNumber(dict, MIN_AU)
+                title: inputFields.title?.text,
+                description: inputFields.description?.text,
+                minGU: GetNumber(inputFields.minGU?.text),
+                maxGC: GetNumber(inputFields.maxGC?.text),
+                minAU: GetNumber(inputFields.minAU?.text)
             };
 
             this.saveInput.emit(details);
 
             const errorString = this.validate(details);
             if (errorString != null) {
-                (this.mode as GameMode).showNotification(errorString);
+                errorText.text = errorString;
+                errorText.visible = true;
+                content.layout(true);
+                this._window.layout();
             } else {
                 this.close(details);
             }
         });
 
-        this.updateFloatLocation();
+        content.layout();
+        this._window.layout();
     }
 
     private validate(details: SubmitPuzzleDetails): string | null {
@@ -155,8 +162,6 @@ export default class SubmitPuzzleDialog extends WindowDialog<SubmitPuzzleDetails
 
         return null;
     }
-
-    public saveInput: Signal<SubmitPuzzleDetails> = new Signal();
 
     private readonly _numPoses: number;
     private readonly _puzzleState: UndoBlock;

@@ -24,12 +24,13 @@ export default class FlashbangApp {
     }
 
     public run(): void {
-        window.addEventListener('error', (e: ErrorEvent) => this.onUncaughtError(e));
+        // window.addEventListener('error', (e: ErrorEvent) => this.onUncaughtError(e));
 
         this._pixi = this.createPixi();
         Assert.assertIsDefined(this.pixiParent);
         this.pixiParent.appendChild(this._pixi.view);
 
+        this._pixi.stage.name = 'Stage';
         this._modeStack = new ModeStack(this._pixi.stage);
 
         Flashbang._registerApp(this);
