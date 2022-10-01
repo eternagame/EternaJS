@@ -390,7 +390,7 @@ export default class Bitmaps {
     public static readonly ImgSubmit: string = require('assets/SmallUI/submit.svg');
     public static readonly ImgTarget: string = require('assets/SmallUI/target.svg');
     public static readonly ImgUndo: string = require('assets/SmallUI/undo.svg');
-    public static readonly ImgValidate3D: string = require('assets/SmallUI/validate3D.svg');
+    public static readonly ImgUpload3D: string = require('assets/SmallUI/upload3D.svg');
     public static readonly ImgViewSolutions: string = require('assets/SmallUI/viewSolutions.svg');
     public static readonly ImgZoomIn: string = require('assets/SmallUI/zoomIn.svg');
     public static readonly ImgZoomOut: string = require('assets/SmallUI/zoomOut.svg');
@@ -437,7 +437,7 @@ export default class Bitmaps {
     public static readonly ImgGreySubmit: string = require('assets/SmallUI/grey/submit.svg');
     public static readonly ImgGreyTarget: string = require('assets/SmallUI/grey/target.svg');
     public static readonly ImgGreyUndo: string = require('assets/SmallUI/grey/undo.svg');
-    public static readonly ImgGreyValidate3D: string = require('assets/SmallUI/grey/validate3D.svg');
+    public static readonly ImgGreyUpload3D: string = require('assets/SmallUI/grey/upload3D.svg');
     public static readonly ImgGreyViewSolutions: string = require('assets/SmallUI/grey/viewSolutions.svg');
     public static readonly ImgGreyZoomIn: string = require('assets/SmallUI/grey/zoomIn.svg');
     public static readonly ImgGreyZoomOut: string = require('assets/SmallUI/grey/zoomOut.svg');
@@ -484,7 +484,7 @@ export default class Bitmaps {
     public static readonly ImgOverSubmit: string = require('assets/SmallUI/highlight/submit.svg');
     public static readonly ImgOverTarget: string = require('assets/SmallUI/highlight/target.svg');
     public static readonly ImgOverUndo: string = require('assets/SmallUI/highlight/undo.svg');
-    public static readonly ImgOverValidate3D: string = require('assets/SmallUI/highlight/validate3D.svg');
+    public static readonly ImgOverUpload3D: string = require('assets/SmallUI/highlight/upload3D.svg');
     public static readonly ImgOverViewSolutions: string = require('assets/SmallUI/highlight/viewSolutions.svg');
     public static readonly ImgOverZoomIn: string = require('assets/SmallUI/highlight/zoomIn.svg');
     public static readonly ImgOverZoomOut: string = require('assets/SmallUI/highlight/zoomOut.svg');

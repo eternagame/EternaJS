@@ -188,9 +188,9 @@ export const upload3DButtonProps: ToolbarParam = {
     cat: ButtonCategory.CREATE,
     id: 'upload3D',
     displayName: 'Upload 3D Model',
-    allImg: Bitmaps.ImgValidate3D,
-    overImg: Bitmaps.ImgOverValidate3D,
-    disableImg: Bitmaps.ImgGreyValidate3D,
+    allImg: Bitmaps.ImgUpload3D,
+    overImg: Bitmaps.ImgOverUpload3D,
+    disableImg: Bitmaps.ImgGreyUpload3D,
     tooltip: 'Upload 3D Model'
 };
 
