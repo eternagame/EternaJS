@@ -21,6 +21,10 @@ export default class ContextMenuDialog extends Dialog<void> {
         return 0;
     }
 
+    protected onBGClicked(): void {
+        this.close();
+    }
+
     private readonly _menu: ContextMenu;
     private readonly _menuLoc: Point;
 }
