@@ -6,7 +6,7 @@ import {
 } from 'pixi.js';
 import {Value} from 'signals';
 import GameDropdown from '../GameDropdown';
-import ScrollContainer from '../ScrollContainer';
+import ScrollBox from '../ScrollBox';
 import ToolbarButton, {ButtonCategory, BUTTON_HEIGHT} from './ToolbarButton';
 
 const BAY_BACKGROUND_COLOR = 0x043468;
@@ -160,7 +160,7 @@ export default class ToolShelf extends ContainerObject {
         this.container.addChild(this._tabContentBackground);
 
         // The buttons are laid out horizontally, and then that whole area is able to be scrolled
-        this._tabContentScroller = new ScrollContainer(0, 0);
+        this._tabContentScroller = new ScrollBox(0, 0);
         this.addObject(this._tabContentScroller, this.container);
         this._tabContentLayout = new HLayoutContainer();
         this._tabContentScroller.content.addChild(this._tabContentLayout);
@@ -264,7 +264,7 @@ export default class ToolShelf extends ContainerObject {
 
     private _tabBar: TabBar<ButtonCategory>;
     private _tabContentBackground: Graphics;
-    private _tabContentScroller: ScrollContainer;
+    private _tabContentScroller: ScrollBox;
     private _tabContentLayout: HLayoutContainer;
 
     private _width = 0;
