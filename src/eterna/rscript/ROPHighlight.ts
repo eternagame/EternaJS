@@ -171,7 +171,7 @@ export default class ROPHighlight extends RScriptOp {
                     highlightParent.container
                 );
             }
-            this._env.setVar(this._id, highlight);
+            this._env.setVar(this._id, highlightObj);
         }
     }
 

@@ -5,31 +5,15 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import RScriptArrow from 'eterna/rscript/RScriptArrow';
 import TextBalloon from './TextBalloon';
 import GameButton from './GameButton';
-import FancyGamePanel from './FancyGamePanel';
 import BaseGamePanel from './BaseGamePanel';
+import GamePanel from './GamePanel';
 
 export default class FancyTextBalloon extends TextBalloon implements Updatable {
-    constructor(
-        balloonColor: number = 0xFFFFFF, balloonAlpha: number = 0.07,
-        showOutline = false, outlineColor = 0xFFFFFF,
-        outlineAlpha = 0.70
-    ) {
-        super(undefined, balloonColor, balloonAlpha);
-
-        this._balloonColor = balloonColor;
-        this._balloonAlpha = balloonAlpha;
-        this._showOutline = showOutline;
-        this._outlineColor = outlineColor;
-        this._outlineAlpha = outlineAlpha;
-    }
-
     protected added(): void {
         // We do not call TextBalloon.added()
         this._button.destroySelf();
 
-        this._fancyPanel = this._showOutline
-            ? new FancyGamePanel(2, this._balloonAlpha, this._balloonColor, this._outlineColor, this._outlineAlpha)
-            : new FancyGamePanel(0, this._balloonAlpha, this._balloonColor);
+        this._fancyPanel = new GamePanel({borderAlpha: 1});
         this.addObject(this._fancyPanel, this.container, 0);
 
         this._button = new GameButton()
@@ -141,12 +125,6 @@ export default class FancyTextBalloon extends TextBalloon implements Updatable {
             arrow.redrawIfDirty();
         }
     }
-
-    private readonly _balloonColor: number;
-    private readonly _balloonAlpha: number;
-    private readonly _showOutline: boolean;
-    private readonly _outlineColor: number;
-    private readonly _outlineAlpha: number;
 
     private _hasFixedWidth: boolean = false;
     private _fixedWidth: number;

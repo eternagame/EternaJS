@@ -41,7 +41,7 @@ export default class ROPTextbox extends RScriptOp {
     }
 
     private showTextbox(): void {
-        const textBox = new FancyTextBalloon(0x122944, 1.0, true, 0xC0DCE7);
+        const textBox = new FancyTextBalloon();
         if (this._initialShow) {
             // if (this._forceTopmost && false) {
             // parent = Application.instance.get_front_object_container();
