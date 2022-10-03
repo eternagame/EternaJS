@@ -111,9 +111,7 @@ export default class EternaSettingsDialog extends WindowDialog<void> {
         return checkbox;
     }
 
-    // private _viewLayout: VLayoutContainer;
     private readonly _optionsMode: EternaViewOptionsMode;
     private _muteButton: GameButton;
     private _volumeButtons: GameButton[] = [];
-    // private scrollBox: VScrollBox;
 }
