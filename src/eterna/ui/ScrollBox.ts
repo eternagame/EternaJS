@@ -55,6 +55,7 @@ export default class ScrollBox extends ContainerObject implements MouseWheelList
 
         Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));
+        Flashbang.app.addManagedInputElement(this.htmlWrapper);
 
         const thumbHeight = (
             this._height * (this._height / this._scrollContainer.content.height)
@@ -117,6 +118,11 @@ export default class ScrollBox extends ContainerObject implements MouseWheelList
         this.mode.resized.connect(() => {
             if (this.isLiveObject) this.doLayout();
         });
+    }
+
+    protected dispose(): void {
+        Flashbang.app.removeManagedInputElement(this.htmlWrapper);
+        super.dispose();
     }
 
     /** Attach scrollable content here */
