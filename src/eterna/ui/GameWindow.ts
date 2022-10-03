@@ -50,8 +50,8 @@ export default class GameWindow extends ContainerObject {
         this._resizable = props.resizable ?? false;
         this._closable = props.closable ?? false;
         this._title = props.title;
-        this._horizontalContentMargin = props.horizontalContentMargin ?? 15;
-        this._verticalContentMargin = props.verticalContentMargin ?? 15;
+        this._horizontalContentMargin = props.horizontalContentMargin ?? 20;
+        this._verticalContentMargin = props.verticalContentMargin ?? 20;
         this._ensureOnScreen = props.ensureOnScreen ?? true;
         this._contentHAlign = props.contentHAlign ?? HAlign.CENTER;
         this._contentVAlign = props.contentVAlign ?? VAlign.CENTER;
@@ -81,7 +81,7 @@ export default class GameWindow extends ContainerObject {
 
         // TODO: We probably want a generic scrollbox for scroll handles
         // TODO: The toolbar also needs that
-        this._content = new ScrollBox(0, 0);
+        this._content = new ScrollBox(0, 0, undefined, -10);
         this.addObject(this._content, this.container);
 
         // RESIZE_MARGIN * 2 gets us to the center of the diagonal of the handle
