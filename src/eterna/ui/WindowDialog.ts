@@ -26,7 +26,6 @@ export default abstract class WindowDialog<T> extends Dialog<T> {
 
     protected added() {
         super.added();
-        // TODO: Many of these need to be overridden in specific dialogs
         this._window = new GameWindow({
             movable: !this.modal,
             resizable: !this.modal,
