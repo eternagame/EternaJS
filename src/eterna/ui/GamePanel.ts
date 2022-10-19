@@ -20,6 +20,8 @@ interface GamePanelProps {
     dropShadow?: boolean;
     borderRadius?: number;
     borderThickness?: number;
+    titleFontSize?: number;
+    titleUpperCase?: boolean;
 }
 
 export default class GamePanel extends BaseGamePanel {
@@ -35,6 +37,8 @@ export default class GamePanel extends BaseGamePanel {
         const borderThickness = props.borderThickness !== undefined
             ? props.borderThickness : GamePanel.DEFAULT_BORDER_THICKNESS;
         const dropShadow = props.dropShadow || false;
+        const titleFontSize = props.titleFontSize ?? 16;
+        const titleUpperCase = props.titleUpperCase ?? true;
 
         this.setup(
             type,
@@ -44,7 +48,9 @@ export default class GamePanel extends BaseGamePanel {
             borderColor,
             borderRadius,
             borderThickness,
-            dropShadow
+            dropShadow,
+            titleFontSize,
+            titleUpperCase
         );
     }
 
@@ -56,7 +62,9 @@ export default class GamePanel extends BaseGamePanel {
         borderColor: number,
         borderRadius: number = 0,
         borderThickness: number = 0,
-        dropShadow: boolean = false
+        dropShadow: boolean = false,
+        titleFontSize: number = 16,
+        titleUpperCase: boolean = true
     ): void {
         this._type = type;
         this._alpha = alpha;
@@ -66,6 +74,8 @@ export default class GamePanel extends BaseGamePanel {
         this._borderRadius = borderRadius;
         this._borderThickness = borderThickness;
         this._dropShadow = dropShadow;
+        this._titleFontSize = titleFontSize;
+        this._titleUpperCase = titleUpperCase;
         this.updateView();
     }
 
@@ -160,12 +170,12 @@ export default class GamePanel extends BaseGamePanel {
 
             if (this._title !== null) {
                 if (this._titleText == null) {
-                    this._titleText = Fonts.std().bold().fontSize(16).color(0xffffff)
+                    this._titleText = Fonts.std().bold().fontSize(this._titleFontSize).color(0xffffff)
                         .build();
                     this.container.addChild(this._titleText);
                 }
 
-                this._titleText.text = this._title.toUpperCase();
+                this._titleText.text = this._titleUpperCase ? this._title.toUpperCase() : this._title;
                 this._titleText.position.set(
                     (this._width - this._titleText.width) * 0.5,
                     (this.titleHeight - this._titleText.height) * 0.5
@@ -195,6 +205,8 @@ export default class GamePanel extends BaseGamePanel {
     protected _borderRadius: number = 5;
     protected _borderThickness: number = 0;
     protected _dropShadow: boolean = false;
+    protected _titleFontSize: number = 16;
+    protected _titleUpperCase: boolean = true;
     protected _title: string | null = null;
     protected _titleText: Text | null = null;
 

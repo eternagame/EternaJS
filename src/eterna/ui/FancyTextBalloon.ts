@@ -13,7 +13,7 @@ export default class FancyTextBalloon extends TextBalloon implements Updatable {
         // We do not call TextBalloon.added()
         this._button.destroySelf();
 
-        this._fancyPanel = new GamePanel({borderAlpha: 1});
+        this._fancyPanel = new GamePanel({borderAlpha: 1, titleFontSize: 13, titleUpperCase: false});
         this.addObject(this._fancyPanel, this.container, 0);
 
         this._button = new GameButton()
@@ -48,7 +48,7 @@ export default class FancyTextBalloon extends TextBalloon implements Updatable {
 
     /* override */
     public get height(): number {
-        return super.height + this._button.container.height;
+        return super.height + this._button.container.height + this._fancyPanel.titleHeight;
     }
 
     /* override */
@@ -70,7 +70,7 @@ export default class FancyTextBalloon extends TextBalloon implements Updatable {
 
         if (!this._centered) {
             if (this._text != null) {
-                this._text.position.set(TextBalloon.W_MARGIN, TextBalloon.H_MARGIN);
+                this._text.position.set(TextBalloon.W_MARGIN, TextBalloon.H_MARGIN + this._fancyPanel.titleHeight);
             }
 
             this._fancyPanel.display.position.set(0, 0);
