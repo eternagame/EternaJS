@@ -14,7 +14,7 @@ import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/toolbar/Nuc
 import Folder from 'eterna/folding/Folder';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import {
-    Base64, DisplayUtil, HAlign, VAlign, KeyCode, Assert, KeyboardEventType
+    Base64, DisplayUtil, HAlign, VAlign, KeyCode, Assert, KeyboardEventType, Flashbang
 } from 'flashbang';
 import {DialogCanceledError} from 'eterna/ui/Dialog';
 import Vienna2 from 'eterna/folding/Vienna2';
@@ -47,8 +47,8 @@ import AnnotationManager, {
 import AnnotationDialog from 'eterna/ui/AnnotationDialog';
 import FileInputObject, {HTMLInputEvent} from 'eterna/ui/FileInputObject';
 import ToolbarButton from 'eterna/ui/toolbar/ToolbarButton';
-import {naturalButtonProps, targetButtonProps} from 'eterna/ui/toolbar/ToolbarButtons';
 import Pose3DDialog from 'eterna/pose3D/Pose3DDialog';
+import ModeBar from 'eterna/ui/ModeBar';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
 import StructureInput from './StructureInput';
@@ -115,26 +115,6 @@ export default class PuzzleEditMode extends GameMode {
         Molecule.initTextures();
         BaseGlow.initTextures();
 
-        this._folderSwitcher = new FolderSwitcher((folder) => {
-            if (this._numTargets > 1 && !folder.canFoldWithBindingSite) return false;
-            return true;
-        });
-        this._folderSwitcher.selectedFolder.connect((folder) => {
-            if (folder.canScoreStructures) {
-                for (const pose of this._poses) {
-                    pose.scoreFolder = folder;
-                }
-            } else {
-                for (const pose of this._poses) {
-                    pose.scoreFolder = null;
-                }
-            }
-
-            this.clearUndoStack();
-            this.poseEditByTarget(0);
-        });
-        this.addObject(this._folderSwitcher, this.uiLayer);
-
         this._homeButton = new GameButton()
             .up(Bitmaps.ImgHome)
             .over(Bitmaps.ImgHome)
@@ -185,13 +165,35 @@ export default class PuzzleEditMode extends GameMode {
             }
         });
 
+        this._modeBar = new ModeBar();
+        this.addObject(this._modeBar, this.uiLayer);
+
+        const {actualButton, targetButton} = this._modeBar.addStructToggle('solve');
+        this._naturalButton = actualButton;
+        this._targetButton = targetButton;
+
+        this._folderSwitcher = this._modeBar.addFolderSwitcher((folder) => {
+            if (this._numTargets > 1 && !folder.canFoldWithBindingSite) return false;
+            return true;
+        });
+        this._folderSwitcher.selectedFolder.connect((folder) => {
+            if (folder.canScoreStructures) {
+                for (const pose of this._poses) {
+                    pose.scoreFolder = folder;
+                }
+            } else {
+                for (const pose of this._poses) {
+                    pose.scoreFolder = null;
+                }
+            }
+
+            this.clearUndoStack();
+            this.poseEditByTarget(0);
+        });
+
         this._toolbar = new Toolbar(toolbarType, {
             annotationManager: this._annotationManager
         });
-        this._naturalButton = ToolbarButton.createButton(naturalButtonProps);
-        this._targetButton = ToolbarButton.createButton(targetButtonProps);
-        this.addObject(this._naturalButton, this.uiLayer);
-        this.addObject(this._targetButton, this.uiLayer);
         this.addObject(this._toolbar, this.uiLayer);
         this.setToolbarEventHandlers();
 
@@ -534,19 +536,15 @@ export default class PuzzleEditMode extends GameMode {
     }
 
     public updateUILayout(): void {
-        let w = 17;
-        const h = 175;
+        Assert.assertIsDefined(Flashbang.stageHeight);
         DisplayUtil.positionRelativeToStage(
-            this._naturalButton.display, HAlign.LEFT, VAlign.TOP,
-            HAlign.LEFT, VAlign.TOP, w, h
+            this._modeBar.display, HAlign.LEFT, VAlign.TOP,
+            HAlign.LEFT, VAlign.TOP, 17, 120
         );
-        w += this._naturalButton.display.width;
-        DisplayUtil.positionRelativeToStage(
-            this._targetButton.display, HAlign.LEFT, VAlign.TOP,
-            HAlign.LEFT, VAlign.TOP, w, h
-        );
-
-        this._folderSwitcher.display.position.set(17, h + this._targetButton.display.height + 20);
+        // Roughly how much space from the bottom of the screen when non-expanded
+        // TODO: Is there a way to make this not hardcoded?
+        const toolbarHeight = 100;
+        this._modeBar.maxHeight = Flashbang.stageHeight - this._modeBar.display.y - toolbarHeight;
 
         const toolbarBounds = this._toolbar.display.getBounds();
         for (let ii = 0; ii < this._numTargets; ++ii) {
@@ -1192,6 +1190,7 @@ export default class PuzzleEditMode extends GameMode {
     private _paused: boolean;
     private _savedInputs: SubmitPuzzleDetails;
 
+    private _modeBar: ModeBar;
     private _folderSwitcher: FolderSwitcher;
     private _homeButton: GameButton;
     private _constraintBar: ConstraintBar;

@@ -71,8 +71,8 @@ import LibrarySelectionConstraint from 'eterna/constraints/constraints/LibrarySe
 import AnnotationDialog from 'eterna/ui/AnnotationDialog';
 import ToolbarButton from 'eterna/ui/toolbar/ToolbarButton';
 import StateToggle from 'eterna/ui/StateToggle';
-import {naturalButtonProps, targetButtonProps} from 'eterna/ui/toolbar/ToolbarButtons';
 import Pose3DDialog from 'eterna/pose3D/Pose3DDialog';
+import ModeBar from 'eterna/ui/ModeBar';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -279,6 +279,9 @@ export default class PoseEditMode extends GameMode {
     }
 
     public updateUILayout(): void {
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(Flashbang.stageHeight);
+
         DisplayUtil.positionRelativeToStage(
             this._helpBar.display, HAlign.RIGHT, VAlign.TOP,
             HAlign.RIGHT, VAlign.TOP, 0 - this._solDialogOffset, 0
@@ -289,31 +292,15 @@ export default class PoseEditMode extends GameMode {
             HAlign.CENTER, VAlign.TOP, 0, 8
         );
 
-        let w = 17;
-        const h = 175;
         DisplayUtil.positionRelativeToStage(
-            this._naturalButton.display, HAlign.LEFT, VAlign.TOP,
-            HAlign.LEFT, VAlign.TOP, w, h
+            this._modeBar.display, HAlign.LEFT, VAlign.TOP,
+            HAlign.LEFT, VAlign.TOP, 17, 120
         );
-        w += this._naturalButton.display.width;
-        DisplayUtil.positionRelativeToStage(
-            this._targetButton.display, HAlign.LEFT, VAlign.TOP,
-            HAlign.LEFT, VAlign.TOP, w, h
-        );
+        // Roughly how much space from the bottom of the screen when non-expanded
+        // TODO: Is there a way to make this not hardcoded?
+        const toolbarHeight = 100;
+        this._modeBar.maxHeight = Flashbang.stageHeight - this._modeBar.display.y - toolbarHeight;
 
-        if (this._stateToggle) {
-            w += this._targetButton.display.width;
-            DisplayUtil.positionRelativeToStage(
-                this._stateToggle.display, HAlign.LEFT, VAlign.TOP,
-                HAlign.LEFT, VAlign.TOP, w,
-                h + (this._targetButton.display.height - this._stateToggle.display.height) / 2
-            );
-        }
-
-        this._folderSwitcher.display.position.set(17, h + this._targetButton.display.height + 20);
-
-        Assert.assertIsDefined(Flashbang.stageWidth);
-        Assert.assertIsDefined(Flashbang.stageHeight);
         this._exitButton.display.position.set(
             Flashbang.stageWidth - 85 - this._solDialogOffset,
             Flashbang.stageHeight - 120
@@ -321,7 +308,10 @@ export default class PoseEditMode extends GameMode {
 
         this._constraintBar.layout();
 
-        if (this._stateToggle && this._stateToggle.numStates < 2) this._stateToggle.display.visible = false;
+        if (this._stateToggle) {
+            this._stateToggle.display.visible = false;
+            this._modeBar.layout();
+        }
     }
 
     public get constraintsLayer(): Container {
@@ -341,7 +331,7 @@ export default class PoseEditMode extends GameMode {
 
     public ropChangeTarget(targetIndex: number): void {
         this.changeTarget(targetIndex);
-        if (this._stateToggle != null) {
+        if (this._stateToggle) {
             this._stateToggle.state = targetIndex;
         }
     }
@@ -552,6 +542,7 @@ export default class PoseEditMode extends GameMode {
     private addMarkerLayer(layer: string, resetSelectedLayer?: boolean) {
         this._markerSwitcher.addMarkerLayer(layer, resetSelectedLayer);
         this._markerSwitcher.display.visible = true;
+        this._modeBar.layout();
     }
 
     private setMarkerLayer(layer: string) {
@@ -706,14 +697,25 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
+        const states = this._puzzle.getSecstructs().length;
+
+        this._modeBar = new ModeBar();
+        this.addObject(this._modeBar, this.uiLayer);
+
+        const {actualButton, targetButton} = this._modeBar.addStructToggle('solve');
+        this._naturalButton = actualButton;
+        this._targetButton = targetButton;
+
+        if (states > 1) {
+            this._stateToggle = this._modeBar.addStateToggle(states);
+        }
+
         // We can only set up the folderSwitcher once we have set up the poses
-        this._folderSwitcher = new FolderSwitcher(
+        this._folderSwitcher = this._modeBar.addFolderSwitcher(
             (folder) => this._puzzle.canUseFolder(folder),
             initialFolder,
             this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
         );
-        this.addObject(this._folderSwitcher, this.uiLayer);
-
         this._folderSwitcher.selectedFolder.connectNotify((folder) => {
             if (folder.canScoreStructures) {
                 for (const pose of this._poses) {
@@ -728,17 +730,15 @@ export default class PoseEditMode extends GameMode {
             this.onChangeFolder();
         });
 
-        this._markerSwitcher = new MarkerSwitcher();
-        this._markerSwitcher.display.position.set(17, 294);
-        this.addObject(this._markerSwitcher, this.uiLayer);
+        this._markerSwitcher = this._modeBar.addMarkerSwitcher();
         this.regs?.add(this._markerSwitcher.selectedLayer.connectNotify((val) => this.setMarkerLayer(val)));
         this._markerSwitcher.display.visible = false;
+        this._modeBar.layout();
 
         this._constraintsLayer = new Container();
         this.uiLayer.addChild(this._constraintsLayer);
         this._constraintsLayer.visible = true;
 
-        const states = this._puzzle.getSecstructs().length;
         const toolbarType = this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL ? ToolbarType.LAB : ToolbarType.PUZZLE;
         this._toolbar = new Toolbar(toolbarType, {
             showGlue: this._puzzle.targetConditions
@@ -748,14 +748,6 @@ export default class PoseEditMode extends GameMode {
             showPip: states > 1,
             annotationManager: this._annotationManager
         });
-        this._naturalButton = ToolbarButton.createButton(naturalButtonProps);
-        this._targetButton = ToolbarButton.createButton(targetButtonProps);
-        this.addObject(this._naturalButton, this.uiLayer);
-        this.addObject(this._targetButton, this.uiLayer);
-        if (states > 1) {
-            this._stateToggle = new StateToggle(states);
-            this.addObject(this._stateToggle, this.uiLayer);
-        }
         this.addObject(this._toolbar, this.uiLayer);
 
         this._helpBar = new HelpBar({
@@ -1590,7 +1582,10 @@ export default class PoseEditMode extends GameMode {
         Eterna.settings.pipEnabled.value = pipMode;
 
         if (pipMode || this._puzzle.getSecstructs().length < 2) {
-            if (this._stateToggle) this._stateToggle.display.visible = false;
+            if (this._stateToggle) {
+                this._stateToggle.display.visible = false;
+                this._modeBar.layout();
+            }
             this._targetName.visible = false;
 
             this._constraintBar.highlightState(-1);
@@ -1616,7 +1611,10 @@ export default class PoseEditMode extends GameMode {
                 pose.setZoomLevel(minZoom);
             }
         } else {
-            if (this._stateToggle) this._stateToggle.display.visible = true;
+            if (this._stateToggle) {
+                this._stateToggle.display.visible = true;
+                this._modeBar.layout();
+            }
             this._targetName.visible = true;
 
             this._constraintBar.highlightState(this._curTargetIndex);
@@ -2396,7 +2394,14 @@ export default class PoseEditMode extends GameMode {
         this._toolbar.disableTools(disable);
         this._hintBoxRef.destroyObject();
 
+        if (this._stateToggle) this._stateToggle.enabled = !disable;
+        this._targetButton.enabled = !disable;
+        this._naturalButton.enabled = !disable;
+
+        // TODO: These should probably be made disableable so that they don't need to be entirely hidden
         this._folderSwitcher.display.visible = !disable;
+        this._markerSwitcher.display.visible = !disable;
+        this._modeBar.layout();
 
         for (const field of this._poseFields) {
             field.container.interactive = !disable;
@@ -3536,7 +3541,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     public get stateToggle(): StateToggle | null {
-        return this._stateToggle ?? null;
+        return this._stateToggle;
     }
 
     private readonly _puzzle: Puzzle;
@@ -3581,11 +3586,12 @@ export default class PoseEditMode extends GameMode {
     private _targetOligos: (Oligo[] | undefined)[] = [];
     private _targetOligosOrder: (number[] | undefined)[] = [];
 
+    private _modeBar: ModeBar;
     private _folderSwitcher: FolderSwitcher;
     private _markerSwitcher: MarkerSwitcher;
     private _naturalButton: ToolbarButton;
     private _targetButton: ToolbarButton;
-    private _stateToggle?: StateToggle;
+    private _stateToggle: StateToggle | null = null;
 
     private _isFrozen: boolean = false;
     private _targetName: Text;

@@ -27,12 +27,19 @@ enum DragMode {
 
 /** Contains scrollable content with scrollbars and drag scrolling */
 export default class ScrollBox extends ContainerObject implements MouseWheelListener {
-    constructor(width: number, height: number, radius: number = 0, scrollThumbPadding = 5) {
+    constructor(
+        width: number,
+        height: number,
+        radius: number = 0,
+        scrollThumbPadding = 5,
+        scrollThumbInlinePadding = 5
+    ) {
         super();
         this._width = width;
         this._height = height;
         this._radius = radius;
-        this._scrollThumbPadding = scrollThumbPadding;
+        this._scrollThumbEdgePadding = scrollThumbPadding;
+        this._scrollThumbInlinePadding = scrollThumbInlinePadding;
     }
 
     protected added() {
@@ -61,8 +68,8 @@ export default class ScrollBox extends ContainerObject implements MouseWheelList
 
         const thumbHeight = (
             this._height * (this._height / this._scrollContainer.content.height)
-        ) - 2 * this._scrollThumbPadding;
-        const vScrollDistance = (this._height - 2 * this._scrollThumbPadding)
+        ) - 2 * this._scrollThumbInlinePadding;
+        const vScrollDistance = (this._height - 2 * this._scrollThumbInlinePadding)
             * (this._scrollContainer.scrollY / this._scrollContainer.content.height);
         this._vScrollThumb = new GraphicsObject();
         this._vScrollThumb.display
@@ -79,7 +86,7 @@ export default class ScrollBox extends ContainerObject implements MouseWheelList
         DisplayUtil.positionRelative(
             this._vScrollThumb.display, HAlign.RIGHT, VAlign.TOP,
             this._scrollContainer.container, HAlign.RIGHT, VAlign.TOP,
-            -this._scrollThumbPadding, this._scrollThumbPadding + vScrollDistance
+            -this._scrollThumbEdgePadding, this._scrollThumbInlinePadding + vScrollDistance
         );
         this.regs.add(this._vScrollThumb.pointerDown.connect((e) => this.onDragPointerDown(e, DragMode.V_THUMB)));
         this.regs.add(this._vScrollThumb.pointerUp.connect(() => this.onDragPointerUp()));
@@ -88,8 +95,8 @@ export default class ScrollBox extends ContainerObject implements MouseWheelList
 
         const thumbWidth = (
             this._width * (this._width / this._scrollContainer.content.width)
-        ) - 2 * this._scrollThumbPadding;
-        const hScrollDistance = (this._width - 2 * this._scrollThumbPadding)
+        ) - 2 * this._scrollThumbInlinePadding;
+        const hScrollDistance = (this._width - 2 * this._scrollThumbInlinePadding)
             * (this._scrollContainer.scrollX / this._scrollContainer.content.width);
         this._hScrollThumb = new GraphicsObject();
         this._hScrollThumb.display
@@ -106,7 +113,7 @@ export default class ScrollBox extends ContainerObject implements MouseWheelList
         DisplayUtil.positionRelative(
             this._hScrollThumb.display, HAlign.LEFT, VAlign.BOTTOM,
             this._scrollContainer.container, HAlign.LEFT, VAlign.BOTTOM,
-            this._scrollThumbPadding + hScrollDistance, -this._scrollThumbPadding
+            this._scrollThumbInlinePadding + hScrollDistance, -this._scrollThumbEdgePadding
         );
         this.regs.add(this._hScrollThumb.pointerDown.connect((e) => this.onDragPointerDown(e, DragMode.H_THUMB)));
         this.regs.add(this._hScrollThumb.pointerUp.connect(() => this.onDragPointerUp()));
@@ -162,8 +169,8 @@ export default class ScrollBox extends ContainerObject implements MouseWheelList
         ) {
             const thumbHeight = (
                 this._height * (this._height / this._scrollContainer.content.height)
-            ) - 2 * this._scrollThumbPadding;
-            const scrollDistance = (this._height - 2 * this._scrollThumbPadding)
+            ) - 2 * this._scrollThumbInlinePadding;
+            const scrollDistance = (this._height - 2 * this._scrollThumbInlinePadding)
                 * (this._scrollContainer.scrollY / this._scrollContainer.content.height);
             this._vScrollThumb.display.clear()
                 .beginFill(0xcee0f5)
@@ -177,7 +184,7 @@ export default class ScrollBox extends ContainerObject implements MouseWheelList
             DisplayUtil.positionRelative(
                 this._vScrollThumb.display, HAlign.RIGHT, VAlign.TOP,
                 this._scrollContainer.container, HAlign.RIGHT, VAlign.TOP,
-                -this._scrollThumbPadding, this._scrollThumbPadding + scrollDistance
+                -this._scrollThumbEdgePadding, this._scrollThumbInlinePadding + scrollDistance
             );
             this._vScrollThumb.display.visible = true;
         } else if (
@@ -194,8 +201,8 @@ export default class ScrollBox extends ContainerObject implements MouseWheelList
         ) {
             const thumbWidth = (
                 this._width * (this._width / this._scrollContainer.content.width)
-            ) - 2 * this._scrollThumbPadding;
-            const scrollDistance = (this._width - 2 * this._scrollThumbPadding)
+            ) - 2 * this._scrollThumbInlinePadding;
+            const scrollDistance = (this._width - 2 * this._scrollThumbInlinePadding)
                 * (this._scrollContainer.scrollX / this._scrollContainer.content.width);
             this._hScrollThumb.display.clear()
                 .beginFill(0xcee0f5)
@@ -209,7 +216,7 @@ export default class ScrollBox extends ContainerObject implements MouseWheelList
             DisplayUtil.positionRelative(
                 this._hScrollThumb.display, HAlign.LEFT, VAlign.BOTTOM,
                 this._scrollContainer.container, HAlign.LEFT, VAlign.BOTTOM,
-                this._scrollThumbPadding + scrollDistance, -this._scrollThumbPadding
+                this._scrollThumbInlinePadding + scrollDistance, -this._scrollThumbEdgePadding
             );
             this._hScrollThumb.display.visible = true;
         } else if (
@@ -342,7 +349,8 @@ export default class ScrollBox extends ContainerObject implements MouseWheelList
     private _width: number;
     private _height: number;
     private _radius: number;
-    private _scrollThumbPadding: number;
+    private _scrollThumbEdgePadding: number;
+    private _scrollThumbInlinePadding: number;
 
     private _SCROLL_THUMB_WIDTH = 6;
 }

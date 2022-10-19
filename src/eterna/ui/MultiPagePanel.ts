@@ -58,7 +58,7 @@ export default class MultiPagePanel extends ContainerObject {
         this.addObject(this._panel, this.container);
 
         // Content
-        this._pagesContainer = new ScrollBox(0, 0, undefined, -10);
+        this._pagesContainer = new ScrollBox(0, 0, undefined, -10, 0);
         this.addObject(this._pagesContainer, this.container);
 
         this._props.pages.forEach((page) => {

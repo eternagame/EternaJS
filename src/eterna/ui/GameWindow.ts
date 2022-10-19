@@ -81,7 +81,7 @@ export default class GameWindow extends ContainerObject {
 
         // TODO: We probably want a generic scrollbox for scroll handles
         // TODO: The toolbar also needs that
-        this._content = new ScrollBox(0, 0, undefined, -10);
+        this._content = new ScrollBox(0, 0, undefined, -10, 0);
         this.addObject(this._content, this.container);
 
         // RESIZE_MARGIN * 2 gets us to the center of the diagonal of the handle
@@ -285,6 +285,8 @@ export default class GameWindow extends ContainerObject {
     public setTargetBounds(bounds: {
         width?: number | null;
         height?: number | null;
+        maxWidth?: number | null;
+        maxHeight?: number | null;
         x?: XTarget;
         y?: YTarget;
     }) {
@@ -293,6 +295,32 @@ export default class GameWindow extends ContainerObject {
                 this._targetWidth = null;
             } else {
                 this._targetWidth = Math.max(bounds.width, this.minWidth);
+            }
+        }
+
+        if (bounds.height !== undefined) {
+            if (bounds.height === null) {
+                this._targetHeight = null;
+            } else {
+                this._targetHeight = Math.max(bounds.height, this.minHeight);
+            }
+        }
+
+        // TODO: Added these max properties for the ModeBar which needs to manage that itself.
+        // I have a feeling there's a cleaner API to manage this.
+        if (bounds.maxWidth !== undefined) {
+            if (bounds.maxWidth === null) {
+                this._targetMaxWidth = null;
+            } else {
+                this._targetMaxWidth = Math.max(bounds.maxWidth, this.minWidth);
+            }
+        }
+
+        if (bounds.maxHeight !== undefined) {
+            if (bounds.maxHeight === null) {
+                this._targetMaxHeight = null;
+            } else {
+                this._targetMaxHeight = Math.max(bounds.maxHeight, this.minHeight);
             }
         }
 
@@ -519,12 +547,12 @@ export default class GameWindow extends ContainerObject {
 
     private get maxWidth(): number {
         Assert.assertIsDefined(Flashbang.stageWidth);
-        return Flashbang.stageWidth - (SCREEN_MARGIN * 2);
+        return this._targetMaxWidth ?? Flashbang.stageWidth - (SCREEN_MARGIN * 2);
     }
 
     private get maxHeight(): number {
         Assert.assertIsDefined(Flashbang.stageHeight);
-        return Flashbang.stageHeight - (SCREEN_MARGIN * 2);
+        return this._targetMaxHeight ?? Flashbang.stageHeight - (SCREEN_MARGIN * 2);
     }
 
     public getMaxContentSize(): { width: number; height: number; } {
@@ -548,6 +576,8 @@ export default class GameWindow extends ContainerObject {
     private _ensureOnScreen: boolean;
     private _targetWidth: number | null = null;
     private _targetHeight: number | null = null;
+    private _targetMaxWidth: number | null = null;
+    private _targetMaxHeight: number | null = null;
     private _targetX: XTarget = {from: 'left', offsetExact: 0};
     private _targetY: YTarget = {from: 'top', offsetExact: 0};
     private _horizontalContentMargin: number;

@@ -15,7 +15,7 @@ import PoseField from 'eterna/pose2D/PoseField';
 import FolderManager from 'eterna/folding/FolderManager';
 import Vienna from 'eterna/folding/Vienna';
 import {
-    VAlign, HAlign, DisplayUtil, KeyboardEventType, KeyCode, Assert
+    VAlign, HAlign, DisplayUtil, KeyboardEventType, KeyCode, Assert, Flashbang
 } from 'flashbang';
 import EternaSettingsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaSettingsDialog';
 import SpecBoxDialog from 'eterna/ui/SpecBoxDialog';
@@ -32,9 +32,7 @@ import UITheme from 'eterna/ui/UITheme';
 import AnnotationManager from 'eterna/AnnotationManager';
 import ToolbarButton from 'eterna/ui/toolbar/ToolbarButton';
 import StateToggle from 'eterna/ui/StateToggle';
-import {
-    baseColorButtonProps, estimateButtonProps, expColorButtonProps, targetButtonProps
-} from 'eterna/ui/toolbar/ToolbarButtons';
+import ModeBar from 'eterna/ui/ModeBar';
 import ViewSolutionOverlay from './DesignBrowser/ViewSolutionOverlay';
 import GameMode from './GameMode';
 
@@ -89,21 +87,25 @@ export default class FeedbackViewMode extends GameMode {
         );
 
         const states = this._puzzle.getSecstructs().length;
-        this._toolbar = new Toolbar(ToolbarType.FEEDBACK, {showPip: states > 1});
-        this._estimateButton = ToolbarButton.createButton(estimateButtonProps);
-        this._targetButton = ToolbarButton.createButton(targetButtonProps);
-        this._baseColorButton = ToolbarButton.createButton(baseColorButtonProps);
-        this._expColorButton = ToolbarButton.createButton(expColorButtonProps);
-        this.addObject(this._estimateButton, this.uiLayer);
-        this.addObject(this._targetButton, this.uiLayer);
-        this.addObject(this._baseColorButton, this.uiLayer);
-        this.addObject(this._expColorButton, this.uiLayer);
-        this.addObject(this._toolbar, this.uiLayer);
+
+        this._modeBar = new ModeBar();
+        this.addObject(this._modeBar, this.uiLayer);
+
+        const {actualButton, targetButton} = this._modeBar.addStructToggle('feedback');
+        this._estimateButton = actualButton;
+        this._targetButton = targetButton;
+
+        const {baseButton, expButton} = this._modeBar.addColorToggle();
+        this._baseColorButton = baseButton;
+        this._expColorButton = expButton;
+
         if (states > 1) {
-            this._stateToggle = new StateToggle(states);
-            this.addObject(this._stateToggle, this.uiLayer);
+            this._stateToggle = this._modeBar.addStateToggle(states);
             this._stateToggle.stateChanged.connect((targetIdx) => this.changeTarget(targetIdx));
         }
+
+        this._toolbar = new Toolbar(ToolbarType.FEEDBACK, {showPip: states > 1});
+        this.addObject(this._toolbar, this.uiLayer);
 
         Assert.assertIsDefined(this._toolbar.zoomOutButton);
         this._toolbar.zoomOutButton.clicked.connect(() => {
@@ -307,38 +309,15 @@ export default class FeedbackViewMode extends GameMode {
     }
 
     public updateUILayout(): void {
-        let w = 17;
-        const h = 175;
+        Assert.assertIsDefined(Flashbang.stageHeight);
         DisplayUtil.positionRelativeToStage(
-            this._estimateButton.display, HAlign.LEFT, VAlign.TOP,
-            HAlign.LEFT, VAlign.TOP, w, h
+            this._modeBar.display, HAlign.LEFT, VAlign.TOP,
+            HAlign.LEFT, VAlign.TOP, 17, 120
         );
-        w += this._estimateButton.display.width;
-        DisplayUtil.positionRelativeToStage(
-            this._targetButton.display, HAlign.LEFT, VAlign.TOP,
-            HAlign.LEFT, VAlign.TOP, w, h
-        );
-        w += this._targetButton.display.width;
-        // Add a bit of extra separation
-        w += 5;
-        DisplayUtil.positionRelativeToStage(
-            this._baseColorButton.display, HAlign.LEFT, VAlign.TOP,
-            HAlign.LEFT, VAlign.TOP, w, h
-        );
-        w += this._baseColorButton.display.width;
-        DisplayUtil.positionRelativeToStage(
-            this._expColorButton.display, HAlign.LEFT, VAlign.TOP,
-            HAlign.LEFT, VAlign.TOP, w, h
-        );
-
-        if (this._stateToggle) {
-            w += this._expColorButton.display.width;
-            DisplayUtil.positionRelativeToStage(
-                this._stateToggle.display, HAlign.LEFT, VAlign.TOP,
-                HAlign.LEFT, VAlign.TOP, w,
-                h + (this._expColorButton.display.height - this._stateToggle.display.height) / 2
-            );
-        }
+        // Roughly how much space from the bottom of the screen when non-expanded
+        // TODO: Is there a way to make this not hardcoded?
+        const toolbarHeight = 100;
+        this._modeBar.maxHeight = Flashbang.stageHeight - this._modeBar.display.y - toolbarHeight;
 
         DisplayUtil.positionRelativeToStage(
             this._info.display, HAlign.RIGHT, VAlign.TOP,
@@ -762,6 +741,7 @@ export default class FeedbackViewMode extends GameMode {
     private readonly _puzzle: Puzzle;
     private _solutions: Solution[];
 
+    private _modeBar: ModeBar;
     private _homeButton: GameButton;
     private _targetButton: ToolbarButton;
     private _estimateButton: ToolbarButton;
