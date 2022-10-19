@@ -4,68 +4,74 @@ import {KeyCode} from 'flashbang';
 import {ButtonCategory, ToolbarParam} from './ToolbarButton';
 
 const MODE_COLOR = 0x043468;
+const MODE_TOGGLE_COLOR = 0xBEDCE8;
 
 // ===== MODES =====
 
 export const naturalButtonProps: ToolbarParam = {
     color: {color: MODE_COLOR, alpha: 1},
+    toggleColor: {color: MODE_TOGGLE_COLOR, alpha: 1},
     cat: ButtonCategory.NONE,
     id: 'naturalStructureMode',
     displayName: 'Natural Mode',
     allImg: Bitmaps.ImgNatural,
     overImg: Bitmaps.ImgOverNatural,
     disableImg: Bitmaps.ImgGreyNatural,
-    selectedImg: Bitmaps.ImgNatural,
+    selectedImg: Bitmaps.ImgSelectedNatural,
     tooltip: 'Natural Mode. RNA folds into the most stable shape (Space)',
     rscriptID: RScriptUIElementID.TOGGLENATURAL
 };
 
 export const estimateButtonProps: ToolbarParam = {
     color: {color: MODE_COLOR, alpha: 1},
+    toggleColor: {color: MODE_TOGGLE_COLOR, alpha: 1},
     cat: ButtonCategory.NONE,
     id: 'estimateStructureMode',
     displayName: 'Estimate Mode',
     allImg: Bitmaps.ImgEstimate,
     overImg: Bitmaps.ImgOverEstimate,
     disableImg: Bitmaps.ImgGreyEstimate,
-    selectedImg: Bitmaps.ImgEstimate,
+    selectedImg: Bitmaps.ImgSelectedEstimate,
     tooltip: 'Estimate Mode. The game approximates how the RNA actually folded in a test tube (Space)'
 };
 
 export const targetButtonProps: ToolbarParam = {
     color: {color: MODE_COLOR, alpha: 1},
+    toggleColor: {color: MODE_TOGGLE_COLOR, alpha: 1},
     cat: ButtonCategory.NONE,
     id: 'targetStructureMode',
     displayName: 'Target Mode',
     allImg: Bitmaps.ImgTarget,
     overImg: Bitmaps.ImgOverTarget,
     disableImg: Bitmaps.ImgGreyTarget,
-    selectedImg: Bitmaps.ImgTarget,
+    selectedImg: Bitmaps.ImgSelectedTarget,
     tooltip: 'Target Mode. RNA freezes into the desired shape (Space)',
     rscriptID: RScriptUIElementID.TOGGLETARGET
 };
 
 export const baseColorButtonProps: ToolbarParam = {
     color: {color: MODE_COLOR, alpha: 1},
+    toggleColor: {color: MODE_TOGGLE_COLOR, alpha: 1},
     cat: ButtonCategory.VIEW,
     id: 'baseColorMode',
     displayName: 'Base Colors',
     allImg: Bitmaps.ImgLetterColor,
     overImg: Bitmaps.ImgOverLetterColor,
     disableImg: Bitmaps.ImgGreyLetterColor,
-    selectedImg: Bitmaps.ImgLetterColor,
+    selectedImg: Bitmaps.ImgSelectedLetterColor,
     tooltip: 'Color sequences based on base colors as in the game'
 };
 
 export const expColorButtonProps: ToolbarParam = {
     color: {color: MODE_COLOR, alpha: 1},
+    toggleColor: {color: MODE_TOGGLE_COLOR, alpha: 1},
     cat: ButtonCategory.VIEW,
     id: 'expColorMode',
     displayName: 'Experimental Data Colors',
     allImg: Bitmaps.ImgExpColor,
     overImg: Bitmaps.ImgOverExpColor,
     disableImg: Bitmaps.ImgGreyExpColor,
-    selectedImg: Bitmaps.ImgExpColor,
+    selectedImg: Bitmaps.ImgSelectedExpColor,
     tooltip: 'Color sequences based on experimental data'
 };
 

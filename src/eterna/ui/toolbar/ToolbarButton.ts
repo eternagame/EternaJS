@@ -3,7 +3,9 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import {KeyCode} from 'flashbang';
 import {ButtonState} from 'flashbang/objects/Button';
-import {Graphics, Sprite, Texture} from 'pixi.js';
+import {
+    Graphics, Sprite, Texture
+} from 'pixi.js';
 import {Value} from 'signals';
 import GameButton from '../GameButton';
 
@@ -34,6 +36,7 @@ export type ToolbarParam = {
     hotKey?:KeyCode,
     rscriptID?:RScriptUIElementID,
     color?:{color:number, alpha:number},
+    toggleColor?:{color:number, alpha:number},
     label?:string,
     fontSize?:number
 };
@@ -48,22 +51,16 @@ export default class ToolbarButton extends GameButton {
         id: string,
         displayName: string,
         category: ButtonCategory,
-        isPaintTool: boolean | undefined,
-        bkColor = {color: 0, alpha: 0}
+        isPaintTool: boolean | undefined
     ) {
         super();
         this.id = id;
         this.displayName = displayName;
         this.category = category;
         this.isPaintTool = isPaintTool === true;
-        const background = new Graphics()
-            .beginFill(0, 0)
-            .drawRect(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT)
-            .endFill()
-            .beginFill(bkColor.color, bkColor.alpha)
-            .drawRoundedRect(2, 2, BUTTON_WIDTH - 4, BUTTON_HEIGHT - 4, 3)
-            .endFill();
-        this.container.addChildAt(background, 0);
+        this._background = new Graphics();
+        this.display.addChildAt(this._background, 0);
+        this._skipHitArea = true;
     }
 
     public static createButton(info: ToolbarParam) {
@@ -75,8 +72,7 @@ export default class ToolbarButton extends GameButton {
                 info.id,
                 info.displayName,
                 info.cat,
-                info.isPaintTool,
-                info.color
+                info.isPaintTool
             );
         } else button = new ToolbarButton(info.id, info.displayName, info.cat, info.isPaintTool);
         button.allStates(info.allImg);
@@ -125,6 +121,9 @@ export default class ToolbarButton extends GameButton {
 
     protected added() {
         super.added();
+
+        this.drawBackground(false);
+
         this._arrow = new Sprite(
             BitmapManager.getBitmap(Bitmaps.ImgToolbarArrow)
         );
@@ -134,7 +133,21 @@ export default class ToolbarButton extends GameButton {
 
         this.regs.add(this.toggled.connectNotify((toggled) => {
             this._arrow.visible = toggled;
+            this.drawBackground(toggled);
         }));
+    }
+
+    private drawBackground(toggled: boolean) {
+        const color = this._info.color ?? {color: 0x0, alpha: 0};
+        const toggleColor = this._info.toggleColor;
+
+        const realColor = toggled && toggleColor ? toggleColor : color;
+        this._background.beginFill(0, 0)
+            .drawRect(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT)
+            .endFill()
+            .beginFill(realColor.color, realColor.alpha)
+            .drawRoundedRect(2, 2, BUTTON_WIDTH - 4, BUTTON_HEIGHT - 4, 3)
+            .endFill();
     }
 
     public set enabled(newVal: boolean) {
@@ -148,6 +161,7 @@ export default class ToolbarButton extends GameButton {
     }
 
     private _arrow: Sprite;
+    private _background: Graphics;
     private _info: ToolbarParam;
     private _enabled = new Value(false);
 }

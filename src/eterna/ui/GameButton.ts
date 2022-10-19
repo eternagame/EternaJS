@@ -254,7 +254,7 @@ export default class GameButton extends Button implements KeyboardListener {
             icon.scale.set(scale, scale);
         }
 
-        if (!drawStyleBox) {
+        if (!drawStyleBox && !this._skipHitArea) {
             this.display.hitArea = DisplayUtil.getBoundsRelative(this._content, this.display);
         }
     }
@@ -342,6 +342,7 @@ export default class GameButton extends Button implements KeyboardListener {
     private _selectedState: Container | null;
     private _customStyleBox?: Graphics;
     private _customTextColors?: Map<ButtonState, number>;
+    protected _skipHitArea = false;
 
     private _rscriptID: RScriptUIElementID;
     private _rscriptClickReg: Registration = Registrations.Null();
