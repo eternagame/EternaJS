@@ -1,5 +1,5 @@
 import {
-    Container, Graphics, Rectangle, Sprite, Text, Texture
+    Container, Graphics, Sprite, Text, Texture
 } from 'pixi.js';
 import {Registration, Registrations, Value} from 'signals';
 import {
@@ -41,6 +41,7 @@ export default class GameButton extends Button implements KeyboardListener {
 
         this.setupHotkey();
         this.setupTooltip();
+        this.needsRedraw();
     }
 
     public up(display: Container | Texture | string| undefined): GameButton {
@@ -248,20 +249,13 @@ export default class GameButton extends Button implements KeyboardListener {
                     (icon.height - label.height) / 2
                 );
             }
-
-            if (icon != null) {
-                // if we have an icon, add an invisible hitbox to prevent unclickable pixels
-                // between the icon and the label
-                const bounds = this._content.getLocalBounds(GameButton.SCRATCH_RECT);
-                const hitbox = new Graphics()
-                    .beginFill(0xff0000, 0)
-                    .drawRect(bounds.x, bounds.y, bounds.width, bounds.height)
-                    .endFill();
-                this._content.addChildAt(hitbox, 0);
-            }
         } else if (this.size > 0 && icon != null) {
             const scale: number = this.size / this._content.height;
             icon.scale.set(scale, scale);
+        }
+
+        if (!drawStyleBox) {
+            this.display.hitArea = DisplayUtil.getBoundsRelative(this._content, this.display);
         }
     }
 
@@ -403,6 +397,4 @@ export default class GameButton extends Button implements KeyboardListener {
 
     private static readonly WMARGIN = 12;
     private static readonly HMARGIN = 6;
-
-    private static readonly SCRATCH_RECT = new Rectangle();
 }
