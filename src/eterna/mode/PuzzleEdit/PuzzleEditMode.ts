@@ -165,38 +165,6 @@ export default class PuzzleEditMode extends GameMode {
             }
         });
 
-        this._modeBar = new ModeBar();
-        this.addObject(this._modeBar, this.uiLayer);
-
-        const {actualButton, targetButton} = this._modeBar.addStructToggle('solve');
-        this._naturalButton = actualButton;
-        this._targetButton = targetButton;
-
-        this._folderSwitcher = this._modeBar.addFolderSwitcher((folder) => {
-            if (this._numTargets > 1 && !folder.canFoldWithBindingSite) return false;
-            return true;
-        });
-        this._folderSwitcher.selectedFolder.connect((folder) => {
-            if (folder.canScoreStructures) {
-                for (const pose of this._poses) {
-                    pose.scoreFolder = folder;
-                }
-            } else {
-                for (const pose of this._poses) {
-                    pose.scoreFolder = null;
-                }
-            }
-
-            this.clearUndoStack();
-            this.poseEditByTarget(0);
-        });
-
-        this._toolbar = new Toolbar(toolbarType, {
-            annotationManager: this._annotationManager
-        });
-        this.addObject(this._toolbar, this.uiLayer);
-        this.setToolbarEventHandlers();
-
         if (this._embedded) {
             this._scriptInterface.addCallback('get_secstruct', () => this.structure);
             this._scriptInterface.addCallback('get_sequence', () => this.sequence);
@@ -263,7 +231,6 @@ export default class PuzzleEditMode extends GameMode {
             const poseField: PoseField = new PoseField(true, this._annotationManager);
             this.addObject(poseField, this.poseLayer);
             const {pose} = poseField;
-            pose.scoreFolder = this._folder;
             pose.molecularStructure = defaultPairs;
             pose.molecularBindingBonus = -4.86;
             pose.sequence = Sequence.fromSequenceString(defaultSequence);
@@ -295,13 +262,51 @@ export default class PuzzleEditMode extends GameMode {
             this._structureInputs.push(structureInput);
         }
 
+        this.setPoseFields(poseFields);
+
         this._constraintBar = new ConstraintBar(Utility.range(this._numTargets).map(
             (stateIndex) => new ShapeConstraint(stateIndex)
         ), this._numTargets);
         this.addObject(this._constraintBar, this.container);
         this._constraintBar.layout();
 
-        this.setPoseFields(poseFields);
+        this._toolbar = new Toolbar(toolbarType, {
+            annotationManager: this._annotationManager
+        });
+        this.addObject(this._toolbar, this.uiLayer);
+        this.setToolbarEventHandlers();
+
+        this._modeBar = new ModeBar();
+        this.addObject(this._modeBar, this.uiLayer);
+
+        const {actualButton, targetButton} = this._modeBar.addStructToggle('solve');
+        this._naturalButton = actualButton;
+        this._targetButton = targetButton;
+
+        this._folderSwitcher = this._modeBar.addFolderSwitcher((folder) => {
+            if (this._numTargets > 1 && !folder.canFoldWithBindingSite) return false;
+            return true;
+        });
+        this._folderSwitcher.selectedFolder.connectNotify((folder) => {
+            if (folder.canScoreStructures) {
+                for (const pose of this._poses) {
+                    pose.scoreFolder = folder;
+                }
+            } else {
+                for (const pose of this._poses) {
+                    pose.scoreFolder = null;
+                }
+            }
+
+            this.clearUndoStack();
+            this.poseEditByTarget(0);
+            for (const pose of this._poses) {
+                pose.updateHighlightsAndScores();
+            }
+        });
+
+        this.regs?.add(this._naturalButton.clicked.connect(() => this.setToNativeMode()));
+        this.regs?.add(this._targetButton.clicked.connect(() => this.setToTargetMode()));
 
         // Must do this AFTER pose initialization
         if (
@@ -356,9 +361,6 @@ export default class PuzzleEditMode extends GameMode {
 
     private setToolbarEventHandlers() {
         Assert.assertIsDefined(this.regs);
-        this.regs.add(this._naturalButton.clicked.connect(() => this.setToNativeMode()));
-        this.regs.add(this._targetButton.clicked.connect(() => this.setToTargetMode()));
-
         this.regs.add(this._toolbar.addBaseButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.ADD_BASE)));
         this.regs.add(this._toolbar.addPairButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.ADD_PAIR)));
         this.regs.add(this._toolbar.deleteButton.clicked.connect(() => this.onEditButtonClicked(RNAPaint.DELETE)));
