@@ -2398,9 +2398,8 @@ export default class PoseEditMode extends GameMode {
         this._targetButton.enabled = !disable;
         this._naturalButton.enabled = !disable;
 
-        // TODO: These should probably be made disableable so that they don't need to be entirely hidden
-        this._folderSwitcher.display.visible = !disable;
-        this._markerSwitcher.display.visible = !disable;
+        this._folderSwitcher.enabled = !disable;
+        this._markerSwitcher.enabled = !disable;
         this._modeBar.layout();
 
         for (const field of this._poseFields) {
