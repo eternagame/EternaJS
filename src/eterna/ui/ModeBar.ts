@@ -1,6 +1,6 @@
 import Folder from 'eterna/folding/Folder';
 import {
-    ContainerObject, HAlign, HLayoutContainer, SceneObject, VLayoutContainer
+    ContainerObject, HAlign, HLayoutContainer, LayoutContainer, SceneObject, VLayoutContainer
 } from 'flashbang';
 import {Container} from 'pixi.js';
 import FolderSwitcher from './FolderSwitcher';
@@ -27,6 +27,8 @@ export default class ModeBar extends ContainerObject {
         this.addObject(this._window, this.container);
         this._vLayout = new VLayoutContainer(10, HAlign.LEFT);
         this._window.content.addChild(this._vLayout);
+        // If there's nothing there, don't show it
+        this._window.display.visible = false;
     }
 
     public addStructToggle(type: 'solve' | 'feedback'): {actualButton: ToolbarButton, targetButton: ToolbarButton} {
@@ -84,8 +86,31 @@ export default class ModeBar extends ContainerObject {
 
     /** When items are added or visibility is changed */
     public layout() {
+        // This nasty bit of code ensures that if rscript has hidden both the target and natural
+        // mode buttons, the hlayoutcontainer containing them doesn't still take up vertical space.
+        // TODO: There's probably a better way to manage this.
+        // Theoretically displayobjects shouldn't have bounds if they're not visible, so I'm
+        // suspicious that there's some other lower-level issue here, but I haven't been able to figure
+        // out what's going on there. I tracked it down to DisplayUtil.getBoundsRelative's call to
+        // DisplayObject.getLocalBounds not overriding the contents of the passed-in bounds, but even
+        // patching around that meant we have an extra vOffset because the VLayoutContainer still adds
+        // a per-item offset since the child is visible, even though it's "empty". Changing that
+        // behavior seemed ill-advised without deeply thinking through the repercussions...
+        for (const child of this._vLayout.children) {
+            if (child instanceof HLayoutContainer) {
+                child.visible = child.children.some((layoutChild) => layoutChild.visible);
+            }
+        }
+
         this._vLayout.layout(true);
         this._window.layout();
+        this._window.display.visible = true;
+        this._window.display.visible = this._vLayout.children.some((child) => {
+            if (child instanceof LayoutContainer) {
+                return child.children.some((layoutChild) => layoutChild.worldVisible);
+            }
+            return child.worldVisible;
+        });
     }
 
     private _window: GameWindow;

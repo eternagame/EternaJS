@@ -380,6 +380,10 @@ export default class PoseEditMode extends GameMode {
         this._ropPresets.push(() => this.setShowTotalEnergy(show));
     }
 
+    public layoutModeBar() {
+        this._modeBar.layout();
+    }
+
     public selectFolder(folderName: string): boolean {
         return this._folderSwitcher.changeFolder(folderName);
     }

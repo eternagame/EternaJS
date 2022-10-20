@@ -263,6 +263,7 @@ export default class RScriptEnv extends ContainerObject {
                 }
             }
         }
+        this.ui.layoutModeBar();
     }
 
     public checkShowUI(instructions: string[]):string[] {
