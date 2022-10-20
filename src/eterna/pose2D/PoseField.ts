@@ -102,6 +102,10 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         return this._secondaryScoreEnergyDisplay;
     }
 
+    public get deltaScoreDisplay(): EnergyScoreDisplay {
+        return this._deltaScoreEnergyDisplay;
+    }
+
     public get width(): number {
         return this._width;
     }

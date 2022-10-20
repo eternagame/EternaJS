@@ -378,6 +378,8 @@ export default class RScriptEnv extends ContainerObject {
                 return this.poseField.primaryScoreDisplay;
             case RScriptUIElementID.SECONDARY_ENERGY:
                 return this.poseField.secondaryScoreDisplay;
+            case RScriptUIElementID.DELTAENERGY:
+                return this.poseField.deltaScoreDisplay;
             case RScriptUIElementID.PALETTE:
             case RScriptUIElementID.PALETTEALT:
                 return this.ui.toolbar.palette;
