@@ -29,16 +29,16 @@ export default class NotificationDialog extends WindowDialog<void> {
             fontFamily: Fonts.STDFONT,
             fontSize: 15,
             fill: 0xFFFFFF
-        }).append(this._message).build();
+        }).appendHTMLStyledText(this._message).build();
         content.addChild(text);
 
-        const buttonLayout: HLayoutContainer = new HLayoutContainer(2);
+        const buttonLayout: HLayoutContainer = new HLayoutContainer(6);
 
         const okButton = new GameButton().label(this._okButtonTitle, 14);
         this.addObject(okButton, buttonLayout);
         okButton.clicked.connect(() => this.close());
 
-        if (this._extraButtonTitle != null) {
+        if (this._extraButtonTitle) {
             this.extraButton = new GameButton().label(this._extraButtonTitle, 14);
             this.addObject(this.extraButton, buttonLayout);
         }

@@ -2244,7 +2244,7 @@ export default class PoseEditMode extends GameMode {
         if (data['error'] !== undefined) {
             log.debug(`Got solution submission error: ${data['error']}`);
             if (data['error'].indexOf('barcode') >= 0) {
-                const dialog = this.showNotification(data['error'], 'More Information');
+                const dialog = this.showNotification(data['error'].replace(/ +/, ' '), 'More Information');
                 dialog.extraButton.clicked.connect(() => window.open(EternaURL.BARCODE_HELP, '_blank'));
                 const hairpin = this._puzzle.getBarcodeHairpin(seq);
                 SolutionManager.instance.addHairpins([hairpin.sequenceString()]);
