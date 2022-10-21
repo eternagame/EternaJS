@@ -3,12 +3,11 @@ import {
     Container, DisplayObject, Rectangle, Point
 } from 'pixi.js';
 import {
-    ContainerObject, Enableable, GameObject, Assert
+    ContainerObject, Enableable, GameObject, Assert, SceneObject
 } from 'flashbang';
 import EPars from 'eterna/EPars';
 import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
 import Puzzle from 'eterna/puzzle/Puzzle';
-import TextBalloon from 'eterna/ui/TextBalloon';
 import Pose2D, {RNAHighlightState} from 'eterna/pose2D/Pose2D';
 import {PaletteTargetType} from 'eterna/ui/toolbar/NucleotidePalette';
 import StateToggle from 'eterna/ui/StateToggle';
@@ -47,10 +46,10 @@ export default class RScriptEnv extends ContainerObject {
         }
 
         const value = this.getVar(id);
-        if (value instanceof TextBalloon) {
+        if (value instanceof SceneObject) {
             value.display.visible = isVisible;
         } else {
-            log.warn(`'${id}' is not a Textbox`);
+            log.warn(`'${id}' is not a SceneObject`);
         }
     }
 

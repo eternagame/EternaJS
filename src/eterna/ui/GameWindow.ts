@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import {
-    Assert, ContainerObject, DisplayUtil, Dragger, Flashbang, HAlign, MathUtil, SpriteObject, VAlign
+    Assert, ContainerObject, DisplayUtil, Dragger, Flashbang, HAlign, MathUtil, SpriteObject, VAlign, Vector2
 } from 'flashbang';
 import {
     Container, InteractionEvent, Point, Rectangle, Sprite
@@ -9,6 +9,7 @@ import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {Signal, SignalView} from 'signals';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
+import RScriptArrow from 'eterna/rscript/RScriptArrow';
 import GameButton from './GameButton';
 import GamePanel from './GamePanel';
 import ScrollBox from './ScrollBox';
@@ -578,6 +579,51 @@ export default class GameWindow extends ContainerObject {
     public get titleHeight(): number {
         return this._panel.titleHeight;
     }
+
+    public addChildArrow(arrow: RScriptArrow): void {
+        this._childrenArrows.push(arrow);
+    }
+
+    public update(_dt: number): void {
+        // This is for rscript where an arrow can be "parented" to a text box such that it will point from
+        // the textbox to wherever it should go. Handling this in GameWindow may not be the best option
+        // (maybe we should create a subclass of GameWindow/wrapper class specifically for tutorial text boxes),
+        // but I'm doing so for the sake of expediency (it maps closely to how it was handled with FancyTextBalloon)
+        for (const arrow of this._childrenArrows) {
+            const xdiff: number = (this.display.x + this.container.width / 2) - arrow.display.x;
+            const ydiff: number = this.display.y < arrow.display.y
+                ? this.display.y - arrow.display.y + this.container.height
+                : this.display.y - arrow.display.y;
+
+            if (xdiff !== 0) {
+                arrow.rotation = (Math.atan(ydiff / xdiff) * 180) / Math.PI;
+            } else {
+                arrow.rotation = 0.0;
+            }
+
+            if (ydiff > 0.0 && xdiff < 0.0) {
+                arrow.rotation += 180;
+            } else if (ydiff < 0.0 && xdiff < 0.0) {
+                arrow.rotation += 180;
+            }
+
+            if (ydiff < 0.0) { // Above
+                arrow.baseLength = Vector2.distance(
+                    arrow.display.x, arrow.display.y,
+                    this.display.x + this.container.width / 2, this.display.y + this.container.height
+                );
+            } else { // Below
+                arrow.baseLength = Vector2.distance(
+                    arrow.display.x, arrow.display.y,
+                    this.display.x + this.container.width / 2, this.display.y - 50
+                );
+            }
+
+            arrow.redrawIfDirty();
+        }
+    }
+
+    private _childrenArrows: RScriptArrow[] = [];
 
     private _panel: GamePanel;
     private _closeButton: GameButton;

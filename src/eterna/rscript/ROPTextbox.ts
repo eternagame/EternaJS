@@ -1,7 +1,6 @@
 import * as log from 'loglevel';
 import {TextStyleExtended} from 'pixi-multistyle-text';
 import {Point} from 'pixi.js';
-import FancyTextBalloon from 'eterna/ui/FancyTextBalloon';
 import Fonts from 'eterna/util/Fonts';
 import {
     StyledTextBuilder, Flashbang, Vector2, GameObject, ColorUtil, Assert
@@ -135,10 +134,14 @@ export default class ROPTextbox extends RScriptOp {
     }
 
     private showArrow(): void {
-        let parent: FancyTextBalloon | null = null;
+        // let parent: FancyTextBalloon | null = null;
+        let parent: GameWindow | null = null;
         if (this._hasParent) {
             const parentVal = this._env.getVar(this._parentID);
-            if (parentVal instanceof FancyTextBalloon) {
+            // We're no longer using TextBalloon, but GameWindow - is there a reason why this was tied down specifically
+            // to TextBalloon?
+            // if (parentVal instanceof FancyTextBalloon) {
+            if (parentVal instanceof GameWindow) {
                 parent = parentVal;
             } else if (parentVal === undefined) {
                 this._hasParent = false;
