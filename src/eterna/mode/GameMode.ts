@@ -146,7 +146,7 @@ export default abstract class GameMode extends AppMode {
             this._notifRef.destroyObject();
         }
 
-        const notif = new NotificationDialog(message, extraButtonTitle);
+        const notif = new NotificationDialog(message, undefined, extraButtonTitle);
         this._notifRef = this.addObject(notif, this.notifLayer);
 
         // Hide dialogs while a notification is showing
