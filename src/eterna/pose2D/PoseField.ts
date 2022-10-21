@@ -1,11 +1,12 @@
 import {Graphics, InteractionEvent, Point} from 'pixi.js';
 import {
     ContainerObject, KeyboardListener, MouseWheelListener, InputUtil, Flashbang,
-    KeyboardEventType, KeyCode, Assert, PointerCapture
+    KeyboardEventType, KeyCode, Assert, PointerCapture, HLayoutContainer
 } from 'flashbang';
 import ROPWait from 'eterna/rscript/ROPWait';
 import debounce from 'lodash.debounce';
 import AnnotationManager from 'eterna/AnnotationManager';
+import GameWindow from 'eterna/ui/GameWindow';
 import Pose2D from './Pose2D';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
 import RNAAnchorObject from './RNAAnchorObject';
@@ -14,7 +15,8 @@ import RNAAnchorObject from './RNAAnchorObject';
 export default class PoseField extends ContainerObject implements KeyboardListener, MouseWheelListener {
     private static readonly zoomThreshold = 5;
 
-    private static readonly SCORES_POSITION_Y = 128;
+    private static readonly SCORES_WIDTH = 115;
+    private static readonly SCORES_HEIGHT = 40;
 
     constructor(edit: boolean, annotationManager: AnnotationManager) {
         super();
@@ -48,19 +50,21 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this.regs.add(this.mode.keyboardInput.pushListener(this));
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));
 
-        this._primaryScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
-        this._primaryScoreEnergyDisplay.position.set(17, PoseField.SCORES_POSITION_Y);
-        this.container.addChild(this._primaryScoreEnergyDisplay);
+        this._energyDisplayLayout = new HLayoutContainer(8);
+        this.container.addChild(this._energyDisplayLayout);
 
-        this._deltaScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
-        this._deltaScoreEnergyDisplay.position.set(17 + 119, PoseField.SCORES_POSITION_Y);
-        this._deltaScoreEnergyDisplay.visible = false;
-        this.container.addChild(this._deltaScoreEnergyDisplay);
-
-        this._secondaryScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
-        this._secondaryScoreEnergyDisplay.position.set(17 + 119 * 2, PoseField.SCORES_POSITION_Y);
+        this._secondaryScoreEnergyDisplay = new EnergyScoreDisplay(PoseField.SCORES_WIDTH, PoseField.SCORES_HEIGHT);
         this._secondaryScoreEnergyDisplay.visible = false;
-        this.container.addChild(this._secondaryScoreEnergyDisplay);
+        this._energyDisplayLayout.addChild(this._secondaryScoreEnergyDisplay);
+
+        this._primaryScoreEnergyDisplay = new EnergyScoreDisplay(PoseField.SCORES_WIDTH, PoseField.SCORES_HEIGHT);
+        this._energyDisplayLayout.addChild(this._primaryScoreEnergyDisplay);
+
+        this._deltaScoreEnergyDisplay = new EnergyScoreDisplay(PoseField.SCORES_WIDTH, PoseField.SCORES_HEIGHT);
+        this._deltaScoreEnergyDisplay.visible = false;
+        this._energyDisplayLayout.addChild(this._deltaScoreEnergyDisplay);
+
+        this.updateEnergyContainer();
     }
 
     /* override */
@@ -73,7 +77,15 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         for (const anchor of this._anchoredObjects) {
             if (anchor.isLive) {
                 const p: Point = this.pose.getBaseLoc(anchor.base);
-                anchor.object.display.position.set(p.x + anchor.offset.x, p.y + anchor.offset.y);
+                const anchorObject = anchor.object;
+                if (anchorObject instanceof GameWindow) {
+                    anchorObject.setTargetBounds({
+                        x: {from: 'left', offsetExact: p.x + anchor.offset.x},
+                        y: {from: 'top', offsetExact: p.y + anchor.offset.y}
+                    });
+                } else {
+                    anchorObject.display.position.set(p.x + anchor.offset.x, p.y + anchor.offset.y);
+                }
             }
         }
     }
@@ -97,6 +109,10 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
     public get secondaryScoreDisplay(): EnergyScoreDisplay {
         return this._secondaryScoreEnergyDisplay;
+    }
+
+    public get deltaScoreDisplay(): EnergyScoreDisplay {
+        return this._deltaScoreEnergyDisplay;
     }
 
     public get width(): number {
@@ -131,6 +147,8 @@ export default class PoseField extends ContainerObject implements KeyboardListen
             this.container.addChild(this._mask);
             this.container.mask = this._mask;
         }
+
+        this.updateEnergyContainer();
     }
 
     public containsEvent(e: InteractionEvent): boolean {
@@ -262,6 +280,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this._primaryScoreEnergyDisplay.setEnergyText('Total', message);
         this._deltaScoreEnergyDisplay.setEnergyText('Natural/Target Delta', message);
         this._secondaryScoreEnergyDisplay.visible = false;
+        this.updateEnergyContainer();
     }
 
     public updateEnergyGui(
@@ -273,11 +292,12 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         nodeFound: boolean,
         deltaFn: () => number
     ): void {
-        this.updateEnergyDisplaySizeLocation(factor);
+        this.updateEnergyDisplaySize(factor);
 
         this._primaryScoreEnergyDisplay.setEnergyText(scoreLabel, scoreScore);
         this._secondaryScoreEnergyDisplay.setEnergyText(nodeLabel, nodeScore);
         this._secondaryScoreEnergyDisplay.visible = (this._showTotalEnergy && nodeFound);
+        this.updateEnergyContainer();
 
         // This is because the undo stack isn't populated yet when this is run on puzzle boot/changing folders,
         // which is needed for the delta - TODO: Handle this in a less hacky way
@@ -292,6 +312,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
                 this._deltaScoreEnergyDisplay.visible = false;
                 setTimeout(attemptSetDelta, 1000);
             }
+            this.updateEnergyContainer();
         };
         setTimeout(attemptSetDelta, 50);
     }
@@ -307,6 +328,15 @@ export default class PoseField extends ContainerObject implements KeyboardListen
             show && this.pose.scoreFolder != null && this._secondaryScoreEnergyDisplay.hasText
         );
         this._deltaScoreEnergyDisplay.visible = show && this.pose.scoreFolder != null;
+        this.updateEnergyContainer();
+    }
+
+    private updateEnergyContainer() {
+        this._energyDisplayLayout.layout(true);
+        this._energyDisplayLayout.position.set(
+            this._width - this._energyDisplayLayout.width - 16,
+            60
+        );
     }
 
     private onPointerUp(e: InteractionEvent): void {
@@ -370,15 +400,10 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         return false;
     }
 
-    private updateEnergyDisplaySizeLocation(factor: number): void {
-        this._primaryScoreEnergyDisplay.position.set(17, PoseField.SCORES_POSITION_Y);
-        this._primaryScoreEnergyDisplay.setSize(111 + factor * 59, 40);
-
-        this._deltaScoreEnergyDisplay.position.set(17 + 119 + factor * 59, PoseField.SCORES_POSITION_Y);
-        this._deltaScoreEnergyDisplay.setSize(111, 40);
-
-        this._secondaryScoreEnergyDisplay.position.set(17 + 119 * 2 + factor * 59, PoseField.SCORES_POSITION_Y);
-        this._secondaryScoreEnergyDisplay.setSize(111, 40);
+    private updateEnergyDisplaySize(factor: number): void {
+        this._primaryScoreEnergyDisplay.setSize(PoseField.SCORES_WIDTH + factor * 59, PoseField.SCORES_HEIGHT);
+        this._deltaScoreEnergyDisplay.setSize(PoseField.SCORES_WIDTH, PoseField.SCORES_HEIGHT);
+        this._secondaryScoreEnergyDisplay.setSize(PoseField.SCORES_WIDTH, PoseField.SCORES_HEIGHT);
     }
 
     // Stores the previous delta
@@ -455,6 +480,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     private static readonly P: Point = new Point();
 
     // New Score Display panels
+    private _energyDisplayLayout: HLayoutContainer;
     private _primaryScoreEnergyDisplay: EnergyScoreDisplay;
     private _secondaryScoreEnergyDisplay: EnergyScoreDisplay;
     private _deltaScoreEnergyDisplay: EnergyScoreDisplay;

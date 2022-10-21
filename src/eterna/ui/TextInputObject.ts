@@ -95,6 +95,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
                 input.onblur = () => this.onFocusChanged(false);
                 input.onkeypress = (e) => this.keyPressed.emit(e.key);
                 document.addEventListener('keydown', ({key}) => {
+                    if (!this._hasFocus) return;
                     if (key === 'Escape') {
                         this.keyPressed.emit('Escape');
                     } else if (key === 'Enter') {
@@ -108,6 +109,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
             this._obj.onblur = () => this.onFocusChanged(false);
             this._obj.onkeypress = (e) => this.keyPressed.emit(e.key);
             document.addEventListener('keydown', ({key}) => {
+                if (!this._hasFocus) return;
                 if (key === 'Escape') {
                     this.keyPressed.emit('Escape');
                 } else if (key === 'Enter') {
@@ -176,7 +178,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
         }
     }
 
-    protected onSizeChanged(): void {
+    protected stylesChanged() {
         if (this._characterLimit) {
             let input: HTMLInputElement | HTMLTextAreaElement | undefined;
             for (const child of this._obj.children) {
@@ -209,7 +211,10 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
             }
             this._obj.style.borderRadius = this._borderRadius.toString();
         }
+        this.onSizeChanged();
+    }
 
+    protected onSizeChanged(): void {
         super.onSizeChanged();
         if (this._fakeTextInput != null) {
             // recreate our fake text input when our properties change
@@ -238,13 +243,13 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
 
     public font(fontFamily: string): TextInputObject {
         this._fontFamily = fontFamily;
-        this.onSizeChanged();
+        this.stylesChanged();
         return this;
     }
 
     public fontWeight(weight: FontWeight): TextInputObject {
         this._fontWeight = weight;
-        this.onSizeChanged();
+        this.stylesChanged();
         return this;
     }
 
@@ -274,7 +279,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
 
     public borderColor(value: number): TextInputObject {
         this._borderColor = value;
-        this.onSizeChanged();
+        this.stylesChanged();
         return this;
     }
 
@@ -359,7 +364,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
             this._obj.style.width = DOMObject.sizeToString(value);
         }
 
-        this.onSizeChanged();
+        this.stylesChanged();
     }
 
     public get height(): number {
@@ -399,7 +404,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
             this._obj.style.height = DOMObject.sizeToString(value);
         }
 
-        this.onSizeChanged();
+        this.stylesChanged();
     }
 
     public get text(): string {
@@ -546,7 +551,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
 
     private destroyFakeTextInput(): void {
         if (this._fakeTextInput != null) {
-            this._fakeTextInput.destroy({children: true});
+            if (!this._fakeTextInput.destroyed) this._fakeTextInput.destroy({children: true});
             this._fakeTextInput = null;
             this._dummyDisp.interactive = false;
         }

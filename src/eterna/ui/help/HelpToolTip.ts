@@ -8,7 +8,7 @@ import Fonts from 'eterna/util/Fonts';
 // AMW we have to be content to accept our positioner may
 // in fact return null (if we want to use getbounds() for
 // the purpose!)
-export type ToolTipPositioner = [() => Rectangle | null, number];
+export type ToolTipPositioner = [() => Rectangle | null, number, string];
 
 export type HelpToolTipSide = 'top' | 'bottom';
 
@@ -21,14 +21,15 @@ interface HelpToolTipProps {
 }
 
 export default class HelpToolTip extends ContainerObject {
-    private static readonly theme = {
+    public static readonly theme = {
         colors: {
             background: 0xC0DCE7
         },
         borderRadius: 6,
-        padding: 10,
-        fontSize: 14,
-        tipSize: 10,
+        vPadding: 8,
+        hPadding: 4,
+        fontSize: 10,
+        tipSize: 6,
         tailWidth: 3
     };
 
@@ -61,11 +62,11 @@ export default class HelpToolTip extends ContainerObject {
 
         // Background
         const widestElem = Math.max(textMetrics.width, props.content ? props.content.width : 0);
-        const width = widestElem + theme.padding * 2;
+        const width = widestElem + theme.hPadding * 2;
 
         const height = textMetrics.height
-            + theme.padding * 2
-            + (props.content ? (props.content.height + theme.padding) : 0);
+            + theme.vPadding * 2
+            + (props.content ? (props.content.height + theme.vPadding) : 0);
 
         const isBottom = props.side === 'bottom';
         const tailLength = props.tailLength ?? 0;
@@ -93,7 +94,7 @@ export default class HelpToolTip extends ContainerObject {
         background.drawRoundedRect(backgroundX, backgroundY, width, height, theme.borderRadius);
         textElem.position.set(
             backgroundX + (width - textMetrics.width) / 2,
-            backgroundY + theme.padding
+            backgroundY + theme.vPadding
         );
 
         // Tip
@@ -118,7 +119,7 @@ export default class HelpToolTip extends ContainerObject {
         if (props.content) {
             props.content.position.set(
                 backgroundX + (width - props.content.width) / 2,
-                backgroundY + textMetrics.height + theme.padding * 2
+                backgroundY + textMetrics.height + theme.vPadding * 2
             );
             this.container.addChild(props.content);
         }

@@ -29,7 +29,9 @@ export default class FlashbangApp {
         this._pixi = this.createPixi();
         Assert.assertIsDefined(this.pixiParent);
         this.pixiParent.appendChild(this._pixi.view);
+        this._managedInputElements.push(this._pixi.view);
 
+        this._pixi.stage.name = 'Stage';
         this._modeStack = new ModeStack(this._pixi.stage);
 
         Flashbang._registerApp(this);
@@ -180,7 +182,8 @@ export default class FlashbangApp {
     }
 
     protected onMouseWheelEvent(e: WheelEvent): void {
-        if (e.target !== this.view) return;
+        const target = e.target;
+        if (target instanceof HTMLElement && !this._managedInputElements.some((el) => el.contains(target))) return;
 
         const {topMode} = this._modeStack;
         if (topMode != null) {
@@ -189,12 +192,21 @@ export default class FlashbangApp {
     }
 
     protected onContextMenuEvent(e: Event): void {
-        if (e.target !== this.view) return;
+        const target = e.target;
+        if (target instanceof HTMLElement && !this._managedInputElements.some((el) => el.contains(target))) return;
 
         const {topMode} = this._modeStack;
         if (topMode != null) {
             topMode.onContextMenuEvent(e);
         }
+    }
+
+    public addManagedInputElement(el: HTMLElement) {
+        this._managedInputElements.push(el);
+    }
+
+    public removeManagedInputElement(el: HTMLElement) {
+        this._managedInputElements = this._managedInputElements.filter((managed) => managed !== el);
     }
 
     /** Called when the app activates or deactivates */
@@ -223,4 +235,5 @@ export default class FlashbangApp {
     protected _modeStack: ModeStack;
 
     protected _keyDown: Map<string, boolean> = new Map<string, boolean>();
+    protected _managedInputElements: HTMLElement[] = [];
 }

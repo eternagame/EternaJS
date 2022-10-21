@@ -40,21 +40,27 @@ export default abstract class Button extends ContainerObject implements Enableab
         this.regs.add(this.pointerOut.connect(() => {
             this.isPointerOver = false;
         }));
+        this.regs.add(this.pointerUpOutside.connect(() => {
+            this.isPointerDown = false;
+        }));
         this.regs.add(this.pointerCancel.connect(() => {
             this.isPointerOver = false;
             this.isPointerDown = false;
         }));
-        this.regs.add(this.pointerDown.filter(InputUtil.IsLeftMouse).connect(() => {
+        this.regs.add(this.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => {
+            e.stopPropagation();
             if (this.enabled) {
                 this.isPointerDown = true;
             } else if (!this.enabled && this.disabledSound != null) {
                 this.playDisabledSound();
             }
         }));
-        this.regs.add(this.pointerUp.filter(InputUtil.IsLeftMouse).connect(() => {
+        this.regs.add(this.pointerUp.filter(InputUtil.IsLeftMouse).connect((e) => {
+            e.stopPropagation();
             this.isPointerDown = false;
         }));
-        this.regs.add(this.pointerTap.filter(InputUtil.IsLeftMouse).connect(() => {
+        this.regs.add(this.pointerTap.filter(InputUtil.IsLeftMouse).connect((e) => {
+            e.stopPropagation();
             if (this.enabled) this.clicked.emit();
         }));
     }
@@ -91,6 +97,12 @@ export default abstract class Button extends ContainerObject implements Enableab
                 ));
             }
         }
+    }
+
+    /** Cancel active over/down state, useful eg when dragging the button */
+    public cancelInteraction() {
+        this.isPointerOver = false;
+        this.isPointerDown = false;
     }
 
     /** Subclasses override this to display the appropriate state */
@@ -137,7 +149,7 @@ export default abstract class Button extends ContainerObject implements Enableab
      * to the DOWN state. Subclasses can override to customize the behavior.
      */
     private playStateTransitionSound(_fromState: ButtonState, toState: ButtonState): void {
-        if (toState === ButtonState.DOWN && this.downSound != null) {
+        if (toState === ButtonState.DOWN && _fromState === ButtonState.OVER && this.downSound != null) {
             Flashbang.sound.playSound(this.downSound);
         }
     }

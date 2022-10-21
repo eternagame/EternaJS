@@ -12,7 +12,7 @@ import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import RankScroll from 'eterna/rank/RankScroll';
 import Eterna from 'eterna/Eterna';
-import VScrollBox from 'eterna/ui/VScrollBox';
+import ScrollBox from 'eterna/ui/ScrollBox';
 import {SubmitSolutionData} from './PoseEditMode';
 
 export default class MissionClearedPanel extends ContainerObject {
@@ -69,7 +69,7 @@ export default class MissionClearedPanel extends ContainerObject {
         const title = Fonts.std('MISSION ACCOMPLISHED!', 20).bold().color(0xFFCC00).build();
         this._contentLayout.addChild(title);
 
-        this._scrollBox = new VScrollBox(MissionClearedPanel.calcWidth(), MissionClearedPanel.calcScrollHeight());
+        this._scrollBox = new ScrollBox(MissionClearedPanel.calcWidth(), MissionClearedPanel.calcScrollHeight());
         this.addObject(this._scrollBox, this._contentLayout);
         this._infoContainer = new VLayoutContainer(25, HAlign.LEFT);
         this._scrollBox.content.addChild(this._infoContainer);
@@ -255,7 +255,7 @@ export default class MissionClearedPanel extends ContainerObject {
     private readonly _bg: Graphics;
 
     private _contentLayout: VLayoutContainer;
-    private _scrollBox: VScrollBox;
+    private _scrollBox: ScrollBox;
     private _infoContainer: VLayoutContainer;
     private _infoObj: HTMLTextObject;
     private _separator: Graphics;

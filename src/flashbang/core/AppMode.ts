@@ -57,6 +57,11 @@ export default class AppMode {
     }
 
     constructor() {
+        class AppModeContainer extends Container {}
+        this._container = new AppModeContainer();
+        // Convenience so that the flashbang class name shows in the Pixi devtools
+        Object.defineProperty(AppModeContainer, 'name', {value: this.constructor.name});
+
         this._rootObject = new RootObject(this);
         if (this.container) this.container.interactiveChildren = false;
     }
@@ -340,7 +345,7 @@ export default class AppMode {
     protected readonly _disposed: UnitSignal = new UnitSignal();
     protected readonly _resized: UnitSignal = new UnitSignal();
 
-    protected _container: Container | null = new Container();
+    protected _container: Container | null;
     protected _modeStack: ModeStack | null;
 
     protected _runningTime: number = 0;

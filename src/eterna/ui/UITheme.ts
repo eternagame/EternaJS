@@ -8,7 +8,7 @@ export default class UITheme {
     };
 
     public static readonly panel = {
-        padding: 10,
+        padding: 15,
         borderSize: 1.5
     };
 

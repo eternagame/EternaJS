@@ -1,17 +1,16 @@
 import {
     ContainerObject, Flashbang
 } from 'flashbang';
-import Fonts from 'eterna/util/Fonts';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {
-    Graphics, Point, Text
+    Point
 } from 'pixi.js';
 import Assert from 'flashbang/util/Assert';
-import {FontWeight} from 'flashbang/util/TextBuilder';
 import GameButton from './GameButton';
 import UITheme from './UITheme';
 import HTMLTextObject from './HTMLTextObject';
-import VScrollBox from './VScrollBox';
+import ScrollBox from './ScrollBox';
+import GamePanel from './GamePanel';
 
 interface MultiPagePanelProps {
     title: string;
@@ -22,11 +21,6 @@ interface MultiPagePanelProps {
 
 export default class MultiPagePanel extends ContainerObject {
     private static readonly theme = {
-        title: {
-            fontSize: 16,
-            height: 35,
-            padding: 7
-        },
         borderRadius: 5,
         buttonSize: new Point(59, 24) // TODO find a better way to position the prev/next buttons!
     };
@@ -34,11 +28,9 @@ export default class MultiPagePanel extends ContainerObject {
     private _props: MultiPagePanelProps;
 
     private _currentPage = 0;
-    private _title: string;
 
-    private _background: Graphics;
-    private _pagesContainer: VScrollBox;
-    private _titleText: Text;
+    private _panel: GamePanel;
+    private _pagesContainer: ScrollBox;
     private _prevButton: GameButton;
     private _nextButton: GameButton;
     private _panelHeight = 0;
@@ -47,8 +39,8 @@ export default class MultiPagePanel extends ContainerObject {
     private get pageCount() { return this._pagesContainer.content.children.length; }
     private get title() {
         return this.pageCount > 1
-            ? `${this._title} ${this._currentPage + 1} of ${this.pageCount}`
-            : this._title;
+            ? `${this._props.title} ${this._currentPage + 1} of ${this.pageCount}`
+            : this._props.title;
     }
 
     constructor(props: MultiPagePanelProps) {
@@ -59,16 +51,14 @@ export default class MultiPagePanel extends ContainerObject {
     protected added() {
         super.added();
 
-        const {theme} = MultiPagePanel;
-
         // Background - we need it on a lower layer so we're adding it here,
         // but we want to derive the height from the pages, so we need to wait
         // until those are added to actually draw
-        this._background = new Graphics();
-        this.container.addChild(this._background);
+        this._panel = new GamePanel({});
+        this.addObject(this._panel, this.container);
 
         // Content
-        this._pagesContainer = new VScrollBox(0, 0);
+        this._pagesContainer = new ScrollBox(0, 0, undefined, -10, 0);
         this.addObject(this._pagesContainer, this.container);
 
         this._props.pages.forEach((page) => {
@@ -77,14 +67,6 @@ export default class MultiPagePanel extends ContainerObject {
             }
             this._pagesContainer.addObject(page, this._pagesContainer.content);
         });
-
-        this._titleText = Fonts.std()
-            .fontWeight(FontWeight.SEMIBOLD)
-            .fontSize(theme.title.fontSize)
-            .color(UITheme.colors.background)
-            .build();
-        this._titleText.text = this.title;
-        this.container.addChild(this._titleText);
 
         // Buttons
         this._prevButton = new GameButton()
@@ -131,7 +113,7 @@ export default class MultiPagePanel extends ContainerObject {
 
         this._pagesContainer.container.position.set(
             UITheme.panel.padding,
-            UITheme.panel.padding + theme.title.height
+            UITheme.panel.padding + this._panel.titleHeight
         );
 
         const getHeight = (page: HTMLTextObject | ContainerObject): number => {
@@ -145,35 +127,15 @@ export default class MultiPagePanel extends ContainerObject {
         Assert.assertIsDefined(Flashbang.stageHeight);
         this._panelHeight = Math.min(Flashbang.stageHeight * 0.8 || Infinity,
             this._props.height || Math.max(...this._props.pages.map(getHeight))
-            + theme.title.height + 2 * UITheme.panel.padding
+            + this._panel.titleHeight + 2 * UITheme.panel.padding
             + (this.pageCount > 1 ? theme.buttonSize.y + UITheme.panel.padding : 0));
 
-        // Now we draw the background
-        this._background.clear();
-        this._background.lineStyle(UITheme.panel.borderSize, UITheme.colors.border, 1);
-        this._background.beginFill(UITheme.colors.background, 1);
-        this._background.drawRoundedRect(0, 0, this._props.width, this._panelHeight, theme.borderRadius);
-        this._background.endFill();
+        this._panel.setSize(this._props.width, this._panelHeight);
 
         this._pagesContainer.setSize(
             this._props.width - UITheme.panel.padding * 2,
-            this._panelHeight - theme.title.height - UITheme.panel.padding * 2
+            this._panelHeight - this._panel.titleHeight - UITheme.panel.padding * 2
         );
-
-        // Title
-        this._title = this._props.title;
-        this._background.beginFill(UITheme.colors.border);
-        this._background.drawRoundedRect(
-            0,
-            0,
-            this._props.width,
-            theme.title.height,
-            theme.borderRadius
-        );
-        this._background.endFill();
-
-        this._titleText.text = this.title;
-        this._titleText.position.set(theme.title.padding, theme.title.padding);
 
         this._prevButton.display.position.set(
             UITheme.panel.padding,
@@ -194,7 +156,7 @@ export default class MultiPagePanel extends ContainerObject {
             // kick in and the DOM to properly rerender in order for the height to not read as zero,
             // which causes the scroll bar not to appear initially. There's probably a less hacky
             // way to do this (and maybe even some other underlying cause)...
-            setTimeout(() => this._pagesContainer.updateScrollThumb(), 20);
+            setTimeout(() => this._pagesContainer.updateScrollThumbs(), 20);
         }
     }
 
@@ -207,7 +169,7 @@ export default class MultiPagePanel extends ContainerObject {
         this._pagesContainer.content.children[pageIndex].visible = true;
         this._currentPage = pageIndex;
 
-        this._titleText.text = this.title;
+        this._panel.title = this.title;
 
         this._prevButton.display.visible = this._currentPage > 0;
         this._nextButton.display.visible = this._currentPage < this.pageCount - 1;

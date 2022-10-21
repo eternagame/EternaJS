@@ -10,7 +10,6 @@ import AchievementManager from 'eterna/achievements/AchievementManager';
 import Tooltips from 'eterna/ui/Tooltips';
 import ExternalInterface, {ExternalInterfaceCtx} from 'eterna/util/ExternalInterface';
 import Pose2D from 'eterna/pose2D/Pose2D';
-import Pose3D from 'eterna/pose3D/Pose3D';
 import ConfirmDialog from 'eterna/ui/ConfirmDialog';
 import NotificationDialog from 'eterna/ui/NotificationDialog';
 import UILockDialog from 'eterna/ui/UILockDialog';
@@ -28,7 +27,10 @@ import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
 import Sequence from 'eterna/rnatypes/Sequence';
 import EPars from 'eterna/EPars';
 import Fonts from 'eterna/util/Fonts';
-import CopyTextDialogMode from './CopyTextDialogMode';
+import CopyTextDialog from 'eterna/ui/CopyTextDialog';
+import Toolbar from 'eterna/ui/toolbar/Toolbar';
+import WindowDialog from 'eterna/ui/WindowDialog';
+import Pose3DDialog from 'eterna/pose3D/Pose3DDialog';
 
 export default abstract class GameMode extends AppMode {
     public readonly bgLayer = new Container();
@@ -48,13 +50,21 @@ export default abstract class GameMode extends AppMode {
         Assert.assertIsDefined(this.container);
 
         this.container.addChild(this.bgLayer);
+        this.bgLayer.name = 'bgLayer';
         this.container.addChild(this.poseLayer);
+        this.poseLayer.name = 'poseLayer';
         this.container.addChild(this.uiLayer);
+        this.uiLayer.name = 'uiLayer';
         this.container.addChild(this.dialogLayer);
+        this.dialogLayer.name = 'dialogLayer';
         this.container.addChild(this.notifLayer);
+        this.notifLayer.name = 'notifLayer';
         this.container.addChild(this.achievementsLayer);
+        this.achievementsLayer.name = 'achievementsLayer';
         this.container.addChild(this.contextMenuLayer);
+        this.contextMenuLayer.name = 'contextMenuLayer';
         this.container.addChild(this.tooltipLayer);
+        this.tooltipLayer.name = 'tooltipLayer';
 
         this._achievements = new AchievementManager();
         this.addObject(this._achievements);
@@ -87,14 +97,24 @@ export default abstract class GameMode extends AppMode {
         return this.showDialog(new ConfirmDialog(prompt, promptIsHTML));
     }
 
-    /** Show a dialog. Removes any existing dialog. */
-    public showDialog<T extends SceneObject>(dialog: T): T {
-        if (this._dialogRef.isLive) {
-            log.warn('Dialog already showing');
-            this._dialogRef.destroyObject();
+    /** Show a dialog. Removes any existing modal dialogs if modal. */
+    public showDialog<T extends SceneObject>(dialog: T): T;
+    public showDialog<T extends SceneObject>(dialog: T, id: string): T | null;
+    public showDialog<T extends SceneObject>(dialog: T, id?: string): T | null {
+        const isModal = !(dialog instanceof WindowDialog) || dialog.modal;
+
+        if (id && this.hasNamedObject(id) && !isModal) return null;
+
+        if (isModal) {
+            if (this._dialogRef.isLive) {
+                log.warn('Dialog already showing');
+                this._dialogRef.destroyObject();
+            }
         }
 
-        this._dialogRef = this.addObject(dialog, this.dialogLayer);
+        const ref = id ? this.addNamedObject(id, dialog, this.dialogLayer) : this.addObject(dialog, this.dialogLayer);
+        if (isModal) this._dialogRef = ref;
+
         return dialog;
     }
 
@@ -287,19 +307,34 @@ export default abstract class GameMode extends AppMode {
     protected addPose3D(structureFile: string | File | Blob) {
         const ublk = this.getCurrentUndoBlock(0);
         Assert.assertIsDefined(ublk, "Can't create 3D view - undo state not available");
-        if (this._pose3D) this.removeObject(this._pose3D);
-        this._pose3D = new Pose3D(structureFile, ublk.sequence, ublk.targetPairs, this._poses[0].customNumbering);
-        this.addObject(this._pose3D, this.dialogLayer);
-        this.regs?.add(this._pose3D.baseHovered.connect((closestIndex) => {
-            this._poses.forEach((pose) => {
-                pose.on3DPickingMouseMoved(closestIndex);
-            });
-        }));
-        this.regs?.add(this._pose3D.baseClicked.connect((closestIndex) => {
-            this._poses.forEach((pose) => {
-                pose.simulateMousedownCallback(closestIndex);
-            });
-        }));
+
+        const show3d = () => {
+            const pose3D = this.showDialog(
+                new Pose3DDialog(structureFile, ublk.sequence, ublk.targetPairs, this._poses[0].customNumbering),
+                'Pose3DDialog'
+            );
+
+            // Already live
+            if (!pose3D) return;
+
+            this._pose3D = pose3D;
+
+            this.regs?.add(pose3D.baseHovered.connect((closestIndex) => {
+                this._poses.forEach((pose) => {
+                    pose.on3DPickingMouseMoved(closestIndex);
+                });
+            }));
+            this.regs?.add(pose3D.baseClicked.connect((closestIndex) => {
+                this._poses.forEach((pose) => {
+                    pose.simulateMousedownCallback(closestIndex);
+                });
+            }));
+        };
+
+        this._toolbar.addView3DButton();
+        this.regs?.add(this._toolbar.view3DButton.clicked.connect(show3d));
+        show3d();
+
         this.regs?.add(this._poses[0].baseHovered.connect(
             (val: number) => this._pose3D?.hover3D(val)
         ));
@@ -402,10 +437,22 @@ export default abstract class GameMode extends AppMode {
         return '#000000';
     }
 
-    protected downloadSVG(): void {
+    private canDownload(): boolean {
         for (let ii = 0; ii < this._poses.length; ++ii) {
-            if (this._poses[ii].customLayout === undefined) continue;
             const cl = this._poses[ii].customLayout;
+            if (cl) return true;
+        }
+        this.showDialog(new NotificationDialog('There is no layout to download'));
+        return false;
+    }
+
+    protected downloadSVG(): void {
+        if (!this.canDownload()) {
+            return;
+        }
+        for (let ii = 0; ii < this._poses.length; ++ii) {
+            const cl = this._poses[ii].customLayout;
+            if (cl === undefined) continue;
             // width and height: xmax-xmin+20
             // each coord is x-xmin+10
             Assert.assertIsDefined(cl);
@@ -482,91 +529,76 @@ export default abstract class GameMode extends AppMode {
         }
     }
 
-    protected downloadHKWS(): void {
-        for (let ii = 0; ii < this._poses.length; ++ii) {
-            if (this._poses[ii].customLayout === undefined) continue;
-            const cl = this._poses[ii].customLayout;
-            Assert.assertIsDefined(cl);
-            let hkwsText = 'idx,x,y,seq,partner\n';
-            for (let jj = 0; jj < this._poses[ii].sequence.length; ++jj) {
-                hkwsText += `${jj},${cl[jj][0]},${cl[jj][1]},${this._poses[ii].sequence.sequenceString()[jj]},${this._poses[ii].secstruct.pairs[jj]}\n`;
-            }
-            this.download(`${ii}.hkws`, hkwsText);
-        }
-    }
-
     protected showCopySequenceDialog(): void {
-        Assert.assertIsDefined(this.modeStack);
         let sequenceString = this._poses[0].sequence.sequenceString();
         if (this._poses[0].customNumbering != null) sequenceString += ` ${Utility.arrayToRangeString(this._poses[0].customNumbering)}`;
-        this.modeStack.pushMode(new CopyTextDialogMode(sequenceString, 'Current Sequence'));
+        this._copySequenceDialog = this.showDialog(
+            new CopyTextDialog(sequenceString, 'Current Sequence'),
+            'CopySequenceDialog'
+        );
+    }
+
+    protected updateCopySequenceDialog(): void {
+        if (this._copySequenceDialog) {
+            let sequenceString = this._poses[0].sequence.sequenceString();
+            if (this._poses[0].customNumbering != null) sequenceString += ` ${Utility.arrayToRangeString(this._poses[0].customNumbering)}`;
+            this._copySequenceDialog.text = sequenceString;
+        }
     }
 
     protected showPasteSequenceDialog(): void {
         const customNumbering = this._poses[0].customNumbering;
-        this.showDialog(new PasteSequenceDialog(customNumbering)).closed.then((sequence) => {
-            if (sequence !== null) {
-                for (const pose of this._poses) {
-                    pose.pasteSequence(sequence);
-                }
+        const pasteDialog = this.showDialog(new PasteSequenceDialog(customNumbering), 'PasteSequenceDialog');
+        // Already live
+        if (!pasteDialog) return;
+        pasteDialog.applyClicked.connect((sequence) => {
+            for (const pose of this._poses) {
+                pose.pasteSequence(sequence);
             }
         });
     }
 
     protected findNucleotide(): void {
-        this.showDialog(new NucleotideFinder()).closed.then((result) => {
-            if (result != null) {
-                if (this._isPipMode) {
-                    this._poses.forEach((p) => p.focusNucleotide(result.nucleotideIndex));
-                } else {
-                    this._poses[this._curTargetIndex].focusNucleotide(result.nucleotideIndex);
-                }
+        const finder = this.showDialog(new NucleotideFinder(), 'NucleotideFinder');
+        // Already live
+        if (!finder) return;
+        finder.jumpClicked.connect((baseNum) => {
+            if (this._isPipMode) {
+                this._poses.forEach((p) => p.focusNucleotide(baseNum));
+            } else {
+                this._poses[this._curTargetIndex].focusNucleotide(baseNum);
             }
         });
     }
 
     protected showNucleotideRange(): void {
-        const initialRange = this._nucleotideRangeToShow
-            ?? (() => {
-                if (this._isPipMode) {
-                    return [
-                        1,
-                        Math.min(...this._poses.map((p) => p.fullSequenceLength))
-                    ];
-                } else {
-                    return [1, this._poses[this._curTargetIndex].fullSequenceLength];
-                }
-            })() as [number, number];
+        const fullRange: [number, number] = [
+            1,
+            Math.max(...this._poses.map((p) => p.fullSequenceLength))
+        ];
+        const initialRange = this._nucleotideRangeToShow ?? fullRange;
 
-        this.showDialog(
-            new NucleotideRangeSelector({
-                initialRange,
-                isPartialRange: Boolean(this._nucleotideRangeToShow)
-            })
-        ).closed.then((result) => {
-            if (result === null) {
-                return;
-            }
-
-            if (result.clearRange) {
-                this._nucleotideRangeToShow = null;
-            } else {
-                this._nucleotideRangeToShow = [result.startIndex, result.endIndex];
-            }
-
-            if (this._isPipMode) {
-                this._poses.forEach((p) => p.showNucleotideRange(this._nucleotideRangeToShow));
-            } else {
-                this._poses[this._curTargetIndex].showNucleotideRange(this._nucleotideRangeToShow);
-            }
+        const selector = this.showDialog(
+            new NucleotideRangeSelector(fullRange, initialRange),
+            'NucleotideRangeSelector'
+        );
+        // Already live
+        if (!selector) return;
+        selector.applyClicked.connect((result) => {
+            this._nucleotideRangeToShow = [result.start, result.end];
+            this._poses.forEach((p) => p.showNucleotideRange(this._nucleotideRangeToShow));
         });
     }
 
     protected changeExplosionFactor(): void {
-        this.showDialog(new ExplosionFactorDialog(this._poseFields[0].explosionFactor)).closed.then((result) => {
-            if (result != null) {
-                this._poseFields.forEach((pf) => { pf.explosionFactor = result; });
-            }
+        const factorDialog = this.showDialog(
+            new ExplosionFactorDialog(this._poseFields[0].explosionFactor),
+            'ExplosionFactorDialog'
+        );
+        // Already live
+        if (!factorDialog) return;
+        factorDialog.factor.connect((factor) => {
+            this._poseFields.forEach((pf) => { pf.explosionFactor = factor; });
         });
     }
 
@@ -576,13 +608,15 @@ export default abstract class GameMode extends AppMode {
     protected _uiLockRef: GameObjectRef = GameObjectRef.NULL;
     protected _notifRef: GameObjectRef = GameObjectRef.NULL;
     protected _contextMenuDialogRef: GameObjectRef = GameObjectRef.NULL;
+    protected _copySequenceDialog: CopyTextDialog | null = null;
 
     private _modeScriptInterface: ExternalInterfaceCtx;
 
     protected _poseFields: PoseField[] = [];
     protected _poses: Pose2D[] = []; // TODO: remove me!
     protected _isPipMode: boolean = false;
-    protected _pose3D: Pose3D | null = null;
+    protected _pose3D: Pose3DDialog | null = null;
+    protected _toolbar: Toolbar;
 
     protected _nucleotideRangeToShow: [number, number] | null = null;
 

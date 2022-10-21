@@ -38,7 +38,7 @@ export interface HTMLInputEvent extends Event {
  * When it loses focus, it creates a fake file input display placeholder, and hides the DOM element.
  */
 export default class FileInputObject extends DOMObject<HTMLInputElement | HTMLDivElement> {
-    public readonly fileSelected = new Signal<Event>();
+    public readonly fileSelected = new Signal<HTMLInputEvent>();
 
     constructor(props: FileInputObjectProps) {
         super(
@@ -97,7 +97,7 @@ export default class FileInputObject extends DOMObject<HTMLInputElement | HTMLDi
                     fileInputEvent.target.files
                     && fileInputEvent.target.files.length > 0
                 ) {
-                    this.fileSelected.emit(e);
+                    this.fileSelected.emit(fileInputEvent);
                 }
             };
         }
@@ -148,7 +148,7 @@ export default class FileInputObject extends DOMObject<HTMLInputElement | HTMLDi
         }
     }
 
-    protected onSizeChanged(): void {
+    protected stylesChanged() {
         if (this._obj instanceof HTMLInputElement || this._obj instanceof HTMLDivElement) {
             this._obj.style.fontSize = DOMObject.sizeToString(this._fontSize);
             this._obj.style.fontFamily = this._fontFamily;
@@ -162,7 +162,10 @@ export default class FileInputObject extends DOMObject<HTMLInputElement | HTMLDi
             }
             this._obj.style.borderRadius = this._borderRadius.toString();
         }
+        this.onSizeChanged();
+    }
 
+    protected onSizeChanged(): void {
         super.onSizeChanged();
         if (this._fakeFileInput != null) {
             // recreate our fake text input when our properties change
@@ -172,13 +175,13 @@ export default class FileInputObject extends DOMObject<HTMLInputElement | HTMLDi
 
     public font(fontFamily: string): FileInputObject {
         this._fontFamily = fontFamily;
-        this.onSizeChanged();
+        this.stylesChanged();
         return this;
     }
 
     public fontWeight(weight: FontWeight): FileInputObject {
         this._fontWeight = weight;
-        this.onSizeChanged();
+        this.stylesChanged();
         return this;
     }
 
@@ -188,7 +191,7 @@ export default class FileInputObject extends DOMObject<HTMLInputElement | HTMLDi
 
     public borderColor(value: number): FileInputObject {
         this._borderColor = value;
-        this.onSizeChanged();
+        this.stylesChanged();
         return this;
     }
 
@@ -199,7 +202,7 @@ export default class FileInputObject extends DOMObject<HTMLInputElement | HTMLDi
     public set width(value: number) {
         this._obj.style.width = DOMObject.sizeToString(value);
 
-        this.onSizeChanged();
+        this.stylesChanged();
     }
 
     public get height(): number {
@@ -208,7 +211,7 @@ export default class FileInputObject extends DOMObject<HTMLInputElement | HTMLDi
 
     public set height(value: number) {
         this._obj.style.height = DOMObject.sizeToString(value);
-        this.onSizeChanged();
+        this.stylesChanged();
     }
 
     public get labelText(): string | undefined {
@@ -239,7 +242,7 @@ export default class FileInputObject extends DOMObject<HTMLInputElement | HTMLDi
 
     private destroyFakeFileInput(): void {
         if (this._fakeFileInput != null) {
-            this._fakeFileInput.destroy({children: true});
+            if (!this._fakeFileInput.destroyed) this._fakeFileInput.destroy({children: true});
             this._fakeFileInput = null;
             this._dummyDisp.interactive = false;
         }

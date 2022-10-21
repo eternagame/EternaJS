@@ -7,18 +7,18 @@ import Connection from './Connection';
  * exposing a public interface for emitting events. This can be used by entities which wish to
  * expose a signal-like interface for listening, without allowing external callers to emit signals.
  */
-export default abstract class AbstractSignal<T> extends Reactor<T, T, undefined> implements SignalView<T> {
+export default abstract class AbstractSignal<T> extends Reactor<[T]> implements SignalView<T> {
     public abstract map<U>(func: (value: T) => U): SignalView<U>;
 
     public abstract filter(pred: (value: T) => boolean): SignalView<T>;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public connect(slot: (value: any) => void): Connection {
+    public connect(slot: (value: T) => void): Connection {
         return this.addConnection(slot);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public disconnect(slot: (value: any) => void): void {
+    public disconnect(slot: (value: T) => void): void {
         this.removeConnection(slot);
     }
 

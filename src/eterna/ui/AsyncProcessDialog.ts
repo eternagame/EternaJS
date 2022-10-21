@@ -12,6 +12,8 @@ export default class AsyncProcessDialog extends Dialog<void> {
     }
 
     protected added(): void {
+        super.added();
+
         const textField = Fonts.std(this._text, 20).color(0xffffff).bold().build();
         this.container.addChild(textField);
 

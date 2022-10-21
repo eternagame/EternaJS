@@ -707,7 +707,18 @@ export default class UndoBlock {
 
     public createDotPlot(): Plot {
         const plot = new Plot(PlotType.SCATTER);
-        plot.set2DData(this._dotPlotData?.data ?? null, this._sequence.length);
+        const data = this._dotPlotData?.data.slice() ?? null;
+        if (data) {
+            // JAR: Apparently we get dot plot data back 1-indexed, not zero-indexed, but nobody happened
+            // to notice the mismatch between that and what plots expect. TBD whether this should be handled
+            // differently, or if this is the correct place to translate. Also worth doing further validation
+            // (I did a visual check of the plots on Vienna1 and Nupack)
+            for (let ii = 0; ii < data.length; ii += 3) {
+                data[ii + 1]--;
+                data[ii]--;
+            }
+        }
+        plot.set2DData(data, this._sequence.length);
         return plot;
     }
 

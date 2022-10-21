@@ -2,10 +2,8 @@ import {
     Container, Text, Graphics
 } from 'pixi.js';
 import {Signal} from 'signals';
-import Dialog from 'eterna/ui/Dialog';
-import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
 import {
-    HAlign, VLayoutContainer, HLayoutContainer, Arrays, DisplayUtil, VAlign, Assert
+    HAlign, VLayoutContainer, HLayoutContainer, Arrays, VAlign
 } from 'flashbang';
 import GameButton from 'eterna/ui/GameButton';
 import GraphicsUtil from 'eterna/util/GraphicsUtil';
@@ -13,10 +11,11 @@ import FixedWidthTextField from 'eterna/ui/FixedWidthTextField';
 import Fonts from 'eterna/util/Fonts';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import GameCheckbox from 'eterna/ui/GameCheckbox';
+import WindowDialog from 'eterna/ui/WindowDialog';
 import {DesignCategory} from './DesignBrowserMode';
 import ButtonWithIcon from './ButtonWithIcon';
 
-export default class CustomizeColumnOrderDialog extends Dialog<void> {
+export default class CustomizeColumnOrderDialog extends WindowDialog<void> {
     public readonly columnsReorganized = new Signal<DesignCategory[]>();
     public readonly selectedFilterUpdate = new Signal<boolean>();
 
@@ -25,7 +24,11 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
         curColumns: DesignCategory[] | null,
         disabled: Set<DesignCategory> | null = null
     ) {
-        super();
+        super({
+            title: 'Configure Columns',
+            contentHAlign: HAlign.LEFT,
+            contentVAlign: VAlign.TOP
+        });
         this._allColumnCategories = allCategories.slice();
         this._initialColumns = curColumns ? curColumns.slice() : null;
         this._disabled = disabled;
@@ -34,36 +37,24 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
     protected added(): void {
         super.added();
 
-        this._bg = new GamePanel({
-            type: GamePanelType.NORMAL,
-            alpha: 1.0,
-            color: 0x043468,
-            borderAlpha: 1,
-            borderColor: 0x4A90E2
-        });
-
-        this._bg.title = 'CONFIGURE COLUMNS';
-        this.addObject(this._bg, this.container);
-
-        this._panelContent = new VLayoutContainer(0, HAlign.CENTER);
-        this.container.addChild(this._panelContent);
+        this._content = new VLayoutContainer(0, HAlign.CENTER);
+        this._window.content.addChild(this._content);
 
         this._columnUILayout = new VLayoutContainer(4);
         const addCriterionLayout = new HLayoutContainer(2);
         addCriterionLayout.position.x = 10;
-        this._panelContent.addVSpacer(30);
-        this._panelContent.addChild(this._columnUILayout);
-        this._panelContent.addVSpacer(20);
+        this._content.addChild(this._columnUILayout);
+        this._content.addVSpacer(20);
 
         // ADD CRITERION LAYOUT
         const criterionContainer = new Container();
         criterionContainer.addChild(new Graphics()
-            .beginFill(0x19508D)
+            .beginFill(0x043468)
             .drawRoundedRect(0, -6, 316, 33, 6)
             .endFill());
         criterionContainer.addChild(addCriterionLayout);
 
-        this._panelContent.addChild(criterionContainer);
+        this._content.addChild(criterionContainer);
         this._prevCategoryButton = new GameButton().allStates(
             GraphicsUtil.drawLeftTriangle(2, 0x2F94D1)
         );
@@ -102,24 +93,15 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
 
         addCriterionLayout.layout();
 
-        this._panelContent.addVSpacer(20);
+        this._content.addVSpacer(20);
 
         this._currentSelectedFilterCheckbox = new GameCheckbox(12, 'Only show designs selected with control+click');
         this._currentSelectedFilterCheckbox.toggled.connect((e) => {
             this.selectedFilterUpdate.emit(e);
         });
-        this.addObject(this._currentSelectedFilterCheckbox, this._panelContent);
+        this.addObject(this._currentSelectedFilterCheckbox, this._content);
 
-        this._panelContent.addVSpacer(20);
-
-        const saveButton = new GameButton()
-            .label('Save', 16)
-            .customStyleBox(new Graphics()
-                .beginFill(0x54B54E)
-                .drawRoundedRect(0, 0, 80, 36, 6)
-                .endFill());
-        saveButton.clicked.connect(() => this.close());
-        this.addObject(saveButton, this._panelContent);
+        this._content.addVSpacer(20);
 
         // EXISTING SORT CRITERIA
         if (this._initialColumns !== null) {
@@ -130,8 +112,6 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
 
         this.validateCurCategoryIdx();
         this.layout();
-        Assert.assertIsDefined(this.mode);
-        this.regs.add(this.mode.resized.connect(() => this.repositionDialog()));
     }
 
     private addColumnUI(category: DesignCategory, idx: number): void {
@@ -286,31 +266,15 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
             this._columnUILayout.addChild(ui.container);
         }
 
-        this._panelContent.layout(true);
-        this._bg.setSize(this._panelContent.width + 60, this._panelContent.height + 40);
-
-        this.repositionDialog();
-    }
-
-    private repositionDialog(): void {
-        DisplayUtil.positionRelativeToStage(
-            this._bg.display, HAlign.CENTER, VAlign.TOP,
-            HAlign.CENTER, VAlign.TOP, 0, 145
-        );
-
-        DisplayUtil.positionRelative(
-            this._panelContent, HAlign.CENTER, VAlign.CENTER,
-            this._bg.display, HAlign.CENTER, VAlign.CENTER
-        );
+        this._content.layout(true);
+        this._window.layout();
     }
 
     private readonly _allColumnCategories: DesignCategory[];
     private readonly _initialColumns: DesignCategory[] | null;
     private readonly _disabled: Set<DesignCategory> | null;
 
-    private _bg: GamePanel;
-
-    private _panelContent: VLayoutContainer;
+    private _content: VLayoutContainer;
     private _columnUILayout: VLayoutContainer;
 
     private _curCategoryText: FixedWidthTextField;

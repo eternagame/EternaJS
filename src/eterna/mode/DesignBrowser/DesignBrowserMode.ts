@@ -433,7 +433,8 @@ export default class DesignBrowserMode extends GameMode {
     private switchToFeedbackViewForSolution(solution: Solution): void {
         this.pushUILock();
 
-        Eterna.app.switchToFeedbackView(this._puzzle, solution, this._filteredSolutions.slice())
+        const solutions = this._filteredSolutions.filter((sol) => sol.expFeedback !== null).slice();
+        Eterna.app.switchToFeedbackView(this._puzzle, solution, solutions)
             .then(() => this.popUILock())
             .catch((e) => {
                 log.error(e);
@@ -678,7 +679,7 @@ export default class DesignBrowserMode extends GameMode {
     }
 
     private showSortDialog(): void {
-        this.showDialog(new SortOptionsDialog(this._sortOptions));
+        this.showDialog(new SortOptionsDialog(this._sortOptions), 'SortDialog');
     }
 
     private showCustomizeColumnOrderDialog(): void {
@@ -689,8 +690,11 @@ export default class DesignBrowserMode extends GameMode {
         }
 
         const dialog = this.showDialog(
-            new CustomizeColumnOrderDialog(AllCategories(), this._categories, disabledCategories)
+            new CustomizeColumnOrderDialog(AllCategories(), this._categories, disabledCategories),
+            'ColumnOrderDialog'
         );
+        // Already live
+        if (!dialog) return;
         dialog.columnsReorganized.connect((columnNames) => {
             this._categories = columnNames;
             Eterna.settings.designBrowserColumnNames.value = columnNames;

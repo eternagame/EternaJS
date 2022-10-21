@@ -3,15 +3,14 @@ import {
     Container, DisplayObject, Rectangle, Point
 } from 'pixi.js';
 import {
-    ContainerObject, Enableable, GameObject, Assert
+    ContainerObject, Enableable, GameObject, Assert, SceneObject
 } from 'flashbang';
 import EPars from 'eterna/EPars';
 import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
 import Puzzle from 'eterna/puzzle/Puzzle';
-import TextBalloon from 'eterna/ui/TextBalloon';
 import Pose2D, {RNAHighlightState} from 'eterna/pose2D/Pose2D';
-import {PaletteTargetType} from 'eterna/ui/NucleotidePalette';
-import ToggleBar from 'eterna/ui/ToggleBar';
+import {PaletteTargetType} from 'eterna/ui/toolbar/NucleotidePalette';
+import StateToggle from 'eterna/ui/StateToggle';
 import PoseField from 'eterna/pose2D/PoseField';
 import {RScriptUIElement, RScriptUIElementID} from './RScriptUIElement';
 
@@ -36,15 +35,21 @@ export default class RScriptEnv extends ContainerObject {
     }
 
     public setTextboxVisible(id: string, isVisible: boolean): void {
-        if (id === '' || !Object.prototype.hasOwnProperty.call(this._vars.hasOwnProperty, 'id')) {
+        if (
+            id === ''
+            || !Object.prototype.hasOwnProperty.call(
+                this._vars.hasOwnProperty,
+                'id'
+            )
+        ) {
             return;
         }
 
         const value = this.getVar(id);
-        if (value instanceof TextBalloon) {
+        if (value instanceof SceneObject) {
             value.display.visible = isVisible;
         } else {
-            log.warn(`'${id}' is not a Textbox`);
+            log.warn(`'${id}' is not a SceneObject`);
         }
     }
 
@@ -62,7 +67,7 @@ export default class RScriptEnv extends ContainerObject {
             return ref;
         } else {
             const value = this.getVar(ref);
-            if (typeof (value) === 'string') {
+            if (typeof value === 'string') {
                 return value;
             } else {
                 log.warn(`'${ref}' is not a string`);
@@ -97,7 +102,9 @@ export default class RScriptEnv extends ContainerObject {
     // Handles parsing the element ID and getting the right object.
     // Returns: UI Element, its UI ID, and the alternate parameter (integer) that may
     //  have been passed in.
-    public getUIElementFromID(key: string): [RScriptUIElement | null, RScriptUIElementID, number] {
+    public getUIElementFromID(
+        key: string
+    ): [RScriptUIElement | null, RScriptUIElementID, number] {
         // Highlight UI.
         let uiElement: RScriptUIElement | null;
 
@@ -109,7 +116,7 @@ export default class RScriptEnv extends ContainerObject {
         // The input number will always come after the dash. The dash should be
         // included in the key that is passed.
         const idString: string = splitId[0] + (splitId.length > 1 ? '-' : '');
-        const elementID: RScriptUIElementID = (idString.toUpperCase()) as RScriptUIElementID;
+        const elementID: RScriptUIElementID = idString.toUpperCase() as RScriptUIElementID;
 
         if (splitId.length > 2) {
             throw new Error('Invalid UI Element ID format');
@@ -136,20 +143,7 @@ export default class RScriptEnv extends ContainerObject {
     public getUIElementBounds(key: string): Rectangle | null {
         try {
             const [uiElement] = this.getUIElementFromID(key);
-            if (uiElement instanceof Rectangle) {
-                // This is a rectangle whithin the palette
-                const [palette] = this.getUIElementFromID(RScriptUIElementID.PALETTE);
-                const obj = palette as GameObject;
-                const rect = uiElement as Rectangle;
-                Assert.assertIsDefined(obj.display);
-                const globalPos = obj.display.toGlobal(new Point());
-                return new Rectangle(
-                    globalPos.x + rect.x,
-                    globalPos.y + rect.y,
-                    rect.width,
-                    rect.height
-                );
-            } else {
+            if (uiElement instanceof GameObject) {
                 const obj = uiElement as GameObject;
                 Assert.assertIsDefined(obj.display);
                 const globalPos = obj.display.toGlobal(new Point());
@@ -159,7 +153,35 @@ export default class RScriptEnv extends ContainerObject {
                     obj.display.getLocalBounds().width,
                     obj.display.getLocalBounds().height
                 );
-            }
+            } else if (uiElement instanceof DisplayObject) {
+                const obj = uiElement;
+                Assert.assertIsDefined(obj);
+                const globalPos = obj.toGlobal(new Point());
+                return new Rectangle(
+                    globalPos.x,
+                    globalPos.y,
+                    obj.getLocalBounds().width,
+                    obj.getLocalBounds().height
+                );
+            } else if (uiElement !== null) {
+                if (uiElement.proxy) {
+                    return uiElement.rect;
+                } else {
+                    const [palette] = this.getUIElementFromID(
+                        RScriptUIElementID.PALETTE
+                    );
+                    const obj = palette as GameObject;
+                    const rect = uiElement.rect as Rectangle;
+                    Assert.assertIsDefined(obj.display);
+                    const globalPos = obj.display.toGlobal(new Point());
+                    return new Rectangle(
+                        globalPos.x + rect.x,
+                        globalPos.y + rect.y,
+                        rect.width,
+                        rect.height
+                    );
+                }
+            } else { return null; }
         } catch (e) {
             return null;
         }
@@ -169,7 +191,11 @@ export default class RScriptEnv extends ContainerObject {
         return this.ui.constraintCount;
     }
 
-    public showHideUI(elementID: string, visible: boolean, disabled: boolean): void {
+    public showHideUI(
+        elementID: string,
+        visible: boolean,
+        disabled: boolean
+    ): void {
         elementID = elementID.toUpperCase();
 
         if (elementID === RScriptUIElementID.ENERGY) {
@@ -184,9 +210,15 @@ export default class RScriptEnv extends ContainerObject {
             // no-op
         } else if (elementID === RScriptUIElementID.TOGGLEBAR) {
             this.showHideUI(RScriptUIElementID.TOGGLETARGET, visible, disabled);
-            this.showHideUI(RScriptUIElementID.TOGGLENATURAL, visible, disabled);
+            this.showHideUI(
+                RScriptUIElementID.TOGGLENATURAL,
+                visible,
+                disabled
+            );
         } else if (elementID === RScriptUIElementID.SWITCH) {
-            (this.getUIElementFromID(elementID)[0] as ToggleBar).display.visible = visible;
+            (
+                this.getUIElementFromID(elementID)[0] as StateToggle
+            ).display.visible = visible;
         } else {
             if (visible && elementID === RScriptUIElementID.PALETTE) {
                 this.ui.toolbar.palette.setOverrideDefault();
@@ -196,27 +228,143 @@ export default class RScriptEnv extends ContainerObject {
                 this.ui.toolbar.palette.changeNoPairMode();
             }
 
-            const obj: RScriptUIElement | null = this.getUIElementFromID(elementID)[0];
-            if (obj) {
-                if (obj instanceof DisplayObject) {
-                    obj.visible = visible;
-                } else if (obj instanceof GameObject && obj.display != null) {
-                    obj.display.visible = visible;
-                }
+            let bEnable = true;
+            switch (elementID) {
+                case RScriptUIElementID.ZOOMIN:
+                case RScriptUIElementID.ZOOMOUT:
+                case RScriptUIElementID.RESET:
+                case RScriptUIElementID.UNDO:
+                case RScriptUIElementID.REDO:
+                case RScriptUIElementID.SWAP:
+                case RScriptUIElementID.PIP:
+                case RScriptUIElementID.BASEMARKER:
+                case RScriptUIElementID.MAGICGLUE:
+                    bEnable = false;
+                    break;
+                default:
+                    break;
+            }
 
-                // AMW TODO: this concerns me. Neither DisplayObject nor GameObject
-                // seem to actually implement Enableable...
-                if (((obj as unknown) as Enableable).enabled !== undefined) {
-                    ((obj as unknown) as Enableable).enabled = visible && !disabled;
+            if (bEnable) {
+                const obj: RScriptUIElement | null = this.getUIElementFromID(elementID)[0];
+                if (obj) {
+                    if (obj instanceof DisplayObject) {
+                        obj.visible = visible;
+                    } else if (obj instanceof GameObject && obj.display != null) {
+                        obj.display.visible = visible;
+                    }
+
+                    // AMW TODO: this concerns me. Neither DisplayObject nor GameObject
+                    // seem to actually implement Enableable...
+                    if ((obj as unknown as Enableable).enabled !== undefined) {
+                        (obj as unknown as Enableable).enabled = visible && !disabled;
+                    }
                 }
             }
         }
+        this.ui.layoutModeBar();
     }
 
-    public getUIElement(type: RScriptUIElementID, i: number = -1): RScriptUIElement | null {
+    public checkShowUI(instructions: string[]):string[] {
+        const newInstructions: string[] = [];
+        const elementIDArray: {key:string, id:RScriptUIElementID}[] = [];
+        let i:number;
+        for (i = 0; i < instructions.length; i++) {
+            const instruction = instructions[i];
+            const instRegex = /(#PRE-)?(\w+)\s*(.*)/gi;
+            const regResult = instRegex.exec(instruction);
+            if (regResult) {
+                let op: string = (regResult[1] ? regResult[1] : '') + regResult[2];
+                const args: string = regResult[3];
+                op = op.replace(/^\s*/, '');
+                op = op.replace(/\s*$/, '');
+                const argArray = args.split(',');
+                const key = argArray[0];
+
+                const splitId: string[] = key.split('-');
+                const idString: string = splitId[0] + (splitId.length > 1 ? '-' : '');
+                const elementID: RScriptUIElementID = idString.toUpperCase() as RScriptUIElementID;
+                elementIDArray.push({key, id: elementID});
+            }
+        }
+
+        if (elementIDArray.length > 0) {
+            const uiElement = this.checkUIElement(elementIDArray[0].id);
+            if (uiElement instanceof GameObject) {
+                return newInstructions;
+            } else if (uiElement instanceof DisplayObject) {
+                return newInstructions;
+            } else if (uiElement !== null) {
+                if (uiElement.proxy) {
+                    newInstructions.push(`WaitForClickUI ${elementIDArray[0].key}`);
+                    newInstructions.push('HideHighlights s');
+                    newInstructions.push('HideUIArrow');
+                    newInstructions.push('HideUITooltip');
+
+                    for (i = 0; i < instructions.length; i++) {
+                        const instruction = instructions[i];
+                        newInstructions.push(instruction);
+                    }
+                }
+            }
+        }
+        return newInstructions;
+    }
+
+    public checkUIElement(
+        type: RScriptUIElementID
+    ): RScriptUIElement | null {
         switch (type) {
-            case RScriptUIElementID.ACTION_MENU:
-                return this.ui.toolbar.actionMenu;
+            case RScriptUIElementID.ZOOMIN:
+                return this.ui.toolbar.zoomInButton
+                    ? this.ui.toolbar.getScriptUIElement(
+                        this.ui.toolbar.zoomInButton, RScriptUIElementID.ZOOMIN
+                    )
+                    : null;
+            case RScriptUIElementID.ZOOMOUT:
+                return this.ui.toolbar.zoomOutButton
+                    ? this.ui.toolbar.getScriptUIElement(
+                        this.ui.toolbar.zoomOutButton, RScriptUIElementID.ZOOMOUT
+                    )
+                    : null;
+            case RScriptUIElementID.RESET:
+                return this.ui.toolbar.getScriptUIElement(
+                    this.ui.toolbar.resetButton, RScriptUIElementID.RESET
+                );
+            case RScriptUIElementID.UNDO:
+                return this.ui.toolbar.getScriptUIElement(
+                    this.ui.toolbar.undoButton, RScriptUIElementID.UNDO
+                );
+            case RScriptUIElementID.REDO:
+                return this.ui.toolbar.getScriptUIElement(
+                    this.ui.toolbar.redoButton, RScriptUIElementID.REDO
+                );
+            case RScriptUIElementID.SWAP:
+                return this.ui.toolbar.getScriptUIElement(
+                    this.ui.toolbar.pairSwapButton, RScriptUIElementID.SWAP
+                );
+            case RScriptUIElementID.PIP:
+                return this.ui.toolbar.getScriptUIElement(
+                    this.ui.toolbar.pipButton, RScriptUIElementID.PIP
+                );
+            case RScriptUIElementID.BASEMARKER:
+                return this.ui.toolbar.getScriptUIElement(
+                    this.ui.toolbar.baseMarkerButton, RScriptUIElementID.BASEMARKER
+                );
+            case RScriptUIElementID.MAGICGLUE:
+                return this.ui.toolbar.getScriptUIElement(
+                    this.ui.toolbar.magicGlueButton, RScriptUIElementID.MAGICGLUE
+                );
+            default:
+                return null;
+        }
+    }
+
+    public getUIElement(
+        type: RScriptUIElementID,
+        i: number = -1
+    ): RScriptUIElement | null {
+        switch (type) {
             case RScriptUIElementID.OBJECTIVES:
                 return this.ui.constraintsLayer;
             case RScriptUIElementID.SHAPEOBJECTIVE:
@@ -224,65 +372,93 @@ export default class RScriptEnv extends ContainerObject {
             case RScriptUIElementID.OBJECTIVE:
                 return this.ui.getConstraintBox(i);
             case RScriptUIElementID.SWITCH:
-                return this.ui.toolbar.stateToggle;
+                return this.ui.stateToggle;
             case RScriptUIElementID.TOTALENERGY:
             case RScriptUIElementID.PRIMARY_ENERGY:
                 return this.poseField.primaryScoreDisplay;
             case RScriptUIElementID.SECONDARY_ENERGY:
                 return this.poseField.secondaryScoreDisplay;
+            case RScriptUIElementID.DELTAENERGY:
+                return this.poseField.deltaScoreDisplay;
             case RScriptUIElementID.PALETTE:
             case RScriptUIElementID.PALETTEALT:
                 return this.ui.toolbar.palette;
             case RScriptUIElementID.TOGGLENATURAL:
-                return this.ui.toolbar.naturalButton;
+                return this.ui.naturalButton;
             case RScriptUIElementID.TOGGLETARGET:
-                return this.ui.toolbar.targetButton;
+                return this.ui.targetButton;
             case RScriptUIElementID.TOGGLEBAR:
                 // NOTE: There is no longer a toggle bar...
-                return this.ui.toolbar.naturalButton;
+                return this.ui.naturalButton;
             case RScriptUIElementID.ZOOMIN:
-                return this.ui.toolbar.zoomInButton ? this.ui.toolbar.zoomInButton : null;
+                return this.ui.toolbar.zoomInButton
+                    ? this.ui.toolbar.getScriptUIElement(
+                        this.ui.toolbar.zoomInButton, RScriptUIElementID.ZOOMIN
+                    )
+                    : null;
             case RScriptUIElementID.ZOOMOUT:
-                return this.ui.toolbar.zoomOutButton ? this.ui.toolbar.zoomOutButton : null;
+                return this.ui.toolbar.zoomOutButton
+                    ? this.ui.toolbar.getScriptUIElement(
+                        this.ui.toolbar.zoomOutButton, RScriptUIElementID.ZOOMOUT
+                    )
+                    : null;
             case RScriptUIElementID.RESET:
-                return this.ui.toolbar.resetButton;
+                return this.ui.toolbar.getScriptUIElement(
+                    this.ui.toolbar.resetButton, RScriptUIElementID.RESET
+                );
             case RScriptUIElementID.UNDO:
-                return this.ui.toolbar.undoButton;
+                return this.ui.toolbar.getScriptUIElement(
+                    this.ui.toolbar.undoButton, RScriptUIElementID.UNDO
+                );
             case RScriptUIElementID.REDO:
-                return this.ui.toolbar.redoButton;
+                return this.ui.toolbar.getScriptUIElement(
+                    this.ui.toolbar.redoButton, RScriptUIElementID.REDO
+                );
             case RScriptUIElementID.SWAP:
-                return this.ui.toolbar.pairSwapButton;
+                return this.ui.toolbar.getScriptUIElement(
+                    this.ui.toolbar.pairSwapButton, RScriptUIElementID.SWAP
+                );
             case RScriptUIElementID.PIP:
-                return this.ui.toolbar.pipButton;
+                return this.ui.toolbar.getScriptUIElement(
+                    this.ui.toolbar.pipButton, RScriptUIElementID.PIP
+                );
             case RScriptUIElementID.BASEMARKER:
-                return this.ui.toolbar.baseMarkerButton;
+                return this.ui.toolbar.getScriptUIElement(
+                    this.ui.toolbar.baseMarkerButton, RScriptUIElementID.BASEMARKER
+                );
             case RScriptUIElementID.MAGICGLUE:
-                return this.ui.toolbar.magicGlueButton;
+                return this.ui.toolbar.getScriptUIElement(
+                    this.ui.toolbar.magicGlueButton, RScriptUIElementID.MAGICGLUE
+                );
             case RScriptUIElementID.A:
-                return this.ui.toolbar.palette.getTarget(PaletteTargetType.A);
+                return {rect: this.ui.toolbar.palette.getTarget(PaletteTargetType.A)};
             case RScriptUIElementID.U:
-                return this.ui.toolbar.palette.getTarget(PaletteTargetType.U);
+                return {rect: this.ui.toolbar.palette.getTarget(PaletteTargetType.U)};
             case RScriptUIElementID.G:
-                return this.ui.toolbar.palette.getTarget(PaletteTargetType.G);
+                return {rect: this.ui.toolbar.palette.getTarget(PaletteTargetType.G)};
             case RScriptUIElementID.C:
-                return this.ui.toolbar.palette.getTarget(PaletteTargetType.C);
+                return {rect: this.ui.toolbar.palette.getTarget(PaletteTargetType.C)};
             case RScriptUIElementID.AU:
             case RScriptUIElementID.UA:
             case RScriptUIElementID.AUCOMPLETE:
             case RScriptUIElementID.UACOMPLETE:
-                return this.ui.toolbar.palette.getTarget(PaletteTargetType.AU);
+                return {rect: this.ui.toolbar.palette.getTarget(PaletteTargetType.AU)};
             case RScriptUIElementID.GU:
             case RScriptUIElementID.UG:
             case RScriptUIElementID.GUCOMPLETE:
             case RScriptUIElementID.UGCOMPLETE:
-                return this.ui.toolbar.palette.getTarget(PaletteTargetType.UG);
+                return {rect: this.ui.toolbar.palette.getTarget(PaletteTargetType.UG)};
             case RScriptUIElementID.GC:
             case RScriptUIElementID.CG:
             case RScriptUIElementID.GCCOMPLETE:
             case RScriptUIElementID.CGCOMPLETE:
-                return this.ui.toolbar.palette.getTarget(PaletteTargetType.GC);
+                return {rect: this.ui.toolbar.palette.getTarget(PaletteTargetType.GC)};
+            case RScriptUIElementID.ACTION_MENU:
+                log.warn('ACTION_MENU rscript ui element no longer exists');
+                return null;
             default:
-                throw new Error(`Invalid UI Element: ${type}`);
+                log.warn(`Invalid UI Element: ${type}`);
+                return null;
         }
     }
 
@@ -328,4 +504,8 @@ export default class RScriptEnv extends ContainerObject {
     private _stringCount: number = 0;
 }
 
-export type RScriptVarType = GameObject | DisplayObject | RNAHighlightState | string;
+export type RScriptVarType =
+    | GameObject
+    | DisplayObject
+    | RNAHighlightState
+    | string;

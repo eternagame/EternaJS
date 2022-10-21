@@ -16,7 +16,7 @@ import {
     ContainerObject,
     DisplayObjectPointerTarget
 } from 'flashbang';
-import {PaletteTarget} from 'eterna/ui/NucleotidePalette';
+import {PaletteTarget} from 'eterna/ui/toolbar/NucleotidePalette';
 import Fonts from 'eterna/util/Fonts';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
 
@@ -127,7 +127,9 @@ export default class Tooltips extends GameObject {
             }
         };
 
-        const hide = (): void => this.removeTooltip(ele);
+        const hide = (): void => {
+            this.removeTooltip(ele);
+        };
 
         const regs = new RegistrationGroup();
 

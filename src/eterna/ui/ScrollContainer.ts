@@ -241,7 +241,7 @@ export default class ScrollContainer extends ContainerObject {
         return this._htmlWrapper;
     }
 
-    private getBounds(): Rectangle {
+    public getBounds(): Rectangle {
         const {x, y} = this.display.getGlobalPosition();
         return new Rectangle(x, y, this._width, this._height);
     }

@@ -1,7 +1,6 @@
 import {UnitSignal} from 'signals';
 import {
-    DisplayObject,
-    Graphics,
+    Container,
     Texture
 } from 'pixi.js';
 import {
@@ -11,7 +10,7 @@ import {
     HAlign,
     VAlign
 } from 'flashbang';
-import GameButton from './GameButton';
+import GameButton, {ButtonTheme} from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';
 
 interface ContextMenuObjectProps {
@@ -25,39 +24,41 @@ export default class ContextMenu extends ContainerObject {
     constructor(props: ContextMenuObjectProps) {
         super();
 
-        this._panel = new GamePanel({
-            type: GamePanelType.NORMAL,
-            alpha: 1.0,
-            color: ContextMenu.PANEL_BACKGROUND_COLOR,
-            dropShadow: true
-        });
-        this.addObject(this._panel, this.container, 0);
-
         if (props.horizontal) {
             this._buttonLayout = new HLayoutContainer(5, VAlign.CENTER);
         } else {
             this._buttonLayout = new VLayoutContainer(5, HAlign.LEFT);
         }
-        this._panel.container.addChild(this._buttonLayout);
 
         this._horizontal = props.horizontal || false;
     }
 
     protected added(): void {
         super.added();
+
+        this._panel = new GamePanel({
+            type: GamePanelType.NORMAL,
+            alpha: 1.0,
+            dropShadow: true
+        });
+        this.addObject(this._panel, this.container, 0);
+
+        this.container.addChild(this._buttonLayout);
+
         this.doLayout();
     }
 
     public addItem(
         text: string,
-        icon: DisplayObject | Texture | string | undefined = undefined,
+        icon: Container | Texture | string | undefined = undefined,
         tooltipText: string | undefined = undefined,
-        fillColor: number | undefined = undefined
+        theme: ButtonTheme = 'secondary',
+        labelBackground?: boolean
     ): GameButton {
-        const button = new GameButton();
+        const button = new GameButton(theme);
 
         if (text) {
-            button.label(text, 14);
+            button.label(text, 14, labelBackground);
         }
 
         if (icon) {
@@ -66,19 +67,6 @@ export default class ContextMenu extends ContainerObject {
 
         if (tooltipText) {
             button.tooltip(tooltipText);
-        }
-
-        if (fillColor) {
-            const buttonGraphic = new Graphics()
-                .beginFill(fillColor)
-                .drawRoundedRect(
-                    0,
-                    0,
-                    ContextMenu.BUTTON_WIDTH,
-                    ContextMenu.BUTTON_HEIGHT,
-                    ContextMenu.BUTTON_CORNER_RADIUS
-                ).endFill();
-            button.customStyleBox(buttonGraphic);
         }
 
         this.addObject(button, this._buttonLayout);
@@ -122,15 +110,11 @@ export default class ContextMenu extends ContainerObject {
         );
     }
 
-    private readonly _panel: GamePanel;
+    private _panel: GamePanel;
     private readonly _buttonLayout: VLayoutContainer | HLayoutContainer;
 
     private _horizontal: boolean;
     private _buttons: GameButton[] = [];
 
     private static readonly PANEL_MARGIN: number = 5;
-    private static readonly PANEL_BACKGROUND_COLOR: number = 0x152843;
-    private static readonly BUTTON_WIDTH: number = 110;
-    private static readonly BUTTON_HEIGHT: number = 30;
-    private static readonly BUTTON_CORNER_RADIUS: number = 5;
 }

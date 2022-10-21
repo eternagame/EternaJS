@@ -475,7 +475,7 @@ export default class AnnotationPanelItem extends ContainerObject {
 
         // Add bottom divider
         const divider = new Graphics()
-            .beginFill(0x112238)
+            .beginFill(AnnotationPanelItem.DIVIDER_COLOR)
             .drawRect(
                 0,
                 0,
@@ -913,12 +913,13 @@ export default class AnnotationPanelItem extends ContainerObject {
     private static readonly FONT_SIZE = 14;
     private static readonly ITEM_BUTTON_MARGIN_LEFT = 10;
     private static readonly CREATE_LAYER_MARGIN_RIGHT = 10;
-    private static readonly VISIBILITY_BUTTON_BACKGROUND_COLOR = 0x1D375C;
-    private static readonly ITEM_BACKGROUND_RESTING = 0x152843;
-    private static readonly ITEM_BACKGROUND_SELECTED = 0x254573;
+    private static readonly VISIBILITY_BUTTON_BACKGROUND_COLOR = 0x014278;
+    private static readonly ITEM_BACKGROUND_RESTING = 0x025191;
+    private static readonly ITEM_BACKGROUND_SELECTED = 0x025fab;
     private static readonly ITEM_EDIT_BUTTON_WIDTH = 30;
     private static readonly ITEM_HOVER_COLOR = 0x2F94D1;
     public static readonly STRUCTURE_RIBBON_COLOR = 0xD73832;
     public static readonly PUZZLE_RIBBON_COLOR = 0x2F94D1;
     public static readonly SOLUTION_RIBBON_COLOR = 0x53B64E;
+    public static readonly DIVIDER_COLOR = 0x01345e;
 }

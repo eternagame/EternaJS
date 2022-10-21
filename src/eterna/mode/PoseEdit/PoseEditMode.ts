@@ -13,8 +13,7 @@ import Puzzle, {
     PuzzleType, PoseState, BoostersData, TargetType
 } from 'eterna/puzzle/Puzzle';
 import Background from 'eterna/vfx/Background';
-import Toolbar, {ToolbarType} from 'eterna/ui/Toolbar';
-import SpecBox from 'eterna/ui/SpecBox';
+import Toolbar, {ToolbarType} from 'eterna/ui/toolbar/Toolbar';
 import GameButton from 'eterna/ui/GameButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {
@@ -22,13 +21,12 @@ import {
     GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
-import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
+import EternaSettingsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaSettingsDialog';
 import FolderManager from 'eterna/folding/FolderManager';
 import Folder, {MultiFoldResult, CacheKey, SuboptEnsembleResult} from 'eterna/folding/Folder';
-import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
+import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/toolbar/NucleotidePalette';
 import PoseField from 'eterna/pose2D/PoseField';
 import Pose2D, {Layout, SCRIPT_MARKER_LAYER} from 'eterna/pose2D/Pose2D';
-import Pose3D from 'eterna/pose3D/Pose3D';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import ConstraintBar from 'eterna/constraints/ConstraintBar';
@@ -70,8 +68,11 @@ import AnnotationManager, {
     AnnotationRange
 } from 'eterna/AnnotationManager';
 import LibrarySelectionConstraint from 'eterna/constraints/constraints/LibrarySelectionConstraint';
-import ErrorDialog from 'eterna/ui/ErrorDialog';
 import AnnotationDialog from 'eterna/ui/AnnotationDialog';
+import ToolbarButton from 'eterna/ui/toolbar/ToolbarButton';
+import StateToggle from 'eterna/ui/StateToggle';
+import Pose3DDialog from 'eterna/pose3D/Pose3DDialog';
+import ModeBar from 'eterna/ui/ModeBar';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -201,142 +202,6 @@ export default class PoseEditMode extends GameMode {
             }
         });
 
-        this._toolbar = new Toolbar(toolbarType, {
-            states: this._puzzle.getSecstructs().length,
-            showGlue: this._puzzle.targetConditions
-                ?.some((condition) => condition?.structure_constrained_bases),
-            showFreeze: (this._puzzle.targetConditions && this._puzzle.targetConditions.some((tc) => (
-                tc?.type === 'pseudoknot'
-                    || tc?.type === 'multistrand'
-                    || (tc?.secstruct.length ?? 0 > 1000)
-            ))),
-            boosters: this._puzzle.boosters ? this._puzzle.boosters : undefined,
-            showAdvancedMenus: this._puzzle.puzzleType !== PuzzleType.PROGRESSION,
-            showLibrarySelect: this._puzzle.constraints?.some((con) => con instanceof LibrarySelectionConstraint),
-            annotationManager: this._annotationManager
-        });
-        this.addObject(this._toolbar, this.uiLayer);
-
-        this._helpBar = new HelpBar({
-            onHintClicked: this._puzzle.hint
-                ? () => this.onHintClicked()
-                : undefined,
-            onHelpClicked: () => this.onHelpClicked(),
-            onChatClicked: () => {
-                Eterna.settings.showChat.value = !Eterna.settings.showChat.value;
-            },
-            onInfoClicked: this._params.initSolution ? () => {
-                if (this._solutionView) {
-                    this._solutionView.container.visible = !this._solutionView.container.visible;
-                    this.onResized();
-                }
-            } : undefined
-        });
-        this.addObject(this._helpBar, this.uiLayer);
-
-        this._toolbar.undoButton.clicked.connect(() => this.moveUndoStackBackward());
-        this._toolbar.redoButton.clicked.connect(() => this.moveUndoStackForward());
-        if (this._toolbar.zoomOutButton) {
-            this._toolbar.zoomOutButton.clicked.connect(() => {
-                for (const poseField of this._poseFields) {
-                    poseField.zoomOut();
-                }
-            });
-        }
-        if (this._toolbar.zoomInButton) {
-            this._toolbar.zoomInButton.clicked.connect(() => {
-                for (const poseField of this._poseFields) {
-                    poseField.zoomIn();
-                }
-            });
-        }
-        this._toolbar.submitButton.clicked.connect(() => this.submitCurrentPose());
-        this._toolbar.viewSolutionsButton.clicked.connect(() => this.openDesignBrowserForOurPuzzle());
-        this._toolbar.resetButton.clicked.connect(() => this.showResetPrompt());
-        this._toolbar.naturalButton.clicked.connect(() => this.togglePoseState());
-        this._toolbar.targetButton.clicked.connect(() => this.togglePoseState());
-        this._toolbar.specButton.clicked.connect(() => this.showSpec());
-        this._toolbar.copyButton.clicked.connect(() => this.showCopySequenceDialog());
-        this._toolbar.pasteButton.clicked.connect(() => this.showPasteSequenceDialog());
-        this._toolbar.viewOptionsButton.clicked.connect(() => this.showViewOptionsDialog());
-        this._toolbar.screenshotButton.clicked.connect(() => this.postScreenshot(this.createScreenshot()));
-
-        this._toolbar.pipButton.clicked.connect(() => this.togglePip());
-
-        this._toolbar.stateToggle.stateChanged.connect((targetIdx) => this.changeTarget(targetIdx));
-
-        this._toolbar.freezeButton.clicked.connect(() => this.toggleFreeze());
-        this._toolbar.palette.targetClicked.connect((targetType) => this.onPaletteTargetSelected(targetType));
-        this._toolbar.pairSwapButton.clicked.connect(() => this.onSwapClicked());
-
-        this._toolbar.nucleotideFindButton.clicked.connect(() => this.findNucleotide());
-        this._toolbar.nucleotideRangeButton.clicked.connect(() => this.showNucleotideRange());
-        this._toolbar.explosionFactorButton.clicked.connect(() => this.changeExplosionFactor());
-
-        this._toolbar.baseMarkerButton.clicked.connect(() => {
-            this.setPosesColor(RNAPaint.BASE_MARK);
-        });
-
-        this._toolbar.librarySelectionButton.clicked.connect(() => {
-            this.setPosesColor(RNAPaint.LIBRARY_SELECT);
-        });
-
-        this._toolbar.magicGlueButton.clicked.connect(() => {
-            this.setPosesColor(RNAPaint.MAGIC_GLUE);
-        });
-
-        this._toolbar.moveButton.clicked.connect(() => {
-            this.setPosesLayoutTool(Layout.MOVE);
-        });
-
-        this._toolbar.rotateStemButton.clicked.connect(() => {
-            this.setPosesLayoutTool(Layout.ROTATE_STEM);
-        });
-
-        this._toolbar.flipStemButton.clicked.connect(() => {
-            this.setPosesLayoutTool(Layout.FLIP_STEM);
-        });
-
-        this._toolbar.snapToGridButton.clicked.connect(() => {
-            for (const pose of this._poses) {
-                pose.snapToGrid();
-            }
-        });
-
-        this._toolbar.downloadHKWSButton.clicked.connect(() => {
-            this.downloadHKWS();
-        });
-
-        this._toolbar.downloadSVGButton.clicked.connect(() => {
-            this.downloadSVG();
-        });
-
-        this._toolbar.annotationPanelButton.toggled.connect((visible) => {
-            if (visible) {
-                this._toolbar.annotationPanel.isVisible = true;
-            } else {
-                this._toolbar.annotationPanel.isVisible = false;
-            }
-        });
-
-        // Add our docked SpecBox at the bottom of uiLayer
-        this._dockedSpecBox = new SpecBox(true);
-        this._dockedSpecBox.display.position.set(15, 190);
-        this._dockedSpecBox.setSize(155, 251);
-        this._dockedSpecBox.display.visible = false;
-        this.addObject(this._dockedSpecBox, this.uiLayer, 0);
-        this._dockedSpecBox.shouldMaximize.connect(() => this.showSpec());
-
-        this._undockSpecBoxButton = new GameButton()
-            .allStates(Bitmaps.ImgMaximize)
-            .tooltip('Re-maximize')
-            .hotkey(KeyCode.KeyM);
-        this._undockSpecBoxButton.clicked.connect(() => {
-            this._dockedSpecBox.display.visible = false;
-            this.showSpec();
-        });
-        this._dockedSpecBox.addObject(this._undockSpecBoxButton, this._dockedSpecBox.container);
-
         this._uiHighlight = new SpriteObject();
         this.addObject(this._uiHighlight, this.uiLayer);
 
@@ -413,13 +278,9 @@ export default class PoseEditMode extends GameMode {
         return Flashbang.stageWidth - this._solDialogOffset;
     }
 
-    private updateUILayout(): void {
-        DisplayUtil.positionRelativeToStage(
-            this._toolbar.display, HAlign.LEFT, VAlign.BOTTOM,
-            HAlign.LEFT, VAlign.BOTTOM, 0, 50
-        );
-
-        this._toolbar.onResized();
+    public updateUILayout(): void {
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(Flashbang.stageHeight);
 
         DisplayUtil.positionRelativeToStage(
             this._helpBar.display, HAlign.RIGHT, VAlign.TOP,
@@ -431,38 +292,37 @@ export default class PoseEditMode extends GameMode {
             HAlign.CENTER, VAlign.TOP, 0, 8
         );
 
-        Assert.assertIsDefined(Flashbang.stageWidth);
-        Assert.assertIsDefined(Flashbang.stageHeight);
+        DisplayUtil.positionRelativeToStage(
+            this._modeBar.display, HAlign.LEFT, VAlign.TOP,
+            HAlign.LEFT, VAlign.TOP, 17, 120
+        );
+        // Roughly how much space from the bottom of the screen when non-expanded
+        // TODO: Is there a way to make this not hardcoded?
+        const toolbarHeight = 100;
+        this._modeBar.maxHeight = Flashbang.stageHeight - this._modeBar.display.y - toolbarHeight;
+
         this._exitButton.display.position.set(
             Flashbang.stageWidth - 85 - this._solDialogOffset,
             Flashbang.stageHeight - 120
         );
-        this._undockSpecBoxButton.display.position.set(Flashbang.stageWidth - 22 - this._solDialogOffset, 5);
 
         this._constraintBar.layout();
 
-        this._dockedSpecBox.setSize(Flashbang.stageWidth - this._solDialogOffset, Flashbang.stageHeight - 340);
-        const s: number = this._dockedSpecBox.plotSize;
-        this._dockedSpecBox.setSize(s + 55, s * 2 + 51);
-
-        if (this._toolbar.annotationPanel.isVisible) {
-            this._toolbar.annotationPanel.updatePanelPosition();
+        if (this._stateToggle) {
+            this._stateToggle.display.visible = false;
+            this._modeBar.layout();
         }
-    }
-
-    public get toolbar(): Toolbar {
-        return this._toolbar;
     }
 
     public get constraintsLayer(): Container {
         return this._constraintsLayer;
     }
 
-    private showViewOptionsDialog(): void {
+    private showSettingsDialog(): void {
         const mode = this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
             ? EternaViewOptionsMode.LAB
             : EternaViewOptionsMode.PUZZLE;
-        this.showDialog(new EternaViewOptionsDialog(mode));
+        this.showDialog(new EternaSettingsDialog(mode), 'SettingsDialog');
     }
 
     public set puzzleDefaultMode(defaultMode: PoseState) {
@@ -471,8 +331,8 @@ export default class PoseEditMode extends GameMode {
 
     public ropChangeTarget(targetIndex: number): void {
         this.changeTarget(targetIndex);
-        if (this._toolbar.stateToggle != null) {
-            this._toolbar.stateToggle.state = targetIndex;
+        if (this._stateToggle) {
+            this._stateToggle.state = targetIndex;
         }
     }
 
@@ -520,6 +380,10 @@ export default class PoseEditMode extends GameMode {
         this._ropPresets.push(() => this.setShowTotalEnergy(show));
     }
 
+    public layoutModeBar() {
+        this._modeBar.layout();
+    }
+
     public selectFolder(folderName: string): boolean {
         return this._folderSwitcher.changeFolder(folderName);
     }
@@ -547,8 +411,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     private onHelpClicked() {
-        const getBounds = (elem: ContainerObject | undefined) => {
-            Assert.assertIsDefined(elem);
+        const getBounds = (elem: ContainerObject) => {
             const globalPos = elem.container.toGlobal(new Point());
             return new Rectangle(
                 globalPos.x,
@@ -558,11 +421,13 @@ export default class PoseEditMode extends GameMode {
             );
         };
 
-        const switchStateButton = Boolean(this.toolbar.stateToggle.container.parent)
-            && this.toolbar.stateToggle.display.visible;
+        const switchStateButton = this._stateToggle && this._stateToggle.display.visible ? this._stateToggle : null;
         Assert.assertIsDefined(this.modeStack);
+
         this.modeStack.pushMode(new HelpScreen({
             toolTips: {
+                hotbarButtons: this._toolbar.getTooltipPositioners(),
+
                 hints: this._puzzle.hint
                     ? [
                         () => new Rectangle(
@@ -571,50 +436,24 @@ export default class PoseEditMode extends GameMode {
                             this._helpBar.container.width,
                             this._helpBar.container.height
                         ),
-                        0
+                        0, 'Hint'
                     ]
                     : undefined,
 
-                modeSwitch: this.toolbar.naturalButton.display.visible
-                    ? [() => getBounds(this.toolbar.naturalButton), this.toolbar.naturalButton.container.width / 2]
-                    : undefined,
-
-                swapPairs: this.toolbar.pairSwapButton.display.visible
-                    ? [() => getBounds(this.toolbar.pairSwapButton), 0]
-                    : undefined,
-
-                pip: this.toolbar.pipButton.container.parent
-                    ? [() => getBounds(this.toolbar.pipButton), 0]
+                modeSwitch: this._naturalButton.display.visible
+                    ? [() => getBounds(this._naturalButton),
+                        this._naturalButton.container.width / 2, 'Mode switch']
                     : undefined,
 
                 switchState: switchStateButton
                     ? [
-                        () => new Rectangle(
-                            this.toolbar.stateToggle.container.x + this.toolbar.container.x,
-                            this.toolbar.stateToggle.container.y + this.toolbar.container.y,
-                            this.toolbar.stateToggle.container.width,
-                            this.toolbar.stateToggle.container.height
-                        ),
-                        0
+                        () => getBounds(switchStateButton),
+                        -18, 'Switch state'
                     ]
                     : undefined,
 
-                submit: this.toolbar.submitButton.container.parent
-                    ? [() => getBounds(this.toolbar.submitButton), 0]
-                    : undefined,
-
-                menu: [() => getBounds(this.toolbar.actionMenu), 0],
-
-                palette: this.toolbar.palette.container.visible
-                    ? [() => getBounds(this.toolbar.palette), 0]
-                    : undefined,
-
-                zoom: this.toolbar.zoomInButton !== undefined && this.toolbar.zoomInButton.container.visible
-                    ? [() => getBounds(this.toolbar.zoomInButton), this.toolbar.zoomInButton.container.width / 2]
-                    : undefined,
-
-                undo: this.toolbar.undoButton.display.visible
-                    ? [() => getBounds(this.toolbar.undoButton), this.toolbar.undoButton.container.width / 2]
+                palette: this._toolbar.palette.display.visible
+                    ? [() => getBounds(this._toolbar.palette), 0, 'Pallete']
                     : undefined
             }
         }));
@@ -707,6 +546,7 @@ export default class PoseEditMode extends GameMode {
     private addMarkerLayer(layer: string, resetSelectedLayer?: boolean) {
         this._markerSwitcher.addMarkerLayer(layer, resetSelectedLayer);
         this._markerSwitcher.display.visible = true;
+        this._modeBar.layout();
     }
 
     private setMarkerLayer(layer: string) {
@@ -826,7 +666,7 @@ export default class PoseEditMode extends GameMode {
         }
 
         this._exitButton.display.visible = false;
-        this.addObject(this._exitButton, this.uiLayer);
+        this.addObject(this._exitButton, this.dialogLayer);
 
         const puzzleTitle = UITheme.makeTitle(this._puzzle.getName(!Eterna.MOBILE_APP), 0xC0DCE7);
         puzzleTitle.hideWhenModeInactive();
@@ -861,15 +701,25 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
+        const states = this._puzzle.getSecstructs().length;
+
+        this._modeBar = new ModeBar();
+        this.addObject(this._modeBar, this.uiLayer);
+
+        const {actualButton, targetButton} = this._modeBar.addStructToggle('solve');
+        this._naturalButton = actualButton;
+        this._targetButton = targetButton;
+
+        if (states > 1) {
+            this._stateToggle = this._modeBar.addStateToggle(states);
+        }
+
         // We can only set up the folderSwitcher once we have set up the poses
-        this._folderSwitcher = new FolderSwitcher(
+        this._folderSwitcher = this._modeBar.addFolderSwitcher(
             (folder) => this._puzzle.canUseFolder(folder),
             initialFolder,
             this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
         );
-        this._folderSwitcher.display.position.set(17, 175);
-        this.addObject(this._folderSwitcher, this.uiLayer);
-
         this._folderSwitcher.selectedFolder.connectNotify((folder) => {
             if (folder.canScoreStructures) {
                 for (const pose of this._poses) {
@@ -884,16 +734,43 @@ export default class PoseEditMode extends GameMode {
             this.onChangeFolder();
         });
 
-        this._markerSwitcher = new MarkerSwitcher();
-        this._markerSwitcher.display.position.set(17, 200);
-        this.addObject(this._markerSwitcher, this.uiLayer);
+        this._markerSwitcher = this._modeBar.addMarkerSwitcher();
         this.regs?.add(this._markerSwitcher.selectedLayer.connectNotify((val) => this.setMarkerLayer(val)));
         this._markerSwitcher.display.visible = false;
+        this._modeBar.layout();
 
         this._constraintsLayer = new Container();
         this.uiLayer.addChild(this._constraintsLayer);
-
         this._constraintsLayer.visible = true;
+
+        const toolbarType = this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL ? ToolbarType.LAB : ToolbarType.PUZZLE;
+        this._toolbar = new Toolbar(toolbarType, {
+            showGlue: this._puzzle.targetConditions
+                ?.some((condition) => condition?.structure_constrained_bases),
+            boosters: this._puzzle.boosters ? this._puzzle.boosters : undefined,
+            showLibrarySelect: this._puzzle.constraints?.some((con) => con instanceof LibrarySelectionConstraint),
+            showPip: states > 1,
+            annotationManager: this._annotationManager
+        });
+        this.addObject(this._toolbar, this.uiLayer);
+
+        this._helpBar = new HelpBar({
+            onHintClicked: this._puzzle.hint
+                ? () => this.onHintClicked()
+                : undefined,
+            onHelpClicked: () => this.onHelpClicked(),
+            onChatClicked: () => {
+                Eterna.settings.showChat.value = !Eterna.settings.showChat.value;
+            },
+            onInfoClicked: this._params.initSolution ? () => {
+                if (this._solutionView) {
+                    this._solutionView.container.visible = !this._solutionView.container.visible;
+                    this.onResized();
+                }
+            } : undefined
+        });
+        this.addObject(this._helpBar, this.uiLayer);
+        this.setToolbarEventHandlers();
 
         this._toolbar.palette.clickTarget(PaletteTargetType.A);
 
@@ -1051,12 +928,97 @@ export default class PoseEditMode extends GameMode {
         const threePath = this._puzzle.threePath;
         if (threePath) {
             const url = new URL(threePath, Eterna.SERVER_URL);
-            Pose3D.checkModelFile(url.href, this._puzzle.getSecstruct(0).length).then(() => {
+            Pose3DDialog.checkModelFile(url.href, this._puzzle.getSecstruct(0).length).then(() => {
                 this.addPose3D(url.href);
             }).catch((err) => {
-                this.showDialog(new ErrorDialog(err));
+                this.showNotification(err);
             });
         }
+    }
+
+    private setToolbarEventHandlers() {
+        Assert.assertIsDefined(this.regs);
+        this.regs.add(this._naturalButton.clicked.connect(() => this.togglePoseState()));
+        this.regs.add(this._targetButton.clicked.connect(() => this.togglePoseState()));
+
+        this.regs.add(this._toolbar.undoButton.clicked.connect(() => this.moveUndoStackBackward()));
+        this.regs.add(this._toolbar.redoButton.clicked.connect(() => this.moveUndoStackForward()));
+        if (this._toolbar.zoomOutButton) {
+            this.regs.add(this._toolbar.zoomOutButton.clicked.connect(() => {
+                for (const poseField of this._poseFields) {
+                    poseField.zoomOut();
+                }
+            }));
+        }
+        if (this._toolbar.zoomInButton) {
+            this.regs.add(this._toolbar.zoomInButton.clicked.connect(() => {
+                for (const poseField of this._poseFields) {
+                    poseField.zoomIn();
+                }
+            }));
+        }
+        this.regs.add(this._toolbar.submitButton.clicked.connect(() => this.submitCurrentPose()));
+        this.regs.add(this._toolbar.viewSolutionsButton.clicked.connect(() => this.openDesignBrowserForOurPuzzle()));
+        this.regs.add(this._toolbar.resetButton.clicked.connect(() => this.showResetPrompt()));
+
+        this.regs.add(this._toolbar.specButton.clicked.connect(() => this.showSpec()));
+        this.regs.add(this._toolbar.copyButton.clicked.connect(() => this.showCopySequenceDialog()));
+        this.regs.add(this._toolbar.pasteButton.clicked.connect(() => this.showPasteSequenceDialog()));
+        this.regs.add(
+            this._toolbar.screenshotButton.clicked.connect(() => this.postScreenshot(this.createScreenshot()))
+        );
+
+        this.regs.add(this._toolbar.pipButton.clicked.connect(() => this.togglePip()));
+
+        if (this._stateToggle) {
+            this.regs.add(this._stateToggle.stateChanged.connect((targetIdx) => this.changeTarget(targetIdx)));
+        }
+
+        this.regs.add(this._toolbar.freezeButton.clicked.connect(() => this.toggleFreeze()));
+        this.regs.add(
+            this._toolbar.palette.targetClicked.connect((targetType) => this.onPaletteTargetSelected(targetType))
+        );
+        this.regs.add(this._toolbar.pairSwapButton.clicked.connect(() => this.onSwapClicked()));
+        this.regs.add(this._toolbar.baseMarkerButton.clicked.connect(() => this.setPosesColor(RNAPaint.BASE_MARK)));
+        this.regs.add(this._toolbar.settingsButton.clicked.connect(() => this.showSettingsDialog()));
+
+        this.regs.add(this._toolbar.nucleotideFindButton.clicked.connect(() => this.findNucleotide()));
+        this.regs.add(this._toolbar.nucleotideRangeButton.clicked.connect(() => this.showNucleotideRange()));
+        this.regs.add(this._toolbar.explosionFactorButton.clicked.connect(() => this.changeExplosionFactor()));
+
+        this.regs.add(this._toolbar.baseMarkerButton.clicked.connect(() => {
+            this.setPosesColor(RNAPaint.BASE_MARK);
+        }));
+
+        this.regs.add(this._toolbar.librarySelectionButton.clicked.connect(() => {
+            this.setPosesColor(RNAPaint.LIBRARY_SELECT);
+        }));
+
+        this.regs.add(this._toolbar.magicGlueButton.clicked.connect(() => {
+            this.setPosesColor(RNAPaint.MAGIC_GLUE);
+        }));
+
+        this.regs.add(this._toolbar.moveButton.clicked.connect(() => {
+            this.setPosesLayoutTool(Layout.MOVE);
+        }));
+
+        this.regs.add(this._toolbar.rotateStemButton.clicked.connect(() => {
+            this.setPosesLayoutTool(Layout.ROTATE_STEM);
+        }));
+
+        this.regs.add(this._toolbar.flipStemButton.clicked.connect(() => {
+            this.setPosesLayoutTool(Layout.FLIP_STEM);
+        }));
+
+        this.regs.add(this._toolbar.snapToGridButton.clicked.connect(() => {
+            for (const pose of this._poses) {
+                pose.snapToGrid();
+            }
+        }));
+
+        this.regs.add(this._toolbar.downloadSVGButton.clicked.connect(() => {
+            this.downloadSVG();
+        }));
     }
 
     private async switchToBrowser(solution: Solution, sortOnSolution: boolean = false): Promise<void> {
@@ -1478,9 +1440,6 @@ export default class PoseEditMode extends GameMode {
             } else if (ctrl && key === KeyCode.KeyS) {
                 this.downloadSVG();
                 handled = true;
-            } else if (ctrl && key === KeyCode.KeyH) {
-                this.downloadHKWS();
-                handled = true;
             } else if (key === KeyCode.BracketLeft) {
                 const factor = Math.max(0, Math.round((this._poseFields[0].explosionFactor - 0.25) * 1000) / 1000);
                 for (const pf of this._poseFields) {
@@ -1626,8 +1585,11 @@ export default class PoseEditMode extends GameMode {
     protected onSetPip(pipMode: boolean): void {
         Eterna.settings.pipEnabled.value = pipMode;
 
-        if (pipMode) {
-            this._toolbar.stateToggle.display.visible = false;
+        if (pipMode || this._puzzle.getSecstructs().length < 2) {
+            if (this._stateToggle) {
+                this._stateToggle.display.visible = false;
+                this._modeBar.layout();
+            }
             this._targetName.visible = false;
 
             this._constraintBar.highlightState(-1);
@@ -1653,7 +1615,10 @@ export default class PoseEditMode extends GameMode {
                 pose.setZoomLevel(minZoom);
             }
         } else {
-            this._toolbar.stateToggle.display.visible = true;
+            if (this._stateToggle) {
+                this._stateToggle.display.visible = true;
+                this._modeBar.layout();
+            }
             this._targetName.visible = true;
 
             this._constraintBar.highlightState(this._curTargetIndex);
@@ -1672,7 +1637,7 @@ export default class PoseEditMode extends GameMode {
 
         const menu = new ContextMenu({horizontal: false});
 
-        menu.addItem('Preferences').clicked.connect(() => this.showViewOptionsDialog());
+        menu.addItem('Preferences').clicked.connect(() => this.showSettingsDialog());
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
             menu.addItem('Design Browser').clicked.connect(() => this.openDesignBrowserForOurPuzzle());
             menu.addItem('Submit').clicked.connect(() => this.submitCurrentPose());
@@ -1721,7 +1686,7 @@ export default class PoseEditMode extends GameMode {
         const info = `Player: ${Eterna.playerName}\n`
             + `Puzzle ID: ${this._puzzle.nodeID}\n`
             + `Puzzle Title: ${this._puzzle.getName()}\n`
-            + `Mode: ${this.toolbar.naturalButton.isSelected ? 'NativeMode' : 'TargetMode'}`;
+            + `Mode: ${this._naturalButton.isSelected ? 'NativeMode' : 'TargetMode'}`;
         const infoText = Fonts.std(info).color(0xffffff).build();
         this.container.addChild(infoText);
 
@@ -1906,10 +1871,11 @@ export default class PoseEditMode extends GameMode {
     private setToNativeMode(): void {
         this._poseState = PoseState.NATIVE;
 
-        this._toolbar.targetButton.toggled.value = false;
-        this._toolbar.naturalButton.toggled.value = true;
-        this._toolbar.targetButton.hotkey(KeyCode.Space);
-        this._toolbar.naturalButton.hotkey();
+        this._targetButton.toggled.value = false;
+        this._naturalButton.toggled.value = true;
+
+        this._targetButton.hotkey(KeyCode.Space);
+        this._naturalButton.hotkey();
 
         this.savePosesMarkersContexts();
         this._paused = false;
@@ -1920,10 +1886,11 @@ export default class PoseEditMode extends GameMode {
     private setToTargetMode(): void {
         this._poseState = PoseState.TARGET;
 
-        this._toolbar.targetButton.toggled.value = true;
-        this._toolbar.naturalButton.toggled.value = false;
-        this._toolbar.naturalButton.hotkey(KeyCode.Space);
-        this._toolbar.targetButton.hotkey();
+        this._targetButton.toggled.value = true;
+        this._naturalButton.toggled.value = false;
+
+        this._naturalButton.hotkey(KeyCode.Space);
+        this._targetButton.hotkey();
 
         this.savePosesMarkersContexts();
 
@@ -2010,26 +1977,20 @@ export default class PoseEditMode extends GameMode {
     }
 
     private showSpec(): void {
-        this._dockedSpecBox.display.visible = false;
-
         this.updateCurrentBlockWithDotAndMeltingPlot();
         const puzzleState = this.getCurrentUndoBlock();
-
-        const dialog = this.showDialog(new SpecBoxDialog(puzzleState));
-        dialog.closed.then((showDocked) => {
-            if (showDocked) {
-                this._dockedSpecBox.setSpec(puzzleState);
-                this._dockedSpecBox.display.visible = true;
-            }
-        });
+        const specBox = this.showDialog(new SpecBoxDialog(), 'SpecBox');
+        // Already live
+        if (!specBox) return;
+        this._specBox = specBox;
+        this._specBox.setSpec(puzzleState);
+        this._specBox.closed.then(() => { this._specBox = null; });
     }
 
-    private updateDockedSpecBox(): void {
-        if (this._dockedSpecBox.display.visible) {
-            this.updateCurrentBlockWithDotAndMeltingPlot();
-            const datablock: UndoBlock = this.getCurrentUndoBlock();
-            this._dockedSpecBox.setSpec(datablock);
-        }
+    private updateSpecBox(): void {
+        this.updateCurrentBlockWithDotAndMeltingPlot();
+        const datablock: UndoBlock = this.getCurrentUndoBlock();
+        this._specBox?.setSpec(datablock);
     }
 
     private updateCurrentBlockWithDotAndMeltingPlot(index: number = -1): void {
@@ -2055,8 +2016,8 @@ export default class PoseEditMode extends GameMode {
                 libraryNT: this._poses[0].librarySelections ?? []
             }, solToSubmit);
         } else {
-            const NOT_SATISFIED_PROMPT = 'Puzzle constraints are not satisfied.\n'
-                + 'You can still submit the sequence, but please note that there is a risk of not getting\n'
+            const NOT_SATISFIED_PROMPT = 'Puzzle constraints are not satisfied.\n\n'
+                + 'You can still submit the sequence, but please note that there is a risk of not getting '
                 + 'synthesized properly';
 
             if (!this.checkConstraints()) {
@@ -2437,7 +2398,13 @@ export default class PoseEditMode extends GameMode {
         this._toolbar.disableTools(disable);
         this._hintBoxRef.destroyObject();
 
-        this._folderSwitcher.display.visible = !disable;
+        if (this._stateToggle) this._stateToggle.enabled = !disable;
+        this._targetButton.enabled = !disable;
+        this._naturalButton.enabled = !disable;
+
+        this._folderSwitcher.enabled = !disable;
+        this._markerSwitcher.enabled = !disable;
+        this._modeBar.layout();
 
         for (const field of this._poseFields) {
             field.container.interactive = !disable;
@@ -2882,8 +2849,9 @@ export default class PoseEditMode extends GameMode {
             this.getCurrentUndoBlock(ii).stable = constraintsSatisfied;
         }
 
-        // / Update spec thumbnail if it is open
-        this.updateDockedSpecBox();
+        // Update open dialogs
+        this.updateSpecBox();
+        this.updateCopySequenceDialog();
 
         if (constraintsSatisfied || (this._puzzle.alreadySolved && this._puzzle.rscript === '')) {
             if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL && !this._alreadyCleared) {
@@ -3563,6 +3531,22 @@ export default class PoseEditMode extends GameMode {
         });
     }
 
+    public get toolbar(): Toolbar {
+        return this._toolbar;
+    }
+
+    public get naturalButton(): ToolbarButton {
+        return this._naturalButton;
+    }
+
+    public get targetButton(): ToolbarButton {
+        return this._targetButton;
+    }
+
+    public get stateToggle(): StateToggle | null {
+        return this._stateToggle;
+    }
+
     private readonly _puzzle: Puzzle;
     private readonly _params: PoseEditParams;
     private readonly _scriptInterface = new ExternalInterfaceCtx();
@@ -3573,7 +3557,6 @@ export default class PoseEditMode extends GameMode {
 
     private _background: Background;
 
-    private _toolbar: Toolbar;
     private _helpBar: HelpBar;
 
     protected get _folder(): Folder {
@@ -3606,8 +3589,12 @@ export default class PoseEditMode extends GameMode {
     private _targetOligos: (Oligo[] | undefined)[] = [];
     private _targetOligosOrder: (number[] | undefined)[] = [];
 
+    private _modeBar: ModeBar;
     private _folderSwitcher: FolderSwitcher;
     private _markerSwitcher: MarkerSwitcher;
+    private _naturalButton: ToolbarButton;
+    private _targetButton: ToolbarButton;
+    private _stateToggle: StateToggle | null = null;
 
     private _isFrozen: boolean = false;
     private _targetName: Text;
@@ -3616,18 +3603,19 @@ export default class PoseEditMode extends GameMode {
 
     private _constraintBar: ConstraintBar;
 
-    private _dockedSpecBox: SpecBox;
     private _exitButton: GameButton;
 
     private _uiHighlight: SpriteObject;
 
     private _homeButton: GameButton;
-    private _undockSpecBoxButton: GameButton;
     private _ropPresets: (() => void)[] = [];
 
     private _isPlaying: boolean = false;
     private _curSolutionIdx: number;
     private _solutionNameText: Text;
+
+    // Dialogs
+    private _specBox: SpecBoxDialog | null = null;
 
     // Tutorial Script Extra Functionality
     private _showMissionScreen: boolean = true;
