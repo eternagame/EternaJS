@@ -225,6 +225,6 @@ export default class GamePanel extends BaseGamePanel {
     protected _height: number = 0;
 
     private static DEFAULT_BORDER_THICKNESS: number = 1.5;
-    private static FORCE_TITLE_BAR_HEIGHT: number = 15;
+    private static FORCE_TITLE_BAR_HEIGHT: number = 22;
     private static FULL_TITLE_BAR_HEIGHT: number = 35;
 }

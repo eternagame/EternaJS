@@ -123,12 +123,6 @@ export default class GameButton extends Button implements KeyboardListener {
         return this;
     }
 
-    public scaleTo(size:number): GameButton {
-        this.size = size;
-        this.needsRedraw();
-        return this;
-    }
-
     public tooltip(text: string): GameButton {
         if (this._tooltip !== text) {
             this._tooltip = text;
@@ -249,9 +243,6 @@ export default class GameButton extends Button implements KeyboardListener {
                     (icon.height - label.height) / 2
                 );
             }
-        } else if (this.size > 0 && icon != null) {
-            const scale: number = this.size / this._content.height;
-            icon.scale.set(scale, scale);
         }
 
         if (!drawStyleBox && !this._skipHitArea) {

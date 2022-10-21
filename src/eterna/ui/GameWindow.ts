@@ -3,7 +3,7 @@ import {
     Assert, ContainerObject, DisplayUtil, Dragger, Flashbang, HAlign, MathUtil, SpriteObject, VAlign, Vector2
 } from 'flashbang';
 import {
-    Container, InteractionEvent, Point, Rectangle, Sprite
+    Container, Graphics, InteractionEvent, Point, Rectangle, Sprite
 } from 'pixi.js';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -81,20 +81,22 @@ export default class GameWindow extends ContainerObject {
         if (this._title) this._panel.title = this._title;
         this.addObject(this._panel, this.container);
 
-        if (this._movable) {
-            this.regs.add(this._panel.titlePointerDown.connect((e) => this.handleMove(e)));
-            // TODO: Drag ribbing
-        }
-
         this._closeButton = new GameButton()
             .allStates(BitmapManager.getBitmap(Bitmaps.ImgDlgClose))
             .over(BitmapManager.getBitmap(Bitmaps.ImgOverDlgClose));
         if (!this._closable) this._closeButton.display.visible = false;
-        this._closeButton.scaleTo(20);
         this.addObject(this._closeButton, this.container);
+        this._closeButton.display.width = this.closeButtonSize;
+        this._closeButton.display.height = this.closeButtonSize;
 
-        // TODO: We probably want a generic scrollbox for scroll handles
-        // TODO: The toolbar also needs that
+        this._dragRibbing = new Graphics();
+        this.container.addChild(this._dragRibbing);
+        this._dragRibbing.visible = this._movable;
+
+        if (this._movable) {
+            this.regs.add(this._panel.titlePointerDown.connect((e) => this.handleMove(e)));
+        }
+
         this._content = new ScrollBox(0, 0, undefined, -10, 0);
         this.addObject(this._content, this.container);
 
@@ -248,9 +250,40 @@ export default class GameWindow extends ContainerObject {
 
         // Center the close button, and use the same vertical margin for the horizontal margin
         this._closeButton.display.position.set(
-            this._panel.width - this._closeButton.display.width - this.closeMargin,
-            this.closeMargin
+            this._panel.width - this.closeButtonSize - this.titleMargin,
+            this.titleMargin
         );
+
+        const RIB_WIDTH = 2;
+        const margin = Math.max(this.titleMargin, 5);
+        // Color is arbitrary, we can probably do better...
+        this._dragRibbing
+            .clear()
+            .beginFill(0xFFFFFF, 0.15);
+        if (this._title) {
+            // Draw on either side of the title
+            const leftWidth = (this._panel.width - this._panel.titleTextWidth - (margin * 4)) / 2;
+            const rightWidth = leftWidth - (
+                this._closable ? this.closeButtonSize + margin : 0
+            );
+            const rightStart = margin + leftWidth + margin + this._panel.titleTextWidth + margin;
+            this._dragRibbing
+                .drawRect(margin, (this.titleHeight - RIB_WIDTH) * 0.25, leftWidth, RIB_WIDTH)
+                .drawRect(margin, (this.titleHeight - RIB_WIDTH) * 0.5, leftWidth, RIB_WIDTH)
+                .drawRect(margin, (this.titleHeight - RIB_WIDTH) * 0.75, leftWidth, RIB_WIDTH)
+                .drawRect(rightStart, (this.titleHeight - RIB_WIDTH) * 0.25, rightWidth, RIB_WIDTH)
+                .drawRect(rightStart, (this.titleHeight - RIB_WIDTH) * 0.5, rightWidth, RIB_WIDTH)
+                .drawRect(rightStart, (this.titleHeight - RIB_WIDTH) * 0.75, rightWidth, RIB_WIDTH);
+        } else {
+            const width = this._panel.width - (margin * 2) - (
+                this._closable ? this.closeButtonSize + margin : 0
+            );
+            this._dragRibbing
+                .drawRect(margin, (this.titleHeight - RIB_WIDTH) * 0.25, width, RIB_WIDTH)
+                .drawRect(margin, (this.titleHeight - RIB_WIDTH) * 0.5, width, RIB_WIDTH)
+                .drawRect(margin, (this.titleHeight - RIB_WIDTH) * 0.75, width, RIB_WIDTH);
+        }
+        this._dragRibbing.endFill();
 
         this._dragHandleLeft.display.position.set(0, this._panel.height - this._dragHandleLeft.display.height);
         this._dragHandleRight.display.position.set(
@@ -536,21 +569,27 @@ export default class GameWindow extends ContainerObject {
         }
     }
 
-    private get closeMargin(): number {
-        return (this._panel.titleHeight - this._closeButton.display.height) / 2;
+    private get closeButtonSize(): number {
+        return this._title ? 20 : 18;
+    }
+
+    private get titleMargin(): number {
+        return (this._panel.titleHeight - this.closeButtonSize) / 2;
     }
 
     private get minWidth(): number {
+        // Accounts for space on both sides of the title (the left ribbing will be wider than the right
+        // if there's a close button since we center the title irrespective of the close button and
+        // the ribbing takes whatever space is left)
+        const DRAG_RIBBING_MIN_WIDTH = 30;
         // Don't allow a width that doesn't fit both drag handles or the close button (if present)
         return Math.max(
             this._resizable ? this._dragHandleLeft.display.width + this._dragHandleRight.display.width : 0,
             // TODO: Would it be better to not tie the min width to the title width and mask it instead to
             // allow for greater flexibility?
-            this._panel.titleTextWidth + (
-                this._closable
-                    ? 2 * (this._closeButton.display.width + 2 * this.closeMargin)
-                    : 0
-            )
+            this._panel.titleTextWidth
+                + (this._closable ? 2 * (this.closeButtonSize + 2 * this.titleMargin) : 0)
+                + (this._movable ? DRAG_RIBBING_MIN_WIDTH + 2 * this.titleMargin : 0)
         );
     }
 
@@ -631,7 +670,7 @@ export default class GameWindow extends ContainerObject {
     private _dragHandleLeft: SpriteObject;
     private _dragHandleRight: SpriteObject;
     private _resizeHitTarget: GraphicsObject;
-
+    private _dragRibbing: Graphics;
     private _ensureOnScreen: boolean;
     private _targetWidth: number | null = null;
     private _targetHeight: number | null = null;
