@@ -121,11 +121,6 @@ FullAdvancedResult* FullEnsembleWithOligos(const std::string& seqString, int tem
     }
 
     clearDnaStructures(&suboptStructs);
-
-    //get defect here later for now popuolate with 0
-    result->ensembleDefect=0;
-
-
     return result;
 }
 
@@ -180,20 +175,20 @@ FullAdvancedResult* FullEnsembleNoBindingSite(const std::string& seqString, int 
     }
 
     //initialize the result to return
+    
     FullAdvancedResult* result = new FullAdvancedResult();
     
     std::string mfeStructure;
     //get dot bracket notation from data 
     for ( int i = 0; i < suboptStructs.nStructs; i++ ) {
         oneDnaStruct currentStruct = suboptStructs.validStructs[i];
-
+        
         //get the secondary strucutre in dot paren notation 
         std::string singlestructure = getDotParens(pseudoknotted, suboptStructs.seqlength, &currentStruct);
-        
         if (i == 0)
         {
           //this is the first one so it is the mfe          
-          mfeStructure =  singlestructure;
+          mfeStructure = singlestructure;
         }
 
         //get energies
@@ -209,182 +204,92 @@ FullAdvancedResult* FullEnsembleNoBindingSite(const std::string& seqString, int 
 
     clearDnaStructures(&suboptStructs);
 
-    //get defect here later for now popuolate with 0
-    //get defect here later for now popuolate with 0
-    auto autoStructString = MakeCString(mfeStructure);
-    char* newSecondStruct = autoStructString.get();
-
-    //get ensemble defect for mfe structure
-     Defect ensembleDefectStruct;
-     double ensembleDefect = -2;
-     double ensembleDefectNormalized = -3;
-     double mfeDefect = -4;
-     double mfeDefectNormalized = -5;
-     bool getDefectMFE = false;
-    ensembleDefectStruct = getEnsembleDefect(string, newSecondStruct, temperature, pseudoknotted, false, getDefectMFE);
-    ensembleDefect = ensembleDefectStruct.ensembleDefect;
-    ensembleDefectNormalized = ensembleDefectStruct.ensembleDefectNormalized;
-    
-    getDefectMFE=true;
-    ensembleDefectStruct = getEnsembleDefect(string, newSecondStruct, temperature, pseudoknotted, false, getDefectMFE);
-    mfeDefect = ensembleDefectStruct.mfeDefect;
-    mfeDefectNormalized = ensembleDefectStruct.mfeDefectNormalized;
-
-    result->ensembleDefect=ensembleDefect;
-    result->ensembleDefectNormalized=ensembleDefectNormalized;
-    result->mfeDefect=mfeDefect;
-    result->mfeDefectNormalized=mfeDefectNormalized;
-
-
     return result;
 }
 
-// This code was pulled directly from src/thermo/basics/defect.c with minimal changes
-Defect getEnsembleDefect(char* seqChar, char* dotParensStructure, int temperature, bool pseudoknot, bool multiFold, bool mfeDefect) {
-  //set global constants needed for correct folding and ensemble reporting     
-    
-  DANGLETYPE=1;  
+/*
+  mode is how to do the ED
+  1= do only ED
+  2 = do only MFE ED
+  3 = do both
+*/
 
-  if (multiFold==true) {
-    Multistranded = 1;
-  } else {
-    Multistranded = 0;
-  }
+FullEnsembleDefectResult* GetEnsembleDefect(const std::string& seqString, const std::string& MfeStructure, int temperature, bool pseudoknot) {
+  
+  FullEnsembleDefectResult* result = new FullEnsembleDefectResult();  
+  int complexity;
+  DBL_TYPE nsStar_ED;
+  int i;
+  int nNicks;
+  int seqlength;
+  int tmpLength;
+  int seqNum[MAXSEQLENGTH+1];
+ 
+  //set the globals 
+  USE_MFE=0;
+  ONLY_ONE_MFE=0;   
 
   if (pseudoknot == true) {
-    DO_PSEUDOKNOTS = 1;
+      DO_PSEUDOKNOTS = 1;
   } else {
-    DO_PSEUDOKNOTS = 0;
+      DO_PSEUDOKNOTS = 0;
   }
 
-  if (mfeDefect==true) {
-    USE_MFE = 1;
-    // -degenerate flag not used for defect calcs, force ONLY_ONE_MFE
-    ONLY_ONE_MFE = 1;
+  if ( !DO_PSEUDOKNOTS ) {
+      complexity = 3;
   } else {
-    USE_MFE = 0;
-    ONLY_ONE_MFE = 0;
+      complexity = 5;
   }
+   
 
-  int i, j;
-  int trySymetry=TRUE;
-  
-  
-  DBL_TYPE nsStar;
-  DBL_TYPE mfe; // Minimum free energy (not really used)
-  DBL_TYPE ene; // Free energy (used to check if the structure is legal)
-  int vs;
-  int complexity;
-  int tmpLength;
-  int seqlength;
-  int nbases; // Number of bases as read from ppairs or mfe file
- 
-  int nNicks;  // Number of strands
-  int doCalc; // Whether we need to compute the pair probability matrix/mfe or not
-  
-   int seqStringLength;
-  char *tok; // Token
-  char tokseps[] = " \t\n"; // Token separators
-
-  //convert structure and sequence to char
-
-  
-  int seqNum[MAXSEQLENGTH+1];
-  seqlength = seqStringLength = tmpLength = strlen(seqChar);
+  //convert sequence from string to char*
+  auto autoSeqString = MakeCString(seqString);
+  char* seqChar = autoSeqString.get();
   
 
-  convertSeq(seqChar, seqNum, seqStringLength);
+  //convert sequence from latin based characters "A,C,U,G" into numerical representation A=1, C=2, G=3. U=4 
+  seqlength = tmpLength = strlen(seqChar);
+  convertSeq(seqChar, seqNum, tmpLength);
 
-  
   // Get the number of strand breaks
   nNicks = 0;
   for (i = 0; i < tmpLength; i++) {
-    if (seqChar[i] == '+') {
-      nNicks++;
-      seqlength--;
-    }
+      if (seqChar[i] == '+') {
+          nNicks++;
+      }
   }
-
-  int thepairs[MAXSEQLENGTH+1];
-  getStructureFromParens( dotParensStructure, thepairs, seqlength);
   
-  ene = naEnergyPairsOrParensFullWithSym( thepairs, NULL, seqNum, RNA, 1 /*DANGLETYPE*/,
-          temperature, trySymetry,
-          SODIUM_CONC, MAGNESIUM_CONC,
-          USE_LONG_HELIX_FOR_SALT_CORRECTION);
+  // New sequence length removing the number of breaks or pluses from the total
+  seqlength -= nNicks;
 
+  //convert the string structure to a char array
+  auto autoMfeStructure = MakeCString(MfeStructure);
+  char* MfeStructureChar = autoMfeStructure.get();
+
+  //get the pairs from the struct
+  int thepairs[MAXSEQLENGTH+1];
+  getStructureFromParens(MfeStructureChar, thepairs, seqlength);  
+    
   // Allocate memory for storing pair probabilities
   pairPr = (DBL_TYPE*) calloc( (seqlength+1)*(seqlength+1), sizeof(DBL_TYPE));
+  // Allocate memory for storing pair probabilities
+  pairPrPbg = (DBL_TYPE*) calloc( (seqlength+1)*(seqlength+1), sizeof(DBL_TYPE));
+  pairPrPb = (DBL_TYPE*) calloc( (seqlength+1)*(seqlength+1), sizeof(DBL_TYPE));
+
+
+  nsStar_ED = nsStarPairsOrParensFull(seqlength, seqNum, thepairs, NULL,
+            complexity, RNA, 1 /*DANGLETYPE*/,
+            temperature, SODIUM_CONC,
+            MAGNESIUM_CONC, USE_LONG_HELIX_FOR_SALT_CORRECTION);
+
   
-  //stuff for folding and getting probs
-  dnaStructures mfeStructs = {NULL, 0, 0, 0, NAD_INFINITY};
+  result->ensembleDefect = (long double) nsStar_ED;
+  result->ensembleDefectNormalized = (long double) nsStar_ED/seqlength;
   
-  //printInputs( argc, argv, seqChar, vs, NULL, parens, "screen");
+  free(pairPr);
+  free(pairPrPbg);
+  free(pairPrPb);
 
-  if (USE_MFE) {
-    if ( !DO_PSEUDOKNOTS ) {
-      complexity = 3;
-    } else {
-      complexity = 5;
-    }
-
-    // Compute MFE and MFE structure
-    mfe = mfeFullWithSym( seqNum, tmpLength, &mfeStructs, complexity, RNA, DANGLETYPE, temperature, trySymetry,
-        ONLY_ONE_MFE, SODIUM_CONC, MAGNESIUM_CONC,
-        USE_LONG_HELIX_FOR_SALT_CORRECTION);
-
-    // Compute nsStar from output
-    nsStar = 0.0;
-    for (i = 0; i < seqlength; i++) {
-      if (thepairs[i] != (mfeStructs.validStructs)[0].theStruct[i]) {
-        nsStar += 1.0;
-      }
-    }
-  } else {
-    // Allocate memory for storing pair probabilities
-    pairPrPbg = (DBL_TYPE*) calloc( (seqlength+1)*(seqlength+1), sizeof(DBL_TYPE));
-    pairPrPb = (DBL_TYPE*) calloc( (seqlength+1)*(seqlength+1), sizeof(DBL_TYPE));
-
-    if ( !DO_PSEUDOKNOTS ) {
-      complexity = 3;
-    } else {
-      complexity = 5;
-    }
-
-    nsStar = nsStarPairsOrParensFull(seqlength, seqNum, thepairs, NULL,
-              complexity, RNA, 1 /*DANGLETYPE*/,
-              temperature, SODIUM_CONC,
-              MAGNESIUM_CONC, USE_LONG_HELIX_FOR_SALT_CORRECTION);
-
-
-    free(pairPrPbg);
-    free(pairPrPb);
-  }
-
-
-  double EnsembleDefect;
-  double EnsembleDefectNormalized;
-  
-  Defect defectResult = Defect();
-  
-  if (USE_MFE) {
-    //Fraction of correct nucleotides vs. MFE
-
-    defectResult.mfeDefect=(long double) nsStar;
-    defectResult.mfeDefectNormalized=(long double) nsStar/seqlength;
-    defectResult.ensembleDefect = NULL;
-    defectResult.ensembleDefectNormalized = NULL;
-  } else {
-    //Ensemble defect n(s,phi) and normalized ensemble defect n(s,phi)/N;
-
-    defectResult.mfeDefect=NULL;
-    defectResult.mfeDefectNormalized=NULL;
-    defectResult.ensembleDefect = (long double) nsStar;
-    defectResult.ensembleDefectNormalized = (long double) nsStar/seqlength;
-   
-  }
-  
-
-  return defectResult;
+  return result;
 }
 

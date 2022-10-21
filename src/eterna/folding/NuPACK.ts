@@ -10,11 +10,11 @@ import Sequence from 'eterna/rnatypes/Sequence';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import * as NupackLib from './engines/NupackLib';
 import {
-    DotPlotResult, FullEvalResult, FullFoldResult, FullAdvancedResult
+    DotPlotResult, FullEvalResult, FullFoldResult, FullAdvancedResult, FullEnsembleDefectResult
 } from './engines/NupackLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
 import Folder, {
-    MultiFoldResult, CacheKey, FullEvalCache, SuboptEnsembleResult
+    MultiFoldResult, CacheKey, FullEvalCache, SuboptEnsembleResult, DefectResult
 } from './Folder';
 import FoldUtil from './FoldUtil';
 
@@ -108,10 +108,6 @@ export default class NuPACK extends Folder {
 
         // initialize empty result cache
         suboptdataCache = {
-            ensembleDefect: 0,
-            ensembleDefectNormalized: 0,
-            mfeDefect: 0,
-            mfeDefectNormalized: 0,
             suboptStructures: [],
             suboptEnergyError: [],
             suboptFreeEnergy: []
@@ -139,10 +135,6 @@ export default class NuPACK extends Folder {
         }
 
         // prepare teh results for return and storage in cache
-        suboptdataCache.ensembleDefect = result.ensembleDefect;
-        suboptdataCache.ensembleDefectNormalized = result.ensembleDefectNormalized;
-        suboptdataCache.mfeDefect = result.mfeDefect;
-        suboptdataCache.mfeDefectNormalized = result.mfeDefectNormalized;
 
         // prepare teh results for return and storage in cache
         const suboptStructures: string[] = EmscriptenUtil.stdVectorToArray(result.suboptStructures);
@@ -156,6 +148,43 @@ export default class NuPACK extends Folder {
 
         this.putCache(key, suboptdataCache);
         return suboptdataCache;
+    }
+
+    /* override */
+    public getDefect(seq: Sequence, pairs: SecStruct, temp: number = 37, pseudoknotted: boolean = false): DefectResult {
+        const key = {
+            primitive: 'defect',
+            seq: seq.baseArray,
+            pairs: pairs.pairs,
+            pseudoknotted,
+            temp
+        };
+
+        let defectResultDataCache: DefectResult = this.getCache(key) as DefectResult;
+        if (defectResultDataCache != null) {
+            // trace("getSuboptEnsemble cache hit");
+            return defectResultDataCache;
+        }
+        let result: FullEnsembleDefectResult | null = null;
+        result = this._lib.GetEnsembleDefect(seq.sequenceString(),
+            pairs.getParenthesis(), temp, pseudoknotted);
+
+        if (!result) {
+            throw new Error('NuPACK returned a null result');
+        }
+
+        // initialize empty result cache
+        defectResultDataCache = {
+            ensembleDefect: -1,
+            ensembleDefectNormalized: -1
+
+        };
+
+        defectResultDataCache.ensembleDefect = result.ensembleDefect;
+        defectResultDataCache.ensembleDefectNormalized = result.ensembleDefectNormalized;
+
+        this.putCache(key, defectResultDataCache);
+        return defectResultDataCache;
     }
 
     /* override */
@@ -179,10 +208,6 @@ export default class NuPACK extends Folder {
 
         // initialize empty result cache
         suboptdataCache = {
-            ensembleDefect: 0,
-            ensembleDefectNormalized: 0,
-            mfeDefect: 0,
-            mfeDefectNormalized: 0,
             suboptStructures: [],
             suboptEnergyError: [],
             suboptFreeEnergy: []
@@ -197,11 +222,6 @@ export default class NuPACK extends Folder {
         if (!result) {
             throw new Error('NuPACK returned a null result');
         }
-
-        suboptdataCache.ensembleDefect = result.ensembleDefect;
-        suboptdataCache.ensembleDefectNormalized = result.ensembleDefectNormalized;
-        suboptdataCache.mfeDefect = result.mfeDefect;
-        suboptdataCache.mfeDefectNormalized = result.mfeDefectNormalized;
 
         // prepare teh results for return and storage in cache
         const suboptStructures: string[] = EmscriptenUtil.stdVectorToArray(result.suboptStructures);

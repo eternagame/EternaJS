@@ -1,6 +1,7 @@
 #include "FullEval.h"
 #include "FullFold.h"
 #include "FullEnsemble.h"
+#include "Utils.h"
 
 #include "src/thermo/utils/pfuncUtilsConstants.h"
 #include "src/thermo/utils/pfuncUtilsHeader.h"
@@ -62,22 +63,21 @@ EMSCRIPTEN_BINDINGS(EmscriptenBridge) {
 
     function("GetDotPlot", &GetDotPlot, allow_raw_pointers());
 
-    class_<FullAdvancedResult>("FullAdvancedResult")
-        .property("ensembleDefect", &FullAdvancedResult::ensembleDefect)
-        .property("ensembleDefectNormalized", &FullAdvancedResult::ensembleDefectNormalized)
-        .property("mfeDefect", &FullAdvancedResult::mfeDefect)
-        .property("mfeDefectNormalized", &FullAdvancedResult::mfeDefectNormalized)
-        .property("ensembleDefect", &FullAdvancedResult::ensembleDefect)
+    class_<FullAdvancedResult>("FullAdvancedResult")        
         .property("suboptStructures", &FullAdvancedResult::suboptStructures)
         .property("suboptEnergyError", &FullAdvancedResult::suboptEnergyError)
         .property("suboptFreeEnergy", &FullAdvancedResult::suboptFreeEnergy);
 
     function("FullEnsembleNoBindingSite", &FullEnsembleNoBindingSite, allow_raw_pointers());
     function("FullEnsembleWithOligos", &FullEnsembleWithOligos, allow_raw_pointers());
-    function("getDotParens", &getDotParens, allow_raw_pointers());
-    function("getEnsembleDefect", &getEnsembleDefect, allow_raw_pointers());
-
-
+    function("GetEnsembleDefect", &GetEnsembleDefect, allow_raw_pointers());
+   
+    class_<FullEnsembleDefectResult>("FullEnsembleDefectResult")  
+        .property("ensembleDefect", &FullEnsembleDefectResult::ensembleDefect)
+        .property("ensembleDefectNormalized", &FullEnsembleDefectResult::ensembleDefectNormalized);
+           
+    
+    function("GetEnsembleDefect", &GetEnsembleDefect, allow_raw_pointers());
 }
 
 #endif
