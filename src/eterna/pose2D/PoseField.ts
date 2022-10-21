@@ -6,6 +6,7 @@ import {
 import ROPWait from 'eterna/rscript/ROPWait';
 import debounce from 'lodash.debounce';
 import AnnotationManager from 'eterna/AnnotationManager';
+import GameWindow from 'eterna/ui/GameWindow';
 import Pose2D from './Pose2D';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
 import RNAAnchorObject from './RNAAnchorObject';
@@ -76,7 +77,15 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         for (const anchor of this._anchoredObjects) {
             if (anchor.isLive) {
                 const p: Point = this.pose.getBaseLoc(anchor.base);
-                anchor.object.display.position.set(p.x + anchor.offset.x, p.y + anchor.offset.y);
+                const anchorObject = anchor.object;
+                if (anchorObject instanceof GameWindow) {
+                    anchorObject.setTargetBounds({
+                        x: {from: 'left', offsetExact: p.x + anchor.offset.x},
+                        y: {from: 'top', offsetExact: p.y + anchor.offset.y}
+                    });
+                } else {
+                    anchorObject.display.position.set(p.x + anchor.offset.x, p.y + anchor.offset.y);
+                }
             }
         }
     }

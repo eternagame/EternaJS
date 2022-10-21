@@ -8,6 +8,9 @@ import {
 } from 'flashbang';
 import RNAAnchorObject from 'eterna/pose2D/RNAAnchorObject';
 import TextUtil from 'eterna/util/TextUtil';
+import GameWindow from 'eterna/ui/GameWindow';
+import GameButton from 'eterna/ui/GameButton';
+import Bitmaps from 'eterna/resources/Bitmaps';
 import ROPWait from './ROPWait';
 import RScriptArrow from './RScriptArrow';
 import RScriptEnv from './RScriptEnv';
@@ -41,76 +44,94 @@ export default class ROPTextbox extends RScriptOp {
     }
 
     private showTextbox(): void {
-        const textBox = new FancyTextBalloon();
-        if (this._initialShow) {
-            // if (this._forceTopmost && false) {
-            // parent = Application.instance.get_front_object_container();
-            // Application.instance.get_front_object_container().add_object(textBox);
-            // } else {
-            this._env.addObject(textBox, this._env.container);
-            // }
-        }
+        const PADDING = 10;
 
-        this._env.setVar(this._id, textBox);
+        const window = new GameWindow({
+            movable: this._mode !== ROPTextboxMode.TEXTBOX_NUCLEOTIDE,
+            resizable: false,
+            closable: false,
+            ensureOnScreen: this._mode !== ROPTextboxMode.TEXTBOX_NUCLEOTIDE,
+            title: this._title,
+            verticalContentMargin: PADDING,
+            horizontalContentMargin: PADDING,
+            titleFontSize: 14
+        });
+        window.display.visible = this._initialShow;
+
+        // TODO: Not sure why forceTopmost was never reimplemented in the transition from Flash.
+        // Is this a bug? Did our layer handling change? Should this get re-added somehow?
+
+        // if (this._forceTopmost && false) {
+        // parent = Application.instance.get_front_object_container();
+        // Application.instance.get_front_object_container().add_object(textBox);
+        // } else {
+        this._env.addObject(window, this._env.container);
+        // }
+
+        this._env.setVar(this._id, window);
 
         const textStyle: TextStyleExtended = {
             fontFamily: Fonts.STDFONT,
             fontSize: 13,
-            fill: 0xC0DCE7
-
+            fill: 0xC0DCE7,
+            // Even when disabled, apparently this counts towards the width/height, even though the
+            // position starts at the visible location. That throws our sizing calculations off
+            dropShadowDistance: 0
             // TSC: wordWrap + letterSpacing is currently broken:
             // https://github.com/tleunen/pixi-multistyle-text/issues/67
             // letterSpacing: 1.0
         };
 
+        const FIXED_SIZE = 215;
         if (this._fixedSize) {
-            textBox.fixedWidth = 215;
+            window.setTargetBounds({width: FIXED_SIZE});
             textStyle.wordWrap = true;
             textStyle.wordWrapWidth = 185;
         }
 
-        textBox.styledText = new StyledTextBuilder(textStyle).appendHTMLStyledText(this._text);
-
-        if (this._title.length > 0) {
-            textBox.title = this._title;
-        }
-
+        const text = new StyledTextBuilder(textStyle).appendHTMLStyledText(this._text).build();
+        window.content.addChild(text);
         if (this._buttonText !== '') {
-            textBox.showButton(true).clicked.connect(() => this.onClickEvent());
-        } else {
-            textBox.showButton(false);
+            const button = new GameButton()
+                .up(Bitmaps.NovaNext)
+                .over(Bitmaps.NovaNextOver)
+                .down(Bitmaps.NovaNextHit);
+            window.addObject(button, window.content);
+            button.display.width = 60;
+            button.display.height = 25;
+            button.display.x = (this._fixedSize ? FIXED_SIZE - 2 * PADDING : text.width) - button.display.width;
+            button.display.y = text.height + 10;
+            button.clicked.connect(() => this.onClickEvent());
         }
 
-        const updateLocation = () => {
-            if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
-                Assert.assertIsDefined(Flashbang.stageWidth);
-                Assert.assertIsDefined(Flashbang.stageHeight);
-                textBox.display.position.set(
-                    Flashbang.stageWidth * this._xPos + this._xRel,
-                    Flashbang.stageHeight * this._yPos + this._yRel
-                );
-            } else if (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
-                // Get position of the textbox based on position of the nucleotide.
-                const p: Point = this._env.pose.getBaseLoc(this._targetIndex);
-                const offset = new Point(ROPTextbox.DEFAULT_X_OFFSET, -(textBox.container.height * 0.5) - 10);
-                if (this._hasXOffset) {
-                    offset.x = this._xOffset;
-                }
+        // Not all cases below force a relayout
+        window.layout();
 
-                if (this._hasYOffset) {
-                    offset.y = this._yOffset;
-                }
-
-                textBox.display.position.set(p.x + offset.x, p.y + offset.y);
-                this._env.poseField.addAnchoredObject(new RNAAnchorObject(textBox, this._targetIndex, offset));
-            } else if (this._mode === ROPTextboxMode.TEXTBOX_DEFAULT) {
-                this._env.setTextboxVisible(this._id, true);
+        if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
+            window.setTargetBounds({
+                x: {from: 'left', offsetRatio: this._xPos, offsetFromRatio: this._xRel},
+                y: {from: 'top', offsetRatio: this._yPos, offsetFromRatio: this._yRel}
+            });
+        } else if (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
+            // Get position of the textbox based on position of the nucleotide.
+            const p: Point = this._env.pose.getBaseLoc(this._targetIndex);
+            const offset = new Point(ROPTextbox.DEFAULT_X_OFFSET, -(window.container.height * 0.5) - 10);
+            if (this._hasXOffset) {
+                offset.x = this._xOffset;
             }
-        };
 
-        Assert.assertIsDefined(this._env.mode);
-        textBox.regs.add(this._env.mode.resized.connect(updateLocation));
-        updateLocation();
+            if (this._hasYOffset) {
+                offset.y = this._yOffset;
+            }
+
+            window.setTargetBounds({
+                x: {from: 'left', offsetExact: p.x + offset.x},
+                y: {from: 'top', offsetExact: p.y + offset.y}
+            });
+            this._env.poseField.addAnchoredObject(new RNAAnchorObject(window, this._targetIndex, offset));
+        } else if (this._mode === ROPTextboxMode.TEXTBOX_DEFAULT) {
+            this._env.setTextboxVisible(this._id, true);
+        }
     }
 
     private showArrow(): void {
@@ -392,7 +413,7 @@ export default class ROPTextbox extends RScriptOp {
                 } else if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
                     this._fixedSize = ROPTextbox.parseBool(arg);
                 } else if (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
-                    // never used: this._forceTopmost = ROPTextbox.parseBool(arg);
+                    // this._forceTopmost = ROPTextbox.parseBool(arg);
                 }
                 break;
             case 8:
@@ -401,7 +422,7 @@ export default class ROPTextbox extends RScriptOp {
                 } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
                     this._outlineColor = ColorUtil.fromString(`#${this._env.getStringRef(arg)}`);
                 } else if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
-                    // never used: this._forceTopmost = ROPTextbox.parseBool(arg);
+                    // this._forceTopmost = ROPTextbox.parseBool(arg);
                 } else if (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
                     this._hasXOffset = true;
                     this._xOffset = Number(arg);

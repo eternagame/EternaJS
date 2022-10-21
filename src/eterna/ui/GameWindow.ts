@@ -13,8 +13,12 @@ import GameButton from './GameButton';
 import GamePanel from './GamePanel';
 import ScrollBox from './ScrollBox';
 
-type XTarget = { from: 'left' | 'center' | 'right' } & ({offsetExact: number} | {offsetRatio: number});
-type YTarget = { from: 'top' | 'center' | 'bottom' } & ({offsetExact: number} | {offsetRatio: number});
+type XTarget = { from: 'left' | 'center' | 'right' } & (
+    {offsetExact: number} | {offsetRatio: number; offsetFromRatio?: number}
+);
+type YTarget = { from: 'top' | 'center' | 'bottom' } & (
+    {offsetExact: number} | {offsetRatio: number; offsetFromRatio?: number}
+);
 
 /**
  * How much space on either side of the window border is valid as a resize target
@@ -43,6 +47,8 @@ export default class GameWindow extends ContainerObject {
             contentVAlign?: VAlign;
             bgColor?: number;
             bgAlpha?: number;
+            titleFontSize?: number;
+            titleUpperCase?: boolean;
         }
     ) {
         super();
@@ -57,12 +63,19 @@ export default class GameWindow extends ContainerObject {
         this._contentVAlign = props.contentVAlign ?? VAlign.CENTER;
         this._bgColor = props.bgColor;
         this._bgAlpha = props.bgAlpha;
+        this._titleFontSize = props.titleFontSize;
+        this._titleUpperCase = props.titleUpperCase;
     }
 
     protected added() {
         this._panel = new GamePanel({
             color: this._bgColor,
-            alpha: this._bgAlpha
+            alpha: this._bgAlpha,
+            // Even if we don't have a title, we need the title bar to be there as a drag handle
+            // and/or as a place for the close button
+            forceTitleBar: this._movable || this._closable,
+            titleFontSize: this._titleFontSize,
+            titleUpperCase: this._titleUpperCase
         });
         if (this._title) this._panel.title = this._title;
         this.addObject(this._panel, this.container);
@@ -434,7 +447,7 @@ export default class GameWindow extends ContainerObject {
         Assert.assertIsDefined(Flashbang.stageWidth);
         const offsetPx = 'offsetExact' in this._targetX
             ? this._targetX.offsetExact
-            : this._targetX.offsetRatio * Flashbang.stageWidth;
+            : this._targetX.offsetRatio * Flashbang.stageWidth + (this._targetX.offsetFromRatio ?? 0);
 
         switch (this._targetX.from) {
             case 'left':
@@ -452,7 +465,7 @@ export default class GameWindow extends ContainerObject {
         Assert.assertIsDefined(Flashbang.stageHeight);
         const offsetPx = 'offsetExact' in this._targetY
             ? this._targetY.offsetExact
-            : this._targetY.offsetRatio * Flashbang.stageHeight;
+            : this._targetY.offsetRatio * Flashbang.stageHeight + (this._targetY.offsetFromRatio ?? 0);
 
         switch (this._targetY.from) {
             case 'top':
@@ -592,4 +605,6 @@ export default class GameWindow extends ContainerObject {
 
     private _bgColor?: number;
     private _bgAlpha?: number;
+    private _titleFontSize?: number;
+    private _titleUpperCase?: boolean;
 }

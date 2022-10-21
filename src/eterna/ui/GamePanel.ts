@@ -22,6 +22,7 @@ interface GamePanelProps {
     borderThickness?: number;
     titleFontSize?: number;
     titleUpperCase?: boolean;
+    forceTitleBar?: boolean;
 }
 
 export default class GamePanel extends BaseGamePanel {
@@ -39,6 +40,7 @@ export default class GamePanel extends BaseGamePanel {
         const dropShadow = props.dropShadow || false;
         const titleFontSize = props.titleFontSize ?? 16;
         const titleUpperCase = props.titleUpperCase ?? true;
+        const forceTitleBar = props.forceTitleBar ?? false;
 
         this.setup(
             type,
@@ -50,7 +52,8 @@ export default class GamePanel extends BaseGamePanel {
             borderThickness,
             dropShadow,
             titleFontSize,
-            titleUpperCase
+            titleUpperCase,
+            forceTitleBar
         );
     }
 
@@ -64,7 +67,8 @@ export default class GamePanel extends BaseGamePanel {
         borderThickness: number = 0,
         dropShadow: boolean = false,
         titleFontSize: number = 16,
-        titleUpperCase: boolean = true
+        titleUpperCase: boolean = true,
+        forceTitleBar: boolean = false
     ): void {
         this._type = type;
         this._alpha = alpha;
@@ -76,6 +80,7 @@ export default class GamePanel extends BaseGamePanel {
         this._dropShadow = dropShadow;
         this._titleFontSize = titleFontSize;
         this._titleUpperCase = titleUpperCase;
+        this._forceTitleBar = forceTitleBar;
         this.updateView();
     }
 
@@ -125,7 +130,9 @@ export default class GamePanel extends BaseGamePanel {
     }
 
     public get titleHeight(): number {
-        return this._title == null ? 0 : 35;
+        if (this._title != null) return GamePanel.FULL_TITLE_BAR_HEIGHT;
+        else if (this._forceTitleBar) return GamePanel.FORCE_TITLE_BAR_HEIGHT;
+        return 0;
     }
 
     public get titleTextWidth(): number {
@@ -180,14 +187,17 @@ export default class GamePanel extends BaseGamePanel {
                     (this._width - this._titleText.width) * 0.5,
                     (this.titleHeight - this._titleText.height) * 0.5
                 );
+            }
+
+            if (this._title !== null || this._forceTitleBar) {
                 this._titleBackground.display.beginFill(this._borderColor, this._alpha);
                 this._titleBackground.display
-                    .moveTo(0, 35)
+                    .moveTo(0, this.titleHeight)
                     .lineTo(0, 5)
                     .arcTo(0, 0, 5, 0, 5)
                     .lineTo(this._width - 5, 0)
                     .arcTo(this._width, 0, this._width, 5, 5)
-                    .lineTo(this._width, 35);
+                    .lineTo(this._width, this.titleHeight);
                 this._background.endFill();
             }
         }
@@ -207,6 +217,7 @@ export default class GamePanel extends BaseGamePanel {
     protected _dropShadow: boolean = false;
     protected _titleFontSize: number = 16;
     protected _titleUpperCase: boolean = true;
+    protected _forceTitleBar: boolean = false;
     protected _title: string | null = null;
     protected _titleText: Text | null = null;
 
@@ -214,4 +225,6 @@ export default class GamePanel extends BaseGamePanel {
     protected _height: number = 0;
 
     private static DEFAULT_BORDER_THICKNESS: number = 1.5;
+    private static FORCE_TITLE_BAR_HEIGHT: number = 15;
+    private static FULL_TITLE_BAR_HEIGHT: number = 35;
 }
