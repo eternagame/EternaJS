@@ -268,20 +268,20 @@ export default class GameWindow extends ContainerObject {
             );
             const rightStart = margin + leftWidth + margin + this._panel.titleTextWidth + margin;
             this._dragRibbing
-                .drawRect(margin, (this.titleHeight - RIB_WIDTH) * 0.25, leftWidth, RIB_WIDTH)
+                .drawRect(margin, (this.titleHeight - RIB_WIDTH) * 0.35, leftWidth, RIB_WIDTH)
                 .drawRect(margin, (this.titleHeight - RIB_WIDTH) * 0.5, leftWidth, RIB_WIDTH)
-                .drawRect(margin, (this.titleHeight - RIB_WIDTH) * 0.75, leftWidth, RIB_WIDTH)
-                .drawRect(rightStart, (this.titleHeight - RIB_WIDTH) * 0.25, rightWidth, RIB_WIDTH)
+                .drawRect(margin, (this.titleHeight - RIB_WIDTH) * 0.65, leftWidth, RIB_WIDTH)
+                .drawRect(rightStart, (this.titleHeight - RIB_WIDTH) * 0.35, rightWidth, RIB_WIDTH)
                 .drawRect(rightStart, (this.titleHeight - RIB_WIDTH) * 0.5, rightWidth, RIB_WIDTH)
-                .drawRect(rightStart, (this.titleHeight - RIB_WIDTH) * 0.75, rightWidth, RIB_WIDTH);
+                .drawRect(rightStart, (this.titleHeight - RIB_WIDTH) * 0.65, rightWidth, RIB_WIDTH);
         } else {
             const width = this._panel.width - (margin * 2) - (
                 this._closable ? this.closeButtonSize + margin : 0
             );
             this._dragRibbing
-                .drawRect(margin, (this.titleHeight - RIB_WIDTH) * 0.25, width, RIB_WIDTH)
+                .drawRect(margin, (this.titleHeight - RIB_WIDTH) * 0.35, width, RIB_WIDTH)
                 .drawRect(margin, (this.titleHeight - RIB_WIDTH) * 0.5, width, RIB_WIDTH)
-                .drawRect(margin, (this.titleHeight - RIB_WIDTH) * 0.75, width, RIB_WIDTH);
+                .drawRect(margin, (this.titleHeight - RIB_WIDTH) * 0.65, width, RIB_WIDTH);
         }
         this._dragRibbing.endFill();
 
