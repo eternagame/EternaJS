@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="26.077" height="23.077" viewBox="0 0 26.077 23.077">
+  <g id="Jump_to_Nucleotide" data-name="Jump to Nucleotide" transform="translate(-1592.058 -609.366)">
+    <g id="Group_658" data-name="Group 658">
+      <path id="Path_1783" data-name="Path 1783" d="M0,5.852V0H5.852" transform="translate(1593.058 631.443) rotate(-90)" fill="none" stroke="#bedce8" stroke-miterlimit="10" stroke-width="2"/>
+      <path id="Path_1781" data-name="Path 1781" d="M0,5.852V0H5.852" transform="translate(1593.058 610.366)" fill="none" stroke="#bedce8" stroke-miterlimit="10" stroke-width="2"/>
+      <path id="Path_1791" data-name="Path 1791" d="M0,5.852V0H5.852" transform="translate(1617.135 610.366) rotate(90)" fill="none" stroke="#bedce8" stroke-miterlimit="10" stroke-width="2"/>
+      <path id="Path_1792" data-name="Path 1792" d="M0,5.852V0H5.852" transform="translate(1617.135 631.443) rotate(180)" fill="none" stroke="#bedce8" stroke-miterlimit="10" stroke-width="2"/>
+    </g>
+    <g id="Group_659" data-name="Group 659" transform="translate(-0.522 0.976)">
+      <path id="Path_1829" data-name="Path 1829" d="M11.328,5.663A5.664,5.664,0,1,1,5.665,0a5.662,5.662,0,0,1,5.663,5.663" transform="translate(1599.955 614.265)" fill="none" stroke="#bedce8" stroke-width="1"/>
+      <path id="Path_1830" data-name="Path 1830" d="M8.536,4.267A4.268,4.268,0,1,1,4.269,0,4.267,4.267,0,0,1,8.536,4.267" transform="translate(1601.351 615.661)" fill="#bedce8"/>
+    </g>
+  </g>
+</svg>

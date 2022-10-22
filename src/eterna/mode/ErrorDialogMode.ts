@@ -47,7 +47,7 @@ export default class ErrorDialogMode extends AppMode {
 
         panelLayout.addVSpacer(20);
 
-        const okButton = new GameButton().label('OK', 16);
+        const okButton = new GameButton().label('OK', 14);
         panel.addObject(okButton, panelLayout);
 
         okButton.clicked.connect(() => {

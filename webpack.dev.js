@@ -14,6 +14,13 @@ module.exports = merge(common, {
         static: {
             directory: path.resolve(__dirname + "/dist/dev"),
         },
-        hot: false
+        hot: false,
+        proxy: [
+            {
+                context: ['/get', '/post', '/login', '/authenticate.php', '/eterna_logout.php'],
+                target: 'https://eternadev.org',
+                changeOrigin: true,
+            }
+        ],
     },
 });

@@ -165,7 +165,7 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
      */
     protected onSizeChanged(): void {
         if (this.isLiveObject) {
-            const transfom: string = this._obj.style.transform;
+            const transform: string = this._obj.style.transform;
             this._obj.style.transform = 'initial';
 
             const r = this._obj.getBoundingClientRect();
@@ -174,7 +174,7 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
                 .drawRect(0, 0, r.width, r.height)
                 .endFill();
 
-            this._obj.style.transform = transfom;
+            this._obj.style.transform = transform;
         }
     }
 

@@ -1,7 +1,9 @@
 import {Registration} from 'signals';
 import LinkedList from 'flashbang/util/LinkedList';
-import {Assert, DisplayUtil, AppMode} from 'flashbang';
-import {Container} from 'pixi.js';
+import {
+    Assert, DisplayUtil, AppMode, Flashbang
+} from 'flashbang';
+import {Container, Point} from 'pixi.js';
 
 export interface MouseWheelListener {
     /**
@@ -20,37 +22,25 @@ export default class MouseWheelInput {
     }
 
     public handleMouseWheelEvent(e: WheelEvent): boolean {
+        Assert.assertIsDefined(Flashbang.app.pixi);
+        const interaction = Flashbang.app.pixi.renderer.plugins.interaction;
         let handled = false;
         try {
-            let smallestCandidateListenerWidth = Infinity;
-            let smallestCandidateListener: MouseWheelListener | null = null;
             for (
                 let elt = this._listeners ? this._listeners.beginIteration() : null;
                 elt != null;
                 elt = elt.next
             ) {
-                if (
-                    elt.data !== null
-                    && elt.data.mode != null
-                    && elt.data.mode.container != null
-                ) {
-                    const globalBoxBounds = DisplayUtil.getBoundsRelative(elt.data.display, elt.data.mode.container);
-                    if (
-                        e.x >= globalBoxBounds.x
-                        && e.x <= globalBoxBounds.x + globalBoxBounds.width
-                        && e.y >= globalBoxBounds.y
-                        && e.y <= globalBoxBounds.y + globalBoxBounds.height
-                        && globalBoxBounds.width < smallestCandidateListenerWidth
-                    ) {
-                        smallestCandidateListenerWidth = globalBoxBounds.width;
-                        smallestCandidateListener = elt.data;
-                    }
+                const pixiPoint = new Point();
+                interaction.mapPositionToPoint(pixiPoint, e.clientX, e.clientY);
+                // If the pointer is not visible or not over the object, skip
+                handled = elt.data !== null
+                    && elt.data.display.worldVisible
+                    && DisplayUtil.hitTest(elt.data.display, pixiPoint)
+                    && elt.data.onMouseWheelEvent(e);
+                if (handled) {
+                    break;
                 }
-            }
-
-            if (smallestCandidateListener) {
-                smallestCandidateListener.onMouseWheelEvent(e);
-                handled = true;
             }
         } finally {
             if (this._listeners) this._listeners.endIteration();

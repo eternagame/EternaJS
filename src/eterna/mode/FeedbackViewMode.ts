@@ -5,19 +5,19 @@ import {
 import Constants from 'eterna/Constants';
 import Eterna from 'eterna/Eterna';
 import Feedback from 'eterna/Feedback';
-import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
+import UndoBlock, {TargetConditions, UndoBlockParam} from 'eterna/UndoBlock';
 import Solution from 'eterna/puzzle/Solution';
 import Puzzle from 'eterna/puzzle/Puzzle';
 import Background from 'eterna/vfx/Background';
 import Fonts from 'eterna/util/Fonts';
-import Toolbar, {ToolbarType} from 'eterna/ui/Toolbar';
+import Toolbar, {ToolbarType} from 'eterna/ui/toolbar/Toolbar';
 import PoseField from 'eterna/pose2D/PoseField';
 import FolderManager from 'eterna/folding/FolderManager';
 import Vienna from 'eterna/folding/Vienna';
 import {
-    VAlign, HAlign, DisplayUtil, KeyboardEventType, KeyCode, Assert
+    VAlign, HAlign, DisplayUtil, KeyboardEventType, KeyCode, Assert, Flashbang
 } from 'flashbang';
-import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
+import EternaSettingsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaSettingsDialog';
 import SpecBoxDialog from 'eterna/ui/SpecBoxDialog';
 import Folder from 'eterna/folding/Folder';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -30,6 +30,9 @@ import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 import UITheme from 'eterna/ui/UITheme';
 import AnnotationManager from 'eterna/AnnotationManager';
+import ToolbarButton from 'eterna/ui/toolbar/ToolbarButton';
+import StateToggle from 'eterna/ui/StateToggle';
+import ModeBar from 'eterna/ui/ModeBar';
 import ViewSolutionOverlay from './DesignBrowser/ViewSolutionOverlay';
 import GameMode from './GameMode';
 
@@ -83,7 +86,25 @@ export default class FeedbackViewMode extends GameMode {
             homeArrow, HAlign.RIGHT, VAlign.CENTER, 8, 8
         );
 
-        this._toolbar = new Toolbar(ToolbarType.FEEDBACK, {states: this._puzzle.getSecstructs().length});
+        const states = this._puzzle.getSecstructs().length;
+
+        this._modeBar = new ModeBar();
+        this.addObject(this._modeBar, this.uiLayer);
+
+        const {actualButton, targetButton} = this._modeBar.addStructToggle('feedback');
+        this._estimateButton = actualButton;
+        this._targetButton = targetButton;
+
+        const {baseButton, expButton} = this._modeBar.addColorToggle();
+        this._baseColorButton = baseButton;
+        this._expColorButton = expButton;
+
+        if (states > 1) {
+            this._stateToggle = this._modeBar.addStateToggle(states);
+            this._stateToggle.stateChanged.connect((targetIdx) => this.changeTarget(targetIdx));
+        }
+
+        this._toolbar = new Toolbar(ToolbarType.FEEDBACK, {showPip: states > 1});
         this.addObject(this._toolbar, this.uiLayer);
 
         Assert.assertIsDefined(this._toolbar.zoomOutButton);
@@ -100,15 +121,15 @@ export default class FeedbackViewMode extends GameMode {
             }
         });
 
+        this._toolbar.settingsButton.clicked.connect(() => this.showSettingsDialog());
         this._toolbar.screenshotButton.clicked.connect(() => this.postScreenshot(this.createScreenshot()));
         this._toolbar.viewSolutionsButton.clicked.connect(() => this.loadDesignBrowser());
-        this._toolbar.viewOptionsButton.clicked.connect(() => this.showViewOptionsDialog());
-        this._toolbar.letterColorButton.clicked.connect(() => this.showBaseColors());
-        this._toolbar.expColorButton.clicked.connect(() => this.showExperimentalColors());
+        this._baseColorButton.clicked.connect(() => this.showBaseColors());
+        this._expColorButton.clicked.connect(() => this.showExperimentalColors());
         this._toolbar.specButton.clicked.connect(() => this.showSpec());
         this._toolbar.pipButton.clicked.connect(() => this.togglePip());
-        this._toolbar.estimateButton.clicked.connect(() => this.setToEstimateMode());
-        this._toolbar.targetButton.clicked.connect(() => this.setToTargetMode());
+        this._estimateButton.clicked.connect(() => this.setToEstimateMode());
+        this._targetButton.clicked.connect(() => this.setToTargetMode());
 
         this._toolbar.nucleotideFindButton.clicked.connect(() => this.findNucleotide());
         this._toolbar.nucleotideRangeButton.clicked.connect(() => this.showNucleotideRange());
@@ -287,18 +308,16 @@ export default class FeedbackViewMode extends GameMode {
             ? ViewSolutionOverlay.theme.width : 0;
     }
 
-    private updateUILayout(): void {
+    public updateUILayout(): void {
+        Assert.assertIsDefined(Flashbang.stageHeight);
         DisplayUtil.positionRelativeToStage(
-            this._toolbar.display, HAlign.LEFT, VAlign.BOTTOM,
-            HAlign.LEFT, VAlign.BOTTOM, 0, 50
+            this._modeBar.display, HAlign.LEFT, VAlign.TOP,
+            HAlign.LEFT, VAlign.TOP, 17, 120
         );
-
-        this._toolbar.onResized();
-
-        // DisplayUtil.positionRelativeToStage(
-        //     this._homeButton.display, HAlign.RIGHT, VAlign.TOP,
-        //     HAlign.RIGHT, VAlign.TOP, 0 - this._solDialogOffset, 5
-        // );
+        // Roughly how much space from the bottom of the screen when non-expanded
+        // TODO: Is there a way to make this not hardcoded?
+        const toolbarHeight = 100;
+        this._modeBar.maxHeight = Flashbang.stageHeight - this._modeBar.display.y - toolbarHeight;
 
         DisplayUtil.positionRelativeToStage(
             this._info.display, HAlign.RIGHT, VAlign.TOP,
@@ -306,8 +325,8 @@ export default class FeedbackViewMode extends GameMode {
         );
     }
 
-    private showViewOptionsDialog(): void {
-        this.showDialog(new EternaViewOptionsDialog(EternaViewOptionsMode.LAB));
+    private showSettingsDialog(): void {
+        this.showDialog(new EternaSettingsDialog(EternaViewOptionsMode.LAB), 'SettingsDialog');
     }
 
     public onKeyboardEvent(e: KeyboardEvent): void {
@@ -322,9 +341,6 @@ export default class FeedbackViewMode extends GameMode {
                 handled = true;
             } else if (!ctrl && key === KeyCode.KeyG) {
                 Eterna.settings.displayFreeEnergies.value = !Eterna.settings.displayFreeEnergies.value;
-                handled = true;
-            } else if (!ctrl && key === KeyCode.KeyS) {
-                this.showSpec();
                 handled = true;
             } else if (key === KeyCode.BracketLeft) {
                 const factor = Math.max(0, Math.round((this._poseFields[0].explosionFactor - 0.25) * 1000) / 1000);
@@ -348,9 +364,9 @@ export default class FeedbackViewMode extends GameMode {
 
     /* override */
     protected onSetPip(pipMode: boolean): void {
-        if (pipMode) {
-            if (this._toolbar.stateToggle != null) {
-                this._toolbar.stateToggle.display.visible = false;
+        if (pipMode || (this._stateToggle && this._stateToggle.numStates < 2)) {
+            if (this._stateToggle) {
+                this._stateToggle.display.visible = false;
             }
 
             if (this._foldMode === PoseFoldMode.ESTIMATE) {
@@ -391,8 +407,8 @@ export default class FeedbackViewMode extends GameMode {
                 this.showExperimentalColors();
             }
         } else {
-            if (this._toolbar.stateToggle != null) {
-                this._toolbar.stateToggle.display.visible = true;
+            if (this._stateToggle) {
+                this._stateToggle.display.visible = true;
             }
 
             this.changeTarget(this._currentIndex);
@@ -452,10 +468,10 @@ export default class FeedbackViewMode extends GameMode {
 
     private setToTargetMode(): void {
         this._foldMode = PoseFoldMode.TARGET;
-        this._toolbar.targetButton.hotkey();
-        this._toolbar.estimateButton.hotkey(KeyCode.Space);
-        this._toolbar.estimateButton.toggled.value = false;
-        this._toolbar.targetButton.toggled.value = true;
+        this._targetButton.hotkey();
+        this._estimateButton.hotkey(KeyCode.Space);
+        this._estimateButton.toggled.value = false;
+        this._targetButton.toggled.value = true;
         if (this._isPipMode) {
             for (let ii = 0; ii < this._secstructs.length; ii++) {
                 this._poseFields[ii].pose.secstruct = this._secstructs[ii];
@@ -467,10 +483,10 @@ export default class FeedbackViewMode extends GameMode {
 
     private setToEstimateMode(): void {
         this._foldMode = PoseFoldMode.ESTIMATE;
-        this._toolbar.estimateButton.hotkey();
-        this._toolbar.targetButton.hotkey(KeyCode.Space);
-        this._toolbar.estimateButton.toggled.value = true;
-        this._toolbar.targetButton.toggled.value = false;
+        this._estimateButton.hotkey();
+        this._targetButton.hotkey(KeyCode.Space);
+        this._estimateButton.toggled.value = true;
+        this._targetButton.toggled.value = false;
         if (this._isPipMode) {
             for (let ii = 0; ii < this._secstructs.length; ii++) {
                 if (this._shapePairs[ii] !== null) {
@@ -512,14 +528,27 @@ export default class FeedbackViewMode extends GameMode {
         if (this._isExpColor) {
             this.showExperimentalColors();
         }
+
+        const undoBlock = this._undoBlocks[this._currentIndex];
+        const numAU: number = undoBlock.getParam(UndoBlockParam.AU, 37) as number;
+        const numGU: number = undoBlock.getParam(UndoBlockParam.GU, 37) as number;
+        const numGC: number = undoBlock.getParam(UndoBlockParam.GC, 37) as number;
+        this._toolbar.palette.setPairCounts(numAU, numGU, numGC);
+
+        if (this._specBox) {
+            undoBlock.updateMeltingPointAndDotPlot();
+            this._specBox?.setSpec(undoBlock);
+        }
+
+        this.updateCopySequenceDialog();
     }
 
     private showExperimentalColors(): void {
         Assert.assertIsDefined(this._feedback);
 
         this._isExpColor = true;
-        this._toolbar.letterColorButton.toggled.value = false;
-        this._toolbar.expColorButton.toggled.value = true;
+        this._baseColorButton.toggled.value = false;
+        this._expColorButton.toggled.value = true;
 
         if (this._dataOption.value === 'SHAPE') {
             if (this._isPipMode) {
@@ -564,8 +593,8 @@ export default class FeedbackViewMode extends GameMode {
 
     private showBaseColors(): void {
         this._isExpColor = false;
-        this._toolbar.letterColorButton.toggled.value = true;
-        this._toolbar.expColorButton.toggled.value = false;
+        this._baseColorButton.toggled.value = true;
+        this._expColorButton.toggled.value = false;
         for (let ii = 0; ii < this._poseFields.length; ii++) {
             this._poseFields[ii].pose.clearFeedback();
         }
@@ -661,7 +690,9 @@ export default class FeedbackViewMode extends GameMode {
     private showSpec(): void {
         const puzzleState = this._undoBlocks[this._currentIndex];
         puzzleState.updateMeltingPointAndDotPlot();
-        this.showDialog(new SpecBoxDialog(puzzleState, false));
+        this._specBox = this.showDialog(new SpecBoxDialog());
+        this._specBox.setSpec(puzzleState);
+        this._specBox.closed.then(() => { this._specBox = null; });
     }
 
     private showNextSolution(indexOffset: number): void {
@@ -681,7 +712,7 @@ export default class FeedbackViewMode extends GameMode {
         this.setSolution(solution);
         this.changeTarget(this._currentIndex);
 
-        if (this._feedback !== null && this._toolbar.expColorButton.toggled.value) {
+        if (this._feedback !== null && this._expColorButton.toggled.value) {
             this.showExperimentalColors();
         }
 
@@ -710,8 +741,15 @@ export default class FeedbackViewMode extends GameMode {
     private readonly _puzzle: Puzzle;
     private _solutions: Solution[];
 
-    private _toolbar: Toolbar;
+    private _modeBar: ModeBar;
     private _homeButton: GameButton;
+    private _targetButton: ToolbarButton;
+    private _estimateButton: ToolbarButton;
+    private _baseColorButton: ToolbarButton;
+    private _expColorButton: ToolbarButton;
+    private _stateToggle: StateToggle | undefined;
+
+    private _specBox: SpecBoxDialog | null = null;
 
     private _undoBlocks: UndoBlock[] = [];
     private _currentIndex: number;

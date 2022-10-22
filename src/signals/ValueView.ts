@@ -27,12 +27,12 @@ export default interface ValueView<T> {
     /**
      * Connects the supplied listener to this value, such that it will be notified when this value
      * changes. Also immediately notifies the listener of the current value. Note that the previous
-     * value supplied with this notification will be null. If the notification triggers an
+     * value supplied with this notification will be undefined. If the notification triggers an
      * unchecked exception, the slot will automatically be disconnected and the caller need not
      * worry about cleaning up after itself.
      * @return a connection instance which can be used to cancel the connection.
      */
-    connectNotify(listener: (value: T, ovalue: T) => void): Connection;
+    connectNotify(listener: (value: T, ovalue: T | undefined) => void): Connection;
 
     /**
      * Disconnects the supplied listener from this value if it's connected. If the listener has been

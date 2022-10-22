@@ -1,4 +1,4 @@
-import EPars from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 import Folder from 'eterna/folding/Folder';
 import NuPACK from 'eterna/folding/NuPACK';
 import LayoutEngineManager from 'eterna/layout/LayoutEngineManager';
@@ -302,7 +302,7 @@ export default class RNALayout {
         } else {
             folder.scoreStructures(seq, this._origPairs, false, EPars.DEFAULT_TEMPERATURE, nnfe);
         }
-        this.scoreTreeRecursive(nnfe, this._root, null);
+        this.scoreTreeRecursive(nnfe, this._root, null, seq);
     }
 
     private addNodesRecursive(biPairs: number[], rootnode: RNATreeNode, startIndex: number, endIndex: number): void {
@@ -890,8 +890,14 @@ export default class RNALayout {
      * @param nnfe list of nearest neighbor free energies
      * @param rootnode current node for consideration
      * @param parentnode parent of roonode, null if rootnode is root_
+     * @param seq the sequence of the structure being scored
      */
-    private scoreTreeRecursive(nnfe: number[], rootnode: RNATreeNode, parentnode: RNATreeNode | null): void {
+    private scoreTreeRecursive(
+        nnfe: number[],
+        rootnode: RNATreeNode,
+        parentnode: RNATreeNode | null,
+        seq: Sequence
+    ): void {
         if (rootnode.isPair) {
             // / Pair node
             if (rootnode.children.length > 1) {
@@ -903,10 +909,10 @@ export default class RNALayout {
             }
 
             if (rootnode.children[0].isPair) {
-                rootnode.score = RNALayout.lookupFe(nnfe, rootnode.indexA);
+                rootnode.score = this.lookupFe(nnfe, seq, rootnode.indexA);
             }
 
-            this.scoreTreeRecursive(nnfe, rootnode.children[0], rootnode);
+            this.scoreTreeRecursive(nnfe, rootnode.children[0], rootnode, seq);
         } else if (!rootnode.isPair && rootnode.indexA >= 0) {
             // / Single residue node
 
@@ -915,8 +921,8 @@ export default class RNALayout {
 
             // / Top root case
             if (parentnode == null) {
-                // / initial ml scoring
-                rootnode.score = RNALayout.lookupFe(nnfe, -1);
+                // The energy value at index -1 is the dangle energy
+                rootnode.score = this.lookupFe(nnfe, seq, -1);
             } else if (!parentnode.isPair) {
                 throw new Error('Parent node must be a pair');
             }
@@ -935,15 +941,15 @@ export default class RNALayout {
             }
 
             if (numStacks === 1 && parentnode != null) {
-                rootnode.score = RNALayout.lookupFe(nnfe, parentnode.indexA);
+                rootnode.score = this.lookupFe(nnfe, seq, parentnode.indexA);
             } else if (numStacks === 0 && parentnode != null) {
-                rootnode.score = RNALayout.lookupFe(nnfe, parentnode.indexA);
+                rootnode.score = this.lookupFe(nnfe, seq, parentnode.indexA);
             } else if (numStacks > 1 && parentnode != null) {
-                rootnode.score = RNALayout.lookupFe(nnfe, parentnode.indexA);
+                rootnode.score = this.lookupFe(nnfe, seq, parentnode.indexA);
             }
 
             for (const child of rootnode.children) {
-                this.scoreTreeRecursive(nnfe, child, rootnode);
+                this.scoreTreeRecursive(nnfe, child, rootnode, seq);
             }
         }
     }
@@ -951,12 +957,23 @@ export default class RNALayout {
     // / FIXME: there's surely a smarter way to do this...
     /**
      * Find a particular nnfe element. Why isn't this a dict? Right now it is a
-     * list of pairs, basically... is JS dict lookup superlinear?
+     * list of pairs, basically... is JS dict lookup superlinear? EDIT: This is
+     * due to how nnfes are retrieved from the folding engine. We insert a callback
+     * which adds two elements (the starting index of a substructure and the energy value)
+     * to an array, and that array winds up getting passed straight through to here. This
+     * may be a holdover from Flash/Alchemy limitations. In theory we should be able to
+     * change it to a map starting in C++ and propagate that change all the way to here.
      *
      * @param nnfe Array of nearest neighbor parameters
      * @param index A desired index from the structure, for which we must search
      */
-    private static lookupFe(nnfe: number[], index: number): number {
+    private lookupFe(nnfe: number[], seq: Sequence, index: number): number {
+        if (index >= 0 && index < seq.length && seq.nt(index + 1) === RNABase.CUT) {
+            // The energy at index -2 is a term for multistrand sequences
+            // We'll distribute that term among energy nodes placed at cut points
+            return this.lookupFe(nnfe, seq, -2) / seq.numCuts();
+        }
+
         for (let ii = 0; ii < nnfe.length - 1; ii += 2) {
             if (nnfe[ii] === index) return nnfe[ii + 1];
         }

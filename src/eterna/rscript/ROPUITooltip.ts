@@ -26,7 +26,7 @@ export default class ROPUITooltip extends RScriptOp {
                     text: this._text,
                     tailLength: this._tailLength,
                     side: this._side as HelpToolTipSide,
-                    positioner: [getBounds, 0]
+                    positioner: [getBounds, 0, '']
                 });
                 const updatePosition = () => tooltip.updatePosition();
 
@@ -34,7 +34,9 @@ export default class ROPUITooltip extends RScriptOp {
                 this._env.addObject(tooltip, this._env.container);
                 this._env.setVar(ROPUITooltip.id, tooltip);
                 Assert.assertIsDefined(this._env.mode);
-                tooltip.regs.add(this._env.mode.resized.connect(updatePosition));
+                tooltip.regs.add(
+                    this._env.mode.resized.connect(updatePosition)
+                );
             }
         } else {
             this.clear();
@@ -60,7 +62,7 @@ export default class ROPUITooltip extends RScriptOp {
     }
 
     private clear() {
-        const elem = (this._env.getVar(ROPUITooltip.id) as GameObject);
+        const elem = this._env.getVar(ROPUITooltip.id) as GameObject;
         if (elem) {
             elem.destroySelf();
         }

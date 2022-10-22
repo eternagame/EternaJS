@@ -41,7 +41,7 @@ export default class EnergyScoreDisplay extends Container {
         });
         textLayout.addChild(this._labelText);
 
-        this._energyText = new MultiStyleText('5.2 kcal', {
+        this._energyText = new MultiStyleText('-.- kcal', {
             default: {
                 fontFamily: Fonts.STDFONT,
                 fontWeight: FontWeight.SEMIBOLD,

@@ -9,14 +9,14 @@ export default class ROPUIArrow extends RScriptOp {
         length: 55,
         colors: {
             outline: 0x000000,
-            fill: 0xFFFF00
+            fill: 0xffff00
         }
     };
 
-    private static id = 'uiArrow';
     private _uiElementId: string;
     private _side: string;
     private _show: boolean;
+    private static _lastId: string = 'uiArrowLast';
 
     constructor(env: RScriptEnv, show: boolean) {
         super(env);
@@ -51,7 +51,8 @@ export default class ROPUIArrow extends RScriptOp {
 
                 updatePosition();
                 this._env.addObject(arrow, this._env.container);
-                this._env.setVar(ROPUIArrow.id, arrow);
+                this._env.setVar(this.id, arrow);
+                this._env.setVar(ROPUIArrow._lastId, arrow);
                 Assert.assertIsDefined(this._env.mode);
                 arrow.regs.add(this._env.mode.resized.connect(updatePosition));
             }
@@ -73,9 +74,21 @@ export default class ROPUIArrow extends RScriptOp {
     }
 
     private clear() {
-        const elem = this._env.getVar(ROPUIArrow.id) as GameObject;
-        if (elem) {
-            elem.destroySelf();
+        if (this._uiElementId) {
+            const elem = this._env.getVar(this.id) as GameObject;
+            if (elem) {
+                elem.destroySelf();
+            }
+        } else {
+            // Backwards compat
+            const elem = this._env.getVar(ROPUIArrow._lastId) as GameObject;
+            if (elem) {
+                elem.destroySelf();
+            }
         }
+    }
+
+    private get id(): string {
+        return `uiArrow_${this._uiElementId}`;
     }
 }

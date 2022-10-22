@@ -287,10 +287,18 @@ export default class NuPACK extends Folder {
             }
         } while (0);
 
-        let cut: number = seq.lastCut();
+        const cut: number = seq.lastCut();
         if (cut >= 0) {
             if (cache.nodes[0] !== -2 || cache.nodes.length === 2 || (cache.nodes[0] === -2 && cache.nodes[2] !== -1)) {
                 // we just scored a duplex that wasn't one, so we have to redo it properly
+                // EG: If we have a target mode where we have two disconnected strands, we need to
+                // fold the two strands independently
+                // cache.nodes[0] is the index of the first score node, and the magic value -2 refers to
+                // the special term for the multistrand penalty
+                // FIXME: What if we have three strands where the first two are connected but the
+                // third is not? Wouldn't this score all three separately when it should score
+                // the first two together then the third separately?
+
                 const seqA: Sequence = seq.slice(0, cut);
                 const pairsA: SecStruct = pairs.slice(0, cut);
                 const nodesA: number[] = [];
@@ -298,11 +306,6 @@ export default class NuPACK extends Folder {
 
                 const seqB: Sequence = seq.slice(cut + 1);
                 const pairsB: SecStruct = pairs.slice(cut + 1);
-                for (let ii = 0; ii < pairsB.length; ii++) {
-                    if (pairsB.isPaired(ii)) {
-                        pairsB.pairs[ii] -= (cut + 1);
-                    }
-                }
                 const nodesB: number[] = [];
                 const retB: number = this.scoreStructures(seqB, pairsB, pseudoknots, temp, nodesB);
 
@@ -326,12 +329,15 @@ export default class NuPACK extends Folder {
 
                 cache.energy = (retA + retB) / 100;
             } else {
-                cut = 0;
-                for (let ii = 0; ii < cache.nodes.length; ii += 2) {
-                    if (seq.baseArray[ii / 2] === RNABase.CUT) {
-                        cut++;
-                    } else {
-                        cache.nodes[ii] += cut;
+                // If we have a sequence like AA&AA, NUPACK numbers the bases 1-4, but we
+                // number the bases 1-5 (counting the cut as a base), so we need to
+                // update the score node indices (ie, the starting base each node applies to)
+                // to be numbered according to our numbering scheme
+                for (let ii = 0; ii < seq.length; ii++) {
+                    if (seq.nt(ii) === RNABase.CUT) {
+                        for (let jj = 0; jj < cache.nodes.length; jj += 2) {
+                            if (cache.nodes[jj] >= ii) cache.nodes[jj]++;
+                        }
                     }
                 }
             }

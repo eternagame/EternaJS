@@ -152,7 +152,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
             'Create',
             Bitmaps.ImgAnnotationCheckmark,
             'Create Annotation',
-            0x54B54E
+            'primary',
+            true
         ).clicked.connect(() => {
             this._annotationDialog = new AnnotationDialog({
                 edit: false,
@@ -181,17 +182,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
                 this.clearAnnotationRanges();
             });
-
-            const menuX = this._annotationContextMenu.display.x;
-            const menuY = this._annotationContextMenu.display.y;
-            Assert.assertIsDefined(Flashbang.stageWidth);
-            Assert.assertIsDefined(Flashbang.stageHeight);
-            this._annotationDialog.display.x = menuX + this._annotationDialog.display.width < Flashbang.stageWidth
-                ? menuX : menuX - this._annotationDialog.display.width;
-            this._annotationDialog.display.y = menuY + this._annotationDialog.display.height < Flashbang.stageWidth
-                ? menuY : menuY - this._annotationDialog.display.height;
-
-            this.addObject(this._annotationDialog, this.container);
+            Assert.assertIsDefined(this.mode);
+            (this.mode as GameMode).showDialog(this._annotationDialog);
 
             this.hideAnnotationContextMenu();
         });
@@ -2769,10 +2761,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
         const fullSeq: Sequence = this.fullSequence;
         let center: Point;
 
-        // Hide bases that aren't part of our current sequence
-        if (!this._showNucleotideRange) {
-            for (let ii = 0; ii < this._bases.length; ++ii) {
-                this._bases[ii].display.visible = this.isNucleotidePartOfSequence(fullSeq, ii);
+        for (let ii = 0; ii < this._bases.length; ++ii) {
+            this._bases[ii].display.visible = this.isNucleotidePartOfSequence(fullSeq, ii);
+            if (this._showNucleotideRange) {
+                const start = this._showNucleotideRange[0];
+                const end = this._showNucleotideRange[1];
+                this._bases[ii].display.visible = this._bases[ii].display.visible && ii >= (start - 1) && ii < end;
             }
         }
 
@@ -3306,13 +3300,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public showNucleotideRange(range: [number, number] | null) {
         const [start, end] = range ?? [1, this._bases.length];
-        if (start < 1 || end > this._bases.length || start >= end) {
+        if (start < 1 || start >= end) {
             // eslint-disable-next-line
             console.warn(`Invalid nucleotide range [${start}, ${end}]`);
             return;
         }
 
-        this._showNucleotideRange = Boolean(range);
+        this._showNucleotideRange = range;
         if (!range) {
             return;
         }
@@ -4394,7 +4388,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _highlightEnergyText: boolean = false;
     private _energyHighlights: SceneObject[] = [];
 
-    private _showNucleotideRange: boolean = false;
+    private _showNucleotideRange: [number, number] | null = null;
 
     // Annotations
     private _annotationManager: AnnotationManager;

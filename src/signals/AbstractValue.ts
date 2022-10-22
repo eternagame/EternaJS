@@ -10,7 +10,7 @@ import ValueView from './ValueView';
  * observable values, but must manage the maintenance and distribution of value updates themselves
  * (so that they may send them over the network, for example).
  */
-export default abstract class AbstractValue<T> extends Reactor<T, T, undefined> implements ValueView<T> {
+export default abstract class AbstractValue<T> extends Reactor<[T, T]> implements ValueView<T> {
     public abstract get value(): T;
 
     /** Returns a "slot" Function which simply calls through to the Value's setter function. */
@@ -21,20 +21,20 @@ export default abstract class AbstractValue<T> extends Reactor<T, T, undefined> 
     public abstract map<U>(func: (value: T) => U): ValueView<U>;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public connect(listener: (value: any, ovalue: any) => void): Connection {
+    public connect(listener: (value: T, ovalue: T) => void): Connection {
         return this.addConnection(listener);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public connectNotify(listener: (value: any, ovalue: any) => void): Connection {
+    public connectNotify(listener: (value: T, ovalue: T | undefined) => void): Connection {
         // connect before calling emit; if the listener changes the value in the body of onEmit, it
         // will expect to be notified of that change; however if onEmit throws a runtime exception,
         // we need to take care of disconnecting the listener because the returned connection
         // instance will never reach the caller
-        const cons: Cons<T, T, undefined> = this.addConnection(listener);
+        const cons: Cons<[T, T]> = this.addConnection(listener);
         try {
             Assert.assertIsDefined(cons.listener);
-            cons.listener(this.value);
+            listener(this.value, undefined);
         } catch (e) {
             cons.close();
             throw e;
@@ -43,7 +43,7 @@ export default abstract class AbstractValue<T> extends Reactor<T, T, undefined> 
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public disconnect(listener: (value: any, ovalue: any) => void): void {
+    public disconnect(listener: (value: T, ovalue: T) => void): void {
         this.removeConnection(listener);
     }
 

@@ -16,17 +16,16 @@ import {
 } from 'pixi.js';
 import Fonts from 'eterna/util/Fonts';
 import {Value} from 'signals';
-import {DropShadowFilter} from '@pixi/filter-drop-shadow';
 import {FontWeight} from 'flashbang/util/TextBuilder';
 import GameCheckbox from 'eterna/ui/GameCheckbox';
 import GamePanel, {GamePanelType} from './GamePanel';
 import TextBalloon from './TextBalloon';
-import VScrollBox from './VScrollBox';
+import ScrollBox from './ScrollBox';
 
-interface GameDropdownProps {
+interface GameDropdownProps<Option> {
     fontSize: number;
-    options: string[];
-    defaultOption: string;
+    options: Option[];
+    defaultOption: Option;
     icons?: {txt:string, icon:string}[];
     borderWidth: number;
     borderColor?: number;
@@ -45,12 +44,12 @@ interface OptionItem {
     icon?: Sprite;
 }
 
-export default class GameDropdown extends ContainerObject {
-    public readonly selectedOption: Value<string>;
-    public readonly options: string[];
+export default class GameDropdown<Option extends string = string> extends ContainerObject {
+    public readonly selectedOption: Value<Option>;
+    public readonly options: Option[];
     private iconMap: Map<string, Texture> = new Map();
 
-    constructor(props: GameDropdownProps) {
+    constructor(props: GameDropdownProps<Option>) {
         super();
         this._fontSize = props.fontSize;
         this.options = props.options;
@@ -59,7 +58,6 @@ export default class GameDropdown extends ContainerObject {
         this._boxColor = props.color || 0x324B73;
         this._textColor = props.textColor || 0xD0DCE7;
         this._textWeight = props.textWeight || FontWeight.MEDIUM;
-        this._dropShadow = props.dropShadow || false;
         this._checkboxes = props.checkboxes || false;
 
         if (props.width) {
@@ -79,13 +77,6 @@ export default class GameDropdown extends ContainerObject {
 
     protected added(): void {
         super.added();
-
-        // Use pointer cursor
-        if (this._disabled) {
-            this.container.cursor = 'not-allowed';
-        } else {
-            this.container.cursor = 'pointer';
-        }
 
         this._box = new Graphics();
         this.container.addChild(this._box);
@@ -161,13 +152,12 @@ export default class GameDropdown extends ContainerObject {
         const dropShadowPanel = new GamePanel({
             type: GamePanelType.NORMAL,
             alpha: 1,
-            color: this._boxColor
+            color: this._boxColor,
+            dropShadow: true
         });
-        if (this._dropShadow) {
-            dropShadowPanel.display.filters = [new DropShadowFilter()];
-        }
+
         this._popup.addObject(dropShadowPanel, scrollViewContainer);
-        this._scrollView = new VScrollBox(
+        this._scrollView = new ScrollBox(
             this._box.width,
             GameDropdown._POPUP_VERTICAL_HEIGHT,
             GameDropdown._BORDER_RADIUS
@@ -199,7 +189,7 @@ export default class GameDropdown extends ContainerObject {
             const text = new TextBalloon(
                 option,
                 balloonColor,
-                this._width ? 1 : 0.07,
+                0, // this._width ? 1 : 0.07,
                 0,
                 0,
                 this._width,
@@ -210,6 +200,12 @@ export default class GameDropdown extends ContainerObject {
                     : iconSize
             );
             text.setText(option, this._fontSize, 0xC0DCE7);
+            const txtBack = new Graphics();
+            txtBack.clear();
+            txtBack.beginFill(this._boxColor, 1);
+            txtBack.drawRect(0, 0, text.display.width, text.display.height);
+            txtBack.endFill();
+            text.display.addChildAt(txtBack, 0);
             this._popup.addObject(text, contentLayout);
             texts.push(text);
 
@@ -267,12 +263,20 @@ export default class GameDropdown extends ContainerObject {
                 if (text.text.text !== this.selectedOption.value) {
                     text.setBalloonColor(0x053E7A);
                 }
+                txtBack.clear();
+                txtBack.beginFill(this._boxColor + 0x202020, 1);
+                txtBack.drawRect(0, 0, text.display.width, text.display.height);
+                txtBack.endFill();
             });
             text.pointerOut.connect(() => {
                 text.setText(option, this._fontSize, 0xC0DCE7);
                 if (text.text.text !== this.selectedOption.value) {
                     text.setBalloonColor(this._boxColor);
                 }
+                txtBack.clear();
+                txtBack.beginFill(this._boxColor, 1);
+                txtBack.drawRect(0, 0, text.display.width, text.display.height);
+                txtBack.endFill();
             });
             text.pointerUp.connect(() => {
                 text.setText(option, this._fontSize, 0xC0DCE7);
@@ -283,7 +287,10 @@ export default class GameDropdown extends ContainerObject {
             text.pointerDown.connect(() => {
                 text.setText(option, this._fontSize, 0x333333);
             });
-            maxWidth = Math.max(text.display.width + GameDropdown._HORIZONTAL_PADDING, maxWidth);
+            maxWidth = Math.max(
+                this._width ? this._width : (text.display.width + GameDropdown._HORIZONTAL_PADDING),
+                maxWidth
+            );
         }
         for (const text of texts) {
             text.setSize(maxWidth, text.height);
@@ -295,7 +302,7 @@ export default class GameDropdown extends ContainerObject {
             popupPanelHeight = this.options.length * GameDropdown._POPUP_ITEM_HEIGHT;
         }
         dropShadowPanel.setSize(this._box.width, popupPanelHeight);
-        this._scrollView.updateScrollThumb();
+        this._scrollView.updateScrollThumbs();
     }
 
     public repositionPopup() {
@@ -401,11 +408,6 @@ export default class GameDropdown extends ContainerObject {
     public set disabled(disabled: boolean) {
         this._disabled = disabled;
         this._arrow.visible = !disabled;
-        if (disabled) {
-            this.container.cursor = 'not-allowed';
-        } else {
-            this.container.cursor = 'pointer';
-        }
     }
 
     public get disabled() {
@@ -424,7 +426,6 @@ export default class GameDropdown extends ContainerObject {
     private _textWeight: FontWeight;
     private _disabled: boolean = false;
     private _boxColor: number;
-    private _dropShadow: boolean;
     private _checkboxes: boolean;
 
     private _box: Graphics;
@@ -432,7 +433,7 @@ export default class GameDropdown extends ContainerObject {
     private _selectedText: Text;
     private _selectedIcon?: Sprite;
     private _popup: ContainerObject;
-    private _scrollView: VScrollBox;
+    private _scrollView: ScrollBox;
     private _activeCapture: PointerCapture | null;
 
     private _optionItems: OptionItem[] = [];

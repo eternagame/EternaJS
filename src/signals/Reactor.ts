@@ -1,25 +1,26 @@
 import Cons from './Cons';
 
-export type RListener<T1, T2, T3> = (arg1?: T1, arg2?: T2, arg3?: T3) => void;
+export type RListenerArgs = [...unknown[]];
+export type RListener<Args extends RListenerArgs> = (...args: Args) => void;
 
 /**
  * A base class for all reactive classes. This is an implementation detail, but is public so that
  * third parties may use it to create their own reactive classes, if desired.
  */
-export default abstract class Reactor<T1, T2, T3> {
+export default abstract class Reactor<ListenerArgs extends RListenerArgs> {
     /** true if this reactor has at least one connection. */
     public get hasConnections(): boolean {
         return this._listeners != null;
     }
 
-    protected addConnection(listener: RListener<T1, T2, T3>): Cons<T1, T2, T3> {
+    protected addConnection(listener: RListener<ListenerArgs>): Cons<ListenerArgs> {
         if (listener == null) {
             throw new Error('Null listener');
         }
         return this._addCons(new Cons(this, listener));
     }
 
-    protected removeConnection(listener: RListener<T1, T2, T3>): void {
+    protected removeConnection(listener: RListener<ListenerArgs>): void {
         if (this.isDispatching) {
             this._pendingRuns = Reactor.insert(this._pendingRuns, new Runs((): void => {
                 this._listeners = Cons._removeAll(this._listeners, listener);
@@ -34,7 +35,7 @@ export default abstract class Reactor<T1, T2, T3> {
     /**
      * Emits the supplied event to all connected slots.
      */
-    protected notify(a1?: T1, a2?: T2, a3?: T3): void {
+    protected notify(...args: ListenerArgs): void {
         if (this._listeners == null) {
             // Bail early if we have no listeners
             return;
@@ -42,16 +43,16 @@ export default abstract class Reactor<T1, T2, T3> {
             throw new Error('Initiated notify while notifying');
         }
 
-        const lners: Cons<T1, T2, T3> = this._listeners;
+        const lners: Cons<ListenerArgs> = this._listeners;
         this._listeners = this.DISPATCHING;
 
         let error: Error | null = null;
         try {
-            for (let cons: Cons<T1, T2, T3> | null = lners; cons != null; cons = cons.next) {
+            for (let cons: Cons<ListenerArgs> | null = lners; cons != null; cons = cons.next) {
                 // cons.listener will be null if Cons was closed after iteration started
                 if (cons && cons.listener != null) {
                     try {
-                        cons.listener(a1, a2, a3);
+                        cons.listener(...args);
                     } catch (e) {
                         error = e;
                     }
@@ -101,7 +102,7 @@ export default abstract class Reactor<T1, T2, T3> {
     }
 
     /* internal */
-    public _addCons(cons: Cons<T1, T2, T3>): Cons<T1, T2, T3> {
+    public _addCons(cons: Cons<ListenerArgs>): Cons<ListenerArgs> {
         if (this.isDispatching) {
             this._pendingRuns = Reactor.insert(this._pendingRuns, new Runs(() => {
                 this._listeners = Cons._insert(this._listeners, cons);
@@ -115,7 +116,7 @@ export default abstract class Reactor<T1, T2, T3> {
     }
 
     /* internal */
-    public _removeCons(cons: Cons<T1, T2, T3>): void {
+    public _removeCons(cons: Cons<ListenerArgs>): void {
         if (this.isDispatching) {
             this._pendingRuns = Reactor.insert(this._pendingRuns, new Runs(() => {
                 this._listeners = Cons._remove(this._listeners, cons);
@@ -140,14 +141,14 @@ export default abstract class Reactor<T1, T2, T3> {
         }
     }
 
-    protected _listeners: Cons<T1, T2, T3> | null;
+    protected _listeners: Cons<ListenerArgs> | null;
     protected _pendingRuns: Runs;
 
     // AMW: this shouldn't be static. then it can't match up with template
     // params...
     // TODO: if this breaks things, maybe that's a sign that we need this... to
     // be nullable or something.
-    protected DISPATCHING: Cons<T1, T2, T3> = new Cons<T1, T2, T3>(null, null);
+    protected DISPATCHING: Cons<ListenerArgs> = new Cons<ListenerArgs>(null, null);
 }
 
 class Runs {

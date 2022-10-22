@@ -17,12 +17,12 @@ export default class ContextMenuDialog extends Dialog<void> {
         this._menu.menuItemSelected.connect(() => this.close());
     }
 
-    protected onBGClicked(): void {
-        this.close();
-    }
-
     protected get bgAlpha(): number {
         return 0;
+    }
+
+    protected onBGClicked(): void {
+        this.close();
     }
 
     private readonly _menu: ContextMenu;

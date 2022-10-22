@@ -22,8 +22,8 @@ export default class HelpScreen extends AppMode {
             height: 23
         },
         column: {
-            width: 228,
-            height: 356,
+            width: 230,
+            height: 360,
             maxItems: 14,
             margin: 10
         },
@@ -191,12 +191,11 @@ export default class HelpScreen extends AppMode {
         }
 
         let width = theme.column.width * 2 + theme.column.margin;
-
         if (this._shortCuts) {
             width += theme.column.width;
             this._shortCuts.container.position.set(
                 Flashbang.stageWidth * 0.5 - width / 2,
-                Flashbang.stageHeight * 0.5 - theme.column.height / 2
+                50// Flashbang.stageHeight * 0.5 - theme.column.height / 2
             );
             this._sections.container.position.set(
                 this._shortCuts.container.position.x + theme.column.width + theme.column.margin,

@@ -135,6 +135,7 @@ std::string getDotParens(bool pseudoknotted, const int seqlength, oneDnaStruct *
     }
 }
 
+
 void setSequenceInfo(const std::string& seqString, SequenceStructureInfo *info) {
    
     
@@ -238,3 +239,4 @@ void setGlobals(const bool useMFE, bool onlyOneMFE, bool doPseudoknot, int tempe
     info->temperature=temperature;
 
 }
+

@@ -1,14 +1,16 @@
-import {HLayoutContainer, Flashbang, Assert} from 'flashbang';
-import Dialog from './Dialog';
+import Fonts from 'eterna/util/Fonts';
+import {
+    HLayoutContainer, VLayoutContainer, StyledTextBuilder
+} from 'flashbang';
 import GameButton from './GameButton';
-import TextBalloon from './TextBalloon';
+import WindowDialog from './WindowDialog';
 
-export default class NotificationDialog extends Dialog<void> {
+export default class NotificationDialog extends WindowDialog<void> {
     /** Non-null if extraButtonTitle is specified */
     public extraButton: GameButton;
 
     constructor(message: string, okButtonTitle: string = 'Ok', extraButtonTitle?: string) {
-        super();
+        super({title: 'Notice', modal: true});
         this._message = message;
         this._okButtonTitle = okButtonTitle;
         this._extraButtonTitle = extraButtonTitle;
@@ -17,45 +19,34 @@ export default class NotificationDialog extends Dialog<void> {
     protected added() {
         super.added();
 
-        const box = new TextBalloon('', 0x152843, 1.0, 0xC0DCE7, 0.27);
-        box.title = 'Notice';
-        box.setText(`${this._message}\n\n\n`);
-        this.addObject(box, this.container);
+        const content = new VLayoutContainer(20);
+        this._window.content.addChild(content);
 
-        // This fade-in is annoying and slows the user down.
-        // box.display.alpha = 0;
-        // box.addObject(new AlphaTask(1, 0.3, Easing.easeIn));
+        // Note that we aren't doing any word wrapping since a lot of notifications insert their own line breaks
+        // It would probably be ideal to have a nicer behavior where we word wrap based on the available
+        // window width, up to some readable maximum...
+        const text = new StyledTextBuilder({
+            fontFamily: Fonts.STDFONT,
+            fontSize: 15,
+            fill: 0xFFFFFF
+        }).appendHTMLStyledText(this._message).build();
+        content.addChild(text);
 
-        const buttonLayout: HLayoutContainer = new HLayoutContainer(2);
+        const buttonLayout: HLayoutContainer = new HLayoutContainer(6);
 
         const okButton = new GameButton().label(this._okButtonTitle, 14);
-        box.addObject(okButton, buttonLayout);
+        this.addObject(okButton, buttonLayout);
         okButton.clicked.connect(() => this.close());
 
-        if (this._extraButtonTitle != null) {
+        if (this._extraButtonTitle) {
             this.extraButton = new GameButton().label(this._extraButtonTitle, 14);
-            box.addObject(this.extraButton, buttonLayout);
+            this.addObject(this.extraButton, buttonLayout);
         }
 
-        buttonLayout.layout();
-        buttonLayout.position.set(
-            (box.width - buttonLayout.width) * 0.5,
-            (box.height - buttonLayout.height - 10)
-        );
+        content.addChild(buttonLayout);
 
-        box.container.addChild(buttonLayout);
-
-        const updateLocation = () => {
-            Assert.assertIsDefined(Flashbang.stageWidth);
-            Assert.assertIsDefined(Flashbang.stageHeight);
-            box.display.position.set(
-                (Flashbang.stageWidth - box.width) * 0.5,
-                (Flashbang.stageHeight - box.height) * 0.5
-            );
-        };
-        updateLocation();
-        Assert.assertIsDefined(this.mode);
-        this.regs.add(this.mode.resized.connect(updateLocation));
+        content.layout();
+        this._window.layout();
     }
 
     private readonly _message: string;

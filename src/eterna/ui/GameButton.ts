@@ -1,5 +1,5 @@
 import {
-    Container, DisplayObject, Graphics, Rectangle, Sprite, Text, Texture
+    Container, Graphics, Sprite, Text, Texture
 } from 'pixi.js';
 import {Registration, Registrations, Value} from 'signals';
 import {
@@ -11,13 +11,18 @@ import Fonts from 'eterna/util/Fonts';
 import Sounds from 'eterna/resources/Sounds';
 import Tooltips from './Tooltips';
 
+export type ButtonTheme = 'primary' | 'secondary';
+
 export default class GameButton extends Button implements KeyboardListener {
     public readonly toggled: Value<boolean> = new Value<boolean>(false);
     public static readonly DEFAULT_DOWN_SOUND: string = Sounds.SoundButtonClick;
+    public size: number = 0;
+    public age: number = 0;
 
-    constructor() {
+    constructor(theme: ButtonTheme = 'primary') {
         super();
 
+        this._theme = theme;
         this.downSound = GameButton.DEFAULT_DOWN_SOUND;
 
         this._content = new Container();
@@ -36,30 +41,31 @@ export default class GameButton extends Button implements KeyboardListener {
 
         this.setupHotkey();
         this.setupTooltip();
+        this.needsRedraw();
     }
 
-    public up(display: DisplayObject | Texture | string| undefined): GameButton {
+    public up(display: Container | Texture | string| undefined): GameButton {
         return this.setIconForState(ButtonState.UP, display);
     }
 
-    public over(display: DisplayObject | Texture | string| undefined): GameButton {
+    public over(display: Container | Texture | string| undefined): GameButton {
         return this.setIconForState(ButtonState.OVER, display);
     }
 
-    public down(display: DisplayObject | Texture | string| undefined): GameButton {
+    public down(display: Container | Texture | string| undefined): GameButton {
         return this.setIconForState(ButtonState.DOWN, display);
     }
 
-    public disabled(display?: DisplayObject | Texture | string): GameButton {
+    public disabled(display?: Container | Texture | string): GameButton {
         return this.setIconForState(ButtonState.DISABLED, display);
     }
 
     /** Sets a single DisplayObect for all states */
-    public allStates(display: DisplayObject | Texture | string| undefined): GameButton {
+    public allStates(display: Container | Texture | string| undefined): GameButton {
         return this.up(display).over(display).down(display).disabled(display);
     }
 
-    public selected(display: DisplayObject | Texture | string): GameButton {
+    public selected(display: Container | Texture | string): GameButton {
         this._selectedState = GameButton.getDisplayObject(display);
         return this;
     }
@@ -182,28 +188,28 @@ export default class GameButton extends Button implements KeyboardListener {
         // Create label
         let label: Text | null = null;
         if (this._labelBuilder != null) {
-            const textColor = this._customTextColors?.get(state) ?? GameButton.TEXT_COLORS.get(state);
+            const textColor = this._customTextColors?.get(state) ?? GameButton.TEXT_COLORS.get(this._theme)?.get(state);
             label = this._labelBuilder.color(textColor ?? 0xffffff).build();
             this._content.addChild(label);
         }
 
         // Stylebox (shown when we have text and no background image)
-        const drawStyleBox = this._customStyleBox == null
+        const drawStyleBox = (this._customStyleBox == null
             && icon == null
             && label !== null
-            && this._labelBackground !== false;
+            && this._labelBackground !== false) || this._labelBackground === true;
 
         if (drawStyleBox) {
             // We can safely assert label is non-null because
             // that is a requirement for drawStyleBox
             Assert.assertIsDefined(label);
-            const labelWidth = this._fixedLabelWidth > 0 ? this._fixedLabelWidth : label.width;
+            const labelWidth = this._fixedLabelWidth > 0 ? this._fixedLabelWidth : label.width + (icon?.width ?? 0);
             const styleBox = new Graphics()
-                .beginFill(GameButton.STYLEBOX_COLORS.get(state) || 0x0)
+                .beginFill(GameButton.STYLEBOX_COLORS.get(this._theme)?.get(state) || 0x0)
                 .drawRoundedRect(0, 0,
                     labelWidth + (GameButton.WMARGIN * 2),
                     label.height + (GameButton.HMARGIN * 2),
-                    3)
+                    5)
                 .endFill();
             this._content.addChildAt(styleBox, 0);
         }
@@ -221,6 +227,10 @@ export default class GameButton extends Button implements KeyboardListener {
 
             this._content.addChild(label);
             if (this._customStyleBox) {
+                label.position.set(
+                    (this._customStyleBox.width - label.width) / 2,
+                    (this._customStyleBox.height - label.height) / 2
+                );
                 DisplayUtil.positionRelative(
                     label, HAlign.CENTER, VAlign.CENTER,
                     this._customStyleBox, HAlign.CENTER, VAlign.CENTER
@@ -228,23 +238,15 @@ export default class GameButton extends Button implements KeyboardListener {
             } else if (icon == null) {
                 label.position.set(GameButton.WMARGIN, GameButton.HMARGIN);
             } else {
-                DisplayUtil.positionRelative(
-                    label, HAlign.LEFT, VAlign.CENTER,
-                    icon, HAlign.RIGHT, VAlign.CENTER,
-                    5, 0
+                label.position.set(
+                    icon.x + icon.width + 5,
+                    (icon.height - label.height) / 2
                 );
             }
+        }
 
-            if (icon != null) {
-                // if we have an icon, add an invisible hitbox to prevent unclickable pixels
-                // between the icon and the label
-                const bounds = this._content.getLocalBounds(GameButton.SCRATCH_RECT);
-                const hitbox = new Graphics()
-                    .beginFill(0xff0000, 0)
-                    .drawRect(bounds.x, bounds.y, bounds.width, bounds.height)
-                    .endFill();
-                this._content.addChildAt(hitbox, 0);
-            }
+        if (!drawStyleBox && !this._skipHitArea) {
+            this.display.hitArea = DisplayUtil.getBoundsRelative(this._content, this.display);
         }
     }
 
@@ -277,7 +279,7 @@ export default class GameButton extends Button implements KeyboardListener {
         }
     }
 
-    private setIconForState(state: ButtonState, displayOrTex?: DisplayObject | Texture | string): GameButton {
+    private setIconForState(state: ButtonState, displayOrTex?: Container | Texture | string): GameButton {
         if (this._buttonIcons == null) {
             this._buttonIcons = [];
         }
@@ -287,7 +289,7 @@ export default class GameButton extends Button implements KeyboardListener {
         return this;
     }
 
-    private getIconForState(state: ButtonState, selected: boolean): DisplayObject | null {
+    private getIconForState(state: ButtonState, selected: boolean): Container | null {
         if (state !== ButtonState.DISABLED && selected && this._selectedState != null) {
             return this._selectedState;
         } else {
@@ -297,16 +299,25 @@ export default class GameButton extends Button implements KeyboardListener {
         }
     }
 
-    private static getDisplayObject(displayOrTex?: DisplayObject | Texture | string): DisplayObject | null {
-        if (displayOrTex instanceof DisplayObject) {
+    private static getDisplayObject(displayOrTex?: Container | Texture | string): Container | null {
+        if (displayOrTex instanceof Container) {
             return displayOrTex;
         } else if (displayOrTex instanceof Texture) {
             return new Sprite(displayOrTex);
         } else if (typeof (displayOrTex) === 'string') {
-            return Sprite.from(displayOrTex);
+            if (displayOrTex.includes('.svg')) {
+                const texture = Texture.from(displayOrTex, {resourceOptions: {scale: 2}});
+                const sprite = new Sprite(texture);
+                return sprite;
+            } else return Sprite.from(displayOrTex);
         } else {
             return null;
         }
+    }
+
+    protected centerContent(width: number, height: number) {
+        if (this._content.width < width) this._content.position.x = (width - this._content.width) / 2;
+        if (this._content.height < height) this._content.position.y = (height - this._content.height) / 2;
     }
 
     private readonly _content: Container;
@@ -318,10 +329,11 @@ export default class GameButton extends Button implements KeyboardListener {
     private _tooltip: string;
     private _hotkey: string | null;
     private _hotkeyCtrl: boolean;
-    private _buttonIcons: (DisplayObject | null)[];
-    private _selectedState: DisplayObject | null;
+    private _buttonIcons: (Container | null)[];
+    private _selectedState: Container | null;
     private _customStyleBox?: Graphics;
     private _customTextColors?: Map<ButtonState, number>;
+    protected _skipHitArea = false;
 
     private _rscriptID: RScriptUIElementID;
     private _rscriptClickReg: Registration = Registrations.Null();
@@ -329,22 +341,52 @@ export default class GameButton extends Button implements KeyboardListener {
     private _hotkeyReg: Registration | null;
     private _tooltipReg: Registration | null;
 
-    private static readonly TEXT_COLORS: Map<ButtonState, number> = new Map([
-        [ButtonState.UP, 0xC0DCE7],
-        [ButtonState.OVER, 0xFFFFFF],
-        [ButtonState.DOWN, 0x333333],
-        [ButtonState.DISABLED, 0x999999]
+    private _theme: ButtonTheme;
+
+    private static readonly TEXT_COLORS: Map<ButtonTheme, Map<ButtonState, number>> = new Map([
+        [
+            'primary',
+            new Map([
+                [ButtonState.UP, 0xFFFFFF],
+                [ButtonState.OVER, 0xFFFFFF],
+                [ButtonState.DOWN, 0x46A840],
+                [ButtonState.DISABLED, 0xFFFFFF]
+            ])
+        ],
+        [
+            'secondary',
+            new Map([
+                [ButtonState.UP, 0xFFFFFF],
+                [ButtonState.OVER, 0xFFFFFF],
+                [ButtonState.DOWN, 0x2888c3],
+                [ButtonState.DISABLED, 0xFFFFFF]
+            ])
+        ]
     ]);
 
-    private static readonly STYLEBOX_COLORS: Map<ButtonState, number> = new Map([
-        [ButtonState.UP, 0x2D4159],
-        [ButtonState.OVER, 0x2D4159],
-        [ButtonState.DOWN, 0xFFCC00],
-        [ButtonState.DISABLED, 0x2D4159]
+    private static readonly STYLEBOX_COLORS: Map<ButtonTheme, Map<ButtonState, number>> = new Map([
+        [
+            'primary',
+            new Map([
+                [ButtonState.UP, 0x54B54E],
+                [ButtonState.OVER, 0x46A840],
+                [ButtonState.DOWN, 0xFFFFFF],
+                // FIXME: I picked this relatively arbitrary, we could probably do better
+                [ButtonState.DISABLED, 0x73A770]
+            ])
+        ],
+        [
+            'secondary',
+            new Map([
+                [ButtonState.UP, 0x2f94d1],
+                [ButtonState.OVER, 0x2888c3],
+                [ButtonState.DOWN, 0xFFFFFF],
+                // FIXME: I picked this relatively arbitrary, we could probably do better
+                [ButtonState.DISABLED, 0x5a9bc2]
+            ])
+        ]
     ]);
 
-    private static readonly WMARGIN = 5;
-    private static readonly HMARGIN = 4;
-
-    private static readonly SCRATCH_RECT = new Rectangle();
+    private static readonly WMARGIN = 12;
+    private static readonly HMARGIN = 6;
 }

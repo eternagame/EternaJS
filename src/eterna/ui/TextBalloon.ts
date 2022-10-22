@@ -119,6 +119,8 @@ export default class TextBalloon extends ContainerObject {
     }
 
     public get width(): number {
+        if (this._width) return this._width;
+
         let wholeWidth: number = this._text != null ? this._text.width : 0;
         if (this._button != null && this._button.display.visible) {
             wholeWidth += TextBalloon.W_MARGIN;
@@ -129,6 +131,8 @@ export default class TextBalloon extends ContainerObject {
     }
 
     public get height(): number {
+        if (this._height) return this._height;
+
         let wholeHeight = this._text != null ? this._text.height : 0;
 
         if (this._button != null && this._button.display.visible) {
@@ -143,14 +147,7 @@ export default class TextBalloon extends ContainerObject {
             return;
         }
 
-        let {width} = this;
-        let {height} = this;
-        if (this._width) {
-            width = this._width;
-        }
-        if (this._height) {
-            height = this._height;
-        }
+        const {width, height} = this;
         this._panel.setSize(width, height);
 
         const wholeWidth: number = width - 2 * TextBalloon.W_MARGIN;

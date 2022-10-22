@@ -79,7 +79,9 @@ FullAdvancedResult* FullEnsembleWithOligos(const std::string& seqString, int tem
         result->suboptFreeEnergy.push_back(correctedEnergy);
     }
 
+
     clearDnaStructures(&rna_info.ensemebleStructs);
+
     return result;
 }
 
@@ -101,17 +103,21 @@ FullAdvancedResult* FullEnsembleNoBindingSite(const std::string& seqString, int 
                                 0, SODIUM_CONC, MAGNESIUM_CONC, USE_LONG_HELIX_FOR_SALT_CORRECTION);
     }
 
+
     //now process the results for return to TS
     //initialize the result to return    
+
     FullAdvancedResult* result = new FullAdvancedResult();
     
     std::string mfeStructure;
     //get dot bracket notation from data 
+
     for ( int i = 0; i < rna_info.ensemebleStructs.nStructs; i++ ) {
         rna_info.currentStruct = rna_info.ensemebleStructs.validStructs[i];
         
         //get the secondary strucutre in dot paren notation 
         std::string singlestructure = getDotParens(pseudoknotted, rna_info.ensemebleStructs.seqlength, &rna_info.currentStruct);
+
         if (i == 0)
         {
           //this is the first one so it is the mfe          
@@ -133,10 +139,13 @@ FullAdvancedResult* FullEnsembleNoBindingSite(const std::string& seqString, int 
         result->suboptFreeEnergy.push_back(correctedEnergy);
     }
 
+
     clearDnaStructures(&rna_info.ensemebleStructs);
+
 
     return result;
 }
+
 
 
 FullEnsembleDefectResult* GetEnsembleDefect(const std::string& seqString, const std::string& MfeStructure, int temperature, bool pseudoknot) {
@@ -170,5 +179,6 @@ FullEnsembleDefectResult* GetEnsembleDefect(const std::string& seqString, const 
     free(pairPrPb);
 
     return result;
+
 }
 

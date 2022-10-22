@@ -119,8 +119,8 @@ test(`ContraFold:many_score_structures`, () => {
                 for (let jj: number = 1; jj < outNNFE.length; jj += 2) {
                     NNFEsum += outNNFE[jj];
                 }
-                console.log(score);
-                console.log(NNFEsum);
+                // console.log(score);
+                // console.log(NNFEsum);
                 expect(score).toBeDeepCloseTo(NNFEsum, 0);
             }
         })
