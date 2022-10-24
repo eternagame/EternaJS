@@ -1331,6 +1331,18 @@ export default class PoseEditMode extends GameMode {
                 }&${folded.slice(len).getParenthesis()}`;
             });
 
+        this._scriptInterface.addCallback('get_defect',
+            (seq: string, secstruct: string, pseudoknotted: boolean, temp: number = 37): number | null => {
+                if (this._folder === null) {
+                    return null;
+                }
+                return this._folder.getDefect(
+                    Sequence.fromSequenceString(seq),
+                    SecStruct.fromParens(secstruct),
+                    temp, pseudoknotted
+                );
+            });
+
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
             this._scriptInterface.addCallback(
                 'select_folder', (folderName: string): boolean => this.selectFolder(folderName)

@@ -14,7 +14,7 @@ import {
 } from './engines/NupackLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
 import Folder, {
-    MultiFoldResult, CacheKey, FullEvalCache, SuboptEnsembleResult, DefectResult
+    MultiFoldResult, CacheKey, FullEvalCache, SuboptEnsembleResult
 } from './Folder';
 import FoldUtil from './FoldUtil';
 
@@ -151,7 +151,7 @@ export default class NuPACK extends Folder {
     }
 
     /* override */
-    public getDefect(seq: Sequence, pairs: SecStruct, temp: number = 37, pseudoknotted: boolean = false): DefectResult {
+    public getDefect(seq: Sequence, pairs: SecStruct, temp: number = 37, pseudoknotted: boolean = false): number {
         const key = {
             primitive: 'defect',
             seq: seq.baseArray,
@@ -160,7 +160,7 @@ export default class NuPACK extends Folder {
             temp
         };
 
-        let defectResultDataCache: DefectResult = this.getCache(key) as DefectResult;
+        const defectResultDataCache: number = this.getCache(key) as number;
         if (defectResultDataCache != null) {
             // trace("getSuboptEnsemble cache hit");
             return defectResultDataCache;
@@ -173,18 +173,8 @@ export default class NuPACK extends Folder {
             throw new Error('NuPACK returned a null result');
         }
 
-        // initialize empty result cache
-        defectResultDataCache = {
-            ensembleDefect: -1,
-            ensembleDefectNormalized: -1
-
-        };
-
-        defectResultDataCache.ensembleDefect = result.ensembleDefect;
-        defectResultDataCache.ensembleDefectNormalized = result.ensembleDefectNormalized;
-
-        this.putCache(key, defectResultDataCache);
-        return defectResultDataCache;
+        this.putCache(key, result.ensembleDefect);
+        return result.ensembleDefect;
     }
 
     /* override */

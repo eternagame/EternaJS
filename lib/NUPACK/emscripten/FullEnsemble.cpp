@@ -25,37 +25,21 @@ FullAdvancedResult* FullEnsembleWithOligos(const std::string& seqString, int tem
     char* string = autoSeqString.get();
     int seqNum[MAXSEQLENGTH+1];
     
-
-
-    //runtime_constants.h defines NAD_INFINITY
-    //#define NAD_INFINITY 100000 //artificial value for positive infinity
-    //this is how teh dnastructure call looks for subopt.c which is waht iran when you ron normal nupack compiled code
-    //here are comments from pfuncutilheaders.h on hwat the attributes of dnastructures consist of
-    
-    //oneDnaStruct and dnaStructures are used for enumerating sequences
-       // typedef struct {
-       // int *theStruct; //describes what is paired to what
-       // DBL_TYPE error; //accumulated error (from the mfe) for a structure
-       // DBL_TYPE correctedEnergy; //actual energy of a structure
-       // int slength;
-       // //(accounting for symmetry).
-       //  } oneDnaStruct;
-       //
-       // typedef struct {
-       // oneDnaStruct *validStructs;
-       //int nStructs; //# of structures stored
-       //int nAlloc; //# of structures allocated
-       // int seqlength;
-       // DBL_TYPE minError; //minimum deviation from mfe for all seqs
-       //in validStructs
-       //
-       //} dnaStructures;
-    
-    //this struct will store
-    //all the structures within the given range
-    dnaStructures suboptStructs = {NULL, 0, 0, 0, NAD_INFINITY}; 
+    // Initialize outparam
+    dnaStructures suboptStructs = {
+        // validStructs (the structures)
+        NULL,
+        // nStructs (count of structures)
+        0,
+        // nAlloc (number of structures allocated)
+        0,
+        // seqlength
+        0,
+        // minError (minimum deviation from mfe for all seqs)
+        NAD_INFINITY
+    };
  
-    //convert from how it comes from eterna to how nuapck needs it for joined oligos '+'
+    // Convert Eterna oligo cut points (&) to Nupack oligo cut points (+)
     char* pc;
     do {
         pc = strchr(string, '&');
@@ -132,36 +116,21 @@ FullAdvancedResult* FullEnsembleNoBindingSite(const std::string& seqString, int 
     char* string = autoSeqString.get();
     int seqNum[MAXSEQLENGTH+1];
     int seqStringLength = strlen(string);
-    //runtime_constants.h defines NAD_INFINITY
-    //#define NAD_INFINITY 100000 //artificial value for positive infinity
-    //this is how teh dnastructure call looks for subopt.c which is waht iran when you ron normal nupack compiled code
-    //here are comments from pfuncutilheaders.h on hwat the attributes of dnastructures consist of
     
-    //oneDnaStruct and dnaStructures are used for enumerating sequences
-       // typedef struct {
-       // int *theStruct; //describes what is paired to what
-       // DBL_TYPE error; //accumulated error (from the mfe) for a structure
-       // DBL_TYPE correctedEnergy; //actual energy of a structure
-       // int slength;
-       // //(accounting for symmetry).
-       //  } oneDnaStruct;
-       //
-       // typedef struct {
-       // oneDnaStruct *validStructs;
-       //int nStructs; //# of structures stored
-       //int nAlloc; //# of structures allocated
-       // int seqlength;
-       // DBL_TYPE minError; //minimum deviation from mfe for all seqs
-       //in validStructs
-       //
-       //} dnaStructures;
-    
-    //this struct will store
-    //all the structures within the given range
-    dnaStructures suboptStructs = {NULL, 0, 0, 0, NAD_INFINITY};     
+    // Initialize outparam
+    dnaStructures suboptStructs = {
+        // validStructs (the structures)
+        NULL,
+        // nStructs (count of structures)
+        0,
+        // nAlloc (number of structures allocated)
+        0,
+        // seqlength
+        0,
+        // minError (minimum deviation from mfe for all seqs)
+        NAD_INFINITY
+    };
     convertSeq(string, seqNum, seqStringLength);
-
-
 
     //first get the ensemble through subopt
     if ( pseudoknotted ) {
@@ -178,24 +147,17 @@ FullAdvancedResult* FullEnsembleNoBindingSite(const std::string& seqString, int 
     
     FullAdvancedResult* result = new FullAdvancedResult();
     
-    std::string mfeStructure;
     //get dot bracket notation from data 
     for ( int i = 0; i < suboptStructs.nStructs; i++ ) {
         oneDnaStruct currentStruct = suboptStructs.validStructs[i];
         
-        //get the secondary strucutre in dot paren notation 
+        //get the secondary structure in dot paren notation 
         std::string singlestructure = getDotParens(pseudoknotted, suboptStructs.seqlength, &currentStruct);
-        if (i == 0)
-        {
-          //this is the first one so it is the mfe          
-          mfeStructure = singlestructure;
-        }
 
         //get energies
         double energyError = currentStruct.error;
         double correctedEnergy = currentStruct.correctedEnergy;  
         
-
         //write out data
         result->suboptStructures.push_back(singlestructure);
         result->suboptEnergyError.push_back(energyError);
@@ -207,13 +169,6 @@ FullAdvancedResult* FullEnsembleNoBindingSite(const std::string& seqString, int 
     return result;
 }
 
-/*
-  mode is how to do the ED
-  1= do only ED
-  2 = do only MFE ED
-  3 = do both
-*/
-
 FullEnsembleDefectResult* GetEnsembleDefect(const std::string& seqString, const std::string& MfeStructure, int temperature, bool pseudoknot) {
   
   FullEnsembleDefectResult* result = new FullEnsembleDefectResult();  
@@ -224,21 +179,11 @@ FullEnsembleDefectResult* GetEnsembleDefect(const std::string& seqString, const 
   int seqlength;
   int tmpLength;
   int seqNum[MAXSEQLENGTH+1];
- 
-  //set the globals 
-  USE_MFE=0;
-  ONLY_ONE_MFE=0;   
 
-  if (pseudoknot == true) {
-      DO_PSEUDOKNOTS = 1;
-  } else {
-      DO_PSEUDOKNOTS = 0;
-  }
-
-  if ( !DO_PSEUDOKNOTS ) {
-      complexity = 3;
-  } else {
+  if (pseudoknot) {
       complexity = 5;
+  } else {
+      complexity = 3;
   }
    
 
@@ -284,7 +229,6 @@ FullEnsembleDefectResult* GetEnsembleDefect(const std::string& seqString, const 
 
   
   result->ensembleDefect = (long double) nsStar_ED;
-  result->ensembleDefectNormalized = (long double) nsStar_ED/seqlength;
   
   free(pairPr);
   free(pairPrPbg);

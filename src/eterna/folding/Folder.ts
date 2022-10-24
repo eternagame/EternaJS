@@ -5,7 +5,7 @@ import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 
 export type CacheItem = SecStruct | number[] | FullEvalCache | MultiFoldResult |
-SuboptEnsembleResult | DefectResult | undefined;
+SuboptEnsembleResult | number | undefined;
 export type CacheKey = Record<string, string | string[] | number | number[] | boolean | Oligo[] | null>;
 
 export interface MultiFoldResult {
@@ -23,11 +23,6 @@ export interface SuboptEnsembleResult {
     suboptStructures: string[];
     suboptEnergyError: number[];
     suboptFreeEnergy: number[];
-}
-
-export interface DefectResult {
-    ensembleDefect: number;
-    ensembleDefectNormalized: number;
 }
 
 export default abstract class Folder {
@@ -110,11 +105,8 @@ export default abstract class Folder {
 
     public getDefect(
         _seq: Sequence, _pairs: SecStruct, _temp: number = 37, _pseudoknotted: boolean = false
-    ): DefectResult {
-        return {
-            ensembleDefect: -1,
-            ensembleDefectNormalized: -1
-        };
+    ): number {
+        return -1;
     }
 
     public getSuboptEnsembleWithOligos(

@@ -73,7 +73,6 @@ declare namespace NupackLib {
 
    export interface FullEnsembleDefectResult {
         ensembleDefect: number;
-        ensembleDefectNormalized: number;
         
         delete (): void;
     }
