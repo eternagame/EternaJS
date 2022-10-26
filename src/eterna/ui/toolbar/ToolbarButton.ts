@@ -47,49 +47,47 @@ export default class ToolbarButton extends GameButton {
     public readonly displayName: string;
     public readonly isPaintTool: boolean;
 
-    constructor(
-        id: string,
-        displayName: string,
-        category: ButtonCategory,
-        isPaintTool: boolean | undefined
-    ) {
+    constructor(info: ToolbarParam) {
         super();
-        this.id = id;
-        this.displayName = displayName;
-        this.category = category;
-        this.isPaintTool = isPaintTool === true;
+        this._info = info;
+        this.id = info.id;
+        this.displayName = info.displayName;
+        this.category = info.cat;
+        this.isPaintTool = info.isPaintTool === true;
+
+        // Hack to force buttons to be of uniform size
+        const bounds = new Graphics()
+            .beginFill(0)
+            .drawRect(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT)
+            .endFill();
+        bounds.alpha = 0;
+        this.display.addChildAt(bounds, 0);
         this._background = new Graphics();
         this.display.addChildAt(this._background, 0);
-        this._skipHitArea = true;
+        // In the expanded toolbar, where the buttons have no background, we want their hitarea to be
+        // defined by the bounds of the icon (so that the space between icons can be used when scrolling)
+        // However, the mode toggle buttons have explicit backgrounds which should be clickable, so we'll
+        // keep the bounds of the entire button (including the background) as the hit area
+        this._skipHitArea = !!info.color;
+
+        this.allStates(info.allImg);
+        if (info.overImg) this.over(info.overImg);
+        this.disabled(info.disableImg);
+        if (info.selectedImg) this.selected(info.selectedImg);
+        this.tooltip(info.tooltip);
+        if (info.hotKey) this.hotkey(info.hotKey);
+        if (info.rscriptID) this.rscriptID(info.rscriptID);
+
+        if (info.label) {
+            this.label(info.label, info.fontSize ? info.fontSize : 14);
+            this.scaleBitmapToLabel();
+        }
     }
 
     public static createButton(info: ToolbarParam) {
         // Bit of a shame to bypass our chaining/builder pattern, but this makes it convenient
         // to define the parameters in a different file and clone ourselves
-        let button;
-        if (info.color) {
-            button = new ToolbarButton(
-                info.id,
-                info.displayName,
-                info.cat,
-                info.isPaintTool
-            );
-        } else button = new ToolbarButton(info.id, info.displayName, info.cat, info.isPaintTool);
-        button.allStates(info.allImg);
-        if (info.overImg) button.over(info.overImg);
-        button.disabled(info.disableImg);
-        if (info.selectedImg) button.selected(info.selectedImg);
-        button.tooltip(info.tooltip);
-        if (info.hotKey) button.hotkey(info.hotKey);
-        if (info.rscriptID) button.rscriptID(info.rscriptID);
-
-        if (info.label) {
-            button.label(info.label, info.fontSize ? info.fontSize : 14);
-            button.scaleBitmapToLabel();
-        }
-
-        button._info = info;
-        return button;
+        return new ToolbarButton(info);
     }
 
     public clone(): ToolbarButton {
@@ -122,8 +120,6 @@ export default class ToolbarButton extends GameButton {
     protected added() {
         super.added();
 
-        this.drawBackground(false);
-
         this._arrow = new Sprite(
             BitmapManager.getBitmap(Bitmaps.ImgToolbarArrow)
         );
@@ -142,9 +138,7 @@ export default class ToolbarButton extends GameButton {
         const toggleColor = this._info.toggleColor;
 
         const realColor = toggled && toggleColor ? toggleColor : color;
-        this._background.beginFill(0, 0)
-            .drawRect(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT)
-            .endFill()
+        this._background
             .beginFill(realColor.color, realColor.alpha)
             .drawRoundedRect(2, 2, BUTTON_WIDTH - 4, BUTTON_HEIGHT - 4, 3)
             .endFill();
