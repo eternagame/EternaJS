@@ -89,6 +89,13 @@ export default class EternaFold extends Folder {
         const cut: number = seq.findCut();
         if (cut >= 0 && cache.nodes[0] !== -2) {
             // we just scored a duplex that wasn't one, so we have to redo it properly
+            // EG: If we have a target mode where we have two disconnected strands, we need to
+            // fold the two strands independently
+            // cache.nodes[0] is the index of the first score node, and the magic value -2 refers to
+            // the special term for the multistrand penalty
+            // FIXME: What if we have three strands where the first two are connected but the
+            // third is not? Wouldn't this score all three separately when it should score
+            // the first two together then the third separately?
             const seqA: Sequence = seq.slice(0, cut);
             const pairsA: SecStruct = pairs.slice(0, cut);
             const nodesA: number[] = [];
@@ -96,9 +103,6 @@ export default class EternaFold extends Folder {
 
             const seqB: Sequence = seq.slice(cut + 1);
             const pairsB: SecStruct = pairs.slice(cut + 1);
-            for (let ii = 0; ii < pairsB.length; ii++) {
-                if (pairsB.isPaired(ii)) pairsB.pairs[ii] -= (cut + 1);
-            }
             const nodesB: number[] = [];
             const retB: number = this.scoreStructures(seqB, pairsB, pseudoknotted, temp, nodesB);
 
