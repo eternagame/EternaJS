@@ -64,7 +64,7 @@
     "webpack-merge": "^5.7.3"
   },
   "dependencies": {
-    "@pixi/filter-color-matrix": "^6.0.4",
+    "@pixi/filter-color-matrix": "^6.5.8",
     "@pixi/filter-drop-shadow": "^4.1.0",
     "@pixi/sound": "^4.0.3",
     "base64-js": "^1.5.1",
@@ -83,7 +83,7 @@
     "pchip": "^1.0.2",
     "pixi-filters": "^4.1.1",
     "pixi-multistyle-text": "https://github.com/eternagame/pixi-multistyle-text/archive/1f2283b1d4a1bb262b57783e1bf2f81802a17809.tar.gz",
-    "pixi.js": "^6.0.4",
+    "pixi.js": "^6.5.8",
     "regenerator-runtime": "^0.13.7",
     "store": "^2.0.12",
     "three": "^0.118.0",
