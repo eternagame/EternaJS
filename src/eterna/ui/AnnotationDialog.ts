@@ -292,13 +292,14 @@ export default class AnnotationDialog extends WindowDialog<AnnotationData> {
         // Generate Delete Annotation Button
         if (this._edit) {
             const deleteButtonGraphic = new Graphics()
-                .beginFill(0x0, 0)
+                .beginFill(0x0)
                 .drawRect(
                     0,
                     0,
                     AnnotationDialog.DELETE_BUTTON_WIDTH,
                     AnnotationDialog.DELETE_BUTTON_HEIGHT
                 ).endFill();
+            deleteButtonGraphic.alpha = 0;
             const deleteButton = new GameButton()
                 .customStyleBox(deleteButtonGraphic)
                 .label('Delete Annotation', AnnotationDialog.DELETE_BUTTON_FONT_SIZE);

@@ -128,9 +128,10 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this._height = height;
 
         this._clickTargetDisp.clear()
-            .beginFill(0x0, 0)
+            .beginFill(0x0)
             .drawRect(0, 0, width, height)
             .endFill();
+        this._clickTargetDisp.alpha = 0;
 
         this._pose.setOffset(this._width * 0.5, this._height * 0.5);
         this._pose.setSize(width, height);

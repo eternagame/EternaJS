@@ -166,14 +166,15 @@ export default class GamePanel extends BaseGamePanel {
         }
 
         if (this._type === GamePanelType.INVISIBLE) {
-            this._background.beginFill(0x000000, 0);
-            this._background.drawRect(0, 0, this._width, this._height);
-            this._background.endFill();
+            this._background.beginFill(0x000000)
+                .drawRect(0, 0, this._width, this._height)
+                .endFill();
+            this._background.alpha = 0;
         } else {
-            this._background.lineStyle(this._borderThickness, this._borderColor, this._borderAlpha);
-            this._background.beginFill(this._color, this._alpha);
-            this._background.drawRoundedRect(0, 0, this._width, this._height, this._borderRadius);
-            this._background.endFill();
+            this._background.lineStyle(this._borderThickness, this._borderColor, this._borderAlpha)
+                .beginFill(this._color, this._alpha)
+                .drawRoundedRect(0, 0, this._width, this._height, this._borderRadius)
+                .endFill();
 
             if (this._title !== null) {
                 if (this._titleText == null) {

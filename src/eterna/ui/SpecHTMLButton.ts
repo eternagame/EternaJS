@@ -2,7 +2,6 @@ import {Graphics, Text} from 'pixi.js';
 import TextBuilder from 'flashbang/util/TextBuilder';
 import {Assert, Button, ButtonState} from 'flashbang';
 
-/** A deliberately unstylish button that displays text on a rectangle. (For debugging.) */
 export default class SpecHTMLButton extends Button {
     constructor(text: string, fontSize: number = 24, fontName = 'Arial') {
         super();

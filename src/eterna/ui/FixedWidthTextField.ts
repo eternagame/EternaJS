@@ -10,7 +10,9 @@ export default class FixedWidthTextField extends Container {
         this._width = width;
         this._halign = hAlign;
         this._tf = new Text('', style);
-        this.addChild(new Graphics().beginFill(0x0, 0).drawRect(0, 0, width, this._tf.height).endFill());
+        const bg = new Graphics().beginFill(0x0).drawRect(0, 0, width, this._tf.height).endFill();
+        bg.alpha = 0;
+        this.addChild(bg);
         this.addChild(this._tf);
 
         this.text = text;
