@@ -316,12 +316,15 @@ export default class AnnotationPanelItem extends ContainerObject {
                 .color(0xFFFFFF)
                 .hAlignLeft();
             const labelTextBackground = new Graphics()
+                .beginFill(0x0)
                 .drawRect(
                     0,
                     0,
                     labelText.width,
                     labelText.height
-                );
+                )
+                .endFill();
+            labelTextBackground.alpha = 0;
             this._itemTextButton = new GameButton()
                 .customStyleBox(labelTextBackground)
                 .label(itemTextButtonTextBuilder)
