@@ -1,4 +1,4 @@
-import {Graphics, Matrix} from 'pixi.js';
+import {Container, Graphics, Matrix} from 'pixi.js';
 import GameObject from 'flashbang/core/GameObject';
 import Flashbang from 'flashbang/core/Flashbang';
 import MatrixUtil from 'flashbang/util/MatrixUtil';
@@ -73,7 +73,7 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
         return this._obj;
     }
 
-    public get display(): Graphics {
+    public get display(): Container {
         return this._dummyDisp;
     }
 
@@ -123,6 +123,9 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
 
     protected added(): void {
         super.added();
+
+        this._dummyDisp.addChild(this._dummyDispBackground);
+
         Assert.assertIsDefined(this._domParent);
         Assert.assertIsDefined(Flashbang.pixi);
         this._domParent.appendChild(this._obj);
@@ -168,11 +171,18 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
             const transform: string = this._obj.style.transform;
             this._obj.style.transform = 'initial';
 
+            // _extraBoundsSize allows us to account for things like box-shadow effects (there's no way
+            // to dynamically get an element size including that information)
             const r = this._obj.getBoundingClientRect();
-            this._dummyDisp.clear()
-                .beginFill(0x0, 0)
-                .drawRect(0, 0, r.width, r.height)
-                .endFill();
+            this._dummyDispBackground.clear()
+                .beginFill(0x0)
+                .drawRect(
+                    -this._extraBoundsSize,
+                    -this._extraBoundsSize,
+                    r.width + 2 * this._extraBoundsSize,
+                    r.height + 2 * this._extraBoundsSize
+                ).endFill();
+            this._dummyDispBackground.alpha = 0;
 
             this._obj.style.transform = transform;
         }
@@ -195,7 +205,9 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
         return `#${color.toString(16).padStart(6, '0')}`;
     }
 
-    protected readonly _dummyDisp: Graphics = new Graphics();
+    protected readonly _dummyDisp: Container = new Container();
+    protected readonly _dummyDispBackground: Graphics = new Graphics();
+    protected readonly _extraBoundsSize: number = 0;
     protected readonly _obj: T;
 
     protected _hideWhenModeInactive: boolean = false;

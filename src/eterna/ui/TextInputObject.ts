@@ -771,6 +771,8 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
 
     private readonly _fontSize: number;
 
+    protected readonly _extraBoundsSize = 3;
+
     private _disallow: RegExp;
     private _fontFamily: string;
     private _fontWeight: FontWeight;
