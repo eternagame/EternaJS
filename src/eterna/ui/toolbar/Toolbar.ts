@@ -169,12 +169,14 @@ export default class Toolbar extends ContainerObject {
         this._expandCollapseButton.display.y = yPos;
 
         this._helpText = new Text(
-            'Drag an icon to the right or left above to replace the existing tool, or tap an icon to use it.',
+            'Drag an icon to the right or left of the nucleotide pallette above\n'
+            + 'to insert or replace an existing tool in the hotbar, or tap an icon to use it.',
             {
                 fontSize: 14,
                 fontFamily: Fonts.STDFONT,
                 fill: 0xabc9d8,
-                fontWeight: FontWeight.MEDIUM
+                fontWeight: FontWeight.MEDIUM,
+                align: 'center'
             }
         );
         this._content.addChild(this._helpText);
