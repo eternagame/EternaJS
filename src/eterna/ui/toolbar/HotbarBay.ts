@@ -222,13 +222,14 @@ export default class HotbarBay extends ContainerObject {
     }
 
     /** Deactivate a tool due to being trashed, inserted into the other hotbar, or swapped */
-    public deactivateTool(toolId: string, replaceWith?: string) {
+    public deactivateTool(toolId: string, replaceWith?: string): {activated: string[]} {
         const toolIdx = this._activatedTools.indexOf(toolId);
         if (toolIdx !== -1) {
             if (replaceWith) this._activatedTools.splice(toolIdx, 1, replaceWith);
             else this._activatedTools.splice(toolIdx, 1);
         }
         this.updateButtons();
+        return {activated: this._activatedTools};
     }
 
     public isToolActive(toolId: string): boolean {
