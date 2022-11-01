@@ -244,7 +244,7 @@ export default class HotbarBay extends ContainerObject {
     public changeActivePaintTool(toolId: string) {
         for (const button of this._buttons) {
             if (button.id === toolId) button.toggled.value = true;
-            else button.toggled.value = false;
+            else if (button.isPaintTool) button.toggled.value = false;
         }
     }
 
