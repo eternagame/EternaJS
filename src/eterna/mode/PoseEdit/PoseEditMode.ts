@@ -1954,8 +1954,8 @@ export default class PoseEditMode extends GameMode {
         this._constraintsLayer.alpha = (this._isFrozen ? 0.25 : 1.0);
         this.setShowTotalEnergy(!this._isFrozen);
 
-        this._toolbar.undoButton.enabled = !this._isFrozen;
-        this._toolbar.redoButton.enabled = !this._isFrozen;
+        this._toolbar.undoButton.enabled = !this._isFrozen && !(this._stackLevel < 1);
+        this._toolbar.redoButton.enabled = !this._isFrozen && !(this._stackLevel + 1 > this._stackSize - 1);
         this._toolbar.freezeButton.toggled.value = this._isFrozen;
 
         if (!this._isFrozen) { // we just "thawed", update
@@ -2848,12 +2848,8 @@ export default class PoseEditMode extends GameMode {
         this._toolbar.palette.setPairCounts(numAU, numGU, numGC);
 
         if (!this._isFrozen) {
-            if (this._toolbar.undoButton.display.visible) {
-                this._toolbar.undoButton.enabled = !(this._stackLevel < 1);
-            }
-            if (this._toolbar.redoButton.display.visible) {
-                this._toolbar.redoButton.enabled = !(this._stackLevel + 1 > this._stackSize - 1);
-            }
+            this._toolbar.undoButton.enabled = !(this._stackLevel < 1);
+            this._toolbar.redoButton.enabled = !(this._stackLevel + 1 > this._stackSize - 1);
         }
 
         const constraintsSatisfied: boolean = this.checkConstraints();
