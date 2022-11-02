@@ -246,7 +246,8 @@ export const pairSwapButtonProps: ToolbarParam = {
     overImg: Bitmaps.ImgOverPairSwap,
     disableImg: Bitmaps.ImgGreyPairSwap,
     tooltip: 'Swap paired bases',
-    rscriptID: RScriptUIElementID.SWAP
+    rscriptID: RScriptUIElementID.SWAP,
+    hotKey: KeyCode.Digit5
 };
 
 export const undoButtonProps: ToolbarParam = {
