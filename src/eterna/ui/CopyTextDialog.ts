@@ -1,8 +1,11 @@
-import {HLayoutContainer, VLayoutContainer} from 'flashbang';
+import {
+    CallbackTask, DelayTask, HLayoutContainer, SerialTask, VLayoutContainer
+} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import WindowDialog from './WindowDialog';
 import TextInputObject from './TextInputObject';
 import GameButton from './GameButton';
+import Tooltips from './Tooltips';
 
 /** Show a dialog with text that the user can copy */
 export default class CopyTextDialog extends WindowDialog<void> {
@@ -40,7 +43,18 @@ export default class CopyTextDialog extends WindowDialog<void> {
 
         this.regs.add(copyButton.clicked.connect(() => {
             this._text.copyToClipboard();
-            if (this.modal) this.close();
+            if (this.modal) {
+                this.close();
+            } else {
+                this.removeNamedObjects('SUCCESS_ANIM');
+                Tooltips.instance?.showTooltipFor(copyButton.display, this, 'Sequence copied');
+                this.addNamedObject('SUCCESS_ANIM', new SerialTask(
+                    new DelayTask(2),
+                    new CallbackTask(() => {
+                        Tooltips.instance?.removeTooltip(this);
+                    })
+                ));
+            }
         }));
 
         content.layout();
