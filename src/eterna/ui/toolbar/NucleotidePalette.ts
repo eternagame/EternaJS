@@ -132,6 +132,11 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
 
         this.regs.add(this.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => this.onClick(e)));
         this.regs.add(this.pointerMove.connect((e) => this.onMoveMouse(e)));
+        this.regs.add(this.pointerOut.connect(() => {
+            if (this._lastTooltipTarget != null) {
+                Tooltips.instance?.removeTooltip(this._lastTooltipTarget);
+            }
+        }));
         Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.keyboardInput.pushListener(this));
     }
