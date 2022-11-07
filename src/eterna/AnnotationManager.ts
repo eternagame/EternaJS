@@ -105,7 +105,11 @@ export interface AnnotationData {
     visible?: boolean;
     selected?: boolean;
     expanded?: boolean;
-    positions: AnnotationPosition[];
+    /**
+     * The top level array has one entry for each separate annotation "view" (ie, in the case of multiple
+     * ranges). The next level down has one entry for each state.
+     */
+    positions: AnnotationPosition[][];
 }
 
 /**
@@ -508,13 +512,20 @@ export default class AnnotationManager {
      * An annotation with multiple ranges would have multiple positions
      *
      * @param annotation total data of annotation of interest
+     * @param state the switch state which the position is valid for
      * @param positionIndex index of relevant annotation view associated with annotation
      * @param position new position
      */
-    public setAnnotationPositions(annotation: AnnotationData, positionIndex: number, position: AnnotationPosition) {
+    public setAnnotationPositions(
+        annotation: AnnotationData,
+        state: number,
+        positionIndex: number,
+        position: AnnotationPosition
+    ) {
         const [parentNode, index] = this.getRelevantParentNode(annotation);
         if (parentNode && index != null) {
-            parentNode[index].positions[positionIndex] = position;
+            if (!parentNode[index].positions[positionIndex]) parentNode[index].positions[positionIndex] = [];
+            parentNode[index].positions[positionIndex][state] = position;
         }
     }
 
@@ -560,6 +571,7 @@ export default class AnnotationManager {
      * Draws all annotation views in a given puzzle pose
      *
      * @param pose puzzle pose of interest
+     * @param state the switch state the pose corresponds to
      * @param reset whether to recalculate the positions of all annotations
      * @param ignoreCustom whether to override the custom
      */
@@ -869,7 +881,11 @@ export default class AnnotationManager {
      *
      * @param item display object to be made into a view
      */
-    private getAnnotationView(pose: Pose2D, positionIndex: number, item: AnnotationData): AnnotationView {
+    private getAnnotationView(
+        pose: Pose2D,
+        positionIndex: number,
+        item: AnnotationData
+    ): AnnotationView {
         let textColor;
         switch (item.category) {
             case AnnotationCategory.STRUCTURE:
@@ -939,11 +955,11 @@ export default class AnnotationManager {
                 view.onReleasePositionButtonPressed.connect(() => {
                     // Release position
                     const releasedPosition: AnnotationPosition = {
-                        ...item.positions[positionIndex],
+                        ...item.positions[positionIndex][pose.stateIndex],
                         custom: false
                     };
 
-                    this.setAnnotationPositions(item, positionIndex, releasedPosition);
+                    this.setAnnotationPositions(item, pose.stateIndex, positionIndex, releasedPosition);
                     this.propagateDataUpdates();
                 });
             }
@@ -955,6 +971,7 @@ export default class AnnotationManager {
     /**
      * Attempts to place a single annotation item
      * @param pose puzzle pose of interest
+     * @param state the switch state the pose corresponds to
      * @param item display object data with positioning and annotation metadata
      * @param itemIndex index of item within parent array
      * @param reset whether to recalculate the positions of all annotations
@@ -976,7 +993,7 @@ export default class AnnotationManager {
             && !params.ignoreCustom
         ) {
             for (let i = 0; i < params.item.positions.length; i++) {
-                const position = params.item.positions[i];
+                const position = params.item.positions[i][params.pose.stateIndex];
                 // When computing positions, we were not able to find a position for this range,
                 // and instead decided that we should just not show this annotation rather than
                 // crashing. We will follow the same advice here, with the same understanding as
@@ -988,7 +1005,7 @@ export default class AnnotationManager {
                     view.onMovedAnnotation.connect((point: Point | null) => {
                         if (!point) return;
 
-                        const anchorIndex = params.item.positions[i].anchorIndex;
+                        const anchorIndex = params.item.positions[i][params.pose.stateIndex].anchorIndex;
                         const base = params.pose.getBase(anchorIndex);
                         const anchorPoint = new Point(
                             base.x + params.pose.xOffset,
@@ -1005,7 +1022,7 @@ export default class AnnotationManager {
                             custom: true
                         };
 
-                        this.setAnnotationPositions(params.item, i, movedPosition);
+                        this.setAnnotationPositions(params.item, params.pose.stateIndex, i, movedPosition);
                         this.persistentAnnotationDataUpdated.emit();
                     });
                 }
@@ -1061,13 +1078,15 @@ export default class AnnotationManager {
         // label duplicates.
         for (let i = 0; i < ranges.length; i++) {
             const range = ranges[i];
-            const prevPosition = params.item.positions.length > i ? params.item.positions[i] : null;
+            const prevPosition = params.item.positions.length > i
+                ? params.item.positions[i][params.pose.stateIndex]
+                : null;
             const view = this.getAnnotationView(params.pose, i, params.item);
             if (params.item.type === AnnotationHierarchyType.ANNOTATION) {
                 view.onMovedAnnotation.connect((point: Point | null) => {
                     if (!point) return;
 
-                    const anchorIndex = params.item.positions[i].anchorIndex;
+                    const anchorIndex = params.item.positions[i][params.pose.stateIndex].anchorIndex;
                     const base = params.pose.getBase(anchorIndex);
                     const anchorPoint = new Point(
                         base.x + params.pose.xOffset,
@@ -1075,7 +1094,7 @@ export default class AnnotationManager {
                     );
                     // Compute relative position
                     const movedPosition: AnnotationPosition = {
-                        ...params.item.positions[i],
+                        ...params.item.positions[i][params.pose.stateIndex],
                         relPosition: new Point(
                             point.x - anchorPoint.x,
                             point.y - anchorPoint.y
@@ -1083,7 +1102,7 @@ export default class AnnotationManager {
                         custom: true
                     };
 
-                    this.setAnnotationPositions(params.item, i, movedPosition);
+                    this.setAnnotationPositions(params.item, params.pose.stateIndex, i, movedPosition);
                     this.persistentAnnotationDataUpdated.emit();
                 });
             }
@@ -1160,7 +1179,7 @@ export default class AnnotationManager {
                 view.display.position.copyFrom(absolutePosition);
 
                 // Cache position
-                this.setAnnotationPositions(params.item, i, {
+                this.setAnnotationPositions(params.item, params.pose.stateIndex, i, {
                     anchorIndex,
                     relPosition,
                     zoomLevel,
@@ -1186,6 +1205,7 @@ export default class AnnotationManager {
      * Runs a recursive/iterative search on each place defined about the co-ordinate
      * system with the anchor point as the origin until it finds a place
      * @param pose puzzle pose of interest
+     * @param state the switch state of the pose
      * @param originalAnchorIndex the index of the base associated with the initial call
      * @param currentAnchorIndex the index of the base currently being used as the anchor
      * @param anchorPoint center-point of base/annotation card that defines the origin on which calculations are made
@@ -1749,6 +1769,7 @@ export default class AnnotationManager {
      * Helper function that checks whether annotations/layers exist at a proposed position
      *
      * @param pose puzzle pose of interest
+     * @param state the switch state the pose corresponds to
      * @param anchorPoint center-point of base/annotation card that defines the origin on which calculations are made
      * relative from. We use the center-point and not the top-left corner, as is convention in pixi,
      * because bases in Eterna.js have their position saved as a central point
@@ -1792,8 +1813,8 @@ export default class AnnotationManager {
                     if (!position) continue;
 
                     const display = pose.getAnnotationViewDims(card.id, j);
-                    const cardRelPosition = card.positions[j].relPosition;
-                    const base = pose.getBase(card.positions[j].anchorIndex);
+                    const cardRelPosition = card.positions[j][pose.stateIndex].relPosition;
+                    const base = pose.getBase(card.positions[j][pose.stateIndex].anchorIndex);
                     const cardAnchorPoint = new Point(
                         base.x + pose.xOffset,
                         base.y + pose.yOffset

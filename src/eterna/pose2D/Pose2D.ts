@@ -76,6 +76,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public readonly baseHovered = new Signal<number>();
     public readonly basesSparked = new Signal<number[]>();
 
+    public stateIndex: number = 0;
+
     constructor(poseField: PoseField, editable: boolean, annotationManager: AnnotationManager) {
         super();
         this._poseField = poseField;

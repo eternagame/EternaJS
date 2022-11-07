@@ -268,6 +268,13 @@ export default abstract class GameMode extends AppMode {
 
     protected setPip(pipMode: boolean): void {
         this._isPipMode = pipMode;
+        if (pipMode) {
+            for (let i = 0; i < this._poses.length; i++) {
+                this._poses[i].stateIndex = i;
+            }
+        } else {
+            this._poses[0].stateIndex = this._curTargetIndex;
+        }
         this.layoutPoseFields();
         this.onSetPip(pipMode);
     }

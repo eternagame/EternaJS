@@ -54,14 +54,16 @@ export default class AnnotationView extends ContainerObject {
                 this._draggerRef.destroyObject();
                 const dragger = new Dragger();
                 this._draggerRef = this.addObject(dragger);
-                const startPoint = this._panel.display.toLocal(new Point(dragger.curX, dragger.curY));
+                // const startPoint = this._panel.display.toLocal(new Point(dragger.curX, dragger.curY));
+                const startPoint = new Point(dragger.curX, dragger.curY);
+                const prevPosition = new Point(this.display.x, this.display.y);
                 if (!this._prevPosition) {
-                    this._prevPosition = new Point(this.display.x, this.display.y);
+                    this._prevPosition = prevPosition;
                 }
                 dragger.dragged.connect((p) => {
                     const point = p as Point;
-                    this.display.x = point.x - startPoint.x;
-                    this.display.y = point.y - startPoint.y;
+                    this.display.x = prevPosition.x + (point.x - startPoint.x);
+                    this.display.y = prevPosition.y + (point.y - startPoint.y);
                 });
 
                 dragger.dragComplete.connect(() => {
@@ -171,8 +173,10 @@ export default class AnnotationView extends ContainerObject {
                 // couldn't find a location to put the annotation. Presumably this means it's not custom
                 // positioned.
                 if (this._item.positions[this._positionIndex]) {
-                    this._moveButton.display.visible = !this._item.positions[this._positionIndex].custom;
-                    this._moveButton.enabled = !this._item.positions[this._positionIndex].custom;
+                    this._moveButton.display.visible = (
+                        !this._item.positions[this._positionIndex][this._pose.stateIndex].custom
+                    );
+                    this._moveButton.enabled = !this._item.positions[this._positionIndex][this._pose.stateIndex].custom;
                 } else {
                     this._moveButton.display.visible = true;
                     this._moveButton.enabled = true;
@@ -200,8 +204,12 @@ export default class AnnotationView extends ContainerObject {
                 // couldn't find a location to put the annotation. Presumably this means it's not custom
                 // positioned.
                 if (this._item.positions[this._positionIndex]) {
-                    this._releaseButton.display.visible = this._item.positions[this._positionIndex].custom;
-                    this._releaseButton.enabled = this._item.positions[this._positionIndex].custom;
+                    this._releaseButton.display.visible = (
+                        this._item.positions[this._positionIndex][this._pose.stateIndex].custom
+                    );
+                    this._releaseButton.enabled = (
+                        this._item.positions[this._positionIndex][this._pose.stateIndex].custom
+                    );
                 } else {
                     this._releaseButton.display.visible = false;
                     this._releaseButton.enabled = false;

@@ -579,7 +579,7 @@ export default class Toolbar extends ContainerObject {
             this.regs.add(
                 this._annotationManager.viewAnnotationDataUpdated.connect(
                     () => {
-                        if (annotationPanelDialog && annotationPanelDialog._ref.isLive) {
+                        if (annotationPanelDialog && annotationPanelDialog.isLiveObject) {
                             annotationPanelDialog.updatePanel();
                         }
                     }
