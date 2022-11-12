@@ -2,7 +2,7 @@ import Eterna from 'eterna/Eterna';
 import Feedback from 'eterna/Feedback';
 import {FoldData} from 'eterna/UndoBlock';
 import Sequence from 'eterna/rnatypes/Sequence';
-import {AnnotationData} from 'eterna/AnnotationManager';
+import {BundledAnnotationData} from 'eterna/AnnotationManager';
 import {DesignCategory} from 'eterna/mode/DesignBrowser/DesignBrowserMode';
 
 export default class Solution {
@@ -101,11 +101,11 @@ export default class Solution {
         this._hasFoldData = avail;
     }
 
-    public set annotations(annotations: AnnotationData[] | undefined) {
+    public set annotations(annotations: BundledAnnotationData[] | undefined) {
         this._annotations = annotations;
     }
 
-    public get annotations(): AnnotationData[] | undefined {
+    public get annotations(): BundledAnnotationData[] | undefined {
         return this._annotations;
     }
 
@@ -242,6 +242,6 @@ export default class Solution {
     private _shortDesc: string;
     private _hasFoldData: boolean = false;
     private _foldData: FoldData[] | null = null;
-    private _annotations: AnnotationData[] | undefined = undefined;
+    private _annotations: BundledAnnotationData[] | undefined = undefined;
     private _libraryNT: number[] = [];
 }

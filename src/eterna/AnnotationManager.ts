@@ -109,18 +109,28 @@ export interface AnnotationData {
     visible?: boolean;
     selected?: boolean;
     expanded?: boolean;
-    positions: KeyedCollection<{
-        /** The index of the ranges array which the position belongs to */
-        rangeIndex: number;
-        /** The switch state which the position is valid for */
-        state: number;
-        /**
-         * When multiple strands have the label which is specified by the range at rangeIndex,
-         * the index of the strand in that set which this position is for
-         */
-        strandClone: number;
-    }, AnnotationPosition>;
+    positions: KeyedCollection<AnnotationPositionKey, AnnotationPosition>;
 }
+
+export type BundledAnnotationData = Omit<
+AnnotationData, 'visible' | 'selected' | 'expanded' | 'positions' | 'children'
+> & {
+    children: BundledAnnotationData[];
+    // AnnotationPosition[] is for backwards compatibility
+    positions: [AnnotationPositionKey, AnnotationPosition][] | AnnotationPosition[];
+};
+
+type AnnotationPositionKey = {
+    /** The index of the ranges array which the position belongs to */
+    rangeIndex: number;
+    /** The switch state which the position is valid for */
+    state: number;
+    /**
+     * When multiple strands have the label which is specified by the range at rangeIndex,
+     * the index of the strand in that set which this position is for
+     */
+    strandClone: number;
+};
 
 /**
  * Represents the location of an annotation
@@ -142,8 +152,8 @@ export interface AnnotationPosition {
  * Transports all annotation categories in a single object
  */
 export interface AnnotationDataBundle {
-    puzzle: AnnotationData[];
-    solution: AnnotationData[];
+    puzzle: BundledAnnotationData[];
+    solution: BundledAnnotationData[];
 }
 
 /**
@@ -702,9 +712,9 @@ export default class AnnotationManager {
      *
      * @param annotations
      */
-    public setPuzzleAnnotations(annotations: AnnotationData[]) {
+    public setPuzzleAnnotations(annotations: BundledAnnotationData[]) {
         const preparedAnnotations: AnnotationData[] = annotations.map(
-            (annotation: AnnotationData) => AnnotationManager.prepareAnnotationNode(annotation)
+            (annotation) => AnnotationManager.prepareAnnotationNode(annotation)
         );
         this._puzzleAnnotations = preparedAnnotations;
         this.propagateDataUpdates();
@@ -733,9 +743,9 @@ export default class AnnotationManager {
      *
      * @param annotations
      */
-    public setSolutionAnnotations(annotations: AnnotationData[]) {
+    public setSolutionAnnotations(annotations: BundledAnnotationData[]) {
         const preparedAnnotations: AnnotationData[] = annotations.map(
-            (annotation: AnnotationData) => AnnotationManager.prepareAnnotationNode(annotation)
+            (annotation) => AnnotationManager.prepareAnnotationNode(annotation)
         );
         this._solutionAnnotations = preparedAnnotations;
         this.propagateDataUpdates();
@@ -790,25 +800,28 @@ export default class AnnotationManager {
     }
 
     private bundleAnnotations(graph: AnnotationData[]) {
-        const prepareNode = (node: AnnotationData): AnnotationData => {
-            const cleansedNode = {...node};
-            // These are runtime properties
-            delete cleansedNode.visible;
-            delete cleansedNode.selected;
+        const prepareNode = (node: AnnotationData): BundledAnnotationData => {
+            const {
+                // Runtime only
+                visible, selected, expanded,
+                // Needs to be transformed
+                positions,
+                ...cleansedNode
+            } = {...node};
+            const bundleNode = {
+                ...cleansedNode,
+                positions: Array.from(positions.entries())
+            };
 
-            const children: AnnotationData[] = [];
+            const children: BundledAnnotationData[] = [];
             if (cleansedNode.children) {
                 for (const child of cleansedNode.children) {
-                    const cleansedChildNode = {...child};
-                    // These are runtime properties
-                    delete cleansedChildNode.visible;
-                    delete cleansedChildNode.selected;
-                    children.push(prepareNode(cleansedChildNode));
+                    children.push(prepareNode(child));
                 }
             }
 
             return {
-                ...cleansedNode,
+                ...bundleNode,
                 children
             };
         };
@@ -2638,20 +2651,34 @@ export default class AnnotationManager {
      *
      * @param node annotation of interest
      */
-    private static prepareAnnotationNode(node: AnnotationData): AnnotationData {
-        const processedNode = {...node};
-        // These are runtime properties
-        processedNode.visible = true;
-        processedNode.selected = false;
+    private static prepareAnnotationNode(node: BundledAnnotationData): AnnotationData {
+        const positions = new KeyedCollection<AnnotationPositionKey, AnnotationPosition>();
+        for (let i = 0; i < node.positions.length; i++) {
+            const position = node.positions[i];
+            if (Array.isArray(position)) {
+                positions.set(position[0], position[1]);
+            } else {
+                // Backwards compatibility. We used to just store one position per range index.
+                // We didn't support multistrand at that point, and the main strand only has one clone,
+                // so the strandClone is always 0. Strictly speaking the position applied for all states,
+                // but as we now support separate positions per state, I think it is reasonable to just
+                // set the custom position for state 1 (I'd rather avoid having to get the number of states
+                // passed through to here, and we should properly handle the situation where some states don't
+                // have positions by just recomputing them)
+                positions.set({rangeIndex: i, state: 1, strandClone: 0}, position);
+            }
+        }
+        const processedNode = {
+            ...node,
+            visible: true,
+            selected: true,
+            positions
+        };
 
         const children: AnnotationData[] = [];
         if (processedNode.children) {
             for (const child of processedNode.children) {
-                const cleansedNode = {...child};
-                // These are runtime properties
-                processedNode.visible = true;
-                processedNode.selected = false;
-                children.push(AnnotationManager.prepareAnnotationNode(cleansedNode));
+                children.push(AnnotationManager.prepareAnnotationNode(child));
             }
         }
 

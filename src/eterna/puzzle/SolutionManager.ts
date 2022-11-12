@@ -2,7 +2,7 @@ import * as log from 'loglevel';
 import Eterna from 'eterna/Eterna';
 import Feedback, {BrentTheoData} from 'eterna/Feedback';
 import Sequence from 'eterna/rnatypes/Sequence';
-import {AnnotationData} from 'eterna/AnnotationManager';
+import {BundledAnnotationData} from 'eterna/AnnotationManager';
 import {DesignCategory} from 'eterna/mode/DesignBrowser/DesignBrowserMode';
 import Solution from './Solution';
 
@@ -29,7 +29,7 @@ interface SolutionSpec {
     'SHAPE-min': string;
     'has-fold-data': number | null;
     'fold-data': string;
-    'annotations': AnnotationData[];
+    'annotations': BundledAnnotationData[];
     'selected-nts': string;
 }
 
@@ -250,7 +250,7 @@ export default class SolutionManager {
         }
 
         if (obj['annotations'] != null) {
-            newsol.annotations = obj['annotations'] as AnnotationData[];
+            newsol.annotations = obj['annotations'];
         }
 
         if (obj['selected-nts'] != null) {

@@ -25,6 +25,10 @@ export default class KeyedCollection<Key extends KeyObject, Value> {
         };
     }
 
+    public entries(): Iterable<[Key, Value]> {
+        return this.getWhere(() => true);
+    }
+
     public delete(key: Key): boolean {
         return this._data.delete(JSON.stringify(key));
     }
