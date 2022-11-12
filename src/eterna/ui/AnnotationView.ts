@@ -26,7 +26,8 @@ export default class AnnotationView extends ContainerObject {
     constructor(
         pose: Pose2D,
         type: AnnotationHierarchyType,
-        positionIndex: number,
+        rangeIndex: number,
+        strandClone: number,
         item: AnnotationData,
         textColor: number
     ) {
@@ -34,7 +35,8 @@ export default class AnnotationView extends ContainerObject {
 
         this._pose = pose;
         this._type = type;
-        this._positionIndex = positionIndex;
+        this._rangeIndex = rangeIndex;
+        this._strandClone = strandClone;
         this._item = item;
         this._textColor = textColor;
     }
@@ -172,14 +174,14 @@ export default class AnnotationView extends ContainerObject {
                 // HACK: The position may not be available if AnnotationManager#computeAnnotationPositionPoint
                 // couldn't find a location to put the annotation. Presumably this means it's not custom
                 // positioned.
-                if (
-                    this._item.positions[this._positionIndex]
-                    && this._item.positions[this._positionIndex][this._pose.stateIndex]
-                ) {
-                    this._moveButton.display.visible = (
-                        !this._item.positions[this._positionIndex][this._pose.stateIndex].custom
-                    );
-                    this._moveButton.enabled = !this._item.positions[this._positionIndex][this._pose.stateIndex].custom;
+                const position = this._item.positions.get({
+                    rangeIndex: this._rangeIndex,
+                    strandClone: this._strandClone,
+                    state: this._pose.stateIndex
+                });
+                if (position) {
+                    this._moveButton.display.visible = !position.custom;
+                    this._moveButton.enabled = !position.custom;
                 } else {
                     this._moveButton.display.visible = true;
                     this._moveButton.enabled = true;
@@ -206,16 +208,9 @@ export default class AnnotationView extends ContainerObject {
                 // HACK: The position may not be available if AnnotationManager#computeAnnotationPositionPoint
                 // couldn't find a location to put the annotation. Presumably this means it's not custom
                 // positioned.
-                if (
-                    this._item.positions[this._positionIndex]
-                    && this._item.positions[this._positionIndex][this._pose.stateIndex]
-                ) {
-                    this._releaseButton.display.visible = (
-                        this._item.positions[this._positionIndex][this._pose.stateIndex].custom
-                    );
-                    this._releaseButton.enabled = (
-                        this._item.positions[this._positionIndex][this._pose.stateIndex].custom
-                    );
+                if (position) {
+                    this._releaseButton.display.visible = position.custom;
+                    this._releaseButton.enabled = position.custom;
                 } else {
                     this._releaseButton.display.visible = false;
                     this._releaseButton.enabled = false;
@@ -357,13 +352,18 @@ export default class AnnotationView extends ContainerObject {
         return this._item.id;
     }
 
-    public get positionIndex() {
-        return this._positionIndex;
+    public get rangeIndex() {
+        return this._rangeIndex;
+    }
+
+    public get strandClone() {
+        return this._strandClone;
     }
 
     private _pose: Pose2D;
     private _type: AnnotationHierarchyType;
-    private _positionIndex: number;
+    private _rangeIndex: number;
+    private _strandClone: number;
     private _item: AnnotationData;
     private _textColor: number;
     private _card: TextBalloon;

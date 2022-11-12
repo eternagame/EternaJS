@@ -16,6 +16,7 @@ import {
     AnnotationHierarchyType,
     AnnotationCategory
 } from 'eterna/AnnotationManager';
+import KeyedCollection from 'eterna/util/KeyedCollection';
 import GameButton from './GameButton';
 import TextInputObject from './TextInputObject';
 import {InputField} from './TextInputGrid';
@@ -295,7 +296,7 @@ export default class AnnotationDialog extends WindowDialog<AnnotationData> {
                 title: this._titleField.input.text,
                 ranges: this.stringToAnnotationRange(this._basesField.input.text) || [],
                 playerID: Eterna.playerID,
-                positions: [],
+                positions: new KeyedCollection(),
                 children: []
             };
 

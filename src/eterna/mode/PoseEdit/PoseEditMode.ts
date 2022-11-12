@@ -73,6 +73,7 @@ import ToolbarButton from 'eterna/ui/toolbar/ToolbarButton';
 import StateToggle from 'eterna/ui/StateToggle';
 import Pose3DDialog from 'eterna/pose3D/Pose3DDialog';
 import ModeBar from 'eterna/ui/ModeBar';
+import KeyedCollection from 'eterna/util/KeyedCollection';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -1872,7 +1873,7 @@ export default class PoseEditMode extends GameMode {
                     start: 28,
                     end: 28
                 }],
-                positions: [],
+                positions: new KeyedCollection(),
                 children: []
             };
             if (targetIndex === 1) {

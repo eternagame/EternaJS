@@ -12,6 +12,7 @@ import {HTMLInputEvent} from 'eterna/ui/FileInputObject';
 import Pose2D from 'eterna/pose2D/Pose2D';
 import GameMode from 'eterna/mode/GameMode';
 import log from 'loglevel';
+import KeyedCollection from './util/KeyedCollection';
 
 // DEBUG SETTINGS FOR ANNOTATION PLACEMENT:
 // In order to visualize placement conflicts, you can toggle these variables
@@ -108,11 +109,17 @@ export interface AnnotationData {
     visible?: boolean;
     selected?: boolean;
     expanded?: boolean;
-    /**
-     * The top level array has one entry for each separate annotation "view" (ie, in the case of multiple
-     * ranges). The next level down has one entry for each state.
-     */
-    positions: AnnotationPosition[][];
+    positions: KeyedCollection<{
+        /** The index of the ranges array which the position belongs to */
+        rangeIndex: number;
+        /** The switch state which the position is valid for */
+        state: number;
+        /**
+         * When multiple strands have the label which is specified by the range at rangeIndex,
+         * the index of the strand in that set which this position is for
+         */
+        strandClone: number;
+    }, AnnotationPosition>;
 }
 
 /**
@@ -243,7 +250,7 @@ export default class AnnotationManager {
             playerID: Eterna.playerID,
             visible: true,
             selected: false,
-            positions: []
+            positions: new KeyedCollection()
         };
 
         if (category === AnnotationCategory.PUZZLE) {
@@ -347,7 +354,7 @@ export default class AnnotationManager {
         // to just once when things change, but this is the best we can do right now
         const fixupAnnotation = (annot: AnnotationData): boolean => {
             if (annot.ranges) {
-                const rangesToRemove = [];
+                const rangesToRemove: number[] = [];
                 for (let i = 0; i < annot.ranges.length; i++) {
                     const range = annot.ranges[i];
                     const strandLength = range.strand ? this._oligoLengths.get(range.strand) : mainLength;
@@ -371,12 +378,10 @@ export default class AnnotationManager {
                         range.end = strandLength - 1;
                         rangesChanged = true;
                     }
-                    if (annot.positions[i]) {
-                        for (const pos of annot.positions[i]) {
-                            // The base is positioned relative to a base that no longer exists. Remove the
-                            // custom positioning and let the layout algorithm figure out where it should go.
-                            if (pos && pos.custom && pos.anchorIndex >= strandLength) pos.custom = false;
-                        }
+                    for (const [_, pos] of annot.positions.getWhere((key) => key.rangeIndex === i)) {
+                        // The base is positioned relative to a base that no longer exists. Remove the
+                        // custom positioning and let the layout algorithm figure out where it should go.
+                        if (pos && pos.custom && pos.anchorIndex >= strandLength) pos.custom = false;
                     }
                 }
                 if (rangesToRemove.length > 0) rangesChanged = true;
@@ -384,8 +389,8 @@ export default class AnnotationManager {
                 // change from under us.
                 for (const removeIdx of rangesToRemove.reverse()) {
                     annot.ranges?.splice(removeIdx, 1);
-                    annot.positions?.splice(removeIdx, 1);
                 }
+                annot.positions.deleteWhere((key) => rangesToRemove.includes(key.rangeIndex));
                 return annot.ranges.length > 0;
             }
             return true;
@@ -573,12 +578,12 @@ export default class AnnotationManager {
         annotation: AnnotationData,
         state: number,
         positionIndex: number,
+        strandClone: number,
         position: AnnotationPosition
     ) {
         const [parentNode, index] = this.getRelevantParentNode(annotation);
         if (parentNode && index != null) {
-            if (!parentNode[index].positions[positionIndex]) parentNode[index].positions[positionIndex] = [];
-            parentNode[index].positions[positionIndex][state] = position;
+            parentNode[index].positions.set({state, strandClone, rangeIndex: positionIndex}, position);
         }
     }
 
@@ -949,7 +954,8 @@ export default class AnnotationManager {
      */
     private getAnnotationView(
         pose: Pose2D,
-        positionIndex: number,
+        rangeIndex: number,
+        strandClone: number,
         item: AnnotationData
     ): AnnotationView {
         let textColor;
@@ -968,7 +974,8 @@ export default class AnnotationManager {
         const view = new AnnotationView(
             pose,
             item.type,
-            positionIndex,
+            rangeIndex,
+            strandClone,
             item,
             textColor
         );
@@ -1020,13 +1027,28 @@ export default class AnnotationManager {
                 });
                 view.onReleasePositionButtonPressed.connect(() => {
                     // Release position
-                    const releasedPosition: AnnotationPosition = {
-                        ...item.positions[positionIndex][pose.stateIndex],
-                        custom: false
-                    };
+                    const position = item.positions.get({
+                        rangeIndex,
+                        state: pose.stateIndex,
+                        strandClone
+                    });
+                    // The position should exist since if the button was pressed this view was placed in the pose,
+                    // but this can't be asserted by our types. If for some reason that doesn't hold, just do nothing
+                    if (position) {
+                        const releasedPosition: AnnotationPosition = {
+                            ...position,
+                            custom: false
+                        };
 
-                    this.setAnnotationPositions(item, pose.stateIndex, positionIndex, releasedPosition);
-                    this.propagateDataUpdates();
+                        this.setAnnotationPositions(
+                            item,
+                            pose.stateIndex,
+                            rangeIndex,
+                            strandClone,
+                            releasedPosition
+                        );
+                        this.propagateDataUpdates();
+                    }
                 });
             }
         }
@@ -1050,28 +1072,33 @@ export default class AnnotationManager {
         ignoreCustom: boolean;
         baseLayerBounds: Rectangle;
     }): void {
-        // If annotation positions have been computed already
-        // use cached value
+        // If annotation positions have been computed already use cached value
+        const cachedPositions = Array.from(params.item.positions.getWhere(
+            (key) => key.state === params.pose.stateIndex
+        ));
         if (
-            params.item.positions.length > 0
+            cachedPositions.length > 0
             && !params.reset
             && !params.ignoreCustom
         ) {
-            for (let i = 0; i < params.item.positions.length; i++) {
-                const position = params.item.positions[i][params.pose.stateIndex];
-                // When computing positions, we were not able to find a position for this range,
-                // and instead decided that we should just not show this annotation rather than
-                // crashing. We will follow the same advice here, with the same understanding as
-                // later on in this function that we should revisit computeAnnotationPositionPoint
-                // to always return something rather than just not display the annotation.
-                if (!position) continue;
-                const view = this.getAnnotationView(params.pose, i, params.item);
+            for (const [positionKey, position] of cachedPositions) {
+                const view = this.getAnnotationView(
+                    params.pose,
+                    positionKey.rangeIndex,
+                    positionKey.strandClone,
+                    params.item
+                );
+
                 if (params.item.type === AnnotationHierarchyType.ANNOTATION) {
                     view.onMovedAnnotation.connect((point: Point | null) => {
                         if (!point) return;
 
-                        const anchorIndex = params.item.positions[i][params.pose.stateIndex].anchorIndex;
-                        const anchorPoint = params.pose.getStrandBaseLoc(params.item.ranges?.[i].strand, anchorIndex);
+                        const anchorIndex = position.anchorIndex;
+                        const anchorPoint = params.pose.getStrandBaseLoc(
+                            params.item.ranges?.[positionKey.rangeIndex].strand,
+                            positionKey.strandClone,
+                            anchorIndex
+                        );
                         if (!anchorPoint) {
                             // Shouldn't happen as the view shouldn't be placed if the anchor doesn't exist, but
                             // don't crash and leave a trace if it happens for some reason
@@ -1089,14 +1116,25 @@ export default class AnnotationManager {
                             custom: true
                         };
 
-                        this.setAnnotationPositions(params.item, params.pose.stateIndex, i, movedPosition);
+                        this.setAnnotationPositions(
+                            params.item,
+                            params.pose.stateIndex,
+                            positionKey.rangeIndex,
+                            positionKey.strandClone,
+                            movedPosition
+                        );
                         this.persistentAnnotationDataUpdated.emit();
                     });
                 }
+
                 params.pose.addAnnotationView(view);
 
                 const anchorIndex = position.anchorIndex;
-                const anchorPoint = params.pose.getStrandBaseLoc(params.item.ranges?.[i].strand, anchorIndex);
+                const anchorPoint = params.pose.getStrandBaseLoc(
+                    params.item.ranges?.[positionKey.rangeIndex].strand,
+                    positionKey.strandClone,
+                    anchorIndex
+                );
                 if (!anchorPoint) continue;
 
                 view.display.position.set(
@@ -1133,6 +1171,7 @@ export default class AnnotationManager {
             }
         }
 
+        const strandCloneCounts = params.pose.strandCloneCounts;
         // Future Improvement:
         // A single annotation or layer can be associated with multiple ranges
         // We handle this by generating a label for each range, regardless
@@ -1141,127 +1180,161 @@ export default class AnnotationManager {
         // An improvement that can be made is to only "duplicate" labels
         // if range positions exceed some defined threshold to avoid unnecessary
         // label duplicates.
-        for (let i = 0; i < ranges.length; i++) {
-            const range = ranges[i];
-            const prevPosition = params.item.positions.length > i
-                ? params.item.positions[i][params.pose.stateIndex]
-                : null;
-            const view = this.getAnnotationView(params.pose, i, params.item);
-            if (params.item.type === AnnotationHierarchyType.ANNOTATION) {
-                view.onMovedAnnotation.connect((point: Point | null) => {
-                    if (!point) return;
+        for (let rangeIndex = 0; rangeIndex < ranges.length; rangeIndex++) {
+            const range = ranges[rangeIndex];
+            const cloneCount = strandCloneCounts.get(range.strand);
+            // Strand is not present in this pose, so we don't need to (and can't) create a view for this range
+            if (cloneCount === undefined) continue;
+            for (let strandClone = 0; strandClone < cloneCount; strandClone++) {
+                const prevPosition = params.item.positions.get({
+                    state: params.pose.stateIndex,
+                    rangeIndex,
+                    strandClone
+                });
+                const view = this.getAnnotationView(params.pose, rangeIndex, strandClone, params.item);
+                if (params.item.type === AnnotationHierarchyType.ANNOTATION) {
+                    view.onMovedAnnotation.connect((point: Point | null) => {
+                        if (!point) return;
 
-                    const anchorIndex = params.item.positions[i][params.pose.stateIndex].anchorIndex;
-                    const anchorPoint = params.pose.getStrandBaseLoc(params.item.ranges?.[i].strand, anchorIndex);
+                        const position = params.item.positions.get({
+                            state: params.pose.stateIndex,
+                            rangeIndex,
+                            strandClone
+                        });
+                        if (!position) {
+                            // Shouldn't happen as the view shouldn't be placed if it doesn't have a position, but
+                            // don't crash and leave a trace if it happens for some reason
+                            log.warn('view.onMovedAnnotation(2) failed to get position');
+                            return;
+                        }
+                        const anchorIndex = position?.anchorIndex;
+                        const anchorPoint = params.pose.getStrandBaseLoc(
+                            range.strand,
+                            strandClone,
+                            anchorIndex
+                        );
+                        if (!anchorPoint) {
+                            // Shouldn't happen as the view shouldn't be placed if the anchor doesn't exist, but
+                            // don't crash and leave a trace if it happens for some reason
+                            log.warn('view.onMovedAnnotation(2) failed to get anchor base location');
+                            return;
+                        }
+
+                        // Compute relative position
+                        const movedPosition: AnnotationPosition = {
+                            ...position,
+                            relPosition: new Point(
+                                point.x - anchorPoint.x,
+                                point.y - anchorPoint.y
+                            ),
+                            custom: true
+                        };
+
+                        this.setAnnotationPositions(
+                            params.item,
+                            params.pose.stateIndex,
+                            rangeIndex,
+                            strandClone,
+                            movedPosition
+                        );
+                        this.persistentAnnotationDataUpdated.emit();
+                    });
+                }
+
+                // We need to prematurely (ie, before we have a final position) add this to the display object graph
+                // so that we can read it's dimensions/position
+                params.pose.addAnnotationView(view);
+
+                let absolutePosition: Point | null = null;
+                let relPosition: Point | null = null;
+                let anchorIndex: number | null = null;
+                let customPosition = false;
+                let zoomLevel: number = params.pose.zoomLevel;
+
+                if (prevPosition?.custom && !params.ignoreCustom) {
+                    relPosition = prevPosition.relPosition;
+                    anchorIndex = prevPosition.anchorIndex;
+                    const zoomScaling = 1
+                        + ((prevPosition.zoomLevel - params.pose.zoomLevel) / (Pose2D.ZOOM_SPACINGS.length - 1));
+
+                    const anchorPoint = params.pose.getStrandBaseLoc(range.strand, strandClone, anchorIndex);
                     if (!anchorPoint) {
-                        // Shouldn't happen as the view shouldn't be placed if the anchor doesn't exist, but
-                        // don't crash and leave a trace if it happens for some reason
-                        log.warn('view.onMovedAnnotation(2) failed to get anchor base location');
-                        return;
+                        // This base isn't in this pose
+                        continue;
+                    }
+                    absolutePosition = new Point(
+                        relPosition.x * zoomScaling + anchorPoint.x,
+                        relPosition.y * zoomScaling + anchorPoint.y
+                    );
+                    zoomLevel = prevPosition.zoomLevel;
+                    customPosition = true;
+                } else {
+                    // Make anchor midpoint of range
+                    // Account for reverse ranges
+                    if (range.start < range.end) {
+                        anchorIndex = range.start + Math.floor((range.end - range.start) / 2);
+                    } else {
+                        anchorIndex = range.end + Math.floor((range.start - range.end) / 2);
                     }
 
-                    // Compute relative position
-                    const movedPosition: AnnotationPosition = {
-                        ...params.item.positions[i][params.pose.stateIndex],
-                        relPosition: new Point(
-                            point.x - anchorPoint.x,
-                            point.y - anchorPoint.y
-                        ),
-                        custom: true
-                    };
+                    const base = params.pose.getStrandBase(range.strand, strandClone, anchorIndex);
+                    const anchorPoint = params.pose.getStrandBaseLoc(range.strand, strandClone, anchorIndex);
+                    if (!base || !anchorPoint) {
+                        // This base isn't in this pose. This should never happen as we should have verified already
+                        // that this strand is in this pose and the base is valid for that strand, but
+                        // don't crash and leave a trace if it happens for some reason
+                        log.warn('placeAnnotationInPose failed to get anchor');
+                        continue;
+                    }
 
-                    this.setAnnotationPositions(params.item, params.pose.stateIndex, i, movedPosition);
-                    this.persistentAnnotationDataUpdated.emit();
-                });
-            }
-            // We need to prematurely (ie, before we have a final position) add this to the display object graph
-            // so that we can read it's dimensions/position
-            params.pose.addAnnotationView(view);
-
-            let absolutePosition: Point | null = null;
-            let relPosition: Point | null = null;
-            let anchorIndex: number | null = null;
-            let customPosition = false;
-            let zoomLevel: number = params.pose.zoomLevel;
-            if (prevPosition?.custom && !params.ignoreCustom) {
-                relPosition = prevPosition.relPosition;
-                anchorIndex = prevPosition.anchorIndex;
-                const zoomScaling = 1
-                + ((prevPosition.zoomLevel - params.pose.zoomLevel) / (Pose2D.ZOOM_SPACINGS.length - 1));
-
-                const anchorPoint = params.pose.getStrandBaseLoc(params.item.ranges?.[i].strand, anchorIndex);
-                if (!anchorPoint) {
-                    // This base isn't in this pose
-                    continue;
-                }
-                absolutePosition = new Point(
-                    relPosition.x * zoomScaling + anchorPoint.x,
-                    relPosition.y * zoomScaling + anchorPoint.y
-                );
-                zoomLevel = prevPosition.zoomLevel;
-                customPosition = true;
-            } else {
-                // Make anchor midpoint of range
-                // Account for reverse ranges
-                if (range.start < range.end) {
-                    anchorIndex = range.start + Math.floor((range.end - range.start) / 2);
-                } else {
-                    anchorIndex = range.end + Math.floor((range.start - range.end) / 2);
-                }
-
-                const base = params.pose.getStrandBase(params.item.ranges?.[i].strand, anchorIndex);
-                const anchorPoint = params.pose.getStrandBaseLoc(params.item.ranges?.[i].strand, anchorIndex);
-                if (!base || !anchorPoint) {
-                    // This base isn't in this pose
-                    continue;
-                }
-
-                // Run a search to find best place to locate
-                // annotation within available space
-                relPosition = this.computeAnnotationPositionPoint(
-                    params.pose,
-                    params.item.ranges?.[i].strand,
-                    anchorIndex,
-                    anchorIndex,
-                    anchorPoint,
-                    base.display,
-                    view,
-                    0,
-                    undefined,
-                    undefined,
-                    undefined,
-                    params.baseLayerBounds
-                );
-
-                if (relPosition) {
-                    absolutePosition = new Point(
-                        relPosition.x + anchorPoint.x,
-                        relPosition.y + anchorPoint.y
+                    // Run a search to find best place to locate
+                    // annotation within available space
+                    relPosition = this.computeAnnotationPositionPoint(
+                        params.pose,
+                        range.strand,
+                        strandClone,
+                        anchorIndex,
+                        anchorIndex,
+                        anchorPoint,
+                        base.display,
+                        view,
+                        0,
+                        undefined,
+                        undefined,
+                        undefined,
+                        params.baseLayerBounds
                     );
+
+                    if (relPosition) {
+                        absolutePosition = new Point(
+                            relPosition.x + anchorPoint.x,
+                            relPosition.y + anchorPoint.y
+                        );
+                    }
                 }
-            }
 
-            // Handle position
-            if (relPosition && absolutePosition) {
-                // Set position
-                view.display.position.copyFrom(absolutePosition);
+                // Handle position
+                if (relPosition && absolutePosition) {
+                    // Set position
+                    view.display.position.copyFrom(absolutePosition);
 
-                // Cache position
-                this.setAnnotationPositions(params.item, params.pose.stateIndex, i, {
-                    anchorIndex,
-                    relPosition,
-                    zoomLevel,
-                    custom: customPosition
-                });
-            } else {
-                // We should ideally always receive a position
-                //
-                // In cases we don't, remove annotation card from view.
-                //
-                // TODO: In the future, we should revisit computeAnnotationPositionPoint to always
-                // return *something*, as just not showing the annotation is behavior that does not
-                // seem user friendly.
-                params.pose.removeAnnotationView(view);
+                    // Cache position
+                    this.setAnnotationPositions(params.item, params.pose.stateIndex, rangeIndex, strandClone, {
+                        anchorIndex,
+                        relPosition,
+                        zoomLevel,
+                        custom: customPosition
+                    });
+                } else {
+                    // We should ideally always receive a position
+                    //
+                    // In cases we don't, remove annotation card from view.
+                    //
+                    // TODO: In the future, we should revisit computeAnnotationPositionPoint to always
+                    // return *something*, as just not showing the annotation is behavior that does not
+                    // seem user friendly.
+                    params.pose.removeAnnotationView(view);
+                }
             }
         }
     }
@@ -1295,6 +1368,7 @@ export default class AnnotationManager {
     private computeAnnotationPositionPoint(
         pose: Pose2D,
         strand: string | undefined,
+        strandClone: number,
         originalAnchorIndex: number,
         currentAnchorIndex: number,
         anchorPoint: Point,
@@ -1453,6 +1527,7 @@ export default class AnnotationManager {
                 const point = this.computeAnnotationPositionPoint(
                     pose,
                     strand,
+                    strandClone,
                     originalAnchorIndex,
                     currentAnchorIndex,
                     anchorPoint,
@@ -1478,7 +1553,7 @@ export default class AnnotationManager {
             // We move in the direction with the most bases
             const increaseAnchor = strandLength - originalAnchorIndex > originalAnchorIndex;
             const newAnchorIndex = increaseAnchor ? currentAnchorIndex + 1 : currentAnchorIndex - 1;
-            const newAnchorPoint = pose.getStrandBaseLoc(strand, newAnchorIndex);
+            const newAnchorPoint = pose.getStrandBaseLoc(strand, strandClone, newAnchorIndex);
             if (!newAnchorPoint) {
                 // Shouldn't happen as we should have bailed already if the anchor doesn't exist, but
                 // don't crash and leave a trace if it happens for some reason
@@ -1489,6 +1564,7 @@ export default class AnnotationManager {
             const point = this.computeAnnotationPositionPoint(
                 pose,
                 strand,
+                strandClone,
                 originalAnchorIndex,
                 newAnchorIndex,
                 newAnchorPoint,
@@ -1875,29 +1951,38 @@ export default class AnnotationManager {
             for (let i = 0; i < cardArray.length; i++) {
                 // Get annotation object
                 const card = cardArray[i];
-                // Annotation might have multiple positions for each range associated with it
-                for (let j = 0; j < card.positions.length; j++) {
+                // Annotation might have multiple positions for each range associated with it,
+                // each state, and for duplicate strands
+                const possiblyConflictingPositions = card.positions.getWhere((key) => (
+                    // If this is a position for another state, it's irrelevant as that won't conflict
+                    key.state === pose.stateIndex
                     // We had to add the annotation to the pose already even though we don't have a final
                     // position (so that we could get its size), so make sure we don't take it into account
-                    if (
+                    && !(
                         card.id === annotationView.annotationID
-                        && j === annotationView.positionIndex
-                    ) {
-                        continue;
-                    }
+                        && key.rangeIndex === annotationView.rangeIndex
+                        && key.strandClone === annotationView.strandClone
+                    )
+                ));
+                for (const [cardPositionKey, cardPosition] of possiblyConflictingPositions) {
                     // When computing positions, we were not able to find a position for this range,
                     // and instead decided that we should just not show this annotation rather than
                     // crashing. See placeAnnotationInPose
+                    // TODO: Why did I add this when this should be verified in the if statement above?
+                    // I'm not going to remove this right now though since I don't think I would have added it if
+                    // a crash wasn't encountered here...
                     if (!position) continue;
 
-                    // Card is not in this state
-                    if (!card.positions[j][pose.stateIndex]) continue;
-
-                    const display = pose.getAnnotationViewDims(card.id, j);
-                    const cardRelPosition = card.positions[j][pose.stateIndex].relPosition;
+                    const display = pose.getAnnotationViewDims(
+                        card.id,
+                        cardPositionKey.rangeIndex,
+                        cardPositionKey.strandClone
+                    );
+                    const cardRelPosition = cardPosition.relPosition;
                     const cardAnchorPoint = pose.getStrandBaseLoc(
-                        card.ranges?.[j].strand,
-                        card.positions[j][pose.stateIndex].anchorIndex
+                        card.ranges?.[cardPositionKey.rangeIndex].strand,
+                        cardPositionKey.strandClone,
+                        cardPosition.anchorIndex
                     );
                     // Card is tied to a strand not in this state
                     if (!cardAnchorPoint) continue;
