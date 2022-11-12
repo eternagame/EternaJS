@@ -3,6 +3,7 @@ import {
     GameObject, LateUpdatable, Arrays
 } from 'flashbang';
 import pchip from 'pchip';
+import {RNABase} from 'eterna/EPars';
 import Pose2D from './Pose2D';
 
 /** BaseRope: A class for drawing a smooth 'rope' through bases. * */
@@ -38,17 +39,19 @@ export default class BaseRope extends GameObject implements LateUpdatable {
     public redraw(forceBaseXY: boolean): void {
         if (!this._enabled) {
             // clear if not cleared.
-            // AMW: Protected in Pixi v5. Clear unconditionally for now.
-            // if (this._graphics.currentPath !== null)
-            this._graphics.clear();
+            if (this._graphics.geometry.points.length > 0) this._graphics.clear();
             return;
         }
 
-        const idx: number[] = [];
-        const basePosX: number[] = [];
-        const basePosY: number[] = [];
         const fullSeq = this._pose.fullSequence;
+        const ropes: [basePosX: number[], basePosY: number[]][] = [[[], []]];
+
         for (let i = 0; i < fullSeq.length; i++) {
+            if (fullSeq.nt(i) === RNABase.CUT) {
+                // Split the rope between strands
+                ropes.push([[], []]);
+                continue;
+            }
             let center: Point = this._pose.getBaseLoc(i);
             if (!forceBaseXY && !this._pose.getBase(i).needRedraw) {
                 // this logic took a long time to figure out -- the event
@@ -56,23 +59,23 @@ export default class BaseRope extends GameObject implements LateUpdatable {
                 center = this._pose.getBase(i).getLastDrawnPos();
             }
             if (center) {
-                idx.push(i);
-                basePosX.push(center.x);
-                basePosY.push(center.y);
+                ropes[ropes.length - 1][0].push(center.x);
+                ropes[ropes.length - 1][1].push(center.y);
             }
         }
 
-        if (Arrays.shallowEqual(basePosX, this._lastBasePosX)
-            && Arrays.shallowEqual(basePosY, this._lastBasePosY)
-            /* && this._graphics.currentPath !== null */) {
+        if (Arrays.deepEqual(ropes, this._lastRopes) && this._graphics.geometry.points.length > 0) {
             // base positions haven't changed, and baseRope has not been cleared,
             // so no need to update -- just return.
             return;
         }
 
-        this._lastBasePosX = basePosX;
-        this._lastBasePosY = basePosY;
-        this.drawBaseRope(basePosX, basePosY);
+        this._lastRopes = ropes;
+
+        this._graphics.clear();
+        for (const rope of ropes) {
+            this.drawBaseRope(rope[0], rope[1]);
+        }
     }
 
     /**
@@ -87,18 +90,18 @@ export default class BaseRope extends GameObject implements LateUpdatable {
         //   interpolate in between...
         const interpBasePosXY = this.updateInterpBasePos(basePosX, basePosY);
 
-        this._graphics.clear();
         const OUTER_ROPE_THICKNESS: number = 0.30 * Pose2D.ZOOM_SPACINGS[this._pose.zoomLevel];
         this._graphics.lineStyle(OUTER_ROPE_THICKNESS, 0x777777, 0.2);
-        this.drawBaseRopeLine(interpBasePosXY);
+        this.drawBaseRopeLine(interpBasePosXY, basePosX[0], basePosY[0]);
 
         const INNER_ROPE_THICKNESS: number = 0.25 * Pose2D.ZOOM_SPACINGS[this._pose.zoomLevel];
         this._graphics.lineStyle(INNER_ROPE_THICKNESS, 0xE8E8E8, 0.2);
-        this.drawBaseRopeLine(interpBasePosXY);
+        this.drawBaseRopeLine(interpBasePosXY, basePosX[0], basePosY[0]);
     }
 
-    private drawBaseRopeLine(interpBasePosXY: Array<[number, number]>): void {
-        this._graphics.moveTo(this._lastBasePosX[0], this._lastBasePosY[0]);
+    private drawBaseRopeLine(interpBasePosXY: [number, number][], startX: number, startY: number): void {
+        this._graphics.moveTo(startX, startY);
+
         for (const pt of interpBasePosXY) {
             this._graphics.lineTo(pt[0], pt[1]);
         }
@@ -147,6 +150,5 @@ export default class BaseRope extends GameObject implements LateUpdatable {
     private readonly _graphics: Graphics;
     private _enabled: boolean;
 
-    private _lastBasePosX: Array<number> = [];
-    private _lastBasePosY: Array<number> = [];
+    private _lastRopes: [basePosX: number[], basePosY: number[]][];
 }
