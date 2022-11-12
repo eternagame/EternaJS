@@ -7,6 +7,7 @@ import Fonts from 'eterna/util/Fonts';
 import WindowDialog from './WindowDialog';
 import TextInputGrid from './TextInputGrid';
 import GameButton from './GameButton';
+import TextInputObject from './TextInputObject';
 
 export default class PasteSequenceDialog extends WindowDialog<void> {
     public readonly applyClicked: Signal<Sequence> = new Signal();
@@ -31,17 +32,15 @@ export default class PasteSequenceDialog extends WindowDialog<void> {
         this._content.addChild(this._errorText);
 
         const inputGrid = new TextInputGrid(undefined, this._window.contentHtmlWrapper);
-        const sequenceField = inputGrid.addField('Sequence', 200);
+        this._sequenceField = inputGrid.addField('Sequence', 200);
         this.addObject(inputGrid, this._content);
-
-        sequenceField.setFocus(true);
 
         const applyButton = new GameButton().label('Apply', 14);
         this.addObject(applyButton, this._content);
 
-        applyButton.clicked.connect(() => this.onApply(sequenceField.text));
-        sequenceField.keyPressed.connect((key) => {
-            if (key === 'Enter') this.onApply(sequenceField.text);
+        applyButton.clicked.connect(() => this.onApply(this._sequenceField.text));
+        this._sequenceField.keyPressed.connect((key) => {
+            if (key === 'Enter') this.onApply(this._sequenceField.text);
         });
 
         this._content.layout();
@@ -76,6 +75,8 @@ export default class PasteSequenceDialog extends WindowDialog<void> {
             }
         }
 
+        this._sequenceField.setFocus(true);
+
         if (this._errorText.visible !== wasVisible || prevText !== this._errorText.text) {
             this._content.layout(true);
             this._window.layout();
@@ -84,6 +85,7 @@ export default class PasteSequenceDialog extends WindowDialog<void> {
 
     private _content: VLayoutContainer;
     private _errorText: Text;
+    private _sequenceField: TextInputObject;
 
     private readonly _customNumbering: (number | null)[] | undefined;
 }

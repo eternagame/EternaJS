@@ -1,6 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="20.398" height="23.483" viewBox="0 0 20.398 23.483">
-  <g id="Copy" transform="translate(-1753 -606.982)">
-    <path id="Path_1785" data-name="Path 1785" d="M1762,610.444V608.1h15.479V626.03h-2.465" transform="translate(-4.832 -0.364)" fill="none" stroke="#bedce8" stroke-width="1.5"/>
-    <rect id="Rectangle_393" data-name="Rectangle 393" width="15.84" height="19.175" transform="translate(1753 611.29)" fill="#bedce8"/>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="21.57" height="20.01" viewBox="0 0 21.57 20.01">
+  <defs>
+    <clipPath id="clip-path">
+      <rect id="Rectangle_1754" data-name="Rectangle 1754" width="21.57" height="20.01" transform="translate(0 0)" fill="none"/>
+    </clipPath>
+  </defs>
+  <g id="Group_3920" data-name="Group 3920" transform="translate(21.57 20.01) rotate(180)">
+    <g id="Group_3919" data-name="Group 3919" clip-path="url(#clip-path)">
+      <path id="Path_6928" data-name="Path 6928" d="M19.786,0H5.284A1.787,1.787,0,0,0,3.5,1.785V3.5h1V1.785A.785.785,0,0,1,5.284,1h14.5a.785.785,0,0,1,.784.785V14.726a.785.785,0,0,1-.784.784H18.07v1h1.716a1.787,1.787,0,0,0,1.784-1.784V1.785A1.787,1.787,0,0,0,19.786,0" fill="#bedce8"/>
+      <path id="Path_6929" data-name="Path 6929" d="M15.786,4.5H1.284A1.286,1.286,0,0,0,0,5.785V18.726A1.285,1.285,0,0,0,1.284,20.01h14.5a1.285,1.285,0,0,0,1.284-1.284V5.785A1.286,1.286,0,0,0,15.786,4.5" fill="#bedce8"/>
+    </g>
   </g>
 </svg>

@@ -175,6 +175,8 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
         super.updateElementProperties();
         if (this._fakeTextInput != null) {
             this._obj.style.visibility = 'hidden';
+        } else {
+            this._obj.style.visibility = 'visible';
         }
     }
 
@@ -303,6 +305,9 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
     }
 
     public setFocus(select: boolean = false): void {
+        // If the element is invisible before focusing, it won't focus
+        this._obj.style.visibility = 'visible';
+
         if (this._characterLimit) {
             let input: HTMLInputElement | HTMLTextAreaElement | undefined;
             for (const child of this._obj.children) {
@@ -782,7 +787,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
     private _borderColor: number | null;
     private _borderRadius: number;
     private _characterLimit: number | null;
-    private _hasFocus: boolean;
+    private _hasFocus: boolean = false;
     private _fakeTextInput: Sprite | null;
     private _showFakeTextInputWhenNotFocused: boolean = true;
     private _progressArc: SVGCircleElement;

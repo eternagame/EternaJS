@@ -169,12 +169,14 @@ export default class Toolbar extends ContainerObject {
         this._expandCollapseButton.display.y = yPos;
 
         this._helpText = new Text(
-            'Drag an icon to the right or left above to replace the existing tool, or tap an icon to use it.',
+            'Drag an icon to the right or left of the nucleotide pallette above\n'
+            + 'to insert or replace an existing tool in the hotbar, or tap an icon to use it.',
             {
                 fontSize: 14,
                 fontFamily: Fonts.STDFONT,
                 fill: 0xabc9d8,
-                fontWeight: FontWeight.MEDIUM
+                fontWeight: FontWeight.MEDIUM,
+                align: 'center'
             }
         );
         this._content.addChild(this._helpText);
@@ -741,34 +743,30 @@ export default class Toolbar extends ContainerObject {
                             // go into the other bay in it's place, as it's a swap)
                             const leftUpdate = this._leftBay.handleButtonDrop(e, button.id);
                             if (leftUpdate) {
-                                this._rightBay.deactivateTool(button.id, leftUpdate.removedId);
+                                const rightSubUpdate = this._rightBay.deactivateTool(button.id, leftUpdate.removedId);
                                 if (this._type === ToolbarType.PUZZLEMAKER) {
                                     Eterna.settings.puzzlemakerHotbarTools.value = {
                                         left: leftUpdate.activated,
-                                        right: Eterna.settings.puzzleSolvingHotbarTools.value?.right
-                                            ?? this.getInitialTools().right
+                                        right: rightSubUpdate.activated
                                     };
                                 } else {
                                     Eterna.settings.puzzleSolvingHotbarTools.value = {
                                         left: leftUpdate.activated,
-                                        right: Eterna.settings.puzzleSolvingHotbarTools.value?.right
-                                            ?? this.getInitialTools().right
+                                        right: rightSubUpdate.activated
                                     };
                                 }
                             }
                             const rightUpdate = this._rightBay.handleButtonDrop(e, button.id);
                             if (rightUpdate) {
-                                this._leftBay.deactivateTool(button.id, rightUpdate.removedId);
+                                const leftSubUpdate = this._leftBay.deactivateTool(button.id, rightUpdate.removedId);
                                 if (this._type === ToolbarType.PUZZLEMAKER) {
                                     Eterna.settings.puzzlemakerHotbarTools.value = {
-                                        left: Eterna.settings.puzzleSolvingHotbarTools.value?.left
-                                            ?? this.getInitialTools().left,
+                                        left: leftSubUpdate.activated,
                                         right: rightUpdate.activated
                                     };
                                 } else {
                                     Eterna.settings.puzzleSolvingHotbarTools.value = {
-                                        left: Eterna.settings.puzzleSolvingHotbarTools.value?.left
-                                            ?? this.getInitialTools().left,
+                                        left: leftSubUpdate.activated,
                                         right: rightUpdate.activated
                                     };
                                 }
