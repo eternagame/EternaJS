@@ -519,11 +519,16 @@ export default class FeedbackViewMode extends GameMode {
             this._poseFields[0].pose.setMolecularBinding(undefined, undefined, 0);
         }
 
+        this._poses[0].clearAnnotationCanvas();
+        this._poses[0].stateIndex = this._curTargetIndex;
+
         if (this._foldMode === PoseFoldMode.ESTIMATE) {
             this.setToEstimateMode();
         } else {
             this.setToTargetMode();
         }
+
+        this._poses[0].redrawAnnotations();
 
         if (this._isExpColor) {
             this.showExperimentalColors();

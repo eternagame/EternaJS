@@ -1752,9 +1752,8 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
-        for (const pose of this._poses) {
-            pose.clearAnnotationCanvas();
-        }
+        this._poses[0].clearAnnotationCanvas();
+        this._poses[0].stateIndex = this._curTargetIndex;
 
         if (this._poseState === PoseState.NATIVE) {
             this.setToNativeMode();
@@ -1763,9 +1762,7 @@ export default class PoseEditMode extends GameMode {
             this.setToTargetMode();
         }
 
-        for (const pose of this._poses) {
-            pose.redrawAnnotations();
-        }
+        this._poses[0].redrawAnnotations();
     }
 
     private getForcedHighlights(targetIndex: number): number[] {
