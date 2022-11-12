@@ -77,7 +77,7 @@ describe('set Puzzle#objective', () => {
                 {sequence: 'UUUU', malus: 0, name: '', label: '1test1'},
             ]}
         ];
-        puz.objective = tcs;
+        puz.objective = JSON.parse(JSON.stringify(tcs));
         for (let i=0; i < tcs.length; i++) {
             if (tcs[i].type === 'oligo') {
                 expect(puz.targetConditions[i]?.oligo_label).toBe(tcs[i].oligo_label)

@@ -349,7 +349,8 @@ export default class Puzzle {
                         concentration = 1.0;
                     }
                     oligos[jj]['malus'] = -Constants.BOLTZMANN * (Constants.KELVIN_0C + 37) * Math.log(concentration);
-                    const label = this._targetConditions[ii]['oligo_label'];
+                    const label = oligos[jj]['label'];
+                    console.log(ii, jj, label);
                     if (label) {
                         // To support parsing logic in AnnotationDialog
                         if (!label.match(/^\w+$/)) {
