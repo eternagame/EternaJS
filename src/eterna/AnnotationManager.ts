@@ -581,19 +581,19 @@ export default class AnnotationManager {
      *
      * @param annotation total data of annotation of interest
      * @param state the switch state which the position is valid for
-     * @param positionIndex index of relevant annotation view associated with annotation
+     * @param rangeIndex index of relevant annotation view associated with annotation
      * @param position new position
      */
-    public setAnnotationPositions(
+    public setAnnotationPosition(
         annotation: AnnotationData,
         state: number,
-        positionIndex: number,
+        rangeIndex: number,
         strandClone: number,
         position: AnnotationPosition
     ) {
         const [parentNode, index] = this.getRelevantParentNode(annotation);
         if (parentNode && index != null) {
-            parentNode[index].positions.set({state, strandClone, rangeIndex: positionIndex}, position);
+            parentNode[index].positions.set({state, strandClone, rangeIndex}, position);
         }
     }
 
@@ -1053,7 +1053,7 @@ export default class AnnotationManager {
                             custom: false
                         };
 
-                        this.setAnnotationPositions(
+                        this.setAnnotationPosition(
                             item,
                             pose.stateIndex,
                             rangeIndex,
@@ -1129,7 +1129,7 @@ export default class AnnotationManager {
                             custom: true
                         };
 
-                        this.setAnnotationPositions(
+                        this.setAnnotationPosition(
                             params.item,
                             params.pose.stateIndex,
                             positionKey.rangeIndex,
@@ -1243,7 +1243,7 @@ export default class AnnotationManager {
                             custom: true
                         };
 
-                        this.setAnnotationPositions(
+                        this.setAnnotationPosition(
                             params.item,
                             params.pose.stateIndex,
                             rangeIndex,
@@ -1332,7 +1332,7 @@ export default class AnnotationManager {
                     view.display.position.copyFrom(absolutePosition);
 
                     // Cache position
-                    this.setAnnotationPositions(params.item, params.pose.stateIndex, rangeIndex, strandClone, {
+                    this.setAnnotationPosition(params.item, params.pose.stateIndex, rangeIndex, strandClone, {
                         anchorIndex,
                         relPosition,
                         zoomLevel,
