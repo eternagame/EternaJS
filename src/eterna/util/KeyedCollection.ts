@@ -56,12 +56,12 @@ export default class KeyedCollection<Key extends KeyObject, Value> {
     }
 
     private getStringKey(key: Key): string {
-        return JSON.stringify(
+        return JSON.stringify(Object.fromEntries(
             Object.entries(key)
                 // We sort to ensure that no matter how the key is constructed when setting or
                 // getting, it always gets the value with the same properties
                 .sort(([aKey], [bKey]) => (aKey < bKey ? -1 : 1))
-        );
+        ));
     }
 
     private _data: Map<string, Value> = new Map();
