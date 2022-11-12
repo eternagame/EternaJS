@@ -47,7 +47,7 @@ export interface TargetConditions {
     oligo_concentration?: string | number; // the strings have to be convertible
     oligo_bind?: boolean;
     oligo_sequence?: string;
-    oligo_label?: string; // really, 'T' | 'R'
+    oligo_label?: string;
     oligo_name?: string;
     concentration?: number;
     oligos?: OligoDef[];
@@ -327,6 +327,14 @@ export default class UndoBlock {
             return undefined;
         }
         return Object.prototype.hasOwnProperty.call(tc, 'oligo_name') ? tc['oligo_name'] : undefined;
+    }
+
+    public get oligoLabel(): string | undefined {
+        const tc: TargetConditions | undefined = this.targetConditions;
+        if (tc === undefined) {
+            return undefined;
+        }
+        return Object.prototype.hasOwnProperty.call(tc, 'oligo_label') ? tc['oligo_label'] : undefined;
     }
 
     public get oligoOrder(): number[] | undefined {

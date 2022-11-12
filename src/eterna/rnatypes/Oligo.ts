@@ -1,6 +1,7 @@
 export interface Oligo {
     malus: number;
     name?: string;
+    label?: string;
     sequence: number[];
 }
 

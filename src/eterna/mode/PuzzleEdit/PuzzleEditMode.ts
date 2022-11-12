@@ -131,7 +131,9 @@ export default class PuzzleEditMode extends GameMode {
 
         const toolbarType = this._embedded ? ToolbarType.PUZZLEMAKER_EMBEDDED : ToolbarType.PUZZLEMAKER;
 
-        this._annotationManager = new AnnotationManager(toolbarType);
+        // We don't support oligos...
+        const oligoLengths = new Map();
+        this._annotationManager = new AnnotationManager(toolbarType, oligoLengths);
         this._annotationManager.persistentAnnotationDataUpdated.connect(() => this.saveData());
         this._annotationManager.annotationEditRequested.connect((annotation: AnnotationData) => {
             if (annotation.ranges) {
@@ -140,15 +142,14 @@ export default class PuzzleEditMode extends GameMode {
                     title: true,
                     sequenceLength: this._poses[0].fullSequenceLength,
                     customNumbering: this._poses[0].customNumbering,
+                    oligoLengths,
                     initialRanges: annotation.ranges,
                     initialLayers: this._annotationManager.allLayers,
                     activeCategory: this._annotationManager.activeCategory,
                     initialAnnotation: annotation
                 });
-                dialog.onUpdateRanges.connect((ranges: AnnotationRange[] | null) => {
-                    if (ranges) {
-                        this._poses.forEach((pose) => pose.setAnnotationRanges(ranges));
-                    }
+                dialog.onUpdateRanges.connect((ranges: AnnotationRange[]) => {
+                    this._poses.forEach((pose) => pose.setAnnotationRanges(ranges));
                 });
                 this._annotationManager.persistentAnnotationDataUpdated.connect(() => {
                     dialog.layers = this._annotationManager.allLayers;

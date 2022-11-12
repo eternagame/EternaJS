@@ -168,7 +168,7 @@ export default class PoseEditMode extends GameMode {
 
         const toolbarType = this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL ? ToolbarType.LAB : ToolbarType.PUZZLE;
 
-        this._annotationManager = new AnnotationManager(toolbarType);
+        this._annotationManager = new AnnotationManager(toolbarType, this._puzzle.oligoLengths);
         this._annotationManager.persistentAnnotationDataUpdated.connect(() => this.saveData());
         this._annotationManager.annotationEditRequested.connect((annotation: AnnotationData) => {
             if (annotation.ranges) {
@@ -176,16 +176,15 @@ export default class PoseEditMode extends GameMode {
                     edit: true,
                     title: true,
                     sequenceLength: this._poses[0].fullSequenceLength,
+                    oligoLengths: this._puzzle.oligoLengths,
                     customNumbering: this._poses[0].customNumbering,
                     initialRanges: annotation.ranges,
                     initialLayers: this._annotationManager.allLayers,
                     activeCategory: this._annotationManager.activeCategory,
                     initialAnnotation: annotation
                 });
-                dialog.onUpdateRanges.connect((ranges: AnnotationRange[] | null) => {
-                    if (ranges) {
-                        this._poses.forEach((pose) => pose.setAnnotationRanges(ranges));
-                    }
+                dialog.onUpdateRanges.connect((ranges: AnnotationRange[]) => {
+                    this._poses.forEach((pose) => pose.setAnnotationRanges(ranges));
                 });
                 this._annotationManager.persistentAnnotationDataUpdated.connect(() => {
                     dialog.layers = this._annotationManager.allLayers;
@@ -659,7 +658,8 @@ export default class PoseEditMode extends GameMode {
                     (odef) => ({
                         sequence: Sequence.fromSequenceString(odef.sequence).baseArray,
                         malus: odef.malus,
-                        name: odef.name
+                        name: odef.name,
+                        label: odef.label
                     })
                 );
             }
@@ -829,7 +829,12 @@ export default class PoseEditMode extends GameMode {
                 this._poses[ii].barcodes = this._puzzle.barcodeIndices;
             }
             this._poses[ii].setOligos(this._targetOligos[ii], this._targetOligosOrder[ii]);
-            this._poses[ii].setOligo(this._targetOligo[ii], this._oligoMode[ii], this._oligoName[ii]);
+            this._poses[ii].setOligo(
+                this._targetOligo[ii],
+                this._oligoMode[ii],
+                this._oligoName[ii],
+                this._oligoLabel[ii]
+            );
             this._poses[ii].secstruct = this._targetPairs[ii];
             this._poses[ii].targetPairs = this._targetPairs[ii];
             if (this._targetConditions[ii] !== undefined) {
@@ -1746,11 +1751,19 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
+        for (const pose of this._poses) {
+            pose.clearAnnotationCanvas();
+        }
+
         if (this._poseState === PoseState.NATIVE) {
             this.setToNativeMode();
         } else {
             this.setPoseTarget(0, this._curTargetIndex);
             this.setToTargetMode();
+        }
+
+        for (const pose of this._poses) {
+            pose.redrawAnnotations();
         }
     }
 
@@ -1799,7 +1812,8 @@ export default class PoseEditMode extends GameMode {
                     this._poses[poseIndex].setOligos(tc['oligos'].map((odef) => ({
                         sequence: Sequence.fromSequenceString(odef.sequence).baseArray,
                         malus: odef.malus,
-                        name: odef.name
+                        name: odef.name,
+                        label: odef.label
                     })));
                 }
             } else {
@@ -1813,7 +1827,8 @@ export default class PoseEditMode extends GameMode {
                 this._poses[poseIndex].setOligo(
                     Sequence.fromSequenceString(tc['oligo_sequence'] as string).baseArray,
                     foldMode,
-                    tc['oligo_name']
+                    tc['oligo_name'],
+                    tc['oligo_label']
                 );
                 this._poses[poseIndex].oligoMalus = tc['malus'] as number;
             } else {
@@ -1909,7 +1924,12 @@ export default class PoseEditMode extends GameMode {
         if (this._isPipMode) {
             for (let ii = 0; ii < this._poses.length; ii++) {
                 this._poses[ii].setOligos(this._targetOligos[ii], this._targetOligosOrder[ii]);
-                this._poses[ii].setOligo(this._targetOligo[ii], this._oligoMode[ii], this._oligoName[ii]);
+                this._poses[ii].setOligo(
+                    this._targetOligo[ii],
+                    this._oligoMode[ii],
+                    this._oligoName[ii],
+                    this._oligoLabel[ii]
+                );
                 this._poses[ii].secstruct = this._targetPairs[ii];
                 if (this._targetConditions != null && this._targetConditions[ii] !== undefined) {
                     const tc = this._targetConditions[ii] as TargetConditions;
@@ -1923,7 +1943,8 @@ export default class PoseEditMode extends GameMode {
             this._poses[0].setOligo(
                 this._targetOligo[this._curTargetIndex],
                 this._oligoMode[this._curTargetIndex],
-                this._oligoName[this._curTargetIndex]
+                this._oligoName[this._curTargetIndex],
+                this._oligoLabel[this._curTargetIndex]
             );
             this._poses[0].secstruct = this._targetPairs[this._curTargetIndex];
             if (this._targetConditions != null && this._targetConditions[this._curTargetIndex] !== undefined) {
@@ -2742,9 +2763,12 @@ export default class PoseEditMode extends GameMode {
                     this._poses[0].setOligos(this.getCurrentUndoBlock().targetOligos,
                         this.getCurrentUndoBlock().oligoOrder,
                         this.getCurrentUndoBlock().oligosPaired);
-                    this._poses[0].setOligo(this.getCurrentUndoBlock().targetOligo,
+                    this._poses[0].setOligo(
+                        this.getCurrentUndoBlock().targetOligo,
                         this.getCurrentUndoBlock().oligoMode,
-                        this.getCurrentUndoBlock().oligoName);
+                        this.getCurrentUndoBlock().oligoName,
+                        this.getCurrentUndoBlock().oligoLabel
+                    );
                     this._poses[0].secstruct = this.getCurrentUndoBlock().getPairs(37, pseudoknots);
                     this._poses[0].structConstraints = (
                         this._targetConditions?.[this._curTargetIndex]?.['structure_constraints']
@@ -2754,9 +2778,12 @@ export default class PoseEditMode extends GameMode {
                 this._poses[ii].setOligos(this.getCurrentUndoBlock(ii).targetOligos,
                     this.getCurrentUndoBlock(ii).oligoOrder,
                     this.getCurrentUndoBlock(ii).oligosPaired);
-                this._poses[ii].setOligo(this.getCurrentUndoBlock(ii).targetOligo,
+                this._poses[ii].setOligo(
+                    this.getCurrentUndoBlock(ii).targetOligo,
                     this.getCurrentUndoBlock(ii).oligoMode,
-                    this.getCurrentUndoBlock(ii).oligoName);
+                    this.getCurrentUndoBlock(ii).oligoName,
+                    this.getCurrentUndoBlock(ii).oligoLabel
+                );
                 this._poses[ii].secstruct = this.getCurrentUndoBlock(ii).getPairs(37, pseudoknots);
                 this._poses[ii].structConstraints = (
                     this._targetConditions?.[ii]?.['structure_constraints']
@@ -2768,9 +2795,12 @@ export default class PoseEditMode extends GameMode {
                     this._poses[0].setOligos(this.getCurrentUndoBlock().targetOligos,
                         this.getCurrentUndoBlock().targetOligoOrder,
                         this.getCurrentUndoBlock().oligosPaired);
-                    this._poses[0].setOligo(this.getCurrentUndoBlock().targetOligo,
+                    this._poses[0].setOligo(
+                        this.getCurrentUndoBlock().targetOligo,
                         this.getCurrentUndoBlock().oligoMode,
-                        this.getCurrentUndoBlock().oligoName);
+                        this.getCurrentUndoBlock().oligoName,
+                        this.getCurrentUndoBlock().oligoLabel
+                    );
                     this._poses[0].secstruct = this.getCurrentUndoBlock().targetPairs;
                     this._poses[0].structConstraints = (
                         this._targetConditions?.[this._curTargetIndex]?.['structure_constraints']
@@ -2790,7 +2820,12 @@ export default class PoseEditMode extends GameMode {
                 this._oligoName[ii] = this.getCurrentUndoBlock(ii).oligoName;
                 this._targetPairs[ii] = this.getCurrentUndoBlock(ii).targetPairs;
                 this._poses[ii].setOligos(this._targetOligos[ii], this._targetOligosOrder[ii]);
-                this._poses[ii].setOligo(this._targetOligo[ii], this._oligoMode[ii], this._oligoName[ii]);
+                this._poses[ii].setOligo(
+                    this._targetOligo[ii],
+                    this._oligoMode[ii],
+                    this._oligoName[ii],
+                    this._oligoLabel[ii]
+                );
                 this._poses[ii].secstruct = this._targetPairs[ii];
                 this._poses[ii].structConstraints = (
                     this._targetConditions?.[ii]?.['structure_constraints']
@@ -3598,6 +3633,7 @@ export default class PoseEditMode extends GameMode {
     private _targetOligo: (RNABase[] | undefined)[] = [];
     private _oligoMode: (number | undefined)[] = [];
     private _oligoName: (string | undefined)[] = [];
+    private _oligoLabel: (string | undefined)[] = [];
     private _targetOligos: (Oligo[] | undefined)[] = [];
     private _targetOligosOrder: (number[] | undefined)[] = [];
 

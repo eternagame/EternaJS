@@ -233,6 +233,49 @@ export default class Puzzle {
         this._secstructs = [];
         let concentration: number;
 
+        const someOligoHasLabel = this._targetConditions.some(
+            (tc) => !!tc.oligo_label || tc.oligos?.some((oligo) => !!oligo.label)
+        );
+        const someOligoHasNoLabel = this._targetConditions.some(
+            (tc) => (tc.oligo_sequence && !tc.oligo_label) || tc.oligos?.some((oligo) => !oligo.label)
+        );
+        if (someOligoHasLabel && someOligoHasNoLabel) {
+            // While we will have a fallback in the case of no oligos having labels for backwards compatibility,
+            // prevent the situation where there is a mix of provided labels and "automatic" labels, as there is a high
+            // likelihood that the behavior won't do what is desired.
+            throw new Error('Some oligos are missing labels. Please contact the puzzle author or a developer.');
+        }
+
+        // When auto-assigning oligo labels, if the same sequence is encountered multiple times, it should
+        // use the same label. While this may not strictly be the desired effect, it seems like the most likely
+        // to be intended behavior (this is a fallback, ideally oligos are always given labels)
+        const oligoLabelMap = new Map<string, string>();
+        // Create new labels starting with the letter A going to Z, then AA to AZ, BA to BZ, etc.
+        // (like excel column names)
+        let nextOligoLabel = 1;
+        const getOligoLabel = (seq: string) => {
+            const currLabel = oligoLabelMap.get(seq);
+            if (currLabel) return currLabel;
+
+            // https://stackoverflow.com/a/182924/5557208
+            let label = '';
+            let n = nextOligoLabel;
+            // Need >= 1 instead of 0 otherwise when n is < 26, we wind up with a decimal that never reaches 0.
+            while (n >= 1) {
+                const remainder = (n - 1) % 26;
+                label = String.fromCharCode('A'.charCodeAt(0) + remainder) + label;
+                n = (n - remainder) / 26;
+            }
+
+            nextOligoLabel++;
+            oligoLabelMap.set(seq, label);
+
+            return label;
+        };
+
+        // Strictly speaking this could be a getter, but doesn't hurt to cache it as the data never changes
+        this._oligoLengths = new Map();
+
         for (let ii = 0; ii < this._targetConditions.length; ii++) {
             if (this._targetConditions[ii]['secstruct'] == null) {
                 throw new Error("Can't find secstruct from a target condition");
@@ -266,7 +309,8 @@ export default class Puzzle {
                 this._targetConditions[ii]['fold_mode'] = OligoMode.DIMER.toString();
             }
 
-            if (Puzzle.isOligoType(tcType) && this._targetConditions[ii]['oligo_sequence'] != null) {
+            const oligoSeq = this._targetConditions[ii]['oligo_sequence'];
+            if (Puzzle.isOligoType(tcType) && oligoSeq != null) {
                 concentration = 0;
                 if (this._targetConditions[ii]['oligo_concentration'] != null) {
                     // AMW: consider altering the JSON online so it is always
@@ -278,6 +322,19 @@ export default class Puzzle {
                 this._targetConditions[ii]['malus'] = (
                     -Constants.BOLTZMANN * (Constants.KELVIN_0C + 37) * Math.log(concentration)
                 );
+
+                const label = this._targetConditions[ii]['oligo_label'];
+                if (label) {
+                    // To support parsing logic in AnnotationDialog
+                    if (!label.match(/^\w+$/)) {
+                        throw new Error('Oligo labels may only contain alphanumeric characters and underscores');
+                    }
+                    this._oligoLengths.set(label, oligoSeq.length);
+                } else {
+                    const newLabel = getOligoLabel(oligoSeq);
+                    this._targetConditions[ii]['oligo_label'] = newLabel;
+                    this._oligoLengths.set(newLabel, oligoSeq.length);
+                }
             }
 
             // Multi-strands
@@ -292,9 +349,25 @@ export default class Puzzle {
                         concentration = 1.0;
                     }
                     oligos[jj]['malus'] = -Constants.BOLTZMANN * (Constants.KELVIN_0C + 37) * Math.log(concentration);
+                    const label = this._targetConditions[ii]['oligo_label'];
+                    if (label) {
+                        // To support parsing logic in AnnotationDialog
+                        if (!label.match(/^\w+$/)) {
+                            throw new Error('Oligo labels may only contain alphanumeric characters and underscores');
+                        }
+                        this._oligoLengths.set(label, oligos[jj].sequence.length);
+                    } else {
+                        const newLabel = getOligoLabel(oligos[jj]['sequence']);
+                        oligos[jj]['label'] = newLabel;
+                        this._oligoLengths.set(newLabel, oligos[jj].sequence.length);
+                    }
                 }
             }
         }
+    }
+
+    public get oligoLengths(): Map<string, number> {
+        return this._oligoLengths;
     }
 
     public set beginningSequence(seq: string) {
@@ -595,6 +668,8 @@ export default class Puzzle {
     private _useBarcode: boolean = false;
     private _barcodeStart: number | null = null;
     private _targetConditions: TargetConditions[] | null = null;
+    // With no oligos, this is correctly empty. We'll set it when we set objectives
+    private _oligoLengths: Map<string, number> = new Map();
     private _constraints: Constraint<BaseConstraintStatus>[] | null = null;
     private _round: number = -1;
     private _numSubmissions: number = 3;

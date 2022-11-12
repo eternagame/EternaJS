@@ -172,7 +172,10 @@ export default class AnnotationView extends ContainerObject {
                 // HACK: The position may not be available if AnnotationManager#computeAnnotationPositionPoint
                 // couldn't find a location to put the annotation. Presumably this means it's not custom
                 // positioned.
-                if (this._item.positions[this._positionIndex]) {
+                if (
+                    this._item.positions[this._positionIndex]
+                    && this._item.positions[this._positionIndex][this._pose.stateIndex]
+                ) {
                     this._moveButton.display.visible = (
                         !this._item.positions[this._positionIndex][this._pose.stateIndex].custom
                     );
@@ -203,7 +206,10 @@ export default class AnnotationView extends ContainerObject {
                 // HACK: The position may not be available if AnnotationManager#computeAnnotationPositionPoint
                 // couldn't find a location to put the annotation. Presumably this means it's not custom
                 // positioned.
-                if (this._item.positions[this._positionIndex]) {
+                if (
+                    this._item.positions[this._positionIndex]
+                    && this._item.positions[this._positionIndex][this._pose.stateIndex]
+                ) {
                     this._releaseButton.display.visible = (
                         this._item.positions[this._positionIndex][this._pose.stateIndex].custom
                     );

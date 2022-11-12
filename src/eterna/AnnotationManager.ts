@@ -11,6 +11,7 @@ import AnnotationView from 'eterna/ui/AnnotationView';
 import {HTMLInputEvent} from 'eterna/ui/FileInputObject';
 import Pose2D from 'eterna/pose2D/Pose2D';
 import GameMode from 'eterna/mode/GameMode';
+import log from 'loglevel';
 
 // DEBUG SETTINGS FOR ANNOTATION PLACEMENT:
 // In order to visualize placement conflicts, you can toggle these variables
@@ -78,6 +79,8 @@ export enum AnnotationPlacement {
 export interface AnnotationRange {
     start: number;
     end: number;
+    // If present, the start and end indices are relative to the oligo strand with this label
+    strand?: string;
 }
 
 /**
@@ -196,8 +199,9 @@ export default class AnnotationManager {
     // Signals to save annotations
     public readonly persistentAnnotationDataUpdated = new UnitSignal();
 
-    constructor(toolbarType: ToolbarType) {
+    constructor(toolbarType: ToolbarType, oligoLengths: Map<string, number>) {
         this._toolbarType = toolbarType;
+        this._oligoLengths = oligoLengths;
     }
 
     /**
@@ -326,23 +330,72 @@ export default class AnnotationManager {
         }
     }
 
-    private validateAnnotationBases(length: number) {
-        const annotationValid = (annot: AnnotationData) => (
-            annot.ranges
-                ? annot.ranges.every((range) => range.start < length && range.end < length)
-                : true
-        );
+    private validateAnnotationBases(mainLength: number): boolean {
+        let rangesChanged = false;
 
-        // This will prevent crashes eg in puzzlemaker if you remove bases where the start/end base
-        // refers to a base that no longer exists (which would cause the layout code to try and get
-        // the position of an undefined base). Running this on every layout update is not great,
-        // and the UX of "just outright delete any annotation where some part of its selection
-        // no longer exists" is not great, so we should probably come up with a better option in
-        // the future when we have better state management. However, this will at least prevent
-        // crashes for now.
-        this._structureAnnotations = this._structureAnnotations.filter(annotationValid);
-        this._puzzleAnnotations = this._puzzleAnnotations.filter(annotationValid);
-        this._solutionAnnotations = this._solutionAnnotations.filter(annotationValid);
+        // This code handles removing annotations or parts of annotation ranges when their bases
+        // are no longer present, eg in puzzlemaker when removing bases (namely, if the range
+        // includes the last base and some base gets deleted). Not doing this fixup means 1)
+        // there could be a crash when the layout code tries to reference a base that doesn't exist
+        // and 2) base highlights could be drawn incorrectly as it tries to take into account these
+        // nonexistent bases. This is namely relevant for puzzlemaker where the strand length changes,
+        // but could also be potentially relevant if trying to copy some annotations to a smaller puzzle
+        // (though I haven't specifically tested that case and many additional things are liable to
+        // go sideways - I can't remember if we even handle custom numbering mappings or anything)
+        //
+        // Admittedly, it's a bit of a waste for this to run on every rerender for every pose as opposed
+        // to just once when things change, but this is the best we can do right now
+        const fixupAnnotation = (annot: AnnotationData): boolean => {
+            if (annot.ranges) {
+                const rangesToRemove = [];
+                for (let i = 0; i < annot.ranges.length; i++) {
+                    const range = annot.ranges[i];
+                    const strandLength = range.strand ? this._oligoLengths.get(range.strand) : mainLength;
+                    // Oligo doesn't exist in this puzzle
+                    if (strandLength === undefined) {
+                        rangesToRemove.push(i);
+                        continue;
+                    }
+                    // None of these bases exist any more (maybe multiple deletions or a one-base range)
+                    if (range.start >= strandLength && range.end >= strandLength) {
+                        rangesToRemove.push(i);
+                        continue;
+                    }
+                    // If the start or end base is now beyond the end of the strand, make it the end of the strand.
+                    // (Keep in mind the start base may be > the end base if drawn "backwards")
+                    if (range.start >= strandLength) {
+                        range.start = strandLength - 1;
+                        rangesChanged = true;
+                    }
+                    if (range.end >= strandLength) {
+                        range.end = strandLength - 1;
+                        rangesChanged = true;
+                    }
+                    if (annot.positions[i]) {
+                        for (const pos of annot.positions[i]) {
+                            // The base is positioned relative to a base that no longer exists. Remove the
+                            // custom positioning and let the layout algorithm figure out where it should go.
+                            if (pos && pos.custom && pos.anchorIndex >= strandLength) pos.custom = false;
+                        }
+                    }
+                }
+                if (rangesToRemove.length > 0) rangesChanged = true;
+                // We go in reverse to remove the later elements first, so that the indices don't
+                // change from under us.
+                for (const removeIdx of rangesToRemove.reverse()) {
+                    annot.ranges?.splice(removeIdx, 1);
+                    annot.positions?.splice(removeIdx, 1);
+                }
+                return annot.ranges.length > 0;
+            }
+            return true;
+        };
+
+        this._structureAnnotations = this._structureAnnotations.filter(fixupAnnotation);
+        this._puzzleAnnotations = this._puzzleAnnotations.filter(fixupAnnotation);
+        this._solutionAnnotations = this._solutionAnnotations.filter(fixupAnnotation);
+
+        return rangesChanged;
     }
 
     /**
@@ -571,16 +624,29 @@ export default class AnnotationManager {
      * Draws all annotation views in a given puzzle pose
      *
      * @param pose puzzle pose of interest
-     * @param state the switch state the pose corresponds to
      * @param reset whether to recalculate the positions of all annotations
      * @param ignoreCustom whether to override the custom
      */
-    public drawAnnotations(params: {
+    public drawAnnotations(origParams: {
         pose: Pose2D;
         reset: boolean;
         ignoreCustom: boolean;
     }): void {
-        this.validateAnnotationBases(params.pose.fullSequenceLength);
+        const rangesChanged = this.validateAnnotationBases(
+            origParams.pose.sequenceLength
+        );
+        if (rangesChanged) {
+            // Why setTimeout this call? We may be drawing in response to the signals we're firing,
+            // which raises an error. The error prevents against infinite loops, but in this case
+            // we can be confident that this would not start a cascading chain of updates, as
+            // nothing should cause the ranges to be changed again next time through.
+            // FIXME: There's probably a better way to handle the event propagation to work around this.
+            setTimeout(() => this.propagateDataUpdates());
+        }
+        const params = {
+            ...origParams,
+            reset: origParams.reset || rangesChanged
+        };
 
         // Get base layer bounds relative to Pose2D container
         // This is done here rather than in findBaseConflicts where it's actually used
@@ -971,7 +1037,6 @@ export default class AnnotationManager {
     /**
      * Attempts to place a single annotation item
      * @param pose puzzle pose of interest
-     * @param state the switch state the pose corresponds to
      * @param item display object data with positioning and annotation metadata
      * @param itemIndex index of item within parent array
      * @param reset whether to recalculate the positions of all annotations
@@ -1006,11 +1071,13 @@ export default class AnnotationManager {
                         if (!point) return;
 
                         const anchorIndex = params.item.positions[i][params.pose.stateIndex].anchorIndex;
-                        const base = params.pose.getBase(anchorIndex);
-                        const anchorPoint = new Point(
-                            base.x + params.pose.xOffset,
-                            base.y + params.pose.yOffset
-                        );
+                        const anchorPoint = params.pose.getStrandBaseLoc(params.item.ranges?.[i].strand, anchorIndex);
+                        if (!anchorPoint) {
+                            // Shouldn't happen as the view shouldn't be placed if the anchor doesn't exist, but
+                            // don't crash and leave a trace if it happens for some reason
+                            log.warn('view.onMovedAnnotation(1) failed to get anchor base location');
+                            return;
+                        }
 
                         // Compute relative position
                         const movedPosition: AnnotationPosition = {
@@ -1029,11 +1096,9 @@ export default class AnnotationManager {
                 params.pose.addAnnotationView(view);
 
                 const anchorIndex = position.anchorIndex;
-                const base = params.pose.getBase(anchorIndex);
-                const anchorPoint = new Point(
-                    base.x + params.pose.xOffset,
-                    base.y + params.pose.yOffset
-                );
+                const anchorPoint = params.pose.getStrandBaseLoc(params.item.ranges?.[i].strand, anchorIndex);
+                if (!anchorPoint) continue;
+
                 view.display.position.set(
                     position.relPosition.x + anchorPoint.x,
                     position.relPosition.y + anchorPoint.y
@@ -1087,11 +1152,14 @@ export default class AnnotationManager {
                     if (!point) return;
 
                     const anchorIndex = params.item.positions[i][params.pose.stateIndex].anchorIndex;
-                    const base = params.pose.getBase(anchorIndex);
-                    const anchorPoint = new Point(
-                        base.x + params.pose.xOffset,
-                        base.y + params.pose.yOffset
-                    );
+                    const anchorPoint = params.pose.getStrandBaseLoc(params.item.ranges?.[i].strand, anchorIndex);
+                    if (!anchorPoint) {
+                        // Shouldn't happen as the view shouldn't be placed if the anchor doesn't exist, but
+                        // don't crash and leave a trace if it happens for some reason
+                        log.warn('view.onMovedAnnotation(2) failed to get anchor base location');
+                        return;
+                    }
+
                     // Compute relative position
                     const movedPosition: AnnotationPosition = {
                         ...params.item.positions[i][params.pose.stateIndex],
@@ -1118,14 +1186,14 @@ export default class AnnotationManager {
             if (prevPosition?.custom && !params.ignoreCustom) {
                 relPosition = prevPosition.relPosition;
                 anchorIndex = prevPosition.anchorIndex;
-                const base = params.pose.getBase(anchorIndex);
                 const zoomScaling = 1
                 + ((prevPosition.zoomLevel - params.pose.zoomLevel) / (Pose2D.ZOOM_SPACINGS.length - 1));
 
-                const anchorPoint = new Point(
-                    base.x + params.pose.xOffset,
-                    base.y + params.pose.yOffset
-                );
+                const anchorPoint = params.pose.getStrandBaseLoc(params.item.ranges?.[i].strand, anchorIndex);
+                if (!anchorPoint) {
+                    // This base isn't in this pose
+                    continue;
+                }
                 absolutePosition = new Point(
                     relPosition.x * zoomScaling + anchorPoint.x,
                     relPosition.y * zoomScaling + anchorPoint.y
@@ -1141,18 +1209,18 @@ export default class AnnotationManager {
                     anchorIndex = range.end + Math.floor((range.start - range.end) / 2);
                 }
 
-                // Make sure anchor sits within sequence length
-                if (anchorIndex > params.pose.sequenceLength - 1) continue;
-                const base = params.pose.getBase(anchorIndex);
-                const anchorPoint = new Point(
-                    base.x + params.pose.xOffset,
-                    base.y + params.pose.yOffset
-                );
+                const base = params.pose.getStrandBase(params.item.ranges?.[i].strand, anchorIndex);
+                const anchorPoint = params.pose.getStrandBaseLoc(params.item.ranges?.[i].strand, anchorIndex);
+                if (!base || !anchorPoint) {
+                    // This base isn't in this pose
+                    continue;
+                }
 
                 // Run a search to find best place to locate
                 // annotation within available space
                 relPosition = this.computeAnnotationPositionPoint(
                     params.pose,
+                    params.item.ranges?.[i].strand,
                     anchorIndex,
                     anchorIndex,
                     anchorPoint,
@@ -1205,7 +1273,6 @@ export default class AnnotationManager {
      * Runs a recursive/iterative search on each place defined about the co-ordinate
      * system with the anchor point as the origin until it finds a place
      * @param pose puzzle pose of interest
-     * @param state the switch state of the pose
      * @param originalAnchorIndex the index of the base associated with the initial call
      * @param currentAnchorIndex the index of the base currently being used as the anchor
      * @param anchorPoint center-point of base/annotation card that defines the origin on which calculations are made
@@ -1227,6 +1294,7 @@ export default class AnnotationManager {
      */
     private computeAnnotationPositionPoint(
         pose: Pose2D,
+        strand: string | undefined,
         originalAnchorIndex: number,
         currentAnchorIndex: number,
         anchorPoint: Point,
@@ -1358,6 +1426,13 @@ export default class AnnotationManager {
             );
         }
 
+        const strandLength = strand ? this._oligoLengths.get(strand) : pose.sequenceLength;
+        if (strandLength === undefined) {
+            // Shouldn't happen as we should have bailed already if the strand doesn't exist, but
+            // don't crash and leave a trace if it happens for some reason
+            log.warn('computeAnnotationPositionPoint failed to get strand length');
+            return null;
+        }
         if (proposedPosition) {
             // We have an available position
             return proposedPosition.relPosition;
@@ -1377,6 +1452,7 @@ export default class AnnotationManager {
 
                 const point = this.computeAnnotationPositionPoint(
                     pose,
+                    strand,
                     originalAnchorIndex,
                     currentAnchorIndex,
                     anchorPoint,
@@ -1396,20 +1472,23 @@ export default class AnnotationManager {
         } else if (
             numSearchAttempts < AnnotationManager.ANNOTATION_PLACEMENT_ITERATION_TIMEOUT
             && currentAnchorIndex > 1
-            && currentAnchorIndex < pose.sequenceLength - 1
+            && currentAnchorIndex < strandLength - 1
         ) {
             // We'll change the anchor index in the hopes of finding available space
             // We move in the direction with the most bases
-            const increaseAnchor = pose.sequenceLength - originalAnchorIndex > originalAnchorIndex;
+            const increaseAnchor = strandLength - originalAnchorIndex > originalAnchorIndex;
             const newAnchorIndex = increaseAnchor ? currentAnchorIndex + 1 : currentAnchorIndex - 1;
-            const base = pose.getBase(newAnchorIndex);
-            const newAnchorPoint = new Point(
-                base.x + pose.xOffset,
-                base.y + pose.yOffset
-            );
+            const newAnchorPoint = pose.getStrandBaseLoc(strand, newAnchorIndex);
+            if (!newAnchorPoint) {
+                // Shouldn't happen as we should have bailed already if the anchor doesn't exist, but
+                // don't crash and leave a trace if it happens for some reason
+                log.warn('computeAnnotationPositionPoint failed to get anchor base location');
+                return null;
+            }
 
             const point = this.computeAnnotationPositionPoint(
                 pose,
+                strand,
                 originalAnchorIndex,
                 newAnchorIndex,
                 newAnchorPoint,
@@ -1769,7 +1848,6 @@ export default class AnnotationManager {
      * Helper function that checks whether annotations/layers exist at a proposed position
      *
      * @param pose puzzle pose of interest
-     * @param state the switch state the pose corresponds to
      * @param anchorPoint center-point of base/annotation card that defines the origin on which calculations are made
      * relative from. We use the center-point and not the top-left corner, as is convention in pixi,
      * because bases in Eterna.js have their position saved as a central point
@@ -1812,13 +1890,18 @@ export default class AnnotationManager {
                     // crashing. See placeAnnotationInPose
                     if (!position) continue;
 
+                    // Card is not in this state
+                    if (!card.positions[j][pose.stateIndex]) continue;
+
                     const display = pose.getAnnotationViewDims(card.id, j);
                     const cardRelPosition = card.positions[j][pose.stateIndex].relPosition;
-                    const base = pose.getBase(card.positions[j][pose.stateIndex].anchorIndex);
-                    const cardAnchorPoint = new Point(
-                        base.x + pose.xOffset,
-                        base.y + pose.yOffset
+                    const cardAnchorPoint = pose.getStrandBaseLoc(
+                        card.ranges?.[j].strand,
+                        card.positions[j][pose.stateIndex].anchorIndex
                     );
+                    // Card is tied to a strand not in this state
+                    if (!cardAnchorPoint) continue;
+
                     const cardAbsolutePosition = new Point(
                         cardRelPosition.x + cardAnchorPoint.x,
                         cardRelPosition.y + cardAnchorPoint.y
@@ -2505,6 +2588,7 @@ export default class AnnotationManager {
     private _selectedItem: AnnotationData | null = null;
 
     private _toolbarType: ToolbarType;
+    private _oligoLengths: Map<string, number>;
 
     public isMovingAnnotation: boolean = false;
 

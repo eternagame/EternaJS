@@ -160,7 +160,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._annotationDialog = new AnnotationDialog({
                 edit: false,
                 title: false,
-                sequenceLength: this.fullSequenceLength,
+                sequenceLength: this.sequenceLength,
+                // This means that you can't create/edit ranges for oligos not in this pose,
+                // which strictly speaking isn't a consistent UX, but realistically shouldn't be an issue since
+                // this was called up from within the context of a pose... if it is an issue, the data as
+                // computed by Puzzle will need to be set on pose setup in the mode
+                oligoLengths: this.oligoLengths,
                 customNumbering: this.customNumbering,
                 initialRanges: this._annotationRanges,
                 initialLayers: this._annotationManager.allLayers,
@@ -171,8 +176,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     this._annotationDialog.layers = this._annotationManager.allLayers;
                 }
             });
-            this._annotationDialog.onUpdateRanges.connect((ranges: AnnotationRange[] | null) => {
-                if (ranges) this.setAnnotationRanges(ranges);
+            this._annotationDialog.onUpdateRanges.connect((ranges: AnnotationRange[]) => {
+                this.setAnnotationRanges(ranges);
             });
 
             this._annotationDialog.closed.then((annotation: AnnotationData | null) => {
@@ -522,6 +527,18 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
         out.x = this._bases[seq].x + this._offX;
         out.y = this._bases[seq].y + this._offY;
+        return out;
+    }
+
+    public getStrandBaseLoc(strand: string | undefined, index: number, out: Point | null = null): Point | null {
+        const base = this.getStrandBase(strand, index);
+        if (!base) return null;
+
+        if (out == null) {
+            out = new Point();
+        }
+        out.x = base.x + this._offX;
+        out.y = base.y + this._offY;
         return out;
     }
 
@@ -966,18 +983,30 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (this._annotationManager.annotationModeActive.value) {
                 this.hideAnnotationContextMenu();
 
-                if (closestIndex < this.sequenceLength) {
+                const strand = this.getStrandLabel(closestIndex) ?? undefined;
+                const extent = strand ? this.oligoExtents.get(strand) : [0, this._sequence.length - 1];
+                if (!extent) {
+                    // Shouldn't be possible as we know the strand label is valid, but prevent crashing
+                    // and leave a trace just in case something goes sideways
+                    log.warn('Can\'t get base ranges of the clicked base\'s strand');
+                } else {
+                    const strandIndex = closestIndex - extent[0];
+
                     const rangeIndex = this._annotationRanges.findIndex((range) => (
-                        closestIndex >= range.start && closestIndex <= range.end)
-                        || (closestIndex <= range.start && closestIndex >= range.end));
+                        range.strand === strand && (
+                            (strandIndex >= range.start && strandIndex <= range.end)
+                            || (strandIndex <= range.start && strandIndex >= range.end)
+                        )
+                    ));
 
                     if (rangeIndex === -1) {
                         // Start annotation selection
                         this._selectingAnnotationRange = true;
 
                         this._annotationRanges.push({
-                            start: closestIndex,
-                            end: closestIndex
+                            start: strandIndex,
+                            end: strandIndex,
+                            strand
                         });
                     } else {
                         // Deselect clicked base
@@ -989,32 +1018,36 @@ export default class Pose2D extends ContainerObject implements Updatable {
                         this._annotationRanges.splice(rangeIndex, 1);
 
                         // Split range
-                        if (range.start <= range.end && closestIndex > range.start) {
+                        if (range.start <= range.end && strandIndex > range.start) {
                             const leftRange = {
                                 start: range.start,
-                                end: closestIndex - 1
+                                end: strandIndex - 1,
+                                strand
                             };
                             this._annotationRanges.push(leftRange);
-                        } else if (range.start >= range.end && closestIndex < range.start) {
+                        } else if (range.start >= range.end && strandIndex < range.start) {
                             const leftRange = {
-                                start: closestIndex + 1,
-                                end: range.start
+                                start: strandIndex + 1,
+                                end: range.start,
+                                strand
                             };
                             this._annotationRanges.push(leftRange);
                         } else {
                             // Do nothing
                         }
 
-                        if (range.start <= range.end && closestIndex < range.end) {
+                        if (range.start <= range.end && strandIndex < range.end) {
                             const rightRange = {
-                                start: closestIndex + 1,
-                                end: range.end
+                                start: strandIndex + 1,
+                                end: range.end,
+                                strand
                             };
                             this._annotationRanges.push(rightRange);
-                        } else if (range.start >= range.end && closestIndex > range.end) {
+                        } else if (range.start >= range.end && strandIndex > range.end) {
                             const rightRange = {
                                 start: range.end,
-                                end: closestIndex - 1
+                                end: strandIndex - 1,
+                                strand
                             };
                             this._annotationRanges.push(rightRange);
                         } else {
@@ -1026,8 +1059,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     reg = this.pointerUp.connect(() => {
                         this._selectingAnnotationRange = false;
                         if (!this._annotationDialog && this._annotationRanges[this._annotationRanges.length - 1]) {
+                            const lastAnnot = this._annotationRanges[this._annotationRanges.length - 1];
+                            const start = lastAnnot.strand ? this.oligoExtents.get(lastAnnot.strand)?.[0] : 0;
                             this.updateAnnotationContextMenu(
-                                this._annotationRanges[this._annotationRanges.length - 1].end
+                                (start ?? 0) + lastAnnot.end
                             );
                         }
                         this.mergeAnnotationRanges();
@@ -1339,6 +1374,15 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public getBase(ind: number): Base {
         return this._bases[ind];
+    }
+
+    public getStrandBase(strand: string | undefined, index: number): Base | null {
+        const extent = this.oligoExtents.get(strand);
+        if (extent) {
+            return this.getBase(extent[0] + index);
+        }
+
+        return null;
     }
 
     public get xOffset(): number {
@@ -2407,7 +2451,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public setOligo(
         oligo: number[] | undefined,
         mode: number | string | null = OligoMode.DIMER,
-        oName: string | null = null
+        oName: string | null = null,
+        oLabel: string | null = null
     ): void {
         if (oligo == null) {
             this._oligo = null;
@@ -2415,6 +2460,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         this._oligo = oligo.slice();
+        this._oligoLabel = oLabel;
         this._oligoName = oName;
 
         // Puzzle JSON encodes oligoMode as a string, for some reason
@@ -2476,7 +2522,67 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return len;
     }
 
-    public getStrandName(seqnum: number): string | null {
+    private get oligoLengths(): Map<string, number> {
+        const lengths = new Map<string, number>();
+
+        if (this._oligo && this._oligoLabel) {
+            lengths.set(this._oligoLabel, this._oligo.length);
+        }
+
+        if (this._oligos) {
+            for (const oligo of this._oligos) {
+                if (oligo.label) lengths.set(oligo.label, oligo.sequence.length);
+            }
+        }
+
+        return lengths;
+    }
+
+    private get oligoExtents(): Map<string | undefined, [start: number, end: number]> {
+        const extents = new Map<string | undefined, [number, number]>();
+
+        // Logic here based on EPars.constructFullSequence
+        if (!this._oligo && !this._oligos) {
+            extents.set(undefined, [0, this._sequence.length - 1]);
+            return extents;
+        }
+
+        if (this._oligos && this._oligosOrder != null) {
+            let fullLength = this._sequence.length;
+            extents.set(undefined, [0, fullLength - 1]);
+            for (let i = 0; i < this._oligosOrder.length; i++) {
+                // Account for the cut
+                fullLength += 1;
+
+                const label = this._oligos[i].label;
+                if (label) {
+                    extents.set(label, [fullLength, fullLength + this._oligos[i].sequence.length - 1]);
+                }
+                fullLength += this._oligos[i].sequence.length;
+            }
+        }
+
+        if (this._oligo && this._oligoLabel) {
+            if (this._oligoMode === OligoMode.EXT5P) {
+                extents.set(this._oligoLabel, [0, this._oligo.length - 1]);
+                extents.set(this._oligoLabel, [this._oligo.length, this._oligo.length + this._sequence.length - 1]);
+            } else if (this._oligoMode === OligoMode.EXT3P) {
+                extents.set(this._oligoLabel, [0, this._sequence.length - 1]);
+                extents.set(this._oligoLabel, [this._sequence.length, this._sequence.length + this._oligo.length - 1]);
+            } else {
+                // In OligoMode.DIMER, we add a cut base between the main strand and the oligo
+                extents.set(this._oligoLabel, [0, this._sequence.length - 1]);
+                extents.set(
+                    this._oligoLabel,
+                    [this._sequence.length, this._sequence.length + 1 + this._oligo.length - 1]
+                );
+            }
+        }
+
+        return extents;
+    }
+
+    private getStrandName(seqnum: number): string | null {
         if (this._oligos != null && this._oligosOrder != null && seqnum >= this._sequence.length) {
             let seq: RNABase[] = this._sequence.baseArray.slice();
             for (let ii = 0; ii < this._oligos.length; ii++) {
@@ -2491,6 +2597,23 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
         if (this._oligo != null && seqnum >= this._sequence.length) {
             return this._oligoName;
+        }
+        return null;
+    }
+
+    private getStrandLabel(seqnum: number): string | null {
+        if (this._oligos != null && this._oligosOrder != null && seqnum >= this._sequence.length) {
+            let seq: RNABase[] = this._sequence.baseArray.slice();
+            for (let ii = 0; ii < this._oligos.length; ii++) {
+                seq.push(RNABase.CUT);
+                seq = seq.concat(this._oligos[this._oligosOrder[ii]].sequence);
+                if (seqnum < seq.length) {
+                    return this._oligos[this._oligosOrder[ii]]['label'] ?? null;
+                }
+            }
+        }
+        if (this._oligo != null && seqnum >= this._sequence.length) {
+            return this._oligoLabel;
         }
         return null;
     }
@@ -3515,6 +3638,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     private onBaseMouseMove(seqnum: number): void {
+        const strandLabel = this.getStrandLabel(seqnum);
+        const strandExtent = strandLabel ? this.oligoExtents.get(strandLabel) : [0, this._sequence.length - 1];
         if (!this._coloring && this._shiftStart >= 0 && seqnum < this.sequenceLength) {
             this._shiftEnd = seqnum;
             this.updateShiftHighlight();
@@ -3523,9 +3648,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
             && this._annotationManager.annotationModeActive.value
             && this._annotationRanges.length > 0
             && this._selectingAnnotationRange
-            && seqnum < this.sequenceLength
+            && strandExtent
+            && seqnum >= strandExtent[0]
+            && seqnum <= strandExtent[1]
         ) {
-            this._annotationRanges[this._annotationRanges.length - 1].end = seqnum;
+            this._annotationRanges[this._annotationRanges.length - 1].end = seqnum - strandExtent[0];
             this.updateAnnotationRangeHighlight();
         }
 
@@ -3651,8 +3778,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
      */
     private setAnnotationRangeHighlight(ranges: AnnotationRange[]): void {
         this._annotationHighlightBox.clear();
+        const oligoExtents = this.oligoExtents;
         for (const range of ranges) {
-            this._annotationHighlightBox.setHighlight([range.start, range.end]);
+            const strandExtent = range.strand ? oligoExtents.get(range.strand) : [0, this._sequence.length - 1];
+            // This strand is not currently present
+            if (!strandExtent) continue;
+
+            this._annotationHighlightBox.setHighlight([range.start + strandExtent[0], range.end + strandExtent[0]]);
         }
     }
 
@@ -3668,10 +3800,15 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
+        const oligoExtents = this.oligoExtents;
         for (const range of this._annotationRanges) {
+            const strandExtent = range.strand ? oligoExtents.get(range.strand) : [0, this._sequence.length - 1];
+            // This strand is not currently present
+            if (!strandExtent) continue;
+
             const highlightExtents: number[] = range.end < range.start
-                ? [range.end, range.start]
-                : [range.start, range.end];
+                ? [range.end + strandExtent[0], range.start + strandExtent[0]]
+                : [range.start + strandExtent[0], range.end + strandExtent[0]];
             this._annotationHighlightBox.setHighlight(highlightExtents);
 
             for (let i = highlightExtents[0]; i <= highlightExtents[1]; i++) {
@@ -3681,47 +3818,59 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     private mergeAnnotationRanges(): void {
-        if (this._annotationRanges.length > 1) {
-            // Sort ranges in increasing order
-            let sortedRanges = [...this._annotationRanges];
-            sortedRanges = sortedRanges.map((range: AnnotationRange) => ({
+        const rangesByStrand = new Map<string | undefined, AnnotationRange[]>();
+        for (const range of this._annotationRanges) {
+            const ranges = rangesByStrand.get(range.strand) ?? [];
+            ranges.push({
+                ...range,
                 start: Math.min(range.start, range.end),
                 end: Math.max(range.start, range.end)
-            }));
-            sortedRanges.sort((a: AnnotationRange, b: AnnotationRange) => a.start - b.start);
-
-            const updatedRanges: AnnotationRange[] = [];
-            let focusedRangeIndex = 0;
-            let comparatorRangeIndexDiff = 1;
-
-            while (focusedRangeIndex + comparatorRangeIndexDiff < sortedRanges.length) {
-                if (sortedRanges[focusedRangeIndex + comparatorRangeIndexDiff].start
-                    - sortedRanges[focusedRangeIndex + comparatorRangeIndexDiff - 1].end <= 1
-                ) {
-                    if (focusedRangeIndex + comparatorRangeIndexDiff + 1 === sortedRanges.length) {
-                        updatedRanges.push({
-                            start: sortedRanges[focusedRangeIndex].start,
-                            end: sortedRanges[focusedRangeIndex + comparatorRangeIndexDiff].end
-                        });
-                    }
-
-                    comparatorRangeIndexDiff += 1;
-                } else {
-                    updatedRanges.push({
-                        start: sortedRanges[focusedRangeIndex].start,
-                        end: sortedRanges[focusedRangeIndex + comparatorRangeIndexDiff - 1].end
-                    });
-
-                    if (focusedRangeIndex + comparatorRangeIndexDiff + 1 === sortedRanges.length) {
-                        updatedRanges.push(sortedRanges[focusedRangeIndex + comparatorRangeIndexDiff]);
-                    }
-
-                    focusedRangeIndex += comparatorRangeIndexDiff;
-                    comparatorRangeIndexDiff = 1;
-                }
-            }
-            this._annotationRanges = updatedRanges;
+            });
+            rangesByStrand.set(range.strand, ranges);
         }
+
+        const updatedRanges: AnnotationRange[] = [];
+        for (const ranges of rangesByStrand.values()) {
+            if (ranges.length > 1) {
+                // Sort ranges in increasing order
+                ranges.sort((a, b) => a.start - b.start);
+                let focusedRangeIndex = 0;
+                let comparatorRangeIndexDiff = 1;
+
+                while (focusedRangeIndex + comparatorRangeIndexDiff < ranges.length) {
+                    if (ranges[focusedRangeIndex + comparatorRangeIndexDiff].start
+                        - ranges[focusedRangeIndex + comparatorRangeIndexDiff - 1].end <= 1
+                    ) {
+                        if (focusedRangeIndex + comparatorRangeIndexDiff + 1 === ranges.length) {
+                            updatedRanges.push({
+                                start: ranges[focusedRangeIndex].start,
+                                end: ranges[focusedRangeIndex + comparatorRangeIndexDiff].end,
+                                strand: ranges[focusedRangeIndex].strand
+                            });
+                        }
+
+                        comparatorRangeIndexDiff += 1;
+                    } else {
+                        updatedRanges.push({
+                            start: ranges[focusedRangeIndex].start,
+                            end: ranges[focusedRangeIndex + comparatorRangeIndexDiff - 1].end,
+                            strand: ranges[focusedRangeIndex].strand
+                        });
+
+                        if (focusedRangeIndex + comparatorRangeIndexDiff + 1 === ranges.length) {
+                            updatedRanges.push(ranges[focusedRangeIndex + comparatorRangeIndexDiff]);
+                        }
+
+                        focusedRangeIndex += comparatorRangeIndexDiff;
+                        comparatorRangeIndexDiff = 1;
+                    }
+                }
+            } else {
+                updatedRanges.push(...ranges);
+            }
+        }
+
+        this._annotationRanges = updatedRanges;
     }
 
     public get annotationSpaceAvailability(): Map<string, boolean> {
@@ -3738,7 +3887,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._annotationCanvas.alpha = opacity;
     }
 
-    private redrawAnnotations(useCachedSpaceAvailability = false) {
+    public redrawAnnotations(useCachedSpaceAvailability = false) {
         this._redrawAnnotations = FrameUpdateState.NEXT_FRAME;
         this._redrawAnnotationUseCache = useCachedSpaceAvailability;
     }
@@ -4247,6 +4396,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _oligo: number[] | null = null;
     private _oligoMode: number = OligoMode.DIMER;
     private _oligoName: string | null = null;
+    private _oligoLabel: string | null = null;
     private _duplexCost: number = 4.1; // total for all strands
     private _oligoMalus: number = 0; // concentration related penalty
     private _oligoBases: BaseGlow[] | null = null; // for glows
