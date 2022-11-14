@@ -307,11 +307,6 @@ export default class PoseEditMode extends GameMode {
         );
 
         this._constraintBar.layout();
-
-        if (this._stateToggle) {
-            this._stateToggle.display.visible = false;
-            this._modeBar.layout();
-        }
     }
 
     public get constraintsLayer(): Container {
