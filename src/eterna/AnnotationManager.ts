@@ -2671,7 +2671,7 @@ export default class AnnotationManager {
         const processedNode = {
             ...node,
             visible: true,
-            selected: true,
+            selected: false,
             positions
         };
 
