@@ -191,8 +191,11 @@ export default class UndoBlock {
     }
 
     public fromJSON(json: FoldData): void {
+        // Note: autosaves may have some fields as null rather than undefined, hence the coercion to undefined
         try {
-            this._folderName = json.folderName_;
+            // In the cases of older autosaves/designs, they won't have a folder name specified.
+            // They should instead default to whatever the current folder is
+            this._folderName = json.folderName_ || this._folderName;
             this._sequence.baseArray = json.sequence_;
 
             // Legacy -- this wasn't always a map. So check typeof and put nonmaps
@@ -219,12 +222,12 @@ export default class UndoBlock {
                 this._paramsArray = this.mapFromJSON(json.params_array_);
             }
             this._stable = json.stable_;
-            this._targetOligo = json.target_oligo_;
-            this._targetOligos = json.target_oligos_;
-            this._oligoOrder = json.oligo_order_;
-            this._oligosPaired = json.oligos_paired_;
+            this._targetOligo = json.target_oligo_ ?? undefined;
+            this._targetOligos = json.target_oligos_ ?? undefined;
+            this._oligoOrder = json.oligo_order_ ?? undefined;
+            this._oligosPaired = json.oligos_paired_ ?? undefined;
             this._targetPairs = new SecStruct(json.target_pairs_);
-            this._targetOligoOrder = json.target_oligo_order_;
+            this._targetOligoOrder = json.target_oligo_order_ ?? undefined;
             this._puzzleLocks = json.puzzle_locks_;
             this._forcedStruct = json.forced_struct_;
             this._librarySelections = json.library_selections_;
@@ -304,7 +307,8 @@ export default class UndoBlock {
     }
 
     public set targetOligos(targetOligos: Oligo[] | undefined) {
-        this._targetOligos = targetOligos === undefined ? undefined : JSON.parse(JSON.stringify(targetOligos));
+        // Note: autosaves may have this field as null rather than undefined
+        this._targetOligos = targetOligos ? JSON.parse(JSON.stringify(targetOligos)) : undefined;
     }
 
     public get targetOligo(): number[] | undefined {
@@ -312,7 +316,8 @@ export default class UndoBlock {
     }
 
     public set targetOligo(targetOligo: number[] | undefined) {
-        this._targetOligo = targetOligo === undefined ? undefined : targetOligo.slice();
+        // Note: autosaves may have this field as null rather than undefined
+        this._targetOligo = targetOligo ? targetOligo.slice() : undefined;
     }
 
     public get oligoMode(): number {
@@ -342,7 +347,8 @@ export default class UndoBlock {
     }
 
     public set oligoOrder(oligoOrder: number[] | undefined) {
-        this._oligoOrder = oligoOrder === undefined ? undefined : oligoOrder.slice();
+        // Note: autosaves may have this field as null rather than undefined
+        this._oligoOrder = oligoOrder ? oligoOrder.slice() : undefined;
     }
 
     public get oligosPaired(): number {
@@ -366,7 +372,8 @@ export default class UndoBlock {
     }
 
     public set targetOligoOrder(oligoOrder: number[] | undefined) {
-        this._targetOligoOrder = oligoOrder === undefined || !oligoOrder ? undefined : oligoOrder.slice();
+        // Note: autosaves may have this field as null rather than undefined
+        this._targetOligoOrder = oligoOrder ? oligoOrder.slice() : undefined;
     }
 
     public get sequence(): Sequence {
