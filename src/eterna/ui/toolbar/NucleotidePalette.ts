@@ -86,25 +86,25 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
 
         this._targets[PaletteTargetType.A] = new PaletteTarget(
             PaletteTargetType.A, RScriptUIElementID.A, false, KeyCode.Digit1,
-            [new Rectangle(12, 3, 25, 25)],
+            [new Rectangle(10, 1, 25, 25)],
             NucleotidePalette.createTooltip('Mutate to <A>A (Adenine)</A>. (1)')
         );
 
         this._targets[PaletteTargetType.U] = new PaletteTarget(
             PaletteTargetType.U, RScriptUIElementID.U, false, KeyCode.Digit2,
-            [new Rectangle(66, 3, 25, 25)],
+            [new Rectangle(64, 1, 25, 25)],
             NucleotidePalette.createTooltip('Mutate to <U>U (Uracil)</U>. (2)')
         );
 
         this._targets[PaletteTargetType.G] = new PaletteTarget(
             PaletteTargetType.G, RScriptUIElementID.G, false, KeyCode.Digit3,
-            [new Rectangle(120, 3, 25, 25)],
+            [new Rectangle(118, 1, 25, 25)],
             NucleotidePalette.createTooltip('Mutate to <G>G (Guanine)</G>. (3)')
         );
 
         this._targets[PaletteTargetType.C] = new PaletteTarget(
             PaletteTargetType.C, RScriptUIElementID.C, false, KeyCode.Digit4,
-            [new Rectangle(174, 3, 25, 25)],
+            [new Rectangle(172, 1, 25, 25)],
             NucleotidePalette.createTooltip('Mutate to <C>C (Cytosine)</C>. (4)')
         );
 
