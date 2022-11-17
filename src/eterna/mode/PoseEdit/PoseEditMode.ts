@@ -3167,7 +3167,7 @@ export default class PoseEditMode extends GameMode {
                 this._seqStacks[this._stackLevel] = [];
 
                 for (let ii = 0; ii < this._poses.length; ii++) {
-                    this._seqStacks[this._stackLevel][ii] = new UndoBlock(new Sequence([]), '');
+                    this._seqStacks[this._stackLevel][ii] = new UndoBlock(new Sequence([]), this._folder?.name ?? '');
                     this._seqStacks[this._stackLevel][ii].fromJSON(fd[ii]);
                 }
 
