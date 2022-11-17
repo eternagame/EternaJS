@@ -469,7 +469,7 @@ export default class PoseEditMode extends GameMode {
 
                 for (let ii = 0; ii < this._poses.length; ii++) {
                     const undoBlock: UndoBlock = new UndoBlock(new Sequence([]), this._folder?.name ?? '');
-                    undoBlock.fromJSON(foldData[ii]);
+                    undoBlock.fromJSON(foldData[ii], this._puzzle.targetConditions[ii]);
                     this._seqStacks[this._stackLevel][ii] = undoBlock;
                 }
 
@@ -2627,11 +2627,11 @@ export default class PoseEditMode extends GameMode {
                     if (saveData.undoBlock) {
                         const pose: FoldData = saveData.undoBlock;
                         savedAnnotations[ii] = saveData.annotations;
-                        undoBlock.fromJSON(pose);
+                        undoBlock.fromJSON(pose, this._puzzle.targetConditions[ii]);
                     } else {
                         // Old format before annotations were introduced
                         const pose: FoldData = saveData;
-                        undoBlock.fromJSON(pose);
+                        undoBlock.fromJSON(pose, this._puzzle.targetConditions[ii]);
                     }
                 } catch (e) {
                     log.error('Error loading saved puzzle data', e);
@@ -3168,7 +3168,7 @@ export default class PoseEditMode extends GameMode {
 
                 for (let ii = 0; ii < this._poses.length; ii++) {
                     this._seqStacks[this._stackLevel][ii] = new UndoBlock(new Sequence([]), this._folder?.name ?? '');
-                    this._seqStacks[this._stackLevel][ii].fromJSON(fd[ii]);
+                    this._seqStacks[this._stackLevel][ii].fromJSON(fd[ii], this._puzzle.targetConditions[ii]);
                 }
 
                 this.savePosesMarkersContexts();
