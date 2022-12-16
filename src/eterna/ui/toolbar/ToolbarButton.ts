@@ -69,6 +69,9 @@ export default class ToolbarButton extends GameButton {
         // However, the mode toggle buttons have explicit backgrounds which should be clickable, so we'll
         // keep the bounds of the entire button (including the background) as the hit area
         this._skipHitArea = !!info.color;
+        // However, we want to ensure the hit targets aren't too small...
+        this._minHitAreaHeight = 32;
+        this._minHitAreaWidth = 32;
 
         this.allStates(info.allImg);
         if (info.overImg) this.over(info.overImg);

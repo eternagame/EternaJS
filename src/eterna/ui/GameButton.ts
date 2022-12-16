@@ -1,5 +1,5 @@
 import {
-    Container, Graphics, Sprite, Text, Texture
+    Container, Graphics, Rectangle, Sprite, Text, Texture
 } from 'pixi.js';
 import {Registration, Registrations, Value} from 'signals';
 import {
@@ -246,7 +246,15 @@ export default class GameButton extends Button implements KeyboardListener {
         }
 
         if (!drawStyleBox && !this._skipHitArea) {
-            this.display.hitArea = DisplayUtil.getBoundsRelative(this._content, this.display);
+            const contentBounds = DisplayUtil.getBoundsRelative(this._content, this.display);
+            const hitWidth = Math.max(this._minHitAreaWidth, contentBounds.width);
+            const hitHeight = Math.max(this._minHitAreaHeight, contentBounds.height);
+            this.display.hitArea = new Rectangle(
+                contentBounds.x - ((hitWidth - contentBounds.width) / 2),
+                contentBounds.y - ((hitHeight - contentBounds.height) / 2),
+                hitWidth,
+                hitHeight
+            );
         }
     }
 
@@ -334,6 +342,8 @@ export default class GameButton extends Button implements KeyboardListener {
     private _customStyleBox?: Graphics;
     private _customTextColors?: Map<ButtonState, number>;
     protected _skipHitArea = false;
+    protected _minHitAreaWidth = 0;
+    protected _minHitAreaHeight = 0;
 
     private _rscriptID: RScriptUIElementID;
     private _rscriptClickReg: Registration = Registrations.Null();
