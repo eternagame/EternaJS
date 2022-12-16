@@ -2014,9 +2014,11 @@ export default class PoseEditMode extends GameMode {
     }
 
     private updateSpecBox(): void {
-        this.updateCurrentBlockWithDotAndMeltingPlot();
-        const datablock: UndoBlock = this.getCurrentUndoBlock();
-        this._specBox?.setSpec(datablock);
+        if (this._specBox) {
+            this.updateCurrentBlockWithDotAndMeltingPlot();
+            const datablock: UndoBlock = this.getCurrentUndoBlock();
+            this._specBox.setSpec(datablock);
+        }
     }
 
     private updateCurrentBlockWithDotAndMeltingPlot(index: number = -1): void {
