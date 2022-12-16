@@ -412,8 +412,7 @@ export default class AnnotationDialog extends WindowDialog<AnnotationData> {
         for (const range of ranges) {
             const validBase = (rangeNum: number) => {
                 if (this._customNumbering && !range.strand) {
-                    const num = this._customNumbering.indexOf(rangeNum);
-                    if (num < 0 || num > this._sequenceLength - 1) {
+                    if (rangeNum < 0 || rangeNum > this._sequenceLength - 1) {
                         return false;
                     }
                 } else {
