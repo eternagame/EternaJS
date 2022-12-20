@@ -637,6 +637,7 @@ export default class PoseEditMode extends GameMode {
             this._targetOligo.push(undefined);
             this._oligoMode.push(undefined);
             this._oligoName.push(undefined);
+            this._oligoLabel.push(undefined);
             if (targetConditions[ii] === undefined) continue;
 
             const tc = targetConditions[ii] as TargetConditions;
@@ -646,6 +647,7 @@ export default class PoseEditMode extends GameMode {
                     ? OligoMode.DIMER
                     : Number(tc['fold_mode']);
                 this._oligoName[ii] = tc['oligo_name'];
+                this._oligoLabel[ii] = tc['oligo_label'];
             }
             if (tc['oligos']) {
                 // Map from OligoDef to Oligo, basically requires turning
@@ -2805,6 +2807,7 @@ export default class PoseEditMode extends GameMode {
                     this._targetOligo[0] = this.getCurrentUndoBlock(0).targetOligo;
                     this._oligoMode[0] = this.getCurrentUndoBlock(0).oligoMode;
                     this._oligoName[0] = this.getCurrentUndoBlock(0).oligoName;
+                    this._oligoLabel[0] = this.getCurrentUndoBlock(0).oligoLabel;
                     this._targetPairs[0] = this.getCurrentUndoBlock(0).targetPairs;
                     continue;
                 }
@@ -2813,6 +2816,7 @@ export default class PoseEditMode extends GameMode {
                 this._targetOligo[ii] = this.getCurrentUndoBlock(ii).targetOligo;
                 this._oligoMode[ii] = this.getCurrentUndoBlock(ii).oligoMode;
                 this._oligoName[ii] = this.getCurrentUndoBlock(ii).oligoName;
+                this._oligoLabel[ii] = this.getCurrentUndoBlock(ii).oligoLabel;
                 this._targetPairs[ii] = this.getCurrentUndoBlock(ii).targetPairs;
                 this._poses[ii].setOligos(this._targetOligos[ii], this._targetOligosOrder[ii]);
                 this._poses[ii].setOligo(
@@ -3492,6 +3496,7 @@ export default class PoseEditMode extends GameMode {
             this._targetOligo[ii] = this._seqStacks[this._stackLevel][ii].targetOligo;
             this._oligoMode[ii] = this._seqStacks[this._stackLevel][ii].oligoMode;
             this._oligoName[ii] = this._seqStacks[this._stackLevel][ii].oligoName;
+            this._oligoLabel[ii] = this._seqStacks[this._stackLevel][ii].oligoLabel;
             this._targetOligos[ii] = this._seqStacks[this._stackLevel][ii].targetOligos;
             this._targetOligosOrder[ii] = this._seqStacks[this._stackLevel][ii].targetOligoOrder;
         }

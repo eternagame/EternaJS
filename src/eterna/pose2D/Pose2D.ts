@@ -2568,16 +2568,16 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (this._oligo && this._oligoLabel) {
             if (this._oligoMode === OligoMode.EXT5P) {
                 extents.set(this._oligoLabel, [[0, this._oligo.length - 1]]);
-                extents.set(this._oligoLabel, [[this._oligo.length, this._oligo.length + this._sequence.length - 1]]);
+                extents.set(undefined, [[this._oligo.length, this._oligo.length + this._sequence.length - 1]]);
             } else if (this._oligoMode === OligoMode.EXT3P) {
-                extents.set(this._oligoLabel, [[0, this._sequence.length - 1]]);
+                extents.set(undefined, [[0, this._sequence.length - 1]]);
                 extents.set(
                     this._oligoLabel,
                     [[this._sequence.length, this._sequence.length + this._oligo.length - 1]]
                 );
             } else {
                 // In OligoMode.DIMER, we add a cut base between the main strand and the oligo
-                extents.set(this._oligoLabel, [[0, this._sequence.length - 1]]);
+                extents.set(undefined, [[0, this._sequence.length - 1]]);
                 extents.set(
                     this._oligoLabel,
                     [[this._sequence.length, this._sequence.length + 1 + this._oligo.length - 1]]
