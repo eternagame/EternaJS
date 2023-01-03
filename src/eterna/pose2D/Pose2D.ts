@@ -2672,7 +2672,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._locks = Pose2D.createDefaultLocks(this._sequence.length);
         }
 
-        this._sequence = sequence;
+        this._sequence = sequence.slice(0);
         if (this._sequence.length > this._bases.length) {
             const diff: number = (this._sequence.length - this._bases.length);
             for (let ii = 0; ii < diff; ii++) {
