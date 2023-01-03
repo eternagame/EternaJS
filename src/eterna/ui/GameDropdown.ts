@@ -189,7 +189,7 @@ export default class GameDropdown<Option extends string = string> extends Contai
             const text = new TextBalloon(
                 option,
                 balloonColor,
-                0, // this._width ? 1 : 0.07,
+                1, // this._width ? 1 : 0.07,
                 0,
                 0,
                 this._width,
@@ -200,12 +200,6 @@ export default class GameDropdown<Option extends string = string> extends Contai
                     : iconSize
             );
             text.setText(option, this._fontSize, 0xC0DCE7);
-            const txtBack = new Graphics();
-            txtBack.clear();
-            txtBack.beginFill(this._boxColor, 1);
-            txtBack.drawRect(0, 0, text.display.width, text.display.height);
-            txtBack.endFill();
-            text.display.addChildAt(txtBack, 0);
             this._popup.addObject(text, contentLayout);
             texts.push(text);
 
@@ -256,27 +250,18 @@ export default class GameDropdown<Option extends string = string> extends Contai
                 }
                 this._hidePopup();
             });
-            // Same as GameButton colors
             text.pointerOver.connect(() => {
                 text.setText(option, this._fontSize, 0xFFFFFF);
                 // Only change background if not selected
                 if (text.text.text !== this.selectedOption.value) {
                     text.setBalloonColor(0x053E7A);
                 }
-                txtBack.clear();
-                txtBack.beginFill(this._boxColor + 0x202020, 1);
-                txtBack.drawRect(0, 0, text.display.width, text.display.height);
-                txtBack.endFill();
             });
             text.pointerOut.connect(() => {
                 text.setText(option, this._fontSize, 0xC0DCE7);
                 if (text.text.text !== this.selectedOption.value) {
                     text.setBalloonColor(this._boxColor);
                 }
-                txtBack.clear();
-                txtBack.beginFill(this._boxColor, 1);
-                txtBack.drawRect(0, 0, text.display.width, text.display.height);
-                txtBack.endFill();
             });
             text.pointerUp.connect(() => {
                 text.setText(option, this._fontSize, 0xC0DCE7);
