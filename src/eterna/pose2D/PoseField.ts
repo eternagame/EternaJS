@@ -303,6 +303,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         // This is because the undo stack isn't populated yet when this is run on puzzle boot/changing folders,
         // which is needed for the delta - TODO: Handle this in a less hacky way
         const attemptSetDelta = () => {
+            if (!this.isLiveObject) return;
             try {
                 this._deltaScoreEnergyDisplay.setEnergyText(
                     'Natural/Target Delta',
