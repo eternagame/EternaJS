@@ -161,7 +161,6 @@ export default class Pose3DDialog extends WindowDialog<void> {
         });
 
         Assert.assertIsDefined(this.mode);
-        this.regs.add(this.mode.mouseWheelInput.pushListener(this));
     }
 
     private initEffects() {
@@ -278,11 +277,6 @@ export default class Pose3DDialog extends WindowDialog<void> {
         this._nglStage.dispose();
         this._nglDiv.remove();
         super.dispose();
-    }
-
-    public onMouseWheelEvent(e: WheelEvent): boolean {
-        this._nglStage.viewer.renderer.domElement.dispatchEvent(new WheelEvent(e.type, e));
-        return true;
     }
 
     private layout(width: number, height: number) {

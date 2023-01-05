@@ -7,10 +7,11 @@ import Eterna from 'eterna/Eterna';
 const events = [
     'pointercancel', 'pointerdown', 'pointerenter', 'pointerleave', 'pointermove',
     'pointerout', 'pointerover', 'pointerup', 'mousedown', 'mouseenter', 'mouseleave',
-    'mousemove', 'mouseout', 'mouseover', 'mouseup', 'mousedown', 'mouseup', 'click'
+    'mousemove', 'mouseout', 'mouseover', 'mouseup', 'mousedown', 'mouseup', 'click',
+    'wheel'
 ] as const;
 
-let earlyHandlers: ((e: MouseEvent | PointerEvent) => void)[] = [];
+let earlyHandlers: ((e: MouseEvent | PointerEvent | WheelEvent) => void)[] = [];
 
 // Why are you doing this, you might ask? First off, see ScrollContainer#handlePossiblyMaskedEvent
 // Ok, got that? Lets continue. For some mouse events, Pixi registers listeners on the window with capturing
@@ -56,6 +57,7 @@ export default class ScrollContainer extends ContainerObject {
 
         this.display.addChild(this.content);
         this.display.addChild(this._contentMask);
+        this._contentMask.hitArea = new Rectangle();
         this.content.mask = this._contentMask;
 
         const overlayEl = document.getElementById(Eterna.OVERLAY_DIV_ID);
@@ -72,9 +74,9 @@ export default class ScrollContainer extends ContainerObject {
         earlyHandlers.push(this._boundHME);
         earlyTouchHandlers.push(this._boundHTE);
         Assert.assertIsDefined(Flashbang.app.pixi);
-        // Technically this is readonly, but the weak typing in Pixi doesn't catch this,
-        // and we have to disable this to force Pixi to only use pointer events - see handleTouchEvent
-        Flashbang.app.pixi.renderer.plugins.interaction.supportsTouchEvents = false;
+        // @ts-expect-error This is readonly, but we have to disable this to force Pixi
+        // to only use pointer events - see handleTouchEvent
+        if (Flashbang.pixi) Flashbang.pixi.renderer.events.supportsTouchEvents = false;
     }
 
     protected dispose(): void {
@@ -83,12 +85,6 @@ export default class ScrollContainer extends ContainerObject {
         overlayEl.removeChild(this._htmlWrapper);
         earlyHandlers = earlyHandlers.filter((handler) => handler !== this._boundHME);
         earlyTouchHandlers = earlyTouchHandlers.filter((handler) => handler !== this._boundHTE);
-        // Just to be clean about it
-        if (earlyTouchHandlers.length === 0) {
-            Assert.assertIsDefined(Flashbang.app.pixi);
-            Flashbang.app.pixi.renderer.plugins.interaction.supportsTouchEvents = true;
-        }
-
         super.dispose();
     }
 
@@ -166,7 +162,10 @@ export default class ScrollContainer extends ContainerObject {
      *
      * The only reason we have to do this is because of a long-standing WebKit/Safari bug
      * where events are fired on elements that cannot be seen with clip-path:
-     * https://bugs.webkit.org/show_bug.cgi?id=152548
+     * https://bugs.webkit.org/show_bug.cgi?id=152548 This issue has since been resolved
+     * (tested as present with Safari on iOS 14.5, and resolved with Safari on iOS 15).
+     * This "hack" can be removed once we no longer need to support browsers running the older webkit
+     * (namely, once Safari on iOS 14.5-14.8 falls below 0.5%)
      *
      * An example of where this can be seen is when you solve a puzzle like 6502949 which has
      * an image in its mission complete screen. If your window is short enough, the image will be
@@ -177,7 +176,7 @@ export default class ScrollContainer extends ContainerObject {
      *
      * @param e Pointer event being handled
      */
-    private handlePossiblyMaskedEvent(e: MouseEvent | PointerEvent): void {
+    private handlePossiblyMaskedEvent(e: MouseEvent | PointerEvent | WheelEvent): void {
         const {
             x, y, width, height
         } = this.getBounds();
@@ -209,8 +208,13 @@ export default class ScrollContainer extends ContainerObject {
                 newTarget.dispatchEvent(new PointerEvent('pointerover', e));
             }
 
-            const newEvent = e instanceof PointerEvent ? new PointerEvent(e.type, e) : new MouseEvent(e.type, e);
-            newTarget.dispatchEvent(newEvent);
+            if (e instanceof PointerEvent) {
+                newTarget.dispatchEvent(new PointerEvent(e.type, e));
+            } else if (e instanceof WheelEvent) {
+                newTarget.dispatchEvent(new WheelEvent(e.type, e));
+            } else {
+                newTarget.dispatchEvent(new MouseEvent(e.type, e));
+            }
         } else if (this.lastEventWasMasked && !isMaskedElement) {
             this.lastEventWasMasked = false;
         }
@@ -221,7 +225,7 @@ export default class ScrollContainer extends ContainerObject {
      * target element, so we can't filter it like we do there. Luckily touch events aren't
      * *actually* required for PIXI to function properly (they really should be just used as
      * fallbacks when PointerEvents aren't available, and we expect them to be available anyways),
-     * so we can just make sure these events never get to Pixi so that it doesn't erroniously
+     * so we can just make sure these events never get to Pixi so that it doesn't erroneously
      * handle these events
      *
      * @param e Touch event to be handled

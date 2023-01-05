@@ -1,5 +1,4 @@
 import {
-    InteractionEvent,
     Point, Rectangle, Sprite, Text, Texture
 } from 'pixi.js';
 import {Signal} from 'signals';
@@ -12,6 +11,7 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import Fonts from 'eterna/util/Fonts';
 import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import ROPWait from 'eterna/rscript/ROPWait';
+import {FederatedPointerEvent} from '@pixi/events';
 import Tooltips from '../Tooltips';
 
 export enum PaletteTargetType {
@@ -274,12 +274,13 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
     }
 
     // Handle Click - Need to map position within the gameobject to action
-    private onClick(e: InteractionEvent): void {
+    private onClick(e: FederatedPointerEvent): void {
+        e.stopPropagation();
         if (!this._enabled) {
             return;
         }
 
-        e.data.getLocalPosition(this.display, NucleotidePalette.P);
+        this.display.toLocal(e.global, undefined, NucleotidePalette.P);
         const target: PaletteTarget | null = this.getTargetAt(NucleotidePalette.P.x, NucleotidePalette.P.y);
         if (target != null) {
             this.clickTarget(target.type);
@@ -303,12 +304,12 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
         return null;
     }
 
-    private onMoveMouse(e: InteractionEvent): void {
+    private onMoveMouse(e: FederatedPointerEvent): void {
         if (!this._enabled) {
             return;
         }
 
-        e.data.getLocalPosition(this.display, NucleotidePalette.P);
+        this.display.toLocal(e.global, undefined, NucleotidePalette.P);
         const target: PaletteTarget | null = this.getTargetAt(NucleotidePalette.P.x, NucleotidePalette.P.y);
 
         if (target !== this._lastTooltipTarget) {
@@ -318,7 +319,7 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
             }
 
             if (target != null) {
-                Tooltips.instance.showTooltip(target, e.data.global, target.tooltip);
+                Tooltips.instance.showTooltip(target, e.global, target.tooltip);
             }
 
             this._lastTooltipTarget = target;

@@ -1,3 +1,4 @@
+import {FederatedPointerEvent} from '@pixi/events';
 import EPars from 'eterna/EPars';
 import EternaURL from 'eterna/net/EternaURL';
 import Plot from 'eterna/Plot';
@@ -10,7 +11,7 @@ import {
 } from 'flashbang';
 import MultiStyleText from 'pixi-multistyle-text';
 import {
-    Container, Graphics, InteractionEvent, Point, Text
+    Container, Graphics, Point, Rectangle, Text
 } from 'pixi.js';
 import GameButton from './GameButton';
 import SpecHTMLButton from './SpecHTMLButton';
@@ -45,6 +46,7 @@ export default class SpecBoxDialog extends WindowDialog<void> {
         this._dotPlotContainer = new Container();
         this._dotPlotMask = new Graphics();
         this._dotPlotContainer.addChild(this._dotPlotMask);
+        this._dotPlotMask.hitArea = new Rectangle();
         this._plotContainer.addChild(this._dotPlotContainer);
         this._meltPlotContainer = new Container();
         this._plotContainer.addChild(this._meltPlotContainer);
@@ -275,7 +277,7 @@ export default class SpecBoxDialog extends WindowDialog<void> {
         );
     }
 
-    private onDotPlotPointerDown(e: InteractionEvent) {
+    private onDotPlotPointerDown(e: FederatedPointerEvent) {
         const dragger = new Dragger();
         this.addObject(dragger);
 
@@ -283,7 +285,7 @@ export default class SpecBoxDialog extends WindowDialog<void> {
             this._coordBalloon.display.visible = false;
         }
 
-        const dragStartingPoint = e.data.global.clone();
+        const dragStartingPoint = e.global.clone();
         const plotStartingPoint = this._dotPlot.position.clone();
         this.regs.add(dragger.dragged.connect((mousePos: Point) => {
             const diffX: number = mousePos.x - dragStartingPoint.x;
@@ -292,10 +294,10 @@ export default class SpecBoxDialog extends WindowDialog<void> {
         }));
     }
 
-    private onDotPlotMouseMove(e: InteractionEvent) {
+    private onDotPlotMouseMove(e: FederatedPointerEvent) {
         // Note: Due to the use of the Dragger in the pointer down handler, this will only
         // execute if the pointer isn't currently down.
-        const localPoint = e.data.getLocalPosition(this._dotPlotContainer);
+        const localPoint = this._dotPlotContainer.toLocal(e.global);
         const plotSize = this.calcPlotSize(this._content.width, this._content.height).size;
         const blockLength = this.calcDotPlotOffsetSize(plotSize);
         const x: number = (localPoint.x - this._dotPlot.x) / blockLength;
@@ -313,7 +315,7 @@ export default class SpecBoxDialog extends WindowDialog<void> {
             this._coordBalloon = new TextBalloon(msg, 0x0, 0.8);
             this.addObject(this._coordBalloon, this._window.content);
         }
-        this._coordBalloon.display.position = this._coordBalloon.display.parent.toLocal(e.data.global);
+        this._coordBalloon.display.position = this._coordBalloon.display.parent.toLocal(e.global);
     }
 
     private redrawDotPlot(size: number, scale: number) {

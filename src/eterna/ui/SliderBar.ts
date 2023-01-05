@@ -1,8 +1,9 @@
-import {Graphics, InteractionEvent, Point} from 'pixi.js';
+import {Graphics, Point} from 'pixi.js';
 import {Signal} from 'signals';
 import {
     ContainerObject, DisplayObjectPointerTarget, Dragger, GameObjectRef
 } from 'flashbang';
+import {FederatedPointerEvent} from '@pixi/events';
 
 export default class SliderBar extends ContainerObject {
     // The width (or height, for a horizontal SliderBar) of the thumb
@@ -130,17 +131,17 @@ export default class SliderBar extends ContainerObject {
         });
     }
 
-    private onSliderLineClicked(e: InteractionEvent): void {
+    private onSliderLineClicked(e: FederatedPointerEvent): void {
         if (this._vertical) {
             if (this._height > 0) {
-                this._currentVal = e.data.getLocalPosition(this.container).y / this._height;
+                this._currentVal = this.container.toLocal(e.global).y / this._height;
             } else {
                 this._currentVal = 1;
             }
             this._barRect.y = this._currentVal * (this._height - 10) + 10;
         } else {
             if (this._width > 0) {
-                this._currentVal = e.data.getLocalPosition(this.container).x / this._width;
+                this._currentVal = this.container.toLocal(e.global).x / this._width;
             } else {
                 this._currentVal = 1;
             }

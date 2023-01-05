@@ -36,6 +36,7 @@ import {FontWeight} from 'flashbang/util/TextBuilder';
 import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
 import CopyTextDialog from 'eterna/ui/CopyTextDialog';
+import {FederatedWheelEvent} from '@pixi/events';
 import ThumbnailAndTextButton from './ThumbnailAndTextButton';
 import GameMode from '../GameMode';
 import ButtonWithIcon from './ButtonWithIcon';
@@ -94,7 +95,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         // Background
         this._panelBG = new GraphicsObject();
         this._panelBG.pointerMove.connect((e) => {
-            if (e.data.getLocalPosition(this._panelBG.display).x > 0) {
+            if (this._panelBG.display.toLocal(e.global).x > 0) {
                 e.stopPropagation();
             }
         });
@@ -117,18 +118,17 @@ export default class ViewSolutionOverlay extends ContainerObject {
 
         Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(() => this.updateLayout()));
+        this.regs.add(this.mouseWheel.connect((e) => this.onMouseWheelEvent(e)));
     }
 
-    public onMouseWheelEvent(e: WheelEvent): boolean {
-        if (!this.container.visible || e.x < this.container.position.x) {
-            return false;
-        }
+    public onMouseWheelEvent(e: FederatedWheelEvent) {
+        if (!this.container.visible || e.x < this.container.position.x) return;
 
         // update scroll
         const pxdelta: number = InputUtil.scrollAmount(e, 13, this._scrollView.height);
         this._scrollView.yScrollLocation += pxdelta;
 
-        return true;
+        e.stopPropagation();
     }
 
     public setVoteStatus(voted: boolean) {

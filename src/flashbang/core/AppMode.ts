@@ -3,8 +3,10 @@ import {
     RegistrationGroup, Signal, SignalView, UnitSignal
 } from 'signals';
 import KeyboardInput from 'flashbang/input/KeyboardInput';
-import MouseWheelInput from 'flashbang/input/MouseWheelInput';
 import Assert from 'flashbang/util/Assert';
+import PointerTarget from 'flashbang/input/PointerTarget';
+import DisplayObjectPointerTarget from 'flashbang/input/DisplayObjectPointerTarget';
+import {FederatedPointerEvent, FederatedWheelEvent} from '@pixi/events';
 import GameObject from './GameObject';
 import GameObjectBase from './GameObjectBase';
 import GameObjectRef from './GameObjectRef';
@@ -18,11 +20,9 @@ import Updatable from './Updatable';
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type ObjectID = Object | string;
 
-export default class AppMode {
+export default class AppMode implements PointerTarget {
     /** Default keyboard input processor */
     public readonly keyboardInput: KeyboardInput = new KeyboardInput();
-    /** Default mouse wheel input processor */
-    public readonly mouseWheelInput: MouseWheelInput = new MouseWheelInput();
 
     /** Emitted at the beginning of the update process */
     public get updateBegan(): SignalView<number> { return this._updateBegan; }
@@ -190,11 +190,6 @@ export default class AppMode {
         this.keyboardInput.handleKeyboardEvent(e);
     }
 
-    /** Called when the application receives a mouse wheel event while this mode is active */
-    public onMouseWheelEvent(e: WheelEvent): void {
-        this.mouseWheelInput.handleMouseWheelEvent(e);
-    }
-
     /** Called when a ContextMenu event is fired while this mode is active */
     public onContextMenuEvent(_e: Event): void {
     }
@@ -249,7 +244,6 @@ export default class AppMode {
         this._rootObject = null;
 
         this.keyboardInput.dispose();
-        this.mouseWheelInput.dispose();
 
         this._idObjects = null;
 
@@ -336,6 +330,109 @@ export default class AppMode {
             this._hasPendingResize = true;
         }
     }
+
+    public get target(): Container {
+        Assert.assertIsDefined(this.container);
+        return this.container;
+    }
+
+    public get pointerEnter(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerEnter;
+    }
+
+    public get pointerOver(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerOver;
+    }
+
+    public get pointerOut(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerOut;
+    }
+
+    public get pointerLeave(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerLeave;
+    }
+
+    public get pointerDown(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerDown;
+    }
+
+    public get pointerMove(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerMove;
+    }
+
+    public get pointerUp(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerUp;
+    }
+
+    public get pointerUpOutside(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerUpOutside;
+    }
+
+    public get pointerCancel(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerCancel;
+    }
+
+    public get pointerTap(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerTap;
+    }
+
+    public get mouseWheel(): SignalView<FederatedWheelEvent> {
+        return this.getPointerTarget().mouseWheel;
+    }
+
+    public get pointerEnterCapture(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerEnterCapture;
+    }
+
+    public get pointerOverCapture(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerOverCapture;
+    }
+
+    public get pointerOutCapture(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerOutCapture;
+    }
+
+    public get pointerLeaveCapture(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerLeaveCapture;
+    }
+
+    public get pointerDownCapture(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerDownCapture;
+    }
+
+    public get pointerMoveCapture(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerMoveCapture;
+    }
+
+    public get pointerUpCapture(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerUpCapture;
+    }
+
+    public get pointerUpOutsideCapture(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerUpOutsideCapture;
+    }
+
+    public get pointerCancelCapture(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerCancelCapture;
+    }
+
+    public get pointerTapCapture(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerTapCapture;
+    }
+
+    public get mouseWheelCapture(): SignalView<FederatedWheelEvent> {
+        return this.getPointerTarget().mouseWheelCapture;
+    }
+
+    protected getPointerTarget(): PointerTarget {
+        Assert.assertIsDefined(this.container);
+        if (this._pointerTarget == null) {
+            this._pointerTarget = new DisplayObjectPointerTarget(this.container);
+        }
+        return this._pointerTarget;
+    }
+
+    private _pointerTarget: PointerTarget; // lazily instantiated
 
     protected readonly _updateBegan: Signal<number> = new Signal();
     protected readonly _lateUpdate: Signal<number> = new Signal();

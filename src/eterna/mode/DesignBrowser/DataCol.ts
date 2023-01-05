@@ -1,5 +1,5 @@
 import {
-    Container, Graphics, Text, Sprite, InteractionEvent
+    Container, Graphics, Text, Sprite
 } from 'pixi.js';
 import {Signal, UnitSignal} from 'signals';
 import {
@@ -15,6 +15,7 @@ import UITheme from 'eterna/ui/UITheme';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import SecStruct from 'eterna/rnatypes/SecStruct';
+import {FederatedPointerEvent} from '@pixi/events';
 import {SortOrder} from './SortOptions';
 import SequenceStringListView from './SequenceStringListView';
 import {DesignBrowserDataType, DesignCategory, DBVote} from './DesignBrowserMode';
@@ -186,11 +187,11 @@ export default class DataCol extends ContainerObject {
         this._pairsArray = pairs.slice(0);
     }
 
-    public getMouseIndex(e: InteractionEvent): [number, number] {
+    public getMouseIndex(e: FederatedPointerEvent): [number, number] {
         const {designBrowser: theme} = UITheme;
         const dataStart = theme.headerHeight + theme.filterHeight + theme.dataPadding / 2;
 
-        const mouseLoc = e.data.getLocalPosition(this.container);
+        const mouseLoc = this.container.toLocal(e.global);
         if (mouseLoc.y < dataStart) {
             return [-1, -1];
         }

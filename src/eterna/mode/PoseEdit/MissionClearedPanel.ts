@@ -86,6 +86,7 @@ export default class MissionClearedPanel extends ContainerObject {
             .color(0xffffff)
             .lineHeight(1.2)
             .selectable(false);
+        this._infoObj.display.name = 'InfoTextObj';
         // Images should be centered, even if the HTML doesn't specify it
         DOMObject.applyStyleRecursive(this._infoObj.element, {display: 'block', margin: 'auto'}, false, ['img']);
         this.addObject(this._infoObj, this._infoContainer);
@@ -101,6 +102,7 @@ export default class MissionClearedPanel extends ContainerObject {
                 .color(0xffffff)
                 .lineHeight(1.2)
                 .selectable(false);
+            moreTextObj.display.name = 'MoreTextObj';
             this.addObject(moreTextObj, this._infoContainer);
         }
 

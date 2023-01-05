@@ -162,6 +162,7 @@ export default class Tooltips extends GameObject {
             textField.x = 10;
             textField.y = 10;
             disp.addChild(textField);
+            disp.hitArea = new Rectangle();
             return disp;
         } else {
             return tooltip();

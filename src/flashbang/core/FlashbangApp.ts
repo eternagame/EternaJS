@@ -1,15 +1,25 @@
 import * as log from 'loglevel';
-import {settings, Application, SCALE_MODES} from 'pixi.js';
+import {
+    settings, Application, SCALE_MODES, extensions, InteractionManager, Point
+} from 'pixi.js';
 import {RegistrationGroup, Value} from 'signals';
 import KeyboardEventType from 'flashbang/input/KeyboardEventType';
 import KeyCode from 'flashbang/input/KeyCode';
 import Assert from 'flashbang/util/Assert';
+import {EventSystem} from '@pixi/events';
 import Flashbang from './Flashbang';
 import ModeStack from './ModeStack';
 import Updatable from './Updatable';
 
 // Adds KeyboardEvent.code support to Edge
 import 'js-polyfills/keyboard';
+
+// Added in run()
+declare module '@pixi/core' {
+    interface AbstractRenderer {
+        events: EventSystem
+    }
+}
 
 export default class FlashbangApp {
     /** True if the app is foregrounded */
@@ -26,7 +36,10 @@ export default class FlashbangApp {
     public run(): void {
         window.addEventListener('error', (e: ErrorEvent) => this.onUncaughtError(e));
 
+        extensions.remove(InteractionManager);
         this._pixi = this.createPixi();
+        // Declared on Renderer at the top of this file
+        this._pixi.renderer.addSystem(EventSystem, 'events');
         Assert.assertIsDefined(this.pixiParent);
         this.pixiParent.appendChild(this._pixi.view);
         this._managedInputElements.push(this._pixi.view);
@@ -41,18 +54,16 @@ export default class FlashbangApp {
 
         this._pixi.ticker.add((delta) => this.update(delta));
 
+        // @ts-expect-error Event type is actually FederatedPointerEvent
+        (this._pixi.stage).addEventListener('pointermove', (e: FederatedPointerEvent) => {
+            this._globalMouse = e.global.clone();
+        });
+
         window.addEventListener(KeyboardEventType.KEY_DOWN, (e) => this.onKeyboardEvent(e));
         window.addEventListener(KeyboardEventType.KEY_UP, (e) => this.onKeyboardEvent(e));
-        window.addEventListener('wheel', (e) => this.onMouseWheelEvent(e));
         window.addEventListener('contextmenu', (e) => this.onContextMenuEvent(e));
         window.addEventListener('focus', () => { this.isActive.value = true; });
         window.addEventListener('blur', () => { this.isActive.value = false; });
-
-        // Due to legacy implementation, by default Pixi raises pointermove events on DisplayObjects
-        // even when the mouse is not actually over them. This behavior isn't really desirable, so
-        // we'll change it. Eventually it will be the default.
-        // See https://pixijs.download/release/docs/PIXI.InteractionManager.html#moveWhenInside
-        this._pixi.renderer.plugins.interaction.moveWhenInside = true;
 
         this.isActive.connect((value) => this.onIsActiveChanged(value));
     }
@@ -181,16 +192,6 @@ export default class FlashbangApp {
         }
     }
 
-    protected onMouseWheelEvent(e: WheelEvent): void {
-        const target = e.target;
-        if (target instanceof HTMLElement && !this._managedInputElements.some((el) => el.contains(target))) return;
-
-        const {topMode} = this._modeStack;
-        if (topMode != null) {
-            topMode.onMouseWheelEvent(e);
-        }
-    }
-
     protected onContextMenuEvent(e: Event): void {
         const target = e.target;
         if (target instanceof HTMLElement && !this._managedInputElements.some((el) => el.contains(target))) return;
@@ -225,6 +226,12 @@ export default class FlashbangApp {
     protected onUncaughtError(e: ErrorEvent): void {
         log.error(e);
     }
+
+    public get globalMouse(): Point {
+        return this._globalMouse;
+    }
+
+    private _globalMouse: Point = new Point();
 
     protected _pixi: Application | null;
     protected _regs: RegistrationGroup | null = new RegistrationGroup();

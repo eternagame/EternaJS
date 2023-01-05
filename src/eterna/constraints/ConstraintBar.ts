@@ -2,7 +2,7 @@ import {
     ContainerObject, Flashbang, ParallelTask, LocationTask, Easing, AlphaTask
 } from 'flashbang';
 import {
-    Point, Graphics, Container, Sprite, InteractionEvent
+    Point, Graphics, Container, Sprite
 } from 'pixi.js';
 import {Value} from 'signals';
 import Eterna from 'eterna/Eterna';
@@ -85,24 +85,24 @@ export default class ConstraintBar extends ContainerObject {
                 const bg = new GraphicsObject();
                 this.addObject(bg, this.container);
 
-                bg.pointerDown.connect((e: InteractionEvent) => {
+                bg.pointerDown.connect((e) => {
                     this._backgroundDrag = true;
                     this._drag = true;
-                    this._previousDragPos = e.data.global.x;
+                    this._previousDragPos = e.global.x;
                 });
-                bg.pointerMove.connect((e: InteractionEvent) => {
+                bg.pointerMove.connect((e) => {
                     if (!this._drag) {
                         return;
                     }
-                    const deltaPos = e.data.global.x - this._previousDragPos;
+                    const deltaPos = e.global.x - this._previousDragPos;
                     this.scrollConstraints(deltaPos);
-                    this._previousDragPos = e.data.global.x;
+                    this._previousDragPos = e.global.x;
                 });
-                bg.pointerUp.connect((_e: InteractionEvent) => {
+                bg.pointerUp.connect(() => {
                     this._drag = false;
                     this._backgroundDrag = false;
                 });
-                bg.display.on('pointerupoutside', (_e: InteractionEvent) => {
+                bg.pointerUpOutside.connect(() => {
                     this._drag = false;
                     this._backgroundDrag = false;
                 });
@@ -120,7 +120,7 @@ export default class ConstraintBar extends ContainerObject {
             this._drawerTip = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgConstraintDrawerTip));
             this._background.display.addChild(this._drawerTip);
             this._drawerTip.interactive = true;
-            this._drawerTip.on('pointertap', (_e: InteractionEvent) => this.collapse());
+            this._drawerTip.on('pointertap', () => this.collapse());
             this._drawerTip.visible = false;
         }
 
@@ -149,16 +149,16 @@ export default class ConstraintBar extends ContainerObject {
             this.addObject(constraint.constraintBox, this._constraintsLayer);
 
             if (drawerEnabled) {
-                constraint.constraintBox.pointerDown.connect((e: InteractionEvent) => {
+                constraint.constraintBox.pointerDown.connect((e) => {
                     this._potentialDrag = true;
-                    this._previousDragPos = e.data.global.x;
+                    this._previousDragPos = e.global.x;
                 });
 
-                constraint.constraintBox.pointerMove.connect((e: InteractionEvent) => {
+                constraint.constraintBox.pointerMove.connect((e) => {
                     if (!this._potentialDrag) {
                         return;
                     }
-                    const deltaPos = e.data.global.x - this._previousDragPos;
+                    const deltaPos = e.global.x - this._previousDragPos;
                     if (Math.abs(deltaPos) > 0) {
                         this._drag = true;
                     }
@@ -168,10 +168,10 @@ export default class ConstraintBar extends ContainerObject {
                     }
 
                     this.scrollConstraints(deltaPos);
-                    this._previousDragPos = e.data.global.x;
+                    this._previousDragPos = e.global.x;
                 });
 
-                constraint.constraintBox.pointerOut.connect((_e: InteractionEvent) => {
+                constraint.constraintBox.pointerOut.connect(() => {
                     if (this._backgroundDrag) {
                         return;
                     }
@@ -180,7 +180,7 @@ export default class ConstraintBar extends ContainerObject {
                 });
             }
 
-            constraint.constraintBox.pointerTap.connect((_e: InteractionEvent) => {
+            constraint.constraintBox.pointerTap.connect(() => {
                 this._potentialDrag = false;
                 if (this._drag) {
                     this._drag = false;

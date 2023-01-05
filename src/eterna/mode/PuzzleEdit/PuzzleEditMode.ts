@@ -1,4 +1,4 @@
-import {DisplayObject, InteractionEvent} from 'pixi.js';
+import {DisplayObject} from 'pixi.js';
 import EPars, {RNAPaint, RNABase} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import UndoBlock, {UndoBlockParam, TargetConditions} from 'eterna/UndoBlock';
@@ -49,6 +49,7 @@ import FileInputObject, {HTMLInputEvent} from 'eterna/ui/FileInputObject';
 import ToolbarButton from 'eterna/ui/toolbar/ToolbarButton';
 import Pose3DDialog from 'eterna/pose3D/Pose3DDialog';
 import ModeBar from 'eterna/ui/ModeBar';
+import {FederatedPointerEvent} from '@pixi/events';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
 import StructureInput from './StructureInput';
@@ -184,7 +185,11 @@ export default class PuzzleEditMode extends GameMode {
         };
 
         const bindMousedownEvent = (pose: Pose2D, index: number): void => {
-            pose.startMousedownCallback = (e: InteractionEvent, _closestDist: number, closestIndex: number): void => {
+            pose.startMousedownCallback = (
+                e: FederatedPointerEvent,
+                _closestDist: number,
+                closestIndex: number
+            ): void => {
                 for (let ii = 0; ii < this._numTargets; ++ii) {
                     const poseField: PoseField = poseFields[ii];
                     const poseToNotify = poseField.pose;

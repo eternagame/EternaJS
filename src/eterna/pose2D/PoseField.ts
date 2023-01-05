@@ -1,18 +1,19 @@
-import {Graphics, InteractionEvent, Point} from 'pixi.js';
+import {Graphics, Point, Rectangle} from 'pixi.js';
 import {
-    ContainerObject, KeyboardListener, MouseWheelListener, InputUtil, Flashbang,
+    ContainerObject, KeyboardListener, InputUtil, Flashbang,
     KeyboardEventType, KeyCode, Assert, PointerCapture, HLayoutContainer
 } from 'flashbang';
 import ROPWait from 'eterna/rscript/ROPWait';
 import debounce from 'lodash.debounce';
 import AnnotationManager from 'eterna/AnnotationManager';
 import GameWindow from 'eterna/ui/GameWindow';
+import {FederatedPointerEvent, FederatedWheelEvent} from '@pixi/events';
 import Pose2D from './Pose2D';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
 import RNAAnchorObject from './RNAAnchorObject';
 
 /** Wraps a Pose2D and handles resizing, masking, and input events */
-export default class PoseField extends ContainerObject implements KeyboardListener, MouseWheelListener {
+export default class PoseField extends ContainerObject implements KeyboardListener {
     private static readonly zoomThreshold = 5;
 
     private static readonly SCORES_WIDTH = 115;
@@ -34,21 +35,21 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this.addObject(this._pose, this.container);
 
         this.pointerDown.filter(InputUtil.IsLeftMouse).connect(
-            (e: InteractionEvent) => this.onPointerDown(e)
+            (e: FederatedPointerEvent) => this.onPointerDown(e)
         );
         this.pointerUp.filter(InputUtil.IsLeftMouse).connect(
-            (e: InteractionEvent) => this.onPointerUp(e)
+            (e: FederatedPointerEvent) => this.onPointerUp(e)
         );
         this.pointerMove.connect(
-            (e: InteractionEvent) => this.onPointerMove(e)
+            (e: FederatedPointerEvent) => this.onPointerMove(e)
         );
         this.pointerUpOutside.connect(
-            (e: InteractionEvent) => this.onPointerUp(e)
+            (e: FederatedPointerEvent) => this.onPointerUp(e)
         );
 
         Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.keyboardInput.pushListener(this));
-        this.regs.add(this.mode.mouseWheelInput.pushListener(this));
+        this.regs.add(this.mouseWheel.connect((e) => this.onMouseWheelEvent(e)));
 
         this._energyDisplayLayout = new HLayoutContainer(8);
         this.container.addChild(this._energyDisplayLayout);
@@ -145,6 +146,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
         if (useMask) {
             this._mask = new Graphics().beginFill(0x0).drawRect(0, 0, width, height).endFill();
+            this._mask.hitArea = new Rectangle();
             this.container.addChild(this._mask);
             this.container.mask = this._mask;
         }
@@ -152,8 +154,8 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this.updateEnergyContainer();
     }
 
-    public containsEvent(e: InteractionEvent): boolean {
-        return this.containsPoint(e.data.global.x, e.data.global.y);
+    public containsEvent(e: FederatedPointerEvent): boolean {
+        return this.containsPoint(e.global.x, e.global.y);
     }
 
     /** true if our bounds contains the given global point */
@@ -199,7 +201,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         return this._pose;
     }
 
-    private onPointerDown(e: InteractionEvent): void {
+    private onPointerDown(e: FederatedPointerEvent): void {
         if (Flashbang.app.isControlKeyDown) {
             return;
         }
@@ -214,8 +216,8 @@ export default class PoseField extends ContainerObject implements KeyboardListen
             this.addObject(this._activePointerCapture);
         }
 
-        const pointerId = e.data.identifier;
-        const {x, y} = e.data.global;
+        const pointerId = e.pointerId;
+        const {x, y} = e.global;
         this._interactionCache.set(pointerId, new Point(x, y));
 
         if (this._interactionCache.size === 1) {
@@ -226,10 +228,10 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         e.stopPropagation();
     }
 
-    private onPointerMove(e: InteractionEvent) {
+    private onPointerMove(e: FederatedPointerEvent) {
         this._interactionCache.forEach((_point, pointerId) => {
-            if (pointerId === e.data.identifier) {
-                const {x, y} = e.data.global;
+            if (pointerId === e.pointerId) {
+                const {x, y} = e.global;
                 this._interactionCache.set(pointerId, new Point(x, y));
             }
         });
@@ -341,13 +343,13 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         );
     }
 
-    private onPointerUp(e: InteractionEvent): void {
+    private onPointerUp(e: FederatedPointerEvent): void {
         this._pose.doneColoring();
-        this._pose.onMouseMoved(e.data.global);
+        this._pose.onMouseMoved(e.global);
 
         const eventsToClear: number[] = [];
         this._interactionCache.forEach((_point, pointerId) => {
-            if (pointerId === e.data.identifier) {
+            if (pointerId === e.pointerId) {
                 eventsToClear.push(pointerId);
             }
         });
@@ -377,11 +379,10 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         }
     }
 
-    public onMouseWheelEvent(e: WheelEvent): boolean {
+    public onMouseWheelEvent(e: FederatedWheelEvent) {
         const mouse = Flashbang.globalMouse;
-        Assert.assertIsDefined(mouse);
         if (!this.display.visible || !this.containsPoint(mouse.x, mouse.y)) {
-            return false;
+            return;
         }
         if (e.deltaY < 0) {
             if (e.deltaY < -2 && e.deltaY < this._lastDeltaY) this._debounceZoomIn();
@@ -389,17 +390,15 @@ export default class PoseField extends ContainerObject implements KeyboardListen
             setTimeout(() => {
                 this._lastDeltaY = 0;
             }, 200);
-            return true;
+            e.stopPropagation();
         } else if (e.deltaY > 0) {
             if (e.deltaY > 2 && e.deltaY > this._lastDeltaY) this._debounceZoomOut();
             this._lastDeltaY = e.deltaY;
             setTimeout(() => {
                 this._lastDeltaY = 0;
             }, 200);
-            return true;
+            e.stopPropagation();
         }
-
-        return false;
     }
 
     private updateEnergyDisplaySize(factor: number): void {

@@ -20,8 +20,6 @@ export {default as KeyboardEventType} from './input/KeyboardEventType';
 export {default as KeyboardInput} from './input/KeyboardInput';
 export type {KeyboardListener} from './input/KeyboardInput';
 export {default as KeyCode} from './input/KeyCode';
-export {default as MouseWheelInput} from './input/MouseWheelInput';
-export type {MouseWheelListener} from './input/MouseWheelInput';
 export {default as PointerCapture} from './input/PointerCapture';
 export {default as PointerTarget} from './input/PointerTarget';
 

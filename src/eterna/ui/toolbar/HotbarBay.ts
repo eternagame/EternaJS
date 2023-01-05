@@ -1,7 +1,6 @@
+import {FederatedPointerEvent} from '@pixi/events';
 import {ContainerObject, DisplayUtil, HLayoutContainer} from 'flashbang';
-import {
-    Graphics, InteractionEvent, Point, Rectangle
-} from 'pixi.js';
+import {Graphics, Point, Rectangle} from 'pixi.js';
 import {ToolTipPositioner} from '../help/HelpToolTip';
 import Tooltips from '../Tooltips';
 import ToolbarButton, {BUTTON_HEIGHT, BUTTON_WIDTH} from './ToolbarButton';
@@ -107,7 +106,7 @@ export default class HotbarBay extends ContainerObject {
     }
 
     /** Update indicators that appear when hovering a dragged button over the hotbar  */
-    public updateHoverIndicator(e: InteractionEvent, existsInHotbar: boolean) {
+    public updateHoverIndicator(e: FederatedPointerEvent, existsInHotbar: boolean) {
         this._hoverSwapIndicator.visible = false;
         this._hoverInsertIndicator.visible = false;
         Tooltips.instance?.removeTooltip(this);
@@ -131,7 +130,10 @@ export default class HotbarBay extends ContainerObject {
     }
 
     /** Handle a dropped button if dropped over the hotbar */
-    public handleButtonDrop(e: InteractionEvent, toolId: string): {activated: string[]; removedId?: string;} | null {
+    public handleButtonDrop(
+        e: FederatedPointerEvent,
+        toolId: string
+    ): {activated: string[]; removedId?: string;} | null {
         this._hoverInsertIndicator.visible = false;
         this._hoverSwapIndicator.visible = false;
         const action = this.getHoverAction(e);
@@ -204,9 +206,9 @@ export default class HotbarBay extends ContainerObject {
     }
 
     /** Determine whether and how a button would be handled when dropped at the current mouse position */
-    private getHoverAction(e: InteractionEvent): {action: 'insert' | 'replace', buttonIndex: number} | null {
-        if (DisplayUtil.hitTest(this.container, e.data.global)) {
-            const localX = e.data.getLocalPosition(this.container).x;
+    private getHoverAction(e: FederatedPointerEvent): {action: 'insert' | 'replace', buttonIndex: number} | null {
+        if (DisplayUtil.hitTest(this.container, e.global)) {
+            const localX = this.container.toLocal(e.global).x;
             const buttonIndex = localX > 0 ? Math.floor(localX / BUTTON_WIDTH) : 0;
             const distanceFromButtonLeftEdge = localX % BUTTON_WIDTH;
 

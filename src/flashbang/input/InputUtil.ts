@@ -1,15 +1,15 @@
-import {InteractionEvent} from 'pixi.js';
+import {FederatedPointerEvent, FederatedWheelEvent} from '@pixi/events';
 
 export default class InputUtil {
-    public static IsLeftMouse = (e: InteractionEvent): boolean => {
-        if (e.data.pointerType === 'mouse') {
-            return e.data.button === 0;
+    public static IsLeftMouse = (e: FederatedPointerEvent): boolean => {
+        if (e.pointerType === 'mouse') {
+            return e.button === 0;
         } else {
             return true;
         }
     };
 
-    public static scrollAmount(e: WheelEvent, lineHeight: number, pageHeight: number): number {
+    public static scrollAmount(e: FederatedWheelEvent | WheelEvent, lineHeight: number, pageHeight: number): number {
         switch (e.deltaMode) {
             case WheelEvent.DOM_DELTA_PIXEL:
                 return e.deltaY;

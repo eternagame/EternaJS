@@ -2,18 +2,18 @@ import {Graphics} from 'pixi.js';
 import {
     ContainerObject,
     KeyboardListener,
-    MouseWheelListener,
     DisplayObjectPointerTarget,
     InputUtil,
     Flashbang,
     Assert
 } from 'flashbang';
+import {FederatedWheelEvent} from '@pixi/events';
 
 /** Dialogs that expose a "confirmed" promise will reject with this error if the dialog is canceled */
 export class DialogCanceledError extends Error {}
 
 /** Convenience base class for dialog objects. */
-export default abstract class Dialog<T> extends ContainerObject implements KeyboardListener, MouseWheelListener {
+export default abstract class Dialog<T> extends ContainerObject implements KeyboardListener {
     /** A Promise that will resolve when the dialog is closed. */
     public readonly closed: Promise<T | null>;
 
@@ -57,7 +57,7 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
 
         Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.keyboardInput.pushListener(this));
-        this.regs.add(this.mode.mouseWheelInput.pushListener(this));
+        this.regs.add(this.mouseWheel.connect((e) => this.onMouseWheelEvent(e)));
 
         const updateBG = () => {
             Assert.assertIsDefined(Flashbang.stageWidth);
@@ -102,10 +102,9 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
         return false;
     }
 
-    public onMouseWheelEvent(_e: WheelEvent): boolean {
+    public onMouseWheelEvent(e: FederatedWheelEvent) {
         // When in modal mode, dialogs eat all mousewheel input
-        if (this.modal) return true;
-        return false;
+        if (this.modal) e.stopPropagation();
     }
 
     protected _resolvePromise: (value: T | null) => void;

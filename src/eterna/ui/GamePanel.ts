@@ -1,10 +1,9 @@
-import {
-    Graphics, InteractionEvent, Text
-} from 'pixi.js';
+import {Graphics, Rectangle, Text} from 'pixi.js';
 import {DropShadowFilter} from '@pixi/filter-drop-shadow';
 import Fonts from 'eterna/util/Fonts';
 import {SignalView} from 'signals';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
+import {FederatedPointerEvent} from '@pixi/events';
 import BaseGamePanel from './BaseGamePanel';
 
 export enum GamePanelType {
@@ -151,7 +150,7 @@ export default class GamePanel extends BaseGamePanel {
         return this._borderRadius;
     }
 
-    public get titlePointerDown(): SignalView<InteractionEvent> {
+    public get titlePointerDown(): SignalView<FederatedPointerEvent> {
         return this._titleBackground.pointerDown;
     }
 
@@ -181,6 +180,7 @@ export default class GamePanel extends BaseGamePanel {
                     this._titleText = Fonts.std().bold().fontSize(this._titleFontSize).color(0xffffff)
                         .build();
                     this.container.addChild(this._titleText);
+                    this._titleText.hitArea = new Rectangle();
                 }
 
                 this._titleText.text = this._titleUpperCase ? this._title.toUpperCase() : this._title;

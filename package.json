@@ -64,6 +64,7 @@
     "webpack-merge": "^5.7.3"
   },
   "dependencies": {
+    "@pixi/events": "^6.5.8",
     "@pixi/filter-color-matrix": "^6.5.8",
     "@pixi/filter-drop-shadow": "^4.1.0",
     "@pixi/sound": "^4.0.3",

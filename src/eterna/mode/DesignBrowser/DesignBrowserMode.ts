@@ -1,7 +1,7 @@
 import * as log from 'loglevel';
 import MultiStyleText from 'pixi-multistyle-text';
 import {
-    Container, InteractionEvent, Sprite
+    Container, Sprite
 } from 'pixi.js';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Eterna from 'eterna/Eterna';
@@ -24,6 +24,7 @@ import UITheme from 'eterna/ui/UITheme';
 import {AchievementData} from 'eterna/achievements/AchievementManager';
 import {FontWeight} from 'flashbang/util/TextBuilder';
 import ScrollContainer from 'eterna/ui/ScrollContainer';
+import {FederatedPointerEvent, FederatedWheelEvent} from '@pixi/events';
 import VoteProcessor from './VoteProcessor';
 import ViewSolutionOverlay from './ViewSolutionOverlay';
 import SortOptionsDialog from './SortOptionsDialog';
@@ -299,6 +300,8 @@ export default class DesignBrowserMode extends GameMode {
         )));
 
         this.updateLayout();
+
+        this._content.on('wheel', (e) => this.onMouseWheelEvent(e));
     }
 
     public onResized(): void {
@@ -306,11 +309,7 @@ export default class DesignBrowserMode extends GameMode {
         this.updateLayout();
     }
 
-    public onMouseWheelEvent(e: WheelEvent): void {
-        const handled = this._solutionView?.onMouseWheelEvent(e);
-        if (handled) {
-            return;
-        }
+    public onMouseWheelEvent(e: FederatedWheelEvent): void {
         if (!this.isDialogOrNotifShowing && e.deltaY !== 0 && this._filteredSolutions != null) {
             if (!this.container || !this.container.visible || e.x < this.container.position.x) {
                 return;
@@ -322,8 +321,8 @@ export default class DesignBrowserMode extends GameMode {
             // convert back to lines
             const progress = (this._firstVisSolutionIdx + pxdelta / 14) / this._filteredSolutions.length;
             this._vSlider.setProgress(MathUtil.clamp(progress, 0, 1));
-        } else {
-            super.onMouseWheelEvent(e);
+
+            e.stopPropagation();
         }
     }
 
@@ -540,7 +539,7 @@ export default class DesignBrowserMode extends GameMode {
             });
     }
 
-    private onMouseUp(e: InteractionEvent): void {
+    private onMouseUp(e: FederatedPointerEvent): void {
         if (Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown) {
             this.mark(e);
             return;
@@ -605,7 +604,7 @@ export default class DesignBrowserMode extends GameMode {
         this.updateLayout();
     }
 
-    private onMouseMove(e: InteractionEvent): void {
+    private onMouseMove(e: FederatedPointerEvent): void {
         this._selectionBox.visible = false;
 
         if (this._dataCols == null || this._dialogRef.isLive || this._filteredSolutions == null) {
@@ -635,7 +634,7 @@ export default class DesignBrowserMode extends GameMode {
         this._clickedSelectionBox.visible = idxOffset > 0;
     }
 
-    private mark(e: InteractionEvent): void {
+    private mark(e: FederatedPointerEvent): void {
         if (this._dataCols == null) {
             this._markerBoxes.visible = false;
             return;

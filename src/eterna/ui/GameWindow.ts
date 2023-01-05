@@ -3,13 +3,14 @@ import {
     Assert, ContainerObject, DisplayUtil, Dragger, Flashbang, HAlign, MathUtil, SpriteObject, VAlign, Vector2
 } from 'flashbang';
 import {
-    Container, Graphics, InteractionEvent, Point, Rectangle, Sprite
+    Container, Graphics, Point, Rectangle, Sprite
 } from 'pixi.js';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {Signal, SignalView} from 'signals';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
 import RScriptArrow from 'eterna/rscript/RScriptArrow';
+import {FederatedPointerEvent} from '@pixi/events';
 import GameButton from './GameButton';
 import GamePanel from './GamePanel';
 import ScrollBox from './ScrollBox';
@@ -92,6 +93,8 @@ export default class GameWindow extends ContainerObject {
         this._dragRibbing = new Graphics();
         this.container.addChild(this._dragRibbing);
         this._dragRibbing.visible = this._movable;
+        // Let interaction pass through to the title bar background
+        this._dragRibbing.hitArea = new Rectangle();
 
         if (this._movable) {
             this.regs.add(this._panel.titlePointerDown.connect((e) => this.handleMove(e)));
@@ -119,7 +122,7 @@ export default class GameWindow extends ContainerObject {
         this.addObject(this._resizeHitTarget, this.container);
         if (this._resizable) {
             this.regs.add(this._resizeHitTarget.pointerDown.connect((e) => {
-                const localPos = e.data.getLocalPosition(this._panel.display);
+                const localPos = this._panel.display.toLocal(e.global);
                 const bottom = localPos.y > this._panel.height - (RESIZE_MARGIN * 2);
                 const top = !bottom && localPos.y < (RESIZE_MARGIN * 2);
                 const right = localPos.x > this._panel.width - (RESIZE_MARGIN * 2);
@@ -133,7 +136,7 @@ export default class GameWindow extends ContainerObject {
             }));
 
             this.regs.add(this._resizeHitTarget.pointerMove.connect((e) => {
-                const localPos = e.data.getLocalPosition(this._panel.display);
+                const localPos = this._panel.display.toLocal(e.global);
                 // TODO: Move cursor?
                 if (this._resizable) {
                     const bottom = localPos.y > this._panel.height - (RESIZE_MARGIN * 2);
@@ -390,11 +393,11 @@ export default class GameWindow extends ContainerObject {
         this.layout();
     }
 
-    private handleMove(e: InteractionEvent) {
+    private handleMove(e: FederatedPointerEvent) {
         const dragger = new Dragger();
         this.addObject(dragger);
 
-        const dragStartingPoint = e.data.global.clone();
+        const dragStartingPoint = e.global.clone();
         const initialX = this.display.x + RESIZE_MARGIN;
         const initialY = this.display.y + RESIZE_MARGIN;
         this.regs.add(dragger.dragged.connect((p: Point) => {
@@ -408,7 +411,7 @@ export default class GameWindow extends ContainerObject {
         }));
     }
 
-    private handleResize(e: InteractionEvent, from: {
+    private handleResize(e: FederatedPointerEvent, from: {
         bottom?: boolean;
         top?: boolean;
         left?: boolean;
@@ -417,7 +420,7 @@ export default class GameWindow extends ContainerObject {
         const dragger = new Dragger();
         this.addObject(dragger);
 
-        const dragStartingPoint = e.data.global.clone();
+        const dragStartingPoint = e.global.clone();
         // Note that we're using the actual width/height to modify, not the target. If we shrink the
         // screen to the point we have to shrink beyond the target width but don't resize,
         // expanding the screen again should bring it back to the original target. However if we

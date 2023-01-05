@@ -312,7 +312,8 @@ export default class GameDropdown<Option extends string = string> extends Contai
         );
 
         this._activeCapture = new PointerCapture(this._popup.display, (e) => {
-            if (e.type === 'pointertap') {
+            // For some reason, EventSystem is firing click not pointertap https://github.com/pixijs/pixijs/issues/9035
+            if (e.type === 'pointertap' || e.type === 'click') {
                 this._hidePopup();
             }
             e.stopPropagation();

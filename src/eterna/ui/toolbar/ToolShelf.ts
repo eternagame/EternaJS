@@ -86,7 +86,8 @@ class TabBar<Title extends string = string> extends ContainerObject {
             const label = new TabLabel(title);
             this.addObject(label, this._tabLayout);
             this._tabLabels.push(label);
-            this.regs.add(label.pointerTap.connect(() => {
+            this.regs.add(label.pointerTap.connect((e) => {
+                e.stopPropagation();
                 this.currentTab.value = title;
             }));
         }

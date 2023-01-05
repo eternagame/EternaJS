@@ -1,9 +1,10 @@
 import {ContainerObject, Assert} from 'flashbang';
 import {
     Container,
-    Graphics, InteractionEvent, Point, Rectangle, TextMetrics
+    Graphics, Point, Rectangle, TextMetrics
 } from 'pixi.js';
 import Fonts from 'eterna/util/Fonts';
+import {FederatedPointerEvent} from '@pixi/events';
 
 // AMW we have to be content to accept our positioner may
 // in fact return null (if we want to use getbounds() for
@@ -89,7 +90,7 @@ export default class HelpToolTip extends ContainerObject {
 
         const background = new Graphics();
         background.interactive = true;
-        background.on('click', (e: InteractionEvent) => e.stopPropagation());
+        background.on('pointerTap', (e: FederatedPointerEvent) => e.stopPropagation());
         background.beginFill(theme.colors.background, 1);
         background.drawRoundedRect(backgroundX, backgroundY, width, height, theme.borderRadius);
         textElem.position.set(

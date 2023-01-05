@@ -1,5 +1,6 @@
 import {
     Graphics,
+    Rectangle,
     Sprite
 } from 'pixi.js';
 import {Signal, Registration} from 'signals';
@@ -293,6 +294,7 @@ export default class FileInputObject extends DOMObject<HTMLInputElement | HTMLDi
                 .build();
             const textMask = new Graphics().beginFill(0x0).drawRect(0, 0, this.width, this.height).endFill();
             this._fakeFileInput.addChild(textMask);
+            textMask.hitArea = new Rectangle();
             labelText.mask = textMask;
             if (this._obj instanceof HTMLInputElement || this._obj instanceof HTMLDivElement) {
                 const x = icon

@@ -1,5 +1,6 @@
 import {
     Graphics,
+    Rectangle,
     Sprite
 } from 'pixi.js';
 import {Signal} from 'signals';
@@ -580,6 +581,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
 
         const textMask = new Graphics().beginFill(0x0).drawRect(0, 0, this.width, this.height).endFill();
         this._fakeTextInput.addChild(textMask);
+        textMask.hitArea = new Rectangle();
 
         let displayText = this.text;
         let textColor = this._textColor;

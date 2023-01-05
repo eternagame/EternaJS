@@ -1,25 +1,27 @@
-import {InteractionEvent, utils as PixiUtils} from 'pixi.js';
+import {FederatedEvent} from '@pixi/events';
+import {utils as PixiUtils} from 'pixi.js';
 import {
     AbstractSignal, FilteredSignal, MappedSignal, SignalView
 } from 'signals';
 
-/** Redispatches a pixi InteractionEvent as a Signal */
-export default class EventSignal extends AbstractSignal<InteractionEvent> implements SignalView<InteractionEvent> {
+/** Redispatches a pixi FederatedPointerEvent as a Signal */
+export default class EventSignal<FEvent extends FederatedEvent> extends AbstractSignal<FEvent>
+    implements SignalView<FEvent> {
     constructor(target: PixiUtils.EventEmitter, eventType: string | symbol) {
         super();
         this._target = target;
         this._eventType = eventType;
     }
 
-    public emit(e: InteractionEvent) {
+    public emit(e: FEvent) {
         this.notifyEmit(e);
     }
 
-    public map<U>(func: (value: InteractionEvent) => U): SignalView<U> {
+    public map<U>(func: (value: FEvent) => U): SignalView<U> {
         return MappedSignal.create(this, func);
     }
 
-    public filter(pred: (value: InteractionEvent) => boolean): SignalView<InteractionEvent> {
+    public filter(pred: (value: FEvent) => boolean): SignalView<FEvent> {
         return new FilteredSignal(this, pred);
     }
 
@@ -57,5 +59,5 @@ export default class EventSignal extends AbstractSignal<InteractionEvent> implem
     protected _eventType: string | symbol;
     protected _connected: boolean;
 
-    private readonly _emitEvent = (e: InteractionEvent) => this.notifyEmit(e);
+    private readonly _emitEvent = (e: FEvent) => this.notifyEmit(e);
 }

@@ -50,7 +50,7 @@ export default class Dragger extends GameObject {
 
         const touchable = new DisplayObjectPointerTarget(this._disp);
         this.regs.add(touchable.pointerMove.connect((e) => {
-            const point = new Point(e.data.global.x, e.data.global.y);
+            const point = new Point(e.global.x, e.global.y);
             this.updateMouseLoc(point);
             this.dragged.emit(point);
 
@@ -58,7 +58,7 @@ export default class Dragger extends GameObject {
         }));
 
         this.regs.add(touchable.pointerUp.connect((e) => {
-            this.complete(new Point(e.data.global.x, e.data.global.y));
+            this.complete(new Point(e.global.x, e.global.y));
             this.destroySelf();
 
             e.stopPropagation();

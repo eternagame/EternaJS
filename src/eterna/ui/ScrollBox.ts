@@ -1,6 +1,5 @@
 import {
     Container,
-    InteractionEvent,
     Point
 } from 'pixi.js';
 import {
@@ -8,7 +7,6 @@ import {
     ContainerObject,
     Assert,
     InputUtil,
-    MouseWheelListener,
     DisplayUtil,
     HAlign,
     VAlign,
@@ -16,6 +14,7 @@ import {
     PointerCapture
 } from 'flashbang';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
+import {FederatedPointerEvent, FederatedWheelEvent} from '@pixi/events';
 import ScrollContainer from './ScrollContainer';
 
 enum DragMode {
@@ -26,7 +25,7 @@ enum DragMode {
 }
 
 /** Contains scrollable content with scrollbars and drag scrolling */
-export default class ScrollBox extends ContainerObject implements MouseWheelListener {
+export default class ScrollBox extends ContainerObject {
     constructor(
         width: number,
         height: number,
@@ -61,9 +60,10 @@ export default class ScrollBox extends ContainerObject implements MouseWheelList
         this.htmlWrapper.addEventListener('pointerdown', (e) => this.onDragPointerDown(e, DragMode.SURFACE));
         this.htmlWrapper.addEventListener('pointerup', () => this.onDragPointerUp());
         this.htmlWrapper.addEventListener('pointermove', (e) => this.onDragPointerMove(e));
+        this.htmlWrapper.addEventListener('wheel', (e) => this.onMouseWheelEvent(e));
 
         Assert.assertIsDefined(this.mode);
-        this.regs.add(this.mode.mouseWheelInput.pushListener(this));
+        this.regs.add(this.mouseWheel.connect((e) => this.onMouseWheelEvent(e)));
         Flashbang.app.addManagedInputElement(this.htmlWrapper);
 
         const thumbHeight = (
@@ -248,10 +248,10 @@ export default class ScrollBox extends ContainerObject implements MouseWheelList
         return this._scrollContainer.htmlWrapper;
     }
 
-    private onDragPointerDown(event: InteractionEvent | PointerEvent, mode: DragMode) {
+    private onDragPointerDown(event: FederatedPointerEvent | PointerEvent, mode: DragMode) {
         this._dragging = mode;
-        if (event instanceof InteractionEvent) {
-            this._dragStartPoint = event.data.global.clone();
+        if (event instanceof FederatedPointerEvent) {
+            this._dragStartPoint = event.global.clone();
         } else {
             if (event.pointerType === 'mouse') {
                 this._dragging = DragMode.NONE;
@@ -264,11 +264,12 @@ export default class ScrollBox extends ContainerObject implements MouseWheelList
         this._dragStartHThumb = this._hScrollThumb.display.position.clone();
 
         // This way you don't need to keep your pointer on the track while dragging
-        const capture = new PointerCapture(this.display, (e) => {
-            if (e.type === 'pointermove') this.onDragPointerMove(e);
+        this._dragCapture = new PointerCapture(null, (e) => {
+            if (e.type === 'pointermove') this.onDragPointerMove(e as FederatedPointerEvent);
             if (e.type === 'pointerup') this.onDragPointerUp();
+            e.stopPropagation();
         });
-        this.addObject(capture);
+        this.addObject(this._dragCapture);
     }
 
     private onDragPointerUp() {
@@ -277,10 +278,10 @@ export default class ScrollBox extends ContainerObject implements MouseWheelList
         this._dragCapture = null;
     }
 
-    private onDragPointerMove(event: InteractionEvent | PointerEvent) {
+    private onDragPointerMove(event: FederatedPointerEvent | PointerEvent) {
         if (this._dragging !== DragMode.NONE) {
-            const currX = event instanceof InteractionEvent ? event.data.global.x : event.x;
-            const currY = event instanceof InteractionEvent ? event.data.global.y : event.y;
+            const currX = event.x;
+            const currY = event.y;
             const xDragRange = currX - this._dragStartPoint.x;
             const yDragRange = currY - this._dragStartPoint.y;
             switch (this._dragging) {
@@ -309,7 +310,7 @@ export default class ScrollBox extends ContainerObject implements MouseWheelList
         }
     }
 
-    public onMouseWheelEvent(e: WheelEvent): boolean {
+    public onMouseWheelEvent(e: FederatedWheelEvent | WheelEvent) {
         const noScrollX = Flashbang.app.isShiftKeyDown && (
             this._scrollContainer.content.width <= 0
             || this._scrollContainer.content.width <= this._width
@@ -319,7 +320,7 @@ export default class ScrollBox extends ContainerObject implements MouseWheelList
             || this._scrollContainer.content.height <= this._height
         );
 
-        if (noScrollX || noScrollY) return false;
+        if (noScrollX || noScrollY) return;
 
         if (Flashbang.app.isShiftKeyDown) {
             // TODO: Does the specified line height still make sense with the horizontal scroll?
@@ -331,7 +332,7 @@ export default class ScrollBox extends ContainerObject implements MouseWheelList
         }
         this.updateScrollThumbs();
 
-        return true;
+        e.stopPropagation();
     }
 
     private _scrollContainer: ScrollContainer;

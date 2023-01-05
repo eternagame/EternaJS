@@ -1,6 +1,6 @@
 import * as log from 'loglevel';
 import {
-    Container, DisplayObject, Point, Sprite, Text, Rectangle, InteractionEvent
+    Container, DisplayObject, Point, Sprite, Text, Rectangle
 } from 'pixi.js';
 import EPars, {RNABase, RNAPaint} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
@@ -74,6 +74,7 @@ import StateToggle from 'eterna/ui/StateToggle';
 import Pose3DDialog from 'eterna/pose3D/Pose3DDialog';
 import ModeBar from 'eterna/ui/ModeBar';
 import KeyedCollection from 'eterna/util/KeyedCollection';
+import {FederatedPointerEvent} from '@pixi/events';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -586,7 +587,7 @@ export default class PoseEditMode extends GameMode {
         };
 
         const bindMousedownEvent = (pose: Pose2D, index: number) => {
-            pose.startMousedownCallback = ((e: InteractionEvent, _closestDist: number, closestIndex: number) => {
+            pose.startMousedownCallback = ((e: FederatedPointerEvent, _closestDist: number, closestIndex: number) => {
                 for (let ii = 0; ii < poseFields.length; ++ii) {
                     const poseField: PoseField = poseFields[ii];
                     const poseToNotify: Pose2D = poseField.pose;

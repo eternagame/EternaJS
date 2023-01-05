@@ -1,8 +1,9 @@
-import {DisplayObject, InteractionEvent} from 'pixi.js';
+import {DisplayObject} from 'pixi.js';
 import {SignalView} from 'signals';
 import GameObject from 'flashbang/core/GameObject';
 import PointerTarget from 'flashbang/input/PointerTarget';
 import DisplayObjectPointerTarget from 'flashbang/input/DisplayObjectPointerTarget';
+import {FederatedPointerEvent, FederatedWheelEvent} from '@pixi/events';
 
 /** A convenience class that manages a DisplayObject directly. */
 export default class SceneObject<T extends DisplayObject = DisplayObject> extends GameObject implements PointerTarget {
@@ -19,36 +20,92 @@ export default class SceneObject<T extends DisplayObject = DisplayObject> extend
         return this._display;
     }
 
-    public get pointerOver(): SignalView<InteractionEvent> {
+    public get pointerEnter(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerEnter;
+    }
+
+    public get pointerOver(): SignalView<FederatedPointerEvent> {
         return this.getPointerTarget().pointerOver;
     }
 
-    public get pointerOut(): SignalView<InteractionEvent> {
+    public get pointerOut(): SignalView<FederatedPointerEvent> {
         return this.getPointerTarget().pointerOut;
     }
 
-    public get pointerDown(): SignalView<InteractionEvent> {
+    public get pointerLeave(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerLeave;
+    }
+
+    public get pointerDown(): SignalView<FederatedPointerEvent> {
         return this.getPointerTarget().pointerDown;
     }
 
-    public get pointerMove(): SignalView<InteractionEvent> {
+    public get pointerMove(): SignalView<FederatedPointerEvent> {
         return this.getPointerTarget().pointerMove;
     }
 
-    public get pointerUp(): SignalView<InteractionEvent> {
+    public get pointerUp(): SignalView<FederatedPointerEvent> {
         return this.getPointerTarget().pointerUp;
     }
 
-    public get pointerUpOutside(): SignalView<InteractionEvent> {
+    public get pointerUpOutside(): SignalView<FederatedPointerEvent> {
         return this.getPointerTarget().pointerUpOutside;
     }
 
-    public get pointerCancel(): SignalView<InteractionEvent> {
+    public get pointerCancel(): SignalView<FederatedPointerEvent> {
         return this.getPointerTarget().pointerCancel;
     }
 
-    public get pointerTap(): SignalView<InteractionEvent> {
+    public get pointerTap(): SignalView<FederatedPointerEvent> {
         return this.getPointerTarget().pointerTap;
+    }
+
+    public get mouseWheel(): SignalView<FederatedWheelEvent> {
+        return this.getPointerTarget().mouseWheel;
+    }
+
+    public get pointerEnterCapture(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerEnterCapture;
+    }
+
+    public get pointerOverCapture(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerOverCapture;
+    }
+
+    public get pointerOutCapture(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerOutCapture;
+    }
+
+    public get pointerLeaveCapture(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerLeaveCapture;
+    }
+
+    public get pointerDownCapture(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerDownCapture;
+    }
+
+    public get pointerMoveCapture(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerMoveCapture;
+    }
+
+    public get pointerUpCapture(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerUpCapture;
+    }
+
+    public get pointerUpOutsideCapture(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerUpOutsideCapture;
+    }
+
+    public get pointerCancelCapture(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerCancelCapture;
+    }
+
+    public get pointerTapCapture(): SignalView<FederatedPointerEvent> {
+        return this.getPointerTarget().pointerTapCapture;
+    }
+
+    public get mouseWheelCapture(): SignalView<FederatedWheelEvent> {
+        return this.getPointerTarget().mouseWheelCapture;
     }
 
     protected getPointerTarget(): PointerTarget {

@@ -1,6 +1,6 @@
 import * as log from 'loglevel';
 import {
-    Container, Graphics, Point, Sprite, Texture, Rectangle, InteractionEvent
+    Container, Graphics, Point, Sprite, Texture, Rectangle
 } from 'pixi.js';
 import {Registration, Signal} from 'signals';
 import EPars, {RNABase, RNAPaint} from 'eterna/EPars';
@@ -31,6 +31,7 @@ import ContextMenu from 'eterna/ui/ContextMenu';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import AnnotationView from 'eterna/ui/AnnotationView';
 import AnnotationDialog from 'eterna/ui/AnnotationDialog';
+import {FederatedPointerEvent} from '@pixi/events';
 import Base from './Base';
 import BaseDrawFlags from './BaseDrawFlags';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
@@ -65,7 +66,7 @@ enum FrameUpdateState {
 export const PLAYER_MARKER_LAYER = 'Markers';
 export const SCRIPT_MARKER_LAYER = 'Script';
 
-export type PoseMouseDownCallback = (e: InteractionEvent, closestDist: number, closestIndex: number) => void;
+export type PoseMouseDownCallback = (e: FederatedPointerEvent, closestDist: number, closestIndex: number) => void;
 export type PosePickCallback = (closestIndex: number) => void;
 
 export default class Pose2D extends ContainerObject implements Updatable {
@@ -209,7 +210,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._strandLabel.display.visible = false;
         this.addObject(this._strandLabel, this.container);
 
-        this.pointerMove.connect((p) => this.onMouseMoved(p.data.global));
+        this.pointerMove.connect((p) => this.onMouseMoved(p.global));
         this.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => {
             this.callStartMousedownCallback(e);
 
@@ -594,7 +595,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public onPoseMouseDownPropagate(e: InteractionEvent, closestIndex: number): void {
+    public onPoseMouseDownPropagate(e: FederatedPointerEvent, closestIndex: number): void {
         const altDown: boolean = Flashbang.app.isAltKeyDown;
         const ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
         const ctrlDownOrBaseMarking = ctrlDown || this.currentColor === RNAPaint.BASE_MARK;
@@ -921,7 +922,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._customLayoutChanged = true;
     }
 
-    public onPoseMouseDown(e: InteractionEvent, closestIndex: number): void {
+    public onPoseMouseDown(e: FederatedPointerEvent, closestIndex: number): void {
         const altDown: boolean = Flashbang.app.isAltKeyDown;
         const shiftDown: boolean = Flashbang.app.isShiftKeyDown;
         const ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
@@ -2142,8 +2143,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._annotationManager.deselectSelected();
     }
 
-    public callStartMousedownCallback(e: InteractionEvent): void {
-        e.data.getLocalPosition(this.display, Pose2D.P);
+    public callStartMousedownCallback(e: FederatedPointerEvent): void {
+        this.display.toLocal(e.global, undefined, Pose2D.P);
         const mouseX: number = Pose2D.P.x;
         const mouseY: number = Pose2D.P.y;
 

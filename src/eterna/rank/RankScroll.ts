@@ -1,5 +1,5 @@
 import {
-    Graphics, Sprite
+    Graphics, Rectangle, Sprite
 } from 'pixi.js';
 import {
     ContainerObject, LocationTask, Easing, SerialTask, VisibleTask, DelayTask,
@@ -247,6 +247,7 @@ export default class RankScroll extends ContainerObject {
         maskTop.beginFill(0x00FF00);
         maskTop.drawRect(0, 0, RankBoard.ROW_WIDTH, sizeIndicator * RankBoard.ROW_HEIGHT);
         this.container.addChild(maskTop);
+        maskTop.hitArea = new Rectangle();
         this._rankBoardTop.display.mask = maskTop;
         this._rankBoardTop.display.position.set(
             0, -((rankDataTop.length - sizeIndicator) * RankBoard.ROW_HEIGHT)
@@ -263,6 +264,7 @@ export default class RankScroll extends ContainerObject {
             RankBoard.ROW_WIDTH, sizeIndicator * RankBoard.ROW_HEIGHT
         );
         this.container.addChild(maskBottom);
+        maskBottom.hitArea = new Rectangle();
         this._rankBoardBottom.display.mask = maskBottom;
 
         this._rankBoardBottom.display.position.set(0,

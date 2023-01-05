@@ -14,9 +14,10 @@ import {
 import {FontWeight} from 'flashbang/util/TextBuilder';
 import log from 'loglevel';
 import {
-    Container, Graphics, InteractionEvent, Point, Text
+    Container, Graphics, Point, Text
 } from 'pixi.js';
 import {Connection, RegistrationGroup} from 'signals';
+import {FederatedPointerEvent, FederatedWheelEvent} from '@pixi/events';
 import AnnotationPanelDialog from '../AnnotationPanelDialog';
 import BoosterDialog from '../BoosterDialog';
 import GameButton from '../GameButton';
@@ -482,7 +483,7 @@ export default class Toolbar extends ContainerObject {
                 else hide();
             }));
             this._autohideRegs.add(this.pointerOver.connect(unhide));
-            this._autohideRegs.add(this.pointerOut.connect(hide));
+            this._autohideRegs.add(this.pointerLeave.connect(hide));
 
             hide();
         } else {
@@ -683,7 +684,7 @@ export default class Toolbar extends ContainerObject {
             draggingButton: ToolbarButton
         } = {name: 'initial'};
 
-        const captureCallback = (e: InteractionEvent) => {
+        const captureCallback = (e: FederatedPointerEvent | FederatedWheelEvent) => {
             switch (state.name) {
                 case 'initial':
                     // This should never happen because we destroy the PointerCapture before resetting the
@@ -697,7 +698,7 @@ export default class Toolbar extends ContainerObject {
                         // 5px is rather arbitrary for "has started to move", but should be fine. It's not super
                         // noticeable, and if we run into issues where users find clicks being interpreted as drags
                         // (because they're actually moving their mouse/finger slightly), we can increase
-                        if (Vector2.distance(state.downPos.x, state.downPos.y, e.data.global.x, e.data.global.y) > 5) {
+                        if (Vector2.distance(state.downPos.x, state.downPos.y, e.global.x, e.global.y) > 5) {
                             const buttonCopy = button.clone();
                             // Temporarily own this object + put it on the top of the display stack
                             Assert.assertIsDefined(this.mode);
@@ -721,11 +722,11 @@ export default class Toolbar extends ContainerObject {
                     e.stopPropagation();
                     switch (e.type) {
                         case 'pointermove': {
-                            state.draggingButton.display.position.copyFrom(e.data.global);
+                            state.draggingButton.display.position.copyFrom(e.global);
                             const existsInHotbar = this._leftBay.isToolActive(button.id)
                                 || this._rightBay.isToolActive(button.id);
-                            this._leftBay.updateHoverIndicator(e, existsInHotbar);
-                            this._rightBay.updateHoverIndicator(e, existsInHotbar);
+                            this._leftBay.updateHoverIndicator(e as FederatedPointerEvent, existsInHotbar);
+                            this._rightBay.updateHoverIndicator(e as FederatedPointerEvent, existsInHotbar);
                             break;
                         }
                         case 'pointercancel':
@@ -741,7 +742,7 @@ export default class Toolbar extends ContainerObject {
                             // If we've added a tool to one bay, make sure it's removed from the other bay
                             // (and if it's replacing an existing tool, the tool that gets popped should
                             // go into the other bay in it's place, as it's a swap)
-                            const leftUpdate = this._leftBay.handleButtonDrop(e, button.id);
+                            const leftUpdate = this._leftBay.handleButtonDrop(e as FederatedPointerEvent, button.id);
                             if (leftUpdate) {
                                 const rightSubUpdate = this._rightBay.deactivateTool(button.id, leftUpdate.removedId);
                                 if (this._type === ToolbarType.PUZZLEMAKER) {
@@ -756,7 +757,7 @@ export default class Toolbar extends ContainerObject {
                                     };
                                 }
                             }
-                            const rightUpdate = this._rightBay.handleButtonDrop(e, button.id);
+                            const rightUpdate = this._rightBay.handleButtonDrop(e as FederatedPointerEvent, button.id);
                             if (rightUpdate) {
                                 const leftSubUpdate = this._leftBay.deactivateTool(button.id, rightUpdate.removedId);
                                 if (this._type === ToolbarType.PUZZLEMAKER) {
@@ -798,7 +799,7 @@ export default class Toolbar extends ContainerObject {
         this.regs.add(button.pointerDown.connect((e) => {
             state = {
                 name: 'pointerdown',
-                downPos: e.data.global.clone(),
+                downPos: e.global.clone(),
                 capture: new PointerCapture(null, captureCallback)
             };
             this.addObject(state.capture);
