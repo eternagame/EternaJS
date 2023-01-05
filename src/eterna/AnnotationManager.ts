@@ -480,9 +480,12 @@ export default class AnnotationManager {
      * @param annotation total data of annotation of interest
      * @param isSelected desired selection value
      */
-    public setAnnotationSelection(annotation: AnnotationPanelItem | AnnotationData, isSelected: boolean): void {
+    public setAnnotationSelection(annotation: AnnotationPanelItem | AnnotationData, isSelected: boolean): boolean {
         const [parentNode, index] = this.getRelevantParentNode(annotation);
         if (parentNode && index != null) {
+            // If the selected state didn't change, don't redraw
+            if (parentNode[index].selected === isSelected) return false;
+
             if (isSelected) {
                 this.deselectSelected();
                 this._selectedItem = parentNode[index];
@@ -515,7 +518,10 @@ export default class AnnotationManager {
             parentNode[index].selected = isSelected;
 
             this.updateAnnotationViews();
+            return true;
         }
+
+        return false;
     }
 
     /**
@@ -1025,8 +1031,10 @@ export default class AnnotationManager {
             });
 
             view.pointerDown.connect((e) => {
-                e.stopPropagation();
-                this.setAnnotationSelection(item, true);
+                const updated = this.setAnnotationSelection(item, true);
+                if (updated) {
+                    e.stopPropagation();
+                }
             });
             view.isMoving.connect((moving: boolean) => {
                 this.isMovingAnnotation = moving;

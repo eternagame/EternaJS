@@ -84,11 +84,6 @@ export default class GamePanel extends BaseGamePanel {
     }
 
     protected added() {
-        // Clicks should not pass through the panel
-        this.regs.add(this.pointerDown.connect((e) => {
-            e.stopPropagation();
-        }));
-
         this._background = new Graphics();
         if (this._dropShadow) {
             this._background.filters = [new DropShadowFilter()];

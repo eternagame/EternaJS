@@ -51,7 +51,9 @@ export default class AnnotationView extends ContainerObject {
             borderColor: 0x2F94D1,
             borderAlpha: this._item.selected ? 1 : 0
         });
-        this._panel.pointerDown.connect(() => {
+        this.addObject(this._panel, this.container);
+
+        this.pointerDown.connect((e) => {
             if (this.isMoving.value) {
                 this._draggerRef.destroyObject();
                 const dragger = new Dragger();
@@ -73,13 +75,13 @@ export default class AnnotationView extends ContainerObject {
                     this._draggedPosition = endPoint;
                 });
             }
+            e.stopPropagation();
         });
-        this._panel.pointerUp.connect(() => {
+        this.pointerUp.connect(() => {
             if (this.isMoving.value) {
                 this._draggerRef.destroyObject();
             }
         });
-        this.addObject(this._panel, this.container);
 
         if (
             !this._item.layerId
@@ -132,7 +134,7 @@ export default class AnnotationView extends ContainerObject {
                 this._editButton = new GameButton()
                     .allStates(Bitmaps.ImgPencil)
                     .tooltip('Edit');
-                this._editButton.pointerDown.connect((e) => {
+                this._editButton.pointerTap.connect((e) => {
                     this.onEditButtonPressed.emit();
                     e.stopPropagation();
                 });
@@ -142,7 +144,7 @@ export default class AnnotationView extends ContainerObject {
                 this._moveButton = new GameButton()
                     .allStates(Bitmaps.ImgPointerHand)
                     .tooltip('Move');
-                this._moveButton.pointerDown.connect((e) => {
+                this._moveButton.pointerTap.connect((e) => {
                     this.isMoving.value = true;
                     this._panel.color = 0x2F94D1;
                     this._panel.alpha = 1;
@@ -192,7 +194,7 @@ export default class AnnotationView extends ContainerObject {
                 this._releaseButton = new GameButton()
                     .allStates(Bitmaps.ImgUnlock)
                     .tooltip('Release Position');
-                this._releaseButton.pointerDown.connect((e) => {
+                this._releaseButton.pointerTap.connect((e) => {
                     e.stopPropagation();
 
                     // Hide Release Position Button
@@ -220,7 +222,7 @@ export default class AnnotationView extends ContainerObject {
                 this._saveButton = new GameButton()
                     .allStates(Bitmaps.ImgAnnotationCheckmark)
                     .tooltip('Save');
-                this._saveButton.pointerDown.connect((e) => {
+                this._saveButton.pointerTap.connect((e) => {
                     this.isMoving.value = false;
                     this._panel.color = 0xFFFFFF;
                     this._panel.alpha = 0.07;
@@ -262,7 +264,7 @@ export default class AnnotationView extends ContainerObject {
                 this._cancelMoveButton = new GameButton()
                     .allStates(Bitmaps.ImgAnnotationCross)
                     .tooltip('Cancel');
-                this._cancelMoveButton.pointerDown.connect((e) => {
+                this._cancelMoveButton.pointerTap.connect((e) => {
                     this.isMoving.value = false;
                     this._panel.color = 0xFFFFFF;
                     this._panel.alpha = 0.07;
