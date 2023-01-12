@@ -177,7 +177,7 @@ export default class PointerEventPropagator extends GameObject {
             case 'pointerout': return null;
             case 'pointerover': return null;
             // For some reason, EventSystem is firing click not pointertap https://github.com/pixijs/pixijs/issues/9035
-            case 'click': return 'click';
+            case 'click': return null;
             case 'pointertap': return null;
             case 'pointerup': return 'touchend';
             case 'pointerupoutside': return null;
