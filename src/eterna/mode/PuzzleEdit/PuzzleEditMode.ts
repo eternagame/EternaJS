@@ -14,7 +14,7 @@ import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/toolbar/Nuc
 import Folder from 'eterna/folding/Folder';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import {
-    Base64, DisplayUtil, HAlign, VAlign, KeyCode, Assert, KeyboardEventType, Flashbang
+    Base64, DisplayUtil, HAlign, VAlign, KeyCode, Assert, KeyboardEventType, Flashbang, VLayoutContainer
 } from 'flashbang';
 import {DialogCanceledError} from 'eterna/ui/Dialog';
 import Vienna2 from 'eterna/folding/Vienna2';
@@ -50,6 +50,7 @@ import ToolbarButton from 'eterna/ui/toolbar/ToolbarButton';
 import Pose3DDialog from 'eterna/pose3D/Pose3DDialog';
 import ModeBar from 'eterna/ui/ModeBar';
 import {FederatedPointerEvent} from '@pixi/events';
+import GameWindow from 'eterna/ui/GameWindow';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
 import StructureInput from './StructureInput';
@@ -314,6 +315,8 @@ export default class PuzzleEditMode extends GameMode {
         this.regs?.add(this._naturalButton.clicked.connect(() => this.setToNativeMode()));
         this.regs?.add(this._targetButton.clicked.connect(() => this.setToTargetMode()));
 
+        this.setupEternafoldNotice();
+
         // Must do this AFTER pose initialization
         if (
             initialPoseData != null
@@ -541,6 +544,61 @@ export default class PuzzleEditMode extends GameMode {
     public onResized(): void {
         super.onResized();
         this.updateUILayout();
+    }
+
+    private setupEternafoldNotice() {
+        // EternaFold doesn't work for switches
+        if (this._numTargets > 1) return;
+
+        // This player has already seen this message
+        if (Eterna.settings.puzzlemakerEternafoldNoticeDismissed.value) return;
+
+        // This user is already using Eternafold
+        if (this._folder.name === EternaFold.NAME) {
+            Eterna.settings.puzzlemakerEternafoldNoticeDismissed.value = true;
+            return;
+        }
+
+        const window = new GameWindow({
+            title: 'Tried Eternafold?',
+            resizable: true,
+            closable: true,
+            horizontalContentMargin: 10,
+            verticalContentMargin: 10,
+            titleFontSize: 14
+        });
+        this.addObject(window, this.dialogLayer);
+
+        const vLayout = new VLayoutContainer(10);
+        window.content.addChild(vLayout);
+
+        vLayout.addChild(
+            Fonts.std(
+                'EternaFold is the most accurate folding engine to date, created by researchers '
+                + 'using data from Eterna.\n\nWe encourage you to use it in your own puzzles by selecting '
+                + 'it in the dropdown to the left. In the future, this will be Eterna\'s default model.'
+            )
+                .color(0xFFFFFF)
+                .fontSize(14)
+                .wordWrap(true, 250)
+                .build()
+        );
+
+        const okButton = new GameButton().label('Ok', 14);
+        window.addObject(okButton, vLayout);
+
+        vLayout.layout();
+        window.setTargetBounds({
+            x: {from: 'left', offsetExact: 250},
+            y: {from: 'top', offsetExact: 75}
+        });
+
+        const onClose = () => {
+            this.removeObject(window);
+            Eterna.settings.puzzlemakerEternafoldNoticeDismissed.value = true;
+        };
+        okButton.clicked.connect(onClose);
+        window.closeClicked.connect(onClose);
     }
 
     public updateUILayout(): void {

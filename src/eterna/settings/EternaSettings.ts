@@ -28,6 +28,7 @@ export default class EternaSettings extends Settings {
     public readonly puzzlemakerHotbarTools: Setting<{left: string[]; right: string[]}> | Setting<null>;
 
     public readonly saveGamesTransfered: Setting<boolean>;
+    public readonly puzzlemakerEternafoldNoticeDismissed: Setting<boolean>;
 
     constructor() {
         super('EternaSettings');
@@ -68,5 +69,10 @@ export default class EternaSettings extends Settings {
             });
             this.saveGamesTransfered.value = true;
         }
+
+        this.puzzlemakerEternafoldNoticeDismissed = this.setting<boolean>(
+            'puzzlemakerEternafoldNoticeDismissed',
+            false
+        );
     }
 }
