@@ -579,10 +579,6 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
             .endFill();
         this._fakeTextInput.addChild(bg);
 
-        const textMask = new Graphics().beginFill(0x0).drawRect(0, 0, this.width, this.height).endFill();
-        this._fakeTextInput.addChild(textMask);
-        textMask.hitArea = new Rectangle();
-
         let displayText = this.text;
         let textColor = this._textColor;
         let input: HTMLInputElement | HTMLTextAreaElement | undefined;
@@ -610,13 +606,13 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
         // this will crash in Firefox.
         //
         // Since we'd be masking out the majority of this text anyways, it's safe to just clip it somewhere around
-        // the end of the mask. The font size may not directly correlate to number of pixels, so the * 2 is just
+        // the end of the mask. The font size may not directly correlate to number of pixels, so the * 4 is just
         // to ensure we're cutting it off with plenty of room to spare - I can't immediately imagine a situation
         // where it would be insufficient, and our input width should always be small enough that it will never
         // be too large as to not prevent the WebGL size issue.
         //
         // See for example https://stackoverflow.com/a/12644047/5557208
-        const limitedText = displayText.substring(0, (this.width / this._fontSize) * 2);
+        const limitedText = displayText.substring(0, (this.width / this._fontSize) * 4);
 
         const text = new TextBuilder(limitedText)
             .font(this._fontFamily)
@@ -626,7 +622,6 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
             .wordWrap(this._rows > 1, this.width - 20)
             .hAlignLeft()
             .build();
-        text.mask = textMask;
         if (this._characterLimit) {
             for (const child of this._obj.children) {
                 if (child instanceof HTMLInputElement) {
@@ -643,6 +638,12 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
                         ? (this.height - this._fontSize) / 2
                         : parseFloat(window.getComputedStyle(input, null).getPropertyValue('padding-left'))
                 );
+
+                const pad = parseFloat(window.getComputedStyle(input, null).getPropertyValue('padding-right'));
+                const textMask = new Graphics().beginFill(0x0).drawRect(0, 0, this.width - pad, this.height).endFill();
+                this._fakeTextInput.addChild(textMask);
+                text.mask = textMask;
+                textMask.hitArea = new Rectangle();
             }
         } else if (this._obj instanceof HTMLInputElement || this._obj instanceof HTMLTextAreaElement) {
             text.position.set(
@@ -651,6 +652,12 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
                     ? (this.height - text.height) / 2
                     : parseFloat(window.getComputedStyle(this._obj, null).getPropertyValue('padding-left'))
             );
+
+            const pad = parseFloat(window.getComputedStyle(this._obj, null).getPropertyValue('padding-right'));
+            const textMask = new Graphics().beginFill(0x0).drawRect(0, 0, this.width - pad, this.height).endFill();
+            this._fakeTextInput.addChild(textMask);
+            text.mask = textMask;
+            textMask.hitArea = new Rectangle();
         }
         this._fakeTextInput.addChild(text);
         this._dummyDisp.addChild(this._fakeTextInput);
