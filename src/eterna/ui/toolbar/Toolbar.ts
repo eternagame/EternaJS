@@ -783,10 +783,11 @@ export default class Toolbar extends ContainerObject {
                             this.layout();
                             break;
                         }
+                        case 'pointerover':
+                        case 'pointerout':
+                            break;
                         default:
                             // pointerdown and pointertap shouldn't be possible as the pointer is already down
-                            // pointerout and pointerover shouldn't be possible because the display object
-                            // events are captured on covers the entire screen
                             log.warn(`Unhandled event in ToolbarButton drag: ${e.type}`);
                             break;
                     }
