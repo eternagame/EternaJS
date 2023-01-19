@@ -779,6 +779,13 @@ export default class Toolbar extends ContainerObject {
                             }
                             state.draggingButton.destroySelf();
                             state.capture.destroySelf();
+                            // Prevent button click from firing, as a pointerTap will be fired on the button
+                            // after we close our pointer capture since it was the last thing to have a pointer down
+                            if (e.path.includes(button.container)) {
+                                this.pointerTapCapture.connect((tapE) => {
+                                    tapE.stopPropagation();
+                                }).once();
+                            }
                             state = {name: 'initial'};
                             this.layout();
                             break;
