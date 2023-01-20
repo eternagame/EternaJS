@@ -304,6 +304,8 @@ export default class EPars {
     ): string | null {
         const pairStack: number[] = [];
 
+        if (parenthesis.length === 0) return 'Structure is empty';
+
         if (lengthLimit >= 0 && parenthesis.length > lengthLimit) {
             return `Structure length limit is ${lengthLimit}`;
         }

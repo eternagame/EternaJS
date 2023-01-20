@@ -56,7 +56,12 @@ export default class StructureInput extends ContainerObject implements Updatable
 
     public update(_dt: number): void {
         // Update the cursor highlight when our caret position changes
-        if (this._prevCaretPostion !== this._textInput.caretPosition) {
+        if (
+            this._prevCaretPostion !== this._textInput.caretPosition
+            // If we've added characters like closing parens which cause the structure to not validate,
+            // the bases may not have been created, and moving our cursor to an invalid base would fail
+            && (this._textInput.caretPosition ?? 0) < this._lastGoodStructure.length
+        ) {
             this._prevCaretPostion = this._textInput.caretPosition;
             this._pose.trackCursor(this._textInput.caretPosition);
         }
@@ -89,6 +94,9 @@ export default class StructureInput extends ContainerObject implements Updatable
         const error: string | null = EPars.validateParenthesis(input, false, Eterna.MAX_PUZZLE_EDIT_LENGTH);
         this.setWarning(error || '');
         this._textInput.text = input;
+
+        if (error) return;
+        this._lastGoodStructure = input;
 
         // PERFIDY. Not slicing this meant I was modifying the array in place.
         // This is why we can't ahve ncie things.
@@ -248,11 +256,11 @@ export default class StructureInput extends ContainerObject implements Updatable
     }
 
     public get structureString(): string {
-        const secstruct: string = this._textInput.text;
-        return secstruct.replace(/[^.(){}[\]]/g, '');
+        return this._lastGoodStructure;
     }
 
     public set structureString(struct: string) {
+        this._lastGoodStructure = struct;
         this._textInput.text = struct;
         this.setWarning('');
     }
@@ -281,4 +289,5 @@ export default class StructureInput extends ContainerObject implements Updatable
     private _textInput: TextInputObject;
     private _prevCaretPostion: number | null = -1;
     private _errorText: TextBalloon;
+    private _lastGoodStructure = '.';
 }
