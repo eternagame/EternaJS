@@ -575,8 +575,9 @@ export default class PuzzleEditMode extends GameMode {
         vLayout.addChild(
             Fonts.std(
                 'EternaFold is the most accurate folding engine to date, created by researchers '
-                + 'using data from Eterna.\n\nWe encourage you to use it in your own puzzles by selecting '
-                + 'it in the dropdown to the left. In the future, this will be Eterna\'s default model.'
+                + 'using data from lab designs submitted by Eterna players.\n\nWe encourage you to use it '
+                + 'in your own puzzles by selecting it in the dropdown to the left. In the future, '
+                + 'this will be Eterna\'s default model.'
             )
                 .color(0xFFFFFF)
                 .fontSize(14)
