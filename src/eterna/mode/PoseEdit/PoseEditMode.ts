@@ -2875,6 +2875,10 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
+        for (const poseField of this._poseFields) {
+            poseField.updateDeltaEnergyGui();
+        }
+
         if (this._pose3D) this._pose3D.sequence.value = this.getCurrentUndoBlock().sequence;
 
         const numAU: number = undoBlock.getParam(UndoBlockParam.AU, 37, pseudoknots) as number;

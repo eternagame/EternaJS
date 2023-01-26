@@ -1029,10 +1029,14 @@ export default class PuzzleEditMode extends GameMode {
             } else {
                 this._poses[ii].secstruct = bestPairs;
             }
+        }
 
-            this._constraintBar.updateConstraints({
-                undoBlocks: this._seqStack[this._stackLevel]
-            });
+        this._constraintBar.updateConstraints({
+            undoBlocks: this._seqStack[this._stackLevel]
+        });
+
+        for (const poseField of this._poseFields) {
+            poseField.updateDeltaEnergyGui();
         }
 
         if (this._pose3D) this._pose3D.sequence.value = this.getCurrentUndoBlock(0).sequence;
@@ -1256,6 +1260,9 @@ export default class PuzzleEditMode extends GameMode {
     private _stackSize: number;
     private _paused: boolean;
     private _savedInputs: SubmitPuzzleDetails;
+    // HACK: We set this ahead of time so that the energy delta routine knows, but we also have to call
+    // setPip to run the logic there...
+    protected _isPipMode: boolean = true;
 
     private _modeBar: ModeBar;
     private _folderSwitcher: FolderSwitcher;

@@ -4129,10 +4129,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public set getEnergyDelta(cb: () => number) {
-        this._getEnergyDelta = cb;
-    }
-
     private static readonly MOUSE_LOC: Point = new Point();
     private updateScoreNodeGui(): void {
         this._scoreNodeIndex = -1;
@@ -4249,7 +4245,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
 
             this._poseField.updateEnergyGui(
-                factor, scoreLabel, scoreScore, nodeLabel, nodeScore, nodeFound, this._getEnergyDelta
+                factor, scoreLabel, scoreScore, nodeLabel, nodeScore, nodeFound
             );
         }
     }
@@ -4471,9 +4467,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _startMousedownCallback: PoseMouseDownCallback;
     private _startPickCallback: PosePickCallback;
     private _mouseDownAltKey: boolean = false;
-
-    // Pointer to function that needs to be called in a GameMode to have access to appropriate state
-    private _getEnergyDelta: () => number;
 
     private _lettermode: boolean = false;
     private _displayScoreTexts: boolean;

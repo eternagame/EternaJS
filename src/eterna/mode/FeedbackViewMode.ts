@@ -140,7 +140,7 @@ export default class FeedbackViewMode extends GameMode {
         this._foldMode = PoseFoldMode.TARGET;
 
         this._isExpColor = false;
-        this._currentIndex = 0;
+        this._curTargetIndex = 0;
 
         const secstructs: string[] = this._puzzle.getSecstructs();
 
@@ -259,6 +259,9 @@ export default class FeedbackViewMode extends GameMode {
             datablock.setPairs(this._secstructs[ii]);
             datablock.setBasics();
             this._undoBlocks.push(datablock);
+        }
+        for (const poseField of this._poseFields) {
+            poseField.updateDeltaEnergyGui();
         }
     }
 
@@ -411,7 +414,7 @@ export default class FeedbackViewMode extends GameMode {
                 this._stateToggle.display.visible = true;
             }
 
-            this.changeTarget(this._currentIndex);
+            this.changeTarget(this._curTargetIndex);
             const pose = this._poses[0];
             pose.setZoomLevel(pose.computeDefaultZoomLevel(), true, true);
         }
@@ -477,7 +480,7 @@ export default class FeedbackViewMode extends GameMode {
                 this._poseFields[ii].pose.secstruct = this._secstructs[ii];
             }
         } else {
-            this._poseFields[0].pose.secstruct = this._secstructs[this._currentIndex];
+            this._poseFields[0].pose.secstruct = this._secstructs[this._curTargetIndex];
         }
     }
 
@@ -493,16 +496,16 @@ export default class FeedbackViewMode extends GameMode {
                     this._poseFields[ii].pose.secstruct = this._shapePairs[ii] as SecStruct;
                 }
             }
-        } else if (this._shapePairs[this._currentIndex] !== null) {
-            this._poseFields[0].pose.secstruct = this._shapePairs[this._currentIndex] as SecStruct;
+        } else if (this._shapePairs[this._curTargetIndex] !== null) {
+            this._poseFields[0].pose.secstruct = this._shapePairs[this._curTargetIndex] as SecStruct;
         }
     }
 
     private changeTarget(targetIndex: number): void {
-        this._currentIndex = targetIndex;
+        this._curTargetIndex = targetIndex;
 
-        if (this._targetConditions[this._currentIndex] !== undefined) {
-            const tc = this._targetConditions[this._currentIndex] as TargetConditions;
+        if (this._targetConditions[this._curTargetIndex] !== undefined) {
+            const tc = this._targetConditions[this._curTargetIndex] as TargetConditions;
             if (tc['type'] === 'aptamer') {
                 // we know bonus will be present for any 'aptamer' puzzle
                 // AMW TODO: encode as type constraint?
@@ -534,7 +537,7 @@ export default class FeedbackViewMode extends GameMode {
             this.showExperimentalColors();
         }
 
-        const undoBlock = this._undoBlocks[this._currentIndex];
+        const undoBlock = this._undoBlocks[this._curTargetIndex];
         const numAU: number = undoBlock.getParam(UndoBlockParam.AU, 37) as number;
         const numGU: number = undoBlock.getParam(UndoBlockParam.GU, 37) as number;
         const numGC: number = undoBlock.getParam(UndoBlockParam.GC, 37) as number;
@@ -568,11 +571,11 @@ export default class FeedbackViewMode extends GameMode {
                 }
             } else {
                 this._poseFields[0].pose.visualizeFeedback(
-                    this._feedback.getShapeData(this._currentIndex, this._dataOption.value),
-                    this._feedback.getShapeThreshold(this._currentIndex, this._dataOption.value),
-                    this._feedback.getShapeMin(this._currentIndex, this._dataOption.value),
-                    this._feedback.getShapeMax(this._currentIndex, this._dataOption.value),
-                    this._feedback.getShapeStartIndex(this._currentIndex, this._dataOption.value)
+                    this._feedback.getShapeData(this._curTargetIndex, this._dataOption.value),
+                    this._feedback.getShapeThreshold(this._curTargetIndex, this._dataOption.value),
+                    this._feedback.getShapeMin(this._curTargetIndex, this._dataOption.value),
+                    this._feedback.getShapeMax(this._curTargetIndex, this._dataOption.value),
+                    this._feedback.getShapeStartIndex(this._curTargetIndex, this._dataOption.value)
                 );
             }
         } else if (this._isPipMode) {
@@ -587,11 +590,11 @@ export default class FeedbackViewMode extends GameMode {
             }
         } else {
             this._poseFields[0].pose.visualizeFeedback(
-                this._feedback.getDegradationData(this._currentIndex, this._dataOption.value),
-                this._feedback.getDegradationThreshold(this._currentIndex, this._dataOption.value),
-                this._feedback.getDegradationMin(this._currentIndex, this._dataOption.value),
-                this._feedback.getDegradationMax(this._currentIndex, this._dataOption.value),
-                this._feedback.getDegradationStartIndex(this._currentIndex, this._dataOption.value)
+                this._feedback.getDegradationData(this._curTargetIndex, this._dataOption.value),
+                this._feedback.getDegradationThreshold(this._curTargetIndex, this._dataOption.value),
+                this._feedback.getDegradationMin(this._curTargetIndex, this._dataOption.value),
+                this._feedback.getDegradationMax(this._curTargetIndex, this._dataOption.value),
+                this._feedback.getDegradationStartIndex(this._curTargetIndex, this._dataOption.value)
             );
         }
     }
@@ -693,7 +696,7 @@ export default class FeedbackViewMode extends GameMode {
     }
 
     private showSpec(): void {
-        const puzzleState = this._undoBlocks[this._currentIndex];
+        const puzzleState = this._undoBlocks[this._curTargetIndex];
         puzzleState.updateMeltingPointAndDotPlot();
         this._specBox = this.showDialog(new SpecBoxDialog());
         this._specBox.setSpec(puzzleState);
@@ -715,7 +718,7 @@ export default class FeedbackViewMode extends GameMode {
         Assert.notNull(solution);
 
         this.setSolution(solution);
-        this.changeTarget(this._currentIndex);
+        this.changeTarget(this._curTargetIndex);
 
         if (this._feedback !== null && this._expColorButton.toggled.value) {
             this.showExperimentalColors();
@@ -757,7 +760,6 @@ export default class FeedbackViewMode extends GameMode {
     private _specBox: SpecBoxDialog | null = null;
 
     private _undoBlocks: UndoBlock[] = [];
-    private _currentIndex: number;
 
     private _foldMode: PoseFoldMode;
     private _feedback: Feedback | null;
