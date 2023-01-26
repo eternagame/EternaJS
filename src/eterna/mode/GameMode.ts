@@ -213,7 +213,7 @@ export default abstract class GameMode extends AppMode {
         newPoseFields.forEach((newField, idx) => {
             this._poseFields.push(newField);
             this._poses.push(newField.pose);
-            newField.pose.getEnergyDelta = () => {
+            newField.getEnergyDelta = () => {
                 // Sanity check
                 if (this._folder !== null) {
                     const poseidx = this._isPipMode ? idx : this._curTargetIndex;

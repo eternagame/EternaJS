@@ -283,7 +283,15 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this._primaryScoreEnergyDisplay.setEnergyText('Total', message);
         this._deltaScoreEnergyDisplay.setEnergyText('Natural/Target Delta', message);
         this._secondaryScoreEnergyDisplay.visible = false;
+        this._energyDisabled = true;
         this.updateEnergyContainer();
+    }
+
+    // Pointer to function that needs to be called in a GameMode to have access to appropriate state
+    private _getEnergyDelta: () => number;
+
+    public set getEnergyDelta(cb: () => number) {
+        this._getEnergyDelta = cb;
     }
 
     public updateEnergyGui(
@@ -292,8 +300,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         scoreScore: string,
         nodeLabel: string,
         nodeScore: string,
-        nodeFound: boolean,
-        deltaFn: () => number
+        nodeFound: boolean
     ): void {
         this.updateEnergyDisplaySize(factor);
 
@@ -301,24 +308,17 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this._secondaryScoreEnergyDisplay.setEnergyText(nodeLabel, nodeScore);
         this._secondaryScoreEnergyDisplay.visible = (this._showTotalEnergy && nodeFound);
         this.updateEnergyContainer();
+    }
 
-        // This is because the undo stack isn't populated yet when this is run on puzzle boot/changing folders,
-        // which is needed for the delta - TODO: Handle this in a less hacky way
-        const attemptSetDelta = () => {
-            if (!this.isLiveObject) return;
-            try {
-                this._deltaScoreEnergyDisplay.setEnergyText(
-                    'Natural/Target Delta',
-                    `${Math.round(deltaFn()) / 100} kcal`
-                );
-                this._deltaScoreEnergyDisplay.visible = (this._showTotalEnergy && this.pose.scoreFolder != null);
-            } catch (e) {
-                this._deltaScoreEnergyDisplay.visible = false;
-                setTimeout(attemptSetDelta, 1000);
-            }
-            this.updateEnergyContainer();
-        };
-        setTimeout(attemptSetDelta, 50);
+    public updateDeltaEnergyGui() {
+        if (this._energyDisabled) return;
+        const delta = this._getEnergyDelta();
+        this._deltaScoreEnergyDisplay.setEnergyText(
+            'Natural/Target Delta',
+            `${Math.round(delta) / 100} kcal`
+        );
+        this._deltaScoreEnergyDisplay.visible = (this._showTotalEnergy && this.pose.scoreFolder != null);
+        this.updateEnergyContainer();
     }
 
     public get showTotalEnergy(): boolean {
@@ -486,6 +486,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     private _secondaryScoreEnergyDisplay: EnergyScoreDisplay;
     private _deltaScoreEnergyDisplay: EnergyScoreDisplay;
     private _showTotalEnergy: boolean = true;
+    private _energyDisabled: boolean = false;
 
     // Explosion Factor (RNALayout pairSpace multiplier)
     private _explosionFactor: number = 1;
