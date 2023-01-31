@@ -2357,7 +2357,20 @@ export default class PoseEditMode extends GameMode {
             this._helpBar.display.visible = true;
         };
 
-        if (hasNextPuzzle) {
+        if (this._puzzle.nextPuzzleLink != null) {
+            missionClearedPanel.nextButton.clicked.connect(() => {
+                keepPlaying();
+                if (Eterna.MOBILE_APP) {
+                    if (window.frameElement) {
+                        window.frameElement.dispatchEvent(
+                            new CustomEvent('navigate', {detail: this._puzzle.nextPuzzleLink})
+                        );
+                    }
+                } else {
+                    window.open(this._puzzle.nextPuzzleLink, '_self');
+                }
+            });
+        } else if (hasNextPuzzle) {
             // Don't just await here nor initialize the call in the nextButton callback
             // so that we can load in the background
             const nextPuzzlePromise = nextPuzzleData
