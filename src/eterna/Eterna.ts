@@ -24,7 +24,7 @@ function ParseBool(value: string | undefined): boolean {
 export default class Eterna {
     public static readonly OVERLAY_DIV_ID = 'eterna-overlay';
     public static readonly PIXI_CONTAINER_ID = 'pixi-container';
-    public static readonly MAX_PUZZLE_EDIT_LENGTH = 400; // max length of PuzzleEditMode input
+    public static readonly MAX_PUZZLE_EDIT_LENGTH = 4000; // max length of PuzzleEditMode input
 
     // If DEBUG is not set, dev mode isn't true.
     public static readonly DEV_MODE: boolean = ParseBool(process.env['DEBUG']);

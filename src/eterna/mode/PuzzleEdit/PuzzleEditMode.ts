@@ -745,7 +745,7 @@ export default class PuzzleEditMode extends GameMode {
         for (let ii = 0; ii < this._poses.length; ii++) {
             const secstruct: string = this._structureInputs[ii].structureString;
 
-            const lengthLimit = Eterna.DEV_MODE ? -1 : 4000;
+            const lengthLimit = Eterna.DEV_MODE ? -1 : Eterna.MAX_PUZZLE_EDIT_LENGTH;
 
             const error: string | null = EPars.validateParenthesis(secstruct, false, lengthLimit);
             if (error != null) {
