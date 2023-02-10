@@ -2715,6 +2715,11 @@ export default class AnnotationManager {
     public static readonly ANNOTATION_UNHIGHLIGHTED_OPACITY = 0.5;
     public static readonly DEFAULT_ANNOTATION_SHIFT = 15;
     public static readonly ANNOTATION_PLACEMENT_ITERATION_TIMEOUT = 5;
-    public static readonly ANNOTATION_LAYER_THRESHOLD = 2;
+    // This specifies the zoom level at which instead of showing annotation names,
+    // annotations are just shown as a speech bubble and layer text is shown
+    // At this point, we've found that this behavior is causing more problems than it's
+    // solving, so I've just bumped it up to a zoom level that doesn't exist, so it never
+    // triggers
+    public static readonly ANNOTATION_LAYER_THRESHOLD = 10;
     public static readonly CONFLICT_RESOLUTION_OFFSET = 5;
 }
