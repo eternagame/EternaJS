@@ -60,7 +60,8 @@ export interface PuzzleJSON {
     reward?: string;
     'ui-specs'?: string;
     'next-puzzle'?: string;
-    'next-puzzle-link'?: string;
+    'next-puzzle-page'?: string;
+    'next-collection'?: string;
     'last-round'?: string;
     check_hairpin?: string;
     barcode_start?: string;
@@ -150,8 +151,12 @@ export default class PuzzleManager {
             newpuz.nextPuzzleID = Number(json['next-puzzle']);
         }
 
-        if (json['next-puzzle-link']) {
-            newpuz.nextPuzzleLink = String(json['next-puzzle-link']);
+        if (json['next-puzzle-page']) {
+            newpuz.nextPuzzlePage = Number(json['next-puzzle-page']);
+        }
+
+        if (json['next-collection']) {
+            newpuz.nextCollection = Number(json['next-collection']);
         }
 
         if (json['last-round'] != null) {
