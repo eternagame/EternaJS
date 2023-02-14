@@ -61,7 +61,6 @@ export interface PuzzleJSON {
     'ui-specs'?: string;
     'next-puzzle'?: string;
     'next-puzzle-page'?: string;
-    'next-collection'?: string;
     'last-round'?: string;
     check_hairpin?: string;
     barcode_start?: string;
@@ -153,10 +152,6 @@ export default class PuzzleManager {
 
         if (json['next-puzzle-page']) {
             newpuz.nextPuzzlePage = Number(json['next-puzzle-page']);
-        }
-
-        if (json['next-collection']) {
-            newpuz.nextCollection = Number(json['next-collection']);
         }
 
         if (json['last-round'] != null) {

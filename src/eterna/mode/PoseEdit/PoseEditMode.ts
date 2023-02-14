@@ -2356,20 +2356,7 @@ export default class PoseEditMode extends GameMode {
 
             this._helpBar.display.visible = true;
         };
-        if (this._puzzle.nextCollection !== null && this._puzzle.nextCollection > 0) {
-            missionClearedPanel.nextButton.clicked.connect(() => {
-                keepPlaying();
-                if (Eterna.MOBILE_APP) {
-                    if (window.frameElement) {
-                        window.frameElement.dispatchEvent(
-                            new CustomEvent('navigate', {detail: `/collections/${this._puzzle.nextCollection}`})
-                        );
-                    }
-                } else {
-                    window.open(`/collections/${this._puzzle.nextCollection}`, '_self');
-                }
-            });
-        } else if (this._puzzle.nextPuzzlePage !== null && this._puzzle.nextPuzzlePage > 0) {
+        if (this._puzzle.nextPuzzlePage !== null && this._puzzle.nextPuzzlePage > 0) {
             missionClearedPanel.nextButton.clicked.connect(() => {
                 keepPlaying();
                 if (Eterna.MOBILE_APP) {

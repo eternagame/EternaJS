@@ -126,14 +126,6 @@ export default class Puzzle {
         this._nextPuzzlePage = nex;
     }
 
-    public get nextCollection(): number {
-        return this._nextCollection;
-    }
-
-    public set nextCollection(nex: number) {
-        this._nextCollection = nex;
-    }
-
     public get rscript(): string {
         return this._rscriptOps;
     }
@@ -695,7 +687,6 @@ export default class Puzzle {
     private _defaultPoseState: PoseState | null;
     private _nextPuzzle: number = -1;
     private _nextPuzzlePage: number = -1;
-    private _nextCollection: number = -1;
     private _hint: string | null = null;
     private _isSoftConstraint: boolean = false;
     private _boosterDefs: BoostersData | null = null;
