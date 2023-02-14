@@ -118,6 +118,14 @@ export default class Puzzle {
         this._nextPuzzle = nex;
     }
 
+    public get nextPuzzlePage(): number {
+        return this._nextPuzzlePage;
+    }
+
+    public set nextPuzzlePage(nex: number) {
+        this._nextPuzzlePage = nex;
+    }
+
     public get rscript(): string {
         return this._rscriptOps;
     }
@@ -678,6 +686,7 @@ export default class Puzzle {
     private _rscriptOps: string = '';
     private _defaultPoseState: PoseState | null;
     private _nextPuzzle: number = -1;
+    private _nextPuzzlePage: number = -1;
     private _hint: string | null = null;
     private _isSoftConstraint: boolean = false;
     private _boosterDefs: BoostersData | null = null;
