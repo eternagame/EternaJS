@@ -70,9 +70,9 @@ export default class ConstraintBar extends ContainerObject {
                 (constraint) => ({constraint, constraintBox: new ConstraintBox(false, states), highlightCache: null})
             ) : [];
 
-        Eterna.settings.highlightRestricted.connect(() => {
+        this.regs.add(Eterna.settings.highlightRestricted.connect(() => {
             this.updateHighlights();
-        });
+        }));
     }
 
     protected added() {
