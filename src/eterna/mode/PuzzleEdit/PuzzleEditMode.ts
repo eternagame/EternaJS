@@ -305,6 +305,10 @@ export default class PuzzleEditMode extends GameMode {
                 }
             }
 
+            for (const pose of this._poses) {
+                pose.canAddBindingSite = folder.canFoldWithBindingSite;
+            }
+
             this.clearUndoStack();
             this.poseEditByTarget(0);
             for (const pose of this._poses) {
@@ -1116,6 +1120,14 @@ export default class PuzzleEditMode extends GameMode {
                 this._structureInputs[ii].setWarning('');
             }
         }
+
+        const hasMolecules = this._poses.some(
+            (pose) => pose.molecularBindingSite && pose.molecularBindingSite.some((bb) => bb)
+        );
+        this._folderSwitcher.canUseFolder = (folder) => {
+            if ((hasMolecules || this._numTargets > 1) && !folder.canFoldWithBindingSite) return false;
+            return true;
+        };
 
         for (let ii = 0; ii < this._poses.length; ii++) {
             const targetPairs: SecStruct = SecStruct.fromParens(this._structureInputs[ii].structureString, true);

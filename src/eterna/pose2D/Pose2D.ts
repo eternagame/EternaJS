@@ -394,6 +394,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._currentColor;
     }
 
+    public set canAddBindingSite(val: boolean) {
+        this._canAddBindingSite = val;
+    }
+
     public set currentArrangementTool(col: Layout) {
         this._currentArrangementTool = col;
     }
@@ -3558,7 +3562,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._bases[seqnum].setDirty();
             this._lockUpdated = true;
         } else if (this._currentColor === RNAPaint.BINDING_SITE) {
-            if (this._bindingSite != null && this._bindingSite[seqnum]) {
+            if (!this._canAddBindingSite) {
+                (this.mode as GameMode).showNotification('The current folding engine does not support molecules');
+            } else if (this._bindingSite != null && this._bindingSite[seqnum]) {
                 this._bindingSite = [];
                 for (let ii = 0; ii < this._sequence.length; ii++) {
                     this._bindingSite.push(false);
@@ -4443,6 +4449,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _lockUpdated: boolean;
     private _bindingSiteUpdated: boolean;
     private _designStructUpdated: boolean;
+    private _canAddBindingSite: boolean = false;
 
     private _currentArrangementTool: Layout = Layout.MOVE;
 
