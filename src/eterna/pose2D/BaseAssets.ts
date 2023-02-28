@@ -77,6 +77,12 @@ export default class BaseAssets {
             : null;
     }
 
+    public static getLockTexture(baseType: number, zoomLevel: number, drawFlags: number): Texture | null {
+        return BaseAssets.isBaseType(baseType)
+            ? BaseAssets.getBaseBitmaps(baseType).getLockTexture(zoomLevel, drawFlags)
+            : null;
+    }
+
     public static getBackboneTexture(zoomLevel: number): Texture {
         if (zoomLevel < Base.NUM_ZOOM_LEVELS) {
             return BaseAssets.textureForSize(BaseAssets._backboneBodyData, 0, zoomLevel);
@@ -167,11 +173,11 @@ export default class BaseAssets {
         BaseAssets._sphereMidData = [];
         BaseAssets._sphereMinData = [];
 
-        const baseWOutline: Texture = BitmapManager.getBitmap(Bitmaps.BaseWOutline);
-        const baseWPattern: Texture = BitmapManager.getBitmap(Bitmaps.BaseWPattern);
-        const baseWMidPattern: Texture = BitmapManager.getBitmap(Bitmaps.BaseWMidPattern);
-        const baseWMidOutline: Texture = BitmapManager.getBitmap(Bitmaps.BaseWMidOutline);
-        const baseWMin: Texture = BitmapManager.getBitmap(Bitmaps.BaseWMin);
+        const baseWOutline = EternaTextureUtil.scaleBy(BitmapManager.getBitmap(Bitmaps.BaseWOutline), 0.5);
+        const baseWPattern = EternaTextureUtil.scaleBy(BitmapManager.getBitmap(Bitmaps.BaseWPattern), 0.5);
+        const baseWMidPattern = EternaTextureUtil.scaleBy(BitmapManager.getBitmap(Bitmaps.BaseWMidPattern), 0.5);
+        const baseWMidOutline = EternaTextureUtil.scaleBy(BitmapManager.getBitmap(Bitmaps.BaseWMidOutline), 0.5);
+        const baseWMin = EternaTextureUtil.scaleBy(BitmapManager.getBitmap(Bitmaps.BaseWMin), 0.5);
 
         for (let ii: number = -ExpPainter.NUM_COLORS; ii <= 2 * ExpPainter.NUM_COLORS + 1; ii++) {
             const color: number = ExpPainter.getColorByLevel(ii);

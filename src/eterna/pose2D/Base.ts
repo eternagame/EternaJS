@@ -27,6 +27,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
         this.container.addChild(this._body);
         this.container.addChild(this._backbone);
         this.container.addChild(this._letter);
+        this.container.addChild(this._lock);
         this.container.addChild(this._sat0);
         this.container.addChild(this._sat1);
         this.container.addChild(this._number);
@@ -326,6 +327,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
         this._backbone.visible = false;
         this._barcode.visible = false;
         this._letter.visible = false;
+        this._lock.visible = false;
         this._sat0.visible = false;
         this._sat1.visible = false;
         this._number.visible = false;
@@ -412,6 +414,16 @@ export default class Base extends ContainerObject implements LateUpdatable {
                 Base.showSprite(this._letter, letterdata);
                 this._letter.x = randomX + offX;
                 this._letter.y = randomY + offY;
+            }
+
+            const lockdata: Texture | null = BaseAssets.getLockTexture(this._baseType, zoomLevel, drawFlags);
+            if (lockdata != null) {
+                Base.showSprite(this._lock, lockdata);
+                // Little bit of trig, assuming width and height are the same, to get the x/y position
+                // of the point at the edge of the circle at 45 degrees
+                const fromCenter = this._body.width / 3 / Math.SQRT2;
+                this._lock.x = randomX + offX + fromCenter;
+                this._lock.y = randomY + offY - fromCenter;
             }
         }
 
@@ -665,6 +677,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
     private readonly _body: Sprite = new Sprite();
     private readonly _backbone: Sprite = new Sprite();
     private readonly _letter: Sprite = new Sprite();
+    private readonly _lock: Sprite = new Sprite();
     private readonly _sat0: Sprite = new Sprite();
     private readonly _sat1: Sprite = new Sprite();
     private readonly _number: Sprite = new Sprite();
