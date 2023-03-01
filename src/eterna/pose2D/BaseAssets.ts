@@ -299,12 +299,12 @@ export default class BaseAssets {
         return textures;
     }
 
-    private static textureForSize(textures: Texture[], ii: number, sizeNum: number): Texture {
+    private static textureForSize(textures: Texture[], ii: number, sizeNum: number, levels?: number): Texture {
         if (textures.length % Base.NUM_ZOOM_LEVELS !== 0) {
             throw new Error(`Invalid textures array length ${textures.length}`);
         }
 
-        const origLength: number = textures.length / Base.NUM_ZOOM_LEVELS;
+        const origLength: number = textures.length / (levels ?? Base.NUM_ZOOM_LEVELS);
         return textures[(origLength * sizeNum + ii)];
     }
 

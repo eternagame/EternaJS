@@ -13,6 +13,7 @@ import {RNAHighlightState} from './Pose2D';
 
 export default class Base extends ContainerObject implements LateUpdatable {
     public static NUM_ZOOM_LEVELS = 2;
+    public static NUM_ZOOM_LEVELS_LOCK = 4;
     public static ZOOM_SCALE_FACTOR = 0.75;
     public static readonly MARKER_THICKNESS: number = 0.4; // Relative to the radius
     public static readonly MARKER_RADIUS: number[] = [15, 10, 7, 5, 3];
@@ -27,10 +28,10 @@ export default class Base extends ContainerObject implements LateUpdatable {
         this.container.addChild(this._body);
         this.container.addChild(this._backbone);
         this.container.addChild(this._letter);
-        this.container.addChild(this._lock);
         this.container.addChild(this._sat0);
         this.container.addChild(this._sat1);
         this.container.addChild(this._number);
+        this.container.addChild(this._lock);
         this.container.addChild(this._spark1);
         this.container.addChild(this._spark2);
         this.container.addChild(this._markers);
@@ -421,7 +422,8 @@ export default class Base extends ContainerObject implements LateUpdatable {
                 Base.showSprite(this._lock, lockdata);
                 // Little bit of trig, assuming width and height are the same, to get the x/y position
                 // of the point at the edge of the circle at 45 degrees
-                const fromCenter = this._body.width / 3 / Math.SQRT2;
+                const fromCenter = this._body.width / (zoomLevel >= 2 ? 5 : 3) / Math.SQRT2;
+                // if (zoomLevel >= 3) fromCenter -= 5;
                 this._lock.x = randomX + offX + fromCenter;
                 this._lock.y = randomY + offY - fromCenter;
             }

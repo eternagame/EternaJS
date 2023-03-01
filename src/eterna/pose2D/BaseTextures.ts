@@ -83,7 +83,7 @@ export default class BaseTextures {
         const locked: boolean = (drawFlags & BaseDrawFlags.LOCKED) !== 0;
 
         if (locked) {
-            return BaseTextures.textureForSize(this.lockIconData, 0, zoomLevel);
+            return BaseTextures.textureForSize(this.lockIconData, 0, zoomLevel, Base.NUM_ZOOM_LEVELS_LOCK);
         }
 
         return null;
@@ -99,7 +99,7 @@ export default class BaseTextures {
 
     private static createLockIconTextures(zoomScalar: number): Texture[] {
         const textures: Texture[] = [EternaTextureUtil.scaleBy(BitmapManager.getBitmap(Bitmaps.BaseLock), 0.75)];
-        EternaTextureUtil.createScaled(textures, zoomScalar, Base.NUM_ZOOM_LEVELS);
+        EternaTextureUtil.createScaled(textures, zoomScalar, Base.NUM_ZOOM_LEVELS_LOCK);
         return textures;
     }
 
@@ -119,12 +119,12 @@ export default class BaseTextures {
         }
     }
 
-    private static textureForSize(textures: Texture[], ii: number, sizeNum: number): Texture {
+    private static textureForSize(textures: Texture[], ii: number, sizeNum: number, levels?: number): Texture {
         if (textures.length % Base.NUM_ZOOM_LEVELS !== 0) {
             throw new Error(`Invalid textures array length ${textures.length}`);
         }
 
-        const origLength: number = textures.length / Base.NUM_ZOOM_LEVELS;
+        const origLength: number = textures.length / (levels ?? Base.NUM_ZOOM_LEVELS);
         return textures[(origLength * sizeNum + ii)];
     }
 }
