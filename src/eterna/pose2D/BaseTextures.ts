@@ -22,15 +22,30 @@ export default class BaseTextures {
     public letterData: Texture[];
     public lockIconData: Texture[];
     public bodyData: Texture[];
+    public brightBodyData: Texture[];
+    public brighterBodyData: Texture[];
+    public celBodyData: Texture[];
 
     constructor(baseType: number) {
         this.baseType = baseType;
         this.letterData = BaseTextures.createLetterTextures(baseType, Base.ZOOM_SCALE_FACTOR);
         this.bodyData = BaseTextures.createBodyTextures(baseType, Base.ZOOM_SCALE_FACTOR);
+        this.brightBodyData = BaseTextures.createBrightBodyTextures(baseType, Base.ZOOM_SCALE_FACTOR);
+        this.brighterBodyData = BaseTextures.createBrighterBodyTextures(baseType, Base.ZOOM_SCALE_FACTOR);
+        this.celBodyData = BaseTextures.createCelBodyTextures(baseType, Base.ZOOM_SCALE_FACTOR);
     }
 
     public getBodyTexture(zoomLevel: number): Texture {
-        return this.bodyData[zoomLevel];
+        switch (Eterna.settings.baseStyle.value) {
+            case 'cel':
+                return this.celBodyData[zoomLevel];
+            case 'linearBright':
+                return this.brightBodyData[zoomLevel];
+            case 'linearBrighter':
+                return this.brighterBodyData[zoomLevel];
+            default:
+                return this.bodyData[zoomLevel];
+        }
     }
 
     public getLetterTexture(zoomLevel: number, drawFlags: number): Texture | null {
@@ -44,6 +59,196 @@ export default class BaseTextures {
     }
 
     private static createBodyTextures(baseType: number, zoomScalar: number) {
+        Assert.assertIsDefined(Eterna.app.pixi);
+        /** Size of largest body texture */
+        const MAX_SIZE = 40;
+        /** Render the graphic this much larger then scale down */
+        const UPSCALE = 2;
+        /** Size of the upscaled base texture */
+        const TEX_SIZE = MAX_SIZE * UPSCALE;
+        /** Size of the base graphic itself, not including whitespace (upscaled) */
+        const BASE_SIZE = BaseTextures.BODY_SIZE * UPSCALE;
+        const texture = RenderTexture.create({width: TEX_SIZE, height: TEX_SIZE});
+        const [hBase, sBase, vBase] = BaseTextures.type2Color(baseType);
+
+        const getGradientColor = (hChange: number, sChange: number, vChange: number) => ColorUtil.compose256(
+            ...ColorConvert.hsv.rgb([
+                (hBase + hChange + 360) % 360,
+                MathUtil.clamp(sBase + sChange, 0, 100),
+                MathUtil.clamp(vBase + vChange, 0, 100)
+            ])
+        );
+
+        GradientFactory.createLinearGradient(Eterna.app.pixi.renderer as Renderer, texture, {
+            x0: 0,
+            y0: 0,
+            x1: BASE_SIZE,
+            y1: BASE_SIZE,
+            colorStops: [
+                // {offset: 0.00, color: getGradientColor(0, -15, 25)},
+                // {offset: 0.50, color: getGradientColor(0, -5, 10)},
+                // {offset: 1.00, color: getGradientColor(0, 20, -20)}
+                {offset: 0.00, color: getGradientColor(0, -20, 20)},
+                {offset: 0.50, color: getGradientColor(0, 0, 0)},
+                {offset: 1.00, color: getGradientColor(0, 20, -20)}
+            ]
+        });
+
+        const bodyWrapper = new Container();
+        // The old body graphics had whitespace
+        // TODO: Should we handle this in the positioning logic instead of the texture itself?
+        const bodyBg = new Graphics()
+            .beginFill(0)
+            .drawRect(0, 0, TEX_SIZE, TEX_SIZE)
+            .endFill();
+        bodyBg.alpha = 0;
+        bodyWrapper.addChild(bodyBg);
+
+        const body = new Graphics()
+            .beginTextureFill({texture})
+            // Note that the texture is positioned relative to the origin, so we need to draw our circle
+            // at what will be the center of the texture
+            .drawCircle(BASE_SIZE / 2, BASE_SIZE / 2, BASE_SIZE / 2)
+            .endFill();
+        // Antialiasing, because the renderer-wide antialiasing is insufficient and smooth-graphics doesn't
+        // support texture fill yet (we need this in addition to the 2x upscaling)
+        body.filters = [new BlurFilter(1, 40), new FXAAFilter()];
+        // Center the body in the whitespace
+        body.x = (TEX_SIZE / 2) - (BASE_SIZE / 2);
+        body.y = (TEX_SIZE / 2) - (BASE_SIZE / 2);
+        bodyWrapper.addChild(body);
+
+        const bodyData = [EternaTextureUtil.scaleBy(TextureUtil.renderToTexture(bodyWrapper), 1 / UPSCALE)];
+        EternaTextureUtil.createScaled(bodyData, zoomScalar, 5);
+        return bodyData;
+    }
+
+    private static createBrightBodyTextures(baseType: number, zoomScalar: number) {
+        Assert.assertIsDefined(Eterna.app.pixi);
+        /** Size of largest body texture */
+        const MAX_SIZE = 40;
+        /** Render the graphic this much larger then scale down */
+        const UPSCALE = 2;
+        /** Size of the upscaled base texture */
+        const TEX_SIZE = MAX_SIZE * UPSCALE;
+        /** Size of the base graphic itself, not including whitespace (upscaled) */
+        const BASE_SIZE = BaseTextures.BODY_SIZE * UPSCALE;
+        const texture = RenderTexture.create({width: TEX_SIZE, height: TEX_SIZE});
+        const [hBase, sBase, vBase] = BaseTextures.type2Color(baseType);
+
+        const getGradientColor = (hChange: number, sChange: number, vChange: number) => ColorUtil.compose256(
+            ...ColorConvert.hsv.rgb([
+                (hBase + hChange + 360) % 360,
+                MathUtil.clamp(sBase + sChange, 0, 100),
+                MathUtil.clamp(vBase + vChange, 0, 100)
+            ])
+        );
+
+        GradientFactory.createLinearGradient(Eterna.app.pixi.renderer as Renderer, texture, {
+            x0: 0,
+            y0: 0,
+            x1: BASE_SIZE,
+            y1: BASE_SIZE,
+            colorStops: [
+                {offset: 0.00, color: getGradientColor(0, -15, 25)},
+                {offset: 0.50, color: getGradientColor(0, -5, 10)},
+                {offset: 1.00, color: getGradientColor(0, 20, -20)}
+            ]
+        });
+
+        const bodyWrapper = new Container();
+        // The old body graphics had whitespace
+        // TODO: Should we handle this in the positioning logic instead of the texture itself?
+        const bodyBg = new Graphics()
+            .beginFill(0)
+            .drawRect(0, 0, TEX_SIZE, TEX_SIZE)
+            .endFill();
+        bodyBg.alpha = 0;
+        bodyWrapper.addChild(bodyBg);
+
+        const body = new Graphics()
+            .beginTextureFill({texture})
+            // Note that the texture is positioned relative to the origin, so we need to draw our circle
+            // at what will be the center of the texture
+            .drawCircle(BASE_SIZE / 2, BASE_SIZE / 2, BASE_SIZE / 2)
+            .endFill();
+        // Antialiasing, because the renderer-wide antialiasing is insufficient and smooth-graphics doesn't
+        // support texture fill yet (we need this in addition to the 2x upscaling)
+        body.filters = [new BlurFilter(1, 40), new FXAAFilter()];
+        // Center the body in the whitespace
+        body.x = (TEX_SIZE / 2) - (BASE_SIZE / 2);
+        body.y = (TEX_SIZE / 2) - (BASE_SIZE / 2);
+        bodyWrapper.addChild(body);
+
+        const bodyData = [EternaTextureUtil.scaleBy(TextureUtil.renderToTexture(bodyWrapper), 1 / UPSCALE)];
+        EternaTextureUtil.createScaled(bodyData, zoomScalar, 5);
+        return bodyData;
+    }
+
+    private static createBrighterBodyTextures(baseType: number, zoomScalar: number) {
+        Assert.assertIsDefined(Eterna.app.pixi);
+        /** Size of largest body texture */
+        const MAX_SIZE = 40;
+        /** Render the graphic this much larger then scale down */
+        const UPSCALE = 2;
+        /** Size of the upscaled base texture */
+        const TEX_SIZE = MAX_SIZE * UPSCALE;
+        /** Size of the base graphic itself, not including whitespace (upscaled) */
+        const BASE_SIZE = BaseTextures.BODY_SIZE * UPSCALE;
+        const texture = RenderTexture.create({width: TEX_SIZE, height: TEX_SIZE});
+        const [hBase, sBase, vBase] = BaseTextures.type2Color(baseType);
+
+        const getGradientColor = (hChange: number, sChange: number, vChange: number) => ColorUtil.compose256(
+            ...ColorConvert.hsv.rgb([
+                (hBase + hChange + 360) % 360,
+                MathUtil.clamp(sBase + sChange, 0, 100),
+                MathUtil.clamp(vBase + vChange, 0, 100)
+            ])
+        );
+
+        GradientFactory.createLinearGradient(Eterna.app.pixi.renderer as Renderer, texture, {
+            x0: 0,
+            y0: 0,
+            x1: BASE_SIZE,
+            y1: BASE_SIZE,
+            colorStops: [
+                {offset: 0.00, color: getGradientColor(0, -70, 70)},
+                {offset: 0.10, color: getGradientColor(0, -25, 25)},
+                {offset: 0.40, color: getGradientColor(0, -15, 15)},
+                {offset: 1.00, color: getGradientColor(0, 20, -20)}
+            ]
+        });
+
+        const bodyWrapper = new Container();
+        // The old body graphics had whitespace
+        // TODO: Should we handle this in the positioning logic instead of the texture itself?
+        const bodyBg = new Graphics()
+            .beginFill(0)
+            .drawRect(0, 0, TEX_SIZE, TEX_SIZE)
+            .endFill();
+        bodyBg.alpha = 0;
+        bodyWrapper.addChild(bodyBg);
+
+        const body = new Graphics()
+            .beginTextureFill({texture})
+            // Note that the texture is positioned relative to the origin, so we need to draw our circle
+            // at what will be the center of the texture
+            .drawCircle(BASE_SIZE / 2, BASE_SIZE / 2, BASE_SIZE / 2)
+            .endFill();
+        // Antialiasing, because the renderer-wide antialiasing is insufficient and smooth-graphics doesn't
+        // support texture fill yet (we need this in addition to the 2x upscaling)
+        body.filters = [new BlurFilter(1, 40), new FXAAFilter()];
+        // Center the body in the whitespace
+        body.x = (TEX_SIZE / 2) - (BASE_SIZE / 2);
+        body.y = (TEX_SIZE / 2) - (BASE_SIZE / 2);
+        bodyWrapper.addChild(body);
+
+        const bodyData = [EternaTextureUtil.scaleBy(TextureUtil.renderToTexture(bodyWrapper), 1 / UPSCALE)];
+        EternaTextureUtil.createScaled(bodyData, zoomScalar, 5);
+        return bodyData;
+    }
+
+    private static createCelBodyTextures(baseType: number, zoomScalar: number) {
         Assert.assertIsDefined(Eterna.app.pixi);
         /** Size of largest body texture */
         const MAX_SIZE = 40;

@@ -2,6 +2,8 @@ import {Settings, Setting} from 'flashbang';
 import Eterna from 'eterna/Eterna';
 import {DesignCategory} from 'eterna/mode/DesignBrowser/DesignBrowserMode';
 
+type BaseStyle = 'linear' | 'linearBright' | 'linearBrighter' | 'cel';
+
 export default class EternaSettings extends Settings {
     public readonly showChat: Setting<boolean>;
     public readonly showNumbers: Setting<boolean>;
@@ -29,6 +31,8 @@ export default class EternaSettings extends Settings {
 
     public readonly saveGamesTransfered: Setting<boolean>;
     public readonly puzzlemakerEternafoldNoticeDismissed: Setting<boolean>;
+
+    public readonly baseStyle: Setting<BaseStyle>;
 
     constructor() {
         super('EternaSettings');
@@ -74,5 +78,7 @@ export default class EternaSettings extends Settings {
             'puzzlemakerEternafoldNoticeDismissed',
             false
         );
+
+        this.baseStyle = this.setting<BaseStyle>('baseStyle', 'linear');
     }
 }

@@ -474,7 +474,7 @@ export default class EternaApp extends FlashbangApp {
 
         settings.ROUND_PIXELS = true;
 
-        return new Application({
+        const app = new Application({
             width: this._params.width,
             height: this._params.height,
             backgroundColor: 0x0,
@@ -486,6 +486,11 @@ export default class EternaApp extends FlashbangApp {
             autoDensity: true,
             resolution: devicePixelRatio
         });
+
+        // So we can use https://github.com/bfanger/pixi-inspector
+        if (!(process.env.NODE_ENV === 'production')) window.__PIXI_APP__ = app;
+
+        return app;
     }
 
     protected get pixiParent(): HTMLElement | null {

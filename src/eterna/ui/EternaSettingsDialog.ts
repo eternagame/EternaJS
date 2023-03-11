@@ -1,11 +1,13 @@
 import {
-    VLayoutContainer, HAlign, Setting, HLayoutContainer, Flashbang
+    VLayoutContainer, HAlign, Setting, HLayoutContainer, Flashbang, ContainerObject
 } from 'flashbang';
 import Eterna from 'eterna/Eterna';
 import Bitmaps from 'eterna/resources/Bitmaps';
+import Fonts from 'eterna/util/Fonts';
 import GameButton from './GameButton';
 import GameCheckbox from './GameCheckbox';
 import WindowDialog from './WindowDialog';
+import GameDropdown from './GameDropdown';
 
 export enum EternaViewOptionsMode {
     PUZZLE = 0, PUZZLEMAKER, LAB
@@ -23,6 +25,7 @@ export default class EternaSettingsDialog extends WindowDialog<void> {
         const showShortcuts = !Eterna.MOBILE_APP;
 
         const settingsLayout: VLayoutContainer = new VLayoutContainer(15, HAlign.LEFT);
+        this._window.content.addChild(settingsLayout);
 
         const bind = (setting: Setting<boolean>, name: string) => {
             this.addObject(EternaSettingsDialog.createCheckbox(name, setting), settingsLayout);
@@ -51,6 +54,12 @@ export default class EternaSettingsDialog extends WindowDialog<void> {
             bind(Eterna.settings.useContinuousColors, 'Use continuous colors for the exp. data (advanced)');
             bind(Eterna.settings.useExtendedColors, 'Use extended 4-color scale for the exp. data (advanced)');
         }
+
+        this.addObject(EternaSettingsDialog.createDropdown(
+            'Base Style',
+            Eterna.settings.baseStyle,
+            ['linear', 'linearBright', 'linearBrighter', 'cel']
+        ), settingsLayout);
 
         const NUM_VOLUME_BUTTONS = 5;
 
@@ -84,7 +93,6 @@ export default class EternaSettingsDialog extends WindowDialog<void> {
         // This will update the sound buttons to their proper start states
         this.setVolume(Eterna.settings.soundMute.value, Eterna.settings.soundVolume.value);
 
-        this._window.content.addChild(settingsLayout);
         settingsLayout.layout();
         this._window.layout();
     }
@@ -109,6 +117,26 @@ export default class EternaSettingsDialog extends WindowDialog<void> {
         checkbox.regs.add(setting.connect(checkbox.toggled.slot));
         checkbox.regs.add(checkbox.toggled.connect(setting.slot));
         return checkbox;
+    }
+
+    private static createDropdown<T extends string>(title: string, setting: Setting<T>, options: T[]) {
+        const containerObject = new ContainerObject(new HLayoutContainer(8));
+        const label = Fonts.std(title, 18).color(0xC0DCE7).build();
+        containerObject.display.addChild(label);
+        const dropdown = new GameDropdown({
+            options,
+            defaultOption: setting.value,
+            borderWidth: 0,
+            fontSize: 18,
+            color: 0x043468,
+            textColor: 0xFFFFFF,
+            height: 32,
+            dropShadow: true
+        });
+        dropdown.regs.add(setting.connect(dropdown.selectedOption.slot));
+        dropdown.regs.add(dropdown.selectedOption.connect(setting.slot));
+        containerObject.addObject(dropdown, containerObject.display);
+        return containerObject;
     }
 
     private readonly _optionsMode: EternaViewOptionsMode;

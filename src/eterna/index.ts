@@ -9,10 +9,8 @@ declare global {
     interface Window {
         EternaApp: typeof EternaApp;
         app: EternaApp; // this syntax is used in index.html.tmpl, at least...
-        PIXI?: typeof PIXI;
+        __PIXI_APP__?: PIXI.Application;
     }
 }
 
 window.EternaApp = EternaApp;
-// So we can use https://github.com/bfanger/pixi-inspector
-if (!isProduction) window.PIXI = PIXI;
