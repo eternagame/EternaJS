@@ -1280,7 +1280,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.onBaseMouseMove(closestIndex);
 
             if (!this._annotationManager.annotationModeActive.value) {
-                // this._paintCursor.display.visible = true;
+                this._paintCursor.display.visible = true;
                 this._paintCursor.setShape(this._currentColor);
             }
 
@@ -1321,7 +1321,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.onBaseMouseMove(closestIndex);
 
             if (!this._annotationManager.annotationModeActive.value) {
-                // this._paintCursor.display.visible = true;
+                this._paintCursor.display.visible = true;
                 this._paintCursor.setShape(this._currentColor);
             }
 
