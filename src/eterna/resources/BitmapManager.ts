@@ -74,7 +74,7 @@ export default class BitmapManager {
         }
     }
 
-    public static getLBase(c: string): Texture[] {
+    public static getBaseLarge(c: string): Texture[] {
         let textures = [];
         if (c === 'A') {
             textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.LBaseA), 0.5)];
@@ -89,7 +89,7 @@ export default class BitmapManager {
         return textures;
     }
 
-    public static getLBasef(c: string): Texture[] {
+    public static getBaseLargeDC(c: string): Texture[] {
         let textures = [];
         if (c === 'A') {
             textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.LBaseAf), 0.5)];
@@ -99,36 +99,6 @@ export default class BitmapManager {
             textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.LBaseGf), 0.5)];
         } else { // c === 'U'
             textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.LBaseUf), 0.5)];
-        }
-        EternaTextureUtil.createScaled(textures, Base.ZOOM_SCALE_FACTOR, Base.NUM_ZOOM_LEVELS);
-        return textures;
-    }
-
-    public static getBaseLock(c: string): Texture[] {
-        let textures = [];
-        if (c === 'A') {
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseALock), 0.5)];
-        } else if (c === 'C') {
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseCLock), 0.5)];
-        } else if (c === 'G') {
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseGLock), 0.5)];
-        } else { // c === 'U'
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseULock), 0.5)];
-        }
-        EternaTextureUtil.createScaled(textures, Base.ZOOM_SCALE_FACTOR, Base.NUM_ZOOM_LEVELS);
-        return textures;
-    }
-
-    public static getBasefLock(c: string): Texture[] {
-        let textures = [];
-        if (c === 'A') {
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseAfLock), 0.5)];
-        } else if (c === 'C') {
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseCfLock), 0.5)];
-        } else if (c === 'G') {
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseGfLock), 0.5)];
-        } else { // c === 'U'
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseUfLock), 0.5)];
         }
         EternaTextureUtil.createScaled(textures, Base.ZOOM_SCALE_FACTOR, Base.NUM_ZOOM_LEVELS);
         return textures;
@@ -149,7 +119,7 @@ export default class BitmapManager {
         return textures;
     }
 
-    public static getBasefMid(c: string): Texture[] {
+    public static getBaseMidDC(c: string): Texture[] {
         let textures = [];
         if (c === 'A') {
             textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseAfMid), 0.5)];
@@ -159,36 +129,6 @@ export default class BitmapManager {
             textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseGfMid), 0.5)];
         } else { // c === 'U'
             textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseUfMid), 0.5)];
-        }
-        EternaTextureUtil.createScaled(textures, Base.ZOOM_SCALE_FACTOR, Base.NUM_ZOOM_LEVELS);
-        return textures;
-    }
-
-    public static getBaseMidLock(c: string): Texture[] {
-        let textures = [];
-        if (c === 'A') {
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseAMidLock), 0.5)];
-        } else if (c === 'C') {
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseCMidLock), 0.5)];
-        } else if (c === 'G') {
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseGMidLock), 0.5)];
-        } else { // c === 'U'
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseUMidLock), 0.5)];
-        }
-        EternaTextureUtil.createScaled(textures, Base.ZOOM_SCALE_FACTOR, Base.NUM_ZOOM_LEVELS);
-        return textures;
-    }
-
-    public static getBasefMidLock(c: string): Texture[] {
-        let textures = [];
-        if (c === 'A') {
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseAfMidLock), 0.5)];
-        } else if (c === 'C') {
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseCfMidLock), 0.5)];
-        } else if (c === 'G') {
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseGfMidLock), 0.5)];
-        } else { // c === 'U'
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseUfMidLock), 0.5)];
         }
         EternaTextureUtil.createScaled(textures, Base.ZOOM_SCALE_FACTOR, Base.NUM_ZOOM_LEVELS);
         return textures;

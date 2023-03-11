@@ -3,7 +3,9 @@ import {
     Point, Sprite, Texture, Graphics
 } from 'pixi.js';
 import {ColorMatrixFilter} from '@pixi/filter-color-matrix';
-import {ContainerObject, LateUpdatable, Flashbang} from 'flashbang';
+import {
+    ContainerObject, LateUpdatable, Flashbang, Easing
+} from 'flashbang';
 import Constants from 'eterna/Constants';
 import {RNABase, RNAPaint} from 'eterna/EPars';
 import ROPWait from 'eterna/rscript/ROPWait';
@@ -25,16 +27,26 @@ export default class Base extends ContainerObject implements LateUpdatable {
 
         // build our display hierarchy
         this.container.addChild(this._barcode);
+        this.container.addChild(this._glow);
         this.container.addChild(this._body);
+        this.container.addChild(this._lock);
         this.container.addChild(this._backbone);
         this.container.addChild(this._letter);
         this.container.addChild(this._sat0);
         this.container.addChild(this._sat1);
         this.container.addChild(this._number);
-        this.container.addChild(this._lock);
         this.container.addChild(this._spark1);
         this.container.addChild(this._spark2);
         this.container.addChild(this._markers);
+
+        // Disable round pixels on non-text moving things to make it smoother
+        this._barcode.roundPixels = false;
+        this._glow.roundPixels = false;
+        this._body.roundPixels = false;
+        this._lock.roundPixels = false;
+        this._backbone.roundPixels = false;
+        this._sat0.roundPixels = false;
+        this._sat1.roundPixels = false;
     }
 
     public set baseIndex(i: number) {
@@ -324,6 +336,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
         zoomLevel: number, offX: number, offY: number, currentTime: number, drawFlags: number,
         numberTexture: Texture | null, highlightState?: RNAHighlightState
     ): void {
+        this._glow.visible = false;
         this._body.visible = false;
         this._backbone.visible = false;
         this._barcode.visible = false;
@@ -339,7 +352,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
 
         const lowperform: boolean = (drawFlags & BaseDrawFlags.LOW_PERFORM) !== 0;
 
-        const bodyData: Texture = BaseAssets.getBodyTexture(this._baseType, this._colorLevel, zoomLevel, drawFlags);
+        const bodyData: Texture = BaseAssets.getBodyTexture(this._baseType, this._colorLevel, zoomLevel);
         const barcodeData: Texture | null = BaseAssets.getBarcodeTexture(zoomLevel, drawFlags);
 
         let randomX = 0;
@@ -351,17 +364,43 @@ export default class Base extends ContainerObject implements LateUpdatable {
                 this._animStartTime = currentTime;
             }
 
-            let prog: number = (currentTime - this._animStartTime) / 0.3;
-            if (prog > 2 * Math.PI) {
+            const EASE_IN_DURATION = 0.75;
+            const EASE_IN_END = EASE_IN_DURATION;
+            const ANIM_MAIN_DURATION = 1;
+            const ANIM_MAIN_END = EASE_IN_END + ANIM_MAIN_DURATION;
+            const EASE_OUT_DURATION = 0.50;
+            const EASE_OUT_END = ANIM_MAIN_END + EASE_OUT_DURATION;
+            const BOUNCE_LEAVE_DURATION = 0.25;
+            const BOUNCE_LEAVE_END = EASE_OUT_END + BOUNCE_LEAVE_DURATION;
+            const BOUNCE_RETURN_DURATION = 0.5;
+            const BOUNCE_RETURN_END = BOUNCE_LEAVE_END + BOUNCE_RETURN_DURATION;
+            const dt = currentTime - this._animStartTime;
+
+            // TODO: In the future maybe we could benefit from an animation system (with blending?)...
+            // TODO: Liner probably isn't actually the right call here
+            let offsetMultiplier: number;
+            if (dt <= EASE_IN_END) {
+                offsetMultiplier = Easing.pow1.easeIn(0, 1, dt, EASE_IN_DURATION);
+            } else if (dt > EASE_IN_END && dt <= ANIM_MAIN_END) {
+                const animDt = dt - EASE_IN_END;
+                offsetMultiplier = Math.cos((animDt / ANIM_MAIN_DURATION) * Math.PI);
+            } else if (dt > ANIM_MAIN_END && dt <= EASE_OUT_END) {
+                const easeDt = dt - ANIM_MAIN_END;
+                offsetMultiplier = Easing.pow1.easeOut(-1, 0, easeDt, EASE_OUT_DURATION);
+            } else if (dt > EASE_OUT_END && dt <= BOUNCE_LEAVE_END) {
+                const bounceDt = dt - EASE_OUT_END;
+                offsetMultiplier = Easing.linear(0, 0.18, bounceDt, BOUNCE_LEAVE_DURATION);
+            } else if (dt > BOUNCE_LEAVE_END && dt <= BOUNCE_RETURN_END) {
+                const bounceDt = dt - BOUNCE_LEAVE_END;
+                offsetMultiplier = Easing.linear(0.18, 0, bounceDt, BOUNCE_RETURN_DURATION);
+            } else {
+                offsetMultiplier = 0;
                 this._animate = false;
-                prog = 2 * Math.PI;
             }
 
-            const progsin: number = Math.sin(prog);
-            angleRand = (Math.PI / 12.0) * progsin;
-
-            randomX = this._goY * progsin * 0.07;
-            randomY = -this._goX * progsin * 0.07;
+            angleRand = (Math.PI / 12.0) * offsetMultiplier;
+            randomX = this._goY * offsetMultiplier * 0.07;
+            randomY = -this._goX * offsetMultiplier * 0.07;
         }
 
         let pairingProg = 0;
@@ -410,22 +449,25 @@ export default class Base extends ContainerObject implements LateUpdatable {
             this._markers.position.set(offX, offY);
             this._markers.scale.set((Base.MARKER_THICKNESS * Base.MARKER_RADIUS[this._zoomLevel]));
 
-            const letterdata: Texture | null = BaseAssets.getLetterTexture(this._baseType, zoomLevel, drawFlags);
-            if (letterdata != null) {
-                Base.showSprite(this._letter, letterdata);
+            const glowTex = BaseAssets.getGlowTexture(zoomLevel, drawFlags);
+            if (glowTex != null) {
+                Base.showSprite(this._glow, glowTex);
+                this._glow.x = randomX + offX;
+                this._glow.y = randomY + offY;
+            }
+
+            const letterTex = BaseAssets.getLetterTexture(this._baseType, zoomLevel, drawFlags);
+            if (letterTex != null) {
+                Base.showSprite(this._letter, letterTex);
                 this._letter.x = randomX + offX;
                 this._letter.y = randomY + offY;
             }
 
-            const lockdata: Texture | null = BaseAssets.getLockTexture(this._baseType, zoomLevel, drawFlags);
-            if (lockdata != null) {
-                Base.showSprite(this._lock, lockdata);
-                // Little bit of trig, assuming width and height are the same, to get the x/y position
-                // of the point at the edge of the circle at 45 degrees
-                const fromCenter = this._body.width / (zoomLevel >= 2 ? 5 : 3) / Math.SQRT2;
-                // if (zoomLevel >= 3) fromCenter -= 5;
-                this._lock.x = randomX + offX + fromCenter;
-                this._lock.y = randomY + offY - fromCenter;
+            const lockTex = BaseAssets.getLockTexture(zoomLevel, drawFlags);
+            if (lockTex != null) {
+                Base.showSprite(this._lock, lockTex);
+                this._lock.x = randomX + offX;
+                this._lock.y = randomY + offY;
             }
         }
 
@@ -677,6 +719,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
 
     private readonly _barcode: Sprite = new Sprite();
     private readonly _body: Sprite = new Sprite();
+    private readonly _glow: Sprite = new Sprite();
     private readonly _backbone: Sprite = new Sprite();
     private readonly _letter: Sprite = new Sprite();
     private readonly _lock: Sprite = new Sprite();

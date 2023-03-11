@@ -10,6 +10,9 @@ export default class Bubble extends SpriteObject implements Updatable {
     constructor(foreground: boolean) {
         super();
 
+        // Smoother animation
+        this.display.roundPixels = false;
+
         this._foreground = foreground;
 
         let useBlueBubble: boolean;

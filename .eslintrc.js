@@ -27,6 +27,7 @@ module.exports = {
         // Handled by typescript
         'no-dupe-class-members': 'off',
         'no-undef': 'off',
+        'consistent-return': 'off',
 
         // These aren't really a big issue and used well keep our code cleaner
         'no-bitwise': 'off',

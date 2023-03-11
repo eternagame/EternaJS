@@ -51,6 +51,15 @@ export default class ColorUtil {
         return ((a & 0xff) << 24) | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
     }
 
+    /** Composes a 32-bit color from separate rgba components. Each component should be between [0, 255] */
+    public static compose256(r: number, g: number, b: number): number {
+        r = MathUtil.clamp(r, 0, 255);
+        g = MathUtil.clamp(g, 0, 255);
+        b = MathUtil.clamp(b, 0, 255);
+
+        return ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
+    }
+
     /** Returns the 8-bit red component of a 24-bit color. The value will be in [0,255] */
     public static getRed(color: number): number {
         return (color >> 16) & 0xff;

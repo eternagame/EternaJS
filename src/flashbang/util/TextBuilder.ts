@@ -141,6 +141,28 @@ export default class TextBuilder {
         return this;
     }
 
+    public dropShadow(dropShadow: boolean = true) {
+        this._style.dropShadow = dropShadow;
+        return this;
+    }
+
+    public shadowFill(color: string | number, alpha?: number) {
+        this._style.dropShadowColor = color;
+        if (alpha !== undefined) this._style.dropShadowAlpha = alpha;
+        return this;
+    }
+
+    public shadowPosition(distance: number, angle: number) {
+        this._style.dropShadowDistance = distance;
+        this._style.dropShadowAngle = angle;
+        return this;
+    }
+
+    public shadowBlur(blur: number) {
+        this._style.dropShadowBlur = blur;
+        return this;
+    }
+
     private _style: Partial<ITextStyle> = {};
     private _text: string;
     private _scale = 1;
