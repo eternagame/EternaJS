@@ -1,5 +1,5 @@
 import {
-    Container, Graphics, Renderer, RenderTexture, Text, Texture
+    Container, Graphics, Renderer, RenderTexture, Texture
 } from 'pixi.js';
 import ColorConvert from 'color-convert';
 import {
@@ -12,6 +12,7 @@ import {GradientFactory} from '@pixi-essentials/gradients';
 import {FXAAFilter} from '@pixi/filter-fxaa';
 import Eterna from 'eterna/Eterna';
 import {BlurFilter} from '@pixi/filter-blur';
+import {AdjustmentFilter} from 'pixi-filters';
 import BaseDrawFlags from './BaseDrawFlags';
 import Base from './Base';
 
@@ -25,6 +26,7 @@ export default class BaseTextures {
     public brightBodyData: Texture[];
     public brighterBodyData: Texture[];
     public celBodyData: Texture[];
+    public lockData: Texture[];
 
     constructor(baseType: number) {
         this.baseType = baseType;
@@ -33,6 +35,7 @@ export default class BaseTextures {
         this.brightBodyData = BaseTextures.createBrightBodyTextures(baseType, Base.ZOOM_SCALE_FACTOR);
         this.brighterBodyData = BaseTextures.createBrighterBodyTextures(baseType, Base.ZOOM_SCALE_FACTOR);
         this.celBodyData = BaseTextures.createCelBodyTextures(baseType, Base.ZOOM_SCALE_FACTOR);
+        this.lockData = BaseTextures.createLockTextures(baseType, Base.ZOOM_SCALE_FACTOR);
     }
 
     public getBodyTexture(zoomLevel: number): Texture {
@@ -85,9 +88,6 @@ export default class BaseTextures {
             x1: BASE_SIZE,
             y1: BASE_SIZE,
             colorStops: [
-                // {offset: 0.00, color: getGradientColor(0, -15, 25)},
-                // {offset: 0.50, color: getGradientColor(0, -5, 10)},
-                // {offset: 1.00, color: getGradientColor(0, 20, -20)}
                 {offset: 0.00, color: getGradientColor(0, -20, 20)},
                 {offset: 0.50, color: getGradientColor(0, 0, 0)},
                 {offset: 1.00, color: getGradientColor(0, 20, -20)}
@@ -313,20 +313,64 @@ export default class BaseTextures {
         return bodyData;
     }
 
-    private static createLetterTextures(baseType: number, zoomScalar: number): Texture[] {
-        const bigLetter: Text = Fonts.std(BaseTextures.type2Letter(baseType)).fontSize(18)
+    private static getLetterText(baseType: number, sizeScalar = 1, color = 0) {
+        return Fonts.std(BaseTextures.type2Letter(baseType))
+            .fontSize(18 * sizeScalar)
             .bold()
-            .color(0)
-            .dropShadow()
-            .shadowFill(ColorUtil.compose256(...ColorConvert.hsv.rgb(this.type2Color(baseType))), 1)
-            .shadowPosition(0, 0)
-            .shadowBlur(3)
+            .color(color)
             .build();
-        bigLetter.alpha = 1;
-        const textures: Texture[] = [TextureUtil.renderToTexture(bigLetter)];
+    }
+
+    private static createLetterTextures(baseType: number, zoomScalar: number): Texture[] {
+        const textures = [TextureUtil.renderToTexture(BaseTextures.getLetterText(baseType))];
 
         EternaTextureUtil.createScaled(textures, zoomScalar, Base.NUM_ZOOM_LEVELS);
         return textures;
+    }
+
+    private static createLockTextures(baseType: number, zoomScalar: number): Texture[] {
+        /** Size of largest lock */
+        const MAX_SIZE = BaseTextures.BODY_SIZE / 1.3;
+        /** Render the graphic this much larger then scale down */
+        const UPSCALE = 2;
+        /** Size of the upscaled lock */
+        const RENDER_SIZE = MAX_SIZE * UPSCALE;
+        /** Thickness of the upscaled lock */
+        const LOCK_WIDTH = RENDER_SIZE / 5;
+
+        const lockWrapper = new Container();
+
+        const lock = new Graphics()
+            .beginFill(ColorUtil.blend(
+                ColorUtil.compose256(...ColorConvert.hsv.rgb(BaseTextures.type2Color(baseType))),
+                0xFFFFFF,
+                0.4
+            ))
+            .lineStyle(LOCK_WIDTH / 1.5, ColorUtil.blend(
+                ColorUtil.compose256(...ColorConvert.hsv.rgb(BaseTextures.type2Color(baseType))),
+                0x111111,
+                0.35
+            ))
+            .drawCircle(LOCK_WIDTH / 2, RENDER_SIZE / 2, RENDER_SIZE / 2)
+            .endFill()
+            .beginFill(ColorUtil.blend(
+                ColorUtil.compose256(...ColorConvert.hsv.rgb(BaseTextures.type2Color(baseType))),
+                0x111111,
+                0.35
+            ))
+            .lineStyle(0)
+            .drawRect(0, 0, LOCK_WIDTH, RENDER_SIZE)
+            .endFill();
+        lock.filters = [new BlurFilter(1, 40), new FXAAFilter(), new AdjustmentFilter({alpha: 0.85})];
+        lockWrapper.addChild(lock);
+
+        lockWrapper.angle = 45;
+
+        const lockTex = TextureUtil.renderToTexture(lockWrapper);
+
+        const lockData = [EternaTextureUtil.scaleBy(lockTex, 1 / UPSCALE)];
+        EternaTextureUtil.createScaled(lockData, zoomScalar, 5);
+        return lockData;
     }
 
     // AMW TODO: isn't this just the EPars function?

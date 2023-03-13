@@ -29,11 +29,11 @@ export default class Base extends ContainerObject implements LateUpdatable {
         this.container.addChild(this._barcode);
         this.container.addChild(this._glow);
         this.container.addChild(this._body);
-        this.container.addChild(this._lock);
         this.container.addChild(this._backbone);
         this.container.addChild(this._letter);
         this.container.addChild(this._sat0);
         this.container.addChild(this._sat1);
+        this.container.addChild(this._lock);
         this.container.addChild(this._number);
         this.container.addChild(this._spark1);
         this.container.addChild(this._spark2);
@@ -463,11 +463,11 @@ export default class Base extends ContainerObject implements LateUpdatable {
                 this._letter.y = randomY + offY;
             }
 
-            const lockTex = BaseAssets.getLockTexture(zoomLevel, drawFlags);
+            const lockTex = BaseAssets.getLockTexture(this._baseType, zoomLevel, drawFlags);
             if (lockTex != null) {
                 Base.showSprite(this._lock, lockTex);
-                this._lock.x = randomX + offX;
-                this._lock.y = randomY + offY;
+                this._lock.x = randomX + offX + 0.2 * this._body.width;
+                this._lock.y = randomY + offY - 0.2 * this._body.height;
             }
         }
 
