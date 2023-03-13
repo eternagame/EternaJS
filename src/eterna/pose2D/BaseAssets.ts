@@ -67,7 +67,16 @@ export default class BaseAssets {
             : null;
     }
 
-    public static getLockTexture(baseType: number, zoomLevel: number, drawFlags: number): Texture | null {
+    public static getLockTexture(zoomLevel: number, drawFlags: number): Texture | null {
+        const isLock: boolean = (drawFlags & BaseDrawFlags.LOCKED) !== 0;
+
+        if (zoomLevel >= 4) return null;
+        if (!isLock) return null;
+
+        return this._lockBitmaps[zoomLevel];
+    }
+
+    public static getLetterLockTexture(baseType: number, zoomLevel: number, drawFlags: number): Texture | null {
         const isLock: boolean = (drawFlags & BaseDrawFlags.LOCKED) !== 0;
 
         if (zoomLevel >= 4) return null;
@@ -251,6 +260,8 @@ export default class BaseAssets {
         // GLOW TEXTURES
         BaseAssets._constrainedGlowData = BaseAssets.createGlowBitmaps(0xFFFFFF);
         BaseAssets._unconstrainedGlowData = BaseAssets.createGlowBitmaps(0xA573E5);
+
+        BaseAssets._lockBitmaps = BaseAssets.createLockBitmaps();
     }
 
     public static drawCircularBarcode(radius: number, lineThickness: number, lineAlpha: number): Texture {
@@ -325,6 +336,40 @@ export default class BaseAssets {
         return ringData;
     }
 
+    private static createLockBitmaps() {
+        /** Size of largest lock */
+        const MAX_SIZE = BaseTextures.BODY_SIZE + 1;
+        /** Render the graphic this much larger then scale down */
+        const UPSCALE = 2;
+        /** Size of the upscaled lock */
+        const RENDER_SIZE = MAX_SIZE * UPSCALE;
+        /** Thickness of the upscaled lock */
+        const LOCK_WIDTH = RENDER_SIZE / 3;
+
+        const lockWrapper = new Container();
+
+        const lock = new Graphics()
+            .beginFill(0x111111, 0.6)
+            .drawRect(0, 0, LOCK_WIDTH, RENDER_SIZE)
+            .endFill();
+        lockWrapper.addChild(lock);
+
+        const lockMask = new Graphics()
+            .beginFill(0xFF0000)
+            .drawCircle(0, 0, RENDER_SIZE / 2)
+            .endFill();
+        lockMask.x = LOCK_WIDTH / 2;
+        lockMask.y = RENDER_SIZE / 2;
+        lockWrapper.addChild(lockMask);
+        lockWrapper.mask = lockMask;
+
+        lockWrapper.angle = 45;
+
+        const lockData = [EternaTextureUtil.scaleBy(TextureUtil.renderToTexture(lockWrapper), 1 / UPSCALE)];
+        EternaTextureUtil.createScaled(lockData, 0.75, 5);
+        return lockData;
+    }
+
     private static textureForSize(textures: Texture[], ii: number, sizeNum: number, levels?: number): Texture {
         if (textures.length % Base.NUM_ZOOM_LEVELS !== 0) {
             throw new Error(`Invalid textures array length ${textures.length}`);
@@ -345,6 +390,8 @@ export default class BaseAssets {
     // Base glow (constrained vs unconstrained)
     private static _constrainedGlowData: Texture[];
     private static _unconstrainedGlowData: Texture[];
+
+    private static _lockBitmaps: Texture[];
 
     // Backbone textures
     private static _backboneBodyData: Texture[];

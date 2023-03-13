@@ -463,11 +463,13 @@ export default class Base extends ContainerObject implements LateUpdatable {
                 this._letter.y = randomY + offY;
             }
 
-            const lockTex = BaseAssets.getLockTexture(this._baseType, zoomLevel, drawFlags);
+            const lockTex = letterTex
+                ? BaseAssets.getLetterLockTexture(this._baseType, zoomLevel, drawFlags)
+                : BaseAssets.getLockTexture(zoomLevel, drawFlags);
             if (lockTex != null) {
                 Base.showSprite(this._lock, lockTex);
-                this._lock.x = randomX + offX + 0.2 * this._body.width;
-                this._lock.y = randomY + offY - 0.2 * this._body.height;
+                this._lock.x = randomX + offX + (letterTex ? 0.2 * this._body.width : 0);
+                this._lock.y = randomY + offY - (letterTex ? 0.2 * this._body.height : 0);
             }
         }
 
