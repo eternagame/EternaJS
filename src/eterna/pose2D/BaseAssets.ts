@@ -344,7 +344,7 @@ export default class BaseAssets {
         /** Size of the upscaled lock */
         const RENDER_SIZE = MAX_SIZE * UPSCALE;
         /** Thickness of the upscaled lock */
-        const LOCK_WIDTH = RENDER_SIZE / 3;
+        const LOCK_WIDTH = RENDER_SIZE / 3.15;
 
         const lockWrapper = new Container();
 
