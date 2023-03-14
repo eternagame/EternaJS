@@ -222,7 +222,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         // handle view settings
         this.regs.add(Eterna.settings.showNumbers.connectNotify((value) => { this.showNumbering = value; }));
         this.regs.add(Eterna.settings.showRope.connectNotify((value) => { this.showRope = value; }));
-        this.regs.add(Eterna.settings.showLetters.connectNotify((value) => { this.lettermode = value; }));
+        this.regs.add(Eterna.settings.showLetters.connectNotify((value) => { this.letterMode = value; }));
+        this.regs.add(Eterna.settings.colorblindTheme.connectNotify((value) => { this.colorblindTheme = value; }));
         this.regs.add(
             Eterna.settings.useContinuousColors.connectNotify((value) => { this.useContinuousExpColors = value; })
         );
@@ -1768,12 +1769,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public set useSimpleGraphics(simpleGraphics: boolean) {
-        this._simpleGraphicsMods = simpleGraphics;
+        this._simpleGraphicsMode = simpleGraphics;
         this._redraw = true;
     }
 
     public get useSimpleGraphics(): boolean {
-        return this._simpleGraphicsMods;
+        return this._simpleGraphicsMode;
     }
 
     public set highlightRestricted(highlight: boolean) {
@@ -2872,8 +2873,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
             const drawFlags: number = BaseDrawFlags.builder()
                 .locked(this.isLocked(ii))
-                .letterMode(this._lettermode)
-                .lowPerform(this._simpleGraphicsMods)
+                .letterMode(this._letterMode)
+                .lowPerform(this._simpleGraphicsMode)
+                .colorblindTheme(this._colorblindTheme)
                 .useBarcode(useBarcode)
                 .result();
 
@@ -2946,7 +2948,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.lastSampledTime = currentTime;
 
             for (let ii = 0; ii < fullSeq.length; ii++) {
-                if (!this._pairs.isPaired(ii) && !this._simpleGraphicsMods && Math.random() > 0.7) {
+                if (!this._pairs.isPaired(ii) && !this._simpleGraphicsMode && Math.random() > 0.7) {
                     this._bases[ii].animate();
                 }
             }
@@ -2957,7 +2959,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         // / Bitblt rendering
         const needRedraw = this._bases.some(
-            (base) => base.needRedraw(this._simpleGraphicsMods)
+            (base) => base.needRedraw(this._simpleGraphicsMode)
         );
 
         if (needRedraw || this._redraw) {
@@ -3227,13 +3229,22 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return n;
     }
 
-    public set lettermode(lettermode: boolean) {
-        this._lettermode = lettermode;
+    public set letterMode(letterMode: boolean) {
+        this._letterMode = letterMode;
         this._redraw = true;
     }
 
-    public get lettermode(): boolean {
-        return this._lettermode;
+    public get letterMode(): boolean {
+        return this._letterMode;
+    }
+
+    public set colorblindTheme(enable: boolean) {
+        this._colorblindTheme = enable;
+        this._redraw = true;
+    }
+
+    public get colorblindTheme(): boolean {
+        return this._colorblindTheme;
     }
 
     public set scoreFolder(folder: Folder | null) {
@@ -4475,9 +4486,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _startPickCallback: PosePickCallback;
     private _mouseDownAltKey: boolean = false;
 
-    private _lettermode: boolean = false;
-    private _displayScoreTexts: boolean;
-
     private _redraw: boolean = true;
 
     // Time which we sampled bases to animate last time;
@@ -4553,7 +4561,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _numberingMode: boolean = false;
     private _showBaseRope: boolean = false;
     private _showPseudoknots: boolean = false;
-    private _simpleGraphicsMods: boolean = false;
+    private _simpleGraphicsMode: boolean = false;
+    private _letterMode: boolean = false;
+    private _displayScoreTexts: boolean;
+    private _colorblindTheme: boolean = false;
 
     // customNumbering
     private _customNumbering: (number | null)[] | undefined = undefined;

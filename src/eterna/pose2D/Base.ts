@@ -352,7 +352,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
 
         const lowperform: boolean = (drawFlags & BaseDrawFlags.LOW_PERFORM) !== 0;
 
-        const bodyData: Texture = BaseAssets.getBodyTexture(this._baseType, this._colorLevel, zoomLevel);
+        const bodyData: Texture = BaseAssets.getBodyTexture(this._baseType, this._colorLevel, zoomLevel, drawFlags);
         const barcodeData: Texture | null = BaseAssets.getBarcodeTexture(zoomLevel, drawFlags);
 
         let randomX = 0;

@@ -3587,7 +3587,7 @@ export default class PoseEditMode extends GameMode {
 
     public set lettersVisible(value: boolean) {
         this._poses.forEach((e) => {
-            e.lettermode = value;
+            e.letterMode = value;
         });
     }
 

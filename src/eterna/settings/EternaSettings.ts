@@ -33,6 +33,7 @@ export default class EternaSettings extends Settings {
     public readonly puzzlemakerEternafoldNoticeDismissed: Setting<boolean>;
 
     public readonly baseStyle: Setting<BaseStyle>;
+    public readonly colorblindTheme: Setting<boolean>;
 
     constructor() {
         super('EternaSettings');
@@ -79,6 +80,6 @@ export default class EternaSettings extends Settings {
             false
         );
 
-        this.baseStyle = this.setting<BaseStyle>('baseStyle', 'linear');
+        this.colorblindTheme = this.setting<boolean>('colorblindTheme', false);
     }
 }

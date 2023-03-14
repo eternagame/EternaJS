@@ -40,6 +40,7 @@ export default class EternaSettingsDialog extends WindowDialog<void> {
         bind(Eterna.settings.highlightRestricted, 'Highlight restricted sequences');
         bind(Eterna.settings.showChat, 'In-game chat');
         bind(Eterna.settings.simpleGraphics, `Use simpler, less animated graphics${showShortcuts ? ' (,)' : ''}`);
+        bind(Eterna.settings.colorblindTheme, 'Use colorblind-friendly base colors');
         bind(
             Eterna.settings.usePuzzlerLayout,
             `Use clash-free layout for big structures${showShortcuts ? ' (L)' : ''}`
@@ -54,12 +55,6 @@ export default class EternaSettingsDialog extends WindowDialog<void> {
             bind(Eterna.settings.useContinuousColors, 'Use continuous colors for the exp. data (advanced)');
             bind(Eterna.settings.useExtendedColors, 'Use extended 4-color scale for the exp. data (advanced)');
         }
-
-        this.addObject(EternaSettingsDialog.createDropdown(
-            'Base Style',
-            Eterna.settings.baseStyle,
-            ['linear', 'linearBright', 'linearBrighter', 'cel']
-        ), settingsLayout);
 
         const NUM_VOLUME_BUTTONS = 5;
 
@@ -119,6 +114,7 @@ export default class EternaSettingsDialog extends WindowDialog<void> {
         return checkbox;
     }
 
+    // @ts-expect-error Unused, but kept in the likely case this util is needed later
     private static createDropdown<T extends string>(title: string, setting: Setting<T>, options: T[]) {
         const containerObject = new ContainerObject(new HLayoutContainer(8));
         const label = Fonts.std(title, 18).color(0xC0DCE7).build();

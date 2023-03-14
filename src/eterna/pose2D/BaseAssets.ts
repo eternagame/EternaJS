@@ -21,9 +21,11 @@ export default class BaseAssets {
         return BaseAssets._baseUBitmaps.bodyData[zoomLevel].width / 2.0;
     }
 
-    public static getBodyTexture(baseType: number, colorLevel: number, zoomLevel: number): Texture {
+    public static getBodyTexture(baseType: number, colorLevel: number, zoomLevel: number, drawFlags: number): Texture {
+        const colorblindTheme: boolean = (drawFlags & BaseDrawFlags.COLORBLIND_THEME) !== 0;
+
         if (BaseAssets.isBaseType(baseType) && colorLevel < 0) {
-            return BaseAssets.getBaseBitmaps(baseType).getBodyTexture(zoomLevel);
+            return BaseAssets.getBaseBitmaps(baseType).getBodyTexture(zoomLevel, colorblindTheme);
         } else if (baseType === RNAPaint.LOCK) {
             return BaseAssets.textureForSize(BaseAssets._backboneBodyData, 0, zoomLevel);
         } else if (colorLevel < 0) {
@@ -78,11 +80,14 @@ export default class BaseAssets {
 
     public static getLetterLockTexture(baseType: number, zoomLevel: number, drawFlags: number): Texture | null {
         const isLock: boolean = (drawFlags & BaseDrawFlags.LOCKED) !== 0;
+        const colorblindTheme: boolean = (drawFlags & BaseDrawFlags.COLORBLIND_THEME) !== 0;
 
         if (zoomLevel >= 4) return null;
         if (!isLock) return null;
 
-        return this.getBaseBitmaps(baseType).lockData[zoomLevel];
+        return colorblindTheme
+            ? this.getBaseBitmaps(baseType).colorblindLockData[zoomLevel]
+            : this.getBaseBitmaps(baseType).lockData[zoomLevel];
     }
 
     public static getGlowTexture(zoomLevel: number, drawFlags: number) {

@@ -21,6 +21,9 @@ export default class BaseDrawFlags {
      */
     public static IS_DONTCARE: number = 1 << 4;
 
+    /** If set, a colorblind-friendly base color palette is used */
+    public static COLORBLIND_THEME: number = 1 << 5;
+
     /** Fluent builder functions */
     public static builder(initialFlags: number = 0): BaseDrawFlags {
         const out: BaseDrawFlags = new BaseDrawFlags();
@@ -50,6 +53,13 @@ export default class BaseDrawFlags {
 
     public isDontCare(val: boolean = true): BaseDrawFlags {
         this._flags = (val ? this._flags | BaseDrawFlags.IS_DONTCARE : this._flags & ~BaseDrawFlags.IS_DONTCARE);
+        return this;
+    }
+
+    public colorblindTheme(val: boolean = true): BaseDrawFlags {
+        this._flags = (
+            val ? this._flags | BaseDrawFlags.COLORBLIND_THEME : this._flags & ~BaseDrawFlags.COLORBLIND_THEME
+        );
         return this;
     }
 
