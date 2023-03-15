@@ -193,8 +193,8 @@ export default class BaseTextures {
         const letter = BaseTextures.type2Letter(baseType);
         switch (letter) {
             case 'A': return colorblind ? [44, 80, 98] : [44, 80, 98];
-            case 'C': return colorblind ? [177, 92, 71] : [130, 85, 65];
-            case 'G': return colorblind ? [334, 73, 87] : [358, 81, 75];
+            case 'C': return colorblind ? [177, 92, 80] : [130, 85, 65];
+            case 'G': return colorblind ? [345, 73, 80] : [358, 81, 75];
             case 'U': return colorblind ? [237, 50, 98] : [204, 100, 85];
             default: Assert.unreachable(letter);
         }
