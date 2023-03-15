@@ -9,7 +9,6 @@ import {RNABase} from 'eterna/EPars';
 import EternaTextureUtil from 'eterna/util/EternaTextureUtil';
 import Fonts from 'eterna/util/Fonts';
 import {GradientFactory} from '@pixi-essentials/gradients';
-import {FXAAFilter} from '@pixi/filter-fxaa';
 import Eterna from 'eterna/Eterna';
 import {BlurFilter} from '@pixi/filter-blur';
 import {AdjustmentFilter} from 'pixi-filters';
@@ -54,10 +53,11 @@ export default class BaseTextures {
         Assert.assertIsDefined(Eterna.app.pixi);
         /** Size of largest body texture */
         const MAX_SIZE = 40;
-        /** Render the graphic this much larger then scale down */
-        const UPSCALE = 2;
         /** Size of the upscaled base texture */
-        const TEX_SIZE = MAX_SIZE * UPSCALE;
+        // Power of two so that we get mipmaps
+        const TEX_SIZE = 2 ** 6;
+        /** Render the graphic this much larger then scale down */
+        const UPSCALE = TEX_SIZE / MAX_SIZE;
         /** Size of the base graphic itself, not including whitespace (upscaled) */
         const BASE_SIZE = BaseTextures.BODY_SIZE * UPSCALE;
         const texture = RenderTexture.create({width: TEX_SIZE, height: TEX_SIZE});
@@ -99,9 +99,9 @@ export default class BaseTextures {
             // at what will be the center of the texture
             .drawCircle(BASE_SIZE / 2, BASE_SIZE / 2, BASE_SIZE / 2)
             .endFill();
-        // Antialiasing, because the renderer-wide antialiasing is insufficient and smooth-graphics doesn't
-        // support texture fill yet (we need this in addition to the 2x upscaling)
-        body.filters = [new BlurFilter(1, 40), new FXAAFilter()];
+        // The MSAA we're applying in renderToTexture is decent, but this slightly cuts down on a little remaining
+        // artifacting. Maybe once smooth-graphics supports texture fills that will make this unnecessary?
+        body.filters = [new BlurFilter(1, 40)];
         // Center the body in the whitespace
         body.x = (TEX_SIZE / 2) - (BASE_SIZE / 2);
         body.y = (TEX_SIZE / 2) - (BASE_SIZE / 2);
@@ -130,10 +130,11 @@ export default class BaseTextures {
     private static createLockTextures(baseType: number, zoomScalar: number, colorblind: boolean): Texture[] {
         /** Size of largest lock */
         const MAX_SIZE = BaseTextures.BODY_SIZE / 1.3;
-        /** Render the graphic this much larger then scale down */
-        const UPSCALE = 2;
         /** Size of the upscaled lock */
-        const RENDER_SIZE = MAX_SIZE * UPSCALE;
+        // Power of two so we get mipmaps
+        const RENDER_SIZE = 2 ** 6;
+        /** Render the graphic this much larger then scale down */
+        const UPSCALE = RENDER_SIZE / MAX_SIZE;
         /** Thickness of the upscaled lock */
         const LOCK_WIDTH = RENDER_SIZE / 5;
 
@@ -160,7 +161,7 @@ export default class BaseTextures {
             .lineStyle(0)
             .drawRect(0, 0, LOCK_WIDTH, RENDER_SIZE)
             .endFill();
-        lock.filters = [new BlurFilter(1, 40), new FXAAFilter(), new AdjustmentFilter({alpha: 0.85})];
+        lock.filters = [new AdjustmentFilter({alpha: 0.85})];
         lockWrapper.addChild(lock);
 
         lockWrapper.angle = 45;

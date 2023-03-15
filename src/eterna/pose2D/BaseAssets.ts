@@ -310,10 +310,11 @@ export default class BaseAssets {
     private static createGlowBitmaps(color: number) {
         /** Size of largest glow */
         const MAX_SIZE = BaseTextures.BODY_SIZE + 6;
-        /** Render the graphic this much larger then scale down */
-        const UPSCALE = 2;
         /** Size of the upscaled glow */
-        const RENDER_SIZE = MAX_SIZE * UPSCALE;
+        // Power of 2 so that we get mipmaps
+        const RENDER_SIZE = 2 ** 6;
+        /** Render the graphic this much larger then scale down */
+        const UPSCALE = RENDER_SIZE / MAX_SIZE;
         /** Size of the full upscaled texture */
         const TEX_SIZE = RENDER_SIZE * 2;
 
@@ -327,10 +328,10 @@ export default class BaseAssets {
         ringWrapper.addChild(ringBg);
 
         const ring = new Graphics()
-            .lineStyle({color, width: 1})
+            .lineStyle({color, width: 4})
             .drawCircle(0, 0, RENDER_SIZE / 2)
             .endFill();
-        ring.filters = [new BlurFilter(8, 16), new AdjustmentFilter({brightness: 1.5, alpha: 3})];
+        ring.filters = [new BlurFilter(8, 16), new AdjustmentFilter({brightness: 1, alpha: 1.2})];
         // Center the ring in the larger texture
         ring.x = (TEX_SIZE) / 2;
         ring.y = (TEX_SIZE) / 2;

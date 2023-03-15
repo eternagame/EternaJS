@@ -1,5 +1,5 @@
 import {
-    BaseRenderTexture, BaseTexture, Container, DisplayObject, Rectangle, RenderTexture, Texture
+    BaseTexture, Container, DisplayObject, MSAA_QUALITY, Rectangle, Texture
 } from 'pixi.js';
 import Flashbang from 'flashbang/core/Flashbang';
 import Assert from './Assert';
@@ -67,17 +67,11 @@ export default class TextureUtil {
         const wrap: Container = new Container();
         wrap.addChild(disp);
 
+        // TODO: Shouldn't generateTexture already be handling this?
         wrap.getLocalBounds(TextureUtil.R);
-        wrap.x = -TextureUtil.R.x;
-        wrap.y = -TextureUtil.R.y;
-        const tex: RenderTexture = new RenderTexture(new BaseRenderTexture({
-            width: TextureUtil.R.width,
-            height: TextureUtil.R.height
-        }));
 
         Assert.assertIsDefined(Flashbang.pixi);
-        Flashbang.pixi.renderer.render(wrap, {renderTexture: tex, clear: true});
-        return tex;
+        return Flashbang.pixi.renderer.generateTexture(disp, {multisample: MSAA_QUALITY.HIGH, region: TextureUtil.R});
     }
 
     private static readonly R: Rectangle = new Rectangle();
