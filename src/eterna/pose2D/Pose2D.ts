@@ -2908,7 +2908,20 @@ export default class Pose2D extends ContainerObject implements Updatable {
         let center: Point;
 
         for (let ii = 0; ii < this._bases.length; ++ii) {
-            this._bases[ii].display.visible = this.isNucleotidePartOfSequence(fullSeq, ii);
+            this._bases[ii].display.visible = this.isNucleotidePartOfSequence(fullSeq, ii)
+                // Basic viewport culling. Theoretically using renderable would be better than visible
+                // since it skips updating transforms, but for some reason in my testing it made things
+                // worse, not better (maybe some weirdness with how this gets updated each frame?)
+                // and I think we actually rely on proper transforms in some cases (annotations and rscript
+                // seem likely culprits, but I haven't actually checked)
+                // The - 60 is to account for the width of the base. This is a slight overestimate to
+                // be safe, though there may be a smarter method to be more precise (nb we need to
+                // account for bases potentially being different sizes due to things like rings and locks,
+                // but we don't want to call width/height on each base which may be expensive)
+                && this._bases[ii].x + this._offX > 0
+                && this._bases[ii].x + this._offX - 60 < this._width
+                && this._bases[ii].y + this._offY > 0
+                && this._bases[ii].y + this._offY - 60 < this._height;
             if (this._showNucleotideRange) {
                 const start = this._showNucleotideRange[0];
                 const end = this._showNucleotideRange[1];
