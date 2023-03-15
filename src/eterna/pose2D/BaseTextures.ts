@@ -192,7 +192,7 @@ export default class BaseTextures {
     private static type2Color(baseType: number, colorblind: boolean): [number, number, number] {
         const letter = BaseTextures.type2Letter(baseType);
         switch (letter) {
-            case 'A': return colorblind ? [42, 73, 98] : [44, 80, 98];
+            case 'A': return colorblind ? [44, 80, 98] : [44, 80, 98];
             case 'C': return colorblind ? [177, 92, 71] : [130, 85, 65];
             case 'G': return colorblind ? [334, 73, 87] : [358, 81, 75];
             case 'U': return colorblind ? [237, 50, 98] : [204, 100, 85];
