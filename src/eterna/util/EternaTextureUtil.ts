@@ -1,4 +1,6 @@
-import {Matrix, Sprite, Texture} from 'pixi.js';
+import {
+    Matrix, MSAA_QUALITY, Sprite, Texture
+} from 'pixi.js';
 import {TextureUtil, ColorUtil, MathUtil} from 'flashbang';
 
 export default class EternaTextureUtil {
@@ -8,7 +10,12 @@ export default class EternaTextureUtil {
      * @param scaleFactor scale factor to apply to each successive zoom level
      * @param numScaleLevels number of scale levels to create versions of
      */
-    public static createScaled(textures: Texture[], scaleFactor: number, numScaleLevels: number): void {
+    public static createScaled(
+        textures: Texture[],
+        scaleFactor: number,
+        numScaleLevels: number,
+        multisample?: MSAA_QUALITY
+    ): void {
         const origLength: number = textures.length;
         let sizeScaler: number = scaleFactor;
         const scalerMat: Matrix = new Matrix();
@@ -18,7 +25,7 @@ export default class EternaTextureUtil {
             scalerMat.scale(sizeScaler, sizeScaler);
 
             for (let ii = 0; ii < origLength; ii++) {
-                textures.push(EternaTextureUtil.scaleBy(textures[ii], sizeScaler));
+                textures.push(EternaTextureUtil.scaleBy(textures[ii], sizeScaler, multisample));
             }
 
             sizeScaler *= scaleFactor;
@@ -79,15 +86,15 @@ export default class EternaTextureUtil {
         return TextureUtil.renderToTexture(sprite);
     }
 
-    public static scaleBy(texture: Texture, scale: number): Texture {
-        return EternaTextureUtil.scaleByXY(texture, scale, scale);
+    public static scaleBy(texture: Texture, scale: number, multisample?: MSAA_QUALITY): Texture {
+        return EternaTextureUtil.scaleByXY(texture, scale, scale, multisample);
     }
 
-    public static scaleByXY(texture: Texture, scaleX: number, scaleY: number): Texture {
+    public static scaleByXY(texture: Texture, scaleX: number, scaleY: number, multisample?: MSAA_QUALITY): Texture {
         const sprite: Sprite = new Sprite(texture);
         sprite.scale.x = scaleX;
         sprite.scale.y = scaleY;
-        return TextureUtil.renderToTexture(sprite);
+        return TextureUtil.renderToTexture(sprite, multisample);
     }
 
     public static rotate(source: Texture, degree: number): Texture {

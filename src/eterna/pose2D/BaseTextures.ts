@@ -1,9 +1,9 @@
 import {
-    Container, Graphics, Renderer, RenderTexture, Texture
+    Container, Graphics, MSAA_QUALITY, Renderer, RenderTexture, Sprite, Texture
 } from 'pixi.js';
 import ColorConvert from 'color-convert';
 import {
-    Assert, ColorUtil, MathUtil, TextureUtil
+    Assert, ColorUtil, DisplayUtil, HAlign, MathUtil, TextureUtil, VAlign
 } from 'flashbang';
 import {RNABase} from 'eterna/EPars';
 import EternaTextureUtil from 'eterna/util/EternaTextureUtil';
@@ -11,7 +11,9 @@ import Fonts from 'eterna/util/Fonts';
 import {GradientFactory} from '@pixi-essentials/gradients';
 import Eterna from 'eterna/Eterna';
 import {BlurFilter} from '@pixi/filter-blur';
-import {AdjustmentFilter} from 'pixi-filters';
+import {AdjustmentFilter, ColorReplaceFilter} from 'pixi-filters';
+import BitmapManager from 'eterna/resources/BitmapManager';
+import Bitmaps from 'eterna/resources/Bitmaps';
 import BaseDrawFlags from './BaseDrawFlags';
 import Base from './Base';
 
@@ -129,7 +131,7 @@ export default class BaseTextures {
 
     private static createLockTextures(baseType: number, zoomScalar: number, colorblind: boolean): Texture[] {
         /** Size of largest lock */
-        const MAX_SIZE = BaseTextures.BODY_SIZE / 1.3;
+        const MAX_SIZE = BaseTextures.BODY_SIZE / 1.1;
         /** Size of the upscaled lock */
         // Power of two so we get mipmaps
         const RENDER_SIZE = 2 ** 6;
@@ -140,7 +142,12 @@ export default class BaseTextures {
 
         const lockWrapper = new Container();
 
-        const lock = new Graphics()
+        // const R = RENDER_SIZE * 0.3;
+        // const TOP_FROM_CENTER = R * 0.5;
+        const TOP_FROM_CENTER = LOCK_WIDTH / 3.25;
+        const R = TOP_FROM_CENTER * 2;
+
+        const lockBg = new Graphics()
             .beginFill(ColorUtil.blend(
                 ColorUtil.compose256(...ColorConvert.hsv.rgb(BaseTextures.type2Color(baseType, colorblind))),
                 0xFFFFFF,
@@ -151,24 +158,63 @@ export default class BaseTextures {
                 0x111111,
                 0.35
             ))
-            .drawCircle(LOCK_WIDTH / 2, RENDER_SIZE / 2, RENDER_SIZE / 2)
+            // .drawCircle(LOCK_WIDTH / 2, RENDER_SIZE / 2, RENDER_SIZE / 2)
+            .drawCircle(
+                0,
+                (
+                    2 * R + (RENDER_SIZE * 0.5 - R) - (Math.sqrt(R ** 2 - (-TOP_FROM_CENTER) ** 2) - TOP_FROM_CENTER)
+                ) / 2 - R,
+                RENDER_SIZE / 2
+            )
             .endFill()
             .beginFill(ColorUtil.blend(
                 ColorUtil.compose256(...ColorConvert.hsv.rgb(BaseTextures.type2Color(baseType, colorblind))),
                 0x111111,
                 0.35
             ))
-            .lineStyle(0)
-            .drawRect(0, 0, LOCK_WIDTH, RENDER_SIZE)
+            // .drawCircle(LOCK_WIDTH / 2, 1.5 * LOCK_WIDTH, LOCK_WIDTH)
+            // .drawRoundedRect(
+            //     LOCK_WIDTH / 2 - (LOCK_WIDTH / 2),
+            //     1.5 * LOCK_WIDTH + LOCK_WIDTH - 4,
+            //     LOCK_WIDTH, LOCK_WIDTH * 1.5, 4
+            // )
+            // .lineStyle(0)
+            // .drawRect(0, 0, LOCK_WIDTH, RENDER_SIZE)
+            /*
+            .drawCircle(0, 0, R)
+            .drawRoundedRect(
+                -TOP_FROM_CENTER,
+                Math.sqrt(R ** 2 - (-TOP_FROM_CENTER) ** 2) - TOP_FROM_CENTER,
+                TOP_FROM_CENTER * 2,
+                (RENDER_SIZE * 0.5 - R) - (Math.sqrt(R ** 2 - (-TOP_FROM_CENTER) ** 2) - TOP_FROM_CENTER),
+                TOP_FROM_CENTER
+            )
+            */
             .endFill();
-        lock.filters = [new AdjustmentFilter({alpha: 0.85})];
+        lockBg.filters = [new BlurFilter(1, 40)];
+        lockWrapper.addChild(lockBg);
+
+        const color = ColorUtil.blend(
+            ColorUtil.compose256(...ColorConvert.hsv.rgb(BaseTextures.type2Color(baseType, colorblind))),
+            0x111111,
+            0.30
+        );
+        const lock = new Sprite(BitmapManager.getBitmap(Bitmaps.BaseLock));
+        lock.height = RENDER_SIZE * 0.65;
+        lock.scale.x = lock.scale.y;
+        lock.filters = [new ColorReplaceFilter(
+            [0, 0, 0],
+            [ColorUtil.getRed(color) / 255, ColorUtil.getGreen(color) / 255, ColorUtil.getBlue(color) / 255]
+        )];
         lockWrapper.addChild(lock);
+        DisplayUtil.positionRelative(lock, HAlign.CENTER, VAlign.CENTER, lockBg, HAlign.CENTER, VAlign.CENTER);
 
-        lockWrapper.angle = 45;
+        lockWrapper.filters = [new AdjustmentFilter({alpha: 0.85})];
+        // lockWrapper.angle = 45;
 
-        const lockTex = TextureUtil.renderToTexture(lockWrapper);
+        const lockTex = TextureUtil.renderToTexture(lockWrapper, MSAA_QUALITY.LOW);
 
-        const lockData = [EternaTextureUtil.scaleBy(lockTex, 1 / UPSCALE)];
+        const lockData = [EternaTextureUtil.scaleBy(lockTex, 1 / UPSCALE, MSAA_QUALITY.LOW)];
         EternaTextureUtil.createScaled(lockData, zoomScalar, 5);
         return lockData;
     }

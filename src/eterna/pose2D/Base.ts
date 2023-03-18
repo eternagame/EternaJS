@@ -468,8 +468,8 @@ export default class Base extends ContainerObject implements LateUpdatable {
                 : BaseAssets.getLockTexture(zoomLevel, drawFlags);
             if (lockTex != null) {
                 Base.showSprite(this._lock, lockTex);
-                this._lock.x = randomX + offX + (letterTex ? 0.2 * this._body.width : 0);
-                this._lock.y = randomY + offY - (letterTex ? 0.2 * this._body.height : 0);
+                this._lock.x = randomX + offX + (letterTex ? 0.25 * this._body.width : 0);
+                this._lock.y = randomY + offY - (letterTex ? 0.25 * this._body.height : 0);
             }
         }
 
