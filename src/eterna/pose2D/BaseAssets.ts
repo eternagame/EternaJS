@@ -509,6 +509,7 @@ export default class BaseAssets {
         */
 
         // lock.filters = [new BlurFilter(1, 40), new AdjustmentFilter({alpha: 0.85})];
+        lock.filters = [new AdjustmentFilter({alpha: 0.85})];
         lockWrapper.addChild(lock);
 
         const lockData = [EternaTextureUtil.scaleBy(
