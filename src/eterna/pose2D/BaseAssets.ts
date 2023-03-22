@@ -508,7 +508,7 @@ export default class BaseAssets {
             // .lineTo(TOP_FROM_CENTER, Math.sqrt(R ** 2 - TOP_FROM_CENTER ** 2));
         */
 
-        // lock.filters = [new AdjustmentFilter({alpha: 0.85})];
+        // lock.filters = [new BlurFilter(1, 40), new AdjustmentFilter({alpha: 0.85})];
         lockWrapper.addChild(lock);
 
         const lockData = [EternaTextureUtil.scaleBy(
