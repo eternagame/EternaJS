@@ -518,7 +518,7 @@ export default class BaseAssets {
         )];
         EternaTextureUtil.createScaled(lockData, 0.75, 5 - 2);
         lockData.push(
-            TextureUtil.renderToTexture(new Graphics().beginFill(0x111111, 0.7).drawRoundedRect(0, 0, 3, 4, 2))
+            TextureUtil.renderToTexture(new Graphics().beginFill(0x111111, 0.7).drawRoundedRect(0, 0, 3, 3, 2))
         );
         return lockData;
     }
