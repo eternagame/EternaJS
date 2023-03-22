@@ -516,7 +516,10 @@ export default class BaseAssets {
             1 / UPSCALE,
             MSAA_QUALITY.LOW
         )];
-        EternaTextureUtil.createScaled(lockData, 0.75, 5);
+        EternaTextureUtil.createScaled(lockData, 0.75, 5 - 2);
+        lockData.push(
+            TextureUtil.renderToTexture(new Graphics().beginFill(0x111111).drawRoundedRect(0, 0, 3, 4, 3))
+        );
         return lockData;
     }
 
