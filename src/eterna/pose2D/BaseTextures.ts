@@ -142,8 +142,6 @@ export default class BaseTextures {
 
         const lockWrapper = new Container();
 
-        // const R = RENDER_SIZE * 0.3;
-        // const TOP_FROM_CENTER = R * 0.5;
         const TOP_FROM_CENTER = LOCK_WIDTH / 3.25;
         const R = TOP_FROM_CENTER * 2;
 
@@ -158,7 +156,6 @@ export default class BaseTextures {
                 0x111111,
                 0.35
             ))
-            // .drawCircle(LOCK_WIDTH / 2, RENDER_SIZE / 2, RENDER_SIZE / 2)
             .drawCircle(
                 0,
                 (
@@ -172,24 +169,6 @@ export default class BaseTextures {
                 0x111111,
                 0.35
             ))
-            // .drawCircle(LOCK_WIDTH / 2, 1.5 * LOCK_WIDTH, LOCK_WIDTH)
-            // .drawRoundedRect(
-            //     LOCK_WIDTH / 2 - (LOCK_WIDTH / 2),
-            //     1.5 * LOCK_WIDTH + LOCK_WIDTH - 4,
-            //     LOCK_WIDTH, LOCK_WIDTH * 1.5, 4
-            // )
-            // .lineStyle(0)
-            // .drawRect(0, 0, LOCK_WIDTH, RENDER_SIZE)
-            /*
-            .drawCircle(0, 0, R)
-            .drawRoundedRect(
-                -TOP_FROM_CENTER,
-                Math.sqrt(R ** 2 - (-TOP_FROM_CENTER) ** 2) - TOP_FROM_CENTER,
-                TOP_FROM_CENTER * 2,
-                (RENDER_SIZE * 0.5 - R) - (Math.sqrt(R ** 2 - (-TOP_FROM_CENTER) ** 2) - TOP_FROM_CENTER),
-                TOP_FROM_CENTER
-            )
-            */
             .endFill();
         lockBg.filters = [new BlurFilter(1, 40)];
         lockWrapper.addChild(lockBg);
@@ -210,7 +189,6 @@ export default class BaseTextures {
         DisplayUtil.positionRelative(lock, HAlign.CENTER, VAlign.CENTER, lockBg, HAlign.CENTER, VAlign.CENTER);
 
         lockWrapper.filters = [new AdjustmentFilter({alpha: 0.85})];
-        // lockWrapper.angle = 45;
 
         const lockTex = TextureUtil.renderToTexture(lockWrapper, MSAA_QUALITY.LOW);
 

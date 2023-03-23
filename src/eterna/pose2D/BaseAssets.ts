@@ -346,181 +346,26 @@ export default class BaseAssets {
 
     private static createLockBitmaps() {
         /** Size of largest lock */
-        // const MAX_SIZE = BaseTextures.BODY_SIZE - 6;
-        // const MAX_SIZE = BaseTextures.BODY_SIZE + 2;
         const MAX_SIZE = BaseTextures.BODY_SIZE - 6;
         // Power of two so we get mipmaps
         const RENDER_SIZE = 2 ** 6;
         /** Render the graphic this much larger then scale down */
         const UPSCALE = RENDER_SIZE / MAX_SIZE;
-        /** Thickness of the upscaled lock */
-        // const LOCK_BAR_WIDTH = RENDER_SIZE / 6;
-        // const LOCK_BAR_WIDTH = RENDER_SIZE / 4;
-        // const LOCK_CIRCLE_WIDTH = LOCK_BAR_WIDTH;
-        // const LOCK_CIRCLE_WIDTH = LOCK_BAR_WIDTH + 2;
-
-        const lockWrapper = new Container();
-
-        /*
-        const lock = new Graphics()
-            .beginFill(0x111111)
-            .drawCircle(0, 0, LOCK_BAR_WIDTH)
-            .drawRoundedRect(-(LOCK_BAR_WIDTH / 2), LOCK_BAR_WIDTH - 4, LOCK_BAR_WIDTH, LOCK_BAR_WIDTH * 1.5, 4)
-            .endFill();
-            // .lineStyle(LOCK_CIRCLE_WIDTH, 0x111111)
-            // .drawCircle(LOCK_BAR_WIDTH / 2, RENDER_SIZE / 2, RENDER_SIZE / 2)
-            // .lineStyle()
-            // .beginFill(0x111111)
-            // .beginFill(0x111111)
-            // .drawRect(0, 0, LOCK_BAR_WIDTH, RENDER_SIZE)
-            // .endFill();
-        lockWrapper.addChild(lock);
-        lock.filters = [new BlurFilter(1, 40), new AdjustmentFilter({alpha: 0.65})];
-        // lock.filters = [new BlurFilter(1, 40), new AdjustmentFilter({alpha: 0.8})];
-        */
-
-        /*
-        const lockMask = new Graphics()
-            .lineStyle(LOCK_CIRCLE_WIDTH, 0xBBBBBB)
-            .beginFill(0xFFFFFF)
-            .drawCircle(0, 0, RENDER_SIZE / 2)
-            .endFill();
-        const lockMaskSprite = new Sprite(TextureUtil.renderToTexture(lockMask));
-        lockWrapper.addChild(lockMaskSprite);
-        lockWrapper.filters = [new BlurFilter(2, 10)];
-        DisplayUtil.positionRelative(lockMaskSprite, HAlign.CENTER, VAlign.CENTER, lock, HAlign.CENTER, VAlign.CENTER);
-        lockWrapper.mask = lockMaskSprite;
-        */
-
-        // lockWrapper.angle = 45;
-
-        /*
-        // The lock body is a taking up 66% of the space, centered on the bottom
-        const BODY_R = RENDER_SIZE * 0.33;
-        const BODY_CENTER_X = RENDER_SIZE * 0.5;
-        const BODY_CENTER_Y = RENDER_SIZE - BODY_R;
-
-        const SHACKLE_THICKNESS = RENDER_SIZE * 0.15;
-        const SHACKLE_WIDTH = RENDER_SIZE * 0.5;
-        const SHACKLE_TOP_HEIGHT = RENDER_SIZE * 0.2;
-        const SHACKLE_TOP = RENDER_SIZE * 0;
-        //         B
-        //  ┌─────────────┐
-        //  │      E      │
-        //  │   ┌─────┐   │
-        //  │   │     │   │
-        //  │   │     │   │
-        //  A   F     D   C
-        const AX = RENDER_SIZE * 0.5 - SHACKLE_WIDTH * 0.5;
-        const AY = SHACKLE_TOP + SHACKLE_TOP_HEIGHT;
-        const BX = AX + SHACKLE_WIDTH * 0.5;
-        const BY = SHACKLE_TOP;
-        const CX = AX + SHACKLE_WIDTH;
-        const CY = AY;
-        const DX = CX - SHACKLE_THICKNESS;
-        const DY = CY;
-        const EX = BX;
-        const EY = BY + SHACKLE_THICKNESS;
-        const FX = AX + SHACKLE_THICKNESS;
-        const FY = AY;
-
-        // We draw the sidebars from where the end of the top part ends all the way down
-        // to the center of the body to ensure sufficient overlap
-        const SHACKLE_BAR_HEIGHT = BODY_CENTER_Y - SHACKLE_TOP_HEIGHT;
-        */
-
-        /*
-        // Note when we draw the bezier curves, the control points are placed on-axis 50% of the
-        // way to the "corner" to give an arc-like feel
-        const lock = new Graphics()
-            .beginFill(0x111111)
-            .drawCircle(BODY_CENTER_X, BODY_CENTER_Y, BODY_R)
-            // .beginHole()
-            // .drawRoundedRect(
-            //     RENDER_SIZE / 2 - SHACKLE_THICKNESS / 2,
-            //     BODY_CENTER_Y - BODY_R / 2,
-            //     SHACKLE_THICKNESS * 0.75,
-            //     BODY_R,
-            //     SHACKLE_THICKNESS * 0.75 * 0.5
-            // )
-            // .endHole()
-            .moveTo(AX, AY)
-            .drawRect(AX, AY, SHACKLE_THICKNESS, SHACKLE_BAR_HEIGHT)
-            .drawRect(DX, DY, SHACKLE_THICKNESS, SHACKLE_BAR_HEIGHT)
-            .bezierCurveTo(AX, (AY + BY) / 2, (AX + BX) / 2, BY, BX, BY)
-            .bezierCurveTo((BX + CX) / 2, BY, CX, (BY + CY) / 2, CX, CY)
-            .lineTo(DX, DY)
-            .bezierCurveTo(DX, (DY + EY) / 2, (DX + EX) / 2, EY, EX, EY)
-            .bezierCurveTo((EX + FX) / 2, EY, FX, (EY + FY) / 2, FX, FY)
-            .lineTo(AX, AY)
-            .endFill();
-        */
-
-        /*
-        const lock = new Graphics()
-            .beginFill(0x111111)
-            .drawRect(BODY_CENTER_X - BODY_R, BODY_CENTER_Y - BODY_R, BODY_R * 2, BODY_R * 2)
-            .moveTo(AX, AY)
-            .drawRect(AX, AY, SHACKLE_THICKNESS, SHACKLE_BAR_HEIGHT)
-            .drawRect(DX, DY, SHACKLE_THICKNESS, SHACKLE_BAR_HEIGHT)
-            .bezierCurveTo(AX, (AY + BY) / 2, (AX + BX) / 2, BY, BX, BY)
-            .bezierCurveTo((BX + CX) / 2, BY, CX, (BY + CY) / 2, CX, CY)
-            .lineTo(DX, DY)
-            .bezierCurveTo(DX, (DY + EY) / 2, (DX + EX) / 2, EY, EX, EY)
-            .bezierCurveTo((EX + FX) / 2, EY, FX, (EY + FY) / 2, FX, FY)
-            .lineTo(AX, AY)
-            .endFill();
-        */
 
         const lock = new Sprite(BitmapManager.getBitmap(Bitmaps.BaseLock));
         lock.height = RENDER_SIZE;
         lock.scale.x = lock.scale.y;
-        // lock.width = RENDER_SIZE;
-        // lock.height = RENDER_SIZE;
-
-        /*
-        const lock = new Graphics()
-            .beginFill(0x111111)
-            .drawRect(0, 0, LOCK_BAR_WIDTH, RENDER_SIZE)
-            .drawRect(-LOCK_BAR_WIDTH / 1.5, RENDER_SIZE * 0.15, LOCK_BAR_WIDTH / 1.5, LOCK_BAR_WIDTH)
-            .drawRect(LOCK_BAR_WIDTH, RENDER_SIZE * 0.85 - LOCK_BAR_WIDTH, LOCK_BAR_WIDTH / 2, LOCK_BAR_WIDTH);
-        */
-
-        /*
-        const R = RENDER_SIZE * 0.3;
-        const TOP_FROM_CENTER = R * 0.5;
-        const BOTTOM_FROM_CENTER = R;
-        const lock = new Graphics()
-            .beginFill(0x111111)
-            .drawCircle(0, 0, R)
-            .drawRoundedRect(
-                -TOP_FROM_CENTER,
-                Math.sqrt(R ** 2 - (-TOP_FROM_CENTER) ** 2) - TOP_FROM_CENTER,
-                TOP_FROM_CENTER * 2,
-                (RENDER_SIZE - R) - (Math.sqrt(R ** 2 - (-TOP_FROM_CENTER) ** 2) - TOP_FROM_CENTER),
-                TOP_FROM_CENTER
-            );
-            // The crazy math with the `sqrt`s is to get the y coordinate of the point on the circle given the
-            // center, radius, and x coordinate (using the equation for a circle)
-            // .moveTo(-TOP_FROM_CENTER, Math.sqrt(R ** 2 - (-TOP_FROM_CENTER) ** 2))
-            // .lineTo(-BOTTOM_FROM_CENTER, RENDER_SIZE - R)
-            // .lineTo(BOTTOM_FROM_CENTER, RENDER_SIZE - R)
-            // .lineTo(TOP_FROM_CENTER, Math.sqrt(R ** 2 - TOP_FROM_CENTER ** 2));
-        */
-
-        // lock.filters = [new BlurFilter(1, 40), new AdjustmentFilter({alpha: 0.85})];
         lock.filters = [new AdjustmentFilter({alpha: 0.85})];
-        lockWrapper.addChild(lock);
 
         const lockData = [EternaTextureUtil.scaleBy(
-            TextureUtil.renderToTexture(lockWrapper, MSAA_QUALITY.LOW),
+            TextureUtil.renderToTexture(lock, MSAA_QUALITY.LOW),
             1 / UPSCALE,
             MSAA_QUALITY.LOW
         )];
         EternaTextureUtil.createScaled(lockData, 0.75, 5 - 2);
-        lockData.push(
-            TextureUtil.renderToTexture(new Graphics().beginFill(0x111111, 0.7).drawRoundedRect(0, 0, 3, 3, 2))
-        );
+        lockData.push(TextureUtil.renderToTexture(
+            new Graphics().beginFill(0x111111, 0.7).drawRoundedRect(0, 0, 3, 3, 2)
+        ));
         return lockData;
     }
 
