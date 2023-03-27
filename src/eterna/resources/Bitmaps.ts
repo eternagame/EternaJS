@@ -16,7 +16,8 @@ export default class Bitmaps {
     public static readonly ImgExpandArrow: string = require('assets/NOVA/Palette/expand_arrow.png');
     public static readonly ImgCollapseArrow: string = require('assets/NOVA/Palette/collapse_arrow.png');
     public static readonly ImgBindingBaseGlow: string = require('assets/Aptamer/base_outer-1.png');
-    public static readonly BaseLock: string = require('assets/RNABase/icon-baselock.png');
+    // public static readonly BaseLock: string = require('assets/RNABase/icon-baselock.png');
+    public static readonly BaseLock: string = require('assets/RNABase/base-lock.svg');
     public static readonly BaseAf: string = require('assets/RNABase/BaseAf.png');
     public static readonly BaseAfLock: string = require('assets/RNABase/base_yellow_low_locked_purple.png');
     public static readonly BaseAfMid: string = require('assets/RNABase/base_yellow_mid_purple.png');

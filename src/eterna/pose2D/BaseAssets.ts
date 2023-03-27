@@ -1,7 +1,9 @@
 import {
-    Container, Graphics, Sprite, Texture
+    Container, Graphics, MSAA_QUALITY, Sprite, Texture
 } from 'pixi.js';
-import {ColorUtil, TextureUtil} from 'flashbang';
+import {
+    ColorUtil, TextureUtil
+} from 'flashbang';
 import {RNABase, RNAPaint} from 'eterna/EPars';
 import ExpPainter from 'eterna/ExpPainter';
 import Sounds from 'eterna/resources/Sounds';
@@ -11,17 +13,26 @@ import EternaTextureUtil from 'eterna/util/EternaTextureUtil';
 import {ColorMatrixFilter} from '@pixi/filter-color-matrix';
 import {BlurFilter} from '@pixi/filter-blur';
 import {AdjustmentFilter} from 'pixi-filters';
+import {FXAAFilter} from '@pixi/filter-fxaa';
 import BaseTextures from './BaseTextures';
 import BaseDrawFlags from './BaseDrawFlags';
 import Base from './Base';
 
+export interface ZoomLevelTexture {
+    texture: Texture;
+    scale: number;
+}
+
 /** Handles initialization and management of Base-related assets */
 export default class BaseAssets {
     public static getHitTestDistanceThreshold(zoomLevel: number): number {
-        return BaseAssets._baseUBitmaps.bodyData[zoomLevel].width / 2.0;
+        const body = BaseAssets._baseUBitmaps.bodyData[zoomLevel];
+        return (body.texture.width * body.scale) / 2.0;
     }
 
-    public static getBodyTexture(baseType: number, colorLevel: number, zoomLevel: number, drawFlags: number): Texture {
+    public static getBodyTexture(
+        baseType: number, colorLevel: number, zoomLevel: number, drawFlags: number
+    ): ZoomLevelTexture {
         const colorblindTheme: boolean = (drawFlags & BaseDrawFlags.COLORBLIND_THEME) !== 0;
 
         if (BaseAssets.isBaseType(baseType) && colorLevel < 0) {
@@ -49,7 +60,7 @@ export default class BaseAssets {
         }
     }
 
-    public static getBarcodeTexture(zoomLevel: number, drawFlags: number): Texture | null {
+    public static getBarcodeTexture(zoomLevel: number, drawFlags: number): ZoomLevelTexture | null {
         if ((drawFlags & BaseDrawFlags.USE_BARCODE) !== 0) {
             if (zoomLevel < Base.NUM_ZOOM_LEVELS) {
                 return BaseAssets.textureForSize(BaseAssets._barcodeData, 0, zoomLevel);
@@ -63,13 +74,13 @@ export default class BaseAssets {
         return null;
     }
 
-    public static getLetterTexture(baseType: number, zoomLevel: number, drawFlags: number): Texture | null {
+    public static getLetterTexture(baseType: number, zoomLevel: number, drawFlags: number): ZoomLevelTexture | null {
         return BaseAssets.isBaseType(baseType)
             ? BaseAssets.getBaseBitmaps(baseType).getLetterTexture(zoomLevel, drawFlags)
             : null;
     }
 
-    public static getLockTexture(zoomLevel: number, drawFlags: number): Texture | null {
+    public static getLockTexture(zoomLevel: number, drawFlags: number): ZoomLevelTexture | null {
         const isLock: boolean = (drawFlags & BaseDrawFlags.LOCKED) !== 0;
 
         if (zoomLevel >= 4) return null;
@@ -78,7 +89,9 @@ export default class BaseAssets {
         return this._lockBitmaps[zoomLevel];
     }
 
-    public static getLetterLockTexture(baseType: number, zoomLevel: number, drawFlags: number): Texture | null {
+    public static getLetterLockTexture(
+        baseType: number, zoomLevel: number, drawFlags: number
+    ): ZoomLevelTexture | null {
         const isLock: boolean = (drawFlags & BaseDrawFlags.LOCKED) !== 0;
         const colorblindTheme: boolean = (drawFlags & BaseDrawFlags.COLORBLIND_THEME) !== 0;
 
@@ -90,7 +103,7 @@ export default class BaseAssets {
             : this.getBaseBitmaps(baseType).lockData[zoomLevel];
     }
 
-    public static getGlowTexture(zoomLevel: number, drawFlags: number) {
+    public static getGlowTexture(zoomLevel: number, drawFlags: number): ZoomLevelTexture | null {
         const isDontcare: boolean = (drawFlags & BaseDrawFlags.IS_DONTCARE) !== 0;
 
         if (zoomLevel >= 4) return null;
@@ -101,7 +114,7 @@ export default class BaseAssets {
         return BaseAssets._constrainedGlowData[zoomLevel];
     }
 
-    public static getBackboneTexture(zoomLevel: number): Texture {
+    public static getBackboneTexture(zoomLevel: number): ZoomLevelTexture {
         if (zoomLevel < Base.NUM_ZOOM_LEVELS) {
             return BaseAssets.textureForSize(BaseAssets._backboneBodyData, 0, zoomLevel);
         } else {
@@ -109,11 +122,11 @@ export default class BaseAssets {
         }
     }
 
-    public static getSatellite0Texture(zoomLevel: number, st0DiffDegree: number): Texture {
+    public static getSatellite0Texture(zoomLevel: number, st0DiffDegree: number): ZoomLevelTexture {
         return BaseAssets.textureForSize(BaseAssets._satelliteData, Math.trunc(st0DiffDegree / 5), zoomLevel);
     }
 
-    public static getSatellite1Texture(zoomLevel: number, st1DiffDegree: number, pairType: number): Texture {
+    public static getSatellite1Texture(zoomLevel: number, st1DiffDegree: number, pairType: number): ZoomLevelTexture {
         if (pairType === -1 || pairType === 2) {
             return BaseAssets.textureForSize(BaseAssets._satelliteData, Math.trunc(st1DiffDegree / 5), zoomLevel);
         } else if (pairType === 1) {
@@ -125,7 +138,7 @@ export default class BaseAssets {
         }
     }
 
-    public static getSparkTexture(progress: number): Texture {
+    public static getSparkTexture(progress: number): ZoomLevelTexture {
         progress = (1 - progress) * (1 - progress);
         progress = 1 - progress;
 
@@ -138,7 +151,8 @@ export default class BaseAssets {
     }
 
     public static getSatelliteReferenceBaseSize(zoomLevel: number): number {
-        return BaseAssets._baseUBitmaps.bodyData[zoomLevel].width;
+        const body = BaseAssets._baseUBitmaps.bodyData[zoomLevel];
+        return body.texture.width * body.scale;
     }
 
     public static getBaseTypeSound(type: number): string | null {
@@ -196,6 +210,9 @@ export default class BaseAssets {
         const baseWMidPattern = EternaTextureUtil.scaleBy(BitmapManager.getBitmap(Bitmaps.BaseWMidPattern), 0.5);
         const baseWMin = EternaTextureUtil.scaleBy(BitmapManager.getBitmap(Bitmaps.BaseWMin), 0.5);
 
+        const sphereData = [];
+        const sphereMidData = [];
+        const sphereMinData = [];
         for (let ii: number = -ExpPainter.NUM_COLORS; ii <= 2 * ExpPainter.NUM_COLORS + 1; ii++) {
             const color: number = ExpPainter.getColorByLevel(ii);
             const r: number = ColorUtil.getRed(color) / 255;
@@ -208,23 +225,27 @@ export default class BaseAssets {
             const pattern = new Sprite(baseWPattern);
             pattern.filters = [colorTransform];
             sphereBitmap.addChild(pattern);
-            BaseAssets._sphereData.push(TextureUtil.renderToTexture(sphereBitmap));
+            sphereData.push(TextureUtil.renderToTexture(sphereBitmap));
 
             const sphereBitmapMid: Container = new Container();
             const patternMid = new Sprite(baseWMidPattern);
             patternMid.filters = [colorTransform];
             sphereBitmapMid.addChild(patternMid);
-            BaseAssets._sphereMidData.push(TextureUtil.renderToTexture(sphereBitmapMid));
+            sphereMidData.push(TextureUtil.renderToTexture(sphereBitmapMid));
 
             const sphereBitmapMin: Container = new Container();
             const patternMin = new Sprite(baseWMin);
             patternMin.filters = [colorTransform];
             sphereBitmapMin.addChild(patternMin);
-            BaseAssets._sphereMinData.push(TextureUtil.renderToTexture(sphereBitmapMin));
+            sphereMinData.push(TextureUtil.renderToTexture(sphereBitmapMin));
         }
 
-        EternaTextureUtil.createScaled(BaseAssets._sphereData, 0.75, Base.NUM_ZOOM_LEVELS);
-        EternaTextureUtil.createScaled(BaseAssets._sphereMidData, 0.75, Base.NUM_ZOOM_LEVELS);
+        // TODO: Rip out all the pre-scaled graphics and return alternate scales
+        EternaTextureUtil.createScaled(sphereData, 0.75, Base.NUM_ZOOM_LEVELS);
+        EternaTextureUtil.createScaled(sphereMidData, 0.75, Base.NUM_ZOOM_LEVELS);
+        BaseAssets._sphereData = sphereData.map((tex) => ({texture: tex, scale: 1}));
+        BaseAssets._sphereMidData = sphereMidData.map((tex) => ({texture: tex, scale: 1}));
+        BaseAssets._sphereMinData = sphereMinData.map((tex) => ({texture: tex, scale: 1}));
 
         // BASE BODY TEXTURES
         BaseAssets._baseUBitmaps = new BaseTextures(RNABase.URACIL);
@@ -232,19 +253,26 @@ export default class BaseAssets {
         BaseAssets._baseGBitmaps = new BaseTextures(RNABase.GUANINE);
         BaseAssets._baseCBitmaps = new BaseTextures(RNABase.CYTOSINE);
 
-        BaseAssets._backboneBodyData = [BitmapManager.getBitmap(Bitmaps.Backbone)];
-        BaseAssets._backboneMidData = [BitmapManager.getBitmap(Bitmaps.BackboneMid)];
+        const backboneBodyData = [BitmapManager.getBitmap(Bitmaps.Backbone)];
+        const backboneMidData = [BitmapManager.getBitmap(Bitmaps.BackboneMid)];
 
-        EternaTextureUtil.createScaled(BaseAssets._backboneBodyData, 0.75, Base.NUM_ZOOM_LEVELS);
-        EternaTextureUtil.createScaled(BaseAssets._backboneMidData, 0.75, Base.NUM_ZOOM_LEVELS);
+        EternaTextureUtil.createScaled(backboneBodyData, 0.75, Base.NUM_ZOOM_LEVELS);
+        EternaTextureUtil.createScaled(backboneMidData, 0.75, Base.NUM_ZOOM_LEVELS);
+
+        BaseAssets._backboneBodyData = backboneBodyData.map((tex) => ({texture: tex, scale: 1}));
+        BaseAssets._backboneMidData = backboneMidData.map((tex) => ({texture: tex, scale: 1}));
 
         // BARCODE TEXTURES
-        BaseAssets._barcodeData = [BaseAssets.drawCircularBarcode(16, 6, /* 0.5 */ 1)];
-        BaseAssets._barcodeMidData = [BaseAssets.drawCircularBarcode(12, 3, /* 0.5 */ 1)];
-        BaseAssets._barcodeMinData = [BaseAssets.drawCircularBarcode(6, 2, /* 0.5 */ 1)];
+        const barcodeData = [BaseAssets.drawCircularBarcode(16, 6, /* 0.5 */ 1)];
+        const barcodeMidData = [BaseAssets.drawCircularBarcode(12, 3, /* 0.5 */ 1)];
+        const barcodeMinData = [BaseAssets.drawCircularBarcode(6, 2, /* 0.5 */ 1)];
 
-        EternaTextureUtil.createScaled(BaseAssets._barcodeData, 0.75, Base.NUM_ZOOM_LEVELS);
-        EternaTextureUtil.createScaled(BaseAssets._barcodeMidData, 0.75, Base.NUM_ZOOM_LEVELS);
+        EternaTextureUtil.createScaled(barcodeData, 0.75, Base.NUM_ZOOM_LEVELS);
+        EternaTextureUtil.createScaled(barcodeMidData, 0.75, Base.NUM_ZOOM_LEVELS);
+
+        BaseAssets._barcodeData = barcodeData.map((tex) => ({texture: tex, scale: 1}));
+        BaseAssets._barcodeMidData = barcodeMidData.map((tex) => ({texture: tex, scale: 1}));
+        BaseAssets._barcodeMinData = barcodeMinData.map((tex) => ({texture: tex, scale: 1}));
 
         // SATELLITE TEXTURES
         BaseAssets._satelliteData = BaseAssets.createSatelliteBitmaps(
@@ -260,7 +288,7 @@ export default class BaseAssets {
         // SPARK TEXTURES
         BaseAssets._sparkBitmaps = EternaTextureUtil.createTransparent(
             BitmapManager.getBitmap(Bitmaps.BonusSymbol), 10
-        );
+        ).map((tex) => ({texture: tex, scale: 1}));
 
         // GLOW TEXTURES
         BaseAssets._constrainedGlowData = BaseAssets.createGlowBitmaps(0xFFFFFF);
@@ -295,88 +323,99 @@ export default class BaseAssets {
         return TextureUtil.renderToTexture(scratch);
     }
 
-    public static createSatelliteBitmaps(colorTransform: ColorMatrixFilter): Texture[] {
+    public static createSatelliteBitmaps(colorTransform: ColorMatrixFilter): ZoomLevelTexture[] {
         const baseImage: Texture = BitmapManager.getBitmap(Bitmaps.Satellite);
         const sprite = new Sprite(baseImage);
         sprite.filters = [colorTransform];
         const texture: Texture = TextureUtil.renderToTexture(sprite);
 
+        // TODO: Rip out pre-rotation/scaling
         const textures: Texture[] = EternaTextureUtil.createRotated(texture, 5);
         EternaTextureUtil.createScaled(textures, 0.75, Base.NUM_ZOOM_LEVELS);
 
-        return textures;
+        return textures.map((tex) => ({texture: tex, scale: 1}));
     }
 
-    private static createGlowBitmaps(color: number) {
+    private static createGlowBitmaps(color: number): ZoomLevelTexture[] {
         /** Size of largest glow */
         const MAX_SIZE = BaseTextures.BODY_SIZE + 6;
-        /** Size of the upscaled glow */
-        // Power of 2 so that we get mipmaps
-        const RENDER_SIZE = 2 ** 6;
-        /** Render the graphic this much larger then scale down */
-        const UPSCALE = RENDER_SIZE / MAX_SIZE;
-        /** Size of the full upscaled texture */
-        const TEX_SIZE = RENDER_SIZE * 2;
 
-        // Add whitespace to the edges so that the filter effects don't get cut off. x2 is chosen arbitrarily.
-        const ringWrapper = new Container();
-        const ringBg = new Graphics()
-            .beginFill(0)
-            .drawRect(0, 0, TEX_SIZE, TEX_SIZE)
-            .endFill();
-        ringBg.alpha = 0;
-        ringWrapper.addChild(ringBg);
+        const getGlowTex = (renderSize: number) => {
+            const ringWrapper = new Container();
+            const ringBg = new Graphics()
+                .beginFill(0)
+                .drawRect(0, 0, renderSize, renderSize)
+                .endFill();
+            ringBg.alpha = 0;
+            ringWrapper.addChild(ringBg);
 
-        const ring = new Graphics()
-            .lineStyle({color, width: 4})
-            .drawCircle(0, 0, RENDER_SIZE / 2)
-            .endFill();
-        ring.filters = [new BlurFilter(8, 16), new AdjustmentFilter({brightness: 1, alpha: 1.2})];
-        // Center the ring in the larger texture
-        ring.x = (TEX_SIZE) / 2;
-        ring.y = (TEX_SIZE) / 2;
-        ringWrapper.addChild(ring);
+            // The ring is drawn smaller than the overall texture to ensure the glow is not cut off.
+            // We'll make it half the size, semi-arbitrarily
+            const ring = new Graphics()
+                .lineStyle({color, width: 4})
+                .drawCircle(0, 0, renderSize / 4)
+                .endFill();
+            ring.filters = [new BlurFilter(8, 16), new AdjustmentFilter({alpha: 1.15}), new FXAAFilter()];
+            // Center the ring in the larger texture
+            ring.x = renderSize / 2;
+            ring.y = renderSize / 2;
+            ringWrapper.addChild(ring);
 
-        const ringData = [EternaTextureUtil.scaleBy(TextureUtil.renderToTexture(ringWrapper), 1 / UPSCALE)];
-        EternaTextureUtil.createScaled(ringData, 0.75, 5);
-        return ringData;
+            return TextureUtil.renderToTexture(ringWrapper, MSAA_QUALITY.HIGH);
+        };
+
+        const texLgSize = 2 ** 7;
+        const texLg = getGlowTex(texLgSize);
+
+        return [
+            {texture: texLg, scale: (MAX_SIZE / texLgSize) * 2},
+            {texture: texLg, scale: (MAX_SIZE / texLgSize) * 2 * 0.75},
+            {texture: texLg, scale: (MAX_SIZE / texLgSize) * 2 * (0.75 ** 2)},
+            // The -1 here addresses some artifacting
+            {texture: texLg, scale: ((MAX_SIZE - 1) / texLgSize) * 2 * (0.75 ** 3)}
+        ];
     }
 
-    private static createLockBitmaps() {
-        /** Size of largest lock */
-        const MAX_SIZE = BaseTextures.BODY_SIZE + 1;
-        /** Render the graphic this much larger then scale down */
-        const UPSCALE = 2;
-        /** Size of the upscaled lock */
-        const RENDER_SIZE = MAX_SIZE * UPSCALE;
-        /** Thickness of the upscaled lock */
-        const LOCK_WIDTH = RENDER_SIZE / 3.15;
+    private static createLockBitmaps(): ZoomLevelTexture[] {
+        const lock = new Sprite(BitmapManager.getBitmap(Bitmaps.BaseLock));
+        lock.filters = [new AdjustmentFilter({alpha: 0.85})];
 
-        const lockWrapper = new Container();
+        const getLockTexture = (renderSize: number) => {
+            lock.height = renderSize;
+            lock.scale.x = lock.scale.y;
+            return TextureUtil.renderToTexture(lock, MSAA_QUALITY.LOW);
+        };
 
-        const lock = new Graphics()
-            .beginFill(0x111111, 0.6)
-            .drawRect(0, 0, LOCK_WIDTH, RENDER_SIZE)
-            .endFill();
-        lockWrapper.addChild(lock);
+        // We use power-of-two size textures to ensure we have mipmaps
+        const texSizeLg = 2 ** 4;
+        const lockTexLg = getLockTexture(texSizeLg);
 
-        const lockMask = new Graphics()
-            .beginFill(0xFF0000)
-            .drawCircle(0, 0, RENDER_SIZE / 2)
-            .endFill();
-        lockMask.x = LOCK_WIDTH / 2;
-        lockMask.y = RENDER_SIZE / 2;
-        lockWrapper.addChild(lockMask);
-        lockWrapper.mask = lockMask;
+        // We pre-generate a smaller version of this texture because if we just scale down the
+        // higher-res texture, the subpixel interpolation will cause undesirable artifacts
+        // (eg, appearing to cut off the left of the circle or protruding the right of the circle)
+        // Maybe if we draw this manually with smooth-graphics, we wouldn't need to do this?
+        const texSizeSm = 2 ** 3;
+        const lockTexSm = getLockTexture(texSizeSm);
 
-        lockWrapper.angle = 45;
+        const tinyLock = new Graphics().beginFill(0x050505, 0.8).drawCircle(0, 0, 1.5);
+        const tinyLockTex = TextureUtil.renderToTexture(tinyLock, MSAA_QUALITY.HIGH);
 
-        const lockData = [EternaTextureUtil.scaleBy(TextureUtil.renderToTexture(lockWrapper), 1 / UPSCALE)];
-        EternaTextureUtil.createScaled(lockData, 0.75, 5);
-        return lockData;
+        const maxSize = BaseTextures.BODY_SIZE - 6;
+
+        return [
+            {texture: lockTexLg, scale: maxSize / texSizeLg},
+            {texture: lockTexLg, scale: (maxSize / texSizeLg) * 0.75},
+            {texture: lockTexSm, scale: (maxSize / texSizeSm) * 0.75 * 0.75},
+            {texture: tinyLockTex, scale: 1}
+        ];
     }
 
-    private static textureForSize(textures: Texture[], ii: number, sizeNum: number, levels?: number): Texture {
+    private static textureForSize(
+        textures: ZoomLevelTexture[],
+        ii: number,
+        sizeNum: number,
+        levels?: number
+    ): ZoomLevelTexture {
         if (textures.length % Base.NUM_ZOOM_LEVELS !== 0) {
             throw new Error(`Invalid textures array length ${textures.length}`);
         }
@@ -394,29 +433,29 @@ export default class BaseAssets {
     private static _baseCBitmaps: BaseTextures;
 
     // Base glow (constrained vs unconstrained)
-    private static _constrainedGlowData: Texture[];
-    private static _unconstrainedGlowData: Texture[];
+    private static _constrainedGlowData: ZoomLevelTexture[];
+    private static _unconstrainedGlowData: ZoomLevelTexture[];
 
-    private static _lockBitmaps: Texture[];
+    private static _lockBitmaps: ZoomLevelTexture[];
 
     // Backbone textures
-    private static _backboneBodyData: Texture[];
-    private static _backboneMidData: Texture[];
+    private static _backboneBodyData: ZoomLevelTexture[];
+    private static _backboneMidData: ZoomLevelTexture[];
 
     // Satellites for the max zoom
-    private static _satelliteData: Texture[];
-    private static _satelliteWeakerData: Texture[];
-    private static _satelliteStrongerData: Texture[];
+    private static _satelliteData: ZoomLevelTexture[];
+    private static _satelliteWeakerData: ZoomLevelTexture[];
+    private static _satelliteStrongerData: ZoomLevelTexture[];
 
     // Barcode outline data
-    private static _barcodeData: Texture[];
-    private static _barcodeMidData: Texture[];
-    private static _barcodeMinData: Texture[];
+    private static _barcodeData: ZoomLevelTexture[];
+    private static _barcodeMidData: ZoomLevelTexture[];
+    private static _barcodeMinData: ZoomLevelTexture[];
 
     // Bitmaps for blank bases
-    private static _sphereData: Texture[];
-    private static _sphereMidData: Texture[];
-    private static _sphereMinData: Texture[];
+    private static _sphereData: ZoomLevelTexture[];
+    private static _sphereMidData: ZoomLevelTexture[];
+    private static _sphereMinData: ZoomLevelTexture[];
 
-    private static _sparkBitmaps: Texture[];
+    private static _sparkBitmaps: ZoomLevelTexture[];
 }

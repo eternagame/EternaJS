@@ -9,7 +9,7 @@ import {
 import Constants from 'eterna/Constants';
 import {RNABase, RNAPaint} from 'eterna/EPars';
 import ROPWait from 'eterna/rscript/ROPWait';
-import BaseAssets from './BaseAssets';
+import BaseAssets, {ZoomLevelTexture} from './BaseAssets';
 import BaseDrawFlags from './BaseDrawFlags';
 import {RNAHighlightState} from './Pose2D';
 
@@ -352,8 +352,8 @@ export default class Base extends ContainerObject implements LateUpdatable {
 
         const lowperform: boolean = (drawFlags & BaseDrawFlags.LOW_PERFORM) !== 0;
 
-        const bodyData: Texture = BaseAssets.getBodyTexture(this._baseType, this._colorLevel, zoomLevel, drawFlags);
-        const barcodeData: Texture | null = BaseAssets.getBarcodeTexture(zoomLevel, drawFlags);
+        const bodyData = BaseAssets.getBodyTexture(this._baseType, this._colorLevel, zoomLevel, drawFlags);
+        const barcodeData = BaseAssets.getBarcodeTexture(zoomLevel, drawFlags);
 
         let randomX = 0;
         let randomY = 0;
@@ -468,14 +468,14 @@ export default class Base extends ContainerObject implements LateUpdatable {
                 : BaseAssets.getLockTexture(zoomLevel, drawFlags);
             if (lockTex != null) {
                 Base.showSprite(this._lock, lockTex);
-                this._lock.x = randomX + offX + (letterTex ? 0.2 * this._body.width : 0);
-                this._lock.y = randomY + offY - (letterTex ? 0.2 * this._body.height : 0);
+                this._lock.x = randomX + offX + (letterTex ? 0.25 * this._body.width : 0);
+                this._lock.y = randomY + offY - (letterTex ? 0.25 * this._body.height : 0);
             }
         }
 
         if (Math.abs(this._goX) > 0 || Math.abs(this._goY) > 0) {
             if (zoomLevel < 2 * Base.NUM_ZOOM_LEVELS && !this._isLast && !lowperform) {
-                const backboneData: Texture = BaseAssets.getBackboneTexture(zoomLevel);
+                const backboneData = BaseAssets.getBackboneTexture(zoomLevel);
                 Base.showSprite(this._backbone, backboneData);
                 this._backbone.x = randomX + offX + this._goX / 2;
                 this._backbone.y = randomY + offY + this._goY / 2;
@@ -692,11 +692,16 @@ export default class Base extends ContainerObject implements LateUpdatable {
         return filter;
     }
 
-    private static showSprite(sprite: Sprite, tex: Texture): Sprite {
+    private static showSprite(sprite: Sprite, tex: ZoomLevelTexture | Texture): Sprite {
         sprite.visible = true;
-        sprite.texture = tex;
-        sprite.pivot.x = tex.width * 0.5;
-        sprite.pivot.y = tex.height * 0.5;
+        const texture = tex instanceof Texture ? tex : tex.texture;
+        const scale = tex instanceof Texture ? 1 : tex.scale;
+
+        sprite.texture = texture;
+        sprite.scale.x = scale;
+        sprite.scale.y = scale;
+        sprite.pivot.x = texture.width * 0.5;
+        sprite.pivot.y = texture.height * 0.5;
         return sprite;
     }
 

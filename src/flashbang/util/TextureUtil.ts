@@ -61,7 +61,7 @@ export default class TextureUtil {
      * Renders the given DisplayObject to a new texture.
      * All textures in the DisplayObject's hierarchy should be loaded before calling this.
      */
-    public static renderToTexture(disp: DisplayObject): Texture {
+    public static renderToTexture(disp: DisplayObject, multisample: MSAA_QUALITY = MSAA_QUALITY.HIGH): Texture {
         Assert.isTrue(disp.parent == null, 'TODO');
 
         const wrap: Container = new Container();
@@ -71,7 +71,9 @@ export default class TextureUtil {
         wrap.getLocalBounds(TextureUtil.R);
 
         Assert.assertIsDefined(Flashbang.pixi);
-        return Flashbang.pixi.renderer.generateTexture(disp, {multisample: MSAA_QUALITY.HIGH, region: TextureUtil.R});
+        const tex = Flashbang.pixi.renderer.generateTexture(disp, {multisample, region: TextureUtil.R});
+        wrap.removeChild(disp);
+        return tex;
     }
 
     private static readonly R: Rectangle = new Rectangle();
