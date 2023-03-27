@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
-   viewBox="0 0 30 30"
-   width="30"
-   height="30"
+   viewBox="0 0 64 64"
+   width="64"
+   height="64"
    version="1.1"
    id="svg3"
    sodipodi:docname="base-lock.svg"
@@ -23,9 +23,9 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      showgrid="false"
-     inkscape:zoom="16"
-     inkscape:cx="34.5625"
-     inkscape:cy="23.1875"
+     inkscape:zoom="8"
+     inkscape:cx="56"
+     inkscape:cy="44.375"
      inkscape:window-width="3440"
      inkscape:window-height="1367"
      inkscape:window-x="0"
@@ -33,32 +33,32 @@
      inkscape:window-maximized="1"
      inkscape:current-layer="svg3" />
   <path
-     style="fill:#050505;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     d="M 10.989085,14.369429 H 6.9889111 l 3.49e-4,-6.9868432 c 0,0 -0.047766,-7.30340872 7.9998249,-7.30000002 8.047591,0.00341 7.999913,7.30000002 7.999913,7.30000002 v 6.9868432 h -4 V 7.3825858 c 0,0 -0.0042,-3.3 -3.999913,-3.3 -3.995667,0 -4,3.3 -4,3.3 z"
+     style="fill:#050505;fill-opacity:1;stroke:none;stroke-width:2.14514px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     d="M 23.419698,30.647334 H 14.83875 l 7.49e-4,-14.987783 c 0,0 -0.102465,-15.6668606 17.160774,-15.6595484412048 C 49.263512,0.0073175 49.161236,15.659551 49.161236,15.659551 V 30.647334 H 40.580661 V 15.659551 c 0,0 -0.009,-7.0789736 -8.580388,-7.0789736 -8.57128,0 -8.580575,7.0789736 -8.580575,7.0789736 z"
      id="path581"
      sodipodi:nodetypes="ccczcccczcc" />
   <rect
-     style="fill:#050505;fill-opacity:1;stroke:none;stroke-width:1.25326"
+     style="fill:#050505;fill-opacity:1;stroke:none;stroke-width:2.68842"
      id="rect1241"
-     width="20.866405"
-     height="18.259541"
-     x="4.5667982"
-     y="11.657875"
-     ry="7.6517739" />
+     width="44.76144"
+     height="39.169338"
+     x="9.6192799"
+     y="24.830662"
+     ry="16.414154" />
   <rect
      style="fill:#111111;fill-opacity:1;stroke:none"
      id="rect1495"
      width="0.10858916"
      height="0.066291258"
-     x="-1.3412058"
-     y="14.984789"
+     x="31.945705"
+     y="14.902205"
      ry="0.033145629" />
   <rect
-     style="fill:#111111;fill-opacity:1;stroke:none"
+     style="fill:#111111;fill-opacity:1;stroke:none;stroke-width:2.14514"
      id="rect1503"
-     width="0.11129061"
-     height="0.022097087"
-     x="1.8803738"
-     y="15.446739"
-     ry="0.011048543" />
+     width="0.23873435"
+     height="0.047401424"
+     x="31.880632"
+     y="32.958321"
+     ry="0.023700712" />
 </svg>
