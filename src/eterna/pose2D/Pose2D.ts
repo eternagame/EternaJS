@@ -3431,7 +3431,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._bases[seqpos].setType(inColor, true);
 
         this._lastColoredIndex = seqpos;
-        this._bases[seqpos].animate();
+        if (!this._simpleGraphicsMode) this._bases[seqpos].animate();
         this.doneColoring();
     }
 
@@ -3799,7 +3799,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
         this._lastColoredIndex = seqnum;
-        this._bases[seqnum].animate();
+        if (!this._simpleGraphicsMode) this._bases[seqnum].animate();
     }
 
     private updateDesignHighlight(): void {
