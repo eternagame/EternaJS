@@ -366,7 +366,7 @@ export default class BaseAssets {
         const texLgSize = 2 ** 7;
         const texLg = getGlowTex(texLgSize, 4, [new BlurFilter(8, 16), new AdjustmentFilter({alpha: 1.15})]);
         const texSmSize = 2 ** 6;
-        const texSm = getGlowTex(texSmSize, 3, [new BlurFilter(3, 14), new AdjustmentFilter({alpha: 0.8})]);
+        const texSm = getGlowTex(texSmSize, 3, [new BlurFilter(3, 12), new AdjustmentFilter({alpha: 0.9})]);
 
         return [
             {texture: texLg, scale: (MAX_SIZE / texLgSize) * 2},
