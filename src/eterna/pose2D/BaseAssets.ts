@@ -1,5 +1,5 @@
 import {
-    Container, Filter, Graphics, MSAA_QUALITY, Sprite, Texture
+    Container, Graphics, MSAA_QUALITY, Sprite, Texture
 } from 'pixi.js';
 import {
     ColorUtil, TextureUtil
@@ -13,6 +13,7 @@ import EternaTextureUtil from 'eterna/util/EternaTextureUtil';
 import {ColorMatrixFilter} from '@pixi/filter-color-matrix';
 import {BlurFilter} from '@pixi/filter-blur';
 import {AdjustmentFilter} from 'pixi-filters';
+import {FXAAFilter} from '@pixi/filter-fxaa';
 import BaseTextures from './BaseTextures';
 import BaseDrawFlags from './BaseDrawFlags';
 import Base from './Base';
@@ -339,7 +340,7 @@ export default class BaseAssets {
         /** Size of largest glow */
         const MAX_SIZE = BaseTextures.BODY_SIZE + 6;
 
-        const getGlowTex = (renderSize: number, width: number, filters: Filter[]) => {
+        const getGlowTex = (renderSize: number) => {
             const ringWrapper = new Container();
             const ringBg = new Graphics()
                 .beginFill(0)
@@ -351,10 +352,10 @@ export default class BaseAssets {
             // The ring is drawn smaller than the overall texture to ensure the glow is not cut off.
             // We'll make it half the size, semi-arbitrarily
             const ring = new Graphics()
-                .lineStyle({color, width})
+                .lineStyle({color, width: 4})
                 .drawCircle(0, 0, renderSize / 4)
                 .endFill();
-            ring.filters = filters;
+            ring.filters = [new BlurFilter(8, 16), new AdjustmentFilter({alpha: 1.15}), new FXAAFilter()];
             // Center the ring in the larger texture
             ring.x = renderSize / 2;
             ring.y = renderSize / 2;
@@ -364,15 +365,14 @@ export default class BaseAssets {
         };
 
         const texLgSize = 2 ** 7;
-        const texLg = getGlowTex(texLgSize, 4, [new BlurFilter(8, 16), new AdjustmentFilter({alpha: 1.15})]);
-        const texSmSize = 2 ** 6;
-        const texSm = getGlowTex(texSmSize, 3, [new BlurFilter(3, 12), new AdjustmentFilter({alpha: 0.9})]);
+        const texLg = getGlowTex(texLgSize);
 
         return [
             {texture: texLg, scale: (MAX_SIZE / texLgSize) * 2},
             {texture: texLg, scale: (MAX_SIZE / texLgSize) * 2 * 0.75},
-            {texture: texSm, scale: (MAX_SIZE / texSmSize) * 2 * (0.75 ** 2)},
-            {texture: texSm, scale: (MAX_SIZE / texSmSize) * 2 * (0.75 ** 3)}
+            {texture: texLg, scale: (MAX_SIZE / texLgSize) * 2 * (0.75 ** 2)},
+            // The -1 here addresses some artifacting
+            {texture: texLg, scale: ((MAX_SIZE - 1) / texLgSize) * 2 * (0.75 ** 3)}
         ];
     }
 
