@@ -154,7 +154,7 @@ export default class BaseTextures {
         const MAX_SIZE = BaseTextures.BODY_SIZE / 1.1;
         /** Size of the upscaled lock */
         // Power of two so we get mipmaps
-        const RENDER_SIZE = 2 ** 6;
+        const RENDER_SIZE = 2 ** 5;
         /** Thickness of the upscaled lock */
         const LOCK_WIDTH = RENDER_SIZE / 5;
 
@@ -188,7 +188,7 @@ export default class BaseTextures {
                 0.35
             ))
             .endFill();
-        lockBg.filters = [new BlurFilter(1, 40)];
+        lockBg.filters = [new BlurFilter(1, 40), new FXAAFilter()];
         lockWrapper.addChild(lockBg);
 
         const color = ColorUtil.blend(
