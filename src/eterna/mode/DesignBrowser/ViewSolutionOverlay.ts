@@ -197,23 +197,19 @@ export default class ViewSolutionOverlay extends ContainerObject {
         this._content.addObject(title, this._header);
         this._header.addVSpacer(20);
 
-        const solutionName = Fonts.std()
-            .bold()
-            .text(this._props.solution.title)
-            .fontSize(24)
-            .color(0xffffff)
-            .wordWrap(true, theme.width - theme.margin.left - theme.margin.right)
-            .build();
-        this._header.addChild(solutionName);
+        const solutionName = new HTMLTextObject(
+            this._props.solution.title,
+            theme.width - theme.margin.left - theme.margin.right
+        );
+        solutionName.bold().fontSize(24).color(0xffffff);
+        this.addObject(solutionName, this._header);
 
-        const playerName = Fonts.std()
-            .bold()
-            .text(`By ${this._props.solution.playerName}`)
-            .fontSize(18)
-            .color(0xffffff)
-            .wordWrap(true, theme.width - theme.margin.left - theme.margin.right)
-            .build();
-        this._header.addChild(playerName);
+        const playerName = new HTMLTextObject(
+            `By ${this._props.solution.playerName}`,
+            theme.width - theme.margin.left - theme.margin.right
+        );
+        playerName.bold().fontSize(18).color(0xffffff);
+        this.addObject(playerName, this._header);
         this._header.addVSpacer(5);
 
         // Links
