@@ -1,8 +1,6 @@
 import {Texture} from 'pixi.js';
 import {TextureUtil, TextBuilder} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
-import EternaTextureUtil from 'eterna/util/EternaTextureUtil';
-import Base from 'eterna/pose2D/Base';
 import Bitmaps from './Bitmaps';
 
 export default class BitmapManager {
@@ -60,78 +58,6 @@ export default class BitmapManager {
         } else { // c === 'U'
             return this.getBitmap(Bitmaps.NovaUReq);
         }
-    }
-
-    public static getBaseMin(c: string): Texture {
-        if (c === 'A') {
-            return EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseAMin), 0.5);
-        } else if (c === 'C') {
-            return EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseCMin), 0.5);
-        } else if (c === 'G') {
-            return EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseGMin), 0.5);
-        } else { // c === 'U'
-            return EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseUMin), 0.5);
-        }
-    }
-
-    public static getBaseLarge(c: string): Texture[] {
-        let textures = [];
-        if (c === 'A') {
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.LBaseA), 0.5)];
-        } else if (c === 'C') {
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.LBaseC), 0.5)];
-        } else if (c === 'G') {
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.LBaseG), 0.5)];
-        } else { // c === 'U'
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.LBaseU), 0.5)];
-        }
-        EternaTextureUtil.createScaled(textures, Base.ZOOM_SCALE_FACTOR, Base.NUM_ZOOM_LEVELS);
-        return textures;
-    }
-
-    public static getBaseLargeDC(c: string): Texture[] {
-        let textures = [];
-        if (c === 'A') {
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.LBaseAf), 0.5)];
-        } else if (c === 'C') {
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.LBaseCf), 0.5)];
-        } else if (c === 'G') {
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.LBaseGf), 0.5)];
-        } else { // c === 'U'
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.LBaseUf), 0.5)];
-        }
-        EternaTextureUtil.createScaled(textures, Base.ZOOM_SCALE_FACTOR, Base.NUM_ZOOM_LEVELS);
-        return textures;
-    }
-
-    public static getBaseMid(c: string): Texture[] {
-        let textures = [];
-        if (c === 'A') {
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseAMid), 0.5)];
-        } else if (c === 'C') {
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseCMid), 0.5)];
-        } else if (c === 'G') {
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseGMid), 0.5)];
-        } else { // c === 'U'
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseUMid), 0.5)];
-        }
-        EternaTextureUtil.createScaled(textures, Base.ZOOM_SCALE_FACTOR, Base.NUM_ZOOM_LEVELS);
-        return textures;
-    }
-
-    public static getBaseMidDC(c: string): Texture[] {
-        let textures = [];
-        if (c === 'A') {
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseAfMid), 0.5)];
-        } else if (c === 'C') {
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseCfMid), 0.5)];
-        } else if (c === 'G') {
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseGfMid), 0.5)];
-        } else { // c === 'U'
-            textures = [EternaTextureUtil.scaleBy(this.getBitmap(Bitmaps.BaseUfMid), 0.5)];
-        }
-        EternaTextureUtil.createScaled(textures, Base.ZOOM_SCALE_FACTOR, Base.NUM_ZOOM_LEVELS);
-        return textures;
     }
 
     public static getTextBitmap(txt: string, color: number = 0xffffff): Texture {

@@ -17,10 +17,11 @@ import ShapeConstraint, {AntiShapeConstraint} from './constraints/ShapeConstrain
 import ConstraintBox from './ConstraintBox';
 import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from './Constraint';
 
-interface ConstraintWrapper {
-    constraint: Constraint<BaseConstraintStatus>;
+interface ConstraintWrapper<Status extends BaseConstraintStatus = BaseConstraintStatus> {
+    constraint: Constraint<Status>;
     constraintBox: ConstraintBox;
     highlightCache: HighlightInfo | null;
+    evalCache: Parameters<Constraint<Status>['getConstraintBoxConfig']> | null;
 }
 
 interface StateSpecificConstraintWrapper extends ConstraintWrapper {
@@ -67,7 +68,12 @@ export default class ConstraintBar extends ContainerObject {
         super();
         this._constraints = constraints
             ? constraints.map(
-                (constraint) => ({constraint, constraintBox: new ConstraintBox(false, states), highlightCache: null})
+                (constraint) => ({
+                    constraint,
+                    constraintBox: new ConstraintBox(false, states),
+                    highlightCache: null,
+                    evalCache: null
+                })
             ) : [];
 
         this.regs.add(Eterna.settings.highlightRestricted.connect(() => {
@@ -189,6 +195,18 @@ export default class ConstraintBar extends ContainerObject {
                 this.onConstraintBoxClicked(constraint);
             });
         }
+
+        // A bit of a hack, but this gets constraints with icons that depend on the colorblind
+        // theme status to visually change when the setting changes
+        this.regs.add(Eterna.settings.colorblindTheme.connect(() => {
+            for (const constraint of this._constraints) {
+                if (constraint.evalCache) {
+                    constraint.constraintBox.setContent(
+                        constraint.constraint.getConstraintBoxConfig(...constraint.evalCache)
+                    );
+                }
+            }
+        }));
     }
 
     public layout() {
@@ -309,6 +327,7 @@ export default class ConstraintBar extends ContainerObject {
                 ),
                 this._constraintsTooltips
             );
+            constraint.evalCache = [status, false, context.undoBlocks, context.targetConditions];
             constraint.highlightCache = status.satisfied
                 ? null : constraint.constraint.getHighlight(status, context);
 

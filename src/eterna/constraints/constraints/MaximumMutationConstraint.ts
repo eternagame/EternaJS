@@ -2,9 +2,9 @@ import {
     Sprite, Texture, Container
 } from 'pixi.js';
 import {StyledTextBuilder, TextureUtil} from 'flashbang';
-import EPars from 'eterna/EPars';
-import BitmapManager from 'eterna/resources/BitmapManager';
-import Bitmaps from 'eterna/resources/Bitmaps';
+import EPars, {RNABase} from 'eterna/EPars';
+import BaseTextures from 'eterna/pose2D/BaseTextures';
+import Eterna from 'eterna/Eterna';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 
@@ -63,20 +63,32 @@ export default class MaximumMutationConstraint extends Constraint<MaxMutationCon
     private static get _icon(): Texture {
         const icon = new Container();
 
-        const base1 = new Sprite(BitmapManager.getBitmap(Bitmaps.BaseAMid));
-        base1.position.set(28, 8);
+        const base1Tex = new BaseTextures(RNABase.ADENINE).getBodyTexture(0, Eterna.settings.colorblindTheme.value);
+        const base1 = new Sprite(base1Tex.texture);
+        base1.height = 30;
+        base1.scale.x = base1.scale.y;
+        base1.position.set(28, 0);
         icon.addChild(base1);
 
-        const base2 = new Sprite(BitmapManager.getBitmap(Bitmaps.BaseGMid));
-        base2.position.set(36, 8);
+        const base2Tex = new BaseTextures(RNABase.GUANINE).getBodyTexture(0, Eterna.settings.colorblindTheme.value);
+        const base2 = new Sprite(base2Tex.texture);
+        base2.height = 30;
+        base2.scale.x = base1.scale.y;
+        base2.position.set(36, 0);
         icon.addChild(base2);
 
-        const base3 = new Sprite(BitmapManager.getBitmap(Bitmaps.BaseUMid));
-        base3.position.set(44, 8);
+        const base3Tex = new BaseTextures(RNABase.URACIL).getBodyTexture(0, Eterna.settings.colorblindTheme.value);
+        const base3 = new Sprite(base3Tex.texture);
+        base3.height = 30;
+        base3.scale.x = base1.scale.y;
+        base3.position.set(44, 0);
         icon.addChild(base3);
 
-        const base4 = new Sprite(BitmapManager.getBitmap(Bitmaps.BaseCMid));
-        base4.position.set(52, 8);
+        const base4Tex = new BaseTextures(RNABase.CYTOSINE).getBodyTexture(0, Eterna.settings.colorblindTheme.value);
+        const base4 = new Sprite(base4Tex.texture);
+        base4.height = 30;
+        base4.scale.x = base1.scale.y;
+        base4.position.set(52, 0);
         icon.addChild(base4);
 
         return TextureUtil.renderToTexture(icon);
