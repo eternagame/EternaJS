@@ -532,7 +532,7 @@ export default class DataCol extends ContainerObject {
         const {designBrowser: theme} = UITheme;
         this._graphics.clear();
         // Data
-        this._graphics.beginFill(this._fillColor, this._fillAlpha);
+        this._graphics.beginFill(this._fillColor, Math.max(this._fillAlpha, 0.001));
         this._graphics.drawRect(
             1,
             theme.headerHeight + theme.filterHeight + 1,
