@@ -402,6 +402,10 @@ export default class Puzzle {
         this._barcodeStart = start;
     }
 
+    public set barcodeLength(length: number) {
+        this._barcodeLength = length;
+    }
+
     public get barcodeIndices(): number[] | null {
         if (!this._useBarcode) {
             return null;
@@ -409,19 +413,21 @@ export default class Puzzle {
 
         const secstruct: string = this.getSecstruct();
 
+        const barcodeLength = this._barcodeLength ?? 7;
+
         let barcodeStart: number;
         if (this._barcodeStart) {
             barcodeStart = this._barcodeStart;
         } else if (this._useTails) {
             // Last 7 bases before the 20-base tail (which is actually always 21 bases
             // apparently - all cloud labs have defined an extra locked A just before the tail)
-            barcodeStart = secstruct.length - 20 - 7 - 1;
+            barcodeStart = secstruct.length - 20 - barcodeLength - 1;
         } else {
             // Last 7 bases
-            barcodeStart = secstruct.length - 7;
+            barcodeStart = secstruct.length - barcodeLength;
         }
 
-        return Utility.range(barcodeStart, barcodeStart + 7);
+        return Utility.range(barcodeStart, barcodeStart + barcodeLength);
     }
 
     public getBarcodeHairpin(seq: Sequence): Sequence {
@@ -675,6 +681,7 @@ export default class Puzzle {
     private _useShortTails: boolean = false;
     private _useBarcode: boolean = false;
     private _barcodeStart: number | null = null;
+    private _barcodeLength: number | null = null;
     private _targetConditions: TargetConditions[] | null = null;
     // With no oligos, this is correctly empty. We'll set it when we set objectives
     private _oligoLengths: Map<string, number> = new Map();

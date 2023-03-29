@@ -64,6 +64,7 @@ export interface PuzzleJSON {
     'last-round'?: string;
     check_hairpin?: string;
     barcode_start?: string;
+    barcode_length?: string;
     'num-submissions'?: string;
     rscript?: string;
     events?: string;
@@ -170,6 +171,10 @@ export default class PuzzleManager {
 
         if (json['barcode_start']) {
             newpuz.barcodeStart = Number(json['barcode_start']);
+        }
+
+        if (json['barcode_length']) {
+            newpuz.barcodeLength = Number(json['barcode_length']);
         }
 
         if (json['num-submissions'] != null) {
