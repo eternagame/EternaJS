@@ -66,7 +66,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
     #
     # Debugging tools (see https://github.com/kripken/emscripten/blob/master/src/settings.js):
     # -s SAFE_HEAP=1
-    set_target_properties(contrafold PROPERTIES LINK_FLAGS "-s 'EXPORT_NAME=\"contrafold\"' -s MODULARIZE=1 --bind -std=c++11 -s SINGLE_FILE=1 -s ALLOW_MEMORY_GROWTH=1 ")
+    set_target_properties(contrafold PROPERTIES LINK_FLAGS "-s 'EXPORT_NAME=\"contrafold\"' -s MODULARIZE=1 --bind -std=c++11 -s SINGLE_FILE=1 -s ALLOW_MEMORY_GROWTH=1 -s STACK_SIZE=5MB")
     set_target_properties(contrafold PROPERTIES LINK_FLAGS_DEBUG "-O0 -s WASM=0 -s DEMANGLE_SUPPORT=1 -s ASSERTIONS=2 -s SAFE_HEAP=1")
     set_target_properties(contrafold PROPERTIES LINK_FLAGS_RELEASE "-O3 -s WASM=1")
 endif ()

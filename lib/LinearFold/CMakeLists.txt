@@ -71,7 +71,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
   #
   # Debugging tools (see https://github.com/kripken/emscripten/blob/master/src/settings.js):
   # -s SAFE_HEAP=1
-  set(BASE_LINK_FLAGS "-s MODULARIZE=1 --bind -std=c++11 -s SINGLE_FILE=1 -s ALLOW_MEMORY_GROWTH=1")
+  set(BASE_LINK_FLAGS "-s MODULARIZE=1 --bind -std=c++11 -s SINGLE_FILE=1 -s ALLOW_MEMORY_GROWTH=1 -s STACK_SIZE=5MB")
   set_target_properties(LinearFoldV    PROPERTIES LINK_FLAGS "-s 'EXPORT_NAME=\"LinearFoldV\"' ${BASE_LINK_FLAGS}")
   set_target_properties(LinearFoldC    PROPERTIES LINK_FLAGS "-s 'EXPORT_NAME=\"LinearFoldC\"' ${BASE_LINK_FLAGS}")
   if (EXISTS "../EternaFold/EternaFold/parameters/LinearFold/feature_weight_e.h")
