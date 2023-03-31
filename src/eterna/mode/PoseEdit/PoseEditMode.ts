@@ -76,6 +76,7 @@ import ModeBar from 'eterna/ui/ModeBar';
 import KeyedCollection from 'eterna/util/KeyedCollection';
 import {FederatedPointerEvent} from '@pixi/events';
 import NuPACK from 'eterna/folding/NuPACK';
+import PasteStructureDialog from 'eterna/ui/PasteStructureDialog';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -1697,7 +1698,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     /* override */
-    protected createContextMenu(): ContextMenu | null {
+    protected createContextMenu(poseIdx: number): ContextMenu | null {
         if (this.isDialogOrNotifShowing || this.hasUILock) {
             return null;
         }
@@ -1714,9 +1715,62 @@ export default class PoseEditMode extends GameMode {
         menu.addItem('Reset').clicked.connect(() => this.showResetPrompt());
         menu.addItem('Copy Sequence').clicked.connect(() => this.showCopySequenceDialog());
         menu.addItem('Paste Sequence').clicked.connect(() => this.showPasteSequenceDialog());
+        menu.addItem('Copy Structure').clicked.connect(() => this.showCopyStructureDialog(poseIdx));
+        const targetIndex = this._isPipMode ? poseIdx : this._curTargetIndex;
+        const structureConstraints = this._targetConditions[targetIndex]?.['structure_constraints'];
+        if (structureConstraints) {
+            menu.addItem('Paste Target Structure').clicked.connect(() => this.showPasteStructureDialog(poseIdx));
+        }
         menu.addItem('Beam to PuzzleMaker').clicked.connect(() => this.transferToPuzzlemaker());
 
         return menu;
+    }
+
+    protected showPasteStructureDialog(poseIdx: number): void {
+        const pseudoknots: boolean = this._targetConditions != null
+            && this._targetConditions[0] != null
+            && this._targetConditions[0]['type'] === 'pseudoknot';
+        const pasteDialog = this.showDialog(new PasteStructureDialog(pseudoknots), 'PasteSequenceDialog');
+        // Already live
+        if (!pasteDialog) return;
+        this.regs?.add(pasteDialog.applyClicked.connect((pasteResult) => {
+            // If we started in pip mode and then leave it, we would be attempting to paste to a
+            // pose that's not actually in use.
+            // TODO: The UX of pasting given multiple poses needs to be rethought...
+            const targetIndex = this._isPipMode ? poseIdx : this._curTargetIndex;
+
+            const structureConstraints = this._targetConditions[targetIndex]?.['structure_constraints'];
+            if (structureConstraints === undefined) return;
+
+            const pairs = this._targetPairs[targetIndex].slice(0);
+            const startIdx = pasteResult.startAt - 1;
+
+            for (let i = startIdx; i < pairs.length && i - startIdx < pasteResult.structure.length; i++) {
+                const targetPartner = pasteResult.structure.pairingPartner(i - startIdx) + startIdx;
+                if (
+                    targetPartner === -1
+                    // This base is unconstrained
+                    && structureConstraints[i] === false
+                    // If this base is currently paired, its pair is unconstrained
+                    && (pairs.pairingPartner(i) === -1 || structureConstraints[pairs.pairingPartner(i)] === false)
+                ) {
+                    pairs.setUnpaired(i);
+                } else if (
+                    targetPartner !== -1
+                    // This base is unconstrained
+                    && structureConstraints[i] === false
+                    // The base we're pairing with is unconstrained
+                    && structureConstraints[targetPartner] === false
+                    // If this base is currently paired, its pair is unconstrained
+                    && (pairs.pairingPartner(i) === -1 || structureConstraints[pairs.pairingPartner(i)] === false)
+                ) {
+                    pairs.setPairingPartner(i, targetPartner);
+                }
+            }
+            this._targetPairs[targetIndex] = pairs;
+
+            this.poseEditByTarget(this._isPipMode ? poseIdx : 0);
+        }));
     }
 
     private openDesignBrowserForOurPuzzle(): void {
@@ -2960,6 +3014,7 @@ export default class PoseEditMode extends GameMode {
         // Update open dialogs
         this.updateSpecBox();
         this.updateCopySequenceDialog();
+        this.updateCopyStructureDialog();
 
         if (constraintsSatisfied || (this._puzzle.alreadySolved && this._puzzle.rscript === '')) {
             if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL && !this._alreadyCleared) {

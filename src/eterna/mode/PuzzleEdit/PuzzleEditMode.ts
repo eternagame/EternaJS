@@ -636,7 +636,7 @@ export default class PuzzleEditMode extends GameMode {
     }
 
     /* override */
-    protected createContextMenu(): ContextMenu | null {
+    protected createContextMenu(poseIdx: number): ContextMenu | null {
         if (this.isDialogOrNotifShowing || this.hasUILock) {
             return null;
         }
@@ -647,6 +647,7 @@ export default class PuzzleEditMode extends GameMode {
         menu.addItem('Reset').clicked.connect(() => this.promptForReset());
         menu.addItem('Copy Sequence').clicked.connect(() => this.showCopySequenceDialog());
         menu.addItem('Paste Sequence').clicked.connect(() => this.showPasteSequenceDialog());
+        menu.addItem('Copy Structure').clicked.connect(() => this.showCopyStructureDialog(poseIdx));
 
         return menu;
     }
@@ -1053,6 +1054,7 @@ export default class PuzzleEditMode extends GameMode {
         this._toolbar.palette.setPairCounts(numAU, numGU, numGC);
 
         this.updateCopySequenceDialog();
+        this.updateCopyStructureDialog();
     }
 
     private onPaletteTargetSelected(type: PaletteTargetType): void {

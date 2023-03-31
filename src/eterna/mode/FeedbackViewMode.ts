@@ -549,6 +549,7 @@ export default class FeedbackViewMode extends GameMode {
         }
 
         this.updateCopySequenceDialog();
+        this.updateCopyStructureDialog();
     }
 
     private showExperimentalColors(): void {
