@@ -465,10 +465,10 @@ export default class PoseEditMode extends GameMode {
             this.popUILock();
 
             if (foldData != null && (
-                foldData[0].folderName_ === this.selectFolder.name
+                foldData[0].folderName_ === this._folder.name
                 // Previously, we didn't record the folder name in the undo block.
                 // At that time, we only uploaded for nupack.
-                || (!foldData[0].folderName_ && this.selectFolder.name === NuPACK.name)
+                || (!foldData[0].folderName_ && this._folder.name === NuPACK.name)
             )) {
                 this._stackLevel++;
                 this._stackSize = this._stackLevel + 1;
