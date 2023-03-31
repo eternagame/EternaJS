@@ -490,36 +490,7 @@ export default class PoseEditMode extends GameMode {
                     pose.pasteSequence(sequence);
                     pose.librarySelections = solution.libraryNT;
                 }
-                if (foldData !== null) {
-                    const setTarget = (ii: number) => {
-                        const cacheUndoBlock: UndoBlock = new UndoBlock(new Sequence([]), this._folder?.name ?? '');
-                        cacheUndoBlock.fromJSON(foldData[ii], this._puzzle.targetConditions[ii]);
-                        // pose.pasteSequence resulted in a new undo block being created, filled with the folding
-                        // engine computations. We want to surgically update just the target structure to match the
-                        // solution. If freeze mode is enabled however, an undo block won't be created in the stack.
-                        // The current undo stack item contains the state at the time of being frozen.
-                        // Unfortunately, unlike sequence, we don't currently have a great way to note a "temporary"
-                        // target structure pending application to the next block. Unfortunately, that means we
-                        // don't get the target structure in that case :(
-                        if (!this._isFrozen) {
-                            const currUndoBlock = this.getCurrentUndoBlock(ii);
-                            currUndoBlock.targetPairs = cacheUndoBlock.targetPairs;
-                            currUndoBlock.targetOligoOrder = cacheUndoBlock.targetOligoOrder;
-                            this.updateScore();
-                            this.transformPosesMarkers();
-                        }
-                    };
-                    for (let ii = 0; ii < foldData.length; ii++) {
-                        // Yay, we get to deal with "async folding". Basically if we're not doing everything
-                        // synchronously, the latest undo block won't actually be available yet, so we'll just
-                        // push another task to the queue after the folding actually finishes
-                        if (this.forceSync) {
-                            setTarget(ii);
-                        } else {
-                            this._opQueue.push(new PoseOp(ii + 1, () => setTarget(ii)));
-                        }
-                    }
-                }
+                if (foldData !== null) this.setSolutionTargetStructure(foldData);
             }
             this.clearMoveTracking(solution.sequence.sequenceString());
             this.setAncestorId(solution.nodeID);
@@ -530,6 +501,37 @@ export default class PoseEditMode extends GameMode {
 
         this.showAsyncText('retrieving...');
         solution.queryFoldData().then((result) => setSolution(result));
+    }
+
+    private setSolutionTargetStructure(foldData: FoldData[]) {
+        const setTarget = (ii: number) => {
+            const cacheUndoBlock: UndoBlock = new UndoBlock(new Sequence([]), this._folder?.name ?? '');
+            cacheUndoBlock.fromJSON(foldData[ii], this._puzzle.targetConditions[ii]);
+            // pose.pasteSequence resulted in a new undo block being created, filled with the folding
+            // engine computations. We want to surgically update just the target structure to match the
+            // solution. If freeze mode is enabled however, an undo block won't be created in the stack.
+            // The current undo stack item contains the state at the time of being frozen.
+            // Unfortunately, unlike sequence, we don't currently have a great way to note a "temporary"
+            // target structure pending application to the next block. Unfortunately, that means we
+            // don't get the target structure in that case :(
+            if (!this._isFrozen) {
+                const currUndoBlock = this.getCurrentUndoBlock(ii);
+                currUndoBlock.targetPairs = cacheUndoBlock.targetPairs;
+                currUndoBlock.targetOligoOrder = cacheUndoBlock.targetOligoOrder;
+                this.updateScore();
+                this.transformPosesMarkers();
+            }
+        };
+        for (let ii = 0; ii < foldData.length; ii++) {
+            // Yay, we get to deal with "async folding". Basically if we're not doing everything
+            // synchronously, the latest undo block won't actually be available yet, so we'll just
+            // push another task to the queue after the folding actually finishes
+            if (this.forceSync) {
+                setTarget(ii);
+            } else {
+                this._opQueue.push(new PoseOp(ii + 1, () => setTarget(ii)));
+            }
+        }
     }
 
     private highlightSequences(highlightInfos: HighlightInfo[] | null) {
@@ -816,6 +818,7 @@ export default class PoseEditMode extends GameMode {
         // Initialize sequence and/or solution as relevant
         let initialSequence: Sequence | null = null;
         let librarySelections: number[] = [];
+        let fdPromise: Promise<FoldData[] | null> | null = null;
         if (this._params.initSolution != null) {
             Assert.assertIsDefined(
                 this._params.solutions,
@@ -830,6 +833,7 @@ export default class PoseEditMode extends GameMode {
             librarySelections = this._params.initSolution.libraryNT;
             this._curSolutionIdx = this._params.solutions.indexOf(this._params.initSolution);
             this.showSolutionDetailsDialog(this._params.initSolution, true);
+            fdPromise = this._params.initSolution.queryFoldData();
         } else if (this._params.initSequence != null) {
             initialSequence = Sequence.fromSequenceString(this._params.initSequence);
         }
@@ -952,6 +956,21 @@ export default class PoseEditMode extends GameMode {
         };
 
         this.poseEditByTarget(0);
+
+        // HACK: This could potentially lead to race conditions (due to the fold data coming back
+        // arbitrarily late), but I don't immediately see another good option for loading the
+        // target structure for the first design loaded from the design browser. At the very least,
+        // I defer responding to the promise here so that we know the PoseOps to set the target structure
+        // are after the poseOps triggered by the initial poseEditByTarget above.
+        // In practice, we shooooould be fine, as there shouldn't be any interaction with the puzzle
+        // that would create another undo block between puzzle load and getting the solution back.
+        // Key word shouldn't.
+        if (fdPromise) {
+            fdPromise.then((fd) => {
+                if (!fd) return;
+                this.setSolutionTargetStructure(fd);
+            });
+        }
 
         // Setup RScript and execute the ROPPRE ops
         this._rscript = new RNAScript(this._puzzle, this);
