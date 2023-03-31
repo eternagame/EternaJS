@@ -75,6 +75,7 @@ import Pose3DDialog from 'eterna/pose3D/Pose3DDialog';
 import ModeBar from 'eterna/ui/ModeBar';
 import KeyedCollection from 'eterna/util/KeyedCollection';
 import {FederatedPointerEvent} from '@pixi/events';
+import NuPACK from 'eterna/folding/NuPACK';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -463,7 +464,12 @@ export default class PoseEditMode extends GameMode {
             this.hideAsyncText();
             this.popUILock();
 
-            if (foldData != null) {
+            if (foldData != null && (
+                foldData[0].folderName_ === this._folder.name
+                // Previously, we didn't record the folder name in the undo block.
+                // At that time, we only uploaded for nupack.
+                || (!foldData[0].folderName_ && this._folder.name === NuPACK.name)
+            )) {
                 this._stackLevel++;
                 this._stackSize = this._stackLevel + 1;
                 this._seqStacks[this._stackLevel] = [];
@@ -484,6 +490,7 @@ export default class PoseEditMode extends GameMode {
                     pose.pasteSequence(sequence);
                     pose.librarySelections = solution.libraryNT;
                 }
+                if (foldData !== null) this.setSolutionTargetStructure(foldData);
             }
             this.clearMoveTracking(solution.sequence.sequenceString());
             this.setAncestorId(solution.nodeID);
@@ -492,11 +499,38 @@ export default class PoseEditMode extends GameMode {
             this._annotationManager.setSolutionAnnotations(annotations ?? []);
         };
 
-        if (this._puzzle.hasTargetType('multistrand')) {
-            this.showAsyncText('retrieving...');
-            solution.queryFoldData().then((result) => setSolution(result));
-        } else {
-            setSolution(null);
+        this.showAsyncText('retrieving...');
+        solution.queryFoldData().then((result) => setSolution(result));
+    }
+
+    private setSolutionTargetStructure(foldData: FoldData[]) {
+        const setTarget = (ii: number) => {
+            const cacheUndoBlock: UndoBlock = new UndoBlock(new Sequence([]), this._folder?.name ?? '');
+            cacheUndoBlock.fromJSON(foldData[ii], this._puzzle.targetConditions[ii]);
+            // pose.pasteSequence resulted in a new undo block being created, filled with the folding
+            // engine computations. We want to surgically update just the target structure to match the
+            // solution. If freeze mode is enabled however, an undo block won't be created in the stack.
+            // The current undo stack item contains the state at the time of being frozen.
+            // Unfortunately, unlike sequence, we don't currently have a great way to note a "temporary"
+            // target structure pending application to the next block. Unfortunately, that means we
+            // don't get the target structure in that case :(
+            if (!this._isFrozen) {
+                const currUndoBlock = this.getCurrentUndoBlock(ii);
+                currUndoBlock.targetPairs = cacheUndoBlock.targetPairs;
+                currUndoBlock.targetOligoOrder = cacheUndoBlock.targetOligoOrder;
+                this.updateScore();
+                this.transformPosesMarkers();
+            }
+        };
+        for (let ii = 0; ii < foldData.length; ii++) {
+            // Yay, we get to deal with "async folding". Basically if we're not doing everything
+            // synchronously, the latest undo block won't actually be available yet, so we'll just
+            // push another task to the queue after the folding actually finishes
+            if (this.forceSync) {
+                setTarget(ii);
+            } else {
+                this._opQueue.push(new PoseOp(ii + 1, () => setTarget(ii)));
+            }
         }
     }
 
@@ -784,6 +818,7 @@ export default class PoseEditMode extends GameMode {
         // Initialize sequence and/or solution as relevant
         let initialSequence: Sequence | null = null;
         let librarySelections: number[] = [];
+        let fdPromise: Promise<FoldData[] | null> | null = null;
         if (this._params.initSolution != null) {
             Assert.assertIsDefined(
                 this._params.solutions,
@@ -798,6 +833,7 @@ export default class PoseEditMode extends GameMode {
             librarySelections = this._params.initSolution.libraryNT;
             this._curSolutionIdx = this._params.solutions.indexOf(this._params.initSolution);
             this.showSolutionDetailsDialog(this._params.initSolution, true);
+            fdPromise = this._params.initSolution.queryFoldData();
         } else if (this._params.initSequence != null) {
             initialSequence = Sequence.fromSequenceString(this._params.initSequence);
         }
@@ -920,6 +956,21 @@ export default class PoseEditMode extends GameMode {
         };
 
         this.poseEditByTarget(0);
+
+        // HACK: This could potentially lead to race conditions (due to the fold data coming back
+        // arbitrarily late), but I don't immediately see another good option for loading the
+        // target structure for the first design loaded from the design browser. At the very least,
+        // I defer responding to the promise here so that we know the PoseOps to set the target structure
+        // are after the poseOps triggered by the initial poseEditByTarget above.
+        // In practice, we shooooould be fine, as there shouldn't be any interaction with the puzzle
+        // that would create another undo block between puzzle load and getting the solution back.
+        // Key word shouldn't.
+        if (fdPromise) {
+            fdPromise.then((fd) => {
+                if (!fd) return;
+                this.setSolutionTargetStructure(fd);
+            });
+        }
 
         // Setup RScript and execute the ROPPRE ops
         this._rscript = new RNAScript(this._puzzle, this);
@@ -2168,13 +2219,11 @@ export default class PoseEditMode extends GameMode {
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
             postData['melt'] = undoBlock.getParam(UndoBlockParam.MELTING_POINT) as number;
 
-            if (this._foldTotalTime >= 1000.0) {
-                const fd: FoldData[] = [];
-                for (let ii = 0; ii < this._poses.length; ii++) {
-                    fd.push(this.getCurrentUndoBlock(ii).toJSON());
-                }
-                postData['fold-data'] = JSON.stringify(fd);
+            const fd: FoldData[] = [];
+            for (let ii = 0; ii < this._poses.length; ii++) {
+                fd.push(this.getCurrentUndoBlock(ii).toJSON());
             }
+            postData['fold-data'] = JSON.stringify(fd);
 
             // Record designStruct numbers, used for library puzzles.
             postData['selected-nts'] = this._poses[0].librarySelections;
@@ -3172,8 +3221,6 @@ export default class PoseEditMode extends GameMode {
         // Ditto but for base shifts
         this.processBaseShifts(targetIndex);
 
-        this._foldTotalTime = 0;
-
         if (this._isFrozen) {
             return;
         }
@@ -3209,6 +3256,12 @@ export default class PoseEditMode extends GameMode {
         };
 
         this.pushUILock(LOCK_NAME);
+        // JAR: We're now uploading data across multiple engines from the submitter for post-hoc analysis and solution
+        // loading, and we don't have a good way of dealing with that, so we're going to avoid just loading the
+        // solution cache, at least for now. If you attempt to add this later, don't forget that:
+        // 1) we didn't used to record the folding engine used and 2) we wouldn't want to load the target structure
+        // of the solutin that had its fold cached
+        /*
         const sol: Solution | null = SolutionManager.instance.getSolutionBySequence(
             this._poses[targetIndex].getSequenceString()
         );
@@ -3218,6 +3271,8 @@ export default class PoseEditMode extends GameMode {
         } else {
             execfoldCB(null);
         }
+        */
+        execfoldCB(null);
     }
 
     private poseEditByTargetDoFold(targetIndex: number): void {
@@ -3473,6 +3528,11 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
+        // JAR: Going forward, we want to use the cached data (target structure, predicted structure, etc)
+        // of the *submitter* for post-hoc analysis, so I'm going to disable uploading a cache on
+        // loading of an uncached solution. We might consider bringing this (or something like it)
+        // back at a future date if we eventually handle that issue.
+        /*
         if (this._foldTotalTime >= 1000.0 && this._puzzle.hasTargetType('multistrand')) {
             const sol: Solution | null = SolutionManager.instance.getSolutionBySequence(
                 this._poses[targetIndex].getSequenceString()
@@ -3489,6 +3549,7 @@ export default class PoseEditMode extends GameMode {
                 });
             }
         }
+        */
     }
 
     protected getCurrentUndoBlock(targetIndex: number = -1): UndoBlock {
@@ -3627,7 +3688,6 @@ export default class PoseEditMode extends GameMode {
     private _opQueue: PoseOp[] = [];
     private _poseEditByTargetCb: (() => void) | null = null;
     private _asynchText: Text;
-    private _foldTotalTime: number;
     // / Undo stack
     private _stackLevel: number;
     private _stackSize: number;
