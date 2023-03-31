@@ -376,6 +376,7 @@ export default abstract class GameMode extends AppMode {
 
     public onContextMenuEvent(e: Event): void {
         Assert.assertIsDefined(Flashbang.globalMouse);
+        Assert.assertIsDefined(Flashbang.stageWidth);
 
         let handled = false;
         if (((e.target as HTMLElement).parentNode as HTMLElement).id === Eterna.PIXI_CONTAINER_ID) {
@@ -383,7 +384,11 @@ export default abstract class GameMode extends AppMode {
                 this._contextMenuDialogRef.destroyObject();
                 handled = true;
             } else {
-                const menu = this.createContextMenu();
+                const menu = this.createContextMenu(
+                    this._isPipMode
+                        ? Math.floor(Flashbang.globalMouse.x / (Flashbang.stageWidth / this._poses.length))
+                        : 0
+                );
                 if (menu != null) {
                     this._contextMenuDialogRef = this.addObject(
                         new ContextMenuDialog(menu, Flashbang.globalMouse),
@@ -400,7 +405,7 @@ export default abstract class GameMode extends AppMode {
     }
 
     /** Subclasses can override to create a ContextMenu that will be shown when the user right-clicks */
-    protected createContextMenu(): ContextMenu | null {
+    protected createContextMenu(_poseIdx: number): ContextMenu | null {
         return null;
     }
 
@@ -553,6 +558,34 @@ export default abstract class GameMode extends AppMode {
         }
     }
 
+    protected showCopyStructureDialog(poseIdx: number): void {
+        const structureString = this._poses[poseIdx].secstruct.getParenthesis(
+            this._poses[poseIdx].fullSequence,
+            // This should be fine and only return pkots if there are already pknots
+            true
+        );
+        this._copyStructureDialog = this.showDialog(
+            new CopyTextDialog(structureString, 'Current Structure'),
+            'CopyStructureDialog'
+        );
+        this._copyStructureDialogPose = poseIdx;
+    }
+
+    protected updateCopyStructureDialog(): void {
+        if (this._copyStructureDialog) {
+            // If we started in pip mode and then leave it, we would be attempting to copy from a
+            // pose that's not actually in use.
+            // TODO: The entire UX of copying given multiple poses needs to be rethought...
+            const poseIdx = this._isPipMode ? this._copyStructureDialogPose : 0;
+            const structureString = this._poses[poseIdx].secstruct.getParenthesis(
+                this._poses[poseIdx].fullSequence,
+                // This should be fine and only return pkots if there are already pknots
+                true
+            );
+            this._copyStructureDialog.text = structureString;
+        }
+    }
+
     protected showPasteSequenceDialog(): void {
         const customNumbering = this._poses[0].customNumbering;
         const pasteDialog = this.showDialog(new PasteSequenceDialog(customNumbering), 'PasteSequenceDialog');
@@ -616,6 +649,8 @@ export default abstract class GameMode extends AppMode {
     protected _notifRef: GameObjectRef = GameObjectRef.NULL;
     protected _contextMenuDialogRef: GameObjectRef = GameObjectRef.NULL;
     protected _copySequenceDialog: CopyTextDialog | null = null;
+    protected _copyStructureDialog: CopyTextDialog | null = null;
+    protected _copyStructureDialogPose: number = 0;
 
     private _modeScriptInterface: ExternalInterfaceCtx;
 
