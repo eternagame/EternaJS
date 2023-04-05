@@ -26,6 +26,7 @@ import LinearFoldV from 'eterna/folding/LinearFoldV';
 import LinearFoldC from 'eterna/folding/LinearFoldC';
 import LinearFoldE from 'eterna/folding/LinearFoldE';
 import EternaFold from 'eterna/folding/Eternafold';
+import EternaFoldThreshknot from 'eterna/folding/EternafoldThreshknot';
 import ConstraintBar from 'eterna/constraints/ConstraintBar';
 import Utility from 'eterna/util/Utility';
 import ShapeConstraint from 'eterna/constraints/constraints/ShapeConstraint';
@@ -291,7 +292,11 @@ export default class PuzzleEditMode extends GameMode {
         this._targetButton = targetButton;
 
         this._folderSwitcher = this._modeBar.addFolderSwitcher((folder) => {
-            if (this._numTargets > 1 && !folder.canFoldWithBindingSite) return false;
+            if (
+                this._numTargets > 1
+                && !folder.canFoldWithBindingSite
+                && folder.name !== EternaFoldThreshknot.NAME
+            ) return false;
             return true;
         });
         this._folderSwitcher.selectedFolder.connectNotify((folder) => {

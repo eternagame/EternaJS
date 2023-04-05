@@ -1,0 +1,172 @@
+import * as log from 'loglevel';
+import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import Sequence from 'eterna/rnatypes/Sequence';
+/* eslint-disable import/no-duplicates, import/no-unresolved */
+import * as EternafoldLib from './engines/EternafoldLib';
+import {FullFoldResult} from './engines/EternafoldLib';
+import EternaFold from './Eternafold';
+
+export default class EternaFoldThreshknot extends EternaFold {
+    public static readonly NAME: string = 'EternaFoldThreshknot';
+
+    /**
+     * Asynchronously creates a new instance of the Eternafold folder.
+     * @returns {Promise<EternaFold>}
+     * @description AMW TODO cannot annotate type of module/program; both are any.
+     */
+    public static create(): Promise<EternaFoldThreshknot | null> {
+        // eslint-disable-next-line import/no-unresolved, import/no-extraneous-dependencies
+        return import('engines-bin/eternafold')
+            .then((module) => EmscriptenUtil.loadProgram(module))
+            .then((program) => new EternaFoldThreshknot(program))
+            .catch((_err) => null);
+    }
+
+    protected constructor(lib: EternafoldLib) {
+        super(lib);
+        this._lib = lib;
+    }
+
+    public get name(): string {
+        return EternaFoldThreshknot.NAME;
+    }
+
+    public get canPseudoknot(): boolean {
+        return true;
+    }
+
+    /* override */
+    /**
+     * This overrides Eternafold's default foldSequenceImpl implementation with
+     * a post-fold modification. Here we run Eternafold on the sequence as usual,
+     * then post-process the returned base pairs with the Threshknot heuristic
+     * algorithm (see https://arxiv.org/abs/1912.12796).
+     * @param seq RNA sequence to be folded
+     * @param _structStr structStr
+     * @param _temp Environmental temperature
+     * @param _gamma gamma
+     * @param _theta Parameter to adjust filter sensitivity of Threshknot algorithm
+     * @returns SecStruct object representing secondary structure output of engine
+     */
+    protected foldSequenceImpl(
+        seq: Sequence,
+        _structStr: string | null = null,
+        _temp: number = 37,
+        _gamma: number = 6.0,
+        _theta: number = 0.15
+    ): SecStruct {
+        const seqStr = seq.sequenceString(false, false);
+        let result: FullFoldResult | null = null;
+
+        let bpp:number[] = [];
+
+        try {
+            // Get BPP in coordinate list format
+            const dotPlotResult = this._lib.GetDotPlot(_temp, seqStr);
+            bpp = EmscriptenUtil.stdVectorToArray(dotPlotResult.plot);
+
+            // THRESHKNOT HEURISTIC
+            // Initialize algorithm parameters, iteration flags, and base pair list variable
+            const maxIterations = 3;
+            // TODO: Implement in SecStruct.stems()
+            // Currently stems() interprets bulges as stem breaks
+            // const allowedBulgeLen = 0;
+            const minLenHelix = 2;
+            let iteration = 0;
+            let newBP = 1;
+            const bpList: number[][] = [];
+
+            // Get pairs for each base via Threshknot heuristic
+            while (newBP !== 0 && iteration <= maxIterations) {
+                const current_bpList: number[][] = [];
+                const bpListFlat = bpList.flat();
+                const Pmax = new Array(seqStr.length).fill(0);
+
+                // Find max probability for each base, filtering out already paired bases
+                for (let index = 0; index < bpp.length; index += 3) {
+                    const base1 = bpp[index];
+                    const base2 = bpp[index + 1];
+                    const prob = bpp[index + 2];
+                    // console.log(base1, base2, prob, !(bpListFlat.includes(base1) || bpListFlat.includes(base2)));
+                    if (!(bpListFlat.includes(base1) || bpListFlat.includes(base2))) {
+                        // -1 to account for 0 indexing
+                        if (prob >= Pmax[base1 - 1]) Pmax[base1 - 1] = prob;
+                        if (prob >= Pmax[base2 - 1]) Pmax[base2 - 1] = prob;
+                    }
+                }
+
+                // Compare each COO tuple to Pmax and theta, and add to the list
+                // of selected base pairs if the check passes
+                for (let index = 0; index < bpp.length; index += 3) {
+                    const base1 = bpp[index];
+                    const base2 = bpp[index + 1];
+                    const prob = bpp[index + 2];
+                    if (prob === Pmax[base1 - 1] && prob === Pmax[base2 - 1] && prob > _theta) {
+                        current_bpList.push([base1, base2]);
+                    }
+                }
+                // Update iteration flags
+                newBP = current_bpList.length;
+                iteration += 1;
+                if (newBP !== 0 && iteration > maxIterations) {
+                    log.debug('Reached max iteration, stopping before converged.');
+                } else {
+                // Add selected base pairs to output list
+                    bpList.push(...current_bpList);
+                }
+            }
+
+            // Ensure that the bpList is sorted, then check for duplicated nucleotides
+            bpList.sort((bpA, bpB) => bpA[0] - bpB[0]);
+            const nts = bpList.flat();
+            if (nts.length > Array.from(new Set(nts)).length) {
+                log.warn('Some nucletotides found in more than 1 base pair');
+                bpList.forEach((bpA, i) => {
+                    const bpB = bpList[i + 1] || [];
+                    if (bpA[0] === bpB[0] && bpA[1] === bpB[1]) {
+                        log.warn(`Removing duplicated base pair: ${bpA}`);
+                        bpList.splice(i, 1);
+                    } else if (bpB.includes(bpA[0])) {
+                        log.warn(`bpA: ${bpA}, bpB: ${bpB}`);
+                    } else if (bpB.includes(bpA[1])) {
+                        log.warn(`bpA: ${bpA}, bpB: ${bpB}`);
+                    }
+                });
+            }
+
+            // Convert from array of pair tuples to partner pair list
+            const partnerPairList = new Array(seqStr.length).fill(-1);
+            bpList.forEach((pair) => {
+                // Indices are 1-indexed here; Dot Plot returns bp 1-indexed
+                partnerPairList[pair[0] - 1] = pair[1] - 1;
+                partnerPairList[pair[1] - 1] = pair[0] - 1;
+            });
+
+            // Convert to SecStruct and remove single pair helices
+            const structure = new SecStruct(partnerPairList);
+            const helices = structure.stems();
+            const pruned_helices = helices.filter((stem) => stem.length >= minLenHelix).flat();
+
+            // Convert from array of pair tuples to partner pair list
+            const pruned_pair_list = new Array(structure.length).fill(-1);
+            pruned_helices.forEach((pair) => {
+                // Indices are 0-indexed here
+                pruned_pair_list[pair[0]] = pair[1];
+                pruned_pair_list[pair[1]] = pair[0];
+            });
+
+            return new SecStruct(pruned_pair_list);
+        } catch (e) {
+            log.error('FullFoldTemperature error', e);
+            return new SecStruct();
+        } finally {
+            if (result != null) {
+                // result.delete();
+                result = null;
+            }
+        }
+    }
+
+    protected readonly _lib: EternafoldLib;
+}

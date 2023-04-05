@@ -27,7 +27,7 @@ export default class EternaFold extends Folder {
             .catch((_err) => null);
     }
 
-    private constructor(lib: EternafoldLib) {
+    protected constructor(lib: EternafoldLib) {
         super();
         this._lib = lib;
     }
@@ -160,7 +160,7 @@ export default class EternaFold extends Folder {
         return pairs;
     }
 
-    private foldSequenceImpl(
+    protected foldSequenceImpl(
         seq: Sequence,
         _structStr: string | null = null,
         _temp: number = 37,
@@ -217,5 +217,5 @@ export default class EternaFold extends Folder {
         return new DotPlot(retArray);
     }
 
-    private readonly _lib: EternafoldLib;
+    protected readonly _lib: EternafoldLib;
 }
