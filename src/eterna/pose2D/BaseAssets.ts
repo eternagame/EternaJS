@@ -1,5 +1,5 @@
 import {
-    Container, Graphics, MSAA_QUALITY, Sprite, Texture
+    Container, Graphics, Sprite, Texture
 } from 'pixi.js';
 import {
     ColorUtil, TextureUtil
@@ -361,7 +361,7 @@ export default class BaseAssets {
             ring.y = renderSize / 2;
             ringWrapper.addChild(ring);
 
-            return TextureUtil.renderToTexture(ringWrapper, MSAA_QUALITY.HIGH);
+            return TextureUtil.renderToTexture(ringWrapper);
         };
 
         const texLgSize = 2 ** 7;
@@ -383,7 +383,7 @@ export default class BaseAssets {
         const getLockTexture = (renderSize: number) => {
             lock.height = renderSize;
             lock.scale.x = lock.scale.y;
-            return TextureUtil.renderToTexture(lock, MSAA_QUALITY.LOW);
+            return TextureUtil.renderToTexture(lock);
         };
 
         // We use power-of-two size textures to ensure we have mipmaps
@@ -398,7 +398,7 @@ export default class BaseAssets {
         const lockTexSm = getLockTexture(texSizeSm);
 
         const tinyLock = new Graphics().beginFill(0x050505, 0.8).drawCircle(0, 0, 1.5);
-        const tinyLockTex = TextureUtil.renderToTexture(tinyLock, MSAA_QUALITY.HIGH);
+        const tinyLockTex = TextureUtil.renderToTexture(tinyLock);
 
         const maxSize = BaseTextures.BODY_SIZE - 6;
 

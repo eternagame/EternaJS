@@ -1,5 +1,5 @@
 import {
-    Container, Graphics, MSAA_QUALITY, Renderer, RenderTexture, Sprite
+    Container, Graphics, Renderer, RenderTexture, Sprite
 } from 'pixi.js';
 import ColorConvert from 'color-convert';
 import {
@@ -111,7 +111,7 @@ export default class BaseTextures {
             body.y = (texSize / 2) - (BASE_SIZE / 2);
             bodyWrapper.addChild(body);
 
-            return TextureUtil.renderToTexture(bodyWrapper, MSAA_QUALITY.HIGH);
+            return TextureUtil.renderToTexture(bodyWrapper);
         };
 
         // We use power-of-two size textures to ensure we have mipmaps
@@ -208,7 +208,7 @@ export default class BaseTextures {
 
         lockWrapper.filters = [new AdjustmentFilter({alpha: 0.85})];
 
-        const lockTex = TextureUtil.renderToTexture(lockWrapper, MSAA_QUALITY.LOW);
+        const lockTex = TextureUtil.renderToTexture(lockWrapper);
 
         return [
             {texture: lockTex, scale: MAX_SIZE / RENDER_SIZE},

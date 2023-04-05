@@ -1,5 +1,5 @@
 import {
-    Matrix, MSAA_QUALITY, Sprite, Texture
+    Matrix, Sprite, Texture
 } from 'pixi.js';
 import {TextureUtil, ColorUtil, MathUtil} from 'flashbang';
 
@@ -13,8 +13,7 @@ export default class EternaTextureUtil {
     public static createScaled(
         textures: Texture[],
         scaleFactor: number,
-        numScaleLevels: number,
-        multisample?: MSAA_QUALITY
+        numScaleLevels: number
     ): void {
         const origLength: number = textures.length;
         let sizeScaler: number = scaleFactor;
@@ -25,7 +24,7 @@ export default class EternaTextureUtil {
             scalerMat.scale(sizeScaler, sizeScaler);
 
             for (let ii = 0; ii < origLength; ii++) {
-                textures.push(EternaTextureUtil.scaleBy(textures[ii], sizeScaler, multisample));
+                textures.push(EternaTextureUtil.scaleBy(textures[ii], sizeScaler));
             }
 
             sizeScaler *= scaleFactor;
@@ -86,15 +85,15 @@ export default class EternaTextureUtil {
         return TextureUtil.renderToTexture(sprite);
     }
 
-    public static scaleBy(texture: Texture, scale: number, multisample?: MSAA_QUALITY): Texture {
-        return EternaTextureUtil.scaleByXY(texture, scale, scale, multisample);
+    public static scaleBy(texture: Texture, scale: number): Texture {
+        return EternaTextureUtil.scaleByXY(texture, scale, scale);
     }
 
-    public static scaleByXY(texture: Texture, scaleX: number, scaleY: number, multisample?: MSAA_QUALITY): Texture {
+    public static scaleByXY(texture: Texture, scaleX: number, scaleY: number): Texture {
         const sprite: Sprite = new Sprite(texture);
         sprite.scale.x = scaleX;
         sprite.scale.y = scaleY;
-        return TextureUtil.renderToTexture(sprite, multisample);
+        return TextureUtil.renderToTexture(sprite);
     }
 
     public static rotate(source: Texture, degree: number): Texture {

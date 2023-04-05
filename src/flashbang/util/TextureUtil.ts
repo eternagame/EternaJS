@@ -1,5 +1,5 @@
 import {
-    BaseTexture, Container, DisplayObject, MSAA_QUALITY, Rectangle, Texture
+    BaseTexture, Container, DisplayObject, Rectangle, Texture
 } from 'pixi.js';
 import Flashbang from 'flashbang/core/Flashbang';
 import Assert from './Assert';
@@ -61,7 +61,7 @@ export default class TextureUtil {
      * Renders the given DisplayObject to a new texture.
      * All textures in the DisplayObject's hierarchy should be loaded before calling this.
      */
-    public static renderToTexture(disp: DisplayObject, _multisample: MSAA_QUALITY = MSAA_QUALITY.HIGH): Texture {
+    public static renderToTexture(disp: DisplayObject): Texture {
         Assert.isTrue(disp.parent == null, 'TODO');
 
         const wrap: Container = new Container();
@@ -71,6 +71,10 @@ export default class TextureUtil {
         wrap.getLocalBounds(TextureUtil.R);
 
         Assert.assertIsDefined(Flashbang.pixi);
+        // NOTE: We briefly enabled multisampling, but had to revert it because it appears to be bugged on
+        // ARM processors. On the HP 11MK G9 EE Chromebook, textures were completely invisible. On Safari
+        // with the M1 (but not Chrome or FF - both worked fine!) it showed the texture backgrounds as pink
+        // instead of transparent
         const tex = Flashbang.pixi.renderer.generateTexture(disp, {region: TextureUtil.R});
         wrap.removeChild(disp);
         return tex;
