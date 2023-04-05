@@ -65,6 +65,7 @@ export default class EternaFoldThreshknot extends EternaFold {
             seq: seq.sequenceString(),
             secondBestPairs: secondBestPairs?.pairs ?? null,
             desiredPairs,
+            pseudoknotted,
             temp,
             gamma
         };
