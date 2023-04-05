@@ -4,7 +4,7 @@ import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import * as EternafoldLib from './engines/EternafoldLib';
-import {FullFoldResult} from './engines/EternafoldLib';
+import {DotPlotResult} from './engines/EternafoldLib';
 import EternaFold from './Eternafold';
 
 export default class EternaFoldThreshknot extends EternaFold {
@@ -46,7 +46,7 @@ export default class EternaFoldThreshknot extends EternaFold {
      * @param _structStr structStr
      * @param _temp Environmental temperature
      * @param _gamma gamma
-     * @param _theta Parameter to adjust filter sensitivity of Threshknot algorithm
+     * @param theta Parameter to adjust filter sensitivity of Threshknot algorithm
      * @returns SecStruct object representing secondary structure output of engine
      */
     protected foldSequenceImpl(
@@ -54,17 +54,16 @@ export default class EternaFoldThreshknot extends EternaFold {
         _structStr: string | null = null,
         _temp: number = 37,
         _gamma: number = 6.0,
-        _theta: number = 0.15
+        theta: number = 0.15
     ): SecStruct {
         const seqStr = seq.sequenceString(false, false);
-        let result: FullFoldResult | null = null;
-
+        let result: DotPlotResult | null = null;
         let bpp:number[] = [];
 
         try {
             // Get BPP in coordinate list format
-            const dotPlotResult = this._lib.GetDotPlot(_temp, seqStr);
-            bpp = EmscriptenUtil.stdVectorToArray(dotPlotResult.plot);
+            result = this._lib.GetDotPlot(_temp, seqStr);
+            bpp = EmscriptenUtil.stdVectorToArray(result.plot);
 
             // THRESHKNOT HEURISTIC
             // Initialize algorithm parameters, iteration flags, and base pair list variable
@@ -79,7 +78,7 @@ export default class EternaFoldThreshknot extends EternaFold {
 
             // Get pairs for each base via Threshknot heuristic
             while (newBP !== 0 && iteration <= maxIterations) {
-                const current_bpList: number[][] = [];
+                const currentBpList: number[][] = [];
                 const bpListFlat = bpList.flat();
                 const Pmax = new Array(seqStr.length).fill(0);
 
@@ -88,7 +87,6 @@ export default class EternaFoldThreshknot extends EternaFold {
                     const base1 = bpp[index];
                     const base2 = bpp[index + 1];
                     const prob = bpp[index + 2];
-                    // console.log(base1, base2, prob, !(bpListFlat.includes(base1) || bpListFlat.includes(base2)));
                     if (!(bpListFlat.includes(base1) || bpListFlat.includes(base2))) {
                         // -1 to account for 0 indexing
                         if (prob >= Pmax[base1 - 1]) Pmax[base1 - 1] = prob;
@@ -102,25 +100,25 @@ export default class EternaFoldThreshknot extends EternaFold {
                     const base1 = bpp[index];
                     const base2 = bpp[index + 1];
                     const prob = bpp[index + 2];
-                    if (prob === Pmax[base1 - 1] && prob === Pmax[base2 - 1] && prob > _theta) {
-                        current_bpList.push([base1, base2]);
+                    if (prob === Pmax[base1 - 1] && prob === Pmax[base2 - 1] && prob > theta) {
+                        currentBpList.push([base1, base2]);
                     }
                 }
                 // Update iteration flags
-                newBP = current_bpList.length;
+                newBP = currentBpList.length;
                 iteration += 1;
                 if (newBP !== 0 && iteration > maxIterations) {
                     log.debug('Reached max iteration, stopping before converged.');
                 } else {
                 // Add selected base pairs to output list
-                    bpList.push(...current_bpList);
+                    bpList.push(...currentBpList);
                 }
             }
 
             // Ensure that the bpList is sorted, then check for duplicated nucleotides
             bpList.sort((bpA, bpB) => bpA[0] - bpB[0]);
             const nts = bpList.flat();
-            if (nts.length > Array.from(new Set(nts)).length) {
+            if (nts.length > new Set(nts).size) {
                 log.warn('Some nucletotides found in more than 1 base pair');
                 bpList.forEach((bpA, i) => {
                     const bpB = bpList[i + 1] || [];
@@ -146,23 +144,23 @@ export default class EternaFoldThreshknot extends EternaFold {
             // Convert to SecStruct and remove single pair helices
             const structure = new SecStruct(partnerPairList);
             const helices = structure.stems();
-            const pruned_helices = helices.filter((stem) => stem.length >= minLenHelix).flat();
+            const prunedHelices = helices.filter((stem) => stem.length >= minLenHelix).flat();
 
             // Convert from array of pair tuples to partner pair list
-            const pruned_pair_list = new Array(structure.length).fill(-1);
-            pruned_helices.forEach((pair) => {
+            const prunedPairList = new Array(structure.length).fill(-1);
+            prunedHelices.forEach((pair) => {
                 // Indices are 0-indexed here
-                pruned_pair_list[pair[0]] = pair[1];
-                pruned_pair_list[pair[1]] = pair[0];
+                prunedPairList[pair[0]] = pair[1];
+                prunedPairList[pair[1]] = pair[0];
             });
 
-            return new SecStruct(pruned_pair_list);
+            return new SecStruct(prunedPairList);
         } catch (e) {
-            log.error('FullFoldTemperature error', e);
+            log.error('GetDotPlot error', e);
             return new SecStruct();
         } finally {
             if (result != null) {
-                // result.delete();
+                result.delete();
                 result = null;
             }
         }
