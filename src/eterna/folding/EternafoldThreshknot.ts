@@ -6,6 +6,8 @@ import Sequence from 'eterna/rnatypes/Sequence';
 import * as EternafoldLib from './engines/EternafoldLib';
 import {DotPlotResult} from './engines/EternafoldLib';
 import EternaFold from './Eternafold';
+/* eslint-enable import/no-duplicates, import/no-unresolved */
+import {CacheKey} from './Folder';
 
 export default class EternaFoldThreshknot extends EternaFold {
     public static readonly NAME: string = 'EternaFoldThreshknot';
@@ -49,11 +51,51 @@ export default class EternaFoldThreshknot extends EternaFold {
      * @param theta Parameter to adjust filter sensitivity of Threshknot algorithm
      * @returns SecStruct object representing secondary structure output of engine
      */
+
+    public foldSequence(
+        seq: Sequence,
+        secondBestPairs: SecStruct | null,
+        desiredPairs: string | null = null,
+        pseudoknotted: boolean = false,
+        temp: number = 37,
+        gamma: number = 0.7
+    ): SecStruct {
+        const key: CacheKey = {
+            primitive: 'fold',
+            seq: seq.sequenceString(),
+            secondBestPairs: secondBestPairs?.pairs ?? null,
+            desiredPairs,
+            temp,
+            gamma
+        };
+        let pairs: SecStruct = this.getCache(key) as SecStruct;
+        if (pairs != null) {
+            // log.debug("fold cache hit");
+            return pairs.slice(0);
+        }
+
+        pairs = this.foldSequenceImpl(seq, null, temp, gamma, pseudoknotted);
+        this.putCache(key, pairs.slice(0));
+        return pairs;
+    }
+
     protected foldSequenceImpl(
         seq: Sequence,
-        _structStr: string | null = null,
-        _temp: number = 37,
-        _gamma: number = 6.0,
+        structStr: string | null = null,
+        temp: number = 37,
+        gamma: number = 6.0,
+        pseudoknotted: boolean = false
+    ): SecStruct {
+        if (pseudoknotted) {
+            return this.foldSequenceThresh(seq, temp);
+        } else {
+            return super.foldSequenceImpl(seq, structStr, temp, gamma);
+        }
+    }
+
+    private foldSequenceThresh(
+        seq: Sequence,
+        temp: number = 37,
         theta: number = 0.15
     ): SecStruct {
         const seqStr = seq.sequenceString(false, false);
@@ -62,7 +104,7 @@ export default class EternaFoldThreshknot extends EternaFold {
 
         try {
             // Get BPP in coordinate list format
-            result = this._lib.GetDotPlot(_temp, seqStr);
+            result = this._lib.GetDotPlot(temp, seqStr);
             bpp = EmscriptenUtil.stdVectorToArray(result.plot);
 
             // THRESHKNOT HEURISTIC
