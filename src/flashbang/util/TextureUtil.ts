@@ -71,7 +71,8 @@ export default class TextureUtil {
         wrap.getLocalBounds(TextureUtil.R);
 
         Assert.assertIsDefined(Flashbang.pixi);
-        return Flashbang.pixi.renderer.generateTexture(disp, {multisample: MSAA_QUALITY.HIGH, region: TextureUtil.R});
+        // return Flashbang.pixi.renderer.generateTexture(disp, {multisample: MSAA_QUALITY.HIGH, region: TextureUtil.R});
+        return Flashbang.pixi.renderer.generateTexture(disp, {region: TextureUtil.R});
     }
 
     private static readonly R: Rectangle = new Rectangle();
