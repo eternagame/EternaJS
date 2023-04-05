@@ -26,6 +26,7 @@ import Vienna2 from './folding/Vienna2';
 import NuPACK from './folding/NuPACK';
 import Contrafold from './folding/Contrafold';
 import EternaFold from './folding/Eternafold';
+import EternaFoldThreshknot from './folding/EternafoldThreshknot';
 import RNAFoldBasic from './folding/RNAFoldBasic';
 import FolderManager from './folding/FolderManager';
 import LayoutEngineManager from './layout/LayoutEngineManager';
@@ -558,6 +559,7 @@ export default class EternaApp extends FlashbangApp {
             LinearFoldV.create(),
             Contrafold.create(),
             EternaFold.create(),
+            EternaFoldThreshknot.create(),
             RNAFoldBasic.create()])
             .then((folders: (Folder | null)[]) => {
                 log.info('Folding engines intialized');
