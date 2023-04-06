@@ -341,7 +341,9 @@ export default class GameDropdown<Option extends string = string> extends Contai
     }
 
     private _drawBox(_hover: boolean) {
-        const TEXT_WIDTH = this.disabled ? this._selectedText.width : this._popup.display.width;
+        const TEXT_WIDTH = this.disabled ? (
+            this._selectedText.width + GameDropdown._HORIZONTAL_PADDING * 2
+        ) : this._popup.display.width;
 
         let width = 0;
         if (this.disabled) {
