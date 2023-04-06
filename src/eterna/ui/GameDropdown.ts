@@ -80,7 +80,7 @@ export default class GameDropdown<Option extends string = string> extends Contai
 
         this._box = new Graphics();
         this.container.addChild(this._box);
-        this._drawBox(false);
+        // Defer drawing until we have the selected text and popup for sizing
 
         this.pointerOver.connect(() => {
             this._hovered = true;
@@ -109,19 +109,6 @@ export default class GameDropdown<Option extends string = string> extends Contai
         }
         this.container.addChild(this._selectedText);
 
-        if (this._selectedIcon) {
-            DisplayUtil.positionRelative(
-                this._selectedIcon, HAlign.LEFT, VAlign.CENTER,
-                this._box, HAlign.LEFT, VAlign.CENTER,
-                this._borderWidth
-            );
-        }
-        DisplayUtil.positionRelative(
-            this._selectedText, HAlign.LEFT, VAlign.CENTER,
-            this._box, HAlign.LEFT, VAlign.CENTER,
-            this._borderWidth + GameDropdown._HORIZONTAL_PADDING + (this._selectedIcon ? GameDropdown._ICON_SIZE : 0)
-        );
-
         this.regs.add(
             this.selectedOption.connectNotify((selected) => {
                 this._selectedText.text = selected;
@@ -140,6 +127,24 @@ export default class GameDropdown<Option extends string = string> extends Contai
         );
 
         this._setupPopup();
+        this._drawBox(false);
+        if (this._selectedIcon) {
+            DisplayUtil.positionRelative(
+                this._selectedIcon, HAlign.LEFT, VAlign.CENTER,
+                this._box, HAlign.LEFT, VAlign.CENTER,
+                this._borderWidth
+            );
+        }
+        DisplayUtil.positionRelative(
+            this._selectedText, HAlign.LEFT, VAlign.CENTER,
+            this._box, HAlign.LEFT, VAlign.CENTER,
+            this._borderWidth + GameDropdown._HORIZONTAL_PADDING + (this._selectedIcon ? GameDropdown._ICON_SIZE : 0)
+        );
+        DisplayUtil.positionRelative(
+            this._arrow, HAlign.RIGHT, VAlign.CENTER,
+            this._box, HAlign.RIGHT, VAlign.CENTER,
+            -(GameDropdown._HORIZONTAL_PADDING + this._borderWidth)
+        );
         this._hidePopup();
     }
 
@@ -158,7 +163,7 @@ export default class GameDropdown<Option extends string = string> extends Contai
 
         this._popup.addObject(dropShadowPanel, scrollViewContainer);
         this._scrollView = new ScrollBox(
-            this._box.width,
+            0,
             GameDropdown._POPUP_VERTICAL_HEIGHT,
             GameDropdown._BORDER_RADIUS
         );
@@ -173,15 +178,8 @@ export default class GameDropdown<Option extends string = string> extends Contai
         this._popup.addObject(popupPanel, contentLayout);
         this._scrollView.doLayout();
 
-        const globalBoxBounds = DisplayUtil.getBoundsRelative(this._box, this.mode.container);
-        DisplayUtil.positionRelativeToBounds(
-            this._popup.container, HAlign.LEFT, VAlign.TOP,
-            globalBoxBounds, HAlign.LEFT, VAlign.BOTTOM,
-            0, GameDropdown._POPUP_VERTICAL_OFFSET
-        );
-
         let yWalker = 0;
-        let maxWidth = this._box.width;
+        let maxWidth = this._width ? this._width : 0;
         const texts: TextBalloon[] = [];
         for (const option of this.options) {
             const balloonColor = option === this.selectedOption.value ? 0x4471A2 : this._boxColor;
@@ -273,20 +271,32 @@ export default class GameDropdown<Option extends string = string> extends Contai
                 text.setText(option, this._fontSize, 0x333333);
             });
             maxWidth = Math.max(
-                this._width ? this._width : (text.display.width + GameDropdown._HORIZONTAL_PADDING),
+                this._width ? this._width : (
+                    text.display.width
+                    + GameDropdown._HORIZONTAL_PADDING
+                    + (!this.disabled ? GameDropdown._ARROW_SIDE_SIZE : 0)
+                ),
                 maxWidth
             );
         }
         for (const text of texts) {
             text.setSize(maxWidth, text.height);
         }
-        popupPanel.setSize(this._box.width, yWalker);
+        popupPanel.setSize(maxWidth, yWalker);
         let popupPanelHeight = GameDropdown._POPUP_VERTICAL_HEIGHT;
         if (GameDropdown._POPUP_VERTICAL_HEIGHT / this.options.length > GameDropdown._POPUP_ITEM_HEIGHT) {
             // Make popup panel height shorter if there aren't enough items in it fill default height
             popupPanelHeight = this.options.length * GameDropdown._POPUP_ITEM_HEIGHT;
         }
-        dropShadowPanel.setSize(this._box.width, popupPanelHeight);
+        dropShadowPanel.setSize(maxWidth, popupPanelHeight);
+        this._scrollView.setSize(maxWidth, GameDropdown._POPUP_VERTICAL_HEIGHT);
+
+        const globalBoxBounds = DisplayUtil.getBoundsRelative(this._box, this.mode.container);
+        DisplayUtil.positionRelativeToBounds(
+            this._popup.container, HAlign.LEFT, VAlign.TOP,
+            globalBoxBounds, HAlign.LEFT, VAlign.BOTTOM,
+            0, GameDropdown._POPUP_VERTICAL_OFFSET
+        );
         this._scrollView.updateScrollThumbs();
     }
 
@@ -331,22 +341,17 @@ export default class GameDropdown<Option extends string = string> extends Contai
     }
 
     private _drawBox(_hover: boolean) {
-        let TEXT_WIDTH = this.options.reduce(
-            (max, opt) => Math.max(max, opt.length),
-            0
-        );
-        if (this.disabled) TEXT_WIDTH = this.selectedOption.value.length;
-        TEXT_WIDTH *= this._fontSize / 1.5;
-        // There should be an extra _PADDING between the text and the arrow
-        const ARROW_WIDTH = GameDropdown._ARROW_SIDE_SIZE + GameDropdown._HORIZONTAL_PADDING;
+        const TEXT_WIDTH = this.disabled ? (
+            this._selectedText.width + GameDropdown._HORIZONTAL_PADDING * 2
+        ) : this._popup.display.width;
 
         let width = 0;
         if (this.disabled) {
-            width = TEXT_WIDTH + GameDropdown._HORIZONTAL_PADDING;
+            width = TEXT_WIDTH;
         } else if (!this.disabled && this._width && this._width !== 0) {
             width = this._width;
         } else {
-            width = TEXT_WIDTH + ARROW_WIDTH + GameDropdown._HORIZONTAL_PADDING;
+            width = TEXT_WIDTH;
         }
         if (this.iconMap.size > 0) width += GameDropdown._ICON_SIZE;
 
@@ -375,12 +380,6 @@ export default class GameDropdown<Option extends string = string> extends Contai
             new Point(GameDropdown._ARROW_SIDE_SIZE / 2, ARROW_HEIGHT)
         ]);
         this._arrow.endFill();
-
-        DisplayUtil.positionRelative(
-            this._arrow, HAlign.RIGHT, VAlign.CENTER,
-            this._box, HAlign.RIGHT, VAlign.CENTER,
-            -(GameDropdown._HORIZONTAL_PADDING + this._borderWidth)
-        );
     }
 
     public get height(): number {
