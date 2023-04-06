@@ -52,6 +52,7 @@ import Pose3DDialog from 'eterna/pose3D/Pose3DDialog';
 import ModeBar from 'eterna/ui/ModeBar';
 import {FederatedPointerEvent} from '@pixi/events';
 import GameWindow from 'eterna/ui/GameWindow';
+import FolderManager from 'eterna/folding/FolderManager';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
 import StructureInput from './StructureInput';
@@ -291,14 +292,17 @@ export default class PuzzleEditMode extends GameMode {
         this._naturalButton = actualButton;
         this._targetButton = targetButton;
 
-        this._folderSwitcher = this._modeBar.addFolderSwitcher((folder) => {
-            if (
-                this._numTargets > 1
-                && !folder.canFoldWithBindingSite
-                && folder.name !== EternaFoldThreshknot.NAME
-            ) return false;
-            return true;
-        });
+        const startingFolderName = initialPoseData?.[0]?.['startingFolder'];
+        const startingFolder = startingFolderName ? FolderManager.instance.getFolder(startingFolderName) : null;
+        let defaultFolder: Folder | undefined;
+        if (startingFolder && this.canUseFolder(startingFolder)) defaultFolder = startingFolder;
+        else if (startingFolder) {
+            defaultFolder = FolderManager.instance.getNextFolder(
+                startingFolderName,
+                (candidateFolder) => !this.canUseFolder(candidateFolder)
+            );
+        }
+        this._folderSwitcher = this._modeBar.addFolderSwitcher((folder) => this.canUseFolder(folder), defaultFolder);
         this._folderSwitcher.selectedFolder.connectNotify((folder) => {
             if (folder.canScoreStructures) {
                 for (const pose of this._poses) {
@@ -325,15 +329,6 @@ export default class PuzzleEditMode extends GameMode {
         this.regs?.add(this._targetButton.clicked.connect(() => this.setToTargetMode()));
 
         this.setupEternafoldNotice();
-
-        // Must do this AFTER pose initialization
-        if (
-            initialPoseData != null
-            && initialPoseData[0] != null
-            && initialPoseData[0]['startingFolder'] != null
-        ) {
-            this._folderSwitcher.changeFolder(initialPoseData[0].startingFolder);
-        }
 
         if (
             initialPoseData != null
@@ -375,6 +370,22 @@ export default class PuzzleEditMode extends GameMode {
         this.registerScriptInterface(this._scriptInterface);
 
         this.updateUILayout();
+    }
+
+    private canUseFolder(folder: Folder) {
+        const pseudoknots = this._structureInputs.some(
+            (input) => SecStruct.fromParens(input.structureString, true).onlyPseudoknots().nonempty()
+        );
+        const hasMolecules = this._poses.some(
+            (pose) => pose.molecularBindingSite && pose.molecularBindingSite.some((bb) => bb)
+        );
+
+        if (
+            ((this._numTargets > 1 || hasMolecules) && !folder.canFoldWithBindingSite)
+            || (pseudoknots && !folder.canPseudoknot)
+            || folder.name === EternaFoldThreshknot.NAME
+        ) return false;
+        return true;
     }
 
     private setToolbarEventHandlers() {
@@ -1128,13 +1139,8 @@ export default class PuzzleEditMode extends GameMode {
             }
         }
 
-        const hasMolecules = this._poses.some(
-            (pose) => pose.molecularBindingSite && pose.molecularBindingSite.some((bb) => bb)
-        );
-        this._folderSwitcher.canUseFolder = (folder) => {
-            if ((hasMolecules || this._numTargets > 1) && !folder.canFoldWithBindingSite) return false;
-            return true;
-        };
+        this._folderSwitcher.canUseFolder = (folder) => this.canUseFolder(folder);
+        this._modeBar.layout();
 
         for (let ii = 0; ii < this._poses.length; ii++) {
             const targetPairs: SecStruct = SecStruct.fromParens(this._structureInputs[ii].structureString, true);
