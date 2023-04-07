@@ -238,7 +238,11 @@ export default class ViewSolutionOverlay extends ContainerObject {
                     filter1_arg2: this._props.solution.nodeID
                     /* eslint-enable camelcase */
                 });
-                (this.mode as GameMode).showDialog(new CopyTextDialog(solutionURL, 'Solution URL', true));
+                (this.mode as GameMode).showDialog(
+                    new CopyTextDialog({
+                        text: solutionURL, dialogTitle: 'Solution URL', copyNotice: 'URL', modal: true
+                    })
+                );
             }
         );
         this._content.addObject(permalink, headerLinks);
@@ -264,7 +268,11 @@ export default class ViewSolutionOverlay extends ContainerObject {
                     filter1_arg1: this._props.solution.playerName
                     /* eslint-enable camelcase */
                 });
-                (this.mode as GameMode).showDialog(new CopyTextDialog(playerURL, 'Player URL', true));
+                (this.mode as GameMode).showDialog(
+                    new CopyTextDialog({
+                        text: playerURL, dialogTitle: 'Player URL', copyNotice: 'URL', modal: true
+                    })
+                );
             }
         );
 
@@ -300,7 +308,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
             // VOTE (disallowed is solution is synthesized or old)
             this._voteButton = new ButtonWithIcon({text: {text: ''}, icon: Bitmaps.ImgVote});
             this._voteButton.clicked.connect(() => this.voteClicked.emit());
-            this.setVoteStatus(this._props.solution.getProperty(DesignCategory.MY_VOTES) > 0);
+            this.setVoteStatus(this._props.solution.getProperty(DesignCategory.MY_VOTES) as number > 0);
             this._content.addObject(this._voteButton, this._contentLayout);
         }
 
@@ -608,7 +616,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         } else if (solution.getProperty(DesignCategory.SYNTHESIZED) === 'y') {
             text += '<bold>[WAITING]</bold>\n'
                     + '<orange>This design is being synthesized and waiting for results. </orange>\n';
-        } else if (solution.getProperty(DesignCategory.ROUND) < puzzle.round) {
+        } else if (solution.getProperty(DesignCategory.ROUND) as number < puzzle.round) {
             text += '<bold>[OLD]</bold>\n'
                     + '<orange>This design was submitted in round </orange>'
                     + `<bold>${solution.getProperty(DesignCategory.ROUND)}.</bold>`

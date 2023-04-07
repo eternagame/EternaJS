@@ -9,9 +9,14 @@ import Tooltips from './Tooltips';
 
 /** Show a dialog with text that the user can copy */
 export default class CopyTextDialog extends WindowDialog<void> {
-    constructor(text: string, dialogTitle?: string, modal: boolean = false) {
+    constructor({
+        text, dialogTitle, copyNotice, modal = false
+    }: {
+        text: string; copyNotice: string; dialogTitle?: string; modal?: boolean;
+    }) {
         super({title: dialogTitle, modal});
         this._initialText = text;
+        this._copyNotice = copyNotice;
     }
 
     protected added() {
@@ -47,7 +52,7 @@ export default class CopyTextDialog extends WindowDialog<void> {
                 this.close();
             } else {
                 this.removeNamedObjects('SUCCESS_ANIM');
-                Tooltips.instance?.showTooltipFor(copyButton.display, this, 'Sequence copied');
+                Tooltips.instance?.showTooltipFor(copyButton.display, this, `${this._copyNotice} copied`);
                 this.addNamedObject('SUCCESS_ANIM', new SerialTask(
                     new DelayTask(2),
                     new CallbackTask(() => {
@@ -68,4 +73,5 @@ export default class CopyTextDialog extends WindowDialog<void> {
     private _text: TextInputObject;
 
     private _initialText: string;
+    private _copyNotice: string;
 }

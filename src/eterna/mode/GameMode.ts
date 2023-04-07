@@ -545,7 +545,7 @@ export default abstract class GameMode extends AppMode {
         let sequenceString = this._poses[0].sequence.sequenceString();
         if (this._poses[0].customNumbering != null) sequenceString += ` ${Utility.arrayToRangeString(this._poses[0].customNumbering)}`;
         this._copySequenceDialog = this.showDialog(
-            new CopyTextDialog(sequenceString, 'Current Sequence'),
+            new CopyTextDialog({text: sequenceString, dialogTitle: 'Current Sequence', copyNotice: 'Sequence'}),
             'CopySequenceDialog'
         );
     }
@@ -565,7 +565,7 @@ export default abstract class GameMode extends AppMode {
             true
         );
         this._copyStructureDialog = this.showDialog(
-            new CopyTextDialog(structureString, 'Current Structure'),
+            new CopyTextDialog({text: structureString, copyNotice: 'Structure', dialogTitle: 'Current Structure'}),
             'CopyStructureDialog'
         );
         this._copyStructureDialogPose = poseIdx;
