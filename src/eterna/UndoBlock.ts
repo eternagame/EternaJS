@@ -630,7 +630,8 @@ export default class UndoBlock {
             throw new Error(`Critical error: can't create a ${this._folderName} folder instance by name`);
         }
 
-        if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) === undefined) {
+        const currDotPlot = this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots);
+        if (currDotPlot === undefined) {
             const dotArray: DotPlot | null = folder.getDotPlot(
                 this.sequence, this.getPairs(37), 37, pseudoknots
             );
@@ -650,6 +651,8 @@ export default class UndoBlock {
                 pseudoknots
             );
             this._dotPlotData = dotArray;
+        } else if (Array.isArray(currDotPlot)) {
+            this._dotPlotData = new DotPlot(currDotPlot);
         }
 
         for (let ii = 37; ii < 100; ii += 10) {
@@ -659,7 +662,7 @@ export default class UndoBlock {
                 this.setPairs(pairs, ii, pseudoknots);
             }
 
-            if (this.getParam(UndoBlockParam.DOTPLOT, ii) == null) {
+            if (this.getParam(UndoBlockParam.DOTPLOT, ii, pseudoknots) == null) {
                 const dotTempArray: DotPlot | null = folder.getDotPlot(
                     this.sequence,
                     this.getPairs(ii),
@@ -686,7 +689,7 @@ export default class UndoBlock {
         const maxPairScores: number[] = [];
 
         for (let ii = 37; ii < 100; ii += 10) {
-            if (this.getParam(UndoBlockParam.PROB_SCORE, ii)) {
+            if (this.getParam(UndoBlockParam.PROB_SCORE, ii, pseudoknots)) {
                 pairScores.push(1 - (this.getParam(UndoBlockParam.PAIR_SCORE, ii, pseudoknots) as number));
                 maxPairScores.push(1.0);
                 continue;
