@@ -456,7 +456,7 @@ export default class UndoBlock {
     public getPairs(temp: number = 37, pseudoknots: boolean = false): SecStruct {
         const pairsArray = this._pairsArray.get(pseudoknots);
         Assert.assertIsDefined(pairsArray);
-        return new SecStruct(pairsArray[temp]?.pairs) ?? null;
+        return new SecStruct(pairsArray[temp]?.pairs);
     }
 
     public getParam(
@@ -656,7 +656,7 @@ export default class UndoBlock {
         }
 
         for (let ii = 37; ii < 100; ii += 10) {
-            if (this.getPairs(ii) == null) {
+            if (this.getPairs(ii, pseudoknots).length === 0) {
                 const pairs: SecStruct | null = folder.foldSequence(this.sequence, null, null, pseudoknots, ii);
                 Assert.assertIsDefined(pairs);
                 this.setPairs(pairs, ii, pseudoknots);
@@ -665,7 +665,7 @@ export default class UndoBlock {
             if (this.getParam(UndoBlockParam.DOTPLOT, ii, pseudoknots) == null) {
                 const dotTempArray: DotPlot | null = folder.getDotPlot(
                     this.sequence,
-                    this.getPairs(ii),
+                    this.getPairs(ii, pseudoknots),
                     ii,
                     pseudoknots
                 );
