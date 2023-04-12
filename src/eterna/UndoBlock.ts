@@ -799,6 +799,84 @@ export default class UndoBlock {
         );
     }
 
+    /**
+     * Given the constraints for the "raw" indices of bases (oligo order defined by targetOligos)
+     * get the constraints for each base with the "target structure" indices of bases
+     * (oligo order defined by the target structure, user-modifiable with magic glue)
+     */
+    private _targetAlignedConstraints(constraints: boolean[]) {
+        const targetMap = this.reorderedOligosIndexMap(this.targetOligoOrder);
+
+        if (targetMap != null) {
+            const targetAlignedConstraints: boolean[] = [];
+            for (const [targetIndex, rawIndex] of targetMap.entries()) {
+                targetAlignedConstraints[targetIndex] = constraints[Number(rawIndex)];
+            }
+            return targetAlignedConstraints;
+        } else {
+            return constraints;
+        }
+    }
+
+    public get targetAlignedStructureConstraints() {
+        if (this.targetConditions !== undefined) {
+            const structureConstraints = this.targetConditions['structure_constraints'];
+            if (structureConstraints) {
+                return this._targetAlignedConstraints(structureConstraints);
+            }
+        }
+        return undefined;
+    }
+
+    public get targetAlignedAntiStructureConstraints() {
+        if (this.targetConditions !== undefined) {
+            const antiStructureConstraints = this.targetConditions['anti_structure_constraints'];
+            if (antiStructureConstraints) {
+                return this._targetAlignedConstraints(antiStructureConstraints);
+            }
+        }
+        return undefined;
+    }
+
+    /**
+     * Given the pair map for the "natural mode" indices of bases (oligo order defined by the natural mode folding)
+     * get the pair map for using the "target structure" indices of bases
+     * (oligo order defined by the target structure, user-modifiable with magic glue)
+     * so that the pair map for natural mode can be compared to the pair map for target mode
+     */
+    public get targetAlignedNaturalPairs() {
+        const pseudoknots = (this.targetConditions !== undefined && this.targetConditions['type'] === 'pseudoknot');
+        const naturalPairs = this.getPairs(37, pseudoknots);
+
+        // targetAlignedIndex => rawIndex
+        const targetMap = this.reorderedOligosIndexMap(this.targetOligoOrder);
+        if (targetMap != null) {
+            // naturalAlignedIndex => rawIndex
+            const naturalMap = this.reorderedOligosIndexMap(this.oligoOrder);
+            if (naturalMap !== undefined) {
+                const targetAlignedNaturalPairs: SecStruct = new SecStruct();
+                for (const [targetIndex, rawIndex] of targetMap.entries()) {
+                    const naturalIndex = naturalMap.indexOf(rawIndex);
+                    // If unpaired, it's unpaired, otherwise we need to get the index of the paired base
+                    // according to target mode
+                    if (!naturalPairs.isPaired(naturalIndex)) {
+                        targetAlignedNaturalPairs.setUnpaired(targetIndex);
+                    } else {
+                        const naturalPairedIndex = naturalPairs.pairingPartner(naturalIndex);
+                        const rawPairedIndex = naturalMap[naturalPairedIndex];
+                        targetAlignedNaturalPairs.setPairingPartner(targetIndex, targetMap.indexOf(rawPairedIndex));
+                    }
+                }
+
+                return targetAlignedNaturalPairs;
+            } else {
+                return naturalPairs;
+            }
+        } else {
+            return naturalPairs;
+        }
+    }
+
     public get folderName(): string {
         return this._folderName;
     }
