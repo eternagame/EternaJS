@@ -1,4 +1,4 @@
-import {VLayoutContainer} from 'flashbang';
+import {HLayoutContainer, VLayoutContainer} from 'flashbang';
 import {Signal} from 'signals';
 import {Text} from 'pixi.js';
 import Fonts from 'eterna/util/Fonts';
@@ -15,6 +15,7 @@ interface PasteResult {
 
 export default class PasteStructureDialog extends WindowDialog<void> {
     public readonly applyClicked: Signal<PasteResult> = new Signal();
+    public readonly resetClicked: Signal<void> = new Signal();
 
     constructor(pseudoknots: boolean) {
         super({title: 'Paste a structure'});
@@ -40,9 +41,14 @@ export default class PasteStructureDialog extends WindowDialog<void> {
         this._startAtField = inputGrid.addField('Starting base', 50);
         this.addObject(inputGrid, this._content);
 
+        const buttonLayout = new HLayoutContainer(6);
+        this._content.addChild(buttonLayout);
+        const resetButton = new GameButton('secondary').label('Reset', 14);
         const applyButton = new GameButton().label('Apply', 14);
-        this.addObject(applyButton, this._content);
+        this.addObject(resetButton, buttonLayout);
+        this.addObject(applyButton, buttonLayout);
 
+        resetButton.clicked.connect(() => this.resetClicked.emit());
         applyButton.clicked.connect(() => this.onApply(this._structureField.text, this._startAtField.text));
         this.regs.add(this._structureField.keyPressed.connect((key) => {
             if (key === 'Enter') this.onApply(this._structureField.text, this._startAtField.text);

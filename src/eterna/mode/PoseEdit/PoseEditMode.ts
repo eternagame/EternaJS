@@ -1771,6 +1771,11 @@ export default class PoseEditMode extends GameMode {
 
             this.poseEditByTarget(this._isPipMode ? poseIdx : 0);
         }));
+        this.regs?.add(pasteDialog.resetClicked.connect(() => {
+            const targetIndex = this._isPipMode ? poseIdx : this._curTargetIndex;
+            this._targetPairs[targetIndex] = SecStruct.fromParens(this._puzzle.getSecstruct(targetIndex));
+            this.poseEditByTarget(this._isPipMode ? poseIdx : 0);
+        }));
     }
 
     private openDesignBrowserForOurPuzzle(): void {
