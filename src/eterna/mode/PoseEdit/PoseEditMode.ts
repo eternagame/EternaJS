@@ -1773,6 +1773,7 @@ export default class PoseEditMode extends GameMode {
         }));
         this.regs?.add(pasteDialog.resetClicked.connect(() => {
             const targetIndex = this._isPipMode ? poseIdx : this._curTargetIndex;
+            this._targetOligosOrder[targetIndex] = undefined;
             this._targetPairs[targetIndex] = SecStruct.fromParens(this._puzzle.getSecstruct(targetIndex));
             this.poseEditByTarget(this._isPipMode ? poseIdx : 0);
         }));
