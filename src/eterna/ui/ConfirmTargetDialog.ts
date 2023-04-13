@@ -15,9 +15,11 @@ export default class ConfirmTargetDialog extends WindowDialog<'cancel' | 'reset'
         this._window.content.addChild(content);
 
         const PROMPT = 'This design has a custom target structure that will be uploaded along with your design, '
-         + 'but there are paired bases in the target structure with base types that are not valid pairs (AU/UG/GC). '
-         + 'Do you want to cancel submitting and make further modifications, reset the target structure to the '
-         + 'puzzle\'s default, or continue submitting this design anyways?';
+         + 'but there are paired bases in the target structure with base types that are not valid pairs (AU/UG/GC).\n\n'
+         + 'You can do one of the following:\n'
+         + '• Cancel submitting and make further modifications\n'
+         + '• Reset the target structure to the puzzle\'s default\n'
+         + '• Continue submitting this design anyways';
         const text = Fonts.std(PROMPT, 15).color(0xC0DCE7).wordWrap(true, 300).build();
         content.addChild(text);
 

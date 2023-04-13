@@ -44,7 +44,7 @@ export default class PasteStructureDialog extends WindowDialog<void> {
 
         const buttonLayout = new HLayoutContainer(6);
         this._content.addChild(buttonLayout);
-        const resetButton = new GameButton('secondary').label('Reset', 14);
+        const resetButton = new GameButton('secondary').label('Reset', 14).tooltip('Reset to Default Structure');
         const applyButton = new GameButton().label('Apply', 14);
         this.addObject(resetButton, buttonLayout);
         this.addObject(applyButton, buttonLayout);

@@ -2165,8 +2165,8 @@ export default class PoseEditMode extends GameMode {
                         // If we pass constraints when taking into account soft constraints, just prompt
                         if (this.checkConstraints(this._puzzle.isSoftConstraint || Eterna.DEV_MODE)) {
                             const NOT_SATISFIED_PROMPT = 'Puzzle constraints are not satisfied.\n\n'
-                            + 'You can still submit the sequence, but please note that there is a risk of not getting '
-                            + 'synthesized properly';
+                            + 'You can still submit the sequence, but please note that there is a risk of the design '
+                            + 'not getting synthesized properly';
                             this.showConfirmDialog(NOT_SATISFIED_PROMPT).closed
                                 .then((confirmed) => {
                                     if (confirmed) {
