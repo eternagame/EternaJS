@@ -133,23 +133,24 @@ export default class SpecBoxDialog extends WindowDialog<void> {
         });
         EPars.addLetterStyles(statString);
 
+        const pseudoknots = this._dataBlock.targetConditions?.type === 'pseudoknot';
         statString
             .append(`${EPars.getColoredLetter('A')}-${EPars.getColoredLetter('U')} pairs : `, 'bold')
-            .append(`${this._dataBlock.getParam(UndoBlockParam.AU, TEMPERATURE)}   `)
+            .append(`${this._dataBlock.getParam(UndoBlockParam.AU, TEMPERATURE, pseudoknots)}   `)
             .append(`${EPars.getColoredLetter('G')}-${EPars.getColoredLetter('C')} pairs : `, 'bold')
-            .append(`${this._dataBlock.getParam(UndoBlockParam.GC, TEMPERATURE)}   `)
+            .append(`${this._dataBlock.getParam(UndoBlockParam.GC, TEMPERATURE, pseudoknots)}   `)
             .append(`${EPars.getColoredLetter('G')}-${EPars.getColoredLetter('U')} pairs : `, 'bold')
-            .append(`${this._dataBlock.getParam(UndoBlockParam.GU, TEMPERATURE)}\n`)
+            .append(`${this._dataBlock.getParam(UndoBlockParam.GU, TEMPERATURE, pseudoknots)}\n`)
             .append('Free energy : ', 'bold')
-            .append(`${Number(this._dataBlock.getParam(UndoBlockParam.FE, TEMPERATURE) as number / 100).toFixed(1)} kcal\t\t`)
+            .append(`${Number(this._dataBlock.getParam(UndoBlockParam.FE, TEMPERATURE, pseudoknots) as number / 100).toFixed(1)} kcal\t\t`)
             .append('Melting point : ', 'bold')
-            .append(`${this._dataBlock.getParam(UndoBlockParam.MELTING_POINT, TEMPERATURE)}°C\n`)
+            .append(`${this._dataBlock.getParam(UndoBlockParam.MELTING_POINT, TEMPERATURE, pseudoknots)}°C\n`)
             .append('Mean P-unpaired : ', 'bold')
-            .append(`${Number(this._dataBlock.getParam(UndoBlockParam.MEANPUNP, TEMPERATURE)).toFixed(3)}\t\t`)
+            .append(`${Number(this._dataBlock.getParam(UndoBlockParam.MEANPUNP, TEMPERATURE, pseudoknots)).toFixed(3)}\t\t`)
             .append('Branchiness : ', 'bold')
-            .append(`${Number(this._dataBlock.getParam(UndoBlockParam.BRANCHINESS, TEMPERATURE)).toFixed(1)}\n`)
+            .append(`${Number(this._dataBlock.getParam(UndoBlockParam.BRANCHINESS, TEMPERATURE, pseudoknots)).toFixed(1)}\n`)
             .append('Target exp acc : ', 'bold')
-            .append(`${(this._dataBlock.getParam(UndoBlockParam.TARGET_EXPECTED_ACCURACY, 37) as number)?.toFixed(3) ?? 'Unavailable'}`);
+            .append(`${(this._dataBlock.getParam(UndoBlockParam.TARGET_EXPECTED_ACCURACY, TEMPERATURE, pseudoknots) as number)?.toFixed(3) ?? 'Unavailable'}`);
 
         statString.apply(this._statText);
 

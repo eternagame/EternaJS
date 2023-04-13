@@ -538,13 +538,14 @@ export default class FeedbackViewMode extends GameMode {
         }
 
         const undoBlock = this._undoBlocks[this._curTargetIndex];
-        const numAU: number = undoBlock.getParam(UndoBlockParam.AU, 37) as number;
-        const numGU: number = undoBlock.getParam(UndoBlockParam.GU, 37) as number;
-        const numGC: number = undoBlock.getParam(UndoBlockParam.GC, 37) as number;
+        const pseudoknots = undoBlock.targetConditions?.type === 'pseudoknot';
+        const numAU: number = undoBlock.getParam(UndoBlockParam.AU, 37, pseudoknots) as number;
+        const numGU: number = undoBlock.getParam(UndoBlockParam.GU, 37, pseudoknots) as number;
+        const numGC: number = undoBlock.getParam(UndoBlockParam.GC, 37, pseudoknots) as number;
         this._toolbar.palette.setPairCounts(numAU, numGU, numGC);
 
         if (this._specBox) {
-            undoBlock.updateMeltingPointAndDotPlot();
+            undoBlock.updateMeltingPointAndDotPlot(pseudoknots);
             this._specBox?.setSpec(undoBlock);
         }
 

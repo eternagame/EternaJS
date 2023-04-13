@@ -32,7 +32,7 @@ export default class TargetExpectedAccuracyConstraint extends Constraint<TargetE
         // zero.
         // AMW: no
         if (undoBlock.getParam(UndoBlockParam.TARGET_EXPECTED_ACCURACY, 37, pseudoknots) === undefined) {
-            undoBlock.updateMeltingPointAndDotPlot(false);
+            undoBlock.updateMeltingPointAndDotPlot(pseudoknots);
         }
 
         // For some reason the null-coalescing operator ?? is not supported here.

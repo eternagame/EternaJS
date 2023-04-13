@@ -1243,7 +1243,9 @@ export default class PoseEditMode extends GameMode {
             if (indx < 0 || indx >= this._poses.length) {
                 return Number.NaN;
             }
-            return this.getCurrentUndoBlock(indx).getParam(UndoBlockParam.FE) as number;
+            const ublk = this.getCurrentUndoBlock(indx);
+            const pseudoknots = ublk.targetConditions?.type === 'pseudoknot';
+            return this.getCurrentUndoBlock(indx).getParam(UndoBlockParam.FE, 37, pseudoknots) as number;
         });
 
         this._scriptInterface.addCallback('check_constraints', (): boolean => this.checkConstraints());
@@ -2180,22 +2182,23 @@ export default class PoseEditMode extends GameMode {
 
         // / Generate dot and melting plot data
         const datablock: UndoBlock = this.getCurrentUndoBlock();
-        if (datablock.getParam(UndoBlockParam.DOTPLOT_BITMAP) == null) {
+        const pseudoknots = datablock.targetConditions?.type === 'pseudoknot';
+        if (datablock.getParam(UndoBlockParam.DOTPLOT_BITMAP, 37, pseudoknots) == null) {
             this.updateCurrentBlockWithDotAndMeltingPlot();
         }
 
-        const initScore: number = datablock.getParam(UndoBlockParam.PROB_SCORE, 37) as number;
+        const initScore: number = datablock.getParam(UndoBlockParam.PROB_SCORE, 37, pseudoknots) as number;
 
         let meltpoint = 107;
         for (let ii = 47; ii < 100; ii += 10) {
-            const currentScore: number = datablock.getParam(UndoBlockParam.PROB_SCORE, ii) as number;
+            const currentScore: number = datablock.getParam(UndoBlockParam.PROB_SCORE, ii, pseudoknots) as number;
             if (currentScore < initScore * 0.5) {
                 meltpoint = ii;
                 break;
             }
         }
 
-        datablock.setParam(UndoBlockParam.MELTING_POINT, meltpoint, 37);
+        datablock.setParam(UndoBlockParam.MELTING_POINT, meltpoint, 37, pseudoknots);
 
         const dialog = new SubmitPoseDialog(this._savedInputs);
         dialog.saveInputs.connect((e) => {
@@ -2257,21 +2260,23 @@ export default class PoseEditMode extends GameMode {
 
         const seqString: string = this._puzzle.transformSequence(undoBlock.sequence, 0).sequenceString();
 
+        const pseudoknots = undoBlock.targetConditions?.type === 'pseudoknot';
+
         postData['title'] = details.title;
-        postData['energy'] = undoBlock.getParam(UndoBlockParam.FE) as number / 100.0;
+        postData['energy'] = undoBlock.getParam(UndoBlockParam.FE, 37, pseudoknots) as number / 100.0;
         postData['puznid'] = this._puzzle.nodeID;
         postData['sequence'] = seqString;
-        postData['repetition'] = undoBlock.getParam(UndoBlockParam.REPETITION) as number;
-        postData['gu'] = undoBlock.getParam(UndoBlockParam.GU) as number;
-        postData['gc'] = undoBlock.getParam(UndoBlockParam.GC) as number;
-        postData['ua'] = undoBlock.getParam(UndoBlockParam.AU) as number;
+        postData['repetition'] = undoBlock.getParam(UndoBlockParam.REPETITION, 37, pseudoknots) as number;
+        postData['gu'] = undoBlock.getParam(UndoBlockParam.GU, 37, pseudoknots) as number;
+        postData['gc'] = undoBlock.getParam(UndoBlockParam.GC, 37, pseudoknots) as number;
+        postData['ua'] = undoBlock.getParam(UndoBlockParam.AU, 37, pseudoknots) as number;
         postData['body'] = details.comment;
         if (details.annotations) {
             postData['annotations'] = JSON.stringify(details.annotations);
         }
 
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
-            postData['melt'] = undoBlock.getParam(UndoBlockParam.MELTING_POINT) as number;
+            postData['melt'] = undoBlock.getParam(UndoBlockParam.MELTING_POINT, 37, pseudoknots) as number;
 
             const fd: FoldData[] = [];
             for (let ii = 0; ii < this._poses.length; ii++) {
