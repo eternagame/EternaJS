@@ -3,6 +3,7 @@ import {Signal} from 'signals';
 import {Text} from 'pixi.js';
 import Fonts from 'eterna/util/Fonts';
 import SecStruct from 'eterna/rnatypes/SecStruct';
+import EPars from 'eterna/EPars';
 import WindowDialog from './WindowDialog';
 import TextInputGrid from './TextInputGrid';
 import GameButton from './GameButton';
@@ -67,12 +68,12 @@ export default class PasteStructureDialog extends WindowDialog<void> {
 
         const startAt = startAtStr ? parseInt(startAtStr, 10) : 1;
 
-        const validStruct = /^[.()[\]{}<>]+$/.test(structure);
+        const validationError = EPars.validateParenthesis(structure, false);
         if (structure.length === 0) {
             this._errorText.text = 'Please enter a structure';
             this._errorText.visible = true;
-        } else if (!validStruct) {
-            this._errorText.text = 'You can only use the following characters: .()[]{}<>';
+        } else if (validationError) {
+            this._errorText.text = validationError;
             this._errorText.visible = true;
         } else if (Number.isNaN(startAt)) {
             this._errorText.text = 'Please enter a valid number for the starting base';
