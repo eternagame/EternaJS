@@ -397,7 +397,8 @@ export default class BaseAssets {
         const texSizeSm = 2 ** 3;
         const lockTexSm = getLockTexture(texSizeSm);
 
-        const tinyLock = new Graphics().beginFill(0x050505, 0.8).drawCircle(0, 0, 1.5);
+        const tinyLock = new Graphics().beginFill(0x050505, 0.8).drawCircle(0, 0, 6);
+        tinyLock.filters = [new BlurFilter(2, 4), new FXAAFilter()];
         const tinyLockTex = TextureUtil.renderToTexture(tinyLock);
 
         const maxSize = BaseTextures.BODY_SIZE - 6;
@@ -406,7 +407,7 @@ export default class BaseAssets {
             {texture: lockTexLg, scale: maxSize / texSizeLg},
             {texture: lockTexLg, scale: (maxSize / texSizeLg) * 0.75},
             {texture: lockTexSm, scale: (maxSize / texSizeSm) * 0.75 * 0.75},
-            {texture: tinyLockTex, scale: 1}
+            {texture: tinyLockTex, scale: 0.25}
         ];
     }
 
