@@ -350,8 +350,22 @@ export default class EPars {
             }
         }
 
+        // order 3 PKs
+        const pkStack3: number[] = [];
+        for (let jj = 0; jj < parenthesis.length; jj++) {
+            if (parenthesis.charAt(jj) === '<') {
+                pkStack3.push(jj);
+            } else if (parenthesis.charAt(jj) === '>') {
+                if (pkStack3.length === 0) {
+                    return 'Unbalanced parenthesis notation <>';
+                }
+
+                pkStack3.pop();
+            }
+        }
+
         for (let jj = 0; jj < parenthesis.length; ++jj) {
-            if (!'.()[]{}'.includes(parenthesis.charAt(jj))) {
+            if (!'.()[]{}<>'.includes(parenthesis.charAt(jj))) {
                 return `Unrecognized character ${parenthesis.charAt(jj)}`;
             }
         }
@@ -364,12 +378,26 @@ export default class EPars {
             return null;
         }
 
-        let index: number = parenthesis.indexOf('(.)');
+        let index = parenthesis.indexOf('()');
+        if (index === -1) index = parenthesis.indexOf('[]');
+        if (index === -1) index = parenthesis.indexOf('{}');
+        if (index === -1) index = parenthesis.indexOf('<>');
+        if (index >= 0) {
+            return `There is a length 0 hairpin loop which is impossible at base ${index + 2}`;
+        }
+
+        index = parenthesis.indexOf('(.)');
+        if (index === -1) index = parenthesis.indexOf('[.]');
+        if (index === -1) index = parenthesis.indexOf('{.}');
+        if (index === -1) index = parenthesis.indexOf('<.>');
         if (index >= 0) {
             return `There is a length 1 hairpin loop which is impossible at base ${index + 2}`;
         }
 
         index = parenthesis.indexOf('(..)');
+        if (index === -1) index = parenthesis.indexOf('[..]');
+        if (index === -1) index = parenthesis.indexOf('{..}');
+        if (index === -1) index = parenthesis.indexOf('<..>');
 
         if (index >= 0) {
             return `There is a length 2 hairpin loop which is impossible at base ${index + 2}`;

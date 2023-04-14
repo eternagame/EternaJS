@@ -77,6 +77,7 @@ import KeyedCollection from 'eterna/util/KeyedCollection';
 import {FederatedPointerEvent} from '@pixi/events';
 import NuPACK from 'eterna/folding/NuPACK';
 import PasteStructureDialog from 'eterna/ui/PasteStructureDialog';
+import ConfirmTargetDialog from 'eterna/ui/ConfirmTargetDialog';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -1773,6 +1774,12 @@ export default class PoseEditMode extends GameMode {
 
             this.poseEditByTarget(this._isPipMode ? poseIdx : 0);
         }));
+        this.regs?.add(pasteDialog.resetClicked.connect(() => {
+            const targetIndex = this._isPipMode ? poseIdx : this._curTargetIndex;
+            this._targetOligosOrder[targetIndex] = undefined;
+            this._targetPairs[targetIndex] = SecStruct.fromParens(this._puzzle.getSecstruct(targetIndex));
+            this.poseEditByTarget(this._isPipMode ? poseIdx : 0);
+        }));
     }
 
     private openDesignBrowserForOurPuzzle(): void {
@@ -2154,25 +2161,58 @@ export default class PoseEditMode extends GameMode {
                 libraryNT: this._poses[0].librarySelections ?? []
             }, solToSubmit);
         } else {
-            const NOT_SATISFIED_PROMPT = 'Puzzle constraints are not satisfied.\n\n'
-                + 'You can still submit the sequence, but please note that there is a risk of not getting '
-                + 'synthesized properly';
-
-            if (!this.checkConstraints()) {
-                // If we pass constraints when taking into account soft constraints, just prompt
-                if (this.checkConstraints(this._puzzle.isSoftConstraint || Eterna.DEV_MODE)) {
-                    this.showConfirmDialog(NOT_SATISFIED_PROMPT).closed
-                        .then((confirmed) => {
-                            if (confirmed) {
-                                this.promptForExperimentalPuzzleSubmission();
+            const pipeline = [
+                () => {
+                    if (!this.checkConstraints()) {
+                        // If we pass constraints when taking into account soft constraints, just prompt
+                        if (this.checkConstraints(this._puzzle.isSoftConstraint || Eterna.DEV_MODE)) {
+                            const NOT_SATISFIED_PROMPT = 'Puzzle constraints are not satisfied.\n\n'
+                            + 'You can still submit the sequence, but please note that there is a risk of the design '
+                            + 'not getting synthesized properly';
+                            this.showConfirmDialog(NOT_SATISFIED_PROMPT).closed
+                                .then((confirmed) => {
+                                    if (confirmed) {
+                                        const next = pipeline.shift();
+                                        if (next) next();
+                                    }
+                                });
+                        } else {
+                            this.showNotification("You didn't satisfy all requirements!");
+                        }
+                    } else {
+                        const next = pipeline.shift();
+                        if (next) next();
+                    }
+                },
+                () => {
+                    if (!this.checkValidCustomPairs()) {
+                        const dialog = this.showDialog(new ConfirmTargetDialog());
+                        dialog.closed.then((confirmed) => {
+                            if (confirmed === 'reset') {
+                                for (let i = 0; i < this._targetPairs.length; i++) {
+                                    this._targetOligosOrder[i] = undefined;
+                                    this._targetPairs[i] = SecStruct.fromParens(this._puzzle.getSecstruct(i));
+                                }
+                                this.poseEditByTarget(this._isPipMode ? this._curTargetIndex : 0);
+                                const next = pipeline.shift();
+                                if (next) next();
+                            } else if (confirmed === 'submit') {
+                                const next = pipeline.shift();
+                                if (next) next();
                             }
                         });
-                } else {
-                    this.showNotification("You didn't satisfy all requirements!");
+                    } else {
+                        const next = pipeline.shift();
+                        if (next) next();
+                    }
+                },
+                () => {
+                    this.promptForExperimentalPuzzleSubmission();
                 }
-            } else {
-                this.promptForExperimentalPuzzleSubmission();
-            }
+            ];
+
+            const next = pipeline.shift();
+            if (next) next();
         }
     }
 
@@ -2861,6 +2901,29 @@ export default class PoseEditMode extends GameMode {
             targetConditions: this._targetConditions,
             puzzle: this._puzzle
         }, soft);
+    }
+
+    private checkValidCustomPairs(): boolean {
+        for (const ublk of this.getCurrentUndoBlocks()) {
+            const constraints = ublk.targetAlignedStructureConstraints;
+            if (constraints) {
+                const targetSeq = EPars.constructFullSequence(
+                    ublk.sequence,
+                    ublk.targetOligo,
+                    ublk.targetOligos,
+                    ublk.targetOligoOrder,
+                    ublk.oligoMode
+                );
+                const targetStruct = ublk.targetPairs;
+                const satisfiedStruct = ublk.targetPairs.getSatisfiedPairs(targetSeq);
+                // We only want to check unconstrained bases that are in a pair in the target structure
+                const customConstraints = constraints.map(
+                    (constrained, idx) => !constrained && targetStruct.isPaired(idx)
+                );
+                if (!EPars.arePairsSame(targetStruct, satisfiedStruct, customConstraints)) return false;
+            }
+        }
+        return true;
     }
 
     private updateScore(): void {
@@ -3618,6 +3681,10 @@ export default class PoseEditMode extends GameMode {
         } else {
             return this._seqStacks[this._stackLevel][targetIndex];
         }
+    }
+
+    protected getCurrentUndoBlocks(): UndoBlock[] {
+        return this._seqStacks[this._stackLevel];
     }
 
     private setPosesWithUndoBlock(ii: number, undoBlock: UndoBlock): void {
