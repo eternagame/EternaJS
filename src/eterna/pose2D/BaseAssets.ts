@@ -340,7 +340,7 @@ export default class BaseAssets {
         /** Size of largest glow */
         const MAX_SIZE = BaseTextures.BODY_SIZE + 6;
 
-        const getGlowTex = (renderSize: number) => {
+        const getGlowTex = (renderSize: number, blurSize = [8, 16], alpha = 1.15) => {
             const ringWrapper = new Container();
             const ringBg = new Graphics()
                 .beginFill(0)
@@ -355,7 +355,7 @@ export default class BaseAssets {
                 .lineStyle({color, width: 4})
                 .drawCircle(0, 0, renderSize / 4)
                 .endFill();
-            ring.filters = [new BlurFilter(8, 16), new AdjustmentFilter({alpha: 1.15}), new FXAAFilter()];
+            ring.filters = [new BlurFilter(...blurSize), new AdjustmentFilter({alpha}), new FXAAFilter()];
             // Center the ring in the larger texture
             ring.x = renderSize / 2;
             ring.y = renderSize / 2;
@@ -366,13 +366,14 @@ export default class BaseAssets {
 
         const texLgSize = 2 ** 7;
         const texLg = getGlowTex(texLgSize);
+        const texSmSize = 2 ** 6;
+        const texSm = getGlowTex(texSmSize, [0.75, 4], 0.6);
 
         return [
             {texture: texLg, scale: (MAX_SIZE / texLgSize) * 2},
             {texture: texLg, scale: (MAX_SIZE / texLgSize) * 2 * 0.75},
             {texture: texLg, scale: (MAX_SIZE / texLgSize) * 2 * (0.75 ** 2)},
-            // The -1 here addresses some artifacting
-            {texture: texLg, scale: ((MAX_SIZE - 1) / texLgSize) * 2 * (0.75 ** 3)}
+            {texture: texSm, scale: (MAX_SIZE / texSmSize) * 2 * (0.75 ** 3)}
         ];
     }
 

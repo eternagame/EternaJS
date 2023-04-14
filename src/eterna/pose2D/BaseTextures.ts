@@ -56,7 +56,7 @@ export default class BaseTextures {
         /** Size of largest body texture */
         const MAX_SIZE = 40;
 
-        const getBodyTex = (texSize: number, antialias: 'none' | 'fxaa' | 'blur' | 'blur-fxaa') => {
+        const getBodyTex = (texSize: number, antialias: 'none' | 'fxaa' | 'blur' | 'blur-fxaa', blurSize = [1, 40]) => {
             Assert.assertIsDefined(Eterna.app.pixi);
             /** Render the graphic this much larger then scale down */
             const UPSCALE = texSize / MAX_SIZE;
@@ -104,7 +104,7 @@ export default class BaseTextures {
             // For some reason, global antialiasing is insufficient.
             // Maybe once smooth-graphics supports texture fills that will make this unnecessary?
             body.filters = [];
-            if (antialias === 'blur' || antialias === 'blur-fxaa') body.filters.push(new BlurFilter(1, 40));
+            if (antialias === 'blur' || antialias === 'blur-fxaa') body.filters.push(new BlurFilter(...blurSize));
             if (antialias === 'fxaa' || antialias === 'blur-fxaa') body.filters.push(new FXAAFilter());
             // Center the body in the whitespace
             body.x = (texSize / 2) - (BASE_SIZE / 2);
@@ -120,16 +120,17 @@ export default class BaseTextures {
         // For some reason, relying on global antialiasing at the smallest zoom levels creates
         // artifacting when downscaling all the way from 2^6, but 2^5 seems like the sweet spot.
         // Additionally, as we get smaller the fxaa and blur can create more artifacts than they solve
-        const texSmSize = 2 ** 4;
-        const texSmA = getBodyTex(texSmSize, 'none');
-        const texSmB = getBodyTex(texSmSize, 'none');
+        const texSmASize = 2 ** 6;
+        const texSmA = getBodyTex(texSmASize, 'blur-fxaa', [4, 60]);
+        const texSmBSize = 2 ** 4;
+        const texSmB = getBodyTex(texSmBSize, 'none');
 
         return [
             {texture: texLg, scale: MAX_SIZE / texLgSize},
             {texture: texLg, scale: (MAX_SIZE / texLgSize) * zoomScalar},
             {texture: texLg, scale: (MAX_SIZE / texLgSize) * (zoomScalar ** 2)},
-            {texture: texSmA, scale: (MAX_SIZE / texSmSize) * (zoomScalar ** 3)},
-            {texture: texSmB, scale: (MAX_SIZE / texSmSize) * (zoomScalar ** 4)}
+            {texture: texSmA, scale: (MAX_SIZE / texSmASize) * (zoomScalar ** 3)},
+            {texture: texSmB, scale: (MAX_SIZE / texSmBSize) * (zoomScalar ** 4)}
         ];
     }
 
