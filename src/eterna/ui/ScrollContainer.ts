@@ -74,9 +74,6 @@ export default class ScrollContainer extends ContainerObject {
         earlyHandlers.push(this._boundHME);
         earlyTouchHandlers.push(this._boundHTE);
         Assert.assertIsDefined(Flashbang.app.pixi);
-        // @ts-expect-error This is readonly, but we have to disable this to force Pixi
-        // to only use pointer events - see handleTouchEvent
-        if (Flashbang.pixi) Flashbang.pixi.renderer.events.supportsTouchEvents = false;
     }
 
     protected dispose(): void {
@@ -221,19 +218,44 @@ export default class ScrollContainer extends ContainerObject {
     }
 
     /**
-     * Similar to handlePossiblyMaskedEvent. However, touch events do not have a position, only a
-     * target element, so we can't filter it like we do there. Luckily touch events aren't
-     * *actually* required for PIXI to function properly (they really should be just used as
-     * fallbacks when PointerEvents aren't available, and we expect them to be available anyways),
-     * so we can just make sure these events never get to Pixi so that it doesn't erroneously
-     * handle these events
+     * Similar to handlePossiblyMaskedEvent.
      *
      * @param e Touch event to be handled
      */
     private handleTouchEvent(e: TouchEvent): void {
-        if (e.target === Flashbang.app.view) {
+        const {
+            x, y, width, height
+        } = this.getBounds();
+
+        const isMaskedElement = this._htmlWrapper.contains(e.target as HTMLDivElement);
+
+        if (
+            isMaskedElement
+            && (
+                e.touches[0].clientX < x
+                || e.touches[0].clientX > x + width
+                || e.touches[0].clientY < y
+                || e.touches[0].clientY > y + height
+            )
+        ) {
+            // This event was fired on a location outside our clip path, and because
+            // we register this callback for elements within our scroll panel, this must mean
+            // it should have been clipped.
             e.preventDefault();
             e.stopPropagation();
+
+            // Find the next element "under" this element that isn't in our scroll container,
+            // to re-fire the event on.
+            const candidateEls = document.elementsFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+            const newTarget = candidateEls.find((el) => !this._htmlWrapper.contains(el));
+            if (!newTarget) return;
+
+            newTarget.dispatchEvent(new TouchEvent(e.type, {
+                ...e,
+                touches: [...e.touches],
+                changedTouches: [...e.changedTouches],
+                targetTouches: [...e.targetTouches]
+            }));
         }
     }
 
