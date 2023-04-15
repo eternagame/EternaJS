@@ -218,12 +218,7 @@ export default class ScrollContainer extends ContainerObject {
     }
 
     /**
-     * Similar to handlePossiblyMaskedEvent. However, touch events do not have a position, only a
-     * target element, so we can't filter it like we do there. Luckily touch events aren't
-     * *actually* required for PIXI to function properly (they really should be just used as
-     * fallbacks when PointerEvents aren't available, and we expect them to be available anyways),
-     * so we can just make sure these events never get to Pixi so that it doesn't erroneously
-     * handle these events
+     * Similar to handlePossiblyMaskedEvent.
      *
      * @param e Touch event to be handled
      */
