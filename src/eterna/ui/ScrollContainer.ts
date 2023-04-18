@@ -229,13 +229,14 @@ export default class ScrollContainer extends ContainerObject {
 
         const isMaskedElement = this._htmlWrapper.contains(e.target as HTMLDivElement);
 
+        const touch = e.changedTouches[0];
         if (
             isMaskedElement
             && (
-                e.touches[0].clientX < x
-                || e.touches[0].clientX > x + width
-                || e.touches[0].clientY < y
-                || e.touches[0].clientY > y + height
+                touch.clientX < x
+                || touch.clientX > x + width
+                || touch.clientY < y
+                || touch.clientY > y + height
             )
         ) {
             // This event was fired on a location outside our clip path, and because
@@ -246,7 +247,7 @@ export default class ScrollContainer extends ContainerObject {
 
             // Find the next element "under" this element that isn't in our scroll container,
             // to re-fire the event on.
-            const candidateEls = document.elementsFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+            const candidateEls = document.elementsFromPoint(touch.clientX, touch.clientY);
             const newTarget = candidateEls.find((el) => !this._htmlWrapper.contains(el));
             if (!newTarget) return;
 
