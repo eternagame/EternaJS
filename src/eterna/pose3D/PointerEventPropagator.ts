@@ -50,7 +50,11 @@ export default class PointerEventPropagator extends GameObject {
 
     private handleEvent(e: FederatedPointerEvent | FederatedWheelEvent) {
         e.stopPropagation();
-        e.nativeEvent.stopImmediatePropagation();
+        // Apparently Pixi may actually provide a `Touch` as a nativeEvent, not a `TouchEvent`.
+        // See https://github.com/pixijs/pixijs/issues/9407
+        if ('stopImmediatePropagation' in e.nativeEvent) {
+            e.nativeEvent.stopImmediatePropagation();
+        }
 
         if (e instanceof FederatedWheelEvent) {
             this._domElement.dispatchEvent(new WheelEvent(e.type, e));
