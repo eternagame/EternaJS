@@ -4,6 +4,7 @@ import Feedback, {BrentTheoData} from 'eterna/Feedback';
 import Sequence from 'eterna/rnatypes/Sequence';
 import {BundledAnnotationData} from 'eterna/AnnotationManager';
 import {DesignCategory} from 'eterna/mode/DesignBrowser/DesignBrowserMode';
+import SecStruct from 'eterna/rnatypes/SecStruct';
 import Solution from './Solution';
 
 interface SolutionSpec {
@@ -42,6 +43,7 @@ interface ShapeData {
     threshold: string;
     max: string;
     min: string;
+    estimate_structure?: string;
 }
 
 interface DegradationData {
@@ -163,7 +165,10 @@ export default class SolutionManager {
                             Number(synthesis['threshold']),
                             Number(synthesis['max']),
                             Number(synthesis['min']),
-                            null
+                            null,
+                            synthesis['estimate_structure']
+                                ? SecStruct.fromParens(synthesis['estimate_structure'])
+                                : null
                         );
                     }
                     if (synthesis['reactive'] === 'Degradation') {
@@ -215,7 +220,7 @@ export default class SolutionManager {
             }
 
             if (Feedback.EXPSTRINGS.indexOf(obj['SHAPE']) >= 0) {
-                newfb.setShapeData(null, 'SHAPE', 0, null, null, null, obj['SHAPE']);
+                newfb.setShapeData(null, 'SHAPE', 0, null, null, null, obj['SHAPE'], null);
             } else {
                 const protoshapeArray = obj['SHAPE'].split(',');
                 const shapeArray: number[] = protoshapeArray.map(
@@ -234,7 +239,7 @@ export default class SolutionManager {
                     ? Number(obj['SHAPE-min'])
                     : null;
 
-                newfb.setShapeData(shapeArray, 'SHAPE', 0, threshold, max, min, null);
+                newfb.setShapeData(shapeArray, 'SHAPE', 0, threshold, max, min, null, null);
             }
         }
 

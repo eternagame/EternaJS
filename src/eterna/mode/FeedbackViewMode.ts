@@ -620,6 +620,12 @@ export default class FeedbackViewMode extends GameMode {
         // This won't work if _feedback is null
         if (this._feedback == null) return;
 
+        const precomputedStructure = this._feedback.getEstimateStructure(index);
+        if (this._feedback.getEstimateStructure(index)) {
+            this._shapePairs[index] = precomputedStructure;
+            return;
+        }
+
         const shapeThreshold: number = this._feedback.getShapeThreshold(index);
         const shapeData: number[] = this._feedback.getShapeData(index);
         const startIndex: number = this._feedback.getShapeStartIndex(index);
