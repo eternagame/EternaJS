@@ -1,3 +1,5 @@
+import SecStruct from './rnatypes/SecStruct';
+
 export interface BrentTheoData {
     type: string;
     score: number;
@@ -29,7 +31,8 @@ export default class Feedback {
 
     public setShapeData(
         dat: number[] | null, condition: string, index: number,
-        threshold: number | null, max: number | null, min: number | null, failed: string | null
+        threshold: number | null, max: number | null, min: number | null, failed: string | null,
+        estimateStructure: SecStruct | null
     ): void {
         if (dat != null) {
             if (this._shapeStarts.get(condition) === undefined) {
@@ -95,6 +98,16 @@ export default class Feedback {
             const faileds = this._faileds.get(condition);
             if (faileds !== undefined) {
                 faileds[index] = Feedback.EXPCODES[Feedback.EXPSTRINGS.indexOf(failed)];
+            }
+        }
+
+        if (estimateStructure) {
+            if (this._estimateStructures.get(condition) === undefined) {
+                this._estimateStructures.set(condition, []);
+            }
+            const estimateStructures = this._estimateStructures.get(condition);
+            if (estimateStructures !== undefined) {
+                estimateStructures[index] = estimateStructure;
             }
         }
     }
@@ -237,6 +250,10 @@ export default class Feedback {
         else return 0.0;
     }
 
+    public getEstimateStructure(index: number = 0, condition: string = 'SHAPE'): SecStruct | null {
+        return this._estimateStructures.get(condition)?.[index] ?? null;
+    }
+
     public getDegradationData(index: number = 0, condition: string): number[] {
         const degradationData = this._degradationData.get(condition);
         if (degradationData === undefined) {
@@ -305,6 +322,7 @@ export default class Feedback {
     private _shapeThresholds: Map<string, number[]> = new Map<string, number[]>();
     private _shapeMaxs: Map<string, number[]> = new Map<string, number[]>();
     private _shapeMins: Map<string, number[]> = new Map<string, number[]>();
+    private _estimateStructures: Map<string, SecStruct[]> = new Map<string, SecStruct[]>();
 
     private _degradationData: Map<string, number[][]> = new Map<string, number[][]>();
     private _degradationStarts: Map<string, number[]> = new Map<string, number[]>();
