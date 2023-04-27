@@ -1749,7 +1749,8 @@ export default class PoseEditMode extends GameMode {
             const startIdx = pasteResult.startAt - 1;
 
             for (let i = startIdx; i < pairs.length && i - startIdx < pasteResult.structure.length; i++) {
-                const targetPartner = pasteResult.structure.pairingPartner(i - startIdx) + startIdx;
+                const rawTargetPartner = pasteResult.structure.pairingPartner(i - startIdx);
+                const targetPartner = rawTargetPartner > -1 ? rawTargetPartner + startIdx : rawTargetPartner;
                 if (
                     targetPartner === -1
                     // This base is unconstrained
