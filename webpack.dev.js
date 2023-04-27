@@ -17,7 +17,7 @@ module.exports = merge(common, {
         hot: false,
         proxy: [
             {
-                context: ['/get', '/post', '/login', '/authenticate.php', '/eterna_logout.php'],
+                context: ['/get', '/post', '/login', '/authenticate.php', '/eterna_logout.php', '/sites'],
                 target: 'https://eternadev.org',
                 changeOrigin: true,
             }
