@@ -163,7 +163,6 @@ export default class FeedbackViewMode extends GameMode {
                 }
                 secstructs[ii] = secs;
             }
-            this._secstructs.push(SecStruct.fromParens(secstructs[ii]));
         }
 
         this._solutionView = new ViewSolutionOverlay({
@@ -203,11 +202,17 @@ export default class FeedbackViewMode extends GameMode {
             const poseField: PoseField = new PoseField(false, annotationManager);
             this.addObject(poseField, this.poseLayer);
 
-            const vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
-            if (!vienna) {
-                throw new Error("Critical error: can't create a Vienna folder instance by name");
+            if (this._targetConditions && this._targetConditions[0]
+                && this._targetConditions[0]['type'] === 'pseudoknot') {
+                this._secstructs.push(SecStruct.fromParens(secstructs[ii], true));
+                poseField.pose.pseudoknotted = true;
+            } else {
+                const vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
+                if (!vienna) {
+                    throw new Error("Critical error: can't create a Vienna folder instance by name");
+                }
+                this._secstructs.push(SecStruct.fromParens(secstructs[ii]));
             }
-            poseField.pose.scoreFolder = vienna;
             poseFields.push(poseField);
         }
         this.setPoseFields(poseFields);

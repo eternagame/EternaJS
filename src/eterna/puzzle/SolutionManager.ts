@@ -167,7 +167,7 @@ export default class SolutionManager {
                             Number(synthesis['min']),
                             null,
                             synthesis['estimate_structure']
-                                ? SecStruct.fromParens(synthesis['estimate_structure'])
+                                ? SecStruct.fromParens(synthesis['estimate_structure'], true)
                                 : null
                         );
                     }
