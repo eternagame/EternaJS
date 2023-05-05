@@ -46,7 +46,7 @@ abstract class MaximumPairConstraint extends Constraint<MaxPairConstraintStatus>
 
         const pseudoknots = (undoBlock.targetConditions !== undefined
             && undoBlock.targetConditions['type'] === 'pseudoknot');
-        const currentPairs: number = undoBlock.getParam(param, 37, pseudoknots) as number;
+        const currentPairs: number = undoBlock.getParam(param, EPars.DEFAULT_TEMPERATURE, pseudoknots) as number;
         return {
             satisfied: (
                 currentPairs <= this.maxPairs

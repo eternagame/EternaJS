@@ -5,6 +5,7 @@ import {
     Container, Texture, Sprite
 } from 'pixi.js';
 import Bitmaps from 'eterna/resources/Bitmaps';
+import EPars from 'eterna/EPars';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 
@@ -31,14 +32,20 @@ export default class TargetExpectedAccuracyConstraint extends Constraint<TargetE
         // undefined. Instead of forcing more folding, try saying it's
         // zero.
         // AMW: no
-        if (undoBlock.getParam(UndoBlockParam.TARGET_EXPECTED_ACCURACY, 37, pseudoknots) === undefined) {
+        if (
+            undoBlock.getParam(
+                UndoBlockParam.TARGET_EXPECTED_ACCURACY,
+                EPars.DEFAULT_TEMPERATURE,
+                pseudoknots
+            ) === undefined
+        ) {
             undoBlock.updateMeltingPointAndDotPlot(pseudoknots);
         }
 
         // For some reason the null-coalescing operator ?? is not supported here.
         const expectedAccuracy = undoBlock.getParam(
             UndoBlockParam.TARGET_EXPECTED_ACCURACY,
-            37,
+            EPars.DEFAULT_TEMPERATURE,
             pseudoknots
         ) as number | undefined || 0;
 

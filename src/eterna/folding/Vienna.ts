@@ -6,6 +6,7 @@ import DotPlot from 'eterna/rnatypes/DotPlot';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
+import EPars from 'eterna/EPars';
 import * as ViennaLib from './engines/ViennaLib';
 import {DotPlotResult, FullEvalResult, FullFoldResult} from './engines/ViennaLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
@@ -37,7 +38,7 @@ export default class Vienna extends Folder {
         return true;
     }
 
-    public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = 37): DotPlot {
+    public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = EPars.DEFAULT_TEMPERATURE): DotPlot {
         const key: CacheKey = {
             primitive: 'dotplot', seq: seq.baseArray, pairs: pairs.pairs, temp
         };
@@ -105,7 +106,7 @@ export default class Vienna extends Folder {
 
     public scoreStructures(
         seq: Sequence, pairs: SecStruct, pseudoknotted: boolean = false,
-        temp: number = 37, outNodes: number[] | null = null
+        temp: number = EPars.DEFAULT_TEMPERATURE, outNodes: number[] | null = null
     ): number {
         const key: CacheKey = {
             primitive: 'score', seq: seq.baseArray, pairs: pairs.pairs, temp
@@ -189,7 +190,7 @@ export default class Vienna extends Folder {
 
     public foldSequence(
         seq: Sequence, secondBestPairs: SecStruct | null, desiredPairs: string | null = null,
-        _pseudoknotted: boolean = false, temp: number = 37
+        _pseudoknotted: boolean = false, temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct {
         const key: CacheKey = {
             primitive: 'fold',
@@ -215,7 +216,7 @@ export default class Vienna extends Folder {
 
     public foldSequenceWithBindingSite(
         seq: Sequence, targetPairs: SecStruct | null, bindingSite: number[], bonus: number,
-        version: number = 1.0, temp: number = 37
+        version: number = 1.0, temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct {
         const key: CacheKey = {
             primitive: 'foldAptamer',
@@ -285,7 +286,7 @@ export default class Vienna extends Folder {
 
     public cofoldSequence(
         seq: Sequence, secondBestPairs: SecStruct | null, malus: number = 0,
-        desiredPairs: string | null = null, temp: number = 37
+        desiredPairs: string | null = null, temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct {
         const cut: number = seq.findCut();
         if (cut < 0) {
@@ -336,7 +337,7 @@ export default class Vienna extends Folder {
 
     public cofoldSequenceWithBindingSite(
         seq: Sequence, bindingSite: number[], bonus: number, desiredPairs: string | null = null,
-        malus: number = 0, temp: number = 37
+        malus: number = 0, temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct {
         const cut: number = seq.findCut();
         if (cut < 0) {
@@ -412,7 +413,9 @@ export default class Vienna extends Folder {
         return 0;
     }
 
-    private foldSequenceImpl(seq: Sequence, structStr: string | null = null, temp: number = 37): SecStruct {
+    private foldSequenceImpl(
+        seq: Sequence, structStr: string | null = null, temp: number = EPars.DEFAULT_TEMPERATURE
+    ): SecStruct {
         const seqStr = seq.sequenceString(false, false);
         let result: FullFoldResult | null = null;
 
@@ -434,7 +437,8 @@ export default class Vienna extends Folder {
     }
 
     private foldSequenceWithBindingSiteImpl(
-        seq: Sequence, i: number, p: number, j: number, q: number, bonus: number, _temp: number = 37
+        seq: Sequence, i: number, p: number, j: number, q: number, bonus: number,
+        _temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct {
         const seqStr = seq.sequenceString(false, false);
         const structStr = '';
@@ -457,7 +461,9 @@ export default class Vienna extends Folder {
         }
     }
 
-    private cofoldSequenceImpl(seq: Sequence, str: string | null = null, _temp: number = 37): SecStruct {
+    private cofoldSequenceImpl(
+        seq: Sequence, str: string | null = null, _temp: number = EPars.DEFAULT_TEMPERATURE
+    ): SecStruct {
         const seqStr = seq.sequenceString(true, false);
         const structStr: string = str || '';
         let result: FullFoldResult | null = null;
@@ -488,7 +494,7 @@ export default class Vienna extends Folder {
         j: number,
         q: number,
         bonus: number,
-        _temp: number = 37
+        _temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct {
         const seqStr = seq.sequenceString(true, false);
         const structStr: string = str || '';
@@ -513,7 +519,8 @@ export default class Vienna extends Folder {
     }
 
     private foldSequenceWithBindingSiteOld(
-        seq: Sequence, targetPairs: SecStruct, bindingSite: number[], bonus: number, _temp: number = 37
+        seq: Sequence, targetPairs: SecStruct, bindingSite: number[], bonus: number,
+        _temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct {
         let bestPairs: SecStruct;
         const nativePairs: SecStruct = this.foldSequence(seq, null, null);

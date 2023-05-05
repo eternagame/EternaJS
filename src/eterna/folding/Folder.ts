@@ -3,6 +3,7 @@ import {Oligo} from 'eterna/rnatypes/Oligo';
 import DotPlot from 'eterna/rnatypes/DotPlot';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
+import EPars from 'eterna/EPars';
 
 export type CacheItem = SecStruct | number[] | FullEvalCache | MultiFoldResult |
 SuboptEnsembleResult | number | undefined;
@@ -40,14 +41,14 @@ export default abstract class Folder {
 
     public scoreStructures(
         _seq: Sequence, _secstruct: SecStruct, _pseudoknotted: boolean = false,
-        _temp: number = 37, _outNodes: number[] | null = null
+        _temp: number = EPars.DEFAULT_TEMPERATURE, _outNodes: number[] | null = null
     ): number {
         return 0;
     }
 
     public foldSequence(
         _seq: Sequence, _secstruct: SecStruct | null, _desiredPairs: string | null = null,
-        _pseudoknotted: boolean = false, _temp: number = 37
+        _pseudoknotted: boolean = false, _temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct | null {
         return null;
     }
@@ -58,7 +59,7 @@ export default abstract class Folder {
 
     public foldSequenceWithBindingSite(
         _seq: Sequence, _secstruct: SecStruct | null, _bindingSite: number[], _bonus: number,
-        _version: number = 2.0, _temp: number = 37
+        _version: number = 2.0, _temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct | null {
         return null;
     }
@@ -69,7 +70,7 @@ export default abstract class Folder {
 
     public cofoldSequence(
         _seq: Sequence, _secstruct: SecStruct | null, _malus: number = 0,
-        _desiredPairs: string | null = null, _temp: number = 37
+        _desiredPairs: string | null = null, _temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct | null {
         return null;
     }
@@ -80,7 +81,7 @@ export default abstract class Folder {
 
     public cofoldSequenceWithBindingSite(
         _seq: Sequence, _bindingSite: number[], _bonus: number, _desiredPairs: string | null = null,
-        _malus: number = 0, _temp: number = 37
+        _malus: number = 0, _temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct | null {
         return null;
     }
@@ -94,7 +95,10 @@ export default abstract class Folder {
     }
 
     public getSuboptEnsembleNoBindingSite(
-        _seq: Sequence, _kcalDeltaRange: number, _pseudoknotted: boolean = false, _temp: number = 37
+        _seq: Sequence,
+        _kcalDeltaRange: number,
+        _pseudoknotted: boolean = false,
+        _temp: number = EPars.DEFAULT_TEMPERATURE
     ): SuboptEnsembleResult {
         return {
             suboptStructures: [],
@@ -104,13 +108,17 @@ export default abstract class Folder {
     }
 
     public getDefect(
-        _seq: Sequence, _pairs: SecStruct, _temp: number = 37, _pseudoknotted: boolean = false
+        _seq: Sequence, _pairs: SecStruct, _temp: number = EPars.DEFAULT_TEMPERATURE, _pseudoknotted: boolean = false
     ): number {
         return -1;
     }
 
     public getSuboptEnsembleWithOligos(
-        _seq: Sequence, _oligos: string[], _kcalDeltaRange: number, _pseudoknotted: boolean = false, _temp: number = 37
+        _seq: Sequence,
+        _oligos: string[],
+        _kcalDeltaRange: number,
+        _pseudoknotted: boolean = false,
+        _temp: number = EPars.DEFAULT_TEMPERATURE
     ): SuboptEnsembleResult {
         return {
 
@@ -121,7 +129,7 @@ export default abstract class Folder {
     }
 
     public getDotPlot(
-        _seq: Sequence, _secstruct: SecStruct, _temp: number = 37, _pseudoknots: boolean = false
+        _seq: Sequence, _secstruct: SecStruct, _temp: number = EPars.DEFAULT_TEMPERATURE, _pseudoknots: boolean = false
     ): DotPlot | null {
         return null;
     }
@@ -132,14 +140,14 @@ export default abstract class Folder {
 
     public multifold(
         _seq: Sequence, _secstruct: SecStruct | null, _oligos: Oligo[],
-        _desiredPairs: string | null = null, _temp: number = 37
+        _desiredPairs: string | null = null, _temp: number = EPars.DEFAULT_TEMPERATURE
     ): MultiFoldResult | undefined {
         return undefined;
     }
 
     public multifoldUnroll(
         _seq: Sequence, _secstruct: SecStruct | null, _oligos: Oligo[],
-        _desiredPairs: string | null = null, _temp: number = 37
+        _desiredPairs: string | null = null, _temp: number = EPars.DEFAULT_TEMPERATURE
     ): PoseOp[] | null {
         return null;
     }

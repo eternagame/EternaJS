@@ -1,5 +1,5 @@
 import * as log from 'loglevel';
-import {RNABase} from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import PoseOp from 'eterna/pose2D/PoseOp';
 import int from 'eterna/util/int';
@@ -50,7 +50,10 @@ export default class NuPACK extends Folder {
     }
 
     /* override */
-    public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = 37, _pseudoknots: boolean = false): DotPlot {
+    public getDotPlot(
+        seq: Sequence, pairs: SecStruct,
+        temp: number = EPars.DEFAULT_TEMPERATURE, _pseudoknots: boolean = false
+    ): DotPlot {
         // AMW TODO: actually NOT pk aware yet
         const key: CacheKey = {
             primitive: 'dotplot', seq: seq.baseArray, pairs: pairs.pairs, temp
@@ -90,8 +93,10 @@ export default class NuPACK extends Folder {
     }
 
     /* override */
-    public getSuboptEnsembleWithOligos(seq: Sequence, oligoStrings: string[], kcalDeltaRange: number,
-        pseudoknotted: boolean = false, temp: number = 37): SuboptEnsembleResult {
+    public getSuboptEnsembleWithOligos(
+        seq: Sequence, oligoStrings: string[], kcalDeltaRange: number,
+        pseudoknotted: boolean = false, temp: number = EPars.DEFAULT_TEMPERATURE
+    ): SuboptEnsembleResult {
         const key = {
             primitive: 'subopt',
             seq: seq.baseArray,
@@ -151,7 +156,10 @@ export default class NuPACK extends Folder {
     }
 
     /* override */
-    public getDefect(seq: Sequence, pairs: SecStruct, temp: number = 37, pseudoknotted: boolean = false): number {
+    public getDefect(
+        seq: Sequence, pairs: SecStruct,
+        temp: number = EPars.DEFAULT_TEMPERATURE, pseudoknotted: boolean = false
+    ): number {
         const key = {
             primitive: 'defect',
             seq: seq.baseArray,
@@ -178,8 +186,10 @@ export default class NuPACK extends Folder {
     }
 
     /* override */
-    public getSuboptEnsembleNoBindingSite(seq: Sequence, kcalDeltaRange: number,
-        pseudoknotted: boolean = false, temp: number = 37): SuboptEnsembleResult {
+    public getSuboptEnsembleNoBindingSite(
+        seq: Sequence, kcalDeltaRange: number,
+        pseudoknotted: boolean = false, temp: number = EPars.DEFAULT_TEMPERATURE
+    ): SuboptEnsembleResult {
         const key = {
             primitive: 'subopt',
             seq: seq.baseArray,
@@ -240,7 +250,7 @@ export default class NuPACK extends Folder {
     /* override */
     public scoreStructures(
         seq: Sequence, pairs: SecStruct,
-        pseudoknots: boolean = false, temp: number = 37, outNodes: number[] | null = null
+        pseudoknots: boolean = false, temp: number = EPars.DEFAULT_TEMPERATURE, outNodes: number[] | null = null
     ): number {
         // See https://github.com/eternagame/EternaJS/issues/654
         if (pseudoknots) return 0;
@@ -344,7 +354,7 @@ export default class NuPACK extends Folder {
     /* override */
     public foldSequence(
         seq: Sequence, secondBestPairs: SecStruct | null, desiredPairs: string | null = null,
-        pseudoknots: boolean = false, temp: number = 37
+        pseudoknots: boolean = false, temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct {
         const key = {
             primitive: 'fold',
@@ -372,7 +382,7 @@ export default class NuPACK extends Folder {
     /* override */
     public foldSequenceWithBindingSite(
         seq: Sequence, targetPairs: SecStruct | null, bindingSite: number[], bonus: number,
-        version: number = 1.0, temp: number = 37
+        version: number = 1.0, temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct {
         const key = {
             primitive: 'foldAptamer',
@@ -425,7 +435,7 @@ export default class NuPACK extends Folder {
     /* override */
     public cofoldSequence(
         seq: Sequence, secondBestPairs: SecStruct, malus: number = 0,
-        desiredPairs: string | null = null, temp: number = 37
+        desiredPairs: string | null = null, temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct {
         const cut: number = seq.findCut();
         if (cut < 0) {
@@ -478,7 +488,7 @@ export default class NuPACK extends Folder {
     /* override */
     public cofoldSequenceWithBindingSite(
         seq: Sequence, bindingSite: number[], bonus: number, desiredPairs: string | null = null,
-        malus: number = 0, temp: number = 37
+        malus: number = 0, temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct {
         const cut: number = seq.findCut();
         if (cut < 0) {
@@ -565,7 +575,7 @@ export default class NuPACK extends Folder {
         secondBestPairs: SecStruct,
         oligos: Oligo[],
         desiredPairs: string | null = null,
-        temp: number = 37
+        temp: number = EPars.DEFAULT_TEMPERATURE
     ): MultiFoldResult {
         const key: CacheKey = {
             primitive: 'multifold',
@@ -651,7 +661,7 @@ export default class NuPACK extends Folder {
         secondBestPairs: SecStruct,
         oligos: Oligo[],
         desiredPairs: string | null = null,
-        temp: number = 37
+        temp: number = EPars.DEFAULT_TEMPERATURE
     ): PoseOp[] {
         const ops: PoseOp[] = [];
 
@@ -695,7 +705,10 @@ export default class NuPACK extends Folder {
         return ops;
     }
 
-    private foldSequenceImpl(seq: Sequence, temp: number = 37, pseudoknots: boolean = false): SecStruct {
+    private foldSequenceImpl(
+        seq: Sequence,
+        temp: number = EPars.DEFAULT_TEMPERATURE, pseudoknots: boolean = false
+    ): SecStruct {
         const seqStr = seq.sequenceString(false, false);
 
         let result: FullFoldResult | null = null;
@@ -717,7 +730,8 @@ export default class NuPACK extends Folder {
     }
 
     private foldSequenceWithBindingSiteImpl(
-        seq: Sequence, i: number, p: number, j: number, q: number, bonus: number, _temp: number = 37
+        seq: Sequence, i: number, p: number, j: number, q: number, bonus: number,
+        _temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct {
         const seqStr = seq.sequenceString(false, false);
 
@@ -771,7 +785,7 @@ export default class NuPACK extends Folder {
         j: number,
         q: number,
         bonus: number,
-        _temp: number = 37
+        _temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct {
         const seqStr = seq.sequenceString(true, false);
 
@@ -795,7 +809,8 @@ export default class NuPACK extends Folder {
     }
 
     private cofoldSeq2(
-        seq: Sequence, secondBestPairs: SecStruct | null, desiredPairs: string | null = null, temp: number = 37
+        seq: Sequence, secondBestPairs: SecStruct | null, desiredPairs: string | null = null,
+        temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct {
         const key: CacheKey = {
             primitive: 'cofold2',

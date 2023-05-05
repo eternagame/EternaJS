@@ -328,7 +328,7 @@ export default class Puzzle {
                     concentration = 1.0;
                 }
                 this._targetConditions[ii]['malus'] = (
-                    -Constants.BOLTZMANN * (Constants.KELVIN_0C + 37) * Math.log(concentration)
+                    -Constants.BOLTZMANN * (Constants.KELVIN_0C + EPars.DEFAULT_TEMPERATURE) * Math.log(concentration)
                 );
 
                 const label = this._targetConditions[ii]['oligo_label'];
@@ -356,7 +356,9 @@ export default class Puzzle {
                     } else {
                         concentration = 1.0;
                     }
-                    oligos[jj]['malus'] = -Constants.BOLTZMANN * (Constants.KELVIN_0C + 37) * Math.log(concentration);
+                    oligos[jj]['malus'] = -Constants.BOLTZMANN * (
+                        Constants.KELVIN_0C + EPars.DEFAULT_TEMPERATURE
+                    ) * Math.log(concentration);
                     const label = oligos[jj]['label'];
                     if (label) {
                         // To support parsing logic in AnnotationDialog

@@ -119,7 +119,7 @@ export default class SpecBoxDialog extends WindowDialog<void> {
     }
 
     private build() {
-        const TEMPERATURE = 37;
+        const TEMPERATURE = EPars.DEFAULT_TEMPERATURE;
 
         const statString = new StyledTextBuilder({
             fontFamily: Fonts.STDFONT,

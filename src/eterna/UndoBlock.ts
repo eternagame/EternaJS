@@ -1,5 +1,5 @@
 import {Assert} from 'flashbang';
-import {RNABase} from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 import Plot, {PlotType} from 'eterna/Plot';
 import {BundledAnnotationData} from 'eterna/AnnotationManager';
 import Folder from './folding/Folder';
@@ -453,7 +453,7 @@ export default class UndoBlock {
         this._stable = stable;
     }
 
-    public getPairs(temp: number = 37, pseudoknots: boolean = false): SecStruct {
+    public getPairs(temp: number = EPars.DEFAULT_TEMPERATURE, pseudoknots: boolean = false): SecStruct {
         const pairsArray = this._pairsArray.get(pseudoknots);
         Assert.assertIsDefined(pairsArray);
         return new SecStruct(pairsArray[temp]?.pairs);
@@ -461,7 +461,7 @@ export default class UndoBlock {
 
     public getParam(
         index: UndoBlockParam,
-        temp: number = 37,
+        temp: number = EPars.DEFAULT_TEMPERATURE,
         pseudoknots: boolean = false
     ): number | number[] | DotPlot | null {
         const paramsArray = this._paramsArray.get(pseudoknots);
@@ -473,7 +473,7 @@ export default class UndoBlock {
         }
     }
 
-    public setPairs(pairs: SecStruct, temp: number = 37, pseudoknots: boolean = false): void {
+    public setPairs(pairs: SecStruct, temp: number = EPars.DEFAULT_TEMPERATURE, pseudoknots: boolean = false): void {
         const pairsArray = this._pairsArray.get(pseudoknots);
         Assert.assertIsDefined(pairsArray);
         pairsArray[temp] = pairs.slice(0);
@@ -482,7 +482,7 @@ export default class UndoBlock {
     public setParam(
         index: UndoBlockParam,
         val: Param,
-        temp: number = 37,
+        temp: number = EPars.DEFAULT_TEMPERATURE,
         pseudoknots: boolean = false
     ): void {
         const paramsArray = this._paramsArray.get(pseudoknots);
@@ -493,7 +493,7 @@ export default class UndoBlock {
         paramsArray[temp][index] = val;
     }
 
-    public setBasics(temp: number = 37, pseudoknots: boolean = false): void {
+    public setBasics(temp: number = EPars.DEFAULT_TEMPERATURE, pseudoknots: boolean = false): void {
         const folder: Folder | null = FolderManager.instance.getFolder(this._folderName);
         if (!folder) {
             throw new Error(`Critical error: can't create a ${this._folderName} folder instance by name`);
@@ -630,24 +630,27 @@ export default class UndoBlock {
             throw new Error(`Critical error: can't create a ${this._folderName} folder instance by name`);
         }
 
-        const currDotPlot = this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots);
+        const currDotPlot = this.getParam(UndoBlockParam.DOTPLOT, EPars.DEFAULT_TEMPERATURE, pseudoknots);
         if (currDotPlot === undefined) {
             const dotArray: DotPlot | null = folder.getDotPlot(
-                this.sequence, this.getPairs(37), 37, pseudoknots
+                this.sequence, this.getPairs(EPars.DEFAULT_TEMPERATURE), EPars.DEFAULT_TEMPERATURE, pseudoknots
             );
-            this.setParam(UndoBlockParam.DOTPLOT, dotArray?.data ?? null, 37, pseudoknots);
+            this.setParam(UndoBlockParam.DOTPLOT, dotArray?.data ?? null, EPars.DEFAULT_TEMPERATURE, pseudoknots);
             // mean+sum prob unpaired
             this.setParam(UndoBlockParam.SUMPUNP,
-                this.sumProbUnpaired(dotArray, bppStatisticBehavior), 37, pseudoknots);
-            this.setParam(UndoBlockParam.MEANPUNP,
-                this.sumProbUnpaired(dotArray, bppStatisticBehavior) / this.sequence.length, 37, pseudoknots);
+                this.sumProbUnpaired(dotArray, bppStatisticBehavior), EPars.DEFAULT_TEMPERATURE, pseudoknots);
+            this.setParam(
+                UndoBlockParam.MEANPUNP,
+                this.sumProbUnpaired(dotArray, bppStatisticBehavior) / this.sequence.length,
+                EPars.DEFAULT_TEMPERATURE, pseudoknots
+            );
             // branchiness
             this.setParam(UndoBlockParam.BRANCHINESS,
-                this.ensembleBranchiness(dotArray, bppStatisticBehavior), 37, pseudoknots);
+                this.ensembleBranchiness(dotArray, bppStatisticBehavior), EPars.DEFAULT_TEMPERATURE, pseudoknots);
             this.setParam(
                 UndoBlockParam.TARGET_EXPECTED_ACCURACY,
                 this.targetExpectedAccuracy(this._targetPairs, dotArray, bppStatisticBehavior),
-                37,
+                EPars.DEFAULT_TEMPERATURE,
                 pseudoknots
             );
             this._dotPlotData = dotArray;
@@ -655,7 +658,7 @@ export default class UndoBlock {
             this._dotPlotData = new DotPlot(currDotPlot);
         }
 
-        for (let ii = 37; ii < 100; ii += 10) {
+        for (let ii = EPars.DEFAULT_TEMPERATURE; ii < 100; ii += 10) {
             if (this.getPairs(ii, pseudoknots).length === 0) {
                 const pairs: SecStruct | null = folder.foldSequence(this.sequence, null, null, pseudoknots, ii);
                 Assert.assertIsDefined(pairs);
@@ -684,11 +687,11 @@ export default class UndoBlock {
             }
         }
 
-        const refPairs: SecStruct = this.getPairs(37, pseudoknots);
+        const refPairs: SecStruct = this.getPairs(EPars.DEFAULT_TEMPERATURE, pseudoknots);
         const pairScores: number[] = [];
         const maxPairScores: number[] = [];
 
-        for (let ii = 37; ii < 100; ii += 10) {
+        for (let ii = EPars.DEFAULT_TEMPERATURE; ii < 100; ii += 10) {
             if (this.getParam(UndoBlockParam.PROB_SCORE, ii, pseudoknots)) {
                 pairScores.push(1 - (this.getParam(UndoBlockParam.PAIR_SCORE, ii, pseudoknots) as number));
                 maxPairScores.push(1.0);
@@ -738,7 +741,9 @@ export default class UndoBlock {
         this._meltPlotPairScores = pairScores;
         this._meltPlotMaxPairScores = maxPairScores;
 
-        const initScore: number = this.getParam(UndoBlockParam.PROB_SCORE, 37, pseudoknots) as number;
+        const initScore: number = this.getParam(
+            UndoBlockParam.PROB_SCORE, EPars.DEFAULT_TEMPERATURE, pseudoknots
+        ) as number;
 
         let meltpoint = 107;
         for (let ii = 47; ii < 100; ii += 10) {
@@ -749,7 +754,7 @@ export default class UndoBlock {
             }
         }
 
-        this.setParam(UndoBlockParam.MELTING_POINT, meltpoint, 37, pseudoknots);
+        this.setParam(UndoBlockParam.MELTING_POINT, meltpoint, EPars.DEFAULT_TEMPERATURE, pseudoknots);
     }
 
     public createDotPlot(): Plot {
@@ -849,7 +854,7 @@ export default class UndoBlock {
      */
     public get targetAlignedNaturalPairs() {
         const pseudoknots = (this.targetConditions !== undefined && this.targetConditions['type'] === 'pseudoknot');
-        const naturalPairs = this.getPairs(37, pseudoknots);
+        const naturalPairs = this.getPairs(EPars.DEFAULT_TEMPERATURE, pseudoknots);
 
         // targetAlignedIndex => rawIndex
         const targetMap = this.reorderedOligosIndexMap(this.targetOligoOrder);

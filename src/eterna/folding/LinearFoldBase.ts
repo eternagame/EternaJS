@@ -5,6 +5,7 @@ import DotPlot from 'eterna/rnatypes/DotPlot';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
+import EPars from 'eterna/EPars';
 import * as LinearFoldLib from './engines/LinearFoldLib';
 import {DotPlotResult, FullFoldResult} from './engines/LinearFoldLib';
 import {FullEvalResult} from './engines/ViennaLib';
@@ -22,7 +23,7 @@ export default abstract class LinearFoldBase extends Folder {
         return true;
     }
 
-    public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = 37): DotPlot {
+    public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = EPars.DEFAULT_TEMPERATURE): DotPlot {
         const key: CacheKey = {
             primitive: 'dotplot', seq: seq.baseArray, pairs: pairs.pairs, temp
         };
@@ -64,7 +65,7 @@ export default abstract class LinearFoldBase extends Folder {
 
     public scoreStructures(
         seq: Sequence, pairs: SecStruct, pseudoknotted: boolean = false,
-        temp: number = 37, outNodes: number[] | null = null
+        temp: number = EPars.DEFAULT_TEMPERATURE, outNodes: number[] | null = null
     ): number {
         const key: CacheKey = {
             primitive: 'score', seq: seq.baseArray, pairs: pairs.pairs, temp
@@ -149,7 +150,7 @@ export default abstract class LinearFoldBase extends Folder {
 
     public foldSequence(
         seq: Sequence, secondBestPairs: SecStruct | null, desiredPairs: string | null = null,
-        _pseudoknotted: boolean = false, temp: number = 37
+        _pseudoknotted: boolean = false, temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct {
         const key: CacheKey = {
             primitive: 'fold',
@@ -195,7 +196,7 @@ export default abstract class LinearFoldBase extends Folder {
 
     public foldSequenceWithBindingSite(
         seq: Sequence, _targetPairs: SecStruct, _bindingSite: number[], _bonus: number,
-        _version: number = 1.0, _temp: number = 37
+        _version: number = 1.0, _temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct {
         log.warn('LinearFold.foldSequenceWithBindingSite: unimplemented');
         return this.foldSequence(seq, null);
@@ -207,7 +208,7 @@ export default abstract class LinearFoldBase extends Folder {
 
     public cofoldSequence(
         seq: Sequence, _secondBestPairs: SecStruct | null, _malus: number = 0,
-        _desiredPairs: string | null = null, _temp: number = 37
+        _desiredPairs: string | null = null, _temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct {
         log.warn('LinearFold.cofoldSequence: unimplemented');
         return this.foldSequence(seq, null);
@@ -219,7 +220,7 @@ export default abstract class LinearFoldBase extends Folder {
 
     public cofoldSequenceWithBindingSite(
         seq: Sequence, _bindingSite: number[], _bonus: number, _desiredPairs: string | null = null,
-        _malus: number = 0, _temp: number = 37
+        _malus: number = 0, _temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct {
         log.warn('LinearFold.cofoldSequenceWithBindingSite: unimplemented');
         return this.foldSequence(seq, null);

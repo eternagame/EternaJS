@@ -1,5 +1,6 @@
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
+import EPars from 'eterna/EPars';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 
@@ -18,7 +19,7 @@ export default class PseudoknotConstraint extends Constraint<BaseConstraintStatu
         }
 
         return {
-            satisfied: undoBlock.getPairs(37, true).onlyPseudoknots().numPairs() > 0
+            satisfied: undoBlock.getPairs(EPars.DEFAULT_TEMPERATURE, true).onlyPseudoknots().numPairs() > 0
         };
     }
 

@@ -6,6 +6,7 @@ import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {TextureUtil} from 'flashbang';
 import Band from 'eterna/ui/Band';
+import EPars from 'eterna/EPars';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 
@@ -28,7 +29,7 @@ export default class MinimumStackLengthConstraint extends Constraint<MinStackCon
         const pseudoknots = (undoBlock.targetConditions !== undefined
             && undoBlock.targetConditions['type'] === 'pseudoknot');
 
-        const stackLen = undoBlock.getParam(UndoBlockParam.STACK, 37, pseudoknots) as number;
+        const stackLen = undoBlock.getParam(UndoBlockParam.STACK, EPars.DEFAULT_TEMPERATURE, pseudoknots) as number;
         return {
             satisfied: stackLen >= this.minLength,
             currentLength: stackLen
