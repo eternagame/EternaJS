@@ -1036,10 +1036,14 @@ export default class PuzzleEditMode extends GameMode {
     private updateScore(): void {
         this.saveData();
 
+        const pseudoknots = this._structureInputs.some(
+            (input) => SecStruct.fromParens(input.structureString, true).onlyPseudoknots().nonempty()
+        );
+
         for (let ii = 0; ii < this._poses.length; ii++) {
             const undoblock: UndoBlock = this.getCurrentUndoBlock(ii);
             const targetPairs = this.getCurrentTargetPairs(ii);
-            const bestPairs = undoblock.getPairs(EPars.DEFAULT_TEMPERATURE);
+            const bestPairs = undoblock.getPairs(EPars.DEFAULT_TEMPERATURE, pseudoknots);
             const {sequence} = this._poses[ii];
             if (sequence.length !== targetPairs.length) {
                 throw new Error("sequence and design pairs lengths don't match");

@@ -633,7 +633,8 @@ export default class UndoBlock {
         const currDotPlot = this.getParam(UndoBlockParam.DOTPLOT, EPars.DEFAULT_TEMPERATURE, pseudoknots);
         if (currDotPlot === undefined) {
             const dotArray: DotPlot | null = folder.getDotPlot(
-                this.sequence, this.getPairs(EPars.DEFAULT_TEMPERATURE), EPars.DEFAULT_TEMPERATURE, pseudoknots
+                this.sequence, this.getPairs(EPars.DEFAULT_TEMPERATURE, pseudoknots),
+                EPars.DEFAULT_TEMPERATURE, pseudoknots
             );
             this.setParam(UndoBlockParam.DOTPLOT, dotArray?.data ?? null, EPars.DEFAULT_TEMPERATURE, pseudoknots);
             // mean+sum prob unpaired
