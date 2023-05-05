@@ -1224,6 +1224,13 @@ export default class PoseEditMode extends GameMode {
             return JSON.parse(JSON.stringify(conditions));
         });
 
+        this._scriptInterface.addCallback('get_target_structure', (index: number): string | null => {
+            if (index < 0 || index >= this._targetPairs.length) return null;
+            const pseudoknots = this._targetConditions && this._targetConditions[0]
+                && this._targetConditions[0]['type'] === 'pseudoknot';
+            return this._targetPairs[index].getParenthesis(null, pseudoknots);
+        });
+
         this._scriptInterface.addCallback('get_native_structure', (indx: number): string | null => {
             if (indx < 0 || indx >= this._poses.length) return null;
             const pseudoknots = this._targetConditions && this._targetConditions[0]
