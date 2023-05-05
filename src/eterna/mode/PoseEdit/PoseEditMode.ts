@@ -1286,8 +1286,9 @@ export default class PoseEditMode extends GameMode {
                 this._puzzle.getBarcodeHairpin(Sequence.fromSequenceString(seq)).sequenceString()
             ));
 
-        this._scriptInterface.addCallback('current_folder',
-            (): string | null => (this._folder ? this._folder.name : null));
+        this._scriptInterface.addCallback('current_folder', (): string | null => (
+            this._folder ? this._folder.name : null
+        ));
 
         this._scriptInterface.addCallback('fold',
             (seq: string, constraint: string | null = null): string | null => {
@@ -1435,6 +1436,22 @@ export default class PoseEditMode extends GameMode {
                 //     this.on_change_folder();
                 // }
                 // return res;
+            });
+
+            this._scriptInterface.addCallback('submit_solution', async (
+                details: {title?: string, description?: string},
+                notifyOnError: boolean = true
+            ) => {
+                this.prepareForExperimentalPuzzleSubmission();
+                await this.doExperimentalPuzzleSubmission(
+                    {
+                        title: details.title,
+                        comment: details.description,
+                        annotations: [],
+                        libraryNT: []
+                    },
+                    {throw: true, notify: notifyOnError}
+                );
             });
         }
 
@@ -2235,7 +2252,7 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    private promptForExperimentalPuzzleSubmission(): void {
+    private prepareForExperimentalPuzzleSubmission(): void {
         // / Generate dot and melting plot data
         this.updateCurrentBlockWithDotAndMeltingPlot();
 
@@ -2260,6 +2277,23 @@ export default class PoseEditMode extends GameMode {
         }
 
         datablock.setParam(UndoBlockParam.MELTING_POINT, meltpoint, EPars.DEFAULT_TEMPERATURE, pseudoknots);
+    }
+
+    private async doExperimentalPuzzleSubmission(
+        submitDetails: SubmitPoseDetails,
+        errorHandling?: {notify: boolean, throw: boolean}
+    ) {
+        // / Always submit the sequence in the first state
+        this.updateCurrentBlockWithDotAndMeltingPlot(0);
+        const solToSubmit: UndoBlock = this.getCurrentUndoBlock(0);
+        submitDetails.annotations = this._annotationManager.categoryAnnotationData(
+            AnnotationCategory.SOLUTION
+        );
+        await this.submitSolution(submitDetails, solToSubmit, errorHandling);
+    }
+
+    private promptForExperimentalPuzzleSubmission(): void {
+        this.prepareForExperimentalPuzzleSubmission();
 
         const dialog = new SubmitPoseDialog(this._savedInputs);
         dialog.saveInputs.connect((e) => {
@@ -2267,15 +2301,7 @@ export default class PoseEditMode extends GameMode {
         });
 
         this.showDialog(dialog).closed.then((submitDetails) => {
-            if (submitDetails != null) {
-                // / Always submit the sequence in the first state
-                this.updateCurrentBlockWithDotAndMeltingPlot(0);
-                const solToSubmit: UndoBlock = this.getCurrentUndoBlock(0);
-                submitDetails.annotations = this._annotationManager.categoryAnnotationData(
-                    AnnotationCategory.SOLUTION
-                );
-                this.submitSolution(submitDetails, solToSubmit);
-            }
+            if (submitDetails != null) this.doExperimentalPuzzleSubmission(submitDetails);
         });
     }
 
@@ -2358,7 +2384,11 @@ export default class PoseEditMode extends GameMode {
         return postData;
     }
 
-    private async submitSolution(details: SubmitPoseDetails, undoBlock: UndoBlock): Promise<void> {
+    private async submitSolution(
+        details: SubmitPoseDetails,
+        undoBlock: UndoBlock,
+        errorHandling: {notify: boolean, throw: boolean} = {notify: true, throw: false}
+    ): Promise<void> {
         if (this._puzzle.nodeID < 0) {
             return;
         }
@@ -2449,15 +2479,20 @@ export default class PoseEditMode extends GameMode {
 
         if (data['error'] !== undefined) {
             log.debug(`Got solution submission error: ${data['error']}`);
-            if (data['error'].indexOf('barcode') >= 0) {
-                const dialog = this.showNotification(data['error'].replace(/ +/, ' '), 'More Information');
-                dialog.extraButton.clicked.connect(() => window.open(EternaURL.BARCODE_HELP, '_blank'));
-                const hairpin = this._puzzle.getBarcodeHairpin(seq);
-                SolutionManager.instance.addHairpins([hairpin.sequenceString()]);
-                this.checkConstraints();
-            } else {
-                this.showNotification(data['error']);
+            if (errorHandling.notify) {
+                let dialog;
+                if (data['error'].indexOf('barcode') >= 0) {
+                    dialog = this.showNotification(data['error'].replace(/ +/, ' '), 'More Information');
+                    dialog.extraButton.clicked.connect(() => window.open(EternaURL.BARCODE_HELP, '_blank'));
+                    const hairpin = this._puzzle.getBarcodeHairpin(seq);
+                    SolutionManager.instance.addHairpins([hairpin.sequenceString()]);
+                    this.checkConstraints();
+                } else {
+                    dialog = this.showNotification(data['error']);
+                }
+                await dialog.closed;
             }
+            if (errorHandling.throw) throw new Error(data['error']);
         } else {
             log.debug('Solution submitted');
 
