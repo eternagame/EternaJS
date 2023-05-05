@@ -2521,18 +2521,27 @@ export default class PoseEditMode extends GameMode {
 
         if (data['error'] !== undefined) {
             log.debug(`Got solution submission error: ${data['error']}`);
+            // TODO: This is an awfully brittle way of checking for this error, since this means
+            // we cannot have another error message containing "barcode"...
+            const errorIsBarcodeInUse = data['error'].indexOf('barcode') >= 0;
+
+            if (errorIsBarcodeInUse) {
+                // In case this is due to our record of used hairpins being out of date (vs
+                // the user submitting even though they knew the barcode was already in use),
+                // record the fact this hairpin is in use, and update the constraints to reflect that
+                const hairpin = this._puzzle.getBarcodeHairpin(seq);
+                SolutionManager.instance.addHairpins([hairpin.sequenceString()]);
+                this.checkConstraints();
+            }
+
             if (errorHandling.notify) {
-                let dialog;
-                if (data['error'].indexOf('barcode') >= 0) {
-                    dialog = this.showNotification(data['error'].replace(/ +/, ' '), 'More Information');
+                if (errorIsBarcodeInUse) {
+                    const dialog = this.showNotification(data['error'].replace(/ +/, ' '), 'More Information');
                     dialog.extraButton.clicked.connect(() => window.open(EternaURL.BARCODE_HELP, '_blank'));
-                    const hairpin = this._puzzle.getBarcodeHairpin(seq);
-                    SolutionManager.instance.addHairpins([hairpin.sequenceString()]);
-                    this.checkConstraints();
+                    await dialog.closed;
                 } else {
-                    dialog = this.showNotification(data['error']);
+                    await this.showNotification(data['error']).closed;
                 }
-                await dialog.closed;
             }
             if (errorHandling.throw) throw new Error(data['error']);
         } else {
