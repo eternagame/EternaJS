@@ -237,7 +237,7 @@ export default abstract class GameMode extends AppMode {
                         targetPairs,
                         "This poses's targetPairs are undefined; energy delta cannot be computed!"
                     );
-                    const nativePairs: SecStruct = ublk.getPairs(37, pseudoknots);
+                    const nativePairs: SecStruct = ublk.getPairs(EPars.DEFAULT_TEMPERATURE, pseudoknots);
                     const targetSeq = EPars.constructFullSequence(
                         newField.pose.sequence,
                         ublk.targetOligo,

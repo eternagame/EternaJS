@@ -5,6 +5,7 @@ import Assert from 'flashbang/util/Assert';
 import DotPlot from 'eterna/rnatypes/DotPlot';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
+import EPars from 'eterna/EPars';
 import * as ContrafoldLib from './engines/ContrafoldLib';
 import {DotPlotResult, FullEvalResult, FullFoldResult} from './engines/ContrafoldLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
@@ -53,7 +54,7 @@ export default class ContraFold extends Folder {
         seq: Sequence,
         pairs: SecStruct,
         pseudoknotted: boolean = false,
-        temp: number = 37,
+        temp: number = EPars.DEFAULT_TEMPERATURE,
         outNodes: number[] | null = null
     ): number {
         const key: CacheKey = {
@@ -138,7 +139,7 @@ export default class ContraFold extends Folder {
         secondBestPairs: SecStruct | null,
         desiredPairs: string | null = null,
         _pseudoknotted: boolean = false,
-        temp: number = 37,
+        temp: number = EPars.DEFAULT_TEMPERATURE,
         gamma: number = 6.0
     ): SecStruct {
         const key: CacheKey = {
@@ -163,7 +164,7 @@ export default class ContraFold extends Folder {
     private foldSequenceImpl(
         seq: Sequence,
         _structStr: string | null = null,
-        _temp: number = 37,
+        _temp: number = EPars.DEFAULT_TEMPERATURE,
         gamma: number = 0.7
     ): SecStruct {
         const seqStr = seq.sequenceString(false, false);
@@ -185,7 +186,7 @@ export default class ContraFold extends Folder {
     }
 
     /* override */
-    public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = 37): DotPlot {
+    public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = EPars.DEFAULT_TEMPERATURE): DotPlot {
         const key: CacheKey = {
             primitive: 'dotplot', seq: seq.baseArray, pairs: pairs.pairs, temp
         };

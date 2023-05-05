@@ -1246,7 +1246,9 @@ export default class PoseEditMode extends GameMode {
             }
             const ublk = this.getCurrentUndoBlock(indx);
             const pseudoknots = ublk.targetConditions?.type === 'pseudoknot';
-            return this.getCurrentUndoBlock(indx).getParam(UndoBlockParam.FE, 37, pseudoknots) as number;
+            return this.getCurrentUndoBlock(indx).getParam(
+                UndoBlockParam.FE, EPars.DEFAULT_TEMPERATURE, pseudoknots
+            ) as number;
         });
 
         this._scriptInterface.addCallback('check_constraints', (): boolean => this.checkConstraints());
@@ -1342,8 +1344,10 @@ export default class PoseEditMode extends GameMode {
             });
 
         this._scriptInterface.addCallback('subopt_single_sequence',
-            (seq: string, kcalDelta: number,
-                pseudoknotted: boolean, temp: number = 37): SuboptEnsembleResult | null => {
+            (
+                seq: string, kcalDelta: number,
+                pseudoknotted: boolean, temp: number = EPars.DEFAULT_TEMPERATURE
+            ): SuboptEnsembleResult | null => {
                 if (this._folder === null) {
                     return null;
                 }
@@ -1354,8 +1358,10 @@ export default class PoseEditMode extends GameMode {
             });
 
         this._scriptInterface.addCallback('subopt_oligos',
-            (seq: string, oligoStrings: string[], kcalDelta: number,
-                pseudoknotted: boolean, temp: number = 37): SuboptEnsembleResult | null => {
+            (
+                seq: string, oligoStrings: string[], kcalDelta: number,
+                pseudoknotted: boolean, temp: number = EPars.DEFAULT_TEMPERATURE
+            ): SuboptEnsembleResult | null => {
                 if (this._folder === null) {
                     return null;
                 }
@@ -1373,7 +1379,9 @@ export default class PoseEditMode extends GameMode {
             });
 
         this._scriptInterface.addCallback('cofold',
-            (seq: string, oligo: string, malus: number = 0.0, constraint: string | null = null): string | null => {
+            (
+                seq: string, oligo: string, malus: number = 0.0, constraint: string | null = null
+            ): string | null => {
                 if (this._folder === null) {
                     return null;
                 }
@@ -1391,7 +1399,9 @@ export default class PoseEditMode extends GameMode {
             });
 
         this._scriptInterface.addCallback('get_defect',
-            (seq: string, secstruct: string, pseudoknotted: boolean, temp: number = 37): number | null => {
+            (
+                seq: string, secstruct: string, pseudoknotted: boolean, temp: number = EPars.DEFAULT_TEMPERATURE
+            ): number | null => {
                 if (this._folder === null) {
                     return null;
                 }
@@ -2224,11 +2234,13 @@ export default class PoseEditMode extends GameMode {
         // / Generate dot and melting plot data
         const datablock: UndoBlock = this.getCurrentUndoBlock();
         const pseudoknots = datablock.targetConditions?.type === 'pseudoknot';
-        if (datablock.getParam(UndoBlockParam.DOTPLOT_BITMAP, 37, pseudoknots) == null) {
+        if (datablock.getParam(UndoBlockParam.DOTPLOT_BITMAP, EPars.DEFAULT_TEMPERATURE, pseudoknots) == null) {
             this.updateCurrentBlockWithDotAndMeltingPlot();
         }
 
-        const initScore: number = datablock.getParam(UndoBlockParam.PROB_SCORE, 37, pseudoknots) as number;
+        const initScore: number = datablock.getParam(
+            UndoBlockParam.PROB_SCORE, EPars.DEFAULT_TEMPERATURE, pseudoknots
+        ) as number;
 
         let meltpoint = 107;
         for (let ii = 47; ii < 100; ii += 10) {
@@ -2239,7 +2251,7 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
-        datablock.setParam(UndoBlockParam.MELTING_POINT, meltpoint, 37, pseudoknots);
+        datablock.setParam(UndoBlockParam.MELTING_POINT, meltpoint, EPars.DEFAULT_TEMPERATURE, pseudoknots);
 
         const dialog = new SubmitPoseDialog(this._savedInputs);
         dialog.saveInputs.connect((e) => {
@@ -2304,20 +2316,26 @@ export default class PoseEditMode extends GameMode {
         const pseudoknots = undoBlock.targetConditions?.type === 'pseudoknot';
 
         postData['title'] = details.title;
-        postData['energy'] = undoBlock.getParam(UndoBlockParam.FE, 37, pseudoknots) as number / 100.0;
+        postData['energy'] = undoBlock.getParam(
+            UndoBlockParam.FE, EPars.DEFAULT_TEMPERATURE, pseudoknots
+        ) as number / 100.0;
         postData['puznid'] = this._puzzle.nodeID;
         postData['sequence'] = seqString;
-        postData['repetition'] = undoBlock.getParam(UndoBlockParam.REPETITION, 37, pseudoknots) as number;
-        postData['gu'] = undoBlock.getParam(UndoBlockParam.GU, 37, pseudoknots) as number;
-        postData['gc'] = undoBlock.getParam(UndoBlockParam.GC, 37, pseudoknots) as number;
-        postData['ua'] = undoBlock.getParam(UndoBlockParam.AU, 37, pseudoknots) as number;
+        postData['repetition'] = undoBlock.getParam(
+            UndoBlockParam.REPETITION, EPars.DEFAULT_TEMPERATURE, pseudoknots
+        ) as number;
+        postData['gu'] = undoBlock.getParam(UndoBlockParam.GU, EPars.DEFAULT_TEMPERATURE, pseudoknots) as number;
+        postData['gc'] = undoBlock.getParam(UndoBlockParam.GC, EPars.DEFAULT_TEMPERATURE, pseudoknots) as number;
+        postData['ua'] = undoBlock.getParam(UndoBlockParam.AU, EPars.DEFAULT_TEMPERATURE, pseudoknots) as number;
         postData['body'] = details.comment;
         if (details.annotations) {
             postData['annotations'] = JSON.stringify(details.annotations);
         }
 
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
-            postData['melt'] = undoBlock.getParam(UndoBlockParam.MELTING_POINT, 37, pseudoknots) as number;
+            postData['melt'] = undoBlock.getParam(
+                UndoBlockParam.MELTING_POINT, EPars.DEFAULT_TEMPERATURE, pseudoknots
+            ) as number;
 
             const fd: FoldData[] = [];
             for (let ii = 0; ii < this._poses.length; ii++) {
@@ -2725,7 +2743,9 @@ export default class PoseEditMode extends GameMode {
             const puzzledef: PuzzleEditPoseData = {
                 sequence: pose.sequence.sequenceString(),
                 structure: (
-                    this._poseState === PoseState.TARGET ? ublk.targetPairs : ublk.getPairs(37, pseudoknots)
+                    this._poseState === PoseState.TARGET
+                        ? ublk.targetPairs
+                        : ublk.getPairs(EPars.DEFAULT_TEMPERATURE, pseudoknots)
                 ).getParenthesis(null, pseudoknots),
                 startingFolder: this._folder.name,
                 annotations: this._annotationManager.createAnnotationBundle()
@@ -2951,7 +2971,9 @@ export default class PoseEditMode extends GameMode {
                         this.getCurrentUndoBlock().oligoName,
                         this.getCurrentUndoBlock().oligoLabel
                     );
-                    this._poses[0].secstruct = this.getCurrentUndoBlock().getPairs(37, pseudoknots);
+                    this._poses[0].secstruct = this.getCurrentUndoBlock().getPairs(
+                        EPars.DEFAULT_TEMPERATURE, pseudoknots
+                    );
                     this._poses[0].structConstraints = (
                         this._targetConditions?.[this._curTargetIndex]?.['structure_constraints']
                     );
@@ -2966,7 +2988,9 @@ export default class PoseEditMode extends GameMode {
                     this.getCurrentUndoBlock(ii).oligoName,
                     this.getCurrentUndoBlock(ii).oligoLabel
                 );
-                this._poses[ii].secstruct = this.getCurrentUndoBlock(ii).getPairs(37, pseudoknots);
+                this._poses[ii].secstruct = this.getCurrentUndoBlock(ii).getPairs(
+                    EPars.DEFAULT_TEMPERATURE, pseudoknots
+                );
                 this._poses[ii].structConstraints = (
                     this._targetConditions?.[ii]?.['structure_constraints']
                 );
@@ -3065,9 +3089,9 @@ export default class PoseEditMode extends GameMode {
 
         if (this._pose3D) this._pose3D.sequence.value = this.getCurrentUndoBlock().sequence;
 
-        const numAU: number = undoBlock.getParam(UndoBlockParam.AU, 37, pseudoknots) as number;
-        const numGU: number = undoBlock.getParam(UndoBlockParam.GU, 37, pseudoknots) as number;
-        const numGC: number = undoBlock.getParam(UndoBlockParam.GC, 37, pseudoknots) as number;
+        const numAU: number = undoBlock.getParam(UndoBlockParam.AU, EPars.DEFAULT_TEMPERATURE, pseudoknots) as number;
+        const numGU: number = undoBlock.getParam(UndoBlockParam.GU, EPars.DEFAULT_TEMPERATURE, pseudoknots) as number;
+        const numGC: number = undoBlock.getParam(UndoBlockParam.GC, EPars.DEFAULT_TEMPERATURE, pseudoknots) as number;
         this._toolbar.palette.setPairCounts(numAU, numGU, numGC);
 
         if (!this._isFrozen) {
@@ -3524,7 +3548,7 @@ export default class PoseEditMode extends GameMode {
                 secondBestPairs: null,
                 oligos,
                 desiredPairs: null,
-                temp: 37
+                temp: EPars.DEFAULT_TEMPERATURE
             };
             const mfold: MultiFoldResult = this._folder.getCache(key) as MultiFoldResult;
 
@@ -3559,7 +3583,7 @@ export default class PoseEditMode extends GameMode {
 
         const undoBlock: UndoBlock = new UndoBlock(this._puzzle.transformSequence(seq, ii), this._folder.name);
         Assert.assertIsDefined(bestPairs);
-        undoBlock.setPairs(bestPairs, 37, pseudoknots);
+        undoBlock.setPairs(bestPairs, EPars.DEFAULT_TEMPERATURE, pseudoknots);
         undoBlock.targetOligos = this._targetOligos[ii];
         undoBlock.targetOligo = this._targetOligo[ii];
         undoBlock.oligoOrder = oligoOrder;
@@ -3568,7 +3592,7 @@ export default class PoseEditMode extends GameMode {
         undoBlock.targetOligoOrder = this._targetOligosOrder[ii];
         undoBlock.puzzleLocks = this._poses[ii].puzzleLocks;
         undoBlock.targetConditions = this._targetConditions[ii];
-        undoBlock.setBasics(37, pseudoknots);
+        undoBlock.setBasics(EPars.DEFAULT_TEMPERATURE, pseudoknots);
         undoBlock.librarySelections = this._poses[ii].librarySelections;
         this._seqStacks[this._stackLevel][ii] = undoBlock;
     }
@@ -3593,11 +3617,15 @@ export default class PoseEditMode extends GameMode {
 
         // / JEEFIX
 
-        let lastBestPairs: SecStruct = this._seqStacks[this._stackLevel][targetIndex].getPairs(37, pseudoknots);
+        let lastBestPairs: SecStruct = this._seqStacks[this._stackLevel][targetIndex].getPairs(
+            EPars.DEFAULT_TEMPERATURE, pseudoknots
+        );
         const bestPairs: SecStruct = lastBestPairs;
 
         if (this._stackLevel > 0) {
-            lastBestPairs = this._seqStacks[this._stackLevel - 1][targetIndex].getPairs(37, pseudoknots);
+            lastBestPairs = this._seqStacks[this._stackLevel - 1][targetIndex].getPairs(
+                EPars.DEFAULT_TEMPERATURE, pseudoknots
+            );
         }
 
         const isShapeConstrained = this._puzzle.constraints && this._puzzle.constraints.some(

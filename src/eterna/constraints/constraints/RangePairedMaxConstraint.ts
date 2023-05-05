@@ -9,6 +9,7 @@ import Utility from 'eterna/util/Utility';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import Vienna from 'eterna/folding/Vienna';
 import Vienna2 from 'eterna/folding/Vienna2';
+import EPars from 'eterna/EPars';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext, HighlightInfo} from '../Constraint';
 
@@ -50,7 +51,7 @@ export default class RangePairedMaxConstraint extends Constraint<RangePairedMaxC
         // undefined. Instead of forcing more folding, try saying it's
         // zero.
         // AMW: no
-        if (undoBlock.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) === undefined) {
+        if (undoBlock.getParam(UndoBlockParam.DOTPLOT, EPars.DEFAULT_TEMPERATURE, pseudoknots) === undefined) {
             undoBlock.updateMeltingPointAndDotPlot(pseudoknots);
         }
 
@@ -74,7 +75,7 @@ export default class RangePairedMaxConstraint extends Constraint<RangePairedMaxC
         }
 
         // For some reason the null-coalescing operator ?? is not supported here.
-        const dotplot = undoBlock.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) as number[];
+        const dotplot = undoBlock.getParam(UndoBlockParam.DOTPLOT, EPars.DEFAULT_TEMPERATURE, pseudoknots) as number[];
 
         // Look through the dotplot and find any pairs involving the implicated
         // residues.

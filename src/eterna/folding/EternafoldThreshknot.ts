@@ -3,6 +3,7 @@ import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
+import EPars from 'eterna/EPars';
 import * as EternafoldLib from './engines/EternafoldLib';
 import {DotPlotResult} from './engines/EternafoldLib';
 import EternaFold from './Eternafold';
@@ -57,7 +58,7 @@ export default class EternaFoldThreshknot extends EternaFold {
         secondBestPairs: SecStruct | null,
         desiredPairs: string | null = null,
         pseudoknotted: boolean = false,
-        temp: number = 37,
+        temp: number = EPars.DEFAULT_TEMPERATURE,
         gamma: number = 0.7
     ): SecStruct {
         const key: CacheKey = {
@@ -83,7 +84,7 @@ export default class EternaFoldThreshknot extends EternaFold {
     protected foldSequenceImpl(
         seq: Sequence,
         structStr: string | null = null,
-        temp: number = 37,
+        temp: number = EPars.DEFAULT_TEMPERATURE,
         gamma: number = 6.0,
         pseudoknotted: boolean = false
     ): SecStruct {
@@ -96,7 +97,7 @@ export default class EternaFoldThreshknot extends EternaFold {
 
     private foldSequenceThresh(
         seq: Sequence,
-        temp: number = 37,
+        temp: number = EPars.DEFAULT_TEMPERATURE,
         theta: number = 0.15
     ): SecStruct {
         const seqStr = seq.sequenceString(false, false);

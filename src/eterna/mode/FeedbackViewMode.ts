@@ -33,6 +33,7 @@ import AnnotationManager from 'eterna/AnnotationManager';
 import ToolbarButton from 'eterna/ui/toolbar/ToolbarButton';
 import StateToggle from 'eterna/ui/StateToggle';
 import ModeBar from 'eterna/ui/ModeBar';
+import EPars from 'eterna/EPars';
 import ViewSolutionOverlay from './DesignBrowser/ViewSolutionOverlay';
 import GameMode from './GameMode';
 
@@ -544,9 +545,9 @@ export default class FeedbackViewMode extends GameMode {
 
         const undoBlock = this._undoBlocks[this._curTargetIndex];
         const pseudoknots = undoBlock.targetConditions?.type === 'pseudoknot';
-        const numAU: number = undoBlock.getParam(UndoBlockParam.AU, 37, pseudoknots) as number;
-        const numGU: number = undoBlock.getParam(UndoBlockParam.GU, 37, pseudoknots) as number;
-        const numGC: number = undoBlock.getParam(UndoBlockParam.GC, 37, pseudoknots) as number;
+        const numAU: number = undoBlock.getParam(UndoBlockParam.AU, EPars.DEFAULT_TEMPERATURE, pseudoknots) as number;
+        const numGU: number = undoBlock.getParam(UndoBlockParam.GU, EPars.DEFAULT_TEMPERATURE, pseudoknots) as number;
+        const numGC: number = undoBlock.getParam(UndoBlockParam.GC, EPars.DEFAULT_TEMPERATURE, pseudoknots) as number;
         this._toolbar.palette.setPairCounts(numAU, numGU, numGC);
 
         if (this._specBox) {

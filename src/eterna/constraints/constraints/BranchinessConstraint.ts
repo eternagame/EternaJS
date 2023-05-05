@@ -4,6 +4,7 @@ import {
 } from 'pixi.js';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {TextureUtil} from 'flashbang';
+import EPars from 'eterna/EPars';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 
@@ -26,7 +27,7 @@ export default class BranchinessConstraint extends Constraint<BranchinessConstra
         const pseudoknots = (undoBlock.targetConditions !== undefined
             && undoBlock.targetConditions['type'] === 'pseudoknot');
 
-        const branchiness = undoBlock.branchiness(undoBlock.getPairs(37, pseudoknots));
+        const branchiness = undoBlock.branchiness(undoBlock.getPairs(EPars.DEFAULT_TEMPERATURE, pseudoknots));
 
         return {
             satisfied: branchiness >= this.minBranchiness,
