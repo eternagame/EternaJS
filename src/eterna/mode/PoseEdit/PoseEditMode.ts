@@ -2182,6 +2182,21 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
+    /**
+     * Trigger solution submission
+     *
+     * @param details [Experimental puzzles only] If `'prompt'`, the user will be prompted for
+     * submission metadata. Otherwise, the submission metadata itself
+     * @param validate [Experimental puzzles only] If `true`, perform sanity checks which
+     * the user may want to be warned about, but do not block submission
+     * @param errorHandling How to respond to validation errors in the submission process
+     * @param errorHandling.throw [Experimental puzzles only] If true, throw an error when solution
+     * submission cannot complete due to errors in required validation instead of just exiting (returning false)
+     * @param errorHandling.notify [Experimental puzzles only] If true, prompt the user to ask they want
+     * to continue if optional validation fails, and show a notification in the UI if required validation fails
+     * @returns Promise that resolves to true if the solution submitted successfully or false if cancelled by
+     * the user (or errorHandling.throw is false a validation error ocurred)
+     */
     private async submitCurrentPose(
         details: {title?: string, description?: string} | 'prompt' = 'prompt',
         validate: boolean = true,
@@ -2209,6 +2224,7 @@ export default class PoseEditMode extends GameMode {
             };
 
             pipeline = [
+                // Stage 1: Make sure constraints are satisfied
                 async () => {
                     if (validate && !this.checkConstraints()) {
                         // If we pass constraints when taking into account soft constraints, just prompt
@@ -2231,6 +2247,8 @@ export default class PoseEditMode extends GameMode {
                         }
                     } else return next();
                 },
+                // Stage 2: Make sure if the user specified a custom target structure, the bases used
+                // for all pairs are actually valid
                 async () => {
                     if (validate && !this.checkValidCustomPairs()) {
                         const dialog = this.showDialog(new ConfirmTargetDialog());
@@ -2249,6 +2267,7 @@ export default class PoseEditMode extends GameMode {
                         }
                     } else return next();
                 },
+                // Stage 3: Gather metadata and submit
                 async () => {
                     this.prepareForExperimentalPuzzleSubmission();
 
@@ -2286,10 +2305,13 @@ export default class PoseEditMode extends GameMode {
     }
 
     private prepareForExperimentalPuzzleSubmission(): void {
-        // / Generate dot and melting plot data
+        // Generate dot and melting plot data
+        // JAR: This duplicate function call has been like this since 2010, and I dare not guess why.
+        // At least, most of this path is cached so it shouldn't be particularly expensive, but who knows
+        // if there was a race condition that can crop up somewhere or something
+        // TODO: Investigate if we can just call this once (either with or without the check for
+        // prior existance)
         this.updateCurrentBlockWithDotAndMeltingPlot();
-
-        // / Generate dot and melting plot data
         const datablock: UndoBlock = this.getCurrentUndoBlock();
         const pseudoknots = datablock.targetConditions?.type === 'pseudoknot';
         if (datablock.getParam(UndoBlockParam.DOTPLOT_BITMAP, EPars.DEFAULT_TEMPERATURE, pseudoknots) == null) {
