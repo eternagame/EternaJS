@@ -307,6 +307,13 @@ export default class RNALayout {
 
     private addNodesRecursive(biPairs: number[], rootnode: RNATreeNode, startIndex: number, endIndex: number): void {
         if (startIndex > endIndex) {
+            // 0-length hairpins (not something that happens in nature, but eg contrafold could predict this)
+            if (startIndex - endIndex === 1) {
+                rootnode.children.push(new RNATreeNode());
+                return;
+            }
+
+            // Something has gone very wrong
             throw new Error(`Error occured while drawing RNA for indices ${startIndex} ${endIndex}`);
             // let tmp = endIndex;
             // endIndex = startIndex;
