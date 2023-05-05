@@ -34,6 +34,7 @@ import MarkerBoxView from './MarkerBoxView';
 import GridLines from './GridLines';
 import DataCol from './DataCol';
 import CustomizeColumnOrderDialog from './CustomizeColumnOrderDialog';
+import ErrorDialogMode from '../ErrorDialogMode';
 
 export interface DBVote {
     canVote: boolean;
@@ -777,6 +778,7 @@ export default class DesignBrowserMode extends GameMode {
 
     private refreshSolutions(): Promise<void> {
         return SolutionManager.instance.getSolutionsForPuzzle(this._puzzle.nodeID)
+            .catch((e) => Flashbang.app.modeStack.pushMode(new ErrorDialogMode(e, 'Unable to load solutions')))
             .then(() => this.updateDataColumns());
     }
 

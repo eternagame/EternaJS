@@ -9,9 +9,10 @@ import GameButton from 'eterna/ui/GameButton';
 export default class ErrorDialogMode extends AppMode {
     public readonly error: Error | ErrorEvent;
 
-    constructor(error: Error | ErrorEvent) {
+    constructor(error: Error | ErrorEvent, title = 'Fatal Error!') {
         super();
         this.error = error;
+        this._title = title;
     }
 
     public get isOpaque(): boolean { return false; }
@@ -34,7 +35,7 @@ export default class ErrorDialogMode extends AppMode {
             borderColor: 0xC0DCE7
         });
 
-        panel.title = 'Fatal Error!';
+        panel.title = this._title;
         this.addObject(panel, this.container);
 
         const panelLayout = new VLayoutContainer(0, HAlign.CENTER);
@@ -79,4 +80,6 @@ export default class ErrorDialogMode extends AppMode {
         Assert.assertIsDefined(this.regs);
         this.regs.add(this.resized.connect(updateView));
     }
+
+    private readonly _title: string;
 }
