@@ -776,10 +776,16 @@ export default class DesignBrowserMode extends GameMode {
         this.updateClickedSelectionBoxPos(this._currentSolutionIndex);
     }
 
-    private refreshSolutions(): Promise<void> {
+    private async refreshSolutions(): Promise<void> {
+        // If we're already refreshing, we can consider the current refresh as sufficient
+        // to satisfy our desire to refresh (otherwise, we may be wasting resources
+        // needlessly making concurrent refreshes)
+        if (this._isRefreshing) return;
+        this._isRefreshing = true;
         return SolutionManager.instance.getSolutionsForPuzzle(this._puzzle.nodeID)
             .catch((e) => Flashbang.app.modeStack.pushMode(new ErrorDialogMode(e, 'Unable to load solutions')))
-            .then(() => this.updateDataColumns());
+            .then(() => this.updateDataColumns())
+            .finally(() => { this._isRefreshing = false; });
     }
 
     private updateVotes(): void {
@@ -1145,4 +1151,5 @@ export default class DesignBrowserMode extends GameMode {
 
     private _initialSolution?: Solution;
     private _initSortOnSolution: boolean;
+    private _isRefreshing: boolean = false;
 }

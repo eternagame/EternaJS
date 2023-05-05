@@ -1,10 +1,10 @@
 import {Graphics} from 'pixi.js';
-import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
 import {
-    VLayoutContainer, HAlign, ErrorUtil, Flashbang, AppMode, Assert
+    VLayoutContainer, HAlign, ErrorUtil, Flashbang, AppMode, Assert, AlphaTask
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import GameButton from 'eterna/ui/GameButton';
+import GameWindow from 'eterna/ui/GameWindow';
 
 export default class ErrorDialogMode extends AppMode {
     public readonly error: Error | ErrorEvent;
@@ -27,19 +27,20 @@ export default class ErrorDialogMode extends AppMode {
         const bg = new Graphics();
         this.container.addChild(bg);
 
-        const panel = new GamePanel({
-            type: GamePanelType.NORMAL,
-            alpha: 1.0,
-            color: 0x152843,
-            borderAlpha: 0.27,
-            borderColor: 0xC0DCE7
+        const window = new GameWindow({
+            movable: false,
+            resizable: false,
+            closable: true,
+            title: this._title
         });
-
-        panel.title = this._title;
-        this.addObject(panel, this.container);
+        window.setTargetBounds({
+            x: {from: 'center', offsetExact: 0},
+            y: {from: 'center', offsetExact: 0}
+        });
+        this.addObject(window, this.container);
 
         const panelLayout = new VLayoutContainer(0, HAlign.CENTER);
-        panel.container.addChild(panelLayout);
+        window.content.addChild(panelLayout);
         panelLayout.addChild(Fonts.std('', 15)
             .text(ErrorUtil.getErrString(this.error, false))
             .color(0xC0DCE7)
@@ -49,20 +50,19 @@ export default class ErrorDialogMode extends AppMode {
         panelLayout.addVSpacer(20);
 
         const okButton = new GameButton().label('OK', 14);
-        panel.addObject(okButton, panelLayout);
+        window.addObject(okButton, panelLayout);
 
-        okButton.clicked.connect(() => {
+        const close = () => {
             Assert.assertIsDefined(this.modeStack);
             this.modeStack.removeMode(this);
-        });
+        };
+        okButton.clicked.connect(close);
+        window.closeClicked.connect(close);
 
         panelLayout.layout();
-
-        const W_MARGIN = 10;
-        const H_MARGIN = 10;
-
-        panel.setSize(panelLayout.width + (W_MARGIN * 2), panel.titleHeight + panelLayout.height + (H_MARGIN * 2));
-        panelLayout.position.set(W_MARGIN, H_MARGIN + panel.titleHeight);
+        window.layout();
+        window.display.alpha = 0;
+        window.addObject(new AlphaTask(1, 0.3));
 
         const updateView = () => {
             Assert.assertIsDefined(Flashbang.stageWidth);
@@ -71,9 +71,6 @@ export default class ErrorDialogMode extends AppMode {
                 .beginFill(0x0, 0.7)
                 .drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
                 .endFill();
-
-            panel.display.position.x = (Flashbang.stageWidth - panel.width) * 0.5;
-            panel.display.position.y = (Flashbang.stageHeight - panel.height) * 0.5;
         };
 
         updateView();
