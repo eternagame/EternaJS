@@ -87,7 +87,7 @@ export default class RangePairedMaxConstraint extends Constraint<RangePairedMaxC
         const square: boolean = (undoBlock.folderName === Vienna.NAME
             || undoBlock.folderName === Vienna2.NAME);
 
-        const finalOffset = (undoBlock.getPairs()?.numPairs() ?? 0) * 3;
+        const finalOffset = (undoBlock.getPairs(EPars.DEFAULT_TEMPERATURE, pseudoknots)?.numPairs() ?? 0) * 3;
 
         for (let ii = 0; ii < dotplot.length - finalOffset; ii += 3) {
             // if either index is a number-of-interest, add probability in.

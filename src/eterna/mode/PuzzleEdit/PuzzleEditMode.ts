@@ -1039,7 +1039,8 @@ export default class PuzzleEditMode extends GameMode {
         for (let ii = 0; ii < this._poses.length; ii++) {
             const undoblock: UndoBlock = this.getCurrentUndoBlock(ii);
             const targetPairs = this.getCurrentTargetPairs(ii);
-            const bestPairs = undoblock.getPairs(EPars.DEFAULT_TEMPERATURE);
+            // TODO: Should we set/get data on the undoblock with the pseudoknot parameter?
+            const bestPairs = undoblock.getPairs();
             const {sequence} = this._poses[ii];
             if (sequence.length !== targetPairs.length) {
                 throw new Error("sequence and design pairs lengths don't match");
@@ -1239,6 +1240,7 @@ export default class PuzzleEditMode extends GameMode {
             }
             Assert.assertIsDefined(bestPairs);
             const undoBlock = new UndoBlock(seq, this._folder.name);
+            // TODO: Should we set/get data on the undoblock with the pseudoknot parameter?
             undoBlock.setPairs(bestPairs);
             undoBlock.setBasics();
             undoBlock.targetPairs = targetPairs;

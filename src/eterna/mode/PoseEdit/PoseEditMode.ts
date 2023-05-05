@@ -1226,7 +1226,9 @@ export default class PoseEditMode extends GameMode {
 
         this._scriptInterface.addCallback('get_native_structure', (indx: number): string | null => {
             if (indx < 0 || indx >= this._poses.length) return null;
-            const nativepairs = this.getCurrentUndoBlock(indx).getPairs();
+            const pseudoknots = this._targetConditions && this._targetConditions[0]
+                && this._targetConditions[0]['type'] === 'pseudoknot';
+            const nativepairs = this.getCurrentUndoBlock(indx).getPairs(EPars.DEFAULT_TEMPERATURE, pseudoknots);
             return nativepairs.getParenthesis();
         });
 
@@ -1235,7 +1237,11 @@ export default class PoseEditMode extends GameMode {
                 return null;
             }
 
-            const nativePairs: SecStruct = this.getCurrentUndoBlock(indx).getPairs();
+            const pseudoknots = this._targetConditions && this._targetConditions[0]
+                && this._targetConditions[0]['type'] === 'pseudoknot';
+            const nativePairs: SecStruct = this.getCurrentUndoBlock(indx).getPairs(
+                EPars.DEFAULT_TEMPERATURE, pseudoknots
+            );
             const seq: Sequence = this.getPose(indx).fullSequence;
             return nativePairs.getParenthesis(seq);
         });
@@ -1282,16 +1288,11 @@ export default class PoseEditMode extends GameMode {
                     return null;
                 }
                 const seqArr: Sequence = Sequence.fromSequenceString(seq);
-                if (this._targetConditions && this._targetConditions[0]
-                    && this._targetConditions[0]['type'] === 'pseudoknot') {
-                    const folded: SecStruct | null = this._folder.foldSequence(seqArr, null, constraint, true);
-                    Assert.assertIsDefined(folded);
-                    return folded.getParenthesis(null, true);
-                } else {
-                    const folded: SecStruct | null = this._folder.foldSequence(seqArr, null, constraint);
-                    Assert.assertIsDefined(folded);
-                    return folded.getParenthesis();
-                }
+                const pseudoknots = this._targetConditions && this._targetConditions[0]
+                    && this._targetConditions[0]['type'] === 'pseudoknot';
+                const folded: SecStruct | null = this._folder.foldSequence(seqArr, null, constraint, pseudoknots);
+                Assert.assertIsDefined(folded);
+                return folded.getParenthesis(null, pseudoknots);
             });
 
         this._scriptInterface.addCallback('fold_with_binding_site',
