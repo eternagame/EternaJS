@@ -1439,20 +1439,16 @@ export default class PoseEditMode extends GameMode {
             });
 
             this._scriptInterface.addCallback('submit_solution', async (
-                details: {title?: string, description?: string},
-                notifyOnError: boolean = true
-            ) => {
-                this.prepareForExperimentalPuzzleSubmission();
-                await this.doExperimentalPuzzleSubmission(
-                    {
-                        title: details.title,
-                        comment: details.description,
-                        annotations: [],
-                        libraryNT: []
-                    },
-                    {throw: true, notify: notifyOnError}
-                );
-            });
+                details: {title?: string, description?: string} | 'prompt' = 'prompt',
+                options?: {
+                    validate?: boolean,
+                    notifyOnError?: boolean
+                }
+            ) => this.submitCurrentPose(
+                details,
+                options?.validate ?? true,
+                {throw: true, notify: options?.notifyOnError ?? true}
+            ));
         }
 
         // Miscellanous
@@ -2186,69 +2182,106 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    private submitCurrentPose(): void {
+    private async submitCurrentPose(
+        details: {title?: string, description?: string} | 'prompt' = 'prompt',
+        validate: boolean = true,
+        errorHandling = {throw: false, notify: true}
+    ): Promise<boolean> {
         if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL) {
+            // NOTE: We don't handle details/validate/errorHandling here because those are specifically
+            // for scripts, and we don't surface submission to scripts outside of experimental puzzles
+
             // / Always submit the sequence in the first state
             const solToSubmit: UndoBlock = this.getCurrentUndoBlock(0);
-            this.submitSolution({
+            await this.submitSolution({
                 title: 'Cleared Solution',
                 comment: 'No comment',
                 annotations: this._annotationManager.categoryAnnotationData(AnnotationCategory.SOLUTION),
                 libraryNT: this._poses[0].librarySelections ?? []
             }, solToSubmit);
+            return true;
         } else {
-            const pipeline = [
-                () => {
-                    if (!this.checkConstraints()) {
+            let pipeline: (() => Promise<boolean>)[];
+            const next = async () => {
+                const nextStage = pipeline.shift();
+                if (nextStage) return nextStage();
+                return false;
+            };
+
+            pipeline = [
+                async () => {
+                    if (validate && !this.checkConstraints()) {
                         // If we pass constraints when taking into account soft constraints, just prompt
                         if (this.checkConstraints(this._puzzle.isSoftConstraint || Eterna.DEV_MODE)) {
                             const NOT_SATISFIED_PROMPT = 'Puzzle constraints are not satisfied.\n\n'
                             + 'You can still submit the sequence, but please note that there is a risk of the design '
                             + 'not getting synthesized properly';
-                            this.showConfirmDialog(NOT_SATISFIED_PROMPT).closed
-                                .then((confirmed) => {
-                                    if (confirmed) {
-                                        const next = pipeline.shift();
-                                        if (next) next();
-                                    }
-                                });
-                        } else {
-                            this.showNotification("You didn't satisfy all requirements!");
-                        }
-                    } else {
-                        const next = pipeline.shift();
-                        if (next) next();
-                    }
-                },
-                () => {
-                    if (!this.checkValidCustomPairs()) {
-                        const dialog = this.showDialog(new ConfirmTargetDialog());
-                        dialog.closed.then((confirmed) => {
-                            if (confirmed === 'reset') {
-                                for (let i = 0; i < this._targetPairs.length; i++) {
-                                    this._targetOligosOrder[i] = undefined;
-                                    this._targetPairs[i] = SecStruct.fromParens(this._puzzle.getSecstruct(i));
-                                }
-                                this.poseEditByTarget(this._isPipMode ? this._curTargetIndex : 0);
-                                const next = pipeline.shift();
-                                if (next) next();
-                            } else if (confirmed === 'submit') {
-                                const next = pipeline.shift();
-                                if (next) next();
+                            if (errorHandling.notify) {
+                                const confirmed = await this.showConfirmDialog(NOT_SATISFIED_PROMPT).closed;
+                                if (confirmed) return next();
+                                else return false;
                             }
-                        });
-                    } else {
-                        const next = pipeline.shift();
-                        if (next) next();
-                    }
+                            return false;
+                        } else {
+                            if (errorHandling.notify) {
+                                await this.showNotification("You didn't satisfy all requirements!").closed;
+                            }
+                            if (errorHandling.throw) throw new Error('Constraints not satisfied');
+                            return false;
+                        }
+                    } else return next();
                 },
-                () => {
-                    this.promptForExperimentalPuzzleSubmission();
+                async () => {
+                    if (validate && !this.checkValidCustomPairs()) {
+                        const dialog = this.showDialog(new ConfirmTargetDialog());
+                        const confirmed = await dialog.closed;
+                        if (confirmed === 'reset') {
+                            for (let i = 0; i < this._targetPairs.length; i++) {
+                                this._targetOligosOrder[i] = undefined;
+                                this._targetPairs[i] = SecStruct.fromParens(this._puzzle.getSecstruct(i));
+                            }
+                            this.poseEditByTarget(this._isPipMode ? this._curTargetIndex : 0);
+                            return next();
+                        } else if (confirmed === 'submit') {
+                            return next();
+                        } else {
+                            return false;
+                        }
+                    } else return next();
+                },
+                async () => {
+                    this.prepareForExperimentalPuzzleSubmission();
+
+                    if (details === 'prompt') {
+                        const dialog = new SubmitPoseDialog(this._savedInputs);
+                        dialog.saveInputs.connect((e) => {
+                            this._savedInputs = e;
+                        });
+
+                        this.showDialog(dialog);
+
+                        const submitDetails = await dialog.closed;
+                        if (submitDetails != null) {
+                            await this.doExperimentalPuzzleSubmission(submitDetails, errorHandling);
+                            return true;
+                        }
+                        return false;
+                    } else {
+                        await this.doExperimentalPuzzleSubmission(
+                            {
+                                title: details.title,
+                                comment: details.description,
+                                annotations: [],
+                                libraryNT: []
+                            },
+                            errorHandling
+                        );
+                        return true;
+                    }
                 }
             ];
 
-            const next = pipeline.shift();
-            if (next) next();
+            return next();
         }
     }
 
@@ -2290,19 +2323,6 @@ export default class PoseEditMode extends GameMode {
             AnnotationCategory.SOLUTION
         );
         await this.submitSolution(submitDetails, solToSubmit, errorHandling);
-    }
-
-    private promptForExperimentalPuzzleSubmission(): void {
-        this.prepareForExperimentalPuzzleSubmission();
-
-        const dialog = new SubmitPoseDialog(this._savedInputs);
-        dialog.saveInputs.connect((e) => {
-            this._savedInputs = e;
-        });
-
-        this.showDialog(dialog).closed.then((submitDetails) => {
-            if (submitDetails != null) this.doExperimentalPuzzleSubmission(submitDetails);
-        });
     }
 
     /** Creates solution-submission data for shipping off to the server */
