@@ -1492,6 +1492,17 @@ export default class PoseEditMode extends GameMode {
                 }
             });
 
+        this._scriptInterface.addCallback('set_target_structure',
+            (index: number, structure: string, startAt: number = 0): void => {
+                const pseudoknots = this._targetConditions && this._targetConditions[0]
+                    && this._targetConditions[0]['type'] === 'pseudoknot';
+
+                const prevForceSync = this.forceSync;
+                this.forceSync = true;
+                this.pasteTargetStructure(index, SecStruct.fromParens(structure, pseudoknots), startAt);
+                this.forceSync = prevForceSync;
+            });
+
         this._scriptInterface.addCallback('set_design_title', (_designTitle: string): void => {
             log.info('TODO: set_design_title');
             // Application.instance.get_application_gui("Design Name").set_text(design_title);
@@ -1760,38 +1771,7 @@ export default class PoseEditMode extends GameMode {
             // TODO: The UX of pasting given multiple poses needs to be rethought...
             const targetIndex = this._isPipMode ? poseIdx : this._curTargetIndex;
 
-            const structureConstraints = this._targetConditions[targetIndex]?.['structure_constraints'];
-            if (structureConstraints === undefined) return;
-
-            const pairs = this._targetPairs[targetIndex].slice(0);
-            const startIdx = pasteResult.startAt - 1;
-
-            for (let i = startIdx; i < pairs.length && i - startIdx < pasteResult.structure.length; i++) {
-                const rawTargetPartner = pasteResult.structure.pairingPartner(i - startIdx);
-                const targetPartner = rawTargetPartner > -1 ? rawTargetPartner + startIdx : rawTargetPartner;
-                if (
-                    targetPartner === -1
-                    // This base is unconstrained
-                    && structureConstraints[i] === false
-                    // If this base is currently paired, its pair is unconstrained
-                    && (pairs.pairingPartner(i) === -1 || structureConstraints[pairs.pairingPartner(i)] === false)
-                ) {
-                    pairs.setUnpaired(i);
-                } else if (
-                    targetPartner !== -1
-                    // This base is unconstrained
-                    && structureConstraints[i] === false
-                    // The base we're pairing with is unconstrained
-                    && structureConstraints[targetPartner] === false
-                    // If this base is currently paired, its pair is unconstrained
-                    && (pairs.pairingPartner(i) === -1 || structureConstraints[pairs.pairingPartner(i)] === false)
-                ) {
-                    pairs.setPairingPartner(i, targetPartner);
-                }
-            }
-            this._targetPairs[targetIndex] = pairs;
-
-            this.poseEditByTarget(this._isPipMode ? poseIdx : 0);
+            this.pasteTargetStructure(targetIndex, pasteResult.structure, pasteResult.startAt, poseIdx);
         }));
         this.regs?.add(pasteDialog.resetClicked.connect(() => {
             const targetIndex = this._isPipMode ? poseIdx : this._curTargetIndex;
@@ -1799,6 +1779,41 @@ export default class PoseEditMode extends GameMode {
             this._targetPairs[targetIndex] = SecStruct.fromParens(this._puzzle.getSecstruct(targetIndex));
             this.poseEditByTarget(this._isPipMode ? poseIdx : 0);
         }));
+    }
+
+    protected pasteTargetStructure(targetIndex: number, structure: SecStruct, startAt: number, poseIdx?: number) {
+        const structureConstraints = this._targetConditions[targetIndex]?.['structure_constraints'];
+        if (structureConstraints === undefined) return;
+
+        const pairs = this._targetPairs[targetIndex].slice(0);
+        const startIdx = startAt - 1;
+
+        for (let i = startIdx; i < pairs.length && i - startIdx < structure.length; i++) {
+            const rawTargetPartner = structure.pairingPartner(i - startIdx);
+            const targetPartner = rawTargetPartner > -1 ? rawTargetPartner + startIdx : rawTargetPartner;
+            if (
+                targetPartner === -1
+                // This base is unconstrained
+                && structureConstraints[i] === false
+                // If this base is currently paired, its pair is unconstrained
+                && (pairs.pairingPartner(i) === -1 || structureConstraints[pairs.pairingPartner(i)] === false)
+            ) {
+                pairs.setUnpaired(i);
+            } else if (
+                targetPartner !== -1
+                // This base is unconstrained
+                && structureConstraints[i] === false
+                // The base we're pairing with is unconstrained
+                && structureConstraints[targetPartner] === false
+                // If this base is currently paired, its pair is unconstrained
+                && (pairs.pairingPartner(i) === -1 || structureConstraints[pairs.pairingPartner(i)] === false)
+            ) {
+                pairs.setPairingPartner(i, targetPartner);
+            }
+        }
+        this._targetPairs[targetIndex] = pairs;
+
+        this.poseEditByTarget((poseIdx && this._isPipMode) ? poseIdx : 0);
     }
 
     private openDesignBrowserForOurPuzzle(): void {
