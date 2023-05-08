@@ -206,6 +206,7 @@ export default class FeedbackViewMode extends GameMode {
             if (this._targetConditions && this._targetConditions[0]
                 && this._targetConditions[0]['type'] === 'pseudoknot') {
                 this._secstructs.push(SecStruct.fromParens(secstructs[ii], true));
+                this._puzzleSecstructs.push(SecStruct.fromParens(secstructs[ii], true));
                 poseField.pose.pseudoknotted = true;
             } else {
                 const vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
@@ -213,6 +214,7 @@ export default class FeedbackViewMode extends GameMode {
                     throw new Error("Critical error: can't create a Vienna folder instance by name");
                 }
                 this._secstructs.push(SecStruct.fromParens(secstructs[ii]));
+                this._puzzleSecstructs.push(SecStruct.fromParens(secstructs[ii]));
             }
             poseFields.push(poseField);
         }
@@ -270,6 +272,24 @@ export default class FeedbackViewMode extends GameMode {
         for (const poseField of this._poseFields) {
             poseField.updateDeltaEnergyGui();
         }
+
+        // HACK: This seems to be the most straightforward way to get the saved target structure to display,
+        // but there's a lot of things to dislike here - the fact we're no longer acting synchronously,
+        // the potential for race conditions, the code duplication...
+        solution.queryFoldData().then((fd) => {
+            if (fd) {
+                for (let i = 0; i < fd.length; i++) {
+                    const ublk = new UndoBlock(this._sequence, Vienna.NAME);
+                    ublk.fromJSON(fd[i]);
+                    this._secstructs[i] = ublk.targetPairs;
+                }
+            } else {
+                for (let i = 0; i < this._secstructs.length; i++) {
+                    this._secstructs[i] = this._puzzleSecstructs[i];
+                }
+            }
+            this.changeTarget(this._curTargetIndex);
+        });
     }
 
     private async switchToPoseEditForSolution(solution: Solution): Promise<void> {
@@ -780,6 +800,7 @@ export default class FeedbackViewMode extends GameMode {
     private _feedback: Feedback | null;
     private _sequence: Sequence;
     private _secstructs: SecStruct[] = [];
+    private _puzzleSecstructs: SecStruct[] = [];
     private _shapePairs: (SecStruct | null)[] = [];
     protected _targetConditions: (TargetConditions | undefined)[];
     private _isExpColor: boolean;
