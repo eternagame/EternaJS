@@ -15,7 +15,7 @@ import PoseField from 'eterna/pose2D/PoseField';
 import FolderManager from 'eterna/folding/FolderManager';
 import Vienna from 'eterna/folding/Vienna';
 import {
-    VAlign, HAlign, DisplayUtil, KeyboardEventType, KeyCode, Assert, Flashbang
+    VAlign, HAlign, DisplayUtil, KeyCode, Assert, Flashbang
 } from 'flashbang';
 import EternaSettingsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaSettingsDialog';
 import SpecBoxDialog from 'eterna/ui/SpecBoxDialog';
@@ -357,39 +357,6 @@ export default class FeedbackViewMode extends GameMode {
 
     private showSettingsDialog(): void {
         this.showDialog(new EternaSettingsDialog(EternaViewOptionsMode.LAB), 'SettingsDialog');
-    }
-
-    public onKeyboardEvent(e: KeyboardEvent): void {
-        let handled: boolean = this.keyboardInput.handleKeyboardEvent(e);
-
-        if (!handled && e.type === KeyboardEventType.KEY_DOWN) {
-            const key = e.code;
-            const ctrl = e.ctrlKey;
-
-            if (!ctrl && key === KeyCode.KeyN) {
-                Eterna.settings.showNumbers.value = !Eterna.settings.showNumbers.value;
-                handled = true;
-            } else if (!ctrl && key === KeyCode.KeyG) {
-                Eterna.settings.displayFreeEnergies.value = !Eterna.settings.displayFreeEnergies.value;
-                handled = true;
-            } else if (key === KeyCode.BracketLeft) {
-                const factor = Math.max(0, Math.round((this._poseFields[0].explosionFactor - 0.25) * 1000) / 1000);
-                for (const pf of this._poseFields) {
-                    pf.explosionFactor = factor;
-                }
-                handled = true;
-            } else if (key === KeyCode.BracketRight) {
-                const factor = Math.max(0, Math.round((this._poseFields[0].explosionFactor + 0.25) * 1000) / 1000);
-                for (const pf of this._poseFields) {
-                    pf.explosionFactor = factor;
-                }
-                handled = true;
-            }
-        }
-
-        if (handled) {
-            e.stopPropagation();
-        }
     }
 
     /* override */

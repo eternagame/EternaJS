@@ -186,8 +186,8 @@ export default class AppMode implements PointerTarget {
      * Called when the application receives a keyDown or keyUp event while this mode is active.
      * By default, we just pass this off to the KeyboardInput handler.
      */
-    public onKeyboardEvent(e: KeyboardEvent): void {
-        this.keyboardInput.handleKeyboardEvent(e);
+    public onKeyboardEvent(e: KeyboardEvent): boolean {
+        return this.keyboardInput.handleKeyboardEvent(e);
     }
 
     /** Called when a ContextMenu event is fired while this mode is active */

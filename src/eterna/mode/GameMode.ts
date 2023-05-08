@@ -4,7 +4,8 @@ import Eterna from 'eterna/Eterna';
 import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import {
-    AppMode, SceneObject, Flashbang, GameObjectRef, Assert, AlphaTask, RepeatingTask, SerialTask
+    AppMode, SceneObject, Flashbang, GameObjectRef, Assert, AlphaTask, RepeatingTask, SerialTask,
+    KeyboardEventType, KeyCode
 } from 'flashbang';
 import AchievementManager from 'eterna/achievements/AchievementManager';
 import Tooltips from 'eterna/ui/Tooltips';
@@ -640,6 +641,56 @@ export default abstract class GameMode extends AppMode {
         factorDialog.factor.connect((factor) => {
             this._poseFields.forEach((pf) => { pf.explosionFactor = factor; });
         });
+    }
+
+    public onKeyboardEvent(e: KeyboardEvent): boolean {
+        let handled: boolean = super.onKeyboardEvent(e);
+
+        // We check this._poses.length > 0 because DesignBrowserMode also inherits from this mode
+        // (sigh) and all of these keybinds are tied to pose-related operations (which the
+        // design browser doesn't have)
+        if (!handled && e.type === KeyboardEventType.KEY_DOWN && this._poses.length > 0) {
+            const key = e.code;
+            const ctrl = e.ctrlKey;
+
+            if (!ctrl && key === KeyCode.KeyN) {
+                Eterna.settings.showNumbers.value = !Eterna.settings.showNumbers.value;
+                handled = true;
+            } else if (!ctrl && key === KeyCode.KeyR) {
+                Eterna.settings.showRope.value = !Eterna.settings.showRope.value;
+                handled = true;
+            } else if (!ctrl && key === KeyCode.KeyG) {
+                Eterna.settings.displayFreeEnergies.value = !Eterna.settings.displayFreeEnergies.value;
+                handled = true;
+            } else if (!ctrl && key === KeyCode.Comma) {
+                Eterna.settings.simpleGraphics.value = !Eterna.settings.simpleGraphics.value;
+                handled = true;
+            } else if (!ctrl && key === KeyCode.KeyL) {
+                Eterna.settings.usePuzzlerLayout.value = !Eterna.settings.usePuzzlerLayout.value;
+                handled = true;
+            } else if (ctrl && key === KeyCode.KeyS) {
+                this.downloadSVG();
+                handled = true;
+            } else if (key === KeyCode.BracketLeft) {
+                const factor = Math.max(0, Math.round((this._poseFields[0].explosionFactor - 0.25) * 1000) / 1000);
+                for (const pf of this._poseFields) {
+                    pf.explosionFactor = factor;
+                }
+                handled = true;
+            } else if (key === KeyCode.BracketRight) {
+                const factor = Math.max(0, Math.round((this._poseFields[0].explosionFactor + 0.25) * 1000) / 1000);
+                for (const pf of this._poseFields) {
+                    pf.explosionFactor = factor;
+                }
+                handled = true;
+            }
+        }
+
+        if (handled) {
+            e.stopPropagation();
+        }
+
+        return handled;
     }
 
     protected _achievements: AchievementManager;

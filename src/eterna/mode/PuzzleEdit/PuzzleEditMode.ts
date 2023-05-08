@@ -14,7 +14,7 @@ import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/toolbar/Nuc
 import Folder from 'eterna/folding/Folder';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import {
-    Base64, DisplayUtil, HAlign, VAlign, KeyCode, Assert, KeyboardEventType, Flashbang, VLayoutContainer
+    Base64, DisplayUtil, HAlign, VAlign, KeyCode, Assert, Flashbang, VLayoutContainer
 } from 'flashbang';
 import {DialogCanceledError} from 'eterna/ui/Dialog';
 import Vienna2 from 'eterna/folding/Vienna2';
@@ -477,36 +477,6 @@ export default class PuzzleEditMode extends GameMode {
                 this.removeObject(uploadButton);
             }));
         }));
-    }
-
-    public onKeyboardEvent(e: KeyboardEvent): void {
-        let handled: boolean = this.keyboardInput.handleKeyboardEvent(e);
-
-        if (!handled && e.type === KeyboardEventType.KEY_DOWN) {
-            const key = e.code;
-            const ctrl = e.ctrlKey;
-
-            if (ctrl && key === KeyCode.KeyS) {
-                this.downloadSVG();
-                handled = true;
-            } else if (key === KeyCode.BracketLeft) {
-                const factor = Math.max(0, Math.round((this._poseFields[0].explosionFactor - 0.25) * 1000) / 1000);
-                for (const pf of this._poseFields) {
-                    pf.explosionFactor = factor;
-                }
-                handled = true;
-            } else if (key === KeyCode.BracketRight) {
-                const factor = Math.max(0, Math.round((this._poseFields[0].explosionFactor + 0.25) * 1000) / 1000);
-                for (const pf of this._poseFields) {
-                    pf.explosionFactor = factor;
-                }
-                handled = true;
-            }
-        }
-
-        if (handled) {
-            e.stopPropagation();
-        }
     }
 
     private saveData(): void {
