@@ -1286,8 +1286,9 @@ export default class PoseEditMode extends GameMode {
                 this._puzzle.getBarcodeHairpin(Sequence.fromSequenceString(seq)).sequenceString()
             ));
 
-        this._scriptInterface.addCallback('current_folder',
-            (): string | null => (this._folder ? this._folder.name : null));
+        this._scriptInterface.addCallback('current_folder', (): string | null => (
+            this._folder ? this._folder.name : null
+        ));
 
         this._scriptInterface.addCallback('fold',
             (seq: string, constraint: string | null = null): string | null => {
@@ -1436,6 +1437,18 @@ export default class PoseEditMode extends GameMode {
                 // }
                 // return res;
             });
+
+            this._scriptInterface.addCallback('submit_solution', async (
+                details: {title?: string, description?: string} | 'prompt' = 'prompt',
+                options?: {
+                    validate?: boolean,
+                    notifyOnError?: boolean
+                }
+            ) => this.submitCurrentPose(
+                details,
+                options?.validate ?? true,
+                {throw: true, notify: options?.notifyOnError ?? true}
+            ));
         }
 
         // Miscellanous
@@ -2184,77 +2197,136 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    private submitCurrentPose(): void {
+    /**
+     * Trigger solution submission
+     *
+     * @param details [Experimental puzzles only] If `'prompt'`, the user will be prompted for
+     * submission metadata. Otherwise, the submission metadata itself
+     * @param validate [Experimental puzzles only] If `true`, perform sanity checks which
+     * the user may want to be warned about, but do not block submission
+     * @param errorHandling How to respond to validation errors in the submission process
+     * @param errorHandling.throw [Experimental puzzles only] If true, throw an error when solution
+     * submission cannot complete due to errors in required validation instead of just exiting (returning false)
+     * @param errorHandling.notify [Experimental puzzles only] If true, prompt the user to ask they want
+     * to continue if optional validation fails, and show a notification in the UI if required validation fails
+     * @returns Promise that resolves to true if the solution submitted successfully or false if cancelled by
+     * the user (or errorHandling.throw is false a validation error ocurred)
+     */
+    private async submitCurrentPose(
+        details: {title?: string, description?: string} | 'prompt' = 'prompt',
+        validate: boolean = true,
+        errorHandling = {throw: false, notify: true}
+    ): Promise<boolean> {
         if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL) {
+            // NOTE: We don't handle details/validate/errorHandling here because those are specifically
+            // for scripts, and we don't surface submission to scripts outside of experimental puzzles
+
             // / Always submit the sequence in the first state
             const solToSubmit: UndoBlock = this.getCurrentUndoBlock(0);
-            this.submitSolution({
+            await this.submitSolution({
                 title: 'Cleared Solution',
                 comment: 'No comment',
                 annotations: this._annotationManager.categoryAnnotationData(AnnotationCategory.SOLUTION),
                 libraryNT: this._poses[0].librarySelections ?? []
             }, solToSubmit);
+            return true;
         } else {
-            const pipeline = [
-                () => {
-                    if (!this.checkConstraints()) {
+            let pipeline: (() => Promise<boolean>)[];
+            const next = async () => {
+                const nextStage = pipeline.shift();
+                if (nextStage) return nextStage();
+                return false;
+            };
+
+            pipeline = [
+                // Stage 1: Make sure constraints are satisfied
+                async () => {
+                    if (validate && !this.checkConstraints()) {
                         // If we pass constraints when taking into account soft constraints, just prompt
                         if (this.checkConstraints(this._puzzle.isSoftConstraint || Eterna.DEV_MODE)) {
                             const NOT_SATISFIED_PROMPT = 'Puzzle constraints are not satisfied.\n\n'
                             + 'You can still submit the sequence, but please note that there is a risk of the design '
                             + 'not getting synthesized properly';
-                            this.showConfirmDialog(NOT_SATISFIED_PROMPT).closed
-                                .then((confirmed) => {
-                                    if (confirmed) {
-                                        const next = pipeline.shift();
-                                        if (next) next();
-                                    }
-                                });
-                        } else {
-                            this.showNotification("You didn't satisfy all requirements!");
-                        }
-                    } else {
-                        const next = pipeline.shift();
-                        if (next) next();
-                    }
-                },
-                () => {
-                    if (!this.checkValidCustomPairs()) {
-                        const dialog = this.showDialog(new ConfirmTargetDialog());
-                        dialog.closed.then((confirmed) => {
-                            if (confirmed === 'reset') {
-                                for (let i = 0; i < this._targetPairs.length; i++) {
-                                    this._targetOligosOrder[i] = undefined;
-                                    this._targetPairs[i] = SecStruct.fromParens(this._puzzle.getSecstruct(i));
-                                }
-                                this.poseEditByTarget(this._isPipMode ? this._curTargetIndex : 0);
-                                const next = pipeline.shift();
-                                if (next) next();
-                            } else if (confirmed === 'submit') {
-                                const next = pipeline.shift();
-                                if (next) next();
+                            if (errorHandling.notify) {
+                                const confirmed = await this.showConfirmDialog(NOT_SATISFIED_PROMPT).closed;
+                                if (confirmed) return next();
+                                else return false;
                             }
-                        });
-                    } else {
-                        const next = pipeline.shift();
-                        if (next) next();
-                    }
+                            return false;
+                        } else {
+                            if (errorHandling.notify) {
+                                await this.showNotification("You didn't satisfy all requirements!").closed;
+                            }
+                            if (errorHandling.throw) throw new Error('Constraints not satisfied');
+                            return false;
+                        }
+                    } else return next();
                 },
-                () => {
-                    this.promptForExperimentalPuzzleSubmission();
+                // Stage 2: Make sure if the user specified a custom target structure, the bases used
+                // for all pairs are actually valid
+                async () => {
+                    if (validate && !this.checkValidCustomPairs()) {
+                        const dialog = this.showDialog(new ConfirmTargetDialog());
+                        const confirmed = await dialog.closed;
+                        if (confirmed === 'reset') {
+                            for (let i = 0; i < this._targetPairs.length; i++) {
+                                this._targetOligosOrder[i] = undefined;
+                                this._targetPairs[i] = SecStruct.fromParens(this._puzzle.getSecstruct(i));
+                            }
+                            this.poseEditByTarget(this._isPipMode ? this._curTargetIndex : 0);
+                            return next();
+                        } else if (confirmed === 'submit') {
+                            return next();
+                        } else {
+                            return false;
+                        }
+                    } else return next();
+                },
+                // Stage 3: Gather metadata and submit
+                async () => {
+                    this.prepareForExperimentalPuzzleSubmission();
+
+                    if (details === 'prompt') {
+                        const dialog = new SubmitPoseDialog(this._savedInputs);
+                        dialog.saveInputs.connect((e) => {
+                            this._savedInputs = e;
+                        });
+
+                        this.showDialog(dialog);
+
+                        const submitDetails = await dialog.closed;
+                        if (submitDetails != null) {
+                            await this.doExperimentalPuzzleSubmission(submitDetails, errorHandling);
+                            return true;
+                        }
+                        return false;
+                    } else {
+                        await this.doExperimentalPuzzleSubmission(
+                            {
+                                title: details.title,
+                                comment: details.description,
+                                annotations: [],
+                                libraryNT: []
+                            },
+                            errorHandling
+                        );
+                        return true;
+                    }
                 }
             ];
 
-            const next = pipeline.shift();
-            if (next) next();
+            return next();
         }
     }
 
-    private promptForExperimentalPuzzleSubmission(): void {
-        // / Generate dot and melting plot data
+    private prepareForExperimentalPuzzleSubmission(): void {
+        // Generate dot and melting plot data
+        // JAR: This duplicate function call has been like this since 2010, and I dare not guess why.
+        // At least, most of this path is cached so it shouldn't be particularly expensive, but who knows
+        // if there was a race condition that can crop up somewhere or something
+        // TODO: Investigate if we can just call this once (either with or without the check for
+        // prior existance)
         this.updateCurrentBlockWithDotAndMeltingPlot();
-
-        // / Generate dot and melting plot data
         const datablock: UndoBlock = this.getCurrentUndoBlock();
         const pseudoknots = datablock.targetConditions?.type === 'pseudoknot';
         if (datablock.getParam(UndoBlockParam.DOTPLOT_BITMAP, EPars.DEFAULT_TEMPERATURE, pseudoknots) == null) {
@@ -2275,23 +2347,19 @@ export default class PoseEditMode extends GameMode {
         }
 
         datablock.setParam(UndoBlockParam.MELTING_POINT, meltpoint, EPars.DEFAULT_TEMPERATURE, pseudoknots);
+    }
 
-        const dialog = new SubmitPoseDialog(this._savedInputs);
-        dialog.saveInputs.connect((e) => {
-            this._savedInputs = e;
-        });
-
-        this.showDialog(dialog).closed.then((submitDetails) => {
-            if (submitDetails != null) {
-                // / Always submit the sequence in the first state
-                this.updateCurrentBlockWithDotAndMeltingPlot(0);
-                const solToSubmit: UndoBlock = this.getCurrentUndoBlock(0);
-                submitDetails.annotations = this._annotationManager.categoryAnnotationData(
-                    AnnotationCategory.SOLUTION
-                );
-                this.submitSolution(submitDetails, solToSubmit);
-            }
-        });
+    private async doExperimentalPuzzleSubmission(
+        submitDetails: SubmitPoseDetails,
+        errorHandling?: {notify: boolean, throw: boolean}
+    ) {
+        // / Always submit the sequence in the first state
+        this.updateCurrentBlockWithDotAndMeltingPlot(0);
+        const solToSubmit: UndoBlock = this.getCurrentUndoBlock(0);
+        submitDetails.annotations = this._annotationManager.categoryAnnotationData(
+            AnnotationCategory.SOLUTION
+        );
+        await this.submitSolution(submitDetails, solToSubmit, errorHandling);
     }
 
     /** Creates solution-submission data for shipping off to the server */
@@ -2373,7 +2441,11 @@ export default class PoseEditMode extends GameMode {
         return postData;
     }
 
-    private async submitSolution(details: SubmitPoseDetails, undoBlock: UndoBlock): Promise<void> {
+    private async submitSolution(
+        details: SubmitPoseDetails,
+        undoBlock: UndoBlock,
+        errorHandling: {notify: boolean, throw: boolean} = {notify: true, throw: false}
+    ): Promise<void> {
         if (this._puzzle.nodeID < 0) {
             return;
         }
@@ -2464,15 +2536,29 @@ export default class PoseEditMode extends GameMode {
 
         if (data['error'] !== undefined) {
             log.debug(`Got solution submission error: ${data['error']}`);
-            if (data['error'].indexOf('barcode') >= 0) {
-                const dialog = this.showNotification(data['error'].replace(/ +/, ' '), 'More Information');
-                dialog.extraButton.clicked.connect(() => window.open(EternaURL.BARCODE_HELP, '_blank'));
+            // TODO: This is an awfully brittle way of checking for this error, since this means
+            // we cannot have another error message containing "barcode"...
+            const errorIsBarcodeInUse = data['error'].indexOf('barcode') >= 0;
+
+            if (errorIsBarcodeInUse) {
+                // In case this is due to our record of used hairpins being out of date (vs
+                // the user submitting even though they knew the barcode was already in use),
+                // record the fact this hairpin is in use, and update the constraints to reflect that
                 const hairpin = this._puzzle.getBarcodeHairpin(seq);
                 SolutionManager.instance.addHairpins([hairpin.sequenceString()]);
                 this.checkConstraints();
-            } else {
-                this.showNotification(data['error']);
             }
+
+            if (errorHandling.notify) {
+                if (errorIsBarcodeInUse) {
+                    const dialog = this.showNotification(data['error'].replace(/ +/, ' '), 'More Information');
+                    dialog.extraButton.clicked.connect(() => window.open(EternaURL.BARCODE_HELP, '_blank'));
+                    await dialog.closed;
+                } else {
+                    await this.showNotification(data['error']).closed;
+                }
+            }
+            if (errorHandling.throw) throw new Error(data['error']);
         } else {
             log.debug('Solution submitted');
 
