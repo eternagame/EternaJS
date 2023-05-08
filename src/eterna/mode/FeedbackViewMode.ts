@@ -265,6 +265,7 @@ export default class FeedbackViewMode extends GameMode {
             datablock.setPairs(this._secstructs[ii]);
             datablock.setBasics();
             this._undoBlocks.push(datablock);
+            this._poses[ii].targetPairs = this._secstructs[ii];
         }
         for (const poseField of this._poseFields) {
             poseField.updateDeltaEnergyGui();
