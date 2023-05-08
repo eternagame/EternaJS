@@ -492,7 +492,7 @@ export default class PoseEditMode extends GameMode {
                     pose.pasteSequence(sequence);
                     pose.librarySelections = solution.libraryNT;
                 }
-                if (foldData !== null) this.setSolutionTargetStructure(foldData);
+                this.setSolutionTargetStructure(foldData);
             }
             this.clearMoveTracking(solution.sequence.sequenceString());
             this.setAncestorId(solution.nodeID);
@@ -505,10 +505,8 @@ export default class PoseEditMode extends GameMode {
         solution.queryFoldData().then((result) => setSolution(result));
     }
 
-    private setSolutionTargetStructure(foldData: FoldData[]) {
+    private setSolutionTargetStructure(foldData: FoldData[] | null) {
         const setTarget = (ii: number) => {
-            const cacheUndoBlock: UndoBlock = new UndoBlock(new Sequence([]), this._folder?.name ?? '');
-            cacheUndoBlock.fromJSON(foldData[ii], this._puzzle.targetConditions[ii]);
             // pose.pasteSequence resulted in a new undo block being created, filled with the folding
             // engine computations. We want to surgically update just the target structure to match the
             // solution. If freeze mode is enabled however, an undo block won't be created in the stack.
@@ -518,13 +516,23 @@ export default class PoseEditMode extends GameMode {
             // don't get the target structure in that case :(
             if (!this._isFrozen) {
                 const currUndoBlock = this.getCurrentUndoBlock(ii);
-                currUndoBlock.targetPairs = cacheUndoBlock.targetPairs;
-                currUndoBlock.targetOligoOrder = cacheUndoBlock.targetOligoOrder;
+                if (foldData && foldData[ii]) {
+                    const cacheUndoBlock: UndoBlock = new UndoBlock(new Sequence([]), this._folder?.name ?? '');
+                    cacheUndoBlock.fromJSON(foldData[ii], this._puzzle.targetConditions[ii]);
+                    currUndoBlock.targetPairs = cacheUndoBlock.targetPairs;
+                    currUndoBlock.targetOligoOrder = cacheUndoBlock.targetOligoOrder;
+                } else {
+                    // Set to puzzle default instead of using whatever we already had set, as if we previously
+                    // loaded a solution that did have a defined target, that's *definitely* bogus. At least
+                    // the default structure is "more consistently wrong"
+                    currUndoBlock.targetPairs = SecStruct.fromParens(this._puzzle.getSecstruct(ii));
+                    currUndoBlock.targetOligoOrder = undefined;
+                }
                 this.updateScore();
                 this.transformPosesMarkers();
             }
         };
-        for (let ii = 0; ii < foldData.length; ii++) {
+        for (let ii = 0; ii < this._targetPairs.length; ii++) {
             // Yay, we get to deal with "async folding". Basically if we're not doing everything
             // synchronously, the latest undo block won't actually be available yet, so we'll just
             // push another task to the queue after the folding actually finishes
@@ -969,7 +977,6 @@ export default class PoseEditMode extends GameMode {
         // Key word shouldn't.
         if (fdPromise) {
             fdPromise.then((fd) => {
-                if (!fd) return;
                 this.setSolutionTargetStructure(fd);
             });
         }
