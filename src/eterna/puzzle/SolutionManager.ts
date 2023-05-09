@@ -161,7 +161,7 @@ export default class SolutionManager {
 
                         newfb.setShapeData(
                             peaks,
-                            'SHAPE', // condition
+                            synthesis['condition'] || 'SHAPE',
                             Number(synthesis['target_index']),
                             Number(synthesis['threshold']),
                             Number(synthesis['max']),
