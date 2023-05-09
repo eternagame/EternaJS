@@ -313,8 +313,12 @@ export default class Feedback {
     }
 
     public get conditions(): string[] {
-        const conds = ['SHAPE'];
-        return Array.prototype.concat(conds, Array.from(this._degradationData.keys()));
+        return [
+            ...Array.from(this._shapeData.keys()).map(
+                (condition) => (condition === 'SHAPE' ? 'SHAPE' : `SHAPE: ${condition}`)
+            ),
+            ...Array.from(this._degradationData.keys()).map((condition) => `Degradation: ${condition}`)
+        ];
     }
 
     private _shapeData: Map<string, number[][]> = new Map<string, number[][]>();

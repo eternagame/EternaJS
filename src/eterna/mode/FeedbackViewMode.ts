@@ -219,17 +219,21 @@ export default class FeedbackViewMode extends GameMode {
             poseFields.push(poseField);
         }
         this.setPoseFields(poseFields);
-        this.setSolution(this._solution);
 
+        const conditions = this._solution.expFeedback?.conditions ?? ['SHAPE'];
         this._dropdown = new GameDropdown({
             fontSize: 14,
-            options: this._solution.expFeedback?.conditions ?? ['SHAPE'],
-            defaultOption: 'SHAPE',
+            options: conditions,
+            defaultOption: conditions[0],
             borderWidth: 0
         });
 
         this._dropdown.disabled = false;
-        this._dropdown.selectedOption.connect(() => this.showExperimentalColors());
+        this._dropdown.selectedOption.connect(() => {
+            this.showExperimentalColors();
+            this.setupShape();
+            this.changeTarget(this._curTargetIndex);
+        });
 
         // for now this is fine; we turn the dropdown options
         // into themselves. that's all we need to access the JSON
@@ -238,6 +242,8 @@ export default class FeedbackViewMode extends GameMode {
             this._dropdown.selectedOption,
             (name) => name
         );
+
+        this.setSolution(this._solution);
 
         this.addObject(this._dropdown, this.uiLayer);
         this._dropdown.display.position.set(18, 50);
@@ -554,44 +560,48 @@ export default class FeedbackViewMode extends GameMode {
         this._baseColorButton.toggled.value = false;
         this._expColorButton.toggled.value = true;
 
-        if (this._dataOption.value === 'SHAPE') {
+        if (this._dataOption.value.startsWith('SHAPE:') || this._dataOption.value === 'SHAPE') {
+            const condition = this._dataOption.value.replace(/^SHAPE: /, '');
             if (this._isPipMode) {
                 for (let ii = 0; ii < this._poseFields.length; ii++) {
                     this._poseFields[ii].pose.visualizeFeedback(
-                        this._feedback.getShapeData(ii, this._dataOption.value),
-                        this._feedback.getShapeThreshold(ii, this._dataOption.value),
-                        this._feedback.getShapeMin(ii, this._dataOption.value),
-                        this._feedback.getShapeMax(ii, this._dataOption.value),
-                        this._feedback.getShapeStartIndex(ii, this._dataOption.value)
+                        this._feedback.getShapeData(ii, condition),
+                        this._feedback.getShapeThreshold(ii, condition),
+                        this._feedback.getShapeMin(ii, condition),
+                        this._feedback.getShapeMax(ii, condition),
+                        this._feedback.getShapeStartIndex(ii, condition)
                     );
                 }
             } else {
                 this._poseFields[0].pose.visualizeFeedback(
-                    this._feedback.getShapeData(this._curTargetIndex, this._dataOption.value),
-                    this._feedback.getShapeThreshold(this._curTargetIndex, this._dataOption.value),
-                    this._feedback.getShapeMin(this._curTargetIndex, this._dataOption.value),
-                    this._feedback.getShapeMax(this._curTargetIndex, this._dataOption.value),
-                    this._feedback.getShapeStartIndex(this._curTargetIndex, this._dataOption.value)
-                );
-            }
-        } else if (this._isPipMode) {
-            for (let ii = 0; ii < this._poseFields.length; ii++) {
-                this._poseFields[ii].pose.visualizeFeedback(
-                    this._feedback.getDegradationData(ii, this._dataOption.value),
-                    this._feedback.getDegradationThreshold(ii, this._dataOption.value),
-                    this._feedback.getDegradationMin(ii, this._dataOption.value),
-                    this._feedback.getDegradationMax(ii, this._dataOption.value),
-                    this._feedback.getDegradationStartIndex(ii, this._dataOption.value)
+                    this._feedback.getShapeData(this._curTargetIndex, condition),
+                    this._feedback.getShapeThreshold(this._curTargetIndex, condition),
+                    this._feedback.getShapeMin(this._curTargetIndex, condition),
+                    this._feedback.getShapeMax(this._curTargetIndex, condition),
+                    this._feedback.getShapeStartIndex(this._curTargetIndex, condition)
                 );
             }
         } else {
-            this._poseFields[0].pose.visualizeFeedback(
-                this._feedback.getDegradationData(this._curTargetIndex, this._dataOption.value),
-                this._feedback.getDegradationThreshold(this._curTargetIndex, this._dataOption.value),
-                this._feedback.getDegradationMin(this._curTargetIndex, this._dataOption.value),
-                this._feedback.getDegradationMax(this._curTargetIndex, this._dataOption.value),
-                this._feedback.getDegradationStartIndex(this._curTargetIndex, this._dataOption.value)
-            );
+            const condition = this._dataOption.value.replace(/^Degradation: /, '');
+            if (this._isPipMode) {
+                for (let ii = 0; ii < this._poseFields.length; ii++) {
+                    this._poseFields[ii].pose.visualizeFeedback(
+                        this._feedback.getDegradationData(ii, condition),
+                        this._feedback.getDegradationThreshold(ii, condition),
+                        this._feedback.getDegradationMin(ii, condition),
+                        this._feedback.getDegradationMax(ii, condition),
+                        this._feedback.getDegradationStartIndex(ii, condition)
+                    );
+                }
+            } else {
+                this._poseFields[0].pose.visualizeFeedback(
+                    this._feedback.getDegradationData(this._curTargetIndex, condition),
+                    this._feedback.getDegradationThreshold(this._curTargetIndex, condition),
+                    this._feedback.getDegradationMin(this._curTargetIndex, condition),
+                    this._feedback.getDegradationMax(this._curTargetIndex, condition),
+                    this._feedback.getDegradationStartIndex(this._curTargetIndex, condition)
+                );
+            }
         }
     }
 
@@ -614,18 +624,28 @@ export default class FeedbackViewMode extends GameMode {
         // This won't work if _feedback is null
         if (this._feedback == null) return;
 
-        const precomputedStructure = this._feedback.getEstimateStructure(index);
-        if (this._feedback.getEstimateStructure(index)) {
+        // The structure we display is tied to the selected condition. If the current condition
+        // is not SHAPE, we can't get a structure for it (we'll just leave it as whatever it was
+        // before)
+        if (!(
+            this._dataOption.value.startsWith('SHAPE:')
+            || this._dataOption.value === 'SHAPE'
+        )) return;
+
+        const condition = this._dataOption.value.replace(/^SHAPE: /, '');
+
+        const precomputedStructure = this._feedback.getEstimateStructure(index, condition);
+        if (this._feedback.getEstimateStructure(index, condition)) {
             this._shapePairs[index] = precomputedStructure;
             return;
         }
 
-        const shapeThreshold: number = this._feedback.getShapeThreshold(index);
-        const shapeData: number[] = this._feedback.getShapeData(index);
-        const startIndex: number = this._feedback.getShapeStartIndex(index);
+        const shapeThreshold: number = this._feedback.getShapeThreshold(index, condition);
+        const shapeData: number[] = this._feedback.getShapeData(index, condition);
+        const startIndex: number = this._feedback.getShapeStartIndex(index, condition);
         const {puzzleLocks} = this._puzzle;
-        const shapeMax: number = this._feedback.getShapeMax(index);
-        const shapeMin: number = this._feedback.getShapeMin(index);
+        const shapeMax: number = this._feedback.getShapeMax(index, condition);
+        const shapeMin: number = this._feedback.getShapeMin(index, condition);
 
         let desiredPairs = '';
 
