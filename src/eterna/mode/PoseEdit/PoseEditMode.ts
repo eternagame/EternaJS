@@ -2245,20 +2245,23 @@ export default class PoseEditMode extends GameMode {
                 // for all pairs are actually valid
                 async () => {
                     if (validate && !this.checkValidCustomPairs()) {
-                        const dialog = this.showDialog(new ConfirmTargetDialog());
-                        const confirmed = await dialog.closed;
-                        if (confirmed === 'reset') {
-                            for (let i = 0; i < this._targetPairs.length; i++) {
-                                this._targetOligosOrder[i] = undefined;
-                                this._targetPairs[i] = SecStruct.fromParens(this._puzzle.getSecstruct(i));
+                        if (errorHandling.notify) {
+                            const dialog = this.showDialog(new ConfirmTargetDialog());
+                            const confirmed = await dialog.closed;
+                            if (confirmed === 'reset') {
+                                for (let i = 0; i < this._targetPairs.length; i++) {
+                                    this._targetOligosOrder[i] = undefined;
+                                    this._targetPairs[i] = SecStruct.fromParens(this._puzzle.getSecstruct(i));
+                                }
+                                this.poseEditByTarget(this._isPipMode ? this._curTargetIndex : 0);
+                                return next();
+                            } else if (confirmed === 'submit') {
+                                return next();
+                            } else {
+                                return false;
                             }
-                            this.poseEditByTarget(this._isPipMode ? this._curTargetIndex : 0);
-                            return next();
-                        } else if (confirmed === 'submit') {
-                            return next();
-                        } else {
-                            return false;
                         }
+                        return false;
                     } else return next();
                 },
                 // Stage 3: Gather metadata and submit
