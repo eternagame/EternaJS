@@ -449,7 +449,6 @@ export default class DesignBrowserMode extends GameMode {
             SortOrder.INCREASING,
             solution.sequence.sequenceString()
         );
-        this.showSortDialog();
     }
 
     private reloadCurrent(): void {
