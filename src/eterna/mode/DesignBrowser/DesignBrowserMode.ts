@@ -718,6 +718,8 @@ export default class DesignBrowserMode extends GameMode {
     }
 
     private reorganize(sort: boolean): void {
+        const selectedSolution = this.getSolutionAtIndex(this._currentSolutionIndex);
+
         if (sort) {
             this._allSolutions.sort((a, b) => this._sortOptions.compareSolutions(a, b));
 
@@ -744,6 +746,7 @@ export default class DesignBrowserMode extends GameMode {
 
         this._filteredSolutions = solutions;
         this.setData(solutions, false, false);
+        if (selectedSolution) this._currentSolutionIndex = this.getSolutionIndex(selectedSolution.nodeID);
         this.setScrollVertical(-1);
     }
 
