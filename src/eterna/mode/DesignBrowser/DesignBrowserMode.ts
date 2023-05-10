@@ -993,7 +993,7 @@ export default class DesignBrowserMode extends GameMode {
                     }
                 } else if (category === DesignCategory.VOTE) {
                     const canVote = !this._novote && singleLineRawData.canVote(puz.round);
-                    const voted = singleLineRawData.getProperty(DesignCategory.MY_VOTES) > 0;
+                    const voted = singleLineRawData.getProperty(DesignCategory.MY_VOTES) as number > 0;
                     dataArray.push({canVote, voted, solutionIndex: ii});
                 } else {
                     const rawdata: string | number = singleLineRawData.getProperty(category) as string | number;

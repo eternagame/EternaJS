@@ -387,11 +387,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public set currentColor(col: RNAPaint | RNABase) {
+    public set currentColor(col: RNAPaint | RNABase | -1) {
         this._currentColor = col;
     }
 
-    public get currentColor(): RNAPaint | RNABase {
+    public get currentColor(): RNAPaint | RNABase | -1 {
         return this._currentColor;
     }
 
@@ -569,7 +569,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._strandLabel.display.visible = false;
     }
 
-    public parseCommand(command: RNAPaint | RNABase, closestIndex: number): [string, PuzzleEditOp, RNABase[]?] | null {
+    public parseCommand(
+        command: RNAPaint | RNABase | -1,
+        closestIndex: number
+    ): [string, PuzzleEditOp, RNABase[]?] | null {
         switch (command) {
             case RNAPaint.ADD_BASE:
                 return PoseUtil.addBaseWithIndex(closestIndex, this._pairs);
@@ -4468,7 +4471,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _energyTextLayer: Container;
 
     private _coloring: boolean = false;
-    private _currentColor: RNABase | RNAPaint = RNABase.URACIL;
+    private _currentColor: RNABase | RNAPaint | -1 = RNABase.URACIL;
     private _lastColoredIndex: number;
     private _lockUpdated: boolean;
     private _bindingSiteUpdated: boolean;
