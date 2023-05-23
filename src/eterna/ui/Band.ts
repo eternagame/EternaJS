@@ -91,6 +91,21 @@ export default class Band extends ContainerObject implements Updatable {
         Band._satelliteWeakerInvert = render(90, ColorUtil.colorTransform(1, 1, 1, 0.4, 0, 0, 0, 0));
     }
 
+    public static dispose() {
+        // @ts-expect-error Ok to remove on shutdown
+        delete Band._satelliteBitmap;
+        // @ts-expect-error Ok to remove on shutdown
+        delete Band._satelliteInvert;
+        // @ts-expect-error Ok to remove on shutdown
+        delete Band._satelliteStrongerBitmap;
+        // @ts-expect-error Ok to remove on shutdown
+        delete Band._satelliteStrongerInvert;
+        // @ts-expect-error Ok to remove on shutdown
+        delete Band._satelliteWeakerBitmap;
+        // @ts-expect-error Ok to remove on shutdown
+        delete Band._satelliteWeakerInvert;
+    }
+
     private readonly _st0: Sprite;
     private readonly _st1: Sprite;
     private readonly _movDist: number;

@@ -3,11 +3,6 @@ import Setting from './Setting';
 
 export default abstract class Settings {
     protected constructor(namespace: string) {
-        if (Settings.ALL_NAMESPACES.has(namespace)) {
-            throw new Error(`Settings namespace '${namespace}' already taken`);
-        }
-        Settings.ALL_NAMESPACES.add(namespace);
-
         this._namespace = storejs.namespace(namespace);
     }
 
@@ -45,6 +40,4 @@ export default abstract class Settings {
 
     protected readonly _namespace: StoreJsAPI;
     protected readonly _allSettings: Set<string> = new Set();
-
-    protected static readonly ALL_NAMESPACES: Set<string> = new Set();
 }

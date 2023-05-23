@@ -266,8 +266,12 @@ export default class SolutionManager {
         return newsol;
     }
 
+    public static dispose() {
+        this._instance = null;
+    }
+
     private _solutions: Solution[] = [];
     private _hairpins: string[] = [];
 
-    private static _instance: SolutionManager;
+    private static _instance: SolutionManager | null;
 }

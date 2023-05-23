@@ -76,6 +76,13 @@ export default class BaseGlow extends Sprite {
         }
     }
 
+    public static dispose() {
+        // @ts-expect-error Ok to remove on shutdown
+        delete BaseGlow._textures;
+        // @ts-expect-error Ok to remove on shutdown
+        delete BaseGlow._texturesWrong;
+    }
+
     private _animStartTime: number = -1;
     private _isWrong: boolean = false;
     private _backward: boolean = false;

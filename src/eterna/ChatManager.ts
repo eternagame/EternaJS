@@ -67,6 +67,11 @@ export default class ChatManager {
         this.chatVisibilityChanged.emit({show, bound: this._chatbox.getBoundingClientRect()});
     }
 
+    public dispose() {
+        this.pushHideChat();
+        if (this._chatbox) this._chatbox.innerHTML = '';
+    }
+
     public readonly chatVisibilityChanged: Signal<{show:boolean, bound:{
         x:number,
         y:number,

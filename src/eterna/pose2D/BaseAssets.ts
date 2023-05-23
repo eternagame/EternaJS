@@ -426,6 +426,43 @@ export default class BaseAssets {
         return textures[(origLength * sizeNum + ii)];
     }
 
+    public static dispose() {
+        // @ts-expect-error Ok to remove on shutdown
+        delete BaseAssets._inited;
+        // @ts-expect-error Ok to remove on shutdown
+        delete BaseAssets._baseABitmaps;
+        // @ts-expect-error Ok to remove on shutdown
+        delete BaseAssets._baseUBitmaps;
+        // @ts-expect-error Ok to remove on shutdown
+        delete BaseAssets._baseGBitmaps;
+        // @ts-expect-error Ok to remove on shutdown
+        delete BaseAssets._baseCBitmaps;
+        // @ts-expect-error Ok to remove on shutdown
+        delete BaseAssets._constrainedGlowData;
+        // @ts-expect-error Ok to remove on shutdown
+        delete BaseAssets._unconstrainedGlowData;
+        // @ts-expect-error Ok to remove on shutdown
+        delete BaseAssets._lockBitmaps;
+        // @ts-expect-error Ok to remove on shutdown
+        delete BaseAssets._backboneBodyData;
+        // @ts-expect-error Ok to remove on shutdown
+        delete BaseAssets._backboneMidData;
+        // @ts-expect-error Ok to remove on shutdown
+        delete BaseAssets._satelliteData;
+        // @ts-expect-error Ok to remove on shutdown
+        delete BaseAssets._satelliteWeakerData;
+        // @ts-expect-error Ok to remove on shutdown
+        delete BaseAssets._satelliteStrongerData;
+        // @ts-expect-error Ok to remove on shutdown
+        delete BaseAssets._barcodeData;
+        // @ts-expect-error Ok to remove on shutdown
+        delete BaseAssets._barcodeMidData;
+        // @ts-expect-error Ok to remove on shutdown
+        delete BaseAssets._barcodeMinData;
+        // @ts-expect-error Ok to remove on shutdown
+        delete BaseAssets._sparkBitmaps;
+    }
+
     private static _inited: boolean;
 
     // Base type specific graphics

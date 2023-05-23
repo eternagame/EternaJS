@@ -4,11 +4,6 @@ export type SaveStoreItem = [number, number[], ...string[]];
 
 export default class SaveGameManager {
     constructor(namespace: string) {
-        if (SaveGameManager.ALL_NAMESPACES.has(namespace)) {
-            throw new Error(`SaveGameManager namespace '${namespace}' already taken`);
-        }
-        SaveGameManager.ALL_NAMESPACES.add(namespace);
-
         this._store = localforage.createInstance({
             name: namespace
         });
@@ -30,6 +25,5 @@ export default class SaveGameManager {
         return this._store.clear();
     }
 
-    protected static readonly ALL_NAMESPACES: Set<string> = new Set();
     private _store: LocalForage;
 }

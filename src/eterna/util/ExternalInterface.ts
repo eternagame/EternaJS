@@ -335,6 +335,13 @@ export default class ExternalInterface {
         }
     }
 
+    public static dispose() {
+        ExternalInterface._scriptRoot = undefined;
+        ExternalInterface._curSyncScript = null;
+        ExternalInterface._noPendingScripts = null;
+        ExternalInterface._preloadedScripts = [];
+    }
+
     private static readonly _registeredContexts: RegisteredCtx[] = [];
     private static readonly _currentCallbackNames = new Set<string>();
     private static readonly _pendingScripts: PendingScript[] = [];

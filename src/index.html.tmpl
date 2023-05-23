@@ -74,26 +74,41 @@
         }
     }
 
-    const app = new EternaApp({
-        containerID: containerID,
-        chatboxID: "chat-container",
-        width: appContainer.clientWidth,
-        height: appContainer.clientHeight,
+    function createApp() {
+        let app = new EternaApp({
+            containerID: containerID,
+            chatboxID: "chat-container",
+            width: appContainer.clientWidth,
+            height: appContainer.clientHeight,
 
-        mode: params.get("mode"),
-        puzzleID: numberParam("puzzle"),
-        solutionID: numberParam("solution"),
-        puzzleEditNumTargets: numberParam("puzzleEditNumTargets"),
-        folderName: params.get("folder"),
-        sequence: params.get("sequence"),
-        designBrowserFilters: designBrowserFilters,
-    });
-    window.app = app;
-    app.run();
+            mode: params.get("mode"),
+            puzzleID: numberParam("puzzle"),
+            solutionID: numberParam("solution"),
+            puzzleEditNumTargets: numberParam("puzzleEditNumTargets"),
+            folderName: params.get("folder"),
+            sequence: params.get("sequence"),
+            designBrowserFilters: designBrowserFilters,
+        });
+        window.app = app;
+        app.run();
 
-    window.addEventListener("resize", () => {
-        app.resize(appContainer.clientWidth, appContainer.clientHeight);
-    });
+        let resize = () => {
+            app.resize(appContainer.clientWidth, appContainer.clientHeight);
+        }
+
+        window.addEventListener("resize", resize);
+
+        window.stopApp = () => {
+            window.removeEventListener("resize", resize);
+            resize = undefined;
+            app.disposeNow();
+            delete window.app;
+            app = undefined;
+        }
+    }
+
+    window.createApp = createApp;
+    createApp();
 </script>
 </body>
 </html>

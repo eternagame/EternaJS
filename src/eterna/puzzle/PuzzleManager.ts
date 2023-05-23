@@ -447,9 +447,13 @@ export default class PuzzleManager {
         return puzzle;
     }
 
+    public static dispose() {
+        PuzzleManager._instance = null;
+    }
+
     private _puzzles: Puzzle[] = [];
 
-    private static _instance: PuzzleManager;
+    private static _instance: PuzzleManager | null;
 
     /* eslint-disable max-len */
     private static readonly OBJECTIVE_877668 = '[{"type":"single","secstruct":".....................(((((............)))))"},{"type":"aptamer","site":[2,3,4,5,6,7,8,9,18,19,20,21,22,23,24],"concentration":100,"secstruct":"(((......(((....))).....)))................"}]';

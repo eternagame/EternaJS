@@ -87,5 +87,10 @@ export default class BitmapManager {
         return bitmap;
     }
 
+    public static dispose() {
+        // @ts-expect-error Ok to remove on shutdown
+        delete BitmapManager._textBitmaps;
+    }
+
     private static readonly _textBitmaps: Map<string, Map<string, Texture>> = new Map();
 }

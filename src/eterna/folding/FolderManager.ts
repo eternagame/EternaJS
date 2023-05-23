@@ -81,6 +81,10 @@ export default class FolderManager {
         return Eterna.settings.lastUsedFolder.value || Vienna.NAME;
     }
 
+    public static dispose() {
+        FolderManager._instance = null;
+    }
+
     private _folders: Folder[] = [];
-    private static _instance: FolderManager;
+    private static _instance: FolderManager | null;
 }

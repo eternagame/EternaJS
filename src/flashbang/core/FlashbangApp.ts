@@ -177,6 +177,8 @@ export default class FlashbangApp {
 
         if (this._pixi) this._pixi.destroy();
         this._pixi = null;
+
+        Flashbang.dispose();
     }
 
     protected onKeyboardEvent(e: KeyboardEvent): void {

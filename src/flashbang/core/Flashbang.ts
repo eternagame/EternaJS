@@ -47,6 +47,15 @@ export default class Flashbang {
         Flashbang._sound = new SoundManager();
     }
 
+    public static dispose() {
+        // @ts-expect-error Ok to remove on shutdown
+        delete Flashbang._app;
+        // @ts-expect-error Ok to remove on shutdown
+        delete Flashbang._eventSystem;
+        // @ts-expect-error Ok to remove on shutdown
+        delete Flashbang._sound;
+    }
+
     private static _app: FlashbangApp;
     private static _eventSystem: EventSystem | null;
     private static _sound: SoundManager;

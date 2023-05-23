@@ -36,6 +36,10 @@ export default class LayoutEngineManager {
         return null;
     }
 
+    public static dispose() {
+        LayoutEngineManager._instance = null;
+    }
+
     private _layoutEngines: LayoutEngine[] = [];
-    private static _instance: LayoutEngineManager;
+    private static _instance: LayoutEngineManager | null;
 }

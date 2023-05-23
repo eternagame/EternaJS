@@ -38,6 +38,11 @@ import LinearFoldV from './folding/LinearFoldV';
 import Folder from './folding/Folder';
 import RSignals from './rscript/RSignals';
 import Fonts from './util/Fonts';
+import BaseAssets from './pose2D/BaseAssets';
+import BitmapManager from './resources/BitmapManager';
+import ROPWait from './rscript/ROPWait';
+import Band from './ui/Band';
+import BaseGlow from './vfx/BaseGlow';
 
 export enum PuzzleID {
     FunAndEasy = 4350940,
@@ -261,6 +266,27 @@ export default class EternaApp extends FlashbangApp {
                 this.popLoadingMode();
                 Eterna.onFatalError(err);
             });
+    }
+
+    protected disposeNow(): void {
+        super.disposeNow();
+        // @ts-expect-error Ok to remove on shutdown
+        delete Eterna.app;
+        Eterna.chat.dispose();
+        // @ts-expect-error Ok to remove on shutdown
+        delete Eterna.chat;
+        if (Eterna.gameDiv) Eterna.gameDiv.innerHTML = '';
+        FolderManager.dispose();
+        LayoutEngineManager.dispose();
+        PuzzleManager.dispose();
+        SolutionManager.dispose();
+        ExternalInterface.dispose();
+        BaseAssets.dispose();
+        BitmapManager.dispose();
+        Band.dispose();
+        ROPWait.dispose();
+        BaseGlow.dispose();
+        utils.destroyTextureCache();
     }
 
     /** Creates a PoseEditMode and removes all other modes from the stack */

@@ -359,6 +359,10 @@ export default class ROPWait extends RScriptOp {
         ROPWait.batchDeregister(clearOps);
     }
 
+    public static dispose() {
+        ROPWait.clearRopWait();
+    }
+
     private readonly _waitType: ROPWaitType;
     private readonly _elements: (number | string)[] = [];
 
