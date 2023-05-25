@@ -66,11 +66,13 @@ export default class FeedbackViewMode extends GameMode {
             .down(Bitmaps.ImgHome);
         this._homeButton.display.position.set(18, 10);
         this._homeButton.clicked.connect(() => {
-            if (Eterna.MOBILE_APP) {
-                Assert.assertIsDefined(window.frameElement);
-                window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
+            if (window.parent !== window) {
+                if (window.frameElement) {
+                    window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
+                }
+                window.parent.postMessage({type: 'navigate', detail: '/'}, '*');
             } else {
-                window.location.href = EternaURL.createURL({page: 'home'});
+                window.open(EternaURL.createURL({page: 'home'}), '_self');
             }
         });
         this.addObject(this._homeButton, this.uiLayer);

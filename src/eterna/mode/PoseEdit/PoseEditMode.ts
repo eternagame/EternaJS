@@ -226,10 +226,13 @@ export default class PoseEditMode extends GameMode {
             .down(Bitmaps.ImgHome);
         this._homeButton.display.position.set(18, 10);
         this._homeButton.clicked.connect(() => {
-            if (Eterna.MOBILE_APP) {
-                if (window.frameElement) window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
+            if (window.parent !== window) {
+                if (window.frameElement) {
+                    window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
+                }
+                window.parent.postMessage({type: 'navigate', detail: '/'}, '*');
             } else {
-                window.location.href = EternaURL.createURL({page: 'home'});
+                window.open(EternaURL.createURL({page: 'home'}), '_self');
             }
         });
         this.addObject(this._homeButton, this.uiLayer);
@@ -2617,7 +2620,7 @@ export default class PoseEditMode extends GameMode {
         if (this._puzzle.nextPuzzlePage !== null && this._puzzle.nextPuzzlePage > 0) {
             missionClearedPanel.nextButton.clicked.connect(() => {
                 keepPlaying();
-                if (Eterna.MOBILE_APP) {
+                if (window.parent !== window) {
                     if (window.frameElement) {
                         window.frameElement.dispatchEvent(
                             new CustomEvent('navigate', {detail: `/puzzles/${this._puzzle.nextPuzzlePage}`})
@@ -2642,12 +2645,20 @@ export default class PoseEditMode extends GameMode {
                     Eterna.chat.popHideChat();
                     Assert.assertIsDefined(this.modeStack);
                     this.modeStack.changeMode(new PoseEditMode(nextPuzzle, {}));
-                    const oldURL = window.location.toString();
-                    const newURL = Eterna.DEV_MODE
-                        ? oldURL.replace(/puzzle=\d+?$/, `puzzle=${nextPuzzle.nodeID}`)
-                        : oldURL.replace(/\d+(\/?)$/, `${nextPuzzle.nodeID.toString()}$1`);
-                    // eslint-disable-next-line no-restricted-globals
-                    if (!Eterna.MOBILE_APP) history.pushState(null, '', newURL);
+                    if (window.parent !== window) {
+                        if (window.frameElement) {
+                            window.frameElement.dispatchEvent(
+                                new CustomEvent('puzzleChange', {detail: nextPuzzle.nodeID.toString()})
+                            );
+                        }
+                        window.parent.postMessage({type: 'puzzleChange', detail: nextPuzzle.nodeID.toString()}, '*');
+                    } else {
+                        const oldURL = window.location.toString();
+                        const newURL = Eterna.DEV_MODE
+                            ? oldURL.replace(/puzzle=\d+?$/, `puzzle=${nextPuzzle.nodeID}`)
+                            : oldURL.replace(/\d+(\/?)$/, `${nextPuzzle.nodeID.toString()}$1`);
+                        window.history.pushState(null, '', newURL);
+                    }
                 } catch (err) {
                     log.error(err);
                     throw new Error(`Failed to load next puzzle - ${err}`);
@@ -2656,10 +2667,11 @@ export default class PoseEditMode extends GameMode {
         } else {
             missionClearedPanel.nextButton.clicked.connect(() => {
                 keepPlaying();
-                if (Eterna.MOBILE_APP) {
+                if (window.parent !== window) {
                     if (window.frameElement) {
                         window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
                     }
+                    window.parent.postMessage({type: 'navigate', detail: '/'}, '*');
                 } else {
                     window.open(EternaURL.getFeedURL(), '_self');
                 }

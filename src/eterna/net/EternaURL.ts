@@ -16,9 +16,10 @@ export default class EternaURL {
     'http://getsatisfaction.com/eternagame/topics/the_strategy_guide_to_solve_eterna_puzzles';
 
     public static getFeedURL(): string {
-        return Eterna.playerID === 0
-            ? EternaURL.createURL({page: 'register'})
-            : EternaURL.createURL({page: 'me'});
+        return EternaURL.createURL({page: 'home'});
+        // return Eterna.playerID === 0
+        //     ? EternaURL.createURL({page: 'register'})
+        //     : EternaURL.createURL({page: 'me'});
     }
 
     /**

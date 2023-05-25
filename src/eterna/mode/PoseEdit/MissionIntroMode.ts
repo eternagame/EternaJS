@@ -60,11 +60,13 @@ export default class MissionIntroMode extends AppMode {
             .down(Bitmaps.ImgHome);
         homeButton.display.position.set(18, 10);
         homeButton.clicked.connect(() => {
-            if (Eterna.MOBILE_APP) {
-                Assert.assertIsDefined(window.frameElement);
-                window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
+            if (window.parent !== window) {
+                if (window.frameElement) {
+                    window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
+                }
+                window.parent.postMessage({type: 'navigate', detail: '/'}, '*');
             } else {
-                window.location.href = EternaURL.createURL({page: 'home'});
+                window.open(EternaURL.createURL({page: 'home'}), '_self');
             }
         });
         this.addObject(homeButton, this.container);
