@@ -100,7 +100,7 @@
             if (
                 event.origin === "https://eternagame.org"
                 || event.origin === "https://eternadev.org"
-                || event.origin === "https://localhost:8080"
+                || event.origin === "http://localhost:8080"
             ) {
                 if (event.data.type === "testTutorial") {
                     appContainer.test_tutorial(event.data.puzzleId, event.data.script);
