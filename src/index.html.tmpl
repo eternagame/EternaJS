@@ -96,10 +96,24 @@
             app.resize(appContainer.clientWidth, appContainer.clientHeight);
         }
 
+        let messageHandler = (event) => {
+            if (
+                event.origin === "https://eternagame.org"
+                || event.origin === "https://eternadev.org"
+                || event.origin === "https://localhost:8080"
+            ) {
+                if (event.data.type === "testTutorial") {
+                    appContainer.test_tutorial(event.data.puzzleId, event.data.script);
+                }
+            }
+        }
+
         window.addEventListener("resize", resize);
+        window.addEventListener("message", messageHandler);
 
         window.stopApp = () => {
             window.removeEventListener("resize", resize);
+            window.removeEventListener("message", messageHandler);
             resize = undefined;
             app.disposeNow();
             delete window.app;
