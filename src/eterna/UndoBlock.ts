@@ -174,7 +174,31 @@ export default class UndoBlock {
             folderName_: this._folderName,
             sequence_: this._sequence.baseArray,
             pairs_array_: this.mapToJSON(this.pairsOfPairs(this._pairsArray)),
-            params_array_: this.mapToJSON(this._paramsArray),
+            params_array_: this.mapToJSON(this._paramsArray).map<[boolean, Param[][]]>(
+                // Limit the amount of data that gets cached. Not only is the dot plot potentially
+                // very large, but a handful of parameters are recomputed at multiple temperatures
+                // in order to service the melt plot. The aggregate size of the cache causes us
+                // some perf issues, so we're going to say it's OK for these to be recalculated
+                // if they're actually needed
+                ([pks, paramsAtTemps]) => [
+                    pks,
+                    paramsAtTemps.map<Param[]>(
+                        (params, temp) => (
+                            temp === EPars.DEFAULT_TEMPERATURE
+                                ? params.map<Param>(
+                                    (param, id) => (
+                                        id !== UndoBlockParam.DOTPLOT
+                                        && id !== UndoBlockParam.DOTPLOT_BITMAP
+                                        && id !== UndoBlockParam.MELTPLOT_BITMAP
+                                            ? param
+                                            : null
+                                    )
+                                )
+                                : []
+                        )
+                    )
+                ]
+            ),
             stable_: this._stable,
             target_oligo_: this._targetOligo,
             target_oligos_: this._targetOligos,
