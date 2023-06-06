@@ -137,8 +137,8 @@
       ret['result'] = true
       ret['eval_time'] = (new Date()).getTime() - _global_timer.getTime();
       return ret
-    catch Error
-      ret['cause'] = Error.message
+    catch err
+      ret['cause'] = err.message
       ret['result'] = false
       ret['eval_time'] = (new Date()).getTime() - _global_timer.getTime();
       return ret
