@@ -40,8 +40,7 @@
 
   out : (result) ->
     $result = $('#result')
-    value = $result.get(0).innerHTML
-    $result.html(value + result)
+    $result.append(result)
     
   outln : (result) ->
     @out result
