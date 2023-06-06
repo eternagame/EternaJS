@@ -1171,6 +1171,8 @@ export default class PoseEditMode extends GameMode {
     }
 
     private buildScriptInterface(): void {
+        this._scriptInterface.addCallback('get_puzzle_id', (): number => this._puzzle.nodeID);
+
         this._scriptInterface.addCallback('get_sequence_string', (): string => this.getPose(0).getSequenceString());
 
         this._scriptInterface.addCallback('get_custom_numbering_to_index',
