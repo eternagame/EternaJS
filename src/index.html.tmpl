@@ -92,9 +92,11 @@
         window.app = app;
         app.run();
 
-        let resize = () => {
-            app.resize(appContainer.clientWidth, appContainer.clientHeight);
-        }
+        const resizeObserver = new ResizeObserver(() => {
+            setTimeout(() => app.resize(appContainer.clientWidth, appContainer.clientHeight));
+        });
+
+        resizeObserver.observe(appContainer);
 
         let messageHandler = (event) => {
             if (
@@ -108,13 +110,12 @@
             }
         }
 
-        window.addEventListener("resize", resize);
         window.addEventListener("message", messageHandler);
 
         window.stopApp = () => {
-            window.removeEventListener("resize", resize);
             window.removeEventListener("message", messageHandler);
-            resize = undefined;
+            resizeObserver.disconnect();
+            resizeObserver = undefined;
             app.disposeNow();
             delete window.app;
             app = undefined;
