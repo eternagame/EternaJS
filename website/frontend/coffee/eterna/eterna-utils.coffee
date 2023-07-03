@@ -584,6 +584,22 @@
         thumbnail_canvas = div.children()
         rna_layout_layer.draw_tree_in_canvas(thumbnail_canvas[0], using_line, line_width)
         return rna_layout_layer
+
+  init_home_page_slick : () ->
+    $('.home-page-slick').slick({
+      variableWidth:true,
+      infinite:true,
+      slidesToScroll:1,
+      autoplay:true,
+      autoplaySpeed:3500,
+      pauseOnFocus:true,
+      pauseOnHover:true,
+      initialSlide:0,
+      centerMode:true,
+      dots:true,
+      #initialSlide: Math.random() > 0.5 ? 0 : 1
+      #speed:400
+    })
 }
 
 class @RNATreeNode 

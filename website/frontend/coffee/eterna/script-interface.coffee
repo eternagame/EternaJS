@@ -40,7 +40,8 @@
 
   out : (result) ->
     $result = $('#result')
-    $result.append(result)
+    value = $result.get(0).innerHTML
+    $result.html(value + result)
     
   outln : (result) ->
     @out result
@@ -136,8 +137,8 @@
       ret['result'] = true
       ret['eval_time'] = (new Date()).getTime() - _global_timer.getTime();
       return ret
-    catch err
-      ret['cause'] = err.message
+    catch Error
+      ret['cause'] = Error.message
       ret['result'] = false
       ret['eval_time'] = (new Date()).getTime() - _global_timer.getTime();
       return ret

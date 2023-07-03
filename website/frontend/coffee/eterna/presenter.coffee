@@ -238,6 +238,19 @@
       )
     , fail_cb)
   
+  get_pubslist : (search, success_cb, fail_cb) ->
+    if !success_cb
+      return
+      
+    query_params = {type:"pubslist", search:search}      
+    url = Application.GET_URI
+    
+    AjaxManager.query("GET", url, query_params, (response) =>
+      EternaUtils.process_response(response, (data) =>
+        success_cb(data)
+      )  
+    , fail_cb)
+    
   get_playerpubslist : (skip, size, search, success_cb, fail_cb) ->
     if !success_cb
       return
@@ -522,6 +535,30 @@
       )      
     )  
   
+  get_puzzle_of_the_week: (success_cb, fail_cb) ->
+    if !success_cb
+      return
+
+    query_params = {type:"puzzle_of_the_week"}
+    url = Application.GET_URI
+    AjaxManager.query("GET", url, query_params, (response) =>
+      EternaUtils.process_response(response, (data) =>
+        success_cb(data)
+      )      
+    ) 
+
+  get_daily_covid_puzzle: (success_cb, fail_cb) ->
+    if !success_cb
+      return
+
+    query_params = {type:"daily_covid"}
+    url = Application.GET_URI
+    AjaxManager.query("GET", url, query_params, (response) =>
+      EternaUtils.process_response(response, (data) =>
+        success_cb(data)
+      )      
+    )
+
   delete_cloud_lab : (nid, success_cb, fail_cb) ->
     query_params = {type:"delete_cloud_lab", nid:nid}
     url = Application.POST_URI
@@ -958,6 +995,7 @@
     
     AjaxManager.query("POST", url, params, (response) =>
       EternaUtils.process_response(response, (data) =>
+        Application.CURRENT_USER['Survey'] = data['survey']
         success_cb(data)
       )
     )
@@ -1002,9 +1040,9 @@
       )
     )
   
-  get_script_lists_with_sort : (_skip, _size, _type, _sort, _search, success_cb) ->
+  get_script_lists_with_sort : (_skip, _size, _type, _sort, _search, _favorties_only, success_cb) ->
     url = Application.GET_URI
-    params = {type:"script", need:"lists", skip:_skip, size:_size, script_type:_type, search:_search, sort:_sort}
+    params = {type:"script", need:"lists", skip:_skip, size:_size, script_type:_type, search:_search, sort:_sort, favorites_only: _favorties_only}
     AjaxManager.query("GET", url, params, (response) =>
       EternaUtils.process_response(response, (data) =>
         success_cb(data)
@@ -1046,7 +1084,7 @@
     params = {type:"script", need:"script", id:script_id}
     return AjaxManager.querySync("GET", url, params)
   
-  post_script : (nid, title, source, type, input, samples, description, success_cb) ->
+  post_script : (nid, title, source, type, is_private, input, samples, description, success_cb) ->
     url = Application.POST_URI
     params = {}
     if nid?
@@ -1055,6 +1093,7 @@
     params['need'] = "save"
     params['title'] = title
     params['script_type'] = type
+    params['is_private'] = is_private
     params['source'] = source
     params['input'] = input
     params['author'] = {id:Application.CURRENT_USER.uid, name:Application.CURRENT_USER.name}
@@ -1066,6 +1105,26 @@
         success_cb(data)
       )
     )
+
+  favorite_script : (nid, should_favorite, success_cb) ->
+    url = Application.POST_URI
+    params = { 'type': "script", need: 'favorite', 'nid': nid, 'should_favorite': should_favorite }
+    AjaxManager.query("POST", url, params, (response) =>
+      EternaUtils.process_response(response, (data) =>
+        success_cb(data)
+      )
+    )
+
+  reaffirm_favorite : (nid, success_cb) ->
+    url = Application.POST_URI
+    params = { 'type': "script", need: 'reaffirm', 'nid': nid }
+
+    AjaxManager.query("POST", url, params, (response) =>
+      EternaUtils.process_response(response, (data) =>
+        success_cb(data)
+      )
+    )
+
   increase_pageview : (id, success_cb) ->
     url = Application.POST_URI
     params = {type:"script", need:"increase_pageview", id:id}
@@ -1074,6 +1133,7 @@
         success_cb(data)      
       )
     )
+
   evaluate_script : (input, target_info, code, success_cb, fail_cb) ->
     url = Application.SCRIPT_URI + "/code/"
     params = {target_info:target_info, input:input, code:code}
@@ -1161,5 +1221,4 @@
         success_cb(data)
       )
     )
-
 }
