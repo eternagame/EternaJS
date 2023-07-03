@@ -96,6 +96,7 @@
             setTimeout(() => app.resize(appContainer.clientWidth, appContainer.clientHeight));
         });
 
+        // Hack to fix bottom of the page being cut off on iOS ~16.5.1
         setTimeout(() => {
             app.resize(appContainer.clientWidth + 1, appContainer.clientHeight + 1);
             app.resize(appContainer.clientWidth, appContainer.clientHeight);
