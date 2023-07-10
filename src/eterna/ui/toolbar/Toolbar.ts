@@ -684,7 +684,7 @@ export default class Toolbar extends ContainerObject {
             draggingButton: ToolbarButton
         } = {name: 'initial'};
 
-        const captureCallback = (e: FederatedPointerEvent | FederatedWheelEvent) => {
+        const captureCallback = (e: FederatedPointerEvent | PointerEvent | FederatedWheelEvent) => {
             switch (state.name) {
                 case 'initial':
                     // This should never happen because we destroy the PointerCapture before resetting the
@@ -698,7 +698,10 @@ export default class Toolbar extends ContainerObject {
                         // 5px is rather arbitrary for "has started to move", but should be fine. It's not super
                         // noticeable, and if we run into issues where users find clicks being interpreted as drags
                         // (because they're actually moving their mouse/finger slightly), we can increase
-                        if (Vector2.distance(state.downPos.x, state.downPos.y, e.global.x, e.global.y) > 5) {
+                        if (Vector2.distance(
+                            state.downPos.x, state.downPos.y,
+                            (e as FederatedPointerEvent).global.x, (e as FederatedPointerEvent).global.y
+                        ) > 5) {
                             const buttonCopy = button.clone();
                             // Temporarily own this object + put it on the top of the display stack
                             Assert.assertIsDefined(this.mode);
@@ -722,7 +725,7 @@ export default class Toolbar extends ContainerObject {
                     e.stopPropagation();
                     switch (e.type) {
                         case 'pointermove': {
-                            state.draggingButton.display.position.copyFrom(e.global);
+                            state.draggingButton.display.position.copyFrom((e as FederatedPointerEvent).global);
                             const existsInHotbar = this._leftBay.isToolActive(button.id)
                                 || this._rightBay.isToolActive(button.id);
                             this._leftBay.updateHoverIndicator(e as FederatedPointerEvent, existsInHotbar);
@@ -781,7 +784,7 @@ export default class Toolbar extends ContainerObject {
                             state.capture.destroySelf();
                             // Prevent button click from firing, as a pointerTap will be fired on the button
                             // after we close our pointer capture since it was the last thing to have a pointer down
-                            if (e.path.includes(button.container)) {
+                            if ((e as FederatedPointerEvent).path.includes(button.container)) {
                                 this.pointerTapCapture.connect((tapE) => {
                                     tapE.stopPropagation();
                                 }).once();

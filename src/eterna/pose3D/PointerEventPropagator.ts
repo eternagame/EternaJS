@@ -48,11 +48,15 @@ export default class PointerEventPropagator extends GameObject {
         }
     }
 
-    private handleEvent(e: FederatedPointerEvent | FederatedWheelEvent) {
+    private handleEvent(e: FederatedPointerEvent | PointerEvent | FederatedWheelEvent) {
         e.stopPropagation();
         // Apparently Pixi may actually provide a `Touch` as a nativeEvent, not a `TouchEvent`.
         // See https://github.com/pixijs/pixijs/issues/9407
-        if ('stopImmediatePropagation' in e.nativeEvent) {
+        if (e instanceof PointerEvent) {
+            if ('stopImmediatePropagation' in e) {
+                e.stopImmediatePropagation();
+            }
+        } else if ('stopImmediatePropagation' in e.nativeEvent) {
             e.nativeEvent.stopImmediatePropagation();
         }
 
@@ -78,8 +82,10 @@ export default class PointerEventPropagator extends GameObject {
             const touchEventType = this.pointerEventTypeToTouchEventType(e.type);
             if (!touchEventType) return;
 
-            const originalTouch = e.nativeEvent instanceof TouchEvent
-                ? this.getTouchById(e.nativeEvent, e.pointerId) : e.nativeEvent;
+            // eslint-disable-next-line no-nested-ternary
+            const originalTouch = e instanceof PointerEvent ? e
+                : e.nativeEvent instanceof TouchEvent ? this.getTouchById(e.nativeEvent, e.pointerId)
+                    : e.nativeEvent;
             // This shouldn't be possible, amd would likely cause issues since the position would be
             // set to 0, 0 or something like that
             if (!originalTouch) throw new Error('Forwarding touch event where the original touch could not be found');

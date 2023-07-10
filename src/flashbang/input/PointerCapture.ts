@@ -17,7 +17,10 @@ import {
  * (only pointer and wheel).
  */
 export default class PointerCapture extends GameObject {
-    constructor(root: DisplayObject | null, onEvent: (e: FederatedPointerEvent | FederatedWheelEvent) => void) {
+    constructor(
+        root: DisplayObject | null,
+        onEvent: (e: FederatedPointerEvent | PointerEvent | FederatedWheelEvent) => void
+    ) {
         super();
         this._root = root;
         this._onEvent = onEvent;
@@ -38,12 +41,12 @@ export default class PointerCapture extends GameObject {
         this.regs.add(this.mode.mouseWheelCapture.connect((e) => this.handleEvent(e)));
     }
 
-    private handleEvent(e: FederatedPointerEvent | FederatedWheelEvent) {
-        if (!this._root || (e.path && !e.path.includes(this._root))) {
+    private handleEvent(e: FederatedPointerEvent | PointerEvent | FederatedWheelEvent) {
+        if (e instanceof PointerEvent || !this._root || (e.path && !e.path.includes(this._root))) {
             this._onEvent(e);
         }
     }
 
     private _root: DisplayObject | null;
-    private _onEvent: ((e: FederatedPointerEvent | FederatedWheelEvent) => void);
+    private _onEvent: ((e: FederatedPointerEvent | PointerEvent | FederatedWheelEvent) => void);
 }

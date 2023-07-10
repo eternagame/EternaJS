@@ -52,7 +52,7 @@ export default class SceneObject<T extends DisplayObject = DisplayObject> extend
         return this.getPointerTarget().pointerUpOutside;
     }
 
-    public get pointerCancel(): SignalView<FederatedPointerEvent> {
+    public get pointerCancel(): SignalView<PointerEvent> {
         return this.getPointerTarget().pointerCancel;
     }
 
@@ -96,7 +96,7 @@ export default class SceneObject<T extends DisplayObject = DisplayObject> extend
         return this.getPointerTarget().pointerUpOutsideCapture;
     }
 
-    public get pointerCancelCapture(): SignalView<FederatedPointerEvent> {
+    public get pointerCancelCapture(): SignalView<PointerEvent> {
         return this.getPointerTarget().pointerCancelCapture;
     }
 

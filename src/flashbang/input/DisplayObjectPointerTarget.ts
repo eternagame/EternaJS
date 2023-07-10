@@ -2,6 +2,9 @@ import {DisplayObject} from 'pixi.js';
 import {SignalView} from 'signals';
 import EventSignal from 'flashbang/util/EventSignal';
 import {FederatedPointerEvent, FederatedWheelEvent} from '@pixi/events';
+import ElementSignal from 'flashbang/util/ElementSignal';
+import Assert from 'flashbang/util/Assert';
+import Flashbang from 'flashbang/core/Flashbang';
 import PointerTarget from './PointerTarget';
 
 export default class DisplayObjectPointerTarget implements PointerTarget {
@@ -68,9 +71,11 @@ export default class DisplayObjectPointerTarget implements PointerTarget {
         return this._pointerUpOutside;
     }
 
-    public get pointerCancel(): SignalView<FederatedPointerEvent> {
+    public get pointerCancel(): SignalView<PointerEvent> {
         if (this._pointerCancel == null) {
-            this._pointerCancel = new EventSignal(this.target, 'pointercancel');
+            // EventSystem never implemented pointercancel: https://github.com/pixijs/pixijs/issues/9538
+            Assert.assertIsDefined(Flashbang.app.pixi);
+            this._pointerCancel = new ElementSignal(Flashbang.app.pixi.view, 'pointercancel');
         }
         return this._pointerCancel;
     }
@@ -145,9 +150,11 @@ export default class DisplayObjectPointerTarget implements PointerTarget {
         return this._pointerUpOutsideCapture;
     }
 
-    public get pointerCancelCapture(): SignalView<FederatedPointerEvent> {
+    public get pointerCancelCapture(): SignalView<PointerEvent> {
         if (this._pointerCancelCapture == null) {
-            this._pointerCancelCapture = new EventSignal(this.target, 'pointercancelcapture');
+            // EventSystem never implemented pointercancel: https://github.com/pixijs/pixijs/issues/9538
+            Assert.assertIsDefined(Flashbang.app.pixi);
+            this._pointerCancelCapture = new ElementSignal(Flashbang.app.pixi.view, 'pointercancel', true);
         }
         return this._pointerCancelCapture;
     }
@@ -175,7 +182,7 @@ export default class DisplayObjectPointerTarget implements PointerTarget {
     private _pointerMoved: EventSignal<FederatedPointerEvent>;
     private _pointerUp: EventSignal<FederatedPointerEvent>;
     private _pointerUpOutside: EventSignal<FederatedPointerEvent>;
-    private _pointerCancel: EventSignal<FederatedPointerEvent>;
+    private _pointerCancel: ElementSignal<'pointercancel'>;
     private _pointerTap: EventSignal<FederatedPointerEvent>;
     private _mouseWheel: EventSignal<FederatedWheelEvent>;
     private _pointerEnterCapture: EventSignal<FederatedPointerEvent>;
@@ -186,7 +193,7 @@ export default class DisplayObjectPointerTarget implements PointerTarget {
     private _pointerMovedCapture: EventSignal<FederatedPointerEvent>;
     private _pointerUpCapture: EventSignal<FederatedPointerEvent>;
     private _pointerUpOutsideCapture: EventSignal<FederatedPointerEvent>;
-    private _pointerCancelCapture: EventSignal<FederatedPointerEvent>;
+    private _pointerCancelCapture: ElementSignal<'pointercancel'>;
     private _pointerTapCapture: EventSignal<FederatedPointerEvent>;
     private _mouseWheelCapture: EventSignal<FederatedWheelEvent>;
 }

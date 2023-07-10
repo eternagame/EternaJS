@@ -75,6 +75,7 @@ export {default as Deferred} from './util/Deferred';
 export {default as DisplayUtil} from './util/DisplayUtil';
 export {default as Easing} from './util/Easing';
 export type {EasingFunc} from './util/Easing';
+export {default as ElementSignal} from './util/ElementSignal';
 export {default as ErrorUtil} from './util/ErrorUtil';
 export {default as EventSignal} from './util/EventSignal';
 export {default as LinkedList} from './util/LinkedList';

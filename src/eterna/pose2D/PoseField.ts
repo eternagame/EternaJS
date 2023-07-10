@@ -8,6 +8,7 @@ import debounce from 'lodash.debounce';
 import AnnotationManager from 'eterna/AnnotationManager';
 import GameWindow from 'eterna/ui/GameWindow';
 import {FederatedPointerEvent, FederatedWheelEvent} from '@pixi/events';
+import Eterna from 'eterna/Eterna';
 import Pose2D from './Pose2D';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
 import RNAAnchorObject from './RNAAnchorObject';
@@ -45,6 +46,9 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         );
         this.pointerUpOutside.connect(
             (e: FederatedPointerEvent) => this.onPointerUp(e)
+        );
+        this.pointerCancel.connect(
+            (e: PointerEvent) => this.onPointerUp(e)
         );
 
         Assert.assertIsDefined(this.mode);
@@ -210,8 +214,10 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         // don't fire the mouseup on them if we release over them, etc.
         if (!this._activePointerCapture) {
             this._activePointerCapture = new PointerCapture(this.display, (captured) => {
-                captured.stopPropagation();
-                this.display.emit(captured.type, captured);
+                if (captured.type !== 'pointercancel') {
+                    captured.stopPropagation();
+                    this.display.emit(captured.type, captured);
+                }
             });
             this.addObject(this._activePointerCapture);
         }
@@ -343,9 +349,16 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         );
     }
 
-    private onPointerUp(e: FederatedPointerEvent): void {
+    private onPointerUp(e: FederatedPointerEvent | PointerEvent): void {
         this._pose.doneColoring();
-        this._pose.onMouseMoved(e.global);
+        if (e instanceof FederatedPointerEvent) {
+            this._pose.onMouseMoved(e.global);
+        } else {
+            const p = new Point();
+            Assert.assertIsDefined(Eterna.app.pixi);
+            Eterna.app.pixi.renderer.events.mapPositionToPoint(p, e.clientX, e.clientY);
+            this._pose.onMouseMoved(p);
+        }
 
         const eventsToClear: number[] = [];
         this._interactionCache.forEach((_point, pointerId) => {

@@ -32,7 +32,7 @@ export default interface PointerTarget {
     pointerUpOutside: SignalView<FederatedPointerEvent>;
 
     /** Fired when a 'pointercancel' event is dispatched on the object */
-    pointerCancel: SignalView<FederatedPointerEvent>;
+    pointerCancel: SignalView<PointerEvent>;
 
     /** Fired when a 'pointertap' event is dispatched on the object */
     pointerTap: SignalView<FederatedPointerEvent>;
@@ -65,7 +65,7 @@ export default interface PointerTarget {
     pointerUpOutsideCapture: SignalView<FederatedPointerEvent>;
 
     /** Fired when a 'pointercancelcapture' event is dispatched on the object */
-    pointerCancelCapture: SignalView<FederatedPointerEvent>;
+    pointerCancelCapture: SignalView<PointerEvent>;
 
     /** Fired when a 'pointertapcapture' event is dispatched on the object */
     pointerTapCapture: SignalView<FederatedPointerEvent>;

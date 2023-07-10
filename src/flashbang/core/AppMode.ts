@@ -368,7 +368,7 @@ export default class AppMode implements PointerTarget {
         return this.getPointerTarget().pointerUpOutside;
     }
 
-    public get pointerCancel(): SignalView<FederatedPointerEvent> {
+    public get pointerCancel(): SignalView<PointerEvent> {
         return this.getPointerTarget().pointerCancel;
     }
 
@@ -412,7 +412,7 @@ export default class AppMode implements PointerTarget {
         return this.getPointerTarget().pointerUpOutsideCapture;
     }
 
-    public get pointerCancelCapture(): SignalView<FederatedPointerEvent> {
+    public get pointerCancelCapture(): SignalView<PointerEvent> {
         return this.getPointerTarget().pointerCancelCapture;
     }
 
