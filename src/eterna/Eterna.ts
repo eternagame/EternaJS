@@ -42,6 +42,8 @@ export default class Eterna {
     public static playerID: number;
     public static playerName: string;
 
+    public static noGame: boolean;
+
     public static setPlayer(name: string, id: number): void {
         this.playerName = name;
         this.playerID = id;

@@ -101,6 +101,12 @@ interface EternaAppParams {
     folderName?: string;
     sequence?: string;
     designBrowserFilters?: DesignBrowserFilter[];
+    noGame?: boolean;
+}
+
+export enum NoNextPuzzleBehavior {
+    RECOMMEND = 'recommend',
+    NOTHING = 'nothing'
 }
 
 interface ProcessedEternaAppParams extends EternaAppParams {
@@ -112,6 +118,7 @@ interface ProcessedEternaAppParams extends EternaAppParams {
     puzzleID: number;
     solutionID: number;
     puzzleEditNumTargets: number;
+    noGame: boolean;
 }
 
 /** Entry point for the game */
@@ -128,6 +135,7 @@ export default class EternaApp extends FlashbangApp {
         params.puzzleID = params.puzzleID || PuzzleID.Tutorial1;
         params.solutionID = params.solutionID || CloudLab19Solution.solutionID;
         params.puzzleEditNumTargets = params.puzzleEditNumTargets || 1;
+        params.noGame = params.noGame || false;
 
         this._params = params as ProcessedEternaAppParams;
 
@@ -189,6 +197,7 @@ export default class EternaApp extends FlashbangApp {
         Eterna.settings = new EternaSettings();
         Eterna.client = new GameClient(Eterna.SERVER_URL);
         Eterna.gameDiv = document.getElementById(this._params.containerID);
+        Eterna.noGame = this._params.noGame;
 
         // Without this, we stop the pointer events from propagating to NGL in Pose3D/PointerEventPropagator,
         // but the original mouse events will still get fired, so NGL will get confused since it tracks some

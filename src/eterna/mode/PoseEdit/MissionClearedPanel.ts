@@ -155,7 +155,7 @@ export default class MissionClearedPanel extends ContainerObject {
     }
 
     public createRankScroll(submissionRsp: SubmitSolutionData): void {
-        if (!RankScroll.hasRankScrollData(submissionRsp)) {
+        if (!RankScroll.hasRankScrollData(submissionRsp) || Eterna.noGame) {
             return;
         }
 
@@ -188,7 +188,7 @@ export default class MissionClearedPanel extends ContainerObject {
 
     private doLayout(): void {
         this._rankScrollContainer.visible = (this._rankScroll != null);
-        this.nextButton.display.visible = this._rankScrollContainer.visible;
+        this.nextButton.display.visible = this._hasNextPuzzle;
 
         const panelWidth = MissionClearedPanel.calcWidth();
 

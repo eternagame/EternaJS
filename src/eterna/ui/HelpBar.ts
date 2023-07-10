@@ -1,6 +1,7 @@
 import {ContainerObject, KeyCode} from 'flashbang';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
+import Eterna from 'eterna/Eterna';
 import GameButton from './GameButton';
 
 interface HelpBarProps {
@@ -20,13 +21,15 @@ export default class HelpBar extends ContainerObject {
 
         const {theme} = HelpBar;
 
-        const chat = new GameButton()
-            .up(Bitmaps.ImgChat)
-            .over(Bitmaps.ImgChatHover)
-            .down(Bitmaps.ImgChat)
-            .tooltip('Chat');
-        this.addObject(chat, this.container);
-        this.regs.add(chat.clicked.connect(props.onChatClicked));
+        if (!Eterna.noGame) {
+            const chat = new GameButton()
+                .up(Bitmaps.ImgChat)
+                .over(Bitmaps.ImgChatHover)
+                .down(Bitmaps.ImgChat)
+                .tooltip('Chat');
+            this.addObject(chat, this.container);
+            this.regs.add(chat.clicked.connect(props.onChatClicked));
+        }
 
         if (props.onInfoClicked) {
             const onInfoClicked = props.onInfoClicked;

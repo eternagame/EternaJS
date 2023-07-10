@@ -42,7 +42,7 @@ export default class ChatManager {
             return;
         }
 
-        const show = this._settings.showChat.value && this._hideChat <= 0;
+        const show = this._settings.showChat.value && this._hideChat <= 0 && !Eterna.noGame;
         if (show) {
             if (!this._chat) {
                 this._chat = new Chat({

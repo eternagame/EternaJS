@@ -2370,7 +2370,7 @@ export default class PoseEditMode extends GameMode {
 
             if (nextPuzzle > 0) {
                 postData['next-puzzle'] = nextPuzzle;
-            } else {
+            } else if (!Eterna.noGame) {
                 postData['recommend-puzzle'] = true;
             }
 
