@@ -57,6 +57,10 @@ export default class RScriptOpTree {
         return ret;
     }
 
+    public get empty(): boolean {
+        return this._curptr == null;
+    }
+
     private checkWaitQueueContinue(): boolean {
         for (const op of this._waitQueue) {
             if (op.isPaused()) {

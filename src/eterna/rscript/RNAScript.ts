@@ -89,25 +89,35 @@ export default class RNAScript {
         }
     }
 
-    /** Executes an instruction from the RScript Instruction Stream. */
-    public tick(): void {
+    /**
+     * Executes pending instructions from the RScript Instruction Stream.
+     *
+     * @returns whether any nodes were actually executed
+     */
+    public tick(): boolean {
         // Do not allow us to start executing instructions until the RNA loads properly
         // Also serves to prevent us from positioning anything in relation to the RNA when
         // the RNA bases are in the middle of folding.
         if (this._env.pose.isFolding || !this._env.ui.isPlaying) {
-            return;
+            return false;
         }
 
         let node: RScriptOp | null = this._ops.next();
+        const nodeFound = node != null;
         while (node) {
             node.exec();
 
             if (this._env.pose.isFolding || !this._env.ui.isPlaying) {
-                return;
+                return true;
             }
 
             node = this._ops.next();
         }
+        return nodeFound;
+    }
+
+    public get done(): boolean {
+        return this._ops.empty;
     }
 
     private createOpFromInstruction(instruction: string): RScriptOp | null {

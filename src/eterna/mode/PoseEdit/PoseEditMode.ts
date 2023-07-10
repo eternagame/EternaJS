@@ -1637,7 +1637,11 @@ export default class PoseEditMode extends GameMode {
             this.hideAsyncText();
         }
 
-        this._rscript.tick();
+        const rscriptDidSomething = this._rscript.tick();
+
+        // If we deferred completing the puzzle because the tutorial wasn't done executing yet,
+        // re-check it now
+        if (rscriptDidSomething && this._rscript.done) this.updateScore();
 
         super.update(dt);
     }
@@ -3214,7 +3218,10 @@ export default class PoseEditMode extends GameMode {
         this.updateCopySequenceDialog();
         this.updateCopyStructureDialog();
 
-        if (constraintsSatisfied || (this._puzzle.alreadySolved && this._puzzle.rscript === '')) {
+        if (
+            (constraintsSatisfied && this._rscript.done)
+            || (this._puzzle.alreadySolved && this._puzzle.rscript === '')
+        ) {
             if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL && !this._alreadyCleared) {
                 this.submitCurrentPose();
             }
