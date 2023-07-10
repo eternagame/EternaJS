@@ -20,6 +20,7 @@ import BaseTextures from 'eterna/pose2D/BaseTextures';
 import BaseAssets from 'eterna/pose2D/BaseAssets';
 import {BlurFilter} from '@pixi/filter-blur';
 import {AdjustmentFilter} from 'pixi-filters';
+import GraphicsObject from 'flashbang/objects/GraphicsObject';
 import Tooltips from '../Tooltips';
 
 export enum PaletteTargetType {
@@ -388,6 +389,8 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
         if (target != null) {
             this.clickTarget(target.type);
         }
+
+        this.showTooltipAtPointer(e);
     }
 
     /** Returns the enabled target whose hitbox contains the given location */
@@ -412,6 +415,10 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
             return;
         }
 
+        this.showTooltipAtPointer(e);
+    }
+
+    private showTooltipAtPointer(e: FederatedPointerEvent) {
         this.display.toLocal(e.global, undefined, NucleotidePalette.P);
         const target: PaletteTarget | null = this.getTargetAt(NucleotidePalette.P.x, NucleotidePalette.P.y);
 
@@ -451,7 +458,7 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
     private static readonly P = new Point();
 }
 
-export class PaletteTarget {
+export class PaletteTarget extends GraphicsObject {
     public readonly type: PaletteTargetType;
     public readonly id: RScriptUIElementID;
     public readonly isPair: boolean;
@@ -468,6 +475,7 @@ export class PaletteTarget {
         hitboxes: Rectangle[],
         tooltip: StyledTextBuilder
     ) {
+        super();
         this.type = type;
         this.id = id;
         this.isPair = isPair;

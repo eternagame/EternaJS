@@ -14,7 +14,8 @@ import {
     Button,
     Assert,
     ContainerObject,
-    DisplayObjectPointerTarget
+    DisplayObjectPointerTarget,
+    PointerCapture
 } from 'flashbang';
 import {PaletteTarget} from 'eterna/ui/toolbar/NucleotidePalette';
 import Fonts from 'eterna/util/Fonts';
@@ -75,6 +76,13 @@ export default class Tooltips extends GameObject {
             new AlphaTask(1, 0.1, Easing.linear, this._curTooltip)
         ));
 
+        this._curTooltipPointerCapture = new PointerCapture(null, (e) => {
+            if (e.type === 'pointerup' || e.type === 'pointercancel' || e.type === 'pointerupoutside') {
+                this.removeTooltip(key);
+            }
+        });
+        this.mode?.addObject(this._curTooltipPointerCapture);
+
         Assert.assertIsDefined(this.mode);
         Assert.assertIsDefined(this.mode.container);
         this.mode.container.removeChild(this._curTooltip);
@@ -110,6 +118,8 @@ export default class Tooltips extends GameObject {
             this._curTooltip = null;
             this._curTooltipKey = null;
             this._curTooltipFader.destroyObject();
+            this._curTooltipPointerCapture?.destroySelf();
+            this._curTooltipPointerCapture = null;
         }
     }
 
@@ -117,6 +127,10 @@ export default class Tooltips extends GameObject {
         ele: Button | ContainerObject | GraphicsObject | DisplayObjectPointerTarget,
         tooltip: Tooltip
     ): Registration {
+        const hide = (): void => {
+            this.removeTooltip(ele);
+        };
+
         const show = (): void => {
             if ((ele instanceof Button && ele.enabled) || !(ele instanceof Button)) {
                 if (ele instanceof DisplayObjectPointerTarget) {
@@ -127,18 +141,9 @@ export default class Tooltips extends GameObject {
             }
         };
 
-        const hide = (): void => {
-            this.removeTooltip(ele);
-        };
-
         const regs = new RegistrationGroup();
 
         regs.add(ele.pointerDown.connect(show));
-        if (ele instanceof Button) {
-            regs.add(ele.clicked.connect(hide));
-            regs.add(ele.clickCanceled.connect(hide));
-        }
-
         regs.add(ele.pointerOver.connect(show));
         regs.add(ele.pointerOut.connect(hide));
 
@@ -178,8 +183,9 @@ export default class Tooltips extends GameObject {
     DisplayObjectPointerTarget |
     null;
 
-    private _curTooltip: DisplayObject | null;
+    private _curTooltip: DisplayObject | null = null;
     private _curTooltipFader: GameObjectRef = GameObjectRef.NULL;
+    private _curTooltipPointerCapture: PointerCapture | null = null;
 
     private static readonly TARGET_BOUNDS = new Rectangle();
     private static readonly P = new Point();
