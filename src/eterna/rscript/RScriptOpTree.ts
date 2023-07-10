@@ -40,7 +40,7 @@ export default class RScriptOpTree {
                 this._waitQueue.push(this._curptr);
                 this._curptr = waitRet;
                 return waitRet;
-            } else if (this._curptr.isPaused() && this._waitQueue.indexOf(this._curptr)) {
+            } else if (this._curptr.isPaused() && this._waitQueue.indexOf(this._curptr) === -1) {
                 this._waitQueue.push(this._curptr);
                 return null;
             } else if (this.checkWaitQueueContinue()) {
