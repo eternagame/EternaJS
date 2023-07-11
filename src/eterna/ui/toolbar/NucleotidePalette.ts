@@ -93,43 +93,43 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
 
         this._targets[PaletteTargetType.A] = new PaletteTarget(
             PaletteTargetType.A, RScriptUIElementID.A, false, KeyCode.Digit1,
-            [new Rectangle(10, 4, 25, 25)],
+            [new Rectangle(10, 2, 30, 30)],
             NucleotidePalette.createTooltip('Mutate to <A>A (Adenine)</A>. (1)')
         );
 
         this._targets[PaletteTargetType.U] = new PaletteTarget(
             PaletteTargetType.U, RScriptUIElementID.U, false, KeyCode.Digit2,
-            [new Rectangle(64, 4, 25, 25)],
+            [new Rectangle(63, 2, 30, 30)],
             NucleotidePalette.createTooltip('Mutate to <U>U (Uracil)</U>. (2)')
         );
 
         this._targets[PaletteTargetType.G] = new PaletteTarget(
             PaletteTargetType.G, RScriptUIElementID.G, false, KeyCode.Digit3,
-            [new Rectangle(118, 4, 25, 25)],
+            [new Rectangle(117, 2, 30, 30)],
             NucleotidePalette.createTooltip('Mutate to <G>G (Guanine)</G>. (3)')
         );
 
         this._targets[PaletteTargetType.C] = new PaletteTarget(
             PaletteTargetType.C, RScriptUIElementID.C, false, KeyCode.Digit4,
-            [new Rectangle(172, 4, 25, 25)],
+            [new Rectangle(170, 2, 30, 30)],
             NucleotidePalette.createTooltip('Mutate to <C>C (Cytosine)</C>. (4)')
         );
 
         this._targets[PaletteTargetType.AU] = new PaletteTarget(
             PaletteTargetType.AU, RScriptUIElementID.AU, true, KeyCode.KeyQ,
-            [new Rectangle(34, 27, 30, 20), new Rectangle(37, 18, 22, 20)],
+            [new Rectangle(36, 25, 30, 24), new Rectangle(40, 15, 22, 20)],
             NucleotidePalette.createTooltip('Mutate to pair (<A>A</A>, <U>U</U>). (Q)')
         );
 
         this._targets[PaletteTargetType.UG] = new PaletteTarget(
             PaletteTargetType.UG, RScriptUIElementID.UG, true, KeyCode.KeyW,
-            [new Rectangle(87, 27, 30, 20), new Rectangle(90, 18, 22, 20)],
+            [new Rectangle(90, 25, 30, 24), new Rectangle(94, 15, 22, 20)],
             NucleotidePalette.createTooltip('Mutate to pair (<G>G</G>, <U>U</U>). (W)')
         );
 
         this._targets[PaletteTargetType.GC] = new PaletteTarget(
             PaletteTargetType.GC, RScriptUIElementID.GC, true, KeyCode.KeyE,
-            [new Rectangle(141, 27, 30, 20), new Rectangle(144, 18, 22, 20)],
+            [new Rectangle(143, 25, 30, 24), new Rectangle(147, 15, 22, 20)],
             NucleotidePalette.createTooltip('Mutate to pair (<G>G</G>, <C>C</C>). (E)')
         );
     }
@@ -141,10 +141,7 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
         const bg = new Graphics().beginFill(0x043468).drawRoundedRect(0, 0, 210, 50, 5).endFill();
         this._paletteDisplay.addChild(bg);
 
-        // FIXME: Now that we're drawing this "by hand" instead of in a prerendered texture,
-        // we can do better with how we position UI objects and hit targets
-        // (ie, we should be using layout containers and positionRelative for more stuff)
-        const addBase = (baseType: RNABase, hitbox: Rectangle, size: number, addLetter: boolean) => {
+        const getBase = (baseType: RNABase, size: number, addLetter: boolean) => {
             const baseTextures = new BaseTextures(baseType);
 
             const base = new Sprite();
@@ -153,50 +150,68 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
                 base.height = size;
                 base.scale.x = base.scale.y;
             }));
-            base.x = hitbox.x;
-            base.y = hitbox.y;
-            this._paletteDisplay.addChild(base);
 
-            if (addLetter) {
-                const letter = Fonts.std(EPars.nucleotideToString(baseType)).bold().fontSize(14).build();
-                this._paletteDisplay.addChild(letter);
-                DisplayUtil.positionRelative(letter, HAlign.CENTER, VAlign.CENTER, base, HAlign.CENTER, VAlign.CENTER);
-                letter.x -= 2;
-                letter.y -= 3;
-            }
+            if (!addLetter) return base;
 
-            return base;
+            const baseWithLetter = new Container();
+            baseWithLetter.addChild(base);
+            const letter = Fonts.std(EPars.nucleotideToString(baseType)).bold().fontSize(14).build();
+            baseWithLetter.addChild(letter);
+            DisplayUtil.positionRelative(
+                letter, HAlign.CENTER, VAlign.CENTER,
+                base, HAlign.CENTER, VAlign.CENTER,
+                0, -1
+            );
+
+            return baseWithLetter;
         };
 
-        const baseA = addBase(RNABase.ADENINE, this._targets[PaletteTargetType.A].hitboxes[0], 34, true);
-        baseA.x -= 2;
-        baseA.y -= 2;
-        const baseU = addBase(RNABase.URACIL, this._targets[PaletteTargetType.U].hitboxes[0], 34, true);
-        baseU.x -= 2;
-        baseU.y -= 2;
-        const baseG = addBase(RNABase.GUANINE, this._targets[PaletteTargetType.G].hitboxes[0], 34, true);
-        baseG.x -= 2;
-        baseG.y -= 2;
-        const baseC = addBase(RNABase.CYTOSINE, this._targets[PaletteTargetType.C].hitboxes[0], 34, true);
-        baseC.x -= 2;
-        baseC.y -= 2;
+        const addBase = (base: Container, hitbox: Rectangle) => {
+            this._paletteDisplay.addChild(base);
+            DisplayUtil.positionRelativeToBounds(
+                base, HAlign.CENTER, VAlign.CENTER,
+                hitbox, HAlign.CENTER, VAlign.CENTER
+            );
+        };
 
-        const auBaseA = addBase(RNABase.ADENINE, this._targets[PaletteTargetType.AU].hitboxes[0], 22, false);
-        const auBaseU = addBase(RNABase.URACIL, this._targets[PaletteTargetType.AU].hitboxes[0], 22, false);
-        auBaseU.x += 13;
+        const addPair = (base1: Container, base2: Container, hitbox: Rectangle) => {
+            const pairContainer = new Container();
+            pairContainer.addChild(base1);
+            pairContainer.addChild(base2);
+            base2.x = 13;
+            this._paletteDisplay.addChild(pairContainer);
+            DisplayUtil.positionRelativeToBounds(
+                pairContainer, HAlign.CENTER, VAlign.CENTER,
+                hitbox, HAlign.CENTER, VAlign.CENTER
+            );
+            return pairContainer;
+        };
 
-        const ugBaseU = addBase(RNABase.URACIL, this._targets[PaletteTargetType.UG].hitboxes[0], 22, false);
-        const ugBaseG = addBase(RNABase.GUANINE, this._targets[PaletteTargetType.UG].hitboxes[0], 22, false);
-        ugBaseG.x += 13;
+        addBase(getBase(RNABase.ADENINE, 34, true), this._targets[PaletteTargetType.A].hitboxes[0]);
+        addBase(getBase(RNABase.URACIL, 34, true), this._targets[PaletteTargetType.U].hitboxes[0]);
+        addBase(getBase(RNABase.GUANINE, 34, true), this._targets[PaletteTargetType.G].hitboxes[0]);
+        addBase(getBase(RNABase.CYTOSINE, 34, true), this._targets[PaletteTargetType.C].hitboxes[0]);
 
-        const gcBaseG = addBase(RNABase.GUANINE, this._targets[PaletteTargetType.GC].hitboxes[0], 22, false);
-        const gcBaseC = addBase(RNABase.CYTOSINE, this._targets[PaletteTargetType.GC].hitboxes[0], 22, false);
-        gcBaseC.x += 13;
+        const auPair = addPair(
+            getBase(RNABase.ADENINE, 22, false),
+            getBase(RNABase.URACIL, 22, false),
+            this._targets[PaletteTargetType.AU].hitboxes[0]
+        );
+        const ugPair = addPair(
+            getBase(RNABase.URACIL, 22, false),
+            getBase(RNABase.GUANINE, 22, false),
+            this._targets[PaletteTargetType.UG].hitboxes[0]
+        );
+        const gcPair = addPair(
+            getBase(RNABase.GUANINE, 22, false),
+            getBase(RNABase.CYTOSINE, 22, false),
+            this._targets[PaletteTargetType.GC].hitboxes[0]
+        );
 
-        this._pairSprites = [auBaseA, auBaseU, ugBaseU, ugBaseG, gcBaseG, gcBaseC];
+        this._pairSprites = [auPair, ugPair, gcPair];
 
         const addSat = (
-            pairType: RNAPaint.GU_PAIR | RNAPaint.AU_PAIR | RNAPaint.GC_PAIR,
+            alpha: number,
             hitbox: Rectangle,
             flip: boolean
         ) => {
@@ -208,31 +223,19 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
                         : [{x: 0, y: 0}, {x: 0, y: 8}, {x: 7, y: 4}]
                 )
                 .endFill();
-            tri.filters = [new BlurFilter(1, 16)];
-            switch (pairType) {
-                case RNAPaint.GU_PAIR:
-                    tri.filters.push(new AdjustmentFilter({alpha: 0.2}));
-                    break;
-                case RNAPaint.AU_PAIR:
-                    tri.filters.push(new AdjustmentFilter({alpha: 0.65}));
-                    break;
-                case RNAPaint.GC_PAIR:
-                    tri.filters.push(new AdjustmentFilter({alpha: 1.5}));
-                    break;
-                default: Assert.unreachable(pairType);
-            }
-            tri.x = hitbox.x + 7 + (flip ? 7 : 0);
-            tri.y = hitbox.y - 3;
+            tri.filters = [new BlurFilter(1, 16), new AdjustmentFilter({alpha})];
+            tri.x = hitbox.x + 4 + (flip ? 7 : 0);
+            tri.y = hitbox.y;
             this._paletteDisplay.addChild(tri);
             tri.cacheAsBitmap = true;
             return tri;
         };
-        addSat(RNAPaint.AU_PAIR, this._targets[PaletteTargetType.AU].hitboxes[1], false);
-        addSat(RNAPaint.AU_PAIR, this._targets[PaletteTargetType.AU].hitboxes[1], true);
-        addSat(RNAPaint.GU_PAIR, this._targets[PaletteTargetType.UG].hitboxes[1], false);
-        addSat(RNAPaint.GU_PAIR, this._targets[PaletteTargetType.UG].hitboxes[1], true);
-        addSat(RNAPaint.GC_PAIR, this._targets[PaletteTargetType.GC].hitboxes[1], false);
-        addSat(RNAPaint.GC_PAIR, this._targets[PaletteTargetType.GC].hitboxes[1], true);
+        addSat(0.2, this._targets[PaletteTargetType.AU].hitboxes[1], false);
+        addSat(0.2, this._targets[PaletteTargetType.AU].hitboxes[1], true);
+        addSat(0.65, this._targets[PaletteTargetType.UG].hitboxes[1], false);
+        addSat(0.65, this._targets[PaletteTargetType.UG].hitboxes[1], true);
+        addSat(1.5, this._targets[PaletteTargetType.GC].hitboxes[1], false);
+        addSat(1.5, this._targets[PaletteTargetType.GC].hitboxes[1], true);
 
         this.regs.add(this.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => this.onClick(e)));
         this.regs.add(this.pointerMove.connect((e) => this.onMoveMouse(e)));
@@ -372,7 +375,10 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
             this.clearSelection();
         } else {
             this._selection.texture = isPair ? this._selectPairData : this._selectBaseData;
-            this._selection.position.set(selectedBox.x, selectedBox.y);
+            DisplayUtil.positionRelativeToBounds(
+                this._selection, HAlign.CENTER, VAlign.CENTER,
+                selectedBox, HAlign.CENTER, VAlign.CENTER
+            );
             this._selection.visible = true;
         }
     }
@@ -442,7 +448,7 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
     private readonly _paletteDisplay: Container;
     private readonly _selection: Sprite;
 
-    private _pairSprites: Sprite[];
+    private _pairSprites: Container[];
 
     private readonly _numAU: Text;
     private readonly _numUG: Text;
