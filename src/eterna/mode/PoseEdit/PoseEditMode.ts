@@ -104,9 +104,9 @@ export interface PoseEditParams {
 }
 
 interface MoveHistory {
-    beginFrom: string;
-    numMoves: number;
-    moves: Move[][];
+    beginFrom?: string;
+    numMoves?: number;
+    moves?: Move[][];
     elapsed: string;
 }
 
@@ -497,7 +497,6 @@ export default class PoseEditMode extends GameMode {
                 }
                 this.setSolutionTargetStructure(foldData);
             }
-            this.clearMoveTracking(solution.sequence.sequenceString());
             this.setAncestorId(solution.nodeID);
 
             const annotations = solution.annotations;
@@ -624,14 +623,6 @@ export default class PoseEditMode extends GameMode {
                 this.poseEditByTarget(index);
             });
         };
-        const bindTrackMoves = (pose: Pose2D, _index: number) => {
-            pose.trackMovesCallback = ((count: number, moves: Move[]) => {
-                this._moveCount += count;
-                if (moves) {
-                    this._moves.push(moves.slice());
-                }
-            });
-        };
 
         const bindMousedownEvent = (pose: Pose2D, index: number) => {
             pose.startMousedownCallback = ((e: FederatedPointerEvent, _closestDist: number, closestIndex: number) => {
@@ -664,7 +655,6 @@ export default class PoseEditMode extends GameMode {
             const pose: Pose2D = poseField.pose;
             bindAddBaseCB(pose, ii);
             bindPoseEdit(pose, ii);
-            bindTrackMoves(pose, ii);
             bindMousedownEvent(pose, ii);
             poseFields.push(poseField);
         }
@@ -1487,7 +1477,6 @@ export default class PoseEditMode extends GameMode {
                 pose.pasteSequence(sequence);
             }
             this.forceSync = prevForceSync;
-            this.moveHistoryAddSequence('paste', seq);
             return true;
         });
 
@@ -2385,9 +2374,6 @@ export default class PoseEditMode extends GameMode {
 
         const elapsed: number = (new Date().getTime() - this._startSolvingTime) / 1000;
         const moveHistory: MoveHistory = {
-            beginFrom: this._startingPoint,
-            numMoves: this._moveCount,
-            moves: this._moves.slice(),
             elapsed: elapsed.toFixed(0)
         };
         postData['move-history'] = JSON.stringify(moveHistory);
@@ -2975,41 +2961,9 @@ export default class PoseEditMode extends GameMode {
         return true;
     }
 
-    private clearMoveTracking(seq: string): void {
-        // move-tracking
-        this._startingPoint = seq;
-        this._moveCount = 0;
-        this._moves = [];
-    }
-
-    private moveHistoryAddMutations(before: Sequence, after: Sequence): void {
-        const muts: Move[] = [];
-        for (let ii = 0; ii < after.length; ii++) {
-            if (after.nt(ii) !== before.nt(ii)) {
-                muts.push({pos: ii + 1, base: EPars.nucleotideToString(after.nt(ii))});
-            }
-        }
-        if (muts.length === 0) return;
-        this._moveCount++;
-        this._moves.push(muts.slice());
-    }
-
-    private moveHistoryAddSequence(changeType: string, seq: string): void {
-        const muts: Move[] = [];
-        muts.push({type: changeType, sequence: seq});
-        this._moveCount++;
-        this._moves.push(muts.slice());
-    }
-
     private setPuzzleEpilog(initSeq: Sequence | null, isReset: boolean | undefined): void {
-        if (isReset) {
-            const newSeq: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
-            this.moveHistoryAddSequence('reset', newSeq.sequenceString());
-        } else {
+        if (!isReset) {
             this._startSolvingTime = new Date().getTime();
-            this._startingPoint = this._puzzle.transformSequence(
-                this.getCurrentUndoBlock(0).sequence, 0
-            ).sequenceString();
         }
 
         if (isReset) {
@@ -3857,13 +3811,8 @@ export default class PoseEditMode extends GameMode {
         }
         this.savePosesMarkersContexts();
 
-        const before: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
-
         this._stackLevel++;
         this.moveUndoStack();
-
-        const after: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
-        this.moveHistoryAddMutations(before, after);
 
         this.updateScore();
         this.transformPosesMarkers();
@@ -3875,13 +3824,8 @@ export default class PoseEditMode extends GameMode {
         }
         this.savePosesMarkersContexts();
 
-        const before: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
-
         this._stackLevel--;
         this.moveUndoStack();
-
-        const after: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
-        this.moveHistoryAddMutations(before, after);
 
         this.updateScore();
         this.transformPosesMarkers();
@@ -3889,17 +3833,11 @@ export default class PoseEditMode extends GameMode {
 
     private moveUndoStackToLastStable(): void {
         this.savePosesMarkersContexts();
-        const before: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
 
         const stackLevel: number = this._stackLevel;
         while (this._stackLevel >= 1) {
             if (this.getCurrentUndoBlock(0).stable) {
                 this.moveUndoStack();
-
-                const after: Sequence = this._puzzle.transformSequence(
-                    this.getCurrentUndoBlock(0).sequence, 0
-                );
-                this.moveHistoryAddMutations(before, after);
 
                 this.updateScore();
                 this.transformPosesMarkers();
@@ -3965,9 +3903,6 @@ export default class PoseEditMode extends GameMode {
     private _alreadyCleared: boolean = false;
     private _paused: boolean;
     private _startSolvingTime: number;
-    private _startingPoint: string;
-    private _moveCount: number = 0;
-    private _moves: Move[][] = [];
     protected _curTargetIndex: number = 0;
     private _poseState: PoseState = PoseState.NATIVE;
 
