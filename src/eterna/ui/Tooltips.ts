@@ -113,7 +113,7 @@ export default class Tooltips extends GameObject {
     }
 
     public removeCurTooltip(): void {
-        if (this._curTooltip != null) {
+        if (this._curTooltip != null && !this._curTooltip.destroyed) {
             this._curTooltip.destroy();
             this._curTooltip = null;
             this._curTooltipKey = null;
