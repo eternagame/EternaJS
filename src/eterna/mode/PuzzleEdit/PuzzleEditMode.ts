@@ -386,7 +386,6 @@ export default class PuzzleEditMode extends GameMode {
         if (
             ((this._numTargets > 1 || hasMolecules) && !folder.canFoldWithBindingSite)
             || (pseudoknots && !folder.canPseudoknot)
-            || folder.name === EternaFoldThreshknot.NAME
         ) return false;
         return true;
     }
@@ -796,6 +795,8 @@ export default class PuzzleEditMode extends GameMode {
             return '[EFOLD]';
         } else if (name === ContraFold.NAME) {
             return '[CONTRA]';
+        } else if (name === EternaFoldThreshknot.NAME) {
+            return '[EFTHRESH]';
         } else {
             return '';
         }
