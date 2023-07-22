@@ -796,7 +796,7 @@ export default class PuzzleEditMode extends GameMode {
         } else if (name === ContraFold.NAME) {
             return '[CONTRA]';
         } else if (name === EternaFoldThreshknot.NAME) {
-            return '[EFTHRESH]';
+            return '[EFTK]';
         } else {
             return '';
         }
