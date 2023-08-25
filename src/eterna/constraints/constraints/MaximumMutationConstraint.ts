@@ -37,7 +37,10 @@ export default class MaximumMutationConstraint extends Constraint<MaxMutationCon
 
     public getConstraintBoxConfig(status: MaxMutationConstraintStatus): ConstraintBoxConfig {
         const statText = new StyledTextBuilder()
-            .append(status.mutations.toString(), {fill: (status.satisfied ? 0x00aa00 : 0xaa0000)})
+            .append(
+                status.mutations.toString(),
+                {fill: (status.satisfied ? 0x00aa00 : 0xFF0000), fontWeight: 'bold'}
+            )
             .append(`/${this.maxMutations}`);
 
         const tooltip = ConstraintBox.createTextStyle().append(`You can only mutate up to ${this.maxMutations} bases`);

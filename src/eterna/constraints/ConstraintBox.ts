@@ -32,7 +32,7 @@ export interface ConstraintBoxConfig {
     icon?: Texture | Graphics | string;
     // Alternative to drawBG, used for SHAPE constraints
     thumbnailBG?: boolean;
-    // Alternative to iconTexture, used for SHAPE constraints
+    // Alternative to icon, used for SHAPE constraints
     thumbnail?: Graphics;
     // Text used to augment the constraint graphic to describe the constraint
     clarificationText?: string | StyledTextBuilder;

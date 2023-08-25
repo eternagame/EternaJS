@@ -41,6 +41,7 @@ import RangePairedMaxConstraint from 'eterna/constraints/constraints/RangePaired
 import {Assert} from 'flashbang';
 import {TargetConditions} from 'eterna/UndoBlock';
 import PseudoknotConstraint from 'eterna/constraints/constraints/PseudoknotConstraint';
+import CodonConstraint from 'eterna/constraints/constraints/CondonConstraint';
 import SolutionManager from './SolutionManager';
 import Puzzle, {PuzzleType} from './Puzzle';
 
@@ -364,6 +365,9 @@ export default class PuzzleManager {
                         break;
                     case PseudoknotConstraint.NAME:
                         constraints.push(new PseudoknotConstraint());
+                        break;
+                    case CodonConstraint.NAME:
+                        constraints.push(new CodonConstraint(parameter));
                         break;
                     default:
                         log.warn(`Unknown constraint ${name} - skipping`);
