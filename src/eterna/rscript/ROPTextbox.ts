@@ -1,9 +1,9 @@
 import * as log from 'loglevel';
 import {TextStyleExtended} from 'pixi-multistyle-text';
-import {Point} from 'pixi.js';
+import {Container, Point, Sprite} from 'pixi.js';
 import Fonts from 'eterna/util/Fonts';
 import {
-    StyledTextBuilder, Flashbang, Vector2, GameObject, ColorUtil, Assert
+    StyledTextBuilder, Flashbang, Vector2, GameObject, ColorUtil, Assert, VLayoutContainer, HAlign
 } from 'flashbang';
 import RNAAnchorObject from 'eterna/pose2D/RNAAnchorObject';
 import TextUtil from 'eterna/util/TextUtil';
@@ -47,7 +47,7 @@ export default class ROPTextbox extends RScriptOp {
 
         const window = new GameWindow({
             movable: this._mode !== ROPTextboxMode.TEXTBOX_NUCLEOTIDE,
-            resizable: false,
+            resizable: true,
             closable: false,
             ensureOnScreen: this._mode !== ROPTextboxMode.TEXTBOX_NUCLEOTIDE,
             title: this._title,
@@ -88,8 +88,67 @@ export default class ROPTextbox extends RScriptOp {
             textStyle.wordWrapWidth = 185;
         }
 
-        const text = new StyledTextBuilder(textStyle).appendHTMLStyledText(this._text).build();
-        window.content.addChild(text);
+        const vLayout = new VLayoutContainer(10, HAlign.LEFT);
+        window.content.addChild(vLayout);
+
+        // Parse out directives that aren't plain text. We do this by extracting, then removing,
+        // reserved patterns, and then rearranging them back in their original order
+        const imgPattern = /<img src='([^']+)'\/?>/i;
+        const specialPatterns = `(?:${[imgPattern].map((re) => re.source.replace('(', '(?:')).join(')|(?:')})`;
+
+        const specialComponents = this._text.match(new RegExp(specialPatterns, 'ig')) ?? [];
+        const textComponents = this._text.split(new RegExp(specialPatterns, 'ig'));
+
+        const components: {type: 'text' | 'img'; value: string; }[] = [];
+        for (let i = 0; i < textComponents.length; i++) {
+            if (textComponents[i]) components.push({type: 'text', value: textComponents[i]});
+            if (specialComponents[i]) {
+                const imgMatch = specialComponents[i].match(imgPattern);
+                if (imgMatch && imgMatch[1] && imgMatch[1].match(/^(https?:)|(\/)/)) {
+                    components.push({type: 'img', value: imgMatch[1]});
+                }
+            }
+        }
+
+        for (const component of components) {
+            if (component.type === 'text') {
+                const textContainer = new Container();
+                vLayout.addChild(textContainer);
+                const text = new StyledTextBuilder(textStyle).appendHTMLStyledText(component.value).build();
+                textContainer.addChild(text);
+                window.regs.add(window.contentSizeWillUpdate.connect(({width}) => {
+                    textContainer.removeChildren();
+                    const newText = new StyledTextBuilder({
+                        ...textStyle,
+                        wordWrapWidth: width
+                    }).appendHTMLStyledText(component.value).build();
+                    textContainer.addChild(newText);
+                }));
+            } else if (component.type === 'img') {
+                const sprite = Sprite.from(component.value);
+                sprite.texture.baseTexture.on('loaded', () => {
+                    sprite.width = Math.min(vLayout.width, sprite.texture.width);
+                    sprite.scale.y = sprite.scale.x;
+                    vLayout.layout(true);
+                    // Why layout twice? Well, if we have a button, when we call it the first time,
+                    // it will compute the target height based on the height with the button at its
+                    // old position, *before* it repositioned itself to be below the content now that
+                    // the content has pushed it down. The second layout call makes the target height
+                    // include the full height including the buttons new position further downward
+                    window.layout();
+                    window.layout();
+                });
+                window.regs.add(window.contentSizeWillUpdate.connect(({width}) => {
+                    sprite.width = Math.min(width, sprite.texture.width);
+                    sprite.scale.y = sprite.scale.x;
+                }));
+                vLayout.addChild(sprite);
+            }
+        }
+
+        vLayout.layout(true);
+        window.regs.add(window.contentSizeWillUpdate.connect(() => vLayout.layout(true)));
+
         if (this._buttonText !== '') {
             const button = new GameButton()
                 .up(Bitmaps.NovaNext)
@@ -98,8 +157,14 @@ export default class ROPTextbox extends RScriptOp {
             window.addObject(button, window.content);
             button.display.width = 60;
             button.display.height = 25;
-            button.display.x = (this._fixedSize ? FIXED_SIZE - 2 * PADDING : text.width) - button.display.width;
-            button.display.y = text.height + 10;
+            const reposition = (forceDynamicSize: boolean) => {
+                button.display.x = (
+                    this._fixedSize && !forceDynamicSize ? FIXED_SIZE - 2 * PADDING : vLayout.width
+                ) - button.display.width;
+                button.display.y = vLayout.height + 10;
+            };
+            reposition(false);
+            window.regs.add(window.contentSizeWillUpdate.connect(() => reposition(true)));
             button.clicked.connect(() => this.onClickEvent());
         }
 
