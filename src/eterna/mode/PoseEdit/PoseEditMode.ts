@@ -26,7 +26,9 @@ import FolderManager from 'eterna/folding/FolderManager';
 import Folder, {MultiFoldResult, CacheKey, SuboptEnsembleResult} from 'eterna/folding/Folder';
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/toolbar/NucleotidePalette';
 import PoseField from 'eterna/pose2D/PoseField';
-import Pose2D, {Layout, SCRIPT_MARKER_LAYER} from 'eterna/pose2D/Pose2D';
+import Pose2D, {
+    Layout, PLAYER_MARKER_LAYER, SCRIPT_MARKER_LAYER, MUTATION_MARKER_LAYER
+} from 'eterna/pose2D/Pose2D';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import ConstraintBar from 'eterna/constraints/ConstraintBar';
@@ -841,6 +843,19 @@ export default class PoseEditMode extends GameMode {
             initialSequence = Sequence.fromSequenceString(this._params.initSequence);
         }
 
+        const puzzleInitSeq = this._puzzle.getBeginningSequence();
+        if (
+            this._puzzle.puzzleLocks.some(
+                (val, idx) => !val && puzzleInitSeq.nt(idx) !== RNABase.ADENINE
+            )
+        ) {
+            // If we have a starting sequence that isn't just all As (excluding locked regions),
+            // there's a good chance players may care about seeing mutations from the starting
+            // sequence, so we'll add a layer to handle that
+            this._shouldMarkMutations = true;
+            this.addMarkerLayer(MUTATION_MARKER_LAYER, false);
+        }
+
         // Load elements from targetConditions into poses.
         for (let ii = 0; ii < this._poses.length; ii++) {
             // If the initialSequence (from a starting solution or other source)
@@ -1497,7 +1512,14 @@ export default class PoseEditMode extends GameMode {
                     return;
                 }
 
-                const layer = options?.layerName ?? SCRIPT_MARKER_LAYER;
+                let layer = SCRIPT_MARKER_LAYER;
+                if (options?.layerName === PLAYER_MARKER_LAYER) {
+                    // Scripts should be able to add marks on behalf of the player
+                    layer = PLAYER_MARKER_LAYER;
+                } else if (options?.layerName) {
+                    // But we want to ensure that scripts can't override system layers, so we prefix them
+                    layer = `${SCRIPT_MARKER_LAYER}: ${options.layerName}`;
+                }
                 this.addMarkerLayer(layer);
 
                 for (let ii = 0; ii < this.numPoseFields; ii++) {
@@ -3156,6 +3178,21 @@ export default class PoseEditMode extends GameMode {
 
         if (this._pose3D) this._pose3D.sequence.value = this.getCurrentUndoBlock().sequence;
 
+        if (this._shouldMarkMutations) {
+            const puzzleInitSeq = this._puzzle.getBeginningSequence();
+            const currentSeq = this.getCurrentUndoBlock().sequence;
+            for (const pose of this._poses) {
+                pose.clearLayerTracking(MUTATION_MARKER_LAYER);
+            }
+            for (let i = 0; i < puzzleInitSeq.length; i++) {
+                if (currentSeq.nt(i) !== puzzleInitSeq.nt(i)) {
+                    for (const pose of this._poses) {
+                        pose.addBaseMark(i, MUTATION_MARKER_LAYER);
+                    }
+                }
+            }
+        }
+
         const numAU: number = undoBlock.getParam(UndoBlockParam.AU, EPars.DEFAULT_TEMPERATURE, pseudoknots) as number;
         const numGU: number = undoBlock.getParam(UndoBlockParam.GU, EPars.DEFAULT_TEMPERATURE, pseudoknots) as number;
         const numGC: number = undoBlock.getParam(UndoBlockParam.GC, EPars.DEFAULT_TEMPERATURE, pseudoknots) as number;
@@ -3906,6 +3943,7 @@ export default class PoseEditMode extends GameMode {
     private _startSolvingTime: number;
     protected _curTargetIndex: number = 0;
     private _poseState: PoseState = PoseState.NATIVE;
+    private _shouldMarkMutations: boolean = false;
 
     private _seqStacks: UndoBlock[][];
     protected _targetPairs: SecStruct[] = [];

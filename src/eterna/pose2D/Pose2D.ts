@@ -58,6 +58,7 @@ enum FrameUpdateState {
     NEXT_FRAME
 }
 export const PLAYER_MARKER_LAYER = 'Markers';
+export const MUTATION_MARKER_LAYER = 'Mutations';
 export const SCRIPT_MARKER_LAYER = 'Script';
 
 export type PoseMouseDownCallback = (e: FederatedPointerEvent, closestDist: number, closestIndex: number) => void;
