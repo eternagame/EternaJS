@@ -1597,7 +1597,7 @@ export default class PoseEditMode extends GameMode {
             parentMode: (() => this)()
         });
         this._solutionView.container.visible = visible || forceShow;
-        this.addObject(this._solutionView, this.dialogLayer);
+        this.addObject(this._solutionView, this.sidebarLayer);
 
         this._solutionView.seeResultClicked.connect(() => {
             this.switchToFeedbackViewForSolution(solution);
@@ -1833,6 +1833,7 @@ export default class PoseEditMode extends GameMode {
         pushVisibleState(this.constraintsLayer);
         pushVisibleState(this.uiLayer);
         pushVisibleState(this.dialogLayer);
+        pushVisibleState(this.sidebarLayer);
         pushVisibleState(this.achievementsLayer);
         const showingHint = this._hintBoxRef.isLive;
         this._hintBoxRef.destroyObject();
@@ -2588,7 +2589,7 @@ export default class PoseEditMode extends GameMode {
         );
         missionClearedPanel.display.alpha = 0;
         missionClearedPanel.addObject(new AlphaTask(1, 0.3));
-        this.addObject(missionClearedPanel, this.dialogLayer);
+        this.addObject(missionClearedPanel, this.sidebarLayer);
         if (submitSolutionRspData) missionClearedPanel.createRankScroll(submitSolutionRspData);
 
         const keepPlaying = () => {

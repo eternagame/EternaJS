@@ -588,7 +588,7 @@ export default class DesignBrowserMode extends GameMode {
             },
             parentMode: (() => this)()
         });
-        this.addObject(this._solutionView, this.dialogLayer);
+        this.addObject(this._solutionView, this.sidebarLayer);
         const rowIndex = this._currentSolutionIndex - this._firstVisSolutionIdx;
         if (rowIndex >= 0) {
             this._clickedSelectionBox.visible = true;

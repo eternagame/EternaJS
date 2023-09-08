@@ -38,6 +38,7 @@ export default abstract class GameMode extends AppMode {
     public readonly poseLayer = new Container();
     public readonly uiLayer = new Container();
     public readonly dialogLayer = new Container();
+    public readonly sidebarLayer = new Container();
     public readonly notifLayer = new Container();
     public readonly tooltipLayer = new Container();
     public readonly achievementsLayer = new Container();
@@ -58,6 +59,8 @@ export default abstract class GameMode extends AppMode {
         this.uiLayer.name = 'uiLayer';
         this.container.addChild(this.dialogLayer);
         this.dialogLayer.name = 'dialogLayer';
+        this.container.addChild(this.sidebarLayer);
+        this.dialogLayer.name = 'sidebarLayer';
         this.container.addChild(this.notifLayer);
         this.notifLayer.name = 'notifLayer';
         this.container.addChild(this.achievementsLayer);
