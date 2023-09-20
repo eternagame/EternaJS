@@ -2644,6 +2644,7 @@ export default class PoseEditMode extends GameMode {
                             new CustomEvent('navigate', {detail: `/puzzles/${this._puzzle.nextPuzzlePage}`})
                         );
                     }
+                    window.parent.postMessage({type: 'navigate', detail: `/puzzles/${this._puzzle.nextPuzzlePage}`}, '*');
                 } else {
                     window.open(`/puzzles/${this._puzzle.nextPuzzlePage}`, '_self');
                 }
