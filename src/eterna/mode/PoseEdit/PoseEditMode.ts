@@ -47,7 +47,6 @@ import EternaURL from 'eterna/net/EternaURL';
 import PuzzleManager, {PuzzleJSON} from 'eterna/puzzle/PuzzleManager';
 import FoldUtil from 'eterna/folding/FoldUtil';
 import ShapeConstraint, {AntiShapeConstraint} from 'eterna/constraints/constraints/ShapeConstraint';
-import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import Utility from 'eterna/util/Utility';
 import HintsPanel from 'eterna/ui/HintsPanel';
 import HelpBar from 'eterna/ui/HelpBar';
@@ -544,45 +543,6 @@ export default class PoseEditMode extends GameMode {
                 setTarget(ii);
             } else {
                 this._opQueue.push(new PoseOp(ii + 1, () => setTarget(ii)));
-            }
-        }
-    }
-
-    private highlightSequences(highlightInfos: HighlightInfo[] | null) {
-        for (const [poseIdx, pose] of this._poses.entries()) {
-            pose.clearRestrictedHighlight();
-            pose.clearUnstableHighlight();
-            pose.clearUserDefinedHighlight();
-            const poseState = this._isPipMode || poseIdx !== 0 ? poseIdx : this._curTargetIndex;
-            if (!highlightInfos) continue;
-            for (const highlightInfo of highlightInfos) {
-                if (highlightInfo.stateIndex !== undefined && poseState !== highlightInfo.stateIndex) {
-                    continue;
-                }
-
-                const currBlock = this.getCurrentUndoBlock(poseState);
-                const naturalMap = currBlock.reorderedOligosIndexMap(currBlock.oligoOrder);
-                const targetMap = currBlock.reorderedOligosIndexMap(currBlock.targetOligoOrder);
-                let ranges = highlightInfo.ranges;
-                if (this._poseState === PoseState.NATIVE && naturalMap !== undefined) {
-                    ranges = highlightInfo.ranges.map((index: number) => naturalMap.indexOf(index));
-                } else if (this._poseState === PoseState.TARGET && targetMap !== undefined) {
-                    ranges = highlightInfo.ranges.map((index: number) => targetMap.indexOf(index));
-                }
-
-                switch (highlightInfo.color) {
-                    case HighlightType.RESTRICTED:
-                        pose.highlightRestrictedSequence(ranges);
-                        break;
-                    case HighlightType.UNSTABLE:
-                        pose.highlightUnstableSequence(ranges);
-                        break;
-                    case HighlightType.USER_DEFINED:
-                        pose.highlightUserDefinedSequence(ranges);
-                        break;
-                    default:
-                        log.error(`Invalid highlight type: ${highlightInfo.color}`);
-                }
             }
         }
     }
@@ -3943,7 +3903,6 @@ export default class PoseEditMode extends GameMode {
     private _paused: boolean;
     private _startSolvingTime: number;
     protected _curTargetIndex: number = 0;
-    private _poseState: PoseState = PoseState.NATIVE;
     private _shouldMarkMutations: boolean = false;
 
     private _seqStacks: UndoBlock[][];
