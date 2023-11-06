@@ -283,12 +283,13 @@ export default class ROPHighlight extends RScriptOp {
                 break;
             case RScriptUIElementID.TOGGLENATURAL:
             case RScriptUIElementID.TOGGLETARGET:
+            case RScriptUIElementID.FOLDER:
                 break;
             case RScriptUIElementID.ACTION_MENU:
                 log.warn('ACTION_MENU rscript ui element no longer exists');
                 break;
             default:
-                log.warn(`UI element does not have size: ${key}`);
+                log.warn(`UI element does not have handled size: ${key}`);
         }
         return size;
     }
@@ -331,6 +332,7 @@ export default class ROPHighlight extends RScriptOp {
             case RScriptUIElementID.REDO:
             case RScriptUIElementID.PIP:
             case RScriptUIElementID.SWITCH:
+            case RScriptUIElementID.FOLDER:
                 return this._env.getUIElement(key);
             case RScriptUIElementID.ACTION_MENU:
                 log.warn('ACTION_MENU rscript ui element no longer exists');
@@ -385,6 +387,7 @@ export default class ROPHighlight extends RScriptOp {
             case RScriptUIElementID.UNDO:
             case RScriptUIElementID.REDO:
             case RScriptUIElementID.PIP:
+            case RScriptUIElementID.FOLDER:
                 break;
             case RScriptUIElementID.OBJECTIVES:
                 offset = new Point(-5, 0);
