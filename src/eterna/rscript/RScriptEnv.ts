@@ -247,6 +247,8 @@ export default class RScriptEnv extends ContainerObject {
 
                     // AMW TODO: this concerns me. Neither DisplayObject nor GameObject
                     // seem to actually implement Enableable...
+                    // JAR Note: Enableable is something that we would add in a subclass of
+                    // DisplayObject or GameObject, but still not sure if this is idiomatic?
                     if ((obj as unknown as Enableable).enabled !== undefined) {
                         (obj as unknown as Enableable).enabled = visible && !disabled;
                     }
