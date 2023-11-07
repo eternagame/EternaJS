@@ -85,18 +85,6 @@ export default class ROPHighlight extends RScriptOp {
                 );
                 return;
             }
-            // if (highlightParent instanceof DisplayObject) {
-            //     log.warn(`ROPHighlight: highlight parent is a raw DisplayObject [id='${this._uiElementString}']`);
-            //     return;
-            // }
-            // if (highlightParent instanceof GameObject) {
-            //     log.warn(`ROPHighlight: highlight parent is a raw GameObject [id='${this._uiElementString}']`);
-            //     return;
-            // }
-            // if (highlightParent instanceof Rectangle) {
-            //     log.warn(`ROPHighlight: highlight parent is a raw Rectangle [id='${this._uiElementString}']`);
-            //     return;
-            // }
 
             // Draw highlight around the UI element.
             // Give it a bit of padding so the highlight isn't so tight.
@@ -122,8 +110,8 @@ export default class ROPHighlight extends RScriptOp {
             highlight.clear();
             highlight.lineStyle(5, this._color, 0.7);
             highlight.drawRoundedRect(
-                newX,
-                newY,
+                0,
+                0,
                 elementSize.x,
                 elementSize.y,
                 4
@@ -133,6 +121,7 @@ export default class ROPHighlight extends RScriptOp {
             let oldY = newY;
 
             const highlightObj = new SceneObject(highlight);
+            highlightObj.display.position = new Point(newX, newY);
             highlightObj.addObject(
                 new RepeatingTask(
                     () => new SerialTask(
@@ -148,16 +137,16 @@ export default class ROPHighlight extends RScriptOp {
                         new CallbackTask(() => {
                             const _uiElementBounds = GetRScriptUIElementBounds(uiElement);
                             Assert.assertIsDefined(_uiElementBounds);
-                            const _newX: number = (highlightParent === uiElement ? 0 : _uiElementBounds.x)
+                            const _newX: number = _uiElementBounds.x
                                 - padding.x
                                 + offset.x;
-                            const _newY: number = (highlightParent === uiElement ? 0 : _uiElementBounds.y)
+                            const _newY: number = _uiElementBounds.y
                                 - padding.y
                                 + offset.y;
 
                             if (oldX !== _newX || oldY !== _newY) {
-                                highlight.position.x += (_newX - oldX);
-                                highlight.position.y += (_newY - oldY);
+                                highlightObj.display.x += (_newX - oldX);
+                                highlightObj.display.y += (_newY - oldY);
                                 oldX = _newX;
                                 oldY = _newY;
                             }
@@ -165,12 +154,9 @@ export default class ROPHighlight extends RScriptOp {
                     )
                 )
             );
-            if (highlightParent instanceof PoseEditMode) {
-                highlightParent.addObject(
-                    highlightObj,
-                    highlightParent.container
-                );
-            }
+
+            this._env.addObject(highlightObj, this._env.container);
+
             this._env.setVar(this._id, highlightObj);
         }
     }
