@@ -859,7 +859,6 @@ export default class Toolbar extends ContainerObject {
         } else if (hotbarButton && hotbarButton.display.visible) {
             return hotbarButton;
         } else {
-            this._expandCollapseButton.rscriptID(scriptID);
             return {
                 rect: this._expandCollapseButton.display.getBounds(),
                 proxy: true
