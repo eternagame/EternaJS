@@ -5,7 +5,6 @@ import Booster from 'eterna/mode/PoseEdit/Booster';
 import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
 import {BoostersData} from 'eterna/puzzle/Puzzle';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import Fonts from 'eterna/util/Fonts';
 import {
     AlphaTask, Assert, CallbackTask, ContainerObject, Easing, Flashbang, HLayoutContainer,
@@ -835,29 +834,23 @@ export default class Toolbar extends ContainerObject {
         this._expandCollapseButton.display.alpha = disable ? 0.5 : 1;
     }
 
-    public getScriptUIElement(button: ToolbarButton, scriptID: RScriptUIElementID) {
+    public getScriptUIElement(button: ToolbarButton) {
         // The passed button will be from the tool shelf as that's what's exposed as properties on the toolbar
         const hotbarButton = this._leftBay.getButton(button.id) || this._rightBay.getButton(button.id);
-        if (this._expanded) {
-            if (hotbarButton && hotbarButton.display.visible) {
-                hotbarButton.rscriptID(scriptID);
-                return hotbarButton;
-            } else if (button.category === this._toolShelf.currentTab) {
-                button.rscriptID(scriptID);
-                return button;
-            } else {
-                const rect = this._toolShelf.getTabBounds(button.category);
-                if (rect) {
-                    return {
-                        rect,
-                        proxy: true
-                    };
-                }
-                // TODO: Can we avoid this?
-                return null;
-            }
-        } else if (hotbarButton && hotbarButton.display.visible) {
+        if (hotbarButton && hotbarButton.display.visible) {
             return hotbarButton;
+        } else if (this._expanded) {
+            if (button.category !== this._toolShelf.currentTab) {
+                const rect = this._toolShelf.getTabBounds(button.category);
+                // TODO: Can we avoid this?
+                if (!rect) return null;
+                return {
+                    rect,
+                    proxy: true
+                };
+            } else {
+                return this._toolShelf.getItemBounds(button.id);
+            }
         } else {
             return {
                 rect: this._expandCollapseButton.display.getBounds(),

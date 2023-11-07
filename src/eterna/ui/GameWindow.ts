@@ -618,6 +618,18 @@ export default class GameWindow extends ContainerObject {
         };
     }
 
+    public getContentVisibleBounds() {
+        return this._content.display.getBounds();
+    }
+
+    public getVScrollThumbBounds() {
+        return this._content.getVScrollThumbBounds();
+    }
+
+    public getHScrollThumbBounds() {
+        return this._content.getHScrollThumbBounds();
+    }
+
     public get titleHeight(): number {
         return this._panel.titleHeight;
     }

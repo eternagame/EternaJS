@@ -125,13 +125,13 @@ class TabBar<Title extends string = string> extends ContainerObject {
         this.layout();
     }
 
-    public getTabBounds(title: Title): Rectangle | undefined {
+    public getTabBounds(title: Title): Rectangle | null {
         if (this._tabLayout.visible) {
-            return this._tabLabels.find((label) => label.title === title)?.display.getBounds();
+            return this._tabLabels.find((label) => label.title === title)?.display.getBounds() ?? null;
         } else {
             // FIXME: Can we adjust things so that we can highlight the actual dropdown item?
             // How would we handle needing to scroll to get to it?
-            return this._dropdown.display.getBounds();
+            return this._dropdown.getItemBounds(title);
         }
     }
 
@@ -259,8 +259,22 @@ export default class ToolShelf extends ContainerObject {
         return this._tabBar.currentTab.value;
     }
 
-    public getTabBounds(category: ButtonCategory): Rectangle | undefined {
+    public getTabBounds(category: ButtonCategory): Rectangle | null {
         return this._tabBar.getTabBounds(category);
+    }
+
+    public getItemBounds(toolId: string) {
+        const button = this._buttons.find((candidate) => candidate.id === toolId);
+        if (!button) return null;
+        const buttonBounds = button.display.getBounds();
+        const scrollBounds = this._tabContentScroller.display.getBounds();
+        if (buttonBounds.right < scrollBounds.left || buttonBounds.left > scrollBounds.right) {
+            return {
+                rect: this._tabContentScroller.getHScrollThumbBounds(),
+                proxy: true
+            };
+        }
+        return button;
     }
 
     private _tabBar: TabBar<ButtonCategory>;
