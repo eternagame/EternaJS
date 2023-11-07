@@ -22,6 +22,9 @@ export function GetRScriptUIElementBounds(element: RScriptUIElement | null): Rec
 export enum RScriptUIElementID {
     TOGGLETARGET = 'TOGGLETARGET',
     TOGGLENATURAL = 'TOGGLENATURAL',
+    SWITCH = 'SWITCH',
+    FOLDER = 'FOLDER',
+
     ZOOMIN = 'ZOOMIN',
     ZOOMOUT = 'ZOOMOUT',
     RESET = 'RESET',
@@ -31,7 +34,6 @@ export enum RScriptUIElementID {
     HINT = 'HINT',
     PIP = 'PIP',
     FREEZE = 'FREEZE',
-    SWITCH = 'SWITCH',
     BASEMARKER = 'BASEMARKER',
     MAGICGLUE = 'MAGICGLUE',
 

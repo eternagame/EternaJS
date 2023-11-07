@@ -5,6 +5,8 @@ import {Value, ValueView} from 'signals';
 import {Sprite} from 'pixi.js';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import BitmapManager from 'eterna/resources/BitmapManager';
+import ROPWait from 'eterna/rscript/ROPWait';
+import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import GameDropdown from './GameDropdown';
 
 export default class FolderSwitcher extends ContainerObject implements Enableable {
@@ -49,6 +51,7 @@ export default class FolderSwitcher extends ContainerObject implements Enableabl
         this.addObject(this._dropdown, this.container);
         this.regs?.add(this._dropdown.selectedOption.connectNotify((val) => {
             this.selectedFolder.value = this.getFolder(val);
+            ROPWait.notifyClickUI(RScriptUIElementID.FOLDER);
         }));
     }
 

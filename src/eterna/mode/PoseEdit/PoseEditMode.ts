@@ -3916,6 +3916,10 @@ export default class PoseEditMode extends GameMode {
         return this._stateToggle;
     }
 
+    public get folderSwitcher(): FolderSwitcher {
+        return this._folderSwitcher;
+    }
+
     private readonly _puzzle: Puzzle;
     private readonly _params: PoseEditParams;
     private readonly _scriptInterface = new ExternalInterfaceCtx();
