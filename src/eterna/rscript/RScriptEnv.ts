@@ -10,7 +10,6 @@ import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
 import Puzzle from 'eterna/puzzle/Puzzle';
 import Pose2D, {RNAHighlightState} from 'eterna/pose2D/Pose2D';
 import {PaletteTargetType} from 'eterna/ui/toolbar/NucleotidePalette';
-import StateToggle from 'eterna/ui/StateToggle';
 import PoseField from 'eterna/pose2D/PoseField';
 import {RScriptUIElement, RScriptUIElementID} from './RScriptUIElement';
 
@@ -201,10 +200,6 @@ export default class RScriptEnv extends ContainerObject {
                 visible,
                 disabled
             );
-        } else if (elementID === RScriptUIElementID.SWITCH) {
-            (
-                this.getUIElementFromID(elementID)[0] as StateToggle
-            ).display.visible = visible;
         } else {
             if (visible && elementID === RScriptUIElementID.PALETTE) {
                 this.ui.toolbar.palette.setOverrideDefault();
@@ -214,24 +209,20 @@ export default class RScriptEnv extends ContainerObject {
                 this.ui.toolbar.palette.changeNoPairMode();
             }
 
-            let bEnable = true;
-            switch (elementID) {
-                case RScriptUIElementID.ZOOMIN:
-                case RScriptUIElementID.ZOOMOUT:
-                case RScriptUIElementID.RESET:
-                case RScriptUIElementID.UNDO:
-                case RScriptUIElementID.REDO:
-                case RScriptUIElementID.SWAP:
-                case RScriptUIElementID.PIP:
-                case RScriptUIElementID.BASEMARKER:
-                case RScriptUIElementID.MAGICGLUE:
-                    bEnable = false;
-                    break;
-                default:
-                    break;
-            }
-
-            if (bEnable) {
+            // These are part of the customizable toolbar, and we don't want to support selectively
+            // removing items in there
+            const elementsToSkip: string[] = [
+                RScriptUIElementID.ZOOMIN,
+                RScriptUIElementID.ZOOMOUT,
+                RScriptUIElementID.RESET,
+                RScriptUIElementID.UNDO,
+                RScriptUIElementID.REDO,
+                RScriptUIElementID.SWAP,
+                RScriptUIElementID.PIP,
+                RScriptUIElementID.BASEMARKER,
+                RScriptUIElementID.MAGICGLUE
+            ];
+            if (!elementsToSkip.includes(elementID)) {
                 const obj: RScriptUIElement | null = this.getUIElementFromID(elementID)[0];
                 if (obj) {
                     if (obj instanceof DisplayObject) {
@@ -242,6 +233,8 @@ export default class RScriptEnv extends ContainerObject {
 
                     // AMW TODO: this concerns me. Neither DisplayObject nor GameObject
                     // seem to actually implement Enableable...
+                    // JAR Note: Enableable is something that we would add in a subclass of
+                    // DisplayObject or GameObject, but still not sure if this is idiomatic?
                     if ((obj as unknown as Enableable).enabled !== undefined) {
                         (obj as unknown as Enableable).enabled = visible && !disabled;
                     }
@@ -264,6 +257,8 @@ export default class RScriptEnv extends ContainerObject {
                 return this.ui.getConstraintBox(i);
             case RScriptUIElementID.SWITCH:
                 return this.ui.stateToggle;
+            case RScriptUIElementID.FOLDER:
+                return this.ui.folderSwitcher;
             case RScriptUIElementID.TOTALENERGY:
             case RScriptUIElementID.PRIMARY_ENERGY:
                 return this.poseField.primaryScoreDisplay;
