@@ -14,7 +14,6 @@ import {
 } from 'flashbang';
 import {RNAHighlightState} from 'eterna/pose2D/Pose2D';
 import ConstraintBox from 'eterna/constraints/ConstraintBox';
-import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
 import {
     RScriptUIElement,
     GetRScriptUIElementBounds,
@@ -74,54 +73,32 @@ export default class ROPHighlight extends RScriptOp {
             const rnaHighlight: RNAHighlightState = this._env.pose.createNewHighlight(res);
             this._env.setVar(this._id, rnaHighlight);
         } else if (this._opVisible && this._mode === ROPHighlightMode.UI) {
-            const [uiElement, elementID, altParam] = this._env.getUIElementFromID(this._uiElementString);
-            const highlightParent = this.getUiElementReference(
-                elementID,
-                altParam
-            );
-            if (highlightParent == null) {
-                log.warn(
-                    `ROPHighlight: missing highlight parent [id='${this._uiElementString}']`
-                );
-                return;
-            }
-
             // Draw highlight around the UI element.
-            // Give it a bit of padding so the highlight isn't so tight.
-            const padding = new Point(5, 5);
-            const offset: Point = ROPHighlight.getUiElementOffset(elementID);
-            const elementSize: Point = this.getUiElementSize(
-                uiElement,
-                padding,
-                elementID
-            );
-
-            const uiElementBounds = GetRScriptUIElementBounds(uiElement);
-            Assert.assertIsDefined(uiElementBounds);
-            const newX: number = (highlightParent === uiElement ? 0 : uiElementBounds.x)
-                - padding.x
-                + offset.x;
-            const newY: number = (highlightParent === uiElement ? 0 : uiElementBounds.y)
-                - padding.y
-                + offset.y;
-
             const highlight = new Graphics();
             highlight.alpha = 0;
-            highlight.clear();
-            highlight.lineStyle(5, this._color, 0.7);
-            highlight.drawRoundedRect(
-                0,
-                0,
-                elementSize.x,
-                elementSize.y,
-                4
-            );
-
-            let oldX = newX;
-            let oldY = newY;
 
             const highlightObj = new SceneObject(highlight);
-            highlightObj.display.position = new Point(newX, newY);
+
+            const redrawHighlight = () => {
+                // We have to get the element again every time we redraw in case eg we were
+                // highlighting a "proxy" like the expand toolbar button and have since changed
+                const [uiElement, elementID] = this._env.getUIElementFromID(this._uiElementString);
+                // Give it a bit of padding so the highlight isn't so tight.
+                const padding = new Point(5, 5);
+                const elementSize = this.getUiElementSize(uiElement, padding, elementID);
+
+                highlight.clear();
+                highlight.lineStyle(5, this._color, 0.7);
+                highlight.drawRoundedRect(0, 0, elementSize.x, elementSize.y, 4);
+
+                const uiElementBounds = GetRScriptUIElementBounds(uiElement);
+                if (!uiElementBounds) return;
+                const offset: Point = ROPHighlight.getUiElementOffset(elementID);
+                highlightObj.display.x = uiElementBounds.x - padding.x + offset.x;
+                highlightObj.display.y = uiElementBounds.y - padding.y + offset.y;
+            };
+            redrawHighlight();
+
             highlightObj.addObject(
                 new RepeatingTask(
                     () => new SerialTask(
@@ -130,27 +107,15 @@ export default class ROPHighlight extends RScriptOp {
                     )
                 )
             );
+            // We could listen for pose resizes, but that wouldn't tell us about things
+            // like items being dragged around, scroll containers with items being scrolled,
+            // the hotbar contents changing, etc. So instead we just reposition the thing
+            // every few frames
             highlightObj.addObject(
                 new RepeatingTask(
                     () => new SerialTask(
-                        new DelayTask(0.01),
-                        new CallbackTask(() => {
-                            const _uiElementBounds = GetRScriptUIElementBounds(uiElement);
-                            Assert.assertIsDefined(_uiElementBounds);
-                            const _newX: number = _uiElementBounds.x
-                                - padding.x
-                                + offset.x;
-                            const _newY: number = _uiElementBounds.y
-                                - padding.y
-                                + offset.y;
-
-                            if (oldX !== _newX || oldY !== _newY) {
-                                highlightObj.display.x += (_newX - oldX);
-                                highlightObj.display.y += (_newY - oldY);
-                                oldX = _newX;
-                                oldY = _newY;
-                            }
-                        })
+                        new DelayTask(0.1),
+                        new CallbackTask(redrawHighlight)
                     )
                 )
             );
@@ -277,54 +242,6 @@ export default class ROPHighlight extends RScriptOp {
                 log.warn(`UI element does not have size: ${key}`);
         }
         return size;
-    }
-
-    private getUiElementReference(
-        key: RScriptUIElementID,
-        altParam: number = -1
-    ): PoseEditMode | RScriptUIElement | null {
-        switch (key) {
-            case RScriptUIElementID.A:
-            case RScriptUIElementID.U:
-            case RScriptUIElementID.G:
-            case RScriptUIElementID.C:
-            case RScriptUIElementID.AU:
-            case RScriptUIElementID.UA:
-            case RScriptUIElementID.GU:
-            case RScriptUIElementID.UG:
-            case RScriptUIElementID.GC:
-            case RScriptUIElementID.CG:
-            case RScriptUIElementID.AUCOMPLETE:
-            case RScriptUIElementID.UACOMPLETE:
-            case RScriptUIElementID.GUCOMPLETE:
-            case RScriptUIElementID.UGCOMPLETE:
-            case RScriptUIElementID.GCCOMPLETE:
-            case RScriptUIElementID.CGCOMPLETE:
-                return this._env.getUIElement(RScriptUIElementID.PALETTE);
-            case RScriptUIElementID.OBJECTIVES:
-                return this._env.getUIElement(RScriptUIElementID.OBJECTIVE, 0);
-            case RScriptUIElementID.OBJECTIVE:
-                return this._env.getUIElement(
-                    RScriptUIElementID.OBJECTIVE,
-                    altParam
-                );
-            case RScriptUIElementID.SWAP:
-            case RScriptUIElementID.TOGGLENATURAL:
-            case RScriptUIElementID.TOGGLETARGET:
-            case RScriptUIElementID.ZOOMIN:
-            case RScriptUIElementID.ZOOMOUT:
-            case RScriptUIElementID.UNDO:
-            case RScriptUIElementID.REDO:
-            case RScriptUIElementID.PIP:
-            case RScriptUIElementID.SWITCH:
-                return this._env.getUIElement(key);
-            case RScriptUIElementID.ACTION_MENU:
-                log.warn('ACTION_MENU rscript ui element no longer exists');
-                break;
-            default:
-                log.warn(`No reference exist for UI element ${key}`);
-        }
-        return this._env.ui;
     }
 
     private removeHighlight(obj: RNAHighlightState): void {
