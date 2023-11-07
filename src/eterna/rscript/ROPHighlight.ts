@@ -1,5 +1,5 @@
 import * as log from 'loglevel';
-import {Graphics, Point} from 'pixi.js';
+import {Graphics} from 'pixi.js';
 import {
     GameObject,
     RepeatingTask,
@@ -8,15 +8,11 @@ import {
     Easing,
     AlphaTask,
     ColorUtil,
-    Assert,
     CallbackTask,
     DelayTask
 } from 'flashbang';
 import {RNAHighlightState} from 'eterna/pose2D/Pose2D';
-import ConstraintBox from 'eterna/constraints/ConstraintBox';
 import {
-    RScriptUIElement,
-    GetRScriptUIElementBounds,
     RScriptUIElementID
 } from './RScriptUIElement';
 import RScriptOp from './RScriptOp';
@@ -80,22 +76,19 @@ export default class ROPHighlight extends RScriptOp {
             const highlightObj = new SceneObject(highlight);
 
             const redrawHighlight = () => {
-                // We have to get the element again every time we redraw in case eg we were
-                // highlighting a "proxy" like the expand toolbar button and have since changed
-                const [uiElement, elementID] = this._env.getUIElementFromID(this._uiElementString);
+                const bounds = this._env.getUIElementBounds(this._uiElementString);
+                if (!bounds) {
+                    highlightObj.display.visible = false;
+                    return;
+                }
                 // Give it a bit of padding so the highlight isn't so tight.
-                const padding = new Point(5, 5);
-                const elementSize = this.getUiElementSize(uiElement, padding, elementID);
+                const padding = 5;
 
                 highlight.clear();
                 highlight.lineStyle(5, this._color, 0.7);
-                highlight.drawRoundedRect(0, 0, elementSize.x, elementSize.y, 4);
-
-                const uiElementBounds = GetRScriptUIElementBounds(uiElement);
-                if (!uiElementBounds) return;
-                const offset: Point = ROPHighlight.getUiElementOffset(elementID);
-                highlightObj.display.x = uiElementBounds.x - padding.x + offset.x;
-                highlightObj.display.y = uiElementBounds.y - padding.y + offset.y;
+                highlight.drawRoundedRect(0, 0, bounds.width + 2 * padding, bounds.height + 2 * padding, 4);
+                highlightObj.display.x = bounds.x - padding;
+                highlightObj.display.y = bounds.y - padding;
             };
             redrawHighlight();
 
@@ -110,18 +103,17 @@ export default class ROPHighlight extends RScriptOp {
             // We could listen for pose resizes, but that wouldn't tell us about things
             // like items being dragged around, scroll containers with items being scrolled,
             // the hotbar contents changing, etc. So instead we just reposition the thing
-            // every few frames
+            // every frame
             highlightObj.addObject(
                 new RepeatingTask(
                     () => new SerialTask(
-                        new DelayTask(0.1),
+                        new DelayTask(0.01),
                         new CallbackTask(redrawHighlight)
                     )
                 )
             );
 
             this._env.addObject(highlightObj, this._env.container);
-
             this._env.setVar(this._id, highlightObj);
         }
     }
@@ -166,84 +158,6 @@ export default class ROPHighlight extends RScriptOp {
         }
     }
 
-    private getUiElementSize(
-        uiObj: RScriptUIElement | null,
-        padding: Point,
-        key: RScriptUIElementID
-    ): Point {
-        const bounds = GetRScriptUIElementBounds(uiObj);
-        Assert.assertIsDefined(bounds);
-        const size = new Point(
-            bounds.width + 2 * padding.x,
-            bounds.height + 2 * padding.y
-        );
-
-        switch (key) {
-            case RScriptUIElementID.OBJECTIVES: {
-                const n: number | null = this._env.ui.constraintCount;
-                Assert.assertIsDefined(n);
-                const firstObj: ConstraintBox | null = this._env.ui.getConstraintBox(0);
-                Assert.assertIsDefined(firstObj);
-                const lastObj: ConstraintBox | null = this._env.ui.getConstraintBox(n - 1);
-                Assert.assertIsDefined(lastObj);
-                size.x = lastObj.display.x
-                    - firstObj.display.x
-                    + lastObj.display.width
-                    + 2 * padding.x;
-                size.y = 84;
-                break;
-            }
-            case RScriptUIElementID.SHAPEOBJECTIVE:
-                size.x = 84;
-                size.y = 84;
-                break;
-            case RScriptUIElementID.OBJECTIVE:
-                size.x = 10 + (uiObj as ConstraintBox).display.width;
-                size.y = 84;
-                break;
-            case RScriptUIElementID.SWAP:
-                size.x -= 6;
-                break;
-            case RScriptUIElementID.ZOOMIN:
-            case RScriptUIElementID.ZOOMOUT:
-            case RScriptUIElementID.UNDO:
-            case RScriptUIElementID.REDO:
-            case RScriptUIElementID.RESET:
-            case RScriptUIElementID.PIP:
-                size.x -= 5;
-                break;
-            case RScriptUIElementID.AU:
-            case RScriptUIElementID.UA:
-            case RScriptUIElementID.GU:
-            case RScriptUIElementID.UG:
-            case RScriptUIElementID.GC:
-            case RScriptUIElementID.CG:
-                size.x = 30;
-                size.y = 15;
-                break;
-            case RScriptUIElementID.AUCOMPLETE:
-            case RScriptUIElementID.UACOMPLETE:
-            case RScriptUIElementID.GUCOMPLETE:
-            case RScriptUIElementID.UGCOMPLETE:
-            case RScriptUIElementID.GCCOMPLETE:
-            case RScriptUIElementID.CGCOMPLETE:
-                size.x += 24;
-                break;
-            case RScriptUIElementID.HELP:
-                size.x -= 6;
-                break;
-            case RScriptUIElementID.TOGGLENATURAL:
-            case RScriptUIElementID.TOGGLETARGET:
-                break;
-            case RScriptUIElementID.ACTION_MENU:
-                log.warn('ACTION_MENU rscript ui element no longer exists');
-                break;
-            default:
-                log.warn(`UI element does not have size: ${key}`);
-        }
-        return size;
-    }
-
     private removeHighlight(obj: RNAHighlightState): void {
         this._env.pose.removeNewHighlight(obj);
     }
@@ -251,51 +165,6 @@ export default class ROPHighlight extends RScriptOp {
     private static processId(inId: string): string {
         if (!inId) return ROPHighlight.ID_POSTFIX;
         return inId + ROPHighlight.ID_POSTFIX;
-    }
-
-    private static getUiElementOffset(id: RScriptUIElementID): Point {
-        let offset: Point = new Point(0, 0);
-        switch (id) {
-            case RScriptUIElementID.SWAP:
-                offset = new Point(4, 0);
-                break;
-            case RScriptUIElementID.A:
-            case RScriptUIElementID.U:
-            case RScriptUIElementID.G:
-            case RScriptUIElementID.C:
-                break;
-            case RScriptUIElementID.AU:
-            case RScriptUIElementID.UA:
-            case RScriptUIElementID.GU:
-            case RScriptUIElementID.UG:
-            case RScriptUIElementID.GC:
-            case RScriptUIElementID.CG:
-                offset = new Point(8, 7);
-                break;
-            case RScriptUIElementID.AUCOMPLETE:
-            case RScriptUIElementID.UACOMPLETE:
-            case RScriptUIElementID.GUCOMPLETE:
-            case RScriptUIElementID.UGCOMPLETE:
-            case RScriptUIElementID.GCCOMPLETE:
-            case RScriptUIElementID.CGCOMPLETE:
-                offset = new Point(-19, 0);
-                break;
-            case RScriptUIElementID.TOGGLENATURAL:
-            case RScriptUIElementID.TOGGLETARGET:
-            case RScriptUIElementID.RESET:
-            case RScriptUIElementID.ZOOMIN:
-            case RScriptUIElementID.ZOOMOUT:
-            case RScriptUIElementID.UNDO:
-            case RScriptUIElementID.REDO:
-            case RScriptUIElementID.PIP:
-                break;
-            case RScriptUIElementID.OBJECTIVES:
-                offset = new Point(-5, 0);
-                break;
-            default:
-                log.warn(`UIElement ${id} has no defined offset`);
-        }
-        return offset;
     }
 
     private readonly _opVisible: boolean;

@@ -144,25 +144,11 @@ export default class RScriptEnv extends ContainerObject {
         try {
             const [uiElement] = this.getUIElementFromID(key);
             if (uiElement instanceof GameObject) {
-                const obj = uiElement as GameObject;
-                Assert.assertIsDefined(obj.display);
-                const globalPos = obj.display.toGlobal(new Point());
-                return new Rectangle(
-                    globalPos.x,
-                    globalPos.y,
-                    obj.display.getLocalBounds().width,
-                    obj.display.getLocalBounds().height
-                );
+                if (!uiElement.display) return null;
+                return uiElement.display.getBounds();
             } else if (uiElement instanceof DisplayObject) {
-                const obj = uiElement;
-                Assert.assertIsDefined(obj);
-                const globalPos = obj.toGlobal(new Point());
-                return new Rectangle(
-                    globalPos.x,
-                    globalPos.y,
-                    obj.getLocalBounds().width,
-                    obj.getLocalBounds().height
-                );
+                if (!uiElement) return null;
+                return uiElement.getBounds();
             } else if (uiElement !== null) {
                 if (uiElement.proxy) {
                     return uiElement.rect;
