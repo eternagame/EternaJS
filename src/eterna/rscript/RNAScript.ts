@@ -149,17 +149,17 @@ export default class RNAScript {
         op = op.replace(/\s*$/, '');
 
         // Regex to detect the various commands
-        const textboxRegex = /(Show|Hide)(Textbox|Arrow)(Location|Nucleotide|Energy)?/gi;
-        const highlightRegex = /(Show|Hide)(UI)?Highlight/gi;
-        const uiRegex = /(Show|Hide|Enable|Disable)UI$/gi;
-        const hintRegex = /(Show|Hide)(Paint)?Hint/gi;
-        const waitRegex = /WaitFor(.*)/gi;
-        const preRegex = /#PRE-(.*)/g;
-        const rnaRegex = /^RNA(SetBase|ChangeMode|EnableModification|SetPainter|ChangeState|SetZoom|SetPIP)$/gi;
-        const popPuzzle = /PopPuzzle/;
-        const showMissionScreen = /ShowMissionScreen/;
-        const uiArrow = /(Show|Hide)UIArrow/;
-        const uiTooltip = /(Show|Hide)UITooltip/;
+        const textboxRegex = /(Show|Hide)(Textbox|Arrow)(Location|Nucleotide|Energy)?/i;
+        const highlightRegex = /(Show|Hide)(UI)?Highlight/i;
+        const uiRegex = /(Show|Hide|Enable|Disable)UI$/i;
+        const hintRegex = /(Show|Hide)(Paint)?Hint/i;
+        const waitRegex = /WaitFor(.*)/i;
+        const preRegex = /#PRE-(.*)/i;
+        const rnaRegex = /^RNA(SetBase|ChangeMode|EnableModification|SetPainter|ChangeState|SetZoom|SetPIP)$/i;
+        const popPuzzle = /PopPuzzle/i;
+        const showMissionScreen = /ShowMissionScreen/i;
+        const uiArrow = /(Show|Hide)UIArrow/i;
+        const uiTooltip = /(Show|Hide)UITooltip/i;
 
         let regResult: RegExpExecArray | null;
         if ((regResult = preRegex.exec(op)) != null) {
