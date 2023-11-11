@@ -113,6 +113,18 @@ export default class ModeBar extends ContainerObject {
         });
     }
 
+    public getScriptUIElement(child: SceneObject) {
+        const childBounds = child.display.getBounds();
+        const scrollBouds = this._window.getContentVisibleBounds();
+        if (childBounds.bottom < scrollBouds.top || childBounds.top > scrollBouds.bottom) {
+            return {
+                rect: this._window.getVScrollThumbBounds(),
+                proxy: true
+            };
+        }
+        return child;
+    }
+
     private _window: GameWindow;
     private _vLayout: VLayoutContainer;
 }

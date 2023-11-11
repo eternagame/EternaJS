@@ -3864,6 +3864,10 @@ export default class PoseEditMode extends GameMode {
         return this._toolbar;
     }
 
+    public get modeBar() {
+        return this._modeBar;
+    }
+
     public get naturalButton(): ToolbarButton {
         return this._naturalButton;
     }

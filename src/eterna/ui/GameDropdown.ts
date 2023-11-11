@@ -38,7 +38,8 @@ interface GameDropdownProps<Option> {
     checkboxes?: boolean;
 }
 
-interface OptionItem {
+interface OptionItem<Option extends string> {
+    option: Option;
     textBalloon: TextBalloon;
     checkbox?: GameCheckbox;
     icon?: Sprite;
@@ -209,7 +210,7 @@ export default class GameDropdown<Option extends string = string> extends Contai
                 icon.x = GameDropdown._HORIZONTAL_PADDING / 2;
                 icon.y = (text.display.height - GameDropdown._ICON_SIZE) / 2;
                 this.addObject(new ContainerObject(icon), text.display);
-                this._optionItems.push({icon, textBalloon: text});
+                this._optionItems.push({option, icon, textBalloon: text});
             } else if (this._checkboxes) {
                 checkbox = new GameCheckbox(GameDropdown._POPUP_CHECKBOX_HEIGHT, '', true);
                 checkbox.enabled = false;
@@ -219,9 +220,9 @@ export default class GameDropdown<Option extends string = string> extends Contai
                 this.addObject(checkbox, text.display);
 
                 // Save to option item array
-                this._optionItems.push({textBalloon: text, checkbox});
+                this._optionItems.push({option, textBalloon: text, checkbox});
             } else {
-                this._optionItems.push({textBalloon: text});
+                this._optionItems.push({option, textBalloon: text});
             }
 
             text.display.y = yWalker;
@@ -399,6 +400,21 @@ export default class GameDropdown<Option extends string = string> extends Contai
         return this._disabled;
     }
 
+    public getItemBounds(option: Option) {
+        if (this._popupVisible) {
+            const optionItem = this._optionItems.find((item) => item.option === option);
+            if (!optionItem) return null;
+            const itemBounds = optionItem.textBalloon.display.getBounds();
+            const maskBounds = this._scrollView.display.getBounds();
+            if (itemBounds.bottom < maskBounds.top || itemBounds.top > maskBounds.bottom) {
+                return this._scrollView.getVScrollThumbBounds();
+            }
+            return itemBounds;
+        } else {
+            return this.display.getBounds();
+        }
+    }
+
     private _fontSize: number;
 
     private _width: number | null;
@@ -421,7 +437,7 @@ export default class GameDropdown<Option extends string = string> extends Contai
     private _scrollView: ScrollBox;
     private _activeCapture: PointerCapture | null;
 
-    private _optionItems: OptionItem[] = [];
+    private _optionItems: OptionItem<Option>[] = [];
 
     private static readonly _HORIZONTAL_PADDING: number = 10;
     private static readonly _VERTICAL_PADDING: number = 3;
