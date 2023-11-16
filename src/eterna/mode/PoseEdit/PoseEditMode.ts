@@ -2856,6 +2856,13 @@ export default class PoseEditMode extends GameMode {
     }
 
     private async transferToPuzzlemaker(): Promise<void> {
+        if (this._targetConditions.some((tc) => tc && (
+            Puzzle.isOligoType(tc.type) || Puzzle.isMultistrandType(tc.type)
+        ))) {
+            this.showNotification('Beam to puzzlemaker is not currently supported for puzzles with oligos');
+            return;
+        }
+
         const poseData: SaveStoreItem = [0, this._poses[0].sequence.baseArray];
         const threeDStructure = this._pose3D?.structureFile instanceof File ? {
             name: this._pose3D.structureFile.name,
