@@ -32,6 +32,9 @@ import CopyTextDialog from 'eterna/ui/CopyTextDialog';
 import Toolbar from 'eterna/ui/toolbar/Toolbar';
 import WindowDialog from 'eterna/ui/WindowDialog';
 import Pose3DDialog from 'eterna/pose3D/Pose3DDialog';
+import {HighlightInfo} from 'eterna/constraints/Constraint';
+import {PoseState} from 'eterna/puzzle/Puzzle';
+import {HighlightType} from 'eterna/pose2D/HighlightBox';
 
 export default abstract class GameMode extends AppMode {
     public readonly bgLayer = new Container();
@@ -355,6 +358,47 @@ export default abstract class GameMode extends AppMode {
         this.regs?.add(this._poses[0].basesSparked.connect(
             (val: number[]) => this._pose3D?.spark3D(val)
         ));
+    }
+
+    protected highlightSequences(highlightInfos: HighlightInfo[] | null) {
+        for (const [poseIdx, pose] of this._poses.entries()) {
+            pose.clearRestrictedHighlight();
+            pose.clearUnstableHighlight();
+            pose.clearUserDefinedHighlight();
+            const poseState = this._isPipMode || poseIdx !== 0 ? poseIdx : this._curTargetIndex;
+            if (!highlightInfos) continue;
+            for (const highlightInfo of highlightInfos) {
+                if (highlightInfo.stateIndex !== undefined && poseState !== highlightInfo.stateIndex) {
+                    continue;
+                }
+
+                const currBlock = this.getCurrentUndoBlock(poseState);
+                if (!currBlock) continue;
+
+                const naturalMap = currBlock.reorderedOligosIndexMap(currBlock.oligoOrder);
+                const targetMap = currBlock.reorderedOligosIndexMap(currBlock.targetOligoOrder);
+                let ranges = highlightInfo.ranges;
+                if (this._poseState === PoseState.NATIVE && naturalMap !== undefined) {
+                    ranges = highlightInfo.ranges.map((index: number) => naturalMap.indexOf(index));
+                } else if (this._poseState === PoseState.TARGET && targetMap !== undefined) {
+                    ranges = highlightInfo.ranges.map((index: number) => targetMap.indexOf(index));
+                }
+
+                switch (highlightInfo.color) {
+                    case HighlightType.RESTRICTED:
+                        pose.highlightRestrictedSequence(ranges);
+                        break;
+                    case HighlightType.UNSTABLE:
+                        pose.highlightUnstableSequence(ranges);
+                        break;
+                    case HighlightType.USER_DEFINED:
+                        pose.highlightUserDefinedSequence(ranges);
+                        break;
+                    default:
+                        log.error(`Invalid highlight type: ${highlightInfo.color}`);
+                }
+            }
+        }
     }
 
     protected postScreenshot(screenshot: ArrayBuffer): void {
@@ -717,11 +761,13 @@ export default abstract class GameMode extends AppMode {
     protected _nucleotideRangeToShow: [number, number] | null = null;
 
     // Things that might or might not be set in children so that getEnergyDelta can get set in setPoseFields
+    // as well as being able to handle other shared code
     protected get _folder(): Folder | null {
         return null;
     }
 
     protected _curTargetIndex: number;
+    protected _poseState: PoseState = PoseState.NATIVE;
     protected getCurrentUndoBlock(_index: number): UndoBlock | undefined {
         return undefined;
     }

@@ -19,14 +19,14 @@ export default class ROPPre extends RScriptOp {
         super(env);
         this._type = null;
 
-        const disMissionScreenRegex = /DisableMissionScreen/ig;
-        const altPaletteRegex = /UseAlternatePalette/ig;
-        const disableHintRegex = /DisableHintSystem/ig;
-        const hideObjRegex = /HideObjectives/ig;
-        const hideUIRegex = /(Hide|Show|Disable|Enable)UI/ig;
-        const disableRNAMod = /(DisableRNAModification)/ig;
-        const modeRegex = /^(Native|Target)Mode$/ig;
-        const pushPuzzleRegex = /PushPuzzle/;
+        const disMissionScreenRegex = /DisableMissionScreen/i;
+        const altPaletteRegex = /UseAlternatePalette/i;
+        const disableHintRegex = /DisableHintSystem/i;
+        const hideObjRegex = /HideObjectives/i;
+        const hideUIRegex = /(Hide|Show|Disable|Enable)UI/i;
+        const disableRNAMod = /(DisableRNAModification)/i;
+        const modeRegex = /^(Native|Target)Mode$/i;
+        const pushPuzzleRegex = /PushPuzzle/i;
 
         let regResult: RegExpExecArray | null;
         if ((regResult = disMissionScreenRegex.exec(command)) != null) {

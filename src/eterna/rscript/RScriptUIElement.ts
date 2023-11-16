@@ -7,18 +7,6 @@ export type RSScriptRectangle = {
 };
 export type RScriptUIElement = GameObject | DisplayObject | RSScriptRectangle;
 
-export function GetRScriptUIElementBounds(element: RScriptUIElement | null): Rectangle | null {
-    if (element instanceof GameObject) {
-        return element.display != null
-            ? element.display.getBounds()
-            : null;
-    } else if (element instanceof DisplayObject) {
-        return element.getBounds();
-    } else if (element !== null) {
-        return element.rect;
-    } else return null;
-}
-
 export enum RScriptUIElementID {
     TOGGLETARGET = 'TOGGLETARGET',
     TOGGLENATURAL = 'TOGGLENATURAL',

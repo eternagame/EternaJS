@@ -28,53 +28,10 @@ export default class RNAScript {
         // If we ever make "Blocks" (i.e for IF conditionals), we'll need to make this a little
         // more complex
         const instructions: string[] = strData.split(';');
-        for (let instruction of instructions) {
-            instruction = instruction.replace(/^\s*/, '');
-            instruction = instruction.replace(/\s*$/, '');
-        }
-
-        const newInstructions: string[] = [];
-        const showUIInstructions: string[] = [];
-        let bShowUI = false;
-        for (const instruction of instructions) {
-            const instRegex = /(#PRE-)?(\w+)\s*(.*)/gi;
-            const regResult = instRegex.exec(instruction);
-            if (regResult) {
-                if (regResult[2] === 'ShowUIHighlight') {
-                    showUIInstructions.push(instruction);
-                    newInstructions.push(instruction);
-                    bShowUI = true;
-                } else if (regResult[2] === 'ShowUIArrow') {
-                    showUIInstructions.push(instruction);
-                    newInstructions.push(instruction);
-                    bShowUI = true;
-                } else if (regResult[2] === 'ShowUITooltip') {
-                    showUIInstructions.push(instruction);
-                    newInstructions.push(instruction);
-                    bShowUI = true;
-                } else {
-                    if (bShowUI) {
-                        const cmds = this._env.checkShowUI(showUIInstructions);
-                        for (const cmd of cmds) {
-                            newInstructions.push(cmd);
-                        }
-                    }
-                    bShowUI = false;
-                    newInstructions.push(instruction);
-                }
-            }
-        }
-        if (bShowUI) {
-            const cmds = this._env.checkShowUI(showUIInstructions);
-            for (const cmd of cmds) {
-                newInstructions.push(cmd);
-            }
-        }
-        bShowUI = false;
 
         // For each instruction, make it into an RScriptOp (OP).
         // Give it to the OpTree to handle placing it where it should go.
-        for (const instruction of newInstructions) {
+        for (const instruction of instructions) {
             this._ops.addNode(this.createOpFromInstruction(instruction));
         }
         this._ops.finishCreation();
@@ -149,17 +106,17 @@ export default class RNAScript {
         op = op.replace(/\s*$/, '');
 
         // Regex to detect the various commands
-        const textboxRegex = /(Show|Hide)(Textbox|Arrow)(Location|Nucleotide|Energy)?/gi;
-        const highlightRegex = /(Show|Hide)(UI)?Highlight/gi;
-        const uiRegex = /(Show|Hide|Enable|Disable)UI$/gi;
-        const hintRegex = /(Show|Hide)(Paint)?Hint/gi;
-        const waitRegex = /WaitFor(.*)/gi;
-        const preRegex = /#PRE-(.*)/g;
-        const rnaRegex = /^RNA(SetBase|ChangeMode|EnableModification|SetPainter|ChangeState|SetZoom|SetPIP)$/gi;
-        const popPuzzle = /PopPuzzle/;
-        const showMissionScreen = /ShowMissionScreen/;
-        const uiArrow = /(Show|Hide)UIArrow/;
-        const uiTooltip = /(Show|Hide)UITooltip/;
+        const textboxRegex = /(Show|Hide)(Textbox|Arrow)(Location|Nucleotide|Energy)?/i;
+        const highlightRegex = /(Show|Hide)(UI)?Highlight/i;
+        const uiRegex = /(Show|Hide|Enable|Disable)UI$/i;
+        const hintRegex = /(Show|Hide)(Paint)?Hint/i;
+        const waitRegex = /WaitFor(.*)/i;
+        const preRegex = /#PRE-(.*)/i;
+        const rnaRegex = /^RNA(SetBase|ChangeMode|EnableModification|SetPainter|ChangeState|SetZoom|SetPIP)$/i;
+        const popPuzzle = /PopPuzzle/i;
+        const showMissionScreen = /ShowMissionScreen/i;
+        const uiArrow = /(Show|Hide)UIArrow/i;
+        const uiTooltip = /(Show|Hide)UITooltip/i;
 
         let regResult: RegExpExecArray | null;
         if ((regResult = preRegex.exec(op)) != null) {

@@ -53,6 +53,8 @@ import ModeBar from 'eterna/ui/ModeBar';
 import {FederatedPointerEvent} from '@pixi/events';
 import GameWindow from 'eterna/ui/GameWindow';
 import FolderManager from 'eterna/folding/FolderManager';
+import {PoseState} from 'eterna/puzzle/Puzzle';
+import {HighlightInfo} from 'eterna/constraints/Constraint';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
 import StructureInput from './StructureInput';
@@ -281,6 +283,9 @@ export default class PuzzleEditMode extends GameMode {
         ), this._numTargets);
         this.addObject(this._constraintBar, this.container);
         this._constraintBar.layout();
+        this._constraintBar.sequenceHighlights.connect(
+            (highlightInfos: HighlightInfo[] | null) => this.highlightSequences(highlightInfos)
+        );
 
         this._toolbar = new Toolbar(toolbarType, {
             annotationManager: this._annotationManager
@@ -918,6 +923,8 @@ export default class PuzzleEditMode extends GameMode {
     }
 
     private setToNativeMode(): void {
+        this._poseState = PoseState.NATIVE;
+
         this._targetButton.toggled.value = false;
         this._naturalButton.toggled.value = true;
 
@@ -929,6 +936,8 @@ export default class PuzzleEditMode extends GameMode {
     }
 
     private setToTargetMode(): void {
+        this._poseState = PoseState.TARGET;
+
         this._targetButton.toggled.value = true;
         this._naturalButton.toggled.value = false;
 

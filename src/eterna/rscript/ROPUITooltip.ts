@@ -1,5 +1,7 @@
 import HelpToolTip, {HelpToolTipSide} from 'eterna/ui/help/HelpToolTip';
-import {GameObject} from 'flashbang';
+import {
+    CallbackTask, DelayTask, GameObject, RepeatingTask, SerialTask
+} from 'flashbang';
 import Assert from 'flashbang/util/Assert';
 import RScriptEnv from './RScriptEnv';
 import RScriptOp from './RScriptOp';
@@ -20,24 +22,38 @@ export default class ROPUITooltip extends RScriptOp {
     public exec(): void {
         if (this._show) {
             this.clear();
-            const getBounds = () => this._env.getUIElementBounds(this._uiElementId);
-            if (getBounds()) {
-                const tooltip = new HelpToolTip({
-                    text: this._text,
-                    tailLength: this._tailLength,
-                    side: this._side as HelpToolTipSide,
-                    positioner: [getBounds, 0, '']
-                });
-                const updatePosition = () => tooltip.updatePosition();
 
-                updatePosition();
-                this._env.addObject(tooltip, this._env.container);
-                this._env.setVar(ROPUITooltip.id, tooltip);
-                Assert.assertIsDefined(this._env.mode);
-                tooltip.regs.add(
-                    this._env.mode.resized.connect(updatePosition)
-                );
-            }
+            const getBounds = () => this._env.getUIElementBounds(this._uiElementId);
+
+            const tooltip = new HelpToolTip({
+                text: this._text,
+                tailLength: this._tailLength,
+                side: this._side as HelpToolTipSide,
+                positioner: [getBounds, 0, '']
+            });
+            const repositionTooltip = () => {
+                const bounds = this._env.getUIElementBounds(this._uiElementId);
+                if (!bounds) {
+                    tooltip.display.visible = false;
+                    return;
+                }
+                tooltip.updatePosition();
+            };
+            this._env.addObject(tooltip, this._env.container);
+            this._env.setVar(ROPUITooltip.id, tooltip);
+            Assert.assertIsDefined(this._env.mode);
+            // We could listen for pose resizes, but that wouldn't tell us about things
+            // like items being dragged around, scroll containers with items being scrolled,
+            // the hotbar contents changing, etc. So instead we just reposition the thing
+            // every frame
+            tooltip.addObject(
+                new RepeatingTask(
+                    () => new SerialTask(
+                        new DelayTask(0.01),
+                        new CallbackTask(repositionTooltip)
+                    )
+                )
+            );
         } else {
             this.clear();
         }

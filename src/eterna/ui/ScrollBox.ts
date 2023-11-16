@@ -335,6 +335,14 @@ export default class ScrollBox extends ContainerObject {
         e.stopPropagation();
     }
 
+    public getVScrollThumbBounds() {
+        return this._vScrollThumb.display.getBounds();
+    }
+
+    public getHScrollThumbBounds() {
+        return this._hScrollThumb.display.getBounds();
+    }
+
     private _scrollContainer: ScrollContainer;
     private _dragSurface: GraphicsObject;
     private _vScrollThumb: GraphicsObject;
