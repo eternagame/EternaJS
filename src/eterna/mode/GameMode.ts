@@ -315,7 +315,7 @@ export default abstract class GameMode extends AppMode {
     protected onSetPip(_pipMode: boolean): void {
     }
 
-    protected addPose3D(structureFile: string | File | Blob) {
+    protected addPose3D(structureFile: string | File) {
         const ublk = this.getCurrentUndoBlock(0);
         Assert.assertIsDefined(ublk, "Can't create 3D view - undo state not available");
 

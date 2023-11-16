@@ -37,11 +37,11 @@ export default class Pose3DDialog extends WindowDialog<void> {
     public readonly baseHovered: Signal<number> = new Signal();
     public readonly sequence: Value<Sequence>;
     public readonly secstruct: Value<SecStruct>;
-    public readonly structureFile: string | File | Blob;
+    public readonly structureFile: string | File;
     public currentColor: RNABase | RNAPaint = RNABase.ADENINE;
 
     constructor(
-        structureFile: string | File | Blob,
+        structureFile: string | File,
         sequence: Sequence,
         secstruct: SecStruct,
         customNumbering: (number | null)[] | undefined
@@ -408,7 +408,7 @@ export default class Pose3DDialog extends WindowDialog<void> {
      * @param structureFile File or path to file to load and check
      * @param expectedLength Expected number of nucleotides in the structure
      */
-    public static async checkModelFile(structureFile: string | File | Blob, expectedLength: number) {
+    public static async checkModelFile(structureFile: string | File, expectedLength: number) {
         const ext = getFileInfo(structureFile).ext;
 
         if (ParserRegistry.isTrajectory(ext)) {

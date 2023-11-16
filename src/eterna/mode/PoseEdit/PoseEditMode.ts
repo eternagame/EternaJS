@@ -2855,8 +2855,12 @@ export default class PoseEditMode extends GameMode {
         return PoseEditMode.savedDataTokenName(this._puzzle.nodeID);
     }
 
-    private transferToPuzzlemaker(): void {
+    private async transferToPuzzlemaker(): Promise<void> {
         const poseData: SaveStoreItem = [0, this._poses[0].sequence.baseArray];
+        const threeDStructure = this._pose3D?.structureFile instanceof File ? {
+            name: this._pose3D.structureFile.name,
+            content: await this._pose3D.structureFile.text()
+        } : this._pose3D?.structureFile;
         for (const [i, pose] of this._poses.entries()) {
             const tc = this._targetConditions[i];
             const ublk = this.getCurrentUndoBlock(i);
@@ -2870,12 +2874,19 @@ export default class PoseEditMode extends GameMode {
                         : ublk.getPairs(EPars.DEFAULT_TEMPERATURE, pseudoknots)
                 ).getParenthesis(null, pseudoknots),
                 startingFolder: this._folder.name,
-                annotations: this._annotationManager.createAnnotationBundle()
+                annotations: this._annotationManager.createAnnotationBundle(),
+                locks: this._puzzle.puzzleLocks
             };
             if (tc !== undefined && Puzzle.isAptamerType(tc['type'])) {
                 puzzledef.site = tc['site'];
                 puzzledef.bindingPairs = tc['binding_pairs'];
                 puzzledef.bonus = tc['bonus'];
+            }
+            if (tc !== undefined && tc['custom-layout']) {
+                puzzledef.customLayout = tc['custom-layout'];
+            }
+            if (threeDStructure) {
+                puzzledef.threeDStructure = threeDStructure;
             }
 
             poseData.push(JSON.stringify(puzzledef));

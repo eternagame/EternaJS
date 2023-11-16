@@ -14,7 +14,7 @@ import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/toolbar/Nuc
 import Folder from 'eterna/folding/Folder';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import {
-    Base64, DisplayUtil, HAlign, VAlign, KeyCode, Assert, Flashbang, VLayoutContainer
+    Base64, DisplayUtil, HAlign, VAlign, KeyCode, Assert, Flashbang
 } from 'flashbang';
 import {DialogCanceledError} from 'eterna/ui/Dialog';
 import Vienna2 from 'eterna/folding/Vienna2';
@@ -51,7 +51,6 @@ import ToolbarButton from 'eterna/ui/toolbar/ToolbarButton';
 import Pose3DDialog from 'eterna/pose3D/Pose3DDialog';
 import ModeBar from 'eterna/ui/ModeBar';
 import {FederatedPointerEvent} from '@pixi/events';
-import GameWindow from 'eterna/ui/GameWindow';
 import FolderManager from 'eterna/folding/FolderManager';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
@@ -65,6 +64,12 @@ export interface PuzzleEditPoseData {
     site?: number[];
     bindingPairs?: number[];
     bonus?: number;
+    locks?: boolean[];
+    customLayout?: Array<[number, number] | [null, null]> | undefined;
+    threeDStructure?: {
+        name: string;
+        content: string;
+    } | string;
 }
 
 // AMW TODO: we need the "all optional" impl for piece by piece buildup.
@@ -228,6 +233,8 @@ export default class PuzzleEditMode extends GameMode {
             let defaultStructure = '.....((((((((....)))))))).....';
             let defaultPairs: SecStruct = SecStruct.fromParens(defaultStructure);
             let defaultSequence = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+            let defaultLocks: boolean[] | undefined;
+            let defaultCustomLayout: Array<[number, number] | [null, null]> | undefined;
 
             if (initialPoseData != null
                 && initialPoseData[ii] != null
@@ -240,12 +247,30 @@ export default class PuzzleEditMode extends GameMode {
                 defaultPairs = SecStruct.fromParens(defaultStructure, true);
             }
 
+            if (
+                initialPoseData != null
+                && initialPoseData[ii] != null
+                && initialPoseData[ii]['locks'] != null
+            ) {
+                defaultLocks = initialPoseData[ii]['locks'];
+            }
+
+            if (
+                initialPoseData != null
+                && initialPoseData[ii] != null
+                && initialPoseData[ii]['customLayout'] != null
+            ) {
+                defaultCustomLayout = initialPoseData[ii]['customLayout'];
+            }
+
             const poseField: PoseField = new PoseField(true, this._annotationManager);
             this.addObject(poseField, this.poseLayer);
             const {pose} = poseField;
             pose.molecularStructure = defaultPairs;
             pose.molecularBindingBonus = -4.86;
             pose.sequence = Sequence.fromSequenceString(defaultSequence);
+            pose.puzzleLocks = defaultLocks;
+            pose.customLayout = defaultCustomLayout;
 
             if (
                 initialPoseData != null
@@ -295,7 +320,7 @@ export default class PuzzleEditMode extends GameMode {
         this._naturalButton = actualButton;
         this._targetButton = targetButton;
 
-        const startingFolderName = initialPoseData?.[0]?.['startingFolder'];
+        const startingFolderName = initialPoseData?.[0]?.['startingFolder'] ?? EternaFold.NAME;
         const startingFolder = startingFolderName ? FolderManager.instance.getFolder(startingFolderName) : null;
         let defaultFolder: Folder | undefined;
         if (startingFolder && this.canUseFolder(startingFolder)) defaultFolder = startingFolder;
@@ -330,8 +355,6 @@ export default class PuzzleEditMode extends GameMode {
 
         this.regs?.add(this._naturalButton.clicked.connect(() => this.setToNativeMode()));
         this.regs?.add(this._targetButton.clicked.connect(() => this.setToTargetMode()));
-
-        this.setupEternafoldNotice();
 
         if (
             initialPoseData != null
@@ -373,6 +396,16 @@ export default class PuzzleEditMode extends GameMode {
         this.registerScriptInterface(this._scriptInterface);
 
         this.updateUILayout();
+
+        const threeDStructure = initialPoseData?.[0]?.['threeDStructure'];
+        if (threeDStructure) {
+            this.addPose3D(
+                typeof threeDStructure === 'string'
+                    ? threeDStructure
+                    : new File([threeDStructure.content], threeDStructure.name)
+            );
+            this.saveData();
+        }
     }
 
     private canUseFolder(folder: Folder) {
@@ -481,18 +514,29 @@ export default class PuzzleEditMode extends GameMode {
         }));
     }
 
-    private saveData(): void {
+    private async saveData(): Promise<void> {
         const objs: SaveStoreItem = [0, this._poses[0].sequence.baseArray];
-        for (const pose of this._poses) {
+        const threeDStructure = this._pose3D?.structureFile instanceof File ? {
+            name: this._pose3D.structureFile.name,
+            content: await this._pose3D.structureFile.text()
+        } : this._pose3D?.structureFile;
+        for (const [ii, pose] of this._poses.entries()) {
             Assert.assertIsDefined(pose.molecularStructure);
-            objs.push(JSON.stringify({
+            const data: PuzzleEditPoseData = {
                 sequence: pose.sequence.sequenceString(),
                 structure: pose.molecularStructure.getParenthesis(null, true),
-                annotations: this._annotationManager.createAnnotationBundle()
-            }));
+                annotations: this._annotationManager.createAnnotationBundle(),
+                startingFolder: this._folder.name,
+                site: this.getCurrentBindingBases(ii) ?? undefined,
+                bonus: pose.molecularBindingBonus * 100.0,
+                locks: this.getCurrentLock(ii),
+                customLayout: this.getCurrentCustomLayout(ii) ?? undefined,
+                threeDStructure
+            };
+            objs.push(JSON.stringify(data));
         }
 
-        Eterna.saveManager.save(this.savedDataTokenName, objs);
+        await Eterna.saveManager.save(this.savedDataTokenName, objs);
     }
 
     private get savedDataTokenName(): string {
@@ -536,62 +580,6 @@ export default class PuzzleEditMode extends GameMode {
     public onResized(): void {
         super.onResized();
         this.updateUILayout();
-    }
-
-    private setupEternafoldNotice() {
-        // EternaFold doesn't work for switches
-        if (this._numTargets > 1) return;
-
-        // This player has already seen this message
-        if (Eterna.settings.puzzlemakerEternafoldNoticeDismissed.value) return;
-
-        // This user is already using Eternafold
-        if (this._folder.name === EternaFold.NAME) {
-            Eterna.settings.puzzlemakerEternafoldNoticeDismissed.value = true;
-            return;
-        }
-
-        const window = new GameWindow({
-            title: 'Tried Eternafold?',
-            resizable: true,
-            closable: true,
-            horizontalContentMargin: 10,
-            verticalContentMargin: 10,
-            titleFontSize: 14
-        });
-        this.addObject(window, this.dialogLayer);
-
-        const vLayout = new VLayoutContainer(10);
-        window.content.addChild(vLayout);
-
-        vLayout.addChild(
-            Fonts.std(
-                'EternaFold is the most accurate folding engine to date, created by researchers '
-                + 'using data from lab designs submitted by Eterna players.\n\nWe encourage you to use it '
-                + 'in your own puzzles by selecting it in the dropdown to the left. In the future, '
-                + 'this will be Eterna\'s default model.'
-            )
-                .color(0xFFFFFF)
-                .fontSize(14)
-                .wordWrap(true, 250)
-                .build()
-        );
-
-        const okButton = new GameButton().label('Ok', 14);
-        window.addObject(okButton, vLayout);
-
-        vLayout.layout();
-        window.setTargetBounds({
-            x: {from: 'left', offsetExact: 250},
-            y: {from: 'top', offsetExact: 75}
-        });
-
-        const onClose = () => {
-            this.removeObject(window);
-            Eterna.settings.puzzlemakerEternafoldNoticeDismissed.value = true;
-        };
-        okButton.clicked.connect(onClose);
-        window.closeClicked.connect(onClose);
     }
 
     public updateUILayout(): void {
@@ -770,9 +758,7 @@ export default class PuzzleEditMode extends GameMode {
                 });
                 return this.showDialog(dialog).confirmed;
             })
-            .then((details) => {
-                this.submitPuzzle(details);
-            })
+            .then((details) => this.submitPuzzle(details))
             .catch((err) => {
                 if (!(err instanceof DialogCanceledError)) {
                     throw err;
@@ -802,7 +788,7 @@ export default class PuzzleEditMode extends GameMode {
         }
     }
 
-    private submitPuzzle(details: SubmitPuzzleDetails): void {
+    private async submitPuzzle(details: SubmitPuzzleDetails): Promise<void> {
         let constraints = this._constraintBar.serializeConstraints();
 
         if (this._poses.length === 1) {
@@ -832,21 +818,13 @@ export default class PuzzleEditMode extends GameMode {
 
         const objectives: TargetConditions[] = [];
         for (let ii = 0; ii < this._poses.length; ii++) {
-            const bindingSite: boolean[] | null = this.getCurrentBindingSite(ii);
-            const bindingBases: number[] = [];
-            if (bindingSite !== null) {
-                for (let bb = 0; bb < bindingSite.length; bb++) {
-                    if (bindingSite[bb]) {
-                        bindingBases.push(bb);
-                    }
-                }
-            }
+            const bindingBases = this.getCurrentBindingBases(ii);
 
             const pseudoknots: boolean = SecStruct.fromParens(this._structureInputs[ii].structureString, true)
                 .onlyPseudoknots().nonempty();
 
             let objective = this._targetConditions[ii];
-            if (bindingBases.length > 0) {
+            if (bindingBases) {
                 objective = {
                     type: 'aptamer',
                     secstruct: this._structureInputs[ii].structureString
@@ -900,13 +878,17 @@ export default class PuzzleEditMode extends GameMode {
             objectives: JSON.stringify(objectives)
         };
 
-        if (this._pose3D?.structureFile instanceof File) {
-            const blob = this._pose3D?.structureFile.slice();
-            postParams['files[3d_structure]'] = new File([blob], this._pose3D?.structureFile.name);
+        const threeDStructure = this._pose3D?.structureFile;
+        if (threeDStructure instanceof File) {
+            const blob = threeDStructure.slice();
+            postParams['files[3d_structure]'] = new File([blob], threeDStructure.name);
+        } else if (threeDStructure) {
+            const blob = await (await fetch(threeDStructure)).blob();
+            postParams['files[3d_structure]'] = new File([blob], threeDStructure.replace(/.*\//g, ''));
         }
 
         const submitText = this.showDialog(new AsyncProcessDialog('Submitting...')).ref;
-        Eterna.client.submitPuzzle(postParams)
+        return Eterna.client.submitPuzzle(postParams)
             .then(() => {
                 submitText.destroyObject();
                 this.showNotification('Your puzzle has been successfully published.\n');
@@ -967,6 +949,25 @@ export default class PuzzleEditMode extends GameMode {
 
     private getCurrentBindingSite(index: number): boolean[] | null {
         return this._bindingSiteStack[this._stackLevel][index];
+    }
+
+    private getCurrentBindingBases(index: number): number[] | null {
+        const bindingSite: boolean[] | null = this.getCurrentBindingSite(index);
+        if (!bindingSite) return null;
+
+        const bindingBases: number[] = [];
+        if (bindingSite !== null) {
+            for (let bb = 0; bb < bindingSite.length; bb++) {
+                if (bindingSite[bb]) {
+                    bindingBases.push(bb);
+                }
+            }
+        }
+        return bindingBases;
+    }
+
+    private getCurrentCustomLayout(index: number) {
+        return this._customLayoutStack[this._stackLevel][index];
     }
 
     private moveUndoStackForward(): void {
