@@ -91,3 +91,7 @@ dist/
 
 # Built folding engines
 /src/eterna/folding/engines/*.js
+
+# vitepress output
+**/.vitepress/dist/
+**/.vitepress/cache/

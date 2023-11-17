@@ -1,7 +1,7 @@
 module.exports = {
     'extends': ['airbnb-base', 'plugin:@typescript-eslint/recommended'],
     'parserOptions': {
-      'project': './tsconfig.json'
+      'project': ['./tsconfig.json', './docs/tsconfig.json']
     },
     'settings': {
         // Some imports may be resolved via webpack aliases
@@ -105,6 +105,14 @@ module.exports = {
       'import/extensions': ['error', 'never'],
       // typescript-eslint changed some stuff, again we'll reenable in v2
       'camelcase': 'off'
-    }
+    },
+    'overrides': [
+      {
+        files: ['docs/**/*'],
+        rules: {
+          'import/no-extraneous-dependencies': 'off'
+        },
+      },
+    ]
   };
   
