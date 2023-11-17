@@ -58,6 +58,10 @@ export default class Puzzle {
         return (Puzzle.T_OLIGO.indexOf(tcType) >= 0);
     }
 
+    public static isMultistrandType(tcType: TargetType): boolean {
+        return (Puzzle.T_MULTISTRAND.indexOf(tcType) >= 0);
+    }
+
     public static probeTail(seq: Sequence): Sequence | null {
         if (seq == null) {
             return null;
@@ -704,6 +708,7 @@ export default class Puzzle {
 
     private static readonly T_APTAMER: string[] = ['aptamer', 'aptamer+oligo'];
     private static readonly T_OLIGO: string[] = ['oligo', 'aptamer+oligo'];
+    private static readonly T_MULTISTRAND: string[] = ['multistrand'];
 
     private static readonly DEFAULT_MISSION_TEXT: string = 'Match the desired RNA shape!';
 }
