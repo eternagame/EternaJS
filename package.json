@@ -1,6 +1,6 @@
 {
   "name": "eternajs",
-  "version": "1.24.0",
+  "version": "1.25.0",
   "license": "SEE LICENSE IN LICENSE",
   "description": "Eterna game/RNA design interface",
   "scripts": {
