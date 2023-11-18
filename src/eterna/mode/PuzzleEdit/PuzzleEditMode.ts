@@ -829,7 +829,7 @@ export default class PuzzleEditMode extends GameMode {
                 .onlyPseudoknots().nonempty();
 
             let objective = this._targetConditions[ii];
-            if (bindingBases) {
+            if (bindingBases && bindingBases.length > 0) {
                 objective = {
                     type: 'aptamer',
                     secstruct: this._structureInputs[ii].structureString
