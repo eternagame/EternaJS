@@ -347,6 +347,13 @@ export default class AnnotationManager {
         }
     }
 
+    public deleteAllAnnotations() {
+        this.deselectSelected();
+        this._solutionAnnotations = [];
+        this._puzzleAnnotations = [];
+        this.propagateDataUpdates();
+    }
+
     private validateAnnotationBases(mainLength: number): boolean {
         let rangesChanged = false;
 

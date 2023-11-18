@@ -701,7 +701,7 @@ export default class PuzzleEditMode extends GameMode {
         this.showConfirmDialog(PROMPT).closed.then((confirmed) => {
             if (confirmed) {
                 for (const pose of this._poses) {
-                    const {sequence} = pose;
+                    const sequence = pose.sequence.slice(0);
                     for (let ii = 0; ii < sequence.length; ii++) {
                         if (!pose.isLocked(ii)) {
                             sequence.setNt(ii, RNABase.ADENINE);
@@ -711,7 +711,15 @@ export default class PuzzleEditMode extends GameMode {
                     pose.puzzleLocks = undefined;
                     pose.sequence = sequence;
                     pose.molecularBindingSite = null;
+                    pose.customLayout = undefined;
                 }
+                if (this._pose3D) {
+                    this._pose3D.destroySelf();
+                    this._pose3D = null;
+                }
+                // This will trigger an autosave asynchronously/implicitly, so we call this LAST
+                // (ensuring all prior changes are made when said autosave happens)
+                this._annotationManager.deleteAllAnnotations();
                 this.poseEditByTarget(0);
             }
         });

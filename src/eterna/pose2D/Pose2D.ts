@@ -414,6 +414,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.callPoseEditCallback();
             this.redrawAnnotations();
             this._librarySelectionsChanged = false;
+            this._customLayoutChanged = false;
             return;
         }
 

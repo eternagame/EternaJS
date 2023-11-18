@@ -333,12 +333,12 @@ export default abstract class GameMode extends AppMode {
 
             this._pose3D = pose3D;
 
-            this.regs?.add(pose3D.baseHovered.connect((closestIndex) => {
+            pose3D.regs.add(pose3D.baseHovered.connect((closestIndex) => {
                 this._poses.forEach((pose) => {
                     pose.on3DPickingMouseMoved(closestIndex);
                 });
             }));
-            this.regs?.add(pose3D.baseClicked.connect((closestIndex) => {
+            pose3D.regs.add(pose3D.baseClicked.connect((closestIndex) => {
                 this._poses.forEach((pose) => {
                     pose.simulateMousedownCallback(closestIndex);
                 });
