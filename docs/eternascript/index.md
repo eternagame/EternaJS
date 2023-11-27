@@ -3,23 +3,21 @@
 layout: home
 
 hero:
-  name: "EternaScript Documentation"
-  text: "EternaScript Documentation"
-  tagline: My great project tagline
-  actions:
-    - theme: brand
-      text: Markdown Examples
-      link: /markdown-examples
-    - theme: alt
-      text: API Examples
-      link: /api-examples
+  name: "EternaScript"
+  text: "Documentation"
 
 features:
-  - title: Feature A
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature B
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature C
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
+  - title: Guide
+    details: Learn the basics of scripting with Eterna
+    link: /guide/getting-started
+    linkText: Get Started
+  - title: Utility APIs
+    details: Discover the core libraries for working with RNA and the Eterna scripting interface
+    link: /reference/utility-apis
+    linkText: Explore
+  - title: Booster APIs
+    details: Discover ways to interact with the Eterna game/design interface
+    link: /reference/booster-apis
+    linkText: Explore
 ---
 
