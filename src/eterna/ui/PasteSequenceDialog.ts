@@ -66,7 +66,7 @@ export default class PasteSequenceDialog extends WindowDialog<void> {
         } else {
             const s = EPars.indexedStringToSequence(sequence, this._customNumbering);
             if (s === undefined) {
-                this._errorText.text = 'There was a problem with how you formatted'
+                this._errorText.text = 'There was a problem with how you formatted '
                     + 'any input numbers after the sequence';
                 this._errorText.visible = true;
             } else {
