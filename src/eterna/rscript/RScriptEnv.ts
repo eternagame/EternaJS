@@ -191,8 +191,6 @@ export default class RScriptEnv extends ContainerObject {
             this.ui.lettersVisible = visible;
         } else if (elementID === RScriptUIElementID.TOTALENERGY) {
             this.ui.setShowTotalEnergy(visible);
-        } else if (elementID === RScriptUIElementID.HINT) {
-            // no-op
         } else if (elementID === RScriptUIElementID.TOGGLEBAR) {
             this.showHideUI(RScriptUIElementID.TOGGLETARGET, visible, disabled);
             this.showHideUI(
@@ -219,6 +217,7 @@ export default class RScriptEnv extends ContainerObject {
                 RScriptUIElementID.REDO,
                 RScriptUIElementID.SWAP,
                 RScriptUIElementID.PIP,
+                RScriptUIElementID.FREEZE,
                 RScriptUIElementID.BASEMARKER,
                 RScriptUIElementID.MAGICGLUE
             ];
@@ -290,6 +289,8 @@ export default class RScriptEnv extends ContainerObject {
                 return this.ui.toolbar.getScriptUIElement(this.ui.toolbar.pairSwapButton);
             case RScriptUIElementID.PIP:
                 return this.ui.toolbar.getScriptUIElement(this.ui.toolbar.pipButton);
+            case RScriptUIElementID.FREEZE:
+                return this.ui.toolbar.getScriptUIElement(this.ui.toolbar.freezeButton);
             case RScriptUIElementID.BASEMARKER:
                 return this.ui.toolbar.getScriptUIElement(this.ui.toolbar.baseMarkerButton);
             case RScriptUIElementID.MAGICGLUE:
@@ -317,6 +318,10 @@ export default class RScriptEnv extends ContainerObject {
             case RScriptUIElementID.GCCOMPLETE:
             case RScriptUIElementID.CGCOMPLETE:
                 return {rect: this.ui.toolbar.palette.getTarget(PaletteTargetType.GC)};
+            case RScriptUIElementID.HELP:
+                return this.ui.helpBar.help;
+            case RScriptUIElementID.HINT:
+                return this.ui.helpBar.hint;
             case RScriptUIElementID.ACTION_MENU:
                 log.warn('ACTION_MENU rscript ui element no longer exists');
                 return null;

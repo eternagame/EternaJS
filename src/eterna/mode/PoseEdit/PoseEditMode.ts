@@ -3902,6 +3902,10 @@ export default class PoseEditMode extends GameMode {
         return this._folderSwitcher;
     }
 
+    public get helpBar(): HelpBar {
+        return this._helpBar;
+    }
+
     private readonly _puzzle: Puzzle;
     private readonly _params: PoseEditParams;
     private readonly _scriptInterface = new ExternalInterfaceCtx();

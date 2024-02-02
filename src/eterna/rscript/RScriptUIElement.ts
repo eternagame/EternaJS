@@ -19,7 +19,6 @@ export enum RScriptUIElementID {
     UNDO = 'UNDO',
     REDO = 'REDO',
     SWAP = 'SWAP',
-    HINT = 'HINT',
     PIP = 'PIP',
     FREEZE = 'FREEZE',
     BASEMARKER = 'BASEMARKER',
@@ -46,6 +45,7 @@ export enum RScriptUIElementID {
     GCCOMPLETE = 'GCCOMPLETE',
     CGCOMPLETE = 'CGCOMPLETE',
 
+    HINT = 'HINT',
     HELP = 'HELP',
 
     TOTALENERGY = 'TOTALENERGY',
