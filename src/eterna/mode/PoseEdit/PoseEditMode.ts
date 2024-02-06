@@ -799,7 +799,7 @@ export default class PoseEditMode extends GameMode {
             this._curSolutionIdx = this._params.solutions.indexOf(this._params.initSolution);
             this.showSolutionDetailsDialog(this._params.initSolution, true);
             fdPromise = this._params.initSolution.queryFoldData();
-        } else if (this._params.initSequence != null) {
+        } else if (this._params.initSequence != null && !this._puzzle.hasRscript) {
             initialSequence = Sequence.fromSequenceString(this._params.initSequence);
         }
 
@@ -916,8 +916,11 @@ export default class PoseEditMode extends GameMode {
 
         // We don't load saved data if we're viewing someone else's solution
         // If there's an initial solution, still autoload if we've previously played
-        if (!this._params.isReset
-            && this._params.initSolution == null) {
+        if (
+            !this._params.isReset
+            && this._params.initSolution == null
+            && !this._puzzle.hasRscript
+        ) {
             this.loadSavedData();
         }
 

@@ -138,6 +138,10 @@ export default class Puzzle {
         this._rscriptOps = inText;
     }
 
+    public get hasRscript(): boolean {
+        return Boolean(this.rscript) && (this.rscript.trim().length > 0);
+    }
+
     public get hint(): string | null {
         return this._hint;
     }
