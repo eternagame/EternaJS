@@ -215,6 +215,7 @@ export default class RScriptEnv extends ContainerObject {
                 RScriptUIElementID.RESET,
                 RScriptUIElementID.UNDO,
                 RScriptUIElementID.REDO,
+                RScriptUIElementID.BOOSTERS,
                 RScriptUIElementID.SWAP,
                 RScriptUIElementID.PIP,
                 RScriptUIElementID.FREEZE,
@@ -285,6 +286,8 @@ export default class RScriptEnv extends ContainerObject {
                 return this.ui.toolbar.getScriptUIElement(this.ui.toolbar.undoButton);
             case RScriptUIElementID.REDO:
                 return this.ui.toolbar.getScriptUIElement(this.ui.toolbar.redoButton);
+            case RScriptUIElementID.BOOSTERS:
+                return this.ui.toolbar.getScriptUIElement(this.ui.toolbar.boostersMenuButton);
             case RScriptUIElementID.SWAP:
                 return this.ui.toolbar.getScriptUIElement(this.ui.toolbar.pairSwapButton);
             case RScriptUIElementID.PIP:
