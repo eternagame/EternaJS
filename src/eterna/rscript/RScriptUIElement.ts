@@ -18,6 +18,7 @@ export enum RScriptUIElementID {
     RESET = 'RESET',
     UNDO = 'UNDO',
     REDO = 'REDO',
+    BOOSTERS = 'BOOSTERS',
     SWAP = 'SWAP',
     PIP = 'PIP',
     FREEZE = 'FREEZE',
