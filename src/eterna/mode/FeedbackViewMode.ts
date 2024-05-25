@@ -34,6 +34,7 @@ import ToolbarButton from 'eterna/ui/toolbar/ToolbarButton';
 import StateToggle from 'eterna/ui/StateToggle';
 import ModeBar from 'eterna/ui/ModeBar';
 import EPars from 'eterna/EPars';
+import ContextMenu from 'eterna/ui/ContextMenu';
 import ViewSolutionOverlay from './DesignBrowser/ViewSolutionOverlay';
 import GameMode from './GameMode';
 
@@ -361,6 +362,21 @@ export default class FeedbackViewMode extends GameMode {
             this._info.display, HAlign.RIGHT, VAlign.TOP,
             HAlign.RIGHT, VAlign.TOP, 0 - this._solDialogOffset, 0
         );
+    }
+
+    /* override */
+    protected createContextMenu(poseIdx: number): ContextMenu | null {
+        if (this.isDialogOrNotifShowing || this.hasUILock) {
+            return null;
+        }
+
+        const menu = new ContextMenu({horizontal: false});
+
+        menu.addItem('Preferences').clicked.connect(() => this.showSettingsDialog());
+        menu.addItem('Copy Sequence').clicked.connect(() => this.showCopySequenceDialog());
+        menu.addItem('Copy Structure').clicked.connect(() => this.showCopyStructureDialog(poseIdx));
+
+        return menu;
     }
 
     private showSettingsDialog(): void {
