@@ -26,9 +26,13 @@ export interface SuboptEnsembleResult {
     suboptFreeEnergy: number[];
 }
 
-export default abstract class Folder {
+export default abstract class Folder<Sync extends boolean = boolean> {
     public abstract get name (): string;
     public abstract get isFunctional (): boolean;
+
+    public isSync(): this is Folder<true> {
+        return this._isSync;
+    }
 
     public getCache(key: CacheKey): CacheItem {
         const keyStr = JSON.stringify(key);
@@ -49,7 +53,7 @@ export default abstract class Folder {
     public foldSequence(
         _seq: Sequence, _secstruct: SecStruct | null, _desiredPairs: string | null = null,
         _pseudoknotted: boolean = false, _temp: number = EPars.DEFAULT_TEMPERATURE
-    ): SecStruct | null {
+    ): Sync extends true ? SecStruct | null : Promise<SecStruct | null> | SecStruct | null {
         return null;
     }
 
@@ -130,7 +134,7 @@ export default abstract class Folder {
 
     public getDotPlot(
         _seq: Sequence, _secstruct: SecStruct, _temp: number = EPars.DEFAULT_TEMPERATURE, _pseudoknots: boolean = false
-    ): DotPlot | null {
+    ): Sync extends true ? DotPlot | null : Promise<DotPlot | null> | DotPlot | null {
         return null;
     }
 
@@ -179,5 +183,6 @@ export default abstract class Folder {
         this._cache.clear();
     }
 
+    protected abstract get _isSync (): Sync;
     private readonly _cache: Map<string, CacheItem> = new Map<string, CacheItem>();
 }

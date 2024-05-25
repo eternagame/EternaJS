@@ -1,12 +1,7 @@
-import Folder from '../Folder';
 import './jest-matcher-deep-close-to';
 import ContraFold from '../Contrafold';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
-
-function CreateFolder(type: any): Promise<Folder | null> {
-    return type.create();
-}
 
 // Cfold_dG Efold_dG Cfold_struct Efold_struct
 // 6.84126  13.6834 .(((((((((((((......))))))..)....((((.....))))...)))))). .(((((((((((((......))))))..)....((((.....))))...)))))).
@@ -24,7 +19,7 @@ test(`ContraFold:many_score_structures`, () => {
     // expect.assertions: the async code should result in X assertions being called
     // https://facebook.github.io/jest/docs/en/expect.html#expectassertionsnumber
 
-    return expect(CreateFolder(ContraFold)
+    return expect(ContraFold.create()
         .then((folder) => {
             if (folder === null) return;
             

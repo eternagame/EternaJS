@@ -24,6 +24,7 @@ export interface ConstraintContext {
 export default abstract class Constraint<ConstraintStatus extends BaseConstraintStatus> {
     public static readonly NAME: string;
     public readonly hard: boolean = false;
+    public readonly requiresDotPlot: boolean = false;
 
     /**
      * @param undoBlocks A list of puzzle states (with sequence and derivatives)

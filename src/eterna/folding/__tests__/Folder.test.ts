@@ -18,11 +18,11 @@ const ZIPPERS_SEQ = Sequence.fromSequenceString('AAAAAGGGGAAAAAAAAACCCCAGCGGAAAA
 const ZIPPERS_BEST_PAIRS = SecStruct.fromParens('.....((((.........)))).((((......))))...');
 const ZIPPERS_TEMP = 37;
 
-function FoldSequence(folder: Folder, seq: Sequence, struct: SecStruct): SecStruct | null {
+function FoldSequence(folder: Folder<true>, seq: Sequence, struct: SecStruct): SecStruct | null {
     return folder.foldSequence(seq, null, struct.getParenthesis());
 }
 
-function CreateFolder(type: any): Promise<Folder | null> {
+function CreateFolder(type: any): Promise<Folder<true> | null> {
     return type.create();
 }
 

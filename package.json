@@ -87,6 +87,7 @@
     "loglevel": "^1.7.1",
     "marked": "^4.0.12",
     "ngl": "https://github.com/eternagame/ngl/archive/a8a0b0f9487ba76eb07aa07404d91ab908d8c8fd.tar.gz",
+    "onnxruntime-web": "^1.18.0",
     "pchip": "^1.0.2",
     "pixi-filters": "^4.1.1",
     "pixi-multistyle-text": "https://github.com/eternagame/pixi-multistyle-text/archive/1f2283b1d4a1bb262b57783e1bf2f81802a17809.tar.gz",

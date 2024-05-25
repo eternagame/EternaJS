@@ -1,13 +1,8 @@
-import Folder from '../Folder';
 // import './jest-matcher-deep-close-to';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 import EternaFoldThreshknot from 'eterna/folding/EternafoldThreshknot';
 import EternaFold from 'eterna/folding/Eternafold';
-
-function CreateFolder(type: any): Promise<Folder | null> {
-    return type.create();
-}
 
 test(`EternaFoldThreshknot:folds_structures`, () => {
     const testSequences = [
@@ -27,7 +22,7 @@ test(`EternaFoldThreshknot:folds_structures`, () => {
         ".....((((((.....))))))....(((((({{{{{{{{{{{........))))))}}}}}}}}}}}........(((((((....)))))))....................."
     ];
 
-    return expect(CreateFolder(EternaFoldThreshknot)
+    return expect(EternaFoldThreshknot.create()
         .then((folder) => {
             if (folder === null) return;
 
@@ -54,7 +49,7 @@ test(`EternaFoldThreshknot:predicts_pseudoknots`, () => {
         ".....(((((((((((((((((....(((((({{{(({{{...{{{{{..{{....))....}}..}}}}})).}}}........}}}.))))...)))))))))))))))))...(((((((....)))))))....................."
     ];
 
-    return expect(CreateFolder(EternaFoldThreshknot)
+    return expect(EternaFoldThreshknot.create()
         .then((folder) => {
             if (folder === null) return;
 
@@ -73,9 +68,9 @@ test('EternaFoldThreshknot:matches_Eternafold_w/o_pseudoknots', () => {
         "GGGAACGACUCGAGUAGAGUCGAAAAGAAAGCGUGCGGACGAACGUGCGUGCGUGCGAACGGACGUGCGUAAGCAACGUUAUAUUCGUAUAACGAAAAGAAACAACAACAACAAC"
     ];
 
-    return expect(CreateFolder(EternaFoldThreshknot)
+    return expect(EternaFoldThreshknot.create()
         .then((folderTK) => {
-            CreateFolder(EternaFold).then((folderEF) => {
+            EternaFold.create().then((folderEF) => {
                 if (folderTK === null) return;
                 if (folderEF === null) return;
 
@@ -102,7 +97,7 @@ const testStructures = [
     "(((...((....))...)))"
 ];
 
- return expect(CreateFolder(EternaFoldThreshknot)
+ return expect(EternaFoldThreshknot.create()
     .then((folder) => {
         if (folder === null) return;
 

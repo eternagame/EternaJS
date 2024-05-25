@@ -1,11 +1,6 @@
 import Sequence from 'eterna/rnatypes/Sequence';
-import Folder from '../Folder';
 import NuPACK from '../NuPACK';
 import './jest-matcher-deep-close-to';
-
-function CreateFolder(type: any): Promise<Folder | null> {
-    return type.create();
-}
 
 // See https://github.com/eternagame/EternaJS/issues/654
 /*
@@ -16,7 +11,7 @@ test(`NuPACK:PK_score_structures`, () => {
     // let expectedTotalFe = TOTAL_FE.get(folderType.NAME);
 
     // expect.assertions(9);
-    return expect(CreateFolder(NuPACK)
+    return expect(NuPACK.create()
         .then((folder) => {
             if (folder === null) return;
 
@@ -121,7 +116,7 @@ test(`NuPACK:PK_foldSequence`, () => {
     // let expectedTotalFe = TOTAL_FE.get(folderType.NAME);
 
     expect.assertions(3);
-    return expect(CreateFolder(NuPACK)
+    return expect(NuPACK.create()
         .then((folder) => {
             if (folder === null) {
                 expect(true).toBeTruthy();
@@ -147,7 +142,7 @@ test(`NuPACK:PK_fold1L2X`, () => {
     // let expectedTotalFe = TOTAL_FE.get(folderType.NAME);
 
     expect.assertions(3);
-    return expect(CreateFolder(NuPACK)
+    return expect(NuPACK.create()
         .then((folder) => {
             if (folder === null) {
                 expect(true).toBeTruthy();
@@ -175,7 +170,7 @@ test(`NuPACK:PK_score1L2X`, () => {
     // let expectedTotalFe = TOTAL_FE.get(folderType.NAME);
 
     expect.assertions(2);
-    return expect(CreateFolder(NuPACK)
+    return expect(NuPACK.create()
         .then((folder) => {
             if (folder === null) {
                 expect(true).toBeTruthy();

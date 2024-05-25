@@ -1,15 +1,11 @@
-import Folder, {SuboptEnsembleResult} from '../Folder';
+import {SuboptEnsembleResult} from '../Folder';
 import NuPACK from '../NuPACK';
 import './jest-matcher-deep-close-to';
 import Sequence from 'eterna/rnatypes/Sequence';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 
-function CreateFolder(type: any): Promise<Folder | null> {
-    return type.create();
-}
-
 test('NuPACK:defect', () => {        
-    return expect((CreateFolder(NuPACK)).then((folder) => {
+    return expect(NuPACK.create().then((folder) => {
         if (folder === null) return; 
         
         let sequence = Sequence.fromSequenceString("GGGAACGACUCGAGUAGAGUCGAAAAGAUAUAGAAAGCGCGACUAUAUCAAUAAACGCGCAAAAUAAAUAAAUAAAGAUCAGUUUCGACUGAUCAAAAGAAACAACAACAACAAC")
@@ -25,7 +21,7 @@ test('NuPACK:defect', () => {
 });
 
 test('NuPACK:suboptstructuresNoOligos', () => {        
-    return expect(CreateFolder(NuPACK).then((folder) => {
+    return expect(NuPACK.create().then((folder) => {
         if (folder === null) return;
 
         let sequence = Sequence.fromSequenceString("GGGAACGACUCGAGUAGAGUCGAAAAGAUAUAGAAAGCGCGACUAUAUCAAUAAACGCGCAAAAUAAAUAAAUAAAGAUCAGUUUCGACUGAUCAAAAGAAACAACAACAACAAC")
@@ -61,7 +57,7 @@ test('NuPACK:suboptstructuresNoOligos', () => {
 });
 
 test('NuPACK:suboptstructuresNoOligosPknot', () => {        
-    return expect(CreateFolder(NuPACK).then((folder) => {
+    return expect(NuPACK.create().then((folder) => {
         if (folder === null) return;
         
         let sequence = Sequence.fromSequenceString("GGGAACGACUCGAGUAGAGUCGAAAAGAUAUAGAAAGCGCGACUAUAUCAAUAAACGCGCAAAAUAAAUAAAUAAAGAUCAGUUUCGACUGAUCAAAAGAAACAACAACAACAAC")
@@ -96,7 +92,7 @@ test('NuPACK:suboptstructuresNoOligosPknot', () => {
 });
     
 test('NuPACK:suboptstructuresWithOligos', () => {        
-    return expect(CreateFolder(NuPACK).then((folder) => {
+    return expect(NuPACK.create().then((folder) => {
         if (folder === null) return;
         
         let sequence = Sequence.fromSequenceString("auauauagaaaauauaua")

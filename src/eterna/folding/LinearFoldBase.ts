@@ -13,7 +13,7 @@ import {FullEvalResult} from './engines/ViennaLib';
 import Folder, {CacheKey, FullEvalCache} from './Folder';
 import FoldUtil from './FoldUtil';
 
-export default abstract class LinearFoldBase extends Folder {
+export default abstract class LinearFoldBase extends Folder<true> {
     protected constructor(lib: LinearFoldLib) {
         super();
         this._lib = lib;
@@ -231,5 +231,6 @@ export default abstract class LinearFoldBase extends Folder {
         return 0;
     }
 
+    protected readonly _isSync = true;
     private readonly _lib: LinearFoldLib;
 }

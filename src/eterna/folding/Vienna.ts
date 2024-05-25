@@ -13,7 +13,7 @@ import {DotPlotResult, FullEvalResult, FullFoldResult} from './engines/ViennaLib
 import Folder, {CacheKey, FullEvalCache} from './Folder';
 import FoldUtil from './FoldUtil';
 
-export default class Vienna extends Folder {
+export default class Vienna extends Folder<true> {
     public static readonly NAME: string = 'Vienna';
 
     /**
@@ -567,5 +567,6 @@ export default class Vienna extends Folder {
         return bestPairs;
     }
 
+    protected readonly _isSync = true;
     private readonly _lib: ViennaLib;
 }

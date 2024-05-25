@@ -313,6 +313,10 @@ export default class ConstraintBar extends ContainerObject {
         }
     }
 
+    public get requiresDotPlot() {
+        return this._constraints.some((c) => c.constraint.requiresDotPlot);
+    }
+
     public updateConstraints(context: ConstraintContext, soft: boolean = false): boolean {
         let satisfied = true;
 
