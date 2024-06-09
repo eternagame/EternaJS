@@ -1272,9 +1272,8 @@ export default class PoseEditMode extends GameMode {
         new FoldingContextScriptAPI({
             getFolder: () => this._folder,
             getIsPseudoknot: () => Boolean(this._targetConditions && this._targetConditions[0]
-                    && this._targetConditions[0]['type'] === 'pseudoknot'),
-            scriptInterface: this._scriptInterface
-        }).registerToScriptInterface();
+                    && this._targetConditions[0]['type'] === 'pseudoknot')
+        }).registerToScriptInterface(this._scriptInterface);
 
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
             this._scriptInterface.addCallback(

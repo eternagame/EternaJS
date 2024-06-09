@@ -7,7 +7,6 @@ import {ExternalInterfaceCtx} from 'eterna/util/ExternalInterface';
 import {Assert} from 'flashbang';
 
 export default class FoldingContextAPI {
-    private readonly _scriptInterface: ExternalInterfaceCtx;
     private readonly _getFolder: () => Folder | null;
     private readonly _getIsPseudoknot: () => boolean;
 
@@ -19,18 +18,17 @@ export default class FoldingContextAPI {
         return this._getIsPseudoknot();
     }
 
-    constructor(params: { scriptInterface: ExternalInterfaceCtx, getFolder: () => Folder, getIsPseudoknot: () => boolean }) {
+    constructor(params: { getFolder: () => Folder, getIsPseudoknot: () => boolean }) {
         this._getIsPseudoknot = params.getIsPseudoknot;
         this._getFolder = params.getFolder;
-        this._scriptInterface = params.scriptInterface;
     }
 
-    public registerToScriptInterface() {
-        this._scriptInterface.addCallback('current_folder', (): string | null => (
+    public registerToScriptInterface(scriptInterface: ExternalInterfaceCtx) {
+        scriptInterface.addCallback('current_folder', (): string | null => (
             this._folder ? this._folder.name : null
         ));
 
-        this._scriptInterface.addCallback('fold',
+        scriptInterface.addCallback('fold',
             (seq: string, constraint: string | null = null): string | null => {
                 if (this._folder === null) {
                     return null;
@@ -41,7 +39,7 @@ export default class FoldingContextAPI {
                 return folded.getParenthesis(null, this._isPseudoknot);
             });
 
-        this._scriptInterface.addCallback('fold_with_binding_site',
+        scriptInterface.addCallback('fold_with_binding_site',
             (seq: string, site: number[], bonus: number): string | null => {
                 if (this._folder === null) {
                     return null;
@@ -56,7 +54,7 @@ export default class FoldingContextAPI {
                 return folded.getParenthesis();
             });
 
-        this._scriptInterface.addCallback('energy_of_structure', (seq: string, secstruct: string): number | null => {
+        scriptInterface.addCallback('energy_of_structure', (seq: string, secstruct: string): number | null => {
             if (this._folder === null) {
                 return null;
             }
@@ -68,7 +66,7 @@ export default class FoldingContextAPI {
         });
 
         // AMW: still give number[] back because external scripts may rely on it
-        this._scriptInterface.addCallback('pairing_probabilities',
+        scriptInterface.addCallback('pairing_probabilities',
             (seq: string, secstruct: string | null = null): number[] | null => {
                 if (this._folder === null) {
                     return null;
@@ -88,7 +86,7 @@ export default class FoldingContextAPI {
                 return pp.data;
             });
 
-        this._scriptInterface.addCallback('subopt_single_sequence',
+        scriptInterface.addCallback('subopt_single_sequence',
             (
                 seq: string, kcalDelta: number,
                 pseudoknotted: boolean, temp: number = EPars.DEFAULT_TEMPERATURE
@@ -102,7 +100,7 @@ export default class FoldingContextAPI {
                     kcalDelta, pseudoknotted, temp);
             });
 
-        this._scriptInterface.addCallback('subopt_oligos',
+        scriptInterface.addCallback('subopt_oligos',
             (
                 seq: string, oligoStrings: string[], kcalDelta: number,
                 pseudoknotted: boolean, temp: number = EPars.DEFAULT_TEMPERATURE
@@ -123,7 +121,7 @@ export default class FoldingContextAPI {
                     oligoStrings, kcalDelta, pseudoknotted, temp);
             });
 
-        this._scriptInterface.addCallback('cofold',
+        scriptInterface.addCallback('cofold',
             (
                 seq: string, oligo: string, malus: number = 0.0, constraint: string | null = null
             ): string | null => {
@@ -143,7 +141,7 @@ export default class FoldingContextAPI {
                 }&${folded.slice(len).getParenthesis()}`;
             });
 
-        this._scriptInterface.addCallback('get_defect',
+        scriptInterface.addCallback('get_defect',
             (
                 seq: string, secstruct: string, pseudoknotted: boolean, temp: number = EPars.DEFAULT_TEMPERATURE
             ): number | null => {
