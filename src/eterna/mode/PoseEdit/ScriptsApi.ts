@@ -36,11 +36,9 @@ export default class FoldingContextAPI {
                     return null;
                 }
                 const seqArr: Sequence = Sequence.fromSequenceString(seq);
-                const pseudoknots = this._targetConditions && this._targetConditions[0]
-                    && this._targetConditions[0]['type'] === 'pseudoknot';
-                const folded: SecStruct | null = this._folder.foldSequence(seqArr, null, constraint, pseudoknots);
+                const folded: SecStruct | null = this._folder.foldSequence(seqArr, null, constraint, this._isPseudoknot);
                 Assert.assertIsDefined(folded);
-                return folded.getParenthesis(null, pseudoknots);
+                return folded.getParenthesis(null, this._isPseudoknot);
             });
 
         this._scriptInterface.addCallback('fold_with_binding_site',
@@ -64,9 +62,7 @@ export default class FoldingContextAPI {
             }
             const seqArr: Sequence = Sequence.fromSequenceString(seq);
             const structArr: SecStruct = SecStruct.fromParens(secstruct);
-            const freeEnergy = (this._targetConditions && this._targetConditions[0]
-                && this._targetConditions[0]['type'] === 'pseudoknot')
-                ? this._folder.scoreStructures(seqArr, structArr, true)
+            const freeEnergy = this._isPseudoknot ? this._folder.scoreStructures(seqArr, structArr, true)
                 : this._folder.scoreStructures(seqArr, structArr);
             return 0.01 * freeEnergy;
         });
