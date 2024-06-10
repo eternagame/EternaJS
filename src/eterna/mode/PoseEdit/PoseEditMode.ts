@@ -79,6 +79,7 @@ import NuPACK from 'eterna/folding/NuPACK';
 import PasteStructureDialog from 'eterna/ui/PasteStructureDialog';
 import ConfirmTargetDialog from 'eterna/ui/ConfirmTargetDialog';
 import FoldingContextScriptAPI from 'eterna/eternaScript/FoldingAPI';
+import addSelectFolderAPIToInterface from 'eterna/eternaScript/SelectFolderAPI';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -1276,9 +1277,10 @@ export default class PoseEditMode extends GameMode {
         }).registerToScriptInterface(this._scriptInterface);
 
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
-            this._scriptInterface.addCallback(
-                'select_folder', (folderName: string): boolean => this.selectFolder(folderName)
-            );
+            addSelectFolderAPIToInterface({
+                selectFolder: this.selectFolder,
+                scriptInterface: this._scriptInterface
+            });
 
             this._scriptInterface.addCallback('load_parameters_from_buffer', (_str: string): boolean => {
                 log.info('TODO: load_parameters_from_buffer');
