@@ -6,7 +6,17 @@ import Sequence from 'eterna/rnatypes/Sequence';
 import {ExternalInterfaceCtx} from 'eterna/util/ExternalInterface';
 import {Assert} from 'flashbang';
 
-export default class FoldingContextAPI {
+/**
+ * An EternaScript API exposing all functions that handle folding an arbitrary
+ * RNA sequence, and aren't dependent on what's the RNA in the puzzle.
+ *
+ * It adds itself to an existing script API (`ExternalInterfaceCtx`) from
+ * `this.registerToScriptInterface`.
+ *
+ * Note: The API in this class is still affected by the selected folder
+ * and the pseudoknot mode of the puzzle - just not the sequence.
+ */
+export default class FoldingAPI {
     private readonly _getFolder: () => Folder | null;
     private readonly _getIsPseudoknot: () => boolean;
 
@@ -34,7 +44,9 @@ export default class FoldingContextAPI {
                     return null;
                 }
                 const seqArr: Sequence = Sequence.fromSequenceString(seq);
-                const folded: SecStruct | null = this._folder.foldSequence(seqArr, null, constraint, this._isPseudoknot);
+                const folded: SecStruct | null = this._folder.foldSequence(
+                    seqArr, null, constraint, this._isPseudoknot
+                );
                 Assert.assertIsDefined(folded);
                 return folded.getParenthesis(null, this._isPseudoknot);
             });

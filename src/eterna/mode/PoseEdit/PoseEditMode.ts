@@ -78,6 +78,7 @@ import {FederatedPointerEvent} from '@pixi/events';
 import NuPACK from 'eterna/folding/NuPACK';
 import PasteStructureDialog from 'eterna/ui/PasteStructureDialog';
 import ConfirmTargetDialog from 'eterna/ui/ConfirmTargetDialog';
+import FoldingContextScriptAPI from 'eterna/eternaScript/FoldingAPI';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -88,7 +89,6 @@ import ViewSolutionOverlay from '../DesignBrowser/ViewSolutionOverlay';
 import {PuzzleEditPoseData} from '../PuzzleEdit/PuzzleEditMode';
 import {DesignCategory} from '../DesignBrowser/DesignBrowserMode';
 import VoteProcessor from '../DesignBrowser/VoteProcessor';
-import FoldingContextScriptAPI from './ScriptsApi';
 
 export interface PoseEditParams {
     isReset?: boolean;
