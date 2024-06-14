@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html style="height: 100%;">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>EternaJS</title>
+
+    <!--
+    These scripts are all grabbed from https://github.com/EteRNAgame/website/tree/master/frontend
+    -->
+
+    <link type="text/css" rel="stylesheet" media="all" href="./frontend/themes/css/eterna.css" />
+
+    <script>
+        // The Coffeescript code exposes a Comment object, which clobbers a browser global, which we do not use,
+        // but the browser global is used by DOMPurify
+        __comment_bak = Comment;
+    </script>
+
+    <script src="./frontend/jscripts/jquery/jquery-1.7.2.min.js"></script>
+    <script src="./frontend/jscripts/jquery/jquery-unselectable.js"></script>
+    <script src="./frontend/jscripts/jquery-ui/jquery-ui-1.8.7.custom.min.js"></script>
+    <script src="./frontend/jscripts/json/json2.js"></script>
+
+    <script src="./frontend/jscripts/application.js"></script>
+    <script src="./frontend/jscripts/utils.js"></script>
+    <script src="./frontend/jscripts/ajaxmanager.js"></script>
+    <script src="./frontend/jscripts/datamanager.js"></script>
+    <script src="./frontend/jscripts/usermanager.js"></script>
+
+    <script src="./frontend/jscripts/eterna/eterna-application.js"></script>
+    <script src="./frontend/jscripts/eterna/eterna-utils.js"></script>
+    <script src="./frontend/jscripts/eterna/script-library.js"></script>
+    <script src="./frontend/jscripts/eterna/script-interface.js"></script>
+    <script src="./frontend/jscripts/eterna/presenter.js"></script>
+
+    <script>
+        // The Coffeescript code exposes a Comment object, which clobbers a browser global, which we do not use,
+        // but the browser global is used by DOMPurify
+        Comment = __comment_bak;
+    </script>
+</head>
+<body style="margin: 0; padding: 0; height: 100%; display: flex; flex-direction: column;">
+
+<!-- Scripts expect that an element with "maingame" will exist, so this name shouldn't be changed -->
+<div id="maingame"></div>
+
+<!-- Load our webpack bundles -->
+<%= htmlWebpackPlugin.tags.bodyTags %>
+
+<script>
+    // Wrapping the code in a function to prevent variables from leaking into the global scope.
+    (() => {
+        Application.GET_URI = "<%= htmlWebpackPlugin.options.process.env.APP_SERVER_URL %>/get/";
+        Application.POST_URI = "<%= htmlWebpackPlugin.options.process.env.APP_SERVER_URL %>/post/";
+
+        const params = new URLSearchParams(window.location.search);
+        const containerID = "maingame";
+
+        const app = new FoldingAPIApp({
+            containerID: containerID,
+            folderName: params.get("folder"),
+        })
+
+        app.run();
+
+        window.stopApp = () => {
+            app.disposeNow();
+        }
+    })();
+</script>
+</body>
+</html>

@@ -38,7 +38,7 @@ function getEngineLocation() {
 
 module.exports = {
     devtool: "inline-source-map",
-    
+
     entry: {
         main: ['core-js/stable', 'regenerator-runtime/runtime', "./src/eterna/index.ts"],
         vendor: vendorDependencies
@@ -73,7 +73,7 @@ module.exports = {
             path: false
         }
     },
-    
+
     module: {
         rules: [
             {
@@ -95,7 +95,7 @@ module.exports = {
             }
         ],
     },
-    
+
     // When importing a module whose path matches one of the following, just
     // assume a corresponding global variable exists and use that instead.
     // This is important because it allows us to avoid bundling all of our
@@ -124,15 +124,28 @@ module.exports = {
     optimization: {
         splitChunks: {
             chunks: 'all',
-        },      
+        },
     },
-    
-    plugins: [        
+
+    plugins: [
         new webpack.EnvironmentPlugin(Object.keys(process.env)),
-        
+
         // Generate an index.html that includes our webpack bundles
         new HtmlWebpackPlugin({
             template: 'src/index.html.tmpl',
+            inject: false,
+            scriptLoading: 'blocking',
+            process: {
+                env: {
+                    ...process.env
+                }
+            }
+        }),
+
+        // Generate folding=api.html, for the scripts page
+        new HtmlWebpackPlugin({
+            template: 'src/folding-api.html.tmpl',
+            filename: "folding-api.html",
             inject: false,
             scriptLoading: 'blocking',
             process: {
