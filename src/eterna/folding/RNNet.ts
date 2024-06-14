@@ -85,7 +85,13 @@ export default class RNNet extends Folder<false> {
             return pairs.slice(0);
         }
 
-        const dotPlot = (await this.getDotPlot(seq));
+        const bpps = (await this.getDotPlot(seq)).data.slice();
+        for (let ii = 0; ii < bpps.length; ii += 3) {
+            if (Math.abs(bpps[ii] - bpps[ii + 1]) < 4) {
+                bpps[ii + 2] = 0;
+            }
+        }
+        const dotPlot = new DotPlot(bpps);
         pairs = FoldUtil.hungarian(dotPlot, seq, BasePairProbabilityTransform.LEAVE_ALONE, {
             theta: 0.5,
             minLenHelix: 1
