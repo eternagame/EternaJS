@@ -13,6 +13,7 @@ import LinearFoldE from './folding/LinearFoldE';
 import LinearFoldV from './folding/LinearFoldV';
 import Folder from './folding/Folder';
 import FoldingAPI from './eternaScript/FoldingAPI';
+import addSelectFolderAPIToInterface from './eternaScript/SelectFolderAPI';
 
 interface FoldingAppParams {
     containerID?: string;
@@ -102,11 +103,25 @@ export default class FoldingAPIApp {
         }
     }
 
+    private trySelectFolder(folderName: string): boolean {
+        const folder = FolderManager.instance.getFolder(folderName);
+        if (folder === null) {
+            log.warn(`No such folder '${this._params.folderName}'`);
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     private initScriptInterface(): void {
         new FoldingAPI({
             getFolder: () => this._folder,
             getIsPseudoknot: () => false
         }).registerToScriptInterface(this._scriptInterface);
+        addSelectFolderAPIToInterface({
+            selectFolder: (folderName) => this.trySelectFolder(folderName),
+            scriptInterface: this._scriptInterface
+        });
 
         ExternalInterface.pushContext(this._scriptInterface);
     }
@@ -114,6 +129,5 @@ export default class FoldingAPIApp {
     private readonly _params: ProcessedFoldingAppParams;
     private readonly _scriptInterface: ExternalInterfaceCtx = new ExternalInterfaceCtx();
     private readonly _appContainer: HTMLElement;
-    // private readonly _folderSwitcher: FolderSwitcher;
     private _folder: Folder;
 }
