@@ -68,16 +68,10 @@ export default class RNNet extends Folder<false> {
         return true;
     }
 
-    public async foldSequence(
-        seq: Sequence,
-        secondBestPairs: SecStruct | null,
-        desiredPairs: string | null = null
-    ): Promise<SecStruct> {
+    public async foldSequence(seq: Sequence): Promise<SecStruct> {
         const key: CacheKey = {
             primitive: 'fold',
-            seq: seq.sequenceString(),
-            secondBestPairs: secondBestPairs?.pairs ?? null,
-            desiredPairs
+            seq: seq.sequenceString()
         };
         let pairs: SecStruct = this.getCache(key) as SecStruct;
         if (pairs != null) {
@@ -150,6 +144,45 @@ export default class RNNet extends Folder<false> {
 
         this.putCache(key, cooArray.slice());
         return new DotPlot(cooArray);
+    }
+
+    public async getEf1(seq: Sequence) {
+        const bpps = (await this.getDotPlot(seq)).data;
+        const struct = await this.foldSequence(seq);
+
+        const acceptedBpps = bpps.filter((_, idx) => (
+            idx % 3 === 2
+            && struct.pairingPartner(bpps[idx - 2] - 1) === bpps[idx - 1] - 1
+        ));
+
+        // Avoid divide by zero
+        if (acceptedBpps.length === 0) return 0;
+
+        let confidence = 0;
+        for (const prob of acceptedBpps) confidence += prob;
+
+        confidence /= acceptedBpps.length;
+
+        return 2.25 * confidence - 1.29;
+    }
+
+    public async getEf1CrossPair(seq: Sequence) {
+        const bpps = (await this.getDotPlot(seq)).data;
+        const struct = (await this.foldSequence(seq)).getCrossedPairs();
+
+        const acceptedBpps = bpps.filter((_, idx) => (
+            idx % 3 === 2
+            && struct.pairingPartner(bpps[idx - 2] - 1) === bpps[idx - 1] - 1
+        ));
+
+        // Avoid divide by zero
+        if (acceptedBpps.length === 0) return 0;
+
+        let confidence = 0;
+        for (const prob of acceptedBpps) confidence += prob;
+        confidence /= acceptedBpps.length;
+
+        return 2 * confidence - 1.19;
     }
 
     protected readonly _isSync = false;

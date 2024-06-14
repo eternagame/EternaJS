@@ -13,6 +13,7 @@ import SecStruct from './rnatypes/SecStruct';
 import Sequence from './rnatypes/Sequence';
 import {TargetType} from './puzzle/Puzzle';
 import FoldUtil, {BasePairProbabilityTransform} from './folding/FoldUtil';
+import RNNet from './folding/RNNet';
 
 /**
  * FoldData is a schema for JSON-ified UndoBlocks.
@@ -99,6 +100,8 @@ export enum UndoBlockParam {
     SUMPUNP = 17,
     BRANCHINESS = 18,
     TARGET_EXPECTED_ACCURACY = 19,
+    EF1 = 20,
+    EF1_CROSS_PAIR = 21,
 }
 
 type Param = (number | number[] | DotPlot | null);
@@ -680,6 +683,20 @@ export default class UndoBlock {
                 EPars.DEFAULT_TEMPERATURE,
                 pseudoknots
             );
+            if (folder instanceof RNNet) {
+                this.setParam(
+                    UndoBlockParam.EF1,
+                    await folder.getEf1(this.sequence),
+                    EPars.DEFAULT_TEMPERATURE,
+                    pseudoknots
+                );
+                this.setParam(
+                    UndoBlockParam.EF1_CROSS_PAIR,
+                    await folder.getEf1CrossPair(this.sequence),
+                    EPars.DEFAULT_TEMPERATURE,
+                    pseudoknots
+                );
+            }
             this._dotPlotData = dotArray;
         } else if (Array.isArray(currDotPlot)) {
             this._dotPlotData = new DotPlot(currDotPlot);

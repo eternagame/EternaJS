@@ -470,6 +470,41 @@ export default class SecStruct {
     }
 
     /**
+     * Return a filtered secondary structure that only contains pairs which are "crossed"
+     * with each other (ie, pseudoknotted).
+     *
+     * Eg: (((((..[[[[((....))..))))]]]]) would become .((((..[[[[..........))))]]]].
+     */
+    public getCrossedPairs() {
+        const pairList: [number, number][] = [];
+        for (let i = 0; i < this.length; i++) {
+            const partner = this.pairingPartner(i);
+            if (partner > i) pairList.push([i, partner]);
+        }
+
+        const crossedPairs = new Set<[number, number]>();
+        for (let i = 0; i < pairList.length; i++) {
+            for (let j = 0; j < pairList.length; j++) {
+                const bp1 = pairList[i];
+                const bp2 = pairList[j];
+                if (
+                    ((bp1[0] < bp2[0]) && (bp2[0] < bp1[1]) && (bp1[1] < bp2[1]))
+                    || ((bp2[0] < bp1[0]) && (bp1[0] < bp2[1]) && (bp2[1] < bp1[1]))
+                ) {
+                    crossedPairs.add(bp1);
+                    crossedPairs.add(bp2);
+                }
+            }
+        }
+
+        const newStruct = new SecStruct(new Array(this.length).fill(-1));
+        for (const pair of crossedPairs) {
+            newStruct.setPairingPartner(pair[0], pair[1]);
+        }
+        return newStruct;
+    }
+
+    /**
      * Return the number of base pairs in total.
      */
     public numPairs(): number {
