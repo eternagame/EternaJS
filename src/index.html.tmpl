@@ -12,6 +12,8 @@
     <link type="text/css" rel="stylesheet" media="all" href="./frontend/themes/css/eterna.css" />
 
     <script>
+        // The Coffeescript code exposes a Comment object, which clobbers a browser global, which we do not use,
+        // but the browser global is used by DOMPurify
         __comment_bak = Comment;
     </script>
 
