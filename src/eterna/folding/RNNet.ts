@@ -163,7 +163,7 @@ export default class RNNet extends Folder<false> {
 
         confidence /= acceptedBpps.length;
 
-        return 2.25 * confidence - 1.29;
+        return 2.21 * confidence - 1.25;
     }
 
     public async getEf1CrossPair(seq: Sequence) {
@@ -182,7 +182,7 @@ export default class RNNet extends Folder<false> {
         for (const prob of acceptedBpps) confidence += prob;
         confidence /= acceptedBpps.length;
 
-        return 2 * confidence - 1.19;
+        return 2.02 * confidence - 1.27;
     }
 
     protected readonly _isSync = false;
