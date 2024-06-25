@@ -3,49 +3,17 @@ import {RNABase} from 'eterna/EPars';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import DotPlot from 'eterna/rnatypes/DotPlot';
 import Sequence from 'eterna/rnatypes/Sequence';
-import rnnetSs from './engines/rnnet-ss.onnx';
 import Folder, {CacheKey} from './Folder';
 import FoldUtil, {BasePairProbabilityTransform} from './FoldUtil';
-
-ort.env.wasm.proxy = true;
-ort.env.wasm.wasmPaths = {
-    'ort-wasm.wasm': new URL(
-        '../../../node_modules/onnxruntime-web/dist/ort-wasm.wasm',
-        import.meta.url
-    ).href,
-    'ort-wasm-threaded.wasm': new URL(
-        '../../../node_modules/onnxruntime-web/dist/ort-wasm-threaded.wasm',
-        import.meta.url
-    ).href,
-    'ort-wasm-simd.wasm': new URL(
-        '../../../node_modules/onnxruntime-web/dist/ort-wasm-simd.wasm',
-        import.meta.url
-    ).href,
-    'ort-training-wasm-simd.wasm': new URL(
-        '../../../node_modules/onnxruntime-web/dist/ort-training-wasm-simd.wasm',
-        import.meta.url
-    ).href,
-    'ort-wasm-simd-threaded.wasm': new URL(
-        '../../../node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.wasm',
-        import.meta.url
-    ).href
-};
-ort.env.wasm.numThreads = 1;
 
 export default class RNNet extends Folder<false> {
     public static readonly NAME: string = 'RibonanzaNet-SS';
 
     /**
      * Asynchronously creates a new instance of the RNNet folder.
-     * @description AMW TODO cannot annotate type of module/program; both are any.
      */
     public static async create(): Promise<RNNet | null> {
-        return new RNNet(await ort.InferenceSession.create(rnnetSs, {}));
-    }
-
-    private constructor(session: ort.InferenceSession) {
-        super();
-        this._session = session;
+        return new RNNet();
     }
 
     public get name(): string {
@@ -126,7 +94,7 @@ export default class RNNet extends Folder<false> {
         }
 
         const sequenceInput = 'sequence';
-        const results = await this._session.run({
+        const results = await (await this._getSession()).run({
             [sequenceInput]: new ort.Tensor('int64', seqArr, [1, seq.length])
         });
         const outputName = 'output';
@@ -186,6 +154,44 @@ export default class RNNet extends Folder<false> {
     }
 
     protected readonly _isSync = false;
+
+    private async _getSession(): Promise<ort.InferenceSession> {
+        // We lazy-load the session instead of setting it up in create() like other engines
+        // so that both the onnx model and the onnxruntime wasm bundle are only loaded if actually
+        // needed. While this has the drawback of introducing additional waiting times instead of
+        // batching that all into the initial loading process, the size of this is just too large
+        // to justify having everyone download it when not needed (which is excruciatingly
+        // slow on poor network connections eg in global regions)
+        if (this._session) return this._session;
+
+        const rnnetSs = await import('./engines/rnnet-ss.onnx');
+
+        ort.env.wasm.proxy = true;
+        ort.env.wasm.wasmPaths = {
+            'ort-wasm.wasm': new URL(
+                '../../../node_modules/onnxruntime-web/dist/ort-wasm.wasm',
+                import.meta.url
+            ).href,
+            'ort-wasm-threaded.wasm': new URL(
+                '../../../node_modules/onnxruntime-web/dist/ort-wasm-threaded.wasm',
+                import.meta.url
+            ).href,
+            'ort-wasm-simd.wasm': new URL(
+                '../../../node_modules/onnxruntime-web/dist/ort-wasm-simd.wasm',
+                import.meta.url
+            ).href,
+            'ort-training-wasm-simd.wasm': new URL(
+                '../../../node_modules/onnxruntime-web/dist/ort-training-wasm-simd.wasm',
+                import.meta.url
+            ).href,
+            'ort-wasm-simd-threaded.wasm': new URL(
+                '../../../node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.wasm',
+                import.meta.url
+            ).href
+        };
+        ort.env.wasm.numThreads = 1;
+        return ort.InferenceSession.create(rnnetSs.default, {});
+    }
 
     private readonly _session: ort.InferenceSession;
 }
