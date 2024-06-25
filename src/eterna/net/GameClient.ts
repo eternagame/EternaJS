@@ -1,4 +1,4 @@
-import * as log from 'loglevel';
+import log from 'loglevel';
 import {Base64} from 'flashbang';
 import {FoldData} from 'eterna/UndoBlock';
 import {VoteData} from 'eterna/mode/DesignBrowser/VoteProcessor';

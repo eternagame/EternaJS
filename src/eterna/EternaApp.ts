@@ -1,6 +1,6 @@
 import 'assets/Styles/styles.css'; // css-loader will pick up on this and embed our stylesheet
 import {settings, Application, utils} from 'pixi.js';
-import * as log from 'loglevel';
+import log from 'loglevel';
 import {
     FlashbangApp, SaveGameManager, TextureUtil, ErrorUtil, Flashbang, Assert
 } from 'flashbang';

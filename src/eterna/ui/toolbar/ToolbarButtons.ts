@@ -303,7 +303,8 @@ export const boostersMenuButtonProps: ToolbarParam = {
     allImg: Bitmaps.ImgBoosters,
     overImg: Bitmaps.ImgOverBoosters,
     disableImg: Bitmaps.ImgGreyBoosters,
-    tooltip: 'Boosters'
+    tooltip: 'Boosters',
+    rscriptID: RScriptUIElementID.BOOSTERS
 };
 
 // ===== IMPORT/EXPORT =====

@@ -1,4 +1,4 @@
-import * as log from 'loglevel';
+import log from 'loglevel';
 import Eterna from 'eterna/Eterna';
 import FolderManager from 'eterna/folding/FolderManager';
 import Folder from 'eterna/folding/Folder';

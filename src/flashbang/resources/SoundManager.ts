@@ -1,4 +1,4 @@
-import * as log from 'loglevel';
+import log from 'loglevel';
 import {sound, Sound as PixiSound, PlayOptions} from '@pixi/sound';
 import Flashbang from 'flashbang/core/Flashbang';
 

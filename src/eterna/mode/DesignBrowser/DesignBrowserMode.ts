@@ -1,4 +1,4 @@
-import * as log from 'loglevel';
+import log from 'loglevel';
 import MultiStyleText from 'pixi-multistyle-text';
 import {
     Container, Sprite

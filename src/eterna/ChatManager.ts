@@ -1,4 +1,4 @@
-import * as log from 'loglevel';
+import log from 'loglevel';
 import {Chat} from 'eterna-chat-wrapper';
 import {Signal} from 'signals';
 import EternaSettings from './settings/EternaSettings';
