@@ -1,4 +1,4 @@
-import * as log from 'loglevel';
+import log from 'loglevel';
 import {Texture} from 'pixi.js';
 import {TextureUtil, Flashbang} from 'flashbang';
 import EPars from 'eterna/EPars';

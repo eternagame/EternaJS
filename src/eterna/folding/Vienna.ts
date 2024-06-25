@@ -1,4 +1,4 @@
-import * as log from 'loglevel';
+import log from 'loglevel';
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import Utility from 'eterna/util/Utility';
 import RNALayout from 'eterna/pose2D/RNALayout';

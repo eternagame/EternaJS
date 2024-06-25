@@ -1,4 +1,4 @@
-import * as log from 'loglevel';
+import log from 'loglevel';
 import {SaveGameManager, ErrorUtil, Flashbang} from 'flashbang';
 import ChatManager from 'eterna/ChatManager';
 import EternaApp from 'eterna/EternaApp';

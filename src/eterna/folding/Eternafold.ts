@@ -1,4 +1,4 @@
-import * as log from 'loglevel';
+import log from 'loglevel';
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import {Assert} from 'flashbang';
 import DotPlot from 'eterna/rnatypes/DotPlot';

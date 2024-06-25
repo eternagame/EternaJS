@@ -1,4 +1,4 @@
-import * as log from 'loglevel';
+import log from 'loglevel';
 import {
     Container, DisplayObject, Rectangle, Point
 } from 'pixi.js';

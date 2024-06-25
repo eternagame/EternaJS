@@ -1,4 +1,4 @@
-import * as log from 'loglevel';
+import log from 'loglevel';
 import {Container, Text} from 'pixi.js';
 import Eterna from 'eterna/Eterna';
 import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
