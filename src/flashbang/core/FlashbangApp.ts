@@ -1,4 +1,4 @@
-import * as log from 'loglevel';
+import log from 'loglevel';
 import {
     settings, Application, SCALE_MODES, extensions, InteractionManager, Point
 } from 'pixi.js';

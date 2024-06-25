@@ -28,31 +28,25 @@ function getEngineLocation() {
 }
 
 module.exports = {
-    "preset": "ts-jest",
+    "preset": "ts-jest/presets/default-esm",
     "moduleDirectories": [
       "node_modules",
       "src",
       ""
     ],
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js"
-    ],
     "moduleNameMapper": {
       "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "assets/__mocks__/fileMock.js",
       "\\.(css|less)$": "assets/__mocks__/styleMock.js",
-      "engines-bin/(.*)": `${getEngineLocation()}/$1`
+      "engines-bin/(.*)": `${getEngineLocation()}/$1`,
+      '^(\\.{1,2}/.*)\\.js$': '$1'
     },
     "rootDir": "src",
-    "transform": {
-      "\\.(ts|tsx)$": "ts-jest"
-    },
     "testRegex": "/__tests__/.*\\.test\\.(ts|tsx|js)$",
     "globals": {
       "ts-jest": {
         "babelConfig": false,
-        "tsconfig": "./tsconfig.jest.json"
+        "tsconfig": "./tsconfig.json",
+        "useESM": true,
       }
     },
     "setupFiles": [

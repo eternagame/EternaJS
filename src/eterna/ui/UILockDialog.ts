@@ -1,4 +1,4 @@
-import * as log from 'loglevel';
+import log from 'loglevel';
 import {AlphaTask} from 'flashbang';
 import Dialog from './Dialog';
 

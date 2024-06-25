@@ -1,4 +1,4 @@
-import * as log from 'loglevel';
+import log from 'loglevel';
 import Eterna from 'eterna/Eterna';
 import Feedback, {BrentTheoData} from 'eterna/Feedback';
 import Sequence from 'eterna/rnatypes/Sequence';

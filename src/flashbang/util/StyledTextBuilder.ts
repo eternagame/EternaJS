@@ -1,4 +1,4 @@
-import * as log from 'loglevel';
+import log from 'loglevel';
 import MultiStyleText, {TextStyleExtended, TextStyleSet} from 'pixi-multistyle-text';
 import ColorUtil from './ColorUtil';
 

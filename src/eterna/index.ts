@@ -1,4 +1,4 @@
-import * as log from 'loglevel';
+import log from 'loglevel';
 import EternaApp from 'eterna/EternaApp';
 import * as PIXI from 'pixi.js';
 

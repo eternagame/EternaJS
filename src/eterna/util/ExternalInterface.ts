@@ -1,4 +1,4 @@
-import * as log from 'loglevel';
+import log from 'loglevel';
 import {Registration, UnitSignal} from 'signals';
 import {Deferred, Assert} from 'flashbang';
 

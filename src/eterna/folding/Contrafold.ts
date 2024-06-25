@@ -1,4 +1,4 @@
-import * as log from 'loglevel';
+import log from 'loglevel';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import Assert from 'flashbang/util/Assert';

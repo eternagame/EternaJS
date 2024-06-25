@@ -1,4 +1,4 @@
-import * as log from 'loglevel';
+import log from 'loglevel';
 import {
     Point, Sprite, Texture, Graphics
 } from 'pixi.js';
