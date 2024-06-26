@@ -55,10 +55,8 @@ module.exports = {
     "jest-canvas-mock",
     "dotenv/config"
   ],
+  "setupFilesAfterEnv": [
+    "<rootDir>/../jest.setup.js"
+  ],
   "testEnvironment": "jsdom",
-  "testEnvironmentOptions": {
-    beforeParse(window) {
-      window.URL = URL;
-    }
-  }
 }
