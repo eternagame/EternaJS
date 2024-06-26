@@ -335,50 +335,7 @@ export default class SecStruct {
         if (pseudoknots) {
             // given partner-style array, writes dot-parens notation string. handles pseudoknots!
             // example of partner-style array: '((.))' -> [4,3,-1,1,0]
-            const bpList: number[] = new Array(this._pairs.length).fill(-1);
-
-            for (let ii = 0; ii < this._pairs.length; ii++) {
-                if (this._pairs[ii] > ii) {
-                    bpList[ii] = this._pairs[ii];
-                    bpList[this._pairs[ii]] = ii;
-                }
-            }
-
-            const bps: number[][] = [];
-            for (let ii = 0; ii < bpList.length; ++ii) {
-                if (bpList[ii] !== -1 && bpList[ii] > ii) {
-                    bps.push([ii, bpList[ii]]);
-                }
-            }
-
-            const stems: number[][][] = [];
-            // #bps: list of bp lists
-            // # i.e. '((.))' is [[0,4],[1,3]]
-            // # Returns list of (list of bp lists), now sorted into stems
-            // # i.e. [ list of all bps in stem 1, list of all bps in stem 2]
-            // if debug: print(bps)
-            for (let ii = 0; ii < bps.length; ++ii) {
-                let added = false;
-                for (let jj = 0; jj < stems.length; ++jj) {
-                    // is this bp adjacent to any element of an existing stem?
-                    for (let kk = 0; kk < stems[jj].length; ++kk) {
-                        if ((bps[ii][0] - 1 === stems[jj][kk][0] && bps[ii][1] + 1 === stems[jj][kk][1])
-                                || (bps[ii][0] + 1 === stems[jj][kk][0] && bps[ii][1] - 1 === stems[jj][kk][1])
-                                || (bps[ii][0] - 1 === stems[jj][kk][1] && bps[ii][1] + 1 === stems[jj][kk][0])
-                                || (bps[ii][0] + 1 === stems[jj][kk][1] && bps[ii][1] - 1 === stems[jj][kk][0])) {
-                            // add to this stem
-                            stems[jj].push(bps[ii]);
-                            added = true;
-                            break;
-                        }
-                    }
-                    if (added) break;
-                }
-                if (!added) {
-                    stems.push([bps[ii]]);
-                }
-            }
-            // if debug: print('stems', stems)
+            const stems = this.stems();
 
             const dbn: string[] = new Array(this._pairs.length).fill('.');
             const delimsL = [/\(/i, /\{/i, /\[/i, /</i];// ,'a','b','c']
