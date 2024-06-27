@@ -338,30 +338,30 @@ export default class SecStruct {
             const stems = this.stems();
 
             const dbn: string[] = new Array(this._pairs.length).fill('.');
-            const delimsL = [/\(/i, /\{/i, /\[/i, /</i];// ,'a','b','c']
-            const delimsR = [/\)/i, /\}/i, /\]/i, />/i];// ,'a','b','c']
             const charsL = ['(', '{', '[', '<'];
             const charsR = [')', '}', ']', '>'];
             if (stems.length === 0) {
                 return dbn.join('');
             } else {
-                for (let ii = 0; ii < stems.length; ++ii) {
-                    const stem = stems[ii];
-
-                    let pkCtr = 0;
-                    const substring = dbn.join('').substring(stem[0][0] + 1, stem[0][1]);
-                    // check to see how many delimiter types exist in between where stem is going to go
-                    // ah -- it's actually how many delimiters are only half-present, I think.
-                    while ((substring.search(delimsL[pkCtr]) !== -1 && substring.search(delimsR[pkCtr]) === -1)
-                            || (substring.search(delimsL[pkCtr]) === -1 && substring.search(delimsR[pkCtr]) !== -1)) {
-                        pkCtr += 1;
+                // For each stem, add the pairs to our dot bracket string
+                for (const stem of stems) {
+                    let pkDegree = 0;
+                    // The portion of our partially-filled-out dot-bracket string
+                    // between the first and last base of the stem we're adding to the dot-bracket
+                    const crossedRegion = dbn.slice(stem[0][0] + 1, stem[0][1]);
+                    // Find the first degree where the region does not include half-open pairs for that degree.
+                    // Not that because the stem list (and by extension our construction of the dot-bracket)
+                    // goes from left/low starting indices to right/high starting indices, the only possible things
+                    // we could encounter are unpaired bases or bases on the closing/right end of a pair.
+                    while (crossedRegion.includes(charsR[pkDegree])) {
+                        pkDegree += 1;
                     }
                     for (let jj = 0; jj < stem.length; ++jj) {
                         const i = stem[jj][0];
                         const j = stem[jj][1];
 
-                        dbn[i] = charsL[pkCtr];
-                        dbn[j] = charsR[pkCtr];
+                        dbn[i] = charsL[pkDegree];
+                        dbn[j] = charsR[pkDegree];
                     }
                 }
                 return dbn.join('');
