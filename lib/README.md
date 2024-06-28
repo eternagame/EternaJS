@@ -61,7 +61,7 @@ are cloned into lib/LinearFold/LinearFold and lib/LinearFold/LinearPartition res
       ```
     - You can obtain the intended version of the pretrained weights from https://www.kaggle.com/datasets/shujun717/ribonanzanet-weights/versions/7
 
-* Clone the [RNApuzzler repository]((https://github.com/dwiegreffe/RNApuzzler)) into the RNApuzzler directory.
+* For the RNApuzzler clash-free layout option, clone the [RNApuzzler repository]((https://github.com/dwiegreffe/RNApuzzler)) into the RNApuzzler directory.
     - You can obtain the latest verified working revision via:
       ```sh
 	  git clone https://github.com/dwiegreffe/RNApuzzler.git
