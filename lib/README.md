@@ -51,7 +51,7 @@ are cloned into lib/LinearFold/LinearFold and lib/LinearFold/LinearPartition res
       git reset --hard 62fbb1ccc4c7e672a28d41ba1eef7fb796fd4f79
       ```
 
-* Clone the [RNApuzzler repository]((https://github.com/dwiegreffe/RNApuzzler)) into the RNApuzzler directory.
+* For the RNApuzzler clash-free layout option, clone the [RNApuzzler repository]((https://github.com/dwiegreffe/RNApuzzler)) into the RNApuzzler directory.
     - You can obtain the latest verified working revision via:
       ```sh
 	  git clone https://github.com/dwiegreffe/RNApuzzler.git
