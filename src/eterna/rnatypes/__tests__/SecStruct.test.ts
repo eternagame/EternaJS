@@ -25,7 +25,7 @@ test(`SecStruct:onlyPseudoknots`, () => {
     expect(pairs.onlyPseudoknots().nonempty()).toEqual(true);
 });
 
-test(`SecStruct:getParenthesis`, () => {
+test(`SecStruct:getParenthesis (pseudoknotted)`, () => {
     const inputStrs = [
         '.........................',
         '((((((......))))))',
