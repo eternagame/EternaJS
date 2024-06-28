@@ -1113,9 +1113,9 @@ export default class PuzzleEditMode extends GameMode {
 
         this._toolbar.palette.setPairCounts(numAU, numGU, numGC);
 
-        this.updateSpecBox();
         this.updateCopySequenceDialog();
         this.updateCopyStructureDialog();
+        this.updateSpecBox();
     }
 
     private onPaletteTargetSelected(type: PaletteTargetType): void {
