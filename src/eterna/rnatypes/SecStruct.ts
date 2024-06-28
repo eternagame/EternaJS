@@ -211,18 +211,18 @@ export default class SecStruct {
         this._pairs = new Array(parenthesis.length).fill(-1);
 
         if (pseudoknots) {
-            const leftMap: Record<string, number[] | undefined> = {
+            const pairStacksLeftMap: Record<string, number[] | undefined> = {
                 '(': [],
                 '[': [],
                 '{': [],
                 '<': []
             };
 
-            const rightMap: Record<string, number[] | undefined> = {
-                ')': leftMap['('],
-                ']': leftMap['['],
-                '}': leftMap['{'],
-                '>': leftMap['<']
+            const pairStacksRightMap: Record<string, number[] | undefined> = {
+                ')': pairStacksLeftMap['('],
+                ']': pairStacksLeftMap['['],
+                '}': pairStacksLeftMap['{'],
+                '>': pairStacksLeftMap['<']
             };
 
             for (let jj = 0; jj < parenthesis.length; jj++) {
@@ -233,16 +233,16 @@ export default class SecStruct {
                 if (char === '.') {
                     continue;
                 } else if (
-                    (pairStack = leftMap[char]) || (char >= 'a' && char <= 'z')
+                    (pairStack = pairStacksLeftMap[char]) || (char >= 'a' && char <= 'z')
                 ) {
                     if (!pairStack) {
                         pairStack = [];
-                        leftMap[char] = pairStack;
-                        rightMap[char.toUpperCase()] = pairStack;
+                        pairStacksLeftMap[char] = pairStack;
+                        pairStacksRightMap[char.toUpperCase()] = pairStack;
                     }
                     pairStack.push(jj);
                 } else if (
-                    (pairStack = rightMap[char])
+                    (pairStack = pairStacksRightMap[char])
                 ) {
                     const partner = pairStack.pop();
                     if (partner === undefined) throw new Error('Invalid parenthesis notation');
