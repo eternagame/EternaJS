@@ -54,6 +54,7 @@ import {FederatedPointerEvent} from '@pixi/events';
 import FolderManager from 'eterna/folding/FolderManager';
 import {PoseState} from 'eterna/puzzle/Puzzle';
 import {HighlightInfo} from 'eterna/constraints/Constraint';
+import SpecBoxDialog from 'eterna/ui/SpecBoxDialog';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
 import StructureInput from './StructureInput';
@@ -469,6 +470,7 @@ export default class PuzzleEditMode extends GameMode {
         this.regs.add(this._toolbar.nucleotideFindButton.clicked.connect(() => this.findNucleotide()));
         this.regs.add(this._toolbar.nucleotideRangeButton.clicked.connect(() => this.showNucleotideRange()));
         this.regs.add(this._toolbar.explosionFactorButton.clicked.connect(() => this.changeExplosionFactor()));
+        this.regs.add(this._toolbar.specButton.clicked.connect(() => this.showSpec()));
 
         this.regs.add(this._toolbar.baseMarkerButton.clicked.connect(() => {
             this.onEditButtonClicked(RNAPaint.BASE_MARK);
@@ -693,6 +695,37 @@ export default class PuzzleEditMode extends GameMode {
         }
 
         return pngData;
+    }
+
+    private showSpec() {
+        this.updateCurrentBlockWithDotAndMeltingPlot(0);
+        const puzzleState = this._seqStack[this._stackLevel][0];
+        const specBox = this.showDialog(new SpecBoxDialog(), 'SpecBox');
+        // Already live
+        if (!specBox) return;
+        this._specBox = specBox;
+        this._specBox.setSpec(puzzleState);
+        this._specBox.closed.then(() => { this._specBox = null; });
+    }
+
+    private updateSpecBox() {
+        if (this._specBox) {
+            this.updateCurrentBlockWithDotAndMeltingPlot(0);
+            const datablock: UndoBlock = this._seqStack[this._stackLevel][0];
+            this._specBox.setSpec(datablock);
+        }
+    }
+
+    private async updateCurrentBlockWithDotAndMeltingPlot(index: number) {
+        const datablock: UndoBlock = this.getCurrentUndoBlock(index);
+        if (this._folder && this._folder.canDotPlot && datablock.sequence.length < 500) {
+            const pseudoknots = (
+                this._targetConditions
+                && this._targetConditions[0]
+                && this._targetConditions[0]['type'] === 'pseudoknot'
+            ) || false;
+            await datablock.updateMeltingPointAndDotPlot(pseudoknots);
+        }
     }
 
     private promptForReset(): void {
@@ -1064,6 +1097,7 @@ export default class PuzzleEditMode extends GameMode {
 
         this.updateCopySequenceDialog();
         this.updateCopyStructureDialog();
+        this.updateSpecBox();
     }
 
     private onPaletteTargetSelected(type: PaletteTargetType): void {
@@ -1289,6 +1323,7 @@ export default class PuzzleEditMode extends GameMode {
     private _constraintBar: ConstraintBar;
     private _targetButton: ToolbarButton;
     private _naturalButton: ToolbarButton;
+    private _specBox: SpecBoxDialog | null;
 
     // Annotations
     private _annotationManager: AnnotationManager;

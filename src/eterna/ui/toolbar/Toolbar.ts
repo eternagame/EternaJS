@@ -556,7 +556,7 @@ export default class Toolbar extends ContainerObject {
 
         // Info
         this.viewSolutionsButton = this.setupButton(viewSolutionsButtonProps, canViewDesigns);
-        this.specButton = this.setupButton(specButtonProps, !isPuzzlemaker);
+        this.specButton = this.setupButton(specButtonProps);
         this.submitButton = this.setupButton(
             isPuzzlemaker ? submitPuzzleButtonProps : submitSolutionButtonProps,
             isSubmittable
