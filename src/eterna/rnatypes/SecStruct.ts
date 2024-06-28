@@ -209,65 +209,68 @@ export default class SecStruct {
      */
     public setPairs(parenthesis: string, pseudoknots: boolean = false) {
         this._pairs = new Array(parenthesis.length).fill(-1);
-        const pairStack: number[] = [];
 
-        for (let jj = 0; jj < parenthesis.length; jj++) {
-            if (parenthesis.charAt(jj) === '(') {
-                pairStack.push(jj);
-            } else if (parenthesis.charAt(jj) === ')') {
-                if (pairStack.length === 0) {
+        if (pseudoknots) {
+            const leftMap: Record<string, number[] | undefined> = {
+                '(': [],
+                '[': [],
+                '{': [],
+                '<': []
+            };
+
+            const rightMap: Record<string, number[] | undefined> = {
+                ')': leftMap['('],
+                ']': leftMap['['],
+                '}': leftMap['{'],
+                '>': leftMap['<']
+            };
+
+            for (let jj = 0; jj < parenthesis.length; jj++) {
+                const char = parenthesis.charAt(jj);
+                // Note that we forward-declare this and assign in the conditional in order
+                // to avoid doing a lookup twice (or introducing extra nesting)
+                let pairStack: number[] | undefined;
+                if (char === '.') {
+                    continue;
+                } else if (
+                    (pairStack = leftMap[char]) || (char >= 'a' && char <= 'z')
+                ) {
+                    if (!pairStack) {
+                        pairStack = [];
+                        leftMap[char] = pairStack;
+                        rightMap[char.toUpperCase()] = pairStack;
+                    }
+                    pairStack.push(jj);
+                } else if (
+                    (pairStack = rightMap[char])
+                ) {
+                    const partner = pairStack.pop();
+                    if (partner === undefined) throw new Error('Invalid parenthesis notation');
+                    this._pairs[jj] = partner;
+                    this._pairs[partner] = jj;
+                } else if (char === '&') {
+                    continue;
+                } else {
                     throw new Error('Invalid parenthesis notation');
                 }
-
-                this._pairs[pairStack[pairStack.length - 1]] = jj;
-                pairStack.pop();
             }
-        }
-
-        // If pseudoknots should be counted, manually repeat for
-        // the char pairs [], {}
-        if (pseudoknots) {
-            for (let jj = 0; jj < parenthesis.length; jj++) {
-                if (parenthesis.charAt(jj) === '[') {
-                    pairStack.push(jj);
-                } else if (parenthesis.charAt(jj) === ']') {
-                    if (pairStack.length === 0) {
-                        throw new Error('Invalid parenthesis notation');
-                    }
-
-                    this._pairs[pairStack[pairStack.length - 1]] = jj;
-                    pairStack.pop();
-                }
-            }
+        } else {
+            // Faster implementation if we can assume no pseudoknots
+            const pairStack: number[] = [];
 
             for (let jj = 0; jj < parenthesis.length; jj++) {
-                if (parenthesis.charAt(jj) === '{') {
+                const char = parenthesis.charAt(jj);
+                if (char === '(') {
                     pairStack.push(jj);
-                } else if (parenthesis.charAt(jj) === '}') {
-                    if (pairStack.length === 0) {
-                        throw new Error('Invalid parenthesis notation');
-                    }
-
-                    this._pairs[pairStack[pairStack.length - 1]] = jj;
-                    pairStack.pop();
+                } else if (char === ')') {
+                    const partner = pairStack.pop();
+                    if (partner === undefined) throw new Error('Invalid parenthesis notation');
+                    this._pairs[jj] = partner;
+                    this._pairs[partner] = jj;
+                } else if (char !== '.' && char !== '&') {
+                    throw new Error(`Invalid dot-bracket character ${char}`);
                 }
             }
-            for (let jj = 0; jj < parenthesis.length; jj++) {
-                if (parenthesis.charAt(jj) === '<') {
-                    pairStack.push(jj);
-                } else if (parenthesis.charAt(jj) === '>') {
-                    if (pairStack.length === 0) {
-                        throw new Error('Invalid parenthesis notation');
-                    }
-
-                    this._pairs[pairStack[pairStack.length - 1]] = jj;
-                    pairStack.pop();
-                }
-            }
-        }
-
-        for (let jj = 0; jj < this._pairs.length; jj++) {
-            if (this._pairs[jj] >= 0) this._pairs[this._pairs[jj]] = jj;
         }
     }
 
@@ -328,7 +331,7 @@ export default class SecStruct {
      * Return the dot-bracket notation.
      * @param seq Sequence passed just for the sake of locating the cutpoint, if
      * there is one.
-     * @param pseudoknots Pseudoknots, to help look for places for [] {} <>
+     * @param pseudoknots Whether or not characters representing pseudoknots should be supported
      */
     public getParenthesis(seq: Sequence | null = null,
         pseudoknots: boolean = false): string {
@@ -336,6 +339,11 @@ export default class SecStruct {
             const dbn: string[] = new Array(this._pairs.length).fill('.');
             const charsL = ['(', '{', '[', '<'];
             const charsR = [')', '}', ']', '>'];
+            // Add a-z (left)/A-Z (right)
+            for (let i = 0; i < 26; i++) {
+                charsL.push(String.fromCharCode(i + 97));
+                charsR.push(String.fromCharCode(i + 65));
+            }
 
             const degrees: number[][] = new Array(charsL.length).fill(null).map(() => []);
 
@@ -345,6 +353,7 @@ export default class SecStruct {
                 // Find the first pseudoknot degree for which none of the bases between the two
                 // bases of this pair contain the closing-half of a pair represented with that degree
                 // (ie, only use this degree if we don't "cross over" any existing pairs).
+                let handled = false;
                 for (const [degree, unfinished] of degrees.entries()) {
                     // If we've already moved past the starting index of the closing half of a
                     // stem that we've noted we're representing with this degree, we don't have
@@ -363,8 +372,12 @@ export default class SecStruct {
                             // Register the existance of a new stem that we could cross
                             unfinished.unshift(bpB);
                         }
+                        handled = true;
                         break;
                     }
+                }
+                if (!handled) {
+                    throw new Error('Structure has pseudoknot of degree too high to represent as a dot-bracket string');
                 }
             }
             return dbn.join('');
@@ -400,13 +413,9 @@ export default class SecStruct {
      */
     public filterForPseudoknots(): SecStruct {
         // Round-trip to remove all pseudoknots.
-        const filtered: string = this.getParenthesis(null, true)
-            .replace(/\{/g, '.')
-            .replace(/\}/g, '.')
-            .replace(/\[/g, '.')
-            .replace(/\]/g, '.')
-            .replace(/</g, '.')
-            .replace(/>/g, '.');
+        // Note including the `.` in the character exclusion isn't necessary for correcness,
+        // but it does make a significant performance impact
+        const filtered: string = this.getParenthesis(null, true).replace(/[^().]/g, '.');
 
         const ss = new SecStruct();
         ss.setPairs(filtered, false);
@@ -419,9 +428,7 @@ export default class SecStruct {
      */
     public onlyPseudoknots(): SecStruct {
         // Round-trip to remove all non-pseudoknots.
-        const filtered: string = this.getParenthesis(null, true)
-            .replace(/\(/g, '.')
-            .replace(/\)/g, '.');
+        const filtered: string = this.getParenthesis(null, true).replace(/[()]/g, '.');
 
         const ss = new SecStruct();
         ss.setPairs(filtered, true);
