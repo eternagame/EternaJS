@@ -338,19 +338,23 @@ export default class SecStruct {
             const charsR = [')', '}', ']', '>'];
 
             // For each pseudoknot degree/character, we maintain an array of base indices
-            // which are the closing end of a pair (specifically, pairs which it's possible
-            // for us to "cross" with a new pair)
+            // which are on the closing end of a pair which is represented with that degree
+            // (more specifically, only pairs which it's possible for us to "cross" with a new pair)
             const closingBasesPerDegree: number[][] = new Array(charsL.length).fill(null).map(() => []);
 
-            // Walk through all openinng-halves of pairs
             for (const [bpA, bpB] of this.pairs.entries()) {
-                // Skip unpaired bases and bases which are the closing end of a pair (these
-                // are already accounted for)
+                // Skip unpaired bases (already in our structure) and pairs which map the "closing"
+                // half to the "opening" half (we've already processed this pair from the other direction)
                 if (bpA > bpB || bpB === -1) continue;
 
                 // Find the first pseudoknot degree for which adding this pair would not introduce
                 // a "cross" (ie, 1-10 crosses with 2-11, but not 2-9. We can't use this degree
                 // if there's a cross because then the characters would match with the wrong bases)
+                // We define two pairs (a,b) and (c,d) (with a<b and c<d) as crossed if c>a and
+                // d > b - that is, (a,b) starts, then (c,d) starts, but (a,b) ends before
+                // (c,d) ends. ((.)) is the normal case, ({.)} is the crossed case.
+                // As such, as we walk through each base, we keep tabs on all pairs which
+                // have started, but not ended yet.
                 for (const [degree, closingBases] of closingBasesPerDegree.entries()) {
                     // If we've already moved past the closing half of a pair, we don't have
                     // to worry about it any more - we can't cross with that stem.
@@ -358,7 +362,7 @@ export default class SecStruct {
                     // the possibility of crossing pair 1-3 because any future pairs we process
                     // will only pair later in the stem
                     while (closingBases.length && closingBases[0] < bpA) closingBases.shift();
-                    // If there are no registered pairs that we could cross, or if the next
+                    // If there are no pairs which have been opened but not closed, or if the next
                     // closing base of a pair is after the closing base of this pair, we can use
                     // this degree. Otherwise, try the next degree (by continuing the loop).
                     // Eg: `(.(.).)`. When processing pair 3-5, we know we're not crossing
