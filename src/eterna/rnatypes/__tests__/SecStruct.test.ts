@@ -24,3 +24,33 @@ test(`SecStruct:onlyPseudoknots`, () => {
     const pairs = SecStruct.fromParens(str, true);
     expect(pairs.onlyPseudoknots().nonempty()).toEqual(true);
 });
+
+test(`SecStruct:getParenthesis (pseudoknotted)`, () => {
+    const inputStrs = [
+        '.........................',
+        '((((((......))))))',
+        '(((((([[[[......]]]]))))))',
+        '((((((...[[[[...))))))]]]]',
+        '((((((.{{{{..[[}}}}[[...))))))]]]]',
+        '.(((((...[[[[...))))).]]]]....((((....))))',
+        '((((((.{{..{{..[[.}}}}[.[...))))).)]]].]',
+        '((((((...[[{{[[...)))}})))]]]]',
+    ];
+    const outputStrs = [
+        '.........................',
+        "((((((......))))))",
+        "((((((((((......))))))))))",
+        "((((((...{{{{...))))))}}}}",
+        "((((((.((((..{{)))){{...))))))}}}}",
+        ".(((((...{{{{...))))).}}}}....((((....))))",
+        "((((((.((..((..{{.)))){.{...))))).)}}}.}",
+        "((((((...{{{{[[...)))}})))]]}}",
+    ];
+
+    for (let i=0; i<inputStrs.length; i++) {
+        const ss = SecStruct.fromParens(inputStrs[i], true);
+        const dbn = ss.getParenthesis(null, true);
+        expect(dbn).toBe(outputStrs[i]);
+        expect(SecStruct.fromParens(dbn, true).pairs).toEqual(ss.pairs);
+    }
+});

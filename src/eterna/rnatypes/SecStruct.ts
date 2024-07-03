@@ -333,82 +333,72 @@ export default class SecStruct {
     public getParenthesis(seq: Sequence | null = null,
         pseudoknots: boolean = false): string {
         if (pseudoknots) {
-            // given partner-style array, writes dot-parens notation string. handles pseudoknots!
-            // example of partner-style array: '((.))' -> [4,3,-1,1,0]
-            const bpList: number[] = new Array(this._pairs.length).fill(-1);
-
-            for (let ii = 0; ii < this._pairs.length; ii++) {
-                if (this._pairs[ii] > ii) {
-                    bpList[ii] = this._pairs[ii];
-                    bpList[this._pairs[ii]] = ii;
-                }
-            }
-
-            const bps: number[][] = [];
-            for (let ii = 0; ii < bpList.length; ++ii) {
-                if (bpList[ii] !== -1 && bpList[ii] > ii) {
-                    bps.push([ii, bpList[ii]]);
-                }
-            }
-
-            const stems: number[][][] = [];
-            // #bps: list of bp lists
-            // # i.e. '((.))' is [[0,4],[1,3]]
-            // # Returns list of (list of bp lists), now sorted into stems
-            // # i.e. [ list of all bps in stem 1, list of all bps in stem 2]
-            // if debug: print(bps)
-            for (let ii = 0; ii < bps.length; ++ii) {
-                let added = false;
-                for (let jj = 0; jj < stems.length; ++jj) {
-                    // is this bp adjacent to any element of an existing stem?
-                    for (let kk = 0; kk < stems[jj].length; ++kk) {
-                        if ((bps[ii][0] - 1 === stems[jj][kk][0] && bps[ii][1] + 1 === stems[jj][kk][1])
-                                || (bps[ii][0] + 1 === stems[jj][kk][0] && bps[ii][1] - 1 === stems[jj][kk][1])
-                                || (bps[ii][0] - 1 === stems[jj][kk][1] && bps[ii][1] + 1 === stems[jj][kk][0])
-                                || (bps[ii][0] + 1 === stems[jj][kk][1] && bps[ii][1] - 1 === stems[jj][kk][0])) {
-                            // add to this stem
-                            stems[jj].push(bps[ii]);
-                            added = true;
-                            break;
-                        }
-                    }
-                    if (added) break;
-                }
-                if (!added) {
-                    stems.push([bps[ii]]);
-                }
-            }
-            // if debug: print('stems', stems)
-
             const dbn: string[] = new Array(this._pairs.length).fill('.');
-            const delimsL = [/\(/i, /\{/i, /\[/i, /</i];// ,'a','b','c']
-            const delimsR = [/\)/i, /\}/i, /\]/i, />/i];// ,'a','b','c']
             const charsL = ['(', '{', '[', '<'];
             const charsR = [')', '}', ']', '>'];
-            if (stems.length === 0) {
-                return dbn.join('');
-            } else {
-                for (let ii = 0; ii < stems.length; ++ii) {
-                    const stem = stems[ii];
 
-                    let pkCtr = 0;
-                    const substring = dbn.join('').substring(stem[0][0] + 1, stem[0][1]);
-                    // check to see how many delimiter types exist in between where stem is going to go
-                    // ah -- it's actually how many delimiters are only half-present, I think.
-                    while ((substring.search(delimsL[pkCtr]) !== -1 && substring.search(delimsR[pkCtr]) === -1)
-                            || (substring.search(delimsL[pkCtr]) === -1 && substring.search(delimsR[pkCtr]) !== -1)) {
-                        pkCtr += 1;
-                    }
-                    for (let jj = 0; jj < stem.length; ++jj) {
-                        const i = stem[jj][0];
-                        const j = stem[jj][1];
+            // For each pseudoknot degree/character, we maintain an array of base indices
+            // which are on the closing end of a pair which is represented with that degree
+            // (more specifically, only pairs which it's possible for us to "cross" with a new pair)
+            const closingBasesPerDegree: number[][] = new Array(charsL.length).fill(null).map(() => []);
 
-                        dbn[i] = charsL[pkCtr];
-                        dbn[j] = charsR[pkCtr];
+            for (const [bpA, bpB] of this.pairs.entries()) {
+                // Skip unpaired bases (already in our structure) and pairs which map the "closing"
+                // half to the "opening" half (we've already processed this pair from the other direction)
+                if (bpA > bpB || bpB === -1) continue;
+
+                // Find the first pseudoknot degree for which adding this pair would not introduce
+                // a "cross" (ie, 1-10 crosses with 2-11, but not 2-9. We can't use this degree
+                // if there's a cross because then the characters would match with the wrong bases)
+                //
+                // We define two pairs (a,b) and (c,d) (with a < b and c < d) as crossed if c > a and
+                // d > b - that is, (a,b) starts, then (c,d) starts, but (a,b) ends before
+                // (c,d) ends. ((.)) is the normal case, ({.)} is the crossed case.
+                //
+                // As such, as we walk through each base, we keep tabs on all pairs which
+                // have started, but not ended yet.
+                for (const [degree, closingBases] of closingBasesPerDegree.entries()) {
+                    // If we've already moved past the closing half of a pair, we don't have
+                    // to worry about it any more - we can't cross with that stem.
+                    //
+                    // EG: Consider `(.).(.)`. If we're at base 4, we no longer have to worry about
+                    // the possibility of crossing pair 1-3 because any future pairs we process
+                    // will only pair later in the stem
+                    while (closingBases.length && closingBases[0] < bpA) closingBases.shift();
+                    // If there are no pairs which have been opened but not closed, or if the next
+                    // closing base of a pair is after the closing base of this pair, we can use
+                    // this degree. Otherwise, try the next degree (by continuing the loop).
+                    //
+                    // Eg: `(.(.).)`. When processing pair 3-5, we know we're not crossing
+                    // 1-7 because bpA is necessarily after 1-7's start pair and we've confirmed
+                    // bpB is before 1-7's end pair
+                    if (closingBases.length === 0 || closingBases[0] > bpB) {
+                        // Update the structure with this pair
+                        dbn[bpA] = charsL[degree];
+                        dbn[bpB] = charsR[degree];
+
+                        // If we have a contiguous set of closing bases, we don't need to
+                        // store (and check) every single one - we only need a reference to one of them.
+                        //
+                        // Eg: If 7,8,9 are all closing bases, a pair can either cross all three
+                        // or not cross all three. Being able to cross only some of them would
+                        // require the crossin pair to start or end in the middle of these bases,
+                        // but they're all already paired!
+                        if (closingBases.length === 0 || bpB !== closingBases[0] - 1) {
+                            // Register the existance of a new pair that we could cross.
+                            // We use `unshift` to ensure closingBases stays in ascending order,
+                            // (letting us shift off the front any bases we've passed, with the following
+                            // base immediately telling us whether there's a cross or not, since if the lowest
+                            // closing pair is not a cross because it's after bpB, all other entries must be
+                            // after bpB and so can't cross)
+                            closingBases.unshift(bpB);
+                        }
+                        // Move on to the next pair
+                        break;
                     }
                 }
-                return dbn.join('');
             }
+            return dbn.join('');
         }
 
         const biPairs: number[] = new Array(this._pairs.length).fill(-1);
