@@ -718,9 +718,13 @@ export default class PuzzleEditMode extends GameMode {
 
     private async updateSpecBox(): Promise<void> {
         if (this._specBox) {
+            this.showAsyncText('folding...');
+            this.pushUILock();
             await this.updateCurrentBlockWithDotAndMeltingPlot(0);
             const datablock: UndoBlock = this._seqStack[this._stackLevel][0];
             this._specBox.setSpec(datablock);
+            this.popUILock();
+            this.hideAsyncText();
         }
     }
 

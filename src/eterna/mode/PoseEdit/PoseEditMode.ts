@@ -1622,6 +1622,8 @@ export default class PoseEditMode extends GameMode {
                 op.fn();
                 if (op.sn) {
                     this.showAsyncText(`folding ${op.sn} of ${this._targetPairs.length} (${this._opQueue.length})`);
+                } else {
+                    this.showAsyncText(`folding (${this._opQueue.length})`);
                 }
             }
 
@@ -2171,14 +2173,32 @@ export default class PoseEditMode extends GameMode {
     }
 
     private async updateSpecBox(): Promise<void> {
-        if (this._specBox) {
-            await this.updateCurrentBlockWithDotAndMeltingPlot();
-            const datablock: UndoBlock = this.getCurrentUndoBlock();
-            this._specBox.setSpec(datablock);
-        }
+        // By making this a PoseOp, we ensure that we avoid a race condition where
+        // we trigger this twice, the second run finishes before the first, and
+        // then the first comes back and we set data which is out-of-date.
+        // The opQueue ensures we don't have more than one of these running at once.
+        // Also, we get the benefit of the indicator saying we're folding
+        //
+        // If we queue it five times, and by the second time we've skipped 5 undo blocks?
+        // That's fine, the second queued operation will just do the most recent block,
+        // and the additional queued operations will do effectively nothing since
+        // the result for that block has been cached.
+        //
+        // Note that future async "normal" folding operations wont complete until this is done.
+        // That means scripts or quickly flipping through states are liable to behave as above,
+        // but if you are mutating by hand, you actually wait until the dot plot finishes
+        // before your new mutation is folded, meaning you do wind up getting a UI lock
+        // between dot plot computations (though slightly "off"), which helps the behavior here
+        // feel more consistent.
+        this._opQueue.push(new PoseOp(null, async () => {
+            if (this._specBox) {
+                const undoBlock = await this.updateCurrentBlockWithDotAndMeltingPlot();
+                this._specBox?.setSpec(undoBlock);
+            }
+        }));
     }
 
-    private async updateCurrentBlockWithDotAndMeltingPlot(index: number = -1): Promise<void> {
+    private async updateCurrentBlockWithDotAndMeltingPlot(index: number = -1): Promise<UndoBlock> {
         const datablock: UndoBlock = this.getCurrentUndoBlock(index);
         if (this._folder && this._folder.canDotPlot && datablock.sequence.length < 500) {
             const pseudoknots = (
@@ -2188,6 +2208,7 @@ export default class PoseEditMode extends GameMode {
             ) || false;
             await datablock.updateMeltingPointAndDotPlot({sync: false, pseudoknots});
         }
+        return datablock;
     }
 
     /**
