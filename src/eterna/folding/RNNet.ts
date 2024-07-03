@@ -111,6 +111,9 @@ export default class RNNet extends Folder<false> {
                     // the model, and we can't modify it to do that without it giving different
                     // results for some reason
                     const val = 1 / (1 + Math.E ** (-bppArr[y * seq.length + x] as number));
+                    // The original output is a dense matrix flattened into an array.
+                    // For compatability with other folders, we turn this into a "COOrdinate"
+                    // format array
                     cooArray.push(y + 1, x + 1, val);
                 }
             }
