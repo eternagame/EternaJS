@@ -350,14 +350,17 @@ export default class SecStruct {
                 // Find the first pseudoknot degree for which adding this pair would not introduce
                 // a "cross" (ie, 1-10 crosses with 2-11, but not 2-9. We can't use this degree
                 // if there's a cross because then the characters would match with the wrong bases)
-                // We define two pairs (a,b) and (c,d) (with a<b and c<d) as crossed if c>a and
+                //
+                // We define two pairs (a,b) and (c,d) (with a < b and c < d) as crossed if c > a and
                 // d > b - that is, (a,b) starts, then (c,d) starts, but (a,b) ends before
                 // (c,d) ends. ((.)) is the normal case, ({.)} is the crossed case.
+                //
                 // As such, as we walk through each base, we keep tabs on all pairs which
                 // have started, but not ended yet.
                 for (const [degree, closingBases] of closingBasesPerDegree.entries()) {
                     // If we've already moved past the closing half of a pair, we don't have
                     // to worry about it any more - we can't cross with that stem.
+                    //
                     // EG: Consider `(.).(.)`. If we're at base 4, we no longer have to worry about
                     // the possibility of crossing pair 1-3 because any future pairs we process
                     // will only pair later in the stem
@@ -365,6 +368,7 @@ export default class SecStruct {
                     // If there are no pairs which have been opened but not closed, or if the next
                     // closing base of a pair is after the closing base of this pair, we can use
                     // this degree. Otherwise, try the next degree (by continuing the loop).
+                    //
                     // Eg: `(.(.).)`. When processing pair 3-5, we know we're not crossing
                     // 1-7 because bpA is necessarily after 1-7's start pair and we've confirmed
                     // bpB is before 1-7's end pair
@@ -375,6 +379,7 @@ export default class SecStruct {
 
                         // If we have a contiguous set of closing bases, we don't need to
                         // store (and check) every single one - we only need a reference to one of them.
+                        //
                         // Eg: If 7,8,9 are all closing bases, a pair can either cross all three
                         // or not cross all three. Being able to cross only some of them would
                         // require the crossin pair to start or end in the middle of these bases,
