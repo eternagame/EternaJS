@@ -233,13 +233,13 @@ export default class SecStruct {
                 if (char === '.') {
                     continue;
                 } else if (
-                    (pairStack = pairStacksLeftMap[char]) || (char >= 'a' && char <= 'z')
+                    (pairStack = pairStacksLeftMap[char])
                 ) {
-                    if (!pairStack) {
-                        pairStack = [];
-                        pairStacksLeftMap[char] = pairStack;
-                        pairStacksRightMap[char.toUpperCase()] = pairStack;
-                    }
+                    pairStack.push(jj);
+                } else if (char >= 'a' && char <= 'z') {
+                    pairStack = [];
+                    pairStacksLeftMap[char] = pairStack;
+                    pairStacksRightMap[char.toUpperCase()] = pairStack;
                     pairStack.push(jj);
                 } else if (
                     (pairStack = pairStacksRightMap[char])
