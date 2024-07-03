@@ -49,6 +49,8 @@ export default class RNNet extends Folder<false> {
 
         const bpps = (await this.getDotPlot(seq)).data.slice();
         for (let ii = 0; ii < bpps.length; ii += 3) {
+            // We should not allow loops with size < 3. As such, zero out probabilities
+            // of all pairs with a distance < 4 (which if paired, would create this scenario)
             if (Math.abs(bpps[ii] - bpps[ii + 1]) < 4) {
                 bpps[ii + 2] = 0;
             }
@@ -93,17 +95,21 @@ export default class RNNet extends Folder<false> {
             }
         }
 
-        const sequenceInput = 'sequence';
-        const results = await (await this._getSession()).run({
-            [sequenceInput]: new ort.Tensor('int64', seqArr, [1, seq.length])
+        const BATCH_SIZE = 1;
+        const session = await this._getSession();
+        const results = await session.run({
+            sequence: new ort.Tensor('int64', seqArr, [BATCH_SIZE, seq.length])
         });
-        const outputName = 'output';
-        const bppArr = results[outputName].data;
+        const bppArr = results['output'].data;
 
         const cooArray = [];
         for (let y = 0; y < seq.length; y++) {
             for (let x = 0; x < seq.length; x++) {
+                // We only insert pairs for the "upper triangle"
                 if (x >= y) {
+                    // We're doing a sigmoid here. The original code does not include this in
+                    // the model, and we can't modify it to do that without it giving different
+                    // results for some reason
                     const val = 1 / (1 + Math.E ** (-bppArr[y * seq.length + x] as number));
                     cooArray.push(y + 1, x + 1, val);
                 }
@@ -114,6 +120,9 @@ export default class RNNet extends Folder<false> {
         return new DotPlot(cooArray);
     }
 
+    /**
+     * Computes the expected F1 score for a sequence, as defined by RibonanzaNet
+     */
     public async getEf1(seq: Sequence) {
         const bpps = (await this.getDotPlot(seq)).data;
         const struct = await this.foldSequence(seq);
@@ -134,6 +143,9 @@ export default class RNNet extends Folder<false> {
         return 2.21 * confidence - 1.25;
     }
 
+    /**
+     * Computes the expected F1 score for a sequence just over crossed pairs, as defined by RibonanzaNet
+     */
     public async getEf1CrossPair(seq: Sequence) {
         const bpps = (await this.getDotPlot(seq)).data;
         const struct = (await this.foldSequence(seq)).getCrossedPairs();
@@ -166,7 +178,8 @@ export default class RNNet extends Folder<false> {
 
         const rnnetSs = await import('./engines/rnnet-ss.onnx');
 
-        ort.env.wasm.proxy = true;
+        // By default, onnxruntime will expect these files to exist at `/`. However, we want them to
+        // be processed through webpack and loaded from wherever webpack says they will be.
         ort.env.wasm.wasmPaths = {
             'ort-wasm.wasm': new URL(
                 '../../../node_modules/onnxruntime-web/dist/ort-wasm.wasm',
@@ -189,6 +202,10 @@ export default class RNNet extends Folder<false> {
                 import.meta.url
             ).href
         };
+        // Let the computation happen in a WebWorker to make things more responsive.
+        // Note that this doesn't work with WebGPU (which we can't use right now) - see
+        // the docs for more info.
+        ort.env.wasm.proxy = true;
         ort.env.wasm.numThreads = 1;
         return ort.InferenceSession.create(rnnetSs.default, {});
     }

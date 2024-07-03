@@ -99,7 +99,7 @@ export default class FoldUtil {
         // Convert from array of pair tuples to partner pair list
         const partnerPairList = new Array(sequenceLength).fill(-1);
         bpList.forEach((pair) => {
-            // Indices are 1-indexed here; Dot Plot returns bp 1-indexed
+            // Dot Plot returns bpps 1-indexed
             partnerPairList[pair[0] - 1] = pair[1] - 1;
             partnerPairList[pair[1] - 1] = pair[0] - 1;
         });
@@ -112,7 +112,6 @@ export default class FoldUtil {
         // Convert from array of pair tuples to partner pair list
         const prunedPairList = new Array(structure.length).fill(-1);
         prunedHelices.forEach((pair) => {
-            // Indices are 0-indexed here
             prunedPairList[pair[0]] = pair[1];
             prunedPairList[pair[1]] = pair[0];
         });

@@ -1617,6 +1617,7 @@ export default class PoseEditMode extends GameMode {
             const op = this._opQueue.shift();
             Assert.assertIsDefined(op);
 
+            // The operation at the front of the queue hasn't been started yet. Run it!
             if (op.state === 'pending') {
                 op.fn();
                 if (op.sn) {
@@ -1624,6 +1625,9 @@ export default class PoseEditMode extends GameMode {
                 }
             }
 
+            // Either we just started an asynchronous operation or otherwise the operation
+            // at the front of the queue was already started but not finished. Keep it in the queue
+            // and check if it's done next tick
             if (op.state === 'running') {
                 this._opQueue.unshift(op);
                 break;
