@@ -209,7 +209,10 @@ export default class RNNet extends Folder<false> {
         // Note that this doesn't work with WebGPU (which we can't use right now) - see
         // the docs for more info.
         ort.env.wasm.proxy = true;
+        // Unfortunately, we can't serve Eterna in a cross origin isolated context (required for multithreading)
+        // because it breaks YouTube and Vimeo embeds
         ort.env.wasm.numThreads = 1;
+
         return ort.InferenceSession.create(rnnetSs.default, {});
     }
 
