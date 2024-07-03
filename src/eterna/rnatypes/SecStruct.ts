@@ -337,32 +337,54 @@ export default class SecStruct {
             const charsL = ['(', '{', '[', '<'];
             const charsR = [')', '}', ']', '>'];
 
-            const degrees: number[][] = new Array(charsL.length).fill(null).map(() => []);
+            // For each pseudoknot degree/character, we maintain an array of base indices
+            // which are the closing end of a pair (specifically, pairs which it's possible
+            // for us to "cross" with a new pair)
+            const closingBasesPerDegree: number[][] = new Array(charsL.length).fill(null).map(() => []);
 
             // Walk through all openinng-halves of pairs
             for (const [bpA, bpB] of this.pairs.entries()) {
+                // Skip unpaired bases and bases which are the closing end of a pair (these
+                // are already accounted for)
                 if (bpA > bpB || bpB === -1) continue;
-                // Find the first pseudoknot degree for which none of the bases between the two
-                // bases of this pair contain the closing-half of a pair represented with that degree
-                // (ie, only use this degree if we don't "cross over" any existing pairs).
-                for (const [degree, unfinished] of degrees.entries()) {
-                    // If we've already moved past the starting index of the closing half of a
-                    // stem that we've noted we're representing with this degree, we don't have
+
+                // Find the first pseudoknot degree for which adding this pair would not introduce
+                // a "cross" (ie, 1-10 crosses with 2-11, but not 2-9. We can't use this degree
+                // if there's a cross because then the characters would match with the wrong bases)
+                for (const [degree, closingBases] of closingBasesPerDegree.entries()) {
+                    // If we've already moved past the closing half of a pair, we don't have
                     // to worry about it any more - we can't cross with that stem.
-                    while (unfinished.length && unfinished[0] < bpA) unfinished.shift();
-                    if (unfinished.length === 0 || unfinished[0] > bpB) {
+                    // EG: Consider `(.).(.)`. If we're at base 4, we no longer have to worry about
+                    // the possibility of crossing pair 1-3 because any future pairs we process
+                    // will only pair later in the stem
+                    while (closingBases.length && closingBases[0] < bpA) closingBases.shift();
+                    // If there are no registered pairs that we could cross, or if the next
+                    // closing base of a pair is after the closing base of this pair, we can use
+                    // this degree. Otherwise, try the next degree (by continuing the loop).
+                    // Eg: `(.(.).)`. When processing pair 3-5, we know we're not crossing
+                    // 1-7 because bpA is necessarily after 1-7's start pair and we've confirmed
+                    // bpB is before 1-7's end pair
+                    if (closingBases.length === 0 || closingBases[0] > bpB) {
+                        // Update the structure with this pair
                         dbn[bpA] = charsL[degree];
                         dbn[bpB] = charsR[degree];
-                        if (unfinished.length && bpB === unfinished[0] - 1) {
-                            // As long as we're staying within the same stem, we can just
-                            // update where the stem starts (if we have a paired base before the start of the stem,
-                            // it must be before the end of the stem and vice-versa since there are no bases
-                            // open for pairing in the middle of a stem)
-                            unfinished[0]--;
-                        } else {
-                            // Register the existance of a new stem that we could cross
-                            unfinished.unshift(bpB);
+
+                        // If we have a contiguous set of closing bases, we don't need to
+                        // store (and check) every single one - we only need a reference to one of them.
+                        // Eg: If 7,8,9 are all closing bases, a pair can either cross all three
+                        // or not cross all three. Being able to cross only some of them would
+                        // require the crossin pair to start or end in the middle of these bases,
+                        // but they're all already paired!
+                        if (closingBases.length === 0 || bpB !== closingBases[0] - 1) {
+                            // Register the existance of a new pair that we could cross.
+                            // We use `unshift` to ensure closingBases stays in ascending order,
+                            // (letting us shift off the front any bases we've passed, with the following
+                            // base immediately telling us whether there's a cross or not, since if the lowest
+                            // closing pair is not a cross because it's after bpB, all other entries must be
+                            // after bpB and so can't cross)
+                            closingBases.unshift(bpB);
                         }
+                        // Move on to the next pair
                         break;
                     }
                 }
