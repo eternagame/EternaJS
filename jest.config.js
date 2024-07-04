@@ -42,6 +42,7 @@ module.exports = {
   "transform": {
     "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|onnx|wasm)$": "<rootDir>/../assets/__mocks__/fileTransformer.js",
   },
+  "transformIgnorePatterns": ["/node_modules/.*(?<!\.onnx)$"],
   "rootDir": "src",
   "testRegex": "/__tests__/.*\\.test\\.(ts|tsx|js)$",
   "globals": {

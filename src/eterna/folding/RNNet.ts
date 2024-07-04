@@ -179,7 +179,8 @@ export default class RNNet extends Folder<false> {
         // slow on poor network connections eg in global regions)
         if (this._session) return this._session;
 
-        const rnnetSs = await import('./engines/rnnet-ss.onnx');
+        // eslint-disable-next-line import/no-unresolved, import/no-extraneous-dependencies
+        const rnnetSs = await import('engines-bin/rnnet-ss.onnx');
 
         // By default, onnxruntime will expect these files to exist at `/`. However, we want them to
         // be processed through webpack and loaded from wherever webpack says they will be.
