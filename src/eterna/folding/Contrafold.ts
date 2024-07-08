@@ -46,7 +46,7 @@ export default class ContraFold extends Folder<true> {
         return true;
     }
 
-    public get canScoreStructures(): boolean {
+    public canScoreStructures(): boolean {
         return true;
     }
 

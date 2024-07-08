@@ -243,8 +243,9 @@ export default class NuPACK extends Folder<true> {
     }
 
     /* override */
-    public get canScoreStructures(): boolean {
-        return true;
+    public canScoreStructures(pseudoknots: boolean): boolean {
+        // See https://github.com/eternagame/EternaJS/issues/654
+        return pseudoknots === false;
     }
 
     /* override */

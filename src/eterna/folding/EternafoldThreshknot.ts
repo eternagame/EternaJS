@@ -38,6 +38,12 @@ export default class EternaFoldThreshknot extends EternaFold {
         return true;
     }
 
+    public canScoreStructures() {
+        // This would return energies for the structure omitting pseudoknots, so the values
+        // for a pseudoknotted structure would be wrong
+        return false;
+    }
+
     /* override */
     /**
      * This overrides Eternafold's default foldSequenceImpl implementation with

@@ -345,14 +345,8 @@ export default class PuzzleEditMode extends GameMode {
         }
         this._folderSwitcher = this._modeBar.addFolderSwitcher((folder) => this.canUseFolder(folder), defaultFolder);
         this._folderSwitcher.selectedFolder.connectNotify(async (folder) => {
-            if (folder.canScoreStructures) {
-                for (const pose of this._poses) {
-                    pose.scoreFolder = folder;
-                }
-            } else {
-                for (const pose of this._poses) {
-                    pose.scoreFolder = null;
-                }
+            for (const pose of this._poses) {
+                pose.scoreFolder = folder;
             }
 
             for (const pose of this._poses) {
@@ -1211,6 +1205,7 @@ export default class PuzzleEditMode extends GameMode {
             const lock: boolean[] | undefined = this._poses[ii].puzzleLocks;
             const bindingSite = this._poses[ii].molecularBindingSite;
             const customLayout = this._poses[ii].customLayout;
+            this._poses[ii].pseudoknotted = pseudoknots;
 
             if (this._stackLevel >= 0) {
                 if (

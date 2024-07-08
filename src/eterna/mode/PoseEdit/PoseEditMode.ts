@@ -769,14 +769,8 @@ export default class PoseEditMode extends GameMode {
             this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
         );
         this._folderSwitcher.selectedFolder.connectNotify((folder) => {
-            if (folder.canScoreStructures) {
-                for (const pose of this._poses) {
-                    pose.scoreFolder = folder;
-                }
-            } else {
-                for (const pose of this._poses) {
-                    pose.scoreFolder = null;
-                }
+            for (const pose of this._poses) {
+                pose.scoreFolder = folder;
             }
 
             this.onChangeFolder();

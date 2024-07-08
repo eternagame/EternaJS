@@ -293,6 +293,10 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this.updateEnergyContainer();
     }
 
+    public enableEnergyGui() {
+        this._energyDisabled = false;
+    }
+
     // Pointer to function that needs to be called in a GameMode to have access to appropriate state
     private _getEnergyDelta: () => number;
 
@@ -323,7 +327,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
             'Natural/Target Delta',
             `${Math.round(delta) / 100} kcal`
         );
-        this._deltaScoreEnergyDisplay.visible = (this._showTotalEnergy && this.pose.scoreFolder != null);
+        this._deltaScoreEnergyDisplay.visible = this._showTotalEnergy;
         this.updateEnergyContainer();
     }
 
@@ -333,11 +337,11 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
     public set showTotalEnergy(show: boolean) {
         this._showTotalEnergy = show;
-        this._primaryScoreEnergyDisplay.visible = (show && this.pose.scoreFolder != null);
+        this._primaryScoreEnergyDisplay.visible = show;
         this._secondaryScoreEnergyDisplay.visible = (
-            show && this.pose.scoreFolder != null && this._secondaryScoreEnergyDisplay.hasText
+            show && this._secondaryScoreEnergyDisplay.hasText
         );
-        this._deltaScoreEnergyDisplay.visible = show && this.pose.scoreFolder != null;
+        this._deltaScoreEnergyDisplay.visible = show;
         this.updateEnergyContainer();
     }
 

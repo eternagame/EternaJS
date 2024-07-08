@@ -24,7 +24,7 @@ export default class RNNet extends Folder<false> {
         return true;
     }
 
-    public get canScoreStructures(): boolean {
+    public canScoreStructures(): boolean {
         return false;
     }
 
