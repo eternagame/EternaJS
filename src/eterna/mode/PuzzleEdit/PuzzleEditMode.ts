@@ -1,4 +1,4 @@
-import {DisplayObject} from 'pixi.js';
+import {DisplayObject, Text} from 'pixi.js';
 import EPars, {RNAPaint, RNABase} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import UndoBlock, {UndoBlockParam, TargetConditions} from 'eterna/UndoBlock';
@@ -55,6 +55,7 @@ import FolderManager from 'eterna/folding/FolderManager';
 import {PoseState} from 'eterna/puzzle/Puzzle';
 import {HighlightInfo} from 'eterna/constraints/Constraint';
 import SpecBoxDialog from 'eterna/ui/SpecBoxDialog';
+import RNNet from 'eterna/folding/RNNet';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
 import StructureInput from './StructureInput';
@@ -115,7 +116,7 @@ export default class PuzzleEditMode extends GameMode {
 
     public get isOpaque(): boolean { return true; }
 
-    protected setup(): void {
+    protected async setup(): Promise<void> {
         super.setup();
 
         const background = new Background();
@@ -143,6 +144,12 @@ export default class PuzzleEditMode extends GameMode {
             }
         });
         this.addObject(this._homeButton, this.uiLayer);
+
+        // Async text shows above our UI lock, and right below all dialogs
+        this._asynchText = Fonts.std('folding...', 12).bold().color(0xffffff).build();
+        this._asynchText.position.set(16, 200);
+        this.dialogLayer.addChild(this._asynchText);
+        this.hideAsyncText();
 
         const toolbarType = this._embedded ? ToolbarType.PUZZLEMAKER_EMBEDDED : ToolbarType.PUZZLEMAKER;
 
@@ -337,7 +344,7 @@ export default class PuzzleEditMode extends GameMode {
             );
         }
         this._folderSwitcher = this._modeBar.addFolderSwitcher((folder) => this.canUseFolder(folder), defaultFolder);
-        this._folderSwitcher.selectedFolder.connectNotify((folder) => {
+        this._folderSwitcher.selectedFolder.connectNotify(async (folder) => {
             if (folder.canScoreStructures) {
                 for (const pose of this._poses) {
                     pose.scoreFolder = folder;
@@ -353,7 +360,7 @@ export default class PuzzleEditMode extends GameMode {
             }
 
             this.clearUndoStack();
-            this.poseEditByTarget(0);
+            await this.poseEditByTarget(0);
             for (const pose of this._poses) {
                 pose.updateHighlightsAndScores();
             }
@@ -361,6 +368,8 @@ export default class PuzzleEditMode extends GameMode {
 
         this.regs?.add(this._naturalButton.clicked.connect(() => this.setToNativeMode()));
         this.regs?.add(this._targetButton.clicked.connect(() => this.setToTargetMode()));
+
+        await this.poseEditByTarget(0);
 
         if (
             initialPoseData != null
@@ -371,8 +380,6 @@ export default class PuzzleEditMode extends GameMode {
             this._annotationManager.setPuzzleAnnotations(defaultAnnotations.puzzle);
             this._annotationManager.setSolutionAnnotations(defaultAnnotations.solution);
         }
-
-        this.poseEditByTarget(0);
 
         const setCB = (kk: number): void => {
             this._poses[kk].addBaseCallback = (
@@ -697,26 +704,31 @@ export default class PuzzleEditMode extends GameMode {
         return pngData;
     }
 
-    private showSpec() {
-        this.updateCurrentBlockWithDotAndMeltingPlot(0);
+    private async showSpec(): Promise<void> {
+        await this.updateCurrentBlockWithDotAndMeltingPlot(0);
         const puzzleState = this._seqStack[this._stackLevel][0];
         const specBox = this.showDialog(new SpecBoxDialog(), 'SpecBox');
         // Already live
         if (!specBox) return;
         this._specBox = specBox;
         this._specBox.setSpec(puzzleState);
-        this._specBox.closed.then(() => { this._specBox = null; });
+        await this._specBox.closed;
+        this._specBox = null;
     }
 
-    private updateSpecBox() {
+    private async updateSpecBox(): Promise<void> {
         if (this._specBox) {
-            this.updateCurrentBlockWithDotAndMeltingPlot(0);
+            this.showAsyncText('folding...');
+            this.pushUILock();
+            await this.updateCurrentBlockWithDotAndMeltingPlot(0);
             const datablock: UndoBlock = this._seqStack[this._stackLevel][0];
             this._specBox.setSpec(datablock);
+            this.popUILock();
+            this.hideAsyncText();
         }
     }
 
-    private async updateCurrentBlockWithDotAndMeltingPlot(index: number) {
+    private async updateCurrentBlockWithDotAndMeltingPlot(index: number): Promise<void> {
         const datablock: UndoBlock = this.getCurrentUndoBlock(index);
         if (this._folder && this._folder.canDotPlot && datablock.sequence.length < 500) {
             const pseudoknots = (
@@ -724,7 +736,7 @@ export default class PuzzleEditMode extends GameMode {
                 && this._targetConditions[0]
                 && this._targetConditions[0]['type'] === 'pseudoknot'
             ) || false;
-            await datablock.updateMeltingPointAndDotPlot(pseudoknots);
+            await datablock.updateMeltingPointAndDotPlot({sync: false, pseudoknots});
         }
     }
 
@@ -766,6 +778,16 @@ export default class PuzzleEditMode extends GameMode {
             targetConditions: this._targetConditions
         }) && !Eterna.DEV_MODE) {
             this.showNotification('You should first solve your puzzle before submitting it!');
+            return;
+        }
+
+        if (this._folder.name === RNNet.NAME) {
+            this.showNotification(`
+                RibonanzaNet-SS is still in development, so you can't submit
+                puzzles with it as the folding engine right now. However,
+                we encourage you to discuss your experiences with
+                RibonanzaNet at https://forum.eternagame.org
+            `.replace(/ {2,}/g, '').replace(/(^\n)|(\n$)/g, ''));
             return;
         }
 
@@ -1120,7 +1142,18 @@ export default class PuzzleEditMode extends GameMode {
         }
     }
 
-    private poseEditByTarget(index: number): void {
+    private showAsyncText(text: string): void {
+        this._asynchText.text = text;
+        this._asynchText.visible = true;
+    }
+
+    private hideAsyncText(): void {
+        this._asynchText.visible = false;
+    }
+
+    private async poseEditByTarget(index: number): Promise<void> {
+        this.showAsyncText('folding...');
+        this.pushUILock();
         let noChange = true;
         const currentUndoBlocks: UndoBlock[] = [];
         const currentTargetPairs: SecStruct[] = [];
@@ -1251,7 +1284,8 @@ export default class PuzzleEditMode extends GameMode {
 
             let bestPairs: SecStruct | null = null;
             if (!isThereMolecule) {
-                bestPairs = this._folder.foldSequence(seq, null, null, pseudoknots, EPars.DEFAULT_TEMPERATURE);
+                // eslint-disable-next-line no-await-in-loop
+                bestPairs = await this._folder.foldSequence(seq, null, null, pseudoknots, EPars.DEFAULT_TEMPERATURE);
             } else {
                 const bonus = -486;
                 const site: number[] = bindingSite
@@ -1276,6 +1310,9 @@ export default class PuzzleEditMode extends GameMode {
             currentCustomLayouts.push(customLayout || null);
             currentTargetPairs.push(targetPairs);
         }
+
+        this.popUILock();
+        this.hideAsyncText();
 
         if (noChange && this._stackLevel >= 0) {
             return;
@@ -1323,6 +1360,7 @@ export default class PuzzleEditMode extends GameMode {
     private _constraintBar: ConstraintBar;
     private _targetButton: ToolbarButton;
     private _naturalButton: ToolbarButton;
+    private _asynchText: Text;
     private _specBox: SpecBoxDialog | null;
 
     // Annotations

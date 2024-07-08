@@ -4,7 +4,8 @@ import Sequence from 'eterna/rnatypes/Sequence';
 import Folder from 'eterna/folding/Folder';
 import FoldUtil from 'eterna/folding/FoldUtil';
 
-class MockFolder extends Folder {
+class MockFolder extends Folder<true> {
+    protected readonly _isSync = true;
     name = 'MockFolder';
 
     public get isFunctional(): boolean {

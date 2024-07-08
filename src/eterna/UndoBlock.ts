@@ -12,6 +12,8 @@ import {Oligo, OligoMode} from './rnatypes/Oligo';
 import SecStruct from './rnatypes/SecStruct';
 import Sequence from './rnatypes/Sequence';
 import {TargetType} from './puzzle/Puzzle';
+import FoldUtil, {BasePairProbabilityTransform} from './folding/FoldUtil';
+import RNNet from './folding/RNNet';
 
 /**
  * FoldData is a schema for JSON-ified UndoBlocks.
@@ -98,11 +100,8 @@ export enum UndoBlockParam {
     SUMPUNP = 17,
     BRANCHINESS = 18,
     TARGET_EXPECTED_ACCURACY = 19,
-}
-
-export enum BasePairProbabilityTransform {
-    LEAVE_ALONE,
-    SQUARE
+    EF1 = 20,
+    EF1_CROSS_PAIR = 21,
 }
 
 type Param = (number | number[] | DotPlot | null);
@@ -333,6 +332,7 @@ export default class UndoBlock {
         let FN = 1e-6;
         const cFP = 1e-6;
 
+        // As formulated in Arnie's MEA routines
         // TP = np.sum(np.multiply(pred_m, probs)) + 1e-6
         // TN = 0.5*N*N-1 - np.sum(pred_m) - np.sum(probs) + TP + 1e-6
         // FP = np.sum(np.multiply(pred_m, 1-probs)) + 1e-6
@@ -352,6 +352,7 @@ export default class UndoBlock {
             }
         }
 
+        // Matthews Correlation Coefficient (MCC)
         return (TP * TN - (FP - cFP) * FN) / Math.sqrt((TP + FP - cFP) * (TP + FN) * (TN + FP - cFP) * (TN + FN));
     }
 
@@ -555,20 +556,7 @@ export default class UndoBlock {
 
     public sumProbUnpaired(dotArray: DotPlot | null, behavior: BasePairProbabilityTransform): number {
         if (dotArray === null || dotArray.data.length === 0) return 0;
-        // dotArray is organized as idx, idx, pairprob.
-        const probUnpaired: number[] = Array<number>(this.sequence.length);
-        for (let idx = 0; idx < this.sequence.length; ++idx) {
-            probUnpaired[idx] = 1;
-            for (let ii = 0; ii < dotArray.data.length; ii += 3) {
-                if (dotArray.data[ii] === idx + 1 || dotArray.data[ii + 1] === idx + 1) {
-                    if (behavior === BasePairProbabilityTransform.LEAVE_ALONE) {
-                        probUnpaired[idx] -= (dotArray.data[ii + 2]);
-                    } else {
-                        probUnpaired[idx] -= (dotArray.data[ii + 2] * dotArray.data[ii + 2]);
-                    }
-                }
-            }
-        }
+        const probUnpaired = FoldUtil.pUnpaired(dotArray, this.sequence, behavior);
         // for (let idx = 0; idx < this.sequence.length; ++idx) {
         //     if (probUnpaired[idx] < 0) {
         //         probUnpaired[idx] = 0;
@@ -644,7 +632,17 @@ export default class UndoBlock {
         return 1 - ((totDist / count) / (this.sequence.length - 1));
     }
 
-    public updateMeltingPointAndDotPlot(pseudoknots: boolean = false): void {
+    public updateMeltingPointAndDotPlot(
+        args: {sync: true; pseudoknots: boolean, skipMelt?: boolean}
+    ): void;
+
+    public async updateMeltingPointAndDotPlot(
+        args: {sync: false; pseudoknots: boolean, skipMelt?: boolean}
+    ): Promise<void>;
+
+    public async updateMeltingPointAndDotPlot(
+        {sync, pseudoknots, skipMelt}:{sync: boolean; pseudoknots: boolean, skipMelt?: boolean}
+    ): Promise<void> {
         let bppStatisticBehavior: BasePairProbabilityTransform = BasePairProbabilityTransform.LEAVE_ALONE;
         if (this._folderName === Vienna.NAME || this._folderName === Vienna2.NAME) {
             bppStatisticBehavior = BasePairProbabilityTransform.SQUARE;
@@ -656,10 +654,19 @@ export default class UndoBlock {
 
         const currDotPlot = this.getParam(UndoBlockParam.DOTPLOT, EPars.DEFAULT_TEMPERATURE, pseudoknots);
         if (currDotPlot === undefined) {
-            const dotArray: DotPlot | null = folder.getDotPlot(
-                this.sequence, this.getPairs(EPars.DEFAULT_TEMPERATURE, pseudoknots),
-                EPars.DEFAULT_TEMPERATURE, pseudoknots
-            );
+            let dotArray: DotPlot | null;
+            if (sync) {
+                if (!folder.isSync()) throw new Error('Tried to use synchronous folder asynchronously');
+                dotArray = folder.getDotPlot(
+                    this.sequence, this.getPairs(EPars.DEFAULT_TEMPERATURE, pseudoknots),
+                    EPars.DEFAULT_TEMPERATURE, pseudoknots
+                );
+            } else {
+                dotArray = await folder.getDotPlot(
+                    this.sequence, this.getPairs(EPars.DEFAULT_TEMPERATURE, pseudoknots),
+                    EPars.DEFAULT_TEMPERATURE, pseudoknots
+                );
+            }
             this.setParam(UndoBlockParam.DOTPLOT, dotArray?.data ?? null, EPars.DEFAULT_TEMPERATURE, pseudoknots);
             // mean+sum prob unpaired
             this.setParam(UndoBlockParam.SUMPUNP,
@@ -678,108 +685,144 @@ export default class UndoBlock {
                 EPars.DEFAULT_TEMPERATURE,
                 pseudoknots
             );
+            if (folder instanceof RNNet) {
+                this.setParam(
+                    UndoBlockParam.EF1,
+                    await folder.getEf1(this.sequence),
+                    EPars.DEFAULT_TEMPERATURE,
+                    pseudoknots
+                );
+                this.setParam(
+                    UndoBlockParam.EF1_CROSS_PAIR,
+                    await folder.getEf1CrossPair(this.sequence),
+                    EPars.DEFAULT_TEMPERATURE,
+                    pseudoknots
+                );
+            }
             this._dotPlotData = dotArray;
         } else if (Array.isArray(currDotPlot)) {
             this._dotPlotData = new DotPlot(currDotPlot);
         }
 
-        for (let ii = EPars.DEFAULT_TEMPERATURE; ii < 100; ii += 10) {
-            if (this.getPairs(ii, pseudoknots).length === 0) {
-                const pairs: SecStruct | null = folder.foldSequence(this.sequence, null, null, pseudoknots, ii);
-                Assert.assertIsDefined(pairs);
-                this.setPairs(pairs, ii, pseudoknots);
+        if (!skipMelt) {
+            for (let ii = EPars.DEFAULT_TEMPERATURE; ii < 100; ii += 10) {
+                if (this.getPairs(ii, pseudoknots).length === 0) {
+                    let pairs: SecStruct | null;
+                    if (sync) {
+                        if (!folder.isSync()) throw new Error('Tried to use synchronous folder asynchronously');
+                        pairs = folder.foldSequence(this.sequence, null, null, pseudoknots, ii);
+                    } else {
+                        // eslint-disable-next-line no-await-in-loop
+                        pairs = await folder.foldSequence(this.sequence, null, null, pseudoknots, ii);
+                    }
+                    Assert.assertIsDefined(pairs);
+                    this.setPairs(pairs, ii, pseudoknots);
+                }
+
+                if (this.getParam(UndoBlockParam.DOTPLOT, ii, pseudoknots) == null) {
+                    let dotTempArray: DotPlot | null;
+                    if (sync) {
+                        if (!folder.isSync()) throw new Error('Tried to use synchronous folder asynchronously');
+                        dotTempArray = folder.getDotPlot(
+                            this.sequence,
+                            this.getPairs(ii, pseudoknots),
+                            ii,
+                            pseudoknots
+                        );
+                    } else {
+                        // eslint-disable-next-line no-await-in-loop
+                        dotTempArray = await folder.getDotPlot(
+                            this.sequence,
+                            this.getPairs(ii, pseudoknots),
+                            ii,
+                            pseudoknots
+                        );
+                    }
+
+                    Assert.assertIsDefined(dotTempArray);
+                    // mean+sum prob unpaired
+                    this.setParam(UndoBlockParam.SUMPUNP,
+                        this.sumProbUnpaired(dotTempArray, bppStatisticBehavior), ii, pseudoknots);
+                    this.setParam(UndoBlockParam.MEANPUNP,
+                        this.sumProbUnpaired(
+                            dotTempArray, bppStatisticBehavior
+                        ) / this.sequence.length, ii, pseudoknots);
+                    // branchiness
+                    this.setParam(UndoBlockParam.BRANCHINESS,
+                        this.ensembleBranchiness(dotTempArray, bppStatisticBehavior), ii, pseudoknots);
+                    this.setParam(UndoBlockParam.DOTPLOT, dotTempArray.data, ii, pseudoknots);
+                }
             }
 
-            if (this.getParam(UndoBlockParam.DOTPLOT, ii, pseudoknots) == null) {
-                const dotTempArray: DotPlot | null = folder.getDotPlot(
-                    this.sequence,
-                    this.getPairs(ii, pseudoknots),
-                    ii,
-                    pseudoknots
-                );
-                Assert.assertIsDefined(dotTempArray);
-                // mean+sum prob unpaired
-                this.setParam(UndoBlockParam.SUMPUNP,
-                    this.sumProbUnpaired(dotTempArray, bppStatisticBehavior), ii, pseudoknots);
-                this.setParam(UndoBlockParam.MEANPUNP,
-                    this.sumProbUnpaired(
-                        dotTempArray, bppStatisticBehavior
-                    ) / this.sequence.length, ii, pseudoknots);
-                // branchiness
-                this.setParam(UndoBlockParam.BRANCHINESS,
-                    this.ensembleBranchiness(dotTempArray, bppStatisticBehavior), ii, pseudoknots);
-                this.setParam(UndoBlockParam.DOTPLOT, dotTempArray.data, ii, pseudoknots);
-            }
-        }
+            const refPairs: SecStruct = this.getPairs(EPars.DEFAULT_TEMPERATURE, pseudoknots);
+            const pairScores: number[] = [];
+            const maxPairScores: number[] = [];
 
-        const refPairs: SecStruct = this.getPairs(EPars.DEFAULT_TEMPERATURE, pseudoknots);
-        const pairScores: number[] = [];
-        const maxPairScores: number[] = [];
+            for (let ii = EPars.DEFAULT_TEMPERATURE; ii < 100; ii += 10) {
+                if (this.getParam(UndoBlockParam.PROB_SCORE, ii, pseudoknots)) {
+                    pairScores.push(1 - (this.getParam(UndoBlockParam.PAIR_SCORE, ii, pseudoknots) as number));
+                    maxPairScores.push(1.0);
+                    continue;
+                }
+                const curDat: DotPlot = new DotPlot(this.getParam(UndoBlockParam.DOTPLOT, ii, pseudoknots) as number[]);
+                const curPairs: SecStruct = this.getPairs(ii, pseudoknots);
+                let probScore = 0;
+                let scoreCount = 0;
 
-        for (let ii = EPars.DEFAULT_TEMPERATURE; ii < 100; ii += 10) {
-            if (this.getParam(UndoBlockParam.PROB_SCORE, ii, pseudoknots)) {
-                pairScores.push(1 - (this.getParam(UndoBlockParam.PAIR_SCORE, ii, pseudoknots) as number));
+                for (let jj = 0; jj < curDat.data.length; jj += 3) {
+                    const indexI: number = curDat.data[jj] - 1;
+                    const indexJ: number = curDat.data[jj + 1] - 1;
+
+                    if (indexI < indexJ) {
+                        if (refPairs.pairingPartner(indexI) === indexJ) {
+                            probScore += Number(curDat.data[jj + 2]);
+                            scoreCount++;
+                        }
+                    } else if (indexJ < indexI) {
+                        if (refPairs.pairingPartner(indexJ) === indexI) {
+                            probScore += Number(curDat.data[jj + 2]);
+                            scoreCount++;
+                        }
+                    }
+                }
+
+                if (scoreCount > 0) {
+                    probScore /= scoreCount;
+                }
+
+                let numPaired = 0;
+                for (let jj = 0; jj < curPairs.length; jj++) {
+                    if (curPairs.pairingPartner(jj) > jj) {
+                        numPaired += 2;
+                    }
+                }
+                const pairScore: number = Number(numPaired) / refPairs.length;
+
+                pairScores.push(1 - pairScore);
                 maxPairScores.push(1.0);
-                continue;
+
+                this.setParam(UndoBlockParam.PROB_SCORE, probScore, ii, pseudoknots);
+                this.setParam(UndoBlockParam.PAIR_SCORE, pairScore, ii, pseudoknots);
             }
-            const curDat: DotPlot = new DotPlot(this.getParam(UndoBlockParam.DOTPLOT, ii, pseudoknots) as number[]);
-            const curPairs: SecStruct = this.getPairs(ii, pseudoknots);
-            let probScore = 0;
-            let scoreCount = 0;
 
-            for (let jj = 0; jj < curDat.data.length; jj += 3) {
-                const indexI: number = curDat.data[jj] - 1;
-                const indexJ: number = curDat.data[jj + 1] - 1;
+            this._meltPlotPairScores = pairScores;
+            this._meltPlotMaxPairScores = maxPairScores;
 
-                if (indexI < indexJ) {
-                    if (refPairs.pairingPartner(indexI) === indexJ) {
-                        probScore += Number(curDat.data[jj + 2]);
-                        scoreCount++;
-                    }
-                } else if (indexJ < indexI) {
-                    if (refPairs.pairingPartner(indexJ) === indexI) {
-                        probScore += Number(curDat.data[jj + 2]);
-                        scoreCount++;
-                    }
+            const initScore: number = this.getParam(
+                UndoBlockParam.PROB_SCORE, EPars.DEFAULT_TEMPERATURE, pseudoknots
+            ) as number;
+
+            let meltpoint = 107;
+            for (let ii = 47; ii < 100; ii += 10) {
+                const currentScore: number = this.getParam(UndoBlockParam.PROB_SCORE, ii, pseudoknots) as number;
+                if (currentScore < initScore * 0.5) {
+                    meltpoint = ii;
+                    break;
                 }
             }
 
-            if (scoreCount > 0) {
-                probScore /= scoreCount;
-            }
-
-            let numPaired = 0;
-            for (let jj = 0; jj < curPairs.length; jj++) {
-                if (curPairs.pairingPartner(jj) > jj) {
-                    numPaired += 2;
-                }
-            }
-            const pairScore: number = Number(numPaired) / refPairs.length;
-
-            pairScores.push(1 - pairScore);
-            maxPairScores.push(1.0);
-
-            this.setParam(UndoBlockParam.PROB_SCORE, probScore, ii, pseudoknots);
-            this.setParam(UndoBlockParam.PAIR_SCORE, pairScore, ii, pseudoknots);
+            this.setParam(UndoBlockParam.MELTING_POINT, meltpoint, EPars.DEFAULT_TEMPERATURE, pseudoknots);
         }
-
-        this._meltPlotPairScores = pairScores;
-        this._meltPlotMaxPairScores = maxPairScores;
-
-        const initScore: number = this.getParam(
-            UndoBlockParam.PROB_SCORE, EPars.DEFAULT_TEMPERATURE, pseudoknots
-        ) as number;
-
-        let meltpoint = 107;
-        for (let ii = 47; ii < 100; ii += 10) {
-            const currentScore: number = this.getParam(UndoBlockParam.PROB_SCORE, ii, pseudoknots) as number;
-            if (currentScore < initScore * 0.5) {
-                meltpoint = ii;
-                break;
-            }
-        }
-
-        this.setParam(UndoBlockParam.MELTING_POINT, meltpoint, EPars.DEFAULT_TEMPERATURE, pseudoknots);
     }
 
     public createDotPlot(): Plot {

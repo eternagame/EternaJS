@@ -88,6 +88,7 @@
     "loglevel": "^1.7.1",
     "marked": "^4.0.12",
     "ngl": "https://github.com/eternagame/ngl/archive/a8a0b0f9487ba76eb07aa07404d91ab908d8c8fd.tar.gz",
+    "onnxruntime-web": "^1.18.0",
     "pchip": "^1.0.2",
     "pixi-filters": "^4.1.1",
     "pixi-multistyle-text": "https://github.com/eternagame/pixi-multistyle-text/archive/1f2283b1d4a1bb262b57783e1bf2f81802a17809.tar.gz",
@@ -106,6 +107,6 @@
     ]
   },
   "optionalDependencies": {
-    "eternajs-folding-engines": "github:eternagame/eternajs-folding-engines#cad1c24dba21a12b3219648b866e1042a64d8403"
+    "eternajs-folding-engines": "github:eternagame/eternajs-folding-engines#e8053f5094c748d9c7dc8c75d8fb942c585dfb2d"
   }
 }

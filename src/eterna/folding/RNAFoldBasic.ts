@@ -4,7 +4,7 @@ import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 import Folder from './Folder';
 
-export default class RNAFoldBasic extends Folder {
+export default class RNAFoldBasic extends Folder<true> {
     public static readonly NAME = 'Basic';
 
     /** Asynchronously creates a new instance of the RNAFoldBasic folder. */
@@ -161,4 +161,6 @@ export default class RNAFoldBasic extends Folder {
             this.tracePairs(traceArray, pairs, n, kk + 1, jjStart);
         }
     }
+
+    protected readonly _isSync = true;
 }

@@ -1,12 +1,7 @@
-import Folder from '../Folder';
 import './jest-matcher-deep-close-to';
 import EternaFold from '../Eternafold';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
-
-function CreateFolder(type: any): Promise<Folder | null> {
-    return type.create();
-}
 
 // Cfold_dG Efold_dG Cfold_struct Efold_struct
 // 6.84126  13.6834 .(((((((((((((......))))))..)....((((.....))))...)))))). .(((((((((((((......))))))..)....((((.....))))...)))))).
@@ -24,7 +19,7 @@ test(`EternaFold:many_score_structures`, () => {
     // expect.assertions: the async code should result in X assertions being called
     // https://facebook.github.io/jest/docs/en/expect.html#expectassertionsnumber
 
-    return expect(CreateFolder(EternaFold)
+    return expect(EternaFold.create()
         .then((folder) => {
             if (folder === null) return;
 
@@ -176,13 +171,12 @@ test(`EternaFold:many_score_structures`, () => {
 
 test(`EternaFold:get_dot_plot`, () => {
     const SEQ = 'GACAAAAGUC';
-    const STRUCT = '(((....)))';
 
     const expectedResult: number[][] = [
         [1, 9, 0.00098976, 1, 10, 0.46370775, 2, 9, 0.47023866, 3, 8, 0.44359806, 4, 9, 0.00040973, 5, 9, 0.00014490]
     ];
  
-    expect(CreateFolder(EternaFold)
+    expect(EternaFold.create()
         .then((folder) => {
             if (folder === null) {
                 expect(true).toBeTruthy();
@@ -190,9 +184,7 @@ test(`EternaFold:get_dot_plot`, () => {
             }
             
             expect(folder.getDotPlot(
-                Sequence.fromSequenceString(SEQ),
-                SecStruct.fromParens(STRUCT),
-                37
+                Sequence.fromSequenceString(SEQ)
             )?.data).toBeDeepCloseTo(expectedResult[0], 5);
         }))
         .resolves.toBeUndefined();

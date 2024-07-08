@@ -1,16 +1,11 @@
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
-import Folder from '../Folder';
 import LinearFoldC from '../LinearFoldC';
-import LinearFoldE from '../LinearFoldE'; // debugging matching dot plots?
+import LinearFoldE from '../LinearFoldE';
 import './jest-matcher-deep-close-to';
 
-function CreateFolder(type: any): Promise<Folder | null> {
-    return type.create();
-}
-
 test('linearfoldC:MFETests', () => {
-    return expect(CreateFolder(LinearFoldC).then((folder) => {
+    return expect(LinearFoldC.create().then((folder) => {
         if (folder === null) return;
 
         let expectedFE: number[] = [
@@ -80,7 +75,7 @@ test('linearfoldC:MFETests', () => {
 
 
 test('linearfoldC:SubOptTests', () => {
-    return expect(CreateFolder(LinearFoldC).then((folder) => {
+    return expect(LinearFoldC.create().then((folder) => {
         if (folder === null) return;
         
         let expectedFE: number[] = [
@@ -187,7 +182,7 @@ test(`LinearFoldC:get_dot_plot(complex)`, () => {
             27, 35, 0.05001801252365112, 27, 36, 0.002211257815361023,
             27, 37, 0.00016619637608528137]];
 
-    return expect(CreateFolder(LinearFoldC)
+    return expect(LinearFoldC.create()
         .then((folder) => {
             if (folder === null) {
                 expect(true).toBeTruthy();
@@ -238,7 +233,7 @@ test(`LinearFoldE:get_dot_plot(complex)`, () => {
             26, 37, 0.0010270774364471436, 27, 34, 0.8198640942573547,
             27, 35, 0.036784470081329346, 27, 36, 0.0010711252689361572]];
 
-    return expect(CreateFolder(LinearFoldE)
+    return expect(LinearFoldE.create()
         .then((folder) => {
             if (folder === null) {
                 expect(true).toBeTruthy();

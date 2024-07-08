@@ -4489,7 +4489,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _foldStartTime: number;
     private _foldDuration: number;
     private _paintCursor: PaintCursor;
-    private _baseRotationDirectionSign: number[];
+    private _baseRotationDirectionSign: number[] = [];
 
     private _zoomLevel: number = 0;
     private _desiredAngle: number = 0;

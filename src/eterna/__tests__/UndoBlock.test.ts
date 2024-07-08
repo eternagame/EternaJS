@@ -1,7 +1,8 @@
-import UndoBlock, {BasePairProbabilityTransform} from "../UndoBlock";
+import UndoBlock from "../UndoBlock";
 import Folder from "../folding/Folder";
 import Vienna2 from "../folding/Vienna2";
 import EternaFold from "eterna/folding/Eternafold";
+import { BasePairProbabilityTransform } from "eterna/folding/FoldUtil";
 import DotPlot from "eterna/rnatypes/DotPlot";
 import SecStruct from "eterna/rnatypes/SecStruct";
 import Sequence from "eterna/rnatypes/Sequence";

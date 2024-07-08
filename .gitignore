@@ -91,3 +91,5 @@ dist/
 
 # Built folding engines
 /src/eterna/folding/engines/*.js
+/src/eterna/folding/engines/*.onnx
+/src/eterna/folding/engines/*.ort

@@ -563,7 +563,7 @@ export default class FeedbackViewMode extends GameMode {
         this._toolbar.palette.setPairCounts(numAU, numGU, numGC);
 
         if (this._specBox) {
-            undoBlock.updateMeltingPointAndDotPlot(pseudoknots);
+            undoBlock.updateMeltingPointAndDotPlot({sync: true, pseudoknots});
             this._specBox?.setSpec(undoBlock);
         }
 
@@ -719,6 +719,9 @@ export default class FeedbackViewMode extends GameMode {
         if (!folder) {
             throw new Error("Critical error: can't create a Vienna folder instance by name");
         }
+        if (!folder?.isSync()) {
+            throw new Error("Can't use asynchronous folder synchronously");
+        }
         // AMW TODO: I don't know if this will still work, but Vienna depends on
         // desiredPairs working differently from ANY OTHER PAIR CONSTRAINT which is
         // not a string.
@@ -737,7 +740,8 @@ export default class FeedbackViewMode extends GameMode {
 
     private showSpec(): void {
         const puzzleState = this._undoBlocks[this._curTargetIndex];
-        puzzleState.updateMeltingPointAndDotPlot();
+        const pseudoknots = puzzleState.targetConditions?.type === 'pseudoknot';
+        puzzleState.updateMeltingPointAndDotPlot({sync: true, pseudoknots});
         this._specBox = this.showDialog(new SpecBoxDialog());
         this._specBox.setSpec(puzzleState);
         this._specBox.closed.then(() => { this._specBox = null; });

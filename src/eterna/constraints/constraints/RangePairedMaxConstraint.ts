@@ -25,6 +25,8 @@ interface RangePairedMaxConstraintStatus extends BaseConstraintStatus {
  *     MAXMEANPAIREDPROB,0.30|2250 2251-2254
  */
 export default class RangePairedMaxConstraint extends Constraint<RangePairedMaxConstraintStatus> {
+    public requiresDotPlot = true;
+
     public readonly maxMeanPairedProb: number;
     public readonly indices: number[];
     private _evalIndices: number[] | null = null;
@@ -46,14 +48,6 @@ export default class RangePairedMaxConstraint extends Constraint<RangePairedMaxC
 
         const pseudoknots = (undoBlock.targetConditions !== undefined
             && undoBlock.targetConditions['type'] === 'pseudoknot');
-
-        // If this gets called before any folding has happened it'll be
-        // undefined. Instead of forcing more folding, try saying it's
-        // zero.
-        // AMW: no
-        if (undoBlock.getParam(UndoBlockParam.DOTPLOT, EPars.DEFAULT_TEMPERATURE, pseudoknots) === undefined) {
-            undoBlock.updateMeltingPointAndDotPlot(pseudoknots);
-        }
 
         if (!this._evalIndices) {
             this._evalIndices = this.indices.map((ii) => {

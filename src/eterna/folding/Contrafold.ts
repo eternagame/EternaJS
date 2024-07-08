@@ -12,7 +12,7 @@ import {DotPlotResult, FullEvalResult, FullFoldResult} from './engines/Contrafol
 import Folder, {CacheKey, FullEvalCache} from './Folder';
 import FoldUtil from './FoldUtil';
 
-export default class ContraFold extends Folder {
+export default class ContraFold extends Folder<true> {
     public static readonly NAME: string = 'ContraFold';
 
     /**
@@ -218,5 +218,6 @@ export default class ContraFold extends Folder {
         return new DotPlot(retArray);
     }
 
+    protected readonly _isSync = true;
     private readonly _lib: ContrafoldLib;
 }

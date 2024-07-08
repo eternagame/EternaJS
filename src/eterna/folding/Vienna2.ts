@@ -13,7 +13,7 @@ import {DotPlotResult, FullEvalResult, FullFoldResult} from './engines/Vienna2Li
 import Folder, {CacheKey, FullEvalCache} from './Folder';
 import FoldUtil from './FoldUtil';
 
-export default class Vienna2 extends Folder {
+export default class Vienna2 extends Folder<true> {
     public static NAME = 'Vienna2';
 
     /**
@@ -588,5 +588,6 @@ export default class Vienna2 extends Folder {
         return bestPairs;
     }
 
+    protected readonly _isSync = true;
     private readonly _lib: Vienna2Lib;
 }

@@ -151,6 +151,17 @@ export default class SpecBoxDialog extends WindowDialog<void> {
             .append(`${Number(this._dataBlock.getParam(UndoBlockParam.BRANCHINESS, TEMPERATURE, pseudoknots)).toFixed(1)}\n`)
             .append('Target exp acc : ', 'bold')
             .append(`${(this._dataBlock.getParam(UndoBlockParam.TARGET_EXPECTED_ACCURACY, TEMPERATURE, pseudoknots) as number)?.toFixed(3) ?? 'Unavailable'}`);
+        const ef1 = this._dataBlock.getParam(UndoBlockParam.EF1, TEMPERATURE, pseudoknots);
+        if (ef1 != null) {
+            const ef1CrossPair = this._dataBlock.getParam(UndoBlockParam.EF1_CROSS_PAIR, TEMPERATURE, pseudoknots);
+            statString
+                .append('\n')
+                .append('eF1 : ', 'bold')
+                .append((ef1 as number).toFixed(3))
+                .append('\t\t')
+                .append('eF1,cross-pair : ', 'bold')
+                .append((ef1CrossPair as number).toFixed(3));
+        }
 
         statString.apply(this._statText);
 

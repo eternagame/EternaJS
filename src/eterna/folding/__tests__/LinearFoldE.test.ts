@@ -1,15 +1,10 @@
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
-import Folder from '../Folder';
 import LinearFoldE from '../LinearFoldE';
 import './jest-matcher-deep-close-to';
 
-function CreateFolder(type: any): Promise<Folder | null> {
-	return type.create();
-}
-
 test('linearfoldE:MFETests', () => {
-    return expect(CreateFolder(LinearFoldE).then((folder) => {
+    return expect(LinearFoldE.create().then((folder) => {
 		if (folder === null) {
 			return;
 		}

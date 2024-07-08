@@ -12,8 +12,9 @@ Namely, if a folding engine is not built, EternaJS will run with it disabled (an
 However, naturally puzzles that require these features will not run.
 
 ## Prerequisites
-* [emscripten](https://kripken.github.io/emscripten-site/docs/getting_started/downloads.html#platform-notes-installation-instructions-sdk)
-* [cmake](https://cmake.org/download/)
+* [emscripten](https://kripken.github.io/emscripten-site/docs/getting_started/downloads.html#platform-notes-installation-instructions-sdk) (for libraries except RibonanzaNet)
+* [cmake](https://cmake.org/download/) (for libraries except RibonanzaNet)
+* [anaconda or miniconda](https://docs.anaconda.com/free/distro-or-miniconda/) (for RibonanzaNet)
 
 ## Prepare libraries
 Due to licensing and availability restrictions, we do not (and in some cases cannot) provide a way to automatically
@@ -51,6 +52,15 @@ are cloned into lib/LinearFold/LinearFold and lib/LinearFold/LinearPartition res
       git reset --hard 62fbb1ccc4c7e672a28d41ba1eef7fb796fd4f79
       ```
 
+* For RibonanzaNet-SS, clone [RibonanzaNet](https://github.com/Shujun-He/RibonanzaNet) and download the pretrained weights
+    - You can obtain the latest verified working revision of RibonanzaNet via:
+      ```sh
+      git clone https://github.com/Shujun-He/RibonanzaNet
+      cd RibonanzaNet
+      git reset --hard efebd44e79615fb23f685971875e8903b04cbdce
+      ```
+    - You can obtain the intended version of the pretrained weights from https://www.kaggle.com/datasets/shujun717/ribonanzanet-weights/versions/7
+
 * For the RNApuzzler clash-free layout option, clone the [RNApuzzler repository]((https://github.com/dwiegreffe/RNApuzzler)) into the RNApuzzler directory.
     - You can obtain the latest verified working revision via:
       ```sh
@@ -72,3 +82,7 @@ To generate fresh diffs, make sure you have a fresh copy of the energy model (so
 * `$ emcmake cmake -DCMAKE_BUILD_TYPE=Release && emmake make clean && emmake make install`
     - Pass `-DCMAKE_BUILD_TYPE=Debug` for a debug build (-O0 optimizations), or `Release` for a release build (-O3 optimizations) (NOTE: when building/running EternaJS (i.e. via `npm start` or `npm run build:<dev|prod>`) with a debug build of these libraries, you will likely need to set NODE_OPTIONS=--max_old_space_size=4096 in order to increase the memory limit, since the debug build is quite large)
     - Built libraries are output in `nupack/dist`, `vienna/dist`, etc. When running `emmake make install`, they are automatically copied into `src/eterna/folding/engines`, but you can disable this functionality by running `emmake make` instead
+
+## Compiling RibonanzaNet
+* Set up a conda environment for RibonanzaNet: `conda env create -f RibonanzaNet/env.yml -p .venv && ./.venv/bin/pip install onnx==1.16.1`
+* Export the model as onnx via `./.venv/bin/python export_onnx.py`

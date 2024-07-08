@@ -168,6 +168,11 @@ export default class Plot extends Container {
                 const xCoord = ((this._data2D[ii + 1])) * horizontalSpace + x;
                 const yCoord = ((this._data2D[ii])) * verticalSpace - 1 + y;
 
+                // Values below 0.001 are discarded as noise (eg for RibonanzaNet, which
+                // has nonzero probabilities for everything)
+                if (this._data2D[ii + 2] < 0.001) continue;
+                // We set a base value of 0.1 and then scale the remaining 0.9 based on the data
+                // so that small values are still visible
                 const minCol = 0.1;
                 const probR: number = 1.0 - ((this._data2D[ii + 2]) * (1 - minCol) + minCol);
                 const probG: number = 1.0 - ((this._data2D[ii + 2]) * (1 - minCol) + minCol);

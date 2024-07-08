@@ -14,7 +14,12 @@ contrafold/contrafold
 contrafold/contrafold_stock
 RNApuzzler/RNApuzzler
 RNApuzzler/RNApuzzler_stock
+RibonanzaNet/RibonanzaNet
+RibonanzaNet/RibonanzaNet_stock
+RibonanzaNet/RibonanzaNet-Weights/*
+!RibonanzaNet/RibonanzaNet-Weights/.gitkeep
 CMakeCache
 CMakeFiles
 Makefile
 cmake_install.cmake
+.venv

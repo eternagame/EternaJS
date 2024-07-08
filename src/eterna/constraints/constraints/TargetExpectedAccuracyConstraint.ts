@@ -14,6 +14,8 @@ interface TargetExpectedAccuracyConstraintStatus extends BaseConstraintStatus {
 }
 
 export default class TargetExpectedAccuracyConstraint extends Constraint<TargetExpectedAccuracyConstraintStatus> {
+    public requiresDotPlot = true;
+
     public readonly targetExpectedAccuracy: number;
 
     constructor(targetExpectedAccuracy: number) {
@@ -27,20 +29,6 @@ export default class TargetExpectedAccuracyConstraint extends Constraint<TargetE
 
         const pseudoknots = (undoBlock.targetConditions !== undefined
             && undoBlock.targetConditions['type'] === 'pseudoknot');
-
-        // If this gets called before any folding has happened it'll be
-        // undefined. Instead of forcing more folding, try saying it's
-        // zero.
-        // AMW: no
-        if (
-            undoBlock.getParam(
-                UndoBlockParam.TARGET_EXPECTED_ACCURACY,
-                EPars.DEFAULT_TEMPERATURE,
-                pseudoknots
-            ) === undefined
-        ) {
-            undoBlock.updateMeltingPointAndDotPlot(pseudoknots);
-        }
 
         // For some reason the null-coalescing operator ?? is not supported here.
         const expectedAccuracy = undoBlock.getParam(

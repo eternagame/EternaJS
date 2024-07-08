@@ -12,7 +12,7 @@ import {DotPlotResult, FullEvalResult, FullFoldResult} from './engines/Eternafol
 import Folder, {CacheKey, FullEvalCache} from './Folder';
 import FoldUtil from './FoldUtil';
 
-export default class EternaFold extends Folder {
+export default class EternaFold extends Folder<true> {
     public static readonly NAME: string = 'EternaFold';
 
     /**
@@ -186,9 +186,9 @@ export default class EternaFold extends Folder {
     }
 
     /* override */
-    public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = EPars.DEFAULT_TEMPERATURE): DotPlot {
+    public getDotPlot(seq: Sequence): DotPlot {
         const key: CacheKey = {
-            primitive: 'dotplot', seq: seq.baseArray, pairs: pairs.pairs, temp
+            primitive: 'dotplot', seq: seq.baseArray
         };
         let retArray: number[] = this.getCache(key) as number[];
         if (retArray != null) {
@@ -200,6 +200,8 @@ export default class EternaFold extends Folder {
 
         let result: DotPlotResult | null = null;
         try {
+            // Eternafold doesn't actually do anything with temperature, so we'll use a dummy value
+            const temp = 0;
             // we don't actually do anything with structstring here yet
             result = this._lib.GetDotPlot(temp, seqStr); // , EPars.pairsToParenthesis(pairs));
             Assert.assertIsDefined(result, 'EternaFold returned a null result');
@@ -218,5 +220,6 @@ export default class EternaFold extends Folder {
         return new DotPlot(retArray);
     }
 
+    protected readonly _isSync = true;
     protected readonly _lib: EternafoldLib;
 }

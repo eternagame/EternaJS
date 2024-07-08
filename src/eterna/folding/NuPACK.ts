@@ -18,7 +18,7 @@ import Folder, {
 } from './Folder';
 import FoldUtil from './FoldUtil';
 
-export default class NuPACK extends Folder {
+export default class NuPACK extends Folder<true> {
     public static NAME = 'NuPACK';
 
     /**
@@ -831,5 +831,6 @@ export default class NuPACK extends Folder {
         return coPairs;
     }
 
+    protected readonly _isSync = true;
     private readonly _lib: NupackLib;
 }
