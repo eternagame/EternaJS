@@ -332,6 +332,7 @@ export default class UndoBlock {
         let FN = 1e-6;
         const cFP = 1e-6;
 
+        // As formulated in Arnie's MEA routines
         // TP = np.sum(np.multiply(pred_m, probs)) + 1e-6
         // TN = 0.5*N*N-1 - np.sum(pred_m) - np.sum(probs) + TP + 1e-6
         // FP = np.sum(np.multiply(pred_m, 1-probs)) + 1e-6
@@ -351,6 +352,7 @@ export default class UndoBlock {
             }
         }
 
+        // Matthews Correlation Coefficient (MCC)
         return (TP * TN - (FP - cFP) * FN) / Math.sqrt((TP + FP - cFP) * (TP + FN) * (TN + FP - cFP) * (TN + FN));
     }
 
