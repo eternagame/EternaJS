@@ -105,7 +105,7 @@ export default class Vienna2 extends Folder<true> {
     }
 
     /* override */
-    public get canScoreStructures(): boolean {
+    public canScoreStructures(): boolean {
         return true;
     }
 

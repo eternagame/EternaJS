@@ -39,7 +39,7 @@ export default abstract class Folder<Sync extends boolean = boolean> {
         return this._cache.get(keyStr);
     }
 
-    public get canScoreStructures(): boolean {
+    public canScoreStructures(_pseudoknots: boolean): boolean {
         return false;
     }
 

@@ -243,8 +243,8 @@ export default class NuPACK extends Folder<true> {
     }
 
     /* override */
-    public get canScoreStructures(): boolean {
-        return true;
+    public canScoreStructures(pseudoknots: boolean): boolean {
+        return pseudoknots === false;
     }
 
     /* override */

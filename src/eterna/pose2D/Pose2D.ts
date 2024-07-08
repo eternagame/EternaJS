@@ -3227,16 +3227,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._colorblindTheme;
     }
 
-    public set scoreFolder(folder: Folder | null) {
+    public set scoreFolder(folder: Folder) {
         if (this._scoreFolder !== folder) {
             this._scoreFolder = folder;
             // this.showTotalEnergy = this._showTotalEnergy;
             this.generateScoreNodes();
         }
-    }
-
-    public get scoreFolder(): Folder | null {
-        return this._scoreFolder;
     }
 
     public baseShiftWithCommand(command: number, index: number): void {
@@ -4130,11 +4126,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private updateScoreNodeGui(): void {
         this._scoreNodeIndex = -1;
 
-        if (this._pseudoknotted) {
-            // See https://github.com/eternagame/EternaJS/issues/654
+        if (!this._scoreFolder || !this._scoreFolder.canScoreStructures(this.pseudoknotted)) {
             this._poseField.disableEnergyGui('Unavailable');
             return;
         }
+        this._poseField.enableEnergyGui();
 
         if (this._scoreNodes != null) {
             let totalScore = 0;
@@ -4170,7 +4166,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 }
             }
 
-            if (this._pseudoknotted && this._scoreFolder !== null) {
+            if (this._pseudoknotted) {
                 totalScore = Math.round(this._scoreFolder.scoreStructures(
                     this._sequence, this._pairs.getSatisfiedPairs(this._sequence), true
                 ));
@@ -4261,7 +4257,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._scoreNodeHighlight.clear();
         this.clearEnergyHighlights();
 
-        if (this._scoreFolder == null
+        if (!this._scoreFolder
+            || !this._scoreFolder.canScoreStructures(this.pseudoknotted)
             || this._sequence == null
             || this._sequence.length === 0
             || this._pairs == null
@@ -4522,7 +4519,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     // Score display nodes
     private _scoreNodes: ScoreDisplayNode[] | null;
     private _scoreTexts: Sprite[] | null;
-    private _scoreFolder: Folder | null;
+    private _scoreFolder?: Folder;
     private _scoreNodeIndex: number = -1;
     private _lastScoreNodeIndex: number = -1;
     private _scoreNodeHighlight: Graphics;

@@ -38,6 +38,10 @@ export default class EternaFoldThreshknot extends EternaFold {
         return true;
     }
 
+    public canScoreStructures() {
+        return false;
+    }
+
     /* override */
     /**
      * This overrides Eternafold's default foldSequenceImpl implementation with
