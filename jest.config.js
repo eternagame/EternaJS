@@ -32,7 +32,7 @@ module.exports = {
   "moduleDirectories": [
     "node_modules",
     "src",
-    ""
+    "<rootDir>"
   ],
   "moduleNameMapper": {
     "\\.(css|less)$": "assets/__mocks__/styleMock.js",
@@ -45,19 +45,18 @@ module.exports = {
   "transformIgnorePatterns": ["/node_modules/.*(?<!\.onnx)$"],
   "rootDir": "src",
   "testRegex": "/__tests__/.*\\.test\\.(ts|tsx|js)$",
-  "globals": {
-    "ts-jest": {
-      "babelConfig": false,
-      "tsconfig": "./tsconfig.json",
-      "useESM": true,
-    }
-  },
   "setupFiles": [
     "jest-canvas-mock",
     "dotenv/config"
   ],
-  "setupFilesAfterEnv": [
-    "<rootDir>/../jest.setup.js"
-  ],
+  // "testEnvironment": '<rootDir>/../jest.environment.js',
   "testEnvironment": "jsdom",
+  "testEnvironmentOptions": {
+    // If a dependency states that it has environments for different runtimes, we choose to
+    // load the node version (vs the browser version). In particular this is relevant for onnxruntime,
+    // in which the browser bundle will auto-detect it is running in a node environment and use
+    // codepaths which don't actually work (we could work around that with a custom environment
+    // but that seems more brittle)
+    "customExportConditions": ["node"],
+  }
 }
