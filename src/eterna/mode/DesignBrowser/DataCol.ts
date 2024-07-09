@@ -237,7 +237,7 @@ export default class DataCol extends ContainerObject {
     /** True if the solution passes our filter options */
     public shouldDisplay(sol: Solution): boolean {
         if (this._dataType === DesignBrowserDataType.VOTE) {
-            const voted = sol.getProperty(DesignCategory.MY_VOTES) > 0;
+            const voted = sol.getProperty(DesignCategory.MY_VOTES) as number > 0;
             const queryString: string = this._filterField1.text;
             if (queryString === 'Y') return voted;
             else if (queryString === 'N') return !voted;
@@ -255,14 +255,14 @@ export default class DataCol extends ContainerObject {
         } else {
             const queryMin: string = this._filterField1.text;
             if (queryMin.length > 0) {
-                if (sol.getProperty(this.category) < Number(queryMin)) {
+                if (sol.getProperty(this.category) as number < Number(queryMin)) {
                     return false;
                 }
             }
 
             const queryMax: string = this._filterField2.text;
             if (queryMax.length > 0) {
-                if (sol.getProperty(this.category) > Number(queryMax)) {
+                if (sol.getProperty(this.category) as number > Number(queryMax)) {
                     return false;
                 }
             }
@@ -432,7 +432,7 @@ export default class DataCol extends ContainerObject {
                         break;
 
                     case DesignCategory.VOTES:
-                        if (this._rawData[ii] >= 0) {
+                        if (this._rawData[ii] as number >= 0) {
                             dataString += `${rawstr}\n`;
                         } else {
                             dataString += '-\n';
@@ -440,7 +440,7 @@ export default class DataCol extends ContainerObject {
                         break;
 
                     case DesignCategory.MY_VOTES:
-                        if (this._rawData[ii] >= 0) {
+                        if (this._rawData[ii] as number >= 0) {
                             dataString += `${rawstr}\n`;
                         } else {
                             dataString += '-\n';
