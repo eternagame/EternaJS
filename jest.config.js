@@ -49,7 +49,6 @@ module.exports = {
     "jest-canvas-mock",
     "dotenv/config"
   ],
-  // "testEnvironment": '<rootDir>/../jest.environment.js',
   "testEnvironment": "jsdom",
   "testEnvironmentOptions": {
     // If a dependency states that it has environments for different runtimes, we choose to
