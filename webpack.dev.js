@@ -5,6 +5,8 @@ const path = require('path');
 module.exports = merge(common, {
     mode: 'development',
 
+    devtool: "eval-source-map",
+
     output: {
         path: path.resolve(__dirname + "/dist/dev"),
     },

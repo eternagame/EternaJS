@@ -13,6 +13,8 @@ const mobile_app = ParseBool(process.env.MOBILE_APP);
 module.exports = merge(common, {
     mode: 'production',
 
+    devtool: "source-map",
+
     output: {
         path: path.resolve(__dirname + "/dist/prod"),
         publicPath: mobile_app ? '' : '/eternajs/dist/prod/'
