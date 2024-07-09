@@ -37,8 +37,6 @@ function getEngineLocation() {
 }
 
 module.exports = {
-    devtool: "inline-source-map",
-    
     entry: {
         main: ['core-js/stable', 'regenerator-runtime/runtime', "./src/eterna/index.ts"],
         vendor: vendorDependencies
