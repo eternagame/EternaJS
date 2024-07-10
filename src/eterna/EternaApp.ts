@@ -326,7 +326,7 @@ export default class EternaApp extends FlashbangApp {
         return this.loadSolution(puzzleID, solutionID)
             .then(([puzzle, solution, solutions]) => {
                 if (loadInPoseEdit) {
-                    this._modeStack.unwindToMode(new PoseEditMode(puzzle, {initSolution: solution}));
+                    this._modeStack.unwindToMode(new PoseEditMode(puzzle, {initSolution: solution, solutions}));
                 } else {
                     this._modeStack.unwindToMode(new FeedbackViewMode(solution, puzzle, solutions));
                 }
