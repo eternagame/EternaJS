@@ -287,7 +287,15 @@ export default class RScriptEnv extends ContainerObject {
             case RScriptUIElementID.REDO:
                 return this.ui.toolbar.getScriptUIElement(this.ui.toolbar.redoButton);
             case RScriptUIElementID.BOOSTERS:
-                return this.ui.toolbar.getScriptUIElement(this.ui.toolbar.boostersMenuButton);
+                if (this.ui.toolbar.boostersMenuButton.isLiveObject) {
+                    return this.ui.toolbar.getScriptUIElement(this.ui.toolbar.boostersMenuButton);
+                } else {
+                    this.ui.showNotification(
+                        'This tutorial references the boosters feature, which you do not have unlocked.'
+                        + ' Boosters are available once you unlock the lab.'
+                    );
+                    return null;
+                }
             case RScriptUIElementID.SWAP:
                 return this.ui.toolbar.getScriptUIElement(this.ui.toolbar.pairSwapButton);
             case RScriptUIElementID.PIP:
