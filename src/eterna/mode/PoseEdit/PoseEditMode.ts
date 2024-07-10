@@ -934,17 +934,17 @@ export default class PoseEditMode extends GameMode {
 
         this.poseEditByTarget(0);
 
-        // HACK: This could potentially lead to race conditions (due to the fold data coming back
-        // arbitrarily late), but I don't immediately see another good option for loading the
-        // target structure for the first design loaded from the design browser. At the very least,
-        // I defer responding to the promise here so that we know the PoseOps to set the target structure
-        // are after the poseOps triggered by the initial poseEditByTarget above.
-        // In practice, we shooooould be fine, as there shouldn't be any interaction with the puzzle
-        // that would create another undo block between puzzle load and getting the solution back.
-        // Key word shouldn't.
         if (fdPromise) {
+            // We defer reacting to the promise until now so that the PoseOps to set the target structure
+            // are after the PoseOps triggered by the initial poseEditByTarget above.
+            // The UI lock ensures that nothing could happen that would create additional UndoBlocks
+            // between the initial puzzle load and the target structures being set (which would mean
+            // thee target structure would be set on the wrong undo block)
+            const LOCK_NAME = 'initialTargetStructure';
+            this.pushUILock(LOCK_NAME);
             fdPromise.then((fd) => {
                 this.setSolutionTargetStructure(fd);
+                this.popUILock(LOCK_NAME);
             });
         }
 
