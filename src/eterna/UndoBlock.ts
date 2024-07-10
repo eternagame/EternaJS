@@ -656,7 +656,7 @@ export default class UndoBlock {
         if (currDotPlot === undefined) {
             let dotArray: DotPlot | null;
             if (sync) {
-                if (!folder.isSync()) throw new Error('Tried to use synchronous folder asynchronously');
+                if (!folder.isSync()) throw new Error('Tried to use asynchronous folder synchronously');
                 dotArray = folder.getDotPlot(
                     this.sequence, this.getPairs(EPars.DEFAULT_TEMPERATURE, pseudoknots),
                     EPars.DEFAULT_TEMPERATURE, pseudoknots
@@ -709,7 +709,7 @@ export default class UndoBlock {
                 if (this.getPairs(ii, pseudoknots).length === 0) {
                     let pairs: SecStruct | null;
                     if (sync) {
-                        if (!folder.isSync()) throw new Error('Tried to use synchronous folder asynchronously');
+                        if (!folder.isSync()) throw new Error('Tried to use asynchronous folder synchronously');
                         pairs = folder.foldSequence(this.sequence, null, null, pseudoknots, ii);
                     } else {
                         // eslint-disable-next-line no-await-in-loop
@@ -722,7 +722,7 @@ export default class UndoBlock {
                 if (this.getParam(UndoBlockParam.DOTPLOT, ii, pseudoknots) == null) {
                     let dotTempArray: DotPlot | null;
                     if (sync) {
-                        if (!folder.isSync()) throw new Error('Tried to use synchronous folder asynchronously');
+                        if (!folder.isSync()) throw new Error('Tried to use asynchronous folder synchronously');
                         dotTempArray = folder.getDotPlot(
                             this.sequence,
                             this.getPairs(ii, pseudoknots),
