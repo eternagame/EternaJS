@@ -1568,7 +1568,7 @@ export default class PoseEditMode extends GameMode {
                     const pseudoknots = this._targetConditions && this._targetConditions[0]
                         && this._targetConditions[0]['type'] === 'pseudoknot';
                     const nativepairs = this.getCurrentUndoBlock(indx).getPairs(EPars.DEFAULT_TEMPERATURE, pseudoknots);
-                    return nativepairs.getParenthesis();
+                    return nativepairs.getParenthesis(null, pseudoknots);
                 }
             )
         );
@@ -1587,7 +1587,7 @@ export default class PoseEditMode extends GameMode {
                         EPars.DEFAULT_TEMPERATURE, pseudoknots
                     );
                     const seq: Sequence = this.getPose(indx).fullSequence;
-                    return nativePairs.getParenthesis(seq);
+                    return nativePairs.getParenthesis(seq, pseudoknots);
                 }
             )
         );
