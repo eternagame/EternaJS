@@ -1135,141 +1135,21 @@ export default class PoseEditMode extends GameMode {
     }
 
     private buildScriptInterface(): void {
-        this._scriptInterface.addCallback('get_puzzle_id', (): number => this._puzzle.nodeID);
-
-        this._scriptInterface.addCallback('get_solution_id',
-            (): number | undefined => this._params.solutions?.[this._curSolutionIdx]?.nodeID);
-
-        this._scriptInterface.addCallback('get_sequence_string', (): string => this.getPose(0).getSequenceString());
-
-        this._scriptInterface.addCallback('get_custom_numbering_to_index',
-            (): { [customNumber: number]: number } | undefined => {
-                const customNumbering = this.getPose(0).customNumbering;
-                if (customNumbering === undefined) return undefined;
-
-                // At Omei's request, create maps both ways
-                const numberingToIdx: { [customNumber: number]: number } = {};
-                for (let ii = 0; ii < customNumbering.length; ++ii) {
-                    const cn: number | null = customNumbering[ii];
-                    if (cn !== null) {
-                        numberingToIdx[cn] = ii;
-                    }
-                }
-                return numberingToIdx;
-            });
-
-        this._scriptInterface.addCallback('get_index_to_custom_numbering',
-            (): { [serialIndex: number]: number | null } | undefined => {
-                const customNumbering = this.getPose(0).customNumbering;
-                if (customNumbering === undefined) return undefined;
-
-                // At Omei's request, create maps both ways
-                const idxToNumbering: { [serialIndex: number]: number | null } = {};
-                for (let ii = 0; ii < customNumbering.length; ++ii) {
-                    idxToNumbering[ii] = customNumbering[ii];
-                }
-                return idxToNumbering;
-            });
-
-        this._scriptInterface.addCallback('get_full_sequence', (indx: number): string | null => {
-            if (indx < 0 || indx >= this._poses.length) {
-                return null;
-            } else {
-                return this.getPose(indx).fullSequence.sequenceString();
-            }
-        });
-
-        this._scriptInterface.addCallback('get_locks', (): boolean[] | null => {
-            const pose: Pose2D = this.getPose(0);
-            return pose.puzzleLocks ? pose.puzzleLocks.slice(0, pose.sequence.length) : null;
-        });
-
-        this._scriptInterface.addCallback('get_targets', (): TargetConditions[] => {
-            const conditions = this._puzzle.targetConditions;
-            if (conditions.length === 0) {
-                conditions.push(undefined);
-            }
-            for (let ii = 0; ii < conditions.length; ii++) {
-                if (conditions[ii] === undefined) {
-                    // conditions[ii] = {};
-                    conditions[ii] = {
-                        type: 'single',
-                        secstruct: this._puzzle.getSecstruct(ii)
-                    };
-                    // conditions[ii]['type'] = 'single';
-                    // conditions[ii]['secstruct'] = this._puzzle.getSecstruct(ii);
-                }
-            }
-            return JSON.parse(JSON.stringify(conditions));
-        });
-
-        this._scriptInterface.addCallback('get_target_structure', (index: number): string | null => {
-            if (index < 0 || index >= this._targetPairs.length) return null;
-            const pseudoknots = this._targetConditions && this._targetConditions[0]
-                && this._targetConditions[0]['type'] === 'pseudoknot';
-            return this._targetPairs[index].getParenthesis(null, pseudoknots);
-        });
-
-        this._scriptInterface.addCallback('get_native_structure', (indx: number): string | null => {
-            if (indx < 0 || indx >= this._poses.length) return null;
-            const pseudoknots = this._targetConditions && this._targetConditions[0]
-                && this._targetConditions[0]['type'] === 'pseudoknot';
-            const nativepairs = this.getCurrentUndoBlock(indx).getPairs(EPars.DEFAULT_TEMPERATURE, pseudoknots);
-            return nativepairs.getParenthesis();
-        });
-
-        this._scriptInterface.addCallback('get_full_structure', (indx: number): string | null => {
-            if (indx < 0 || indx >= this._poses.length) {
-                return null;
+        const lockDuringFold = <T extends [...unknown[]], U>(fn: (...args: T) => U) => (...args: T): U => {
+            if (this._opQueue.length > 0) {
+                throw new Error(
+                    'An EternaScript booster attempted to call a method that interacts with the game while a folding'
+                    + ' operation is in progress. Maybe you forgot to `await` a setter, or the user triggered a folding'
+                    + ' operation from the UI.'
+                );
             }
 
-            const pseudoknots = this._targetConditions && this._targetConditions[0]
-                && this._targetConditions[0]['type'] === 'pseudoknot';
-            const nativePairs: SecStruct = this.getCurrentUndoBlock(indx).getPairs(
-                EPars.DEFAULT_TEMPERATURE, pseudoknots
-            );
-            const seq: Sequence = this.getPose(indx).fullSequence;
-            return nativePairs.getParenthesis(seq);
-        });
+            return fn(...args);
+        };
 
-        this._scriptInterface.addCallback('get_free_energy', (indx: number): number => {
-            if (indx < 0 || indx >= this._poses.length) {
-                return Number.NaN;
-            }
-            const ublk = this.getCurrentUndoBlock(indx);
-            const pseudoknots = ublk.targetConditions?.type === 'pseudoknot';
-            return this.getCurrentUndoBlock(indx).getParam(
-                UndoBlockParam.FE, EPars.DEFAULT_TEMPERATURE, pseudoknots
-            ) as number;
-        });
-
-        this._scriptInterface.addCallback('check_constraints', (): boolean => this.checkConstraints());
-
-        this._scriptInterface.addCallback('constraint_satisfied', (idx: number): boolean | null => {
-            this.checkConstraints();
-            if (idx >= 0 && this.constraintCount && idx < this.constraintCount) {
-                return this._puzzle.constraints ? this._puzzle.constraints[idx].evaluate({
-                    undoBlocks: this._seqStacks[this._stackLevel],
-                    targetConditions: this._targetConditions,
-                    puzzle: this._puzzle
-                }).satisfied : null;
-            } else {
-                return false;
-            }
-        });
-
-        this._scriptInterface.addCallback('get_tracked_indices', (): number[] => this.getPose(0).trackedIndices);
-        this._scriptInterface.addCallback('get_barcode_indices', (): number[] | null => this._puzzle.barcodeIndices);
-        this._scriptInterface.addCallback('is_barcode_available',
-            (seq: string): boolean => SolutionManager.instance.isHairpinUsed(
-                this._puzzle.getBarcodeHairpin(Sequence.fromSequenceString(seq)).sequenceString()
-            ));
-
-        this._scriptInterface.addCallback('current_folder', (): string | null => (
-            this._folder ? this._folder.name : null
-        ));
-
-        this._scriptInterface.addCallback('fold',
+        // Folding
+        this._scriptInterface.addCallback(
+            'fold',
             (seq: string, constraint: string | null = null): string | null => {
                 if (this._folder === null) {
                     return null;
@@ -1283,9 +1163,26 @@ export default class PoseEditMode extends GameMode {
                 const folded: SecStruct | null = this._folder.foldSequence(seqArr, null, constraint, pseudoknots);
                 Assert.assertIsDefined(folded);
                 return folded.getParenthesis(null, pseudoknots);
-            });
+            }
+        );
 
-        this._scriptInterface.addCallback('fold_with_binding_site',
+        this._scriptInterface.addCallback(
+            'fold_async',
+            async (seq: string, constraint: string | null = null): Promise<string | null> => {
+                if (this._folder === null) {
+                    return null;
+                }
+                const seqArr: Sequence = Sequence.fromSequenceString(seq);
+                const pseudoknots = this._targetConditions && this._targetConditions[0]
+                    && this._targetConditions[0]['type'] === 'pseudoknot';
+                const folded: SecStruct | null = await this._folder.foldSequence(seqArr, null, constraint, pseudoknots);
+                Assert.assertIsDefined(folded);
+                return folded.getParenthesis(null, pseudoknots);
+            }
+        );
+
+        this._scriptInterface.addCallback(
+            'fold_with_binding_site',
             (seq: string, site: number[], bonus: number): string | null => {
                 if (this._folder === null) {
                     return null;
@@ -1298,23 +1195,60 @@ export default class PoseEditMode extends GameMode {
                     return null;
                 }
                 return folded.getParenthesis();
-            });
-
-        this._scriptInterface.addCallback('energy_of_structure', (seq: string, secstruct: string): number | null => {
-            if (this._folder === null) {
-                return null;
             }
-            const seqArr: Sequence = Sequence.fromSequenceString(seq);
-            const structArr: SecStruct = SecStruct.fromParens(secstruct);
-            const freeEnergy = (this._targetConditions && this._targetConditions[0]
-                && this._targetConditions[0]['type'] === 'pseudoknot')
-                ? this._folder.scoreStructures(seqArr, structArr, true)
-                : this._folder.scoreStructures(seqArr, structArr);
-            return 0.01 * freeEnergy;
-        });
+        );
 
-        // AMW: still give number[] back because external scripts may rely on it
-        this._scriptInterface.addCallback('pairing_probabilities',
+        this._scriptInterface.addCallback(
+            'fold_with_binding_site_async',
+            async (seq: string, site: number[], bonus: number): Promise<string | null> => {
+                if (this._folder === null) {
+                    return null;
+                }
+                const seqArr: Sequence = Sequence.fromSequenceString(seq);
+                const folded: SecStruct | null = this._folder.foldSequenceWithBindingSite(
+                    seqArr, null, site, Math.floor(bonus * 100), 2.5
+                );
+                if (folded === null) {
+                    return null;
+                }
+                return folded.getParenthesis();
+            }
+        );
+
+        this._scriptInterface.addCallback(
+            'energy_of_structure',
+            (seq: string, secstruct: string): number | null => {
+                if (this._folder === null) {
+                    return null;
+                }
+                const seqArr: Sequence = Sequence.fromSequenceString(seq);
+                const structArr: SecStruct = SecStruct.fromParens(secstruct);
+                const freeEnergy = (this._targetConditions && this._targetConditions[0]
+                && this._targetConditions[0]['type'] === 'pseudoknot')
+                    ? this._folder.scoreStructures(seqArr, structArr, true)
+                    : this._folder.scoreStructures(seqArr, structArr);
+                return 0.01 * freeEnergy;
+            }
+        );
+
+        this._scriptInterface.addCallback(
+            'energy_of_structure_async',
+            (seq: string, secstruct: string): number | null => {
+                if (this._folder === null) {
+                    return null;
+                }
+                const seqArr: Sequence = Sequence.fromSequenceString(seq);
+                const structArr: SecStruct = SecStruct.fromParens(secstruct);
+                const freeEnergy = (this._targetConditions && this._targetConditions[0]
+                && this._targetConditions[0]['type'] === 'pseudoknot')
+                    ? this._folder.scoreStructures(seqArr, structArr, true)
+                    : this._folder.scoreStructures(seqArr, structArr);
+                return 0.01 * freeEnergy;
+            }
+        );
+
+        this._scriptInterface.addCallback(
+            'pairing_probabilities',
             (seq: string, secstruct: string | null = null): number[] | null => {
                 if (this._folder === null) {
                     return null;
@@ -1335,9 +1269,33 @@ export default class PoseEditMode extends GameMode {
                 const pp: DotPlot | null = this._folder.getDotPlot(seqArr, folded);
                 Assert.assertIsDefined(pp);
                 return pp.data;
-            });
+            }
+        );
 
-        this._scriptInterface.addCallback('subopt_single_sequence',
+        this._scriptInterface.addCallback(
+            'pairing_probabilities',
+            async (seq: string, secstruct: string | null = null): Promise<number[] | null> => {
+                if (this._folder === null) {
+                    return null;
+                }
+                const seqArr: Sequence = Sequence.fromSequenceString(seq);
+                let folded: SecStruct | null;
+                if (secstruct) {
+                    folded = SecStruct.fromParens(secstruct);
+                } else {
+                    folded = await this._folder.foldSequence(seqArr, null, null);
+                    if (folded === null) {
+                        return null;
+                    }
+                }
+                const pp: DotPlot | null = await this._folder.getDotPlot(seqArr, folded);
+                Assert.assertIsDefined(pp);
+                return pp.data;
+            }
+        );
+
+        this._scriptInterface.addCallback(
+            'subopt_single_sequence',
             (
                 seq: string, kcalDelta: number,
                 pseudoknotted: boolean, temp: number = EPars.DEFAULT_TEMPERATURE
@@ -1349,9 +1307,27 @@ export default class PoseEditMode extends GameMode {
                 const seqArr: Sequence = Sequence.fromSequenceString(seq);
                 return this._folder.getSuboptEnsembleNoBindingSite(seqArr,
                     kcalDelta, pseudoknotted, temp);
-            });
+            }
+        );
 
-        this._scriptInterface.addCallback('subopt_oligos',
+        this._scriptInterface.addCallback(
+            'subopt_single_sequence_async',
+            async (
+                seq: string, kcalDelta: number,
+                pseudoknotted: boolean, temp: number = EPars.DEFAULT_TEMPERATURE
+            ): Promise<SuboptEnsembleResult | null> => {
+                if (this._folder === null) {
+                    return null;
+                }
+                // now get subopt stuff
+                const seqArr: Sequence = Sequence.fromSequenceString(seq);
+                return this._folder.getSuboptEnsembleNoBindingSite(seqArr,
+                    kcalDelta, pseudoknotted, temp);
+            }
+        );
+
+        this._scriptInterface.addCallback(
+            'subopt_oligos',
             (
                 seq: string, oligoStrings: string[], kcalDelta: number,
                 pseudoknotted: boolean, temp: number = EPars.DEFAULT_TEMPERATURE
@@ -1370,9 +1346,34 @@ export default class PoseEditMode extends GameMode {
                 const seqArr: Sequence = Sequence.fromSequenceString(newSequence);
                 return this._folder.getSuboptEnsembleWithOligos(seqArr,
                     oligoStrings, kcalDelta, pseudoknotted, temp);
-            });
+            }
+        );
 
-        this._scriptInterface.addCallback('cofold',
+        this._scriptInterface.addCallback(
+            'subopt_oligos_async',
+            async (
+                seq: string, oligoStrings: string[], kcalDelta: number,
+                pseudoknotted: boolean, temp: number = EPars.DEFAULT_TEMPERATURE
+            ): Promise<SuboptEnsembleResult | null> => {
+                if (this._folder === null) {
+                    return null;
+                }
+                // make the sequence string from the oligos
+                let newSequence: string = seq;
+                for (let oligoIndex = 0; oligoIndex < oligoStrings.length; oligoIndex++) {
+                    const oligoSequence: string = oligoStrings[oligoIndex];
+                    newSequence = `${newSequence}&${oligoSequence}`;
+                }
+
+                // now get subopt stuff
+                const seqArr: Sequence = Sequence.fromSequenceString(newSequence);
+                return this._folder.getSuboptEnsembleWithOligos(seqArr,
+                    oligoStrings, kcalDelta, pseudoknotted, temp);
+            }
+        );
+
+        this._scriptInterface.addCallback(
+            'cofold',
             (
                 seq: string, oligo: string, malus: number = 0.0, constraint: string | null = null
             ): string | null => {
@@ -1390,9 +1391,33 @@ export default class PoseEditMode extends GameMode {
                 }
                 return `${folded.slice(0, len).getParenthesis()
                 }&${folded.slice(len).getParenthesis()}`;
-            });
+            }
+        );
 
-        this._scriptInterface.addCallback('get_defect',
+        this._scriptInterface.addCallback(
+            'cofold_async',
+            async (
+                seq: string, oligo: string, malus: number = 0.0, constraint: string | null = null
+            ): Promise<string | null> => {
+                if (this._folder === null) {
+                    return null;
+                }
+                const len: number = seq.length;
+                const cseq = `${seq}&${oligo}`;
+                const seqArr: Sequence = Sequence.fromSequenceString(cseq);
+                const folded: SecStruct | null = this._folder.cofoldSequence(
+                    seqArr, null, Math.floor(malus * 100), constraint
+                );
+                if (folded === null) {
+                    return null;
+                }
+                return `${folded.slice(0, len).getParenthesis()
+                }&${folded.slice(len).getParenthesis()}`;
+            }
+        );
+
+        this._scriptInterface.addCallback(
+            'get_defect',
             (
                 seq: string, secstruct: string, pseudoknotted: boolean, temp: number = EPars.DEFAULT_TEMPERATURE
             ): number | null => {
@@ -1404,36 +1429,364 @@ export default class PoseEditMode extends GameMode {
                     SecStruct.fromParens(secstruct),
                     temp, pseudoknotted
                 );
-            });
+            }
+        );
+
+        this._scriptInterface.addCallback(
+            'get_defect_async',
+            async (
+                seq: string, secstruct: string, pseudoknotted: boolean, temp: number = EPars.DEFAULT_TEMPERATURE
+            ): Promise<number | null> => {
+                if (this._folder === null) {
+                    return null;
+                }
+                return this._folder.getDefect(
+                    Sequence.fromSequenceString(seq),
+                    SecStruct.fromParens(secstruct),
+                    temp, pseudoknotted
+                );
+            }
+        );
+
+        // Getters
+        this._scriptInterface.addCallback(
+            'get_puzzle_id',
+            lockDuringFold((): number => this._puzzle.nodeID)
+        );
+
+        this._scriptInterface.addCallback(
+            'get_solution_id',
+            lockDuringFold((): number | undefined => this._params.solutions?.[this._curSolutionIdx]?.nodeID)
+        );
+
+        this._scriptInterface.addCallback(
+            'get_sequence_string',
+            lockDuringFold((): string => this.getPose(0).getSequenceString())
+        );
+
+        this._scriptInterface.addCallback(
+            'get_custom_numbering_to_index',
+            lockDuringFold(
+                (): { [customNumber: number]: number } | undefined => {
+                    const customNumbering = this.getPose(0).customNumbering;
+                    if (customNumbering === undefined) return undefined;
+
+                    // At Omei's request, create maps both ways
+                    const numberingToIdx: { [customNumber: number]: number } = {};
+                    for (let ii = 0; ii < customNumbering.length; ++ii) {
+                        const cn: number | null = customNumbering[ii];
+                        if (cn !== null) {
+                            numberingToIdx[cn] = ii;
+                        }
+                    }
+                    return numberingToIdx;
+                }
+            )
+        );
+
+        this._scriptInterface.addCallback(
+            'get_index_to_custom_numbering',
+            lockDuringFold(
+                (): { [serialIndex: number]: number | null } | undefined => {
+                    const customNumbering = this.getPose(0).customNumbering;
+                    if (customNumbering === undefined) return undefined;
+
+                    // At Omei's request, create maps both ways
+                    const idxToNumbering: { [serialIndex: number]: number | null } = {};
+                    for (let ii = 0; ii < customNumbering.length; ++ii) {
+                        idxToNumbering[ii] = customNumbering[ii];
+                    }
+                    return idxToNumbering;
+                }
+            )
+        );
+
+        this._scriptInterface.addCallback(
+            'get_full_sequence',
+            lockDuringFold(
+                (indx: number): string | null => {
+                    if (indx < 0 || indx >= this._poses.length) {
+                        return null;
+                    } else {
+                        return this.getPose(indx).fullSequence.sequenceString();
+                    }
+                }
+            )
+        );
+
+        this._scriptInterface.addCallback(
+            'get_locks',
+            lockDuringFold(
+                (): boolean[] | null => {
+                    const pose: Pose2D = this.getPose(0);
+                    return pose.puzzleLocks ? pose.puzzleLocks.slice(0, pose.sequence.length) : null;
+                }
+            )
+        );
+
+        this._scriptInterface.addCallback(
+            'get_targets',
+            lockDuringFold(
+                (): TargetConditions[] => {
+                    const conditions = this._puzzle.targetConditions;
+                    if (conditions.length === 0) {
+                        conditions.push(undefined);
+                    }
+                    for (let ii = 0; ii < conditions.length; ii++) {
+                        if (conditions[ii] === undefined) {
+                            // conditions[ii] = {};
+                            conditions[ii] = {
+                                type: 'single',
+                                secstruct: this._puzzle.getSecstruct(ii)
+                            };
+                            // conditions[ii]['type'] = 'single';
+                            // conditions[ii]['secstruct'] = this._puzzle.getSecstruct(ii);
+                        }
+                    }
+                    return JSON.parse(JSON.stringify(conditions));
+                }
+            )
+        );
+
+        this._scriptInterface.addCallback(
+            'get_target_structure',
+            lockDuringFold(
+                (index: number): string | null => {
+                    if (index < 0 || index >= this._targetPairs.length) return null;
+                    const pseudoknots = this._targetConditions && this._targetConditions[0]
+                        && this._targetConditions[0]['type'] === 'pseudoknot';
+                    return this._targetPairs[index].getParenthesis(null, pseudoknots);
+                }
+            )
+        );
+
+        this._scriptInterface.addCallback(
+            'get_native_structure',
+            lockDuringFold(
+                (indx: number): string | null => {
+                    if (indx < 0 || indx >= this._poses.length) return null;
+                    const pseudoknots = this._targetConditions && this._targetConditions[0]
+                        && this._targetConditions[0]['type'] === 'pseudoknot';
+                    const nativepairs = this.getCurrentUndoBlock(indx).getPairs(EPars.DEFAULT_TEMPERATURE, pseudoknots);
+                    return nativepairs.getParenthesis();
+                }
+            )
+        );
+
+        this._scriptInterface.addCallback(
+            'get_full_structure',
+            lockDuringFold(
+                (indx: number): string | null => {
+                    if (indx < 0 || indx >= this._poses.length) {
+                        return null;
+                    }
+
+                    const pseudoknots = this._targetConditions && this._targetConditions[0]
+                        && this._targetConditions[0]['type'] === 'pseudoknot';
+                    const nativePairs: SecStruct = this.getCurrentUndoBlock(indx).getPairs(
+                        EPars.DEFAULT_TEMPERATURE, pseudoknots
+                    );
+                    const seq: Sequence = this.getPose(indx).fullSequence;
+                    return nativePairs.getParenthesis(seq);
+                }
+            )
+        );
+
+        this._scriptInterface.addCallback(
+            'get_free_energy',
+            lockDuringFold(
+                (indx: number): number => {
+                    if (indx < 0 || indx >= this._poses.length) {
+                        return Number.NaN;
+                    }
+                    const ublk = this.getCurrentUndoBlock(indx);
+                    const pseudoknots = ublk.targetConditions?.type === 'pseudoknot';
+                    return this.getCurrentUndoBlock(indx).getParam(
+                        UndoBlockParam.FE, EPars.DEFAULT_TEMPERATURE, pseudoknots
+                    ) as number;
+                }
+            )
+        );
+
+        this._scriptInterface.addCallback('check_constraints', lockDuringFold((): boolean => this.checkConstraints()));
+
+        this._scriptInterface.addCallback(
+            'constraint_satisfied',
+            lockDuringFold(
+                (idx: number): boolean | null => {
+                    this.checkConstraints();
+                    if (idx >= 0 && this.constraintCount && idx < this.constraintCount) {
+                        return this._puzzle.constraints ? this._puzzle.constraints[idx].evaluate({
+                            undoBlocks: this._seqStacks[this._stackLevel],
+                            targetConditions: this._targetConditions,
+                            puzzle: this._puzzle
+                        }).satisfied : null;
+                    } else {
+                        return false;
+                    }
+                }
+            )
+        );
+
+        this._scriptInterface.addCallback(
+            'get_tracked_indices',
+            lockDuringFold((): number[] => this.getPose(0).trackedIndices)
+        );
+        this._scriptInterface.addCallback(
+            'get_barcode_indices',
+            lockDuringFold((): number[] | null => this._puzzle.barcodeIndices)
+        );
+        this._scriptInterface.addCallback(
+            'is_barcode_available',
+            lockDuringFold(
+                (seq: string): boolean => SolutionManager.instance.isHairpinUsed(
+                    this._puzzle.getBarcodeHairpin(Sequence.fromSequenceString(seq)).sequenceString()
+                )
+            )
+        );
+
+        this._scriptInterface.addCallback(
+            'current_folder',
+            lockDuringFold(
+                (): string | null => (
+                    this._folder ? this._folder.name : null
+                )
+            )
+        );
+
+        // Setters
+        this._scriptInterface.addCallback(
+            'set_sequence_string',
+            lockDuringFold(
+                (seq: string): boolean => {
+                    if (!this._folder.isSync()) {
+                        throw new Error('Attempted to use asynchronous folding engine synchronously');
+                    }
+                    const sequence: Sequence = Sequence.fromSequenceString(seq);
+                    if (sequence.findUndefined() >= 0 || sequence.findCut() >= 0) {
+                        log.info(`Invalid characters in ${seq}`);
+                        return false;
+                    }
+                    const prevForceSync = this.forceSync;
+                    this.forceSync = true;
+                    for (const pose of this._poses) {
+                        pose.pasteSequence(sequence);
+                    }
+                    this.forceSync = prevForceSync;
+                    return true;
+                }
+            )
+        );
+
+        this._scriptInterface.addCallback(
+            'set_sequence_string_async',
+            lockDuringFold(
+                (seq: string): Promise<boolean> => new Promise((resolve) => {
+                    const sequence: Sequence = Sequence.fromSequenceString(seq);
+                    if (sequence.findUndefined() >= 0 || sequence.findCut() >= 0) {
+                        log.info(`Invalid characters in ${seq}`);
+                        resolve(false);
+                    }
+                    for (const pose of this._poses) {
+                        pose.pasteSequence(sequence);
+                    }
+                    this._opQueue.push(new PoseOp(null, () => resolve(true)));
+                })
+            )
+        );
+
+        this._scriptInterface.addCallback(
+            'set_target_structure',
+            lockDuringFold(
+                (index: number, structure: string, startAt: number = 0): void => {
+                    if (!this._folder.isSync()) {
+                        throw new Error('Attempted to use asynchronous folding engine synchronously');
+                    }
+
+                    const pseudoknots = this._targetConditions && this._targetConditions[0]
+                        && this._targetConditions[0]['type'] === 'pseudoknot';
+
+                    const prevForceSync = this.forceSync;
+                    this.forceSync = true;
+                    this.pasteTargetStructure(index, SecStruct.fromParens(structure, pseudoknots), startAt);
+                    this.forceSync = prevForceSync;
+                }
+            )
+        );
+
+        this._scriptInterface.addCallback(
+            'set_target_structure_async',
+            lockDuringFold(
+                (index: number, structure: string, startAt: number = 0): Promise<void> => new Promise((resolve) => {
+                    const pseudoknots = this._targetConditions && this._targetConditions[0]
+                        && this._targetConditions[0]['type'] === 'pseudoknot';
+
+                    this.pasteTargetStructure(index, SecStruct.fromParens(structure, pseudoknots), startAt);
+                    this._opQueue.push(new PoseOp(null, () => resolve()));
+                })
+            )
+        );
+
+        this._scriptInterface.addCallback(
+            'set_tracked_indices',
+            lockDuringFold(
+                (
+                    marks: (number | { baseIndex: number; colors?: number | number[] })[],
+                    options?: { layerName?: string }
+                ): void => {
+                    const standardizedMarks = marks.map(
+                        (mark) => (typeof (mark) === 'number' ? {baseIndex: mark as number} : mark)
+                    );
+
+                    if (standardizedMarks.some((mark) => typeof (mark.baseIndex) !== 'number')) {
+                        log.error(
+                            "At least one mark object either doesn't have a `baseIndex` property or has a",
+                            ' non-numeric one - aborting'
+                        );
+                        return;
+                    }
+
+                    let layer = SCRIPT_MARKER_LAYER;
+                    if (options?.layerName === PLAYER_MARKER_LAYER) {
+                        // Scripts should be able to add marks on behalf of the player
+                        layer = PLAYER_MARKER_LAYER;
+                    } else if (options?.layerName) {
+                        // But we want to ensure that scripts can't override system layers, so we prefix them
+                        layer = `${SCRIPT_MARKER_LAYER}: ${options.layerName}`;
+                    }
+                    this.addMarkerLayer(layer);
+
+                    for (let ii = 0; ii < this.numPoseFields; ii++) {
+                        const pose: Pose2D = this.getPose(ii);
+                        pose.clearLayerTracking(layer);
+                        for (const mark of standardizedMarks) {
+                            pose.addBaseMark(mark.baseIndex, layer, mark.colors);
+                        }
+                    }
+                }
+            )
+        );
 
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
             this._scriptInterface.addCallback(
-                'select_folder', (folderName: string): boolean => this.selectFolder(folderName)
+                'select_folder',
+                lockDuringFold((folderName: string): boolean => {
+                    const newFolder = FolderManager.instance.getFolder(folderName);
+                    if (newFolder && !newFolder.isSync()) {
+                        throw new Error('Attempted to use asynchronous folding engine synchronously');
+                    }
+
+                    return this.selectFolder(folderName);
+                })
             );
 
-            this._scriptInterface.addCallback('load_parameters_from_buffer', (_str: string): boolean => {
-                log.info('TODO: load_parameters_from_buffer');
-                return false;
-                // let buf: ByteArray = new ByteArray;
-                // buf.writeUTFBytes(str);
-                // let res: boolean = folder.load_parameters_from_buffer(buf);
-                // if (res) {
-                //     this.on_change_folder();
-                // }
-                // return res;
-            });
-
-            this._scriptInterface.addCallback('submit_solution', async (
-                details: {title?: string, description?: string} | 'prompt' = 'prompt',
-                options?: {
-                    validate?: boolean,
-                    notifyOnError?: boolean
-                }
-            ) => this.submitCurrentPose(
-                details,
-                options?.validate ?? true,
-                {throw: true, notify: options?.notifyOnError ?? true}
-            ));
+            this._scriptInterface.addCallback(
+                'select_folder_async',
+                lockDuringFold((folderName: string): Promise<boolean> => new Promise((resolve) => {
+                    const result = this.selectFolder(folderName);
+                    this._opQueue.push(new PoseOp(null, () => resolve(result)));
+                }))
+            );
         }
 
         // Miscellanous
@@ -1444,83 +1797,24 @@ export default class PoseEditMode extends GameMode {
             }
         });
 
-        // Setters
-        this._scriptInterface.addCallback('set_sequence_string', (seq: string): boolean => {
-            if (!this._folder.isSync()) {
-                throw new Error('Attempted to use asynchronous folding engine synchronously');
-            }
-            const sequence: Sequence = Sequence.fromSequenceString(seq);
-            if (sequence.findUndefined() >= 0 || sequence.findCut() >= 0) {
-                log.info(`Invalid characters in ${seq}`);
-                return false;
-            }
-            const prevForceSync = this.forceSync;
-            this.forceSync = true;
-            for (const pose of this._poses) {
-                pose.pasteSequence(sequence);
-            }
-            this.forceSync = prevForceSync;
-            return true;
-        });
-
-        this._scriptInterface.addCallback('set_tracked_indices',
-            (
-                marks: (number | { baseIndex: number; colors?: number | number[] })[],
-                options?: { layerName?: string }
-            ): void => {
-                const standardizedMarks = marks.map(
-                    (mark) => (typeof (mark) === 'number' ? {baseIndex: mark as number} : mark)
-                );
-
-                if (standardizedMarks.some((mark) => typeof (mark.baseIndex) !== 'number')) {
-                    log.error(
-                        "At least one mark object either doesn't have a `baseIndex` property or has a non-numeric one",
-                        '- aborting'
-                    );
-                    return;
-                }
-
-                let layer = SCRIPT_MARKER_LAYER;
-                if (options?.layerName === PLAYER_MARKER_LAYER) {
-                    // Scripts should be able to add marks on behalf of the player
-                    layer = PLAYER_MARKER_LAYER;
-                } else if (options?.layerName) {
-                    // But we want to ensure that scripts can't override system layers, so we prefix them
-                    layer = `${SCRIPT_MARKER_LAYER}: ${options.layerName}`;
-                }
-                this.addMarkerLayer(layer);
-
-                for (let ii = 0; ii < this.numPoseFields; ii++) {
-                    const pose: Pose2D = this.getPose(ii);
-                    pose.clearLayerTracking(layer);
-                    for (const mark of standardizedMarks) {
-                        pose.addBaseMark(mark.baseIndex, layer, mark.colors);
-                    }
-                }
-            });
-
-        this._scriptInterface.addCallback('set_target_structure',
-            (index: number, structure: string, startAt: number = 0): void => {
-                if (!this._folder.isSync()) {
-                    throw new Error('Attempted to use asynchronous folding engine synchronously');
-                }
-
-                const pseudoknots = this._targetConditions && this._targetConditions[0]
-                    && this._targetConditions[0]['type'] === 'pseudoknot';
-
-                const prevForceSync = this.forceSync;
-                this.forceSync = true;
-                this.pasteTargetStructure(index, SecStruct.fromParens(structure, pseudoknots), startAt);
-                this.forceSync = prevForceSync;
-            });
-
-        this._scriptInterface.addCallback('set_design_title', (_designTitle: string): void => {
-            log.info('TODO: set_design_title');
-            // Application.instance.get_application_gui("Design Name").set_text(design_title);
-            // Application.instance.get_application_gui("Design Name").visible = true;
-            this.clearUndoStack();
-            this.poseEditByTarget(0);
-        });
+        if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
+            this._scriptInterface.addCallback(
+                'submit_solution',
+                lockDuringFold(
+                    async (
+                        details: {title?: string, description?: string} | 'prompt' = 'prompt',
+                        options?: {
+                            validate?: boolean,
+                            notifyOnError?: boolean
+                        }
+                    ) => this.submitCurrentPose(
+                        details,
+                        options?.validate ?? true,
+                        {throw: true, notify: options?.notifyOnError ?? true}
+                    )
+                )
+            );
+        }
     }
 
     public onKeyboardEvent(e: KeyboardEvent): boolean {
@@ -2166,33 +2460,63 @@ export default class PoseEditMode extends GameMode {
         this._specBox = null;
     }
 
-    private async updateSpecBox(): Promise<void> {
-        // By making this a PoseOp, we ensure that we avoid a race condition where
-        // we trigger this twice, the second run finishes before the first, and
-        // then the first comes back and we set data which is out-of-date.
-        // The opQueue ensures we don't have more than one of these running at once.
-        // Also, we get the benefit of the indicator saying we're folding
+    private updateSpecBox(): void {
+        // updateSpecBox could be triggered in a couple of scenarios:
+        // 1) We made a change that triggered a fold
+        // 2) We've changed our current pose in a way that didn't trigger a fold, eg by
+        // changing between target and natural mode or between states
         //
-        // If we queue it five times, and by the second time we've skipped 5 undo blocks?
-        // That's fine, the second queued operation will just do the most recent block,
-        // and the additional queued operations will do effectively nothing since
-        // the result for that block has been cached.
+        // In either case, once we get here we won't have an active UI lock. In case 1, the folding lock
+        // is released before updateScore is called - however, the codepath is synchronous between
+        // there and here, so there's no opportunity for a UI interaction to have been triggered
+        // in the meantime. In case 2, the codepath is synchronous between user action and here.
+        // All that to say, introducing a UI lock here is reasonable.
         //
-        // Note that future async "normal" folding operations wont complete until this is done.
-        // That means scripts or quickly flipping through states are liable to behave as above,
-        // but if you are mutating by hand, you actually wait until the dot plot finishes
-        // before your new mutation is folded, meaning you do wind up getting a UI lock
-        // between dot plot computations (though slightly "off"), which helps the behavior here
-        // feel more consistent.
-        this._opQueue.push(new PoseOp(null, async () => {
+        // * Why do we use a UI lock/PoseOp instead of just starting the async operation
+        // and letting it finish whenever? This avoids a race condition where we trigger this twice, the second run
+        // finishes before the first, and then the first comes back and we set data which is out-of-date
+        // * Why not use just the PoseOp, which on its own would ensure these runs happen in order?
+        // While that would be nice so that eg tabbing through states would not require waiting for
+        // this to finish, this avoids confusing users since the UI being completely locked makes it
+        // clear that computation is in progress. Also, EternaScript commands use the opQueue to
+        // know (1) when it's safe to run and (2) when folding operations it has triggered are finished.
+        // Without the UI lock, it's more likely that a script operation would attempt to be triggered
+        // while this is still in the queue
+        // * Well, why not use just the UI lock since that prevents this from being queued multiple times
+        // at all? Because that isn't taken into account for scripts (at least currently). Also this just
+        // keeps us consistent that when a script triggers a folding operation, it doesnt resolve
+        // until the app has fully updated (hence we also handle forceSync).
+        //
+        // Note we put the operation at the start of the queue instead of the end. That is so that
+        // if we were ultimately triggered by an async EternaScript command, this is run before the
+        // PoseOp which resolves the EternaScript command's promise (otherwise a script author
+        // would assume that it is safe to issue another command, but the commands require the
+        // opQueue to be empty to avoid things getting out of sync.)
+        const LOCK_NAME = 'updateSpecBox';
+        this.pushUILock(LOCK_NAME);
+        if (this.forceSync) {
             if (this._specBox) {
-                const undoBlock = await this.updateCurrentBlockWithDotAndMeltingPlot();
-                this._specBox?.setSpec(undoBlock);
+                // We don't use the result of updateCurrentBlockWithDotAndMeltingPlot because
+                // even if we run synchronously, the result is still a promise. However, we don't
+                // need to because we can be absolutely sure the undo block hasn't changed
+                // (technically this is now true for the async case as well, but we'll play
+                // it safe in case we decide to change that behavior)
+                this.updateCurrentBlockWithDotAndMeltingPlot(-1, true);
+                this._specBox?.setSpec(this.getCurrentUndoBlock());
             }
-        }));
+            this.popUILock(LOCK_NAME);
+        } else {
+            this._opQueue.unshift(new PoseOp(null, async () => {
+                if (this._specBox) {
+                    const undoBlock = await this.updateCurrentBlockWithDotAndMeltingPlot();
+                    this._specBox?.setSpec(undoBlock);
+                }
+                this.popUILock(LOCK_NAME);
+            }));
+        }
     }
 
-    private async updateCurrentBlockWithDotAndMeltingPlot(index: number = -1): Promise<UndoBlock> {
+    private async updateCurrentBlockWithDotAndMeltingPlot(index: number = -1, sync = false): Promise<UndoBlock> {
         const datablock: UndoBlock = this.getCurrentUndoBlock(index);
         if (this._folder && this._folder.canDotPlot && datablock.sequence.length < 500) {
             const pseudoknots = (
@@ -2200,7 +2524,11 @@ export default class PoseEditMode extends GameMode {
                 && this._targetConditions[0]
                 && this._targetConditions[0]['type'] === 'pseudoknot'
             ) || false;
-            await datablock.updateMeltingPointAndDotPlot({sync: false, pseudoknots});
+            if (sync) {
+                datablock.updateMeltingPointAndDotPlot({sync: true, pseudoknots});
+            } else {
+                await datablock.updateMeltingPointAndDotPlot({sync: false, pseudoknots});
+            }
         }
         return datablock;
     }
