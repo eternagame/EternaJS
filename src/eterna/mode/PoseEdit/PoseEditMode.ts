@@ -906,6 +906,12 @@ export default class PoseEditMode extends GameMode {
         // reset lineage for experimental targets
         this.setAncestorId(0);
 
+        // Setup RScript and execute the ROPPRE ops
+        this._rscript = new RNAScript(this._puzzle, this);
+
+        // RScript can set our initial poseState
+        this._poseState = this._puzzle.defaultMode;
+
         // We don't load saved data if we're viewing someone else's solution
         // If there's an initial solution, still autoload if we've previously played
         if (
@@ -937,12 +943,6 @@ export default class PoseEditMode extends GameMode {
                 this.popUILock(LOCK_NAME);
             });
         }
-
-        // Setup RScript and execute the ROPPRE ops
-        this._rscript = new RNAScript(this._puzzle, this);
-
-        // RScript can set our initial poseState
-        this._poseState = this._puzzle.defaultMode;
 
         // add 3DWindow
         const threePath = this._puzzle.threePath;
