@@ -920,19 +920,16 @@ export default class PoseEditMode extends GameMode {
             this.loadSavedData();
         }
 
-        this._poseEditByTargetCb = () => {
-            if (this.forceSync) {
-                this.setPuzzleEpilog(initialSequence, this._params.isReset);
-            } else {
-                this._opQueue.push(new PoseOp(
-                    this._targetPairs.length,
-                    () => this.setPuzzleEpilog(initialSequence, this._params.isReset)
-                ));
-            }
-            this._poseEditByTargetCb = null;
-        };
-
         this.poseEditByTarget(0);
+
+        if (this.forceSync) {
+            this.setPuzzleEpilog(initialSequence, this._params.isReset);
+        } else {
+            this._opQueue.push(new PoseOp(
+                this._targetPairs.length,
+                () => this.setPuzzleEpilog(initialSequence, this._params.isReset)
+            ));
+        }
 
         if (fdPromise) {
             // We defer reacting to the promise until now so that the PoseOps to set the target structure
@@ -3849,9 +3846,6 @@ export default class PoseEditMode extends GameMode {
                 this.updateScore();
                 this.transformPosesMarkers();
 
-                if (this._poseEditByTargetCb != null) {
-                    this._poseEditByTargetCb();
-                }
                 return;
             }
 
@@ -3928,10 +3922,6 @@ export default class PoseEditMode extends GameMode {
             return new Promise<void>((resolve) => {
                 this._opQueue.push(new PoseOp(null, resolve));
             });
-        }
-
-        if (this._poseEditByTargetCb != null) {
-            this._poseEditByTargetCb();
         }
     }
 
@@ -4363,7 +4353,6 @@ export default class PoseEditMode extends GameMode {
 
     // / Asynch folding
     private _opQueue: PoseOp[] = [];
-    private _poseEditByTargetCb: (() => void) | null = null;
     private _asynchText: Text;
     // / Undo stack
     private _stackLevel: number;
