@@ -775,7 +775,7 @@ export default class PoseEditMode extends GameMode {
         // Initialize sequence and/or solution as relevant
         let initialSequence: Sequence | null = null;
         let librarySelections: number[] = [];
-        let fdPromise: Promise<FoldData[] | null> | null = null;
+        let solutionFoldDataPromise: Promise<FoldData[] | null> | null = null;
         if (this._params.initSolution != null) {
             Assert.assertIsDefined(
                 this._params.solutions,
@@ -790,7 +790,7 @@ export default class PoseEditMode extends GameMode {
             librarySelections = this._params.initSolution.libraryNT;
             this._curSolutionIdx = this._params.solutions.indexOf(this._params.initSolution);
             this.showSolutionDetailsDialog(this._params.initSolution, true);
-            fdPromise = this._params.initSolution.queryFoldData();
+            solutionFoldDataPromise = this._params.initSolution.queryFoldData();
         } else if (this._params.initSequence != null && !this._puzzle.hasRscript) {
             initialSequence = Sequence.fromSequenceString(this._params.initSequence);
         }
@@ -899,6 +899,13 @@ export default class PoseEditMode extends GameMode {
             this._poses[ii].librarySelections = librarySelections;
         }
 
+        // Start loading the model file now instead of waiting for the initial
+        // fold to complete before doing it
+        const pose3DUrl = this._puzzle.threePath ? new URL(this._puzzle.threePath, Eterna.SERVER_URL) : null;
+        const pose3DCheckPromise = pose3DUrl
+            ? Pose3DDialog.checkModelFile(pose3DUrl.href, this._puzzle.getSecstruct(0).length)
+            : null;
+
         this.clearUndoStack();
 
         this.disableTools(true);
@@ -924,9 +931,40 @@ export default class PoseEditMode extends GameMode {
 
         this.poseEditByTarget(0);
 
-        // NB: forceSync is always false when we do our initial load
+        // From here on out, all of these things have to happen after the first fold completes.
+        // so we put them in the opQueue.
+        // NB: forceSync is always false when we do our initial load, so we don't need
+        // to have a syncronous version of any of this
+        // We split them into separate PoseOps so that the counter in the async text
+        // is more fine-grained (ie, you see more status updates if it winds up being slow).
         this._opQueue.push(new PoseOp(
-            this._targetPairs.length,
+            null,
+            async () => {
+                if (pose3DUrl && pose3DCheckPromise) {
+                    try {
+                        await pose3DCheckPromise;
+                        this.addPose3D(pose3DUrl.href);
+                    } catch (err) {
+                        this.showNotification(err);
+                    }
+                }
+            }
+        ));
+
+        this._opQueue.push(new PoseOp(
+            null,
+            async () => {
+                if (solutionFoldDataPromise) {
+                    const fd = await solutionFoldDataPromise;
+                    this.setSolutionTargetStructure(fd);
+                }
+            }
+        ));
+
+        // Only once the above are complete can we actually unlock the UI and tell the
+        // user we're ready
+        this._opQueue.push(new PoseOp(
+            null,
             () => {
                 if (!this._params.isReset) {
                     this._startSolvingTime = new Date().getTime();
@@ -948,31 +986,6 @@ export default class PoseEditMode extends GameMode {
                 this.ropPresets();
             }
         ));
-
-        if (fdPromise) {
-            // We defer reacting to the promise until now so that the PoseOps to set the target structure
-            // are after the PoseOps triggered by the initial poseEditByTarget above.
-            // The UI lock ensures that nothing could happen that would create additional UndoBlocks
-            // between the initial puzzle load and the target structures being set (which would mean
-            // thee target structure would be set on the wrong undo block)
-            const LOCK_NAME = 'initialTargetStructure';
-            this.pushUILock(LOCK_NAME);
-            fdPromise.then((fd) => {
-                this.setSolutionTargetStructure(fd);
-                this.popUILock(LOCK_NAME);
-            });
-        }
-
-        // add 3DWindow
-        const threePath = this._puzzle.threePath;
-        if (threePath) {
-            const url = new URL(threePath, Eterna.SERVER_URL);
-            Pose3DDialog.checkModelFile(url.href, this._puzzle.getSecstruct(0).length).then(() => {
-                this.addPose3D(url.href);
-            }).catch((err) => {
-                this.showNotification(err);
-            });
-        }
     }
 
     private setToolbarEventHandlers() {
