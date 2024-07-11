@@ -3329,7 +3329,6 @@ export default class PoseEditMode extends GameMode {
                 this._annotationManager.setSolutionAnnotations(annotations.solution);
             }
         }
-        this.poseEditByTarget(0);
         return true;
     }
 
