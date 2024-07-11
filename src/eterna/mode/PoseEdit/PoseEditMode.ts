@@ -922,14 +922,11 @@ export default class PoseEditMode extends GameMode {
 
         this.poseEditByTarget(0);
 
-        if (this.forceSync) {
-            this.setPuzzleEpilog(initialSequence, this._params.isReset);
-        } else {
-            this._opQueue.push(new PoseOp(
-                this._targetPairs.length,
-                () => this.setPuzzleEpilog(initialSequence, this._params.isReset)
-            ));
-        }
+        // NB: forceSync is always false when we do our initial load
+        this._opQueue.push(new PoseOp(
+            this._targetPairs.length,
+            () => this.setPuzzleEpilog(initialSequence, this._params.isReset)
+        ));
 
         if (fdPromise) {
             // We defer reacting to the promise until now so that the PoseOps to set the target structure
