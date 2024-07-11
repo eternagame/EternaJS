@@ -337,8 +337,8 @@ export default class SecStruct {
         pseudoknots: boolean = false): string {
         if (pseudoknots) {
             const dbn: string[] = new Array(this._pairs.length).fill('.');
-            const charsL = ['(', '{', '[', '<'];
-            const charsR = [')', '}', ']', '>'];
+            const charsL = ['(', '[', '{', '<'];
+            const charsR = [')', ']', '}', '>'];
             // Add a-z (left)/A-Z (right)
             for (let i = 0; i < 26; i++) {
                 charsL.push(String.fromCharCode(i + 97));

@@ -130,7 +130,7 @@ test(`NuPACK:PK_foldSequence`, () => {
 
             expect(pairs).toBeDefined();
             expect(pairs!.getParenthesis(null, true))
-                .toEqual("(((....))).......(((((((((...{{{{{..)))))))))((((((((((.........))).)))))))....}}}}}....");
+                .toEqual("(((....))).......(((((((((...[[[[[..)))))))))((((((((((.........))).)))))))....]]]]]....");
         }))
         .resolves.toBeUndefined(); // (we're returning a promise)
 });
@@ -156,7 +156,7 @@ test(`NuPACK:PK_fold1L2X`, () => {
 
             expect(pairs).toBeDefined();
             expect(pairs!.getParenthesis(null, true))
-                .toEqual("..(((((..{{{{)))))......}}}}");
+                .toEqual("..(((((..[[[[)))))......]]]]");
         }))
         .resolves.toBeUndefined(); // (we're returning a promise)
 });
