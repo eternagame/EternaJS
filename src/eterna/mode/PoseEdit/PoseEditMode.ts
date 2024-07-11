@@ -944,7 +944,6 @@ export default class PoseEditMode extends GameMode {
 
         // Setup RScript and execute the ROPPRE ops
         this._rscript = new RNAScript(this._puzzle, this);
-        this._rscript.tick();
 
         // RScript can set our initial poseState
         this._poseState = this._puzzle.defaultMode;
