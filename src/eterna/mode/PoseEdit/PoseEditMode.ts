@@ -409,10 +409,6 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    public publicStartCountdown(): void {
-        this.startCountdown();
-    }
-
     private onHelpClicked() {
         const getBounds = (elem: ContainerObject) => {
             const globalPos = elem.container.toGlobal(new Point());
