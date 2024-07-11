@@ -927,7 +927,26 @@ export default class PoseEditMode extends GameMode {
         // NB: forceSync is always false when we do our initial load
         this._opQueue.push(new PoseOp(
             this._targetPairs.length,
-            () => this.setPuzzleEpilog(initialSequence, this._params.isReset)
+            () => {
+                if (!this._params.isReset) {
+                    this._startSolvingTime = new Date().getTime();
+                }
+
+                if (this._params.isReset) {
+                    this.startPlaying();
+                } else if (initialSequence == null) {
+                    this.startCountdown();
+                } else if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
+                    // / Given init sequence (solution) in the lab, don't show mission animation - go straight to game
+                    this.startPlaying();
+                } else {
+                    this.startCountdown();
+                }
+
+                this.setPip(Eterna.settings.pipEnabled.value);
+
+                this.ropPresets();
+            }
         ));
 
         if (fdPromise) {
@@ -3319,27 +3338,6 @@ export default class PoseEditMode extends GameMode {
             }
         }
         return true;
-    }
-
-    private setPuzzleEpilog(initSeq: Sequence | null, isReset: boolean | undefined): void {
-        if (!isReset) {
-            this._startSolvingTime = new Date().getTime();
-        }
-
-        if (isReset) {
-            this.startPlaying();
-        } else if (initSeq == null) {
-            this.startCountdown();
-        } else if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
-            // / Given init sequence (solution) in the lab, don't show mission animation - go straight to game
-            this.startPlaying();
-        } else {
-            this.startCountdown();
-        }
-
-        this.setPip(Eterna.settings.pipEnabled.value);
-
-        this.ropPresets();
     }
 
     private checkConstraints(soft: boolean = false): boolean {
