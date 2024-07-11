@@ -355,9 +355,6 @@ export default class PuzzleEditMode extends GameMode {
 
             this.clearUndoStack();
             await this.poseEditByTarget(0);
-            for (const pose of this._poses) {
-                pose.updateHighlightsAndScores();
-            }
         });
 
         this.regs?.add(this._naturalButton.clicked.connect(() => this.setToNativeMode()));

@@ -1790,12 +1790,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.generateScoreNodes();
     }
 
-    public updateHighlightsAndScores(): void {
-        this._prevOffsetX = -1;
-        this._prevOffsetY = -1;
-        this.generateScoreNodes();
-    }
-
     public set showEnergyHighlight(display: boolean) {
         this._highlightEnergyText = display;
         this.generateScoreNodes();

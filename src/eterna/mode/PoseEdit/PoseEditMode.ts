@@ -2435,9 +2435,6 @@ export default class PoseEditMode extends GameMode {
     private onChangeFolder(): void {
         this.clearUndoStack();
         this.poseEditByTarget(0);
-        for (const pose of this._poses) {
-            pose.updateHighlightsAndScores();
-        }
     }
 
     private ropPresets(): void {
@@ -2610,7 +2607,7 @@ export default class PoseEditMode extends GameMode {
                                     this._targetOligosOrder[i] = undefined;
                                     this._targetPairs[i] = SecStruct.fromParens(this._puzzle.getSecstruct(i));
                                 }
-                                this.poseEditByTarget(this._isPipMode ? this._curTargetIndex : 0);
+                                await this.poseEditByTarget(this._isPipMode ? this._curTargetIndex : 0);
                                 return next();
                             } else if (confirmed === 'submit') {
                                 return next();
@@ -3820,7 +3817,7 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    private poseEditByTarget(targetIndex: number): void {
+    private async poseEditByTarget(targetIndex: number) {
         this.savePosesMarkersContexts();
 
         // Reorder oligos and reorganize structure constraints as needed
@@ -3859,7 +3856,7 @@ export default class PoseEditMode extends GameMode {
                 return;
             }
 
-            this.poseEditByTargetDoFold(targetIndex);
+            return this.poseEditByTargetDoFold(targetIndex);
         };
 
         this.pushUILock(LOCK_NAME);
@@ -3878,16 +3875,16 @@ export default class PoseEditMode extends GameMode {
         );
         if (sol != null && this._puzzle.hasTargetType('multistrand')) {
             this.showAsyncText('retrieving...');
-            sol.queryFoldData().then((result) => execfoldCB(result));
+            return sol.queryFoldData().then((result) => execfoldCB(result));
         } else {
-            execfoldCB(null);
+            return execfoldCB(null);
         }
         */
 
-        execfoldCB(null);
+        return execfoldCB(null);
     }
 
-    private poseEditByTargetDoFold(targetIndex: number): void {
+    private async poseEditByTargetDoFold(targetIndex: number) {
         this.showAsyncText('folding...');
         this.pushUILock(PoseEditMode.FOLDING_LOCK);
 
@@ -3928,6 +3925,10 @@ export default class PoseEditMode extends GameMode {
             this._opQueue.push(
                 new PoseOp(this._targetPairs.length + 1, () => this.poseEditByTargetEpilog(targetIndex))
             );
+
+            return new Promise<void>((resolve) => {
+                this._opQueue.push(new PoseOp(null, resolve));
+            });
         }
 
         if (this._poseEditByTargetCb != null) {
