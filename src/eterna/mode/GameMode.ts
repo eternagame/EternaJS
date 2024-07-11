@@ -168,7 +168,7 @@ export default abstract class GameMode extends AppMode {
         let lockDialog = this._uiLockRef.object as UILockDialog;
         if (lockDialog == null) {
             lockDialog = new UILockDialog();
-            this._uiLockRef = this.addObject(lockDialog, this.dialogLayer, 0);
+            this._uiLockRef = this.addObject(lockDialog, this.dialogLayer);
         }
 
         lockDialog.addRef(name);
