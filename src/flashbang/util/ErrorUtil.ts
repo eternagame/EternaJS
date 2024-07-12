@@ -11,7 +11,7 @@ export default class ErrorUtil {
     }
 
     /** Returns a reasonable string value for an error object, if possible */
-    public static getErrString(e: Error | ErrorEvent | null, includeStack = true): string {
+    public static getErrString(e: Error | ErrorEvent | string | null | unknown, includeStack = true): string {
         try {
             if (e == null) {
                 return 'Unknown error';
@@ -19,8 +19,16 @@ export default class ErrorUtil {
                 return includeStack && e.stack ? e.stack : e.message;
             } else if (e instanceof ErrorEvent) {
                 return e.error != null ? this.getErrString(e.error, includeStack) : e.message;
+            } else if (typeof e === 'string') {
+                return e;
+            } else if (typeof e === 'object') {
+                return `Unknown error type: object/${e.constructor.name}`;
+            } else if (typeof e === 'function') {
+                return `Unknown error type: function/${e.name}`;
+            } else if (typeof e === 'function') {
+                return `Unknown error type: function/${e.name}`;
             } else {
-                return ''; // unreachable, but necessary for return typechecker
+                return `Unknown error type: ${typeof e}`;
             }
         } catch (errStringError) {
             return 'Unknown error';
