@@ -1720,13 +1720,12 @@ export default class PoseEditMode extends GameMode {
         this._scriptInterface.addCallback(
             'set_target_structure_async',
             lockDuringFold(
-                (index: number, structure: string, startAt: number = 0): Promise<void> => new Promise((resolve) => {
+                async (index: number, structure: string, startAt: number = 0): Promise<void> => {
                     const pseudoknots = this._targetConditions && this._targetConditions[0]
                         && this._targetConditions[0]['type'] === 'pseudoknot';
 
-                    this.pasteTargetStructure(index, SecStruct.fromParens(structure, pseudoknots), startAt);
-                    this._opQueue.push(new PoseOp(null, () => resolve()));
-                })
+                    await this.pasteTargetStructure(index, SecStruct.fromParens(structure, pseudoknots), startAt);
+                }
             )
         );
 
@@ -2078,7 +2077,7 @@ export default class PoseEditMode extends GameMode {
         }));
     }
 
-    protected pasteTargetStructure(targetIndex: number, structure: SecStruct, startAt: number, poseIdx?: number) {
+    protected async pasteTargetStructure(targetIndex: number, structure: SecStruct, startAt: number, poseIdx?: number) {
         const structureConstraints = this._targetConditions[targetIndex]?.['structure_constraints'];
         if (structureConstraints === undefined) return;
 
@@ -2110,7 +2109,7 @@ export default class PoseEditMode extends GameMode {
         }
         this._targetPairs[targetIndex] = pairs;
 
-        this.poseEditByTarget((poseIdx && this._isPipMode) ? poseIdx : 0);
+        await this.poseEditByTarget((poseIdx && this._isPipMode) ? poseIdx : 0);
     }
 
     private openDesignBrowserForOurPuzzle(): void {
@@ -2421,11 +2420,11 @@ export default class PoseEditMode extends GameMode {
         this._toolbar.redoButton.enabled = !this._isFrozen && !(this._stackLevel + 1 > this._stackSize - 1);
         this._toolbar.freezeButton.toggled.value = this._isFrozen;
 
+        this._background.freezeBackground(this._isFrozen);
+
         if (!this._isFrozen) { // we just "thawed", update
             this.poseEditByTarget(this._curTargetIndex);
         }
-
-        this._background.freezeBackground(this._isFrozen);
     }
 
     // / This mode is strictly for internal use, not to be used by users
