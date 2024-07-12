@@ -3813,7 +3813,7 @@ export default class PoseEditMode extends GameMode {
 
         const LOCK_NAME = 'ExecFold';
 
-        const execfoldCB = async (fd: FoldData[] | null) => {
+        const execfoldCB = (fd: FoldData[] | null) => {
             this.hideAsyncText();
             this.popUILock(LOCK_NAME);
 
@@ -3835,7 +3835,7 @@ export default class PoseEditMode extends GameMode {
                 return;
             }
 
-            await this.poseEditByTargetDoFold(targetIndex);
+            return this.poseEditByTargetDoFold(targetIndex);
         };
 
         this.pushUILock(LOCK_NAME);
@@ -3854,17 +3854,16 @@ export default class PoseEditMode extends GameMode {
         );
         if (sol != null && this._puzzle.hasTargetType('multistrand')) {
             this.showAsyncText('retrieving...');
-            const fd = await sol.queryFoldData();
-            execfoldCB(fd);
+            return sol.queryFoldData().then((result) => execfoldCB(result));
         } else {
-            awaut execfoldCB(null);
+            return execfoldCB(null);
         }
         */
 
-        await execfoldCB(null);
+        return execfoldCB(null);
     }
 
-    private async poseEditByTargetDoFold(targetIndex: number) {
+    private poseEditByTargetDoFold(targetIndex: number) {
         this.showAsyncText('folding...');
         this.pushUILock(PoseEditMode.FOLDING_LOCK);
 
@@ -3884,6 +3883,7 @@ export default class PoseEditMode extends GameMode {
                 }
             }
             this.poseEditByTargetEpilog(targetIndex);
+            return Promise.resolve();
         } else {
             for (let ii = 0; ii < this._targetPairs.length; ii++) {
                 this._opQueue.push(new PoseOp(ii + 1, () => this.poseEditByTargetFoldTarget(ii, false)));
