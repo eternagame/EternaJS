@@ -469,38 +469,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public pasteSequence(sequence: Sequence): void {
-        if (sequence == null) {
-            return;
-        }
-
-        const n: number = Math.min(sequence.length, this._sequence.length);
-        let needUpdate = false;
-        const offset: number = (
-            this._oligo != null && this._oligoMode === OligoMode.EXT5P
-        ) ? this._oligo.length : 0;
-
-        // Without this, there is some weird behavior where pasting a sequence across multiple
-        // poses fails to update sequences on all poses. There may be a better fix for that.
-        this._sequence = this._sequence.slice(0);
-
-        for (let ii = 0; ii < n; ii++) {
-            if (sequence.nt(ii) === RNABase.UNDEFINED) continue;
-            if (this._sequence.nt(ii) !== sequence.nt(ii) && !this.isLocked(offset + ii)) {
-                this._sequence.setNt(ii, sequence.nt(ii));
-                this._bases[offset + ii].setType(sequence.nt(ii));
-                needUpdate = true;
-            }
-        }
-
-        if (needUpdate) {
-            this.checkPairs();
-            this.updateMolecule();
-            this.generateScoreNodes();
-            this.callPoseEditCallback();
-        }
-    }
-
     public getBaseLoc(seq: number, out: Point | null = null): Point {
         if (out == null) {
             out = new Point();
@@ -1411,7 +1379,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._redraw = true;
     }
 
-    public get puzzleLocks(): boolean[] | undefined {
+    public get puzzleLocks(): boolean[] {
         if (this._locks === undefined) {
             this._locks = Pose2D.createDefaultLocks(this._sequence.length);
         }

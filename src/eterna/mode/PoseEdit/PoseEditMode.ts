@@ -458,54 +458,50 @@ export default class PoseEditMode extends GameMode {
         }));
     }
 
-    private showSolution(solution: Solution): void {
+    private async showSolution(solution: Solution): Promise<void> {
         this.clearUndoStack();
         this.pushUILock();
 
-        const setSolution = (foldData: FoldData[] | null) => {
-            this.hideAsyncText();
-            this.popUILock();
-
-            if (foldData != null && (
-                foldData[0].folderName_ === this._folder.name
-                // Previously, we didn't record the folder name in the undo block.
-                // At that time, we only uploaded for nupack.
-                || (!foldData[0].folderName_ && this._folder.name === NuPACK.name)
-            )) {
-                this._stackLevel++;
-                this._stackSize = this._stackLevel + 1;
-                this._seqStacks[this._stackLevel] = [];
-
-                for (let ii = 0; ii < this._poses.length; ii++) {
-                    const undoBlock: UndoBlock = new UndoBlock(new Sequence([]), this._folder?.name ?? '');
-                    undoBlock.fromJSON(foldData[ii], this._puzzle.targetConditions[ii]);
-                    this._seqStacks[this._stackLevel][ii] = undoBlock;
-                }
-
-                this.savePosesMarkersContexts();
-                this.moveUndoStack();
-                this.updateScore();
-                this.transformPosesMarkers();
-            } else {
-                const sequence = solution.sequence;
-                for (const pose of this._poses) {
-                    pose.pasteSequence(sequence);
-                    pose.librarySelections = solution.libraryNT;
-                }
-                this.setSolutionTargetStructure(foldData);
-            }
-            this.setAncestorId(solution.nodeID);
-
-            const annotations = solution.annotations;
-            this._annotationManager.setSolutionAnnotations(annotations ?? []);
-        };
-
         this.showAsyncText('retrieving...');
-        solution.queryFoldData().then((result) => setSolution(result));
+        const foldData = await solution.queryFoldData();
+        this.hideAsyncText();
+        this.popUILock();
+
+        if (foldData != null && (
+            foldData[0].folderName_ === this._folder.name
+            // Previously, we didn't record the folder name in the undo block.
+            // At that time, we only uploaded for nupack.
+            || (!foldData[0].folderName_ && this._folder.name === NuPACK.name)
+        )) {
+            this._stackLevel++;
+            this._stackSize = this._stackLevel + 1;
+            this._seqStacks[this._stackLevel] = [];
+
+            for (let ii = 0; ii < this._poses.length; ii++) {
+                const undoBlock: UndoBlock = new UndoBlock(new Sequence([]), this._folder?.name ?? '');
+                undoBlock.fromJSON(foldData[ii], this._puzzle.targetConditions[ii]);
+                this._seqStacks[this._stackLevel][ii] = undoBlock;
+            }
+
+            this.savePosesMarkersContexts();
+            this.moveUndoStack();
+            this.updateScore();
+            this.transformPosesMarkers();
+        } else {
+            for (const pose of this._poses) {
+                pose.librarySelections = solution.libraryNT;
+            }
+            await this.pasteSequence(solution.sequence);
+            this.setSolutionTargetStructure(foldData);
+        }
+        this.setAncestorId(solution.nodeID);
+
+        const annotations = solution.annotations;
+        this._annotationManager.setSolutionAnnotations(annotations ?? []);
     }
 
     private setSolutionTargetStructure(foldData: FoldData[] | null) {
-        const setTarget = (ii: number) => {
+        for (let ii = 0; ii < this._targetPairs.length; ii++) {
             // pose.pasteSequence resulted in a new undo block being created, filled with the folding
             // engine computations. We want to surgically update just the target structure to match the
             // solution. If freeze mode is enabled however, an undo block won't be created in the stack.
@@ -529,16 +525,6 @@ export default class PoseEditMode extends GameMode {
                 }
                 this.updateScore();
                 this.transformPosesMarkers();
-            }
-        };
-        for (let ii = 0; ii < this._targetPairs.length; ii++) {
-            // Yay, we get to deal with "async folding". Basically if we're not doing everything
-            // synchronously, the latest undo block won't actually be available yet, so we'll just
-            // push another task to the queue after the folding actually finishes
-            if (this.forceSync) {
-                setTarget(ii);
-            } else {
-                this._opQueue.push(new PoseOp(ii + 1, () => setTarget(ii)));
             }
         }
     }
@@ -1690,9 +1676,7 @@ export default class PoseEditMode extends GameMode {
                     }
                     const prevForceSync = this.forceSync;
                     this.forceSync = true;
-                    for (const pose of this._poses) {
-                        pose.pasteSequence(sequence);
-                    }
+                    this.pasteSequence(sequence);
                     this.forceSync = prevForceSync;
                     return true;
                 }
@@ -1702,17 +1686,15 @@ export default class PoseEditMode extends GameMode {
         this._scriptInterface.addCallback(
             'set_sequence_string_async',
             lockDuringFold(
-                (seq: string): Promise<boolean> => new Promise((resolve) => {
+                async (seq: string): Promise<boolean> => {
                     const sequence: Sequence = Sequence.fromSequenceString(seq);
                     if (sequence.findUndefined() >= 0 || sequence.findCut() >= 0) {
                         log.info(`Invalid characters in ${seq}`);
-                        resolve(false);
+                        return false;
                     }
-                    for (const pose of this._poses) {
-                        pose.pasteSequence(sequence);
-                    }
-                    this._opQueue.push(new PoseOp(null, () => resolve(true)));
-                })
+                    await this.pasteSequence(sequence);
+                    return true;
+                }
             )
         );
 
@@ -1872,8 +1854,8 @@ export default class PoseEditMode extends GameMode {
             : this._curSolutionIdx;
 
         const newSolution = this._params.solutions[newCurrentIdx];
-        this.showSolution(newSolution);
         this.showSolutionDetailsDialog(newSolution);
+        this.showSolution(newSolution);
     }
 
     private showNextSolution(indexOffset: number): void {
@@ -1888,10 +1870,10 @@ export default class PoseEditMode extends GameMode {
             nextSolutionIdx = this._params.solutions.length + nextSolutionIdx;
         }
 
-        const solution = this._params.solutions[nextSolutionIdx];
-        this.showSolution(solution);
-        this.showSolutionDetailsDialog(solution);
         this._curSolutionIdx = nextSolutionIdx;
+        const solution = this._params.solutions[nextSolutionIdx];
+        this.showSolutionDetailsDialog(solution);
+        this.showSolution(solution);
     }
 
     public showSolutionDetailsDialog(solution: Solution, forceShow: boolean = false): void {
@@ -3816,7 +3798,7 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    private async poseEditByTarget(targetIndex: number) {
+    protected async poseEditByTarget(targetIndex: number) {
         this.savePosesMarkersContexts();
 
         // Reorder oligos and reorganize structure constraints as needed

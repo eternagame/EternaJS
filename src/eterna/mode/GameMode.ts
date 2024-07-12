@@ -640,9 +640,7 @@ export default abstract class GameMode extends AppMode {
         // Already live
         if (!pasteDialog) return;
         pasteDialog.applyClicked.connect((sequence) => {
-            for (const pose of this._poses) {
-                pose.pasteSequence(sequence);
-            }
+            this.pasteSequence(sequence);
         });
     }
 
@@ -688,6 +686,27 @@ export default abstract class GameMode extends AppMode {
         factorDialog.factor.connect((factor) => {
             this._poseFields.forEach((pf) => { pf.explosionFactor = factor; });
         });
+    }
+
+    public async pasteSequence(pasteSequence: Sequence) {
+        if (pasteSequence == null) return;
+
+        // All poses have the same sequence, so we'll pick the first one
+        const newSequence = this._poses[0].sequence.slice(0);
+        const locks = this._poses[0].puzzleLocks;
+        const lengthToPaste: number = Math.min(pasteSequence.length, newSequence.length);
+        for (let ii = 0; ii < lengthToPaste; ii++) {
+            if (!locks[ii]) {
+                newSequence.setNt(ii, pasteSequence.nt(ii));
+            }
+        }
+
+        for (const pose of this._poses) {
+            pose.sequence = newSequence;
+        }
+
+        // We'll semi-arbitrarily decide that this update was "triggered" by the first pose
+        await this.poseEditByTarget(0);
     }
 
     public onKeyboardEvent(e: KeyboardEvent): boolean {
@@ -775,6 +794,8 @@ export default abstract class GameMode extends AppMode {
     protected getCurrentTargetPairs(_index: number): SecStruct | undefined {
         return undefined;
     }
+
+    protected async poseEditByTarget(_index: number): Promise<void> {}
 
     protected _targetPairs: SecStruct[];
 
