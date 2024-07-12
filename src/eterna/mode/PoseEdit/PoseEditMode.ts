@@ -3563,6 +3563,12 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
+    /**
+     * Check a pose for pending "magic glue" operations. If it's in a state where the magic
+     * glue can be applied, figure out how the target structure should be modified and apply it
+     *
+     * @param targetIndex The pose index to check for potential target updates
+     */
     private establishTargetPairs(targetIndex: number): void {
         const xx: number = this._isPipMode ? targetIndex : this._curTargetIndex;
         const pairsxx = this._targetPairs[xx];
@@ -3700,118 +3706,132 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    private processBaseShifts(targetIndex: number): void {
+    /**
+     * After a pose edit operation has been initiated from a given pose, update all
+     * other pose with the changes made to that pose (eg, mutations)
+     *
+     * @param targetIndex The index of the pose which was originally modified
+     */
+    private syncUpdatesFromPose(targetIndex: number): void {
         const lastShiftedIndex: number = this._poses[targetIndex].lastShiftedIndex;
         const lastShiftedCommand: number = this._poses[targetIndex].lastShiftedCommand;
         for (let ii = 0; ii < this._poses.length; ii++) {
-            if (lastShiftedIndex <= 0 || lastShiftedCommand < 0) {
-                this._poses[ii].sequence = this._poses[targetIndex].sequence;
-                this._poses[ii].puzzleLocks = this._poses[targetIndex].puzzleLocks;
-                this._poses[ii].librarySelections = this._poses[targetIndex].librarySelections;
-                continue;
-            }
-
-            if (ii !== targetIndex) {
-                this._poses[ii].baseShiftWithCommand(lastShiftedCommand, lastShiftedIndex);
-            }
-
-            const results: [string, PuzzleEditOp, number[]?] | null = this._poses[ii].parseCommandWithPairs(
-                lastShiftedCommand, lastShiftedIndex, this._targetPairs[ii]
-            );
-            if (results != null) {
-                const parenthesis: string = results[0];
-                this._targetPairs[ii] = SecStruct.fromParens(parenthesis);
-            }
-
-            // Adjust indices for all constraints in TargetConditions
-            const tc = this._targetConditions[ii] as TargetConditions;
-            const antiStructureConstraints = tc['anti_structure_constraints'];
-            if (antiStructureConstraints !== undefined) {
-                if (lastShiftedCommand === RNAPaint.ADD_BASE) {
-                    const antiStructureConstraint: boolean = antiStructureConstraints[lastShiftedIndex];
-                    antiStructureConstraints.splice(lastShiftedIndex, 0, antiStructureConstraint);
-                } else if (lastShiftedCommand === RNAPaint.DELETE) {
-                    antiStructureConstraints.splice(lastShiftedIndex, 1);
+            // Before syncing any other data, handle shifting first since that would add or remove bases
+            if (lastShiftedIndex > 0 && lastShiftedCommand >= 0) {
+                if (ii !== targetIndex) {
+                    this._poses[ii].baseShiftWithCommand(lastShiftedCommand, lastShiftedIndex);
                 }
-            }
 
-            const structureConstraints = tc['structure_constraints'];
-            if (structureConstraints !== undefined) {
-                const constraintVal: boolean = structureConstraints[lastShiftedIndex];
-                let newConstraints: boolean[];
-
-                if (lastShiftedCommand === RNAPaint.ADD_BASE) {
-                    newConstraints = structureConstraints.slice(0, lastShiftedIndex);
-                    newConstraints.push(constraintVal);
-                    newConstraints = newConstraints.concat(
-                        structureConstraints.slice(lastShiftedIndex, structureConstraints.length)
-                    );
-                } else {
-                    newConstraints = structureConstraints.slice(0, lastShiftedIndex);
-                    newConstraints = newConstraints.concat(
-                        structureConstraints.slice(lastShiftedIndex + 1, structureConstraints.length)
-                    );
-                }
-                tc['structure_constraints'] = newConstraints;
-            }
-
-            const antiSecstruct: string | undefined = tc['anti_secstruct'];
-            if (antiSecstruct != null) {
-                const antiPairs: SecStruct = SecStruct.fromParens(antiSecstruct);
-                const antiResult: [string, PuzzleEditOp, number[]?] | null = this._poses[ii].parseCommandWithPairs(
-                    lastShiftedCommand, lastShiftedIndex, antiPairs
+                const results: [string, PuzzleEditOp, number[]?] | null = this._poses[ii].parseCommandWithPairs(
+                    lastShiftedCommand, lastShiftedIndex, this._targetPairs[ii]
                 );
-                if (antiResult) tc['anti_secstruct'] = antiResult[0];
-            }
+                if (results != null) {
+                    const parenthesis: string = results[0];
+                    this._targetPairs[ii] = SecStruct.fromParens(parenthesis);
+                }
 
-            if (tc['type'] === 'aptamer') {
-                const bindingSite: number[] = (tc['site'] as number[]).slice(0);
-                const bindingPairs: number[] = [];
-                if (lastShiftedCommand === RNAPaint.ADD_BASE) {
-                    for (let ss = 0; ss < bindingSite.length; ss++) {
-                        if (bindingSite[ss] >= lastShiftedIndex) {
-                            bindingSite[ss]++;
-                        }
-                    }
-
-                    for (let jj = 0; jj < bindingSite.length; jj++) {
-                        bindingPairs.push(this._targetPairs[ii].pairingPartner(bindingSite[jj]));
-                    }
-                } else {
-                    for (let ss = 0; ss < bindingSite.length; ss++) {
-                        if (bindingSite[ss] >= lastShiftedIndex) {
-                            bindingSite[ss]--;
-                        }
-                    }
-
-                    for (let jj = 0; jj < bindingSite.length; jj++) {
-                        bindingPairs.push(this._targetPairs[ii].pairingPartner(bindingSite[jj]));
+                // Adjust indices for all constraints in TargetConditions
+                const tc = this._targetConditions[ii] as TargetConditions;
+                const antiStructureConstraints = tc['anti_structure_constraints'];
+                if (antiStructureConstraints !== undefined) {
+                    if (lastShiftedCommand === RNAPaint.ADD_BASE) {
+                        const antiStructureConstraint: boolean = antiStructureConstraints[lastShiftedIndex];
+                        antiStructureConstraints.splice(lastShiftedIndex, 0, antiStructureConstraint);
+                    } else if (lastShiftedCommand === RNAPaint.DELETE) {
+                        antiStructureConstraints.splice(lastShiftedIndex, 1);
                     }
                 }
 
-                tc['site'] = bindingSite;
-                tc['binding_pairs'] = bindingPairs;
+                const structureConstraints = tc['structure_constraints'];
+                if (structureConstraints !== undefined) {
+                    const constraintVal: boolean = structureConstraints[lastShiftedIndex];
+                    let newConstraints: boolean[];
+
+                    if (lastShiftedCommand === RNAPaint.ADD_BASE) {
+                        newConstraints = structureConstraints.slice(0, lastShiftedIndex);
+                        newConstraints.push(constraintVal);
+                        newConstraints = newConstraints.concat(
+                            structureConstraints.slice(lastShiftedIndex, structureConstraints.length)
+                        );
+                    } else {
+                        newConstraints = structureConstraints.slice(0, lastShiftedIndex);
+                        newConstraints = newConstraints.concat(
+                            structureConstraints.slice(lastShiftedIndex + 1, structureConstraints.length)
+                        );
+                    }
+                    tc['structure_constraints'] = newConstraints;
+                }
+
+                const antiSecstruct: string | undefined = tc['anti_secstruct'];
+                if (antiSecstruct != null) {
+                    const antiPairs: SecStruct = SecStruct.fromParens(antiSecstruct);
+                    const antiResult: [string, PuzzleEditOp, number[]?] | null = this._poses[ii].parseCommandWithPairs(
+                        lastShiftedCommand, lastShiftedIndex, antiPairs
+                    );
+                    if (antiResult) tc['anti_secstruct'] = antiResult[0];
+                }
+
+                if (tc['type'] === 'aptamer') {
+                    const bindingSite: number[] = (tc['site'] as number[]).slice(0);
+                    const bindingPairs: number[] = [];
+                    if (lastShiftedCommand === RNAPaint.ADD_BASE) {
+                        for (let ss = 0; ss < bindingSite.length; ss++) {
+                            if (bindingSite[ss] >= lastShiftedIndex) {
+                                bindingSite[ss]++;
+                            }
+                        }
+
+                        for (let jj = 0; jj < bindingSite.length; jj++) {
+                            bindingPairs.push(this._targetPairs[ii].pairingPartner(bindingSite[jj]));
+                        }
+                    } else {
+                        for (let ss = 0; ss < bindingSite.length; ss++) {
+                            if (bindingSite[ss] >= lastShiftedIndex) {
+                                bindingSite[ss]--;
+                            }
+                        }
+
+                        for (let jj = 0; jj < bindingSite.length; jj++) {
+                            bindingPairs.push(this._targetPairs[ii].pairingPartner(bindingSite[jj]));
+                        }
+                    }
+
+                    tc['site'] = bindingSite;
+                    tc['binding_pairs'] = bindingPairs;
+                }
             }
 
+            // In all cases, update these properties from the pose that was originally updated
             this._poses[ii].sequence = this._poses[targetIndex].sequence;
             this._poses[ii].puzzleLocks = this._poses[targetIndex].puzzleLocks;
             this._poses[ii].librarySelections = this._poses[targetIndex].librarySelections;
         }
     }
 
+    /**
+     * Handler that responds to a given pose (ie, for a particular target) has been updated
+     * (edited). Responsible for syncing the change across poses, refolding, creating a new
+     * undo block, etc.
+     *
+     * If this._forceSync is true, completes syncronously. If false, resolves once all operations
+     * are complete.
+     *
+     * @param targetIndex The index of the pose which a change was made in
+     */
     protected async poseEditByTarget(targetIndex: number) {
         this.savePosesMarkersContexts();
 
         // Reorder oligos and reorganize structure constraints as needed
         this.establishTargetPairs(targetIndex);
         // Ditto but for base shifts
-        this.processBaseShifts(targetIndex);
+        this.syncUpdatesFromPose(targetIndex);
 
         if (this._isFrozen) {
             return;
         }
 
         const LOCK_NAME = 'ExecFold';
+        this.pushUILock(LOCK_NAME);
 
         const execfoldCB = (fd: FoldData[] | null) => {
             this.hideAsyncText();
@@ -3838,8 +3858,6 @@ export default class PoseEditMode extends GameMode {
             return this.poseEditByTargetDoFold(targetIndex);
         };
 
-        this.pushUILock(LOCK_NAME);
-
         // JAR: We're now uploading data across multiple engines from the submitter for post-hoc analysis and solution
         // loading, and we don't have a good way of dealing with that, so we're going to avoid just loading the
         // solution cache, at least for now. If you attempt to add this later, don't forget that:
@@ -3863,6 +3881,15 @@ export default class PoseEditMode extends GameMode {
         return execfoldCB(null);
     }
 
+    /**
+     * Runs folding operations after a state update, followed by a UI update.
+     *
+     * If this._forceSync is true, completes syncronously. If false, operations are pushed to this._opQueue,
+     * such that every update/game tick we try to complete some work and update a status indicator
+     * (yielding the event loop occasionally when possible to limit UI freezing), and resolves once complete.
+     *
+     * @param targetIndex The index of the pose which a change was made in
+     */
     private poseEditByTargetDoFold(targetIndex: number) {
         this.showAsyncText('folding...');
         this.pushUILock(PoseEditMode.FOLDING_LOCK);
@@ -3912,6 +3939,13 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
+    /**
+     * Performs folding operations for a given target/state and pushes a new UndoBlock with the result.
+     *
+     * @param ii The index of the target/(switch) state to fold
+     * @param sync Whether we have to run folding syncronously or not. If true, we can't use
+     * asyncronous folders. If false, we `await` the fold result.
+     */
     private poseEditByTargetFoldTarget(ii: number, sync: true): void
     private async poseEditByTargetFoldTarget(ii: number, sync: false): Promise<void>
     private async poseEditByTargetFoldTarget(ii: number, sync: boolean): Promise<void> {
@@ -4099,6 +4133,11 @@ export default class PoseEditMode extends GameMode {
         this._seqStacks[this._stackLevel][ii] = undoBlock;
     }
 
+    /**
+     * Perform all UI and additional state updates necessary after folding completes.
+     *
+     * @param targetIndex The index of the pose that was originally updated
+     */
     private poseEditByTargetEpilog(targetIndex: number): void {
         this.hideAsyncText();
         this.popUILock(PoseEditMode.FOLDING_LOCK);
