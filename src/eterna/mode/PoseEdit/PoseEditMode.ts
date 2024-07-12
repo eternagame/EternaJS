@@ -3813,7 +3813,7 @@ export default class PoseEditMode extends GameMode {
 
         const LOCK_NAME = 'ExecFold';
 
-        const execfoldCB = (fd: FoldData[] | null) => {
+        const execfoldCB = async (fd: FoldData[] | null) => {
             this.hideAsyncText();
             this.popUILock(LOCK_NAME);
 
@@ -3835,7 +3835,7 @@ export default class PoseEditMode extends GameMode {
                 return;
             }
 
-            return this.poseEditByTargetDoFold(targetIndex);
+            await this.poseEditByTargetDoFold(targetIndex);
         };
 
         this.pushUILock(LOCK_NAME);
@@ -3854,13 +3854,14 @@ export default class PoseEditMode extends GameMode {
         );
         if (sol != null && this._puzzle.hasTargetType('multistrand')) {
             this.showAsyncText('retrieving...');
-            return sol.queryFoldData().then((result) => execfoldCB(result));
+            const fd = await sol.queryFoldData();
+            execfoldCB(fd);
         } else {
-            return execfoldCB(null);
+            awaut execfoldCB(null);
         }
         */
 
-        return execfoldCB(null);
+        await execfoldCB(null);
     }
 
     private async poseEditByTargetDoFold(targetIndex: number) {
