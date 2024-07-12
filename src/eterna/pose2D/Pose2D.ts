@@ -253,6 +253,34 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }));
     }
 
+    public worldToScreenPosition(
+        worldPosition: Point,
+        offset: Point | null = null,
+        zoomLevel: number | null = null
+    ): Point {
+        zoomLevel ??= this.zoomLevel;
+        offset ??= this._offset;
+        const spacing = Pose2D.ZOOM_SPACINGS[zoomLevel];
+        return new Point(
+            offset.x + worldPosition.x * spacing,
+            offset.y + worldPosition.y * spacing
+        );
+    }
+
+    public screenToWorldPosition(
+        screenPosition: Point,
+        offset: Point | null = null,
+        zoomLevel: number | null = null
+    ): Point {
+        zoomLevel ??= this.zoomLevel;
+        offset ??= this._offset;
+        const spacing = Pose2D.ZOOM_SPACINGS[zoomLevel];
+        return new Point(
+            (screenPosition.x - offset.x) / spacing,
+            (screenPosition.y - offset.y) / spacing
+        );
+    }
+
     public setSize(width: number, height: number): void {
         this._width = width;
         this._height = height;
@@ -312,44 +340,79 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public get zoomLevel(): number {
         return this._zoomLevel;
     }
+    
+    public focusOnScreenPoint(screenPoint: Point) {
+        // Guy TODO: Should I use .set/.copyFrom or `=`?
+        this._startOffset = this._offset.clone();
+        this._endOffset = screenPoint.clone();
+    }
 
+    private zoomOntoMouse(newZoomLevel: number){
+        // Guy TODO: should this be different? I need to respect if the mosue moved
+        // also what if the user presses the button?
+        // also what if the user drags in the middle of the zoom?
+        /** The offset after the current animation finishes */
+        const effectiveOffset = this._animatingZoom ? this._endOffset : this._offset;
+
+        const oldMouseScreenPosition = Pose2D.P;
+        const mouseWorldPosition = this.screenToWorldPosition(
+            oldMouseScreenPosition,
+            effectiveOffset,
+            this.zoomLevel
+        );
+        const newMouseScreenPosition = this.worldToScreenPosition(
+            mouseWorldPosition,
+            effectiveOffset,
+            newZoomLevel
+        );
+
+        // The mouse should stay at the same point in space before and after zooming,
+        // so move the offset to cancel the mouse movement.
+        this.focusOnScreenPoint(new Point(
+            effectiveOffset.x + oldMouseScreenPosition.x - newMouseScreenPosition.x,
+            effectiveOffset.y + oldMouseScreenPosition.y - newMouseScreenPosition.y
+        ));
+    }
+
+    /**
+     * @param animate should the zoom happen in an animation over time, instead of instantaniously
+     * @param center should the camera move to the center of the screen
+     */
     public setZoomLevel(zoomLevel: number, animate: boolean = true, center: boolean = false): void {
-        if ((this._zoomLevel !== zoomLevel || center) && animate) {
-            if (this._zoomLevel === zoomLevel && center) {
-                if (Math.abs(this._width / 2 - this._offX) + Math.abs(this._height / 2 - this._offY) < 50) {
+        console.trace();
+        // I need to extract the inner logic to make sure I can use it in any way I want:
+        // * Just set the zoom level and the target offset (don't calculate the mouse at all)
+        //  * potential: Just set the zoom level, and zoom according to any arbitrary focus?
+        // * Zoom in / out on the mouse
+        // * Zoom in / out on an arbitrary point
+        // * Zoom in / out on the center of the RNA
+        const needsToZoom = this._zoomLevel !== zoomLevel;
+        if ((needsToZoom || center) && animate) {
+            if (!needsToZoom && center) {
+                const squaredDistanceFromCenter = (this._width / 2 - this._offset.x) ** 2
+                    + (this._height / 2 - this._offset.y) ** 2;
+                if (squaredDistanceFromCenter < 50 ** 2) {
                     return;
                 }
             }
 
-            this._startOffsetX = this._offX;
-            this._startOffsetY = this._offY;
-
-            let scaler = 1;
-            if (zoomLevel > this._zoomLevel) {
-                scaler = Pose2D.ZOOM_SPACINGS[zoomLevel] / Pose2D.ZOOM_SPACINGS[this._zoomLevel];
-            }
-
-            if (!this._offsetTranslating && !center) {
-                this._endOffsetX = scaler * (this._offX - this._width / 2) + this._width / 2;
-                this._endOffsetY = scaler * (this._offY - this._height / 2) + this._height / 2;
-            } else if (this._offsetTranslating) {
-                this._endOffsetX = scaler * (this._endOffsetX - this._width / 2) + this._width / 2;
-                this._endOffsetY = scaler * (this._endOffsetY - this._height / 2) + this._height / 2;
+            if (center) {
+                this.focusOnScreenPoint(new Point(this._width / 2, this._height / 2));
             } else {
-                this._endOffsetX = this._width / 2;
-                this._endOffsetY = this._height / 2;
+                this.zoomOntoMouse(zoomLevel);
             }
 
-            this._offsetTranslating = true;
+            this._animatingZoom = true;
 
-            this._zoomLevel = zoomLevel;
-            this.computeLayout(true);
-            this._redraw = true;
-        } else if (this._zoomLevel !== zoomLevel) {
-            this._zoomLevel = zoomLevel;
-            this.computeLayout(true);
-            this._redraw = true;
         }
+        // Guy TODO: make sure that I didn't break anything here
+        // I think that I made it still happen if all 3 values are false? might just wrap everything in an if or add a return at the start
+        // Guy TODO: Where should _zoomLevel = zoomLevel sit?
+        this._zoomLevel = zoomLevel;
+        // Guy TODO: What do these 2 lines do? is it just because I changed the zoomLevel, or also because I changed the offset?
+        // If it's because I change the offset, can I put that in setOffset?
+        this.computeLayout(true);
+        this._redraw = true;
     }
 
     public computeDefaultZoomLevel(): number {
@@ -505,8 +568,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (out == null) {
             out = new Point();
         }
-        out.x = this._bases[seq].x + this._offX;
-        out.y = this._bases[seq].y + this._offY;
+        out.x = this._bases[seq].x + this._offset.x;
+        out.y = this._bases[seq].y + this._offset.y;
         return out;
     }
 
@@ -532,8 +595,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public getBaseOutXY(seq: number, out: Point | null = null): Point {
         out = this._bases[seq].getOutXY(out);
-        out.x += this._offX;
-        out.y += this._offY;
+        out.x += this._offset.x;
+        out.y += this._offset.y;
         return out;
     }
 
@@ -1189,16 +1252,16 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (!this._targetPairs.isPaired(startIdx)) {
                 // Update individual base coordinates.
                 this._bases[startIdx].setXY(
-                    (mouseX - this._offX),
-                    (mouseY - this._offY)
+                    (mouseX - this._offset.x),
+                    (mouseY - this._offset.y)
                 );
 
                 // Update the customLayout in the same way.
                 // Actually, after writing this, I no longer know why it works.
                 for (let ii = 0; ii < localCustomLayout.length; ++ii) {
                     localCustomLayout[startIdx] = [
-                        localCustomLayout[ii][0] as number + (mouseX - this._offX) - this._bases[ii].x,
-                        localCustomLayout[ii][1] as number + (mouseY - this._offY) - this._bases[ii].y
+                        localCustomLayout[ii][0] as number + (mouseX - this._offset.x) - this._bases[ii].x,
+                        localCustomLayout[ii][1] as number + (mouseY - this._offset.y) - this._bases[ii].y
                     ];
                 }
 
@@ -1211,8 +1274,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 for (const bp of stem) {
                     for (const idx of bp) {
                         this._bases[idx].setXY(
-                            mouseX + this._bases[idx].x - origX - this._offX,
-                            mouseY + this._bases[idx].y - origY - this._offY
+                            mouseX + this._bases[idx].x - origX - this._offset.x,
+                            mouseY + this._bases[idx].y - origY - this._offset.y
                         );
                         this._bases[idx].setDirty();
 
@@ -1242,7 +1305,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         const fullSeqLen = this.fullSequenceLength;
         for (let ii = 0; ii < fullSeqLen; ii++) {
             const mouseDist: number = this._bases[ii].isClicked(
-                mouseX - this._offX, mouseY - this._offY, this._zoomLevel, this._coloring
+                mouseX - this._offset.x, mouseY - this._offset.y, this._zoomLevel, this._coloring
             );
             if (mouseDist >= 0) {
                 if (closestIndex < 0 || mouseDist < closestDist) {
@@ -1289,8 +1352,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (!this._coloring) {
             this.clearMouse();
         }
-        const mouseX = this._bases[closestIndex].x + this._offX;
-        const mouseY = this._bases[closestIndex].y + this._offY;
+        const mouseX = this._bases[closestIndex].x + this._offset.x;
+        const mouseY = this._bases[closestIndex].y + this._offset.y;
 
         this._paintCursor.display.x = mouseX;
         this._paintCursor.display.y = mouseY;
@@ -1369,11 +1432,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public get xOffset(): number {
-        return this._offX;
+        return this._offset.x;
     }
 
     public get yOffset(): number {
-        return this._offY;
+        return this._offset.y;
     }
 
     public setOffset(offX: number, offY: number): void {
@@ -1384,8 +1447,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._annotationDialog.display.x -= (this.xOffset - offX);
             this._annotationDialog.display.y -= (this.yOffset - offY);
         }
-        this._offX = offX;
-        this._offY = offY;
+        this._offset.x = offX;
+        this._offset.y = offY;
         this._redraw = true;
     }
 
@@ -1791,8 +1854,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public updateHighlightsAndScores(): void {
-        this._prevOffsetX = -1;
-        this._prevOffsetY = -1;
+        this._prevOffset = new Point(-1, -1);
         this.generateScoreNodes();
     }
 
@@ -2127,7 +2189,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             const fullSeqLen = this.fullSequenceLength;
             for (let ii = 0; ii < fullSeqLen; ii++) {
                 const mouseDist: number = this._bases[ii].isClicked(
-                    mouseX - this._offX, mouseY - this._offY, this._zoomLevel, false
+                    mouseX - this._offset.x, mouseY - this._offset.y, this._zoomLevel, false
                 );
                 if (mouseDist >= 0) {
                     if (closestIndex < 0 || mouseDist < closestDist) {
@@ -2857,7 +2919,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
 
             this._bases[ii].setDrawParams(
-                this._zoomLevel, this._offX, this._offY, currentTime, drawFlags, numberBitmap, hlState
+                this._zoomLevel, this._offset.x, this._offset.y, currentTime, drawFlags, numberBitmap, hlState
             );
         }
     }
@@ -2908,19 +2970,24 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
             if (prog >= 1) {
                 prog = 1;
-                this._offsetTranslating = false;
+            }
+
+            if (this._animatingZoom) {
+                this._redraw = true;
+                this.setOffset(
+                    prog * this._endOffset.x + (1 - prog) * this._startOffset.x,
+                    prog * this._endOffset.y + (1 - prog) * this._startOffset.y
+                );
+            }
+
+            if (prog >= 1) {
+                this._animatingZoom = false;
 
                 this.redrawAnnotations();
             } else {
                 // Don't show annotations while animating. If we recomputed it each frame it would
                 // be laggy, if we don't the annotation locations may be in visually bizarre locations
                 this.clearAnnotationCanvas();
-            }
-
-            if (this._offsetTranslating) {
-                this._redraw = true;
-                this._offX = prog * this._endOffsetX + (1 - prog) * this._startOffsetX;
-                this._offY = prog * this._endOffsetY + (1 - prog) * this._startOffsetY;
             }
 
             this.setAnimationProgress(prog);
@@ -2935,7 +3002,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         // Update score node
-        this.updateScoreNodeVisualization(this._offX !== this._prevOffsetX || this._offY !== this._prevOffsetY);
+        this.updateScoreNodeVisualization(!this._offset.equals(this._prevOffset));
 
         // / Bitblt rendering
         const needRedraw = this._bases.some(
@@ -3070,7 +3137,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         // / Praise stacks when RNA is not moving
-        if (!this._offsetTranslating && this._baseToX == null) {
+        if (!this._animatingZoom && this._baseToX == null) {
             if (this._praiseQueue.length > 0) {
                 for (let ii = 0; ii < this._praiseQueue.length; ii += 2) {
                     this.onPraiseStack(
@@ -3088,15 +3155,16 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        if (this._isExploding && !this._offsetTranslating && this._baseToX == null) {
+        if (this._isExploding && !this._animatingZoom && this._baseToX == null) {
             if (this._explosionStartTime < 0) {
                 this._explosionStartTime = currentTime;
-                this._origOffsetX = this._offX;
-                this._origOffsetY = this._offY;
+                this._origOffset = this._offset.clone();
             }
 
-            this._offX = this._origOffsetX + (Math.random() * 2 - 1) * 5;
-            this._offY = this._origOffsetY + (Math.random() * 2 - 1) * 5;
+            this.setOffset(
+                this._origOffset.x + (Math.random() * 2 - 1) * 5,
+                this._origOffset.y + (Math.random() * 2 - 1) * 5
+            );
             this._redraw = true;
 
             const prog = (currentTime - this._explosionStartTime) * 5;
@@ -3145,8 +3213,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        this._prevOffsetX = this._offX;
-        this._prevOffsetY = this._offY;
+        this._prevOffset = this._offset.clone();
     }
 
     public lateUpdate(_dt: number): void {
@@ -3179,8 +3246,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 const vx: number = this._baseToX[ii] - this._baseFromX[ii];
                 const vy: number = this._baseToY[ii] - this._baseFromY[ii];
 
-                const currentX: number = this._baseFromX[ii] + ((vx + (vx * progress)) / 2) * progress;
-                const currentY: number = this._baseFromY[ii] + ((vy + (vy * progress)) / 2) * progress;
+                const currentX = this._baseFromX[ii] + vx * progress;
+                const currentY = this._baseFromY[ii] + vy * progress;
 
                 this._bases[ii].setXY(currentX, currentY);
             }
@@ -4468,15 +4535,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private lastSampledTime: number = -1;
 
     // Pose position offset
-    private _offX: number = 0;
-    private _offY: number = 0;
-    private _prevOffsetX: number = 0;
-    private _prevOffsetY: number = 0;
-    private _offsetTranslating: boolean;
-    private _startOffsetX: number;
-    private _startOffsetY: number;
-    private _endOffsetX: number;
-    private _endOffsetY: number;
+    private _offset: Point = new Point(0, 0);
+    private _prevOffset: Point = new Point(0, 0);
+    private _animatingZoom: boolean;
+    private _startOffset: Point;
+    private _endOffset: Point;
 
     // For base moving animation
     private _baseFromX: number[] | null;
@@ -4495,8 +4558,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _isExploding: boolean = false;
     private _explosionStartTime: number = -1;
     private _explosionRays: LightRay[];
-    private _origOffsetX: number;
-    private _origOffsetY: number;
+    private _origOffset: Point;
 
     private _onExplosionComplete: (() => void) | null;
 

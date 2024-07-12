@@ -2006,7 +2006,7 @@ export default class PoseEditMode extends GameMode {
             ));
 
             for (const pose of this._poses) {
-                pose.setZoomLevel(minZoom);
+                pose.setZoomLevel(minZoom, true, true);
             }
         } else {
             if (this._stateToggle) {
