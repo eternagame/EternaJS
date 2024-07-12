@@ -488,10 +488,12 @@ export default class PoseEditMode extends GameMode {
             this.updateScore();
             this.transformPosesMarkers();
         } else {
+            // Note that we do this first
             for (const pose of this._poses) {
                 pose.librarySelections = solution.libraryNT;
+                pose.sequence = solution.sequence;
             }
-            await this.pasteSequence(solution.sequence);
+            await this.poseEditByTarget(0);
             this.setSolutionTargetStructure(foldData);
         }
         this.setAncestorId(solution.nodeID);
