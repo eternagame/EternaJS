@@ -409,10 +409,6 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    public publicStartCountdown(): void {
-        this.startCountdown();
-    }
-
     private onHelpClicked() {
         const getBounds = (elem: ContainerObject) => {
             const globalPos = elem.container.toGlobal(new Point());
@@ -462,54 +458,52 @@ export default class PoseEditMode extends GameMode {
         }));
     }
 
-    private showSolution(solution: Solution): void {
+    private async showSolution(solution: Solution): Promise<void> {
         this.clearUndoStack();
         this.pushUILock();
 
-        const setSolution = (foldData: FoldData[] | null) => {
-            this.hideAsyncText();
-            this.popUILock();
-
-            if (foldData != null && (
-                foldData[0].folderName_ === this._folder.name
-                // Previously, we didn't record the folder name in the undo block.
-                // At that time, we only uploaded for nupack.
-                || (!foldData[0].folderName_ && this._folder.name === NuPACK.name)
-            )) {
-                this._stackLevel++;
-                this._stackSize = this._stackLevel + 1;
-                this._seqStacks[this._stackLevel] = [];
-
-                for (let ii = 0; ii < this._poses.length; ii++) {
-                    const undoBlock: UndoBlock = new UndoBlock(new Sequence([]), this._folder?.name ?? '');
-                    undoBlock.fromJSON(foldData[ii], this._puzzle.targetConditions[ii]);
-                    this._seqStacks[this._stackLevel][ii] = undoBlock;
-                }
-
-                this.savePosesMarkersContexts();
-                this.moveUndoStack();
-                this.updateScore();
-                this.transformPosesMarkers();
-            } else {
-                const sequence = solution.sequence;
-                for (const pose of this._poses) {
-                    pose.pasteSequence(sequence);
-                    pose.librarySelections = solution.libraryNT;
-                }
-                this.setSolutionTargetStructure(foldData);
-            }
-            this.setAncestorId(solution.nodeID);
-
-            const annotations = solution.annotations;
-            this._annotationManager.setSolutionAnnotations(annotations ?? []);
-        };
-
         this.showAsyncText('retrieving...');
-        solution.queryFoldData().then((result) => setSolution(result));
+        const foldData = await solution.queryFoldData();
+        this.hideAsyncText();
+        this.popUILock();
+
+        if (foldData != null && (
+            foldData[0].folderName_ === this._folder.name
+            // Previously, we didn't record the folder name in the undo block.
+            // At that time, we only uploaded for nupack.
+            || (!foldData[0].folderName_ && this._folder.name === NuPACK.name)
+        )) {
+            this._stackLevel++;
+            this._stackSize = this._stackLevel + 1;
+            this._seqStacks[this._stackLevel] = [];
+
+            for (let ii = 0; ii < this._poses.length; ii++) {
+                const undoBlock: UndoBlock = new UndoBlock(new Sequence([]), this._folder?.name ?? '');
+                undoBlock.fromJSON(foldData[ii], this._puzzle.targetConditions[ii]);
+                this._seqStacks[this._stackLevel][ii] = undoBlock;
+            }
+
+            this.savePosesMarkersContexts();
+            this.moveUndoStack();
+            this.updateScore();
+            this.transformPosesMarkers();
+        } else {
+            // Note that we do this first
+            for (const pose of this._poses) {
+                pose.librarySelections = solution.libraryNT;
+                pose.sequence = solution.sequence;
+            }
+            await this.poseEditByTarget(0);
+            this.setSolutionTargetStructure(foldData);
+        }
+        this.setAncestorId(solution.nodeID);
+
+        const annotations = solution.annotations;
+        this._annotationManager.setSolutionAnnotations(annotations ?? []);
     }
 
     private setSolutionTargetStructure(foldData: FoldData[] | null) {
-        const setTarget = (ii: number) => {
+        for (let ii = 0; ii < this._targetPairs.length; ii++) {
             // pose.pasteSequence resulted in a new undo block being created, filled with the folding
             // engine computations. We want to surgically update just the target structure to match the
             // solution. If freeze mode is enabled however, an undo block won't be created in the stack.
@@ -533,16 +527,6 @@ export default class PoseEditMode extends GameMode {
                 }
                 this.updateScore();
                 this.transformPosesMarkers();
-            }
-        };
-        for (let ii = 0; ii < this._targetPairs.length; ii++) {
-            // Yay, we get to deal with "async folding". Basically if we're not doing everything
-            // synchronously, the latest undo block won't actually be available yet, so we'll just
-            // push another task to the queue after the folding actually finishes
-            if (this.forceSync) {
-                setTarget(ii);
-            } else {
-                this._opQueue.push(new PoseOp(ii + 1, () => setTarget(ii)));
             }
         }
     }
@@ -779,7 +763,7 @@ export default class PoseEditMode extends GameMode {
         // Initialize sequence and/or solution as relevant
         let initialSequence: Sequence | null = null;
         let librarySelections: number[] = [];
-        let fdPromise: Promise<FoldData[] | null> | null = null;
+        let solutionFoldDataPromise: Promise<FoldData[] | null> | null = null;
         if (this._params.initSolution != null) {
             Assert.assertIsDefined(
                 this._params.solutions,
@@ -794,7 +778,7 @@ export default class PoseEditMode extends GameMode {
             librarySelections = this._params.initSolution.libraryNT;
             this._curSolutionIdx = this._params.solutions.indexOf(this._params.initSolution);
             this.showSolutionDetailsDialog(this._params.initSolution, true);
-            fdPromise = this._params.initSolution.queryFoldData();
+            solutionFoldDataPromise = this._params.initSolution.queryFoldData();
         } else if (this._params.initSequence != null && !this._puzzle.hasRscript) {
             initialSequence = Sequence.fromSequenceString(this._params.initSequence);
         }
@@ -903,12 +887,25 @@ export default class PoseEditMode extends GameMode {
             this._poses[ii].librarySelections = librarySelections;
         }
 
+        // Start loading the model file now instead of waiting for the initial
+        // fold to complete before doing it
+        const pose3DUrl = this._puzzle.threePath ? new URL(this._puzzle.threePath, Eterna.SERVER_URL) : null;
+        const pose3DCheckPromise = pose3DUrl
+            ? Pose3DDialog.checkModelFile(pose3DUrl.href, this._puzzle.getSecstruct(0).length)
+            : null;
+
         this.clearUndoStack();
 
         this.disableTools(true);
 
         // reset lineage for experimental targets
         this.setAncestorId(0);
+
+        // Setup RScript and execute the ROPPRE ops
+        this._rscript = new RNAScript(this._puzzle, this);
+
+        // RScript can set our initial poseState
+        this._poseState = this._puzzle.defaultMode;
 
         // We don't load saved data if we're viewing someone else's solution
         // If there's an initial solution, still autoload if we've previously played
@@ -920,51 +917,63 @@ export default class PoseEditMode extends GameMode {
             this.loadSavedData();
         }
 
-        this._poseEditByTargetCb = () => {
-            if (this.forceSync) {
-                this.setPuzzleEpilog(initialSequence, this._params.isReset);
-            } else {
-                this._opQueue.push(new PoseOp(
-                    this._targetPairs.length,
-                    () => this.setPuzzleEpilog(initialSequence, this._params.isReset)
-                ));
-            }
-            this._poseEditByTargetCb = null;
-        };
-
         this.poseEditByTarget(0);
 
-        if (fdPromise) {
-            // We defer reacting to the promise until now so that the PoseOps to set the target structure
-            // are after the PoseOps triggered by the initial poseEditByTarget above.
-            // The UI lock ensures that nothing could happen that would create additional UndoBlocks
-            // between the initial puzzle load and the target structures being set (which would mean
-            // thee target structure would be set on the wrong undo block)
-            const LOCK_NAME = 'initialTargetStructure';
-            this.pushUILock(LOCK_NAME);
-            fdPromise.then((fd) => {
-                this.setSolutionTargetStructure(fd);
-                this.popUILock(LOCK_NAME);
-            });
-        }
+        // From here on out, all of these things have to happen after the first fold completes.
+        // so we put them in the opQueue.
+        // NB: forceSync is always false when we do our initial load, so we don't need
+        // to have a syncronous version of any of this
+        // We split them into separate PoseOps so that the counter in the async text
+        // is more fine-grained (ie, you see more status updates if it winds up being slow).
+        this._opQueue.push(new PoseOp(
+            null,
+            async () => {
+                if (pose3DUrl && pose3DCheckPromise) {
+                    try {
+                        await pose3DCheckPromise;
+                        this.addPose3D(pose3DUrl.href);
+                    } catch (err) {
+                        this.showNotification(err);
+                    }
+                }
+            }
+        ));
 
-        // Setup RScript and execute the ROPPRE ops
-        this._rscript = new RNAScript(this._puzzle, this);
-        this._rscript.tick();
+        this._opQueue.push(new PoseOp(
+            null,
+            async () => {
+                if (solutionFoldDataPromise) {
+                    const fd = await solutionFoldDataPromise;
+                    this.setSolutionTargetStructure(fd);
+                }
+            }
+        ));
 
-        // RScript can set our initial poseState
-        this._poseState = this._puzzle.defaultMode;
+        // Only once the above are complete can we actually unlock the UI and tell the
+        // user we're ready
+        this._opQueue.push(new PoseOp(
+            null,
+            () => {
+                if (!this._params.isReset) {
+                    this._startSolvingTime = new Date().getTime();
+                }
 
-        // add 3DWindow
-        const threePath = this._puzzle.threePath;
-        if (threePath) {
-            const url = new URL(threePath, Eterna.SERVER_URL);
-            Pose3DDialog.checkModelFile(url.href, this._puzzle.getSecstruct(0).length).then(() => {
-                this.addPose3D(url.href);
-            }).catch((err) => {
-                this.showNotification(err);
-            });
-        }
+                if (this._params.isReset) {
+                    this.startPlaying();
+                } else if (initialSequence == null) {
+                    this.startCountdown();
+                } else if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
+                    // / Given init sequence (solution) in the lab, don't show mission animation - go straight to game
+                    this.startPlaying();
+                } else {
+                    this.startCountdown();
+                }
+
+                this.setPip(Eterna.settings.pipEnabled.value);
+
+                this.ropPresets();
+            }
+        ));
     }
 
     private setToolbarEventHandlers() {
@@ -1669,9 +1678,7 @@ export default class PoseEditMode extends GameMode {
                     }
                     const prevForceSync = this.forceSync;
                     this.forceSync = true;
-                    for (const pose of this._poses) {
-                        pose.pasteSequence(sequence);
-                    }
+                    this.pasteSequence(sequence);
                     this.forceSync = prevForceSync;
                     return true;
                 }
@@ -1681,17 +1688,15 @@ export default class PoseEditMode extends GameMode {
         this._scriptInterface.addCallback(
             'set_sequence_string_async',
             lockDuringFold(
-                (seq: string): Promise<boolean> => new Promise((resolve) => {
+                async (seq: string): Promise<boolean> => {
                     const sequence: Sequence = Sequence.fromSequenceString(seq);
                     if (sequence.findUndefined() >= 0 || sequence.findCut() >= 0) {
                         log.info(`Invalid characters in ${seq}`);
-                        resolve(false);
+                        return false;
                     }
-                    for (const pose of this._poses) {
-                        pose.pasteSequence(sequence);
-                    }
-                    this._opQueue.push(new PoseOp(null, () => resolve(true)));
-                })
+                    await this.pasteSequence(sequence);
+                    return true;
+                }
             )
         );
 
@@ -1717,13 +1722,12 @@ export default class PoseEditMode extends GameMode {
         this._scriptInterface.addCallback(
             'set_target_structure_async',
             lockDuringFold(
-                (index: number, structure: string, startAt: number = 0): Promise<void> => new Promise((resolve) => {
+                async (index: number, structure: string, startAt: number = 0): Promise<void> => {
                     const pseudoknots = this._targetConditions && this._targetConditions[0]
                         && this._targetConditions[0]['type'] === 'pseudoknot';
 
-                    this.pasteTargetStructure(index, SecStruct.fromParens(structure, pseudoknots), startAt);
-                    this._opQueue.push(new PoseOp(null, () => resolve()));
-                })
+                    await this.pasteTargetStructure(index, SecStruct.fromParens(structure, pseudoknots), startAt);
+                }
             )
         );
 
@@ -1851,8 +1855,8 @@ export default class PoseEditMode extends GameMode {
             : this._curSolutionIdx;
 
         const newSolution = this._params.solutions[newCurrentIdx];
-        this.showSolution(newSolution);
         this.showSolutionDetailsDialog(newSolution);
+        this.showSolution(newSolution);
     }
 
     private showNextSolution(indexOffset: number): void {
@@ -1867,10 +1871,10 @@ export default class PoseEditMode extends GameMode {
             nextSolutionIdx = this._params.solutions.length + nextSolutionIdx;
         }
 
-        const solution = this._params.solutions[nextSolutionIdx];
-        this.showSolution(solution);
-        this.showSolutionDetailsDialog(solution);
         this._curSolutionIdx = nextSolutionIdx;
+        const solution = this._params.solutions[nextSolutionIdx];
+        this.showSolutionDetailsDialog(solution);
+        this.showSolution(solution);
     }
 
     public showSolutionDetailsDialog(solution: Solution, forceShow: boolean = false): void {
@@ -2075,7 +2079,7 @@ export default class PoseEditMode extends GameMode {
         }));
     }
 
-    protected pasteTargetStructure(targetIndex: number, structure: SecStruct, startAt: number, poseIdx?: number) {
+    protected async pasteTargetStructure(targetIndex: number, structure: SecStruct, startAt: number, poseIdx?: number) {
         const structureConstraints = this._targetConditions[targetIndex]?.['structure_constraints'];
         if (structureConstraints === undefined) return;
 
@@ -2107,7 +2111,7 @@ export default class PoseEditMode extends GameMode {
         }
         this._targetPairs[targetIndex] = pairs;
 
-        this.poseEditByTarget((poseIdx && this._isPipMode) ? poseIdx : 0);
+        await this.poseEditByTarget((poseIdx && this._isPipMode) ? poseIdx : 0);
     }
 
     private openDesignBrowserForOurPuzzle(): void {
@@ -2418,11 +2422,11 @@ export default class PoseEditMode extends GameMode {
         this._toolbar.redoButton.enabled = !this._isFrozen && !(this._stackLevel + 1 > this._stackSize - 1);
         this._toolbar.freezeButton.toggled.value = this._isFrozen;
 
+        this._background.freezeBackground(this._isFrozen);
+
         if (!this._isFrozen) { // we just "thawed", update
             this.poseEditByTarget(this._curTargetIndex);
         }
-
-        this._background.freezeBackground(this._isFrozen);
     }
 
     // / This mode is strictly for internal use, not to be used by users
@@ -2435,9 +2439,6 @@ export default class PoseEditMode extends GameMode {
     private onChangeFolder(): void {
         this.clearUndoStack();
         this.poseEditByTarget(0);
-        for (const pose of this._poses) {
-            pose.updateHighlightsAndScores();
-        }
     }
 
     private ropPresets(): void {
@@ -2610,7 +2611,7 @@ export default class PoseEditMode extends GameMode {
                                     this._targetOligosOrder[i] = undefined;
                                     this._targetPairs[i] = SecStruct.fromParens(this._puzzle.getSecstruct(i));
                                 }
-                                this.poseEditByTarget(this._isPipMode ? this._curTargetIndex : 0);
+                                await this.poseEditByTarget(this._isPipMode ? this._curTargetIndex : 0);
                                 return next();
                             } else if (confirmed === 'submit') {
                                 return next();
@@ -3332,29 +3333,7 @@ export default class PoseEditMode extends GameMode {
                 this._annotationManager.setSolutionAnnotations(annotations.solution);
             }
         }
-        this.poseEditByTarget(0);
         return true;
-    }
-
-    private setPuzzleEpilog(initSeq: Sequence | null, isReset: boolean | undefined): void {
-        if (!isReset) {
-            this._startSolvingTime = new Date().getTime();
-        }
-
-        if (isReset) {
-            this.startPlaying();
-        } else if (initSeq == null) {
-            this.startCountdown();
-        } else if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
-            // / Given init sequence (solution) in the lab, don't show mission animation - go straight to game
-            this.startPlaying();
-        } else {
-            this.startCountdown();
-        }
-
-        this.setPip(Eterna.settings.pipEnabled.value);
-
-        this.ropPresets();
     }
 
     private checkConstraints(soft: boolean = false): boolean {
@@ -3820,7 +3799,7 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    private poseEditByTarget(targetIndex: number): void {
+    protected async poseEditByTarget(targetIndex: number) {
         this.savePosesMarkersContexts();
 
         // Reorder oligos and reorganize structure constraints as needed
@@ -3853,13 +3832,10 @@ export default class PoseEditMode extends GameMode {
                 this.updateScore();
                 this.transformPosesMarkers();
 
-                if (this._poseEditByTargetCb != null) {
-                    this._poseEditByTargetCb();
-                }
                 return;
             }
 
-            this.poseEditByTargetDoFold(targetIndex);
+            return this.poseEditByTargetDoFold(targetIndex);
         };
 
         this.pushUILock(LOCK_NAME);
@@ -3878,16 +3854,16 @@ export default class PoseEditMode extends GameMode {
         );
         if (sol != null && this._puzzle.hasTargetType('multistrand')) {
             this.showAsyncText('retrieving...');
-            sol.queryFoldData().then((result) => execfoldCB(result));
+            return sol.queryFoldData().then((result) => execfoldCB(result));
         } else {
-            execfoldCB(null);
+            return execfoldCB(null);
         }
         */
 
-        execfoldCB(null);
+        return execfoldCB(null);
     }
 
-    private poseEditByTargetDoFold(targetIndex: number): void {
+    private poseEditByTargetDoFold(targetIndex: number) {
         this.showAsyncText('folding...');
         this.pushUILock(PoseEditMode.FOLDING_LOCK);
 
@@ -3907,6 +3883,7 @@ export default class PoseEditMode extends GameMode {
                 }
             }
             this.poseEditByTargetEpilog(targetIndex);
+            return Promise.resolve();
         } else {
             for (let ii = 0; ii < this._targetPairs.length; ii++) {
                 this._opQueue.push(new PoseOp(ii + 1, () => this.poseEditByTargetFoldTarget(ii, false)));
@@ -3928,10 +3905,10 @@ export default class PoseEditMode extends GameMode {
             this._opQueue.push(
                 new PoseOp(this._targetPairs.length + 1, () => this.poseEditByTargetEpilog(targetIndex))
             );
-        }
 
-        if (this._poseEditByTargetCb != null) {
-            this._poseEditByTargetCb();
+            return new Promise<void>((resolve) => {
+                this._opQueue.push(new PoseOp(null, resolve));
+            });
         }
     }
 
@@ -4363,7 +4340,6 @@ export default class PoseEditMode extends GameMode {
 
     // / Asynch folding
     private _opQueue: PoseOp[] = [];
-    private _poseEditByTargetCb: (() => void) | null = null;
     private _asynchText: Text;
     // / Undo stack
     private _stackLevel: number;

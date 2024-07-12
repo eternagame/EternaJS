@@ -355,9 +355,6 @@ export default class PuzzleEditMode extends GameMode {
 
             this.clearUndoStack();
             await this.poseEditByTarget(0);
-            for (const pose of this._poses) {
-                pose.updateHighlightsAndScores();
-            }
         });
 
         this.regs?.add(this._naturalButton.clicked.connect(() => this.setToNativeMode()));
@@ -1145,7 +1142,7 @@ export default class PuzzleEditMode extends GameMode {
         this._asynchText.visible = false;
     }
 
-    private async poseEditByTarget(index: number): Promise<void> {
+    protected async poseEditByTarget(index: number): Promise<void> {
         this.showAsyncText('folding...');
         this.pushUILock();
         let noChange = true;

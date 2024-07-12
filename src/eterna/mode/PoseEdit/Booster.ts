@@ -169,10 +169,7 @@ export default class Booster {
             } else {
                 const prevForceSync = this._view.forceSync;
                 this._view.forceSync = true;
-                for (let ii = 0; ii < this._view.numPoseFields; ii++) {
-                    pose = this._view.getPose(ii);
-                    pose.pasteSequence(seqArr);
-                }
+                this._view.pasteSequence(seqArr);
                 this._view.forceSync = prevForceSync;
             }
             return true;
