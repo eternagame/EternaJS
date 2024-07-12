@@ -18,7 +18,8 @@ import GameButton from 'eterna/ui/GameButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {
     KeyCode, SpriteObject, DisplayUtil, HAlign, VAlign, Flashbang, KeyboardEventType, Assert,
-    GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject
+    GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject,
+    ErrorUtil
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import EternaSettingsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaSettingsDialog';
@@ -933,7 +934,10 @@ export default class PoseEditMode extends GameMode {
                         await pose3DCheckPromise;
                         this.addPose3D(pose3DUrl.href);
                     } catch (err) {
-                        this.showNotification(err);
+                        // We don't pause the queue at this point so loading will continue on,
+                        // the intro screen will be shown, and then once dismissed you'll see
+                        // the notification dialog, but that's fine for our purposes
+                        this.showNotification(`Failed to load 3D view: ${ErrorUtil.getErrString(err)}`);
                     }
                 }
             }
