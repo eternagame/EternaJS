@@ -1,6 +1,5 @@
 import EPars, {RNABase} from 'eterna/EPars';
 import Folder from 'eterna/folding/Folder';
-import NuPACK from 'eterna/folding/NuPACK';
 import LayoutEngineManager from 'eterna/layout/LayoutEngineManager';
 import RNApuzzler from 'eterna/layout/RNApuzzler';
 import Eterna from 'eterna/Eterna';
@@ -283,7 +282,7 @@ export default class RNALayout {
         return this.getTotalScoreRecursive(this._root);
     }
 
-    public scoreTree(seq: Sequence, folder: Folder): void {
+    public scoreTree(seq: Sequence, folder: Folder, pseudoknotted: boolean): void {
         if (this._scoreBiPairs == null) {
             throw new Error('Layout tree is not properly setup for scoring');
         }
@@ -294,10 +293,7 @@ export default class RNALayout {
 
         const nnfe: number[] = [];
 
-        if (this._targetPairs !== null
-            && (this._targetPairs.getParenthesis().includes('{')
-                || this._targetPairs.getParenthesis().includes('['))
-            && folder.name === NuPACK.NAME) {
+        if (pseudoknotted) {
             folder.scoreStructures(seq, this._origPairs, true, EPars.DEFAULT_TEMPERATURE, nnfe);
         } else {
             folder.scoreStructures(seq, this._origPairs, false, EPars.DEFAULT_TEMPERATURE, nnfe);

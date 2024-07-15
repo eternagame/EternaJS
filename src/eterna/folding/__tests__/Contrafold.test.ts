@@ -95,7 +95,7 @@ test(`ContraFold:many_score_structures`, () => {
                     new SecStruct());
                 
                 expect(struct).toBeDefined();
-                expect(struct?.getParenthesis()).toEqual(str);
+                expect(struct?.getParenthesis({ pseudoknots: false })).toEqual(str);
 
                 let outNNFE: number[] = [];
                 let score = folder.scoreStructures(

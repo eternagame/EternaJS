@@ -28,7 +28,7 @@ export default class PoseUtil {
                 mutatedPairs[ii]++;
             }
         }
-        const parenthesis: string = new SecStruct(mutatedPairs).getParenthesis(null, pseudoknots);
+        const parenthesis: string = new SecStruct(mutatedPairs).getParenthesis({pseudoknots});
         return [parenthesis, PuzzleEditOp.ADD_BASE, mutatedPairs];
     }
 
@@ -59,7 +59,7 @@ export default class PoseUtil {
             mutatedPairs[index] = pindex + 2;
             mutatedPairs[pindex + 2] = index;
 
-            const parenthesis: string = new SecStruct(mutatedPairs).getParenthesis(null, pseudoknots);
+            const parenthesis: string = new SecStruct(mutatedPairs).getParenthesis({pseudoknots});
             return [parenthesis, PuzzleEditOp.ADD_PAIR];
         } else {
             // add a cycle of length 3
@@ -76,7 +76,7 @@ export default class PoseUtil {
             mutatedPairs[index] = index + 4;
             mutatedPairs[index + 4] = index;
 
-            const parenthesis: string = new SecStruct(mutatedPairs).getParenthesis(null, pseudoknots);
+            const parenthesis: string = new SecStruct(mutatedPairs).getParenthesis({pseudoknots});
             return [parenthesis, PuzzleEditOp.ADD_CYCLE];
         }
     }
@@ -92,7 +92,7 @@ export default class PoseUtil {
             }
         }
 
-        const parenthesis: string = new SecStruct(mutatedPairs).getParenthesis(null, pseudoknots);
+        const parenthesis: string = new SecStruct(mutatedPairs).getParenthesis({pseudoknots});
         return [parenthesis, PuzzleEditOp.DELETE_BASE, mutatedPairs];
     }
 
@@ -119,7 +119,7 @@ export default class PoseUtil {
             }
         }
 
-        const parenthesis: string = new SecStruct(mutatedPairs).getParenthesis(null, pseudoknots);
+        const parenthesis: string = new SecStruct(mutatedPairs).getParenthesis({pseudoknots});
         return [parenthesis, PuzzleEditOp.DELETE_PAIR];
     }
 

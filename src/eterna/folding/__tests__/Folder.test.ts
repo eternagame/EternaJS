@@ -9,17 +9,17 @@ import Sequence from 'eterna/rnatypes/Sequence';
 
 
 const SNOWFLAKE_SEQ = Sequence.fromSequenceString('GUGGACAAGAUGAAACAUCAGUAACAAGCGCAAAGCGCGGGCAAAGCCCCCGGAAACCGGAAGUUACAGAACAAAGUUCAAGUUUACAAGUGGACAAGUUGAAACAACAGUUACAAGACGAAACGUCGGCCAAAGGCCCCAUAAAAUGGAAGUAACACUUGAAACAAGAAGUUUACAAGUUGACAAGUUCAAAGAACAGUUACAAGUGGAAACCACGCGCAAAGCGCCUCCAAAGGAGAAGUAACAGAAGAAACUUCAAGUUAGCAAGUGGUCAAGUACAAAGUACAGUAACAACAUCAAAGAUGGCGCAAAGCGCGAGCAAAGCUCAAGUUACAGAACAAAGUUCAAGAUUACAAGAGUGCAAGAAGAAACUUCAGAUAGAACUGCAAAGCAGCACCAAAGGUGGGGCAAAGCCCAACUAUCAGUUGAAACAACAAGUAUUCAAGAGGUCAAGAUCAAAGAUCAGUAACAAGUGCAAAGCACGGGCAAAGCCCGACCAAAGGUCAAGUUACAGUUCAAAGAACAAGAUUUC');
-const SNOWFLAKE_STRUCT = SecStruct.fromParens('((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))');
+const SNOWFLAKE_STRUCT = SecStruct.fromParens('((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))', false);
 
 const BASIC_SEQ = Sequence.fromSequenceString('AAAAAAAAAAAAAA');
 const BASIC_RESULT = new SecStruct([-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]);
 
 const ZIPPERS_SEQ = Sequence.fromSequenceString('AAAAAGGGGAAAAAAAAACCCCAGCGGAAAAAACUGCAAA');
-const ZIPPERS_BEST_PAIRS = SecStruct.fromParens('.....((((.........)))).((((......))))...');
+const ZIPPERS_BEST_PAIRS = SecStruct.fromParens('.....((((.........)))).((((......))))...', false);
 const ZIPPERS_TEMP = 37;
 
 function FoldSequence(folder: Folder<true>, seq: Sequence, struct: SecStruct): SecStruct | null {
-    return folder.foldSequence(seq, null, struct.getParenthesis());
+    return folder.foldSequence(seq, null, struct.getParenthesis({ pseudoknots: false }));
 }
 
 function CreateFolder(type: any): Promise<Folder<true> | null> {
@@ -133,7 +133,7 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldV]) {
     test(`${folderType.NAME}:get_dot_plot(simple)`, () => {
         expect.assertions(2);
         const SEQ = Sequence.fromSequenceString('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
-        const STRUCT = SecStruct.fromParens('........................................');
+        const STRUCT = SecStruct.fromParens('........................................', false);
         return expect(CreateFolder(folderType)
             .then((folder) => {
                 if (folder === null) {
@@ -155,7 +155,7 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldV]) {
     test(`${folderType.NAME}:get_dot_plot(complex)`, () => {
         expect.assertions(2);
         const SEQ = Sequence.fromSequenceString('AAAAACCCCAAAAAAAAAGGGGACCCCAAAAAAGGGGAAA');
-        const STRUCT = SecStruct.fromParens('.....((((.........)))).((((......))))...');
+        const STRUCT = SecStruct.fromParens('.....((((.........)))).((((......))))...', false);
 
         const RESULT: Map<string, number[]> = new Map([
             [Vienna.NAME, [6,20,0.003204861,6,21,0.050702623,6,22,0.994967823,6,37,0.014707212,7,20,0.050686163,7,21,0.997305727,7,22,0.049737799,7,36,0.014697534,8,19,0.048807822,8,20,0.997265654,8,21,0.049896478,8,35,0.014696120,9,19,0.981161504,9,20,0.048955465,9,34,0.014664345,19,24,0.007318126,19,26,0.006963470,19,27,0.007932088,20,25,0.006957857,20,26,0.007936614,20,27,0.007544318,21,25,0.006246202,21,26,0.007525488,24,36,0.036388827,24,37,0.996200675,25,35,0.036287239,25,36,0.998544617,25,37,0.035832064,26,34,0.035331676,26,35,0.998545990,26,36,0.035898986,27,34,0.982421238,27,35,0.035432802,22,6,0.9500000,21,7,0.9500000,20,8,0.9500000,19,9,0.9500000,37,24,0.9500000,36,25,0.9500000,35,26,0.9500000,34,27,0.9500000]],

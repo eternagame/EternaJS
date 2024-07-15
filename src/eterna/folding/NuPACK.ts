@@ -158,13 +158,13 @@ export default class NuPACK extends Folder<true> {
     /* override */
     public getDefect(
         seq: Sequence, pairs: SecStruct,
-        temp: number = EPars.DEFAULT_TEMPERATURE, pseudoknotted: boolean = false
+        temp: number = EPars.DEFAULT_TEMPERATURE, pseudoknots: boolean = false
     ): number {
         const key = {
             primitive: 'defect',
             seq: seq.baseArray,
             pairs: pairs.pairs,
-            pseudoknotted,
+            pseudoknotted: pseudoknots,
             temp
         };
 
@@ -175,7 +175,7 @@ export default class NuPACK extends Folder<true> {
         }
         let result: FullEnsembleDefectResult | null = null;
         result = this._lib.GetEnsembleDefect(seq.sequenceString(),
-            pairs.getParenthesis(), temp, pseudoknotted);
+            pairs.getParenthesis({pseudoknots}), temp, pseudoknots);
 
         if (!result) {
             throw new Error('NuPACK returned a null result');
@@ -273,7 +273,7 @@ export default class NuPACK extends Folder<true> {
             try {
                 result = this._lib.FullEval(temp,
                     seq.sequenceString(),
-                    pairs.getParenthesis(null, pseudoknots));
+                    pairs.getParenthesis({pseudoknots}));
                 if (!result) {
                     throw new Error('NuPACK returned a null result');
                 }
@@ -438,6 +438,8 @@ export default class NuPACK extends Folder<true> {
         seq: Sequence, secondBestPairs: SecStruct, malus: number = 0,
         desiredPairs: string | null = null, temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct {
+        const pseudoknots = false;
+
         const cut: number = seq.findCut();
         if (cut < 0) {
             throw new Error('Missing cutting point');
@@ -473,8 +475,8 @@ export default class NuPACK extends Folder<true> {
         const coFE: number = this.scoreStructures(seq, coPairs, false, temp, coNodes);
 
         if (coFE + malus >= feA + feB) {
-            const struc = `${pairsA.getParenthesis()}&${pairsB.getParenthesis()}`;
-            coPairs = SecStruct.fromParens(struc);
+            const struc = `${pairsA.getParenthesis({pseudoknots})}&${pairsB.getParenthesis({pseudoknots})}`;
+            coPairs = SecStruct.fromParens(struc, pseudoknots);
         }
 
         this.putCache(key, coPairs.slice(0));
@@ -491,6 +493,8 @@ export default class NuPACK extends Folder<true> {
         seq: Sequence, bindingSite: number[], bonus: number, desiredPairs: string | null = null,
         malus: number = 0, temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct {
+        const pseudoknots = false;
+
         const cut: number = seq.findCut();
         if (cut < 0) {
             throw new Error('Missing cutting point');
@@ -557,8 +561,8 @@ export default class NuPACK extends Folder<true> {
         }
 
         if (coFE + malus >= feA + feB) {
-            const struc = `${pairsA.getParenthesis()}&${pairsB.getParenthesis()}`;
-            coPairs = SecStruct.fromParens(struc);
+            const struc = `${pairsA.getParenthesis({pseudoknots})}&${pairsB.getParenthesis({pseudoknots})}`;
+            coPairs = SecStruct.fromParens(struc, pseudoknots);
         }
 
         this.putCache(key, coPairs.slice(0));
@@ -578,6 +582,8 @@ export default class NuPACK extends Folder<true> {
         desiredPairs: string | null = null,
         temp: number = EPars.DEFAULT_TEMPERATURE
     ): MultiFoldResult {
+        const pseudoknots = false;
+
         const key: CacheKey = {
             primitive: 'multifold',
             seq: seq.baseArray,
@@ -637,8 +643,8 @@ export default class NuPACK extends Folder<true> {
                         new Sequence(oligos[order[jj]].sequence), sPairs, false, temp, sNodes
                     );
 
-                    const struc = `${msPairs.getParenthesis()}&${sPairs.getParenthesis()}`;
-                    msPairs = SecStruct.fromParens(struc);
+                    const struc = `${msPairs.getParenthesis({pseudoknots})}&${sPairs.getParenthesis({pseudoknots})}`;
+                    msPairs = SecStruct.fromParens(struc, pseudoknots);
                     msFE += sFE;
                 }
 
@@ -734,6 +740,7 @@ export default class NuPACK extends Folder<true> {
         seq: Sequence, i: number, p: number, j: number, q: number, bonus: number,
         _temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct {
+        const pseudoknots = false;
         const seqStr = seq.sequenceString(false, false);
 
         let result: FullFoldResult | null = null;
@@ -742,7 +749,7 @@ export default class NuPACK extends Folder<true> {
             if (!result) {
                 throw new Error('NuPACK returned a null result');
             }
-            return SecStruct.fromParens(result.structure);
+            return SecStruct.fromParens(result.structure, pseudoknots);
         } catch (e) {
             log.error('FullFoldWithBindingSite error', e);
             return new SecStruct();
@@ -755,6 +762,7 @@ export default class NuPACK extends Folder<true> {
     }
 
     private cofoldSequenceImpl(seq: Sequence): SecStruct {
+        const pseudoknots = false;
         const seqStr = seq.sequenceString(true, false);
 
         let result: FullFoldResult | null = null;
@@ -764,7 +772,7 @@ export default class NuPACK extends Folder<true> {
             if (!result) {
                 throw new Error('NuPACK returned a null result');
             }
-            return SecStruct.fromParens(result.structure);
+            return SecStruct.fromParens(result.structure, pseudoknots);
         } catch (e) {
             log.error('CoFoldSequence error', e);
             return new SecStruct();
@@ -788,6 +796,7 @@ export default class NuPACK extends Folder<true> {
         bonus: number,
         _temp: number = EPars.DEFAULT_TEMPERATURE
     ): SecStruct {
+        const pseudoknots = false;
         const seqStr = seq.sequenceString(true, false);
 
         let result: FullFoldResult | null = null;
@@ -797,7 +806,7 @@ export default class NuPACK extends Folder<true> {
             if (!result) {
                 throw new Error('NuPACK returned a null result');
             }
-            return SecStruct.fromParens(result.structure);
+            return SecStruct.fromParens(result.structure, pseudoknots);
         } catch (e) {
             log.error('CoFoldSequenceWithBindingSite error', e);
             return new SecStruct();

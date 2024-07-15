@@ -216,8 +216,8 @@ export default class FeedbackViewMode extends GameMode {
                 if (!vienna) {
                     throw new Error("Critical error: can't create a Vienna folder instance by name");
                 }
-                this._secstructs.push(SecStruct.fromParens(secstructs[ii]));
-                this._puzzleSecstructs.push(SecStruct.fromParens(secstructs[ii]));
+                this._secstructs.push(SecStruct.fromParens(secstructs[ii], false));
+                this._puzzleSecstructs.push(SecStruct.fromParens(secstructs[ii], false));
             }
             poseFields.push(poseField);
         }

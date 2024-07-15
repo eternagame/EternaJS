@@ -69,12 +69,12 @@ test(`EternaFold:many_score_structures`, () => {
             for (let ii: number = 0; ii < sequences.length; ++ii ) {
                 let struct = folder.foldSequence(Sequence.fromSequenceString(sequences[ii]), new SecStruct());
                 expect(struct).toBeDefined();
-                expect(struct!.getParenthesis()).toEqual(structures[ii])
+                expect(struct!.getParenthesis({ pseudoknots: false })).toEqual(structures[ii])
     
                 let outNNFE: number[] = [];
                 let FE = folder.scoreStructures(
                     Sequence.fromSequenceString(sequences[ii]),
-                    SecStruct.fromParens(structures[ii]),
+                    SecStruct.fromParens(structures[ii], false),
                     false,
                     37,
                     outNNFE);

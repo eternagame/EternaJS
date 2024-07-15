@@ -32,14 +32,14 @@ test('linearfoldC:MFETests', () => {
             [16, 598, 15, -239, 14, -239, 13, -239, 3, 453, 2, -239, 1, -239, 0, -239, -1, -108],
         ];
         let structures: SecStruct[] = [
-            SecStruct.fromParens("(((((........)))))"),
-            SecStruct.fromParens("(((((........)))))"),
-            SecStruct.fromParens("((((((((...........)).))))))"),
-            SecStruct.fromParens(".((((((.((((((......)))))).......((((.....))))...))))))."),
-            SecStruct.fromParens("(((((((..((((........)))).(((((.......))))).....(((((.......))))))))))))."),
-            SecStruct.fromParens("...........((((....))))...........................................(((....)))........."),
-            SecStruct.fromParens("...........((((....))))...........................................(((.((.(((((((((((((.........((((.....))))........))))))))))))))).)))........."),
-            SecStruct.fromParens("((((.........((((.....))))........))))"),
+            SecStruct.fromParens("(((((........)))))", false),
+            SecStruct.fromParens("(((((........)))))", false),
+            SecStruct.fromParens("((((((((...........)).))))))", false),
+            SecStruct.fromParens(".((((((.((((((......)))))).......((((.....))))...)))))).", false),
+            SecStruct.fromParens("(((((((..((((........)))).(((((.......))))).....(((((.......)))))))))))).", false),
+            SecStruct.fromParens("...........((((....))))...........................................(((....))).........", false),
+            SecStruct.fromParens("...........((((....))))...........................................(((.((.(((((((((((((.........((((.....))))........))))))))))))))).))).........", false),
+            SecStruct.fromParens("((((.........((((.....))))........))))", false),
             
         ];
         let sequences: Sequence[] = [
@@ -99,11 +99,11 @@ test('linearfoldC:SubOptTests', () => {
                 -1, -108]
         ];
         let structures: SecStruct[] = [
-            SecStruct.fromParens("((......))"),
-            SecStruct.fromParens(".........."),
-            SecStruct.fromParens("(((((((..(((...)))..((((((....))))))..((((((...))))))..)))))))"),
-            SecStruct.fromParens("(((((((..(((...)))..((((((....))))))..((((((...))))))..)))))))"),
-            SecStruct.fromParens("(((((((..(((...)))..((((((....))))))..((((((...))))))..)))))))"),
+            SecStruct.fromParens("((......))", false),
+            SecStruct.fromParens("..........", false),
+            SecStruct.fromParens("(((((((..(((...)))..((((((....))))))..((((((...))))))..)))))))", false),
+            SecStruct.fromParens("(((((((..(((...)))..((((((....))))))..((((((...))))))..)))))))", false),
+            SecStruct.fromParens("(((((((..(((...)))..((((((....))))))..((((((...))))))..)))))))", false),
             
         ];
         let sequences: Sequence[] = [
@@ -191,7 +191,7 @@ test(`LinearFoldC:get_dot_plot(complex)`, () => {
             
             const calcdResult = folder.getDotPlot(
                 Sequence.fromSequenceString(SEQ),
-                SecStruct.fromParens(STRUCT),
+                SecStruct.fromParens(STRUCT, false),
                 37
             );
 
@@ -242,7 +242,7 @@ test(`LinearFoldE:get_dot_plot(complex)`, () => {
             
             const calcdResult = folder.getDotPlot(
                 Sequence.fromSequenceString(SEQ),
-                SecStruct.fromParens(STRUCT),
+                SecStruct.fromParens(STRUCT, false),
                 37
             );
             

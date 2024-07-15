@@ -53,11 +53,11 @@ test(`RNALayout:setupTree`, () => {
 
 test('RNALayout:scoreTree (multistrand)', () => {
     const scoreTree: RNALayout = new RNALayout();
-    const pairs = SecStruct.fromParens('((((((((((.))))))))))........(((((((((((((((((((((((((((((((....))))))))))))))))))))))))))))))).');
+    const pairs = SecStruct.fromParens('((((((((((.))))))))))........(((((((((((((((((((((((((((((((....))))))))))))))))))))))))))))))).', false);
     scoreTree.setupTree(pairs);
 
     const seq = Sequence.fromSequenceString('UAAGUUCUGA&UCGGAACUUAGCUUAGAUGGUUGCGUUGAAUUCGAGAUCUACAUGGUAGUUCGCUAUCAUGUAGAUUUCGGGUUCCAUCUGCAGU', true);
-    scoreTree.scoreTree(seq, new MockFolder());
+    scoreTree.scoreTree(seq, new MockFolder(), false);
 
     expect(scoreTreeToJSON(scoreTree.root!)).toEqual(
         {"score":-200,"children":[{"score":-110,"children":[{"score":-90,"children":[{"score":-170,"children":[{"score":-210,"children":[{"score":-90,"children":[{"score":-230,"children":[{"score":-190,"children":[{"score":-120,"children":[{"score":-230,"children":[{"score":0,"children":[{"score":409,"children":[{"score":0,"children":[]}]}]}]}]}]}]}]}]}]}]}]},{"score":0,"children":[]},{"score":0,"children":[]},{"score":0,"children":[]},{"score":0,"children":[]},{"score":0,"children":[]},{"score":0,"children":[]},{"score":0,"children":[]},{"score":0,"children":[]},{"score":-210,"children":[{"score":-180,"children":[{"score":-210,"children":[{"score":-20,"children":[{"score":-210,"children":[{"score":-180,"children":[{"score":-90,"children":[{"score":-110,"children":[{"score":-120,"children":[{"score":-230,"children":[{"score":-90,"children":[{"score":-90,"children":[{"score":-110,"children":[{"score":-210,"children":[{"score":-200,"children":[{"score":-230,"children":[{"score":-50,"children":[{"score":-110,"children":[{"score":-90,"children":[{"score":-230,"children":[{"score":-170,"children":[{"score":-110,"children":[{"score":-210,"children":[{"score":-180,"children":[{"score":-90,"children":[{"score":-180,"children":[{"score":-140,"children":[{"score":-100,"children":[{"score":-110,"children":[{"score":-170,"children":[{"score":0,"children":[{"score":210,"children":[{"score":0,"children":[]},{"score":0,"children":[]},{"score":0,"children":[]},{"score":0,"children":[]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]},{"score":0,"children":[]}]}   

@@ -9,7 +9,7 @@ test('NuPACK:defect', () => {
         if (folder === null) return; 
         
         let sequence = Sequence.fromSequenceString("GGGAACGACUCGAGUAGAGUCGAAAAGAUAUAGAAAGCGCGACUAUAUCAAUAAACGCGCAAAAUAAAUAAAUAAAGAUCAGUUUCGACUGAUCAAAAGAAACAACAACAACAAC")
-        let secstruct = SecStruct.fromParens(".....((((((.....))))))..............(((((..(((....)))..)))))................(((((((....))))))).....................");
+        let secstruct = SecStruct.fromParens(".....((((((.....))))))..............(((((..(((....)))..)))))................(((((((....))))))).....................", false);
         let temperature: number = 37;
         let isPsuedoknot:boolean = false;
         

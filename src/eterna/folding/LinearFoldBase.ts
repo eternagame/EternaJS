@@ -24,6 +24,8 @@ export default abstract class LinearFoldBase extends Folder<true> {
     }
 
     public getDotPlot(seq: Sequence, pairs: SecStruct, temp: number = EPars.DEFAULT_TEMPERATURE): DotPlot {
+        const pseudoknots = false;
+
         const key: CacheKey = {
             primitive: 'dotplot', seq: seq.baseArray, pairs: pairs.pairs, temp
         };
@@ -38,7 +40,7 @@ export default abstract class LinearFoldBase extends Folder<true> {
         let result: DotPlotResult | null = null;
         try {
             // we don't actually do anything with structstring here yet
-            result = this._lib.GetDotPlot(temp, seqStr, pairs.getParenthesis());
+            result = this._lib.GetDotPlot(temp, seqStr, pairs.getParenthesis({pseudoknots}));
             Assert.assertIsDefined(result, 'Linearfold returned a null result');
             retArray = EmscriptenUtil.stdVectorToArray(result.plot);
         } catch (e) {
@@ -64,7 +66,7 @@ export default abstract class LinearFoldBase extends Folder<true> {
     }
 
     public scoreStructures(
-        seq: Sequence, pairs: SecStruct, pseudoknotted: boolean = false,
+        seq: Sequence, pairs: SecStruct, pseudoknots: boolean = false,
         temp: number = EPars.DEFAULT_TEMPERATURE, outNodes: number[] | null = null
     ): number {
         const key: CacheKey = {
@@ -85,7 +87,7 @@ export default abstract class LinearFoldBase extends Folder<true> {
             try {
                 result = this._lib.FullEval(
                     seq.sequenceString(),
-                    pairs.getParenthesis()
+                    pairs.getParenthesis({pseudoknots})
                 );
                 if (!result) {
                     throw new Error('LinearFold returned a null result');
@@ -114,12 +116,12 @@ export default abstract class LinearFoldBase extends Folder<true> {
             const seqA: Sequence = seq.slice(0, cut);
             const pairsA: SecStruct = pairs.slice(0, cut);
             const nodesA: number[] = [];
-            const retA: number = this.scoreStructures(seqA, pairsA, pseudoknotted, temp, nodesA);
+            const retA: number = this.scoreStructures(seqA, pairsA, pseudoknots, temp, nodesA);
 
             const seqB: Sequence = seq.slice(cut + 1);
             const pairsB: SecStruct = pairs.slice(cut + 1);
             const nodesB: number[] = [];
-            const retB: number = this.scoreStructures(seqB, pairsB, pseudoknotted, temp, nodesB);
+            const retB: number = this.scoreStructures(seqB, pairsB, pseudoknots, temp, nodesB);
 
             if (nodesA[0] !== -1 || nodesB[0] !== -1) {
                 throw new Error('Something went terribly wrong in scoreStructures()');
@@ -170,6 +172,7 @@ export default abstract class LinearFoldBase extends Folder<true> {
     }
 
     private fullFoldDefault(seq: Sequence): SecStruct {
+        const pseudoknots = false;
         const seqStr = seq.sequenceString(false, false);
         let result: FullFoldResult | null = null;
 
@@ -178,7 +181,7 @@ export default abstract class LinearFoldBase extends Folder<true> {
             if (!result) {
                 throw new Error('LinearFold returned a null result');
             }
-            return SecStruct.fromParens(result.structure);
+            return SecStruct.fromParens(result.structure, pseudoknots);
         } catch (e) {
             log.error('FullFoldDefault error', e);
             return new SecStruct();

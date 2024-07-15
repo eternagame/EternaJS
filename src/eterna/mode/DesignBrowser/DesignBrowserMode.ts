@@ -1007,7 +1007,10 @@ export default class DesignBrowserMode extends GameMode {
             if (category === DesignCategory.SEQUENCE || category === DesignCategory.SYNTHESIS_SCORE) {
                 dataCol.expFeedback = solutions.map((solution) => solution.expFeedback);
             }
-            dataCol.setPairs(SecStruct.fromParens(puz.getSecstruct()));
+            // The target structure may have pseudoknots, but we never want to display them
+            // (the visualization doesn't support it)
+            const pairs = SecStruct.fromParens(puz.getSecstruct(), true).filterForPseudoknots();
+            dataCol.setPairs(pairs);
 
             // Setting and Displaying all raw data for each column
             dataCol.setDataAndDisplay(dataArray);

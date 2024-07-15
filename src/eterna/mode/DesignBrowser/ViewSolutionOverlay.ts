@@ -321,7 +321,9 @@ export default class ViewSolutionOverlay extends ContainerObject {
         PoseThumbnail.drawToSprite(
             playThumbnail,
             this._props.solution.sequence.baseArray,
-            SecStruct.fromParens(this._props.puzzle.getSecstruct()),
+            // The target structure may have pseudoknots, but we never want to display them
+            // (the visualization doesn't support it)
+            SecStruct.fromParens(this._props.puzzle.getSecstruct(), true).filterForPseudoknots(),
             3, PoseThumbnailType.BASE_COLORED,
             0, null, false, 0, customLayout
         );
@@ -348,7 +350,9 @@ export default class ViewSolutionOverlay extends ContainerObject {
             PoseThumbnail.drawToSprite(
                 resultThumbnail,
                 shapeData,
-                SecStruct.fromParens(this._props.puzzle.getSecstruct()),
+                // The target structure may have pseudoknots, but we never want to display them
+                // (the visualization doesn't support it)
+                SecStruct.fromParens(this._props.puzzle.getSecstruct(), true).filterForPseudoknots(),
                 3,
                 PoseThumbnailType.EXP_COLORED,
                 expdata.getShapeStartIndex(),

@@ -20,7 +20,7 @@ export default class SecStruct {
      * @param pseudoknots If true, run through other ()-like characters too, to
      * represent pseudoknots.
      */
-    public static fromParens(str: string, pseudoknots: boolean = false): SecStruct {
+    public static fromParens(str: string, pseudoknots: boolean): SecStruct {
         const s = new SecStruct();
         s.setPairs(str, pseudoknots);
         return s;
@@ -207,7 +207,7 @@ export default class SecStruct {
      * @param parenthesis
      * @param pseudoknots
      */
-    public setPairs(parenthesis: string, pseudoknots: boolean = false) {
+    public setPairs(parenthesis: string, pseudoknots: boolean) {
         this._pairs = new Array(parenthesis.length).fill(-1);
 
         if (pseudoknots) {
@@ -333,8 +333,7 @@ export default class SecStruct {
      * there is one.
      * @param pseudoknots Whether or not characters representing pseudoknots should be supported
      */
-    public getParenthesis(seq: Sequence | null = null,
-        pseudoknots: boolean = false): string {
+    public getParenthesis({seq, pseudoknots}: { seq?: Sequence; pseudoknots: boolean; }): string {
         if (pseudoknots) {
             const dbn: string[] = new Array(this._pairs.length).fill('.');
             const charsL = ['(', '[', '{', '<'];
@@ -428,7 +427,7 @@ export default class SecStruct {
                 str += '(';
             } else if (biPairs[ii] >= 0) {
                 str += ')';
-            } else if (seq != null && seq.hasCut(ii)) {
+            } else if (seq && seq.hasCut(ii)) {
                 str += '&';
             } else {
                 str += '.';
@@ -446,7 +445,7 @@ export default class SecStruct {
         // Round-trip to remove all pseudoknots.
         // Note including the `.` in the character exclusion isn't necessary for correcness,
         // but it does make a significant performance impact
-        const filtered: string = this.getParenthesis(null, true).replace(/[^().]/g, '.');
+        const filtered: string = this.getParenthesis({pseudoknots: true}).replace(/[^().]/g, '.');
 
         const ss = new SecStruct();
         ss.setPairs(filtered, false);
@@ -459,7 +458,7 @@ export default class SecStruct {
      */
     public onlyPseudoknots(): SecStruct {
         // Round-trip to remove all non-pseudoknots.
-        const filtered: string = this.getParenthesis(null, true).replace(/[()]/g, '.');
+        const filtered: string = this.getParenthesis({pseudoknots: true}).replace(/[()]/g, '.');
 
         const ss = new SecStruct();
         ss.setPairs(filtered, true);
