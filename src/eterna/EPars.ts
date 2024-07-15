@@ -1,5 +1,5 @@
 import Utility from 'eterna/util/Utility';
-import {Assert, StyledTextBuilder} from 'flashbang';
+import {Assert, ErrorUtil, StyledTextBuilder} from 'flashbang';
 import Arrays from 'flashbang/util/Arrays';
 import {Oligo, OligoMode} from './rnatypes/Oligo';
 import SecStruct from './rnatypes/SecStruct';
@@ -302,76 +302,16 @@ export default class EPars {
     public static validateParenthesis(
         parenthesis: string, letteronly: boolean = true, lengthLimit: number = -1
     ): string | null {
-        const pairStack: number[] = [];
-
         if (parenthesis.length === 0) return 'Structure is empty';
 
         if (lengthLimit >= 0 && parenthesis.length > lengthLimit) {
             return `Structure length limit is ${lengthLimit}`;
         }
 
-        for (let jj = 0; jj < parenthesis.length; jj++) {
-            if (parenthesis.charAt(jj) === '(') {
-                pairStack.push(jj);
-            } else if (parenthesis.charAt(jj) === ')') {
-                if (pairStack.length === 0) {
-                    return 'Unbalanced parenthesis notation';
-                }
-
-                pairStack.pop();
-            }
-        }
-
-        // order 1 PKs
-        const pkStack: number[] = [];
-        for (let jj = 0; jj < parenthesis.length; jj++) {
-            if (parenthesis.charAt(jj) === '[') {
-                pkStack.push(jj);
-            } else if (parenthesis.charAt(jj) === ']') {
-                if (pkStack.length === 0) {
-                    return 'Unbalanced parenthesis notation []';
-                }
-
-                pkStack.pop();
-            }
-        }
-
-        // order 2 PKs
-        const pkStack2: number[] = [];
-        for (let jj = 0; jj < parenthesis.length; jj++) {
-            if (parenthesis.charAt(jj) === '{') {
-                pkStack2.push(jj);
-            } else if (parenthesis.charAt(jj) === '}') {
-                if (pkStack2.length === 0) {
-                    return 'Unbalanced parenthesis notation {}';
-                }
-
-                pkStack2.pop();
-            }
-        }
-
-        // order 3 PKs
-        const pkStack3: number[] = [];
-        for (let jj = 0; jj < parenthesis.length; jj++) {
-            if (parenthesis.charAt(jj) === '<') {
-                pkStack3.push(jj);
-            } else if (parenthesis.charAt(jj) === '>') {
-                if (pkStack3.length === 0) {
-                    return 'Unbalanced parenthesis notation <>';
-                }
-
-                pkStack3.pop();
-            }
-        }
-
-        for (let jj = 0; jj < parenthesis.length; ++jj) {
-            if (!'.()[]{}<>'.includes(parenthesis.charAt(jj))) {
-                return `Unrecognized character ${parenthesis.charAt(jj)}`;
-            }
-        }
-
-        if (pairStack.length !== 0) {
-            return 'Unbalanced parenthesis notation';
+        try {
+            SecStruct.fromParens(parenthesis, true);
+        } catch (e) {
+            return ErrorUtil.getErrString(e, false);
         }
 
         if (letteronly) {
@@ -382,6 +322,9 @@ export default class EPars {
         if (index === -1) index = parenthesis.indexOf('[]');
         if (index === -1) index = parenthesis.indexOf('{}');
         if (index === -1) index = parenthesis.indexOf('<>');
+        for (const char of ['abcdefghijklmnopqrstuvwxyz']) {
+            if (index === -1) index = parenthesis.indexOf(`${char}${char.toUpperCase()}`);
+        }
         if (index >= 0) {
             return `There is a length 0 hairpin loop which is impossible at base ${index + 2}`;
         }
@@ -390,6 +333,9 @@ export default class EPars {
         if (index === -1) index = parenthesis.indexOf('[.]');
         if (index === -1) index = parenthesis.indexOf('{.}');
         if (index === -1) index = parenthesis.indexOf('<.>');
+        for (const char of ['abcdefghijklmnopqrstuvwxyz']) {
+            if (index === -1) index = parenthesis.indexOf(`${char}.${char.toUpperCase()}`);
+        }
         if (index >= 0) {
             return `There is a length 1 hairpin loop which is impossible at base ${index + 2}`;
         }
@@ -398,7 +344,9 @@ export default class EPars {
         if (index === -1) index = parenthesis.indexOf('[..]');
         if (index === -1) index = parenthesis.indexOf('{..}');
         if (index === -1) index = parenthesis.indexOf('<..>');
-
+        for (const char of ['abcdefghijklmnopqrstuvwxyz']) {
+            if (index === -1) index = parenthesis.indexOf(`${char}..${char.toUpperCase()}`);
+        }
         if (index >= 0) {
             return `There is a length 2 hairpin loop which is impossible at base ${index + 2}`;
         }
