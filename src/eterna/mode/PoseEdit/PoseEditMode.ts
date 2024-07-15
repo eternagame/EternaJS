@@ -937,7 +937,7 @@ export default class PoseEditMode extends GameMode {
                         // We don't pause the queue at this point so loading will continue on,
                         // the intro screen will be shown, and then once dismissed you'll see
                         // the notification dialog, but that's fine for our purposes
-                        this.showNotification(`Failed to load 3D view: ${ErrorUtil.getErrString(err)}`);
+                        this.showNotification(`Failed to load 3D view: ${ErrorUtil.getErrString(err, false)}`);
                     }
                 }
             }
