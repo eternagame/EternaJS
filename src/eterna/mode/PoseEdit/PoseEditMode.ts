@@ -280,8 +280,8 @@ export default class PoseEditMode extends GameMode {
         this._asynchText.visible = false;
     }
 
-    public override pushUILock(name?: string, sidebarOnly?: boolean) {
-        if (!sidebarOnly) super.pushUILock(name);
+    public override pushUILock(name?: string) {
+        super.pushUILock(name);
 
         let sidebarLockDialog = this._sidebarLockRef.object as UILockDialog;
         if (sidebarLockDialog == null) {
@@ -293,8 +293,8 @@ export default class PoseEditMode extends GameMode {
         sidebarLockDialog.addRef(name);
     }
 
-    public override popUILock(name?: string, sidebarOnly?: boolean) {
-        if (!sidebarOnly) super.popUILock(name);
+    public override popUILock(name?: string) {
+        super.popUILock(name);
 
         if (this._sidebarLockRef.isLive) {
             (this._sidebarLockRef.object as UILockDialog).releaseRef(name);
@@ -313,9 +313,12 @@ export default class PoseEditMode extends GameMode {
         const isModal = !(dialog instanceof WindowDialog) || dialog.modal;
 
         if (isModal) {
-            const LOCK_NAME = 'MODAL_LOCK';
-            this.pushUILock(LOCK_NAME, true);
-            dialogRef?.closed.then(() => this.popUILock(LOCK_NAME, true));
+            if (this._solutionView?.container.visible) {
+                this._solutionView.container.visible = false;
+                dialogRef?.closed.then(() => {
+                    if (this._solutionView) this._solutionView.container.visible = true;
+                });
+            }
         }
 
         return dialogRef;
