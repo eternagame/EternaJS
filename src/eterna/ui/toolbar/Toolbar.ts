@@ -605,7 +605,7 @@ export default class Toolbar extends ContainerObject {
     private setupDynamicPaintTools() {
         if (this._boostersData?.paint_tools) {
             const mode: PoseEditMode = this.mode as PoseEditMode;
-            for (const data of this._boostersData.paint_tools) {
+            for (const [idx, data] of this._boostersData.paint_tools.entries()) {
                 Booster.create(mode, data).then((booster) => {
                     booster.onLoad();
 
@@ -617,8 +617,8 @@ export default class Toolbar extends ContainerObject {
 
                     const boosterPaintButton = this.setupButton({
                         cat: ButtonCategory.SOLVE,
-                        id: booster.label,
-                        displayName: booster.label,
+                        id: `DYNAMIC-${idx}`,
+                        displayName: booster.label ?? '',
                         isPaintTool: true,
                         allImg: booster.buttonStateTextures[0],
                         overImg: booster.buttonStateTextures[1] ? booster.buttonStateTextures[1]
@@ -626,7 +626,6 @@ export default class Toolbar extends ContainerObject {
                         disableImg: booster.buttonStateTextures[4] ? booster.buttonStateTextures[4]
                             : booster.buttonStateTextures[0],
                         tooltip: booster.tooltip,
-                        label: booster.label,
                         fontSize: 14
                     });
                     boosterPaintButton.clicked.connect(() => {

@@ -17,7 +17,7 @@ export enum BoosterType {
 export interface BoosterData {
     type?: string;
     icons_b64?: string[];
-    label: string;
+    label?: string;
     tooltip: string;
     script: string;
 }
@@ -71,7 +71,7 @@ export default class Booster {
         view: GameMode,
         type: BoosterType,
         toolColor: number,
-        label: string,
+        label: string | undefined,
         tooltip: string,
         scriptNID: string,
         buttonStateTextures: Texture[]
@@ -209,7 +209,7 @@ export default class Booster {
     private readonly _view: GameMode;
     private readonly _toolColor: number;
     private readonly _type: BoosterType;
-    private readonly _label: string;
+    private readonly _label: string | undefined;
     private readonly _tooltip: string;
     private readonly _scriptID: string;
     private readonly _buttonStateTextures: (Texture | null)[] = [null, null, null, null, null];
