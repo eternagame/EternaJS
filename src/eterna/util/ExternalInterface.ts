@@ -229,7 +229,8 @@ export default class ExternalInterface {
 
     /**
      * Runs a named script. Calls a callback with the result of the script, or a different one if
-     * the script has an error.
+     * the script execution process has an error (errors in the script itself will cause a resolution
+     * with the `result` property of the resolved object set to false and `cause` set to the error).
      *
      * This function uses callbacks instead of a Promise because Promise callbacks never run syncronously
      *
