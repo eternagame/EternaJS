@@ -1,6 +1,7 @@
 import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import Puzzle from 'eterna/puzzle/Puzzle';
+import {ExternalInterfaceCtx} from 'eterna/util/ExternalInterface';
 import {ConstraintBoxConfig} from './ConstraintBox';
 
 export interface BaseConstraintStatus {
@@ -19,6 +20,7 @@ export interface ConstraintContext {
     undoBlocks: UndoBlock[];
     targetConditions?: (TargetConditions | undefined)[];
     puzzle?: Puzzle;
+    scriptConstraintCtx?: ExternalInterfaceCtx;
 }
 
 export default abstract class Constraint<ConstraintStatus extends BaseConstraintStatus> {
