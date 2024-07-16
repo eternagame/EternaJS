@@ -106,7 +106,7 @@ export default abstract class GameMode extends AppMode {
 
     /** Show a dialog. Removes any existing modal dialogs if modal. */
     public showDialog<T extends SceneObject>(dialog: T): T;
-    public showDialog<T extends SceneObject>(dialog: T, id: string): T | null;
+    public showDialog<T extends SceneObject>(dialog: T, id: string | undefined): T | null;
     public showDialog<T extends SceneObject>(dialog: T, id?: string): T | null {
         const isModal = !(dialog instanceof WindowDialog) || dialog.modal;
 

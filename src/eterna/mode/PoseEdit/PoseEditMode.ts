@@ -19,8 +19,7 @@ import GameButton from 'eterna/ui/GameButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {
     KeyCode, SpriteObject, DisplayUtil, HAlign, VAlign, Flashbang, KeyboardEventType, Assert,
-    GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject,
-    ErrorUtil
+    GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject, ErrorUtil
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import EternaSettingsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaSettingsDialog';
@@ -82,6 +81,8 @@ import PasteStructureDialog from 'eterna/ui/PasteStructureDialog';
 import ConfirmTargetDialog from 'eterna/ui/ConfirmTargetDialog';
 import DotPlot from 'eterna/rnatypes/DotPlot';
 import UILockDialog from 'eterna/ui/UILockDialog';
+import Dialog from 'eterna/ui/Dialog';
+import WindowDialog from 'eterna/ui/WindowDialog';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -279,8 +280,8 @@ export default class PoseEditMode extends GameMode {
         this._asynchText.visible = false;
     }
 
-    public override pushUILock(name?: string) {
-        super.pushUILock(name);
+    public override pushUILock(name?: string, sidebarOnly?: boolean) {
+        if (!sidebarOnly) super.pushUILock(name);
 
         let sidebarLockDialog = this._sidebarLockRef.object as UILockDialog;
         if (sidebarLockDialog == null) {
@@ -292,14 +293,32 @@ export default class PoseEditMode extends GameMode {
         sidebarLockDialog.addRef(name);
     }
 
-    public override popUILock(name?: string) {
-        super.popUILock(name);
+    public override popUILock(name?: string, sidebarOnly?: boolean) {
+        if (!sidebarOnly) super.popUILock(name);
 
         if (this._sidebarLockRef.isLive) {
             (this._sidebarLockRef.object as UILockDialog).releaseRef(name);
         } else {
             log.warn('SidebarLockDialog not currently active');
         }
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public override showDialog<T extends Dialog<any>>(dialog: T): T;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public override showDialog<T extends Dialog<any>>(dialog: T, id: string): T | null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public override showDialog<T extends Dialog<any>>(dialog: T, id?: string): T | null {
+        const dialogRef = super.showDialog(dialog, id);
+        const isModal = !(dialog instanceof WindowDialog) || dialog.modal;
+
+        if (isModal) {
+            const LOCK_NAME = 'MODAL_LOCK';
+            this.pushUILock(LOCK_NAME, true);
+            dialogRef?.closed.then(() => this.popUILock(LOCK_NAME, true));
+        }
+
+        return dialogRef;
     }
 
     private get _solDialogOffset(): number {
