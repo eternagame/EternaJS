@@ -63,7 +63,7 @@ export default abstract class GameMode extends AppMode {
         this.container.addChild(this.dialogLayer);
         this.dialogLayer.name = 'dialogLayer';
         this.container.addChild(this.sidebarLayer);
-        this.dialogLayer.name = 'sidebarLayer';
+        this.sidebarLayer.name = 'sidebarLayer';
         this.container.addChild(this.notifLayer);
         this.notifLayer.name = 'notifLayer';
         this.container.addChild(this.achievementsLayer);
@@ -106,7 +106,7 @@ export default abstract class GameMode extends AppMode {
 
     /** Show a dialog. Removes any existing modal dialogs if modal. */
     public showDialog<T extends SceneObject>(dialog: T): T;
-    public showDialog<T extends SceneObject>(dialog: T, id: string): T | null;
+    public showDialog<T extends SceneObject>(dialog: T, id: string | undefined): T | null;
     public showDialog<T extends SceneObject>(dialog: T, id?: string): T | null {
         const isModal = !(dialog instanceof WindowDialog) || dialog.modal;
 

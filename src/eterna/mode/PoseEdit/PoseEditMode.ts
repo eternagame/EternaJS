@@ -1,6 +1,7 @@
 import log from 'loglevel';
 import {
-    Container, DisplayObject, Point, Sprite, Text, Rectangle
+    Container, DisplayObject, Point, Sprite, Text, Rectangle,
+    Graphics
 } from 'pixi.js';
 import EPars, {RNABase, RNAPaint} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
@@ -18,8 +19,7 @@ import GameButton from 'eterna/ui/GameButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {
     KeyCode, SpriteObject, DisplayUtil, HAlign, VAlign, Flashbang, KeyboardEventType, Assert,
-    GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject,
-    ErrorUtil
+    GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject, ErrorUtil
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import EternaSettingsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaSettingsDialog';
@@ -80,6 +80,9 @@ import NuPACK from 'eterna/folding/NuPACK';
 import PasteStructureDialog from 'eterna/ui/PasteStructureDialog';
 import ConfirmTargetDialog from 'eterna/ui/ConfirmTargetDialog';
 import DotPlot from 'eterna/rnatypes/DotPlot';
+import UILockDialog from 'eterna/ui/UILockDialog';
+import Dialog from 'eterna/ui/Dialog';
+import WindowDialog from 'eterna/ui/WindowDialog';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -277,6 +280,50 @@ export default class PoseEditMode extends GameMode {
         this._asynchText.visible = false;
     }
 
+    public override pushUILock(name?: string) {
+        super.pushUILock(name);
+
+        let sidebarLockDialog = this._sidebarLockRef.object as UILockDialog;
+        if (sidebarLockDialog == null) {
+            sidebarLockDialog = new UILockDialog();
+            sidebarLockDialog.container.mask = this._sidebarLockMask;
+            this._sidebarLockRef = this.addObject(sidebarLockDialog, this.sidebarLayer);
+        }
+
+        sidebarLockDialog.addRef(name);
+    }
+
+    public override popUILock(name?: string) {
+        super.popUILock(name);
+
+        if (this._sidebarLockRef.isLive) {
+            (this._sidebarLockRef.object as UILockDialog).releaseRef(name);
+        } else {
+            log.warn('SidebarLockDialog not currently active');
+        }
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public override showDialog<T extends Dialog<any>>(dialog: T): T;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public override showDialog<T extends Dialog<any>>(dialog: T, id: string): T | null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public override showDialog<T extends Dialog<any>>(dialog: T, id?: string): T | null {
+        const dialogRef = super.showDialog(dialog, id);
+        const isModal = !(dialog instanceof WindowDialog) || dialog.modal;
+
+        if (isModal) {
+            if (this._solutionView?.container.visible) {
+                this._solutionView.container.visible = false;
+                dialogRef?.closed.then(() => {
+                    if (this._solutionView) this._solutionView.container.visible = true;
+                });
+            }
+        }
+
+        return dialogRef;
+    }
+
     private get _solDialogOffset(): number {
         return this._solutionView !== undefined && this._solutionView.container.visible
             ? ViewSolutionOverlay.theme.width : 0;
@@ -316,6 +363,15 @@ export default class PoseEditMode extends GameMode {
         );
 
         this._constraintBar.layout();
+
+        this._sidebarLockMask.clear();
+        if (this._solutionView) {
+            const rect = this._solutionView.container.getBounds();
+            this._sidebarLockMask
+                .beginFill(0, 1)
+                .drawRect(rect.x, rect.y, rect.width, rect.height)
+                .endFill();
+        }
     }
 
     public get constraintsLayer(): Container {
@@ -4479,6 +4535,8 @@ export default class PoseEditMode extends GameMode {
 
     // Dialogs
     private _specBox: SpecBoxDialog | null = null;
+    private _sidebarLockRef: GameObjectRef = GameObjectRef.NULL;
+    private _sidebarLockMask = new Graphics();
 
     // Tutorial Script Extra Functionality
     private _showMissionScreen: boolean = true;
