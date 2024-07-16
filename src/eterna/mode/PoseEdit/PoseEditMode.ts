@@ -252,8 +252,8 @@ export default class PoseEditMode extends GameMode {
 
         this.setPuzzle();
 
-        this.buildScriptInterface();
-        this.registerScriptInterface(this._scriptInterface);
+        this.registerScriptInterface(this.buildScriptInterface());
+        this._scriptConstraintContext = this.buildScriptInterface(true);
 
         this.updateUILayout();
     }
@@ -740,7 +740,10 @@ export default class PoseEditMode extends GameMode {
         this._toolbar.palette.clickTarget(PaletteTargetType.A);
 
         // Set up the constraintBar
-        this._constraintBar = new ConstraintBar(this._puzzle.constraints, this._puzzle.getSecstructs.length);
+        this._constraintBar = new ConstraintBar(
+            this._puzzle.constraints,
+            this._puzzle.getSecstructs.length
+        );
         this._constraintBar.display.visible = false;
         this.addObject(this._constraintBar, this._constraintsLayer);
         this._constraintBar.sequenceHighlights.connect(
@@ -1149,9 +1152,18 @@ export default class PoseEditMode extends GameMode {
             });
     }
 
-    private buildScriptInterface(): void {
+    private buildScriptInterface(forConstraints: boolean = false): ExternalInterfaceCtx {
+        const scriptInterfaceCtx = new ExternalInterfaceCtx();
+
         const lockDuringFold = <T extends [...unknown[]], U>(fn: (...args: T) => U) => (...args: T): U => {
-            if (this._opQueue.length > 0) {
+            if (
+                this._opQueue.length > 0
+                // SCRIPT constraints may call these APIs, eg to get the current sequence to do something with,
+                // or the IUPAC booster hack to set colored rings, or Jnicol's "Human vs Computer"/"Battle Bot"
+                // scripted constraints which use this opportunity to even set the sequence string.
+                // While it *should* be safe, it is potentially dangerous. I hope you know what you're doing...
+                && !forConstraints
+            ) {
                 throw new Error(
                     'An EternaScript booster attempted to call a method that interacts with the game while a folding'
                     + ' operation is in progress. Maybe you forgot to `await` a setter, or the user triggered a folding'
@@ -1163,7 +1175,7 @@ export default class PoseEditMode extends GameMode {
         };
 
         // Folding
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'fold',
             (seq: string, constraint: string | null = null): string | null => {
                 if (this._folder === null) {
@@ -1181,7 +1193,7 @@ export default class PoseEditMode extends GameMode {
             }
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'fold_async',
             async (seq: string, constraint: string | null = null): Promise<string | null> => {
                 if (this._folder === null) {
@@ -1196,7 +1208,7 @@ export default class PoseEditMode extends GameMode {
             }
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'fold_with_binding_site',
             (seq: string, site: number[], bonus: number): string | null => {
                 if (this._folder === null) {
@@ -1215,7 +1227,7 @@ export default class PoseEditMode extends GameMode {
             }
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'fold_with_binding_site_async',
             async (seq: string, site: number[], bonus: number): Promise<string | null> => {
                 if (this._folder === null) {
@@ -1234,7 +1246,7 @@ export default class PoseEditMode extends GameMode {
             }
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'energy_of_structure',
             (seq: string, secstruct: string): number | null => {
                 if (this._folder === null) {
@@ -1252,7 +1264,7 @@ export default class PoseEditMode extends GameMode {
             }
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'energy_of_structure_async',
             (seq: string, secstruct: string): number | null => {
                 if (this._folder === null) {
@@ -1270,7 +1282,7 @@ export default class PoseEditMode extends GameMode {
             }
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'pairing_probabilities',
             (seq: string, secstruct: string | null = null): number[] | null => {
                 if (this._folder === null) {
@@ -1297,7 +1309,7 @@ export default class PoseEditMode extends GameMode {
             }
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'pairing_probabilities',
             async (seq: string, secstruct: string | null = null): Promise<number[] | null> => {
                 if (this._folder === null) {
@@ -1321,7 +1333,7 @@ export default class PoseEditMode extends GameMode {
             }
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'subopt_single_sequence',
             (
                 seq: string, kcalDelta: number,
@@ -1337,7 +1349,7 @@ export default class PoseEditMode extends GameMode {
             }
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'subopt_single_sequence_async',
             async (
                 seq: string, kcalDelta: number,
@@ -1353,7 +1365,7 @@ export default class PoseEditMode extends GameMode {
             }
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'subopt_oligos',
             (
                 seq: string, oligoStrings: string[], kcalDelta: number,
@@ -1376,7 +1388,7 @@ export default class PoseEditMode extends GameMode {
             }
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'subopt_oligos_async',
             async (
                 seq: string, oligoStrings: string[], kcalDelta: number,
@@ -1399,7 +1411,7 @@ export default class PoseEditMode extends GameMode {
             }
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'cofold',
             (
                 seq: string, oligo: string, malus: number = 0.0, constraint: string | null = null
@@ -1423,7 +1435,7 @@ export default class PoseEditMode extends GameMode {
             }
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'cofold_async',
             async (
                 seq: string, oligo: string, malus: number = 0.0, constraint: string | null = null
@@ -1447,7 +1459,7 @@ export default class PoseEditMode extends GameMode {
             }
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'get_defect',
             (
                 seq: string, secstruct: string, pseudoknotted: boolean, temp: number = EPars.DEFAULT_TEMPERATURE
@@ -1463,7 +1475,7 @@ export default class PoseEditMode extends GameMode {
             }
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'get_defect_async',
             async (
                 seq: string, secstruct: string, pseudoknotted: boolean, temp: number = EPars.DEFAULT_TEMPERATURE
@@ -1480,22 +1492,22 @@ export default class PoseEditMode extends GameMode {
         );
 
         // Getters
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'get_puzzle_id',
             lockDuringFold((): number => this._puzzle.nodeID)
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'get_solution_id',
             lockDuringFold((): number | undefined => this._params.solutions?.[this._curSolutionIdx]?.nodeID)
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'get_sequence_string',
             lockDuringFold((): string => this.getPose(0).getSequenceString())
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'get_custom_numbering_to_index',
             lockDuringFold(
                 (): { [customNumber: number]: number } | undefined => {
@@ -1515,7 +1527,7 @@ export default class PoseEditMode extends GameMode {
             )
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'get_index_to_custom_numbering',
             lockDuringFold(
                 (): { [serialIndex: number]: number | null } | undefined => {
@@ -1532,7 +1544,7 @@ export default class PoseEditMode extends GameMode {
             )
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'get_full_sequence',
             lockDuringFold(
                 (indx: number): string | null => {
@@ -1545,7 +1557,7 @@ export default class PoseEditMode extends GameMode {
             )
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'get_locks',
             lockDuringFold(
                 (): boolean[] | null => {
@@ -1555,7 +1567,7 @@ export default class PoseEditMode extends GameMode {
             )
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'get_targets',
             lockDuringFold(
                 (): TargetConditions[] => {
@@ -1579,7 +1591,7 @@ export default class PoseEditMode extends GameMode {
             )
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'get_target_structure',
             lockDuringFold(
                 (index: number): string | null => {
@@ -1591,7 +1603,7 @@ export default class PoseEditMode extends GameMode {
             )
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'get_native_structure',
             lockDuringFold(
                 (indx: number): string | null => {
@@ -1604,7 +1616,7 @@ export default class PoseEditMode extends GameMode {
             )
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'get_full_structure',
             lockDuringFold(
                 (indx: number): string | null => {
@@ -1623,7 +1635,7 @@ export default class PoseEditMode extends GameMode {
             )
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'get_free_energy',
             lockDuringFold(
                 (indx: number): number => {
@@ -1639,9 +1651,9 @@ export default class PoseEditMode extends GameMode {
             )
         );
 
-        this._scriptInterface.addCallback('check_constraints', lockDuringFold((): boolean => this.checkConstraints()));
+        scriptInterfaceCtx.addCallback('check_constraints', lockDuringFold((): boolean => this.checkConstraints()));
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'constraint_satisfied',
             lockDuringFold(
                 (idx: number): boolean | null => {
@@ -1659,15 +1671,15 @@ export default class PoseEditMode extends GameMode {
             )
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'get_tracked_indices',
             lockDuringFold((): number[] => this.getPose(0).trackedIndices)
         );
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'get_barcode_indices',
             lockDuringFold((): number[] | null => this._puzzle.barcodeIndices)
         );
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'is_barcode_available',
             lockDuringFold(
                 (seq: string): boolean => SolutionManager.instance.isHairpinUsed(
@@ -1676,7 +1688,7 @@ export default class PoseEditMode extends GameMode {
             )
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'current_folder',
             lockDuringFold(
                 (): string | null => (
@@ -1686,7 +1698,7 @@ export default class PoseEditMode extends GameMode {
         );
 
         // Setters
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'set_sequence_string',
             lockDuringFold(
                 (seq: string): boolean => {
@@ -1707,7 +1719,7 @@ export default class PoseEditMode extends GameMode {
             )
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'set_sequence_string_async',
             lockDuringFold(
                 async (seq: string): Promise<boolean> => {
@@ -1722,7 +1734,7 @@ export default class PoseEditMode extends GameMode {
             )
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'set_target_structure',
             lockDuringFold(
                 (index: number, structure: string, startAt: number = 0): void => {
@@ -1741,7 +1753,7 @@ export default class PoseEditMode extends GameMode {
             )
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'set_target_structure_async',
             lockDuringFold(
                 async (index: number, structure: string, startAt: number = 0): Promise<void> => {
@@ -1753,7 +1765,7 @@ export default class PoseEditMode extends GameMode {
             )
         );
 
-        this._scriptInterface.addCallback(
+        scriptInterfaceCtx.addCallback(
             'set_tracked_indices',
             lockDuringFold(
                 (
@@ -1794,7 +1806,7 @@ export default class PoseEditMode extends GameMode {
         );
 
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
-            this._scriptInterface.addCallback(
+            scriptInterfaceCtx.addCallback(
                 'select_folder',
                 lockDuringFold((folderName: string): boolean => {
                     const newFolder = FolderManager.instance.getFolder(folderName);
@@ -1806,7 +1818,7 @@ export default class PoseEditMode extends GameMode {
                 })
             );
 
-            this._scriptInterface.addCallback(
+            scriptInterfaceCtx.addCallback(
                 'select_folder_async',
                 lockDuringFold((folderName: string): Promise<boolean> => new Promise((resolve) => {
                     const result = this.selectFolder(folderName);
@@ -1816,7 +1828,7 @@ export default class PoseEditMode extends GameMode {
         }
 
         // Miscellanous
-        this._scriptInterface.addCallback('sparks_effect', (from: number, to: number): void => {
+        scriptInterfaceCtx.addCallback('sparks_effect', (from: number, to: number): void => {
             // FIXME: check PiP mode and handle accordingly
             for (const pose of this._poses) {
                 pose.praiseSequence(from, to);
@@ -1824,7 +1836,7 @@ export default class PoseEditMode extends GameMode {
         });
 
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
-            this._scriptInterface.addCallback(
+            scriptInterfaceCtx.addCallback(
                 'submit_solution',
                 lockDuringFold(
                     async (
@@ -1841,6 +1853,8 @@ export default class PoseEditMode extends GameMode {
                 )
             );
         }
+
+        return scriptInterfaceCtx;
     }
 
     public onKeyboardEvent(e: KeyboardEvent): boolean {
@@ -3372,7 +3386,8 @@ export default class PoseEditMode extends GameMode {
         return this._constraintBar.updateConstraints({
             undoBlocks: this._seqStacks[this._stackLevel],
             targetConditions: this._targetConditions,
-            puzzle: this._puzzle
+            puzzle: this._puzzle,
+            scriptConstraintCtx: this._scriptConstraintContext
         }, soft);
     }
 
@@ -4401,8 +4416,8 @@ export default class PoseEditMode extends GameMode {
 
     private readonly _puzzle: Puzzle;
     private readonly _params: PoseEditParams;
-    private readonly _scriptInterface = new ExternalInterfaceCtx();
     private readonly _autosaveData: SaveStoreItem | null;
+    private _scriptConstraintContext: ExternalInterfaceCtx;
     private _savedInputs: SubmitPoseDetails;
 
     private _constraintsLayer: Container;
