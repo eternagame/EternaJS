@@ -3671,6 +3671,8 @@ export default class PoseEditMode extends GameMode {
             // breaking pairs is safe, but adding them may not always be
             // (by "not safe" it appears we mean "could introduce a pseudoknot", which is invalid
             // if pseudoknots are not enabled/not supported in our current engine)
+            // TODO: Assuming the above is correct, if we are pknot AND multistrand, do we want to
+            // try to optimize the order to reduce pknots instead of just taking this immediately?
             if (
                 pseudoknots || EPars.validateParenthesis(
                     pairsxx.getParenthesis({pseudoknots: false}).slice(segments[1] + 1, segments[2]),
