@@ -51,10 +51,18 @@ export default class Eterna {
 
     public static onFatalError(err: Error | ErrorEvent): void {
         log.error('Fatal error error', ErrorUtil.getErrorObj(err) || ErrorUtil.getErrString(err));
-        if (Flashbang.app != null
+        if (
+            Flashbang.app != null
             && Flashbang.app.modeStack != null
-            && !(Flashbang.app.modeStack.topMode instanceof ErrorDialogMode)) {
+            && !(Flashbang.app.modeStack.topMode instanceof ErrorDialogMode)
+        ) {
             Flashbang.app.modeStack.pushMode(new ErrorDialogMode(err));
+            // If the error occurred in our update loop, the error will have meant Pixi's update
+            // routine stopped before it could queue up the next frame. We need to keep the update
+            // loop running in order to show our error dialog (...and let things keep running
+            // if they can)
+            Flashbang.app.pixi?.ticker.stop();
+            Flashbang.app.pixi?.ticker.start();
         } else if (process.env.NODE_ENV !== 'production') {
             try {
                 // eslint-disable-next-line no-alert
