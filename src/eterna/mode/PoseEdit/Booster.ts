@@ -157,23 +157,23 @@ export default class Booster {
     private executeScript(pose: Pose2D | null, cmd: string | null, baseNum: number): void {
         const scriptInterface = new ExternalInterfaceCtx();
 
-        scriptInterface.addCallback('set_sequence_string', (seq: string): boolean => {
-            const seqArr: Sequence = Sequence.fromSequenceString(seq);
-            if (seqArr.findUndefined() >= 0 || seqArr.findCut() >= 0) {
-                log.info(`Invalid characters in ${seq}`);
-                return false;
-            }
+        if (this._type === BoosterType.PAINTER && pose) {
+            // Note we don't have to do any async handling here because we are running
+            // in the middle of the paint process. We are not triggering folding and
+            // do not expect folding to complete before we return - that happens
+            // only after painting is completed.
+            scriptInterface.addCallback('set_sequence_string', (seq: string): boolean => {
+                const seqArr: Sequence = Sequence.fromSequenceString(seq);
+                if (seqArr.findUndefined() >= 0 || seqArr.findCut() >= 0) {
+                    log.info(`Invalid characters in ${seq}`);
+                    return false;
+                }
 
-            if (this._type === BoosterType.PAINTER && pose) {
                 pose.setMutated(seqArr);
-            } else {
-                const prevForceSync = this._view.forceSync;
-                this._view.forceSync = true;
-                this._view.pasteSequence(seqArr);
-                this._view.forceSync = prevForceSync;
-            }
-            return true;
-        });
+
+                return true;
+            });
+        }
 
         scriptInterface.addCallback('set_script_status', (): void => {});
 
