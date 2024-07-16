@@ -166,7 +166,7 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
         if (antiStructureString === undefined) {
             throw new Error('Target structure not available for ANTISHAPE constraint');
         }
-        const antiPairs: SecStruct = SecStruct.fromParens(antiStructureString);
+        const antiPairs: SecStruct = SecStruct.fromParens(antiStructureString, tc['type'] === 'pseudoknot');
 
         return {
             satisfied: !EPars.arePairsSame(naturalPairs, antiPairs, targetAlignedConstraints),
@@ -191,8 +191,9 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
             undoBlock.targetConditions ? undoBlock.targetConditions['custom-layout'] : undefined
         );
         const antiSS = targetConditions[this.stateIndex]['anti_secstruct'];
+        const tcType = targetConditions[this.stateIndex]['type'];
         const wrongPairs = antiSS !== undefined
-            ? SecStruct.fromParens(antiSS)
+            ? SecStruct.fromParens(antiSS, tcType === 'pseudoknot')
             : undefined;
         return {
             ...details,

@@ -33,13 +33,13 @@ test('linearfoldE:MFETests', () => {
                 -1, 175]
         ];
         let structures: SecStruct[] = [
-            SecStruct.fromParens("(((((........)))))"),
-            SecStruct.fromParens("(((...)))"),
-            SecStruct.fromParens("(((((........)))))"),
-            SecStruct.fromParens("((((((((...........)).))))))"),
-            SecStruct.fromParens(".((((((.((((((......)))))).......((((.....))))...))))))."),
-            SecStruct.fromParens("(((((((..((((........)))).(((((.......))))).....(((((.......))))))))))))."),
-            SecStruct.fromParens(".(((((((((.((((....))))..................))))..(((((......)))))...(((.((.(((((((((((((...((((..((((.....))))...)))).))))))))))))))).)))..))))).."),  
+            SecStruct.fromParens("(((((........)))))", false),
+            SecStruct.fromParens("(((...)))", false),
+            SecStruct.fromParens("(((((........)))))", false),
+            SecStruct.fromParens("((((((((...........)).))))))", false),
+            SecStruct.fromParens(".((((((.((((((......)))))).......((((.....))))...)))))).", false),
+            SecStruct.fromParens("(((((((..((((........)))).(((((.......))))).....(((((.......)))))))))))).", false),
+            SecStruct.fromParens(".(((((((((.((((....))))..................))))..(((((......)))))...(((.((.(((((((((((((...((((..((((.....))))...)))).))))))))))))))).)))..)))))..", false),  
         ];
         let sequences: Sequence[] = [
             Sequence.fromSequenceString(  "GGGGGAAAAAAAACCCCC"),

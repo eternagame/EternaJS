@@ -3333,7 +3333,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         this.sequence = new Sequence(sequence);
         this.puzzleLocks = locks;
-        this.molecularStructure = SecStruct.fromParens(parenthesis);
+        this.molecularStructure = SecStruct.fromParens(parenthesis, this._pseudoknotted);
         this.molecularBindingSite = bindingSite;
     }
 
@@ -4235,7 +4235,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         scoreTree.setupTree(this.satisfiedPairs);
 
         const treeroot: RNATreeNode | null = scoreTree.root;
-        scoreTree.scoreTree(this.fullSequence, this._scoreFolder);
+        scoreTree.scoreTree(this.fullSequence, this._scoreFolder, this._pseudoknotted);
 
         const scoreNodes: ScoreDisplayNode[] = [];
         const rootCoords: number[] = [];

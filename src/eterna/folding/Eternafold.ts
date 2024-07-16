@@ -53,7 +53,7 @@ export default class EternaFold extends Folder<true> {
     public scoreStructures(
         seq: Sequence,
         pairs: SecStruct,
-        pseudoknotted: boolean = false,
+        pseudoknots: boolean = false,
         temp: number = EPars.DEFAULT_TEMPERATURE,
         outNodes: number[] | null = null
     ): number {
@@ -73,9 +73,11 @@ export default class EternaFold extends Folder<true> {
         do {
             let result: FullEvalResult | null = null;
             try {
-                result = this._lib.FullEval(temp,
+                result = this._lib.FullEval(
+                    temp,
                     seq.sequenceString(),
-                    pairs.getParenthesis());
+                    pairs.getParenthesis({pseudoknots})
+                );
                 cache = {energy: result.energy, nodes: EmscriptenUtil.stdVectorToArray<number>(result.nodes)};
             } catch (e) {
                 log.error('FullEval error', e);
@@ -100,12 +102,12 @@ export default class EternaFold extends Folder<true> {
             const seqA: Sequence = seq.slice(0, cut);
             const pairsA: SecStruct = pairs.slice(0, cut);
             const nodesA: number[] = [];
-            const retA: number = this.scoreStructures(seqA, pairsA, pseudoknotted, temp, nodesA);
+            const retA: number = this.scoreStructures(seqA, pairsA, pseudoknots, temp, nodesA);
 
             const seqB: Sequence = seq.slice(cut + 1);
             const pairsB: SecStruct = pairs.slice(cut + 1);
             const nodesB: number[] = [];
-            const retB: number = this.scoreStructures(seqB, pairsB, pseudoknotted, temp, nodesB);
+            const retB: number = this.scoreStructures(seqB, pairsB, pseudoknots, temp, nodesB);
 
             if (nodesA[0] !== -1 || nodesB[0] !== -1) {
                 throw new Error('Something went terribly wrong in scoreStructures()');
@@ -167,13 +169,14 @@ export default class EternaFold extends Folder<true> {
         _temp: number = EPars.DEFAULT_TEMPERATURE,
         gamma: number = 6.0
     ): SecStruct {
+        const pseudoknots = false;
         const seqStr = seq.sequenceString(false, false);
         let result: FullFoldResult | null = null;
 
         try {
             // can't do anything with structStr for now. constrained folding later.
             result = this._lib.FullFoldDefault(seqStr, gamma);// , structStr || '');
-            return SecStruct.fromParens(result.structure);
+            return SecStruct.fromParens(result.structure, pseudoknots);
         } catch (e) {
             log.error('FullFoldTemperature error', e);
             return new SecStruct();

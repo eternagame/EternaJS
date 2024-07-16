@@ -24,7 +24,7 @@ test(`NuPACK:Multifold`, () => {
             );
 
             expect(fold).toBeDefined()
-            expect(fold!.pairs.getParenthesis()).toEqual('((((((((((.))))))))))........(((((((((((((((((((((((((((((((....))))))))))))))))))))))))))))))).');
+            expect(fold!.pairs.getParenthesis({ pseudoknots: false })).toEqual('((((((((((.))))))))))........(((((((((((((((((((((((((((((((....))))))))))))))))))))))))))))))).');
         }))
         .resolves.toBeUndefined(); // (we're returning a promise)
 });
@@ -42,7 +42,7 @@ test(`NuPACK:scoreStructures (multistrand)`, () => {
             const nnfes: number[] = [];
             const energy = folder.scoreStructures(
                 Sequence.fromSequenceString('UAAGUUCUGA&UCGGAACUUAGCUUAGAUGUGUGCAUUGAAUACGAGAUCUACAUGGUAGUUCGCUAUCAUGUAGAUUUCGUAUUCGAUGUGCACU', true),
-                SecStruct.fromParens('((((((((((.))))))))))........(((((((((((((((((((((((((((((((....))))))))))))))))))))))))))))))).'),
+                SecStruct.fromParens('((((((((((.))))))))))........(((((((((((((((((((((((((((((((....))))))))))))))))))))))))))))))).', false),
                 false,
                 37,
                 nnfes
@@ -76,7 +76,7 @@ test(`NuPACK:scoreStructures (multistrand, partially paired)`, () => {
             const nnfes: number[] = [];
             const energy = folder.scoreStructures(
                 Sequence.fromSequenceString('UAAGUUCUGA&UCGGAACUUAGCUUAGAUGGUUGCGUUGAAUUCGAGAUCUACAUGGUAGUUCGCUAUCAUGUAGAUUUCGGGUUCCAUCUGCAGU', true),
-                SecStruct.fromParens('................................((((..((((((((((((((((((((((....))))))))))))))))))))))....))))..'),
+                SecStruct.fromParens('................................((((..((((((((((((((((((((((....))))))))))))))))))))))....))))..', false),
                 false,
                 37,
                 nnfes

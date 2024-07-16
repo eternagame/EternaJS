@@ -129,7 +129,7 @@ test(`NuPACK:PK_foldSequence`, () => {
                 null, null, true, 37);
 
             expect(pairs).toBeDefined();
-            expect(pairs!.getParenthesis(null, true))
+            expect(pairs!.getParenthesis({ pseudoknots: true }))
                 .toEqual("(((....))).......(((((((((...[[[[[..)))))))))((((((((((.........))).)))))))....]]]]]....");
         }))
         .resolves.toBeUndefined(); // (we're returning a promise)
@@ -155,7 +155,7 @@ test(`NuPACK:PK_fold1L2X`, () => {
                 null, null, true, 37);
 
             expect(pairs).toBeDefined();
-            expect(pairs!.getParenthesis(null, true))
+            expect(pairs!.getParenthesis({ pseudoknots: true }))
                 .toEqual("..(((((..[[[[)))))......]]]]");
         }))
         .resolves.toBeUndefined(); // (we're returning a promise)

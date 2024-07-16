@@ -241,7 +241,7 @@ export default class PuzzleEditMode extends GameMode {
         const initialPoseData = this._initialPoseData;
         for (let ii = 0; ii < this._numTargets; ii++) {
             let defaultStructure = '.....((((((((....)))))))).....';
-            let defaultPairs: SecStruct = SecStruct.fromParens(defaultStructure);
+            let defaultPairs: SecStruct = SecStruct.fromParens(defaultStructure, false);
             let defaultSequence = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
             let defaultLocks: boolean[] | undefined;
             let defaultCustomLayout: Array<[number, number] | [null, null]> | undefined;
@@ -529,7 +529,7 @@ export default class PuzzleEditMode extends GameMode {
             Assert.assertIsDefined(pose.molecularStructure);
             const data: PuzzleEditPoseData = {
                 sequence: pose.sequence.sequenceString(),
-                structure: pose.molecularStructure.getParenthesis(null, true),
+                structure: pose.molecularStructure.getParenthesis({pseudoknots: true}),
                 annotations: this._annotationManager.createAnnotationBundle(),
                 startingFolder: this._folder.name,
                 site: this.getCurrentBindingBases(ii) ?? undefined,
@@ -926,7 +926,7 @@ export default class PuzzleEditMode extends GameMode {
         const postParams: SubmitPuzzleParams = {
             folder: this._folder.name,
             title: paramsTitle,
-            secstruct: this.getCurrentTargetPairs(0).getParenthesis(undefined, true),
+            secstruct: this.getCurrentTargetPairs(0).getParenthesis({pseudoknots: true}),
             constraints,
             body: details.description,
             midimgdata: midImageString,
@@ -1047,7 +1047,7 @@ export default class PuzzleEditMode extends GameMode {
             this._poses[ii].molecularBindingSite = this._bindingSiteStack[this._stackLevel][ii];
             this._poses[ii].customLayout = this._customLayoutStack[this._stackLevel][ii] ?? undefined;
             this._structureInputs[ii].structureString = this._targetPairsStack[this._stackLevel][ii]
-                .getParenthesis(undefined, true);
+                .getParenthesis({pseudoknots: true});
         }
 
         this.updateScore();
@@ -1066,7 +1066,7 @@ export default class PuzzleEditMode extends GameMode {
             this._poses[ii].molecularBindingSite = this._bindingSiteStack[this._stackLevel][ii];
             this._poses[ii].customLayout = this._customLayoutStack[this._stackLevel][ii] ?? undefined;
             this._structureInputs[ii].structureString = this._targetPairsStack[this._stackLevel][ii]
-                .getParenthesis(undefined, true);
+                .getParenthesis({pseudoknots: true});
         }
         this.updateScore();
     }
@@ -1207,7 +1207,7 @@ export default class PuzzleEditMode extends GameMode {
             if (this._stackLevel >= 0) {
                 if (
                     this._structureInputs[ii].structureString !== (
-                        this._targetPairsStack[this._stackLevel][ii].getParenthesis(undefined, true)
+                        this._targetPairsStack[this._stackLevel][ii].getParenthesis({pseudoknots: true})
                     ) || seq.sequenceString() !== this._seqStack[this._stackLevel][ii].sequence.sequenceString()
                 ) {
                     noChange = false;

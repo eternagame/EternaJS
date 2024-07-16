@@ -302,8 +302,9 @@ export default class Puzzle {
             // Aptamers
 
             if (Puzzle.isAptamerType(tcType) && this._targetConditions[ii]['site'] !== undefined) {
+                const pseudoknotted = false;
                 const bindingSite: number[] = this._targetConditions[ii]['site'] as number[];
-                const targetPairs: number[] = SecStruct.fromParens(this.getSecstruct(ii)).pairs;
+                const targetPairs: number[] = SecStruct.fromParens(this.getSecstruct(ii), pseudoknotted).pairs;
                 const bindingPairs: number[] = bindingSite.map(
                     (jj) => targetPairs[jj]
                 );

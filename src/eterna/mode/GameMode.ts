@@ -608,9 +608,11 @@ export default abstract class GameMode extends AppMode {
 
     protected showCopyStructureDialog(poseIdx: number): void {
         const structureString = this._poses[poseIdx].secstruct.getParenthesis(
-            this._poses[poseIdx].fullSequence,
-            // This should be fine and only return pkots if there are already pknots
-            true
+            {
+                seq: this._poses[poseIdx].fullSequence,
+                // This should be fine and only return pkots if there are already pknots
+                pseudoknots: true
+            }
         );
         this._copyStructureDialog = this.showDialog(
             new CopyTextDialog({text: structureString, copyNotice: 'Structure', dialogTitle: 'Current Structure'}),
@@ -626,9 +628,11 @@ export default abstract class GameMode extends AppMode {
             // TODO: The entire UX of copying given multiple poses needs to be rethought...
             const poseIdx = this._isPipMode ? this._copyStructureDialogPose : 0;
             const structureString = this._poses[poseIdx].secstruct.getParenthesis(
-                this._poses[poseIdx].fullSequence,
-                // This should be fine and only return pkots if there are already pknots
-                true
+                {
+                    seq: this._poses[poseIdx].fullSequence,
+                    // This should be fine and only return pkots if there are already pknots
+                    pseudoknots: true
+                }
             );
             this._copyStructureDialog.text = structureString;
         }

@@ -102,7 +102,7 @@ test('UndoBlock:tea', () => {
             const foo = new UndoBlock(seq, eternafold.name);
             const bpps = eternafold.getDotPlot(seq, new SecStruct, 37, false) as DotPlot;
             expect(foo.targetExpectedAccuracy(
-                SecStruct.fromParens('(((....)))'),
+                SecStruct.fromParens('(((....)))', false),
                 bpps,
                 BasePairProbabilityTransform.LEAVE_ALONE)
             ).toBeCloseTo(0.8607, 4);
