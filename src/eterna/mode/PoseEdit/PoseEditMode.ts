@@ -1,6 +1,7 @@
 import log from 'loglevel';
 import {
-    Container, DisplayObject, Point, Sprite, Text, Rectangle
+    Container, DisplayObject, Point, Sprite, Text, Rectangle,
+    Graphics
 } from 'pixi.js';
 import EPars, {RNABase, RNAPaint} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
@@ -80,6 +81,7 @@ import NuPACK from 'eterna/folding/NuPACK';
 import PasteStructureDialog from 'eterna/ui/PasteStructureDialog';
 import ConfirmTargetDialog from 'eterna/ui/ConfirmTargetDialog';
 import DotPlot from 'eterna/rnatypes/DotPlot';
+import UILockDialog from 'eterna/ui/UILockDialog';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -277,6 +279,29 @@ export default class PoseEditMode extends GameMode {
         this._asynchText.visible = false;
     }
 
+    public override pushUILock(name?: string) {
+        super.pushUILock(name);
+
+        let sidebarLockDialog = this._sidebarLockRef.object as UILockDialog;
+        if (sidebarLockDialog == null) {
+            sidebarLockDialog = new UILockDialog();
+            sidebarLockDialog.container.mask = this._sidebarLockMask;
+            this._sidebarLockRef = this.addObject(sidebarLockDialog, this.sidebarLayer);
+        }
+
+        sidebarLockDialog.addRef(name);
+    }
+
+    public override popUILock(name?: string) {
+        super.popUILock(name);
+
+        if (this._sidebarLockRef.isLive) {
+            (this._sidebarLockRef.object as UILockDialog).releaseRef(name);
+        } else {
+            log.warn('SidebarLockDialog not currently active');
+        }
+    }
+
     private get _solDialogOffset(): number {
         return this._solutionView !== undefined && this._solutionView.container.visible
             ? ViewSolutionOverlay.theme.width : 0;
@@ -316,6 +341,15 @@ export default class PoseEditMode extends GameMode {
         );
 
         this._constraintBar.layout();
+
+        this._sidebarLockMask.clear();
+        if (this._solutionView) {
+            const rect = this._solutionView.container.getBounds();
+            this._sidebarLockMask
+                .beginFill(0, 1)
+                .drawRect(rect.x, rect.y, rect.width, rect.height)
+                .endFill();
+        }
     }
 
     public get constraintsLayer(): Container {
@@ -4479,6 +4513,8 @@ export default class PoseEditMode extends GameMode {
 
     // Dialogs
     private _specBox: SpecBoxDialog | null = null;
+    private _sidebarLockRef: GameObjectRef = GameObjectRef.NULL;
+    private _sidebarLockMask = new Graphics();
 
     // Tutorial Script Extra Functionality
     private _showMissionScreen: boolean = true;

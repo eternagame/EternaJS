@@ -63,7 +63,7 @@ export default abstract class GameMode extends AppMode {
         this.container.addChild(this.dialogLayer);
         this.dialogLayer.name = 'dialogLayer';
         this.container.addChild(this.sidebarLayer);
-        this.dialogLayer.name = 'sidebarLayer';
+        this.sidebarLayer.name = 'sidebarLayer';
         this.container.addChild(this.notifLayer);
         this.notifLayer.name = 'notifLayer';
         this.container.addChild(this.achievementsLayer);
