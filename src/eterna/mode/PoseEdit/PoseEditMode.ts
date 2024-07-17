@@ -1366,7 +1366,7 @@ export default class PoseEditMode extends GameMode {
         );
 
         scriptInterfaceCtx.addCallback(
-            'pairing_probabilities',
+            'pairing_probabilities_async',
             async (seq: string, secstruct: string | null = null): Promise<number[] | null> => {
                 if (this._folder === null) {
                     return null;
