@@ -653,7 +653,7 @@ export default class UndoBlock {
         }
 
         const currDotPlot = this.getParam(UndoBlockParam.DOTPLOT, EPars.DEFAULT_TEMPERATURE, pseudoknots);
-        if (currDotPlot === undefined) {
+        if (currDotPlot == null) {
             let dotArray: DotPlot | null;
             if (sync) {
                 if (!folder.isSync()) throw new Error('Tried to use asynchronous folder synchronously');
