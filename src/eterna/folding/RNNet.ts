@@ -214,8 +214,10 @@ export default class RNNet extends Folder<false> {
         // because it breaks YouTube and Vimeo embeds
         ort.env.wasm.numThreads = 1;
 
-        return ort.InferenceSession.create(rnnetSs.default, {});
+        const session = await ort.InferenceSession.create(rnnetSs.default, {});
+        this._session = session;
+        return session;
     }
 
-    private readonly _session: ort.InferenceSession;
+    private _session: ort.InferenceSession;
 }
