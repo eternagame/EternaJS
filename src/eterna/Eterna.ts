@@ -49,14 +49,14 @@ export default class Eterna {
         this.playerID = id;
     }
 
-    public static onFatalError(err: Error | ErrorEvent): void {
+    public static onFatalError(err: Error | ErrorEvent, title?: string): void {
         log.error('Fatal error error', ErrorUtil.getErrorObj(err) || ErrorUtil.getErrString(err));
         if (
             Flashbang.app != null
             && Flashbang.app.modeStack != null
             && !(Flashbang.app.modeStack.topMode instanceof ErrorDialogMode)
         ) {
-            Flashbang.app.modeStack.pushMode(new ErrorDialogMode(err));
+            Flashbang.app.modeStack.pushMode(new ErrorDialogMode(err, title));
             // If the error occurred in our update loop, the error will have meant Pixi's update
             // routine stopped before it could queue up the next frame. We need to keep the update
             // loop running in order to show our error dialog (...and let things keep running
