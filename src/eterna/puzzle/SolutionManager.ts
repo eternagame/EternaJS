@@ -65,14 +65,40 @@ export default class SolutionManager {
         return SolutionManager._instance;
     }
 
-    public getSolutionsForPuzzle(puzzleID: number): Promise<Solution[]> {
+    public async getSolutionsForPuzzle(puzzleID: number): Promise<Solution[]> {
         log.info(`Loading solutions for puzzle ${puzzleID}...`);
-        return Eterna.client.getSolutions(puzzleID).then((json) => {
+        const PAGE_SIZE = 10000;
+        const PAGE_OVERLAP = 10;
+        const loaded = new Map<string, SolutionSpec>();
+        let skip = 0;
+        while (true) {
+            // We're explicitly trying to be a good citizen and not overload the server,
+            // plus making these requests in parallel would make the concurrency handling harder
+            // eslint-disable-next-line no-await-in-loop
+            const json = await Eterna.client.getSolutions(puzzleID, PAGE_SIZE, skip);
             if (json['data']['error']) throw new Error(json['data']['error']);
-            const solutionsData = json['data']['solutions'] as SolutionSpec[];
-            this._solutions = solutionsData.map((solution) => SolutionManager.processData(solution));
-            return this._solutions;
-        });
+            const page = json['data']['solutions'] as SolutionSpec[];
+
+            // We always explicitly request some solutions we already have. Why? That way if a bunch
+            // of solutions get deleted, we can check here to ensure that the list of solutions
+            // hasn't shifted so much that we may have accidentally skipped over some solutions.
+            if (skip !== 0 && !loaded.has(page[0].id)) {
+                skip = Math.max(0, skip - PAGE_OVERLAP);
+                continue;
+            }
+
+            for (const solution of page) {
+                loaded.set(solution.id, solution);
+            }
+
+            // If the page doesn't have the maximum amount we requested, it must mean that there aren't
+            // any more to return, which means we're done
+            if (page.length < PAGE_SIZE) break;
+
+            skip += PAGE_SIZE - PAGE_OVERLAP;
+        }
+        this._solutions = Array.from(loaded.values()).map((solution) => SolutionManager.processData(solution));
+        return this._solutions;
     }
 
     public get solutions(): Solution[] {

@@ -129,8 +129,10 @@ export default class GameClient {
             });
     }
 
-    public getSolutions(puzzleID: number): Promise<JSONData> {
-        return this.get(GameClient.GET_URI, {type: 'solutions', puznid: puzzleID})
+    public getSolutions(puzzleID: number, limit: number, skip: number): Promise<JSONData> {
+        return this.get(GameClient.GET_URI, {
+            type: 'solutions', puznid: puzzleID, limit, skip
+        })
             .then((rsp) => rsp.json());
     }
 
