@@ -268,7 +268,7 @@ export default class SecStruct {
                     this._pairs[jj] = partner;
                     this._pairs[partner] = jj;
                 } else if (char !== '.' && char !== '&') {
-                    throw new Error(`Invalid dot-bracket character ${char}`);
+                    throw new Error(`Invalid dot-bracket character '${char}'`);
                 }
             }
         }
