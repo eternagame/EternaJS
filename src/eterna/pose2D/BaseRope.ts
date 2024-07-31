@@ -64,16 +64,19 @@ export default class BaseRope extends GameObject implements LateUpdatable {
             }
         }
 
-        if (Arrays.deepEqual(ropes, this._lastRopes) && this._graphics.geometry.points.length > 0) {
+        // We can only draw a rope when there is more than one point
+        const validRopes = ropes.filter((rope) => rope[0].length > 1);
+
+        if (Arrays.deepEqual(validRopes, this._lastRopes) && this._graphics.geometry.points.length > 0) {
             // base positions haven't changed, and baseRope has not been cleared,
             // so no need to update -- just return.
             return;
         }
 
-        this._lastRopes = ropes;
+        this._lastRopes = validRopes;
 
         this._graphics.clear();
-        for (const rope of ropes) {
+        for (const rope of validRopes) {
             this.drawBaseRope(rope[0], rope[1]);
         }
     }
