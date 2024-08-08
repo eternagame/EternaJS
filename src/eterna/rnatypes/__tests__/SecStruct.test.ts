@@ -35,6 +35,7 @@ test(`SecStruct:setPairs (pseudoknotted)`, () => {
         '.(((((...{{{{...))))).}}}}....((((....))))',
         '((((((.[[..[[..{{.]]]]{.{...))))).)}}}.}',
         '((((((...{{[[{{...)))]])))}}}}',
+
         'aaaaaa......AAAAAA',
         'aaaaaabbbb......BBBBAAAAAA',
         'aaaaaa...bbbb...AAAAAABBBB',
@@ -42,7 +43,12 @@ test(`SecStruct:setPairs (pseudoknotted)`, () => {
         '.aaaaa...bbbb...AAAAA.BBBB....aaaa....AAAA',
         'aaaaaa.cc..cc..bb.CCCCb.b...AAAAA.ABBB.B',
         'aaaaaa...bbccbb...AAACCAAABBBB',
-        `([{<${alpha}....)]}>${alpha.toUpperCase()}`
+
+        `([{<${alpha}....)]}>${alpha.toUpperCase()}`,
+
+        'BBBB...bbbb',
+        'BBABB...bbabb',
+        '((((({<A[[[....))))).......}>]a]]',
     ];
     const outputStrs = [
       '.........................',
@@ -53,6 +59,7 @@ test(`SecStruct:setPairs (pseudoknotted)`, () => {
       '.(((((...[[[[...))))).]]]]....((((....))))',
       '((((((.((..((..[[.))))[.[...))))).)]]].]',
       '((((((...[[[[{{...)))]])))}}]]',
+      
       '((((((......))))))',
       '((((((((((......))))))))))',
       '((((((...[[[[...))))))]]]]',
@@ -60,16 +67,55 @@ test(`SecStruct:setPairs (pseudoknotted)`, () => {
       '.(((((...[[[[...))))).]]]]....((((....))))',
       '((((((.((..((..[[.))))[.[...))))).)]]].]',
       '((((((...[[[[{{...)))]])))}}]]',
-      '([{<abcdefghijklmnopqrstuvwxyz....)]}>ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+      '([{<abcdefghijklmnopqrstuvwxyz....)]}>ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+
+      '((((...))))',
+      '(((((...)))))',
+      '((((([{<aa<....))))).......]}>>AA',
     ];
 
     for (let i=0; i<inputStrs.length; i++) {
+        console.log(inputStrs[i])
         const ss = new SecStruct();
         ss.setPairs(inputStrs[i], true);
         expect(ss.pairs).toMatchSnapshot(inputStrs[i]);
         const dbn = ss.getParenthesis({ pseudoknots: true });
         expect(dbn).toBe(outputStrs[i]);
         outputStrs.push(dbn);
+    }
+});
+
+test(`SecStruct:setPairs (error cases)`, () => {
+    const inputs = [
+        // Unbalanced
+        ['(((...))))', false],
+        ['(((...))))', true],
+        ['(((', false],
+        ['(((', true],
+        ['...)))', false],
+        ['...)))', true],
+
+        // Unknown characters
+        ['xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', false],
+        ['xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', true],
+        ['-(((((..(((((....)))))((((((((.((...-----((((((..(((((((..)))))))(((((({..[[[[[[[)))))))))))..).))).))))))))))))}.]]]]]]]...', false],
+        ['-(((((..(((((....)))))((((((((.((...-----((((((..(((((((..)))))))(((((({..[[[[[[[)))))))))))..).))).))))))))))))}.]]]]]]]...', true],
+        ['(((....))) (((....)))', false],
+        ['(((....))) (((....)))', true],
+
+        // Mixed orientation
+        ['aB...bA', true],
+
+        // PKs disabled
+        ['[...]', false],
+        ['a...A', false],
+    ] as [string, boolean][];
+    for (const input of inputs) {
+        console.log(input);
+        const ss = new SecStruct();
+        expect(() => {
+            ss.setPairs(...input)
+        }).toThrow();
     }
 });
 

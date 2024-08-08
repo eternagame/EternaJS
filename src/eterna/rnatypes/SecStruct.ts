@@ -218,6 +218,9 @@ export default class SecStruct {
                 '<': []
             };
 
+            // Both the left and right delimiter of each pair of characters point to the same
+            // array, so that when we encounter a left character we push an opening-half pair index,
+            // and when we encounter a right character we can pop off the most recent one.
             const pairStacksRightMap: Record<string, number[] | undefined> = {
                 ')': pairStacksLeftMap['('],
                 ']': pairStacksLeftMap['['],
@@ -225,34 +228,51 @@ export default class SecStruct {
                 '>': pairStacksLeftMap['<']
             };
 
+            let flipped: boolean | null = null;
             for (let jj = 0; jj < parenthesis.length; jj++) {
                 const char = parenthesis.charAt(jj);
-                // Note that we forward-declare this and assign in the conditional in order
-                // to avoid doing a lookup twice (or introducing extra nesting)
-                let pairStack: number[] | undefined;
                 if (char === '.') {
+                    // Unpaired
                     continue;
-                } else if (
-                    (pairStack = pairStacksLeftMap[char])
-                ) {
-                    pairStack.push(jj);
-                } else if (char >= 'a' && char <= 'z') {
-                    pairStack = [];
-                    pairStacksLeftMap[char] = pairStack;
-                    pairStacksRightMap[char.toUpperCase()] = pairStack;
-                    pairStack.push(jj);
-                } else if (
-                    (pairStack = pairStacksRightMap[char])
-                ) {
-                    const partner = pairStack.pop();
-                    if (partner === undefined) throw new Error('Invalid parenthesis notation');
+                } else if (pairStacksLeftMap[char]) {
+                    // This is an opening delimiter which we've already registered
+                    pairStacksLeftMap[char].push(jj);
+                } else if (pairStacksRightMap[char]) {
+                    // This is a closing delimiter which we've already registered
+                    const partner = pairStacksRightMap[char].pop();
+                    if (partner === undefined) throw new Error(`Unbalanced parenthesis notation (found closing character '${char}')`);
+
                     this._pairs[jj] = partner;
                     this._pairs[partner] = jj;
+                } else if (
+                    ((flipped === null || flipped === false) && char >= 'a' && char <= 'z')
+                    || ((flipped === null || flipped === true) && char >= 'A' && char <= 'Z')
+                ) {
+                    // For performance, we don't initialize our pair stacks with alpha characters.
+                    // Also, we don't know whether lower/upper case characters are considered left or right
+                    // delimiters until we encounter one for the first time. Whichever we see first
+                    // we treat as a left delimiter, then whenever we encounter a new letter, it has
+                    // to follow the same standard.
+                    if (flipped === null) {
+                        flipped = char >= 'A' && char <= 'Z';
+                    }
+
+                    const pairStack: number[] = [];
+                    pairStacksLeftMap[char] = pairStack;
+                    pairStacksRightMap[flipped ? char.toLowerCase() : char.toUpperCase()] = pairStack;
+                    pairStack.push(jj);
+                } else if ((char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z')) {
+                    // We haven't encountered this character yet, but the case that showed up
+                    // we have designated as a right delimiter
+                    throw new Error(`Unbalanced parenthesis notation (found closing character '${char}')`);
                 } else if (char === '&') {
                     continue;
                 } else {
-                    throw new Error('Invalid parenthesis notation');
+                    throw new Error(`Unknown character '${char}' in parenthesis notation`);
                 }
+            }
+            for (const [char, pairStack] of Object.entries(pairStacksLeftMap)) {
+                if (pairStack?.length) throw new Error(`Unbalanced parenthesis notation (found unclosed pair for character '${char}')`);
             }
         } else {
             // Faster implementation if we can assume no pseudoknots
@@ -264,12 +284,16 @@ export default class SecStruct {
                     pairStack.push(jj);
                 } else if (char === ')') {
                     const partner = pairStack.pop();
-                    if (partner === undefined) throw new Error('Invalid parenthesis notation');
+                    if (partner === undefined) throw new Error(`Unbalanced parenthesis notation (found closing character '${char}')`);
                     this._pairs[jj] = partner;
                     this._pairs[partner] = jj;
                 } else if (char !== '.' && char !== '&') {
-                    throw new Error(`Invalid dot-bracket character ${char}`);
+                    throw new Error(`Unknown character '${char}' in parenthesis notation`);
                 }
+            }
+
+            if (pairStack?.length) {
+                throw new Error('Unbalanced parenthesis notation (found unclosed pair for character \'(\')');
             }
         }
     }
