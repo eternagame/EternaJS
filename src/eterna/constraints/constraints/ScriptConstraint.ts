@@ -25,7 +25,7 @@ export default class ScriptConstraint extends Constraint<ScriptConstraintStatus>
             ctx: context.scriptConstraintCtx
         });
         if (result.result === false) {
-            throw new Error(result.cause);
+            throw new Error(`SCRIPT constraint ${this.scriptID} failed with error: ${result.cause}`);
         }
 
         return {
