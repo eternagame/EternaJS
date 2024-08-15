@@ -42,6 +42,9 @@ import {Assert} from 'flashbang';
 import {TargetConditions} from 'eterna/UndoBlock';
 import PseudoknotConstraint from 'eterna/constraints/constraints/PseudoknotConstraint';
 import CodonConstraint from 'eterna/constraints/constraints/CondonConstraint';
+import {
+    NativeConfidenceConstraint, NativePKConfidenceConstraint
+} from 'eterna/constraints/constraints/ConfidenceConstraint';
 import SolutionManager from './SolutionManager';
 import Puzzle, {PuzzleType} from './Puzzle';
 
@@ -347,6 +350,12 @@ export default class PuzzleManager {
                         break;
                     case TargetExpectedAccuracyConstraint.NAME:
                         constraints.push(new TargetExpectedAccuracyConstraint(Number(parameter)));
+                        break;
+                    case NativeConfidenceConstraint.NAME:
+                        constraints.push(new NativeConfidenceConstraint(Number(parameter)));
+                        break;
+                    case NativePKConfidenceConstraint.NAME:
+                        constraints.push(new NativePKConfidenceConstraint(Number(parameter)));
                         break;
                     case ScriptConstraint.NAME:
                         constraints.push(new ScriptConstraint(Number(parameter)));

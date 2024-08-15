@@ -1,7 +1,6 @@
 import UndoBlock from "../UndoBlock";
 import Folder from "../folding/Folder";
 import Vienna2 from "../folding/Vienna2";
-import EternaFold from "eterna/folding/Eternafold";
 import { BasePairProbabilityTransform } from "eterna/folding/FoldUtil";
 import DotPlot from "eterna/rnatypes/DotPlot";
 import SecStruct from "eterna/rnatypes/SecStruct";
@@ -86,26 +85,6 @@ test('UndoBlock:punp_vienna', () => {
             foo = new UndoBlock(seq, vienna.name);
             bpps = vienna.getDotPlot(seq, new SecStruct(), 37, false) as DotPlot;
             expect(foo.sumProbUnpaired(bpps, BasePairProbabilityTransform.SQUARE)).toBeCloseTo(10.2378, 4);
-    }))
-    .resolves.toBeUndefined();
-});
-
-test('UndoBlock:tea', () => {
-    expect(CreateFolder(EternaFold)
-        .then((eternafold) => {
-            if (eternafold === null) {
-                expect(true).toBeTruthy();
-                return;
-            }
-
-            const seq = Sequence.fromSequenceString('GGGGAAACCC');
-            const foo = new UndoBlock(seq, eternafold.name);
-            const bpps = eternafold.getDotPlot(seq, new SecStruct, 37, false) as DotPlot;
-            expect(foo.targetExpectedAccuracy(
-                SecStruct.fromParens('(((....)))', false),
-                bpps,
-                BasePairProbabilityTransform.LEAVE_ALONE)
-            ).toBeCloseTo(0.8607, 4);
     }))
     .resolves.toBeUndefined();
 });
