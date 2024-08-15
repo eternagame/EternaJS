@@ -395,4 +395,65 @@ export default class FoldUtil {
 
         return {rowInd: a, colInd: b};
     }
+
+    public static expectedAccuracy(
+        targetPairs: SecStruct,
+        dotArray: DotPlot | null,
+        bppBehavior: BasePairProbabilityTransform
+    ): { mcc: number, f1: number } {
+        if (dotArray === null || dotArray.data.length === 0) return {mcc: 0, f1: 0};
+
+        const dotMap: Map<string, number> = new Map<string, number>();
+        const pairedPer: Map<number, number> = new Map<number, number>();
+
+        for (let jj = 0; jj < dotArray.data.length; jj += 3) {
+            const prob: number = bppBehavior === BasePairProbabilityTransform.LEAVE_ALONE
+                ? dotArray.data[jj + 2]
+                : (dotArray.data[jj + 2] * dotArray.data[jj + 2]);
+
+            if (dotArray.data[jj] < dotArray.data[jj + 1]) {
+                dotMap.set([dotArray.data[jj], dotArray.data[jj + 1]].join(','), prob);
+            } else if (dotArray.data[jj] > dotArray.data[jj + 1]) {
+                dotMap.set([dotArray.data[jj + 1], dotArray.data[jj]].join(','), prob);
+            }
+
+            const jjprob = pairedPer.get(dotArray.data[jj]);
+            pairedPer.set(dotArray.data[jj], jjprob ? jjprob + prob : prob);
+
+            const jjp1prob = pairedPer.get(dotArray.data[jj + 1]);
+            pairedPer.set(dotArray.data[jj + 1], jjp1prob ? jjp1prob + prob : prob);
+        }
+
+        let TP = 1e-6;
+        // this is the remnant of a clever closed form solution irrelevant here
+        let TN = /* 0.5 * targetPairs.length * targetPairs.length - 1 + */ 1e-6;
+        let FP = 1e-6;
+        let FN = 1e-6;
+        const cFP = 1e-6;
+
+        // As formulated in Arnie's MEA routines
+        // TP = np.sum(np.multiply(pred_m, probs)) + 1e-6
+        // TN = 0.5*N*N-1 - np.sum(pred_m) - np.sum(probs) + TP + 1e-6
+        // FP = np.sum(np.multiply(pred_m, 1-probs)) + 1e-6
+        // FN = np.sum(np.multiply(1-pred_m, probs)) + 1e-6
+
+        for (let ii = 0; ii < targetPairs.length; ++ii) {
+            for (let jj = ii + 1; jj < targetPairs.length; ++jj) {
+                const prob = dotMap.get([ii + 1, jj + 1].join(',')) ?? 0;
+                // Are ii and jj paired?
+                if (targetPairs.pairingPartner(ii) === jj) {
+                    TP += prob;
+                    FN += 1 - prob;
+                } else {
+                    FP += prob;
+                    TN += 1 - prob;
+                }
+            }
+        }
+
+        return {
+            mcc: (TP * TN - (FP - cFP) * FN) / Math.sqrt((TP + FP - cFP) * (TP + FN) * (TN + FP - cFP) * (TN + FN)),
+            f1: (2 * TP) / (2 * TP + FP - cFP + FN)
+        };
+    }
 }
