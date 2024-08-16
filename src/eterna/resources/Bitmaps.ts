@@ -199,8 +199,8 @@ export default class Bitmaps {
     public static readonly ImgAchievementsCheckmark: string = new URL('assets/Achievements/checkmark.png', import.meta.url).href;
     public static readonly ImgConstraintArrowUp: string = new URL('assets/UI/constraint-arrow-up.png', import.meta.url).href;
     public static readonly ImgConstraintDrawerTip: string = new URL('assets/UI/constraint-drawer-tip.png', import.meta.url).href;
-    public static readonly Quality: string = new URL('assets/quality.png', import.meta.url).href;
-    public static readonly QualityPK: string = new URL('assets/quality-pk.png', import.meta.url).href;
+    public static readonly QualityNatural: string = new URL('assets/quality-natural.png', import.meta.url).href;
+    public static readonly QualityNaturalPK: string = new URL('assets/quality-natural-pk.png', import.meta.url).href;
 
     public static readonly ImgFileOpen: string = new URL('assets/UI/file-open.png', import.meta.url).href;
     public static readonly ImgFileOpenHover: string = new URL('assets/UI/file-open-hover.png', import.meta.url).href;
