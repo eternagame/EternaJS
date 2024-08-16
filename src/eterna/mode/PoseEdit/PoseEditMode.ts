@@ -2673,9 +2673,12 @@ export default class PoseEditMode extends GameMode {
             pipeline = [
                 // Stage 1: Make sure constraints are satisfied
                 async () => {
-                    if (validate && !this.checkConstraints()) {
+                    if (!this.checkConstraints()) {
                         // If we pass constraints when taking into account soft constraints, just prompt
+                        // (Or if we've skipped optional validation, continue)
                         if (this.checkConstraints(this._puzzle.isSoftConstraint || Eterna.DEV_MODE)) {
+                            if (!validate) return next();
+
                             const NOT_SATISFIED_PROMPT = 'Puzzle constraints are not satisfied.\n\n'
                             + 'You can still submit the sequence, but please note that there is a risk of the design '
                             + 'not getting synthesized properly';
