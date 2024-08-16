@@ -103,7 +103,7 @@ export class NativeConfidenceConstraint extends BaseConfidenceConstraint {
 }
 
 export class NativePKConfidenceConstraint extends BaseConfidenceConstraint {
-    public static readonly NAME = 'BPPF1NATIVEPKMIN';
+    public static readonly NAME = 'BPPF1NATIVEPKMASKMIN';
 
     public evaluate(context: ConstraintContext): ConfidenceConstraintStatus {
         return this._evaluate(context, true);
