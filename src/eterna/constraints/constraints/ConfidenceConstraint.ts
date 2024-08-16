@@ -67,7 +67,7 @@ abstract class BaseConfidenceConstraint extends Constraint<ConfidenceConstraintS
             tooltip.pushStyle('altTextMain');
         }
 
-        tooltip.append(`Your design must have a ${forKnot ? 'pseudoknot confidence' : 'confidence'} greater than`, 'altText').append(` ${this.minConfidence}.`);
+        tooltip.append(`Your design must have a ${forKnot ? 'pseudoknot confidence' : 'confidence'} for the natural mode prediction greater than`, 'altText').append(` ${this.minConfidence}.`);
 
         if (forMissionScreen) {
             tooltip.popStyle();
@@ -76,7 +76,7 @@ abstract class BaseConfidenceConstraint extends Constraint<ConfidenceConstraintS
             satisfied: status.satisfied,
             showOutline: true,
             drawBG: true,
-            icon: BitmapManager.getBitmap(forKnot ? Bitmaps.QualityPK : Bitmaps.Quality),
+            icon: BitmapManager.getBitmap(forKnot ? Bitmaps.QualityNaturalPK : Bitmaps.QualityNatural),
             statText: !forMissionScreen ? `${status.confidence.toFixed(3)}` : undefined,
             tooltip
         };
