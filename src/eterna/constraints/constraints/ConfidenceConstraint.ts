@@ -39,6 +39,17 @@ abstract class BaseConfidenceConstraint extends Constraint<ConfidenceConstraintS
 
         if (this.pseudoknot) {
             pairs = pairs.getCrossedPairs();
+            if (!pairs.nonempty()) {
+                // Otherwise since all bpp contributions would be zeroed out, f1 would be calculated
+                // as (2 * 1e6) / (2 * 1e6 + 1e6 - 1e6 + 1e6) = 0.666666666. Really it's undefined
+                // (the 1e6 default values are there to prevent that) and "0" is better reflecting
+                // our intent
+                return {
+                    confidence: 0,
+                    satisfied: false
+                };
+            }
+
             dotplot = dotplot.slice();
             for (let i = 0; i < dotplot.length; i += 3) {
                 const a = dotplot[i] - 1;
