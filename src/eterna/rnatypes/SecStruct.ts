@@ -520,6 +520,7 @@ export default class SecStruct {
         const newStruct = new SecStruct(new Array(this.length).fill(-1));
         for (const pair of crossedPairs) {
             newStruct.setPairingPartner(pair[0], pair[1]);
+            newStruct.setPairingPartner(pair[1], pair[0]);
         }
         return newStruct;
     }
