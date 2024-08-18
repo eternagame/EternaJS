@@ -16,22 +16,28 @@ interface ConfidenceConstraintStatus extends BaseConstraintStatus {
 abstract class BaseConfidenceConstraint extends Constraint<ConfidenceConstraintStatus> {
     public requiresDotPlot = true;
     public readonly minConfidence: number;
+    public readonly mode: 'target' | 'native';
+    public readonly pseudoknot: boolean;
 
-    constructor(minConfidence: number) {
+    constructor(minConfidence: number, mode: 'target' | 'native', pseudoknot: boolean) {
         super();
         this.minConfidence = minConfidence;
+        this.mode = mode;
+        this.pseudoknot = pseudoknot;
     }
 
-    protected _evaluate(context: ConstraintContext, crossPair: boolean): ConfidenceConstraintStatus {
+    public evaluate(context: ConstraintContext): ConfidenceConstraintStatus {
         // TODO: Multistate?
         const undoBlock = context.undoBlocks[0];
         const pseudoknots = (undoBlock.targetConditions !== undefined
             && undoBlock.targetConditions['type'] === 'pseudoknot');
         let dotplot = undoBlock.getParam(UndoBlockParam.DOTPLOT, EPars.DEFAULT_TEMPERATURE, pseudoknots) as number[];
 
-        let pairs = undoBlock.targetAlignedNaturalPairs;
+        let pairs = this.mode === 'native'
+            ? undoBlock.targetAlignedNaturalPairs
+            : undoBlock.targetPairs;
 
-        if (crossPair) {
+        if (this.pseudoknot) {
             pairs = pairs.getCrossedPairs();
             dotplot = dotplot.slice();
             for (let i = 0; i < dotplot.length; i += 3) {
@@ -56,10 +62,9 @@ abstract class BaseConfidenceConstraint extends Constraint<ConfidenceConstraintS
         };
     }
 
-    public _getConstraintBoxConfig(
+    public getConstraintBoxConfig(
         status: ConfidenceConstraintStatus,
-        forMissionScreen: boolean,
-        forKnot: boolean
+        forMissionScreen: boolean
     ): ConstraintBoxConfig {
         const tooltip = ConstraintBox.createTextStyle();
 
@@ -67,7 +72,7 @@ abstract class BaseConfidenceConstraint extends Constraint<ConfidenceConstraintS
             tooltip.pushStyle('altTextMain');
         }
 
-        tooltip.append(`Your design must have a ${forKnot ? 'pseudoknot confidence' : 'confidence'} for the natural mode prediction greater than`, 'altText').append(` ${this.minConfidence}.`);
+        tooltip.append(`Your design must have a ${this.pseudoknot ? 'pseudoknot confidence' : 'confidence'} for the ${this.mode === 'native' ? 'natural mode prediction' : 'target mode'} greater than`, 'altText').append(` ${this.minConfidence}.`);
 
         if (forMissionScreen) {
             tooltip.popStyle();
@@ -76,10 +81,32 @@ abstract class BaseConfidenceConstraint extends Constraint<ConfidenceConstraintS
             satisfied: status.satisfied,
             showOutline: true,
             drawBG: true,
-            icon: BitmapManager.getBitmap(forKnot ? Bitmaps.QualityNaturalPK : Bitmaps.QualityNatural),
+            icon: BitmapManager.getBitmap(this.getBitmap()),
             statText: !forMissionScreen ? `${status.confidence.toFixed(3)}` : undefined,
             tooltip
         };
+    }
+
+    private getBitmap() {
+        if (this.pseudoknot) {
+            if (this.mode === 'native') {
+                return Bitmaps.QualityNaturalPK;
+            } else {
+                return Bitmaps.QualityTargetPK;
+            }
+        } else if (this.mode === 'native') {
+            return Bitmaps.QualityNatural;
+        } else {
+            return Bitmaps.QualityTarget;
+        }
+    }
+}
+
+export class NativeConfidenceConstraint extends BaseConfidenceConstraint {
+    public static readonly NAME = 'BPPF1NATIVEMIN';
+
+    constructor(minConfidence: number) {
+        super(minConfidence, 'native', false);
     }
 
     public serialize(): [string, string] {
@@ -90,26 +117,47 @@ abstract class BaseConfidenceConstraint extends Constraint<ConfidenceConstraintS
     }
 }
 
-export class NativeConfidenceConstraint extends BaseConfidenceConstraint {
-    public static readonly NAME = 'BPPF1NATIVEMIN';
+export class TargetConfidenceConstraint extends BaseConfidenceConstraint {
+    public static readonly NAME = 'BPPF1TARGETMIN';
 
-    public evaluate(context: ConstraintContext): ConfidenceConstraintStatus {
-        return this._evaluate(context, false);
+    constructor(minConfidence: number) {
+        super(minConfidence, 'target', false);
     }
 
-    public getConstraintBoxConfig(status: ConfidenceConstraintStatus, forMissionScreen: boolean): ConstraintBoxConfig {
-        return this._getConstraintBoxConfig(status, forMissionScreen, false);
+    public serialize(): [string, string] {
+        return [
+            TargetConfidenceConstraint.NAME,
+            this.minConfidence.toString()
+        ];
     }
 }
 
 export class NativePKConfidenceConstraint extends BaseConfidenceConstraint {
     public static readonly NAME = 'BPPF1NATIVEPKMASKMIN';
 
-    public evaluate(context: ConstraintContext): ConfidenceConstraintStatus {
-        return this._evaluate(context, true);
+    constructor(minConfidence: number) {
+        super(minConfidence, 'native', true);
     }
 
-    public getConstraintBoxConfig(status: ConfidenceConstraintStatus, forMissionScreen: boolean): ConstraintBoxConfig {
-        return this._getConstraintBoxConfig(status, forMissionScreen, true);
+    public serialize(): [string, string] {
+        return [
+            NativePKConfidenceConstraint.NAME,
+            this.minConfidence.toString()
+        ];
+    }
+}
+
+export class TargetPKConfidenceConstraint extends BaseConfidenceConstraint {
+    public static readonly NAME = 'BPPF1TARGETPKMASKMIN';
+
+    constructor(minConfidence: number) {
+        super(minConfidence, 'target', true);
+    }
+
+    public serialize(): [string, string] {
+        return [
+            TargetPKConfidenceConstraint.NAME,
+            this.minConfidence.toString()
+        ];
     }
 }

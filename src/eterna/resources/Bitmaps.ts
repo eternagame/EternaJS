@@ -201,6 +201,8 @@ export default class Bitmaps {
     public static readonly ImgConstraintDrawerTip: string = new URL('assets/UI/constraint-drawer-tip.png', import.meta.url).href;
     public static readonly QualityNatural: string = new URL('assets/quality-natural.png', import.meta.url).href;
     public static readonly QualityNaturalPK: string = new URL('assets/quality-natural-pk.png', import.meta.url).href;
+    public static readonly QualityTarget: string = new URL('assets/quality-target.png', import.meta.url).href;
+    public static readonly QualityTargetPK: string = new URL('assets/quality-target-pk.png', import.meta.url).href;
 
     public static readonly ImgFileOpen: string = new URL('assets/UI/file-open.png', import.meta.url).href;
     public static readonly ImgFileOpenHover: string = new URL('assets/UI/file-open-hover.png', import.meta.url).href;
