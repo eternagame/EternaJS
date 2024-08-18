@@ -43,7 +43,9 @@ import {TargetConditions} from 'eterna/UndoBlock';
 import PseudoknotConstraint from 'eterna/constraints/constraints/PseudoknotConstraint';
 import CodonConstraint from 'eterna/constraints/constraints/CondonConstraint';
 import {
-    NativeConfidenceConstraint, NativePKConfidenceConstraint
+    NativeConfidenceConstraint, NativePKConfidenceConstraint,
+    TargetConfidenceConstraint,
+    TargetPKConfidenceConstraint
 } from 'eterna/constraints/constraints/ConfidenceConstraint';
 import SolutionManager from './SolutionManager';
 import Puzzle, {PuzzleType} from './Puzzle';
@@ -356,6 +358,12 @@ export default class PuzzleManager {
                         break;
                     case NativePKConfidenceConstraint.NAME:
                         constraints.push(new NativePKConfidenceConstraint(Number(parameter)));
+                        break;
+                    case TargetConfidenceConstraint.NAME:
+                        constraints.push(new TargetConfidenceConstraint(Number(parameter)));
+                        break;
+                    case TargetPKConfidenceConstraint.NAME:
+                        constraints.push(new TargetPKConfidenceConstraint(Number(parameter)));
                         break;
                     case ScriptConstraint.NAME:
                         constraints.push(new ScriptConstraint(Number(parameter)));
