@@ -35,8 +35,8 @@ abstract class BaseConfidenceConstraint extends Constraint<ConfidenceConstraintS
             pairs = pairs.getCrossedPairs();
             dotplot = dotplot.slice();
             for (let i = 0; i < dotplot.length; i += 3) {
-                const a = dotplot[i];
-                const b = dotplot[i + 1];
+                const a = dotplot[i] - 1;
+                const b = dotplot[i + 1] - 1;
                 if (!pairs.isPaired(a) && !pairs.isPaired(b)) {
                     dotplot[i + 2] = 0;
                 }
@@ -45,7 +45,7 @@ abstract class BaseConfidenceConstraint extends Constraint<ConfidenceConstraintS
 
         const square: boolean = (undoBlock.folderName === Vienna.NAME || undoBlock.folderName === Vienna2.NAME);
         const conf = FoldUtil.expectedAccuracy(
-            undoBlock.targetAlignedNaturalPairs,
+            pairs,
             new DotPlot(dotplot),
             square ? BasePairProbabilityTransform.SQUARE : BasePairProbabilityTransform.LEAVE_ALONE
         ).f1;
