@@ -84,6 +84,8 @@ abstract class BaseConfidenceConstraint extends Constraint<ConfidenceConstraintS
         }
 
         tooltip.append(`Your design must have a ${this.pseudoknot ? 'pseudoknot confidence' : 'confidence'} for the ${this.mode === 'native' ? 'natural mode prediction' : 'target mode'} greater than`, 'altText').append(` ${this.minConfidence}.`);
+        tooltip.append('\n\n');
+        tooltip.append(`Confidence metric: F1 BPP-${this.mode}${this.pseudoknot ? ' PK-masked' : ''}`);
 
         if (forMissionScreen) {
             tooltip.popStyle();
