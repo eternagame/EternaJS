@@ -3923,8 +3923,7 @@ export default class PoseEditMode extends GameMode {
         // 1) we didn't used to record the folding engine used and 2) we wouldn't want to load the target structure
         // of the solution that had its fold cached
         // NOTE: If we do re-enable this, we should change it to add an async PoseOp to opQueue so that
-        // we ensure we avoid race conditions - namely if we have an initial solution, we need to ensure
-        // the folding is done before we execute the operations to set the solution's custom target structure.
+        // we ensure we avoid potential race conditions
         /*
         if (!this.forceSync) {
             const sol: Solution | null = SolutionManager.instance.getSolutionBySequence(
