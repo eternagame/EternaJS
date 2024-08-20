@@ -536,8 +536,8 @@ export default class PoseEditMode extends GameMode {
                 pose.librarySelections = solution.libraryNT;
                 pose.sequence = solution.sequence;
             }
-            await this.poseEditByTarget(0);
             this.setSolutionTargetStructure(foldData);
+            await this.poseEditByTarget(0);
         }
         this.setAncestorId(solution.nodeID);
 
@@ -549,31 +549,19 @@ export default class PoseEditMode extends GameMode {
 
     private setSolutionTargetStructure(foldData: FoldData[] | null) {
         for (let ii = 0; ii < this._targetPairs.length; ii++) {
-            // pose.pasteSequence resulted in a new undo block being created, filled with the folding
-            // engine computations. We want to surgically update just the target structure to match the
-            // solution. If freeze mode is enabled however, an undo block won't be created in the stack.
-            // The current undo stack item contains the state at the time of being frozen.
-            // Unfortunately, unlike sequence, we don't currently have a great way to note a "temporary"
-            // target structure pending application to the next block. Unfortunately, that means we
-            // don't get the target structure in that case :(
-            if (!this._isFrozen) {
-                const currUndoBlock = this.getCurrentUndoBlock(ii);
-                if (foldData && foldData[ii]) {
-                    const cacheUndoBlock: UndoBlock = new UndoBlock(new Sequence([]), this._folder?.name ?? '');
-                    cacheUndoBlock.fromJSON(foldData[ii], this._puzzle.targetConditions[ii]);
-                    currUndoBlock.targetPairs = cacheUndoBlock.targetPairs;
-                    currUndoBlock.targetOligoOrder = cacheUndoBlock.targetOligoOrder;
-                } else {
-                    // Set to puzzle default instead of using whatever we already had set, as if we previously
-                    // loaded a solution that did have a defined target, that's *definitely* bogus. At least
-                    // the default structure is "more consistently wrong"
-                    const pseudoknots = (this._targetConditions && this._targetConditions[0]
-                        && this._targetConditions[0]['type'] === 'pseudoknot') ?? false;
-                    currUndoBlock.targetPairs = SecStruct.fromParens(this._puzzle.getSecstruct(ii), pseudoknots);
-                    currUndoBlock.targetOligoOrder = undefined;
-                }
-                this.updateScore();
-                this.transformPosesMarkers();
+            if (foldData && foldData[ii]) {
+                const cacheUndoBlock: UndoBlock = new UndoBlock(new Sequence([]), this._folder?.name ?? '');
+                cacheUndoBlock.fromJSON(foldData[ii], this._puzzle.targetConditions[ii]);
+                this._targetPairs[ii] = cacheUndoBlock.targetPairs;
+                this._targetOligosOrder[ii] = cacheUndoBlock.targetOligoOrder;
+            } else {
+                // Set to puzzle default instead of using whatever we already had set, as if we previously
+                // loaded a solution that did have a defined target, that's *definitely* bogus. At least
+                // the default structure is "more consistently wrong"
+                const pseudoknots = (this._targetConditions && this._targetConditions[0]
+                    && this._targetConditions[0]['type'] === 'pseudoknot') ?? false;
+                this._targetPairs[ii] = SecStruct.fromParens(this._puzzle.getSecstruct(ii), pseudoknots);
+                this._targetOligosOrder[ii] = undefined;
             }
         }
     }
@@ -967,6 +955,19 @@ export default class PoseEditMode extends GameMode {
             this.loadSavedData();
         }
 
+        // This PoseOp needs to run before the initial folding PoseOps because the new target
+        // structure needs to be registered before the creation of the UndoBlock accesses it
+        this._opQueue.push(new PoseOp(
+            null,
+            async () => {
+                if (solutionFoldDataPromise) {
+                    const fd = await solutionFoldDataPromise;
+                    this.setSolutionTargetStructure(fd);
+                }
+            }
+        ));
+
+        // This will push our initial folding PoseOps to the queue, but not execute them yet
         this.poseEditByTarget(0);
 
         // From here on out, all of these things have to happen after the first fold completes.
@@ -988,16 +989,6 @@ export default class PoseEditMode extends GameMode {
                         // the notification dialog, but that's fine for our purposes
                         this.showNotification(`Failed to load 3D view: ${ErrorUtil.getErrString(err, false)}`);
                     }
-                }
-            }
-        ));
-
-        this._opQueue.push(new PoseOp(
-            null,
-            async () => {
-                if (solutionFoldDataPromise) {
-                    const fd = await solutionFoldDataPromise;
-                    this.setSolutionTargetStructure(fd);
                 }
             }
         ));
@@ -3932,8 +3923,7 @@ export default class PoseEditMode extends GameMode {
         // 1) we didn't used to record the folding engine used and 2) we wouldn't want to load the target structure
         // of the solution that had its fold cached
         // NOTE: If we do re-enable this, we should change it to add an async PoseOp to opQueue so that
-        // we ensure we avoid race conditions - namely if we have an initial solution, we need to ensure
-        // the folding is done before we execute the operations to set the solution's custom target structure.
+        // we ensure we avoid potential race conditions
         /*
         if (!this.forceSync) {
             const sol: Solution | null = SolutionManager.instance.getSolutionBySequence(
