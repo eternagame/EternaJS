@@ -159,6 +159,11 @@ export default class ViewSolutionOverlay extends ContainerObject {
         return this._parentMode;
     }
 
+    public setSolutionNavigationEnabled(enabled: boolean) {
+        this._prevButton.enabled = enabled;
+        this._nextButton.enabled = enabled;
+    }
+
     private populate() {
         const {theme} = ViewSolutionOverlay;
 
@@ -466,7 +471,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         this._footer.addChild(footerLinks);
 
         // Previous
-        const previous = new ButtonWithIcon({
+        this._prevButton = new ButtonWithIcon({
             icon: Bitmaps.ImgPrevious,
             text: {
                 text: 'Previous',
@@ -475,12 +480,12 @@ export default class ViewSolutionOverlay extends ContainerObject {
             },
             frame: null
         });
-        this.regs.add(previous.clicked.connect(() => this._props.onPrevious()));
-        previous.hotkey(KeyCode.KeyU);
-        this._content.addObject(previous, footerLinks);
+        this.regs.add(this._prevButton.clicked.connect(() => this._props.onPrevious()));
+        this._prevButton.hotkey(KeyCode.KeyU);
+        this._content.addObject(this._prevButton, footerLinks);
 
         // Next
-        const next = new ButtonWithIcon({
+        this._nextButton = new ButtonWithIcon({
             icon: Bitmaps.ImgNext,
             iconPosition: 'right',
             text: {
@@ -490,10 +495,12 @@ export default class ViewSolutionOverlay extends ContainerObject {
             },
             frame: null
         });
-        this.regs.add(next.clicked.connect(() => this._props.onNext()));
-        next.container.position.x = theme.width - theme.margin.right - theme.margin.left - next.container.width;
-        next.hotkey(KeyCode.KeyD);
-        this._content.addObject(next, footerLinks);
+        this.regs.add(this._nextButton.clicked.connect(() => this._props.onNext()));
+        this._nextButton.container.position.x = (
+            theme.width - theme.margin.right - theme.margin.left - this._nextButton.container.width
+        );
+        this._nextButton.hotkey(KeyCode.KeyD);
+        this._content.addObject(this._nextButton, footerLinks);
 
         this._footer.addVSpacer(20);
 
@@ -685,4 +692,6 @@ export default class ViewSolutionOverlay extends ContainerObject {
     private _voteButton: ButtonWithIcon;
     private _footer: VLayoutContainer;
     private _parentMode: GameMode;
+    private _nextButton: GameButton;
+    private _prevButton: GameButton;
 }

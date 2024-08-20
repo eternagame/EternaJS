@@ -1961,6 +1961,7 @@ export default class PoseEditMode extends GameMode {
         });
         this._solutionView.container.visible = visible || forceShow;
         this.addObject(this._solutionView, this.sidebarLayer);
+        this._solutionView.setSolutionNavigationEnabled(!this._isFrozen);
 
         this._solutionView.seeResultClicked.connect(() => {
             this.switchToFeedbackViewForSolution(solution);
@@ -2488,6 +2489,7 @@ export default class PoseEditMode extends GameMode {
 
     private toggleFreeze(): void {
         this._isFrozen = !this._isFrozen;
+        if (this._solutionView) this._solutionView.setSolutionNavigationEnabled(!this._isFrozen);
 
         this._constraintsLayer.alpha = (this._isFrozen ? 0.25 : 1.0);
         this.setShowTotalEnergy(!this._isFrozen);
