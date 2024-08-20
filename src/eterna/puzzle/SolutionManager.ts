@@ -5,6 +5,7 @@ import Sequence from 'eterna/rnatypes/Sequence';
 import {BundledAnnotationData} from 'eterna/AnnotationManager';
 import {DesignCategory} from 'eterna/mode/DesignBrowser/DesignBrowserMode';
 import SecStruct from 'eterna/rnatypes/SecStruct';
+import {ErrorUtil} from 'flashbang';
 import Solution from './Solution';
 
 interface SolutionSpec {
@@ -97,7 +98,13 @@ export default class SolutionManager {
 
             skip += PAGE_SIZE - PAGE_OVERLAP;
         }
-        this._solutions = Array.from(loaded.values()).map((solution) => SolutionManager.processData(solution));
+        this._solutions = Array.from(loaded.values()).map((solution) => {
+            try {
+                return SolutionManager.processData(solution);
+            } catch (e) {
+                throw new Error(`Failed loading solution ${solution.id}: ${ErrorUtil.getErrString(e, false)}`);
+            }
+        });
         return this._solutions;
     }
 
