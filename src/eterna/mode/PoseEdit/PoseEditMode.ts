@@ -3432,24 +3432,46 @@ export default class PoseEditMode extends GameMode {
     }
 
     private checkValidCustomPairs(): boolean {
-        for (const ublk of this.getCurrentUndoBlocks()) {
+        const pseudoknots = (
+            this._targetConditions && this._targetConditions[0]
+            && this._targetConditions[0]['type'] === 'pseudoknot'
+        ) ?? false;
+        const startingTargetStructs = this._puzzle.getSecstructs().map(
+            (dbn) => SecStruct.fromParens(dbn, pseudoknots)
+        );
+        for (const [stateIdx, ublk] of this.getCurrentUndoBlocks().entries()) {
             const constraints = ublk.targetAlignedStructureConstraints;
-            if (constraints) {
-                const targetSeq = EPars.constructFullSequence(
-                    ublk.sequence,
-                    ublk.targetOligo,
-                    ublk.targetOligos,
-                    ublk.targetOligoOrder,
-                    ublk.oligoMode
-                );
-                const targetStruct = ublk.targetPairs;
-                const satisfiedStruct = ublk.targetPairs.getSatisfiedPairs(targetSeq);
-                // We only want to check unconstrained bases that are in a pair in the target structure
-                const customConstraints = constraints.map(
-                    (constrained, idx) => !constrained && targetStruct.isPaired(idx)
-                );
-                if (!EPars.arePairsSame(targetStruct, satisfiedStruct, customConstraints)) return false;
-            }
+            if (!constraints) continue;
+
+            const targetStruct = ublk.targetPairs;
+            const targetSeq = EPars.constructFullSequence(
+                ublk.sequence,
+                ublk.targetOligo,
+                ublk.targetOligos,
+                ublk.targetOligoOrder,
+                ublk.oligoMode
+            );
+
+            // We convert from DBN and back again to ensure the DBN format (eg, which PK characters are
+            // used where) is the same
+            const startingDbn = startingTargetStructs[stateIdx].getParenthesis({seq: targetSeq, pseudoknots: true});
+            const targetDbn = targetStruct.getParenthesis({seq: targetSeq, pseudoknots: true});
+            // If we haven't changed the target structure, don't warn. We want to allow players to
+            // ignore the default target structure without having to provide one of their own
+            if (
+                startingDbn === targetDbn
+                && (
+                    !ublk.targetOligoOrder
+                    || ublk.targetOligoOrder.every((value, idx) => value === idx)
+                )
+            ) continue;
+
+            const satisfiedStruct = ublk.targetPairs.getSatisfiedPairs(targetSeq);
+            // We only want to check unconstrained bases that are in a pair in the target structure
+            const customConstraints = constraints.map(
+                (constrained, idx) => !constrained && targetStruct.isPaired(idx)
+            );
+            if (!EPars.arePairsSame(targetStruct, satisfiedStruct, customConstraints)) return false;
         }
         return true;
     }
