@@ -522,7 +522,6 @@ export default class PoseEditMode extends GameMode {
         this.showAsyncText('retrieving...');
         const foldData = await solution.queryFoldData();
         this.hideAsyncText();
-        this.popUILock();
 
         if (foldData != null && (
             foldData[0].folderName_ === this._folder.name
@@ -530,20 +529,7 @@ export default class PoseEditMode extends GameMode {
             // At that time, we only uploaded for nupack.
             || (!foldData[0].folderName_ && this._folder.name === NuPACK.name)
         )) {
-            this._stackLevel++;
-            this._stackSize = this._stackLevel + 1;
-            this._seqStacks[this._stackLevel] = [];
-
-            for (let ii = 0; ii < this._poses.length; ii++) {
-                const undoBlock: UndoBlock = new UndoBlock(new Sequence([]), this._folder?.name ?? '');
-                undoBlock.fromJSON(foldData[ii], this._puzzle.targetConditions[ii]);
-                this._seqStacks[this._stackLevel][ii] = undoBlock;
-            }
-
-            this.savePosesMarkersContexts();
-            this.moveUndoStack();
-            this.updateScore();
-            this.transformPosesMarkers();
+            await this.loadCachedUndoBlocks(foldData);
         } else {
             // Note that we do this first
             for (const pose of this._poses) {
@@ -557,6 +543,8 @@ export default class PoseEditMode extends GameMode {
 
         const annotations = solution.annotations;
         this._annotationManager.setSolutionAnnotations(annotations ?? []);
+
+        this.popUILock();
     }
 
     private setSolutionTargetStructure(foldData: FoldData[] | null) {
@@ -3933,42 +3921,12 @@ export default class PoseEditMode extends GameMode {
     protected async poseEditByTarget(targetIndex: number) {
         this.savePosesMarkersContexts();
 
-        // Reorder oligos and reorganize structure constraints as needed
         this.establishTargetPairs(targetIndex);
-        // Ditto but for base shifts
         this.syncUpdatesFromPose(targetIndex);
 
         if (this._isFrozen) {
             return;
         }
-
-        const LOCK_NAME = 'ExecFold';
-        this.pushUILock(LOCK_NAME);
-
-        const execfoldCB = (fd: FoldData[] | null) => {
-            this.hideAsyncText();
-            this.popUILock(LOCK_NAME);
-
-            if (fd != null) {
-                this._stackLevel++;
-                this._stackSize = this._stackLevel + 1;
-                this._seqStacks[this._stackLevel] = [];
-
-                for (let ii = 0; ii < this._poses.length; ii++) {
-                    this._seqStacks[this._stackLevel][ii] = new UndoBlock(new Sequence([]), this._folder?.name ?? '');
-                    this._seqStacks[this._stackLevel][ii].fromJSON(fd[ii], this._puzzle.targetConditions[ii]);
-                }
-
-                this.savePosesMarkersContexts();
-                this.moveUndoStack();
-                this.updateScore();
-                this.transformPosesMarkers();
-
-                return;
-            }
-
-            return this.poseEditByTargetDoFold(targetIndex);
-        };
 
         // JAR: We're now uploading data across multiple engines from the submitter for post-hoc analysis and solution
         // loading, and we don't have a good way of dealing with that, so we're going to avoid just loading the
@@ -3979,18 +3937,67 @@ export default class PoseEditMode extends GameMode {
         // we ensure we avoid race conditions - namely if we have an initial solution, we need to ensure
         // the folding is done before we execute the operations to set the solution's custom target structure.
         /*
-        const sol: Solution | null = SolutionManager.instance.getSolutionBySequence(
-            this._poses[targetIndex].getSequenceString()
-        );
-        if (sol != null && this._puzzle.hasTargetType('multistrand')) {
-            this.showAsyncText('retrieving...');
-            return sol.queryFoldData().then((result) => execfoldCB(result));
-        } else {
-            return execfoldCB(null);
+        if (!this.forceSync) {
+            const sol: Solution | null = SolutionManager.instance.getSolutionBySequence(
+                this._poses[targetIndex].getSequenceString()
+            );
+            if (sol != null && this._puzzle.hasTargetType('multistrand')) {
+                this.pushUILock();
+                this.showAsyncText('retrieving...');
+                const foldData = await sol.queryFoldData();
+                this.popUILock();
+                this.hideAsyncText();
+                if (foldData) return this.loadCachedUndoBlocks(foldData);
+            }
         }
-        */
+            */
 
-        return execfoldCB(null);
+        return this.poseEditByTargetDoFold(targetIndex);
+    }
+
+    private async loadCachedUndoBlocks(fd: FoldData[]) {
+        if (fd.length !== this._poses.length) {
+            throw new Error(`Tried loading cached fold data, but cached data was only for ${fd.length} states`);
+        }
+
+        this._stackLevel++;
+        this._stackSize = this._stackLevel + 1;
+        this._seqStacks[this._stackLevel] = [];
+
+        for (let ii = 0; ii < this._poses.length; ii++) {
+            this._seqStacks[this._stackLevel][ii] = new UndoBlock(new Sequence([]), this._folder?.name ?? '');
+            this._seqStacks[this._stackLevel][ii].fromJSON(fd[ii], this._puzzle.targetConditions[ii]);
+        }
+
+        // We don't include the dot plot when saving undoblocks, and some constraints require
+        // it being computed before being evaluated (which happens in updateScore).
+        // Maybe at some point there should be more shared code between here and poseEditByTarget?
+        if (this._constraintBar.requiresDotPlot) {
+            for (let ii = 0; ii < this._targetPairs.length; ii++) {
+                if (this._constraintBar.requiresDotPlot) {
+                    this._opQueue.push(new PoseOp(ii + 1, async () => {
+                        const undoBlock = this._seqStacks[this._stackLevel][ii];
+                        await undoBlock.updateMeltingPointAndDotPlot({
+                            sync: false,
+                            pseudoknots: (
+                                undoBlock.targetConditions !== undefined
+                                && undoBlock.targetConditions['type'] === 'pseudoknot'
+                            ),
+                            skipMelt: true
+                        });
+                    }));
+                }
+            }
+            await new Promise<void>((resolve) => {
+                this._opQueue.push(new PoseOp(null, resolve));
+            });
+        }
+
+        this.savePosesMarkersContexts();
+        // The call to updateScore() is not sufficient, since we need to eg load in the sequence, etc.
+        this.moveUndoStack();
+        this.updateScore();
+        this.transformPosesMarkers();
     }
 
     /**
