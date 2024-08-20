@@ -3924,9 +3924,7 @@ export default class PoseEditMode extends GameMode {
         this.establishTargetPairs(targetIndex);
         this.syncUpdatesFromPose(targetIndex);
 
-        if (this._isFrozen) {
-            return;
-        }
+        if (this._isFrozen) return;
 
         // JAR: We're now uploading data across multiple engines from the submitter for post-hoc analysis and solution
         // loading, and we don't have a good way of dealing with that, so we're going to avoid just loading the
@@ -3950,7 +3948,7 @@ export default class PoseEditMode extends GameMode {
                 if (foldData) return this.loadCachedUndoBlocks(foldData);
             }
         }
-            */
+        */
 
         return this.poseEditByTargetDoFold(targetIndex);
     }
