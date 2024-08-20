@@ -103,14 +103,14 @@ abstract class BaseConfidenceConstraint extends Constraint<ConfidenceConstraintS
     private getBitmap() {
         if (this.pseudoknot) {
             if (this.mode === 'native') {
-                return Bitmaps.QualityNaturalPK;
+                return Bitmaps.ConfidenceNaturalPK;
             } else {
-                return Bitmaps.QualityTargetPK;
+                return Bitmaps.ConfidenceTargetPK;
             }
         } else if (this.mode === 'native') {
-            return Bitmaps.QualityNatural;
+            return Bitmaps.ConfidenceNatural;
         } else {
-            return Bitmaps.QualityTarget;
+            return Bitmaps.ConfidenceTarget;
         }
     }
 }

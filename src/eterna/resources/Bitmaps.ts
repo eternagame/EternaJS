@@ -199,10 +199,10 @@ export default class Bitmaps {
     public static readonly ImgAchievementsCheckmark: string = new URL('assets/Achievements/checkmark.png', import.meta.url).href;
     public static readonly ImgConstraintArrowUp: string = new URL('assets/UI/constraint-arrow-up.png', import.meta.url).href;
     public static readonly ImgConstraintDrawerTip: string = new URL('assets/UI/constraint-drawer-tip.png', import.meta.url).href;
-    public static readonly QualityNatural: string = new URL('assets/quality-natural.png', import.meta.url).href;
-    public static readonly QualityNaturalPK: string = new URL('assets/quality-natural-pk.png', import.meta.url).href;
-    public static readonly QualityTarget: string = new URL('assets/quality-target.png', import.meta.url).href;
-    public static readonly QualityTargetPK: string = new URL('assets/quality-target-pk.png', import.meta.url).href;
+    public static readonly ConfidenceNatural: string = new URL('assets/constraint-confidence-natural.svg', import.meta.url).href;
+    public static readonly ConfidenceNaturalPK: string = new URL('assets/constraint-confidence-natural-PK.svg', import.meta.url).href;
+    public static readonly ConfidenceTarget: string = new URL('assets/constraint-confidence-target.svg', import.meta.url).href;
+    public static readonly ConfidenceTargetPK: string = new URL('assets/constraint-confidence-target-PK.svg', import.meta.url).href;
 
     public static readonly ImgFileOpen: string = new URL('assets/UI/file-open.png', import.meta.url).href;
     public static readonly ImgFileOpenHover: string = new URL('assets/UI/file-open-hover.png', import.meta.url).href;
