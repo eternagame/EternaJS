@@ -26,7 +26,7 @@ import NucleotideFinder from 'eterna/ui/NucleotideFinder';
 import ExplosionFactorDialog from 'eterna/ui/ExplosionFactorDialog';
 import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
 import Sequence from 'eterna/rnatypes/Sequence';
-import EPars from 'eterna/EPars';
+import EPars, {RNABase} from 'eterna/EPars';
 import Fonts from 'eterna/util/Fonts';
 import CopyTextDialog from 'eterna/ui/CopyTextDialog';
 import Toolbar from 'eterna/ui/toolbar/Toolbar';
@@ -700,7 +700,11 @@ export default abstract class GameMode extends AppMode {
         const locks = this._poses[0].puzzleLocks;
         const lengthToPaste: number = Math.min(pasteSequence.length, newSequence.length);
         for (let ii = 0; ii < lengthToPaste; ii++) {
-            if (!locks[ii]) {
+            if (
+                !locks[ii]
+                // When pasting a region, we set all bases we're not pasting as undefined
+                && pasteSequence.nt(ii) !== RNABase.UNDEFINED
+            ) {
                 newSequence.setNt(ii, pasteSequence.nt(ii));
             }
         }
