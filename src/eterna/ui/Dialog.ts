@@ -5,12 +5,102 @@ import {
     DisplayObjectPointerTarget,
     InputUtil,
     Flashbang,
-    Assert
+    Assert,
+    DOMObject
 } from 'flashbang';
 import {FederatedWheelEvent} from '@pixi/events';
+import Eterna from 'eterna/Eterna';
 
 /** Dialogs that expose a "confirmed" promise will reject with this error if the dialog is canceled */
 export class DialogCanceledError extends Error {}
+
+const events = [
+    'pointercancel', 'pointerdown', 'pointerenter', 'pointerleave', 'pointermove',
+    'pointerout', 'pointerover', 'pointerup', 'mousedown', 'mouseenter', 'mouseleave',
+    'mousemove', 'mouseout', 'mouseover', 'mouseup', 'mousedown', 'mouseup', 'click',
+    'wheel', 'touchstart', 'touchcancel', 'touchend', 'touchmove'
+] as const;
+
+let earlyHandlers: ((e: MouseEvent | PointerEvent | WheelEvent | TouchEvent) => void)[] = [];
+
+// Why are you doing this, you might ask? For some mouse events, Pixi registers listeners on the window
+// with capturing enabled, which means that it gets notified of events dispatched on children before
+// event listeners on the children themselves do. This is the only way for us to make sure we can catch
+// an event and prevent it from propagating before Pixi has a chance to say "well, that event was fired on
+// something that wasn't the Pixi canvas, so that must mean our canvas has lost focus" (and as such,
+// refusing to do things like fire a pointertap because it threw away references to tracked pointers,
+// thinking we started a tap and canceled it by releasing our mouse outside the canvas).
+for (const event of events) {
+    // eslint-disable-next-line no-loop-func
+    window.addEventListener(event, (e) => {
+        earlyHandlers.forEach((handler) => handler(e));
+    }, true);
+}
+
+class HTMLOverlayObject extends DOMObject<HTMLDivElement> {
+    constructor() {
+        super(Eterna.OVERLAY_DIV_ID, document.createElement('div'));
+        this._boundHandleEvent = this.handleEvent.bind(this);
+        this._obj.classList.add('dialog-event-eater');
+    }
+
+    protected added(): void {
+        super.added();
+        earlyHandlers.push(this._boundHandleEvent);
+    }
+
+    protected dispose(): void {
+        earlyHandlers = earlyHandlers.filter((handler) => handler !== this._boundHandleEvent);
+        super.dispose();
+    }
+
+    public set width(value: number) {
+        this._obj.style.width = DOMObject.sizeToString(value);
+        this.onSizeChanged();
+    }
+
+    public get width(): number {
+        return this._obj.getBoundingClientRect().width;
+    }
+
+    public set height(value: number) {
+        this._obj.style.height = DOMObject.sizeToString(value);
+        this.onSizeChanged();
+    }
+
+    public get height(): number {
+        return this._obj.getBoundingClientRect().height;
+    }
+
+    private handleEvent(e: MouseEvent | PointerEvent | WheelEvent | TouchEvent) {
+        if (e.target !== this._obj) return;
+
+        // Prevent any of the UI in our HTML overlay below this element from receiving clicks
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Instead, continue at the top of the pixi stack, since that may have elements that are
+        // supposed to be "over" the modal background
+        const canvas = Flashbang.app.view;
+        if (e instanceof PointerEvent) {
+            canvas.dispatchEvent(new PointerEvent(e.type, e));
+        } else if (e instanceof WheelEvent) {
+            canvas.dispatchEvent(new WheelEvent(e.type, e));
+        } else if (e instanceof MouseEvent) {
+            canvas.dispatchEvent(new MouseEvent(e.type, e));
+        } else if (e instanceof TouchEvent) {
+            canvas.dispatchEvent(new TouchEvent(e.type, {
+                ...e,
+                touches: [...e.touches],
+                changedTouches: [...e.changedTouches],
+                targetTouches: [...e.targetTouches]
+            }));
+        }
+        this._obj.style.cursor = canvas.style.cursor;
+    }
+
+    private _boundHandleEvent: (e: MouseEvent | PointerEvent | WheelEvent | TouchEvent) => void;
+}
 
 /** Convenience base class for dialog objects. */
 export default abstract class Dialog<T> extends ContainerObject implements KeyboardListener {
@@ -59,6 +149,9 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
         this.regs.add(this.mode.keyboardInput.pushListener(this));
         this.regs.add(this.mouseWheel.connect((e) => this.onMouseWheelEvent(e)));
 
+        const htmlOverlay = new HTMLOverlayObject();
+        this.addObject(htmlOverlay);
+
         const updateBG = () => {
             Assert.assertIsDefined(Flashbang.stageWidth);
             Assert.assertIsDefined(Flashbang.stageHeight);
@@ -67,6 +160,8 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
                 .drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
                 .endFill();
             bg.alpha = this.bgAlpha;
+            htmlOverlay.width = Flashbang.stageWidth;
+            htmlOverlay.height = Flashbang.stageHeight;
         };
         updateBG();
         this.regs.add(this.mode.resized.connect(updateBG));
