@@ -7,7 +7,6 @@ body {
 #maingame {
     width: 100%;
     height: 100%;
-    overflow: hidden;
     background-image: radial-gradient(ellipse, rgb(2, 38, 76) 0%, rgb(3, 27, 60) 70%);
 }
 
