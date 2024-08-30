@@ -2,7 +2,8 @@ import 'assets/Styles/styles.css'; // css-loader will pick up on this and embed 
 import {settings, Application, utils} from 'pixi.js';
 import log from 'loglevel';
 import {
-    FlashbangApp, SaveGameManager, TextureUtil, ErrorUtil, Flashbang, Assert
+    FlashbangApp, SaveGameManager, TextureUtil, ErrorUtil, Flashbang, Assert,
+    ElementSignal
 } from 'flashbang';
 import ChatManager from 'eterna/ChatManager';
 import Eterna from 'eterna/Eterna';
@@ -145,6 +146,13 @@ export default class EternaApp extends FlashbangApp {
             throw new Error(`Could not find HTML element with ID ${params.containerID}`);
         }
         eternaContainer.style.position = 'relative';
+        eternaContainer.style.overflow = 'hidden';
+
+        const scroll = new ElementSignal(eternaContainer, 'scroll');
+        Assert.assertIsDefined(this._regs);
+        this._regs.add(scroll.connect(() => {
+            eternaContainer.scrollLeft = 0;
+        }));
 
         const pixiContainer: HTMLElement = document.createElement('div');
         pixiContainer.id = Eterna.PIXI_CONTAINER_ID;
