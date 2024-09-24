@@ -1301,7 +1301,7 @@ export default class PoseEditMode extends GameMode {
 
         scriptInterfaceCtx.addCallback(
             'energy_of_structure_async',
-            (seq: string, secstruct: string): number | null => {
+            async (seq: string, secstruct: string): Promise<number | null> => {
                 if (this._folder === null) {
                     return null;
                 }
