@@ -13,7 +13,6 @@ import SecStruct from './rnatypes/SecStruct';
 import Sequence from './rnatypes/Sequence';
 import {TargetType} from './puzzle/Puzzle';
 import FoldUtil, {BasePairProbabilityTransform} from './folding/FoldUtil';
-import RNNet from './folding/RNNet';
 
 /**
  * FoldData is a schema for JSON-ified UndoBlocks.
@@ -100,8 +99,12 @@ export enum UndoBlockParam {
     SUMPUNP = 17,
     BRANCHINESS = 18,
     TARGET_EXPECTED_ACCURACY = 19,
-    EF1 = 20,
-    EF1_CROSS_PAIR = 21,
+    // EF1 = 20,
+    // EF1_CROSS_PAIR = 21,
+    BPP_F1_TARGET = 22,
+    BPP_F1_NATIVE = 23,
+    BPP_F1_TARGET_PKMASK = 24,
+    BPP_F1_NATIVE_PKMASK = 25,
 }
 
 type Param = (number | number[] | DotPlot | null);
@@ -609,42 +612,73 @@ export default class UndoBlock {
                     EPars.DEFAULT_TEMPERATURE, pseudoknots
                 );
             }
-            this.setParam(UndoBlockParam.DOTPLOT, dotArray?.data ?? null, EPars.DEFAULT_TEMPERATURE, pseudoknots);
-            // mean+sum prob unpaired
-            this.setParam(UndoBlockParam.SUMPUNP,
-                this.sumProbUnpaired(dotArray, bppStatisticBehavior), EPars.DEFAULT_TEMPERATURE, pseudoknots);
-            this.setParam(
-                UndoBlockParam.MEANPUNP,
-                this.sumProbUnpaired(dotArray, bppStatisticBehavior) / this.sequence.length,
-                EPars.DEFAULT_TEMPERATURE, pseudoknots
-            );
-            // branchiness
-            this.setParam(UndoBlockParam.BRANCHINESS,
-                this.ensembleBranchiness(dotArray, bppStatisticBehavior), EPars.DEFAULT_TEMPERATURE, pseudoknots);
-            this.setParam(
-                UndoBlockParam.TARGET_EXPECTED_ACCURACY,
-                FoldUtil.expectedAccuracy(this._targetPairs, dotArray, bppStatisticBehavior).mcc,
-                EPars.DEFAULT_TEMPERATURE,
-                pseudoknots
-            );
-            if (folder instanceof RNNet) {
-                this.setParam(
-                    UndoBlockParam.EF1,
-                    await folder.getEf1(this.sequence),
-                    EPars.DEFAULT_TEMPERATURE,
-                    pseudoknots
-                );
-                this.setParam(
-                    UndoBlockParam.EF1_CROSS_PAIR,
-                    await folder.getEf1CrossPair(this.sequence),
-                    EPars.DEFAULT_TEMPERATURE,
-                    pseudoknots
-                );
-            }
             this._dotPlotData = dotArray;
         } else if (Array.isArray(currDotPlot)) {
             this._dotPlotData = new DotPlot(currDotPlot);
         }
+
+        this.setParam(UndoBlockParam.DOTPLOT, this._dotPlotData?.data ?? null, EPars.DEFAULT_TEMPERATURE, pseudoknots);
+        this.setParam(
+            UndoBlockParam.SUMPUNP,
+            this.sumProbUnpaired(this._dotPlotData, bppStatisticBehavior),
+            EPars.DEFAULT_TEMPERATURE, pseudoknots
+        );
+        this.setParam(
+            UndoBlockParam.MEANPUNP,
+            this.sumProbUnpaired(this._dotPlotData, bppStatisticBehavior) / this.sequence.length,
+            EPars.DEFAULT_TEMPERATURE, pseudoknots
+        );
+        this.setParam(
+            UndoBlockParam.BRANCHINESS,
+            this.ensembleBranchiness(this._dotPlotData, bppStatisticBehavior),
+            EPars.DEFAULT_TEMPERATURE, pseudoknots
+        );
+        this.setParam(
+            UndoBlockParam.TARGET_EXPECTED_ACCURACY,
+            FoldUtil.bppConfidence(
+                this.targetPairs,
+                this._dotPlotData,
+                bppStatisticBehavior
+            ).mcc,
+            EPars.DEFAULT_TEMPERATURE, pseudoknots
+        );
+
+        this.setParam(
+            UndoBlockParam.BPP_F1_TARGET,
+            FoldUtil.bppConfidence(
+                this._targetPairs,
+                this._dotPlotData,
+                bppStatisticBehavior
+            ).f1,
+            EPars.DEFAULT_TEMPERATURE, pseudoknots
+        );
+        this.setParam(
+            UndoBlockParam.BPP_F1_NATIVE,
+            FoldUtil.bppConfidence(
+                this.targetAlignedNaturalPairs,
+                this._dotPlotData,
+                bppStatisticBehavior
+            ).f1,
+            EPars.DEFAULT_TEMPERATURE, pseudoknots
+        );
+        this.setParam(
+            UndoBlockParam.BPP_F1_TARGET_PKMASK,
+            FoldUtil.pkMaskedBppConfidence(
+                this._targetPairs,
+                this._dotPlotData,
+                bppStatisticBehavior
+            ).f1,
+            EPars.DEFAULT_TEMPERATURE, pseudoknots
+        );
+        this.setParam(
+            UndoBlockParam.BPP_F1_NATIVE_PKMASK,
+            FoldUtil.pkMaskedBppConfidence(
+                this.targetAlignedNaturalPairs,
+                this._dotPlotData,
+                bppStatisticBehavior
+            ).f1,
+            EPars.DEFAULT_TEMPERATURE, pseudoknots
+        );
 
         if (!skipMelt) {
             for (let ii = EPars.DEFAULT_TEMPERATURE; ii < 100; ii += 10) {

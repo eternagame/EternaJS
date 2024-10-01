@@ -396,7 +396,7 @@ export default class FoldUtil {
         return {rowInd: a, colInd: b};
     }
 
-    public static expectedAccuracy(
+    public static bppConfidence(
         targetPairs: SecStruct,
         dotArray: DotPlot | null,
         bppBehavior: BasePairProbabilityTransform
@@ -453,7 +453,45 @@ export default class FoldUtil {
 
         return {
             mcc: (TP * TN - (FP - cFP) * FN) / Math.sqrt((TP + FP - cFP) * (TP + FN) * (TN + FP - cFP) * (TN + FN)),
-            f1: (2 * TP) / (2 * TP + FP - cFP + FN)
+            // Why this check? Otherwise since all bpp contributions would be zeroed out,
+            // f1 would be calculated as (2 * 1e6) / (2 * 1e6 + 1e6 - 1e6 + 1e6) = 0.666666666.
+            // Really it's undefined (the 1e6 default values are there to prevent that)
+            // and "0" is better reflecting our intent
+            f1: targetPairs.nonempty() ? (2 * TP) / (2 * TP + FP - cFP + FN) : 0
         };
+    }
+
+    public static pkMaskedBppConfidence(
+        pairs: SecStruct,
+        dotplot: DotPlot | null,
+        bppBehavior: BasePairProbabilityTransform
+    ): { mcc: number, f1: number } {
+        if (dotplot === null || dotplot.data.length === 0) return {mcc: 0, f1: 0};
+
+        // With this formulation, we are effectively saying any nucleotides not predicted to be
+        // part of a cross pair are "correct", as we specify they should be unpaired
+        // and there are no pairing probabilities at that position > 0. This is specifically tuned
+        // for F1, in which the "true negative" component is disgarded in its formula.
+        // As put by Rhiju:
+        // The motivation for this choice is that in cases with inferred pseudoknots,
+        // we really don't care about what residues outside the relevant crossed-pairs are doing.
+        // We just want an estimate of whether the specific crossed-pairs will show up in the actual
+        // structure. There is an analogy to how we set up the 'crossed pair quality' component for OpenKnotScore.
+        const crossedPairs = pairs.getCrossedPairs();
+
+        const bpps = dotplot.data.slice();
+        for (let i = 0; i < bpps.length; i += 3) {
+            const a = bpps[i] - 1;
+            const b = bpps[i + 1] - 1;
+            if (!crossedPairs.isPaired(a) && !crossedPairs.isPaired(b)) {
+                bpps[i + 2] = 0;
+            }
+        }
+
+        return FoldUtil.bppConfidence(
+            crossedPairs,
+            new DotPlot(bpps),
+            bppBehavior
+        );
     }
 }
