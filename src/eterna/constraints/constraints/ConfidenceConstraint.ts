@@ -1,9 +1,5 @@
-import FoldUtil, {BasePairProbabilityTransform} from 'eterna/folding/FoldUtil';
-import Vienna2 from 'eterna/folding/Vienna2';
-import Vienna from 'eterna/folding/Vienna';
 import {UndoBlockParam} from 'eterna/UndoBlock';
 import EPars from 'eterna/EPars';
-import DotPlot from 'eterna/rnatypes/DotPlot';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
@@ -29,43 +25,27 @@ abstract class BaseConfidenceConstraint extends Constraint<ConfidenceConstraintS
     public evaluate(context: ConstraintContext): ConfidenceConstraintStatus {
         // TODO: Multistate?
         const undoBlock = context.undoBlocks[0];
-        const pseudoknots = (undoBlock.targetConditions !== undefined
-            && undoBlock.targetConditions['type'] === 'pseudoknot');
-        let dotplot = undoBlock.getParam(UndoBlockParam.DOTPLOT, EPars.DEFAULT_TEMPERATURE, pseudoknots) as number[];
+        const pseudoknots = (
+            undoBlock.targetConditions !== undefined
+            && undoBlock.targetConditions['type'] === 'pseudoknot'
+        );
 
-        let pairs = this.mode === 'native'
-            ? undoBlock.targetAlignedNaturalPairs
-            : undoBlock.targetPairs;
-
+        let conf: number;
         if (this.pseudoknot) {
-            pairs = pairs.getCrossedPairs();
-            if (!pairs.nonempty()) {
-                // Otherwise since all bpp contributions would be zeroed out, f1 would be calculated
-                // as (2 * 1e6) / (2 * 1e6 + 1e6 - 1e6 + 1e6) = 0.666666666. Really it's undefined
-                // (the 1e6 default values are there to prevent that) and "0" is better reflecting
-                // our intent
-                return {
-                    confidence: 0,
-                    satisfied: false
-                };
+            if (this.mode === 'target') {
+                conf = undoBlock.getParam(
+                    UndoBlockParam.BPP_F1_TARGET_PKMASK, EPars.DEFAULT_TEMPERATURE, pseudoknots
+                ) as number;
+            } else {
+                conf = undoBlock.getParam(
+                    UndoBlockParam.BPP_F1_NATIVE_PKMASK, EPars.DEFAULT_TEMPERATURE, pseudoknots
+                ) as number;
             }
-
-            dotplot = dotplot.slice();
-            for (let i = 0; i < dotplot.length; i += 3) {
-                const a = dotplot[i] - 1;
-                const b = dotplot[i + 1] - 1;
-                if (!pairs.isPaired(a) && !pairs.isPaired(b)) {
-                    dotplot[i + 2] = 0;
-                }
-            }
+        } else if (this.mode === 'target') {
+            conf = undoBlock.getParam(UndoBlockParam.BPP_F1_TARGET, EPars.DEFAULT_TEMPERATURE, pseudoknots) as number;
+        } else {
+            conf = undoBlock.getParam(UndoBlockParam.BPP_F1_NATIVE, EPars.DEFAULT_TEMPERATURE, pseudoknots) as number;
         }
-
-        const square: boolean = (undoBlock.folderName === Vienna.NAME || undoBlock.folderName === Vienna2.NAME);
-        const conf = FoldUtil.expectedAccuracy(
-            pairs,
-            new DotPlot(dotplot),
-            square ? BasePairProbabilityTransform.SQUARE : BasePairProbabilityTransform.LEAVE_ALONE
-        ).f1;
 
         return {
             confidence: conf,

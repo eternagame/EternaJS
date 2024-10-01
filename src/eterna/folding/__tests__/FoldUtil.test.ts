@@ -13,7 +13,7 @@ test('FoldUtil:tea', () => {
 
             const seq = Sequence.fromSequenceString('GGGGAAACCC');
             const bpps = eternafold.getDotPlot(seq);;
-            expect(FoldUtil.expectedAccuracy(
+            expect(FoldUtil.bppConfidence(
                 SecStruct.fromParens('(((....)))', false),
                 bpps,
                 BasePairProbabilityTransform.LEAVE_ALONE
