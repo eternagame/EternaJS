@@ -419,12 +419,12 @@ export default class EternaApp extends FlashbangApp {
             this.modeStack.setModeIndex(existingMode, -1);
             return Promise.resolve();
         } else {
-            return this.loadSolution(puzzleOrID, solutionOrID)
-                .then(([puzzle, solution, allSolutions]) => {
+            return this.loadSolution(puzzleOrID, solutionOrID, solutions)
+                .then(([puzzle, solution, solutionList]) => {
                     if (existingMode != null) {
                         this.modeStack.removeMode(existingMode);
                     }
-                    this.modeStack.pushMode(new FeedbackViewMode(solution, puzzle, solutions ?? allSolutions));
+                    this.modeStack.pushMode(new FeedbackViewMode(solution, puzzle, solutionList));
                 });
         }
     }
@@ -437,7 +437,8 @@ export default class EternaApp extends FlashbangApp {
 
     private loadSolution(
         puzzleOrID: number | Puzzle,
-        solutionOrID: number | Solution
+        solutionOrID: number | Solution,
+        solutionList?: Solution[]
     ): Promise<[Puzzle, Solution, Solution[]]> {
         const puzzleID = (puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID);
         const solutionID = (solutionOrID instanceof Solution ? solutionOrID.nodeID : solutionOrID);
@@ -446,9 +447,13 @@ export default class EternaApp extends FlashbangApp {
             ? Promise.resolve(puzzleOrID)
             : PuzzleManager.instance.getPuzzleByID(puzzleOrID);
 
+        const solutionsPromise = solutionList
+            ? Promise.resolve(solutionList)
+            : SolutionManager.instance.getSolutionsForPuzzle(puzzleID);
+
         const solutionPromise: Promise<Solution> = (solutionOrID instanceof Solution)
             ? Promise.resolve(solutionOrID)
-            : SolutionManager.instance.getSolutionsForPuzzle(puzzleID)
+            : solutionsPromise
                 .then((solutions) => {
                     for (const solution of solutions) {
                         if (solution.nodeID === solutionID) {
@@ -460,8 +465,6 @@ export default class EternaApp extends FlashbangApp {
                         new Error(`No such solution for given puzzle [puzzleID=${puzzleID}, solutionID=${solutionID}`)
                     );
                 });
-
-        const solutionsPromise = SolutionManager.instance.getSolutionsForPuzzle(puzzleID);
 
         this.setLoadingText(`Loading solution ${solutionID}...`, null);
         return Promise.all([puzzlePromise, solutionPromise, solutionsPromise])
