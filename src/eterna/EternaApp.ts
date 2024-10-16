@@ -420,11 +420,11 @@ export default class EternaApp extends FlashbangApp {
             return Promise.resolve();
         } else {
             return this.loadSolution(puzzleOrID, solutionOrID, solutions)
-                .then(([puzzle, solution, allSolutions]) => {
+                .then(([puzzle, solution, solutionList]) => {
                     if (existingMode != null) {
                         this.modeStack.removeMode(existingMode);
                     }
-                    this.modeStack.pushMode(new FeedbackViewMode(solution, puzzle, solutions ?? allSolutions));
+                    this.modeStack.pushMode(new FeedbackViewMode(solution, puzzle, solutionList));
                 });
         }
     }
