@@ -35,7 +35,7 @@ import {
     nucleotideRangeButtonProps, explosionFactorButtonProps, pipButtonProps, zoomInButtonProps,
     zoomOutButtonProps, view3DButtonProps, moveButtonProps, rotateStemButtonProps, flipStemButtonProps,
     snapToGridButtonProps, baseMarkerButtonProps, annotationModeButtonProps, annotationPanelButtonProps,
-    boostersMenuButtonProps
+    boostersMenuButtonProps, stampTLoop5MenuButtonProps, stampTLoop3MenuButtonProps
 } from './ToolbarButtons';
 import ToolShelf from './ToolShelf';
 
@@ -79,6 +79,8 @@ export default class Toolbar extends ContainerObject {
     public librarySelectionButton: ToolbarButton;
     public magicGlueButton: ToolbarButton;
     public boostersMenuButton: ToolbarButton;
+    public stampTLoop5: ToolbarButton;
+    public stampTLoop3: ToolbarButton;
     public dynPaintTools: ToolbarButton[] = [];
 
     // Import/Export
@@ -114,12 +116,14 @@ export default class Toolbar extends ContainerObject {
             showGlue = false,
             showLibrarySelect = false,
             showPip = false,
+            showStampTLoop = false,
             annotationManager
         }: {
             boosters?: BoostersData;
             showGlue?: boolean;
             showLibrarySelect?: boolean;
             showPip?: boolean;
+            showStampTLoop?: boolean;
             annotationManager?: AnnotationManager;
         }
     ) {
@@ -128,6 +132,7 @@ export default class Toolbar extends ContainerObject {
         this._showGlue = showGlue;
         this._showLibrarySelect = showLibrarySelect;
         this._showPip = showPip;
+        this._showStampTLoop = showStampTLoop;
         this._boostersData = boosters ?? null;
         this._annotationManager = annotationManager;
         this.display.name = 'Toolbar';
@@ -523,6 +528,8 @@ export default class Toolbar extends ContainerObject {
         this.librarySelectionButton = this.setupButton(librarySelectionButtonProps, this._showLibrarySelect);
         this.resetButton = this.setupButton(resetButtonProps, isEditable);
         this.magicGlueButton = this.setupButton(magicGlueButtonProps, this._showGlue);
+        this.stampTLoop5 = this.setupButton(stampTLoop5MenuButtonProps, this._showStampTLoop);
+        this.stampTLoop3 = this.setupButton(stampTLoop3MenuButtonProps, this._showStampTLoop);
         this.boostersMenuButton = this.setupButton(
             boostersMenuButtonProps,
             isEditable && this._boostersData !== null
@@ -881,6 +888,7 @@ export default class Toolbar extends ContainerObject {
     private readonly _showGlue: boolean;
     private readonly _showLibrarySelect: boolean;
     private readonly _showPip: boolean;
+    private readonly _showStampTLoop: boolean;
     private readonly _boostersData: BoostersData | null;
     private readonly _annotationManager: AnnotationManager | undefined;
 }

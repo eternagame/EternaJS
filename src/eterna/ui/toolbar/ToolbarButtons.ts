@@ -307,6 +307,28 @@ export const boostersMenuButtonProps: ToolbarParam = {
     rscriptID: RScriptUIElementID.BOOSTERS
 };
 
+export const stampTLoop5MenuButtonProps: ToolbarParam = {
+    cat: ButtonCategory.SOLVE,
+    id: 'stampTLoop5',
+    displayName: 'Stamp T-loop (5\')',
+    allImg: Bitmaps.ImgStampTLoop,
+    overImg: Bitmaps.ImgOverStampTLoop,
+    disableImg: Bitmaps.ImgGreyStampTLoop,
+    tooltip: 'Stamp T-loop (5\')',
+    isPaintTool: true
+};
+
+export const stampTLoop3MenuButtonProps: ToolbarParam = {
+    cat: ButtonCategory.SOLVE,
+    id: 'stampTLoop3',
+    displayName: 'Stamp T-loop (3\')',
+    allImg: Bitmaps.ImgStampTLoop,
+    overImg: Bitmaps.ImgOverStampTLoop,
+    disableImg: Bitmaps.ImgGreyStampTLoop,
+    tooltip: 'Stamp T-loop (3\')',
+    isPaintTool: true
+};
+
 // ===== IMPORT/EXPORT =====
 
 export const copyButtonProps: ToolbarParam = {
