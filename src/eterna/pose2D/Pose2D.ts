@@ -441,6 +441,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             || this._lockUpdated
             || this._bindingSiteUpdated
             || this._designStructUpdated
+            || this._lastStamp
         ) {
             this.checkPairs();
             this.updateMolecule();
@@ -3350,6 +3351,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._lastShiftedCommand;
     }
 
+    public get lastStamp(): {baseIndex: number; type: 'TLOOP3' | 'TLOOP5'} | null {
+        return this._lastStamp;
+    }
+
+    public clearLastStamp() {
+        this._lastStamp = null;
+    }
+
     public setBaseColor(seqpos: number, inColor: RNABase): void {
         this._mutatedSequence = this._sequence.slice(0);
         this._mutatedSequence.setNt(seqpos, inColor);
@@ -3543,6 +3552,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (this.toggleDesignStruct(seqnum)) {
                 this._designStructUpdated = true;
             }
+        } else if (this._currentColor === RNAPaint.STAMP_TLOOP5) {
+            this._lastStamp = {type: 'TLOOP5', baseIndex: seqnum};
+        } else if (this._currentColor === RNAPaint.STAMP_TLOOP3) {
+            this._lastStamp = {type: 'TLOOP3', baseIndex: seqnum};
         } else if (!this.isLocked(seqnum)) {
             if (
                 this._currentColor === RNABase.ADENINE || this._currentColor === RNABase.URACIL
@@ -4400,7 +4413,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _bindingSiteUpdated: boolean;
     private _designStructUpdated: boolean;
     private _canAddBindingSite: boolean = false;
-
     private _currentArrangementTool: Layout = Layout.MOVE;
 
     // Rope connecting bases for crazy user-defined layouts
@@ -4494,6 +4506,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
     // Adding/removing bases
     private _lastShiftedIndex: number = -1;
     private _lastShiftedCommand: number = -1;
+
+    // Stamping
+    private _lastStamp: {baseIndex: number; type: 'TLOOP3' | 'TLOOP5'} | null = null;
 
     // Rendering mode
     private _numberingMode: boolean = false;

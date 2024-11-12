@@ -83,6 +83,7 @@ import DotPlot from 'eterna/rnatypes/DotPlot';
 import UILockDialog from 'eterna/ui/UILockDialog';
 import Dialog from 'eterna/ui/Dialog';
 import WindowDialog from 'eterna/ui/WindowDialog';
+import TLoopConstraint, {TLoop3Seq, TLoop5Seq, TLoopPairs} from 'eterna/constraints/constraints/TLoopConstraint';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -746,6 +747,7 @@ export default class PoseEditMode extends GameMode {
                 ?.some((condition) => condition?.structure_constrained_bases),
             boosters: this._puzzle.boosters ? this._puzzle.boosters : undefined,
             showLibrarySelect: this._puzzle.constraints?.some((con) => con instanceof LibrarySelectionConstraint),
+            showStampTLoop: this._puzzle.constraints?.some((con) => con instanceof TLoopConstraint),
             showPip: states > 1,
             annotationManager: this._annotationManager
         });
@@ -1080,6 +1082,14 @@ export default class PoseEditMode extends GameMode {
 
         this.regs.add(this._toolbar.magicGlueButton.clicked.connect(() => {
             this.setPosesColor(RNAPaint.MAGIC_GLUE);
+        }));
+
+        this.regs.add(this._toolbar.stampTLoop5.clicked.connect(() => {
+            this.setPosesColor(RNAPaint.STAMP_TLOOP5);
+        }));
+
+        this.regs.add(this._toolbar.stampTLoop3.clicked.connect(() => {
+            this.setPosesColor(RNAPaint.STAMP_TLOOP3);
         }));
 
         this.regs.add(this._toolbar.moveButton.clicked.connect(() => {
@@ -3921,6 +3931,111 @@ export default class PoseEditMode extends GameMode {
             this._poses[ii].puzzleLocks = this._poses[targetIndex].puzzleLocks;
             this._poses[ii].librarySelections = this._poses[targetIndex].librarySelections;
         }
+        this.syncStampFromPose(targetIndex);
+    }
+
+    private syncStampFromPose(targetIndex: number) {
+        const fromPose = this._poses[targetIndex];
+
+        const lastStamp = fromPose.lastStamp;
+        if (!lastStamp) return;
+
+        const canStampSeq = (stampSeq: Sequence, stampPosition: number) => Utility.range(
+            stampPosition, stampPosition + stampSeq.length
+        ).every((seqIdx) => !fromPose.isLocked(seqIdx));
+
+        const stampSeq = (seqToStamp: Sequence, stampPosition: number) => {
+            const seq = fromPose.sequence.slice(0);
+            for (let i = 0; i < seqToStamp.length; i++) {
+                const base = seqToStamp.nt(i);
+                if (base !== RNABase.UNDEFINED) {
+                    seq.setNt(stampPosition + i, base);
+                }
+            }
+            for (const pose of this._poses) {
+                pose.sequence = seq;
+            }
+        };
+
+        const canStampStruct = (stampPairs: number[][]) => {
+            const structureConstraints = this._targetConditions[targetIndex]?.['structure_constraints'];
+            if (structureConstraints === undefined) return false;
+
+            const targetPairs = this._targetPairs[targetIndex];
+            for (const [a, b] of stampPairs) {
+                if (
+                    // This base would have its pairing changed
+                    targetPairs.pairingPartner(a) !== b
+                    && (
+                        // This base cant have its structure changed
+                        structureConstraints[a]
+                        // The base we want to pair to cant have its structure changed
+                        || (b !== -1 && structureConstraints[b])
+                        // This base is currently paired to another base which cant have its structure changed
+                        || (targetPairs.pairingPartner(a) !== -1 && structureConstraints[targetPairs.pairingPartner(a)])
+                    )
+                ) {
+                    return false;
+                }
+            }
+
+            return true;
+        };
+
+        const stampStruct = (stampPairs: number[][]) => {
+            const targetPairs = this._targetPairs[targetIndex].slice(0);
+            for (const [a, b] of stampPairs) {
+                if (b === -1) targetPairs.setUnpaired(a);
+                else targetPairs.setPairingPartner(a, b);
+            }
+            this._targetPairs[targetIndex] = targetPairs;
+        };
+
+        switch (lastStamp.type) {
+            case 'TLOOP5': {
+                if (canStampSeq(TLoop5Seq, lastStamp.baseIndex)) {
+                    stampSeq(TLoop5Seq, lastStamp.baseIndex);
+                    if (
+                        this._lastStampedTLoop3 !== -1
+                        // The opposing stamped sequence is still there
+                        && TLoop3Seq.baseArray.every(
+                            (base, idx) => (
+                                base === RNABase.UNDEFINED
+                                || fromPose.sequence.nt(this._lastStampedTLoop3 + idx) === base
+                            )
+                        )
+                        && canStampStruct(TLoopPairs(lastStamp.baseIndex, this._lastStampedTLoop3))
+                    ) {
+                        stampStruct(TLoopPairs(lastStamp.baseIndex, this._lastStampedTLoop3));
+                    }
+                    this._lastStampedTLoop5 = lastStamp.baseIndex;
+                }
+                break;
+            }
+            case 'TLOOP3': {
+                if (canStampSeq(TLoop3Seq, lastStamp.baseIndex)) {
+                    stampSeq(TLoop3Seq, lastStamp.baseIndex);
+                    if (
+                        this._lastStampedTLoop5 !== -1
+                        // The opposing stamped sequence is still there
+                        && TLoop5Seq.baseArray.every(
+                            (base, idx) => (
+                                base === RNABase.UNDEFINED
+                                || fromPose.sequence.nt(this._lastStampedTLoop5 + idx) === base
+                            )
+                        )
+                        && canStampStruct(TLoopPairs(this._lastStampedTLoop5, lastStamp.baseIndex))
+                    ) {
+                        stampStruct(TLoopPairs(this._lastStampedTLoop5, lastStamp.baseIndex));
+                    }
+                    this._lastStampedTLoop3 = lastStamp.baseIndex;
+                }
+                break;
+            }
+            default:
+                Assert.unreachable(lastStamp.type);
+        }
+        fromPose.clearLastStamp();
     }
 
     /**
@@ -4573,6 +4688,9 @@ export default class PoseEditMode extends GameMode {
 
     // Annotations
     private _annotationManager: AnnotationManager;
+
+    private _lastStampedTLoop5 = -1;
+    private _lastStampedTLoop3 = -1;
 
     private static readonly FOLDING_LOCK = 'Folding';
 }

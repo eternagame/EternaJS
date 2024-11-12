@@ -203,6 +203,7 @@ export default class Bitmaps {
     public static readonly ConfidenceNaturalPK: string = new URL('assets/constraint-confidence-natural-PK.svg', import.meta.url).href;
     public static readonly ConfidenceTarget: string = new URL('assets/constraint-confidence-target.svg', import.meta.url).href;
     public static readonly ConfidenceTargetPK: string = new URL('assets/constraint-confidence-target-PK.svg', import.meta.url).href;
+    public static readonly TLoopIcon: string = new URL('assets/constraint-t-loop.png', import.meta.url).href;
 
     public static readonly ImgFileOpen: string = new URL('assets/UI/file-open.png', import.meta.url).href;
     public static readonly ImgFileOpenHover: string = new URL('assets/UI/file-open-hover.png', import.meta.url).href;
@@ -345,6 +346,7 @@ export default class Bitmaps {
     public static readonly ImgZoomIn: string = new URL('assets/SmallUI/zoomIn.svg', import.meta.url).href;
     public static readonly ImgZoomOut: string = new URL('assets/SmallUI/zoomOut.svg', import.meta.url).href;
     public static readonly ImgThreeWindow: string = new URL('assets/SmallUI/icon-3D-window.svg', import.meta.url).href;
+    public static readonly ImgStampTLoop: string = new URL('assets/SmallUI/stampTLoop.svg', import.meta.url).href;
 
     public static readonly ImgGreyAddBase: string = new URL('assets/SmallUI/grey/addBase.svg', import.meta.url).href;
     public static readonly ImgGreyAddPair: string = new URL('assets/SmallUI/grey/addPair.svg', import.meta.url).href;
@@ -392,6 +394,7 @@ export default class Bitmaps {
     public static readonly ImgGreyZoomIn: string = new URL('assets/SmallUI/grey/zoomIn.svg', import.meta.url).href;
     public static readonly ImgGreyZoomOut: string = new URL('assets/SmallUI/grey/zoomOut.svg', import.meta.url).href;
     public static readonly ImgGreyThreeWindow: string = new URL('assets/SmallUI/grey/icon-3D-window.svg', import.meta.url).href;
+    public static readonly ImgGreyStampTLoop: string = new URL('assets/SmallUI/grey/stampTLoop.svg', import.meta.url).href;
 
     public static readonly ImgOverAddBase: string = new URL('assets/SmallUI/highlight/addBase.svg', import.meta.url).href;
     public static readonly ImgOverAddPair: string = new URL('assets/SmallUI/highlight/addPair.svg', import.meta.url).href;
@@ -439,6 +442,7 @@ export default class Bitmaps {
     public static readonly ImgOverZoomIn: string = new URL('assets/SmallUI/highlight/zoomIn.svg', import.meta.url).href;
     public static readonly ImgOverZoomOut: string = new URL('assets/SmallUI/highlight/zoomOut.svg', import.meta.url).href;
     public static readonly ImgOverThreeWindow: string = new URL('assets/SmallUI/highlight/icon-3D-window.svg', import.meta.url).href;
+    public static readonly ImgOverStampTLoop: string = new URL('assets/SmallUI/highlight/stampTLoop.svg', import.meta.url).href;
 
     public static readonly ImgSelectedAddBase: string = new URL('assets/SmallUI/inverse/addBase.svg', import.meta.url).href;
     public static readonly ImgSelectedAddPair: string = new URL('assets/SmallUI/inverse/addPair.svg', import.meta.url).href;
@@ -486,6 +490,7 @@ export default class Bitmaps {
     public static readonly ImgSelectedZoomIn: string = new URL('assets/SmallUI/inverse/zoomIn.svg', import.meta.url).href;
     public static readonly ImgSelectedZoomOut: string = new URL('assets/SmallUI/inverse/zoomOut.svg', import.meta.url).href;
     public static readonly ImgSelectedThreeWindow: string = new URL('assets/SmallUI/inverse/icon-3D-window.svg', import.meta.url).href;
+    public static readonly ImgSelectedStampTLoop: string = new URL('assets/SmallUI/inverse/stampTLoop.svg', import.meta.url).href;
 
     public static readonly ImgDlgClose: string = new URL('assets/UI/close.svg', import.meta.url).href;
     public static readonly ImgOverDlgClose: string = new URL('assets/UI/close-over.svg', import.meta.url).href;
