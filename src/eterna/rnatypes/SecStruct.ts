@@ -67,7 +67,7 @@ export default class SecStruct {
     }
 
     /**
-     * Set the pairing partner to a particular value. If the position was
+     * Set the pairing partner to a particular value. If either position was
      * paired to begin with, unpair it first so we don't have an inconsistent
      * state.
      * @param index
@@ -77,7 +77,11 @@ export default class SecStruct {
         if (this.isPaired(index) && this.pairingPartner(index) !== pi) {
             this._pairs[this.pairingPartner(index)] = -1;
         }
+        if (this.isPaired(pi) && this.pairingPartner(pi) !== index) {
+            this._pairs[this.pairingPartner(pi)] = -1;
+        }
         this._pairs[index] = pi;
+        this._pairs[pi] = index;
     }
 
     /**
@@ -520,7 +524,6 @@ export default class SecStruct {
         const newStruct = new SecStruct(new Array(this.length).fill(-1));
         for (const pair of crossedPairs) {
             newStruct.setPairingPartner(pair[0], pair[1]);
-            newStruct.setPairingPartner(pair[1], pair[0]);
         }
         return newStruct;
     }

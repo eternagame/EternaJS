@@ -2190,6 +2190,11 @@ export default class PoseEditMode extends GameMode {
                 && structureConstraints[targetPartner] === false
                 // If this base is currently paired, its pair is unconstrained
                 && (pairs.pairingPartner(i) === -1 || structureConstraints[pairs.pairingPartner(i)] === false)
+                // If the base we're pairing with is currently paired, its pair is unconstrained
+                && (
+                    pairs.pairingPartner(targetPartner) === -1
+                    || structureConstraints[pairs.pairingPartner(targetPartner)] === false
+                )
             ) {
                 pairs.setPairingPartner(i, targetPartner);
             }
@@ -3973,6 +3978,9 @@ export default class PoseEditMode extends GameMode {
                         || (b !== -1 && structureConstraints[b])
                         // This base is currently paired to another base which cant have its structure changed
                         || (targetPairs.pairingPartner(a) !== -1 && structureConstraints[targetPairs.pairingPartner(a)])
+                        // The base we want to pair to is currently paired to another base which
+                        // cant have its structure changed
+                        || (b !== -1 && structureConstraints[targetPairs.pairingPartner(b)])
                     )
                 ) {
                     return false;
