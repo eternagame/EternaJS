@@ -6,18 +6,18 @@ import Sequence from 'eterna/rnatypes/Sequence';
 import Folder, {CacheKey} from './Folder';
 import FoldUtil, {BasePairProbabilityTransform} from './FoldUtil';
 
-export default class RNNet extends Folder<false> {
+export default class RNet extends Folder<false> {
     public static readonly NAME: string = 'RibonanzaNet-SS';
 
     /**
-     * Asynchronously creates a new instance of the RNNet folder.
+     * Asynchronously creates a new instance of the RNet folder.
      */
-    public static async create(): Promise<RNNet | null> {
-        return new RNNet();
+    public static async create(): Promise<RNet | null> {
+        return new RNet();
     }
 
     public get name(): string {
-        return RNNet.NAME;
+        return RNet.NAME;
     }
 
     public get isFunctional(): boolean {
@@ -180,7 +180,7 @@ export default class RNNet extends Folder<false> {
         if (this._session) return this._session;
 
         // eslint-disable-next-line import/no-unresolved, import/no-extraneous-dependencies
-        const rnnetSs = await import('engines-bin/rnnet-ss.onnx');
+        const rnetSs = await import('engines-bin/rnet-ss.onnx');
 
         // By default, onnxruntime will expect these files to exist at `/`. However, we want them to
         // be processed through webpack and loaded from wherever webpack says they will be.
@@ -214,7 +214,7 @@ export default class RNNet extends Folder<false> {
         // because it breaks YouTube and Vimeo embeds
         ort.env.wasm.numThreads = 1;
 
-        const session = await ort.InferenceSession.create(rnnetSs.default, {});
+        const session = await ort.InferenceSession.create(rnetSs.default, {});
         this._session = session;
         return session;
     }
