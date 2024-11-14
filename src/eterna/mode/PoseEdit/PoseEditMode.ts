@@ -4012,6 +4012,11 @@ export default class PoseEditMode extends GameMode {
                                 || fromPose.sequence.nt(this._lastStampedTLoopB + idx) === base
                             )
                         )
+                        // Ensure the two stamped sequences do not overlap
+                        && (
+                            (lastStamp.baseIndex + TLoopSeqA.length - 1) < this._lastStampedTLoopB
+                            || (this._lastStampedTLoopB + TLoopSeqB.length - 1) < lastStamp.baseIndex
+                        )
                         && canStampStruct(TLoopPairs(lastStamp.baseIndex, this._lastStampedTLoopB))
                     ) {
                         stampStruct(TLoopPairs(lastStamp.baseIndex, this._lastStampedTLoopB));
@@ -4031,6 +4036,11 @@ export default class PoseEditMode extends GameMode {
                                 base === RNABase.UNDEFINED
                                 || fromPose.sequence.nt(this._lastStampedTLoopA + idx) === base
                             )
+                        )
+                        // Ensure the two stamped sequences do not overlap
+                        && (
+                            (this._lastStampedTLoopA + TLoopSeqA.length - 1) < lastStamp.baseIndex
+                            || (lastStamp.baseIndex + TLoopSeqB.length - 1) < this._lastStampedTLoopA
                         )
                         && canStampStruct(TLoopPairs(this._lastStampedTLoopA, lastStamp.baseIndex))
                     ) {
