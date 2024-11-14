@@ -48,7 +48,11 @@ export default class TLoopConstraint extends Constraint<TLoopConstraintStatus> {
                 const aStart = candidateForA.index;
                 const bStart = candidateForB.index;
                 if (
-                    (aStart + TLoopSeqA.length - 1) < bStart
+                    // Ensure the two candidate regions do not overlap
+                    (
+                        (aStart + TLoopSeqA.length - 1) < bStart
+                        || (bStart + TLoopSeqB.length - 1) < aStart
+                    )
                     && TLoopPairs(aStart, bStart).every(
                         ([a, b]) => naturalPairs.pairingPartner(a) === b
                     )
