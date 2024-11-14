@@ -4,7 +4,6 @@ import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {TextureUtil} from 'flashbang';
 import Sequence from 'eterna/rnatypes/Sequence';
-import Utility from 'eterna/util/Utility';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 
@@ -14,23 +13,20 @@ interface TLoopConstraintStatus extends BaseConstraintStatus {
 }
 
 // NNAGUUGGGANN NNUUCGAUCNN
-// ((.....[..)) ((..]....))
+// ((xxxxx[xx)) ((xx]xxxx))
 // Derived from the tRNA(phe)(E. coli) secondary structure (based on DSSR) from PDB ID 1EHZ
+// The bases marked "x" here may be paired or unpaired
 export const TLoop5Seq = Sequence.fromSequenceString('??AGUUGGGA??');
 export const TLoop3Seq = Sequence.fromSequenceString('??UUCGAUC??');
 export const TLoopPairs = (tloop5Start: number, tloop3Start: number) => [
-    // Pair mappings for 5' region
+    // Pair mappings within 5' region
     [tloop5Start, tloop5Start + 11],
     [tloop5Start + 1, tloop5Start + 10],
-    ...Utility.range(2, 7).map((n) => [tloop5Start + n, -1]),
-    [tloop5Start + 7, tloop3Start + 4],
-    ...Utility.range(8, 10).map((n) => [tloop5Start + n, -1]),
-    // Pair mappings for 3' region
+    // Pair mappings within 3' region
     [tloop3Start, tloop3Start + 10],
     [tloop3Start + 1, tloop3Start + 9],
-    ...Utility.range(2, 4).map((n) => [tloop3Start + n, -1]),
-    [tloop3Start + 4, tloop5Start + 7],
-    ...Utility.range(5, 9).map((n) => [tloop3Start + n, -1])
+    // Cross-region pairs
+    [tloop5Start + 7, tloop3Start + 4]
 ];
 
 export default class TLoopConstraint extends Constraint<TLoopConstraintStatus> {
