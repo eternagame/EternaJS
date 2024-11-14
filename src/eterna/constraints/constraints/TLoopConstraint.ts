@@ -16,17 +16,17 @@ interface TLoopConstraintStatus extends BaseConstraintStatus {
 // ((xxxxx[xx)) ((xx]xxxx))
 // Derived from the tRNA(phe)(E. coli) secondary structure (based on DSSR) from PDB ID 1EHZ
 // The bases marked "x" here may be paired or unpaired
-export const TLoop5Seq = Sequence.fromSequenceString('??AGUUGGGA??');
-export const TLoop3Seq = Sequence.fromSequenceString('??UUCGAUC??');
-export const TLoopPairs = (tloop5Start: number, tloop3Start: number) => [
+export const TLoopSeqA = Sequence.fromSequenceString('??AGUUGGGA??');
+export const TLoopSeqB = Sequence.fromSequenceString('??UUCGAUC??');
+export const TLoopPairs = (tloopAStart: number, tloopBStart: number) => [
     // Pair mappings within 5' region
-    [tloop5Start, tloop5Start + 11],
-    [tloop5Start + 1, tloop5Start + 10],
+    [tloopAStart, tloopAStart + 11],
+    [tloopAStart + 1, tloopAStart + 10],
     // Pair mappings within 3' region
-    [tloop3Start, tloop3Start + 10],
-    [tloop3Start + 1, tloop3Start + 9],
+    [tloopBStart, tloopBStart + 10],
+    [tloopBStart + 1, tloopBStart + 9],
     // Cross-region pairs
-    [tloop5Start + 7, tloop3Start + 4]
+    [tloopAStart + 7, tloopBStart + 4]
 ];
 
 export default class TLoopConstraint extends Constraint<TLoopConstraintStatus> {
@@ -40,16 +40,20 @@ export default class TLoopConstraint extends Constraint<TLoopConstraintStatus> {
         );
         const naturalPairs = undoBlock.getPairs(EPars.DEFAULT_TEMPERATURE, pseudoknots);
         const seq = undoBlock.sequence.toString();
-        const seqMatch5 = Array.from(seq.matchAll(new RegExp(TLoop5Seq.toString().replaceAll('?', '.'), 'g')));
-        const seqMatch3 = Array.from(seq.matchAll(new RegExp(TLoop3Seq.toString().replaceAll('?', '.'), 'g')));
+        const tloopASeqMatch = Array.from(seq.matchAll(new RegExp(TLoopSeqA.toString().replaceAll('?', '.'), 'g')));
+        const tloopBSeqMatch = Array.from(seq.matchAll(new RegExp(TLoopSeqB.toString().replaceAll('?', '.'), 'g')));
 
-        for (const candidate5 of seqMatch5) {
-            for (const candidate3 of seqMatch3) {
-                const c5Start = candidate5.index;
-                const c3Start = candidate3.index;
+        for (const candidateForA of tloopASeqMatch) {
+            for (const candidateForB of tloopBSeqMatch) {
+                const aStart = candidateForA.index;
+                const bStart = candidateForB.index;
                 if (
-                    (c5Start + TLoop5Seq.length - 1) < c3Start
-                    && TLoopPairs(c5Start, c3Start).every(
+                    // Ensure the two candidate regions do not overlap
+                    (
+                        (aStart + TLoopSeqA.length - 1) < bStart
+                        || (bStart + TLoopSeqB.length - 1) < aStart
+                    )
+                    && TLoopPairs(aStart, bStart).every(
                         ([a, b]) => naturalPairs.pairingPartner(a) === b
                     )
                 ) {
@@ -64,8 +68,8 @@ export default class TLoopConstraint extends Constraint<TLoopConstraintStatus> {
 
         return {
             satisfied: false,
-            found5Prime: seqMatch5.length > 0,
-            found3Prime: seqMatch3.length > 0
+            found5Prime: tloopASeqMatch.length > 0,
+            found3Prime: tloopBSeqMatch.length > 0
         };
     }
 
@@ -97,11 +101,11 @@ export default class TLoopConstraint extends Constraint<TLoopConstraintStatus> {
             tooltip.pushStyle('altTextMain');
         }
 
-        tooltip.append(`Your design must contain the T-loop sequence (${TLoop5Seq.toString().replaceAll('?', 'N')}--${TLoop3Seq.toString().replaceAll('?', 'N')}) and form the T-loop structure`);
+        tooltip.append(`Your design must contain the T-loop sequence (${TLoopSeqA.toString().replaceAll('?', 'N')}--${TLoopSeqB.toString().replaceAll('?', 'N')}) and form the T-loop structure`);
         if (!forMissionScreen) {
-            tooltip.append(`\n\nThe T-loop 5' sequence ${TLoop5Seq.toString().replaceAll('?', 'N')} is currently `)
+            tooltip.append(`\n\nThe T-loop sequence ${TLoopSeqA.toString().replaceAll('?', 'N')} is currently `)
                 .append(status.found5Prime ? 'present' : 'missing', 'altText')
-                .append(`\n\nThe T-loop 3' sequence ${TLoop3Seq.toString().replaceAll('?', 'N')} is currently `)
+                .append(`\n\nThe T-loop sequence ${TLoopSeqB.toString().replaceAll('?', 'N')} is currently `)
                 .append(status.found3Prime ? 'present' : 'missing', 'altText')
                 .append('\n\nThe T-loop structure is currently ')
                 .append(status.satisfied ? 'forming' : 'not forming', 'altText');

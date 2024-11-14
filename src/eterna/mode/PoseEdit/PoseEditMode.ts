@@ -83,7 +83,7 @@ import DotPlot from 'eterna/rnatypes/DotPlot';
 import UILockDialog from 'eterna/ui/UILockDialog';
 import Dialog from 'eterna/ui/Dialog';
 import WindowDialog from 'eterna/ui/WindowDialog';
-import TLoopConstraint, {TLoop3Seq, TLoop5Seq, TLoopPairs} from 'eterna/constraints/constraints/TLoopConstraint';
+import TLoopConstraint, {TLoopSeqB, TLoopSeqA, TLoopPairs} from 'eterna/constraints/constraints/TLoopConstraint';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -1084,12 +1084,12 @@ export default class PoseEditMode extends GameMode {
             this.setPosesColor(RNAPaint.MAGIC_GLUE);
         }));
 
-        this.regs.add(this._toolbar.stampTLoop5.clicked.connect(() => {
-            this.setPosesColor(RNAPaint.STAMP_TLOOP5);
+        this.regs.add(this._toolbar.stampTLoopA.clicked.connect(() => {
+            this.setPosesColor(RNAPaint.STAMP_TLOOPA);
         }));
 
-        this.regs.add(this._toolbar.stampTLoop3.clicked.connect(() => {
-            this.setPosesColor(RNAPaint.STAMP_TLOOP3);
+        this.regs.add(this._toolbar.stampTLoopB.clicked.connect(() => {
+            this.setPosesColor(RNAPaint.STAMP_TLOOPB);
         }));
 
         this.regs.add(this._toolbar.moveButton.clicked.connect(() => {
@@ -4000,43 +4000,43 @@ export default class PoseEditMode extends GameMode {
         };
 
         switch (lastStamp.type) {
-            case 'TLOOP5': {
-                if (canStampSeq(TLoop5Seq, lastStamp.baseIndex)) {
-                    stampSeq(TLoop5Seq, lastStamp.baseIndex);
+            case 'TLOOPA': {
+                if (canStampSeq(TLoopSeqA, lastStamp.baseIndex)) {
+                    stampSeq(TLoopSeqA, lastStamp.baseIndex);
                     if (
-                        this._lastStampedTLoop3 !== -1
+                        this._lastStampedTLoopB !== -1
                         // The opposing stamped sequence is still there
-                        && TLoop3Seq.baseArray.every(
+                        && TLoopSeqB.baseArray.every(
                             (base, idx) => (
                                 base === RNABase.UNDEFINED
-                                || fromPose.sequence.nt(this._lastStampedTLoop3 + idx) === base
+                                || fromPose.sequence.nt(this._lastStampedTLoopB + idx) === base
                             )
                         )
-                        && canStampStruct(TLoopPairs(lastStamp.baseIndex, this._lastStampedTLoop3))
+                        && canStampStruct(TLoopPairs(lastStamp.baseIndex, this._lastStampedTLoopB))
                     ) {
-                        stampStruct(TLoopPairs(lastStamp.baseIndex, this._lastStampedTLoop3));
+                        stampStruct(TLoopPairs(lastStamp.baseIndex, this._lastStampedTLoopB));
                     }
-                    this._lastStampedTLoop5 = lastStamp.baseIndex;
+                    this._lastStampedTLoopA = lastStamp.baseIndex;
                 }
                 break;
             }
-            case 'TLOOP3': {
-                if (canStampSeq(TLoop3Seq, lastStamp.baseIndex)) {
-                    stampSeq(TLoop3Seq, lastStamp.baseIndex);
+            case 'TLOOPB': {
+                if (canStampSeq(TLoopSeqB, lastStamp.baseIndex)) {
+                    stampSeq(TLoopSeqB, lastStamp.baseIndex);
                     if (
-                        this._lastStampedTLoop5 !== -1
+                        this._lastStampedTLoopA !== -1
                         // The opposing stamped sequence is still there
-                        && TLoop5Seq.baseArray.every(
+                        && TLoopSeqA.baseArray.every(
                             (base, idx) => (
                                 base === RNABase.UNDEFINED
-                                || fromPose.sequence.nt(this._lastStampedTLoop5 + idx) === base
+                                || fromPose.sequence.nt(this._lastStampedTLoopA + idx) === base
                             )
                         )
-                        && canStampStruct(TLoopPairs(this._lastStampedTLoop5, lastStamp.baseIndex))
+                        && canStampStruct(TLoopPairs(this._lastStampedTLoopA, lastStamp.baseIndex))
                     ) {
-                        stampStruct(TLoopPairs(this._lastStampedTLoop5, lastStamp.baseIndex));
+                        stampStruct(TLoopPairs(this._lastStampedTLoopA, lastStamp.baseIndex));
                     }
-                    this._lastStampedTLoop3 = lastStamp.baseIndex;
+                    this._lastStampedTLoopB = lastStamp.baseIndex;
                 }
                 break;
             }
@@ -4697,8 +4697,8 @@ export default class PoseEditMode extends GameMode {
     // Annotations
     private _annotationManager: AnnotationManager;
 
-    private _lastStampedTLoop5 = -1;
-    private _lastStampedTLoop3 = -1;
+    private _lastStampedTLoopA = -1;
+    private _lastStampedTLoopB = -1;
 
     private static readonly FOLDING_LOCK = 'Folding';
 }

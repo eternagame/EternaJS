@@ -3351,7 +3351,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._lastShiftedCommand;
     }
 
-    public get lastStamp(): {baseIndex: number; type: 'TLOOP3' | 'TLOOP5'} | null {
+    public get lastStamp(): {baseIndex: number; type: 'TLOOPA' | 'TLOOPB'} | null {
         return this._lastStamp;
     }
 
@@ -3552,10 +3552,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (this.toggleDesignStruct(seqnum)) {
                 this._designStructUpdated = true;
             }
-        } else if (this._currentColor === RNAPaint.STAMP_TLOOP5) {
-            this._lastStamp = {type: 'TLOOP5', baseIndex: seqnum};
-        } else if (this._currentColor === RNAPaint.STAMP_TLOOP3) {
-            this._lastStamp = {type: 'TLOOP3', baseIndex: seqnum};
+        } else if (this._currentColor === RNAPaint.STAMP_TLOOPA) {
+            this._lastStamp = {type: 'TLOOPA', baseIndex: seqnum};
+        } else if (this._currentColor === RNAPaint.STAMP_TLOOPB) {
+            this._lastStamp = {type: 'TLOOPB', baseIndex: seqnum};
         } else if (!this.isLocked(seqnum)) {
             if (
                 this._currentColor === RNABase.ADENINE || this._currentColor === RNABase.URACIL
@@ -4508,7 +4508,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _lastShiftedCommand: number = -1;
 
     // Stamping
-    private _lastStamp: {baseIndex: number; type: 'TLOOP3' | 'TLOOP5'} | null = null;
+    private _lastStamp: {baseIndex: number; type: 'TLOOPA' | 'TLOOPB'} | null = null;
 
     // Rendering mode
     private _numberingMode: boolean = false;

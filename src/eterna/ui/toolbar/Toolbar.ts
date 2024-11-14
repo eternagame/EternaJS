@@ -35,7 +35,7 @@ import {
     nucleotideRangeButtonProps, explosionFactorButtonProps, pipButtonProps, zoomInButtonProps,
     zoomOutButtonProps, view3DButtonProps, moveButtonProps, rotateStemButtonProps, flipStemButtonProps,
     snapToGridButtonProps, baseMarkerButtonProps, annotationModeButtonProps, annotationPanelButtonProps,
-    boostersMenuButtonProps, stampTLoop5MenuButtonProps, stampTLoop3MenuButtonProps
+    boostersMenuButtonProps, stampTLoopAMenuButtonProps, stampTLoopBMenuButtonProps
 } from './ToolbarButtons';
 import ToolShelf from './ToolShelf';
 
@@ -79,8 +79,8 @@ export default class Toolbar extends ContainerObject {
     public librarySelectionButton: ToolbarButton;
     public magicGlueButton: ToolbarButton;
     public boostersMenuButton: ToolbarButton;
-    public stampTLoop5: ToolbarButton;
-    public stampTLoop3: ToolbarButton;
+    public stampTLoopA: ToolbarButton;
+    public stampTLoopB: ToolbarButton;
     public dynPaintTools: ToolbarButton[] = [];
 
     // Import/Export
@@ -528,8 +528,8 @@ export default class Toolbar extends ContainerObject {
         this.librarySelectionButton = this.setupButton(librarySelectionButtonProps, this._showLibrarySelect);
         this.resetButton = this.setupButton(resetButtonProps, isEditable);
         this.magicGlueButton = this.setupButton(magicGlueButtonProps, this._showGlue);
-        this.stampTLoop5 = this.setupButton(stampTLoop5MenuButtonProps, this._showStampTLoop);
-        this.stampTLoop3 = this.setupButton(stampTLoop3MenuButtonProps, this._showStampTLoop);
+        this.stampTLoopA = this.setupButton(stampTLoopAMenuButtonProps, this._showStampTLoop);
+        this.stampTLoopB = this.setupButton(stampTLoopBMenuButtonProps, this._showStampTLoop);
         this.boostersMenuButton = this.setupButton(
             boostersMenuButtonProps,
             isEditable && this._boostersData !== null

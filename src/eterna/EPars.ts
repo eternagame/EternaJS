@@ -39,8 +39,8 @@ export enum RNAPaint {
     MAGIC_GLUE = 20,
     BASE_MARK = 21,
     LIBRARY_SELECT = 22,
-    STAMP_TLOOP5 = 23,
-    STAMP_TLOOP3 = 24,
+    STAMP_TLOOPA = 23,
+    STAMP_TLOOPB = 24,
 }
 
 export default class EPars {
