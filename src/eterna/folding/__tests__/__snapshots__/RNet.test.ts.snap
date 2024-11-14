@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`RNNet-SS:get_dot_plot(complex) 1`] = `
+exports[`RNet-SS:get_dot_plot(complex) 1`] = `
 [
   1,
   1,

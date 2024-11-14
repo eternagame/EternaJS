@@ -55,7 +55,7 @@ import FolderManager from 'eterna/folding/FolderManager';
 import {PoseState} from 'eterna/puzzle/Puzzle';
 import {HighlightInfo} from 'eterna/constraints/Constraint';
 import SpecBoxDialog from 'eterna/ui/SpecBoxDialog';
-import RNNet from 'eterna/folding/RNNet';
+import RNet from 'eterna/folding/RNet';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
 import StructureInput from './StructureInput';
@@ -772,7 +772,7 @@ export default class PuzzleEditMode extends GameMode {
             return;
         }
 
-        if (this._folder.name === RNNet.NAME) {
+        if (this._folder.name === RNet.NAME) {
             this.showNotification(`
                 RibonanzaNet-SS is still in development, so you can't submit
                 puzzles with it as the folding engine right now. However,

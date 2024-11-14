@@ -63,7 +63,7 @@ with torch.no_grad():
     torch.onnx.export(
         model,
         (encode_sequence('AUUCCGGGAC')),
-        path.join(path.dirname(__file__), '../../src/eterna/folding/engines/rnnet-ss.onnx'),
+        path.join(path.dirname(__file__), '../../src/eterna/folding/engines/rnet-ss.onnx'),
         input_names=[ "sequence"],
         output_names=[ "output" ],
         dynamic_axes={

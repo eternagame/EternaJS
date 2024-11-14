@@ -44,7 +44,7 @@ import BitmapManager from './resources/BitmapManager';
 import ROPWait from './rscript/ROPWait';
 import Band from './ui/Band';
 import BaseGlow from './vfx/BaseGlow';
-import RNNet from './folding/RNNet';
+import RNet from './folding/RNet';
 
 export enum PuzzleID {
     FunAndEasy = 4350940,
@@ -597,7 +597,7 @@ export default class EternaApp extends FlashbangApp {
             Contrafold.create(),
             EternaFold.create(),
             EternaFoldThreshknot.create(),
-            RNNet.create(),
+            RNet.create(),
             RNAFoldBasic.create()])
             .then((folders: (Folder | null)[]) => {
                 log.info('Folding engines intialized');

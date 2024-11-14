@@ -1,10 +1,10 @@
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 import './jest-matcher-deep-close-to';
-import RNNet from '../RNNet';
+import RNet from '../RNet';
 
-test('RNNet-SS:MFETests', () => {
-    return expect(RNNet.create().then(async (folder) => {
+test('RNet-SS:MFETests', () => {
+    return expect(RNet.create().then(async (folder) => {
         if (folder === null) return;
 
         let structures: SecStruct[] = [
@@ -35,8 +35,8 @@ test('RNNet-SS:MFETests', () => {
     })).resolves.toBeUndefined();
 }, 30000);
 
-test('RNNet-SS:eF1Tests', () => {
-    return expect(RNNet.create().then(async (folder) => {
+test('RNet-SS:eF1Tests', () => {
+    return expect(RNet.create().then(async (folder) => {
         if (folder === null) return;
 
         const expectedEstimates = [
@@ -70,11 +70,11 @@ test('RNNet-SS:eF1Tests', () => {
     })).resolves.toBeUndefined();
 }, 30000);
 
-test(`RNNet-SS:get_dot_plot(complex)`, () => {
+test(`RNet-SS:get_dot_plot(complex)`, () => {
     expect.assertions(2);
     const SEQ = 'AAAAACCCCAAAAAAAAAGGGGACCCCAAAAAAGGGGAAA';
 
-    return expect(RNNet.create()
+    return expect(RNet.create()
         .then(async (folder) => {
             if (folder === null) {
                 expect(true).toBeTruthy();
@@ -82,6 +82,7 @@ test(`RNNet-SS:get_dot_plot(complex)`, () => {
             }
             
             const calcdResult = await folder.getDotPlot(Sequence.fromSequenceString(SEQ));
+            console.log(calcdResult)
             expect(calcdResult?.data).toMatchSnapshot();
         }))
         .resolves.toBeUndefined();
