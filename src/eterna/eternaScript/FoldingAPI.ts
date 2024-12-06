@@ -44,8 +44,7 @@ export default class FoldingAPI {
                     throw new Error('Attempted to use asynchronous folding engine synchronously');
                 }
                 const seqArr: Sequence = Sequence.fromSequenceString(seq);
-                const pseudoknots = (this._targetConditions && this._targetConditions[0]
-                    && this._targetConditions[0]['type'] === 'pseudoknot') ?? false;
+                const pseudoknots = this._isPseudoknot;
                 const folded: SecStruct | null = this._folder.foldSequence(seqArr, null, constraint, pseudoknots);
                 Assert.assertIsDefined(folded);
                 return folded.getParenthesis({pseudoknots});
@@ -59,8 +58,7 @@ export default class FoldingAPI {
                     return null;
                 }
                 const seqArr: Sequence = Sequence.fromSequenceString(seq);
-                const pseudoknots = (this._targetConditions && this._targetConditions[0]
-                    && this._targetConditions[0]['type'] === 'pseudoknot') ?? false;
+                const pseudoknots = this._isPseudoknot;
                 const folded: SecStruct | null = await this._folder.foldSequence(seqArr, null, constraint, pseudoknots);
                 Assert.assertIsDefined(folded);
                 return folded.getParenthesis({pseudoknots});
@@ -74,8 +72,7 @@ export default class FoldingAPI {
                     return null;
                 }
                 const seqArr: Sequence = Sequence.fromSequenceString(seq);
-                const pseudoknots = (this._targetConditions && this._targetConditions[0]
-                    && this._targetConditions[0]['type'] === 'pseudoknot') ?? false;
+                const pseudoknots = this._isPseudoknot;
                 const folded: SecStruct | null = this._folder.foldSequenceWithBindingSite(
                     seqArr, null, site, Math.floor(bonus * 100), 2.5
                 );
@@ -93,8 +90,7 @@ export default class FoldingAPI {
                     return null;
                 }
                 const seqArr: Sequence = Sequence.fromSequenceString(seq);
-                const pseudoknots = (this._targetConditions && this._targetConditions[0]
-                    && this._targetConditions[0]['type'] === 'pseudoknot') ?? false;
+                const pseudoknots = this._isPseudoknot;
                 const folded: SecStruct | null = this._folder.foldSequenceWithBindingSite(
                     seqArr, null, site, Math.floor(bonus * 100), 2.5
                 );
@@ -112,11 +108,9 @@ export default class FoldingAPI {
                     return null;
                 }
                 const seqArr: Sequence = Sequence.fromSequenceString(seq);
-                const pseudoknots = (this._targetConditions && this._targetConditions[0]
-                    && this._targetConditions[0]['type'] === 'pseudoknot') ?? false;
+                const pseudoknots = this._isPseudoknot;
                 const structArr: SecStruct = SecStruct.fromParens(secstruct, pseudoknots);
-                const freeEnergy = (this._targetConditions && this._targetConditions[0]
-                && this._targetConditions[0]['type'] === 'pseudoknot')
+                const freeEnergy = this._isPseudoknot
                     ? this._folder.scoreStructures(seqArr, structArr, true)
                     : this._folder.scoreStructures(seqArr, structArr);
                 return 0.01 * freeEnergy;
@@ -130,11 +124,9 @@ export default class FoldingAPI {
                     return null;
                 }
                 const seqArr: Sequence = Sequence.fromSequenceString(seq);
-                const pseudoknots = (this._targetConditions && this._targetConditions[0]
-                    && this._targetConditions[0]['type'] === 'pseudoknot') ?? false;
+                const pseudoknots = this._isPseudoknot;
                 const structArr: SecStruct = SecStruct.fromParens(secstruct, pseudoknots);
-                const freeEnergy = (this._targetConditions && this._targetConditions[0]
-                && this._targetConditions[0]['type'] === 'pseudoknot')
+                const freeEnergy = this._isPseudoknot
                     ? this._folder.scoreStructures(seqArr, structArr, true)
                     : this._folder.scoreStructures(seqArr, structArr);
                 return 0.01 * freeEnergy;
@@ -151,8 +143,7 @@ export default class FoldingAPI {
                     throw new Error('Attempted to use asynchronous folding engine synchronously');
                 }
                 const seqArr: Sequence = Sequence.fromSequenceString(seq);
-                const pseudoknots = (this._targetConditions && this._targetConditions[0]
-                    && this._targetConditions[0]['type'] === 'pseudoknot') ?? false;
+                const pseudoknots = this._isPseudoknot;
                 let folded: SecStruct | null;
                 if (secstruct) {
                     folded = SecStruct.fromParens(secstruct, pseudoknots);
@@ -175,8 +166,7 @@ export default class FoldingAPI {
                     return null;
                 }
                 const seqArr: Sequence = Sequence.fromSequenceString(seq);
-                const pseudoknots = (this._targetConditions && this._targetConditions[0]
-                    && this._targetConditions[0]['type'] === 'pseudoknot') ?? false;
+                const pseudoknots = this._isPseudoknot;
                 let folded: SecStruct | null;
                 if (secstruct) {
                     folded = SecStruct.fromParens(secstruct, pseudoknots);
@@ -281,8 +271,7 @@ export default class FoldingAPI {
                 const len: number = seq.length;
                 const cseq = `${seq}&${oligo}`;
                 const seqArr: Sequence = Sequence.fromSequenceString(cseq);
-                const pseudoknots = (this._targetConditions && this._targetConditions[0]
-                    && this._targetConditions[0]['type'] === 'pseudoknot') ?? false;
+                const pseudoknots = this._isPseudoknot;
                 const folded: SecStruct | null = this._folder.cofoldSequence(
                     seqArr, null, Math.floor(malus * 100), constraint
                 );
@@ -305,8 +294,7 @@ export default class FoldingAPI {
                 const len: number = seq.length;
                 const cseq = `${seq}&${oligo}`;
                 const seqArr: Sequence = Sequence.fromSequenceString(cseq);
-                const pseudoknots = (this._targetConditions && this._targetConditions[0]
-                    && this._targetConditions[0]['type'] === 'pseudoknot') ?? false;
+                const pseudoknots = this._isPseudoknot;
                 const folded: SecStruct | null = this._folder.cofoldSequence(
                     seqArr, null, Math.floor(malus * 100), constraint
                 );
