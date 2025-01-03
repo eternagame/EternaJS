@@ -15,9 +15,12 @@ features:
     details: Discover the core libraries for working with RNA and the Eterna scripting interface
     link: /reference/utility-apis
     linkText: Explore
+  - title: Booster Structure
+    details: Learn about the structure boosters should follow.
+    link: /reference/booster-structure.md
+    linkText: Explore
   - title: Booster APIs
     details: Discover ways to interact with the Eterna game/design interface
     link: /reference/booster-apis
     linkText: Explore
 ---
-

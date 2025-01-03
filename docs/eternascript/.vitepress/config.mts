@@ -40,6 +40,7 @@ export default defineConfig({
         text: 'Reference',
         items: [
           { text: 'Utility APIs', link: '/reference/utility-apis' },
+          { text: 'Booster Structure', link: '/reference/booster-structure' },
           { text: 'Booster APIs', link: '/reference/booster-apis' },
         ]
       }
