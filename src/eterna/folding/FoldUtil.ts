@@ -70,17 +70,20 @@ export default class FoldUtil {
     public static pUnpaired(dotArray: DotPlot, seq: Sequence, behavior: BasePairProbabilityTransform) {
         // dotArray is organized as idx, idx, pairprob.
         const probUnpaired: number[] = Array<number>(seq.length);
-        const probUnpairedTrk: number[][] = Array<number[]>(seq.length);
         for (let idx = 0; idx < seq.length; ++idx) {
             probUnpaired[idx] = 1;
-            probUnpairedTrk[idx] = [];
             for (let ii = 0; ii < dotArray.data.length; ii += 3) {
                 if (dotArray.data[ii] === idx + 1 || dotArray.data[ii + 1] === idx + 1) {
                     if (behavior === BasePairProbabilityTransform.LEAVE_ALONE) {
-                        probUnpairedTrk[idx].push((dotArray.data[ii + 2]));
-                        probUnpaired[idx] -= (dotArray.data[ii + 2]);
+                        probUnpaired[idx] -= Math.min(
+                            (dotArray.data[ii + 2]),
+                            probUnpaired[idx]
+                        );
                     } else {
-                        probUnpaired[idx] -= (dotArray.data[ii + 2] * dotArray.data[ii + 2]);
+                        probUnpaired[idx] -= Math.min(
+                            (dotArray.data[ii + 2] * dotArray.data[ii + 2]),
+                            probUnpaired[idx]
+                        );
                     }
                 }
             }
