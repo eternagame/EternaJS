@@ -45,6 +45,9 @@ interface ShapeData {
     max: string;
     min: string;
     estimate_structure?: string;
+    puzzle_start_index?: number;
+    puzzle_end_index?: number;
+    full_sequence?: string;
 }
 
 interface DegradationData {
@@ -181,12 +184,33 @@ export default class SolutionManager {
                         // This means that it's a ShapeData.
                         // Ugh: this is better than the alternative but still a little ridiculous
                         synthesis = synthesis as ShapeData;
-                        const peaks: number[] = [];
-                        peaks.push(Number(synthesis['start_index']));
 
-                        for (const val of synthesis['peaks']) {
-                            peaks.push(Number(val));
-                        }
+                        const reactivityStartIndex = Number(synthesis['start_index']);
+                        const reactivityPuzzleStart = (
+                            synthesis['puzzle_start_index'] !== undefined
+                            && synthesis['puzzle_start_index'] > reactivityStartIndex
+                        )
+                            ? synthesis['puzzle_start_index'] - reactivityStartIndex
+                            : 0;
+                        const reactivityPuzzleEnd = (
+                            synthesis['puzzle_end_index'] !== undefined
+                            && synthesis['puzzle_end_index'] < reactivityStartIndex + synthesis['peaks'].length
+                        )
+                            ? synthesis['puzzle_end_index'] - reactivityStartIndex
+                            : synthesis['peaks'].length;
+                        const peaks = [
+                            // When mapping the data to our puzzle, in the case the reactivity values start
+                            // after the start of our puzzle, we need to offset them by the appropriate amount
+                            // based on where the data is positioned. However if our puzzle starts after
+                            // the reactivity data does, we just place the reactivity data at the start
+                            // of the puzzle since we slice off the values that occur before the beginning
+                            // of the puzzle
+                            Math.max(reactivityStartIndex - ((synthesis['puzzle_start_index'] ?? 1) - 1), 1),
+                            ...synthesis['peaks'].slice(
+                                reactivityPuzzleStart,
+                                reactivityPuzzleEnd
+                            ).map((val) => Number(val))
+                        ];
 
                         if (newfb == null) {
                             newfb = new Feedback();
@@ -201,7 +225,10 @@ export default class SolutionManager {
                             Number(synthesis['min']),
                             null,
                             synthesis['estimate_structure']
-                                ? SecStruct.fromParens(synthesis['estimate_structure'], true)
+                                ? SecStruct.fromParens(synthesis['estimate_structure'], true).slice(
+                                    (synthesis['puzzle_start_index'] ?? 1) - 1,
+                                    (synthesis['puzzle_end_index'] ?? newsol.sequence.length)
+                                )
                                 : null
                         );
                     }
