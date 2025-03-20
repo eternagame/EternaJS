@@ -7,7 +7,7 @@ import {Assert} from 'flashbang';
 DOMPurify.addHook('uponSanitizeElement', (node, data) => {
     if (data.tagName === 'iframe') {
         const validSrc = (node as HTMLIFrameElement).src.match(/^(https:)?\/\/(www.)?(youtube.com)\/.*$/);
-        if (!validSrc) node.remove();
+        if (!validSrc) (node as HTMLIFrameElement).remove();
     }
 });
 
