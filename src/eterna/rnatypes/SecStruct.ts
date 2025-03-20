@@ -552,7 +552,18 @@ export default class SecStruct {
         const pairsB = this._pairs.slice(start, end);
 
         for (let ii = 0; ii < pairsB.length; ii++) {
-            if (pairsB[ii] >= 0) pairsB[ii] -= start;
+            if (pairsB[ii] >= 0) {
+                if (
+                    pairsB[ii] - start < 0
+                    || (end !== undefined && pairsB[ii] >= end)
+                ) {
+                    // The pairing partner for this base no longer exists (it was sliced
+                    // off one of the ends), remove it
+                    pairsB[ii] = -1;
+                } else {
+                    pairsB[ii] -= start;
+                }
+            }
         }
 
         return new SecStruct(pairsB);
