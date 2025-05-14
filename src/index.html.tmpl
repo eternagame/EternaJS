@@ -89,7 +89,8 @@
             folderName: params.get("folder"),
             sequence: params.get("sequence"),
             designBrowserFilters: designBrowserFilters,
-            noGame: booleanParam("noGame")
+            noGame: booleanParam("noGame"),
+            experimentalFeatures: params.get('experimentalFeatures')?.split(',')
         });
         window.app = app;
         app.run();

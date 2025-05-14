@@ -772,7 +772,7 @@ export default class PuzzleEditMode extends GameMode {
             return;
         }
 
-        if (this._folder.name === RNet.NAME) {
+        if (this._folder.name === RNet.NAME && !Eterna.experimentalFeatures.includes('rnet-publishing')) {
             this.showNotification(`
                 RibonanzaNet-SS is still in development, so you can't submit
                 puzzles with it as the folding engine right now. However,
