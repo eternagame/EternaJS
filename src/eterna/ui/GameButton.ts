@@ -75,9 +75,9 @@ export default class GameButton extends Button implements KeyboardListener {
             this._rscriptID = value;
             this._rscriptClickReg.close();
             if (value != null) {
-                this._rscriptClickReg = this.clicked.connect(() => {
+                this._rscriptClickReg = this.regs.add(this.clicked.connect(() => {
                     ROPWait.notifyClickUI(this._rscriptID);
-                });
+                }));
             }
         }
         return this;
