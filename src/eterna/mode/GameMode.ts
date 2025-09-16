@@ -688,6 +688,7 @@ export default abstract class GameMode extends AppMode {
         // Already live
         if (!factorDialog) return;
         factorDialog.factor.connect((factor) => {
+            Eterna.observability.recordEvent('Display:ExplosionFactor', {factor});
             this._poseFields.forEach((pf) => { pf.explosionFactor = factor; });
         });
     }
@@ -742,17 +743,16 @@ export default abstract class GameMode extends AppMode {
             } else if (!ctrl && key === KeyCode.KeyL) {
                 Eterna.settings.usePuzzlerLayout.value = !Eterna.settings.usePuzzlerLayout.value;
                 handled = true;
-            } else if (ctrl && key === KeyCode.KeyS) {
-                this.downloadSVG();
-                handled = true;
             } else if (key === KeyCode.BracketLeft) {
                 const factor = Math.max(0, Math.round((this._poseFields[0].explosionFactor - 0.25) * 1000) / 1000);
+                Eterna.observability.recordEvent('Display:ExplosionFactor', {factor});
                 for (const pf of this._poseFields) {
                     pf.explosionFactor = factor;
                 }
                 handled = true;
             } else if (key === KeyCode.BracketRight) {
                 const factor = Math.max(0, Math.round((this._poseFields[0].explosionFactor + 0.25) * 1000) / 1000);
+                Eterna.observability.recordEvent('Display:ExplosionFactor', {factor});
                 for (const pf of this._poseFields) {
                     pf.explosionFactor = factor;
                 }

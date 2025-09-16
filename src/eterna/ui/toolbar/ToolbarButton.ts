@@ -7,6 +7,7 @@ import {
     Graphics, Sprite, Texture
 } from 'pixi.js';
 import {Value} from 'signals';
+import Eterna from 'eterna/Eterna';
 import GameButton from '../GameButton';
 
 export const BUTTON_WIDTH = 55;
@@ -34,6 +35,7 @@ export type ToolbarParam = {
     tooltip:string,
     selectedImg?:string | Texture,
     hotKey?:KeyCode,
+    hotKeyCtrl?: boolean;
     rscriptID?:RScriptUIElementID,
     color?:{color:number, alpha:number},
     toggleColor?:{color:number, alpha:number},
@@ -78,7 +80,7 @@ export default class ToolbarButton extends GameButton {
         this.disabled(info.disableImg);
         if (info.selectedImg) this.selected(info.selectedImg);
         this.tooltip(info.tooltip);
-        if (info.hotKey) this.hotkey(info.hotKey);
+        if (info.hotKey) this.hotkey(info.hotKey, info.hotKeyCtrl);
         if (info.rscriptID) this.rscriptID(info.rscriptID);
 
         if (info.label) {
@@ -133,6 +135,10 @@ export default class ToolbarButton extends GameButton {
         this.regs.add(this.toggled.connectNotify((toggled) => {
             this._arrow.visible = toggled;
             this.drawBackground(toggled);
+        }));
+
+        this.regs.add(this.clicked.connect(() => {
+            Eterna.observability.recordEvent(`RunTool:${this.id}`);
         }));
     }
 

@@ -1600,6 +1600,7 @@ export default class PoseEditMode extends GameMode {
             const ctrl = e.ctrlKey;
 
             if (ctrl && key === KeyCode.KeyZ) {
+                Eterna.observability.recordEvent('RunTool:lastStable');
                 this.moveUndoStackToLastStable();
                 handled = true;
             }

@@ -890,12 +890,15 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this.addObject(dragger);
 
                 if (this._currentArrangementTool === Layout.MOVE) {
+                    Eterna.observability.recordEvent('Base:LayoutMove');
                     dragger.dragged.connect((p) => {
                         this.onMouseMoved(p as Point, closestIndex);
                     });
                 } else if (this._currentArrangementTool === Layout.ROTATE_STEM) {
+                    Eterna.observability.recordEvent('Base:LayoutRotate');
                     this.rotateStem(closestIndex);
                 } else if (this._currentArrangementTool === Layout.FLIP_STEM) {
+                    Eterna.observability.recordEvent('Base:LayoutFlip');
                     this.flipStem(closestIndex);
                 }
                 dragger.dragComplete.connect(() => {
@@ -908,6 +911,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 && closestIndex < this.fullSequenceLength
                 && !this._annotationManager.annotationModeActive.value
             ) {
+                Eterna.observability.recordEvent('Base:Mark');
                 this.toggleBaseMark(closestIndex);
                 return;
             }
@@ -928,6 +932,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 return;
             }
             if (this._annotationManager.annotationModeActive.value) {
+                Eterna.observability.recordEvent('Base:Annotate');
                 this.hideAnnotationContextMenu();
 
                 const strand = this.getStrandLabel(closestIndex) ?? undefined;
@@ -1042,6 +1047,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this._lastShiftedCommand = this._currentColor;
                 this._lastShiftedIndex = closestIndex;
 
+                Eterna.observability.recordEvent(`Base:${cmd[1]}`);
                 this.callAddBaseCallback(cmd[0], cmd[1], closestIndex);
             }
 
@@ -1069,6 +1075,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 && closestIndex < this.fullSequenceLength
                 && !this._annotationManager.annotationModeActive.value
             ) {
+                Eterna.observability.recordEvent('Base:Mark');
                 this.toggleBaseMark(closestIndex);
                 return;
             }
@@ -1082,6 +1089,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this._lastShiftedCommand = this._currentColor;
                 this._lastShiftedIndex = closestIndex;
 
+                Eterna.observability.recordEvent(`Base:${cmd[1]}`);
                 this.callAddBaseCallback(cmd[0], cmd[1], closestIndex);
             }
         }
@@ -1548,6 +1556,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (q == null) {
             return;
         }
+        Eterna.observability.recordEvent('Base:Shift3');
 
         const first: number = q[0];
         const last: number = q[1];
@@ -1612,6 +1621,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (q == null) {
             return;
         }
+        Eterna.observability.recordEvent('Base:Shift5');
 
         const first: number = q[0];
         const last: number = q[1];
@@ -3510,6 +3520,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._mutatedSequence = this.fullSequence.slice(0);
 
         if (this._currentColor === RNAPaint.LOCK) {
+            Eterna.observability.recordEvent('Base:Lock');
             if (!this._locks) {
                 this._locks = [];
                 for (let ii = 0; ii < this._sequence.length; ii++) {
@@ -3520,6 +3531,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._bases[seqnum].setDirty();
             this._lockUpdated = true;
         } else if (this._currentColor === RNAPaint.BINDING_SITE) {
+            Eterna.observability.recordEvent('Base:BindingSite');
             if (!this._canAddBindingSite) {
                 (this.mode as GameMode).showNotification('The current folding engine does not support molecules');
             } else if (this._bindingSite != null && this._bindingSite[seqnum]) {
@@ -3549,22 +3561,27 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 }
             }
         } else if (this._mouseDownAltKey || this._currentColor === RNAPaint.MAGIC_GLUE) {
+            Eterna.observability.recordEvent('Base:Glue');
             if (this.toggleDesignStruct(seqnum)) {
                 this._designStructUpdated = true;
             }
         } else if (this._currentColor === RNAPaint.STAMP_TLOOPA) {
+            Eterna.observability.recordEvent('Base:TLoopA');
             this._lastStamp = {type: 'TLOOPA', baseIndex: seqnum};
         } else if (this._currentColor === RNAPaint.STAMP_TLOOPB) {
+            Eterna.observability.recordEvent('Base:TLoopB');
             this._lastStamp = {type: 'TLOOPB', baseIndex: seqnum};
         } else if (!this.isLocked(seqnum)) {
             if (
                 this._currentColor === RNABase.ADENINE || this._currentColor === RNABase.URACIL
                 || this._currentColor === RNABase.GUANINE || this._currentColor === RNABase.CYTOSINE
             ) {
+                Eterna.observability.recordEvent(`Base:${EPars.nucleotideToString(this._currentColor)}`);
                 this._mutatedSequence.setNt(seqnum, this._currentColor);
                 ROPWait.notifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
                 this._bases[seqnum].setType(this._currentColor, true);
             } else if (this._currentColor === RNAPaint.PAIR && this._pairs.isPaired(seqnum)) {
+                Eterna.observability.recordEvent('Base:Swap');
                 const pi = this._pairs.pairingPartner(seqnum);
                 if (this.isLocked(pi)) {
                     return;
@@ -3578,6 +3595,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
                 this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
             } else if (this._currentColor === RNAPaint.AU_PAIR && this._pairs.isPaired(seqnum)) {
+                Eterna.observability.recordEvent('Base:AuPair');
                 const pi = this._pairs.pairingPartner(seqnum);
                 if (this.isLocked(pi)) {
                     return;
@@ -3589,6 +3607,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
                 this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
             } else if (this._currentColor === RNAPaint.GC_PAIR && this._pairs.isPaired(seqnum)) {
+                Eterna.observability.recordEvent('Base:GcPair');
                 const pi = this._pairs.pairingPartner(seqnum);
                 if (this.isLocked(pi)) {
                     return;
@@ -3600,6 +3619,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this._bases[seqnum].setType(this._mutatedSequence.nt(seqnum), true);
                 this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
             } else if (this._currentColor === RNAPaint.GU_PAIR && this._pairs.isPaired(seqnum)) {
+                Eterna.observability.recordEvent('Base:GuPair');
                 const pi = this._pairs.pairingPartner(seqnum);
                 if (this.isLocked(pi)) {
                     return;
@@ -3612,8 +3632,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this._bases[pi].setType(this._mutatedSequence.nt(pi), true);
             } else if (this._dynPaintColors.indexOf(this._currentColor) >= 0) {
                 const index: number = this._dynPaintColors.indexOf(this._currentColor);
+                Eterna.observability.recordEvent(`Base:DynPaint:Script${this._dynPaintTools[index].scriptID}`);
                 this._dynPaintTools[index].onPaint(this, seqnum);
             } else if (this._currentColor === RNAPaint.LIBRARY_SELECT && seqnum < this.sequenceLength) {
+                Eterna.observability.recordEvent('Base:LibrarySelect');
                 this.toggleLibrarySelection(seqnum);
                 this._librarySelectionsChanged = true;
             }
