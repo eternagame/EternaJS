@@ -7,7 +7,6 @@ import {
     Graphics, Sprite, Texture
 } from 'pixi.js';
 import {Value} from 'signals';
-import Eterna from 'eterna/Eterna';
 import GameButton from '../GameButton';
 
 export const BUTTON_WIDTH = 55;
@@ -135,10 +134,6 @@ export default class ToolbarButton extends GameButton {
         this.regs.add(this.toggled.connectNotify((toggled) => {
             this._arrow.visible = toggled;
             this.drawBackground(toggled);
-        }));
-
-        this.regs.add(this.clicked.connect(() => {
-            Eterna.observability.recordEvent(`ToolbarAction:${this.id}`);
         }));
     }
 
