@@ -2729,7 +2729,7 @@ export default class PoseEditMode extends GameMode {
         // For some reason the backend returns 0 in the progression instead of just null
         // when we want to redirect back to the homepage...? I imagine we should change that
         // at some point
-        const hasNextPuzzle = nextPuzzleData !== null && nextPuzzleData !== 0;
+        const hasNextPuzzle = nextPuzzleData !== null && nextPuzzleData !== undefined && nextPuzzleData !== 0;
 
         let missionClearedPanel: MissionClearedPanel | null = new MissionClearedPanel(
             hasNextPuzzle, infoText, moreText
