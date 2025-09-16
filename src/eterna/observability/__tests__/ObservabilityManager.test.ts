@@ -1,101 +1,120 @@
+import {jest} from '@jest/globals'
 import ObservabilityManager from '../ObservabilityManager';
+import ObservabilityReporter from '../ObservabilityReporter';
 
-test('ObservabilityCapture - immediate capture', () => {
-    const om = new ObservabilityManager();
-    const cap = om.eventCapture();
-    om.recordEvent('FIRST', {a:1, b:2, c:3});
-    om.recordEvent('SECOND');
-    expect(cap.report()).toMatchInlineSnapshot(`
+function createReporter() {
+  class NullReporter extends ObservabilityReporter {
+    recordEvent = jest.fn();
+  }
+  return new NullReporter();
+}
+
+test('ObservabilityManager - basic', () => {
+  const manager = new ObservabilityManager();
+  const reporter = createReporter();
+  manager.startCapture(reporter);
+  manager.recordEvent('EV1');
+  manager.recordEvent('EV2', {abc: 123});
+  expect(reporter.recordEvent.mock.calls).toMatchInlineSnapshot(`
 [
-  {
-    "details": {
-      "a": 1,
-      "b": 2,
-      "c": 3,
+  [
+    {
+      "name": "EV1",
     },
-    "name": "FIRST",
-  },
-  {
-    "name": "SECOND",
-  },
+  ],
+  [
+    {
+      "details": {
+        "abc": 123,
+      },
+      "name": "EV2",
+    },
+  ],
 ]
-`)
+`);
 })
 
-test('ObservabilityCapture - skipped event', () => {
-    const om = new ObservabilityManager();
-    om.recordEvent('FIRST', {});
-    const cap = om.eventCapture();
-    om.recordEvent('SECOND', {});
-    om.recordEvent('THIRD', {});
-    expect(cap.report()).toMatchInlineSnapshot(`
+test('ObservabilityManager - filter', () => {
+  const manager = new ObservabilityManager();
+  const reporter = createReporter();
+  manager.startCapture(reporter, (ev) => ev.name === 'EV2');
+  manager.recordEvent('EV1');
+  manager.recordEvent('EV2');
+  expect(reporter.recordEvent.mock.calls).toMatchInlineSnapshot(`
 [
-  {
-    "details": {},
-    "name": "SECOND",
-  },
-  {
-    "details": {},
-    "name": "THIRD",
-  },
+  [
+    {
+      "name": "EV2",
+    },
+  ],
 ]
-`)
+`);
 })
 
-test('ObservabilityCapture - mixed lifetimes', () => {
-    const om = new ObservabilityManager();
-    om.recordEvent('FIRST', {});
-    const cap = om.eventCapture();
-    om.recordEvent('SECOND', {});
-    const cap2 = om.eventCapture();
-    om.recordEvent('THIRD', {});
-    expect(cap.report()).toMatchInlineSnapshot(`
+test('ObservabilityManager - multiple', () => {
+  const manager = new ObservabilityManager();
+  const reporter = createReporter();
+  const reporter2 = createReporter();
+  manager.startCapture(reporter, (ev) => ev.name === 'EV1');
+  manager.startCapture(reporter2, (ev) => ev.name === 'EV2');
+  manager.recordEvent('EV1');
+  manager.recordEvent('EV2');
+  expect(reporter.recordEvent.mock.calls).toMatchInlineSnapshot(`
 [
-  {
-    "details": {},
-    "name": "SECOND",
-  },
-  {
-    "details": {},
-    "name": "THIRD",
-  },
+  [
+    {
+      "name": "EV1",
+    },
+  ],
 ]
-`)
-    expect(cap2.report()).toMatchInlineSnapshot(`
+`);
+  expect(reporter2.recordEvent.mock.calls).toMatchInlineSnapshot(`
 [
-  {
-    "details": {},
-    "name": "THIRD",
-  },
+  [
+    {
+      "name": "EV2",
+    },
+  ],
 ]
-`)
+`);
 })
 
-test('ObservabilityCapture - mixed lifetimes', () => {
-    const om = new ObservabilityManager();
-    om.recordEvent('FIRST', {});
-    const cap = om.eventCapture();
-    om.recordEvent('SECOND', {});
-    const cap2 = om.eventCapture();
-    om.recordEvent('THIRD', {});
-    expect(cap.report()).toMatchInlineSnapshot(`
+test('ObservabilityManager - registration lifetimes', () => {
+  const manager = new ObservabilityManager();
+  const reporter = createReporter();
+  const reporter2 = createReporter();
+  manager.startCapture(reporter);
+  manager.recordEvent('EV1');
+  manager.startCapture(reporter2);
+  manager.recordEvent('EV2');
+  manager.endCapture(reporter);
+  manager.recordEvent('EV3');
+  expect(reporter.recordEvent.mock.calls).toMatchInlineSnapshot(`
 [
-  {
-    "details": {},
-    "name": "SECOND",
-  },
-  {
-    "details": {},
-    "name": "THIRD",
-  },
+  [
+    {
+      "name": "EV1",
+    },
+  ],
+  [
+    {
+      "name": "EV2",
+    },
+  ],
 ]
-`)
-    expect(cap2.report()).toMatchInlineSnapshot(`
+`);
+  expect(reporter2.recordEvent.mock.calls).toMatchInlineSnapshot(`
 [
-  {
-    "details": {},
-    "name": "THIRD",
-  },
+  [
+    {
+      "name": "EV2",
+    },
+  ],
+  [
+    {
+      "name": "EV3",
+    },
+  ],
 ]
-`)
+`);
 })

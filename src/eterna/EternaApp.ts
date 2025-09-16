@@ -128,10 +128,6 @@ interface ProcessedEternaAppParams extends EternaAppParams {
 
 /** Entry point for the game */
 export default class EternaApp extends FlashbangApp {
-    get o11y() {
-        return Eterna.observability;
-    }
-
     constructor(params: EternaAppParams) {
         super();
 
