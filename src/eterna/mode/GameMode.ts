@@ -644,6 +644,7 @@ export default abstract class GameMode extends AppMode {
         // Already live
         if (!pasteDialog) return;
         pasteDialog.applyClicked.connect((sequence) => {
+            Eterna.observability.recordEvent('RunTool:PasteSequence');
             this.pasteSequence(sequence);
         });
     }
@@ -653,6 +654,7 @@ export default abstract class GameMode extends AppMode {
         // Already live
         if (!finder) return;
         finder.jumpClicked.connect((baseNum) => {
+            Eterna.observability.recordEvent('Display:JumpToNt');
             if (this._isPipMode) {
                 this._poses.forEach((p) => p.focusNucleotide(baseNum));
             } else {
@@ -662,6 +664,7 @@ export default abstract class GameMode extends AppMode {
     }
 
     protected showNucleotideRange(): void {
+        Eterna.observability.recordEvent('Display:ShowRange');
         const fullRange: [number, number] = [
             1,
             Math.max(...this._poses.map((p) => p.fullSequenceLength))

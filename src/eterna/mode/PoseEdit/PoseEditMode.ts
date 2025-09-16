@@ -464,6 +464,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     public onHintClicked(): void {
+        Eterna.observability.recordEvent('RunTool:Hint');
         if (this._hintBoxRef.isLive) {
             this._hintBoxRef.destroyObject();
         } else {
@@ -473,6 +474,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     private onHelpClicked() {
+        Eterna.observability.recordEvent('RunTool:Help');
         const getBounds = (elem: ContainerObject) => {
             const globalPos = elem.container.toGlobal(new Point());
             return new Rectangle(
@@ -580,6 +582,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     private setMarkerLayer(layer: string) {
+        Eterna.observability.recordEvent('RunTool:MarkerLayer', {layer});
         for (const pose of this._poses) {
             pose.setMarkerLayer(layer);
         }
@@ -809,6 +812,7 @@ export default class PoseEditMode extends GameMode {
             this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
         );
         this._folderSwitcher.selectedFolder.connectNotify((folder) => {
+            Eterna.observability.recordEvent('RunTool:ChangeFolder', {folder});
             for (const pose of this._poses) {
                 pose.scoreFolder = folder;
             }
@@ -1622,7 +1626,7 @@ export default class PoseEditMode extends GameMode {
             const ctrl = e.ctrlKey;
 
             if (ctrl && key === KeyCode.KeyZ) {
-                Eterna.observability.recordEvent('RunTool:lastStable');
+                Eterna.observability.recordEvent('RunTool:LastStable');
                 this.moveUndoStackToLastStable();
                 handled = true;
             }

@@ -2,6 +2,7 @@ import Booster from 'eterna/mode/PoseEdit/Booster';
 import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
 import {BoostersData} from 'eterna/puzzle/Puzzle';
 import {HAlign, VAlign, VLayoutContainer} from 'flashbang';
+import Eterna from 'eterna/Eterna';
 import WindowDialog from './WindowDialog';
 
 export default class BoosterDialog extends WindowDialog<void> {
@@ -25,7 +26,10 @@ export default class BoosterDialog extends WindowDialog<void> {
                 Booster.create(this.mode as PoseEditMode, data).then((booster) => {
                     const button = booster.createButton(14);
                     this.addObject(button, content);
-                    button.clicked.connect(() => { booster.onRun(); });
+                    button.clicked.connect(() => {
+                        booster.onRun();
+                        Eterna.observability.recordEvent(`RunScript:${booster.scriptID}`);
+                    });
                     content.layout();
                     this._window.layout();
                 });

@@ -138,7 +138,7 @@ export default class ToolbarButton extends GameButton {
         }));
 
         this.regs.add(this.clicked.connect(() => {
-            Eterna.observability.recordEvent(`RunTool:${this.id}`);
+            Eterna.observability.recordEvent(`ToolbarAction:${this.id}`);
         }));
     }
 
