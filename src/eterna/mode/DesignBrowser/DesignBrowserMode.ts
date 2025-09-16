@@ -384,6 +384,7 @@ export default class DesignBrowserMode extends GameMode {
 
     protected enter(): void {
         super.enter();
+        Eterna.observability.recordEvent('ModeEnter', {mode: 'DesignBrowser', puzzle: this._puzzle.nodeID});
         this.refreshSolutions();
         const {existingPoseEditMode} = Eterna.app;
         this._returnToGameButton.display.visible = (

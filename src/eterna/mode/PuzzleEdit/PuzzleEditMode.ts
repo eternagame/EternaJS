@@ -412,6 +412,10 @@ export default class PuzzleEditMode extends GameMode {
         }
     }
 
+    protected enter() {
+        Eterna.observability.recordEvent('ModeEnter', {mode: 'PuzzleEdit'});
+    }
+
     private canUseFolder(folder: Folder) {
         const pseudoknots = this._structureInputs.some(
             (input) => SecStruct.fromParens(input.structureString, true).onlyPseudoknots().nonempty()

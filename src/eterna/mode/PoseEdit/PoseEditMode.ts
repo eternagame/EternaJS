@@ -264,6 +264,7 @@ export default class PoseEditMode extends GameMode {
 
     protected enter(): void {
         super.enter();
+        Eterna.observability.recordEvent('ModeEnter', {mode: 'PoseEdit', puzzle: this._puzzle.nodeID});
         this.hideAsyncText();
     }
 
