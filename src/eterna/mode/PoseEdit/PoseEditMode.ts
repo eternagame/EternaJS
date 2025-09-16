@@ -547,7 +547,7 @@ export default class PoseEditMode extends GameMode {
             this.setSolutionTargetStructure(foldData);
             await this.poseEditByTarget(0);
         }
-        this.clearMoveTracking(solution.sequence.sequenceString());
+        Eterna.observability.recordEvent('Move:StartSeq', solution.sequence.sequenceString());
         this.setAncestorId(solution.nodeID);
 
         const annotations = solution.annotations;
@@ -617,9 +617,8 @@ export default class PoseEditMode extends GameMode {
 
         const bindTrackMoves = (pose: Pose2D, _index: number) => {
             pose.trackMovesCallback = ((count: number, moves: Move[]) => {
-                this._moveCount += count;
-                if (moves) {
-                    this._moves.push(moves.slice());
+                if (moves.length) {
+                    Eterna.observability.recordEvent('Move', {moves, count});
                 }
             });
         };
@@ -1025,9 +1024,9 @@ export default class PoseEditMode extends GameMode {
                     this.moveHistoryAddSequence('reset', newSeq.sequenceString());
                 } else {
                     this._startSolvingTime = new Date().getTime();
-                    this._startingPoint = this._puzzle.transformSequence(
+                    Eterna.observability.recordEvent('Move:StartSeq', this._puzzle.transformSequence(
                         this.getCurrentUndoBlock(0).sequence, 0
-                    ).sequenceString();
+                    ).sequenceString());
                 }
 
                 if (this._params.isReset) {
@@ -3154,12 +3153,6 @@ export default class PoseEditMode extends GameMode {
         return true;
     }
 
-    private clearMoveTracking(seq: string): void {
-        this._startingPoint = seq;
-        this._moveCount = 0;
-        this._moves = [];
-    }
-
     private moveHistoryAddMutations(before: Sequence, after: Sequence): void {
         const muts: Move[] = [];
         for (let ii = 0; ii < after.length; ii++) {
@@ -3169,15 +3162,13 @@ export default class PoseEditMode extends GameMode {
         }
 
         if (muts.length === 0) return;
-        this._moveCount++;
-        this._moves.push(muts.slice());
+        Eterna.observability.recordEvent('Move', {count: 1, moves: muts});
     }
 
     private moveHistoryAddSequence(changeType: string, seq: string): void {
         const muts: Move[] = [];
         muts.push({type: changeType, sequence: seq});
-        this._moveCount++;
-        this._moves.push(muts.slice());
+        Eterna.observability.recordEvent('Move', {count: 1, moves: muts});
     }
 
     private checkConstraints(soft: boolean = false): boolean {
@@ -4411,9 +4402,6 @@ export default class PoseEditMode extends GameMode {
     private _alreadyCleared: boolean = false;
     private _paused: boolean;
     private _startSolvingTime: number;
-    private _startingPoint: string;
-    private _moveCount: number = 0;
-    private _moves: Move[][] = [];
     protected _curTargetIndex: number = 0;
     private _shouldMarkMutations: boolean = false;
 
