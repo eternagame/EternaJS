@@ -458,6 +458,11 @@ export default class PoseEditMode extends GameMode {
         this.setPosesColor(RNAPaint.PAIR);
     }
 
+    public async pasteSequence(pasteSequence: Sequence): Promise<void> {
+        super.pasteSequence(pasteSequence);
+        this.moveHistoryAddSequence('paste', pasteSequence.toString());
+    }
+
     public onHintClicked(): void {
         if (this._hintBoxRef.isLive) {
             this._hintBoxRef.destroyObject();
@@ -540,6 +545,7 @@ export default class PoseEditMode extends GameMode {
             this.setSolutionTargetStructure(foldData);
             await this.poseEditByTarget(0);
         }
+        this.clearMoveTracking(solution.sequence.sequenceString());
         this.setAncestorId(solution.nodeID);
 
         const annotations = solution.annotations;
@@ -606,6 +612,15 @@ export default class PoseEditMode extends GameMode {
             });
         };
 
+        const bindTrackMoves = (pose: Pose2D, _index: number) => {
+            pose.trackMovesCallback = ((count: number, moves: Move[]) => {
+                this._moveCount += count;
+                if (moves) {
+                    this._moves.push(moves.slice());
+                }
+            });
+        };
+
         const bindMousedownEvent = (pose: Pose2D, index: number) => {
             pose.startMousedownCallback = ((e: FederatedPointerEvent, _closestDist: number, closestIndex: number) => {
                 for (let ii = 0; ii < poseFields.length; ++ii) {
@@ -637,6 +652,7 @@ export default class PoseEditMode extends GameMode {
             const pose: Pose2D = poseField.pose;
             bindAddBaseCB(pose, ii);
             bindPoseEdit(pose, ii);
+            bindTrackMoves(pose, ii);
             bindMousedownEvent(pose, ii);
             poseFields.push(poseField);
         }
@@ -1000,8 +1016,14 @@ export default class PoseEditMode extends GameMode {
         this._opQueue.push(new PoseOp(
             null,
             () => {
-                if (!this._params.isReset) {
+                if (this._params.isReset) {
+                    const newSeq: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
+                    this.moveHistoryAddSequence('reset', newSeq.sequenceString());
+                } else {
                     this._startSolvingTime = new Date().getTime();
+                    this._startingPoint = this._puzzle.transformSequence(
+                        this.getCurrentUndoBlock(0).sequence, 0
+                    ).sequenceString();
                 }
 
                 if (this._params.isReset) {
@@ -3128,6 +3150,32 @@ export default class PoseEditMode extends GameMode {
         return true;
     }
 
+    private clearMoveTracking(seq: string): void {
+        this._startingPoint = seq;
+        this._moveCount = 0;
+        this._moves = [];
+    }
+
+    private moveHistoryAddMutations(before: Sequence, after: Sequence): void {
+        const muts: Move[] = [];
+        for (let ii = 0; ii < after.length; ii++) {
+            if (after.nt(ii) !== before.nt(ii)) {
+                muts.push({pos: ii + 1, base: EPars.nucleotideToString(after.nt(ii))});
+            }
+        }
+
+        if (muts.length === 0) return;
+        this._moveCount++;
+        this._moves.push(muts.slice());
+    }
+
+    private moveHistoryAddSequence(changeType: string, seq: string): void {
+        const muts: Move[] = [];
+        muts.push({type: changeType, sequence: seq});
+        this._moveCount++;
+        this._moves.push(muts.slice());
+    }
+
     private checkConstraints(soft: boolean = false): boolean {
         return this._constraintBar.updateConstraints({
             undoBlocks: this._seqStacks[this._stackLevel],
@@ -4238,8 +4286,13 @@ export default class PoseEditMode extends GameMode {
         }
         this.savePosesMarkersContexts();
 
+        const before: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
+
         this._stackLevel++;
         this.moveUndoStack();
+
+        const after: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
+        this.moveHistoryAddMutations(before, after);
 
         this.updateScore();
         this.transformPosesMarkers();
@@ -4251,8 +4304,13 @@ export default class PoseEditMode extends GameMode {
         }
         this.savePosesMarkersContexts();
 
+        const before: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
+
         this._stackLevel--;
         this.moveUndoStack();
+
+        const after: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
+        this.moveHistoryAddMutations(before, after);
 
         this.updateScore();
         this.transformPosesMarkers();
@@ -4261,10 +4319,18 @@ export default class PoseEditMode extends GameMode {
     private moveUndoStackToLastStable(): void {
         this.savePosesMarkersContexts();
 
+        const before: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
+
         const stackLevel: number = this._stackLevel;
         while (this._stackLevel >= 1) {
             if (this.getCurrentUndoBlock(0).stable) {
                 this.moveUndoStack();
+
+                const after: Sequence = this._puzzle.transformSequence(
+                    this.getCurrentUndoBlock(0).sequence, 0
+                );
+
+                this.moveHistoryAddMutations(before, after);
 
                 this.updateScore();
                 this.transformPosesMarkers();
@@ -4341,6 +4407,9 @@ export default class PoseEditMode extends GameMode {
     private _alreadyCleared: boolean = false;
     private _paused: boolean;
     private _startSolvingTime: number;
+    private _startingPoint: string;
+    private _moveCount: number = 0;
+    private _moves: Move[][] = [];
     protected _curTargetIndex: number = 0;
     private _shouldMarkMutations: boolean = false;
 

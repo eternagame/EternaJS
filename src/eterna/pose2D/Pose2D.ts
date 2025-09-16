@@ -31,6 +31,7 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import AnnotationView from 'eterna/ui/AnnotationView';
 import AnnotationDialog from 'eterna/ui/AnnotationDialog';
 import {FederatedPointerEvent} from '@pixi/events';
+import {Move} from 'eterna/mode/PoseEdit/PoseEditMode';
 import Base from './Base';
 import BaseDrawFlags from './BaseDrawFlags';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
@@ -45,6 +46,11 @@ import PuzzleEditOp from './PuzzleEditOp';
 import RNALayout, {RNATreeNode} from './RNALayout';
 import ScoreDisplayNode, {ScoreDisplayNodeType} from './ScoreDisplayNode';
 import triangulate from './triangulate';
+
+interface Mut {
+    pos: number;
+    base: string;
+}
 
 export enum Layout {
     MOVE,
@@ -426,15 +432,30 @@ export default class Pose2D extends ContainerObject implements Updatable {
             throw new Error("Mutated sequence and original sequence lengths don't match");
         }
 
+        let mutationsPerInteraction = 1;
+        if (this._currentColor === RNAPaint.PAIR
+            || this._currentColor === RNAPaint.GC_PAIR
+            || this._currentColor === RNAPaint.AU_PAIR
+            || this._currentColor === RNAPaint.GU_PAIR) {
+            mutationsPerInteraction = 2;
+        }
+
         const offset: number = (
             this._oligo != null
             && this._oligoMode === OligoMode.EXT5P
         ) ? this._oligo.length : 0;
+        let numMut = 0;
+        const muts: Mut[] = [];
         for (let ii = 0; ii < this._sequence.length; ii++) {
             if (this._sequence.nt(ii) !== this._mutatedSequence.nt(ii + offset)) {
+                numMut++;
                 this._sequence.setNt(ii, this._mutatedSequence.nt(ii + offset));
+                muts.push({pos: ii + 1, base: EPars.nucleotideToString(this._sequence.nt(ii))});
                 needUpdate = true;
             }
+        }
+        if (needUpdate) {
+            this.callTrackMovesCallback(numMut / mutationsPerInteraction, muts);
         }
         if (
             needUpdate
@@ -2057,6 +2078,16 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public callPoseEditCallback(): void {
         if (this._poseEditCallback != null) {
             this._poseEditCallback();
+        }
+    }
+
+    public set trackMovesCallback(cb: (count: number, moves: Move[]) => void) {
+        this._trackMovesCallback = cb;
+    }
+
+    public callTrackMovesCallback(count: number, moves: Move[]): void {
+        if (this._trackMovesCallback != null) {
+            this._trackMovesCallback(count, moves);
         }
     }
 
@@ -4453,6 +4484,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     // Pointer to callback function to be called after change in pose
     private _poseEditCallback: (() => void) | null = null;
+    private _trackMovesCallback: ((count: number, moves: Move[]) => void) | null = null;
     private _addBaseCallback: (parenthesis: string | null, op: PuzzleEditOp | null, index: number) => void;
     private _startMousedownCallback: PoseMouseDownCallback;
     private _startPickCallback: PosePickCallback;
