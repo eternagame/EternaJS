@@ -1,3 +1,3 @@
-export default abstract class ObservabilityReporter {
-    abstract recordEvent(event: {name: string, details?: unknown}): void;
+export default interface ObservabilityReporter {
+    recordEvent(event: {name: string, details?: unknown}): void;
 }

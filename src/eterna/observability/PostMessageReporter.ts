@@ -1,4 +1,6 @@
-export default class PostMessageReporter {
+import ObservabilityReporter from './ObservabilityReporter';
+
+export default class PostMessageReporter implements ObservabilityReporter {
     constructor(id: string, targetOrigin?: string) {
         this._id = id;
         this._targetOrigin = targetOrigin;

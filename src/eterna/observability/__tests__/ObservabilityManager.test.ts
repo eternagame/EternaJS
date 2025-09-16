@@ -3,7 +3,7 @@ import ObservabilityManager from '../ObservabilityManager';
 import ObservabilityReporter from '../ObservabilityReporter';
 
 function createReporter() {
-  class NullReporter extends ObservabilityReporter {
+  class NullReporter implements ObservabilityReporter {
     recordEvent = jest.fn();
   }
   return new NullReporter();
