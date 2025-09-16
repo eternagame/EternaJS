@@ -582,7 +582,6 @@ export default class PoseEditMode extends GameMode {
     }
 
     private setMarkerLayer(layer: string) {
-        Eterna.observability.recordEvent('RunTool:MarkerLayer', {layer});
         for (const pose of this._poses) {
             pose.setMarkerLayer(layer);
         }
@@ -752,6 +751,9 @@ export default class PoseEditMode extends GameMode {
 
         this._markerSwitcher = this._modeBar.addMarkerSwitcher();
         this.regs?.add(this._markerSwitcher.selectedLayer.connectNotify((val) => this.setMarkerLayer(val)));
+        this.regs?.add(this._markerSwitcher.selectedLayer.connect((layer) => {
+            Eterna.observability.recordEvent('RunTool:MarkerLayer', {layer});
+        }));
         this._markerSwitcher.display.visible = false;
         this._modeBar.layout();
 
@@ -798,9 +800,9 @@ export default class PoseEditMode extends GameMode {
         );
         this._constraintBar.display.visible = false;
         this.addObject(this._constraintBar, this._constraintsLayer);
-        this._constraintBar.sequenceHighlights.connect(
+        this.regs?.add(this._constraintBar.sequenceHighlights.connect(
             (highlightInfos: HighlightInfo[] | null) => this.highlightSequences(highlightInfos)
-        );
+        ));
 
         // We can only set up the folderSwitcher once we have set up the poses
         // (and constraintBar, because by setting the folder on the pose, it triggers a fold
@@ -810,14 +812,16 @@ export default class PoseEditMode extends GameMode {
             initialFolder,
             this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
         );
-        this._folderSwitcher.selectedFolder.connectNotify((folder) => {
-            Eterna.observability.recordEvent('RunTool:ChangeFolder', {folder});
+        this.regs?.add(this._folderSwitcher.selectedFolder.connectNotify((folder) => {
             for (const pose of this._poses) {
                 pose.scoreFolder = folder;
             }
 
             this.onChangeFolder();
-        });
+        }));
+        this.regs?.add(this._folderSwitcher.selectedFolder.connect((folder) => {
+            Eterna.observability.recordEvent('RunTool:ChangeFolder', {folder: folder.name});
+        }));
 
         // Initialize sequence and/or solution as relevant
         let initialSequence: Sequence | null = null;
