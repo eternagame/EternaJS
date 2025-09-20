@@ -35,7 +35,8 @@ import {
     nucleotideRangeButtonProps, explosionFactorButtonProps, pipButtonProps, zoomInButtonProps,
     zoomOutButtonProps, view3DButtonProps, moveButtonProps, rotateStemButtonProps, flipStemButtonProps,
     snapToGridButtonProps, baseMarkerButtonProps, annotationModeButtonProps, annotationPanelButtonProps,
-    boostersMenuButtonProps, stampTLoopAMenuButtonProps, stampTLoopBMenuButtonProps
+    boostersMenuButtonProps, stampTLoopAMenuButtonProps, stampTLoopBMenuButtonProps,
+    AutoSolverMenuButtonProps
 } from './ToolbarButtons';
 import ToolShelf from './ToolShelf';
 
@@ -81,6 +82,7 @@ export default class Toolbar extends ContainerObject {
     public boostersMenuButton: ToolbarButton;
     public stampTLoopA: ToolbarButton;
     public stampTLoopB: ToolbarButton;
+    public autoSolver: ToolbarButton;
     public dynPaintTools: ToolbarButton[] = [];
 
     // Import/Export
@@ -530,6 +532,7 @@ export default class Toolbar extends ContainerObject {
         this.magicGlueButton = this.setupButton(magicGlueButtonProps, this._showGlue);
         this.stampTLoopA = this.setupButton(stampTLoopAMenuButtonProps, this._showStampTLoop);
         this.stampTLoopB = this.setupButton(stampTLoopBMenuButtonProps, this._showStampTLoop);
+        this.autoSolver = this.setupButton(AutoSolverMenuButtonProps, true);
         this.boostersMenuButton = this.setupButton(
             boostersMenuButtonProps,
             isEditable && this._boostersData !== null
