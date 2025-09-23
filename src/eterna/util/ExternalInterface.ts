@@ -20,7 +20,7 @@ export class ExternalInterfaceCtx {
     public addCallback(name: string, callback: AnyFunction): void {
         this.callbacks.set(name, (...args) => {
             Eterna.observability.recordEvent(`ScriptFunc:${name}`);
-            callback(...args);
+            return callback(...args);
         });
         this.changed.emit();
     }
