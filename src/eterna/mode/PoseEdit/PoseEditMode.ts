@@ -84,6 +84,7 @@ import Dialog from 'eterna/ui/Dialog';
 import WindowDialog from 'eterna/ui/WindowDialog';
 import TLoopConstraint, {TLoopSeqB, TLoopSeqA, TLoopPairs} from 'eterna/constraints/constraints/TLoopConstraint';
 import FoldingAPI from 'eterna/eternaScript/FoldingAPI';
+import PostMessageReporter from 'eterna/observability/PostMessageReporter';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -264,8 +265,17 @@ export default class PoseEditMode extends GameMode {
 
     protected enter(): void {
         super.enter();
+        if (Eterna.experimentalFeatures.includes('qualtrics-report')) {
+            Eterna.observability.startCapture(this._qualtricsReporter, (event) => !event.name.match(/^(ScriptFunc):/));
+        }
         Eterna.observability.recordEvent('ModeEnter', {mode: 'PoseEdit', puzzle: this._puzzle.nodeID});
         this.hideAsyncText();
+    }
+
+    protected exit(): void {
+        if (Eterna.experimentalFeatures.includes('qualtrics-report')) {
+            Eterna.observability.endCapture(this._qualtricsReporter);
+        }
     }
 
     public onResized(): void {
@@ -4466,6 +4476,11 @@ export default class PoseEditMode extends GameMode {
 
     private _lastStampedTLoopA = -1;
     private _lastStampedTLoopB = -1;
+
+    private _qualtricsReporter: PostMessageReporter = new PostMessageReporter(
+        'qualtrics',
+        'stanfordmedicine.yul1.qualtrics.com'
+    );
 
     private static readonly FOLDING_LOCK = 'Folding';
 }
