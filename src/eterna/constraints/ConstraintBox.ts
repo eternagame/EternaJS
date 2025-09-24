@@ -23,6 +23,8 @@ export interface ConstraintBoxConfig {
     tooltip: string | StyledTextBuilder;
     // Show the green/red outline
     showOutline?: boolean;
+    // Show the checkmark when satisfied
+    showCheck?: boolean;
     // Used when the constraint image includes a background
     // Due to a type constraint from Pixi, we need this to be nullable, not optional
     fullTexture?: Texture;
@@ -144,7 +146,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     }
 
     public setContent(config: ConstraintBoxConfig, toolTipContainer?: Container): void {
-        this._check.visible = config.satisfied && !this._forMissionScreen;
+        this._check.visible = config.satisfied && !this._forMissionScreen && config.showCheck !== false;
 
         // If clarificationText is a string we're fine; if it's a StyledTextBuilder
         // we need to get .text from it to check this.
@@ -172,12 +174,10 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             this.initOpaqueBackdrop(config.fullTexture.width, config.fullTexture.height);
         }
 
+        this._outline.texture = config.satisfied
+            ? BitmapManager.getBitmap(Bitmaps.NovaPassOutline)
+            : BitmapManager.getBitmap(Bitmaps.NovaFailOutline);
         this._outline.visible = config.showOutline || false;
-        if (this._outline.visible) {
-            this._outline.texture = config.satisfied
-                ? BitmapManager.getBitmap(Bitmaps.NovaPassOutline)
-                : BitmapManager.getBitmap(Bitmaps.NovaFailOutline);
-        }
 
         this._reqClarifyText.visible = config.clarificationText !== undefined;
         if (config.clarificationText !== undefined) {
