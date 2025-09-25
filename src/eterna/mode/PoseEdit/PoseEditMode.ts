@@ -3466,13 +3466,14 @@ export default class PoseEditMode extends GameMode {
     }
 
     private checkSolved() {
-        const constraintsSatisfied: boolean = this.checkConstraints();
+        const constraintsSatisfied = this.checkConstraints();
         for (let ii = 0; ii < this._poses.length; ii++) {
             this.getCurrentUndoBlock(ii).stable = constraintsSatisfied;
         }
 
+        const submittable = this.checkConstraints(this._puzzle.isSoftConstraint);
         if (
-            (constraintsSatisfied && this._rscript.done)
+            (submittable && this._rscript.done)
             || (this._puzzle.alreadySolved && this._puzzle.rscript === '')
         ) {
             if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL && !this._alreadyCleared) {
