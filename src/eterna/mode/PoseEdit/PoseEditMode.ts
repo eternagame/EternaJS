@@ -19,7 +19,11 @@ import GameButton from 'eterna/ui/GameButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {
     KeyCode, SpriteObject, DisplayUtil, HAlign, VAlign, Flashbang, KeyboardEventType, Assert,
-    GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject, ErrorUtil
+    GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject, ErrorUtil,
+    RepeatingTask,
+    DelayTask,
+    FunctionTask,
+    CallbackTask
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import EternaSettingsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaSettingsDialog';
@@ -85,6 +89,7 @@ import WindowDialog from 'eterna/ui/WindowDialog';
 import TLoopConstraint, {TLoopSeqB, TLoopSeqA, TLoopPairs} from 'eterna/constraints/constraints/TLoopConstraint';
 import FoldingAPI from 'eterna/eternaScript/FoldingAPI';
 import PostMessageReporter from 'eterna/observability/PostMessageReporter';
+import TimerConstraint from 'eterna/constraints/constraints/TimerConstraint';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -1058,6 +1063,35 @@ export default class PoseEditMode extends GameMode {
                 this.setPip(Eterna.settings.pipEnabled.value);
 
                 this.ropPresets();
+
+                // If we have a timer constraint, we need to trigger a state update
+                // (namely, constraint update) not just when user interaction happens, but
+                // over time. We only due this when the constraint is present so we don't do
+                // a bunch of unnecessary work
+                if (this._puzzle.constraints?.find((constraint) => constraint instanceof TimerConstraint)) {
+                    this.addObject(new RepeatingTask(() => {
+                        let poseOpComplete = false;
+                        return new SerialTask(
+                            // Once a second should be responsive enough without incurring unnecessary
+                            // performance cost from having to re-sync all the other state and
+                            // constraint checks, etc. (This is unscientific)
+                            new DelayTask(1),
+                            // We push this to the opqueue to ensure we aren't triggering a state
+                            // resync while folding operations are half-complete
+                            new CallbackTask(() => {
+                                this._opQueue.push(new PoseOp(null, () => {
+                                    this.updateScore();
+                                    poseOpComplete = true;
+                                }));
+                            }),
+                            // We wait until the sync has completed before we continue on to the next
+                            // interation of this repeaing task in order to prevent multiple syncs being
+                            // queued up faster than we can process them in some unfortunate situation where
+                            // things take forever
+                            new FunctionTask(() => poseOpComplete)
+                        );
+                    }));
+                }
             }
         ));
     }

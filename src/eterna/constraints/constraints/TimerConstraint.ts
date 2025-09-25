@@ -34,7 +34,7 @@ export default class TimerConstraint extends Constraint<BaseConstraintStatus> {
             // a player might just save their results elsewhere and resume...
             // If we ever use this for time trials as opposed to just research
             // studies we'd need to think through all that.
-            this.timeLimit - (context.elapsed ?? 0),
+            (this.timeLimit * 1000) - ((context.elapsed ?? 0)),
             0
         );
 
@@ -52,7 +52,7 @@ export default class TimerConstraint extends Constraint<BaseConstraintStatus> {
             drawBG: true,
             tooltip: ConstraintBox.createTextStyle().append(`You have ${this.timeLimit} seconds to complete this puzzle`),
             clarificationText: `${this.timeLimit} SECONDS`,
-            statText: status.timeRemaining.toString(),
+            statText: (status.timeRemaining / 1000).toFixed(0),
             icon: TimerConstraint._icon,
             // This isn't really something that needs to be "satisfied" perse,
             // so the outline/check indication is liable to be confusing.
