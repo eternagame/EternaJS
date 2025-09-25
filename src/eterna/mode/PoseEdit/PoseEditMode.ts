@@ -2665,7 +2665,11 @@ export default class PoseEditMode extends GameMode {
 
         let data: SubmitSolutionData;
 
-        if (
+        Eterna.observability.recordEvent('SubmitSolution', this.createSubmitData(details, undoBlock));
+        if (Eterna.experimentalFeatures.includes('qualtrics-report')) {
+            this.showMissionClearedPanel(null, false);
+            return;
+        } if (
             !this._puzzle.alreadySolved
             || this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
             || this._puzzle.rscript !== ''
@@ -3191,7 +3195,8 @@ export default class PoseEditMode extends GameMode {
             undoBlocks: this._seqStacks[this._stackLevel],
             targetConditions: this._targetConditions,
             puzzle: this._puzzle,
-            scriptConstraintCtx: this._scriptConstraintContext
+            scriptConstraintCtx: this._scriptConstraintContext,
+            elapsed: new Date().getTime() - this._startSolvingTime
         }, soft);
     }
 
