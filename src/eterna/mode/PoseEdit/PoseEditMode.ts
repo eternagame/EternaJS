@@ -1077,12 +1077,22 @@ export default class PoseEditMode extends GameMode {
                             // constraint checks, etc. (This is unscientific)
                             new DelayTask(1),
                             // We push this to the opqueue to ensure we aren't triggering a state
-                            // resync while folding operations are half-complete
+                            // resync while folding operations are half-complete (checkSolved
+                            // updates undoblock)
                             new CallbackTask(() => {
-                                this._opQueue.push(new PoseOp(null, () => {
-                                    this.updateScore();
+                                if (this._opQueue.length > 0) {
+                                    this._opQueue.push(new PoseOp(null, () => {
+                                        this.checkSolved();
+                                        poseOpComplete = true;
+                                    }));
+                                } else {
+                                    // If we know we're not racing with some other operation,
+                                    // we run this immediately rather than running through the
+                                    // opqueue to prevent the "folding..." message from showing
+                                    // for a brief period of time/"flickering"
+                                    this.checkSolved();
                                     poseOpComplete = true;
-                                }));
+                                }
                             }),
                             // We wait until the sync has completed before we continue on to the next
                             // interation of this repeaing task in order to prevent multiple syncs being
@@ -3446,15 +3456,20 @@ export default class PoseEditMode extends GameMode {
             this._toolbar.redoButton.enabled = !(this._stackLevel + 1 > this._stackSize - 1);
         }
 
-        const constraintsSatisfied: boolean = this.checkConstraints();
-        for (let ii = 0; ii < this._poses.length; ii++) {
-            this.getCurrentUndoBlock(ii).stable = constraintsSatisfied;
-        }
-
         // Update open dialogs
         this.updateSpecBox();
         this.updateCopySequenceDialog();
         this.updateCopyStructureDialog();
+
+        // Reevaluate constraints and submit if solved (and we want to autosubmit)
+        this.checkSolved();
+    }
+
+    private checkSolved() {
+        const constraintsSatisfied: boolean = this.checkConstraints();
+        for (let ii = 0; ii < this._poses.length; ii++) {
+            this.getCurrentUndoBlock(ii).stable = constraintsSatisfied;
+        }
 
         if (
             (constraintsSatisfied && this._rscript.done)
