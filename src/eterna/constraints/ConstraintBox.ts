@@ -23,8 +23,9 @@ export interface ConstraintBoxConfig {
     tooltip: string | StyledTextBuilder;
     // Show the green/red outline
     showOutline?: boolean;
-    // Show the checkmark when satisfied
-    showCheck?: boolean;
+    // Whether to enable satisfied indicators (outline and check, glow and sound on change)
+    // Default true, overrides showOutline if set
+    satisfiedIndicators?: boolean;
     // Used when the constraint image includes a background
     // Due to a type constraint from Pixi, we need this to be nullable, not optional
     fullTexture?: Texture;
@@ -146,7 +147,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     }
 
     public setContent(config: ConstraintBoxConfig, toolTipContainer?: Container): void {
-        this._check.visible = config.satisfied && !this._forMissionScreen && config.showCheck !== false;
+        this._check.visible = config.satisfied && !this._forMissionScreen && config.satisfiedIndicators !== false;
 
         // If clarificationText is a string we're fine; if it's a StyledTextBuilder
         // we need to get .text from it to check this.
@@ -177,7 +178,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._outline.texture = config.satisfied
             ? BitmapManager.getBitmap(Bitmaps.NovaPassOutline)
             : BitmapManager.getBitmap(Bitmaps.NovaFailOutline);
-        this._outline.visible = config.showOutline || false;
+        this._outline.visible = config.satisfiedIndicators ?? config.showOutline ?? false;
 
         this._reqClarifyText.visible = config.clarificationText !== undefined;
         if (config.clarificationText !== undefined) {
@@ -276,12 +277,14 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
         this._noText.visible = config.noText || false;
 
-        if (config.satisfied && !this._satisfied) {
-            Flashbang.sound.playSound(Sounds.SoundCondition);
-            this.flare(true);
-        } else if (!config.satisfied && this._satisfied) {
-            Flashbang.sound.playSound(Sounds.SoundDecondition);
-            this.flare(false);
+        if (config.satisfiedIndicators !== false) {
+            if (config.satisfied && !this._satisfied) {
+                Flashbang.sound.playSound(Sounds.SoundCondition);
+                this.flare(true);
+            } else if (!config.satisfied && this._satisfied) {
+                Flashbang.sound.playSound(Sounds.SoundDecondition);
+                this.flare(false);
+            }
         }
 
         this._satisfied = config.satisfied;

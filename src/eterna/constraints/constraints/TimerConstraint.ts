@@ -58,8 +58,7 @@ export default class TimerConstraint extends Constraint<BaseConstraintStatus> {
             // so the outline/check indication is liable to be confusing.
             // When the time limit passes, calling code is responsible for
             // halting the puzzle and doing whatever is necessary
-            showOutline: false,
-            showCheck: false
+            satisfiedIndicators: false
         };
     }
 
