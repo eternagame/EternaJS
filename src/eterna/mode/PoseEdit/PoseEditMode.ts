@@ -82,6 +82,7 @@ import ConfirmTargetDialog from 'eterna/ui/ConfirmTargetDialog';
 import UILockDialog from 'eterna/ui/UILockDialog';
 import Dialog from 'eterna/ui/Dialog';
 import WindowDialog from 'eterna/ui/WindowDialog';
+import AutoSolverDialog from 'eterna/ui/AutoSolverDialog';
 import TLoopConstraint, {TLoopSeqB, TLoopSeqA, TLoopPairs} from 'eterna/constraints/constraints/TLoopConstraint';
 import FoldingAPI from 'eterna/eternaScript/FoldingAPI';
 import GameMode from '../GameMode';
@@ -514,6 +515,23 @@ export default class PoseEditMode extends GameMode {
                     : undefined
             }
         }));
+    }
+
+    private onAutoSolverClicked() {
+        this.pushUILock();
+        const sequenceString = this._poses[0].sequence.sequenceString();
+        this._autoSolverDialog = this.showDialog(
+            new AutoSolverDialog({sequence: sequenceString}),
+            'AutoSolverDialog'
+        );
+
+        if (!this._autoSolverDialog) return;
+        this._autoSolverDialog.submitClicked.connect((seqString) => {
+            const sequence: Sequence = Sequence.fromSequenceString(seqString);
+            this.pasteSequence(sequence);
+            this.popUILock();
+            // this._autoSolverDialog.close(null);
+        });
     }
 
     private async showSolution(solution: Solution): Promise<void> {
@@ -1071,6 +1089,7 @@ export default class PoseEditMode extends GameMode {
         this.regs.add(this._toolbar.nucleotideFindButton.clicked.connect(() => this.findNucleotide()));
         this.regs.add(this._toolbar.nucleotideRangeButton.clicked.connect(() => this.showNucleotideRange()));
         this.regs.add(this._toolbar.explosionFactorButton.clicked.connect(() => this.changeExplosionFactor()));
+        this.regs.add(this._toolbar.autoSolverButton.clicked.connect(() => this.onAutoSolverClicked()));
 
         this.regs.add(this._toolbar.baseMarkerButton.clicked.connect(() => {
             this.setPosesColor(RNAPaint.BASE_MARK);
@@ -4382,6 +4401,7 @@ export default class PoseEditMode extends GameMode {
     private _specBox: SpecBoxDialog | null = null;
     private _sidebarLockRef: GameObjectRef = GameObjectRef.NULL;
     private _sidebarLockMask = new Graphics();
+    private _autoSolverDialog: AutoSolverDialog | null = null;
 
     // Tutorial Script Extra Functionality
     private _showMissionScreen: boolean = true;

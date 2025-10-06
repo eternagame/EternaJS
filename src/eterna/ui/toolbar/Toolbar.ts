@@ -82,7 +82,7 @@ export default class Toolbar extends ContainerObject {
     public boostersMenuButton: ToolbarButton;
     public stampTLoopA: ToolbarButton;
     public stampTLoopB: ToolbarButton;
-    public autoSolver: ToolbarButton;
+    public autoSolverButton: ToolbarButton;
     public dynPaintTools: ToolbarButton[] = [];
 
     // Import/Export
@@ -532,7 +532,7 @@ export default class Toolbar extends ContainerObject {
         this.magicGlueButton = this.setupButton(magicGlueButtonProps, this._showGlue);
         this.stampTLoopA = this.setupButton(stampTLoopAMenuButtonProps, this._showStampTLoop);
         this.stampTLoopB = this.setupButton(stampTLoopBMenuButtonProps, this._showStampTLoop);
-        this.autoSolver = this.setupButton(AutoSolverMenuButtonProps, true);
+        this.autoSolverButton = this.setupButton(AutoSolverMenuButtonProps, true);
         this.boostersMenuButton = this.setupButton(
             boostersMenuButtonProps,
             isEditable && this._boostersData !== null
