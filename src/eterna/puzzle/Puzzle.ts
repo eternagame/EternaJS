@@ -610,8 +610,6 @@ export default class Puzzle {
         this._useShortTails = useShortTails;
     }
 
-    // As far as I can tell this only exists to support this early FMN simulation:
-    // https://eternagame.org/puzzles/2631115
     public transformSequence(seq: Sequence, targetIndex: number, fromTargetIndex: number): Sequence {
         if (this._targetConditions == null) {
             return seq;
