@@ -15,7 +15,7 @@ import {
 import {
     MaximumAConstraint, MaximumCConstraint, MaximumGConstraint, MaximumUConstraint
 } from 'eterna/constraints/constraints/MaximumBaseConstraint';
-import MaximumMutationConstraint from 'eterna/constraints/constraints/MaximumMutationConstraint';
+import {MaximumMutationConstraint, MinimumMutationConstraint} from 'eterna/constraints/constraints/MutationConstraint';
 import MaximumNonLibraryMutationConstraint from 'eterna/constraints/constraints/MaximumNonLibraryMutationConstraint';
 import {
     MaximumAUConstraint,
@@ -312,6 +312,9 @@ export default class PuzzleManager {
                         break;
                     case MaximumMutationConstraint.NAME:
                         constraints.push(new MaximumMutationConstraint(Number(parameter)));
+                        break;
+                    case MinimumMutationConstraint.NAME:
+                        constraints.push(new MinimumMutationConstraint(Number(parameter)));
                         break;
                     case MaximumNonLibraryMutationConstraint.NAME:
                         constraints.push(new MaximumNonLibraryMutationConstraint(Number(parameter)));

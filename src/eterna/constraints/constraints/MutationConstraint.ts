@@ -12,13 +12,14 @@ interface MaxMutationConstraintStatus extends BaseConstraintStatus {
     mutations: number;
 }
 
-export default class MaximumMutationConstraint extends Constraint<MaxMutationConstraintStatus> {
-    public static readonly NAME = 'MUTATION';
-    public readonly maxMutations: number;
+abstract class MutationConstraint extends Constraint<MaxMutationConstraintStatus> {
+    public readonly mutations: number;
+    public readonly mode: 'min' | 'max';
 
-    constructor(maxMutations: number) {
+    constructor(mutations: number, mode: 'min' | 'max') {
         super();
-        this.maxMutations = maxMutations;
+        this.mutations = mutations;
+        this.mode = mode;
     }
 
     public evaluate(context: ConstraintContext): MaxMutationConstraintStatus {
@@ -30,7 +31,7 @@ export default class MaximumMutationConstraint extends Constraint<MaxMutationCon
         );
 
         return {
-            satisfied: mutations <= this.maxMutations,
+            satisfied: this.mode === 'max' ? mutations <= this.mutations : mutations >= this.mutations,
             mutations
         };
     }
@@ -41,9 +42,11 @@ export default class MaximumMutationConstraint extends Constraint<MaxMutationCon
                 status.mutations.toString(),
                 {fill: (status.satisfied ? 0x00aa00 : 0xFF0000), fontWeight: 'bold'}
             )
-            .append(`/${this.maxMutations}`);
+            .append(`/${this.mutations}`);
 
-        const tooltip = ConstraintBox.createTextStyle().append(`You can only mutate up to ${this.maxMutations} bases`);
+        const tooltip = this.mode === 'max'
+            ? ConstraintBox.createTextStyle().append(`You can only mutate up to ${this.mutations} bases`)
+            : ConstraintBox.createTextStyle().append(`You must mutate at least ${this.mutations} bases`);
 
         return {
             satisfied: status.satisfied,
@@ -52,14 +55,14 @@ export default class MaximumMutationConstraint extends Constraint<MaxMutationCon
             icon: MaximumMutationConstraint._icon,
             showOutline: true,
             statText,
-            clarificationText: `AT MOST${this.maxMutations.toString().length > 2 ? ' \n' : ' '}${this.maxMutations} CHANGES`
+            clarificationText: `AT ${this.mode === 'max' ? 'MOST' : 'LEAST'}${this.mutations.toString().length > 2 ? ' \n' : ' '}${this.mutations} CHANGES`
         };
     }
 
     public serialize(): [string, string] {
         return [
             MaximumMutationConstraint.NAME,
-            this.maxMutations.toString()
+            this.mutations.toString()
         ];
     }
 
@@ -95,5 +98,19 @@ export default class MaximumMutationConstraint extends Constraint<MaxMutationCon
         icon.addChild(base4);
 
         return TextureUtil.renderToTexture(icon);
+    }
+}
+
+export class MaximumMutationConstraint extends MutationConstraint {
+    public static readonly NAME = 'MUTATION';
+    constructor(mutations: number) {
+        super(mutations, 'max');
+    }
+}
+
+export class MinimumMutationConstraint extends MutationConstraint {
+    public static readonly NAME = 'MINMUTATION';
+    constructor(mutations: number) {
+        super(mutations, 'min');
     }
 }
