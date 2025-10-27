@@ -5,6 +5,8 @@ import TextInputGrid from './TextInputGrid';
 import GameButton from './GameButton';
 import TextInputObject from './TextInputObject';
 
+const COMPUTE_BASE_URL = process.env['COMPUTE_SERVER_URL'];
+
 export default class AutoSolverDialog extends WindowDialog<void> {
     public readonly submitClicked: Signal<string> = new Signal();
 
@@ -54,7 +56,7 @@ export default class AutoSolverDialog extends WindowDialog<void> {
     }
 
     private async onSubmit() {
-        const computeUrl = 'https://compute.eternadev.org/ribotree';
+        const computeUrl = `${COMPUTE_BASE_URL}/ribotree`;
         const requestBody = {
             sequence: this._sequence,
             ...this._solverParameters
