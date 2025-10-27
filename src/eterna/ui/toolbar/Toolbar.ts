@@ -261,8 +261,7 @@ export default class Toolbar extends ContainerObject {
                 ]
             };
         } else {
-            if (Eterna.settings.puzzleSolvingHotbarTools.value) return Eterna.settings.puzzleSolvingHotbarTools.value;
-            return {
+            let defaults = {
                 left: [
                     resetButtonProps.id, // not present in ToolbarType.FEEDBACK
                     screenshotButtonProps.id,
@@ -279,6 +278,15 @@ export default class Toolbar extends ContainerObject {
                     magicGlueButtonProps.id // only present in puzzles with unconstrained regions
                 ]
             };
+
+            if (Eterna.settings.puzzleSolvingHotbarTools.value) {
+                defaults = Eterna.settings.puzzleSolvingHotbarTools.value;
+            }
+
+            if (Eterna.experimentalFeatures.includes('autosolver')) {
+                defaults.right.unshift(AutoSolverMenuButtonProps.id);
+            }
+            return defaults;
         }
     }
 
@@ -532,7 +540,13 @@ export default class Toolbar extends ContainerObject {
         this.magicGlueButton = this.setupButton(magicGlueButtonProps, this._showGlue);
         this.stampTLoopA = this.setupButton(stampTLoopAMenuButtonProps, this._showStampTLoop);
         this.stampTLoopB = this.setupButton(stampTLoopBMenuButtonProps, this._showStampTLoop);
-        this.autoSolverButton = this.setupButton(AutoSolverMenuButtonProps, true);
+        this.autoSolverButton = this.setupButton(
+            AutoSolverMenuButtonProps,
+            // Note that elsewhere we automatically add this to the hotbar and never save it
+            // while this is an experimental feature used in user testing. If it stays around
+            // we may need to change this!
+            Eterna.experimentalFeatures.includes('autosolver')
+        );
         this.boostersMenuButton = this.setupButton(
             boostersMenuButtonProps,
             isEditable && this._boostersData !== null
@@ -763,8 +777,12 @@ export default class Toolbar extends ContainerObject {
                                     };
                                 } else {
                                     Eterna.settings.puzzleSolvingHotbarTools.value = {
-                                        left: leftUpdate.activated,
-                                        right: rightSubUpdate.activated
+                                        left: leftUpdate.activated.filter(
+                                            (id) => id !== AutoSolverMenuButtonProps.id
+                                        ),
+                                        right: rightSubUpdate.activated.filter(
+                                            (id) => id !== AutoSolverMenuButtonProps.id
+                                        )
                                     };
                                 }
                             }
@@ -778,8 +796,12 @@ export default class Toolbar extends ContainerObject {
                                     };
                                 } else {
                                     Eterna.settings.puzzleSolvingHotbarTools.value = {
-                                        left: leftSubUpdate.activated,
-                                        right: rightUpdate.activated
+                                        left: leftSubUpdate.activated.filter(
+                                            (id) => id !== AutoSolverMenuButtonProps.id
+                                        ),
+                                        right: rightUpdate.activated.filter(
+                                            (id) => id !== AutoSolverMenuButtonProps.id
+                                        )
                                     };
                                 }
                             }
