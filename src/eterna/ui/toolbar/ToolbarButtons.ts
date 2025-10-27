@@ -329,6 +329,16 @@ export const stampTLoopBMenuButtonProps: ToolbarParam = {
     isPaintTool: true
 };
 
+export const AutoSolverMenuButtonProps: ToolbarParam = {
+    cat: ButtonCategory.SOLVE,
+    id: 'autoSolver',
+    displayName: 'Auto-Solver',
+    allImg: Bitmaps.ImgAutoSolver,
+    overImg: Bitmaps.ImgOverAutoSolver,
+    disableImg: Bitmaps.ImgGreyAutoSolver,
+    tooltip: 'Solve with AI Help'
+};
+
 // ===== IMPORT/EXPORT =====
 
 export const copyButtonProps: ToolbarParam = {
