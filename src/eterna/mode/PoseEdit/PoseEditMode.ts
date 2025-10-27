@@ -19,7 +19,11 @@ import GameButton from 'eterna/ui/GameButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {
     KeyCode, SpriteObject, DisplayUtil, HAlign, VAlign, Flashbang, KeyboardEventType, Assert,
-    GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject, ErrorUtil
+    GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject, ErrorUtil,
+    RepeatingTask,
+    DelayTask,
+    FunctionTask,
+    CallbackTask
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import EternaSettingsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaSettingsDialog';
@@ -84,6 +88,8 @@ import Dialog from 'eterna/ui/Dialog';
 import WindowDialog from 'eterna/ui/WindowDialog';
 import TLoopConstraint, {TLoopSeqB, TLoopSeqA, TLoopPairs} from 'eterna/constraints/constraints/TLoopConstraint';
 import FoldingAPI from 'eterna/eternaScript/FoldingAPI';
+import PostMessageReporter from 'eterna/observability/PostMessageReporter';
+import TimerConstraint from 'eterna/constraints/constraints/TimerConstraint';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -264,8 +270,19 @@ export default class PoseEditMode extends GameMode {
 
     protected enter(): void {
         super.enter();
+
+        if (Eterna.experimentalFeatures.includes('qualtrics-report')) {
+            Eterna.observability.startCapture(this._qualtricsReporter, (event) => !event.name.match(/^(ScriptFunc):/));
+        }
         Eterna.observability.recordEvent('ModeEnter', {mode: 'PoseEdit', puzzle: this._puzzle.nodeID});
+
         this.hideAsyncText();
+    }
+
+    protected exit(): void {
+        if (Eterna.experimentalFeatures.includes('qualtrics-report')) {
+            Eterna.observability.endCapture(this._qualtricsReporter);
+        }
     }
 
     public onResized(): void {
@@ -813,6 +830,7 @@ export default class PoseEditMode extends GameMode {
             initialFolder,
             this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
         );
+
         this.regs?.add(this._folderSwitcher.selectedFolder.connectNotify(() => {
             this.onChangeFolder();
         }));
@@ -1047,6 +1065,45 @@ export default class PoseEditMode extends GameMode {
                 this.setPip(Eterna.settings.pipEnabled.value);
 
                 this.ropPresets();
+
+                // If we have a timer constraint, we need to trigger a state update
+                // (namely, constraint update) not just when user interaction happens, but
+                // over time. We only due this when the constraint is present so we don't do
+                // a bunch of unnecessary work
+                if (this._puzzle.constraints?.find((constraint) => constraint instanceof TimerConstraint)) {
+                    this.addObject(new RepeatingTask(() => {
+                        let poseOpComplete = false;
+                        return new SerialTask(
+                            // Once a second should be responsive enough without incurring unnecessary
+                            // performance cost from having to re-sync all the other state and
+                            // constraint checks, etc. (This is unscientific)
+                            new DelayTask(1),
+                            // We push this to the opqueue to ensure we aren't triggering a state
+                            // resync while folding operations are half-complete (checkSolved
+                            // updates undoblock)
+                            new CallbackTask(() => {
+                                if (this._opQueue.length > 0) {
+                                    this._opQueue.push(new PoseOp(null, () => {
+                                        this.checkSolved();
+                                        poseOpComplete = true;
+                                    }));
+                                } else {
+                                    // If we know we're not racing with some other operation,
+                                    // we run this immediately rather than running through the
+                                    // opqueue to prevent the "folding..." message from showing
+                                    // for a brief period of time/"flickering"
+                                    this.checkSolved();
+                                    poseOpComplete = true;
+                                }
+                            }),
+                            // We wait until the sync has completed before we continue on to the next
+                            // interation of this repeaing task in order to prevent multiple syncs being
+                            // queued up faster than we can process them in some unfortunate situation where
+                            // things take forever
+                            new FunctionTask(() => poseOpComplete)
+                        );
+                    }));
+                }
             }
         ));
     }
@@ -2659,7 +2716,11 @@ export default class PoseEditMode extends GameMode {
 
         let data: SubmitSolutionData;
 
-        if (
+        Eterna.observability.recordEvent('SubmitSolution', this.createSubmitData(details, undoBlock));
+        if (Eterna.experimentalFeatures.includes('qualtrics-report')) {
+            this.showMissionClearedPanel(null, false);
+            return;
+        } if (
             !this._puzzle.alreadySolved
             || this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
             || this._puzzle.rscript !== ''
@@ -3185,7 +3246,8 @@ export default class PoseEditMode extends GameMode {
             undoBlocks: this._seqStacks[this._stackLevel],
             targetConditions: this._targetConditions,
             puzzle: this._puzzle,
-            scriptConstraintCtx: this._scriptConstraintContext
+            scriptConstraintCtx: this._scriptConstraintContext,
+            elapsed: new Date().getTime() - this._startSolvingTime
         }, soft);
     }
 
@@ -3403,18 +3465,24 @@ export default class PoseEditMode extends GameMode {
             this._toolbar.redoButton.enabled = !(this._stackLevel + 1 > this._stackSize - 1);
         }
 
-        const constraintsSatisfied: boolean = this.checkConstraints();
-        for (let ii = 0; ii < this._poses.length; ii++) {
-            this.getCurrentUndoBlock(ii).stable = constraintsSatisfied;
-        }
-
         // Update open dialogs
         this.updateSpecBox();
         this.updateCopySequenceDialog();
         this.updateCopyStructureDialog();
 
+        // Reevaluate constraints and submit if solved (and we want to autosubmit)
+        this.checkSolved();
+    }
+
+    private checkSolved() {
+        const constraintsSatisfied = this.checkConstraints();
+        for (let ii = 0; ii < this._poses.length; ii++) {
+            this.getCurrentUndoBlock(ii).stable = constraintsSatisfied;
+        }
+
+        const submittable = this.checkConstraints(this._puzzle.isSoftConstraint);
         if (
-            (constraintsSatisfied && this._rscript.done)
+            (submittable && this._rscript.done)
             || (this._puzzle.alreadySolved && this._puzzle.rscript === '')
         ) {
             if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL && !this._alreadyCleared) {
@@ -4492,6 +4560,11 @@ export default class PoseEditMode extends GameMode {
 
     private _lastStampedTLoopA = -1;
     private _lastStampedTLoopB = -1;
+
+    private _qualtricsReporter: PostMessageReporter = new PostMessageReporter(
+        'qualtrics',
+        'stanfordmedicine.yul1.qualtrics.com'
+    );
 
     private static readonly FOLDING_LOCK = 'Folding';
 }

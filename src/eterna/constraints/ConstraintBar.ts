@@ -16,6 +16,7 @@ import GraphicsObject from 'flashbang/objects/GraphicsObject';
 import ShapeConstraint, {AntiShapeConstraint} from './constraints/ShapeConstraint';
 import ConstraintBox from './ConstraintBox';
 import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from './Constraint';
+import TimerConstraint from './constraints/TimerConstraint';
 
 interface ConstraintWrapper<Status extends BaseConstraintStatus = BaseConstraintStatus> {
     constraint: Constraint<Status>;
@@ -321,19 +322,33 @@ export default class ConstraintBar extends ContainerObject {
         let satisfied = true;
 
         for (const constraint of this._constraints) {
-            const status = constraint.constraint.evaluate(context);
-            constraint.constraintBox.setContent(
-                constraint.constraint.getConstraintBoxConfig(
-                    status,
-                    false,
-                    context.undoBlocks,
-                    context.targetConditions
-                ),
-                this._constraintsTooltips
-            );
-            constraint.evalCache = [status, false, context.undoBlocks, context.targetConditions];
-            constraint.highlightCache = status.satisfied
-                ? null : constraint.constraint.getHighlight(status, context);
+            let status;
+            // For constraints that dont rely on the elapsed time, dont reevaluate if
+            // no other properties have changed
+            if (
+                !constraint.evalCache
+                || constraint.constraint instanceof TimerConstraint
+                || !(Object.entries(context) as Array<[keyof ConstraintContext, unknown]>).every((
+                    ([key, val]) => key === 'elapsed'
+                    || this._lastConstraintContext?.[key] === val
+                ))
+            ) {
+                status = constraint.constraint.evaluate(context);
+                constraint.constraintBox.setContent(
+                    constraint.constraint.getConstraintBoxConfig(
+                        status,
+                        false,
+                        context.undoBlocks,
+                        context.targetConditions
+                    ),
+                    this._constraintsTooltips
+                );
+                constraint.evalCache = [status, false, context.undoBlocks, context.targetConditions];
+                constraint.highlightCache = status.satisfied
+                    ? null : constraint.constraint.getHighlight(status, context);
+            } else {
+                status = constraint.evalCache[0];
+            }
 
             // Hack to allow certain constraints to be required to be met even if the SOFT
             // constraint would otherwise mean no constraint is required. Really we should allow
@@ -342,6 +357,7 @@ export default class ConstraintBar extends ContainerObject {
             const isSoft = soft && !constraint.constraint.hard;
             satisfied = satisfied && (status.satisfied || isSoft);
         }
+        this._lastConstraintContext = context;
 
         this.updateHighlights();
 
@@ -518,4 +534,5 @@ export default class ConstraintBar extends ContainerObject {
 
     private _constraints: ConstraintWrapper[];
     private _flaggedConstraint: ConstraintWrapper | null;
+    private _lastConstraintContext: ConstraintContext | null;
 }

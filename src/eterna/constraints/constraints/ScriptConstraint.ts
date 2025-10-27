@@ -1,5 +1,6 @@
 import ExternalInterface from 'eterna/util/ExternalInterface';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
+import Eterna from 'eterna/Eterna';
 import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from '../Constraint';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 
@@ -27,6 +28,12 @@ export default class ScriptConstraint extends Constraint<ScriptConstraintStatus>
         if (result.result === false) {
             throw new Error(`SCRIPT constraint ${this.scriptID} failed with error: ${result.cause}`);
         }
+
+        Eterna.observability.recordEvent(`ConstraintResult:Script:${this.scriptID}`, {
+            // We include the goal because the OpenVaccine constraint includes additional statistics there
+            goal: result.cause.goal,
+            value: result.cause.value
+        });
 
         return {
             goal: result.cause.goal != null ? result.cause.goal : '',

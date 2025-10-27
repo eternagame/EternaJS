@@ -48,6 +48,7 @@ import {
     TargetPKConfidenceConstraint
 } from 'eterna/constraints/constraints/ConfidenceConstraint';
 import TLoopConstraint from 'eterna/constraints/constraints/TLoopConstraint';
+import TimerConstraint from 'eterna/constraints/constraints/TimerConstraint';
 import SolutionManager from './SolutionManager';
 import Puzzle, {PuzzleType} from './Puzzle';
 
@@ -389,6 +390,9 @@ export default class PuzzleManager {
                         break;
                     case TLoopConstraint.NAME:
                         constraints.push(new TLoopConstraint());
+                        break;
+                    case TimerConstraint.NAME:
+                        constraints.push(new TimerConstraint(Number(parameter)));
                         break;
                     default:
                         log.warn(`Unknown constraint ${name} - skipping`);
