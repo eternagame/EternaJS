@@ -4067,11 +4067,10 @@ export default class PoseEditMode extends GameMode {
         // re-queue itself without triggering the stack push coded above
         ii %= this._targetPairs.length;
 
-        // This is dumb. We only track the sequence state based on what's shown on the UI.
-        // This used to be fine, because the sequence was always the same in every state.
-        // However, since we introduced the reverse complement stuff that is no longer true.
-        // So here, instead of fixing our state management, I am just recovering whatever
-        // the sequence for this state actually should be.
+        // We have to pull the sequence from the pose (we haven't constructed our new undo block
+        // yet), but the puzzle may apply sequence transformations. Figure out what
+        // state of the pose we're reading the sequence from, and then apply any transforms
+        // to the state we're trying to fold into
         const poseState = (this._isPipMode || ii > 0) ? ii : this._curTargetIndex;
         const seq: Sequence = this._puzzle.transformSequence(this._poses[ii].sequence, ii, poseState);
 
