@@ -795,6 +795,9 @@ export default class PoseEditMode extends GameMode {
         this._folderSwitcher.selectedFolder.connectNotify(() => {
             this.onChangeFolder();
         });
+        if (this._puzzle.targetConditions.every((tc) => tc?.folder)) {
+            this._folderSwitcher.display.visible = false;
+        }
 
         // Initialize sequence and/or solution as relevant
         let initialSequence: Sequence | null = null;
@@ -1761,6 +1764,10 @@ export default class PoseEditMode extends GameMode {
 
             for (let ii = 0; ii < this._poses.length; ii++) {
                 this.setPoseTarget(ii, ii);
+                const tc = this._targetConditions[ii];
+                if (tc) {
+                    this._poseFields[ii].folderName = tc.folder;
+                }
             }
 
             if (this._poseState === PoseState.NATIVE) {
@@ -1969,6 +1976,7 @@ export default class PoseEditMode extends GameMode {
             if (tc['state_name'] !== undefined) {
                 this._targetName.text = tc['state_name'];
             }
+            this._poseFields[0].folderName = tc.folder;
         }
 
         this._poses[0].clearAnnotationCanvas();
