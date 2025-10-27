@@ -292,7 +292,7 @@ export default class FoldUtil {
                 bpAssignmentsSet.add([col, row].sort((a, b) => a - b).join(','));
             }
         }
-        const bpAssignments = Array.from(bpAssignmentsSet).map(
+        let bpAssignments = Array.from(bpAssignmentsSet).map(
             (str) => str.split(',').map((s) => +s) as [number, number]
         );
         const bpList = [];
@@ -307,7 +307,7 @@ export default class FoldUtil {
                 const conflict = bpAssignments.find((bp) => bp.includes(checkNt));
                 if (!conflict) break;
                 bps.unshift(conflict);
-                bpAssignments.filter((bp) => bp !== conflict);
+                bpAssignments = bpAssignments.filter((bp) => bp !== conflict);
                 // eslint-disable-next-line no-loop-func
                 checkNt = conflict.find((nt) => nt !== checkNt) as number;
             }
@@ -317,7 +317,7 @@ export default class FoldUtil {
                 const conflict = bpAssignments.find((bp) => bp.includes(checkNt));
                 if (!conflict) break;
                 bps.push(conflict);
-                bpAssignments.filter((bp) => bp !== conflict);
+                bpAssignments = bpAssignments.filter((bp) => bp !== conflict);
                 // eslint-disable-next-line no-loop-func
                 checkNt = conflict.find((nt) => nt !== checkNt) as number;
             }
