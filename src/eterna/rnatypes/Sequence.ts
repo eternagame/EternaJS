@@ -368,6 +368,22 @@ export default class Sequence {
         }
     }
 
+    public complement() {
+        return new Sequence(this._baseArray.map((base) => {
+            switch (base) {
+                case RNABase.ADENINE: return RNABase.URACIL;
+                case RNABase.URACIL: return RNABase.ADENINE;
+                case RNABase.GUANINE: return RNABase.CYTOSINE;
+                case RNABase.CYTOSINE: return RNABase.GUANINE;
+                default: return base;
+            }
+        }));
+    }
+
+    public reverse() {
+        return new Sequence(this._baseArray.reverse());
+    }
+
     /**
      * The underlying data, an array of RNABase.
      */
