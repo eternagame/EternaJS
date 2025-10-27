@@ -4286,12 +4286,17 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.clearEnergyHighlights();
 
         if (!this._scoreFolder
-            || !this._scoreFolder.canScoreStructures(this.pseudoknotted)
             || this._sequence == null
             || this._sequence.length === 0
             || this._pairs == null
             || this._pairs.length !== this.fullSequenceLength) {
             this.clearScoreTexts();
+            return;
+        }
+
+        if (!this._scoreFolder.canScoreStructures(this.pseudoknotted)) {
+            this.clearScoreTexts();
+            this.updateScoreNodeGui();
             return;
         }
 

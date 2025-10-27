@@ -221,19 +221,13 @@ export default abstract class GameMode extends AppMode {
             this._poseFields.push(newField);
             this._poses.push(newField.pose);
             newField.getEnergyDelta = () => {
+                const poseidx = this._isPipMode ? idx : this._curTargetIndex;
+                const folder = this.folderForState(poseidx);
                 // Sanity check
-                if (this._folder !== null) {
-                    const poseidx = this._isPipMode ? idx : this._curTargetIndex;
-
+                if (folder !== null) {
                     const pseudoknots: boolean = this._targetConditions != null
                         && this._targetConditions[0] != null
                         && this._targetConditions[0]['type'] === 'pseudoknot';
-                    const score = (sequence: Sequence, pairs: SecStruct) => {
-                        Assert.assertIsDefined(this._folder);
-                        return this._folder.scoreStructures(
-                            sequence, pairs, pseudoknots
-                        );
-                    };
 
                     const ublk = this.getCurrentUndoBlock(poseidx);
                     Assert.assertIsDefined(ublk, 'getEnergyDelta is being called where UndoBlocks are unavailable!');
@@ -260,7 +254,14 @@ export default abstract class GameMode extends AppMode {
                         ublk.oligoMode
                     );
 
-                    return score(targetSeq, targetPairs.getSatisfiedPairs(targetSeq)) - score(nativeSeq, nativePairs);
+                    const targetEnergy = folder.scoreStructures(
+                        targetSeq, targetPairs.getSatisfiedPairs(targetSeq), pseudoknots
+                    );
+                    const nativeEnergy = folder.scoreStructures(
+                        nativeSeq, nativePairs, pseudoknots
+                    );
+
+                    return targetEnergy - nativeEnergy;
                 }
                 return -1;
             };
@@ -792,7 +793,7 @@ export default abstract class GameMode extends AppMode {
 
     // Things that might or might not be set in children so that getEnergyDelta can get set in setPoseFields
     // as well as being able to handle other shared code
-    protected get _folder(): Folder | null {
+    protected folderForState(_stateIdx: number): Folder | null {
         return null;
     }
 

@@ -344,13 +344,10 @@ export default class PuzzleEditMode extends GameMode {
             );
         }
         this._folderSwitcher = this._modeBar.addFolderSwitcher((folder) => this.canUseFolder(folder), defaultFolder);
-        this._folderSwitcher.selectedFolder.connectNotify(async (folder) => {
-            for (const pose of this._poses) {
-                pose.scoreFolder = folder;
-            }
-
-            for (const pose of this._poses) {
-                pose.canAddBindingSite = folder.canFoldWithBindingSite;
+        this._folderSwitcher.selectedFolder.connectNotify(async () => {
+            for (let i = 0; i < this._poses.length; i++) {
+                this._poses[i].scoreFolder = this.folderForState(i);
+                this._poses[i].canAddBindingSite = this._poses[i].scoreFolder.canFoldWithBindingSite;
             }
 
             this.clearUndoStack();
@@ -535,7 +532,7 @@ export default class PuzzleEditMode extends GameMode {
                 sequence: pose.sequence.sequenceString(),
                 structure: pose.molecularStructure.getParenthesis({pseudoknots: true}),
                 annotations: this._annotationManager.createAnnotationBundle(),
-                startingFolder: this._folder.name,
+                startingFolder: this._folderSwitcher.selectedFolder.value.name,
                 site: this.getCurrentBindingBases(ii) ?? undefined,
                 bonus: pose.molecularBindingBonus * 100.0,
                 locks: this.getCurrentLock(ii),
@@ -725,7 +722,8 @@ export default class PuzzleEditMode extends GameMode {
 
     private async updateCurrentBlockWithDotAndMeltingPlot(index: number): Promise<void> {
         const datablock: UndoBlock = this.getCurrentUndoBlock(index);
-        if (this._folder && this._folder.canDotPlot && datablock.sequence.length < 500) {
+        const folder = this.folderForState(index);
+        if (folder && folder.canDotPlot && datablock.sequence.length < 500) {
             const pseudoknots = (
                 this._targetConditions
                 && this._targetConditions[0]
@@ -776,7 +774,10 @@ export default class PuzzleEditMode extends GameMode {
             return;
         }
 
-        if (this._folder.name === RNet.NAME && !Eterna.experimentalFeatures.includes('rnet-publishing')) {
+        if (
+            this._folderSwitcher.selectedFolder.value.name === RNet.NAME
+            && !Eterna.experimentalFeatures.includes('rnet-publishing')
+        ) {
             this.showNotification(`
                 RibonanzaNet-SS is still in development, so you can't submit
                 puzzles with it as the folding engine right now. However,
@@ -803,11 +804,13 @@ export default class PuzzleEditMode extends GameMode {
             }
         }
 
-        if (this._structureInputs.some(
-            (si) => SecStruct.fromParens(si.structureString, true).onlyPseudoknots().nonempty()
-        ) && !this._folder.canPseudoknot) {
-            this.showNotification('You need to select the NuPACK folder, because '
-                + 'your puzzle specification has a pseudoknot.');
+        if (
+            this._structureInputs.some((si, idx) => (
+                SecStruct.fromParens(si.structureString, true).onlyPseudoknots().nonempty()
+                && !this.folderForState(idx).canPseudoknot
+            ))
+        ) {
+            this.showNotification('You need to select a folder that supports pseudoknots');
             return;
         }
 
@@ -908,7 +911,8 @@ export default class PuzzleEditMode extends GameMode {
             objectives.push(objective);
         }
 
-        let paramsTitle: string = this.folderNameMap(this._folder.name);
+        const folder = this._folderSwitcher.selectedFolder.value.name;
+        let paramsTitle: string = this.folderNameMap(folder);
 
         if (this._poses.length > 1) {
             paramsTitle += `[switch2.5][${this._poses.length} states] ${details.title}`;
@@ -928,7 +932,7 @@ export default class PuzzleEditMode extends GameMode {
         );
 
         const postParams: SubmitPuzzleParams = {
-            folder: this._folder.name,
+            folder,
             title: paramsTitle,
             secstruct: this.getCurrentTargetPairs(0).getParenthesis({pseudoknots: true}),
             constraints,
@@ -1281,7 +1285,9 @@ export default class PuzzleEditMode extends GameMode {
             let bestPairs: SecStruct | null = null;
             if (!isThereMolecule) {
                 // eslint-disable-next-line no-await-in-loop
-                bestPairs = await this._folder.foldSequence(seq, null, null, pseudoknots, EPars.DEFAULT_TEMPERATURE);
+                bestPairs = await this.folderForState(ii).foldSequence(
+                    seq, null, null, pseudoknots, EPars.DEFAULT_TEMPERATURE
+                );
             } else {
                 const bonus = -486;
                 const site: number[] = bindingSite
@@ -1290,12 +1296,12 @@ export default class PuzzleEditMode extends GameMode {
                         .filter((idx) => idx !== -1)
                     : [];
 
-                bestPairs = this._folder.foldSequenceWithBindingSite(
+                bestPairs = this.folderForState(ii).foldSequenceWithBindingSite(
                     seq, targetPairs, site, Number(bonus), 2.0
                 );
             }
             Assert.assertIsDefined(bestPairs);
-            const undoBlock = new UndoBlock(seq, this._folder.name);
+            const undoBlock = new UndoBlock(seq, this.folderForState(ii).name);
             // TODO: Should we set/get data on the undoblock with the pseudoknot parameter?
             undoBlock.setPairs(bestPairs);
             undoBlock.setBasics();
@@ -1333,7 +1339,7 @@ export default class PuzzleEditMode extends GameMode {
     private readonly _scriptInterface: ExternalInterfaceCtx = new ExternalInterfaceCtx();
 
     private _structureInputs: StructureInput[] = [];
-    protected get _folder(): Folder {
+    protected folderForState(_stateIdx: number): Folder {
         return this._folderSwitcher.selectedFolder.value;
     }
 

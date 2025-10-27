@@ -1,7 +1,12 @@
-import {Graphics, Point, Rectangle} from 'pixi.js';
+import {
+    Graphics, Point, Rectangle, Sprite, Text
+} from 'pixi.js';
 import {
     ContainerObject, KeyboardListener, InputUtil, Flashbang,
-    KeyboardEventType, KeyCode, Assert, PointerCapture, HLayoutContainer
+    KeyboardEventType, KeyCode, Assert, PointerCapture, HLayoutContainer,
+    VLayoutContainer,
+    HAlign,
+    VAlign
 } from 'flashbang';
 import ROPWait from 'eterna/rscript/ROPWait';
 import debounce from 'lodash.debounce';
@@ -9,6 +14,8 @@ import AnnotationManager from 'eterna/AnnotationManager';
 import GameWindow from 'eterna/ui/GameWindow';
 import {FederatedPointerEvent, FederatedWheelEvent} from '@pixi/events';
 import Eterna from 'eterna/Eterna';
+import BitmapManager from 'eterna/resources/BitmapManager';
+import Bitmaps from 'eterna/resources/Bitmaps';
 import Pose2D from './Pose2D';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
 import RNAAnchorObject from './RNAAnchorObject';
@@ -55,8 +62,11 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this.regs.add(this.mode.keyboardInput.pushListener(this));
         this.regs.add(this.mouseWheel.connect((e) => this.onMouseWheelEvent(e)));
 
+        this._metadataLayout = new VLayoutContainer(8, HAlign.RIGHT);
+        this.container.addChild(this._metadataLayout);
+
         this._energyDisplayLayout = new HLayoutContainer(8);
-        this.container.addChild(this._energyDisplayLayout);
+        this._metadataLayout.addChild(this._energyDisplayLayout);
 
         this._secondaryScoreEnergyDisplay = new EnergyScoreDisplay(PoseField.SCORES_WIDTH, PoseField.SCORES_HEIGHT);
         this._secondaryScoreEnergyDisplay.visible = false;
@@ -69,7 +79,22 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this._deltaScoreEnergyDisplay.visible = false;
         this._energyDisplayLayout.addChild(this._deltaScoreEnergyDisplay);
 
-        this.updateEnergyContainer();
+        this._folderInfoContainer = new HLayoutContainer(8, VAlign.CENTER);
+        this._folderInfoContainer.visible = false;
+        this._metadataLayout.addChild(this._folderInfoContainer);
+
+        const folderIcon = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgFoldingEngine));
+        folderIcon.width = 18;
+        folderIcon.height = 18;
+        this._folderInfoContainer.addChild(folderIcon);
+
+        this._folderInfoText = new Text('', {
+            fontSize: 14,
+            fill: 0xFFFFFF
+        });
+        this._folderInfoContainer.addChild(this._folderInfoText);
+
+        this.updateMetadataLayout();
     }
 
     /* override */
@@ -155,7 +180,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
             this.container.mask = this._mask;
         }
 
-        this.updateEnergyContainer();
+        this.updateMetadataLayout();
     }
 
     public containsEvent(e: FederatedPointerEvent): boolean {
@@ -290,7 +315,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this._deltaScoreEnergyDisplay.setEnergyText('Natural/Target Delta', message);
         this._secondaryScoreEnergyDisplay.visible = false;
         this._energyDisabled = true;
-        this.updateEnergyContainer();
+        this.updateMetadataLayout();
     }
 
     public enableEnergyGui() {
@@ -317,7 +342,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this._primaryScoreEnergyDisplay.setEnergyText(scoreLabel, scoreScore);
         this._secondaryScoreEnergyDisplay.setEnergyText(nodeLabel, nodeScore);
         this._secondaryScoreEnergyDisplay.visible = (this._showTotalEnergy && nodeFound);
-        this.updateEnergyContainer();
+        this.updateMetadataLayout();
     }
 
     public updateDeltaEnergyGui() {
@@ -328,7 +353,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
             `${Math.round(delta) / 100} kcal`
         );
         this._deltaScoreEnergyDisplay.visible = this._showTotalEnergy;
-        this.updateEnergyContainer();
+        this.updateMetadataLayout();
     }
 
     public get showTotalEnergy(): boolean {
@@ -342,13 +367,23 @@ export default class PoseField extends ContainerObject implements KeyboardListen
             show && this._secondaryScoreEnergyDisplay.hasText
         );
         this._deltaScoreEnergyDisplay.visible = show;
-        this.updateEnergyContainer();
+        this.updateMetadataLayout();
     }
 
-    private updateEnergyContainer() {
-        this._energyDisplayLayout.layout(true);
-        this._energyDisplayLayout.position.set(
-            this._width - this._energyDisplayLayout.width - 16,
+    public set folderName(folderName: string | undefined) {
+        if (folderName) {
+            this._folderInfoText.text = folderName;
+            this._folderInfoContainer.visible = true;
+        } else {
+            this._folderInfoContainer.visible = false;
+        }
+        this.updateMetadataLayout();
+    }
+
+    private updateMetadataLayout() {
+        this._metadataLayout.layout(true);
+        this._metadataLayout.position.set(
+            this._width - this._metadataLayout.width - 16,
             60
         );
     }
@@ -497,6 +532,8 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
     private static readonly P: Point = new Point();
 
+    private _metadataLayout: VLayoutContainer;
+
     // New Score Display panels
     private _energyDisplayLayout: HLayoutContainer;
     private _primaryScoreEnergyDisplay: EnergyScoreDisplay;
@@ -504,6 +541,9 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     private _deltaScoreEnergyDisplay: EnergyScoreDisplay;
     private _showTotalEnergy: boolean = true;
     private _energyDisabled: boolean = false;
+
+    private _folderInfoContainer: HLayoutContainer;
+    private _folderInfoText: Text;
 
     // Explosion Factor (RNALayout pairSpace multiplier)
     private _explosionFactor: number = 1;
