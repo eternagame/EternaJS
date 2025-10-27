@@ -45,6 +45,7 @@ import ROPWait from './rscript/ROPWait';
 import Band from './ui/Band';
 import BaseGlow from './vfx/BaseGlow';
 import RNet from './folding/RNet';
+import ObservabilityManager from './observability/ObservabilityManager';
 
 export enum PuzzleID {
     FunAndEasy = 4350940,
@@ -211,6 +212,7 @@ export default class EternaApp extends FlashbangApp {
         Eterna.gameDiv = document.getElementById(this._params.containerID);
         Eterna.noGame = this._params.noGame;
         Eterna.experimentalFeatures = this._params.experimentalFeatures;
+        Eterna.observability = new ObservabilityManager();
 
         // Without this, we stop the pointer events from propagating to NGL in Pose3D/PointerEventPropagator,
         // but the original mouse events will still get fired, so NGL will get confused since it tracks some

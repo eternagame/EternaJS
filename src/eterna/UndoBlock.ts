@@ -67,6 +67,7 @@ export interface TargetConditions {
     binding_pairs?: number[];
     bonus?: number;
     malus?: number;
+    folder?: string;
 }
 
 export interface OligoDef {

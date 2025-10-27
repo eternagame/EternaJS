@@ -368,7 +368,9 @@ export const downloadSVGButtonProps: ToolbarParam = {
     allImg: Bitmaps.ImgDownloadSVG,
     overImg: Bitmaps.ImgOverDownloadSVG,
     disableImg: Bitmaps.ImgGreyDownloadSVG,
-    tooltip: 'Download an SVG of the current custom layout'
+    tooltip: 'Download an SVG of the current custom layout',
+    hotKey: KeyCode.KeyS,
+    hotKeyCtrl: true
 };
 
 export const screenshotButtonProps: ToolbarParam = {

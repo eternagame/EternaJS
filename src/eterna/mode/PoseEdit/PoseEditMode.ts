@@ -19,7 +19,11 @@ import GameButton from 'eterna/ui/GameButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {
     KeyCode, SpriteObject, DisplayUtil, HAlign, VAlign, Flashbang, KeyboardEventType, Assert,
-    GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject, ErrorUtil
+    GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject, ErrorUtil,
+    RepeatingTask,
+    DelayTask,
+    FunctionTask,
+    CallbackTask
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import EternaSettingsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaSettingsDialog';
@@ -85,6 +89,8 @@ import WindowDialog from 'eterna/ui/WindowDialog';
 import AutoSolverDialog from 'eterna/ui/AutoSolverDialog';
 import TLoopConstraint, {TLoopSeqB, TLoopSeqA, TLoopPairs} from 'eterna/constraints/constraints/TLoopConstraint';
 import FoldingAPI from 'eterna/eternaScript/FoldingAPI';
+import PostMessageReporter from 'eterna/observability/PostMessageReporter';
+import TimerConstraint from 'eterna/constraints/constraints/TimerConstraint';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -265,7 +271,19 @@ export default class PoseEditMode extends GameMode {
 
     protected enter(): void {
         super.enter();
+
+        if (Eterna.experimentalFeatures.includes('qualtrics-report')) {
+            Eterna.observability.startCapture(this._qualtricsReporter, (event) => !event.name.match(/^(ScriptFunc):/));
+        }
+        Eterna.observability.recordEvent('ModeEnter', {mode: 'PoseEdit', puzzle: this._puzzle.nodeID});
+
         this.hideAsyncText();
+    }
+
+    protected exit(): void {
+        if (Eterna.experimentalFeatures.includes('qualtrics-report')) {
+            Eterna.observability.endCapture(this._qualtricsReporter);
+        }
     }
 
     public onResized(): void {
@@ -459,7 +477,13 @@ export default class PoseEditMode extends GameMode {
         this.setPosesColor(RNAPaint.PAIR);
     }
 
+    public async pasteSequence(pasteSequence: Sequence): Promise<void> {
+        super.pasteSequence(pasteSequence);
+        this.moveHistoryAddSequence('paste', pasteSequence.toString());
+    }
+
     public onHintClicked(): void {
+        Eterna.observability.recordEvent('RunTool:Hint');
         if (this._hintBoxRef.isLive) {
             this._hintBoxRef.destroyObject();
         } else {
@@ -469,6 +493,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     private onHelpClicked() {
+        Eterna.observability.recordEvent('RunTool:Help');
         const getBounds = (elem: ContainerObject) => {
             const globalPos = elem.container.toGlobal(new Point());
             return new Rectangle(
@@ -542,12 +567,12 @@ export default class PoseEditMode extends GameMode {
         const foldData = await solution.queryFoldData();
         this.hideAsyncText();
 
-        if (foldData != null && (
-            foldData[0].folderName_ === this._folder.name
+        if (foldData != null && foldData.every((fd, idx) => (
+            fd.folderName_ === this.folderForState(idx).name
             // Previously, we didn't record the folder name in the undo block.
             // At that time, we only uploaded for nupack.
-            || (!foldData[0].folderName_ && this._folder.name === NuPACK.name)
-        )) {
+            || (!fd.folderName_ && this.folderForState(idx).name === NuPACK.NAME)
+        ))) {
             await this.loadCachedUndoBlocks(foldData);
         } else {
             // Note that we do this first
@@ -558,6 +583,7 @@ export default class PoseEditMode extends GameMode {
             this.setSolutionTargetStructure(foldData);
             await this.poseEditByTarget(0);
         }
+        Eterna.observability.recordEvent('Move:StartSeq', solution.sequence.sequenceString());
         this.setAncestorId(solution.nodeID);
 
         const annotations = solution.annotations;
@@ -569,7 +595,7 @@ export default class PoseEditMode extends GameMode {
     private setSolutionTargetStructure(foldData: FoldData[] | null) {
         for (let ii = 0; ii < this._targetPairs.length; ii++) {
             if (foldData && foldData[ii]) {
-                const cacheUndoBlock: UndoBlock = new UndoBlock(new Sequence([]), this._folder?.name ?? '');
+                const cacheUndoBlock: UndoBlock = new UndoBlock(new Sequence([]), this.folderForState(ii).name);
                 cacheUndoBlock.fromJSON(foldData[ii], this._puzzle.targetConditions[ii]);
                 this._targetPairs[ii] = cacheUndoBlock.targetPairs;
                 this._targetOligosOrder[ii] = cacheUndoBlock.targetOligoOrder;
@@ -624,6 +650,14 @@ export default class PoseEditMode extends GameMode {
             });
         };
 
+        const bindTrackMoves = (pose: Pose2D, _index: number) => {
+            pose.trackMovesCallback = ((count: number, moves: Move[]) => {
+                if (moves.length) {
+                    Eterna.observability.recordEvent('Move', {moves, count});
+                }
+            });
+        };
+
         const bindMousedownEvent = (pose: Pose2D, index: number) => {
             pose.startMousedownCallback = ((e: FederatedPointerEvent, _closestDist: number, closestIndex: number) => {
                 for (let ii = 0; ii < poseFields.length; ++ii) {
@@ -655,6 +689,7 @@ export default class PoseEditMode extends GameMode {
             const pose: Pose2D = poseField.pose;
             bindAddBaseCB(pose, ii);
             bindPoseEdit(pose, ii);
+            bindTrackMoves(pose, ii);
             bindMousedownEvent(pose, ii);
             poseFields.push(poseField);
         }
@@ -752,6 +787,9 @@ export default class PoseEditMode extends GameMode {
 
         this._markerSwitcher = this._modeBar.addMarkerSwitcher();
         this.regs?.add(this._markerSwitcher.selectedLayer.connectNotify((val) => this.setMarkerLayer(val)));
+        this.regs?.add(this._markerSwitcher.selectedLayer.connect((layer) => {
+            Eterna.observability.recordEvent('RunTool:MarkerLayer', {layer});
+        }));
         this._markerSwitcher.display.visible = false;
         this._modeBar.layout();
 
@@ -798,9 +836,9 @@ export default class PoseEditMode extends GameMode {
         );
         this._constraintBar.display.visible = false;
         this.addObject(this._constraintBar, this._constraintsLayer);
-        this._constraintBar.sequenceHighlights.connect(
+        this.regs?.add(this._constraintBar.sequenceHighlights.connect(
             (highlightInfos: HighlightInfo[] | null) => this.highlightSequences(highlightInfos)
-        );
+        ));
 
         // We can only set up the folderSwitcher once we have set up the poses
         // (and constraintBar, because by setting the folder on the pose, it triggers a fold
@@ -810,13 +848,16 @@ export default class PoseEditMode extends GameMode {
             initialFolder,
             this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
         );
-        this._folderSwitcher.selectedFolder.connectNotify((folder) => {
-            for (const pose of this._poses) {
-                pose.scoreFolder = folder;
-            }
 
+        this.regs?.add(this._folderSwitcher.selectedFolder.connectNotify(() => {
             this.onChangeFolder();
-        });
+        }));
+        if (this._puzzle.targetConditions.every((tc) => tc?.folder)) {
+            this._folderSwitcher.display.visible = false;
+        }
+        this.regs?.add(this._folderSwitcher.selectedFolder.connect((folder) => {
+            Eterna.observability.recordEvent('RunTool:ChangeFolder', {folder: folder.name});
+        }));
 
         // Initialize sequence and/or solution as relevant
         let initialSequence: Sequence | null = null;
@@ -1018,8 +1059,14 @@ export default class PoseEditMode extends GameMode {
         this._opQueue.push(new PoseOp(
             null,
             () => {
-                if (!this._params.isReset) {
+                if (this._params.isReset) {
+                    const newSeq: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
+                    this.moveHistoryAddSequence('reset', newSeq.sequenceString());
+                } else {
                     this._startSolvingTime = new Date().getTime();
+                    Eterna.observability.recordEvent('Move:StartSeq', this._puzzle.transformSequence(
+                        this.getCurrentUndoBlock(0).sequence, 0
+                    ).sequenceString());
                 }
 
                 if (this._params.isReset) {
@@ -1036,6 +1083,45 @@ export default class PoseEditMode extends GameMode {
                 this.setPip(Eterna.settings.pipEnabled.value);
 
                 this.ropPresets();
+
+                // If we have a timer constraint, we need to trigger a state update
+                // (namely, constraint update) not just when user interaction happens, but
+                // over time. We only due this when the constraint is present so we don't do
+                // a bunch of unnecessary work
+                if (this._puzzle.constraints?.find((constraint) => constraint instanceof TimerConstraint)) {
+                    this.addObject(new RepeatingTask(() => {
+                        let poseOpComplete = false;
+                        return new SerialTask(
+                            // Once a second should be responsive enough without incurring unnecessary
+                            // performance cost from having to re-sync all the other state and
+                            // constraint checks, etc. (This is unscientific)
+                            new DelayTask(1),
+                            // We push this to the opqueue to ensure we aren't triggering a state
+                            // resync while folding operations are half-complete (checkSolved
+                            // updates undoblock)
+                            new CallbackTask(() => {
+                                if (this._opQueue.length > 0) {
+                                    this._opQueue.push(new PoseOp(null, () => {
+                                        this.checkSolved();
+                                        poseOpComplete = true;
+                                    }));
+                                } else {
+                                    // If we know we're not racing with some other operation,
+                                    // we run this immediately rather than running through the
+                                    // opqueue to prevent the "folding..." message from showing
+                                    // for a brief period of time/"flickering"
+                                    this.checkSolved();
+                                    poseOpComplete = true;
+                                }
+                            }),
+                            // We wait until the sync has completed before we continue on to the next
+                            // interation of this repeaing task in order to prevent multiple syncs being
+                            // queued up faster than we can process them in some unfortunate situation where
+                            // things take forever
+                            new FunctionTask(() => poseOpComplete)
+                        );
+                    }));
+                }
             }
         ));
     }
@@ -1240,7 +1326,7 @@ export default class PoseEditMode extends GameMode {
 
         // Folding
         new FoldingAPI({
-            getFolder: () => this._folder,
+            getFolder: () => this._folderSwitcher.selectedFolder.value,
             getIsPseudoknot: () => Boolean(this._targetConditions && this._targetConditions[0]
                     && this._targetConditions[0]['type'] === 'pseudoknot')
         }).registerToScriptInterface(scriptInterfaceCtx);
@@ -1445,9 +1531,7 @@ export default class PoseEditMode extends GameMode {
         scriptInterfaceCtx.addCallback(
             'current_folder',
             lockDuringFold(
-                (): string | null => (
-                    this._folder ? this._folder.name : null
-                )
+                (): string | null => this._folderSwitcher.selectedFolder.value.name
             )
         );
 
@@ -1456,7 +1540,7 @@ export default class PoseEditMode extends GameMode {
             'set_sequence_string',
             lockDuringFold(
                 (seq: string): boolean => {
-                    if (!this._folder.isSync()) {
+                    if (!this.activeFolders().some((folder) => !folder.isSync())) {
                         throw new Error('Attempted to use asynchronous folding engine synchronously');
                     }
                     const sequence: Sequence = Sequence.fromSequenceString(seq);
@@ -1492,7 +1576,7 @@ export default class PoseEditMode extends GameMode {
             'set_target_structure',
             lockDuringFold(
                 (index: number, structure: string, startAt: number = 0): void => {
-                    if (!this._folder.isSync()) {
+                    if (this.activeFolders().some((folder) => !folder.isSync())) {
                         throw new Error('Attempted to use asynchronous folding engine synchronously');
                     }
 
@@ -1619,6 +1703,7 @@ export default class PoseEditMode extends GameMode {
             const ctrl = e.ctrlKey;
 
             if (ctrl && key === KeyCode.KeyZ) {
+                Eterna.observability.recordEvent('RunTool:LastStable');
                 this.moveUndoStackToLastStable();
                 handled = true;
             }
@@ -1786,6 +1871,10 @@ export default class PoseEditMode extends GameMode {
 
             for (let ii = 0; ii < this._poses.length; ii++) {
                 this.setPoseTarget(ii, ii);
+                const tc = this._targetConditions[ii];
+                if (tc) {
+                    this._poseFields[ii].folderName = tc.folder;
+                }
             }
 
             if (this._poseState === PoseState.NATIVE) {
@@ -1994,6 +2083,7 @@ export default class PoseEditMode extends GameMode {
             if (tc['state_name'] !== undefined) {
                 this._targetName.text = tc['state_name'];
             }
+            this._poseFields[0].folderName = tc.folder;
         }
 
         this._poses[0].clearAnnotationCanvas();
@@ -2318,8 +2408,10 @@ export default class PoseEditMode extends GameMode {
     }
 
     private async updateCurrentBlockWithDotAndMeltingPlot(index: number = -1, sync = false): Promise<UndoBlock> {
-        const datablock: UndoBlock = this.getCurrentUndoBlock(index);
-        if (this._folder && this._folder.canDotPlot && datablock.sequence.length < 500) {
+        const stateIdx = index < 0 ? this._curTargetIndex : index;
+        const datablock: UndoBlock = this.getCurrentUndoBlock(stateIdx);
+        const folder = this.folderForState(stateIdx);
+        if (folder && folder.canDotPlot && datablock.sequence.length < 500) {
             const pseudoknots = (
                 this._targetConditions
                 && this._targetConditions[0]
@@ -2643,7 +2735,11 @@ export default class PoseEditMode extends GameMode {
 
         let data: SubmitSolutionData;
 
-        if (
+        Eterna.observability.recordEvent('SubmitSolution', this.createSubmitData(details, undoBlock));
+        if (Eterna.experimentalFeatures.includes('qualtrics-report')) {
+            this.showMissionClearedPanel(null, false);
+            return;
+        } if (
             !this._puzzle.alreadySolved
             || this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
             || this._puzzle.rscript !== ''
@@ -3024,7 +3120,7 @@ export default class PoseEditMode extends GameMode {
                         ? ublk.targetPairs
                         : ublk.getPairs(EPars.DEFAULT_TEMPERATURE, pseudoknots)
                 ).getParenthesis({pseudoknots}),
-                startingFolder: this._folder.name,
+                startingFolder: this._folderSwitcher.selectedFolder.value.name,
                 annotations: this._annotationManager.createAnnotationBundle(),
                 locks: this._puzzle.puzzleLocks
             };
@@ -3146,12 +3242,31 @@ export default class PoseEditMode extends GameMode {
         return true;
     }
 
+    private moveHistoryAddMutations(before: Sequence, after: Sequence): void {
+        const muts: Move[] = [];
+        for (let ii = 0; ii < after.length; ii++) {
+            if (after.nt(ii) !== before.nt(ii)) {
+                muts.push({pos: ii + 1, base: EPars.nucleotideToString(after.nt(ii))});
+            }
+        }
+
+        if (muts.length === 0) return;
+        Eterna.observability.recordEvent('Move', {count: 1, moves: muts});
+    }
+
+    private moveHistoryAddSequence(changeType: string, seq: string): void {
+        const muts: Move[] = [];
+        muts.push({type: changeType, sequence: seq});
+        Eterna.observability.recordEvent('Move', {count: 1, moves: muts});
+    }
+
     private checkConstraints(soft: boolean = false): boolean {
         return this._constraintBar.updateConstraints({
             undoBlocks: this._seqStacks[this._stackLevel],
             targetConditions: this._targetConditions,
             puzzle: this._puzzle,
-            scriptConstraintCtx: this._scriptConstraintContext
+            scriptConstraintCtx: this._scriptConstraintContext,
+            elapsed: new Date().getTime() - this._startSolvingTime
         }, soft);
     }
 
@@ -3299,6 +3414,8 @@ export default class PoseEditMode extends GameMode {
                 ? this._curTargetIndex
                 : poseIdx;
 
+            this._poses[poseIdx].scoreFolder = this.folderForState(stateIdx);
+
             if (this._targetConditions == null || this._targetConditions[stateIdx] === undefined
                 || (this._targetConditions[stateIdx] as TargetConditions)['type'] === undefined) {
                 continue;
@@ -3367,18 +3484,24 @@ export default class PoseEditMode extends GameMode {
             this._toolbar.redoButton.enabled = !(this._stackLevel + 1 > this._stackSize - 1);
         }
 
-        const constraintsSatisfied: boolean = this.checkConstraints();
-        for (let ii = 0; ii < this._poses.length; ii++) {
-            this.getCurrentUndoBlock(ii).stable = constraintsSatisfied;
-        }
-
         // Update open dialogs
         this.updateSpecBox();
         this.updateCopySequenceDialog();
         this.updateCopyStructureDialog();
 
+        // Reevaluate constraints and submit if solved (and we want to autosubmit)
+        this.checkSolved();
+    }
+
+    private checkSolved() {
+        const constraintsSatisfied = this.checkConstraints();
+        for (let ii = 0; ii < this._poses.length; ii++) {
+            this.getCurrentUndoBlock(ii).stable = constraintsSatisfied;
+        }
+
+        const submittable = this.checkConstraints(this._puzzle.isSoftConstraint);
         if (
-            (constraintsSatisfied && this._rscript.done)
+            (submittable && this._rscript.done)
             || (this._puzzle.alreadySolved && this._puzzle.rscript === '')
         ) {
             if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL && !this._alreadyCleared) {
@@ -3819,7 +3942,7 @@ export default class PoseEditMode extends GameMode {
         this._seqStacks[this._stackLevel] = [];
 
         for (let ii = 0; ii < this._poses.length; ii++) {
-            this._seqStacks[this._stackLevel][ii] = new UndoBlock(new Sequence([]), this._folder?.name ?? '');
+            this._seqStacks[this._stackLevel][ii] = new UndoBlock(new Sequence([]), this.folderForState(ii).name);
             this._seqStacks[this._stackLevel][ii].fromJSON(fd[ii], this._puzzle.targetConditions[ii]);
         }
 
@@ -3936,10 +4059,6 @@ export default class PoseEditMode extends GameMode {
         const pseudoknots = (this._targetConditions && this._targetConditions[ii] !== undefined
             && (this._targetConditions[ii] as TargetConditions)['type'] === 'pseudoknot');
 
-        if (!this._folder) {
-            throw new Error('Cannot progress through poseEditByTargetFoldTarget with a null Folder!');
-        }
-
         const tc = this._targetConditions[ii];
 
         // The rest of this function basically takes tc and a couple other forms
@@ -3954,25 +4073,29 @@ export default class PoseEditMode extends GameMode {
         const forceStruct = tc ? tc['force_struct'] : undefined;
         if (tc === undefined || (tc && tc['type'] === 'single')) {
             if (sync) {
-                if (!this._folder.isSync()) {
+                const folder = this.folderForState(ii);
+                if (!folder.isSync()) {
                     throw new Error('Cannot call asynchronous folder synchronously');
                 }
-                bestPairs = this._folder.foldSequence(this._puzzle.transformSequence(seq, ii), null, forceStruct);
+                bestPairs = folder.foldSequence(this._puzzle.transformSequence(seq, ii), null, forceStruct);
             } else {
-                bestPairs = await this._folder.foldSequence(this._puzzle.transformSequence(seq, ii), null, forceStruct);
+                bestPairs = await this.folderForState(ii).foldSequence(
+                    this._puzzle.transformSequence(seq, ii), null, forceStruct
+                );
             }
         } else if (tc['type'] === 'pseudoknot') {
             if (sync) {
-                if (!this._folder.isSync()) {
+                const folder = this.folderForState(ii);
+                if (!folder.isSync()) {
                     throw new Error('Cannot call asynchronous folder synchronously');
                 }
-                bestPairs = this._folder.foldSequence(
+                bestPairs = folder.foldSequence(
                     this._puzzle.transformSequence(seq, ii),
                     null, forceStruct,
                     true
                 );
             } else {
-                bestPairs = await this._folder.foldSequence(
+                bestPairs = await this.folderForState(ii).foldSequence(
                     this._puzzle.transformSequence(seq, ii),
                     null, forceStruct,
                     true
@@ -3981,7 +4104,7 @@ export default class PoseEditMode extends GameMode {
         } else if (tc['type'] === 'aptamer') {
             bonus = tc['bonus'] as number;
             sites = tc['site'] as number[];
-            bestPairs = this._folder.foldSequenceWithBindingSite(
+            bestPairs = this.folderForState(ii).foldSequenceWithBindingSite(
                 this._puzzle.transformSequence(seq, ii),
                 this._targetPairs[ii],
                 sites, Number(bonus),
@@ -3995,26 +4118,28 @@ export default class PoseEditMode extends GameMode {
                 log.debug('cofold');
                 const fullSeq = seq.concat(Sequence.fromSequenceString(`&${tc['oligo_sequence']}`));
                 malus = int(tc['malus'] as number * 100);
-                bestPairs = this._folder.cofoldSequence(fullSeq, null, malus, forceStruct);
+                bestPairs = this.folderForState(ii).cofoldSequence(fullSeq, null, malus, forceStruct);
             } else if (foldMode === OligoMode.EXT5P) {
                 const fullSeq = Sequence.fromSequenceString(tc['oligo_sequence'] as string).concat(seq);
                 if (sync) {
-                    if (!this._folder.isSync()) {
+                    const folder = this.folderForState(ii);
+                    if (!folder.isSync()) {
                         throw new Error('Cannot call asynchronous folder synchronously');
                     }
-                    bestPairs = this._folder.foldSequence(fullSeq, null, forceStruct);
+                    bestPairs = folder.foldSequence(fullSeq, null, forceStruct);
                 } else {
-                    bestPairs = await this._folder.foldSequence(fullSeq, null, forceStruct);
+                    bestPairs = await this.folderForState(ii).foldSequence(fullSeq, null, forceStruct);
                 }
             } else {
                 const fullSeq = seq.concat(Sequence.fromSequenceString(tc['oligo_sequence'] as string));
                 if (sync) {
-                    if (!this._folder.isSync()) {
+                    const folder = this.folderForState(ii);
+                    if (!folder.isSync()) {
                         throw new Error('Cannot call asynchronous folder synchronously');
                     }
-                    bestPairs = this._folder.foldSequence(fullSeq, null, forceStruct);
+                    bestPairs = folder.foldSequence(fullSeq, null, forceStruct);
                 } else {
-                    bestPairs = await this._folder.foldSequence(fullSeq, null, forceStruct);
+                    bestPairs = await this.folderForState(ii).foldSequence(fullSeq, null, forceStruct);
                 }
             }
         } else if (tc['type'] === 'aptamer+oligo') {
@@ -4027,17 +4152,17 @@ export default class PoseEditMode extends GameMode {
                 log.debug('cofold');
                 const fullSeq = seq.concat(Sequence.fromSequenceString(`&${tc['oligo_sequence']}`));
                 malus = int(tc['malus'] as number * 100);
-                bestPairs = this._folder.cofoldSequenceWithBindingSite(
+                bestPairs = this.folderForState(ii).cofoldSequenceWithBindingSite(
                     fullSeq, sites, bonus, forceStruct, malus
                 );
             } else if (foldMode === OligoMode.EXT5P) {
                 const fullSeq = Sequence.fromSequenceString(tc['oligo_sequence'] as string).concat(seq);
-                bestPairs = this._folder.foldSequenceWithBindingSite(
+                bestPairs = this.folderForState(ii).foldSequenceWithBindingSite(
                     fullSeq, this._targetPairs[ii], sites, Number(bonus), tc['fold_version']
                 );
             } else {
                 const fullSeq = seq.concat(Sequence.fromSequenceString(tc['oligo_sequence'] as string));
-                bestPairs = this._folder.foldSequenceWithBindingSite(
+                bestPairs = this.folderForState(ii).foldSequenceWithBindingSite(
                     fullSeq, this._targetPairs[ii], sites, Number(bonus), tc['fold_version']
                 );
             }
@@ -4059,12 +4184,12 @@ export default class PoseEditMode extends GameMode {
                 desiredPairs: null,
                 temp: EPars.DEFAULT_TEMPERATURE
             };
-            const mfold: MultiFoldResult = this._folder.getCache(key) as MultiFoldResult;
+            const mfold: MultiFoldResult = this.folderForState(ii).getCache(key) as MultiFoldResult;
 
             if (mfold === null && !this.forceSync) {
                 // multistrand folding can be really slow
                 // break it down to each permutation
-                const ops: PoseOp[] | null = this._folder.multifoldUnroll(
+                const ops: PoseOp[] | null = this.folderForState(ii).multifoldUnroll(
                     this._puzzle.transformSequence(seq, ii), null, oligos
                 );
                 this._opQueue.unshift(new PoseOp(
@@ -4079,7 +4204,7 @@ export default class PoseEditMode extends GameMode {
                 }
                 return;
             } else {
-                const best: MultiFoldResult = this._folder.multifold(
+                const best: MultiFoldResult = this.folderForState(ii).multifold(
                     this._puzzle.transformSequence(seq, ii),
                     null,
                     oligos
@@ -4090,7 +4215,10 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
-        const undoBlock: UndoBlock = new UndoBlock(this._puzzle.transformSequence(seq, ii), this._folder.name);
+        const undoBlock: UndoBlock = new UndoBlock(
+            this._puzzle.transformSequence(seq, ii),
+            this.folderForState(ii).name
+        );
         Assert.assertIsDefined(bestPairs);
         undoBlock.setPairs(bestPairs, EPars.DEFAULT_TEMPERATURE, pseudoknots);
         undoBlock.targetOligos = this._targetOligos[ii];
@@ -4256,8 +4384,13 @@ export default class PoseEditMode extends GameMode {
         }
         this.savePosesMarkersContexts();
 
+        const before: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
+
         this._stackLevel++;
         this.moveUndoStack();
+
+        const after: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
+        this.moveHistoryAddMutations(before, after);
 
         this.updateScore();
         this.transformPosesMarkers();
@@ -4269,8 +4402,13 @@ export default class PoseEditMode extends GameMode {
         }
         this.savePosesMarkersContexts();
 
+        const before: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
+
         this._stackLevel--;
         this.moveUndoStack();
+
+        const after: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
+        this.moveHistoryAddMutations(before, after);
 
         this.updateScore();
         this.transformPosesMarkers();
@@ -4279,10 +4417,18 @@ export default class PoseEditMode extends GameMode {
     private moveUndoStackToLastStable(): void {
         this.savePosesMarkersContexts();
 
+        const before: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
+
         const stackLevel: number = this._stackLevel;
         while (this._stackLevel >= 1) {
             if (this.getCurrentUndoBlock(0).stable) {
                 this.moveUndoStack();
+
+                const after: Sequence = this._puzzle.transformSequence(
+                    this.getCurrentUndoBlock(0).sequence, 0
+                );
+
+                this.moveHistoryAddMutations(before, after);
 
                 this.updateScore();
                 this.transformPosesMarkers();
@@ -4346,8 +4492,23 @@ export default class PoseEditMode extends GameMode {
 
     private _helpBar: HelpBar;
 
-    protected get _folder(): Folder {
-        return this._folderSwitcher.selectedFolder.value;
+    protected folderForState(stateIndex: number): Folder {
+        const stateFolderName = this._targetConditions[stateIndex]?.folder;
+        if (stateFolderName) {
+            const folder = FolderManager.instance.getFolder(stateFolderName);
+            Assert.assertIsDefined(folder, `Folder ${stateFolderName} configured for state ${stateIndex} does not exist`);
+            return folder;
+        } else {
+            return this._folderSwitcher.selectedFolder.value;
+        }
+    }
+
+    private activeFolders(): Folder[] {
+        const folders = [];
+        for (let i = 0; i < this._poses.length; i++) {
+            folders.push(this.folderForState(i));
+        }
+        return folders;
     }
 
     // / Asynch folding
@@ -4419,6 +4580,11 @@ export default class PoseEditMode extends GameMode {
 
     private _lastStampedTLoopA = -1;
     private _lastStampedTLoopB = -1;
+
+    private _qualtricsReporter: PostMessageReporter = new PostMessageReporter(
+        'qualtrics',
+        'stanfordmedicine.yul1.qualtrics.com'
+    );
 
     private static readonly FOLDING_LOCK = 'Folding';
 }

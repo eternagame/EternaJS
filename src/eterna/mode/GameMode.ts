@@ -221,19 +221,13 @@ export default abstract class GameMode extends AppMode {
             this._poseFields.push(newField);
             this._poses.push(newField.pose);
             newField.getEnergyDelta = () => {
+                const poseidx = this._isPipMode ? idx : this._curTargetIndex;
+                const folder = this.folderForState(poseidx);
                 // Sanity check
-                if (this._folder !== null) {
-                    const poseidx = this._isPipMode ? idx : this._curTargetIndex;
-
+                if (folder !== null) {
                     const pseudoknots: boolean = this._targetConditions != null
                         && this._targetConditions[0] != null
                         && this._targetConditions[0]['type'] === 'pseudoknot';
-                    const score = (sequence: Sequence, pairs: SecStruct) => {
-                        Assert.assertIsDefined(this._folder);
-                        return this._folder.scoreStructures(
-                            sequence, pairs, pseudoknots
-                        );
-                    };
 
                     const ublk = this.getCurrentUndoBlock(poseidx);
                     Assert.assertIsDefined(ublk, 'getEnergyDelta is being called where UndoBlocks are unavailable!');
@@ -260,7 +254,14 @@ export default abstract class GameMode extends AppMode {
                         ublk.oligoMode
                     );
 
-                    return score(targetSeq, targetPairs.getSatisfiedPairs(targetSeq)) - score(nativeSeq, nativePairs);
+                    const targetEnergy = folder.scoreStructures(
+                        targetSeq, targetPairs.getSatisfiedPairs(targetSeq), pseudoknots
+                    );
+                    const nativeEnergy = folder.scoreStructures(
+                        nativeSeq, nativePairs, pseudoknots
+                    );
+
+                    return targetEnergy - nativeEnergy;
                 }
                 return -1;
             };
@@ -644,6 +645,7 @@ export default abstract class GameMode extends AppMode {
         // Already live
         if (!pasteDialog) return;
         pasteDialog.applyClicked.connect((sequence) => {
+            Eterna.observability.recordEvent('RunTool:PasteSequence');
             this.pasteSequence(sequence);
         });
     }
@@ -653,6 +655,7 @@ export default abstract class GameMode extends AppMode {
         // Already live
         if (!finder) return;
         finder.jumpClicked.connect((baseNum) => {
+            Eterna.observability.recordEvent('Display:JumpToNt');
             if (this._isPipMode) {
                 this._poses.forEach((p) => p.focusNucleotide(baseNum));
             } else {
@@ -662,6 +665,7 @@ export default abstract class GameMode extends AppMode {
     }
 
     protected showNucleotideRange(): void {
+        Eterna.observability.recordEvent('Display:ShowRange');
         const fullRange: [number, number] = [
             1,
             Math.max(...this._poses.map((p) => p.fullSequenceLength))
@@ -688,6 +692,7 @@ export default abstract class GameMode extends AppMode {
         // Already live
         if (!factorDialog) return;
         factorDialog.factor.connect((factor) => {
+            Eterna.observability.recordEvent('Display:ExplosionFactor', {factor});
             this._poseFields.forEach((pf) => { pf.explosionFactor = factor; });
         });
     }
@@ -742,17 +747,16 @@ export default abstract class GameMode extends AppMode {
             } else if (!ctrl && key === KeyCode.KeyL) {
                 Eterna.settings.usePuzzlerLayout.value = !Eterna.settings.usePuzzlerLayout.value;
                 handled = true;
-            } else if (ctrl && key === KeyCode.KeyS) {
-                this.downloadSVG();
-                handled = true;
             } else if (key === KeyCode.BracketLeft) {
                 const factor = Math.max(0, Math.round((this._poseFields[0].explosionFactor - 0.25) * 1000) / 1000);
+                Eterna.observability.recordEvent('Display:ExplosionFactor', {factor});
                 for (const pf of this._poseFields) {
                     pf.explosionFactor = factor;
                 }
                 handled = true;
             } else if (key === KeyCode.BracketRight) {
                 const factor = Math.max(0, Math.round((this._poseFields[0].explosionFactor + 0.25) * 1000) / 1000);
+                Eterna.observability.recordEvent('Display:ExplosionFactor', {factor});
                 for (const pf of this._poseFields) {
                     pf.explosionFactor = factor;
                 }
@@ -789,7 +793,7 @@ export default abstract class GameMode extends AppMode {
 
     // Things that might or might not be set in children so that getEnergyDelta can get set in setPoseFields
     // as well as being able to handle other shared code
-    protected get _folder(): Folder | null {
+    protected folderForState(_stateIdx: number): Folder | null {
         return null;
     }
 

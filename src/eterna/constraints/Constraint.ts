@@ -21,6 +21,7 @@ export interface ConstraintContext {
     targetConditions?: (TargetConditions | undefined)[];
     puzzle?: Puzzle;
     scriptConstraintCtx?: ExternalInterfaceCtx;
+    elapsed?: number;
 }
 
 export default abstract class Constraint<ConstraintStatus extends BaseConstraintStatus> {

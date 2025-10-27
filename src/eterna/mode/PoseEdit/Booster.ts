@@ -137,6 +137,10 @@ export default class Booster {
         return this._buttonStateTextures;
     }
 
+    public get scriptID() {
+        return this._scriptID;
+    }
+
     public onLoad(): void {
         this.executeScript(null, 'ON_LOAD', -1);
     }
