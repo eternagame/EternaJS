@@ -652,6 +652,9 @@ export default class Toolbar extends ContainerObject {
 
     private setupButton(props: ToolbarParam, enabled: boolean = true): ToolbarButton {
         const button = ToolbarButton.createButton(props);
+        this.regs.add(button.clicked.connect(() => {
+            Eterna.observability.recordEvent(`ToolbarAction:${props.id}`);
+        }));
         if (enabled) {
             this._toolShelf.addButton(button);
             this.setupButtonDrag(button, 'shelf');

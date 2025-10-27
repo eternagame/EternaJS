@@ -261,6 +261,10 @@ export default class FeedbackViewMode extends GameMode {
         this.updateUILayout();
     }
 
+    protected enter() {
+        Eterna.observability.recordEvent('ModeEnter', {mode: 'FeedbackView', puzzle: this._puzzle.nodeID});
+    }
+
     private setSolution(solution: Solution) {
         this._solution = solution;
         this._sequence = solution.sequence.slice(0);

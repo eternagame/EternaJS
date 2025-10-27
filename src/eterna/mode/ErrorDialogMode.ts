@@ -5,6 +5,7 @@ import {
 import Fonts from 'eterna/util/Fonts';
 import GameButton from 'eterna/ui/GameButton';
 import GameWindow from 'eterna/ui/GameWindow';
+import Eterna from 'eterna/Eterna';
 
 export default class ErrorDialogMode extends AppMode {
     public readonly error: Error | ErrorEvent;
@@ -109,6 +110,10 @@ export default class ErrorDialogMode extends AppMode {
         updateView();
         Assert.assertIsDefined(this.regs);
         this.regs.add(this.resized.connect(updateView));
+    }
+
+    protected enter() {
+        Eterna.observability.recordEvent('ModeEnter', {mode: 'ErrorDialog'});
     }
 
     private readonly _title: string;

@@ -5,6 +5,7 @@ import EternaApp from 'eterna/EternaApp';
 import EternaSettings from './settings/EternaSettings';
 import GameClient from './net/GameClient';
 import ErrorDialogMode from './mode/ErrorDialogMode';
+import ObservabilityManager from './observability/ObservabilityManager';
 
 /** Return env.APP_SERVER_URL; if unspecified, default to window.location.origin */
 function GetServerURL(): string {
@@ -38,6 +39,7 @@ export default class Eterna {
     public static saveManager: SaveGameManager;
     public static client: GameClient;
     public static chat: ChatManager;
+    public static observability: ObservabilityManager;
 
     public static playerID: number;
     public static playerName: string;

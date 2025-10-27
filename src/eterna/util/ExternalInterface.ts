@@ -1,6 +1,7 @@
 import log from 'loglevel';
 import {Registration, UnitSignal} from 'signals';
 import {Deferred, Assert} from 'flashbang';
+import Eterna from 'eterna/Eterna';
 
 // We have to deal with callbacks weakly. Ideally there'd be a mechanism to make this a bit
 // more explicit using `unknown`, but I couldn't immediately figure out a way to do it
@@ -17,7 +18,10 @@ export class ExternalInterfaceCtx {
     public readonly changed = new UnitSignal();
 
     public addCallback(name: string, callback: AnyFunction): void {
-        this.callbacks.set(name, callback);
+        this.callbacks.set(name, (...args) => {
+            Eterna.observability.recordEvent(`ScriptFunc:${name}`);
+            return callback(...args);
+        });
         this.changed.emit();
     }
 

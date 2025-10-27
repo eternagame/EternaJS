@@ -134,6 +134,7 @@ export default class MissionIntroMode extends AppMode {
 
     protected enter(): void {
         super.enter();
+        Eterna.observability.recordEvent('ModeEnter', {mode: 'MissionIntro'});
         Eterna.chat.pushHideChat();
     }
 

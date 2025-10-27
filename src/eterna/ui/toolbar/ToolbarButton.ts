@@ -34,6 +34,7 @@ export type ToolbarParam = {
     tooltip:string,
     selectedImg?:string | Texture,
     hotKey?:KeyCode,
+    hotKeyCtrl?: boolean;
     rscriptID?:RScriptUIElementID,
     color?:{color:number, alpha:number},
     toggleColor?:{color:number, alpha:number},
@@ -78,7 +79,7 @@ export default class ToolbarButton extends GameButton {
         this.disabled(info.disableImg);
         if (info.selectedImg) this.selected(info.selectedImg);
         this.tooltip(info.tooltip);
-        if (info.hotKey) this.hotkey(info.hotKey);
+        if (info.hotKey) this.hotkey(info.hotKey, info.hotKeyCtrl);
         if (info.rscriptID) this.rscriptID(info.rscriptID);
 
         if (info.label) {
