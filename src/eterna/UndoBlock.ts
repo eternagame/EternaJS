@@ -68,6 +68,7 @@ export interface TargetConditions {
     bonus?: number;
     malus?: number;
     folder?: string;
+    reverseComplement?: boolean;
 }
 
 export interface OligoDef {

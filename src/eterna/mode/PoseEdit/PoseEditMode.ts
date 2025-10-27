@@ -916,7 +916,7 @@ export default class PoseEditMode extends GameMode {
             }
 
             Assert.assertIsDefined(seq);
-            this._poses[ii].sequence = this._puzzle.transformSequence(seq, ii);
+            this._poses[ii].sequence = this._puzzle.transformSequence(seq, ii, 0);
             if (this._puzzle.barcodeIndices != null) {
                 this._poses[ii].barcodes = this._puzzle.barcodeIndices;
             }
@@ -1060,12 +1060,12 @@ export default class PoseEditMode extends GameMode {
             null,
             () => {
                 if (this._params.isReset) {
-                    const newSeq: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
+                    const newSeq: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
                     this.moveHistoryAddSequence('reset', newSeq.sequenceString());
                 } else {
                     this._startSolvingTime = new Date().getTime();
                     Eterna.observability.recordEvent('Move:StartSeq', this._puzzle.transformSequence(
-                        this.getCurrentUndoBlock(0).sequence, 0
+                        this.getCurrentUndoBlock(0).sequence, 0, 0
                     ).sequenceString());
                 }
 
@@ -2090,6 +2090,9 @@ export default class PoseEditMode extends GameMode {
         this._poses[0].stateIndex = this._curTargetIndex;
 
         if (this._poseState === PoseState.NATIVE) {
+            this._poses[0].sequence = this._puzzle.transformSequence(
+                this.getCurrentUndoBlock(targetIndex).sequence, targetIndex, targetIndex
+            );
             this.setToNativeMode();
         } else {
             this.setPoseTarget(0, this._curTargetIndex);
@@ -2135,7 +2138,7 @@ export default class PoseEditMode extends GameMode {
         if (this._targetConditions[targetIndex] !== undefined) {
             const tc = this._targetConditions[targetIndex] as TargetConditions;
             this._poses[poseIndex].sequence = this._puzzle.transformSequence(
-                this._poses[targetIndex].sequence, targetIndex
+                this.getCurrentUndoBlock(targetIndex).sequence, targetIndex, targetIndex
             );
             const tcType: TargetType = tc['type'];
 
@@ -2641,7 +2644,7 @@ export default class PoseEditMode extends GameMode {
         details.comment = details.comment.replace(newlinereg, "'");
         details.title = details.title.replace(newlinereg, "'");
 
-        const seqString: string = this._puzzle.transformSequence(undoBlock.sequence, 0).sequenceString();
+        const seqString: string = this._puzzle.transformSequence(undoBlock.sequence, 0, 0).sequenceString();
 
         const pseudoknots = undoBlock.targetConditions?.type === 'pseudoknot';
 
@@ -2775,7 +2778,7 @@ export default class PoseEditMode extends GameMode {
             return;
         }
 
-        const seq = this._puzzle.transformSequence(undoBlock.sequence, 0);
+        const seq = this._puzzle.transformSequence(undoBlock.sequence, 0, 0);
 
         if (data['error'] !== undefined) {
             log.debug(`Got solution submission error: ${data['error']}`);
@@ -3229,7 +3232,7 @@ export default class PoseEditMode extends GameMode {
         }
 
         for (let ii = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].sequence = this._puzzle.transformSequence(new Sequence(a), ii);
+            this._poses[ii].sequence = this._puzzle.transformSequence(new Sequence(a), ii, 0);
             this._poses[ii].puzzleLocks = locks;
 
             const annotations: AnnotationDataBundle | null = savedAnnotations[ii];
@@ -3763,8 +3766,18 @@ export default class PoseEditMode extends GameMode {
                 }
             }
 
+            const poseStateIdx: number = (ii === 0 && !this._isPipMode)
+                ? this._curTargetIndex
+                : ii;
+            const mutatedStateIdx: number = (targetIndex === 0 && !this._isPipMode)
+                ? this._curTargetIndex
+                : targetIndex;
             // In all cases, update these properties from the pose that was originally updated
-            this._poses[ii].sequence = this._poses[targetIndex].sequence;
+            this._poses[ii].sequence = this._puzzle.transformSequence(
+                this._poses[targetIndex].sequence,
+                poseStateIdx,
+                mutatedStateIdx
+            );
             this._poses[ii].puzzleLocks = this._poses[targetIndex].puzzleLocks;
             this._poses[ii].librarySelections = this._poses[targetIndex].librarySelections;
         }
@@ -4054,7 +4067,12 @@ export default class PoseEditMode extends GameMode {
         // re-queue itself without triggering the stack push coded above
         ii %= this._targetPairs.length;
 
-        const seq: Sequence = this._poses[ii].sequence;
+        // We have to pull the sequence from the pose (we haven't constructed our new undo block
+        // yet), but the puzzle may apply sequence transformations. Figure out what
+        // state of the pose we're reading the sequence from, and then apply any transforms
+        // to the state we're trying to fold into
+        const poseState = (this._isPipMode || ii > 0) ? ii : this._curTargetIndex;
+        const seq: Sequence = this._puzzle.transformSequence(this._poses[ii].sequence, ii, poseState);
 
         const pseudoknots = (this._targetConditions && this._targetConditions[ii] !== undefined
             && (this._targetConditions[ii] as TargetConditions)['type'] === 'pseudoknot');
@@ -4077,10 +4095,10 @@ export default class PoseEditMode extends GameMode {
                 if (!folder.isSync()) {
                     throw new Error('Cannot call asynchronous folder synchronously');
                 }
-                bestPairs = folder.foldSequence(this._puzzle.transformSequence(seq, ii), null, forceStruct);
+                bestPairs = folder.foldSequence(seq, null, forceStruct);
             } else {
                 bestPairs = await this.folderForState(ii).foldSequence(
-                    this._puzzle.transformSequence(seq, ii), null, forceStruct
+                    seq, null, forceStruct
                 );
             }
         } else if (tc['type'] === 'pseudoknot') {
@@ -4090,13 +4108,13 @@ export default class PoseEditMode extends GameMode {
                     throw new Error('Cannot call asynchronous folder synchronously');
                 }
                 bestPairs = folder.foldSequence(
-                    this._puzzle.transformSequence(seq, ii),
+                    seq,
                     null, forceStruct,
                     true
                 );
             } else {
                 bestPairs = await this.folderForState(ii).foldSequence(
-                    this._puzzle.transformSequence(seq, ii),
+                    seq,
                     null, forceStruct,
                     true
                 );
@@ -4105,7 +4123,7 @@ export default class PoseEditMode extends GameMode {
             bonus = tc['bonus'] as number;
             sites = tc['site'] as number[];
             bestPairs = this.folderForState(ii).foldSequenceWithBindingSite(
-                this._puzzle.transformSequence(seq, ii),
+                seq,
                 this._targetPairs[ii],
                 sites, Number(bonus),
                 (tc as TargetConditions)['fold_version']
@@ -4178,7 +4196,7 @@ export default class PoseEditMode extends GameMode {
 
             const key: CacheKey = {
                 primitive: 'multifold',
-                seq: this._puzzle.transformSequence(seq, ii).baseArray,
+                seq: seq.baseArray,
                 secondBestPairs: null,
                 oligos,
                 desiredPairs: null,
@@ -4190,7 +4208,7 @@ export default class PoseEditMode extends GameMode {
                 // multistrand folding can be really slow
                 // break it down to each permutation
                 const ops: PoseOp[] | null = this.folderForState(ii).multifoldUnroll(
-                    this._puzzle.transformSequence(seq, ii), null, oligos
+                    seq, null, oligos
                 );
                 this._opQueue.unshift(new PoseOp(
                     ii + 1,
@@ -4205,7 +4223,7 @@ export default class PoseEditMode extends GameMode {
                 return;
             } else {
                 const best: MultiFoldResult = this.folderForState(ii).multifold(
-                    this._puzzle.transformSequence(seq, ii),
+                    seq,
                     null,
                     oligos
                 ) as MultiFoldResult;
@@ -4215,10 +4233,7 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
-        const undoBlock: UndoBlock = new UndoBlock(
-            this._puzzle.transformSequence(seq, ii),
-            this.folderForState(ii).name
-        );
+        const undoBlock: UndoBlock = new UndoBlock(seq, this.folderForState(ii).name);
         Assert.assertIsDefined(bestPairs);
         undoBlock.setPairs(bestPairs, EPars.DEFAULT_TEMPERATURE, pseudoknots);
         undoBlock.targetOligos = this._targetOligos[ii];
@@ -4359,7 +4374,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     private setPosesWithUndoBlock(ii: number, undoBlock: UndoBlock): void {
-        this._poses[ii].sequence = this._puzzle.transformSequence(undoBlock.sequence, ii);
+        this._poses[ii].sequence = this._puzzle.transformSequence(undoBlock.sequence, ii, ii);
         this._poses[ii].puzzleLocks = undoBlock.puzzleLocks;
         this._poses[ii].librarySelections = undoBlock.librarySelections;
     }
@@ -4384,12 +4399,12 @@ export default class PoseEditMode extends GameMode {
         }
         this.savePosesMarkersContexts();
 
-        const before: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
+        const before: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
 
         this._stackLevel++;
         this.moveUndoStack();
 
-        const after: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
+        const after: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
         this.moveHistoryAddMutations(before, after);
 
         this.updateScore();
@@ -4402,12 +4417,12 @@ export default class PoseEditMode extends GameMode {
         }
         this.savePosesMarkersContexts();
 
-        const before: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
+        const before: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
 
         this._stackLevel--;
         this.moveUndoStack();
 
-        const after: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
+        const after: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
         this.moveHistoryAddMutations(before, after);
 
         this.updateScore();
@@ -4417,7 +4432,7 @@ export default class PoseEditMode extends GameMode {
     private moveUndoStackToLastStable(): void {
         this.savePosesMarkersContexts();
 
-        const before: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
+        const before: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
 
         const stackLevel: number = this._stackLevel;
         while (this._stackLevel >= 1) {
@@ -4425,7 +4440,7 @@ export default class PoseEditMode extends GameMode {
                 this.moveUndoStack();
 
                 const after: Sequence = this._puzzle.transformSequence(
-                    this.getCurrentUndoBlock(0).sequence, 0
+                    this.getCurrentUndoBlock(0).sequence, 0, 0
                 );
 
                 this.moveHistoryAddMutations(before, after);
