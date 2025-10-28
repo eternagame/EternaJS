@@ -49,6 +49,7 @@ import {
 } from 'eterna/constraints/constraints/ConfidenceConstraint';
 import TLoopConstraint from 'eterna/constraints/constraints/TLoopConstraint';
 import TimerConstraint from 'eterna/constraints/constraints/TimerConstraint';
+import {MaximumEnergyConstraint, MinimumEnergyConstraint} from 'eterna/constraints/constraints/EnergyConstraint';
 import SolutionManager from './SolutionManager';
 import Puzzle, {PuzzleType} from './Puzzle';
 
@@ -397,6 +398,16 @@ export default class PuzzleManager {
                     case TimerConstraint.NAME:
                         constraints.push(new TimerConstraint(Number(parameter)));
                         break;
+                    case MaximumEnergyConstraint.NAME: {
+                        const [energy, state] = parameter.split('|');
+                        constraints.push(new MaximumEnergyConstraint(Number(energy), Number(state)));
+                        break;
+                    }
+                    case MinimumEnergyConstraint.NAME: {
+                        const [energy, state] = parameter.split('|');
+                        constraints.push(new MinimumEnergyConstraint(Number(energy), Number(state)));
+                        break;
+                    }
                     default:
                         log.warn(`Unknown constraint ${name} - skipping`);
                 }
