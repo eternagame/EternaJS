@@ -3323,16 +3323,14 @@ export default class PoseEditMode extends GameMode {
         // let dn: GameObject = (<GameObject>Application.instance.get_application_gui("Design Name"));
         // if (dn != null) dn.visible = (this._stack_level === 0);
 
-        const undoBlock: UndoBlock = this.getCurrentUndoBlock();
-        const pseudoknots: boolean = (
-            this._targetConditions
-            && this._targetConditions[this._curTargetIndex] !== undefined
-            && (this._targetConditions[this._curTargetIndex] as TargetConditions).type === 'pseudoknot'
-        );
-
         if (!this._paused) {
             for (let ii = 0; ii < this._poses.length; ii++) {
                 if (ii === 0 && this._poseState === PoseState.NATIVE && !this._isPipMode) {
+                    const pseudoknots: boolean = (
+                        this._targetConditions
+                        && this._targetConditions[this._curTargetIndex] !== undefined
+                        && (this._targetConditions[this._curTargetIndex] as TargetConditions).type === 'pseudoknot'
+                    );
                     this._poses[0].setOligos(this.getCurrentUndoBlock().targetOligos,
                         this.getCurrentUndoBlock().oligoOrder,
                         this.getCurrentUndoBlock().oligosPaired);
@@ -3350,6 +3348,11 @@ export default class PoseEditMode extends GameMode {
                     );
                     continue;
                 }
+                const pseudoknots: boolean = (
+                    this._targetConditions
+                    && this._targetConditions[ii] !== undefined
+                    && (this._targetConditions[ii] as TargetConditions).type === 'pseudoknot'
+                );
                 this._poses[ii].setOligos(this.getCurrentUndoBlock(ii).targetOligos,
                     this.getCurrentUndoBlock(ii).oligoOrder,
                     this.getCurrentUndoBlock(ii).oligosPaired);
@@ -3425,6 +3428,7 @@ export default class PoseEditMode extends GameMode {
             }
 
             const tc = this._targetConditions[stateIdx] as TargetConditions;
+            const pseudoknots = tc.type === 'pseudoknot';
             if (Puzzle.isAptamerType(tc['type'])) {
                 this._poses[poseIdx].setMolecularBinding(
                     tc['site'],
@@ -3477,6 +3481,12 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
+        const undoBlock: UndoBlock = this.getCurrentUndoBlock();
+        const pseudoknots: boolean = (
+            this._targetConditions
+            && this._targetConditions[this._curTargetIndex] !== undefined
+            && (this._targetConditions[this._curTargetIndex] as TargetConditions).type === 'pseudoknot'
+        );
         const numAU: number = undoBlock.getParam(UndoBlockParam.AU, EPars.DEFAULT_TEMPERATURE, pseudoknots) as number;
         const numGU: number = undoBlock.getParam(UndoBlockParam.GU, EPars.DEFAULT_TEMPERATURE, pseudoknots) as number;
         const numGC: number = undoBlock.getParam(UndoBlockParam.GC, EPars.DEFAULT_TEMPERATURE, pseudoknots) as number;
