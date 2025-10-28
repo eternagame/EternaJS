@@ -8,11 +8,11 @@ import Eterna from 'eterna/Eterna';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 
-interface MaxMutationConstraintStatus extends BaseConstraintStatus {
+interface MutationConstraintStatus extends BaseConstraintStatus {
     mutations: number;
 }
 
-abstract class MutationConstraint extends Constraint<MaxMutationConstraintStatus> {
+abstract class MutationConstraint extends Constraint<MutationConstraintStatus> {
     public readonly mutations: number;
     public readonly mode: 'min' | 'max';
 
@@ -22,7 +22,7 @@ abstract class MutationConstraint extends Constraint<MaxMutationConstraintStatus
         this.mode = mode;
     }
 
-    public evaluate(context: ConstraintContext): MaxMutationConstraintStatus {
+    public evaluate(context: ConstraintContext): MutationConstraintStatus {
         if (!context.puzzle) throw new Error('Mutation constraint requires beginning sequence, which is unavailable');
 
         const mutations: number = EPars.sequenceDiff(
@@ -36,7 +36,7 @@ abstract class MutationConstraint extends Constraint<MaxMutationConstraintStatus
         };
     }
 
-    public getConstraintBoxConfig(status: MaxMutationConstraintStatus): ConstraintBoxConfig {
+    public getConstraintBoxConfig(status: MutationConstraintStatus): ConstraintBoxConfig {
         const statText = new StyledTextBuilder()
             .append(
                 status.mutations.toString(),
@@ -52,18 +52,11 @@ abstract class MutationConstraint extends Constraint<MaxMutationConstraintStatus
             satisfied: status.satisfied,
             tooltip,
             drawBG: true,
-            icon: MaximumMutationConstraint._icon,
+            icon: MutationConstraint._icon,
             showOutline: true,
             statText,
             clarificationText: `AT ${this.mode === 'max' ? 'MOST' : 'LEAST'}${this.mutations.toString().length > 2 ? ' \n' : ' '}${this.mutations} CHANGES`
         };
-    }
-
-    public serialize(): [string, string] {
-        return [
-            MaximumMutationConstraint.NAME,
-            this.mutations.toString()
-        ];
     }
 
     private static get _icon(): Texture {
@@ -106,11 +99,25 @@ export class MaximumMutationConstraint extends MutationConstraint {
     constructor(mutations: number) {
         super(mutations, 'max');
     }
+
+    public serialize(): [string, string] {
+        return [
+            MaximumMutationConstraint.NAME,
+            this.mutations.toString()
+        ];
+    }
 }
 
 export class MinimumMutationConstraint extends MutationConstraint {
     public static readonly NAME = 'MINMUTATION';
     constructor(mutations: number) {
         super(mutations, 'min');
+    }
+
+    public serialize(): [string, string] {
+        return [
+            MinimumMutationConstraint.NAME,
+            this.mutations.toString()
+        ];
     }
 }
