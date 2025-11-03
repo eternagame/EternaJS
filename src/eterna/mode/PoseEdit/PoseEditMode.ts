@@ -91,6 +91,7 @@ import TLoopConstraint, {TLoopSeqB, TLoopSeqA, TLoopPairs} from 'eterna/constrai
 import FoldingAPI from 'eterna/eternaScript/FoldingAPI';
 import PostMessageReporter from 'eterna/observability/PostMessageReporter';
 import TimerConstraint from 'eterna/constraints/constraints/TimerConstraint';
+import {MutationConstraint} from 'eterna/constraints/constraints/MutationConstraint';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -892,7 +893,10 @@ export default class PoseEditMode extends GameMode {
             // there's a good chance players may care about seeing mutations from the starting
             // sequence, so we'll add a layer to handle that
             this._shouldMarkMutations = true;
-            this.addMarkerLayer(MUTATION_MARKER_LAYER, false);
+            const setAsDefault = this._puzzle.constraints?.some(
+                (constraint) => constraint instanceof MutationConstraint
+            );
+            this.addMarkerLayer(MUTATION_MARKER_LAYER, setAsDefault);
         }
 
         // Load elements from targetConditions into poses.
