@@ -832,7 +832,7 @@ export default class PoseEditMode extends GameMode {
         // Set up the constraintBar
         this._constraintBar = new ConstraintBar(
             this._puzzle.constraints,
-            this._puzzle.getSecstructs.length
+            this._puzzle.getSecstructs().length
         );
         this._constraintBar.display.visible = false;
         this.addObject(this._constraintBar, this._constraintsLayer);
