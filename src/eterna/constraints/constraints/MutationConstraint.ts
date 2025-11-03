@@ -12,7 +12,7 @@ interface MutationConstraintStatus extends BaseConstraintStatus {
     mutations: number;
 }
 
-abstract class MutationConstraint extends Constraint<MutationConstraintStatus> {
+export abstract class MutationConstraint extends Constraint<MutationConstraintStatus> {
     public readonly mutations: number;
     public readonly mode: 'min' | 'max';
 
