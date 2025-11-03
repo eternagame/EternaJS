@@ -85,7 +85,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
         this._stateText = Fonts.std('', 18).bold().color(0xffffff).letterSpacing(-0.5)
             .build();
-        this._stateText.position.set(3, 45);
+        this._stateText.position.set(5, 45);
         this._stateText.visible = false;
         this.container.addChild(this._stateText);
 
@@ -235,7 +235,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             this.initOpaqueBackdrop(this._bg.texture.width, this._bg.texture.height);
             this._check.position.set(55, 50);
             this._noText.position.set(35, 1);
-            this._stateText.position.set(3, 45);
+            this._stateText.position.set(5, 45);
         }
 
         if (this._forMissionScreen) {

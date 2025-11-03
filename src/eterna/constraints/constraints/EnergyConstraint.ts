@@ -11,6 +11,7 @@ import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint
 
 interface EnergyConstraintStatus extends BaseConstraintStatus {
     energy: number;
+    states: number;
 }
 
 abstract class EnergyConstraint extends Constraint<EnergyConstraintStatus> {
@@ -34,7 +35,8 @@ abstract class EnergyConstraint extends Constraint<EnergyConstraintStatus> {
 
         return {
             satisfied: this.mode === 'max' ? energy <= this.energy : energy >= this.energy,
-            energy
+            energy,
+            states: context.undoBlocks.length
         };
     }
 
@@ -50,6 +52,10 @@ abstract class EnergyConstraint extends Constraint<EnergyConstraintStatus> {
             ? ConstraintBox.createTextStyle().append(`The free energy must be below ${this.energy} kcal`)
             : ConstraintBox.createTextStyle().append(`The free energy must be above ${this.energy} kcal`);
 
+        if (status.states > 1) {
+            tooltip.append(` in state ${this.state + 1}`);
+        }
+
         return {
             satisfied: status.satisfied,
             tooltip,
@@ -57,7 +63,8 @@ abstract class EnergyConstraint extends Constraint<EnergyConstraintStatus> {
             icon: EnergyConstraint._icon,
             showOutline: true,
             statText,
-            clarificationText: `AT ${this.mode === 'max' ? 'MOST' : 'LEAST'}${this.energy.toString().length > 2 ? ' \n' : ' '}${this.energy} KCAL`
+            clarificationText: `AT ${this.mode === 'max' ? 'MOST' : 'LEAST'}${this.energy.toString().length > 2 ? ' \n' : ' '}${this.energy} KCAL`,
+            stateNumber: this.state + 1
         };
     }
 
