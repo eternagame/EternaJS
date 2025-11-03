@@ -921,9 +921,6 @@ export default class PoseEditMode extends GameMode {
 
             Assert.assertIsDefined(seq);
             this._poses[ii].sequence = this._puzzle.transformSequence(seq, ii, 0);
-            if (this._puzzle.barcodeIndices != null) {
-                this._poses[ii].barcodes = this._puzzle.barcodeIndices;
-            }
             this._poses[ii].setOligos(this._targetOligos[ii], this._targetOligosOrder[ii]);
             this._poses[ii].setOligo(
                 this._targetOligo[ii],
@@ -1521,7 +1518,7 @@ export default class PoseEditMode extends GameMode {
         );
         scriptInterfaceCtx.addCallback(
             'get_barcode_indices',
-            lockDuringFold((): number[] | null => this._puzzle.barcodeIndices)
+            lockDuringFold((): number[] | null => this._puzzle.getBarcodeIndices(0))
         );
         scriptInterfaceCtx.addCallback(
             'is_barcode_available',
@@ -2145,6 +2142,11 @@ export default class PoseEditMode extends GameMode {
                 this.getCurrentUndoBlock(targetIndex).sequence, targetIndex, targetIndex
             );
             const tcType: TargetType = tc['type'];
+
+            const barcode = this._puzzle.getBarcodeIndices(targetIndex);
+            if (barcode) {
+                this._poses[poseIndex].barcodes = barcode;
+            }
 
             if (tcType === 'multistrand') {
                 if (tc['oligos'] !== undefined) {
@@ -3429,6 +3431,11 @@ export default class PoseEditMode extends GameMode {
             if (this._targetConditions == null || this._targetConditions[stateIdx] === undefined
                 || (this._targetConditions[stateIdx] as TargetConditions)['type'] === undefined) {
                 continue;
+            }
+
+            const barcode = this._puzzle.getBarcodeIndices(stateIdx);
+            if (barcode) {
+                this._poses[poseIdx].barcodes = barcode;
             }
 
             const tc = this._targetConditions[stateIdx] as TargetConditions;

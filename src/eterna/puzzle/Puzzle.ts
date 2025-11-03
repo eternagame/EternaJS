@@ -417,7 +417,7 @@ export default class Puzzle {
         this._barcodeLength = length;
     }
 
-    public get barcodeIndices(): number[] | null {
+    public getBarcodeIndices(targetIndex: number): number[] | null {
         if (!this._useBarcode) {
             return null;
         }
@@ -438,11 +438,15 @@ export default class Puzzle {
             barcodeStart = secstruct.length - barcodeLength;
         }
 
-        return Utility.range(barcodeStart, barcodeStart + barcodeLength);
+        if (this._targetConditions?.[targetIndex].reverseComplement) {
+            return Utility.range(secstruct.length - (barcodeStart + barcodeLength), secstruct.length - barcodeStart);
+        } else {
+            return Utility.range(barcodeStart, barcodeStart + barcodeLength);
+        }
     }
 
     public getBarcodeHairpin(seq: Sequence): Sequence {
-        const barcode = this.barcodeIndices;
+        const barcode = this.getBarcodeIndices(0);
         if (!barcode) {
             throw new Error('Can\'t determine barcode hairpin for a puzzle that doesn\'t use barcodes');
         }
