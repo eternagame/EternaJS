@@ -221,19 +221,19 @@ export default abstract class GameMode extends AppMode {
             this._poseFields.push(newField);
             this._poses.push(newField.pose);
             newField.getEnergyDelta = () => {
-                const poseidx = this._isPipMode ? idx : this._curTargetIndex;
-                const folder = this.folderForState(poseidx);
+                const targetIdx = this.poseTargetIndex(idx);
+                const folder = this.folderForState(targetIdx);
                 // Sanity check
                 if (folder !== null) {
                     const pseudoknots: boolean = this._targetConditions != null
                         && this._targetConditions[0] != null
                         && this._targetConditions[0]['type'] === 'pseudoknot';
 
-                    const ublk = this.getCurrentUndoBlock(poseidx);
+                    const ublk = this.getCurrentUndoBlock(targetIdx);
                     Assert.assertIsDefined(ublk, 'getEnergyDelta is being called where UndoBlocks are unavailable!');
 
                     const targetPairs: SecStruct | undefined = this._targetPairs
-                        ? this._targetPairs[poseidx] : this.getCurrentTargetPairs(poseidx);
+                        ? this._targetPairs[targetIdx] : this.getCurrentTargetPairs(targetIdx);
                     Assert.assertIsDefined(
                         targetPairs,
                         "This poses's targetPairs are undefined; energy delta cannot be computed!"
@@ -366,14 +366,14 @@ export default abstract class GameMode extends AppMode {
             pose.clearRestrictedHighlight();
             pose.clearUnstableHighlight();
             pose.clearUserDefinedHighlight();
-            const poseState = this._isPipMode || poseIdx !== 0 ? poseIdx : this._curTargetIndex;
+            const targetIdx = this.poseTargetIndex(poseIdx);
             if (!highlightInfos) continue;
             for (const highlightInfo of highlightInfos) {
-                if (highlightInfo.stateIndex !== undefined && poseState !== highlightInfo.stateIndex) {
+                if (highlightInfo.stateIndex !== undefined && targetIdx !== highlightInfo.stateIndex) {
                     continue;
                 }
 
-                const currBlock = this.getCurrentUndoBlock(poseState);
+                const currBlock = this.getCurrentUndoBlock(targetIdx);
                 if (!currBlock) continue;
 
                 const naturalMap = currBlock.reorderedOligosIndexMap(currBlock.oligoOrder);
@@ -799,6 +799,12 @@ export default abstract class GameMode extends AppMode {
 
     protected _curTargetIndex: number;
     protected _poseState: PoseState = PoseState.NATIVE;
+    protected poseTargetIndex(poseIndex: number): number {
+        return (poseIndex === 0 && !this._isPipMode)
+            ? this._curTargetIndex
+            : poseIndex;
+    }
+
     protected getCurrentUndoBlock(_index: number): UndoBlock | undefined {
         return undefined;
     }
