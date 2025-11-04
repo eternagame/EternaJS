@@ -3789,13 +3789,13 @@ export default class PoseEditMode extends GameMode {
                 }
             }
 
-            const poseStateIdx = this.poseTargetIndex(ii);
-            const mutatedStateIdx = this.poseTargetIndex(sourcePoseIndex);
+            const poseTargetIdx = this.poseTargetIndex(ii);
+            const mutatedTargetIdx = this.poseTargetIndex(sourcePoseIndex);
             // In all cases, update these properties from the pose that was originally updated
             this._poses[ii].sequence = this._puzzle.transformSequence(
                 this._poses[sourcePoseIndex].sequence,
-                poseStateIdx,
-                mutatedStateIdx
+                poseTargetIdx,
+                mutatedTargetIdx
             );
             this._poses[ii].puzzleLocks = this._poses[sourcePoseIndex].puzzleLocks;
             this._poses[ii].librarySelections = this._poses[sourcePoseIndex].librarySelections;
@@ -3803,8 +3803,9 @@ export default class PoseEditMode extends GameMode {
         this.syncStampFromPose(sourcePoseIndex);
     }
 
-    private syncStampFromPose(targetIndex: number) {
-        const fromPose = this._poses[targetIndex];
+    private syncStampFromPose(sourcePoseIndex: number) {
+        const fromPose = this._poses[sourcePoseIndex];
+        const sourceTargetIndex = this.poseTargetIndex(sourcePoseIndex);
 
         const lastStamp = fromPose.lastStamp;
         if (!lastStamp) return;
@@ -3821,16 +3822,20 @@ export default class PoseEditMode extends GameMode {
                     seq.setNt(stampPosition + i, base);
                 }
             }
-            for (const pose of this._poses) {
-                pose.sequence = seq;
+            for (let ii = 0; ii < this._poses.length; ii++) {
+                this._poses[ii].sequence = this._puzzle.transformSequence(
+                    seq,
+                    this.poseTargetIndex(ii),
+                    sourceTargetIndex
+                );
             }
         };
 
         const canStampStruct = (stampPairs: number[][]) => {
-            const structureConstraints = this._targetConditions[targetIndex]?.['structure_constraints'];
+            const structureConstraints = this._targetConditions[sourceTargetIndex]?.['structure_constraints'];
             if (structureConstraints === undefined) return false;
 
-            const targetPairs = this._targetPairs[targetIndex];
+            const targetPairs = this._targetPairs[sourceTargetIndex];
             for (const [a, b] of stampPairs) {
                 if (
                     // This base would have its pairing changed
@@ -3855,12 +3860,12 @@ export default class PoseEditMode extends GameMode {
         };
 
         const stampStruct = (stampPairs: number[][]) => {
-            const targetPairs = this._targetPairs[targetIndex].slice(0);
+            const targetPairs = this._targetPairs[sourceTargetIndex].slice(0);
             for (const [a, b] of stampPairs) {
                 if (b === -1) targetPairs.setUnpaired(a);
                 else targetPairs.setPairingPartner(a, b);
             }
-            this._targetPairs[targetIndex] = targetPairs;
+            this._targetPairs[sourceTargetIndex] = targetPairs;
         };
 
         switch (lastStamp.type) {
@@ -4091,8 +4096,8 @@ export default class PoseEditMode extends GameMode {
         // state of the pose we're reading the sequence from, and then apply any transforms
         // to the state we're trying to fold into. Stricly speaking we should be able to use
         // any arbitrary pose (eg always use pose 0) but. Whatever.
-        const poseState = this.poseTargetIndex(ii);
-        const seq: Sequence = this._puzzle.transformSequence(this._poses[ii].sequence, ii, poseState);
+        const poseTargetIdx = this.poseTargetIndex(ii);
+        const seq: Sequence = this._puzzle.transformSequence(this._poses[ii].sequence, ii, poseTargetIdx);
 
         const pseudoknots = (this._targetConditions && this._targetConditions[ii] !== undefined
             && (this._targetConditions[ii] as TargetConditions)['type'] === 'pseudoknot');
@@ -4402,7 +4407,7 @@ export default class PoseEditMode extends GameMode {
 
     private moveUndoStack(): void {
         for (let ii = 0; ii < this._poses.length; ii++) {
-            this.setPosesWithUndoBlock(ii, this._seqStacks[this._stackLevel][ii]);
+            this.setPosesWithUndoBlock(ii, this._seqStacks[this._stackLevel][this.poseTargetIndex(ii)]);
             this._targetPairs[ii] = this._seqStacks[this._stackLevel][ii].targetPairs;
             this._targetConditions[ii] = this._seqStacks[this._stackLevel][ii].targetConditions;
             this._targetOligo[ii] = this._seqStacks[this._stackLevel][ii].targetOligo;
