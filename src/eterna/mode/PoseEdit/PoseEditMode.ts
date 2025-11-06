@@ -577,9 +577,11 @@ export default class PoseEditMode extends GameMode {
             await this.loadCachedUndoBlocks(foldData);
         } else {
             // Note that we do this first
-            for (const pose of this._poses) {
-                pose.librarySelections = solution.libraryNT;
-                pose.sequence = solution.sequence;
+            for (let i = 0; i < this._poses.length; i++) {
+                this._poses[i].librarySelections = solution.libraryNT;
+                this._poses[i].sequence = this._puzzle.transformSequence(
+                    solution.sequence, this.poseTargetIndex(i), 0
+                );
             }
             this.setSolutionTargetStructure(foldData);
             await this.poseEditByTarget(0);
