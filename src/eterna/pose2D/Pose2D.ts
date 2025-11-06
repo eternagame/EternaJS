@@ -1701,10 +1701,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return (this._designStruct[index] === true);
     }
 
-    public getSequenceString(): string {
-        return this._sequence.sequenceString();
-    }
-
     public get satisfied(): boolean {
         const fullSeq = this.fullSequence;
         for (let ii = 0; ii < this._pairs.length; ii++) {

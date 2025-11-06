@@ -1345,7 +1345,9 @@ export default class PoseEditMode extends GameMode {
 
         scriptInterfaceCtx.addCallback(
             'get_sequence_string',
-            lockDuringFold((): string => this.getPose(0).getSequenceString())
+            lockDuringFold((): string => this._puzzle.transformSequence(
+                this._poses[0].sequence, 0, this.poseTargetIndex(0)
+            ).toString())
         );
 
         scriptInterfaceCtx.addCallback(
