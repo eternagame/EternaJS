@@ -922,7 +922,7 @@ export default class PoseEditMode extends GameMode {
             }
 
             Assert.assertIsDefined(seq);
-            this._poses[ii].sequence = this._puzzle.transformSequence(seq, ii, 0);
+            this._poses[ii].sequence = this._puzzle.transformSequence(seq, this.poseTargetIndex(ii), 0);
             this._poses[ii].setOligos(this._targetOligos[ii], this._targetOligosOrder[ii]);
             this._poses[ii].setOligo(
                 this._targetOligo[ii],
@@ -3244,7 +3244,7 @@ export default class PoseEditMode extends GameMode {
         }
 
         for (let ii = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].sequence = this._puzzle.transformSequence(new Sequence(a), ii, 0);
+            this._poses[ii].sequence = this._puzzle.transformSequence(new Sequence(a), this.poseTargetIndex(ii), 0);
             this._poses[ii].puzzleLocks = locks;
 
             const annotations: AnnotationDataBundle | null = savedAnnotations[ii];
