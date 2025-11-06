@@ -2326,7 +2326,7 @@ export default class PoseEditMode extends GameMode {
         this._background.freezeBackground(this._isFrozen);
 
         if (!this._isFrozen) { // we just "thawed", update
-            this.poseEditByTarget(this._curTargetIndex);
+            this.poseEditByTarget(0);
         }
     }
 
