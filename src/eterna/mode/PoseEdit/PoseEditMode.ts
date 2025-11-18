@@ -669,7 +669,10 @@ export default class PoseEditMode extends GameMode {
                     if (index === ii) {
                         poseToNotify.onPoseMouseDown(e, closestIndex);
                     } else {
-                        poseToNotify.onPoseMouseDownPropagate(e, closestIndex);
+                        poseToNotify.onPoseMouseDownPropagate(
+                            e,
+                            this._puzzle.transformBaseIndex(closestIndex, ii, index)
+                        );
                     }
                 }
             });
@@ -1637,13 +1640,7 @@ export default class PoseEditMode extends GameMode {
                     }
                     this.addMarkerLayer(layer);
 
-                    for (let ii = 0; ii < this.numPoseFields; ii++) {
-                        const pose: Pose2D = this.getPose(ii);
-                        pose.clearLayerTracking(layer);
-                        for (const mark of standardizedMarks) {
-                            pose.addBaseMark(mark.baseIndex, layer, mark.colors);
-                        }
-                    }
+                    this.setBaseMarks(standardizedMarks, layer);
                 }
             )
         );
@@ -2239,6 +2236,15 @@ export default class PoseEditMode extends GameMode {
     private transformPosesMarkers(): void {
         for (const pose of this._poses) {
             pose.transformMarkers();
+        }
+    }
+
+    private setBaseMarks(marks: {baseIndex: number, colors?: number | number[]}[], layer: string) {
+        for (let i = 0; i < this._poses.length; i++) {
+            this._poses[i].clearLayerTracking(layer);
+            for (const mark of marks) {
+                this._poses[i].addBaseMark(this._puzzle.transformBaseIndex(mark.baseIndex, i, 0), layer, mark.colors);
+            }
         }
     }
 
@@ -3486,16 +3492,15 @@ export default class PoseEditMode extends GameMode {
         if (this._shouldMarkMutations) {
             const puzzleInitSeq = this._puzzle.getBeginningSequence();
             const currentSeq = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
-            for (const pose of this._poses) {
-                pose.clearLayerTracking(MUTATION_MARKER_LAYER);
-            }
-            for (let i = 0; i < puzzleInitSeq.length; i++) {
-                if (currentSeq.nt(i) !== puzzleInitSeq.nt(i)) {
-                    for (const pose of this._poses) {
-                        pose.addBaseMark(i, MUTATION_MARKER_LAYER);
-                    }
-                }
-            }
+
+            this.setBaseMarks(
+                Utility.range(
+                    puzzleInitSeq.length
+                ).filter(
+                    (i) => currentSeq.nt(i) !== puzzleInitSeq.nt(i)
+                ).map((i) => ({baseIndex: i})),
+                MUTATION_MARKER_LAYER
+            );
         }
 
         const undoBlock: UndoBlock = this.getCurrentUndoBlock();

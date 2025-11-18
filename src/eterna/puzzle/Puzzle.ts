@@ -438,11 +438,12 @@ export default class Puzzle {
             barcodeStart = secstruct.length - barcodeLength;
         }
 
-        return Utility.range(
+        const [firstBase, lastBase] = [
             this.transformBaseIndex(barcodeStart, targetIndex, 0),
-            this.transformBaseIndex(barcodeStart + barcodeLength, targetIndex, 0),
-            'asc'
-        );
+            this.transformBaseIndex(barcodeStart + barcodeLength - 1, targetIndex, 0)
+        ].sort((a, b) => a - b);
+
+        return Utility.range(firstBase, lastBase + 1);
     }
 
     public getBarcodeHairpin(seq: Sequence): Sequence {
@@ -679,7 +680,7 @@ export default class Puzzle {
         const targetIsComplement = this._targetConditions?.[targetIndex]?.reverseComplement;
         const fromTargetIsComplement = this._targetConditions?.[fromTargetIndex]?.reverseComplement;
         if ((targetIsComplement && !fromTargetIsComplement) || (!targetIsComplement && fromTargetIsComplement)) {
-            return secstruct.length - baseIndex;
+            return secstruct.length - baseIndex - 1;
         } else {
             return baseIndex;
         }
