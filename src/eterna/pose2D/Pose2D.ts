@@ -68,7 +68,6 @@ export const MUTATION_MARKER_LAYER = 'Mutations';
 export const SCRIPT_MARKER_LAYER = 'Script';
 
 export type PoseMouseDownCallback = (e: FederatedPointerEvent, closestDist: number, closestIndex: number) => void;
-export type PosePickCallback = (closestIndex: number) => void;
 
 export default class Pose2D extends ContainerObject implements Updatable {
     public static readonly COLOR_CURSOR: number = 0xFFC0CB;
@@ -213,7 +212,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         this.pointerMove.connect((p) => this.onMouseMoved(p.global));
         this.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => {
-            this.callStartMousedownCallback(e);
+            this.onPoseMouseDown(e);
 
             // deselect all annotations
             this._annotationManager.deselectSelected();
@@ -567,32 +566,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public onPoseMouseDownPropagate(e: FederatedPointerEvent, closestIndex: number): void {
-        const altDown: boolean = Flashbang.app.isAltKeyDown;
-        const ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
-        const ctrlDownOrBaseMarking = ctrlDown || this.currentColor === RNAPaint.BASE_MARK;
-
-        if ((this._coloring && !altDown) || ctrlDownOrBaseMarking) {
-            if (ctrlDownOrBaseMarking && closestIndex >= this.sequence.length) {
-                return;
-            }
-            this.onPoseMouseDown(e, closestIndex);
-        }
-    }
-
-    public onVirtualPoseMouseDownPropagate(closestIndex: number): void {
-        const altDown: boolean = Flashbang.app.isAltKeyDown;
-        const ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
-        const ctrlDownOrBaseMarking = ctrlDown || this.currentColor === RNAPaint.BASE_MARK;
-
-        if ((this._coloring && !altDown) || ctrlDownOrBaseMarking) {
-            if (ctrlDownOrBaseMarking && closestIndex >= this.sequence.length) {
-                return;
-            }
-            this.onVirtualPoseMouseDown(closestIndex);
-        }
-    }
-
     /**
      * Rotate the stem containing nucleotide idx. Save your results in the
      * customLayout. To achieve this: figure out what stem you're in (helper);
@@ -894,7 +867,27 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._customLayoutChanged = true;
     }
 
-    public onPoseMouseDown(e: FederatedPointerEvent, closestIndex: number): void {
+    public onPoseMouseDown(e: FederatedPointerEvent): void {
+        this.display.toLocal(e.global, undefined, Pose2D.P);
+        const mouseX: number = Pose2D.P.x;
+        const mouseY: number = Pose2D.P.y;
+
+        let closestDist = -1;
+        let closestIndex = -1;
+
+        const fullSeqLen = this.fullSequenceLength;
+        for (let ii = 0; ii < fullSeqLen; ii++) {
+            const mouseDist: number = this._bases[ii].isClicked(
+                mouseX - this._offX, mouseY - this._offY, this._zoomLevel, false
+            );
+            if (mouseDist >= 0) {
+                if (closestIndex < 0 || mouseDist < closestDist) {
+                    closestIndex = ii;
+                    closestDist = mouseDist;
+                }
+            }
+        }
+
         const altDown: boolean = Flashbang.app.isAltKeyDown;
         const shiftDown: boolean = Flashbang.app.isShiftKeyDown;
         const ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
@@ -933,6 +926,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 && !this._annotationManager.annotationModeActive.value
             ) {
                 Eterna.observability.recordEvent('Base:Mark');
+                this.baseMarked.emit(closestIndex);
                 this.toggleBaseMark(closestIndex);
                 return;
             }
@@ -1097,6 +1091,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 && !this._annotationManager.annotationModeActive.value
             ) {
                 Eterna.observability.recordEvent('Base:Mark');
+                this.baseMarked.emit(closestIndex);
                 this.toggleBaseMark(closestIndex);
                 return;
             }
@@ -1124,8 +1119,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public toggleBaseMark(baseIndex: number): void {
-        this.baseMarked.emit(baseIndex);
-
         if (!this.isTrackedLayer(baseIndex, PLAYER_MARKER_LAYER)) {
             this.addBaseMark(baseIndex, PLAYER_MARKER_LAYER);
         } else {
@@ -2099,47 +2092,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public set startMousedownCallback(cb: PoseMouseDownCallback) {
-        this._startMousedownCallback = cb;
-    }
-
-    public set startPickCallback(cb: PosePickCallback) {
-        this._startPickCallback = cb;
-    }
-
     public simulateMousedownCallback(closestIndex:number): void {
-        if (this._startPickCallback != null && closestIndex >= 0) {
-            this._startPickCallback(closestIndex);
+        if (closestIndex >= 0) {
+            this.onVirtualPoseMouseDown(closestIndex);
         }
         // deselect all annotations
         this._annotationManager.deselectSelected();
-    }
-
-    public callStartMousedownCallback(e: FederatedPointerEvent): void {
-        this.display.toLocal(e.global, undefined, Pose2D.P);
-        const mouseX: number = Pose2D.P.x;
-        const mouseY: number = Pose2D.P.y;
-
-        let closestDist = -1;
-        let closestIndex = -1;
-
-        if (this._startMousedownCallback != null) {
-            const fullSeqLen = this.fullSequenceLength;
-            for (let ii = 0; ii < fullSeqLen; ii++) {
-                const mouseDist: number = this._bases[ii].isClicked(
-                    mouseX - this._offX, mouseY - this._offY, this._zoomLevel, false
-                );
-                if (mouseDist >= 0) {
-                    if (closestIndex < 0 || mouseDist < closestDist) {
-                        closestIndex = ii;
-                        closestDist = mouseDist;
-                    }
-                }
-            }
-            this._startMousedownCallback(e, closestDist, closestIndex);
-        } else {
-            this.onPoseMouseDown(e, closestIndex);
-        }
     }
 
     public get satisfiedPairs(): SecStruct {
@@ -4487,8 +4445,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _poseEditCallback: (() => void) | null = null;
     private _trackMovesCallback: ((count: number, moves: Move[]) => void) | null = null;
     private _addBaseCallback: (parenthesis: string | null, op: PuzzleEditOp | null, index: number) => void;
-    private _startMousedownCallback: PoseMouseDownCallback;
-    private _startPickCallback: PosePickCallback;
     private _mouseDownAltKey: boolean = false;
 
     private _redraw: boolean = true;

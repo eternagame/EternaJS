@@ -23,7 +23,8 @@ import {
     RepeatingTask,
     DelayTask,
     FunctionTask,
-    CallbackTask
+    CallbackTask,
+    Arrays
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import EternaSettingsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaSettingsDialog';
@@ -79,7 +80,6 @@ import StateToggle from 'eterna/ui/StateToggle';
 import Pose3DDialog from 'eterna/pose3D/Pose3DDialog';
 import ModeBar from 'eterna/ui/ModeBar';
 import KeyedCollection from 'eterna/util/KeyedCollection';
-import {FederatedPointerEvent} from '@pixi/events';
 import NuPACK from 'eterna/folding/NuPACK';
 import PasteStructureDialog from 'eterna/ui/PasteStructureDialog';
 import ConfirmTargetDialog from 'eterna/ui/ConfirmTargetDialog';
@@ -661,32 +661,20 @@ export default class PoseEditMode extends GameMode {
             });
         };
 
-        const bindMousedownEvent = (pose: Pose2D, index: number) => {
-            pose.startMousedownCallback = ((e: FederatedPointerEvent, _closestDist: number, closestIndex: number) => {
+        const bindBaseMarkEvent = (pose: Pose2D, index: number) => {
+            this.regs?.add(pose.baseMarked.connect((baseIdx) => {
+                const sourcePoseTarget = this.poseTargetIndex(index);
                 for (let ii = 0; ii < poseFields.length; ++ii) {
-                    const poseField: PoseField = poseFields[ii];
-                    const poseToNotify: Pose2D = poseField.pose;
-                    if (index === ii) {
-                        poseToNotify.onPoseMouseDown(e, closestIndex);
-                    } else {
-                        poseToNotify.onPoseMouseDownPropagate(
-                            e,
-                            this._puzzle.transformBaseIndex(closestIndex, ii, index)
+                    const poseToNotify = this._poses[ii];
+                    if (index !== ii) {
+                        const notifyPoseTarget = this.poseTargetIndex(ii);
+                        const newPoseBaseIdx = this.transformBaseIndex(
+                            baseIdx, notifyPoseTarget, this._poseState, sourcePoseTarget, this._poseState
                         );
+                        if (newPoseBaseIdx) poseToNotify.toggleBaseMark(newPoseBaseIdx);
                     }
                 }
-            });
-            pose.startPickCallback = (closestIndex: number):void => {
-                for (let ii = 0; ii < poseFields.length; ++ii) {
-                    const poseField: PoseField = poseFields[ii];
-                    const poseToNotify = poseField.pose;
-                    if (ii === index) {
-                        poseToNotify.onVirtualPoseMouseDown(closestIndex);
-                    } else {
-                        poseToNotify.onVirtualPoseMouseDownPropagate(closestIndex);
-                    }
-                }
-            };
+            }));
         };
 
         for (let ii = 0; ii < targetConditions.length; ii++) {
@@ -696,7 +684,7 @@ export default class PoseEditMode extends GameMode {
             bindAddBaseCB(pose, ii);
             bindPoseEdit(pose, ii);
             bindTrackMoves(pose, ii);
-            bindMousedownEvent(pose, ii);
+            bindBaseMarkEvent(pose, ii);
             poseFields.push(poseField);
         }
 
@@ -1525,7 +1513,7 @@ export default class PoseEditMode extends GameMode {
         );
         scriptInterfaceCtx.addCallback(
             'get_barcode_indices',
-            lockDuringFold((): number[] | null => this._puzzle.getBarcodeIndices(0))
+            lockDuringFold((): number[] | null => this._puzzle.barcodeIndices)
         );
         scriptInterfaceCtx.addCallback(
             'is_barcode_available',
@@ -1640,6 +1628,10 @@ export default class PoseEditMode extends GameMode {
                     }
                     this.addMarkerLayer(layer);
 
+                    // It's a bit presumptive that the base mark indices are relative to
+                    // state 0/target mode, but I think that's the most consistent thing we can
+                    // do right now (especially given EternaScript doesn't have a way to introspect
+                    // the current posestate)
                     this.setBaseMarks(standardizedMarks, layer);
                 }
             )
@@ -2146,7 +2138,9 @@ export default class PoseEditMode extends GameMode {
             );
             const tcType: TargetType = tc['type'];
 
-            const barcode = this._puzzle.getBarcodeIndices(targetIndex);
+            const barcode = this._puzzle.barcodeIndices?.map(
+                (idx) => this.transformBaseIndex(idx, targetIndex, this._poseState, 0, PoseState.TARGET)
+            ).filter((idx) => idx !== null);
             if (barcode) {
                 this._poses[poseIndex].barcodes = barcode;
             }
@@ -2243,7 +2237,8 @@ export default class PoseEditMode extends GameMode {
         for (let i = 0; i < this._poses.length; i++) {
             this._poses[i].clearLayerTracking(layer);
             for (const mark of marks) {
-                this._poses[i].addBaseMark(this._puzzle.transformBaseIndex(mark.baseIndex, i, 0), layer, mark.colors);
+                const poseBaseIdx = this.transformBaseIndex(mark.baseIndex, i, this._poseState, 0, PoseState.TARGET);
+                if (poseBaseIdx) this._poses[i].addBaseMark(poseBaseIdx, layer, mark.colors);
             }
         }
     }
@@ -3336,6 +3331,79 @@ export default class PoseEditMode extends GameMode {
         return true;
     }
 
+    private transformBaseIndex(
+        baseIndex: number,
+        targetIndex: number,
+        targetState: PoseState,
+        fromTargetIndex: number,
+        fromTargetState: PoseState
+    ): number | null {
+        if (!this._targetConditions) return baseIndex;
+
+        const seqLen = this.getCurrentUndoBlock(0).sequence.length;
+
+        if (baseIndex < seqLen) {
+            const targetIsComplement = this._targetConditions?.[targetIndex]?.reverseComplement;
+            const fromTargetIsComplement = this._targetConditions?.[fromTargetIndex]?.reverseComplement;
+            if ((targetIsComplement && !fromTargetIsComplement) || (!targetIsComplement && fromTargetIsComplement)) {
+                return seqLen - baseIndex - 1;
+            } else {
+                return baseIndex;
+            }
+        }
+
+        const fromTargetOligos = this._targetOligos[fromTargetIndex];
+        const fromTargetOligosOrder = fromTargetState === PoseState.NATIVE
+            ? this.getCurrentUndoBlock(fromTargetIndex).oligoOrder
+            : this._targetOligosOrder[fromTargetIndex];
+        const fromTargetOligo = this._targetOligo[fromTargetIndex];
+
+        const newTargetOligos = this._targetOligos[targetIndex];
+        const newTargetOligosOrder = targetState === PoseState.NATIVE
+            ? this.getCurrentUndoBlock(targetIndex).oligoOrder
+            : this._targetOligosOrder[targetIndex];
+        const newTargetOligo = this._targetOligo[targetIndex];
+
+        if (fromTargetOligo && newTargetOligo && Arrays.shallowEqual(fromTargetOligo, newTargetOligo)) {
+            return baseIndex;
+        } else if (fromTargetOligos && fromTargetOligosOrder && newTargetOligos && newTargetOligosOrder) {
+            let fromTargetCursor = seqLen;
+            let sourceOligoLabel = null;
+            let sourceOligoInstance = 0;
+            let sourceOligoOffset = 0;
+            for (let fromTargetOligoIdx = 0; fromTargetOligoIdx < fromTargetOligosOrder.length; fromTargetOligoIdx++) {
+                fromTargetCursor += 1 + fromTargetOligos[fromTargetOligosOrder[fromTargetOligoIdx]].sequence.length;
+                if (baseIndex < fromTargetCursor) {
+                    sourceOligoLabel = fromTargetOligos[fromTargetOligosOrder[fromTargetOligoIdx]].label;
+                    sourceOligoOffset = fromTargetCursor - baseIndex;
+                    for (let ii = 0; ii < fromTargetOligoIdx; ii++) {
+                        if (fromTargetOligos[fromTargetOligosOrder[fromTargetOligoIdx]].label === sourceOligoLabel) {
+                            sourceOligoInstance++;
+                        }
+                    }
+                }
+            }
+            if (!sourceOligoLabel) return null;
+
+            let newTargetCursor = seqLen;
+            let instance = 0;
+            for (let newTargetOligoIdx = 0; newTargetOligoIdx < newTargetOligosOrder.length; newTargetOligoIdx++) {
+                const currNewTargetOligo = newTargetOligos[newTargetOligosOrder[newTargetOligoIdx]];
+                newTargetCursor += currNewTargetOligo.sequence.length + 1;
+                if (currNewTargetOligo.label === sourceOligoLabel) {
+                    if (instance === sourceOligoInstance) {
+                        return newTargetCursor - sourceOligoOffset;
+                    } else {
+                        instance++;
+                    }
+                }
+            }
+            return null;
+        } else {
+            return null;
+        }
+    }
+
     private updateScore(): void {
         this.saveData();
         // let dn: GameObject = (<GameObject>Application.instance.get_application_gui("Design Name"));
@@ -3443,7 +3511,9 @@ export default class PoseEditMode extends GameMode {
                 continue;
             }
 
-            const barcode = this._puzzle.getBarcodeIndices(stateIdx);
+            const barcode = this._puzzle.barcodeIndices?.map(
+                (idx) => this.transformBaseIndex(idx, stateIdx, this._poseState, 0, PoseState.TARGET)
+            ).filter((idx) => idx !== null);
             if (barcode) {
                 this._poses[poseIdx].barcodes = barcode;
             }

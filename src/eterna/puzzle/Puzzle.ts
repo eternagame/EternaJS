@@ -417,7 +417,7 @@ export default class Puzzle {
         this._barcodeLength = length;
     }
 
-    public getBarcodeIndices(targetIndex: number): number[] | null {
+    public get barcodeIndices(): number[] | null {
         if (!this._useBarcode) {
             return null;
         }
@@ -438,16 +438,11 @@ export default class Puzzle {
             barcodeStart = secstruct.length - barcodeLength;
         }
 
-        const [firstBase, lastBase] = [
-            this.transformBaseIndex(barcodeStart, targetIndex, 0),
-            this.transformBaseIndex(barcodeStart + barcodeLength - 1, targetIndex, 0)
-        ].sort((a, b) => a - b);
-
-        return Utility.range(firstBase, lastBase + 1);
+        return Utility.range(barcodeStart, barcodeStart + barcodeLength);
     }
 
     public getBarcodeHairpin(seq: Sequence): Sequence {
-        const barcode = this.getBarcodeIndices(0);
+        const barcode = this.barcodeIndices;
         if (!barcode) {
             throw new Error('Can\'t determine barcode hairpin for a puzzle that doesn\'t use barcodes');
         }
@@ -669,20 +664,6 @@ export default class Puzzle {
             return seq.complement().reverse();
         } else {
             return seq;
-        }
-    }
-
-    public transformBaseIndex(baseIndex: number, targetIndex: number, fromTargetIndex: number) : number {
-        if (!this._targetConditions) return baseIndex;
-
-        const secstruct = this.getSecstruct();
-
-        const targetIsComplement = this._targetConditions?.[targetIndex]?.reverseComplement;
-        const fromTargetIsComplement = this._targetConditions?.[fromTargetIndex]?.reverseComplement;
-        if ((targetIsComplement && !fromTargetIsComplement) || (!targetIsComplement && fromTargetIsComplement)) {
-            return secstruct.length - baseIndex - 1;
-        } else {
-            return baseIndex;
         }
     }
 
