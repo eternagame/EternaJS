@@ -1454,13 +1454,17 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     private toggleLibrarySelection(seqnum: number) {
+        // We make some assumptions that we're not marking oligos, namely the array length
+        // below and also PoseEditMode pulls library selections from poses, so if some base is
+        // missing in the current state of all poses (eg, non-pip mode and target index > 0)
+        // that base selection would dissapear beacuse no one is holding that state.
+        if (seqnum >= this._sequence.length) return;
+
         // Don't allow bases to be selected if they don't "actually exist" (eg, in the PTC
         // puzzles where we have a subset of a larger solution that isn't contiguous and we added
         // "padding" bases
         if (this.customNumbering && !this.customNumbering[seqnum]) return;
 
-        // This might break on multistrand puzzles, but I'm also not sure what would be
-        // required there - if for some reason we ever need that, some testing and thought is needed
         if (this._librarySelections.length === 0) {
             this._librarySelections = new Array(this._sequence.length);
         }

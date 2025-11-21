@@ -579,7 +579,9 @@ export default class PoseEditMode extends GameMode {
         } else {
             // Note that we do this first
             for (let i = 0; i < this._poses.length; i++) {
-                this._poses[i].librarySelections = solution.libraryNT;
+                this._poses[i].librarySelections = solution.libraryNT.map((idx) => this.transformBaseIndex(
+                    idx, this.poseTargetIndex(i), this._poseState, 0, PoseState.TARGET
+                )).filter((idx) => idx !== null);
                 this._poses[i].sequence = this._puzzle.transformSequence(
                     solution.sequence, this.poseTargetIndex(i), 0
                 );
@@ -2520,7 +2522,9 @@ export default class PoseEditMode extends GameMode {
                 title: 'Cleared Solution',
                 comment: 'No comment',
                 annotations: this._annotationManager.categoryAnnotationData(AnnotationCategory.SOLUTION),
-                libraryNT: this._poses[0].librarySelections ?? []
+                libraryNT: this._poses[0].librarySelections?.map((idx) => this.transformBaseIndex(
+                    idx, 0, PoseState.TARGET, 0, this._poseState
+                )).filter((idx) => idx !== null) ?? []
             }, solToSubmit);
             return true;
         } else {
@@ -2738,7 +2742,9 @@ export default class PoseEditMode extends GameMode {
             postData['fold-data'] = JSON.stringify(fd);
 
             // Record designStruct numbers, used for library puzzles.
-            postData['selected-nts'] = this._poses[0].librarySelections;
+            postData['selected-nts'] = this._poses[0].librarySelections?.map((idx) => this.transformBaseIndex(
+                idx, 0, PoseState.TARGET, 0, this._poseState
+            )).filter((idx) => idx !== null);
         }
 
         return postData;
@@ -3960,7 +3966,12 @@ export default class PoseEditMode extends GameMode {
                 this.poseTargetIndex(ii),
                 this.poseTargetIndex(sourcePoseIndex)
             );
-            this._poses[ii].librarySelections = this._poses[sourcePoseIndex].librarySelections;
+            this._poses[ii].librarySelections = this._poses[sourcePoseIndex].librarySelections
+                ?.map((idx) => this.transformBaseIndex(
+                    idx,
+                    this.poseTargetIndex(ii), this._poseState,
+                    this.poseTargetIndex(sourcePoseIndex), this._poseState
+                )).filter((idx) => idx !== null);
         }
         this.syncStampFromPose(sourcePoseIndex);
     }
@@ -4428,7 +4439,9 @@ export default class PoseEditMode extends GameMode {
         undoBlock.puzzleLocks = this.transformBaseMap(this._poses[ii].puzzleLocks, ii, this.poseTargetIndex(ii));
         undoBlock.targetConditions = this._targetConditions[ii];
         undoBlock.setBasics(EPars.DEFAULT_TEMPERATURE, pseudoknots);
-        undoBlock.librarySelections = this._poses[ii].librarySelections;
+        undoBlock.librarySelections = this._poses[ii].librarySelections?.map((idx) => this.transformBaseIndex(
+            idx, ii, PoseState.TARGET, this.poseTargetIndex(ii), this._poseState
+        )).filter((idx) => idx !== null);
         this._seqStacks[this._stackLevel][ii] = undoBlock;
     }
 
@@ -4561,7 +4574,9 @@ export default class PoseEditMode extends GameMode {
         this._poses[ii].puzzleLocks = undoBlock.puzzleLocks
             ? this.transformBaseMap(undoBlock.puzzleLocks, ii, ii)
             : undefined;
-        this._poses[ii].librarySelections = undoBlock.librarySelections;
+        this._poses[ii].librarySelections = undoBlock.librarySelections?.map((idx) => this.transformBaseIndex(
+            idx, ii, this._poseState, ii, PoseState.TARGET
+        )).filter((idx) => idx !== null);
     }
 
     private moveUndoStack(): void {
