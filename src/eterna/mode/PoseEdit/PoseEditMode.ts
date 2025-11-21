@@ -3172,13 +3172,13 @@ export default class PoseEditMode extends GameMode {
             name: this._pose3D.structureFile.name,
             content: await this._pose3D.structureFile.text()
         } : this._pose3D?.structureFile;
-        for (const [i, pose] of this._poses.entries()) {
+        for (let i = 0; i < this._poses.length; i++) {
             const tc = this._targetConditions[i];
             const ublk = this.getCurrentUndoBlock(i);
             const pseudoknots = tc !== undefined && tc.type === 'pseudoknot';
 
             const puzzledef: PuzzleEditPoseData = {
-                sequence: pose.sequence.sequenceString(),
+                sequence: this._poses[0].sequence.sequenceString(),
                 structure: (
                     this._poseState === PoseState.TARGET
                         ? ublk.targetPairs
