@@ -2615,7 +2615,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         } else {
             let diff = false;
             for (let ii = 0; ii < setting.length; ++ii) {
-                if (setting[ii] !== this._customLayout?.[ii] ?? null) {
+                if (setting[ii] !== (this._customLayout?.[ii] ?? null)) {
                     diff = true;
                     break;
                 }
