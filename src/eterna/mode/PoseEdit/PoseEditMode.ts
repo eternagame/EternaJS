@@ -4119,7 +4119,11 @@ export default class PoseEditMode extends GameMode {
         /*
         if (!this.forceSync) {
             const sol: Solution | null = SolutionManager.instance.getSolutionBySequence(
-                this._poses[targetIndex].getSequenceString()
+                this._puzzle.transformSequence(
+                    this._poses[sourcePoseIndex].getSequenceString(),
+                    0,
+                    this.poseTargetIndex(sourcePoseIndex)
+                )
             );
             if (sol != null && this._puzzle.hasTargetType('multistrand')) {
                 this.pushUILock();
@@ -4535,7 +4539,11 @@ export default class PoseEditMode extends GameMode {
         /*
         if (this._foldTotalTime >= 1000.0 && this._puzzle.hasTargetType('multistrand')) {
             const sol: Solution | null = SolutionManager.instance.getSolutionBySequence(
-                this._poses[targetIndex].getSequenceString()
+                this._puzzle.transformSequence(
+                    this._poses[sourcePoseIndex].getSequenceString(),
+                    0,
+                    this.poseTargetIndex(sourcePoseIndex)
+                )
             );
             if (sol != null && !sol.hasFoldData) {
                 const fd: FoldData[] = [];
