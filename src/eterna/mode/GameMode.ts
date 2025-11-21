@@ -379,9 +379,9 @@ export default abstract class GameMode extends AppMode {
                 const currBlock = this.getCurrentUndoBlock(targetIdx);
                 if (!currBlock) continue;
 
-                const ranges = highlightInfo.ranges.map((index: number) => this.transformBaseIndex(
-                    index, poseIdx, this._poseState, highlightInfo.stateIndex ?? 0, PoseState.FROZEN
-                )).filter((idx) => idx !== null);
+                const ranges = this.transformBaseRanges(
+                    highlightInfo.ranges, poseIdx, this._poseState, highlightInfo.stateIndex ?? 0, PoseState.FROZEN
+                );
 
                 switch (highlightInfo.color) {
                     case HighlightType.RESTRICTED:
@@ -826,6 +826,35 @@ export default abstract class GameMode extends AppMode {
         _fromTargetState: PoseState
     ): number | null {
         return baseIndex;
+    }
+
+    protected transformBaseRanges(
+        ranges: number[],
+        targetIndex: number,
+        targetState: PoseState,
+        fromTargetIndex: number,
+        fromTargetState: PoseState
+    ): number[] {
+        // TODO: There's probably a more efficient way to do this
+        let allIndices: number[] = [];
+        for (let i = 0; i < ranges.length; i += 2) {
+            allIndices = allIndices.concat(Utility.range(ranges[i], ranges[i + 1] + 1));
+        }
+        allIndices = allIndices.map((idx) => this.transformBaseIndex(
+            idx, targetIndex, targetState, fromTargetIndex, fromTargetState
+        )).filter((idx) => idx !== null);
+
+        const ret: number[] = [];
+        while (true) {
+            const next = allIndices.shift();
+            if (!next) break;
+
+            const last = ret[ret.length - 1];
+            if (last === next - 1) ret[ret.length - 1] = next;
+            else ret.push(next, next);
+        }
+
+        return ret;
     }
 
     protected getCurrentUndoBlock(_index: number): UndoBlock | undefined {
