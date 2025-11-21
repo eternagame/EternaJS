@@ -329,8 +329,9 @@ export default class PuzzleEditMode extends GameMode {
         this._folderSwitcher = this._modeBar.addFolderSwitcher((folder) => this.canUseFolder(folder), defaultFolder);
         this._folderSwitcher.selectedFolder.connectNotify(async () => {
             for (let i = 0; i < this._poses.length; i++) {
-                this._poses[i].scoreFolder = this.folderForState(i);
-                this._poses[i].canAddBindingSite = this._poses[i].scoreFolder.canFoldWithBindingSite;
+                const folder = this.folderForState(i);
+                this._poses[i].scoreFolder = folder;
+                this._poses[i].canAddBindingSite = folder.canFoldWithBindingSite;
             }
 
             this.clearUndoStack();
