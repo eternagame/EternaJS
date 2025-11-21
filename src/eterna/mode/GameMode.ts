@@ -376,14 +376,9 @@ export default abstract class GameMode extends AppMode {
                 const currBlock = this.getCurrentUndoBlock(targetIdx);
                 if (!currBlock) continue;
 
-                const naturalMap = currBlock.reorderedOligosIndexMap(currBlock.oligoOrder);
-                const targetMap = currBlock.reorderedOligosIndexMap(currBlock.targetOligoOrder);
-                let ranges = highlightInfo.ranges;
-                if (this._poseState === PoseState.NATIVE && naturalMap !== undefined) {
-                    ranges = highlightInfo.ranges.map((index: number) => naturalMap.indexOf(index));
-                } else if (this._poseState === PoseState.TARGET && targetMap !== undefined) {
-                    ranges = highlightInfo.ranges.map((index: number) => targetMap.indexOf(index));
-                }
+                const ranges = highlightInfo.ranges.map((index: number) => this.transformBaseIndex(
+                    index, poseIdx, this._poseState, highlightInfo.stateIndex ?? 0, PoseState.FROZEN
+                )).filter((idx) => idx !== null);
 
                 switch (highlightInfo.color) {
                     case HighlightType.RESTRICTED:
@@ -803,6 +798,16 @@ export default abstract class GameMode extends AppMode {
         return (poseIndex === 0 && !this._isPipMode)
             ? this._curTargetIndex
             : poseIndex;
+    }
+
+    protected transformBaseIndex(
+        baseIndex: number,
+        _targetIndex: number,
+        _targetState: PoseState,
+        _fromTargetIndex: number,
+        _fromTargetState: PoseState
+    ): number | null {
+        return baseIndex;
     }
 
     protected getCurrentUndoBlock(_index: number): UndoBlock | undefined {

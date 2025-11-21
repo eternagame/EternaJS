@@ -3385,7 +3385,7 @@ export default class PoseEditMode extends GameMode {
         return true;
     }
 
-    private transformBaseIndex(
+    protected transformBaseIndex(
         baseIndex: number,
         targetIndex: number,
         targetState: PoseState,
@@ -3657,6 +3657,7 @@ export default class PoseEditMode extends GameMode {
             );
         }
         this.syncBaseMarks();
+        this.highlightSequences(this._constraintBar.sequenceHighlights.value);
 
         const undoBlock: UndoBlock = this.getCurrentUndoBlock();
         const pseudoknots: boolean = (
