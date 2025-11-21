@@ -50,7 +50,6 @@ import FileInputObject, {HTMLInputEvent} from 'eterna/ui/FileInputObject';
 import ToolbarButton from 'eterna/ui/toolbar/ToolbarButton';
 import Pose3DDialog from 'eterna/pose3D/Pose3DDialog';
 import ModeBar from 'eterna/ui/ModeBar';
-import {FederatedPointerEvent} from '@pixi/events';
 import FolderManager from 'eterna/folding/FolderManager';
 import {PoseState} from 'eterna/puzzle/Puzzle';
 import {HighlightInfo} from 'eterna/constraints/Constraint';
@@ -205,33 +204,17 @@ export default class PuzzleEditMode extends GameMode {
             poseToSet.poseEditCallback = () => this.poseEditByTarget(index);
         };
 
-        const bindMousedownEvent = (pose: Pose2D, index: number): void => {
-            pose.startMousedownCallback = (
-                e: FederatedPointerEvent,
-                _closestDist: number,
-                closestIndex: number
-            ): void => {
-                for (let ii = 0; ii < this._numTargets; ++ii) {
-                    const poseField: PoseField = poseFields[ii];
-                    const poseToNotify = poseField.pose;
-                    if (ii === index) {
-                        poseToNotify.onPoseMouseDown(e, closestIndex);
+        const bindBaseMarkEvent = (pose: Pose2D) => {
+            this.regs?.add(pose.baseMarked.connect((baseIdx) => {
+                for (let ii = 0; ii < poseFields.length; ++ii) {
+                    const poseToNotify = this._poses[ii];
+                    if (poseToNotify.isBaseMarked(baseIdx)) {
+                        poseToNotify.unmarkBase(baseIdx);
                     } else {
-                        poseToNotify.onPoseMouseDownPropagate(e, closestIndex);
+                        poseToNotify.markBase(baseIdx);
                     }
                 }
-            };
-            pose.startPickCallback = (closestIndex: number):void => {
-                for (let ii = 0; ii < this._numTargets; ++ii) {
-                    const poseField: PoseField = poseFields[ii];
-                    const poseToNotify = poseField.pose;
-                    if (ii === index) {
-                        poseToNotify.onVirtualPoseMouseDown(closestIndex);
-                    } else {
-                        poseToNotify.onVirtualPoseMouseDownPropagate(closestIndex);
-                    }
-                }
-            };
+            }));
         };
 
         // We don't appropriately handle these, so for now just force them off
@@ -387,7 +370,7 @@ export default class PuzzleEditMode extends GameMode {
                 this._poses[ii].setZoomLevel(2, true, true);
             }
 
-            bindMousedownEvent(this._poses[ii], ii);
+            bindBaseMarkEvent(this._poses[ii]);
         }
 
         this.setToTargetMode();

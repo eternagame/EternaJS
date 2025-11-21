@@ -143,8 +143,8 @@ export default class Utility {
         return ip;
     }
 
-    public static range(start: number, stop: number): number[];
     public static range(length: number): number[];
+    public static range(start: number, stop: number): number[];
 
     public static range(a: number, b?: number): number[] {
         const start = b ? a : 0;

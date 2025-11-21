@@ -223,6 +223,19 @@ export default class PuzzleManager {
             for (let ii = 0; ii < targetConditions.length; ii++) {
                 if (targetConditions[ii] === undefined) continue;
                 const tc = targetConditions[ii] as TargetConditions;
+                if (ii === 0 && tc.reverseComplement) {
+                    // There's a bunch of places where we use some shortcuts which assume
+                    // state 1 is not a reverse complement. Eg, comparing the starting sequence
+                    // to the sequence in state 1 to detect mutations, syncing to pose3D,
+                    // tying to what sequence is saved on the server (among other things, things I
+                    // may not even be aware of as I'm implementing this - transformSequence
+                    // to/from target 0 and use of getCurrentUndoBlock(0) or similar should
+                    // raise a bunch of these).
+                    // We haven't even intentionally defined what a state-1 reverse complement means.
+                    // Does that mean the stored sequence doesn't match state 1? That would
+                    // probably be unintuitive to the user.
+                    throw new Error('reverseComplement in state 1 is not supported');
+                }
 
                 const constrainedBases = tc['structure_constrained_bases'];
                 if (constrainedBases !== undefined && constrainedBases.length % 2 === 0) {

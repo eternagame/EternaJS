@@ -63,12 +63,8 @@ enum FrameUpdateState {
     THIS_FRAME,
     NEXT_FRAME
 }
-export const PLAYER_MARKER_LAYER = 'Markers';
-export const MUTATION_MARKER_LAYER = 'Mutations';
-export const SCRIPT_MARKER_LAYER = 'Script';
 
 export type PoseMouseDownCallback = (e: FederatedPointerEvent, closestDist: number, closestIndex: number) => void;
-export type PosePickCallback = (closestIndex: number) => void;
 
 export default class Pose2D extends ContainerObject implements Updatable {
     public static readonly COLOR_CURSOR: number = 0xFFC0CB;
@@ -213,7 +209,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         this.pointerMove.connect((p) => this.onMouseMoved(p.global));
         this.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => {
-            this.callStartMousedownCallback(e);
+            this.onPoseMouseDown(e);
 
             // deselect all annotations
             this._annotationManager.deselectSelected();
@@ -567,32 +563,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public onPoseMouseDownPropagate(e: FederatedPointerEvent, closestIndex: number): void {
-        const altDown: boolean = Flashbang.app.isAltKeyDown;
-        const ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
-        const ctrlDownOrBaseMarking = ctrlDown || this.currentColor === RNAPaint.BASE_MARK;
-
-        if ((this._coloring && !altDown) || ctrlDownOrBaseMarking) {
-            if (ctrlDownOrBaseMarking && closestIndex >= this.sequence.length) {
-                return;
-            }
-            this.onPoseMouseDown(e, closestIndex);
-        }
-    }
-
-    public onVirtualPoseMouseDownPropagate(closestIndex: number): void {
-        const altDown: boolean = Flashbang.app.isAltKeyDown;
-        const ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
-        const ctrlDownOrBaseMarking = ctrlDown || this.currentColor === RNAPaint.BASE_MARK;
-
-        if ((this._coloring && !altDown) || ctrlDownOrBaseMarking) {
-            if (ctrlDownOrBaseMarking && closestIndex >= this.sequence.length) {
-                return;
-            }
-            this.onVirtualPoseMouseDown(closestIndex);
-        }
-    }
-
     /**
      * Rotate the stem containing nucleotide idx. Save your results in the
      * customLayout. To achieve this: figure out what stem you're in (helper);
@@ -894,7 +864,27 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._customLayoutChanged = true;
     }
 
-    public onPoseMouseDown(e: FederatedPointerEvent, closestIndex: number): void {
+    public onPoseMouseDown(e: FederatedPointerEvent): void {
+        this.display.toLocal(e.global, undefined, Pose2D.P);
+        const mouseX: number = Pose2D.P.x;
+        const mouseY: number = Pose2D.P.y;
+
+        let closestDist = -1;
+        let closestIndex = -1;
+
+        const fullSeqLen = this.fullSequenceLength;
+        for (let ii = 0; ii < fullSeqLen; ii++) {
+            const mouseDist: number = this._bases[ii].isClicked(
+                mouseX - this._offX, mouseY - this._offY, this._zoomLevel, false
+            );
+            if (mouseDist >= 0) {
+                if (closestIndex < 0 || mouseDist < closestDist) {
+                    closestIndex = ii;
+                    closestDist = mouseDist;
+                }
+            }
+        }
+
         const altDown: boolean = Flashbang.app.isAltKeyDown;
         const shiftDown: boolean = Flashbang.app.isShiftKeyDown;
         const ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
@@ -933,7 +923,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 && !this._annotationManager.annotationModeActive.value
             ) {
                 Eterna.observability.recordEvent('Base:Mark');
-                this.toggleBaseMark(closestIndex);
+                this.baseMarked.emit(closestIndex);
                 return;
             }
             if (shiftDown && !this._annotationManager.annotationModeActive.value) {
@@ -1097,7 +1087,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 && !this._annotationManager.annotationModeActive.value
             ) {
                 Eterna.observability.recordEvent('Base:Mark');
-                this.toggleBaseMark(closestIndex);
+                this.baseMarked.emit(closestIndex);
                 return;
             }
             this._lastShiftedCommand = -1;
@@ -1116,36 +1106,22 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public setMarkerLayer(layer: string) {
-        this._currentMarkerLayer = layer;
+    public markBase(baseIndex: number, color: number | number[] = 0x000000) {
+        this._bases[baseIndex].mark(color);
+    }
+
+    public unmarkBase(baseIndex: number) {
+        this._bases[baseIndex].unmark();
+    }
+
+    public unmarkAllBases() {
         for (const base of this._bases) {
-            base.setMarkerLayer(layer);
+            base.unmark();
         }
     }
 
-    public toggleBaseMark(baseIndex: number): void {
-        this.baseMarked.emit(baseIndex);
-
-        if (!this.isTrackedLayer(baseIndex, PLAYER_MARKER_LAYER)) {
-            this.addBaseMark(baseIndex, PLAYER_MARKER_LAYER);
-        } else {
-            this.removeBaseMark(baseIndex, PLAYER_MARKER_LAYER);
-        }
-    }
-
-    public addBaseMark(baseIndex: number, layer: string, colors: number | number[] = 0x000000): void {
-        if (typeof (colors) === 'number') colors = [colors];
-        ROPWait.notifyBlackMark(baseIndex, true);
-        this._bases[baseIndex].mark(colors, layer);
-    }
-
-    public removeBaseMark(baseIndex: number, layer: string): void {
-        this._bases[baseIndex].unmarkLayer(layer);
-        ROPWait.notifyBlackMark(baseIndex, false);
-    }
-
-    private isTrackedLayer(index: number, layer: string) {
-        return this._bases[index].isLayerMarked(layer);
+    public isBaseMarked(baseIndex: number) {
+        return this._bases[baseIndex].isMarked();
     }
 
     public onMouseMoved(point: Point, startIdx?: number): void {
@@ -1331,28 +1307,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return PoseUtil.deleteNopairWithIndex(index, pairs);
     }
 
-    public clearLayerTracking(layer: string): void {
-        for (const base of this._bases) {
-            base.unmarkLayer(layer);
-        }
-    }
-
-    public clearTrackingAllLayers(): void {
-        for (const base of this._bases) {
-            base.unmarkAllLayers();
-        }
-    }
-
-    public get trackedIndices(): number[] {
-        const result: number[] = [];
-        this._bases.forEach((base, baseIndex) => {
-            if (base.isCurrentLayerMarked()) {
-                result.push(baseIndex);
-            }
-        });
-        return result;
-    }
-
     public getBase(ind: number): Base {
         return this._bases[ind];
     }
@@ -1500,13 +1454,17 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     private toggleLibrarySelection(seqnum: number) {
+        // We make some assumptions that we're not marking oligos, namely the array length
+        // below and also PoseEditMode pulls library selections from poses, so if some base is
+        // missing in the current state of all poses (eg, non-pip mode and target index > 0)
+        // that base selection would dissapear beacuse no one is holding that state.
+        if (seqnum >= this._sequence.length) return;
+
         // Don't allow bases to be selected if they don't "actually exist" (eg, in the PTC
         // puzzles where we have a subset of a larger solution that isn't contiguous and we added
         // "padding" bases
         if (this.customNumbering && !this.customNumbering[seqnum]) return;
 
-        // This might break on multistrand puzzles, but I'm also not sure what would be
-        // required there - if for some reason we ever need that, some testing and thought is needed
         if (this._librarySelections.length === 0) {
             this._librarySelections = new Array(this._sequence.length);
         }
@@ -1699,10 +1657,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public isDesignStructureHighlighted(index: number): boolean {
         return (this._designStruct[index] === true);
-    }
-
-    public getSequenceString(): string {
-        return this._sequence.sequenceString();
     }
 
     public get satisfied(): boolean {
@@ -2103,47 +2057,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public set startMousedownCallback(cb: PoseMouseDownCallback) {
-        this._startMousedownCallback = cb;
-    }
-
-    public set startPickCallback(cb: PosePickCallback) {
-        this._startPickCallback = cb;
-    }
-
     public simulateMousedownCallback(closestIndex:number): void {
-        if (this._startPickCallback != null && closestIndex >= 0) {
-            this._startPickCallback(closestIndex);
+        if (closestIndex >= 0) {
+            this.onVirtualPoseMouseDown(closestIndex);
         }
         // deselect all annotations
         this._annotationManager.deselectSelected();
-    }
-
-    public callStartMousedownCallback(e: FederatedPointerEvent): void {
-        this.display.toLocal(e.global, undefined, Pose2D.P);
-        const mouseX: number = Pose2D.P.x;
-        const mouseY: number = Pose2D.P.y;
-
-        let closestDist = -1;
-        let closestIndex = -1;
-
-        if (this._startMousedownCallback != null) {
-            const fullSeqLen = this.fullSequenceLength;
-            for (let ii = 0; ii < fullSeqLen; ii++) {
-                const mouseDist: number = this._bases[ii].isClicked(
-                    mouseX - this._offX, mouseY - this._offY, this._zoomLevel, false
-                );
-                if (mouseDist >= 0) {
-                    if (closestIndex < 0 || mouseDist < closestDist) {
-                        closestIndex = ii;
-                        closestDist = mouseDist;
-                    }
-                }
-            }
-            this._startMousedownCallback(e, closestDist, closestIndex);
-        } else {
-            this.onPoseMouseDown(e, closestIndex);
-        }
     }
 
     public get satisfiedPairs(): SecStruct {
@@ -2300,6 +2219,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
+        this.clearDesignStruct();
+
         const prevOrder: number[] | undefined = this._oligosOrder;
         this._oligos = JSON.parse(JSON.stringify(oligos));
         if (order == null) {
@@ -2378,59 +2299,19 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return idxMap;
     }
 
-    public saveMarkersContext(): void {
-        if (this._oligos === undefined) {
-            this._prevOligosOrder = undefined;
-        } else if (this._prevOligosOrder === undefined && this._oligosOrder !== undefined) {
-            this._prevOligosOrder = this._oligosOrder.slice();
-        }
-    }
-
-    public transformMarkers(): void {
-        if (
-            this._prevOligosOrder == null
-            || this._oligosOrder == null
-            || this._prevOligosOrder.length !== this._oligosOrder.length
-        ) {
-            this._prevOligosOrder = undefined;
-            return;
-        }
-
-        const idxMap: number[] | null = this.getOrderMap(this._prevOligosOrder);
-        if (idxMap === null) {
-            throw new Error('idxMap is null!');
-        }
-        this._prevOligosOrder = undefined;
-
-        // base marks
-        const baseMarkerData = this._bases.map((base, baseIdx) => ({
-            markerData: base.markerData,
-            baseIdx
-        }));
-        this.clearTrackingAllLayers();
-        for (const baseInfo of baseMarkerData) {
-            const newIdx = idxMap[baseInfo.baseIdx];
-            baseInfo.markerData.forEach((colors, layer) => {
-                this.addBaseMark(newIdx, layer, colors);
-            });
-        }
-
-        // blue highlights ("magic glue")
-        const newDesign: boolean[] = [];
-        const fullSeqLen = this.fullSequenceLength;
-        for (let ii = 0; ii < fullSeqLen; ii++) {
-            newDesign[idxMap[ii]] = this._designStruct[ii];
-        }
-        this._designStruct = newDesign;
-        this.updateDesignHighlight();
-    }
-
     public setOligo(
         oligo: number[] | undefined,
         mode: number | string | null = OligoMode.DIMER,
         oName: string | null = null,
         oLabel: string | null = null
     ): void {
+        if (!(
+            oligo === this._oligo
+            || (oligo && this._oligo && Arrays.shallowEqual(oligo, this._oligo))
+        )) {
+            this.clearDesignStruct();
+        }
+
         if (oligo == null) {
             this._oligo = null;
             return;
@@ -4398,7 +4279,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     private createBase(): Base {
         const base: Base = new Base(RNABase.GUANINE);
-        base.setMarkerLayer(this._currentMarkerLayer);
         this.addObject(base, this._baseLayer);
         this._bases.push(base);
         return base;
@@ -4456,7 +4336,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     // Multistrands
     private _oligos: Oligo[] | undefined = undefined;
     private _oligosOrder: number[] | undefined = undefined;
-    private _prevOligosOrder: number[] | undefined;
     private _oligosPaired: number = 0;
     private _strandLabel: TextBalloon;
 
@@ -4491,8 +4370,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _poseEditCallback: (() => void) | null = null;
     private _trackMovesCallback: ((count: number, moves: Move[]) => void) | null = null;
     private _addBaseCallback: (parenthesis: string | null, op: PuzzleEditOp | null, index: number) => void;
-    private _startMousedownCallback: PoseMouseDownCallback;
-    private _startPickCallback: PosePickCallback;
     private _mouseDownAltKey: boolean = false;
 
     private _redraw: boolean = true;
@@ -4560,7 +4437,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     // Base rings
     private _cursorIndex: number | null = 0;
     private _cursorBox: Graphics | null = null;
-    private _currentMarkerLayer: string = PLAYER_MARKER_LAYER;
 
     // Adding/removing bases
     private _lastShiftedIndex: number = -1;
