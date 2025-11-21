@@ -333,15 +333,17 @@ export default abstract class GameMode extends AppMode {
 
             this._pose3D = pose3D;
 
-            pose3D.regs.add(pose3D.baseHovered.connect((closestIndex) => {
-                this._poses.forEach((pose) => {
-                    pose.on3DPickingMouseMoved(closestIndex);
-                });
-            }));
             pose3D.regs.add(pose3D.baseClicked.connect((closestIndex) => {
-                this._poses.forEach((pose) => {
-                    pose.simulateMousedownCallback(closestIndex);
-                });
+                // We'll sync with the first pose and let it propagate changes
+                // as necessary to other poses. It's sorta arbitrary that in
+                // pip mode that we'd pick to sync with pose 0, but it's probably
+                // most intutivie if we have to pick.
+                this._poses[0].simulateMousedownCallback(closestIndex);
+            }));
+            pose3D.regs.add(pose3D.baseHovered.connect((closestIndex) => {
+                // We sync the paint cursor, so we use pose 0 because that's the
+                // pose where we'll be triggering the click
+                this._poses[0].on3DPickingMouseMoved(closestIndex);
             }));
         };
 
@@ -349,15 +351,17 @@ export default abstract class GameMode extends AppMode {
         this.regs?.add(this._toolbar.view3DButton.clicked.connect(show3d));
         show3d();
 
-        this.regs?.add(this._poses[0].baseHovered.connect(
-            (val: number) => this._pose3D?.hover3D(val)
-        ));
-        this.regs?.add(this._poses[0].baseMarked.connect(
-            (val: number) => this._pose3D?.mark3D(val)
-        ));
-        this.regs?.add(this._poses[0].basesSparked.connect(
-            (val: number[]) => this._pose3D?.spark3D(val)
-        ));
+        for (const pose of this._poses) {
+            this.regs?.add(pose.baseHovered.connect(
+                (val: number) => this._pose3D?.hover3D(val)
+            ));
+            this.regs?.add(pose.baseMarked.connect(
+                (val: number) => this._pose3D?.mark3D(val)
+            ));
+            this.regs?.add(pose.basesSparked.connect(
+                (val: number[]) => this._pose3D?.spark3D(val)
+            ));
+        }
     }
 
     protected highlightSequences(highlightInfos: HighlightInfo[] | null) {
