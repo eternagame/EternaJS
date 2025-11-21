@@ -961,7 +961,7 @@ export default class PoseEditMode extends GameMode {
                 }
             }
 
-            this._poses[ii].puzzleLocks = this._puzzle.puzzleLocks;
+            this._poses[ii].puzzleLocks = this.transformBaseMap(this._puzzle.puzzleLocks, this.poseTargetIndex(ii), 0);
             this._poses[ii].shiftLimit = this._puzzle.shiftLimit;
             this._poses[ii].librarySelections = librarySelections;
         }
@@ -1382,10 +1382,7 @@ export default class PoseEditMode extends GameMode {
         scriptInterfaceCtx.addCallback(
             'get_locks',
             lockDuringFold(
-                (): boolean[] | null => {
-                    const pose: Pose2D = this.getPose(0);
-                    return pose.puzzleLocks ? pose.puzzleLocks.slice(0, pose.sequence.length) : null;
-                }
+                (): boolean[] => this.transformBaseMap(this._poses[0].puzzleLocks, 0, this.poseTargetIndex(0))
             )
         );
 
@@ -2078,6 +2075,10 @@ export default class PoseEditMode extends GameMode {
             this._poses[0].sequence = this._puzzle.transformSequence(
                 this.getCurrentUndoBlock(targetIndex).sequence, targetIndex, targetIndex
             );
+            const locks = this.getCurrentUndoBlock(targetIndex).puzzleLocks;
+            if (locks) {
+                this._poses[0].puzzleLocks = this.transformBaseMap(locks, targetIndex, targetIndex);
+            }
             this.setToNativeMode();
         } else {
             this.setPoseTarget(0, this._curTargetIndex);
@@ -2125,6 +2126,10 @@ export default class PoseEditMode extends GameMode {
             this._poses[poseIndex].sequence = this._puzzle.transformSequence(
                 this.getCurrentUndoBlock(targetIndex).sequence, targetIndex, targetIndex
             );
+            const locks = this.getCurrentUndoBlock(targetIndex).puzzleLocks;
+            if (locks) {
+                this._poses[0].puzzleLocks = this.transformBaseMap(locks, targetIndex, targetIndex);
+            }
             const tcType: TargetType = tc['type'];
 
             const barcode = this._puzzle.barcodeIndices?.map(
@@ -3289,7 +3294,7 @@ export default class PoseEditMode extends GameMode {
 
         for (let ii = 0; ii < this._poses.length; ii++) {
             this._poses[ii].sequence = this._puzzle.transformSequence(new Sequence(a), this.poseTargetIndex(ii), 0);
-            this._poses[ii].puzzleLocks = locks;
+            this._poses[ii].puzzleLocks = this.transformBaseMap(locks, this.poseTargetIndex(ii), 0);
 
             const annotations: AnnotationDataBundle | null = savedAnnotations[ii];
             if (annotations) {
@@ -3383,7 +3388,7 @@ export default class PoseEditMode extends GameMode {
     ): number | null {
         if (!this._targetConditions) return baseIndex;
 
-        const seqLen = this.getCurrentUndoBlock(0).sequence.length;
+        const seqLen = this._poses[0].sequence.length;
 
         if (baseIndex < seqLen) {
             const targetIsComplement = this._targetConditions?.[targetIndex]?.reverseComplement;
@@ -3456,6 +3461,25 @@ export default class PoseEditMode extends GameMode {
         } else {
             return null;
         }
+    }
+
+    private transformBaseMap(
+        map: boolean[],
+        targetIndex: number,
+        fromTargetIndex: number
+    ): boolean[] {
+        const indices = map
+            .map((val, idx) => (val ? idx : null))
+            .filter((idx) => idx !== null)
+            .map((idx) => this.transformBaseIndex(
+                idx, targetIndex, PoseState.FROZEN, fromTargetIndex, PoseState.FROZEN
+            ))
+            .filter((idx) => idx !== null);
+        const ret = new Array(map.length).fill(false);
+        for (const index of indices) {
+            ret[index] = true;
+        }
+        return ret;
     }
 
     private updateScore(): void {
@@ -3931,7 +3955,11 @@ export default class PoseEditMode extends GameMode {
                 poseTargetIdx,
                 mutatedTargetIdx
             );
-            this._poses[ii].puzzleLocks = this._poses[sourcePoseIndex].puzzleLocks;
+            this._poses[ii].puzzleLocks = this.transformBaseMap(
+                this._poses[sourcePoseIndex].puzzleLocks,
+                this.poseTargetIndex(ii),
+                this.poseTargetIndex(sourcePoseIndex)
+            );
             this._poses[ii].librarySelections = this._poses[sourcePoseIndex].librarySelections;
         }
         this.syncStampFromPose(sourcePoseIndex);
@@ -4397,7 +4425,7 @@ export default class PoseEditMode extends GameMode {
         undoBlock.oligosPaired = oligosPaired;
         undoBlock.targetPairs = this._targetPairs[ii];
         undoBlock.targetOligoOrder = this._targetOligosOrder[ii];
-        undoBlock.puzzleLocks = this._poses[ii].puzzleLocks;
+        undoBlock.puzzleLocks = this.transformBaseMap(this._poses[ii].puzzleLocks, ii, this.poseTargetIndex(ii));
         undoBlock.targetConditions = this._targetConditions[ii];
         undoBlock.setBasics(EPars.DEFAULT_TEMPERATURE, pseudoknots);
         undoBlock.librarySelections = this._poses[ii].librarySelections;
@@ -4530,7 +4558,9 @@ export default class PoseEditMode extends GameMode {
 
     private setPosesWithUndoBlock(ii: number, undoBlock: UndoBlock): void {
         this._poses[ii].sequence = this._puzzle.transformSequence(undoBlock.sequence, ii, ii);
-        this._poses[ii].puzzleLocks = undoBlock.puzzleLocks;
+        this._poses[ii].puzzleLocks = undoBlock.puzzleLocks
+            ? this.transformBaseMap(undoBlock.puzzleLocks, ii, ii)
+            : undefined;
         this._poses[ii].librarySelections = undoBlock.librarySelections;
     }
 
