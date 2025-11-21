@@ -225,9 +225,8 @@ export default abstract class GameMode extends AppMode {
                 const folder = this.folderForState(targetIdx);
                 // Sanity check
                 if (folder !== null) {
-                    const pseudoknots: boolean = this._targetConditions != null
-                        && this._targetConditions[0] != null
-                        && this._targetConditions[0]['type'] === 'pseudoknot';
+                    const tc = this._targetConditions?.[this.poseTargetIndex(idx)];
+                    const pseudoknots: boolean = tc != null && tc['type'] === 'pseudoknot';
 
                     const ublk = this.getCurrentUndoBlock(targetIdx);
                     Assert.assertIsDefined(ublk, 'getEnergyDelta is being called where UndoBlocks are unavailable!');

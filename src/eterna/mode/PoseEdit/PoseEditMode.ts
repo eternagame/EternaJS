@@ -609,8 +609,8 @@ export default class PoseEditMode extends GameMode {
                 // Set to puzzle default instead of using whatever we already had set, as if we previously
                 // loaded a solution that did have a defined target, that's *definitely* bogus. At least
                 // the default structure is "more consistently wrong"
-                const pseudoknots = (this._targetConditions && this._targetConditions[0]
-                    && this._targetConditions[0]['type'] === 'pseudoknot') ?? false;
+                const tc = this._targetConditions?.[ii];
+                const pseudoknots: boolean = tc != null && tc['type'] === 'pseudoknot';
                 this._targetPairs[ii] = SecStruct.fromParens(this._puzzle.getSecstruct(ii), pseudoknots);
                 this._targetOligosOrder[ii] = undefined;
             }
@@ -745,8 +745,9 @@ export default class PoseEditMode extends GameMode {
         // now that we have made the folder check, we can set _targetPairs. Used to do this
         // above but because NuPACK can handle pseudoknots, we shouldn't
         for (let ii = 0; ii < targetSecstructs.length; ii++) {
-            if (this._targetConditions && this._targetConditions[0]
-                && this._targetConditions[0]['type'] === 'pseudoknot') {
+            const tc = this._targetConditions?.[ii];
+            const pseudoknots: boolean = tc != null && tc['type'] === 'pseudoknot';
+            if (pseudoknots) {
                 this._targetPairs.push(SecStruct.fromParens(targetSecstructs[ii], true));
                 this._poseFields[ii].pose.pseudoknotted = true;
             } else {
@@ -1309,8 +1310,7 @@ export default class PoseEditMode extends GameMode {
         // Folding
         new FoldingAPI({
             getFolder: () => this._folderSwitcher.selectedFolder.value,
-            getIsPseudoknot: () => Boolean(this._targetConditions && this._targetConditions[0]
-                    && this._targetConditions[0]['type'] === 'pseudoknot')
+            getIsPseudoknot: () => this._targetConditions?.some((tc) => tc && tc.type === 'pseudoknot')
         }).registerToScriptInterface(scriptInterfaceCtx);
 
         // Getters
@@ -1417,8 +1417,8 @@ export default class PoseEditMode extends GameMode {
             lockDuringFold(
                 (index: number): string | null => {
                     if (index < 0 || index >= this._targetPairs.length) return null;
-                    const pseudoknots = (this._targetConditions && this._targetConditions[0]
-                        && this._targetConditions[0]['type'] === 'pseudoknot') ?? false;
+                    const tc = this._targetConditions?.[index];
+                    const pseudoknots: boolean = tc != null && tc['type'] === 'pseudoknot';
                     return this._targetPairs[index].getParenthesis({pseudoknots});
                 }
             )
@@ -1427,11 +1427,12 @@ export default class PoseEditMode extends GameMode {
         scriptInterfaceCtx.addCallback(
             'get_native_structure',
             lockDuringFold(
-                (indx: number): string | null => {
-                    if (indx < 0 || indx >= this._poses.length) return null;
-                    const pseudoknots = (this._targetConditions && this._targetConditions[0]
-                        && this._targetConditions[0]['type'] === 'pseudoknot') ?? false;
-                    const nativepairs = this.getCurrentUndoBlock(indx).getPairs(EPars.DEFAULT_TEMPERATURE, pseudoknots);
+                (index: number): string | null => {
+                    if (index < 0 || index >= this._poses.length) return null;
+                    const tc = this._targetConditions?.[index];
+                    const pseudoknots: boolean = tc != null && tc['type'] === 'pseudoknot';
+                    const nativepairs = this.getCurrentUndoBlock(index)
+                        .getPairs(EPars.DEFAULT_TEMPERATURE, pseudoknots);
                     return nativepairs.getParenthesis({pseudoknots});
                 }
             )
@@ -1445,8 +1446,8 @@ export default class PoseEditMode extends GameMode {
                         return null;
                     }
 
-                    const pseudoknots = (this._targetConditions && this._targetConditions[0]
-                        && this._targetConditions[0]['type'] === 'pseudoknot') ?? false;
+                    const tc = this._targetConditions?.[indx];
+                    const pseudoknots: boolean = tc != null && tc['type'] === 'pseudoknot';
                     const nativePairs: SecStruct = this.getCurrentUndoBlock(indx).getPairs(
                         EPars.DEFAULT_TEMPERATURE, pseudoknots
                     );
@@ -1564,8 +1565,8 @@ export default class PoseEditMode extends GameMode {
                         throw new Error('Attempted to use asynchronous folding engine synchronously');
                     }
 
-                    const pseudoknots = (this._targetConditions && this._targetConditions[0]
-                        && this._targetConditions[0]['type'] === 'pseudoknot') ?? false;
+                    const tc = this._targetConditions?.[index];
+                    const pseudoknots: boolean = tc != null && tc['type'] === 'pseudoknot';
 
                     const prevForceSync = this.forceSync;
                     this.forceSync = true;
@@ -1579,9 +1580,8 @@ export default class PoseEditMode extends GameMode {
             'set_target_structure_async',
             lockDuringFold(
                 async (index: number, structure: string, startAt: number = 0): Promise<void> => {
-                    const pseudoknots = (this._targetConditions && this._targetConditions[0]
-                        && this._targetConditions[0]['type'] === 'pseudoknot') ?? false;
-
+                    const tc = this._targetConditions?.[index];
+                    const pseudoknots: boolean = tc != null && tc['type'] === 'pseudoknot';
                     await this.pasteTargetStructure(index, SecStruct.fromParens(structure, pseudoknots), startAt);
                 }
             )
@@ -1918,9 +1918,8 @@ export default class PoseEditMode extends GameMode {
     }
 
     protected showPasteStructureDialog(poseIdx: number): void {
-        const pseudoknots: boolean = this._targetConditions != null
-            && this._targetConditions[0] != null
-            && this._targetConditions[0]['type'] === 'pseudoknot';
+        const tc = this._targetConditions?.[this.poseTargetIndex(poseIdx)];
+        const pseudoknots: boolean = tc != null && tc['type'] === 'pseudoknot';
         const pasteDialog = this.showDialog(new PasteStructureDialog(pseudoknots), 'PasteSequenceDialog');
         // Already live
         if (!pasteDialog) return;
@@ -2478,11 +2477,8 @@ export default class PoseEditMode extends GameMode {
         const datablock: UndoBlock = this.getCurrentUndoBlock(stateIdx);
         const folder = this.folderForState(stateIdx);
         if (folder && folder.canDotPlot && datablock.sequence.length < 500) {
-            const pseudoknots = (
-                this._targetConditions
-                && this._targetConditions[0]
-                && this._targetConditions[0]['type'] === 'pseudoknot'
-            ) || false;
+            const tc = this._targetConditions?.[stateIdx];
+            const pseudoknots: boolean = tc != null && tc['type'] === 'pseudoknot';
             if (sync) {
                 datablock.updateMeltingPointAndDotPlot({sync: true, pseudoknots});
             } else {
@@ -2572,10 +2568,8 @@ export default class PoseEditMode extends GameMode {
                             if (confirmed === 'reset') {
                                 for (let i = 0; i < this._targetPairs.length; i++) {
                                     this._targetOligosOrder[i] = undefined;
-                                    const pseudoknots = (
-                                        this._targetConditions && this._targetConditions[0]
-                                        && this._targetConditions[0]['type'] === 'pseudoknot'
-                                    ) ?? false;
+                                    const tc = this._targetConditions?.[i];
+                                    const pseudoknots: boolean = tc != null && tc['type'] === 'pseudoknot';
                                     this._targetPairs[i] = SecStruct.fromParens(
                                         this._puzzle.getSecstruct(i),
                                         pseudoknots
@@ -3341,12 +3335,12 @@ export default class PoseEditMode extends GameMode {
     }
 
     private checkValidCustomPairs(): boolean {
-        const pseudoknots = (
-            this._targetConditions && this._targetConditions[0]
-            && this._targetConditions[0]['type'] === 'pseudoknot'
-        ) ?? false;
         const startingTargetStructs = this._puzzle.getSecstructs().map(
-            (dbn) => SecStruct.fromParens(dbn, pseudoknots)
+            (dbn, idx) => {
+                const tc = this._targetConditions?.[idx];
+                const pseudoknots: boolean = tc != null && tc['type'] === 'pseudoknot';
+                return SecStruct.fromParens(dbn, pseudoknots);
+            }
         );
         for (const [stateIdx, ublk] of this.getCurrentUndoBlocks().entries()) {
             const constraints = ublk.targetAlignedStructureConstraints;
