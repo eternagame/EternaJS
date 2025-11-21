@@ -246,66 +246,26 @@ export default class Base extends ContainerObject implements LateUpdatable {
         return -1;
     }
 
-    public mark(colors: number[], layer: string) {
-        if (colors.length === 0) {
-            this.unmarkLayer(layer);
-            return;
-        }
-
-        this._markerColors.set(layer, colors);
-        this.redrawMark();
-    }
-
-    public unmarkLayer(layer: string) {
-        this._markerColors.delete(layer);
-        this.redrawMark();
-    }
-
-    public unmarkAllLayers() {
-        this._markerColors.clear();
-        this.redrawMark();
-    }
-
-    public setMarkerLayer(layer: string) {
-        this._currentMarkerLayer = layer;
-        this.redrawMark();
-    }
-
-    private redrawMark() {
+    public mark(color: number | number[]) {
+        const colors = typeof (color) === 'number' ? [color] : color;
         this._markers.clear();
-        const colors = this._markerColors.get(this._currentMarkerLayer);
-        if (!colors) return;
 
         const angle = (Math.PI * 2) / colors.length;
-        colors.forEach((color, colorIndex) => {
-            this._markers.lineStyle(1, color);
+        colors.forEach((sectionColor, colorIndex) => {
+            this._markers.lineStyle(1, sectionColor);
             this._markers.arc(0, 0, 1 / Base.MARKER_THICKNESS,
                 colorIndex * angle, (colorIndex + 1) * angle);
         });
         this._markers.visible = true;
     }
 
-    public isCurrentLayerMarked(): boolean {
-        return !!this.isLayerMarked(this._currentMarkerLayer);
+    public unmark() {
+        this._markers.clear();
+        this._markers.visible = false;
     }
 
-    public isLayerMarked(layer: string): boolean {
-        return this._markerColors.has(layer);
-    }
-
-    public isAnyLayerMarked(): boolean {
-        for (const val of this._markerColors.values()) {
-            if (val) return true;
-        }
-        return false;
-    }
-
-    public get markerData(): Map<string, number[]> {
-        const ret = new Map<string, number[]>();
-        this._markerColors.forEach((colors, layer) => {
-            ret.set(layer, colors.slice());
-        });
-        return ret;
+    public isMarked() {
+        return this._markers.visible;
     }
 
     public setDrawParams(
@@ -745,9 +705,6 @@ export default class Base extends ContainerObject implements LateUpdatable {
     private _goY: number = 0;
     private _outX: number = 0;
     private _outY: number = 0;
-
-    private _currentMarkerLayer: string = '';
-    private _markerColors: Map<string, number[]> = new Map();
 
     private _needsRedraw: boolean = false;
     private _lastCenterX: number;

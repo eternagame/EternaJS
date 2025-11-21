@@ -3,8 +3,11 @@ import {Value, ValueView} from 'signals';
 import {Sprite} from 'pixi.js';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import BitmapManager from 'eterna/resources/BitmapManager';
-import {PLAYER_MARKER_LAYER} from 'eterna/pose2D/Pose2D';
 import GameDropdown from './GameDropdown';
+
+export const PLAYER_MARKER_LAYER = 'Markers';
+export const MUTATION_MARKER_LAYER = 'Mutations';
+export const SCRIPT_MARKER_LAYER = 'Script';
 
 export default class MarkerSwitcher extends ContainerObject implements Enableable {
     public readonly selectedLayer: ValueView<string> = new Value(PLAYER_MARKER_LAYER);

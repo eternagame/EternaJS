@@ -204,12 +204,14 @@ export default class PuzzleEditMode extends GameMode {
             poseToSet.poseEditCallback = () => this.poseEditByTarget(index);
         };
 
-        const bindBaseMarkEvent = (pose: Pose2D, index: number) => {
+        const bindBaseMarkEvent = (pose: Pose2D) => {
             this.regs?.add(pose.baseMarked.connect((baseIdx) => {
                 for (let ii = 0; ii < poseFields.length; ++ii) {
                     const poseToNotify = this._poses[ii];
-                    if (index !== ii) {
-                        poseToNotify.toggleBaseMark(baseIdx);
+                    if (poseToNotify.isBaseMarked(baseIdx)) {
+                        poseToNotify.unmarkBase(baseIdx);
+                    } else {
+                        poseToNotify.markBase(baseIdx);
                     }
                 }
             }));
@@ -368,7 +370,7 @@ export default class PuzzleEditMode extends GameMode {
                 this._poses[ii].setZoomLevel(2, true, true);
             }
 
-            bindBaseMarkEvent(this._poses[ii], ii);
+            bindBaseMarkEvent(this._poses[ii]);
         }
 
         this.setToTargetMode();

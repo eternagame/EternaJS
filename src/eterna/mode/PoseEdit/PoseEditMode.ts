@@ -32,9 +32,7 @@ import FolderManager from 'eterna/folding/FolderManager';
 import Folder, {MultiFoldResult, CacheKey} from 'eterna/folding/Folder';
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/toolbar/NucleotidePalette';
 import PoseField from 'eterna/pose2D/PoseField';
-import Pose2D, {
-    Layout, PLAYER_MARKER_LAYER, SCRIPT_MARKER_LAYER, MUTATION_MARKER_LAYER
-} from 'eterna/pose2D/Pose2D';
+import Pose2D, {Layout} from 'eterna/pose2D/Pose2D';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import ConstraintBar from 'eterna/constraints/ConstraintBar';
@@ -61,7 +59,9 @@ import {HighlightInfo} from 'eterna/constraints/Constraint';
 import {AchievementData} from 'eterna/achievements/AchievementManager';
 import {RankScrollData} from 'eterna/rank/RankScroll';
 import FolderSwitcher from 'eterna/ui/FolderSwitcher';
-import MarkerSwitcher from 'eterna/ui/MarkerSwitcher';
+import MarkerSwitcher, {
+    PLAYER_MARKER_LAYER, SCRIPT_MARKER_LAYER, MUTATION_MARKER_LAYER
+} from 'eterna/ui/MarkerSwitcher';
 import {Oligo, OligoMode} from 'eterna/rnatypes/Oligo';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
@@ -92,6 +92,7 @@ import FoldingAPI from 'eterna/eternaScript/FoldingAPI';
 import PostMessageReporter from 'eterna/observability/PostMessageReporter';
 import TimerConstraint from 'eterna/constraints/constraints/TimerConstraint';
 import {MutationConstraint} from 'eterna/constraints/constraints/MutationConstraint';
+import ROPWait from 'eterna/rscript/ROPWait';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -620,12 +621,6 @@ export default class PoseEditMode extends GameMode {
         this._modeBar.layout();
     }
 
-    private setMarkerLayer(layer: string) {
-        for (const pose of this._poses) {
-            pose.setMarkerLayer(layer);
-        }
-    }
-
     private setPuzzle(): void {
         const poseFields: PoseField[] = [];
 
@@ -663,17 +658,7 @@ export default class PoseEditMode extends GameMode {
 
         const bindBaseMarkEvent = (pose: Pose2D, index: number) => {
             this.regs?.add(pose.baseMarked.connect((baseIdx) => {
-                const sourcePoseTarget = this.poseTargetIndex(index);
-                for (let ii = 0; ii < poseFields.length; ++ii) {
-                    const poseToNotify = this._poses[ii];
-                    if (index !== ii) {
-                        const notifyPoseTarget = this.poseTargetIndex(ii);
-                        const newPoseBaseIdx = this.transformBaseIndex(
-                            baseIdx, notifyPoseTarget, this._poseState, sourcePoseTarget, this._poseState
-                        );
-                        if (newPoseBaseIdx) poseToNotify.toggleBaseMark(newPoseBaseIdx);
-                    }
-                }
+                this.toggleBaseMark(baseIdx, this.poseTargetIndex(index), this._poseState);
             }));
         };
 
@@ -705,6 +690,7 @@ export default class PoseEditMode extends GameMode {
             this._oligoMode.push(undefined);
             this._oligoName.push(undefined);
             this._oligoLabel.push(undefined);
+            this._baseMarks.push(new Map([[PLAYER_MARKER_LAYER, []]]));
             if (targetConditions[ii] === undefined) continue;
 
             const tc = targetConditions[ii] as TargetConditions;
@@ -780,7 +766,7 @@ export default class PoseEditMode extends GameMode {
         }
 
         this._markerSwitcher = this._modeBar.addMarkerSwitcher();
-        this.regs?.add(this._markerSwitcher.selectedLayer.connectNotify((val) => this.setMarkerLayer(val)));
+        this.regs?.add(this._markerSwitcher.selectedLayer.connect(() => this.syncBaseMarks()));
         this.regs?.add(this._markerSwitcher.selectedLayer.connect((layer) => {
             Eterna.observability.recordEvent('RunTool:MarkerLayer', {layer});
         }));
@@ -1509,7 +1495,10 @@ export default class PoseEditMode extends GameMode {
 
         scriptInterfaceCtx.addCallback(
             'get_tracked_indices',
-            lockDuringFold((): number[] => this.getPose(0).trackedIndices)
+            lockDuringFold((): number[] => this._baseMarks[0]
+                .get(PLAYER_MARKER_LAYER)
+                ?.map((color, idx) => (color ? idx : null))
+                .filter((idx) => idx !== null) ?? [])
         );
         scriptInterfaceCtx.addCallback(
             'get_barcode_indices',
@@ -2139,7 +2128,7 @@ export default class PoseEditMode extends GameMode {
             const tcType: TargetType = tc['type'];
 
             const barcode = this._puzzle.barcodeIndices?.map(
-                (idx) => this.transformBaseIndex(idx, targetIndex, this._poseState, 0, PoseState.TARGET)
+                (idx) => this.transformBaseIndex(idx, targetIndex, this._poseState, 0, PoseState.FROZEN)
             ).filter((idx) => idx !== null);
             if (barcode) {
                 this._poses[poseIndex].barcodes = barcode;
@@ -2221,24 +2210,83 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    private savePosesMarkersContexts(): void {
-        for (const pose of this._poses) {
-            pose.saveMarkersContext();
+    private toggleBaseMark(baseIndex: number, targetIndex: number, poseState: PoseState) {
+        let ropNotified = false;
+        for (let iterTargetIdx = 0; iterTargetIdx < this._poses.length; iterTargetIdx++) {
+            const layer = this._baseMarks[iterTargetIdx].get(PLAYER_MARKER_LAYER);
+            Assert.assertIsDefined(layer);
+            const targetBaseIdx = this.transformBaseIndex(
+                baseIndex,
+                iterTargetIdx,
+                PoseState.FROZEN,
+                targetIndex,
+                poseState
+            );
+            if (targetBaseIdx !== null) {
+                if (layer[targetBaseIdx] !== undefined) {
+                    if (!ropNotified) {
+                        ROPWait.notifyBlackMark(baseIndex, false);
+                        ropNotified = true;
+                    }
+                    layer[targetBaseIdx] = undefined;
+                } else {
+                    if (!ropNotified) {
+                        ROPWait.notifyBlackMark(baseIndex, true);
+                        ropNotified = true;
+                    }
+                    layer[targetBaseIdx] = 0x000000;
+                }
+            }
+        }
+
+        if (this._markerSwitcher.selectedLayer.value === PLAYER_MARKER_LAYER) {
+            this.syncBaseMarks();
         }
     }
 
-    private transformPosesMarkers(): void {
-        for (const pose of this._poses) {
-            pose.transformMarkers();
-        }
-    }
+    private setBaseMarks(marks: {baseIndex: number, colors?: number | number[]}[], layerName: string) {
+        for (let iterTargetIdx = 0; iterTargetIdx < this._poses.length; iterTargetIdx++) {
+            const layer: (undefined | number | number[])[] = [];
+            this._baseMarks[iterTargetIdx].set(layerName, layer);
 
-    private setBaseMarks(marks: {baseIndex: number, colors?: number | number[]}[], layer: string) {
-        for (let i = 0; i < this._poses.length; i++) {
-            this._poses[i].clearLayerTracking(layer);
             for (const mark of marks) {
-                const poseBaseIdx = this.transformBaseIndex(mark.baseIndex, i, this._poseState, 0, PoseState.TARGET);
-                if (poseBaseIdx) this._poses[i].addBaseMark(poseBaseIdx, layer, mark.colors);
+                const targetBaseIdx = this.transformBaseIndex(
+                    mark.baseIndex,
+                    iterTargetIdx,
+                    PoseState.FROZEN,
+                    // Yeah this is a limitation, but we don't have anything that has a need for anything else
+                    0,
+                    PoseState.FROZEN
+                );
+                if (targetBaseIdx !== null) {
+                    layer[targetBaseIdx] = mark.colors ?? 0x000000;
+                }
+            }
+        }
+
+        if (this._markerSwitcher.selectedLayer.value === layerName) {
+            this.syncBaseMarks();
+        }
+    }
+
+    private syncBaseMarks() {
+        for (let poseIdx = 0; poseIdx < this._poses.length; poseIdx++) {
+            this._poses[poseIdx].unmarkAllBases();
+            const poseTargetIdx = this.poseTargetIndex(poseIdx);
+            const layer = this._baseMarks[poseTargetIdx].get(this._markerSwitcher.selectedLayer.value);
+            if (!layer) continue;
+
+            for (const [baseIdx, color] of layer.entries()) {
+                const poseBaseIdx = this.transformBaseIndex(
+                    baseIdx,
+                    poseTargetIdx,
+                    this._poseState,
+                    poseTargetIdx,
+                    PoseState.FROZEN
+                );
+                if (poseBaseIdx !== null && color !== undefined) {
+                    this._poses[poseIdx].markBase(poseBaseIdx, color);
+                }
             }
         }
     }
@@ -2252,10 +2300,8 @@ export default class PoseEditMode extends GameMode {
         this._targetButton.hotkey(KeyCode.Space);
         this._naturalButton.hotkey();
 
-        this.savePosesMarkersContexts();
         this._paused = false;
         this.updateScore();
-        this.transformPosesMarkers();
     }
 
     private setToTargetMode(): void {
@@ -2266,8 +2312,6 @@ export default class PoseEditMode extends GameMode {
 
         this._naturalButton.hotkey(KeyCode.Space);
         this._targetButton.hotkey();
-
-        this.savePosesMarkersContexts();
 
         if (this._isPipMode) {
             for (let ii = 0; ii < this._poses.length; ii++) {
@@ -2304,7 +2348,6 @@ export default class PoseEditMode extends GameMode {
 
         this._paused = true;
         this.updateScore();
-        this.transformPosesMarkers();
     }
 
     private togglePoseState(): void {
@@ -3353,20 +3396,30 @@ export default class PoseEditMode extends GameMode {
         }
 
         const fromTargetOligos = this._targetOligos[fromTargetIndex];
-        const fromTargetOligosOrder = fromTargetState === PoseState.NATIVE
-            ? this.getCurrentUndoBlock(fromTargetIndex).oligoOrder
-            : this._targetOligosOrder[fromTargetIndex];
+        let fromTargetOligosOrder;
+        if (fromTargetState === PoseState.NATIVE) {
+            fromTargetOligosOrder = this.getCurrentUndoBlock(fromTargetIndex).oligoOrder;
+        } else if (fromTargetState === PoseState.TARGET) {
+            fromTargetOligosOrder = this._targetOligosOrder[fromTargetIndex];
+        }
+        // Target or native order may be undefined in case of it being the default order.
+        // We also use PoseState.FROZEN to indicate we specifically want the default order.
+        // PoseState.FROZEN is not intended for this. I don't think its original intended purpose
+        // is even implemented at this point. But I don't have the time or energy to figure
+        // out something better at this point.
+        fromTargetOligosOrder ??= Utility.range(fromTargetOligos?.length ?? 0);
+
         const fromTargetOligo = this._targetOligo[fromTargetIndex];
 
         const newTargetOligos = this._targetOligos[targetIndex];
-        const newTargetOligosOrder = targetState === PoseState.NATIVE
+        const newTargetOligosOrder = (targetState === PoseState.NATIVE
             ? this.getCurrentUndoBlock(targetIndex).oligoOrder
-            : this._targetOligosOrder[targetIndex];
+            : this._targetOligosOrder[targetIndex]) ?? Utility.range(newTargetOligos?.length ?? 0);
         const newTargetOligo = this._targetOligo[targetIndex];
 
         if (fromTargetOligo && newTargetOligo && Arrays.shallowEqual(fromTargetOligo, newTargetOligo)) {
             return baseIndex;
-        } else if (fromTargetOligos && fromTargetOligosOrder && newTargetOligos && newTargetOligosOrder) {
+        } else if (fromTargetOligos && newTargetOligos) {
             let fromTargetCursor = seqLen;
             let sourceOligoLabel = null;
             let sourceOligoInstance = 0;
@@ -3377,10 +3430,11 @@ export default class PoseEditMode extends GameMode {
                     sourceOligoLabel = fromTargetOligos[fromTargetOligosOrder[fromTargetOligoIdx]].label;
                     sourceOligoOffset = fromTargetCursor - baseIndex;
                     for (let ii = 0; ii < fromTargetOligoIdx; ii++) {
-                        if (fromTargetOligos[fromTargetOligosOrder[fromTargetOligoIdx]].label === sourceOligoLabel) {
+                        if (fromTargetOligos[fromTargetOligosOrder[ii]].label === sourceOligoLabel) {
                             sourceOligoInstance++;
                         }
                     }
+                    break;
                 }
             }
             if (!sourceOligoLabel) return null;
@@ -3512,7 +3566,7 @@ export default class PoseEditMode extends GameMode {
             }
 
             const barcode = this._puzzle.barcodeIndices?.map(
-                (idx) => this.transformBaseIndex(idx, stateIdx, this._poseState, 0, PoseState.TARGET)
+                (idx) => this.transformBaseIndex(idx, stateIdx, this._poseState, 0, PoseState.FROZEN)
             ).filter((idx) => idx !== null);
             if (barcode) {
                 this._poses[poseIdx].barcodes = barcode;
@@ -3572,6 +3626,7 @@ export default class PoseEditMode extends GameMode {
                 MUTATION_MARKER_LAYER
             );
         }
+        this.syncBaseMarks();
 
         const undoBlock: UndoBlock = this.getCurrentUndoBlock();
         const pseudoknots: boolean = (
@@ -4015,8 +4070,6 @@ export default class PoseEditMode extends GameMode {
      * @param sourcePoseIndex The index of the pose which a change was made in
      */
     protected async poseEditByTarget(sourcePoseIndex: number) {
-        this.savePosesMarkersContexts();
-
         this.establishTargetPairs(sourcePoseIndex);
         this.syncUpdatesFromPose(sourcePoseIndex);
 
@@ -4086,11 +4139,9 @@ export default class PoseEditMode extends GameMode {
             });
         }
 
-        this.savePosesMarkersContexts();
         // The call to updateScore() is not sufficient, since we need to eg load in the sequence, etc.
         this.moveUndoStack();
         this.updateScore();
-        this.transformPosesMarkers();
     }
 
     /**
@@ -4375,7 +4426,6 @@ export default class PoseEditMode extends GameMode {
 
         this._stackSize = this._stackLevel + 1;
         this.updateScore();
-        this.transformPosesMarkers();
 
         // / JEEFIX
 
@@ -4502,7 +4552,6 @@ export default class PoseEditMode extends GameMode {
         if (this._stackLevel + 1 > this._stackSize - 1) {
             return;
         }
-        this.savePosesMarkersContexts();
 
         const before: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
 
@@ -4513,14 +4562,12 @@ export default class PoseEditMode extends GameMode {
         this.moveHistoryAddMutations(before, after);
 
         this.updateScore();
-        this.transformPosesMarkers();
     }
 
     private moveUndoStackBackward(): void {
         if (this._stackLevel < 1) {
             return;
         }
-        this.savePosesMarkersContexts();
 
         const before: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
 
@@ -4531,12 +4578,9 @@ export default class PoseEditMode extends GameMode {
         this.moveHistoryAddMutations(before, after);
 
         this.updateScore();
-        this.transformPosesMarkers();
     }
 
     private moveUndoStackToLastStable(): void {
-        this.savePosesMarkersContexts();
-
         const before: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
 
         const stackLevel: number = this._stackLevel;
@@ -4551,7 +4595,6 @@ export default class PoseEditMode extends GameMode {
                 this.moveHistoryAddMutations(before, after);
 
                 this.updateScore();
-                this.transformPosesMarkers();
                 return;
             }
 
@@ -4652,6 +4695,7 @@ export default class PoseEditMode extends GameMode {
     private _oligoLabel: (string | undefined)[] = [];
     private _targetOligos: (Oligo[] | undefined)[] = [];
     private _targetOligosOrder: (number[] | undefined)[] = [];
+    private _baseMarks: Map<string, (undefined | number | number[])[]>[] = [];
 
     private _modeBar: ModeBar;
     private _folderSwitcher: FolderSwitcher;

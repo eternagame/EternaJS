@@ -63,9 +63,6 @@ enum FrameUpdateState {
     THIS_FRAME,
     NEXT_FRAME
 }
-export const PLAYER_MARKER_LAYER = 'Markers';
-export const MUTATION_MARKER_LAYER = 'Mutations';
-export const SCRIPT_MARKER_LAYER = 'Script';
 
 export type PoseMouseDownCallback = (e: FederatedPointerEvent, closestDist: number, closestIndex: number) => void;
 
@@ -927,7 +924,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
             ) {
                 Eterna.observability.recordEvent('Base:Mark');
                 this.baseMarked.emit(closestIndex);
-                this.toggleBaseMark(closestIndex);
                 return;
             }
             if (shiftDown && !this._annotationManager.annotationModeActive.value) {
@@ -1092,7 +1088,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
             ) {
                 Eterna.observability.recordEvent('Base:Mark');
                 this.baseMarked.emit(closestIndex);
-                this.toggleBaseMark(closestIndex);
                 return;
             }
             this._lastShiftedCommand = -1;
@@ -1111,34 +1106,22 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public setMarkerLayer(layer: string) {
-        this._currentMarkerLayer = layer;
+    public markBase(baseIndex: number, color: number | number[] = 0x000000) {
+        this._bases[baseIndex].mark(color);
+    }
+
+    public unmarkBase(baseIndex: number) {
+        this._bases[baseIndex].unmark();
+    }
+
+    public unmarkAllBases() {
         for (const base of this._bases) {
-            base.setMarkerLayer(layer);
+            base.unmark();
         }
     }
 
-    public toggleBaseMark(baseIndex: number): void {
-        if (!this.isTrackedLayer(baseIndex, PLAYER_MARKER_LAYER)) {
-            this.addBaseMark(baseIndex, PLAYER_MARKER_LAYER);
-        } else {
-            this.removeBaseMark(baseIndex, PLAYER_MARKER_LAYER);
-        }
-    }
-
-    public addBaseMark(baseIndex: number, layer: string, colors: number | number[] = 0x000000): void {
-        if (typeof (colors) === 'number') colors = [colors];
-        ROPWait.notifyBlackMark(baseIndex, true);
-        this._bases[baseIndex].mark(colors, layer);
-    }
-
-    public removeBaseMark(baseIndex: number, layer: string): void {
-        this._bases[baseIndex].unmarkLayer(layer);
-        ROPWait.notifyBlackMark(baseIndex, false);
-    }
-
-    private isTrackedLayer(index: number, layer: string) {
-        return this._bases[index].isLayerMarked(layer);
+    public isBaseMarked(baseIndex: number) {
+        return this._bases[baseIndex].isMarked();
     }
 
     public onMouseMoved(point: Point, startIdx?: number): void {
@@ -1322,28 +1305,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public deleteBaseWithIndexPairs(index: number, pairs: SecStruct): [string, PuzzleEditOp, RNABase[]?] {
         return PoseUtil.deleteNopairWithIndex(index, pairs);
-    }
-
-    public clearLayerTracking(layer: string): void {
-        for (const base of this._bases) {
-            base.unmarkLayer(layer);
-        }
-    }
-
-    public clearTrackingAllLayers(): void {
-        for (const base of this._bases) {
-            base.unmarkAllLayers();
-        }
-    }
-
-    public get trackedIndices(): number[] {
-        const result: number[] = [];
-        this._bases.forEach((base, baseIndex) => {
-            if (base.isCurrentLayerMarked()) {
-                result.push(baseIndex);
-            }
-        });
-        return result;
     }
 
     public getBase(ind: number): Base {
@@ -2254,6 +2215,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
+        this.clearDesignStruct();
+
         const prevOrder: number[] | undefined = this._oligosOrder;
         this._oligos = JSON.parse(JSON.stringify(oligos));
         if (order == null) {
@@ -2332,59 +2295,19 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return idxMap;
     }
 
-    public saveMarkersContext(): void {
-        if (this._oligos === undefined) {
-            this._prevOligosOrder = undefined;
-        } else if (this._prevOligosOrder === undefined && this._oligosOrder !== undefined) {
-            this._prevOligosOrder = this._oligosOrder.slice();
-        }
-    }
-
-    public transformMarkers(): void {
-        if (
-            this._prevOligosOrder == null
-            || this._oligosOrder == null
-            || this._prevOligosOrder.length !== this._oligosOrder.length
-        ) {
-            this._prevOligosOrder = undefined;
-            return;
-        }
-
-        const idxMap: number[] | null = this.getOrderMap(this._prevOligosOrder);
-        if (idxMap === null) {
-            throw new Error('idxMap is null!');
-        }
-        this._prevOligosOrder = undefined;
-
-        // base marks
-        const baseMarkerData = this._bases.map((base, baseIdx) => ({
-            markerData: base.markerData,
-            baseIdx
-        }));
-        this.clearTrackingAllLayers();
-        for (const baseInfo of baseMarkerData) {
-            const newIdx = idxMap[baseInfo.baseIdx];
-            baseInfo.markerData.forEach((colors, layer) => {
-                this.addBaseMark(newIdx, layer, colors);
-            });
-        }
-
-        // blue highlights ("magic glue")
-        const newDesign: boolean[] = [];
-        const fullSeqLen = this.fullSequenceLength;
-        for (let ii = 0; ii < fullSeqLen; ii++) {
-            newDesign[idxMap[ii]] = this._designStruct[ii];
-        }
-        this._designStruct = newDesign;
-        this.updateDesignHighlight();
-    }
-
     public setOligo(
         oligo: number[] | undefined,
         mode: number | string | null = OligoMode.DIMER,
         oName: string | null = null,
         oLabel: string | null = null
     ): void {
+        if (!(
+            oligo === this._oligo
+            || (oligo && this._oligo && Arrays.shallowEqual(oligo, this._oligo))
+        )) {
+            this.clearDesignStruct();
+        }
+
         if (oligo == null) {
             this._oligo = null;
             return;
@@ -4352,7 +4275,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     private createBase(): Base {
         const base: Base = new Base(RNABase.GUANINE);
-        base.setMarkerLayer(this._currentMarkerLayer);
         this.addObject(base, this._baseLayer);
         this._bases.push(base);
         return base;
@@ -4410,7 +4332,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     // Multistrands
     private _oligos: Oligo[] | undefined = undefined;
     private _oligosOrder: number[] | undefined = undefined;
-    private _prevOligosOrder: number[] | undefined;
     private _oligosPaired: number = 0;
     private _strandLabel: TextBalloon;
 
@@ -4512,7 +4433,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     // Base rings
     private _cursorIndex: number | null = 0;
     private _cursorBox: Graphics | null = null;
-    private _currentMarkerLayer: string = PLAYER_MARKER_LAYER;
 
     // Adding/removing bases
     private _lastShiftedIndex: number = -1;
