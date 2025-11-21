@@ -3278,7 +3278,7 @@ export default class PoseEditMode extends GameMode {
                 this._targetPairs[ii] = undoBlock.targetPairs;
                 this._targetOligosOrder[ii] = undoBlock.targetOligoOrder;
 
-                this.setPosesWithUndoBlock(ii, undoBlock);
+                this.setPosesWithUndoBlock(ii, ii, undoBlock);
             }
         }
 
@@ -4607,19 +4607,23 @@ export default class PoseEditMode extends GameMode {
         return this._seqStacks[this._stackLevel];
     }
 
-    private setPosesWithUndoBlock(ii: number, undoBlock: UndoBlock): void {
-        this._poses[ii].sequence = this.transformSequence(undoBlock.sequence, ii, ii);
-        this._poses[ii].puzzleLocks = undoBlock.puzzleLocks
-            ? this.transformBaseMap(undoBlock.puzzleLocks, ii, ii)
+    private setPosesWithUndoBlock(poseIdx: number, targetIdx: number, undoBlock: UndoBlock): void {
+        this._poses[poseIdx].sequence = this.transformSequence(undoBlock.sequence, targetIdx, targetIdx);
+        this._poses[poseIdx].puzzleLocks = undoBlock.puzzleLocks
+            ? this.transformBaseMap(undoBlock.puzzleLocks, targetIdx, targetIdx)
             : undefined;
-        this._poses[ii].librarySelections = undoBlock.librarySelections?.map((idx) => this.transformBaseIndex(
-            idx, ii, this._poseState, ii, PoseState.TARGET
+        this._poses[poseIdx].librarySelections = undoBlock.librarySelections?.map((idx) => this.transformBaseIndex(
+            idx, targetIdx, this._poseState, targetIdx, PoseState.TARGET
         )).filter((idx) => idx !== null);
     }
 
     private moveUndoStack(): void {
         for (let ii = 0; ii < this._poses.length; ii++) {
-            this.setPosesWithUndoBlock(ii, this._seqStacks[this._stackLevel][this.poseTargetIndex(ii)]);
+            this.setPosesWithUndoBlock(
+                ii,
+                this.poseTargetIndex(ii),
+                this._seqStacks[this._stackLevel][this.poseTargetIndex(ii)]
+            );
             this._targetPairs[ii] = this._seqStacks[this._stackLevel][ii].targetPairs;
             this._targetConditions[ii] = this._seqStacks[this._stackLevel][ii].targetConditions;
             this._targetOligo[ii] = this._seqStacks[this._stackLevel][ii].targetOligo;
