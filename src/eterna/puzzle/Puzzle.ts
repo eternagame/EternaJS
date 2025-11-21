@@ -624,12 +624,11 @@ export default class Puzzle {
         if (!this._useBarcode) {
             return seq.slice(0);
         }
-        let minus = 19;
-        if (this._useTails) {
-            minus += 20;
-        }
 
-        return seq.slice(0, seq.length - minus);
+        const barcodeIndices = this.barcodeIndices;
+        return new Sequence(
+            seq.baseArray.filter((_, idx) => !barcodeIndices?.includes(idx))
+        );
     }
 
     public setUseTails(useTails: boolean, useShortTails: boolean): void {
