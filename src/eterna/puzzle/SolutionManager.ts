@@ -185,6 +185,7 @@ export default class SolutionManager {
                         // Ugh: this is better than the alternative but still a little ridiculous
                         synthesis = synthesis as ShapeData;
 
+                        // Note start_index, puzzle_start_index, and puzzle_end_index are all 1-indexed
                         const reactivityStartIndex = Number(synthesis['start_index']);
                         const reactivityPuzzleStart = (
                             synthesis['puzzle_start_index'] !== undefined
@@ -196,7 +197,7 @@ export default class SolutionManager {
                             synthesis['puzzle_end_index'] !== undefined
                             && synthesis['puzzle_end_index'] < reactivityStartIndex + synthesis['peaks'].length
                         )
-                            ? synthesis['puzzle_end_index'] - reactivityStartIndex
+                            ? synthesis['puzzle_end_index'] - reactivityStartIndex + 1
                             : synthesis['peaks'].length;
                         const peaks = [
                             // When mapping the data to our puzzle, in the case the reactivity values start
