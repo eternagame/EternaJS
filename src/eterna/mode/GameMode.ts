@@ -584,18 +584,23 @@ export default abstract class GameMode extends AppMode {
         }
     }
 
-    protected showCopySequenceDialog(): void {
-        let sequenceString = this._poses[0].sequence.sequenceString();
+    protected showCopySequenceDialog(poseIdx: number = 0): void {
+        let sequenceString = this._poses[poseIdx].sequence.sequenceString();
         if (this._poses[0].customNumbering != null) sequenceString += ` ${Utility.arrayToRangeString(this._poses[0].customNumbering)}`;
         this._copySequenceDialog = this.showDialog(
             new CopyTextDialog({text: sequenceString, dialogTitle: 'Current Sequence', copyNotice: 'Sequence'}),
             'CopySequenceDialog'
         );
+        this._copySequenceDialogPose = poseIdx;
     }
 
     protected updateCopySequenceDialog(): void {
         if (this._copySequenceDialog) {
-            let sequenceString = this._poses[0].sequence.sequenceString();
+            // If we started in pip mode and then leave it, we would be attempting to copy from a
+            // pose that's not actually in use.
+            // TODO: The entire UX of copying given multiple poses needs to be rethought...
+            const poseIdx = this._isPipMode ? this._copyStructureDialogPose : 0;
+            let sequenceString = this._poses[poseIdx].sequence.sequenceString();
             if (this._poses[0].customNumbering != null) sequenceString += ` ${Utility.arrayToRangeString(this._poses[0].customNumbering)}`;
             this._copySequenceDialog.text = sequenceString;
         }
@@ -633,14 +638,14 @@ export default abstract class GameMode extends AppMode {
         }
     }
 
-    protected showPasteSequenceDialog(): void {
-        const customNumbering = this._poses[0].customNumbering;
+    protected showPasteSequenceDialog(poseIdx: number = 0): void {
+        const customNumbering = this._poses[poseIdx].customNumbering;
         const pasteDialog = this.showDialog(new PasteSequenceDialog(customNumbering), 'PasteSequenceDialog');
         // Already live
         if (!pasteDialog) return;
         pasteDialog.applyClicked.connect((sequence) => {
             Eterna.observability.recordEvent('RunTool:PasteSequence');
-            this.pasteSequence(sequence);
+            this.pasteSequence(sequence, poseIdx);
         });
     }
 
@@ -691,12 +696,13 @@ export default abstract class GameMode extends AppMode {
         });
     }
 
-    public async pasteSequence(pasteSequence: Sequence) {
+    public async pasteSequence(pasteSequence: Sequence, targetIdx: number) {
         if (pasteSequence == null) return;
 
-        // All poses have the same sequence, so we'll pick the first one
-        const newSequence = this._poses[0].sequence.slice(0);
-        const locks = this._poses[0].puzzleLocks;
+        const ublk = this.getCurrentUndoBlock(targetIdx);
+        Assert.assertIsDefined(ublk, "Can't paste sequence, undo block not avilable");
+        const newSequence = ublk.sequence.slice(0);
+        const locks = ublk.puzzleLocks ?? Array(newSequence.length).fill(false);
         const lengthToPaste: number = Math.min(pasteSequence.length, newSequence.length);
         for (let ii = 0; ii < lengthToPaste; ii++) {
             if (
@@ -708,8 +714,12 @@ export default abstract class GameMode extends AppMode {
             }
         }
 
-        for (const pose of this._poses) {
-            pose.sequence = newSequence;
+        for (let poseIdx = 0; poseIdx < this._poses.length; poseIdx++) {
+            this._poses[poseIdx].sequence = this.transformSequence(
+                newSequence,
+                this.poseTargetIndex(poseIdx),
+                targetIdx
+            );
         }
 
         // We'll semi-arbitrarily decide that this update was "triggered" by the first pose
@@ -774,6 +784,7 @@ export default abstract class GameMode extends AppMode {
     protected _copySequenceDialog: CopyTextDialog | null = null;
     protected _copyStructureDialog: CopyTextDialog | null = null;
     protected _copyStructureDialogPose: number = 0;
+    protected _copySequenceDialogPose: number = 0;
 
     private _modeScriptInterface: ExternalInterfaceCtx;
 
@@ -797,6 +808,10 @@ export default abstract class GameMode extends AppMode {
         return (poseIndex === 0 && !this._isPipMode)
             ? this._curTargetIndex
             : poseIndex;
+    }
+
+    public transformSequence(seq: Sequence, _targetIndex: number, _fromTargetIndex: number): Sequence {
+        return seq;
     }
 
     protected transformBaseIndex(

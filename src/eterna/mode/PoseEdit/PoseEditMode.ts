@@ -479,8 +479,8 @@ export default class PoseEditMode extends GameMode {
         this.setPosesColor(RNAPaint.PAIR);
     }
 
-    public async pasteSequence(pasteSequence: Sequence): Promise<void> {
-        super.pasteSequence(pasteSequence);
+    public async pasteSequence(pasteSequence: Sequence, targetIdx: number): Promise<void> {
+        super.pasteSequence(pasteSequence, targetIdx);
         this.moveHistoryAddSequence('paste', pasteSequence.toString());
     }
 
@@ -555,7 +555,7 @@ export default class PoseEditMode extends GameMode {
         if (!this._autoSolverDialog) return;
         this._autoSolverDialog.submitClicked.connect((seqString) => {
             const sequence: Sequence = Sequence.fromSequenceString(seqString);
-            this.pasteSequence(sequence);
+            this.pasteSequence(sequence, 0);
             this.popUILock();
             // this._autoSolverDialog.close(null);
         });
@@ -582,7 +582,7 @@ export default class PoseEditMode extends GameMode {
                 this._poses[i].librarySelections = solution.libraryNT.map((idx) => this.transformBaseIndex(
                     idx, this.poseTargetIndex(i), this._poseState, 0, PoseState.TARGET
                 )).filter((idx) => idx !== null);
-                this._poses[i].sequence = this._puzzle.transformSequence(
+                this._poses[i].sequence = this.transformSequence(
                     solution.sequence, this.poseTargetIndex(i), 0
                 );
             }
@@ -902,7 +902,7 @@ export default class PoseEditMode extends GameMode {
             }
 
             Assert.assertIsDefined(seq);
-            this._poses[ii].sequence = this._puzzle.transformSequence(seq, this.poseTargetIndex(ii), 0);
+            this._poses[ii].sequence = this.transformSequence(seq, this.poseTargetIndex(ii), 0);
             this._poses[ii].setOligos(this._targetOligos[ii], this._targetOligosOrder[ii]);
             this._poses[ii].setOligo(
                 this._targetOligo[ii],
@@ -1043,11 +1043,11 @@ export default class PoseEditMode extends GameMode {
             null,
             () => {
                 if (this._params.isReset) {
-                    const newSeq: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
+                    const newSeq: Sequence = this.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
                     this.moveHistoryAddSequence('reset', newSeq.sequenceString());
                 } else {
                     this._startSolvingTime = new Date().getTime();
-                    Eterna.observability.recordEvent('Move:StartSeq', this._puzzle.transformSequence(
+                    Eterna.observability.recordEvent('Move:StartSeq', this.transformSequence(
                         this.getCurrentUndoBlock(0).sequence, 0, 0
                     ).sequenceString());
                 }
@@ -1326,7 +1326,7 @@ export default class PoseEditMode extends GameMode {
 
         scriptInterfaceCtx.addCallback(
             'get_sequence_string',
-            lockDuringFold((): string => this._puzzle.transformSequence(
+            lockDuringFold((): string => this.transformSequence(
                 this._poses[0].sequence, 0, this.poseTargetIndex(0)
             ).toString())
         );
@@ -1535,7 +1535,7 @@ export default class PoseEditMode extends GameMode {
                     }
                     const prevForceSync = this.forceSync;
                     this.forceSync = true;
-                    this.pasteSequence(sequence);
+                    this.pasteSequence(sequence, 0);
                     this.forceSync = prevForceSync;
                     return true;
                 }
@@ -1551,7 +1551,7 @@ export default class PoseEditMode extends GameMode {
                         log.info(`Invalid characters in ${seq}`);
                         return false;
                     }
-                    await this.pasteSequence(sequence);
+                    await this.pasteSequence(sequence, 0);
                     return true;
                 }
             )
@@ -1905,8 +1905,8 @@ export default class PoseEditMode extends GameMode {
         menu.addItem('Specs').clicked.connect(() => this.showSpec());
 
         menu.addItem('Reset').clicked.connect(() => this.showResetPrompt());
-        menu.addItem('Copy Sequence').clicked.connect(() => this.showCopySequenceDialog());
-        menu.addItem('Paste Sequence').clicked.connect(() => this.showPasteSequenceDialog());
+        menu.addItem('Copy Sequence').clicked.connect(() => this.showCopySequenceDialog(poseIdx));
+        menu.addItem('Paste Sequence').clicked.connect(() => this.showPasteSequenceDialog(poseIdx));
         menu.addItem('Copy Structure').clicked.connect(() => this.showCopyStructureDialog(poseIdx));
         const structureConstraints = this._targetConditions[this.poseTargetIndex(poseIdx)]?.['structure_constraints'];
         if (structureConstraints) {
@@ -2073,7 +2073,7 @@ export default class PoseEditMode extends GameMode {
         this._poses[0].stateIndex = this._curTargetIndex;
 
         if (this._poseState === PoseState.NATIVE) {
-            this._poses[0].sequence = this._puzzle.transformSequence(
+            this._poses[0].sequence = this.transformSequence(
                 this.getCurrentUndoBlock(targetIndex).sequence, targetIndex, targetIndex
             );
             const locks = this.getCurrentUndoBlock(targetIndex).puzzleLocks;
@@ -2124,7 +2124,7 @@ export default class PoseEditMode extends GameMode {
     private setPoseTarget(poseIndex: number, targetIndex: number): void {
         if (this._targetConditions[targetIndex] !== undefined) {
             const tc = this._targetConditions[targetIndex] as TargetConditions;
-            this._poses[poseIndex].sequence = this._puzzle.transformSequence(
+            this._poses[poseIndex].sequence = this.transformSequence(
                 this.getCurrentUndoBlock(targetIndex).sequence, targetIndex, targetIndex
             );
             const locks = this.getCurrentUndoBlock(targetIndex).puzzleLocks;
@@ -2703,7 +2703,7 @@ export default class PoseEditMode extends GameMode {
         details.comment = details.comment.replace(newlinereg, "'");
         details.title = details.title.replace(newlinereg, "'");
 
-        const seqString: string = this._puzzle.transformSequence(undoBlock.sequence, 0, 0).sequenceString();
+        const seqString: string = this.transformSequence(undoBlock.sequence, 0, 0).sequenceString();
 
         const pseudoknots = undoBlock.targetConditions?.type === 'pseudoknot';
 
@@ -2839,7 +2839,7 @@ export default class PoseEditMode extends GameMode {
             return;
         }
 
-        const seq = this._puzzle.transformSequence(undoBlock.sequence, 0, 0);
+        const seq = this.transformSequence(undoBlock.sequence, 0, 0);
 
         if (data['error'] !== undefined) {
             log.debug(`Got solution submission error: ${data['error']}`);
@@ -3293,7 +3293,7 @@ export default class PoseEditMode extends GameMode {
         }
 
         for (let ii = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].sequence = this._puzzle.transformSequence(new Sequence(a), this.poseTargetIndex(ii), 0);
+            this._poses[ii].sequence = this.transformSequence(new Sequence(a), this.poseTargetIndex(ii), 0);
             this._poses[ii].puzzleLocks = this.transformBaseMap(locks, this.poseTargetIndex(ii), 0);
 
             const annotations: AnnotationDataBundle | null = savedAnnotations[ii];
@@ -3377,6 +3377,41 @@ export default class PoseEditMode extends GameMode {
             if (!EPars.arePairsSame(targetStruct, satisfiedStruct, customConstraints)) return false;
         }
         return true;
+    }
+
+    public transformSequence(seq: Sequence, targetIndex: number, fromTargetIndex: number): Sequence {
+        if (this._targetConditions == null) {
+            return seq;
+        }
+
+        const newSequence = seq.slice(0);
+
+        // As far as I can tell, this was for this early FMN simulation:
+        // https://eternagame.org/puzzles/2631115
+        const targetSeq = this._targetConditions[targetIndex]?.['sequence'];
+        if (targetSeq) {
+            const ublk = this.getCurrentUndoBlock(targetIndex);
+            const locks = ublk.puzzleLocks;
+
+            if (locks && (locks.length !== newSequence.length || newSequence.length !== seq.length)) {
+                throw new Error("lock length doesn't match object sequence");
+            }
+
+            // For any locked bases, set the base according to the targetConditions sequence
+            for (let ii = 0; ii < targetSeq.length; ii++) {
+                if (locks?.[ii]) {
+                    seq.setNt(ii, EPars.stringToNucleotide(targetSeq[ii]));
+                }
+            }
+        }
+
+        const targetIsComplement = this._targetConditions[targetIndex]?.reverseComplement;
+        const fromTargetIsComplement = this._targetConditions[fromTargetIndex]?.reverseComplement;
+        if ((targetIsComplement && !fromTargetIsComplement) || (!targetIsComplement && fromTargetIsComplement)) {
+            return seq.complement().reverse();
+        } else {
+            return seq;
+        }
     }
 
     protected transformBaseIndex(
@@ -3634,12 +3669,12 @@ export default class PoseEditMode extends GameMode {
         }
 
         if (this._pose3D) {
-            this._pose3D.sequence.value = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
+            this._pose3D.sequence.value = this.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
         }
 
         if (this._shouldMarkMutations) {
             const puzzleInitSeq = this._puzzle.getBeginningSequence();
-            const currentSeq = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
+            const currentSeq = this.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
 
             this.setBaseMarks(
                 Utility.range(
@@ -3951,7 +3986,7 @@ export default class PoseEditMode extends GameMode {
             const poseTargetIdx = this.poseTargetIndex(ii);
             const mutatedTargetIdx = this.poseTargetIndex(sourcePoseIndex);
             // In all cases, update these properties from the pose that was originally updated
-            this._poses[ii].sequence = this._puzzle.transformSequence(
+            this._poses[ii].sequence = this.transformSequence(
                 this._poses[sourcePoseIndex].sequence,
                 poseTargetIdx,
                 mutatedTargetIdx
@@ -3991,7 +4026,7 @@ export default class PoseEditMode extends GameMode {
                 }
             }
             for (let ii = 0; ii < this._poses.length; ii++) {
-                this._poses[ii].sequence = this._puzzle.transformSequence(
+                this._poses[ii].sequence = this.transformSequence(
                     seq,
                     this.poseTargetIndex(ii),
                     sourceTargetIndex
@@ -4119,7 +4154,7 @@ export default class PoseEditMode extends GameMode {
         /*
         if (!this.forceSync) {
             const sol: Solution | null = SolutionManager.instance.getSolutionBySequence(
-                this._puzzle.transformSequence(
+                this.transformSequence(
                     this._poses[sourcePoseIndex].getSequenceString(),
                     0,
                     this.poseTargetIndex(sourcePoseIndex)
@@ -4265,7 +4300,7 @@ export default class PoseEditMode extends GameMode {
         // to the state we're trying to fold into. Stricly speaking we should be able to use
         // any arbitrary pose (eg always use pose 0) but. Whatever.
         const poseTargetIdx = this.poseTargetIndex(ii);
-        const seq: Sequence = this._puzzle.transformSequence(this._poses[ii].sequence, ii, poseTargetIdx);
+        const seq: Sequence = this.transformSequence(this._poses[ii].sequence, ii, poseTargetIdx);
 
         const pseudoknots = (this._targetConditions && this._targetConditions[ii] !== undefined
             && (this._targetConditions[ii] as TargetConditions)['type'] === 'pseudoknot');
@@ -4539,7 +4574,7 @@ export default class PoseEditMode extends GameMode {
         /*
         if (this._foldTotalTime >= 1000.0 && this._puzzle.hasTargetType('multistrand')) {
             const sol: Solution | null = SolutionManager.instance.getSolutionBySequence(
-                this._puzzle.transformSequence(
+                this.transformSequence(
                     this._poses[sourcePoseIndex].getSequenceString(),
                     0,
                     this.poseTargetIndex(sourcePoseIndex)
@@ -4573,7 +4608,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     private setPosesWithUndoBlock(ii: number, undoBlock: UndoBlock): void {
-        this._poses[ii].sequence = this._puzzle.transformSequence(undoBlock.sequence, ii, ii);
+        this._poses[ii].sequence = this.transformSequence(undoBlock.sequence, ii, ii);
         this._poses[ii].puzzleLocks = undoBlock.puzzleLocks
             ? this.transformBaseMap(undoBlock.puzzleLocks, ii, ii)
             : undefined;
@@ -4601,12 +4636,12 @@ export default class PoseEditMode extends GameMode {
             return;
         }
 
-        const before: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
+        const before: Sequence = this.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
 
         this._stackLevel++;
         this.moveUndoStack();
 
-        const after: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
+        const after: Sequence = this.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
         this.moveHistoryAddMutations(before, after);
 
         this.updateScore();
@@ -4617,26 +4652,26 @@ export default class PoseEditMode extends GameMode {
             return;
         }
 
-        const before: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
+        const before: Sequence = this.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
 
         this._stackLevel--;
         this.moveUndoStack();
 
-        const after: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
+        const after: Sequence = this.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
         this.moveHistoryAddMutations(before, after);
 
         this.updateScore();
     }
 
     private moveUndoStackToLastStable(): void {
-        const before: Sequence = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
+        const before: Sequence = this.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
 
         const stackLevel: number = this._stackLevel;
         while (this._stackLevel >= 1) {
             if (this.getCurrentUndoBlock(0).stable) {
                 this.moveUndoStack();
 
-                const after: Sequence = this._puzzle.transformSequence(
+                const after: Sequence = this.transformSequence(
                     this.getCurrentUndoBlock(0).sequence, 0, 0
                 );
 

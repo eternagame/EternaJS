@@ -298,6 +298,33 @@ export default class Puzzle {
             }
             this._secstructs.push(this._targetConditions[ii]['secstruct']);
 
+            if (this._targetConditions[ii]['sequence']) {
+                const targetSeq: RNABase[] = [];
+                if (this._useTails) {
+                    if (this._useShortTails) {
+                        targetSeq.push(RNABase.GUANINE);
+                        targetSeq.push(RNABase.GUANINE);
+                    } else {
+                        targetSeq.push(RNABase.GUANINE);
+                        targetSeq.push(RNABase.GUANINE);
+                        targetSeq.push(RNABase.ADENINE);
+                        targetSeq.push(RNABase.ADENINE);
+                        targetSeq.push(RNABase.ADENINE);
+                    }
+                }
+                targetSeq.push(
+                    ...Sequence.fromSequenceString(
+                        this._targetConditions[ii]['sequence'] as string
+                    ).baseArray
+                );
+                if (this._useTails) {
+                    for (let jj = 0; jj < 20; jj++) {
+                        targetSeq.push(EPars.RNABase_LAST20[jj]);
+                    }
+                }
+                this._targetConditions[ii]['sequence'] = new Sequence(targetSeq).sequenceString();
+            }
+
             const tcType: TargetType = this._targetConditions[ii]['type'];
             // Aptamers
 
@@ -608,63 +635,6 @@ export default class Puzzle {
     public setUseTails(useTails: boolean, useShortTails: boolean): void {
         this._useTails = useTails;
         this._useShortTails = useShortTails;
-    }
-
-    public transformSequence(seq: Sequence, targetIndex: number, fromTargetIndex: number): Sequence {
-        if (this._targetConditions == null) {
-            return seq;
-        }
-
-        const newSequence = seq.slice(0);
-
-        // As far as I can tell, this was for this early FMN simulation:
-        // https://eternagame.org/puzzles/2631115
-        if (this._targetConditions[targetIndex]['sequence']) {
-            const targetSeq: RNABase[] = [];
-            if (this._useTails) {
-                if (this._useShortTails) {
-                    targetSeq.push(RNABase.GUANINE);
-                    targetSeq.push(RNABase.GUANINE);
-                } else {
-                    targetSeq.push(RNABase.GUANINE);
-                    targetSeq.push(RNABase.GUANINE);
-                    targetSeq.push(RNABase.ADENINE);
-                    targetSeq.push(RNABase.ADENINE);
-                    targetSeq.push(RNABase.ADENINE);
-                }
-            }
-            targetSeq.push(
-                ...Sequence.fromSequenceString(
-                    this._targetConditions[targetIndex]['sequence'] as string
-                ).baseArray
-            );
-            if (this._useTails) {
-                for (let ii = 0; ii < 20; ii++) {
-                    targetSeq.push(EPars.RNABase_LAST20[ii]);
-                }
-            }
-
-            const locks: boolean[] = this.puzzleLocks;
-
-            if (locks.length !== newSequence.length || newSequence.length !== seq.length) {
-                throw new Error("lock length doesn't match object sequence");
-            }
-
-            // For any locked bases, set the base according to the targetConditions sequence
-            for (let ii = 0; ii < targetSeq.length; ii++) {
-                if (locks[ii]) {
-                    seq.setNt(ii, targetSeq[ii]);
-                }
-            }
-        }
-
-        const targetIsComplement = this._targetConditions[targetIndex]?.reverseComplement;
-        const fromTargetIsComplement = this._targetConditions[fromTargetIndex]?.reverseComplement;
-        if ((targetIsComplement && !fromTargetIsComplement) || (!targetIsComplement && fromTargetIsComplement)) {
-            return seq.complement().reverse();
-        } else {
-            return seq;
-        }
     }
 
     public get alreadySolved() {
