@@ -1458,12 +1458,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
         // below and also PoseEditMode pulls library selections from poses, so if some base is
         // missing in the current state of all poses (eg, non-pip mode and target index > 0)
         // that base selection would dissapear beacuse no one is holding that state.
-        if (seqnum >= this._sequence.length) return;
-
+        const seqOffset = this._oligo && this._oligoMode === OligoMode.EXT5P ? this._oligo.length : 0;
+        if (seqnum < seqOffset || seqnum >= this._sequence.length + seqOffset) return false;
         // Don't allow bases to be selected if they don't "actually exist" (eg, in the PTC
         // puzzles where we have a subset of a larger solution that isn't contiguous and we added
         // "padding" bases
-        if (this.customNumbering && !this.customNumbering[seqnum]) return;
+        if (this.customNumbering && !this.customNumbering[seqnum]) return false;
 
         if (this._librarySelections.length === 0) {
             this._librarySelections = new Array(this._sequence.length);
@@ -1471,18 +1471,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         this._librarySelections[seqnum] = !this._librarySelections[seqnum];
         this.updateLibraryHighlights();
+
+        return true;
     }
 
     public get librarySelections(): number[] | undefined {
-        const sels = this._librarySelections.map((selected, idx) => (selected ? idx : null))
+        return this._librarySelections
+            .map((selected, idx) => (selected ? idx : null))
             .filter((idx): idx is number => idx != null);
-
-        if (this.customNumbering) {
-            return sels.map((idx) => this.customNumbering && this.customNumbering[idx])
-                .filter((idx): idx is number => idx !== null);
-        } else {
-            return sels.map((idx) => idx + 1);
-        }
     }
 
     public set librarySelections(selections: number[] | undefined) {
@@ -1490,9 +1486,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (!selections) return;
 
         for (const idx of selections) {
-            const customNumbering = this.customNumbering;
-            if (customNumbering) this._librarySelections[customNumbering.indexOf(idx)] = true;
-            else this._librarySelections[idx - 1] = true;
+            this._librarySelections[idx] = true;
         }
         this.updateLibraryHighlights();
     }
@@ -2467,7 +2461,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 }
             }
         }
-        if (this._oligo != null && seqnum >= this._sequence.length) {
+        if (this._oligo != null && this._oligoMode === OligoMode.EXT5P && seqnum < this._oligo.length) {
+            return this._oligoName;
+        }
+        if (this._oligo != null && this._oligoMode !== OligoMode.EXT5P && seqnum >= this._sequence.length) {
             return this._oligoName;
         }
         return null;
@@ -2484,7 +2481,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 }
             }
         }
-        if (this._oligo != null && seqnum >= this._sequence.length) {
+        if (this._oligo != null && this._oligoMode === OligoMode.EXT5P && seqnum < this._oligo.length) {
+            return this._oligoLabel;
+        }
+        if (this._oligo != null && this._oligoMode !== OligoMode.EXT5P && seqnum >= this._sequence.length) {
             return this._oligoLabel;
         }
         return null;
@@ -3546,10 +3546,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 const index: number = this._dynPaintColors.indexOf(this._currentColor);
                 Eterna.observability.recordEvent(`Base:DynPaint:Script${this._dynPaintTools[index].scriptID}`);
                 this._dynPaintTools[index].onPaint(this, seqnum);
-            } else if (this._currentColor === RNAPaint.LIBRARY_SELECT && seqnum < this.sequenceLength) {
+            } else if (this._currentColor === RNAPaint.LIBRARY_SELECT) {
                 Eterna.observability.recordEvent('Base:LibrarySelect');
-                this.toggleLibrarySelection(seqnum);
-                this._librarySelectionsChanged = true;
+                this._librarySelectionsChanged = this.toggleLibrarySelection(seqnum);
             }
         }
     }
@@ -3665,9 +3664,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
             } else if (this._dynPaintColors.indexOf(this._currentColor) >= 0) {
                 const index: number = this._dynPaintColors.indexOf(this._currentColor);
                 this._dynPaintTools[index].onPainting(this, seqnum);
-            } else if (this._currentColor === RNAPaint.LIBRARY_SELECT && seqnum <= this.sequenceLength) {
-                this.toggleLibrarySelection(seqnum);
-                this._librarySelectionsChanged = true;
+            } else if (this._currentColor === RNAPaint.LIBRARY_SELECT) {
+                this._librarySelectionsChanged = this.toggleLibrarySelection(seqnum);
             }
         }
         this._lastColoredIndex = seqnum;
