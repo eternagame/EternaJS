@@ -580,7 +580,7 @@ export default class PoseEditMode extends GameMode {
             // Note that we do this first
             for (let i = 0; i < this._poses.length; i++) {
                 this._poses[i].librarySelections = solution.libraryNT.map((idx) => this.transformBaseIndex(
-                    idx, this.poseTargetIndex(i), this._poseState, 0, PoseState.TARGET
+                    idx, this.poseTargetIndex(i), this._poseState, 0, PoseState.TARGET, false, false, true
                 )).filter((idx) => idx !== null);
                 this._poses[i].sequence = this.transformSequence(
                     solution.sequence, this.poseTargetIndex(i), 0
@@ -964,9 +964,13 @@ export default class PoseEditMode extends GameMode {
                 }
             }
 
-            this._poses[ii].puzzleLocks = this.transformBaseMap(this._puzzle.puzzleLocks, this.poseTargetIndex(ii), 0);
+            this._poses[ii].puzzleLocks = this.transformBaseMap(
+                this._puzzle.puzzleLocks, this.poseTargetIndex(ii), 0, true
+            );
             this._poses[ii].shiftLimit = this._puzzle.shiftLimit;
-            this._poses[ii].librarySelections = librarySelections;
+            this._poses[ii].librarySelections = librarySelections.map((idx) => this.transformBaseIndex(
+                idx, this.poseTargetIndex(ii), this._poseState, 0, PoseState.TARGET, false, false, true
+            )).filter((idx) => idx !== null);
         }
 
         // Start loading the model file now instead of waiting for the initial
@@ -1384,7 +1388,9 @@ export default class PoseEditMode extends GameMode {
         scriptInterfaceCtx.addCallback(
             'get_locks',
             lockDuringFold(
-                (): boolean[] => this.transformBaseMap(this._poses[0].puzzleLocks, 0, this.poseTargetIndex(0))
+                (): boolean[] => this.transformBaseMap(
+                    this._poses[0].puzzleLocks, 0, this.poseTargetIndex(0), true
+                )
             )
         );
 
@@ -2078,7 +2084,7 @@ export default class PoseEditMode extends GameMode {
             );
             const locks = this.getCurrentUndoBlock(targetIndex).puzzleLocks;
             if (locks) {
-                this._poses[0].puzzleLocks = this.transformBaseMap(locks, targetIndex, targetIndex);
+                this._poses[0].puzzleLocks = this.transformBaseMap(locks, targetIndex, targetIndex, true);
             }
             this.setToNativeMode();
         } else {
@@ -2129,7 +2135,7 @@ export default class PoseEditMode extends GameMode {
             );
             const locks = this.getCurrentUndoBlock(targetIndex).puzzleLocks;
             if (locks) {
-                this._poses[0].puzzleLocks = this.transformBaseMap(locks, targetIndex, targetIndex);
+                this._poses[0].puzzleLocks = this.transformBaseMap(locks, targetIndex, targetIndex, true);
             }
             const tcType: TargetType = tc['type'];
 
@@ -2737,7 +2743,7 @@ export default class PoseEditMode extends GameMode {
 
             // Record designStruct numbers, used for library puzzles.
             postData['selected-nts'] = this._poses[0].librarySelections?.map((idx) => this.transformBaseIndex(
-                idx, 0, PoseState.TARGET, 0, this._poseState
+                idx, 0, PoseState.TARGET, 0, this._poseState, false, true, false
             )).filter((idx) => idx !== null);
         }
 
@@ -3294,7 +3300,7 @@ export default class PoseEditMode extends GameMode {
 
         for (let ii = 0; ii < this._poses.length; ii++) {
             this._poses[ii].sequence = this.transformSequence(new Sequence(a), this.poseTargetIndex(ii), 0);
-            this._poses[ii].puzzleLocks = this.transformBaseMap(locks, this.poseTargetIndex(ii), 0);
+            this._poses[ii].puzzleLocks = this.transformBaseMap(locks, this.poseTargetIndex(ii), 0, true);
 
             const annotations: AnnotationDataBundle | null = savedAnnotations[ii];
             if (annotations) {
@@ -3419,22 +3425,34 @@ export default class PoseEditMode extends GameMode {
         targetIndex: number,
         targetState: PoseState,
         fromTargetIndex: number,
-        fromTargetState: PoseState
+        fromTargetState: PoseState,
+        sequenceOnly: boolean = false,
+        customNumbering: boolean = false,
+        fromCustomNumbering: boolean = false
     ): number | null {
         if (!this._targetConditions) return baseIndex;
 
+        // ============ Convert from custom numbering to real index ============
+        const localBaseIndex = (() => {
+            if (!fromCustomNumbering) return baseIndex;
+            const fromCustomNumberingStr = this._targetConditions[fromTargetIndex]?.['custom-numbering'];
+            const fromCustomNumberingMap = fromCustomNumberingStr
+                ? Utility.numberingJSONToArray(fromCustomNumberingStr)
+                : null;
+            if (fromCustomNumberingMap) {
+                const newIndex = fromCustomNumberingMap.indexOf(baseIndex);
+                if (newIndex === -1) return null;
+                return newIndex;
+            }
+            return baseIndex - 1;
+        })();
+        if (localBaseIndex === null) return null;
+
+        // ============ Get strand info ============
         const seqLen = this._poses[0].sequence.length;
 
-        if (baseIndex < seqLen) {
-            const targetIsComplement = this._targetConditions?.[targetIndex]?.reverseComplement;
-            const fromTargetIsComplement = this._targetConditions?.[fromTargetIndex]?.reverseComplement;
-            if ((targetIsComplement && !fromTargetIsComplement) || (!targetIsComplement && fromTargetIsComplement)) {
-                return seqLen - baseIndex - 1;
-            } else {
-                return baseIndex;
-            }
-        }
-
+        const fromTargetOligo = this._targetOligo[fromTargetIndex];
+        const fromTargetOligoMode = this._oligoMode[fromTargetIndex];
         const fromTargetOligos = this._targetOligos[fromTargetIndex];
         let fromTargetOligosOrder;
         if (fromTargetState === PoseState.NATIVE) {
@@ -3449,65 +3467,157 @@ export default class PoseEditMode extends GameMode {
         // out something better at this point.
         fromTargetOligosOrder ??= Utility.range(fromTargetOligos?.length ?? 0);
 
-        const fromTargetOligo = this._targetOligo[fromTargetIndex];
-
-        const newTargetOligos = this._targetOligos[targetIndex];
-        const newTargetOligosOrder = (targetState === PoseState.NATIVE
-            ? this.getCurrentUndoBlock(targetIndex).oligoOrder
-            : this._targetOligosOrder[targetIndex]) ?? Utility.range(newTargetOligos?.length ?? 0);
         const newTargetOligo = this._targetOligo[targetIndex];
+        const newTargetOligoMode = this._oligoMode[targetIndex];
+        const newTargetOligos = this._targetOligos[targetIndex];
+        let newTargetOligosOrder;
+        if (targetState === PoseState.NATIVE) {
+            newTargetOligosOrder = this.getCurrentUndoBlock(targetIndex).oligoOrder;
+        } else if (targetState === PoseState.TARGET) {
+            newTargetOligosOrder = this._targetOligosOrder[targetIndex];
+        }
+        newTargetOligosOrder ??= Utility.range(newTargetOligos?.length ?? 0);
 
-        if (fromTargetOligo && newTargetOligo && Arrays.shallowEqual(fromTargetOligo, newTargetOligo)) {
-            return baseIndex;
-        } else if (fromTargetOligos && newTargetOligos) {
-            let fromTargetCursor = seqLen;
-            let sourceOligoLabel = null;
-            let sourceOligoInstance = 0;
-            let sourceOligoOffset = 0;
-            for (let fromTargetOligoIdx = 0; fromTargetOligoIdx < fromTargetOligosOrder.length; fromTargetOligoIdx++) {
-                fromTargetCursor += 1 + fromTargetOligos[fromTargetOligosOrder[fromTargetOligoIdx]].sequence.length;
-                if (baseIndex < fromTargetCursor) {
-                    sourceOligoLabel = fromTargetOligos[fromTargetOligosOrder[fromTargetOligoIdx]].label;
-                    sourceOligoOffset = fromTargetCursor - baseIndex;
-                    for (let ii = 0; ii < fromTargetOligoIdx; ii++) {
-                        if (fromTargetOligos[fromTargetOligosOrder[ii]].label === sourceOligoLabel) {
-                            sourceOligoInstance++;
+        // ============ Get strand and location in strand ============
+        const strandLocation = (() => {
+            let cursor = 0;
+
+            if (!sequenceOnly && fromTargetOligo && fromTargetOligoMode === OligoMode.EXT5P) {
+                cursor += fromTargetOligo.length;
+            }
+            if (!sequenceOnly && localBaseIndex < cursor) return {strand: 'oligo', offset: cursor - localBaseIndex};
+
+            cursor += seqLen;
+            if (localBaseIndex < cursor) return {strand: 'sequence', offset: cursor - localBaseIndex};
+
+            if (!sequenceOnly && fromTargetOligo && fromTargetOligoMode === OligoMode.EXT3P) {
+                cursor += fromTargetOligo.length;
+            }
+            if (!sequenceOnly && localBaseIndex < cursor) return {strand: 'oligo', offset: cursor - localBaseIndex};
+
+            if (!sequenceOnly && fromTargetOligo && fromTargetOligoMode === OligoMode.DIMER) {
+                cursor += fromTargetOligo.length + 1;
+            }
+            if (!sequenceOnly && localBaseIndex < cursor) return {strand: 'oligo', offset: cursor - localBaseIndex};
+
+            if (!sequenceOnly && fromTargetOligos) {
+                for (const [fromTargetOligoIdx, oligoDefIdx] of fromTargetOligosOrder.entries()) {
+                    const oligo = fromTargetOligos[oligoDefIdx];
+                    cursor += oligo.sequence.length + 1;
+                    if (localBaseIndex < cursor) {
+                        let cloneNum = 0;
+                        for (let ii = 0; ii < fromTargetOligoIdx; ii++) {
+                            if (fromTargetOligos[fromTargetOligosOrder[ii]].label === oligo.label) {
+                                cloneNum++;
+                            }
+                        }
+                        return {
+                            strand: 'oligos',
+                            label: oligo.label,
+                            cloneNum,
+                            offset: cursor - localBaseIndex
+                        };
+                    }
+                }
+            }
+
+            return null;
+        })();
+
+        if (strandLocation === null) return null;
+
+        // ============ Find new position ============
+        const restrandedPosition = (() => {
+            let cursor = 0;
+            if (!sequenceOnly && newTargetOligo && newTargetOligoMode === OligoMode.EXT5P) {
+                cursor += newTargetOligo.length;
+                if (
+                    strandLocation.strand === 'oligo'
+                    && fromTargetOligo
+                    && Arrays.shallowEqual(fromTargetOligo, newTargetOligo)
+                ) return cursor - strandLocation.offset;
+            }
+
+            cursor += seqLen;
+            if (strandLocation.strand === 'sequence') {
+                const targetIsComplement = this._targetConditions?.[targetIndex]?.reverseComplement;
+                const fromTargetIsComplement = this._targetConditions?.[fromTargetIndex]?.reverseComplement;
+                if (
+                    (targetIsComplement && !fromTargetIsComplement)
+                    || (!targetIsComplement && fromTargetIsComplement)
+                ) {
+                    return cursor - (seqLen - strandLocation.offset) - 1;
+                } else {
+                    return cursor - strandLocation.offset;
+                }
+            }
+
+            if (!sequenceOnly && newTargetOligo && newTargetOligoMode === OligoMode.EXT3P) {
+                cursor += newTargetOligo.length;
+                if (
+                    strandLocation.strand === 'oligo'
+                    && fromTargetOligo
+                    && Arrays.shallowEqual(fromTargetOligo, newTargetOligo)
+                ) return cursor - strandLocation.offset;
+            }
+
+            if (!sequenceOnly && newTargetOligo && newTargetOligoMode === OligoMode.DIMER) {
+                cursor += newTargetOligo.length + 1;
+                if (
+                    strandLocation.strand === 'oligo'
+                    && fromTargetOligo
+                    && Arrays.shallowEqual(fromTargetOligo, newTargetOligo)
+                ) return cursor - strandLocation.offset;
+            }
+
+            if (!sequenceOnly && newTargetOligos) {
+                let cloneNum = 0;
+                for (const oligoIdx of newTargetOligosOrder) {
+                    const oligo = newTargetOligos[oligoIdx];
+                    cursor += oligo.sequence.length + 1;
+                    if (
+                        strandLocation.strand === 'oligos'
+                        && strandLocation.label === oligo.label
+                    ) {
+                        if (strandLocation.cloneNum === cloneNum) {
+                            return cursor - strandLocation.offset;
+                        } else {
+                            cloneNum++;
                         }
                     }
-                    break;
                 }
             }
-            if (!sourceOligoLabel) return null;
 
-            let newTargetCursor = seqLen;
-            let instance = 0;
-            for (let newTargetOligoIdx = 0; newTargetOligoIdx < newTargetOligosOrder.length; newTargetOligoIdx++) {
-                const currNewTargetOligo = newTargetOligos[newTargetOligosOrder[newTargetOligoIdx]];
-                newTargetCursor += currNewTargetOligo.sequence.length + 1;
-                if (currNewTargetOligo.label === sourceOligoLabel) {
-                    if (instance === sourceOligoInstance) {
-                        return newTargetCursor - sourceOligoOffset;
-                    } else {
-                        instance++;
-                    }
-                }
+            return null;
+        })();
+
+        if (restrandedPosition === null) return null;
+
+        // ============ Convert from real index to custom numbering ============
+        return (() => {
+            if (!customNumbering) return restrandedPosition;
+            const newCustomNumberingStr = this._targetConditions[fromTargetIndex]?.['custom-numbering'];
+            const newCustomNumberingMap = newCustomNumberingStr
+                ? Utility.numberingJSONToArray(newCustomNumberingStr)
+                : null;
+            if (newCustomNumberingMap) {
+                return newCustomNumberingMap[restrandedPosition];
             }
-            return null;
-        } else {
-            return null;
-        }
+            return baseIndex + 1;
+        })();
     }
 
     private transformBaseMap(
         map: boolean[],
         targetIndex: number,
-        fromTargetIndex: number
+        fromTargetIndex: number,
+        sequenceOnly: boolean
     ): boolean[] {
         const indices = map
             .map((val, idx) => (val ? idx : null))
             .filter((idx) => idx !== null)
             .map((idx) => this.transformBaseIndex(
-                idx, targetIndex, PoseState.FROZEN, fromTargetIndex, PoseState.FROZEN
+                idx, targetIndex, PoseState.FROZEN, fromTargetIndex, PoseState.FROZEN, sequenceOnly
             ))
             .filter((idx) => idx !== null);
         const ret = new Array(map.length).fill(false);
@@ -3994,7 +4104,8 @@ export default class PoseEditMode extends GameMode {
             this._poses[ii].puzzleLocks = this.transformBaseMap(
                 this._poses[sourcePoseIndex].puzzleLocks,
                 this.poseTargetIndex(ii),
-                this.poseTargetIndex(sourcePoseIndex)
+                this.poseTargetIndex(sourcePoseIndex),
+                true
             );
             this._poses[ii].librarySelections = this._poses[sourcePoseIndex].librarySelections
                 ?.map((idx) => this.transformBaseIndex(
@@ -4470,11 +4581,11 @@ export default class PoseEditMode extends GameMode {
         undoBlock.oligosPaired = oligosPaired;
         undoBlock.targetPairs = this._targetPairs[ii];
         undoBlock.targetOligoOrder = this._targetOligosOrder[ii];
-        undoBlock.puzzleLocks = this.transformBaseMap(this._poses[ii].puzzleLocks, ii, this.poseTargetIndex(ii));
+        undoBlock.puzzleLocks = this.transformBaseMap(this._poses[ii].puzzleLocks, ii, this.poseTargetIndex(ii), true);
         undoBlock.targetConditions = this._targetConditions[ii];
         undoBlock.setBasics(EPars.DEFAULT_TEMPERATURE, pseudoknots);
         undoBlock.librarySelections = this._poses[ii].librarySelections?.map((idx) => this.transformBaseIndex(
-            idx, ii, PoseState.TARGET, this.poseTargetIndex(ii), this._poseState
+            idx, ii, PoseState.TARGET, this.poseTargetIndex(ii), this._poseState, false, true, false
         )).filter((idx) => idx !== null);
         this._seqStacks[this._stackLevel][ii] = undoBlock;
     }
@@ -4610,10 +4721,10 @@ export default class PoseEditMode extends GameMode {
     private setPosesWithUndoBlock(poseIdx: number, targetIdx: number, undoBlock: UndoBlock): void {
         this._poses[poseIdx].sequence = this.transformSequence(undoBlock.sequence, targetIdx, targetIdx);
         this._poses[poseIdx].puzzleLocks = undoBlock.puzzleLocks
-            ? this.transformBaseMap(undoBlock.puzzleLocks, targetIdx, targetIdx)
+            ? this.transformBaseMap(undoBlock.puzzleLocks, targetIdx, targetIdx, true)
             : undefined;
         this._poses[poseIdx].librarySelections = undoBlock.librarySelections?.map((idx) => this.transformBaseIndex(
-            idx, targetIdx, this._poseState, targetIdx, PoseState.TARGET
+            idx, targetIdx, this._poseState, targetIdx, PoseState.TARGET, false, false, true
         )).filter((idx) => idx !== null);
     }
 
