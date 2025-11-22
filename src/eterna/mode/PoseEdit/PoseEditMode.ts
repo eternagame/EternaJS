@@ -2135,7 +2135,7 @@ export default class PoseEditMode extends GameMode {
             );
             const locks = this.getCurrentUndoBlock(targetIndex).puzzleLocks;
             if (locks) {
-                this._poses[0].puzzleLocks = this.transformBaseMap(locks, targetIndex, targetIndex, true);
+                this._poses[poseIndex].puzzleLocks = this.transformBaseMap(locks, targetIndex, targetIndex, true);
             }
             const tcType: TargetType = tc['type'];
 
