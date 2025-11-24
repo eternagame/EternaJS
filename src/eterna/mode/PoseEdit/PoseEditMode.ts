@@ -2809,7 +2809,7 @@ export default class PoseEditMode extends GameMode {
         if (Eterna.experimentalFeatures.includes('qualtrics-report')) {
             this.showMissionClearedPanel(null, false);
             return;
-        } if (
+        } else if (
             !this._puzzle.alreadySolved
             || this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
             || this._puzzle.rscript !== ''
