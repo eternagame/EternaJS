@@ -7,7 +7,7 @@ export default class PostMessageReporter implements ObservabilityReporter {
     }
 
     public recordEvent(event: {name: string, details?: unknown}) {
-        window.postMessage({
+        window.parent.postMessage({
             type: 'observability-event',
             reporterId: this._id,
             event
