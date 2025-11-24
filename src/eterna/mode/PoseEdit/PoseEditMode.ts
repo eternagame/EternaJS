@@ -999,6 +999,7 @@ export default class PoseEditMode extends GameMode {
             !this._params.isReset
             && this._params.initSolution == null
             && !this._puzzle.hasRscript
+            && !Eterna.experimentalFeatures.includes('qualtrics-report')
         ) {
             this.loadSavedData();
         }
