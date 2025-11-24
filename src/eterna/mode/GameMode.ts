@@ -847,7 +847,7 @@ export default abstract class GameMode extends AppMode {
         const ret: number[] = [];
         while (true) {
             const next = allIndices.shift();
-            if (!next) break;
+            if (next === undefined) break;
 
             const last = ret[ret.length - 1];
             if (last === next - 1) ret[ret.length - 1] = next;
