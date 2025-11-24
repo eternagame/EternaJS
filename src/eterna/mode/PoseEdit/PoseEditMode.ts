@@ -1531,7 +1531,7 @@ export default class PoseEditMode extends GameMode {
             'set_sequence_string',
             lockDuringFold(
                 (seq: string): boolean => {
-                    if (!this.activeFolders().some((folder) => !folder.isSync())) {
+                    if (this.activeFolders().some((folder) => !folder.isSync())) {
                         throw new Error('Attempted to use asynchronous folding engine synchronously');
                     }
                     const sequence: Sequence = Sequence.fromSequenceString(seq);
