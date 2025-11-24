@@ -4945,7 +4945,7 @@ export default class PoseEditMode extends GameMode {
 
     private _qualtricsReporter: PostMessageReporter = new PostMessageReporter(
         'qualtrics',
-        'stanfordmedicine.yul1.qualtrics.com'
+        'https://stanfordmedicine.yul1.qualtrics.com'
     );
 
     private static readonly FOLDING_LOCK = 'Folding';
