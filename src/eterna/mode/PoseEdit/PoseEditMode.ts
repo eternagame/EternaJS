@@ -1504,7 +1504,7 @@ export default class PoseEditMode extends GameMode {
             'get_tracked_indices',
             lockDuringFold((): number[] => this._baseMarks[0]
                 .get(PLAYER_MARKER_LAYER)
-                ?.map((color, idx) => (color ? idx : null))
+                ?.map((color, idx) => (color !== undefined ? idx : null))
                 .filter((idx) => idx !== null) ?? [])
         );
         scriptInterfaceCtx.addCallback(
