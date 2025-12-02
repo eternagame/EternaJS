@@ -570,10 +570,12 @@ export default class PoseEditMode extends GameMode {
         this.hideAsyncText();
 
         if (foldData != null && foldData.every((fd, idx) => (
-            fd.folderName_ === this.folderForState(idx).name
-            // Previously, we didn't record the folder name in the undo block.
-            // At that time, we only uploaded for nupack.
-            || (!fd.folderName_ && this.folderForState(idx).name === NuPACK.NAME)
+            (
+                fd.folderName_ === this.folderForState(idx).name
+                // Previously, we didn't record the folder name in the undo block.
+                // At that time, we only uploaded for nupack.
+                || (!fd.folderName_ && this.folderForState(idx).name === NuPACK.NAME)
+            ) && Arrays.shallowEqual(fd.sequence_, this.transformSequence(solution.sequence, idx, 0).baseArray)
         ))) {
             await this.loadCachedUndoBlocks(foldData);
         } else {
