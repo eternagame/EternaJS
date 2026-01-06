@@ -73,8 +73,6 @@ test('linearfoldE:MFETests', () => {
             for (let jj: number = 1; jj < outNNFE.length; jj += 2) {
                 NNFEsum += outNNFE[jj];
             }
-            console.log(FE);
-            console.log(NNFEsum);
             //expect(FE).toBeDeepCloseTo(NNFEsum, 0);
         }
     })).resolves.toBeUndefined();

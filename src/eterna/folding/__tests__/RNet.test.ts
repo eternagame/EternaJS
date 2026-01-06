@@ -82,7 +82,6 @@ test(`RNet-SS:get_dot_plot(complex)`, () => {
             }
             
             const calcdResult = await folder.getDotPlot(Sequence.fromSequenceString(SEQ));
-            console.log(calcdResult)
             expect(calcdResult?.data).toMatchSnapshot();
         }))
         .resolves.toBeUndefined();

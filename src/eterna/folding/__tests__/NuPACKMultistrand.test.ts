@@ -92,9 +92,6 @@ test(`NuPACK:scoreStructures (multistrand, partially paired)`, () => {
                 40, -100, 39,  -90, 38, -230, 35,  330,
                 34, -120, 33, -340, 32, -180
             ]);
-
-            console.log(energy);
-            console.log(nnfes);
         }))
         .resolves.toBeUndefined(); // (we're returning a promise)
 });
