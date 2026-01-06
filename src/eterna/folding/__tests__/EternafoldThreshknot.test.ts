@@ -28,7 +28,6 @@ test(`EternaFoldThreshknot:folds_structures`, () => {
 
             testSequences.map((sequence, index) => {
                 const foldedStructure =  folder.foldSequence(Sequence.fromSequenceString(sequence), new SecStruct(), null, true);
-                // console.log(foldedStructure?.getParenthesis(null, true))
                 expect(foldedStructure?.getParenthesis({ pseudoknots: true })).toBe(testStructures[index])
             })
         })).resolves.toBeUndefined();
@@ -55,7 +54,6 @@ test(`EternaFoldThreshknot:predicts_pseudoknots`, () => {
 
             testSequences.map((sequence, index) => {
                 const foldedStructure =  folder.foldSequence(Sequence.fromSequenceString(sequence), new SecStruct(), null, true);
-                // console.log(foldedStructure?.getParenthesis(null, true))
                 expect(foldedStructure?.getParenthesis({ pseudoknots: true })).toBe(testStructures[index])
             })
         })).resolves.toBeUndefined();
