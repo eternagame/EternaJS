@@ -31,7 +31,7 @@ export default class NuPACK extends Folder<true> {
         return import('engines-bin/nupack')
             .then((module) => EmscriptenUtil.loadProgram(module))
             .then((program) => new NuPACK(program))
-            .catch((_err) => null);
+            .catch((err) => { log.warn(err); return null; });
     }
 
     private constructor(lib: NupackLib) {
