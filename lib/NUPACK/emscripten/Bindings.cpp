@@ -74,9 +74,6 @@ EMSCRIPTEN_BINDINGS(EmscriptenBridge) {
    
     class_<FullEnsembleDefectResult>("FullEnsembleDefectResult")  
         .property("ensembleDefect", &FullEnsembleDefectResult::ensembleDefect);
-           
-    
-    function("GetEnsembleDefect", &GetEnsembleDefect, allow_raw_pointers());
 }
 
 #endif

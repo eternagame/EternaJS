@@ -26,7 +26,7 @@ export default class Vienna2 extends Folder<true> {
         return import('engines-bin/vienna2')
             .then((module) => EmscriptenUtil.loadProgram(module))
             .then((program) => new Vienna2(program))
-            .catch((_err) => null);
+            .catch((err) => { log.warn(err); return null; });
     }
 
     private constructor(lib: Vienna2Lib) {

@@ -1,4 +1,5 @@
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
+import log from 'loglevel';
 import LinearFoldBase from './LinearFoldBase';
 
 export default class LinearFoldV extends LinearFoldBase {
@@ -14,7 +15,7 @@ export default class LinearFoldV extends LinearFoldBase {
         return import('engines-bin/LinearFoldV')
             .then((module) => EmscriptenUtil.loadProgram(module))
             .then((program) => new LinearFoldV(program))
-            .catch((_err) => null);
+            .catch((err) => { log.warn(err); return null; });
     }
 
     public get name(): string {

@@ -3,6 +3,7 @@ import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import EPars from 'eterna/EPars';
+import log from 'loglevel';
 import * as EternafoldLib from './engines/EternafoldLib';
 import EternaFold from './Eternafold';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
@@ -22,7 +23,7 @@ export default class EternaFoldThreshknot extends EternaFold {
         return import('engines-bin/eternafold')
             .then((module) => EmscriptenUtil.loadProgram(module))
             .then((program) => new EternaFoldThreshknot(program))
-            .catch((_err) => null);
+            .catch((err) => { log.warn(err); return null; });
     }
 
     protected constructor(lib: EternafoldLib) {

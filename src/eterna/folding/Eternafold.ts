@@ -25,7 +25,7 @@ export default class EternaFold extends Folder<true> {
         return import('engines-bin/eternafold')
             .then((module) => EmscriptenUtil.loadProgram(module))
             .then((program) => new EternaFold(program))
-            .catch((_err) => null);
+            .catch((err) => { log.warn(err); return null; });
     }
 
     protected constructor(lib: EternafoldLib) {
