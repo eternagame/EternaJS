@@ -34,7 +34,7 @@ export default class Utility {
      * @param str String to be sanitized/markup applied
      * @param markup When true, markdown rendering is applied and html is allowed
      */
-    public static sanitizeAndMarkup(str: string, markup: boolean = false) {
+    public static sanitizeAndMarkup(str: string, markup: boolean = false): string {
         const opts: DOMPurify.Config = {
             FORBID_TAGS: ['style']
         };
@@ -43,7 +43,7 @@ export default class Utility {
             opts.ALLOWED_TAGS = [];
         }
 
-        return DOMPurify.sanitize(markup ? marked(str) : str, opts) as string;
+        return DOMPurify.sanitize(markup ? marked(str, {async: false}) : str, opts);
     }
 
     /**
