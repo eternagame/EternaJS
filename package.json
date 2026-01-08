@@ -13,7 +13,7 @@
     "postbuild:prod": "node multiplatform/cpr ./website/frontend ./dist/prod/frontend && coffee -o ./dist/prod/frontend/jscripts -c ./website/frontend/coffee",
     "test": "cross-env NODE_OPTIONS=\"--experimental-vm-modules\" jest --verbose",
     "lint": "eslint src --ext .ts",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -49,11 +49,11 @@
     "eslint-plugin-import": "^2.26.0",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.3.1",
-    "husky": "^6.0.0",
+    "husky": "^9.1.7",
     "jest": "^29.7.0",
     "jest-canvas-mock": "^2.5.2",
     "jest-environment-jsdom": "^29.7.0",
-    "lint-staged": "^13.2.1",
+    "lint-staged": "^16.2.7",
     "source-map-loader": "^3.0.0",
     "style-loader": "^2.0.0",
     "ts-jest": "^29.2.0",
