@@ -40,7 +40,7 @@
     "babel-loader": "^10.0.0",
     "babel-preset-minify": "^0.5.2",
     "coffeescript": "^1.12.7",
-    "cross-env": "^7.0.3",
+    "cross-env": "^10.1.0",
     "css-loader": "^5.2.6",
     "dotenv": "^10.0.0",
     "eslint": "^7.27.0",
