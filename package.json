@@ -92,7 +92,7 @@
     "pixi-filters": "^4.1.1",
     "pixi-multistyle-text": "https://github.com/eternagame/pixi-multistyle-text/archive/1f2283b1d4a1bb262b57783e1bf2f81802a17809.tar.gz",
     "pixi.js": "^6.5.8",
-    "regenerator-runtime": "^0.13.7",
+    "regenerator-runtime": "^0.14.1",
     "store": "^2.0.12",
     "three": "^0.118.0",
     "upng-js": "^2.1.0",
