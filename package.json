@@ -34,7 +34,6 @@
     "@types/node": "^15.6.1",
     "@types/storejs": "^2.0.3",
     "@types/upng-js": "^2.1.1",
-    "@types/uuid": "^8.3.0",
     "@types/webfontloader": "^1.6.32",
     "@typescript-eslint/eslint-plugin": "^4.26.0",
     "@typescript-eslint/parser": "^4.26.0",
@@ -96,7 +95,7 @@
     "store": "^2.0.12",
     "three": "^0.118.0",
     "upng-js": "^2.1.0",
-    "uuid": "^8.3.2",
+    "uuid": "^13.0.0",
     "webfontloader": "^1.6.28"
   },
   "lint-staged": {
