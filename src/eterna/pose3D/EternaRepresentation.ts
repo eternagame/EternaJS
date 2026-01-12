@@ -19,6 +19,7 @@ import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
 import log from 'loglevel';
 import EternaEllipsoidBuffer from './EternaEllipsoidBuffer';
+import NGLColorUtils from './NGLColorUtils';
 
 enum BondColor {
     STRONG = 0xFFFFFF,
@@ -80,25 +81,37 @@ class EternaRepresentationImpl extends StructureRepresentation {
 
             const pairData = this.getPairData(bondData);
             if (pairData !== null) {
+                const coneBufferParams = this.getBufferParams({
+                    openEnded: false,
+                    radialSegments: this.radialSegments,
+                    disableImpostor: this.disableImpostor,
+                    dullInterior: true
+                });
                 const coneBuffer = new ConeBuffer(
-                    (pairData[0] as ConeBufferData),
-                    this.getBufferParams({
-                        openEnded: false,
-                        radialSegments: this.radialSegments,
-                        disableImpostor: this.disableImpostor,
-                        dullInterior: true
-                    })
+                    pairData[0] as ConeBufferData,
+                    {
+                        ...coneBufferParams,
+                        diffuse: NGLColorUtils.getHex(coneBufferParams.diffuse),
+                        interiorColor: NGLColorUtils.getHex(
+                            coneBufferParams.interiorColor
+                        )
+                    }
                 );
                 bufferList.push(coneBuffer);
 
+                const coneBufferParams2 = this.getBufferParams({
+                    openEnded: false,
+                    radialSegments: this.radialSegments,
+                    disableImpostor: this.disableImpostor,
+                    dullInterior: true
+                });
                 const coneBuffer2 = new ConeBuffer(
                     (pairData[1] as ConeBufferData),
-                    this.getBufferParams({
-                        openEnded: false,
-                        radialSegments: this.radialSegments,
-                        disableImpostor: this.disableImpostor,
-                        dullInterior: true
-                    })
+                    {
+                        ...coneBufferParams2,
+                        diffuse: NGLColorUtils.getHex(coneBufferParams2.diffuse),
+                        interiorColor: NGLColorUtils.getHex(coneBufferParams2.interiorColor)
+                    }
                 );
                 bufferList.push(coneBuffer2);
 
