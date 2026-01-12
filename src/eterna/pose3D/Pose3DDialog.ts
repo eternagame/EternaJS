@@ -83,7 +83,9 @@ export default class Pose3DDialog extends WindowDialog<void> {
         // Initialize NGL
         this._nglStage = new Stage(this._nglDiv, {
             lightColor: 0xffffff,
-            ambientColor: 0xffffff
+            ambientColor: 0xffffff,
+            lightIntensity: 1,
+            ambientIntensity: 0.2
         });
 
         this._nglSprite = new SpriteObject(Sprite.from(this._nglStage.viewer.renderer.domElement));
