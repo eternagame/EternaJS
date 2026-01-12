@@ -17,6 +17,7 @@ import {v4 as uuidv4} from 'uuid';
 import {Value} from 'signals';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
+import log from 'loglevel';
 import EternaEllipsoidBuffer from './EternaEllipsoidBuffer';
 
 enum BondColor {
@@ -211,6 +212,12 @@ class EternaRepresentationImpl extends StructureRepresentation {
             for (let i = 0; i < pairs.length; i++) {
                 const pairNum = pairs[i];
                 if (pairNum < 0) continue;
+                if (i * 3 >= data.position2.length || pairNum * 3 >= data.position2.length) {
+                    // Should be prevented by Pose3DDialog.checkModelFile() validating the structure,
+                    // but prevent crashing the 3D view
+                    log.warn(`Could not find position info for pair (${i + 1}, ${pairNum + 1})`);
+                    continue;
+                }
                 if (pairMap.get(i) === pairNum || pairMap.get(pairNum) === i) continue;
                 pairMap.set(i, pairNum);
 
