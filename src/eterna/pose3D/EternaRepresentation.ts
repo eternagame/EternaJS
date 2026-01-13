@@ -413,6 +413,10 @@ class EternaRepresentationImpl extends StructureRepresentation {
             data.bufferList[2].setAttributes(pairData[1]);
             data.bufferList[3].setAttributes(pairData[2]);
         }
+        // Shouldn't crash the 3D renderer when removing a Cone or Wide Line buffer.
+        // Error is only printed, not thrown, from ThreeJS.
+        // Puzzles continue to render and behave as expected.
+        log.warn('A NaN error message from Three.js may occur when removing a Cone or Wide Line Buffer.');
         this.build();
     }
 
