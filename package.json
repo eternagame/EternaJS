@@ -88,7 +88,6 @@
     "onnxruntime-web": "^1.18.0",
     "pchip": "^1.0.2",
     "pixi-filters": "^4.1.1",
-    "pixi-multistyle-text": "https://github.com/eternagame/pixi-multistyle-text/archive/1f2283b1d4a1bb262b57783e1bf2f81802a17809.tar.gz",
     "pixi-tagged-text": "^3.15.2",
     "pixi.js": "^6.5.8",
     "regenerator-runtime": "^0.14.1",
