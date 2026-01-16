@@ -1,5 +1,5 @@
 import log from 'loglevel';
-import MultiStyleText from 'pixi-multistyle-text';
+import TaggedText from 'pixi-tagged-text';
 import {
     Container, Sprite
 } from 'pixi.js';
@@ -107,7 +107,7 @@ export default class DesignBrowserMode extends GameMode {
         this._content.position.set(10, 86);
         this.uiLayer.addChild(this._content);
 
-        this._votesText = new MultiStyleText('You have...', {
+        this._votesText = new TaggedText('You have...', {
             default: {
                 fontFamily: Fonts.STDFONT,
                 fontSize: 14,
@@ -1127,7 +1127,7 @@ export default class DesignBrowserMode extends GameMode {
     private _returnToGameButton: GameButton;
     private _letterColorButton: GameButton;
     private _expColorButton: GameButton;
-    private _votesText: MultiStyleText;
+    private _votesText: TaggedText;
     private _selectionBox: SelectionBox;
     private _clickedSelectionBox: SelectionBox;
     private _markerBoxes: MarkerBoxView;

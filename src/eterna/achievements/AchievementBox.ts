@@ -22,7 +22,7 @@ import VibrateTask from 'eterna/vfx/VibrateTask';
 import {UnitSignal} from 'signals';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import MultiStyleText from 'pixi-multistyle-text';
+import type TaggedText from 'pixi-tagged-text';
 import * as confetti from 'canvas-confetti';
 import Eterna from 'eterna/Eterna';
 import HTMLImageObject from 'eterna/ui/HTMLImageObject';
@@ -44,7 +44,7 @@ export default class AchievementBox extends ContainerObject {
 
     private readonly _imageURL: string;
     private readonly _description: string;
-    private _descriptionTxt: MultiStyleText;
+    private _descriptionTxt: TaggedText;
 
     constructor(imageURL: string, text: string) {
         super();

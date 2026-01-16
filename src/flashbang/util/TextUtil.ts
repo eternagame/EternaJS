@@ -1,3 +1,4 @@
+import TaggedText from 'pixi-tagged-text';
 import {Text} from 'pixi.js';
 
 export default class TextUtil {
@@ -25,5 +26,19 @@ export default class TextUtil {
         }
 
         text.text += trimmedPostfix;
+    }
+
+    /**
+     * Returns the height/width of a text sprite.
+     *
+     * If text is `TaggedText`, reference `textContainer`.
+     * `TaggedText`'s height/width does not include `textContainer` dimensions
+     */
+    public static getTextDimensions(text: Text | TaggedText) {
+        if (text instanceof TaggedText) {
+            return {height: text.textContainer.height, width: text.textContainer.width};
+        } else {
+            return {height: text.height, width: text.width};
+        }
     }
 }

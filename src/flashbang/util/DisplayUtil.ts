@@ -3,9 +3,11 @@ import {
 } from 'pixi.js';
 import * as UPNG from 'upng-js';
 import Flashbang from 'flashbang/core/Flashbang';
+import TaggedText from 'pixi-tagged-text';
 import {HAlign, VAlign} from 'flashbang/core/Align';
 import RectangleUtil from './RectangleUtil';
 import Assert from './Assert';
+import TextUtil from './TextUtil';
 
 export default class DisplayUtil {
     public static renderToPNG(target: DisplayObject): ArrayBuffer {
@@ -174,6 +176,12 @@ export default class DisplayUtil {
             const scaleY: number = disp.scale.y;
 
             disp.getLocalBounds(out);
+            if (disp instanceof TaggedText) {
+                // TaggedText.getLocalBounds() may return values larger than expected
+                const {height, width} = TextUtil.getTextDimensions(disp);
+                out.height = height;
+                out.width = width;
+            }
 
             RectangleUtil.setTo(out,
                 disp.x + out.x - disp.pivot.x * scaleX,

@@ -1,5 +1,5 @@
 import log from 'loglevel';
-import {TextStyleExtended} from 'pixi-multistyle-text';
+import type {TextStyleExtended} from 'pixi-tagged-text/dist/types';
 import {Container, Point, Sprite} from 'pixi.js';
 import Fonts from 'eterna/util/Fonts';
 import {

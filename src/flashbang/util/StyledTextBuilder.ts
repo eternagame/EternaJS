@@ -1,5 +1,6 @@
 import log from 'loglevel';
-import MultiStyleText, {TextStyleExtended, TextStyleSet} from 'pixi-multistyle-text';
+import TaggedText from 'pixi-tagged-text';
+import type {TextStyleExtended, TextStyleSet} from 'pixi-tagged-text/dist/types';
 import ColorUtil from './ColorUtil';
 
 export default class StyledTextBuilder {
@@ -13,30 +14,30 @@ export default class StyledTextBuilder {
         return this._text;
     }
 
-    /** Creates a new MultiStyleText */
-    public build(): MultiStyleText {
+    /** Creates a new TaggedText */
+    public build(): TaggedText {
         if (this._styleStack.length > 0) {
             log.warn('Unpopped styles');
         }
 
-        return new MultiStyleText(this._text, this.cloneStyles());
+        return new TaggedText(this._text, this.cloneStyles());
     }
 
-    /** Applies the styled text to an existing MultiSyleText object */
-    public apply(textField: MultiStyleText): void {
+    /** Applies the styled text to an existing TaggedText object */
+    public apply(textField: TaggedText): void {
         if (this._styleStack.length > 0) {
             log.warn('Unpopped styles');
         }
 
         textField.text = this._text;
-        textField.styles = this.cloneStyles();
+        textField.setTagStyles(this.cloneStyles());
     }
 
-    public defaultStyle(style: TextStyleExtended): StyledTextBuilder {
+    public defaultStyle(style: TextStyleExtended): this {
         return this.addStyle('default', style);
     }
 
-    public addStyle(name: string, style: TextStyleExtended): StyledTextBuilder {
+    public addStyle(name: string, style: TextStyleExtended): this {
         if (this._styles[name] != null) {
             log.warn(`Redefining existing style '${name}'`);
         }
@@ -53,7 +54,7 @@ export default class StyledTextBuilder {
         return this;
     }
 
-    public pushStyle(style: TextStyleExtended | string): StyledTextBuilder {
+    public pushStyle(style: TextStyleExtended | string): this {
         let styleName: string;
         if (typeof (style) === 'string') {
             if (this._styles[style] == null) {
@@ -72,7 +73,7 @@ export default class StyledTextBuilder {
         return this;
     }
 
-    public popStyle(): StyledTextBuilder {
+    public popStyle(): this {
         if (this._styleStack.length === 0) {
             log.warn('Unbalanced popStyle');
         } else {
@@ -82,7 +83,7 @@ export default class StyledTextBuilder {
         return this;
     }
 
-    public append(text: string, style?: TextStyleExtended | string): StyledTextBuilder {
+    public append(text: string, style?: TextStyleExtended | string): this {
         if (style) {
             this.pushStyle(style);
         }
@@ -98,7 +99,7 @@ export default class StyledTextBuilder {
      * In general: don't do this! It's primarily here for compatibility with Eterna's tutorial scripts.
      * Supported tags: <font color = "#xxxxxx">, <b>
      */
-    public appendHTMLStyledText(text: string): StyledTextBuilder {
+    public appendHTMLStyledText(text: string): this {
         type CreateStyleCallback = (openTagMatch: RegExpExecArray) => [string, TextStyleExtended];
 
         const parseHTMLStyle = (

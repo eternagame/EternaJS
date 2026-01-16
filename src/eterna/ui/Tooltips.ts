@@ -15,7 +15,8 @@ import {
     Assert,
     ContainerObject,
     DisplayObjectPointerTarget,
-    PointerCapture
+    PointerCapture,
+    TextUtil
 } from 'flashbang';
 import {PaletteTarget} from 'eterna/ui/toolbar/NucleotidePalette';
 import Fonts from 'eterna/util/Fonts';
@@ -156,13 +157,14 @@ export default class Tooltips extends GameObject {
 
     private static createTooltip(tooltip: Tooltip): DisplayObject {
         if (typeof (tooltip) === 'string' || tooltip instanceof StyledTextBuilder) {
-            const textField: Container = (typeof (tooltip) === 'string')
+            const textField = (typeof (tooltip) === 'string')
                 ? new Text(tooltip, Tooltips.DEFAULT_STYLE)
                 : tooltip.build();
 
+            const {height, width} = TextUtil.getTextDimensions(textField);
             const disp = new Graphics()
                 .beginFill(0x0, 0.8)
-                .drawRoundedRect(0, 0, textField.width + 20, textField.height + 20, 5)
+                .drawRoundedRect(0, 0, width + 20, height + 20, 5)
                 .endFill();
             textField.x = 10;
             textField.y = 10;

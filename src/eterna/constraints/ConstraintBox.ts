@@ -1,11 +1,12 @@
 import {
     ContainerObject, Enableable, SceneObject, StyledTextBuilder, DisplayUtil, HAlign, VAlign,
-    SerialTask, DelayTask, AlphaTask, TextureUtil, LocationTask, Easing, ParallelTask, ScaleTask, VisibleTask, Flashbang
+    SerialTask, DelayTask, AlphaTask, TextureUtil, LocationTask, Easing, ParallelTask, ScaleTask,
+    VisibleTask, Flashbang, TextUtil
 } from 'flashbang';
 import {
     Graphics, Sprite, Text, Point, Texture, Container
 } from 'pixi.js';
-import MultiStyleText from 'pixi-multistyle-text';
+import TaggedText from 'pixi-tagged-text';
 import Fonts from 'eterna/util/Fonts';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -89,20 +90,19 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._stateText.visible = false;
         this.container.addChild(this._stateText);
 
-        this._reqClarifyText = new MultiStyleText('', {
+        this._reqClarifyText = new TaggedText('', {
             default: {
                 fontFamily: Fonts.STDFONT,
                 fontSize: 11,
                 fill: 0xC0DCE7,
-                letterSpacing: -0.5,
-                align: 'center'
+                letterSpacing: -0.5
             }
         });
         this._reqClarifyText.position.set(50, 30);
         this._reqClarifyText.visible = false;
         this.container.addChild(this._reqClarifyText);
 
-        this._reqStatText = new MultiStyleText('', {
+        this._reqStatText = new TaggedText('', {
             default: {
                 fontFamily: Fonts.STDFONT,
                 fontSize: 11,
@@ -128,7 +128,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._flag.visible = false;
 
         if (this._forMissionScreen) {
-            this._sideText = new MultiStyleText('', {});
+            this._sideText = new TaggedText('', {});
             this.container.addChild(this._sideText);
         }
 
@@ -242,7 +242,10 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             this._outline.visible = false;
             tooltipText.apply(this._sideText);
             // Make the icon look centered with respect to the text
-            const deltaWidth = Math.max(0, this._sideText.width - this._opaqueBackdrop.width);
+            const deltaWidth = Math.max(
+                0,
+                TextUtil.getTextDimensions(this._sideText).width - this._opaqueBackdrop.width
+            );
             this._sideText.position.set(-deltaWidth / 2, this._opaqueBackdrop.height + 10);
         }
 
@@ -308,7 +311,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
     public get width() {
         if (this._forMissionScreen) {
-            return Math.max(this._sideText.width, this._opaqueBackdrop.width);
+            return Math.max(TextUtil.getTextDimensions(this._sideText).width, this._opaqueBackdrop.width);
         } else {
             return this._opaqueBackdrop.width;
         }
@@ -341,9 +344,12 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         return style;
     }
 
-    private setPossiblyStyledText(str: string | StyledTextBuilder, text: MultiStyleText): void {
+    private setPossiblyStyledText(str: string | StyledTextBuilder, text: TaggedText): void {
         if (str instanceof StyledTextBuilder) {
-            str.defaultStyle(text.style);
+            const potentialStyle = text.getStyleForTag('default');
+            if (potentialStyle) {
+                str.defaultStyle(potentialStyle);
+            }
             str.apply(text);
         } else {
             text.text = str;
@@ -504,11 +510,11 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     private _icon: Sprite;
     private _noText: Text;
     private _stateText: Text;
-    private _reqClarifyText: MultiStyleText;
-    private _reqStatText: MultiStyleText;
+    private _reqClarifyText: TaggedText;
+    private _reqStatText: TaggedText;
     private _smallThumbnail: Sprite;
     private _flag: Graphics;
-    private _sideText: MultiStyleText;
+    private _sideText: TaggedText;
     private _check: Sprite;
     private _outline: Sprite;
     private _fglow: Graphics;

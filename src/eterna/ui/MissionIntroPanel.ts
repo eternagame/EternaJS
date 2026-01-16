@@ -1,11 +1,12 @@
 import {
-    ContainerObject, StyledTextBuilder, DisplayUtil, Flashbang
+    ContainerObject, StyledTextBuilder, DisplayUtil, Flashbang,
+    TextUtil
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import {Sprite, Point, Text} from 'pixi.js';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import ConstraintBox from 'eterna/constraints/ConstraintBox';
-import MultiStyleText from 'pixi-multistyle-text';
+import type TaggedText from 'pixi-tagged-text';
 import Assert from 'flashbang/util/Assert';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
@@ -33,7 +34,7 @@ export default class MissionIntroPanel extends ContainerObject {
     private _thumbnail: Sprite;
     private _constraints: MissionIntroConstraints;
     private _titleLabel: Text;
-    private _descriptionLabel: MultiStyleText;
+    private _descriptionLabel: TaggedText;
     private _thumbnailButtons?: GameButton[];
     private _size = new Point();
 
@@ -110,7 +111,7 @@ export default class MissionIntroPanel extends ContainerObject {
 
             this._descriptionLabel.position.y = this._titleLabel.height + theme.spacing;
             this._goalsBG.position.y = this._descriptionLabel.position.y
-                + this._descriptionLabel.height
+                + TextUtil.getTextDimensions(this._descriptionLabel).height
                 + theme.spacing;
             DisplayUtil.center(this._thumbnail, this._goalsBG);
 

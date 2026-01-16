@@ -7,9 +7,9 @@ import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
 import Fonts from 'eterna/util/Fonts';
 import {
     DisplayObjectPointerTarget, DisplayUtil, Dragger, HAlign, HLayoutContainer, InputUtil,
-    KeyCode, MathUtil, StyledTextBuilder, VAlign, VLayoutContainer
+    KeyCode, MathUtil, StyledTextBuilder, TextUtil, VAlign, VLayoutContainer
 } from 'flashbang';
-import MultiStyleText from 'pixi-multistyle-text';
+import TaggedText from 'pixi-tagged-text';
 import {
     Container, Graphics, Point, Rectangle, Text
 } from 'pixi.js';
@@ -83,7 +83,7 @@ export default class SpecBoxDialog extends WindowDialog<void> {
 
         this._zoomContainer.layout();
 
-        this._statText = new MultiStyleText('', {
+        this._statText = new TaggedText('', {
             default: {
                 fontFamily: Fonts.STDFONT,
                 fontSize: 14,
@@ -216,7 +216,8 @@ export default class SpecBoxDialog extends WindowDialog<void> {
 
         // These values are somewhat arbitrary, but seem to be about as small as you can go while ensuring
         // the plots are at least minimally readable
-        const width = Math.max(requestedWidth, requestedWidth < requestedHeight ? this._statText.width : 425);
+        const width = Math.max(requestedWidth,
+            requestedWidth < requestedHeight ? TextUtil.getTextDimensions(this._statText).width : 425);
         const height = Math.max(requestedHeight, requestedWidth < requestedHeight ? 580 : 365);
 
         const plotSize = this.calcPlotSize(width, height);
@@ -433,7 +434,7 @@ export default class SpecBoxDialog extends WindowDialog<void> {
     private _dotPlotMask: Graphics;
     private _meltPlot: Plot;
     private _meltPlotContainer: Container;
-    private _statText: MultiStyleText;
+    private _statText: TaggedText;
     private _zoomContainer: HLayoutContainer;
     private _zoomInButton: GameButton;
     private _zoomOutButton: GameButton;
