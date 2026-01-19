@@ -116,7 +116,7 @@ export default class HelpScreen extends AppMode {
 
         // backdrop
         this._backdrop = new Graphics();
-        this._backdrop.interactive = true;
+        this._backdrop.eventMode = 'static';
         this._backdrop.once('tap', () => {
             Assert.assertIsDefined(this.modeStack);
             this.modeStack.popMode();

@@ -1,8 +1,8 @@
 import log from 'loglevel';
 import {
-    Point, Sprite, Texture, Graphics
+    Point, Sprite, Texture, Graphics,
+    ColorMatrixFilter
 } from 'pixi.js';
-import {ColorMatrixFilter} from '@pixi/filter-color-matrix';
 import {
     ContainerObject, LateUpdatable, Flashbang, Easing
 } from 'flashbang';

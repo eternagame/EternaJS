@@ -12,7 +12,7 @@ export default class DisplayObjectPointerTarget implements PointerTarget {
 
     constructor(disp: DisplayObject) {
         this.target = disp;
-        disp.interactive = true;
+        disp.eventMode = 'static';
     }
 
     public get pointerEnter(): SignalView<FederatedPointerEvent> {

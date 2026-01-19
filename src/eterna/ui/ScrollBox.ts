@@ -45,7 +45,7 @@ export default class ScrollBox extends ContainerObject {
         super.added();
 
         this._dragSurface = new GraphicsObject();
-        this._dragSurface.display.interactive = true;
+        this._dragSurface.display.eventMode = 'static';
         this._dragSurface.display.alpha = 0;
         this.addObject(this._dragSurface, this.display);
 

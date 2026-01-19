@@ -1,5 +1,6 @@
 import {
-    Container, Graphics, Renderer, RenderTexture, Sprite
+    Container, Graphics, Renderer, RenderTexture, Sprite,
+    BlurFilter, FXAAFilter
 } from 'pixi.js';
 import ColorConvert from 'color-convert';
 import {
@@ -9,11 +10,9 @@ import {RNABase} from 'eterna/EPars';
 import Fonts from 'eterna/util/Fonts';
 import {GradientFactory} from '@pixi-essentials/gradients';
 import Eterna from 'eterna/Eterna';
-import {BlurFilter} from '@pixi/filter-blur';
 import {AdjustmentFilter, ColorReplaceFilter} from 'pixi-filters';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import {FXAAFilter} from '@pixi/filter-fxaa';
 import BaseDrawFlags from './BaseDrawFlags';
 import Base from './Base';
 import {ZoomLevelTexture} from './BaseAssets';
@@ -73,7 +72,7 @@ export default class BaseTextures {
                 ])
             );
 
-            GradientFactory.createLinearGradient(Eterna.app.pixi.renderer as Renderer, gradientTexture, {
+            GradientFactory.createLinearGradient(Eterna.app.pixi.renderer as unknown as Renderer, gradientTexture, {
                 x0: 0,
                 y0: 0,
                 x1: BASE_SIZE,

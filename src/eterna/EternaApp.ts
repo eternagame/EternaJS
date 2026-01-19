@@ -508,7 +508,7 @@ export default class EternaApp extends FlashbangApp {
         }
     }
 
-    protected createPixi(): Application {
+    protected createPixi(): Application<HTMLCanvasElement> {
         // When roundPixels is true, the renderer floor()s pixel locations
         // to avoid pixel interpolation. This makes our text look much better,
         // though slow movement animation will end up looking a bit worse.
@@ -518,7 +518,7 @@ export default class EternaApp extends FlashbangApp {
 
         settings.ROUND_PIXELS = true;
 
-        const app = new Application({
+        const app = new Application<HTMLCanvasElement>({
             width: this._params.width,
             height: this._params.height,
             backgroundColor: 0x0,

@@ -3052,7 +3052,7 @@ export default class PoseEditMode extends GameMode {
         this._modeBar.layout();
 
         for (const field of this._poseFields) {
-            field.container.interactive = !disable;
+            field.container.eventMode = !disable ? 'static' : 'auto';
             field.container.interactiveChildren = !disable;
         }
 

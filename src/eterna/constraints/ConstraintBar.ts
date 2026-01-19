@@ -126,7 +126,7 @@ export default class ConstraintBar extends ContainerObject {
             // Drawer tip
             this._drawerTip = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgConstraintDrawerTip));
             this._background.display.addChild(this._drawerTip);
-            this._drawerTip.interactive = true;
+            this._drawerTip.eventMode = 'static';
             this._drawerTip.on('pointertap', () => this.collapse());
             this._drawerTip.visible = false;
         }
@@ -410,7 +410,7 @@ export default class ConstraintBar extends ContainerObject {
     }
 
     private collapse() {
-        this._background.display.interactive = false;
+        this._background.display.eventMode = 'auto';
 
         Assert.assertIsDefined(this._selectedConstraint);
         this._collapsed = true;
@@ -461,7 +461,7 @@ export default class ConstraintBar extends ContainerObject {
     }
 
     private expand() {
-        this._background.display.interactive = true;
+        this._background.display.eventMode = 'static';
 
         Assert.assertIsDefined(this._selectedConstraint);
 

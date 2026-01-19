@@ -428,7 +428,7 @@ export default class Toolbar extends ContainerObject {
         const ANIM_TIME = 0.25;
 
         if (enabled) {
-            this.display.interactive = true;
+            this.display.eventMode = 'static';
 
             let deferredAnimConn: Connection | null = null;
 
@@ -502,7 +502,7 @@ export default class Toolbar extends ContainerObject {
             hide();
         } else {
             Assert.assertIsDefined(Flashbang.stageHeight);
-            this.display.interactive = false;
+            this.display.eventMode = 'auto';
             this._hidden = false;
 
             if (this._autohideRegs !== null) {

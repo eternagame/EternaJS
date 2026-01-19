@@ -1,7 +1,7 @@
 import {
-    Graphics, Sprite, Text, Texture
+    Graphics, Sprite, Text, Texture,
+    ColorMatrixFilter
 } from 'pixi.js';
-import {ColorMatrixFilter} from '@pixi/filter-color-matrix';
 import {
     ContainerObject, MathUtil, TextureUtil, ColorUtil, Updatable
 } from 'flashbang';

@@ -224,7 +224,7 @@ export default class MissionClearedPanel extends ContainerObject {
 
         const separatorPos = this.nextButton.display.position.y - theme.separator.separation;
         this._separator.clear();
-        this._separator.lineStyle(1, 0x70707080);
+        this._separator.lineStyle(1, '0x70707080');
         this._separator.moveTo(theme.separator.margin, separatorPos);
         this._separator.lineTo(panelWidth - theme.separator.margin, separatorPos);
 

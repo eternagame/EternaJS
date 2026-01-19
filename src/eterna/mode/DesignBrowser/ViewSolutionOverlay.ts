@@ -460,7 +460,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         // Footer separator
         this._footer.addChild((() => {
             const line = new Graphics();
-            line.lineStyle(1, 0x70707080);
+            line.lineStyle(1, '0x70707080');
             line.moveTo(0, 1);
             line.lineTo(theme.width - theme.margin.left - theme.margin.right, 1);
             return line;

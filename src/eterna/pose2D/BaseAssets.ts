@@ -1,5 +1,6 @@
 import {
-    Container, Graphics, Sprite, Texture
+    Container, Graphics, Sprite, Texture,
+    FXAAFilter, BlurFilter, ColorMatrixFilter
 } from 'pixi.js';
 import {
     ColorUtil, TextureUtil
@@ -10,10 +11,7 @@ import Sounds from 'eterna/resources/Sounds';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import EternaTextureUtil from 'eterna/util/EternaTextureUtil';
-import {ColorMatrixFilter} from '@pixi/filter-color-matrix';
-import {BlurFilter} from '@pixi/filter-blur';
 import {AdjustmentFilter} from 'pixi-filters';
-import {FXAAFilter} from '@pixi/filter-fxaa';
 import BaseTextures from './BaseTextures';
 import BaseDrawFlags from './BaseDrawFlags';
 import Base from './Base';

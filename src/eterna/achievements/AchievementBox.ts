@@ -69,7 +69,7 @@ export default class AchievementBox extends ContainerObject {
         background.beginFill(theme.colors.border);
         background.drawRoundedRect(0, 0, theme.size.x, theme.headerHeight, theme.borderRadius);
         background.endFill();
-        background.interactive = true;
+        background.eventMode = 'static';
         background.on('click', () => this.closed.emit());
         background.on('tap', () => this.closed.emit());
         this.container.addChild(background);

@@ -112,7 +112,7 @@ export default class FileInputObject extends DOMObject<HTMLInputElement | HTMLDi
             this.activateDialog();
         });
 
-        this._dummyDisp.interactive = false;
+        this._dummyDisp.eventMode = 'auto';
 
         this.createFakeFileInput();
         this.setupTooltip();
@@ -245,14 +245,14 @@ export default class FileInputObject extends DOMObject<HTMLInputElement | HTMLDi
         if (this._fakeFileInput != null) {
             if (!this._fakeFileInput.destroyed) this._fakeFileInput.destroy({children: true});
             this._fakeFileInput = null;
-            this._dummyDisp.interactive = false;
+            this._dummyDisp.eventMode = 'auto';
         }
     }
 
     private createFakeFileInput(): void {
         this.destroyFakeFileInput();
 
-        this._dummyDisp.interactive = true;
+        this._dummyDisp.eventMode = 'static';
 
         this._fakeFileInput = new Sprite();
 

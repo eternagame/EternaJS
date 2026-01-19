@@ -152,7 +152,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
             }
         });
 
-        this._dummyDisp.interactive = false;
+        this._dummyDisp.eventMode = 'auto';
 
         if (this._showFakeTextInputWhenNotFocused) {
             this.onFocusChanged(this._hasFocus);
@@ -559,14 +559,14 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
         if (this._fakeTextInput != null) {
             if (!this._fakeTextInput.destroyed) this._fakeTextInput.destroy({children: true});
             this._fakeTextInput = null;
-            this._dummyDisp.interactive = false;
+            this._dummyDisp.eventMode = 'auto';
         }
     }
 
     private createFakeTextInput(): void {
         this.destroyFakeTextInput();
 
-        this._dummyDisp.interactive = true;
+        this._dummyDisp.eventMode = 'static';
 
         this._fakeTextInput = new Sprite();
 

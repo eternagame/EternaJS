@@ -1,5 +1,5 @@
 import {Graphics, Rectangle, Text} from 'pixi.js';
-import {DropShadowFilter} from '@pixi/filter-drop-shadow';
+import {DropShadowFilter} from 'pixi-filters';
 import Fonts from 'eterna/util/Fonts';
 import {SignalView} from 'signals';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';

@@ -1,7 +1,8 @@
 import {
     Container,
     Graphics,
-    Point, Rectangle, Sprite, Text, Texture
+    Point, Rectangle, Sprite, Text, Texture,
+    BlurFilter
 } from 'pixi.js';
 import {Signal} from 'signals';
 import {
@@ -18,7 +19,6 @@ import {FederatedPointerEvent} from '@pixi/events';
 import Eterna from 'eterna/Eterna';
 import BaseTextures from 'eterna/pose2D/BaseTextures';
 import BaseAssets from 'eterna/pose2D/BaseAssets';
-import {BlurFilter} from '@pixi/filter-blur';
 import {AdjustmentFilter} from 'pixi-filters';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
 import Tooltips from '../Tooltips';
@@ -71,7 +71,7 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
     constructor() {
         super();
 
-        this.display.interactive = true;
+        this.display.eventMode = 'static';
 
         this._selectPairData = BitmapManager.getBitmap(Bitmaps.ImgSelectPair);
         this._selectBaseData = BitmapManager.getBitmap(Bitmaps.ImgSelectBase);

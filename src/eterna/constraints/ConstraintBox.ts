@@ -95,7 +95,8 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                 fontFamily: Fonts.STDFONT,
                 fontSize: 11,
                 fill: 0xC0DCE7,
-                letterSpacing: -0.5
+                letterSpacing: -0.5,
+                lineHeight: 1
             }
         });
         this._reqClarifyText.position.set(50, 30);
@@ -107,7 +108,8 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                 fontFamily: Fonts.STDFONT,
                 fontSize: 11,
                 fill: 0xC0DCE7,
-                letterSpacing: -0.5
+                letterSpacing: -0.5,
+                lineHeight: 1
             }
         });
         this._reqStatText.position.set(50, 50);
@@ -329,7 +331,8 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             fill: 0xffffff,
             letterSpacing: -0.5,
             wordWrap: true,
-            wordWrapWidth: UITheme.missionIntro.maxConstraintWidth
+            wordWrapWidth: UITheme.missionIntro.maxConstraintWidth,
+            lineHeight: 1
         }).addStyle('altText', {
             fontFamily: Fonts.STDFONT,
             fontWeight: FontWeight.SEMIBOLD,
@@ -372,7 +375,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             obj.display.x = 0;
             obj.display.y = 78;
             obj.display.visible = false;
-            obj.display.interactive = false;
+            obj.display.eventMode = 'auto';
             this.addObject(obj, container ?? this.container);
 
             this._mouseOverObject = obj;
