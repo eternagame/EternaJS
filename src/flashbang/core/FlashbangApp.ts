@@ -1,9 +1,9 @@
-import '@pixi/events';
 import {Assert, KeyboardEventType, KeyCode} from 'flashbang';
 import log from 'loglevel';
 import {
     Application,
     BaseTexture,
+    FederatedPointerEvent,
     Point,
     SCALE_MODES,
     Ticker
@@ -37,6 +37,8 @@ export default class FlashbangApp {
         this._managedInputElements.push(this._pixi.view);
 
         this._pixi.stage.name = 'Stage';
+        // Necessary for emitting the 'pointermove' event
+        this._pixi.stage.eventMode = 'dynamic';
         this._modeStack = new ModeStack(this._pixi.stage);
 
         Flashbang._registerApp(this);
@@ -46,7 +48,6 @@ export default class FlashbangApp {
 
         this._pixi.ticker.add((delta) => this.update(delta));
 
-        // @ts-expect-error Event type is actually FederatedPointerEvent
         (this._pixi.stage).addEventListener('pointermove', (e: FederatedPointerEvent) => {
             this._globalMouse = e.global.clone();
         });
