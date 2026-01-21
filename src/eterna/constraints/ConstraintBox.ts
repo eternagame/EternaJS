@@ -6,7 +6,7 @@ import {
 import {
     Graphics, Sprite, Text, Point, Texture, Container
 } from 'pixi.js';
-import TaggedText from 'pixi-tagged-text';
+import {Glyphs} from 'pixi-glyphs';
 import Fonts from 'eterna/util/Fonts';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -90,7 +90,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._stateText.visible = false;
         this.container.addChild(this._stateText);
 
-        this._reqClarifyText = new TaggedText('', {
+        this._reqClarifyText = new Glyphs('', {
             default: {
                 fontFamily: Fonts.STDFONT,
                 fontSize: 11,
@@ -103,7 +103,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._reqClarifyText.visible = false;
         this.container.addChild(this._reqClarifyText);
 
-        this._reqStatText = new TaggedText('', {
+        this._reqStatText = new Glyphs('', {
             default: {
                 fontFamily: Fonts.STDFONT,
                 fontSize: 11,
@@ -130,7 +130,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._flag.visible = false;
 
         if (this._forMissionScreen) {
-            this._sideText = new TaggedText('', {});
+            this._sideText = new Glyphs('', {});
             this.container.addChild(this._sideText);
         }
 
@@ -347,7 +347,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         return style;
     }
 
-    private setPossiblyStyledText(str: string | StyledTextBuilder, text: TaggedText): void {
+    private setPossiblyStyledText(str: string | StyledTextBuilder, text: Glyphs): void {
         if (str instanceof StyledTextBuilder) {
             const potentialStyle = text.getStyleForTag('default');
             if (potentialStyle) {
@@ -513,11 +513,11 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     private _icon: Sprite;
     private _noText: Text;
     private _stateText: Text;
-    private _reqClarifyText: TaggedText;
-    private _reqStatText: TaggedText;
+    private _reqClarifyText: Glyphs;
+    private _reqStatText: Glyphs;
     private _smallThumbnail: Sprite;
     private _flag: Graphics;
-    private _sideText: TaggedText;
+    private _sideText: Glyphs;
     private _check: Sprite;
     private _outline: Sprite;
     private _fglow: Graphics;

@@ -1,5 +1,5 @@
 import log from 'loglevel';
-import TaggedText from 'pixi-tagged-text';
+import {Glyphs} from 'pixi-glyphs';
 import {
     Container, Sprite, FederatedPointerEvent, FederatedWheelEvent
 } from 'pixi.js';
@@ -106,7 +106,7 @@ export default class DesignBrowserMode extends GameMode {
         this._content.position.set(10, 86);
         this.uiLayer.addChild(this._content);
 
-        this._votesText = new TaggedText('You have...', {
+        this._votesText = new Glyphs('You have...', {
             default: {
                 fontFamily: Fonts.STDFONT,
                 fontSize: 14,
@@ -1126,7 +1126,7 @@ export default class DesignBrowserMode extends GameMode {
     private _returnToGameButton: GameButton;
     private _letterColorButton: GameButton;
     private _expColorButton: GameButton;
-    private _votesText: TaggedText;
+    private _votesText: Glyphs;
     private _selectionBox: SelectionBox;
     private _clickedSelectionBox: SelectionBox;
     private _markerBoxes: MarkerBoxView;

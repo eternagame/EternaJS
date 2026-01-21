@@ -1,6 +1,6 @@
 import log from 'loglevel';
-import TaggedText from 'pixi-tagged-text';
-import type {TextStyleExtended, TextStyleSet} from 'pixi-tagged-text/dist/types';
+import {Glyphs} from 'pixi-glyphs';
+import type {TextStyleExtended, TextStyleSet} from 'pixi-glyphs/dist/types';
 import ColorUtil from './ColorUtil';
 
 export default class StyledTextBuilder {
@@ -14,17 +14,17 @@ export default class StyledTextBuilder {
         return this._text;
     }
 
-    /** Creates a new TaggedText */
-    public build(): TaggedText {
+    /** Creates a new Glyphs text */
+    public build(): Glyphs {
         if (this._styleStack.length > 0) {
             log.warn('Unpopped styles');
         }
 
-        return new TaggedText(this._text, this.cloneStyles());
+        return new Glyphs(this._text, this.cloneStyles());
     }
 
-    /** Applies the styled text to an existing TaggedText object */
-    public apply(textField: TaggedText): void {
+    /** Applies the styled text to an existing Glyphs object */
+    public apply(textField: Glyphs): void {
         if (this._styleStack.length > 0) {
             log.warn('Unpopped styles');
         }

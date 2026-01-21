@@ -6,7 +6,7 @@ import Fonts from 'eterna/util/Fonts';
 import {Sprite, Point, Text} from 'pixi.js';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import ConstraintBox from 'eterna/constraints/ConstraintBox';
-import type TaggedText from 'pixi-tagged-text';
+import type {Glyphs} from 'pixi-glyphs';
 import Assert from 'flashbang/util/Assert';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
@@ -34,7 +34,7 @@ export default class MissionIntroPanel extends ContainerObject {
     private _thumbnail: Sprite;
     private _constraints: MissionIntroConstraints;
     private _titleLabel: Text;
-    private _descriptionLabel: TaggedText;
+    private _descriptionLabel: Glyphs;
     private _thumbnailButtons?: GameButton[];
     private _size = new Point();
 

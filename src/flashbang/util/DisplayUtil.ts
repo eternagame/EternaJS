@@ -3,7 +3,7 @@ import {
 } from 'pixi.js';
 import * as UPNG from 'upng-js';
 import Flashbang from 'flashbang/core/Flashbang';
-import TaggedText from 'pixi-tagged-text';
+import {Glyphs} from 'pixi-glyphs';
 import {HAlign, VAlign} from 'flashbang/core/Align';
 import RectangleUtil from './RectangleUtil';
 import Assert from './Assert';
@@ -176,8 +176,8 @@ export default class DisplayUtil {
             const scaleY: number = disp.scale.y;
 
             disp.getLocalBounds(out);
-            if (disp instanceof TaggedText) {
-                // TaggedText.getLocalBounds() may return values larger than expected
+            if (disp instanceof Glyphs) {
+                // Glyphs.getLocalBounds() may return values larger than expected
                 const {height, width} = TextUtil.getTextDimensions(disp);
                 out.height = height;
                 out.width = width;

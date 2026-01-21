@@ -1,4 +1,4 @@
-import TaggedText from 'pixi-tagged-text';
+import {Glyphs} from 'pixi-glyphs';
 import {Container, Graphics} from 'pixi.js';
 import {VLayoutContainer, HAlign} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
@@ -29,7 +29,7 @@ export default class EnergyScoreDisplay extends Container {
 
         const textLayout: VLayoutContainer = new VLayoutContainer(2, HAlign.LEFT);
 
-        this._labelText = new TaggedText('Total', {
+        this._labelText = new Glyphs('Total', {
             default: {
                 fontFamily: Fonts.STDFONT,
                 fontSize: 11,
@@ -41,7 +41,7 @@ export default class EnergyScoreDisplay extends Container {
         });
         textLayout.addChild(this._labelText);
 
-        this._energyText = new TaggedText('-.- kcal', {
+        this._energyText = new Glyphs('-.- kcal', {
             default: {
                 fontFamily: Fonts.STDFONT,
                 fontWeight: FontWeight.SEMIBOLD,
@@ -87,8 +87,8 @@ export default class EnergyScoreDisplay extends Container {
         this._bg.alpha = 0.5;
     }
 
-    private readonly _labelText: TaggedText;
-    private readonly _energyText: TaggedText;
+    private readonly _labelText: Glyphs;
+    private readonly _energyText: Glyphs;
     private readonly _bg: Graphics;
 
     protected _width: number;

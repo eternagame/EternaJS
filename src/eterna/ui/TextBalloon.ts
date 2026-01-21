@@ -1,4 +1,4 @@
-import type TaggedText from 'pixi-tagged-text';
+import type {Glyphs} from 'pixi-glyphs';
 import {
     StyledTextBuilder, DisplayUtil, ContainerObject, TextUtil
 } from 'flashbang';
@@ -64,7 +64,7 @@ export default class TextBalloon extends ContainerObject {
         this.updateView();
     }
 
-    public get text(): TaggedText {
+    public get text(): Glyphs {
         return this._text;
     }
 
@@ -202,7 +202,7 @@ export default class TextBalloon extends ContainerObject {
     protected _button: GameButton;
 
     private _panel: GamePanel;
-    protected _text: TaggedText;
+    protected _text: Glyphs;
     protected _centered: boolean = false;
     protected _hasTitle: boolean = false;
 

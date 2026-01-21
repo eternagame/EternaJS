@@ -8,7 +8,7 @@ import {
     DisplayObjectPointerTarget, DisplayUtil, Dragger, HAlign, HLayoutContainer, InputUtil,
     KeyCode, MathUtil, StyledTextBuilder, TextUtil, VAlign, VLayoutContainer
 } from 'flashbang';
-import TaggedText from 'pixi-tagged-text';
+import {Glyphs} from 'pixi-glyphs';
 import {
     Container, Graphics, Point, Rectangle, Text, FederatedPointerEvent
 } from 'pixi.js';
@@ -82,7 +82,7 @@ export default class SpecBoxDialog extends WindowDialog<void> {
 
         this._zoomContainer.layout();
 
-        this._statText = new TaggedText('', {
+        this._statText = new Glyphs('', {
             default: {
                 fontFamily: Fonts.STDFONT,
                 fontSize: 14,
@@ -433,7 +433,7 @@ export default class SpecBoxDialog extends WindowDialog<void> {
     private _dotPlotMask: Graphics;
     private _meltPlot: Plot;
     private _meltPlotContainer: Container;
-    private _statText: TaggedText;
+    private _statText: Glyphs;
     private _zoomContainer: HLayoutContainer;
     private _zoomInButton: GameButton;
     private _zoomOutButton: GameButton;

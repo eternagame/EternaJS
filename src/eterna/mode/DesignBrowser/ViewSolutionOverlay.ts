@@ -29,7 +29,7 @@ import BitmapManager from 'eterna/resources/BitmapManager';
 import EternaURL from 'eterna/net/EternaURL';
 import TextInputObject from 'eterna/ui/TextInputObject';
 import ScrollBox from 'eterna/ui/ScrollBox';
-import TaggedText from 'pixi-tagged-text';
+import {Glyphs} from 'pixi-glyphs';
 import Feedback from 'eterna/Feedback';
 import SliderBar from 'eterna/ui/SliderBar';
 import {FontWeight} from 'flashbang/util/TextBuilder';
@@ -636,7 +636,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         }
 
         const {theme} = ViewSolutionOverlay;
-        return new TaggedText(text, {
+        return new Glyphs(text, {
             default: {
                 fontFamily: Fonts.STDFONT,
                 fontSize: 13,

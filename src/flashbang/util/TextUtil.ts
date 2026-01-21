@@ -1,4 +1,4 @@
-import TaggedText from 'pixi-tagged-text';
+import {Glyphs} from 'pixi-glyphs';
 import {Text} from 'pixi.js';
 
 export default class TextUtil {
@@ -31,11 +31,11 @@ export default class TextUtil {
     /**
      * Returns the height/width of a text sprite.
      *
-     * If text is `TaggedText`, reference `textContainer`.
-     * `TaggedText`'s height/width does not include `textContainer` dimensions
+     * If text is `Glyphs`, reference `textContainer`.
+     * `Glyphs`'s height/width does not include `textContainer` dimensions
      */
-    public static getTextDimensions(text: Text | TaggedText) {
-        if (text instanceof TaggedText) {
+    public static getTextDimensions(text: Text | Glyphs) {
+        if (text instanceof Glyphs) {
             return {height: text.textContainer.height, width: text.textContainer.width};
         } else {
             return {height: text.height, width: text.width};
