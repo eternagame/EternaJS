@@ -1,7 +1,7 @@
 import {
     Matrix, Sprite, Texture
 } from 'pixi.js';
-import {TextureUtil, ColorUtil, MathUtil} from 'flashbang';
+import {TextureUtil, ColorUtil} from 'flashbang';
 
 export default class EternaTextureUtil {
     /**
@@ -37,11 +37,12 @@ export default class EternaTextureUtil {
      */
     public static createRotated(texture: Texture, stepSize: number): Texture[] {
         const rotated: Texture[] = [texture];
-        const endIndex: number = 360 / stepSize;
+        const stepAmount: number = 360 / stepSize;
 
-        for (let ii = 1; ii < endIndex; ii++) {
+        for (let step = 1; step < stepAmount; step++) {
             const sprite: Sprite = new Sprite(texture);
-            sprite.rotation = stepSize * ii * MathUtil.deg2Rad;
+            sprite.anchor.set(0.5);
+            sprite.angle = stepSize * step;
             rotated.push(TextureUtil.renderToTexture(sprite));
         }
 

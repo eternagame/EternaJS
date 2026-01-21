@@ -1,5 +1,5 @@
 import {
-    Container, DisplayObject, Graphics, Sprite, Texture
+    Container, Graphics, Sprite, Texture
 } from 'pixi.js';
 import {TextureUtil, DisplayUtil, Assert} from 'flashbang';
 import Constants from 'eterna/Constants';
@@ -29,7 +29,7 @@ export default class PoseThumbnail {
         expThreshold: number = 0,
         customLayout: ([number, number] | [null, null])[] | null = null
     ): Texture {
-        const disp: DisplayObject = PoseThumbnail.create(
+        const disp: Container = PoseThumbnail.create(
             sequence.baseArray, pairs, size, type,
             expStartIndex, wrongPairs, expUseThreshold, expThreshold,
             null, customLayout
@@ -112,8 +112,8 @@ export default class PoseThumbnail {
         expThreshold: number,
         canvas: Graphics | null = null,
         customLayout: ([number, number] | [null, null])[] | null = null
-    ): DisplayObject {
-        let frame: DisplayObject | null = null;
+    ): Container {
+        let frame: Container | null = null;
 
         if (size === 1) {
             frame = Sprite.from(Bitmaps.SolutionSmallFrame);
