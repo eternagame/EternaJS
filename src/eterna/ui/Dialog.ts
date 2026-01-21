@@ -1,4 +1,4 @@
-import {Graphics} from 'pixi.js';
+import {Graphics, FederatedWheelEvent} from 'pixi.js';
 import {
     ContainerObject,
     KeyboardListener,
@@ -8,7 +8,6 @@ import {
     Assert,
     DOMObject
 } from 'flashbang';
-import {FederatedWheelEvent} from '@pixi/events';
 import Eterna from 'eterna/Eterna';
 
 /** Dialogs that expose a "confirmed" promise will reject with this error if the dialog is canceled */

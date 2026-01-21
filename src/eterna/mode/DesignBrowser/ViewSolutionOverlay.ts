@@ -1,5 +1,5 @@
 import {
-    Container, Graphics, Sprite, Text
+    Container, Graphics, Sprite, Text, FederatedWheelEvent
 } from 'pixi.js';
 import {UnitSignal} from 'signals';
 import SecStruct from 'eterna/rnatypes/SecStruct';
@@ -36,7 +36,6 @@ import {FontWeight} from 'flashbang/util/TextBuilder';
 import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
 import CopyTextDialog from 'eterna/ui/CopyTextDialog';
-import {FederatedWheelEvent} from '@pixi/events';
 import ThumbnailAndTextButton from './ThumbnailAndTextButton';
 import GameMode from '../GameMode';
 import ButtonWithIcon from './ButtonWithIcon';

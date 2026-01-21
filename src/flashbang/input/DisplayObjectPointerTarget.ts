@@ -1,7 +1,6 @@
-import {DisplayObject} from 'pixi.js';
+import {DisplayObject, FederatedPointerEvent, FederatedWheelEvent} from 'pixi.js';
 import {SignalView} from 'signals';
 import EventSignal from 'flashbang/util/EventSignal';
-import {FederatedPointerEvent, FederatedWheelEvent} from '@pixi/events';
 import ElementSignal from 'flashbang/util/ElementSignal';
 import Assert from 'flashbang/util/Assert';
 import Flashbang from 'flashbang/core/Flashbang';

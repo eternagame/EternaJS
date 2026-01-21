@@ -1,7 +1,6 @@
 import Assert from 'flashbang/util/Assert';
 import {SoundManager} from 'flashbang';
-import {Application, Point} from 'pixi.js';
-import {EventSystem} from '@pixi/events';
+import {Application, Point, EventSystem} from 'pixi.js';
 import FlashbangApp from './FlashbangApp';
 import AppMode from './AppMode';
 

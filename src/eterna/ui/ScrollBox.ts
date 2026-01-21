@@ -1,6 +1,8 @@
 import {
     Container,
-    Point
+    Point,
+    FederatedPointerEvent,
+    FederatedWheelEvent
 } from 'pixi.js';
 import {
     MathUtil,
@@ -14,7 +16,6 @@ import {
     PointerCapture
 } from 'flashbang';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
-import {FederatedPointerEvent, FederatedWheelEvent} from '@pixi/events';
 import ScrollContainer from './ScrollContainer';
 
 enum DragMode {

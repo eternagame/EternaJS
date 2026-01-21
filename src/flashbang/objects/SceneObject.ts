@@ -1,12 +1,13 @@
-import {DisplayObject} from 'pixi.js';
+import {
+    Container, DisplayObject, FederatedPointerEvent, FederatedWheelEvent
+} from 'pixi.js';
 import {SignalView} from 'signals';
 import GameObject from 'flashbang/core/GameObject';
 import PointerTarget from 'flashbang/input/PointerTarget';
 import DisplayObjectPointerTarget from 'flashbang/input/DisplayObjectPointerTarget';
-import {FederatedPointerEvent, FederatedWheelEvent} from '@pixi/events';
 
 /** A convenience class that manages a DisplayObject directly. */
-export default class SceneObject<T extends DisplayObject = DisplayObject> extends GameObject implements PointerTarget {
+export default class SceneObject<T extends DisplayObject = Container> extends GameObject implements PointerTarget {
     constructor(displayObject: T) {
         super();
         this._display = displayObject;

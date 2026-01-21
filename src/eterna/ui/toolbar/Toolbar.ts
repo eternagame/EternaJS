@@ -13,10 +13,10 @@ import {
 import {FontWeight} from 'flashbang/util/TextBuilder';
 import log from 'loglevel';
 import {
-    Container, Graphics, Point, Text
+    Container, Graphics, Point, Text,
+    FederatedPointerEvent, FederatedWheelEvent
 } from 'pixi.js';
 import {Connection, RegistrationGroup} from 'signals';
-import {FederatedPointerEvent, FederatedWheelEvent} from '@pixi/events';
 import AnnotationPanelDialog from '../AnnotationPanelDialog';
 import BoosterDialog from '../BoosterDialog';
 import GameButton from '../GameButton';

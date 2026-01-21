@@ -1,5 +1,6 @@
 import {
-    Graphics, Point, Rectangle, Sprite, Text
+    Graphics, Point, Rectangle, Sprite, Text,
+    FederatedPointerEvent, FederatedWheelEvent
 } from 'pixi.js';
 import {
     ContainerObject, KeyboardListener, InputUtil, Flashbang,
@@ -12,7 +13,6 @@ import ROPWait from 'eterna/rscript/ROPWait';
 import debounce from 'lodash.debounce';
 import AnnotationManager from 'eterna/AnnotationManager';
 import GameWindow from 'eterna/ui/GameWindow';
-import {FederatedPointerEvent, FederatedWheelEvent} from '@pixi/events';
 import Eterna from 'eterna/Eterna';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';

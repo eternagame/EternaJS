@@ -1,6 +1,7 @@
-import {FederatedPointerEvent} from '@pixi/events';
 import {ContainerObject, DisplayUtil, HLayoutContainer} from 'flashbang';
-import {Graphics, Point, Rectangle} from 'pixi.js';
+import {
+    Graphics, Point, Rectangle, FederatedPointerEvent
+} from 'pixi.js';
 import {ToolTipPositioner} from '../help/HelpToolTip';
 import Tooltips from '../Tooltips';
 import ToolbarButton, {BUTTON_HEIGHT, BUTTON_WIDTH} from './ToolbarButton';

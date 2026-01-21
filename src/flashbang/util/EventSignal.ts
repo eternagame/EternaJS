@@ -1,5 +1,4 @@
-import {FederatedEvent} from '@pixi/events';
-import {utils as PixiUtils} from 'pixi.js';
+import {utils as PixiUtils, FederatedEvent} from 'pixi.js';
 import {
     AbstractSignal, FilteredSignal, MappedSignal, SignalView
 } from 'signals';

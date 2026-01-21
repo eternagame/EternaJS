@@ -3,14 +3,13 @@ import {
     Assert, ContainerObject, DisplayUtil, Dragger, Flashbang, HAlign, MathUtil, SpriteObject, VAlign, Vector2
 } from 'flashbang';
 import {
-    Container, Graphics, Point, Rectangle, Sprite
+    Container, Graphics, Point, Rectangle, Sprite, FederatedPointerEvent
 } from 'pixi.js';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {Signal, SignalView} from 'signals';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
 import RScriptArrow from 'eterna/rscript/RScriptArrow';
-import {FederatedPointerEvent} from '@pixi/events';
 import GameButton from './GameButton';
 import GamePanel from './GamePanel';
 import ScrollBox from './ScrollBox';

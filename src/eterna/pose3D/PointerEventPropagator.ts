@@ -1,4 +1,4 @@
-import {FederatedPointerEvent, FederatedWheelEvent} from '@pixi/events';
+import {FederatedPointerEvent, FederatedWheelEvent} from 'pixi.js';
 import {
     GameObject, PointerCapture, SceneObject
 } from 'flashbang';

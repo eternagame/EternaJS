@@ -1,9 +1,8 @@
-import {Graphics, Point} from 'pixi.js';
+import {Graphics, Point, FederatedPointerEvent} from 'pixi.js';
 import {Signal} from 'signals';
 import {
     ContainerObject, DisplayObjectPointerTarget, Dragger, GameObjectRef
 } from 'flashbang';
-import {FederatedPointerEvent} from '@pixi/events';
 
 export default class SliderBar extends ContainerObject {
     // The width (or height, for a horizontal SliderBar) of the thumb

@@ -1,4 +1,4 @@
-import {Container} from 'pixi.js';
+import {Container, FederatedPointerEvent, FederatedWheelEvent} from 'pixi.js';
 import {
     RegistrationGroup, Signal, SignalView, UnitSignal
 } from 'signals';
@@ -6,7 +6,6 @@ import KeyboardInput from 'flashbang/input/KeyboardInput';
 import Assert from 'flashbang/util/Assert';
 import PointerTarget from 'flashbang/input/PointerTarget';
 import DisplayObjectPointerTarget from 'flashbang/input/DisplayObjectPointerTarget';
-import {FederatedPointerEvent, FederatedWheelEvent} from '@pixi/events';
 import GameObject from './GameObject';
 import GameObjectBase from './GameObjectBase';
 import GameObjectRef from './GameObjectRef';

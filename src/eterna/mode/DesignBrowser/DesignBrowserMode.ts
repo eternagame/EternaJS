@@ -1,7 +1,7 @@
 import log from 'loglevel';
 import TaggedText from 'pixi-tagged-text';
 import {
-    Container, Sprite
+    Container, Sprite, FederatedPointerEvent, FederatedWheelEvent
 } from 'pixi.js';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Eterna from 'eterna/Eterna';
@@ -24,7 +24,6 @@ import UITheme from 'eterna/ui/UITheme';
 import {AchievementData} from 'eterna/achievements/AchievementManager';
 import {FontWeight} from 'flashbang/util/TextBuilder';
 import ScrollContainer from 'eterna/ui/ScrollContainer';
-import {FederatedPointerEvent, FederatedWheelEvent} from '@pixi/events';
 import VoteProcessor from './VoteProcessor';
 import ViewSolutionOverlay from './ViewSolutionOverlay';
 import SortOptionsDialog from './SortOptionsDialog';

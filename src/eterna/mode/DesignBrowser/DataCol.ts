@@ -1,5 +1,6 @@
 import {
-    Container, Graphics, Text, Sprite
+    Container, Graphics, Text, Sprite,
+    FederatedPointerEvent
 } from 'pixi.js';
 import {Signal, UnitSignal} from 'signals';
 import {
@@ -15,7 +16,6 @@ import UITheme from 'eterna/ui/UITheme';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import SecStruct from 'eterna/rnatypes/SecStruct';
-import {FederatedPointerEvent} from '@pixi/events';
 import {SortOrder} from './SortOptions';
 import SequenceStringListView from './SequenceStringListView';
 import {DesignBrowserDataType, DesignCategory, DBVote} from './DesignBrowserMode';

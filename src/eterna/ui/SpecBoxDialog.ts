@@ -1,4 +1,3 @@
-import {FederatedPointerEvent} from '@pixi/events';
 import EPars from 'eterna/EPars';
 import EternaURL from 'eterna/net/EternaURL';
 import Plot from 'eterna/Plot';
@@ -11,7 +10,7 @@ import {
 } from 'flashbang';
 import TaggedText from 'pixi-tagged-text';
 import {
-    Container, Graphics, Point, Rectangle, Text
+    Container, Graphics, Point, Rectangle, Text, FederatedPointerEvent
 } from 'pixi.js';
 import GameButton from './GameButton';
 import SpecHTMLButton from './SpecHTMLButton';

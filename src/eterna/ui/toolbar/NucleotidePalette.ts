@@ -2,7 +2,7 @@ import {
     Container,
     Graphics,
     Point, Rectangle, Sprite, Text, Texture,
-    BlurFilter
+    BlurFilter, FederatedPointerEvent
 } from 'pixi.js';
 import {Signal} from 'signals';
 import {
@@ -15,7 +15,6 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import Fonts from 'eterna/util/Fonts';
 import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import ROPWait from 'eterna/rscript/ROPWait';
-import {FederatedPointerEvent} from '@pixi/events';
 import Eterna from 'eterna/Eterna';
 import BaseTextures from 'eterna/pose2D/BaseTextures';
 import BaseAssets from 'eterna/pose2D/BaseAssets';

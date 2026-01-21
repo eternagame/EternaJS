@@ -1,4 +1,4 @@
-import {FederatedPointerEvent, FederatedWheelEvent} from '@pixi/events';
+import {FederatedPointerEvent, FederatedWheelEvent} from 'pixi.js';
 
 export default class InputUtil {
     public static IsLeftMouse = (e: FederatedPointerEvent): boolean => {

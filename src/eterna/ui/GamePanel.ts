@@ -1,9 +1,10 @@
-import {Graphics, Rectangle, Text} from 'pixi.js';
+import {
+    Graphics, Rectangle, Text, FederatedPointerEvent
+} from 'pixi.js';
 import {DropShadowFilter} from 'pixi-filters';
 import Fonts from 'eterna/util/Fonts';
 import {SignalView} from 'signals';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
-import {FederatedPointerEvent} from '@pixi/events';
 import BaseGamePanel from './BaseGamePanel';
 
 export enum GamePanelType {

@@ -1,5 +1,4 @@
-import {FederatedPointerEvent, FederatedWheelEvent} from '@pixi/events';
-import {DisplayObject} from 'pixi.js';
+import {DisplayObject, FederatedPointerEvent, FederatedWheelEvent} from 'pixi.js';
 import {SignalView} from 'signals';
 
 /** Exposes signals for an interactive object */

@@ -1,10 +1,10 @@
 import {ContainerObject, Assert} from 'flashbang';
 import {
     Container,
-    Graphics, Point, Rectangle, TextMetrics
+    Graphics, Point, Rectangle, TextMetrics,
+    FederatedPointerEvent
 } from 'pixi.js';
 import Fonts from 'eterna/util/Fonts';
-import {FederatedPointerEvent} from '@pixi/events';
 
 // AMW we have to be content to accept our positioner may
 // in fact return null (if we want to use getbounds() for

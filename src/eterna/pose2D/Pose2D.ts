@@ -1,6 +1,6 @@
 import log from 'loglevel';
 import {
-    Container, Graphics, Point, Sprite, Texture, Rectangle
+    Container, Graphics, Point, Sprite, Texture, Rectangle, FederatedPointerEvent
 } from 'pixi.js';
 import {Registration, Signal} from 'signals';
 import EPars, {RNABase, RNAPaint} from 'eterna/EPars';
@@ -30,7 +30,6 @@ import ContextMenu from 'eterna/ui/ContextMenu';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import AnnotationView from 'eterna/ui/AnnotationView';
 import AnnotationDialog from 'eterna/ui/AnnotationDialog';
-import {FederatedPointerEvent} from '@pixi/events';
 import {Move} from 'eterna/mode/PoseEdit/PoseEditMode';
 import Base from './Base';
 import BaseDrawFlags from './BaseDrawFlags';
