@@ -1,6 +1,6 @@
 import {
     Container, Graphics, Renderer, RenderTexture, Sprite,
-    BlurFilter, FXAAFilter
+    BlurFilter, BlurFilterOptions, Filter
 } from 'pixi.js';
 import ColorConvert from 'color-convert';
 import {
@@ -55,7 +55,11 @@ export default class BaseTextures {
         /** Size of largest body texture */
         const MAX_SIZE = 40;
 
-        const getBodyTex = (texSize: number, antialias: 'none' | 'fxaa' | 'blur' | 'blur-fxaa', blurSize = [1, 40]) => {
+        const getBodyTex = (
+            texSize: number,
+            antialias: 'none' | 'fxaa' | 'blur' | 'blur-fxaa',
+            blurOptions: BlurFilterOptions = {}
+        ) => {
             Assert.assertIsDefined(Eterna.app.pixi);
             /** Render the graphic this much larger then scale down */
             const UPSCALE = texSize / MAX_SIZE;
@@ -103,8 +107,12 @@ export default class BaseTextures {
             // For some reason, global antialiasing is insufficient.
             // Maybe once smooth-graphics supports texture fills that will make this unnecessary?
             body.filters = [];
-            if (antialias === 'blur' || antialias === 'blur-fxaa') body.filters.push(new BlurFilter(...blurSize));
-            if (antialias === 'fxaa' || antialias === 'blur-fxaa') body.filters.push(new FXAAFilter());
+            if (antialias === 'blur' || antialias === 'blur-fxaa') {
+                body.filters.push(new BlurFilter({
+                    strength: 1, quality: 40, antialias: antialias === 'blur-fxaa' ? 'on' : 'off', ...blurOptions
+                }));
+            }
+            if (antialias === 'fxaa' || antialias === 'blur-fxaa') body.filters.push(new Filter({antialias: 'on'}));
             // Center the body in the whitespace
             body.x = (texSize / 2) - (BASE_SIZE / 2);
             body.y = (texSize / 2) - (BASE_SIZE / 2);
@@ -120,7 +128,7 @@ export default class BaseTextures {
         // artifacting when downscaling all the way from 2^6, but 2^5 seems like the sweet spot.
         // Additionally, as we get smaller the fxaa and blur can create more artifacts than they solve
         const texSmASize = 2 ** 6;
-        const texSmA = getBodyTex(texSmASize, 'blur-fxaa', [4, 60]);
+        const texSmA = getBodyTex(texSmASize, 'blur-fxaa', {strength: 4, quality: 60});
         const texSmBSize = 2 ** 4;
         const texSmB = getBodyTex(texSmBSize, 'none');
 
@@ -188,7 +196,7 @@ export default class BaseTextures {
                 0.35
             ))
             .endFill();
-        lockBg.filters = [new BlurFilter(1, 40), new FXAAFilter()];
+        lockBg.filters = [new BlurFilter({strength: 1, quality: 40, antialias: 'on'})];
         lockWrapper.addChild(lockBg);
 
         const color = ColorUtil.blend(
@@ -200,8 +208,14 @@ export default class BaseTextures {
         lock.height = RENDER_SIZE * 0.65;
         lock.scale.x = lock.scale.y;
         lock.filters = [new ColorReplaceFilter(
-            [0, 0, 0],
-            [ColorUtil.getRed(color) / 255, ColorUtil.getGreen(color) / 255, ColorUtil.getBlue(color) / 255]
+            {
+                originalColor: [0, 0, 0],
+                targetColor: [
+                    ColorUtil.getRed(color) / 255,
+                    ColorUtil.getGreen(color) / 255,
+                    ColorUtil.getBlue(color) / 255
+                ]
+            }
         )];
         lockWrapper.addChild(lock);
         DisplayUtil.positionRelative(lock, HAlign.CENTER, VAlign.CENTER, lockBg, HAlign.CENTER, VAlign.CENTER);

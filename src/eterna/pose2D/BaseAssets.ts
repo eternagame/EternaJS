@@ -1,6 +1,6 @@
 import {
     Container, Graphics, Sprite, Texture,
-    FXAAFilter, BlurFilter, ColorMatrixFilter
+    BlurFilter, BlurFilterOptions, ColorMatrixFilter
 } from 'pixi.js';
 import {
     ColorUtil, TextureUtil
@@ -338,7 +338,11 @@ export default class BaseAssets {
         /** Size of largest glow */
         const MAX_SIZE = BaseTextures.BODY_SIZE + 6;
 
-        const getGlowTex = (renderSize: number, blurSize = [8, 16], alpha = 1.15) => {
+        const getGlowTex = (
+            renderSize: number,
+            blurOptions: BlurFilterOptions = {},
+            alpha = 1.15
+        ) => {
             const ringWrapper = new Container();
             const ringBg = new Graphics()
                 .beginFill(0)
@@ -353,7 +357,15 @@ export default class BaseAssets {
                 .lineStyle({color, width: 4})
                 .drawCircle(0, 0, renderSize / 4)
                 .endFill();
-            ring.filters = [new BlurFilter(...blurSize), new AdjustmentFilter({alpha}), new FXAAFilter()];
+            ring.filters = [
+                new BlurFilter({
+                    strength: 8,
+                    quality: 16,
+                    antialias: 'on',
+                    ...blurOptions
+                }),
+                new AdjustmentFilter({alpha})
+            ];
             // Center the ring in the larger texture
             ring.x = renderSize / 2;
             ring.y = renderSize / 2;
@@ -365,7 +377,7 @@ export default class BaseAssets {
         const texLgSize = 2 ** 7;
         const texLg = getGlowTex(texLgSize);
         const texSmSize = 2 ** 6;
-        const texSm = getGlowTex(texSmSize, [0.75, 4], 0.6);
+        const texSm = getGlowTex(texSmSize, {strength: 0.75, quality: 4}, 0.6);
 
         return [
             {texture: texLg, scale: (MAX_SIZE / texLgSize) * 2},
@@ -397,7 +409,7 @@ export default class BaseAssets {
         const lockTexSm = getLockTexture(texSizeSm);
 
         const tinyLock = new Graphics().beginFill(0x050505, 0.8).drawCircle(0, 0, 6);
-        tinyLock.filters = [new BlurFilter(2, 4), new FXAAFilter()];
+        tinyLock.filters = [new BlurFilter({strength: 2, quality: 4, antialias: 'on'})];
         const tinyLockTex = TextureUtil.renderToTexture(tinyLock);
 
         const maxSize = BaseTextures.BODY_SIZE - 6;
