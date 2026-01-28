@@ -95,11 +95,14 @@ export default class GameDropdown<Option extends string = string> extends Contai
         this.container.addChild(this._arrow);
         this._drawArrow();
 
-        this._selectedText = new Text('', {
-            fontSize: this._fontSize,
-            fontFamily: Fonts.STDFONT,
-            fill: this._textColor,
-            fontWeight: this._textWeight
+        this._selectedText = new Text({
+            text: '',
+            style: {
+                fontSize: this._fontSize,
+                fontFamily: Fonts.STDFONT,
+                fill: this._textColor,
+                fontWeight: this._textWeight
+            }
         });
 
         if (this.iconMap.size > 0) {
@@ -363,24 +366,24 @@ export default class GameDropdown<Option extends string = string> extends Contai
             height = this._fontSize + GameDropdown._VERTICAL_PADDING * 2;
         }
 
-        this._box.clear();
-        this._box.lineStyle(this._borderWidth, this._borderColor);
-        this._box.beginFill(this._boxColor, 1);
-        this._box.drawRoundedRect(0, 0, width, height, GameDropdown._BORDER_RADIUS);
-        this._box.endFill();
+        this._box
+            .clear()
+            .roundRect(0, 0, width, height, GameDropdown._BORDER_RADIUS)
+            .fill({color: this._boxColor, alpha: 1})
+            .stroke({width: this._borderWidth, color: this._borderColor});
     }
 
     private _drawArrow() {
         const ARROW_HEIGHT = (GameDropdown._ARROW_SIDE_SIZE * Math.sqrt(3)) / 3;
 
-        this._arrow.clear();
-        this._arrow.beginFill(this._textColor);
-        this._arrow.drawPolygon([
-            new Point(0, 0),
-            new Point(GameDropdown._ARROW_SIDE_SIZE, 0),
-            new Point(GameDropdown._ARROW_SIDE_SIZE / 2, ARROW_HEIGHT)
-        ]);
-        this._arrow.endFill();
+        this._arrow
+            .clear()
+            .poly([
+                new Point(0, 0),
+                new Point(GameDropdown._ARROW_SIDE_SIZE, 0),
+                new Point(GameDropdown._ARROW_SIDE_SIZE / 2, ARROW_HEIGHT)
+            ])
+            .fill(this._textColor);
     }
 
     public get height(): number {

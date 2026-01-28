@@ -17,29 +17,31 @@ export default class GameCheckbox extends ToggleButton {
         // breaks interactivity :( (PIXI bug?)
 
         this._box = new Graphics();
-        this._box.lineStyle(1, this._COLOR);
-        this._box.beginFill(0x0, 0.001);
         if (this._rounded) {
-            this._box.drawCircle(0, 0, this._size / 2);
+            this._box.circle(0, 0, this._size / 2);
         } else {
-            this._box.drawRect(0, 0, this._size, this._size);
+            this._box.rect(0, 0, this._size, this._size);
         }
+        this._box
+            .stroke({width: 1, color: this._COLOR})
+            .fill({color: 0x0, alpha: 0.001});
 
-        this._box.endFill();
         // box.cacheAsBitmap = true;
         this.container.addChild(this._box);
 
         this._check = new Graphics();
-        this._check.lineStyle(3.5, 0xFFFFFF);
         if (this._rounded) {
-            this._check.moveTo(0.3 * this._size - 12, 0.35 * this._size - 7);
-            this._check.lineTo(0.5 * this._size - 12, 0.6 * this._size - 7);
-            this._check.lineTo(this._size - 12, 0.1 * this._size - 7);
+            this._check
+                .moveTo(0.3 * this._size - 12, 0.35 * this._size - 7)
+                .lineTo(0.5 * this._size - 12, 0.6 * this._size - 7)
+                .lineTo(this._size - 12, 0.1 * this._size - 7);
         } else {
-            this._check.moveTo(0.3 * this._size - 3, 0.35 * this._size + 2);
-            this._check.lineTo(0.5 * this._size - 3, 0.6 * this._size + 2);
-            this._check.lineTo(this._size - 3, 0.1 * this._size + 2);
+            this._check
+                .moveTo(0.3 * this._size - 3, 0.35 * this._size + 2)
+                .lineTo(0.5 * this._size - 3, 0.6 * this._size + 2)
+                .lineTo(this._size - 3, 0.1 * this._size + 2);
         }
+        this._check.stroke({width: 3.5, color: 0xffffff});
         // this._check.cacheAsBitmap = true;
         this._check.visible = false;
         this.container.addChild(this._check);
@@ -58,19 +60,18 @@ export default class GameCheckbox extends ToggleButton {
         this._check.visible = this.toggled.value;
 
         this._box.clear();
-        this._box.lineStyle(1, this._COLOR);
-        if (this.enabled && (this.toggled.value || _state)) {
-            this._box.beginFill(this._COLOR, 1);
+        if (this._rounded) {
+            this._box.circle(0, 0, this._size / 2);
         } else {
-            this._box.beginFill(0x0, 0.001);
+            this._box.rect(0, 0, this._size, this._size);
         }
 
-        if (this._rounded) {
-            this._box.drawCircle(0, 0, this._size / 2);
+        this._box.stroke({width: 1, color: this._COLOR});
+        if (this.enabled && (this.toggled.value || _state)) {
+            this._box.fill({color: this._COLOR, alpha: 1});
         } else {
-            this._box.drawRect(0, 0, this._size, this._size);
+            this._box.fill({color: 0x0, alpha: 0.001});
         }
-        this._box.endFill();
     }
 
     private readonly _check: Graphics;

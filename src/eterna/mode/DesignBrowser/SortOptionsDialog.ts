@@ -40,9 +40,8 @@ export default class SortOptionsDialog extends WindowDialog<void> {
 
         const criterionContainer = new Container();
         criterionContainer.addChild(new Graphics()
-            .beginFill(0x043468)
-            .drawRoundedRect(0, -6, 334, 33, 6)
-            .endFill());
+            .roundRect(0, -6, 334, 33, 6)
+            .fill(0x043468));
         criterionContainer.addChild(addCriterionLayout);
         this._content.addChild(criterionContainer);
 
@@ -122,9 +121,9 @@ export default class SortOptionsDialog extends WindowDialog<void> {
 
         // Separator line
         ui.container.addChild(new Graphics()
-            .lineStyle(1, 0x4A90E2)
             .moveTo(8, 24)
-            .lineTo(336, 24));
+            .lineTo(336, 24)
+            .stroke({width: 1, color: 0x4A90E2}));
     }
 
     private addCriteria(category: DesignCategory, order: SortOrder, args?: string): void {

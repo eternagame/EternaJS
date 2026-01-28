@@ -1,10 +1,11 @@
 import log from 'loglevel';
 import {Glyphs} from 'pixi-glyphs';
 import type {TextStyleExtended, TextStyleSet} from 'pixi-glyphs/dist/types';
+import {TextStyleOptions} from 'pixi.js';
 import ColorUtil from './ColorUtil';
 
 export default class StyledTextBuilder {
-    constructor(defaultStyle?: TextStyleExtended) {
+    constructor(defaultStyle?: TextStyleExtended | TextStyleOptions) {
         if (defaultStyle !== undefined) {
             this.defaultStyle(defaultStyle);
         }
@@ -33,11 +34,11 @@ export default class StyledTextBuilder {
         textField.setTagStyles(this.cloneStyles());
     }
 
-    public defaultStyle(style: TextStyleExtended): this {
+    public defaultStyle(style: TextStyleExtended | TextStyleOptions): this {
         return this.addStyle('default', style);
     }
 
-    public addStyle(name: string, style: TextStyleExtended): this {
+    public addStyle(name: string, style: TextStyleExtended | TextStyleOptions): this {
         if (this._styles[name] != null) {
             log.warn(`Redefining existing style '${name}'`);
         }

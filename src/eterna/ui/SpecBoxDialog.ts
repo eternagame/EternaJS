@@ -5,6 +5,7 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
 import Fonts from 'eterna/util/Fonts';
 import {
+    Assert,
     DisplayObjectPointerTarget, DisplayUtil, Dragger, HAlign, HLayoutContainer, InputUtil,
     KeyCode, MathUtil, StyledTextBuilder, TextUtil, VAlign, VLayoutContainer
 } from 'flashbang';
@@ -321,13 +322,14 @@ export default class SpecBoxDialog extends WindowDialog<void> {
             this._coordBalloon = new TextBalloon(msg, 0x0, 0.8);
             this.addObject(this._coordBalloon, this._window.content);
         }
+        Assert.assertIsDefined(this._coordBalloon.display.parent);
         this._coordBalloon.display.position = this._coordBalloon.display.parent.toLocal(e.global);
     }
 
     private redrawDotPlot(size: number, scale: number) {
         const scaledSize = size * scale;
         this._dotPlot.setSize(scaledSize, scaledSize);
-        this._dotPlotMask.clear().beginFill(0).drawRect(0, 0, size + 1, size + 1).endFill();
+        this._dotPlotMask.clear().rect(0, 0, size + 1, size + 1).fill(0);
         this._dotPlot.replot();
     }
 

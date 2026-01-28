@@ -235,13 +235,14 @@ export default class HighlightBox extends GraphicsObject implements LateUpdatabl
             const lineThickness = this._type === HighlightType.ANNOTATION
                 ? HighlightBox.ANNOTATION_LINE_THICKNESS
                 : HighlightBox.STANDARD_LINE_THICKNESS;
-            this._graphics.lineStyle(lineThickness, color, 0.7);
-            this._graphics.drawRoundedRect(
-                minX - baseSize,
-                minY - baseSize,
-                maxX - minX + 2 * baseSize,
-                maxY - minY + 2 * baseSize, 10
-            );
+            this._graphics
+                .roundRect(
+                    minX - baseSize,
+                    minY - baseSize,
+                    maxX - minX + 2 * baseSize,
+                    maxY - minY + 2 * baseSize, 10
+                )
+                .stroke({width: lineThickness, color, alpha: 0.7});
         }
     }
 
@@ -311,10 +312,6 @@ export default class HighlightBox extends GraphicsObject implements LateUpdatabl
             const lineThickness = this._type === HighlightType.ANNOTATION
                 ? HighlightBox.ANNOTATION_LINE_THICKNESS
                 : HighlightBox.STANDARD_LINE_THICKNESS;
-            this._graphics.lineStyle(lineThickness, _color, 0.7);
-            if (this._type === HighlightType.ANNOTATION) {
-                this._graphics.beginFill(HighlightBox.ANNOTATION_COLOR, 0.3);
-            }
             this._graphics.moveTo(
                 loopStartLoc.x + loopStartAxis.x * baseSize - startFrom.x * baseSize,
                 loopStartLoc.y + loopStartAxis.y * baseSize - startFrom.y * baseSize
@@ -354,8 +351,9 @@ export default class HighlightBox extends GraphicsObject implements LateUpdatabl
                     loopStartLoc.y + loopStartAxis.y * baseSize - startFrom.y * baseSize
                 );
 
+                this._graphics.stroke({width: lineThickness, color: _color, alpha: 0.7});
                 if (this._type === HighlightType.ANNOTATION) {
-                    this._graphics.endFill();
+                    this._graphics.fill({color: HighlightBox.ANNOTATION_COLOR, alpha: 0.3});
                 }
             }
         }

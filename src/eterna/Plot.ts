@@ -69,55 +69,58 @@ export default class Plot extends Container {
         const horizontalSpace: number = this._width / this._numBases;
         const verticalSpace: number = this._height / this._numBases;
 
-        this._graphics.clear();
-        this._graphics.lineStyle(1, 0);
-        this._graphics.beginFill(0xFFFFFF);
-        this._graphics.drawRect(0, 0, this._width, this._height);
-        this._graphics.endFill();
+        this._graphics
+            .clear()
+            .rect(0, 0, this._width, this._height)
+            .fill(0xFFFFFF)
+            .stroke({width: 1, color: 0});
 
         if (this.type === PlotType.BAR) {
-            this._graphics.lineStyle(0, 0xFFFFFF);
             Assert.assertIsDefined(this._data);
             Assert.assertIsDefined(this._upperBounds);
             for (let ii = 0; ii < this._data.length; ii++) {
                 const len: number = (this._data[ii] / this._upperBounds[ii]) * this._height;
 
                 if (this._ghostData == null) {
-                    this._graphics.beginFill(0x00AA00);
-                    this._graphics.drawRect(
-                        Plot.W_MARGIN + (ii + 1) * horizontalSpace - horizontalSpace / 2.0,
-                        Plot.H_MARGIN + this._height - len, horizontalSpace / 2.0, len
-                    );
+                    this._graphics
+                        .rect(
+                            Plot.W_MARGIN + (ii + 1) * horizontalSpace - horizontalSpace / 2.0,
+                            Plot.H_MARGIN + this._height - len, horizontalSpace / 2.0, len
+                        )
+                        .fill(0x00AA00);
                 } else {
                     const ghostlen: number = (this._ghostData[ii] / this._upperBounds[ii]) * this._height;
-                    this._graphics.beginFill(0x00AA00);
-                    this._graphics.drawRect(
-                        Plot.W_MARGIN + (ii + 1) * horizontalSpace - horizontalSpace / 2.0,
-                        Plot.H_MARGIN + this._height - len, horizontalSpace / 4.0, len
-                    );
-                    this._graphics.beginFill(0xAA0000);
-                    this._graphics.drawRect(
-                        Plot.W_MARGIN + (ii + 1) * horizontalSpace - horizontalSpace / 4.0,
-                        Plot.H_MARGIN + this._height - ghostlen, horizontalSpace / 4.0, ghostlen
-                    );
+                    this._graphics
+                        .rect(
+                            Plot.W_MARGIN + (ii + 1) * horizontalSpace - horizontalSpace / 2.0,
+                            Plot.H_MARGIN + this._height - len, horizontalSpace / 4.0, len
+                        )
+                        .fill(0x00AA00)
+                        .rect(
+                            Plot.W_MARGIN + (ii + 1) * horizontalSpace - horizontalSpace / 4.0,
+                            Plot.H_MARGIN + this._height - ghostlen, horizontalSpace / 4.0, ghostlen
+                        )
+                        .fill(0xAA0000);
                 }
             }
+            this._graphics.stroke({width: 0, color: 0xffffff});
         } else if (this.type === PlotType.LINE) {
-            this._graphics.lineStyle(1, 0xAAAAAA, 1);
             Assert.assertIsDefined(this._data);
             for (let ii = 0; ii < this._data.length; ii++) {
                 const xCoord = Plot.W_MARGIN + (ii + 1) * horizontalSpace - horizontalSpace / 2.0 + x;
-                this._graphics.moveTo(xCoord, 0);
-                this._graphics.lineTo(xCoord, this._height);
+                this._graphics
+                    .moveTo(xCoord, 0)
+                    .lineTo(xCoord, this._height);
             }
 
             for (let ii = 0; ii < 10; ii++) {
                 const yCoord = (ii / 10) * (this._height - Plot.H_MARGIN) + y;
-                this._graphics.moveTo(0, yCoord + Plot.H_MARGIN);
-                this._graphics.lineTo(this._width, yCoord + Plot.H_MARGIN);
+                this._graphics
+                    .moveTo(0, yCoord + Plot.H_MARGIN)
+                    .lineTo(this._width, yCoord + Plot.H_MARGIN);
             }
+            this._graphics.stroke({width: 1, color: 0xaaaaaa, alpha: 1});
 
-            this._graphics.lineStyle(2, 0x00AA00);
             Assert.assertIsDefined(this._upperBounds);
             for (let ii = 0; ii < this._data.length; ii++) {
                 const hlen: number = (this._data[ii] / (this._upperBounds[ii])) * (this._height - Plot.H_MARGIN);
@@ -133,9 +136,9 @@ export default class Plot extends Container {
                     );
                 }
             }
+            this._graphics.stroke({width: 2, color: 0x00aa00});
 
             if (this._ghostData != null) {
-                this._graphics.lineStyle(2, 0xAA0000);
                 for (let ii = 0; ii < this._ghostData.length; ii++) {
                     const ghosthlen: number = (this._ghostData[ii] / this._upperBounds[ii]) * this._height;
                     if (ii === 0) {
@@ -150,19 +153,22 @@ export default class Plot extends Container {
                         );
                     }
                 }
+                this._graphics.stroke({width: 2, color: 0xaa0000});
             }
         } else if (this.type === PlotType.SCATTER) {
-            this._graphics.lineStyle(1, 0xAAAAAA, 1);
             for (let ii = 10; ii < this._numBases; ii += 10) {
                 const xCoord = (ii / this._numBases) * this._width + x;
                 const yCoord = (ii / this._numBases) * this._height + y;
 
-                this._graphics.moveTo(xCoord, 0);
-                this._graphics.lineTo(xCoord, this._height);
+                this._graphics
+                    .moveTo(xCoord, 0)
+                    .lineTo(xCoord, this._height);
 
-                this._graphics.moveTo(0, yCoord);
-                this._graphics.lineTo(this._width, yCoord);
+                this._graphics
+                    .moveTo(0, yCoord)
+                    .lineTo(this._width, yCoord);
             }
+            this._graphics.stroke({width: 1, color: 0xAAAAAA, alpha: 1});
 
             for (let ii = 0; ii < this._data2D.length; ii += 3) {
                 const xCoord = ((this._data2D[ii + 1])) * horizontalSpace + x;
@@ -180,19 +186,21 @@ export default class Plot extends Container {
 
                 const probColor: number = ColorUtil.compose(probR, probG, probB);
 
-                this._graphics.lineStyle(0, 0, 0);
-                this._graphics.beginFill(probColor);
-                this._graphics.drawRect(xCoord, yCoord, horizontalSpace, verticalSpace);
-                this._graphics.endFill();
+                this._graphics
+                    .rect(xCoord, yCoord, horizontalSpace, verticalSpace)
+                    .fill(probColor)
+                    .stroke({width: 0, color: 0, alpha: 0});
             }
 
-            this._graphics.lineStyle(1, 0);
-            this._graphics.moveTo(0, 0);
-            this._graphics.lineTo(this._width, this._height);
+            this._graphics
+                .moveTo(0, 0)
+                .lineTo(this._width, this._height)
+                .stroke({width: 1, color: 0});
         }
 
-        this._graphics.lineStyle(1, 0);
-        this._graphics.drawRect(0, 0, this._width, this._height);
+        this._graphics
+            .rect(0, 0, this._width, this._height)
+            .stroke({width: 1, color: 0});
 
         if (this._labelFields != null) {
             for (const label of this._labelFields) {

@@ -1,4 +1,4 @@
-import {DisplayObject} from 'pixi.js';
+import {Container} from 'pixi.js';
 import {EasingFunc} from 'flashbang/util/Easing';
 import {Assert} from 'flashbang';
 import DisplayObjectTask from './DisplayObjectTask';
@@ -6,7 +6,7 @@ import DisplayObjectTask from './DisplayObjectTask';
 export default class RotationTask extends DisplayObjectTask {
     constructor(
         radians: number, time: number = 0, easingFn: EasingFunc | null = null,
-        target: DisplayObject | null = null
+        target: Container | null = null
     ) {
         super(time, easingFn, target);
         this._to = radians;

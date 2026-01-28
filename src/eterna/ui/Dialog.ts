@@ -155,9 +155,8 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
             Assert.assertIsDefined(Flashbang.stageWidth);
             Assert.assertIsDefined(Flashbang.stageHeight);
             bg.clear()
-                .beginFill(0x0)
-                .drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
-                .endFill();
+                .rect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
+                .fill(0x0);
             bg.alpha = this.bgAlpha;
             htmlOverlay.width = Flashbang.stageWidth;
             htmlOverlay.height = Flashbang.stageHeight;

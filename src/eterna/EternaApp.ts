@@ -1,51 +1,63 @@
 import 'assets/Styles/styles.css'; // css-loader will pick up on this and embed our stylesheet
-import {settings, Application, utils} from 'pixi.js';
-import log from 'loglevel';
-import {
-    FlashbangApp, SaveGameManager, TextureUtil, ErrorUtil, Flashbang, Assert,
-    ElementSignal
-} from 'flashbang';
 import ChatManager from 'eterna/ChatManager';
 import Eterna from 'eterna/Eterna';
+import {
+    Assert,
+    ElementSignal,
+    ErrorUtil,
+    Flashbang,
+    FlashbangApp,
+    SaveGameManager,
+    TextureUtil
+} from 'flashbang';
 import {SaveStoreItem} from 'flashbang/settings/SaveGameManager';
-import DesignBrowserMode, {DesignBrowserFilter} from './mode/DesignBrowser/DesignBrowserMode';
-import ExternalInterface, {ExternalInterfaceCtx} from './util/ExternalInterface';
-import EternaSettings from './settings/EternaSettings';
-import GameClient from './net/GameClient';
-import Bitmaps from './resources/Bitmaps';
+import log from 'loglevel';
+import {
+    AbstractRenderer,
+    Application,
+    Cache,
+    Renderer,
+    isWebGLSupported
+} from 'pixi.js';
 import TestMode from './debug/TestMode';
-import Puzzle from './puzzle/Puzzle';
-import PoseEditMode, {PoseEditParams} from './mode/PoseEdit/PoseEditMode';
-import PuzzleEditMode from './mode/PuzzleEdit/PuzzleEditMode';
-import FeedbackViewMode from './mode/FeedbackViewMode';
-import Solution from './puzzle/Solution';
-import PuzzleManager from './puzzle/PuzzleManager';
-import SolutionManager from './puzzle/SolutionManager';
-import LoadingMode from './mode/LoadingMode';
-import Vienna from './folding/Vienna';
-import Vienna2 from './folding/Vienna2';
-import NuPACK from './folding/NuPACK';
 import Contrafold from './folding/Contrafold';
 import EternaFold from './folding/Eternafold';
 import EternaFoldThreshknot from './folding/EternafoldThreshknot';
-import RNAFoldBasic from './folding/RNAFoldBasic';
+import Folder from './folding/Folder';
 import FolderManager from './folding/FolderManager';
-import LayoutEngineManager from './layout/LayoutEngineManager';
-import LayoutEngine from './layout/LayoutEngine';
-import RNApuzzler from './layout/RNApuzzler';
 import LinearFoldC from './folding/LinearFoldC';
 import LinearFoldE from './folding/LinearFoldE';
 import LinearFoldV from './folding/LinearFoldV';
-import Folder from './folding/Folder';
-import RSignals from './rscript/RSignals';
-import Fonts from './util/Fonts';
-import BaseAssets from './pose2D/BaseAssets';
-import BitmapManager from './resources/BitmapManager';
-import ROPWait from './rscript/ROPWait';
-import Band from './ui/Band';
-import BaseGlow from './vfx/BaseGlow';
+import NuPACK from './folding/NuPACK';
+import RNAFoldBasic from './folding/RNAFoldBasic';
 import RNet from './folding/RNet';
+import Vienna from './folding/Vienna';
+import Vienna2 from './folding/Vienna2';
+import LayoutEngine from './layout/LayoutEngine';
+import LayoutEngineManager from './layout/LayoutEngineManager';
+import RNApuzzler from './layout/RNApuzzler';
+import DesignBrowserMode, {DesignBrowserFilter} from './mode/DesignBrowser/DesignBrowserMode';
+import FeedbackViewMode from './mode/FeedbackViewMode';
+import LoadingMode from './mode/LoadingMode';
+import PoseEditMode, {PoseEditParams} from './mode/PoseEdit/PoseEditMode';
+import PuzzleEditMode from './mode/PuzzleEdit/PuzzleEditMode';
+import GameClient from './net/GameClient';
 import ObservabilityManager from './observability/ObservabilityManager';
+import BaseAssets from './pose2D/BaseAssets';
+import Puzzle from './puzzle/Puzzle';
+import PuzzleManager from './puzzle/PuzzleManager';
+import Solution from './puzzle/Solution';
+import SolutionManager from './puzzle/SolutionManager';
+import BitmapManager from './resources/BitmapManager';
+import Bitmaps from './resources/Bitmaps';
+import ROPWait from './rscript/ROPWait';
+import RSignals from './rscript/RSignals';
+import EternaSettings from './settings/EternaSettings';
+import Band from './ui/Band';
+import ExternalInterface, {ExternalInterfaceCtx} from './util/ExternalInterface';
+import Fonts from './util/Fonts';
+import LegacyPatchUtil from './util/LegacyPatchUtil';
+import BaseGlow from './vfx/BaseGlow';
 
 export enum PuzzleID {
     FunAndEasy = 4350940,
@@ -176,9 +188,10 @@ export default class EternaApp extends FlashbangApp {
         RSignals.popPuzzle.connect(() => this._modeStack.popMode());
     }
 
-    public run(): void {
+    public async run(): Promise<void> {
+        LegacyPatchUtil.patchModifiedPrototypes();
         const wasmError = typeof WebAssembly === 'object' ? '' : 'WebAssembly';
-        const webGLError = utils.isWebGLSupported() ? '' : 'WebGL';
+        const webGLError = isWebGLSupported() ? '' : 'WebGL';
         const unsupported = wasmError || webGLError;
         if (unsupported) {
             const errorEl = document.createElement('div');
@@ -199,7 +212,7 @@ export default class EternaApp extends FlashbangApp {
             Assert.assertIsDefined(eternaContainer);
             eternaContainer.appendChild(errorEl);
         } else {
-            super.run();
+            await super.run();
         }
     }
 
@@ -275,8 +288,11 @@ export default class EternaApp extends FlashbangApp {
                         if (this._params.solutionID === undefined) {
                             throw new Error("Can't load the solution app mode with an undefined Solution ID!");
                         }
-                        return this.loadSolutionViewer(this._params.puzzleID, this._params.solutionID,
-                            this._params.mode === InitialAppMode.SOLUTION_COPY_AND_VIEW);
+                        return this.loadSolutionViewer(
+                            this._params.puzzleID,
+                            this._params.solutionID,
+                            this._params.mode === InitialAppMode.SOLUTION_COPY_AND_VIEW
+                        );
                     case InitialAppMode.DESIGN_BROWSER:
                         if (this._params.puzzleID === undefined) {
                             throw new Error("Can't load the design browser with an undefined Puzzle ID!");
@@ -310,7 +326,7 @@ export default class EternaApp extends FlashbangApp {
         Band.dispose();
         ROPWait.dispose();
         BaseGlow.dispose();
-        utils.destroyTextureCache();
+        Cache.reset();
     }
 
     /** Creates a PoseEditMode and removes all other modes from the stack */
@@ -326,7 +342,7 @@ export default class EternaApp extends FlashbangApp {
             throw new Error("puzzleEditNumTargets can't be undefined here!");
         }
         const initPoseData = initialPoseData
-            || await Eterna.saveManager.load(PuzzleEditMode.savedDataTokenName(this._params.puzzleEditNumTargets))
+            || (await Eterna.saveManager.load(PuzzleEditMode.savedDataTokenName(this._params.puzzleEditNumTargets)))
             || undefined;
         this._modeStack.unwindToMode(new PuzzleEditMode(false, numTargets, initPoseData));
         return Promise.resolve();
@@ -362,7 +378,7 @@ export default class EternaApp extends FlashbangApp {
         solution?: Solution,
         sortOnSolution: boolean = false
     ): Promise<void> {
-        const puzzleID = (puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID);
+        const puzzleID = puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID;
         Assert.assertIsDefined(this.modeStack.modes);
         const existingBrowser = this.modeStack.modes.find(
             (mode) => mode instanceof DesignBrowserMode
@@ -393,9 +409,11 @@ export default class EternaApp extends FlashbangApp {
      * retaining any existing modes.
      */
     public switchToPoseEdit(
-        puzzleOrID: number | Puzzle, canSwitchToExisting: boolean, params: PoseEditParams = {}
+        puzzleOrID: number | Puzzle,
+        canSwitchToExisting: boolean,
+        params: PoseEditParams = {}
     ): Promise<void> {
-        const puzzleID = (puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID);
+        const puzzleID = puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID;
         const existingPoseEdit = this.existingPoseEditMode;
         if (existingPoseEdit != null && canSwitchToExisting && existingPoseEdit.puzzleID === puzzleID) {
             this.modeStack.setModeIndex(existingPoseEdit, -1);
@@ -416,8 +434,8 @@ export default class EternaApp extends FlashbangApp {
         solutionOrID: number | Solution,
         solutions?: Solution[]
     ): Promise<void> {
-        const puzzleID = (puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID);
-        const solutionID = (solutionOrID instanceof Solution ? solutionOrID.nodeID : solutionOrID);
+        const puzzleID = puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID;
+        const solutionID = solutionOrID instanceof Solution ? solutionOrID.nodeID : solutionOrID;
 
         Assert.assertIsDefined(this.modeStack.modes);
         const existingMode = this.modeStack.modes.find((mode) => mode instanceof FeedbackViewMode) as FeedbackViewMode;
@@ -446,10 +464,10 @@ export default class EternaApp extends FlashbangApp {
         solutionOrID: number | Solution,
         solutionList?: Solution[]
     ): Promise<[Puzzle, Solution, Solution[]]> {
-        const puzzleID = (puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID);
-        const solutionID = (solutionOrID instanceof Solution ? solutionOrID.nodeID : solutionOrID);
+        const puzzleID = puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID;
+        const solutionID = solutionOrID instanceof Solution ? solutionOrID.nodeID : solutionOrID;
 
-        const puzzlePromise: Promise<Puzzle> = (puzzleOrID instanceof Puzzle)
+        const puzzlePromise: Promise<Puzzle> = puzzleOrID instanceof Puzzle
             ? Promise.resolve(puzzleOrID)
             : PuzzleManager.instance.getPuzzleByID(puzzleOrID);
 
@@ -457,7 +475,7 @@ export default class EternaApp extends FlashbangApp {
             ? Promise.resolve(solutionList)
             : SolutionManager.instance.getSolutionsForPuzzle(puzzleID);
 
-        const solutionPromise: Promise<Solution> = (solutionOrID instanceof Solution)
+        const solutionPromise: Promise<Solution> = solutionOrID instanceof Solution
             ? Promise.resolve(solutionOrID)
             : solutionsPromise
                 .then((solutions) => {
@@ -494,7 +512,7 @@ export default class EternaApp extends FlashbangApp {
     protected onKeyboardEvent(e: KeyboardEvent): void {
         // if a form element is focused, don't trigger hotkeys
         const selected = document.body.querySelectorAll(':focus')[0];
-        if (selected && (['INPUT', 'TEXTAREA', 'OPTION', 'SELECT', 'BUTTON'].includes(selected.tagName))) return;
+        if (selected && ['INPUT', 'TEXTAREA', 'OPTION', 'SELECT', 'BUTTON'].includes(selected.tagName)) return;
 
         super.onKeyboardEvent(e);
     }
@@ -508,7 +526,7 @@ export default class EternaApp extends FlashbangApp {
         }
     }
 
-    protected createPixi(): Application<HTMLCanvasElement> {
+    protected async createPixi(): Promise<Application<Renderer<HTMLCanvasElement>>> {
         // When roundPixels is true, the renderer floor()s pixel locations
         // to avoid pixel interpolation. This makes our text look much better,
         // though slow movement animation will end up looking a bit worse.
@@ -516,9 +534,10 @@ export default class EternaApp extends FlashbangApp {
         // We've disabled this on specific display objects where it makes sense
         // (namely base graphics and bubbles)
 
-        settings.ROUND_PIXELS = true;
+        AbstractRenderer.defaultOptions.roundPixels = true;
 
-        const app = new Application<HTMLCanvasElement>({
+        const app = new Application<Renderer<HTMLCanvasElement>>();
+        await app.init({
             width: this._params.width,
             height: this._params.height,
             backgroundColor: 0x0,
@@ -528,7 +547,9 @@ export default class EternaApp extends FlashbangApp {
             // XREF https://github.com/eternagame/EternaJS/issues/634
             antialias: !window.navigator.userAgent.match(/iPhone OS 15_4/),
             autoDensity: true,
-            resolution: devicePixelRatio
+            resolution: devicePixelRatio,
+            // Maintain renderer type from pixi.js before v8
+            preference: 'webgl'
         });
 
         // So we can use https://github.com/bfanger/pixi-inspector
@@ -604,15 +625,15 @@ export default class EternaApp extends FlashbangApp {
             EternaFold.create(),
             EternaFoldThreshknot.create(),
             RNet.create(),
-            RNAFoldBasic.create()])
-            .then((folders: (Folder | null)[]) => {
-                log.info('Folding engines intialized');
-                for (const folder of folders) {
-                    if (folder !== null) {
-                        FolderManager.instance.addFolder(folder);
-                    }
+            RNAFoldBasic.create()
+        ]).then((folders: (Folder | null)[]) => {
+            log.info('Folding engines intialized');
+            for (const folder of folders) {
+                if (folder !== null) {
+                    FolderManager.instance.addFolder(folder);
                 }
-            });
+            }
+        });
     }
 
     private initLayoutEngines(): Promise<void> {

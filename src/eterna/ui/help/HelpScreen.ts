@@ -218,10 +218,10 @@ export default class HelpScreen extends AppMode {
 
     private drawBackDrop() {
         this._backdrop.clear();
-        this._backdrop.beginFill(0, 0.4);
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
-        this._backdrop.drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight);
-        this._backdrop.endFill();
+        this._backdrop
+            .rect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
+            .fill({color: 0, alpha: 0.4});
     }
 }

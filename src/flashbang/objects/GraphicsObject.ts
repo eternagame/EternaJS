@@ -7,6 +7,6 @@ export default class GraphicsObject extends SceneObject<Graphics> {
         class GraphicsObjectGraphics extends Graphics {}
         super(sprite || new GraphicsObjectGraphics());
         // Convenience so that the flashbang class name shows in the Pixi devtools
-        Object.defineProperty(GraphicsObjectGraphics, 'name', {value: this.constructor.name});
+        Object.defineProperty(GraphicsObjectGraphics, 'label', {value: this.constructor.name});
     }
 }

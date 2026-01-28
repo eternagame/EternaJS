@@ -1,12 +1,12 @@
 import log from 'loglevel';
-import {Container, DisplayObject} from 'pixi.js';
+import {Container} from 'pixi.js';
 import Assert from 'flashbang/util/Assert';
 import GameObjectBase from './GameObjectBase';
 import GameObjectRef from './GameObjectRef';
 
 export default class GameObject extends GameObjectBase {
     /** The DisplayObject that this GameObject manages, if any */
-    public get display(): DisplayObject | null {
+    public get display(): Container | null {
         return null;
     }
 
@@ -230,7 +230,8 @@ export default class GameObject extends GameObjectBase {
                     log.warn('GameObject.display.destroy blew up', e);
                 }
             } else {
-                this.display.destroy();
+                // Should never reach this point since DisplayObject was removed in `pixi.js` v8
+                log.warn('Unhandled display instance type');
             }
         }
 

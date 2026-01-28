@@ -1,4 +1,4 @@
-import {DisplayObject, Graphics, Point} from 'pixi.js';
+import {Container, Graphics, Point} from 'pixi.js';
 import {
     GameObject, LateUpdatable, Arrays
 } from 'flashbang';
@@ -15,7 +15,7 @@ export default class BaseRope extends GameObject implements LateUpdatable {
         this._enabled = false;
     }
 
-    public get display(): DisplayObject {
+    public get display(): Container {
         return this._graphics;
     }
 
@@ -39,7 +39,7 @@ export default class BaseRope extends GameObject implements LateUpdatable {
     public redraw(forceBaseXY: boolean): void {
         if (!this._enabled) {
             // clear if not cleared.
-            if (this._graphics.geometry.points.length > 0) this._graphics.clear();
+            if (this._graphics.context.instructions.length > 0) this._graphics.clear();
             return;
         }
 
@@ -67,7 +67,7 @@ export default class BaseRope extends GameObject implements LateUpdatable {
         // We can only draw a rope when there is more than one point
         const validRopes = ropes.filter((rope) => rope[0].length > 1);
 
-        if (Arrays.deepEqual(validRopes, this._lastRopes) && this._graphics.geometry.points.length > 0) {
+        if (Arrays.deepEqual(validRopes, this._lastRopes) && this._graphics.context.instructions.length > 0) {
             // base positions haven't changed, and baseRope has not been cleared,
             // so no need to update -- just return.
             return;
@@ -94,12 +94,12 @@ export default class BaseRope extends GameObject implements LateUpdatable {
         const interpBasePosXY = this.updateInterpBasePos(basePosX, basePosY);
 
         const OUTER_ROPE_THICKNESS: number = 0.30 * Pose2D.ZOOM_SPACINGS[this._pose.zoomLevel];
-        this._graphics.lineStyle(OUTER_ROPE_THICKNESS, 0x777777, 0.2);
         this.drawBaseRopeLine(interpBasePosXY, basePosX[0], basePosY[0]);
+        this._graphics.stroke({width: OUTER_ROPE_THICKNESS, color: 0x777777, alpha: 0.2});
 
         const INNER_ROPE_THICKNESS: number = 0.25 * Pose2D.ZOOM_SPACINGS[this._pose.zoomLevel];
-        this._graphics.lineStyle(INNER_ROPE_THICKNESS, 0xE8E8E8, 0.2);
         this.drawBaseRopeLine(interpBasePosXY, basePosX[0], basePosY[0]);
+        this._graphics.stroke({width: INNER_ROPE_THICKNESS, color: 0xE8E8E8, alpha: 0.2});
     }
 
     private drawBaseRopeLine(interpBasePosXY: [number, number][], startX: number, startY: number): void {

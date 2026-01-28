@@ -46,7 +46,7 @@ export default class ErrorDialogMode extends AppMode {
         // The extra containers and graphics objects are so that we can left align all the text,
         // left align the intro and trailer, but center the bounds of the error text itself
         const introContainer = new Container();
-        const introBg = new Graphics().beginFill(0).drawRect(0, 0, 350, 1);
+        const introBg = new Graphics().rect(0, 0, 350, 1).fill(0);
         introBg.alpha = 0;
         introContainer.addChild(introBg);
         introContainer.addChild(Fonts.std('', 15)
@@ -63,7 +63,7 @@ export default class ErrorDialogMode extends AppMode {
             .build());
 
         const trailerContainer = new Container();
-        const trailerBg = new Graphics().beginFill(0).drawRect(0, 0, 350, 1);
+        const trailerBg = new Graphics().rect(0, 0, 350, 1).fill(0);
         trailerBg.alpha = 0;
         trailerContainer.addChild(trailerBg);
         trailerContainer.addChild(Fonts.std('', 15)
@@ -102,9 +102,8 @@ export default class ErrorDialogMode extends AppMode {
             Assert.assertIsDefined(Flashbang.stageWidth);
             Assert.assertIsDefined(Flashbang.stageHeight);
             bg.clear()
-                .beginFill(0x0, 0.7)
-                .drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
-                .endFill();
+                .rect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
+                .fill({color: 0x0, alpha: 0.7});
         };
 
         updateView();

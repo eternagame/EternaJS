@@ -252,9 +252,10 @@ export default class Base extends ContainerObject implements LateUpdatable {
 
         const angle = (Math.PI * 2) / colors.length;
         colors.forEach((sectionColor, colorIndex) => {
-            this._markers.lineStyle(1, sectionColor);
-            this._markers.arc(0, 0, 1 / Base.MARKER_THICKNESS,
-                colorIndex * angle, (colorIndex + 1) * angle);
+            this._markers
+                .arc(0, 0, 1 / Base.MARKER_THICKNESS,
+                    colorIndex * angle, (colorIndex + 1) * angle)
+                .stroke({width: 1, color: sectionColor});
         });
         this._markers.visible = true;
     }

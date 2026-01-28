@@ -44,33 +44,33 @@ export default class GameButton extends Button implements KeyboardListener {
         this.needsRedraw();
     }
 
-    public up(display: Container | Texture | string| undefined): GameButton {
+    public up(display: Container | Texture | string): this {
         return this.setIconForState(ButtonState.UP, display);
     }
 
-    public over(display: Container | Texture | string| undefined): GameButton {
+    public over(display: Container | Texture | string): this {
         return this.setIconForState(ButtonState.OVER, display);
     }
 
-    public down(display: Container | Texture | string| undefined): GameButton {
+    public down(display: Container | Texture | string): this {
         return this.setIconForState(ButtonState.DOWN, display);
     }
 
-    public disabled(display?: Container | Texture | string): GameButton {
+    public disabled(display: Container | Texture | string): this {
         return this.setIconForState(ButtonState.DISABLED, display);
     }
 
-    /** Sets a single DisplayObect for all states */
-    public allStates(display: Container | Texture | string| undefined): GameButton {
+    /** Sets a single DisplayObject for all states */
+    public allStates(display: Container | Texture | string): this {
         return this.up(display).over(display).down(display).disabled(display);
     }
 
-    public selected(display: Container | Texture | string): GameButton {
+    public selected(display: Container | Texture | string): this {
         this._selectedState = GameButton.getDisplayObject(display);
         return this;
     }
 
-    public rscriptID(value: RScriptUIElementID): GameButton {
+    public rscriptID(value: RScriptUIElementID): this {
         if (this._rscriptID !== value) {
             this._rscriptID = value;
             this._rscriptClickReg.close();
@@ -87,7 +87,7 @@ export default class GameButton extends Button implements KeyboardListener {
         return this.toggled.value;
     }
 
-    public customStyleBox(stylebox: Graphics): GameButton {
+    public customStyleBox(stylebox: Graphics): this {
         this._customStyleBox = stylebox;
         return this;
     }
@@ -97,7 +97,7 @@ export default class GameButton extends Button implements KeyboardListener {
         fontSize?: number,
         background?: boolean,
         customTextColors?: Map<ButtonState, number>
-    ): GameButton {
+    ): this {
         if (typeof (text) === 'string') {
             this._labelBuilder = Fonts.std(text as string).fontSize(fontSize || 22).bold().color(0xFFFFFF);
         } else {
@@ -109,7 +109,7 @@ export default class GameButton extends Button implements KeyboardListener {
         return this;
     }
 
-    public fixedLabelWidth(width: number): GameButton {
+    public fixedLabelWidth(width: number): this {
         if (this._fixedLabelWidth !== width) {
             this._fixedLabelWidth = width;
             this.needsRedraw();
@@ -117,13 +117,13 @@ export default class GameButton extends Button implements KeyboardListener {
         return this;
     }
 
-    public scaleBitmapToLabel(): GameButton {
+    public scaleBitmapToLabel(): this {
         this._scaleIconToLabel = true;
         this.needsRedraw();
         return this;
     }
 
-    public tooltip(text: string): GameButton {
+    public tooltip(text: string): this {
         if (this._tooltip !== text) {
             this._tooltip = text;
             if (this.isLiveObject) {
@@ -133,7 +133,7 @@ export default class GameButton extends Button implements KeyboardListener {
         return this;
     }
 
-    public hotkey(keycode?: string, ctrl: boolean = false): GameButton {
+    public hotkey(keycode?: string, ctrl: boolean = false): this {
         if (keycode !== this._hotkey || ctrl !== this._hotkeyCtrl) {
             this._hotkey = keycode ?? null;
             this._hotkeyCtrl = ctrl;
@@ -205,12 +205,11 @@ export default class GameButton extends Button implements KeyboardListener {
             Assert.assertIsDefined(label);
             const labelWidth = this._fixedLabelWidth > 0 ? this._fixedLabelWidth : label.width + (icon?.width ?? 0);
             const styleBox = new Graphics()
-                .beginFill(GameButton.STYLEBOX_COLORS.get(this._theme)?.get(state) || 0x0)
-                .drawRoundedRect(0, 0,
+                .roundRect(0, 0,
                     labelWidth + (GameButton.WMARGIN * 2),
                     label.height + (GameButton.HMARGIN * 2),
                     5)
-                .endFill();
+                .fill(GameButton.STYLEBOX_COLORS.get(this._theme)?.get(state) ?? 0x0);
             this._content.addChildAt(styleBox, 0);
         }
 
@@ -287,7 +286,7 @@ export default class GameButton extends Button implements KeyboardListener {
         }
     }
 
-    private setIconForState(state: ButtonState, displayOrTex?: Container | Texture | string): GameButton {
+    private setIconForState(state: ButtonState, displayOrTex: Container | Texture | string): this {
         if (this._buttonIcons == null) {
             this._buttonIcons = [];
         }
@@ -307,17 +306,13 @@ export default class GameButton extends Button implements KeyboardListener {
         }
     }
 
-    private static getDisplayObject(displayOrTex?: Container | Texture | string): Container | null {
+    private static getDisplayObject(displayOrTex: Container | Texture | string): Container | null {
         if (displayOrTex instanceof Container) {
             return displayOrTex;
         } else if (displayOrTex instanceof Texture) {
             return new Sprite(displayOrTex);
-        } else if (typeof (displayOrTex) === 'string') {
-            if (displayOrTex.includes('.svg')) {
-                const texture = Texture.from(displayOrTex, {resourceOptions: {scale: 2}});
-                const sprite = new Sprite(texture);
-                return sprite;
-            } else return Sprite.from(displayOrTex);
+        } else if (typeof displayOrTex === 'string') {
+            return Sprite.from(displayOrTex);
         } else {
             return null;
         }

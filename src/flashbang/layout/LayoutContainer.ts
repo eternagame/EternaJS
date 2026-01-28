@@ -1,4 +1,4 @@
-import {Container, DisplayObject, Sprite} from 'pixi.js';
+import {Container, Sprite} from 'pixi.js';
 
 /** A base class for Containers that arrange their children automatically. */
 export default abstract class LayoutContainer extends Container {
@@ -7,13 +7,13 @@ export default abstract class LayoutContainer extends Container {
     }
 
     /* override */
-    public addChildAt<T extends DisplayObject>(child: T, index: number): T {
+    public addChildAt<T extends Container>(child: T, index: number): T {
         this._needsLayout = true;
         return super.addChildAt(child, index);
     }
 
     /* override */
-    public addChild<T extends DisplayObject[]>(...children: T): T[0] {
+    public addChild<T extends Container>(...children: T[]): T {
         this._needsLayout = true;
         return super.addChild(...children);
     }
@@ -23,19 +23,19 @@ export default abstract class LayoutContainer extends Container {
     // DisplayObject instead of T.
 
     /* override */
-    public removeChildAt<T extends DisplayObject = Container>(index: number): T {
+    public removeChildAt<T extends Container = Container>(index: number): T {
         this._needsLayout = true;
-        return super.removeChildAt(index) as T;
+        return super.removeChildAt(index);
     }
 
     /* override */
-    public removeChild<T extends DisplayObject = Container>(...children: T[]): T {
+    public removeChild<T extends Container = Container>(...children: T[]): T {
         this._needsLayout = true;
         return super.removeChild(...children);
     }
 
     /* override */
-    public removeChildren<T extends DisplayObject = Container>(
+    public removeChildren<T extends Container = Container>(
         beginIndex?: number,
         endIndex?: number
     ): T[] {
@@ -72,7 +72,7 @@ export default abstract class LayoutContainer extends Container {
         this._isLayingOut = false;
     }
 
-    protected static createSpacer(width: number, height: number): DisplayObject {
+    protected static createSpacer(width: number, height: number): Container {
         return new Spacer(width, height);
     }
 

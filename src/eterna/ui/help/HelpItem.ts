@@ -1,7 +1,7 @@
-import {TextMetrics} from 'pixi.js';
-import {ContainerObject} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
+import {ContainerObject} from 'flashbang';
 import {FontWeight} from 'flashbang/util/TextBuilder';
+import {CanvasTextMetrics} from 'pixi.js';
 import GameButton from '../GameButton';
 
 interface HelpItemProps {
@@ -42,7 +42,7 @@ export default class HelpItem extends ContainerObject {
                 .fontWeight(FontWeight.SEMIBOLD)
                 .color(0xffffff);
 
-            const labelMetrics = TextMetrics.measureText(props.label, labelBuilder.style);
+            const labelMetrics = CanvasTextMetrics.measureText(props.label, labelBuilder.style);
             const labelText = labelBuilder.build();
             labelText.x = props.width - labelMetrics.width;
             this.container.addChild(labelText);

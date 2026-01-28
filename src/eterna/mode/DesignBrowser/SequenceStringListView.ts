@@ -85,19 +85,17 @@ export default class SequenceStringListView extends Container {
 
             for (let jj = 0; jj < seq.length; jj++) {
                 if (ii === 0 && expData != null && pairs !== null) {
-                    if (!pairs.isPaired(jj)) {
-                        this._graphics.beginFill(0xCCCC00, 0.5);
-                    } else {
-                        this._graphics.beginFill(0x0000FF, 0.2);
-                    }
-
                     const x = jj * this._letterWidth;
                     const y = 0;
                     const w = this._letterWidth;
                     const h = Math.min(this._height, sequences.length * this._letterHeight);
 
-                    this._graphics.drawRect(x, y, w, h);
-                    this._graphics.endFill();
+                    this._graphics.rect(x, y, w, h);
+                    if (!pairs.isPaired(jj)) {
+                        this._graphics.fill({color: 0xcccc00, alpha: 0.5});
+                    } else {
+                        this._graphics.fill({color: 0x0000ff, alpha: 0.2});
+                    }
                 }
 
                 let letterIndex = 0;

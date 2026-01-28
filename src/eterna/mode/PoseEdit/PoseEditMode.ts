@@ -1,6 +1,6 @@
 import log from 'loglevel';
 import {
-    Container, DisplayObject, Point, Sprite, Text, Rectangle,
+    Container, Point, Sprite, Text, Rectangle,
     Graphics
 } from 'pixi.js';
 import EPars, {RNABase, RNAPaint} from 'eterna/EPars';
@@ -390,9 +390,8 @@ export default class PoseEditMode extends GameMode {
         if (this._solutionView) {
             const rect = this._solutionView.container.getBounds();
             this._sidebarLockMask
-                .beginFill(0, 1)
-                .drawRect(rect.x, rect.y, rect.width, rect.height)
-                .endFill();
+                .rect(rect.x, rect.y, rect.width, rect.height)
+                .fill({color: 0, alpha: 1});
         }
     }
 
@@ -2008,8 +2007,8 @@ export default class PoseEditMode extends GameMode {
 
     private createScreenshot(): ArrayBuffer {
         Assert.assertIsDefined(this.container);
-        const visibleState: Map<DisplayObject, boolean> = new Map();
-        const pushVisibleState = (disp: DisplayObject) => {
+        const visibleState: Map<Container, boolean> = new Map();
+        const pushVisibleState = (disp: Container) => {
             visibleState.set(disp, disp.visible);
             disp.visible = false;
         };

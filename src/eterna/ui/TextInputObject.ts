@@ -570,13 +570,12 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
 
         this._fakeTextInput = new Sprite();
 
-        const bg = new Graphics();
+        const bg = new Graphics()
+            .roundRect(0, 0, this.width, this.height, this._borderRadius)
+            .fill(this._bgColor);
         if (this._borderColor) {
-            bg.lineStyle(1, this._borderColor);
+            bg.stroke({width: 1, color: this._borderColor});
         }
-        bg.beginFill(this._bgColor)
-            .drawRoundedRect(0, 0, this.width, this.height, this._borderRadius)
-            .endFill();
         this._fakeTextInput.addChild(bg);
 
         let displayText = this.text;
@@ -640,7 +639,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
                 );
 
                 const pad = parseFloat(window.getComputedStyle(input, null).getPropertyValue('padding-right'));
-                const textMask = new Graphics().beginFill(0x0).drawRect(0, 0, this.width - pad, this.height).endFill();
+                const textMask = new Graphics().rect(0, 0, this.width - pad, this.height).fill(0x0);
                 this._fakeTextInput.addChild(textMask);
                 text.mask = textMask;
                 textMask.hitArea = new Rectangle();
@@ -654,7 +653,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
             );
 
             const pad = parseFloat(window.getComputedStyle(this._obj, null).getPropertyValue('padding-right'));
-            const textMask = new Graphics().beginFill(0x0).drawRect(0, 0, this.width - pad, this.height).endFill();
+            const textMask = new Graphics().rect(0, 0, this.width - pad, this.height).fill(0x0);
             this._fakeTextInput.addChild(textMask);
             text.mask = textMask;
             textMask.hitArea = new Rectangle();

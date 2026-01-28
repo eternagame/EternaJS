@@ -1,60 +1,49 @@
-import {
-    BaseTexture, Container, Rectangle, Texture
-} from 'pixi.js';
 import Flashbang from 'flashbang/core/Flashbang';
+import {
+    Assets,
+    Container,
+    Texture,
+    UnresolvedAsset
+} from 'pixi.js';
 import Assert from './Assert';
 
 export default class TextureUtil {
     public static async fromBase64PNG(base64PNG: string): Promise<Texture> {
-        // <img> elements can be created from base64 strings.
-        // We create an img, set its src data to the base64 string,
-        // and then use that as the source for a new PIXI texture.
-        const img = document.createElement('img');
-        img.src = `data:image/png;base64, ${base64PNG}`;
-        const baseTex = new BaseTexture(img);
-        const tex = new Texture(baseTex);
+        const url = `data:image/png;base64, ${base64PNG}`;
+        return Assets.load<Texture>(url);
+    }
 
-        if (baseTex.valid) {
-            // The image may already be loaded
-            return tex;
+    public static async load(source: string | string[]): Promise<void> {
+        if (typeof source === 'string') {
+            await this.loadURL(source as string);
         } else {
-            return new Promise<Texture>((resolve) => {
-                tex.once('update', () => resolve(tex));
-            });
+            await this.loadURLs(source as string[]);
         }
     }
 
-    public static load(source: Texture | string | string[]): Promise<void> {
-        if (source instanceof Texture) {
-            return this.loadTexture(source as Texture).then(() => {});
-        } else if (typeof source === 'string') {
-            return this.loadURL(source as string).then(() => {});
+    /**
+     * Get configurations for loading textures.
+     * Scales the texture if it's an SVG URL
+     */
+    private static getLoadConfig(textureURL: string) : string | UnresolvedAsset {
+        if (textureURL.startsWith('data:image/svg;base64') || textureURL.endsWith('.svg')) {
+            return {src: textureURL, data: {resolution: 2}};
         } else {
-            return this.loadURLs(source as string[]).then(() => {});
+            return textureURL;
         }
-    }
-
-    /** Returns a promise that will resolve when the texture is loaded */
-    public static async loadTexture(tex: Texture): Promise<Texture> {
-        const base: BaseTexture = tex.baseTexture;
-        if (base.valid) return tex;
-        return new Promise<Texture>((resolve, reject) => {
-            base.once('loaded', () => resolve(tex));
-            base.once('error', (e: string | Error) => reject(new Error(`Texture failed to load: ${e}`)));
-        });
     }
 
     /**
      * Returns a promise that will resolve when the given texture source is ready to be used.
      * Textures are cached after being loaded, so calling this multiple times is fine.
      */
-    public static loadURL(texURL: string): Promise<Texture> {
-        return this.loadTexture(Texture.from(texURL));
+    private static async loadURL(textureURL: string): Promise<void> {
+        await Assets.load<Texture>(this.getLoadConfig(textureURL));
     }
 
     /** Returns a promise that will resolve when the textures at the given URLs are loaded. */
-    public static loadURLs(urls: string[]): Promise<Texture[]> {
-        return Promise.all(urls.map((url) => this.loadURL(url)));
+    private static async loadURLs(textureURLs: string[]): Promise<void> {
+        await Assets.load<Texture>(textureURLs.map((url) => this.getLoadConfig(url)));
     }
 
     /**
@@ -68,7 +57,7 @@ export default class TextureUtil {
         wrap.addChild(disp);
 
         // TODO: Shouldn't generateTexture already be handling this?
-        wrap.getLocalBounds(TextureUtil.R);
+        const bounds = wrap.getLocalBounds();
 
         Assert.assertIsDefined(Flashbang.pixi);
         // NOTE: We briefly enabled multisampling, but had to revert it because it appears to be bugged on
@@ -77,10 +66,8 @@ export default class TextureUtil {
         // instead of transparent
 
         // Render the wrapper Container so that rotated Sprites aren't clipped
-        const tex = Flashbang.pixi.renderer.generateTexture(wrap, {region: TextureUtil.R});
+        const tex = Flashbang.pixi.renderer.generateTexture({target: wrap, frame: bounds.rectangle});
         wrap.removeChild(disp);
         return tex;
     }
-
-    private static readonly R: Rectangle = new Rectangle();
 }

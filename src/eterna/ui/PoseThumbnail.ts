@@ -168,7 +168,6 @@ export default class PoseThumbnail {
 
         canvas = canvas || new Graphics();
         canvas.clear();
-        canvas.lineStyle(0, 0x0, 0);
 
         const expPainter: ExpPainter | null = type === PoseThumbnailType.EXP_COLORED
             ? new ExpPainter(sequence, expStartIndex) : null;
@@ -321,8 +320,6 @@ export default class PoseThumbnail {
                 else color = expPainter.getColor(ii);
             }
 
-            canvas.lineStyle(Math.min(size, 3), color, 1);
-
             const xpos = (xarray[ii] - xmin) * scale + xOffset;
             const ypos = (yarray[ii] - ymin) * scale + yOffset;
 
@@ -331,12 +328,11 @@ export default class PoseThumbnail {
             } else {
                 canvas.lineTo(xpos, ypos);
             }
+            canvas.stroke({width: Math.min(size, 3), color, alpha: 1});
         }
 
         if (type === PoseThumbnailType.WRONG_COLORED) {
             color = COLOR_RIGHT;
-            canvas.lineStyle(Math.min(size, 3), color, 1);
-
             for (let jj = 0; jj < rightXCoords.length; jj++) {
                 if (jj % 3 === 0) {
                     if (sequence[jj / 3] === RNABase.CUT) {
@@ -348,10 +344,9 @@ export default class PoseThumbnail {
                     canvas.lineTo(rightXCoords[jj], rightYCoords[jj]);
                 }
             }
+            canvas.stroke({width: Math.min(size, 3), color, alpha: 1});
 
             color = COLOR_WRONG;
-            canvas.lineStyle(Math.min(size, 3), color, 1);
-
             for (let jj = 0; jj < wrongXCoords.length; jj++) {
                 if (jj % 3 === 0) {
                     if (sequence[jj / 3] === RNABase.CUT) {
@@ -363,10 +358,9 @@ export default class PoseThumbnail {
                     canvas.lineTo(wrongXCoords[jj], wrongYCoords[jj]);
                 }
             }
+            canvas.stroke({width: Math.min(size, 3), color, alpha: 1});
 
             color = COLOR_DONTCARE;
-            canvas.lineStyle(Math.min(size, 3), color, 0.65);
-
             for (let jj = 0; jj < dontcareXCoords.length; jj++) {
                 if (jj % 3 === 0) {
                     if (sequence[jj / 3] === RNABase.CUT) {
@@ -378,6 +372,7 @@ export default class PoseThumbnail {
                     canvas.lineTo(dontcareXCoords[jj], dontcareYCoords[jj]);
                 }
             }
+            canvas.stroke({width: Math.min(size, 3), color, alpha: 0.65});
         }
 
         bd.addChild(canvas);

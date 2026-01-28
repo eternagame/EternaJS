@@ -1,10 +1,10 @@
-import {DisplayObject, FederatedPointerEvent, FederatedWheelEvent} from 'pixi.js';
+import {Container, FederatedPointerEvent, FederatedWheelEvent} from 'pixi.js';
 import {SignalView} from 'signals';
 
 /** Exposes signals for an interactive object */
 export default interface PointerTarget {
-    /** the DisplayObject associated with this PointerTarget */
-    target: DisplayObject;
+    /** the Container associated with this PointerTarget */
+    target: Container;
 
     /** Fired when a 'pointerenter' event is dispatched on the object */
     pointerEnter: SignalView<FederatedPointerEvent>;

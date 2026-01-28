@@ -259,14 +259,13 @@ export default class FileInputObject extends DOMObject<HTMLInputElement | HTMLDi
         let bg: Graphics;
         if (this._bgColor) {
             bg = new Graphics()
-                .lineStyle(this._border ? 1 : 0, this._borderColor)
-                .beginFill(this._bgColor)
-                .drawRoundedRect(0, 0, this.width, this.height, this._borderRadius)
-                .endFill();
+                .roundRect(0, 0, this.width, this.height, this._borderRadius)
+                .stroke({width: this._border ? 1 : 0, color: this._borderColor})
+                .fill(this._bgColor);
         } else {
             bg = new Graphics()
-                .lineStyle(this._border ? 1 : 0, this._borderColor)
-                .drawRoundedRect(0, 0, this.width, this.height, this._borderRadius);
+                .roundRect(0, 0, this.width, this.height, this._borderRadius)
+                .stroke({width: this._border ? 1 : 0, color: this._borderColor});
         }
         this._fakeFileInput.addChild(bg);
 
@@ -292,7 +291,7 @@ export default class FileInputObject extends DOMObject<HTMLInputElement | HTMLDi
                 .color(textColor)
                 .hAlignLeft()
                 .build();
-            const textMask = new Graphics().beginFill(0x0).drawRect(0, 0, this.width, this.height).endFill();
+            const textMask = new Graphics().rect(0, 0, this.width, this.height).fill(0x0);
             this._fakeFileInput.addChild(textMask);
             textMask.hitArea = new Rectangle();
             labelText.mask = textMask;

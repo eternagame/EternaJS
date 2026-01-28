@@ -8,26 +8,28 @@
 //
 // =================================================================================================
 
-import {Point, Rectangle, Matrix} from 'pixi.js';
+import {
+    Point, Rectangle, Matrix, Bounds
+} from 'pixi.js';
 import MatrixUtil from './MatrixUtil';
 
 /** A utility class containing methods related to the Rectangle class. */
 export default class RectangleUtil {
-    public static setTo(r: Rectangle, left: number, top: number, width: number, height: number): void {
+    public static setTo(r: Bounds | Rectangle, left: number, top: number, width: number, height: number): void {
         r.x = left;
         r.y = top;
         r.width = width;
         r.height = height;
     }
 
-    public static setEmpty(r: Rectangle): void {
-        RectangleUtil.setTo(r, 0, 0, 0, 0);
+    public static setEmpty(r: Bounds): void {
+        this.setTo(r, 0, 0, 0, 0);
     }
 
     /** Calculates the intersection between two Rectangles. If the rectangles do not intersect,
      *  this method returns an empty Rectangle object with its properties set to 0. */
-    public static intersect(rect1: Rectangle, rect2: Rectangle, out: Rectangle | null = null): Rectangle {
-        if (out == null) out = new Rectangle();
+    public static intersect(rect1: Rectangle, rect2: Rectangle): Bounds {
+        const out = new Bounds();
 
         const left: number = rect1.x > rect2.x ? rect1.x : rect2.x;
         const right: number = rect1.right < rect2.right ? rect1.right : rect2.right;
@@ -35,9 +37,9 @@ export default class RectangleUtil {
         const bottom: number = rect1.bottom < rect2.bottom ? rect1.bottom : rect2.bottom;
 
         if (left > right || top > bottom) {
-            RectangleUtil.setEmpty(out);
+            this.setEmpty(out);
         } else {
-            RectangleUtil.setTo(out, left, top, right - left, bottom - top);
+            this.setTo(out, left, top, right - left, bottom - top);
         }
 
         return out;
@@ -73,51 +75,42 @@ export default class RectangleUtil {
         const right: number = Math.ceil(rect.right * scaleFactor) / scaleFactor;
         const bottom: number = Math.ceil(rect.bottom * scaleFactor) / scaleFactor;
 
-        RectangleUtil.setTo(rect, left, top, right - left, bottom - top);
+        this.setTo(rect, left, top, right - left, bottom - top);
     }
 
     /** Calculates the bounds of a rectangle after transforming it by a matrix.
      *  If you pass an <code>out</code>-rectangle, the result will be stored in this rectangle
      *  instead of creating a new object. */
-    public static getBounds(rectangle: Rectangle, matrix: Matrix, out: Rectangle | null = null): Rectangle {
-        if (out == null) out = new Rectangle();
+    public static getBounds(rectangle: Rectangle | Bounds, matrix: Matrix): Bounds {
+        const out = new Bounds();
 
         let minX: number = Number.MAX_VALUE;
         let maxX: number = -Number.MAX_VALUE;
         let minY: number = Number.MAX_VALUE;
         let maxY: number = -Number.MAX_VALUE;
-        const positions: Point[] = RectangleUtil.getPositions(rectangle, RectangleUtil.sPositions);
+        const positions: Point[] = this.getPositions(rectangle);
 
         for (let i = 0; i < 4; ++i) {
-            MatrixUtil.transformCoords(matrix, positions[i].x, positions[i].y, RectangleUtil.sPoint);
+            const sPoint = MatrixUtil.transformCoords(matrix, positions[i].x, positions[i].y);
 
-            if (minX > RectangleUtil.sPoint.x) minX = RectangleUtil.sPoint.x;
-            if (maxX < RectangleUtil.sPoint.x) maxX = RectangleUtil.sPoint.x;
-            if (minY > RectangleUtil.sPoint.y) minY = RectangleUtil.sPoint.y;
-            if (maxY < RectangleUtil.sPoint.y) maxY = RectangleUtil.sPoint.y;
+            if (minX > sPoint.x) minX = sPoint.x;
+            if (maxX < sPoint.x) maxX = sPoint.x;
+            if (minY > sPoint.y) minY = sPoint.y;
+            if (maxY < sPoint.y) maxY = sPoint.y;
         }
 
-        RectangleUtil.setTo(out, minX, minY, maxX - minX, maxY - minY);
+        this.setTo(out, minX, minY, maxX - minX, maxY - minY);
         return out;
     }
 
     /** Returns a vector containing the positions of the four edges of the given rectangle. */
-    public static getPositions(rectangle: Rectangle, out: Point[] | null = null): Point[] {
-        if (out == null) out = [];
-
-        for (let i = 0; i < 4; ++i) {
-            if (out[i] == null) out[i] = new Point();
-        }
-
-        out[0].x = rectangle.left;
-        out[0].y = rectangle.top;
-        out[1].x = rectangle.right;
-        out[1].y = rectangle.top;
-        out[2].x = rectangle.left;
-        out[2].y = rectangle.bottom;
-        out[3].x = rectangle.right;
-        out[3].y = rectangle.bottom;
-        return out;
+    public static getPositions(rectangle: Rectangle | Bounds): Point[] {
+        return [
+            new Point(rectangle.left, rectangle.top),
+            new Point(rectangle.right, rectangle.top),
+            new Point(rectangle.left, rectangle.bottom),
+            new Point(rectangle.right, rectangle.bottom)
+        ];
     }
 
     /** Compares all properties of the given rectangle, returning true only if
@@ -134,7 +127,4 @@ export default class RectangleUtil {
                 && r1.height > r2.height - e && r1.height < r2.height + e;
         }
     }
-
-    private static readonly sPoint: Point = new Point();
-    private static readonly sPositions: Point[] = [new Point(), new Point(), new Point(), new Point()];
 }

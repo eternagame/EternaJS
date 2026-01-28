@@ -88,9 +88,8 @@ export default class ScrollContainer extends ContainerObject {
 
         this._contentMask
             .clear()
-            .beginFill(0x00ff00)
-            .drawRoundedRect(0, 0, this._width, this._height, this._radius)
-            .endFill();
+            .roundRect(0, 0, this._width, this._height, this._radius)
+            .fill(0x00ff00);
 
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);

@@ -1,15 +1,23 @@
+import RNAAnchorObject from 'eterna/pose2D/RNAAnchorObject';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import GameButton from 'eterna/ui/GameButton';
+import GameWindow from 'eterna/ui/GameWindow';
+import Fonts from 'eterna/util/Fonts';
+import TextUtil from 'eterna/util/TextUtil';
+import {
+    Assert,
+    ColorUtil,
+    Flashbang,
+    GameObject,
+    HAlign,
+    StyledTextBuilder,
+    TextureUtil,
+    Vector2,
+    VLayoutContainer
+} from 'flashbang';
 import log from 'loglevel';
 import type {TextStyleExtended} from 'pixi-glyphs/dist/types';
 import {Container, Point, Sprite} from 'pixi.js';
-import Fonts from 'eterna/util/Fonts';
-import {
-    StyledTextBuilder, Flashbang, Vector2, GameObject, ColorUtil, Assert, VLayoutContainer, HAlign
-} from 'flashbang';
-import RNAAnchorObject from 'eterna/pose2D/RNAAnchorObject';
-import TextUtil from 'eterna/util/TextUtil';
-import GameWindow from 'eterna/ui/GameWindow';
-import GameButton from 'eterna/ui/GameButton';
-import Bitmaps from 'eterna/resources/Bitmaps';
 import ROPWait from './ROPWait';
 import RScriptArrow from './RScriptArrow';
 import RScriptEnv from './RScriptEnv';
@@ -125,8 +133,9 @@ export default class ROPTextbox extends RScriptOp {
                     textContainer.addChild(newText);
                 }));
             } else if (component.type === 'img') {
+                // TODO: v8 Migration - Verify that the sprite loads correctly here
                 const sprite = Sprite.from(component.value);
-                sprite.texture.baseTexture.on('loaded', () => {
+                TextureUtil.load(component.value).then(() => {
                     sprite.width = Math.min(vLayout.width, sprite.texture.width);
                     sprite.scale.y = sprite.scale.x;
                     vLayout.layout(true);

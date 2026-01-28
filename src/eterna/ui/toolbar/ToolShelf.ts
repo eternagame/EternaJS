@@ -23,11 +23,14 @@ class TabLabel extends ContainerObject {
         this._background = new Graphics();
         this.container.addChild(this._background);
 
-        const text = new Text(this.title, {
-            fontSize: 10,
-            fontFamily: Fonts.STDFONT,
-            fill: 0xffffff,
-            fontWeight: FontWeight.BOLD
+        const text = new Text({
+            text: this.title,
+            style: {
+                fontSize: 10,
+                fontFamily: Fonts.STDFONT,
+                fill: 0xffffff,
+                fontWeight: FontWeight.BOLD
+            }
         });
         this.container.addChild(text);
         this._width = Math.max(text.width + 20, this._MIN_WIDTH);
@@ -44,10 +47,9 @@ class TabLabel extends ContainerObject {
         // overlapping rounded rect on the top
         this._background
             .clear()
-            .beginFill(BAY_BACKGROUND_COLOR)
-            .drawRect(0, this._RADIUS, this._width, this._HEIGHT - this._RADIUS)
-            .drawRoundedRect(0, 0, this._width, this._HEIGHT, this._RADIUS)
-            .endFill();
+            .rect(0, this._RADIUS, this._width, this._HEIGHT - this._RADIUS)
+            .roundRect(0, 0, this._width, this._HEIGHT, this._RADIUS)
+            .fill(BAY_BACKGROUND_COLOR);
     }
 
     public disable() {
@@ -55,10 +57,9 @@ class TabLabel extends ContainerObject {
         // overlapping rounded rect on the top
         this._background
             .clear()
-            .beginFill(0x0c2040)
-            .drawRect(0, this._RADIUS, this._width, this._HEIGHT - this._RADIUS)
-            .drawRoundedRect(0, 0, this._width, this._HEIGHT, this._RADIUS)
-            .endFill();
+            .rect(0, this._RADIUS, this._width, this._HEIGHT - this._RADIUS)
+            .roundRect(0, 0, this._width, this._HEIGHT, this._RADIUS)
+            .fill(0x0c2040);
     }
 
     private _background: Graphics;
@@ -127,11 +128,11 @@ class TabBar<Title extends string = string> extends ContainerObject {
 
     public getTabBounds(title: Title): Rectangle | null {
         if (this._tabLayout.visible) {
-            return this._tabLabels.find((label) => label.title === title)?.display.getBounds() ?? null;
+            return this._tabLabels.find((label) => label.title === title)?.display.getBounds().rectangle ?? null;
         } else {
             // FIXME: Can we adjust things so that we can highlight the actual dropdown item?
             // How would we handle needing to scroll to get to it?
-            return this._dropdown.getItemBounds(title);
+            return this._dropdown.getItemBounds(title)?.rectangle ?? null;
         }
     }
 
@@ -235,10 +236,9 @@ export default class ToolShelf extends ContainerObject {
         const RADIUS = 7;
         this._tabContentBackground
             .clear()
-            .beginFill(BAY_BACKGROUND_COLOR)
-            .drawRect(0, 0, this._width, BUTTON_HEIGHT - RADIUS)
-            .drawRoundedRect(0, BUTTON_HEIGHT - RADIUS * 2, this._width, RADIUS * 2, RADIUS)
-            .endFill();
+            .rect(0, 0, this._width, BUTTON_HEIGHT - RADIUS)
+            .roundRect(0, BUTTON_HEIGHT - RADIUS * 2, this._width, RADIUS * 2, RADIUS)
+            .fill(BAY_BACKGROUND_COLOR);
         this._tabContentScroller.setSize(this._width, BUTTON_HEIGHT);
     }
 
@@ -270,7 +270,7 @@ export default class ToolShelf extends ContainerObject {
         const scrollBounds = this._tabContentScroller.display.getBounds();
         if (buttonBounds.right < scrollBounds.left || buttonBounds.left > scrollBounds.right) {
             return {
-                rect: this._tabContentScroller.getHScrollThumbBounds(),
+                rect: this._tabContentScroller.getHScrollThumbBounds().rectangle,
                 proxy: true
             };
         }

@@ -1,9 +1,9 @@
-import {DisplayObject} from 'pixi.js';
+import {Container} from 'pixi.js';
 import ObjectTask from 'flashbang/core/ObjectTask';
 import Assert from 'flashbang/util/Assert';
 
 export default class VisibleTask extends ObjectTask {
-    constructor(visible: boolean, target: DisplayObject | null = null) {
+    constructor(visible: boolean, target: Container | null = null) {
         super();
         this._visible = visible;
         this._target = target;
@@ -22,6 +22,6 @@ export default class VisibleTask extends ObjectTask {
         this.destroySelf();
     }
 
-    private readonly _target: DisplayObject | null;
+    private readonly _target: Container | null;
     private readonly _visible: boolean;
 }

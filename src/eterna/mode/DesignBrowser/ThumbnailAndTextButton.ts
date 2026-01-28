@@ -15,10 +15,9 @@ export default class ThumbnailAndTextButton extends GameButton {
         const SIZE = 52;
 
         const thumbnailFrame = new Graphics()
-            .lineStyle(2, 0xC0DCE7)
-            .beginFill(0x0f254a)
-            .drawRoundedRect(0, 0, SIZE, SIZE, 10)
-            .endFill();
+            .roundRect(0, 0, SIZE, SIZE, 10)
+            .fill(0x0f254a)
+            .stroke({width: 2, color: 0xC0DCE7});
         thumbnailFrame.addChild(props.thumbnail);
         const {width, height} = props.thumbnail.getBounds();
         props.thumbnail.x += (SIZE - width) / 2;
@@ -31,10 +30,5 @@ export default class ThumbnailAndTextButton extends GameButton {
         view.layout(true);
 
         this.allStates(view);
-    }
-
-    public tooltip(text: string): ThumbnailAndTextButton {
-        super.tooltip(text);
-        return this;
     }
 }

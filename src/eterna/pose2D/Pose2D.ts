@@ -2680,10 +2680,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._cursorBox.x = center.x;
             this._cursorBox.y = center.y;
             this._cursorBox.visible = true;
-            this._cursorBox.clear();
-            this._cursorBox.lineStyle(Base.MARKER_THICKNESS * Base.MARKER_RADIUS[this.zoomLevel],
-                Pose2D.COLOR_CURSOR);
-            this._cursorBox.drawCircle(0, 0, Base.MARKER_RADIUS[this.zoomLevel]);
+            this._cursorBox
+                .clear()
+                .circle(0, 0, Base.MARKER_RADIUS[this.zoomLevel])
+                .stroke({
+                    width: Base.MARKER_THICKNESS * Base.MARKER_RADIUS[this.zoomLevel],
+                    color: Pose2D.COLOR_CURSOR
+                });
         } else if (this._cursorBox != null) {
             this._cursorBox.destroy({children: true});
             this._cursorBox = null;
@@ -2748,7 +2751,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     /* override */
     public update(_dt: number): void {
-        if (!this.display.worldVisible) {
+        if (!DisplayUtil.isWorldVisible(this.display)) {
             // update is expensive, so don't bother doing it if we're not visible
             return;
         }
@@ -2850,10 +2853,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this._cursorBox.x = center.x;
                 this._cursorBox.y = center.y;
                 this._cursorBox.visible = true;
-                this._cursorBox.clear();
-                this._cursorBox.lineStyle(Base.MARKER_THICKNESS * Base.MARKER_RADIUS[this.zoomLevel],
-                    Pose2D.COLOR_CURSOR);
-                this._cursorBox.drawCircle(0, 0, Base.MARKER_RADIUS[this.zoomLevel]);
+                this._cursorBox
+                    .clear()
+                    .circle(0, 0, Base.MARKER_RADIUS[this.zoomLevel])
+                    .stroke({
+                        width: Base.MARKER_THICKNESS * Base.MARKER_RADIUS[this.zoomLevel],
+                        color: Pose2D.COLOR_CURSOR
+                    });
             }
         }
 
@@ -3893,11 +3899,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
         // Give it a bit of padding so the highlight isn't so tight.
         const PADDING = 2;
         return hilite.clear()
-            .lineStyle(1, 0xFFFFFF, 0.7)
-            .drawRoundedRect(
+            .roundRect(
                 energy.x - PADDING, energy.y - PADDING,
                 energy.width + PADDING, energy.height + PADDING, 10
-            );
+            )
+            .stroke({width: 1, color: 0xFFFFFF, alpha: 0.7});
     }
 
     private updateEnergyHighlight(energy: Sprite, idx: number, vis: boolean): void {
@@ -3979,8 +3985,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
             ) {
                 const origIndices = this._scoreNodes[this._scoreNodeIndex].baseIndices;
                 Assert.assertIsDefined(origIndices);
-                this._scoreNodeHighlight.lineStyle(0, 0, 0);
-                this._scoreNodeHighlight.beginFill(0xFFFFFF, 0.22);
                 const indices: number[] = origIndices.slice();
 
                 const contour: number[] = [];
@@ -3995,7 +3999,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     this._scoreNodeHighlight.lineTo(triangleVerts[6 * ii + 2], triangleVerts[6 * ii + 3]);
                     this._scoreNodeHighlight.lineTo(triangleVerts[6 * ii + 4], triangleVerts[6 * ii + 5]);
                 }
-                this._scoreNodeHighlight.endFill();
+                this._scoreNodeHighlight
+                    .fill({color: 0xffffff, alpha: 0.22})
+                    .stroke({width: 0, color: 0, alpha: 0});
             }
             this._lastScoreNodeIndex = this._scoreNodeIndex;
         }

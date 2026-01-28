@@ -312,10 +312,11 @@ export default class BaseAssets {
         for (let i = 1; i <= steps; i++) {
             const color = (i % 32 < 16) ? 0xFFFFFF : 0x0;
 
-            scratch.lineStyle(lineThickness, color, lineAlpha);
             xx = centerX + Math.cos((i / steps) * twoPI) * radius;
             yy = centerY + Math.sin((i / steps) * twoPI) * radius;
-            scratch.lineTo(xx, yy);
+            scratch
+                .lineTo(xx, yy)
+                .stroke({width: lineThickness, color, alpha: lineAlpha});
         }
 
         return TextureUtil.renderToTexture(scratch);
@@ -345,18 +346,16 @@ export default class BaseAssets {
         ) => {
             const ringWrapper = new Container();
             const ringBg = new Graphics()
-                .beginFill(0)
-                .drawRect(0, 0, renderSize, renderSize)
-                .endFill();
+                .rect(0, 0, renderSize, renderSize)
+                .fill(0);
             ringBg.alpha = 0;
             ringWrapper.addChild(ringBg);
 
             // The ring is drawn smaller than the overall texture to ensure the glow is not cut off.
             // We'll make it half the size, semi-arbitrarily
             const ring = new Graphics()
-                .lineStyle({color, width: 4})
-                .drawCircle(0, 0, renderSize / 4)
-                .endFill();
+                .circle(0, 0, renderSize / 4)
+                .stroke({color, width: 4});
             ring.filters = [
                 new BlurFilter({
                     strength: 8,
@@ -408,7 +407,7 @@ export default class BaseAssets {
         const texSizeSm = 2 ** 3;
         const lockTexSm = getLockTexture(texSizeSm);
 
-        const tinyLock = new Graphics().beginFill(0x050505, 0.8).drawCircle(0, 0, 6);
+        const tinyLock = new Graphics().circle(0, 0, 6).fill({color: 0x050505, alpha: 0.8});
         tinyLock.filters = [new BlurFilter({strength: 2, quality: 4, antialias: 'on'})];
         const tinyLockTex = TextureUtil.renderToTexture(tinyLock);
 

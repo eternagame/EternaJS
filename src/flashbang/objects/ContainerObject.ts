@@ -7,7 +7,7 @@ export default class ContainerObject extends SceneObject<Container> {
         class ContainerObjectContainer extends Container {}
         super(container || new ContainerObjectContainer());
         // Convenience so that the flashbang class name shows in the Pixi devtools
-        Object.defineProperty(ContainerObjectContainer, 'name', {value: this.constructor.name});
+        Object.defineProperty(ContainerObjectContainer, 'label', {value: this.constructor.name});
     }
 
     /** An alias for this.display */

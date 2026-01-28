@@ -161,15 +161,15 @@ export default class GamePanel extends BaseGamePanel {
         }
 
         if (this._type === GamePanelType.INVISIBLE) {
-            this._background.beginFill(0x000000)
-                .drawRect(0, 0, this._width, this._height)
-                .endFill();
+            this._background
+                .rect(0, 0, this._width, this._height)
+                .fill(0x000000);
             this._background.alpha = 0;
         } else {
-            this._background.lineStyle(this._borderThickness, this._borderColor, this._borderAlpha)
-                .beginFill(this._color, this._alpha)
-                .drawRoundedRect(0, 0, this._width, this._height, this._borderRadius)
-                .endFill();
+            this._background
+                .roundRect(0, 0, this._width, this._height, this._borderRadius)
+                .stroke({width: this._borderThickness, color: this._borderColor, alpha: this._borderAlpha})
+                .fill({color: this._color, alpha: this._alpha});
 
             if (this._title !== null) {
                 if (this._titleText == null) {
@@ -187,15 +187,14 @@ export default class GamePanel extends BaseGamePanel {
             }
 
             if (this._title !== null || this._forceTitleBar) {
-                this._titleBackground.display.beginFill(this._borderColor, this._alpha);
                 this._titleBackground.display
                     .moveTo(0, this.titleHeight)
                     .lineTo(0, 5)
                     .arcTo(0, 0, 5, 0, 5)
                     .lineTo(this._width - 5, 0)
                     .arcTo(this._width, 0, this._width, 5, 5)
-                    .lineTo(this._width, this.titleHeight);
-                this._background.endFill();
+                    .lineTo(this._width, this.titleHeight)
+                    .fill({color: this._borderColor, alpha: this._alpha});
             }
         }
     }

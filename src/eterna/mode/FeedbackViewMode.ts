@@ -1,6 +1,6 @@
 import log from 'loglevel';
 import {
-    DisplayObject, Sprite
+    Container, Sprite
 } from 'pixi.js';
 import Constants from 'eterna/Constants';
 import Eterna from 'eterna/Eterna';
@@ -443,8 +443,8 @@ export default class FeedbackViewMode extends GameMode {
     }
 
     protected createScreenshot(): ArrayBuffer {
-        const visibleState: Map<DisplayObject, boolean> = new Map();
-        const pushVisibleState = (disp: DisplayObject) => {
+        const visibleState: Map<Container, boolean> = new Map();
+        const pushVisibleState = (disp: Container) => {
             visibleState.set(disp, disp.visible);
             disp.visible = false;
         };

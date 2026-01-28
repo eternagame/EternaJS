@@ -7,36 +7,81 @@ import {BoostersData} from 'eterna/puzzle/Puzzle';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import Fonts from 'eterna/util/Fonts';
 import {
-    AlphaTask, Assert, CallbackTask, ContainerObject, Easing, Flashbang, HLayoutContainer,
-    LocationTask, ObjectTask, ParallelTask, PointerCapture, SerialTask, Vector2
+    AlphaTask,
+    Assert,
+    CallbackTask,
+    ContainerObject,
+    Easing,
+    Flashbang,
+    HLayoutContainer,
+    LocationTask,
+    ObjectTask,
+    ParallelTask,
+    PointerCapture,
+    SerialTask,
+    Vector2
 } from 'flashbang';
 import {FontWeight} from 'flashbang/util/TextBuilder';
 import log from 'loglevel';
 import {
-    Container, Graphics, Point, Text,
-    FederatedPointerEvent, FederatedWheelEvent
+    Container,
+    FederatedPointerEvent,
+    FederatedWheelEvent,
+    Graphics,
+    Point,
+    Text
 } from 'pixi.js';
 import {Connection, RegistrationGroup} from 'signals';
 import AnnotationPanelDialog from '../AnnotationPanelDialog';
 import BoosterDialog from '../BoosterDialog';
 import GameButton from '../GameButton';
 import {ToolTipPositioner} from '../help/HelpToolTip';
-import NucleotidePalette from './NucleotidePalette';
 import HotbarBay from './HotbarBay';
+import NucleotidePalette from './NucleotidePalette';
 import ToolbarButton, {
     ButtonCategory, ToolbarParam
 } from './ToolbarButton';
 import {
-    specButtonProps, viewSolutionsButtonProps, settingsButtonProps, submitSolutionButtonProps,
-    submitPuzzleButtonProps, addBaseButtonProps, addPairButtonProps, deleteButtonProps, lockButtonProps,
-    moleculeButtonProps, upload3DButtonProps, freezeButtonProps, pairSwapButtonProps, undoButtonProps,
-    redoButtonProps, librarySelectionButtonProps, resetButtonProps, magicGlueButtonProps, copyButtonProps,
-    pasteButtonProps, downloadSVGButtonProps, screenshotButtonProps, nucleotideFindButtonProps,
-    nucleotideRangeButtonProps, explosionFactorButtonProps, pipButtonProps, zoomInButtonProps,
-    zoomOutButtonProps, view3DButtonProps, moveButtonProps, rotateStemButtonProps, flipStemButtonProps,
-    snapToGridButtonProps, baseMarkerButtonProps, annotationModeButtonProps, annotationPanelButtonProps,
-    boostersMenuButtonProps, stampTLoopAMenuButtonProps, stampTLoopBMenuButtonProps,
-    AutoSolverMenuButtonProps
+    addBaseButtonProps,
+    addPairButtonProps,
+    annotationModeButtonProps,
+    annotationPanelButtonProps,
+    AutoSolverMenuButtonProps,
+    baseMarkerButtonProps,
+    boostersMenuButtonProps,
+    copyButtonProps,
+    deleteButtonProps,
+    downloadSVGButtonProps,
+    explosionFactorButtonProps,
+    flipStemButtonProps,
+    freezeButtonProps,
+    librarySelectionButtonProps,
+    lockButtonProps,
+    magicGlueButtonProps,
+    moleculeButtonProps,
+    moveButtonProps,
+    nucleotideFindButtonProps,
+    nucleotideRangeButtonProps,
+    pairSwapButtonProps,
+    pasteButtonProps,
+    pipButtonProps,
+    redoButtonProps,
+    resetButtonProps,
+    rotateStemButtonProps,
+    screenshotButtonProps,
+    settingsButtonProps,
+    snapToGridButtonProps,
+    specButtonProps,
+    stampTLoopAMenuButtonProps,
+    stampTLoopBMenuButtonProps,
+    submitPuzzleButtonProps,
+    submitSolutionButtonProps,
+    undoButtonProps,
+    upload3DButtonProps,
+    view3DButtonProps,
+    viewSolutionsButtonProps,
+    zoomInButtonProps,
+    zoomOutButtonProps
 } from './ToolbarButtons';
 import ToolShelf from './ToolShelf';
 
@@ -137,7 +182,7 @@ export default class Toolbar extends ContainerObject {
         this._showStampTLoop = showStampTLoop;
         this._boostersData = boosters ?? null;
         this._annotationManager = annotationManager;
-        this.display.name = 'Toolbar';
+        this.display.label = 'Toolbar';
     }
 
     protected added(): void {
@@ -158,36 +203,38 @@ export default class Toolbar extends ContainerObject {
 
         this._expandedBackground = new Graphics();
         this._expandedBackground.alpha = 0;
-        this._expandedBackground.name = 'Expanded Background';
+        this._expandedBackground.label = 'Expanded Background';
         this.container.addChild(this._expandedBackground);
 
         // All toolbar content, minus the background
         // Note that we're not using a VLayoutContainer because the open/close animation overlaps elements
         this._content = new Container();
         this.container.addChild(this._content);
-        this._content.name = 'Content';
+        this._content.label = 'Content';
 
         let yPos = -CONTENT_PADDING;
 
         this._expandCollapseButton = new GameButton().allStates(Bitmaps.ImgExpandArrow);
         this.addObject(this._expandCollapseButton, this._content);
-        this._expandCollapseButton.display.name = 'Expand/Collapse Button';
+        this._expandCollapseButton.display.label = 'Expand/Collapse Button';
         yPos -= this._expandCollapseButton.display.height;
         this._expandCollapseButton.display.y = yPos;
 
         this._helpText = new Text(
-            'Drag an icon to the right or left of the nucleotide pallette above\n'
-            + 'to insert or replace an existing tool in the hotbar, or tap an icon to use it.',
             {
-                fontSize: 14,
-                fontFamily: Fonts.STDFONT,
-                fill: 0xabc9d8,
-                fontWeight: FontWeight.MEDIUM,
-                align: 'center'
+                text: 'Drag an icon to the right or left of the nucleotide pallette above\n'
+                    + 'to insert or replace an existing tool in the hotbar, or tap an icon to use it.',
+                style: {
+                    fontSize: 14,
+                    fontFamily: Fonts.STDFONT,
+                    fill: 0xabc9d8,
+                    fontWeight: FontWeight.MEDIUM,
+                    align: 'center'
+                }
             }
         );
         this._content.addChild(this._helpText);
-        this._helpText.name = 'Help Text';
+        this._helpText.label = 'Help Text';
         // Remember - distance from top of chevron to top of help text (the origin is the top left corner)
         yPos -= CONTENT_V_MARGIN;
         yPos -= this._helpText.height;
@@ -197,7 +244,7 @@ export default class Toolbar extends ContainerObject {
 
         this._toolShelf = new ToolShelf();
         this.addObject(this._toolShelf, this._content);
-        this._toolShelf.display.name = 'Tool Shelf';
+        this._toolShelf.display.label = 'Tool Shelf';
         yPos -= CONTENT_V_MARGIN;
         yPos -= this._toolShelf.display.height;
         this._toolShelf.display.y = yPos;
@@ -356,10 +403,9 @@ export default class Toolbar extends ContainerObject {
 
         this._expandedBackground
             .clear()
-            .beginFill(0x21508c, 1)
-            .drawRect(0, -(totalHeight - RADIUS), width, totalHeight - RADIUS)
-            .drawRoundedRect(0, -totalHeight, width, RADIUS * 2, RADIUS)
-            .endFill();
+            .rect(0, -(totalHeight - RADIUS), width, totalHeight - RADIUS)
+            .roundRect(0, -totalHeight, width, RADIUS * 2, RADIUS)
+            .fill({color: 0x21508c, alpha: 1});
     }
 
     private toggleExpanded(expand: boolean) {
@@ -887,7 +933,7 @@ export default class Toolbar extends ContainerObject {
             }
         } else {
             return {
-                rect: this._expandCollapseButton.display.getBounds(),
+                rect: this._expandCollapseButton.display.getBounds().rectangle,
                 proxy: true
             };
         }

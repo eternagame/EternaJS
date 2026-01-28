@@ -18,13 +18,12 @@ export default class SliderBar extends ContainerObject {
         this.container.addChild(this._sliderLine);
 
         this._barRect = new Graphics();
-        this._barRect.beginFill(0x3E566A);
         if (vertical) {
-            this._barRect.drawRoundedRect(-6, -26, 11, 40, 3);
+            this._barRect.roundRect(-6, -26, 11, 40, 3);
         } else {
-            this._barRect.drawRoundedRect(-26, -6, 40, 11, 3);
+            this._barRect.roundRect(-26, -6, 40, 11, 3);
         }
-        this._barRect.endFill();
+        this._barRect.fill(0X3E566A);
 
         this.container.addChild(this._barRect);
 
@@ -69,20 +68,20 @@ export default class SliderBar extends ContainerObject {
 
     protected onSizeChanged(): void {
         this._sliderLine.clear();
-        this._sliderLine.beginFill(0x0C1A31);
         if (this._vertical) {
-            this._sliderLine.drawRect(-8, -17, 15, this._height + 30);
+            this._sliderLine.rect(-8, -17, 15, this._height + 30);
         } else {
-            this._sliderLine.drawRect(-17, -8, this._width + 30, 15);
+            this._sliderLine.rect(-17, -8, this._width + 30, 15);
         }
-        this._sliderLine.endFill();
-        this._sliderLine.lineStyle(1, 0x3E566A);
+        this._sliderLine.fill(0x0C1A31);
+
         this._sliderLine.moveTo(0, 0);
         if (this._vertical) {
             this._sliderLine.lineTo(0, this._height);
         } else {
             this._sliderLine.lineTo(this._width, 0);
         }
+        this._sliderLine.stroke({width: 1, color: 0x3e566a});
 
         if (this._vertical) {
             this._barRect.y = this._currentVal * (this._height - 10) + 10;

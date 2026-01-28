@@ -396,14 +396,13 @@ export default class ViewSolutionOverlay extends ContainerObject {
         ) {
             const deleteButton = new ThumbnailAndTextButton({
                 thumbnail: new Graphics()
-                    .beginFill(0, 0)
-                    .lineStyle(2, 0xC0DCE7)
-                    .drawRoundedRect(0, 0, 52, 52, 10)
-                    .endFill()
+                    .roundRect(0, 0, 52, 52, 10)
+                    .fill({color: 0, alpha: 0})
                     .moveTo(10, 10)
                     .lineTo(42, 42)
                     .moveTo(42, 10)
-                    .lineTo(10, 42),
+                    .lineTo(10, 42)
+                    .stroke({width: 2, color: 0xC0DCE7}),
                 text: 'Delete'
             })
                 .tooltip('Delete this design to retrieve your slots for this round');
@@ -439,9 +438,8 @@ export default class ViewSolutionOverlay extends ContainerObject {
         this._content.addObject(this._commentsInput, this._inputContainer);
 
         const commentButtonIcon = new Graphics()
-            .beginFill(0x54B54E)
-            .drawRoundedRect(0, 0, 64, 30, 5)
-            .endFill();
+            .roundRect(0, 0, 64, 30, 5)
+            .fill(0x54B54E);
         this._commentsButton = new GameButton()
             .customStyleBox(commentButtonIcon)
             .label('Post', 14);
@@ -458,10 +456,10 @@ export default class ViewSolutionOverlay extends ContainerObject {
 
         // Footer separator
         this._footer.addChild((() => {
-            const line = new Graphics();
-            line.lineStyle(1, '0x70707080');
-            line.moveTo(0, 1);
-            line.lineTo(theme.width - theme.margin.left - theme.margin.right, 1);
+            const line = new Graphics()
+                .moveTo(0, 1)
+                .lineTo(theme.width - theme.margin.left - theme.margin.right, 1)
+                .stroke({width: 1, color: '0x70707080'});
             return line;
         })());
 
@@ -525,9 +523,10 @@ export default class ViewSolutionOverlay extends ContainerObject {
         const {theme} = ViewSolutionOverlay;
         this.container.position.set(Flashbang.stageWidth - theme.width, 0);
 
-        this._panelBG.display.clear();
-        this._panelBG.display.beginFill(0x101010);
-        this._panelBG.display.drawRect(0, 0, theme.width, Flashbang.stageHeight);
+        this._panelBG.display
+            .clear()
+            .rect(0, 0, theme.width, Flashbang.stageHeight)
+            .fill(0x101010);
         this._header.layout(true);
         this._footer.layout(true);
         this._footer.position.set(theme.margin.left, Flashbang.stageHeight - this._footer.height);

@@ -29,13 +29,15 @@ export default class SimpleTextButton extends Button {
         const textColor = SimpleTextButton.TEXT_COLORS.get(state);
         Assert.assertIsDefined(textColor);
 
-        this._bg.clear();
-        this._bg.beginFill(bgColor);
-        this._bg.drawRoundedRect(0, 0,
-            this._tf.width + (SimpleTextButton.PADDING * 2),
-            this._tf.height + (SimpleTextButton.PADDING * 2),
-            5);
-        this._bg.endFill();
+        this._bg.clear()
+            .roundRect(
+                0,
+                0,
+                this._tf.width + (SimpleTextButton.PADDING * 2),
+                this._tf.height + (SimpleTextButton.PADDING * 2),
+                5
+            )
+            .fill(bgColor);
 
         this._tf.style.fill = textColor;
     }

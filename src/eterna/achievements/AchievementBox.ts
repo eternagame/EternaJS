@@ -61,14 +61,12 @@ export default class AchievementBox extends ContainerObject {
 
         const {theme} = AchievementBox;
 
-        const background = new Graphics();
-        background.lineStyle(1, theme.colors.border, 1);
-        background.beginFill(theme.colors.background, 1);
-        background.drawRoundedRect(0, 0, theme.size.x, theme.size.y, theme.borderRadius);
-        background.endFill();
-        background.beginFill(theme.colors.border);
-        background.drawRoundedRect(0, 0, theme.size.x, theme.headerHeight, theme.borderRadius);
-        background.endFill();
+        const background = new Graphics()
+            .roundRect(0, 0, theme.size.x, theme.size.y, theme.borderRadius)
+            .fill({color: theme.colors.background, alpha: 1})
+            .roundRect(0, 0, theme.size.x, theme.headerHeight, theme.borderRadius)
+            .fill({color: theme.colors.border})
+            .stroke({width: 1, color: theme.colors.border, alpha: 1});
         background.eventMode = 'static';
         background.on('click', () => this.closed.emit());
         background.on('tap', () => this.closed.emit());

@@ -120,11 +120,10 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._smallThumbnail.position.set(6, 6);
         this.container.addChild(this._smallThumbnail);
 
-        this._flag = new Graphics();
-        this._flag.clear();
-        this._flag.beginFill(0xBEDCE7, 1.0);
-        this._flag.drawRect(0, 0, 5, 5);
-        this._flag.endFill();
+        this._flag = new Graphics()
+            .clear()
+            .rect(0, 0, 5, 5)
+            .fill({color: 0xBEDCE7, alpha: 1.0});
         this._flag.position.set(4, 4);
         this.container.addChild(this._flag);
         this._flag.visible = false;
@@ -165,14 +164,15 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             // Add border
             const border = new Graphics();
             border.interactiveChildren = false;
-            border.lineStyle(UITheme.panel.borderSize, UITheme.constraints.borderColor, 1);
-            border.drawRoundedRect(
-                0,
-                0,
-                this._req.texture.width,
-                this._req.texture.height,
-                UITheme.constraints.borderRadius
-            );
+            border
+                .roundRect(
+                    0,
+                    0,
+                    this._req.texture.width,
+                    this._req.texture.height,
+                    UITheme.constraints.borderRadius
+                )
+                .stroke({width: UITheme.panel.borderSize, color: UITheme.constraints.borderColor, alpha: 1});
             this._req.addChild(border);
             this.initOpaqueBackdrop(config.fullTexture.width, config.fullTexture.height);
         }
@@ -219,10 +219,9 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
         this._bgGraphics.visible = config.drawBG || false;
         if (this._bgGraphics.visible) {
-            this._bgGraphics.clear();
-            this._bgGraphics.beginFill(0x1E314B, 0.5);
-            this._bgGraphics.drawRoundedRect(0, 0, 111, this._forMissionScreen ? 55 : 75, 15);
-            this._bgGraphics.endFill();
+            this._bgGraphics.clear()
+                .roundRect(0, 0, 111, this._forMissionScreen ? 55 : 75, 15)
+                .fill({color: 0x1E314B, alpha: 0.5});
             this.initOpaqueBackdrop(this._bgGraphics.width, this._bgGraphics.height);
         }
 
@@ -410,10 +409,9 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     }
 
     private initOpaqueBackdrop(width: number, height: number) {
-        this._opaqueBackdrop.clear();
-        this._opaqueBackdrop.beginFill(0x142640, 1);
-        this._opaqueBackdrop.drawRoundedRect(0, 0, width, height, 15);
-        this._opaqueBackdrop.endFill();
+        this._opaqueBackdrop.clear()
+            .roundRect(0, 0, width, height, 15)
+            .fill({color: 0x142640, alpha: 1});
     }
 
     public setLocation(p: Point, animate: boolean = false, animTime: number = 0.5): void {
@@ -440,15 +438,16 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
         const lineWidth = 6;
 
-        this._fglow.clear();
-        this._fglow.lineStyle(lineWidth, satisfied ? 0x00FF00 : 0xFF0000, 1.0);
-        this._fglow.drawRoundedRect(
-            lineWidth / 2,
-            lineWidth / 2,
-            this.display.width - lineWidth,
-            this.display.height - lineWidth,
-            10
-        );
+        this._fglow
+            .clear()
+            .roundRect(
+                lineWidth / 2,
+                lineWidth / 2,
+                this.display.width - lineWidth,
+                this.display.height - lineWidth,
+                10
+            )
+            .stroke({width: lineWidth, color: satisfied ? 0x00FF00 : 0xFF0000, alpha: 1.0});
         this._fglow.scale.x = 1;
         this._fglow.scale.y = 1;
         this._fglow.alpha = 0;
@@ -464,10 +463,9 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             )
         ));
 
-        this._backlight.clear();
-        this._backlight.beginFill(satisfied ? 0x00FF00 : 0xFF0000, 0.7);
-        this._backlight.drawRoundedRect(0, 0, this.display.width, this.display.height, 10);
-        this._backlight.endFill();
+        this._backlight.clear()
+            .roundRect(0, 0, this.display.width, this.display.height, 10)
+            .fill({color: satisfied ? 0x00FF00 : 0xFF0000, alpha: 0.7});
         this._backlight.alpha = 0;
         this._backlight.visible = true;
         this._backlight.position.set(0, 0);
@@ -479,10 +477,9 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     }
 
     public flash(color: number): void {
-        this._backlight.clear();
-        this._backlight.beginFill(color, 0.9);
-        this._backlight.drawRoundedRect(0, 0, this.display.width, this.display.height, 10);
-        this._backlight.endFill();
+        this._backlight.clear()
+            .roundRect(0, 0, this.display.width, this.display.height, 10)
+            .fill({color, alpha: 0.9});
         this._backlight.alpha = 0;
         this._backlight.visible = true;
         this._backlight.position.set(0, 0);

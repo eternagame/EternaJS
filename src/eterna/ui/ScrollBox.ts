@@ -74,14 +74,15 @@ export default class ScrollBox extends ContainerObject {
             * (this._scrollContainer.scrollY / this._scrollContainer.content.height);
         this._vScrollThumb = new GraphicsObject();
         this._vScrollThumb.display
-            .beginFill(0xFFFFFF)
-            .drawRoundedRect(
+            .roundRect(
                 0,
                 0,
                 this._SCROLL_THUMB_WIDTH,
                 thumbHeight,
                 this._SCROLL_THUMB_WIDTH / 2
-            ).endFill();
+            )
+            .fill(0xFFFFFF);
+
         this._vScrollThumb.display.alpha = 0.4;
         this.addObject(this._vScrollThumb, this.display);
         DisplayUtil.positionRelative(
@@ -101,14 +102,14 @@ export default class ScrollBox extends ContainerObject {
             * (this._scrollContainer.scrollX / this._scrollContainer.content.width);
         this._hScrollThumb = new GraphicsObject();
         this._hScrollThumb.display
-            .beginFill(0xFFFFFF)
-            .drawRoundedRect(
+            .roundRect(
                 0,
                 0,
                 thumbWidth,
                 this._SCROLL_THUMB_WIDTH,
                 this._SCROLL_THUMB_WIDTH / 2
-            ).endFill();
+            )
+            .fill(0xFFFFFF);
         this._hScrollThumb.display.alpha = 0.4;
         this.addObject(this._hScrollThumb, this.display);
         DisplayUtil.positionRelative(
@@ -157,10 +158,10 @@ export default class ScrollBox extends ContainerObject {
         this._scrollContainer.doLayout();
         this.updateScrollThumbs();
 
-        this._dragSurface.display.clear();
-        this._dragSurface.display.beginFill(0x00FF00);
-        this._dragSurface.display.drawRoundedRect(0, 0, this._width, this._height, this._radius);
-        this._dragSurface.display.endFill();
+        this._dragSurface.display
+            .clear()
+            .roundRect(0, 0, this._width, this._height, this._radius)
+            .fill(0x00FF00);
     }
 
     public updateScrollThumbs() {
@@ -174,14 +175,14 @@ export default class ScrollBox extends ContainerObject {
             const scrollDistance = (this._height - 2 * this._scrollThumbInlinePadding)
                 * (this._scrollContainer.scrollY / this._scrollContainer.content.height);
             this._vScrollThumb.display.clear()
-                .beginFill(0xcee0f5)
-                .drawRoundedRect(
+                .roundRect(
                     0,
                     0,
                     this._SCROLL_THUMB_WIDTH,
                     thumbHeight,
                     this._SCROLL_THUMB_WIDTH / 2
-                ).endFill();
+                )
+                .fill(0xcee0f5);
             DisplayUtil.positionRelative(
                 this._vScrollThumb.display, HAlign.RIGHT, VAlign.TOP,
                 this._scrollContainer.container, HAlign.RIGHT, VAlign.TOP,
@@ -206,14 +207,14 @@ export default class ScrollBox extends ContainerObject {
             const scrollDistance = (this._width - 2 * this._scrollThumbInlinePadding)
                 * (this._scrollContainer.scrollX / this._scrollContainer.content.width);
             this._hScrollThumb.display.clear()
-                .beginFill(0xcee0f5)
-                .drawRoundedRect(
+                .roundRect(
                     0,
                     0,
                     thumbWidth,
                     this._SCROLL_THUMB_WIDTH,
                     this._SCROLL_THUMB_WIDTH / 2
-                ).endFill();
+                )
+                .fill(0xcee0f5);
             DisplayUtil.positionRelative(
                 this._hScrollThumb.display, HAlign.LEFT, VAlign.BOTTOM,
                 this._scrollContainer.container, HAlign.LEFT, VAlign.BOTTOM,

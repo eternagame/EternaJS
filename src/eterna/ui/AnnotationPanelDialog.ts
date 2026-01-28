@@ -238,14 +238,13 @@ export default class AnnotationPanelDialog extends WindowDialog<void> {
         }
 
         this._upperToolbarBottomDivider.clear()
-            .beginFill(AnnotationPanelItem.DIVIDER_COLOR)
-            .drawRect(
+            .rect(
                 0,
                 0,
                 this._width,
                 AnnotationPanelDialog.DIVIDER_THICKNESS
             )
-            .endFill();
+            .fill(AnnotationPanelItem.DIVIDER_COLOR);
 
         this._scrollView.setSize(
             this._width,

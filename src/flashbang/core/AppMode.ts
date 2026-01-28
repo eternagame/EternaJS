@@ -59,7 +59,7 @@ export default class AppMode implements PointerTarget {
         class AppModeContainer extends Container {}
         this._container = new AppModeContainer();
         // Convenience so that the flashbang class name shows in the Pixi devtools
-        Object.defineProperty(AppModeContainer, 'name', {value: this.constructor.name});
+        Object.defineProperty(AppModeContainer, 'label', {value: this.constructor.name});
 
         this._rootObject = new RootObject(this);
         if (this.container) this.container.interactiveChildren = false;

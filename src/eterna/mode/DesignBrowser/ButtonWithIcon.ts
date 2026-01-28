@@ -58,20 +58,14 @@ export default class ButtonWithIcon extends GameButton {
             const width = theme.margin.horizontal * 2 + layout.width;
             const height = theme.margin.vertical * 2 + layout.height;
             const frame = new Graphics()
-                .beginFill(theme.color)
-                .drawRoundedRect(0, 0, width, height, 5)
-                .endFill();
+                .roundRect(0, 0, width, height, 5)
+                .fill(theme.color);
             this._view.addChild(frame);
         } else if (props.frame) {
             this._view.addChild(props.frame);
         }
 
         this._view.addChild(layout);
-    }
-
-    public tooltip(text: string): ButtonWithIcon {
-        super.tooltip(text);
-        return this;
     }
 
     private _view: Container;

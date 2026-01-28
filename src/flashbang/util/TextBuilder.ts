@@ -1,4 +1,9 @@
-import {ITextStyle, Text, TextStyle} from 'pixi.js';
+import {
+    Text,
+    TextDropShadow,
+    TextStyle,
+    TextStyleOptions
+} from 'pixi.js';
 
 // Using the terms used by Google Fonts
 export enum FontWeight {
@@ -20,7 +25,7 @@ export default class TextBuilder {
 
     /** Creates the Text object */
     public build(): Text {
-        const text = new Text(this._text, this.style);
+        const text = new Text({text: this._text, style: this.style});
         text.scale.x = this._scale;
         text.scale.y = this._scale;
         return text;
@@ -141,29 +146,12 @@ export default class TextBuilder {
         return this;
     }
 
-    public dropShadow(dropShadow: boolean = true) {
+    public dropShadow(dropShadow: boolean | Partial<TextDropShadow> = true) {
         this._style.dropShadow = dropShadow;
         return this;
     }
 
-    public shadowFill(color: string | number, alpha?: number) {
-        this._style.dropShadowColor = color;
-        if (alpha !== undefined) this._style.dropShadowAlpha = alpha;
-        return this;
-    }
-
-    public shadowPosition(distance: number, angle: number) {
-        this._style.dropShadowDistance = distance;
-        this._style.dropShadowAngle = angle;
-        return this;
-    }
-
-    public shadowBlur(blur: number) {
-        this._style.dropShadowBlur = blur;
-        return this;
-    }
-
-    private _style: Partial<ITextStyle> = {};
+    private _style: TextStyleOptions = {};
     private _text: string;
     private _scale = 1;
 }

@@ -1,21 +1,25 @@
-import {
-    Container, Graphics, Renderer, RenderTexture, Sprite,
-    BlurFilter, BlurFilterOptions, Filter
-} from 'pixi.js';
 import ColorConvert from 'color-convert';
+import {RNABase} from 'eterna/EPars';
+import Eterna from 'eterna/Eterna';
+import BitmapManager from 'eterna/resources/BitmapManager';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import Fonts from 'eterna/util/Fonts';
 import {
     Assert, ColorUtil, DisplayUtil, HAlign, MathUtil, TextureUtil, VAlign
 } from 'flashbang';
-import {RNABase} from 'eterna/EPars';
-import Fonts from 'eterna/util/Fonts';
-import {GradientFactory} from '@pixi-essentials/gradients';
-import Eterna from 'eterna/Eterna';
 import {AdjustmentFilter, ColorReplaceFilter} from 'pixi-filters';
-import BitmapManager from 'eterna/resources/BitmapManager';
-import Bitmaps from 'eterna/resources/Bitmaps';
-import BaseDrawFlags from './BaseDrawFlags';
+import {
+    BlurFilter,
+    BlurFilterOptions,
+    Container,
+    FillGradient,
+    Filter,
+    Graphics,
+    Sprite
+} from 'pixi.js';
 import Base from './Base';
 import {ZoomLevelTexture} from './BaseAssets';
+import BaseDrawFlags from './BaseDrawFlags';
 
 /** Encapsulates textures for a Base type */
 export default class BaseTextures {
@@ -65,7 +69,6 @@ export default class BaseTextures {
             const UPSCALE = texSize / MAX_SIZE;
             /** Size of the base graphic itself, not including whitespace (upscaled) */
             const BASE_SIZE = BaseTextures.BODY_SIZE * UPSCALE;
-            const gradientTexture = RenderTexture.create({width: texSize, height: texSize});
             const [hBase, sBase, vBase] = BaseTextures.type2Color(baseType, colorblind);
 
             const getGradientColor = (hChange: number, sChange: number, vChange: number) => ColorUtil.compose256(
@@ -75,16 +78,14 @@ export default class BaseTextures {
                     MathUtil.clamp(vBase + vChange, 0, 100)
                 ])
             );
-
-            GradientFactory.createLinearGradient(Eterna.app.pixi.renderer as unknown as Renderer, gradientTexture, {
-                x0: 0,
-                y0: 0,
-                x1: BASE_SIZE,
-                y1: BASE_SIZE,
+            const gradientTexture = new FillGradient({
+                type: 'linear',
+                start: {x: 0, y: 0},
+                end: {x: 1, y: 1},
                 colorStops: [
-                    {offset: 0.00, color: getGradientColor(0, -20, 20)},
-                    {offset: 0.50, color: getGradientColor(0, 0, 0)},
-                    {offset: 1.00, color: getGradientColor(0, 20, -20)}
+                    {offset: 0.0, color: getGradientColor(0, -20, 20)},
+                    {offset: 0.5, color: getGradientColor(0, 0, 0)},
+                    {offset: 1.0, color: getGradientColor(0, 20, -20)}
                 ]
             });
 
@@ -92,27 +93,30 @@ export default class BaseTextures {
             // The old body graphics had whitespace
             // TODO: Should we handle this in the positioning logic instead of the texture itself?
             const bodyBg = new Graphics()
-                .beginFill(0)
-                .drawRect(0, 0, texSize, texSize)
-                .endFill();
+                .rect(0, 0, texSize, texSize)
+                .fill(0);
             bodyBg.alpha = 0;
             bodyWrapper.addChild(bodyBg);
 
-            const body = new Graphics()
-                .beginTextureFill({texture: gradientTexture})
-            // Note that the texture is positioned relative to the origin, so we need to draw our circle
-            // at what will be the center of the texture
-                .drawCircle(BASE_SIZE / 2, BASE_SIZE / 2, BASE_SIZE / 2)
-                .endFill();
+            const filters: Filter[] = [];
             // For some reason, global antialiasing is insufficient.
             // Maybe once smooth-graphics supports texture fills that will make this unnecessary?
-            body.filters = [];
             if (antialias === 'blur' || antialias === 'blur-fxaa') {
-                body.filters.push(new BlurFilter({
-                    strength: 1, quality: 40, antialias: antialias === 'blur-fxaa' ? 'on' : 'off', ...blurOptions
+                filters.push(new BlurFilter({
+                    strength: 1,
+                    quality: 40,
+                    antialias: antialias === 'blur-fxaa' ? 'on' : 'off',
+                    ...blurOptions
                 }));
             }
-            if (antialias === 'fxaa' || antialias === 'blur-fxaa') body.filters.push(new Filter({antialias: 'on'}));
+            if (antialias === 'fxaa') {
+                filters.push(new Filter({antialias: 'on'}));
+            }
+            // Note that the texture is positioned relative to the origin, so we need to draw our circle
+            // at what will be the center of the texture
+            const body = new Graphics({filters})
+                .circle(BASE_SIZE / 2, BASE_SIZE / 2, BASE_SIZE / 2)
+                .fill(gradientTexture);
             // Center the body in the whitespace
             body.x = (texSize / 2) - (BASE_SIZE / 2);
             body.y = (texSize / 2) - (BASE_SIZE / 2);
@@ -172,30 +176,35 @@ export default class BaseTextures {
         const R = TOP_FROM_CENTER * 2;
 
         const lockBg = new Graphics()
-            .beginFill(ColorUtil.blend(
-                ColorUtil.compose256(...ColorConvert.hsv.rgb(BaseTextures.type2Color(baseType, colorblind))),
-                0xFFFFFF,
-                0.4
-            ))
-            .lineStyle(LOCK_WIDTH / 1.5, ColorUtil.blend(
-                ColorUtil.compose256(...ColorConvert.hsv.rgb(BaseTextures.type2Color(baseType, colorblind))),
-                0x111111,
-                0.35
-            ))
-            .drawCircle(
+            .circle(
                 0,
                 (
                     2 * R + (RENDER_SIZE * 0.5 - R) - (Math.sqrt(R ** 2 - (-TOP_FROM_CENTER) ** 2) - TOP_FROM_CENTER)
                 ) / 2 - R,
                 RENDER_SIZE / 2
             )
-            .endFill()
-            .beginFill(ColorUtil.blend(
-                ColorUtil.compose256(...ColorConvert.hsv.rgb(BaseTextures.type2Color(baseType, colorblind))),
-                0x111111,
-                0.35
-            ))
-            .endFill();
+            .fill(
+                ColorUtil.blend(
+                    ColorUtil.compose256(...ColorConvert.hsv.rgb(BaseTextures.type2Color(baseType, colorblind))),
+                    0xffffff,
+                    0.4
+                )
+            )
+            .stroke({
+                width: LOCK_WIDTH / 1.5,
+                color: ColorUtil.blend(
+                    ColorUtil.compose256(...ColorConvert.hsv.rgb(BaseTextures.type2Color(baseType, colorblind))),
+                    0x111111,
+                    0.35
+                )
+            })
+            .fill(
+                ColorUtil.blend(
+                    ColorUtil.compose256(...ColorConvert.hsv.rgb(BaseTextures.type2Color(baseType, colorblind))),
+                    0x111111,
+                    0.35
+                )
+            );
         lockBg.filters = [new BlurFilter({strength: 1, quality: 40, antialias: 'on'})];
         lockWrapper.addChild(lockBg);
 

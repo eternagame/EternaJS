@@ -29,18 +29,19 @@ export default class SpecHTMLButton extends Button {
         const textColor = SpecHTMLButton.TEXT_COLORS.get(state);
         Assert.assertIsDefined(textColor);
 
-        this._bg.clear();
-        this._bg.beginFill(0x00, 0);
-        this._bg.drawRoundedRect(0, 0,
-            this._tf.width + (SpecHTMLButton.PADDING * 2),
-            this._tf.height + (SpecHTMLButton.PADDING * 2),
-            5);
-        this._bg.endFill();
+        this._bg
+            .clear()
+            .roundRect(0, 0,
+                this._tf.width + (SpecHTMLButton.PADDING * 2),
+                this._tf.height + (SpecHTMLButton.PADDING * 2),
+                5)
+            .fill({color: 0x00, alpha: 0});
 
-        this._line.clear();
-        this._line.lineStyle(1, textColor);
-        this._line.moveTo(SpecHTMLButton.PADDING, this._tf.height + SpecHTMLButton.PADDING);
-        this._line.lineTo(this._tf.width + SpecHTMLButton.PADDING, this._tf.height + SpecHTMLButton.PADDING);
+        this._line
+            .clear()
+            .moveTo(SpecHTMLButton.PADDING, this._tf.height + SpecHTMLButton.PADDING)
+            .lineTo(this._tf.width + SpecHTMLButton.PADDING, this._tf.height + SpecHTMLButton.PADDING)
+            .stroke({width: 1, color: textColor});
 
         this._tf.style.fill = textColor;
     }

@@ -1,4 +1,4 @@
-import {Graphics, DisplayObject} from 'pixi.js';
+import {Graphics, Container} from 'pixi.js';
 import {GameObject, Flashbang, Updatable} from 'flashbang';
 import {RNABase, RNAPaint} from 'eterna/EPars';
 
@@ -11,7 +11,7 @@ export default class PaintCursor extends GameObject implements Updatable {
     }
 
     /* override */
-    public get display(): DisplayObject {
+    public get display(): Container {
         return this._graphics;
     }
 
@@ -87,19 +87,19 @@ export default class PaintCursor extends GameObject implements Updatable {
         }
 
         if (oc !== PaintCursor.NULL) {
-            this._graphics.beginFill(ic, 0);
-            this._graphics.lineStyle(4, oc, 0.5);
-            this._graphics.drawCircle(0, 0, 8 + 3 * Math.cos(new Date().getTime() / 300.0));
-            this._graphics.endFill();
+            this._graphics
+                .circle(0, 0, 8 + 3 * Math.cos(new Date().getTime() / 300.0))
+                .fill({color: ic, alpha: 0})
+                .stroke({width: 4, color: oc, alpha: 0.5});
 
-            this._graphics.beginFill(ic, 0.5);
-            this._graphics.lineStyle(0, 0x0, 0.0);
-            this._graphics.drawCircle(0, 0, 6 + 3 * Math.cos(new Date().getTime() / 300.0));
-            this._graphics.endFill();
+            this._graphics
+                .circle(0, 0, 6 + 3 * Math.cos(new Date().getTime() / 300.0))
+                .fill({color: ic, alpha: 0.5})
+                .stroke({width: 0, color: 0x0, alpha: 0.0});
         } else {
-            this._graphics.beginFill(ic, 0.5);
-            this._graphics.drawCircle(0, 0, 10 + 3 * Math.cos(new Date().getTime() / 300.0));
-            this._graphics.endFill();
+            this._graphics
+                .circle(0, 0, 10 + 3 * Math.cos(new Date().getTime() / 300.0))
+                .fill({color: ic, alpha: 0.5});
         }
     }
 

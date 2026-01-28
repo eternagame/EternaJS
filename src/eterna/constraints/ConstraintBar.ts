@@ -230,19 +230,18 @@ export default class ConstraintBar extends ContainerObject {
             const backgroundY = config.startPos.y - config.padding;
             const backgroundHeight = config.constraintHeight + config.padding * 2;
             this._background.display.clear();
-            this._background.display.beginFill(0x2A4366, 1);
-            this._background.display.drawRect(
+            this._background.display.rect(
                 0,
                 backgroundY,
                 drawerWidth,
                 backgroundHeight
-            );
-            this._background.display.endFill();
+            )
+                .fill({color: 0x2a4366, alpha: 1});
 
-            this._mask.clear();
-            this._mask.beginFill(0, 1);
-            this._mask.drawRect(0, backgroundY, drawerWidth, backgroundHeight);
-            this._mask.endFill();
+            this._mask
+                .clear()
+                .rect(0, backgroundY, drawerWidth, backgroundHeight)
+                .fill({color: 0, alpha: 1});
 
             this._drawerTip.visible = true;
             this._drawerTip.position.set(drawerWidth, backgroundY);
