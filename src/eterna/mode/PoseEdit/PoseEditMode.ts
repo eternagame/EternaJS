@@ -93,7 +93,6 @@ import PostMessageReporter from 'eterna/observability/PostMessageReporter';
 import TimerConstraint from 'eterna/constraints/constraints/TimerConstraint';
 import {MutationConstraint} from 'eterna/constraints/constraints/MutationConstraint';
 import ROPWait from 'eterna/rscript/ROPWait';
-import ConsoleReporter from 'eterna/observability/ConsoleReporter';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -275,7 +274,6 @@ export default class PoseEditMode extends GameMode {
     protected enter(): void {
         super.enter();
 
-        Eterna.observability.startCapture(new ConsoleReporter(), (event) => !!event.name.match(/^(ScriptFunc):/));
         if (Eterna.experimentalFeatures.includes('qualtrics-report')) {
             Eterna.observability.startCapture(this._qualtricsReporter, (event) => !event.name.match(/^(ScriptFunc):/));
         }
