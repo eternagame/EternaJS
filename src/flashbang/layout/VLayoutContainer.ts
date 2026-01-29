@@ -55,8 +55,7 @@ export default class VLayoutContainer extends LayoutContainer {
         this.addChildAt(LayoutContainer.createSpacer(1, size), index);
     }
 
-    /* override */
-    protected doLayout(): void {
+    protected override doLayout(): void {
         const maxWidth = this._hAlign === HAlign.LEFT ? 0
             : Math.max(...this.children.filter(
                 (child) => child.visible

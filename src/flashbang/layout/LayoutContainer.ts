@@ -1,4 +1,4 @@
-import {Container, Sprite} from 'pixi.js';
+import {Container, Graphics} from 'pixi.js';
 
 /** A base class for Containers that arrange their children automatically. */
 export default abstract class LayoutContainer extends Container {
@@ -6,14 +6,12 @@ export default abstract class LayoutContainer extends Container {
         return this._needsLayout;
     }
 
-    /* override */
-    public addChildAt<T extends Container>(child: T, index: number): T {
+    public override addChildAt<T extends Container>(child: T, index: number): T {
         this._needsLayout = true;
         return super.addChildAt(child, index);
     }
 
-    /* override */
-    public addChild<T extends Container>(...children: T[]): T {
+    public override addChild<T extends Container>(...children: T[]): T {
         this._needsLayout = true;
         return super.addChild(...children);
     }
@@ -22,23 +20,17 @@ export default abstract class LayoutContainer extends Container {
     // return types for removeChildAt and removeChildren, we have to return
     // DisplayObject instead of T.
 
-    /* override */
-    public removeChildAt<T extends Container = Container>(index: number): T {
+    public override removeChildAt<T extends Container = Container>(index: number): T {
         this._needsLayout = true;
         return super.removeChildAt(index);
     }
 
-    /* override */
-    public removeChild<T extends Container = Container>(...children: T[]): T {
+    public override removeChild<T extends Container = Container>(...children: T[]): T {
         this._needsLayout = true;
         return super.removeChild(...children);
     }
 
-    /* override */
-    public removeChildren<T extends Container = Container>(
-        beginIndex?: number,
-        endIndex?: number
-    ): T[] {
+    public override removeChildren<T extends Container = Container>(beginIndex?: number, endIndex?: number): T[] {
         this._needsLayout = true;
         return super.removeChildren(beginIndex, endIndex) as T[];
     }
@@ -53,7 +45,7 @@ export default abstract class LayoutContainer extends Container {
         // Recursively lay out our children if they need it.
         for (const child of this.children) {
             if (child instanceof LayoutContainer) {
-                (child as LayoutContainer).layout(force);
+                child.layout(force);
             }
         }
 
@@ -63,7 +55,7 @@ export default abstract class LayoutContainer extends Container {
         // If our parent is a layout sprite, force it to re-layout, since our size has
         // likely changed.
         if (this.parent instanceof LayoutContainer) {
-            const layoutParent: LayoutContainer = this.parent as LayoutContainer;
+            const layoutParent = this.parent;
             if (!layoutParent._isLayingOut) {
                 layoutParent.layout(true);
             }
@@ -88,9 +80,9 @@ class Spacer extends Container {
 
         // For some reasons, spacers have zero-width bounds
         // unless they're wrapped in a Container
-        const sprite = new Sprite();
-        sprite.width = width;
-        sprite.height = height;
-        this.addChild(sprite);
+        const space = new Graphics()
+            .rect(0, 0, width, height)
+            .fill({color: 0x0, alpha: 0});
+        this.addChild(space);
     }
 }

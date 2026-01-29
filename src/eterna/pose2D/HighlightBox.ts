@@ -1,16 +1,16 @@
-import {Graphics, Point} from 'pixi.js';
+import SecStruct from 'eterna/rnatypes/SecStruct';
 import {
-    LateUpdatable,
-    Assert,
-    RepeatingTask,
-    ObjectTask,
-    SerialTask,
     AlphaTask,
+    Assert,
+    ContainerObject,
+    LateUpdatable,
+    ObjectTask,
+    RepeatingTask,
+    SerialTask,
     Vector2
 } from 'flashbang';
-import GraphicsObject from 'flashbang/objects/GraphicsObject';
+import {Graphics, Point} from 'pixi.js';
 import {Value} from 'signals';
-import SecStruct from 'eterna/rnatypes/SecStruct';
 import Pose2D from './Pose2D';
 
 export enum HighlightType {
@@ -27,7 +27,7 @@ export enum HighlightType {
 }
 
 /** A class for highlighting groups of bases in a Pose2D */
-export default class HighlightBox extends GraphicsObject implements LateUpdatable {
+export default class HighlightBox extends ContainerObject implements LateUpdatable {
     public readonly hovered = new Value<boolean>(false);
     constructor(pose: Pose2D, type: HighlightType) {
         super();

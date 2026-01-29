@@ -87,7 +87,7 @@ export default class GameButton extends Button implements KeyboardListener {
         return this.toggled.value;
     }
 
-    public customStyleBox(stylebox: Graphics): this {
+    public customStyleBox(stylebox: Container | Graphics): this {
         this._customStyleBox = stylebox;
         return this;
     }
@@ -334,7 +334,7 @@ export default class GameButton extends Button implements KeyboardListener {
     private _hotkeyCtrl: boolean;
     private _buttonIcons: (Container | null)[];
     private _selectedState: Container | null;
-    private _customStyleBox?: Graphics;
+    private _customStyleBox?: Container | Graphics;
     private _customTextColors?: Map<ButtonState, number>;
     protected _skipHitArea = false;
     protected _minHitAreaWidth = 0;

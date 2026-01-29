@@ -1,7 +1,7 @@
 import {
+    Container,
     Graphics,
-    Rectangle,
-    Sprite
+    Rectangle
 } from 'pixi.js';
 import {Signal} from 'signals';
 import {
@@ -568,7 +568,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
 
         this._dummyDisp.eventMode = 'static';
 
-        this._fakeTextInput = new Sprite();
+        this._fakeTextInput = new Container();
 
         const bg = new Graphics()
             .roundRect(0, 0, this.width, this.height, this._borderRadius)
@@ -796,7 +796,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
     private _borderRadius: number;
     private _characterLimit: number | null;
     private _hasFocus: boolean = false;
-    private _fakeTextInput: Sprite | null;
+    private _fakeTextInput: Container | null;
     private _showFakeTextInputWhenNotFocused: boolean = true;
     private _progressArc: SVGCircleElement;
     private _characterText: HTMLSpanElement;

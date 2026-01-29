@@ -157,6 +157,9 @@ export default class AnnotationPanelItem extends ContainerObject {
         }
 
         // Set up visibility button
+        // TODO: v8 Migration - Verify new Container composition
+        const visibilityContainer = new Container();
+
         this._visibilityButtonBackground = new Graphics()
             .rect(
                 0,
@@ -165,13 +168,16 @@ export default class AnnotationPanelItem extends ContainerObject {
                 length
             )
             .fill(AnnotationPanelItem.VISIBILITY_BUTTON_BACKGROUND_COLOR);
+        visibilityContainer.addChild(this._visibilityButtonBackground);
+
         this._visibilityEyeSprite = Sprite.from(Bitmaps.ImgEye);
         this._visibilityEyeSprite.width = length;
         this._visibilityEyeSprite.height = length;
         this._visibilityEyeSprite.alpha = 1;
-        this._visibilityButtonBackground.addChild(this._visibilityEyeSprite);
+        visibilityContainer.addChild(this._visibilityEyeSprite);
+
         this._visibilityButton = new GameButton()
-            .customStyleBox(this._visibilityButtonBackground)
+            .customStyleBox(visibilityContainer)
             .tooltip(`Hide ${this._data.type.toString()}`);
         this._visibilityButton.display.cursor = 'pointer';
         this._visibilityButton.clicked.connect(() => {
@@ -383,6 +389,9 @@ export default class AnnotationPanelItem extends ContainerObject {
             this.addObject(this._itemNameInput, textContainer);
 
             // Set up save edit button
+            // TODO: v8 Migration - Verify new Container composition
+            const itemSaveEditContainer = new Container();
+
             this._itemSaveEditButtonBackground = new Graphics()
                 .rect(
                     0,
@@ -395,13 +404,16 @@ export default class AnnotationPanelItem extends ContainerObject {
                         ? AnnotationPanelItem.ITEM_BACKGROUND_SELECTED
                         : AnnotationPanelItem.ITEM_BACKGROUND_RESTING
                 );
+            itemSaveEditContainer.addChild(this._itemSaveEditButtonBackground);
+
             this._checkmarkSprite = Sprite.from(Bitmaps.ImgAnnotationCheckmark);
             this._checkmarkSprite.width = AnnotationPanelItem.ITEM_EDIT_BUTTON_WIDTH;
             this._checkmarkSprite.height = AnnotationPanelItem.ITEM_EDIT_BUTTON_WIDTH;
             this._checkmarkSprite.alpha = 1;
-            this._itemSaveEditButtonBackground.addChild(this._checkmarkSprite);
+            itemSaveEditContainer.addChild(this._checkmarkSprite);
+
             this._itemSaveEditButton = new GameButton()
-                .customStyleBox(this._itemSaveEditButtonBackground)
+                .customStyleBox(itemSaveEditContainer)
                 .tooltip('Save');
             this._itemSaveEditButton.display.cursor = 'pointer';
             this._itemSaveEditButton.clicked.connect(() => this.saveEdit());
@@ -412,6 +424,8 @@ export default class AnnotationPanelItem extends ContainerObject {
             this.addObject(this._itemSaveEditButton, textContainer);
 
             // Set up cancel edit button
+            // TODO: v8 Migration - Verify new Container composition
+            const itemCancelEditContainer = new Container();
             this._itemCancelEditButtonBackground = new Graphics()
                 .rect(
                     0,
@@ -424,13 +438,16 @@ export default class AnnotationPanelItem extends ContainerObject {
                         ? AnnotationPanelItem.ITEM_BACKGROUND_SELECTED
                         : AnnotationPanelItem.ITEM_BACKGROUND_RESTING
                 );
+            itemCancelEditContainer.addChild(this._itemCancelEditButtonBackground);
+
             this._crossSprite = Sprite.from(Bitmaps.ImgAnnotationCross);
             this._crossSprite.width = AnnotationPanelItem.ITEM_EDIT_BUTTON_WIDTH;
             this._crossSprite.height = AnnotationPanelItem.ITEM_EDIT_BUTTON_WIDTH;
             this._crossSprite.alpha = 1;
-            this._itemCancelEditButtonBackground.addChild(this._crossSprite);
+            itemCancelEditContainer.addChild(this._crossSprite);
+
             this._itemCancelEditButton = new GameButton()
-                .customStyleBox(this._itemCancelEditButtonBackground)
+                .customStyleBox(itemCancelEditContainer)
                 .tooltip('Cancel');
             this._itemCancelEditButton.display.cursor = 'pointer';
             this._itemCancelEditButton.clicked.connect(() => this.cancelEdit());

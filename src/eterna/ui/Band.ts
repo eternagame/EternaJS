@@ -1,6 +1,7 @@
 import {
     Graphics, Sprite, Text, Texture,
-    ColorMatrixFilter
+    ColorMatrixFilter,
+    Container
 } from 'pixi.js';
 import {
     ContainerObject, MathUtil, TextureUtil, ColorUtil, Updatable
@@ -68,9 +69,12 @@ export default class Band extends ContainerObject implements Updatable {
 
         const satTex: Texture = BitmapManager.getBitmap(Bitmaps.Satellite);
         const render = (rotation: number, colorTransform: ColorMatrixFilter | null = null): Texture => {
-            const disp = new Graphics()
-                .rect(0, 0, 20, 20)
-                .fill(0);
+            const disp = new Container();
+            disp.addChild(
+                new Graphics()
+                    .rect(0, 0, 20, 20)
+                    .fill(0)
+            );
 
             const sat = new Sprite(satTex);
             sat.pivot.set(10, 10);

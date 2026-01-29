@@ -66,7 +66,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._opaqueBackdrop.visible = false;
         this.container.addChild(this._opaqueBackdrop);
 
-        this._req = new Sprite();
+        this._req = new Container();
         this._req.visible = false;
         this.container.addChild(this._req);
 
@@ -116,7 +116,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._reqStatText.visible = false;
         this.container.addChild(this._reqStatText);
 
-        this._smallThumbnail = new Sprite();
+        this._smallThumbnail = new Container();
         this._smallThumbnail.position.set(6, 6);
         this.container.addChild(this._smallThumbnail);
 
@@ -159,7 +159,8 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
         this._req.visible = config.fullTexture !== undefined;
         if (config.fullTexture !== undefined) {
-            this._req.texture = config.fullTexture;
+            this._req.removeChildren();
+            this._req.addChild(Sprite.from(config.fullTexture));
 
             // Add border
             const border = new Graphics();
@@ -168,8 +169,8 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                 .roundRect(
                     0,
                     0,
-                    this._req.texture.width,
-                    this._req.texture.height,
+                    config.fullTexture.width,
+                    config.fullTexture.height,
                     UITheme.constraints.borderRadius
                 )
                 .stroke({width: UITheme.panel.borderSize, color: UITheme.constraints.borderColor, alpha: 1});
@@ -265,17 +266,21 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         if (config.icon) {
             this._icon.visible = true;
             this._icon.removeChildren();
-            this._icon.texture = Texture.EMPTY;
+
             if (config.icon instanceof Texture) {
-                this._icon.texture = config.icon;
-                this._icon.position.set((111 - this._icon.width) * 0.5, 5);
+                const sprite = Sprite.from(config.icon);
+                sprite.position.set((111 - this._icon.width) * 0.5, 5);
+                this._icon.addChild(sprite);
             } else if (config.icon instanceof Graphics) {
                 this._icon.addChild(config.icon);
             } else {
-                TextureUtil.fromBase64PNG(config.icon).then((tex) => {
-                    this._icon.texture = tex;
-                    this._icon.position.set((111 - this._icon.width) * 0.5, 5);
-                });
+                TextureUtil
+                    .fromBase64PNG(config.icon)
+                    .then((tex) => {
+                        const sprite = Sprite.from(tex);
+                        sprite.position.set((111 - this._icon.width) * 0.5, 5);
+                        this._icon.addChild(sprite);
+                    });
             }
         }
 
@@ -505,14 +510,14 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
     private _bgGraphics: Graphics;
     private _backlight: Graphics;
-    private _req: Sprite;
+    private _req: Container;
     private _bg: Sprite;
-    private _icon: Sprite;
+    private _icon: Container;
     private _noText: Text;
     private _stateText: Text;
     private _reqClarifyText: Glyphs;
     private _reqStatText: Glyphs;
-    private _smallThumbnail: Sprite;
+    private _smallThumbnail: Container;
     private _flag: Graphics;
     private _sideText: Glyphs;
     private _check: Sprite;

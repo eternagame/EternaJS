@@ -1,21 +1,28 @@
-import {
-    ContainerObject, Flashbang, ParallelTask, LocationTask, Easing, AlphaTask
-} from 'flashbang';
-import {
-    Point, Graphics, Container, Sprite
-} from 'pixi.js';
-import {Value} from 'signals';
 import Eterna from 'eterna/Eterna';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
-import ROPWait from 'eterna/rscript/ROPWait';
-import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
+import ROPWait from 'eterna/rscript/ROPWait';
+import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
+import {
+    AlphaTask,
+    ContainerObject,
+    Easing,
+    Flashbang,
+    LocationTask,
+    ParallelTask
+} from 'flashbang';
 import Assert from 'flashbang/util/Assert';
-import GraphicsObject from 'flashbang/objects/GraphicsObject';
-import ShapeConstraint, {AntiShapeConstraint} from './constraints/ShapeConstraint';
+import {
+    Container,
+    Graphics,
+    Point,
+    Sprite
+} from 'pixi.js';
+import {Value} from 'signals';
+import Constraint, {BaseConstraintStatus, ConstraintContext, HighlightInfo} from './Constraint';
 import ConstraintBox from './ConstraintBox';
-import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from './Constraint';
+import ShapeConstraint, {AntiShapeConstraint} from './constraints/ShapeConstraint';
 import TimerConstraint from './constraints/TimerConstraint';
 
 interface ConstraintWrapper<Status extends BaseConstraintStatus = BaseConstraintStatus> {
@@ -49,7 +56,8 @@ export default class ConstraintBar extends ContainerObject {
     public sequenceHighlights: Value<HighlightInfo[]> | Value<null> = new Value(null);
 
     private _collapsed = false;
-    private _background: GraphicsObject;
+    private _backgroundGraphics: Graphics;
+    private _background: ContainerObject;
     private _mask: Graphics;
     private _constraintsRoot: Container;
     private _constraintsLayer: Container;
@@ -88,8 +96,10 @@ export default class ConstraintBar extends ContainerObject {
         const drawerEnabled = this._constraints.length > 1;
         if (drawerEnabled) {
             // Background
+            this._backgroundGraphics = new Graphics();
             this._background = (() => {
-                const bg = new GraphicsObject();
+                const bg = new ContainerObject();
+                bg.display.addChild(this._backgroundGraphics);
                 this.addObject(bg, this.container);
 
                 bg.pointerDown.connect((e) => {
@@ -229,13 +239,13 @@ export default class ConstraintBar extends ContainerObject {
             const drawerWidth = Math.min(Flashbang.stageWidth * config.maxWidth, positioning.totalWidth);
             const backgroundY = config.startPos.y - config.padding;
             const backgroundHeight = config.constraintHeight + config.padding * 2;
-            this._background.display.clear();
-            this._background.display.rect(
-                0,
-                backgroundY,
-                drawerWidth,
-                backgroundHeight
-            )
+            this._backgroundGraphics.clear()
+                .rect(
+                    0,
+                    backgroundY,
+                    drawerWidth,
+                    backgroundHeight
+                )
                 .fill({color: 0x2a4366, alpha: 1});
 
             this._mask

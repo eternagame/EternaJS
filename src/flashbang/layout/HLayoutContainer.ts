@@ -56,8 +56,7 @@ export default class HLayoutContainer extends LayoutContainer {
         this.addChildAt(LayoutContainer.createSpacer(size, 1), index);
     }
 
-    /* override */
-    protected doLayout(): void {
+    protected override doLayout(): void {
         const maxHeight = this._vAlign === VAlign.TOP ? 0
             : Math.max(...this.children.filter(
                 (child) => child.visible

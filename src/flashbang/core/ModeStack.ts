@@ -21,10 +21,10 @@ class PendingTransition {
 export default class ModeStack {
     public readonly topModeChanged: UnitSignal = new UnitSignal();
 
-    constructor(parentSprite: Container) {
+    constructor(parentContainer: Container) {
         Assert.assertIsDefined(this._container);
         this._container.label = 'ModeStack';
-        parentSprite.addChild(this._container);
+        parentContainer.addChild(this._container);
     }
 
     public get modes(): readonly AppMode[] | null {

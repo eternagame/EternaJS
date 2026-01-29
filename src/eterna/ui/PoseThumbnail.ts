@@ -49,7 +49,7 @@ export default class PoseThumbnail {
         customLayout: ([number, number] | [null, null])[] | null = null
     ) {
         const graphics = new Graphics();
-        PoseThumbnail.create(
+        this.create(
             sequence.baseArray, pairs, size, type, expStartIndex, wrongPairs, expUseThreshold, expThreshold, graphics,
             customLayout
         );
@@ -60,8 +60,9 @@ export default class PoseThumbnail {
         return newGraphics;
     }
 
+    // TODO: V8 Migration - Remove children from Sprites/Graphics
     public static drawToSprite(
-        sprite: Sprite,
+        thumbnailContainer: Container,
         sequence: number[],
         pairs: SecStruct,
         size: number = 1,
@@ -72,16 +73,16 @@ export default class PoseThumbnail {
         expThreshold: number = 0,
         customLayout: Array<[number, number] | [null, null]> | null = null
     ): void {
-        sprite.removeChildren();
+        thumbnailContainer.removeChildren();
         const graphics = new Graphics();
-        PoseThumbnail.create(
+        this.create(
             sequence, pairs, size, type, expStartIndex, wrongPairs, expUseThreshold, expThreshold, graphics,
             customLayout
         );
         const bounds = graphics.getLocalBounds();
         graphics.x = -bounds.left;
         graphics.y = -bounds.top;
-        sprite.addChild(graphics);
+        thumbnailContainer.addChild(graphics);
     }
 
     /**

@@ -31,11 +31,13 @@ export default class HelpToolTips {
                         const elemH = 18;
                         const separation = 2;
                         const makeRect = (x: number, y: number, color: number) => {
+                            const container = new Container();
                             const rect = new Graphics()
                                 .rect(0, 0, elemW, elemH)
                                 .fill(color);
-                            rect.position.set(x, y);
-                            return rect;
+                            container.position.set(x, y);
+                            container.addChild(rect);
+                            return container;
                         };
 
                         const makeText = (text: string) => {

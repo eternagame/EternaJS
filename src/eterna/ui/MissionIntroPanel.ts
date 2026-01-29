@@ -3,7 +3,9 @@ import {
     TextUtil
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
-import {Sprite, Point, Text} from 'pixi.js';
+import {
+    Sprite, Point, Text, Container
+} from 'pixi.js';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import ConstraintBox from 'eterna/constraints/ConstraintBox';
 import type {Glyphs} from 'pixi-glyphs';
@@ -31,7 +33,7 @@ export default class MissionIntroPanel extends ContainerObject {
 
     private _props: MissionIntroPanelProps;
     private _goalsBG: Sprite;
-    private _thumbnail: Sprite;
+    private _thumbnail: Container;
     private _constraints: MissionIntroConstraints;
     private _titleLabel: Text;
     private _descriptionLabel: Glyphs;
@@ -55,7 +57,7 @@ export default class MissionIntroPanel extends ContainerObject {
         this.addObject(this._constraints, this.container);
 
         // Thumbnails
-        this._thumbnail = new Sprite();
+        this._thumbnail = new Container();
         this.container.addChild(this._thumbnail);
 
         const setThumbnail = (targetPairs: SecStruct) => {

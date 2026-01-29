@@ -580,9 +580,18 @@ export default class PoseEditMode extends GameMode {
         } else {
             // Note that we do this first
             for (let i = 0; i < this._poses.length; i++) {
-                this._poses[i].librarySelections = solution.libraryNT.map((idx) => this.transformBaseIndex(
-                    idx, this.poseTargetIndex(i), this._poseState, 0, PoseState.TARGET, false, false, true
-                )).filter((idx) => idx !== null);
+                this._poses[i].librarySelections = solution.libraryNT
+                    .map((idx) => this.transformBaseIndex(
+                        idx,
+                        this.poseTargetIndex(i),
+                        this._poseState,
+                        0,
+                        PoseState.TARGET,
+                        false,
+                        false,
+                        true
+                    ))
+                    .filter((idx): idx is number => idx !== null);
                 this._poses[i].sequence = this.transformSequence(
                     solution.sequence, this.poseTargetIndex(i), 0
                 );

@@ -1,4 +1,5 @@
 import {
+    Container,
     Graphics,
     Rectangle,
     Sprite
@@ -254,7 +255,7 @@ export default class FileInputObject extends DOMObject<HTMLInputElement | HTMLDi
 
         this._dummyDisp.eventMode = 'static';
 
-        this._fakeFileInput = new Sprite();
+        this._fakeFileInput = new Container();
 
         let bg: Graphics;
         if (this._bgColor) {
@@ -409,7 +410,7 @@ export default class FileInputObject extends DOMObject<HTMLInputElement | HTMLDi
     private _borderRadius: number;
     private _labelText: string | undefined;
     private _labelIcon: string | undefined;
-    private _fakeFileInput: Sprite | null;
+    private _fakeFileInput: Container | null;
     private _tooltip: string;
     private _tooltipReg: Registration | null;
     private _pointerTarget: DisplayObjectPointerTarget;

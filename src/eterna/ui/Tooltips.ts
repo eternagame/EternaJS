@@ -1,27 +1,27 @@
+import {PaletteTarget} from 'eterna/ui/toolbar/NucleotidePalette';
+import Fonts from 'eterna/util/Fonts';
+import {
+    AlphaTask,
+    Assert,
+    Button,
+    ContainerObject,
+    DelayTask,
+    DisplayObjectPointerTarget,
+    Easing,
+    Flashbang,
+    GameObject,
+    GameObjectRef,
+    PointerCapture,
+    SerialTask,
+    StyledTextBuilder,
+    TextUtil
+} from 'flashbang';
+import GraphicsObject from 'flashbang/objects/GraphicsObject';
 import {
     Container, Graphics, Point, Rectangle, Text,
     TextStyleOptions
 } from 'pixi.js';
 import {Registration, RegistrationGroup} from 'signals';
-import {
-    StyledTextBuilder,
-    GameObject,
-    Flashbang,
-    SerialTask,
-    Easing,
-    AlphaTask,
-    DelayTask,
-    GameObjectRef,
-    Button,
-    Assert,
-    ContainerObject,
-    DisplayObjectPointerTarget,
-    PointerCapture,
-    TextUtil
-} from 'flashbang';
-import {PaletteTarget} from 'eterna/ui/toolbar/NucleotidePalette';
-import Fonts from 'eterna/util/Fonts';
-import GraphicsObject from 'flashbang/objects/GraphicsObject';
 
 /** A tooltip can be a string, styled text, or a function that creates a DisplayObject */
 export type Tooltip = (() => Container) | string | StyledTextBuilder;
@@ -158,19 +158,21 @@ export default class Tooltips extends GameObject {
 
     private static createTooltip(tooltip: Tooltip): Container {
         if (typeof tooltip === 'string' || tooltip instanceof StyledTextBuilder) {
-            const textField = (typeof tooltip === 'string')
+            const textField = typeof tooltip === 'string'
                 ? new Text({text: tooltip, style: Tooltips.DEFAULT_STYLE})
                 : tooltip.build();
 
             const {height, width} = TextUtil.getTextDimensions(textField);
-            const disp = new Graphics()
+            const container = new Container();
+            const backdrop = new Graphics()
                 .roundRect(0, 0, width + 20, height + 20, 5)
                 .fill({color: 0x0, alpha: 0.8});
             textField.x = 10;
             textField.y = 10;
-            disp.addChild(textField);
-            disp.hitArea = new Rectangle();
-            return disp;
+            container.addChild(backdrop);
+            container.addChild(textField);
+            container.hitArea = new Rectangle();
+            return container;
         } else {
             return tooltip();
         }

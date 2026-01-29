@@ -317,7 +317,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         }
 
         // Play button
-        const playThumbnail = new Sprite();
+        const playThumbnail = new Container();
         const customLayout: Array<[number, number] | [null, null]> | undefined = (
             this._props.puzzle.targetConditions && this._props.puzzle.targetConditions[0]
                 ? this._props.puzzle.targetConditions[0]['custom-layout'] : undefined
@@ -350,7 +350,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
             const shapeData = ExpPainter.transformData(
                 expdata.getShapeData(), expdata.getShapeMax(), expdata.getShapeMin()
             );
-            const resultThumbnail = new Sprite();
+            const resultThumbnail = new Container();
             PoseThumbnail.drawToSprite(
                 resultThumbnail,
                 shapeData,
@@ -455,13 +455,13 @@ export default class ViewSolutionOverlay extends ContainerObject {
         this._content.display.addChild(this._footer);
 
         // Footer separator
-        this._footer.addChild((() => {
-            const line = new Graphics()
+        this._footer.addChild((
+            new Graphics()
                 .moveTo(0, 1)
                 .lineTo(theme.width - theme.margin.left - theme.margin.right, 1)
-                .stroke({width: 1, color: '0x70707080'});
-            return line;
-        })());
+                .stroke({width: 1, color: '0x70707080'})
+
+        ));
 
         // Footer links
         const footerLinks = new Container();

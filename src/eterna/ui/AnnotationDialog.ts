@@ -73,12 +73,11 @@ export default class AnnotationDialog extends WindowDialog<AnnotationData> {
     }
 
     /**
-     * @override
      * This is overridden in order for closing with the x button to not delete the annotation.
      * FIXME: It would be better to change the semantics so that the default close behavior isn't
      * interpreted as removing the annotation.
      */
-    protected close() {
+    protected override close() {
         this._isClosing = true;
         super.close(this._initialAnnotation || null);
     }

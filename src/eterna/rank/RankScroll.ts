@@ -1,5 +1,8 @@
 import {
-    Graphics, Rectangle, Sprite
+    Container,
+    Graphics,
+    Rectangle,
+    Sprite
 } from 'pixi.js';
 import {
     ContainerObject, LocationTask, Easing, SerialTask, VisibleTask, DelayTask,
@@ -278,7 +281,8 @@ export default class RankScroll extends ContainerObject {
         this._playerRow.display.position.set(0, sizeIndicator * RankBoard.ROW_HEIGHT + 4);
         this.addObject(this._playerRow, this.container);
 
-        this._tfRankOffset = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgRankBubble));
+        this._tfRankOffset = new Container();
+        this._tfRankOffset.addChild(new Sprite(BitmapManager.getBitmap(Bitmaps.ImgRankBubble)));
         const rankText = Fonts.std(`+${this._rankOffset}`, 20).color(0).bold().build();
         rankText.position.set(
             (this._tfRankOffset.width - rankText.width) / 2,
@@ -354,7 +358,7 @@ export default class RankScroll extends ContainerObject {
     private _rankBoardBottom: RankBoard;
 
     private _playerRow: RankRowLayout;
-    private _tfRankOffset: Sprite;
+    private _tfRankOffset: Container;
 
     private _scrollAnimDuration: number;
 }
