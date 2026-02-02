@@ -398,6 +398,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
                 thumbnail: new Graphics()
                     .roundRect(0, 0, 52, 52, 10)
                     .fill({color: 0, alpha: 0})
+                    .stroke({width: 2, color: 0xC0DCE7})
                     .moveTo(10, 10)
                     .lineTo(42, 42)
                     .moveTo(42, 10)

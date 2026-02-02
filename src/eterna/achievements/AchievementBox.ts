@@ -64,6 +64,7 @@ export default class AchievementBox extends ContainerObject {
         const background = new Graphics()
             .roundRect(0, 0, theme.size.x, theme.size.y, theme.borderRadius)
             .fill({color: theme.colors.background, alpha: 1})
+            .stroke({width: 1, color: theme.colors.border, alpha: 1})
             .roundRect(0, 0, theme.size.x, theme.headerHeight, theme.borderRadius)
             .fill({color: theme.colors.border})
             .stroke({width: 1, color: theme.colors.border, alpha: 1});

@@ -36,6 +36,7 @@ export default class GraphicsUtil {
         graphics
             .clear()
             .poly([endPoint.x, endPoint.y, n1.x, n1.y, n2.x, n2.y])
+            .fill({color: fillColor, alpha: 1})
             .stroke({width: 1, color: outlineColor});
 
         // draw rectangle

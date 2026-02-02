@@ -25,8 +25,7 @@ export default class LightRay extends GraphicsObject {
         this._display
             .clear()
             .moveTo(0, 2)
-            .lineTo(len, 30)
-            .stroke({width: 0, color: 0, alpha: 0});
+            .lineTo(len, 30);
         for (let ii = 1; ii <= 7; ii++) {
             const lineAngle: number = (Math.PI * (ii - 4)) / 8;
             this._display.lineTo(len + Math.cos(lineAngle) * 30, -Math.sin(lineAngle) * 30);
@@ -35,7 +34,8 @@ export default class LightRay extends GraphicsObject {
         this._display
             .lineTo(len, -30)
             .lineTo(0, -2)
-            .fill({color, alpha: 0.8});
+            .fill({color, alpha: 0.8})
+            .stroke({width: 0, color: 0, alpha: 0});
 
         this._display.rotation = v.angle;
     }
