@@ -1,6 +1,5 @@
 import {HAlign, VAlign} from 'flashbang/core/Align';
 import Flashbang from 'flashbang/core/Flashbang';
-import {Glyphs} from 'pixi-glyphs';
 import {
     Bounds,
     Container,
@@ -12,7 +11,6 @@ import {
 import * as UPNG from 'upng-js';
 import Assert from './Assert';
 import RectangleUtil from './RectangleUtil';
-import TextUtil from './TextUtil';
 
 export default class DisplayUtil {
     public static renderToPNG(target: Container): ArrayBuffer {
@@ -199,12 +197,6 @@ export default class DisplayUtil {
             const scaleY: number = disp.scale.y;
 
             out = disp.getLocalBounds();
-            if (disp instanceof Glyphs) {
-                // Glyphs.getLocalBounds() may return values larger than expected
-                const {height, width} = TextUtil.getTextDimensions(disp);
-                out.height = height;
-                out.width = width;
-            }
 
             RectangleUtil.setTo(out,
                 disp.x + out.x - disp.pivot.x * scaleX,

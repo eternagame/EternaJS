@@ -30,13 +30,11 @@ export default class TextUtil {
 
     /**
      * Returns the height/width of a text sprite.
-     *
-     * If text is `Glyphs`, reference `textContainer`.
-     * `Glyphs`'s height/width does not include `textContainer` dimensions
      */
     public static getTextDimensions(text: Text | Glyphs) {
         if (text instanceof Glyphs) {
-            return {height: text.textContainer.height, width: text.textContainer.width};
+            const {height, width} = text.getLocalBounds();
+            return {height, width};
         } else {
             return {height: text.height, width: text.width};
         }
