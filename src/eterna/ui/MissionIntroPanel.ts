@@ -32,6 +32,7 @@ export default class MissionIntroPanel extends ContainerObject {
     public get size() { return this._size; }
 
     private _props: MissionIntroPanelProps;
+    private _goalsContainer: Container;
     private _goalsBG: Sprite;
     private _thumbnail: Container;
     private _constraints: MissionIntroConstraints;
@@ -45,10 +46,14 @@ export default class MissionIntroPanel extends ContainerObject {
         this._props = props;
 
         this._titleLabel = Fonts.std('GOAL', 24).bold().color(0xFAC244).build();
+        this._titleLabel.label = 'Title';
         this.container.addChild(this._titleLabel);
 
+        this._goalsContainer = new Container();
+        this.container.addChild(this._goalsContainer);
+
         this._goalsBG = Sprite.from(Bitmaps.ImgGoalBackground);
-        this.container.addChild(this._goalsBG);
+        this._goalsContainer.addChild(this._goalsBG);
 
         // Constraints
         this._constraints = new MissionIntroConstraints({
@@ -57,8 +62,8 @@ export default class MissionIntroPanel extends ContainerObject {
         this.addObject(this._constraints, this.container);
 
         // Thumbnails
-        this._thumbnail = new Container();
-        this.container.addChild(this._thumbnail);
+        this._thumbnail = new Container({label: 'Thumbnail'});
+        this._goalsContainer.addChild(this._thumbnail);
 
         const setThumbnail = (targetPairs: SecStruct) => {
             const wrongPairs = new Array(targetPairs.length).fill(-1);
@@ -75,6 +80,7 @@ export default class MissionIntroPanel extends ContainerObject {
                 0,
                 props.customLayout
             );
+            DisplayUtil.center(this._thumbnail, this._goalsContainer);
         };
 
         if (props.puzzleThumbnails.length > 1) {
@@ -93,8 +99,8 @@ export default class MissionIntroPanel extends ContainerObject {
         const updateLayout = () => {
             const {theme} = MissionIntroPanel;
             Assert.assertIsDefined(Flashbang.stageWidth);
-            this._constraints.updateLayout(Flashbang.stageWidth - (this._goalsBG.width + theme.spacing));
-            const width = this._goalsBG.width + theme.spacing + this._constraints.actualWidth;
+            this._constraints.updateLayout(Flashbang.stageWidth - (this._goalsContainer.width + theme.spacing));
+            const width = this._goalsContainer.width + theme.spacing + this._constraints.actualWidth;
 
             // Description
             if (this._descriptionLabel) {
@@ -112,27 +118,26 @@ export default class MissionIntroPanel extends ContainerObject {
             this.container.addChild(this._descriptionLabel);
 
             this._descriptionLabel.position.y = this._titleLabel.height + theme.spacing;
-            this._goalsBG.position.y = this._descriptionLabel.position.y
+            this._goalsContainer.position.y = this._descriptionLabel.position.y
                 + TextUtil.getTextDimensions(this._descriptionLabel).height
                 + theme.spacing;
-            DisplayUtil.center(this._thumbnail, this._goalsBG);
 
             this._constraints.container.position.set(
-                this._goalsBG.width,
-                this._goalsBG.y + 20
+                this._goalsContainer.width,
+                this._goalsContainer.y + 20
             );
 
             if (this._thumbnailButtons) {
                 this._thumbnailButtons.forEach((button, index) => {
                     button.display.position.set(
                         index * (button.container.width + theme.spacing),
-                        this._goalsBG.position.y + this._goalsBG.height + theme.spacing
+                        this._goalsContainer.position.y + this._goalsContainer.height + theme.spacing
                     );
                 });
             }
 
-            const height = this._goalsBG.position.y
-                + this._goalsBG.height
+            const height = this._goalsContainer.position.y
+                + this._goalsContainer.height
                 + (this._thumbnailButtons ? (this._thumbnailButtons[0].container.height + theme.spacing) : 0);
 
             const {headerHeight} = UITheme.missionIntro;
