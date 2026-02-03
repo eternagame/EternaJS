@@ -1,11 +1,10 @@
 import ColorConvert from 'color-convert';
 import {RNABase} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
-import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import Fonts from 'eterna/util/Fonts';
 import {
-    Assert, ColorUtil, DisplayUtil, HAlign, MathUtil, TextureUtil, VAlign
+    Assert, ColorUtil, DisplayUtil, MathUtil, TextureUtil
 } from 'flashbang';
 import {AdjustmentFilter, ColorReplaceFilter} from 'pixi-filters';
 import {
@@ -23,7 +22,7 @@ import BaseDrawFlags from './BaseDrawFlags';
 
 /** Encapsulates textures for a Base type */
 export default class BaseTextures {
-    public baseType: number;
+    public baseType: RNABase;
 
     public letterData: ZoomLevelTexture[];
     public lockIconData: ZoomLevelTexture[];
@@ -32,7 +31,7 @@ export default class BaseTextures {
     public lockData: ZoomLevelTexture[];
     public colorblindLockData: ZoomLevelTexture[];
 
-    constructor(baseType: number) {
+    constructor(baseType: RNABase) {
         this.baseType = baseType;
         this.letterData = BaseTextures.createLetterTextures(baseType, Base.ZOOM_SCALE_FACTOR);
         this.bodyData = BaseTextures.createBodyTextures(baseType, Base.ZOOM_SCALE_FACTOR, false);
@@ -55,7 +54,7 @@ export default class BaseTextures {
         return null;
     }
 
-    private static createBodyTextures(baseType: number, zoomScalar: number, colorblind: boolean): ZoomLevelTexture[] {
+    private static createBodyTextures(baseType: RNABase, zoomScalar: number, colorblind: boolean): ZoomLevelTexture[] {
         /** Size of largest body texture */
         const MAX_SIZE = 40;
 
@@ -145,7 +144,7 @@ export default class BaseTextures {
         ];
     }
 
-    private static getLetterText(baseType: number, sizeScalar = 1, color = 0) {
+    private static getLetterText(baseType: RNABase, sizeScalar = 1, color = 0) {
         return Fonts.std(BaseTextures.type2Letter(baseType))
             .fontSize(18 * sizeScalar)
             .bold()
@@ -153,7 +152,7 @@ export default class BaseTextures {
             .build();
     }
 
-    private static createLetterTextures(baseType: number, zoomScalar: number): ZoomLevelTexture[] {
+    private static createLetterTextures(baseType: RNABase, zoomScalar: number): ZoomLevelTexture[] {
         const texture = TextureUtil.renderToTexture(BaseTextures.getLetterText(baseType));
         return [
             {texture, scale: 1},
@@ -161,7 +160,7 @@ export default class BaseTextures {
         ];
     }
 
-    private static createLockTextures(baseType: number, zoomScalar: number, colorblind: boolean): ZoomLevelTexture[] {
+    private static createLockTextures(baseType: RNABase, zoomScalar: number, colorblind: boolean): ZoomLevelTexture[] {
         /** Size of largest lock */
         const MAX_SIZE = BaseTextures.BODY_SIZE / 1.1;
         /** Size of the upscaled lock */
@@ -197,14 +196,7 @@ export default class BaseTextures {
                     0x111111,
                     0.35
                 )
-            })
-            .fill(
-                ColorUtil.blend(
-                    ColorUtil.compose256(...ColorConvert.hsv.rgb(BaseTextures.type2Color(baseType, colorblind))),
-                    0x111111,
-                    0.35
-                )
-            );
+            });
         lockBg.filters = [new BlurFilter({strength: 1, quality: 40, antialias: 'on'})];
         lockWrapper.addChild(lockBg);
 
@@ -213,7 +205,7 @@ export default class BaseTextures {
             0x111111,
             0.30
         );
-        const lock = new Sprite(BitmapManager.getBitmap(Bitmaps.BaseLock));
+        const lock = Sprite.from(Bitmaps.BaseLock);
         lock.height = RENDER_SIZE * 0.65;
         lock.scale.x = lock.scale.y;
         lock.filters = [new ColorReplaceFilter(
@@ -227,7 +219,7 @@ export default class BaseTextures {
             }
         )];
         lockWrapper.addChild(lock);
-        DisplayUtil.positionRelative(lock, HAlign.CENTER, VAlign.CENTER, lockBg, HAlign.CENTER, VAlign.CENTER);
+        DisplayUtil.center(lock, lockWrapper);
 
         lockWrapper.filters = [new AdjustmentFilter({alpha: 0.85})];
 
@@ -240,7 +232,7 @@ export default class BaseTextures {
     }
 
     // AMW TODO: isn't this just the EPars function?
-    private static type2Letter(baseType: number): 'U' | 'A' | 'G' | 'C' {
+    private static type2Letter(baseType: RNABase): 'U' | 'A' | 'G' | 'C' {
         switch (baseType) {
             case RNABase.URACIL:
                 return 'U';
@@ -256,7 +248,7 @@ export default class BaseTextures {
     }
 
     /** Return the HSV color for the current base type */
-    private static type2Color(baseType: number, colorblind: boolean): [number, number, number] {
+    private static type2Color(baseType: RNABase, colorblind: boolean): [number, number, number] {
         const letter = BaseTextures.type2Letter(baseType);
         switch (letter) {
             case 'A': return colorblind ? [44, 80, 98] : [44, 80, 98];
