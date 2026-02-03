@@ -479,8 +479,8 @@ export default class PoseEditMode extends GameMode {
     }
 
     public async pasteSequence(pasteSequence: Sequence, targetIdx: number): Promise<void> {
-        super.pasteSequence(pasteSequence, targetIdx);
         this.moveHistoryAddSequence('paste', pasteSequence.toString());
+        await super.pasteSequence(pasteSequence, targetIdx);
     }
 
     public onHintClicked(): void {

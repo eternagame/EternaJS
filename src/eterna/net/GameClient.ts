@@ -72,7 +72,8 @@ export default class GameClient {
                 }
 
                 return Number(json['data']['uid']);
-            });
+            })
+            .then((res) => this.refreshCsrfToken().then(() => res));
     }
 
     /**
@@ -80,7 +81,25 @@ export default class GameClient {
      */
     public logout(): Promise<void> {
         return this.get('/eterna_logout.php', {noredirect: true})
-            .then((rsp) => rsp.text()).then(() => {});
+            .then((rsp) => rsp.text())
+            .then(() => {})
+            .then((res) => this.refreshCsrfToken().then(() => res));
+    }
+
+    public refreshCsrfToken(): Promise<void> {
+        return this.get(`${GameClient.GET_URI}csrf-token`)
+            .then((rsp) => rsp.json())
+            .then((resp) => {
+                this._csrfToken = resp['token'];
+            });
+    }
+
+    public get csrfHostname(): string {
+        return new URL(this.baseURL).hostname;
+    }
+
+    public get csrfToken(): string {
+        return this._csrfToken;
     }
 
     /**
@@ -274,6 +293,8 @@ export default class GameClient {
     private makeURL(urlString: string): URL {
         return new URL(urlString, this.baseURL);
     }
+
+    private _csrfToken: string = '';
 
     private static GET_URI: string = '/get/';
     private static POST_URI: string = '/post/';

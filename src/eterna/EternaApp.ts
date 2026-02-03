@@ -216,6 +216,14 @@ export default class EternaApp extends FlashbangApp {
         }
     }
 
+    public get csrfToken(): string {
+        return Eterna.client.csrfToken;
+    }
+
+    public get csrfHostname(): string {
+        return Eterna.client.csrfHostname;
+    }
+
     /* override */
     protected setup(): void {
         Eterna.app = this;
@@ -579,7 +587,8 @@ export default class EternaApp extends FlashbangApp {
 
     private authenticate(): Promise<void> {
         if (!Eterna.DEV_MODE) {
-            return Eterna.client.authenticate()
+            return Eterna.client.refreshCsrfToken()
+                .then(() => Eterna.client.authenticate())
                 .then(([username, uid]) => {
                     log.debug(`Authenticated as [name=${username}, uid=${uid}]`);
                     Eterna.setPlayer(username, uid);
@@ -589,7 +598,8 @@ export default class EternaApp extends FlashbangApp {
             // If no player is specified, ensure that no user is authenticated,
             // allowing for testing as a nonauthenticated user
             if (playerID === undefined || playerID.length === 0) {
-                return Eterna.client.logout()
+                return Eterna.client.refreshCsrfToken()
+                    .then(() => Eterna.client.logout())
                     .catch((err) => {
                         log.debug(`Logout error: ${err}`);
                     });
@@ -605,10 +615,12 @@ export default class EternaApp extends FlashbangApp {
                     });
             }
             log.debug(`Logging in ${playerID}...`);
-            return Eterna.client.login(playerID, playerPassword).then((uid) => {
-                log.debug(`Logged in [name=${playerID}, uid=${uid}]`);
-                Eterna.setPlayer(playerID, uid);
-            });
+            return Eterna.client.refreshCsrfToken()
+                .then(() => Eterna.client.login(playerID, playerPassword))
+                .then((uid) => {
+                    log.debug(`Logged in [name=${playerID}, uid=${uid}]`);
+                    Eterna.setPlayer(playerID, uid);
+                });
         }
     }
 
