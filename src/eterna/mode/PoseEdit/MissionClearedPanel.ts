@@ -36,6 +36,7 @@ export default class MissionClearedPanel extends ContainerObject {
 
     constructor(hasNextPuzzle: boolean, infoText: string | null = null, moreText: string | null = null) {
         super();
+        this.container.label = 'Mission Cleared Panel';
 
         this._hasNextPuzzle = hasNextPuzzle;
         this._infoText = infoText || 'You have solved the puzzle, congratulations!';
@@ -63,6 +64,7 @@ export default class MissionClearedPanel extends ContainerObject {
         const panelWidth = MissionClearedPanel.calcWidth();
 
         this._contentLayout = new VLayoutContainer(10, HAlign.CENTER);
+        this._contentLayout.label = 'Content Layout';
         this._contentLayout.position.set(theme.margin.left, theme.margin.top);
         this.container.addChild(this._contentLayout);
 
@@ -86,7 +88,7 @@ export default class MissionClearedPanel extends ContainerObject {
             .color(0xffffff)
             .lineHeight(1.2)
             .selectable(false);
-        this._infoObj.display.label = 'InfoTextObj';
+        this._infoObj.display.label = 'Info Text';
         // Images should be centered, even if the HTML doesn't specify it
         DOMObject.applyStyleRecursive(this._infoObj.element, {display: 'block', margin: 'auto'}, false, ['img']);
         this.addObject(this._infoObj, this._infoContainer);
@@ -150,6 +152,7 @@ export default class MissionClearedPanel extends ContainerObject {
         Assert.assertIsDefined(this.mode);
 
         this.regs.add(this.mode.resized.connect(() => this.onResize()));
+        this.regs.add(this.mode.lateUpdate.connect(() => this.onResize()).once());
         this.onResize();
     }
 
@@ -158,9 +161,7 @@ export default class MissionClearedPanel extends ContainerObject {
             return;
         }
 
-        if (this._rankScroll != null) {
-            this._rankScroll.destroySelf();
-        }
+        this._rankScroll?.destroySelf();
 
         this._rankScroll = RankScroll.fromSubmissionResponse(submissionRsp);
         this._rankScroll.display.alpha = 0;

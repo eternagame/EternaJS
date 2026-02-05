@@ -9,6 +9,7 @@ export default class RankRowLayout extends ContainerObject {
         fontSize: number = 18, maxNameWidth: number = -1, textColor: number = 0xFFFFFF
     ) {
         super();
+        this.display.label = 'Rank Row Layout';
 
         this._tfName = Fonts.std('', fontSize).color(textColor).build();
         this.container.addChild(this._tfName);

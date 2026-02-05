@@ -187,17 +187,14 @@ export default class DisplayUtil {
     public static getBoundsRelative(
         disp: Container, targetSpace: Container | null
     ): Bounds {
-        let out: Bounds;
-
         if (targetSpace === disp || targetSpace === null) {
-            out = disp.getLocalBounds();
+            return disp.getLocalBounds();
         } else if (targetSpace === disp.parent && !DisplayUtil.isRotated(disp)) {
             // optimization
             const scaleX: number = disp.scale.x;
             const scaleY: number = disp.scale.y;
 
-            out = disp.getLocalBounds();
-
+            const out = disp.getLocalBounds().clone();
             RectangleUtil.setTo(out,
                 disp.x + out.x - disp.pivot.x * scaleX,
                 disp.y + out.y - disp.pivot.y * scaleY,
@@ -212,12 +209,11 @@ export default class DisplayUtil {
                 out.height *= -1;
                 out.y -= out.height;
             }
+            return out;
         } else {
             DisplayUtil.getTransformationMatrix(disp, targetSpace, DisplayUtil.GET_BOUNDS_RELATIVE_MATRIX);
-            out = RectangleUtil.getBounds(disp.getLocalBounds(), DisplayUtil.GET_BOUNDS_RELATIVE_MATRIX);
+            return RectangleUtil.getBounds(disp.getLocalBounds(), DisplayUtil.GET_BOUNDS_RELATIVE_MATRIX);
         }
-
-        return out;
     }
 
     /** Transforms a Rectangle from one DisplayObject's coordinate space to another's. */
