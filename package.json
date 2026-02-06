@@ -86,7 +86,7 @@
     "pchip": "^1.0.2",
     "pixi-filters": "^6.1.5",
     "pixi-glyphs": "^5.0.11",
-    "pixi.js": "^8.15.0",
+    "pixi.js": "^8.16.0",
     "regenerator-runtime": "^0.14.1",
     "store": "^2.0.12",
     "three": "^0.118.0",
