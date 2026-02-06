@@ -209,6 +209,7 @@ export default class Pose3DDialog extends WindowDialog<void> {
 
                 // We've removed the 3D view, but NGL hasn't been fully destroyed yet
                 if (!this._nglSprite.display.texture) return;
+                this._nglSprite.display.texture.source.update();
                 this._nglSprite.display.texture.update();
             }
         };
