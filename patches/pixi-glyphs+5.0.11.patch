@@ -1,0 +1,12 @@
+diff --git a/node_modules/pixi-glyphs/package.json b/node_modules/pixi-glyphs/package.json
+index eb23cad..dcb367e 100644
+--- a/node_modules/pixi-glyphs/package.json
++++ b/node_modules/pixi-glyphs/package.json
+@@ -4,6 +4,7 @@
+   "description": "Glyphs - Advanced text rendering for pixi.js",
+   "author": "Mims Wright, JT Smith, tleunen",
+   "license": "MIT",
++  "type": "module",
+   "repository": {
+     "type": "git",
+     "url": "git://github.com/rizen/pixi-glyphs.git"

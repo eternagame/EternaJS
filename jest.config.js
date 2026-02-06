@@ -38,8 +38,7 @@ module.exports = {
   "moduleNameMapper": {
     "\\.(css|less)$": "assets/__mocks__/styleMock.js",
     "engines-bin/(.*)": `${getEngineLocation()}/$1`,
-    '^(\\.{1,2}/.*)\\.js$': '$1',
-    '^pixi-tagged-text': '<rootDir>/../node_modules/pixi-tagged-text/dist/pixi-tagged-text.js'
+    '^(\\.{1,2}/.*)\\.js$': '$1'
   },
   "transform": {
     "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|onnx|wasm)$": "<rootDir>/../assets/__mocks__/fileTransformer.js",
