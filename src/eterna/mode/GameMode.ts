@@ -416,7 +416,7 @@ export default abstract class GameMode extends AppMode {
             .catch((err) => {
                 this.showNotification(`There was an error posting the screenshot\n${err}`);
             })
-            ./* finally */then(() => {
+            .finally(() => {
                 this.popUILock('Screenshot');
             });
     }

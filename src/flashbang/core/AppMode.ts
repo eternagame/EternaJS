@@ -19,7 +19,7 @@ import Updatable from './Updatable';
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type ObjectID = Object | string;
 
-export default class AppMode implements PointerTarget {
+export default abstract class AppMode implements PointerTarget {
     /** Default keyboard input processor */
     public readonly keyboardInput: KeyboardInput = new KeyboardInput();
 
@@ -115,23 +115,8 @@ export default class AppMode implements PointerTarget {
             return Promise.resolve();
         } else {
             return new Promise((resolve, reject) => {
-                this._entered.connect(() => {
-                    // if (resolve != null) {
-                    const fn = resolve;
-                    // resolve = null;
-                    // reject = null;
-                    fn();
-                    // }
-                });
-
-                this._disposed.connect(() => {
-                    // if (reject != null) {
-                    const fn = reject;
-                    // resolve = null;
-                    // reject = null;
-                    fn('Mode was disposed');
-                    // }
-                });
+                this._entered.connect(() => resolve());
+                this._disposed.connect(() => reject(new Error('Mode was disposed')));
             });
         }
     }
