@@ -9,7 +9,7 @@ import {
     Box3,
     Component, getFileInfo, Matrix4, MouseActions, ParserRegistry, PickingProxy, Stage, Structure, Vector2, Vector3
 } from 'ngl';
-import {Sprite} from 'pixi.js';
+import {Container, Sprite} from 'pixi.js';
 import TextBalloon from 'eterna/ui/TextBalloon';
 import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer';
 import {OutlinePass} from 'three/examples/jsm/postprocessing/OutlinePass';
@@ -86,8 +86,11 @@ export default class Pose3DDialog extends WindowDialog<void> {
             ambientColor: 0xffffff
         });
 
+        this._nglContainer = new Container({label: 'NGL Container'});
+        this._window.content.addChild(this._nglContainer);
+
         this._nglSprite = new SpriteObject(Sprite.from(this._nglStage.viewer.renderer.domElement));
-        this.addObject(this._nglSprite, this._window.content);
+        this.addObject(this._nglSprite, this._nglContainer);
 
         const eventPropagator = new PointerEventPropagator(this._nglSprite, this._nglStage.viewer.renderer.domElement);
         this.addObject(eventPropagator);
@@ -291,6 +294,7 @@ export default class Pose3DDialog extends WindowDialog<void> {
         this._effectFXAA.uniforms['resolution'].value.set(1 / width, 1 / height);
         this._nglStage.viewer.render(false);
 
+        this._nglContainer.setSize(width, height);
         this._nglSprite.display.width = width;
         this._nglSprite.display.height = height;
     }
@@ -432,6 +436,7 @@ export default class Pose3DDialog extends WindowDialog<void> {
 
     private _nglDragState: NGLDragState = NGLDragState.ROTATE;
 
+    private _nglContainer: Container;
     private _nglDiv: HTMLElement;
     private _nglStage: Stage;
     private _nglSprite: SpriteObject;
