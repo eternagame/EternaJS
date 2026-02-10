@@ -1,20 +1,21 @@
-import {
-    Container,
-    Graphics,
-    Rectangle,
-    Sprite
-} from 'pixi.js';
-import {Signal, Registration} from 'signals';
+import Eterna from 'eterna/Eterna';
+import Fonts from 'eterna/util/Fonts';
 import {
     DOMObject,
     DisplayObjectPointerTarget,
     TextBuilder
 } from 'flashbang';
-import Eterna from 'eterna/Eterna';
-import Fonts from 'eterna/util/Fonts';
 import {FontWeight} from 'flashbang/util/TextBuilder';
-import UITheme from './UITheme';
+import {
+    Container,
+    Graphics,
+    Rectangle,
+    Sprite,
+    StrokeInput
+} from 'pixi.js';
+import {Registration, Signal} from 'signals';
 import Tooltips from './Tooltips';
+import UITheme from './UITheme';
 
 interface FileInputObjectProps {
     id: string;
@@ -257,16 +258,15 @@ export default class FileInputObject extends DOMObject<HTMLInputElement | HTMLDi
 
         this._fakeFileInput = new Container();
 
-        let bg: Graphics;
+        const border: StrokeInput = {width: this._border ? 1 : 0};
+        if (this._borderColor) {
+            border.color = this._borderColor;
+        }
+        const bg = new Graphics()
+            .roundRect(0, 0, this.width, this.height, this._borderRadius)
+            .stroke(border);
         if (this._bgColor) {
-            bg = new Graphics()
-                .roundRect(0, 0, this.width, this.height, this._borderRadius)
-                .stroke({width: this._border ? 1 : 0, color: this._borderColor})
-                .fill(this._bgColor);
-        } else {
-            bg = new Graphics()
-                .roundRect(0, 0, this.width, this.height, this._borderRadius)
-                .stroke({width: this._border ? 1 : 0, color: this._borderColor});
+            bg.fill(this._bgColor);
         }
         this._fakeFileInput.addChild(bg);
 
