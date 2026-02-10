@@ -293,10 +293,7 @@ export default class Pose3DDialog extends WindowDialog<void> {
         this._composer.setSize(width, height);
         this._effectFXAA.uniforms['resolution'].value.set(1 / width, 1 / height);
         this._nglStage.viewer.render(false);
-
         this._nglContainer.setSize(width, height);
-        this._nglSprite.display.width = width;
-        this._nglSprite.display.height = height;
     }
 
     /**
