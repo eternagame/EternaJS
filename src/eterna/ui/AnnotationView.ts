@@ -32,7 +32,7 @@ export default class AnnotationView extends ContainerObject {
         textColor: number
     ) {
         super();
-
+        this.display.label = 'Annotation View';
         this._pose = pose;
         this._type = type;
         this._rangeIndex = rangeIndex;
@@ -90,7 +90,6 @@ export default class AnnotationView extends ContainerObject {
             && !this._item.selected
         ) {
             // Use annotation collapsed view
-            // TODO: v8 Migration - Verify new Container composition
             this._collapsedAnnotationContainer = new Container();
             this._annotationSprite = Sprite.from(Bitmaps.ImgAnnotation);
             this._annotationSprite.width = AnnotationView.COLLAPSED_ANNOTATION_ICON_LENGTH;

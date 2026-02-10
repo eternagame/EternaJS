@@ -60,7 +60,6 @@ export default class PoseThumbnail {
         return newGraphics;
     }
 
-    // TODO: V8 Migration - Remove children from Sprites/Graphics
     public static drawToSprite(
         thumbnailContainer: Container,
         sequence: number[],

@@ -15,9 +15,9 @@ export default class TextureUtil {
 
     public static async load(source: string | string[]): Promise<void> {
         if (typeof source === 'string') {
-            await this.loadURL(source as string);
+            await this.loadURL(source);
         } else {
-            await this.loadURLs(source as string[]);
+            await this.loadURLs(source);
         }
     }
 

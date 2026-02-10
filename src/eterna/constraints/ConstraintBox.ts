@@ -74,7 +74,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._bg.visible = false;
         this.container.addChild(this._bg);
 
-        this._icon = new Sprite();
+        this._icon = new Container();
         this._icon.visible = false;
         this.container.addChild(this._icon);
 

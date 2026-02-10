@@ -133,7 +133,6 @@ export default class ROPTextbox extends RScriptOp {
                     textContainer.addChild(newText);
                 }));
             } else if (component.type === 'img') {
-                // TODO: v8 Migration - Verify that the sprite loads correctly here
                 const sprite = Sprite.from(component.value);
                 TextureUtil.load(component.value).then(() => {
                     sprite.width = Math.min(vLayout.width, sprite.texture.width);

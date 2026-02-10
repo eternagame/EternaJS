@@ -52,6 +52,7 @@ export default class AnnotationPanelItem extends ContainerObject {
 
     constructor(props: AnnotationPanelItemProps) {
         super();
+        this.display.label = 'Annotation Panel Item';
         this._data = props.data;
         this._indexPath = props.indexPath;
         this._width = props.width;
@@ -157,8 +158,7 @@ export default class AnnotationPanelItem extends ContainerObject {
         }
 
         // Set up visibility button
-        // TODO: v8 Migration - Verify new Container composition
-        const visibilityContainer = new Container();
+        const visibilityContainer = new Container({label: 'Visibility Container'});
 
         this._visibilityButtonBackground = new Graphics()
             .rect(
@@ -288,6 +288,7 @@ export default class AnnotationPanelItem extends ContainerObject {
             );
         this._itemButton = new GameButton()
             .customStyleBox(this._itemButtonBackground);
+        this._itemButton.display.label = 'Annotation Item Button';
         this._itemButton.display.cursor = 'default';
         this._itemButton.clicked.connect(() => {
             this.isSelected.value = !this.isSelected.value;
@@ -389,8 +390,7 @@ export default class AnnotationPanelItem extends ContainerObject {
             this.addObject(this._itemNameInput, textContainer);
 
             // Set up save edit button
-            // TODO: v8 Migration - Verify new Container composition
-            const itemSaveEditContainer = new Container();
+            const itemSaveEditContainer = new Container({label: 'Save Edit Container'});
 
             this._itemSaveEditButtonBackground = new Graphics()
                 .rect(
@@ -424,8 +424,7 @@ export default class AnnotationPanelItem extends ContainerObject {
             this.addObject(this._itemSaveEditButton, textContainer);
 
             // Set up cancel edit button
-            // TODO: v8 Migration - Verify new Container composition
-            const itemCancelEditContainer = new Container();
+            const itemCancelEditContainer = new Container({label: 'Cancel Edit Container'});
             this._itemCancelEditButtonBackground = new Graphics()
                 .rect(
                     0,

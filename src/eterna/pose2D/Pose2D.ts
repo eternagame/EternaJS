@@ -143,7 +143,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._currentColor = -1;
         }
 
-        this._annotationCanvas = new Graphics();
+        this._annotationCanvas = new Container();
         this.container.addChild(this._annotationCanvas);
 
         this._annotationContextMenu = new ContextMenu({horizontal: true});
@@ -3924,7 +3924,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         } else {
             const obj = this._energyHighlights[idx];
             obj.display.visible = vis;
-            Pose2D.drawEnergyHighlight(obj.display as Graphics, energy);
+            Pose2D.drawEnergyHighlight(obj.display, energy);
         }
     }
 
@@ -4468,13 +4468,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _expExtendedScale: boolean = false;
 
     private _highlightEnergyText: boolean = false;
-    private _energyHighlights: SceneObject[] = [];
+    private _energyHighlights: SceneObject<Graphics>[] = [];
 
     private _showNucleotideRange: [number, number] | null = null;
 
     // Annotations
     private _annotationManager: AnnotationManager;
-    private _annotationCanvas: Graphics;
+    private _annotationCanvas: Container;
     private _annotationViews: AnnotationView[] = [];
     private _annotationHighlightBox: HighlightBox;
     private _annotationContextMenu: ContextMenu;
