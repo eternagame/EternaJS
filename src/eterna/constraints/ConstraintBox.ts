@@ -66,6 +66,8 @@ export interface ConstraintBoxConfig {
 }
 
 export default class ConstraintBox extends ContainerObject implements Enableable {
+    private static readonly BG_GRAPHICS_WIDTH = 111;
+
     constructor(forMissionScreen: boolean, states = 1) {
         super();
         this._forMissionScreen = forMissionScreen;
@@ -235,15 +237,15 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         balloon.styledText = tooltipText;
         this.setMouseOverObject(balloon, toolTipContainer);
 
-        this._bgGraphics.visible = config.drawBG || false;
+        this._bgGraphics.visible = config.drawBG ?? false;
         if (this._bgGraphics.visible) {
             this._bgGraphics.clear()
-                .roundRect(0, 0, 111, this._forMissionScreen ? 55 : 75, 15)
+                .roundRect(0, 0, ConstraintBox.BG_GRAPHICS_WIDTH, this._forMissionScreen ? 55 : 75, 15)
                 .fill({color: 0x1E314B, alpha: 0.5});
             this.initOpaqueBackdrop(this._bgGraphics.width, this._bgGraphics.height);
         }
 
-        this._bg.visible = config.thumbnailBG || false;
+        this._bg.visible = config.thumbnailBG ?? false;
         if (this._bg.visible) {
             if (config.satisfied) {
                 this._bg.texture = BitmapManager.getBitmap(Bitmaps.NovaPuzThumbSmallMet);
@@ -284,9 +286,10 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             this._icon.visible = true;
             this._icon.removeChildren();
 
+            const iconYOffset = this._forMissionScreen ? 2.5 : 5;
             if (config.icon instanceof Texture) {
                 const sprite = Sprite.from(config.icon);
-                sprite.position.set((111 - this._icon.width) * 0.5, 5);
+                sprite.position.set((ConstraintBox.BG_GRAPHICS_WIDTH - sprite.width) / 2, iconYOffset);
                 this._icon.addChild(sprite);
             } else if (config.icon instanceof Graphics) {
                 this._icon.addChild(config.icon);
@@ -295,13 +298,13 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                     .fromBase64PNG(config.icon)
                     .then((tex) => {
                         const sprite = Sprite.from(tex);
-                        sprite.position.set((111 - this._icon.width) * 0.5, 5);
+                        sprite.position.set((ConstraintBox.BG_GRAPHICS_WIDTH - sprite.width) / 2, iconYOffset);
                         this._icon.addChild(sprite);
                     });
             }
         }
 
-        this._noText.visible = config.noText || false;
+        this._noText.visible = config.noText ?? false;
 
         if (config.satisfiedIndicators !== false) {
             if (config.satisfied && !this._satisfied) {
