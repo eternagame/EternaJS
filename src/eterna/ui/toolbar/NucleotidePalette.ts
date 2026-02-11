@@ -215,7 +215,7 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
             flip: boolean
         ) => {
             const tri = new Graphics({
-                filters: [new BlurFilter({strength: 1, quality: 16}), new AdjustmentFilter({alpha})]
+                filters: [new BlurFilter({strength: 1.25, quality: 16}), new AdjustmentFilter({alpha, brightness: 2})]
             })
                 .poly(
                     flip
