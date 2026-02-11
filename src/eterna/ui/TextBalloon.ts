@@ -1,11 +1,14 @@
-import type {Glyphs} from 'pixi-glyphs';
-import {
-    StyledTextBuilder, DisplayUtil, ContainerObject, TextUtil
-} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
+import {
+    ContainerObject,
+    DisplayUtil,
+    StyledTextBuilder,
+    TextUtil
+} from 'flashbang';
+import {Text} from 'pixi.js';
+import {FontWeight} from '../../flashbang/util/TextBuilder';
 import GameButton from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';
-import {FontWeight} from '../../flashbang/util/TextBuilder';
 
 export default class TextBalloon extends ContainerObject {
     constructor(
@@ -64,7 +67,7 @@ export default class TextBalloon extends ContainerObject {
         this.updateView();
     }
 
-    public get text(): Glyphs {
+    public get text(): Text {
         return this._text;
     }
 
@@ -202,7 +205,7 @@ export default class TextBalloon extends ContainerObject {
     protected _button: GameButton;
 
     private _panel: GamePanel;
-    protected _text: Glyphs;
+    protected _text: Text;
     protected _centered: boolean = false;
     protected _hasTitle: boolean = false;
 

@@ -1,19 +1,23 @@
-import {
-    ContainerObject, StyledTextBuilder, DisplayUtil, Flashbang,
-    TextUtil
-} from 'flashbang';
-import Fonts from 'eterna/util/Fonts';
-import {
-    Sprite, Point, Text, Container
-} from 'pixi.js';
-import Bitmaps from 'eterna/resources/Bitmaps';
 import ConstraintBox from 'eterna/constraints/ConstraintBox';
-import type {Glyphs} from 'pixi-glyphs';
-import Assert from 'flashbang/util/Assert';
+import Bitmaps from 'eterna/resources/Bitmaps';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
-import MissionIntroConstraints from './MissionIntroConstraints';
+import Fonts from 'eterna/util/Fonts';
+import {
+    ContainerObject,
+    DisplayUtil, Flashbang,
+    StyledTextBuilder,
+    TextUtil
+} from 'flashbang';
+import Assert from 'flashbang/util/Assert';
+import {
+    Container,
+    Point,
+    Sprite,
+    Text
+} from 'pixi.js';
 import GameButton from './GameButton';
+import MissionIntroConstraints from './MissionIntroConstraints';
 import PoseThumbnail, {PoseThumbnailType} from './PoseThumbnail';
 import UITheme from './UITheme';
 
@@ -37,7 +41,7 @@ export default class MissionIntroPanel extends ContainerObject {
     private _thumbnail: Container;
     private _constraints: MissionIntroConstraints;
     private _titleLabel: Text;
-    private _descriptionLabel: Glyphs;
+    private _descriptionLabel: Text;
     private _thumbnailButtons?: GameButton[];
     private _size = new Point();
 

@@ -1,4 +1,3 @@
-import {Glyphs} from 'pixi-glyphs';
 import {Text} from 'pixi.js';
 
 export default class TextUtil {
@@ -31,12 +30,8 @@ export default class TextUtil {
     /**
      * Returns the height/width of a text sprite.
      */
-    public static getTextDimensions(text: Text | Glyphs) {
-        if (text instanceof Glyphs) {
-            const {height, width} = text.getLocalBounds();
-            return {height, width};
-        } else {
-            return {height: text.height, width: text.width};
-        }
+    public static getTextDimensions(text: Text): {height:number, width: number} {
+        const {height, width} = text.getLocalBounds();
+        return {height, width};
     }
 }

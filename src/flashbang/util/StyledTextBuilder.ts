@@ -1,13 +1,19 @@
 import log from 'loglevel';
-import {Glyphs} from 'pixi-glyphs';
-import type {TextStyleExtended, TextStyleSet} from 'pixi-glyphs/dist/types';
-import {TextStyleOptions} from 'pixi.js';
+import {Text, TextStyle, TextStyleOptions} from 'pixi.js';
 import ColorUtil from './ColorUtil';
 
 export default class StyledTextBuilder {
-    constructor(defaultStyle?: TextStyleExtended | TextStyleOptions) {
-        if (defaultStyle !== undefined) {
-            this.defaultStyle(defaultStyle);
+    constructor(defaultStyle: TextStyle | TextStyleOptions | null = null) {
+        if (defaultStyle) {
+            if (defaultStyle instanceof TextStyle) {
+                this._style = defaultStyle.clone();
+                // Ensures that `_style.tagStyles` is never undefined
+                this._style.tagStyles ??= {};
+            } else {
+                this._style = new TextStyle({...defaultStyle, tagStyles: defaultStyle.tagStyles ?? {}});
+            }
+        } else {
+            this._style = new TextStyle({tagStyles: {}});
         }
     }
 
@@ -15,50 +21,47 @@ export default class StyledTextBuilder {
         return this._text;
     }
 
-    /** Creates a new Glyphs text */
-    public build(): Glyphs {
+    /** Creates a new Text */
+    public build(): Text {
         if (this._styleStack.length > 0) {
             log.warn('Unpopped styles');
         }
 
-        return new Glyphs(this._text, this.cloneStyles());
+        return new Text({text: this._text, style: this.cloneStyle()});
     }
 
-    /** Applies the styled text to an existing Glyphs object */
-    public apply(textField: Glyphs): void {
+    /** Applies the styled text to an existing Text instance */
+    public apply(textField: Text): void {
         if (this._styleStack.length > 0) {
             log.warn('Unpopped styles');
         }
 
         textField.text = this._text;
-        textField.setTagStyles(this.cloneStyles());
+        textField.style = this.cloneStyle();
     }
 
-    public defaultStyle(style: TextStyleExtended | TextStyleOptions): this {
-        return this.addStyle('default', style);
-    }
-
-    public addStyle(name: string, style: TextStyleExtended | TextStyleOptions): this {
-        if (this._styles[name] != null) {
-            log.warn(`Redefining existing style '${name}'`);
-        }
-        // If we were passed a PIXI.TextStyle and pass that on to MultiStyleText, MultiStyleText
-        // will copy the private values of the TextStyle rather than the public getters,
-        // since the getters are not enumerable. This means that if we then override any values
-        // with a different style, it won't properly override the underscore-prefixed property
-        // since when the styles are merged, both will be present and apparently the
-        // underscore-prefixed one is preferred... which frankly I don't understad looking at the
-        // source for MultiStyleText, but here we are.
-        this._styles[name] = Object.fromEntries(
-            Object.entries(style).map(([key, value]) => [key.replace(/^_/, ''), value])
-        );
+    public defaultStyle(style: TextStyle): this {
+        const tagStyles = this._style.tagStyles ?? {};
+        const updatedStyle = style.clone();
+        updatedStyle.tagStyles = tagStyles;
+        this._style = updatedStyle;
         return this;
     }
 
-    public pushStyle(style: TextStyleExtended | string): this {
+    public addStyle(name: string, style: TextStyleOptions): this {
+        this._style.tagStyles ??= {};
+        if (this._style.tagStyles[name]) {
+            log.warn(`Redefining existing style '${name}'`);
+        }
+        this._style.tagStyles[name] = {...this._style.tagStyles[name], ...style};
+        return this;
+    }
+
+    public pushStyle(style: string | TextStyleOptions): this {
+        this._style.tagStyles ??= {};
         let styleName: string;
-        if (typeof (style) === 'string') {
-            if (this._styles[style] == null) {
+        if (typeof style === 'string') {
+            if (!this._style.tagStyles[style]) {
                 log.warn(`Unrecognized style '${style}'`);
             }
             // Use a registered style
@@ -66,7 +69,7 @@ export default class StyledTextBuilder {
         } else {
             // Create a new anonymous style
             styleName = `_Style${this._anonymousStyleCounter++}`;
-            this._styles[styleName] = style;
+            this._style.tagStyles[styleName] = style;
         }
 
         this._styleStack.push(styleName);
@@ -84,7 +87,7 @@ export default class StyledTextBuilder {
         return this;
     }
 
-    public append(text: string, style?: TextStyleExtended | string): this {
+    public append(text: string, style?: string | TextStyleOptions): this {
         if (style) {
             this.pushStyle(style);
         }
@@ -101,10 +104,13 @@ export default class StyledTextBuilder {
      * Supported tags: <font color = "#xxxxxx">, <b>
      */
     public appendHTMLStyledText(text: string): this {
-        type CreateStyleCallback = (openTagMatch: RegExpExecArray) => [string, TextStyleExtended];
+        type CreateStyleCallback = (openTagMatch: RegExpExecArray) => [string, TextStyleOptions];
 
         const parseHTMLStyle = (
-            rawText: string, openTag: RegExp, closeTag: RegExp, createStyle: CreateStyleCallback
+            rawText: string,
+            openTag: RegExp,
+            closeTag: RegExp,
+            createStyle: CreateStyleCallback
         ): string => {
             while (true) {
                 const openMatch = openTag.exec(rawText);
@@ -155,34 +161,30 @@ export default class StyledTextBuilder {
         return this.append(text);
     }
 
-    public getStyle(name: string): TextStyleExtended {
-        return this._styles[name];
+    public getStyle(name: string): TextStyleOptions | null {
+        return this._style.tagStyles?.[name] ?? null;
     }
 
     /** True if a style with the given name is registered */
     public hasStyle(name: string): boolean {
-        return this._styles[name] != null;
+        return !!this._style.tagStyles?.[name];
     }
 
     public clone(): StyledTextBuilder {
         const out: StyledTextBuilder = new StyledTextBuilder();
         out._styleStack = this._styleStack.slice();
         out._text = this._text;
-        out._styles = this.cloneStyles();
+        out._style = this.cloneStyle();
         return out;
     }
 
-    private cloneStyles(): TextStyleSet {
-        const out: TextStyleSet = {};
-        for (const [key, value] of Object.entries(this._styles)) {
-            out[key] = value;
-        }
-        return out;
+    private cloneStyle(): TextStyle {
+        return this._style.clone();
     }
 
     private _styleStack: string[] = [];
-    private _styles: TextStyleSet = {};
-    private _text = '';
+    private _style: TextStyle;
+    private _text: string = '';
 
     private _anonymousStyleCounter = 0;
 }

@@ -29,7 +29,6 @@ import BitmapManager from 'eterna/resources/BitmapManager';
 import EternaURL from 'eterna/net/EternaURL';
 import TextInputObject from 'eterna/ui/TextInputObject';
 import ScrollBox from 'eterna/ui/ScrollBox';
-import {Glyphs} from 'pixi-glyphs';
 import Feedback from 'eterna/Feedback';
 import SliderBar from 'eterna/ui/SliderBar';
 import {FontWeight} from 'flashbang/util/TextBuilder';
@@ -636,16 +635,19 @@ export default class ViewSolutionOverlay extends ContainerObject {
         }
 
         const {theme} = ViewSolutionOverlay;
-        return new Glyphs(text, {
-            default: {
+        return new Text({
+            text,
+            style: {
                 fontFamily: Fonts.STDFONT,
                 fontSize: 13,
                 fill: 0xffffff,
                 wordWrap: true,
-                wordWrapWidth: theme.width - 40
-            },
-            bold: {fontWeight: 'bold'},
-            orange: {fill: 0xffcc00}
+                wordWrapWidth: theme.width - 40,
+                tagStyles: {
+                    bold: {fontWeight: 'bold'},
+                    orange: {fill: 0xffcc00}
+                }
+            }
         });
     }
 

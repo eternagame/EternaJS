@@ -9,9 +9,13 @@ import {
     DisplayObjectPointerTarget, DisplayUtil, Dragger, HAlign, HLayoutContainer, InputUtil,
     KeyCode, MathUtil, StyledTextBuilder, TextUtil, VAlign, VLayoutContainer
 } from 'flashbang';
-import {Glyphs} from 'pixi-glyphs';
 import {
-    Container, Graphics, Point, Rectangle, Text, FederatedPointerEvent
+    Container,
+    FederatedPointerEvent,
+    Graphics,
+    Point,
+    Rectangle,
+    Text
 } from 'pixi.js';
 import GameButton from './GameButton';
 import SpecHTMLButton from './SpecHTMLButton';
@@ -83,8 +87,9 @@ export default class SpecBoxDialog extends WindowDialog<void> {
 
         this._zoomContainer.layout();
 
-        this._statText = new Glyphs('', {
-            default: {
+        this._statText = new Text({
+            text: '',
+            style: {
                 fontFamily: Fonts.STDFONT,
                 fontSize: 14,
                 fill: 0xffffff
@@ -124,13 +129,8 @@ export default class SpecBoxDialog extends WindowDialog<void> {
         const statString = new StyledTextBuilder({
             fontFamily: Fonts.STDFONT,
             fontSize: 14,
-            fill: 0xffffff,
-            // Even when disabled, apparently this counts towards the width/height, even though the
-            // position starts at the visible location. That throws our sizing calculations off
-            dropShadowDistance: 0
-        }).addStyle('bold', {
-            fontWeight: 'bold'
-        });
+            fill: 0xffffff
+        }).addStyle('bold', {fontWeight: 'bold'});
         EPars.addLetterStyles(statString);
 
         const pseudoknots = this._dataBlock.targetConditions?.type === 'pseudoknot';
@@ -435,7 +435,7 @@ export default class SpecBoxDialog extends WindowDialog<void> {
     private _dotPlotMask: Graphics;
     private _meltPlot: Plot;
     private _meltPlotContainer: Container;
-    private _statText: Glyphs;
+    private _statText: Text;
     private _zoomContainer: HLayoutContainer;
     private _zoomInButton: GameButton;
     private _zoomOutButton: GameButton;

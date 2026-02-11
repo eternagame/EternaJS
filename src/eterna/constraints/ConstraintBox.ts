@@ -1,21 +1,38 @@
-import {
-    ContainerObject, Enableable, SceneObject, StyledTextBuilder, DisplayUtil, HAlign, VAlign,
-    SerialTask, DelayTask, AlphaTask, TextureUtil, LocationTask, Easing, ParallelTask, ScaleTask,
-    VisibleTask, Flashbang, TextUtil
-} from 'flashbang';
-import {
-    Graphics, Sprite, Text, Point, Texture, Container
-} from 'pixi.js';
-import {Glyphs} from 'pixi-glyphs';
-import Fonts from 'eterna/util/Fonts';
+import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import EPars from 'eterna/EPars';
-import TextBalloon from 'eterna/ui/TextBalloon';
-import {RegistrationGroup} from 'signals';
 import Sounds from 'eterna/resources/Sounds';
+import TextBalloon from 'eterna/ui/TextBalloon';
 import UITheme from 'eterna/ui/UITheme';
+import Fonts from 'eterna/util/Fonts';
+import {
+    AlphaTask,
+    ContainerObject,
+    DelayTask,
+    DisplayUtil,
+    Easing,
+    Enableable,
+    Flashbang,
+    HAlign,
+    LocationTask,
+    ParallelTask, ScaleTask,
+    SceneObject,
+    SerialTask,
+    StyledTextBuilder,
+    TextureUtil,
+    TextUtil,
+    VAlign,
+    VisibleTask
+} from 'flashbang';
 import {FontWeight} from 'flashbang/util/TextBuilder';
+import {
+    Container,
+    Graphics,
+    Point,
+    Sprite, Text,
+    Texture
+} from 'pixi.js';
+import {RegistrationGroup} from 'signals';
 
 export interface ConstraintBoxConfig {
     // Toggle checkmark, green vs red outline
@@ -90,26 +107,26 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._stateText.visible = false;
         this.container.addChild(this._stateText);
 
-        this._reqClarifyText = new Glyphs('', {
-            default: {
+        this._reqClarifyText = new Text({
+            text: '',
+            style: {
                 fontFamily: Fonts.STDFONT,
                 fontSize: 11,
                 fill: 0xC0DCE7,
-                letterSpacing: -0.5,
-                lineHeight: 1
+                letterSpacing: -0.5
             }
         });
         this._reqClarifyText.position.set(50, 30);
         this._reqClarifyText.visible = false;
         this.container.addChild(this._reqClarifyText);
 
-        this._reqStatText = new Glyphs('', {
-            default: {
+        this._reqStatText = new Text({
+            text: '',
+            style: {
                 fontFamily: Fonts.STDFONT,
                 fontSize: 11,
                 fill: 0xC0DCE7,
-                letterSpacing: -0.5,
-                lineHeight: 1
+                letterSpacing: -0.5
             }
         });
         this._reqStatText.position.set(50, 50);
@@ -129,7 +146,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._flag.visible = false;
 
         if (this._forMissionScreen) {
-            this._sideText = new Glyphs('', {});
+            this._sideText = new Text({text: '', style: {}});
             this.container.addChild(this._sideText);
         }
 
@@ -329,14 +346,13 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
     /** Creates a StyledTextBuilder with the ConstraintBox's default settings */
     public static createTextStyle(): StyledTextBuilder {
-        const style: StyledTextBuilder = new StyledTextBuilder({
+        const style = new StyledTextBuilder({
             fontFamily: Fonts.STDFONT,
             fontSize: 14,
             fill: 0xffffff,
             letterSpacing: -0.5,
             wordWrap: true,
-            wordWrapWidth: UITheme.missionIntro.maxConstraintWidth,
-            lineHeight: 1
+            wordWrapWidth: UITheme.missionIntro.maxConstraintWidth
         }).addStyle('altText', {
             fontFamily: Fonts.STDFONT,
             fontWeight: FontWeight.SEMIBOLD,
@@ -351,12 +367,9 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         return style;
     }
 
-    private setPossiblyStyledText(str: string | StyledTextBuilder, text: Glyphs): void {
+    private setPossiblyStyledText(str: string | StyledTextBuilder, text: Text): void {
         if (str instanceof StyledTextBuilder) {
-            const potentialStyle = text.getStyleForTag('default');
-            if (potentialStyle) {
-                str.defaultStyle(potentialStyle);
-            }
+            str.defaultStyle(text.style);
             str.apply(text);
         } else {
             text.text = str;
@@ -515,11 +528,11 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     private _icon: Container;
     private _noText: Text;
     private _stateText: Text;
-    private _reqClarifyText: Glyphs;
-    private _reqStatText: Glyphs;
+    private _reqClarifyText: Text;
+    private _reqStatText: Text;
     private _smallThumbnail: Container;
     private _flag: Graphics;
-    private _sideText: Glyphs;
+    private _sideText: Text;
     private _check: Sprite;
     private _outline: Sprite;
     private _fglow: Graphics;

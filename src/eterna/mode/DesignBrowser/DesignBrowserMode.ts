@@ -1,38 +1,53 @@
-import log from 'loglevel';
-import {Glyphs} from 'pixi-glyphs';
-import {
-    Container, Sprite, FederatedPointerEvent, FederatedWheelEvent
-} from 'pixi.js';
-import SecStruct from 'eterna/rnatypes/SecStruct';
+import {AchievementData} from 'eterna/achievements/AchievementManager';
 import Eterna from 'eterna/Eterna';
 import GameMode from 'eterna/mode/GameMode';
+import EternaURL from 'eterna/net/EternaURL';
 import Puzzle from 'eterna/puzzle/Puzzle';
-import Fonts from 'eterna/util/Fonts';
-import SliderBar from 'eterna/ui/SliderBar';
-import {
-    ContainerObject, DisplayUtil, HAlign, VAlign, RepeatingTask, SerialTask, DelayTask, CallbackTask,
-    MathUtil, Flashbang, LocationTask, Easing, HLayoutContainer, Assert, InputUtil
-} from 'flashbang';
-import GameButton from 'eterna/ui/GameButton';
-import Bitmaps from 'eterna/resources/Bitmaps';
-import BitmapManager from 'eterna/resources/BitmapManager';
 import Solution from 'eterna/puzzle/Solution';
 import SolutionManager from 'eterna/puzzle/SolutionManager';
-import int from 'eterna/util/int';
-import EternaURL from 'eterna/net/EternaURL';
-import UITheme from 'eterna/ui/UITheme';
-import {AchievementData} from 'eterna/achievements/AchievementManager';
-import {FontWeight} from 'flashbang/util/TextBuilder';
+import BitmapManager from 'eterna/resources/BitmapManager';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import SecStruct from 'eterna/rnatypes/SecStruct';
+import GameButton from 'eterna/ui/GameButton';
 import ScrollContainer from 'eterna/ui/ScrollContainer';
-import VoteProcessor from './VoteProcessor';
-import ViewSolutionOverlay from './ViewSolutionOverlay';
-import SortOptionsDialog from './SortOptionsDialog';
-import SortOptions, {SortOrder} from './SortOptions';
-import SelectionBox from './SelectionBox';
-import MarkerBoxView from './MarkerBoxView';
-import GridLines from './GridLines';
-import DataCol from './DataCol';
+import SliderBar from 'eterna/ui/SliderBar';
+import UITheme from 'eterna/ui/UITheme';
+import Fonts from 'eterna/util/Fonts';
+import int from 'eterna/util/int';
+import {
+    Assert,
+    CallbackTask,
+    ContainerObject,
+    DelayTask,
+    DisplayUtil,
+    Easing,
+    Flashbang,
+    HAlign,
+    HLayoutContainer,
+    InputUtil,
+    LocationTask,
+    MathUtil,
+    RepeatingTask, SerialTask,
+    VAlign
+} from 'flashbang';
+import {FontWeight} from 'flashbang/util/TextBuilder';
+import log from 'loglevel';
+import {
+    Container,
+    FederatedPointerEvent,
+    FederatedWheelEvent,
+    Sprite,
+    Text
+} from 'pixi.js';
 import CustomizeColumnOrderDialog from './CustomizeColumnOrderDialog';
+import DataCol from './DataCol';
+import GridLines from './GridLines';
+import MarkerBoxView from './MarkerBoxView';
+import SelectionBox from './SelectionBox';
+import SortOptions, {SortOrder} from './SortOptions';
+import SortOptionsDialog from './SortOptionsDialog';
+import ViewSolutionOverlay from './ViewSolutionOverlay';
+import VoteProcessor from './VoteProcessor';
 
 export interface DBVote {
     canVote: boolean;
@@ -106,14 +121,13 @@ export default class DesignBrowserMode extends GameMode {
         this._content.position.set(10, 86);
         this.uiLayer.addChild(this._content);
 
-        this._votesText = new Glyphs('You have...', {
-            default: {
+        this._votesText = new Text({
+            text: 'You have...',
+            style: {
                 fontFamily: Fonts.STDFONT,
                 fontSize: 14,
-                fill: 0xffffff
-            },
-            bold: {
-                fontWeight: FontWeight.BOLD
+                fill: 0xffffff,
+                tagStyles: {bold: {fontWeight: FontWeight.BOLD}}
             }
         });
         this._votesText.position.set(20, 52);
@@ -1126,7 +1140,7 @@ export default class DesignBrowserMode extends GameMode {
     private _returnToGameButton: GameButton;
     private _letterColorButton: GameButton;
     private _expColorButton: GameButton;
-    private _votesText: Glyphs;
+    private _votesText: Text;
     private _selectionBox: SelectionBox;
     private _clickedSelectionBox: SelectionBox;
     private _markerBoxes: MarkerBoxView;
