@@ -202,8 +202,10 @@ export default class Pose3DDialog extends WindowDialog<void> {
                 // think that because the highlight is the first thing behind the cursor, that we're
                 // hovering over that and not the base
                 this._baseHighlights.visible = false;
+                this._sparkGroup.visible = false;
                 nglRender(true);
                 this._baseHighlights.visible = true;
+                this._sparkGroup.visible = true;
             } else {
                 this._composer.render();
 

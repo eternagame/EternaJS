@@ -5,6 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>EternaJS</title>
 
+    <script>
+        // We patch both XMLHttpRequest and fetch so that any network requests to our API that
+        // a user script may make will properly have the CSRF token included (we didn't use to
+        // require this, so this ensures backward compatibility)
+        XMLHttpRequest.prototype.origOpen = XMLHttpRequest.prototype.open;
+        XMLHttpRequest.prototype.open = function () {
+            this.origOpen.apply(this, arguments);
+            if (window.app.csrfToken && new URL(arguments[1], window.location.toString()).hostname === window.app.csrfHostname) {
+                this.setRequestHeader('x-csrf-token', window.app.csrfToken);
+            }
+        };
+
+        let originalFetch = window.fetch;
+        window.fetch = function (input, init) {
+            if (!init) {
+                init = {};
+            }
+            if (!init.headers) {
+                init.headers = new Headers();
+            }
+
+            if (window.app.csrfToken && new URL(input instanceof Request ? input.url : input, window.location.toString()).hostname === window.app.csrfHostname) {
+                if (init.headers instanceof Headers) {
+                    init.headers.append('x-csrf-token', window.app.csrfToken);
+                } else if (init.headers instanceof Array) {
+                    init.headers.push(['x-csrf-token', window.app.csrfToken]);
+                } else {
+                    init.headers['x-csrf-token'] = window.app.csrfToken;
+                }
+            }
+
+            return originalFetch(input, init);
+        };
+    </script>
+
     <!--
     These scripts are all grabbed from https://github.com/EteRNAgame/website/tree/master/frontend
     -->
