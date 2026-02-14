@@ -555,9 +555,7 @@ export default class EternaApp extends FlashbangApp {
             // XREF https://github.com/eternagame/EternaJS/issues/634
             antialias: !window.navigator.userAgent.match(/iPhone OS 15_4/),
             autoDensity: true,
-            resolution: devicePixelRatio,
-            // Maintain renderer type from pixi.js before v8
-            preference: 'webgl'
+            resolution: devicePixelRatio
         });
 
         // So we can use https://github.com/bfanger/pixi-inspector
