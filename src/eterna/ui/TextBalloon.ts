@@ -2,8 +2,7 @@ import Fonts from 'eterna/util/Fonts';
 import {
     ContainerObject,
     DisplayUtil,
-    StyledTextBuilder,
-    TextUtil
+    StyledTextBuilder
 } from 'flashbang';
 import {Text} from 'pixi.js';
 import {FontWeight} from '../../flashbang/util/TextBuilder';
@@ -126,7 +125,7 @@ export default class TextBalloon extends ContainerObject {
     public get width(): number {
         if (this._width) return this._width;
 
-        let wholeWidth: number = this._text ? TextUtil.getTextDimensions(this._text).width : 0;
+        let wholeWidth: number = this._text?.width ?? 0;
         if (this._button != null && this._button.display.visible) {
             wholeWidth += TextBalloon.W_MARGIN;
             wholeWidth += DisplayUtil.width(this._button.display);
@@ -138,7 +137,7 @@ export default class TextBalloon extends ContainerObject {
     public get height(): number {
         if (this._height) return this._height;
 
-        let wholeHeight = this._text ? TextUtil.getTextDimensions(this._text).height : 0;
+        let wholeHeight = this._text?.height ?? 0;
 
         if (this._button != null && this._button.display.visible) {
             wholeHeight = Math.max(wholeHeight, DisplayUtil.height(this._button.display));
@@ -167,10 +166,9 @@ export default class TextBalloon extends ContainerObject {
             }
 
             if (this._button.display.visible) {
-                const {height: textHeight, width: textWidth} = TextUtil.getTextDimensions(this._text);
                 this._button.display.position.set(
-                    TextBalloon.W_MARGIN + textWidth + TextBalloon.W_MARGIN,
-                    TextBalloon.H_MARGIN + titleSpace + textHeight
+                    TextBalloon.W_MARGIN + this._text.width + TextBalloon.W_MARGIN,
+                    TextBalloon.H_MARGIN + titleSpace + this._text.height
                         - DisplayUtil.height(this._button.display)
                 );
             }
@@ -182,10 +180,9 @@ export default class TextBalloon extends ContainerObject {
             }
 
             if (this._button.display.visible) {
-                const {height: textHeight, width: textWidth} = TextUtil.getTextDimensions(this._text);
                 this._button.display.position.set(
-                    -wholeWidth / 2 + textWidth + TextBalloon.W_MARGIN,
-                    TextBalloon.H_MARGIN + titleSpace + textHeight
+                    -wholeWidth / 2 + this._text.width + TextBalloon.W_MARGIN,
+                    TextBalloon.H_MARGIN + titleSpace + this._text.height
                         - DisplayUtil.height(this._button.display)
                 );
             }

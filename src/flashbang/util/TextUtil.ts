@@ -26,12 +26,4 @@ export default class TextUtil {
 
         text.text += trimmedPostfix;
     }
-
-    /**
-     * Returns the height/width of a text sprite.
-     */
-    public static getTextDimensions(text: Text): {height:number, width: number} {
-        const {height, width} = text.getLocalBounds();
-        return {height, width};
-    }
 }

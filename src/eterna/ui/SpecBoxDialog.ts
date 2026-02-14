@@ -7,7 +7,7 @@ import Fonts from 'eterna/util/Fonts';
 import {
     Assert,
     DisplayObjectPointerTarget, DisplayUtil, Dragger, HAlign, HLayoutContainer, InputUtil,
-    KeyCode, MathUtil, StyledTextBuilder, TextUtil, VAlign, VLayoutContainer
+    KeyCode, MathUtil, StyledTextBuilder, VAlign, VLayoutContainer
 } from 'flashbang';
 import {
     Container,
@@ -217,7 +217,7 @@ export default class SpecBoxDialog extends WindowDialog<void> {
         // These values are somewhat arbitrary, but seem to be about as small as you can go while ensuring
         // the plots are at least minimally readable
         const width = Math.max(requestedWidth,
-            requestedWidth < requestedHeight ? TextUtil.getTextDimensions(this._statText).width : 425);
+            requestedWidth < requestedHeight ? this._statText.width : 425);
         const height = Math.max(requestedHeight, requestedWidth < requestedHeight ? 580 : 365);
 
         const plotSize = this.calcPlotSize(width, height);

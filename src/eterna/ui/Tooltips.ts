@@ -13,8 +13,7 @@ import {
     GameObjectRef,
     PointerCapture,
     SerialTask,
-    StyledTextBuilder,
-    TextUtil
+    StyledTextBuilder
 } from 'flashbang';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
 import {
@@ -162,10 +161,9 @@ export default class Tooltips extends GameObject {
                 ? new Text({text: tooltip, style: Tooltips.DEFAULT_STYLE})
                 : tooltip.build();
 
-            const {height, width} = TextUtil.getTextDimensions(textField);
             const container = new Container();
             const backdrop = new Graphics()
-                .roundRect(0, 0, width + 20, height + 20, 5)
+                .roundRect(0, 0, textField.width + 20, textField.height + 20, 5)
                 .fill({color: 0x0, alpha: 0.8});
             textField.x = 10;
             textField.y = 10;

@@ -6,8 +6,7 @@ import Fonts from 'eterna/util/Fonts';
 import {
     ContainerObject,
     DisplayUtil, Flashbang,
-    StyledTextBuilder,
-    TextUtil
+    StyledTextBuilder
 } from 'flashbang';
 import Assert from 'flashbang/util/Assert';
 import {
@@ -123,7 +122,7 @@ export default class MissionIntroPanel extends ContainerObject {
 
             this._descriptionLabel.position.y = this._titleLabel.height + theme.spacing;
             this._goalsContainer.position.y = this._descriptionLabel.position.y
-                + TextUtil.getTextDimensions(this._descriptionLabel).height
+                + this._descriptionLabel.height
                 + theme.spacing;
 
             this._constraints.container.position.set(

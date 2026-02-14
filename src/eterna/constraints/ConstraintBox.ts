@@ -20,7 +20,6 @@ import {
     SerialTask,
     StyledTextBuilder,
     TextureUtil,
-    TextUtil,
     VAlign,
     VisibleTask
 } from 'flashbang';
@@ -265,7 +264,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             // Make the icon look centered with respect to the text
             const deltaWidth = Math.max(
                 0,
-                TextUtil.getTextDimensions(this._sideText).width - this._opaqueBackdrop.width
+                this._sideText.width - this._opaqueBackdrop.width
             );
             this._sideText.position.set(-deltaWidth / 2, this._opaqueBackdrop.height + 10);
         }
@@ -337,7 +336,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
     public get width() {
         if (this._forMissionScreen) {
-            return Math.max(TextUtil.getTextDimensions(this._sideText).width, this._opaqueBackdrop.width);
+            return Math.max(this._sideText.width, this._opaqueBackdrop.width);
         } else {
             return this._opaqueBackdrop.width;
         }
