@@ -114,7 +114,8 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                 fontFamily: Fonts.STDFONT,
                 fontSize: 11,
                 fill: 0xC0DCE7,
-                letterSpacing: -0.5
+                letterSpacing: -0.5,
+                align: 'center'
             }
         });
         this._reqClarifyText.position.set(50, 30);
@@ -285,10 +286,9 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             this._icon.visible = true;
             this._icon.removeChildren();
 
-            const iconYOffset = this._forMissionScreen ? 2.5 : 5;
             if (config.icon instanceof Texture) {
                 const sprite = Sprite.from(config.icon);
-                sprite.position.set((ConstraintBox.BG_GRAPHICS_WIDTH - sprite.width) / 2, iconYOffset);
+                sprite.position.set((ConstraintBox.BG_GRAPHICS_WIDTH - sprite.width) / 2, 5);
                 this._icon.addChild(sprite);
             } else if (config.icon instanceof Graphics) {
                 this._icon.addChild(config.icon);
@@ -297,7 +297,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                     .fromBase64PNG(config.icon)
                     .then((tex) => {
                         const sprite = Sprite.from(tex);
-                        sprite.position.set((ConstraintBox.BG_GRAPHICS_WIDTH - sprite.width) / 2, iconYOffset);
+                        sprite.position.set((ConstraintBox.BG_GRAPHICS_WIDTH - sprite.width) / 2, 5);
                         this._icon.addChild(sprite);
                     });
             }
