@@ -180,6 +180,7 @@ export default class Pose3DDialog extends WindowDialog<void> {
         changedBaseOutlinePass.edgeStrength = 5;
         changedBaseOutlinePass.edgeGlow = 0.5;
         changedBaseOutlinePass.edgeThickness = 2;
+        changedBaseOutlinePass.hiddenEdgeColor.set(0xFFFFFF);
         this._composer.addPass(changedBaseOutlinePass);
 
         this._effectFXAA = new ShaderPass(FXAAShader);
