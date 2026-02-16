@@ -1,19 +1,3 @@
-diff --git a/node_modules/pixi.js/lib/scene/container/container-mixins/measureMixin.mjs b/node_modules/pixi.js/lib/scene/container/container-mixins/measureMixin.mjs
-index 841abc2..735fddc 100644
---- a/node_modules/pixi.js/lib/scene/container/container-mixins/measureMixin.mjs
-+++ b/node_modules/pixi.js/lib/scene/container/container-mixins/measureMixin.mjs
-@@ -37,9 +37,9 @@ const measureMixin = {
-     const localBoundsCacheData = this._localBoundsCacheData;
-     localBoundsCacheData.index = 1;
-     localBoundsCacheData.didChange = false;
--    if (localBoundsCacheData.data[0] !== this._didViewChangeTick) {
-+    if (localBoundsCacheData.data[0] !== ((this._didViewChangeTick & 0xffff) << 16) | (this._didContainerChangeTick & 0xffff)) {
-       localBoundsCacheData.didChange = true;
--      localBoundsCacheData.data[0] = this._didViewChangeTick;
-+      localBoundsCacheData.data[0] = ((this._didViewChangeTick & 0xffff) << 16) | (this._didContainerChangeTick & 0xffff);
-     }
-     checkChildrenDidChange(this, localBoundsCacheData);
-     if (localBoundsCacheData.didChange) {
 diff --git a/node_modules/pixi.js/lib/scene/graphics/shared/GraphicsContext.mjs b/node_modules/pixi.js/lib/scene/graphics/shared/GraphicsContext.mjs
 index 8f0d0ab..c22b048 100644
 --- a/node_modules/pixi.js/lib/scene/graphics/shared/GraphicsContext.mjs
