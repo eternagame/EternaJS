@@ -49,9 +49,15 @@ export default class SpecBoxDialog extends WindowDialog<void> {
 
         this._dotPlotContainer = new Container();
         this._dotPlotMask = new Graphics();
-        this._dotPlotContainer.addChild(this._dotPlotMask);
         this._dotPlotMask.hitArea = new Rectangle();
+        this._dotPlotContainer.addChild(this._dotPlotMask);
+        this._maskedDotPlotContainer = new Container();
+        // Must apply mask to a wrapping container
+        // The height/width of the `this._dotPlot` would be affected by the mask otherwise
+        this._maskedDotPlotContainer.mask = this._dotPlotMask;
+        this._dotPlotContainer.addChild(this._maskedDotPlotContainer);
         this._plotContainer.addChild(this._dotPlotContainer);
+
         this._meltPlotContainer = new Container();
         this._plotContainer.addChild(this._meltPlotContainer);
 
@@ -159,16 +165,11 @@ export default class SpecBoxDialog extends WindowDialog<void> {
             .append(`${(this._dataBlock.getParam(UndoBlockParam.BPP_F1_NATIVE_PKMASK, TEMPERATURE, pseudoknots) as number)?.toFixed(3) ?? 'Unavailable'}`);
         statString.apply(this._statText);
 
-        if (this._dotPlot) this._dotPlot.destroy();
+        this._dotPlot?.destroy();
         this._dotPlot = this._dataBlock.createDotPlot();
-        // Be aware: The mask is a child of the container (so that it's (0,0) position is relative to that),
-        // but masks the plot itself because Pixi only updates the bounds of the object according to the mask
-        // for the container the mask is applied to, not its children. The effect of masking the container would be
-        // the entire container would report to be the size of the zoomed in dot plot, and so our vlayoutcontainer
-        // would shove everything below the plot lower than we intend
-        this._dotPlot.mask = this._dotPlotMask;
-        this._dotPlotContainer.addChild(this._dotPlot);
-        if (this._meltPlot) this._meltPlot.destroy();
+        this._maskedDotPlotContainer.addChild(this._dotPlot);
+
+        this._meltPlot?.destroy();
         this._meltPlot = this._dataBlock.createMeltPlot();
         this._meltPlotContainer.addChild(this._meltPlot);
 
@@ -220,7 +221,9 @@ export default class SpecBoxDialog extends WindowDialog<void> {
             requestedWidth < requestedHeight ? this._statText.width : 425);
         const height = Math.max(requestedHeight, requestedWidth < requestedHeight ? 580 : 365);
 
-        const plotSize = this.calcPlotSize(width, height);
+        // Prevent scroll bars from showing up too soon
+        const SCROLL_PADDING_CORRECTION = 3;
+        const plotSize = this.calcPlotSize(width - SCROLL_PADDING_CORRECTION, height - SCROLL_PADDING_CORRECTION);
         const dotPlotVLabelWidth = Math.max(...this._dotVLabels.map((label) => label.width));
         if (plotSize.vAligned) {
             let yPos = 0;
@@ -431,6 +434,7 @@ export default class SpecBoxDialog extends WindowDialog<void> {
     private _content: VLayoutContainer;
     private _plotContainer: Container;
     private _dotPlotContainer: Container;
+    private _maskedDotPlotContainer: Container;
     private _dotPlot: Plot;
     private _dotPlotMask: Graphics;
     private _meltPlot: Plot;
