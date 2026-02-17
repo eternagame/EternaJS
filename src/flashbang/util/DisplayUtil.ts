@@ -19,8 +19,8 @@ export default class DisplayUtil {
         // Floor our target width/height - UPNG.encode doesn't handle fractional sizes
         return UPNG.encode(
             [pixelData.pixels.buffer as ArrayBuffer],
-            Math.floor(DisplayUtil.width(target)),
-            Math.floor(DisplayUtil.height(target)),
+            pixelData.width,
+            pixelData.height,
             0
         );
     }
