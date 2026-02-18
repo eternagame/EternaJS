@@ -1,4 +1,3 @@
-import {Rectangle} from 'pixi.js';
 import {HAlign} from 'flashbang/core/Align';
 import DisplayUtil from 'flashbang/util/DisplayUtil';
 import LayoutContainer from './LayoutContainer';
@@ -56,13 +55,12 @@ export default class VLayoutContainer extends LayoutContainer {
         this.addChildAt(LayoutContainer.createSpacer(1, size), index);
     }
 
-    /* override */
-    protected doLayout(): void {
+    protected override doLayout(): void {
         const maxWidth = this._hAlign === HAlign.LEFT ? 0
             : Math.max(...this.children.filter(
                 (child) => child.visible
             ).map(
-                (child) => DisplayUtil.getBoundsRelative(child, this, VLayoutContainer.R).width
+                (child) => DisplayUtil.getBoundsRelative(child, this).width
             ));
 
         const from: number = this._reversed ? this.children.length - 1 : 0;
@@ -75,7 +73,7 @@ export default class VLayoutContainer extends LayoutContainer {
             if (child.visible) {
                 child.x = 0;
                 child.y = 0;
-                const bounds = DisplayUtil.getBoundsRelative(child, this, VLayoutContainer.R);
+                const bounds = DisplayUtil.getBoundsRelative(child, this);
                 child.y = -bounds.top + y;
                 child.x = -bounds.left;
                 if (this._hAlign === HAlign.CENTER) {
@@ -92,6 +90,4 @@ export default class VLayoutContainer extends LayoutContainer {
     protected _vOffset: number;
     protected _hAlign: HAlign;
     protected _reversed: boolean;
-
-    protected static R: Rectangle = new Rectangle();
 }

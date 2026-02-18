@@ -75,17 +75,18 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
         const origLower = (111 - twLower) * 0.5;
         const step: number = twUpper / (2 * oligos.length - 1);
 
-        const iconGraphics = new Graphics();
-        iconGraphics.lineStyle(2.5, 0xFFFFFF, 0.9);
-        iconGraphics.moveTo(origLower, 27);
-        iconGraphics.lineTo(origLower + twLower, 27);
+        const iconGraphics = new Graphics()
+            .moveTo(origLower, 27)
+            .lineTo(origLower + twLower, 27);
 
         for (let ii = 0; ii < oligos.length; ii++) {
             if (!oligos[ii]) continue;
             const ctrlY: number = (oligos[ii].bind ? 22 : 14);
-            iconGraphics.moveTo(origUpper + (ii * 2) * step, ctrlY);
-            iconGraphics.lineTo(origUpper + (ii * 2 + 1) * step, ctrlY);
+            iconGraphics
+                .moveTo(origUpper + (ii * 2) * step, ctrlY)
+                .lineTo(origUpper + (ii * 2 + 1) * step, ctrlY);
         }
+        iconGraphics.stroke({width: 2.5, color: 0xFFFFFF, alpha: 0.9});
 
         return {
             satisfied: status.satisfied,

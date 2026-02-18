@@ -100,8 +100,7 @@ export class MinimumGCConstraint extends MinimumPairConstraint {
         super(Pair.GC, count);
     }
 
-    /** @override */
-    public getConstraintBoxConfig(
+    public override getConstraintBoxConfig(
         status: MinPairConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
@@ -128,8 +127,7 @@ export class MinimumAUConstraint extends MinimumPairConstraint {
         super(Pair.AU, count);
     }
 
-    /** @override */
-    public getConstraintBoxConfig(
+    public override getConstraintBoxConfig(
         status: MinPairConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
@@ -156,8 +154,7 @@ export class MinimumGUConstraint extends MinimumPairConstraint {
         super(Pair.GU, count);
     }
 
-    /** @override */
-    public getConstraintBoxConfig(
+    public override getConstraintBoxConfig(
         status: MinPairConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
@@ -184,8 +181,7 @@ export class MinimumAnyPairConstraint extends MinimumPairConstraint {
         super(Pair.ANY, count);
     }
 
-    /** @override */
-    public getConstraintBoxConfig(
+    public override getConstraintBoxConfig(
         status: MinPairConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {

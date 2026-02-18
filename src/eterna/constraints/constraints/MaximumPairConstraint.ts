@@ -103,8 +103,7 @@ export class MaximumGCConstraint extends MaximumPairConstraint {
         super(Pair.GC, count);
     }
 
-    /** @override */
-    public getConstraintBoxConfig(
+    public override getConstraintBoxConfig(
         status: MaxPairConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
@@ -135,8 +134,7 @@ export class MaximumAUConstraint extends MaximumPairConstraint {
         super(Pair.AU, count);
     }
 
-    /** @override */
-    public getConstraintBoxConfig(
+    public override getConstraintBoxConfig(
         status: MaxPairConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
@@ -167,8 +165,7 @@ export class MaximumGUConstraint extends MaximumPairConstraint {
         super(Pair.GU, count);
     }
 
-    /** @override */
-    public getConstraintBoxConfig(
+    public override getConstraintBoxConfig(
         status: MaxPairConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {

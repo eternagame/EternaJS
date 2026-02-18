@@ -1,7 +1,8 @@
 import {
     Container,
     Graphics,
-    Point, Rectangle, Sprite, Text, Texture
+    Point, Rectangle, Sprite, Text, Texture,
+    BlurFilter, FederatedPointerEvent
 } from 'pixi.js';
 import {Signal} from 'signals';
 import {
@@ -14,11 +15,9 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import Fonts from 'eterna/util/Fonts';
 import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import ROPWait from 'eterna/rscript/ROPWait';
-import {FederatedPointerEvent} from '@pixi/events';
 import Eterna from 'eterna/Eterna';
 import BaseTextures from 'eterna/pose2D/BaseTextures';
 import BaseAssets from 'eterna/pose2D/BaseAssets';
-import {BlurFilter} from '@pixi/filter-blur';
 import {AdjustmentFilter} from 'pixi-filters';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
 import Tooltips from '../Tooltips';
@@ -71,7 +70,7 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
     constructor() {
         super();
 
-        this.display.interactive = true;
+        this.display.eventMode = 'static';
 
         this._selectPairData = BitmapManager.getBitmap(Bitmaps.ImgSelectPair);
         this._selectBaseData = BitmapManager.getBitmap(Bitmaps.ImgSelectBase);
@@ -138,7 +137,7 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
         super.added();
         BaseAssets._init();
 
-        const bg = new Graphics().beginFill(0x043468).drawRoundedRect(0, 0, 210, 50, 5).endFill();
+        const bg = new Graphics().roundRect(0, 0, 210, 50, 5).fill(0x043468);
         this._paletteDisplay.addChild(bg);
 
         const getBase = (baseType: RNABase, size: number, addLetter: boolean) => {
@@ -215,19 +214,19 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
             hitbox: Rectangle,
             flip: boolean
         ) => {
-            const tri = new Graphics()
-                .beginFill(0xffffff)
-                .drawPolygon(
+            const tri = new Graphics({
+                filters: [new BlurFilter({strength: 1.25, quality: 16}), new AdjustmentFilter({alpha, brightness: 2})]
+            })
+                .poly(
                     flip
                         ? [{x: 0, y: 4}, {x: 7, y: 0}, {x: 7, y: 8}]
                         : [{x: 0, y: 0}, {x: 0, y: 8}, {x: 7, y: 4}]
                 )
-                .endFill();
-            tri.filters = [new BlurFilter(1, 16), new AdjustmentFilter({alpha})];
+                .fill(0xffffff);
             tri.x = hitbox.x + 4 + (flip ? 7 : 0);
             tri.y = hitbox.y;
             this._paletteDisplay.addChild(tri);
-            tri.cacheAsBitmap = true;
+            tri.cacheAsTexture(true);
             return tri;
         };
         addSat(0.2, this._targets[PaletteTargetType.AU].hitboxes[1], false);

@@ -13,7 +13,8 @@
     "postbuild:prod": "node multiplatform/cpr ./website/frontend ./dist/prod/frontend && coffee -o ./dist/prod/frontend/jscripts -c ./website/frontend/coffee",
     "test": "cross-env NODE_OPTIONS=\"--experimental-vm-modules\" jest --verbose",
     "lint": "eslint src --ext .ts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "postinstall": "patch-package"
   },
   "repository": {
     "type": "git",
@@ -54,6 +55,7 @@
     "jest-canvas-mock": "^2.5.2",
     "jest-environment-jsdom": "^29.7.0",
     "lint-staged": "^16.2.7",
+    "patch-package": "^8.0.1",
     "source-map-loader": "^5.0.0",
     "style-loader": "^4.0.0",
     "ts-jest": "^29.2.0",
@@ -65,13 +67,7 @@
     "webpack-merge": "^6.0.1"
   },
   "dependencies": {
-    "@pixi-essentials/gradients": "^0.0.5",
-    "@pixi/events": "^6.5.8",
-    "@pixi/filter-blur": "^6.5.8",
-    "@pixi/filter-color-matrix": "^6.5.8",
-    "@pixi/filter-drop-shadow": "^4.1.0",
-    "@pixi/filter-fxaa": "^6.5.8",
-    "@pixi/sound": "^4.0.3",
+    "@pixi/sound": "^6.0.1",
     "base64-js": "^1.5.1",
     "canvas-confetti": "^1.9.4",
     "color-convert": "^3.1.3",
@@ -88,9 +84,8 @@
     "ngl": "^2.4.0",
     "onnxruntime-web": "^1.18.0",
     "pchip": "^1.0.2",
-    "pixi-filters": "^4.1.1",
-    "pixi-multistyle-text": "https://github.com/eternagame/pixi-multistyle-text/archive/1f2283b1d4a1bb262b57783e1bf2f81802a17809.tar.gz",
-    "pixi.js": "^6.5.8",
+    "pixi-filters": "^6.1.5",
+    "pixi.js": "^8.16.0",
     "regenerator-runtime": "^0.14.1",
     "store": "^2.0.12",
     "three": "^0.158.0",

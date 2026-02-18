@@ -1,17 +1,18 @@
 import {
-    Point,
-    Rectangle,
-    Graphics,
-    Container
-} from 'pixi.js';
-import {Signal, Value} from 'signals';
-import {
+    Assert,
     ContainerObject,
     DisplayObjectPointerTarget,
-    Dragger,
     DisplayUtil,
+    Dragger,
     GameObjectRef
 } from 'flashbang';
+import {
+    Container,
+    Graphics,
+    Point,
+    Rectangle
+} from 'pixi.js';
+import {Signal, Value} from 'signals';
 
 export enum DragDropType {
     SOURCE,
@@ -230,12 +231,13 @@ export default class DragDropper extends ContainerObject {
             );
 
             // Place drag source in global coordinate space
-            this._displayObject.setParent(this.mode.container);
+            this.mode.container.addChild(this._displayObject);
 
             const dragger = new Dragger();
             this._draggerRef = this.addObject(dragger);
 
             // Cache initial cursor offset relative to drag source
+            Assert.assertIsDefined(this._originalParent);
             const draggerRelToParentPosition = this._originalParent.toLocal(new Point(dragger.curX, dragger.curY));
             const draggerRelToDisplayPosition = new Point(
                 draggerRelToParentPosition.x - this._originalLocation.x,
@@ -243,6 +245,7 @@ export default class DragDropper extends ContainerObject {
             );
 
             // Move to correct location in global coordinate space
+            Assert.assertIsDefined(this._displayObject.parent);
             const startMouse = this._displayObject.parent.toLocal(new Point(dragger.curX, dragger.curY));
             this._displayObject.x = startMouse.x - draggerRelToDisplayPosition.x;
             this._displayObject.y = startMouse.y - draggerRelToDisplayPosition.y;
@@ -254,29 +257,29 @@ export default class DragDropper extends ContainerObject {
             // Add dragging border if specified
             if (this._draggingBorderColor) {
                 this._draggingBorder = new Graphics()
-                    .lineStyle(
-                        DragDropper.DRAGGING_BORDER_WEIGHT,
-                        this._draggingBorderColor
-                    )
-                    .drawRect(
+                    .rect(
                         0,
                         0,
                         this._displayObject.width,
                         this._displayObject.height
-                    );
+                    )
+                    .stroke({
+                        width: DragDropper.DRAGGING_BORDER_WEIGHT,
+                        color: this._draggingBorderColor
+                    });
                 this._displayObject.addChild(this._draggingBorder);
             }
 
             // Create placeholder object for dragged object
             // Add to parent container
             this._placeholderObject = new Graphics()
-                .beginFill(0x112238)
-                .drawRect(
+                .rect(
                     this._originalLocation.x,
                     this._originalLocation.y,
                     this._originalLocation.width,
                     this._originalLocation.height
-                ).endFill();
+                )
+                .fill(0x112238);
             this._originalParent.addChildAt(this._placeholderObject, 0); // zero index places it behind dragged object
 
             const startItem = {
@@ -298,6 +301,7 @@ export default class DragDropper extends ContainerObject {
                     && this._canDrop
                     && this._canDrop(this._item)
                 ) {
+                    Assert.assertIsDefined(this._displayObject.parent);
                     const mouse = this._displayObject.parent.toLocal(new Point(dragger.curX, dragger.curY));
 
                     // emit on drop
@@ -321,7 +325,7 @@ export default class DragDropper extends ContainerObject {
 
                 // Return object to original parent
                 if (this._originalParent) {
-                    this._displayObject.setParent(this._originalParent);
+                    this._originalParent.addChild(this._displayObject);
                 }
 
                 // Return opacity to normal
@@ -348,6 +352,7 @@ export default class DragDropper extends ContainerObject {
                 dragger.destroySelf();
             });
             dragger.dragged.connect(() => {
+                Assert.assertIsDefined(this._displayObject.parent);
                 const mouse = this._displayObject.parent.toLocal(new Point(dragger.curX, dragger.curY));
                 this._displayObject.x = mouse.x - draggerRelToDisplayPosition.x;
                 this._displayObject.y = mouse.y - draggerRelToDisplayPosition.y;

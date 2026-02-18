@@ -1,20 +1,31 @@
-import {
-    Graphics, Rectangle, Sprite
-} from 'pixi.js';
-import {
-    ContainerObject, LocationTask, Easing, SerialTask, VisibleTask, DelayTask,
-    ParallelTask, AlphaTask, InterpolatingTask, EasingFunc
-} from 'flashbang';
 import Eterna from 'eterna/Eterna';
+import {SubmitSolutionData} from 'eterna/mode/PoseEdit/PoseEditMode';
+import Bitmaps from 'eterna/resources/Bitmaps';
 import GamePanel from 'eterna/ui/GamePanel';
 import Fonts from 'eterna/util/Fonts';
 import VibrateTask from 'eterna/vfx/VibrateTask';
-import BitmapManager from 'eterna/resources/BitmapManager';
-import Bitmaps from 'eterna/resources/Bitmaps';
-import {SubmitSolutionData} from 'eterna/mode/PoseEdit/PoseEditMode';
-import RankRowLayout from './RankRowLayout';
-import RankBoard from './RankBoard';
+import {
+    AlphaTask,
+    ContainerObject,
+    DelayTask,
+    DisplayUtil,
+    Easing,
+    EasingFunc,
+    InterpolatingTask,
+    LocationTask,
+    ParallelTask,
+    SerialTask,
+    VisibleTask
+} from 'flashbang';
+import {
+    Container,
+    Graphics,
+    Rectangle,
+    Sprite
+} from 'pixi.js';
 import PlayerRank from './PlayerRank';
+import RankBoard from './RankBoard';
+import RankRowLayout from './RankRowLayout';
 
 export interface RankScrollData {
     points: number;
@@ -31,8 +42,10 @@ interface PlayerRankData {
 }
 
 export default class RankScroll extends ContainerObject {
-    public static hasRankScrollData(submissionRsp: SubmitSolutionData): boolean {
-        return (submissionRsp['pointsrank-before'] != null && submissionRsp['pointsrank-after'] != null);
+    public static hasRankScrollData(
+        submissionRsp: SubmitSolutionData
+    ): submissionRsp is Record<'pointsrank-before' | 'pointsrank-after', RankScrollData> {
+        return submissionRsp['pointsrank-before'] != null && submissionRsp['pointsrank-after'] != null;
     }
 
     /** Creates a RankScroll object with data returned from the submit-solution server response */
@@ -41,8 +54,8 @@ export default class RankScroll extends ContainerObject {
             throw new Error('No RankScroll data in submission response');
         }
 
-        const pointsrankBefore: RankScrollData = submissionRsp['pointsrank-before'] as RankScrollData;
-        const pointsrankAfter: RankScrollData = submissionRsp['pointsrank-after'] as RankScrollData;
+        const pointsrankBefore = submissionRsp['pointsrank-before'];
+        const pointsrankAfter = submissionRsp['pointsrank-after'];
         let player: PlayerRank;
         const ranks: PlayerRank[] = [];
         const prevRank: number = pointsrankBefore['rank'];
@@ -141,7 +154,7 @@ export default class RankScroll extends ContainerObject {
         this._newRank = newRank;
     }
 
-    protected added(): void {
+    protected override added(): void {
         super.added();
 
         // How many rows other than player's will show for each top/bottom side
@@ -166,7 +179,7 @@ export default class RankScroll extends ContainerObject {
         }
 
         if (!startingSet) {
-            topStartingIdx = (this._allRanks.length - sizeIndicator);
+            topStartingIdx = this._allRanks.length - sizeIndicator;
             bottomStartingIdx = this._allRanks.length;
             endIdx = this._allRanks.length;
         }
@@ -242,54 +255,54 @@ export default class RankScroll extends ContainerObject {
         this.addObject(bg, this.container);
 
         // Set up rankboard according to above infos
-        this._rankBoardTop = new RankBoard(topStartingIdx + 1, rankDataTop.reverse(), maxWidth);
-        const maskTop: Graphics = new Graphics();
-        maskTop.beginFill(0x00FF00);
-        maskTop.drawRect(0, 0, RankBoard.ROW_WIDTH, sizeIndicator * RankBoard.ROW_HEIGHT);
-        this.container.addChild(maskTop);
+        const maskTop: Graphics = new Graphics()
+            .rect(0, 0, RankBoard.ROW_WIDTH, sizeIndicator * RankBoard.ROW_HEIGHT)
+            .fill(0x00FF00);
         maskTop.hitArea = new Rectangle();
+
+        this._rankBoardTop = new RankBoard(topStartingIdx + 1, rankDataTop.slice().reverse(), maxWidth);
+        this._rankBoardTop.display.label = 'Rank Board Top';
         this._rankBoardTop.display.mask = maskTop;
-        this._rankBoardTop.display.position.set(
-            0, -((rankDataTop.length - sizeIndicator) * RankBoard.ROW_HEIGHT)
-        );
+        this._rankBoardTop.display.position.set(0, -((rankDataTop.length - sizeIndicator) * RankBoard.ROW_HEIGHT));
         this._rankBoardTop.registerStartingPos();
+        this.container.addChild(maskTop);
         this.addObject(this._rankBoardTop, this.container);
 
-        this._rankBoardBottom = new RankBoard(this._newRank + 1, rankDataBottom.reverse(), maxWidth);
-
-        const maskBottom: Graphics = new Graphics();
-        maskBottom.beginFill(0x00FF00);
-        maskBottom.drawRect(
-            0, sizeIndicator * RankBoard.ROW_HEIGHT + RankBoard.PLAYER_ROW_HEIGHT,
-            RankBoard.ROW_WIDTH, sizeIndicator * RankBoard.ROW_HEIGHT
-        );
-        this.container.addChild(maskBottom);
+        const maskBottom: Graphics = new Graphics()
+            .rect(
+                0, sizeIndicator * RankBoard.ROW_HEIGHT + RankBoard.PLAYER_ROW_HEIGHT,
+                RankBoard.ROW_WIDTH, sizeIndicator * RankBoard.ROW_HEIGHT
+            )
+            .fill(0x00FF00);
         maskBottom.hitArea = new Rectangle();
-        this._rankBoardBottom.display.mask = maskBottom;
 
+        this._rankBoardBottom = new RankBoard(this._newRank + 1, rankDataBottom.slice().reverse(), maxWidth);
+        this._rankBoardBottom.display.label = 'Rank Board Bottom';
+        this._rankBoardBottom.display.mask = maskBottom;
         this._rankBoardBottom.display.position.set(0,
             (sizeIndicator * RankBoard.ROW_HEIGHT) + RankBoard.PLAYER_ROW_HEIGHT
             - (this._moveOffset * RankBoard.ROW_HEIGHT));
         this._rankBoardBottom.registerStartingPos();
+        this.container.addChild(maskBottom);
         this.addObject(this._rankBoardBottom, this.container);
 
         // Set current player's row as center position
-        this._playerRow = new RankRowLayout(startRank, this._playerRank, maxWidth, 20, 100, 0xEBA800);
+        this._playerRow = new RankRowLayout(startRank, this._playerRank, maxWidth, 20, 100, 0xeba800);
         this._playerRow.display.position.set(0, sizeIndicator * RankBoard.ROW_HEIGHT + 4);
         this.addObject(this._playerRow, this.container);
 
-        this._tfRankOffset = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgRankBubble));
-        const rankText = Fonts.std(`+${this._rankOffset}`, 20).color(0).bold().build();
-        rankText.position.set(
-            (this._tfRankOffset.width - rankText.width) / 2,
-            (this._tfRankOffset.height - rankText.height) / 2
-        );
-        this._tfRankOffset.addChild(rankText);
-        this._tfRankOffset.position.set(
-            -this._tfRankOffset.width - 2, sizeIndicator * RankBoard.ROW_HEIGHT - 12
-        );
-        this._tfRankOffset.visible = true;
+        this._tfRankOffset = new Container({label: 'Rank Offset'});
         this.container.addChild(this._tfRankOffset);
+
+        this._tfRankBubbleSprite = Sprite.from(Bitmaps.ImgRankBubble);
+        this._tfRankOffset.addChild(this._tfRankBubbleSprite);
+
+        const rankText = Fonts.std(`+${this._rankOffset}`, 20).color(0).bold().build();
+        this._tfRankOffset.addChild(rankText);
+        DisplayUtil.center(rankText, this._tfRankOffset);
+
+        this._tfRankOffset.position.set(-this._tfRankOffset.width - 2, sizeIndicator * RankBoard.ROW_HEIGHT - 12);
+        this._tfRankOffset.visible = true;
     }
 
     public animate(): void {
@@ -354,7 +367,8 @@ export default class RankScroll extends ContainerObject {
     private _rankBoardBottom: RankBoard;
 
     private _playerRow: RankRowLayout;
-    private _tfRankOffset: Sprite;
+    private _tfRankOffset: Container;
+    private _tfRankBubbleSprite: Sprite;
 
     private _scrollAnimDuration: number;
 }

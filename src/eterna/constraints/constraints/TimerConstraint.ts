@@ -72,7 +72,7 @@ export default class TimerConstraint extends Constraint<BaseConstraintStatus> {
     private static get _icon(): Texture {
         const icon = new Container();
 
-        const img = new Sprite(Texture.from(Bitmaps.ImgStopwatch, {resourceOptions: {scale: 2}}));
+        const img = Sprite.from(Bitmaps.ImgStopwatch);
         img.scale.x = 0.4;
         img.scale.y = 0.4;
         icon.addChild(img);

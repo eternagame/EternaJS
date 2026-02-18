@@ -1,4 +1,4 @@
-import {DisplayObject, Text} from 'pixi.js';
+import {Container, Text} from 'pixi.js';
 import EPars, {RNAPaint, RNABase} from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import UndoBlock, {UndoBlockParam, TargetConditions} from 'eterna/UndoBlock';
@@ -624,8 +624,8 @@ export default class PuzzleEditMode extends GameMode {
     }
 
     protected createScreenshot(): ArrayBuffer {
-        const visibleState: Map<DisplayObject, boolean> = new Map();
-        const pushVisibleState = (disp: DisplayObject) => {
+        const visibleState: Map<Container, boolean> = new Map();
+        const pushVisibleState = (disp: Container) => {
             visibleState.set(disp, disp.visible);
             disp.visible = false;
         };

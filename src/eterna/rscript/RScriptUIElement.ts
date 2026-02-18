@@ -1,11 +1,11 @@
-import {DisplayObject, Rectangle} from 'pixi.js';
-import {GameObject} from 'flashbang';
+import type {Container, Rectangle} from 'pixi.js';
+import type {GameObject} from 'flashbang';
 
 export type RSScriptRectangle = {
     rect: Rectangle;
     proxy?: boolean;
 };
-export type RScriptUIElement = GameObject | DisplayObject | RSScriptRectangle;
+export type RScriptUIElement = GameObject | Container | RSScriptRectangle;
 
 export enum RScriptUIElementID {
     TOGGLETARGET = 'TOGGLETARGET',

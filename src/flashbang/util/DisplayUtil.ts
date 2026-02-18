@@ -1,23 +1,47 @@
+import {HAlign, VAlign} from 'flashbang/core/Align';
+import Flashbang from 'flashbang/core/Flashbang';
 import {
-    DisplayObject, Graphics, Matrix, Point, IPoint, Rectangle
+    Bounds,
+    Container,
+    Graphics,
+    Matrix,
+    Point,
+    Rectangle
 } from 'pixi.js';
 import * as UPNG from 'upng-js';
-import Flashbang from 'flashbang/core/Flashbang';
-import {HAlign, VAlign} from 'flashbang/core/Align';
-import RectangleUtil from './RectangleUtil';
 import Assert from './Assert';
+import RectangleUtil from './RectangleUtil';
 
 export default class DisplayUtil {
-    public static renderToPNG(target: DisplayObject): ArrayBuffer {
+    public static renderToPNG(target: Container): ArrayBuffer {
         Assert.assertIsDefined(Flashbang.app.pixi);
-        const pixels = Flashbang.app.pixi.renderer.plugins.extract.pixels(target);
+        const pixelData = Flashbang.app.pixi.renderer.extract.pixels({target});
         // Floor our target width/height - UPNG.encode doesn't handle fractional sizes
         return UPNG.encode(
-            [pixels.buffer],
-            Math.floor(DisplayUtil.width(target)),
-            Math.floor(DisplayUtil.height(target)),
+            [pixelData.pixels.buffer as ArrayBuffer],
+            pixelData.width,
+            pixelData.height,
             0
         );
+    }
+
+    /**
+     * Indicates if the object is globally visible.
+     *
+     * @see https://github.com/pixijs/pixijs/issues/11030
+     * `worldVisible` property was removed in `pixi.js` v8 with no built-in replacement.
+     * @see https://github.com/pixijs/pixijs/blob/v7.4.3/packages/display/src/DisplayObject.ts#L935
+     * PixiJS's implementation before removal.
+     */
+    public static isWorldVisible<T extends Container = Container>(display: T): boolean {
+        let item: T | T['parent'] = display;
+        do {
+            if (!item.visible) {
+                return false;
+            }
+            item = item.parent;
+        } while (item !== null);
+        return true;
     }
 
     /**
@@ -25,14 +49,14 @@ export default class DisplayUtil {
      * Use DisplayObject.destroy() if you want to dispose of the object (destroy() also removes the object
      * from its parent.)
      */
-    public static removeFromParent(disp: DisplayObject): void {
+    public static removeFromParent(disp: Container): void {
         if (disp.parent != null) {
             disp.parent.removeChild(disp);
         }
     }
 
     /** @return true if potentialAncestor is an ancestor of potentialDescendent */
-    public static isAncestor(potentialAncestor: DisplayObject, potentialDescendent: DisplayObject): boolean {
+    public static isAncestor(potentialAncestor: Container, potentialDescendent: Container): boolean {
         let cur = potentialDescendent.parent;
         while (cur != null) {
             if (cur === potentialAncestor) {
@@ -44,20 +68,19 @@ export default class DisplayUtil {
     }
 
     /** @return true if the given global point is within the DisplayObject's hit area */
-    public static hitTest(disp: DisplayObject, globalLoc: Point): boolean {
+    public static hitTest(disp: Container, globalLoc: Point): boolean {
         disp.toLocal(globalLoc, undefined, DisplayUtil.P, false);
 
         return (disp.hitArea != null
             ? disp.hitArea.contains(DisplayUtil.P.x, DisplayUtil.P.y)
-            : disp.getLocalBounds(DisplayUtil.R).contains(DisplayUtil.P.x, DisplayUtil.P.y));
+            : disp.getLocalBounds().rectangle.contains(DisplayUtil.P.x, DisplayUtil.P.y));
     }
 
     /** Returns a rectangle filled with the given color */
     public static fillRect(width: number, height: number, color: number, alpha: number = 1): Graphics {
-        const r: Graphics = new Graphics();
-        r.beginFill(color, alpha);
-        r.drawRect(0, 0, width, height);
-        r.endFill();
+        const r: Graphics = new Graphics()
+            .rect(0, 0, width, height)
+            .fill({color, alpha});
         return r;
     }
 
@@ -67,18 +90,18 @@ export default class DisplayUtil {
         return this.fillRect(Flashbang.stageWidth, Flashbang.stageHeight, color, alpha);
     }
 
-    public static width(disp: DisplayObject): number {
-        return disp.getLocalBounds(DisplayUtil.R).width;
+    public static width(disp: Container): number {
+        return disp.getLocalBounds().width;
     }
 
-    public static height(disp: DisplayObject): number {
-        return disp.getLocalBounds(DisplayUtil.R).height;
+    public static height(disp: Container): number {
+        return disp.getLocalBounds().height;
     }
 
     /** Transforms a point from one DisplayObject's coordinate space to another's. */
     public static transformPoint(
-        p: IPoint, from: DisplayObject, to: DisplayObject, out: Point | undefined = undefined
-    ): IPoint {
+        p: Point, from: Container, to: Container, out?: Point
+    ): Point {
         return to.toLocal(from.toGlobal(p, DisplayUtil.P), undefined, out);
     }
 
@@ -89,9 +112,9 @@ export default class DisplayUtil {
      *  matrix instead of creating a new object.
      *  (Adapted from Starling-Framework) */
     public static getTransformationMatrix(
-        disp: DisplayObject, targetSpace: DisplayObject, out: Matrix | null = null
+        disp: Container, targetSpace: Container, out: Matrix | null = null
     ): Matrix {
-        let currentObject: DisplayObject;
+        let currentObject: Container | null;
 
         if (out) {
             out.identity();
@@ -108,7 +131,7 @@ export default class DisplayUtil {
             // targetCoordinateSpace 'null' represents the target space of the base object.
             // -> move up from this to base
             currentObject = disp;
-            while (currentObject !== targetSpace) {
+            while (currentObject !== null && currentObject !== targetSpace) {
                 out.append(currentObject.localTransform);
                 currentObject = currentObject.parent;
             }
@@ -124,12 +147,12 @@ export default class DisplayUtil {
 
         // 1. find a common parent of this and the target space
 
-        const commonParent: DisplayObject = DisplayUtil.findCommonParent(disp, targetSpace);
+        const commonParent: Container = DisplayUtil.findCommonParent(disp, targetSpace);
 
         // 2. move up from this to common parent
 
         currentObject = disp;
-        while (currentObject !== commonParent) {
+        while (currentObject !== null && currentObject !== commonParent) {
             out.append(currentObject.localTransform);
             currentObject = currentObject.parent;
         }
@@ -142,7 +165,7 @@ export default class DisplayUtil {
 
         DisplayUtil.GET_TRANSFORMATION_MATRIX.identity();
         currentObject = targetSpace;
-        while (currentObject !== commonParent) {
+        while (currentObject !== null && currentObject !== commonParent) {
             DisplayUtil.GET_TRANSFORMATION_MATRIX.append(currentObject.localTransform);
             currentObject = currentObject.parent;
         }
@@ -162,19 +185,16 @@ export default class DisplayUtil {
      * (Adapted from Starling-Framework)
      */
     public static getBoundsRelative(
-        disp: DisplayObject, targetSpace: DisplayObject, out: Rectangle | null = null
-    ): Rectangle {
-        if (out == null) out = new Rectangle();
-
+        disp: Container, targetSpace: Container | null
+    ): Bounds {
         if (targetSpace === disp || targetSpace === null) {
-            disp.getLocalBounds(out);
+            return disp.getLocalBounds();
         } else if (targetSpace === disp.parent && !DisplayUtil.isRotated(disp)) {
             // optimization
             const scaleX: number = disp.scale.x;
             const scaleY: number = disp.scale.y;
 
-            disp.getLocalBounds(out);
-
+            const out = disp.getLocalBounds().clone();
             RectangleUtil.setTo(out,
                 disp.x + out.x - disp.pivot.x * scaleX,
                 disp.y + out.y - disp.pivot.y * scaleY,
@@ -189,17 +209,16 @@ export default class DisplayUtil {
                 out.height *= -1;
                 out.y -= out.height;
             }
+            return out;
         } else {
             DisplayUtil.getTransformationMatrix(disp, targetSpace, DisplayUtil.GET_BOUNDS_RELATIVE_MATRIX);
-            RectangleUtil.getBounds(disp.getLocalBounds(out), DisplayUtil.GET_BOUNDS_RELATIVE_MATRIX, out);
+            return RectangleUtil.getBounds(disp.getLocalBounds(), DisplayUtil.GET_BOUNDS_RELATIVE_MATRIX);
         }
-
-        return out;
     }
 
     /** Transforms a Rectangle from one DisplayObject's coordinate space to another's. */
     public static transformRect(
-        r: Rectangle, from: DisplayObject, to: DisplayObject, out: Rectangle | null = null
+        r: Rectangle, from: Container, to: Container, out: Rectangle | null = null
     ): Rectangle {
         let left: number = Number.MAX_VALUE;
         let top: number = Number.MAX_VALUE;
@@ -250,7 +269,7 @@ export default class DisplayUtil {
 
     /** Centers a DisplayObject on another DisplayObject */
     public static center(
-        disp: DisplayObject, relativeTo: DisplayObject,
+        disp: Container, relativeTo: Container,
         xOffset: number = 0, yOffset: number = 0
     ): void {
         this.positionRelative(
@@ -260,51 +279,56 @@ export default class DisplayUtil {
         );
     }
 
-    private static readonly POSITION_RELATIVE_RECT: Rectangle = new Rectangle();
     /** Positions a DisplayObject in relation to another DisplayObject */
     public static positionRelative(
-        disp: DisplayObject,
+        disp: Container,
         dispHAlign: HAlign, dispVAlign: VAlign,
-        relativeTo: DisplayObject,
+        relativeTo: Container,
         targetHAlign: HAlign, targetVAlign: VAlign,
         xOffset: number = 0, yOffset: number = 0
     ): void {
         DisplayUtil.positionRelativeToBounds(disp,
             dispHAlign, dispVAlign,
-            DisplayUtil.getBoundsRelative(relativeTo, disp.parent || relativeTo, DisplayUtil.POSITION_RELATIVE_RECT),
+            DisplayUtil.getBoundsRelative(relativeTo, disp.parent || relativeTo),
             targetHAlign, targetVAlign,
             xOffset, yOffset);
     }
 
-    private static SCREEN_BOUNDS: Rectangle = new Rectangle();
-
     /** Positions a DisplayObject relative to the screen */
     public static positionRelativeToStage(
-        disp: DisplayObject,
+        disp: Container,
         dispHAlign: HAlign, dispVAlign: VAlign,
         targetHAlign: HAlign, targetVAlign: VAlign,
         xOffset: number = 0, yOffset: number = 0
     ): void {
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
-        RectangleUtil.setTo(DisplayUtil.SCREEN_BOUNDS, 0, 0, Flashbang.stageWidth, Flashbang.stageHeight);
+
+        let screenBounds = new Bounds();
+        RectangleUtil.setTo(screenBounds, 0, 0, Flashbang.stageWidth, Flashbang.stageHeight);
+
         if (disp.parent != null) {
-            RectangleUtil.getBounds(DisplayUtil.SCREEN_BOUNDS, disp.parent.localTransform, DisplayUtil.SCREEN_BOUNDS);
+            screenBounds = RectangleUtil.getBounds(screenBounds, disp.parent.localTransform);
         }
 
-        DisplayUtil.positionRelativeToBounds(disp,
-            dispHAlign, dispVAlign,
-            DisplayUtil.SCREEN_BOUNDS,
-            targetHAlign, targetVAlign,
-            xOffset, yOffset);
+        DisplayUtil.positionRelativeToBounds(
+            disp,
+            dispHAlign,
+            dispVAlign,
+            screenBounds,
+            targetHAlign,
+            targetVAlign,
+            xOffset,
+            yOffset
+        );
     }
 
     public static readonly POSITION_RELATIVE_TO_BOUNDS_RECT: Rectangle = new Rectangle();
 
     public static positionRelativeToBounds(
-        disp: DisplayObject,
+        disp: Container,
         dispHAlign: HAlign, dispVAlign: VAlign,
-        relativeTo: Rectangle,
+        relativeTo: Rectangle | Bounds,
         targetHAlign: HAlign, targetVAlign: VAlign,
         xOffset: number = 0, yOffset: number = 0
     ): void {
@@ -341,9 +365,7 @@ export default class DisplayUtil {
 
         disp.x = 0;
         disp.y = 0;
-        const dispBounds = DisplayUtil.getBoundsRelative(
-            disp, disp.parent, DisplayUtil.POSITION_RELATIVE_TO_BOUNDS_RECT
-        );
+        const dispBounds = DisplayUtil.getBoundsRelative(disp, disp.parent);
         // should this be relative to self or parent?
         // let dispBounds = DisplayUtil.getBoundsRelative(disp, disp, DisplayUtil.POSITION_RELATIVE_TO_BOUNDS_RECT);
         switch (dispHAlign) {
@@ -378,8 +400,8 @@ export default class DisplayUtil {
         disp.y = y;
     }
 
-    private static findCommonParent(object1: DisplayObject, object2: DisplayObject): DisplayObject {
-        let currentObject: DisplayObject = object1;
+    private static findCommonParent(object1: Container, object2: Container): Container {
+        let currentObject: Container | null = object1;
 
         // Walks up tree from object1 to root node
         while (currentObject) {
@@ -402,18 +424,17 @@ export default class DisplayUtil {
         }
     }
 
-    private static isRotated(disp: DisplayObject): boolean {
+    private static isRotated(disp: Container): boolean {
         return disp.rotation !== 0 || disp.skew.x !== 0 || disp.skew.y !== 0;
     }
 
     /** The topmost object in the display tree the object is part of. */
-    private static base(disp: DisplayObject): DisplayObject {
-        let currentObject: DisplayObject = disp;
+    private static base(disp: Container): Container {
+        let currentObject: Container = disp;
         while (currentObject.parent) currentObject = currentObject.parent;
         return currentObject;
     }
 
     private static readonly P: Point = new Point();
-    private static readonly R: Rectangle = new Rectangle();
-    private static readonly sAncestors: DisplayObject[] = [];
+    private static readonly sAncestors: Container[] = [];
 }

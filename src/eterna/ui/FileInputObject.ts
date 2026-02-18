@@ -1,19 +1,21 @@
-import {
-    Graphics,
-    Rectangle,
-    Sprite
-} from 'pixi.js';
-import {Signal, Registration} from 'signals';
+import Eterna from 'eterna/Eterna';
+import Fonts from 'eterna/util/Fonts';
 import {
     DOMObject,
     DisplayObjectPointerTarget,
     TextBuilder
 } from 'flashbang';
-import Eterna from 'eterna/Eterna';
-import Fonts from 'eterna/util/Fonts';
 import {FontWeight} from 'flashbang/util/TextBuilder';
-import UITheme from './UITheme';
+import {
+    Container,
+    Graphics,
+    Rectangle,
+    Sprite,
+    StrokeInput
+} from 'pixi.js';
+import {Registration, Signal} from 'signals';
 import Tooltips from './Tooltips';
+import UITheme from './UITheme';
 
 interface FileInputObjectProps {
     id: string;
@@ -112,7 +114,7 @@ export default class FileInputObject extends DOMObject<HTMLInputElement | HTMLDi
             this.activateDialog();
         });
 
-        this._dummyDisp.interactive = false;
+        this._dummyDisp.eventMode = 'auto';
 
         this.createFakeFileInput();
         this.setupTooltip();
@@ -245,28 +247,26 @@ export default class FileInputObject extends DOMObject<HTMLInputElement | HTMLDi
         if (this._fakeFileInput != null) {
             if (!this._fakeFileInput.destroyed) this._fakeFileInput.destroy({children: true});
             this._fakeFileInput = null;
-            this._dummyDisp.interactive = false;
+            this._dummyDisp.eventMode = 'auto';
         }
     }
 
     private createFakeFileInput(): void {
         this.destroyFakeFileInput();
 
-        this._dummyDisp.interactive = true;
+        this._dummyDisp.eventMode = 'static';
 
-        this._fakeFileInput = new Sprite();
+        this._fakeFileInput = new Container();
 
-        let bg: Graphics;
+        const border: StrokeInput = {width: this._border ? 1 : 0};
+        if (this._borderColor) {
+            border.color = this._borderColor;
+        }
+        const bg = new Graphics()
+            .roundRect(0, 0, this.width, this.height, this._borderRadius)
+            .stroke(border);
         if (this._bgColor) {
-            bg = new Graphics()
-                .lineStyle(this._border ? 1 : 0, this._borderColor)
-                .beginFill(this._bgColor)
-                .drawRoundedRect(0, 0, this.width, this.height, this._borderRadius)
-                .endFill();
-        } else {
-            bg = new Graphics()
-                .lineStyle(this._border ? 1 : 0, this._borderColor)
-                .drawRoundedRect(0, 0, this.width, this.height, this._borderRadius);
+            bg.fill(this._bgColor);
         }
         this._fakeFileInput.addChild(bg);
 
@@ -292,7 +292,7 @@ export default class FileInputObject extends DOMObject<HTMLInputElement | HTMLDi
                 .color(textColor)
                 .hAlignLeft()
                 .build();
-            const textMask = new Graphics().beginFill(0x0).drawRect(0, 0, this.width, this.height).endFill();
+            const textMask = new Graphics().rect(0, 0, this.width, this.height).fill(0x0);
             this._fakeFileInput.addChild(textMask);
             textMask.hitArea = new Rectangle();
             labelText.mask = textMask;
@@ -410,7 +410,7 @@ export default class FileInputObject extends DOMObject<HTMLInputElement | HTMLDi
     private _borderRadius: number;
     private _labelText: string | undefined;
     private _labelIcon: string | undefined;
-    private _fakeFileInput: Sprite | null;
+    private _fakeFileInput: Container | null;
     private _tooltip: string;
     private _tooltipReg: Registration | null;
     private _pointerTarget: DisplayObjectPointerTarget;

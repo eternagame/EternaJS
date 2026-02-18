@@ -1,4 +1,4 @@
-import {Graphics} from 'pixi.js';
+import {Graphics, FederatedWheelEvent} from 'pixi.js';
 import {
     ContainerObject,
     KeyboardListener,
@@ -8,7 +8,6 @@ import {
     Assert,
     DOMObject
 } from 'flashbang';
-import {FederatedWheelEvent} from '@pixi/events';
 import Eterna from 'eterna/Eterna';
 
 /** Dialogs that expose a "confirmed" promise will reject with this error if the dialog is canceled */
@@ -156,9 +155,8 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
             Assert.assertIsDefined(Flashbang.stageWidth);
             Assert.assertIsDefined(Flashbang.stageHeight);
             bg.clear()
-                .beginFill(0x0)
-                .drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
-                .endFill();
+                .rect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
+                .fill(0x0);
             bg.alpha = this.bgAlpha;
             htmlOverlay.width = Flashbang.stageWidth;
             htmlOverlay.height = Flashbang.stageHeight;

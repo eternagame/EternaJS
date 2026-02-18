@@ -55,23 +55,23 @@ export default abstract class GameMode extends AppMode {
         Assert.assertIsDefined(this.container);
 
         this.container.addChild(this.bgLayer);
-        this.bgLayer.name = 'bgLayer';
+        this.bgLayer.label = 'bgLayer';
         this.container.addChild(this.poseLayer);
-        this.poseLayer.name = 'poseLayer';
+        this.poseLayer.label = 'poseLayer';
         this.container.addChild(this.uiLayer);
-        this.uiLayer.name = 'uiLayer';
+        this.uiLayer.label = 'uiLayer';
         this.container.addChild(this.dialogLayer);
-        this.dialogLayer.name = 'dialogLayer';
+        this.dialogLayer.label = 'dialogLayer';
         this.container.addChild(this.sidebarLayer);
-        this.sidebarLayer.name = 'sidebarLayer';
+        this.sidebarLayer.label = 'sidebarLayer';
         this.container.addChild(this.notifLayer);
-        this.notifLayer.name = 'notifLayer';
+        this.notifLayer.label = 'notifLayer';
         this.container.addChild(this.achievementsLayer);
-        this.achievementsLayer.name = 'achievementsLayer';
+        this.achievementsLayer.label = 'achievementsLayer';
         this.container.addChild(this.contextMenuLayer);
-        this.contextMenuLayer.name = 'contextMenuLayer';
+        this.contextMenuLayer.label = 'contextMenuLayer';
         this.container.addChild(this.tooltipLayer);
-        this.tooltipLayer.name = 'tooltipLayer';
+        this.tooltipLayer.label = 'tooltipLayer';
 
         this._achievements = new AchievementManager();
         this.addObject(this._achievements);
@@ -416,7 +416,7 @@ export default abstract class GameMode extends AppMode {
             .catch((err) => {
                 this.showNotification(`There was an error posting the screenshot\n${err}`);
             })
-            ./* finally */then(() => {
+            .finally(() => {
                 this.popUILock('Screenshot');
             });
     }

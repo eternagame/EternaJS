@@ -36,6 +36,7 @@ export default class MissionClearedPanel extends ContainerObject {
 
     constructor(hasNextPuzzle: boolean, infoText: string | null = null, moreText: string | null = null) {
         super();
+        this.container.label = 'Mission Cleared Panel';
 
         this._hasNextPuzzle = hasNextPuzzle;
         this._infoText = infoText || 'You have solved the puzzle, congratulations!';
@@ -63,6 +64,7 @@ export default class MissionClearedPanel extends ContainerObject {
         const panelWidth = MissionClearedPanel.calcWidth();
 
         this._contentLayout = new VLayoutContainer(10, HAlign.CENTER);
+        this._contentLayout.label = 'Content Layout';
         this._contentLayout.position.set(theme.margin.left, theme.margin.top);
         this.container.addChild(this._contentLayout);
 
@@ -86,7 +88,7 @@ export default class MissionClearedPanel extends ContainerObject {
             .color(0xffffff)
             .lineHeight(1.2)
             .selectable(false);
-        this._infoObj.display.name = 'InfoTextObj';
+        this._infoObj.display.label = 'Info Text';
         // Images should be centered, even if the HTML doesn't specify it
         DOMObject.applyStyleRecursive(this._infoObj.element, {display: 'block', margin: 'auto'}, false, ['img']);
         this.addObject(this._infoObj, this._infoContainer);
@@ -102,7 +104,7 @@ export default class MissionClearedPanel extends ContainerObject {
                 .color(0xffffff)
                 .lineHeight(1.2)
                 .selectable(false);
-            moreTextObj.display.name = 'MoreTextObj';
+            moreTextObj.display.label = 'MoreTextObj';
             this.addObject(moreTextObj, this._infoContainer);
         }
 
@@ -137,9 +139,8 @@ export default class MissionClearedPanel extends ContainerObject {
         this.addObject(this.closeButton, this.container);
 
         const nextButtonGraphic = new Graphics()
-            .beginFill(0x54B54E)
-            .drawRoundedRect(0, 0, 170, 40, 10)
-            .endFill();
+            .roundRect(0, 0, 170, 40, 10)
+            .fill(0x54B54E);
         this.nextButton = new GameButton()
             .customStyleBox(nextButtonGraphic)
             .label(this._hasNextPuzzle ? 'Next Puzzle' : "What's Next?");
@@ -151,6 +152,7 @@ export default class MissionClearedPanel extends ContainerObject {
         Assert.assertIsDefined(this.mode);
 
         this.regs.add(this.mode.resized.connect(() => this.onResize()));
+        this.regs.add(this.mode.lateUpdate.connect(() => this.onResize()).once());
         this.onResize();
     }
 
@@ -159,9 +161,7 @@ export default class MissionClearedPanel extends ContainerObject {
             return;
         }
 
-        if (this._rankScroll != null) {
-            this._rankScroll.destroySelf();
-        }
+        this._rankScroll?.destroySelf();
 
         this._rankScroll = RankScroll.fromSubmissionResponse(submissionRsp);
         this._rankScroll.display.alpha = 0;
@@ -180,10 +180,10 @@ export default class MissionClearedPanel extends ContainerObject {
 
     private drawBG(): void {
         this._bg.clear();
-        this._bg.beginFill(0x0, 0.8);
         Assert.assertIsDefined(Flashbang.stageHeight);
-        this._bg.drawRect(0, 0, MissionClearedPanel.calcWidth(), Flashbang.stageHeight);
-        this._bg.endFill();
+        this._bg
+            .rect(0, 0, MissionClearedPanel.calcWidth(), Flashbang.stageHeight)
+            .fill({color: 0x0, alpha: 0.8});
     }
 
     private doLayout(): void {
@@ -223,10 +223,11 @@ export default class MissionClearedPanel extends ContainerObject {
         );
 
         const separatorPos = this.nextButton.display.position.y - theme.separator.separation;
-        this._separator.clear();
-        this._separator.lineStyle(1, 0x70707080);
-        this._separator.moveTo(theme.separator.margin, separatorPos);
-        this._separator.lineTo(panelWidth - theme.separator.margin, separatorPos);
+        this._separator
+            .clear()
+            .moveTo(theme.separator.margin, separatorPos)
+            .lineTo(panelWidth - theme.separator.margin, separatorPos)
+            .stroke({width: 1, color: '0x70707080'});
 
         Assert.assertIsDefined(Flashbang.stageWidth);
         this.display.position.x = Flashbang.stageWidth - MissionClearedPanel.calcWidth();

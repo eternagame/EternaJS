@@ -18,9 +18,8 @@ export default class URLButton extends HTMLTextObject {
             const WMARGIN = 14;
             const HMARGIN = 6;
             this._background = new Graphics()
-                .beginFill(0x162539, 0.8)
-                .drawRoundedRect(0, 0, this.width + (WMARGIN * 2), this.height + (HMARGIN * 2), 3)
-                .endFill();
+                .roundRect(0, 0, this.width + (WMARGIN * 2), this.height + (HMARGIN * 2), 3)
+                .fill({color: 0x162539, alpha: 0.8});
             this._background.x = -WMARGIN;
             this._background.y = -HMARGIN + 2;
             this._dummyDisp.addChild(this._background);

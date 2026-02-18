@@ -4,7 +4,6 @@ import {
 import {StyledTextBuilder, TextureUtil} from 'flashbang';
 import EPars from 'eterna/EPars';
 import {UndoBlockParam} from 'eterna/UndoBlock';
-import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
@@ -71,7 +70,7 @@ abstract class EnergyConstraint extends Constraint<EnergyConstraintStatus> {
     private static get _icon(): Texture {
         const icon = new Container();
 
-        const img = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgFoldingEngine));
+        const img = Sprite.from(Bitmaps.ImgFoldingEngine);
         img.width = 16;
         img.height = 16;
         icon.addChild(img);

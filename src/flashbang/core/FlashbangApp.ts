@@ -1,12 +1,14 @@
+import {Assert, KeyboardEventType, KeyCode} from 'flashbang';
 import log from 'loglevel';
 import {
-    settings, Application, SCALE_MODES, extensions, InteractionManager, Point
+    Application,
+    FederatedPointerEvent,
+    Point,
+    Renderer,
+    TextureStyle,
+    Ticker
 } from 'pixi.js';
 import {RegistrationGroup, Value} from 'signals';
-import KeyboardEventType from 'flashbang/input/KeyboardEventType';
-import KeyCode from 'flashbang/input/KeyCode';
-import Assert from 'flashbang/util/Assert';
-import {EventSystem} from '@pixi/events';
 import Flashbang from './Flashbang';
 import ModeStack from './ModeStack';
 import Updatable from './Updatable';
@@ -14,18 +16,11 @@ import Updatable from './Updatable';
 // Adds KeyboardEvent.code support to Edge
 import 'js-polyfills/keyboard';
 
-// Added in run()
-declare module '@pixi/core' {
-    interface AbstractRenderer {
-        events: EventSystem
-    }
-}
-
 export default class FlashbangApp {
     /** True if the app is foregrounded */
     public readonly isActive: Value<boolean> = new Value<boolean>(true);
 
-    public get pixi(): Application | null {
+    public get pixi(): Application<Renderer<HTMLCanvasElement>> | null {
         return this._pixi;
     }
 
@@ -33,18 +28,17 @@ export default class FlashbangApp {
         return this._modeStack;
     }
 
-    public run(): void {
+    public async run(): Promise<void> {
         window.addEventListener('error', (e: ErrorEvent) => this.onUncaughtError(e));
 
-        extensions.remove(InteractionManager);
-        this._pixi = this.createPixi();
-        // Declared on Renderer at the top of this file
-        this._pixi.renderer.addSystem(EventSystem, 'events');
+        this._pixi = await this.createPixi();
         Assert.assertIsDefined(this.pixiParent);
-        this.pixiParent.appendChild(this._pixi.view);
-        this._managedInputElements.push(this._pixi.view);
+        this.pixiParent.appendChild(this._pixi.canvas);
+        this._managedInputElements.push(this._pixi.canvas);
 
-        this._pixi.stage.name = 'Stage';
+        this._pixi.stage.label = 'Stage';
+        // Necessary for emitting the 'pointermove' event
+        this._pixi.stage.eventMode = 'dynamic';
         this._modeStack = new ModeStack(this._pixi.stage);
 
         Flashbang._registerApp(this);
@@ -52,10 +46,9 @@ export default class FlashbangApp {
         this.setup();
         this._modeStack._handleModeTransitions();
 
-        this._pixi.ticker.add((delta) => this.update(delta));
+        this._pixi.ticker.add((ticker) => this.update(ticker.deltaTime));
 
-        // @ts-expect-error Event type is actually FederatedPointerEvent
-        (this._pixi.stage).addEventListener('pointermove', (e: FederatedPointerEvent) => {
+        this._pixi.stage.addEventListener('pointermove', (e: FederatedPointerEvent) => {
             this._globalMouse = e.global.clone();
         });
 
@@ -70,7 +63,7 @@ export default class FlashbangApp {
 
     public get view(): HTMLCanvasElement {
         Assert.assertIsDefined(this._pixi);
-        return this._pixi.view;
+        return this._pixi.canvas;
     }
 
     public resize(width: number, height: number): void {
@@ -128,9 +121,11 @@ export default class FlashbangApp {
      * Creates a PIXI.Application instance.
      * Subclasses can override to do custom initialization.
      */
-    protected createPixi(): Application {
-        settings.SCALE_MODE = SCALE_MODES.LINEAR;
-        return new Application({width: 800, height: 600, backgroundColor: 0x1099bb});
+    protected async createPixi(): Promise<Application<Renderer<HTMLCanvasElement>>> {
+        TextureStyle.defaultOptions.scaleMode = 'linear';
+        const pixi = new Application();
+        await pixi.init({width: 800, height: 600, backgroundColor: 0x1099bb});
+        return pixi;
     }
 
     /** The HTMLElement that the PIXI application will be added to. */
@@ -143,9 +138,9 @@ export default class FlashbangApp {
 
         try {
             // This seems to aways be set. TODO: Investigate
-            Assert.assertIsDefined(settings.TARGET_FPMS);
+            Assert.assertIsDefined(Ticker.targetFPMS);
             // convert PIXI's weird ticker delta into elapsed seconds
-            const dt = tickerDelta / (settings.TARGET_FPMS * 1000);
+            const dt = tickerDelta / (Ticker.targetFPMS * 1000);
 
             // update all our updatables
             if (this._updatables) {
@@ -161,7 +156,7 @@ export default class FlashbangApp {
 
             // should the MainLoop be stopped?
             if (this._disposePending) {
-                if (this._regs) this._regs.close();
+                this._regs?.close();
                 this.disposeNow();
             }
         }
@@ -172,10 +167,10 @@ export default class FlashbangApp {
 
         this._updatables = null;
 
-        if (this._regs) this._regs.close();
+        this._regs?.close();
         this._regs = null;
 
-        if (this._pixi) this._pixi.destroy();
+        this._pixi?.destroy();
         this._pixi = null;
 
         Flashbang.dispose();
@@ -235,7 +230,7 @@ export default class FlashbangApp {
 
     private _globalMouse: Point = new Point();
 
-    protected _pixi: Application | null;
+    protected _pixi: Application<Renderer<HTMLCanvasElement>> | null;
     protected _regs: RegistrationGroup | null = new RegistrationGroup();
 
     protected _isUpdating: boolean;

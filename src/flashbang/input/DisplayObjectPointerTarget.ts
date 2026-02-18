@@ -1,18 +1,17 @@
-import {DisplayObject} from 'pixi.js';
+import {Container, FederatedPointerEvent, FederatedWheelEvent} from 'pixi.js';
 import {SignalView} from 'signals';
 import EventSignal from 'flashbang/util/EventSignal';
-import {FederatedPointerEvent, FederatedWheelEvent} from '@pixi/events';
 import ElementSignal from 'flashbang/util/ElementSignal';
 import Assert from 'flashbang/util/Assert';
 import Flashbang from 'flashbang/core/Flashbang';
 import PointerTarget from './PointerTarget';
 
 export default class DisplayObjectPointerTarget implements PointerTarget {
-    public readonly target: DisplayObject;
+    public readonly target: Container;
 
-    constructor(disp: DisplayObject) {
+    constructor(disp: Container) {
         this.target = disp;
-        disp.interactive = true;
+        disp.eventMode = 'static';
     }
 
     public get pointerEnter(): SignalView<FederatedPointerEvent> {
@@ -75,7 +74,7 @@ export default class DisplayObjectPointerTarget implements PointerTarget {
         if (this._pointerCancel == null) {
             // EventSystem never implemented pointercancel: https://github.com/pixijs/pixijs/issues/9538
             Assert.assertIsDefined(Flashbang.app.pixi);
-            this._pointerCancel = new ElementSignal(Flashbang.app.pixi.view, 'pointercancel');
+            this._pointerCancel = new ElementSignal(Flashbang.app.pixi.canvas, 'pointercancel');
         }
         return this._pointerCancel;
     }
@@ -154,7 +153,7 @@ export default class DisplayObjectPointerTarget implements PointerTarget {
         if (this._pointerCancelCapture == null) {
             // EventSystem never implemented pointercancel: https://github.com/pixijs/pixijs/issues/9538
             Assert.assertIsDefined(Flashbang.app.pixi);
-            this._pointerCancelCapture = new ElementSignal(Flashbang.app.pixi.view, 'pointercancel', true);
+            this._pointerCancelCapture = new ElementSignal(Flashbang.app.pixi.canvas, 'pointercancel', true);
         }
         return this._pointerCancelCapture;
     }

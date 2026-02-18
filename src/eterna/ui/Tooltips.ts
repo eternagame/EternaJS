@@ -1,32 +1,33 @@
-import {
-    Container, DisplayObject, Graphics, ITextStyle, Point, Rectangle, Text
-} from 'pixi.js';
-import {Registration, RegistrationGroup} from 'signals';
-import {
-    StyledTextBuilder,
-    GameObject,
-    Flashbang,
-    SerialTask,
-    Easing,
-    AlphaTask,
-    DelayTask,
-    GameObjectRef,
-    Button,
-    Assert,
-    ContainerObject,
-    DisplayObjectPointerTarget,
-    PointerCapture
-} from 'flashbang';
 import {PaletteTarget} from 'eterna/ui/toolbar/NucleotidePalette';
 import Fonts from 'eterna/util/Fonts';
+import {
+    AlphaTask,
+    Assert,
+    Button,
+    ContainerObject,
+    DelayTask,
+    DisplayObjectPointerTarget,
+    Easing,
+    Flashbang,
+    GameObject,
+    GameObjectRef,
+    PointerCapture,
+    SerialTask,
+    StyledTextBuilder
+} from 'flashbang';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
+import {
+    Container, Graphics, Point, Rectangle, Text,
+    TextStyleOptions
+} from 'pixi.js';
+import {Registration, RegistrationGroup} from 'signals';
 
 /** A tooltip can be a string, styled text, or a function that creates a DisplayObject */
-export type Tooltip = (() => DisplayObject) | string | StyledTextBuilder;
+export type Tooltip = (() => Container) | string | StyledTextBuilder;
 
 export default class Tooltips extends GameObject {
     /** Default text style for tooltips */
-    public static readonly DEFAULT_STYLE: Partial<ITextStyle> = {
+    public static readonly DEFAULT_STYLE: TextStyleOptions = {
         fontFamily: Fonts.STDFONT,
         fontSize: 15,
         fill: 0xC0DCE7
@@ -90,7 +91,7 @@ export default class Tooltips extends GameObject {
     }
 
     public showTooltipFor(
-        target: DisplayObject,
+        target: Container,
         key: Button | PaletteTarget | ContainerObject | GraphicsObject | DisplayObjectPointerTarget,
         tooltip: Tooltip
     ): void {
@@ -98,8 +99,8 @@ export default class Tooltips extends GameObject {
             return;
         }
 
-        const r = target.getBounds(false, Tooltips.TARGET_BOUNDS);
-        const p = Tooltips.P;
+        const r = target.getBounds(false);
+        const p = new Point();
         p.set(r.x + (r.width * 0.5), r.y + (r.height * 0.5));
         this.showTooltip(key, p, tooltip);
     }
@@ -154,21 +155,22 @@ export default class Tooltips extends GameObject {
         return regs;
     }
 
-    private static createTooltip(tooltip: Tooltip): DisplayObject {
-        if (typeof (tooltip) === 'string' || tooltip instanceof StyledTextBuilder) {
-            const textField: Container = (typeof (tooltip) === 'string')
-                ? new Text(tooltip, Tooltips.DEFAULT_STYLE)
+    private static createTooltip(tooltip: Tooltip): Container {
+        if (typeof tooltip === 'string' || tooltip instanceof StyledTextBuilder) {
+            const textField = typeof tooltip === 'string'
+                ? new Text({text: tooltip, style: Tooltips.DEFAULT_STYLE})
                 : tooltip.build();
 
-            const disp = new Graphics()
-                .beginFill(0x0, 0.8)
-                .drawRoundedRect(0, 0, textField.width + 20, textField.height + 20, 5)
-                .endFill();
+            const container = new Container();
+            const backdrop = new Graphics()
+                .roundRect(0, 0, textField.width + 20, textField.height + 20, 5)
+                .fill({color: 0x0, alpha: 0.8});
             textField.x = 10;
             textField.y = 10;
-            disp.addChild(textField);
-            disp.hitArea = new Rectangle();
-            return disp;
+            container.addChild(backdrop);
+            container.addChild(textField);
+            container.hitArea = new Rectangle();
+            return container;
         } else {
             return tooltip();
         }
@@ -183,12 +185,9 @@ export default class Tooltips extends GameObject {
     DisplayObjectPointerTarget |
     null;
 
-    private _curTooltip: DisplayObject | null = null;
+    private _curTooltip: Container | null = null;
     private _curTooltipFader: GameObjectRef = GameObjectRef.NULL;
     private _curTooltipPointerCapture: PointerCapture | null = null;
-
-    private static readonly TARGET_BOUNDS = new Rectangle();
-    private static readonly P = new Point();
 
     private static readonly TOOLTIP_DELAY = 0.5;
 }

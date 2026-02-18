@@ -1,16 +1,22 @@
-import {
-    ContainerObject, StyledTextBuilder, DisplayUtil, Flashbang
-} from 'flashbang';
-import Fonts from 'eterna/util/Fonts';
-import {Sprite, Point, Text} from 'pixi.js';
-import Bitmaps from 'eterna/resources/Bitmaps';
 import ConstraintBox from 'eterna/constraints/ConstraintBox';
-import MultiStyleText from 'pixi-multistyle-text';
-import Assert from 'flashbang/util/Assert';
+import Bitmaps from 'eterna/resources/Bitmaps';
 import SecStruct from 'eterna/rnatypes/SecStruct';
 import Sequence from 'eterna/rnatypes/Sequence';
-import MissionIntroConstraints from './MissionIntroConstraints';
+import Fonts from 'eterna/util/Fonts';
+import {
+    ContainerObject,
+    DisplayUtil, Flashbang,
+    StyledTextBuilder
+} from 'flashbang';
+import Assert from 'flashbang/util/Assert';
+import {
+    Container,
+    Point,
+    Sprite,
+    Text
+} from 'pixi.js';
 import GameButton from './GameButton';
+import MissionIntroConstraints from './MissionIntroConstraints';
 import PoseThumbnail, {PoseThumbnailType} from './PoseThumbnail';
 import UITheme from './UITheme';
 
@@ -29,11 +35,12 @@ export default class MissionIntroPanel extends ContainerObject {
     public get size() { return this._size; }
 
     private _props: MissionIntroPanelProps;
+    private _goalsContainer: Container;
     private _goalsBG: Sprite;
-    private _thumbnail: Sprite;
+    private _thumbnail: Container;
     private _constraints: MissionIntroConstraints;
     private _titleLabel: Text;
-    private _descriptionLabel: MultiStyleText;
+    private _descriptionLabel: Text;
     private _thumbnailButtons?: GameButton[];
     private _size = new Point();
 
@@ -42,10 +49,14 @@ export default class MissionIntroPanel extends ContainerObject {
         this._props = props;
 
         this._titleLabel = Fonts.std('GOAL', 24).bold().color(0xFAC244).build();
+        this._titleLabel.label = 'Title';
         this.container.addChild(this._titleLabel);
 
+        this._goalsContainer = new Container();
+        this.container.addChild(this._goalsContainer);
+
         this._goalsBG = Sprite.from(Bitmaps.ImgGoalBackground);
-        this.container.addChild(this._goalsBG);
+        this._goalsContainer.addChild(this._goalsBG);
 
         // Constraints
         this._constraints = new MissionIntroConstraints({
@@ -54,8 +65,8 @@ export default class MissionIntroPanel extends ContainerObject {
         this.addObject(this._constraints, this.container);
 
         // Thumbnails
-        this._thumbnail = new Sprite();
-        this.container.addChild(this._thumbnail);
+        this._thumbnail = new Container({label: 'Thumbnail'});
+        this._goalsContainer.addChild(this._thumbnail);
 
         const setThumbnail = (targetPairs: SecStruct) => {
             const wrongPairs = new Array(targetPairs.length).fill(-1);
@@ -72,6 +83,7 @@ export default class MissionIntroPanel extends ContainerObject {
                 0,
                 props.customLayout
             );
+            DisplayUtil.center(this._thumbnail, this._goalsContainer);
         };
 
         if (props.puzzleThumbnails.length > 1) {
@@ -90,8 +102,8 @@ export default class MissionIntroPanel extends ContainerObject {
         const updateLayout = () => {
             const {theme} = MissionIntroPanel;
             Assert.assertIsDefined(Flashbang.stageWidth);
-            this._constraints.updateLayout(Flashbang.stageWidth - (this._goalsBG.width + theme.spacing));
-            const width = this._goalsBG.width + theme.spacing + this._constraints.actualWidth;
+            this._constraints.updateLayout(Flashbang.stageWidth - (this._goalsContainer.width + theme.spacing));
+            const width = this._goalsContainer.width + theme.spacing + this._constraints.actualWidth;
 
             // Description
             if (this._descriptionLabel) {
@@ -109,27 +121,26 @@ export default class MissionIntroPanel extends ContainerObject {
             this.container.addChild(this._descriptionLabel);
 
             this._descriptionLabel.position.y = this._titleLabel.height + theme.spacing;
-            this._goalsBG.position.y = this._descriptionLabel.position.y
+            this._goalsContainer.position.y = this._descriptionLabel.position.y
                 + this._descriptionLabel.height
                 + theme.spacing;
-            DisplayUtil.center(this._thumbnail, this._goalsBG);
 
             this._constraints.container.position.set(
-                this._goalsBG.width,
-                this._goalsBG.y + 20
+                this._goalsContainer.width,
+                this._goalsContainer.y + 20
             );
 
             if (this._thumbnailButtons) {
                 this._thumbnailButtons.forEach((button, index) => {
                     button.display.position.set(
                         index * (button.container.width + theme.spacing),
-                        this._goalsBG.position.y + this._goalsBG.height + theme.spacing
+                        this._goalsContainer.position.y + this._goalsContainer.height + theme.spacing
                     );
                 });
             }
 
-            const height = this._goalsBG.position.y
-                + this._goalsBG.height
+            const height = this._goalsContainer.position.y
+                + this._goalsContainer.height
                 + (this._thumbnailButtons ? (this._thumbnailButtons[0].container.height + theme.spacing) : 0);
 
             const {headerHeight} = UITheme.missionIntro;

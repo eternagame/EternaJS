@@ -1,20 +1,37 @@
-import {
-    ContainerObject, Enableable, SceneObject, StyledTextBuilder, DisplayUtil, HAlign, VAlign,
-    SerialTask, DelayTask, AlphaTask, TextureUtil, LocationTask, Easing, ParallelTask, ScaleTask, VisibleTask, Flashbang
-} from 'flashbang';
-import {
-    Graphics, Sprite, Text, Point, Texture, Container
-} from 'pixi.js';
-import MultiStyleText from 'pixi-multistyle-text';
-import Fonts from 'eterna/util/Fonts';
+import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import EPars from 'eterna/EPars';
-import TextBalloon from 'eterna/ui/TextBalloon';
-import {RegistrationGroup} from 'signals';
 import Sounds from 'eterna/resources/Sounds';
+import TextBalloon from 'eterna/ui/TextBalloon';
 import UITheme from 'eterna/ui/UITheme';
+import Fonts from 'eterna/util/Fonts';
+import {
+    AlphaTask,
+    ContainerObject,
+    DelayTask,
+    DisplayUtil,
+    Easing,
+    Enableable,
+    Flashbang,
+    HAlign,
+    LocationTask,
+    ParallelTask, ScaleTask,
+    SceneObject,
+    SerialTask,
+    StyledTextBuilder,
+    TextureUtil,
+    VAlign,
+    VisibleTask
+} from 'flashbang';
 import {FontWeight} from 'flashbang/util/TextBuilder';
+import {
+    Container,
+    Graphics,
+    Point,
+    Sprite, Text,
+    Texture
+} from 'pixi.js';
+import {RegistrationGroup} from 'signals';
 
 export interface ConstraintBoxConfig {
     // Toggle checkmark, green vs red outline
@@ -48,6 +65,8 @@ export interface ConstraintBoxConfig {
 }
 
 export default class ConstraintBox extends ContainerObject implements Enableable {
+    private static readonly BG_GRAPHICS_WIDTH = 111;
+
     constructor(forMissionScreen: boolean, states = 1) {
         super();
         this._forMissionScreen = forMissionScreen;
@@ -65,7 +84,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._opaqueBackdrop.visible = false;
         this.container.addChild(this._opaqueBackdrop);
 
-        this._req = new Sprite();
+        this._req = new Container();
         this._req.visible = false;
         this.container.addChild(this._req);
 
@@ -73,7 +92,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._bg.visible = false;
         this.container.addChild(this._bg);
 
-        this._icon = new Sprite();
+        this._icon = new Container();
         this._icon.visible = false;
         this.container.addChild(this._icon);
 
@@ -89,8 +108,9 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._stateText.visible = false;
         this.container.addChild(this._stateText);
 
-        this._reqClarifyText = new MultiStyleText('', {
-            default: {
+        this._reqClarifyText = new Text({
+            text: '',
+            style: {
                 fontFamily: Fonts.STDFONT,
                 fontSize: 11,
                 fill: 0xC0DCE7,
@@ -102,8 +122,9 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._reqClarifyText.visible = false;
         this.container.addChild(this._reqClarifyText);
 
-        this._reqStatText = new MultiStyleText('', {
-            default: {
+        this._reqStatText = new Text({
+            text: '',
+            style: {
                 fontFamily: Fonts.STDFONT,
                 fontSize: 11,
                 fill: 0xC0DCE7,
@@ -114,21 +135,20 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._reqStatText.visible = false;
         this.container.addChild(this._reqStatText);
 
-        this._smallThumbnail = new Sprite();
+        this._smallThumbnail = new Container();
         this._smallThumbnail.position.set(6, 6);
         this.container.addChild(this._smallThumbnail);
 
-        this._flag = new Graphics();
-        this._flag.clear();
-        this._flag.beginFill(0xBEDCE7, 1.0);
-        this._flag.drawRect(0, 0, 5, 5);
-        this._flag.endFill();
+        this._flag = new Graphics()
+            .clear()
+            .rect(0, 0, 5, 5)
+            .fill({color: 0xBEDCE7, alpha: 1.0});
         this._flag.position.set(4, 4);
         this.container.addChild(this._flag);
         this._flag.visible = false;
 
         if (this._forMissionScreen) {
-            this._sideText = new MultiStyleText('', {});
+            this._sideText = new Text({text: '', style: {}});
             this.container.addChild(this._sideText);
         }
 
@@ -158,19 +178,21 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
         this._req.visible = config.fullTexture !== undefined;
         if (config.fullTexture !== undefined) {
-            this._req.texture = config.fullTexture;
+            this._req.removeChildren();
+            this._req.addChild(Sprite.from(config.fullTexture));
 
             // Add border
             const border = new Graphics();
             border.interactiveChildren = false;
-            border.lineStyle(UITheme.panel.borderSize, UITheme.constraints.borderColor, 1);
-            border.drawRoundedRect(
-                0,
-                0,
-                this._req.texture.width,
-                this._req.texture.height,
-                UITheme.constraints.borderRadius
-            );
+            border
+                .roundRect(
+                    0,
+                    0,
+                    config.fullTexture.width,
+                    config.fullTexture.height,
+                    UITheme.constraints.borderRadius
+                )
+                .stroke({width: UITheme.panel.borderSize, color: UITheme.constraints.borderColor, alpha: 1});
             this._req.addChild(border);
             this.initOpaqueBackdrop(config.fullTexture.width, config.fullTexture.height);
         }
@@ -215,16 +237,15 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         balloon.styledText = tooltipText;
         this.setMouseOverObject(balloon, toolTipContainer);
 
-        this._bgGraphics.visible = config.drawBG || false;
+        this._bgGraphics.visible = config.drawBG ?? false;
         if (this._bgGraphics.visible) {
-            this._bgGraphics.clear();
-            this._bgGraphics.beginFill(0x1E314B, 0.5);
-            this._bgGraphics.drawRoundedRect(0, 0, 111, this._forMissionScreen ? 55 : 75, 15);
-            this._bgGraphics.endFill();
+            this._bgGraphics.clear()
+                .roundRect(0, 0, ConstraintBox.BG_GRAPHICS_WIDTH, this._forMissionScreen ? 55 : 75, 15)
+                .fill({color: 0x1E314B, alpha: 0.5});
             this.initOpaqueBackdrop(this._bgGraphics.width, this._bgGraphics.height);
         }
 
-        this._bg.visible = config.thumbnailBG || false;
+        this._bg.visible = config.thumbnailBG ?? false;
         if (this._bg.visible) {
             if (config.satisfied) {
                 this._bg.texture = BitmapManager.getBitmap(Bitmaps.NovaPuzThumbSmallMet);
@@ -242,7 +263,10 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             this._outline.visible = false;
             tooltipText.apply(this._sideText);
             // Make the icon look centered with respect to the text
-            const deltaWidth = Math.max(0, this._sideText.width - this._opaqueBackdrop.width);
+            const deltaWidth = Math.max(
+                0,
+                this._sideText.width - this._opaqueBackdrop.width
+            );
             this._sideText.position.set(-deltaWidth / 2, this._opaqueBackdrop.height + 10);
         }
 
@@ -261,21 +285,25 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         if (config.icon) {
             this._icon.visible = true;
             this._icon.removeChildren();
-            this._icon.texture = Texture.EMPTY;
+
             if (config.icon instanceof Texture) {
-                this._icon.texture = config.icon;
-                this._icon.position.set((111 - this._icon.width) * 0.5, 5);
+                const sprite = Sprite.from(config.icon);
+                sprite.position.set((ConstraintBox.BG_GRAPHICS_WIDTH - sprite.width) / 2, 5);
+                this._icon.addChild(sprite);
             } else if (config.icon instanceof Graphics) {
                 this._icon.addChild(config.icon);
             } else {
-                TextureUtil.fromBase64PNG(config.icon).then((tex) => {
-                    this._icon.texture = tex;
-                    this._icon.position.set((111 - this._icon.width) * 0.5, 5);
-                });
+                TextureUtil
+                    .fromBase64PNG(config.icon)
+                    .then((tex) => {
+                        const sprite = Sprite.from(tex);
+                        sprite.position.set((ConstraintBox.BG_GRAPHICS_WIDTH - sprite.width) / 2, 5);
+                        this._icon.addChild(sprite);
+                    });
             }
         }
 
-        this._noText.visible = config.noText || false;
+        this._noText.visible = config.noText ?? false;
 
         if (config.satisfiedIndicators !== false) {
             if (config.satisfied && !this._satisfied) {
@@ -320,7 +348,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
     /** Creates a StyledTextBuilder with the ConstraintBox's default settings */
     public static createTextStyle(): StyledTextBuilder {
-        const style: StyledTextBuilder = new StyledTextBuilder({
+        const style = new StyledTextBuilder({
             fontFamily: Fonts.STDFONT,
             fontSize: 14,
             fill: 0xffffff,
@@ -341,7 +369,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         return style;
     }
 
-    private setPossiblyStyledText(str: string | StyledTextBuilder, text: MultiStyleText): void {
+    private setPossiblyStyledText(str: string | StyledTextBuilder, text: Text): void {
         if (str instanceof StyledTextBuilder) {
             str.defaultStyle(text.style);
             str.apply(text);
@@ -366,7 +394,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             obj.display.x = 0;
             obj.display.y = 78;
             obj.display.visible = false;
-            obj.display.interactive = false;
+            obj.display.eventMode = 'auto';
             this.addObject(obj, container ?? this.container);
 
             this._mouseOverObject = obj;
@@ -401,10 +429,9 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     }
 
     private initOpaqueBackdrop(width: number, height: number) {
-        this._opaqueBackdrop.clear();
-        this._opaqueBackdrop.beginFill(0x142640, 1);
-        this._opaqueBackdrop.drawRoundedRect(0, 0, width, height, 15);
-        this._opaqueBackdrop.endFill();
+        this._opaqueBackdrop.clear()
+            .roundRect(0, 0, width, height, 15)
+            .fill({color: 0x142640, alpha: 1});
     }
 
     public setLocation(p: Point, animate: boolean = false, animTime: number = 0.5): void {
@@ -431,15 +458,16 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
         const lineWidth = 6;
 
-        this._fglow.clear();
-        this._fglow.lineStyle(lineWidth, satisfied ? 0x00FF00 : 0xFF0000, 1.0);
-        this._fglow.drawRoundedRect(
-            lineWidth / 2,
-            lineWidth / 2,
-            this.display.width - lineWidth,
-            this.display.height - lineWidth,
-            10
-        );
+        this._fglow
+            .clear()
+            .roundRect(
+                lineWidth / 2,
+                lineWidth / 2,
+                this.display.width - lineWidth,
+                this.display.height - lineWidth,
+                10
+            )
+            .stroke({width: lineWidth, color: satisfied ? 0x00FF00 : 0xFF0000, alpha: 1.0});
         this._fglow.scale.x = 1;
         this._fglow.scale.y = 1;
         this._fglow.alpha = 0;
@@ -455,10 +483,9 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             )
         ));
 
-        this._backlight.clear();
-        this._backlight.beginFill(satisfied ? 0x00FF00 : 0xFF0000, 0.7);
-        this._backlight.drawRoundedRect(0, 0, this.display.width, this.display.height, 10);
-        this._backlight.endFill();
+        this._backlight.clear()
+            .roundRect(0, 0, this.display.width, this.display.height, 10)
+            .fill({color: satisfied ? 0x00FF00 : 0xFF0000, alpha: 0.7});
         this._backlight.alpha = 0;
         this._backlight.visible = true;
         this._backlight.position.set(0, 0);
@@ -470,10 +497,9 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     }
 
     public flash(color: number): void {
-        this._backlight.clear();
-        this._backlight.beginFill(color, 0.9);
-        this._backlight.drawRoundedRect(0, 0, this.display.width, this.display.height, 10);
-        this._backlight.endFill();
+        this._backlight.clear()
+            .roundRect(0, 0, this.display.width, this.display.height, 10)
+            .fill({color, alpha: 0.9});
         this._backlight.alpha = 0;
         this._backlight.visible = true;
         this._backlight.position.set(0, 0);
@@ -499,16 +525,16 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
     private _bgGraphics: Graphics;
     private _backlight: Graphics;
-    private _req: Sprite;
+    private _req: Container;
     private _bg: Sprite;
-    private _icon: Sprite;
+    private _icon: Container;
     private _noText: Text;
     private _stateText: Text;
-    private _reqClarifyText: MultiStyleText;
-    private _reqStatText: MultiStyleText;
-    private _smallThumbnail: Sprite;
+    private _reqClarifyText: Text;
+    private _reqStatText: Text;
+    private _smallThumbnail: Container;
     private _flag: Graphics;
-    private _sideText: MultiStyleText;
+    private _sideText: Text;
     private _check: Sprite;
     private _outline: Sprite;
     private _fglow: Graphics;

@@ -3,7 +3,8 @@ import {
 } from 'flashbang';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {
-    Point
+    Point,
+    UPDATE_PRIORITY
 } from 'pixi.js';
 import Assert from 'flashbang/util/Assert';
 import GameButton from './GameButton';
@@ -100,7 +101,7 @@ export default class MultiPagePanel extends ContainerObject {
         Assert.assertIsDefined(this.mode);
         Assert.assertIsDefined(Flashbang.pixi);
         this.regs.add(this.mode.resized.connect(() => this.doLayout()));
-        Flashbang.pixi.renderer.addListener('postrender', this.updateDOMMask, this);
+        Flashbang.pixi.ticker.add(this.updateDOMMask, this, UPDATE_PRIORITY.LOW);
         this.doLayout();
     }
 
@@ -174,5 +175,11 @@ export default class MultiPagePanel extends ContainerObject {
         this._prevButton.display.visible = this._currentPage > 0;
         this._nextButton.display.visible = this._currentPage < this.pageCount - 1;
         this.doLayout();
+    }
+
+    protected removed() {
+        super.removed();
+        Assert.assertIsDefined(Flashbang.pixi);
+        Flashbang.pixi.ticker.remove(this.updateDOMMask, this);
     }
 }
