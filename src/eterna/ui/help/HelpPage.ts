@@ -1,9 +1,9 @@
-import {ContainerObject, StyledTextBuilder} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import TextUtil from 'eterna/util/TextUtil';
-import {UnitSignal} from 'signals';
-import {TextMetrics} from 'pixi.js';
+import {ContainerObject, StyledTextBuilder} from 'flashbang';
 import {FontWeight} from 'flashbang/util/TextBuilder';
+import {CanvasTextMetrics} from 'pixi.js';
+import {UnitSignal} from 'signals';
 import GameButton from '../GameButton';
 
 interface HelpPageProps {
@@ -40,7 +40,7 @@ export default class HelpPage extends ContainerObject {
             .fontWeight(FontWeight.SEMIBOLD)
             .color(0xffffff);
 
-        const titleMetrics = TextMetrics.measureText(section, titleBuilder.style);
+        const titleMetrics = CanvasTextMetrics.measureText(section, titleBuilder.style);
         const titleElem = titleBuilder.build();
 
         const contentBuilder = new StyledTextBuilder({

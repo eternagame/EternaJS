@@ -1,7 +1,8 @@
 import {
-    Graphics, Sprite, Text, Texture
+    Graphics, Sprite, Text, Texture,
+    ColorMatrixFilter,
+    Container
 } from 'pixi.js';
-import {ColorMatrixFilter} from '@pixi/filter-color-matrix';
 import {
     ContainerObject, MathUtil, TextureUtil, ColorUtil, Updatable
 } from 'flashbang';
@@ -68,8 +69,12 @@ export default class Band extends ContainerObject implements Updatable {
 
         const satTex: Texture = BitmapManager.getBitmap(Bitmaps.Satellite);
         const render = (rotation: number, colorTransform: ColorMatrixFilter | null = null): Texture => {
-            const disp = new Graphics();
-            disp.beginFill(0).drawRect(0, 0, 20, 20).endFill();
+            const disp = new Container();
+            disp.addChild(
+                new Graphics()
+                    .rect(0, 0, 20, 20)
+                    .fill(0)
+            );
 
             const sat = new Sprite(satTex);
             sat.pivot.set(10, 10);

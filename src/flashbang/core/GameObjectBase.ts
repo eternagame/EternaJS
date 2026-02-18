@@ -5,7 +5,7 @@ import ModeStack from './ModeStack';
 import GameObject from './GameObject';
 import GameObjectRef from './GameObjectRef';
 
-export default class GameObjectBase {
+export default abstract class GameObjectBase {
     public get destroyed(): UnitSignal {
         if (this._destroyed == null) {
             this._destroyed = new UnitSignal();

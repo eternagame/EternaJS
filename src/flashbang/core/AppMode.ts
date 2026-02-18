@@ -1,4 +1,4 @@
-import {Container} from 'pixi.js';
+import {Container, FederatedPointerEvent, FederatedWheelEvent} from 'pixi.js';
 import {
     RegistrationGroup, Signal, SignalView, UnitSignal
 } from 'signals';
@@ -6,7 +6,6 @@ import KeyboardInput from 'flashbang/input/KeyboardInput';
 import Assert from 'flashbang/util/Assert';
 import PointerTarget from 'flashbang/input/PointerTarget';
 import DisplayObjectPointerTarget from 'flashbang/input/DisplayObjectPointerTarget';
-import {FederatedPointerEvent, FederatedWheelEvent} from '@pixi/events';
 import GameObject from './GameObject';
 import GameObjectBase from './GameObjectBase';
 import GameObjectRef from './GameObjectRef';
@@ -20,7 +19,7 @@ import Updatable from './Updatable';
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type ObjectID = Object | string;
 
-export default class AppMode implements PointerTarget {
+export default abstract class AppMode implements PointerTarget {
     /** Default keyboard input processor */
     public readonly keyboardInput: KeyboardInput = new KeyboardInput();
 
@@ -60,7 +59,7 @@ export default class AppMode implements PointerTarget {
         class AppModeContainer extends Container {}
         this._container = new AppModeContainer();
         // Convenience so that the flashbang class name shows in the Pixi devtools
-        Object.defineProperty(AppModeContainer, 'name', {value: this.constructor.name});
+        Object.defineProperty(AppModeContainer, 'label', {value: this.constructor.name});
 
         this._rootObject = new RootObject(this);
         if (this.container) this.container.interactiveChildren = false;
@@ -116,23 +115,8 @@ export default class AppMode implements PointerTarget {
             return Promise.resolve();
         } else {
             return new Promise((resolve, reject) => {
-                this._entered.connect(() => {
-                    // if (resolve != null) {
-                    const fn = resolve;
-                    // resolve = null;
-                    // reject = null;
-                    fn();
-                    // }
-                });
-
-                this._disposed.connect(() => {
-                    // if (reject != null) {
-                    const fn = reject;
-                    // resolve = null;
-                    // reject = null;
-                    fn('Mode was disposed');
-                    // }
-                });
+                this._entered.connect(() => resolve());
+                this._disposed.connect(() => reject(new Error('Mode was disposed')));
             });
         }
     }

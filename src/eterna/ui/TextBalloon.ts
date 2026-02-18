@@ -1,9 +1,13 @@
-import MultiStyleText from 'pixi-multistyle-text';
-import {StyledTextBuilder, DisplayUtil, ContainerObject} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
+import {
+    ContainerObject,
+    DisplayUtil,
+    StyledTextBuilder
+} from 'flashbang';
+import {Text} from 'pixi.js';
+import {FontWeight} from '../../flashbang/util/TextBuilder';
 import GameButton from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';
-import {FontWeight} from '../../flashbang/util/TextBuilder';
 
 export default class TextBalloon extends ContainerObject {
     constructor(
@@ -62,7 +66,7 @@ export default class TextBalloon extends ContainerObject {
         this.updateView();
     }
 
-    public get text(): MultiStyleText {
+    public get text(): Text {
         return this._text;
     }
 
@@ -121,7 +125,7 @@ export default class TextBalloon extends ContainerObject {
     public get width(): number {
         if (this._width) return this._width;
 
-        let wholeWidth: number = this._text != null ? this._text.width : 0;
+        let wholeWidth: number = this._text?.width ?? 0;
         if (this._button != null && this._button.display.visible) {
             wholeWidth += TextBalloon.W_MARGIN;
             wholeWidth += DisplayUtil.width(this._button.display);
@@ -133,7 +137,7 @@ export default class TextBalloon extends ContainerObject {
     public get height(): number {
         if (this._height) return this._height;
 
-        let wholeHeight = this._text != null ? this._text.height : 0;
+        let wholeHeight = this._text?.height ?? 0;
 
         if (this._button != null && this._button.display.visible) {
             wholeHeight = Math.max(wholeHeight, DisplayUtil.height(this._button.display));
@@ -164,7 +168,8 @@ export default class TextBalloon extends ContainerObject {
             if (this._button.display.visible) {
                 this._button.display.position.set(
                     TextBalloon.W_MARGIN + this._text.width + TextBalloon.W_MARGIN,
-                    TextBalloon.H_MARGIN + titleSpace + this._text.height - DisplayUtil.height(this._button.display)
+                    TextBalloon.H_MARGIN + titleSpace + this._text.height
+                        - DisplayUtil.height(this._button.display)
                 );
             }
 
@@ -177,7 +182,8 @@ export default class TextBalloon extends ContainerObject {
             if (this._button.display.visible) {
                 this._button.display.position.set(
                     -wholeWidth / 2 + this._text.width + TextBalloon.W_MARGIN,
-                    TextBalloon.H_MARGIN + titleSpace + this._text.height - DisplayUtil.height(this._button.display)
+                    TextBalloon.H_MARGIN + titleSpace + this._text.height
+                        - DisplayUtil.height(this._button.display)
                 );
             }
 
@@ -196,7 +202,7 @@ export default class TextBalloon extends ContainerObject {
     protected _button: GameButton;
 
     private _panel: GamePanel;
-    protected _text: MultiStyleText;
+    protected _text: Text;
     protected _centered: boolean = false;
     protected _hasTitle: boolean = false;
 

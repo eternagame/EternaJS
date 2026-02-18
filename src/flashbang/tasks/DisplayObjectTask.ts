@@ -1,10 +1,10 @@
-import {DisplayObject} from 'pixi.js';
+import {Container} from 'pixi.js';
 import {EasingFunc} from 'flashbang/util/Easing';
 import Assert from 'flashbang/util/Assert';
 import InterpolatingTask from './InterpolatingTask';
 
 export default class DisplayObjectTask extends InterpolatingTask {
-    constructor(time: number, easing: EasingFunc | null, target: DisplayObject | null) {
+    constructor(time: number, easing: EasingFunc | null, target: Container | null) {
         super(time, easing);
         this._target = target;
     }
@@ -19,5 +19,5 @@ export default class DisplayObjectTask extends InterpolatingTask {
         }
     }
 
-    protected _target: DisplayObject | null;
+    protected _target: Container | null;
 }

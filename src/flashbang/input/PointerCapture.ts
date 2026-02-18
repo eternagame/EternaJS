@@ -1,9 +1,5 @@
-import {DisplayObject} from 'pixi.js';
+import {Container, FederatedPointerEvent, FederatedWheelEvent} from 'pixi.js';
 import {Assert, GameObject} from 'flashbang';
-import {
-    FederatedPointerEvent, FederatedWheelEvent
-} from '@pixi/events';
-
 /**
  * Begins capturing pointer input. All pointer events not related to the passed Container will be
  * routed to the given callback function before they reach their intended target. The callback
@@ -18,7 +14,7 @@ import {
  */
 export default class PointerCapture extends GameObject {
     constructor(
-        root: DisplayObject | null,
+        root: Container | null,
         onEvent: (e: FederatedPointerEvent | PointerEvent | FederatedWheelEvent) => void
     ) {
         super();
@@ -47,6 +43,6 @@ export default class PointerCapture extends GameObject {
         }
     }
 
-    private _root: DisplayObject | null;
+    private _root: Container | null;
     private _onEvent: ((e: FederatedPointerEvent | PointerEvent | FederatedWheelEvent) => void);
 }

@@ -687,7 +687,7 @@ export default class AnnotationManager {
             for (const [idx, layer] of this.allLayers.entries()) {
                 if (this.isAnnotationVisible(layer)) {
                     this.placeAnnotationInPose({
-                        ...params, item: layer, itemIndex: idx, baseLayerBounds
+                        ...params, item: layer, itemIndex: idx, baseLayerBounds: baseLayerBounds.rectangle
                     });
                 }
             }
@@ -696,7 +696,7 @@ export default class AnnotationManager {
             for (const [idx, annotation] of this.allAnnotations.entries()) {
                 if (!annotation.layerId && this.isAnnotationVisible(annotation)) {
                     this.placeAnnotationInPose({
-                        ...params, item: annotation, itemIndex: idx, baseLayerBounds
+                        ...params, item: annotation, itemIndex: idx, baseLayerBounds: baseLayerBounds.rectangle
                     });
                 }
             }
@@ -705,7 +705,7 @@ export default class AnnotationManager {
             for (const [idx, annotation] of this.allAnnotations.entries()) {
                 if (this.isAnnotationVisible(annotation)) {
                     this.placeAnnotationInPose({
-                        ...params, item: annotation, itemIndex: idx, baseLayerBounds
+                        ...params, item: annotation, itemIndex: idx, baseLayerBounds: baseLayerBounds.rectangle
                     });
                 }
             }
@@ -2087,12 +2087,14 @@ export default class AnnotationManager {
                         };
 
                         if (DEBUG_ANNOTATION_PLACEMENT) {
-                            const debugRect = new Graphics().lineStyle(1, ANNOTATION_CONFLICT_COLOR).drawRect(
-                                positionConflict.bounds.x,
-                                positionConflict.bounds.y,
-                                positionConflict.bounds.width,
-                                positionConflict.bounds.height
-                            );
+                            const debugRect = new Graphics()
+                                .rect(
+                                    positionConflict.bounds.x,
+                                    positionConflict.bounds.y,
+                                    positionConflict.bounds.width,
+                                    positionConflict.bounds.height
+                                )
+                                .stroke({width: 1, color: ANNOTATION_CONFLICT_COLOR});
                             if (numSearchAttempts >= DEBUG_FROM_SEARCH_ATTEMPT) {
                                 pose.baseLayer.addChild(debugRect);
                             }
@@ -2369,12 +2371,14 @@ export default class AnnotationManager {
         // determine if any conflict is resolvable
         if (conflict) {
             if (DEBUG_ANNOTATION_PLACEMENT) {
-                const debugRect = new Graphics().lineStyle(1, BASE_CONFLICT_COLOR).drawRect(
-                    baseLayerBounds.x + conflict.bounds.x,
-                    baseLayerBounds.y + conflict.bounds.y,
-                    conflict.bounds.width,
-                    conflict.bounds.height
-                );
+                const debugRect = new Graphics()
+                    .rect(
+                        baseLayerBounds.x + conflict.bounds.x,
+                        baseLayerBounds.y + conflict.bounds.y,
+                        conflict.bounds.width,
+                        conflict.bounds.height
+                    )
+                    .stroke({width: 1, color: BASE_CONFLICT_COLOR});
                 if (numSearchAttempts >= DEBUG_FROM_SEARCH_ATTEMPT) {
                     pose.baseLayer.addChild(debugRect);
                 }
@@ -2398,12 +2402,14 @@ export default class AnnotationManager {
                 conflict.correction = correction;
             }
         } else if (DEBUG_ANNOTATION_PLACEMENT) {
-            const debugRect = new Graphics().lineStyle(1, POSSIBLE_PLACEMENT_AVAILABILITY_COLOR).drawRect(
-                startColumn + baseLayerBounds.x,
-                startRow + baseLayerBounds.y,
-                annotationView.width,
-                annotationView.height
-            );
+            const debugRect = new Graphics()
+                .rect(
+                    startColumn + baseLayerBounds.x,
+                    startRow + baseLayerBounds.y,
+                    annotationView.width,
+                    annotationView.height
+                )
+                .stroke({width: 1, color: POSSIBLE_PLACEMENT_AVAILABILITY_COLOR});
             if (numSearchAttempts >= DEBUG_FROM_SEARCH_ATTEMPT) {
                 pose.baseLayer.addChild(debugRect);
             }

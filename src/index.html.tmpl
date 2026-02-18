@@ -110,7 +110,7 @@
         }
     }
 
-    function createApp() {
+    async function createApp() {
         let app = new EternaApp({
             containerID: containerID,
             chatboxID: "chat-container",
@@ -128,7 +128,7 @@
             experimentalFeatures: params.get('experimentalFeatures')?.split(',')
         });
         window.app = app;
-        app.run();
+        await app.run();
 
         const resizeObserver = new ResizeObserver(() => {
             setTimeout(() => app.resize(appContainer.clientWidth, appContainer.clientHeight));

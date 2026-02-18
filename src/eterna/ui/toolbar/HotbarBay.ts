@@ -1,6 +1,7 @@
-import {FederatedPointerEvent} from '@pixi/events';
 import {ContainerObject, DisplayUtil, HLayoutContainer} from 'flashbang';
-import {Graphics, Point, Rectangle} from 'pixi.js';
+import {
+    Graphics, Point, Rectangle, FederatedPointerEvent
+} from 'pixi.js';
 import {ToolTipPositioner} from '../help/HelpToolTip';
 import Tooltips from '../Tooltips';
 import ToolbarButton, {BUTTON_HEIGHT, BUTTON_WIDTH} from './ToolbarButton';
@@ -20,15 +21,13 @@ export default class HotbarBay extends ContainerObject {
 
         // Hover stuff
         this._hoverSwapIndicator = new Graphics()
-            .beginFill(0xc0c0c0, 0.4)
-            .drawRoundedRect(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, 7)
-            .endFill();
+            .roundRect(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, 7)
+            .fill({color: 0xc0c0c0, alpha: 0.4});
         this.container.addChild(this._hoverSwapIndicator);
         this._hoverSwapIndicator.visible = false;
         this._hoverInsertIndicator = new Graphics()
-            .beginFill(0xc0c0c0)
-            .drawRect(0, 2, 2, BUTTON_HEIGHT - 4)
-            .endFill();
+            .rect(0, 2, 2, BUTTON_HEIGHT - 4)
+            .fill(0xc0c0c0);
         this.container.addChild(this._hoverInsertIndicator);
         this._hoverInsertIndicator.visible = false;
 
@@ -69,28 +68,26 @@ export default class HotbarBay extends ContainerObject {
         if (this._editable) {
             this._background
                 .clear()
-                .lineStyle(1, 0x3397db, 1)
-                .beginFill(BAY_BACKGROUND_COLOR, 1)
-                .drawRoundedRect(
+                .roundRect(
                     -1,
                     -1,
                     Math.max(this._content.width, BUTTON_WIDTH) + 2,
                     Math.max(this._content.height, BUTTON_HEIGHT) + 2,
                     7
                 )
-                .endFill();
+                .fill({color: BAY_BACKGROUND_COLOR, alpha: 1})
+                .stroke({width: 1, color: 0x3397db, alpha: 1});
         } else {
             this._background
                 .clear()
-                .beginFill(BAY_BACKGROUND_COLOR, 1)
-                .drawRoundedRect(
+                .roundRect(
                     0,
                     0,
                     Math.max(this._content.width, BUTTON_WIDTH),
                     Math.max(this._content.height, BUTTON_HEIGHT),
                     7
                 )
-                .endFill();
+                .fill({color: BAY_BACKGROUND_COLOR, alpha: 1});
         }
     }
 

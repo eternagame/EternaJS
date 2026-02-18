@@ -1,8 +1,7 @@
-import MultiStyleText from 'pixi-multistyle-text';
-import {Container, Graphics} from 'pixi.js';
-import {VLayoutContainer, HAlign} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
+import {HAlign, VLayoutContainer} from 'flashbang';
 import {FontWeight} from 'flashbang/util/TextBuilder';
+import {Container, Graphics, Text} from 'pixi.js';
 
 export default class EnergyScoreDisplay extends Container {
     public static grey(text: string): string {
@@ -29,28 +28,34 @@ export default class EnergyScoreDisplay extends Container {
 
         const textLayout: VLayoutContainer = new VLayoutContainer(2, HAlign.LEFT);
 
-        this._labelText = new MultiStyleText('Total', {
-            default: {
+        this._labelText = new Text({
+            text: 'Total',
+            style: {
                 fontFamily: Fonts.STDFONT,
                 fontSize: 11,
-                fill: 0xffffff
-            },
-            grey: {fill: 0x777777},
-            green: {fill: 0x33AA33},
-            red: {fill: 0xFF4747}
+                fill: 0xffffff,
+                tagStyles: {
+                    grey: {fill: 0x777777},
+                    green: {fill: 0x33AA33},
+                    red: {fill: 0xFF4747}
+                }
+            }
         });
         textLayout.addChild(this._labelText);
 
-        this._energyText = new MultiStyleText('-.- kcal', {
-            default: {
+        this._energyText = new Text({
+            text: '-.- kcal',
+            style: {
                 fontFamily: Fonts.STDFONT,
                 fontWeight: FontWeight.SEMIBOLD,
                 fontSize: 13,
-                fill: 0xffffff
-            },
-            grey: {fill: 0x777777},
-            green: {fill: 0x33AA33},
-            red: {fill: 0xFF4747}
+                fill: 0xffffff,
+                tagStyles: {
+                    grey: {fill: 0x777777},
+                    green: {fill: 0x33AA33},
+                    red: {fill: 0xFF4747}
+                }
+            }
         });
         textLayout.addChild(this._energyText);
 
@@ -80,15 +85,15 @@ export default class EnergyScoreDisplay extends Container {
     }
 
     private updateBG(): void {
-        this._bg.clear();
-        this._bg.beginFill(0x33465F);
-        this._bg.drawRoundedRect(0, 0, this._width, this._height, 10);
-        this._bg.endFill();
+        this._bg
+            .clear()
+            .roundRect(0, 0, this._width, this._height, 10)
+            .fill(0x33465F);
         this._bg.alpha = 0.5;
     }
 
-    private readonly _labelText: MultiStyleText;
-    private readonly _energyText: MultiStyleText;
+    private readonly _labelText: Text;
+    private readonly _energyText: Text;
     private readonly _bg: Graphics;
 
     protected _width: number;

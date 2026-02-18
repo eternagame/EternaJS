@@ -1,31 +1,32 @@
+import confetti, {Options as ConfettiOptions} from 'canvas-confetti';
+import Eterna from 'eterna/Eterna';
+import BitmapManager from 'eterna/resources/BitmapManager';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import PlaySoundTask from 'eterna/resources/PlaySoundTask';
+import Sounds from 'eterna/resources/Sounds';
+import GameButton from 'eterna/ui/GameButton';
+import HTMLImageObject from 'eterna/ui/HTMLImageObject';
+import Fonts from 'eterna/util/Fonts';
+import VibrateTask from 'eterna/vfx/VibrateTask';
 import {
-    Point, Sprite, Graphics
-} from 'pixi.js';
-import {
-    ContainerObject,
-    SerialTask,
-    DelayTask,
-    ParallelTask,
     AlphaTask,
-    ScaleTask,
+    Assert,
+    ContainerObject,
+    DelayTask,
     Easing,
     Flashbang,
     LocationTask,
-    StyledTextBuilder,
-    Assert
+    ParallelTask,
+    ScaleTask,
+    SerialTask,
+    StyledTextBuilder
 } from 'flashbang';
-import GameButton from 'eterna/ui/GameButton';
-import Fonts from 'eterna/util/Fonts';
-import PlaySoundTask from 'eterna/resources/PlaySoundTask';
-import Sounds from 'eterna/resources/Sounds';
-import VibrateTask from 'eterna/vfx/VibrateTask';
+import {
+    Graphics,
+    Point, Sprite,
+    Text
+} from 'pixi.js';
 import {UnitSignal} from 'signals';
-import BitmapManager from 'eterna/resources/BitmapManager';
-import Bitmaps from 'eterna/resources/Bitmaps';
-import MultiStyleText from 'pixi-multistyle-text';
-import * as confetti from 'canvas-confetti';
-import Eterna from 'eterna/Eterna';
-import HTMLImageObject from 'eterna/ui/HTMLImageObject';
 
 export default class AchievementBox extends ContainerObject {
     public closed = new UnitSignal();
@@ -44,7 +45,7 @@ export default class AchievementBox extends ContainerObject {
 
     private readonly _imageURL: string;
     private readonly _description: string;
-    private _descriptionTxt: MultiStyleText;
+    private _descriptionTxt: Text;
 
     constructor(imageURL: string, text: string) {
         super();
@@ -61,15 +62,14 @@ export default class AchievementBox extends ContainerObject {
 
         const {theme} = AchievementBox;
 
-        const background = new Graphics();
-        background.lineStyle(1, theme.colors.border, 1);
-        background.beginFill(theme.colors.background, 1);
-        background.drawRoundedRect(0, 0, theme.size.x, theme.size.y, theme.borderRadius);
-        background.endFill();
-        background.beginFill(theme.colors.border);
-        background.drawRoundedRect(0, 0, theme.size.x, theme.headerHeight, theme.borderRadius);
-        background.endFill();
-        background.interactive = true;
+        const background = new Graphics()
+            .roundRect(0, 0, theme.size.x, theme.size.y, theme.borderRadius)
+            .fill({color: theme.colors.background, alpha: 1})
+            .stroke({width: 1, color: theme.colors.border, alpha: 1})
+            .roundRect(0, 0, theme.size.x, theme.headerHeight, theme.borderRadius)
+            .fill({color: theme.colors.border})
+            .stroke({width: 1, color: theme.colors.border, alpha: 1});
+        background.eventMode = 'static';
         background.on('click', () => this.closed.emit());
         background.on('tap', () => this.closed.emit());
         this.container.addChild(background);
@@ -205,16 +205,16 @@ export default class AchievementBox extends ContainerObject {
                 // Confetti - realistic look
                 // https://www.kirilv.com/canvas-confetti/
                 const count = 200;
-                const defaults = {
+                const defaults: ConfettiOptions = {
                     origin: {y: 0.7}
                 };
 
-                function fire(particleRatio: number, opts: Record<string, unknown>) {
-                    // sadly, @types/canvas-confetti doesn't export the confetti method properly!
-                    // eslint-disable-next-line
-                    (confetti as any).default(Object.assign({}, defaults, opts, {
+                async function fire(particleRatio: number, opts: ConfettiOptions) {
+                    await confetti({
+                        ...defaults,
+                        ...opts,
                         particleCount: Math.floor(count * particleRatio)
-                    }));
+                    });
                 }
 
                 fire(0.25, {

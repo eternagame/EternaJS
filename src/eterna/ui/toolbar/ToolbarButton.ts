@@ -58,9 +58,8 @@ export default class ToolbarButton extends GameButton {
 
         // Hack to force buttons to be of uniform size
         const bounds = new Graphics()
-            .beginFill(0)
-            .drawRect(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT)
-            .endFill();
+            .rect(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT)
+            .fill(0);
         bounds.alpha = 0;
         this.display.addChildAt(bounds, 0);
         this._background = new Graphics();
@@ -143,9 +142,8 @@ export default class ToolbarButton extends GameButton {
 
         const realColor = toggled && toggleColor ? toggleColor : color;
         this._background
-            .beginFill(realColor.color, realColor.alpha)
-            .drawRoundedRect(2, 2, BUTTON_WIDTH - 4, BUTTON_HEIGHT - 4, 3)
-            .endFill();
+            .roundRect(2, 2, BUTTON_WIDTH - 4, BUTTON_HEIGHT - 4, 3)
+            .fill({color: realColor.color, alpha: realColor.alpha});
     }
 
     public set enabled(newVal: boolean) {

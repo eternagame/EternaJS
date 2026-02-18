@@ -1,4 +1,3 @@
-import {FederatedPointerEvent} from '@pixi/events';
 import EPars from 'eterna/EPars';
 import EternaURL from 'eterna/net/EternaURL';
 import Plot from 'eterna/Plot';
@@ -6,12 +5,17 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
 import Fonts from 'eterna/util/Fonts';
 import {
+    Assert,
     DisplayObjectPointerTarget, DisplayUtil, Dragger, HAlign, HLayoutContainer, InputUtil,
     KeyCode, MathUtil, StyledTextBuilder, VAlign, VLayoutContainer
 } from 'flashbang';
-import MultiStyleText from 'pixi-multistyle-text';
 import {
-    Container, Graphics, Point, Rectangle, Text
+    Container,
+    FederatedPointerEvent,
+    Graphics,
+    Point,
+    Rectangle,
+    Text
 } from 'pixi.js';
 import GameButton from './GameButton';
 import SpecHTMLButton from './SpecHTMLButton';
@@ -45,9 +49,15 @@ export default class SpecBoxDialog extends WindowDialog<void> {
 
         this._dotPlotContainer = new Container();
         this._dotPlotMask = new Graphics();
-        this._dotPlotContainer.addChild(this._dotPlotMask);
         this._dotPlotMask.hitArea = new Rectangle();
+        this._dotPlotContainer.addChild(this._dotPlotMask);
+        this._maskedDotPlotContainer = new Container();
+        // Must apply mask to a wrapping container
+        // The height/width of the `this._dotPlot` would be affected by the mask otherwise
+        this._maskedDotPlotContainer.mask = this._dotPlotMask;
+        this._dotPlotContainer.addChild(this._maskedDotPlotContainer);
         this._plotContainer.addChild(this._dotPlotContainer);
+
         this._meltPlotContainer = new Container();
         this._plotContainer.addChild(this._meltPlotContainer);
 
@@ -83,8 +93,9 @@ export default class SpecBoxDialog extends WindowDialog<void> {
 
         this._zoomContainer.layout();
 
-        this._statText = new MultiStyleText('', {
-            default: {
+        this._statText = new Text({
+            text: '',
+            style: {
                 fontFamily: Fonts.STDFONT,
                 fontSize: 14,
                 fill: 0xffffff
@@ -124,13 +135,8 @@ export default class SpecBoxDialog extends WindowDialog<void> {
         const statString = new StyledTextBuilder({
             fontFamily: Fonts.STDFONT,
             fontSize: 14,
-            fill: 0xffffff,
-            // Even when disabled, apparently this counts towards the width/height, even though the
-            // position starts at the visible location. That throws our sizing calculations off
-            dropShadowDistance: 0
-        }).addStyle('bold', {
-            fontWeight: 'bold'
-        });
+            fill: 0xffffff
+        }).addStyle('bold', {fontWeight: 'bold'});
         EPars.addLetterStyles(statString);
 
         const pseudoknots = this._dataBlock.targetConditions?.type === 'pseudoknot';
@@ -159,16 +165,11 @@ export default class SpecBoxDialog extends WindowDialog<void> {
             .append(`${(this._dataBlock.getParam(UndoBlockParam.BPP_F1_NATIVE_PKMASK, TEMPERATURE, pseudoknots) as number)?.toFixed(3) ?? 'Unavailable'}`);
         statString.apply(this._statText);
 
-        if (this._dotPlot) this._dotPlot.destroy();
+        this._dotPlot?.destroy();
         this._dotPlot = this._dataBlock.createDotPlot();
-        // Be aware: The mask is a child of the container (so that it's (0,0) position is relative to that),
-        // but masks the plot itself because Pixi only updates the bounds of the object according to the mask
-        // for the container the mask is applied to, not its children. The effect of masking the container would be
-        // the entire container would report to be the size of the zoomed in dot plot, and so our vlayoutcontainer
-        // would shove everything below the plot lower than we intend
-        this._dotPlot.mask = this._dotPlotMask;
-        this._dotPlotContainer.addChild(this._dotPlot);
-        if (this._meltPlot) this._meltPlot.destroy();
+        this._maskedDotPlotContainer.addChild(this._dotPlot);
+
+        this._meltPlot?.destroy();
         this._meltPlot = this._dataBlock.createMeltPlot();
         this._meltPlotContainer.addChild(this._meltPlot);
 
@@ -216,10 +217,13 @@ export default class SpecBoxDialog extends WindowDialog<void> {
 
         // These values are somewhat arbitrary, but seem to be about as small as you can go while ensuring
         // the plots are at least minimally readable
-        const width = Math.max(requestedWidth, requestedWidth < requestedHeight ? this._statText.width : 425);
+        const width = Math.max(requestedWidth,
+            requestedWidth < requestedHeight ? this._statText.width : 425);
         const height = Math.max(requestedHeight, requestedWidth < requestedHeight ? 580 : 365);
 
-        const plotSize = this.calcPlotSize(width, height);
+        // Prevent scroll bars from showing up too soon
+        const SCROLL_PADDING_CORRECTION = 3;
+        const plotSize = this.calcPlotSize(width - SCROLL_PADDING_CORRECTION, height - SCROLL_PADDING_CORRECTION);
         const dotPlotVLabelWidth = Math.max(...this._dotVLabels.map((label) => label.width));
         if (plotSize.vAligned) {
             let yPos = 0;
@@ -321,13 +325,14 @@ export default class SpecBoxDialog extends WindowDialog<void> {
             this._coordBalloon = new TextBalloon(msg, 0x0, 0.8);
             this.addObject(this._coordBalloon, this._window.content);
         }
+        Assert.assertIsDefined(this._coordBalloon.display.parent);
         this._coordBalloon.display.position = this._coordBalloon.display.parent.toLocal(e.global);
     }
 
     private redrawDotPlot(size: number, scale: number) {
         const scaledSize = size * scale;
         this._dotPlot.setSize(scaledSize, scaledSize);
-        this._dotPlotMask.clear().beginFill(0).drawRect(0, 0, size + 1, size + 1).endFill();
+        this._dotPlotMask.clear().rect(0, 0, size + 1, size + 1).fill(0);
         this._dotPlot.replot();
     }
 
@@ -429,11 +434,12 @@ export default class SpecBoxDialog extends WindowDialog<void> {
     private _content: VLayoutContainer;
     private _plotContainer: Container;
     private _dotPlotContainer: Container;
+    private _maskedDotPlotContainer: Container;
     private _dotPlot: Plot;
     private _dotPlotMask: Graphics;
     private _meltPlot: Plot;
     private _meltPlotContainer: Container;
-    private _statText: MultiStyleText;
+    private _statText: Text;
     private _zoomContainer: HLayoutContainer;
     private _zoomInButton: GameButton;
     private _zoomOutButton: GameButton;

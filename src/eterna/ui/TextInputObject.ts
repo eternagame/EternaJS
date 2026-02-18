@@ -1,7 +1,7 @@
 import {
+    Container,
     Graphics,
-    Rectangle,
-    Sprite
+    Rectangle
 } from 'pixi.js';
 import {Signal} from 'signals';
 import {
@@ -152,7 +152,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
             }
         });
 
-        this._dummyDisp.interactive = false;
+        this._dummyDisp.eventMode = 'auto';
 
         if (this._showFakeTextInputWhenNotFocused) {
             this.onFocusChanged(this._hasFocus);
@@ -559,24 +559,23 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
         if (this._fakeTextInput != null) {
             if (!this._fakeTextInput.destroyed) this._fakeTextInput.destroy({children: true});
             this._fakeTextInput = null;
-            this._dummyDisp.interactive = false;
+            this._dummyDisp.eventMode = 'auto';
         }
     }
 
     private createFakeTextInput(): void {
         this.destroyFakeTextInput();
 
-        this._dummyDisp.interactive = true;
+        this._dummyDisp.eventMode = 'static';
 
-        this._fakeTextInput = new Sprite();
+        this._fakeTextInput = new Container();
 
-        const bg = new Graphics();
+        const bg = new Graphics()
+            .roundRect(0, 0, this.width, this.height, this._borderRadius)
+            .fill(this._bgColor);
         if (this._borderColor) {
-            bg.lineStyle(1, this._borderColor);
+            bg.stroke({width: 1, color: this._borderColor});
         }
-        bg.beginFill(this._bgColor)
-            .drawRoundedRect(0, 0, this.width, this.height, this._borderRadius)
-            .endFill();
         this._fakeTextInput.addChild(bg);
 
         let displayText = this.text;
@@ -640,7 +639,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
                 );
 
                 const pad = parseFloat(window.getComputedStyle(input, null).getPropertyValue('padding-right'));
-                const textMask = new Graphics().beginFill(0x0).drawRect(0, 0, this.width - pad, this.height).endFill();
+                const textMask = new Graphics().rect(0, 0, this.width - pad, this.height).fill(0x0);
                 this._fakeTextInput.addChild(textMask);
                 text.mask = textMask;
                 textMask.hitArea = new Rectangle();
@@ -654,7 +653,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
             );
 
             const pad = parseFloat(window.getComputedStyle(this._obj, null).getPropertyValue('padding-right'));
-            const textMask = new Graphics().beginFill(0x0).drawRect(0, 0, this.width - pad, this.height).endFill();
+            const textMask = new Graphics().rect(0, 0, this.width - pad, this.height).fill(0x0);
             this._fakeTextInput.addChild(textMask);
             text.mask = textMask;
             textMask.hitArea = new Rectangle();
@@ -797,7 +796,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
     private _borderRadius: number;
     private _characterLimit: number | null;
     private _hasFocus: boolean = false;
-    private _fakeTextInput: Sprite | null;
+    private _fakeTextInput: Container | null;
     private _showFakeTextInputWhenNotFocused: boolean = true;
     private _progressArc: SVGCircleElement;
     private _characterText: HTMLSpanElement;

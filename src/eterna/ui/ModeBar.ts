@@ -1,6 +1,6 @@
 import Folder from 'eterna/folding/Folder';
 import {
-    ContainerObject, HAlign, HLayoutContainer, LayoutContainer, SceneObject, VLayoutContainer
+    ContainerObject, DisplayUtil, HAlign, HLayoutContainer, LayoutContainer, SceneObject, VLayoutContainer
 } from 'flashbang';
 import {Container} from 'pixi.js';
 import FolderSwitcher from './FolderSwitcher';
@@ -107,18 +107,18 @@ export default class ModeBar extends ContainerObject {
         this._window.display.visible = true;
         this._window.display.visible = this._vLayout.children.some((child) => {
             if (child instanceof LayoutContainer) {
-                return child.children.some((layoutChild) => layoutChild.worldVisible);
+                return child.children.some((layoutChild) => DisplayUtil.isWorldVisible(layoutChild));
             }
-            return child.worldVisible;
+            return DisplayUtil.isWorldVisible(child);
         });
     }
 
     public getScriptUIElement(child: SceneObject) {
         const childBounds = child.display.getBounds();
-        const scrollBouds = this._window.getContentVisibleBounds();
-        if (childBounds.bottom < scrollBouds.top || childBounds.top > scrollBouds.bottom) {
+        const scrollBounds = this._window.getContentVisibleBounds();
+        if (childBounds.bottom < scrollBounds.top || childBounds.top > scrollBounds.bottom) {
             return {
-                rect: this._window.getVScrollThumbBounds(),
+                rect: this._window.getVScrollThumbBounds().rectangle,
                 proxy: true
             };
         }

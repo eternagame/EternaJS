@@ -1,5 +1,5 @@
 import {
-    Container, Graphics, Sprite, Text
+    Container, Graphics, Sprite, Text, FederatedWheelEvent
 } from 'pixi.js';
 import {UnitSignal} from 'signals';
 import SecStruct from 'eterna/rnatypes/SecStruct';
@@ -29,14 +29,12 @@ import BitmapManager from 'eterna/resources/BitmapManager';
 import EternaURL from 'eterna/net/EternaURL';
 import TextInputObject from 'eterna/ui/TextInputObject';
 import ScrollBox from 'eterna/ui/ScrollBox';
-import MultiStyleText from 'pixi-multistyle-text';
 import Feedback from 'eterna/Feedback';
 import SliderBar from 'eterna/ui/SliderBar';
 import {FontWeight} from 'flashbang/util/TextBuilder';
 import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
 import CopyTextDialog from 'eterna/ui/CopyTextDialog';
-import {FederatedWheelEvent} from '@pixi/events';
 import ThumbnailAndTextButton from './ThumbnailAndTextButton';
 import GameMode from '../GameMode';
 import ButtonWithIcon from './ButtonWithIcon';
@@ -318,7 +316,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         }
 
         // Play button
-        const playThumbnail = new Sprite();
+        const playThumbnail = new Container();
         const customLayout: Array<[number, number] | [null, null]> | undefined = (
             this._props.puzzle.targetConditions && this._props.puzzle.targetConditions[0]
                 ? this._props.puzzle.targetConditions[0]['custom-layout'] : undefined
@@ -351,7 +349,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
             const shapeData = ExpPainter.transformData(
                 expdata.getShapeData(), expdata.getShapeMax(), expdata.getShapeMin()
             );
-            const resultThumbnail = new Sprite();
+            const resultThumbnail = new Container();
             PoseThumbnail.drawToSprite(
                 resultThumbnail,
                 shapeData,
@@ -397,14 +395,14 @@ export default class ViewSolutionOverlay extends ContainerObject {
         ) {
             const deleteButton = new ThumbnailAndTextButton({
                 thumbnail: new Graphics()
-                    .beginFill(0, 0)
-                    .lineStyle(2, 0xC0DCE7)
-                    .drawRoundedRect(0, 0, 52, 52, 10)
-                    .endFill()
+                    .roundRect(0, 0, 52, 52, 10)
+                    .fill({color: 0, alpha: 0})
+                    .stroke({width: 2, color: 0xC0DCE7})
                     .moveTo(10, 10)
                     .lineTo(42, 42)
                     .moveTo(42, 10)
-                    .lineTo(10, 42),
+                    .lineTo(10, 42)
+                    .stroke({width: 2, color: 0xC0DCE7}),
                 text: 'Delete'
             })
                 .tooltip('Delete this design to retrieve your slots for this round');
@@ -440,9 +438,8 @@ export default class ViewSolutionOverlay extends ContainerObject {
         this._content.addObject(this._commentsInput, this._inputContainer);
 
         const commentButtonIcon = new Graphics()
-            .beginFill(0x54B54E)
-            .drawRoundedRect(0, 0, 64, 30, 5)
-            .endFill();
+            .roundRect(0, 0, 64, 30, 5)
+            .fill(0x54B54E);
         this._commentsButton = new GameButton()
             .customStyleBox(commentButtonIcon)
             .label('Post', 14);
@@ -458,13 +455,13 @@ export default class ViewSolutionOverlay extends ContainerObject {
         this._content.display.addChild(this._footer);
 
         // Footer separator
-        this._footer.addChild((() => {
-            const line = new Graphics();
-            line.lineStyle(1, 0x70707080);
-            line.moveTo(0, 1);
-            line.lineTo(theme.width - theme.margin.left - theme.margin.right, 1);
-            return line;
-        })());
+        this._footer.addChild((
+            new Graphics()
+                .moveTo(0, 1)
+                .lineTo(theme.width - theme.margin.left - theme.margin.right, 1)
+                .stroke({width: 1, color: '0x70707080'})
+
+        ));
 
         // Footer links
         const footerLinks = new Container();
@@ -526,9 +523,10 @@ export default class ViewSolutionOverlay extends ContainerObject {
         const {theme} = ViewSolutionOverlay;
         this.container.position.set(Flashbang.stageWidth - theme.width, 0);
 
-        this._panelBG.display.clear();
-        this._panelBG.display.beginFill(0x101010);
-        this._panelBG.display.drawRect(0, 0, theme.width, Flashbang.stageHeight);
+        this._panelBG.display
+            .clear()
+            .rect(0, 0, theme.width, Flashbang.stageHeight)
+            .fill(0x101010);
         this._header.layout(true);
         this._footer.layout(true);
         this._footer.position.set(theme.margin.left, Flashbang.stageHeight - this._footer.height);
@@ -637,16 +635,19 @@ export default class ViewSolutionOverlay extends ContainerObject {
         }
 
         const {theme} = ViewSolutionOverlay;
-        return new MultiStyleText(text, {
-            default: {
+        return new Text({
+            text,
+            style: {
                 fontFamily: Fonts.STDFONT,
                 fontSize: 13,
                 fill: 0xffffff,
                 wordWrap: true,
-                wordWrapWidth: theme.width - 40
-            },
-            bold: {fontWeight: 'bold'},
-            orange: {fill: 0xffcc00}
+                wordWrapWidth: theme.width - 40,
+                tagStyles: {
+                    bold: {fontWeight: 'bold'},
+                    orange: {fill: 0xffcc00}
+                }
+            }
         });
     }
 

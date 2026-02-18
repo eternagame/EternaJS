@@ -1,4 +1,4 @@
-import {DisplayObject, Graphics, Text} from 'pixi.js';
+import {Container, Graphics, Text} from 'pixi.js';
 import {Signal} from 'signals';
 import {
     VLayoutContainer,
@@ -73,12 +73,11 @@ export default class AnnotationDialog extends WindowDialog<AnnotationData> {
     }
 
     /**
-     * @override
      * This is overridden in order for closing with the x button to not delete the annotation.
      * FIXME: It would be better to change the semantics so that the default close behavior isn't
      * interpreted as removing the annotation.
      */
-    protected close() {
+    protected override close() {
         this._isClosing = true;
         super.close(this._initialAnnotation || null);
     }
@@ -97,7 +96,7 @@ export default class AnnotationDialog extends WindowDialog<AnnotationData> {
         if (this._categoryDropdown) this.removeObject(this._categoryDropdown);
         if (this._layerDropdown) this.removeObject(this._layerDropdown);
         // Handle any other lingering non-flashbang-managed objects
-        this._window.content.children.forEach((child: DisplayObject) => {
+        this._window.content.children.forEach((child: Container) => {
             child.destroy({children: true});
         });
 
@@ -260,11 +259,12 @@ export default class AnnotationDialog extends WindowDialog<AnnotationData> {
 
         // Generate Dialog Divider
         this._divider = new Graphics()
-            .lineStyle(
-                AnnotationDialog.ACTION_BUTTON_BORDER_WIDTH,
-                AnnotationDialog.UPPER_TOOLBAR_DIVIDER_COLOR
-            ).moveTo(0, 0)
-            .lineTo(AnnotationDialog.FIELD_WIDTH + 2 * AnnotationDialog.W_MARGIN, 0);
+            .moveTo(0, 0)
+            .lineTo(AnnotationDialog.FIELD_WIDTH + 2 * AnnotationDialog.W_MARGIN, 0)
+            .stroke({
+                width: AnnotationDialog.ACTION_BUTTON_BORDER_WIDTH,
+                color: AnnotationDialog.UPPER_TOOLBAR_DIVIDER_COLOR
+            });
         bodyLayout.addChild(this._divider);
 
         // Generate Dialog Action Buttons
@@ -313,13 +313,13 @@ export default class AnnotationDialog extends WindowDialog<AnnotationData> {
         // Generate Delete Annotation Button
         if (this._edit) {
             const deleteButtonGraphic = new Graphics()
-                .beginFill(0x0)
-                .drawRect(
+                .rect(
                     0,
                     0,
                     AnnotationDialog.DELETE_BUTTON_WIDTH,
                     AnnotationDialog.DELETE_BUTTON_HEIGHT
-                ).endFill();
+                )
+                .fill(0x0);
             deleteButtonGraphic.alpha = 0;
             const deleteButton = new GameButton()
                 .customStyleBox(deleteButtonGraphic)

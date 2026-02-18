@@ -7,6 +7,6 @@ export default class SpriteObject extends SceneObject<Sprite> {
         class SpriteObjectSprite extends Sprite {}
         super(sprite || new SpriteObjectSprite());
         // Convenience so that the flashbang class name shows in the Pixi devtools
-        Object.defineProperty(SpriteObjectSprite, 'name', {value: this.constructor.name});
+        Object.defineProperty(SpriteObjectSprite, 'label', {value: this.constructor.name});
     }
 }

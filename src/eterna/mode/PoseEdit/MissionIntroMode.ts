@@ -42,9 +42,8 @@ export default class MissionIntroMode extends AppMode {
             .connect(() => this.play());
 
         const playButtonBg = new Graphics()
-            .beginFill(0x54B54E)
-            .drawRoundedRect(0, 0, 120, 36, 10)
-            .endFill();
+            .roundRect(0, 0, 120, 36, 10)
+            .fill(0x54B54E);
         const playButton = new GameButton()
             .customStyleBox(playButtonBg)
             .label('PLAY', 16);
@@ -101,19 +100,16 @@ export default class MissionIntroMode extends AppMode {
             Assert.assertIsDefined(Flashbang.stageHeight);
 
             // draw background
-            background.clear();
-            background.beginFill(0x101010, 0.95);
-            background.drawRect(0, 0, Flashbang.stageWidth, headerHeight);
-            background.endFill();
-
-            background.beginFill(0x05224B, 0.95);
-            background.drawRect(
-                0,
-                headerHeight,
-                Flashbang.stageWidth,
-                Math.max(Flashbang.stageHeight - headerHeight, 0)
-            );
-            background.endFill();
+            background.clear()
+                .rect(0, 0, Flashbang.stageWidth, headerHeight)
+                .fill({color: 0x101010, alpha: 0.95})
+                .rect(
+                    0,
+                    headerHeight,
+                    Flashbang.stageWidth,
+                    Math.max(Flashbang.stageHeight - headerHeight, 0)
+                )
+                .fill({color: 0x05224B, alpha: 0.95});
 
             playButton.display.position.set(
                 Math.min(

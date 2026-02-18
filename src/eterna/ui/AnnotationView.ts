@@ -3,8 +3,8 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import {UnitSignal, Value} from 'signals';
 import {
     Point,
-    Graphics,
-    Sprite
+    Sprite,
+    Container
 } from 'pixi.js';
 import AnnotationManager, {
     AnnotationData,
@@ -32,7 +32,7 @@ export default class AnnotationView extends ContainerObject {
         textColor: number
     ) {
         super();
-
+        this.display.label = 'Annotation View';
         this._pose = pose;
         this._type = type;
         this._rangeIndex = rangeIndex;
@@ -90,16 +90,17 @@ export default class AnnotationView extends ContainerObject {
             && !this._item.selected
         ) {
             // Use annotation collapsed view
-            this._collapsedAnnotationBackground = new Graphics();
+            this._collapsedAnnotationContainer = new Container();
             this._annotationSprite = Sprite.from(Bitmaps.ImgAnnotation);
             this._annotationSprite.width = AnnotationView.COLLAPSED_ANNOTATION_ICON_LENGTH;
             this._annotationSprite.height = AnnotationView.COLLAPSED_ANNOTATION_ICON_LENGTH;
             this._annotationSprite.x = (AnnotationView.COLLAPSED_ANNOTATION_LENGTH - this._annotationSprite.width) / 8;
             this._annotationSprite.y = (AnnotationView.COLLAPSED_ANNOTATION_LENGTH - this._annotationSprite.height) / 8;
             this._annotationSprite.alpha = 1;
-            this._collapsedAnnotationBackground.addChild(this._annotationSprite);
+            this._collapsedAnnotationContainer.addChild(this._annotationSprite);
+
             this._collapsedAnnotationCard = new GameButton()
-                .customStyleBox(this._collapsedAnnotationBackground)
+                .customStyleBox(this._collapsedAnnotationContainer)
                 .tooltip(this._item.title);
             this._collapsedAnnotationCard.display.cursor = 'pointer';
             // this.__collapsedAnnotationCard.clicked.connect(() => this.cancelEdit());
@@ -380,7 +381,7 @@ export default class AnnotationView extends ContainerObject {
     private _prevPosition: Point | null = null;
     private _annotationSprite: Sprite;
     private _collapsedAnnotationCard: GameButton;
-    private _collapsedAnnotationBackground: Graphics;
+    private _collapsedAnnotationContainer: Container;
 
     private static readonly MAX_WIDTH: number = 200;
     private static readonly COLLAPSED_ANNOTATION_ICON_LENGTH: number = 30;

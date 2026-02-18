@@ -1,0 +1,12 @@
+diff --git a/node_modules/pixi.js/lib/scene/graphics/shared/GraphicsContext.mjs b/node_modules/pixi.js/lib/scene/graphics/shared/GraphicsContext.mjs
+index 8f0d0ab..c22b048 100644
+--- a/node_modules/pixi.js/lib/scene/graphics/shared/GraphicsContext.mjs
++++ b/node_modules/pixi.js/lib/scene/graphics/shared/GraphicsContext.mjs
+@@ -667,7 +667,6 @@ const _GraphicsContext = class _GraphicsContext extends EventEmitter {
+   }
+   onUpdate() {
+     this._boundsDirty = true;
+-    if (this.dirty) return;
+     this.emit("update", this, 16);
+     this.dirty = true;
+   }

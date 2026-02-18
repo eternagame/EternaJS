@@ -1,8 +1,10 @@
-import {Container, Graphics, Matrix} from 'pixi.js';
-import GameObject from 'flashbang/core/GameObject';
+import {Assert, DisplayUtil} from 'flashbang';
 import Flashbang from 'flashbang/core/Flashbang';
+import GameObject from 'flashbang/core/GameObject';
 import MatrixUtil from 'flashbang/util/MatrixUtil';
-import {Assert} from 'flashbang';
+import {
+    Container, Graphics, Matrix, UPDATE_PRIORITY
+} from 'pixi.js';
 
 /**
  * Wraps an HTML element that lives in the DOM and is drawn on top of the PIXI canvas.
@@ -137,7 +139,7 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
 
         // Update the HTML element's transform during the PIXI postrender event -
         // this is the point where the dummy display object's transform will be up to date.
-        Flashbang.pixi.renderer.addListener('postrender', this.updateElementProperties, this);
+        Flashbang.pixi.ticker.add(this.updateElementProperties, this, UPDATE_PRIORITY.LOW);
         this._added = true;
     }
 
@@ -146,7 +148,7 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
         Assert.assertIsDefined(Flashbang.pixi);
         this._added = false;
         this._domParent.removeChild(this._obj);
-        Flashbang.pixi.renderer.removeListener('postrender', this.updateElementProperties, this);
+        Flashbang.pixi.ticker.remove(this.updateElementProperties, this);
 
         super.dispose();
     }
@@ -158,8 +160,8 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
             m.copyTo(this._lastTransform);
         }
 
-        this._obj.style.visibility = this.display.worldVisible ? 'visible' : 'hidden';
-        this._obj.style.opacity = this.display.worldAlpha.toString();
+        this._obj.style.visibility = DisplayUtil.isWorldVisible(this.display) ? 'visible' : 'hidden';
+        this._obj.style.opacity = this.display.getGlobalAlpha().toString();
     }
 
     /**
@@ -174,14 +176,14 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
             // _extraBoundsSize allows us to account for things like box-shadow effects (there's no way
             // to dynamically get an element size including that information)
             const r = this._obj.getBoundingClientRect();
-            this._dummyDispBackground.clear()
-                .beginFill(0x0)
-                .drawRect(
+            this._dummyDispBackground
+                .clear()
+                .rect(
                     -this._extraBoundsSize,
                     -this._extraBoundsSize,
                     r.width + 2 * this._extraBoundsSize,
                     r.height + 2 * this._extraBoundsSize
-                ).endFill();
+                ).fill(0x0);
             this._dummyDispBackground.alpha = 0;
 
             this._obj.style.transform = transform;

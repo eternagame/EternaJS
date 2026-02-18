@@ -84,9 +84,10 @@ export default class ROPHighlight extends RScriptOp {
                 // Give it a bit of padding so the highlight isn't so tight.
                 const padding = 5;
 
-                highlight.clear();
-                highlight.lineStyle(5, this._color, 0.7);
-                highlight.drawRoundedRect(0, 0, bounds.width + 2 * padding, bounds.height + 2 * padding, 4);
+                highlight
+                    .clear()
+                    .roundRect(0, 0, bounds.width + 2 * padding, bounds.height + 2 * padding, 4)
+                    .stroke({width: 5, color: this._color, alpha: 0.7});
                 highlightObj.display.x = bounds.x - padding;
                 highlightObj.display.y = bounds.y - padding;
             };

@@ -1,5 +1,6 @@
 import {
-    Container, Graphics, Text, Sprite
+    Container, Graphics, Text, Sprite,
+    FederatedPointerEvent
 } from 'pixi.js';
 import {Signal, UnitSignal} from 'signals';
 import {
@@ -15,7 +16,6 @@ import UITheme from 'eterna/ui/UITheme';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import SecStruct from 'eterna/rnatypes/SecStruct';
-import {FederatedPointerEvent} from '@pixi/events';
 import {SortOrder} from './SortOptions';
 import SequenceStringListView from './SequenceStringListView';
 import {DesignBrowserDataType, DesignCategory, DBVote} from './DesignBrowserMode';
@@ -218,19 +218,18 @@ export default class DataCol extends ContainerObject {
 
         this._labelArrow.clear();
         if (this._sortOrder === SortOrder.DECREASING) {
-            this._labelArrow.beginFill(0xFFFFFF, 0.8);
-            this._labelArrow.moveTo(this._label.container.width + 4, 8);
-            this._labelArrow.lineTo(this._label.container.width + 14, 8);
-            this._labelArrow.lineTo(this._label.container.width + 9, 18);
-            this._labelArrow.lineTo(this._label.container.width + 4, 8);
-            this._labelArrow.endFill();
+            this._labelArrow
+                .moveTo(this._label.container.width + 4, 8)
+                .lineTo(this._label.container.width + 14, 8)
+                .lineTo(this._label.container.width + 9, 18)
+                .lineTo(this._label.container.width + 4, 8)
+                .fill({color: 0xFFFFFF, alpha: 0.8});
         } else if (this._sortOrder === SortOrder.INCREASING) {
-            this._labelArrow.beginFill(0xFFFFFF, 0.8);
-            this._labelArrow.moveTo(this._label.container.width + 4, 18);
-            this._labelArrow.lineTo(this._label.container.width + 14, 18);
-            this._labelArrow.lineTo(this._label.container.width + 9, 8);
-            this._labelArrow.lineTo(this._label.container.width + 4, 18);
-            this._labelArrow.endFill();
+            this._labelArrow.moveTo(this._label.container.width + 4, 18)
+                .lineTo(this._label.container.width + 14, 18)
+                .lineTo(this._label.container.width + 9, 8)
+                .lineTo(this._label.container.width + 4, 18)
+                .fill({color: 0xFFFFFF, alpha: 0.8});
         }
     }
 
@@ -532,22 +531,23 @@ export default class DataCol extends ContainerObject {
         const {designBrowser: theme} = UITheme;
         this._graphics.clear();
         // Data
-        this._graphics.beginFill(this._fillColor, Math.max(this._fillAlpha, 0.001));
-        this._graphics.drawRect(
-            1,
-            theme.headerHeight + theme.filterHeight + 1,
-            this._dataWidth - 1,
-            this._height - theme.headerHeight - theme.filterHeight - 1
-        );
+        this._graphics
+            .rect(
+                1,
+                theme.headerHeight + theme.filterHeight + 1,
+                this._dataWidth - 1,
+                this._height - theme.headerHeight - theme.filterHeight - 1
+            )
+            .fill({color: this._fillColor, alpha: Math.max(this._fillAlpha, 0.001)});
         // Header
-        this._graphics.beginFill(0x043468);
-        this._graphics.drawRect(1, 1, this._dataWidth - 1, theme.headerHeight - 1);
+        this._graphics
+            .rect(1, 1, this._dataWidth - 1, theme.headerHeight - 1)
+            .fill(0x043468);
         // Filters
-        this._graphics.beginFill(0x043468, 0.5);
-        this._graphics.drawRect(1, 1 + theme.headerHeight, this._dataWidth - 1, theme.filterHeight - 1);
-        this._graphics.endFill();
+        this._graphics
+            .rect(1, 1 + theme.headerHeight, this._dataWidth - 1, theme.filterHeight - 1)
+            .fill({color: 0x043468, alpha: 0.5});
         if (this.category === 'Sequence') {
-            this._graphics.lineStyle(1, 0x92A8BB, 0.4);
             // This iterates every 5 characters (fontSize * 5) of the true data width (removing the padding)
             for (let ii = 1; ii < Math.floor((this._dataWidth - theme.dataPadding) / (this._fontSize * 5) + 1); ii++) {
                 // Draw lines every 5 characters (fontSize * 5),
@@ -556,6 +556,7 @@ export default class DataCol extends ContainerObject {
                 this._graphics.moveTo(x, 85);
                 this._graphics.lineTo(x, this._height - 5);
             }
+            this._graphics.stroke({width: 1, color: 0x92A8BB, alpha: 0.4});
         }
     }
 

@@ -1,4 +1,4 @@
-import {DisplayObject} from 'pixi.js';
+import {Container} from 'pixi.js';
 import {EasingFunc} from 'flashbang/util/Easing';
 import Assert from 'flashbang/util/Assert';
 import DisplayObjectTask from './DisplayObjectTask';
@@ -7,7 +7,7 @@ export default class LocationTask extends DisplayObjectTask {
     private callback: ()=>void;
     constructor(
         x: number | null, y: number | null, time: number = 0, easingFn: EasingFunc | null = null,
-        target: DisplayObject | null = null, callback: ()=>void = () => {}
+        target: Container | null = null, callback: ()=>void = () => {}
     ) {
         super(time, easingFn, target);
         this._toX = x;

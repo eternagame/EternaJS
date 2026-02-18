@@ -1,4 +1,4 @@
-import {DisplayObject, Graphics, Point} from 'pixi.js';
+import {Container, Graphics, Point} from 'pixi.js';
 import {
     GameObject, LateUpdatable, Arrays
 } from 'flashbang';
@@ -13,7 +13,7 @@ export default class PseudoknotLines extends GameObject implements LateUpdatable
         this._enabled = (this._pose.pseudoknotPairs.nonempty());
     }
 
-    public get display(): DisplayObject {
+    public get display(): Container {
         return this._graphics;
     }
 
@@ -101,8 +101,8 @@ export default class PseudoknotLines extends GameObject implements LateUpdatable
         this._graphics.clear();
 
         const INNER_LINE_THICKNESS: number = 0.1 * Pose2D.ZOOM_SPACINGS[this._pose.zoomLevel];
-        this._graphics.lineStyle(INNER_LINE_THICKNESS, 0xE8E8E8, 0.6);
         this.drawPseudoknotLine(starts, ends);
+        this._graphics.stroke({width: INNER_LINE_THICKNESS, color: 0xE8E8E8, alpha: 0.6});
     }
 
     private drawPseudoknotLine(starts: Point[], ends: Point[]): void {

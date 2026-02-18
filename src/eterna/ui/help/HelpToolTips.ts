@@ -1,5 +1,5 @@
 import {
-    Graphics, Container, TextMetrics
+    Graphics, Container, CanvasTextMetrics
 } from 'pixi.js';
 import TextUtil from 'eterna/util/TextUtil';
 import Fonts from 'eterna/util/Fonts';
@@ -31,17 +31,18 @@ export default class HelpToolTips {
                         const elemH = 18;
                         const separation = 2;
                         const makeRect = (x: number, y: number, color: number) => {
-                            const rect = new Graphics();
-                            rect.beginFill(color);
-                            rect.drawRect(0, 0, elemW, elemH);
-                            rect.endFill();
-                            rect.position.set(x, y);
-                            return rect;
+                            const container = new Container();
+                            const rect = new Graphics()
+                                .rect(0, 0, elemW, elemH)
+                                .fill(color);
+                            container.position.set(x, y);
+                            container.addChild(rect);
+                            return container;
                         };
 
                         const makeText = (text: string) => {
                             const builder = Fonts.std(text).color(0);
-                            const metrics = TextMetrics.measureText(text, builder.style);
+                            const metrics = CanvasTextMetrics.measureText(text, builder.style);
                             const textElem = builder.build();
                             textElem.position.set(
                                 (elemW - metrics.width) / 2,

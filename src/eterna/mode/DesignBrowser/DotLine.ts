@@ -18,7 +18,6 @@ export default class DotLine extends Graphics {
         this._length = value;
 
         this.clear();
-        this.lineStyle(this._thickness, this._color);
 
         let wWalker = 0;
         let index = 0;
@@ -41,6 +40,8 @@ export default class DotLine extends Graphics {
             wWalker += lenToGo + DotLine.SHORT_LEN;
             index++;
         }
+
+        this.stroke({width: this._thickness, color: this._color});
     }
 
     private readonly _thickness: number;

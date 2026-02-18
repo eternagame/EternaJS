@@ -1,26 +1,28 @@
-import {
-    Container, Graphics, Renderer, RenderTexture, Sprite
-} from 'pixi.js';
 import ColorConvert from 'color-convert';
-import {
-    Assert, ColorUtil, DisplayUtil, HAlign, MathUtil, TextureUtil, VAlign
-} from 'flashbang';
 import {RNABase} from 'eterna/EPars';
-import Fonts from 'eterna/util/Fonts';
-import {GradientFactory} from '@pixi-essentials/gradients';
 import Eterna from 'eterna/Eterna';
-import {BlurFilter} from '@pixi/filter-blur';
-import {AdjustmentFilter, ColorReplaceFilter} from 'pixi-filters';
-import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import {FXAAFilter} from '@pixi/filter-fxaa';
-import BaseDrawFlags from './BaseDrawFlags';
+import Fonts from 'eterna/util/Fonts';
+import {
+    Assert, ColorUtil, DisplayUtil, MathUtil, TextureUtil
+} from 'flashbang';
+import {AdjustmentFilter, ColorReplaceFilter} from 'pixi-filters';
+import {
+    BlurFilter,
+    BlurFilterOptions,
+    Container,
+    FillGradient,
+    Filter,
+    Graphics,
+    Sprite
+} from 'pixi.js';
 import Base from './Base';
 import {ZoomLevelTexture} from './BaseAssets';
+import BaseDrawFlags from './BaseDrawFlags';
 
 /** Encapsulates textures for a Base type */
 export default class BaseTextures {
-    public baseType: number;
+    public baseType: RNABase;
 
     public letterData: ZoomLevelTexture[];
     public lockIconData: ZoomLevelTexture[];
@@ -29,7 +31,7 @@ export default class BaseTextures {
     public lockData: ZoomLevelTexture[];
     public colorblindLockData: ZoomLevelTexture[];
 
-    constructor(baseType: number) {
+    constructor(baseType: RNABase) {
         this.baseType = baseType;
         this.letterData = BaseTextures.createLetterTextures(baseType, Base.ZOOM_SCALE_FACTOR);
         this.bodyData = BaseTextures.createBodyTextures(baseType, Base.ZOOM_SCALE_FACTOR, false);
@@ -52,17 +54,20 @@ export default class BaseTextures {
         return null;
     }
 
-    private static createBodyTextures(baseType: number, zoomScalar: number, colorblind: boolean): ZoomLevelTexture[] {
+    private static createBodyTextures(baseType: RNABase, zoomScalar: number, colorblind: boolean): ZoomLevelTexture[] {
         /** Size of largest body texture */
         const MAX_SIZE = 40;
 
-        const getBodyTex = (texSize: number, antialias: 'none' | 'fxaa' | 'blur' | 'blur-fxaa', blurSize = [1, 40]) => {
+        const getBodyTex = (
+            texSize: number,
+            antialias: 'none' | 'fxaa' | 'blur' | 'blur-fxaa',
+            blurOptions: BlurFilterOptions = {}
+        ) => {
             Assert.assertIsDefined(Eterna.app.pixi);
             /** Render the graphic this much larger then scale down */
             const UPSCALE = texSize / MAX_SIZE;
             /** Size of the base graphic itself, not including whitespace (upscaled) */
             const BASE_SIZE = BaseTextures.BODY_SIZE * UPSCALE;
-            const gradientTexture = RenderTexture.create({width: texSize, height: texSize});
             const [hBase, sBase, vBase] = BaseTextures.type2Color(baseType, colorblind);
 
             const getGradientColor = (hChange: number, sChange: number, vChange: number) => ColorUtil.compose256(
@@ -72,16 +77,14 @@ export default class BaseTextures {
                     MathUtil.clamp(vBase + vChange, 0, 100)
                 ])
             );
-
-            GradientFactory.createLinearGradient(Eterna.app.pixi.renderer as Renderer, gradientTexture, {
-                x0: 0,
-                y0: 0,
-                x1: BASE_SIZE,
-                y1: BASE_SIZE,
+            const gradientTexture = new FillGradient({
+                type: 'linear',
+                start: {x: 0, y: 0},
+                end: {x: 1, y: 1},
                 colorStops: [
-                    {offset: 0.00, color: getGradientColor(0, -20, 20)},
-                    {offset: 0.50, color: getGradientColor(0, 0, 0)},
-                    {offset: 1.00, color: getGradientColor(0, 20, -20)}
+                    {offset: 0.0, color: getGradientColor(0, -20, 20)},
+                    {offset: 0.5, color: getGradientColor(0, 0, 0)},
+                    {offset: 1.0, color: getGradientColor(0, 20, -20)}
                 ]
             });
 
@@ -89,23 +92,30 @@ export default class BaseTextures {
             // The old body graphics had whitespace
             // TODO: Should we handle this in the positioning logic instead of the texture itself?
             const bodyBg = new Graphics()
-                .beginFill(0)
-                .drawRect(0, 0, texSize, texSize)
-                .endFill();
+                .rect(0, 0, texSize, texSize)
+                .fill(0);
             bodyBg.alpha = 0;
             bodyWrapper.addChild(bodyBg);
 
-            const body = new Graphics()
-                .beginTextureFill({texture: gradientTexture})
-            // Note that the texture is positioned relative to the origin, so we need to draw our circle
-            // at what will be the center of the texture
-                .drawCircle(BASE_SIZE / 2, BASE_SIZE / 2, BASE_SIZE / 2)
-                .endFill();
+            const filters: Filter[] = [];
             // For some reason, global antialiasing is insufficient.
             // Maybe once smooth-graphics supports texture fills that will make this unnecessary?
-            body.filters = [];
-            if (antialias === 'blur' || antialias === 'blur-fxaa') body.filters.push(new BlurFilter(...blurSize));
-            if (antialias === 'fxaa' || antialias === 'blur-fxaa') body.filters.push(new FXAAFilter());
+            if (antialias === 'blur' || antialias === 'blur-fxaa') {
+                filters.push(new BlurFilter({
+                    strength: 1,
+                    quality: 40,
+                    antialias: antialias === 'blur-fxaa' ? 'on' : 'off',
+                    ...blurOptions
+                }));
+            }
+            if (antialias === 'fxaa') {
+                filters.push(new Filter({antialias: 'on'}));
+            }
+            // Note that the texture is positioned relative to the origin, so we need to draw our circle
+            // at what will be the center of the texture
+            const body = new Graphics({filters})
+                .circle(BASE_SIZE / 2, BASE_SIZE / 2, BASE_SIZE / 2)
+                .fill(gradientTexture);
             // Center the body in the whitespace
             body.x = (texSize / 2) - (BASE_SIZE / 2);
             body.y = (texSize / 2) - (BASE_SIZE / 2);
@@ -121,7 +131,7 @@ export default class BaseTextures {
         // artifacting when downscaling all the way from 2^6, but 2^5 seems like the sweet spot.
         // Additionally, as we get smaller the fxaa and blur can create more artifacts than they solve
         const texSmASize = 2 ** 6;
-        const texSmA = getBodyTex(texSmASize, 'blur-fxaa', [4, 60]);
+        const texSmA = getBodyTex(texSmASize, 'blur-fxaa', {strength: 4, quality: 60});
         const texSmBSize = 2 ** 4;
         const texSmB = getBodyTex(texSmBSize, 'none');
 
@@ -134,7 +144,7 @@ export default class BaseTextures {
         ];
     }
 
-    private static getLetterText(baseType: number, sizeScalar = 1, color = 0) {
+    private static getLetterText(baseType: RNABase, sizeScalar = 1, color = 0) {
         return Fonts.std(BaseTextures.type2Letter(baseType))
             .fontSize(18 * sizeScalar)
             .bold()
@@ -142,7 +152,7 @@ export default class BaseTextures {
             .build();
     }
 
-    private static createLetterTextures(baseType: number, zoomScalar: number): ZoomLevelTexture[] {
+    private static createLetterTextures(baseType: RNABase, zoomScalar: number): ZoomLevelTexture[] {
         const texture = TextureUtil.renderToTexture(BaseTextures.getLetterText(baseType));
         return [
             {texture, scale: 1},
@@ -150,7 +160,7 @@ export default class BaseTextures {
         ];
     }
 
-    private static createLockTextures(baseType: number, zoomScalar: number, colorblind: boolean): ZoomLevelTexture[] {
+    private static createLockTextures(baseType: RNABase, zoomScalar: number, colorblind: boolean): ZoomLevelTexture[] {
         /** Size of largest lock */
         const MAX_SIZE = BaseTextures.BODY_SIZE / 1.1;
         /** Size of the upscaled lock */
@@ -165,31 +175,29 @@ export default class BaseTextures {
         const R = TOP_FROM_CENTER * 2;
 
         const lockBg = new Graphics()
-            .beginFill(ColorUtil.blend(
-                ColorUtil.compose256(...ColorConvert.hsv.rgb(BaseTextures.type2Color(baseType, colorblind))),
-                0xFFFFFF,
-                0.4
-            ))
-            .lineStyle(LOCK_WIDTH / 1.5, ColorUtil.blend(
-                ColorUtil.compose256(...ColorConvert.hsv.rgb(BaseTextures.type2Color(baseType, colorblind))),
-                0x111111,
-                0.35
-            ))
-            .drawCircle(
+            .circle(
                 0,
                 (
                     2 * R + (RENDER_SIZE * 0.5 - R) - (Math.sqrt(R ** 2 - (-TOP_FROM_CENTER) ** 2) - TOP_FROM_CENTER)
                 ) / 2 - R,
                 RENDER_SIZE / 2
             )
-            .endFill()
-            .beginFill(ColorUtil.blend(
-                ColorUtil.compose256(...ColorConvert.hsv.rgb(BaseTextures.type2Color(baseType, colorblind))),
-                0x111111,
-                0.35
-            ))
-            .endFill();
-        lockBg.filters = [new BlurFilter(1, 40), new FXAAFilter()];
+            .fill(
+                ColorUtil.blend(
+                    ColorUtil.compose256(...ColorConvert.hsv.rgb(BaseTextures.type2Color(baseType, colorblind))),
+                    0xffffff,
+                    0.4
+                )
+            )
+            .stroke({
+                width: LOCK_WIDTH / 1.5,
+                color: ColorUtil.blend(
+                    ColorUtil.compose256(...ColorConvert.hsv.rgb(BaseTextures.type2Color(baseType, colorblind))),
+                    0x111111,
+                    0.35
+                )
+            });
+        lockBg.filters = [new BlurFilter({strength: 1, quality: 40, antialias: 'on'})];
         lockWrapper.addChild(lockBg);
 
         const color = ColorUtil.blend(
@@ -197,15 +205,21 @@ export default class BaseTextures {
             0x111111,
             0.30
         );
-        const lock = new Sprite(BitmapManager.getBitmap(Bitmaps.BaseLock));
+        const lock = Sprite.from(Bitmaps.BaseLock);
         lock.height = RENDER_SIZE * 0.65;
         lock.scale.x = lock.scale.y;
         lock.filters = [new ColorReplaceFilter(
-            [0, 0, 0],
-            [ColorUtil.getRed(color) / 255, ColorUtil.getGreen(color) / 255, ColorUtil.getBlue(color) / 255]
+            {
+                originalColor: [0, 0, 0],
+                targetColor: [
+                    ColorUtil.getRed(color) / 255,
+                    ColorUtil.getGreen(color) / 255,
+                    ColorUtil.getBlue(color) / 255
+                ]
+            }
         )];
         lockWrapper.addChild(lock);
-        DisplayUtil.positionRelative(lock, HAlign.CENTER, VAlign.CENTER, lockBg, HAlign.CENTER, VAlign.CENTER);
+        DisplayUtil.center(lock, lockWrapper);
 
         lockWrapper.filters = [new AdjustmentFilter({alpha: 0.85})];
 
@@ -218,7 +232,7 @@ export default class BaseTextures {
     }
 
     // AMW TODO: isn't this just the EPars function?
-    private static type2Letter(baseType: number): 'U' | 'A' | 'G' | 'C' {
+    private static type2Letter(baseType: RNABase): 'U' | 'A' | 'G' | 'C' {
         switch (baseType) {
             case RNABase.URACIL:
                 return 'U';
@@ -234,7 +248,7 @@ export default class BaseTextures {
     }
 
     /** Return the HSV color for the current base type */
-    private static type2Color(baseType: number, colorblind: boolean): [number, number, number] {
+    private static type2Color(baseType: RNABase, colorblind: boolean): [number, number, number] {
         const letter = BaseTextures.type2Letter(baseType);
         switch (letter) {
             case 'A': return colorblind ? [44, 80, 98] : [44, 80, 98];

@@ -52,6 +52,7 @@ export default class AnnotationPanelItem extends ContainerObject {
 
     constructor(props: AnnotationPanelItemProps) {
         super();
+        this.display.label = 'Annotation Panel Item';
         this._data = props.data;
         this._indexPath = props.indexPath;
         this._width = props.width;
@@ -126,12 +127,7 @@ export default class AnnotationPanelItem extends ContainerObject {
             // Layers or layerless annotations have a single indent
             const width = AnnotationPanelItem.LAYER_HEIGHT;
             this._itemIndent = new Graphics()
-                .beginFill(
-                    this.isSelected.value
-                        ? AnnotationPanelItem.ITEM_BACKGROUND_SELECTED
-                        : AnnotationPanelItem.ITEM_BACKGROUND_RESTING
-                )
-                .drawRect(
+                .rect(
                     0,
                     0,
                     width,
@@ -139,42 +135,49 @@ export default class AnnotationPanelItem extends ContainerObject {
                         ? AnnotationPanelItem.LAYER_HEIGHT
                         : AnnotationPanelItem.ANNOTATION_HEIGHT
                 )
-                .endFill();
+                .fill(
+                    this.isSelected.value
+                        ? AnnotationPanelItem.ITEM_BACKGROUND_SELECTED
+                        : AnnotationPanelItem.ITEM_BACKGROUND_RESTING
+                );
             usedWidth += width;
             this._itemContainer.addChild(this._itemIndent);
         } else if (this._data.type === AnnotationHierarchyType.ANNOTATION && this._data.layerId) {
             // Annotations in a layer have a double indent
             const width = 2 * AnnotationPanelItem.LAYER_HEIGHT;
             this._itemIndent = new Graphics()
-                .beginFill(AnnotationPanelItem.ITEM_BACKGROUND_RESTING)
-                .drawRect(
+                .rect(
                     0,
                     0,
                     width,
                     AnnotationPanelItem.ANNOTATION_HEIGHT
                 )
-                .endFill();
+                .fill(AnnotationPanelItem.ITEM_BACKGROUND_RESTING);
             usedWidth += width;
             this._itemContainer.addChild(this._itemIndent);
         }
 
         // Set up visibility button
+        const visibilityContainer = new Container({label: 'Visibility Container'});
+
         this._visibilityButtonBackground = new Graphics()
-            .beginFill(AnnotationPanelItem.VISIBILITY_BUTTON_BACKGROUND_COLOR)
-            .drawRect(
+            .rect(
                 0,
                 0,
                 length,
                 length
             )
-            .endFill();
+            .fill(AnnotationPanelItem.VISIBILITY_BUTTON_BACKGROUND_COLOR);
+        visibilityContainer.addChild(this._visibilityButtonBackground);
+
         this._visibilityEyeSprite = Sprite.from(Bitmaps.ImgEye);
         this._visibilityEyeSprite.width = length;
         this._visibilityEyeSprite.height = length;
         this._visibilityEyeSprite.alpha = 1;
-        this._visibilityButtonBackground.addChild(this._visibilityEyeSprite);
+        visibilityContainer.addChild(this._visibilityEyeSprite);
+
         this._visibilityButton = new GameButton()
-            .customStyleBox(this._visibilityButtonBackground)
+            .customStyleBox(visibilityContainer)
             .tooltip(`Hide ${this._data.type.toString()}`);
         this._visibilityButton.display.cursor = 'pointer';
         this._visibilityButton.clicked.connect(() => {
@@ -206,14 +209,13 @@ export default class AnnotationPanelItem extends ContainerObject {
             ribbonColor = AnnotationPanelItem.SOLUTION_RIBBON_COLOR;
         }
         this._itemRibbon = new Graphics()
-            .beginFill(ribbonColor)
-            .drawRect(
+            .rect(
                 0,
                 0,
                 AnnotationPanelItem.RIBBON_WIDTH,
                 length
             )
-            .endFill();
+            .fill(ribbonColor);
         this._itemContainer.addChild(this._itemRibbon);
 
         // Set up accordion chevron if necessary
@@ -234,18 +236,17 @@ export default class AnnotationPanelItem extends ContainerObject {
             this._chevronDown.alpha = 0;
             const aspectRatio = this._chevronRight.width / this._chevronRight.height;
             this._accordionChevron = new Graphics()
-                .beginFill(
-                    this.isSelected.value
-                        ? AnnotationPanelItem.ITEM_BACKGROUND_SELECTED
-                        : AnnotationPanelItem.ITEM_BACKGROUND_RESTING
-                )
-                .drawRect(
+                .rect(
                     0,
                     0,
                     length * aspectRatio,
                     length
                 )
-                .endFill();
+                .fill(
+                    this.isSelected.value
+                        ? AnnotationPanelItem.ITEM_BACKGROUND_SELECTED
+                        : AnnotationPanelItem.ITEM_BACKGROUND_RESTING
+                );
 
             this._chevronButton = new GameButton()
                 .customStyleBox(this._accordionChevron);
@@ -274,20 +275,20 @@ export default class AnnotationPanelItem extends ContainerObject {
         const textContainer = new Container();
         this._itemWidth = this._width - length - AnnotationPanelItem.RIBBON_WIDTH - usedWidth;
         this._itemButtonBackground = new Graphics()
-            .beginFill(
-                this.isSelected.value
-                    ? AnnotationPanelItem.ITEM_BACKGROUND_SELECTED
-                    : AnnotationPanelItem.ITEM_BACKGROUND_RESTING
-            )
-            .drawRect(
+            .rect(
                 0,
                 0,
                 this._itemWidth,
                 length
             )
-            .endFill();
+            .fill(
+                this.isSelected.value
+                    ? AnnotationPanelItem.ITEM_BACKGROUND_SELECTED
+                    : AnnotationPanelItem.ITEM_BACKGROUND_RESTING
+            );
         this._itemButton = new GameButton()
             .customStyleBox(this._itemButtonBackground);
+        this._itemButton.display.label = 'Annotation Item Button';
         this._itemButton.display.cursor = 'default';
         this._itemButton.clicked.connect(() => {
             this.isSelected.value = !this.isSelected.value;
@@ -316,14 +317,13 @@ export default class AnnotationPanelItem extends ContainerObject {
                 .color(0xFFFFFF)
                 .hAlignLeft();
             const labelTextBackground = new Graphics()
-                .beginFill(0x0)
-                .drawRect(
+                .rect(
                     0,
                     0,
                     labelText.width,
                     labelText.height
                 )
-                .endFill();
+                .fill(0x0);
             labelTextBackground.alpha = 0;
             this._itemTextButton = new GameButton()
                 .customStyleBox(labelTextBackground)
@@ -390,26 +390,30 @@ export default class AnnotationPanelItem extends ContainerObject {
             this.addObject(this._itemNameInput, textContainer);
 
             // Set up save edit button
+            const itemSaveEditContainer = new Container({label: 'Save Edit Container'});
+
             this._itemSaveEditButtonBackground = new Graphics()
-                .beginFill(
-                    this.isSelected.value
-                        ? AnnotationPanelItem.ITEM_BACKGROUND_SELECTED
-                        : AnnotationPanelItem.ITEM_BACKGROUND_RESTING
-                )
-                .drawRect(
+                .rect(
                     0,
                     0,
                     AnnotationPanelItem.ITEM_EDIT_BUTTON_WIDTH,
                     length
                 )
-                .endFill();
+                .fill(
+                    this.isSelected.value
+                        ? AnnotationPanelItem.ITEM_BACKGROUND_SELECTED
+                        : AnnotationPanelItem.ITEM_BACKGROUND_RESTING
+                );
+            itemSaveEditContainer.addChild(this._itemSaveEditButtonBackground);
+
             this._checkmarkSprite = Sprite.from(Bitmaps.ImgAnnotationCheckmark);
             this._checkmarkSprite.width = AnnotationPanelItem.ITEM_EDIT_BUTTON_WIDTH;
             this._checkmarkSprite.height = AnnotationPanelItem.ITEM_EDIT_BUTTON_WIDTH;
             this._checkmarkSprite.alpha = 1;
-            this._itemSaveEditButtonBackground.addChild(this._checkmarkSprite);
+            itemSaveEditContainer.addChild(this._checkmarkSprite);
+
             this._itemSaveEditButton = new GameButton()
-                .customStyleBox(this._itemSaveEditButtonBackground)
+                .customStyleBox(itemSaveEditContainer)
                 .tooltip('Save');
             this._itemSaveEditButton.display.cursor = 'pointer';
             this._itemSaveEditButton.clicked.connect(() => this.saveEdit());
@@ -420,26 +424,29 @@ export default class AnnotationPanelItem extends ContainerObject {
             this.addObject(this._itemSaveEditButton, textContainer);
 
             // Set up cancel edit button
+            const itemCancelEditContainer = new Container({label: 'Cancel Edit Container'});
             this._itemCancelEditButtonBackground = new Graphics()
-                .beginFill(
-                    this.isSelected.value
-                        ? AnnotationPanelItem.ITEM_BACKGROUND_SELECTED
-                        : AnnotationPanelItem.ITEM_BACKGROUND_RESTING
-                )
-                .drawRect(
+                .rect(
                     0,
                     0,
                     AnnotationPanelItem.ITEM_EDIT_BUTTON_WIDTH,
                     length
                 )
-                .endFill();
+                .fill(
+                    this.isSelected.value
+                        ? AnnotationPanelItem.ITEM_BACKGROUND_SELECTED
+                        : AnnotationPanelItem.ITEM_BACKGROUND_RESTING
+                );
+            itemCancelEditContainer.addChild(this._itemCancelEditButtonBackground);
+
             this._crossSprite = Sprite.from(Bitmaps.ImgAnnotationCross);
             this._crossSprite.width = AnnotationPanelItem.ITEM_EDIT_BUTTON_WIDTH;
             this._crossSprite.height = AnnotationPanelItem.ITEM_EDIT_BUTTON_WIDTH;
             this._crossSprite.alpha = 1;
-            this._itemCancelEditButtonBackground.addChild(this._crossSprite);
+            itemCancelEditContainer.addChild(this._crossSprite);
+
             this._itemCancelEditButton = new GameButton()
-                .customStyleBox(this._itemCancelEditButtonBackground)
+                .customStyleBox(itemCancelEditContainer)
                 .tooltip('Cancel');
             this._itemCancelEditButton.display.cursor = 'pointer';
             this._itemCancelEditButton.clicked.connect(() => this.cancelEdit());
@@ -478,14 +485,13 @@ export default class AnnotationPanelItem extends ContainerObject {
 
         // Add bottom divider
         const divider = new Graphics()
-            .beginFill(AnnotationPanelItem.DIVIDER_COLOR)
-            .drawRect(
+            .rect(
                 0,
                 0,
                 this._width,
                 this._dividerThickness
             )
-            .endFill();
+            .fill(AnnotationPanelItem.DIVIDER_COLOR);
         divider.x = 0;
         divider.y = length;
         this.container.addChild(divider);
@@ -646,7 +652,7 @@ export default class AnnotationPanelItem extends ContainerObject {
             .color(0xFFFFFF)
             .hAlignLeft();
         const background = new Graphics()
-            .drawRect(
+            .rect(
                 0,
                 0,
                 text.width,
@@ -675,14 +681,13 @@ export default class AnnotationPanelItem extends ContainerObject {
     private redraw(graphic: Graphics, color: number, width: number, height: number) {
         graphic.clear();
         graphic
-            .beginFill(color)
-            .drawRect(
+            .rect(
                 0,
                 0,
                 width,
                 height
             )
-            .endFill();
+            .fill(color);
     }
 
     private activateHoverHighlight() {
@@ -769,7 +774,7 @@ export default class AnnotationPanelItem extends ContainerObject {
                 .color(0xFFFFFF)
                 .hAlignLeft();
             const background = new Graphics()
-                .drawRect(
+                .rect(
                     0,
                     0,
                     text.width,

@@ -1,18 +1,19 @@
 import {
-    Graphics, Point, Rectangle, Sprite, Text
+    Graphics, Point, Rectangle, Sprite, Text,
+    FederatedPointerEvent, FederatedWheelEvent
 } from 'pixi.js';
 import {
     ContainerObject, KeyboardListener, InputUtil, Flashbang,
     KeyboardEventType, KeyCode, Assert, PointerCapture, HLayoutContainer,
     VLayoutContainer,
     HAlign,
-    VAlign
+    VAlign,
+    DisplayUtil
 } from 'flashbang';
 import ROPWait from 'eterna/rscript/ROPWait';
 import debounce from 'lodash.debounce';
 import AnnotationManager from 'eterna/AnnotationManager';
 import GameWindow from 'eterna/ui/GameWindow';
-import {FederatedPointerEvent, FederatedWheelEvent} from '@pixi/events';
 import Eterna from 'eterna/Eterna';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -88,9 +89,12 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         folderIcon.height = 18;
         this._folderInfoContainer.addChild(folderIcon);
 
-        this._folderInfoText = new Text('', {
-            fontSize: 14,
-            fill: 0xFFFFFF
+        this._folderInfoText = new Text({
+            text: '',
+            style: {
+                fontSize: 14,
+                fill: 0xFFFFFF
+            }
         });
         this._folderInfoContainer.addChild(this._folderInfoText);
 
@@ -99,7 +103,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
     /* override */
     public update(_dt: number): void {
-        if (!this.display.worldVisible) {
+        if (!DisplayUtil.isWorldVisible(this.display)) {
             // update is expensive, so don't bother doing it if we're not visible
             return;
         }
@@ -158,9 +162,8 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this._height = height;
 
         this._clickTargetDisp.clear()
-            .beginFill(0x0)
-            .drawRect(0, 0, width, height)
-            .endFill();
+            .rect(0, 0, width, height)
+            .fill(0x0);
         this._clickTargetDisp.alpha = 0;
 
         this._pose.setOffset(this._width * 0.5, this._height * 0.5);
@@ -174,7 +177,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this.container.mask = null;
 
         if (useMask) {
-            this._mask = new Graphics().beginFill(0x0).drawRect(0, 0, width, height).endFill();
+            this._mask = new Graphics().rect(0, 0, width, height).fill(0x0);
             this._mask.hitArea = new Rectangle();
             this.container.addChild(this._mask);
             this.container.mask = this._mask;

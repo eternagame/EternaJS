@@ -1,4 +1,3 @@
-import {Rectangle} from 'pixi.js';
 import {VAlign} from 'flashbang/core/Align';
 import DisplayUtil from 'flashbang/util/DisplayUtil';
 import TrueWidthDisplay from 'eterna/ui/TrueWidthDisplay';
@@ -57,13 +56,12 @@ export default class HLayoutContainer extends LayoutContainer {
         this.addChildAt(LayoutContainer.createSpacer(size, 1), index);
     }
 
-    /* override */
-    protected doLayout(): void {
+    protected override doLayout(): void {
         const maxHeight = this._vAlign === VAlign.TOP ? 0
             : Math.max(...this.children.filter(
                 (child) => child.visible
             ).map(
-                (child) => DisplayUtil.getBoundsRelative(child, this, HLayoutContainer.R).height
+                (child) => DisplayUtil.getBoundsRelative(child, this).height
             ));
 
         const from: number = this._reversed ? this.children.length - 1 : 0;
@@ -77,7 +75,7 @@ export default class HLayoutContainer extends LayoutContainer {
 
             child.x = 0;
             child.y = 0;
-            const bounds = DisplayUtil.getBoundsRelative(child, this, HLayoutContainer.R);
+            const bounds = DisplayUtil.getBoundsRelative(child, this);
             child.x = -bounds.left + x;
             child.y = -bounds.top;
             if (this._vAlign === VAlign.CENTER) {
@@ -87,7 +85,7 @@ export default class HLayoutContainer extends LayoutContainer {
             }
 
             // This is an incredibly hacky setup for making sure menus are handled correctly
-            if (child.name === 'EternaMenu') {
+            if (child.label === 'EternaMenu') {
                 bounds.width = (child as TrueWidthDisplay).trueWidth;
             }
 
@@ -98,6 +96,4 @@ export default class HLayoutContainer extends LayoutContainer {
     protected _hOffset: number;
     protected _vAlign: VAlign;
     protected _reversed: boolean;
-
-    protected static R: Rectangle = new Rectangle();
 }

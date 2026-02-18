@@ -14,10 +14,9 @@ export default class SelectionBox extends Graphics {
         this._width = width;
         this._height = height;
 
-        this.clear();
-        this.beginFill(this._color, 0.3);
-        this.drawRect(0, 0, width, height);
-        this.endFill();
+        this.clear()
+            .rect(0, 0, width, height)
+            .fill({color: this._color, alpha: 0.3});
     }
 
     protected readonly _color: number;

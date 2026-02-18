@@ -1,10 +1,13 @@
-import {ContainerObject, Assert} from 'flashbang';
-import {
-    Container,
-    Graphics, Point, Rectangle, TextMetrics
-} from 'pixi.js';
 import Fonts from 'eterna/util/Fonts';
-import {FederatedPointerEvent} from '@pixi/events';
+import {Assert, ContainerObject} from 'flashbang';
+import {
+    CanvasTextMetrics,
+    Container,
+    FederatedPointerEvent,
+    Graphics,
+    Point,
+    Rectangle
+} from 'pixi.js';
 
 // AMW we have to be content to accept our positioner may
 // in fact return null (if we want to use getbounds() for
@@ -58,7 +61,7 @@ export default class HelpToolTip extends ContainerObject {
 
         // Text
         const textBuilder = Fonts.std(props.text, theme.fontSize).bold().color(0);
-        const textMetrics = TextMetrics.measureText(props.text, textBuilder.style);
+        const textMetrics = CanvasTextMetrics.measureText(props.text, textBuilder.style);
         const textElem = textBuilder.build();
 
         // Background
@@ -89,10 +92,10 @@ export default class HelpToolTip extends ContainerObject {
         })();
 
         const background = new Graphics();
-        background.interactive = true;
-        background.on('pointerTap', (e: FederatedPointerEvent) => e.stopPropagation());
-        background.beginFill(theme.colors.background, 1);
-        background.drawRoundedRect(backgroundX, backgroundY, width, height, theme.borderRadius);
+        background.eventMode = 'static';
+        background
+            .on('pointerTap', (e: FederatedPointerEvent) => e.stopPropagation())
+            .roundRect(backgroundX, backgroundY, width, height, theme.borderRadius);
         textElem.position.set(
             backgroundX + (width - textMetrics.width) / 2,
             backgroundY + theme.vPadding
@@ -105,14 +108,16 @@ export default class HelpToolTip extends ContainerObject {
             new Point(backgroundX + width / 2 + theme.tipSize, tipY),
             new Point(backgroundX + width / 2, tipY + theme.tipSize * tipDirection)
         ];
-        background.drawPolygon(tip);
-        background.endFill();
+        background
+            .poly(tip)
+            .fill({color: theme.colors.background, alpha: 1});
 
         // Tail
         if (tailLength > 0) {
-            background.lineStyle(theme.tailWidth, theme.colors.background);
-            background.moveTo(tip[2].x, tailY);
-            background.lineTo(tip[2].x, tailY + tailLength + 2);
+            background
+                .moveTo(tip[2].x, tailY)
+                .lineTo(tip[2].x, tailY + tailLength + 2)
+                .stroke({width: theme.tailWidth, color: theme.colors.background});
         }
 
         this.container.addChild(background);

@@ -1,5 +1,4 @@
-import {FederatedEvent} from '@pixi/events';
-import {utils as PixiUtils} from 'pixi.js';
+import type {EventEmitter, FederatedEvent} from 'pixi.js';
 import {
     AbstractSignal, FilteredSignal, MappedSignal, SignalView
 } from 'signals';
@@ -7,7 +6,7 @@ import {
 /** Redispatches a pixi FederatedPointerEvent as a Signal */
 export default class EventSignal<FEvent extends FederatedEvent> extends AbstractSignal<FEvent>
     implements SignalView<FEvent> {
-    constructor(target: PixiUtils.EventEmitter, eventType: string | symbol) {
+    constructor(target: EventEmitter, eventType: string | symbol) {
         super();
         this._target = target;
         this._eventType = eventType;
@@ -55,7 +54,7 @@ export default class EventSignal<FEvent extends FederatedEvent> extends Abstract
         }
     }
 
-    protected _target: PixiUtils.EventEmitter;
+    protected _target: EventEmitter;
     protected _eventType: string | symbol;
     protected _connected: boolean;
 

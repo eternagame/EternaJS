@@ -3,14 +3,13 @@ import {
     Assert, ContainerObject, DisplayUtil, Dragger, Flashbang, HAlign, MathUtil, SpriteObject, VAlign, Vector2
 } from 'flashbang';
 import {
-    Container, Graphics, Point, Rectangle, Sprite
+    Container, Graphics, Point, Rectangle, Sprite, FederatedPointerEvent
 } from 'pixi.js';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {Signal, SignalView} from 'signals';
 import GraphicsObject from 'flashbang/objects/GraphicsObject';
 import RScriptArrow from 'eterna/rscript/RScriptArrow';
-import {FederatedPointerEvent} from '@pixi/events';
 import GameButton from './GameButton';
 import GamePanel from './GamePanel';
 import ScrollBox from './ScrollBox';
@@ -260,9 +259,7 @@ export default class GameWindow extends ContainerObject {
         const RIB_WIDTH = 2;
         const margin = Math.max(this.titleMargin, 5);
         // Color is arbitrary, we can probably do better...
-        this._dragRibbing
-            .clear()
-            .beginFill(0xFFFFFF, 0.15);
+        this._dragRibbing.clear();
         if (this._title) {
             // Draw on either side of the title
             const leftWidth = (this._panel.width - this._panel.titleTextWidth - (margin * 4)) / 2;
@@ -271,22 +268,22 @@ export default class GameWindow extends ContainerObject {
             );
             const rightStart = margin + leftWidth + margin + this._panel.titleTextWidth + margin;
             this._dragRibbing
-                .drawRect(margin, (this.titleHeight - RIB_WIDTH) * 0.35, leftWidth, RIB_WIDTH)
-                .drawRect(margin, (this.titleHeight - RIB_WIDTH) * 0.5, leftWidth, RIB_WIDTH)
-                .drawRect(margin, (this.titleHeight - RIB_WIDTH) * 0.65, leftWidth, RIB_WIDTH)
-                .drawRect(rightStart, (this.titleHeight - RIB_WIDTH) * 0.35, rightWidth, RIB_WIDTH)
-                .drawRect(rightStart, (this.titleHeight - RIB_WIDTH) * 0.5, rightWidth, RIB_WIDTH)
-                .drawRect(rightStart, (this.titleHeight - RIB_WIDTH) * 0.65, rightWidth, RIB_WIDTH);
+                .rect(margin, (this.titleHeight - RIB_WIDTH) * 0.35, leftWidth, RIB_WIDTH)
+                .rect(margin, (this.titleHeight - RIB_WIDTH) * 0.5, leftWidth, RIB_WIDTH)
+                .rect(margin, (this.titleHeight - RIB_WIDTH) * 0.65, leftWidth, RIB_WIDTH)
+                .rect(rightStart, (this.titleHeight - RIB_WIDTH) * 0.35, rightWidth, RIB_WIDTH)
+                .rect(rightStart, (this.titleHeight - RIB_WIDTH) * 0.5, rightWidth, RIB_WIDTH)
+                .rect(rightStart, (this.titleHeight - RIB_WIDTH) * 0.65, rightWidth, RIB_WIDTH);
         } else {
             const width = this._panel.width - (margin * 2) - (
                 this._closable ? this.closeButtonSize + margin : 0
             );
             this._dragRibbing
-                .drawRect(margin, (this.titleHeight - RIB_WIDTH) * 0.35, width, RIB_WIDTH)
-                .drawRect(margin, (this.titleHeight - RIB_WIDTH) * 0.5, width, RIB_WIDTH)
-                .drawRect(margin, (this.titleHeight - RIB_WIDTH) * 0.65, width, RIB_WIDTH);
+                .rect(margin, (this.titleHeight - RIB_WIDTH) * 0.35, width, RIB_WIDTH)
+                .rect(margin, (this.titleHeight - RIB_WIDTH) * 0.5, width, RIB_WIDTH)
+                .rect(margin, (this.titleHeight - RIB_WIDTH) * 0.65, width, RIB_WIDTH);
         }
-        this._dragRibbing.endFill();
+        this._dragRibbing.fill({color: 0xFFFFFF, alpha: 0.15});
 
         this._dragHandleLeft.display.position.set(0, this._panel.height - this._dragHandleLeft.display.height);
         this._dragHandleRight.display.position.set(
@@ -295,24 +292,22 @@ export default class GameWindow extends ContainerObject {
         );
 
         this._resizeHitTarget.display.clear()
-            .beginFill(0x000000)
-            .drawRoundedRect(
+            .roundRect(
                 -RESIZE_MARGIN,
                 -RESIZE_MARGIN,
                 this._panel.width + (RESIZE_MARGIN * 2),
                 this._panel.height + (RESIZE_MARGIN * 2),
                 this._panel.borderRadius
             )
-            .endFill()
-            .beginHole()
-            .drawRoundedRect(
+            .fill(0x000000)
+            .roundRect(
                 RESIZE_MARGIN,
                 RESIZE_MARGIN,
                 this._panel.width - (RESIZE_MARGIN * 2),
                 this._panel.height - (RESIZE_MARGIN * 2),
                 this._panel.borderRadius
             )
-            .endHole();
+            .cut();
 
         const x = this._ensureOnScreen ? MathUtil.clamp(
             this.targetXPixels - RESIZE_MARGIN,

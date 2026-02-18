@@ -1,67 +1,3 @@
-if typeof Array.prototype.indexOf != 'function'
-  Array.prototype.indexOf = (needle) ->
-    for ii in [0..@length-1] by 1
-      if @[ii] == needle
-        return ii
-    return -1
-
-
-Array.prototype.is_array = (value) ->
-  value and
-    typeof value is 'object' and
-    value instanceof Array and
-    typeof value.length is 'number' and
-    typeof value.splice is 'function' and
-    not ( value.propertyIsEnumerable 'length' )
-
-
-Array.prototype.last = () ->
-  if @length > 0
-    return @[@length-1]
-  return null
-
-
-Array.prototype.get_random = () ->
-  return @[Math.floor(Math.random() * @length) % @length]
-
-
-Array.prototype.clone = () ->
-  new_array = new Array()
-  for ii in [0..@length-1] by 1
-  
-    val = @[ii]
-    
-    if typeof val == "object" && val instanceof Array
-      val = val.clone()
-    else if typeof val == "object"
-      val = Utils.clone_object(val)
-  
-    new_array.push(val)
-  
-  return new_array
-
-Array.prototype.remove = (i) ->
-  @splice(i,1)
-
-Array.prototype.swap = (i,j) ->
-  array = @
-  temp = array[i]
-  array[i] = array[j]
-  array[j] = temp
-
-String.prototype.hash_code = () ->
-
-  hash = 0
-  if @length == 0 then return hash
-  for i in [0..@length-1] by 1
-    char = this.charCodeAt(i)
-    hash = ((hash<<5)-hash)+char
-    hash = hash & hash
-
-  return hash;
-
-
-
 # Custom jQuery extension
 
 jQuery.fn.extend({
@@ -106,17 +42,14 @@ jQuery.fn.extend({
 
   clone_object : (obj) ->
     
-    if typeof obj == "object" && obj instanceof Array
-      return obj.clone()
-    
+    if obj instanceof Array
+      return obj.map (item) => @clone_object(item)
+    else if typeof obj != 'object' || obj == null
+      return obj
+
     newobj = new Object()
     for own key,value of obj
-      if typeof value == "object" && value instanceof Array
-        value = value.clone()
-      else if typeof value == "object"
-        value = @clone_object(value)
-    
-      newobj[key] = value
+      newobj[key] = @clone_object(value)
     return newobj
 
   add_objects : (obj1, obj2) ->

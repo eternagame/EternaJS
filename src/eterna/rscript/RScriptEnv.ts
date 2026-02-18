@@ -1,6 +1,6 @@
 import log from 'loglevel';
 import {
-    Container, DisplayObject, Rectangle, Point
+    Container, Rectangle, Point
 } from 'pixi.js';
 import {
     ContainerObject, Enableable, GameObject, Assert, SceneObject
@@ -144,10 +144,10 @@ export default class RScriptEnv extends ContainerObject {
             const [uiElement] = this.getUIElementFromID(key);
             if (uiElement instanceof GameObject) {
                 if (!uiElement.display) return null;
-                return uiElement.display.getBounds();
-            } else if (uiElement instanceof DisplayObject) {
+                return uiElement.display.getBounds().rectangle;
+            } else if (uiElement instanceof Container) {
                 if (!uiElement) return null;
-                return uiElement.getBounds();
+                return uiElement.getBounds().rectangle;
             } else if (uiElement !== null) {
                 if (uiElement.proxy) {
                     return uiElement.rect;
@@ -225,7 +225,7 @@ export default class RScriptEnv extends ContainerObject {
             if (!elementsToSkip.includes(elementID)) {
                 const obj: RScriptUIElement | null = this.getUIElementFromID(elementID)[0];
                 if (obj) {
-                    if (obj instanceof DisplayObject) {
+                    if (obj instanceof Container) {
                         obj.visible = visible;
                     } else if (obj instanceof GameObject && obj.display != null) {
                         obj.display.visible = visible;
@@ -366,8 +366,6 @@ export default class RScriptEnv extends ContainerObject {
             scriptVar.destroySelf();
         } else if (scriptVar instanceof Container) {
             scriptVar.destroy({children: true});
-        } else if (scriptVar instanceof DisplayObject) {
-            scriptVar.destroy();
         }
 
         this._vars.delete(key);
@@ -386,6 +384,5 @@ export default class RScriptEnv extends ContainerObject {
 
 export type RScriptVarType =
     | GameObject
-    | DisplayObject
     | RNAHighlightState
     | string;
