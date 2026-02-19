@@ -83,7 +83,9 @@ export default class Pose3DDialog extends WindowDialog<void> {
         // Initialize NGL
         this._nglStage = new Stage(this._nglDiv, {
             lightColor: 0xffffff,
-            ambientColor: 0xffffff
+            ambientColor: 0xffffff,
+            lightIntensity: 1,
+            ambientIntensity: 0.2
         });
 
         this._nglContainer = new Container({label: 'NGL Container'});
@@ -181,6 +183,7 @@ export default class Pose3DDialog extends WindowDialog<void> {
         changedBaseOutlinePass.edgeStrength = 5;
         changedBaseOutlinePass.edgeGlow = 0.5;
         changedBaseOutlinePass.edgeThickness = 2;
+        changedBaseOutlinePass.hiddenEdgeColor.set(0xFFFFFF);
         this._composer.addPass(changedBaseOutlinePass);
 
         this._effectFXAA = new ShaderPass(FXAAShader);
