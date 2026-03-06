@@ -79,3 +79,13 @@ popd
 pushd EternaFold 
 patch -t -p0 --forward < eternafold-eterna.patch
 popd
+
+### CDSfold
+###########
+## This is how the patch file was created.
+## cd CDSfold/CDSfold_SU && git diff src/Problem.hpp src/Problem.cpp > ../cdsfold-eterna.patch
+
+# With your fresh git checkout in CDSfold/CDSfold_SU/...
+pushd CDSfold
+patch -t -p0 --forward < cdsfold-eterna.patch
+popd
