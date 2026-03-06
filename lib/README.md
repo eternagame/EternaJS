@@ -69,6 +69,16 @@ are cloned into lib/LinearFold/LinearFold and lib/LinearFold/LinearPartition res
 	  git reset --hard 0b365e31d2436d426858ed70f931da4fdced2397
 	  ```
 
+* For Ribotree-mRNA, clone [Ribotree-mRNA](https://github.com/DasLab/ribotree-mrna) into the `ribotree` directory.
+    - You can obtain the latest verified working revision via:
+      ```sh
+      cd Ribotree
+      git clone https://github.com/DasLab/ribotree-mrna ribotree
+      cd ribotree
+      git reset --hard 56f4ba2e2ca3857690506b3c0e9c49ce269c780e
+      ```
+    - The patch step (below) will add the Pyodide-compatible `arnie` bridge, async wrappers, and bundled DegScore files. 
+
 ## Apply Patches
 
 EternaJS maintains patchfiles with modifications to support our compilation and runtime processes as well as
@@ -86,3 +96,16 @@ To generate fresh diffs, make sure you have a fresh copy of the energy model (so
 ## Compiling RibonanzaNet
 * Set up a conda environment for RibonanzaNet: `conda env create -f RibonanzaNet/env.yml -p .venv && ./.venv/bin/pip install onnx==1.16.1`
 * Export the model as onnx via `./.venv/bin/python export_onnx.py`
+
+## Building Ribotree-mRNA
+* Ribotree-mRNA is packaged as a Python wheel and loaded at runtime via Pyodide's `micropip`. Building
+requires Python's `build` module. If it's not installed:
+```sh
+pip install build
+```
+* Then build the wheel:
+```sh
+cd Ribotree
+python -m build
+```
+The wheel will be output to `Ribotree/dist/`.
