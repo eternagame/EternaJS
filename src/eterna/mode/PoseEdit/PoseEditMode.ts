@@ -545,9 +545,13 @@ export default class PoseEditMode extends GameMode {
 
     private onAutoSolverClicked() {
         this.pushUILock();
-        const sequenceString = this._poses[0].sequence.sequenceString();
+        const targetStructure = this._targetPairs[0].getParenthesis({pseudoknots: false});
         this._autoSolverDialog = this.showDialog(
-            new AutoSolverDialog({sequence: sequenceString}),
+            new AutoSolverDialog({
+                targetStructure,
+                pose: this._poses[0],
+                defaultFolder: this._folderSwitcher.selectedFolder.value
+            }),
             'AutoSolverDialog'
         );
 
@@ -555,9 +559,8 @@ export default class PoseEditMode extends GameMode {
         this._autoSolverDialog.submitClicked.connect((seqString) => {
             const sequence: Sequence = Sequence.fromSequenceString(seqString);
             this.pasteSequence(sequence, 0);
-            this.popUILock();
-            // this._autoSolverDialog.close(null);
         });
+        this._autoSolverDialog.closed.then(() => this.popUILock());
     }
 
     private async showSolution(solution: Solution): Promise<void> {
