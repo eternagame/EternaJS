@@ -69,14 +69,7 @@ are cloned into lib/LinearFold/LinearFold and lib/LinearFold/LinearPartition res
 	  git reset --hard 0b365e31d2436d426858ed70f931da4fdced2397
 	  ```
 
-* For Ribotree-mRNA, clone [Ribotree-mRNA](https://github.com/DasLab/ribotree-mrna) into the `ribotree` directory.
-    - You can obtain the latest verified working revision via:
-      ```sh
-      cd Ribotree
-      git clone https://github.com/DasLab/ribotree-mrna ribotree
-      cd ribotree
-      git reset --hard 56f4ba2e2ca3857690506b3c0e9c49ce269c780e
-      ```
+* For Ribotree-mRNA, download v1.1.8 via https://eternagame.org/tech into the `ribotree` directory.
     - The patch step (below) will add the Pyodide-compatible `arnie` bridge, async wrappers, and bundled DegScore files. 
 
 ## Apply Patches
@@ -107,5 +100,5 @@ pip install build
 ```sh
 cd Ribotree
 python -m build
+cp lib/Ribotree/dist/ribotree_pyodide-2.0.2-py3-none-any.whl src/eterna/folding/engines
 ```
-The wheel will be output to `Ribotree/dist/`.
