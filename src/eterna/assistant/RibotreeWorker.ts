@@ -18,7 +18,7 @@
 /// <reference lib="webworker" />
 
 const PYODIDE_CDN_URL = 'https://cdn.jsdelivr.net/pyodide/v0.29.0/full/';
-const RIBOTREE_WHEEL_URL = '/ribotree_pyodide-2.0.2-py3-none-any.whl';
+const RIBOTREE_WHEEL_URL = new URL('engines-bin/ribotree_pyodide-2.0.2-py3-none-any.whl', import.meta.url).href;
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare function loadPyodide(options: {
