@@ -80,6 +80,20 @@ pushd EternaFold
 patch -t -p0 --forward < eternafold-eterna.patch
 popd
 
+### Ribotree-mRNA
+#################
+## This is how the patch file was created.
+## cd ribotree/ribotree-mrna
+## git add arnie/ __init__.py <modified-files> DegScore/
+## git diff --staged > ../ribotree-eterna.patch
+## git reset HEAD && git checkout -- . && rm -rf arnie/ __init__.py
+
+# With your fresh git checkout in Ribotree/ribotree/...
+# Uses git apply to correctly handle new file creation (arnie/, DegScore/, __init__.py)
+pushd Ribotree/ribotree
+git apply --allow-empty ../ribotree-eterna.patch
+popd
+
 ### CDSfold
 ###########
 ## This is how the patch file was created.
@@ -88,4 +102,3 @@ popd
 # With your fresh git checkout in CDSfold/CDSfold_SU/...
 pushd CDSfold
 patch -t -p0 --forward < cdsfold-eterna.patch
-popd
