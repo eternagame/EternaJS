@@ -1,0 +1,73 @@
+diff --git CDSfold_SU/src/Problem.cpp CDSfold_SU/src/Problem.cpp
+index a7275d6..ea693d5 100644
+--- CDSfold_SU/src/Problem.cpp
++++ CDSfold_SU/src/Problem.cpp
+@@ -606,7 +606,7 @@ void Problem::calculate() {
+         exit(1);
+     }
+ 
+-    array<stack, 500> sector;
++    array<nt_stack, 500> sector;
+     string optseq(nuclen_ + 1, 'N');
+     optseq[0] = ' ';
+ 
+@@ -1447,7 +1447,7 @@ void Problem::fill_F() {
+     }
+ }
+ 
+-void Problem::backtrack(string *optseq, array<stack, 500> & sector, const int &initL, const int &initR) {
++void Problem::backtrack(string *optseq, array<nt_stack, 500> & sector, const int &initL, const int &initR) {
+ 
+     int s = 0;
+     int b = 0;
+@@ -1982,7 +1982,7 @@ OUTLOOP:
+     base_pair_[0].i = b; /* save the total number of base pairs */
+ }
+ 
+-void Problem::backtrack2(string *optseq, array<stack, 500> & sector, const int &initL, const int &initR) {
++void Problem::backtrack2(string *optseq, array<nt_stack, 500> & sector, const int &initL, const int &initR) {
+ 
+     std::mt19937 *genp = nullptr;
+     if (options_.fixed_seed) {
+@@ -2565,7 +2565,7 @@ void Problem::fixed_backtrack(string const & optseq, bond *base_pair_, vector<in
+     int rtype[7] = {0, 2, 1, 4, 3, 6, 5};
+     int s = 0;
+     int b = 0;
+-    array<stack, 500> sector;
++    array<nt_stack, 500> sector;
+     sector[++s].i = 1;
+     sector[s].j = nuclen;
+     sector[s].ml = 0;
+diff --git CDSfold_SU/src/Problem.hpp CDSfold_SU/src/Problem.hpp
+index b166800..323e063 100644
+--- CDSfold_SU/src/Problem.hpp
++++ CDSfold_SU/src/Problem.hpp
+@@ -21,7 +21,7 @@ using namespace std;
+ 
+ struct Options;
+           
+-using stack = struct stack {
++using nt_stack = struct nt_stack {
+     int i;
+     int j;
+     int Li;
+@@ -34,7 +34,7 @@ using bond = struct bond {
+     int j;
+ };
+ 
+-inline void clear_sec_bp(stack *s, bond *b, int len) {
++inline void clear_sec_bp(nt_stack *s, bond *b, int len) {
+     for (int i = 0; i < 500; i++) {
+         s[i].i = -INF;
+         s[i].j = -INF;
+@@ -169,8 +169,8 @@ private:
+ 
+ 
+ 
+-    void backtrack(string *optseq, array<stack, 500> & sector, const int &initL, const int &initR);
+-    void backtrack2(string *optseq, array<stack, 500> & sector, const int &initL, const int &initR);
++    void backtrack(string *optseq, array<nt_stack, 500> & sector, const int &initL, const int &initR);
++    void backtrack2(string *optseq, array<nt_stack, 500> & sector, const int &initL, const int &initR);
+     void fixed_backtrack(string const & optseq, bond *base_pair, vector<int> const & c, vector<int> const & m, int *f, int nuclen, const int (&BP_pair)[5][5]);
+ 
+ };

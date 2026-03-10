@@ -72,6 +72,28 @@ are cloned into lib/LinearFold/LinearFold and lib/LinearFold/LinearPartition res
 * For Ribotree-mRNA, download v1.1.8 via https://eternagame.org/tech into the `ribotree` directory.
     - The patch step (below) will add the Pyodide-compatible `arnie` bridge, async wrappers, and bundled DegScore files. 
 
+* For CDSfold, clone [CDSfold-SU](https://github.com/DasLab/CDSfold_SU) into the `CDSfold` directory.
+    - You can obtain the latest verified working working revision via:
+      ```sh
+      cd CDSfold
+      git clone https://github.com/DasLab/CDSfold_SU CDSfold_SU
+      cd CDSfold_SU
+      git reset --hard 0a673fb987d4b4c3d1535ae02024c7f5d7d3ac14
+      ```
+    - You also need to install Vienna 2.4.9, as CDSfold_SU relies on Vienna to provide energy calculations. Download the [v2.4.9 release](https://github.com/ViennaRNA/ViennaRNA/releases/download/v2.4.9/ViennaRNA-2.4.9.tar.gz), then extract it to the `CDSfold_SU` directory.
+      ```sh
+      cd CDSfold_SU
+      tar xzf ViennaRNA-2.4.9.tar.gz 
+      cd ViennaRNA-2.4.9
+      emconfigure ./configure \
+      --without-perl --without-python --without-forester \
+      --without-kinfold --without-rnalocmin --without-gsl \
+      --disable-openmp --disable-shared --enable-static \
+      --prefix=$(pwd)/install-wasm
+      emmake make -j4 -C src
+      emmake make -C src install
+      ```
+
 ## Apply Patches
 
 EternaJS maintains patchfiles with modifications to support our compilation and runtime processes as well as
