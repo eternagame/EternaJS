@@ -36,6 +36,11 @@ import Vienna2 from './folding/Vienna2';
 import LayoutEngine from './layout/LayoutEngine';
 import LayoutEngineManager from './layout/LayoutEngineManager';
 import RNApuzzler from './layout/RNApuzzler';
+import SolverManager from './assistant/SolverManager';
+import RibotreeSolver from './assistant/RibotreeSolver';
+import CDSfoldSolver from './assistant/CDSfoldSolver';
+import RibotreeParams from './assistant/ui/RibotreeParams';
+import CDSfoldParams from './assistant/ui/CDSfoldParams';
 import DesignBrowserMode, {DesignBrowserFilter} from './mode/DesignBrowser/DesignBrowserMode';
 import FeedbackViewMode from './mode/FeedbackViewMode';
 import LoadingMode from './mode/LoadingMode';
@@ -269,6 +274,7 @@ export default class EternaApp extends FlashbangApp {
             return Promise.all([
                 this.initFoldingEngines(),
                 this.initLayoutEngines(),
+                this.initSolverEngines(),
                 TextureUtil.load(Bitmaps.all)
             ]);
         })
@@ -325,6 +331,7 @@ export default class EternaApp extends FlashbangApp {
         delete Eterna.chat;
         if (Eterna.gameDiv) Eterna.gameDiv.innerHTML = '';
         FolderManager.dispose();
+        SolverManager.dispose();
         LayoutEngineManager.dispose();
         PuzzleManager.dispose();
         SolutionManager.dispose();
@@ -672,6 +679,20 @@ export default class EternaApp extends FlashbangApp {
         });
 
         ExternalInterface.pushContext(this._scriptInterface);
+    }
+
+    private initSolverEngines(): void {
+        log.info('Initializing solvers...');
+        SolverManager.instance.registerSolver(
+            'Ribotree',
+            () => RibotreeSolver.create(),
+            (domParent) => new RibotreeParams(domParent)
+        );
+        SolverManager.instance.registerSolver(
+            'CDSfold',
+            () => CDSfoldSolver.create(),
+            (domParent) => new CDSfoldParams(domParent)
+        );
     }
 
     private readonly _params: ProcessedEternaAppParams;
