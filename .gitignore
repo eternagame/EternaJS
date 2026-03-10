@@ -93,3 +93,4 @@ dist/
 /src/eterna/folding/engines/*.js
 /src/eterna/folding/engines/*.onnx
 /src/eterna/folding/engines/*.ort
+/src/eterna/folding/engines/*.whl

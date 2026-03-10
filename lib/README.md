@@ -69,6 +69,9 @@ are cloned into lib/LinearFold/LinearFold and lib/LinearFold/LinearPartition res
 	  git reset --hard 0b365e31d2436d426858ed70f931da4fdced2397
 	  ```
 
+* For Ribotree-mRNA, download v1.1.8 via https://eternagame.org/tech into the `ribotree` directory.
+    - The patch step (below) will add the Pyodide-compatible `arnie` bridge, async wrappers, and bundled DegScore files. 
+
 ## Apply Patches
 
 EternaJS maintains patchfiles with modifications to support our compilation and runtime processes as well as
@@ -86,3 +89,16 @@ To generate fresh diffs, make sure you have a fresh copy of the energy model (so
 ## Compiling RibonanzaNet
 * Set up a conda environment for RibonanzaNet: `conda env create -f RibonanzaNet/env.yml -p .venv && ./.venv/bin/pip install onnx==1.16.1`
 * Export the model as onnx via `./.venv/bin/python export_onnx.py`
+
+## Building Ribotree-mRNA
+* Ribotree-mRNA is packaged as a Python wheel and loaded at runtime via Pyodide's `micropip`. Building
+requires Python's `build` module. If it's not installed:
+```sh
+pip install build
+```
+* Then build the wheel:
+```sh
+cd Ribotree
+python -m build
+cp lib/Ribotree/dist/ribotree_pyodide-2.0.2-py3-none-any.whl src/eterna/folding/engines
+```
