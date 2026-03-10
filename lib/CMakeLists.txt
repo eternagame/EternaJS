@@ -29,3 +29,7 @@ endif()
 if (EXISTS "contrafold/contrafold")
 	add_subdirectory(contrafold)
 endif()
+
+if (EXISTS "CDSfold/CDSfold_SU")
+	add_subdirectory(CDSfold)
+endif()
