@@ -1,8 +1,8 @@
-diff --git CDSfold_SU/src/Problem.cpp CDSfold_SU/src/Problem.cpp
-index a7275d6..ea693d5 100644
---- CDSfold_SU/src/Problem.cpp
-+++ CDSfold_SU/src/Problem.cpp
-@@ -606,7 +606,7 @@ void Problem::calculate() {
+Binary files CDSfold_SU_stock/.git/index and CDSfold_SU/.git/index differ
+diff -X .gitignore -ur CDSfold_SU_stock/src/Problem.cpp CDSfold_SU/src/Problem.cpp
+--- CDSfold_SU_stock/src/Problem.cpp	2026-03-10 21:17:46.325789414 -0400
++++ CDSfold_SU/src/Problem.cpp	2026-03-10 17:29:48.365032261 -0400
+@@ -606,7 +606,7 @@
          exit(1);
      }
  
@@ -11,7 +11,7 @@ index a7275d6..ea693d5 100644
      string optseq(nuclen_ + 1, 'N');
      optseq[0] = ' ';
  
-@@ -1447,7 +1447,7 @@ void Problem::fill_F() {
+@@ -1447,7 +1447,7 @@
      }
  }
  
@@ -20,7 +20,7 @@ index a7275d6..ea693d5 100644
  
      int s = 0;
      int b = 0;
-@@ -1982,7 +1982,7 @@ OUTLOOP:
+@@ -1982,7 +1982,7 @@
      base_pair_[0].i = b; /* save the total number of base pairs */
  }
  
@@ -29,7 +29,7 @@ index a7275d6..ea693d5 100644
  
      std::mt19937 *genp = nullptr;
      if (options_.fixed_seed) {
-@@ -2565,7 +2565,7 @@ void Problem::fixed_backtrack(string const & optseq, bond *base_pair_, vector<in
+@@ -2565,7 +2565,7 @@
      int rtype[7] = {0, 2, 1, 4, 3, 6, 5};
      int s = 0;
      int b = 0;
@@ -38,11 +38,10 @@ index a7275d6..ea693d5 100644
      sector[++s].i = 1;
      sector[s].j = nuclen;
      sector[s].ml = 0;
-diff --git CDSfold_SU/src/Problem.hpp CDSfold_SU/src/Problem.hpp
-index b166800..323e063 100644
---- CDSfold_SU/src/Problem.hpp
-+++ CDSfold_SU/src/Problem.hpp
-@@ -21,7 +21,7 @@ using namespace std;
+diff -X .gitignore -ur CDSfold_SU_stock/src/Problem.hpp CDSfold_SU/src/Problem.hpp
+--- CDSfold_SU_stock/src/Problem.hpp	2026-03-10 21:17:46.325789414 -0400
++++ CDSfold_SU/src/Problem.hpp	2026-03-10 17:29:48.366286498 -0400
+@@ -21,7 +21,7 @@
  
  struct Options;
            
@@ -51,7 +50,7 @@ index b166800..323e063 100644
      int i;
      int j;
      int Li;
-@@ -34,7 +34,7 @@ using bond = struct bond {
+@@ -34,7 +34,7 @@
      int j;
  };
  
@@ -60,7 +59,7 @@ index b166800..323e063 100644
      for (int i = 0; i < 500; i++) {
          s[i].i = -INF;
          s[i].j = -INF;
-@@ -169,8 +169,8 @@ private:
+@@ -169,8 +169,8 @@
  
  
  

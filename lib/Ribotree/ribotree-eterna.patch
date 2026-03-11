@@ -1,8 +1,264 @@
-diff --git a/DegScore/DegScore.py b/DegScore/DegScore.py
-new file mode 100644
-index 0000000..4c1fec0
---- /dev/null
-+++ b/DegScore/DegScore.py
+diff -X .gitignore -urN ribotree_stock/arnie/bpps.py ribotree/arnie/bpps.py
+--- ribotree_stock/arnie/bpps.py	1969-12-31 19:00:00.000000000 -0500
++++ ribotree/arnie/bpps.py	2026-03-10 17:29:48.362507579 -0400
+@@ -0,0 +1,39 @@
++"""arnie.bpps — Base pair probability calculation via EternaJS bridge."""
++
++import numpy as np
++
++try:
++    import eternajs as _eternajs
++    _has_eternajs = True
++except ImportError:
++    _has_eternajs = False
++
++
++async def bpps(sequence, package='vienna', param_file=None, linear=False, T=37, **kwargs):
++    """
++    Base pair probability matrix via EternaJS folding engine bridge.
++
++    Returns:
++        numpy.ndarray of shape (N, N) with base pair probabilities.
++    """
++    if not _has_eternajs:
++        raise RuntimeError(
++            "arnie.bpps requires the EternaJS bridge. "
++            "Call pyodide.registerJsModule('eternajs', bridge) before importing ribotree."
++        )
++
++    result = await _eternajs.bpps(sequence, package)
++    result_dict = result.to_py() if hasattr(result, 'to_py') else dict(result)
++    probs = result_dict.get('probabilities', [])
++    length = result_dict.get('length', len(sequence))
++
++    matrix = np.zeros((length, length))
++    idx = 0
++    for i in range(length):
++        for j in range(i, length):
++            if idx < len(probs):
++                matrix[i, j] = probs[idx]
++                matrix[j, i] = probs[idx]
++                idx += 1
++
++    return matrix
+diff -X .gitignore -urN ribotree_stock/arnie/free_energy.py ribotree/arnie/free_energy.py
+--- ribotree_stock/arnie/free_energy.py	1969-12-31 19:00:00.000000000 -0500
++++ ribotree/arnie/free_energy.py	2026-03-10 17:29:48.362529348 -0400
+@@ -0,0 +1,31 @@
++"""arnie.free_energy — Free energy calculation via EternaJS bridge."""
++
++try:
++    import eternajs as _eternajs
++    _has_eternajs = True
++except ImportError:
++    _has_eternajs = False
++
++
++def free_energy(sequence, package='eternafold', constraint=None, T=37,
++                linear=False, param_file=None, **kwargs):
++    """
++    Free energy calculation via EternaJS folding engine bridge.
++
++    Args:
++        constraint: Optional dot-bracket structure for constrained evaluation.
++                    If None, returns the MFE (unconstrained) free energy.
++    """
++    if not _has_eternajs:
++        raise RuntimeError(
++            "arnie.free_energy requires the EternaJS bridge. "
++            "Call pyodide.registerJsModule('eternajs', bridge) before importing ribotree."
++        )
++
++    if constraint is None:
++        result = _eternajs.mfe(sequence, package)
++        result_dict = result.to_py() if hasattr(result, 'to_py') else dict(result)
++        return result_dict.get('energy', 0.0)
++
++    result = _eternajs.freeEnergy(sequence, constraint, package)
++    return float(result) if result else 0.0
+diff -X .gitignore -urN ribotree_stock/arnie/__init__.py ribotree/arnie/__init__.py
+--- ribotree_stock/arnie/__init__.py	1969-12-31 19:00:00.000000000 -0500
++++ ribotree/arnie/__init__.py	2026-03-10 17:29:48.362311037 -0400
+@@ -0,0 +1 @@
++"""Stub arnie module - provides empty implementations of arnie functions."""
+diff -X .gitignore -urN ribotree_stock/arnie/mfe.py ribotree/arnie/mfe.py
+--- ribotree_stock/arnie/mfe.py	1969-12-31 19:00:00.000000000 -0500
++++ ribotree/arnie/mfe.py	2026-03-10 17:29:48.362549824 -0400
+@@ -0,0 +1,32 @@
++"""arnie.mfe — MFE structure prediction via EternaJS bridge."""
++
++try:
++    import eternajs as _eternajs
++    _has_eternajs = True
++except ImportError:
++    _has_eternajs = False
++
++
++async def mfe(sequence, package='vienna', constraint=None, viterbi=False,
++        linear=False, return_dG_MFE=False, param_file=None, T=37, **kwargs):
++    """
++    Minimum free energy structure prediction via EternaJS folding engine bridge.
++
++    Returns:
++        - If return_dG_MFE=False: dot-bracket structure string
++        - If return_dG_MFE=True: tuple of (structure string, dG float)
++    """
++    if not _has_eternajs:
++        raise RuntimeError(
++            "arnie.mfe requires the EternaJS bridge. "
++            "Call pyodide.registerJsModule('eternajs', bridge) before importing ribotree."
++        )
++
++    result = await _eternajs.mfe(sequence, package)
++    result_dict = result.to_py() if hasattr(result, 'to_py') else dict(result)
++    structure = result_dict.get('structure', '.' * len(sequence))
++    energy = result_dict.get('energy', 0.0)
++
++    if return_dG_MFE:
++        return structure, energy
++    return structure
+diff -X .gitignore -urN ribotree_stock/arnie/pfunc.py ribotree/arnie/pfunc.py
+--- ribotree_stock/arnie/pfunc.py	1969-12-31 19:00:00.000000000 -0500
++++ ribotree/arnie/pfunc.py	2026-03-10 17:29:48.362570920 -0400
+@@ -0,0 +1,10 @@
++"""Stub implementation of arnie.pfunc module."""
++
++
++def pfunc(sequence, package='vienna', linear=False, **kwargs):
++    """
++    Stub function for partition function calculation.
++    """
++    raise RuntimeError(
++        "arnie.pfunc hasn't been ported to the EternaJS bridge. "
++    )
+\ No newline at end of file
+diff -X .gitignore -urN ribotree_stock/arnie/utils.py ribotree/arnie/utils.py
+--- ribotree_stock/arnie/utils.py	1969-12-31 19:00:00.000000000 -0500
++++ ribotree/arnie/utils.py	2026-03-10 17:29:48.362589821 -0400
+@@ -0,0 +1,28 @@
++"""Stub implementation of arnie.utils module."""
++
++
++def get_expected_accuracy(structure, bpm, mode='mcc', **kwargs):
++    """
++    Stub function for expected accuracy calculation.
++
++    Returns a float value (stub returns 0.0).
++    """
++    return 0.0
++
++
++def get_mean_base_pair_propensity(structure, **kwargs):
++    """
++    Stub function for mean base pair propensity calculation.
++
++    Returns a float value (stub returns 0.0).
++    """
++    return 0.0
++
++
++def load_package_locations(DEBUG=False, **kwargs):
++    """
++    Stub function for loading package locations.
++
++    Returns an empty dictionary.
++    """
++    return {}
+diff -X .gitignore -urN ribotree_stock/DegScore/assign_loop_type.py ribotree/DegScore/assign_loop_type.py
+--- ribotree_stock/DegScore/assign_loop_type.py	1969-12-31 19:00:00.000000000 -0500
++++ ribotree/DegScore/assign_loop_type.py	2026-03-10 17:29:48.362311037 -0400
+@@ -0,0 +1,87 @@
++import numpy as np
++import re
++
++def convert_structure_to_bps(secstruct):
++
++    bps = []
++
++    left_delimiters = ['(','{','[']
++    right_delimiters = [')','}',']']
++
++    for (left_delim, right_delim) in list(zip(left_delimiters, right_delimiters)):
++
++        left_list = []
++        for i, char in enumerate(secstruct):
++            if char == left_delim:
++                left_list.append(i)
++
++            elif char == right_delim:
++                bps.append([left_list[-1],i])
++                left_list = left_list[:-1]
++
++        assert len(left_list)==0
++
++    return bps
++
++def secstruct_to_partner(secstruct):
++    '''Convert secondary structure string to partner array.
++    I.E. ((.)) -> [4,3,-1,1,0]
++    '''
++    bps = convert_structure_to_bps(secstruct)
++    partner_vec = -1*np.ones([len(secstruct)]) 
++
++    for (i,j) in bps:
++        partner_vec[i] = j
++        partner_vec[j] = i
++
++    return partner_vec
++
++def write_loop_assignments(dbn_string):
++    '''Input: dot-parenthesis string
++    Output: bpRNA-style loop type assignments'''
++    
++    pair_partners = secstruct_to_partner(dbn_string)
++    
++    #print(pair_partners)
++    bprna_string=['u']*len(dbn_string)
++
++    # assign stems
++    for s_ind, s in enumerate(dbn_string):
++        if s != '.':
++            bprna_string[s_ind] = 'S'
++                
++    # get loop regions
++    
++    while 'u' in ''.join(bprna_string):
++        #print(''.join(bprna_string))
++
++        obj = re.search(r"uu*", ''.join(bprna_string))
++        start_ind, end_ind = obj.start(), obj.end()
++        
++        n_open_hps = dbn_string[:start_ind].count(')') - dbn_string[:start_ind].count('(')
++        
++        if n_open_hps == 0:
++            bprna_string[start_ind:end_ind] = 'E'*(end_ind-start_ind)
++
++        else:
++
++            last_stem_pairing = int(pair_partners[start_ind - 1])
++            next_stem_pairing = int(pair_partners[end_ind ])
++            
++            if last_stem_pairing == end_ind:
++                bprna_string[start_ind:end_ind] = 'H'*(end_ind-start_ind)
++
++            elif (last_stem_pairing - 1 == next_stem_pairing):
++                bprna_string[start_ind:end_ind] = 'B'*(end_ind-start_ind)
++                
++            elif dbn_string[start_ind-1]==')' and dbn_string[end_ind]=='(':
++                bprna_string[start_ind:end_ind] = 'M'*(end_ind-start_ind)
++                
++            else:
++                if dbn_string[next_stem_pairing+1:last_stem_pairing] == '.'*(last_stem_pairing - next_stem_pairing-1):
++                    bprna_string[start_ind:end_ind] = 'I'*(end_ind-start_ind)
++                    bprna_string[next_stem_pairing+1:last_stem_pairing] = 'I'*(last_stem_pairing - next_stem_pairing-1)
++
++                else:
++                    bprna_string[start_ind:end_ind] = 'M'*(end_ind - start_ind)
++    return ''.join(bprna_string)
+\ No newline at end of file
+diff -X .gitignore -urN ribotree_stock/DegScore/DegScore.py ribotree/DegScore/DegScore.py
+--- ribotree_stock/DegScore/DegScore.py	1969-12-31 19:00:00.000000000 -0500
++++ ribotree/DegScore/DegScore.py	2026-03-10 17:29:48.361032265 -0400
 @@ -0,0 +1,156 @@
 +import numpy as np
 +import sys, os
@@ -161,11 +417,9 @@ index 0000000..4c1fec0
 +                start_ind=start_ind, end_ind=end_ind, linear=linear,
 +                coefficients=coefficients, intercept=intercept)
 \ No newline at end of file
-diff --git a/DegScore/__init__.py b/DegScore/__init__.py
-new file mode 100644
-index 0000000..c0c1033
---- /dev/null
-+++ b/DegScore/__init__.py
+diff -X .gitignore -urN ribotree_stock/DegScore/__init__.py ribotree/DegScore/__init__.py
+--- ribotree_stock/DegScore/__init__.py	1969-12-31 19:00:00.000000000 -0500
++++ ribotree/DegScore/__init__.py	2026-03-10 17:29:48.362289529 -0400
 @@ -0,0 +1,5 @@
 +"""DegScore module for RNA degradation score calculation."""
 +
@@ -173,105 +427,145 @@ index 0000000..c0c1033
 +
 +__all__ = ['DegScore']
 \ No newline at end of file
-diff --git a/DegScore/assign_loop_type.py b/DegScore/assign_loop_type.py
-new file mode 100644
-index 0000000..6af0f5a
---- /dev/null
-+++ b/DegScore/assign_loop_type.py
-@@ -0,0 +1,87 @@
-+import numpy as np
-+import re
+diff -X .gitignore -urN ribotree_stock/DegScore/LICENSE ribotree/DegScore/LICENSE
+--- ribotree_stock/DegScore/LICENSE	1969-12-31 19:00:00.000000000 -0500
++++ ribotree/DegScore/LICENSE	2026-03-10 18:29:10.032583845 -0400
+@@ -0,0 +1,21 @@
++MIT License
 +
-+def convert_structure_to_bps(secstruct):
++Copyright (c) 2020 Leland Stanford Junior University
 +
-+    bps = []
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
 +
-+    left_delimiters = ['(','{','[']
-+    right_delimiters = [')','}',']']
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
 +
-+    for (left_delim, right_delim) in list(zip(left_delimiters, right_delimiters)):
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
+diff -X .gitignore -urN ribotree_stock/domain.py ribotree/domain.py
+--- ribotree_stock/domain.py	2026-03-10 18:31:41.364320987 -0400
++++ ribotree/domain.py	2026-03-10 17:29:48.362589821 -0400
+@@ -1,5 +1,5 @@
+ import copy
+-import utils_domain as ud
++from . import utils_domain as ud
+ 
+ RNA_BASES = set('ACGU')
+ DNA_BASES = set('ACGT')
+diff -X .gitignore -urN ribotree_stock/evaluate.py ribotree/evaluate.py
+--- ribotree_stock/evaluate.py	2026-03-10 18:31:41.364527174 -0400
++++ ribotree/evaluate.py	2026-03-10 21:09:07.088104482 -0400
+@@ -1,9 +1,9 @@
+ from itertools import chain, combinations
+ import numpy as np
+ import re
+-from arnie.pfunc import pfunc
+-from arnie.free_energy import free_energy
+-import utils_features as uf
++from .arnie.pfunc import pfunc
++from .arnie.free_energy import free_energy
++from . import utils_features as uf
+ import pickle
+ 
+ # Set limit for printing floats
+@@ -12,7 +12,7 @@
+ # GLOBAL CONSTANTS:
+ DELTA_PROB = 1e-100 # offset to preservevent log(0) when probability is 0
+ 
+-def mrna_score_func(seq, RNA_seq, condition, package, dna=False, Temp=37, linearfold=False, mod_U=False, **kwargs):
++async def mrna_score_func(seq, RNA_seq, condition, package, dna=False, Temp=37, linearfold=False, mod_U=False, **kwargs):
+     """ Returns a float that represents the score of the sequence """
+ 
+     # Calculate dG
+@@ -44,7 +44,7 @@
+             else:
+                 ss_constraint = RNA_seq.get_ss_open()
+                 feature = condition_key.split('.')[0]
+-                feature_value = uf.get_feature_value(seq, ss_constraint, feature, package, param_file, linearfold, RNA_seq, mod_U=mod_U)
++                feature_value = await uf.get_feature_value(seq, ss_constraint, feature, package, param_file, linearfold, RNA_seq, mod_U=mod_U)
+                 dG = feature_value
+ 
+             if condition_value is None:
+@@ -64,12 +64,12 @@
+     constraint_float.append(total_dG)
+     return [constraint_binary], [constraint_float], [prob_list]
+ 
+-def ensemble_score_func(args_d, RNA_seq = None, seq = ''):
++async def ensemble_score_func(args_d, RNA_seq=None, seq=''):
+     """ returns an ensemble score of a sequence using NUPACK to test different conditions """
+ 
+     if RNA_seq:
+         seq = RNA_seq.get_seq()
+-    return mrna_score_func(seq, RNA_seq, **args_d)
++    return await mrna_score_func(seq, RNA_seq, **args_d)
+ 
+ #-----------------------------------------------------------------------------------
+ 
+diff -X .gitignore -urN ribotree_stock/.git/gk/config ribotree/.git/gk/config
+--- ribotree_stock/.git/gk/config	1969-12-31 19:00:00.000000000 -0500
++++ ribotree/.git/gk/config	2026-03-10 18:08:59.408084652 -0400
+@@ -0,0 +1,2 @@
++[branch "master"]
++	gk-last-accessed = 2026-03-10T22:08:59.375Z
+diff -X .gitignore -urN ribotree_stock/.git/ORIG_HEAD ribotree/.git/ORIG_HEAD
+--- ribotree_stock/.git/ORIG_HEAD	1969-12-31 19:00:00.000000000 -0500
++++ ribotree/.git/ORIG_HEAD	2026-03-10 17:20:12.222569567 -0400
+@@ -0,0 +1 @@
++56f4ba2e2ca3857690506b3c0e9c49ce269c780e
+diff -X .gitignore -urN ribotree_stock/__init__.py ribotree/__init__.py
+--- ribotree_stock/__init__.py	1969-12-31 19:00:00.000000000 -0500
++++ ribotree/__init__.py	2026-03-10 17:29:48.362311037 -0400
+@@ -0,0 +1,22 @@
++"""
++Ribotree-MCTS: Monte Carlo Tree Search for RNA sequence design
++Pyodide-compatible package for browser-based RNA sequence optimization
++"""
 +
-+        left_list = []
-+        for i, char in enumerate(secstruct):
-+            if char == left_delim:
-+                left_list.append(i)
++from .MCTS_class import MCTS, MC_iteration, MC_search
++from .Tree import Tree
++from .Node import Node
++from .RNA_Sequence import RNA_Sequence
++from .evaluate import ensemble_score_func, ensemble_score_comparison
 +
-+            elif char == right_delim:
-+                bps.append([left_list[-1],i])
-+                left_list = left_list[:-1]
-+
-+        assert len(left_list)==0
-+
-+    return bps
-+
-+def secstruct_to_partner(secstruct):
-+    '''Convert secondary structure string to partner array.
-+    I.E. ((.)) -> [4,3,-1,1,0]
-+    '''
-+    bps = convert_structure_to_bps(secstruct)
-+    partner_vec = -1*np.ones([len(secstruct)]) 
-+
-+    for (i,j) in bps:
-+        partner_vec[i] = j
-+        partner_vec[j] = i
-+
-+    return partner_vec
-+
-+def write_loop_assignments(dbn_string):
-+    '''Input: dot-parenthesis string
-+    Output: bpRNA-style loop type assignments'''
-+    
-+    pair_partners = secstruct_to_partner(dbn_string)
-+    
-+    #print(pair_partners)
-+    bprna_string=['u']*len(dbn_string)
-+
-+    # assign stems
-+    for s_ind, s in enumerate(dbn_string):
-+        if s != '.':
-+            bprna_string[s_ind] = 'S'
-+                
-+    # get loop regions
-+    
-+    while 'u' in ''.join(bprna_string):
-+        #print(''.join(bprna_string))
-+
-+        obj = re.search(r"uu*", ''.join(bprna_string))
-+        start_ind, end_ind = obj.start(), obj.end()
-+        
-+        n_open_hps = dbn_string[:start_ind].count(')') - dbn_string[:start_ind].count('(')
-+        
-+        if n_open_hps == 0:
-+            bprna_string[start_ind:end_ind] = 'E'*(end_ind-start_ind)
-+
-+        else:
-+
-+            last_stem_pairing = int(pair_partners[start_ind - 1])
-+            next_stem_pairing = int(pair_partners[end_ind ])
-+            
-+            if last_stem_pairing == end_ind:
-+                bprna_string[start_ind:end_ind] = 'H'*(end_ind-start_ind)
-+
-+            elif (last_stem_pairing - 1 == next_stem_pairing):
-+                bprna_string[start_ind:end_ind] = 'B'*(end_ind-start_ind)
-+                
-+            elif dbn_string[start_ind-1]==')' and dbn_string[end_ind]=='(':
-+                bprna_string[start_ind:end_ind] = 'M'*(end_ind-start_ind)
-+                
-+            else:
-+                if dbn_string[next_stem_pairing+1:last_stem_pairing] == '.'*(last_stem_pairing - next_stem_pairing-1):
-+                    bprna_string[start_ind:end_ind] = 'I'*(end_ind-start_ind)
-+                    bprna_string[next_stem_pairing+1:last_stem_pairing] = 'I'*(last_stem_pairing - next_stem_pairing-1)
-+
-+                else:
-+                    bprna_string[start_ind:end_ind] = 'M'*(end_ind - start_ind)
-+    return ''.join(bprna_string)
-\ No newline at end of file
-diff --git a/MCTS_class.py b/MCTS_class.py
-index 5ad5ee6..5e647a9 100644
---- a/MCTS_class.py
-+++ b/MCTS_class.py
-@@ -3,12 +3,13 @@ import networkx as nx
++__version__ = "1.0.0-pyodide"
++__all__ = [
++    "MCTS",
++    "MC_iteration",
++    "MC_search",
++    "Tree",
++    "Node",
++    "RNA_Sequence",
++    "ensemble_score_func",
++    "ensemble_score_comparison"
++]
+diff -X .gitignore -urN ribotree_stock/init_starting_RNA_Sequence.py ribotree/init_starting_RNA_Sequence.py
+--- ribotree_stock/init_starting_RNA_Sequence.py	2026-03-10 18:31:41.373524917 -0400
++++ ribotree/init_starting_RNA_Sequence.py	2026-03-10 17:29:48.362589821 -0400
+@@ -1,8 +1,8 @@
+ import numpy as np
+ import random
+ import re
+-from RNA_Sequence import *
+-from utils_sequence import *
++from .RNA_Sequence import *
++from .utils_sequence import *
+ 
+ 
+ RNA_BASES = set('ACGU')
+diff -X .gitignore -urN ribotree_stock/MCTS_class.py ribotree/MCTS_class.py
+--- ribotree_stock/MCTS_class.py	2026-03-10 18:31:41.363528321 -0400
++++ ribotree/MCTS_class.py	2026-03-10 20:54:19.517850007 -0400
+@@ -3,12 +3,13 @@
  import numpy as np
  import pandas as pd
  import random
@@ -290,7 +584,7 @@ index 5ad5ee6..5e647a9 100644
  
  RNA_BASES = set('ACGU')
  DNA_BASES = set('ACGT')
-@@ -16,7 +17,7 @@ DNA_BASES = set('ACGT')
+@@ -16,7 +17,7 @@
  
  # functions for the Monte Carlo Tree Search Algorithm
  
@@ -299,22 +593,7 @@ index 5ad5ee6..5e647a9 100644
      """ Runs a MCTS to search for sequences
  
      Args:
-@@ -31,12 +32,12 @@ def MCTS(args_d):
-             0 -> depth
-             inf -> breathd
-         r_round: Specified which DMSSD round
--        num_shuffle: Number of segments to shuffle when shufflings the segment 
-+        num_shuffle: Number of segments to shuffle when shufflings the segment
-             order
-         shuffle_prob: The probability that the segments will be shuffled
-             Units in decimal (0.5 == 50%)
-         constant_length: Whether to preserve the length of each segment
--        verbose: To print everything for debugging    
-+        verbose: To print everything for debugging
-     """
- 
-     n_children = args_d['n_children']
-@@ -44,12 +45,12 @@ def MCTS(args_d):
+@@ -44,12 +45,12 @@
  
      # generate starting point
      tree = Tree(args_d)
@@ -324,14 +603,13 @@ index 5ad5ee6..5e647a9 100644
 +    child, solution = await tree.add_children()
  
      # save starting point
--    MC_results = save_node(root, MC_results = [])
+     MC_results = save_node(root, MC_results = [])
 -    save_results(args_d, root, root, MC_results, save_full=False)
-+    MC_results = save_node(root, MC_results=[])
 +    await save_results(args_d, root, root, MC_results, save_full=False)
  
      best_leaf = root # Keep track of best solution so far
      for i in range(args_d['n_iter']):
-@@ -60,7 +61,7 @@ def MCTS(args_d):
+@@ -60,7 +61,7 @@
          # 2: Node expansion
          # if leaf has never been visited before rollout/simulation
          # else create children and then pick a random child for rollout/simulation
@@ -340,21 +618,7 @@ index 5ad5ee6..5e647a9 100644
          MC_results = save_node(leaf, MC_results)
  
          if solution:
-@@ -75,7 +76,7 @@ def MCTS(args_d):
- 
-         # 5: beam prune
-         if C > 0 and args_d['beam']:
--            tree.beam_prune(beam = n_children+1)  # TODO: maybe allow for option of different beam sizes
-+            tree.beam_prune(beam=n_children+1)  # TODO: maybe allow for option of different beam sizes
- 
-         # Update best leaf found thus far
-         # Lower dG is better
-@@ -84,16 +85,16 @@ def MCTS(args_d):
-             print('Current best node:', best_leaf.get_node_status())
- 
-         # Plot result and print result
--        if args_d['plot'] and (i % n_children)==0:
-+        if args_d['plot'] and (i % n_children) == 0:
+@@ -88,12 +89,12 @@
              plot_MC(root)
          if (i+1) % args_d['stride'] == 0:
              print(f"Iteration: {i+1}. Saving.")
@@ -371,7 +635,7 @@ index 5ad5ee6..5e647a9 100644
  
  def MC_move(RNA_seq_new, cur_id, args_d, cur_id_category, cur_id_options, preserve_list):
      # Mutate the segment using a strategy
-@@ -237,7 +238,7 @@ def compile_MC_result(RNA_seq, ensemble_score, accept, move = 'start', MC_result
+@@ -237,7 +238,7 @@
      else:
          return MC_result_temp
  
@@ -380,7 +644,7 @@ index 5ad5ee6..5e647a9 100644
      """ performs a Monte Carlo (MC) search around the given sequence 
      
      Args:
-@@ -277,7 +278,7 @@ def MC_iteration(RNA_seq, n_iter, verbose=False):
+@@ -277,7 +278,7 @@
              seq_set.add(RNA_seq_new.get_seq())
  
          # Calculate the score of the new sequence
@@ -389,10 +653,9 @@ index 5ad5ee6..5e647a9 100644
          RNA_seq_new.store_score(ensemble_score_new)
  
          # Accept or Reject new result
-diff --git a/Node.py b/Node.py
-index 79bf845..0ca9901 100644
---- a/Node.py
-+++ b/Node.py
+diff -X .gitignore -urN ribotree_stock/Node.py ribotree/Node.py
+--- ribotree_stock/Node.py	2026-03-10 18:31:41.363637766 -0400
++++ ribotree/Node.py	2026-03-10 17:29:48.362311037 -0400
 @@ -1,6 +1,6 @@
  import numpy as np
  import pandas as pd
@@ -401,85 +664,9 @@ index 79bf845..0ca9901 100644
  
  
  rt = 1.987e-3*310 # for calcualting probabilities from delta G
-diff --git a/RNA_Sequence.py b/RNA_Sequence.py
-index 159dad0..bb38203 100644
---- a/RNA_Sequence.py
-+++ b/RNA_Sequence.py
-@@ -1,10 +1,9 @@
- import copy
- import numpy as np
--import utils_sequence as us
--from arnie.bpps import bpps
--from arnie.mfe import mfe
--from RiboGraphViz import RGV
--from utils_features import calc_cai
-+from . import utils_sequence as us
-+from .arnie.bpps import bpps
-+from .arnie.mfe import mfe
-+from .utils_features import calc_cai
- 
- class RNA_Sequence(object):
-     """ object to represent the RNA sequence for monte carlo searching
-@@ -36,7 +35,6 @@ class RNA_Sequence(object):
-         self.mfe = None
-         self.dG_MFE = None
-         self.mfe_ss_constraint = None
--        self.RGV = None
- 
-     def check_ratio_mode(self):
-         return self.args_d['ratio']
-@@ -57,7 +55,7 @@ class RNA_Sequence(object):
-     def get_args_d(self):
-         return self.args_d
- 
--    def get_bpm(self):
-+    async def get_bpm(self):
-         # Assumes package, param_file, linear doesn't change
-         if self.bpm is None:
-             dna = self.args_d['dna']
-@@ -65,32 +63,22 @@ class RNA_Sequence(object):
-                 param_file = 'DNA'
-             else:
-                 param_file = None
--            self.bpm = bpps(self.get_seq(), package=self.args_d['package'], 
--                param_file=param_file, 
-+            self.bpm = await bpps(self.get_seq(), package=self.args_d['package'],
-+                param_file=param_file,
-                 linear=self.args_d['linearfold'])
-         return self.bpm
- 
-     def get_category(self, domain_name):
-         return self.args_d['domain'][domain_name].get_category()
- 
--    def get_RGV(self):
--        #if self.RGV is None:
--        #    self.RGV = RGV(self.get_mfe())
--        self.RGV = RGV(self.get_mfe())
--        self.RGV.run_structure_properties()
--
--        return self.RGV
--
--    def get_dG_MFE(self):
-+    async def get_dG_MFE(self):
-         if self.dG_MFE is None:
--            self.mfe, self.dG_MFE = mfe(self.get_seq(), package=self.args_d['package'], linear=True, return_dG_MFE = True)
-+            self.mfe, self.dG_MFE = await mfe(self.get_seq(), package=self.args_d['package'], linear=True, return_dG_MFE=True)
-         return self.dG_MFE
- 
--    def get_mfe(self, ss_constraint=None):
-+    async def get_mfe(self, ss_constraint=None):
-         if self.mfe is None or (self.mfe_ss_constraint != ss_constraint and ss_constraint is not None):
--
--            self.mfe, self.dG_MFE = mfe(self.get_seq(), package=self.args_d['package'], linear=True, return_dG_MFE = True)
--
-+            self.mfe, self.dG_MFE = await mfe(self.get_seq(), package=self.args_d['package'], linear=True, return_dG_MFE=True)
-             self.mfe_ss_constraint = ss_constraint
-         return self.mfe
- 
-diff --git a/RNA_sequence_mutations.py b/RNA_sequence_mutations.py
-index 4d98c83..d0b56a5 100644
---- a/RNA_sequence_mutations.py
-+++ b/RNA_sequence_mutations.py
+diff -X .gitignore -urN ribotree_stock/RNA_sequence_mutations.py ribotree/RNA_sequence_mutations.py
+--- ribotree_stock/RNA_sequence_mutations.py	2026-03-10 18:31:41.364037263 -0400
++++ ribotree/RNA_sequence_mutations.py	2026-03-10 17:29:48.362311037 -0400
 @@ -1,13 +1,13 @@
  import numpy as np
  import random
@@ -500,7 +687,7 @@ index 4d98c83..d0b56a5 100644
  
  RNA_BASES = set('ACGU')
  DNA_BASES = set('ACGT')
-@@ -214,63 +214,63 @@ def mutate_fragment(RNA_seq, seg_id, constant_length, preserve_seq, num_mutate=1
+@@ -214,63 +214,63 @@
              RNA_seq, move = mutate_edge_len(RNA_seq, seg_id, preserve_seq, DNA=DNA)
      return RNA_seq, f"({i+1}){move}"
  
@@ -551,12 +738,6 @@ index 4d98c83..d0b56a5 100644
 -#     frag_len = {}
 -#     for x in RNA_seq.seg_order:
 -#         frag_len[x] = len(RNA_seq.RNA_frag[x])
--
--#     RNA_frag_temp, seg_order_temp = generate_simple_seq(seg_order_start = RNA_seq.seg_order,
--#         frag_len_start = frag_len, **args_d)
--
--#     length = len(RNA_seq.RNA_frag[seg_id])
--#     new_frag = match_seq_len(RNA_frag_temp[seg_id], length, DNA=args_d['dna']) # Turn the sequence into the proper length
 +def mutate_seq(RNA_seq, seg_id, DNA=False):
 +    """ mutates the sequence of a RNA segment """
 +    if DNA:
@@ -604,10 +785,14 @@ index 4d98c83..d0b56a5 100644
 +    frag_len = {}
 +    for x in RNA_seq.seg_order:
 +        frag_len[x] = len(RNA_seq.RNA_frag[x])
-+
+ 
+-#     RNA_frag_temp, seg_order_temp = generate_simple_seq(seg_order_start = RNA_seq.seg_order,
+-#         frag_len_start = frag_len, **args_d)
 +    RNA_frag_temp, seg_order_temp = generate_simple_seq(seg_order_start = RNA_seq.seg_order,
 +        frag_len_start = frag_len, **args_d)
-+
+ 
+-#     length = len(RNA_seq.RNA_frag[seg_id])
+-#     new_frag = match_seq_len(RNA_frag_temp[seg_id], length, DNA=args_d['dna']) # Turn the sequence into the proper length
 +    length = len(RNA_seq.RNA_frag[seg_id])
 +    new_frag = match_seq_len(RNA_frag_temp[seg_id], length, DNA=args_d['dna']) # Turn the sequence into the proper length
      
@@ -624,10 +809,194 @@ index 4d98c83..d0b56a5 100644
 +    #RNA_seq.RNA_frag[seg_id] = mutate_edge(RNA_seq.RNA_frag[seg_id])
 +    return RNA_seq, 'Swap:{}'.format(seg_id)
 \ No newline at end of file
-diff --git a/Tree.py b/Tree.py
-index 1d77755..b00fbb0 100644
---- a/Tree.py
-+++ b/Tree.py
+diff -X .gitignore -urN ribotree_stock/RNA_Sequence.py ribotree/RNA_Sequence.py
+--- ribotree_stock/RNA_Sequence.py	2026-03-10 18:31:41.363782068 -0400
++++ ribotree/RNA_Sequence.py	2026-03-10 17:29:48.362311037 -0400
+@@ -1,10 +1,9 @@
+ import copy
+ import numpy as np
+-import utils_sequence as us
+-from arnie.bpps import bpps
+-from arnie.mfe import mfe
+-from RiboGraphViz import RGV
+-from utils_features import calc_cai
++from . import utils_sequence as us
++from .arnie.bpps import bpps
++from .arnie.mfe import mfe
++from .utils_features import calc_cai
+ 
+ class RNA_Sequence(object):
+     """ object to represent the RNA sequence for monte carlo searching
+@@ -36,7 +35,6 @@
+         self.mfe = None
+         self.dG_MFE = None
+         self.mfe_ss_constraint = None
+-        self.RGV = None
+ 
+     def check_ratio_mode(self):
+         return self.args_d['ratio']
+@@ -57,7 +55,7 @@
+     def get_args_d(self):
+         return self.args_d
+ 
+-    def get_bpm(self):
++    async def get_bpm(self):
+         # Assumes package, param_file, linear doesn't change
+         if self.bpm is None:
+             dna = self.args_d['dna']
+@@ -65,32 +63,22 @@
+                 param_file = 'DNA'
+             else:
+                 param_file = None
+-            self.bpm = bpps(self.get_seq(), package=self.args_d['package'], 
+-                param_file=param_file, 
++            self.bpm = await bpps(self.get_seq(), package=self.args_d['package'],
++                param_file=param_file,
+                 linear=self.args_d['linearfold'])
+         return self.bpm
+ 
+     def get_category(self, domain_name):
+         return self.args_d['domain'][domain_name].get_category()
+ 
+-    def get_RGV(self):
+-        #if self.RGV is None:
+-        #    self.RGV = RGV(self.get_mfe())
+-        self.RGV = RGV(self.get_mfe())
+-        self.RGV.run_structure_properties()
+-
+-        return self.RGV
+-
+-    def get_dG_MFE(self):
++    async def get_dG_MFE(self):
+         if self.dG_MFE is None:
+-            self.mfe, self.dG_MFE = mfe(self.get_seq(), package=self.args_d['package'], linear=True, return_dG_MFE = True)
++            self.mfe, self.dG_MFE = await mfe(self.get_seq(), package=self.args_d['package'], linear=True, return_dG_MFE=True)
+         return self.dG_MFE
+ 
+-    def get_mfe(self, ss_constraint=None):
++    async def get_mfe(self, ss_constraint=None):
+         if self.mfe is None or (self.mfe_ss_constraint != ss_constraint and ss_constraint is not None):
+-
+-            self.mfe, self.dG_MFE = mfe(self.get_seq(), package=self.args_d['package'], linear=True, return_dG_MFE = True)
+-
++            self.mfe, self.dG_MFE = await mfe(self.get_seq(), package=self.args_d['package'], linear=True, return_dG_MFE=True)
+             self.mfe_ss_constraint = ss_constraint
+         return self.mfe
+ 
+diff -X .gitignore -urN ribotree_stock/save_results.py ribotree/save_results.py
+--- ribotree_stock/save_results.py	2026-03-10 18:31:41.381786800 -0400
++++ ribotree/save_results.py	2026-03-10 17:29:48.362589821 -0400
+@@ -1,11 +1,17 @@
+ import csv
++import json
+ import numpy as np
+ import pandas as pd
+-import time
+-from plot_tree import plot_pickle_save
++from .plot_tree import plot_pickle_save
+ import os
+-from utils_features import calc_cai
+-from DegScore import DegScore
++from .utils_features import calc_cai
++from .DegScore import DegScore
++
++try:
++    from js import postMessage as _js_postMessage
++    _has_postmessage = True
++except ImportError:
++    _has_postmessage = False
+ 
+ def append_full_sequence(df, constant_5_prime, constant_3_prime):
+     idx = df.columns.get_loc("Accept") + 1 # insert after "Accept"
+@@ -14,67 +20,28 @@
+     df.insert(idx, 'Sequence', sequence)
+     return df
+ 
+-def save_results(args_d, root, sol_node, MC_results, save_full=True):
++async def save_results(args_d, root, sol_node, MC_results, save_full=True):
++    await save_best_MC_results_to_csv(sol_node, args_d)
+ 
+-    if save_full:
+-        full_outfile = _generate_outfile_name(args_d, 'FULL', timestamp=False)
+-        save_full_MC_results_to_csv(root, sol_node, args_d, full_outfile, MC_results)
+-
+-    best_outfile = _generate_outfile_name(args_d, 'RUNNING_BEST', timestamp=False)
+-    save_best_MC_results_to_csv(sol_node, args_d, best_outfile)
+-
+-def save_best_MC_results_to_csv(sol_node, args_d, outfile):
+-    """ saves the Monte Carlo results as a tab-delimited txt """
+-    MC_results = save_node(sol_node, MC_results = [])
+-
+-    #print('saving best result\n')
+-    column_headers = _compile_column_headers(args_d, sol_node, IDs = True)
+-
+-    # Appending 5' and 3' prime sequences
+-    c5prime = sol_node.RNA_seq.c5prime
+-    c3prime = sol_node.RNA_seq.c3prime
+-    #sequence = MC_results[0][2]
++async def save_best_MC_results_to_csv(sol_node, args_d):
++    """ Saves best result and posts a progress update to the main thread. """
+     sequence = sol_node.RNA_seq.get_seq()
+-    #if sequence != MC_results[0][2]:
+-    #    print('sequence was,',sequence,'MC_results[0][2] was,',MC_results[0][2])
+-
+-    bp_matrix = sol_node.RNA_seq.get_bpm()
+-    mfe_struct = sol_node.RNA_seq.get_mfe()
+-    RiboGraphViz = sol_node.RNA_seq.get_RGV()
+-
+-    AUP = np.mean(1 - np.sum(bp_matrix, axis=0))
+-    AUP_init14 = np.mean(1 - np.sum(bp_matrix, axis=0)[:14])
+-
+-    #full_sequence = c5prime+sequence+c3prime
+-    degscore_mdl = DegScore(sequence, structure=mfe_struct, mask_U=args_d['mod_U'])
++    mfe_struct = await sol_node.RNA_seq.get_mfe()
++    degscore_mdl = DegScore(sequence, structure=mfe_struct)
+     degscore = degscore_mdl.degscore
++    dG_MFE = await sol_node.RNA_seq.get_dG_MFE()
+ 
+-    rg_mdl = sol_node.RNA_seq.get_RGV()
+-    MLD = rg_mdl.MLD
+-
+-    dG_MFE = sol_node.RNA_seq.get_dG_MFE()
+-
+-    if len(c3prime)==0:
+-        CDS_sequence = sequence[len(c5prime):]
+-    else:
+-        CDS_sequence = sequence[len(c5prime):-1*len(c3prime)]
+-
+-    output_dict = {'CDS_sequence': [CDS_sequence],'full_sequence':[sequence], 'CAI': [calc_cai(CDS_sequence)],\
+-    'AUP': [AUP], 'AUP_init14': [AUP_init14], 'MFE Structure': [mfe_struct], 'dG(MFE)': [dG_MFE],\
+-    'DegScore': [degscore],'MLD': [MLD], 'c5prime': [c5prime], 'c3prime': [c3prime]}
+-
+-    df = pd.DataFrame(output_dict) 
+-    # except:
+-    #     print("Warning: Something went wrong with the column labels")
+-    #     df = pd.DataFrame(MC_results)
+-
+-    #append_full_sequence(df, args_d['constant_5_prime'], args_d['constant_3_prime'])
+-
+-    if os.path.exists(args_d['output'] + outfile):
+-        df_old = pd.read_csv(args_d['output'] + outfile, delimiter='\t')
+-        df = df_old.append(df, ignore_index=True)
+-
+-    df.to_csv(args_d['output'] + outfile, sep='\t', quoting=csv.QUOTE_NONE, index=False)
++    output = {
++        'type': 'progress',
++        'sequence': sequence,
++        'structure': mfe_struct,
++        'degscore': float(degscore),
++        'energy': float(dG_MFE),
++    }
++
++    print(output)
++    if _has_postmessage:
++        _js_postMessage(json.dumps(output))
+ 
+ 
+ def save_full_MC_results_to_csv(root, sol_node, args_d, outfile, MC_results):
+diff -X .gitignore -urN ribotree_stock/Tree.py ribotree/Tree.py
+--- ribotree_stock/Tree.py	2026-03-10 18:31:41.364158359 -0400
++++ ribotree/Tree.py	2026-03-10 21:10:56.278953133 -0400
 @@ -1,11 +1,11 @@
 -from Node import *
 +from .Node import *
@@ -647,7 +1016,7 @@ index 1d77755..b00fbb0 100644
  
  
  class Tree(object):
-@@ -17,23 +17,21 @@ class Tree(object):
+@@ -17,13 +17,13 @@
  
  
      # Step 0
@@ -659,23 +1028,11 @@ index 1d77755..b00fbb0 100644
          RNA_seq.store_args_d(self.args_d)
  
 -        ensemble_score = ensemble_score_func(self.args_d, RNA_seq = RNA_seq)
-+        ensemble_score = await ensemble_score_func(self.args_d, RNA_seq=RNA_seq)
++        ensemble_score = await ensemble_score_func(self.args_d, RNA_seq = RNA_seq)
  
          # store score and parameters
          RNA_seq.store_score(ensemble_score)
-         MC_result = MCTS_class.compile_MC_result(RNA_seq, ensemble_score, 1)
--    
-+
-         print("Creating root")
--        # print('root ensemble score', ensemble_score)
--        # print('root info', "\n{:<5}({:3})".format(0, 1), RNA_seq.get_seq(),RNA_seq.seg_order, ensemble_score[0], ensemble_score[1], ensemble_score[2])
- 
--        root = Node(RNA_seq, MC_result, layer = 0)
-+        root = Node(RNA_seq, MC_result, layer=0)
-         root.set_id("R")
-         self.root = root
-         return root
-@@ -55,7 +53,7 @@ class Tree(object):
+@@ -55,7 +55,7 @@
  
  
      # Step 2
@@ -684,7 +1041,7 @@ index 1d77755..b00fbb0 100644
          """ If the leaf node has been visited before, generate children
              for the node and return one of them; else, return input node.
              Args:
-@@ -65,7 +63,7 @@ class Tree(object):
+@@ -65,7 +65,7 @@
                  - boolean, was a solution found
          """
          if node.get_n_visits() > 0:
@@ -693,16 +1050,16 @@ index 1d77755..b00fbb0 100644
              return node, solution
          else:
              return node, False
-@@ -122,7 +120,7 @@ class Tree(object):
+@@ -122,7 +122,7 @@
                      node.set_dead()
  
  
 -    def add_children(self, parent_node = None):
-+    async def add_children(self, parent_node=None):
++    async def add_children(self, parent_node = None):
          """ Adds n_children to the input leaf parent node, returns one child.
              Args:
                  - parent_node: the node to create children for.
-@@ -137,7 +135,7 @@ class Tree(object):
+@@ -137,7 +137,7 @@
          if parent_node is None:
              parent_node = self.root
  
@@ -711,7 +1068,7 @@ index 1d77755..b00fbb0 100644
          self._add_children_to_tree(new_children, parent_node)
  
          for child_node in new_children:
-@@ -155,29 +153,27 @@ class Tree(object):
+@@ -155,29 +155,27 @@
              self.layer_dict[parent_node.get_layer() + 1].add(child_node)
  
  
@@ -745,435 +1102,25 @@ index 1d77755..b00fbb0 100644
  
  
 -def _create_child(child_num, parent_sequence, parent_layer, verbose = True):
-+async def _create_child(child_num, parent_sequence, parent_layer, verbose=True):
++async def _create_child(child_num, parent_sequence, parent_layer, verbose = True):
      np.random.seed()  # TODO: ???
 -    RNA_seq, MC_result = MCTS_class.MC_iteration(parent_sequence, 1, verbose=verbose) # 1 iteration
-+    RNA_seq, MC_result = await MCTS_class.MC_iteration(parent_sequence, 1, verbose=verbose)
++    RNA_seq, MC_result = await MCTS_class.MC_iteration(parent_sequence, 1, verbose=verbose) # 1 iteration
      child = Node(RNA_seq, MC_result, parent_layer + 1)
      return child
  
-diff --git a/__init__.py b/__init__.py
-new file mode 100644
-index 0000000..3500963
---- /dev/null
-+++ b/__init__.py
-@@ -0,0 +1,22 @@
-+"""
-+Ribotree-MCTS: Monte Carlo Tree Search for RNA sequence design
-+Pyodide-compatible package for browser-based RNA sequence optimization
-+"""
-+
-+from .MCTS_class import MCTS, MC_iteration, MC_search
-+from .Tree import Tree
-+from .Node import Node
-+from .RNA_Sequence import RNA_Sequence
-+from .evaluate import ensemble_score_func, ensemble_score_comparison
-+
-+__version__ = "1.0.0-pyodide"
-+__all__ = [
-+    "MCTS",
-+    "MC_iteration",
-+    "MC_search",
-+    "Tree",
-+    "Node",
-+    "RNA_Sequence",
-+    "ensemble_score_func",
-+    "ensemble_score_comparison"
-+]
-diff --git a/arnie/__init__.py b/arnie/__init__.py
-new file mode 100644
-index 0000000..a70eac0
---- /dev/null
-+++ b/arnie/__init__.py
-@@ -0,0 +1 @@
-+"""Stub arnie module - provides empty implementations of arnie functions."""
-diff --git a/arnie/bpps.py b/arnie/bpps.py
-new file mode 100644
-index 0000000..f8d54ec
---- /dev/null
-+++ b/arnie/bpps.py
-@@ -0,0 +1,39 @@
-+"""arnie.bpps — Base pair probability calculation via EternaJS bridge."""
-+
-+import numpy as np
-+
-+try:
-+    import eternajs as _eternajs
-+    _has_eternajs = True
-+except ImportError:
-+    _has_eternajs = False
-+
-+
-+async def bpps(sequence, package='vienna', param_file=None, linear=False, T=37, **kwargs):
-+    """
-+    Base pair probability matrix via EternaJS folding engine bridge.
-+
-+    Returns:
-+        numpy.ndarray of shape (N, N) with base pair probabilities.
-+    """
-+    if not _has_eternajs:
-+        raise RuntimeError(
-+            "arnie.bpps requires the EternaJS bridge. "
-+            "Call pyodide.registerJsModule('eternajs', bridge) before importing ribotree."
-+        )
-+
-+    result = await _eternajs.bpps(sequence, package)
-+    result_dict = result.to_py() if hasattr(result, 'to_py') else dict(result)
-+    probs = result_dict.get('probabilities', [])
-+    length = result_dict.get('length', len(sequence))
-+
-+    matrix = np.zeros((length, length))
-+    idx = 0
-+    for i in range(length):
-+        for j in range(i, length):
-+            if idx < len(probs):
-+                matrix[i, j] = probs[idx]
-+                matrix[j, i] = probs[idx]
-+                idx += 1
-+
-+    return matrix
-diff --git a/arnie/free_energy.py b/arnie/free_energy.py
-new file mode 100644
-index 0000000..07b88a7
---- /dev/null
-+++ b/arnie/free_energy.py
-@@ -0,0 +1,31 @@
-+"""arnie.free_energy — Free energy calculation via EternaJS bridge."""
-+
-+try:
-+    import eternajs as _eternajs
-+    _has_eternajs = True
-+except ImportError:
-+    _has_eternajs = False
-+
-+
-+def free_energy(sequence, package='eternafold', constraint=None, T=37,
-+                linear=False, param_file=None, **kwargs):
-+    """
-+    Free energy calculation via EternaJS folding engine bridge.
-+
-+    Args:
-+        constraint: Optional dot-bracket structure for constrained evaluation.
-+                    If None, returns the MFE (unconstrained) free energy.
-+    """
-+    if not _has_eternajs:
-+        raise RuntimeError(
-+            "arnie.free_energy requires the EternaJS bridge. "
-+            "Call pyodide.registerJsModule('eternajs', bridge) before importing ribotree."
-+        )
-+
-+    if constraint is None:
-+        result = _eternajs.mfe(sequence, package)
-+        result_dict = result.to_py() if hasattr(result, 'to_py') else dict(result)
-+        return result_dict.get('energy', 0.0)
-+
-+    result = _eternajs.freeEnergy(sequence, constraint, package)
-+    return float(result) if result else 0.0
-diff --git a/arnie/mfe.py b/arnie/mfe.py
-new file mode 100644
-index 0000000..76f564c
---- /dev/null
-+++ b/arnie/mfe.py
-@@ -0,0 +1,32 @@
-+"""arnie.mfe — MFE structure prediction via EternaJS bridge."""
-+
-+try:
-+    import eternajs as _eternajs
-+    _has_eternajs = True
-+except ImportError:
-+    _has_eternajs = False
-+
-+
-+async def mfe(sequence, package='vienna', constraint=None, viterbi=False,
-+        linear=False, return_dG_MFE=False, param_file=None, T=37, **kwargs):
-+    """
-+    Minimum free energy structure prediction via EternaJS folding engine bridge.
-+
-+    Returns:
-+        - If return_dG_MFE=False: dot-bracket structure string
-+        - If return_dG_MFE=True: tuple of (structure string, dG float)
-+    """
-+    if not _has_eternajs:
-+        raise RuntimeError(
-+            "arnie.mfe requires the EternaJS bridge. "
-+            "Call pyodide.registerJsModule('eternajs', bridge) before importing ribotree."
-+        )
-+
-+    result = await _eternajs.mfe(sequence, package)
-+    result_dict = result.to_py() if hasattr(result, 'to_py') else dict(result)
-+    structure = result_dict.get('structure', '.' * len(sequence))
-+    energy = result_dict.get('energy', 0.0)
-+
-+    if return_dG_MFE:
-+        return structure, energy
-+    return structure
-diff --git a/arnie/pfunc.py b/arnie/pfunc.py
-new file mode 100644
-index 0000000..aca559f
---- /dev/null
-+++ b/arnie/pfunc.py
-@@ -0,0 +1,10 @@
-+"""Stub implementation of arnie.pfunc module."""
-+
-+
-+def pfunc(sequence, package='vienna', linear=False, **kwargs):
-+    """
-+    Stub function for partition function calculation.
-+    """
-+    raise RuntimeError(
-+        "arnie.pfunc hasn't been ported to the EternaJS bridge. "
-+    )
-\ No newline at end of file
-diff --git a/arnie/utils.py b/arnie/utils.py
-new file mode 100644
-index 0000000..b5f3f52
---- /dev/null
-+++ b/arnie/utils.py
-@@ -0,0 +1,28 @@
-+"""Stub implementation of arnie.utils module."""
-+
-+
-+def get_expected_accuracy(structure, bpm, mode='mcc', **kwargs):
-+    """
-+    Stub function for expected accuracy calculation.
-+
-+    Returns a float value (stub returns 0.0).
-+    """
-+    return 0.0
-+
-+
-+def get_mean_base_pair_propensity(structure, **kwargs):
-+    """
-+    Stub function for mean base pair propensity calculation.
-+
-+    Returns a float value (stub returns 0.0).
-+    """
-+    return 0.0
-+
-+
-+def load_package_locations(DEBUG=False, **kwargs):
-+    """
-+    Stub function for loading package locations.
-+
-+    Returns an empty dictionary.
-+    """
-+    return {}
-diff --git a/domain.py b/domain.py
-index ed8a8c2..5e8224f 100644
---- a/domain.py
-+++ b/domain.py
-@@ -1,5 +1,5 @@
- import copy
--import utils_domain as ud
-+from . import utils_domain as ud
- 
- RNA_BASES = set('ACGU')
- DNA_BASES = set('ACGT')
-diff --git a/evaluate.py b/evaluate.py
-index 384d15a..91ffa22 100644
---- a/evaluate.py
-+++ b/evaluate.py
-@@ -1,9 +1,9 @@
- from itertools import chain, combinations
- import numpy as np
- import re
--from arnie.pfunc import pfunc
--from arnie.free_energy import free_energy
--import utils_features as uf
-+from .arnie.pfunc import pfunc
-+from .arnie.free_energy import free_energy
-+from . import utils_features as uf
- import pickle
- 
- # Set limit for printing floats
-@@ -12,7 +12,7 @@ np.set_printoptions(precision=4)
- # GLOBAL CONSTANTS:
- DELTA_PROB = 1e-100 # offset to preservevent log(0) when probability is 0
- 
--def mrna_score_func(seq, RNA_seq, condition, package, dna=False, Temp=37, linearfold=False, mod_U=False, **kwargs):
-+async def mrna_score_func(seq, RNA_seq, condition, package, dna=False, Temp=37, linearfold=False, mod_U=False, **kwargs):
-     """ Returns a float that represents the score of the sequence """
- 
-     # Calculate dG
-@@ -33,18 +33,18 @@ def mrna_score_func(seq, RNA_seq, condition, package, dna=False, Temp=37, linear
-             # condition_value = float(condition_value)
- 
-             if 'dgopen' in condition_key:
--                dG = free_energy(seq, package=package, constraint=RNA_seq.get_ss_open(), T=Temp,  param_file=param_file)
-+                dG = free_energy(seq, package=package, constraint=RNA_seq.get_ss_open(), T=Temp, param_file=param_file)
-             elif 'dg' in condition_key:
-                 if linearfold:
-                     Z = pfunc(seq, package=package, linear=True)
-                     rt = 1.987e-3*(T + 273.15)
-                     dG = -rt*np.log(Z)
-                 else:
--                    dG = free_energy(seq, package=package, T=Temp,  param_file=param_file)
-+                    dG = free_energy(seq, package=package, T=Temp, param_file=param_file)
-             else:
-                 ss_constraint = RNA_seq.get_ss_open()
-                 feature = condition_key.split('.')[0]
--                feature_value = uf.get_feature_value(seq, ss_constraint, feature, package, param_file, linearfold, RNA_seq, mod_U=mod_U)
-+                feature_value = await uf.get_feature_value(seq, ss_constraint, feature, package, param_file, linearfold, RNA_seq, mod_U=mod_U)
-                 dG = feature_value
- 
-             if condition_value is None:
-@@ -64,12 +64,12 @@ def mrna_score_func(seq, RNA_seq, condition, package, dna=False, Temp=37, linear
-     constraint_float.append(total_dG)
-     return [constraint_binary], [constraint_float], [prob_list]
- 
--def ensemble_score_func(args_d, RNA_seq = None, seq = ''):
-+async def ensemble_score_func(args_d, RNA_seq=None, seq=''):
-     """ returns an ensemble score of a sequence using NUPACK to test different conditions """
- 
-     if RNA_seq:
-         seq = RNA_seq.get_seq()
--    return mrna_score_func(seq, RNA_seq, **args_d)
-+    return await mrna_score_func(seq, RNA_seq, **args_d)
- 
- #-----------------------------------------------------------------------------------
- 
-diff --git a/init_starting_RNA_Sequence.py b/init_starting_RNA_Sequence.py
-index fe9c641..6073b2c 100644
---- a/init_starting_RNA_Sequence.py
-+++ b/init_starting_RNA_Sequence.py
-@@ -1,8 +1,8 @@
- import numpy as np
- import random
- import re
--from RNA_Sequence import *
--from utils_sequence import *
-+from .RNA_Sequence import *
-+from .utils_sequence import *
- 
- 
- RNA_BASES = set('ACGU')
-diff --git a/save_results.py b/save_results.py
-index 122d473..6d3411a 100644
---- a/save_results.py
-+++ b/save_results.py
-@@ -1,11 +1,17 @@
- import csv
-+import json
- import numpy as np
- import pandas as pd
--import time
--from plot_tree import plot_pickle_save
-+from .plot_tree import plot_pickle_save
- import os
--from utils_features import calc_cai
--from DegScore import DegScore
-+from .utils_features import calc_cai
-+from .DegScore import DegScore
-+
-+try:
-+    from js import postMessage as _js_postMessage
-+    _has_postmessage = True
-+except ImportError:
-+    _has_postmessage = False
- 
- def append_full_sequence(df, constant_5_prime, constant_3_prime):
-     idx = df.columns.get_loc("Accept") + 1 # insert after "Accept"
-@@ -14,67 +20,28 @@ def append_full_sequence(df, constant_5_prime, constant_3_prime):
-     df.insert(idx, 'Sequence', sequence)
-     return df
- 
--def save_results(args_d, root, sol_node, MC_results, save_full=True):
--
--    if save_full:
--        full_outfile = _generate_outfile_name(args_d, 'FULL', timestamp=False)
--        save_full_MC_results_to_csv(root, sol_node, args_d, full_outfile, MC_results)
--
--    best_outfile = _generate_outfile_name(args_d, 'RUNNING_BEST', timestamp=False)
--    save_best_MC_results_to_csv(sol_node, args_d, best_outfile)
--
--def save_best_MC_results_to_csv(sol_node, args_d, outfile):
--    """ saves the Monte Carlo results as a tab-delimited txt """
--    MC_results = save_node(sol_node, MC_results = [])
--
--    #print('saving best result\n')
--    column_headers = _compile_column_headers(args_d, sol_node, IDs = True)
-+async def save_results(args_d, root, sol_node, MC_results, save_full=True):
-+    await save_best_MC_results_to_csv(sol_node, args_d)
- 
--    # Appending 5' and 3' prime sequences
--    c5prime = sol_node.RNA_seq.c5prime
--    c3prime = sol_node.RNA_seq.c3prime
--    #sequence = MC_results[0][2]
-+async def save_best_MC_results_to_csv(sol_node, args_d):
-+    """ Saves best result and posts a progress update to the main thread. """
-     sequence = sol_node.RNA_seq.get_seq()
--    #if sequence != MC_results[0][2]:
--    #    print('sequence was,',sequence,'MC_results[0][2] was,',MC_results[0][2])
--
--    bp_matrix = sol_node.RNA_seq.get_bpm()
--    mfe_struct = sol_node.RNA_seq.get_mfe()
--    RiboGraphViz = sol_node.RNA_seq.get_RGV()
--
--    AUP = np.mean(1 - np.sum(bp_matrix, axis=0))
--    AUP_init14 = np.mean(1 - np.sum(bp_matrix, axis=0)[:14])
--
--    #full_sequence = c5prime+sequence+c3prime
--    degscore_mdl = DegScore(sequence, structure=mfe_struct, mask_U=args_d['mod_U'])
-+    mfe_struct = await sol_node.RNA_seq.get_mfe()
-+    degscore_mdl = DegScore(sequence, structure=mfe_struct)
-     degscore = degscore_mdl.degscore
--
--    rg_mdl = sol_node.RNA_seq.get_RGV()
--    MLD = rg_mdl.MLD
--
--    dG_MFE = sol_node.RNA_seq.get_dG_MFE()
--
--    if len(c3prime)==0:
--        CDS_sequence = sequence[len(c5prime):]
--    else:
--        CDS_sequence = sequence[len(c5prime):-1*len(c3prime)]
--
--    output_dict = {'CDS_sequence': [CDS_sequence],'full_sequence':[sequence], 'CAI': [calc_cai(CDS_sequence)],\
--    'AUP': [AUP], 'AUP_init14': [AUP_init14], 'MFE Structure': [mfe_struct], 'dG(MFE)': [dG_MFE],\
--    'DegScore': [degscore],'MLD': [MLD], 'c5prime': [c5prime], 'c3prime': [c3prime]}
--
--    df = pd.DataFrame(output_dict) 
--    # except:
--    #     print("Warning: Something went wrong with the column labels")
--    #     df = pd.DataFrame(MC_results)
--
--    #append_full_sequence(df, args_d['constant_5_prime'], args_d['constant_3_prime'])
--
--    if os.path.exists(args_d['output'] + outfile):
--        df_old = pd.read_csv(args_d['output'] + outfile, delimiter='\t')
--        df = df_old.append(df, ignore_index=True)
--
--    df.to_csv(args_d['output'] + outfile, sep='\t', quoting=csv.QUOTE_NONE, index=False)
-+    dG_MFE = await sol_node.RNA_seq.get_dG_MFE()
-+
-+    output = {
-+        'type': 'progress',
-+        'sequence': sequence,
-+        'structure': mfe_struct,
-+        'degscore': float(degscore),
-+        'energy': float(dG_MFE),
-+    }
-+
-+    print(output)
-+    if _has_postmessage:
-+        _js_postMessage(json.dumps(output))
- 
- 
- def save_full_MC_results_to_csv(root, sol_node, args_d, outfile, MC_results):
-diff --git a/utils_domain.py b/utils_domain.py
-index 97c05ad..c738f56 100644
---- a/utils_domain.py
-+++ b/utils_domain.py
+diff -X .gitignore -urN ribotree_stock/utils_domain.py ribotree/utils_domain.py
+--- ribotree_stock/utils_domain.py	2026-03-10 18:31:41.382040889 -0400
++++ ribotree/utils_domain.py	2026-03-10 17:29:48.362589821 -0400
 @@ -1,4 +1,4 @@
 -import utils_sequence as us
 +from . import utils_sequence as us
  import pickle
  import numpy as np
  
-diff --git a/utils_features.py b/utils_features.py
-index cea0b09..9560160 100644
---- a/utils_features.py
-+++ b/utils_features.py
+diff -X .gitignore -urN ribotree_stock/utils_features.py ribotree/utils_features.py
+--- ribotree_stock/utils_features.py	2026-03-10 18:31:41.382159505 -0400
++++ ribotree/utils_features.py	2026-03-10 21:12:01.606621903 -0400
 @@ -1,11 +1,11 @@
 +import asyncio
  import numpy as np
@@ -1191,21 +1138,20 @@ index cea0b09..9560160 100644
  
  
  # C2W was created using the values from https://www.kazusa.or.jp/codon/cgi-bin/showcodon.cgi?species=9606&aa=1&style=N
-@@ -51,10 +51,10 @@ def calc_cai(seq):
+@@ -51,10 +51,10 @@
      return gmean(w_list)
  
  
 -def get_MFE_open(seq, feature, package, param_file, linearfold, N=50):
--    for i in range(0,N):
 +async def get_MFE_open(seq, feature, package, param_file, linearfold, N=50):
-+    for i in range(0, N):
+     for i in range(0,N):
          try:
 -            ss = mfe(seq, package=package, viterbi=True, param_file=param_file, linear=linearfold)
 +            ss = await mfe(seq, package=package, viterbi=True, param_file=param_file, linear=linearfold)
  
              if "open" in feature:
                  v = (14 - ss[:14].count('.') + ss[14:].count('.')) / len(ss)
-@@ -62,23 +62,23 @@ def get_MFE_open(seq, feature, package, param_file, linearfold, N=50):
+@@ -62,21 +62,21 @@
                  v = ss.count('.') / len(ss)
              return v
          except:
@@ -1214,9 +1160,8 @@ index cea0b09..9560160 100644
      raise ValueError(f"Could not compute MFEopen score for {seq}")
  
 -def get_degscore(seq, by_position=False, feature="", linearfold=False, package="eternafold", mask_U=False, N=50):
--    for i in range(0,N):
 +async def get_degscore(seq, by_position=False, feature="", linearfold=False, package="eternafold", mask_U=False, N=50):
-+    for i in range(0, N):
+     for i in range(0,N):
          try:
              if "all" in feature:
                  mdl_list = []
@@ -1231,12 +1176,9 @@ index cea0b09..9560160 100644
 -                output = np.mean([mdl.degscore_by_position[len(UTR[0]):-len(UTR[1])] for mdl, UTR in zip(mdl_list,UTR_list)], axis=0)
 +                output = np.mean([mdl.degscore_by_position[len(UTR[0]):-len(UTR[1])] for mdl, UTR in zip(mdl_list, UTR_list)], axis=0)
              else:
--                output =  mdl.degscore_by_position
-+                output = mdl.degscore_by_position
+                 output =  mdl.degscore_by_position
  
-             # open 14
-             if "open" in feature:
-@@ -89,16 +89,16 @@ def get_degscore(seq, by_position=False, feature="", linearfold=False, package="
+@@ -89,16 +89,16 @@
              else:
                  return np.sum(output)
          except:
@@ -1258,14 +1200,13 @@ index cea0b09..9560160 100644
      rg = RGV(ss)
  
      if feature == 'mld':
-@@ -119,21 +119,20 @@ def get_rg_feature(ss_constraint, feature, get_RNA_seq):
+@@ -119,21 +119,20 @@
      else:
          raise ValueError(f"Unkown rg feature {feature}.")
  
 -def bpps_try_wrapper(seq, package, param_file, linearfold, N=50):
--    for i in range(0,N):
 +async def bpps_try_wrapper(seq, package, param_file, linearfold, N=50):
-+    for i in range(0, N):
+     for i in range(0,N):
          try:
 -            bpm = bpps(seq, package=package, param_file=param_file, linear=linearfold)
 +            bpm = await bpps(seq, package=package, param_file=param_file, linear=linearfold)
@@ -1287,7 +1228,7 @@ index cea0b09..9560160 100644
  
      if feature == 'bpsum':
          return np.sum(bpm.flatten())/bpm.shape[0]
-@@ -149,28 +148,28 @@ def get_bpm_feature(seq, ss_constraint, feature, package, param_file, linearfold
+@@ -149,24 +148,24 @@
          return np.mean(bp_prob)
  
      elif feature == 'mcc':
@@ -1317,12 +1258,7 @@ index cea0b09..9560160 100644
      # mld = maximal ladder distance; hp = hairpin
      # Nwj = N way junction; 5wj includes >= 5wj
      rg_feature_list = ['mld', 'hp', '3wj', '4wj', '5wj', 'wj', 'hp/3wj']
--    
-+
-     # bpsum = sum of all bp probabilities
-     # bpunpaired = # of unpaired based with probabilities > 50%
-     # mcc = expected MCC
-@@ -178,16 +177,16 @@ def get_feature_value(seq, ss_constraint, feature, package, param_file, linearfo
+@@ -178,16 +177,16 @@
  
      # mbp = mean base pair propensity
      # cai = codon adaption index (HUMAN)
@@ -1345,11 +1281,10 @@ index cea0b09..9560160 100644
 +        return await get_util_feature(seq, ss_constraint, feature, RNA_seq)
      else:
          raise ValueError(f"Unknown feature {feature}. Please look at function get_feature_value for details.")
-diff --git a/utils_parser.py b/utils_parser.py
-index 6eef791..f406b68 100644
---- a/utils_parser.py
-+++ b/utils_parser.py
-@@ -2,8 +2,8 @@ import argparse
+diff -X .gitignore -urN ribotree_stock/utils_parser.py ribotree/utils_parser.py
+--- ribotree_stock/utils_parser.py	2026-03-10 18:31:41.382301456 -0400
++++ ribotree/utils_parser.py	2026-03-10 17:29:48.362589821 -0400
+@@ -2,8 +2,8 @@
  import numpy as np
  import pickle
  import re
@@ -1360,11 +1295,10 @@ index 6eef791..f406b68 100644
  
  #-----------------------------------------------------------------------------------
  # Argparse custom actions
-diff --git a/wrapper_CDSFold.py b/wrapper_CDSFold.py
-index 74d5d11..19257e2 100644
---- a/wrapper_CDSFold.py
-+++ b/wrapper_CDSFold.py
-@@ -3,7 +3,7 @@ import os
+diff -X .gitignore -urN ribotree_stock/wrapper_CDSFold.py ribotree/wrapper_CDSFold.py
+--- ribotree_stock/wrapper_CDSFold.py	2026-03-10 18:31:41.382517381 -0400
++++ ribotree/wrapper_CDSFold.py	2026-03-10 17:29:48.362589821 -0400
+@@ -3,7 +3,7 @@
  import shutil
  import tempfile
  from Bio.Seq import Seq

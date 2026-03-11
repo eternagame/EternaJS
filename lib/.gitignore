@@ -18,6 +18,10 @@ RibonanzaNet/RibonanzaNet
 RibonanzaNet/RibonanzaNet_stock
 RibonanzaNet/RibonanzaNet-Weights/*
 !RibonanzaNet/RibonanzaNet-Weights/.gitkeep
+Ribotree/ribotree
+Ribotree/ribotree_stock
+CDSfold/CDSfold_SU
+CDSfold/CDSfold_SU_stock
 CMakeCache
 CMakeFiles
 Makefile
