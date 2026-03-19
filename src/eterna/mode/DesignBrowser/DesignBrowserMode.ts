@@ -317,6 +317,7 @@ export default class DesignBrowserMode extends GameMode {
 
         this.updateLayout();
 
+        this._content.eventMode = 'static';
         this._content.on('wheel', (e) => this.onMouseWheelEvent(e));
     }
 
