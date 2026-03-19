@@ -19,7 +19,6 @@ export default class ScrollContainer extends ContainerObject {
 
         this.display.addChild(this.content);
         this.display.addChild(this._contentMask);
-        this._contentMask.hitArea = new Rectangle();
         this.display.mask = this._contentMask;
 
         const overlayEl = document.getElementById(Eterna.OVERLAY_DIV_ID);
