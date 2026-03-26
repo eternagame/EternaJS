@@ -688,6 +688,9 @@ export default class EternaApp extends FlashbangApp {
             () => RibotreeSolver.create(),
             (domParent) => new RibotreeParams(domParent)
         );
+        if (Eterna.experimentalFeatures.includes('autosolver-ribotree-only')) {
+            return;
+        }
         SolverManager.instance.registerSolver(
             'CDSfold',
             () => CDSfoldSolver.create(),

@@ -5,6 +5,7 @@ import TextInputGrid from 'eterna/ui/TextInputGrid';
 import TextInputObject from 'eterna/ui/TextInputObject';
 import type {SolverOptions} from 'eterna/assistant/Solver';
 import type {RibotreeOptions} from 'eterna/assistant/RibotreeSolver';
+import Eterna from 'eterna/Eterna';
 
 /** Solver-specific options exposed by this params component */
 export type RibotreeParamsOptions = Pick<RibotreeOptions, 'mode' | 'iterations'> & SolverOptions;
@@ -35,7 +36,7 @@ export default class RibotreeParams extends ContainerObject {
         this._modeDropdown = new GameDropdown<RibotreeMode>({
             fontSize: 14,
             options: ['rna', 'mrna'],
-            defaultOption: 'rna',
+            defaultOption: Eterna.experimentalFeatures.includes('autosolver-ribotree-only') ? 'mrna' : 'rna',
             color: 0x043468,
             textColor: 0xFFFFFF,
             height: 32,

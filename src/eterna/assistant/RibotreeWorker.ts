@@ -94,7 +94,7 @@ args = {
     'shuffle_prob': 0.33,
     'num_shuffle': 1,
     'constant_length': False,
-    'allow_nucleotide_repeat': False,
+    'allow_nucleotide_repeat': True,
     'preserve_seq': [],
     'preserve_order': None,
     'restriction_sites': None,

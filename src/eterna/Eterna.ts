@@ -46,7 +46,9 @@ export default class Eterna {
 
     public static noGame: boolean;
 
-    public static experimentalFeatures: ('rnet-publishing' | 'qualtrics-report' | 'autosolver')[];
+    public static experimentalFeatures: (
+        'rnet-publishing' | 'qualtrics-report' | 'autosolver' | 'autosolver-ribotree-only'
+    )[];
 
     public static setPlayer(name: string, id: number): void {
         this.playerName = name;
