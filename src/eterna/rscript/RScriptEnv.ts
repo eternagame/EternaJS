@@ -306,6 +306,8 @@ export default class RScriptEnv extends ContainerObject {
                 return this.ui.toolbar.getScriptUIElement(this.ui.toolbar.baseMarkerButton);
             case RScriptUIElementID.MAGICGLUE:
                 return this.ui.toolbar.getScriptUIElement(this.ui.toolbar.magicGlueButton);
+            case RScriptUIElementID.AUTOSOLVER:
+                return this.ui.toolbar.getScriptUIElement(this.ui.toolbar.autoSolverButton);
             case RScriptUIElementID.A:
                 return {rect: this.ui.toolbar.palette.getTarget(PaletteTargetType.A)};
             case RScriptUIElementID.U:
