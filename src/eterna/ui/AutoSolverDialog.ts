@@ -10,6 +10,7 @@ import Solver from 'eterna/assistant/Solver';
 import type {SolverResult} from 'eterna/assistant/Solver';
 import SolverManager from 'eterna/assistant/SolverManager';
 import type {SolverParamsComponent} from 'eterna/assistant/SolverManager';
+import Eterna from 'eterna/Eterna';
 import WindowDialog from './WindowDialog';
 import GameButton from './GameButton';
 import FolderSwitcher from './FolderSwitcher';
@@ -189,8 +190,7 @@ export default class AutoSolverDialog extends WindowDialog<void> {
                 ...this._activeParams.getParameters()
             };
 
-            console.log(options);
-
+            Eterna.observability.recordEvent('RunTool:Autosolver', {solver: this._solver.name, options});
             const result: SolverResult = await this._solver.solve(options);
 
             if (!result.success) {
