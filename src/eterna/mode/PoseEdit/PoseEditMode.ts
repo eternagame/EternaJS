@@ -93,6 +93,7 @@ import PostMessageReporter from 'eterna/observability/PostMessageReporter';
 import TimerConstraint from 'eterna/constraints/constraints/TimerConstraint';
 import {MutationConstraint} from 'eterna/constraints/constraints/MutationConstraint';
 import ROPWait from 'eterna/rscript/ROPWait';
+import ConsoleReporter from 'eterna/observability/ConsoleReporter';
 import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
 import SubmitPoseDialog from './SubmitPoseDialog';
@@ -116,6 +117,8 @@ export interface PoseEditParams {
     initSolution?: Solution;
     // a list of solutions we can iterate through
     solutions?: Solution[];
+
+    startSolvingTime?: number;
 }
 
 interface MoveHistory {
@@ -273,6 +276,8 @@ export default class PoseEditMode extends GameMode {
 
     protected enter(): void {
         super.enter();
+
+        Eterna.observability.startCapture(new ConsoleReporter(), (event) => !event.name.match(/^(ScriptFunc):/));
 
         if (Eterna.experimentalFeatures.includes('qualtrics-report')) {
             Eterna.observability.startCapture(this._qualtricsReporter, (event) => !event.name.match(/^(ScriptFunc):/));
@@ -1060,11 +1065,11 @@ export default class PoseEditMode extends GameMode {
         this._opQueue.push(new PoseOp(
             null,
             () => {
+                this._startSolvingTime = this._params.startSolvingTime ?? new Date().getTime();
                 if (this._params.isReset) {
                     const newSeq: Sequence = this.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
                     this.moveHistoryAddSequence('reset', newSeq.sequenceString());
                 } else {
-                    this._startSolvingTime = new Date().getTime();
                     Eterna.observability.recordEvent('Move:StartSeq', this.transformSequence(
                         this.getCurrentUndoBlock(0).sequence, 0, 0
                     ).sequenceString());
@@ -2071,7 +2076,20 @@ export default class PoseEditMode extends GameMode {
             if (confirmed) {
                 this.resetAutosaveData();
                 Assert.assertIsDefined(this.modeStack);
-                this.modeStack.changeMode(new PoseEditMode(this._puzzle, {isReset: true}));
+                this.modeStack.changeMode(new PoseEditMode(this._puzzle, {
+                    isReset: true,
+                    // We're making a semi-arbitrary decision that the solve time should not
+                    // reset to 0 when doing a reset. The pragmatic reason for this is for user testing
+                    // with the TimerConstraint, a puzzle reset should not have the user continue
+                    // playing for longer. For recording elapsed time with the puzzle solution
+                    // for statistics purposes, there's an argument to be made either way (how long
+                    // did the user spend trying to solve - though we still don't include time from
+                    // previous sessions - vs how long did it take for them to get from fresh state
+                    // to solution). There may be some other way in which we use the timer constraint
+                    // in the future that necessetates something else, but this seems like the best
+                    // option for now.
+                    startSolvingTime: this._startSolvingTime
+                }));
             }
         });
     }
@@ -3081,7 +3099,6 @@ export default class PoseEditMode extends GameMode {
         if (constraints == null || constraints.length === 0 || !this._showMissionScreen) {
             this.startPlaying();
         } else {
-            this._startSolvingTime = new Date().getTime();
             this.startPlaying();
             this.showIntroScreen();
 
