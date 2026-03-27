@@ -336,7 +336,8 @@ export const AutoSolverMenuButtonProps: ToolbarParam = {
     allImg: Bitmaps.ImgAutoSolver,
     overImg: Bitmaps.ImgOverAutoSolver,
     disableImg: Bitmaps.ImgGreyAutoSolver,
-    tooltip: 'Solve with AI Help'
+    tooltip: 'Solve with AI Help',
+    rscriptID: RScriptUIElementID.AUTOSOLVER
 };
 
 // ===== IMPORT/EXPORT =====
