@@ -190,7 +190,10 @@ export default class AutoSolverDialog extends WindowDialog<void> {
                 ...this._activeParams.getParameters()
             };
 
-            Eterna.observability.recordEvent('RunTool:Autosolver', {solver: this._solver.name, options});
+            Eterna.observability.recordEvent('RunTool:Autosolver', {
+                solver: this._solver.name,
+                options: JSON.parse(JSON.stringify(options))
+            });
             const result: SolverResult = await this._solver.solve(options);
 
             if (!result.success) {
