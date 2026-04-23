@@ -90,7 +90,7 @@
     "store": "^2.0.12",
     "three": "^0.158.0",
     "upng-js": "^2.1.0",
-    "uuid": "^13.0.0",
+    "uuid": "^14.0.0",
     "webfontloader": "^1.6.28"
   },
   "lint-staged": {
