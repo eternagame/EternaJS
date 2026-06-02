@@ -1,0 +1,13 @@
+{
+  "name": "eterna-rnapro-e2e",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "test": "playwright test",
+    "baseline": "playwright test baseline.spec.ts",
+    "rnapro": "playwright test rnapro.spec.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0"
+  }
+}

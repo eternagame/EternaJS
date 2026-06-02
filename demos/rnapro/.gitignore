@@ -1,0 +1,5 @@
+node_modules/
+structures/
+*.mov
+e2e/artifacts/
+e2e/test-results/
