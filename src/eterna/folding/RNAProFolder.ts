@@ -22,10 +22,26 @@ export interface RNAProResult {
     pdb: string;
     c1Coords: number[][] | null;
     walltimeS: number | null;
-    // Morph endpoints (flat [x,y,z,...] in the new PDB's atom order) for animating between the
-    // previous and new 3D structure. Null on the first fold (no previous) or if alignment failed.
-    morphFrom: number[] | null;
-    morphTo: number[] | null;
+}
+
+const RNAPRO_MORPH_URL = RNAPRO_BRIDGE_URL.replace(/\/fold$/, '/morph');
+
+/**
+ * Ask the bridge to superpose `toPdb` onto `fromPdb` (USalign) and return morph endpoints for a
+ * smooth transition. Computed on demand so ANY structure change morphs — fresh fold, cached
+ * structure, undo/redo. Returns the aligned target PDB plus flat [x,y,z,...] from/to arrays.
+ */
+export async function requestMorph(
+    fromPdb: string, toPdb: string
+): Promise<{pdb: string; morphFrom: number[] | null; morphTo: number[] | null}> {
+    const resp = await fetch(RNAPRO_MORPH_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({from_pdb: fromPdb, to_pdb: toPdb})
+    });
+    const data = await resp.json();
+    if (!data || !data.ok) throw new Error((data && data.error) || `morph HTTP ${resp.status}`);
+    return {pdb: data.pdb, morphFrom: data.morph_from ?? null, morphTo: data.morph_to ?? null};
 }
 
 const _store = new Map<string, RNAProResult>();
@@ -92,9 +108,9 @@ export default class RNAProFolder extends Folder<false> {
         const cached = this.getCache(key) as SecStruct;
         if (cached != null) {
             const prev = _store.get(seqStr);
-            // Re-broadcast so the 2D panel re-syncs, but without morph arrays (they were computed
-            // against a now-stale previous structure) — the 3D view just reloads statically.
-            if (prev) publishResult({...prev, morphFrom: null, morphTo: null});
+            // Re-broadcast so the latest-pointer/status re-sync. The 3D morph is driven by the pose
+            // update (PoseEditMode.updateScore), which morphs from the shown structure to this one.
+            if (prev) publishResult(prev);
             return cached.slice(0);
         }
 
@@ -111,9 +127,7 @@ export default class RNAProFolder extends Folder<false> {
                 secstruct: dotBracket,
                 pdb: data.pdb,
                 c1Coords: data.c1_coords ?? null,
-                walltimeS: data.walltime_s ?? null,
-                morphFrom: data.morph_from ?? null,
-                morphTo: data.morph_to ?? null
+                walltimeS: data.walltime_s ?? null
             });
             const ss = SecStruct.fromParens(dotBracket, true);
             this.putCache(key, ss.slice(0));

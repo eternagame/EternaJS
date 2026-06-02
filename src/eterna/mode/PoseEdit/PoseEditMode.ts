@@ -29,7 +29,7 @@ import {
 import Fonts from 'eterna/util/Fonts';
 import EternaSettingsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaSettingsDialog';
 import FolderManager from 'eterna/folding/FolderManager';
-import {downloadRNAProPDB} from 'eterna/folding/RNAProFolder';
+import {downloadRNAProPDB, getRNAProResult, requestMorph} from 'eterna/folding/RNAProFolder';
 import Folder, {MultiFoldResult, CacheKey} from 'eterna/folding/Folder';
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/toolbar/NucleotidePalette';
 import PoseField from 'eterna/pose2D/PoseField';
@@ -377,6 +377,8 @@ export default class PoseEditMode extends GameMode {
         );
         if (!dialog) return;
         this._pose3D = dialog;
+        this._pose3DShownSeq = latest.sequence;
+        this._pose3DShownPdb = latest.pdb;
         dialog.regs.add(dialog.baseClicked.connect(
             (i: number) => this._poses[0].simulateMousedownCallback(i)
         ));
@@ -385,35 +387,60 @@ export default class PoseEditMode extends GameMode {
         ));
 
         // Demo controls live inside the 3D panel: a status line + Download PDB button.
-        const statusLine = (s?: string, ss?: string, wt?: number | null) => `RNAPro · ${s} · ${ss}${
-            wt != null ? ` · ${wt}s` : ''}`;
         dialog.enableRNAProControls(() => downloadRNAProPDB());
-        dialog.setRNAProStatus(statusLine(latest.sequence, latest.secstruct, latest.walltimeS));
+        dialog.setRNAProStatus(this.rnaProStatusLine(latest.sequence, latest.secstruct, latest.walltimeS));
 
-        // Auto-refresh (with a morph) whenever RNAPro returns a new structure while we're in natural
-        // mode. RNAProFolder dispatches 'rnapro:structure' with {sequence, pdb, secstruct, morph*}.
-        const onStructure = (ev: Event) => {
-            if (this._pose3D !== dialog || !this.isNaturalMode) return;
-            const r = (ev as CustomEvent).detail as {
-                sequence?: string; pdb?: string; secstruct?: string; walltimeS?: number | null;
-                morphFrom?: number[] | null; morphTo?: number[] | null;
-            };
-            if (!r || !r.pdb || !r.sequence) return;
-            // Never let a 3D refresh error break the fold pipeline.
-            try {
-                const newSeq = Sequence.fromSequenceString(r.sequence);
-                const newSS = SecStruct.fromParens(r.secstruct || '.'.repeat(newSeq.length), true);
-                dialog.setRNAProStatus(statusLine(r.sequence, r.secstruct, r.walltimeS));
-                dialog.updateStructure(r.pdb, newSeq, newSS, r.morphFrom, r.morphTo);
-            } catch (e) {
-                // eslint-disable-next-line no-console
-                console.error('[RNAPro] 3D auto-refresh failed:', e);
-            }
-        };
-        window.addEventListener('rnapro:structure', onStructure);
+        // Subsequent structure updates (edits, cached structures, undo/redo, mode toggle) are driven
+        // by refresh3DForCurrentPose() from updateScore() — see that method.
         dialog.closed.then(() => {
-            window.removeEventListener('rnapro:structure', onStructure);
-            if (this._pose3D === dialog) this._pose3D = null;
+            if (this._pose3D === dialog) {
+                this._pose3D = null;
+                this._pose3DShownSeq = undefined;
+                this._pose3DShownPdb = undefined;
+            }
+        });
+    }
+
+    private rnaProStatusLine(seq?: string, ss?: string, wt?: number | null): string {
+        return `RNAPro · ${seq} · ${ss}${wt != null ? ` · ${wt}s` : ''}`;
+    }
+
+    /**
+     * Keep the open 3D view in sync with the currently-displayed pose. Runs from updateScore(), so it
+     * fires for every 2D-updating action — edits, cached structures, undo/redo, natural/target toggle.
+     * Morphs (via the bridge /morph) from the structure currently shown to the one for this sequence.
+     */
+    private refresh3DForCurrentPose(): void {
+        const dialog = this._pose3D;
+        if (!dialog || !this.isNaturalMode) return;
+        const ublk = this.getCurrentUndoBlock(0);
+        const seqStr = ublk ? this.transformSequence(ublk.sequence, 0, 0).sequenceString() : undefined;
+        if (!seqStr || seqStr === this._pose3DShownSeq) return;
+        const result = getRNAProResult(seqStr);
+        if (!result || !result.pdb) return; // not folded yet; the fold + next updateScore will handle it
+
+        const fromPdb = this._pose3DShownPdb;
+        this._pose3DShownSeq = seqStr; // claim synchronously so we don't double-fire
+        const seq = Sequence.fromSequenceString(seqStr);
+        const ss = SecStruct.fromParens(result.secstruct || '.'.repeat(seq.length), true);
+        dialog.setRNAProStatus(this.rnaProStatusLine(seqStr, result.secstruct, result.walltimeS));
+
+        if (!fromPdb) {
+            this._pose3DShownPdb = result.pdb;
+            dialog.updateStructure(result.pdb, seq, ss);
+            return;
+        }
+        requestMorph(fromPdb, result.pdb).then(({pdb, morphFrom, morphTo}) => {
+            if (this._pose3D !== dialog || this._pose3DShownSeq !== seqStr) return; // superseded
+            this._pose3DShownPdb = pdb;
+            dialog.updateStructure(pdb, seq, ss, morphFrom, morphTo);
+        }).catch((e) => {
+            // eslint-disable-next-line no-console
+            console.error('[RNAPro] morph failed:', e);
+            if (this._pose3D === dialog && this._pose3DShownSeq === seqStr) {
+                this._pose3DShownPdb = result.pdb;
+                dialog.updateStructure(result.pdb, seq, ss); // fall back to a plain reload
+            }
         });
     }
 
@@ -3882,6 +3909,8 @@ export default class PoseEditMode extends GameMode {
 
         if (this._pose3D) {
             this._pose3D.sequence.value = this.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
+            // Morph the 3D structure to match the now-displayed pose (edits, cached, undo/redo, toggle).
+            this.refresh3DForCurrentPose();
         }
 
         if (this._shouldMarkMutations) {
@@ -4985,6 +5014,10 @@ export default class PoseEditMode extends GameMode {
     private _startSolvingTime: number;
     protected _curTargetIndex: number = 0;
     private _shouldMarkMutations: boolean = false;
+    // RNAPro demo: the sequence + PDB currently shown in the 3D view, so refresh3DForCurrentPose()
+    // only morphs on an actual change and knows what to morph "from".
+    private _pose3DShownSeq?: string;
+    private _pose3DShownPdb?: string;
 
     private _seqStacks: UndoBlock[][];
     protected _targetPairs: SecStruct[] = [];

@@ -309,6 +309,7 @@ export default class Pose3DDialog extends WindowDialog<void> {
         morphFrom?: number[] | null,
         morphTo?: number[] | null
     ): Promise<void> {
+        const gen = ++this._updateGen; // supersede any in-flight morph (rapid undo/redo)
         this.sequence.value = sequence;
         this.secstruct.value = secstruct;
         this._structureFile = new File([pdbText], 'rnapro.pdb');
@@ -318,6 +319,7 @@ export default class Pose3DDialog extends WindowDialog<void> {
         // Build the morphing frames without base-pair bonds to avoid white-oval artifacts.
         if (willMorph) this.secstruct.value = noPairs;
         await this.loadStructure(false);
+        if (this._updateGen !== gen) return; // a newer updateStructure took over
         this.secstruct.value = secstruct; // restore the real secstruct (for tooltips/coloring)
 
         const structure = (this._component as StructureComponent | null)?.structure;
@@ -343,6 +345,7 @@ export default class Pose3DDialog extends WindowDialog<void> {
         const startTime = (typeof performance !== 'undefined' ? performance.now() : 0);
         await new Promise<void>((resolve) => {
             const step = (now: number) => {
+                if (this._updateGen !== gen) { resolve(); return; } // superseded -> stop cleanly
                 const raw = Math.min(1, (now - startTime) / DURATION_MS);
                 const e = raw < 0.5 ? 2 * raw * raw : 1 - ((-2 * raw + 2) ** 2) / 2;
                 for (let i = 0; i < 3 * n; i++) coords[i] = morphFrom[i] + (morphTo[i] - morphFrom[i]) * e;
@@ -354,6 +357,7 @@ export default class Pose3DDialog extends WindowDialog<void> {
             };
             requestAnimationFrame(step);
         });
+        if (this._updateGen !== gen) return;
 
         // Settled: restore base-pair bonds at the final positions.
         this.applyRepresentations(secstruct);
@@ -554,4 +558,5 @@ export default class Pose3DDialog extends WindowDialog<void> {
     private _sparkGroup: SparkGroup;
     private _rnaproControls = false;
     private _rnaproStatus?: TextBalloon;
+    private _updateGen = 0;
 }

@@ -381,6 +381,14 @@ export default class EternaApp extends FlashbangApp {
                 mode?.openRNAPro3D?.();
             },
             downloadPDB: () => downloadRNAProPDB(),
+            undo: () => {
+                const mode = this._modeStack.topMode as unknown as {moveUndoStackBackward?: () => void};
+                mode?.moveUndoStackBackward?.();
+            },
+            redo: () => {
+                const mode = this._modeStack.topMode as unknown as {moveUndoStackForward?: () => void};
+                mode?.moveUndoStackForward?.();
+            },
             getFolderName: () => {
                 const mode = this._modeStack.topMode as unknown as {
                     _folderSwitcher?: {selectedFolder?: {value?: {name?: string}}};
@@ -403,7 +411,9 @@ export default class EternaApp extends FlashbangApp {
                     open: !!dlg,
                     naturalMode: mode?.isNaturalMode ?? null,
                     sequence: dlg?.sequence?.value?.sequenceString?.() ?? null,
-                    atomCount: dlg?._component?.structure?.atomCount ?? null
+                    atomCount: dlg?._component?.structure?.atomCount ?? null,
+                    // the current 2D pose sequence, to assert 3D stays in sync with 2D
+                    poseSequence: mode?.getCurrentUndoBlock?.(0)?.sequence?.sequenceString?.() ?? null
                 };
             }
         };
