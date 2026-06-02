@@ -31,6 +31,8 @@ import LinearFoldV from './folding/LinearFoldV';
 import NuPACK from './folding/NuPACK';
 import RNAFoldBasic from './folding/RNAFoldBasic';
 import RNet from './folding/RNet';
+import RNAProFolder from './folding/RNAProFolder';
+import Sequence from './rnatypes/Sequence';
 import Vienna from './folding/Vienna';
 import Vienna2 from './folding/Vienna2';
 import LayoutEngine from './layout/LayoutEngine';
@@ -49,8 +51,8 @@ import PuzzleEditMode from './mode/PuzzleEdit/PuzzleEditMode';
 import GameClient from './net/GameClient';
 import ObservabilityManager from './observability/ObservabilityManager';
 import BaseAssets from './pose2D/BaseAssets';
-import Puzzle from './puzzle/Puzzle';
-import PuzzleManager from './puzzle/PuzzleManager';
+import Puzzle, {PuzzleType} from './puzzle/Puzzle';
+import PuzzleManager, {PuzzleJSON} from './puzzle/PuzzleManager';
 import Solution from './puzzle/Solution';
 import SolutionManager from './puzzle/SolutionManager';
 import BitmapManager from './resources/BitmapManager';
@@ -105,6 +107,7 @@ export enum InitialAppMode {
     SOLUTION_COPY_AND_VIEW = 'solution_copy_and_view', // load a solution into PoseEditMode
     DESIGN_BROWSER = 'design_browser', // load a puzzle into DesignBrowserMode
     TEST = 'test', // load the debugging test mode
+    RNAPRO_DEMO = 'rnapro_demo', // load the local RNAPro 3D-structure demo puzzle (no server)
 }
 
 interface EternaAppParams {
@@ -284,6 +287,8 @@ export default class EternaApp extends FlashbangApp {
                     case InitialAppMode.TEST:
                         this._modeStack.unwindToMode(new TestMode());
                         return Promise.resolve();
+                    case InitialAppMode.RNAPRO_DEMO:
+                        return this.loadRNAProDemo();
                     case InitialAppMode.PUZZLEMAKER:
                         return this.loadPuzzleEditor(this._params.puzzleEditNumTargets);
                     case InitialAppMode.PUZZLE:
@@ -342,6 +347,51 @@ export default class EternaApp extends FlashbangApp {
         ROPWait.dispose();
         BaseGlow.dispose();
         Cache.reset();
+    }
+
+    /**
+     * Loads the local RNAPro 3D-structure demo: a tiny 8-nt single-target puzzle defined inline
+     * (no server / DB), folded by the RNAPro engine. See src/eterna/folding/RNAProFolder.ts.
+     */
+    public async loadRNAProDemo() {
+        const demoPuzzle: PuzzleJSON = {
+            id: '8888',
+            title: 'RNAPro demo (8 nt)',
+            // EXPERIMENTAL so solving doesn't try to submit to the (absent) server — see
+            // PoseEditMode.checkSolved() — and so we skip the mission countdown.
+            type: PuzzleType.EXPERIMENTAL,
+            body: 'Edit the sequence — RNAPro predicts a 3D structure; its secondary structure '
+                + '(via x3dna-dssr) is shown here, and the 3D structure in the 3D view.',
+            username: 'rnapro-demo',
+            secstruct: '((....))',
+            beginseq: 'GGGAAACC',
+            usetails: '0',
+            folder: RNAProFolder.NAME
+        };
+        const puzzle = await PuzzleManager.instance.parsePuzzle(demoPuzzle);
+        await this.loadPoseEdit(puzzle, {initialFolder: RNAProFolder.NAME});
+
+        // Expose a tiny hook for the demo control panel (defined in index.html.tmpl) and tests.
+        (window as unknown as {__eternaDemo?: unknown}).__eternaDemo = {
+            open3D: () => {
+                const mode = this._modeStack.topMode as unknown as {openRNAPro3D?: () => void};
+                mode?.openRNAPro3D?.();
+            },
+            getFolderName: () => {
+                const mode = this._modeStack.topMode as unknown as {
+                    _folderSwitcher?: {selectedFolder?: {value?: {name?: string}}};
+                };
+                return mode?._folderSwitcher?.selectedFolder?.value?.name ?? null;
+            },
+            // Programmatically change the sequence and re-fold (used by the demo's tests and handy
+            // for scripting). Goes through the normal paste path so it triggers an RNAPro fold.
+            setSequence: (seqStr: string) => {
+                const mode = this._modeStack.topMode as unknown as {
+                    pasteSequence?: (s: Sequence, idx: number) => Promise<void>;
+                };
+                return mode?.pasteSequence?.(Sequence.fromSequenceString(seqStr), 0);
+            }
+        };
     }
 
     /** Creates a PoseEditMode and removes all other modes from the stack */
@@ -642,6 +692,7 @@ export default class EternaApp extends FlashbangApp {
             EternaFold.create(),
             EternaFoldThreshknot.create(),
             RNet.create(),
+            RNAProFolder.create(),
             RNAFoldBasic.create()
         ]).then((folders: (Folder | null)[]) => {
             log.info('Folding engines intialized');

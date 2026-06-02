@@ -351,6 +351,39 @@ export default class PoseEditMode extends GameMode {
         return dialogRef;
     }
 
+    /**
+     * Opens a 3D view of the latest RNAPro-predicted structure (stashed on window.__rnaproLatest by
+     * RNAProFolder). Re-opening after an edit shows the newest structure. Used by the RNAPro demo's
+     * control panel; see EternaApp.loadRNAProDemo(). Mirrors the wiring in GameMode.addPose3D().
+     */
+    public openRNAPro3D(): void {
+        const latest = (window as unknown as {
+            __rnaproLatest?: {pdb?: string; secstruct?: string};
+        }).__rnaproLatest;
+        if (!latest || !latest.pdb) {
+            this.showNotification('No RNAPro structure yet — edit the sequence to fold first.');
+            return;
+        }
+        const file = new File([latest.pdb], 'rnapro.pdb');
+        const ublk = this.getCurrentUndoBlock(0);
+        const secstruct = latest.secstruct
+            ? SecStruct.fromParens(latest.secstruct, true)
+            : ublk.targetPairs;
+        const dialog = this.showDialog(
+            new Pose3DDialog(file, ublk.sequence, secstruct, this._poses[0].customNumbering),
+            'Pose3DDialog'
+        );
+        if (!dialog) return; // already open
+        this._pose3D = dialog;
+        dialog.regs.add(dialog.baseClicked.connect(
+            (i: number) => this._poses[0].simulateMousedownCallback(i)
+        ));
+        dialog.regs.add(dialog.baseHovered.connect(
+            (i: number) => this._poses[0].on3DPickingMouseMoved(i)
+        ));
+        dialog.closed.then(() => { if (this._pose3D === dialog) this._pose3D = null; });
+    }
+
     private get _solDialogOffset(): number {
         return this._solutionView !== undefined && this._solutionView.container.visible
             ? ViewSolutionOverlay.theme.width : 0;
