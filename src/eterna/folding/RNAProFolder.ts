@@ -22,12 +22,31 @@ export interface RNAProResult {
     pdb: string;
     c1Coords: number[][] | null;
     walltimeS: number | null;
+    // Morph endpoints (flat [x,y,z,...] in the new PDB's atom order) for animating between the
+    // previous and new 3D structure. Null on the first fold (no previous) or if alignment failed.
+    morphFrom: number[] | null;
+    morphTo: number[] | null;
 }
 
 const _store = new Map<string, RNAProResult>();
 
 export function getRNAProResult(seqStr: string): RNAProResult | undefined {
     return _store.get(seqStr);
+}
+
+/** Download the latest predicted PDB as a file (used by the demo's 3D-panel button and tests). */
+export function downloadRNAProPDB(): void {
+    if (typeof window === 'undefined') return;
+    const r = (window as unknown as {__rnaproLatest?: RNAProResult}).__rnaproLatest;
+    if (!r || !r.pdb) return;
+    const blob = new Blob([r.pdb], {type: 'chemical/x-pdb'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `rnapro_${r.sequence}.pdb`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
 }
 
 function publishResult(result: RNAProResult): void {
@@ -73,7 +92,9 @@ export default class RNAProFolder extends Folder<false> {
         const cached = this.getCache(key) as SecStruct;
         if (cached != null) {
             const prev = _store.get(seqStr);
-            if (prev) publishResult(prev); // re-broadcast so the 3D view / panel re-sync
+            // Re-broadcast so the 2D panel re-syncs, but without morph arrays (they were computed
+            // against a now-stale previous structure) — the 3D view just reloads statically.
+            if (prev) publishResult({...prev, morphFrom: null, morphTo: null});
             return cached.slice(0);
         }
 
@@ -90,7 +111,9 @@ export default class RNAProFolder extends Folder<false> {
                 secstruct: dotBracket,
                 pdb: data.pdb,
                 c1Coords: data.c1_coords ?? null,
-                walltimeS: data.walltime_s ?? null
+                walltimeS: data.walltime_s ?? null,
+                morphFrom: data.morph_from ?? null,
+                morphTo: data.morph_to ?? null
             });
             const ss = SecStruct.fromParens(dotBracket, true);
             this.putCache(key, ss.slice(0));

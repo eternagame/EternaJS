@@ -7,10 +7,12 @@ import {Assert, Flashbang, SpriteObject} from 'flashbang';
 import {
     autoLoad,
     Box3,
-    Component, getFileInfo, Matrix4, MouseActions, ParserRegistry, PickingProxy, Stage, Structure, Vector2, Vector3
+    Component, getFileInfo, Matrix4, MouseActions, ParserRegistry, PickingProxy, Stage, Structure,
+    StructureComponent, Vector2, Vector3
 } from 'ngl';
 import {Container, Sprite} from 'pixi.js';
 import TextBalloon from 'eterna/ui/TextBalloon';
+import GameButton from 'eterna/ui/GameButton';
 import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer';
 import {OutlinePass} from 'three/examples/jsm/postprocessing/OutlinePass';
 import {ShaderPass} from 'three/examples/jsm/postprocessing/ShaderPass';
@@ -37,8 +39,12 @@ export default class Pose3DDialog extends WindowDialog<void> {
     public readonly baseHovered: Signal<number> = new Signal();
     public readonly sequence: Value<Sequence>;
     public readonly secstruct: Value<SecStruct>;
-    public readonly structureFile: string | File;
     public currentColor: RNABase | RNAPaint = RNABase.ADENINE;
+
+    // Backing field for structureFile so the RNAPro demo can swap in a freshly predicted structure
+    // (see updateStructure). Exposed read-only via the getter below for back-compat.
+    private _structureFile: string | File;
+    public get structureFile(): string | File { return this._structureFile; }
 
     constructor(
         structureFile: string | File,
@@ -54,7 +60,7 @@ export default class Pose3DDialog extends WindowDialog<void> {
             windowBgAlpha: 0.6
         });
 
-        this.structureFile = structureFile;
+        this._structureFile = structureFile;
         this.secstruct = new Value(secstruct);
         this.sequence = new Value(sequence);
         this._customNumbering = customNumbering;
@@ -257,21 +263,18 @@ export default class Pose3DDialog extends WindowDialog<void> {
         );
     }
 
-    private loadStructure() {
+    private loadStructure(autoView: boolean = true): Promise<void> {
         this._nglStage.removeAllComponents();
         this._component = null;
 
         this._nglStage.defaultFileParams = {firstModelOnly: true};
-        this._nglStage
-            .loadFile(this.structureFile)
+        return this._nglStage
+            .loadFile(this._structureFile)
             .then((component: void | Component) => {
                 if (component) {
                     this._component = component;
-                    this._colorScheme = createColorScheme(this.sequence);
-                    const representationID = createEternaRepresentation(this.sequence, this.secstruct);
-                    this._component.addRepresentation(representationID, {vScale: 0.5, color: this._colorScheme});
-                    this._component.addRepresentation('backbone', {color: 0xff8000});
-                    this._component.autoView();
+                    this.applyRepresentations(this.secstruct.value);
+                    if (autoView) this._component.autoView();
                     // This forces NGL's debug bounding box mesh to be updated and its bounding sphere
                     // computed. Without doing this, rotateDrag won't actually rotate around the center
                     // of the model. Is there a better way to do this that isn't taking advantage of debug
@@ -279,6 +282,107 @@ export default class Pose3DDialog extends WindowDialog<void> {
                     this._nglStage.viewer.updateHelper();
                 }
             });
+    }
+
+    /** (Re)build the Eterna + backbone representations for the given secondary structure. */
+    private applyRepresentations(secstruct: SecStruct) {
+        if (!this._component) return;
+        this._component.removeAllRepresentations();
+        this._colorScheme = createColorScheme(this.sequence);
+        const representationID = createEternaRepresentation(this.sequence, new Value(secstruct));
+        this._component.addRepresentation(representationID, {vScale: 0.5, color: this._colorScheme});
+        this._component.addRepresentation('backbone', {color: 0xff8000});
+    }
+
+    /**
+     * Swap in a freshly predicted structure (used by the RNAPro demo's auto-refresh in natural mode).
+     * If morph endpoints are provided (flat [x,y,z,...] in the new structure's atom order), animates a
+     * smooth transition from the previous structure's positions to the new ones; otherwise just reloads.
+     * The camera is preserved (no autoView) so successive folds don't jump. During the morph the
+     * base-pair "bonds" are suppressed (they'd stretch into big white ovals across moving atoms); they
+     * reappear at rest once the structure settles.
+     */
+    public async updateStructure(
+        pdbText: string,
+        sequence: Sequence,
+        secstruct: SecStruct,
+        morphFrom?: number[] | null,
+        morphTo?: number[] | null
+    ): Promise<void> {
+        this.sequence.value = sequence;
+        this.secstruct.value = secstruct;
+        this._structureFile = new File([pdbText], 'rnapro.pdb');
+
+        const willMorph = !!(morphFrom && morphTo);
+        const noPairs = SecStruct.fromParens('.'.repeat(sequence.length), false);
+        // Build the morphing frames without base-pair bonds to avoid white-oval artifacts.
+        if (willMorph) this.secstruct.value = noPairs;
+        await this.loadStructure(false);
+        this.secstruct.value = secstruct; // restore the real secstruct (for tooltips/coloring)
+
+        const structure = (this._component as StructureComponent | null)?.structure;
+        if (!structure) return;
+        const n = structure.atomCount;
+        if (!morphFrom || !morphTo || morphFrom.length !== 3 * n || morphTo.length !== 3 * n) {
+            // No usable morph (first fold, alignment failed, or atom-count mismatch): show final.
+            this.applyRepresentations(secstruct);
+            this._nglStage.viewer.requestRender();
+            return;
+        }
+
+        // Set the first frame synchronously so we never flash the final structure before morphing.
+        const coords = new Float32Array(3 * n);
+        for (let i = 0; i < 3 * n; i++) coords[i] = morphFrom[i];
+        structure.updatePosition(coords);
+        this._component?.updateRepresentations({position: true});
+        this._nglStage.viewer.requestRender();
+
+        // Ease-in-out lerp from the previous positions to the new ones, matching the 2D fold
+        // animation duration (Pose2D._foldDuration = 0.7s).
+        const DURATION_MS = 700;
+        const startTime = (typeof performance !== 'undefined' ? performance.now() : 0);
+        await new Promise<void>((resolve) => {
+            const step = (now: number) => {
+                const raw = Math.min(1, (now - startTime) / DURATION_MS);
+                const e = raw < 0.5 ? 2 * raw * raw : 1 - ((-2 * raw + 2) ** 2) / 2;
+                for (let i = 0; i < 3 * n; i++) coords[i] = morphFrom[i] + (morphTo[i] - morphFrom[i]) * e;
+                structure.updatePosition(coords);
+                this._component?.updateRepresentations({position: true});
+                this._nglStage.viewer.requestRender();
+                if (raw < 1) requestAnimationFrame(step);
+                else resolve();
+            };
+            requestAnimationFrame(step);
+        });
+
+        // Settled: restore base-pair bonds at the final positions.
+        this.applyRepresentations(secstruct);
+        structure.updatePosition(coords);
+        this._component?.updateRepresentations({position: true});
+        this._nglStage.viewer.requestRender();
+    }
+
+    /**
+     * Demo-only: add a status line + a "Download PDB" button into this 3D window, so the RNAPro demo
+     * has a single panel instead of a separate floating one.
+     */
+    public enableRNAProControls(onDownload: () => void) {
+        if (this._rnaproControls) return;
+        this._rnaproControls = true;
+
+        const downloadBtn = new GameButton().label('Download PDB', 11);
+        downloadBtn.display.position.set(10, 40);
+        downloadBtn.clicked.connect(() => onDownload());
+        this.addObject(downloadBtn, this._window.content);
+
+        this._rnaproStatus = new TextBalloon('', 0x0, 0.4);
+        this._rnaproStatus.display.position.set(10, 72);
+        this.addObject(this._rnaproStatus, this._window.content);
+    }
+
+    /** Update the demo status line (sequence / 2D / fold time). */
+    public setRNAProStatus(text: string) {
+        this._rnaproStatus?.setText(text, 11, 0xFFFFFF);
     }
 
     protected dispose() {
@@ -448,4 +552,6 @@ export default class Pose3DDialog extends WindowDialog<void> {
     private _effectFXAA: ShaderPass;
     private _baseHighlights: BaseHighlightGroup;
     private _sparkGroup: SparkGroup;
+    private _rnaproControls = false;
+    private _rnaproStatus?: TextBalloon;
 }

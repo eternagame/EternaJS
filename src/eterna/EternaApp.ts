@@ -31,7 +31,7 @@ import LinearFoldV from './folding/LinearFoldV';
 import NuPACK from './folding/NuPACK';
 import RNAFoldBasic from './folding/RNAFoldBasic';
 import RNet from './folding/RNet';
-import RNAProFolder from './folding/RNAProFolder';
+import RNAProFolder, {downloadRNAProPDB} from './folding/RNAProFolder';
 import Sequence from './rnatypes/Sequence';
 import Vienna from './folding/Vienna';
 import Vienna2 from './folding/Vienna2';
@@ -51,7 +51,7 @@ import PuzzleEditMode from './mode/PuzzleEdit/PuzzleEditMode';
 import GameClient from './net/GameClient';
 import ObservabilityManager from './observability/ObservabilityManager';
 import BaseAssets from './pose2D/BaseAssets';
-import Puzzle, {PuzzleType} from './puzzle/Puzzle';
+import Puzzle, {PuzzleType, PoseState} from './puzzle/Puzzle';
 import PuzzleManager, {PuzzleJSON} from './puzzle/PuzzleManager';
 import Solution from './puzzle/Solution';
 import SolutionManager from './puzzle/SolutionManager';
@@ -369,14 +369,18 @@ export default class EternaApp extends FlashbangApp {
             folder: RNAProFolder.NAME
         };
         const puzzle = await PuzzleManager.instance.parsePuzzle(demoPuzzle);
+        // Default to natural mode so the 3D view shows what the sequence folds into (and so the
+        // 3D auto-refresh — which is gated on natural mode — works out of the box).
+        puzzle.defaultMode = PoseState.NATIVE;
         await this.loadPoseEdit(puzzle, {initialFolder: RNAProFolder.NAME});
 
-        // Expose a tiny hook for the demo control panel (defined in index.html.tmpl) and tests.
+        // Expose a tiny hook for tests / scripting.
         (window as unknown as {__eternaDemo?: unknown}).__eternaDemo = {
             open3D: () => {
                 const mode = this._modeStack.topMode as unknown as {openRNAPro3D?: () => void};
                 mode?.openRNAPro3D?.();
             },
+            downloadPDB: () => downloadRNAProPDB(),
             getFolderName: () => {
                 const mode = this._modeStack.topMode as unknown as {
                     _folderSwitcher?: {selectedFolder?: {value?: {name?: string}}};
@@ -390,8 +394,33 @@ export default class EternaApp extends FlashbangApp {
                     pasteSequence?: (s: Sequence, idx: number) => Promise<void>;
                 };
                 return mode?.pasteSequence?.(Sequence.fromSequenceString(seqStr), 0);
+            },
+            // Introspect the open 3D dialog (for tests): the structure the NGL view is currently showing.
+            get3DInfo: () => {
+                const mode = this._modeStack.topMode as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+                const dlg = mode?._pose3D;
+                return {
+                    open: !!dlg,
+                    naturalMode: mode?.isNaturalMode ?? null,
+                    sequence: dlg?.sequence?.value?.sequenceString?.() ?? null,
+                    atomCount: dlg?._component?.structure?.atomCount ?? null
+                };
             }
         };
+
+        // Auto-show the 3D view once the first prediction is available (and the mode is ready).
+        const w = window as unknown as {__rnaproLatest?: {pdb?: string}};
+        let shown3D = false;
+        const autoShow = () => {
+            if (shown3D || !w.__rnaproLatest?.pdb) return;
+            const mode = this._modeStack.topMode as unknown as {openRNAPro3D?: () => void};
+            if (!mode?.openRNAPro3D) return;
+            shown3D = true;
+            window.removeEventListener('rnapro:structure', autoShow);
+            mode.openRNAPro3D();
+        };
+        window.addEventListener('rnapro:structure', autoShow);
+        autoShow(); // in case the first fold already completed
     }
 
     /** Creates a PoseEditMode and removes all other modes from the stack */

@@ -166,67 +166,17 @@
         }
     }
 
-    // ---- RNAPro demo control panel (only when ?rnaprodemo is present) ----
-    // Shows the latest RNAPro prediction status, opens the 3D view, and downloads the PDB.
-    function setupRNAProPanel() {
+    // ---- RNAPro demo (only when ?rnaprodemo is present) ----
+    // The 3D view auto-shows and hosts the status + Download PDB controls (see EternaApp /
+    // Pose3DDialog). Here we just declutter by hiding the standard chat panel.
+    function setupRNAProDemo() {
         if (!params.has("rnaprodemo")) return;
-
-        // Hide the standard chat panel for a cleaner local demo (it talks to the live server).
         const chat = document.getElementById("chat-container");
         if (chat) chat.style.display = "none";
-
-        const panel = document.createElement("div");
-        panel.id = "rnapro-panel";
-        panel.style.cssText = "position:fixed;left:12px;bottom:12px;z-index:99999;"
-            + "background:rgba(2,35,71,0.92);color:#fff;font:13px/1.4 Helvetica,Arial,sans-serif;"
-            + "padding:12px 14px;border:1px solid #2a6;border-radius:8px;max-width:340px;";
-        panel.innerHTML =
-            '<div style="font-weight:bold;font-size:14px;margin-bottom:6px;">RNAPro demo</div>'
-            + '<div id="rnapro-status">Waiting for first fold…</div>'
-            + '<div style="margin-top:10px;">'
-            + '<button id="rnapro-show3d" disabled style="margin-right:8px;padding:6px 10px;cursor:pointer;">Show / refresh 3D</button>'
-            + '<button id="rnapro-download" disabled style="padding:6px 10px;cursor:pointer;">Download PDB</button>'
-            + '</div>';
-        document.body.appendChild(panel);
-
-        const statusEl = panel.querySelector("#rnapro-status");
-        const show3dBtn = panel.querySelector("#rnapro-show3d");
-        const downloadBtn = panel.querySelector("#rnapro-download");
-
-        window.addEventListener("rnapro:structure", (e) => {
-            const r = e.detail || window.__rnaproLatest;
-            if (!r) return;
-            statusEl.innerHTML = "seq: <b>" + r.sequence + "</b><br>2D (dssr): <b>" + r.secstruct
-                + "</b><br>" + (r.walltimeS != null ? ("RNAPro " + r.walltimeS + "s") : "");
-            show3dBtn.disabled = false;
-            downloadBtn.disabled = false;
-        });
-
-        // If the first fold already completed before this listener attached, show it now.
-        if (window.__rnaproLatest) {
-            window.dispatchEvent(new CustomEvent("rnapro:structure", {detail: window.__rnaproLatest}));
-        }
-
-        show3dBtn.addEventListener("click", () => {
-            if (window.__eternaDemo && window.__eternaDemo.open3D) window.__eternaDemo.open3D();
-        });
-
-        downloadBtn.addEventListener("click", () => {
-            const r = window.__rnaproLatest;
-            if (!r || !r.pdb) return;
-            const blob = new Blob([r.pdb], {type: "chemical/x-pdb"});
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
-            a.download = "rnapro_" + r.sequence + ".pdb";
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(a.href);
-        });
     }
 
     window.createApp = createApp;
-    createApp().then(setupRNAProPanel);
+    createApp().then(setupRNAProDemo);
 </script>
 </body>
 </html>
