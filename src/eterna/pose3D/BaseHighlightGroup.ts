@@ -83,6 +83,17 @@ export default class BaseHighlightGroup extends Group {
             .map((highlight) => highlight.mesh);
     }
 
+    /**
+     * Rebuild the changed-base outline meshes from the bases' CURRENT positions (keeping their
+     * expiry timers). Call this while the structure is morphing so the white outlines travel with
+     * their bases instead of hanging at the pre-morph location.
+     */
+    public repositionChangedHighlights() {
+        for (const baseIndex of Array.from(this._changeHighlights.keys())) {
+            this.addChanged(baseIndex, false);
+        }
+    }
+
     private clearChangedHighlight(baseIndex: number) {
         const oldHighlight = this._changeHighlights.get(baseIndex);
         if (oldHighlight) {

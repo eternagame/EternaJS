@@ -337,11 +337,12 @@ export default class Pose3DDialog extends WindowDialog<void> {
         for (let i = 0; i < 3 * n; i++) coords[i] = morphFrom[i];
         structure.updatePosition(coords);
         this._component?.updateRepresentations({position: true});
+        this._baseHighlights.repositionChangedHighlights(); // outlines start with their bases
         this._nglStage.viewer.requestRender();
 
         // Ease-in-out lerp from the previous positions to the new ones, matching the 2D fold
-        // animation duration (Pose2D._foldDuration = 0.7s).
-        const DURATION_MS = 700;
+        // animation duration (Pose2D._foldDuration = 0.7s). Overridable via window.__rnaproMorphMs.
+        const DURATION_MS = (window as unknown as {__rnaproMorphMs?: number}).__rnaproMorphMs || 700;
         const startTime = (typeof performance !== 'undefined' ? performance.now() : 0);
         await new Promise<void>((resolve) => {
             const step = (now: number) => {
@@ -351,6 +352,7 @@ export default class Pose3DDialog extends WindowDialog<void> {
                 for (let i = 0; i < 3 * n; i++) coords[i] = morphFrom[i] + (morphTo[i] - morphFrom[i]) * e;
                 structure.updatePosition(coords);
                 this._component?.updateRepresentations({position: true});
+                this._baseHighlights.repositionChangedHighlights(); // outlines track their bases
                 this._nglStage.viewer.requestRender();
                 if (raw < 1) requestAnimationFrame(step);
                 else resolve();
@@ -363,6 +365,7 @@ export default class Pose3DDialog extends WindowDialog<void> {
         this.applyRepresentations(secstruct);
         structure.updatePosition(coords);
         this._component?.updateRepresentations({position: true});
+        this._baseHighlights.repositionChangedHighlights();
         this._nglStage.viewer.requestRender();
     }
 
