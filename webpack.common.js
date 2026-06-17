@@ -52,6 +52,8 @@ module.exports = {
         // Add '.ts' and '.tsx' as resolvable extensions.
         extensions: [".ts", ".tsx", ".js", ".json"],
         alias: {
+            stream: require.resolve('stream-browserify'),
+            'irc-framework/src/transports/websocket': 'irc-framework/dist/browser/src/transports/websocket.js',
             assets: path.resolve(__dirname, 'assets/'),
             signals: path.resolve(__dirname, 'src/signals'),
             flashbang: path.resolve(__dirname, 'src/flashbang'),
@@ -144,6 +146,11 @@ module.exports = {
         // https://github.com/danethurber/webpack-manifest-plugin#hooks-options
         new WebpackManifestPlugin({
             filter: (item) => item.isInitial
+        }),
+
+        new webpack.DefinePlugin({
+            // `irc-framework` imports `utils` which tries to do this lookup
+            'process.env.NODE_DEBUG': 'undefined'
         }),
     ]
 };
