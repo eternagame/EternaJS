@@ -52,6 +52,7 @@ import TimerConstraint from 'eterna/constraints/constraints/TimerConstraint';
 import {MaximumEnergyConstraint, MinimumEnergyConstraint} from 'eterna/constraints/constraints/EnergyConstraint';
 import MinimumStackLengthConstraint from 'eterna/constraints/constraints/MinimumStackLengthConstraint';
 import MaximumLoopLengthConstraint from 'eterna/constraints/constraints/MaximumLoopLengthConstraint';
+import MinimumCrossedPercentConstraint from 'eterna/constraints/constraints/MinimumCrossedPercentConstraint';
 import SolutionManager from './SolutionManager';
 import Puzzle, {PuzzleType} from './Puzzle';
 
@@ -428,6 +429,9 @@ export default class PuzzleManager {
                         break;
                     case MaximumLoopLengthConstraint.NAME:
                         constraints.push(new MaximumLoopLengthConstraint(Number(parameter)));
+                        break;
+                    case MinimumCrossedPercentConstraint.NAME:
+                        constraints.push(new MinimumCrossedPercentConstraint(Number(parameter)));
                         break;
                     default:
                         log.warn(`Unknown constraint ${name} - skipping`);
