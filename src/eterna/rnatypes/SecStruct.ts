@@ -242,6 +242,8 @@ export default class SecStruct {
             }
         }
 
+        if (shortlen === Infinity) return 0;
+
         return shortlen;
     }
 
