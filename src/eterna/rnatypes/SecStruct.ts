@@ -245,6 +245,28 @@ export default class SecStruct {
         return shortlen;
     }
 
+    public getLongestLoopLength(): number {
+        let longlen = 0;
+
+        let loopStart = -1;
+
+        for (let ii = 0; ii < this._pairs.length; ii++) {
+            if (this._pairs[ii] === -1) {
+                if (loopStart < 0) {
+                    loopStart = ii;
+                }
+
+                if (ii - loopStart > longlen) {
+                    longlen = ii - loopStart;
+                }
+            } else {
+                loopStart = -1;
+            }
+        }
+
+        return longlen;
+    }
+
     /**
      * Set the pairs based on a passed in dot-bracket string, with or without
      * pseudoknots. Used both by the filtering functions and the constructor.
