@@ -11,11 +11,11 @@ import Eterna from 'eterna/Eterna';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 
-interface MinStackConstraintStatus extends BaseConstraintStatus{
+interface MinExistStackConstraintStatus extends BaseConstraintStatus{
     currentLength: number;
 }
 
-export default class MinimumExistingStackLengthConstraint extends Constraint<MinStackConstraintStatus> {
+export default class MinimumExistingStackLengthConstraint extends Constraint<MinExistStackConstraintStatus> {
     public static readonly NAME = 'STACK';
     public readonly minLength: number;
 
@@ -24,7 +24,7 @@ export default class MinimumExistingStackLengthConstraint extends Constraint<Min
         this.minLength = minLength;
     }
 
-    public evaluate(context: ConstraintContext): MinStackConstraintStatus {
+    public evaluate(context: ConstraintContext): MinExistStackConstraintStatus {
         // TODO: Multistate?
         const undoBlock = context.undoBlocks[0];
         const pseudoknots = (undoBlock.targetConditions !== undefined
@@ -37,7 +37,7 @@ export default class MinimumExistingStackLengthConstraint extends Constraint<Min
         };
     }
 
-    public getConstraintBoxConfig(status: MinStackConstraintStatus): ConstraintBoxConfig {
+    public getConstraintBoxConfig(status: MinExistStackConstraintStatus): ConstraintBoxConfig {
         const statText = ConstraintBox.createTextStyle()
             .append(status.currentLength.toString(), {fill: status.satisfied ? 0x00aa00 : 0xaa0000})
             .append(`/${this.minLength}`);
@@ -47,7 +47,8 @@ export default class MinimumExistingStackLengthConstraint extends Constraint<Min
             tooltip: `You must have a stack with ${this.minLength} or more pairs.`,
             statText,
             icon: MinimumExistingStackLengthConstraint._icon,
-            drawBG: true
+            drawBG: true,
+            showOutline: true
         };
     }
 

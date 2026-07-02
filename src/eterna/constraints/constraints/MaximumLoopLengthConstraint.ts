@@ -8,11 +8,11 @@ import Eterna from 'eterna/Eterna';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 
-interface MinStackConstraintStatus extends BaseConstraintStatus{
+interface MaxLoopConstraintStatus extends BaseConstraintStatus{
     currentLength: number;
 }
 
-export default class MaximumLoopLengthConstraint extends Constraint<MinStackConstraintStatus> {
+export default class MaximumLoopLengthConstraint extends Constraint<MaxLoopConstraintStatus> {
     public static readonly NAME = 'MAX_LOOP';
     public readonly maxLength: number;
 
@@ -21,7 +21,7 @@ export default class MaximumLoopLengthConstraint extends Constraint<MinStackCons
         this.maxLength = maxLength;
     }
 
-    public evaluate(context: ConstraintContext): MinStackConstraintStatus {
+    public evaluate(context: ConstraintContext): MaxLoopConstraintStatus {
         // TODO: Multistate?
         const undoBlock = context.undoBlocks[0];
         const pseudoknots = (undoBlock.targetConditions !== undefined
@@ -34,7 +34,7 @@ export default class MaximumLoopLengthConstraint extends Constraint<MinStackCons
         };
     }
 
-    public getConstraintBoxConfig(status: MinStackConstraintStatus): ConstraintBoxConfig {
+    public getConstraintBoxConfig(status: MaxLoopConstraintStatus): ConstraintBoxConfig {
         const statText = ConstraintBox.createTextStyle()
             .append(status.currentLength.toString(), {fill: status.satisfied ? 0x00aa00 : 0xaa0000})
             .append(`/${this.maxLength}`);
@@ -44,7 +44,8 @@ export default class MaximumLoopLengthConstraint extends Constraint<MinStackCons
             tooltip: `All loops must have ${this.maxLength} or fewer bases.`,
             statText,
             icon: MaximumLoopLengthConstraint._icon,
-            drawBG: true
+            drawBG: true,
+            showOutline: true
         };
     }
 

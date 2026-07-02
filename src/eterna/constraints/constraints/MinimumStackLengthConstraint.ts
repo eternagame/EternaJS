@@ -46,7 +46,8 @@ export default class MinimumStackLengthConstraint extends Constraint<MinStackCon
             tooltip: `All stacks must have ${this.minLength} or more pairs.`,
             statText,
             icon: MinimumStackLengthConstraint._icon,
-            drawBG: true
+            drawBG: true,
+            showOutline: true
         };
     }
 

@@ -4,11 +4,11 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 
-interface MinStackConstraintStatus extends BaseConstraintStatus{
+interface MinCrossedConstraintStatus extends BaseConstraintStatus{
     currentPercent: number;
 }
 
-export default class MinimumCrossedPercentConstraint extends Constraint<MinStackConstraintStatus> {
+export default class MinimumCrossedPercentConstraint extends Constraint<MinCrossedConstraintStatus> {
     public static readonly NAME = 'MIN_CROSSED_PERCENT';
     public readonly minPercent: number;
 
@@ -17,7 +17,7 @@ export default class MinimumCrossedPercentConstraint extends Constraint<MinStack
         this.minPercent = minPercent;
     }
 
-    public evaluate(context: ConstraintContext): MinStackConstraintStatus {
+    public evaluate(context: ConstraintContext): MinCrossedConstraintStatus {
         // TODO: Multistate?
         const undoBlock = context.undoBlocks[0];
         const pseudoknots = (undoBlock.targetConditions !== undefined
@@ -31,7 +31,7 @@ export default class MinimumCrossedPercentConstraint extends Constraint<MinStack
         };
     }
 
-    public getConstraintBoxConfig(status: MinStackConstraintStatus): ConstraintBoxConfig {
+    public getConstraintBoxConfig(status: MinCrossedConstraintStatus): ConstraintBoxConfig {
         const statText = ConstraintBox.createTextStyle()
             .append(status.currentPercent.toFixed(2).replace(/\.?0+$/, ''), {fill: status.satisfied ? 0x00aa00 : 0xaa0000})
             .append(`/${this.minPercent}%`);
@@ -41,7 +41,8 @@ export default class MinimumCrossedPercentConstraint extends Constraint<MinStack
             tooltip: `At least ${this.minPercent}% of pairs must be crossed (involved in a pseudoknot).`,
             statText,
             icon: BitmapManager.getBitmap(Bitmaps.PseudoknotReqIcon),
-            drawBG: true
+            drawBG: true,
+            showOutline: true
         };
     }
 
