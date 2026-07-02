@@ -206,6 +206,46 @@ export default class SecStruct {
     }
 
     /**
+     * Return the longest stack length.
+     */
+    public shortestStackLength(): number {
+        let shortlen = Infinity;
+
+        let stackStart = -1;
+        let lastStackOther = -1;
+
+        for (let ii = 0; ii < this._pairs.length; ii++) {
+            if (this._pairs[ii] > ii) {
+                if (stackStart < 0) {
+                    stackStart = ii;
+                }
+
+                const isContinued = lastStackOther < 0 || this._pairs[ii] === lastStackOther - 1;
+
+                if (isContinued) {
+                    lastStackOther = this._pairs[ii];
+                } else {
+                    if (stackStart >= 0 && ii - stackStart < shortlen) {
+                        shortlen = ii - stackStart;
+                    }
+
+                    lastStackOther = -1;
+                    stackStart = -1;
+                }
+            } else {
+                if (stackStart >= 0 && ii - stackStart < shortlen) {
+                    shortlen = ii - stackStart;
+                }
+
+                stackStart = -1;
+                lastStackOther = -1;
+            }
+        }
+
+        return shortlen;
+    }
+
+    /**
      * Set the pairs based on a passed in dot-bracket string, with or without
      * pseudoknots. Used both by the filtering functions and the constructor.
      * @param parenthesis

@@ -30,7 +30,7 @@ import {
 import {
     MinimumAUConstraint, MinimumGCConstraint, MinimumGUConstraint, MinimumAnyPairConstraint
 } from 'eterna/constraints/constraints/MinimumPairConstraint';
-import MinimumStackLengthConstraint from 'eterna/constraints/constraints/MinimumStackLengthConstraint';
+import MinimumExistingStackLengthConstraint from 'eterna/constraints/constraints/MinimumExistingStackLengthConstraint';
 import TargetExpectedAccuracyConstraint from 'eterna/constraints/constraints/TargetExpectedAccuracyConstraint';
 import ScriptConstraint from 'eterna/constraints/constraints/ScriptConstraint';
 import SynthesisConstraint from 'eterna/constraints/constraints/SynthesisConstraint';
@@ -50,6 +50,7 @@ import {
 import TLoopConstraint from 'eterna/constraints/constraints/TLoopConstraint';
 import TimerConstraint from 'eterna/constraints/constraints/TimerConstraint';
 import {MaximumEnergyConstraint, MinimumEnergyConstraint} from 'eterna/constraints/constraints/EnergyConstraint';
+import MinimumStackLengthConstraint from 'eterna/constraints/constraints/MinimumStackLengthConstraint';
 import SolutionManager from './SolutionManager';
 import Puzzle, {PuzzleType} from './Puzzle';
 
@@ -366,8 +367,8 @@ export default class PuzzleManager {
                     case MinimumAnyPairConstraint.NAME:
                         constraints.push(new MinimumAnyPairConstraint(Number(parameter)));
                         break;
-                    case MinimumStackLengthConstraint.NAME:
-                        constraints.push(new MinimumStackLengthConstraint(Number(parameter)));
+                    case MinimumExistingStackLengthConstraint.NAME:
+                        constraints.push(new MinimumExistingStackLengthConstraint(Number(parameter)));
                         break;
                     case TargetExpectedAccuracyConstraint.NAME:
                         constraints.push(new TargetExpectedAccuracyConstraint(Number(parameter)));
@@ -421,6 +422,9 @@ export default class PuzzleManager {
                         constraints.push(new MinimumEnergyConstraint(Number(energy), Number(state)));
                         break;
                     }
+                    case MinimumStackLengthConstraint.NAME:
+                        constraints.push(new MinimumStackLengthConstraint(Number(parameter)));
+                        break;
                     default:
                         log.warn(`Unknown constraint ${name} - skipping`);
                 }
