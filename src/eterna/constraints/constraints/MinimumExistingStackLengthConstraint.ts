@@ -1,3 +1,4 @@
+import {UndoBlockParam} from 'eterna/UndoBlock';
 import {
     BlurFilter,
     Container, Graphics, Sprite, Texture
@@ -10,12 +11,12 @@ import Eterna from 'eterna/Eterna';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 
-interface MinStackConstraintStatus extends BaseConstraintStatus{
+interface MinExistStackConstraintStatus extends BaseConstraintStatus{
     currentLength: number;
 }
 
-export default class MinimumStackLengthConstraint extends Constraint<MinStackConstraintStatus> {
-    public static readonly NAME = 'MIN_STACK';
+export default class MinimumExistingStackLengthConstraint extends Constraint<MinExistStackConstraintStatus> {
+    public static readonly NAME = 'STACK';
     public readonly minLength: number;
 
     constructor(minLength: number) {
@@ -23,29 +24,29 @@ export default class MinimumStackLengthConstraint extends Constraint<MinStackCon
         this.minLength = minLength;
     }
 
-    public evaluate(context: ConstraintContext): MinStackConstraintStatus {
+    public evaluate(context: ConstraintContext): MinExistStackConstraintStatus {
         // TODO: Multistate?
         const undoBlock = context.undoBlocks[0];
         const pseudoknots = (undoBlock.targetConditions !== undefined
             && undoBlock.targetConditions['type'] === 'pseudoknot');
 
-        const stackLen = undoBlock.getPairs(EPars.DEFAULT_TEMPERATURE, pseudoknots).shortestStackLength();
+        const stackLen = undoBlock.getParam(UndoBlockParam.STACK, EPars.DEFAULT_TEMPERATURE, pseudoknots) as number;
         return {
             satisfied: stackLen >= this.minLength,
             currentLength: stackLen
         };
     }
 
-    public getConstraintBoxConfig(status: MinStackConstraintStatus): ConstraintBoxConfig {
+    public getConstraintBoxConfig(status: MinExistStackConstraintStatus): ConstraintBoxConfig {
         const statText = ConstraintBox.createTextStyle()
             .append(status.currentLength.toString(), {fill: status.satisfied ? 0x00aa00 : 0xaa0000})
             .append(`/${this.minLength}`);
 
         return {
             satisfied: status.satisfied,
-            tooltip: `All stacks must have ${this.minLength} or more pairs.`,
+            tooltip: `You must have a stack with ${this.minLength} or more pairs.`,
             statText,
-            icon: MinimumStackLengthConstraint._icon,
+            icon: MinimumExistingStackLengthConstraint._icon,
             drawBG: true,
             showOutline: true
         };
@@ -53,7 +54,7 @@ export default class MinimumStackLengthConstraint extends Constraint<MinStackCon
 
     public serialize(): [string, string] {
         return [
-            MinimumStackLengthConstraint.NAME,
+            MinimumExistingStackLengthConstraint.NAME,
             this.minLength.toString()
         ];
     }
