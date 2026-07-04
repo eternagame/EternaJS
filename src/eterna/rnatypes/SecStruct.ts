@@ -201,8 +201,8 @@ export default class SecStruct {
                     loopStart = ii;
                 }
 
-                if (ii - loopStart > longlen) {
-                    longlen = ii - loopStart;
+                if (ii - loopStart + 1 > longlen) {
+                    longlen = ii - loopStart + 1;
                 }
             } else {
                 loopStart = -1;
