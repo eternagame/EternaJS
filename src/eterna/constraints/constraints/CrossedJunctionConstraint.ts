@@ -10,12 +10,6 @@ interface CrossedJunctionStatus extends BaseConstraintStatus{
     crossedJunctions: number;
 }
 
-// See SecStruct.getCrossedPairs
-function crosses(a: [number, number], b: [number, number]): boolean {
-    return (a[0] < b[0] && b[0] < a[1] && a[1] < b[1])
-        || (b[0] < a[0] && a[0] < b[1] && b[1] < a[1]);
-}
-
 // Residues that participate in any crossed pair, from the full structure.
 function crossedResidues(pairs: SecStruct): Set<number> {
     const crossed = pairs.getCrossedPairs();
@@ -26,33 +20,36 @@ function crossedResidues(pairs: SecStruct): Set<number> {
     return res;
 }
 
-// Split pairs into non-crossing layers, longest stems first, so the nested
-// backbone occupies layer 0 and pseudoknot stems fall to later layers.
+// Split pairs into non-crossing layers
 function separateLayers(pairs: SecStruct): SecStruct[] {
-    const stems: [number, number][][] = pairs.stems();
-    // Sort stems first by length, then by which stem is positioned first
-    stems.sort(
-        (s1, s2) => (s2.length - s1.length) || Math.min(...s1.flat()) - Math.min(...s2.flat())
-    );
+    const dbn = pairs.getParenthesis({pseudoknots: true});
 
-    const layers: [number, number][][] = [];
-    for (const stem of stems) {
-        let placed = false;
-        for (const layer of layers) {
-            if (stem.every((bp) => layer.every((o) => !crosses(bp, o)))) {
-                layer.push(...stem);
-                placed = true;
-                break;
-            }
-        }
-        if (!placed) layers.push([...stem]);
+    const charsL = ['(', '[', '{', '<'];
+    const charsR = [')', ']', '}', '>'];
+    // Add a-z (left)/A-Z (right)
+    for (let i = 0; i < 26; i++) {
+        charsL.push(String.fromCharCode(i + 97));
+        charsR.push(String.fromCharCode(i + 65));
     }
 
-    return layers.map((layer) => {
-        const ss = new SecStruct(new Array<number>(pairs.length).fill(-1));
-        for (const [a, b] of layer) ss.setPairingPartner(a, b);
-        return ss;
-    });
+    const layers: SecStruct[] = [];
+
+    for (let i = 0; i < charsL.length; i++) {
+        // This dot-bracket comes from getParenthesis, which has a fixed order of characters.
+        // For performance, bail early once we've exhausted the characters present in the dot-bracket
+        if (!dbn.includes(charsL[i])) break;
+
+        layers.push(
+            SecStruct.fromParens(
+                dbn.split('').map(
+                    (char) => ((char === charsL[i] || char === charsR[i]) ? char : '.')
+                ).join(''),
+                true
+            )
+        );
+    }
+
+    return layers;
 }
 
 // Adjacent pairs and unpaired bases in the loop or quad spanning the open interval (lo, hi).
