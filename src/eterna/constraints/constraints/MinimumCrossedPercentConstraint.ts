@@ -33,8 +33,8 @@ export default class MinimumCrossedPercentConstraint extends Constraint<MinCross
 
     public getConstraintBoxConfig(status: MinCrossedConstraintStatus): ConstraintBoxConfig {
         const statText = ConstraintBox.createTextStyle()
-            .append(status.currentPercent.toFixed(2).replace(/\.?0+$/, ''), {fill: status.satisfied ? 0x00aa00 : 0xaa0000})
-            .append(`/${this.minPercent}%`);
+            .append(`${Math.floor(status.currentPercent).toString()}%`, {fill: status.satisfied ? 0x00aa00 : 0xaa0000})
+            .append(`>= ${this.minPercent}%`);
 
         return {
             satisfied: status.satisfied,

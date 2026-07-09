@@ -12,6 +12,7 @@ export default class Bitmaps {
     public static readonly NovaBarcodeMissionReq: string = new URL('assets/NOVA/Mission/barcode-req-mission.png', import.meta.url).href;
     public static readonly NovaBarcodeReq: string = new URL('assets/NOVA/Constraints/barcode-requirement-carrier.png', import.meta.url).href;
     public static readonly PseudoknotReqIcon: string = new URL('assets/NOVA/Constraints/constraint-pseudoknot.png', import.meta.url).href;
+    public static readonly CrossedJunctionReqIcon: string = new URL('assets/NOVA/Constraints/constraint-crossed-junction.png', import.meta.url).href;
     public static readonly ImgSelectBase: string = new URL('assets/NOVA/Palette/base-selected.png', import.meta.url).href;
     public static readonly ImgExpandArrow: string = new URL('assets/NOVA/Palette/expand_arrow.png', import.meta.url).href;
     public static readonly ImgCollapseArrow: string = new URL('assets/NOVA/Palette/collapse_arrow.png', import.meta.url).href;

@@ -169,80 +169,25 @@ export default class SecStruct {
      * Return the longest stack length.
      */
     public getLongestStackLength(): number {
-        let longlen = 0;
-
-        let stackStart = -1;
-        let lastStackOther = -1;
-
-        for (let ii = 0; ii < this._pairs.length; ii++) {
-            if (this._pairs[ii] > ii) {
-                if (stackStart < 0) {
-                    stackStart = ii;
-                }
-
-                const isContinued = lastStackOther < 0 || this._pairs[ii] === lastStackOther - 1;
-
-                if (isContinued) {
-                    lastStackOther = this._pairs[ii];
-                } else {
-                    if (stackStart >= 0 && ii - stackStart > longlen) {
-                        longlen = ii - stackStart;
-                    }
-
-                    lastStackOther = -1;
-                    stackStart = -1;
-                }
-            } else {
-                if (stackStart >= 0 && ii - stackStart > longlen) {
-                    longlen = ii - stackStart;
-                }
-
-                stackStart = -1;
-                lastStackOther = -1;
-            }
+        let max = 0;
+        for (const stem of this.stems()) {
+            if (stem.length > max) max = stem.length;
         }
-
-        return longlen;
+        return max;
     }
 
     /**
-     * Return the longest stack length.
+     * Return the shortest stack length.
      */
     public shortestStackLength(): number {
-        let shortlen = Infinity;
+        const stems = this.stems();
+        if (stems.length === 0) return 0;
 
-        let stackStart = -1;
-        let lastStackOther = -1;
-
-        for (let ii = 0; ii < this._pairs.length; ii++) {
-            if (this._pairs[ii] > ii) {
-                if (stackStart < 0) {
-                    stackStart = ii;
-                }
-
-                const isContinued = lastStackOther < 0 || this._pairs[ii] === lastStackOther - 1;
-
-                if (isContinued) {
-                    lastStackOther = this._pairs[ii];
-                } else {
-                    if (stackStart >= 0 && ii - stackStart < shortlen) {
-                        shortlen = ii - stackStart;
-                    }
-
-                    lastStackOther = -1;
-                    stackStart = -1;
-                }
-            } else {
-                if (stackStart >= 0 && ii - stackStart < shortlen) {
-                    shortlen = ii - stackStart;
-                }
-
-                stackStart = -1;
-                lastStackOther = -1;
-            }
+        let min = Infinity;
+        for (const stem of stems) {
+            if (stem.length < min) min = stem.length;
         }
-
-        return shortlen;
+        return min;
     }
 
     public getLongestLoopLength(): number {
@@ -256,8 +201,8 @@ export default class SecStruct {
                     loopStart = ii;
                 }
 
-                if (ii - loopStart > longlen) {
-                    longlen = ii - loopStart;
+                if (ii - loopStart + 1 > longlen) {
+                    longlen = ii - loopStart + 1;
                 }
             } else {
                 loopStart = -1;
