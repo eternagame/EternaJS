@@ -37,7 +37,7 @@ export default class EternaSettings extends Settings {
 
     constructor() {
         super('EternaSettings');
-        this.showChat = this.setting<boolean>('showChat', !Eterna.MOBILE_APP);
+        this.showChat = this.setting<boolean>('showChat', true);
         this.showNumbers = this.setting<boolean>('showNumbers', true);
         this.showLetters = this.setting<boolean>('showLetters', true);
         this.showRope = this.setting<boolean>('showRope', false);
