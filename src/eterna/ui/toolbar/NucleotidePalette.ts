@@ -229,10 +229,10 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
             tri.cacheAsTexture(true);
             return tri;
         };
-        addSat(0.2, this._targets[PaletteTargetType.AU].hitboxes[1], false);
-        addSat(0.2, this._targets[PaletteTargetType.AU].hitboxes[1], true);
-        addSat(0.65, this._targets[PaletteTargetType.UG].hitboxes[1], false);
-        addSat(0.65, this._targets[PaletteTargetType.UG].hitboxes[1], true);
+        addSat(0.65, this._targets[PaletteTargetType.AU].hitboxes[1], false);
+        addSat(0.65, this._targets[PaletteTargetType.AU].hitboxes[1], true);
+        addSat(0.2, this._targets[PaletteTargetType.UG].hitboxes[1], false);
+        addSat(0.2, this._targets[PaletteTargetType.UG].hitboxes[1], true);
         addSat(1.5, this._targets[PaletteTargetType.GC].hitboxes[1], false);
         addSat(1.5, this._targets[PaletteTargetType.GC].hitboxes[1], true);
 
