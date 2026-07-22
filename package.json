@@ -67,7 +67,7 @@
     "webpack-merge": "^6.0.1"
   },
   "dependencies": {
-    "@eternagame/chat": "^1.0.0",
+    "@eternagame/chat": "^1.0.1",
     "@pixi/sound": "^6.0.1",
     "base64-js": "^1.5.1",
     "canvas-confetti": "^1.9.4",
