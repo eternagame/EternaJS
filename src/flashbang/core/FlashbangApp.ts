@@ -177,6 +177,8 @@ export default class FlashbangApp {
     }
 
     protected onKeyboardEvent(e: KeyboardEvent): void {
+        if (e.target !== document.body) return;
+
         if (e.type === KeyboardEventType.KEY_DOWN) {
             this._keyDown.set(e.code, true);
         } else if (e.type === KeyboardEventType.KEY_UP) {
