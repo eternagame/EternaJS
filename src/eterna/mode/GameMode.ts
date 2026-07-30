@@ -100,8 +100,8 @@ export default abstract class GameMode extends AppMode {
         return this._poseFields[i];
     }
 
-    public showConfirmDialog(prompt: string, promptIsHTML: boolean = false): ConfirmDialog {
-        return this.showDialog(new ConfirmDialog(prompt, promptIsHTML));
+    public showConfirmDialog(prompt: string, promptIsHTML: boolean = false, yesOrNo: boolean = true): ConfirmDialog {
+        return this.showDialog(new ConfirmDialog(prompt, promptIsHTML, yesOrNo));
     }
 
     /** Show a dialog. Removes any existing modal dialogs if modal. */

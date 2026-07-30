@@ -802,7 +802,32 @@ export default class DesignBrowserMode extends GameMode {
         if (this._isRefreshing) return;
         this._isRefreshing = true;
         return SolutionManager.instance.getSolutionsForPuzzle(this._puzzle.nodeID)
-            .catch((e) => Eterna.onFatalError(e, 'Unable to load solutions'))
+            .catch(async (e) => {
+                if (e.message === 'User does not have lab data access or has not yet solved this puzzle') {
+                    let dialog;
+                    if (!Eterna.playerID) {
+                        dialog = this.showConfirmDialog(
+                            'Please <a href="/">log in</a> to view solutions',
+                            true,
+                            false
+                        );
+                    } else {
+                        dialog = this.showConfirmDialog(
+                            'You must unlock the lab by completing the tutorials to view solutions',
+                            true,
+                            false
+                        );
+                    }
+                    await dialog.closed;
+                    if (Eterna.app.modeStack.modes?.length === 1) {
+                        window.history.back();
+                    } else {
+                        Eterna.app.modeStack.popMode();
+                    }
+                } else {
+                    Eterna.onFatalError(e, 'Unable to load solutions');
+                }
+            })
             .then(() => this.updateDataColumns())
             .finally(() => { this._isRefreshing = false; });
     }

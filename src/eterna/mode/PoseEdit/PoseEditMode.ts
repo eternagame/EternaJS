@@ -2647,7 +2647,19 @@ export default class PoseEditMode extends GameMode {
             };
 
             pipeline = [
-                // Stage 1: Make sure constraints are satisfied
+                async () => {
+                    if (Eterna.playerID) return next();
+
+                    const dialog = this.showConfirmDialog(
+                        'Please <a href="/">log in</a> to submit solutions',
+                        true,
+                        false
+                    );
+                    await dialog.closed;
+
+                    return false;
+                },
+                // Stage 2: Make sure constraints are satisfied
                 async () => {
                     if (!this.checkConstraints()) {
                         // If we pass constraints when taking into account soft constraints, just prompt
@@ -2673,7 +2685,7 @@ export default class PoseEditMode extends GameMode {
                         }
                     } else return next();
                 },
-                // Stage 2: Make sure if the user specified a custom target structure, the bases used
+                // Stage 3: Make sure if the user specified a custom target structure, the bases used
                 // for all pairs are actually valid
                 async () => {
                     if (validate && !this.checkValidCustomPairs()) {
@@ -2701,7 +2713,7 @@ export default class PoseEditMode extends GameMode {
                         return false;
                     } else return next();
                 },
-                // Stage 3: Gather metadata and submit
+                // Stage 4: Gather metadata and submit
                 async () => {
                     await this.prepareForExperimentalPuzzleSubmission();
 

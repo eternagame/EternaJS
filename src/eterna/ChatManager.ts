@@ -68,8 +68,8 @@ export default class ChatManager {
             if (!this._chat) {
                 registerChat();
                 this._chat = new EternaChat({
-                    username: Eterna.playerName,
-                    uid: `${Eterna.playerID}`,
+                    username: Eterna.playerName ?? 'Anonymous',
+                    uid: `${Eterna.playerID ?? 0}`,
                     appContext: 'designer',
                     defaultX: Flashbang.stageWidth - 400 - 30,
                     defaultY: 140,

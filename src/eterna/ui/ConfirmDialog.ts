@@ -6,10 +6,11 @@ import HTMLTextObject from './HTMLTextObject';
 import WindowDialog from './WindowDialog';
 
 export default class ConfirmDialog extends WindowDialog<boolean> {
-    constructor(prompt: string, promptIsHTML: boolean = false) {
+    constructor(prompt: string, promptIsHTML: boolean = false, yesOrNo: boolean = true) {
         super({title: 'Are you sure?', modal: true});
         this._prompt = prompt;
         this._useHTML = promptIsHTML;
+        this._yesOrNo = yesOrNo;
     }
 
     public get confirmed(): Promise<void> {
@@ -46,13 +47,19 @@ export default class ConfirmDialog extends WindowDialog<boolean> {
         const buttonLayout = new HLayoutContainer(12);
         content.addChild(buttonLayout);
 
-        const yesButton = new GameButton().label('Yes', 14);
-        this.addObject(yesButton, buttonLayout);
-        yesButton.clicked.connect(() => this.close(true));
+        if (this._yesOrNo) {
+            const yesButton = new GameButton().label('Yes', 14);
+            this.addObject(yesButton, buttonLayout);
+            yesButton.clicked.connect(() => this.close(true));
 
-        const noButton = new GameButton().label('No', 14);
-        this.addObject(noButton, buttonLayout);
-        noButton.clicked.connect(() => this.close(false));
+            const noButton = new GameButton().label('No', 14);
+            this.addObject(noButton, buttonLayout);
+            noButton.clicked.connect(() => this.close(false));
+        } else {
+            const okButton = new GameButton().label('OK', 14);
+            this.addObject(okButton, buttonLayout);
+            okButton.clicked.connect(() => this.close(true));
+        }
 
         content.layout();
         this._window.layout();
@@ -63,4 +70,5 @@ export default class ConfirmDialog extends WindowDialog<boolean> {
 
     private readonly _prompt: string;
     private readonly _useHTML: boolean;
+    private readonly _yesOrNo: boolean;
 }
