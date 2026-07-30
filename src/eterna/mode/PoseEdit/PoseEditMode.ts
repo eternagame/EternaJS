@@ -573,6 +573,7 @@ export default class PoseEditMode extends GameMode {
         const foldData = await solution.queryFoldData();
         this.hideAsyncText();
 
+        let loadedFromCache = false;
         if (foldData != null && foldData.every((fd, idx) => (
             (
                 fd.folderName_ === this.folderForState(idx).name
@@ -581,8 +582,15 @@ export default class PoseEditMode extends GameMode {
                 || (!fd.folderName_ && this.folderForState(idx).name === NuPACK.NAME)
             ) && Arrays.shallowEqual(fd.sequence_, this.transformSequence(solution.sequence, idx, 0).baseArray)
         ))) {
-            await this.loadCachedUndoBlocks(foldData);
-        } else {
+            try {
+                await this.loadCachedUndoBlocks(foldData);
+                loadedFromCache = true;
+            } catch (e) {
+                log.warn('Error loading cached undo block from solution', e);
+            }
+        }
+
+        if (!loadedFromCache) {
             // Note that we do this first
             for (let i = 0; i < this._poses.length; i++) {
                 this._poses[i].librarySelections = solution.libraryNT
@@ -847,7 +855,7 @@ export default class PoseEditMode extends GameMode {
             this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL
         );
 
-        this.regs?.add(this._folderSwitcher.selectedFolder.connectNotify(() => {
+        this.regs?.add(this._folderSwitcher.selectedFolder.connect(() => {
             this.onChangeFolder();
         }));
         if (this._puzzle.targetConditions.every((tc) => tc?.folder)) {
@@ -931,11 +939,6 @@ export default class PoseEditMode extends GameMode {
                 const tc = this._targetConditions[ii] as TargetConditions;
                 this._poses[ii].structConstraints = tc['structure_constraints'];
 
-                const annotations = tc['annotations'];
-                if (annotations) {
-                    this._annotationManager.setPuzzleAnnotations(annotations);
-                }
-
                 this._poses[ii].customLayout = tc['custom-layout'];
                 const customLayout = this._poses[ii].customLayout;
                 if (customLayout != null && customLayout.length !== targetSecstructs[ii].length) {
@@ -1008,6 +1011,7 @@ export default class PoseEditMode extends GameMode {
         // RScript can set our initial poseState
         this._poseState = this._puzzle.defaultMode;
 
+        let savedDataLoaded = false;
         // We don't load saved data if we're viewing someone else's solution
         // If there's an initial solution, still autoload if we've previously played
         if (
@@ -1016,115 +1020,191 @@ export default class PoseEditMode extends GameMode {
             && !this._puzzle.hasRscript
             && !Eterna.experimentalFeatures.includes('qualtrics-report')
         ) {
-            this.loadSavedData();
+            savedDataLoaded = this.loadSavedData();
         }
 
-        // This PoseOp needs to run before the initial folding PoseOps because the new target
-        // structure needs to be registered before the creation of the UndoBlock accesses it
-        this._opQueue.push(new PoseOp(
-            null,
-            async () => {
-                if (solutionFoldDataPromise) {
-                    const fd = await solutionFoldDataPromise;
-                    this.setSolutionTargetStructure(fd);
+        if (
+            !savedDataLoaded
+            && !solutionFoldDataPromise
+            && this._puzzle.startingFoldCache
+        ) {
+            if (this._puzzle.startingFoldCache.some((fd, idx) => {
+                if (!Arrays.shallowEqual(
+                    fd.sequence_, this.transformSequence(
+                        this._puzzle.getBeginningSequence(idx),
+                        idx,
+                        0
+                    ).baseArray
+                )) {
+                    return true;
+                }
+
+                if (fd.folderName_ !== this.folderForState(idx).name) {
+                    return true;
+                }
+
+                if (JSON.stringify(fd.target_conditions_) !== JSON.stringify(this._puzzle.targetConditions[idx])) {
+                    return true;
+                }
+
+                if (!Arrays.shallowEqual(
+                    fd.puzzle_locks_ ?? null,
+                    this.transformBaseMap(this._puzzle.puzzleLocks, idx, 0, true)
+                )) {
+                    return true;
+                }
+
+                return false;
+            })) {
+                log.warn('Skipping startingFoldCache - out of sync with puzzle definition');
+            } else {
+                try {
+                    this.loadCachedUndoBlocks(this._puzzle.startingFoldCache);
+                    savedDataLoaded = true;
+                } catch (e) {
+                    log.warn('Failed loading starting fold cache', e);
                 }
             }
-        ));
+        }
 
-        // This will push our initial folding PoseOps to the queue, but not execute them yet
-        this.poseEditByTarget(0);
-
-        // From here on out, all of these things have to happen after the first fold completes.
-        // so we put them in the opQueue.
-        // NB: forceSync is always false when we do our initial load, so we don't need
-        // to have a syncronous version of any of this
-        // We split them into separate PoseOps so that the counter in the async text
-        // is more fine-grained (ie, you see more status updates if it winds up being slow).
+        // Why in the world are we doing this here, you ask? Great question! Because of some bizarre
+        // side-effect of how `signals` works, when setPuzzleAnnotations is called and triggers a
+        // signal event, it causes a pending event from flashbang's update loop to fire, which causes
+        // our update function to fire, which is not in a position to be able to do so yet since we
+        // haven't finished initializing yet (at least rscript, but I'm nervous about what else may be
+        // in a weird state so I'm not just moving rscript to be earlier). And so, we delay doing the
+        // thing that would cause our update loop to run
         this._opQueue.push(new PoseOp(
             null,
-            async () => {
-                if (pose3DUrl && pose3DCheckPromise) {
-                    try {
-                        await pose3DCheckPromise;
-                        this.addPose3D(pose3DUrl.href);
-                    } catch (err) {
-                        // We don't pause the queue at this point so loading will continue on,
-                        // the intro screen will be shown, and then once dismissed you'll see
-                        // the notification dialog, but that's fine for our purposes
-                        this.showNotification(`Failed to load 3D view: ${ErrorUtil.getErrString(err, false)}`);
+            () => {
+                for (let ii = 0; ii < this._poses.length; ii++) {
+                    if (this._targetConditions[ii] !== undefined) {
+                        const tc = this._targetConditions[ii] as TargetConditions;
+                        const annotations = tc['annotations'];
+                        if (annotations) {
+                            this._annotationManager.setPuzzleAnnotations(annotations);
+                        }
                     }
                 }
             }
         ));
 
-        // Only once the above are complete can we actually unlock the UI and tell the
-        // user we're ready
         this._opQueue.push(new PoseOp(
             null,
-            () => {
-                this._startSolvingTime = this._params.startSolvingTime ?? new Date().getTime();
-                if (this._params.isReset) {
-                    const newSeq: Sequence = this.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
-                    this.moveHistoryAddSequence('reset', newSeq.sequenceString());
-                } else {
-                    Eterna.observability.recordEvent('Move:StartSeq', this.transformSequence(
-                        this.getCurrentUndoBlock(0).sequence, 0, 0
-                    ).sequenceString());
+            async () => {
+                if (solutionFoldDataPromise) {
+                    const solutionFoldData = await solutionFoldDataPromise;
+                    if (solutionFoldData) {
+                        try {
+                            this.loadCachedUndoBlocks(solutionFoldData);
+                            savedDataLoaded = true;
+                        } catch (e) {
+                            log.warn('Failed loading cached solution fold data for initial solution', e);
+                            // This needs to run before the initial folding PoseOps because the new target
+                            // structure needs to be registered before the creation of the UndoBlock accesses it
+                            this.setSolutionTargetStructure(solutionFoldData);
+                        }
+                    }
                 }
 
-                if (this._params.isReset) {
-                    this.startPlaying();
-                } else if (initialSequence == null) {
-                    this.startCountdown();
-                } else if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
-                    // / Given init sequence (solution) in the lab, don't show mission animation - go straight to game
-                    this.startPlaying();
-                } else {
-                    this.startCountdown();
+                if (!savedDataLoaded) {
+                    // This will push our initial folding PoseOps to the queue, but not execute them yet
+                    this.poseEditByTarget(0);
                 }
 
-                this.setPip(Eterna.settings.pipEnabled.value);
+                // From here on out, all of these things have to happen after the first fold completes.
+                // NB: forceSync is always false when we do our initial load, so we don't need
+                // to have a syncronous version of any of this
+                // We split them into separate PoseOps so that the counter in the async text
+                // is more fine-grained (ie, you see more status updates if it winds up being slow).
+                this._opQueue.push(new PoseOp(
+                    null,
+                    async () => {
+                        if (pose3DUrl && pose3DCheckPromise) {
+                            try {
+                                await pose3DCheckPromise;
+                                this.addPose3D(pose3DUrl.href);
+                            } catch (err) {
+                                // We don't pause the queue at this point so loading will continue on,
+                                // the intro screen will be shown, and then once dismissed you'll see
+                                // the notification dialog, but that's fine for our purposes
+                                this.showNotification(`Failed to load 3D view: ${ErrorUtil.getErrString(err, false)}`);
+                            }
+                        }
+                    }
+                ));
 
-                this.ropPresets();
+                // Only once the above are complete can we actually unlock the UI and tell the
+                // user we're ready
+                this._opQueue.push(new PoseOp(
+                    null,
+                    () => {
+                        this._startSolvingTime = this._params.startSolvingTime ?? new Date().getTime();
+                        if (this._params.isReset) {
+                            const newSeq: Sequence = this.transformSequence(this.getCurrentUndoBlock(0).sequence, 0, 0);
+                            this.moveHistoryAddSequence('reset', newSeq.sequenceString());
+                        } else {
+                            Eterna.observability.recordEvent('Move:StartSeq', this.transformSequence(
+                                this.getCurrentUndoBlock(0).sequence, 0, 0
+                            ).sequenceString());
+                        }
 
-                // If we have a timer constraint, we need to trigger a state update
-                // (namely, constraint update) not just when user interaction happens, but
-                // over time. We only due this when the constraint is present so we don't do
-                // a bunch of unnecessary work
-                if (this._puzzle.constraints?.find((constraint) => constraint instanceof TimerConstraint)) {
-                    this.addObject(new RepeatingTask(() => {
-                        let poseOpComplete = false;
-                        return new SerialTask(
-                            // Once a second should be responsive enough without incurring unnecessary
-                            // performance cost from having to re-sync all the other state and
-                            // constraint checks, etc. (This is unscientific)
-                            new DelayTask(1),
-                            // We push this to the opqueue to ensure we aren't triggering a state
-                            // resync while folding operations are half-complete (checkSolved
-                            // updates undoblock)
-                            new CallbackTask(() => {
-                                if (this._opQueue.length > 0) {
-                                    this._opQueue.push(new PoseOp(null, () => {
-                                        this.checkSolved();
-                                        poseOpComplete = true;
-                                    }));
-                                } else {
-                                    // If we know we're not racing with some other operation,
-                                    // we run this immediately rather than running through the
-                                    // opqueue to prevent the "folding..." message from showing
-                                    // for a brief period of time/"flickering"
-                                    this.checkSolved();
-                                    poseOpComplete = true;
-                                }
-                            }),
-                            // We wait until the sync has completed before we continue on to the next
-                            // interation of this repeaing task in order to prevent multiple syncs being
-                            // queued up faster than we can process them in some unfortunate situation where
-                            // things take forever
-                            new FunctionTask(() => poseOpComplete)
-                        );
-                    }));
-                }
+                        if (this._params.isReset) {
+                            this.startPlaying();
+                        } else if (initialSequence == null) {
+                            this.startCountdown();
+                        } else if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
+                            // Given init sequence (solution) in the lab, don't show mission animation
+                            // go straight to game
+                            this.startPlaying();
+                        } else {
+                            this.startCountdown();
+                        }
+
+                        this.setPip(Eterna.settings.pipEnabled.value);
+
+                        this.ropPresets();
+
+                        // If we have a timer constraint, we need to trigger a state update
+                        // (namely, constraint update) not just when user interaction happens, but
+                        // over time. We only due this when the constraint is present so we don't do
+                        // a bunch of unnecessary work
+                        if (this._puzzle.constraints?.find((constraint) => constraint instanceof TimerConstraint)) {
+                            this.addObject(new RepeatingTask(() => {
+                                let poseOpComplete = false;
+                                return new SerialTask(
+                                    // Once a second should be responsive enough without incurring unnecessary
+                                    // performance cost from having to re-sync all the other state and
+                                    // constraint checks, etc. (This is unscientific)
+                                    new DelayTask(1),
+                                    // We push this to the opqueue to ensure we aren't triggering a state
+                                    // resync while folding operations are half-complete (checkSolved
+                                    // updates undoblock)
+                                    new CallbackTask(() => {
+                                        if (this._opQueue.length > 0) {
+                                            this._opQueue.push(new PoseOp(null, () => {
+                                                this.checkSolved();
+                                                poseOpComplete = true;
+                                            }));
+                                        } else {
+                                            // If we know we're not racing with some other operation,
+                                            // we run this immediately rather than running through the
+                                            // opqueue to prevent the "folding..." message from showing
+                                            // for a brief period of time/"flickering"
+                                            this.checkSolved();
+                                            poseOpComplete = true;
+                                        }
+                                    }),
+                                    // We wait until the sync has completed before we continue on to the next
+                                    // interation of this repeaing task in order to prevent multiple syncs being
+                                    // queued up faster than we can process them in some unfortunate situation where
+                                    // things take forever
+                                    new FunctionTask(() => poseOpComplete)
+                                );
+                            }));
+                        }
+                    }
+                ));
             }
         ));
     }
@@ -3280,39 +3360,35 @@ export default class PoseEditMode extends GameMode {
         }
 
         const a: number[] = saveStoreItem[1];
+        const foldData: FoldData[] = [];
         const savedAnnotations: (AnnotationDataBundle | null)[] = Array(this._poses.length).fill(null);
         // AMW: this suggests it knows the iteration is from all-but-first-two
         // meaning this is a save datum thing. [number, number[], ...string[]]
         for (let ii = 0; ii < this._poses.length; ++ii) {
             if (saveStoreItem[ii + 2] != null) {
-                const undoBlock: UndoBlock = new UndoBlock(new Sequence([]), '');
                 try {
                     const saveData = JSON.parse(saveStoreItem[ii + 2] as string);
                     if (saveData.undoBlock) {
-                        const pose: FoldData = saveData.undoBlock;
+                        foldData.push(saveData.undoBlock);
                         savedAnnotations[ii] = saveData.annotations;
-                        undoBlock.fromJSON(pose, this._puzzle.targetConditions[ii]);
                     } else {
                         // Old format before annotations were introduced
-                        const pose: FoldData = saveData;
-                        undoBlock.fromJSON(pose, this._puzzle.targetConditions[ii]);
+                        foldData.push(saveData);
                     }
                 } catch (e) {
-                    log.error('Error loading saved puzzle data', e);
+                    log.warn('Error loading saved puzzle data', e);
                     return false;
                 }
 
                 // / JEEFIX : Don't override secstruct from autoload without checking whther the puzzle can vary length.
                 // / KWSFIX : Only allow when shiftable mode (=> shift_limit = 0)
 
-                if (this._puzzle.shiftLimit === 0 && undoBlock.targetPairs.length !== this._targetPairs[ii].length) {
+                if (
+                    this._puzzle.shiftLimit === 0
+                    && foldData[ii].target_pairs_.length !== this._targetPairs[ii].length
+                ) {
                     return false;
                 }
-
-                this._targetPairs[ii] = undoBlock.targetPairs;
-                this._targetOligosOrder[ii] = undoBlock.targetOligoOrder;
-
-                this.setPosesWithUndoBlock(ii, ii, undoBlock);
             }
         }
 
@@ -3326,11 +3402,13 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
-        for (let ii = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].sequence = this.transformSequence(new Sequence(a), this.poseTargetIndex(ii), 0);
-            this._poses[ii].puzzleLocks = this.transformBaseMap(locks, this.poseTargetIndex(ii), 0, true);
-
-            const annotations: AnnotationDataBundle | null = savedAnnotations[ii];
+        try {
+            this.loadCachedUndoBlocks(foldData);
+        } catch (e) {
+            log.warn(e);
+            return false;
+        }
+        for (const annotations of savedAnnotations) {
             if (annotations) {
                 // Don't load puzzle annotations, as we want to use the up-to-date ones from
                 // the current puzzle definition in case they changed
@@ -4318,33 +4396,51 @@ export default class PoseEditMode extends GameMode {
             throw new Error(`Tried loading cached fold data, but cached data was only for ${fd.length} states`);
         }
 
+        const undoBlocks = fd.map((data, idx) => {
+            const folder = this.folderForState(idx).name;
+            if (folder !== data.folderName_) throw new Error('Tried loading cached fold data for a different folder');
+            if (!Arrays.shallowEqual(
+                data.sequence_,
+                this.transformSequence(new Sequence(data.sequence_), idx, idx).baseArray
+            )) {
+                // eslint-disable-next-line max-len
+                throw new Error('Tried loading cached fold data, but the sequence is no longer valid due to puzzle definition changes');
+            }
+            const block = new UndoBlock(new Sequence([]), folder);
+            block.fromJSON(data, this._puzzle.targetConditions[idx]);
+            return block;
+        });
+
         this._stackLevel++;
         this._stackSize = this._stackLevel + 1;
         this._seqStacks[this._stackLevel] = [];
 
         for (let ii = 0; ii < this._poses.length; ii++) {
-            this._seqStacks[this._stackLevel][ii] = new UndoBlock(new Sequence([]), this.folderForState(ii).name);
-            this._seqStacks[this._stackLevel][ii].fromJSON(fd[ii], this._puzzle.targetConditions[ii]);
+            this._seqStacks[this._stackLevel][ii] = undoBlocks[ii];
         }
 
         // We don't include the dot plot when saving undoblocks, and some constraints require
         // it being computed before being evaluated (which happens in updateScore).
         // Maybe at some point there should be more shared code between here and poseEditByTarget?
-        if (this._constraintBar.requiresDotPlot) {
+        if (this._constraintBar.requiresDotPlot && undoBlocks.some((ublk) => (
+            ublk.getParam(
+                UndoBlockParam.DOTPLOT,
+                EPars.DEFAULT_TEMPERATURE,
+                ublk.targetConditions?.['type'] === 'pseudoknot'
+            ) == null
+        ))) {
             for (let ii = 0; ii < this._targetPairs.length; ii++) {
-                if (this._constraintBar.requiresDotPlot) {
-                    this._opQueue.push(new PoseOp(ii + 1, async () => {
-                        const undoBlock = this._seqStacks[this._stackLevel][ii];
-                        await undoBlock.updateMeltingPointAndDotPlot({
-                            sync: false,
-                            pseudoknots: (
-                                undoBlock.targetConditions !== undefined
-                                && undoBlock.targetConditions['type'] === 'pseudoknot'
-                            ),
-                            skipMelt: true
-                        });
-                    }));
-                }
+                this._opQueue.push(new PoseOp(ii + 1, async () => {
+                    const undoBlock = undoBlocks[ii];
+                    await undoBlock.updateMeltingPointAndDotPlot({
+                        sync: false,
+                        pseudoknots: (
+                            undoBlock.targetConditions !== undefined
+                            && undoBlock.targetConditions['type'] === 'pseudoknot'
+                        ),
+                        skipMelt: true
+                    });
+                }));
             }
             await new Promise<void>((resolve) => {
                 this._opQueue.push(new PoseOp(null, resolve));

@@ -39,7 +39,7 @@ import ExternalInterface from 'eterna/util/ExternalInterface';
 import BoostConstraint from 'eterna/constraints/constraints/BoostConstraint';
 import RangePairedMaxConstraint from 'eterna/constraints/constraints/RangePairedMaxConstraint';
 import {Assert} from 'flashbang';
-import {TargetConditions} from 'eterna/UndoBlock';
+import {FoldData, TargetConditions} from 'eterna/UndoBlock';
 import PseudoknotConstraint from 'eterna/constraints/constraints/PseudoknotConstraint';
 import CodonConstraint from 'eterna/constraints/constraints/CondonConstraint';
 import {
@@ -84,7 +84,8 @@ export interface PuzzleJSON {
     hint?: string;
     'max-votes'?: string;
     constraints?: string; // AMW TODO: string formatting restrictions
-    '3d_structure'?: string; //
+    '3d_structure'?: string;
+    starting_solution_fold_cache?: string;
 }
 
 interface ObjectiveString {
@@ -485,6 +486,12 @@ export default class PuzzleManager {
         const [, secondaryPuzzleId] = newpuz.rscript.match(/#PRE-PushPuzzle ([0-9]+);/) ?? [null, null];
         if (secondaryPuzzleId) {
             await this.getPuzzleByID(parseInt(secondaryPuzzleId, 10));
+        }
+
+        if (json['starting_solution_fold_cache']) {
+            const fd: FoldData[] = JSON.parse(json['starting_solution_fold_cache']);
+
+            newpuz.startingFoldCache = fd;
         }
 
         return newpuz;

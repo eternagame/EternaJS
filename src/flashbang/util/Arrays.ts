@@ -1,6 +1,6 @@
 export default class Arrays {
     /** True if two Arrays hold the same contents */
-    public static shallowEqual<T>(a: T[], b: T[]): boolean {
+    public static shallowEqual<T>(a: T[] | null, b: T[] | null): boolean {
         if (a === b) {
             return true;
         } else if (a == null || b == null || a.length !== b.length) {
@@ -10,7 +10,7 @@ export default class Arrays {
         return a.every((value, index) => value === b[index]);
     }
 
-    public static deepEqual<T>(a: T[], b: T[]): boolean {
+    public static deepEqual<T>(a: T[] | null, b: T[] | null): boolean {
         if (a === b) {
             return true;
         } else if (a == null || b == null || a.length !== b.length) {

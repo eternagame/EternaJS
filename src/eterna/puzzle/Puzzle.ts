@@ -6,7 +6,7 @@ import Folder from 'eterna/folding/Folder';
 import EternaURL from 'eterna/net/EternaURL';
 import Constraint, {BaseConstraintStatus} from 'eterna/constraints/Constraint';
 import ShapeConstraint from 'eterna/constraints/constraints/ShapeConstraint';
-import {TargetConditions, OligoDef} from 'eterna/UndoBlock';
+import {TargetConditions, OligoDef, FoldData} from 'eterna/UndoBlock';
 import {BoosterData} from 'eterna/mode/PoseEdit/Booster';
 import Utility from 'eterna/util/Utility';
 import SecStruct from 'eterna/rnatypes/SecStruct';
@@ -652,6 +652,14 @@ export default class Puzzle {
         this._threePath = path;
     }
 
+    public get startingFoldCache(): FoldData[] | null {
+        return this._startingFoldCache;
+    }
+
+    public set startingFoldCache(data: FoldData[] | null) {
+        this._startingFoldCache = data;
+    }
+
     private _threePath: string | null = null;
     private readonly _nid: number;
     private readonly _name: string;
@@ -685,6 +693,7 @@ export default class Puzzle {
     private _boosterDefs: BoostersData | null = null;
     private _maxVotes: number = 0;
     private _alreadySolved: boolean = false;
+    private _startingFoldCache: FoldData[] | null = null;
 
     private static readonly T_APTAMER: string[] = ['aptamer', 'aptamer+oligo'];
     private static readonly T_OLIGO: string[] = ['oligo', 'aptamer+oligo'];
