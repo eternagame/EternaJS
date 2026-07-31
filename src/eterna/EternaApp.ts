@@ -536,6 +536,9 @@ export default class EternaApp extends FlashbangApp {
         const errstring = ErrorUtil.getErrString(err);
         if (errstring.startsWith("Error: Failed to set the 'buffer' property on 'AudioBufferSourceNode'")) {
             log.debug('@pixi/sound is misbehaving again');
+        } else if (errstring === 'ResizeObserver loop completed with undelivered notifications.') {
+            // The new chat is triggering this for some reason. Can't figure out why. But we can supress it
+            // without any apparent issues
         } else {
             Eterna.onFatalError(err);
         }
