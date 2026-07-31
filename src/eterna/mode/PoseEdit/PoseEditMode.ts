@@ -875,10 +875,6 @@ export default class PoseEditMode extends GameMode {
                 'Initial solution provided, but no solution list is available'
             );
             initialSequence = this._params.initSolution.sequence.slice(0);
-            const annotations = this._params.initSolution.annotations;
-            if (annotations) {
-                this._annotationManager.setSolutionAnnotations(annotations);
-            }
 
             librarySelections = this._params.initSolution.libraryNT;
             this._curSolutionIdx = this._params.solutions.indexOf(this._params.initSolution);
@@ -1067,16 +1063,16 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
-        // Why in the world are we doing this here, you ask? Great question! Because of some bizarre
-        // side-effect of how `signals` works, when setPuzzleAnnotations is called and triggers a
-        // signal event, it causes a pending event from flashbang's update loop to fire, which causes
-        // our update function to fire, which is not in a position to be able to do so yet since we
-        // haven't finished initializing yet (at least rscript, but I'm nervous about what else may be
-        // in a weird state so I'm not just moving rscript to be earlier). And so, we delay doing the
-        // thing that would cause our update loop to run
         this._opQueue.push(new PoseOp(
             null,
             () => {
+                // Why in the world are we doing this here, you ask? Great question! Because of some bizarre
+                // side-effect of how `signals` works, when setPuzzleAnnotations is called and triggers a
+                // signal event, it causes a pending event from flashbang's update loop to fire, which causes
+                // our update function to fire, which is not in a position to be able to do so yet since we
+                // haven't finished initializing yet (at least rscript, but I'm nervous about what else may be
+                // in a weird state so I'm not just moving rscript to be earlier). And so, we delay doing the
+                // thing that would cause our update loop to run
                 for (let ii = 0; ii < this._poses.length; ii++) {
                     if (this._targetConditions[ii] !== undefined) {
                         const tc = this._targetConditions[ii] as TargetConditions;
@@ -1085,6 +1081,11 @@ export default class PoseEditMode extends GameMode {
                             this._annotationManager.setPuzzleAnnotations(annotations);
                         }
                     }
+                }
+                // Also we need to wait for this so that we don't trigger an autosave before our puzzle has data set
+                const annotations = this._params.initSolution?.annotations;
+                if (annotations) {
+                    this._annotationManager.setSolutionAnnotations(annotations);
                 }
             }
         ));
