@@ -496,10 +496,10 @@ export default class Bitmaps {
     public static readonly ImgSelectedThreeWindow: string = new URL('assets/SmallUI/inverse/icon-3D-window.svg', import.meta.url).href;
     public static readonly ImgSelectedStampTLoop: string = new URL('assets/SmallUI/inverse/stampTLoop.svg', import.meta.url).href;
     public static readonly ImgSelectedAutoSolver: string = new URL('assets/SmallUI/inverse/robot.svg', import.meta.url).href;
-
     public static readonly ImgDlgClose: string = new URL('assets/UI/close.svg', import.meta.url).href;
     public static readonly ImgOverDlgClose: string = new URL('assets/UI/close-over.svg', import.meta.url).href;
     public static readonly ImgStopwatch: string = new URL('assets/stopwatch.svg', import.meta.url).href;
+    public static readonly ClampIcon: string = new URL('assets/clamp.svg', import.meta.url).href;
 
     public static get all(): string[] {
         if (Bitmaps.ALL_URLS == null) {
