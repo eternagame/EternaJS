@@ -59,6 +59,8 @@ export interface TargetConditions {
     anti_structure_constrained_bases?: number[];
     structure_constraints?: boolean[];
     anti_structure_constraints?: boolean[];
+    clamps?: [number[], number[]][];
+    clamp_constraints?: [boolean[], boolean[]][];
     site?: number[];
     fold_version?: number;
     fold_mode?: string; // this time it's '3'

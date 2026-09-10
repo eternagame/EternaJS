@@ -54,6 +54,10 @@ import MinimumStackLengthConstraint from 'eterna/constraints/constraints/Minimum
 import MaximumLoopLengthConstraint from 'eterna/constraints/constraints/MaximumLoopLengthConstraint';
 import MinimumCrossedPercentConstraint from 'eterna/constraints/constraints/MinimumCrossedPercentConstraint';
 import CrossedJunctionConstraint from 'eterna/constraints/constraints/CrossedJunctionConstraint';
+import {
+    ClampProbabilityMinimumConstraint,
+    ClampProbabilityMaximumConstraint
+} from 'eterna/constraints/constraints/ClampProbabilityConstraint';
 import SolutionManager from './SolutionManager';
 import Puzzle, {PuzzleType} from './Puzzle';
 
@@ -266,6 +270,32 @@ export default class PuzzleManager {
                         }
                     }
                 }
+
+                const {clamps} = tc;
+                if (clamps !== undefined) {
+                    tc['clamp_constraints'] = clamps.map(([rangesA, rangesB]) => {
+                        const constraintsA = new Array(tc['secstruct'].length).fill(false);
+                        const constraintsB = new Array(tc['secstruct'].length).fill(false);
+
+                        if (rangesA.length % 2 === 0) {
+                            for (let jj = 0; jj < rangesA.length; jj += 2) {
+                                for (let kk = rangesA[jj]; kk <= rangesA[jj + 1]; kk++) {
+                                    constraintsA[kk] = true;
+                                }
+                            }
+                        }
+
+                        if (rangesB.length % 2 === 0) {
+                            for (let jj = 0; jj < rangesB.length; jj += 2) {
+                                for (let kk = rangesB[jj]; kk <= rangesB[jj + 1]; kk++) {
+                                    constraintsB[kk] = true;
+                                }
+                            }
+                        }
+
+                        return [constraintsA, constraintsB];
+                    });
+                }
             }
         }
 
@@ -438,6 +468,20 @@ export default class PuzzleManager {
                     case CrossedJunctionConstraint.NAME:
                         constraints.push(new CrossedJunctionConstraint(Number(parameter)));
                         break;
+                    case ClampProbabilityMinimumConstraint.NAME: {
+                        const [probability, clampIndex] = parameter.split('|');
+                        constraints.push(
+                            new ClampProbabilityMinimumConstraint(Number(probability), Number(clampIndex))
+                        );
+                        break;
+                    }
+                    case ClampProbabilityMaximumConstraint.NAME: {
+                        const [probability, clampIndex] = parameter.split('|');
+                        constraints.push(
+                            new ClampProbabilityMaximumConstraint(Number(probability), Number(clampIndex))
+                        );
+                        break;
+                    }
                     default:
                         log.warn(`Unknown constraint ${name} - skipping`);
                 }
