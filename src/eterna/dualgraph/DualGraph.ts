@@ -1,4 +1,4 @@
-import SecStruct from 'eterna/rnatypes/SecStruct';
+import type SecStruct from 'eterna/rnatypes/SecStruct';
 
 /**
  * A helix after RAG's merge rule has been applied. Both strands are inclusive
@@ -50,12 +50,42 @@ export interface DualGraph {
  */
 export default class DualGraphBuilder {
     /**
-     * Raw stacks of consecutive base pairs, before any merging.
-     * `SecStruct.stems()` finds them; this only normalises the shape.
+     * Stacks of consecutive base pairs, before any merging.
+     *
+     * Same grouping as `SecStruct.stems()`, reimplemented on a plain pairing
+     * table so the whole module stays free of eterna imports -- importing
+     * SecStruct transitively pulls in pixi.js, which the Jest setup in this
+     * repo cannot currently transform (the repo's own SecStruct.test.ts fails
+     * the same way). Keeping this standalone means it stays testable.
+     *
+     * @param pairs partner index per position, -1 where unpaired
      */
-    public static helicesOf(secstruct: SecStruct): Helix[] {
+    public static stemsOf(pairs: number[]): [number, number][][] {
+        const stems: [number, number][][] = [];
+        for (let i = 0; i < pairs.length; ++i) {
+            const pi = pairs[i];
+            if (pi < 0 || i > pi) continue;
+            let placed = false;
+            for (const stem of stems) {
+                for (const [a, b] of stem) {
+                    if ((a === i - 1 && b === pi + 1) || (a === i + 1 && b === pi - 1)
+                            || (b === i - 1 && a === pi + 1) || (b === i + 1 && a === pi - 1)) {
+                        stem.push([i, pi]);
+                        placed = true;
+                        break;
+                    }
+                }
+                if (placed) break;
+            }
+            if (!placed) stems.push([[i, pi]]);
+        }
+        return stems;
+    }
+
+    /** Normalise stacks into helices, sorted 5'->3'. */
+    public static helicesOf(pairs: number[]): Helix[] {
         const helices: Helix[] = [];
-        for (const stem of secstruct.stems()) {
+        for (const stem of DualGraphBuilder.stemsOf(pairs)) {
             if (stem.length === 0) continue;
             let fiveStart = Infinity;
             let fiveEnd = -Infinity;
@@ -124,8 +154,13 @@ export default class DualGraphBuilder {
         return merged.filter((h) => h.fiveStart !== h.fiveEnd || h.threeStart !== h.threeEnd);
     }
 
+    /** Convenience wrapper for callers holding a SecStruct. */
     public static build(secstruct: SecStruct): DualGraph {
-        const raw = DualGraphBuilder.helicesOf(secstruct);
+        return DualGraphBuilder.fromPairs(secstruct.pairs);
+    }
+
+    public static fromPairs(pairs: number[]): DualGraph {
+        const raw = DualGraphBuilder.helicesOf(pairs);
         const helices = DualGraphBuilder.merge(raw);
         const V = helices.length;
 
@@ -149,7 +184,7 @@ export default class DualGraphBuilder {
             const to = blocks[k + 1].start - 1;
             edges.push({a, b, gap: to >= from ? [from, to] : null});
             if (a === b) {
-                adjacency[a][a] += 2;       // RAG convention: diagonal is 2 x hairpins
+                adjacency[a][a] += 2; // RAG convention: diagonal is 2 x hairpins
             } else {
                 adjacency[a][b] += 1;
                 adjacency[b][a] += 1;

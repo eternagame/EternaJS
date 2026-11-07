@@ -1,13 +1,36 @@
-import SecStruct from 'eterna/rnatypes/SecStruct';
 import DualGraphBuilder from '../DualGraph';
+
+/**
+ * A local dot-bracket parser, so this suite imports nothing from eterna.
+ * Going through SecStruct would pull in pixi.js, which this repo's Jest setup
+ * cannot transform -- its own SecStruct.test.ts fails the same way.
+ */
+function toPairs(parens: string): number[] {
+    const OPEN = '([{<';
+    const CLOSE = ')]}>';
+    const pairs = new Array<number>(parens.length).fill(-1);
+    const stacks: number[][] = [[], [], [], []];
+    for (let i = 0; i < parens.length; ++i) {
+        const o = OPEN.indexOf(parens[i]);
+        const c = CLOSE.indexOf(parens[i]);
+        if (o >= 0) stacks[o].push(i);
+        else if (c >= 0) {
+            const j = stacks[c].pop();
+            if (j === undefined) throw new Error(`unmatched ${parens[i]} at ${i}`);
+            pairs[i] = j;
+            pairs[j] = i;
+        }
+    }
+    return pairs;
+}
 
 /**
  * Every expectation here was produced by the Python reference implementation
  * (github.com/cailyx/rna-dual-graphs), which wraps the Schlick lab's own code.
  * If a case below fails, this file is right and DualGraph.ts is wrong.
  */
-function graph(parens: string, pseudoknots = false) {
-    return DualGraphBuilder.build(SecStruct.fromParens(parens, pseudoknots));
+function graph(parens: string, _pseudoknots = false) {
+    return DualGraphBuilder.fromPairs(toPairs(parens));
 }
 
 describe('DualGraph: the complete set of two-stem topologies', () => {
